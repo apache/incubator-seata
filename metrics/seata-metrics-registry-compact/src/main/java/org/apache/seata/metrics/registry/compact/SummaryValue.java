@@ -38,7 +38,8 @@ public class SummaryValue {
     }
 
     public double getTps(double currentMilliseconds) {
-        System.out.println("currentMilliseconds: "+currentMilliseconds+" , startMilliseconds: "+startMilliseconds);
+        System.out
+            .println("currentMilliseconds: " + currentMilliseconds + " , startMilliseconds: " + startMilliseconds);
         if (currentMilliseconds <= startMilliseconds) {
             return 0;
         }
