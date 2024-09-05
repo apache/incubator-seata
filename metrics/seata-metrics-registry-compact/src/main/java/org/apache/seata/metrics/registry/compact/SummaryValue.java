@@ -41,6 +41,8 @@ public class SummaryValue {
         System.out
             .println("currentMilliseconds: " + currentMilliseconds + " , startMilliseconds: " + startMilliseconds);
         if (currentMilliseconds <= startMilliseconds) {
+            System.out
+                .println("getTps: 0");
             return 0;
         }
         System.out
