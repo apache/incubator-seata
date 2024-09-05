@@ -39,18 +39,13 @@
                 <include>bin/seata-server.sh</include>
                 <include>bin/seata-setup.sh</include>
             </includes>
+            <outputDirectory>seata-server/bin/</outputDirectory>
             <fileMode>0755</fileMode>
         </fileSet>
 
         <fileSet>
-            <includes>
-                <include>logs/**</include>
-            </includes>
-        </fileSet>
-
-        <fileSet>
             <directory>../server/src/main/resources/logback/</directory>
-            <outputDirectory>conf/logback/</outputDirectory>
+            <outputDirectory>seata-server/conf/logback/</outputDirectory>
             <includes>
                 <include>**/*.xml</include>
             </includes>
@@ -58,23 +53,35 @@
 
         <fileSet>
             <directory>../ext/apm-seata-skywalking-plugin/target/ext/skywalking-agent/</directory>
-            <outputDirectory>ext/apm-skywalking</outputDirectory>
+            <outputDirectory>seata-server/ext/apm-skywalking</outputDirectory>
         </fileSet>
 
         <fileSet>
             <directory>../server/target/lib/</directory>
-            <outputDirectory>lib</outputDirectory>
+            <outputDirectory>seata-server/lib</outputDirectory>
         </fileSet>
-
+        <!-- namingserver -->
         <fileSet>
-            <directory>../script/</directory>
-            <outputDirectory>script</outputDirectory>
             <includes>
-                <include>**/server/</include>
-                <include>**/logstash/</include>
-                <include>**/config-center/</include>
+                <include>bin/seata-namingserver.bat</include>
+                <include>bin/seata-namingserver.sh</include>
+                <include>bin/seata-namingserver-setup.sh</include>
+            </includes>
+            <outputDirectory>seata-namingserver/bin/</outputDirectory>
+            <fileMode>0755</fileMode>
+        </fileSet>
+        <fileSet>
+            <directory>../namingserver/target/lib/</directory>
+            <outputDirectory>seata-namingserver/lib</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>../namingserver/src/main/resources/logback/</directory>
+            <outputDirectory>seata-namingserver/conf/logback/</outputDirectory>
+            <includes>
+                <include>**/*.xml</include>
             </includes>
         </fileSet>
+
     </fileSets>
 
     <files>
@@ -100,32 +107,48 @@
 
         <file>
             <source>../server/target/seata-server-exec.jar</source>
-            <outputDirectory>target/</outputDirectory>
+            <outputDirectory>seata-server/target/</outputDirectory>
             <destName>seata-server.jar</destName>
         </file>
 
         <file>
             <source>../server/src/main/resources/application.yml</source>
-            <outputDirectory>conf/</outputDirectory>
+            <outputDirectory>seata-server/conf/</outputDirectory>
         </file>
         <file>
             <source>../server/src/main/resources/application.example.yml</source>
-            <outputDirectory>conf/</outputDirectory>
+            <outputDirectory>seata-server/conf/</outputDirectory>
         </file>
         <file>
             <source>../server/src/main/resources/application.raft.example.yml</source>
-            <outputDirectory>conf/</outputDirectory>
+            <outputDirectory>seata-server/conf/</outputDirectory>
         </file>
 
         <file>
             <source>../server/src/main/resources/logback-spring.xml</source>
-            <outputDirectory>conf/</outputDirectory>
+            <outputDirectory>seata-server/conf/</outputDirectory>
         </file>
 
         <file>
             <source>NOTICE.md</source>
-            <outputDirectory>lib/jdbc/</outputDirectory>
+            <outputDirectory>seata-server/lib/jdbc/</outputDirectory>
         </file>
+
+        <!-- namingserver -->
+        <file>
+            <source>../namingserver/target/seata-namingserver-exec.jar</source>
+            <outputDirectory>seata-namingserver/target/</outputDirectory>
+            <destName>seata-namingserver.jar</destName>
+        </file>
+        <file>
+            <source>../namingserver/src/main/resources/logback-spring.xml</source>
+            <outputDirectory>seata-namingserver/conf/</outputDirectory>
+        </file>
+        <file>
+            <source>../namingserver/src/main/resources/application.yml</source>
+            <outputDirectory>seata-namingserver/conf/</outputDirectory>
+        </file>
+
     </files>
 
     <moduleSets>
@@ -133,6 +156,7 @@
             <useAllReactorProjects>true</useAllReactorProjects>
             <includes>
                 <include>org.apache.seata:seata-server</include>
+                <include>org.apache.seata:seata-namingserver</include>
             </includes>
         </moduleSet>
     </moduleSets>

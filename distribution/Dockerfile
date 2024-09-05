@@ -38,7 +38,8 @@ ADD ext/ /seata-server/ext
 ADD target/ /seata-server/target
 ADD lib/ /seata-server/lib
 ADD conf/ /seata-server/conf
-ADD LICENSE /seata-server/LICENSE
+ADD LICENSE ./LICENSE
+ADD NOTICE ./LICENSE
 
 # set extra environment
 ENV LOADER_PATH="/seata-server/lib"
