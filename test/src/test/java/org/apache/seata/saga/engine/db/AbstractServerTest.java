@@ -27,7 +27,7 @@ import org.apache.seata.core.rpc.ShutdownHook;
 import org.apache.seata.core.rpc.netty.NettyRemotingServer;
 import org.apache.seata.core.rpc.netty.NettyServerConfig;
 import org.apache.seata.server.ParameterParser;
-import org.apache.seata.server.UUIDGenerator;
+import org.apache.seata.common.util.UUIDGenerator;
 import org.apache.seata.server.coordinator.DefaultCoordinator;
 import org.apache.seata.server.metrics.MetricsManager;
 import org.apache.seata.server.session.SessionHolder;

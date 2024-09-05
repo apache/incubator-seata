@@ -43,6 +43,7 @@ import org.apache.seata.server.cluster.raft.context.SeataClusterContext;
 import org.apache.seata.server.lock.distributed.DistributedLockerFactory;
 import org.apache.seata.server.store.StoreConfig;
 import org.apache.seata.server.store.StoreConfig.SessionMode;
+import org.apache.seata.server.store.VGroupMappingStoreManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +55,6 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_D
 
 /**
  * The type Session holder.
- *
  */
 public class SessionHolder {
 
@@ -75,6 +75,13 @@ public class SessionHolder {
      */
     private static long DISTRIBUTED_LOCK_EXPIRE_TIME = CONFIG.getLong(ConfigurationKeys.DISTRIBUTED_LOCK_EXPIRE_TIME, DEFAULT_DISTRIBUTED_LOCK_EXPIRE_TIME);
 
+    /**
+     * The default vgroup mapping store dir
+     */
+    public static final String DEFAULT_VGROUP_MAPPING_STORE_FILE_DIR = "vgroupStore";
+
+    private static VGroupMappingStoreManager ROOT_VGROUP_MAPPING_MANAGER;
+
     private static SessionManager ROOT_SESSION_MANAGER;
     private static volatile Map<String, SessionManager> SESSION_MANAGER_MAP;
 
@@ -83,6 +90,7 @@ public class SessionHolder {
     public static void init() {
         init(null);
     }
+
     /**
      * Init.
      *
@@ -98,6 +106,8 @@ public class SessionHolder {
         if (SessionMode.DB.equals(sessionMode)) {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.DB.getName());
             reload(sessionMode);
+
+            ROOT_VGROUP_MAPPING_MANAGER = EnhancedServiceLoader.load(VGroupMappingStoreManager.class, SessionMode.DB.getName());
         } else if (SessionMode.RAFT.equals(sessionMode) || SessionMode.FILE.equals(sessionMode)) {
             RaftServerManager.init();
             if (CollectionUtils.isNotEmpty(RaftServerManager.getRaftServers())) {
@@ -106,23 +116,32 @@ public class SessionHolder {
             if (SessionMode.RAFT.equals(sessionMode)) {
                 String group = CONFIG.getConfig(ConfigurationKeys.SERVER_RAFT_GROUP, DEFAULT_SEATA_GROUP);
                 ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.RAFT.getName(),
-                    new Object[] {ROOT_SESSION_MANAGER_NAME});
+                    new Object[]{ROOT_SESSION_MANAGER_NAME});
                 SESSION_MANAGER_MAP = new HashMap<>();
                 SESSION_MANAGER_MAP.put(group, ROOT_SESSION_MANAGER);
                 RaftServerManager.start();
             } else {
+                String vGroupMappingStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR,
+                    DEFAULT_VGROUP_MAPPING_STORE_FILE_DIR)  + separator
+                        + System.getProperty(SERVER_SERVICE_PORT_CAMEL);
                 String sessionStorePath =
                     CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR) + separator
                         + System.getProperty(SERVER_SERVICE_PORT_CAMEL);
-                if (StringUtils.isBlank(sessionStorePath)) {
+                if (StringUtils.isBlank(sessionStorePath) || StringUtils.isBlank(vGroupMappingStorePath)) {
                     throw new StoreException("the {store.file.dir} is empty.");
                 }
+                ROOT_VGROUP_MAPPING_MANAGER = EnhancedServiceLoader.load(VGroupMappingStoreManager.class, SessionMode.FILE.getName(),
+                    new Object[]{vGroupMappingStorePath});
+
                 ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.FILE.getName(),
-                    new Object[] {ROOT_SESSION_MANAGER_NAME, sessionStorePath});
+                    new Object[]{ROOT_SESSION_MANAGER_NAME, sessionStorePath});
+                ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.FILE.getName(),
+                    new Object[]{ROOT_SESSION_MANAGER_NAME, sessionStorePath});
                 reload(sessionMode);
             }
         } else if (SessionMode.REDIS.equals(sessionMode)) {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.REDIS.getName());
+            ROOT_VGROUP_MAPPING_MANAGER = EnhancedServiceLoader.load(VGroupMappingStoreManager.class, SessionMode.REDIS.getName());
             reload(sessionMode);
         } else {
             // unknown store
@@ -137,7 +156,7 @@ public class SessionHolder {
      */
     protected static void reload(SessionMode sessionMode) {
         if (sessionMode == SessionMode.FILE) {
-            ((Reloadable)ROOT_SESSION_MANAGER).reload();
+            ((Reloadable) ROOT_SESSION_MANAGER).reload();
             reload(ROOT_SESSION_MANAGER.allSessions(), sessionMode);
         } else {
             reload(null, sessionMode);
@@ -231,7 +250,7 @@ public class SessionHolder {
             // Redis, db and so on
             CompletableFuture.runAsync(() -> {
                 SessionCondition searchCondition = new SessionCondition(GlobalStatus.UnKnown, GlobalStatus.Committed,
-                        GlobalStatus.Rollbacked, GlobalStatus.TimeoutRollbacked, GlobalStatus.Finished);
+                    GlobalStatus.Rollbacked, GlobalStatus.TimeoutRollbacked, GlobalStatus.Finished);
                 searchCondition.setLazyLoadBranch(true);
 
                 long now = System.currentTimeMillis();
@@ -277,6 +296,16 @@ public class SessionHolder {
     }
 
 
+    //region get group mapping manager
+    public static VGroupMappingStoreManager getRootVGroupMappingManager() {
+        if (ROOT_VGROUP_MAPPING_MANAGER == null) {
+            init();
+            if (ROOT_VGROUP_MAPPING_MANAGER == null) {
+                throw new ShouldNeverHappenException("vGroupMappingManager is NOT init!");
+            }
+        }
+        return ROOT_VGROUP_MAPPING_MANAGER;
+    }
 
     //endregion
 
@@ -328,7 +357,7 @@ public class SessionHolder {
      * @return the value
      */
     public static <T> T lockAndExecute(GlobalSession globalSession, GlobalSession.LockCallable<T> lockCallable)
-            throws TransactionException {
+        throws TransactionException {
         return getRootSessionManager().lockAndExecute(globalSession, lockCallable);
     }
 

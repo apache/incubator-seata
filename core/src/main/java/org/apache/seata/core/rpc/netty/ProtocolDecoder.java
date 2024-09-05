@@ -17,6 +17,7 @@
 package org.apache.seata.core.rpc.netty;
 
 import io.netty.buffer.ByteBuf;
+import org.apache.seata.core.protocol.RpcMessage;
 
 /**
  * the protocol decoder
@@ -24,6 +25,6 @@ import io.netty.buffer.ByteBuf;
  **/
 public interface ProtocolDecoder {
 
-    ProtocolRpcMessage decodeFrame(ByteBuf in);
+    RpcMessage decodeFrame(ByteBuf in);
 
 }
