@@ -1,5 +1,11 @@
 package org.apache.seata.spring.boot.autoconfigure.provider;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Properties;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.config.FileConfiguration;
@@ -12,10 +18,13 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertiesPropertySource;
 
-import java.util.*;
-
 import static org.apache.seata.common.ConfigurationKeys.FILE_ROOT_PREFIX_CONFIG;
-import static org.apache.seata.common.ConfigurationKeys.*;
+import static org.apache.seata.common.ConfigurationKeys.FILE_ROOT_PREFIX_REGISTRY;
+import static org.apache.seata.common.ConfigurationKeys.SERVER_PREFIX;
+import static org.apache.seata.common.ConfigurationKeys.STORE_PREFIX;
+import static org.apache.seata.common.ConfigurationKeys.METRICS_PREFIX;
+import static org.apache.seata.common.ConfigurationKeys.TRANSPORT_PREFIX;
+import static org.apache.seata.common.ConfigurationKeys.SEATA_FILE_PREFIX_ROOT_CONFIG;
 
 public class SeataFileConfigurationProvider implements ApplicationContextAware, ApplicationListener<ContextRefreshedEvent> {
 
