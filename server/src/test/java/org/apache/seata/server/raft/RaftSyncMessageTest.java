@@ -16,9 +16,15 @@
  */
 package org.apache.seata.server.raft;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.*;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
+import org.apache.seata.common.exception.SeataRuntimeException;
 import org.apache.seata.common.metadata.ClusterRole;
 import org.apache.seata.common.metadata.Node;
 import org.apache.seata.core.exception.TransactionException;
@@ -58,6 +64,19 @@ public class RaftSyncMessageTest {
     public static void destroy(){
         SessionHolder.destroy();
     }
+
+    @Test
+    public void testSecurityMsgSerialize() throws IOException {
+        TestSecurity testSecurity = new TestSecurity();
+        byte[] bytes;
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(bos)) {
+            oos.writeObject(testSecurity);
+            bytes =  bos.toByteArray();
+        }
+        Assertions.assertThrows(SeataRuntimeException.class,()->RaftSyncMessageSerializer.decode(bytes));
+    }
+
     @Test
     public void testMsgSerialize() throws IOException {
         RaftSyncMessage raftSyncMessage = new RaftSyncMessage();

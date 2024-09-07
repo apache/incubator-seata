@@ -19,26 +19,45 @@ package org.apache.seata.config.nacos;
 import java.lang.reflect.Method;
 import java.util.Properties;
 
-import org.apache.seata.common.util.ReflectionUtil;
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.Test;
+import com.alibaba.nacos.api.exception.NacosException;
 
+import org.apache.seata.common.util.ReflectionUtil;
+import org.apache.seata.config.Configuration;
+import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.config.Dispose;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 /**
  * The type Nacos configuration test
- *
  */
 public class NacosConfigurationTest {
 
-    @Test
-    public void testGetConfigProperties() throws Exception {
-        Method method = ReflectionUtil.getMethod(NacosConfiguration.class, "getConfigProperties");
-        Properties properties = (Properties) ReflectionUtil.invokeMethod(null, method);
-        Assertions.assertThat(properties.getProperty("contextPath")).isEqualTo("/bar");
-        System.setProperty("contextPath", "/foo");
-        properties = (Properties) ReflectionUtil.invokeMethod(null, method);
-        Assertions.assertThat(properties.getProperty("contextPath")).isEqualTo("/foo");
+    private static Configuration configuration;
+
+    @BeforeAll
+    public static void setup() throws NacosException {
+        System.clearProperty("seataEnv");
+        configuration = NacosConfiguration.getInstance();
+        if (configuration instanceof Dispose) {
+            ((Dispose)configuration).dispose();
+        }
+        ConfigurationFactory.reload();
+        configuration = NacosConfiguration.getInstance();
     }
 
+    @Test
+    public void testGetConfigProperties() throws Exception {
+        Assertions.assertNotNull(configuration);
+        Method method = ReflectionUtil.getMethod(NacosConfiguration.class, "getConfigProperties");
+        //do not use `ConfigurationFactory.getInstance()`, it's a proxy object
+        Properties properties = (Properties)method.invoke(configuration);
+        Assertions.assertEquals("/bar", properties.getProperty("contextPath"));
+        System.setProperty("contextPath", "/foo");
+        properties = (Properties)method.invoke(configuration);
+        Assertions.assertEquals("/foo", properties.getProperty("contextPath"));
+        System.clearProperty("contextPath");
+    }
 
 }

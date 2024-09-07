@@ -78,6 +78,8 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
     private static final int REGISTERED_PATH_SET_SIZE = 1;
     private static final Set<String> REGISTERED_PATH_SET = Collections.synchronizedSet(new HashSet<>(REGISTERED_PATH_SET_SIZE));
 
+    private String transactionServiceGroup;
+
     private ZookeeperRegisterServiceImpl() {
     }
 
@@ -175,6 +177,7 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
      */
     @Override
     public List<InetSocketAddress> lookup(String key) throws Exception {
+        transactionServiceGroup = key;
         String clusterName = getServiceGroup(key);
 
         if (clusterName == null) {
@@ -309,7 +312,7 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
         }
         CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
 
-        removeOfflineAddressesIfNecessary(clusterName, newAddressList);
+        removeOfflineAddressesIfNecessary(transactionServiceGroup, clusterName, newAddressList);
     }
 
     private String getClusterName() {
