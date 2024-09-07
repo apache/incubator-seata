@@ -16,23 +16,15 @@
  */
 package org.apache.seata.server.controller;
 
-import org.apache.seata.core.rpc.netty.http.HttpController;
 import org.apache.seata.server.ServerRunner;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 /**
- *
  */
-@Component
-public class HealthController implements HttpController {
+@RestController
+public class HealthController {
 
     private static final String OK = "ok";
     private static final String NOT_OK = "not_ok";
@@ -40,15 +32,10 @@ public class HealthController implements HttpController {
     @Autowired
     private ServerRunner serverRunner;
 
-    @Override
-    public Set<String> getPath() {
-        return new HashSet<String>() {{
-            add("/health");
-        }};
-    }
 
-    @Override
-    public String handle(String path, Map<String, List<String>> paramMap) {
+    @RequestMapping("/health")
+    String healthCheck() {
         return serverRunner.started() ? OK : NOT_OK;
     }
+
 }

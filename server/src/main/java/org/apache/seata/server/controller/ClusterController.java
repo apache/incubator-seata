@@ -16,38 +16,33 @@
  */
 package org.apache.seata.server.controller;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletRequest;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.alipay.sofa.jraft.RouteTable;
 import com.alipay.sofa.jraft.conf.Configuration;
 import com.alipay.sofa.jraft.entity.PeerId;
-import org.apache.catalina.connector.Connector;
-import org.apache.catalina.connector.Request;
-import org.apache.catalina.connector.RequestFacade;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.metadata.MetadataResponse;
 import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.result.Result;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.ConfigurationFactory;
-import org.apache.seata.core.rpc.netty.http.HttpController;
 import org.apache.seata.server.cluster.manager.ClusterWatcherManager;
 import org.apache.seata.server.cluster.raft.RaftServer;
 import org.apache.seata.server.cluster.raft.RaftServerManager;
 import org.apache.seata.server.cluster.raft.sync.msg.dto.RaftClusterMetadata;
 import org.apache.seata.server.cluster.watch.Watcher;
-import org.apache.seata.server.console.param.ParamUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -58,10 +53,10 @@ import static org.apache.seata.common.ConfigurationKeys.STORE_MODE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 
 /**
- *
  */
-@Component
-public class ClusterController implements HttpController {
+@RestController
+@RequestMapping("/metadata/v1")
+public class ClusterController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterController.class);
 
@@ -78,31 +73,7 @@ public class ClusterController implements HttpController {
         this.serverProperties = applicationContext.getBean(ServerProperties.class);
     }
 
-    @Override
-    public Set<String> getPath() {
-        return new HashSet<String>() {{
-            add("/metadata/v1/watch");
-            add("/metadata/v1/cluster");
-            add("/metadata/v1/changeCluster");
-        }};
-    }
-
-    @Override
-    public String handle(String path, Map<String, List<String>> paramMap) {
-        if ("/metadata/v1/watch".equals(path)) {
-            Map<String, Object> map = JSONObject.parseObject(paramMap.get("groupTerms").get(0), Map.class);
-            RequestFacade requestFacade = new RequestFacade(new Request(new Connector()));
-            watch(requestFacade, map, ParamUtil.getIntParam(paramMap, "timeout"));
-            return "";
-        } else if ("/metadata/v1/cluster".equals(path)) {
-            return JSON.toJSONString(cluster(ParamUtil.getStringParam(paramMap, "group")));
-        } else if ("/metadata/v1/changeCluster".equals(path)) {
-            return JSON.toJSONString(changeCluster(ParamUtil.getStringParam(paramMap, "raftClusterStr")));
-        }
-
-        return "unknown path: " + path;
-    }
-
+    @PostMapping("/changeCluster")
     public Result<?> changeCluster(@RequestParam String raftClusterStr) {
         Result<?> result = new Result<>();
         final Configuration newConf = new Configuration();
@@ -118,6 +89,7 @@ public class ClusterController implements HttpController {
         return result;
     }
 
+    @GetMapping("/cluster")
     public MetadataResponse cluster(String group) {
         MetadataResponse metadataResponse = new MetadataResponse();
         if (StringUtils.isBlank(group)) {
@@ -150,6 +122,7 @@ public class ClusterController implements HttpController {
         return metadataResponse;
     }
 
+    @PostMapping("/watch")
     public void watch(HttpServletRequest request, @RequestParam Map<String, Object> groupTerms,
                       @RequestParam(defaultValue = "28000") int timeout) {
         AsyncContext context = request.startAsync();
@@ -160,4 +133,5 @@ public class ClusterController implements HttpController {
             clusterWatcherManager.registryWatcher(watcher);
         });
     }
+
 }

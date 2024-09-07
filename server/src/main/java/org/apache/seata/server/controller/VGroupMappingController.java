@@ -16,18 +16,14 @@
  */
 package org.apache.seata.server.controller;
 
-import com.alibaba.fastjson.JSON;
 import org.apache.seata.common.metadata.namingserver.Instance;
 import org.apache.seata.common.result.Result;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
-import org.apache.seata.core.rpc.netty.http.HttpController;
 import org.apache.seata.core.store.MappingDO;
-import org.apache.seata.server.console.param.ParamUtil;
 import org.apache.seata.server.session.SessionHolder;
 import org.apache.seata.server.store.VGroupMappingStoreManager;
-import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -35,18 +31,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.PostConstruct;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import static org.apache.seata.common.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
 import static org.apache.seata.common.ConfigurationKeys.FILE_ROOT_REGISTRY;
 import static org.apache.seata.common.ConfigurationKeys.FILE_ROOT_TYPE;
 import static org.apache.seata.common.ConfigurationKeys.NAMING_SERVER;
 
-@Component
-public class VGroupMappingController implements HttpController {
+@RestController
+@RequestMapping("/vgroup/v1")
+public class VGroupMappingController {
 
     private VGroupMappingStoreManager vGroupMappingStoreManager;
 
@@ -61,36 +53,13 @@ public class VGroupMappingController implements HttpController {
         }
     }
 
-    @Override
-    public Set<String> getPath() {
-        return new HashSet<String>() {{
-            add("/vgroup/v1/addVGroup");
-            add("/vgroup/v1/removeVGroup");
-        }};
-    }
-
-    @Override
-    public String handle(String path, Map<String, List<String>> paramMap) {
-        if ("/vgroup/v1/addVGroup".equals(path)) {
-            String vGroup = ParamUtil.getStringParam(paramMap, "vGroup");
-            String unit = ParamUtil.getStringParam(paramMap, "unit");
-
-            return JSON.toJSONString(addVGroup(vGroup, unit));
-        } else if ("/vgroup/v1/removeVGroup".equals(path)) {
-            String vGroup = ParamUtil.getStringParam(paramMap, "vGroup");
-
-            return JSON.toJSONString(removeVGroup(vGroup));
-        }
-
-        return "unknown path: " + path;
-    }
-
     /**
      * add vGroup in cluster
      *
      * @param vGroup
      * @return
      */
+    @GetMapping("/addVGroup")
     public Result<?> addVGroup(@RequestParam String vGroup, @RequestParam String unit) {
         Result<?> result = new Result<>();
         MappingDO mappingDO = new MappingDO();
@@ -115,6 +84,7 @@ public class VGroupMappingController implements HttpController {
      * @param vGroup
      * @return
      */
+    @GetMapping("/removeVGroup")
     public Result<?> removeVGroup(@RequestParam String vGroup) {
         Result<?> result = new Result<>();
         boolean rst = vGroupMappingStoreManager.removeVGroup(vGroup);
@@ -127,4 +97,6 @@ public class VGroupMappingController implements HttpController {
         vGroupMappingStoreManager.notifyMapping();
         return result;
     }
+
+
 }
