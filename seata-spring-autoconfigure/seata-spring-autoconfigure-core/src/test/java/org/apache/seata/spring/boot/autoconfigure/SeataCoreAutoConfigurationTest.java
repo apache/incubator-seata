@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -17,9 +16,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class SeataCoreAutoConfigurationTest {
 
     @Autowired
-    private ApplicationContext applicationContext;
-
-    @Autowired
     private Environment environment;
 
     @Test
@@ -27,7 +23,6 @@ public class SeataCoreAutoConfigurationTest {
         // default file.conf
         String txServiceGroup = environment.getProperty("seata.store.db.url");
         assertEquals("jdbc:mysql://127.0.0.1:3306/seata?rewriteBatchedStatements=true&configType=file", txServiceGroup, "The transaction service group should be correctly loaded from configuration");
-
 
         // overridden by application-test.properties
         String registryType = environment.getProperty("seata.config.type");
