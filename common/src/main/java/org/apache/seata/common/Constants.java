@@ -128,6 +128,10 @@ public interface Constants {
      */
     String BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER = "springApplicationContextProvider";
     /**
+     * The constant BEAN_NAME_SEATA_FILE_CONFIGURATION_PROVIDER
+     */
+    String BEAN_NAME_SEATA_FILE_CONFIGURATION_PROVIDER = "seataFileConfigurationProvider";
+    /**
      * The constant BEAN_NAME_SPRING_FENCE_CONFIG
      */
     String BEAN_NAME_SPRING_FENCE_CONFIG = "SpringFenceConfig";

@@ -16,6 +16,7 @@
  */
 package org.apache.seata.spring.boot.autoconfigure;
 
+import org.apache.seata.spring.boot.autoconfigure.provider.SeataFileConfigurationProvider;
 import org.apache.seata.spring.boot.autoconfigure.provider.SpringApplicationContextProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -23,6 +24,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
+import static org.apache.seata.common.Constants.BEAN_NAME_SEATA_FILE_CONFIGURATION_PROVIDER;
 import static org.apache.seata.common.Constants.BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
 
@@ -36,5 +38,11 @@ public class SeataCoreAutoConfiguration {
     @ConditionalOnMissingBean(name = {BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER})
     public SpringApplicationContextProvider springApplicationContextProvider() {
         return new SpringApplicationContextProvider();
+    }
+
+    @Bean(BEAN_NAME_SEATA_FILE_CONFIGURATION_PROVIDER)
+    @ConditionalOnMissingBean(name = {BEAN_NAME_SEATA_FILE_CONFIGURATION_PROVIDER})
+    public SeataFileConfigurationProvider seataFileConfigurationProvider() {
+        return new SeataFileConfigurationProvider();
     }
 }

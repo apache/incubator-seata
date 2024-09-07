@@ -69,6 +69,10 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
                     result = originalConfiguration.getConfigFromSys(rawDataId);
 
                     if (result == null) {
+                        result = originalConfiguration.getConfig(rawDataId);
+                    }
+
+                    if (result == null) {
                         String dataId = convertDataId(rawDataId);
 
                         // 2. Get config value from the springboot environment
