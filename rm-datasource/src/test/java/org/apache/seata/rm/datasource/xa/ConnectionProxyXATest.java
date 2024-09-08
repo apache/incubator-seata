@@ -233,6 +233,9 @@ public class ConnectionProxyXATest {
 
         Mockito.verify(xaResource, times(0)).end(any(Xid.class), any(Integer.class));
         Mockito.verify(xaResource, times(0)).prepare(any(Xid.class));
+
+        connectionProxyXA.rollback();
+        Mockito.verify(xaResource, times(0)).rollback(any(Xid.class));
     }
 
     @AfterAll
