@@ -159,7 +159,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
         if (currentAutoCommitStatus == autoCommit) {
             return;
         }
-        if (checkReadOnly()) {
+        if (isReadOnly()) {
             //If it is a read-only transaction, do nothing
             currentAutoCommitStatus = autoCommit;
             return;
@@ -211,7 +211,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
 
     @Override
     public synchronized void commit() throws SQLException {
-        if (currentAutoCommitStatus || checkReadOnly()) {
+        if (currentAutoCommitStatus || isReadOnly()) {
             // Ignore the committing on an autocommit session and read-only transaction.
             return;
         }
@@ -252,7 +252,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
 
     @Override
     public void rollback() throws SQLException {
-        if (currentAutoCommitStatus || checkReadOnly()) {
+        if (currentAutoCommitStatus || isReadOnly()) {
             // Ignore the committing on an autocommit session and read-only transaction.
             return;
         }
@@ -392,10 +392,6 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             LOGGER.warn("Failed to report XA branch {} on {}-{} since {}:{}",
                     status, xid, xaBranchXid.getBranchId(), te.getCode(), te.getMessage());
         }
-    }
-
-    private boolean checkReadOnly() throws SQLException {
-        return originalConnection.isReadOnly();
     }
 
 }
