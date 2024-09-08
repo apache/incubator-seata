@@ -37,15 +37,15 @@ public class SeataCoreAutoConfigurationTest {
     @Test
     public void testSeataPropertiesLoaded() {
         // default file.conf
-        String txServiceGroup = environment.getProperty("seata.store.db.url");
-        assertEquals("jdbc:mysql://127.0.0.1:3306/seata?rewriteBatchedStatements=true", txServiceGroup, "The transaction service group should be correctly loaded from configuration");
+        String dbUrl = environment.getProperty("seata.store.db.url");
+        assertEquals("jdbc:mysql://127.0.0.1:3306/seata?rewriteBatchedStatements=true", dbUrl, "The DB URL should be correctly loaded from configuration");
 
         // overridden by application-test.properties
         String registryType = environment.getProperty("seata.config.type");
-        assertEquals("file", registryType, "The config type should be file");
+        assertEquals("file", registryType, "The config type should be 'file'");
 
         // overridden by application-test.properties
         String seataNamespaces = environment.getProperty("seata.config.nacos.namespace");
-        assertEquals("seata-test-application.yml", seataNamespaces, "The config type should be file");
+        assertEquals("seata-test-application.yml", seataNamespaces, "The Nacos namespace should be 'seata-test-application.yml'");
     }
 }
