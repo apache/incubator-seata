@@ -139,14 +139,14 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
      * @param branchId transaction branch id
      * @param applicationData application data
      */
-	public synchronized void xaRollback(String xid, long branchId, String applicationData) throws XAException {
-		if (this.xaBranchXid != null) {
+    public synchronized void xaRollback(String xid, long branchId, String applicationData) throws XAException {
+    	if (this.xaBranchXid != null) {
 			xaRollback(xaBranchXid);
 		} else {
 			XAXid xaXid = XAXidBuilder.build(xid, branchId);
 			xaRollback(xaXid);
 		}
-	}
+    }
 
     /**
      * XA rollback
