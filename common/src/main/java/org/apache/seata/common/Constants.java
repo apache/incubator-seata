@@ -265,5 +265,8 @@ public interface Constants {
      */
     int DEAD_LOCK_ERROR_CODE = 1213;
 
-
+    /**
+     * The constant CONFIGURATION_META_FILE_NAME
+     */
+    String CONFIGURATION_META_FILE_NAME = "configuration-meta.yml";
 }

@@ -61,6 +61,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 
+import static org.apache.seata.common.ConfigurationKeys.SEATA_FILE_PREFIX_ROOT_CONFIG;
 import static org.apache.seata.common.ConfigurationKeys.STORE_MODE;
 import static org.apache.seata.common.Constants.RAFT_CONFIG_GROUP;
 import static org.apache.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
@@ -282,7 +283,12 @@ public class ClusterController {
             }
             Properties properties = ConfigProcessor.processConfig(sb.toString(), dataType);
             for (String key : properties.stringPropertyNames()) {
-                configMap.put(key, properties.getProperty(key));
+                String value = properties.getProperty(key);
+                // remove 'seata.' prefix compatible with the config under Spring Boot
+                if (key.startsWith(SEATA_FILE_PREFIX_ROOT_CONFIG)) {
+                    key = key.substring(SEATA_FILE_PREFIX_ROOT_CONFIG.length());
+                }
+                configMap.put(key, value);
             }
         }catch (IOException e){
             LOGGER.error("Failed to read config file: {}", e.getMessage());

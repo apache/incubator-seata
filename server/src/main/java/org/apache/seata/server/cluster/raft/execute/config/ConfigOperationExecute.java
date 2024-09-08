@@ -22,6 +22,8 @@ import org.apache.seata.server.cluster.raft.processor.response.ConfigOperationRe
 import org.apache.seata.server.cluster.raft.sync.msg.RaftBaseMsg;
 import org.apache.seata.server.cluster.raft.sync.msg.RaftConfigOperationSyncMsg;
 import org.apache.seata.server.cluster.raft.sync.msg.dto.ConfigOperationDTO;
+import org.apache.seata.server.config.ConfigurationItem;
+import org.apache.seata.server.config.ConfigurationProcessor;
 import org.checkerframework.checker.units.qual.C;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,7 +67,9 @@ public class ConfigOperationExecute extends AbstractRaftConfigMsgExecute {
 
     private ConfigOperationResponse get(ConfigOperationDTO configOperation) {
         String result = configStoreManager.get(configOperation.getNamespace(), configOperation.getDataId(), configOperation.getKey());
-        return ConfigOperationResponse.success(result);
+        // fill config description and default value
+        ConfigurationItem item = ConfigurationProcessor.processConfigItem(configOperation.getKey(), result);
+        return ConfigOperationResponse.success(item);
     }
 
     private ConfigOperationResponse put(ConfigOperationDTO configOperation) {
@@ -121,7 +125,9 @@ public class ConfigOperationExecute extends AbstractRaftConfigMsgExecute {
         Map<String, Object> configMap = configStoreManager.getAll(configOperation.getNamespace(), configOperation.getDataId());
         Long configVersion = configStoreManager.getConfigVersion(configOperation.getNamespace(), configOperation.getDataId());
         Map<String, Object> result = new HashMap<>();
-        result.put("config", configMap);
+        // fill config description and default value
+        Map<String, ConfigurationItem> itemMap = ConfigurationProcessor.processConfigMap(configMap);
+        result.put("config", itemMap);
         result.put("version", configVersion);
         return ConfigOperationResponse.success(result);
     }

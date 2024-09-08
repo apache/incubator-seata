@@ -182,7 +182,8 @@ class ConfigInfo extends React.Component<GlobalProps, ConfigInfoState> {
       const response = await getConfig({namespace: this.state.configParam.namespace, dataId: this.state.configParam.dataId});
       if (response.success && response.result){
         const { config } = response.result;
-        const configList = Object.keys(config).map((key) => ({ key, value: config[key] }));
+        console.log(config);
+        const configList = Object.keys(config).map((key) => ({ ...config[key] }));
         this.setState({ configList, loading: false });
       }else {
         Message.error(response.errMsg || 'Failed to fetch config list');
@@ -486,11 +487,14 @@ class ConfigInfo extends React.Component<GlobalProps, ConfigInfoState> {
 
         {/* config info table */}
         <div>
-          <Table dataSource={this.state.configList} loading={this.state.loading}>
-            <Table.Column title="Key" dataIndex="key" />
-            <Table.Column title="Value" dataIndex="value" />
+          <Table dataSource={this.state.configList} loading={this.state.loading} tableLayout={"fixed"} tableWidth={1800}>
+            <Table.Column title="Key" dataIndex="key" width={250} />
+            <Table.Column title="Value" dataIndex="value" width={350} />
+            <Table.Column title="Default Value" dataIndex="defaultValue" width={350} />
+            <Table.Column title="Description" dataIndex="description" width={550}/>
             <Table.Column
               title={operateTitle}
+              width={250}
               cell={(value, index, record) => (
                 <>
                   <Button

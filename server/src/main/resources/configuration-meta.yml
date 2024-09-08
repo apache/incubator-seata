@@ -1,0 +1,608 @@
+configuration-meta:
+  # common configuration
+  - key: 'transport.type'
+    desc: 'socket 通信方式'
+    defaultValue: TCP
+    isEncrypt: false
+
+  - key: 'transport.server'
+    desc: 'socket 通道类型'
+    defaultValue: null
+    isEncrypt: false
+
+  - key: 'transport.threadFactory.bossThreadSize'
+    desc: 'Netty 通信模型 Boss group 线程数'
+    defaultValue: 1
+    isEncrypt: false
+
+  - key: 'transport.threadFactory.workerThreadSize'
+    desc: 'Netty 通信模型 Worker group 线程数，线程的默认工作模式有 4 种: Auto(2*CPU 核数 + 1)、Pin(CPU 核数)、BusyPin(CPU 核数 + 1)、Default(2*CPU 核数)'
+    defaultValue: Default
+    isEncrypt: false
+
+  - key: 'transport.shutdown.wait'
+    desc: '服务端 Netty 线程池关闭前等待服务下线时间'
+    defaultValue: 3
+    isEncrypt: false
+
+  - key: 'transport.serialization'
+    desc: 'client 和 server 通信编解码方式'
+    defaultValue: seata
+    isEncrypt: false
+
+  - key: 'transport.compressor'
+    desc: 'client 和 server 通信数据压缩方式，支持 none、gzip、zip、sevenz、bzip2、lz4、deflater、zstd'
+    defaultValue: none
+    isEncrypt: false
+
+  - key: 'transport.heartbeat'
+    desc: 'client 和 server 通信心跳检测开关'
+    defaultValue: true
+    isEncrypt: false
+
+  - key: 'registry.type'
+    desc: '注册中心类型，支持 file 、nacos 、redis、eureka、zk、consul、etcd3、sofa、custom'
+    defaultValue: file
+    isEncrypt: false
+
+  - key: 'config.type'
+    desc: '配置中心类型，支持 file、nacos 、apollo、zk、consul、etcd3、springcloud、custom'
+    defaultValue: file
+    isEncrypt: false
+
+  #  server configuration
+  - key: 'transport.enableTcServerBatchSendResponse'
+    desc: 'TC 批量发送回复消息开关'
+    defaultValue: false
+    isEncrypt: false
+
+  - key: 'transport.rpcTcRequestTimeout'
+    desc: 'TC 二阶段下发请求超时时间'
+    defaultValue: 30
+    isEncrypt: false
+
+  - key: 'server.undo.logSaveDays'
+    desc: 'undo 保留天数，log_status=1 和未正常清理的 undo'
+    defaultValue: 7
+    isEncrypt: false
+
+  - key: 'server.undo.logDeletePeriod'
+    desc: 'undo 清理线程间隔时间'
+    defaultValue: 86400000
+    isEncrypt: false
+
+  - key: 'server.maxCommitRetryTimeout'
+    desc: '二阶段提交重试超时时长，单位 ms,s,m,h,d，默认值为-1 表示无限重试'
+    defaultValue: -1
+    isEncrypt: false
+
+  - key: 'server.maxRollbackRetryTimeout'
+    desc: '二阶段回滚重试超时时长，同 commit'
+    defaultValue: -1
+    isEncrypt: false
+
+  - key: 'server.recovery.committingRetryPeriod'
+    desc: '二阶段提交未完成状态全局事务重试提交线程间隔时间'
+    defaultValue: 1000
+    isEncrypt: false
+
+  - key: 'server.recovery.asynCommittingRetryPeriod'
+    desc: '二阶段异步提交状态重试提交线程间隔时间'
+    defaultValue: 1000
+    isEncrypt: false
+
+  - key: 'server.recovery.rollbackingRetryPeriod'
+    desc: '二阶段回滚状态重试回滚线程间隔时间'
+    defaultValue: 1000
+    isEncrypt: false
+
+  - key: 'server.recovery.timeoutRetryPeriod'
+    desc: '超时状态检测重试线程间隔时间，检测出超时将全局事务置入回滚会话管理器'
+    defaultValue: 1000
+    isEncrypt: false
+
+  - key: 'server.rollbackRetryTimeoutUnlockEnable'
+    desc: '二阶段回滚超时后是否释放锁'
+    defaultValue: false
+    isEncrypt: false
+
+  - key: 'server.distributedLockExpireTime'
+    desc: 'Server 端事务管理全局锁超时时间'
+    defaultValue: 10000
+    isEncrypt: false
+
+  - key: 'server.server.xaerNotaRetryTimeout'
+    desc: '防止 XA 分支事务悬挂的重试超时时间'
+    defaultValue: 60000
+    isEncrypt: false
+
+  - key: 'server.session.branchAsyncQueueSize'
+    desc: '分支事务 Session 异步删除线程池队列大小'
+    defaultValue: 5000
+    isEncrypt: false
+
+  - key: 'server.session.enableBranchAsyncRemove'
+    desc: '分支事务 Session 异步删除开关'
+    defaultValue: false
+    isEncrypt: false
+
+  - key: 'server.enableParallelRequestHandle'
+    desc: '对于批量请求消息的并行处理开关'
+    defaultValue: true
+    isEncrypt: false
+
+  - key: 'server.enableParallelHandleBranch'
+    desc: '二阶段并行下发开关'
+    defaultValue: false
+    isEncrypt: false
+
+  - key: 'server.applicationDataLimitCheck'
+    desc: '是否开启应用数据大小检查'
+    defaultValue: false
+    isEncrypt: false
+
+  - key: 'server.applicationDataLimit'
+    desc: '应用数据大小限制'
+    defaultValue: 64000
+    isEncrypt: false
+
+  - key: 'server.raft.group'
+    desc: 'raft 存储模式下的 group，client 的事务分组值要与之对应'
+    defaultValue: default
+    isEncrypt: false
+
+  - key: 'server.raft.server-addr'
+    desc: 'raft 集群列表如 192.168.0.111:9091,192.168.0.112:9091'
+    defaultValue: null
+    isEncrypt: false
+
+  - key: 'server.raft.snapshot-interval'
+    desc: '间隔多久做一次内存快照，暂停状态机，但能提高停机恢复速度'
+    defaultValue: 600
+    isEncrypt: false
+
+  - key: 'server.raft.apply-batch'
+    desc: '任务累积批次后提交至 leader'
+    defaultValue: 32
+    isEncrypt: false
+
+  - key: 'server.raft.max-append-bufferSize'
+    desc: 'raft 日志存储缓冲区最大大小'
+    defaultValue: 256K
+    isEncrypt: false
+
+  - key: 'server.raft.max-replicator-inflight-msgs'
+    desc: '启用 pipeline 请求情况下，最大 in-flight 请求数'
+    defaultValue: 256
+    isEncrypt: false
+
+  - key: 'server.raft.disruptor-buffer-size'
+    desc: '内部 disruptor buffer 大小，适当调高该值适应写入吞吐量高场景'
+    defaultValue: 16384
+    isEncrypt: false
+
+  - key: 'server.raft.election-timeout-ms'
+    desc: '超过多久没有 leader 心跳开始重选举'
+    defaultValue: 1000
+    isEncrypt: false
+
+  - key: 'server.raft.reporter-enabled'
+    desc: 'raft 自身的监控是否开启'
+    defaultValue: false
+    isEncrypt: false
+
+  - key: 'server.raft.reporter-initial-delay'
+    desc: '监控输出间隔'
+    defaultValue: 60
+    isEncrypt: false
+
+  - key: 'server.raft.serialization'
+    desc: '序列化方式，仅支持 jackson'
+    defaultValue: jackson
+    isEncrypt: false
+
+  - key: 'server.raft.compressor'
+    desc: 'raftlog 和 snapshot 的压缩方式，支持 gzip, zstd, lz4'
+    defaultValue: none
+    isEncrypt: false
+
+  - key: 'server.raft.sync'
+    desc: 'raftlog 同步刷盘'
+    defaultValue: true
+    isEncrypt: false
+
+  - key: 'store.mode'
+    desc: '事务会话信息存储方式'
+    defaultValue: file
+    isEncrypt: false
+
+  - key: 'store.lock.mode'
+    desc: '事务锁信息存储方式'
+    defaultValue: file
+    isEncrypt: false
+
+  - key: 'store.session.mode'
+    desc: '事务回话信息存储方式'
+    defaultValue: file
+    isEncrypt: false
+
+  - key: 'store.publicKey'
+    desc: 'db 或 redis 存储密码解密公钥'
+    defaultValue: null
+    isEncrypt: true
+
+  - key: 'store.file.dir'
+    desc: 'file 模式文件存储文件夹名'
+    defaultValue: sessionStore
+    isEncrypt: false
+
+  - key: 'store.file.maxBranchSessionSize'
+    desc: 'file 模式文件存储分支 session 最大字节数'
+    defaultValue: 16384(16kb)
+    isEncrypt: false
+
+  - key: 'store.file.maxGlobalSessionSize'
+    desc: 'file 模式文件存储全局 session 最大字节数'
+    defaultValue: 512b
+    isEncrypt: false
+
+  - key: 'store.file.fileWriteBufferCacheSize'
+    desc: 'file 模式文件存储 buffer 最大缓存大小'
+    defaultValue: 16384(16kb)
+    isEncrypt: false
+
+  - key: 'store.file.flushDiskMode'
+    desc: 'file 模式文件存储刷盘策略'
+    defaultValue: async
+    isEncrypt: false
+
+  - key: 'store.file.sessionReloadReadSize'
+    desc: 'file 模式文件存储 Server 节点重启后从备份文件中恢复的 session 或 lock key 上限个数'
+    defaultValue: 100
+    isEncrypt: false
+
+  - key: 'store.db.datasource'
+    desc: 'db 模式数据源类型'
+    defaultValue: ''
+    isEncrypt: false
+
+  - key: 'store.db.dbType'
+    desc: 'db 模式数据库类型'
+    defaultValue: ''
+    isEncrypt: false
+
+  - key: 'store.db.driverClassName'
+    desc: 'db 模式数据库驱动'
+    defaultValue: ''
+    isEncrypt: false
+
+  - key: 'store.db.url'
+    desc: 'db 模式数据库 url'
+    defaultValue: ''
+    isEncrypt: false
+
+  - key: 'store.db.user'
+    desc: 'db 模式数据库账户'
+    defaultValue: ''
+    isEncrypt: false
+
+  - key: 'store.db.password'
+    desc: 'db 模式数据库账户密码'
+    defaultValue: ''
+    isEncrypt: true
+
+  - key: 'store.db.minConn'
+    desc: 'db 模式数据库初始连接数'
+    defaultValue: 1
+    isEncrypt: false
+
+  - key: 'store.db.maxConn'
+    desc: 'db 模式数据库最大连接数'
+    defaultValue: 20
+    isEncrypt: false
+
+  - key: 'store.db.maxWait'
+    desc: 'db 模式获取连接时最大等待时间'
+    defaultValue: 5000
+    isEncrypt: false
+
+  - key: 'store.db.globalTable'
+    desc: 'db 模式全局事务表名'
+    defaultValue: 'global_table'
+    isEncrypt: false
+
+  - key: 'store.db.branchTable'
+    desc: 'db 模式分支事务表名'
+    defaultValue: 'branch_table'
+    isEncrypt: false
+
+  - key: 'store.db.lockTable'
+    desc: 'db 模式全局锁表名'
+    defaultValue: 'lock_table'
+    isEncrypt: false
+
+  - key: 'store.db.queryLimit'
+    desc: 'db 模式查询全局事务一次的最大条数'
+    defaultValue: 100
+    isEncrypt: false
+
+  - key: 'store.db.distributedLockTable'
+    desc: 'db 模式 Sever 端事务管理全局锁存储表名'
+    defaultValue: 'distributed_lock'
+    isEncrypt: false
+
+  - key: 'store.redis.mode'
+    desc: 'redis 模式'
+    defaultValue: single
+    isEncrypt: false
+
+  - key: 'store.redis.single.host'
+    desc: '单机模式下 redis 的 host'
+    defaultValue: ''
+    isEncrypt: false
+
+  - key: 'store.redis.single.port'
+    desc: '单机模式下 redis 的 port'
+    defaultValue: ''
+    isEncrypt: false
+
+  - key: 'store.redis.sentinel.masterName'
+    desc: 'sentinel 模式下 redis 的主库名称'
+    defaultValue: ''
+    isEncrypt: false
+
+  - key: 'store.redis.sentinel.sentinelHosts'
+    desc: 'sentinel 模式下 sentinel 的 hosts'
+    defaultValue: ''
+    isEncrypt: false
+
+  - key: 'store.redis.host'
+    desc: 'redis 模式 ip'
+    defaultValue: '127.0.0.1'
+    isEncrypt: false
+
+  - key: 'store.redis.port'
+    desc: 'redis 模式端口'
+    defaultValue: 6379
+    isEncrypt: false
+
+  - key: 'store.redis.maxConn'
+    desc: 'redis 模式最大连接数'
+    defaultValue: 10
+    isEncrypt: false
+
+  - key: 'store.redis.minConn'
+    desc: 'redis 模式最小连接数'
+    defaultValue: 1
+    isEncrypt: false
+
+  - key: 'store.redis.database'
+    desc: 'redis 模式默认库'
+    defaultValue: 0
+    isEncrypt: false
+
+  - key: 'store.redis.password'
+    desc: 'redis 模式密码'
+    defaultValue: 'null'
+    isEncrypt: true
+
+  - key: 'store.redis.queryLimit'
+    desc: 'redis 模式一次查询最大条数'
+    defaultValue: 100
+    isEncrypt: false
+
+  - key: 'store.redis.type'
+    desc: 'redis 模式主要使用的方式: lua, pippline'
+    defaultValue: 'pippline'
+    isEncrypt: false
+
+  - key: 'metrics.enabled'
+    desc: '是否启用 Metrics'
+    defaultValue: false
+    isEncrypt: false
+
+  - key: 'metrics.registryType'
+    desc: '指标注册器类型'
+    defaultValue: 'compact'
+    isEncrypt: false
+
+  - key: 'metrics.exporterList'
+    desc: '指标结果 Measurement 数据输出器列表'
+    defaultValue: 'prometheus'
+    isEncrypt: false
+
+  - key: 'metrics.exporterPrometheusPort'
+    desc: 'prometheus 输出器 Client 端口号'
+    defaultValue: 9898
+    isEncrypt: false
+
+  # client configuration
+  - key: 'seata.enabled'
+    desc: '是否开启 spring-boot 自动装配'
+    defaultValue: true
+    isEncrypt: false
+
+  - key: 'seata.enableAutoDataSourceProxy'
+    desc: '是否开启数据源自动代理'
+    defaultValue: true
+    isEncrypt: false
+
+  - key: 'seata.useJdkProxy'
+    desc: '是否使用 JDK 代理作为数据源自动代理的实现方式'
+    defaultValue: false
+    isEncrypt: false
+
+  - key: 'transport.enableClientBatchSendRequest'
+    desc: '客户端事务消息请求是否批量合并发送'
+    defaultValue: true
+    isEncrypt: false
+
+  - key: 'transport.enableTmClientChannelCheckFailFast'
+    desc: '客户端 TM 快速失败检查'
+    defaultValue: true
+    isEncrypt: false
+
+  - key: 'transport.enableRmClientChannelCheckFailFast'
+    desc: '客户端 RM 快速失败检查'
+    defaultValue: true
+    isEncrypt: false
+
+  - key: 'client.log.exceptionRate'
+    desc: '日志异常输出概率'
+    defaultValue: 100
+    isEncrypt: false
+
+  - key: 'service.vgroupMapping.my_test_tx_group'
+    desc: '事务群组（附录 1）'
+    defaultValue: ''
+    isEncrypt: false
+
+  - key: 'service.default.grouplist'
+    desc: 'TC 服务列表（附录 2）'
+    defaultValue: ''
+    isEncrypt: false
+
+  - key: 'service.disableGlobalTransaction'
+    desc: '全局事务开关'
+    defaultValue: false
+    isEncrypt: false
+
+  - key: 'client.tm.degradeCheck'
+    desc: '降级开关'
+    defaultValue: false
+    isEncrypt: false
+
+  - key: 'client.tm.degradeCheckAllowTimes'
+    desc: '升降级达标阈值'
+    defaultValue: 10
+    isEncrypt: false
+
+  - key: 'client.tm.degradeCheckPeriod'
+    desc: '服务自检周期，单位 ms，每 2 秒进行一次服务自检'
+    defaultValue: 2000
+    isEncrypt: false
+
+  - key: 'client.rm.reportSuccessEnable'
+    desc: '是否上报一阶段成功'
+    defaultValue: false
+    isEncrypt: false
+
+  - key: 'client.rm.asyncCommitBufferLimit'
+    desc: '异步提交缓存队列长度'
+    defaultValue: 10000
+    isEncrypt: false
+
+  - key: 'client.rm.lock.retryInterval'
+    desc: '校验或占用全局锁重试间隔，单位毫秒'
+    defaultValue: 10
+    isEncrypt: false
+
+  - key: 'client.rm.lock.retryTimes'
+    desc: '校验或占用全局锁重试次数'
+    defaultValue: 30
+    isEncrypt: false
+
+  - key: 'client.rm.lock.retryPolicyBranchRollbackOnConflict'
+    desc: '分支事务与其它全局回滚事务冲突时锁策略'
+    defaultValue: true
+    isEncrypt: false
+
+  - key: 'client.rm.reportRetryCount'
+    desc: '一阶段结果上报 TC 重试次数'
+    defaultValue: 5
+    isEncrypt: false
+
+  - key: 'client.rm.tableMetaCheckEnable'
+    desc: '自动刷新缓存中的表结构'
+    defaultValue: false
+    isEncrypt: false
+
+  - key: 'client.rm.tableMetaCheckerInterval'
+    desc: '定时刷新缓存中表结构间隔时间，单位秒'
+    defaultValue: 60
+    isEncrypt: false
+
+  - key: 'client.rm.sagaBranchRegisterEnable'
+    desc: '是否开启 saga 分支注册'
+    defaultValue: false
+    isEncrypt: false
+
+  - key: 'client.rm.sagaJsonParser'
+    desc: 'saga 模式中数据序列化方式'
+    defaultValue: fastjson
+    isEncrypt: false
+
+  - key: 'client.rm.tccActionInterceptorOrder'
+    desc: 'tcc 拦截器顺序'
+    defaultValue: 'Ordered.HIGHEST_PRECEDENCE + 1000'
+    isEncrypt: false
+
+  - key: 'client.rm.applicationDataLimitCheck'
+    desc: '客户端应用数据是否开启限制'
+    defaultValue: false
+    isEncrypt: false
+
+  - key: 'client.rm.applicationDataLimit'
+    desc: '客户端应用数据上报限制'
+    defaultValue: 64000
+    isEncrypt: false
+
+  - key: 'client.tm.commitRetryCount'
+    desc: '一阶段全局提交结果上报 TC 重试次数'
+    defaultValue: 1
+    isEncrypt: false
+
+  - key: 'client.tm.rollbackRetryCount'
+    desc: '一阶段全局回滚结果上报 TC 重试次数'
+    defaultValue: 1
+    isEncrypt: false
+
+  - key: 'client.tm.defaultGlobalTransactionTimeout'
+    desc: '全局事务超时时间'
+    defaultValue: 60
+    isEncrypt: false
+
+  - key: 'client.tm.interceptorOrder'
+    desc: 'TM 全局事务拦截器顺序'
+    defaultValue: 'Ordered.HIGHEST_PRECEDENCE + 1000'
+    isEncrypt: false
+
+  - key: 'client.undo.dataValidation'
+    desc: '二阶段回滚镜像校验'
+    defaultValue: true
+    isEncrypt: false
+
+  - key: 'client.undo.logSerialization'
+    desc: 'undo 序列化方式'
+    defaultValue: jackson
+    isEncrypt: false
+
+  - key: 'client.undo.logTable'
+    desc: '自定义 undo 表名'
+    defaultValue: undo_log
+    isEncrypt: false
+
+  - key: 'client.undo.onlyCareUpdateColumns'
+    desc: '只生成被更新列的镜像'
+    defaultValue: true
+    isEncrypt: false
+
+  - key: 'client.undo.compress.enable'
+    desc: 'undo log 压缩开关'
+    defaultValue: true
+    isEncrypt: false
+
+  - key: 'client.undo.compress.type'
+    desc: 'undo log 压缩算法'
+    defaultValue: zip
+    isEncrypt: false
+
+  - key: 'client.undo.compress.threshold'
+    desc: 'undo log 压缩阈值'
+    defaultValue: '64k'
+    isEncrypt: false
+
+  - key: 'client.rm.sqlParserType'
+    desc: 'sql 解析类型'
+    defaultValue: druid
+    isEncrypt: false
