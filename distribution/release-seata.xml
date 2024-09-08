@@ -97,8 +97,9 @@
 
     <files>
         <file>
-            <source>Dockerfile</source>
+            <source>docker/server/Dockerfile</source>
             <destName>Dockerfile</destName>
+            <outputDirectory>seata-server/</outputDirectory>
         </file>
 
         <file>
@@ -146,6 +147,11 @@
         </file>
 
         <!-- namingserver -->
+        <file>
+            <source>docker/namingserver/Dockerfile</source>
+            <destName>Dockerfile</destName>
+            <outputDirectory>seata-namingserver/</outputDirectory>
+        </file>
         <file>
             <source>../namingserver/target/seata-namingserver-exec.jar</source>
             <outputDirectory>seata-namingserver/target/</outputDirectory>
