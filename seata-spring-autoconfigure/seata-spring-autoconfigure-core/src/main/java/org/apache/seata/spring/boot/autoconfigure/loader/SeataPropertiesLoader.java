@@ -83,17 +83,23 @@ public class SeataPropertiesLoader implements ApplicationContextInitializer<Conf
     public void loadSessionAndLockModes() {
         try {
             Class<?> storeConfigClass = Class.forName("org.apache.seata.server.store.StoreConfig");
-            String sessionMode = invokeStaticMethod(storeConfigClass, "getSessionMode").orElse("defaultSessionMode");
-            String lockMode = invokeStaticMethod(storeConfigClass, "getLockMode").orElse("defaultLockMode");
-            System.setProperty("sessionMode", sessionMode);
-            System.setProperty("lockMode", lockMode);
+            Optional<String> sessionMode = invokeEnumMethod(storeConfigClass, "getSessionMode", "getName");
+            Optional<String> lockMode = invokeEnumMethod(storeConfigClass, "getLockMode", "getName");
+            sessionMode.ifPresent(value -> System.setProperty("sessionMode", value));
+            lockMode.ifPresent(value -> System.setProperty("lockMode", value));
         } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
             // The exception is not printed because it is an expected behavior and does not affect the normal operation of the program.
         }
     }
 
-    private Optional<String> invokeStaticMethod(Class<?> clazz, String methodName) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        Method method = clazz.getMethod(methodName);
-        return Optional.ofNullable((String) method.invoke(null));
+    private Optional<String> invokeEnumMethod(Class<?> clazz, String enumMethodName, String getterMethodName)
+            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        Method enumMethod = clazz.getMethod(enumMethodName);
+        Object enumValue = enumMethod.invoke(null);
+        if (enumValue != null) {
+            Method getterMethod = enumValue.getClass().getMethod(getterMethodName);
+            return Optional.ofNullable((String) getterMethod.invoke(enumValue));
+        }
+        return Optional.empty();
     }
 }
