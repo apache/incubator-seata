@@ -21,3 +21,6 @@ org.apache.seata.spring.boot.autoconfigure.SeataCoreAutoConfiguration
 # Environment Post Processors
 org.springframework.boot.env.EnvironmentPostProcessor=\
 org.apache.seata.spring.boot.autoconfigure.SeataCoreEnvironmentPostProcessor
+
+org.springframework.context.ApplicationContextInitializer=\
+org.apache.seata.spring.boot.autoconfigure.loader.SeataPropertiesLoader

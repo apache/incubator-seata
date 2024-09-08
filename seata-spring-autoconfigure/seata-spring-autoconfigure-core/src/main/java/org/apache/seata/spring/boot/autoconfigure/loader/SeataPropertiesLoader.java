@@ -14,14 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.server.spring.listener;
+package org.apache.seata.spring.boot.autoconfigure.loader;
 
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.config.FileConfiguration;
 import org.apache.seata.config.file.FileConfig;
-import org.apache.seata.server.store.StoreConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.Ordered;
@@ -29,6 +30,8 @@ import org.springframework.core.annotation.Order;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertiesPropertySource;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -74,8 +77,23 @@ public class SeataPropertiesLoader implements ApplicationContextInitializer<Conf
             environment.getPropertySources().addLast(new PropertiesPropertySource("seataOldConfig", properties));
         }
         // Load by priority
-        System.setProperty("sessionMode", StoreConfig.getSessionMode().getName());
-        System.setProperty("lockMode", StoreConfig.getLockMode().getName());
+        loadSessionAndLockModes();
     }
 
+    public void loadSessionAndLockModes() {
+        try {
+            Class<?> storeConfigClass = Class.forName("org.apache.seata.server.store.StoreConfig");
+            String sessionMode = invokeStaticMethod(storeConfigClass, "getSessionMode").orElse("defaultSessionMode");
+            String lockMode = invokeStaticMethod(storeConfigClass, "getLockMode").orElse("defaultLockMode");
+            System.setProperty("sessionMode", sessionMode);
+            System.setProperty("lockMode", lockMode);
+        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+            // The exception is not printed because it is an expected behavior and does not affect the normal operation of the program.
+        }
+    }
+
+    private Optional<String> invokeStaticMethod(Class<?> clazz, String methodName) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        Method method = clazz.getMethod(methodName);
+        return Optional.ofNullable((String) method.invoke(null));
+    }
 }

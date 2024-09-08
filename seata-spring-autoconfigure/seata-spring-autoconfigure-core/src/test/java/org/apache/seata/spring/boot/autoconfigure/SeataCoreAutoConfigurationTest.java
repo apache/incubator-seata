@@ -22,7 +22,7 @@ public class SeataCoreAutoConfigurationTest {
     public void testSeataPropertiesLoaded() {
         // default file.conf
         String txServiceGroup = environment.getProperty("seata.store.db.url");
-        assertEquals("jdbc:mysql://127.0.0.1:3306/seata?rewriteBatchedStatements=true&configType=file", txServiceGroup, "The transaction service group should be correctly loaded from configuration");
+        assertEquals("jdbc:mysql://127.0.0.1:3306/seata?rewriteBatchedStatements=true", txServiceGroup, "The transaction service group should be correctly loaded from configuration");
 
         // overridden by application-test.properties
         String registryType = environment.getProperty("seata.config.type");
