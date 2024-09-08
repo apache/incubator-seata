@@ -16,6 +16,7 @@
  */
 package org.apache.seata.server.controller;
 
+import org.apache.seata.core.rpc.netty.http.HttpController;
 import org.apache.seata.server.ServerRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  */
 @RestController
-public class HealthController {
+public class HealthController implements HttpController {
 
     private static final String OK = "ok";
     private static final String NOT_OK = "not_ok";
@@ -34,7 +35,7 @@ public class HealthController {
 
 
     @RequestMapping("/health")
-    String healthCheck() {
+    public String healthCheck() {
         return serverRunner.started() ? OK : NOT_OK;
     }
 

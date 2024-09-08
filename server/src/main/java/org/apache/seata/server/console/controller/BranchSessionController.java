@@ -17,6 +17,8 @@
 package org.apache.seata.server.console.controller;
 
 import javax.annotation.Resource;
+
+import org.apache.seata.core.rpc.netty.http.HttpController;
 import org.apache.seata.server.console.service.BranchSessionService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("console/branchSession")
-public class BranchSessionController {
+public class BranchSessionController implements HttpController {
 
     @Resource(type = BranchSessionService.class)
     private BranchSessionService branchSessionService;

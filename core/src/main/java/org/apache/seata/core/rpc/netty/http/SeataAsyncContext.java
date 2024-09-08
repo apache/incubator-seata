@@ -1,7 +1,5 @@
 package org.apache.seata.core.rpc.netty.http;
 
-import org.apache.seata.common.exception.SeataRuntimeException;
-
 import javax.servlet.*;
 import java.io.IOException;
 import java.util.ArrayList;

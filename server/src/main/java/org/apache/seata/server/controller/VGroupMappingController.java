@@ -21,6 +21,7 @@ import org.apache.seata.common.result.Result;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.core.rpc.netty.http.HttpController;
 import org.apache.seata.core.store.MappingDO;
 import org.apache.seata.server.session.SessionHolder;
 import org.apache.seata.server.store.VGroupMappingStoreManager;
@@ -38,7 +39,7 @@ import static org.apache.seata.common.ConfigurationKeys.NAMING_SERVER;
 
 @RestController
 @RequestMapping("/vgroup/v1")
-public class VGroupMappingController {
+public class VGroupMappingController implements HttpController {
 
     private VGroupMappingStoreManager vGroupMappingStoreManager;
 

@@ -34,6 +34,7 @@ import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.result.Result;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.core.rpc.netty.http.HttpController;
 import org.apache.seata.server.cluster.manager.ClusterWatcherManager;
 import org.apache.seata.server.cluster.raft.RaftServer;
 import org.apache.seata.server.cluster.raft.RaftServerManager;
@@ -56,22 +57,15 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
  */
 @RestController
 @RequestMapping("/metadata/v1")
-public class ClusterController {
+public class ClusterController implements HttpController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterController.class);
 
     @Resource
     private ClusterWatcherManager clusterWatcherManager;
 
-    private ServerProperties serverProperties;
-
     @Resource
     ApplicationContext applicationContext;
-
-    @PostConstruct
-    private void init() {
-        this.serverProperties = applicationContext.getBean(ServerProperties.class);
-    }
 
     @PostMapping("/changeCluster")
     public Result<?> changeCluster(@RequestParam String raftClusterStr) {
@@ -124,12 +118,12 @@ public class ClusterController {
 
     @PostMapping("/watch")
     public void watch(HttpServletRequest request, @RequestParam Map<String, Object> groupTerms,
-                      @RequestParam(defaultValue = "28000") int timeout) {
+                      @RequestParam(defaultValue = "28000") String timeout) {
         AsyncContext context = request.startAsync();
         context.setTimeout(0L);
         groupTerms.forEach((group, term) -> {
             Watcher<AsyncContext> watcher =
-                    new Watcher<>(group, context, timeout, Long.parseLong(String.valueOf(term)));
+                    new Watcher<>(group, context, Integer.parseInt(timeout), Long.parseLong(String.valueOf(term)));
             clusterWatcherManager.registryWatcher(watcher);
         });
     }

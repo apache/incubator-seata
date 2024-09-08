@@ -37,7 +37,6 @@ import org.springframework.stereotype.Component;
 /**
  */
 @Component
-@DependsOn("httpControllerManager")
 public class ServerRunner implements CommandLineRunner, DisposableBean,
     ApplicationListener<ApplicationEvent>, Ordered {
 
