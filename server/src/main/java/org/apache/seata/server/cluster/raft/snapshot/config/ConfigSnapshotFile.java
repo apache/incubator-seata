@@ -16,6 +16,12 @@
  */
 package org.apache.seata.server.cluster.raft.snapshot.config;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.Map;
+import java.util.Objects;
+
 import com.alipay.sofa.jraft.Status;
 import com.alipay.sofa.jraft.error.RaftError;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
@@ -31,15 +37,8 @@ import org.apache.seata.server.cluster.raft.snapshot.StoreSnapshotFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.Map;
-import java.util.Objects;
-
 import static org.apache.seata.common.ConfigurationKeys.CONFIG_STORE_TYPE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_DB_TYPE;
-
 
 public class ConfigSnapshotFile implements Serializable, StoreSnapshotFile {
 

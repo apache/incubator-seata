@@ -14,41 +14,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.spring.boot.autoconfigure.properties.config.test;
-
+package org.apache.seata.spring.boot.autoconfigure.properties.config;
 
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ExtConfigurationProvider;
 import org.apache.seata.config.FileConfiguration;
 import org.apache.seata.spring.boot.autoconfigure.BasePropertiesTest;
-import org.apache.seata.spring.boot.autoconfigure.properties.config.ConfigStoreProperties;
 import org.apache.seata.spring.boot.autoconfigure.provider.SpringApplicationContextProvider;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.mock;
+
 
 @org.springframework.context.annotation.Configuration
 @Import(SpringApplicationContextProvider.class)
-public class StorePropertiesTest extends BasePropertiesTest {
-    @Bean("testConfigStoreProperties")
-    public ConfigStoreProperties configStoreProperties() {
-        return new ConfigStoreProperties().setType(STR_TEST_AAA).setDir(STR_TEST_BBB).setDestroyOnShutdown(false).setNamespace(STR_TEST_DDD).setDataId(STR_TEST_EEE);
+public class ConfigRaftPropertiesTest extends BasePropertiesTest {
+    @Bean("testConfigRaftProperties")
+    public ConfigRaftProperties configRaftProperties() {
+        return new ConfigRaftProperties().setUsername(STR_TEST_AAA).setPassword(STR_TEST_BBB).setServerAddr(STR_TEST_CCC).setMetadataMaxAgeMs((long)LONG_TEST_ONE).setTokenValidityInMilliseconds((long)LONG_TEST_TWO);
     }
 
     @Test
-    public void testConfigStoreProperties() {
+    public void testConfigRaftProperties() {
         FileConfiguration configuration = mock(FileConfiguration.class);
         Configuration currentConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
 
-        assertEquals(STR_TEST_AAA, currentConfiguration.getConfig("config.raft.db.type"));
-        assertEquals(STR_TEST_BBB, currentConfiguration.getConfig("config.raft.db.dir"));
-        assertFalse(currentConfiguration.getBoolean("config.raft.db.destroyOnShutdown"));
-        assertEquals(STR_TEST_DDD, currentConfiguration.getConfig("config.raft.db.namespace"));
-        assertEquals(STR_TEST_EEE, currentConfiguration.getConfig("config.raft.db.dataId"));
+        assertEquals(STR_TEST_AAA, currentConfiguration.getConfig("config.raft.username"));
+        assertEquals(STR_TEST_BBB, currentConfiguration.getConfig("config.raft.password"));
+        assertEquals(STR_TEST_CCC, currentConfiguration.getConfig("config.raft.serverAddr"));
+        assertEquals(LONG_TEST_ONE, currentConfiguration.getInt("config.raft.metadataMaxAgeMs"));
+        assertEquals(LONG_TEST_TWO, currentConfiguration.getInt("config.raft.tokenValidityInMilliseconds"));
+
     }
 }

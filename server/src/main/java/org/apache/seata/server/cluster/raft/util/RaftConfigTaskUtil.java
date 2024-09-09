@@ -16,6 +16,11 @@
  */
 package org.apache.seata.server.cluster.raft.util;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+
 import com.alipay.sofa.jraft.Closure;
 import com.alipay.sofa.jraft.entity.Task;
 import org.apache.seata.core.exception.GlobalTransactionException;
@@ -24,11 +29,6 @@ import org.apache.seata.core.exception.TransactionExceptionCode;
 import org.apache.seata.server.cluster.raft.RaftConfigServerManager;
 import org.apache.seata.server.cluster.raft.sync.RaftSyncMessageSerializer;
 import org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMessage;
-
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 /**
  */

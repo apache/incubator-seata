@@ -17,6 +17,7 @@
 package org.apache.seata.spring.boot.autoconfigure;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.apache.seata.spring.boot.autoconfigure.properties.LogProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.ShutdownProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.ThreadFactoryProperties;
@@ -37,7 +38,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
-
 
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.*;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_APOLLO_PREFIX;
@@ -64,8 +64,6 @@ import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGIST
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SHUTDOWN_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.THREAD_FACTORY_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.TRANSPORT_PREFIX;
-
-
 
 public class SeataCoreEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 

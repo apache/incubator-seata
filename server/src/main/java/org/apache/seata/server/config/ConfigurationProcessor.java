@@ -16,6 +16,8 @@
  */
 package org.apache.seata.server.config;
 
+import java.io.InputStream;
+import java.util.*;
 
 import org.apache.seata.common.Constants;
 import org.apache.seata.config.store.rocksdb.RocksDBConfigStoreManager;
@@ -24,9 +26,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.*;
 
 /**
  * The configuration items processor

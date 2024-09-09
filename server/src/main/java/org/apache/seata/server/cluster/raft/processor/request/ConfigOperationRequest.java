@@ -16,11 +16,10 @@
  */
 package org.apache.seata.server.cluster.raft.processor.request;
 
-import org.apache.seata.server.cluster.raft.execute.config.ConfigOperationType;
-
 import java.io.Serializable;
 import java.util.Map;
 
+import org.apache.seata.server.cluster.raft.execute.config.ConfigOperationType;
 
 public class ConfigOperationRequest implements Serializable {
     private static final long serialVersionUID = -1149573667621259458L;

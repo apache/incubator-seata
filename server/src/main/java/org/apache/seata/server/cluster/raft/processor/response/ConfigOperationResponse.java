@@ -16,9 +16,7 @@
  */
 package org.apache.seata.server.cluster.raft.processor.response;
 
-
 import java.io.Serializable;
-
 
 public class ConfigOperationResponse implements Serializable {
     private static final long serialVersionUID = -1439073440621259777L;

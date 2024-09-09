@@ -23,7 +23,6 @@ import org.apache.seata.server.cluster.raft.*;
 import org.apache.seata.server.cluster.raft.processor.request.PutNodeMetadataRequest;
 import org.apache.seata.server.cluster.raft.processor.response.PutNodeMetadataResponse;
 
-import static org.apache.seata.common.Constants.RAFT_CONFIG_GROUP;
 
 public class PutNodeInfoRequestProcessor implements RpcProcessor<PutNodeMetadataRequest> {
 

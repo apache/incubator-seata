@@ -16,6 +16,11 @@
  */
 package org.apache.seata.server.cluster.raft;
 
+import java.io.Closeable;
+import java.io.File;
+import java.io.IOException;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import com.alipay.sofa.jraft.Node;
 import com.alipay.sofa.jraft.RaftGroupService;
@@ -29,12 +34,6 @@ import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.rpc.Disposable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.Closeable;
-import java.io.File;
-import java.io.IOException;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_REPORTER_ENABLED;
 import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_REPORTER_INITIAL_DELAY;

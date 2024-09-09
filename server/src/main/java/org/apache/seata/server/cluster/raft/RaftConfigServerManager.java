@@ -16,6 +16,11 @@
  */
 package org.apache.seata.server.cluster.raft;
 
+import java.io.IOException;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+
 import com.alipay.remoting.serialization.SerializerManager;
 import com.alipay.sofa.jraft.CliService;
 import com.alipay.sofa.jraft.RaftServiceFactory;
@@ -43,11 +48,6 @@ import org.apache.seata.server.cluster.raft.processor.PutNodeInfoRequestProcesso
 import org.apache.seata.server.cluster.raft.serializer.JacksonBoltSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static java.io.File.separator;
 import static org.apache.seata.common.ConfigurationKeys.*;

@@ -16,17 +16,10 @@
  */
 package org.apache.seata.server.cluster.raft.sync.msg.dto;
 
-import org.apache.seata.config.ConfigurationFactory;
-import org.apache.seata.server.cluster.raft.execute.config.ConfigOperationType;
-import org.apache.seata.server.cluster.raft.processor.request.ConfigOperationRequest;
-
 import java.io.Serializable;
 
-import static org.apache.seata.common.ConfigurationKeys.CONFIG_STORE_DATA_ID;
-import static org.apache.seata.common.ConfigurationKeys.CONFIG_STORE_NAMESPACE;
-import static org.apache.seata.common.Constants.DEFAULT_STORE_DATA_ID;
-import static org.apache.seata.common.Constants.DEFAULT_STORE_NAMESPACE;
-
+import org.apache.seata.server.cluster.raft.execute.config.ConfigOperationType;
+import org.apache.seata.server.cluster.raft.processor.request.ConfigOperationRequest;
 
 public class ConfigOperationDTO implements Serializable {
     private static final long serialVersionUID = -1237293571963636954L;

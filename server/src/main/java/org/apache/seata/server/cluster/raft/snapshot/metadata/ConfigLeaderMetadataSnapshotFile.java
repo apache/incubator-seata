@@ -16,6 +16,10 @@
  */
 package org.apache.seata.server.cluster.raft.snapshot.metadata;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.Serializable;
+
 import com.alipay.sofa.jraft.Status;
 import com.alipay.sofa.jraft.error.RaftError;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
@@ -26,11 +30,6 @@ import org.apache.seata.server.cluster.raft.snapshot.StoreSnapshotFile;
 import org.apache.seata.server.cluster.raft.sync.msg.dto.RaftClusterMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.Serializable;
-
 
 public class ConfigLeaderMetadataSnapshotFile implements Serializable, StoreSnapshotFile {
     private static final long serialVersionUID = 43235664615355354L;

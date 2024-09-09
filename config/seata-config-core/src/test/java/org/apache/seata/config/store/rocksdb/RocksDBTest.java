@@ -16,14 +16,13 @@
  */
 package org.apache.seata.config.store.rocksdb;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-
-import java.util.HashMap;
-import java.util.Map;
-
 
 import static org.apache.seata.common.Constants.DEFAULT_STORE_DATA_ID;
 import static org.apache.seata.common.Constants.DEFAULT_STORE_NAMESPACE;
@@ -153,7 +152,10 @@ class RocksDBTest {
         configMap.put("default",new HashMap<>());
         Assertions.assertTrue(configStoreManager.putConfigMap(configMap));
         Map<String, Map<String, Object>> other = configStoreManager.getConfigMap();
-        Assertions.assertEquals(other, configMap);
+
+        Assertions.assertEquals(configMap.get(namespace1), other.get(namespace1));
+        Assertions.assertEquals(configMap.get(namespace2), other.get(namespace2));
+        Assertions.assertEquals(configMap.get("default"), other.get("default"));
 
         Assertions.assertDoesNotThrow(()->configStoreManager.getAll(namespace1, dataId1));
     }

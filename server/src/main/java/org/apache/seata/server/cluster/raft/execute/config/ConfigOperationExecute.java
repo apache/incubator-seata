@@ -16,6 +16,10 @@
  */
 package org.apache.seata.server.cluster.raft.execute.config;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.seata.common.holder.ObjectHolder;
 import org.apache.seata.server.cluster.listener.ClusterConfigChangeEvent;
 import org.apache.seata.server.cluster.raft.processor.response.ConfigOperationResponse;
@@ -24,14 +28,9 @@ import org.apache.seata.server.cluster.raft.sync.msg.RaftConfigOperationSyncMsg;
 import org.apache.seata.server.cluster.raft.sync.msg.dto.ConfigOperationDTO;
 import org.apache.seata.server.config.ConfigurationItem;
 import org.apache.seata.server.config.ConfigurationProcessor;
-import org.checkerframework.checker.units.qual.C;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
 

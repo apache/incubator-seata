@@ -74,7 +74,7 @@ public class NumberUtils {
         long result = 0;
         for (int i = 0; i < 8; i++) {
             result <<= 8;
-            result |= (bytes[i] & 0xFF);
+            result |= bytes[i] & 0xFF;
         }
         return result;
     }

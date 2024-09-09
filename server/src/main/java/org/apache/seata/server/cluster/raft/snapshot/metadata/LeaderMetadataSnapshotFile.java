@@ -45,7 +45,6 @@ public class LeaderMetadataSnapshotFile implements Serializable, StoreSnapshotFi
         this.group = group;
     }
 
-
     @Override
     public Status save(SnapshotWriter writer) {
         RaftSnapshot raftSnapshot = new RaftSnapshot();

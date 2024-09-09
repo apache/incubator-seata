@@ -16,16 +16,14 @@
  */
 package org.apache.seata.config.store.rocksdb;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
 import org.rocksdb.*;
 import org.rocksdb.util.SizeUnit;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import static java.io.File.separator;
 import static org.apache.seata.common.ConfigurationKeys.*;
