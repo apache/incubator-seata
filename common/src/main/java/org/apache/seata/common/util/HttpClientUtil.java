@@ -91,7 +91,7 @@ public class HttpClientUtil {
                     String requestBody = URLEncodedUtils.format(nameValuePairs, StandardCharsets.UTF_8);
                     StringEntity stringEntity = new StringEntity(requestBody, ContentType.APPLICATION_FORM_URLENCODED);
                     httpPost.setEntity(stringEntity);
-                }else if (ContentType.APPLICATION_JSON.getMimeType().equals(contentType)) {
+                } else if (ContentType.APPLICATION_JSON.getMimeType().equals(contentType)) {
                     String requestBody = OBJECT_MAPPER.writeValueAsString(params);
                     StringEntity stringEntity = new StringEntity(requestBody, ContentType.APPLICATION_JSON);
                     httpPost.setEntity(stringEntity);
