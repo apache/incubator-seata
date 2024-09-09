@@ -16,22 +16,30 @@
  */
 package org.apache.seata.config.raft;
 
-import java.util.*;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.apache.seata.common.exception.NotSupportYetException;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
-import org.apache.seata.config.*;
+import org.apache.seata.config.AbstractConfiguration;
+import org.apache.seata.config.Configuration;
+import org.apache.seata.config.ConfigurationChangeEvent;
+import org.apache.seata.config.ConfigurationChangeListener;
+import org.apache.seata.config.ConfigurationChangeType;
+import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.config.store.ConfigStoreManager;
 import org.apache.seata.config.store.ConfigStoreManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.apache.seata.common.ConfigurationKeys.*;
-import static org.apache.seata.common.Constants.*;
-
+import static org.apache.seata.common.ConfigurationKeys.CONFIG_STORE_DATA_ID;
+import static org.apache.seata.common.ConfigurationKeys.CONFIG_STORE_NAMESPACE;
+import static org.apache.seata.common.Constants.DEFAULT_STORE_DATA_ID;
+import static org.apache.seata.common.Constants.DEFAULT_STORE_NAMESPACE;
 
 
 public class RaftConfigurationServer extends AbstractConfiguration {

@@ -14,25 +14,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.config.raft;
+package org.apache.seata.config.dto;
 
-import org.apache.seata.common.loader.LoadLevel;
-import org.apache.seata.config.Configuration;
-import org.apache.seata.config.ConfigurationProvider;
+/**
+ * The configuration items meta
+ *
+ */
+public class ConfigurationItemMeta {
+    private final String key;
+    private final String description;
+    private final Object defaultValue;
+    private final Boolean isEncrypt;
 
-import static org.apache.seata.common.Constants.APPLICATION_TYPE_KEY;
-import static org.apache.seata.common.Constants.APPLICATION_TYPE_SERVER;
+    public ConfigurationItemMeta(String key, String description, Object defaultValue, Boolean isEncrypt) {
+        this.key = key;
+        this.description = description;
+        this.defaultValue = defaultValue;
+        this.isEncrypt = isEncrypt;
+    }
 
-@LoadLevel(name = "Raft", order = 1)
-public class RaftConfigurationProvider implements ConfigurationProvider {
-    @Override
-    public Configuration provide() {
-        // todo : optimize
-        String applicationType = System.getProperty(APPLICATION_TYPE_KEY);
-        if (APPLICATION_TYPE_SERVER.equals(applicationType)){
-            return RaftConfigurationServer.getInstance();
-        }else{
-            return RaftConfigurationClient.getInstance();
-        }
+    public String getKey() {
+        return key;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public Object getDefaultValue() {
+        return defaultValue;
+    }
+    public Boolean getEncrypt() {
+        return isEncrypt;
     }
 }

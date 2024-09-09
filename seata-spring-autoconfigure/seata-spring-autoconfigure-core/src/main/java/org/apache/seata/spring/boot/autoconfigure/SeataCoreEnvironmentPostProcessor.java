@@ -22,7 +22,16 @@ import org.apache.seata.spring.boot.autoconfigure.properties.LogProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.ShutdownProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.ThreadFactoryProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.TransportProperties;
-import org.apache.seata.spring.boot.autoconfigure.properties.config.*;
+import org.apache.seata.spring.boot.autoconfigure.properties.config.ConfigApolloProperties;
+import org.apache.seata.spring.boot.autoconfigure.properties.config.ConfigConsulProperties;
+import org.apache.seata.spring.boot.autoconfigure.properties.config.ConfigCustomProperties;
+import org.apache.seata.spring.boot.autoconfigure.properties.config.ConfigEtcd3Properties;
+import org.apache.seata.spring.boot.autoconfigure.properties.config.ConfigFileProperties;
+import org.apache.seata.spring.boot.autoconfigure.properties.config.ConfigNacosProperties;
+import org.apache.seata.spring.boot.autoconfigure.properties.config.ConfigProperties;
+import org.apache.seata.spring.boot.autoconfigure.properties.config.ConfigRaftProperties;
+import org.apache.seata.spring.boot.autoconfigure.properties.config.ConfigStoreProperties;
+import org.apache.seata.spring.boot.autoconfigure.properties.config.ConfigZooKeeperProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryConsulProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryCustomProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryEtcd3Properties;
@@ -39,7 +48,7 @@ import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
 
-import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.*;
+
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_APOLLO_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_CONSUL_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_CUSTOM_PREFIX;
@@ -47,6 +56,8 @@ import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.CONFIG
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_FILE_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_NACOS_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_PREFIX;
+import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_RAFT_PREFIX;
+import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_STORE_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_ZK_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.LOG_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_BEAN_MAP;

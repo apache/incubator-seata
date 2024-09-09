@@ -18,7 +18,15 @@ package org.apache.seata.config.store.rocksdb;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -28,14 +36,38 @@ import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.NumberUtils;
 import org.apache.seata.common.util.StringUtils;
-import org.apache.seata.config.*;
+import org.apache.seata.config.Configuration;
+import org.apache.seata.config.ConfigurationChangeEvent;
+import org.apache.seata.config.ConfigurationChangeListener;
+import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.config.FileConfiguration;
 import org.apache.seata.config.store.AbstractConfigStoreManager;
 import org.apache.seata.config.store.ConfigStoreManager;
-import org.rocksdb.*;
+import org.rocksdb.ColumnFamilyDescriptor;
+import org.rocksdb.ColumnFamilyHandle;
+import org.rocksdb.DBOptions;
+import org.rocksdb.Options;
+import org.rocksdb.RocksDB;
+import org.rocksdb.RocksDBException;
+import org.rocksdb.RocksIterator;
+import org.rocksdb.WriteBatch;
+import org.rocksdb.WriteOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.apache.seata.common.ConfigurationKeys.*;
+import static org.apache.seata.common.ConfigurationKeys.CLIENT_PREFIX;
+import static org.apache.seata.common.ConfigurationKeys.CONFIG_STORE_DATA_ID;
+import static org.apache.seata.common.ConfigurationKeys.CONFIG_STORE_NAMESPACE;
+import static org.apache.seata.common.ConfigurationKeys.FILE_ROOT_PREFIX_CONFIG;
+import static org.apache.seata.common.ConfigurationKeys.FILE_ROOT_PREFIX_REGISTRY;
+import static org.apache.seata.common.ConfigurationKeys.LOG_PREFIX;
+import static org.apache.seata.common.ConfigurationKeys.METRICS_PREFIX;
+import static org.apache.seata.common.ConfigurationKeys.SEATA_FILE_PREFIX_ROOT_CONFIG;
+import static org.apache.seata.common.ConfigurationKeys.SERVER_PREFIX;
+import static org.apache.seata.common.ConfigurationKeys.SERVICE_PREFIX;
+import static org.apache.seata.common.ConfigurationKeys.STORE_PREFIX;
+import static org.apache.seata.common.ConfigurationKeys.TCC_PREFIX;
+import static org.apache.seata.common.ConfigurationKeys.TRANSPORT_PREFIX;
 import static org.apache.seata.common.Constants.DEFAULT_STORE_DATA_ID;
 import static org.apache.seata.common.Constants.DEFAULT_STORE_NAMESPACE;
 
@@ -66,7 +98,7 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
     private RocksDB rocksdb;
     private final Map<String, ColumnFamilyHandle> columnFamilyHandleMap = new ConcurrentHashMap<>();
     private final String VERSION_COLUMN_FAMILY = "config_version";
-    private static final List<String> prefixList = Arrays.asList(FILE_ROOT_PREFIX_CONFIG, FILE_ROOT_PREFIX_REGISTRY, SERVER_PREFIX, CLIENT_PREFIX, SERVICE_PREFIX,
+    private static final List<String> PREFIX_LIST = Arrays.asList(FILE_ROOT_PREFIX_CONFIG, FILE_ROOT_PREFIX_REGISTRY, SERVER_PREFIX, CLIENT_PREFIX, SERVICE_PREFIX,
             STORE_PREFIX, METRICS_PREFIX, TRANSPORT_PREFIX, LOG_PREFIX, TCC_PREFIX);
 
 
@@ -153,7 +185,7 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
                     k = k.substring(SEATA_FILE_PREFIX_ROOT_CONFIG.length());
                 }
                 // filter all seata related configs
-                if (prefixList.stream().anyMatch(k::startsWith)) {
+                if (PREFIX_LIST.stream().anyMatch(k::startsWith)) {
                     seataConfigs.put(k, v);
                 }
             });

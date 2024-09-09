@@ -14,50 +14,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.server.config;
+package org.apache.seata.config.dto;
 
-/**
- * The configuration items
- *
- */
-public class ConfigurationItem {
-    private String key;
-    private Object value;
-    private String description;
-    private Object defaultValue;
+import java.io.Serializable;
+import java.util.Map;
 
+public class ConfigurationInfoDto implements Serializable {
+    private static final long serialVersionUID = 72337179613855724L;
+    private Map<String, ConfigurationItem> config;
 
-    public String getKey() {
-        return key;
+    private Long version;
+
+    public Map<String, ConfigurationItem> getConfig() {
+        return config;
     }
 
-    public void setKey(String key) {
-        this.key = key;
+    public void setConfig(Map<String, ConfigurationItem> config) {
+        this.config = config;
     }
 
-    public Object getValue() {
-        return value;
+    public Long getVersion() {
+        return version;
     }
 
-    public void setValue(Object value) {
-        this.value = value;
+    public void setVersion(Long version) {
+        this.version = version;
     }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public Object getDefaultValue() {
-        return defaultValue;
-    }
-
-    public void setDefaultValue(Object defaultValue) {
-        this.defaultValue = defaultValue;
-    }
-
-
 }

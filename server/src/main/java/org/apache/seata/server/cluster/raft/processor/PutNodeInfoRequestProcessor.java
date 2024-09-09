@@ -19,7 +19,12 @@ package org.apache.seata.server.cluster.raft.processor;
 import com.alipay.sofa.jraft.rpc.RpcContext;
 import com.alipay.sofa.jraft.rpc.RpcProcessor;
 import org.apache.seata.common.metadata.Node;
-import org.apache.seata.server.cluster.raft.*;
+import org.apache.seata.server.cluster.raft.RaftConfigServer;
+import org.apache.seata.server.cluster.raft.RaftConfigServerManager;
+import org.apache.seata.server.cluster.raft.RaftConfigStateMachine;
+import org.apache.seata.server.cluster.raft.RaftServer;
+import org.apache.seata.server.cluster.raft.RaftServerManager;
+import org.apache.seata.server.cluster.raft.RaftStateMachine;
 import org.apache.seata.server.cluster.raft.processor.request.PutNodeMetadataRequest;
 import org.apache.seata.server.cluster.raft.processor.response.PutNodeMetadataResponse;
 

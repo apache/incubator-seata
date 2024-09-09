@@ -14,37 +14,52 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.server.config;
+package org.apache.seata.config.dto;
+
+import java.io.Serializable;
 
 /**
- * The configuration items meta
+ * The configuration items
  *
  */
-public class ConfigurationItemMeta {
-    private final String key;
-    private final String description;
-    private final Object defaultValue;
-    private final Boolean isEncrypt;
-
-    public ConfigurationItemMeta(String key, String description, Object defaultValue, Boolean isEncrypt) {
-        this.key = key;
-        this.description = description;
-        this.defaultValue = defaultValue;
-        this.isEncrypt = isEncrypt;
-    }
+public class ConfigurationItem implements Serializable {
+    private static final long serialVersionUID = 32787493713855767L;
+    private String key;
+    private Object value;
+    private String description;
+    private Object defaultValue;
 
     public String getKey() {
         return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public Object getValue() {
+        return value;
+    }
+
+    public void setValue(Object value) {
+        this.value = value;
     }
 
     public String getDescription() {
         return description;
     }
 
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public Object getDefaultValue() {
         return defaultValue;
     }
-    public Boolean getEncrypt() {
-        return isEncrypt;
+
+    public void setDefaultValue(Object defaultValue) {
+        this.defaultValue = defaultValue;
     }
+
+
 }

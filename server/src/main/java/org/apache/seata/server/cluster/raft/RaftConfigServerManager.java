@@ -50,10 +50,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static java.io.File.separator;
-import static org.apache.seata.common.ConfigurationKeys.*;
+import static org.apache.seata.common.ConfigurationKeys.CONFIG_STORE_DIR;
+import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_APPLY_BATCH;
+import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_DISRUPTOR_BUFFER_SIZE;
 import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_ELECTION_TIMEOUT_MS;
+import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_MAX_APPEND_BUFFER_SIZE;
+import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_MAX_REPLICATOR_INFLIGHT_MSGS;
+import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_PORT_CAMEL;
+import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_SNAPSHOT_INTERVAL;
+import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_SYNC;
 import static org.apache.seata.common.Constants.RAFT_CONFIG_GROUP;
-import static org.apache.seata.common.DefaultValues.*;
+import static org.apache.seata.common.DefaultValues.DEFAULT_DB_STORE_FILE_DIR;
+import static org.apache.seata.common.DefaultValues.DEFAULT_SERVER_RAFT_ELECTION_TIMEOUT_MS;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGEX_SPLIT_CHAR;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_PREFERED_NETWORKS;
 
@@ -67,7 +75,7 @@ public class RaftConfigServerManager {
     private static RpcServer rpcServer;
     private static RaftConfigServer raftServer;
     private static volatile boolean RAFT_MODE;
-    private static String group = RAFT_CONFIG_GROUP;
+    private static final String GROUP = RAFT_CONFIG_GROUP;
 
     public static CliService getCliServiceInstance() {
         return RaftConfigServerManager.SingletonHandler.CLI_SERVICE;
@@ -129,7 +137,7 @@ public class RaftConfigServerManager {
                 // separately
                 SerializerManager.addSerializer(SerializerType.JACKSON.getCode(), new JacksonBoltSerializer());
                 rpcServer = RaftRpcServerFactory.createRaftRpcServer(serverId.getEndpoint());
-                raftServer = new RaftConfigServer(dataPath, group, serverId, initNodeOptions(initConf), rpcServer);
+                raftServer = new RaftConfigServer(dataPath, GROUP, serverId, initNodeOptions(initConf), rpcServer);
             } catch (IOException e) {
                 throw new IllegalArgumentException("fail init raft cluster:" + e.getMessage(), e);
             }
@@ -144,10 +152,10 @@ public class RaftConfigServerManager {
                 raftServer.start();
             }
         } catch (IOException e) {
-            LOGGER.error("start seata server raft cluster error, group: {} ", group, e);
+            LOGGER.error("start seata server raft cluster error, group: {} ", GROUP, e);
             throw new RuntimeException(e);
         }
-        LOGGER.info("started seata server raft cluster, group: {} ", group);
+        LOGGER.info("started seata server raft cluster, group: {} ", GROUP);
 
         if (rpcServer != null) {
             rpcServer.registerProcessor(new PutNodeInfoRequestProcessor());
@@ -166,7 +174,7 @@ public class RaftConfigServerManager {
 
     public static void destroy() {
         raftServer.close();
-        LOGGER.info("closed seata server raft cluster, group: {} ", group);
+        LOGGER.info("closed seata server raft cluster, group: {} ", GROUP);
         Optional.ofNullable(rpcServer).ifPresent(RpcServer::shutdown);
         raftServer = null;
         rpcServer = null;
@@ -232,7 +240,7 @@ public class RaftConfigServerManager {
         return nodeOptions;
     }
     public static String getGroup() {
-        return group;
+        return GROUP;
     }
     private static class SingletonHandler {
         private static final CliService CLI_SERVICE = RaftServiceFactory.createAndInitCliService(new CliOptions());

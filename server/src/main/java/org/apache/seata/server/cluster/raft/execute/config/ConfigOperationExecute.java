@@ -21,12 +21,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.seata.common.holder.ObjectHolder;
+import org.apache.seata.config.dto.ConfigurationInfoDto;
 import org.apache.seata.server.cluster.listener.ClusterConfigChangeEvent;
 import org.apache.seata.server.cluster.raft.processor.response.ConfigOperationResponse;
 import org.apache.seata.server.cluster.raft.sync.msg.RaftBaseMsg;
 import org.apache.seata.server.cluster.raft.sync.msg.RaftConfigOperationSyncMsg;
 import org.apache.seata.server.cluster.raft.sync.msg.dto.ConfigOperationDTO;
-import org.apache.seata.server.config.ConfigurationItem;
+import org.apache.seata.config.dto.ConfigurationItem;
 import org.apache.seata.server.config.ConfigurationProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -126,9 +127,12 @@ public class ConfigOperationExecute extends AbstractRaftConfigMsgExecute {
         Map<String, Object> result = new HashMap<>();
         // fill config description and default value
         Map<String, ConfigurationItem> itemMap = ConfigurationProcessor.processConfigMap(configMap);
-        result.put("config", itemMap);
-        result.put("version", configVersion);
-        return ConfigOperationResponse.success(result);
+        ConfigurationInfoDto configurationInfoDto = new ConfigurationInfoDto();
+        configurationInfoDto.setConfig(itemMap);
+        configurationInfoDto.setVersion(configVersion);
+        //result.put("config", itemMap);
+        //result.put("version", configVersion);
+        return ConfigOperationResponse.success(configurationInfoDto);
     }
 
     private ConfigOperationResponse getNamespaces(ConfigOperationDTO configOperation){

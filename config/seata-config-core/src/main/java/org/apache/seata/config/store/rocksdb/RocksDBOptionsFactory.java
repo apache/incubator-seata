@@ -22,11 +22,15 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
-import org.rocksdb.*;
+import org.rocksdb.ColumnFamilyOptions;
+import org.rocksdb.CompactionStyle;
+import org.rocksdb.CompressionType;
+import org.rocksdb.DBOptions;
 import org.rocksdb.util.SizeUnit;
 
 import static java.io.File.separator;
-import static org.apache.seata.common.ConfigurationKeys.*;
+import static org.apache.seata.common.ConfigurationKeys.CONFIG_STORE_DESTROY_ON_SHUTDOWN;
+import static org.apache.seata.common.ConfigurationKeys.CONFIG_STORE_DIR;
 import static org.apache.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 
 
@@ -39,7 +43,7 @@ public class RocksDBOptionsFactory {
 
     public static final String ROCKSDB_SUFFIX = "rocksdb";
     private static volatile DBOptions options = null;
-    private static final Map<String/*namespace*/, ColumnFamilyOptions> columnFamilyOptionsMap = new ConcurrentHashMap<>();
+    private static final Map<String/*namespace*/, ColumnFamilyOptions> COLUMN_FAMILY_OPTIONS_MAP = new ConcurrentHashMap<>();
     public static DBOptions getDBOptions() {
         if (options == null){
             synchronized (RocksDBOptionsFactory.class){
@@ -52,10 +56,10 @@ public class RocksDBOptionsFactory {
     }
 
     public static ColumnFamilyOptions getColumnFamilyOptionsMap(final String namespace) {
-        ColumnFamilyOptions opts = columnFamilyOptionsMap.get(namespace);
+        ColumnFamilyOptions opts = COLUMN_FAMILY_OPTIONS_MAP.get(namespace);
         if (opts == null){
             final ColumnFamilyOptions newOpts = buildColumnFamilyOptions();
-            opts = columnFamilyOptionsMap.putIfAbsent(namespace, newOpts);
+            opts = COLUMN_FAMILY_OPTIONS_MAP.putIfAbsent(namespace, newOpts);
             if (opts != null) {
                 newOpts.close();
             }else{
@@ -111,14 +115,14 @@ public class RocksDBOptionsFactory {
         if (options != null){
             options.close();
         }
-        for (final ColumnFamilyOptions opts : columnFamilyOptionsMap.values()) {
+        for (final ColumnFamilyOptions opts : COLUMN_FAMILY_OPTIONS_MAP.values()) {
             if (opts != null){
                 opts.close();
             }
         }
         // help gc
         options = null;
-        columnFamilyOptionsMap.clear();
+        COLUMN_FAMILY_OPTIONS_MAP.clear();
     }
 
 }

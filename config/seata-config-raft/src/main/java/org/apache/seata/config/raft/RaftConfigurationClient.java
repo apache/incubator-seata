@@ -19,8 +19,18 @@ package org.apache.seata.config.raft;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -38,7 +48,11 @@ import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.config.ConfigDataResponse;
-import org.apache.seata.common.exception.*;
+import org.apache.seata.common.exception.AuthenticationFailedException;
+import org.apache.seata.common.exception.ErrorCode;
+import org.apache.seata.common.exception.NotSupportYetException;
+import org.apache.seata.common.exception.RetryableException;
+import org.apache.seata.common.exception.SeataRuntimeException;
 import org.apache.seata.common.metadata.Metadata;
 import org.apache.seata.common.metadata.MetadataResponse;
 import org.apache.seata.common.metadata.Node;
@@ -46,14 +60,23 @@ import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.HttpClientUtil;
 import org.apache.seata.common.util.StringUtils;
-import org.apache.seata.config.*;
+import org.apache.seata.config.AbstractConfiguration;
+import org.apache.seata.config.Configuration;
+import org.apache.seata.config.ConfigurationChangeEvent;
+import org.apache.seata.config.ConfigurationChangeListener;
+import org.apache.seata.config.ConfigurationChangeType;
+import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.config.dto.ConfigurationInfoDto;
+import org.apache.seata.config.dto.ConfigurationItem;
 import org.apache.seata.config.store.ConfigStoreManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.apache.seata.common.ConfigurationKeys.CONFIG_STORE_DATA_ID;
 import static org.apache.seata.common.ConfigurationKeys.CONFIG_STORE_NAMESPACE;
-import static org.apache.seata.common.Constants.*;
+import static org.apache.seata.common.Constants.DEFAULT_STORE_DATA_ID;
+import static org.apache.seata.common.Constants.DEFAULT_STORE_NAMESPACE;
+import static org.apache.seata.common.Constants.RAFT_CONFIG_GROUP;
 import static org.apache.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 
 /**
@@ -62,7 +85,6 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
  */
 public class RaftConfigurationClient extends AbstractConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(RaftConfigurationClient.class);
-
     private static final String CONFIG_TYPE = "raft";
     private static final String SERVER_ADDR_KEY = "serverAddr";
     private static final String RAFT_GROUP = RAFT_CONFIG_GROUP;
@@ -75,7 +97,6 @@ public class RaftConfigurationClient extends AbstractConfiguration {
     private static final String VERSION_KEY = "version";
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String TOKEN_VALID_TIME_MS_KEY = "tokenValidityInMilliseconds";
-
     private static volatile RaftConfigurationClient instance;
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static final String USERNAME;
@@ -85,7 +106,6 @@ public class RaftConfigurationClient extends AbstractConfiguration {
     private static final String IP_PORT_SPLIT_CHAR = ":";
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final Map<String, List<InetSocketAddress>> INIT_ADDRESSES = new HashMap<>();
-
     private static final Metadata METADATA = new Metadata();
     private static volatile ThreadPoolExecutor REFRESH_METADATA_EXECUTOR;
     private static volatile ThreadPoolExecutor REFRESH_CONFIG_EXECUTOR;
@@ -206,6 +226,7 @@ public class RaftConfigurationClient extends AbstractConfiguration {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private static Map<String, Object> acquireClusterConfigData(String clusterName, String group, String configNamespace, String configDataId) throws RetryableException {
         String tcAddress = queryHttpAddress(clusterName, group);
         Map<String, String> header = new HashMap<>();
@@ -235,14 +256,19 @@ public class RaftConfigurationClient extends AbstractConfiguration {
                     }
                 }
 
-                ConfigDataResponse<Map<String, Object>> configDataResponse;
+                ConfigDataResponse<ConfigurationInfoDto> configDataResponse;
                 if (StringUtils.isNotBlank(response)) {
                     try {
-                        configDataResponse = OBJECT_MAPPER.readValue(response, new TypeReference<ConfigDataResponse<Map<String, Object>>>() {});
+                        configDataResponse = OBJECT_MAPPER.readValue(response, new TypeReference<ConfigDataResponse<ConfigurationInfoDto>>() {});
                         if(configDataResponse.getSuccess()) {
-                            Map<String, Object> result = configDataResponse.getResult();
-                            Map<String, Object> configMap = (Map<String, Object>) result.get(CONFIG_KEY);
-                            Long version = result.get(VERSION_KEY) == null ? -1 : ((Integer)result.get(VERSION_KEY)).longValue();
+                            ConfigurationInfoDto configurationInfoDto = configDataResponse.getResult();
+                            Map<String, ConfigurationItem> configItemMap = configurationInfoDto.getConfig();
+                            Map<String, Object> configMap = configItemMap.entrySet().stream()
+                                    .collect(Collectors.toMap(
+                                            Map.Entry::getKey,
+                                            entry -> entry.getValue().getValue()
+                                    ));
+                            Long version = configurationInfoDto.getVersion() == null ? -1 : configurationInfoDto.getVersion();
                             Long currentVersion = CONFIG_VERSION.get();
                             if (version < currentVersion) {
                                 LOGGER.info("The configuration version: {} of the server is lower than the current configuration: {} , it may be expired configuration.", version, CONFIG_VERSION.get());
@@ -594,6 +620,7 @@ public class RaftConfigurationClient extends AbstractConfiguration {
         Map<String, String> param = new HashMap<>();
         param.put(USERNAME_KEY, USERNAME);
         param.put(PASSWORD_KEY, PASSWORD);
+
         Map<String, String> header = new HashMap<>();
         header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
         String response = null;

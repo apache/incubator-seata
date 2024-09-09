@@ -17,7 +17,13 @@
 package org.apache.seata.server.cluster.raft;
 
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -71,8 +77,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.env.Environment;
 
-import static org.apache.seata.common.Constants.*;
-import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.*;
+import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
+import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
+import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.CONFIG_OPERATION;
+import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.REFRESH_CLUSTER_METADATA;
+
 
 /**
  * The type raft config state machine.
