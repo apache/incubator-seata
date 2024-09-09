@@ -16,6 +16,10 @@ jobs:
         ports:
           - 6379:6379
         options: --health-cmd="redis-cli ping" --health-interval=10s --health-timeout=5s --health-retries=3
+      nacos:
+        image: nacos/nacos-server:2.4.2
+        ports:
+          - 8848:8848
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
