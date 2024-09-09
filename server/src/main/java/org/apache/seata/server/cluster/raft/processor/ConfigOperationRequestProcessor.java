@@ -32,9 +32,9 @@ public class ConfigOperationRequestProcessor implements RpcProcessor<ConfigOpera
     private static final String NOT_LEADER = "not leader";
     @Override
     public void handleRequest(RpcContext rpcCtx, ConfigOperationRequest request) {
-        if (RaftConfigServerManager.isLeader()){
+        if (RaftConfigServerManager.isLeader()) {
             onExecute(rpcCtx, request);
-        }else{
+        } else {
             rpcCtx.sendResponse(ConfigOperationResponse.fail(NOT_LEADER));
         }
     }
@@ -47,7 +47,7 @@ public class ConfigOperationRequestProcessor implements RpcProcessor<ConfigOpera
         closure.setRaftBaseMsg(syncMsg);
         closure.setResponse(response);
         closure.setDone(status -> {
-            if (!status.isOk()){
+            if (!status.isOk()) {
                 response.setSuccess(false);
                 response.setErrMsg(status.getErrorMsg());
             }

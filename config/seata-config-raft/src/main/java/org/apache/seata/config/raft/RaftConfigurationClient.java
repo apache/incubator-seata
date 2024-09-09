@@ -150,7 +150,7 @@ public class RaftConfigurationClient extends AbstractConfiguration {
             }
             CONFIG_LISTENER = new ConfigStoreListener(CONFIG_NAMESPACE, null);
             startQueryConfigData();
-        }catch (RetryableException e){
+        } catch (RetryableException e) {
             LOGGER.error("init config properties error", e);
         }
 
@@ -259,25 +259,24 @@ public class RaftConfigurationClient extends AbstractConfiguration {
                 ConfigDataResponse<ConfigurationInfoDto> configDataResponse;
                 if (StringUtils.isNotBlank(response)) {
                     try {
-                        configDataResponse = OBJECT_MAPPER.readValue(response, new TypeReference<ConfigDataResponse<ConfigurationInfoDto>>() {});
-                        if(configDataResponse.getSuccess()) {
+                        configDataResponse = OBJECT_MAPPER.readValue(response, new TypeReference<ConfigDataResponse<ConfigurationInfoDto>>() {
+                        });
+                        if (configDataResponse.getSuccess()) {
                             ConfigurationInfoDto configurationInfoDto = configDataResponse.getResult();
                             Map<String, ConfigurationItem> configItemMap = configurationInfoDto.getConfig();
                             Map<String, Object> configMap = configItemMap.entrySet().stream()
                                     .collect(Collectors.toMap(
-                                            Map.Entry::getKey,
-                                            entry -> entry.getValue().getValue()
-                                    ));
+                                            Map.Entry::getKey, entry -> entry.getValue().getValue()));
                             Long version = configurationInfoDto.getVersion() == null ? -1 : configurationInfoDto.getVersion();
                             Long currentVersion = CONFIG_VERSION.get();
                             if (version < currentVersion) {
                                 LOGGER.info("The configuration version: {} of the server is lower than the current configuration: {} , it may be expired configuration.", version, CONFIG_VERSION.get());
                                 throw new RetryableException("Expired configuration!");
-                            }else{
+                            } else {
                                 CONFIG_VERSION.set(version);
                                 return configMap;
                             }
-                        }else{
+                        } else {
                             throw new RetryableException(configDataResponse.getErrMsg());
                         }
                     } catch (JsonProcessingException e) {
@@ -366,7 +365,7 @@ public class RaftConfigurationClient extends AbstractConfiguration {
                                 if (fetch) {
                                     try {
                                         Map<String, Object> configMap = acquireClusterConfigData(RAFT_CLUSTER, RAFT_GROUP, CONFIG_NAMESPACE, CONFIG_DATA_ID);
-                                        if(CollectionUtils.isNotEmpty(configMap)) {
+                                        if (CollectionUtils.isNotEmpty(configMap)) {
                                             notifyConfigMayChange(configMap);
                                         }
                                     } catch (Exception e) {
@@ -498,7 +497,7 @@ public class RaftConfigurationClient extends AbstractConfiguration {
                 // Refresh the metadata by initializing the address
                 try {
                     acquireClusterMetaData(clusterName, group);
-                }catch (RetryableException e) {
+                } catch (RetryableException e) {
                     LOGGER.warn(e.getMessage(), e);
                 }
                 startQueryMetadata();
@@ -576,7 +575,7 @@ public class RaftConfigurationClient extends AbstractConfiguration {
     @Override
     public Set<ConfigurationChangeListener> getConfigListeners(String dataId) {
         ConcurrentMap<ConfigurationChangeListener, ConfigStoreListener> configListeners = CONFIG_LISTENERS_MAP.get(dataId);
-        if (CollectionUtils.isNotEmpty(configListeners)){
+        if (CollectionUtils.isNotEmpty(configListeners)) {
             return configListeners.keySet();
         } else {
             return null;
@@ -675,7 +674,7 @@ public class RaftConfigurationClient extends AbstractConfiguration {
                                 .setNamespace(CONFIG_NAMESPACE)
                                 .setChangeType(ConfigurationChangeType.MODIFY);
 
-                        // 通知ConfigurationCache
+                        // notify ConfigurationCache
                         ConcurrentMap<ConfigurationChangeListener, ConfigStoreListener> configListeners = entry.getValue();
                         for (ConfigurationChangeListener configListener : configListeners.keySet()) {
                             configListener.onProcessEvent(newEvent);

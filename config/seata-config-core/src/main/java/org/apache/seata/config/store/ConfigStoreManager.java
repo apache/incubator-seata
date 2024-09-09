@@ -71,7 +71,7 @@ public interface ConfigStoreManager {
 
     static String convertConfig2Str(Map<String, Object> configs) {
         StringBuilder sb = new StringBuilder();
-        if (CollectionUtils.isEmpty(configs)){
+        if (CollectionUtils.isEmpty(configs)) {
             sb.toString();
         }
         for (Map.Entry<String, Object> entry : configs.entrySet()) {

@@ -137,7 +137,7 @@ class ConfigInfo extends React.Component<GlobalProps, ConfigInfoState> {
       if (raftMode === 'raft') {
         this.setState({ isRaft: true, loading: false });
         this.fetchNamespaces();
-      }else{
+      } else {
         this.setState({ loading: false });
         Message.error(disableTitle);
         setTimeout(() => this.props.history.goBack(), 1000);
@@ -185,7 +185,7 @@ class ConfigInfo extends React.Component<GlobalProps, ConfigInfoState> {
         console.log(config);
         const configList = Object.keys(config).map((key) => ({ ...config[key] }));
         this.setState({ configList, loading: false });
-      }else {
+      } else {
         Message.error(response.errMsg || 'Failed to fetch config list');
         this.setState({ loading: false });
       }
@@ -289,7 +289,7 @@ class ConfigInfo extends React.Component<GlobalProps, ConfigInfoState> {
           if (response.success) {
             Message.success(operationSuccess);
             this.fetchConfigList();
-          }else {
+          } else {
             Message.error(response.errMsg || operationFail);
           }
         } catch (error) {

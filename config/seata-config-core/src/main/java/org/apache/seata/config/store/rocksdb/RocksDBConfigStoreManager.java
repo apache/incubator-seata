@@ -88,7 +88,7 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
     private static final String FILE_TYPE = "file";
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static final DBOptions DB_OPTIONS = RocksDBOptionsFactory.getDBOptions();
-    private final Map<String, ReentrantReadWriteLock> LOCK_MAP = new ConcurrentHashMap<>();
+    private static final Map<String, ReentrantReadWriteLock> LOCK_MAP = new ConcurrentHashMap<>();
     private static final int MAP_INITIAL_CAPACITY = 8;
     private static final ConcurrentMap<String/*namespace*/, Map<String/*dataId*/, Set<ConfigurationChangeListener>>> CONFIG_LISTENERS_MAP = new ConcurrentHashMap<>(
             MAP_INITIAL_CAPACITY);
@@ -97,7 +97,7 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
     private static volatile RocksDBConfigStoreManager instance;
     private RocksDB rocksdb;
     private final Map<String, ColumnFamilyHandle> columnFamilyHandleMap = new ConcurrentHashMap<>();
-    private final String VERSION_COLUMN_FAMILY = "config_version";
+    private static final String VERSION_COLUMN_FAMILY = "config_version";
     private static final List<String> PREFIX_LIST = Arrays.asList(FILE_ROOT_PREFIX_CONFIG, FILE_ROOT_PREFIX_REGISTRY, SERVER_PREFIX, CLIENT_PREFIX, SERVICE_PREFIX,
             STORE_PREFIX, METRICS_PREFIX, TRANSPORT_PREFIX, LOG_PREFIX, TCC_PREFIX);
 
@@ -122,10 +122,10 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
         LOGGER.info("RocksDBConfigStoreManager initialized successfully");
     }
 
-    private void openRocksDB(){
+    private void openRocksDB() {
         final List<ColumnFamilyHandle> handles = new ArrayList<>();
         final List<ColumnFamilyDescriptor> descriptors = new ArrayList<>();
-        try (final Options options = new Options()){
+        try (final Options options = new Options()) {
             List<byte[]> cfs = RocksDB.listColumnFamilies(options, DB_PATH);
             for (byte[] cf : cfs) {
                 String namespace = new String(cf);
@@ -140,12 +140,12 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
             for (ColumnFamilyHandle handle : handles) {
                 columnFamilyHandleMap.put(new String(handle.getName()), handle);
             }
-        }catch (RocksDBException e){
+        } catch (RocksDBException e) {
             LOGGER.error("open rocksdb error", e);
         }
     }
 
-    private ColumnFamilyHandle getOrCreateColumnFamilyHandle(String namespace) throws RocksDBException{
+    private ColumnFamilyHandle getOrCreateColumnFamilyHandle(String namespace) throws RocksDBException {
         ColumnFamilyHandle handle = columnFamilyHandleMap.get(namespace);
         if (handle == null) {
             synchronized (RocksDBConfigStoreManager.class) {
@@ -164,7 +164,7 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
      * load origin config if first startup
      */
     private void maybeNeedLoadOriginConfig() {
-        if (isEmpty(CURRENT_NAMESPACE, CURRENT_DATA_ID)){
+        if (isEmpty(CURRENT_NAMESPACE, CURRENT_DATA_ID)) {
             Map<String, Object> configs = new HashMap<>();
             Map<String, Object> seataConfigs = new HashMap<>();
             String pathDataId = String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR,
@@ -209,7 +209,7 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
      * @return
      * @throws RocksDBException
      */
-    private Map<String, Object> getConfigMap(String namespace, String dataId) throws RocksDBException{
+    private Map<String, Object> getConfigMap(String namespace, String dataId) throws RocksDBException {
         ReentrantReadWriteLock lock = acquireLock(namespace);
         lock.readLock().lock();
         try {
@@ -221,7 +221,7 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
             byte[] value = rocksdb.get(handle, dataId.getBytes(DEFAULT_CHARSET));
             String configStr = value != null ? new String(value, DEFAULT_CHARSET) : null;
             return ConfigStoreManager.convertConfigStr2Map(configStr);
-        }finally {
+        } finally {
             lock.readLock().unlock();
         }
     }
@@ -240,9 +240,9 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
         try {
             Map<String, Object> configMap = getConfigMap(namespace, dataId);
             return configMap.get(key) != null ? configMap.get(key).toString() : null;
-        }catch (RocksDBException e) {
+        } catch (RocksDBException e) {
             LOGGER.error("Failed to get value for key: " + key, e);
-        }finally {
+        } finally {
             lock.readLock().unlock();
         }
         return null;
@@ -258,7 +258,7 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
     public Map<String, Object> getAll(String namespace, String dataId) {
         try {
             return getConfigMap(namespace, dataId);
-        }catch (RocksDBException e) {
+        } catch (RocksDBException e) {
             LOGGER.error("Failed to get all configs", e);
         }
         return null;
@@ -285,9 +285,9 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
             updateConfigVersion(namespace, dataId);
             notifyConfigChange(namespace, dataId, new ConfigurationChangeEvent(namespace, dataId, configStr));
             return true;
-        }catch (RocksDBException e){
+        } catch (RocksDBException e) {
             LOGGER.error("Failed to put value for key: " + key, e);
-        }finally {
+        } finally {
             lock.writeLock().unlock();
         }
         return false;
@@ -313,9 +313,9 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
             updateConfigVersion(namespace, dataId);
             notifyConfigChange(namespace, dataId, new ConfigurationChangeEvent(namespace, dataId, configStr));
             return true;
-        }catch (RocksDBException e){
+        } catch (RocksDBException e) {
             LOGGER.error("Failed to delete value for key: " + key, e);
-        }finally {
+        } finally {
             lock.writeLock().unlock();
         }
         return false;
@@ -332,16 +332,16 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
     public Boolean putAll(String namespace, String dataId, Map<String, Object> configMap) {
         ReentrantReadWriteLock lock = acquireLock(namespace);
         lock.writeLock().lock();
-        try{
+        try {
             String configStr = ConfigStoreManager.convertConfig2Str(configMap);
             ColumnFamilyHandle handle = getOrCreateColumnFamilyHandle(namespace);
             rocksdb.put(handle, dataId.getBytes(DEFAULT_CHARSET), configStr.getBytes(DEFAULT_CHARSET));
             updateConfigVersion(namespace, dataId);
             notifyConfigChange(namespace, dataId, new ConfigurationChangeEvent(namespace, dataId, configStr));
             return true;
-        }catch (RocksDBException e){
+        } catch (RocksDBException e) {
             LOGGER.error("Failed to put all configs", e);
-        }finally {
+        } finally {
             lock.writeLock().unlock();
         }
         return false;
@@ -423,9 +423,9 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
                     for (Map.Entry<String, Object> nsEntry : configs .entrySet()) {
                         batch.put(handle, nsEntry.getKey().getBytes(DEFAULT_CHARSET), nsEntry.getValue().toString().getBytes(DEFAULT_CHARSET));
                     }
-                }catch (RocksDBException e){
+                } catch (RocksDBException e) {
                     LOGGER.error("Failed to put configMap in namespace : {}", namespace, e);
-                }finally {
+                } finally {
                     lock.writeLock().unlock();
                 }
             }
@@ -440,7 +440,7 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
                 }
             }
             return true;
-        }catch (RocksDBException e) {
+        } catch (RocksDBException e) {
             LOGGER.error("Failed to put all configMap", e);
             return false;
         }
@@ -459,13 +459,13 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
                 ReentrantReadWriteLock lock = acquireLock(namespace);
                 lock.writeLock().lock();
                 HashSet<String> deleteKeySet = new HashSet<>();
-                try(RocksIterator iterator = rocksdb.newIterator(handle)) {
+                try (RocksIterator iterator = rocksdb.newIterator(handle)) {
                     for (iterator.seekToFirst(); iterator.isValid(); iterator.next()) {
                         batch.delete(handle, iterator.key());
                         deleteKeySet.add(new String(iterator.key()));
                     }
                     clearDataMap.put(namespace, deleteKeySet);
-                }finally {
+                } finally {
                     lock.writeLock().unlock();
                 }
             }
@@ -478,7 +478,7 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
                 }
             }
             return true;
-        }catch (RocksDBException e) {
+        } catch (RocksDBException e) {
             LOGGER.error("Failed to clear all data in rocksdb", e);
             return false;
         }
@@ -502,7 +502,7 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
     @Override
     public List<String> getAllNamespaces() {
         return columnFamilyHandleMap.keySet().stream()
-                .filter(namespace -> !namespace.equals(VERSION_COLUMN_FAMILY))
+                .filter(namespace -> !VERSION_COLUMN_FAMILY.equals(namespace))
                 .collect(Collectors.toList());
     }
 
@@ -527,9 +527,9 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
                 String dataId = new String(iterator.key(), DEFAULT_CHARSET);
                 dataIds.add(dataId);
             }
-        }catch (RocksDBException e) {
+        } catch (RocksDBException e) {
             LOGGER.error("Failed to get all dataIds in namespace: {}", namespace, e);
-        }finally {
+        } finally {
             if (iterator != null) {
                 iterator.close();
             }
@@ -553,9 +553,9 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
             ColumnFamilyHandle handle = getOrCreateColumnFamilyHandle(VERSION_COLUMN_FAMILY);
             byte[] value = rocksdb.get(handle, configVersionKey.getBytes(DEFAULT_CHARSET));
             return value != null ? NumberUtils.bytesToLong(value) : null;
-        }catch (RocksDBException | IllegalArgumentException e) {
+        } catch (RocksDBException | IllegalArgumentException e) {
             LOGGER.error("Failed to get config version in namespace: {} and dataId: {}", namespace, dataId, e);
-        }finally {
+        } finally {
             lock.readLock().unlock();
         }
         return null;
@@ -577,9 +577,9 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
             ColumnFamilyHandle handle = getOrCreateColumnFamilyHandle(VERSION_COLUMN_FAMILY);
             rocksdb.put(handle, configVersionKey.getBytes(DEFAULT_CHARSET), NumberUtils.longToBytes(version));
             return true;
-        }catch (RocksDBException | IllegalArgumentException e) {
+        } catch (RocksDBException | IllegalArgumentException e) {
             LOGGER.error("Failed to put config version in namespace: {} and dataId: {}", namespace, dataId, e);
-        }finally {
+        } finally {
             lock.writeLock().unlock();
         }
         return false;
@@ -600,9 +600,9 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
             ColumnFamilyHandle handle = getOrCreateColumnFamilyHandle(VERSION_COLUMN_FAMILY);
             rocksdb.delete(handle, configVersionKey.getBytes(DEFAULT_CHARSET));
             return true;
-        }catch (RocksDBException | IllegalArgumentException e) {
+        } catch (RocksDBException | IllegalArgumentException e) {
             LOGGER.error("Failed to put config version in namespace: {} and dataId: {}", namespace, dataId, e);
-        }finally {
+        } finally {
             lock.writeLock().unlock();
         }
         return false;
@@ -617,7 +617,7 @@ public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
 
     @Override
     public void shutdown() {
-        synchronized (RocksDBConfigStoreManager.class){
+        synchronized (RocksDBConfigStoreManager.class) {
             // 1. close all handles
             for (ColumnFamilyHandle handle : columnFamilyHandleMap.values()) {
                 if (handle != null) {

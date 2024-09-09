@@ -58,7 +58,7 @@ public class RocksDBFactory {
         try {
             checkPath(dbPath);
             return RocksDB.open(dbOptions, dbPath, columnFamilyDescriptors, columnFamilyHandles);
-        }catch (RocksDBException | IOException e){
+        } catch (RocksDBException | IOException e) {
             LOGGER.error("RocksDB open error: {}", e.getMessage(), e);
             return null;
         }
@@ -74,9 +74,9 @@ public class RocksDBFactory {
 
     public static synchronized void destroy(String dbPath) {
         close();
-        try(final Options opt = new Options()) {
+        try (final Options opt = new Options()) {
             RocksDB.destroyDB(dbPath, opt);
-        }catch (RocksDBException e){
+        } catch (RocksDBException e) {
             LOGGER.error("RocksDB destroy error: {}", e.getMessage(), e);
         }
     }

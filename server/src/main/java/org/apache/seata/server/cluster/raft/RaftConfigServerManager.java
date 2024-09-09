@@ -91,7 +91,7 @@ public class RaftConfigServerManager {
             String configTypeName = CONFIG.getConfig(org.apache.seata.config.ConfigurationKeys.FILE_ROOT_CONFIG
                     + org.apache.seata.config.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + org.apache.seata.config.ConfigurationKeys.FILE_ROOT_TYPE);
             RAFT_MODE = ConfigType.Raft.name().equalsIgnoreCase(configTypeName);
-            if (!RAFT_MODE){
+            if (!RAFT_MODE) {
                 return;
             }
             if (StringUtils.isBlank(initConfStr)) {
@@ -109,10 +109,10 @@ public class RaftConfigServerManager {
             PeerId serverId = null;
             // XID may be null when configuration center is not initialized.
             String host = null;
-            if (XID.getIpAddress() == null){
+            if (XID.getIpAddress() == null) {
                 String preferredNetworks = CONFIG.getConfig(REGISTRY_PREFERED_NETWORKS);
                 host = StringUtils.isNotBlank(preferredNetworks) ? NetUtil.getLocalIp(preferredNetworks.split(REGEX_SPLIT_CHAR)) : NetUtil.getLocalIp();
-            }else{
+            } else {
                 host = XID.getIpAddress();
             }
             if (port <= 0) {
@@ -144,7 +144,7 @@ public class RaftConfigServerManager {
         }
     }
     public static void start() {
-        if (!RAFT_MODE){
+        if (!RAFT_MODE) {
             return;
         }
         try {

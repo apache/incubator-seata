@@ -29,9 +29,9 @@ public class RaftConfigurationProvider implements ConfigurationProvider {
     public Configuration provide() {
         // todo : optimize
         String applicationType = System.getProperty(APPLICATION_TYPE_KEY);
-        if (APPLICATION_TYPE_SERVER.equals(applicationType)){
+        if (APPLICATION_TYPE_SERVER.equals(applicationType)) {
             return RaftConfigurationServer.getInstance();
-        }else{
+        } else {
             return RaftConfigurationClient.getInstance();
         }
     }

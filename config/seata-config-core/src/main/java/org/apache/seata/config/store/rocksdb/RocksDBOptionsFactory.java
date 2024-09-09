@@ -45,9 +45,9 @@ public class RocksDBOptionsFactory {
     private static volatile DBOptions options = null;
     private static final Map<String/*namespace*/, ColumnFamilyOptions> COLUMN_FAMILY_OPTIONS_MAP = new ConcurrentHashMap<>();
     public static DBOptions getDBOptions() {
-        if (options == null){
-            synchronized (RocksDBOptionsFactory.class){
-                if (options == null){
+        if (options == null) {
+            synchronized (RocksDBOptionsFactory.class) {
+                if (options == null) {
                     options = buildDBOptions();
                 }
             }
@@ -57,12 +57,12 @@ public class RocksDBOptionsFactory {
 
     public static ColumnFamilyOptions getColumnFamilyOptionsMap(final String namespace) {
         ColumnFamilyOptions opts = COLUMN_FAMILY_OPTIONS_MAP.get(namespace);
-        if (opts == null){
+        if (opts == null) {
             final ColumnFamilyOptions newOpts = buildColumnFamilyOptions();
             opts = COLUMN_FAMILY_OPTIONS_MAP.putIfAbsent(namespace, newOpts);
             if (opts != null) {
                 newOpts.close();
-            }else{
+            } else {
                 opts = newOpts;
             }
         }
@@ -112,11 +112,11 @@ public class RocksDBOptionsFactory {
 
     public static void releaseAllOptions() {
         // close all options
-        if (options != null){
+        if (options != null) {
             options.close();
         }
         for (final ColumnFamilyOptions opts : COLUMN_FAMILY_OPTIONS_MAP.values()) {
-            if (opts != null){
+            if (opts != null) {
                 opts.close();
             }
         }

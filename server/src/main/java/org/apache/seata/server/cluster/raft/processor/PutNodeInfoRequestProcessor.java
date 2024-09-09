@@ -39,14 +39,14 @@ public class PutNodeInfoRequestProcessor implements RpcProcessor<PutNodeMetadata
     public void handleRequest(RpcContext rpcCtx, PutNodeMetadataRequest request) {
         Node node = request.getNode();
         String group = node.getGroup();
-        if (RaftConfigServerManager.getGroup().equals(group)){
+        if (RaftConfigServerManager.getGroup().equals(group)) {
             changeConfigGroupRequest(group, node, rpcCtx, request);
-        }else{
+        } else {
             changeNormalGroupRequest(group, node, rpcCtx, request);
         }
     }
 
-    private static void changeConfigGroupRequest(String group, Node node, RpcContext rpcCtx, PutNodeMetadataRequest request){
+    private static void changeConfigGroupRequest(String group, Node node, RpcContext rpcCtx, PutNodeMetadataRequest request) {
         if (RaftConfigServerManager.isLeader()) {
             RaftConfigServer raftServer = RaftConfigServerManager.getRaftServer();
             RaftConfigStateMachine raftStateMachine = raftServer.getRaftStateMachine();
@@ -57,7 +57,7 @@ public class PutNodeInfoRequestProcessor implements RpcProcessor<PutNodeMetadata
         }
     }
 
-    private static void changeNormalGroupRequest(String group, Node node, RpcContext rpcCtx, PutNodeMetadataRequest request){
+    private static void changeNormalGroupRequest(String group, Node node, RpcContext rpcCtx, PutNodeMetadataRequest request) {
         if (RaftServerManager.isLeader(group)) {
             RaftServer raftServer = RaftServerManager.getRaftServer(group);
             RaftStateMachine raftStateMachine = raftServer.getRaftStateMachine();

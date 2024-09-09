@@ -76,7 +76,7 @@ public class ConfigOperationExecute extends AbstractRaftConfigMsgExecute {
         Boolean success = configStoreManager.put(configOperation.getNamespace(), configOperation.getDataId(), configOperation.getKey(), configOperation.getValue());
         if (success) {
             // ApplicationContext may not have been started at this point
-            if (ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT) != null){
+            if (ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT) != null) {
                 ((ApplicationEventPublisher) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
                         .publishEvent(new ClusterConfigChangeEvent(this, configOperation.getNamespace(), configOperation.getDataId()));
             }
@@ -88,7 +88,7 @@ public class ConfigOperationExecute extends AbstractRaftConfigMsgExecute {
     private ConfigOperationResponse delete(ConfigOperationDTO configOperation) {
         Boolean success = configStoreManager.delete(configOperation.getNamespace(), configOperation.getDataId(), configOperation.getKey());
         if (success) {
-            if (ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT) != null){
+            if (ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT) != null) {
                 ((ApplicationEventPublisher) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
                         .publishEvent(new ClusterConfigChangeEvent(this, configOperation.getNamespace(), configOperation.getDataId()));
             }
@@ -100,7 +100,7 @@ public class ConfigOperationExecute extends AbstractRaftConfigMsgExecute {
     private ConfigOperationResponse deleteAll(ConfigOperationDTO configOperation) {
         Boolean success = configStoreManager.deleteAll(configOperation.getNamespace(), configOperation.getDataId());
         if (success) {
-            if (ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT) != null){
+            if (ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT) != null) {
                 ((ApplicationEventPublisher) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
                         .publishEvent(new ClusterConfigChangeEvent(this, configOperation.getNamespace(), configOperation.getDataId()));
             }
@@ -112,7 +112,7 @@ public class ConfigOperationExecute extends AbstractRaftConfigMsgExecute {
     private ConfigOperationResponse upload(ConfigOperationDTO configOperation) {
         Boolean success = configStoreManager.putAll(configOperation.getNamespace(), configOperation.getDataId(), (Map<String, Object>) configOperation.getValue());
         if (success) {
-            if (ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT) != null){
+            if (ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT) != null) {
                 ((ApplicationEventPublisher) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
                         .publishEvent(new ClusterConfigChangeEvent(this, configOperation.getNamespace(), configOperation.getDataId()));
             }
@@ -135,12 +135,12 @@ public class ConfigOperationExecute extends AbstractRaftConfigMsgExecute {
         return ConfigOperationResponse.success(configurationInfoDto);
     }
 
-    private ConfigOperationResponse getNamespaces(ConfigOperationDTO configOperation){
+    private ConfigOperationResponse getNamespaces(ConfigOperationDTO configOperation) {
         List<String> namespaces = configStoreManager.getAllNamespaces();
         return ConfigOperationResponse.success(namespaces);
     }
 
-    private ConfigOperationResponse getDataIds(ConfigOperationDTO configOperation){
+    private ConfigOperationResponse getDataIds(ConfigOperationDTO configOperation) {
         List<String> dataIds = configStoreManager.getAllDataIds(configOperation.getNamespace());
         return ConfigOperationResponse.success(dataIds);
     }

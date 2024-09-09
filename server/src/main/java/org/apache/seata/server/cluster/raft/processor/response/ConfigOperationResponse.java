@@ -52,25 +52,25 @@ public class ConfigOperationResponse implements Serializable {
         this.errMsg = errMsg;
     }
 
-    public static ConfigOperationResponse success(){
+    public static ConfigOperationResponse success() {
         ConfigOperationResponse response = new ConfigOperationResponse();
         response.setSuccess(true);
         return response;
     }
 
-    public static ConfigOperationResponse success(Object result){
+    public static ConfigOperationResponse success(Object result) {
         ConfigOperationResponse response = success();
         response.setResult(result);
         return response;
     }
 
-    public static ConfigOperationResponse fail(){
+    public static ConfigOperationResponse fail() {
         ConfigOperationResponse response = new ConfigOperationResponse();
         response.setSuccess(false);
         return response;
     }
 
-    public static ConfigOperationResponse fail(String errMsg){
+    public static ConfigOperationResponse fail(String errMsg) {
         ConfigOperationResponse response = fail();
         response.setErrMsg(errMsg);
         return response;

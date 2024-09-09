@@ -55,7 +55,7 @@ public class ConfigurationProcessor {
      * load Configuration items meta from local yaml file.
      */
     @SuppressWarnings("unchecked")
-    private static void loadConfigurationItemMeta(){
+    private static void loadConfigurationItemMeta() {
         try(InputStream inputStream = new ClassPathResource(META_FILE_NAME).getInputStream()) {
             Yaml yaml = new Yaml();
             Map<String, Object> map = yaml.load(inputStream);
@@ -92,7 +92,7 @@ public class ConfigurationProcessor {
     /**
      * Process ConfigurationItem
      */
-    public static ConfigurationItem processConfigItem(String key, Object value){
+    public static ConfigurationItem processConfigItem(String key, Object value) {
         ConfigurationItemMeta meta = CONFIGURATION_ITEMS_META_MAP.get(key);
         ConfigurationItem item = new ConfigurationItem();
         item.setKey(key);

@@ -211,7 +211,7 @@ public class ClusterController {
             checkParam(namespace, "namespace");
             checkParam(dataId, "dataId");
             checkParam(key, "key");
-        }catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             return ConfigOperationResponse.fail(e.getMessage());
         }
         ConfigOperationRequest request = ConfigOperationRequest.buildGetRequest(namespace, dataId, key);
@@ -225,7 +225,7 @@ public class ClusterController {
             checkParam(dataId, "dataId");
             checkParam(key, "key");
             checkParam(value, "value");
-        }catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             return ConfigOperationResponse.fail(e.getMessage());
         }
         ConfigOperationRequest request = ConfigOperationRequest.buildPutRequest(namespace, dataId, key, value);
@@ -238,7 +238,7 @@ public class ClusterController {
             checkParam(namespace, "namespace");
             checkParam(dataId, "dataId");
             checkParam(key, "key");
-        }catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             return ConfigOperationResponse.fail(e.getMessage());
         }
         ConfigOperationRequest request = ConfigOperationRequest.buildDeleteRequest(namespace, dataId, key);
@@ -250,7 +250,7 @@ public class ClusterController {
         try {
             checkParam(namespace, "namespace");
             checkParam(dataId, "dataId");
-        }catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             return ConfigOperationResponse.fail(e.getMessage());
         }
         ConfigOperationRequest request = ConfigOperationRequest.buildDeleteAllRequest(namespace, dataId);
@@ -262,7 +262,7 @@ public class ClusterController {
         try {
             checkParam(namespace, "namespace");
             checkParam(dataId, "dataId");
-        }catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             return ConfigOperationResponse.fail(e.getMessage());
         }
         ConfigOperationRequest request = ConfigOperationRequest.buildGetAllRequest(namespace, dataId);
@@ -274,7 +274,7 @@ public class ClusterController {
         try {
             checkParam(namespace, "namespace");
             checkParam(dataId, "dataId");
-        }catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             return ConfigOperationResponse.fail(e.getMessage());
         }
         if (file == null || file.isEmpty()) {
@@ -282,7 +282,7 @@ public class ClusterController {
         }
         String fileName = file.getOriginalFilename();
         String dataType = SUFFIX_MAP.get(getFileType(fileName));
-        if (StringUtils.isEmpty(dataType)){
+        if (StringUtils.isEmpty(dataType)) {
             return ConfigOperationResponse.fail("The configuration file type is not supported!");
         }
         StringBuilder sb = new StringBuilder();
@@ -301,7 +301,7 @@ public class ClusterController {
                 }
                 configMap.put(key, value);
             }
-        }catch (IOException e){
+        } catch (IOException e) {
             LOGGER.error("Failed to read config file: {}", e.getMessage());
             return ConfigOperationResponse.fail("Failed to read config file");
         }
@@ -326,7 +326,7 @@ public class ClusterController {
     public ConfigOperationResponse getDataIds(String namespace) {
         try {
             checkParam(namespace, "namespace");
-        }catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             return ConfigOperationResponse.fail(e.getMessage());
         }
         ConfigOperationRequest request = ConfigOperationRequest.buildGetDataIds(namespace);

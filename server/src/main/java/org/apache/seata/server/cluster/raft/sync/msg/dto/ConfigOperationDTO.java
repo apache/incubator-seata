@@ -48,12 +48,12 @@ public class ConfigOperationDTO implements Serializable {
         this.value = value;
     }
 
-    public ConfigOperationDTO(ConfigOperationType optType, String dataId, String key){
+    public ConfigOperationDTO(ConfigOperationType optType, String dataId, String key) {
         this.optType = optType;
         this.dataId = dataId;
         this.key = key;
     }
-    public ConfigOperationDTO(ConfigOperationType optType,  String key){
+    public ConfigOperationDTO(ConfigOperationType optType,  String key) {
         this.optType = optType;
         this.key = key;
     }

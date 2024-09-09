@@ -150,7 +150,7 @@ public class RaftConfigurationServer extends AbstractConfiguration {
     @Override
     public Set<ConfigurationChangeListener> getConfigListeners(String dataId) {
         ConcurrentMap<ConfigurationChangeListener, ConfigStoreListener> configListeners = CONFIG_LISTENERS_MAP.get(dataId);
-        if (CollectionUtils.isNotEmpty(configListeners)){
+        if (CollectionUtils.isNotEmpty(configListeners)) {
             return configListeners.keySet();
         } else {
             return null;
