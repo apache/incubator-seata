@@ -487,14 +487,13 @@ class ConfigInfo extends React.Component<GlobalProps, ConfigInfoState> {
 
         {/* config info table */}
         <div>
-          <Table dataSource={this.state.configList} loading={this.state.loading} tableLayout={"fixed"} tableWidth={1800}>
-            <Table.Column title="Key" dataIndex="key" width={250} />
-            <Table.Column title="Value" dataIndex="value" width={350} />
-            <Table.Column title="Default Value" dataIndex="defaultValue" width={350} />
-            <Table.Column title="Description" dataIndex="description" width={550}/>
+          <Table dataSource={this.state.configList} loading={this.state.loading} tableLayout={"fixed"}>
+            <Table.Column title="Key" dataIndex="key"  />
+            <Table.Column title="Value" dataIndex="value"  />
+            <Table.Column title="Default Value" dataIndex="defaultValue"  />
+            <Table.Column title="Description" dataIndex="description" />
             <Table.Column
               title={operateTitle}
-              width={250}
               cell={(value, index, record) => (
                 <>
                   <Button
