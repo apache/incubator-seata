@@ -17,6 +17,7 @@
 package org.apache.seata.common.util;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.config.RequestConfig;
@@ -88,6 +89,11 @@ public class HttpClientUtil {
                     });
                     String requestBody = URLEncodedUtils.format(nameValuePairs, StandardCharsets.UTF_8);
                     StringEntity stringEntity = new StringEntity(requestBody, ContentType.APPLICATION_FORM_URLENCODED);
+                    httpPost.setEntity(stringEntity);
+                }else if (ContentType.APPLICATION_JSON.getMimeType().equals(contentType)) {
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    String requestBody = objectMapper.writeValueAsString(params);
+                    StringEntity stringEntity = new StringEntity(requestBody, ContentType.APPLICATION_JSON);
                     httpPost.setEntity(stringEntity);
                 }
             }
