@@ -18,13 +18,13 @@
 # the Dockerfile support x86 & arrch64
 # build：
 # 1. mvn -Prelease-seata -Dmaven.test.skip=true clean install -U
-# 2. cd distribution/target/seata-server-xxx/seata/
-# 3. docker build --no-cache --build-arg SEATA_VERSION=1.6.0-SNAPSHOT -t seata-server:1.6.0-dev .
+# 2. cd distribution/target/apache-seata-x.x.x-SNAPSHOT-incubating-bin/seata-server/
+# 3. docker build --no-cache --build-arg SEATA_VERSION=2.2.0-SNAPSHOT -t seata-server:2.2.0-dev .
 #
 # run:
-# 1. docker run --name=seata-server -d seata-server:1.6.0-dev
+# 1. docker run --name=seata-server -d seata-server:2.2.0-dev
 #
-# https://hub.docker.com/orgs/seataio
+# https://hub.docker.com/r/apache/seata-server
 FROM openjdk:8u342
 
 # set label
@@ -34,13 +34,12 @@ WORKDIR /$BASE_DIR
 
 # ADD FORM distribution
 ADD bin/ /seata-server/bin
-ADD conf/ /seata-server/conf
 ADD ext/ /seata-server/ext
 ADD lib/ /seata-server/lib
-ADD script/ /seata-server/script
-ADD target/ /seata-server/target
-ADD LICENSE /seata-server/LICENSE
-ADD NOTICE /seata-server/NOTICE
+ADD conf/ /seata-server/conf
+ADD target /seata-server/target
+ADD ../LICENSE ./LICENSE
+ADD ../NOTICE ./LICENSE
 
 # set extra environment
 ENV LOADER_PATH="/seata-server/lib"

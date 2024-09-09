@@ -264,6 +264,7 @@
                                 <include>**/*.def</include>
                             </includes>
                             <excludes>
+                                <exclude>**/script/**</exclude>
                                 <exclude>**/generated/**</exclude>
                                 <exclude>**/antlr/mysql/parser/*.*</exclude>
                                 <exclude>**/antlr/mysql/antlr/*.*</exclude>
