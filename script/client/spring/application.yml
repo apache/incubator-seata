@@ -131,7 +131,7 @@ seata:
       name:
   registry:
     type: file
-    namingserver:
+    seata:
       server-addr: 127.0.0.1:8081
       namespace: public
       heartbeat-period: 5000
