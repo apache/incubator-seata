@@ -19,7 +19,7 @@
 -->
 <assembly>
     <id>${project.version}-incubating-bin</id>
-    <includeBaseDirectory>true</includeBaseDirectory>
+    <includeBaseDirectory>false</includeBaseDirectory>
     <formats>
         <format>dir</format>
         <format>tar.gz</format>

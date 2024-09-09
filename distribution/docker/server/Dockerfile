@@ -18,7 +18,7 @@
 # the Dockerfile support x86 & arrch64
 # build：
 # 1. mvn -Prelease-seata -Dmaven.test.skip=true clean install -U
-# 2. cd distribution/target/apache-seata-x.x.x-SNAPSHOT-incubating-bin/apache-seata/seata-server/
+# 2. cd distribution/target/apache-seata-x.x.x-SNAPSHOT-incubating-bin/seata-server/
 # 3. docker build --no-cache --build-arg SEATA_VERSION=2.2.0-SNAPSHOT -t seata-server:2.2.0-dev .
 #
 # run:
