@@ -53,6 +53,7 @@ public class HttpClientUtil {
 
     private static final PoolingHttpClientConnectionManager POOLING_HTTP_CLIENT_CONNECTION_MANAGER =
             new PoolingHttpClientConnectionManager();
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     static {
         POOLING_HTTP_CLIENT_CONNECTION_MANAGER.setMaxTotal(10);
@@ -91,7 +92,6 @@ public class HttpClientUtil {
                     StringEntity stringEntity = new StringEntity(requestBody, ContentType.APPLICATION_FORM_URLENCODED);
                     httpPost.setEntity(stringEntity);
                 }else if (ContentType.APPLICATION_JSON.getMimeType().equals(contentType)) {
-                    ObjectMapper objectMapper = new ObjectMapper();
                     String requestBody = objectMapper.writeValueAsString(params);
                     StringEntity stringEntity = new StringEntity(requestBody, ContentType.APPLICATION_JSON);
                     httpPost.setEntity(stringEntity);
