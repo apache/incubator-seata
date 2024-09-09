@@ -17,9 +17,18 @@ jobs:
           - 6379:6379
         options: --health-cmd="redis-cli ping" --health-interval=10s --health-timeout=5s --health-retries=3
       nacos:
-        image: nacos/nacos-server:2.4.2
+        image: nacos/nacos-server:v2.4.2
         ports:
           - 8848:8848
+        environment:
+          - MODE=standalone
+          - SPRING_SECURITY_ENABLED=false
+        healthcheck:
+          test: ["CMD", "curl", "-f", "http://localhost:8848/nacos/health"]
+          interval: 30s
+          timeout: 10s
+          retries: 3
+          start_period: 30s
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
