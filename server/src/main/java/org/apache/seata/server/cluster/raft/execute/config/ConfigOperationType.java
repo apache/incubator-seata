@@ -17,13 +17,45 @@
 package org.apache.seata.server.cluster.raft.execute.config;
 
 public enum ConfigOperationType {
+
+    /**
+     * Get configuration operation
+     */
     GET("get"),
+
+    /**
+     * Put configuration operation
+     */
     PUT("put"),
+
+    /**
+     * Delete configuration operation
+     */
     DELETE("delete"),
+
+    /**
+     * Delete all configuration operation
+     */
     DELETE_ALL("deleteALL"),
+
+    /**
+     * Upload configuration operation
+     */
     UPLOAD("upload"),
+
+    /**
+     * Get all configuration operation
+     */
     GET_ALL("getAll"),
+
+    /**
+     * Get namespaces operation
+     */
     GET_NAMESPACES("getNamespaces"),
+
+    /**
+     * Get data ids operation
+     */
     GET_DATA_IDS("getDataIds");
 
     private final String type;
