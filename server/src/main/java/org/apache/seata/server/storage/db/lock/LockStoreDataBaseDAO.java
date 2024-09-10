@@ -16,7 +16,12 @@
  */
 package org.apache.seata.server.storage.db.lock;
 
-import java.sql.*;
+import java.sql.BatchUpdateException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
