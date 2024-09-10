@@ -82,7 +82,7 @@ public class ConfigOperationExecute extends AbstractRaftConfigMsgExecute {
             }
             LOGGER.info("config namespace: {}, dataId: {}, config change event: {}", configOperation.getNamespace(), configOperation.getDataId(), configOperation.getOptType());
         }
-        return success? ConfigOperationResponse.success() : ConfigOperationResponse.fail();
+        return success ? ConfigOperationResponse.success() : ConfigOperationResponse.fail();
     }
 
     private ConfigOperationResponse delete(ConfigOperationDTO configOperation) {
@@ -94,7 +94,7 @@ public class ConfigOperationExecute extends AbstractRaftConfigMsgExecute {
             }
             LOGGER.info("config namespace: {}, dataId: {}, config change event: {}", configOperation.getNamespace(), configOperation.getDataId(), configOperation.getOptType());
         }
-        return success? ConfigOperationResponse.success() : ConfigOperationResponse.fail();
+        return success ? ConfigOperationResponse.success() : ConfigOperationResponse.fail();
     }
 
     private ConfigOperationResponse deleteAll(ConfigOperationDTO configOperation) {
@@ -106,7 +106,7 @@ public class ConfigOperationExecute extends AbstractRaftConfigMsgExecute {
             }
             LOGGER.info("config namespace: {}, dataId: {}, config change event: {}", configOperation.getNamespace(), configOperation.getDataId(), configOperation.getOptType());
         }
-        return success? ConfigOperationResponse.success() : ConfigOperationResponse.fail();
+        return success ? ConfigOperationResponse.success() : ConfigOperationResponse.fail();
     }
 
     private ConfigOperationResponse upload(ConfigOperationDTO configOperation) {
@@ -118,7 +118,7 @@ public class ConfigOperationExecute extends AbstractRaftConfigMsgExecute {
             }
             LOGGER.info("config namespace: {}, dataId: {}, config change event: {}", configOperation.getNamespace(), configOperation.getDataId(), configOperation.getOptType());
         }
-        return success? ConfigOperationResponse.success() : ConfigOperationResponse.fail();
+        return success ? ConfigOperationResponse.success() : ConfigOperationResponse.fail();
     }
 
     private ConfigOperationResponse getAll(ConfigOperationDTO configOperation) {

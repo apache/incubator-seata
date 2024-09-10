@@ -20,7 +20,7 @@ import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.server.cluster.raft.sync.msg.dto.ConfigOperationDTO;
 
 
-public class RaftConfigOperationSyncMsg extends RaftBaseMsg{
+public class RaftConfigOperationSyncMsg extends RaftBaseMsg {
 
     private static final long serialVersionUID = -3344345671349834321L;
     private ConfigOperationDTO configOperation;

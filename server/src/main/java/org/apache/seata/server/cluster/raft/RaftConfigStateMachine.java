@@ -320,7 +320,7 @@ public class RaftConfigStateMachine extends StateMachineAdapter {
         if (leaderNode == null || (leaderNode.getInternal() != null
                 && !cureentPeerId.equals(new PeerId(leaderNode.getInternal().getHost(), leaderNode.getInternal().getPort())))) {
             Node leader =
-                    raftClusterMetadata.createNode(XID.getIpAddress() == null ? NetUtil.getLocalIp() : XID.getIpAddress(), XID.getPort() <= 0? 8091 : XID.getPort(), raftServer.getServerId().getPort(),
+                    raftClusterMetadata.createNode(XID.getIpAddress() == null ? NetUtil.getLocalIp() : XID.getIpAddress(), XID.getPort() <= 0 ? 8091 : XID.getPort(), raftServer.getServerId().getPort(),
                             Integer.parseInt(
                                     ((Environment) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT))
                                             .getProperty("server.port", String.valueOf(7091))),
@@ -364,7 +364,7 @@ public class RaftConfigStateMachine extends StateMachineAdapter {
             if (leader != null && StringUtils.isNotBlank(leader.getVersion()) && initSync.compareAndSet(false, true)) {
                 RaftConfigServer raftServer = RaftConfigServerManager.getRaftServer();
                 PeerId cureentPeerId = raftServer.getServerId();
-                Node node = raftClusterMetadata.createNode(XID.getIpAddress() == null ? NetUtil.getLocalIp() : XID.getIpAddress(), XID.getPort() <= 0? 8091 : XID.getPort(), cureentPeerId.getPort(),
+                Node node = raftClusterMetadata.createNode(XID.getIpAddress() == null ? NetUtil.getLocalIp() : XID.getIpAddress(), XID.getPort() <= 0 ? 8091 : XID.getPort(), cureentPeerId.getPort(),
                         Integer.parseInt(
                                 ((Environment)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT))
                                         .getProperty("server.port", String.valueOf(7091))),
@@ -381,24 +381,24 @@ public class RaftConfigStateMachine extends StateMachineAdapter {
                 // The previous leader may be an old snapshot or log playback, which is not accurate, and you
                 // need to get the leader again
                 cliClientService.getRpcClient().invokeAsync(leaderPeerId.getEndpoint(), putNodeInfoRequest,
-                        invokeContext, (result, err) -> {
-                            if (err == null) {
-                                PutNodeMetadataResponse putNodeMetadataResponse = (PutNodeMetadataResponse)result;
-                                if (putNodeMetadataResponse.isSuccess()) {
-                                    scheduledFuture.cancel(true);
-                                    LOGGER.info("sync node info to leader: {}, result: {}", leaderPeerId, result);
-                                } else {
-                                    initSync.compareAndSet(true, false);
-                                    LOGGER.info(
-                                            "sync node info to leader: {}, result: {}, retry will be made at the time of the re-election or after 10 seconds",
-                                            leaderPeerId, result);
-                                }
+                    invokeContext, (result, err) -> {
+                        if (err == null) {
+                            PutNodeMetadataResponse putNodeMetadataResponse = (PutNodeMetadataResponse)result;
+                            if (putNodeMetadataResponse.isSuccess()) {
+                                scheduledFuture.cancel(true);
+                                LOGGER.info("sync node info to leader: {}, result: {}", leaderPeerId, result);
                             } else {
                                 initSync.compareAndSet(true, false);
-                                LOGGER.error("sync node info to leader: {}, error: {}", leaderPeerId, err.getMessage(),
-                                        err);
+                                LOGGER.info(
+                                        "sync node info to leader: {}, result: {}, retry will be made at the time of the re-election or after 10 seconds",
+                                        leaderPeerId, result);
                             }
-                        }, 30000);
+                        } else {
+                            initSync.compareAndSet(true, false);
+                            LOGGER.error("sync node info to leader: {}, error: {}", leaderPeerId, err.getMessage(),
+                                    err);
+                        }
+                    }, 30000);
             }
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);

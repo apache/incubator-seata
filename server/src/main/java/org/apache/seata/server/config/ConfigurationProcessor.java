@@ -56,7 +56,7 @@ public class ConfigurationProcessor {
      */
     @SuppressWarnings("unchecked")
     private static void loadConfigurationItemMeta() {
-        try(InputStream inputStream = new ClassPathResource(META_FILE_NAME).getInputStream()) {
+        try (InputStream inputStream = new ClassPathResource(META_FILE_NAME).getInputStream()) {
             Yaml yaml = new Yaml();
             Map<String, Object> map = yaml.load(inputStream);
             List<Map<String, Object>> configItemMetaList = (List<Map<String, Object>>) map.get(CONFIG_META_KEY);
