@@ -386,14 +386,10 @@ public class LockStoreDataBaseDAO implements LockStore {
             SQLException nextException = e.getNextException();
             if (nextException == null) {
                 throw e;
+            } else if (nextException instanceof SQLIntegrityConstraintViolationException) {
+                return false;
             }
-            while (nextException != null) {
-                if (!(nextException instanceof SQLIntegrityConstraintViolationException)) {
-                    throw nextException;
-                }
-                nextException = nextException.getNextException();
-            }
-            return false;
+            throw nextException;
         } finally {
             IOUtil.close(ps);
         }
