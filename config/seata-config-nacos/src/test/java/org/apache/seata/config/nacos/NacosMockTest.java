@@ -40,7 +40,7 @@ import org.junit.jupiter.api.Test;
 
 public class NacosMockTest {
     private static ConfigService configService;
-    private static final String NACOS_ENDPOINT = "console.nacos.io:80";
+    private static final String NACOS_ENDPOINT = "127.0.0.1:8848";
 
     private static final String NACOS_GROUP = "SEATA_GROUP";
 
