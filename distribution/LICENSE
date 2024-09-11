@@ -552,306 +552,344 @@ ISC licenses
 MIT licenses
 ========================================================================
 
-@alicloud/console-components  MIT 4.1.101.Final1.6.2
-@alicloud/console-components-actions    MIT 4.1.101.Final1.1.1
-@alicloud/console-components-app-layout MIT 4.1.101.Final1.1.4
-@alicloud/console-components-console-menu           MIT  1.2.12
-@alicloud/css-var-utils       MIT 4.1.101.Final0.1.0
-@alifd/babel-runtime-jsx-style-transform            MIT 4.1.101.Final1.0.0
-@alifd/field        MIT 4.1.101.Final1.7.0
-@alifd/meet-react   MIT 4.1.101.Final2.9.9
-@alifd/meet-react-component-one         MIT 4.1.101.Final1.3.2
-@alifd/meet-react/node_modules/classnames           MIT 4.1.101.Final2.2.6
-@alifd/next         MIT 4.1.101.Final1.24.18
-@alifd/next/node_modules/@alifd/field   MIT 4.1.101.Final1.5.8
-@alifd/next/node_modules/@alifd/validate            MIT 4.1.101.Final1.2.3
-@alifd/validate     MIT 4.1.101.Final1.4.0
-@ampproject/remapping      Apache-2.0 4.1.101.Final2.2.1
-@babel/code-frame   MIT  7.23.5
-@babel/compat-data  MIT  7.23.5
-@babel/core         MIT  7.23.9
-@babel/generator    MIT  7.23.6
-@babel/helper-annotate-as-pure          MIT  7.22.5
-@babel/helper-compilation-targets       MIT  7.23.6
-@babel/helper-environment-visitor       MIT 4.1.101.Final7.22.20
-@babel/helper-function-name   MIT  7.23.0
-@babel/helper-hoist-variables           MIT  7.22.5
-@babel/helper-module-imports  MIT 4.1.101.Final7.22.15
-@babel/helper-module-transforms         MIT  7.23.3
-@babel/helper-plugin-utils    MIT  7.22.5
-@babel/helper-simple-access   MIT  7.22.5
-@babel/helper-split-export-declaration  MIT  7.22.6
-@babel/helper-string-parser   MIT  7.23.4
-@babel/helper-validator-identifier      MIT 4.1.101.Final7.22.20
-@babel/helper-validator-option          MIT  7.23.5
-@babel/helpers      MIT  7.23.9
-@babel/highlight    MIT  7.23.4
-@babel/parser       MIT  7.23.9
-@babel/plugin-syntax-jsx      MIT  7.23.3
-@babel/runtime      MIT  7.23.9
-@babel/template     MIT  7.23.9
-@babel/traverse     MIT  7.23.9
-@babel/types        MIT  7.23.9
-@bpmn-io/cm-theme   MIT | 0.1.0-alpha.2
-@bpmn-io/diagram-js-ui        MIT 4.1.101.Final0.2.2
-@bpmn-io/feel-editor          MIT 4.1.101.Final1.1.0
-@bpmn-io/feel-lint  MIT 4.1.101.Final1.2.0
-@bpmn-io/properties-panel     MIT  3.16.0
-@codemirror/autocomplete      MIT  6.12.0
-@codemirror/commands          MIT 4.1.101.Final6.3.3
-@codemirror/language          MIT  6.10.0
-@codemirror/lint    MIT 4.1.101.Final6.4.2
-@codemirror/state   MIT 4.1.101.Final6.4.0
-@codemirror/view    MIT  6.23.0
-@emotion/cache      MIT 4.1.101.Final10.0.29
-@emotion/core       MIT  10.3.1
-@emotion/css        MIT 4.1.101.Final10.0.27
-@emotion/hash       MIT 4.1.101.Final0.8.0
-@emotion/is-prop-valid        MIT 4.1.101.Final0.8.8
-@emotion/memoize    MIT 4.1.101.Final0.7.4
-@emotion/serialize  MIT 4.1.101.Final0.11.16
-@emotion/serialize/node_modules/csstype  MIT  2.6.21
-@emotion/sheet      MIT 4.1.101.Final0.9.4
-@emotion/stylis     MIT 4.1.101.Final0.8.5
-@emotion/unitless   MIT 4.1.101.Final0.7.5
-@emotion/utils      MIT  0.11.3
-@emotion/weak-memoize         MIT 4.1.101.Final0.2.5
-@jridgewell/gen-mapping       MIT 4.1.101.Final0.3.4
-@jridgewell/resolve-uri       MIT 4.1.101.Final3.1.2
-@jridgewell/set-array         MIT 4.1.101.Final1.1.2
-@jridgewell/sourcemap-codec   MIT  1.4.15
-@jridgewell/trace-mapping     MIT  0.3.23
-@lezer/common       MIT 4.1.101.Final1.2.1
-@lezer/highlight    MIT 4.1.101.Final1.2.0
-@lezer/lr           MIT 4.1.101.Final1.4.0
-@lezer/markdown     MIT 4.1.101.Final1.2.0
-@types/history      MIT  4.7.11
-@types/hoist-non-react-statics          MIT 4.1.101.Final3.3.5
-@types/isomorphic-fetch       MIT  0.0.34
-@types/parse-json   MIT 4.1.101.Final4.0.2
-@types/prop-types   MIT 4.1.101.Final15.7.11
-@types/react        MIT |      16.14.56
-@types/react-dom    MIT 4.1.101.Final16.9.24
-@types/react-router           MIT  5.1.20
-@types/react-router-redux     MIT  5.0.27
-@types/scheduler    MIT  0.16.8
-@types/use-sync-external-store          MIT 4.1.101.Final0.0.3
-ansi-styles     MIT   3.2.1
-argparse        MIT  1.0.10
-asn1.js         MIT  4.10.1
-asn1.js/node_modules/bn.js        MIT  4.12.0
-asynckit        MIT   0.4.0
-axios           MIT   1.7.4
-babel-plugin-emotion      MIT  10.2.2
-babel-plugin-emotion/node_modules/babel-plugin-macros           MIT   2.8.0
-babel-plugin-emotion/node_modules/convert-source-map            MIT   1.9.0
-babel-plugin-emotion/node_modules/cosmiconfig         MIT   6.0.0
-babel-plugin-emotion/node_modules/source-map           BSD-3-Clause   0.5.7
-babel-plugin-styled-components  MIT   2.1.4
-babel-plugin-syntax-jsx           MIT  6.18.0
-babel-runtime             MIT  6.26.0
-babel-runtime/node_modules/regenerator-runtime        MIT  0.11.1
-balanced-match            MIT   1.0.2
-bignumber.js  MIT   9.1.2
-bn.js           MIT   5.2.1
-brace-expansion           MIT  1.1.11
-brorand         MIT   1.1.0
-browserify-aes            MIT   1.2.0
-browserify-rsa            MIT   4.1.0
-browserify-sign/node_modules/hash-base      MIT   3.0.4
-browserify-sign/node_modules/isarray        MIT   1.0.0
-browserify-sign/node_modules/readable-stream          MIT   2.3.8
-browserify-sign/node_modules/readable-stream/node_modules/safe-buffer     MIT   5.1.2
-browserify-sign/node_modules/string_decoder           MIT   1.1.1
-browserify-sign/node_modules/string_decoder/node_modules/safe-buffer      MIT   5.1.2
-browserslist  MIT  4.23.0
-buffer-xor      MIT   1.0.3
-callsites       MIT   3.1.0
-camelize        MIT   1.0.1
-chalk           MIT   2.4.2
-cipher-base     MIT   1.0.4
-classnames      MIT   2.5.1
-classnames      MIT   2.5.1
-clsx            MIT   2.1.0
-color-convert             MIT   1.9.3
-color-name      MIT   1.1.3
-combined-stream           MIT   1.0.8
-component-event           MIT   0.2.1
-concat-map      MIT   0.0.1
-convert-source-map        MIT   2.0.0
-core-js         MIT  2.6.12
-core-util-is  MIT   1.0.3
-create-hash     MIT   1.2.0
-create-hmac     MIT   1.1.7
-crelt           MIT   1.0.6
-css-to-react-native       MIT   2.3.2
-css-to-react-native/node_modules/postcss-value-parser           MIT   3.3.1
-csstype         MIT   3.1.3
-dayjs           MIT 4.1.101.Final1.11.10
-debug           MIT   4.3.6
-decode-uri-component      MIT   0.4.1
-delayed-stream            MIT   1.0.0
-diagram-js      MIT  12.8.1
-diagram-js-grid           MIT   0.2.0
-didi            MIT   9.0.2
-dom-helpers     MIT   3.4.0
-dom-walk        MIT   0.1.2
-dom7            MIT   3.0.0
-domify          MIT   1.4.2
-dva             MIT   2.4.1
-dva-core        MIT   1.4.0
-dva-core/node_modules/@babel/runtime        MIT | 7.0.0-beta.46
-dva-core/node_modules/redux       MIT   3.7.2
-dva-core/node_modules/regenerator-runtime             MIT  0.11.1
-dva/node_modules/@babel/runtime             MIT | 7.0.0-beta.46
-dva/node_modules/@types/react-router-dom  MIT   4.3.5
-dva/node_modules/react-redux      MIT   5.0.7
-dva/node_modules/react-router     MIT   4.3.1
-dva/node_modules/react-router-dom           MIT   4.3.1
-dva/node_modules/react-router-redux         MIT | 5.0.0-alpha.9
-dva/node_modules/redux4.1.101.Final    MIT   3.7.2
-dva/node_modules/regenerator-runtime        MIT  0.11.1
-elliptic        MIT   6.5.7
-elliptic/node_modules/bn.js       MIT  4.12.0
-encoding        MIT  0.1.13
-encoding/node_modules/iconv-lite            MIT   0.6.3
-error-ex        MIT   1.3.2
-escalade        MIT   3.1.2
-escape-string-regexp      MIT   1.0.5
-evp_bytestokey            MIT   1.0.3
-feelers         MIT   1.2.0
-feelin          MIT   2.3.0
-find-root       MIT   1.1.0
-flatten         MIT   1.0.3
-focus-trap      MIT   7.5.4
-follow-redirects          MIT  1.15.6
-form-data       MIT   4.0.0
-function-bind             MIT   1.1.2
-gensync         MIT |  1.0.0-beta.2
-global          MIT   4.4.0
-globals         MIT 4.1.101.Final11.12.0
-hammerjs        MIT   2.0.8
-has-flag        MIT   3.0.0
-hash-base       MIT   3.1.0
-hash.js         MIT   1.1.7
-hasown          MIT   2.0.1
-history         MIT  4.10.1
-hmac-drbg       MIT   1.0.1
-import-fresh  MIT   3.3.0
-invariant       MIT   2.2.4
-is-arrayish     MIT   0.2.1
-is-core-module            MIT  2.13.1
-is-plain-object           MIT   2.0.4
-is-what         MIT  3.14.1
-isarray         MIT   0.0.1
-isobject        MIT   3.0.1
-isomorphic-fetch          MIT   2.2.1
-jquery          MIT   3.7.1
-js-tokens       MIT   4.0.0
-js-tokens       MIT   4.0.0
-jsesc           MIT   2.5.2
-json-parse-even-better-errors     MIT   2.3.1
-json5           MIT   2.2.3
-lang-feel       MIT   2.0.0
-lezer-feel      MIT   1.2.4
-lines-and-columns         MIT   1.2.4
-loader-utils  MIT   3.2.1
-lodash          MIT 4.1.101.Final4.17.21
-lodash-es       MIT 4.1.101.Final4.17.21
-lodash.clonedeep          MIT   4.5.0
-loose-envify  MIT   1.4.0
-loose-envify  MIT   1.4.0
-luxon           MIT   3.4.4
-md5.js          MIT   1.3.5
-memoize-one     MIT   5.2.1
-merge-anything            MIT   2.4.4
-mime-db         MIT  1.52.0
-mime-types      MIT  2.1.35
-min-dash        MIT   4.2.1
-min-document  MIT  2.19.0
-min-dom         MIT   4.1.0
-minimalistic-crypto-utils         MIT   1.0.1
-moment          MIT  2.30.1
-ms  MIT   2.1.2
-node-fetch      MIT   2.6.7
-node-releases             MIT  2.0.14
-object-assign             MIT   4.1.1
-object-assign             MIT   4.1.1
-object-refs     MIT   0.3.0
-omit.js         MIT   2.0.2
-org.checkerframework:checker-qual           MIT  3.37.0
-parent-module             MIT   1.0.1
-parse-asn1/node_modules/hash-base           MIT   3.0.4
-parse-json      MIT   5.2.0
-path-intersection         MIT   2.2.1
-path-is-absolute          MIT   1.0.1
-path-parse      MIT   1.0.7
-path-to-regexp            MIT   1.8.0
-path-type       MIT   4.0.0
-pbkdf2          MIT   3.1.2
-picocolors      ISC   1.0.0
-picomatch       MIT   2.3.1
-preact          MIT 4.1.101.Final10.19.3
-process         MIT 4.1.101.Final0.11.10
-process-nextick-args      MIT   2.0.1
-prop-types      MIT  15.8.1
-prop-types      MIT  15.8.1
-proxy-from-env            MIT   1.1.0
-randombytes     MIT   2.1.0
-react           MIT 4.1.101.Final16.14.0
-react           MIT 4.1.101.Final16.14.0
-react-dom       MIT 4.1.101.Final16.14.0
-react-is        MIT 4.1.101.Final16.13.1
-react-is        MIT 4.1.101.Final16.13.1
-react-lifecycles-compat           MIT   3.0.4
-react-loading-skeleton4.1.101.Final    MIT   2.2.0
-react-redux     MIT   8.1.3
-react-redux/node_modules/react-is           MIT  18.2.0
-react-router  MIT   5.3.4
-react-router-dom          MIT   5.3.4
-react-router-redux        MIT   4.0.8
-readable-stream           MIT   3.6.2
-redux           MIT   5.0.1
-redux-saga      MIT  0.16.2
-redux-thunk     MIT   3.1.0
-regenerator-runtime       MIT  0.14.1
-resize-observer-polyfill          MIT   1.5.1
-resolve         MIT  1.22.8
-resolve-from  MIT   4.0.0
-resolve-pathname          MIT   3.0.0
-ripemd160       MIT   2.0.2
-safe-buffer     MIT   5.2.1
-safer-buffer  MIT   2.1.2
-scheduler       MIT  0.19.1
-shallow-element-equals4.1.101.Final    MIT   1.0.1
-ssr-window      MIT   3.0.0
-string_decoder            MIT   1.3.0
-style-equal     MIT   1.0.0
-style-mod       MIT   4.1.0
-styled-components         MIT   4.4.1
-stylis          MIT   3.5.4
-stylis-rule-sheet         MIT  0.0.10
-supports-color            MIT   5.5.0
-supports-preserve-symlinks-flag             MIT   1.0.0
-svelte          MIT  3.59.2
-swiper          MIT   6.5.1
-symbol-observable         MIT   1.2.0
-tabbable        MIT   6.2.0
-tiny-invariant            MIT   1.3.3
-tiny-svg        MIT   3.0.1
-tiny-warning  MIT   1.0.3
-to-fast-properties        MIT   2.0.0
-tr46            MIT   0.0.3
-update-browserslist-db4.1.101.Final    MIT  1.0.13
-use-sync-external-store           MIT   1.2.0
-util-deprecate            MIT   1.0.2
-value-equal     MIT   1.0.1
-w3c-keyname     MIT   2.2.8
-warning         MIT   4.0.3
-whatwg-fetch  MIT  3.6.20
-whatwg-url      MIT   5.0.0
-yamljs          MIT   0.3.0
-
+    @alicloud/console-components 1.6.2 MIT
+    @alicloud/console-components-actions 1.1.1 MIT
+    @alicloud/console-components-app-layout 1.1.4 MIT
+    @alicloud/console-components-console-menu 1.2.12 MIT
+    @alicloud/css-var-utils 0.1.0 MIT
+    @alifd/babel-runtime-jsx-style-transform 1.0.0 MIT
+    @alifd/field 1.7.0 MIT
+    @alifd/meet-react 2.9.9 MIT
+    @alifd/meet-react-component-one 1.3.2 MIT
+    @alifd/meet-react/node_modules/classnames 2.2.6 MIT
+    @alifd/next 1.24.18 MIT
+    @alifd/next/node_modules/@alifd/field 1.5.8 MIT
+    @alifd/next/node_modules/@alifd/validate 1.2.3 MIT
+    @alifd/validate 1.4.0 MIT
+    @babel/code-frame 7.23.5 MIT
+    @babel/compat-data 7.23.5 MIT
+    @babel/core 7.23.9 MIT
+    @babel/generator 7.23.6 MIT
+    @babel/helper-annotate-as-pure 7.22.5 MIT
+    @babel/helper-compilation-targets 7.23.6 MIT
+    @babel/helper-environment-visitor 7.22.20 MIT
+    @babel/helper-function-name 7.23.0 MIT
+    @babel/helper-hoist-variables 7.22.5 MIT
+    @babel/helper-module-imports 7.22.15 MIT
+    @babel/helper-module-transforms 7.23.3 MIT
+    @babel/helper-plugin-utils 7.22.5 MIT
+    @babel/helper-simple-access 7.22.5 MIT
+    @babel/helper-split-export-declaration 7.22.6 MIT
+    @babel/helper-string-parser 7.23.4 MIT
+    @babel/helper-validator-identifier 7.22.20 MIT
+    @babel/helper-validator-option 7.23.5 MIT
+    @babel/helpers 7.23.9 MIT
+    @babel/highlight 7.23.4 MIT
+    @babel/parser 7.23.9 MIT
+    @babel/plugin-syntax-jsx 7.23.3 MIT
+    @babel/runtime 7.0.0-beta.46 MIT
+    @babel/runtime 7.23.9 MIT
+    @babel/template 7.23.9 MIT
+    @babel/traverse 7.23.9 MIT
+    @babel/types 7.23.9 MIT
+    @bpmn-io/cm-theme 0.1.0-alpha.2 MIT
+    @bpmn-io/diagram-js-ui 0.2.2 MIT
+    @bpmn-io/feel-editor 1.1.0 MIT
+    @bpmn-io/feel-lint 1.2.0 MIT
+    @bpmn-io/properties-panel 3.16.0 MIT
+    @codemirror/autocomplete 6.12.0 MIT
+    @codemirror/commands 6.3.3 MIT
+    @codemirror/language 6.10.0 MIT
+    @codemirror/lint 6.4.2 MIT
+    @codemirror/state 6.4.0 MIT
+    @codemirror/view 6.23.0 MIT
+    @emotion/cache 10.0.29 MIT
+    @emotion/core 10.3.1 MIT
+    @emotion/css 10.0.27 MIT
+    @emotion/hash 0.8.0 MIT
+    @emotion/is-prop-valid 0.8.8 MIT
+    @emotion/memoize 0.7.4 MIT
+    @emotion/serialize 0.11.16 MIT
+    @emotion/serialize/node_modules/csstype 2.6.21 MIT
+    @emotion/sheet 0.9.4 MIT
+    @emotion/stylis 0.8.5 MIT
+    @emotion/unitless 0.7.5 MIT
+    @emotion/utils 0.11.3 MIT
+    @emotion/weak-memoize 0.2.5 MIT
+    @jridgewell/gen-mapping 0.3.4 MIT
+    @jridgewell/resolve-uri 3.1.2 MIT
+    @jridgewell/set-array 1.1.2 MIT
+    @jridgewell/sourcemap-codec 1.4.15 MIT
+    @jridgewell/trace-mapping 0.3.23 MIT
+    @lezer/common 1.2.1 MIT
+    @lezer/highlight 1.2.0 MIT
+    @lezer/lr 1.4.0 MIT
+    @lezer/markdown 1.2.0 MIT
+    @types/history 4.7.11 MIT
+    @types/hoist-non-react-statics 3.3.5 MIT
+    @types/isomorphic-fetch 0.0.34 MIT
+    @types/parse-json 4.0.2 MIT
+    @types/prop-types 15.7.11 MIT
+    @types/react 16.14.56 MIT
+    @types/react-dom 16.9.24 MIT
+    @types/react-router 5.1.20 MIT
+    @types/react-router-dom 16.9.24 MIT
+    @types/react-router  5.1.20 MIT
+    @types/react-router-redux 5.0.27 MIT
+    @types/scheduler 0.16.8 MIT
+    @types/use-sync-external-store 0.0.3 MIT
+    ansi-styles 3.2.1 MIT
+    argparse 1.0.10 MIT
+    asn1.js 4.10.1 MIT
+    asn1.js/node_modules/bn.js 4.12.0 MIT
+    asynckit 0.4.0 MIT
+    axios 1.7.4 MIT
+    babel-plugin-emotion 10.2.2 MIT
+    babel-plugin-macros 2.8.0 MIT
+    babel-plugin-styled-components 2.1.4 MIT
+    babel-plugin-syntax-jsx 6.18.0 MIT
+    babel-runtime 6.26.0 MIT
+    babel-runtime-jsx-style-transform 1.0.2 MIT
+    balanced-match 1.0.2 MIT
+    bignumber.js 9.1.2 MIT
+    binary-extensions 2.2.0 MIT
+    bn.js 4.12.0 MIT
+    bn.js 5.2.1 MIT
+    brace-expansion 1.1.11 MIT
+    braces 3.0.2 MIT
+    brorand 1.1.0 MIT
+    browserify-aes 1.2.0 MIT
+    browserify-rsa 4.1.0 MIT
+    browserslist 4.23.0 MIT
+    buffer-xor 1.0.3 MIT
+    callsites 3.1.0 MIT
+    camelcase 6.3.0 MIT
+    camelize 1.0.1 MIT
+    chalk 2.4.2 MIT
+    chalk 4.1.2 MIT
+    chokidar 3.5.1 MIT
+    cipher-base 1.0.4 MIT
+    classnames 2.2.6 MIT
+    classnames 2.5.1 MIT
+    classnames 2.5.1 MIT
+    clsx 2.1.0 MIT
+    color-convert 1.9.3 MIT
+    color-convert 2.0.1 MIT
+    color-name 1.1.3 MIT
+    color-name 1.1.4 MIT
+    combined-stream 1.0.8 MIT
+    component-event 0.2.1 MIT
+    concat-map 0.0.1 MIT
+    convert-source-map 1.9.0 MIT
+    convert-source-map 2.0.0 MIT
+    core-js 2.6.12 MIT
+    cosmiconfig 6.0.0 MIT
+    create-hash 1.2.0 MIT
+    create-hmac 1.1.7 MIT
+    crelt 1.0.6 MIT
+    css-to-react-native 2.3.2 MIT
+    csstype 2.6.21 MIT
+    csstype 3.1.3 MIT
+    dayjs 1.11.10 MIT
+    debug 4.3.1 MIT
+    debug 4.3.4 MIT
+    decamelize 4.0.0 MIT
+    decode-uri-component 0.4.1 MIT
+    delayed-stream 1.0.0 MIT
+    diagram-js 12.8.1 MIT
+    diagram-js-grid 0.2.0 MIT
+    didi 9.0.2 MIT
+    dom-helpers 3.4.0 MIT
+    dom-walk 0.1.2 MIT
+    dom7 3.0.0 MIT
+    domify 1.4.2 MIT
+    dva 2.4.1 MIT
+    dva-core 1.4.0 MIT
+    elliptic 6.5.4 MIT
+    emoji-regex 8.0.0 MIT
+    encoding 0.1.13 MIT
+    error-ex 1.3.2 MIT
+    escalade 3.1.2 MIT
+    escape-string-regexp 1.0.5 MIT
+    escape-string-regexp 4.0.0 MIT
+    evp_bytestokey 1.0.3 MIT
+    feelers 1.2.0 MIT
+    feelin 2.3.0 MIT
+    fill-range 7.0.1 MIT
+    find-root 1.1.0 MIT
+    find-up 5.0.0 MIT
+    flatten 1.0.3 MIT
+    focus-trap 7.5.4 MIT
+    follow-redirects 1.15.5 MIT
+    form-data 4.0.0 MIT
+    fsevents 2.3.3 MIT
+    function-bind 1.1.2 MIT
+    gensync 1.0.0-beta.2 MIT
+    global 4.4.0 MIT
+    globals 11.12.0 MIT
+    growl 1.10.5 MIT
+    hammerjs 2.0.8 MIT
+    has-flag 3.0.0 MIT
+    hash-base 3.1.0 MIT
+    hash.js 1.1.7 MIT
+    hasown 2.0.1 MIT
+    he 1.2.0 MIT
+    history 4.10.1 MIT
+    hmac-drbg 1.0.1 MIT
+    iconv-lite 0.6.3 MIT
+    import-fresh 3.3.0 MIT
+    invariant 2.2.4 MIT
+    is-arrayish 0.2.1 MIT
+    is-binary-path 2.1.0 MIT
+    is-core-module 2.13.1 MIT
+    is-extglob 2.1.1 MIT
+    is-fullwidth-code-point 2.0.0 MIT
+    is-fullwidth-code-point 3.0.0 MIT
+    is-glob 4.0.3 MIT
+    is-number 7.0.0 MIT
+    is-plain-obj 2.1.0 MIT
+    is-plain-object 2.0.4 MIT
+    is-what 3.14.1 MIT
+    isarray 0.0.1 MIT
+    isobject 3.0.1 MIT
+    isomorphic-fetch 2.2.1 MIT
+    jquery 3.7.1 MIT
+    js-tokens 4.0.0 MIT
+    js-tokens 4.0.0 MIT
+    js-yaml 4.0.0 MIT
+    jsesc 2.5.2 MIT
+    json-parse-even-better-errors 2.3.1 MIT
+    json5 2.2.3 MIT
+    lang-feel 2.0.0 MIT
+    lezer-feel 1.2.4 MIT
+    lines-and-columns 1.2.4 MIT
+    loader-utils 3.2.1 MIT
+    locate-path 6.0.0 MIT
+    lodash 4.17.21 MIT
+    lodash-es 4.17.21 MIT
+    lodash.clonedeep 4.5.0 MIT
+    log-symbols 4.0.0 MIT
+    loose-envify 1.4.0 MIT
+    loose-envify 1.4.0 MIT
+    luxon 3.4.4 MIT
+    md5.js 1.3.5 MIT
+    memoize-one 5.2.1 MIT
+    merge-anything 2.4.4 MIT
+    mime-db 1.52.0 MIT
+    mime-types 2.1.35 MIT
+    min-dash 4.2.1 MIT
+    min-document 2.19.0 MIT
+    min-dom 4.1.0 MIT
+    minimalistic-crypto-utils 1.0.1 MIT
+    mocha 8.4.0 MIT
+    moment 2.30.1 MIT
+    ms 2.1.2 MIT
+    ms 2.1.3 MIT
+    nanoid 3.1.31 MIT
+    node-fetch 2.6.7 MIT
+    node-releases 2.0.14 MIT
+    normalize-path 3.0.0 MIT
+    object-assign 4.1.1 MIT
+    object-assign 4.1.1 MIT
+    object-refs 0.3.0 MIT
+    omit.js 2.0.2 MIT
+    p-limit 3.1.0 MIT
+    p-locate 5.0.0 MIT
+    parent-module 1.0.1 MIT
+    parse-json 5.2.0 MIT
+    path-exists 4.0.0 MIT
+    path-intersection 2.2.1 MIT
+    path-is-absolute 1.0.1 MIT
+    path-parse 1.0.7 MIT
+    path-to-regexp 1.8.0 MIT
+    path-type 4.0.0 MIT
+    pbkdf2 3.1.2 MIT
+    picomatch 2.3.1 MIT
+    postcss-value-parser 3.3.1 MIT
+    preact 10.19.3 MIT
+    process 0.11.10 MIT
+    prop-types 15.8.1 MIT
+    prop-types 15.8.1 MIT
+    proxy-from-env 1.1.0 MIT
+    randombytes 2.1.0 MIT
+    react 16.14.0 MIT
+    react 16.14.0 MIT
+    react-dom 16.14.0 MIT
+    react-is 16.13.1 MIT
+    react-is 16.13.1 MIT
+    react-is 18.2.0 MIT
+    react-lifecycles-compat 3.0.4 MIT
+    react-loading-skeleton 2.2.0 MIT
+    react-redux 5.0.7 MIT
+    react-redux 8.1.3 MIT
+    react-router 4.3.1 MIT
+    react-router 5.3.4 MIT
+    react-router-dom 4.3.1 MIT
+    react-router-dom 5.3.4 MIT
+    react-router-redux 4.0.8 MIT
+    react-router-redux 5.0.0-alpha.9 MIT
+    readable-stream 3.6.2 MIT
+    readdirp 3.5.0 MIT
+    redux 3.7.2 MIT
+    redux 5.0.1 MIT
+    redux-saga 0.16.2 MIT
+    redux-thunk 3.1.0 MIT
+    regenerator-runtime 0.11.1 MIT
+    regenerator-runtime 0.14.1 MIT
+    require-directory 2.1.1 MIT
+    resize-observer-polyfill 1.5.1 MIT
+    resolve 1.22.8 MIT
+    resolve-from 4.0.0 MIT
+    resolve-pathname 3.0.0 MIT
+    ripemd160 2.0.2 MIT
+    sha.js 2.4.11 MIT
+    safe-buffer 5.2.1 MIT
+    safer-buffer 2.1.2 MIT
+    scheduler 0.19.1 MIT
+    shallow-element-equals 1.0.1 MIT
+    ssr-window 3.0.0 MIT
+    string-width 2.1.1 MIT
+    string-width 4.2.3 MIT
+    string_decoder 1.3.0 MIT
+    strip-ansi 4.0.0 MIT
+    strip-ansi 6.0.1 MIT
+    strip-json-comments 3.1.1 MIT
+    style-equal 1.0.0 MIT
+    style-mod 4.1.0 MIT
+    styled-components 4.4.1 MIT
+    stylis 3.5.4 MIT
+    stylis-rule-sheet 0.0.10 MIT
+    supports-color 5.5.0 MIT
+    supports-color 7.2.0 MIT
+    supports-color 8.1.1 MIT
+    supports-preserve-symlinks-flag 1.0.0 MIT
+    svelte 3.59.2 MIT
+    swiper 6.5.1 MIT
+    symbol-observable 1.2.0 MIT
+    tabbable 6.2.0 MIT
+    tiny-invariant 1.3.3 MIT
+    tiny-svg 3.0.1 MIT
+    tiny-warning 1.0.3 MIT
+    to-fast-properties 2.0.0 MIT
+    to-regex-range 5.0.1 MIT
+    tr46 0.0.3 MIT
+    update-browserslist-db 1.0.13 MIT
+    use-sync-external-store 1.2.0 MIT
+    util-deprecate 1.0.2 MIT
+    value-equal 1.0.1 MIT
+    w3c-keyname 2.2.8 MIT
+    warning 4.0.3 MIT
+    whatwg-fetch 3.6.20 MIT
+    whatwg-url 5.0.0 MIT
+    wrap-ansi 7.0.0 MIT
+    yamljs 0.3.0 MIT
+    yargs 16.2.0 MIT
+    yargs-unparser 2.0.0 MIT
+    yocto-queue 0.1.0 MIT
+    org.slf4j:jul-to-slf4j 1.7.36  MIT
+    org.slf4j:slf4j-api 1.7.36  MIT
+    redis.clients:jedis 3.8.0 MIT
+    org.checkerframework:checker-qual 3.37.0 MIT
 
 ========================================================================
 Public Domain licenses
