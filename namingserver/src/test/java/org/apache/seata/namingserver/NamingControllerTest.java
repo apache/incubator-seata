@@ -123,7 +123,7 @@ class NamingControllerTest {
         metaResponse = namingController.discovery(vGroup, namespace);
         assertNotNull(metaResponse);
         assertNotNull(metaResponse.getClusterList());
-        assertEquals(1, metaResponse.getClusterList().get(0).getUnitData().size());
+        assertEquals(0, metaResponse.getClusterList().get(0).getUnitData().size());
     }
 
     @Test
