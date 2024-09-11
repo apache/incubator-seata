@@ -14,31 +14,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.config.processor;
-
-
-import org.apache.seata.common.loader.LoadLevel;
-import org.apache.seata.common.util.MapUtil;
-import org.yaml.snakeyaml.LoaderOptions;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.SafeConstructor;
-
-import java.util.Map;
-import java.util.Properties;
+package org.apache.seata.sqlparser.struct;
 
 /**
- * The Yaml Processor.
- *
+ * The type Table meta of SqlServer.
  */
-@LoadLevel(name = "yaml")
-public class ProcessorYaml implements Processor {
+public class SqlServerTableMeta extends TableMeta {
 
-    @Override
-    public Properties processor(String config) {
-        Properties properties = new Properties();
-        Map<String, Object> configMap = MapUtil.asMap(new Yaml(new SafeConstructor(new LoaderOptions())).load(config));
-        properties.putAll(MapUtil.getFlattenedMap(configMap));
-        return properties;
+    /**
+     * Stands for whether there is a column of a SQLServer table with a "IDENTITY"
+     */
+    private boolean tableIdentifyExistence = false;
+
+    public boolean isTableIdentifyExistence() {
+        return tableIdentifyExistence;
+    }
+
+    public void setTableIdentifyExistence(boolean tableIdentifyExistence) {
+        this.tableIdentifyExistence = tableIdentifyExistence;
     }
 
 }
