@@ -85,7 +85,7 @@ class NamingControllerTest {
 
     @Test
     void mockUnregisterGracefully() {
-        String clusterName = "cluster1";
+        String clusterName = "cluster2";
         String namespace = "public2";
         String vGroup = "mockUnregisterGracefully";
         String unitName = String.valueOf(UUID.randomUUID());
@@ -105,7 +105,7 @@ class NamingControllerTest {
         String unitName2 = UUID.randomUUID().toString();
         vGroups2.put(vGroup,unitName2);
         meatadata2.put(CONSTANT_GROUP, vGroups2);
-        namingController.registerInstance(namespace, "cluster1", unitName2, node2);
+        namingController.registerInstance(namespace, clusterName, unitName2, node2);
         MetaResponse metaResponse = namingController.discovery(vGroup, namespace);
         assertNotNull(metaResponse);
         assertNotNull(metaResponse.getClusterList());
@@ -128,7 +128,7 @@ class NamingControllerTest {
 
     @Test
     void mockUnregisterUngracefully() throws InterruptedException {
-        String clusterName = "cluster1";
+        String clusterName = "cluster3";
         String namespace = "public3";
         String vGroup = "mockUnregisterUngracefully";
         String unitName = String.valueOf(UUID.randomUUID());
@@ -164,7 +164,7 @@ class NamingControllerTest {
 
     @Test
     void mockDiscoveryMultiNode() {
-        String clusterName = "cluster1";
+        String clusterName = "cluster4";
         String namespace = "public4";
         String vGroup = "mockDiscoveryMultiNode";
         String unitName = String.valueOf(UUID.randomUUID());
@@ -208,7 +208,7 @@ class NamingControllerTest {
 
     @Test
     void mockHeartbeat() throws InterruptedException {
-        String clusterName = "cluster1";
+        String clusterName = "cluster5";
         String namespace = "public5";
         String unitName = String.valueOf(UUID.randomUUID());
         String vGroup = "mockHeartbeat";
