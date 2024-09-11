@@ -17,12 +17,14 @@
 package org.apache.seata.metrics.exporter.prometheus;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 
 import io.prometheus.client.Collector;
 import io.prometheus.client.Collector.MetricFamilySamples.Sample;
+import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.exporter.HTTPServer;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.config.ConfigurationFactory;
@@ -48,8 +50,9 @@ public class PrometheusExporter extends Collector implements Collector.Describab
     public PrometheusExporter() throws IOException {
         int port = ConfigurationFactory.getInstance().getInt(
             ConfigurationKeys.METRICS_PREFIX + METRICS_EXPORTER_PROMETHEUS_PORT, DEFAULT_PROMETHEUS_PORT);
-        this.server = new HTTPServer(port, true);
-        this.register();
+        CollectorRegistry collectorRegistry = new CollectorRegistry(true);
+        this.register(collectorRegistry);
+        this.server = new HTTPServer(new InetSocketAddress(port),collectorRegistry, true);
     }
 
     @Override
