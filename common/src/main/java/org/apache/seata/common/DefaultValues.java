@@ -259,7 +259,7 @@ public interface DefaultValues {
     /**
      * the const DEFAULT_METRICS_ENABLED
      */
-    boolean DEFAULT_METRICS_ENABLED = false;
+    boolean DEFAULT_METRICS_ENABLED = true;
 
     /**
      * the const DEFAULT_METRICS_REGISTRY_TYPE

@@ -164,7 +164,7 @@ server.raft.sync=true
 
 
 #Metrics configuration, only for the server
-metrics.enabled=false
+metrics.enabled=true
 metrics.registryType=compact
 metrics.exporterList=prometheus
 metrics.exporterPrometheusPort=9898
