@@ -32,7 +32,10 @@ logging:
     kafka-appender:
       bootstrap-servers: 127.0.0.1:9092
       topic: logback_to_logstash
-
+console:
+  user:
+    username: seata
+    password: seata
 seata:
   config:
     # support: nacos 、 consul 、 apollo 、 zk  、 etcd3
@@ -73,16 +76,16 @@ seata:
       server-addr: http://localhost:2379
       key: seata.properties
   registry:
-    # support: nacos 、 eureka 、 redis 、 zk  、 consul 、 etcd3 、 sofa
+    # support: nacos 、 eureka 、 redis 、 zk  、 consul 、 etcd3 、 sofa 、 seata
     type: file
     preferred-networks: 30.240.*
     metadata:
-      weight: 1
-    namingserver:
-      server-addr: 127.0.0.1:8080
+      weight: 100
+    seata:
+      server-addr: 127.0.0.1:8081
       cluster: default
       namespace: public
-      heartbeat-period: 1000
+      heartbeat-period: 5000
     nacos:
       application: seata-server
       server-addr: 127.0.0.1:8848
@@ -130,6 +133,7 @@ seata:
       cluster: default
       group: SEATA_GROUP
       address-wait-time: 3000
+
 
   server:
     service-port: 8091 #If not configured, the default is '${server.port} + 1000'
@@ -182,6 +186,7 @@ seata:
       branch-table: branch_table
       lock-table: lock_table
       distributed-lock-table: distributed_lock
+      vgroup-table: vgroup_table
       query-limit: 1000
       max-wait: 5000
     redis:
@@ -215,3 +220,8 @@ seata:
       boss-thread-prefix: NettyBoss
       worker-thread-prefix: NettyServerNIOWorker
       boss-thread-size: 1
+  security:
+    secretKey: SeataSecretKey0c382ef121d778043159209298fd40bf3850a017
+    tokenValidityInMilliseconds: 1800000
+    ignore:
+      urls: /,/**/*.css,/**/*.js,/**/*.html,/**/*.map,/**/*.svg,/**/*.png,/**/*.jpeg,/**/*.ico,/api/v1/auth/login,/version.json,/health,/error

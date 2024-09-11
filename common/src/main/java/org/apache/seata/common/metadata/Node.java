@@ -16,8 +16,12 @@
  */
 package org.apache.seata.common.metadata;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 
 public class Node {
@@ -27,6 +31,10 @@ public class Node {
     private Endpoint transaction;
 
     private Endpoint internal;
+
+    private double weight = 1.0;
+    private boolean healthy = true;
+    private long timeStamp;
 
     private String group;
     private ClusterRole role = ClusterRole.MEMBER;
@@ -97,6 +105,33 @@ public class Node {
         this.internal = internal;
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(control, transaction);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Node node = (Node) o;
+        return Objects.equals(control, node.control) && Objects.equals(transaction, node.transaction);
+    }
+
+
+    // convert to String
+    public String toJsonString(ObjectMapper objectMapper) {
+        try {
+            return objectMapper.writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static class Endpoint {
 
         private String host;
@@ -134,6 +169,25 @@ public class Node {
 
         public String createAddress() {
             return host + ":" + port;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(host,port,protocol);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            Endpoint endpoint = (Endpoint) o;
+            return Objects.equals(endpoint.host,this.host)
+                    && Objects.equals(endpoint.port,this.port)
+                    && Objects.equals(endpoint.protocol,this.protocol);
         }
 
         @Override

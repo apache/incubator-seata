@@ -81,6 +81,8 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
 
     private static volatile SofaRegistryServiceImpl instance;
 
+    private String transactionServiceGroup;
+
     private SofaRegistryServiceImpl() {
     }
 
@@ -159,6 +161,7 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
 
     @Override
     public List<InetSocketAddress> lookup(String key) throws Exception {
+        transactionServiceGroup = key;
         String clusterName = getServiceGroup(key);
         if (clusterName == null) {
             String missingDataId = PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key;
@@ -174,7 +177,7 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
                     List<InetSocketAddress> newAddressList = flatData(instances);
                     CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
 
-                    removeOfflineAddressesIfNecessary(clusterName, newAddressList);
+                    removeOfflineAddressesIfNecessary(transactionServiceGroup, clusterName, newAddressList);
                 }
                 respondRegistries.countDown();
             });

@@ -814,7 +814,7 @@ public interface ConfigurationKeys {
     /**
      * The constant NAMING_SERVER
      */
-    String NAMING_SERVER = "namingserver";
+    String NAMING_SERVER = "seata";
 
     /**
      * The constant APPLICATION_ID.
@@ -1033,9 +1033,9 @@ public interface ConfigurationKeys {
     String REGISTRY_NAMINGSERVER_CLUSTER = NAMINGSERVER_REGISTRY_PREFIX + "cluster";
 
     /**
-     * The constant MAPPING_TABLE_NAME
+     * The constant VGROUP_TABLE_NAME
      */
-    String MAPPING_TABLE_NAME = STORE_DB_PREFIX + FILE_CONFIG_SPLIT_CHAR + "mapping-table";
+    String VGROUP_TABLE_NAME = STORE_DB_PREFIX + FILE_CONFIG_SPLIT_CHAR + "vgroup-table";
 
     /**
      * The constant NAMESPACE_KEY

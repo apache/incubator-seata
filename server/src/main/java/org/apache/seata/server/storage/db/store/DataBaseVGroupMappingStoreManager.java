@@ -16,12 +16,12 @@
  */
 package org.apache.seata.server.storage.db.store;
 
+import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.common.metadata.namingserver.Instance;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
-import org.apache.seata.core.constants.ConfigurationKeys;
 import org.apache.seata.core.store.MappingDO;
 import org.apache.seata.core.store.db.DataSourceProvider;
 import org.apache.seata.server.store.VGroupMappingStoreManager;

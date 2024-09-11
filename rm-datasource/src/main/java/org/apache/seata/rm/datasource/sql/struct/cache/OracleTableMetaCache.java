@@ -47,16 +47,14 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
         StringBuilder cacheKey = new StringBuilder(resourceId);
         cacheKey.append(".");
 
-        //separate it to schemaName and tableName
-        String[] tableNameWithSchema = tableName.split("\\.");
-        String defaultTableName = tableNameWithSchema.length > 1 ? tableNameWithSchema[1] : tableNameWithSchema[0];
-
+        //original: separate it to schemaName and tableName
+        //now: Use the original table name to avoid cache errors of tables with the same name across databases
         //oracle does not implement supportsMixedCaseIdentifiers in DatabaseMetadata
-        if (defaultTableName.contains("\"")) {
-            cacheKey.append(defaultTableName.replace("\"", ""));
+        if (tableName.contains("\"")) {
+            cacheKey.append(tableName.replace("\"", ""));
         } else {
             // oracle default store in upper case
-            cacheKey.append(defaultTableName.toUpperCase());
+            cacheKey.append(tableName.toUpperCase());
         }
 
         return cacheKey.toString();
@@ -75,6 +73,9 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
 
     protected TableMeta resultSetMetaToSchema(DatabaseMetaData dbmd, String tableName) throws SQLException {
         TableMeta tm = new TableMeta();
+        //  Save the original table name information for active cache refresh
+        //  to avoid refresh failure caused by missing catalog information
+        tm.setOriginalTableName(tableName);
         String[] schemaTable = tableName.split("\\.");
         String schemaName = schemaTable.length > 1 ? schemaTable[0] : dbmd.getUserName();
         tableName = schemaTable.length > 1 ? schemaTable[1] : tableName;
