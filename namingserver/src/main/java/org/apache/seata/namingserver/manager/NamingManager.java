@@ -205,28 +205,29 @@ public class NamingManager {
         return new Result<>("200", "remove group in old cluster successfully!");
     }
 
-    public void addGroup(String namespace, String clusterName, String unitName, String vGroup) {
+    public boolean addGroup(String namespace, String clusterName, String unitName, String vGroup) {
         try {
             ClusterBO clusterBO = vGroupMap.get(vGroup, k -> new ConcurrentHashMap<>())
                 .computeIfAbsent(namespace, k -> new NamespaceBO()).getCluster(clusterName);
-            if (clusterBO != null && !clusterBO.getUnitNames().contains(unitName)) {
-                clusterBO.addUnit(unitName);
+            if (clusterBO != null /**&& !clusterBO.getUnitNames().contains(unitName)**/) {
+                boolean needNotify = !clusterBO.getUnitNames().contains(unitName);
                 NamespaceBO namespaceBO = vGroupMap.getIfPresent(vGroup).get(namespace);
                 namespaceBO.removeOldCluster(clusterName);
-                applicationContext.publishEvent(new ClusterChangeEvent(this, vGroup, System.currentTimeMillis()));
+                if (needNotify) {
+                    clusterBO.addUnit(unitName);
+                }
+                return needNotify;
             }
         } catch (Exception e) {
             LOGGER.error("change vGroup mapping failed:{}", vGroup, e);
         }
+        return false;
     }
 
     public void notifyClusterChange(String vGroup, String namespace, String clusterName, String unitName, long term) {
 
         Optional.ofNullable(vGroupMap.asMap().get(vGroup)).flatMap(map -> Optional.ofNullable(map.get(namespace)).flatMap(namespaceBO -> Optional.ofNullable(namespaceBO.getCluster(clusterName)))).ifPresent(clusterBO -> {
-            Set<String> units = clusterBO.getUnitNames();
-            if (StringUtils.isBlank(unitName) || units.contains(unitName)) {
-                applicationContext.publishEvent(new ClusterChangeEvent(this, vGroup, term));
-            }
+            applicationContext.publishEvent(new ClusterChangeEvent(this, vGroup, term));
         });
     }
 
@@ -248,8 +249,8 @@ public class NamingManager {
                     vGroups.forEach((k, v) -> {
                         // In non-raft mode, a unit is one-to-one with a node, and the unitName is stored on the node.
                         // In raft mode, the unitName is equal to the raft-group, so the node's unitName cannot be used.
-                        addGroup(namespace, clusterName, StringUtils.isBlank(v) ? unitName : v, k);
-                        if (hasChanged) {
+                        boolean changed = addGroup(namespace, clusterName, StringUtils.isBlank(v) ? unitName : v, k);
+                        if (hasChanged || changed) {
                             notifyClusterChange(k, namespace, clusterName, unitName, node.getTerm());
                         }
                     });
@@ -276,7 +277,7 @@ public class NamingManager {
                     if (vgroupMap instanceof Map) {
                         ((Map<String, Object>) vgroupMap).forEach((group, realUnitName) -> {
                             vGroupMap.get(group, k -> new ConcurrentHashMap<>())
-                                .get(namespace).getCluster(clusterName).remove(realUnitName == null ? unitName : (String) realUnitName);
+                                    .get(namespace).getCluster(clusterName).remove(realUnitName == null ? unitName : (String) realUnitName);
                             notifyClusterChange(group, namespace, clusterName, unitName, node.getTerm());
                         });
                     }
@@ -360,6 +361,7 @@ public class NamingManager {
     }
 
     public Result<String> changeGroup(String namespace, String vGroup, String clusterName, String unitName) {
+        long changeTime = System.currentTimeMillis();
         ConcurrentMap<String, NamespaceBO> namespaceMap = new ConcurrentHashMap<>(vGroupMap.get(vGroup));
         Set<String> currentNamespaces = namespaceMap.keySet();
         Map<String, Set<String>> namespaceClusters = new HashMap<>();
@@ -367,17 +369,27 @@ public class NamingManager {
             namespaceClusters.put(currentNamespace,
                 new HashSet<>(namespaceMap.get(currentNamespace).getClusterMap().keySet()));
         }
-        createGroup(namespace, vGroup, clusterName, unitName);
+        Result<String> res = createGroup(namespace, vGroup, clusterName, unitName);
+        if (!res.isSuccess()) {
+            LOGGER.error("add vgroup failed!" + res.getMessage());
+            return res;
+        }
         AtomicReference<Result<String>> result = new AtomicReference<>();
         namespaceClusters.forEach((oldNamespace, clusters) -> {
             for (String cluster : clusters) {
                 Optional.ofNullable(namespaceClusterDataMap.get(oldNamespace))
-                    .flatMap(map -> Optional.ofNullable(map.get(cluster))).ifPresent(clusterData -> {
-                        if (!CollectionUtils.isEmpty(clusterData.getUnitData())) {
-                            clusterData.getUnitData().forEach((unit, unitData) -> result
-                                .set(removeGroup(unitData, vGroup, cluster, oldNamespace, unitName)));
-                        }
-                    });
+                        .flatMap(map -> Optional.ofNullable(map.get(cluster))).ifPresent(clusterData -> {
+                            if (!CollectionUtils.isEmpty(clusterData.getUnitData())) {
+                                Optional<Map.Entry<String, Unit>> optionalEntry =
+                                        clusterData.getUnitData().entrySet().stream().findFirst();
+                                if (optionalEntry.isPresent()) {
+                                    String unit = optionalEntry.get().getKey();
+                                    Unit unitData = optionalEntry.get().getValue();
+                                    result.set(removeGroup(unitData, vGroup, cluster, oldNamespace, unitName));
+                                    notifyClusterChange(vGroup, namespace, cluster, unit, changeTime);
+                                }
+                            }
+                        });
             }
         });
         return Optional.ofNullable(result.get()).orElseGet(() -> new Result<>("200", "change vGroup successfully!"));
