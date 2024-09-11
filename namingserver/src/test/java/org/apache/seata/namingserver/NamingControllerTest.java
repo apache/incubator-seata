@@ -56,16 +56,16 @@ class NamingControllerTest {
     void mockRegister() {
         String clusterName = "cluster1";
         String namespace = "public1";
+        String vGroup = "mockRegister";
         String unitName = String.valueOf(UUID.randomUUID());
         NamingServerNode node = new NamingServerNode();
         node.setTransaction(new Node.Endpoint("127.0.0.1", 8091, "netty"));
         node.setControl(new Node.Endpoint("127.0.0.1", 7091, "http"));
         Map<String, Object> meatadata = node.getMetadata();
         Map<String,Object> vGroups = new HashMap<>();
-        vGroups.put("vgroup1",unitName);
+        vGroups.put(vGroup,unitName);
         meatadata.put(CONSTANT_GROUP, vGroups);
         namingController.registerInstance(namespace, clusterName, unitName, node);
-        String vGroup = "vgroup1";
         namingController.changeGroup(namespace, clusterName, unitName, vGroup);
         MetaResponse metaResponse = namingController.discovery(vGroup, namespace);
         assertNotNull(metaResponse);
@@ -87,13 +87,14 @@ class NamingControllerTest {
     void mockUnregisterGracefully() {
         String clusterName = "cluster1";
         String namespace = "public2";
+        String vGroup = "mockUnregisterGracefully";
         String unitName = String.valueOf(UUID.randomUUID());
         NamingServerNode node = new NamingServerNode();
         node.setTransaction(new Node.Endpoint("127.0.0.1", 8091, "netty"));
         node.setControl(new Node.Endpoint("127.0.0.1", 7091, "http"));
         Map<String, Object> meatadata = node.getMetadata();
         Map<String,Object> vGroups = new HashMap<>();
-        vGroups.put("vgroup1",unitName);
+        vGroups.put(vGroup,unitName);
         meatadata.put(CONSTANT_GROUP, vGroups);
         namingController.registerInstance(namespace, clusterName, unitName, node);
         NamingServerNode node2 = new NamingServerNode();
@@ -102,10 +103,9 @@ class NamingControllerTest {
         Map<String, Object> meatadata2 = node2.getMetadata();
         Map<String,Object> vGroups2 = new HashMap<>();
         String unitName2 = UUID.randomUUID().toString();
-        vGroups2.put("vgroup2",unitName2);
+        vGroups2.put(vGroup,unitName2);
         meatadata2.put(CONSTANT_GROUP, vGroups2);
         namingController.registerInstance(namespace, "cluster1", unitName2, node2);
-        String vGroup = "vgroup1";
         MetaResponse metaResponse = namingController.discovery(vGroup, namespace);
         assertNotNull(metaResponse);
         assertNotNull(metaResponse.getClusterList());
@@ -130,16 +130,16 @@ class NamingControllerTest {
     void mockUnregisterUngracefully() throws InterruptedException {
         String clusterName = "cluster1";
         String namespace = "public3";
+        String vGroup = "mockUnregisterUngracefully";
         String unitName = String.valueOf(UUID.randomUUID());
         NamingServerNode node = new NamingServerNode();
         node.setTransaction(new Node.Endpoint("127.0.0.1", 8091, "netty"));
         node.setControl(new Node.Endpoint("127.0.0.1", 7091, "http"));
         Map<String, Object> meatadata = node.getMetadata();
         Map<String,Object> vGroups = new HashMap<>();
-        vGroups.put("vgroup1",unitName);
+        vGroups.put(vGroup,unitName);
         meatadata.put(CONSTANT_GROUP, vGroups);
         namingController.registerInstance(namespace, clusterName, unitName, node);
-        String vGroup = "vgroup1";
         //namingController.changeGroup(namespace, clusterName, vGroup, vGroup);
         MetaResponse metaResponse = namingController.discovery(vGroup, namespace);
         assertNotNull(metaResponse);
@@ -211,12 +211,13 @@ class NamingControllerTest {
         String clusterName = "cluster1";
         String namespace = "public5";
         String unitName = String.valueOf(UUID.randomUUID());
+        String vGroup = "mockHeartbeat";
         NamingServerNode node = new NamingServerNode();
         node.setTransaction(new Node.Endpoint("127.0.0.1", 8091, "netty"));
         node.setControl(new Node.Endpoint("127.0.0.1", 7091, "http"));
         Map<String, Object> meatadata = node.getMetadata();
         Map<String,Object> vGroups = new HashMap<>();
-        vGroups.put("vgroup1",unitName);
+        vGroups.put(vGroup,unitName);
         meatadata.put(CONSTANT_GROUP, vGroups);
         namingController.registerInstance(namespace, clusterName, unitName, node);
         NamingServerNode node2 = new NamingServerNode();
@@ -225,10 +226,9 @@ class NamingControllerTest {
         Map<String, Object> meatadata2 = node2.getMetadata();
         Map<String,Object> vGroups2 = new HashMap<>();
         String unitName2 = UUID.randomUUID().toString();
-        vGroups2.put("vgroup1",unitName2);
+        vGroups2.put(vGroup,unitName2);
         meatadata2.put(CONSTANT_GROUP, vGroups2);
         namingController.registerInstance(namespace, clusterName, unitName2, node2);
-        String vGroup = "vgroup1";
         Thread thread = new Thread(()->{
             for (int i = 0; i < 5; i++) {
                 try {
