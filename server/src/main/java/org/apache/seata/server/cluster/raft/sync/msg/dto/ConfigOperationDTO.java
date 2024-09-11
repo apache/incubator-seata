@@ -41,29 +41,6 @@ public class ConfigOperationDTO implements Serializable {
         this.value = value;
     }
 
-    public ConfigOperationDTO(ConfigOperationType optType, String dataId, String key, Object value) {
-        this.optType = optType;
-        this.dataId = dataId;
-        this.key = key;
-        this.value = value;
-    }
-
-    public ConfigOperationDTO(ConfigOperationType optType, String dataId, String key) {
-        this.optType = optType;
-        this.dataId = dataId;
-        this.key = key;
-    }
-    public ConfigOperationDTO(ConfigOperationType optType,  String key) {
-        this.optType = optType;
-        this.key = key;
-    }
-    public ConfigOperationDTO(ConfigOperationType optType, String key, Object value) {
-        this.optType = optType;
-        this.key = key;
-        this.value = value;
-    }
-
-
     public ConfigOperationType getOptType() {
         return optType;
     }

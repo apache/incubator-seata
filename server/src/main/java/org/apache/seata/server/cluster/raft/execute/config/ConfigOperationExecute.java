@@ -124,14 +124,11 @@ public class ConfigOperationExecute extends AbstractRaftConfigMsgExecute {
     private ConfigOperationResponse getAll(ConfigOperationDTO configOperation) {
         Map<String, Object> configMap = configStoreManager.getAll(configOperation.getNamespace(), configOperation.getDataId());
         Long configVersion = configStoreManager.getConfigVersion(configOperation.getNamespace(), configOperation.getDataId());
-        Map<String, Object> result = new HashMap<>();
         // fill config description and default value
         Map<String, ConfigurationItem> itemMap = ConfigurationProcessor.processConfigMap(configMap);
         ConfigurationInfoDto configurationInfoDto = new ConfigurationInfoDto();
         configurationInfoDto.setConfig(itemMap);
         configurationInfoDto.setVersion(configVersion);
-        //result.put("config", itemMap);
-        //result.put("version", configVersion);
         return ConfigOperationResponse.success(configurationInfoDto);
     }
 

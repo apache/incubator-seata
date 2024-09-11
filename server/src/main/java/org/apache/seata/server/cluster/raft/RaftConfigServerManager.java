@@ -173,7 +173,9 @@ public class RaftConfigServerManager {
 
 
     public static void destroy() {
-        raftServer.close();
+        if (raftServer != null) {
+            raftServer.close();
+        }
         LOGGER.info("closed seata server raft cluster, group: {} ", GROUP);
         Optional.ofNullable(rpcServer).ifPresent(RpcServer::shutdown);
         raftServer = null;

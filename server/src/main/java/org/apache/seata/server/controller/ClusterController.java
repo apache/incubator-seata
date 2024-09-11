@@ -44,6 +44,7 @@ import org.apache.seata.common.metadata.MetadataResponse;
 import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.result.Result;
 import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.config.ConfigType;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.config.processor.ConfigProcessor;
 import org.apache.seata.config.store.ConfigStoreManager;
@@ -93,7 +94,7 @@ public class ClusterController {
 
     private ServerProperties serverProperties;
 
-    private final ConfigStoreManager configStoreManager = ConfigStoreManagerFactory.getInstance();
+    private ConfigStoreManager configStoreManager;
     @Resource
     ApplicationContext applicationContext;
 
@@ -109,6 +110,12 @@ public class ClusterController {
     @PostConstruct
     private void init() {
         this.serverProperties = applicationContext.getBean(ServerProperties.class);
+        // only initialize configStoreManager in raft configuration.
+        String configType = ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig(ConfigurationKeys.FILE_ROOT_CONFIG
+                + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + ConfigurationKeys.FILE_ROOT_TYPE);
+        if (ConfigType.Raft.name().equalsIgnoreCase(configType)) {
+            configStoreManager = ConfigStoreManagerFactory.getInstance();
+        }
     }
 
     @PostMapping("/changeCluster")
@@ -246,7 +253,7 @@ public class ClusterController {
     }
 
     @DeleteMapping("/config/deleteAll")
-    public ConfigOperationResponse deleteConfig(String namespace, String dataId) {
+    public ConfigOperationResponse deleteAllConfig(String namespace, String dataId) {
         try {
             checkParam(namespace, "namespace");
             checkParam(dataId, "dataId");
@@ -369,7 +376,7 @@ public class ClusterController {
     }
 
     @PostMapping("/config/watch")
-    public void watch(HttpServletRequest request, @RequestParam String namespace, @RequestParam String dataId, @RequestParam(required = false) Long version,
+    public void configWatch(HttpServletRequest request, @RequestParam String namespace, @RequestParam String dataId, @RequestParam(required = false) Long version,
                       @RequestParam(defaultValue = "28000") int timeout) {
         Long currentVersion = configStoreManager.getConfigVersion(namespace, dataId);
         // if the config version of client is lower than the server, return directly

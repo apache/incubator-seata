@@ -16,7 +16,9 @@
  */
 package org.apache.seata.config.store.rocksdb;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.AfterAll;
@@ -41,6 +43,7 @@ class RocksDBTest {
     @AfterAll
     static void tearDown() {
         if (configStoreManager != null) {
+            configStoreManager.shutdown();
             configStoreManager.destroy();
         }
     }
@@ -106,8 +109,10 @@ class RocksDBTest {
         configStoreManager.clearData();
         String namespace1 = "namespace1";
         String namespace2 = "namespace2";
+        List<String> namespaces = Arrays.asList(DEFAULT_STORE_NAMESPACE, namespace1, namespace2);
         String dataId1 = "dataId1";
         String dataId2 = "dataId2";
+        List<String> dataIds = Arrays.asList(dataId1, dataId2);
         String key = "aaa";
         // put and get
         Assertions.assertTrue(configStoreManager.put(namespace1, dataId1, key , "11"));
@@ -118,7 +123,9 @@ class RocksDBTest {
         Assertions.assertEquals("12", configStoreManager.get(namespace1, dataId2, key));
         Assertions.assertEquals("21", configStoreManager.get(namespace2, dataId1, key));
         Assertions.assertEquals("22", configStoreManager.get(namespace2, dataId2, key));
-
+        Assertions.assertEquals(namespaces.size(), configStoreManager.getAllNamespaces().size());
+        Assertions.assertEquals(dataIds.size(), configStoreManager.getAllDataIds(namespace1).size());
+        Assertions.assertEquals(dataIds.size(), configStoreManager.getAllDataIds(namespace2).size());
         // delete
         Assertions.assertTrue(configStoreManager.delete(namespace1, dataId1, key));
         Assertions.assertTrue(configStoreManager.delete(namespace1, dataId2, key));
