@@ -63,6 +63,11 @@ public class MysqlTableMetaCacheTest {
             new Object[] {"name2", "name2", true, "", 3, 2, "A", 34L},
         };
 
+    private static Object[][] tableMetas =
+            new Object[][]{
+                    new Object[]{"seata", "", "mt1"}
+            };
+
     @Test
     public void testTableMeta() {
         TableMetaCache tableMetaCache = getTableMetaCache();
@@ -83,6 +88,7 @@ public class MysqlTableMetaCacheTest {
     public void getTableMetaTest_0() throws SQLException {
 
         MockDriver mockDriver = new MockDriver(columnMetas, indexMetas);
+        mockDriver.setMockTableMetasReturnValue(tableMetas);
         DruidDataSource dataSource = new DruidDataSource();
         dataSource.setUrl("jdbc:mock:xxx");
         dataSource.setDriver(mockDriver);
@@ -92,6 +98,7 @@ public class MysqlTableMetaCacheTest {
         TableMeta tableMeta = getTableMetaCache().getTableMeta(proxy.getPlainConnection(), "mt1", proxy.getResourceId());
 
         Assertions.assertEquals("mt1", tableMeta.getTableName());
+        Assertions.assertEquals("mt1", tableMeta.getOriginalTableName());
         Assertions.assertEquals("id", tableMeta.getPrimaryKeyOnlyName().get(0));
 
         Assertions.assertEquals("id", tableMeta.getColumnMeta("id").getColumnName());

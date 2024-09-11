@@ -16,20 +16,19 @@
  */
 package org.apache.seata.discovery.registry.namingserver;
 
-
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Objects;
+import java.util.Map;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
@@ -42,22 +41,23 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.http.HttpStatus;
+import org.apache.http.StatusLine;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.ContentType;
 import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
 import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.metadata.namingserver.Instance;
 import org.apache.seata.common.metadata.namingserver.MetaResponse;
 import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.util.CollectionUtils;
+import org.apache.seata.common.util.HttpClientUtil;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
-import org.apache.seata.common.util.HttpClientUtil;
 import org.apache.seata.discovery.registry.RegistryService;
-import org.apache.http.HttpStatus;
-import org.apache.http.StatusLine;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,39 +73,36 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
     private static final String NAMING_SERVICE_URL_KEY = "server-addr";
     private static final String FILE_ROOT_REGISTRY = "registry";
     private static final String FILE_CONFIG_SPLIT_CHAR = ".";
-    private static final String REGISTRY_TYPE = "namingserver";
+    private static final String REGISTRY_TYPE = "seata";
     private static final String HTTP_PREFIX = "http://";
     private static final String TIME_OUT_KEY = "timeout";
 
     private static final String HEART_BEAT_KEY = "heartbeat-period";
-    private static int HEARTBEAT_PERIOD = 30 * 1000;
-    private static final int HEALTHCHECK_PERIOD = 3 * 1000;
+    private static int healthcheckPeriod = 5 * 1000;
     private static final int PULL_PERIOD = 30 * 1000;
     private static final int LONG_POLL_TIME_OUT_PERIOD = 28 * 1000;
     private static final int THREAD_POOL_NUM = 1;
     private static final int HEALTH_CHECK_THRESHOLD = 1; // namingserver is considered unhealthy if failing in healthy check more than 1 times
     private volatile long term = 0;
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-    private ScheduledFuture<?> heartBeatScheduledFuture;
     private volatile boolean isSubscribed = false;
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private String namingServerAddressCache;
     private static ConcurrentMap<String /* namingserver address */, AtomicInteger /* Number of Health Check Continues Failures */> AVAILABLE_NAMINGSERVER_MAP = new ConcurrentHashMap<>();
     private static final ConcurrentMap<String/* vgroup */, List<InetSocketAddress>> VGROUP_ADDRESS_MAP = new ConcurrentHashMap<>();
     private static final ConcurrentMap<String/* vgroup */, List<NamingListener>> LISTENER_SERVICE_MAP = new ConcurrentHashMap<>();
-    protected final ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("scheduledExcuter", THREAD_POOL_NUM, true));
+    protected final ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("seata-namingser-scheduled", THREAD_POOL_NUM, true));
     private final ExecutorService notifierExecutor = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM, Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), new NamedThreadFactory("serviceNamingNotifier", THREAD_POOL_NUM));
 
 
     private NamingserverRegistryServiceImpl() {
         OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         String heartBeatKey = String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_REGISTRY, REGISTRY_TYPE, HEART_BEAT_KEY);
-        HEARTBEAT_PERIOD = FILE_CONFIG.getInt(heartBeatKey, HEARTBEAT_PERIOD);
+        healthcheckPeriod = FILE_CONFIG.getInt(heartBeatKey, healthcheckPeriod);
         List<String> urlList = getNamingAddrs();
         checkAvailableNamingAddr(urlList);
-        this.executorService.scheduleAtFixedRate(() -> {
-            checkAvailableNamingAddr(urlList);
-        }, HEARTBEAT_PERIOD, HEALTHCHECK_PERIOD, TimeUnit.MILLISECONDS);
+        this.executorService.scheduleAtFixedRate(() -> checkAvailableNamingAddr(urlList), healthcheckPeriod,
+                healthcheckPeriod, TimeUnit.MILLISECONDS);
     }
 
     private void checkAvailableNamingAddr(List<String> urlList) {
@@ -154,14 +151,8 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
         NetUtil.validAddress(address);
         Instance instance = Instance.getInstance();
         instance.setTransaction(new Node.Endpoint(address.getAddress().getHostAddress(), address.getPort(), "netty"));
-
         instance.setTimestamp(System.currentTimeMillis());
         doRegister(instance, getNamingAddrs());
-
-        if (heartBeatScheduledFuture != null && !heartBeatScheduledFuture.isCancelled()) {
-            heartBeatScheduledFuture.cancel(false);
-        }
-
     }
 
     public void doRegister(Instance instance, List<String> urlList) {
@@ -174,7 +165,7 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
             String namespace = instance.getNamespace();
             String clusterName = instance.getClusterName();
             String unit = instance.getUnit();
-            String jsonBody = instance.toJsonString();
+            String jsonBody = instance.toJsonString(OBJECT_MAPPER);
             String params = "namespace=" + namespace + "&clusterName=" + clusterName + "&unit=" + unit;
             url += params;
             Map<String, String> header = new HashMap<>();
@@ -209,18 +200,13 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
 
     @Override
     public void unregister(InetSocketAddress address) {
-        // stop heartbeat
-
-        if (heartBeatScheduledFuture != null && !heartBeatScheduledFuture.isCancelled()) {
-            heartBeatScheduledFuture.cancel(true);
-        }
         NetUtil.validAddress(address);
         Instance instance = Instance.getInstance();
         instance.setTransaction(new Node.Endpoint(address.getAddress().getHostAddress(), address.getPort(), "netty"));
         for (String urlSuffix : getNamingAddrs()) {
             String url = HTTP_PREFIX + urlSuffix + "/naming/v1/unregister?";
             String unit = instance.getUnit();
-            String jsonBody = instance.toJsonString();
+            String jsonBody = instance.toJsonString(OBJECT_MAPPER);
             String params = "unit=" + unit;
             params = params + "&clusterName=" + instance.getClusterName();
             params = params + "&namespace=" + instance.getNamespace();
@@ -337,17 +323,6 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
         isSubscribed = false;
     }
 
-    @Override
-    public List<InetSocketAddress> aliveLookup(String transactionServiceGroup) {
-        return CURRENT_ADDRESS_MAP.computeIfAbsent(transactionServiceGroup, k -> new ArrayList<>());
-    }
-
-    @Override
-    public List<InetSocketAddress> refreshAliveLookup(String transactionServiceGroup,
-                                                      List<InetSocketAddress> aliveAddress) {
-        return CURRENT_ADDRESS_MAP.put(transactionServiceGroup, aliveAddress);
-    }
-
     /**
      * @param key vGroup name
      * @return List<InetSocketAddress> available instance list
@@ -387,7 +362,6 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
                 throw new NamingRegistryException("cannot lookup server list in vgroup: " + vGroup);
             }
             String jsonResponse = EntityUtils.toString(response.getEntity(), "UTF-8");
-            response.close();
             // jsonResponse -> MetaResponse
             MetaResponse metaResponse = OBJECT_MAPPER.readValue(jsonResponse, new TypeReference<MetaResponse>() {
             });
@@ -400,9 +374,9 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
                 term = metaResponse.getTerm();
             }
             VGROUP_ADDRESS_MAP.put(vGroup, newAddressList);
-            removeOfflineAddressesIfNecessary(vGroup, newAddressList);
+            removeOfflineAddressesIfNecessary(vGroup,vGroup,newAddressList);
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage());
             throw new RemoteException();
         }
 
@@ -427,6 +401,31 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
             namespace = DEFAULT_NAMESPACE;
         }
         return namespace;
+    }
+
+    @Override
+    public List<InetSocketAddress> aliveLookup(String transactionServiceGroup) {
+        Map<String, List<InetSocketAddress>> clusterAddressMap = CURRENT_ADDRESS_MAP.computeIfAbsent(transactionServiceGroup,
+            k -> new ConcurrentHashMap<>());
+
+        List<InetSocketAddress> inetSocketAddresses = clusterAddressMap.get(transactionServiceGroup);
+        if (CollectionUtils.isNotEmpty(inetSocketAddresses)) {
+            return inetSocketAddresses;
+        }
+
+        // fall back to addresses of any cluster
+        return clusterAddressMap.values().stream().filter(CollectionUtils::isNotEmpty)
+                .findAny().orElse(Collections.emptyList());
+    }
+
+    @Override
+    public List<InetSocketAddress> refreshAliveLookup(String transactionServiceGroup,
+                                                      List<InetSocketAddress> aliveAddress) {
+        Map<String, List<InetSocketAddress>> clusterAddressMap = CURRENT_ADDRESS_MAP.computeIfAbsent(transactionServiceGroup,
+            key -> new ConcurrentHashMap<>());
+
+
+        return clusterAddressMap.put(transactionServiceGroup, aliveAddress);
     }
 
 

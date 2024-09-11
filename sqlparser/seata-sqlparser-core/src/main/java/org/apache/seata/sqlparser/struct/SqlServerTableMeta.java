@@ -14,27 +14,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.server.controller;
+package org.apache.seata.sqlparser.struct;
 
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+/**
+ * The type Table meta of SqlServer.
+ */
+public class SqlServerTableMeta extends TableMeta {
 
+    /**
+     * Stands for whether there is a column of a SQLServer table with a "IDENTITY"
+     */
+    private boolean tableIdentifyExistence = false;
 
-@Disabled
-@SpringBootTest
-class NamingControllerTest {
-    @Autowired
-    private NamingController namingController;
-
-    @Test
-    void addVGroup() {
-        namingController.addVGroup("group1","unit1");
+    public boolean isTableIdentifyExistence() {
+        return tableIdentifyExistence;
     }
 
-    @Test
-    void removeVGroup() {
-        namingController.removeVGroup("group1");
+    public void setTableIdentifyExistence(boolean tableIdentifyExistence) {
+        this.tableIdentifyExistence = tableIdentifyExistence;
     }
+
 }

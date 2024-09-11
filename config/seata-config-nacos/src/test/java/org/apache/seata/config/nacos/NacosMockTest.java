@@ -40,7 +40,7 @@ import org.junit.jupiter.api.Test;
 
 public class NacosMockTest {
     private static ConfigService configService;
-    private static final String NACOS_ENDPOINT = "console.nacos.io:80";
+    private static final String NACOS_ENDPOINT = "127.0.0.1:8848";
 
     private static final String NACOS_GROUP = "SEATA_GROUP";
 
@@ -75,13 +75,13 @@ public class NacosMockTest {
         Configuration configuration = ConfigurationFactory.getInstance();
         String configStrValue = configuration.getConfig(SUB_NACOS_DATAID);
         Assertions.assertNull(configStrValue);
-        configStrValue = configuration.getConfig(SUB_NACOS_DATAID, 5000);
+        configStrValue = configuration.getConfig(SUB_NACOS_DATAID, 1000);
         Assertions.assertNull(configStrValue);
-        configStrValue = configuration.getConfig(SUB_NACOS_DATAID, "TEST", 5000);
+        configStrValue = configuration.getConfig(SUB_NACOS_DATAID, "TEST", 1000);
         Assertions.assertEquals("TEST", configStrValue);
         ConfigurationCache.clear();
         System.setProperty(SUB_NACOS_DATAID, "SYS-TEST");
-        configStrValue = configuration.getConfig(SUB_NACOS_DATAID, "TEST", 5000);
+        configStrValue = configuration.getConfig(SUB_NACOS_DATAID, "TEST", 1000);
         Assertions.assertEquals("SYS-TEST", configStrValue);
         ConfigurationCache.clear();
         System.clearProperty(SUB_NACOS_DATAID);
@@ -91,7 +91,7 @@ public class NacosMockTest {
         Assertions.assertEquals(0, configIntValue);
         configIntValue = configuration.getInt(SUB_NACOS_DATAID, 100);
         Assertions.assertEquals(100, configIntValue);
-        configIntValue = configuration.getInt(SUB_NACOS_DATAID, 100, 5000);
+        configIntValue = configuration.getInt(SUB_NACOS_DATAID, 100, 1000);
         Assertions.assertEquals(100, configIntValue);
 
         ConfigurationCache.clear();
@@ -99,7 +99,7 @@ public class NacosMockTest {
         Assertions.assertEquals(false, configBoolValue);
         configBoolValue = configuration.getBoolean(SUB_NACOS_DATAID, true);
         Assertions.assertEquals(true, configBoolValue);
-        configBoolValue = configuration.getBoolean(SUB_NACOS_DATAID, true, 5000);
+        configBoolValue = configuration.getBoolean(SUB_NACOS_DATAID, true, 1000);
         Assertions.assertEquals(true, configBoolValue);
 
         ConfigurationCache.clear();
@@ -107,7 +107,7 @@ public class NacosMockTest {
         Assertions.assertEquals(0, configShortValue);
         configShortValue = configuration.getShort(SUB_NACOS_DATAID, (short)64);
         Assertions.assertEquals(64, configShortValue);
-        configShortValue = configuration.getShort(SUB_NACOS_DATAID, (short)127, 5000);
+        configShortValue = configuration.getShort(SUB_NACOS_DATAID, (short)127, 1000);
         Assertions.assertEquals(127, configShortValue);
 
         ConfigurationCache.clear();
@@ -115,21 +115,21 @@ public class NacosMockTest {
         Assertions.assertEquals(0L, configLongValue);
         configLongValue = configuration.getLong(SUB_NACOS_DATAID, 12345678L);
         Assertions.assertEquals(12345678L, configLongValue);
-        configLongValue = configuration.getLong(SUB_NACOS_DATAID, 65535L, 5000);
+        configLongValue = configuration.getLong(SUB_NACOS_DATAID, 65535L, 1000);
         Assertions.assertEquals(65535L, configLongValue);
 
         ConfigurationCache.clear();
         Duration configDurValue = configuration.getDuration(SUB_NACOS_DATAID);
         Assertions.assertEquals(Duration.ZERO, configDurValue);
-        Duration defaultDuration = Duration.ofMillis(5000);
+        Duration defaultDuration = Duration.ofMillis(1000);
         configDurValue = configuration.getDuration(SUB_NACOS_DATAID, defaultDuration);
         Assertions.assertEquals(defaultDuration, configDurValue);
         defaultDuration = Duration.ofMillis(1000);
-        configDurValue = configuration.getDuration(SUB_NACOS_DATAID, defaultDuration, 5000);
+        configDurValue = configuration.getDuration(SUB_NACOS_DATAID, defaultDuration, 1000);
         Assertions.assertEquals(defaultDuration, configDurValue);
 
         ConfigurationCache.clear();
-        configStrValue = configuration.getLatestConfig(SUB_NACOS_DATAID, "DEFAULT", 5000);
+        configStrValue = configuration.getLatestConfig(SUB_NACOS_DATAID, "DEFAULT", 1000);
         Assertions.assertEquals("DEFAULT", configStrValue);
 
     }
@@ -145,7 +145,7 @@ public class NacosMockTest {
     @Test
     public void removeConfig() {
         Configuration configuration = ConfigurationFactory.getInstance();
-        boolean removed = configuration.removeConfig(SUB_NACOS_DATAID);
+        boolean removed = configuration.removeConfig(NACOS_DATAID);
         Assertions.assertTrue(removed);
     }
 
@@ -175,7 +175,7 @@ public class NacosMockTest {
         configuration.addConfigListener(SUB_NACOS_DATAID, listener);
         Thread.sleep(1000);
         configuration.putConfig(NACOS_DATAID, "KEY=VALUE");
-        latch.await(3000, TimeUnit.MILLISECONDS);
+        latch.await(1000, TimeUnit.MILLISECONDS);
         Set<ConfigurationChangeListener> listeners = configuration.getConfigListeners(SUB_NACOS_DATAID);
         //configcache listener + user listener
         Assertions.assertEquals(2, listeners.size());

@@ -38,7 +38,7 @@ public class MariadbTableMetaCache extends MysqlTableMetaCache {
         String sql = "SELECT * FROM " + ColumnUtils.addEscape(tableName, JdbcConstants.MARIADB) + " LIMIT 1";
         try (Statement stmt = connection.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
-            return resultSetMetaToSchema(rs.getMetaData(), connection.getMetaData());
+            return resultSetMetaToSchema(rs.getMetaData(), connection.getMetaData(), tableName);
         } catch (SQLException sqlEx) {
             throw sqlEx;
         } catch (Exception e) {
