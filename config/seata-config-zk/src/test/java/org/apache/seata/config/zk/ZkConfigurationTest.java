@@ -62,16 +62,17 @@ public class ZkConfigurationTest {
         CountDownLatch countDownLatch = new CountDownLatch(1);
         final boolean[] listened = {false};
         String dataId = "putMockDataId";
-        zookeeperConfiguration.putConfig(dataId, "value");
         ConfigurationChangeListener changeListener = new ConfigurationChangeListener() {
             @Override
             public void onChangeEvent(ConfigurationChangeEvent event) {
-                Assertions.assertEquals("value2", event.getNewValue());
-                Assertions.assertEquals(ConfigurationChangeType.MODIFY, event.getChangeType());
-                countDownLatch.countDown();
-                listened[0] = true;
+                if (event.getChangeType() == ConfigurationChangeType.MODIFY) {
+                    Assertions.assertEquals("value2", event.getNewValue());
+                    countDownLatch.countDown();
+                    listened[0] = true;
+                }
             }
         };
+        zookeeperConfiguration.createPersistent(zookeeperConfiguration.buildPath(dataId), "value");
         zookeeperConfiguration.addConfigListener(dataId, changeListener);
         zookeeperConfiguration.putConfig(dataId, "value2");
         try {
@@ -93,22 +94,20 @@ public class ZkConfigurationTest {
         CountDownLatch countDownLatch = new CountDownLatch(1);
         final boolean[] listened = {false};
         String dataId = "removeMockDataId";
-        zookeeperConfiguration.putConfig(dataId, "value");
+        zookeeperConfiguration.createPersistent(zookeeperConfiguration.buildPath(dataId), "value");
         ConfigurationChangeListener changeListener = new ConfigurationChangeListener() {
             @Override
             public void onChangeEvent(ConfigurationChangeEvent event) {
-                Assertions.assertNull(event.getNewValue());
-                Assertions.assertEquals(ConfigurationChangeType.DELETE, event.getChangeType());
-                countDownLatch.countDown();
-                listened[0] = true;
+                if (event.getChangeType() == ConfigurationChangeType.DELETE) {
+                    Assertions.assertNull(event.getNewValue());
+                    countDownLatch.countDown();
+                    listened[0] = true;
+                }
             }
         };
 
         zookeeperConfiguration.addConfigListener(dataId, changeListener);
-
         zookeeperConfiguration.putConfig(dataId, "value2");
-
-        zookeeperConfiguration.deletePath(zookeeperConfiguration.buildPath(dataId));
         boolean remove = zookeeperConfiguration.removeConfig(dataId);
         Assertions.assertTrue(remove);
         try {
