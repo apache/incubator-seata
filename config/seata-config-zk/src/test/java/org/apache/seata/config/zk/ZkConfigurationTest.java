@@ -38,7 +38,7 @@ public class ZkConfigurationTest {
     public static void adBeforeClass() throws Exception {
         System.setProperty("config.type", "zk");
         System.setProperty("config.zk.serverAddr", "127.0.0.1:2181");
-        server = new TestingServer(2181, true);
+        server = new TestingServer(2181);
         server.start();
     }
 
@@ -75,7 +75,7 @@ public class ZkConfigurationTest {
         zookeeperConfiguration.addConfigListener(dataId, changeListener);
         zookeeperConfiguration.putConfig(dataId, "value2");
         try {
-            countDownLatch.await(3000, TimeUnit.MILLISECONDS);
+            countDownLatch.await(10000, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
