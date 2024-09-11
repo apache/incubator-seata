@@ -96,7 +96,6 @@ class NamingControllerTest {
         Map<String,Object> vGroups = new HashMap<>();
         vGroups.put(vGroup,unitName);
         meatadata.put(CONSTANT_GROUP, vGroups);
-        System.out.println("registerInstance: "+System.currentTimeMillis());
         namingController.registerInstance(namespace, clusterName, unitName, node);
         NamingServerNode node2 = new NamingServerNode();
         node2.setTransaction(new Node.Endpoint("127.0.0.1", 8093, "netty"));
@@ -106,10 +105,8 @@ class NamingControllerTest {
         String unitName2 = UUID.randomUUID().toString();
         vGroups2.put(vGroup,unitName2);
         meatadata2.put(CONSTANT_GROUP, vGroups2);
-        namingController.registerInstance(namespace, clusterName, unitName2, node2);
-        System.out.println("registerInstance: "+System.currentTimeMillis());
+        namingController.registerInstance(namespace, UUID.randomUUID().toString(), unitName2, node2);
         MetaResponse metaResponse = namingController.discovery(vGroup, namespace);
-        System.out.println("registerInstance: "+System.currentTimeMillis());
         assertNotNull(metaResponse);
         assertNotNull(metaResponse.getClusterList());
         assertEquals(1, metaResponse.getClusterList().size());
