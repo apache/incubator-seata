@@ -26,11 +26,15 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type zk configuration test
  */
 public class ZkConfigurationTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ZkConfigurationTest.class);
 
     protected static TestingServer server = null;
 
@@ -65,10 +69,11 @@ public class ZkConfigurationTest {
         ConfigurationChangeListener changeListener = new ConfigurationChangeListener() {
             @Override
             public void onChangeEvent(ConfigurationChangeEvent event) {
+                LOGGER.info("onChangeEvent:{}", event);
                 if (event.getChangeType() == ConfigurationChangeType.MODIFY) {
                     Assertions.assertEquals("value2", event.getNewValue());
-                    countDownLatch.countDown();
                     listened[0] = true;
+                    countDownLatch.countDown();
                 }
             }
         };
@@ -98,10 +103,11 @@ public class ZkConfigurationTest {
         ConfigurationChangeListener changeListener = new ConfigurationChangeListener() {
             @Override
             public void onChangeEvent(ConfigurationChangeEvent event) {
+                LOGGER.info("onChangeEvent:{}", event);
                 if (event.getChangeType() == ConfigurationChangeType.DELETE) {
                     Assertions.assertNull(event.getNewValue());
-                    countDownLatch.countDown();
                     listened[0] = true;
+                    countDownLatch.countDown();
                 }
             }
         };
