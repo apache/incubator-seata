@@ -166,25 +166,24 @@ class NamingControllerTest {
     void mockDiscoveryMultiNode() {
         String clusterName = "cluster1";
         String namespace = "public4";
+        String vGroup = "mockDiscoveryMultiNode";
         String unitName = String.valueOf(UUID.randomUUID());
         NamingServerNode node = new NamingServerNode();
         node.setTransaction(new Node.Endpoint("127.0.0.1", 8095, "netty"));
         node.setControl(new Node.Endpoint("127.0.0.1", 7095, "http"));
         Map<String, Object> meatadata = node.getMetadata();
         Map<String,Object> vGroups = new HashMap<>();
-        vGroups.put("vgroup1",unitName);
+        vGroups.put(vGroup,unitName);
         meatadata.put(CONSTANT_GROUP, vGroups);
         NamingServerNode node2 = new NamingServerNode();
         String unitName2 = String.valueOf(UUID.randomUUID());
         node2.setTransaction(new Node.Endpoint("127.0.0.1", 8096, "netty"));
         node2.setControl(new Node.Endpoint("127.0.0.1", 7096, "http"));
         vGroups = new HashMap<>();
-        vGroups.put("vgroup1",unitName2);
+        vGroups.put(vGroup,unitName2);
         node2.getMetadata().put(CONSTANT_GROUP, vGroups);
         namingController.registerInstance(namespace, clusterName, unitName, node);
         namingController.registerInstance(namespace, clusterName, unitName2, node2);
-        String vGroup = "vgroup1";
-        //namingController.changeGroup(namespace, clusterName, vGroup, vGroup);
         MetaResponse metaResponse = namingController.discovery(vGroup, namespace);
         assertNotNull(metaResponse);
         assertNotNull(metaResponse.getClusterList());
