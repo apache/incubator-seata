@@ -16,6 +16,7 @@
  */
 package org.apache.seata.server.storage.db.lock;
 
+import java.sql.BatchUpdateException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -372,10 +373,23 @@ public class LockStoreDataBaseDAO implements LockStore {
             return ps.executeBatch().length == lockDOs.size();
         } catch (SQLIntegrityConstraintViolationException e) {
             LOGGER.error("Global lock batch acquire error: {}", e.getMessage(), e);
-            //return false,let the caller go to conn.rollabck()
+            //return false,let the caller go to conn.rollback()
             return false;
-        } catch (SQLException e) {
-            throw e;
+        } catch (BatchUpdateException e) {
+            Throwable cause = e.getCause();
+            if (cause != null) {
+                if (cause instanceof SQLIntegrityConstraintViolationException) {
+                    return false;
+                }
+                throw e;
+            }
+            SQLException nextException = e.getNextException();
+            if (nextException == null) {
+                throw e;
+            } else if (nextException instanceof SQLIntegrityConstraintViolationException) {
+                return false;
+            }
+            throw nextException;
         } finally {
             IOUtil.close(ps);
         }
