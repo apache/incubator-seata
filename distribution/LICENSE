@@ -241,9 +241,7 @@ Apache-2.0 licenses
     com.fasterxml.jackson.core:jackson-databind 2.12.7.1 Apache-2.0
     com.fasterxml.jackson.core:jackson-databind 2.13.5 Apache-2.0
     com.fasterxml.jackson.datatype:jackson-datatype-jdk8 2.13.5 Apache-2.0
-    com.fasterxml.jackson.datatype:jackson-datatype-jdk8 2.12.7 Apache-2.0
     com.fasterxml.jackson.module:jackson-module-parameter-names 2.13.5 Apache-2.0
-    com.fasterxml.jackson.module:jackson-module-parameter-names 2.12.7 Apache-2.0
     com.github.ben-manes.caffeine:caffeine 2.9.3 Apache-2.0
     com.github.danielwegener:logback-kafka-appender 0.2.0-RC2 Apache-2.0
     com.github.vlsi.compactmap:compactmap 2.0 Apache-2.0
@@ -253,7 +251,6 @@ Apache-2.0 licenses
     com.google.code.gson:gson 2.8.9 Apache-2.0
     com.google.code.gson:gson 2.9.1 Apache-2.0
     com.google.errorprone:error_prone_annotations 2.21.1 Apache-2.0
-    com.google.errorprone:error_prone_annotations 2.10.0 Apache-2.0
     com.google.guava:failureaccess 1.0.1 Apache-2.0
     com.google.guava:guava 32.1.3-jre Apache-2.0
     com.google.inject:guice 5.0.1 Apache-2.0
@@ -296,98 +293,37 @@ Apache-2.0 licenses
     io.jsonwebtoken:jjwt-api 0.10.5 Apache-2.0
     io.jsonwebtoken:jjwt-impl 0.10.5 Apache-2.0
     io.jsonwebtoken:jjwt-jackson 0.10.5 Apache-2.0
-    io.netty:netty-all 4.1.94.Final Apache-2.0
-    io.netty:netty-all 4.1.100.Final Apache-2.0
-    io.netty:netty-buffer 4.1.92.Final Apache-2.0
-    io.netty:netty-buffer 4.1.94.Final Apache-2.0
-    io.netty:netty-buffer 4.1.100.Final Apache-2.0
-    io.netty:netty-codec 4.1.92.Final Apache-2.0
-    io.netty:netty-codec 4.1.94.Final Apache-2.0
-    io.netty:netty-codec 4.1.100.Final Apache-2.0
-    io.netty:netty-codec-dns 4.1.92.Final Apache-2.0
-    io.netty:netty-codec-dns 4.1.94.Final Apache-2.0
-    io.netty:netty-codec-dns 4.1.100.Final Apache-2.0
-    io.netty:netty-codec-haproxy 4.1.92.Final Apache-2.0
-    io.netty:netty-codec-haproxy 4.1.94.Final Apache-2.0
-    io.netty:netty-codec-haproxy 4.1.100.Final Apache-2.0
-    io.netty:netty-codec-http 4.1.92.Final Apache-2.0
-    io.netty:netty-codec-http 4.1.94.Final Apache-2.0
-    io.netty:netty-codec-http 4.1.100.Final Apache-2.0
-    io.netty:netty-codec-http2 4.1.92.Final Apache-2.0
-    io.netty:netty-codec-http2 4.1.94.Final Apache-2.0
-    io.netty:netty-codec-http2 4.1.100.Final Apache-2.0
-    io.netty:netty-codec-memcache 4.1.92.Final Apache-2.0
-    io.netty:netty-codec-memcache 4.1.94.Final Apache-2.0
-    io.netty:netty-codec-memcache 4.1.100.Final Apache-2.0
-    io.netty:netty-codec-mqtt 4.1.92.Final Apache-2.0
-    io.netty:netty-codec-mqtt 4.1.94.Final Apache-2.0
-    io.netty:netty-codec-mqtt 4.1.100.Final Apache-2.0
-    io.netty:netty-codec-redis 4.1.92.Final Apache-2.0
-    io.netty:netty-codec-redis 4.1.94.Final Apache-2.0
-    io.netty:netty-codec-redis 4.1.100.Final Apache-2.0
-    io.netty:netty-codec-smtp 4.1.92.Final Apache-2.0
-    io.netty:netty-codec-smtp 4.1.94.Final Apache-2.0
-    io.netty:netty-codec-smtp 4.1.100.Final Apache-2.0
-    io.netty:netty-codec-socks 4.1.92.Final Apache-2.0
-    io.netty:netty-codec-socks 4.1.94.Final Apache-2.0
-    io.netty:netty-codec-socks 4.1.100.Final Apache-2.0
-    io.netty:netty-codec-stomp 4.1.92.Final Apache-2.0
-    io.netty:netty-codec-stomp 4.1.94.Final Apache-2.0
-    io.netty:netty-codec-stomp 4.1.100.Final Apache-2.0
-    io.netty:netty-codec-xml 4.1.92.Final Apache-2.0
-    io.netty:netty-codec-xml 4.1.94.Final Apache-2.0
-    io.netty:netty-codec-xml 4.1.100.Final Apache-2.0
-    io.netty:netty-common 4.1.92.Final Apache-2.0
-    io.netty:netty-common 4.1.94.Final Apache-2.0
-    io.netty:netty-common 4.1.100.Final Apache-2.0
-    io.netty:netty-handler 4.1.92.Final Apache-2.0
-    io.netty:netty-handler 4.1.94.Final Apache-2.0
-    io.netty:netty-handler 4.1.100.Final Apache-2.0
-    io.netty:netty-handler-proxy 4.1.92.Final Apache-2.0
-    io.netty:netty-handler-proxy 4.1.94.Final Apache-2.0
-    io.netty:netty-handler-proxy 4.1.100.Final Apache-2.0
-    io.netty:netty-handler-ssl-ocsp 4.1.92.Final Apache-2.0
-    io.netty:netty-handler-ssl-ocsp 4.1.94.Final Apache-2.0
-    io.netty:netty-handler-ssl-ocsp 4.1.100.Final Apache-2.0
-    io.netty:netty-resolver 4.1.92.Final Apache-2.0
-    io.netty:netty-resolver 4.1.94.Final Apache-2.0
-    io.netty:netty-resolver 4.1.100.Final Apache-2.0
-    io.netty:netty-resolver-dns 4.1.92.Final Apache-2.0
-    io.netty:netty-resolver-dns 4.1.94.Final Apache-2.0
-    io.netty:netty-resolver-dns 4.1.100.Final Apache-2.0
-    io.netty:netty-resolver-dns-classes-macos 4.1.92.Final Apache-2.0
-    io.netty:netty-resolver-dns-classes-macos 4.1.94.Final Apache-2.0
-    io.netty:netty-resolver-dns-classes-macos 4.1.100.Final Apache-2.0
-    io.netty:netty-resolver-dns-native-macos 4.1.92.Final Apache-2.0
-    io.netty:netty-resolver-dns-native-macos 4.1.94.Final Apache-2.0
-    io.netty:netty-resolver-dns-native-macos 4.1.100.Final Apache-2.0
-    io.netty:netty-transport 4.1.92.Final Apache-2.0
-    io.netty:netty-transport 4.1.94.Final Apache-2.0
-    io.netty:netty-transport 4.1.100.Final Apache-2.0
-    io.netty:netty-transport-classes-epoll 4.1.92.Final Apache-2.0
-    io.netty:netty-transport-classes-epoll 4.1.94.Final Apache-2.0
-    io.netty:netty-transport-classes-epoll 4.1.100.Final Apache-2.0
-    io.netty:netty-transport-classes-kqueue 4.1.92.Final Apache-2.0
-    io.netty:netty-transport-classes-kqueue 4.1.94.Final Apache-2.0
-    io.netty:netty-transport-classes-kqueue 4.1.100.Final Apache-2.0
-    io.netty:netty-transport-native-epoll 4.1.92.Final Apache-2.0
-    io.netty:netty-transport-native-epoll 4.1.94.Final Apache-2.0
-    io.netty:netty-transport-native-epoll 4.1.100.Final Apache-2.0
-    io.netty:netty-transport-native-kqueue 4.1.92.Final Apache-2.0
-    io.netty:netty-transport-native-kqueue 4.1.94.Final Apache-2.0
-    io.netty:netty-transport-native-kqueue 4.1.100.Final Apache-2.0
-    io.netty:netty-transport-native-unix-common 4.1.92.Final Apache-2.0
-    io.netty:netty-transport-native-unix-common 4.1.94.Final Apache-2.0
-    io.netty:netty-transport-native-unix-common 4.1.100.Final Apache-2.0
-    io.netty:netty-transport-rxtx 4.1.92.Final Apache-2.0
-    io.netty:netty-transport-rxtx 4.1.94.Final Apache-2.0
-    io.netty:netty-transport-rxtx 4.1.100.Final Apache-2.0
-    io.netty:netty-transport-sctp 4.1.92.Final Apache-2.0
-    io.netty:netty-transport-sctp 4.1.94.Final Apache-2.0
-    io.netty:netty-transport-sctp 4.1.100.Final Apache-2.0
-    io.netty:netty-transport-udt 4.1.92.Final Apache-2.0
-    io.netty:netty-transport-udt 4.1.94.Final Apache-2.0
-    io.netty:netty-transport-udt 4.1.100.Final Apache-2.0
+    io.netty:netty-all 4.1.101.Final Apache-2.0
+    io.netty:netty-buffer 4.1.101.Final Apache-2.0
+    io.netty:netty-codec 4.1.101.Final Apache-2.0
+    io.netty:netty-codec-dns 4.1.101.Final Apache-2.0
+    io.netty:netty-codec-haproxy 4.1.101.Final Apache-2.0
+    io.netty:netty-codec-http 4.1.101.Final Apache-2.0
+    io.netty:netty-codec-http2 4.1.101.Final Apache-2.0
+    io.netty:netty-codec-memcache 4.1.101.Final Apache-2.0
+    io.netty:netty-codec-mqtt 4.1.101.Final Apache-2.0
+    io.netty:netty-codec-redis 4.1.101.Final Apache-2.0
+    io.netty:netty-codec-smtp 4.1.101.Final Apache-2.0
+    io.netty:netty-codec-socks 4.1.101.Final Apache-2.0
+    io.netty:netty-codec-stomp 4.1.101.Final Apache-2.0
+    io.netty:netty-codec-xml 4.1.101.Final Apache-2.0
+    io.netty:netty-common 4.1.101.Final Apache-2.0
+    io.netty:netty-handler 4.1.101.Final Apache-2.0
+    io.netty:netty-handler-proxy 4.1.101.Final Apache-2.0
+    io.netty:netty-handler-ssl-ocsp 4.1.101.Final Apache-2.0
+    io.netty:netty-resolver 4.1.101.Final Apache-2.0
+    io.netty:netty-resolver-dns 4.1.101.Final Apache-2.0
+    io.netty:netty-resolver-dns-classes-macos 4.1.101.Final Apache-2.0
+    io.netty:netty-resolver-dns-native-macos 4.1.101.Final Apache-2.0
+    io.netty:netty-transport 4.1.101.Final Apache-2.0
+    io.netty:netty-transport-classes-epoll 4.1.101.Final Apache-2.0
+    io.netty:netty-transport-classes-kqueue 4.1.101.Final Apache-2.0
+    io.netty:netty-transport-native-epoll 4.1.101.Final Apache-2.0
+    io.netty:netty-transport-native-kqueue 4.1.101.Final Apache-2.0
+    io.netty:netty-transport-native-unix-common 4.1.101.Final Apache-2.0
+    io.netty:netty-transport-rxtx 4.1.101.Final Apache-2.0
+    io.netty:netty-transport-sctp 4.1.101.Final Apache-2.0
+    io.netty:netty-transport-udt 4.1.101.Final Apache-2.0
     io.perfmark:perfmark-api 0.19.0 Apache-2.0
     io.prometheus:simpleclient 0.10.0 Apache-2.0
     io.prometheus:simpleclient 0.15.0 Apache-2.0
@@ -421,12 +357,9 @@ Apache-2.0 licenses
     org.apache.rocketmq:rocketmq-common 5.0.0 Apache-2.0
     org.apache.rocketmq:rocketmq-logging 5.0.0 Apache-2.0
     org.apache.rocketmq:rocketmq-remoting 5.0.0 Apache-2.0
-    org.apache.tomcat.embed:tomcat-embed-el 9.0.82 Apache-2.0
-    org.apache.tomcat.embed:tomcat-embed-el 9.0.75 Apache-2.0
-    org.apache.tomcat.embed:tomcat-embed-websocket 9.0.82 Apache-2.0
-    org.apache.tomcat.embed:tomcat-embed-websocket 9.0.75 Apache-2.0
-    org.apache.tomcat:tomcat-annotations-api 9.0.82 Apache-2.0
-    org.apache.tomcat:tomcat-annotations-api 9.0.75 Apache-2.0
+    org.apache.tomcat.embed:tomcat-embed-el 9.0.90 Apache-2.0
+    org.apache.tomcat.embed:tomcat-embed-websocket 9.0.90 Apache-2.0
+    org.apache.tomcat:tomcat-annotations-api 9.0.83 Apache-2.0
     org.apache.yetus:audience-annotations 0.12.0 Apache-2.0
     org.awaitility:awaitility 4.0.3 Apache-2.0
     org.codehaus.groovy:groovy-all 2.4.4 Apache-2.0
@@ -463,7 +396,6 @@ Apache-2.0 licenses
     io.dropwizard.metrics:metrics-core 4.1.36 Apache-2.0
     com.alipay.sofa:jraft-core 1.3.14 Apache-2.0
     com.fasterxml.jackson.datatype:jackson-datatype-jsr310 2.13.5 Apache-2.0
-    com.fasterxml.jackson.datatype:jackson-datatype-jsr310 2.12.7 Apache-2.0
     io.protostuff:protostuff-api 1.5.9 Apache-2.0
     io.protostuff:protostuff-collectionschema 1.5.9  Apache-2.0
     io.protostuff:protostuff-core 1.5.9  Apache-2.0
@@ -474,8 +406,7 @@ Apache-2.0 licenses
     org.apache.zookeeper:zookeeper 3.7.2  Apache-2.0
     org.apache.zookeeper:zookeeper-jute 3.7.2  Apache-2.0
     org.apache.skywalking 8.4.0 Apache-2.0
-    org.apache.tomcat.embed:tomcat-embed-core 9.0.83 Apache-2.0
-    org.apache.tomcat.embed:tomcat-embed-core 9.0.82 Apache-2.0
+    org.apache.tomcat.embed:tomcat-embed-core 9.0.90 Apache-2.0
     net.java.dev.jna:jna 5.5.0 Apache-2.0
     org.rocksdb:rocksdbjni 8.8.1 Apache-2.0
     org.springframework:spring-aop 5.3.39 Apache-2.0
@@ -590,13 +521,12 @@ ISC licenses
     @ungap/promise-all-settled 1.1.2 ISC
     anymatch 3.1.3 ISC
     browser-stdout 1.3.1 ISC
-    browserify-sign 4.2.2 ISC
+    browserify-sign 4.2.3 ISC
     cliui 7.0.4 ISC
     css-color-keywords 1.0.0 ISC
     electron-to-chromium 1.4.681 ISC
     fs.realpath 1.0.0 ISC
     get-caller-file 2.0.5 ISC
-    glob 7.1.6 ISC
     glob 7.2.3 ISC
     glob-parent 5.1.2 ISC
     inflight 1.0.6 ISC
@@ -605,10 +535,9 @@ ISC licenses
     isexe 2.0.0 ISC
     lru-cache 5.1.1 ISC
     minimalistic-assert 1.0.1 ISC
-    minimatch 3.0.4 ISC
     minimatch 3.1.2 ISC
     once 1.4.0 ISC
-    parse-asn1 5.1.6 ISC
+    parse-asn1 5.1.7 ISC
     picocolors 1.0.0 ISC
     semver 6.3.1 ISC
     which 2.0.2 ISC
@@ -628,12 +557,14 @@ MIT licenses
     @alicloud/console-components-app-layout 1.1.4 MIT
     @alicloud/console-components-console-menu 1.2.12 MIT
     @alicloud/css-var-utils 0.1.0 MIT
-    @alifd/field 1.5.8 MIT
+    @alifd/babel-runtime-jsx-style-transform 1.0.0 MIT
     @alifd/field 1.7.0 MIT
-    @alifd/meet-react 2.9.8 MIT
+    @alifd/meet-react 2.9.9 MIT
     @alifd/meet-react-component-one 1.3.2 MIT
+    @alifd/meet-react/node_modules/classnames 2.2.6 MIT
     @alifd/next 1.24.18 MIT
-    @alifd/validate 1.2.3 MIT
+    @alifd/next/node_modules/@alifd/field 1.5.8 MIT
+    @alifd/next/node_modules/@alifd/validate 1.2.3 MIT
     @alifd/validate 1.4.0 MIT
     @babel/code-frame 7.23.5 MIT
     @babel/compat-data 7.23.5 MIT
@@ -679,6 +610,7 @@ MIT licenses
     @emotion/is-prop-valid 0.8.8 MIT
     @emotion/memoize 0.7.4 MIT
     @emotion/serialize 0.11.16 MIT
+    @emotion/serialize/node_modules/csstype 2.6.21 MIT
     @emotion/sheet 0.9.4 MIT
     @emotion/stylis 0.8.5 MIT
     @emotion/unitless 0.7.5 MIT
@@ -701,19 +633,17 @@ MIT licenses
     @types/react 16.14.56 MIT
     @types/react-dom 16.9.24 MIT
     @types/react-router 5.1.20 MIT
-    @types/react-router-dom 4.3.5 MIT
+    @types/react-router-dom 16.9.24 MIT
+    @types/react-router  5.1.20 MIT
     @types/react-router-redux 5.0.27 MIT
     @types/scheduler 0.16.8 MIT
     @types/use-sync-external-store 0.0.3 MIT
-    ansi-colors 4.1.1 MIT
-    ansi-regex 3.0.1 MIT
-    ansi-regex 5.0.1 MIT
     ansi-styles 3.2.1 MIT
-    ansi-styles 4.3.0 MIT
     argparse 1.0.10 MIT
-    asn1.js 5.4.1 MIT
+    asn1.js 4.10.1 MIT
+    asn1.js/node_modules/bn.js 4.12.0 MIT
     asynckit 0.4.0 MIT
-    axios 1.6.7 MIT
+    axios 1.7.4 MIT
     babel-plugin-emotion 10.2.2 MIT
     babel-plugin-macros 2.8.0 MIT
     babel-plugin-styled-components 2.1.4 MIT
@@ -800,7 +730,6 @@ MIT licenses
     growl 1.10.5 MIT
     hammerjs 2.0.8 MIT
     has-flag 3.0.0 MIT
-    has-flag 4.0.0 MIT
     hash-base 3.1.0 MIT
     hash.js 1.1.7 MIT
     hasown 2.0.1 MIT
@@ -960,6 +889,7 @@ MIT licenses
     org.slf4j:jul-to-slf4j 1.7.36  MIT
     org.slf4j:slf4j-api 1.7.36  MIT
     redis.clients:jedis 3.8.0 MIT
+    org.checkerframework:checker-qual 3.37.0 MIT
 
 ========================================================================
 Public Domain licenses

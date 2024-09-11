@@ -72,9 +72,8 @@
         <ant.version>1.10.12</ant.version>
         <lz4.version>1.7.1</lz4.version>
         <jraft.version>1.3.14</jraft.version>
-        <netty.version>4.1.86.Final</netty.version>
         <snakeyaml.version>2.0</snakeyaml.version>
-        <netty.version>4.1.94.Final</netty.version>
+        <netty.version>4.1.101.Final</netty.version>
         <sofa.hessian.version>4.0.3</sofa.hessian.version>
         <sofa.bolt.version>1.6.7</sofa.bolt.version>
 
@@ -86,6 +85,9 @@
         <groovy.version>2.4.4</groovy.version>
         <zstd.version>1.5.0-4</zstd.version>
         <xstream.version>1.4.20</xstream.version>
+        <checker-qual.version>3.37.0</checker-qual.version>
+        <error_prone_annotations.version>2.21.1</error_prone_annotations.version>
+        <tomcat-embed.version>9.0.90</tomcat-embed.version>
 
         <!-- The `httpcore` and `httpclient` have been removed in spring-boot 3.1.0 and above. -->
         <httpcore.version>4.4.16</httpcore.version>
@@ -135,6 +137,7 @@
         <janino-version>3.1.10</janino-version>
         <mockwebserver-version>4.12.0</mockwebserver-version>
         <native-lib-loader.version>2.4.0</native-lib-loader.version>
+
     </properties>
 
     <dependencyManagement>
@@ -171,16 +174,48 @@
                         <groupId>org.apache.tomcat.embed</groupId>
                         <artifactId>tomcat-embed-core</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.tomcat.embed</groupId>
+                        <artifactId>tomcat-embed-websocket</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.tomcat.embed</groupId>
+                        <artifactId>tomcat-embed-el</artifactId>
+                    </exclusion>
                 </exclusions>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-core</artifactId>
+                <version>${tomcat-embed.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-el</artifactId>
+                <version>${tomcat-embed.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-websocket</artifactId>
+                <version>${tomcat-embed.version}</version>
+            </dependency>
             <!-- the 3rd part -->
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-all</artifactId>
                 <version>${netty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.checkerframework</groupId>
+                <artifactId>checker-qual</artifactId>
+                <version>${checker-qual.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.errorprone</groupId>
+                <artifactId>error_prone_annotations</artifactId>
+                <version>${error_prone_annotations.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.yaml</groupId>
