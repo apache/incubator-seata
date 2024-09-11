@@ -28,6 +28,7 @@ import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.sqlparser.struct.ColumnMeta;
 import org.apache.seata.sqlparser.struct.IndexMeta;
 import org.apache.seata.sqlparser.struct.IndexType;
+import org.apache.seata.sqlparser.struct.SqlServerTableMeta;
 import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.sqlparser.util.ColumnUtils;
 import org.apache.seata.sqlparser.util.JdbcConstants;
@@ -82,7 +83,7 @@ public class SqlServerTableMetaCache extends AbstractTableMetaCache {
     }
 
     private TableMeta resultSetMetaToSchema(Connection connection, String tableName) throws SQLException {
-        TableMeta tm = new TableMeta();
+        SqlServerTableMeta tm = new SqlServerTableMeta();
         tm.setTableName(tableName);
         tm.setOriginalTableName(tableName);
 
@@ -134,6 +135,9 @@ public class SqlServerTableMetaCache extends AbstractTableMetaCache {
                 col.setOrdinalPosition(rsColumns.getInt("ORDINAL_POSITION"));
                 col.setIsNullAble(rsColumns.getString("IS_NULLABLE"));
                 col.setIsAutoincrement(rsColumns.getString("IS_AUTOINCREMENT"));
+                if (col.isAutoincrement()) {
+                    tm.setTableIdentifyExistence(true);
+                }
 
                 if (tm.getAllColumns().containsKey(col.getColumnName())) {
                     throw new NotSupportYetException("Not support the table has the same column name with different case yet");
