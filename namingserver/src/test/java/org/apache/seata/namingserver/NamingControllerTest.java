@@ -103,7 +103,7 @@ class NamingControllerTest {
         Map<String, Object> meatadata2 = node2.getMetadata();
         Map<String,Object> vGroups2 = new HashMap<>();
         String unitName2 = UUID.randomUUID().toString();
-        vGroups2.put(vGroup,unitName2);
+        vGroups2.put(UUID.randomUUID().toString(),unitName2);
         meatadata2.put(CONSTANT_GROUP, vGroups2);
         namingController.registerInstance(namespace, UUID.randomUUID().toString(), unitName2, node2);
         MetaResponse metaResponse = namingController.discovery(vGroup, namespace);
