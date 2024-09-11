@@ -90,7 +90,7 @@ public class DataBaseLockStoreDAOTest {
             lock.setXid("abc-123:123");
             lock.setTransactionId(123L);
             lock.setBranchId((long) i);
-            lock.setRowKey("abc-"+i);
+            lock.setRowKey("test_acquireLocks-"+i);
             lock.setPk(String.valueOf(i));
             lock.setTableName("t");
             lockDOs.add(lock);
@@ -99,7 +99,8 @@ public class DataBaseLockStoreDAOTest {
         boolean ret = dataBaseLockStoreDAO.acquireLock(lockDOs);
         Assertions.assertTrue(ret);
 
-        String sql = "select * from lock_table where xid = 'abc-123:123' and table_name  = 't' and row_key in ('abc-0','abc-1','abc-2')"  ;
+        String sql = "select * from lock_table where xid = 'abc-123:123' and table_name  = 't' " +
+                "and row_key in ('test_acquireLocks-0','test_acquireLocks-1','test_acquireLocks-2')"  ;
         Connection conn =  null;
         ResultSet rs = null;
         try{
@@ -128,7 +129,7 @@ public class DataBaseLockStoreDAOTest {
             lock.setXid("abc-123:123");
             lock.setTransactionId(123L);
             lock.setBranchId((long) i);
-            lock.setRowKey("abc-"+i);
+            lock.setRowKey("test_re_acquireLocks-"+i);
             lock.setPk(String.valueOf(i));
             lock.setTableName("t");
             lockDOs.add(lock);
@@ -137,7 +138,8 @@ public class DataBaseLockStoreDAOTest {
         boolean ret = dataBaseLockStoreDAO.acquireLock(lockDOs);
         Assertions.assertTrue(ret);
 
-        String sql = "select * from lock_table where xid = 'abc-123:123' and table_name  = 't' and row_key in ('abc-0','abc-1','abc-2')"  ;
+        String sql = "select * from lock_table where xid = 'abc-123:123' and table_name  = 't' " +
+                "and row_key in ('test_re_acquireLocks-0','test_re_acquireLocks-1','test_re_acquireLocks-2')"  ;
         Connection conn =  null;
         ResultSet rs = null;
         try{
@@ -168,7 +170,7 @@ public class DataBaseLockStoreDAOTest {
             lock.setXid("abc-456:123");
             lock.setTransactionId(123L);
             lock.setBranchId((long) i);
-            lock.setRowKey("abc-"+i);
+            lock.setRowKey("tes_unLocks-"+i);
             lock.setPk(String.valueOf(i));
             lock.setTableName("t");
             lockDOs.add(lock);
@@ -177,7 +179,8 @@ public class DataBaseLockStoreDAOTest {
         boolean ret = dataBaseLockStoreDAO.acquireLock(lockDOs);
         Assertions.assertTrue(ret);
 
-        String sql = "select * from lock_table where xid = 'abc-456:123' and table_name  = 't' and row_key in ('abc-0','abc-1','abc-2')"  ;
+        String sql = "select * from lock_table where xid = 'abc-456:123' and table_name  = 't' " +
+                "and row_key in ('tes_unLocks-0','tes_unLocks-1','tes_unLocks-2')"  ;
         Connection conn =  null;
         ResultSet rs = null;
         try{
@@ -216,7 +219,7 @@ public class DataBaseLockStoreDAOTest {
             lock.setXid("abc-678:123");
             lock.setTransactionId(123L);
             lock.setBranchId((long) i);
-            lock.setRowKey("abc-"+i);
+            lock.setRowKey("test_isLockable_can-"+i);
             lock.setPk(String.valueOf(i));
             lock.setTableName("t");
             lockDOs.add(lock);
@@ -238,7 +241,7 @@ public class DataBaseLockStoreDAOTest {
             lock.setXid("abc-123:222");
             lock.setTransactionId(222L);
             lock.setBranchId((long) i);
-            lock.setRowKey("abc-"+i);
+            lock.setRowKey("test_isLockable_cannot-"+i);
             lock.setPk(String.valueOf(i));
             lock.setTableName("t");
             lockDOs.add(lock);
@@ -247,7 +250,8 @@ public class DataBaseLockStoreDAOTest {
         boolean ret = dataBaseLockStoreDAO.acquireLock(lockDOs);
         Assertions.assertTrue(ret);
 
-        String sql = "select * from lock_table where xid = 'abc-123:222' and table_name  = 't' and row_key in ('abc-0','abc-1','abc-2')"  ;
+        String sql = "select * from lock_table where xid = 'abc-123:222' and table_name  = 't' " +
+                "and row_key in ('test_isLockable_cannot-0','test_isLockable_cannot-1','test_isLockable_cannot-2')"  ;
         Connection conn =  null;
         ResultSet rs = null;
         try{
@@ -269,7 +273,7 @@ public class DataBaseLockStoreDAOTest {
             lock.setXid("abc-123:333");
             lock.setTransactionId(333L);
             lock.setBranchId((long) i);
-            lock.setRowKey("abc-"+i);
+            lock.setRowKey("test_isLockable_cannot-"+i);
             lock.setPk(String.valueOf(i));
             lock.setTableName("t");
             lockDOs_2.add(lock);
@@ -289,7 +293,7 @@ public class DataBaseLockStoreDAOTest {
             lock.setXid("abc-123:222");
             lock.setTransactionId(222L);
             lock.setBranchId(1L);
-            lock.setRowKey("abc-"+i);
+            lock.setRowKey("test_isLockable_cannot1-"+i);
             lock.setPk(String.valueOf(i));
             lock.setTableName("t");
             lockDOs.add(lock);
@@ -298,7 +302,8 @@ public class DataBaseLockStoreDAOTest {
         boolean ret = dataBaseLockStoreDAO.acquireLock(lockDOs, true, true);
         Assertions.assertTrue(ret);
 
-        String sql = "select * from lock_table where xid = 'abc-123:222' and table_name  = 't' and row_key in ('abc-0','abc-1','abc-2')"  ;
+        String sql = "select * from lock_table where xid = 'abc-123:222' and table_name  = 't' " +
+                "and row_key in ('test_isLockable_cannot1-0','test_isLockable_cannot1-1','test_isLockable_cannot1-2')"  ;
         Connection conn =  null;
         ResultSet rs = null;
         try{
@@ -320,7 +325,7 @@ public class DataBaseLockStoreDAOTest {
             lock.setXid("abc-123:333");
             lock.setTransactionId(333L);
             lock.setBranchId(2L);
-            lock.setRowKey("abc-"+i);
+            lock.setRowKey("test_isLockable_cannot1-"+i);
             lock.setPk(String.valueOf(i));
             lock.setTableName("t");
             lockDOs_2.add(lock);
