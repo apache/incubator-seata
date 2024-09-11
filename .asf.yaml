@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 github:
   description: ":fire: Seata is an easy-to-use, high-performance, open source distributed transaction solution."
   homepage: https://seata.apache.org/
