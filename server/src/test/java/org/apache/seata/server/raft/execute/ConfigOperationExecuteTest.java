@@ -16,20 +16,11 @@
  */
 package org.apache.seata.server.raft.execute;
 
-
-import java.util.LinkedHashMap;
-
 import javax.annotation.Resource;
 
 import org.apache.seata.common.util.NetUtil;
-import org.apache.seata.config.dto.ConfigurationInfoDto;
-import org.apache.seata.config.dto.ConfigurationItem;
-import org.apache.seata.config.store.rocksdb.RocksDBConfigStoreManager;
 import org.apache.seata.server.cluster.raft.RaftConfigServerManager;
-import org.apache.seata.server.cluster.raft.execute.config.ConfigOperationExecute;
-import org.apache.seata.server.cluster.raft.processor.response.ConfigOperationResponse;
 import org.apache.seata.server.controller.ClusterController;
-import org.apache.seata.server.lock.LockerManagerFactory;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -49,7 +40,7 @@ class ConfigOperationExecuteTest {
     @BeforeAll
     public static void setUp(ApplicationContext context) {
         RaftConfigServerManager.destroy();
-        System.setProperty("server.raft.serverAddr", NetUtil.getLocalIp() + ":9091");
+        System.setProperty("server.raft.serverAddr", NetUtil.getLocalIp() + ":9291");
         System.setProperty("config.type", "raft");
         System.setProperty("registry.preferredNetworks", "*");
         System.setProperty("config.raft.db.dir", "configStore");
@@ -60,12 +51,11 @@ class ConfigOperationExecuteTest {
 
     @AfterAll
     public static void destroy() {
-        RaftConfigServerManager.destroy();
         System.clearProperty("server.raft.serverAddr");
         System.clearProperty("config.type");
         System.clearProperty("registry.preferredNetworks");
+        RaftConfigServerManager.destroy();
         System.clearProperty("config.raft.db.dir");
-        System.clearProperty("config.raft.db.destroyOnShutdown");
     }
 
     @Test
