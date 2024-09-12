@@ -172,7 +172,6 @@
       defend, and hold each Contributor harmless for any liability
       incurred by, or claims asserted against, such Contributor by reason
       of your accepting any such warranty or additional liability.
-
    END OF TERMS AND CONDITIONS
 
    APPENDIX: How to apply the Apache License to your work.
@@ -236,9 +235,7 @@ Apache-2.0 licenses
     com.ecwid.consul:consul-api 1.4.2 Apache-2.0
     com.fasterxml.jackson.core:jackson-annotations 2.12.7 Apache-2.0
     com.fasterxml.jackson.core:jackson-annotations 2.13.5 Apache-2.0
-    com.fasterxml.jackson.core:jackson-core 2.12.7 Apache-2.0
     com.fasterxml.jackson.core:jackson-core 2.13.5 Apache-2.0
-    com.fasterxml.jackson.core:jackson-databind 2.12.7.1 Apache-2.0
     com.fasterxml.jackson.core:jackson-databind 2.13.5 Apache-2.0
     com.fasterxml.jackson.datatype:jackson-datatype-jdk8 2.13.5 Apache-2.0
     com.fasterxml.jackson.module:jackson-module-parameter-names 2.13.5 Apache-2.0
@@ -443,11 +440,15 @@ BSD-3-Clause licenses
     @uni/page-scroll-to 1.0.0 BSD-3-Clause
     @uni/vibrate 1.0.1 BSD-3-Clause
     @uni/video 1.0.8 BSD-3-Clause
-    diff 5.0.0 BSD-3-Clause
+    babel-plugin-emotion/node_modules/source-map 0.5.7 BSD-3-Clause
     driver-dom 2.2.2 BSD-3-Clause
+    driver-dom/node_modules/style-unit 3.0.5 BSD-3-Clause
     driver-miniapp 0.1.5 BSD-3-Clause
     driver-universal 3.5.0 BSD-3-Clause
     driver-weex 2.1.0 BSD-3-Clause
+    driver-weex/node_modules/style-unit 3.0.5 BSD-3-Clause
+    dva-core/node_modules/warning 3.0.0 BSD-3-Clause
+    dva/node_modules/hoist-non-react-statics 2.5.5 BSD-3-Clause
     flat 5.0.2 BSD-3-Clause
     hoist-non-react-statics 2.5.5 BSD-3-Clause
     hoist-non-react-statics 3.3.2 BSD-3-Clause
@@ -462,14 +463,17 @@ BSD-3-Clause licenses
     sprintf-js 1.0.3 BSD-3-Clause
     style-unit 2.0.1 BSD-3-Clause
     style-unit 3.0.5 BSD-3-Clause
+    style-unit/node_modules/universal-env 2.0.0 BSD-3-Clause
     universal-choose-image 1.3.0 BSD-3-Clause
     universal-device 1.0.3 BSD-3-Clause
     universal-device 2.3.1 BSD-3-Clause
     universal-env 0.6.6 BSD-3-Clause
     universal-env 2.0.0 BSD-3-Clause
     universal-panresponder 0.6.5 BSD-3-Clause
+    universal-panresponder/node_modules/universal-env 0.6.6 BSD-3-Clause
     universal-transition 1.1.1 BSD-3-Clause
     universal-unit-tool 1.0.0 BSD-3-Clause
+    universal-unit-tool/node_modules/universal-device 2.3.1 BSD-3-Clause
     warning 3.0.0 BSD-3-Clause
     com.thoughtworks.xstream:xstream 1.4.20 BSD-3-Clause
     org.antlr:ST4 4.3  The BSD License
@@ -500,13 +504,11 @@ CDDL-1.0 licenses
     com.sun.jersey:jersey-core 1.19.1 CDDL-1.0
 
 ========================================================================
-EPL-1.0 licenses
+EPL-1.0  licenses
 ========================================================================
 
     ch.qos.logback:logback-classic 1.2.12 EPL-1.0
-    ch.qos.logback:logback-classic 1.3.14 EPL-1.0
     ch.qos.logback:logback-core 1.2.12 EPL-1.0
-    ch.qos.logback:logback-core 1.3.14 EPL-1.0
 
 ========================================================================
 EPL-2.0 licenses
@@ -648,21 +650,26 @@ MIT licenses
     asynckit 0.4.0 MIT
     axios 1.7.4 MIT
     babel-plugin-emotion 10.2.2 MIT
-    babel-plugin-macros 2.8.0 MIT
+    babel-plugin-emotion/node_modules/babel-plugin-macros 2.8.0 MIT
+    babel-plugin-emotion/node_modules/convert-source-map 1.9.0 MIT
+    babel-plugin-emotion/node_modules/cosmiconfig 6.0.0 MIT
     babel-plugin-styled-components 2.1.4 MIT
     babel-plugin-syntax-jsx 6.18.0 MIT
     babel-runtime 6.26.0 MIT
-    babel-runtime-jsx-style-transform 1.0.2 MIT
+    babel-runtime/node_modules/regenerator-runtime 0.11.1 MIT
     balanced-match 1.0.2 MIT
     bignumber.js 9.1.2 MIT
-    binary-extensions 2.2.0 MIT
-    bn.js 4.12.0 MIT
     bn.js 5.2.1 MIT
     brace-expansion 1.1.11 MIT
-    braces 3.0.2 MIT
     brorand 1.1.0 MIT
     browserify-aes 1.2.0 MIT
     browserify-rsa 4.1.0 MIT
+    browserify-sign/node_modules/hash-base 3.0.4 MIT
+    browserify-sign/node_modules/isarray 1.0.0 MIT
+    browserify-sign/node_modules/readable-stream 2.3.8 MIT
+    browserify-sign/node_modules/readable-stream/node_modules/safe-buffer 5.1.2 MIT
+    browserify-sign/node_modules/string_decoder 1.1.1 MIT
+    browserify-sign/node_modules/string_decoder/node_modules/safe-buffer 5.1.2 MIT
     browserslist 4.23.0 MIT
     buffer-xor 1.0.3 MIT
     callsites 3.1.0 MIT
@@ -683,19 +690,18 @@ MIT licenses
     combined-stream 1.0.8 MIT
     component-event 0.2.1 MIT
     concat-map 0.0.1 MIT
-    convert-source-map 1.9.0 MIT
     convert-source-map 2.0.0 MIT
     core-js 2.6.12 MIT
     cosmiconfig 6.0.0 MIT
+    core-util-is 1.0.3 MIT
     create-hash 1.2.0 MIT
     create-hmac 1.1.7 MIT
     crelt 1.0.6 MIT
     css-to-react-native 2.3.2 MIT
-    csstype 2.6.21 MIT
+    css-to-react-native/node_modules/postcss-value-parser 3.3.1 MIT
     csstype 3.1.3 MIT
     dayjs 1.11.10 MIT
-    debug 4.3.1 MIT
-    debug 4.3.4 MIT
+    debug 4.3.6 MIT
     decamelize 4.0.0 MIT
     decode-uri-component 0.4.1 MIT
     delayed-stream 1.0.0 MIT
@@ -708,9 +714,21 @@ MIT licenses
     domify 1.4.2 MIT
     dva 2.4.1 MIT
     dva-core 1.4.0 MIT
-    elliptic 6.5.4 MIT
-    emoji-regex 8.0.0 MIT
+    dva-core/node_modules/@babel/runtime 7.0.0-beta.46 MIT
+    dva-core/node_modules/redux 3.7.2 MIT
+    dva-core/node_modules/regenerator-runtime 0.11.1 MIT
+    dva/node_modules/@babel/runtime 7.0.0-beta.46 MIT
+    dva/node_modules/@types/react-router-dom 4.3.5 MIT
+    dva/node_modules/react-redux 5.0.7 MIT
+    dva/node_modules/react-router 4.3.1 MIT
+    dva/node_modules/react-router-dom 4.3.1 MIT
+    dva/node_modules/react-router-redux 5.0.0-alpha.9 MIT
+    dva/node_modules/redux 3.7.2 MIT
+    dva/node_modules/regenerator-runtime 0.11.1 MIT
+    elliptic 6.5.7 MIT
+    elliptic/node_modules/bn.js 4.12.0 MIT
     encoding 0.1.13 MIT
+    encoding/node_modules/iconv-lite 0.6.3 MIT
     error-ex 1.3.2 MIT
     escalade 3.1.2 MIT
     escape-string-regexp 1.0.5 MIT
@@ -723,7 +741,7 @@ MIT licenses
     find-up 5.0.0 MIT
     flatten 1.0.3 MIT
     focus-trap 7.5.4 MIT
-    follow-redirects 1.15.5 MIT
+    follow-redirects 1.15.6 MIT
     form-data 4.0.0 MIT
     fsevents 2.3.3 MIT
     function-bind 1.1.2 MIT
@@ -759,7 +777,6 @@ MIT licenses
     jquery 3.7.1 MIT
     js-tokens 4.0.0 MIT
     js-tokens 4.0.0 MIT
-    js-yaml 4.0.0 MIT
     jsesc 2.5.2 MIT
     json-parse-even-better-errors 2.3.1 MIT
     json5 2.2.3 MIT
@@ -787,7 +804,6 @@ MIT licenses
     mocha 8.4.0 MIT
     moment 2.30.1 MIT
     ms 2.1.2 MIT
-    ms 2.1.3 MIT
     nanoid 3.1.31 MIT
     node-fetch 2.6.7 MIT
     node-releases 2.0.14 MIT
@@ -798,7 +814,9 @@ MIT licenses
     omit.js 2.0.2 MIT
     p-limit 3.1.0 MIT
     p-locate 5.0.0 MIT
+    org.checkerframework:checker-qual 3.37.0 MIT
     parent-module 1.0.1 MIT
+    parse-asn1/node_modules/hash-base 3.0.4 MIT
     parse-json 5.2.0 MIT
     path-exists 4.0.0 MIT
     path-intersection 2.2.1 MIT
@@ -811,6 +829,7 @@ MIT licenses
     postcss-value-parser 3.3.1 MIT
     preact 10.19.3 MIT
     process 0.11.10 MIT
+    process-nextick-args 2.0.1 MIT
     prop-types 15.8.1 MIT
     prop-types 15.8.1 MIT
     proxy-from-env 1.1.0 MIT
@@ -820,12 +839,10 @@ MIT licenses
     react-dom 16.14.0 MIT
     react-is 16.13.1 MIT
     react-is 16.13.1 MIT
-    react-is 18.2.0 MIT
     react-lifecycles-compat 3.0.4 MIT
     react-loading-skeleton 2.2.0 MIT
-    react-redux 5.0.7 MIT
     react-redux 8.1.3 MIT
-    react-router 4.3.1 MIT
+    react-redux/node_modules/react-is 18.2.0 MIT
     react-router 5.3.4 MIT
     react-router-dom 4.3.1 MIT
     react-router-dom 5.3.4 MIT
@@ -837,7 +854,6 @@ MIT licenses
     redux 5.0.1 MIT
     redux-saga 0.16.2 MIT
     redux-thunk 3.1.0 MIT
-    regenerator-runtime 0.11.1 MIT
     regenerator-runtime 0.14.1 MIT
     require-directory 2.1.1 MIT
     resize-observer-polyfill 1.5.1 MIT
@@ -929,7 +945,6 @@ Indiana University Extreme! Lab Software License
 ========================================================================
 
     io.github.x-stream:mxparser 1.2.2 Indiana University Extreme! Lab Software License
-
 ========================================================================
 0BSD licenses
 ========================================================================
