@@ -18,21 +18,26 @@ package org.apache.seata.discovery.registry.zk;
 
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
+import org.apache.curator.framework.CuratorFramework;
+import org.apache.curator.framework.recipes.cache.ChildData;
+import org.apache.curator.framework.recipes.cache.CuratorCacheListener;
+import org.apache.curator.test.TestingServer;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.config.exception.ConfigNotFoundException;
-import org.I0Itec.zkclient.IZkChildListener;
-import org.I0Itec.zkclient.ZkClient;
-import org.apache.curator.test.TestingServer;
+import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.data.Stat;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
-
 
 public class ZookeeperRegisterServiceImplTest {
     protected static TestingServer server = null;
@@ -60,8 +65,14 @@ public class ZookeeperRegisterServiceImplTest {
 
     @Test
     public void buildZkTest() {
-        ZkClient client = service.buildZkClient("127.0.0.1:2181", 5000, 5000);
-        Assertions.assertTrue(client.exists("/zookeeper"));
+
+        CuratorFramework client = service.buildZkClient("127.0.0.1:2181", 5000, 5000);
+        try {
+            Stat stat = client.checkExists().forPath("/zookeeper");
+            Assertions.assertTrue(stat!=null);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test
@@ -79,7 +90,13 @@ public class ZookeeperRegisterServiceImplTest {
 
         final List<String> data = new ArrayList<>();
         final CountDownLatch latch = new CountDownLatch(1);
-        IZkChildListener listener = (s, list) -> {
+        CuratorCacheListener listener = (CuratorCacheListener.Type type, ChildData oldData, ChildData newdata) -> {
+            List<String> list;
+            try {
+                list =service.getZkClient().getChildren().forPath(newdata.getPath());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
             data.clear();
             data.addAll(list);
             latch.countDown();
@@ -87,11 +104,19 @@ public class ZookeeperRegisterServiceImplTest {
         service.subscribe("default", listener);
         final CountDownLatch latch2 = new CountDownLatch(1);
         final List<String> data2 = new ArrayList<>();
-        IZkChildListener listener2 = (s, list) -> {
+
+        CuratorCacheListener listener2 = (CuratorCacheListener.Type type, ChildData oldData, ChildData newdata) -> {
+            List<String> list;
+            try {
+                list =service.getZkClient().getChildren().forPath(newdata.getPath());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
             data2.clear();
             data2.addAll(list);
             latch2.countDown();
         };
+        
         service.subscribe("default", listener2);
 
         service.unregister(new InetSocketAddress(NetUtil.getLocalAddress(), 33333));
@@ -106,9 +131,9 @@ public class ZookeeperRegisterServiceImplTest {
     public void testLookUp() throws Exception {
         ZookeeperRegisterServiceImpl zookeeperRegisterService = ZookeeperRegisterServiceImpl.getInstance();
 
-        ZkClient client = service.buildZkClient("127.0.0.1:2181", 5000, 5000);
-        client.createPersistent("/registry/zk/cluster");
-        client.createEphemeral("/registry/zk/cluster/127.0.0.1:8091");
+        CuratorFramework client = service.buildZkClient("127.0.0.1:2181", 5000, 5000);
+        client.create().withMode(CreateMode.PERSISTENT).forPath("/registry/zk/cluster");
+        client.create().withMode(CreateMode.EPHEMERAL).forPath("/registry/zk/cluster/127.0.0.1:8091");
 
         Field field = ZookeeperRegisterServiceImpl.class.getDeclaredField("zkClient");
         field.setAccessible(true);
