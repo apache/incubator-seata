@@ -61,6 +61,11 @@ class ConfigOperationExecuteTest {
     @AfterAll
     public static void destroy() {
         RaftConfigServerManager.destroy();
+        System.clearProperty("server.raft.serverAddr");
+        System.clearProperty("config.type");
+        System.clearProperty("registry.preferredNetworks");
+        System.clearProperty("config.raft.db.dir");
+        System.clearProperty("config.raft.db.destroyOnShutdown");
     }
 
     @Test

@@ -16,7 +16,6 @@
  */
 package org.apache.seata.server.cluster.raft.execute.config;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 

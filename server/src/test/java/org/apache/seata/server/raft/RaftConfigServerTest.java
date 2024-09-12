@@ -48,6 +48,10 @@ public class RaftConfigServerTest {
     public void destroy() {
         System.setProperty("server.raftPort", "0");
         System.setProperty(ConfigurationKeys.SERVER_RAFT_SERVER_ADDR, "");
+        System.clearProperty("config.type");
+        System.clearProperty("registry.preferredNetworks");
+        System.clearProperty("config.raft.db.dir");
+        System.clearProperty("config.raft.db.destroyOnShutdown");
         ConfigurationCache.clear();
         RaftConfigServerManager.destroy();
     }
