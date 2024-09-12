@@ -62,9 +62,9 @@ public enum RegistryType {
      */
     Custom,
     /**
-     * NamingServer registry type
+     * Seata namingServer registry type
      */
-    NamingServer;
+    Seata;
 
     /**
      * Gets type.

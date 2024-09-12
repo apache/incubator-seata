@@ -398,7 +398,7 @@ Apache-2.0 licenses
     io.prometheus:simpleclient_tracer_common 0.15.0 Apache-2.0
     io.prometheus:simpleclient_tracer_otel 0.15.0 Apache-2.0
     io.prometheus:simpleclient_tracer_otel_agent 0.15.0 Apache-2.0
-    io.seata:seata-all 2.1.0-SNAPSHOT Apache-2.0
+    io.seata:seata-all 2.2.0-SNAPSHOT Apache-2.0
     javax.inject:javax.inject 1 Apache-2.0
     joda-time:joda-time 2.3 Apache-2.0
     net.bytebuddy:byte-buddy-agent 1.10.22 Apache-2.0

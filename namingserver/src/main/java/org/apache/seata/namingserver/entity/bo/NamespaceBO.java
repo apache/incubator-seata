@@ -19,6 +19,7 @@ package org.apache.seata.namingserver.entity.bo;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.apache.seata.common.metadata.Cluster;
@@ -56,7 +57,11 @@ public class NamespaceBO {
     }
 
     public void removeOldCluster(String clusterName) {
-        clusterMap.keySet().forEach(currentClusterName -> {
+        Set<String> clusterSet = clusterMap.keySet();
+        if (clusterSet.size() <= 1) {
+            return;
+        }
+        clusterSet.forEach(currentClusterName -> {
             if (!StringUtils.equals(currentClusterName, clusterName)) {
                 clusterMap.remove(currentClusterName);
             }

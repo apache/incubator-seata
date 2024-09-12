@@ -299,10 +299,7 @@ public class SessionHolder {
     //region get group mapping manager
     public static VGroupMappingStoreManager getRootVGroupMappingManager() {
         if (ROOT_VGROUP_MAPPING_MANAGER == null) {
-            init();
-            if (ROOT_VGROUP_MAPPING_MANAGER == null) {
-                throw new ShouldNeverHappenException("vGroupMappingManager is NOT init!");
-            }
+            throw new ShouldNeverHappenException("vGroupMappingManager is NOT init!");
         }
         return ROOT_VGROUP_MAPPING_MANAGER;
     }

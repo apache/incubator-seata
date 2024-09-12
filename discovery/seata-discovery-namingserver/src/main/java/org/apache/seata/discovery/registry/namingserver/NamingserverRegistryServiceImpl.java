@@ -73,7 +73,7 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
     private static final String NAMING_SERVICE_URL_KEY = "server-addr";
     private static final String FILE_ROOT_REGISTRY = "registry";
     private static final String FILE_CONFIG_SPLIT_CHAR = ".";
-    private static final String REGISTRY_TYPE = "namingserver";
+    private static final String REGISTRY_TYPE = "seata";
     private static final String HTTP_PREFIX = "http://";
     private static final String TIME_OUT_KEY = "timeout";
 
@@ -362,7 +362,6 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
                 throw new NamingRegistryException("cannot lookup server list in vgroup: " + vGroup);
             }
             String jsonResponse = EntityUtils.toString(response.getEntity(), "UTF-8");
-            response.close();
             // jsonResponse -> MetaResponse
             MetaResponse metaResponse = OBJECT_MAPPER.readValue(jsonResponse, new TypeReference<MetaResponse>() {
             });
@@ -375,6 +374,7 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
                 term = metaResponse.getTerm();
             }
             VGROUP_ADDRESS_MAP.put(vGroup, newAddressList);
+            removeOfflineAddressesIfNecessary(vGroup,vGroup,newAddressList);
         } catch (IOException e) {
             LOGGER.error(e.getMessage());
             throw new RemoteException();
