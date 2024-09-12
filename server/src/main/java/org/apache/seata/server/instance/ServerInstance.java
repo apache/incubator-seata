@@ -61,8 +61,8 @@ public class ServerInstance {
     private static final Logger LOGGER = LoggerFactory.getLogger(Server.class);
 
     public void serverInstanceInit() {
-        VGroupMappingStoreManager vGroupMappingStoreManager = SessionHolder.getRootVGroupMappingManager();
         if (StringUtils.equals(registryProperties.getType(), NAMING_SERVER)) {
+            VGroupMappingStoreManager vGroupMappingStoreManager = SessionHolder.getRootVGroupMappingManager();
             EXECUTOR_SERVICE = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("scheduledExcuter", 1, true));
             ConfigurableEnvironment environment = (ConfigurableEnvironment) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT);
 
