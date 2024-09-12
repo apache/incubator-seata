@@ -638,6 +638,9 @@ MIT licenses
     @types/react-router-redux 5.0.27 MIT
     @types/scheduler 0.16.8 MIT
     @types/use-sync-external-store 0.0.3 MIT
+    ansi-colors 4.1.1 MIT
+    ansi-regex 3.0.1 MIT
+    ansi-regex 5.0.1 MIT
     ansi-styles 3.2.1 MIT
     argparse 1.0.10 MIT
     asn1.js 4.10.1 MIT
