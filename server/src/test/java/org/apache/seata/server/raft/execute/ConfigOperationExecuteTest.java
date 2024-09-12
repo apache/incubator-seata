@@ -18,7 +18,9 @@ package org.apache.seata.server.raft.execute;
 
 import javax.annotation.Resource;
 
+import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.util.NetUtil;
+import org.apache.seata.config.ConfigurationCache;
 import org.apache.seata.server.cluster.raft.RaftConfigServerManager;
 import org.apache.seata.server.controller.ClusterController;
 import org.junit.jupiter.api.AfterAll;
@@ -27,7 +29,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
-
 
 @SpringBootTest
 class ConfigOperationExecuteTest {
@@ -40,9 +41,10 @@ class ConfigOperationExecuteTest {
     @BeforeAll
     public static void setUp(ApplicationContext context) {
         RaftConfigServerManager.destroy();
-        System.setProperty("server.raft.serverAddr", NetUtil.getLocalIp() + ":9291");
+        System.setProperty(ConfigurationKeys.SERVER_RAFT_SERVER_ADDR, NetUtil.getLocalIp() + ":9191");
         System.setProperty("config.type", "raft");
         System.setProperty("registry.preferredNetworks", "*");
+        System.setProperty("config.raft.db.type", "rocksdb");
         System.setProperty("config.raft.db.dir", "configStore");
         System.setProperty("config.raft.db.destroyOnShutdown", "true");
         RaftConfigServerManager.init();
@@ -51,10 +53,12 @@ class ConfigOperationExecuteTest {
 
     @AfterAll
     public static void destroy() {
-        System.clearProperty("server.raft.serverAddr");
+        RaftConfigServerManager.destroy();
+        ConfigurationCache.clear();
+        System.setProperty(ConfigurationKeys.SERVER_RAFT_SERVER_ADDR,"");
+        Assertions.assertNull(RaftConfigServerManager.getRaftServer());
         System.clearProperty("config.type");
         System.clearProperty("registry.preferredNetworks");
-        RaftConfigServerManager.destroy();
         System.clearProperty("config.raft.db.dir");
     }
 
