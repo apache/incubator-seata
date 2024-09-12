@@ -49,6 +49,8 @@ import org.apache.seata.config.exception.ConfigNotFoundException;
 import org.apache.seata.discovery.registry.RegistryService;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
+
+import com.google.common.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
