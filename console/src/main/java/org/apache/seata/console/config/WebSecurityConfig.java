@@ -35,6 +35,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 /**
  * Spring security config
@@ -101,7 +102,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             // custom token authorize exception handler
             .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
             // since we use jwt, session is not necessary
-            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).disable();
+            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).disable()
+            .csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
             // don't disable csrf, jwt may be implemented based on cookies
         http.addFilterBefore(new JwtAuthenticationTokenFilter(tokenProvider),
             UsernamePasswordAuthenticationFilter.class);
