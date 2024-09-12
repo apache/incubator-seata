@@ -16,7 +16,6 @@
  */
 package org.apache.seata.discovery.registry.zk;
 
-import com.google.common.annotations.VisibleForTesting;
 import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
