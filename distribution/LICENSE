@@ -418,6 +418,10 @@ Apache-2.0 licenses
     org.springframework:spring-web 5.3.39 Apache-2.0
     org.springframework:spring-webmvc 5.3.39 Apache-2.0
     org.apache.commons:commons-math 2.2 Apache-2.0
+    org.apache.curator:curator-recipes:jar 5.1.0 Apache-2.0
+    org.apache.curator:curator-framework:jar 5.1.0 Apache-2.0
+    org.apache.curator:curator-client:jar 5.1.0 Apache-2.0
+    org.apache.curator:curator-test:jar 5.1.0 Apache-2.0
 
 ========================================================================
 BSD-2-Clause licenses
