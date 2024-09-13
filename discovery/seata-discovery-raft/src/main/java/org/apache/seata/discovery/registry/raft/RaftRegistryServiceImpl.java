@@ -36,6 +36,9 @@ import java.util.stream.Stream;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.http.client.CookieStore;
+import org.apache.http.cookie.Cookie;
+import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.exception.AuthenticationFailedException;
 import org.apache.seata.common.exception.RetryableException;
@@ -77,6 +80,9 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
 
     private static final String AUTHORIZATION_HEADER = "Authorization";
 
+    private static final String XSRF_HEADER = "X-Xsrf-Token";
+
+
     private static final String TOKEN_VALID_TIME_MS_KEY = "tokenValidityInMilliseconds";
 
     private static final long TOKEN_EXPIRE_TIME_IN_MILLISECONDS;
@@ -86,6 +92,8 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
     private static final String PASSWORD;
 
     public static String jwtToken;
+
+    public static String xsrfToken;
 
     private static long tokenTimeStamp = -1;
 
@@ -108,6 +116,8 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
     private static volatile ThreadPoolExecutor REFRESH_METADATA_EXECUTOR;
 
     private static final AtomicBoolean CLOSED = new AtomicBoolean(false);
+
+    private final CookieStore cookieStore = new BasicCookieStore();
 
     /**
      * Service node health check
@@ -159,7 +169,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
 
     }
 
-    protected static void startQueryMetadata() {
+    protected void startQueryMetadata() {
         if (REFRESH_METADATA_EXECUTOR == null) {
             synchronized (INIT_ADDRESSES) {
                 if (REFRESH_METADATA_EXECUTOR == null) {
@@ -298,7 +308,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
         return RegistryService.super.aliveLookup(transactionServiceGroup);
     }
 
-    private static boolean watch() throws RetryableException {
+    private boolean watch() throws RetryableException {
         Map<String, String> header = new HashMap<>();
         header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
         Map<String, String> param = new HashMap<>();
@@ -312,6 +322,9 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
             }
             if (StringUtils.isNotBlank(jwtToken)) {
                 header.put(AUTHORIZATION_HEADER, jwtToken);
+            }
+            if (StringUtils.isNotBlank(xsrfToken)) {
+                header.put(XSRF_HEADER, xsrfToken);
             }
             try (CloseableHttpResponse response =
                      HttpClientUtil.doPost("http://" + tcAddress + "/metadata/v1/watch", param, header, 30000)) {
@@ -352,7 +365,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
         }
     }
 
-    private static void acquireClusterMetaDataByClusterName(String clusterName) {
+    private void acquireClusterMetaDataByClusterName(String clusterName) {
         try {
             acquireClusterMetaData(clusterName, "");
         } catch (RetryableException e) {
@@ -360,7 +373,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
         }
     }
 
-    private static void acquireClusterMetaData(String clusterName, String group) throws RetryableException {
+    private void acquireClusterMetaData(String clusterName, String group) throws RetryableException {
         String tcAddress = queryHttpAddress(clusterName, group);
         Map<String, String> header = new HashMap<>();
         header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
@@ -370,12 +383,15 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
         if (StringUtils.isNotBlank(jwtToken)) {
             header.put(AUTHORIZATION_HEADER, jwtToken);
         }
+        if (StringUtils.isNotBlank(xsrfToken)) {
+            header.put(XSRF_HEADER, xsrfToken);
+        }
         if (StringUtils.isNotBlank(tcAddress)) {
             Map<String, String> param = new HashMap<>();
             param.put("group", group);
             String response = null;
             try (CloseableHttpResponse httpResponse =
-                     HttpClientUtil.doGet("http://" + tcAddress + "/metadata/v1/cluster", param, header, 1000)) {
+                     HttpClientUtil.doGet("http://" + tcAddress + "/metadata/v1/cluster", param, header, 1000, cookieStore)) {
                 if (httpResponse != null) {
                     if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                         response = EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
@@ -384,6 +400,15 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                             throw new RetryableException("Authentication failed!");
                         } else {
                             throw new AuthenticationFailedException("Authentication failed! you should configure the correct username and password.");
+                        }
+                    }
+                }
+                List<Cookie> list = cookieStore.getCookies();
+                if (CollectionUtils.isNotEmpty(list)) {
+                    for (Cookie cookie : list) {
+                        if (cookie.getName().equalsIgnoreCase("XSRF-TOKEN")) {
+                            xsrfToken = cookie.getValue();
+                            break;
                         }
                     }
                 }
@@ -402,7 +427,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
         }
     }
 
-    private static void refreshToken(String tcAddress) throws RetryableException {
+    private void refreshToken(String tcAddress) throws RetryableException {
         // if username and password is not in config , return
         if (StringUtils.isBlank(USERNAME) || StringUtils.isBlank(PASSWORD)) {
             return;
@@ -416,7 +441,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
         String response = null;
         tokenTimeStamp = System.currentTimeMillis();
         try (CloseableHttpResponse httpResponse =
-                 HttpClientUtil.doPost("http://" + tcAddress + "/api/v1/auth/login", param, header, 1000)) {
+                 HttpClientUtil.doPost("http://" + tcAddress + "/api/v1/auth/login", param, header, 1000, cookieStore)) {
             if (httpResponse != null) {
                 if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                     response = EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
