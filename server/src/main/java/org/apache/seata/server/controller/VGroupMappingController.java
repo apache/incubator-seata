@@ -73,8 +73,6 @@ public class VGroupMappingController {
             result.setCode("500");
             result.setMessage("add vGroup failed!");
         }
-        // push the newest mapping relationship
-        vGroupMappingStoreManager.notifyMapping();
         return result;
     }
 
@@ -93,8 +91,6 @@ public class VGroupMappingController {
             result.setCode("500");
             result.setMessage("remove vGroup failed!");
         }
-        // push the newest mapping relationship
-        vGroupMappingStoreManager.notifyMapping();
         return result;
     }
 

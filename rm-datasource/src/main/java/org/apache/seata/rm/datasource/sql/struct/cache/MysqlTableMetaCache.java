@@ -48,11 +48,11 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
     protected String getCacheKey(Connection connection, String tableName, String resourceId) {
         StringBuilder cacheKey = new StringBuilder(resourceId);
         cacheKey.append(".");
-        //remove single quote and separate it to catalogName and tableName
-        String[] tableNameWithCatalog = tableName.replace("`", "").split("\\.");
-        String defaultTableName = tableNameWithCatalog.length > 1 ? tableNameWithCatalog[1] : tableNameWithCatalog[0];
+        //original: remove single quote and separate it to catalogName and tableName
+        //now: Use the original table name to avoid cache errors of tables with the same name across databases
+        String defaultTableName = ColumnUtils.delEscape(tableName, JdbcConstants.MYSQL);
 
-        DatabaseMetaData databaseMetaData = null;
+        DatabaseMetaData databaseMetaData;
         try {
             databaseMetaData = connection.getMetaData();
         } catch (SQLException e) {
@@ -80,7 +80,7 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
         String sql = "SELECT * FROM " + ColumnUtils.addEscape(tableName, JdbcConstants.MYSQL) + " LIMIT 1";
         try (Statement stmt = connection.createStatement();
             ResultSet rs = stmt.executeQuery(sql)) {
-            return resultSetMetaToSchema(rs.getMetaData(), connection.getMetaData());
+            return resultSetMetaToSchema(rs.getMetaData(), connection.getMetaData(), tableName);
         } catch (SQLException sqlEx) {
             throw sqlEx;
         } catch (Exception e) {
@@ -88,7 +88,7 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
         }
     }
 
-    protected TableMeta resultSetMetaToSchema(ResultSetMetaData rsmd, DatabaseMetaData dbmd)
+    protected TableMeta resultSetMetaToSchema(ResultSetMetaData rsmd, DatabaseMetaData dbmd, String originalTableName)
         throws SQLException {
         //always "" for mysql
         String schemaName = rsmd.getSchemaName(1);
@@ -109,6 +109,10 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
         //always true and nothing to do with escape characters for mysql.
         // May be not consistent with lower_case_table_names
         tm.setCaseSensitive(true);
+
+        // Save the original table name information for active cache refresh
+        // to avoid refresh failure caused by missing catalog information
+        tm.setOriginalTableName(originalTableName);
 
         /*
          * here has two different type to get the data

@@ -16,6 +16,7 @@
  */
 package io.seata.core.context;
 
+
 import java.util.Map;
 
 import javax.annotation.Nonnull;
@@ -42,7 +43,11 @@ public class RootContext {
     public static final String KEY_BRANCH_TYPE = "TX_BRANCH_TYPE";
 
     private static BranchType convertIoSeata(org.apache.seata.core.model.BranchType branchType) {
-        return BranchType.get(branchType.name());
+        if (branchType == null) {
+            return null;
+        } else {
+            return BranchType.get(branchType.name());
+        }
     }
 
     /**

@@ -27,6 +27,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 class InstanceTest {
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
     void toJsonString() throws JsonProcessingException {
@@ -39,7 +40,6 @@ class InstanceTest {
         instance.setMetadata(map);
         instance.setControl(new Node.Endpoint("1.1.1.1",888));
         instance.setTransaction(new Node.Endpoint("2.2.2.2",999));
-        System.out.println(instance.toJsonString());
-        assertEquals(instance.toJsonString(),objectMapper.writeValueAsString(instance));
+        assertEquals(instance.toJsonString(objectMapper),objectMapper.writeValueAsString(instance));
     }
 }

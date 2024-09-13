@@ -162,7 +162,7 @@
 
     <profiles>
         <profile>
-            <id>release-seata-namingserver</id>
+            <id>release-seata</id>
             <properties>
                 <dependencies.copy.skip>false</dependencies.copy.skip>
             </properties>
