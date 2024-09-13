@@ -218,13 +218,6 @@
                 <maven.git-commit-id.skip>false</maven.git-commit-id.skip>
             </properties>
         </profile>
-        <!-- profile: arrch64 -->
-        <profile>
-            <id>arrch64</id>
-            <properties>
-                <os.detected.classifier>osx-x86_64</os.detected.classifier>
-            </properties>
-        </profile>
         <!-- profile: checkstyle -->
         <profile>
             <id>checkstyle</id>
