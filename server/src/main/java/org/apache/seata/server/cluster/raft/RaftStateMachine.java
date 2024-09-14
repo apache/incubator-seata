@@ -295,8 +295,12 @@ public class RaftStateMachine extends StateMachineAdapter {
     }
 
     private boolean contains(Node node, Collection<PeerId> list) {
+        // This indicates that the node is of a lower version.
+        // When scaling up or down on a higher version
+        // you need to ensure that the cluster is consistent first
+        // otherwise, the lower version nodes may be removed.
         if (node.getInternal() == null) {
-            return false;
+            return true;
         }
         PeerId nodePeer = new PeerId(node.getInternal().getHost(), node.getInternal().getPort());
         return list.contains(nodePeer);
