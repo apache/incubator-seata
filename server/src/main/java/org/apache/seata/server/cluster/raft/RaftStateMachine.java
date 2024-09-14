@@ -266,21 +266,21 @@ public class RaftStateMachine extends StateMachineAdapter {
         LOGGER.info("groupId: {}, onConfigurationCommitted: {}.", group, conf);
         RouteTable.getInstance().updateConfiguration(group, conf);
         // After a member change, the metadata needs to be synchronized again.
-        initSync.compareAndSet(true,false);
+        initSync.compareAndSet(true, false);
         if (isLeader()) {
             changePeers(conf);
         }
     }
 
-    private void changePeers(Configuration conf){
+    private void changePeers(Configuration conf) {
         lock.lock();
         try {
             List<PeerId> newFollowers = conf.getPeers();
             Set<PeerId> newLearners = conf.getLearners();
             List<Node> currentFollowers = raftClusterMetadata.getFollowers();
             if (CollectionUtils.isNotEmpty(newFollowers)) {
-                raftClusterMetadata.setFollowers(currentFollowers.stream()
-                    .filter(node -> contains(node, newFollowers)).collect(Collectors.toList()));
+                raftClusterMetadata.setFollowers(currentFollowers.stream().filter(node -> contains(node, newFollowers))
+                    .collect(Collectors.toList()));
             }
             if (CollectionUtils.isNotEmpty(newLearners)) {
                 raftClusterMetadata.setLearner(raftClusterMetadata.getLearner().stream()
