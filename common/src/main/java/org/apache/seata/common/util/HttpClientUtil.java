@@ -20,7 +20,6 @@ package org.apache.seata.common.util;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.CookieStore;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -30,7 +29,6 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicNameValuePair;
@@ -54,7 +52,7 @@ public class HttpClientUtil {
     private static final Map<Integer/*timeout*/, CloseableHttpClient> HTTP_CLIENT_MAP = new ConcurrentHashMap<>();
 
     private static final PoolingHttpClientConnectionManager POOLING_HTTP_CLIENT_CONNECTION_MANAGER =
-            new PoolingHttpClientConnectionManager();
+        new PoolingHttpClientConnectionManager();
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     static {
@@ -74,13 +72,7 @@ public class HttpClientUtil {
 
     // post request
     public static CloseableHttpResponse doPost(String url, Map<String, String> params, Map<String, String> header,
-                                               int timeout) throws IOException {
-        return doPost(url, params, header, timeout, null);
-    }
-
-    // post request
-    public static CloseableHttpResponse doPost(String url, Map<String, String> params, Map<String, String> header,
-                                               int timeout, CookieStore cookieStore ) throws IOException {
+        int timeout) throws IOException {
         try {
             URIBuilder builder = new URIBuilder(url);
             URI uri = builder.build();
@@ -105,16 +97,11 @@ public class HttpClientUtil {
                     httpPost.setEntity(stringEntity);
                 }
             }
-            CloseableHttpClient client = HTTP_CLIENT_MAP.computeIfAbsent(timeout, k -> {
-                HttpClientBuilder httpClientBuilder =
-                    HttpClients.custom().setConnectionManager(POOLING_HTTP_CLIENT_CONNECTION_MANAGER)
-                        .setDefaultRequestConfig(RequestConfig.custom().setConnectionRequestTimeout(timeout)
-                            .setSocketTimeout(timeout).setConnectTimeout(timeout).build());
-                if (cookieStore != null) {
-                    httpClientBuilder.setDefaultCookieStore(cookieStore);
-                }
-                return httpClientBuilder.build();
-            });
+            CloseableHttpClient client = HTTP_CLIENT_MAP.computeIfAbsent(timeout,
+                k -> HttpClients.custom().setConnectionManager(POOLING_HTTP_CLIENT_CONNECTION_MANAGER)
+                    .setDefaultRequestConfig(RequestConfig.custom().setConnectionRequestTimeout(timeout)
+                        .setSocketTimeout(timeout).setConnectTimeout(timeout).build())
+                    .build());
             return client.execute(httpPost);
         } catch (URISyntaxException | ClientProtocolException e) {
             LOGGER.error(e.getMessage(), e);
@@ -124,7 +111,7 @@ public class HttpClientUtil {
 
     // post request
     public static CloseableHttpResponse doPost(String url, String body, Map<String, String> header,
-                                               int timeout) throws IOException {
+        int timeout) throws IOException {
         try {
             URIBuilder builder = new URIBuilder(url);
             URI uri = builder.build();
@@ -156,12 +143,6 @@ public class HttpClientUtil {
     // get request
     public static CloseableHttpResponse doGet(String url, Map<String, String> param, Map<String, String> header,
         int timeout) throws IOException {
-        return doGet(url, param, header, timeout, null);
-    }
-
-    // get request
-    public static CloseableHttpResponse doGet(String url, Map<String, String> param, Map<String, String> header,
-                                              int timeout, CookieStore cookieStore) throws IOException {
         try {
             URIBuilder builder = new URIBuilder(url);
             if (param != null) {
@@ -174,16 +155,11 @@ public class HttpClientUtil {
             if (header != null) {
                 header.forEach(httpGet::addHeader);
             }
-            CloseableHttpClient client = HTTP_CLIENT_MAP.computeIfAbsent(timeout, k -> {
-                HttpClientBuilder httpClientBuilder =
-                    HttpClients.custom().setConnectionManager(POOLING_HTTP_CLIENT_CONNECTION_MANAGER)
-                        .setDefaultRequestConfig(RequestConfig.custom().setConnectionRequestTimeout(timeout)
-                            .setSocketTimeout(timeout).setConnectTimeout(timeout).build());
-                if (cookieStore != null) {
-                    httpClientBuilder.setDefaultCookieStore(cookieStore);
-                }
-                return httpClientBuilder.build();
-            });
+            CloseableHttpClient client = HTTP_CLIENT_MAP.computeIfAbsent(timeout,
+                k -> HttpClients.custom().setConnectionManager(POOLING_HTTP_CLIENT_CONNECTION_MANAGER)
+                    .setDefaultRequestConfig(RequestConfig.custom().setConnectionRequestTimeout(timeout)
+                        .setSocketTimeout(timeout).setConnectTimeout(timeout).build())
+                    .build());
             return client.execute(httpGet);
         } catch (URISyntaxException | ClientProtocolException e) {
             LOGGER.error(e.getMessage(), e);

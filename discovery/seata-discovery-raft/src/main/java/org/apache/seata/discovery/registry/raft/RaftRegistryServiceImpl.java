@@ -117,8 +117,6 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
 
     private static final AtomicBoolean CLOSED = new AtomicBoolean(false);
 
-    private final CookieStore cookieStore = new BasicCookieStore();
-
     /**
      * Service node health check
      */
@@ -391,7 +389,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
             param.put("group", group);
             String response = null;
             try (CloseableHttpResponse httpResponse =
-                     HttpClientUtil.doGet("http://" + tcAddress + "/metadata/v1/cluster", param, header, 1000, cookieStore)) {
+                     HttpClientUtil.doGet("http://" + tcAddress + "/metadata/v1/cluster", param, header, 1000)) {
                 if (httpResponse != null) {
                     if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                         response = EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
@@ -400,15 +398,6 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                             throw new RetryableException("Authentication failed!");
                         } else {
                             throw new AuthenticationFailedException("Authentication failed! you should configure the correct username and password.");
-                        }
-                    }
-                }
-                List<Cookie> list = cookieStore.getCookies();
-                if (CollectionUtils.isNotEmpty(list)) {
-                    for (Cookie cookie : list) {
-                        if (cookie.getName().equalsIgnoreCase("XSRF-TOKEN")) {
-                            xsrfToken = cookie.getValue();
-                            break;
                         }
                     }
                 }
@@ -441,7 +430,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
         String response = null;
         tokenTimeStamp = System.currentTimeMillis();
         try (CloseableHttpResponse httpResponse =
-                 HttpClientUtil.doPost("http://" + tcAddress + "/api/v1/auth/login", param, header, 1000, cookieStore)) {
+                 HttpClientUtil.doPost("http://" + tcAddress + "/api/v1/auth/login", param, header, 1000)) {
             if (httpResponse != null) {
                 if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                     response = EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
@@ -452,11 +441,32 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                         throw new AuthenticationFailedException("Authentication failed! you should configure the correct username and password.");
                     }
                     jwtToken = jsonNode.get("data").asText();
+                    if(StringUtils.isNotBlank(jwtToken)){
+                        queryCsrfToken(tcAddress);
+                    }
                 } else {
                     //authorized failed,throw exception to kill process
                     throw new AuthenticationFailedException("Authentication failed! you should configure the correct username and password.");
                 }
             }
+        } catch (IOException e) {
+            throw new RetryableException(e.getMessage(), e);
+        }
+    }
+
+    private void queryCsrfToken(String tcAddress) throws RetryableException {
+        Map<String, String> header = new HashMap<>();
+        if (StringUtils.isNotBlank(jwtToken)) {
+            header.put(AUTHORIZATION_HEADER, jwtToken);
+        }
+        try (CloseableHttpResponse httpResponse =
+            HttpClientUtil.doGet("http://" + tcAddress + "/csrf", Collections.emptyMap(), header, 1000)) {
+            if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                String response = EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
+                JsonNode jsonNode = OBJECT_MAPPER.readTree(response);
+                xsrfToken = jsonNode.get("token").asText();
+            }
+            // HTTP status code 404 indicates that the version is lower than 2.2.0 and does not support CSRF.
         } catch (IOException e) {
             throw new RetryableException(e.getMessage(), e);
         }
