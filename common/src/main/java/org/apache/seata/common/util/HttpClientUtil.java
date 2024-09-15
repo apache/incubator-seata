@@ -52,7 +52,7 @@ public class HttpClientUtil {
     private static final Map<Integer/*timeout*/, CloseableHttpClient> HTTP_CLIENT_MAP = new ConcurrentHashMap<>();
 
     private static final PoolingHttpClientConnectionManager POOLING_HTTP_CLIENT_CONNECTION_MANAGER =
-            new PoolingHttpClientConnectionManager();
+        new PoolingHttpClientConnectionManager();
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     static {
@@ -72,7 +72,7 @@ public class HttpClientUtil {
 
     // post request
     public static CloseableHttpResponse doPost(String url, Map<String, String> params, Map<String, String> header,
-                                               int timeout) throws IOException {
+        int timeout) throws IOException {
         try {
             URIBuilder builder = new URIBuilder(url);
             URI uri = builder.build();
@@ -111,7 +111,7 @@ public class HttpClientUtil {
 
     // post request
     public static CloseableHttpResponse doPost(String url, String body, Map<String, String> header,
-                                               int timeout) throws IOException {
+        int timeout) throws IOException {
         try {
             URIBuilder builder = new URIBuilder(url);
             URI uri = builder.build();
@@ -142,7 +142,7 @@ public class HttpClientUtil {
 
     // get request
     public static CloseableHttpResponse doGet(String url, Map<String, String> param, Map<String, String> header,
-                                              int timeout) throws IOException {
+        int timeout) throws IOException {
         try {
             URIBuilder builder = new URIBuilder(url);
             if (param != null) {
