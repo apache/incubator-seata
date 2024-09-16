@@ -872,10 +872,6 @@
                 <artifactId>spring-webmvc</artifactId>
                 <version>${spring-webmvc.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.apache.tomcat.embed</groupId>
-                <artifactId>tomcat-embed-core</artifactId>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 </project>
