@@ -122,7 +122,6 @@ public class Node {
         return Objects.equals(control, node.control) && Objects.equals(transaction, node.transaction);
     }
 
-
     // convert to String
     public String toJsonString(ObjectMapper objectMapper) {
         try {
