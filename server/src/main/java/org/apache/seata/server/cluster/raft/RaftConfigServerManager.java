@@ -183,7 +183,9 @@ public class RaftConfigServerManager {
         RAFT_MODE = false;
         INIT.set(false);
     }
-
+    public static boolean isRaftMode() {
+        return RAFT_MODE;
+    }
     public static RaftConfigServer getRaftServer() {
         return raftServer;
     }

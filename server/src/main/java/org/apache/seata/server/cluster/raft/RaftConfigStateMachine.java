@@ -207,10 +207,16 @@ public class RaftConfigStateMachine extends StateMachineAdapter {
     }
     @Override
     public void onLeaderStart(final long term) {
+        boolean leader = isLeader();
         this.leaderTerm.set(term);
         LOGGER.info("groupId: {}, onLeaderStart: term={}.", group, term);
         this.currentTerm.set(term);
         syncMetadata();
+        if (!leader && RaftConfigServerManager.isRaftMode()) {
+            Configuration conf = RouteTable.getInstance().getConfiguration(group);
+            // A member change might trigger a leader re-election. At this point, it’s necessary to filter out non-existent members and synchronize again.
+            changePeers(conf);
+        }
     }
 
     @Override
@@ -235,28 +241,39 @@ public class RaftConfigStateMachine extends StateMachineAdapter {
     public void onConfigurationCommitted(Configuration conf) {
         LOGGER.info("groupId: {}, onConfigurationCommitted: {}.", group, conf);
         RouteTable.getInstance().updateConfiguration(group, conf);
+        // After a member change, the metadata needs to be synchronized again.
+        initSync.compareAndSet(true, false);
         if (isLeader()) {
-            lock.lock();
-            try {
-                List<PeerId> newFollowers = conf.getPeers();
-                Set<PeerId> newLearners = conf.getLearners();
-                List<Node> currentFollowers = raftClusterMetadata.getFollowers();
-                if (CollectionUtils.isNotEmpty(newFollowers)) {
-                    raftClusterMetadata.setFollowers(currentFollowers.stream()
-                            .filter(node -> contains(node, newFollowers)).collect(Collectors.toList()));
-                }
-                if (CollectionUtils.isNotEmpty(newLearners)) {
-                    raftClusterMetadata.setLearner(raftClusterMetadata.getLearner().stream()
-                            .filter(node -> contains(node, newLearners)).collect(Collectors.toList()));
-                }
-                syncMetadata();
-            } finally {
-                lock.unlock();
+            changePeers(conf);
+        }
+    }
+    private void changePeers(Configuration conf) {
+        lock.lock();
+        try {
+            List<PeerId> newFollowers = conf.getPeers();
+            Set<PeerId> newLearners = conf.getLearners();
+            List<Node> currentFollowers = raftClusterMetadata.getFollowers();
+            if (CollectionUtils.isNotEmpty(newFollowers)) {
+                raftClusterMetadata.setFollowers(currentFollowers.stream().filter(node -> contains(node, newFollowers))
+                        .collect(Collectors.toList()));
             }
+            if (CollectionUtils.isNotEmpty(newLearners)) {
+                raftClusterMetadata.setLearner(raftClusterMetadata.getLearner().stream()
+                        .filter(node -> contains(node, newLearners)).collect(Collectors.toList()));
+            } else {
+                raftClusterMetadata.setLearner(Collections.emptyList());
+            }
+            CompletableFuture.runAsync(this::syncMetadata, RESYNC_METADATA_POOL);
+        } finally {
+            lock.unlock();
         }
     }
 
     private boolean contains(Node node, Collection<PeerId> list) {
+        // This indicates that the node is of a lower version.
+        // When scaling up or down on a higher version
+        // you need to ensure that the cluster is consistent first
+        // otherwise, the lower version nodes may be removed.
         if (node.getInternal() == null) {
             return true;
         }
@@ -343,17 +360,16 @@ public class RaftConfigStateMachine extends StateMachineAdapter {
     }
 
     private void syncCurrentNodeInfo(String group) {
-        if (initSync.get()) {
-            return;
-        }
-        try {
-            RouteTable.getInstance().refreshLeader(RaftConfigServerManager.getCliClientServiceInstance(), group, 1000);
-            PeerId peerId = RouteTable.getInstance().selectLeader(group);
-            if (peerId != null) {
-                syncCurrentNodeInfo(peerId);
+        if (initSync.compareAndSet(false, true)) {
+            try {
+                RouteTable.getInstance().refreshLeader(RaftConfigServerManager.getCliClientServiceInstance(), group, 1000);
+                PeerId peerId = RouteTable.getInstance().selectLeader(group);
+                if (peerId != null) {
+                    syncCurrentNodeInfo(peerId);
+                }
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
             }
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
         }
     }
 
@@ -361,7 +377,7 @@ public class RaftConfigStateMachine extends StateMachineAdapter {
         try {
             // Ensure that the current leader must be version 2.1 or later to synchronize the operation
             Node leader = raftClusterMetadata.getLeader();
-            if (leader != null && StringUtils.isNotBlank(leader.getVersion()) && initSync.compareAndSet(false, true)) {
+            if (leader != null && StringUtils.isNotBlank(leader.getVersion())) {
                 RaftConfigServer raftServer = RaftConfigServerManager.getRaftServer();
                 PeerId cureentPeerId = raftServer.getServerId();
                 Node node = raftClusterMetadata.createNode(XID.getIpAddress() == null ? NetUtil.getLocalIp() : XID.getIpAddress(), XID.getPort() <= 0 ? 8091 : XID.getPort(), cureentPeerId.getPort(),
