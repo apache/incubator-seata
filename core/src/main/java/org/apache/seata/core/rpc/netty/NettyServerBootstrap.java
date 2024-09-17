@@ -36,6 +36,10 @@ import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.XID;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.core.protocol.detector.Http2Detector;
+import org.apache.seata.core.protocol.detector.HttpDetector;
+import org.apache.seata.core.protocol.detector.ProtocolDetector;
+import org.apache.seata.core.protocol.detector.SeataDetector;
 import org.apache.seata.core.rpc.RemotingBootstrap;
 import org.apache.seata.discovery.registry.MultiRegistryFactory;
 import org.apache.seata.discovery.registry.RegistryService;
@@ -162,8 +166,13 @@ public class NettyServerBootstrap implements RemotingBootstrap {
             .childHandler(new ChannelInitializer<SocketChannel>() {
                 @Override
                 public void initChannel(SocketChannel ch) {
+                    ProtocolDetector[] defaultProtocolDetectors = {
+                            new Http2Detector(getChannelHandlers()),
+                            new SeataDetector(getChannelHandlers()),
+                            new HttpDetector()
+                    };
                     ch.pipeline().addLast(new IdleStateHandler(nettyServerConfig.getChannelMaxReadIdleSeconds(), 0, 0))
-                            .addLast(new ProtocolDetectHandler(NettyServerBootstrap.this));
+                            .addLast(new ProtocolDetectHandler(defaultProtocolDetectors));
                 }
             });
 

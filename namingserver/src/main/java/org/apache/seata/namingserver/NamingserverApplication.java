@@ -19,11 +19,14 @@ package org.apache.seata.namingserver;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import java.util.concurrent.CountDownLatch;
+
 @SpringBootApplication
 public class NamingserverApplication {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         SpringApplication.run(NamingserverApplication.class, args);
+        new CountDownLatch(1).await();
     }
 
 }

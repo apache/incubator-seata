@@ -19,8 +19,9 @@ server:
   port: 8081
 
 spring:
-  application:
-    name: seata-namingserver
+  main:
+    web-application-type: none
+
 logging:
   config: classpath:logback-spring.xml
   file:
@@ -28,3 +29,7 @@ logging:
 heartbeat:
   threshold: 90000
   period: 60000
+
+seata:
+  config:
+    type: file
