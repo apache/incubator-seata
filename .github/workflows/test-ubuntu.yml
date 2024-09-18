@@ -72,8 +72,6 @@ jobs:
         java: [ 17, 21 ]
         os: [
           ubuntu,
-          macos,
-          windows, # Skip tests, because too many errors in unit-test.
         ]
         springboot: [
           3.2.0  -D spring-framework.version=6.1.1,
