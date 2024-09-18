@@ -3,6 +3,8 @@ name: "test"
 on:
   push:
     branches: [ test*, "*.*.*" ]
+  pull_request:
+    branches: [ test*, "*.*.*" ]
 jobs:
   # job 1
   test:
