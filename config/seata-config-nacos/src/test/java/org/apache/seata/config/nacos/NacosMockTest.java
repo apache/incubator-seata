@@ -67,7 +67,7 @@ public class NacosMockTest {
     }
 
     @Test
-    @EnabledOnOs({OS.WINDOWS, OS.MAC})
+    @EnabledOnOs(OS.LINUX)
     public void getInstance() {
         Assertions.assertNotNull(configService);
         Assertions.assertNotNull(NacosConfiguration.getInstance());
@@ -75,7 +75,7 @@ public class NacosMockTest {
     }
 
     @Test
-    @EnabledOnOs({OS.WINDOWS, OS.MAC})
+    @EnabledOnOs(OS.LINUX)
     public void getConfig() {
         Configuration configuration = ConfigurationFactory.getInstance();
         String configStrValue = configuration.getConfig(SUB_NACOS_DATAID);
@@ -140,7 +140,7 @@ public class NacosMockTest {
     }
 
     @Test
-    @EnabledOnOs({OS.WINDOWS, OS.MAC})
+    @EnabledOnOs(OS.LINUX)
     public void putConfigIfAbsent() {
         Configuration configuration = ConfigurationFactory.getInstance();
         Assertions.assertThrows(UndeclaredThrowableException.class, () -> {
@@ -149,7 +149,7 @@ public class NacosMockTest {
     }
 
     @Test
-    @EnabledOnOs({OS.WINDOWS, OS.MAC})
+    @EnabledOnOs(OS.LINUX)
     public void removeConfig() {
         Configuration configuration = ConfigurationFactory.getInstance();
         boolean removed = configuration.removeConfig(NACOS_DATAID);
@@ -157,7 +157,7 @@ public class NacosMockTest {
     }
 
     @Test
-    @EnabledOnOs({OS.WINDOWS, OS.MAC})
+    @EnabledOnOs(OS.LINUX)
     public void putConfig() {
         Configuration configuration = ConfigurationFactory.getInstance();
         boolean added = configuration.putConfig(SUB_NACOS_DATAID, "TEST");
@@ -167,7 +167,7 @@ public class NacosMockTest {
     }
 
     @Test
-    @EnabledOnOs({OS.WINDOWS, OS.MAC})
+    @EnabledOnOs(OS.LINUX)
     public void testConfigListener() throws NacosException, InterruptedException {
         Configuration configuration = ConfigurationFactory.getInstance();
         configuration.putConfig(NACOS_DATAID, "KEY=TEST");

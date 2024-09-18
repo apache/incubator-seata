@@ -61,7 +61,7 @@ public class TestConfigFromExtendSPI {
     }
 
     @Test
-    @EnabledOnOs({ OS.WINDOWS, OS.MAC})
+    @EnabledOnOs(OS.LINUX)
     public void testGetConfigProperties() throws Exception {
         Assertions.assertNotNull(configService);
         Configuration configuration = ConfigurationFactory.getInstance();
