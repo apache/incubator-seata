@@ -111,6 +111,7 @@ public class PageUtil {
             case "postgresql":
             case "oceanbase":
             case "dm":
+            case "oscar":
                 return LIMIT_TEMPLATE.replace(SOURCE_SQL_PLACE_HOLD, sourceSql)
                         .replace(LIMIT_PLACE_HOLD, String.valueOf(pageSize))
                         .replace(OFFSET_PLACE_HOLD, String.valueOf((pageNum - 1) * pageSize));
@@ -141,6 +142,7 @@ public class PageUtil {
             case "oceanbase":
             case "oracle":
             case "dm":
+            case "oscar":
                 return sourceSql.replaceAll("(?i)(?<=select)(.*)(?=from)", " count(1) ");
             case "postgresql":
             case "sqlserver":
@@ -183,6 +185,7 @@ public class PageUtil {
             case "postgresql":
             case "sqlserver":
             case "dm":
+            case "oscar":
                 return " and FLOOR(" + timeColumnName + "/1000) >= ? ";
             default:
                 throw new IllegalArgumentException("The DB type :" + dbType + " is not supported yet");
@@ -202,6 +205,7 @@ public class PageUtil {
             case "postgresql":
             case "sqlserver":
             case "dm":
+            case "oscar":
                 return " and FLOOR(" + timeColumnName + "/1000) <= ? ";
             default:
                 throw new IllegalArgumentException("The DB type :" + dbType + " is not supported yet");
