@@ -8,6 +8,7 @@ jobs:
   test:
     name: "test"
     services:
+      if: matrix.os != 'windows'
       redis:
         image: redis:7.2
         ports:
