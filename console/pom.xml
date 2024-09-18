@@ -184,6 +184,7 @@
                         <phase>generate-resources</phase>
                         <configuration>
                             <nodeVersion>v19.5.0</nodeVersion>
+                            <nodeDownloadRoot>https://mirrors.aliyun.com/nodejs-release/</nodeDownloadRoot>
                         </configuration>
                     </execution>
                     <execution>
