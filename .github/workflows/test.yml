@@ -6,9 +6,8 @@ on:
     branches: [ test*, "*.*.*" ]
 jobs:
   # job 1
-  docker:
+  build:
     name: "docker pull"
-    if: matrix.os != 'windows'
     services:
       redis:
         image: redis:7.2
