@@ -4,8 +4,9 @@ on:
   push:
     branches: [ test*, "*.*.*" ]
 jobs:
-  build:
-    name: "build"
+  # job 1
+  test:
+    name: "test"
     services:
       redis:
         image: redis:7.2
@@ -20,10 +21,6 @@ jobs:
           MODE: standalone
           SPRING_SECURITY_ENABLED: false
         options: --health-cmd="curl -f http://localhost:8848/nacos" --health-interval=10s --health-timeout=5s --health-retries=3 --health-start-period=30s
-    runs-on: ubuntu-latest
-  # job 1
-  test:
-    name: "test"
     runs-on: "${{ matrix.os }}-latest"
     strategy:
       fail-fast: false
