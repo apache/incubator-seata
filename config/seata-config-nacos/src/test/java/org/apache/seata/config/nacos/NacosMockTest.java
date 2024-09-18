@@ -39,6 +39,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnJre;
 import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 
 public class NacosMockTest {
     private static ConfigService configService;
@@ -66,7 +67,7 @@ public class NacosMockTest {
     }
 
     @Test
-    @EnabledOnOs(org.junit.jupiter.api.condition.OS.WINDOWS)
+    @EnabledOnOs({OS.WINDOWS, OS.MAC})
     public void getInstance() {
         Assertions.assertNotNull(configService);
         Assertions.assertNotNull(NacosConfiguration.getInstance());
@@ -74,7 +75,7 @@ public class NacosMockTest {
     }
 
     @Test
-    @EnabledOnOs(org.junit.jupiter.api.condition.OS.WINDOWS)
+    @EnabledOnOs({OS.WINDOWS, OS.MAC})
     public void getConfig() {
         Configuration configuration = ConfigurationFactory.getInstance();
         String configStrValue = configuration.getConfig(SUB_NACOS_DATAID);
@@ -139,7 +140,7 @@ public class NacosMockTest {
     }
 
     @Test
-    @EnabledOnOs(org.junit.jupiter.api.condition.OS.WINDOWS)
+    @EnabledOnOs({OS.WINDOWS, OS.MAC})
     public void putConfigIfAbsent() {
         Configuration configuration = ConfigurationFactory.getInstance();
         Assertions.assertThrows(UndeclaredThrowableException.class, () -> {
@@ -148,7 +149,7 @@ public class NacosMockTest {
     }
 
     @Test
-    @EnabledOnOs(org.junit.jupiter.api.condition.OS.WINDOWS)
+    @EnabledOnOs({OS.WINDOWS, OS.MAC})
     public void removeConfig() {
         Configuration configuration = ConfigurationFactory.getInstance();
         boolean removed = configuration.removeConfig(NACOS_DATAID);
@@ -156,7 +157,7 @@ public class NacosMockTest {
     }
 
     @Test
-    @EnabledOnOs(org.junit.jupiter.api.condition.OS.WINDOWS)
+    @EnabledOnOs({OS.WINDOWS, OS.MAC})
     public void putConfig() {
         Configuration configuration = ConfigurationFactory.getInstance();
         boolean added = configuration.putConfig(SUB_NACOS_DATAID, "TEST");
@@ -166,7 +167,7 @@ public class NacosMockTest {
     }
 
     @Test
-    @EnabledOnOs(org.junit.jupiter.api.condition.OS.WINDOWS)
+    @EnabledOnOs({OS.WINDOWS, OS.MAC})
     public void testConfigListener() throws NacosException, InterruptedException {
         Configuration configuration = ConfigurationFactory.getInstance();
         configuration.putConfig(NACOS_DATAID, "KEY=TEST");
