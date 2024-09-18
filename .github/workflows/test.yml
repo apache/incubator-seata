@@ -7,7 +7,6 @@ on:
 jobs:
   # job 1
   build:
-    name: "docker pull"
     services:
       redis:
         image: redis:7.2
