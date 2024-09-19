@@ -59,7 +59,7 @@ public class OscarUndoDeleteExecutor extends AbstractUndoExecutor {
         }
         Row row = beforeImageRows.get(0);
         List<Field> fields = new ArrayList<>(row.nonPrimaryKeys());
-        fields.addAll(getOrderedPkList(beforeImage,row,JdbcConstants.ORACLE));
+        fields.addAll(getOrderedPkList(beforeImage,row,JdbcConstants.OSCAR));
 
         // delete sql undo log before image all field come from table meta, need add escape.
         // see BaseTransactionalExecutor#buildTableRecords

@@ -54,12 +54,12 @@ public class OscarUndoUpdateExecutor extends AbstractUndoExecutor {
         // update sql undo log before image all field come from table meta. need add escape.
         // see BaseTransactionalExecutor#buildTableRecords
         String updateColumns = nonPkFields.stream().map(
-            field -> ColumnUtils.addEscape(field.getName(), JdbcConstants.ORACLE) + " = ?").collect(
+            field -> ColumnUtils.addEscape(field.getName(), JdbcConstants.OSCAR) + " = ?").collect(
             Collectors.joining(", "));
 
-        List<String> pkNameList = getOrderedPkList(beforeImage, row, JdbcConstants.ORACLE).stream().map(
+        List<String> pkNameList = getOrderedPkList(beforeImage, row, JdbcConstants.OSCAR).stream().map(
             e -> e.getName()).collect(Collectors.toList());
-        String whereSql = SqlGenerateUtils.buildWhereConditionByPKs(pkNameList, JdbcConstants.ORACLE);
+        String whereSql = SqlGenerateUtils.buildWhereConditionByPKs(pkNameList, JdbcConstants.OSCAR);
 
         return String.format(UPDATE_SQL_TEMPLATE, sqlUndoLog.getTableName(), updateColumns, whereSql);
     }
