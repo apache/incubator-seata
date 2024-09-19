@@ -25,6 +25,7 @@ jobs:
         options: --health-cmd="curl -f http://localhost:8848/nacos" --health-interval=10s --health-timeout=5s --health-retries=3 --health-start-period=30s
     runs-on: "${{ matrix.os }}-latest"
     strategy:
+      max-parallel: 2
       fail-fast: false
       matrix:
         java: [ 8, 11, 17, 21 ]

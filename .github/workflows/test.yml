@@ -11,6 +11,7 @@ jobs:
     name: "test"
     runs-on: "${{ matrix.os }}-latest"
     strategy:
+      max-parallel: 2
       fail-fast: false
       matrix:
         java: [ 8, 11, 17, 21 ]
