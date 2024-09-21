@@ -139,7 +139,7 @@ public class MySQLInsertExecutorTest {
                 new Object[]{0, "update_time", Types.INTEGER, "INTEGER", 64, 10, 0, 0}
         };
 
-        MockDriver mockDriver = new MockDriver(returnValueColumnLabels, returnValue, columnMetas, indexMetas, null, onUpdateColumnsReturnValue);
+        MockDriver mockDriver = new MockDriver(returnValueColumnLabels, returnValue, columnMetas, indexMetas, null, onUpdateColumnsReturnValue, new Object[][]{});
         DruidDataSource dataSource = new DruidDataSource();
         dataSource.setUrl("jdbc:mock:xxx");
         dataSource.setDriver(mockDriver);
@@ -159,6 +159,7 @@ public class MySQLInsertExecutorTest {
 
     @Test
     public void testBeforeAndAfterImage() throws SQLException {
+        System.out.println(newStatementProxy);
         String sql = "insert into table_insert_executor_test(id, user_id, name, sex) values (1, 1, 'will', 1)";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
         MySQLInsertRecognizer recognizer = new MySQLInsertRecognizer(sql, asts.get(0));

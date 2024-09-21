@@ -43,16 +43,14 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
         StringBuilder cacheKey = new StringBuilder(resourceId);
         cacheKey.append(".");
 
-        //separate it to schemaName and tableName
-        String[] tableNameWithSchema = tableName.split("\\.");
-        String defaultTableName = tableNameWithSchema.length > 1 ? tableNameWithSchema[1] : tableNameWithSchema[0];
-
+        //original: separate it to schemaName and tableName
+        //now: Use the original table name to avoid cache errors of tables with the same name across databases
         //postgres does not implement supportsMixedCaseIdentifiers in DatabaseMetadata
-        if (defaultTableName.contains("\"")) {
-            cacheKey.append(defaultTableName.replace("\"", ""));
+        if (tableName.contains("\"")) {
+            cacheKey.append(tableName.replace("\"", ""));
         } else {
             //postgres default store in lower case
-            cacheKey.append(defaultTableName.toLowerCase());
+            cacheKey.append(tableName.toLowerCase());
         }
 
         return cacheKey.toString();
@@ -73,6 +71,7 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
         DatabaseMetaData dbmd = connection.getMetaData();
         TableMeta tm = new TableMeta();
         tm.setTableName(tableName);
+        tm.setOriginalTableName(tableName);
         String[] schemaTable = tableName.split("\\.");
         String schemaName = schemaTable.length > 1 ? schemaTable[0] : null;
         tableName = schemaTable.length > 1 ? schemaTable[1] : tableName;
@@ -185,8 +184,8 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
             }
 
             while (rsTable.next()) {
-                String rsTableName = rsTable.getString("TABLE_NAME");
                 String rsTableSchema = rsTable.getString("TABLE_SCHEM");
+                String rsTableName = rsTable.getString("TABLE_NAME");
                 //set origin tableName with schema if necessary
                 if ("public".equalsIgnoreCase(rsTableSchema)) {
                     //for compatibility reasons, old clients generally do not have the 'public' default schema by default.
