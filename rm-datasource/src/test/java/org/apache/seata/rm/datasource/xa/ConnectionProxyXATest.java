@@ -204,6 +204,40 @@ public class ConnectionProxyXATest {
         Assertions.assertTrue(statement instanceof StatementProxyXA);
     }
 
+    @Test
+    public void testXAReadOnly() throws Throwable {
+        Connection connection = Mockito.mock(Connection.class);
+        Mockito.when(connection.getAutoCommit()).thenReturn(true);
+        Mockito.when(connection.isReadOnly()).thenReturn(true);
+
+        XAResource xaResource = Mockito.mock(XAResource.class);
+        XAConnection xaConnection = Mockito.mock(XAConnection.class);
+        Mockito.when(xaConnection.getXAResource()).thenReturn(xaResource);
+        BaseDataSourceResource<ConnectionProxyXA> baseDataSourceResource = Mockito.mock(BaseDataSourceResource.class);
+        String xid = "xxx";
+        ResourceManager resourceManager = Mockito.mock(ResourceManager.class);
+        Mockito.doNothing().when(resourceManager).registerResource(any(Resource.class));
+        DefaultResourceManager.get();
+        DefaultResourceManager.mockResourceManager(BranchType.XA, resourceManager);
+
+        ConnectionProxyXA connectionProxyXA = new ConnectionProxyXA(connection, xaConnection, baseDataSourceResource, xid);
+        connectionProxyXA.init();
+        connectionProxyXA.setAutoCommit(false);
+
+        // Assert setAutoCommit = false was NEVER invoked on the wrapped connection
+        Mockito.verify(connection, times(0)).setAutoCommit(false);
+        // Assert XA start was invoked
+        Mockito.verify(xaResource, times(0)).start(any(Xid.class), any(Integer.class));
+
+        connectionProxyXA.commit();
+
+        Mockito.verify(xaResource, times(0)).end(any(Xid.class), any(Integer.class));
+        Mockito.verify(xaResource, times(0)).prepare(any(Xid.class));
+
+        connectionProxyXA.rollback();
+        Mockito.verify(xaResource, times(0)).rollback(any(Xid.class));
+    }
+
     @AfterAll
     public static void tearDown(){
         RootContext.unbind();
