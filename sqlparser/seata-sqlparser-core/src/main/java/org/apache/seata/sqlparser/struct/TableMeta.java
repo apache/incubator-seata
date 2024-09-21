@@ -39,6 +39,8 @@ import org.apache.seata.sqlparser.util.ColumnUtils;
 public class TableMeta {
     private String tableName;
 
+    private String originalTableName;
+
     private boolean isCaseSensitive;
 
     /**
@@ -67,6 +69,24 @@ public class TableMeta {
      */
     public void setTableName(String tableName) {
         this.tableName = tableName;
+    }
+
+    /**
+     * Gets original table name.
+     *
+     * @return the table name
+     */
+    public String getOriginalTableName() {
+        return originalTableName;
+    }
+
+    /**
+     * Sets original table name.
+     *
+     * @param originalTableName the table name
+     */
+    public void setOriginalTableName(String originalTableName) {
+        this.originalTableName = originalTableName;
     }
 
     /**

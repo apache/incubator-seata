@@ -112,6 +112,7 @@ store.db.maxConn=30
 store.db.globalTable=global_table
 store.db.branchTable=branch_table
 store.db.distributedLockTable=distributed_lock
+store.db.vgroupTable=vgroup-table
 store.db.queryLimit=100
 store.db.lockTable=lock_table
 store.db.maxWait=5000
@@ -163,7 +164,7 @@ server.raft.sync=true
 
 
 #Metrics configuration, only for the server
-metrics.enabled=false
+metrics.enabled=true
 metrics.registryType=compact
 metrics.exporterList=prometheus
 metrics.exporterPrometheusPort=9898

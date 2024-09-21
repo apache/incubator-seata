@@ -18,6 +18,7 @@ package org.apache.seata.common;
 
 import static org.apache.seata.common.Constants.IP_PORT_SPLIT_CHAR;
 
+
 /**
  * The type Xid.
  *

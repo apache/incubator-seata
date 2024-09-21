@@ -19,7 +19,7 @@ package org.apache.seata.server.session;
 import java.util.stream.Stream;
 
 import org.apache.seata.core.model.BranchType;
-import org.apache.seata.server.UUIDGenerator;
+import org.apache.seata.common.util.UUIDGenerator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;

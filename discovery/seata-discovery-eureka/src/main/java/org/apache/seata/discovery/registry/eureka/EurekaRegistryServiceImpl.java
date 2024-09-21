@@ -75,6 +75,8 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
     private static volatile EurekaRegistryServiceImpl instance;
     private static volatile EurekaClient eurekaClient;
 
+    private String transactionServiceGroup;
+
     private EurekaRegistryServiceImpl() {
     }
 
@@ -130,6 +132,7 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
 
     @Override
     public List<InetSocketAddress> lookup(String key) throws Exception {
+        transactionServiceGroup = key;
         String clusterName = getServiceGroup(key);
         if (clusterName == null) {
             String missingDataId = PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key;
@@ -169,7 +172,7 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
                     .collect(Collectors.toList());
             CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
 
-            removeOfflineAddressesIfNecessary(clusterName, newAddressList);
+            removeOfflineAddressesIfNecessary(transactionServiceGroup, clusterName, newAddressList);
         }
     }
 

@@ -90,5 +90,10 @@ enum BranchStatusProto {
      */
     // Rollback logic is failed but NOT retryable.
     PhaseTwo_RollbackFailed_Unretryable = 10;
+    /**
+     * The results of the Phase one are read-only.
+     */
+    // In the branch transaction, only purely read-only query statements were executed.
+    PhaseOne_RDONLY = 13;
 
 }

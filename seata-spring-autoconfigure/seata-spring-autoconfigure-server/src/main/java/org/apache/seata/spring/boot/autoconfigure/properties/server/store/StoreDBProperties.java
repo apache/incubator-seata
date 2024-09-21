@@ -40,6 +40,7 @@ public class StoreDBProperties {
     private String branchTable = "branch_table";
     private String lockTable = "lock_table";
     private String distributedLockTable = "distributed_lock";
+    private String vgroupTable = "vgroup_table";
     private Integer queryLimit = DEFAULT_QUERY_LIMIT;
     private Long maxWait = 5000L;
 
@@ -167,4 +168,14 @@ public class StoreDBProperties {
         this.maxWait = maxWait;
         return this;
     }
+
+    public String getVgroupTable() {
+        return vgroupTable;
+    }
+
+    public StoreDBProperties setVgroupTable(String vgroupTable) {
+        this.vgroupTable = vgroupTable;
+        return this;
+    }
+
 }

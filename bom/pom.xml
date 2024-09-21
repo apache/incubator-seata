@@ -128,6 +128,11 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.seata</groupId>
+                <artifactId>seata-discovery-namingserver</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.seata</groupId>
                 <artifactId>seata-discovery-redis</artifactId>
                 <version>${project.version}</version>
             </dependency>

@@ -18,7 +18,6 @@ package org.apache.seata.rm.datasource.undo.dm;
 
 
 import org.apache.seata.common.loader.LoadLevel;
-import org.apache.seata.common.util.BlobUtils;
 import org.apache.seata.core.compressor.CompressorType;
 import org.apache.seata.core.constants.ClientTableColumnsName;
 import org.apache.seata.rm.datasource.undo.AbstractUndoLogManager;
@@ -27,10 +26,8 @@ import org.apache.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 
@@ -79,13 +76,6 @@ public class DmUndoLogManager extends AbstractUndoLogManager {
     protected void insertUndoLogWithGlobalFinished(String xid, long branchId, UndoLogParser parser, Connection conn) throws SQLException {
         insertUndoLog(xid, branchId, buildContext(parser.getName(), CompressorType.NONE), parser.getDefaultContent(),
                 State.GlobalFinished, conn);
-    }
-
-    @Override
-    protected byte[] getRollbackInfo(ResultSet rs) throws SQLException {
-        Blob b = rs.getBlob(ClientTableColumnsName.UNDO_LOG_ROLLBACK_INFO);
-        byte[] rollbackInfo = BlobUtils.blob2Bytes(b);
-        return rollbackInfo;
     }
 
     private void insertUndoLog(String xid, long branchID, String rollbackCtx, byte[] undoLogContent,

@@ -80,21 +80,6 @@ public class Version {
     }
 
     /**
-     * Check version string.
-     *
-     * @param version the version
-     * @throws IncompatibleVersionException the incompatible version exception
-     */
-    public static void checkVersion(String version) throws IncompatibleVersionException {
-        long current = convertVersion(CURRENT);
-        long clientVersion = convertVersion(version);
-        long divideVersion = convertVersion(VERSION_0_7_1);
-        if ((current > divideVersion && clientVersion < divideVersion) || (current < divideVersion && clientVersion > divideVersion)) {
-            throw new IncompatibleVersionException("incompatible client version:" + version);
-        }
-    }
-
-    /**
      * Determine whether the client version is greater than or equal to version 1.5.0
      *
      * @param version client version

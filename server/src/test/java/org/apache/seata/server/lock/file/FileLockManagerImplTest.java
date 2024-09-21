@@ -20,7 +20,7 @@ import java.util.stream.Stream;
 
 import org.apache.seata.common.XID;
 import org.apache.seata.core.model.BranchType;
-import org.apache.seata.server.UUIDGenerator;
+import org.apache.seata.common.util.UUIDGenerator;
 import org.apache.seata.server.lock.LockManager;
 import org.apache.seata.server.session.BranchSession;
 import org.junit.jupiter.api.Assertions;

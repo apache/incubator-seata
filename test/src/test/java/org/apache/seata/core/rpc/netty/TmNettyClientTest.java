@@ -26,7 +26,7 @@ import org.apache.seata.core.protocol.transaction.BranchRegisterRequest;
 import org.apache.seata.core.protocol.transaction.BranchRegisterResponse;
 import org.apache.seata.mockserver.MockServer;
 import org.apache.seata.saga.engine.db.AbstractServerTest;
-import org.apache.seata.server.UUIDGenerator;
+import org.apache.seata.common.util.UUIDGenerator;
 import org.apache.seata.server.coordinator.DefaultCoordinator;
 import org.apache.seata.server.session.SessionHolder;
 import org.junit.jupiter.api.AfterAll;

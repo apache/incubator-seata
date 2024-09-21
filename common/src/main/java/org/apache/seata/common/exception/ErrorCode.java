@@ -24,10 +24,22 @@ public enum ErrorCode {
     /**
      * 0001 ~ 0099  Configuration related errors
      */
-    ERR_CONFIG(ErrorType.Config, 0001);
+    ERR_CONFIG(ErrorType.Config, 0001),
+
+    /**
+     * 0100 ~ 0199 Security related errors
+     */
+    ERR_DESERIALIZATION_SECURITY(ErrorType.Security, 0156),
+
     /**
      * The error code of the transaction exception.
      */
+
+
+    /**
+     * The error code of the sql exception
+     */
+    ERROR_SQL(ErrorType.Datasource, 0201);
 
     private int code;
     private ErrorType type;
@@ -93,6 +105,10 @@ public enum ErrorCode {
          * Datasource error type.
          */
         Datasource,
+        /**
+         * Security error type.
+         */
+        Security,
         /**
          * Other error type.
          */

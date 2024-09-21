@@ -87,7 +87,7 @@ public class TwoPhaseResult {
         sb.append("[");
         sb.append("isSuccess:").append(isSuccess);
         if (StringUtils.isNotBlank(message)) {
-            sb.append(", msg").append(message);
+            sb.append(", msg:").append(message);
         }
         sb.append("]");
         return sb.toString();
