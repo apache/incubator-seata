@@ -528,7 +528,7 @@ ISC licenses
     anymatch 3.1.3 ISC
     browser-stdout 1.3.1 ISC
     browserify-sign 4.2.3 ISC
-    cliui 7.0.4 ISC
+    cliui 8.0.1 ISC
     css-color-keywords 1.0.0 ISC
     electron-to-chromium 1.4.681 ISC
     fs.realpath 1.0.0 ISC
@@ -665,6 +665,9 @@ MIT licenses
     bignumber.js 9.1.2 MIT
     bn.js 5.2.1 MIT
     brace-expansion 1.1.11 MIT
+    braces 3.0.2 MIT
+    braces 3.0.3 MIT
+    braces 2.3.1 MIT
     brorand 1.1.0 MIT
     browserify-aes 1.2.0 MIT
     browserify-rsa 4.1.0 MIT
