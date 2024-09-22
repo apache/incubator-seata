@@ -71,6 +71,11 @@
             <artifactId>seata-tm</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-core</artifactId>
+            <scope>test</scope>
+        </dependency>
 
 <!-- The actual spring-related dependencies that take effect are from the seata-dependencies module, not the seata-server module-->
         <dependency>
