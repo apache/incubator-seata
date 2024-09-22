@@ -73,7 +73,7 @@
         </dependency>
         <dependency>
             <groupId>io.grpc</groupId>
-            <artifactId>grpc-core</artifactId>
+            <artifactId>grpc-alts</artifactId>
         </dependency>
 
 <!-- The actual spring-related dependencies that take effect are from the seata-dependencies module, not the seata-server module-->
