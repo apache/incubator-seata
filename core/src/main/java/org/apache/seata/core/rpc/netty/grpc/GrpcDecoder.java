@@ -65,7 +65,7 @@ public class GrpcDecoder extends ChannelDuplexHandler {
 
             GrpcMessageProto grpcMessageProto = GrpcMessageProto.parseFrom(data);
             Any body = grpcMessageProto.getBody();
-            int messageType = grpcMessageProto.getMessageType();
+            int messageType = safeCastToInt(grpcMessageProto.getMessageType());
             int messageId = grpcMessageProto.getId();
             byte[] byteArray = body.toByteArray();
 
@@ -87,4 +87,18 @@ public class GrpcDecoder extends ChannelDuplexHandler {
     public void onHeadersRead(ChannelHandlerContext ctx, Http2HeadersFrame headersFrame) throws Exception {
         // TODO Subsequent decompression logic is possible
     }
+
+    private int safeCastToInt(Object userInput) {
+        if (userInput instanceof Number) {
+            long value = ((Number)userInput).longValue();
+            if (value >= Integer.MIN_VALUE && value <= Integer.MAX_VALUE) {
+                return (int)value;
+            } else {
+                throw new IllegalArgumentException("Value exceeds int range");
+            }
+        } else {
+            throw new IllegalArgumentException("Input is not a number");
+        }
+    }
+
 }

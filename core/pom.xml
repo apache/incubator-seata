@@ -100,7 +100,7 @@
                 <configuration>
                     <protoSourceRoot>${project.basedir}/src/main/proto/</protoSourceRoot>
                     <protocArtifact>
-                        com.google.protobuf:protoc:3.11.0:exe:${os.detected.classifier}
+                        com.google.protobuf:protoc:3.25.4:exe:${os.detected.classifier}
                     </protocArtifact>
                 </configuration>
                 <executions>
