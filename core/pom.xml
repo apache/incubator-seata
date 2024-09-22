@@ -98,7 +98,7 @@
                 <groupId>org.xolstice.maven.plugins</groupId>
                 <artifactId>protobuf-maven-plugin</artifactId>
                 <configuration>
-                    <protoSourceRoot>${project.basedir}/src/main/proto/</protoSourceRoot>
+                    <protoSourceRoot>${project.basedir}/src/main/resources/protobuf/org/apache/seata/protocol/transcation/</protoSourceRoot>
                     <protocArtifact>
                         com.google.protobuf:protoc:3.25.4:exe:${os.detected.classifier}
                     </protocArtifact>

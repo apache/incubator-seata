@@ -19,7 +19,7 @@ package org.apache.seata.protocol.protobuf;
 import "google/protobuf/any.proto";
 option java_multiple_files = true;
 option java_outer_classname = "GrpcMessage";
-option java_package = "org.apache.seata.serializer.protobuf.generated";
+option java_package = "org.apache.seata.core.protocol.generated";
 
 message GrpcMessageProto {
     int32 id = 1;
