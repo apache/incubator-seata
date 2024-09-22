@@ -628,7 +628,7 @@ public interface ConfigurationKeys {
     @Deprecated
     String ENABLE_CLIENT_BATCH_SEND_REQUEST = TRANSPORT_PREFIX + "enableClientBatchSendRequest";
 
-    String PROTOCOL = TRANSPORT_PREFIX + "protocol";
+    String TRANSPORT_PROTOCOL = TRANSPORT_PREFIX + "protocol";
 
     /**
      * The constant ENABLE_TM_CLIENT_BATCH_SEND_REQUEST

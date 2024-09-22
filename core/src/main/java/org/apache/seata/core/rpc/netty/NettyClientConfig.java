@@ -453,7 +453,7 @@ public class NettyClientConfig extends NettyBaseConfig {
     }
 
     public String getProtocol() {
-        return CONFIG.getConfig(org.apache.seata.common.ConfigurationKeys.PROTOCOL, DEFAULT_PROTOCOL);
+        return CONFIG.getConfig(org.apache.seata.common.ConfigurationKeys.TRANSPORT_PROTOCOL, DEFAULT_PROTOCOL);
     }
 
     @Deprecated
