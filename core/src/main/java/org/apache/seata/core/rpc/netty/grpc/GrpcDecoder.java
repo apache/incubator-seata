@@ -92,7 +92,7 @@ public class GrpcDecoder extends ChannelDuplexHandler {
         if (value >= Integer.MIN_VALUE && value <= Integer.MAX_VALUE) {
             return (int)value;
         } else {
-            throw new IllegalArgumentException("数值超出 int 范围");
+            throw new IllegalArgumentException("Value exceeds int range: " + value);
         }
     }
 
