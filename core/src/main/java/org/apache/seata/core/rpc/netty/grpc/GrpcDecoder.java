@@ -22,6 +22,7 @@ import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http2.Http2DataFrame;
 import io.netty.handler.codec.http2.Http2HeadersFrame;
+import io.netty.util.ReferenceCountUtil;
 import io.netty.util.ReferenceCounted;
 import org.apache.seata.core.protocol.RpcMessage;
 import org.apache.seata.core.protocol.generated.GrpcMessageProto;
@@ -38,51 +39,55 @@ public class GrpcDecoder extends ChannelDuplexHandler {
         } else if (msg instanceof Http2DataFrame) {
             onDataRead(ctx, (Http2DataFrame) msg);
         } else if (msg instanceof ReferenceCounted) {
-            ctx.fireChannelRead(msg);
+            ReferenceCountUtil.release(msg);
         }
     }
 
     public void onDataRead(ChannelHandlerContext ctx, Http2DataFrame msg) throws Exception {
         ByteBuf content = msg.content();
-        int readableBytes = content.readableBytes();
-        byte[] bytes = new byte[readableBytes];
-        content.readBytes(bytes);
-        if (bytes.length < 5) {
-            return;
-        }
+        try {
+            int readableBytes = content.readableBytes();
+            byte[] bytes = new byte[readableBytes];
+            content.readBytes(bytes);
+            if (bytes.length < 5) {
+                return;
+            }
 
-        int srcPos = 0;
-        while (srcPos < readableBytes) {
-            // The first byte defaults to 0, indicating that no decompression is required
-            // Read the value of the next four bytes as the length of the body
-            int length = ((bytes[srcPos + 1] & 0xFF) << 24) |
-                    ((bytes[srcPos + 2] & 0xFF) << 16) |
-                    ((bytes[srcPos + 3] & 0xFF) << 8) |
-                    (bytes[srcPos + 4] & 0xFF);
+            int srcPos = 0;
+            while (srcPos < readableBytes) {
+                // The first byte defaults to 0, indicating that no decompression is required
+                // Read the value of the next four bytes as the length of the body
+                int length = ((bytes[srcPos + 1] & 0xFF) << 24) | ((bytes[srcPos + 2] & 0xFF) << 16)
+                    | ((bytes[srcPos + 3] & 0xFF) << 8) | (bytes[srcPos + 4] & 0xFF);
 
-            byte[] data = new byte[length];
-            System.arraycopy(bytes, srcPos + 5, data, 0, length);
+                byte[] data = new byte[length];
+                System.arraycopy(bytes, srcPos + 5, data, 0, length);
 
-            GrpcMessageProto grpcMessageProto = GrpcMessageProto.parseFrom(data);
-            Any body = grpcMessageProto.getBody();
-            int messageType = safeCastToInt(grpcMessageProto.getMessageType());
-            int messageId = safeCastToInt(grpcMessageProto.getId());
-            byte[] byteArray = body.toByteArray();
+                GrpcMessageProto grpcMessageProto = GrpcMessageProto.parseFrom(data);
+                Any body = grpcMessageProto.getBody();
+                int messageType = safeCastToInt(grpcMessageProto.getMessageType());
+                int messageId = safeCastToInt(grpcMessageProto.getId());
+                byte[] byteArray = body.toByteArray();
 
-            Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(SerializerType.GRPC.getCode()), (byte) 0);
-            Object messageBody = serializer.deserialize(byteArray);
+                Serializer serializer =
+                    SerializerServiceLoader.load(SerializerType.getByCode(SerializerType.GRPC.getCode()), (byte)0);
+                Object messageBody = serializer.deserialize(byteArray);
 
-            RpcMessage rpcMsg = new RpcMessage();
-            rpcMsg.setMessageType((byte) messageType);
-            rpcMsg.setBody(messageBody);
-            rpcMsg.setId(messageId);
-            rpcMsg.setHeadMap(grpcMessageProto.getHeadMapMap());
+                RpcMessage rpcMsg = new RpcMessage();
+                rpcMsg.setMessageType((byte)messageType);
+                rpcMsg.setBody(messageBody);
+                rpcMsg.setId(messageId);
+                rpcMsg.setHeadMap(grpcMessageProto.getHeadMapMap());
 
-            ctx.fireChannelRead(rpcMsg);
+                ctx.fireChannelRead(rpcMsg);
 
-            srcPos += length + 5;
+                srcPos += length + 5;
+            }
+        } finally {
+            ReferenceCountUtil.release(content);
         }
     }
+        
 
     public void onHeadersRead(ChannelHandlerContext ctx, Http2HeadersFrame headersFrame) throws Exception {
         // TODO Subsequent decompression logic is possible
