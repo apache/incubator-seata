@@ -17,6 +17,7 @@
 package org.apache.seata.core.rpc.netty.grpc;
 
 import com.google.protobuf.Any;
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
@@ -25,6 +26,7 @@ import io.netty.handler.codec.http2.DefaultHttp2DataFrame;
 import io.netty.handler.codec.http2.DefaultHttp2Headers;
 import io.netty.handler.codec.http2.DefaultHttp2HeadersFrame;
 import io.netty.handler.codec.http2.Http2Headers;
+import io.netty.util.ReferenceCountUtil;
 import org.apache.seata.core.protocol.RpcMessage;
 import org.apache.seata.core.protocol.generated.GrpcMessageProto;
 import org.apache.seata.core.serializer.Serializer;
@@ -79,7 +81,12 @@ public class GrpcEncoder extends ChannelOutboundHandlerAdapter {
             System.arraycopy(lengthBytes, 0, messageWithPrefix, 1, 4);
             // The remaining bytes are body
             System.arraycopy(bodyBytes, 0, messageWithPrefix, 5, bodyBytes.length);
-            ctx.writeAndFlush(new DefaultHttp2DataFrame(Unpooled.wrappedBuffer(messageWithPrefix)));
+            ByteBuf byteBuf = Unpooled.wrappedBuffer(messageWithPrefix);
+            try {
+                ctx.writeAndFlush(new DefaultHttp2DataFrame(byteBuf), promise);
+            } finally {
+                ReferenceCountUtil.release(byteBuf);
+            }
         }
     }
 
