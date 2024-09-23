@@ -125,12 +125,6 @@ public class ClusterData {
     }
 
     public boolean registerInstance(NamingServerNode instance, String unitName) {
-        // refresh node weight
-        Object weightValue = instance.getMetadata().get("weight");
-        if (weightValue != null) {
-            instance.setWeight(Double.parseDouble(String.valueOf(weightValue)));
-            instance.getMetadata().remove("weight");
-        }
         Unit currentUnit = unitData.computeIfAbsent(unitName, value -> {
             Unit unit = new Unit();
             List<NamingServerNode> instances = new CopyOnWriteArrayList<>();

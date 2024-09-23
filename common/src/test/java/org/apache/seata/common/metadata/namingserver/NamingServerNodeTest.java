@@ -28,6 +28,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 class NamingServerNodeTest {
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
     void toJsonString() throws JsonProcessingException {
@@ -39,8 +40,7 @@ class NamingServerNodeTest {
         node.setGroup("group");
         node.setControl(new Node.Endpoint("1.1.1.1",888));
         node.setTransaction(new Node.Endpoint("2.2.2.2",999));
-        System.out.println(node.toJsonString());
-        assertEquals(node.toJsonString(),objectMapper.writeValueAsString(node));
+        assertEquals(node.toJsonString(objectMapper),objectMapper.writeValueAsString(node));
     }
     
     @Test
