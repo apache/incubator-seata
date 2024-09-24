@@ -14,29 +14,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.config.zk;
-
-import org.I0Itec.zkclient.exception.ZkMarshallingError;
-import org.I0Itec.zkclient.serialize.ZkSerializer;
-
-import java.nio.charset.StandardCharsets;
+package org.apache.seata.sqlparser.struct;
 
 /**
- * Default zk serializer.
- * <p>
- * If the user is not configured in config.zk.serializer configuration item, then use default serializer.
- *
- * @since 1.3.0
+ * The type Table meta of SqlServer.
  */
-public class DefaultZkSerializer implements ZkSerializer {
+public class SqlServerTableMeta extends TableMeta {
 
-    @Override
-    public byte[] serialize(Object data) throws ZkMarshallingError {
-        return String.valueOf(data).getBytes(StandardCharsets.UTF_8);
+    /**
+     * Stands for whether there is a column of a SQLServer table with a "IDENTITY"
+     */
+    private boolean tableIdentifyExistence = false;
+
+    public boolean isTableIdentifyExistence() {
+        return tableIdentifyExistence;
     }
 
-    @Override
-    public Object deserialize(byte[] bytes) throws ZkMarshallingError {
-        return new String(bytes, StandardCharsets.UTF_8);
+    public void setTableIdentifyExistence(boolean tableIdentifyExistence) {
+        this.tableIdentifyExistence = tableIdentifyExistence;
     }
+
 }

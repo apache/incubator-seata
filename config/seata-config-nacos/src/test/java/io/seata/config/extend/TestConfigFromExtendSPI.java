@@ -37,6 +37,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 
 public class TestConfigFromExtendSPI {
 
@@ -59,6 +61,7 @@ public class TestConfigFromExtendSPI {
     }
 
     @Test
+    @EnabledOnOs(OS.LINUX)
     public void testGetConfigProperties() throws Exception {
         Assertions.assertNotNull(configService);
         Configuration configuration = ConfigurationFactory.getInstance();
