@@ -286,7 +286,7 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
             for (int i = 0; i < mergedWarpMessage.msgs.size(); i++) {
                 RpcMessage rpcMsg =
                     buildRequestMessage(mergedWarpMessage.msgs.get(i), rpcMessage, mergedWarpMessage.msgIds.get(i));
-                processMessage(ctx, rpcMsg);
+                super.processMessage(ctx, rpcMsg);
             }
         } else {
             super.processMessage(ctx, rpcMessage);
