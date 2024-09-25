@@ -1,17 +1,18 @@
 /*
- *  Copyright 1999-2019 Seata.io Group.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
  *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.apache.seata.rm.datasource.sql.handler.kingbase;
 
@@ -27,326 +28,457 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * The type postgresql keyword checker.
+ * The type kingbase keyword checker.
  *
  * @author yougecn
  */
 @LoadLevel(name = JdbcConstants.KINGBASE)
 public class KingbaseEscapeHandler implements EscapeHandler {
 
-    private Set<String> keywordSet = Arrays.stream(KingbaseEscapeHandler.PostgresqlKeyword.values())
-            .map(KingbaseEscapeHandler.PostgresqlKeyword::name).collect(Collectors.toSet());
+    private Set<String> keywordSet = Arrays.stream(KingbaseEscapeHandler.KingbaseKeyword.values()).map(KingbaseEscapeHandler.KingbaseKeyword::name).collect(Collectors.toSet());
 
     /**
-     * postgresql keyword
+     * kingbase keyword
      */
-    private enum PostgresqlKeyword {
+    private enum KingbaseKeyword {
         /**
-         * ALL is postgresql keyword
+         * ACCESS is kingbase keyword
+         */
+        ACCESS("ACCESS"),
+        /**
+         * ADD is kingbase keyword
+         */
+        ADD("ADD"),
+        /**
+         * ALL is kingbase keyword
          */
         ALL("ALL"),
         /**
-         * ANALYSE is postgresql keyword
+         * ALTER is kingbase keyword
          */
-        ANALYSE("ANALYSE"),
+        ALTER("ALTER"),
         /**
-         * ANALYZE is postgresql keyword
-         */
-        ANALYZE("ANALYZE"),
-        /**
-         * AND is postgresql keyword
+         * AND is kingbase keyword
          */
         AND("AND"),
         /**
-         * ANY is postgresql keyword
+         * ANY is kingbase keyword
          */
         ANY("ANY"),
         /**
-         * ARRAY is postgresql keyword
-         */
-        ARRAY("ARRAY"),
-        /**
-         * AS is postgresql keyword
+         * AS is kingbase keyword
          */
         AS("AS"),
         /**
-         * ASC is postgresql keyword
+         * ASC is kingbase keyword
          */
         ASC("ASC"),
         /**
-         * ASYMMETRIC is postgresql keyword
+         * AUDIT is kingbase keyword
          */
-        ASYMMETRIC("ASYMMETRIC"),
+        AUDIT("AUDIT"),
         /**
-         * BOTH is postgresql keyword
+         * BETWEEN is kingbase keyword
          */
-        BOTH("BOTH"),
+        BETWEEN("BETWEEN"),
         /**
-         * CASE is postgresql keyword
+         * BY is kingbase keyword
          */
-        CASE("CASE"),
+        BY("BY"),
         /**
-         * CAST is postgresql keyword
+         * CHAR is kingbase keyword
          */
-        CAST("CAST"),
+        CHAR("CHAR"),
         /**
-         * CHECK is postgresql keyword
+         * CHECK is kingbase keyword
          */
         CHECK("CHECK"),
         /**
-         * COLLATE is postgresql keyword
+         * CLUSTER is kingbase keyword
          */
-        COLLATE("COLLATE"),
+        CLUSTER("CLUSTER"),
         /**
-         * COLUMN is postgresql keyword
+         * COLUMN is kingbase keyword
          */
         COLUMN("COLUMN"),
         /**
-         * CONSTRAINT is postgresql keyword
+         * COLUMN_VALUE is kingbase keyword
          */
-        CONSTRAINT("CONSTRAINT"),
+        COLUMN_VALUE("COLUMN_VALUE"),
         /**
-         * CREATE is postgresql keyword
+         * COMMENT is kingbase keyword
+         */
+        COMMENT("COMMENT"),
+        /**
+         * COMPRESS is kingbase keyword
+         */
+        COMPRESS("COMPRESS"),
+        /**
+         * CONNECT is kingbase keyword
+         */
+        CONNECT("CONNECT"),
+        /**
+         * CREATE is kingbase keyword
          */
         CREATE("CREATE"),
         /**
-         * CURRENT_CATALOG is postgresql keyword
+         * CURRENT is kingbase keyword
          */
-        CURRENT_CATALOG("CURRENT_CATALOG"),
+        CURRENT("CURRENT"),
         /**
-         * CURRENT_DATE is postgresql keyword
+         * DATE is kingbase keyword
          */
-        CURRENT_DATE("CURRENT_DATE"),
+        DATE("DATE"),
         /**
-         * CURRENT_ROLE is postgresql keyword
+         * DECIMAL is kingbase keyword
          */
-        CURRENT_ROLE("CURRENT_ROLE"),
+        DECIMAL("DECIMAL"),
         /**
-         * CURRENT_TIME is postgresql keyword
-         */
-        CURRENT_TIME("CURRENT_TIME"),
-        /**
-         * CURRENT_TIMESTAMP is postgresql keyword
-         */
-        CURRENT_TIMESTAMP("CURRENT_TIMESTAMP"),
-        /**
-         * CURRENT_USER is postgresql keyword
-         */
-        CURRENT_USER("CURRENT_USER"),
-        /**
-         * DEFAULT is postgresql keyword
+         * DEFAULT is kingbase keyword
          */
         DEFAULT("DEFAULT"),
         /**
-         * DEFERRABLE is postgresql keyword
+         * DELETE is kingbase keyword
          */
-        DEFERRABLE("DEFERRABLE"),
+        DELETE("DELETE"),
         /**
-         * DESC is postgresql keyword
+         * DESC is kingbase keyword
          */
         DESC("DESC"),
         /**
-         * DISTINCT is postgresql keyword
+         * DISTINCT is kingbase keyword
          */
         DISTINCT("DISTINCT"),
         /**
-         * DO is postgresql keyword
+         * DROP is kingbase keyword
          */
-        DO("DO"),
+        DROP("DROP"),
         /**
-         * ELSE is postgresql keyword
+         * ELSE is kingbase keyword
          */
         ELSE("ELSE"),
         /**
-         * END is postgresql keyword
+         * EXCLUSIVE is kingbase keyword
          */
-        END("END"),
+        EXCLUSIVE("EXCLUSIVE"),
         /**
-         * EXCEPT is postgresql keyword
+         * EXISTS is kingbase keyword
          */
-        EXCEPT("EXCEPT"),
+        EXISTS("EXISTS"),
         /**
-         * FALSE is postgresql keyword
+         * FILE is kingbase keyword
          */
-        FALSE("FALSE"),
+        FILE("FILE"),
         /**
-         * FETCH is postgresql keyword
+         * FLOAT is kingbase keyword
          */
-        FETCH("FETCH"),
+        FLOAT("FLOAT"),
         /**
-         * FOR is postgresql keyword
+         * FOR is kingbase keyword
          */
         FOR("FOR"),
         /**
-         * FOREIGN is postgresql keyword
-         */
-        FOREIGN("FOREIGN"),
-        /**
-         * FROM is postgresql keyword
+         * FROM is kingbase keyword
          */
         FROM("FROM"),
         /**
-         * GRANT is postgresql keyword
+         * GRANT is kingbase keyword
          */
         GRANT("GRANT"),
         /**
-         * GROUP is postgresql keyword
+         * GROUP is kingbase keyword
          */
         GROUP("GROUP"),
         /**
-         * HAVING is postgresql keyword
+         * HAVING is kingbase keyword
          */
         HAVING("HAVING"),
         /**
-         * IN is postgresql keyword
+         * IDENTIFIED is kingbase keyword
+         */
+        IDENTIFIED("IDENTIFIED"),
+        /**
+         * IMMEDIATE is kingbase keyword
+         */
+        IMMEDIATE("IMMEDIATE"),
+        /**
+         * IN is kingbase keyword
          */
         IN("IN"),
         /**
-         * INITIALLY is postgresql keyword
+         * INCREMENT is kingbase keyword
          */
-        INITIALLY("INITIALLY"),
+        INCREMENT("INCREMENT"),
         /**
-         * INTERSECT is postgresql keyword
+         * INDEX is kingbase keyword
+         */
+        INDEX("INDEX"),
+        /**
+         * INITIAL is kingbase keyword
+         */
+        INITIAL("INITIAL"),
+        /**
+         * INSERT is kingbase keyword
+         */
+        INSERT("INSERT"),
+        /**
+         * INTEGER is kingbase keyword
+         */
+        INTEGER("INTEGER"),
+        /**
+         * INTERSECT is kingbase keyword
          */
         INTERSECT("INTERSECT"),
         /**
-         * INTO is postgresql keyword
+         * INTO is kingbase keyword
          */
         INTO("INTO"),
         /**
-         * LATERAL is postgresql keyword
+         * IS is kingbase keyword
          */
-        LATERAL("LATERAL"),
+        IS("IS"),
         /**
-         * LEADING is postgresql keyword
+         * LEVEL is kingbase keyword
          */
-        LEADING("LEADING"),
+        LEVEL("LEVEL"),
         /**
-         * LIMIT is postgresql keyword
+         * LIKE is kingbase keyword
          */
-        LIMIT("LIMIT"),
+        LIKE("LIKE"),
         /**
-         * LOCALTIME is postgresql keyword
+         * LOCK is kingbase keyword
          */
-        LOCALTIME("LOCALTIME"),
+        LOCK("LOCK"),
         /**
-         * LOCALTIMESTAMP is postgresql keyword
+         * LONG is kingbase keyword
          */
-        LOCALTIMESTAMP("LOCALTIMESTAMP"),
+        LONG("LONG"),
         /**
-         * NOT is postgresql keyword
+         * MAXEXTENTS is kingbase keyword
+         */
+        MAXEXTENTS("MAXEXTENTS"),
+        /**
+         * MINUS is kingbase keyword
+         */
+        MINUS("MINUS"),
+        /**
+         * MLSLABEL is kingbase keyword
+         */
+        MLSLABEL("MLSLABEL"),
+        /**
+         * MODE is kingbase keyword
+         */
+        MODE("MODE"),
+        /**
+         * MODIFY is kingbase keyword
+         */
+        MODIFY("MODIFY"),
+        /**
+         * NESTED_TABLE_ID is kingbase keyword
+         */
+        NESTED_TABLE_ID("NESTED_TABLE_ID"),
+        /**
+         * NOAUDIT is kingbase keyword
+         */
+        NOAUDIT("NOAUDIT"),
+        /**
+         * NOCOMPRESS is kingbase keyword
+         */
+        NOCOMPRESS("NOCOMPRESS"),
+        /**
+         * NOT is kingbase keyword
          */
         NOT("NOT"),
         /**
-         * NULL is postgresql keyword
+         * NOWAIT is kingbase keyword
+         */
+        NOWAIT("NOWAIT"),
+        /**
+         * NULL is kingbase keyword
          */
         NULL("NULL"),
         /**
-         * OFFSET is postgresql keyword
+         * NUMBER is kingbase keyword
          */
-        OFFSET("OFFSET"),
+        NUMBER("NUMBER"),
         /**
-         * ON is postgresql keyword
+         * OF is kingbase keyword
+         */
+        OF("OF"),
+        /**
+         * OFFLINE is kingbase keyword
+         */
+        OFFLINE("OFFLINE"),
+        /**
+         * ON is kingbase keyword
          */
         ON("ON"),
         /**
-         * ONLY is postgresql keyword
+         * ONLINE is kingbase keyword
          */
-        ONLY("ONLY"),
+        ONLINE("ONLINE"),
         /**
-         * OR is postgresql keyword
+         * OPTION is kingbase keyword
+         */
+        OPTION("OPTION"),
+        /**
+         * OR is kingbase keyword
          */
         OR("OR"),
         /**
-         * ORDER is postgresql keyword
+         * ORDER is kingbase keyword
          */
         ORDER("ORDER"),
         /**
-         * PLACING is postgresql keyword
+         * PCTFREE is kingbase keyword
          */
-        PLACING("PLACING"),
+        PCTFREE("PCTFREE"),
         /**
-         * PRIMARY is postgresql keyword
+         * PRIOR is kingbase keyword
          */
-        PRIMARY("PRIMARY"),
+        PRIOR("PRIOR"),
         /**
-         * REFERENCES is postgresql keyword
+         * PUBLIC is kingbase keyword
          */
-        REFERENCES("REFERENCES"),
+        PUBLIC("PUBLIC"),
         /**
-         * RETURNING is postgresql keyword
+         * RAW is kingbase keyword
          */
-        RETURNING("RETURNING"),
+        RAW("RAW"),
         /**
-         * SELECT is postgresql keyword
+         * RENAME is kingbase keyword
+         */
+        RENAME("RENAME"),
+        /**
+         * RESOURCE is kingbase keyword
+         */
+        RESOURCE("RESOURCE"),
+        /**
+         * REVOKE is kingbase keyword
+         */
+        REVOKE("REVOKE"),
+        /**
+         * ROW is kingbase keyword
+         */
+        ROW("ROW"),
+        /**
+         * ROWID is kingbase keyword
+         */
+        ROWID("ROWID"),
+        /**
+         * ROWNUM is kingbase keyword
+         */
+        ROWNUM("ROWNUM"),
+        /**
+         * ROWS is kingbase keyword
+         */
+        ROWS("ROWS"),
+        /**
+         * SELECT is kingbase keyword
          */
         SELECT("SELECT"),
         /**
-         * SESSION_USER is postgresql keyword
+         * SESSION is kingbase keyword
          */
-        SESSION_USER("SESSION_USER"),
+        SESSION("SESSION"),
         /**
-         * SOME is postgresql keyword
+         * SET is kingbase keyword
          */
-        SOME("SOME"),
+        SET("SET"),
         /**
-         * SYMMETRIC is postgresql keyword
+         * SHARE is kingbase keyword
          */
-        SYMMETRIC("SYMMETRIC"),
+        SHARE("SHARE"),
         /**
-         * TABLE is postgresql keyword
+         * SIZE is kingbase keyword
+         */
+        SIZE("SIZE"),
+        /**
+         * SMALLINT is kingbase keyword
+         */
+        SMALLINT("SMALLINT"),
+        /**
+         * START is kingbase keyword
+         */
+        START("START"),
+        /**
+         * SUCCESSFUL is kingbase keyword
+         */
+        SUCCESSFUL("SUCCESSFUL"),
+        /**
+         * SYNONYM is kingbase keyword
+         */
+        SYNONYM("SYNONYM"),
+        /**
+         * SYSDATE is kingbase keyword
+         */
+        SYSDATE("SYSDATE"),
+        /**
+         * TABLE is kingbase keyword
          */
         TABLE("TABLE"),
         /**
-         * THEN is postgresql keyword
+         * THEN is kingbase keyword
          */
         THEN("THEN"),
         /**
-         * TO is postgresql keyword
+         * TO is kingbase keyword
          */
         TO("TO"),
         /**
-         * TRAILING is postgresql keyword
+         * TRIGGER is kingbase keyword
          */
-        TRAILING("TRAILING"),
+        TRIGGER("TRIGGER"),
         /**
-         * TRUE is postgresql keyword
+         * UID is kingbase keyword
          */
-        TRUE("TRUE"),
+        UID("UID"),
         /**
-         * UNION is postgresql keyword
+         * UNION is kingbase keyword
          */
         UNION("UNION"),
         /**
-         * UNIQUE is postgresql keyword
+         * UNIQUE is kingbase keyword
          */
         UNIQUE("UNIQUE"),
         /**
-         * USER is postgresql keyword
+         * UPDATE is kingbase keyword
+         */
+        UPDATE("UPDATE"),
+        /**
+         * USER is kingbase keyword
          */
         USER("USER"),
         /**
-         * USING is postgresql keyword
+         * VALIDATE is kingbase keyword
          */
-        USING("USING"),
+        VALIDATE("VALIDATE"),
         /**
-         * VARIADIC is postgresql keyword
+         * VALUES is kingbase keyword
          */
-        VARIADIC("VARIADIC"),
+        VALUES("VALUES"),
         /**
-         * WHEN is postgresql keyword
+         * VARCHAR is kingbase keyword
          */
-        WHEN("WHEN"),
+        VARCHAR("VARCHAR"),
         /**
-         * WHERE is postgresql keyword
+         * VARCHAR2 is kingbase keyword
+         */
+        VARCHAR2("VARCHAR2"),
+        /**
+         * VIEW is kingbase keyword
+         */
+        VIEW("VIEW"),
+        /**
+         * WHENEVER is kingbase keyword
+         */
+        WHENEVER("WHENEVER"),
+        /**
+         * WHERE is kingbase keyword
          */
         WHERE("WHERE"),
         /**
-         * WINDOW is postgresql keyword
-         */
-        WINDOW("WINDOW"),
-        /**
-         * WITH is postgresql keyword
+         * WITH is kingbase keyword
          */
         WITH("WITH");
         /**
@@ -354,7 +486,7 @@ public class KingbaseEscapeHandler implements EscapeHandler {
          */
         public final String name;
 
-        PostgresqlKeyword(String name) {
+        KingbaseKeyword(String name) {
             this.name = name;
         }
     }
@@ -371,6 +503,7 @@ public class KingbaseEscapeHandler implements EscapeHandler {
 
     }
 
+
     @Override
     public boolean checkIfNeedEscape(String columnName, TableMeta tableMeta) {
         if (StringUtils.isBlank(columnName)) {
@@ -384,27 +517,39 @@ public class KingbaseEscapeHandler implements EscapeHandler {
         if (isKeyWord) {
             return true;
         }
+        // kingbase
+        // we are recommend table name and column name must uppercase.
+        // if exists full uppercase, the table name or column name doesn't bundle escape symbol.
+        //create\read    table TABLE "table" "TABLE"
+        //
+        //table        √     √       ×       √
+        //
+        //TABLE        √     √       ×       √
+        //
+        //"table"      ×     ×       √       ×
+        //
+        //"TABLE"      √     √       ×       √
         if (null != tableMeta) {
             ColumnMeta columnMeta = tableMeta.getColumnMeta(columnName);
             if (null != columnMeta) {
                 return columnMeta.isCaseSensitive();
             }
-        } else if (!containsUppercase(columnName)) {
+        } else if (isUppercase(columnName)) {
             return false;
         }
         return true;
     }
 
-    private static boolean containsUppercase(String colName) {
-        if (colName == null) {
+    private static boolean isUppercase(String fieldOrTableName) {
+        if (fieldOrTableName == null) {
             return false;
         }
-        char[] chars = colName.toCharArray();
+        char[] chars = fieldOrTableName.toCharArray();
         for (char ch : chars) {
-            if (ch >= 'A' && ch <= 'Z') {
-                return true;
+            if (ch >= 'a' && ch <= 'z') {
+                return false;
             }
         }
-        return false;
+        return true;
     }
 }
