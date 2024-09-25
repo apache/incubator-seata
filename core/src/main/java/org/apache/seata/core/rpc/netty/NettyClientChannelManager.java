@@ -17,13 +17,7 @@
 package org.apache.seata.core.rpc.netty;
 
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
@@ -244,7 +238,7 @@ class NettyClientChannelManager {
                 } else if (LOGGER.isDebugEnabled()) {
                     failedMap.forEach((key, value) -> {
                         LOGGER.error("{} can not connect to {} cause:{} trace information:{}",
-                                FrameworkErrorCode.NetConnect.getErrCode(), key, value.getMessage(), value);
+                                FrameworkErrorCode.NetConnect.getErrCode(), key, value.getMessage(), Arrays.toString(value.getStackTrace()));
                     });
                 }
                 String invalidAddress = StringUtils.join(failedMap.keySet().iterator(), ", ");
