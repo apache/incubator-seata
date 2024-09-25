@@ -16,6 +16,7 @@
  */
 package org.apache.seata.core.rpc;
 
+import org.apache.seata.core.auth.AuthResult;
 import org.apache.seata.core.protocol.RegisterRMRequest;
 import org.apache.seata.core.protocol.RegisterTMRequest;
 
@@ -31,7 +32,7 @@ public interface RegisterCheckAuthHandler {
      * @param request the request
      * @return the boolean
      */
-    boolean regTransactionManagerCheckAuth(RegisterTMRequest request);
+    AuthResult regTransactionManagerCheckAuth(RegisterTMRequest request);
 
     /**
      * Reg resource manager check auth boolean.
@@ -39,5 +40,11 @@ public interface RegisterCheckAuthHandler {
      * @param request the request
      * @return the boolean
      */
-    boolean regResourceManagerCheckAuth(RegisterRMRequest request);
+    AuthResult regResourceManagerCheckAuth(RegisterRMRequest request);
+
+    /**
+     *  Fetch new token
+     * @return the String
+     */
+    String fetchNewToken(AuthResult authResult) ;
 }

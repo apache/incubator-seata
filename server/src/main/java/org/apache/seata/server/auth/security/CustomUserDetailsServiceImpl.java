@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.console.security;
+package org.apache.seata.server.auth.security;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -29,13 +29,13 @@ import javax.annotation.PostConstruct;
  * Custem user service
  *
  */
-@Service("consoleUserDetailsService")
+@Service("clusterUserDetailsService")
 public class CustomUserDetailsServiceImpl implements UserDetailsService {
 
-    @Value("${console.user.username}")
+    @Value("${seata.security.username}")
     private String username;
 
-    @Value("${console.user.password}")
+    @Value("${seata.security.password}")
     private String password;
 
     private User user;

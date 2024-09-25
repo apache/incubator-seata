@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.console.utils;
+package org.apache.seata.server.auth.utils;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -41,29 +41,29 @@ import java.util.List;
  * Jwt token tool
  *
  */
-@Component("consoleJwtTokenUtils")
-public class JwtTokenUtils {
+@Component("clusterJwtTokenUtils")
+public class RaftRegJwtTokenUtils {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JwtTokenUtils.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RaftRegJwtTokenUtils.class);
 
     private static final String AUTHORITIES_KEY = "auth";
 
     /**
      * secret key
      */
-    @Value("${console.secretKey}")
+    @Value("${seata.security.secretKey}")
     private String secretKey;
 
     /**
      * Access token validity time(ms)
      */
-    @Value("${console.accessTokenValidityInMilliseconds}")
+    @Value("${seata.security.accessTokenValidityInMilliseconds}")
     private long accessTokenValidityInMilliseconds;
 
     /**
      * Refresh token validity time(ms)
      */
-    @Value("${console.refreshTokenValidityInMilliseconds}")
+    @Value("${seata.security.refreshTokenValidityInMilliseconds}")
     private long refreshTokenValidityInMilliseconds;
 
     /**
@@ -167,8 +167,8 @@ public class JwtTokenUtils {
             LOGGER.trace("Expired JWT token trace: {}", e);
             return new SingleResult<>(Code.REFRESH_TOKEN_EXPIRED);
         } catch (Exception e) {
-            LOGGER.warn("Invalid JWT token.");
-            LOGGER.trace("Invalid JWT token trace: {}", e);
+            LOGGER.warn("Unsupported JWT token.");
+            LOGGER.trace("Unsupported JWT token trace: {}", e);
             return new SingleResult<>(Code.CHECK_TOKEN_FAILED);
         }
     }
