@@ -15,3 +15,4 @@
 # limitations under the License.
 #
 org.apache.seata.serializer.protobuf.ProtobufSerializer
+org.apache.seata.serializer.protobuf.GrpcSerializer
