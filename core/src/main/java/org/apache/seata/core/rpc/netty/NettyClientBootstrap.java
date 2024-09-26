@@ -139,21 +139,18 @@ public class NettyClientBootstrap implements RemotingBootstrap {
                 @Override
                 public void initChannel(SocketChannel ch) {
                     ChannelPipeline pipeline = ch.pipeline();
-                    pipeline.addLast(new IdleStateHandler(nettyClientConfig.getChannelMaxReadIdleSeconds(),
-                            nettyClientConfig.getChannelMaxWriteIdleSeconds(),
-                            nettyClientConfig.getChannelMaxAllIdleSeconds()));
                     if (nettyClientConfig.getProtocol().equals(Protocol.GPRC.value)) {
                         pipeline.addLast(Http2FrameCodecBuilder.forClient().build())
-                                .addLast(new Http2MultiplexHandler(new ChannelDuplexHandler()))
-                                .addLast(new GrpcDecoder())
-                                .addLast(new GrpcEncoder());
+                                .addLast(new Http2MultiplexHandler(new ChannelDuplexHandler()));
                     } else {
+                        pipeline.addLast(new IdleStateHandler(nettyClientConfig.getChannelMaxReadIdleSeconds(),
+                                nettyClientConfig.getChannelMaxWriteIdleSeconds(),
+                                nettyClientConfig.getChannelMaxAllIdleSeconds()));
                         pipeline.addLast(new ProtocolDecoderV1())
                                 .addLast(new ProtocolEncoderV1());
-                    }
-
-                    if (channelHandlers != null) {
-                        addChannelPipelineLast(ch, channelHandlers);
+                        if (channelHandlers != null) {
+                            addChannelPipelineLast(ch, channelHandlers);
+                        }
                     }
                 }
             });
@@ -194,13 +191,15 @@ public class NettyClientBootstrap implements RemotingBootstrap {
                 channel = f.channel();
             }
 
-            // TODO tmp only for grpc
             if (nettyClientConfig.getProtocol().equals(Protocol.GPRC.value)) {
                 Http2StreamChannelBootstrap bootstrap = new Http2StreamChannelBootstrap(channel);
                 bootstrap.handler(new ChannelInboundHandlerAdapter() {
                     @Override
-                    public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
+                    public void handlerAdded(ChannelHandlerContext ctx) {
                         Channel channel = ctx.channel();
+                        channel.pipeline().addLast(new IdleStateHandler(nettyClientConfig.getChannelMaxReadIdleSeconds(),
+                                nettyClientConfig.getChannelMaxWriteIdleSeconds(),
+                                nettyClientConfig.getChannelMaxAllIdleSeconds()));
                         channel.pipeline().addLast(new GrpcDecoder());
                         channel.pipeline().addLast(new GrpcEncoder());
                         if (channelHandlers != null) {
