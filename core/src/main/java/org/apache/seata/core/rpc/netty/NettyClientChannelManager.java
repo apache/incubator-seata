@@ -244,8 +244,8 @@ class NettyClientChannelManager {
                             failedMap.values().stream().map(Throwable::getMessage).collect(Collectors.toSet()));
                 } else if (LOGGER.isDebugEnabled()) {
                     failedMap.forEach((key, value) -> {
-                        LOGGER.error("{} can not connect to {} cause:{} trace information:{}",
-                                FrameworkErrorCode.NetConnect.getErrCode(), key, value.getMessage(), Arrays.toString(value.getStackTrace()));
+                        LOGGER.error("{} can not connect to {} cause:{} trace information:",
+                                FrameworkErrorCode.NetConnect.getErrCode(), key, value.getMessage(), value);
                     });
                 }
                 String invalidAddress = StringUtils.join(failedMap.keySet().iterator(), ", ");
