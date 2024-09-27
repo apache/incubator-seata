@@ -101,8 +101,6 @@ public class TccAnnotationProcessor implements BeanPostProcessor {
         }
         for (Method method : field.getType().getMethods()) {
             if (!Modifier.isStatic(method.getModifiers()) && (method.isAnnotationPresent(TwoPhaseBusinessAction.class))) {
-                RemotingDesc remotingDesc = new RemotingDesc();
-                remotingDesc.setServiceClass(serviceClass);
 
                 Object proxyBean = ProxyUtil.createProxy(bean, beanName);
                 field.setAccessible(true);
