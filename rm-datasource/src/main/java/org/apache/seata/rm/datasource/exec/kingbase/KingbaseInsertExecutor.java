@@ -16,20 +16,16 @@
  */
 package org.apache.seata.rm.datasource.exec.kingbase;
 
-import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.common.loader.Scope;
 import org.apache.seata.common.util.CollectionUtils;
-import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.rm.datasource.StatementProxy;
 import org.apache.seata.rm.datasource.exec.BaseInsertExecutor;
 import org.apache.seata.rm.datasource.exec.StatementCallback;
 import org.apache.seata.sqlparser.SQLInsertRecognizer;
 import org.apache.seata.sqlparser.SQLRecognizer;
-import org.apache.seata.sqlparser.struct.ColumnMeta;
-import org.apache.seata.sqlparser.struct.Defaultable;
+import org.apache.seata.sqlparser.struct.Null;
 import org.apache.seata.sqlparser.struct.Sequenceable;
-import org.apache.seata.sqlparser.struct.SqlDefaultExpr;
 import org.apache.seata.sqlparser.struct.SqlMethodExpr;
 import org.apache.seata.sqlparser.struct.SqlSequenceExpr;
 import org.apache.seata.sqlparser.util.ColumnUtils;
@@ -45,12 +41,10 @@ import java.util.Set;
 
 /**
  * The type Postgresql insert executor.
- *
- * @author  yougecn
  * 
  */
 @LoadLevel(name = JdbcConstants.KINGBASE, scope = Scope.PROTOTYPE)
-public class KingbaseInsertExecutor extends BaseInsertExecutor implements Sequenceable, Defaultable {
+public class KingbaseInsertExecutor extends BaseInsertExecutor implements Sequenceable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KingbaseInsertExecutor.class);
 
@@ -62,7 +56,7 @@ public class KingbaseInsertExecutor extends BaseInsertExecutor implements Sequen
      * @param sqlRecognizer     the sql recognizer
      */
     public KingbaseInsertExecutor(StatementProxy statementProxy, StatementCallback statementCallback,
-                                  SQLRecognizer sqlRecognizer) {
+                                SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }
 
@@ -114,7 +108,7 @@ public class KingbaseInsertExecutor extends BaseInsertExecutor implements Sequen
         }
         List<String> newColumns = ColumnUtils.delEscape(insertColumns, getDbType());
         return pkColumnNameList.stream().anyMatch(pkColumn -> newColumns.contains(pkColumn)
-            || CollectionUtils.toUpperList(newColumns).contains(pkColumn.toUpperCase()));
+                || CollectionUtils.toUpperList(newColumns).contains(pkColumn.toUpperCase()));
     }
 
     @Override
@@ -128,8 +122,8 @@ public class KingbaseInsertExecutor extends BaseInsertExecutor implements Sequen
                     pkValues.set(i, getPkValuesBySequence((SqlSequenceExpr) pkValues.get(i), pkKey).get(0));
                 } else if (!pkKey.isEmpty() && pkValues.get(i) instanceof SqlMethodExpr) {
                     pkValues.set(i, getGeneratedKeys(pkKey).get(0));
-                } else if (!pkValues.isEmpty() && pkValues.get(i) instanceof SqlDefaultExpr) {
-                    pkValues.set(i, getPkValuesByDefault(pkKey).get(0));
+                } else if (!pkKey.isEmpty() && pkValues.get(i) instanceof Null) {
+                    pkValues.set(i, getGeneratedKeys(pkKey).get(0));
                 }
             }
             pkValuesMap.put(pkKey, pkValues);
@@ -137,52 +131,9 @@ public class KingbaseInsertExecutor extends BaseInsertExecutor implements Sequen
         return pkValuesMap;
     }
 
-    /**
-     * get primary key values by default
-     * @return the pk values
-     * @throws SQLException the sql exception
-     */
-    @Override
-    @Deprecated
-    public List<Object> getPkValuesByDefault() throws SQLException {
-        // current version 1.2 only support postgresql.
-        Map<String, ColumnMeta> pkMetaMap = getTableMeta().getPrimaryKeyMap();
-        ColumnMeta pkMeta = pkMetaMap.values().iterator().next();
-        String columnDef = pkMeta.getColumnDef();
-        // sample: nextval('test_id_seq'::regclass)
-        String seq = org.apache.commons.lang.StringUtils.substringBetween(columnDef, "'", "'");
-        String function = org.apache.commons.lang.StringUtils.substringBetween(columnDef, "", "(");
-        if (StringUtils.isBlank(seq)) {
-            throw new ShouldNeverHappenException("get primary key value failed, cause columnDef is " + columnDef);
-        }
-        return getPkValuesBySequence(new SqlSequenceExpr("'" + seq + "'", function));
-    }
-
-    /**
-     * get primary key values by default
-     *
-     * @param pkKey the pk key
-     * @return the primary values
-     * @throws SQLException the sql exception
-     */
-    @Override
-    public List<Object> getPkValuesByDefault(String pkKey) throws SQLException {
-        // current version 1.2 only support postgresql.
-        Map<String, ColumnMeta> pkMetaMap = getTableMeta().getPrimaryKeyMap();
-        ColumnMeta pkMeta = pkMetaMap.values().iterator().next();
-        String columnDef = pkMeta.getColumnDef();
-        // sample: nextval('test_id_seq'::regclass)
-        String seq = org.apache.commons.lang.StringUtils.substringBetween(columnDef, "'", "'");
-        String function = org.apache.commons.lang.StringUtils.substringBetween(columnDef, "", "(");
-        if (StringUtils.isBlank(seq)) {
-            throw new ShouldNeverHappenException("get primary key value failed, cause columnDef is " + columnDef);
-        }
-        return getPkValuesBySequence(new SqlSequenceExpr("'" + seq + "'", function), pkKey);
-    }
-
     @Override
     public String getSequenceSql(SqlSequenceExpr expr) {
-        return "SELECT currval(" + expr.getSequence() + ")";
+        return "SELECT " + expr.getSequence() + ".currval FROM DUAL";
     }
 
 }

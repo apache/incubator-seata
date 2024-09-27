@@ -17,6 +17,7 @@
 package org.apache.seata.sqlparser.druid.kingbase;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
+import com.alibaba.druid.sql.ast.SQLOrderBy;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLSelect;
@@ -34,7 +35,7 @@ import java.util.List;
 
 /**
  * The type kingbase select for update recognizer.
- * @author yougecn
+ *
  */
 public class KingbaseSelectForUpdateRecognizer extends BaseKingbaseRecognizer implements SQLSelectRecognizer {
 
@@ -71,6 +72,30 @@ public class KingbaseSelectForUpdateRecognizer extends BaseKingbaseRecognizer im
         return super.getWhereCondition(where);
     }
 
+    @Override
+    public String getLimitCondition() {
+        //kingbase does not support limit or rownum yet
+        return null;
+    }
+
+    @Override
+    public String getLimitCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
+        //kingbase does not support limit or rownum yet
+        return null;
+    }
+
+    @Override
+    public String getOrderByCondition() {
+        SQLOrderBy sqlOrderBy = getSelect().getOrderBy();
+        return super.getOrderByCondition(sqlOrderBy);
+    }
+
+    @Override
+    public String getOrderByCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
+        SQLOrderBy sqlOrderBy = getSelect().getOrderBy();
+        return super.getOrderByCondition(sqlOrderBy, parametersHolder, paramAppenderList);
+    }
+
     private SQLSelectQueryBlock getSelect() {
         SQLSelect select = ast.getSelect();
         if (select == null) {
@@ -105,26 +130,6 @@ public class KingbaseSelectForUpdateRecognizer extends BaseKingbaseRecognizer im
         };
         visitor.visit((SQLExprTableSource)tableSource);
         return sb.toString();
-    }
-
-    @Override
-    public String getLimitCondition() {
-        return null;
-    }
-
-    @Override
-    public String getLimitCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
-        return null;
-    }
-
-    @Override
-    public String getOrderByCondition() {
-        return null;
-    }
-
-    @Override
-    public String getOrderByCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
-        return null;
     }
 
     @Override

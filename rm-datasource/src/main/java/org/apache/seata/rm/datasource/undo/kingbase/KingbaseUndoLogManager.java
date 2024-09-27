@@ -17,6 +17,7 @@
 package org.apache.seata.rm.datasource.undo.kingbase;
 
 import org.apache.seata.common.loader.LoadLevel;
+import org.apache.seata.common.util.DateUtil;
 import org.apache.seata.core.compressor.CompressorType;
 import org.apache.seata.core.constants.ClientTableColumnsName;
 import org.apache.seata.rm.datasource.undo.AbstractUndoLogManager;
@@ -31,35 +32,32 @@ import java.sql.SQLException;
 import java.util.Date;
 
 /**
- * @author yougecn
  */
 @LoadLevel(name = JdbcConstants.KINGBASE)
 public class KingbaseUndoLogManager extends AbstractUndoLogManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KingbaseUndoLogManager.class);
 
+    private static final String CHECK_UNDO_LOG_TABLE_EXIST_SQL = "SELECT 1 FROM " + UNDO_LOG_TABLE_NAME + " WHERE ROWNUM = 1";
+
     private static final String INSERT_UNDO_LOG_SQL = "INSERT INTO " + UNDO_LOG_TABLE_NAME +
             " (" + ClientTableColumnsName.UNDO_LOG_ID + "," + ClientTableColumnsName.UNDO_LOG_BRANCH_XID + ", "
             + ClientTableColumnsName.UNDO_LOG_XID + ", " + ClientTableColumnsName.UNDO_LOG_CONTEXT + ", "
             + ClientTableColumnsName.UNDO_LOG_ROLLBACK_INFO + ", " + ClientTableColumnsName.UNDO_LOG_LOG_STATUS + ", "
             + ClientTableColumnsName.UNDO_LOG_LOG_CREATED + ", " + ClientTableColumnsName.UNDO_LOG_LOG_MODIFIED + ")"
-            + "VALUES (nextval('undo_log_id_seq'), ?, ?, ?, ?, ?, now(), now())";
+            + "VALUES (UNDO_LOG_SEQ.nextval, ?, ?, ?, ?, ?, sysdate, sysdate)";
 
-    private static final String DELETE_UNDO_LOG_BY_CREATE_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME + " WHERE "
-            + ClientTableColumnsName.UNDO_LOG_ID + " IN ("
-            + "SELECT " + ClientTableColumnsName.UNDO_LOG_ID + " FROM " + UNDO_LOG_TABLE_NAME
-            + " WHERE " + ClientTableColumnsName.UNDO_LOG_LOG_CREATED + " <= ? LIMIT ?" + ")";
+    private static final String DELETE_UNDO_LOG_BY_CREATE_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME + " WHERE " + ClientTableColumnsName.UNDO_LOG_LOG_CREATED + " <= to_date(?,'yyyy-mm-dd hh24:mi:ss') and ROWNUM <= ?";
 
     @Override
     public int deleteUndoLogByLogCreated(Date logCreated, int limitRows, Connection conn) throws SQLException {
-        PreparedStatement deletePST = null;
-        try {
-            deletePST = conn.prepareStatement(DELETE_UNDO_LOG_BY_CREATE_SQL);
-            deletePST.setDate(1, new java.sql.Date(logCreated.getTime()));
+        try (PreparedStatement deletePST = conn.prepareStatement(DELETE_UNDO_LOG_BY_CREATE_SQL)) {
+            String dateStr = DateUtil.formatDate(logCreated, "yyyy-MM-dd HH:mm:ss");
+            deletePST.setString(1, dateStr);
             deletePST.setInt(2, limitRows);
             int deleteRows = deletePST.executeUpdate();
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("batch delete undo log size " + deleteRows);
+                LOGGER.debug("batch delete undo log size {}", deleteRows);
             }
             return deleteRows;
         } catch (Exception e) {
@@ -67,31 +65,25 @@ public class KingbaseUndoLogManager extends AbstractUndoLogManager {
                 e = new SQLException(e);
             }
             throw (SQLException) e;
-        } finally {
-            if (deletePST != null) {
-                deletePST.close();
-            }
         }
     }
 
     @Override
-    protected void insertUndoLogWithNormal(String xid, long branchID, String rollbackCtx, byte[] undoLogContent,
+    protected void insertUndoLogWithNormal(String xid, long branchId, String rollbackCtx, byte[] undoLogContent,
                                            Connection conn) throws SQLException {
-        insertUndoLog(xid, branchID, rollbackCtx, undoLogContent, State.Normal, conn);
+        insertUndoLog(xid, branchId,rollbackCtx, undoLogContent, State.Normal, conn);
     }
 
     @Override
-    protected void insertUndoLogWithGlobalFinished(String xid, long branchId, UndoLogParser parser,
-        Connection conn) throws SQLException {
+    protected void insertUndoLogWithGlobalFinished(String xid, long branchId, UndoLogParser parser, Connection conn) throws SQLException {
         insertUndoLog(xid, branchId, buildContext(parser.getName(), CompressorType.NONE), parser.getDefaultContent(),
                 State.GlobalFinished, conn);
     }
 
+
     private void insertUndoLog(String xid, long branchID, String rollbackCtx, byte[] undoLogContent,
                                State state, Connection conn) throws SQLException {
-        PreparedStatement pst = null;
-        try {
-            pst = conn.prepareStatement(INSERT_UNDO_LOG_SQL);
+        try (PreparedStatement pst = conn.prepareStatement(INSERT_UNDO_LOG_SQL)) {
             pst.setLong(1, branchID);
             pst.setString(2, xid);
             pst.setString(3, rollbackCtx);
@@ -103,10 +95,11 @@ public class KingbaseUndoLogManager extends AbstractUndoLogManager {
                 e = new SQLException(e);
             }
             throw (SQLException) e;
-        } finally {
-            if (pst != null) {
-                pst.close();
-            }
         }
+    }
+
+    @Override
+    protected String getCheckUndoLogTableExistSql() {
+        return CHECK_UNDO_LOG_TABLE_EXIST_SQL;
     }
 }

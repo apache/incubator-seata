@@ -32,7 +32,6 @@ import java.util.stream.Collectors;
 
 /**
  * The type kingbase undo update executor.
- * @author yougecn
  */
 public class KingbaseUndoUpdateExecutor extends AbstractUndoExecutor {
 

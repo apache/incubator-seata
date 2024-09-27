@@ -31,7 +31,6 @@ import java.sql.SQLException;
 
 /**
  * The type Table meta cache.
- * @author yougecn
  */
 @LoadLevel(name = JdbcConstants.KINGBASE)
 public class KingbaseTableMetaCache extends OracleTableMetaCache {

@@ -39,7 +39,7 @@ import java.util.List;
 
 /**
  * The type kingbase update recognizer.
- * @author yougecn
+ *
  */
 public class KingbaseUpdateRecognizer extends BaseKingbaseRecognizer implements SQLUpdateRecognizer {
 
@@ -75,8 +75,8 @@ public class KingbaseUpdateRecognizer extends BaseKingbaseRecognizer implements 
                 if (owner instanceof SQLIdentifierExpr) {
                     list.add(((SQLIdentifierExpr)owner).getName() + "." + ((SQLPropertyExpr)expr).getName());
                     //This is table Field Full path, like update xxx_database.xxx_tbl set xxx_database.xxx_tbl.xxx_field...
-                } else if (((SQLPropertyExpr) expr).getOwnernName().split("\\.").length > 1) {
-                    list.add(((SQLPropertyExpr)expr).getOwnernName()  + "." + ((SQLPropertyExpr)expr).getName());
+                } else if (((SQLPropertyExpr) expr).getOwnerName().split("\\.").length > 1) {
+                    list.add(((SQLPropertyExpr)expr).getOwnerName()  + "." + ((SQLPropertyExpr)expr).getName());
                 }
             } else {
                 wrapSQLParsingException(expr);
@@ -103,6 +103,12 @@ public class KingbaseUpdateRecognizer extends BaseKingbaseRecognizer implements 
     }
 
     @Override
+    public List<String> getUpdateColumnsUnEscape() {
+        List<String> updateColumns = getUpdateColumns();
+        return ColumnUtils.delEscape(updateColumns, getDbType());
+    }
+
+    @Override
     public String getWhereCondition(final ParametersHolder parametersHolder,
                                     final ArrayList<List<Object>> paramAppenderList) {
         SQLExpr where = ast.getWhere();
@@ -113,6 +119,30 @@ public class KingbaseUpdateRecognizer extends BaseKingbaseRecognizer implements 
     public String getWhereCondition() {
         SQLExpr where = ast.getWhere();
         return super.getWhereCondition(where);
+    }
+
+    @Override
+    public String getLimitCondition() {
+        //kingbase does not support limit or rownum yet
+        return null;
+    }
+
+    @Override
+    public String getLimitCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
+        //kingbase does not support limit or rownum yet
+        return null;
+    }
+
+    @Override
+    public String getOrderByCondition() {
+        //kingbase does not support order by yet
+        return null;
+    }
+
+    @Override
+    public String getOrderByCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
+        //kingbase does not support order by yet
+        return null;
     }
 
     @Override
@@ -145,32 +175,6 @@ public class KingbaseUpdateRecognizer extends BaseKingbaseRecognizer implements 
             throw new NotSupportYetException("not support the syntax of update with unknow");
         }
         return sb.toString();
-    }
-
-    @Override
-    public String getLimitCondition() {
-        return null;
-    }
-
-    @Override
-    public String getLimitCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
-        return null;
-    }
-
-    @Override
-    public String getOrderByCondition() {
-        return null;
-    }
-
-    @Override
-    public String getOrderByCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
-        return null;
-    }
-
-    @Override
-    public List<String> getUpdateColumnsUnEscape() {
-        List<String> updateColumns = getUpdateColumns();
-        return ColumnUtils.delEscape(updateColumns, getDbType());
     }
 
     @Override

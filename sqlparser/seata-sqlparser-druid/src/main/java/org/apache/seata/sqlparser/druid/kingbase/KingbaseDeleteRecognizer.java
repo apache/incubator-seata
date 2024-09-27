@@ -32,7 +32,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author yougecn
+ * The type kingbase delete recognizer.
+ *
  */
 public class KingbaseDeleteRecognizer extends BaseKingbaseRecognizer implements SQLDeleteRecognizer {
 
@@ -107,21 +108,25 @@ public class KingbaseDeleteRecognizer extends BaseKingbaseRecognizer implements 
 
     @Override
     public String getLimitCondition() {
+        //kingbase does not support limit or rownum yet
         return null;
     }
 
     @Override
     public String getLimitCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
+        //kingbase does not support limit or rownum yet
         return null;
     }
 
     @Override
     public String getOrderByCondition() {
+        //kingbase does not support order by yet
         return null;
     }
 
     @Override
     public String getOrderByCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
+        //kingbase does not support order by yet
         return null;
     }
 

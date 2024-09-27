@@ -33,7 +33,6 @@ import java.util.stream.Collectors;
 /**
  * The type kingbase undo delete executor.
  *
- * @author yougecn
  */
 public class KingbaseUndoDeleteExecutor extends AbstractUndoExecutor {
 

@@ -41,7 +41,7 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * @author yougecn
+ *
  */
 public class KingbaseInsertRecognizer extends BaseKingbaseRecognizer implements SQLInsertRecognizer {
 

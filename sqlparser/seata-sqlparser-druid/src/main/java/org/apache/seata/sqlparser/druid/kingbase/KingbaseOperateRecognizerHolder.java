@@ -26,7 +26,7 @@ import org.apache.seata.sqlparser.util.JdbcConstants;
 /**
  * The type KingbaseOperateRecognizerHolder
  *
- * @author yougecn
+ *
  */
 @LoadLevel(name = JdbcConstants.KINGBASE)
 public class KingbaseOperateRecognizerHolder implements SQLOperateRecognizerHolder {

@@ -29,8 +29,6 @@ import java.util.stream.Collectors;
 
 /**
  * The type kingbase keyword checker.
- *
- * @author yougecn
  */
 @LoadLevel(name = JdbcConstants.KINGBASE)
 public class KingbaseEscapeHandler implements EscapeHandler {

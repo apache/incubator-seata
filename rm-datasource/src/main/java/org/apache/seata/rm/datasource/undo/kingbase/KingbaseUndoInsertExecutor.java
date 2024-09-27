@@ -35,7 +35,6 @@ import java.util.stream.Collectors;
 /**
  * The type kingbase undo insert executor.
  *
- * @author yougecn
  */
 public class KingbaseUndoInsertExecutor extends AbstractUndoExecutor {
 

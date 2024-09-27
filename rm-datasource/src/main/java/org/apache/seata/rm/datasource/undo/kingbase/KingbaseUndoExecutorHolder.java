@@ -25,7 +25,6 @@ import org.apache.seata.sqlparser.util.JdbcConstants;
 /**
  * The Type KingbaseUndoExecutorHolder
  *
- * @author yougecn
  */
 @LoadLevel(name = JdbcConstants.KINGBASE)
 public class KingbaseUndoExecutorHolder implements UndoExecutorHolder {
