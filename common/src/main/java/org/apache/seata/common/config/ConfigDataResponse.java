@@ -16,12 +16,13 @@
  */
 package org.apache.seata.common.config;
 
+import java.io.Serializable;
 
-public class ConfigDataResponse<T> {
-
-    T result;
-    String errMsg;
-    Boolean success;
+public class ConfigDataResponse<T> implements Serializable {
+    private static final long serialVersionUID = -1959848221874923781L;
+    private T result;
+    private String errMsg;
+    private Boolean success;
 
     public T getResult() {
         return result;
@@ -45,5 +46,14 @@ public class ConfigDataResponse<T> {
 
     public void setSuccess(Boolean success) {
         this.success = success;
+    }
+
+    @Override
+    public String toString() {
+        return "ConfigDataResponse{" +
+                "result=" + result +
+                ", errMsg='" + errMsg + '\'' +
+                ", success=" + success +
+                '}';
     }
 }

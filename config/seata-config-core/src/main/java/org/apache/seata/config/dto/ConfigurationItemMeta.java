@@ -16,11 +16,15 @@
  */
 package org.apache.seata.config.dto;
 
+import java.io.Serializable;
+
 /**
  * The configuration items meta
  *
  */
-public class ConfigurationItemMeta {
+public class ConfigurationItemMeta implements Serializable {
+
+    private static final long serialVersionUID = 8771878731395411166L;
     private final String key;
     private final String description;
     private final Object defaultValue;

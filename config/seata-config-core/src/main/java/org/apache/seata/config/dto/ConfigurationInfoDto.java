@@ -21,6 +21,7 @@ import java.util.Map;
 
 public class ConfigurationInfoDto implements Serializable {
     private static final long serialVersionUID = 72337179613855724L;
+
     private Map<String, ConfigurationItem> config;
 
     private Long version;

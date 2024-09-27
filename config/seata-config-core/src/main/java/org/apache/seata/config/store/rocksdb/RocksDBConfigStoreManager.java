@@ -41,7 +41,6 @@ import org.apache.seata.config.ConfigurationChangeEvent;
 import org.apache.seata.config.ConfigurationChangeListener;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.config.FileConfiguration;
-import org.apache.seata.config.store.AbstractConfigStoreManager;
 import org.apache.seata.config.store.ConfigStoreManager;
 import org.rocksdb.ColumnFamilyDescriptor;
 import org.rocksdb.ColumnFamilyHandle;
@@ -75,7 +74,7 @@ import static org.apache.seata.common.Constants.DEFAULT_STORE_NAMESPACE;
  * The RocksDB config store manager
  *
  */
-public class RocksDBConfigStoreManager extends AbstractConfigStoreManager {
+public class RocksDBConfigStoreManager implements ConfigStoreManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RocksDBConfigStoreManager.class);
     private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
