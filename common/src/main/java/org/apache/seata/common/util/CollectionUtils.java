@@ -16,11 +16,7 @@
  */
 package org.apache.seata.common.util;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 /**
@@ -271,11 +267,17 @@ public class CollectionUtils {
      * @return the value
      */
     public static <K, V> V computeIfAbsent(Map<K, V> map, K key, Function<? super K, ? extends V> mappingFunction) {
-        V value = map.get(key);
-        if (value != null) {
-            return value;
+        V value;
+        if ((value = map.get(key)) == null) {
+            Objects.requireNonNull(mappingFunction);
+            V newValue;
+            if ((newValue = mappingFunction.apply(key)) != null) {
+                map.put(key, newValue);
+                return newValue;
+            }
         }
-        return map.computeIfAbsent(key, mappingFunction);
+
+        return value;
     }
 
     /**
