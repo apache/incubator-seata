@@ -109,6 +109,7 @@ public class PageUtil {
             case "mysql":
             case "h2":
             case "postgresql":
+            case "kingbase":
             case "oceanbase":
             case "dm":
                 return LIMIT_TEMPLATE.replace(SOURCE_SQL_PLACE_HOLD, sourceSql)
@@ -143,6 +144,7 @@ public class PageUtil {
             case "dm":
                 return sourceSql.replaceAll("(?i)(?<=select)(.*)(?=from)", " count(1) ");
             case "postgresql":
+            case "kingbase":
             case "sqlserver":
                 int lastIndexOfOrderBy = sourceSql.toLowerCase().lastIndexOf("order by");
                 if (lastIndexOfOrderBy != -1) {
