@@ -16,7 +16,6 @@
  */
 package org.apache.seata.spring.tcc;
 
-import org.apache.seata.integration.tx.api.remoting.RemotingDesc;
 import org.apache.seata.integration.tx.api.util.ProxyUtil;
 import org.apache.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import org.slf4j.Logger;
