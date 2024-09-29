@@ -23,7 +23,6 @@ import com.alibaba.druid.sql.dialect.oracle.ast.expr.OracleBinaryDoubleExpr;
 import org.apache.seata.sqlparser.SQLParsingException;
 import org.apache.seata.sqlparser.SQLType;
 import org.apache.seata.sqlparser.druid.kingbase.KingbaseInsertRecognizer;
-import org.apache.seata.sqlparser.druid.oracle.OracleInsertRecognizer;
 import org.apache.seata.sqlparser.struct.NotPlaceholderExpr;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -34,7 +33,7 @@ import java.util.List;
 
 public class KingbaseInsertRecognizerTest {
 
-    private static final String DB_TYPE = "oracle";
+    private static final String DB_TYPE = "kingbase";
 
     @Test
     public void testGetSqlType() {
@@ -89,8 +88,8 @@ public class KingbaseInsertRecognizerTest {
             SQLInsertStatement sqlInsertStatement = (SQLInsertStatement)sqlStatements.get(0);
             sqlInsertStatement.getColumns().add(new OracleBinaryDoubleExpr());
 
-            KingbaseInsertRecognizer oracleInsertRecognizer = new KingbaseInsertRecognizer(s, sqlInsertStatement);
-            oracleInsertRecognizer.getInsertColumns();
+            KingbaseInsertRecognizer kingbaseInsertRecognizer = new KingbaseInsertRecognizer(s, sqlInsertStatement);
+            kingbaseInsertRecognizer.getInsertColumns();
         });
     }
 
@@ -112,8 +111,8 @@ public class KingbaseInsertRecognizerTest {
             SQLInsertStatement sqlInsertStatement = (SQLInsertStatement)sqlStatements.get(0);
             sqlInsertStatement.getValuesList().get(0).getValues().set(pkIndex, new OracleBinaryDoubleExpr());
 
-            KingbaseInsertRecognizer oracleInsertRecognizer = new KingbaseInsertRecognizer(s, sqlInsertStatement);
-            oracleInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex));
+            KingbaseInsertRecognizer kingbaseInsertRecognizer = new KingbaseInsertRecognizer(s, sqlInsertStatement);
+            kingbaseInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex));
         });
     }
 
@@ -122,8 +121,8 @@ public class KingbaseInsertRecognizerTest {
         String sql = "insert into test(create_time) values(sysdate)";
         List<SQLStatement> sqlStatements = SQLUtils.parseStatements(sql, DB_TYPE);
 
-        KingbaseInsertRecognizer oracle = new KingbaseInsertRecognizer(sql, sqlStatements.get(0));
-        List<List<Object>> insertRows = oracle.getInsertRows(Collections.singletonList(-1));
+        KingbaseInsertRecognizer kingbase = new KingbaseInsertRecognizer(sql, sqlStatements.get(0));
+        List<List<Object>> insertRows = kingbase.getInsertRows(Collections.singletonList(-1));
         Assertions.assertTrue(insertRows.get(0).get(0) instanceof NotPlaceholderExpr);
     }
 }

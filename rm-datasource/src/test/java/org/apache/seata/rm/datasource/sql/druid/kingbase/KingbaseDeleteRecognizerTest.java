@@ -34,7 +34,7 @@ import java.util.Map;
 
 public class KingbaseDeleteRecognizerTest {
 
-    private static final String DB_TYPE = "oracle";
+    private static final String DB_TYPE = "kingbase";
 
     @Test
     public void testGetSqlType() {

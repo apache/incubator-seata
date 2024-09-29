@@ -35,7 +35,7 @@ import java.util.Map;
 
 public class KingbaseUpdateRecognizerTest {
 
-    private static final String DB_TYPE = "oracle";
+    private static final String DB_TYPE = "kingbase";
 
     @Test
     public void testGetSqlType() {
@@ -71,8 +71,8 @@ public class KingbaseUpdateRecognizerTest {
             for (SQLUpdateSetItem updateSetItem : updateSetItems) {
                 updateSetItem.setColumn(new OracleCursorExpr());
             }
-            KingbaseUpdateRecognizer oracleUpdateRecognizer = new KingbaseUpdateRecognizer(s, sqlUpdateStatement);
-            oracleUpdateRecognizer.getUpdateColumns();
+            KingbaseUpdateRecognizer kingbaseUpdateRecognizer = new KingbaseUpdateRecognizer(s, sqlUpdateStatement);
+            kingbaseUpdateRecognizer.getUpdateColumns();
         });
     }
 
@@ -101,8 +101,8 @@ public class KingbaseUpdateRecognizerTest {
             for (SQLUpdateSetItem updateSetItem : updateSetItems) {
                 updateSetItem.setValue(new OracleCursorExpr());
             }
-            KingbaseUpdateRecognizer oracleUpdateRecognizer = new KingbaseUpdateRecognizer(s, sqlUpdateStatement);
-            oracleUpdateRecognizer.getUpdateValues();
+            KingbaseUpdateRecognizer kingbaseUpdateRecognizer = new KingbaseUpdateRecognizer(s, sqlUpdateStatement);
+            kingbaseUpdateRecognizer.getUpdateValues();
         });
     }
 

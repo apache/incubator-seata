@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
 public class KingbaseEscapeHandlerTest {
 
     @Test
-    public void testOracleKeywordChecker() {
+    public void testKingbaseKeywordChecker() {
         EscapeHandler escapeHandler = EscapeHandlerFactory.getEscapeHandler(JdbcConstants.KINGBASE);
         Assertions.assertNotNull(escapeHandler);
     }
