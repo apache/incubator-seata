@@ -109,6 +109,7 @@ public class PageUtil {
             case "mysql":
             case "h2":
             case "postgresql":
+            case "kingbase":
             case "oceanbase":
             case "dm":
             case "oscar":
@@ -145,6 +146,7 @@ public class PageUtil {
             case "oscar":
                 return sourceSql.replaceAll("(?i)(?<=select)(.*)(?=from)", " count(1) ");
             case "postgresql":
+            case "kingbase":
             case "sqlserver":
                 int lastIndexOfOrderBy = sourceSql.toLowerCase().lastIndexOf("order by");
                 if (lastIndexOfOrderBy != -1) {

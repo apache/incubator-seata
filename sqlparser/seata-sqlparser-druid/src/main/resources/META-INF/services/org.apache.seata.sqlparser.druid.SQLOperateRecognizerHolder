@@ -22,3 +22,4 @@ org.apache.seata.sqlparser.druid.sqlserver.SqlServerOperateRecognizerHolder
 org.apache.seata.sqlparser.druid.polardbx.PolarDBXOperateRecognizerHolder
 org.apache.seata.sqlparser.druid.dm.DmOperateRecognizerHolder
 org.apache.seata.sqlparser.druid.oscar.OscarOperateRecognizerHolder
+org.apache.seata.sqlparser.druid.kingbase.KingbaseOperateRecognizerHolder
