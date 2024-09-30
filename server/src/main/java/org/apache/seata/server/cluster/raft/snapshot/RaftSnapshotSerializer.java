@@ -78,7 +78,7 @@ public class RaftSnapshotSerializer {
 
     public static RaftSnapshot decode(byte[] raftSnapshotByte) throws IOException {
         try (ByteArrayInputStream bin = new ByteArrayInputStream(raftSnapshotByte);
-             ObjectInputStream ois = new ObjectInputStream(bin){
+             ObjectInputStream ois = new ObjectInputStream(bin) {
                  @Override
                  protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
                      if (!PERMITS.contains(desc.getName())) {
