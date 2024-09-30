@@ -41,6 +41,9 @@ public class OscarEscapeHandler implements EscapeHandler {
      * OSCAR keyword
      */
     private enum OscarKeyword {
+        /**
+         * ABORT is oscar keyword
+         */
         ABORT("ABORT"),
         ABSOLUTE("ABSOLUTE"),
         ACCESS("ACCESS"),
