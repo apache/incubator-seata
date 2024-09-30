@@ -16,7 +16,6 @@
  */
 package org.apache.seata.spring.tcc;
 
-import org.apache.seata.integration.tx.api.remoting.RemotingDesc;
 import org.apache.seata.integration.tx.api.util.ProxyUtil;
 import org.apache.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import org.slf4j.Logger;
@@ -101,8 +100,6 @@ public class TccAnnotationProcessor implements BeanPostProcessor {
         }
         for (Method method : field.getType().getMethods()) {
             if (!Modifier.isStatic(method.getModifiers()) && (method.isAnnotationPresent(TwoPhaseBusinessAction.class))) {
-                RemotingDesc remotingDesc = new RemotingDesc();
-                remotingDesc.setServiceClass(serviceClass);
 
                 Object proxyBean = ProxyUtil.createProxy(bean, beanName);
                 field.setAccessible(true);
