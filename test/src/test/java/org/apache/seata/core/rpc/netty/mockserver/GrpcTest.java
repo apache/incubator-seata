@@ -23,10 +23,12 @@ import io.grpc.stub.StreamObserver;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.ConfigurationTestHelper;
 import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.core.protocol.generated.GrpcMessageProto;
 import org.apache.seata.core.rpc.netty.RmNettyRemotingClient;
 import org.apache.seata.core.rpc.netty.TmNettyRemotingClient;
 import org.apache.seata.mockserver.MockServer;
 import org.apache.seata.serializer.protobuf.generated.*;
+import org.apache.seata.core.protocol.generated.SeataServiceGrpc;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -68,7 +70,7 @@ public class GrpcTest {
                 .setAbstractIdentifyRequest(abstractIdentifyRequestProto)
                 .build();
 
-        return GrpcMessageProto.newBuilder().setBody(Any.pack(registerTMRequestProto)).build();
+        return GrpcMessageProto.newBuilder().setBody(registerTMRequestProto.toByteString()).build();
     }
 
     private GrpcMessageProto getGlobalBeginRequest() {
