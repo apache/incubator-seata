@@ -67,7 +67,7 @@ public class GrpcEncoder extends ChannelOutboundHandlerAdapter {
             Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(rpcMessage.getCodec()));
             dataBytes = ByteString.copyFrom(serializer.serialize(body));
         }
-        headMap.put(GrpcHeaderEnum.CODEC_TYPE.header, String.valueOf(rpcMessage.getCodec()));
+        headMap.put(GrpcHeaderEnum.CODEC_TYPE.header, String.valueOf(SerializerType.PROTOBUF.getCode()));
         headMap.put(GrpcHeaderEnum.COMPRESS_TYPE.header, String.valueOf(rpcMessage.getCompressor()));
         GrpcMessageProto.Builder builder = GrpcMessageProto.newBuilder()
                 .putAllHeadMap(headMap)

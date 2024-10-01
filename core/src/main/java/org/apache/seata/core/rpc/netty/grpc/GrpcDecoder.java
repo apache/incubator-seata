@@ -90,11 +90,8 @@ public class GrpcDecoder extends ChannelDuplexHandler {
                         bodyBytes = compressor.decompress(bodyBytes);
                     }
 
-                    SerializerType serializerType = SerializerType.PROTOBUF;
-                    if (headMap.containsKey(GrpcHeaderEnum.CODEC_TYPE.header)) {
-                        String codecValue = headMap.get(GrpcHeaderEnum.CODEC_TYPE.header);
-                        serializerType = SerializerType.getByCode(Integer.parseInt(codecValue));
-                    }
+                    String codecValue = headMap.get(GrpcHeaderEnum.CODEC_TYPE.header);
+                    SerializerType serializerType = SerializerType.getByCode(Integer.parseInt(codecValue));
                     Serializer serializer = SerializerServiceLoader.load(serializerType);
                     Object messageBody = serializer.deserialize(bodyBytes);
                     rpcMsg.setBody(messageBody);
