@@ -264,7 +264,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
         if (replaceParams != null) {
             contextVariables.putAll(replaceParams);
         }
-        putBusinesskeyToContextariables(stateMachineInstance, contextVariables);
+        putBusinessKeyToContextVariables(stateMachineInstance, contextVariables);
 
         ConcurrentHashMap<String, Object> concurrentContextVariables = new ConcurrentHashMap<>(contextVariables.size());
         nullSafeCopy(contextVariables, concurrentContextVariables);
@@ -509,7 +509,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
         if (replaceParams != null) {
             contextVariables.putAll(replaceParams);
         }
-        putBusinesskeyToContextariables(stateMachineInstance, contextVariables);
+        putBusinessKeyToContextVariables(stateMachineInstance, contextVariables);
 
         ConcurrentHashMap<String, Object> concurrentContextVariables = new ConcurrentHashMap<>(contextVariables.size());
         nullSafeCopy(contextVariables, concurrentContextVariables);
@@ -697,7 +697,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
         return stringBuilder.toString();
     }
 
-    private void putBusinesskeyToContextariables(StateMachineInstance stateMachineInstance,
+    private void putBusinessKeyToContextVariables(StateMachineInstance stateMachineInstance,
                                                  Map<String, Object> contextVariables) {
         if (StringUtils.hasText(stateMachineInstance.getBusinessKey()) && !contextVariables.containsKey(
             DomainConstants.VAR_NAME_BUSINESSKEY)) {
