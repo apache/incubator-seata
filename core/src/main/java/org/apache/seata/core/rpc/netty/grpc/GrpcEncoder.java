@@ -16,7 +16,7 @@
  */
 package org.apache.seata.core.rpc.netty.grpc;
 
-import com.google.protobuf.Any;
+import com.google.protobuf.ByteString;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
@@ -25,6 +25,7 @@ import io.netty.handler.codec.http2.DefaultHttp2DataFrame;
 import io.netty.handler.codec.http2.DefaultHttp2Headers;
 import io.netty.handler.codec.http2.DefaultHttp2HeadersFrame;
 import io.netty.handler.codec.http2.Http2Headers;
+import org.apache.seata.core.protocol.ProtocolConstants;
 import org.apache.seata.core.protocol.RpcMessage;
 import org.apache.seata.core.protocol.generated.GrpcMessageProto;
 import org.apache.seata.core.serializer.Serializer;
@@ -50,8 +51,7 @@ public class GrpcEncoder extends ChannelOutboundHandlerAdapter {
         Object body = rpcMessage.getBody();
         int id = rpcMessage.getId();
 
-        if (headerSent.compareAndSet(false, true))
-        {
+        if (headerSent.compareAndSet(false, true)) {
             Http2Headers headers = new DefaultHttp2Headers();
             headers.add(GrpcHeaderEnum.HTTP2_STATUS.header, String.valueOf(200));
             headers.add(GrpcHeaderEnum.GRPC_STATUS.header, String.valueOf(0));
@@ -59,16 +59,24 @@ public class GrpcEncoder extends ChannelOutboundHandlerAdapter {
             ctx.writeAndFlush(new DefaultHttp2HeadersFrame(headers));
         }
 
-        Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(SerializerType.GRPC.getCode()), (byte) 0);
-        Any messageBody = Any.parseFrom(serializer.serialize(body));
-        GrpcMessageProto grpcMessageProto = GrpcMessageProto.newBuilder()
-                .setBody(messageBody)
+        byte[] dataBytes = null;
+        if (messageType != ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST
+                && messageType != ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE) {
+            Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(rpcMessage.getCodec()));
+            dataBytes = serializer.serialize(body);
+        }
+        headMap.put(GrpcHeaderEnum.CODEC_TYPE.header, String.valueOf(rpcMessage.getCodec()));
+        GrpcMessageProto.Builder builder = GrpcMessageProto.newBuilder()
                 .putAllHeadMap(headMap)
                 .setMessageType(messageType)
-                .setId(id).build();
+                .setId(id);
+        if (dataBytes != null) {
+            builder.setData(ByteString.copyFrom(dataBytes));
+        }
+        GrpcMessageProto grpcMessageProto = builder.build();
+
         byte[] bodyBytes = grpcMessageProto.toByteArray();
-        if (bodyBytes != null)
-        {
+        if (bodyBytes != null) {
             byte[] messageWithPrefix = new byte[bodyBytes.length + 5];
             // The first byte is 0, indicating no compression
             messageWithPrefix[0] = 0;

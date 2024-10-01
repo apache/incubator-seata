@@ -16,7 +16,6 @@
  */
 package org.apache.seata.core.rpc.netty.grpc;
 
-import com.google.protobuf.Any;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -24,11 +23,15 @@ import io.netty.handler.codec.http2.Http2DataFrame;
 import io.netty.handler.codec.http2.Http2HeadersFrame;
 import io.netty.util.ReferenceCountUtil;
 import io.netty.util.ReferenceCounted;
+import org.apache.seata.core.protocol.HeartbeatMessage;
+import org.apache.seata.core.protocol.ProtocolConstants;
 import org.apache.seata.core.protocol.RpcMessage;
 import org.apache.seata.core.protocol.generated.GrpcMessageProto;
 import org.apache.seata.core.serializer.Serializer;
 import org.apache.seata.core.serializer.SerializerServiceLoader;
 import org.apache.seata.core.serializer.SerializerType;
+
+import java.util.Map;
 
 public class GrpcDecoder extends ChannelDuplexHandler {
 
@@ -62,22 +65,31 @@ public class GrpcDecoder extends ChannelDuplexHandler {
 
                 byte[] data = new byte[length];
                 System.arraycopy(bytes, srcPos + 5, data, 0, length);
-
                 GrpcMessageProto grpcMessageProto = GrpcMessageProto.parseFrom(data);
-                Any body = grpcMessageProto.getBody();
-                int messageType = safeCastToInt(grpcMessageProto.getMessageType());
-                int messageId = safeCastToInt(grpcMessageProto.getId());
-                byte[] byteArray = body.toByteArray();
-
-                Serializer serializer =
-                    SerializerServiceLoader.load(SerializerType.getByCode(SerializerType.GRPC.getCode()), (byte)0);
-                Object messageBody = serializer.deserialize(byteArray);
+                byte[] dataBytes = grpcMessageProto.getData().toByteArray();
+                int messageType = grpcMessageProto.getMessageType();
+                int messageId = grpcMessageProto.getId();
+                Map<String, String> headMap = grpcMessageProto.getHeadMapMap();
 
                 RpcMessage rpcMsg = new RpcMessage();
                 rpcMsg.setMessageType((byte)messageType);
-                rpcMsg.setBody(messageBody);
                 rpcMsg.setId(messageId);
                 rpcMsg.setHeadMap(grpcMessageProto.getHeadMapMap());
+
+                if (messageType == ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST) {
+                    rpcMsg.setBody(HeartbeatMessage.PING);
+                } else if (messageType == ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE) {
+                    rpcMsg.setBody(HeartbeatMessage.PONG);
+                }else {
+                    SerializerType serializerType = SerializerType.PROTOBUF;
+                    if (headMap.containsKey(GrpcHeaderEnum.CODEC_TYPE.header)) {
+                        String codecValue = headMap.get(GrpcHeaderEnum.CODEC_TYPE.header);
+                        serializerType = SerializerType.getByCode(Integer.parseInt(codecValue));
+                    }
+                    Serializer serializer = SerializerServiceLoader.load(serializerType);
+                    Object messageBody = serializer.deserialize(dataBytes);
+                    rpcMsg.setBody(messageBody);
+                }
 
                 ctx.fireChannelRead(rpcMsg);
 
