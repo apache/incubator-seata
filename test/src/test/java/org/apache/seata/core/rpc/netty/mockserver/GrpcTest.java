@@ -27,7 +27,6 @@ import org.apache.seata.core.rpc.netty.RmNettyRemotingClient;
 import org.apache.seata.core.rpc.netty.TmNettyRemotingClient;
 import org.apache.seata.mockserver.MockServer;
 import org.apache.seata.serializer.protobuf.generated.*;
-import org.apache.seata.core.protocol.generated.SeataServiceGrpc;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;

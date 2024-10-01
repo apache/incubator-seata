@@ -74,7 +74,9 @@ public class GrpcDecoder extends ChannelDuplexHandler {
                 Map<String, String> headMap = grpcMessageProto.getHeadMapMap();
 
                 RpcMessage rpcMsg = new RpcMessage();
-                rpcMsg.setMessageType((byte) messageType);
+                if (messageType <= Byte.MAX_VALUE && messageType >= Byte.MIN_VALUE) {
+                    rpcMsg.setMessageType((byte) messageType);
+                }
                 rpcMsg.setId(messageId);
                 rpcMsg.setHeadMap(grpcMessageProto.getHeadMapMap());
 
