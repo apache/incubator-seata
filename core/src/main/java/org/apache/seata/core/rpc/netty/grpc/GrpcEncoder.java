@@ -61,11 +61,11 @@ public class GrpcEncoder extends ChannelOutboundHandlerAdapter {
             ctx.writeAndFlush(new DefaultHttp2HeadersFrame(headers));
         }
 
-        byte[] dataBytes = null;
+        ByteString dataBytes = ByteString.EMPTY;
         if (messageType != ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST
                 && messageType != ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE) {
             Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(rpcMessage.getCodec()));
-            dataBytes = serializer.serialize(body);
+            dataBytes = ByteString.copyFrom(serializer.serialize(body));
         }
         headMap.put(GrpcHeaderEnum.CODEC_TYPE.header, String.valueOf(rpcMessage.getCodec()));
         headMap.put(GrpcHeaderEnum.COMPRESS_TYPE.header, String.valueOf(rpcMessage.getCompressor()));
@@ -73,10 +73,8 @@ public class GrpcEncoder extends ChannelOutboundHandlerAdapter {
                 .putAllHeadMap(headMap)
                 .setMessageType(messageType)
                 .setId(id);
-        if (dataBytes != null) {
-            Compressor compressor = CompressorFactory.getCompressor(rpcMessage.getCompressor());
-            builder.setBody(ByteString.copyFrom(compressor.compress(dataBytes)));
-        }
+        Compressor compressor = CompressorFactory.getCompressor(rpcMessage.getCompressor());
+        builder.setBody(ByteString.copyFrom(compressor.compress(dataBytes.toByteArray())));
         GrpcMessageProto grpcMessageProto = builder.build();
 
         byte[] bodyBytes = grpcMessageProto.toByteArray();

@@ -85,12 +85,12 @@ public class GrpcDecoder extends ChannelDuplexHandler {
                 } else if (messageType == ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE) {
                     rpcMsg.setBody(HeartbeatMessage.PONG);
                 } else {
-                    SerializerType serializerType = SerializerType.SEATA;
                     if (headMap.containsKey(GrpcHeaderEnum.COMPRESS_TYPE.header)) {
                         Compressor compressor = CompressorFactory.getCompressor(rpcMsg.getCompressor());
                         bodyBytes = compressor.decompress(bodyBytes);
                     }
 
+                    SerializerType serializerType = SerializerType.PROTOBUF;
                     if (headMap.containsKey(GrpcHeaderEnum.CODEC_TYPE.header)) {
                         String codecValue = headMap.get(GrpcHeaderEnum.CODEC_TYPE.header);
                         serializerType = SerializerType.getByCode(Integer.parseInt(codecValue));
