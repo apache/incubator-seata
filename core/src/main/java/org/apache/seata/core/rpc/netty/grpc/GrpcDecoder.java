@@ -23,6 +23,8 @@ import io.netty.handler.codec.http2.Http2DataFrame;
 import io.netty.handler.codec.http2.Http2HeadersFrame;
 import io.netty.util.ReferenceCountUtil;
 import io.netty.util.ReferenceCounted;
+import org.apache.seata.core.compressor.Compressor;
+import org.apache.seata.core.compressor.CompressorFactory;
 import org.apache.seata.core.protocol.HeartbeatMessage;
 import org.apache.seata.core.protocol.ProtocolConstants;
 import org.apache.seata.core.protocol.RpcMessage;
@@ -61,18 +63,18 @@ public class GrpcDecoder extends ChannelDuplexHandler {
                 // The first byte defaults to 0, indicating that no decompression is required
                 // Read the value of the next four bytes as the length of the body
                 int length = ((bytes[srcPos + 1] & 0xFF) << 24) | ((bytes[srcPos + 2] & 0xFF) << 16)
-                    | ((bytes[srcPos + 3] & 0xFF) << 8) | (bytes[srcPos + 4] & 0xFF);
+                        | ((bytes[srcPos + 3] & 0xFF) << 8) | (bytes[srcPos + 4] & 0xFF);
 
                 byte[] data = new byte[length];
                 System.arraycopy(bytes, srcPos + 5, data, 0, length);
                 GrpcMessageProto grpcMessageProto = GrpcMessageProto.parseFrom(data);
-                byte[] dataBytes = grpcMessageProto.getData().toByteArray();
+                byte[] bodyBytes = grpcMessageProto.getBody().toByteArray();
                 int messageType = grpcMessageProto.getMessageType();
                 int messageId = grpcMessageProto.getId();
                 Map<String, String> headMap = grpcMessageProto.getHeadMapMap();
 
                 RpcMessage rpcMsg = new RpcMessage();
-                rpcMsg.setMessageType((byte)messageType);
+                rpcMsg.setMessageType((byte) messageType);
                 rpcMsg.setId(messageId);
                 rpcMsg.setHeadMap(grpcMessageProto.getHeadMapMap());
 
@@ -80,14 +82,19 @@ public class GrpcDecoder extends ChannelDuplexHandler {
                     rpcMsg.setBody(HeartbeatMessage.PING);
                 } else if (messageType == ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE) {
                     rpcMsg.setBody(HeartbeatMessage.PONG);
-                }else {
-                    SerializerType serializerType = SerializerType.PROTOBUF;
+                } else {
+                    SerializerType serializerType = SerializerType.SEATA;
+                    if (headMap.containsKey(GrpcHeaderEnum.COMPRESS_TYPE.header)) {
+                        Compressor compressor = CompressorFactory.getCompressor(rpcMsg.getCompressor());
+                        bodyBytes = compressor.decompress(bodyBytes);
+                    }
+
                     if (headMap.containsKey(GrpcHeaderEnum.CODEC_TYPE.header)) {
                         String codecValue = headMap.get(GrpcHeaderEnum.CODEC_TYPE.header);
                         serializerType = SerializerType.getByCode(Integer.parseInt(codecValue));
                     }
                     Serializer serializer = SerializerServiceLoader.load(serializerType);
-                    Object messageBody = serializer.deserialize(dataBytes);
+                    Object messageBody = serializer.deserialize(bodyBytes);
                     rpcMsg.setBody(messageBody);
                 }
 
@@ -99,7 +106,7 @@ public class GrpcDecoder extends ChannelDuplexHandler {
             ReferenceCountUtil.release(content);
         }
     }
-        
+
 
     public void onHeadersRead(ChannelHandlerContext ctx, Http2HeadersFrame headersFrame) throws Exception {
         // TODO Subsequent decompression logic is possible
@@ -107,7 +114,7 @@ public class GrpcDecoder extends ChannelDuplexHandler {
 
     private int safeCastToInt(long value) {
         if (value >= Integer.MIN_VALUE && value <= Integer.MAX_VALUE) {
-            return (int)value;
+            return (int) value;
         } else {
             throw new IllegalArgumentException("Value exceeds int range: " + value);
         }

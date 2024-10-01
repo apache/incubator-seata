@@ -25,6 +25,8 @@ import io.netty.handler.codec.http2.DefaultHttp2DataFrame;
 import io.netty.handler.codec.http2.DefaultHttp2Headers;
 import io.netty.handler.codec.http2.DefaultHttp2HeadersFrame;
 import io.netty.handler.codec.http2.Http2Headers;
+import org.apache.seata.core.compressor.Compressor;
+import org.apache.seata.core.compressor.CompressorFactory;
 import org.apache.seata.core.protocol.ProtocolConstants;
 import org.apache.seata.core.protocol.RpcMessage;
 import org.apache.seata.core.protocol.generated.GrpcMessageProto;
@@ -66,12 +68,14 @@ public class GrpcEncoder extends ChannelOutboundHandlerAdapter {
             dataBytes = serializer.serialize(body);
         }
         headMap.put(GrpcHeaderEnum.CODEC_TYPE.header, String.valueOf(rpcMessage.getCodec()));
+        headMap.put(GrpcHeaderEnum.COMPRESS_TYPE.header, String.valueOf(rpcMessage.getCompressor()));
         GrpcMessageProto.Builder builder = GrpcMessageProto.newBuilder()
                 .putAllHeadMap(headMap)
                 .setMessageType(messageType)
                 .setId(id);
         if (dataBytes != null) {
-            builder.setData(ByteString.copyFrom(dataBytes));
+            Compressor compressor = CompressorFactory.getCompressor(rpcMessage.getCompressor());
+            builder.setBody(ByteString.copyFrom(compressor.compress(dataBytes)));
         }
         GrpcMessageProto grpcMessageProto = builder.build();
 

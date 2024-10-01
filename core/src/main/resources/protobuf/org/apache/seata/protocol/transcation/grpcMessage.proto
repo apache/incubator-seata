@@ -24,7 +24,7 @@ message GrpcMessageProto {
     int32 id = 1;
     int32 messageType = 2;
     map<string, string> headMap = 3;
-    bytes data = 4;
+    bytes body = 4;
 }
 
 service SeataService {

@@ -23,7 +23,6 @@ import io.grpc.stub.StreamObserver;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.ConfigurationTestHelper;
 import org.apache.seata.config.ConfigurationFactory;
-import org.apache.seata.core.protocol.generated.GrpcMessageProto;
 import org.apache.seata.core.rpc.netty.RmNettyRemotingClient;
 import org.apache.seata.core.rpc.netty.TmNettyRemotingClient;
 import org.apache.seata.mockserver.MockServer;
