@@ -64,7 +64,7 @@ public class GrpcEncoder extends ChannelOutboundHandlerAdapter {
         ByteString dataBytes = ByteString.EMPTY;
         if (messageType != ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST
                 && messageType != ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE) {
-            Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(rpcMessage.getCodec()));
+            Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(SerializerType.PROTOBUF.getCode()));
             dataBytes = ByteString.copyFrom(serializer.serialize(body));
         }
         headMap.put(GrpcHeaderEnum.CODEC_TYPE.header, String.valueOf(SerializerType.PROTOBUF.getCode()));
