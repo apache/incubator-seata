@@ -86,7 +86,8 @@ public class GrpcDecoder extends ChannelDuplexHandler {
                     rpcMsg.setBody(HeartbeatMessage.PONG);
                 } else {
                     if (headMap.containsKey(GrpcHeaderEnum.COMPRESS_TYPE.header)) {
-                        Compressor compressor = CompressorFactory.getCompressor(rpcMsg.getCompressor());
+                        String compressType = headMap.get(GrpcHeaderEnum.COMPRESS_TYPE.header);
+                        Compressor compressor = CompressorFactory.getCompressor(Byte.parseByte(compressType));
                         bodyBytes = compressor.decompress(bodyBytes);
                     }
 
