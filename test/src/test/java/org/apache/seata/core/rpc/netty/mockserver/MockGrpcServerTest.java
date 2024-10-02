@@ -92,16 +92,6 @@ public class MockGrpcServerTest {
         Assertions.assertEquals(3, Action1Impl.getRollbackTimes(xid));
     }
 
-    @Test
-    public void testTm() throws Exception {
-        TmClientTest.testTm();
-    }
-
-    @Test
-    public void testRm() throws Exception {
-        RmClientTest.testRm();
-    }
-
     private String doTestCommit(int times) throws TransactionException {
         TransactionManager tm = TmClientTest.getTm();
         DefaultResourceManager rm = RmClientTest.getRm(RESOURCE_ID);
