@@ -86,7 +86,7 @@ public class GrpcDecoder extends ChannelDuplexHandler {
                 } else if (messageType == ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE) {
                     rpcMsg.setBody(HeartbeatMessage.PONG);
                 } else {
-                    String compressType = headMap.get(GrpcHeaderEnum.COMPRESS_TYPE.header);;
+                    String compressType = headMap.get(GrpcHeaderEnum.COMPRESS_TYPE.header);
                     if (StringUtils.isNotBlank(compressType)) {
                         byte compress = Byte.parseByte(compressType);
                         rpcMsg.setCompressor(compress);
