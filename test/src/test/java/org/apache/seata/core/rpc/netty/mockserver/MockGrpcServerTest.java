@@ -102,7 +102,6 @@ public class MockGrpcServerTest {
         GlobalStatus commit = tm.commit(xid);
         Assertions.assertEquals(GlobalStatus.Committed, commit);
         return xid;
-
     }
 
     private String doTestRollback(int times) throws TransactionException {
