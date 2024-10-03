@@ -115,13 +115,4 @@ public class GrpcDecoder extends ChannelDuplexHandler {
     public void onHeadersRead(ChannelHandlerContext ctx, Http2HeadersFrame headersFrame) throws Exception {
         // TODO Subsequent decompression logic is possible
     }
-
-    private int safeCastToInt(long value) {
-        if (value >= Integer.MIN_VALUE && value <= Integer.MAX_VALUE) {
-            return (int) value;
-        } else {
-            throw new IllegalArgumentException("Value exceeds int range: " + value);
-        }
-    }
-
 }

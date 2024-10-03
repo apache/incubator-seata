@@ -63,13 +63,6 @@ public enum SerializerType {
      * Math.pow(2, 5)
      */
     JACKSON((byte)0x32),
-
-    /**
-     * The grpc.
-     * <p>
-     * Math.pow(2, 6)
-     */
-    GRPC((byte)0x64)
     ;
 
     private final byte code;
