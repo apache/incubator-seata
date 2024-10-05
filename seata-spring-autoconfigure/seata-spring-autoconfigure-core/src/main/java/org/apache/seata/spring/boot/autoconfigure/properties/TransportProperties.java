@@ -23,6 +23,7 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_ENABLE_CLIENT_BATCH_
 import static org.apache.seata.common.DefaultValues.DEFAULT_ENABLE_RM_CLIENT_BATCH_SEND_REQUEST;
 import static org.apache.seata.common.DefaultValues.DEFAULT_ENABLE_TC_SERVER_BATCH_SEND_RESPONSE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_ENABLE_TM_CLIENT_BATCH_SEND_REQUEST;
+import static org.apache.seata.common.DefaultValues.DEFAULT_PROTOCOL;
 import static org.apache.seata.common.DefaultValues.DEFAULT_RPC_RM_REQUEST_TIMEOUT;
 import static org.apache.seata.common.DefaultValues.DEFAULT_RPC_TC_REQUEST_TIMEOUT;
 import static org.apache.seata.common.DefaultValues.DEFAULT_RPC_TM_REQUEST_TIMEOUT;
@@ -53,6 +54,8 @@ public class TransportProperties {
      * compressor
      */
     private String compressor = "none";
+
+    private String protocol = DEFAULT_PROTOCOL;
 
     /**
      * enable client batch send request
@@ -192,5 +195,13 @@ public class TransportProperties {
 
     public void setRpcTcRequestTimeout(long rpcTcRequestTimeout) {
         this.rpcTcRequestTimeout = rpcTcRequestTimeout;
+    }
+
+    public String getProtocol() {
+        return protocol;
+    }
+
+    public void setProtocol(String protocol) {
+        this.protocol = protocol;
     }
 }
