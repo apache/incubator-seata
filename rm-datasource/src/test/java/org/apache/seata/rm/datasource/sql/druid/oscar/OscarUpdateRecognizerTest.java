@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author hsh
+ * The Oscar Update Recognizer Test.
  */
 public class OscarUpdateRecognizerTest {
 

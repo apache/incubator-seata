@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author hsh
+ * The type Oscar select for update recognizer test.
  */
 public class OscarSelectForUpdateRecognizerTest {
 

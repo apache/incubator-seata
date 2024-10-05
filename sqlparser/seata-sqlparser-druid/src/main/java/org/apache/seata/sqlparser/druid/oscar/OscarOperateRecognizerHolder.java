@@ -26,7 +26,6 @@ import org.apache.seata.sqlparser.util.JdbcConstants;
 /**
  * The Type OscarOperateRecognizerHolder
  *
- * @author hsh
  */
 @LoadLevel(name = JdbcConstants.OSCAR)
 public class OscarOperateRecognizerHolder implements SQLOperateRecognizerHolder {

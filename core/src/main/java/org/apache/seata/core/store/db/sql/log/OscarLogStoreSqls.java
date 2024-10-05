@@ -21,7 +21,6 @@ import org.apache.seata.common.loader.LoadLevel;
 
 /**
  * Database log store oscar sql
- * @author hsh
  */
 @LoadLevel(name = "oscar")
 public class OscarLogStoreSqls extends OracleLogStoreSqls {

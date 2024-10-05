@@ -40,7 +40,6 @@ import java.util.List;
 /**
  * The type oscar update recognizer.
  *
- * @author hsh
  */
 public class OscarUpdateRecognizer extends BaseOscarRecognizer implements SQLUpdateRecognizer {
 

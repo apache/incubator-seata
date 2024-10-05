@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author hsh
+ * The type Oscar delete recognizer test.
  */
 public class OscarDeleteRecognizerTest {
 

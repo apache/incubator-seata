@@ -42,7 +42,6 @@ import java.util.Set;
 /**
  * The type Oscar insert executor.
  *
- * @author hsh
  */
 @LoadLevel(name = JdbcConstants.OSCAR, scope = Scope.PROTOTYPE)
 public class OscarInsertExecutor extends BaseInsertExecutor implements Sequenceable {

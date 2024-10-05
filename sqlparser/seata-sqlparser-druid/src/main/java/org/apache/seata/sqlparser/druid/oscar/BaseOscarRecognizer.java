@@ -43,7 +43,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * @author hsh
+ * The type Base oscar recognizer.
  */
 public abstract class BaseOscarRecognizer extends BaseRecognizer {
 

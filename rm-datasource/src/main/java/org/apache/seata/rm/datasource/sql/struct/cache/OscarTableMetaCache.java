@@ -37,7 +37,6 @@ import java.util.Map;
 /**
  * The type Table meta cache.
  *
- * @author hsh
  */
 @LoadLevel(name = JdbcConstants.OSCAR)
 public class OscarTableMetaCache extends AbstractTableMetaCache {

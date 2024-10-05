@@ -31,7 +31,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * @author hsh
+ * The type Oscar insert recognizer test.
  */
 public class OscarInsertRecognizerTest {
 

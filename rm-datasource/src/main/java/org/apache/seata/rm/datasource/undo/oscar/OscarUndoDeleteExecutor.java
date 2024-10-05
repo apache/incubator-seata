@@ -33,7 +33,6 @@ import java.util.stream.Collectors;
 /**
  * The type oscar undo delete executor.
  *
- * @author hsh
  */
 public class OscarUndoDeleteExecutor extends AbstractUndoExecutor {
 

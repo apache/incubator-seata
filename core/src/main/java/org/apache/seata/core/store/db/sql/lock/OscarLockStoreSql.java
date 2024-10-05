@@ -22,7 +22,6 @@ import org.apache.seata.common.loader.LoadLevel;
 /**
  * the database lock store shentong sql
  *
- * @author hsh
  */
 @LoadLevel(name = "oscar")
 public class OscarLockStoreSql extends OracleLockStoreSql {

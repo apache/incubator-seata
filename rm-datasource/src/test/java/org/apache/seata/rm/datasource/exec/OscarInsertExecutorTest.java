@@ -39,7 +39,7 @@ import java.util.*;
 import static org.mockito.Mockito.*;
 
 /**
- * @author hsh
+ * The type Oscar insert executor test.
  */
 public class OscarInsertExecutorTest {
 

@@ -32,7 +32,7 @@ import java.sql.SQLException;
 import java.util.Date;
 
 /**
- * @author hsh
+ * The type Oscar undo log manager.
  */
 @LoadLevel(name = JdbcConstants.OSCAR)
 public class OscarUndoLogManager extends AbstractUndoLogManager {

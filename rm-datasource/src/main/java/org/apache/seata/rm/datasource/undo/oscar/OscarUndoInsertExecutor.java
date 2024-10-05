@@ -35,7 +35,6 @@ import java.util.stream.Collectors;
 /**
  * The type oscar undo insert executor.
  *
- * @author hsh
  */
 public class OscarUndoInsertExecutor extends AbstractUndoExecutor {
 
