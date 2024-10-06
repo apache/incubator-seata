@@ -59,9 +59,14 @@ public class OracleTableMetaCacheTest {
             new Object[] {"id"}
         };
 
+    private static Object[][] tableMetas =
+            new Object[][]{
+                    new Object[]{"", "t", "ot1"}
+            };
+
     @Test
     public void getTableMetaTest() throws SQLException {
-        MockDriver mockDriver = new MockDriver(columnMetas, indexMetas, pkMetas);
+        MockDriver mockDriver = new MockDriver(columnMetas, indexMetas, pkMetas, tableMetas);
         DruidDataSource dataSource = new DruidDataSource();
         dataSource.setUrl("jdbc:mock:xxx");
         dataSource.setDriver(mockDriver);
@@ -73,6 +78,8 @@ public class OracleTableMetaCacheTest {
         TableMeta tableMeta = tableMetaCache.getTableMeta(proxy.getPlainConnection(), "t.ot1", proxy.getResourceId());
 
         Assertions.assertNotNull(tableMeta);
+        Assertions.assertEquals("OT1", tableMeta.getTableName());
+        Assertions.assertEquals("t.ot1", tableMeta.getOriginalTableName());
 
         tableMeta = tableMetaCache.getTableMeta(proxy.getPlainConnection(), "t.\"ot1\"", proxy.getResourceId());
 

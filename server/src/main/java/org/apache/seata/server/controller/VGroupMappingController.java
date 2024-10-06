@@ -74,8 +74,6 @@ public class VGroupMappingController implements HttpController {
             result.setCode("500");
             result.setMessage("add vGroup failed!");
         }
-        // push the newest mapping relationship
-        vGroupMappingStoreManager.notifyMapping();
         return result;
     }
 
@@ -94,8 +92,6 @@ public class VGroupMappingController implements HttpController {
             result.setCode("500");
             result.setMessage("remove vGroup failed!");
         }
-        // push the newest mapping relationship
-        vGroupMappingStoreManager.notifyMapping();
         return result;
     }
 

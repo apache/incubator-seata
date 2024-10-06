@@ -125,7 +125,7 @@ Please do not use our public issue tracker but refer to our [security policy](./
 
 ## Contributing
 
-Contributors are welcomed to join the Seata project. Please check [CONTRIBUTING](./CONTRIBUTING.md) and[CONTRIBUTING-CN](./CONTRIBUTING_CN.md)about how to contribute to this project.
+Contributors are welcomed to join the Seata project. Please check [CONTRIBUTING](./CONTRIBUTING.md) and [CONTRIBUTING-CN](./CONTRIBUTING_CN.md) about how to contribute to this project.
 
 
 ## Contact

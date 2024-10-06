@@ -16,8 +16,6 @@
  */
 package org.apache.seata.common.metadata.namingserver;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.seata.common.metadata.Node;
 
 import java.util.Objects;
@@ -83,16 +81,6 @@ public class NamingServerNode extends Node {
 
         // other node is newer than me
         return otherNode.term > term;
-    }
-
-    // convert to String
-    public String toJsonString() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            return objectMapper.writeValueAsString(this);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public void setWeight(double weight) {

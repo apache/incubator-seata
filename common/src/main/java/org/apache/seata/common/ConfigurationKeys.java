@@ -816,7 +816,7 @@ public interface ConfigurationKeys {
     /**
      * The constant NAMING_SERVER
      */
-    String NAMING_SERVER = "namingserver";
+    String NAMING_SERVER = "seata";
 
     /**
      * The constant APPLICATION_ID.
