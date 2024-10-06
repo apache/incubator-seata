@@ -18,6 +18,7 @@ import javax.servlet.AsyncListener;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
@@ -29,10 +30,14 @@ import java.util.concurrent.ConcurrentHashMap;
 public class HttpDispatchHandler extends SimpleChannelInboundHandler<HttpRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpDispatchHandler.class);
-    private static final Map<String, Object> httpControllerMap = new ConcurrentHashMap<>();
-    private static final Map<String, Method> requestMethodMap = new ConcurrentHashMap<>();
+
     private static final String INVALID_DEFAULT_VALUE = "\"\\n\\t\\t\\n\\t\\t\\n\\ue000\\ue001\\ue002\\n\\t\\t\\t\\t\\n";
-    private static final List<Class> mappingClass = new ArrayList<Class>() {{
+
+    private static final Map<String, Object> HTTP_CONTROLLER_MAP = new ConcurrentHashMap<>();
+
+    private static final Map<String, Method> REQUEST_METHOD_MAP = new ConcurrentHashMap<>();
+
+    private static final List<Class<? extends Annotation>> MAPPING_CLASS = new ArrayList<Class<? extends Annotation>>() {{
         add(GetMapping.class);
         add(PostMapping.class);
         add(RequestMapping.class);
@@ -41,11 +46,11 @@ public class HttpDispatchHandler extends SimpleChannelInboundHandler<HttpRequest
     }};
 
     public static Object getHttpController(String path) {
-        return httpControllerMap.get(path);
+        return HTTP_CONTROLLER_MAP.get(path);
     }
 
     public static Method getHandleMethod(String path) {
-        return requestMethodMap.get(path);
+        return REQUEST_METHOD_MAP.get(path);
     }
 
     public static void addHttpController(Object httpController) {
@@ -59,31 +64,32 @@ public class HttpDispatchHandler extends SimpleChannelInboundHandler<HttpRequest
         }
         Method[] methods = httpControllerClass.getMethods();
         for (Method method : methods) {
-            GetMapping getMapping = method.getAnnotation(GetMapping.class);
-            if (getMapping != null) {
-                String[] postPaths = getMapping.value();
-                addPathMapping(httpController, prePaths, method, postPaths);
+            for (Class<? extends Annotation> annotationType : MAPPING_CLASS) {
+                Annotation annotation = method.getAnnotation(annotationType);
+                if (annotation != null) {
+                    String[] postPaths = getAnnotationValue(annotation);
+                    addPathMapping(httpController, prePaths, method, postPaths);
+                }
             }
+        }
+    }
 
-            PostMapping postMapping = method.getAnnotation(PostMapping.class);
-            if (postMapping != null) {
-                String[] postPaths = postMapping.value();
-                addPathMapping(httpController, prePaths, method, postPaths);
-            }
-
-            RequestMapping methodRequestMapping = method.getAnnotation(RequestMapping.class);
-            if (methodRequestMapping != null) {
-                String[] postPaths = methodRequestMapping.value();
-                addPathMapping(httpController, prePaths, method, postPaths);
-            }
+    private static String[] getAnnotationValue(Annotation annotation) {
+        try {
+            Class<? extends Annotation> annotationClass = annotation.getClass();
+            Field valueField = annotationClass.getDeclaredField("value");
+            valueField.setAccessible(true);
+            return (String[]) valueField.get(annotation);
+        } catch (Throwable e) {
+            return new String[]{};
         }
     }
 
     private static void addPathMapping(Object httpController, String[] prePaths, Method method, String[] postPaths) {
         for (String prePath : prePaths) {
             for (String postPath : postPaths) {
-                requestMethodMap.put((prePath + "/" + postPath).replaceAll("(/)+", "/"), method);
-                httpControllerMap.put((prePath + "/" + postPath).replaceAll("(/)+", "/"), httpController);
+                REQUEST_METHOD_MAP.put((prePath + "/" + postPath).replaceAll("(/)+", "/"), method);
+                HTTP_CONTROLLER_MAP.put((prePath + "/" + postPath).replaceAll("(/)+", "/"), httpController);
             }
         }
     }
