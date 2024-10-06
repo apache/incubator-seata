@@ -81,8 +81,8 @@ public class NettyClientBootstrap implements RemotingBootstrap {
         int selectorThreadSizeThreadSize = this.nettyClientConfig.getClientSelectorThreadSize();
         this.transactionRole = transactionRole;
         this.eventLoopGroupWorker = new NioEventLoopGroup(selectorThreadSizeThreadSize,
-                new NamedThreadFactory(getThreadPrefix(this.nettyClientConfig.getClientSelectorThreadPrefix()),
-                        selectorThreadSizeThreadSize));
+            new NamedThreadFactory(getThreadPrefix(this.nettyClientConfig.getClientSelectorThreadPrefix()),
+                selectorThreadSizeThreadSize));
         this.defaultEventExecutorGroup = eventExecutorGroup;
     }
 
@@ -113,15 +113,15 @@ public class NettyClientBootstrap implements RemotingBootstrap {
     public void start() {
         if (this.defaultEventExecutorGroup == null) {
             this.defaultEventExecutorGroup = new DefaultEventExecutorGroup(nettyClientConfig.getClientWorkerThreads(),
-                    new NamedThreadFactory(getThreadPrefix(nettyClientConfig.getClientWorkerThreadPrefix()),
-                            nettyClientConfig.getClientWorkerThreads()));
+                new NamedThreadFactory(getThreadPrefix(nettyClientConfig.getClientWorkerThreadPrefix()),
+                    nettyClientConfig.getClientWorkerThreads()));
         }
         this.bootstrap.group(this.eventLoopGroupWorker).channel(
-                nettyClientConfig.getClientChannelClazz()).option(
-                ChannelOption.TCP_NODELAY, true).option(ChannelOption.SO_KEEPALIVE, true).option(
-                ChannelOption.CONNECT_TIMEOUT_MILLIS, nettyClientConfig.getConnectTimeoutMillis()).option(
-                ChannelOption.SO_SNDBUF, nettyClientConfig.getClientSocketSndBufSize()).option(ChannelOption.SO_RCVBUF,
-                nettyClientConfig.getClientSocketRcvBufSize());
+            nettyClientConfig.getClientChannelClazz()).option(
+            ChannelOption.TCP_NODELAY, true).option(ChannelOption.SO_KEEPALIVE, true).option(
+            ChannelOption.CONNECT_TIMEOUT_MILLIS, nettyClientConfig.getConnectTimeoutMillis()).option(
+            ChannelOption.SO_SNDBUF, nettyClientConfig.getClientSocketSndBufSize()).option(ChannelOption.SO_RCVBUF,
+            nettyClientConfig.getClientSocketRcvBufSize());
 
         if (nettyClientConfig.enableNative()) {
             if (PlatformDependent.isOsx()) {
@@ -130,30 +130,30 @@ public class NettyClientBootstrap implements RemotingBootstrap {
                 }
             } else {
                 bootstrap.option(EpollChannelOption.EPOLL_MODE, EpollMode.EDGE_TRIGGERED)
-                        .option(EpollChannelOption.TCP_QUICKACK, true);
+                    .option(EpollChannelOption.TCP_QUICKACK, true);
             }
         }
 
         bootstrap.handler(
-                new ChannelInitializer<SocketChannel>() {
-                    @Override
-                    public void initChannel(SocketChannel ch) {
-                        ChannelPipeline pipeline = ch.pipeline();
-                        if (nettyClientConfig.getProtocol().equals(Protocol.GPRC.value)) {
-                            pipeline.addLast(Http2FrameCodecBuilder.forClient().build())
-                                    .addLast(new Http2MultiplexHandler(new ChannelDuplexHandler()));
-                        } else {
-                            pipeline.addLast(new IdleStateHandler(nettyClientConfig.getChannelMaxReadIdleSeconds(),
-                                    nettyClientConfig.getChannelMaxWriteIdleSeconds(),
-                                    nettyClientConfig.getChannelMaxAllIdleSeconds()));
-                            pipeline.addLast(new ProtocolDecoderV1())
-                                    .addLast(new ProtocolEncoderV1());
-                            if (channelHandlers != null) {
-                                addChannelPipelineLast(ch, channelHandlers);
-                            }
+            new ChannelInitializer<SocketChannel>() {
+                @Override
+                public void initChannel(SocketChannel ch) {
+                    ChannelPipeline pipeline = ch.pipeline();
+                    if (nettyClientConfig.getProtocol().equals(Protocol.GPRC.value)) {
+                        pipeline.addLast(Http2FrameCodecBuilder.forClient().build())
+                                .addLast(new Http2MultiplexHandler(new ChannelDuplexHandler()));
+                    } else {
+                        pipeline.addLast(new IdleStateHandler(nettyClientConfig.getChannelMaxReadIdleSeconds(),
+                                nettyClientConfig.getChannelMaxWriteIdleSeconds(),
+                                nettyClientConfig.getChannelMaxAllIdleSeconds()));
+                        pipeline.addLast(new ProtocolDecoderV1())
+                                .addLast(new ProtocolEncoderV1());
+                        if (channelHandlers != null) {
+                            addChannelPipelineLast(ch, channelHandlers);
                         }
                     }
-                });
+                }
+            });
 
         if (initialized.compareAndSet(false, true) && LOGGER.isInfoEnabled()) {
             LOGGER.info("NettyClientBootstrap has started");
