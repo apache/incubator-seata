@@ -29,16 +29,18 @@ import java.util.concurrent.ConcurrentHashMap;
 public class HttpDispatchHandler extends SimpleChannelInboundHandler<HttpRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpDispatchHandler.class);
-    private static final Map<String, HttpController> httpControllerMap = new ConcurrentHashMap<>();
+    private static final Map<String, Object> httpControllerMap = new ConcurrentHashMap<>();
     private static final Map<String, Method> requestMethodMap = new ConcurrentHashMap<>();
     private static final String INVALID_DEFAULT_VALUE = "\"\\n\\t\\t\\n\\t\\t\\n\\ue000\\ue001\\ue002\\n\\t\\t\\t\\t\\n";
     private static final List<Class> mappingClass = new ArrayList<Class>() {{
         add(GetMapping.class);
         add(PostMapping.class);
         add(RequestMapping.class);
+        add(PutMapping.class);
+        add(DeleteMapping.class);
     }};
 
-    public static HttpController getHttpController(String path) {
+    public static Object getHttpController(String path) {
         return httpControllerMap.get(path);
     }
 
@@ -46,8 +48,8 @@ public class HttpDispatchHandler extends SimpleChannelInboundHandler<HttpRequest
         return requestMethodMap.get(path);
     }
 
-    public static void addHttpController(HttpController httpController) {
-        Class<? extends HttpController> httpControllerClass = httpController.getClass();
+    public static void addHttpController(Object httpController) {
+        Class<?> httpControllerClass = httpController.getClass();
         RequestMapping requestMapping = httpControllerClass.getAnnotation(RequestMapping.class);
         String[] prePaths;
         if (requestMapping != null) {
@@ -77,7 +79,7 @@ public class HttpDispatchHandler extends SimpleChannelInboundHandler<HttpRequest
         }
     }
 
-    private static void addPathMapping(HttpController httpController, String[] prePaths, Method method, String[] postPaths) {
+    private static void addPathMapping(Object httpController, String[] prePaths, Method method, String[] postPaths) {
         for (String prePath : prePaths) {
             for (String postPath : postPaths) {
                 requestMethodMap.put((prePath + "/" + postPath).replaceAll("(/)+", "/"), method);
@@ -105,7 +107,7 @@ public class HttpDispatchHandler extends SimpleChannelInboundHandler<HttpRequest
         }
 
         SeataHttpServletRequest seataHttpServletRequest = new SeataHttpServletRequest(httpRequest, new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK));
-        HttpController httpController = getHttpController(path);
+        Object httpController = getHttpController(path);
         Method handleMethod = getHandleMethod(path);
         Class<?>[] parameterTypes = handleMethod.getParameterTypes();
         Annotation[][] parameterAnnotations = handleMethod.getParameterAnnotations();

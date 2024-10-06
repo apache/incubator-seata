@@ -18,7 +18,6 @@ package org.apache.seata.server.console.controller;
 
 import javax.annotation.Resource;
 
-import org.apache.seata.core.rpc.netty.http.HttpController;
 import org.apache.seata.server.console.param.GlobalSessionParam;
 import org.apache.seata.common.result.PageResult;
 import org.apache.seata.server.console.vo.GlobalSessionVO;
@@ -33,7 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/api/v1/console/globalSession")
-public class GlobalSessionController implements HttpController {
+public class GlobalSessionController {
 
     @Resource(type = GlobalSessionService.class)
     private GlobalSessionService globalSessionService;

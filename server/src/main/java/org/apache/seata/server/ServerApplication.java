@@ -17,7 +17,6 @@
 package org.apache.seata.server;
 
 import java.io.IOException;
-import java.util.concurrent.CountDownLatch;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -26,9 +25,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  */
 @SpringBootApplication(scanBasePackages = {"org.apache.seata"})
 public class ServerApplication {
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) throws IOException {
         // run the spring-boot application
         SpringApplication.run(ServerApplication.class, args);
-        new CountDownLatch(1).await();
     }
 }
