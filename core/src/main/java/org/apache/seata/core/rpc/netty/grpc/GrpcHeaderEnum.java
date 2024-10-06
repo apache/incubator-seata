@@ -29,7 +29,17 @@ public enum GrpcHeaderEnum {
     /**
      * content-type
      */
-    GRPC_CONTENT_TYPE("content-type");
+    GRPC_CONTENT_TYPE("content-type"),
+
+    /**
+     * codec-type
+     */
+    CODEC_TYPE("codec-type"),
+
+    /**
+     * compress-type
+     */
+    COMPRESS_TYPE("compress-type");
 
     public final String header;
 

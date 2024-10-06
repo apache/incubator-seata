@@ -16,17 +16,18 @@
  */
 package org.apache.seata.core.rpc.netty.mockserver;
 
-import com.google.protobuf.Any;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.ConfigurationTestHelper;
 import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.core.protocol.generated.GrpcMessageProto;
 import org.apache.seata.core.rpc.netty.RmNettyRemotingClient;
 import org.apache.seata.core.rpc.netty.TmNettyRemotingClient;
 import org.apache.seata.mockserver.MockServer;
 import org.apache.seata.serializer.protobuf.generated.*;
+import org.apache.seata.core.protocol.generated.SeataServiceGrpc;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -68,7 +69,7 @@ public class GrpcTest {
                 .setAbstractIdentifyRequest(abstractIdentifyRequestProto)
                 .build();
 
-        return GrpcMessageProto.newBuilder().setBody(Any.pack(registerTMRequestProto)).build();
+        return GrpcMessageProto.newBuilder().setBody(registerTMRequestProto.toByteString()).build();
     }
 
     private GrpcMessageProto getGlobalBeginRequest() {
@@ -76,7 +77,7 @@ public class GrpcTest {
                 .setTransactionName("test-transaction")
                 .setTimeout(2000)
                 .build();
-        return GrpcMessageProto.newBuilder().setBody(Any.pack(globalBeginRequestProto)).build();
+        return GrpcMessageProto.newBuilder().setBody(globalBeginRequestProto.toByteString()).build();
     }
 
     private GrpcMessageProto getBranchRegisterRequest() {
@@ -88,7 +89,7 @@ public class GrpcTest {
                 .setApplicationData("{\"mock\":\"mock\"}")
                 .build();
 
-        return GrpcMessageProto.newBuilder().setBody(Any.pack(branchRegisterRequestProto)).build();
+        return GrpcMessageProto.newBuilder().setBody(branchRegisterRequestProto.toByteString()).build();
     }
 
     private GrpcMessageProto getGlobalCommitRequest() {
@@ -99,7 +100,7 @@ public class GrpcTest {
                 .setAbstractGlobalEndRequest(globalEndRequestProto)
                 .build();
 
-        return GrpcMessageProto.newBuilder().setBody(Any.pack(globalCommitRequestProto)).build();
+        return GrpcMessageProto.newBuilder().setBody(globalCommitRequestProto.toByteString()).build();
     }
 
     private GrpcMessageProto getGlobalRollbackRequest() {
@@ -110,7 +111,7 @@ public class GrpcTest {
                 .setAbstractGlobalEndRequest(globalEndRequestProto)
                 .build();
 
-        return GrpcMessageProto.newBuilder().setBody(Any.pack(globalRollbackRequestProto)).build();
+        return GrpcMessageProto.newBuilder().setBody(globalRollbackRequestProto.toByteString()).build();
     }
 
     @Test

@@ -21,7 +21,6 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import org.apache.seata.core.protocol.detector.Http2Detector;
-import org.apache.seata.core.protocol.detector.HttpDetector;
 import org.apache.seata.core.protocol.detector.ProtocolDetector;
 import org.apache.seata.core.protocol.detector.SeataDetector;
 import org.slf4j.Logger;
@@ -36,11 +35,7 @@ public class ProtocolDetectHandler extends ByteToMessageDecoder {
 
     public ProtocolDetectHandler(NettyServerBootstrap nettyServerBootstrap) {
         this.nettyServerBootstrap = nettyServerBootstrap;
-        this.supportedProtocolDetectors = new ProtocolDetector[]{
-            new Http2Detector(nettyServerBootstrap.getChannelHandlers()),
-            new SeataDetector(nettyServerBootstrap.getChannelHandlers()),
-            new HttpDetector()
-        };
+        this.supportedProtocolDetectors = new ProtocolDetector[]{new Http2Detector(nettyServerBootstrap.getChannelHandlers()), new SeataDetector(nettyServerBootstrap.getChannelHandlers())};
     }
 
     @Override
