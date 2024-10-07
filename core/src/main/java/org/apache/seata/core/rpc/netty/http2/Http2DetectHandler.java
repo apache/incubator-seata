@@ -37,7 +37,7 @@ public class Http2DetectHandler extends ChannelDuplexHandler {
         if (msg instanceof Http2HeadersFrame) {
             Http2HeadersFrame headersFrame = (Http2HeadersFrame) msg;
             CharSequence contentType = headersFrame.headers().get(GrpcHeaderEnum.GRPC_CONTENT_TYPE.header);
-            if ("appliction/grpc".equals(contentType.toString())) {
+            if ("application/grpc".equals(contentType.toString())) {
                 ctx.pipeline().addLast(new GrpcDecoder());
                 ctx.pipeline().addLast(new GrpcEncoder());
                 ctx.pipeline().addLast(serverHandlers);
