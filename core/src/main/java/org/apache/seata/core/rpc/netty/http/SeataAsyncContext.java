@@ -1,18 +1,42 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.seata.core.rpc.netty.http;
 
-import javax.servlet.*;
+import javax.servlet.AsyncContext;
+import javax.servlet.AsyncEvent;
+import javax.servlet.AsyncListener;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class SeataAsyncContext implements AsyncContext {
-    private SeataHttpServletRequest request;
-    private SeataHttpServletResponse response;
+    private HttpServletRequest request;
+    private HttpServletResponse response;
     private List<AsyncListener> asyncListenerList;
 
-    public SeataAsyncContext(SeataHttpServletRequest request, SeataHttpServletResponse response) {
+    public SeataAsyncContext(HttpServletRequest request) {
         this.request = request;
-        this.response = response;
+        this.response = new SeataHttpServletResponse();
         asyncListenerList = new ArrayList<>();
     }
 
