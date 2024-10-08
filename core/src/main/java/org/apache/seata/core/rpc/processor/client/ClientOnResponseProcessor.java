@@ -69,9 +69,9 @@ public class ClientOnResponseProcessor implements RemotingProcessor {
     /**
      * The Merge msg map from org.apache.seata.core.rpc.netty.AbstractNettyRemotingClient#mergeMsgMap.
      */
-    private Map<Integer, MergeMessage> mergeMsgMap;
+    private final Map<Integer, MergeMessage> mergeMsgMap;
 
-    private Map<Integer, Integer> childToParentMap;
+    private final Map<Integer, Integer> childToParentMap;
 
     /**
      * The Futures from org.apache.seata.core.rpc.netty.AbstractNettyRemoting#futures
@@ -100,6 +100,8 @@ public class ClientOnResponseProcessor implements RemotingProcessor {
             for (int i = 0; i < mergeMessage.msgs.size(); i++) {
                 int msgId = mergeMessage.msgIds.get(i);
                 MessageFuture future = futures.remove(msgId);
+                // The old version of the server will return MergeResultMessage, so it is necessary to remove the msgId from the childToParentMap.
+                childToParentMap.remove(msgId);
                 if (future == null) {
                     LOGGER.error("msg: {} is not found in futures, result message: {}", msgId,results.getMsgs()[i]);
                 } else {
@@ -112,6 +114,8 @@ public class ClientOnResponseProcessor implements RemotingProcessor {
                 for (int i = 0; i < batchResultMessage.getMsgIds().size(); i++) {
                     int msgId = batchResultMessage.getMsgIds().get(i);
                     MessageFuture future = futures.remove(msgId);
+                    // The old version of the server will return BatchResultMessage, so it is necessary to remove the msgId from the childToParentMap.
+                    childToParentMap.remove(msgId);
                     if (future == null) {
                         LOGGER.error("msg: {} is not found in futures, result message: {}", msgId, batchResultMessage.getResultMessages().get(i));
                     } else {
