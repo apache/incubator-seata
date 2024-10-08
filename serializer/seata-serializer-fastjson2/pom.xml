@@ -31,12 +31,6 @@
     <name>seata-serializer-fastjson2 ${project.version}</name>
     <description>serializer-fastjson2 for Seata built with Maven</description>
 
-    <properties>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
