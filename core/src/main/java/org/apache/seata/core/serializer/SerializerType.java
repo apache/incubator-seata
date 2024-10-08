@@ -63,6 +63,13 @@ public enum SerializerType {
      * Math.pow(2, 5)
      */
     JACKSON((byte)0x32),
+
+    /**
+     * The fastjson2.
+     * <p>
+     * Math.pow(2, 5)
+     */
+    FASTJSON2((byte)0x64),
     ;
 
     private final byte code;
