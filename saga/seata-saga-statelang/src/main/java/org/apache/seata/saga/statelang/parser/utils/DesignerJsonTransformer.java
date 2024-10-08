@@ -122,7 +122,7 @@ public class DesignerJsonTransformer {
                     machineJsonObject.put("StartState", targetStateId);
                     //Make sure 'StartState' is before 'States'
                     machineJsonObject.put("States", machineJsonObject.remove("States"));
-                } else if ("ServiceTask".equals(sourceType)) {
+                } else if ("ServiceTask".equals(sourceType) || "SubStateMachine".equals(sourceType)) {
                     if (targetNode != null && "Compensation".equals(targetNode.get("stateType"))) {
                         sourceState.put("CompensateState", targetStateId);
                     } else {
