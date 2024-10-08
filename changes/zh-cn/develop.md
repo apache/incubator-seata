@@ -22,6 +22,7 @@
 ### optimize:
 - [[#6044](https://github.com/seata/seata/pull/6044)] 优化MySQL衍生数据库判断逻辑
 - [[#6361](https://github.com/seata/seata/pull/6361)] 优化部分链接 401 的问题
+- [[#6903](https://github.com/apache/incubator-seata/pull/6903)] 优化`tableMeta`缓存定时刷新问题
 
 ### security:
 - [[#PR_NO](https://github.com/seata/seata/pull/PR_NO)] 准确简要的PR描述
