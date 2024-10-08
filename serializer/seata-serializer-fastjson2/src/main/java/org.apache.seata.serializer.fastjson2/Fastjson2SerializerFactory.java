@@ -38,23 +38,23 @@ public class Fastjson2SerializerFactory {
         autoTypeFilter = JSONReader.autoTypeFilter(true, SerializerSecurityRegistry.getAllowClassType().toArray(new Class[]{}));
 
         jsonReaderFeature = new JSONReader.Feature[]{
-                JSONReader.Feature.UseDefaultConstructorAsPossible,
-                // If not configured, it will be serialized based on public field and getter methods by default.
-                // After configuration, it will be deserialized based on non-static fields (including private).
-                // It will be safer under FieldBased configuration
-                JSONReader.Feature.FieldBased,
-                JSONReader.Feature.IgnoreAutoTypeNotMatch,
-                JSONReader.Feature.UseNativeObject
+            JSONReader.Feature.UseDefaultConstructorAsPossible,
+            // If not configured, it will be serialized based on public field and getter methods by default.
+            // After configuration, it will be deserialized based on non-static fields (including private).
+            // It will be safer under FieldBased configuration
+            JSONReader.Feature.FieldBased,
+            JSONReader.Feature.IgnoreAutoTypeNotMatch,
+            JSONReader.Feature.UseNativeObject
         };
 
         jsonWriterFeature = new JSONWriter.Feature[]{
-                JSONWriter.Feature.WriteClassName,
-                JSONWriter.Feature.FieldBased,
-                JSONWriter.Feature.ReferenceDetection,
-                JSONWriter.Feature.WriteNulls,
-                JSONWriter.Feature.NotWriteDefaultValue,
-                JSONWriter.Feature.NotWriteHashMapArrayListClassName,
-                JSONWriter.Feature.WriteNameAsSymbol
+            JSONWriter.Feature.WriteClassName,
+            JSONWriter.Feature.FieldBased,
+            JSONWriter.Feature.ReferenceDetection,
+            JSONWriter.Feature.WriteNulls,
+            JSONWriter.Feature.NotWriteDefaultValue,
+            JSONWriter.Feature.NotWriteHashMapArrayListClassName,
+            JSONWriter.Feature.WriteNameAsSymbol
         };
     }
 
