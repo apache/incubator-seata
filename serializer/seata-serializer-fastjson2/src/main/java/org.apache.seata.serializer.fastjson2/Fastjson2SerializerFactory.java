@@ -31,7 +31,7 @@ public class Fastjson2SerializerFactory {
 
     private  JSONWriter.Feature[] jsonWriterFeature;
     private static final class InstanceHolder {
-        public static final Fastjson2SerializerFactory instance = new Fastjson2SerializerFactory();
+        public static final Fastjson2SerializerFactory INSTANCE = new Fastjson2SerializerFactory();
     }
 
     public Fastjson2SerializerFactory() {
@@ -59,7 +59,7 @@ public class Fastjson2SerializerFactory {
     }
 
     public static Fastjson2SerializerFactory getInstance() {
-        return Fastjson2SerializerFactory.InstanceHolder.instance;
+        return Fastjson2SerializerFactory.InstanceHolder.INSTANCE;
     }
 
     public Filter getFilter() {
