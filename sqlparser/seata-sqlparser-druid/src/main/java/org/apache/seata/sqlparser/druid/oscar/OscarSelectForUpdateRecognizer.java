@@ -36,7 +36,6 @@ import java.util.List;
 /**
  * The type oscar select for update recognizer.
  *
- * @author ccg
  */
 public class OscarSelectForUpdateRecognizer extends BaseOscarRecognizer implements SQLSelectRecognizer {
 
