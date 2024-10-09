@@ -58,8 +58,8 @@ public class MockFastJson2Test {
     @AfterAll
     public static void after() {
         //MockServer.close();
+        ConfigurationTestHelper.removeConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
         ConfigurationTestHelper.removeConfig(ConfigurationKeys.SERIALIZE_FOR_RPC);
-        ConfigurationTestHelper.putConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, String.valueOf(ProtocolTestConstants.MOCK_SERVER_PORT));
         TmNettyRemotingClient.getInstance().destroy();
         RmNettyRemotingClient.getInstance().destroy();
     }
