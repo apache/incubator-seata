@@ -46,7 +46,7 @@ public class OscarUpdateRecognizer extends BaseOscarRecognizer implements SQLUpd
     private SQLUpdateStatement ast;
 
     /**
-     * Instantiates a new My sql update recognizer.
+     * Instantiates a new Oscar sql update recognizer.
      *
      * @param originalSQL the original sql
      * @param ast         the ast
