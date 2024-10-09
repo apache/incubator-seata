@@ -73,6 +73,7 @@ seata:
       default: 127.0.0.1:8091
     disable-global-transaction: false
   transport:
+    protocol: seata
     shutdown:
       wait: 3
     thread-factory:
