@@ -43,7 +43,6 @@ import java.util.List;
 /**
  * The type oscar insert recognizer.
  *
- * @author ccg
  */
 public class OscarInsertRecognizer extends BaseOscarRecognizer implements SQLInsertRecognizer {
 
