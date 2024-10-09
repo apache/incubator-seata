@@ -21,11 +21,13 @@ import org.apache.seata.core.store.MappingDO;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Map;
 
 
+@EnabledIfSystemProperty(named = "redisCaseEnabled", matches = "true")
 @SpringBootTest
 public class RedisVGroupMappingStoreManagerTest {
     private RedisVGroupMappingStoreManager redisVGroupMappingStoreManager;
