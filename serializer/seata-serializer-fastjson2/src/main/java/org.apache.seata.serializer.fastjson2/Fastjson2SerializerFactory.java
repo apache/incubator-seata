@@ -21,9 +21,6 @@ import com.alibaba.fastjson2.JSONWriter;
 import com.alibaba.fastjson2.filter.Filter;
 import org.apache.seata.core.serializer.SerializerSecurityRegistry;
 
-/**
- * @Author GoodBoyCoder
- */
 public class Fastjson2SerializerFactory {
     private Filter autoTypeFilter;
 

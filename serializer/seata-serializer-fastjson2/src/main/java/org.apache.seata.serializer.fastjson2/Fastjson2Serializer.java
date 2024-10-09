@@ -20,9 +20,6 @@ import com.alibaba.fastjson2.JSONB;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.core.serializer.Serializer;
 
-/**
- * @Author GoodBoyCoder
- */
 @LoadLevel(name = "FASTJSON2")
 public class Fastjson2Serializer implements Serializer {
 
