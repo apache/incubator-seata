@@ -109,24 +109,22 @@ public class ClientOnResponseProcessor implements RemotingProcessor {
                 }
             }
         } else if (rpcMessage.getBody() instanceof BatchResultMessage) {
-            try {
-                BatchResultMessage batchResultMessage = (BatchResultMessage) rpcMessage.getBody();
-                for (int i = 0; i < batchResultMessage.getMsgIds().size(); i++) {
-                    int msgId = batchResultMessage.getMsgIds().get(i);
-                    MessageFuture future = futures.remove(msgId);
-                    // The old version of the server will return BatchResultMessage, so it is necessary to remove the msgId from the childToParentMap.
-                    childToParentMap.remove(msgId);
-                    if (future == null) {
-                        LOGGER.error("msg: {} is not found in futures, result message: {}", msgId, batchResultMessage.getResultMessages().get(i));
-                    } else {
-                        future.setResultMessage(batchResultMessage.getResultMessages().get(i));
-                    }
+            BatchResultMessage batchResultMessage = (BatchResultMessage)rpcMessage.getBody();
+            for (int i = 0; i < batchResultMessage.getMsgIds().size(); i++) {
+                int msgId = batchResultMessage.getMsgIds().get(i);
+                MessageFuture future = futures.remove(msgId);
+                // The old version of the server will return BatchResultMessage, so it is necessary to remove the msgId
+                // from the childToParentMap.
+                Integer parentId = childToParentMap.remove(msgId);
+                if (parentId != null) {
+                    mergeMsgMap.remove(parentId);
                 }
-            } finally {
-                // In order to be compatible with the old version, in the batch sending of version 1.5.0,
-                // batch messages will also be placed in the local cache of mergeMsgMap,
-                // but version 1.5.0 no longer needs to obtain batch messages from mergeMsgMap
-                mergeMsgMap.clear();
+                if (future == null) {
+                    LOGGER.error("msg: {} is not found in futures, result message: {}", msgId,
+                        batchResultMessage.getResultMessages().get(i));
+                } else {
+                    future.setResultMessage(batchResultMessage.getResultMessages().get(i));
+                }
             }
         } else {
             Integer id = rpcMessage.getId();
