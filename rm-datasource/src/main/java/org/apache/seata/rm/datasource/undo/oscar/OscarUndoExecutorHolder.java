@@ -25,7 +25,6 @@ import org.apache.seata.sqlparser.util.JdbcConstants;
 /**
  * The Type OscarUndoExecutorHolder
  *
- * @author Zhibei Hao
  */
 @LoadLevel(name = JdbcConstants.OSCAR)
 public class OscarUndoExecutorHolder implements UndoExecutorHolder {
