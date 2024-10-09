@@ -40,7 +40,7 @@ public class OscarDeleteRecognizer extends BaseOscarRecognizer implements SQLDel
     private final SQLDeleteStatement ast;
 
     /**
-     * Instantiates a new My sql delete recognizer.
+     * Instantiates a new Oscar sql delete recognizer.
      *
      * @param originalSQL the original sql
      * @param ast         the ast
