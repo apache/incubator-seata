@@ -67,7 +67,7 @@ public enum SerializerType {
     /**
      * The fastjson2.
      * <p>
-     * Math.pow(2, 5)
+     * Math.pow(2, 6)
      */
     FASTJSON2((byte)0x64),
     ;
