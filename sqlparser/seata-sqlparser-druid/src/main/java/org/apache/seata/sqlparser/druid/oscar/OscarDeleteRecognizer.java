@@ -34,7 +34,6 @@ import java.util.List;
 /**
  * The type oscar delete recognizer.
  *
- * @author ccg
  */
 public class OscarDeleteRecognizer extends BaseOscarRecognizer implements SQLDeleteRecognizer {
 
