@@ -49,7 +49,7 @@ public class OscarInsertRecognizer extends BaseOscarRecognizer implements SQLIns
     private final SQLInsertStatement ast;
 
     /**
-     * Instantiates a new My sql insert recognizer.
+     * Instantiates a new Oscar sql insert recognizer.
      *
      * @param originalSQL the original sql
      * @param ast         the ast
