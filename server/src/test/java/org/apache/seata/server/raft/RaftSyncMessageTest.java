@@ -117,6 +117,18 @@ public class RaftSyncMessageTest {
     }
 
     @Test
+    public void testSecuritySnapshotSerialize() throws IOException {
+        TestSecurity testSecurity = new TestSecurity();
+        byte[] bytes;
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
+             ObjectOutputStream oos = new ObjectOutputStream(bos)) {
+            oos.writeObject(testSecurity);
+            bytes =  bos.toByteArray();
+        }
+        Assertions.assertThrows(SeataRuntimeException.class,()->RaftSnapshotSerializer.decode(bytes));
+    }
+
+    @Test
     public void testSnapshotSerialize() throws IOException, TransactionException {
         Map<String, GlobalSession> sessionMap = new HashMap<>();
         GlobalSession globalSession = GlobalSession.createGlobalSession("123", "123", "123", 11111);
