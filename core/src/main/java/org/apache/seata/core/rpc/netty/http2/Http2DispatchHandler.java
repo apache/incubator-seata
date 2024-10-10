@@ -16,10 +16,12 @@
  */
 package org.apache.seata.core.rpc.netty.http2;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.http.QueryStringDecoder;
 import io.netty.handler.codec.http2.DefaultHttp2DataFrame;
 import io.netty.handler.codec.http2.DefaultHttp2Headers;
 import io.netty.handler.codec.http2.DefaultHttp2HeadersFrame;
@@ -27,6 +29,7 @@ import io.netty.handler.codec.http2.Http2Headers;
 import io.netty.handler.codec.http2.Http2HeadersFrame;
 import org.apache.seata.core.rpc.netty.grpc.GrpcHeaderEnum;
 import org.apache.seata.core.rpc.netty.http.ControllerManager;
+import org.apache.seata.core.rpc.netty.http.ParameterParser;
 import org.apache.seata.core.rpc.netty.http.SeataHttpServletRequest;
 
 import javax.servlet.AsyncEvent;
@@ -35,12 +38,9 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class Http2WatchHandler extends ChannelDuplexHandler {
-
-    public static final String WATCH_PATH = "/metadata/v1/watch";
+public class Http2DispatchHandler extends ChannelDuplexHandler {
 
     private final AtomicBoolean headerSent = new AtomicBoolean(false);
 
@@ -54,37 +54,44 @@ public class Http2WatchHandler extends ChannelDuplexHandler {
             }
 
             Http2HeadersFrame http2HeadersFrame = (Http2HeadersFrame) msg;
-            CharSequence groupTermMapString = http2HeadersFrame.headers().get("seata-group-term-map");
-            CharSequence watchTimeout = http2HeadersFrame.headers().get("seata-watch-timeout");
-            Map<String, Object>  groupTermMap = JSONObject.parseObject(groupTermMapString.toString(), Map.class);
+            String path = http2HeadersFrame.headers().path().toString();
+            QueryStringDecoder queryStringDecoder = new QueryStringDecoder(path);
+            JSONObject paramMap = new JSONObject();
+            paramMap.putAll(ParameterParser.convertParamMap(queryStringDecoder.parameters()));
+
             InetSocketAddress inetSocketAddress = (InetSocketAddress) ctx.channel().remoteAddress();
-
             SeataHttpServletRequest seataHttpServletRequest = new SeataHttpServletRequest(inetSocketAddress.getAddress().getHostAddress());
-            seataHttpServletRequest.getAsyncContext().addListener(new AsyncListener() {
-                @Override
-                public void onComplete(AsyncEvent event) throws IOException {
-                    ctx.channel().writeAndFlush(new DefaultHttp2DataFrame(Unpooled.wrappedBuffer("changed\n".getBytes())));
-                }
+            Object httpController = ControllerManager.getHttpController(path);
+            Method handleMethod = ControllerManager.getHandleMethod(path);
+            Object[] args = ParameterParser.getArgValues(seataHttpServletRequest, handleMethod, paramMap);
+            Object result = handleMethod.invoke(httpController, args);
+            if (seataHttpServletRequest.isAsyncStarted()) {
+                seataHttpServletRequest.getAsyncContext().addListener(new AsyncListener() {
+                    @Override
+                    public void onComplete(AsyncEvent event) throws IOException {
+                        ctx.channel().writeAndFlush(new DefaultHttp2DataFrame(Unpooled.wrappedBuffer("changed\n".getBytes())));
+                    }
 
-                @Override
-                public void onTimeout(AsyncEvent event) throws IOException {
+                    @Override
+                    public void onTimeout(AsyncEvent event) throws IOException {
 
-                }
+                    }
 
-                @Override
-                public void onError(AsyncEvent event) throws IOException {
+                    @Override
+                    public void onError(AsyncEvent event) throws IOException {
 
-                }
+                    }
 
-                @Override
-                public void onStartAsync(AsyncEvent event) throws IOException {
+                    @Override
+                    public void onStartAsync(AsyncEvent event) throws IOException {
 
-                }
-            });
+                    }
+                });
 
-            Object httpController = ControllerManager.getHttpController(WATCH_PATH);
-            Method handleMethod = ControllerManager.getHandleMethod(WATCH_PATH);
-            handleMethod.invoke(httpController, seataHttpServletRequest, groupTermMap, Integer.valueOf(watchTimeout.toString()));
+                return;
+            }
+
+            ctx.writeAndFlush(new DefaultHttp2DataFrame(Unpooled.wrappedBuffer(JSON.toJSONBytes(result))));
         }
     }
 }

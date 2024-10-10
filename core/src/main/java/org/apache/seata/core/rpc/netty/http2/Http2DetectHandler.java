@@ -42,7 +42,7 @@ public class Http2DetectHandler extends ChannelDuplexHandler {
                 ctx.pipeline().addLast(new GrpcEncoder());
                 ctx.pipeline().addLast(serverHandlers);
             } else {
-                ctx.pipeline().addLast(new Http2WatchHandler());
+                ctx.pipeline().addLast(new Http2DispatchHandler());
             }
 
             ctx.pipeline().remove(this);
