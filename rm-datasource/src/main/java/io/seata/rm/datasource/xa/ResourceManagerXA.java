@@ -15,12 +15,13 @@
  */
 package io.seata.rm.datasource.xa;
 
+import java.sql.SQLException;
+import javax.transaction.xa.XAException;
+
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.sql.SQLException;
-import javax.transaction.xa.XAException;
 import io.seata.common.DefaultValues;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.config.ConfigurationFactory;
@@ -34,7 +35,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static io.seata.core.constants.ConfigurationKeys.XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT;
-
 /**
  * RM for XA mode.
  *
@@ -65,7 +65,7 @@ public class ResourceManagerXA extends AbstractDataSourceCacheResourceManager {
                 if (xaTwoPhaseTimeoutChecker == null) {
                     boolean shouldBeHold = dataSourceCache.values().parallelStream().anyMatch(resource -> {
                         if (resource instanceof DataSourceProxyXA) {
-                            return ((DataSourceProxyXA)resource).isShouldBeHeld();
+                            return ((DataSourceProxyXA)resource).isShouldBeHold();
                         }
                         return false;
                     });
@@ -75,9 +75,10 @@ public class ResourceManagerXA extends AbstractDataSourceCacheResourceManager {
                         xaTwoPhaseTimeoutChecker.scheduleAtFixedRate(() -> {
                             for (Map.Entry<String, Resource> entry : dataSourceCache.entrySet()) {
                                 BaseDataSourceResource resource = (BaseDataSourceResource)entry.getValue();
-                                if (resource.isShouldBeHeld()) {
-                                    if (resource instanceof DataSourceProxyXA) {
-                                        Map<String, ConnectionProxyXA> keeper = resource.getKeeper();
+                                if (resource instanceof DataSourceProxyXA) {
+                                    BaseDataSourceResourceXA<ConnectionProxyXA> resourceXA = (BaseDataSourceResourceXA<ConnectionProxyXA>) resource;
+                                    if (resourceXA.isShouldBeHold()) {
+                                        Map<String, ConnectionProxyXA> keeper = BaseDataSourceResourceXA.getKeeper();
                                         for (Map.Entry<String, ConnectionProxyXA> connectionEntry : keeper.entrySet()) {
                                             ConnectionProxyXA connection = connectionEntry.getValue();
                                             long now = System.currentTimeMillis();
@@ -92,6 +93,8 @@ public class ResourceManagerXA extends AbstractDataSourceCacheResourceManager {
                                                 }
                                             }
                                         }
+                                        // keeper is static
+                                        break;
                                     }
                                 }
                             }
@@ -138,7 +141,7 @@ public class ResourceManagerXA extends AbstractDataSourceCacheResourceManager {
             } catch (XAException | SQLException sqle) {
                 if (sqle instanceof XAException) {
                     try {
-                        if (((XAException) sqle).errorCode == XAException.XAER_NOTA) {
+                        if (((XAException)sqle).errorCode == XAException.XAER_NOTA) {
                             if (committed) {
                                 return BranchStatus.PhaseTwo_CommitFailed_XAER_NOTA_Retryable;
                             } else {
@@ -146,8 +149,8 @@ public class ResourceManagerXA extends AbstractDataSourceCacheResourceManager {
                             }
                         }
                     } finally {
-                        BaseDataSourceResource.setBranchStatus(xaBranchXid.toString(),
-                                committed ? BranchStatus.PhaseTwo_Committed : BranchStatus.PhaseTwo_Rollbacked);
+                        BaseDataSourceResourceXA.setBranchStatus(xaBranchXid.toString(),
+                            committed ? BranchStatus.PhaseTwo_Committed : BranchStatus.PhaseTwo_Rollbacked);
                     }
                 }
                 if (committed) {

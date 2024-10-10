@@ -21,6 +21,7 @@ import io.seata.core.model.Resource;
 import io.seata.core.model.ResourceManager;
 import io.seata.rm.BaseDataSourceResource;
 import io.seata.rm.DefaultResourceManager;
+import io.seata.rm.datasource.xa.BaseDataSourceResourceXA;
 import io.seata.rm.datasource.xa.ConnectionProxyXA;
 import io.seata.rm.datasource.xa.StatementProxyXA;
 import org.junit.jupiter.api.AfterAll;
@@ -49,7 +50,7 @@ public class ConnectionProxyXATest {
         Connection connection = Mockito.mock(Connection.class);
         Mockito.when(connection.getAutoCommit()).thenReturn(false);
         XAConnection xaConnection = Mockito.mock(XAConnection.class);
-        BaseDataSourceResource<ConnectionProxyXA> baseDataSourceResource = Mockito.mock(BaseDataSourceResource.class);
+        BaseDataSourceResourceXA<ConnectionProxyXA> baseDataSourceResource = Mockito.mock(BaseDataSourceResourceXA.class);
         String xid = "xxx";
 
         ConnectionProxyXA connectionProxyXA = new ConnectionProxyXA(connection, xaConnection, baseDataSourceResource, xid);
@@ -67,7 +68,7 @@ public class ConnectionProxyXATest {
         XAResource xaResource = Mockito.mock(XAResource.class);
         XAConnection xaConnection = Mockito.mock(XAConnection.class);
         Mockito.when(xaConnection.getXAResource()).thenReturn(xaResource);
-        BaseDataSourceResource<ConnectionProxyXA> baseDataSourceResource = Mockito.mock(BaseDataSourceResource.class);
+        BaseDataSourceResourceXA<ConnectionProxyXA> baseDataSourceResource = Mockito.mock(BaseDataSourceResourceXA.class);
         String xid = "xxx";
         ResourceManager resourceManager = Mockito.mock(ResourceManager.class);
         Mockito.doNothing().when(resourceManager).registerResource(any(Resource.class));
@@ -98,7 +99,7 @@ public class ConnectionProxyXATest {
         XAResource xaResource = Mockito.mock(XAResource.class);
         XAConnection xaConnection = Mockito.mock(XAConnection.class);
         Mockito.when(xaConnection.getXAResource()).thenReturn(xaResource);
-        BaseDataSourceResource<ConnectionProxyXA> baseDataSourceResource = Mockito.mock(BaseDataSourceResource.class);
+        BaseDataSourceResourceXA<ConnectionProxyXA> baseDataSourceResource = Mockito.mock(BaseDataSourceResourceXA.class);
         String xid = "xxx";
         ResourceManager resourceManager = Mockito.mock(ResourceManager.class);
         Mockito.doNothing().when(resourceManager).registerResource(any(Resource.class));
@@ -130,7 +131,7 @@ public class ConnectionProxyXATest {
         Mockito.when(connection.getAutoCommit()).thenReturn(true);
 
         XAConnection xaConnection = Mockito.mock(XAConnection.class);
-        BaseDataSourceResource<ConnectionProxyXA> baseDataSourceResource = Mockito.mock(BaseDataSourceResource.class);
+        BaseDataSourceResourceXA<ConnectionProxyXA> baseDataSourceResource = Mockito.mock(BaseDataSourceResourceXA.class);
         String xid = "xxx";
 
         ConnectionProxyXA connectionProxyXA1 = new ConnectionProxyXA(connection, xaConnection, baseDataSourceResource, xid);
@@ -160,7 +161,7 @@ public class ConnectionProxyXATest {
         XAResource xaResource = Mockito.mock(XAResource.class);
         XAConnection xaConnection = Mockito.mock(XAConnection.class);
         Mockito.when(xaConnection.getXAResource()).thenReturn(xaResource);
-        BaseDataSourceResource<ConnectionProxyXA> baseDataSourceResource = Mockito.mock(BaseDataSourceResource.class);
+        BaseDataSourceResourceXA<ConnectionProxyXA> baseDataSourceResource = Mockito.mock(BaseDataSourceResourceXA.class);
         String xid = "xxx";
 
         ConnectionProxyXA connectionProxyXA = new ConnectionProxyXA(connection, xaConnection, baseDataSourceResource, xid);
@@ -181,7 +182,7 @@ public class ConnectionProxyXATest {
 
         XAConnection xaConnection = Mockito.mock(XAConnection.class);
         Mockito.when(xaConnection.getXAResource()).thenReturn(xaResource);
-        BaseDataSourceResource<ConnectionProxyXA> baseDataSourceResource = Mockito.mock(BaseDataSourceResource.class);
+        BaseDataSourceResourceXA<ConnectionProxyXA> baseDataSourceResource = Mockito.mock(BaseDataSourceResourceXA.class);
         String xid = "xxx";
 
         ConnectionProxyXA connectionProxyXA = new ConnectionProxyXA(connection, xaConnection, baseDataSourceResource, xid);
@@ -198,7 +199,7 @@ public class ConnectionProxyXATest {
         Connection connection = Mockito.mock(Connection.class);
         Mockito.when(connection.getAutoCommit()).thenReturn(true);
         XAConnection xaConnection = Mockito.mock(XAConnection.class);
-        BaseDataSourceResource<ConnectionProxyXA> baseDataSourceResource = Mockito.mock(BaseDataSourceResource.class);
+        BaseDataSourceResourceXA<ConnectionProxyXA> baseDataSourceResource = Mockito.mock(BaseDataSourceResourceXA.class);
         String xid = "xxx";
 
         ConnectionProxyXA connectionProxyXA = new ConnectionProxyXA(connection, xaConnection, baseDataSourceResource, xid);
