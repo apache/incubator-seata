@@ -16,6 +16,32 @@
  */
 package org.apache.seata.discovery.registry.raft;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.http.HttpStatus;
+import org.apache.http.StatusLine;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.entity.ContentType;
+import org.apache.http.protocol.HTTP;
+import org.apache.http.util.EntityUtils;
+import org.apache.seata.common.ConfigurationKeys;
+import org.apache.seata.common.exception.AuthenticationFailedException;
+import org.apache.seata.common.exception.RetryableException;
+import org.apache.seata.common.metadata.Metadata;
+import org.apache.seata.common.metadata.MetadataResponse;
+import org.apache.seata.common.metadata.Node;
+import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.util.CollectionUtils;
+import org.apache.seata.common.util.HttpClientUtil;
+import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.config.ConfigChangeListener;
+import org.apache.seata.config.Configuration;
+import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.discovery.registry.RegistryService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -32,32 +58,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.seata.common.ConfigurationKeys;
-import org.apache.seata.common.exception.AuthenticationFailedException;
-import org.apache.seata.common.exception.RetryableException;
-import org.apache.seata.common.metadata.Metadata;
-import org.apache.seata.common.metadata.MetadataResponse;
-import org.apache.seata.common.metadata.Node;
-import org.apache.seata.common.thread.NamedThreadFactory;
-import org.apache.seata.common.util.CollectionUtils;
-import org.apache.seata.common.util.HttpClientUtil;
-import org.apache.seata.common.util.StringUtils;
-import org.apache.seata.config.ConfigChangeListener;
-import org.apache.seata.config.Configuration;
-import org.apache.seata.config.ConfigurationFactory;
-import org.apache.seata.discovery.registry.RegistryService;
-import org.apache.http.HttpStatus;
-import org.apache.http.StatusLine;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.entity.ContentType;
-import org.apache.http.util.EntityUtils;
-import org.apache.http.protocol.HTTP;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The type File registry service.
@@ -164,7 +164,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
             synchronized (INIT_ADDRESSES) {
                 if (REFRESH_METADATA_EXECUTOR == null) {
                     REFRESH_METADATA_EXECUTOR = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
-                        new LinkedBlockingQueue<>(), new NamedThreadFactory("refreshMetadata", 1, true));
+                            new LinkedBlockingQueue<>(), new NamedThreadFactory("refreshMetadata", 1, true));
                     REFRESH_METADATA_EXECUTOR.execute(() -> {
                         long metadataMaxAgeMs = CONFIG.getLong(ConfigurationKeys.CLIENT_METADATA_MAX_AGE_MS, 30000L);
                         long currentTime = System.currentTimeMillis();
@@ -221,7 +221,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
             List<InetSocketAddress> inetSocketAddresses = ALIVE_NODES.get(CURRENT_TRANSACTION_SERVICE_GROUP);
             if (CollectionUtils.isEmpty(inetSocketAddresses)) {
                 addressList =
-                    nodeList.stream().map(node -> node.getControl().createAddress()).collect(Collectors.toList());
+                        nodeList.stream().map(node -> node.getControl().createAddress()).collect(Collectors.toList());
             } else {
                 stream = inetSocketAddresses.stream();
             }
@@ -235,14 +235,14 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
             if (CollectionUtils.isNotEmpty(nodeList)) {
                 for (Node node : nodeList) {
                     map.put(new InetSocketAddress(node.getTransaction().getHost(), node.getTransaction().getPort()).getAddress().getHostAddress()
-                        + IP_PORT_SPLIT_CHAR + node.getTransaction().getPort(), node);
+                            + IP_PORT_SPLIT_CHAR + node.getTransaction().getPort(), node);
                 }
             }
             addressList = stream.map(inetSocketAddress -> {
                 String host = inetSocketAddress.getAddress().getHostAddress();
                 Node node = map.get(host + IP_PORT_SPLIT_CHAR + inetSocketAddress.getPort());
                 return host + IP_PORT_SPLIT_CHAR
-                    + (node != null ? node.getControl().getPort() : inetSocketAddress.getPort());
+                        + (node != null ? node.getControl().getPort() : inetSocketAddress.getPort());
             }).collect(Collectors.toList());
             return addressList.get(ThreadLocalRandom.current().nextInt(addressList.size()));
         }
@@ -250,22 +250,22 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
 
     private static String getRaftAddrFileKey() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY,
-            REGISTRY_TYPE, PRO_SERVER_ADDR_KEY);
+                REGISTRY_TYPE, PRO_SERVER_ADDR_KEY);
     }
 
     private static String getRaftUserNameKey() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY,
-            REGISTRY_TYPE, PRO_USERNAME_KEY);
+                REGISTRY_TYPE, PRO_USERNAME_KEY);
     }
 
     private static String getRaftPassWordKey() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY,
-            REGISTRY_TYPE, PRO_PASSWORD_KEY);
+                REGISTRY_TYPE, PRO_PASSWORD_KEY);
     }
 
     private static String getTokenExpireTimeInMillisecondsKey() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY,
-            REGISTRY_TYPE, TOKEN_VALID_TIME_MS_KEY);
+                REGISTRY_TYPE, TOKEN_VALID_TIME_MS_KEY);
     }
 
     private static boolean isTokenExpired() {
@@ -314,7 +314,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                 header.put(AUTHORIZATION_HEADER, jwtToken);
             }
             try (CloseableHttpResponse response =
-                HttpClientUtil.doPost("http://" + tcAddress + "/metadata/v1/watch", param, header, 30000)) {
+                         HttpClientUtil.doPost("http://" + tcAddress + "/metadata/v1/watch", param, header, 30000)) {
                 if (response != null) {
                     StatusLine statusLine = response.getStatusLine();
                     if (statusLine != null && statusLine.getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
@@ -337,16 +337,16 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
 
     @Override
     public List<InetSocketAddress> refreshAliveLookup(String transactionServiceGroup,
-        List<InetSocketAddress> aliveAddress) {
+                                                      List<InetSocketAddress> aliveAddress) {
         if (METADATA.isRaftMode()) {
             Node leader = METADATA.getLeader(getServiceGroup(transactionServiceGroup));
             InetSocketAddress leaderAddress = convertInetSocketAddress(leader);
             return ALIVE_NODES.put(transactionServiceGroup,
-                aliveAddress.isEmpty() ? aliveAddress : aliveAddress.parallelStream().filter(inetSocketAddress -> {
-                    // Since only follower will turn into leader, only the follower node needs to be listened to
-                    return inetSocketAddress.getPort() != leaderAddress.getPort() || !inetSocketAddress.getAddress()
-                        .getHostAddress().equals(leaderAddress.getAddress().getHostAddress());
-                }).collect(Collectors.toList()));
+                    aliveAddress.isEmpty() ? aliveAddress : aliveAddress.parallelStream().filter(inetSocketAddress -> {
+                        // Since only follower will turn into leader, only the follower node needs to be listened to
+                        return inetSocketAddress.getPort() != leaderAddress.getPort() || !inetSocketAddress.getAddress()
+                                .getHostAddress().equals(leaderAddress.getAddress().getHostAddress());
+                    }).collect(Collectors.toList()));
         } else {
             return RegistryService.super.refreshAliveLookup(transactionServiceGroup, aliveAddress);
         }
@@ -375,7 +375,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
             param.put("group", group);
             String response = null;
             try (CloseableHttpResponse httpResponse =
-                HttpClientUtil.doGet("http://" + tcAddress + "/metadata/v1/cluster", param, header, 1000)) {
+                         HttpClientUtil.doGet("http://" + tcAddress + "/metadata/v1/cluster", param, header, 1000)) {
                 if (httpResponse != null) {
                     if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                         response = EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
@@ -416,7 +416,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
         String response = null;
         tokenTimeStamp = System.currentTimeMillis();
         try (CloseableHttpResponse httpResponse =
-            HttpClientUtil.doPost("http://" + tcAddress + "/api/v1/auth/login", param, header, 1000)) {
+                     HttpClientUtil.doPost("http://" + tcAddress + "/api/v1/auth/login", param, header, 1000)) {
             if (httpResponse != null) {
                 if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                     response = EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);

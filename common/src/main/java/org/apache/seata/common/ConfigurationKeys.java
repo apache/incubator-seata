@@ -69,6 +69,11 @@ public interface ConfigurationKeys {
     String SEATA_PREFIX = SEATA_FILE_ROOT_CONFIG + ".";
 
     /**
+     * The constant SECURITY_PREFIX
+     */
+    String SECURITY_PREFIX = "security.";
+
+    /**
      * The constant SERVICE_PREFIX.
      */
     String SERVICE_PREFIX = "service.";
@@ -1013,6 +1018,31 @@ public interface ConfigurationKeys {
      * The constant SERVER_APPLICATION_DATA_SIZE_CHECK
      */
     String SERVER_APPLICATION_DATA_SIZE_CHECK = SERVER_PREFIX + "applicationDataLimitCheck";
+
+    /**
+     * The constant SECURITY_USERNAME;
+     */
+    String SECURITY_USERNME = SECURITY_PREFIX + "username";
+
+    /**
+     * The constant SECURITY_PASSWORD;
+     */
+    String SECURITY_PASSWORD = SECURITY_PREFIX + "password";
+
+    /**
+     * The constant SECURITY_SECRET_KEY;
+     */
+    String SECURITY_SECRET_KEY = SECURITY_PREFIX + "secretKey";
+
+    /**
+     * The constant SECURITY_ACCESS_TOKEN_VALID_TIME;
+     */
+    String SECURITY_ACCESS_TOKEN_VALID_TIME = SECURITY_PREFIX + "accessTokenValidityInMilliseconds";
+
+    /**
+     * The constant SECURITY_REFRESH_TOKEN_VALID_TIME;
+     */
+    String SECURITY_REFRESH_TOKEN_VALID_TIME = SECURITY_PREFIX + "refreshTokenValidityInMilliseconds";
 
     /**
      * The constant ROCKET_MQ_MSG_TIMEOUT

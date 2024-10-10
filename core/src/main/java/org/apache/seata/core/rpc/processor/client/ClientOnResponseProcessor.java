@@ -16,31 +16,18 @@
  */
 package org.apache.seata.core.rpc.processor.client;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
 import io.netty.channel.ChannelHandlerContext;
-import org.apache.seata.core.protocol.AbstractResultMessage;
-import org.apache.seata.core.protocol.BatchResultMessage;
-import org.apache.seata.core.protocol.MergeMessage;
-import org.apache.seata.core.protocol.MergeResultMessage;
-import org.apache.seata.core.protocol.MergedWarpMessage;
-import org.apache.seata.core.protocol.MessageFuture;
-import org.apache.seata.core.protocol.RegisterRMResponse;
-import org.apache.seata.core.protocol.RegisterTMResponse;
-import org.apache.seata.core.protocol.RpcMessage;
-import org.apache.seata.core.protocol.transaction.BranchRegisterResponse;
-import org.apache.seata.core.protocol.transaction.BranchReportResponse;
-import org.apache.seata.core.protocol.transaction.GlobalBeginResponse;
-import org.apache.seata.core.protocol.transaction.GlobalCommitResponse;
-import org.apache.seata.core.protocol.transaction.GlobalLockQueryResponse;
-import org.apache.seata.core.protocol.transaction.GlobalReportResponse;
-import org.apache.seata.core.protocol.transaction.GlobalRollbackResponse;
+import org.apache.seata.core.auth.RegisterHandler;
+import org.apache.seata.core.protocol.*;
+import org.apache.seata.core.protocol.transaction.*;
 import org.apache.seata.core.rpc.TransactionMessageHandler;
 import org.apache.seata.core.rpc.processor.RemotingProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * process TC response message.
@@ -126,7 +113,12 @@ public class ClientOnResponseProcessor implements RemotingProcessor {
             if (messageFuture != null) {
                 messageFuture.setResultMessage(rpcMessage.getBody());
             } else {
-                if (rpcMessage.getBody() instanceof AbstractResultMessage) {
+                if (rpcMessage.getBody() instanceof RegisterRMResponse) {
+                    if (transactionMessageHandler != null) {
+                        ((RegisterHandler) transactionMessageHandler).onRegisterResponse(
+                                (RegisterRMResponse) rpcMessage.getBody(), ctx.channel(), rpcMessage.getId());
+                    }
+                } else if (rpcMessage.getBody() instanceof AbstractResultMessage) {
                     if (transactionMessageHandler != null) {
                         transactionMessageHandler.onResponse((AbstractResultMessage) rpcMessage.getBody(), null);
                     }
