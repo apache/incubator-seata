@@ -44,6 +44,7 @@ public class PageUtilTest {
         assertEquals(PageUtil.pageSql(sourceSql, "postgresql", 1, 5), mysqlTargetSql);
         assertEquals(PageUtil.pageSql(sourceSql, "oceanbase", 1, 5), mysqlTargetSql);
         assertEquals(PageUtil.pageSql(sourceSql, "dm", 1, 5), mysqlTargetSql);
+        assertEquals(PageUtil.pageSql(sourceSql, "oscar", 1, 5), mysqlTargetSql);
         assertEquals(PageUtil.pageSql(sourceSql, "oracle", 1, 5), oracleTargetSql);
         assertEquals(PageUtil.pageSql(sourceSql, "sqlserver", 1, 5), sqlserverTargetSql);
 
@@ -61,6 +62,7 @@ public class PageUtilTest {
         assertEquals(PageUtil.countSql(sourceSql, "postgresql"), targetSql);
         assertEquals(PageUtil.countSql(sourceSql, "oceanbase"), targetSql);
         assertEquals(PageUtil.countSql(sourceSql, "dm"), targetSql);
+        assertEquals(PageUtil.countSql(sourceSql, "oscar"), targetSql);
         assertEquals(PageUtil.countSql(sourceSql, "oracle"), targetSql);
         assertEquals(PageUtil.countSql(sourceSql, "sqlserver"), targetSql);
 
