@@ -192,7 +192,12 @@ public enum DBType {
     /**
      * PolarDB db type.
      */
-    POLARDB;
+    POLARDB,
+
+    /**
+     * oscar db type.
+     */
+    OSCAR;
 
     /**
      * Valueof db type.
