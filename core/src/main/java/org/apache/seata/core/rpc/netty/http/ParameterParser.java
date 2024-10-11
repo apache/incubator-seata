@@ -16,14 +16,6 @@
  */
 package org.apache.seata.core.rpc.netty.http;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-
 import javax.servlet.http.HttpServletRequest;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -32,14 +24,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+
 public class ParameterParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ParameterParser.class);
 
     private static final String INVALID_DEFAULT_VALUE = "\"\\n\\t\\t\\n\\t\\t\\n\\ue000\\ue001\\ue002\\n\\t\\t\\t\\t\\n";
 
-    public static Map<String, String> convertParamMap(Map<String, List<String>> paramMap) {
+    public static Map<String, String> convertParamMap(Map<String, List<String>> paramMap) throws JsonProcessingException {
         Map<String, String> ret = new HashMap<>();
+        ObjectMapper objectMapper = new ObjectMapper();
         for (Map.Entry<String, List<String>> entry : paramMap.entrySet()) {
             List<String> list = entry.getValue();
             if (list == null || list.isEmpty()) {
@@ -48,20 +50,20 @@ public class ParameterParser {
             if (list.size() == 1) {
                 ret.put(entry.getKey(), list.get(0));
             } else {
-                ret.put(entry.getKey(), JSON.toJSONString(list));
+                ret.put(entry.getKey(), objectMapper.writeValueAsString(list));
             }
         }
         return ret;
     }
 
-    public static Object[] getArgValues(HttpServletRequest httpServletRequest, Method handleMethod, JSONObject paramMap) {
+    public static Object[] getArgValues(HttpServletRequest httpServletRequest, Method handleMethod, JsonNode paramMap) throws JsonProcessingException {
         Class<?>[] parameterTypes = handleMethod.getParameterTypes();
         Annotation[][] parameterAnnotations = handleMethod.getParameterAnnotations();
         Parameter[] parameters = handleMethod.getParameters();
         return getParameters(httpServletRequest, parameterTypes, parameterAnnotations, parameters, paramMap);
     }
 
-    private static Object[] getParameters(HttpServletRequest httpServletRequest, Class<?>[] parameterTypes, Annotation[][] parameterAnnotations, Parameter[] parameters, JSONObject paramMap) {
+    private static Object[] getParameters(HttpServletRequest httpServletRequest, Class<?>[] parameterTypes, Annotation[][] parameterAnnotations, Parameter[] parameters, JsonNode paramMap) throws JsonProcessingException {
         int length = parameterTypes.length;
         Object[] ret = new Object[length];
         for (int i = 0; i < length; i++) {
@@ -89,15 +91,16 @@ public class ParameterParser {
     }
 
 
-    private static Object getArgValue(HttpServletRequest httpServletRequest, Class<?> parameterType, String parameterName, Class<? extends Annotation> parameterAnnotationType, Annotation parameterAnnotation, JSONObject paramMap) {
+    private static Object getArgValue(HttpServletRequest httpServletRequest, Class<?> parameterType, String parameterName, Class<? extends Annotation> parameterAnnotationType, Annotation parameterAnnotation, JsonNode paramMap) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
         if (parameterType.equals(HttpServletRequest.class)) {
             return httpServletRequest;
         } else if (parameterAnnotationType.equals(ModelAttribute.class)) {
-            return paramMap.toJavaObject(parameterType);
+            return objectMapper.readValue(paramMap.toString(), parameterType);
         } else if (parameterAnnotationType.equals(RequestBody.class)) {
-            return JSONObject.parseObject(paramMap.getString(parameterName));
+            return objectMapper.readValue(paramMap.with(parameterName).toString(), parameterType);
         } else {
-            String paramValue = paramMap.getString(parameterName);
+            String paramValue = paramMap.with(parameterName).toString();
             return paramValue == null ? getDefaultValue(parameterAnnotation) : paramValue;
         }
     }

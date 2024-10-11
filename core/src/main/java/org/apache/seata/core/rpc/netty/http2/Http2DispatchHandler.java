@@ -16,8 +16,16 @@
  */
 package org.apache.seata.core.rpc.netty.http2;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import javax.servlet.AsyncEvent;
+import javax.servlet.AsyncListener;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.InetSocketAddress;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -32,20 +40,12 @@ import org.apache.seata.core.rpc.netty.http.ControllerManager;
 import org.apache.seata.core.rpc.netty.http.ParameterParser;
 import org.apache.seata.core.rpc.netty.http.SeataHttpServletRequest;
 
-import javax.servlet.AsyncEvent;
-import javax.servlet.AsyncListener;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.InetSocketAddress;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 public class Http2DispatchHandler extends ChannelDuplexHandler {
 
     private final AtomicBoolean headerSent = new AtomicBoolean(false);
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws InvocationTargetException, IllegalAccessException {
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof Http2HeadersFrame) {
             if (headerSent.compareAndSet(false, true)) {
                 Http2Headers headers = new DefaultHttp2Headers();
@@ -56,9 +56,8 @@ public class Http2DispatchHandler extends ChannelDuplexHandler {
             Http2HeadersFrame http2HeadersFrame = (Http2HeadersFrame) msg;
             String path = http2HeadersFrame.headers().path().toString();
             QueryStringDecoder queryStringDecoder = new QueryStringDecoder(path);
-            JSONObject paramMap = new JSONObject();
-            paramMap.putAll(ParameterParser.convertParamMap(queryStringDecoder.parameters()));
-
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode paramMap = objectMapper.valueToTree(ParameterParser.convertParamMap(queryStringDecoder.parameters()));
             InetSocketAddress inetSocketAddress = (InetSocketAddress) ctx.channel().remoteAddress();
             SeataHttpServletRequest seataHttpServletRequest = new SeataHttpServletRequest(inetSocketAddress.getAddress().getHostAddress());
             Object httpController = ControllerManager.getHttpController(path);
@@ -91,7 +90,7 @@ public class Http2DispatchHandler extends ChannelDuplexHandler {
                 return;
             }
 
-            ctx.writeAndFlush(new DefaultHttp2DataFrame(Unpooled.wrappedBuffer(JSON.toJSONBytes(result))));
+            ctx.writeAndFlush(new DefaultHttp2DataFrame(Unpooled.wrappedBuffer(objectMapper.writeValueAsBytes(result))));
         }
     }
 }

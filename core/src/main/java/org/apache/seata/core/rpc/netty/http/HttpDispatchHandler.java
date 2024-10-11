@@ -16,8 +16,15 @@
  */
 package org.apache.seata.core.rpc.netty.http;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import java.io.IOException;
+import java.lang.reflect.Method;
+
+import javax.servlet.AsyncEvent;
+import javax.servlet.AsyncListener;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -33,35 +40,30 @@ import io.netty.handler.codec.http.multipart.Attribute;
 import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
 import io.netty.handler.codec.http.multipart.InterfaceHttpData;
 
-import javax.servlet.AsyncEvent;
-import javax.servlet.AsyncListener;
-import java.io.IOException;
-import java.lang.reflect.Method;
-
 public class HttpDispatchHandler extends SimpleChannelInboundHandler<HttpRequest> {
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, HttpRequest httpRequest) throws Exception {
         QueryStringDecoder queryStringDecoder = new QueryStringDecoder(httpRequest.uri());
         String path = queryStringDecoder.path();
-        JSONObject paramMap = new JSONObject();
-        if (httpRequest.method() == HttpMethod.GET) {
-            paramMap.putAll(ParameterParser.convertParamMap(queryStringDecoder.parameters()));
-        } else if (httpRequest.method() == HttpMethod.POST) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode jsonNode = objectMapper.valueToTree(ParameterParser.convertParamMap(queryStringDecoder.parameters()));
+
+        if (httpRequest.method() == HttpMethod.POST) {
             HttpPostRequestDecoder httpPostRequestDecoder = new HttpPostRequestDecoder(httpRequest);
             for (InterfaceHttpData interfaceHttpData : httpPostRequestDecoder.getBodyHttpDatas()) {
                 if (interfaceHttpData.getHttpDataType() != InterfaceHttpData.HttpDataType.Attribute) {
                     continue;
                 }
                 Attribute attribute = (Attribute) interfaceHttpData;
-                paramMap.put(attribute.getName(), attribute.getValue());
+                ((ObjectNode)jsonNode).put(attribute.getName(), attribute.getValue());
             }
         }
 
         SeataHttpServletRequest seataHttpServletRequest = new SeataHttpServletRequest(ctx.channel().remoteAddress().toString());
         Object httpController = ControllerManager.getHttpController(path);
         Method handleMethod = ControllerManager.getHandleMethod(path);
-        Object[] args = ParameterParser.getArgValues(seataHttpServletRequest, handleMethod, paramMap);
+        Object[] args = ParameterParser.getArgValues(seataHttpServletRequest, handleMethod, jsonNode);
         Object result = handleMethod.invoke(httpController, args);
         if (seataHttpServletRequest.isAsyncStarted()) {
             seataHttpServletRequest.getAsyncContext().addListener(new AsyncListener() {
@@ -89,7 +91,7 @@ public class HttpDispatchHandler extends SimpleChannelInboundHandler<HttpRequest
             return;
         }
 
-        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.wrappedBuffer(JSON.toJSONBytes(result)));
+        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.wrappedBuffer(objectMapper.writeValueAsBytes(result)));
         response.headers().set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
         ctx.writeAndFlush(response);
     }
