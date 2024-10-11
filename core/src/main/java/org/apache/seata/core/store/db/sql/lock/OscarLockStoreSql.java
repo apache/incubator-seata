@@ -16,29 +16,13 @@
  */
 package org.apache.seata.core.store.db.sql.lock;
 
-import com.google.common.collect.Maps;
-import org.apache.seata.common.loader.EnhancedServiceLoader;
-import org.apache.seata.common.util.CollectionUtils;
 
-import java.util.Map;
+import org.apache.seata.common.loader.LoadLevel;
 
 /**
- * the database lock store factory
+ * the database lock store shentong sql
  *
- * @since 1.2.0
  */
-public class LockStoreSqlFactory {
-
-    private static Map<String/*dbType*/, LockStoreSql> LOCK_STORE_SQL_MAP = Maps.newConcurrentMap();
-
-    /**
-     * get the lock store sql
-     *
-     * @param dbType the dbType, support mysql/oracle/h2/postgre/oceanbase/dm/oscar
-     * @return lock store sql
-     */
-    public static LockStoreSql getLogStoreSql(String dbType) {
-        return CollectionUtils.computeIfAbsent(LOCK_STORE_SQL_MAP, dbType,
-            key -> EnhancedServiceLoader.load(LockStoreSql.class, dbType.toLowerCase()));
-    }
+@LoadLevel(name = "oscar")
+public class OscarLockStoreSql extends OracleLockStoreSql {
 }
