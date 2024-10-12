@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        java: [ 8, 17 ]
+        java: [ 8, 17, 21 ]
     steps:
       # step 1
       - name: "Checkout"
