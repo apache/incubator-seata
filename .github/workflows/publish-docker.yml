@@ -41,7 +41,7 @@ jobs:
           if [ "${{ github.ref_name }}" == "develop" ] || [ "${{ github.ref_name }}" == "snapshot"  || [ "${{ github.ref_name }}" == "2.x" ]; then
             ./mvnw -T 4C clean package -Dimage.name=eclipse-temurin:8u422-b05-jdk      -Pimage                                    -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
           else
-            ./mvnw -T 4C clean package -Dimage.name=eclipse-temurin:8-jdk      -Pimage,release-image-based-on-java8       -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+            ./mvnw -T 4C clean package -Dimage.name=eclipse-temurin:8u422-b05-jdk      -Pimage,release-image-based-on-java8       -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
           fi
       # step 4 based on java17
       - name: "Publish images to DockerHub based on java17"
@@ -50,7 +50,7 @@ jobs:
           REGISTRY_USERNAME: ${{ secrets.DOCKERHUB_USER }}
           REGISTRY_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
         run: |
-          ./mvnw -T 4C clean package -Dimage.name=eclipse-temurin:17-jdk       -Pimage,release-image-based-on-java17      -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+          ./mvnw -T 4C clean package -Dimage.name=eclipse-temurin:17.0.12_7-jdk       -Pimage,release-image-based-on-java17      -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
       # step 5 based on java21
       - name: "Publish images to DockerHub based on java21"
         if: ${{ matrix.java == 21 && github.ref_name != 'develop' && github.ref_name != 'snapshot' && github.ref_name != '2.x' }}
@@ -58,4 +58,4 @@ jobs:
           REGISTRY_USERNAME: ${{ secrets.DOCKERHUB_USER }}
           REGISTRY_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
         run: |
-          ./mvnw -T 4C clean package -Dimage.name=eclipse-temurin:21-jdk       -Pimage,release-image-based-on-java21      -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+          ./mvnw -T 4C clean package -Dimage.name=eclipse-temurin:21.0.4_7-jdk       -Pimage,release-image-based-on-java21      -DskipTests -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;

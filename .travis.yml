@@ -29,13 +29,13 @@ install: true
 
 before_script:
   - if [ "$TRAVIS_JDK_VERSION" == "openjdk8" ]; then
-      export IMAGE_NAME="eclipse-temurin:8-jre";
+      export IMAGE_NAME="eclipse-temurin:8u422-b05-jre";
     fi
   - if [ "$TRAVIS_JDK_VERSION" == "openjdk17" ]; then
-      export IMAGE_NAME="eclipse-temurin:17-jre";
+      export IMAGE_NAME="eclipse-temurin:17.0.12_7-jre";
     fi
   - if [ "$TRAVIS_JDK_VERSION" == "openjdk21" ]; then
-      export IMAGE_NAME="eclipse-temurin:21-jre";
+      export IMAGE_NAME="eclipse-temurin:21.0.4_7-jre";
     fi
 
 script:
