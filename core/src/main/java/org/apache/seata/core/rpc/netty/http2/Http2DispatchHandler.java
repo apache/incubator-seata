@@ -19,7 +19,6 @@ package org.apache.seata.core.rpc.netty.http2;
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.util.concurrent.atomic.AtomicBoolean;
