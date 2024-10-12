@@ -16,16 +16,10 @@
  */
 package org.apache.seata.core.rpc.netty.http;
 
-import java.io.IOException;
-import java.lang.reflect.Method;
-
-import javax.servlet.AsyncEvent;
-import javax.servlet.AsyncListener;
-
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
@@ -40,6 +34,9 @@ import io.netty.handler.codec.http.multipart.Attribute;
 import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
 import io.netty.handler.codec.http.multipart.InterfaceHttpData;
 
+import java.lang.reflect.Method;
+import java.util.concurrent.atomic.AtomicReference;
+
 public class HttpDispatchHandler extends SimpleChannelInboundHandler<HttpRequest> {
 
     @Override
@@ -47,47 +44,29 @@ public class HttpDispatchHandler extends SimpleChannelInboundHandler<HttpRequest
         QueryStringDecoder queryStringDecoder = new QueryStringDecoder(httpRequest.uri());
         String path = queryStringDecoder.path();
         ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode jsonNode = objectMapper.valueToTree(ParameterParser.convertParamMap(queryStringDecoder.parameters()));
+        ObjectNode requestDataNode = objectMapper.createObjectNode();
+        requestDataNode.putIfAbsent("param", ParameterParser.convertParamMap(queryStringDecoder.parameters()));
 
         if (httpRequest.method() == HttpMethod.POST) {
+            ObjectNode bodyDataNode = objectMapper.createObjectNode();
             HttpPostRequestDecoder httpPostRequestDecoder = new HttpPostRequestDecoder(httpRequest);
             for (InterfaceHttpData interfaceHttpData : httpPostRequestDecoder.getBodyHttpDatas()) {
                 if (interfaceHttpData.getHttpDataType() != InterfaceHttpData.HttpDataType.Attribute) {
                     continue;
                 }
                 Attribute attribute = (Attribute) interfaceHttpData;
-                ((ObjectNode)jsonNode).put(attribute.getName(), attribute.getValue());
+                bodyDataNode.put(attribute.getName(), attribute.getValue());
             }
+            requestDataNode.putIfAbsent("body", bodyDataNode);
         }
 
-        SeataHttpServletRequest seataHttpServletRequest = new SeataHttpServletRequest(ctx.channel().remoteAddress().toString());
-        Object httpController = ControllerManager.getHttpController(path);
-        Method handleMethod = ControllerManager.getHandleMethod(path);
-        Object[] args = ParameterParser.getArgValues(seataHttpServletRequest, handleMethod, jsonNode);
+        HttpInvocation httpInvocation = ControllerManager.getHttpInvocation(path);
+        Object httpController = httpInvocation.getController();
+        Method handleMethod = httpInvocation.getMethod();
+        AtomicReference<Channel> channel = new AtomicReference<>(ctx.channel());
+        Object[] args = ParameterParser.getArgValues(channel, httpInvocation.getParamMetaData(), handleMethod, requestDataNode);
         Object result = handleMethod.invoke(httpController, args);
-        if (seataHttpServletRequest.isAsyncStarted()) {
-            seataHttpServletRequest.getAsyncContext().addListener(new AsyncListener() {
-                @Override
-                public void onComplete(AsyncEvent event) throws IOException {
-                    ctx.channel().writeAndFlush(((SeataHttpServletResponse) event.getAsyncContext().getResponse()).getHttpResponse());
-                }
-
-                @Override
-                public void onTimeout(AsyncEvent event) throws IOException {
-
-                }
-
-                @Override
-                public void onError(AsyncEvent event) throws IOException {
-
-                }
-
-                @Override
-                public void onStartAsync(AsyncEvent event) throws IOException {
-
-                }
-            });
-
+        if (channel.get() == null) {
             return;
         }
 

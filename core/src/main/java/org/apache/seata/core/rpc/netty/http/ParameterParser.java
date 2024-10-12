@@ -16,71 +16,59 @@
  */
 package org.apache.seata.core.rpc.netty.http;
 
-import javax.servlet.http.HttpServletRequest;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
 public class ParameterParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ParameterParser.class);
 
-    private static final String INVALID_DEFAULT_VALUE = "\"\\n\\t\\t\\n\\t\\t\\n\\ue000\\ue001\\ue002\\n\\t\\t\\t\\t\\n";
-
-    public static Map<String, String> convertParamMap(Map<String, List<String>> paramMap) throws JsonProcessingException {
-        Map<String, String> ret = new HashMap<>();
+    public static ObjectNode convertParamMap(Map<String, List<String>> paramMap) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
+        ObjectNode paramNode = objectMapper.createObjectNode();
         for (Map.Entry<String, List<String>> entry : paramMap.entrySet()) {
             List<String> list = entry.getValue();
             if (list == null || list.isEmpty()) {
                 continue;
             }
             if (list.size() == 1) {
-                ret.put(entry.getKey(), list.get(0));
+                paramNode.put(entry.getKey(), list.get(0));
             } else {
-                ret.put(entry.getKey(), objectMapper.writeValueAsString(list));
+                ArrayNode arrayNode = paramNode.putArray(entry.getKey());
+                for (String s : list) {
+                    arrayNode.add(s);
+                }
             }
         }
-        return ret;
+        return paramNode;
     }
 
-    public static Object[] getArgValues(HttpServletRequest httpServletRequest, Method handleMethod, JsonNode paramMap) throws JsonProcessingException {
+    public static Object[] getArgValues(AtomicReference<Channel> channel, ParamMetaData[] paramMetaDatas, Method handleMethod, ObjectNode paramMap) throws JsonProcessingException {
         Class<?>[] parameterTypes = handleMethod.getParameterTypes();
-        Annotation[][] parameterAnnotations = handleMethod.getParameterAnnotations();
         Parameter[] parameters = handleMethod.getParameters();
-        return getParameters(httpServletRequest, parameterTypes, parameterAnnotations, parameters, paramMap);
+        return getParameters(channel, parameterTypes, paramMetaDatas, parameters, paramMap);
     }
 
-    private static Object[] getParameters(HttpServletRequest httpServletRequest, Class<?>[] parameterTypes, Annotation[][] parameterAnnotations, Parameter[] parameters, JsonNode paramMap) throws JsonProcessingException {
+    private static Object[] getParameters(AtomicReference<Channel> channel, Class<?>[] parameterTypes, ParamMetaData[] paramMetaDatas, Parameter[] parameters, ObjectNode paramMap) throws JsonProcessingException {
         int length = parameterTypes.length;
         Object[] ret = new Object[length];
         for (int i = 0; i < length; i++) {
             Class<?> parameterType = parameterTypes[i];
             String parameterName = parameters[i].getName();
-            Class<? extends Annotation> parameterAnnotationType = null;
-            Annotation parameterAnnotation = null;
-            if (parameterAnnotations[i] != null && parameterAnnotations[i].length > 0) {
-                parameterAnnotationType = parameterAnnotations[i][0].annotationType();
-                parameterAnnotation = parameterAnnotations[i][0];
-            }
-
-            if (parameterAnnotationType == null) {
-                parameterAnnotationType = RequestParam.class;
-            }
-
-            ret[i] = getArgValue(httpServletRequest, parameterType, parameterName, parameterAnnotationType, parameterAnnotation, paramMap);
+            ParamMetaData paramMetaData = paramMetaDatas[i];
+            ret[i] = getArgValue(channel, parameterType, parameterName, paramMetaData, paramMap);
             if (!parameterType.isAssignableFrom(ret[i].getClass())) {
                 LOGGER.error("[HttpDispatchHandler] not compatible parameter type, expect {}, but {}", parameterType, ret[i].getClass());
                 ret[i] = null;
@@ -91,27 +79,21 @@ public class ParameterParser {
     }
 
 
-    private static Object getArgValue(HttpServletRequest httpServletRequest, Class<?> parameterType, String parameterName, Class<? extends Annotation> parameterAnnotationType, Annotation parameterAnnotation, JsonNode paramMap) throws JsonProcessingException {
+    private static Object getArgValue(AtomicReference<Channel> channel, Class<?> parameterType, String parameterName, ParamMetaData paramMetaData, ObjectNode paramMap) throws JsonProcessingException {
+        ParamMetaData.ParamConvertType paramConvertType = paramMetaData.getParamConvertType();
         ObjectMapper objectMapper = new ObjectMapper();
-        if (parameterType.equals(HttpServletRequest.class)) {
-            return httpServletRequest;
-        } else if (parameterAnnotationType.equals(ModelAttribute.class)) {
-            return objectMapper.readValue(paramMap.toString(), parameterType);
-        } else if (parameterAnnotationType.equals(RequestBody.class)) {
-            return objectMapper.readValue(paramMap.with(parameterName).toString(), parameterType);
+        if (parameterType.equals(Channel.class)) {
+            Channel ret = channel.get();
+            channel.set(null);
+            return ret;
+        } else if (ParamMetaData.ParamConvertType.MODEL_ATTRIBUTE.equals(paramConvertType)) {
+            JsonNode param = paramMap.get("param");
+            return objectMapper.convertValue(param, parameterType);
+        } else if (ParamMetaData.ParamConvertType.REQUEST_BODY.equals(paramConvertType)) {
+            JsonNode body = paramMap.get("body");
+            return objectMapper.convertValue(body, parameterType);
         } else {
-            String paramValue = paramMap.with(parameterName).toString();
-            return paramValue == null ? getDefaultValue(parameterAnnotation) : paramValue;
+            return paramMap.get(parameterName).asText(null);
         }
-    }
-
-
-    private static String getDefaultValue(Annotation parameterAnnotation) {
-        if (!(parameterAnnotation instanceof RequestParam)) {
-            return null;
-        }
-
-        RequestParam annotation = (RequestParam) parameterAnnotation;
-        return annotation.defaultValue().equals(INVALID_DEFAULT_VALUE) ? null : annotation.defaultValue();
     }
 }

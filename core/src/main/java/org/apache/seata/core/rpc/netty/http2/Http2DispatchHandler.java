@@ -16,32 +16,38 @@
  */
 package org.apache.seata.core.rpc.netty.http2;
 
-import javax.servlet.AsyncEvent;
-import javax.servlet.AsyncListener;
-import java.io.IOException;
-import java.lang.reflect.Method;
-import java.net.InetSocketAddress;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.QueryStringDecoder;
 import io.netty.handler.codec.http2.DefaultHttp2DataFrame;
 import io.netty.handler.codec.http2.DefaultHttp2Headers;
 import io.netty.handler.codec.http2.DefaultHttp2HeadersFrame;
+import io.netty.handler.codec.http2.Http2DataFrame;
 import io.netty.handler.codec.http2.Http2Headers;
 import io.netty.handler.codec.http2.Http2HeadersFrame;
 import org.apache.seata.core.rpc.netty.grpc.GrpcHeaderEnum;
 import org.apache.seata.core.rpc.netty.http.ControllerManager;
+import org.apache.seata.core.rpc.netty.http.HttpInvocation;
 import org.apache.seata.core.rpc.netty.http.ParameterParser;
-import org.apache.seata.core.rpc.netty.http.SeataHttpServletRequest;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class Http2DispatchHandler extends ChannelDuplexHandler {
 
     private final AtomicBoolean headerSent = new AtomicBoolean(false);
+    
+    private ObjectNode requestDataNode;
+
+    private String path;
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
@@ -53,43 +59,33 @@ public class Http2DispatchHandler extends ChannelDuplexHandler {
             }
 
             Http2HeadersFrame http2HeadersFrame = (Http2HeadersFrame) msg;
-            String path = http2HeadersFrame.headers().path().toString();
+            path = http2HeadersFrame.headers().path().toString();
             QueryStringDecoder queryStringDecoder = new QueryStringDecoder(path);
             ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode paramMap = objectMapper.valueToTree(ParameterParser.convertParamMap(queryStringDecoder.parameters()));
-            InetSocketAddress inetSocketAddress = (InetSocketAddress) ctx.channel().remoteAddress();
-            SeataHttpServletRequest seataHttpServletRequest = new SeataHttpServletRequest(inetSocketAddress.getAddress().getHostAddress());
-            Object httpController = ControllerManager.getHttpController(path);
-            Method handleMethod = ControllerManager.getHandleMethod(path);
-            Object[] args = ParameterParser.getArgValues(seataHttpServletRequest, handleMethod, paramMap);
-            Object result = handleMethod.invoke(httpController, args);
-            if (seataHttpServletRequest.isAsyncStarted()) {
-                seataHttpServletRequest.getAsyncContext().addListener(new AsyncListener() {
-                    @Override
-                    public void onComplete(AsyncEvent event) throws IOException {
-                        ctx.channel().writeAndFlush(new DefaultHttp2DataFrame(Unpooled.wrappedBuffer("changed\n".getBytes())));
-                    }
-
-                    @Override
-                    public void onTimeout(AsyncEvent event) throws IOException {
-
-                    }
-
-                    @Override
-                    public void onError(AsyncEvent event) throws IOException {
-
-                    }
-
-                    @Override
-                    public void onStartAsync(AsyncEvent event) throws IOException {
-
-                    }
-                });
-
-                return;
-            }
-
-            ctx.writeAndFlush(new DefaultHttp2DataFrame(Unpooled.wrappedBuffer(objectMapper.writeValueAsBytes(result))));
+            requestDataNode = objectMapper.createObjectNode();
+            requestDataNode.putIfAbsent("param", ParameterParser.convertParamMap(queryStringDecoder.parameters()));
+        } else if (msg instanceof Http2DataFrame) {
+            ObjectMapper objectMapper = new ObjectMapper();
+            Http2DataFrame http2DataFrame = (Http2DataFrame) msg;
+            ByteBuf byteBuf = http2DataFrame.content();
+            byte[] bytes = new byte[byteBuf.readableBytes()];
+            byteBuf.readBytes(bytes);
+            requestDataNode.putIfAbsent("body", objectMapper.readTree(bytes));
+            invoke(ctx, path, objectMapper);
         }
+    }
+
+    private void invoke(ChannelHandlerContext ctx, String path, ObjectMapper objectMapper) throws JsonProcessingException, IllegalAccessException, InvocationTargetException {
+        HttpInvocation httpInvocation = ControllerManager.getHttpInvocation(path);
+        Object httpController = httpInvocation.getController();
+        Method handleMethod = httpInvocation.getMethod();
+        AtomicReference<Channel> channel = new AtomicReference<>(ctx.channel());
+        Object[] args = ParameterParser.getArgValues(channel, httpInvocation.getParamMetaData(), handleMethod, requestDataNode);
+        Object result = handleMethod.invoke(httpController, args);
+        if (channel.get() == null) {
+            return;
+        }
+
+        ctx.writeAndFlush(new DefaultHttp2DataFrame(Unpooled.wrappedBuffer(objectMapper.writeValueAsBytes(result))));
     }
 }

@@ -16,41 +16,33 @@
  */
 package org.apache.seata.core.rpc.netty.http;
 
-import javax.servlet.AsyncContext;
+public class ParamMetaData {
 
-public class SeataHttpServletRequest extends BaseSeataServletRequest {
+    private ParamConvertType paramConvertType;
 
-    private AsyncContext asyncContext;
-
-    private String remoteAddr;
-
-    public SeataHttpServletRequest(String remoteAddr) {
-        this.remoteAddr = remoteAddr;
+    public ParamConvertType getParamConvertType() {
+        return paramConvertType;
     }
 
-    @Override
-    public AsyncContext startAsync() throws IllegalStateException {
-        asyncContext = new SeataAsyncContext(this);
-        return asyncContext;
+    public void setParamConvertType(ParamConvertType paramConvertType) {
+        this.paramConvertType = paramConvertType;
     }
 
-    @Override
-    public boolean isAsyncStarted() {
-        return asyncContext != null;
-    }
+    public enum ParamConvertType {
 
-    @Override
-    public boolean isAsyncSupported() {
-        return asyncContext != null;
-    }
+        /**
+         * convert like Spring @RequestBody
+         */
+        REQUEST_BODY,
 
-    @Override
-    public AsyncContext getAsyncContext() {
-        return asyncContext;
-    }
+        /**
+         * convert like Spring @RequestParam
+         */
+        REQUEST_PARAM,
 
-    @Override
-    public String getRemoteAddr() {
-        return remoteAddr;
+        /**
+         * convert like Spring @ModelAttribute
+         */
+        MODEL_ATTRIBUTE
     }
 }

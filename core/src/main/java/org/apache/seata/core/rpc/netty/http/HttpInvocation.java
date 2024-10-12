@@ -16,18 +16,47 @@
  */
 package org.apache.seata.core.rpc.netty.http;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.lang.reflect.Method;
 
-public class ControllerManager {
+public class HttpInvocation {
 
-    private static final Map<String, HttpInvocation> HTTP_CONTROLLER_MAP = new ConcurrentHashMap<>();
+    private Object controller;
 
-    public static HttpInvocation getHttpInvocation(String path) {
-        return HTTP_CONTROLLER_MAP.get(path);
+    private Method method;
+
+    private String path;
+
+    private ParamMetaData[] paramMetaData;
+
+    public Method getMethod() {
+        return method;
     }
 
-    public static void addHttpInvocation(HttpInvocation httpInvocation) {
-        HTTP_CONTROLLER_MAP.put(httpInvocation.getPath(), httpInvocation);
+    public void setMethod(Method method) {
+        this.method = method;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public Object getController() {
+        return controller;
+    }
+
+    public void setController(Object controller) {
+        this.controller = controller;
+    }
+
+    public ParamMetaData[] getParamMetaData() {
+        return paramMetaData;
+    }
+
+    public void setParamMetaData(ParamMetaData[] paramMetaData) {
+        this.paramMetaData = paramMetaData;
     }
 }
