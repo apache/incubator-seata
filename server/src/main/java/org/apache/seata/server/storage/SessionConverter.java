@@ -149,13 +149,13 @@ public class SessionConverter {
                 BeanUtils.copyProperties(globalSession,globalSessionVO);
                 globalSessionVO.setStatus(globalSession.getStatus().getCode());
                 globalSessionVO.setTimeout(Long.valueOf(globalSession.getTimeout()));
-                globalSessionVO.setBranchSessionVOs(converToBranchSession(globalSession.getBranchSessions()));
+                globalSessionVO.setBranchSessionVOs(convertToBranchSession(globalSession.getBranchSessions()));
                 result.add(globalSessionVO);
             }
         }
     }
 
-    public static Set<BranchSessionVO> converToBranchSession(List<BranchSession> branchSessions) {
+    public static Set<BranchSessionVO> convertToBranchSession(List<BranchSession> branchSessions) {
         Set<BranchSessionVO> branchSessionVOs = new HashSet<>(branchSessions.size());
         if (CollectionUtils.isNotEmpty(branchSessions)) {
             for (BranchSession branchSession : branchSessions) {
