@@ -243,6 +243,8 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             initSqlServerResourceId();
         } else if (JdbcConstants.DM.equals(dbType)) {
             initDMResourceId();
+        } else if (JdbcConstants.OSCAR.equals(dbType)) {
+            initOscarResourceId();
         } else {
             initDefaultResourceId();
         }
@@ -318,6 +320,18 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             resourceId = jdbcUrlBuilder.toString();
         } else {
             resourceId = jdbcUrl;
+        }
+    }
+
+    /**
+     * init the oscar resource id
+     * jdbc:oscar://192.168.x.xx:2003/OSRDB
+     */
+    private void initOscarResourceId() {
+        if (jdbcUrl.contains("?")) {
+            resourceId = jdbcUrl.substring(0, jdbcUrl.indexOf('?')) + "/" + userName;
+        } else {
+            resourceId = jdbcUrl + "/" + userName;
         }
     }
 

@@ -245,7 +245,7 @@ public class MockCoordinator extends AbstractTCInboundHandler implements Transac
     }
 
 
-    public void setExepectedResult(String xid, ResultCode expected) {
+    public void setExpectedResult(String xid, ResultCode expected) {
         expectedResultMap.put(xid, expected);
     }
 
