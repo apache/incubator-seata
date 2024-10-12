@@ -39,7 +39,7 @@ public class MockHelpController {
 
     @PostMapping("/expect/result")
     public String expectResult(@RequestParam String xid, @RequestParam int code) {
-        MockCoordinator.getInstance().setExepectedResult(xid, ResultCode.get(code));
+        MockCoordinator.getInstance().setExpectedResult(xid, ResultCode.get(code));
         return OK;
     }
 
