@@ -139,7 +139,7 @@ public class NettyClientBootstrap implements RemotingBootstrap {
                 @Override
                 public void initChannel(SocketChannel ch) {
                     ChannelPipeline pipeline = ch.pipeline();
-                    if (nettyClientConfig.getProtocol().equals(Protocol.GPRC.value)) {
+                    if (nettyClientConfig.getProtocol().equals(Protocol.GRPC.value)) {
                         pipeline.addLast(Http2FrameCodecBuilder.forClient().build())
                                 .addLast(new Http2MultiplexHandler(new ChannelDuplexHandler()));
                     } else {
@@ -191,7 +191,7 @@ public class NettyClientBootstrap implements RemotingBootstrap {
                 channel = f.channel();
             }
 
-            if (nettyClientConfig.getProtocol().equals(Protocol.GPRC.value)) {
+            if (nettyClientConfig.getProtocol().equals(Protocol.GRPC.value)) {
                 Http2StreamChannelBootstrap bootstrap = new Http2StreamChannelBootstrap(channel);
                 bootstrap.handler(new ChannelInboundHandlerAdapter() {
                     @Override
