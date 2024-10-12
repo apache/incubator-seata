@@ -24,7 +24,7 @@ public enum Protocol {
     /**
      * grpc
      */
-    GPRC("grpc"),
+    GRPC("grpc"),
 
     /**
      * seata
