@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
+import org.apache.seata.common.store.SessionMode;
 import org.apache.seata.core.event.GlobalTransactionEvent;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.GlobalStatus;
@@ -37,7 +38,6 @@ import org.apache.seata.server.coordinator.DefaultCore;
 import org.apache.seata.server.metrics.MetricsManager;
 import org.apache.seata.server.session.SessionHolder;
 import org.apache.seata.server.store.StoreConfig;
-import org.apache.seata.server.store.StoreConfig.SessionMode;
 import org.apache.seata.server.util.StoreUtil;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;

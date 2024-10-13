@@ -19,6 +19,7 @@ package org.apache.seata.server.coordinator;
 import java.util.Collection;
 import java.util.stream.Stream;
 
+import org.apache.seata.common.store.SessionMode;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
@@ -28,7 +29,6 @@ import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.session.SessionHelper;
 import org.apache.seata.server.session.SessionHolder;
-import org.apache.seata.server.store.StoreConfig.SessionMode;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;

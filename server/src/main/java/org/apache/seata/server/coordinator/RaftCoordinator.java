@@ -16,6 +16,7 @@
  */
 package org.apache.seata.server.coordinator;
 
+import org.apache.seata.common.store.SessionMode;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.exception.TransactionExceptionCode;
 import org.apache.seata.core.protocol.transaction.AbstractTransactionRequest;
@@ -64,7 +65,7 @@ public class RaftCoordinator extends DefaultCoordinator implements ApplicationLi
     }
 
     public static void setPrevent(String group, boolean prevent) {
-        if (StoreConfig.getSessionMode() == StoreConfig.SessionMode.RAFT) {
+        if (StoreConfig.getSessionMode() == SessionMode.RAFT) {
             GROUP_PREVENT.put(group, prevent);
         }
     }

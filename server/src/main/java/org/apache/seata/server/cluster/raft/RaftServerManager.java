@@ -38,6 +38,7 @@ import com.alipay.sofa.jraft.rpc.RpcServer;
 import com.alipay.sofa.jraft.rpc.impl.cli.CliClientServiceImpl;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.XID;
+import org.apache.seata.common.store.SessionMode;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.serializer.SerializerType;
@@ -87,7 +88,7 @@ public class RaftServerManager {
     public static void init() {
         if (INIT.compareAndSet(false, true)) {
             String initConfStr = CONFIG.getConfig(ConfigurationKeys.SERVER_RAFT_SERVER_ADDR);
-            RAFT_MODE = StoreConfig.getSessionMode().equals(StoreConfig.SessionMode.RAFT);
+            RAFT_MODE = StoreConfig.getSessionMode().equals(SessionMode.RAFT);
             if (StringUtils.isBlank(initConfStr)) {
                 if (RAFT_MODE) {
                     throw new IllegalArgumentException(

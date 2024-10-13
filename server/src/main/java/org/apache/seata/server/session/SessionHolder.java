@@ -29,6 +29,7 @@ import org.apache.seata.common.XID;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.common.exception.StoreException;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
+import org.apache.seata.common.store.SessionMode;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.Configuration;
@@ -42,7 +43,6 @@ import org.apache.seata.server.cluster.raft.RaftServerManager;
 import org.apache.seata.server.cluster.raft.context.SeataClusterContext;
 import org.apache.seata.server.lock.distributed.DistributedLockerFactory;
 import org.apache.seata.server.store.StoreConfig;
-import org.apache.seata.server.store.StoreConfig.SessionMode;
 import org.apache.seata.server.store.VGroupMappingStoreManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,27 +116,27 @@ public class SessionHolder {
             if (SessionMode.RAFT.equals(sessionMode)) {
                 String group = CONFIG.getConfig(ConfigurationKeys.SERVER_RAFT_GROUP, DEFAULT_SEATA_GROUP);
                 ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.RAFT.getName(),
-                    new Object[]{ROOT_SESSION_MANAGER_NAME});
+                        new Object[]{ROOT_SESSION_MANAGER_NAME});
                 SESSION_MANAGER_MAP = new HashMap<>();
                 SESSION_MANAGER_MAP.put(group, ROOT_SESSION_MANAGER);
                 RaftServerManager.start();
             } else {
                 String vGroupMappingStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR,
-                    DEFAULT_VGROUP_MAPPING_STORE_FILE_DIR)  + separator
+                        DEFAULT_VGROUP_MAPPING_STORE_FILE_DIR)  + separator
                         + System.getProperty(SERVER_SERVICE_PORT_CAMEL);
                 String sessionStorePath =
-                    CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR) + separator
-                        + System.getProperty(SERVER_SERVICE_PORT_CAMEL);
+                        CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR) + separator
+                                + System.getProperty(SERVER_SERVICE_PORT_CAMEL);
                 if (StringUtils.isBlank(sessionStorePath) || StringUtils.isBlank(vGroupMappingStorePath)) {
                     throw new StoreException("the {store.file.dir} is empty.");
                 }
                 ROOT_VGROUP_MAPPING_MANAGER = EnhancedServiceLoader.load(VGroupMappingStoreManager.class, SessionMode.FILE.getName(),
-                    new Object[]{vGroupMappingStorePath});
+                        new Object[]{vGroupMappingStorePath});
 
                 ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.FILE.getName(),
-                    new Object[]{ROOT_SESSION_MANAGER_NAME, sessionStorePath});
+                        new Object[]{ROOT_SESSION_MANAGER_NAME, sessionStorePath});
                 ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.FILE.getName(),
-                    new Object[]{ROOT_SESSION_MANAGER_NAME, sessionStorePath});
+                        new Object[]{ROOT_SESSION_MANAGER_NAME, sessionStorePath});
                 reload(sessionMode);
             }
         } else if (SessionMode.REDIS.equals(sessionMode)) {
@@ -169,7 +169,7 @@ public class SessionHolder {
 
     public static void reload(Collection<GlobalSession> allSessions, SessionMode storeMode, boolean acquireLock) {
         if ((SessionMode.FILE == storeMode || SessionMode.RAFT == storeMode)
-            && CollectionUtils.isNotEmpty(allSessions)) {
+                && CollectionUtils.isNotEmpty(allSessions)) {
             for (GlobalSession globalSession : allSessions) {
                 GlobalStatus globalStatus = globalSession.getStatus();
                 switch (globalStatus) {
@@ -179,7 +179,7 @@ public class SessionHolder {
                             SessionHelper.endRollbacked(globalSession, true);
                         } catch (TransactionException e) {
                             LOGGER.error("Could not handle the global session, xid: {},error: {}",
-                                globalSession.getXid(), e.getMessage());
+                                    globalSession.getXid(), e.getMessage());
                         }
                         break;
                     case Committed:
@@ -187,7 +187,7 @@ public class SessionHolder {
                             SessionHelper.endCommitted(globalSession, true);
                         } catch (TransactionException e) {
                             LOGGER.error("Could not handle the global session, xid: {},error: {}",
-                                globalSession.getXid(), e.getMessage());
+                                    globalSession.getXid(), e.getMessage());
                         }
                         break;
                     case Finished:
@@ -214,9 +214,9 @@ public class SessionHolder {
                         if (acquireLock) {
                             lockBranchSessions(globalSession.getSortedBranches());
                             if (GlobalStatus.Rollbacking.equals(globalSession.getStatus())
-                                || GlobalStatus.TimeoutRollbacking.equals(globalSession.getStatus())) {
+                                    || GlobalStatus.TimeoutRollbacking.equals(globalSession.getStatus())) {
                                 globalSession.getBranchSessions().parallelStream()
-                                    .forEach(branchSession -> branchSession.setLockStatus(LockStatus.Rollbacking));
+                                        .forEach(branchSession -> branchSession.setLockStatus(LockStatus.Rollbacking));
                             }
                         }
                         switch (globalStatus) {
@@ -230,7 +230,7 @@ public class SessionHolder {
                                     try {
                                         globalSession.changeGlobalStatus(GlobalStatus.RollbackRetrying);
                                         LOGGER.info("change global status: {}, xid: {}", globalSession.getStatus(),
-                                            globalSession.getXid());
+                                                globalSession.getXid());
                                     } catch (TransactionException e) {
                                         LOGGER.error("change global status fail: {}", e.getMessage(), e);
                                     }
@@ -250,7 +250,7 @@ public class SessionHolder {
             // Redis, db and so on
             CompletableFuture.runAsync(() -> {
                 SessionCondition searchCondition = new SessionCondition(GlobalStatus.UnKnown, GlobalStatus.Committed,
-                    GlobalStatus.Rollbacked, GlobalStatus.TimeoutRollbacked, GlobalStatus.Finished);
+                        GlobalStatus.Rollbacked, GlobalStatus.TimeoutRollbacked, GlobalStatus.Finished);
                 searchCondition.setLazyLoadBranch(true);
 
                 long now = System.currentTimeMillis();
@@ -320,7 +320,7 @@ public class SessionHolder {
 
     public static SessionManager getRootSessionManager(String group) {
         return StringUtils.isNotBlank(group) && SESSION_MANAGER_MAP != null
-            ? SESSION_MANAGER_MAP.computeIfAbsent(group, k -> ROOT_SESSION_MANAGER) : ROOT_SESSION_MANAGER;
+                ? SESSION_MANAGER_MAP.computeIfAbsent(group, k -> ROOT_SESSION_MANAGER) : ROOT_SESSION_MANAGER;
     }
 
     //endregion
@@ -354,7 +354,7 @@ public class SessionHolder {
      * @return the value
      */
     public static <T> T lockAndExecute(GlobalSession globalSession, GlobalSession.LockCallable<T> lockCallable)
-        throws TransactionException {
+            throws TransactionException {
         return getRootSessionManager().lockAndExecute(globalSession, lockCallable);
     }
 
