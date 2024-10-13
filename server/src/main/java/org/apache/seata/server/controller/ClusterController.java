@@ -16,14 +16,13 @@
  */
 package org.apache.seata.server.controller;
 
+import java.nio.channels.Channel;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import javax.servlet.AsyncContext;
-import javax.servlet.http.HttpServletRequest;
 
 import com.alipay.sofa.jraft.RouteTable;
 import com.alipay.sofa.jraft.conf.Configuration;
@@ -123,13 +122,11 @@ public class ClusterController {
     }
 
     @PostMapping("/watch")
-    public void watch(HttpServletRequest request, @RequestParam Map<String, Object> groupTerms,
-        @RequestParam(defaultValue = "28000") int timeout) {
-        AsyncContext context = request.startAsync();
-        context.setTimeout(0L);
+    public void watch(Channel channel, @RequestParam Map<String, Object> groupTerms,
+                      @RequestParam(defaultValue = "28000") int timeout) {
         groupTerms.forEach((group, term) -> {
-            Watcher<AsyncContext> watcher =
-                new Watcher<>(group, context, timeout, Long.parseLong(String.valueOf(term)));
+            Watcher<Channel> watcher =
+                    new Watcher<>(group, channel, timeout, Long.parseLong(String.valueOf(term)));
             clusterWatcherManager.registryWatcher(watcher);
         });
     }

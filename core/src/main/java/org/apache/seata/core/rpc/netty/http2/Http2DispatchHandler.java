@@ -44,7 +44,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class Http2DispatchHandler extends ChannelDuplexHandler {
 
     private final AtomicBoolean headerSent = new AtomicBoolean(false);
-    
+
     private ObjectNode requestDataNode;
 
     private String path;
