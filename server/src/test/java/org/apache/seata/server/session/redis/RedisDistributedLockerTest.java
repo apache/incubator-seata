@@ -20,6 +20,8 @@ import java.io.IOException;
 
 import org.apache.seata.common.XID;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
+import org.apache.seata.common.store.SessionMode;
+import org.apache.seata.common.store.StoreMode;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -33,8 +35,6 @@ import org.apache.seata.core.store.DistributedLocker;
 import org.apache.seata.server.lock.distributed.DistributedLockerFactory;
 import org.apache.seata.server.session.SessionHolder;
 import org.apache.seata.server.storage.redis.JedisPooledFactory;
-import org.apache.seata.server.store.StoreConfig.SessionMode;
-import static org.apache.seata.server.store.StoreConfig.StoreMode;
 
 /**
  * @description redis distributed lock test
