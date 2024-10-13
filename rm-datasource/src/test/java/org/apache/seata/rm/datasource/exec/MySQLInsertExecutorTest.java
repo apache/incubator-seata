@@ -225,7 +225,7 @@ public class MySQLInsertExecutorTest {
 
     @Test
     public void testBeforeAndAfterImageUpperColumn() throws SQLException {
-        String sql = "insert into table_insert_executor_test(ID, USER_ID, NMAE, SEX) values (1, 1, 'will', 1)";
+        String sql = "insert into table_insert_executor_test(ID, USER_ID, NAME, SEX) values (1, 1, 'will', 1)";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
         MySQLInsertRecognizer recognizer = new MySQLInsertRecognizer(sql, asts.get(0));
         newInsertExecutor = new MySQLInsertExecutor(newStatementProxy, (statement, args) -> null, recognizer);

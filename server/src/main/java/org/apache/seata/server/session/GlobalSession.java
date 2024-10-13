@@ -757,7 +757,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
             } catch (InterruptedException e) {
                 LOGGER.error("Interrupted error", e);
             }
-            throw new GlobalTransactionException(TransactionExceptionCode.FailedLockGlobalTranscation, "Lock global session failed");
+            throw new GlobalTransactionException(TransactionExceptionCode.FailedLockGlobalTransaction, "Lock global session failed");
         }
 
         public void unlock() {
