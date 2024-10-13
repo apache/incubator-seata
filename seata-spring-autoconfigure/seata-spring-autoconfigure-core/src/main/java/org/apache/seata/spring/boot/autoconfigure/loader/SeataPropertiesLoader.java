@@ -87,6 +87,7 @@ public class SeataPropertiesLoader implements ApplicationContextInitializer<Conf
             lockMode.ifPresent(value -> System.setProperty("lockMode", value));
         } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
             // The exception is not printed because it is an expected behavior and does not affect the normal operation of the program.
+            // StoreConfig only exists on the server side
         }
     }
 

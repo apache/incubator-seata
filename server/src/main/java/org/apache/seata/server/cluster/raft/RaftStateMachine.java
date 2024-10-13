@@ -49,6 +49,8 @@ import org.apache.seata.common.XID;
 import org.apache.seata.common.holder.ObjectHolder;
 import org.apache.seata.common.metadata.ClusterRole;
 import org.apache.seata.common.metadata.Node;
+import org.apache.seata.common.store.SessionMode;
+import org.apache.seata.common.store.StoreMode;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
@@ -140,7 +142,7 @@ public class RaftStateMachine extends StateMachineAdapter {
             return null;
         });
         registryStoreSnapshotFile(new LeaderMetadataSnapshotFile(group));
-        if (StoreConfig.StoreMode.RAFT.getName().equalsIgnoreCase(mode)) {
+        if (StoreMode.RAFT.getName().equalsIgnoreCase(mode)) {
             registryStoreSnapshotFile(new SessionSnapshotFile(group));
             EXECUTES.put(ADD_GLOBAL_SESSION, new AddGlobalSessionExecute());
             EXECUTES.put(ADD_BRANCH_SESSION, new AddBranchSessionExecute());
@@ -180,7 +182,7 @@ public class RaftStateMachine extends StateMachineAdapter {
 
     @Override
     public void onSnapshotSave(final SnapshotWriter writer, final Closure done) {
-        if (!StringUtils.equals(StoreConfig.SessionMode.RAFT.getName(), mode)) {
+        if (!StringUtils.equals(SessionMode.RAFT.getName(), mode)) {
             done.run(Status.OK());
             return;
         }
@@ -198,7 +200,7 @@ public class RaftStateMachine extends StateMachineAdapter {
 
     @Override
     public boolean onSnapshotLoad(final SnapshotReader reader) {
-        if (!StringUtils.equals(StoreConfig.SessionMode.RAFT.getName(), mode)) {
+        if (!StringUtils.equals(SessionMode.RAFT.getName(), mode)) {
             return true;
         }
         if (isLeader()) {
@@ -232,7 +234,7 @@ public class RaftStateMachine extends StateMachineAdapter {
                 try {
                     // become the leader again,reloading global session
                     SessionHolder.reload(SessionHolder.getRootSessionManager().allSessions(),
-                        StoreConfig.SessionMode.RAFT, false);
+                        SessionMode.RAFT, false);
                 } finally {
                     SeataClusterContext.unbindGroup();
                 }
