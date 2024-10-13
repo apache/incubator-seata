@@ -19,7 +19,6 @@ package org.apache.seata.core.rpc.netty.http;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
@@ -35,7 +34,6 @@ import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
 import io.netty.handler.codec.http.multipart.InterfaceHttpData;
 
 import java.lang.reflect.Method;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class HttpDispatchHandler extends SimpleChannelInboundHandler<HttpRequest> {
 
@@ -46,6 +44,7 @@ public class HttpDispatchHandler extends SimpleChannelInboundHandler<HttpRequest
         ObjectMapper objectMapper = new ObjectMapper();
         ObjectNode requestDataNode = objectMapper.createObjectNode();
         requestDataNode.putIfAbsent("param", ParameterParser.convertParamMap(queryStringDecoder.parameters()));
+        requestDataNode.putPOJO("channel", ctx.channel());
 
         if (httpRequest.method() == HttpMethod.POST) {
             ObjectNode bodyDataNode = objectMapper.createObjectNode();
@@ -63,13 +62,11 @@ public class HttpDispatchHandler extends SimpleChannelInboundHandler<HttpRequest
         HttpInvocation httpInvocation = ControllerManager.getHttpInvocation(path);
         Object httpController = httpInvocation.getController();
         Method handleMethod = httpInvocation.getMethod();
-        AtomicReference<Channel> channel = new AtomicReference<>(ctx.channel());
-        Object[] args = ParameterParser.getArgValues(channel, httpInvocation.getParamMetaData(), handleMethod, requestDataNode);
+        Object[] args = ParameterParser.getArgValues(httpInvocation.getParamMetaData(), handleMethod, requestDataNode);
         Object result = handleMethod.invoke(httpController, args);
-        if (channel.get() == null) {
+        if (requestDataNode.get("channel") == null) {
             return;
         }
-
         FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.wrappedBuffer(objectMapper.writeValueAsBytes(result)));
         response.headers().set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
         ctx.writeAndFlush(response);

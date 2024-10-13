@@ -29,6 +29,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
+import io.netty.handler.codec.http.DefaultHttpResponse;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http2.DefaultHttp2DataFrame;
 import io.netty.handler.codec.http2.Http2StreamChannel;
 import org.apache.seata.common.thread.NamedThreadFactory;
@@ -62,7 +65,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
             for (String group : WATCHERS.keySet()) {
                 Optional.ofNullable(WATCHERS.remove(group))
                     .ifPresent(watchers -> watchers.parallelStream().forEach(watcher -> {
-                        if (watcher.getTimeout() != -1L && System.currentTimeMillis() >= watcher.getTimeout()) {
+                        if (System.currentTimeMillis() >= watcher.getTimeout()) {
                             HttpServletResponse httpServletResponse =
                                 (HttpServletResponse)((AsyncContext)watcher.getAsyncContext()).getResponse();
                             watcher.setDone(true);
@@ -94,21 +97,15 @@ public class ClusterWatcherManager implements ClusterChangeListener {
         Channel channel  = (Channel) watcher.getAsyncContext();
         if (channel instanceof Http2StreamChannel) {
             // http2
-            String group = watcher.getGroup();
-            // No need to remove it, just put it back.
-            WATCHERS.computeIfAbsent(group, value -> new ConcurrentLinkedQueue<>()).add(watcher);
             channel.writeAndFlush(new DefaultHttp2DataFrame(Unpooled.wrappedBuffer("changed\n".getBytes())));
             return;
+        } else {
+            // http
+            channel.writeAndFlush(new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK));
         }
-
-        AsyncContext asyncContext = (AsyncContext)watcher.getAsyncContext();
-        HttpServletResponse httpServletResponse = (HttpServletResponse)asyncContext.getResponse();
-        watcher.setDone(true);
         if (logger.isDebugEnabled()) {
-            logger.debug("notify cluster change event to: {}", asyncContext.getRequest().getRemoteAddr());
+            logger.debug("notify cluster change event to: {}", channel.remoteAddress());
         }
-        httpServletResponse.setStatus(HttpServletResponse.SC_OK);
-        asyncContext.complete();
     }
 
     public void registryWatcher(Watcher<?> watcher) {

@@ -20,7 +20,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -55,20 +54,20 @@ public class ParameterParser {
         return paramNode;
     }
 
-    public static Object[] getArgValues(AtomicReference<Channel> channel, ParamMetaData[] paramMetaDatas, Method handleMethod, ObjectNode paramMap) throws JsonProcessingException {
+    public static Object[] getArgValues(ParamMetaData[] paramMetaDatas, Method handleMethod, ObjectNode paramMap) throws JsonProcessingException {
         Class<?>[] parameterTypes = handleMethod.getParameterTypes();
         Parameter[] parameters = handleMethod.getParameters();
-        return getParameters(channel, parameterTypes, paramMetaDatas, parameters, paramMap);
+        return getParameters(parameterTypes, paramMetaDatas, parameters, paramMap);
     }
 
-    private static Object[] getParameters(AtomicReference<Channel> channel, Class<?>[] parameterTypes, ParamMetaData[] paramMetaDatas, Parameter[] parameters, ObjectNode paramMap) throws JsonProcessingException {
+    private static Object[] getParameters(Class<?>[] parameterTypes, ParamMetaData[] paramMetaDatas, Parameter[] parameters, ObjectNode paramMap) throws JsonProcessingException {
         int length = parameterTypes.length;
         Object[] ret = new Object[length];
         for (int i = 0; i < length; i++) {
             Class<?> parameterType = parameterTypes[i];
             String parameterName = parameters[i].getName();
             ParamMetaData paramMetaData = paramMetaDatas[i];
-            ret[i] = getArgValue(channel, parameterType, parameterName, paramMetaData, paramMap);
+            ret[i] = getArgValue(parameterType, parameterName, paramMetaData, paramMap);
             if (!parameterType.isAssignableFrom(ret[i].getClass())) {
                 LOGGER.error("[HttpDispatchHandler] not compatible parameter type, expect {}, but {}", parameterType, ret[i].getClass());
                 ret[i] = null;
@@ -79,13 +78,13 @@ public class ParameterParser {
     }
 
 
-    private static Object getArgValue(AtomicReference<Channel> channel, Class<?> parameterType, String parameterName, ParamMetaData paramMetaData, ObjectNode paramMap) throws JsonProcessingException {
+    private static Object getArgValue(Class<?> parameterType, String parameterName, ParamMetaData paramMetaData, ObjectNode paramMap) throws JsonProcessingException {
         ParamMetaData.ParamConvertType paramConvertType = paramMetaData.getParamConvertType();
         ObjectMapper objectMapper = new ObjectMapper();
         if (parameterType.equals(Channel.class)) {
-            Channel ret = channel.get();
-            channel.set(null);
-            return ret;
+            JsonNode jsonNode = paramMap.get("channel");
+            paramMap.putPOJO("channel", null);
+            return objectMapper.convertValue(jsonNode, Channel.class);
         } else if (ParamMetaData.ParamConvertType.MODEL_ATTRIBUTE.equals(paramConvertType)) {
             JsonNode param = paramMap.get("param");
             return objectMapper.convertValue(param, parameterType);

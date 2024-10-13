@@ -23,6 +23,8 @@ import java.util.Map;
 import java.util.Set;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import javax.servlet.AsyncContext;
+import javax.servlet.http.HttpServletRequest;
 
 import com.alipay.sofa.jraft.RouteTable;
 import com.alipay.sofa.jraft.conf.Configuration;
@@ -54,7 +56,7 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 /**
  */
 @RestController
-@RequestMapping("/metadata/v1")
+@RequestMapping("/metadata")
 public class ClusterController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterController.class);
@@ -72,7 +74,7 @@ public class ClusterController {
         this.serverProperties = applicationContext.getBean(ServerProperties.class);
     }
 
-    @PostMapping("/changeCluster")
+    @PostMapping("/v1/changeCluster")
     public Result<?> changeCluster(@RequestParam String raftClusterStr) {
         Result<?> result = new Result<>();
         final Configuration newConf = new Configuration();
@@ -88,7 +90,7 @@ public class ClusterController {
         return result;
     }
 
-    @GetMapping("/cluster")
+    @GetMapping("/v1/cluster")
     public MetadataResponse cluster(String group) {
         MetadataResponse metadataResponse = new MetadataResponse();
         if (StringUtils.isBlank(group)) {
@@ -121,8 +123,20 @@ public class ClusterController {
         return metadataResponse;
     }
 
-    @PostMapping("/watch")
-    public void watch(Channel channel, @RequestParam Map<String, Object> groupTerms,
+    @PostMapping("/v1/watch")
+    public void watch(HttpServletRequest request, @RequestParam Map<String, Object> groupTerms,
+                      @RequestParam(defaultValue = "28000") int timeout) {
+        AsyncContext context = request.startAsync();
+        context.setTimeout(0L);
+        groupTerms.forEach((group, term) -> {
+            Watcher<AsyncContext> watcher =
+                    new Watcher<>(group, context, timeout, Long.parseLong(String.valueOf(term)));
+            clusterWatcherManager.registryWatcher(watcher);
+        });
+    }
+
+    @PostMapping("/v2/watch")
+    public void watchV2(Channel channel, @RequestParam Map<String, Object> groupTerms,
                       @RequestParam(defaultValue = "28000") int timeout) {
         groupTerms.forEach((group, term) -> {
             Watcher<Channel> watcher =
@@ -130,5 +144,4 @@ public class ClusterController {
             clusterWatcherManager.registryWatcher(watcher);
         });
     }
-
 }

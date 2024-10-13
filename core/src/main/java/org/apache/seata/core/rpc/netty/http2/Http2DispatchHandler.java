@@ -21,7 +21,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.QueryStringDecoder;
@@ -39,7 +38,6 @@ import org.apache.seata.core.rpc.netty.http.ParameterParser;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class Http2DispatchHandler extends ChannelDuplexHandler {
 
@@ -64,6 +62,7 @@ public class Http2DispatchHandler extends ChannelDuplexHandler {
             ObjectMapper objectMapper = new ObjectMapper();
             requestDataNode = objectMapper.createObjectNode();
             requestDataNode.putIfAbsent("param", ParameterParser.convertParamMap(queryStringDecoder.parameters()));
+            requestDataNode.putPOJO("channel", ctx.channel());
         } else if (msg instanceof Http2DataFrame) {
             ObjectMapper objectMapper = new ObjectMapper();
             Http2DataFrame http2DataFrame = (Http2DataFrame) msg;
@@ -71,18 +70,18 @@ public class Http2DispatchHandler extends ChannelDuplexHandler {
             byte[] bytes = new byte[byteBuf.readableBytes()];
             byteBuf.readBytes(bytes);
             requestDataNode.putIfAbsent("body", objectMapper.readTree(bytes));
-            invoke(ctx, path, objectMapper);
+            invoke(ctx);
         }
     }
 
-    private void invoke(ChannelHandlerContext ctx, String path, ObjectMapper objectMapper) throws JsonProcessingException, IllegalAccessException, InvocationTargetException {
+    private void invoke(ChannelHandlerContext ctx) throws JsonProcessingException, IllegalAccessException, InvocationTargetException {
+        ObjectMapper objectMapper = new ObjectMapper();
         HttpInvocation httpInvocation = ControllerManager.getHttpInvocation(path);
         Object httpController = httpInvocation.getController();
         Method handleMethod = httpInvocation.getMethod();
-        AtomicReference<Channel> channel = new AtomicReference<>(ctx.channel());
-        Object[] args = ParameterParser.getArgValues(channel, httpInvocation.getParamMetaData(), handleMethod, requestDataNode);
+        Object[] args = ParameterParser.getArgValues(httpInvocation.getParamMetaData(), handleMethod, requestDataNode);
         Object result = handleMethod.invoke(httpController, args);
-        if (channel.get() == null) {
+        if (requestDataNode.get("channel") == null) {
             return;
         }
 
