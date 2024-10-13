@@ -16,6 +16,7 @@
  */
 package org.apache.seata.console.config;
 
+import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.console.filter.JwtAuthenticationTokenFilter;
 import org.apache.seata.console.security.CustomUserDetailsServiceImpl;
 import org.apache.seata.console.security.JwtAuthenticationEntryPoint;
@@ -31,10 +32,12 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 /**
  * Spring security config
@@ -97,11 +100,16 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests().anyRequest().authenticated().and()
+        String csrfIgnoreUrls = env.getProperty("seata.security.csrf-ignore-urls");
+        CsrfConfigurer<HttpSecurity> csrf = http.authorizeRequests().anyRequest().authenticated().and()
             // custom token authorize exception handler
             .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
             // since we use jwt, session is not necessary
-            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).disable();
+            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).disable().csrf();
+        if (StringUtils.isNotBlank(csrfIgnoreUrls)) {
+            csrf.ignoringAntMatchers(csrfIgnoreUrls.trim().split(SECURITY_IGNORE_URLS_SPILT_CHAR));
+        }
+        csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
             // don't disable csrf, jwt may be implemented based on cookies
         http.addFilterBefore(new JwtAuthenticationTokenFilter(tokenProvider),
             UsernamePasswordAuthenticationFilter.class);

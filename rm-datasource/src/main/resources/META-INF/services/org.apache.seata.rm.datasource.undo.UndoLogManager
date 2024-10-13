@@ -21,3 +21,5 @@ org.apache.seata.rm.datasource.undo.sqlserver.SqlServerUndoLogManager
 org.apache.seata.rm.datasource.undo.mariadb.MariadbUndoLogManager
 org.apache.seata.rm.datasource.undo.polardbx.PolarDBXUndoLogManager
 org.apache.seata.rm.datasource.undo.dm.DmUndoLogManager
+org.apache.seata.rm.datasource.undo.oscar.OscarUndoLogManager
+org.apache.seata.rm.datasource.undo.kingbase.KingbaseUndoLogManager

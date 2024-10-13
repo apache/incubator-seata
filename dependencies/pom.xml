@@ -50,7 +50,7 @@
         <aopalliance.version>1.0</aopalliance.version>
         <zkclient.version>0.11</zkclient.version>
         <apache-zookeeper.version>3.7.2</apache-zookeeper.version>
-        <curator-test.version>5.1.0</curator-test.version>
+        <curator.version>5.1.0</curator.version>
         <spring-context-support.version>1.0.2</spring-context-support.version>
         <apollo-client.version>2.0.1</apollo-client.version>
         <eureka-clients.version>1.10.18</eureka-clients.version>
@@ -72,20 +72,21 @@
         <ant.version>1.10.12</ant.version>
         <lz4.version>1.7.1</lz4.version>
         <jraft.version>1.3.14</jraft.version>
-        <netty.version>4.1.86.Final</netty.version>
         <snakeyaml.version>2.0</snakeyaml.version>
-        <netty.version>4.1.94.Final</netty.version>
+        <netty.version>4.1.101.Final</netty.version>
         <sofa.hessian.version>4.0.3</sofa.hessian.version>
         <sofa.bolt.version>1.6.7</sofa.bolt.version>
-
-        <protobuf.version>3.16.3</protobuf.version>
-        <grpc.version>1.27.1</grpc.version>
+        <protobuf.version>3.25.4</protobuf.version>
+        <grpc.version>1.66.0</grpc.version>
         <kryo.version>5.4.0</kryo.version>
         <kryo-serializers.version>0.45</kryo-serializers.version>
         <hessian.version>4.0.63</hessian.version>
         <groovy.version>2.4.4</groovy.version>
         <zstd.version>1.5.0-4</zstd.version>
         <xstream.version>1.4.20</xstream.version>
+        <checker-qual.version>3.37.0</checker-qual.version>
+        <error_prone_annotations.version>2.21.1</error_prone_annotations.version>
+        <tomcat-embed.version>9.0.90</tomcat-embed.version>
 
         <!-- The `httpcore` and `httpclient` have been removed in spring-boot 3.1.0 and above. -->
         <httpcore.version>4.4.16</httpcore.version>
@@ -111,7 +112,7 @@
         <druid.version>1.2.20</druid.version>
         <commons-dbcp2.version>2.9.0</commons-dbcp2.version>
         <hikari.version>3.4.3</hikari.version>
-        <caffeine.version>2.8.8</caffeine.version>
+        <caffeine.version>2.9.3</caffeine.version>
         <!-- sql parser -->
         <antlr4.version>4.8</antlr4.version>
         <!-- for jdbc driver when package -->
@@ -132,7 +133,7 @@
         <mockito.version>4.11.0</mockito.version>
         <assertj-core.version>3.12.2</assertj-core.version>
         <jetty-version>9.4.38.v20210224</jetty-version>
-        <janino-version>3.1.7</janino-version>
+        <janino-version>3.1.10</janino-version>
         <mockwebserver-version>4.12.0</mockwebserver-version>
         <native-lib-loader.version>2.4.0</native-lib-loader.version>
     </properties>
@@ -164,6 +165,10 @@
                 <version>${spring-boot.version}</version>
                 <exclusions>
                     <exclusion>
+                        <groupId>org.apache.kafka</groupId>
+                        <artifactId>kafka-clients</artifactId>
+                    </exclusion>
+                    <exclusion>
                         <groupId>org.springframework</groupId>
                         <artifactId>spring-framework-bom</artifactId>
                     </exclusion>
@@ -171,16 +176,48 @@
                         <groupId>org.apache.tomcat.embed</groupId>
                         <artifactId>tomcat-embed-core</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.tomcat.embed</groupId>
+                        <artifactId>tomcat-embed-websocket</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.tomcat.embed</groupId>
+                        <artifactId>tomcat-embed-el</artifactId>
+                    </exclusion>
                 </exclusions>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-core</artifactId>
+                <version>${tomcat-embed.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-el</artifactId>
+                <version>${tomcat-embed.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-websocket</artifactId>
+                <version>${tomcat-embed.version}</version>
+            </dependency>
             <!-- the 3rd part -->
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-all</artifactId>
                 <version>${netty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.checkerframework</groupId>
+                <artifactId>checker-qual</artifactId>
+                <version>${checker-qual.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.errorprone</groupId>
+                <artifactId>error_prone_annotations</artifactId>
+                <version>${error_prone_annotations.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.yaml</groupId>
@@ -356,8 +393,18 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.curator</groupId>
+                <artifactId>curator-recipes</artifactId>
+                <version>${curator.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.curator</groupId>
+                <artifactId>curator-framework</artifactId>
+                <version>${curator.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.curator</groupId>
                 <artifactId>curator-test</artifactId>
-                <version>${curator-test.version}</version>
+                <version>${curator.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.alipay.sofa</groupId>
@@ -434,6 +481,10 @@
                     <exclusion>
                         <groupId>org.codehaus.jettison</groupId>
                         <artifactId>jettison</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.antlr</groupId>
+                        <artifactId>antlr-runtime</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -569,6 +620,11 @@
             <dependency>
                 <groupId>io.grpc</groupId>
                 <artifactId>grpc-core</artifactId>
+                <version>${grpc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-alts</artifactId>
                 <version>${grpc.version}</version>
             </dependency>
             <dependency>
@@ -819,10 +875,6 @@
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-webmvc</artifactId>
                 <version>${spring-webmvc.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.tomcat.embed</groupId>
-                <artifactId>tomcat-embed-core</artifactId>
             </dependency>
         </dependencies>
     </dependencyManagement>

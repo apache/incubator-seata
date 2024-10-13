@@ -14,29 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.config.zk;
+package org.apache.seata.core.store.db.sql.lock;
 
-import org.I0Itec.zkclient.exception.ZkMarshallingError;
-import org.I0Itec.zkclient.serialize.ZkSerializer;
-
-import java.nio.charset.StandardCharsets;
+import org.apache.seata.common.loader.LoadLevel;
 
 /**
- * Default zk serializer.
- * <p>
- * If the user is not configured in config.zk.serializer configuration item, then use default serializer.
- *
- * @since 1.3.0
+ * the database lock store kingbase sql
  */
-public class DefaultZkSerializer implements ZkSerializer {
+@LoadLevel(name = "kingbase")
+public class KingbaseLockStoreSql extends OracleLockStoreSql {
 
-    @Override
-    public byte[] serialize(Object data) throws ZkMarshallingError {
-        return String.valueOf(data).getBytes(StandardCharsets.UTF_8);
-    }
-
-    @Override
-    public Object deserialize(byte[] bytes) throws ZkMarshallingError {
-        return new String(bytes, StandardCharsets.UTF_8);
-    }
 }

@@ -71,7 +71,7 @@
 
     <properties>
         <!-- seata version -->
-        <revision>2.2.0-SNAPSHOT</revision>
+        <revision>2.3.0-SNAPSHOT</revision>
 
         <!-- Compiler settings properties -->
         <java.version>1.8</java.version>
@@ -81,8 +81,8 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <!-- The version of spring-boot for 'spring-boot-dependencies' and 'spring-boot-maven-plugin' -->
-        <spring-boot.version>2.5.15</spring-boot.version>
-        <spring-framework.version>5.3.27</spring-framework.version>
+        <spring-boot.version>2.7.18</spring-boot.version>
+        <spring-framework.version>5.3.39</spring-framework.version>
 
         <!--  server side dependency-->
         <kafka-appender.version>0.2.0-RC2</kafka-appender.version>
@@ -137,6 +137,7 @@
         <pmd.skip>true</pmd.skip>
         <maven.test.skip>false</maven.test.skip>
         <maven.git-commit-id.skip>true</maven.git-commit-id.skip>
+
         <maven.surefire.argLine></maven.surefire.argLine>
         <maven.surefire.excludes></maven.surefire.excludes>
 
