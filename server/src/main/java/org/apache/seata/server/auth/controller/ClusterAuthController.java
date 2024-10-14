@@ -14,13 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.console.controller;
+package org.apache.seata.server.auth.controller;
 
 import org.apache.seata.common.result.Code;
 import org.apache.seata.common.result.SingleResult;
-import org.apache.seata.console.config.ConsoleSecurityConfig;
-import org.apache.seata.console.security.User;
-import org.apache.seata.console.utils.JwtTokenUtils;
+import org.apache.seata.server.auth.config.ClusterSecurityConfig;
+import org.apache.seata.server.auth.security.User;
+import org.apache.seata.server.auth.utils.ClusterJwtTokenUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -32,21 +32,17 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
 import javax.servlet.http.HttpServletResponse;
 
-/**
- * auth user
- *
- */
 @RestController
-@RequestMapping("/api/v1/auth")
-public class AuthController {
+@RequestMapping("/metadata/v1/auth")
+public class ClusterAuthController {
     @Autowired
-    @Qualifier("consoleJwtTokenUtils")
-    private JwtTokenUtils jwtTokenUtils;
-
+    @Qualifier("clusterJwtTokenUtils")
+    private ClusterJwtTokenUtils jwtTokenUtils;
     @Autowired
-    @Qualifier("consoleAuthenticationManager")
+    @Qualifier("clusterAuthenticationManager")
     private AuthenticationManager authenticationManager;
 
     /**
@@ -61,7 +57,6 @@ public class AuthController {
     public SingleResult<String> login(HttpServletResponse response, @RequestBody User user) {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                 user.getUsername(), user.getPassword());
-
         try {
             //AuthenticationManager(default ProviderManager) #authenticate check Authentication
             Authentication authentication = authenticationManager.authenticate(authenticationToken);
@@ -71,10 +66,10 @@ public class AuthController {
             String accessToken = jwtTokenUtils.createAccessToken(authentication);
             String refreshToken = jwtTokenUtils.createRefreshToken(authentication);
 
-            String authHeader = ConsoleSecurityConfig.TOKEN_PREFIX + accessToken;
+            String authHeader = ClusterSecurityConfig.TOKEN_PREFIX + accessToken;
             //put token into http header
-            response.addHeader(ConsoleSecurityConfig.AUTHORIZATION_HEADER, authHeader);
-            response.addHeader(ConsoleSecurityConfig.REFRESH_TOKEN, refreshToken);
+            response.addHeader(ClusterSecurityConfig.AUTHORIZATION_HEADER, authHeader);
+            response.addHeader(ClusterSecurityConfig.REFRESH_TOKEN, refreshToken);
             return new SingleResult<>(Code.SUCCESS, authHeader);
         } catch (BadCredentialsException authentication) {
             return new SingleResult<>(Code.LOGIN_FAILED);
