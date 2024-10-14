@@ -16,16 +16,17 @@
  */
 package org.apache.seata.server.console.controller;
 
-import javax.annotation.Resource;
 import org.apache.seata.server.console.service.BranchSessionService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.annotation.Resource;
 
 /**
  * Branch Session Controller
  */
 @RestController
-@RequestMapping("console/branchSession")
+@RequestMapping("/api/v1/console/branchSession")
 public class BranchSessionController {
 
     @Resource(type = BranchSessionService.class)

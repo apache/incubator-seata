@@ -14,44 +14,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.common.result;
-
-import java.io.Serializable;
+package org.apache.seata.server.auth.security;
 
 /**
- * The single result
+ * mock user info
+ *
  */
-public class SingleResult<T> extends Result<T> implements Serializable {
-    private static final long serialVersionUID = 77612626624298767L;
-
+public class User {
     /**
-     * the data
+     * The Username.
      */
-    private T data;
+    String username;
+    /**
+     * The Password.
+     */
+    String password;
 
-    public SingleResult(String code, String message) {
-        super(code, message);
-    }
-    public SingleResult(Code code) {
-        super(code.getCode(), code.getMsg());
-    }
 
-    public SingleResult(String code, String message, T data) {
-        super(code, message);
-        this.data = data;
-    }
+    //region Getter && Setter
 
-    public SingleResult(Code code, T data) {
-        super(code.getCode(), code.getMsg());
-        this.data = data;
+    public String getUsername() {
+        return username;
     }
 
-    public T getData() {
-        return data;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
-    public void setData(T data) {
-        this.data = data;
+    public String getPassword() {
+        return password;
     }
 
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    //endregion
 }

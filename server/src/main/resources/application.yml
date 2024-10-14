@@ -37,6 +37,12 @@ console:
   user:
     username: seata
     password: seata
+  secretKey: SeataSecretKey0c382ef121d778043159209298fd40bf3850a017
+  accessTokenValidityInMilliseconds: 600000
+  refreshTokenValidityInMilliseconds: 86400000
+  ignore:
+    urls: /,/**/*.css,/**/*.js,/**/*.html,/**/*.map,/**/*.svg,/**/*.png,/**/*.jpeg,/**/*.ico,/api/v1/auth/login,/version.json,/health,/error,/vgroup/v1/**,/metadata/v1/auth/login
+
 seata:
   config:
     # support: nacos, consul, apollo, zk, etcd3
@@ -50,8 +56,11 @@ seata:
   #  server:
   #    service-port: 8091 #If not configured, the default is '${server.port} + 1000'
   security:
+    username: seata
+    password: seata
     secretKey: SeataSecretKey0c382ef121d778043159209298fd40bf3850a017
-    tokenValidityInMilliseconds: 1800000
+    accessTokenValidityInMilliseconds: 600000
+    refreshTokenValidityInMilliseconds: 86400000
     csrf-ignore-urls: /metadata/v1/**
     ignore:
-      urls: /,/**/*.css,/**/*.js,/**/*.html,/**/*.map,/**/*.svg,/**/*.png,/**/*.jpeg,/**/*.ico,/api/v1/auth/login,/version.json,/health,/error,/vgroup/v1/**
+      urls: /,/**/*.css,/**/*.js,/**/*.html,/**/*.map,/**/*.svg,/**/*.png,/**/*.jpeg,/**/*.ico,/api/v1/auth/login,/version.json,/health,/error,/vgroup/v1/**,/metadata/v1/auth/login
