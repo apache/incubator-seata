@@ -49,7 +49,8 @@ public class MockFastJson2Test {
     public static void before() {
         ConfigurationFactory.reload();
         ConfigurationTestHelper.putConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, String.valueOf(ProtocolTestConstants.MOCK_SERVER_PORT));
-        ConfigurationTestHelper.putConfig(ConfigurationKeys.SERIALIZE_FOR_RPC, String.valueOf(SerializerType.FASTJSON2));
+        //Enable it when testing is needed. The settings here will affect the global configuration.
+        //ConfigurationTestHelper.putConfig(ConfigurationKeys.SERIALIZE_FOR_RPC, String.valueOf(SerializerType.FASTJSON2));
         MockServer.start(ProtocolTestConstants.MOCK_SERVER_PORT);
         TmNettyRemotingClient.getInstance().destroy();
         RmNettyRemotingClient.getInstance().destroy();
