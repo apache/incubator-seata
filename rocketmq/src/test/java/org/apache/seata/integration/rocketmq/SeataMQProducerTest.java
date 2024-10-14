@@ -20,6 +20,7 @@ import org.apache.rocketmq.client.exception.MQBrokerException;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.producer.LocalTransactionState;
 import org.apache.rocketmq.client.producer.SendResult;
+import org.apache.rocketmq.client.producer.SendStatus;
 import org.apache.rocketmq.client.producer.TransactionListener;
 import org.apache.rocketmq.client.producer.TransactionMQProducer;
 import org.apache.rocketmq.common.message.Message;
@@ -42,6 +43,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -72,6 +75,42 @@ public class SeataMQProducerTest {
         producer.setTccRocketMQ(tccRocketMQ);
         producer1 = new SeataMQProducer("namespace", "producerGroup", null);
         transactionListener = producer1.getTransactionListener();
+    }
+
+    @Test
+    void testDoSendMessageInTransactionWithNonOkStatus() throws Exception {
+        // Arrange
+        Message msg = new Message("testTopic", "testBody".getBytes());
+        long timeout = 3000L;
+        String xid = "testXid";
+        long branchId = 123L;
+
+        SendResult mockSendResult = mock(SendResult.class);
+        when(mockSendResult.getSendStatus()).thenReturn(SendStatus.FLUSH_DISK_TIMEOUT);
+
+        doReturn(mockSendResult).when(producer).send(any(Message.class), anyLong());
+
+        // Act & Assert
+        assertThrows(MQClientException.class, () ->
+            producer.doSendMessageInTransaction(msg, timeout, xid, branchId)
+        );
+    }
+
+
+
+    @Test
+    void testDoSendMessageInTransactionWithException() throws Exception {
+        // Arrange
+        Message msg = new Message("testTopic", "testBody".getBytes());
+        long timeout = 3000L;
+        String xid = "testXid";
+        long branchId = 123L;
+
+        doThrow(new RuntimeException("Test exception")).when(producer).send(any(Message.class), anyLong());
+        doCallRealMethod().when(producer)
+            .doSendMessageInTransaction(any(Message.class), anyLong(), anyString(), anyLong());
+        // Act & Assert
+        assertThrows(MQClientException.class, () -> producer.doSendMessageInTransaction(msg, timeout, xid, branchId));
     }
 
     @Test

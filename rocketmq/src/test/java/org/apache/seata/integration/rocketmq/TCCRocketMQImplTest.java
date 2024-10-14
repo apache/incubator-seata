@@ -86,8 +86,8 @@ public class TCCRocketMQImplTest {
         Message message = new Message("testTopic", "testBody".getBytes());
         SendResult sendResult = mock(SendResult.class);
 
-        when(businessActionContext.getActionContext(TCCRocketMQImpl.ROCKET_MSG_KEY, Message.class)).thenReturn(message);
-        when(businessActionContext.getActionContext(TCCRocketMQImpl.ROCKET_SEND_RESULT_KEY, SendResult.class)).thenReturn(sendResult);
+        when(businessActionContext.getActionContext("ROCKET_MSG", Message.class)).thenReturn(message);
+        when(businessActionContext.getActionContext("ROCKET_SEND_RESULT", SendResult.class)).thenReturn(sendResult);
         when(businessActionContext.getXid()).thenReturn("testXid");
         when(businessActionContext.getBranchId()).thenReturn(123L);
 
@@ -104,8 +104,8 @@ public class TCCRocketMQImplTest {
         // Arrange
         SendResult sendResult = mock(SendResult.class);
 
-        when(businessActionContext.getActionContext(TCCRocketMQImpl.ROCKET_MSG_KEY, Message.class)).thenReturn(null);
-        when(businessActionContext.getActionContext(TCCRocketMQImpl.ROCKET_SEND_RESULT_KEY, SendResult.class)).thenReturn(sendResult);
+        when(businessActionContext.getActionContext("ROCKET_MSG", Message.class)).thenReturn(null);
+        when(businessActionContext.getActionContext("ROCKET_SEND_RESULT", SendResult.class)).thenReturn(sendResult);
         when(businessActionContext.getXid()).thenReturn("testXid");
         when(businessActionContext.getBranchId()).thenReturn(123L);
 
@@ -122,8 +122,8 @@ public class TCCRocketMQImplTest {
         // Arrange
         Message message = new Message("testTopic", "testBody".getBytes());
 
-        when(businessActionContext.getActionContext(TCCRocketMQImpl.ROCKET_MSG_KEY, Message.class)).thenReturn(message);
-        when(businessActionContext.getActionContext(TCCRocketMQImpl.ROCKET_SEND_RESULT_KEY, SendResult.class)).thenReturn(null);
+        when(businessActionContext.getActionContext("ROCKET_MSG", Message.class)).thenReturn(message);
+        when(businessActionContext.getActionContext("ROCKET_SEND_RESULT", SendResult.class)).thenReturn(null);
         when(businessActionContext.getXid()).thenReturn("testXid");
         when(businessActionContext.getBranchId()).thenReturn(123L);
 
@@ -141,8 +141,8 @@ public class TCCRocketMQImplTest {
         Message message = new Message("testTopic", "testBody".getBytes());
         SendResult sendResult = mock(SendResult.class);
 
-        when(businessActionContext.getActionContext(TCCRocketMQImpl.ROCKET_MSG_KEY, Message.class)).thenReturn(message);
-        when(businessActionContext.getActionContext(TCCRocketMQImpl.ROCKET_SEND_RESULT_KEY, SendResult.class)).thenReturn(sendResult);
+        when(businessActionContext.getActionContext("ROCKET_MSG", Message.class)).thenReturn(message);
+        when(businessActionContext.getActionContext("ROCKET_SEND_RESULT", SendResult.class)).thenReturn(sendResult);
         when(businessActionContext.getXid()).thenReturn("testXid");
         when(businessActionContext.getBranchId()).thenReturn(123L);
 
@@ -163,8 +163,8 @@ public class TCCRocketMQImplTest {
         Message message = new Message("testTopic", "testBody".getBytes());
         SendResult sendResult = mock(SendResult.class);
 
-        when(businessActionContext.getActionContext(TCCRocketMQImpl.ROCKET_MSG_KEY, Message.class)).thenReturn(message);
-        when(businessActionContext.getActionContext(TCCRocketMQImpl.ROCKET_SEND_RESULT_KEY,
+        when(businessActionContext.getActionContext("ROCKET_MSG", Message.class)).thenReturn(message);
+        when(businessActionContext.getActionContext("ROCKET_SEND_RESULT",
             SendResult.class)).thenReturn(sendResult);
         when(businessActionContext.getXid()).thenReturn("testXid");
         when(businessActionContext.getBranchId()).thenReturn(123L);
@@ -181,8 +181,8 @@ public class TCCRocketMQImplTest {
     @Test
     void testCommitWithNullMessage() {
         // Arrange
-        when(businessActionContext.getActionContext(TCCRocketMQImpl.ROCKET_MSG_KEY, Message.class)).thenReturn(null);
-        when(businessActionContext.getActionContext(TCCRocketMQImpl.ROCKET_SEND_RESULT_KEY,
+        when(businessActionContext.getActionContext("ROCKET_MSG", Message.class)).thenReturn(null);
+        when(businessActionContext.getActionContext("ROCKET_SEND_RESULT",
             SendResult.class)).thenReturn(mock(SendResult.class));
 
         // Act & Assert
@@ -192,9 +192,9 @@ public class TCCRocketMQImplTest {
     @Test
     void testCommitWithNullSendResult() {
         // Arrange
-        when(businessActionContext.getActionContext(TCCRocketMQImpl.ROCKET_MSG_KEY, Message.class)).thenReturn(
+        when(businessActionContext.getActionContext("ROCKET_MSG", Message.class)).thenReturn(
             new Message());
-        when(businessActionContext.getActionContext(TCCRocketMQImpl.ROCKET_SEND_RESULT_KEY,
+        when(businessActionContext.getActionContext("ROCKET_SEND_RESULT",
             SendResult.class)).thenReturn(null);
 
         // Act & Assert
@@ -208,8 +208,8 @@ public class TCCRocketMQImplTest {
         Message message = new Message("testTopic", "testBody".getBytes());
         SendResult sendResult = mock(SendResult.class);
 
-        when(businessActionContext.getActionContext(TCCRocketMQImpl.ROCKET_MSG_KEY, Message.class)).thenReturn(message);
-        when(businessActionContext.getActionContext(TCCRocketMQImpl.ROCKET_SEND_RESULT_KEY,
+        when(businessActionContext.getActionContext("ROCKET_MSG", Message.class)).thenReturn(message);
+        when(businessActionContext.getActionContext("ROCKET_SEND_RESULT",
             SendResult.class)).thenReturn(sendResult);
 
         doThrow(new MQBrokerException(1, "Test exception")).when(producerImpl)
