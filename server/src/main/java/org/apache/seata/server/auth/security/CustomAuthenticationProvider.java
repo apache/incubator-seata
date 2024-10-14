@@ -14,9 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.console.security;
+package org.apache.seata.server.auth.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -28,10 +29,11 @@ import org.springframework.stereotype.Component;
  * auth provider
  *
  */
-@Component
+@Component("clusterAuthenticationProvider")
 public class CustomAuthenticationProvider implements AuthenticationProvider {
 
     @Autowired
+    @Qualifier("clusterUserDetailsService")
     private CustomUserDetailsServiceImpl userDetailsService;
 
     @Override

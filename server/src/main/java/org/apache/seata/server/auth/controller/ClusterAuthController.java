@@ -1,26 +1,10 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package org.apache.seata.console.controller;
+package org.apache.seata.server.auth.controller;
 
 import org.apache.seata.common.result.Code;
 import org.apache.seata.common.result.SingleResult;
-import org.apache.seata.console.config.ConsoleSecurityConfig;
-import org.apache.seata.console.security.User;
-import org.apache.seata.console.utils.JwtTokenUtils;
+import org.apache.seata.server.auth.config.ClusterSecurityConfig;
+import org.apache.seata.server.auth.security.User;
+import org.apache.seata.server.auth.utils.RaftRegJwtTokenUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -35,19 +19,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
 
-/**
- * auth user
- *
- */
 @RestController
-@RequestMapping("/api/v1/auth")
-public class AuthController {
+@RequestMapping("/metadata/v1/auth")
+public class ClusterAuthController {
     @Autowired
-    @Qualifier("consoleJwtTokenUtils")
-    private JwtTokenUtils jwtTokenUtils;
-
+    @Qualifier("clusterJwtTokenUtils")
+    private RaftRegJwtTokenUtils jwtTokenUtils;
     @Autowired
-    @Qualifier("consoleAuthenticationManager")
+    @Qualifier("clusterAuthenticationManager")
     private AuthenticationManager authenticationManager;
 
     /**
@@ -62,7 +41,6 @@ public class AuthController {
     public SingleResult<String> login(HttpServletResponse response, @RequestBody User user) {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                 user.getUsername(), user.getPassword());
-
         try {
             //AuthenticationManager(default ProviderManager) #authenticate check Authentication
             Authentication authentication = authenticationManager.authenticate(authenticationToken);
@@ -72,10 +50,10 @@ public class AuthController {
             String accessToken = jwtTokenUtils.createAccessToken(authentication);
             String refreshToken = jwtTokenUtils.createRefreshToken(authentication);
 
-            String authHeader = ConsoleSecurityConfig.TOKEN_PREFIX + accessToken;
+            String authHeader = ClusterSecurityConfig.TOKEN_PREFIX + accessToken;
             //put token into http header
-            response.addHeader(ConsoleSecurityConfig.AUTHORIZATION_HEADER, authHeader);
-            response.addHeader(ConsoleSecurityConfig.REFRESH_TOKEN, refreshToken);
+            response.addHeader(ClusterSecurityConfig.AUTHORIZATION_HEADER, authHeader);
+            response.addHeader(ClusterSecurityConfig.REFRESH_TOKEN, refreshToken);
 
             return new SingleResult<>(Code.SUCCESS, authHeader);
         } catch (BadCredentialsException authentication) {

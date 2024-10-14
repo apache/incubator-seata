@@ -16,22 +16,20 @@
  */
 package org.apache.seata.rm;
 
+import io.netty.channel.Channel;
+import org.apache.seata.common.exception.FrameworkException;
+import org.apache.seata.core.auth.JwtAuthManager;
+import org.apache.seata.core.auth.RegisterHandler;
 import org.apache.seata.core.exception.AbstractExceptionHandler;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.ResourceManager;
-import org.apache.seata.core.protocol.AbstractMessage;
-import org.apache.seata.core.protocol.AbstractResultMessage;
-import org.apache.seata.core.protocol.transaction.AbstractTransactionRequestToRM;
-import org.apache.seata.core.protocol.transaction.BranchCommitRequest;
-import org.apache.seata.core.protocol.transaction.BranchCommitResponse;
-import org.apache.seata.core.protocol.transaction.BranchRollbackRequest;
-import org.apache.seata.core.protocol.transaction.BranchRollbackResponse;
-import org.apache.seata.core.protocol.transaction.RMInboundHandler;
-import org.apache.seata.core.protocol.transaction.UndoLogDeleteRequest;
+import org.apache.seata.core.protocol.*;
+import org.apache.seata.core.protocol.transaction.*;
 import org.apache.seata.core.rpc.RpcContext;
 import org.apache.seata.core.rpc.TransactionMessageHandler;
+import org.apache.seata.core.rpc.netty.RmNettyRemotingClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +38,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 public abstract class AbstractRMHandler extends AbstractExceptionHandler
-    implements RMInboundHandler, TransactionMessageHandler {
+    implements RMInboundHandler, TransactionMessageHandler, RegisterHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRMHandler.class);
 
@@ -153,6 +151,56 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
     @Override
     public void onResponse(AbstractResultMessage response, RpcContext context) {
         LOGGER.info("the rm client received response msg [{}] from tc server.", response.toString());
+    }
+
+    @Override
+    public void onRegisterResponse(RegisterRMResponse response, Channel channel, Integer rpcId) {
+        LOGGER.info("the rm client received register response msg [{}] from tc server.", response.toString());
+        try {
+            ResultCode resultCode = response.getResultCode();
+            RegisterRMRequest request = RmNettyRemotingClient.getInstance().getRegisterRMRequest(rpcId);
+            if (resultCode.equals(ResultCode.AccessTokenExpired)) {
+                // refresh token to get access token
+                JwtAuthManager.getInstance().setAccessToken(null);
+                String identifyExtraData = JwtAuthManager.getInstance().getAuthData();
+                request.setExtraData(identifyExtraData);
+                RmNettyRemotingClient.getInstance().sendAsyncRequest(channel, request);
+            } else if (resultCode.equals(ResultCode.RefreshTokenExpired)) {
+                // relogin to get refresh token and access token
+                JwtAuthManager.getInstance().setAccessToken(null);
+                JwtAuthManager.getInstance().setRefreshToken(null);
+                String identifyExtraData = JwtAuthManager.getInstance().getAuthData();
+                request.setExtraData(identifyExtraData);
+                RmNettyRemotingClient.getInstance().sendAsyncRequest(channel, request);
+            } else if (resultCode.equals(ResultCode.AccessTokenNearExpiration)) {
+                //
+                JwtAuthManager.getInstance().setAccessTokenNearExpiration(true);
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.info("register RM success. client version:{}, server version:{},channel:{}",
+                            request.getVersion(), request.getVersion(), channel);
+                }
+
+            } else if (resultCode.equals(ResultCode.Success)) {
+                RmNettyRemotingClient.getInstance().refreshAuthToken(response.getExtraData());
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.info("register RM success. client version:{}, server version:{},channel:{}",
+                            request.getVersion(), request.getVersion(), channel);
+                }
+                RmNettyRemotingClient.getInstance().removeRegisterRMRequest(rpcId);
+            } else {
+                String errMsg = String.format(
+                        "register RM failed. client version: %s,server version: %s, errorMsg: %s, " + "channel: %s",
+                        request.getVersion(), request.getVersion(), response.getMsg(), channel);
+                RmNettyRemotingClient.getInstance().removeRegisterRMRequest(rpcId);
+                throw new FrameworkException(errMsg);
+            }
+        } catch (Exception exx) {
+            throw new FrameworkException(
+                    "register RM" + " error, errMsg:" + exx.getMessage());
+        }
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("register RM success");
+        }
     }
 
     public abstract BranchType getBranchType();

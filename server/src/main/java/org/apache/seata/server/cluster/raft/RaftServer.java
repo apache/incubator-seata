@@ -16,11 +16,6 @@
  */
 package org.apache.seata.server.cluster.raft;
 
-import java.io.Closeable;
-import java.io.File;
-import java.io.IOException;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import com.alipay.sofa.jraft.Node;
 import com.alipay.sofa.jraft.RaftGroupService;
 import com.alipay.sofa.jraft.RouteTable;
@@ -28,14 +23,20 @@ import com.alipay.sofa.jraft.entity.PeerId;
 import com.alipay.sofa.jraft.option.NodeOptions;
 import com.alipay.sofa.jraft.rpc.RpcServer;
 import com.codahale.metrics.Slf4jReporter;
+import org.apache.commons.io.FileUtils;
+import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.rpc.Disposable;
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_REPORTER_ENABLED;
-import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_REPORTER_INITIAL_DELAY;
+import java.io.Closeable;
+import java.io.File;
+import java.io.IOException;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+
+import static org.apache.seata.common.ConfigurationKeys.*;
 
 /**
  */
@@ -79,6 +80,11 @@ public class RaftServer implements Disposable, Closeable {
         // Initialize the raft Group service framework
         this.raftGroupService = new RaftGroupService(groupId, serverId, nodeOptions, rpcServer, true);
         this.node = this.raftGroupService.start(false);
+        // Enable SSL authentication for the Raft group if SSL is enabled.
+        boolean sslEnabled = ConfigurationFactory.getInstance().getBoolean(SERVER_RAFT_SSL_ENABLED, false);
+        if (sslEnabled) {
+            enableSSL();
+        }
         RouteTable.getInstance().updateConfiguration(groupId, node.getOptions().getInitialConf());
         if (reporterEnabled) {
             final Slf4jReporter reporter = Slf4jReporter.forRegistry(node.getNodeMetrics().getMetricRegistry())
@@ -119,4 +125,19 @@ public class RaftServer implements Disposable, Closeable {
         });
     }
 
+    private void enableSSL() {
+        System.setProperty("bolt.server.ssl.enable", "true");
+        System.setProperty("bolt.server.ssl.clientAuth", "true");
+        System.setProperty("bolt.client.ssl.enable", "true");
+
+        Configuration instance = ConfigurationFactory.getInstance();
+        System.setProperty("bolt.server.ssl.keystore", instance.getConfig(SERVER_RAFT_SSL_SERVER_KEYSTORE));
+        System.setProperty("bolt.server.ssl.keystore.password", instance.getConfig(SERVER_RAFT_SSL_SERVER_KEYSTORE_PASSWORD));
+        System.setProperty("bolt.server.ssl.keystore.type", instance.getConfig(SERVER_RAFT_SSL_SERVER_KEYSTORE_TYPE));
+        System.setProperty("bolt.server.ssl.kmf.algorithm", instance.getConfig(SERVER_RAFT_SSL_SERVER_TMF_ALGORITHM));
+        System.setProperty("bolt.client.ssl.keystore", instance.getConfig(SERVER_RAFT_SSL_CLIENT_KEYSTORE));
+        System.setProperty("bolt.client.ssl.keystore.password", instance.getConfig(SERVER_RAFT_SSL_CLIENT_KEYSTORE_PASSWORD));
+        System.setProperty("bolt.client.ssl.keystore.type", instance.getConfig(SERVER_RAFT_SSL_CLIENT_KEYSTORE_TYPE));
+        System.setProperty("bolt.client.ssl.tmf.algorithm", instance.getConfig(SERVER_RAFT_SSL_CLIENT_TMF_ALGORITHM));
+    }
 }

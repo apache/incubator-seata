@@ -19,29 +19,15 @@ package org.apache.seata.core.rpc;
 import io.netty.channel.ChannelHandlerContext;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.NetUtil;
-import org.apache.seata.core.protocol.AbstractMessage;
-import org.apache.seata.core.protocol.AbstractResultMessage;
-import org.apache.seata.core.protocol.HeartbeatMessage;
-import org.apache.seata.core.protocol.MergeResultMessage;
-import org.apache.seata.core.protocol.MergedWarpMessage;
-import org.apache.seata.core.protocol.RegisterRMRequest;
-import org.apache.seata.core.protocol.RegisterRMResponse;
-import org.apache.seata.core.protocol.RegisterTMRequest;
-import org.apache.seata.core.protocol.RegisterTMResponse;
-import org.apache.seata.core.protocol.RpcMessage;
-import org.apache.seata.core.protocol.Version;
+import org.apache.seata.core.auth.AuthResult;
+import org.apache.seata.core.protocol.*;
 import org.apache.seata.core.rpc.netty.ChannelManager;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * The type Default server message listener.
@@ -106,65 +92,89 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
     }
 
     @Override
-    public void onRegRmMessage(RpcMessage request, ChannelHandlerContext ctx, RegisterCheckAuthHandler checkAuthHandler) {
-        RegisterRMRequest message = (RegisterRMRequest)request.getBody();
+    public void onRegRmMessage(RpcMessage rpcMessage, ChannelHandlerContext ctx, RegisterCheckAuthHandler checkAuthHandler) {
+        RegisterRMRequest message = (RegisterRMRequest) rpcMessage.getBody();
         String ipAndPort = NetUtil.toStringAddress(ctx.channel().remoteAddress());
-        boolean isSuccess = false;
-        String errorInfo = StringUtils.EMPTY;
+        RegisterRMResponse response = new RegisterRMResponse(false);
         try {
-            if (checkAuthHandler == null || checkAuthHandler.regResourceManagerCheckAuth(message)) {
+            AuthResult authResult = (checkAuthHandler != null) ? checkAuthHandler.regResourceManagerCheckAuth(message) : null;
+            if (checkAuthHandler == null || authResult.getResultCode().equals(ResultCode.Success)
+                    || authResult.getResultCode().equals(ResultCode.AccessTokenNearExpiration)) {
                 ChannelManager.registerRMChannel(message, ctx.channel());
                 Version.putChannelVersion(ctx.channel(), message.getVersion());
-                isSuccess = true;
+                response.setIdentified(true);
+                response.setResultCode(checkAuthHandler == null ? ResultCode.Success : authResult.getResultCode());
+                response.setExtraData(checkAuthHandler.fetchNewToken(authResult));
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("checkAuth for client:{},vgroup:{},applicationId:{} is OK", ipAndPort, message.getTransactionServiceGroup(), message.getApplicationId());
+                    LOGGER.debug("RM checkAuth for client:{},vgroup:{},applicationId:{} is OK",
+                            ipAndPort, message.getTransactionServiceGroup(), message.getApplicationId());
+                }
+            } else {
+                if (authResult.getResultCode().equals(ResultCode.Failed)) {
+                    response.setMsg("RM checkAuth failed!Please check your username/password or token.");
+                } else if (authResult.getResultCode().equals(ResultCode.AccessTokenExpired)) {
+                    response.setMsg("RM checkAuth failed! The access token has been expired.");
+                } else if (authResult.getResultCode().equals(ResultCode.RefreshTokenExpired)) {
+                    response.setMsg("RM checkAuth failed! The refresh token has been expired.");
+                }
+                response.setResultCode(authResult.getResultCode());
+                if (LOGGER.isWarnEnabled()) {
+                    LOGGER.warn("RM checkAuth for client:{},vgroup:{},applicationId:{} is FAIL",
+                            ipAndPort, message.getTransactionServiceGroup(), message.getApplicationId());
                 }
             }
-        } catch (Exception exx) {
-            isSuccess = false;
-            errorInfo = exx.getMessage();
-            LOGGER.error("RM register fail, error message:{}", errorInfo);
+        } catch (IncompatibleVersionException e) {
+            LOGGER.error("RM register fail, error message:{}", e.getMessage());
+            response.setResultCode(ResultCode.Failed);
         }
-        RegisterRMResponse response = new RegisterRMResponse(isSuccess);
-        if (StringUtils.isNotEmpty(errorInfo)) {
-            response.setMsg(errorInfo);
-        }
-        getServerMessageSender().sendAsyncResponse(request, ctx.channel(), response);
-        if (LOGGER.isInfoEnabled()) {
+        remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), response);
+        if (response.isIdentified() && LOGGER.isInfoEnabled()) {
             LOGGER.info("RM register success,message:{},channel:{},client version:{}", message, ctx.channel(),
-                message.getVersion());
+                    message.getVersion());
         }
     }
 
     @Override
-    public void onRegTmMessage(RpcMessage request, ChannelHandlerContext ctx, RegisterCheckAuthHandler checkAuthHandler) {
-        RegisterTMRequest message = (RegisterTMRequest)request.getBody();
+    public void onRegTmMessage(RpcMessage rpcMessage, ChannelHandlerContext ctx, RegisterCheckAuthHandler checkAuthHandler) {
+        RegisterTMRequest message = (RegisterTMRequest) rpcMessage.getBody();
         String ipAndPort = NetUtil.toStringAddress(ctx.channel().remoteAddress());
         Version.putChannelVersion(ctx.channel(), message.getVersion());
-        boolean isSuccess = false;
-        String errorInfo = StringUtils.EMPTY;
+        RegisterTMResponse response = new RegisterTMResponse(false);
         try {
-            if (checkAuthHandler == null || checkAuthHandler.regTransactionManagerCheckAuth(message)) {
+            AuthResult authResult = (checkAuthHandler != null) ? checkAuthHandler.regTransactionManagerCheckAuth(message) : null;
+            if (checkAuthHandler == null || authResult.getResultCode().equals(ResultCode.Success)
+                    || authResult.getResultCode().equals(ResultCode.AccessTokenNearExpiration)) {
                 ChannelManager.registerTMChannel(message, ctx.channel());
                 Version.putChannelVersion(ctx.channel(), message.getVersion());
-                isSuccess = true;
+                response.setIdentified(true);
+                response.setResultCode(checkAuthHandler == null ? ResultCode.Success : authResult.getResultCode());
+                response.setExtraData(checkAuthHandler.fetchNewToken(authResult));
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("checkAuth for client:{},vgroup:{},applicationId:{} is OK", ipAndPort, message.getTransactionServiceGroup(), message.getApplicationId());
+                    LOGGER.debug("TM checkAuth for client:{},vgroup:{},applicationId:{} is OK",
+                            ipAndPort, message.getTransactionServiceGroup(), message.getApplicationId());
+                }
+            } else {
+                if (authResult.getResultCode().equals(ResultCode.Failed)) {
+                    response.setMsg("TM checkAuth failed!Please check your username/password.");
+                } else if (authResult.getResultCode().equals(ResultCode.AccessTokenExpired)) {
+                    response.setMsg("TM checkAuth failed! The access token has been expired.");
+                } else if (authResult.getResultCode().equals(ResultCode.RefreshTokenExpired)) {
+                    response.setMsg("TM checkAuth failed! The refresh token has been expired.");
+                }
+                response.setResultCode(authResult.getResultCode());
+                if (LOGGER.isWarnEnabled()) {
+                    LOGGER.warn("TM checkAuth for client:{},vgroup:{},applicationId:{} is FAIL",
+                            ipAndPort, message.getTransactionServiceGroup(), message.getApplicationId());
                 }
             }
-        } catch (Exception exx) {
-            isSuccess = false;
-            errorInfo = exx.getMessage();
-            LOGGER.error("TM register fail, error message:{}", errorInfo);
+        } catch (IncompatibleVersionException e) {
+            LOGGER.error("TM register fail, error message:{}", e.getMessage());
+            response.setResultCode(ResultCode.Failed);
         }
-        RegisterTMResponse response = new RegisterTMResponse(isSuccess);
-        if (StringUtils.isNotEmpty(errorInfo)) {
-            response.setMsg(errorInfo);
-        }
-        getServerMessageSender().sendAsyncResponse(request, ctx.channel(), response);
-        if (LOGGER.isInfoEnabled()) {
+        remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), response);
+        if (response.isIdentified() && LOGGER.isInfoEnabled()) {
             LOGGER.info("TM register success,message:{},channel:{},client version:{}", message, ctx.channel(),
-                message.getVersion());
+                    message.getVersion());
         }
     }
 

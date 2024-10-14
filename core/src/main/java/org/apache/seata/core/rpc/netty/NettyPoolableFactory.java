@@ -16,16 +16,16 @@
  */
 package org.apache.seata.core.rpc.netty;
 
-import java.net.InetSocketAddress;
-
 import io.netty.channel.Channel;
+import org.apache.commons.pool.KeyedPoolableObjectFactory;
 import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.common.util.NetUtil;
-import org.apache.seata.core.protocol.RegisterRMResponse;
-import org.apache.seata.core.protocol.RegisterTMResponse;
-import org.apache.commons.pool.KeyedPoolableObjectFactory;
+import org.apache.seata.core.auth.JwtAuthManager;
+import org.apache.seata.core.protocol.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.InetSocketAddress;
 
 /**
  * The type Netty key poolable factory.
@@ -64,45 +64,58 @@ public class NettyPoolableFactory implements KeyedPoolableObjectFactory<NettyPoo
         }
         try {
             response = rpcRemotingClient.sendSyncRequest(tmpChannel, key.getMessage());
-            if (!isRegisterSuccess(response, key.getTransactionRole())) {
+
+            if ((key.getTransactionRole().equals(NettyPoolKey.TransactionRole.TMROLE)
+                    && !(response instanceof RegisterTMResponse))
+                    || (key.getTransactionRole().equals(NettyPoolKey.TransactionRole.RMROLE)
+                    && !(response instanceof RegisterRMResponse))) {
                 rpcRemotingClient.onRegisterMsgFail(key.getAddress(), tmpChannel, response, key.getMessage());
-            } else {
+            }
+
+            if (((AbstractIdentifyResponse) response).getResultCode().equals(ResultCode.AccessTokenExpired)) {
+                // refresh token to get access token
+                JwtAuthManager.getInstance().setAccessToken(null);
+                AbstractIdentifyRequest request = (AbstractIdentifyRequest)key.getMessage();
+                String identifyExtraData = JwtAuthManager.getInstance().getAuthData();
+                request.setExtraData(identifyExtraData);
+                response = rpcRemotingClient.sendSyncRequest(tmpChannel, request);
+            }
+            if (((AbstractIdentifyResponse) response).getResultCode().equals(ResultCode.RefreshTokenExpired)) {
+                // relogin to get refresh token and access token
+                JwtAuthManager.getInstance().setAccessToken(null);
+                JwtAuthManager.getInstance().setRefreshToken(null);
+                AbstractIdentifyRequest request = (AbstractIdentifyRequest)key.getMessage();
+                String identifyExtraData = JwtAuthManager.getInstance().getAuthData();
+                request.setExtraData(identifyExtraData);
+                response = rpcRemotingClient.sendSyncRequest(tmpChannel, request);
+            }
+            ResultCode resultCode = ((AbstractIdentifyResponse) response).getResultCode();
+            if (resultCode.equals(ResultCode.AccessTokenNearExpiration)) {
+                // access token near expiration
+                JwtAuthManager.getInstance().setAccessTokenNearExpiration(true);
                 channelToServer = tmpChannel;
                 rpcRemotingClient.onRegisterMsgSuccess(key.getAddress(), tmpChannel, response, key.getMessage());
+                rpcRemotingClient.getClientChannelManager().registerChannel(key.getAddress(), tmpChannel);
+            } else if (resultCode.equals(ResultCode.Success)) {
+                channelToServer = tmpChannel;
+                rpcRemotingClient.onRegisterMsgSuccess(key.getAddress(), tmpChannel, response, key.getMessage());
+                rpcRemotingClient.getClientChannelManager().registerChannel(key.getAddress(), tmpChannel);
+            } else {
+                rpcRemotingClient.onRegisterMsgFail(key.getAddress(), tmpChannel, response, key.getMessage());
             }
         } catch (Exception exx) {
             if (tmpChannel != null) {
                 tmpChannel.close();
             }
             throw new FrameworkException(
-                "register " + key.getTransactionRole().name() + " error, errMsg:" + exx.getMessage());
+                    "register " + key.getTransactionRole().name() + " error, errMsg:" + exx.getMessage());
         }
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("register success, cost " + (System.currentTimeMillis() - start) + " ms, version:" + getVersion(
-                response, key.getTransactionRole()) + ",role:" + key.getTransactionRole().name() + ",channel:"
-                + channelToServer);
+                    response, key.getTransactionRole()) + ",role:" + key.getTransactionRole().name() + ",channel:"
+                    + channelToServer);
         }
         return channelToServer;
-    }
-
-    private boolean isRegisterSuccess(Object response, NettyPoolKey.TransactionRole transactionRole) {
-        if (response == null) {
-            return false;
-        }
-        if (transactionRole.equals(NettyPoolKey.TransactionRole.TMROLE)) {
-            if (!(response instanceof RegisterTMResponse)) {
-                return false;
-            }
-            RegisterTMResponse registerTMResponse = (RegisterTMResponse)response;
-            return registerTMResponse.isIdentified();
-        } else if (transactionRole.equals(NettyPoolKey.TransactionRole.RMROLE)) {
-            if (!(response instanceof RegisterRMResponse)) {
-                return false;
-            }
-            RegisterRMResponse registerRMResponse = (RegisterRMResponse)response;
-            return registerRMResponse.isIdentified();
-        }
-        return false;
     }
 
     private String getVersion(Object response, NettyPoolKey.TransactionRole transactionRole) {

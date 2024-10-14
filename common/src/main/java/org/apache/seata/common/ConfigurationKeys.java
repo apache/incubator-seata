@@ -69,6 +69,11 @@ public interface ConfigurationKeys {
     String SEATA_PREFIX = SEATA_FILE_ROOT_CONFIG + ".";
 
     /**
+     * The constant SECURITY_PREFIX
+     */
+    String SECURITY_PREFIX = "security.";
+
+    /**
      * The constant SERVICE_PREFIX.
      */
     String SERVICE_PREFIX = "service.";
@@ -889,6 +894,21 @@ public interface ConfigurationKeys {
     String SERVER_RAFT = SERVER_PREFIX + "raft.";
 
     /**
+     * The constant SERVER_RAFT_SSL.
+     */
+    String SERVER_RAFT_SSL = SERVER_RAFT + "ssl.";
+
+    /**
+     * The constant SERVER_RAFT_SSL_CLIENT.
+     */
+    String SERVER_RAFT_SSL_CLIENT = SERVER_RAFT_SSL + "client.";
+
+    /**
+     * The constant SERVER_RAFT_SSL_SERVER.
+     */
+    String SERVER_RAFT_SSL_SERVER = SERVER_RAFT_SSL + "server.";
+
+    /**
      * The constant SERVER_RAFT_SERVER_ADDR.
      */
     String SERVER_RAFT_SERVER_ADDR = SERVER_RAFT + "serverAddr";
@@ -917,6 +937,51 @@ public interface ConfigurationKeys {
      * The constant SERVER_RAFT_SYNC.
      */
     String SERVER_RAFT_SYNC = SERVER_RAFT + "sync";
+
+    /**
+     * The constant SERVER_RAFT_SSL_ENABLED.
+     */
+    String SERVER_RAFT_SSL_ENABLED = SERVER_RAFT_SSL + "enabled";
+
+    /**
+     * The constant SERVER_RAFT_SSL_SERVER_KEYSTORE.
+     */
+    String SERVER_RAFT_SSL_SERVER_KEYSTORE = SERVER_RAFT_SSL_SERVER + "keystore";
+
+    /**
+     * The constant SERVER_RAFT_SSL_CLIENT_KEYSTORE.
+     */
+    String SERVER_RAFT_SSL_CLIENT_KEYSTORE = SERVER_RAFT_SSL_CLIENT + "keystore";
+
+    /**
+     * The constant SERVER_RAFT_SSL_SERVER_KEYSTORE_PASSWORD.
+     */
+    String SERVER_RAFT_SSL_SERVER_KEYSTORE_PASSWORD = SERVER_RAFT_SSL_SERVER + "keystore.password";
+
+    /**
+     * The constant SERVER_RAFT_SSL_CLIENT_KEYSTORE_PASSWORD.
+     */
+    String SERVER_RAFT_SSL_CLIENT_KEYSTORE_PASSWORD = SERVER_RAFT_SSL_CLIENT + "keystore.password";
+
+    /**
+     * The constant SERVER_RAFT_SSL_SERVER_KEYSTORE_TYPE.
+     */
+    String SERVER_RAFT_SSL_SERVER_KEYSTORE_TYPE = SERVER_RAFT_SSL_SERVER + "keystore.type";
+
+    /**
+     * The constant SERVER_RAFT_SSL_CLIENT_KEYSTORE_TYPE.
+     */
+    String SERVER_RAFT_SSL_CLIENT_KEYSTORE_TYPE = SERVER_RAFT_SSL_CLIENT + "keystore.type";
+
+    /**
+     * The constant SERVER_RAFT_SSL_SERVER_TMF_ALGORITHM.
+     */
+    String SERVER_RAFT_SSL_SERVER_TMF_ALGORITHM = SERVER_RAFT_SSL_SERVER + "kmf.algorithm";
+
+    /**
+     * The constant SERVER_RAFT_SSL_CLIENT_TMF_ALGORITHM.
+     */
+    String SERVER_RAFT_SSL_CLIENT_TMF_ALGORITHM = SERVER_RAFT_SSL_CLIENT + "kmf.algorithm";
 
     /**
      * The constant SERVER_RAFT_MAX_APPEND_BUFFER_SIZE.
@@ -1013,6 +1078,32 @@ public interface ConfigurationKeys {
      * The constant SERVER_APPLICATION_DATA_SIZE_CHECK
      */
     String SERVER_APPLICATION_DATA_SIZE_CHECK = SERVER_PREFIX + "applicationDataLimitCheck";
+
+    /**
+     * The constant SECURITY_USERNAME;
+     */
+    String SECURITY_USERNME = SECURITY_PREFIX + "username";
+
+    /**
+     * The constant SECURITY_PASSWORD;
+     */
+    String SECURITY_PASSWORD = SECURITY_PREFIX + "password";
+
+    /**
+     * The constant SECURITY_SECRET_KEY;
+     */
+    String SECURITY_SECRET_KEY = SECURITY_PREFIX + "secretKey";
+
+    /**
+     * The constant SECURITY_ACCESS_TOKEN_VALID_TIME;
+     */
+    String SECURITY_ACCESS_TOKEN_VALID_TIME = SECURITY_PREFIX + "accessTokenValidityInMilliseconds";
+
+    /**
+     * The constant SECURITY_REFRESH_TOKEN_VALID_TIME;
+     */
+    String SECURITY_REFRESH_TOKEN_VALID_TIME = SECURITY_PREFIX + "refreshTokenValidityInMilliseconds";
+
 
     /**
      * The constant ROCKET_MQ_MSG_TIMEOUT

@@ -16,12 +16,6 @@
  */
 package org.apache.seata.core.rpc.netty;
 
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Function;
-
 import io.netty.channel.Channel;
 import io.netty.util.concurrent.EventExecutorGroup;
 import org.apache.commons.lang.StringUtils;
@@ -45,6 +39,15 @@ import org.apache.seata.core.rpc.processor.client.ClientHeartbeatProcessor;
 import org.apache.seata.core.rpc.processor.client.ClientOnResponseProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
+
+import static org.apache.seata.common.ConfigurationKeys.EXTRA_DATA_KV_CHAR;
+import static org.apache.seata.common.ConfigurationKeys.EXTRA_DATA_SPLIT_CHAR;
 
 /**
  * The rm netty client.
@@ -213,6 +216,7 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
                                      AbstractMessage requestMessage) {
         RegisterTMRequest registerTMRequest = (RegisterTMRequest) requestMessage;
         RegisterTMResponse registerTMResponse = (RegisterTMResponse) response;
+        refreshAuthToken(registerTMResponse.getExtraData());
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("register TM success. client version:{}, server version:{},channel:{}", registerTMRequest.getVersion(), registerTMResponse.getVersion(), channel);
         }
@@ -272,15 +276,12 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
         }
         String digest = signer.sign(digestSource, secretKey);
         StringBuilder sb = new StringBuilder();
-        sb.append(RegisterTMRequest.UDATA_AK).append(org.apache.seata.common.ConfigurationKeys.EXTRA_DATA_KV_CHAR).append(accessKey).append(
-            org.apache.seata.common.ConfigurationKeys.EXTRA_DATA_SPLIT_CHAR);
-        sb.append(RegisterTMRequest.UDATA_DIGEST).append(org.apache.seata.common.ConfigurationKeys.EXTRA_DATA_KV_CHAR).append(digest).append(
-            org.apache.seata.common.ConfigurationKeys.EXTRA_DATA_SPLIT_CHAR);
-        sb.append(RegisterTMRequest.UDATA_TIMESTAMP).append(org.apache.seata.common.ConfigurationKeys.EXTRA_DATA_KV_CHAR).append(timestamp).append(
-            org.apache.seata.common.ConfigurationKeys.EXTRA_DATA_SPLIT_CHAR);
-        sb.append(RegisterTMRequest.UDATA_AUTH_VERSION).append(
-            org.apache.seata.common.ConfigurationKeys.EXTRA_DATA_KV_CHAR).append(signer.getSignVersion()).append(
-            org.apache.seata.common.ConfigurationKeys.EXTRA_DATA_SPLIT_CHAR);
+        sb.append(RegisterTMRequest.UDATA_AK).append(EXTRA_DATA_KV_CHAR).append(accessKey).append(EXTRA_DATA_SPLIT_CHAR);
+        sb.append(RegisterTMRequest.UDATA_DIGEST).append(EXTRA_DATA_KV_CHAR).append(digest).append(EXTRA_DATA_SPLIT_CHAR);
+        sb.append(RegisterTMRequest.UDATA_TIMESTAMP).append(EXTRA_DATA_KV_CHAR).append(timestamp).append(EXTRA_DATA_SPLIT_CHAR);
+        sb.append(RegisterTMRequest.UDATA_AUTH_VERSION).append(EXTRA_DATA_KV_CHAR).append(signer.getSignVersion()).append(EXTRA_DATA_SPLIT_CHAR);
+        String authExtraData = getAuthData();
+        sb.append(authExtraData);
         return sb.toString();
     }
 

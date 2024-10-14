@@ -16,14 +16,6 @@
  */
 package org.apache.seata.core.rpc.netty;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Function;
-
 import io.netty.channel.Channel;
 import io.netty.util.concurrent.EventExecutorGroup;
 import org.apache.seata.common.DefaultValues;
@@ -43,13 +35,17 @@ import org.apache.seata.core.protocol.MessageType;
 import org.apache.seata.core.protocol.RegisterRMRequest;
 import org.apache.seata.core.protocol.RegisterRMResponse;
 import org.apache.seata.core.rpc.netty.NettyPoolKey.TransactionRole;
-import org.apache.seata.core.rpc.processor.client.ClientHeartbeatProcessor;
-import org.apache.seata.core.rpc.processor.client.ClientOnResponseProcessor;
-import org.apache.seata.core.rpc.processor.client.RmBranchCommitProcessor;
-import org.apache.seata.core.rpc.processor.client.RmBranchRollbackProcessor;
-import org.apache.seata.core.rpc.processor.client.RmUndoLogProcessor;
+import org.apache.seata.core.rpc.processor.client.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 
 import static org.apache.seata.common.Constants.DBKEYS_SPLIT_CHAR;
 
@@ -173,19 +169,18 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
     @Override
     public void onRegisterMsgSuccess(String serverAddress, Channel channel, Object response,
                                      AbstractMessage requestMessage) {
-        RegisterRMRequest registerRMRequest = (RegisterRMRequest)requestMessage;
-        RegisterRMResponse registerRMResponse = (RegisterRMResponse)response;
+        RegisterRMRequest registerRMRequest = (RegisterRMRequest) requestMessage;
+        RegisterRMResponse registerRMResponse = (RegisterRMResponse) response;
+        refreshAuthToken(registerRMResponse.getExtraData());
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("register RM success. client version:{}, server version:{},channel:{}", registerRMRequest.getVersion(), registerRMResponse.getVersion(), channel);
         }
         getClientChannelManager().registerChannel(serverAddress, channel);
         String dbKey = getMergedResourceKeys();
-        if (registerRMRequest.getResourceIds() != null) {
-            if (!registerRMRequest.getResourceIds().equals(dbKey)) {
-                sendRegisterMessage(serverAddress, channel, dbKey);
-            }
+        if (registerRMRequest.getResourceIds() != null
+                && !registerRMRequest.getResourceIds().equals(dbKey)) {
+            sendRegisterMessage(serverAddress, channel, dbKey);
         }
-
     }
 
     @Override
@@ -237,7 +232,7 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
     }
 
     public void sendRegisterMessage(String serverAddress, Channel channel, String resourceId) {
-        RegisterRMRequest message = new RegisterRMRequest(applicationId, transactionServiceGroup);
+        RegisterRMRequest message = new RegisterRMRequest(applicationId, transactionServiceGroup, getAuthData());
         message.setResourceIds(resourceId);
         try {
             super.sendAsyncRequest(channel, message);
@@ -248,7 +243,7 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
                     LOGGER.info("remove not writable channel:{}", channel);
                 }
             } else {
-                LOGGER.error("register resource failed, channel:{},resourceId:{}", channel, resourceId, e);
+                LOGGER.error("sendAsyncRequest register resource failed,, channel:{},resourceId:{}", channel, resourceId, e);
             }
         }
     }
@@ -290,7 +285,7 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
             if (resourceIds != null && LOGGER.isInfoEnabled()) {
                 LOGGER.info("RM will register :{}", resourceIds);
             }
-            RegisterRMRequest message = new RegisterRMRequest(applicationId, transactionServiceGroup);
+            RegisterRMRequest message = new RegisterRMRequest(applicationId, transactionServiceGroup, getAuthData());
             message.setResourceIds(resourceIds);
             return new NettyPoolKey(NettyPoolKey.TransactionRole.RMROLE, serverAddress, message);
         };
