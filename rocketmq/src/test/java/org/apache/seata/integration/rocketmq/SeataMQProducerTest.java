@@ -215,14 +215,13 @@ public class SeataMQProducerTest {
 
         Message msg = new Message("testTopic", "testBody".getBytes());
         SendResult expectedResult = mock(SendResult.class);
-        int expectedTimeout = 3000; // 假设默认超时时间是3000毫秒
+        int expectedTimeout = 3000;
 
         doReturn(expectedTimeout).when(producer).getSendMsgTimeout();
         doReturn(expectedResult).when(producer).send(any(Message.class), anyLong());
 
         SendResult result = producer.send(msg);
 
-        // Assert
         assertSame(expectedResult, result);
         verify(producer).send(msg, expectedTimeout);
     }

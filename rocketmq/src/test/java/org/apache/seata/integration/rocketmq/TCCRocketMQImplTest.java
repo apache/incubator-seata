@@ -16,6 +16,9 @@
  */
 package org.apache.seata.integration.rocketmq;
 
+import java.lang.reflect.Field;
+import java.net.UnknownHostException;
+import java.util.concurrent.TimeoutException;
 import org.apache.rocketmq.client.exception.MQBrokerException;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.impl.producer.DefaultMQProducerImpl;
@@ -32,10 +35,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
-
-import java.lang.reflect.Field;
-import java.net.UnknownHostException;
-import java.util.concurrent.TimeoutException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
