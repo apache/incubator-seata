@@ -88,7 +88,7 @@ public class ServerRunner implements CommandLineRunner, DisposableBean,
     public void destroy() throws Exception {
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("destoryAll starting");
+            LOGGER.debug("destory All starting");
         }
 
         for (Disposable disposable : DISPOSABLE_LIST) {
@@ -96,7 +96,7 @@ public class ServerRunner implements CommandLineRunner, DisposableBean,
         }
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("destoryAll finish");
+            LOGGER.debug("destory All finish");
         }
     }
 

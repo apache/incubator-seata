@@ -36,7 +36,7 @@ public enum ConfigOperationType {
     /**
      * Delete all configuration operation
      */
-    DELETE_ALL("deleteALL"),
+    DELETE_ALL("deleteAll"),
 
     /**
      * Upload configuration operation

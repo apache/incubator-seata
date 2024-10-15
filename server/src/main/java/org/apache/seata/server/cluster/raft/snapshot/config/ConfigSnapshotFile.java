@@ -49,9 +49,9 @@ public class ConfigSnapshotFile implements Serializable, StoreSnapshotFile {
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
 
     private static ConfigStoreManager configStoreManager;
-    String group;
+    private final String group;
 
-    String fileName = "config";
+    private final String fileName = "config";
 
     public ConfigSnapshotFile(String group) {
         this.group = group;

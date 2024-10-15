@@ -45,7 +45,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ClusterConfigWatcherManager implements ClusterConfigChangeListener {
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    private static final Logger logger = LoggerFactory.getLogger(ClusterConfigWatcherManager.class);
 
     private static final Map<String/*namespace*/, Map<String/*dataId*/, Queue<ConfigWatcher<?>>>> WATCHERS = new ConcurrentHashMap<>();
 
@@ -55,7 +55,7 @@ public class ClusterConfigWatcherManager implements ClusterConfigChangeListener 
     @PostConstruct
     public void init() {
         // Responds to monitors that time out
-        scheduledThreadPoolExecutor.scheduleAtFixedRate(() -> {
+        scheduledThreadPoolExecutor.scheduleWithFixedDelay(() -> {
             for (String namespace : WATCHERS.keySet()) {
                 Map<String, Queue<ConfigWatcher<?>>> dataIdWatchersMap = WATCHERS.get(namespace);
                 for (String dataId : dataIdWatchersMap.keySet()) {
