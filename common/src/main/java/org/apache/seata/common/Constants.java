@@ -226,6 +226,36 @@ public interface Constants {
     String JACKSON_JSON_TEXT_PREFIX = "{\"@class\":";
 
     /**
+     * The constant APPLICATION_TYPE_KEY
+     */
+    String APPLICATION_TYPE_KEY = "application.type";
+
+    /**
+     * The constant APPLICATION_TYPE_SERVER
+     */
+    String APPLICATION_TYPE_SERVER = "server";
+
+    /**
+     * The constant APPLICATION_TYPE_CLIENT
+     */
+    String APPLICATION_TYPE_CLIENT = "client";
+
+    /**
+     * The constant DEFAULT_STORE_NAMESPACE in raft configuration
+     */
+
+    String DEFAULT_STORE_NAMESPACE = "default";
+    /**
+     * The constant DEFAULT_STORE_DATA_ID in raft configuration
+     */
+    String DEFAULT_STORE_DATA_ID = "seata.properties";
+
+    /**
+     * The constant RAFT_CONFIG_GROUP
+     */
+    String RAFT_CONFIG_GROUP = "config";
+
+    /**
      * The constant DEAD_LOCK_SQL_STATE
      */
     String DEAD_LOCK_SQL_STATE = "40001";
@@ -235,4 +265,8 @@ public interface Constants {
      */
     int DEAD_LOCK_ERROR_CODE = 1213;
 
+    /**
+     * The constant CONFIGURATION_META_FILE_NAME
+     */
+    String CONFIGURATION_META_FILE_NAME = "configuration-meta.yml";
 }

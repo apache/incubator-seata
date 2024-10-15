@@ -29,15 +29,18 @@ import org.apache.seata.common.metadata.ClusterRole;
 import org.apache.seata.common.metadata.Node;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchType;
+import org.apache.seata.server.cluster.raft.execute.config.ConfigOperationType;
 import org.apache.seata.server.cluster.raft.snapshot.RaftSnapshot;
-import org.apache.seata.server.cluster.raft.sync.msg.RaftBranchSessionSyncMsg;
-import org.apache.seata.server.cluster.raft.sync.msg.RaftClusterMetadataMsg;
-import org.apache.seata.server.cluster.raft.sync.msg.RaftGlobalSessionSyncMsg;
-import org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMessage;
 import org.apache.seata.server.cluster.raft.sync.RaftSyncMessageSerializer;
 import org.apache.seata.server.cluster.raft.snapshot.RaftSnapshotSerializer;
 import org.apache.seata.server.cluster.raft.snapshot.session.RaftSessionSnapshot;
+import org.apache.seata.server.cluster.raft.sync.msg.RaftBranchSessionSyncMsg;
+import org.apache.seata.server.cluster.raft.sync.msg.RaftClusterMetadataMsg;
+import org.apache.seata.server.cluster.raft.sync.msg.RaftConfigOperationSyncMsg;
+import org.apache.seata.server.cluster.raft.sync.msg.RaftGlobalSessionSyncMsg;
+import org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMessage;
 import org.apache.seata.server.cluster.raft.sync.msg.dto.BranchTransactionDTO;
+import org.apache.seata.server.cluster.raft.sync.msg.dto.ConfigOperationDTO;
 import org.apache.seata.server.cluster.raft.sync.msg.dto.GlobalTransactionDTO;
 import org.apache.seata.server.cluster.raft.sync.msg.dto.RaftClusterMetadata;
 import org.apache.seata.server.session.GlobalSession;
@@ -219,4 +222,34 @@ public class RaftSyncMessageTest {
         Assertions.assertEquals(ClusterRole.LEARNER,learner1.getRole());
     }
 
+    @Test
+    public void testConfigSnapshotSerialize() throws IOException{
+        Map<String, Object> configMap = new HashMap<>();
+        configMap.put("config.type","file");
+        configMap.put("store","file");
+
+        RaftSnapshot raftSnapshot = new RaftSnapshot();
+        raftSnapshot.setBody(configMap);
+        raftSnapshot.setType(RaftSnapshot.SnapshotType.config);
+        byte[] msg = RaftSnapshotSerializer.encode(raftSnapshot);
+        RaftSnapshot raftSnapshot1 = RaftSnapshotSerializer.decode(msg);
+        HashMap<String, Object> configMap1 = (HashMap<String, Object>) raftSnapshot1.getBody();
+        Assertions.assertEquals(configMap,configMap1);
+    }
+
+    @Test
+    public void testConfigMsgSerialize() throws IOException{
+        RaftSyncMessage raftSyncMessage = new RaftSyncMessage();
+        ConfigOperationDTO configOperationDTO = new ConfigOperationDTO(ConfigOperationType.PUT, "namespace", "dataId", "key", "value");
+        RaftConfigOperationSyncMsg configSyncMsg = new RaftConfigOperationSyncMsg(configOperationDTO);
+        raftSyncMessage.setBody(configSyncMsg);
+        byte[] msg = RaftSyncMessageSerializer.encode(raftSyncMessage);
+        RaftSyncMessage raftSyncMessage1 = RaftSyncMessageSerializer.decode(msg);
+        Assertions.assertEquals(configSyncMsg.getMsgType(), ((RaftConfigOperationSyncMsg)raftSyncMessage1.getBody()).getMsgType());
+        Assertions.assertEquals(configSyncMsg.getConfigOperation().getKey(), ((RaftConfigOperationSyncMsg)raftSyncMessage1.getBody()).getConfigOperation().getKey());
+        Assertions.assertEquals(configSyncMsg.getConfigOperation().getValue(), ((RaftConfigOperationSyncMsg)raftSyncMessage1.getBody()).getConfigOperation().getValue());
+        Assertions.assertEquals(configSyncMsg.getConfigOperation().getNamespace(), ((RaftConfigOperationSyncMsg)raftSyncMessage1.getBody()).getConfigOperation().getNamespace());
+        Assertions.assertEquals(configSyncMsg.getConfigOperation().getDataId(), ((RaftConfigOperationSyncMsg)raftSyncMessage1.getBody()).getConfigOperation().getDataId());
+        Assertions.assertEquals(configSyncMsg.getConfigOperation().getOptType(), ((RaftConfigOperationSyncMsg)raftSyncMessage1.getBody()).getConfigOperation().getOptType());
+    }
 }
