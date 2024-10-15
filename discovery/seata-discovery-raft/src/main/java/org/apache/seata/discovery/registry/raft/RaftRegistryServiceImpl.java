@@ -58,7 +58,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.ContentType;
 import org.apache.http.util.EntityUtils;
 import org.apache.http.protocol.HTTP;
-import org.jetbrains.annotations.Nullable;
+import org.apache.seata.discovery.registry.enums.HttpVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -318,8 +318,8 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
             if (StringUtils.isNotBlank(jwtToken)) {
                 header.put(AUTHORIZATION_HEADER, jwtToken);
             }
-            String httpVersion = CONFIG.getConfig(org.apache.seata.common.ConfigurationKeys.TRANSPORT_PROTOCOL, DEFAULT_HTTP_VERSION);
-            if (httpVersion.equals(DEFAULT_HTTP_VERSION)) {
+            String httpVersion = CONFIG.getConfig(org.apache.seata.common.ConfigurationKeys.HTTP_VERSION, DEFAULT_HTTP_VERSION);
+            if (httpVersion.equals(HttpVersion.HTTP.value)) {
                 return watchWithHttp(header, param, tcAddress);
             } else {
                 return watchWithHttp2(header, param, tcAddress);
@@ -330,7 +330,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
 
     private static Boolean watchWithHttp2(Map<String, String> header, Map<String, String> param, String tcAddress) throws RetryableException {
         try (Response response =
-                     Http2ClientUtil.doPost("http://" + tcAddress + "/metadata/v1/watch", param, header, 30000)) {
+                     Http2ClientUtil.doPost("http://" + tcAddress + "/metadata/v2/watch", param, header, 30000)) {
             int code = response.code();
             return code == HttpStatus.SC_OK;
         } catch (IOException e) {
@@ -472,7 +472,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
         CURRENT_TRANSACTION_SERVICE_GROUP = key;
         CURRENT_TRANSACTION_CLUSTER_NAME = clusterName;
         if (!METADATA.containsGroup(clusterName)) {
-            String raftClusterAddress = CONFIG.getConfig("httpVersion");
+            String raftClusterAddress = CONFIG.getConfig(getRaftAddrFileKey());
             if (StringUtils.isNotBlank(raftClusterAddress)) {
                 List<InetSocketAddress> list = new ArrayList<>();
                 String[] addresses = raftClusterAddress.split(",");

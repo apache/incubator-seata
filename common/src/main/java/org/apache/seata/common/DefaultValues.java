@@ -16,8 +16,6 @@
  */
 package org.apache.seata.common;
 
-import org.apache.http.HttpVersion;
-
 import java.time.Duration;
 
 public interface DefaultValues {
@@ -66,7 +64,7 @@ public interface DefaultValues {
     String DEFAULT_NIO_WORKER_THREAD_PREFIX = "NettyServerNIOWorker";
     String DEFAULT_EXECUTOR_THREAD_PREFIX = "NettyServerBizHandler";
     String DEFAULT_PROTOCOL = "seata";
-    String DEFAULT_HTTP_VERSION = "http1";
+    String DEFAULT_HTTP_VERSION = "http";
 
     boolean DEFAULT_TRANSPORT_HEARTBEAT = true;
     boolean DEFAULT_TRANSACTION_UNDO_DATA_VALIDATION = true;
