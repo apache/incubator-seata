@@ -16,6 +16,8 @@
  */
 package org.apache.seata.server.auth.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.apache.seata.common.result.Code;
 import org.apache.seata.common.result.SingleResult;
 import org.apache.seata.server.auth.config.ClusterSecurityConfig;
@@ -36,11 +38,14 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletResponse;
 
 @RestController
+@Api(tags = "Cluster authentication APIs")
 @RequestMapping("/metadata/v1/auth")
 public class ClusterAuthController {
+
     @Autowired
     @Qualifier("clusterJwtTokenUtils")
     private ClusterJwtTokenUtils jwtTokenUtils;
+
     @Autowired
     @Qualifier("clusterAuthenticationManager")
     private AuthenticationManager authenticationManager;
@@ -53,6 +58,7 @@ public class ClusterAuthController {
      * @return HTTP code equal to 200 indicates that Seata is in right states. HTTP code equal to 500 indicates that
      * Seata is in broken states.
      */
+    @ApiOperation("login to get access token and refresh token")
     @PostMapping("/login")
     public SingleResult<String> login(HttpServletResponse response, @RequestBody User user) {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(

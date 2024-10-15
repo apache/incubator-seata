@@ -16,6 +16,8 @@
  */
 package org.apache.seata.console.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.apache.seata.common.result.Code;
 import org.apache.seata.common.result.SingleResult;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,6 +33,7 @@ import java.util.Map;
  *
  */
 @RestController
+@Api(tags = "Overview APIs")
 @RequestMapping("/api/v1/overview")
 public class OverviewController {
 
@@ -39,6 +42,7 @@ public class OverviewController {
      *
      * @return the data
      */
+    @ApiOperation("get data")
     @GetMapping(value = "/getData")
     public SingleResult<List> getData() {
         List<Map<String, Object>> result = new ArrayList<>();

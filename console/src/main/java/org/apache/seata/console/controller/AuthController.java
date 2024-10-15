@@ -16,6 +16,8 @@
  */
 package org.apache.seata.console.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.apache.seata.common.result.Code;
 import org.apache.seata.common.result.SingleResult;
 import org.apache.seata.console.config.ConsoleSecurityConfig;
@@ -39,6 +41,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  */
 @RestController
+@Api(tags = "Console authentication APIs")
 @RequestMapping("/api/v1/auth")
 public class AuthController {
     @Autowired
@@ -57,6 +60,7 @@ public class AuthController {
      * @return HTTP code equal to 200 indicates that Seata is in right states. HTTP code equal to 500 indicates that
      * Seata is in broken states.
      */
+    @ApiOperation("login and get access token and refresh token")
     @PostMapping("/login")
     public SingleResult<String> login(HttpServletResponse response, @RequestBody User user) {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(

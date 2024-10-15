@@ -16,6 +16,8 @@
  */
 package org.apache.seata.server.controller;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.apache.seata.common.metadata.namingserver.Instance;
 import org.apache.seata.common.result.Result;
 import org.apache.seata.common.util.StringUtils;
@@ -37,6 +39,7 @@ import static org.apache.seata.common.ConfigurationKeys.FILE_ROOT_TYPE;
 import static org.apache.seata.common.ConfigurationKeys.NAMING_SERVER;
 
 @RestController
+@Api(tags = "VGroup mapping APIs")
 @RequestMapping("/vgroup/v1")
 public class VGroupMappingController {
 
@@ -59,6 +62,7 @@ public class VGroupMappingController {
      * @param vGroup
      * @return
      */
+    @ApiOperation("add VGroup")
     @GetMapping("/addVGroup")
     public Result<?> addVGroup(@RequestParam String vGroup, @RequestParam String unit) {
         Result<?> result = new Result<>();
@@ -82,6 +86,7 @@ public class VGroupMappingController {
      * @param vGroup
      * @return
      */
+    @ApiOperation("remove VGroup")
     @GetMapping("/removeVGroup")
     public Result<?> removeVGroup(@RequestParam String vGroup) {
         Result<?> result = new Result<>();

@@ -19,6 +19,9 @@ server:
   port: 7091
 
 spring:
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER
   application:
     name: seata-server
 
