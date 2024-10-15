@@ -16,13 +16,22 @@
  */
 package org.apache.seata.config;
 
+import org.apache.commons.lang.ObjectUtils;
+import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.util.CollectionUtils;
+import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.config.ConfigFuture.ConfigOperation;
+import org.apache.seata.config.file.FileConfig;
+
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,15 +41,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.seata.common.thread.NamedThreadFactory;
-import org.apache.seata.common.util.CollectionUtils;
-import org.apache.seata.common.util.StringUtils;
-import org.apache.seata.config.ConfigFuture.ConfigOperation;
-import org.apache.seata.config.file.FileConfig;
-import org.apache.commons.lang.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 /**
  * The type FileConfiguration.
  *
@@ -134,7 +136,6 @@ public class FileConfiguration extends AbstractConfiguration {
             boolean filePathCustom = name.startsWith(SYS_FILE_RESOURCE_PREFIX);
             String filePath = filePathCustom ? name.substring(SYS_FILE_RESOURCE_PREFIX.length()) : name;
             String decodedPath = URLDecoder.decode(filePath, StandardCharsets.UTF_8.name());
-
             File targetFile = getFileFromFileSystem(decodedPath);
             if (targetFile != null) {
                 return targetFile;
@@ -157,21 +158,18 @@ public class FileConfiguration extends AbstractConfiguration {
 
         // run with jar file and not package third lib into jar file, this.getClass().getClassLoader() will be null
         URL resourceUrl = this.getClass().getClassLoader().getResource("");
-        String[] tryPaths = null;
+        // try to get log dir (spring.config.additional-location) after package and run sh or bat in bin dir
+        String configLocation = System.getProperty("spring.config.additional-location");
+        List<String> tryPathsList = new ArrayList<>();
+        tryPathsList.add(decodedPath);
         if (resourceUrl != null) {
-            tryPaths = new String[]{
-                // first: project dir
-                resourceUrl.getPath() + decodedPath,
-                // second: system path
-                decodedPath
-            };
-        } else {
-            tryPaths = new String[]{
-                decodedPath
-            };
+            tryPathsList.add(resourceUrl.getPath() + decodedPath);
+        }
+        if (configLocation != null) {
+            tryPathsList.add(configLocation + decodedPath);
         }
 
-
+        String[] tryPaths = tryPathsList.toArray(new String[0]);
         for (String tryPath : tryPaths) {
             File targetFile = new File(tryPath);
             if (targetFile.exists()) {

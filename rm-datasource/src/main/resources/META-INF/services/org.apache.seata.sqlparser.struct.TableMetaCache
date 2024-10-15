@@ -21,3 +21,5 @@ org.apache.seata.rm.datasource.sql.struct.cache.SqlServerTableMetaCache
 org.apache.seata.rm.datasource.sql.struct.cache.MariadbTableMetaCache
 org.apache.seata.rm.datasource.sql.struct.cache.PolarDBXTableMetaCache
 org.apache.seata.rm.datasource.sql.struct.cache.DmTableMetaCache
+org.apache.seata.rm.datasource.sql.struct.cache.OscarTableMetaCache
+org.apache.seata.rm.datasource.sql.struct.cache.KingbaseTableMetaCache

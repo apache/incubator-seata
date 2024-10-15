@@ -7,7 +7,7 @@
 [![Build Status](https://github.com/apache/incubator-seata/workflows/build/badge.svg?branch=develop)](https://github.com/apache/incubator-seata/actions)
 [![codecov](https://codecov.io/gh/apache/incubator-seata/graph/badge.svg?token=tbmHt2ZfxO)](https://codecov.io/gh/apache/incubator-seata)
 [![license](https://img.shields.io/github/license/apache/incubator-seata.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
-[![maven](https://img.shields.io/maven-central/v/io.apache/incubator-seata-parent?versionSuffix=2.0.0)](https://search.maven.org/search?q=io.seata)
+[![maven](https://img.shields.io/maven-central/v/org.apache.seata/seata-all?versionSuffix=2.1.0)](https://central.sonatype.com/search?q=org.apache.seata%3Aseata-all)
 
 ## What is Seata?
 
@@ -82,16 +82,16 @@ For more details about principle and design, please go to [Seata wiki page](http
 
 ## Maven dependency
 
-Depending on the scenario, choose one of the two dependencies: `io.seata:seata-all` or `io.seata:seata-spring-boot-starter`.
+Depending on the scenario, choose one of the two dependencies: `org.apache.seata:seata-all` or `org.apache.seata:seata-spring-boot-starter`.
 ```xml
 <properties>
-  <seata.version>2.0.0</seata.version>
+  <seata.version>2.1.0</seata.version>
 </properties>
 
 <dependencies>
 <!--dependencies for non-SpringBoot application framework-->
   <dependency>
-    <groupId>io.seata</groupId>
+    <groupId>org.apache.seata</groupId>
     <artifactId>seata-all</artifactId>
     <version>${seata.version}</version>
   </dependency>
@@ -99,7 +99,7 @@ Depending on the scenario, choose one of the two dependencies: `io.seata:seata-a
 <!--If your project base on `Spring Boot`, you can directly use the following dependencies-->
 <!--Notice: `seata-spring-boot-starter` has already included `seata-all` dependency-->
   <dependency>
-    <groupId>io.seata</groupId>
+    <groupId>org.apache.seata</groupId>
     <artifactId>seata-spring-boot-starter</artifactId>
     <version>${seata.version}</version>
   </dependency>
@@ -142,7 +142,7 @@ Contributors are welcomed to join the Seata project. Please check [CONTRIBUTING]
 * [Seata Website](https://github.com/apache/incubator-seata.github.io) - Seata official website
 * [Seata GoLang](https://github.com/apache/incubator-seata-go) - Seata GoLang client and server
 * [Seata Samples](https://github.com/apache/incubator-seata-samples) - Samples for Seata
-* [Seata GoLang Simples](https://github.com/apache/incubator-seata-go-samples) - Samples for Seata GoLang
+* [Seata GoLang Samples](https://github.com/apache/incubator-seata-go-samples) - Samples for Seata GoLang
 * [Seata K8s](https://github.com/apache/incubator-seata-k8s) - Seata integration with k8s
 * [Seata CLI](https://github.com/apache/incubator-seata-ctl) - CLI tool for Seata
 

@@ -26,7 +26,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 /**
- * Custem user service
+ * Custom user service
  *
  */
 @Service

@@ -23,7 +23,7 @@ import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
 
 /**
- * custem user
+ * custom user
  *
  */
 public class CustomUserDetails implements UserDetails {
