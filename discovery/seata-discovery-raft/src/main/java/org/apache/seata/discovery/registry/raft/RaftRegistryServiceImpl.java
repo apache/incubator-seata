@@ -382,7 +382,11 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                         response = EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
                     } else if (statusCode == HttpStatus.SC_UNAUTHORIZED) {
                         refreshToken(tcAddress);
-                        throw new RetryableException("Token refreshed, retrying request.");
+                        if (StringUtils.isNotBlank(USERNAME) && StringUtils.isNotBlank(PASSWORD)) {
+                            throw new RetryableException("Token refreshed, retrying request.");
+                        } else {
+                            throw new AuthenticationFailedException("Authentication failed! you should configure the correct username and password.");
+                        }
                     } else {
                         throw new AuthenticationFailedException("Authentication failed! you should configure the correct username and password.");
                     }
