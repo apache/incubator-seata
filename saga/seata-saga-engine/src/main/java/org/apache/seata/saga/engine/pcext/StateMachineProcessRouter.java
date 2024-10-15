@@ -33,6 +33,7 @@ import org.apache.seata.saga.proctrl.ProcessRouter;
 import org.apache.seata.saga.statelang.domain.DomainConstants;
 import org.apache.seata.saga.statelang.domain.State;
 import org.apache.seata.saga.statelang.domain.StateMachine;
+import org.apache.seata.saga.statelang.domain.StateType;
 
 /**
  * StateMachine ProcessRouter
@@ -105,19 +106,21 @@ public class StateMachineProcessRouter implements ProcessRouter {
     }
 
     public void initDefaultStateRouters() {
-        if (this.stateRouters.isEmpty()) {
-            TaskStateRouter taskStateRouter = new TaskStateRouter();
-            this.stateRouters.put(DomainConstants.STATE_TYPE_SERVICE_TASK, taskStateRouter);
-            this.stateRouters.put(DomainConstants.STATE_TYPE_SCRIPT_TASK, taskStateRouter);
-            this.stateRouters.put(DomainConstants.STATE_TYPE_CHOICE, taskStateRouter);
-            this.stateRouters.put(DomainConstants.STATE_TYPE_COMPENSATION_TRIGGER, taskStateRouter);
-            this.stateRouters.put(DomainConstants.STATE_TYPE_SUB_STATE_MACHINE, taskStateRouter);
-            this.stateRouters.put(DomainConstants.STATE_TYPE_SUB_MACHINE_COMPENSATION, taskStateRouter);
-            this.stateRouters.put(DomainConstants.STATE_TYPE_LOOP_START, taskStateRouter);
-
-            this.stateRouters.put(DomainConstants.STATE_TYPE_SUCCEED, new EndStateRouter());
-            this.stateRouters.put(DomainConstants.STATE_TYPE_FAIL, new EndStateRouter());
+        if (!stateRouters.isEmpty()) {
+            return;
         }
+
+        TaskStateRouter taskStateRouter = new TaskStateRouter();
+        stateRouters.put(StateType.SERVICE_TASK.getValue(), taskStateRouter);
+        stateRouters.put(StateType.SCRIPT_TASK.getValue(), taskStateRouter);
+        stateRouters.put(StateType.CHOICE.getValue(), taskStateRouter);
+        stateRouters.put(StateType.COMPENSATION_TRIGGER.getValue(), taskStateRouter);
+        stateRouters.put(StateType.SUB_STATE_MACHINE.getValue(), taskStateRouter);
+        stateRouters.put(StateType.SUB_MACHINE_COMPENSATION.getValue(), taskStateRouter);
+        stateRouters.put(StateType.LOOP_START.getValue(), taskStateRouter);
+
+        stateRouters.put(StateType.SUCCEED.getValue(), new EndStateRouter());
+        stateRouters.put(StateType.FAIL.getValue(), new EndStateRouter());
     }
 
     public Map<String, StateRouter> getStateRouters() {

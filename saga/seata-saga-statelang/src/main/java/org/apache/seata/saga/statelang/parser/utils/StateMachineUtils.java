@@ -18,7 +18,7 @@ package org.apache.seata.saga.statelang.parser.utils;
 
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.saga.statelang.domain.ChoiceState;
-import org.apache.seata.saga.statelang.domain.DomainConstants;
+import org.apache.seata.saga.statelang.domain.StateType;
 import org.apache.seata.saga.statelang.domain.State;
 import org.apache.seata.saga.statelang.domain.TaskState;
 
@@ -36,17 +36,18 @@ public class StateMachineUtils {
         Set<String> subsequentStates = new HashSet<>();
         // Next state
         subsequentStates.add(state.getNext());
-        switch (state.getType()) {
-            case DomainConstants.STATE_TYPE_SCRIPT_TASK:
-            case DomainConstants.STATE_TYPE_SERVICE_TASK:
-            case DomainConstants.STATE_TYPE_SUB_STATE_MACHINE:
-            case DomainConstants.STATE_TYPE_SUB_MACHINE_COMPENSATION:
+        StateType stateType = StateType.getStateType(state.getType());
+        switch (stateType) {
+            case SCRIPT_TASK:
+            case SERVICE_TASK:
+            case SUB_STATE_MACHINE:
+            case SUB_MACHINE_COMPENSATION:
                 // Next state in catches
                 Optional.ofNullable(((TaskState) state).getCatches())
                         .ifPresent(c -> c.forEach(e -> subsequentStates.add(e.getNext())));
                 break;
 
-            case DomainConstants.STATE_TYPE_CHOICE:
+            case CHOICE:
                 // Choice state
                 Optional.ofNullable(((ChoiceState) state).getChoices())
                         .ifPresent(c -> c.forEach(e -> subsequentStates.add(e.getNext())));
