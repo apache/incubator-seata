@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.console.utils;
+package org.apache.seata.server.auth.utils;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -32,6 +32,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Date;
 import java.util.List;
@@ -40,30 +42,35 @@ import java.util.List;
  * Jwt token tool
  *
  */
-@Component("consoleJwtTokenUtils")
-public class JwtTokenUtils {
+@Component("clusterJwtTokenUtils")
+public class ClusterJwtTokenUtils {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JwtTokenUtils.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterJwtTokenUtils.class);
 
     private static final String AUTHORITIES_KEY = "auth";
 
     /**
      * secret key
      */
-    @Value("${console.secretKey}")
+    @Value("${seata.security.secretKey}")
     private String secretKey;
 
     /**
      * Access token validity time(ms)
      */
-    @Value("${console.accessTokenValidityInMilliseconds}")
+    @Value("${seata.security.accessTokenValidityInMilliseconds}")
     private long accessTokenValidityInMilliseconds;
 
     /**
      * Refresh token validity time(ms)
      */
-    @Value("${console.refreshTokenValidityInMilliseconds}")
+    @Value("${seata.security.refreshTokenValidityInMilliseconds}")
     private long refreshTokenValidityInMilliseconds;
+
+    @PostConstruct
+    public void warmupJwtGenerate() {
+       createToken("", accessTokenValidityInMilliseconds);
+    }
 
     /**
      * Create access token
@@ -72,7 +79,7 @@ public class JwtTokenUtils {
      * @return token string
      */
     public String createAccessToken(Authentication authentication) {
-        return createToken(authentication, accessTokenValidityInMilliseconds);
+        return createToken(authentication.getName(), accessTokenValidityInMilliseconds);
     }
 
     /**
@@ -82,16 +89,16 @@ public class JwtTokenUtils {
      * @return token string
      */
     public String createRefreshToken(Authentication authentication) {
-        return createToken(authentication, refreshTokenValidityInMilliseconds);
+        return createToken(authentication.getName(), refreshTokenValidityInMilliseconds);
     }
 
     /**
      * Create token
-     * @param authentication auth info
+     * @param subject authentication name
      * @param tokenValidityInMilliseconds token validity time in milliseconds
      * @return token string
      */
-    private String createToken(Authentication authentication, long tokenValidityInMilliseconds) {
+    private String createToken(String subject, long tokenValidityInMilliseconds) {
         /**
          * Current time
          */
@@ -108,8 +115,8 @@ public class JwtTokenUtils {
         /**
          * create token
          */
-        return Jwts.builder().setSubject(authentication.getName()).claim(AUTHORITIES_KEY, "")
-                .setExpiration(expirationDate).signWith(secretKeySpec, SignatureAlgorithm.HS256).compact();
+        return Jwts.builder().setSubject(subject).signWith(secretKeySpec, SignatureAlgorithm.HS256)
+                .claim(AUTHORITIES_KEY, "").setExpiration(expirationDate).compact();
     }
 
     /**
@@ -166,8 +173,8 @@ public class JwtTokenUtils {
             LOGGER.trace("Expired JWT token trace: {}", e);
             return new SingleResult<>(Code.REFRESH_TOKEN_EXPIRED);
         } catch (Exception e) {
-            LOGGER.warn("Invalid JWT token.");
-            LOGGER.trace("Invalid JWT token trace: {}", e);
+            LOGGER.warn("Unsupported JWT token.");
+            LOGGER.trace("Unsupported JWT token trace: {}", e);
             return new SingleResult<>(Code.CHECK_TOKEN_FAILED);
         }
     }

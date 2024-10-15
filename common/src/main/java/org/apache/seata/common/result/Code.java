@@ -16,12 +16,19 @@
  */
 package org.apache.seata.common.result;
 
-
+/**
+ * The Code for the response of message
+ *
+ */
 public enum Code {
     /**
      * response success
      */
     SUCCESS("200", "ok"),
+    /**
+     * the custom error
+     */
+    ACCESS_TOKEN_NEAR_EXPIRATION("200", "Access token is near expiration"),
     /**
      * server error
      */
@@ -29,17 +36,29 @@ public enum Code {
     /**
      * the custom error
      */
-    LOGIN_FAILED("401", "Login failed");
+    LOGIN_FAILED("401", "Login failed"),
+    /**
+     * the custom error
+     */
+    CHECK_TOKEN_FAILED("401", "Check token failed"),
+    /**
+     * the custom error
+     */
+    ACCESS_TOKEN_EXPIRED("401", "Access token expired"),
+    /**
+     * the custom error
+     */
+    REFRESH_TOKEN_EXPIRED("401", "Refresh token expired");
 
     /**
      * The Code.
      */
-    public String code;
+    private String code;
 
     /**
      * The Msg.
      */
-    public String msg;
+    private String msg;
 
     private Code(String code, String msg) {
         this.code = code;
@@ -98,4 +117,3 @@ public enum Code {
         return null;
     }
 }
-
