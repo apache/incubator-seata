@@ -45,7 +45,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ClusterConfigWatcherManager implements ClusterConfigChangeListener {
-    private static final Logger logger = LoggerFactory.getLogger(ClusterConfigWatcherManager.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterConfigWatcherManager.class);
 
     private static final Map<String/*namespace*/, Map<String/*dataId*/, Queue<ConfigWatcher<?>>>> WATCHERS = new ConcurrentHashMap<>();
 
@@ -94,9 +94,9 @@ public class ClusterConfigWatcherManager implements ClusterConfigChangeListener 
         AsyncContext asyncContext = (AsyncContext)watcher.getAsyncContext();
         HttpServletResponse httpServletResponse = (HttpServletResponse)asyncContext.getResponse();
         watcher.setDone(true);
-        logger.info("notify cluster config change event to: {}", asyncContext.getRequest().getRemoteAddr());
-        if (logger.isDebugEnabled()) {
-            logger.debug("notify cluster config change event to: {}", asyncContext.getRequest().getRemoteAddr());
+        LOGGER.info("notify cluster config change event to: {}", asyncContext.getRequest().getRemoteAddr());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("notify cluster config change event to: {}", asyncContext.getRequest().getRemoteAddr());
         }
         httpServletResponse.setStatus(HttpServletResponse.SC_OK);
         asyncContext.complete();
