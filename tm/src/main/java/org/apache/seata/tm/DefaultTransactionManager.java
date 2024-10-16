@@ -51,6 +51,9 @@ public class DefaultTransactionManager implements TransactionManager {
         request.setTransactionName(name);
         request.setTimeout(timeout);
         GlobalBeginResponse response = (GlobalBeginResponse) syncCall(request);
+        if (response.getResultCode() == ResultCode.RateLimited) {
+            throw new TmTransactionException(TransactionExceptionCode.BeginFailedRateLimited, response.getMsg());
+        }
         if (response.getResultCode() == ResultCode.Failed) {
             throw new TmTransactionException(TransactionExceptionCode.BeginFailed, response.getMsg());
         }

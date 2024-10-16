@@ -16,22 +16,26 @@
  */
 package org.apache.seata.server.metrics;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-
 import com.google.common.eventbus.Subscribe;
 import org.apache.seata.core.event.ExceptionEvent;
 import org.apache.seata.core.event.GlobalTransactionEvent;
+import org.apache.seata.core.event.RateLimitEvent;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.metrics.registry.Registry;
 import org.apache.seata.server.event.EventBusManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+
 import static org.apache.seata.metrics.IdConstants.APP_ID_KEY;
+import static org.apache.seata.metrics.IdConstants.CLIENT_ID_KEY;
 import static org.apache.seata.metrics.IdConstants.GROUP_KEY;
+import static org.apache.seata.metrics.IdConstants.LIMIT_TYPE_KEY;
+import static org.apache.seata.metrics.IdConstants.SERVER_IP_ADDRESS_AND_PORT_KEY;
 import static org.apache.seata.metrics.IdConstants.STATUS_VALUE_AFTER_COMMITTED_KEY;
 import static org.apache.seata.metrics.IdConstants.STATUS_VALUE_AFTER_ROLLBACKED_KEY;
 
@@ -206,6 +210,20 @@ public class MetricsSubscriber {
     public void exceptionEventForMetrics(ExceptionEvent event) {
         registry.getSummary(MeterIdConstants.SUMMARY_EXP
                 .withTag(APP_ID_KEY, event.getName())).increase(1);
+    }
+
+    @Subscribe
+    public void recordRateLimitEventForMetrics(RateLimitEvent event) {
+        registry.getCounter(MeterIdConstants.COUNTER_RATE_LIMIT
+                .withTag(LIMIT_TYPE_KEY, event.getLimitType())
+                .withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(CLIENT_ID_KEY, event.getClientId())
+                .withTag(SERVER_IP_ADDRESS_AND_PORT_KEY, event.getServerIpAddressAndPort())).increase(1);
+        registry.getSummary(MeterIdConstants.SUMMARY_RATE_LIMIT
+                .withTag(LIMIT_TYPE_KEY, event.getLimitType())
+                .withTag(APP_ID_KEY, event.getApplicationId())
+                .withTag(CLIENT_ID_KEY, event.getClientId())
+                .withTag(SERVER_IP_ADDRESS_AND_PORT_KEY, event.getServerIpAddressAndPort())).increase(1);
     }
 
     @Override
