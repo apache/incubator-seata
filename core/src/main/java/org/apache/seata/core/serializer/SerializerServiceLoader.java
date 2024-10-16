@@ -30,6 +30,7 @@ import org.apache.seata.core.constants.ConfigurationKeys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.apache.seata.core.serializer.SerializerType.FASTJSON2;
 import static org.apache.seata.core.serializer.SerializerType.HESSIAN;
 import static org.apache.seata.core.serializer.SerializerType.KRYO;
 import static org.apache.seata.core.serializer.SerializerType.PROTOBUF;
@@ -46,7 +47,7 @@ public final class SerializerServiceLoader {
     private static final Logger LOGGER = LoggerFactory.getLogger(SerializerServiceLoader.class);
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
-    private static final SerializerType[] DEFAULT_SERIALIZER_TYPE = new SerializerType[]{SEATA, PROTOBUF, KRYO, HESSIAN};
+    private static final SerializerType[] DEFAULT_SERIALIZER_TYPE = new SerializerType[]{SEATA, PROTOBUF, KRYO, HESSIAN, FASTJSON2};
 
     private final static Map<String, Serializer> SERIALIZER_MAP = new HashMap<>();
 

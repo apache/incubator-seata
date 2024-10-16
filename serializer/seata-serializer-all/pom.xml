@@ -50,5 +50,10 @@
             <artifactId>seata-serializer-hessian</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-serializer-fastjson2</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>
