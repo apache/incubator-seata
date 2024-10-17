@@ -14,16 +14,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.rm.datasource.mock;
+package org.apache.seata.rm.datasource.metadata;
 
-import java.sql.Connection;
+import javax.sql.DataSource;
 import java.sql.SQLException;
-import java.util.Properties;
+import java.util.HashMap;
+import java.util.Map;
 
+public class DefaultDataSourceProxyMetadata extends AbstractDataSourceProxyMetadata {
 
-public class MockMariadbDataSource extends MockDataSource {
     @Override
-    public Connection getConnection() throws SQLException {
-        return new MockConnection(new MockDriver(), "jdbc:mariadb://127.0.0.1:3306/seata?rewriteBatchedStatements=true", new Properties());
+    public void init(DataSource dataSource) throws SQLException {
+        super.init(dataSource);
     }
+
+    @Override
+    public String getVariableValue(String name) {
+        return null;
+    }
+
+    @Override
+    public Map<String, String> getVariables() {
+        return new HashMap<>();
+    }
+
+    @Override
+    public String getKernelVersion() {
+        return null;
+    }
+
 }

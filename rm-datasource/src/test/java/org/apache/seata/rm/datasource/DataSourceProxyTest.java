@@ -16,14 +16,13 @@
  */
 package org.apache.seata.rm.datasource;
 
+import javax.sql.DataSource;
 import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.SQLException;
-import javax.sql.DataSource;
+import java.util.Properties;
 
 import com.alibaba.druid.pool.DruidDataSource;
-
-import org.apache.seata.rm.datasource.DataSourceProxy;
 import org.apache.seata.rm.datasource.mock.MockDataSource;
 import org.apache.seata.rm.datasource.mock.MockDriver;
 import org.apache.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
@@ -37,7 +36,8 @@ import org.mockito.Mockito;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 
 public class DataSourceProxyTest {
@@ -64,6 +64,7 @@ public class DataSourceProxyTest {
         dataSource.setDriver(mockDriver);
         dataSource.setUsername(username);
         dataSource.setPassword("password");
+        dataSource.setConnectProperties(new Properties());
 
         Throwable throwable = Assertions.assertThrows(IllegalStateException.class, () -> new DataSourceProxy(dataSource));
         assertThat(throwable).hasMessageContaining("AT mode don't support the dbtype");

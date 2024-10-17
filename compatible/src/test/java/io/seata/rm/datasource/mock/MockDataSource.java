@@ -20,6 +20,7 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
+import java.util.Properties;
 import java.util.logging.Logger;
 
 import javax.sql.DataSource;
@@ -27,7 +28,7 @@ import javax.sql.DataSource;
 public class MockDataSource implements DataSource {
     @Override
     public Connection getConnection() throws SQLException {
-        return new MockConnection(new MockDriver(), "jdbc:mysql://127.0.0.1:3306/seata?rewriteBatchedStatements=true", null);
+        return new MockConnection(new MockDriver(), "jdbc:mysql://127.0.0.1:3306/seata?rewriteBatchedStatements=true", new Properties());
     }
 
     @Override
