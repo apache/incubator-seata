@@ -32,7 +32,25 @@ public enum  ResultCode {
      * Success result code.
      */
     // Success
-    Success;
+    Success,
+
+    /**
+     * Access token is expired result code.
+     */
+    // AccessTokenExpired
+    AccessTokenExpired,
+
+    /**
+     * Access token will expire soon result code.
+     */
+    // AccessTokenNearExpiration
+    AccessTokenNearExpiration,
+
+    /**
+     * Refresh token is expired result code.
+     */
+    // RefreshTokenExpired
+    RefreshTokenExpired;
 
     /**
      * Get result code.

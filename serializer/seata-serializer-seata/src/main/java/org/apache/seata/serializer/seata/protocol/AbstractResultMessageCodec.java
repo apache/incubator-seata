@@ -16,16 +16,15 @@
  */
 package org.apache.seata.serializer.seata.protocol;
 
-import java.nio.ByteBuffer;
-
 import io.netty.buffer.ByteBuf;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.core.protocol.AbstractResultMessage;
 import org.apache.seata.core.protocol.ResultCode;
 
+import java.nio.ByteBuffer;
+
 /**
  * The type Abstract result message codec.
- *
  */
 public abstract class AbstractResultMessageCodec extends AbstractMessageCodec {
 
@@ -36,41 +35,44 @@ public abstract class AbstractResultMessageCodec extends AbstractMessageCodec {
 
     @Override
     public <T> void encode(T t, ByteBuf out) {
-        AbstractResultMessage abstractResultMessage = (AbstractResultMessage)t;
+        AbstractResultMessage abstractResultMessage = (AbstractResultMessage) t;
         ResultCode resultCode = abstractResultMessage.getResultCode();
         String resultMsg = abstractResultMessage.getMsg();
+        if (null != resultCode) {
+            out.writeByte(resultCode.ordinal());
+        } else {
+            out.writeByte(ResultCode.values().length);
+        }
 
-        out.writeByte(resultCode.ordinal());
-        if (resultCode == ResultCode.Failed) {
-            if (StringUtils.isNotEmpty(resultMsg)) {
-                String msg;
-                if (resultMsg.length() > Short.MAX_VALUE) {
-                    msg = resultMsg.substring(0, Short.MAX_VALUE);
-                } else {
-                    msg = resultMsg;
-                }
-                byte[] bs = msg.getBytes(UTF8);
-                out.writeShort((short)bs.length);
-                out.writeBytes(bs);
+        if (StringUtils.isNotEmpty(resultMsg)) {
+            String msg;
+            if (resultMsg.length() > Short.MAX_VALUE) {
+                msg = resultMsg.substring(0, Short.MAX_VALUE);
             } else {
-                out.writeShort((short)0);
+                msg = resultMsg;
             }
+            byte[] bs = msg.getBytes(UTF8);
+            out.writeShort((short) bs.length);
+            out.writeBytes(bs);
+        } else {
+            out.writeShort((short) 0);
         }
     }
 
     @Override
     public <T> void decode(T t, ByteBuffer in) {
-        AbstractResultMessage abstractResultMessage = (AbstractResultMessage)t;
-
-        ResultCode resultCode = ResultCode.get(in.get());
-        abstractResultMessage.setResultCode(resultCode);
-        if (resultCode == ResultCode.Failed) {
-            short len = in.getShort();
-            if (len > 0) {
-                byte[] msg = new byte[len];
-                in.get(msg);
-                abstractResultMessage.setMsg(new String(msg, UTF8));
-            }
+        AbstractResultMessage abstractResultMessage = (AbstractResultMessage) t;
+        ResultCode resultCode = null;
+        byte resultCodeOrdinal = in.get();
+        if (resultCodeOrdinal < ResultCode.values().length) {
+            resultCode = ResultCode.get(resultCodeOrdinal);
+            abstractResultMessage.setResultCode(resultCode);
+        }
+        short len = in.getShort();
+        if (len > 0) {
+            byte[] msg = new byte[len];
+            in.get(msg);
+            abstractResultMessage.setMsg(new String(msg, UTF8));
         }
     }
 

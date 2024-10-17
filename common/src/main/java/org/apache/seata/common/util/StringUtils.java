@@ -16,6 +16,10 @@
  */
 package org.apache.seata.common.util;
 
+import org.apache.seata.common.Constants;
+import org.apache.seata.common.exception.ShouldNeverHappenException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
@@ -25,15 +29,14 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.seata.common.Constants;
-import org.apache.seata.common.exception.ShouldNeverHappenException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.apache.seata.common.ConfigurationKeys.EXTRA_DATA_KV_CHAR;
+import static org.apache.seata.common.ConfigurationKeys.EXTRA_DATA_SPLIT_CHAR;
 
 /**
  * The type String utils.
@@ -331,7 +334,7 @@ public class StringUtils {
 
     /**
      * hump to Line or line to hump, only spring environment use
-     * 
+     *
      * @param str str
      * @return string string
      */
@@ -446,4 +449,35 @@ public class StringUtils {
         return false;
     }
 
+    public static HashMap<String, String> string2Map(String inputString) {
+        HashMap<String, String> resultMap = new HashMap<>();
+        if (StringUtils.isBlank(inputString)) {
+            return resultMap;
+        }
+        String[] keyValuePairs = inputString.split(EXTRA_DATA_SPLIT_CHAR);
+        for (String pair : keyValuePairs) {
+            String[] keyValue = pair.trim().split(EXTRA_DATA_KV_CHAR);
+            if (keyValue.length == 2) {
+                resultMap.put(keyValue[0].trim(), keyValue[1].trim());
+            }
+        }
+        return resultMap;
+    }
+
+    public static String map2String(HashMap<String, String> inputMap) {
+        if (inputMap == null || inputMap.isEmpty()) {
+            return "";
+        }
+        StringBuilder resultString = new StringBuilder();
+        for (Map.Entry<String, String> entry : inputMap.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+            String pair = key + EXTRA_DATA_KV_CHAR + value + EXTRA_DATA_SPLIT_CHAR;
+            resultString.append(pair);
+        }
+        if (resultString.length() > 0) {
+            resultString.deleteCharAt(resultString.length() - 1);
+        }
+        return resultString.toString();
+    }
 }

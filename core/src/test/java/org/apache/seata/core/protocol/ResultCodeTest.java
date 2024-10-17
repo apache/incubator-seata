@@ -29,8 +29,11 @@ class ResultCodeTest {
     void getByte() {
         Assertions.assertEquals(ResultCode.Failed, ResultCode.get((byte) 0));
         Assertions.assertEquals(ResultCode.Success, ResultCode.get((byte) 1));
+        Assertions.assertEquals(ResultCode.AccessTokenExpired, ResultCode.get((byte) 2));
+        Assertions.assertEquals(ResultCode.AccessTokenNearExpiration, ResultCode.get((byte) 3));
+        Assertions.assertEquals(ResultCode.RefreshTokenExpired, ResultCode.get((byte) 4));
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            ResultCode.get((byte) 2);
+            ResultCode.get((byte) 5);
         });
     }
 
@@ -38,14 +41,19 @@ class ResultCodeTest {
     void getInt() {
         Assertions.assertEquals(ResultCode.Failed, ResultCode.get(0));
         Assertions.assertEquals(ResultCode.Success, ResultCode.get(1));
+        Assertions.assertEquals(ResultCode.AccessTokenExpired, ResultCode.get(2));
+        Assertions.assertEquals(ResultCode.AccessTokenNearExpiration, ResultCode.get(3));
+        Assertions.assertEquals(ResultCode.RefreshTokenExpired, ResultCode.get(4));
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            ResultCode.get(2);
+            ResultCode.get(5);
         });
     }
 
     @Test
     void values() {
-        Assertions.assertArrayEquals(new ResultCode[]{ResultCode.Failed, ResultCode.Success}, ResultCode.values());
+        Assertions.assertArrayEquals(new ResultCode[]{ResultCode.Failed,
+                ResultCode.Success, ResultCode.AccessTokenExpired,
+                ResultCode.AccessTokenNearExpiration, ResultCode.RefreshTokenExpired}, ResultCode.values());
     }
 
     @Test
@@ -57,6 +65,18 @@ class ResultCodeTest {
         Assertions.assertEquals(ResultCode.Success, ResultCode.valueOf("Success"));
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             ResultCode.valueOf("SUCCESS");
+        });
+        Assertions.assertEquals(ResultCode.AccessTokenExpired, ResultCode.valueOf("AccessTokenExpired"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            ResultCode.valueOf("ACCESSTOKENEXPIRED");
+        });
+        Assertions.assertEquals(ResultCode.AccessTokenNearExpiration, ResultCode.valueOf("AccessTokenNearExpiration"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            ResultCode.valueOf("ACCESSTOKENNEAREXPIRATION");
+        });
+        Assertions.assertEquals(ResultCode.RefreshTokenExpired, ResultCode.valueOf("RefreshTokenExpired"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            ResultCode.valueOf("REFRESHTOKENEXPIRED");
         });
     }
 }

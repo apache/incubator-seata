@@ -17,9 +17,12 @@
 package org.apache.seata.server.auth;
 
 import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.core.auth.AuthResult;
+import org.apache.seata.core.auth.AuthResultBuilder;
 import org.apache.seata.core.constants.ConfigurationKeys;
 import org.apache.seata.core.protocol.RegisterRMRequest;
 import org.apache.seata.core.protocol.RegisterTMRequest;
+import org.apache.seata.core.protocol.ResultCode;
 import org.apache.seata.core.rpc.RegisterCheckAuthHandler;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_SERVER_ENABLE_CHECK_AUTH;
@@ -29,25 +32,31 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_SERVER_ENABLE_CHECK_
 public abstract class AbstractCheckAuthHandler implements RegisterCheckAuthHandler {
 
     private static final Boolean ENABLE_CHECK_AUTH = ConfigurationFactory.getInstance().getBoolean(
-        ConfigurationKeys.SERVER_ENABLE_CHECK_AUTH, DEFAULT_SERVER_ENABLE_CHECK_AUTH);
+            ConfigurationKeys.SERVER_ENABLE_CHECK_AUTH, DEFAULT_SERVER_ENABLE_CHECK_AUTH);
 
     @Override
-    public boolean regTransactionManagerCheckAuth(RegisterTMRequest request) {
+    public AuthResult regTransactionManagerCheckAuth(RegisterTMRequest request) {
         if (!ENABLE_CHECK_AUTH) {
-            return true;
+            return new AuthResultBuilder().setResultCode(ResultCode.Success).build();
         }
         return doRegTransactionManagerCheck(request);
     }
 
-    public abstract boolean doRegTransactionManagerCheck(RegisterTMRequest request);
+    public abstract AuthResult doRegTransactionManagerCheck(RegisterTMRequest request);
 
     @Override
-    public boolean regResourceManagerCheckAuth(RegisterRMRequest request) {
+    public AuthResult regResourceManagerCheckAuth(RegisterRMRequest request) {
         if (!ENABLE_CHECK_AUTH) {
-            return true;
+            return new AuthResultBuilder().setResultCode(ResultCode.Success).build();
         }
         return doRegResourceManagerCheck(request);
     }
 
-    public abstract boolean doRegResourceManagerCheck(RegisterRMRequest request);
+    public abstract AuthResult doRegResourceManagerCheck(RegisterRMRequest request);
+
+    @Override
+    public String fetchNewToken(AuthResult authResult)  {
+        return null;
+    }
+
 }

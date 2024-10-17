@@ -14,37 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.core.rpc;
+package org.apache.seata.core.auth;
 
-import org.apache.seata.core.auth.AuthResult;
-import org.apache.seata.core.protocol.RegisterRMRequest;
-import org.apache.seata.core.protocol.RegisterTMRequest;
+import io.netty.channel.Channel;
+import org.apache.seata.core.protocol.RegisterRMResponse;
 
-/**
- * The interface Register check auth handler.
- *
- */
-public interface RegisterCheckAuthHandler {
-
+public interface RegisterHandler {
     /**
-     * Reg transaction manager check auth boolean.
+     * On a register response received.
      *
-     * @param request the request
-     * @return the boolean
+     * @param response received response message
+     * @param channel  channel of the response
      */
-    AuthResult regTransactionManagerCheckAuth(RegisterTMRequest request);
-
-    /**
-     * Reg resource manager check auth boolean.
-     *
-     * @param request the request
-     * @return the boolean
-     */
-    AuthResult regResourceManagerCheckAuth(RegisterRMRequest request);
-
-    /**
-     *  Fetch new token
-     * @return the String
-     */
-    String fetchNewToken(AuthResult authResult) ;
+    void onRegisterResponse(RegisterRMResponse response, Channel channel, Integer rpcId);
 }

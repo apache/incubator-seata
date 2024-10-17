@@ -16,11 +16,9 @@
  */
 package org.apache.seata.console.controller;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.seata.common.result.Code;
-import org.apache.seata.console.config.WebSecurityConfig;
 import org.apache.seata.common.result.SingleResult;
+import org.apache.seata.console.config.WebSecurityConfig;
 import org.apache.seata.console.security.User;
 import org.apache.seata.console.utils.JwtTokenUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +31,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * auth user
@@ -58,7 +58,6 @@ public class AuthController {
     public SingleResult<String> login(HttpServletResponse response, @RequestBody User user) {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
             user.getUsername(), user.getPassword());
-
         try {
             //AuthenticationManager(default ProviderManager) #authenticate check Authentication
             Authentication authentication = authenticationManager.authenticate(authenticationToken);

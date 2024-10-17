@@ -16,19 +16,6 @@
  */
 package org.apache.seata.core.rpc.netty;
 
-import java.lang.reflect.Field;
-import java.net.InetSocketAddress;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.function.Function;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandler.Sharable;
@@ -43,13 +30,8 @@ import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.StringUtils;
-import org.apache.seata.core.protocol.AbstractMessage;
-import org.apache.seata.core.protocol.HeartbeatMessage;
-import org.apache.seata.core.protocol.MergeMessage;
-import org.apache.seata.core.protocol.MergedWarpMessage;
-import org.apache.seata.core.protocol.MessageFuture;
-import org.apache.seata.core.protocol.ProtocolConstants;
-import org.apache.seata.core.protocol.RpcMessage;
+import org.apache.seata.core.auth.JwtAuthManager;
+import org.apache.seata.core.protocol.*;
 import org.apache.seata.core.protocol.transaction.AbstractGlobalEndRequest;
 import org.apache.seata.core.protocol.transaction.BranchRegisterRequest;
 import org.apache.seata.core.protocol.transaction.BranchReportRequest;
@@ -63,6 +45,14 @@ import org.apache.seata.discovery.registry.RegistryFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Field;
+import java.net.InetSocketAddress;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.*;
+import java.util.function.Function;
+
 import static org.apache.seata.common.exception.FrameworkErrorCode.NoAvailableService;
 
 /**
@@ -72,6 +62,8 @@ import static org.apache.seata.common.exception.FrameworkErrorCode.NoAvailableSe
 public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting implements RemotingClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractNettyRemotingClient.class);
+    private static final String PRO_TOKEN = "token";
+    private static final String PRO_REFRESH_TOKEN = "refresh_token";
     private static final String MSG_ID_PREFIX = "msgId:";
     private static final String FUTURES_PREFIX = "futures:";
     private static final String SINGLE_LOG_POSTFIX = ";";
@@ -88,6 +80,11 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
      * When sending message type is {@link MergeMessage}, will be stored to mergeMsgMap.
      */
     protected final Map<Integer, MergeMessage> mergeMsgMap = new ConcurrentHashMap<>();
+
+    /**
+     * When sending message type is {@link RegisterRMRequest}, will be stored to regRmRequestMap.
+     */
+    private final Map<Integer, RegisterRMRequest> regRmRequestMap = new ConcurrentHashMap<>();
 
     /**
      * When batch sending is enabled, the message will be stored to basketMap
@@ -113,10 +110,10 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         }, SCHEDULE_DELAY_MILLS, SCHEDULE_INTERVAL_MILLS, TimeUnit.MILLISECONDS);
         if (this.isEnableClientBatchSendRequest()) {
             mergeSendExecutorService = new ThreadPoolExecutor(MAX_MERGE_SEND_THREAD,
-                MAX_MERGE_SEND_THREAD,
-                KEEP_ALIVE_TIME, TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<>(),
-                new NamedThreadFactory(getThreadPrefix(), MAX_MERGE_SEND_THREAD));
+                    MAX_MERGE_SEND_THREAD,
+                    KEEP_ALIVE_TIME, TimeUnit.MILLISECONDS,
+                    new LinkedBlockingQueue<>(),
+                    new NamedThreadFactory(getThreadPrefix(), MAX_MERGE_SEND_THREAD));
             mergeSendExecutorService.submit(new MergedSendRunnable());
         }
         super.init();
@@ -130,7 +127,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         clientBootstrap = new NettyClientBootstrap(nettyClientConfig, eventExecutorGroup, transactionRole);
         clientBootstrap.setChannelHandlers(new ClientHandler());
         clientChannelManager = new NettyClientChannelManager(
-            new NettyPoolableFactory(this, clientBootstrap), getPoolKeyFunction(), nettyClientConfig);
+                new NettyPoolableFactory(this, clientBootstrap), getPoolKeyFunction(), nettyClientConfig);
     }
 
     @Override
@@ -151,10 +148,10 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
 
             // put message into basketMap
             BlockingQueue<RpcMessage> basket = CollectionUtils.computeIfAbsent(basketMap, serverAddress,
-                key -> new LinkedBlockingQueue<>());
+                    key -> new LinkedBlockingQueue<>());
             if (!basket.offer(rpcMessage)) {
                 LOGGER.error("put message into basketMap offer failed, serverAddress:{},rpcMessage:{}",
-                    serverAddress, rpcMessage);
+                        serverAddress, rpcMessage);
                 return null;
             }
             if (LOGGER.isDebugEnabled()) {
@@ -201,10 +198,12 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             return;
         }
         RpcMessage rpcMessage = buildRequestMessage(msg, msg instanceof HeartbeatMessage
-            ? ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST
-            : ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY);
+                ? ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST
+                : ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY);
         if (rpcMessage.getBody() instanceof MergeMessage) {
             mergeMsgMap.put(rpcMessage.getId(), (MergeMessage) rpcMessage.getBody());
+        } else if (rpcMessage.getBody() instanceof RegisterRMRequest) {
+            regRmRequestMap.put(rpcMessage.getId(), (RegisterRMRequest) rpcMessage.getBody());
         }
         super.sendAsync(channel, rpcMessage);
     }
@@ -236,6 +235,16 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         super.destroy();
     }
 
+    public void refreshAuthToken(String extraData) {
+        if (StringUtils.isBlank(extraData)) {
+            return;
+        }
+        HashMap<String, String> extraDataMap = StringUtils.string2Map(extraData);
+        String newAccessToken = extraDataMap.get(PRO_TOKEN);
+        String newRefreshToken = extraDataMap.get(PRO_REFRESH_TOKEN);
+        JwtAuthManager.getInstance().refreshToken(newAccessToken, newRefreshToken);
+    }
+
     public void setTransactionMessageHandler(TransactionMessageHandler transactionMessageHandler) {
         this.transactionMessageHandler = transactionMessageHandler;
     }
@@ -248,12 +257,20 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         return clientChannelManager;
     }
 
+    public RegisterRMRequest getRegisterRMRequest(Integer rpcMessageId) {
+        return regRmRequestMap.get(rpcMessageId);
+    }
+
+    public RegisterRMRequest removeRegisterRMRequest(Integer rpcMessageId) {
+        return regRmRequestMap.remove(rpcMessageId);
+    }
+
     protected String loadBalance(String transactionServiceGroup, Object msg) {
         InetSocketAddress address = null;
         try {
             @SuppressWarnings("unchecked")
             List<InetSocketAddress> inetSocketAddressList =
-                RegistryFactory.getInstance().aliveLookup(transactionServiceGroup);
+                    RegistryFactory.getInstance().aliveLookup(transactionServiceGroup);
             address = this.doSelect(inetSocketAddressList, msg);
         } catch (Exception ex) {
             LOGGER.error("Select the address failed: {}", ex.getMessage());
@@ -293,6 +310,10 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             }
         }
         return StringUtils.isBlank(xid) ? String.valueOf(ThreadLocalRandom.current().nextLong(Long.MAX_VALUE)) : xid;
+    }
+
+    protected String getAuthData() {
+        return JwtAuthManager.getInstance().getAuthData();
     }
 
     private String getThreadPrefix() {
@@ -372,7 +393,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                             MessageFuture messageFuture = futures.remove(msgId);
                             if (messageFuture != null) {
                                 messageFuture.setResultMessage(
-                                    new RuntimeException(String.format("%s is unreachable", address), e));
+                                        new RuntimeException(String.format("%s is unreachable", address), e));
                             }
                         }
                         LOGGER.error("client merge call failed: {}", e.getMessage(), e);
@@ -471,7 +492,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
             LOGGER.error(FrameworkErrorCode.ExceptionCaught.getErrCode(),
-                NetUtil.toStringAddress(ctx.channel().remoteAddress()) + "connect exception. " + cause.getMessage(), cause);
+                    NetUtil.toStringAddress(ctx.channel().remoteAddress()) + "connect exception. " + cause.getMessage(), cause);
             clientChannelManager.releaseChannel(ctx.channel(), getAddressFromChannel(ctx.channel()));
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("remove exception rm channel:{}", ctx.channel());

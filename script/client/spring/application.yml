@@ -28,6 +28,15 @@ seata:
   scan-packages: firstPackage,secondPackage
   excludes-for-scanning: firstBeanNameForExclude,secondBeanNameForExclude
   excludes-for-auto-proxying: firstClassNameForExclude,secondClassNameForExclude
+  security:
+    username: seata
+    password: seata
+    secretKey: SeataSecretKey0c382ef121d778043159209298fd40bf3850a017
+    accessTokenValidityInMilliseconds: 600000
+    refreshTokenValidityInMilliseconds: 86400000
+    csrf-ignore-urls: /metadata/v1/**
+    ignore:
+      urls: /,/**/*.css,/**/*.js,/**/*.html,/**/*.map,/**/*.svg,/**/*.png,/**/*.jpeg,/**/*.ico,/api/v1/auth/login,/version.json,/health,/error,/vgroup/v1/**,/metadata/v1/auth/login
   client:
     rm:
       async-commit-buffer-limit: 10000

@@ -17,21 +17,23 @@
 package org.apache.seata.server.auth;
 
 import org.apache.seata.common.loader.LoadLevel;
+import org.apache.seata.core.auth.AuthResult;
+import org.apache.seata.core.auth.AuthResultBuilder;
 import org.apache.seata.core.protocol.RegisterRMRequest;
 import org.apache.seata.core.protocol.RegisterTMRequest;
+import org.apache.seata.core.protocol.ResultCode;
 
 /**
  */
-@LoadLevel(name = "defaultCheckAuthHandler", order = 100)
+@LoadLevel(name = "defaultCheckAuthHandler", order = 2)
 public class DefaultCheckAuthHandler extends AbstractCheckAuthHandler {
 
     @Override
-    public boolean doRegTransactionManagerCheck(RegisterTMRequest request) {
-        return true;
-    }
+    public AuthResult doRegTransactionManagerCheck(RegisterTMRequest request) {
+        return new AuthResultBuilder().setResultCode(ResultCode.Success).build();    }
 
     @Override
-    public boolean doRegResourceManagerCheck(RegisterRMRequest request) {
-        return true;
-    }
+    public AuthResult doRegResourceManagerCheck(RegisterRMRequest request) {
+        return new AuthResultBuilder().setResultCode(ResultCode.Success).build();    }
+
 }
