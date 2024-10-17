@@ -18,7 +18,6 @@ package org.apache.seata.discovery.registry.raft;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -45,20 +44,13 @@ import org.apache.seata.common.metadata.MetadataResponse;
 import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.CollectionUtils;
-import org.apache.seata.common.util.Http2ClientUtil;
-import org.apache.seata.common.util.HttpClientUtil;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.ConfigChangeListener;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.discovery.registry.RegistryService;
-import org.apache.http.HttpStatus;
-import org.apache.http.StatusLine;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.entity.ContentType;
-import org.apache.http.util.EntityUtils;
-import org.apache.http.protocol.HTTP;
 import org.apache.seata.discovery.registry.enums.HttpVersion;
+import org.apache.seata.discovery.registry.utils.OkHttpClientUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -305,7 +297,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
 
     private static boolean watch() throws RetryableException {
         Map<String, String> header = new HashMap<>();
-        header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
+        header.put("Content-Type", "application/x-www-form-urlencoded");
         Map<String, String> param = new HashMap<>();
         String clusterName = CURRENT_TRANSACTION_CLUSTER_NAME;
         Map<String, Long> groupTerms = METADATA.getClusterTerm(clusterName);
@@ -330,9 +322,9 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
 
     private static Boolean watchWithHttp2(Map<String, String> header, Map<String, String> param, String tcAddress) throws RetryableException {
         try (Response response =
-                     Http2ClientUtil.doPost("http://" + tcAddress + "/metadata/v2/watch", param, header, 30000)) {
+                     OkHttpClientUtil.doPostV2("http://" + tcAddress + "/metadata/v2/watch", param, header, 30000)) {
             int code = response.code();
-            return code == HttpStatus.SC_OK;
+            return code == 200;
         } catch (IOException e) {
             LOGGER.error("watch cluster node: {}, fail: {}", tcAddress, e.getMessage());
             throw new RetryableException(e.getMessage(), e);
@@ -340,24 +332,22 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
     }
 
     private static Boolean watchWithHttp(Map<String, String> header, Map<String, String> param, String tcAddress) throws RetryableException {
-        try (CloseableHttpResponse response =
-            HttpClientUtil.doPost("http://" + tcAddress + "/metadata/v1/watch", param, header, 30000)) {
-            if (response != null) {
-                StatusLine statusLine = response.getStatusLine();
-                if (statusLine != null && statusLine.getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
-                    if (StringUtils.isNotBlank(USERNAME) && StringUtils.isNotBlank(PASSWORD)) {
-                        throw new RetryableException("Authentication failed!");
-                    } else {
-                        throw new AuthenticationFailedException("Authentication failed! you should configure the correct username and password.");
-                    }
+        try (Response response =
+            OkHttpClientUtil.doPostV1("http://" + tcAddress + "/metadata/v1/watch", param, header, 30000)) {
+            int statusCode = response.code();
+            if (statusCode == 401) {
+                if (StringUtils.isNotBlank(USERNAME) && StringUtils.isNotBlank(PASSWORD)) {
+                    throw new RetryableException("Authentication failed!");
+                } else {
+                    throw new AuthenticationFailedException("Authentication failed! you should configure the correct username and password.");
                 }
-                return statusLine != null && statusLine.getStatusCode() == HttpStatus.SC_OK;
             }
+            
+            return statusCode == 200;
         } catch (IOException e) {
             LOGGER.error("watch cluster node: {}, fail: {}", tcAddress, e.getMessage());
             throw new RetryableException(e.getMessage(), e);
         }
-        return false;
     }
 
     @Override
@@ -388,7 +378,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
     private static void acquireClusterMetaData(String clusterName, String group) throws RetryableException {
         String tcAddress = queryHttpAddress(clusterName, group);
         Map<String, String> header = new HashMap<>();
-        header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
+        header.put("Content-Type", "application/x-www-form-urlencoded");
         if (isTokenExpired()) {
             refreshToken(tcAddress);
         }
@@ -399,17 +389,16 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
             Map<String, String> param = new HashMap<>();
             param.put("group", group);
             String response = null;
-            try (CloseableHttpResponse httpResponse =
-                HttpClientUtil.doGet("http://" + tcAddress + "/metadata/v1/cluster", param, header, 1000)) {
-                if (httpResponse != null) {
-                    if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                        response = EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
-                    } else if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
-                        if (StringUtils.isNotBlank(USERNAME) && StringUtils.isNotBlank(PASSWORD)) {
-                            throw new RetryableException("Authentication failed!");
-                        } else {
-                            throw new AuthenticationFailedException("Authentication failed! you should configure the correct username and password.");
-                        }
+            try (Response httpResponse =
+                OkHttpClientUtil.doGet("http://" + tcAddress + "/metadata/v1/cluster", param, header, 1000)) {
+                int code = httpResponse.code();
+                if (code == 200) {
+                    response =  httpResponse.message();
+                } else if (code == 401) {
+                    if (StringUtils.isNotBlank(USERNAME) && StringUtils.isNotBlank(PASSWORD)) {
+                        throw new RetryableException("Authentication failed!");
+                    } else {
+                        throw new AuthenticationFailedException("Authentication failed! you should configure the correct username and password.");
                     }
                 }
                 MetadataResponse metadataResponse;
@@ -437,14 +426,15 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
         param.put(PRO_USERNAME_KEY, USERNAME);
         param.put(PRO_PASSWORD_KEY, PASSWORD);
         Map<String, String> header = new HashMap<>();
-        header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
+        header.put("Content-Type", "application/json");
         String response = null;
         tokenTimeStamp = System.currentTimeMillis();
-        try (CloseableHttpResponse httpResponse =
-            HttpClientUtil.doPost("http://" + tcAddress + "/api/v1/auth/login", param, header, 1000)) {
+        try (Response httpResponse =
+            OkHttpClientUtil.doPostV1("http://" + tcAddress + "/api/v1/auth/login", param, header, 1000)) {
             if (httpResponse != null) {
-                if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                    response = EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
+                int code = httpResponse.code();
+                if (code == 200) {
+                    response = httpResponse.body().string();
                     JsonNode jsonNode = OBJECT_MAPPER.readTree(response);
                     String codeStatus = jsonNode.get("code").asText();
                     if (!StringUtils.equals(codeStatus, "200")) {
