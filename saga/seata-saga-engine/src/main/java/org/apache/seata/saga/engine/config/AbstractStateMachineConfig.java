@@ -214,20 +214,8 @@ public abstract class AbstractStateMachineConfig implements StateMachineConfig {
     }
 
     public ProcessControllerImpl createProcessorController(ProcessCtrlEventPublisher eventPublisher) throws Exception {
-        StateMachineProcessRouter stateMachineProcessRouter = new StateMachineProcessRouter();
-        stateMachineProcessRouter.initDefaultStateRouters();
-        loadStateRouterInterceptors(stateMachineProcessRouter.getStateRouters());
-
-        StateMachineProcessHandler stateMachineProcessHandler = new StateMachineProcessHandler();
-        stateMachineProcessHandler.initDefaultHandlers();
-        loadStateHandlerInterceptors(stateMachineProcessHandler.getStateHandlers());
-
-        DefaultRouterHandler defaultRouterHandler = new DefaultRouterHandler();
-        defaultRouterHandler.setEventPublisher(eventPublisher);
-
-        Map<String, ProcessRouter> processRouterMap = new HashMap<>(1);
-        processRouterMap.put(ProcessType.STATE_LANG.getCode(), stateMachineProcessRouter);
-        defaultRouterHandler.setProcessRouters(processRouterMap);
+        StateMachineProcessHandler stateMachineProcessHandler = buildStateMachineProcessHandler();
+        DefaultRouterHandler defaultRouterHandler = buildDefaultRouterHandler(eventPublisher);
 
         CustomizeBusinessProcessor customizeBusinessProcessor = new CustomizeBusinessProcessor();
 
@@ -243,6 +231,27 @@ public abstract class AbstractStateMachineConfig implements StateMachineConfig {
         processorController.setBusinessProcessor(customizeBusinessProcessor);
 
         return processorController;
+    }
+
+    private StateMachineProcessHandler buildStateMachineProcessHandler() {
+        StateMachineProcessHandler stateMachineProcessHandler = new StateMachineProcessHandler();
+        stateMachineProcessHandler.initDefaultHandlers();
+        loadStateHandlerInterceptors(stateMachineProcessHandler.getStateHandlers());
+        return stateMachineProcessHandler;
+    }
+
+    private DefaultRouterHandler buildDefaultRouterHandler(ProcessCtrlEventPublisher eventPublisher) {
+        DefaultRouterHandler defaultRouterHandler = new DefaultRouterHandler();
+        defaultRouterHandler.setEventPublisher(eventPublisher);
+
+        StateMachineProcessRouter stateMachineProcessRouter = new StateMachineProcessRouter();
+        stateMachineProcessRouter.initDefaultStateRouters();
+        loadStateRouterInterceptors(stateMachineProcessRouter.getStateRouters());
+
+        Map<String, ProcessRouter> processRouterMap = new HashMap<>(1);
+        processRouterMap.put(ProcessType.STATE_LANG.getCode(), stateMachineProcessRouter);
+        defaultRouterHandler.setProcessRouters(processRouterMap);
+        return defaultRouterHandler;
     }
 
     public void loadStateHandlerInterceptors(Map<String, StateHandler> stateHandlerMap) {

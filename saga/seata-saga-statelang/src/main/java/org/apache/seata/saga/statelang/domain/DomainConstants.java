@@ -21,19 +21,6 @@ package org.apache.seata.saga.statelang.domain;
  *
  */
 public interface DomainConstants {
-
-    //region State Types
-    String STATE_TYPE_SERVICE_TASK = "ServiceTask";
-    String STATE_TYPE_CHOICE = "Choice";
-    String STATE_TYPE_FAIL = "Fail";
-    String STATE_TYPE_SUCCEED = "Succeed";
-    String STATE_TYPE_COMPENSATION_TRIGGER = "CompensationTrigger";
-    String STATE_TYPE_SUB_STATE_MACHINE = "SubStateMachine";
-    String STATE_TYPE_SUB_MACHINE_COMPENSATION = "CompensateSubMachine";
-    String STATE_TYPE_SCRIPT_TASK = "ScriptTask";
-    String STATE_TYPE_LOOP_START = "LoopStart";
-    //endregion
-
     String COMPENSATE_SUB_MACHINE_STATE_NAME_PREFIX = "_compensate_sub_machine_state_";
 
     //region Service Types
