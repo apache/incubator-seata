@@ -631,11 +631,6 @@ public interface ConfigurationKeys {
     String TRANSPORT_PROTOCOL = TRANSPORT_PREFIX + "protocol";
 
     /**
-     * http1 or http2
-     */
-    String HTTP_VERSION = TRANSPORT_PREFIX + "httpVersion";
-
-    /**
      * The constant ENABLE_TM_CLIENT_BATCH_SEND_REQUEST
      */
     String ENABLE_TM_CLIENT_BATCH_SEND_REQUEST = TRANSPORT_PREFIX + "enableTmClientBatchSendRequest";

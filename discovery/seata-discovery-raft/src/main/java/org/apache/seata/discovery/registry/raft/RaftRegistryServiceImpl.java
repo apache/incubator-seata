@@ -70,6 +70,8 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
 
     private static final String PRO_USERNAME_KEY = "username";
 
+    private static final String PROTOCOL_KEY = "protocol";
+
     private static final String PRO_PASSWORD_KEY = "password";
 
     private static final String AUTHORIZATION_HEADER = "Authorization";
@@ -81,6 +83,8 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
     private static final String USERNAME;
 
     private static final String PASSWORD;
+
+    private static final String PROTOCOL;
 
     public static String jwtToken;
 
@@ -115,6 +119,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
         TOKEN_EXPIRE_TIME_IN_MILLISECONDS = CONFIG.getLong(getTokenExpireTimeInMillisecondsKey(), 29 * 60 * 1000L);
         USERNAME = CONFIG.getConfig(getRaftUserNameKey());
         PASSWORD = CONFIG.getConfig(getRaftPassWordKey());
+        PROTOCOL = CONFIG.getConfig(getRaftProtocolKey());
     }
 
     private RaftRegistryServiceImpl() {
@@ -260,6 +265,12 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
             REGISTRY_TYPE, PRO_PASSWORD_KEY);
     }
 
+    private static String getRaftProtocolKey() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY,
+                REGISTRY_TYPE, PROTOCOL_KEY);
+    }
+
+
     private static String getTokenExpireTimeInMillisecondsKey() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY,
             REGISTRY_TYPE, TOKEN_VALID_TIME_MS_KEY);
@@ -310,8 +321,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
             if (StringUtils.isNotBlank(jwtToken)) {
                 header.put(AUTHORIZATION_HEADER, jwtToken);
             }
-            String httpVersion = CONFIG.getConfig(org.apache.seata.common.ConfigurationKeys.HTTP_VERSION, DEFAULT_HTTP_VERSION);
-            if (httpVersion.equals(HttpVersion.HTTP.value)) {
+            if (PROTOCOL.equals(HttpVersion.HTTP.value)) {
                 return watchWithHttp(header, param, tcAddress);
             } else {
                 return watchWithHttp2(header, param, tcAddress);
