@@ -46,7 +46,7 @@ public class OkHttpClientUtil {
 
     public static Response doPostV1(String url, Map<String, String> params, Map<String, String> header,
                                     int timeout) throws IOException {
-        OkHttpClient okHttpClient = HTTP_CLIENT_MAP_V1.computeIfAbsent(timeout, (t) -> new OkHttpClient()
+        OkHttpClient okHttpClient = HTTP_CLIENT_MAP_V1.computeIfAbsent(timeout, t -> new OkHttpClient()
                 .newBuilder()
                 .readTimeout(t, TimeUnit.SECONDS)
                 .protocols(Collections.singletonList(Protocol.HTTP_1_1))
@@ -57,7 +57,7 @@ public class OkHttpClientUtil {
 
     public static Response doPostV1(String url, String body, Map<String, String> header,
                                     int timeout) throws IOException {
-        OkHttpClient okHttpClient = HTTP_CLIENT_MAP_V1.computeIfAbsent(timeout, (t) -> new OkHttpClient()
+        OkHttpClient okHttpClient = HTTP_CLIENT_MAP_V1.computeIfAbsent(timeout, t -> new OkHttpClient()
                 .newBuilder()
                 .readTimeout(t, TimeUnit.SECONDS)
                 .protocols(Collections.singletonList(Protocol.HTTP_1_1))
@@ -68,7 +68,7 @@ public class OkHttpClientUtil {
 
     public static Response doPostV2(String url, Map<String, String> params, Map<String, String> header,
                                     int timeout) throws IOException {
-        OkHttpClient okHttpClient = HTTP_CLIENT_MAP_V2.computeIfAbsent(timeout, (t) -> new OkHttpClient()
+        OkHttpClient okHttpClient = HTTP_CLIENT_MAP_V2.computeIfAbsent(timeout, t -> new OkHttpClient()
                 .newBuilder()
                 .readTimeout(t, TimeUnit.SECONDS)
                 .protocols(Collections.singletonList(Protocol.H2_PRIOR_KNOWLEDGE))
@@ -131,14 +131,14 @@ public class OkHttpClientUtil {
     // get request
     public static Response doGet(String url, Map<String, String> param, Map<String, String> header,
                                  int timeout) throws IOException {
-        OkHttpClient okHttpClient = HTTP_CLIENT_MAP_V1.computeIfAbsent(timeout, (t) -> new OkHttpClient()
+        OkHttpClient okHttpClient = HTTP_CLIENT_MAP_V1.computeIfAbsent(timeout, t -> new OkHttpClient()
                 .newBuilder()
                 .readTimeout(t, TimeUnit.SECONDS)
                 .protocols(Collections.singletonList(Protocol.HTTP_1_1))
                 .build());
 
         QueryStringEncoder queryStringEncoder = new QueryStringEncoder(url);
-        if(param != null){
+        if (param != null) {
             param.forEach(queryStringEncoder::addParam);
         }
         Request.Builder builder = new Request.Builder();
