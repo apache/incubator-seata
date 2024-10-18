@@ -20,6 +20,7 @@ import java.lang.reflect.Field;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
+import java.util.Properties;
 
 import com.alibaba.druid.mock.MockStatement;
 import com.alibaba.druid.mock.MockStatementBase;
@@ -72,6 +73,7 @@ public class UpdateExecutorTest {
         DruidDataSource dataSource = new DruidDataSource();
         dataSource.setUrl("jdbc:mock:xxx");
         dataSource.setDriver(mockDriver);
+        dataSource.setConnectProperties(new Properties());
 
         DataSourceProxy dataSourceProxy = DataSourceProxyTest.getDataSourceProxy(dataSource);
 
