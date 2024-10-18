@@ -26,6 +26,14 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletResponse;
+
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
+import io.netty.handler.codec.http.DefaultHttpResponse;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpVersion;
+import io.netty.handler.codec.http2.DefaultHttp2DataFrame;
+import io.netty.handler.codec.http2.Http2StreamChannel;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.server.cluster.listener.ClusterChangeEvent;
 import org.apache.seata.server.cluster.listener.ClusterChangeListener;
@@ -86,14 +94,18 @@ public class ClusterWatcherManager implements ClusterChangeListener {
     }
 
     private void notify(Watcher<?> watcher) {
-        AsyncContext asyncContext = (AsyncContext)watcher.getAsyncContext();
-        HttpServletResponse httpServletResponse = (HttpServletResponse)asyncContext.getResponse();
-        watcher.setDone(true);
-        if (logger.isDebugEnabled()) {
-            logger.debug("notify cluster change event to: {}", asyncContext.getRequest().getRemoteAddr());
+        Channel channel  = (Channel) watcher.getAsyncContext();
+        if (channel instanceof Http2StreamChannel) {
+            // http2
+            channel.writeAndFlush(new DefaultHttp2DataFrame(Unpooled.wrappedBuffer(Unpooled.EMPTY_BUFFER)));
+            return;
+        } else {
+            // http
+            channel.writeAndFlush(new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK));
         }
-        httpServletResponse.setStatus(HttpServletResponse.SC_OK);
-        asyncContext.complete();
+        if (logger.isDebugEnabled()) {
+            logger.debug("notify cluster change event to: {}", channel.remoteAddress());
+        }
     }
 
     public void registryWatcher(Watcher<?> watcher) {

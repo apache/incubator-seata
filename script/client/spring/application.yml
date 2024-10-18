@@ -142,6 +142,8 @@ seata:
       username: seata
       password: seata
       tokenValidityInMilliseconds: 1740000
+      protocol: http
+
     file:
       name: file.conf
     consul:
