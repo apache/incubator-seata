@@ -97,7 +97,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
         Channel channel  = (Channel) watcher.getAsyncContext();
         if (channel instanceof Http2StreamChannel) {
             // http2
-            channel.writeAndFlush(new DefaultHttp2DataFrame(Unpooled.wrappedBuffer("changed\n".getBytes())));
+            channel.writeAndFlush(new DefaultHttp2DataFrame(Unpooled.wrappedBuffer(Unpooled.EMPTY_BUFFER)));
             return;
         } else {
             // http
