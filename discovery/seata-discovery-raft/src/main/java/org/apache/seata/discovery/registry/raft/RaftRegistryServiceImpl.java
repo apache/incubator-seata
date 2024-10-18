@@ -54,8 +54,6 @@ import org.apache.seata.discovery.registry.utils.OkHttpClientUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.apache.seata.common.DefaultValues.DEFAULT_HTTP_VERSION;
-
 /**
  * The type File registry service.
  *
