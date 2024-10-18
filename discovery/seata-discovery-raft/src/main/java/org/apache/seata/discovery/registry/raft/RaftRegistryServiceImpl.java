@@ -342,7 +342,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                     throw new AuthenticationFailedException("Authentication failed! you should configure the correct username and password.");
                 }
             }
-            
+
             return statusCode == 200;
         } catch (IOException e) {
             LOGGER.error("watch cluster node: {}, fail: {}", tcAddress, e.getMessage());
@@ -396,10 +396,13 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                     response =  httpResponse.message();
                 } else if (code == 401) {
                     if (StringUtils.isNotBlank(USERNAME) && StringUtils.isNotBlank(PASSWORD)) {
-                        throw new RetryableException("Authentication failed!");
+                        refreshToken(tcAddress);
+                        throw new RetryableException("Token refreshed, retrying request.");
                     } else {
                         throw new AuthenticationFailedException("Authentication failed! you should configure the correct username and password.");
                     }
+                } else {
+                    throw new AuthenticationFailedException("Authentication failed! you should configure the correct username and password.");
                 }
                 MetadataResponse metadataResponse;
                 if (StringUtils.isNotBlank(response)) {
@@ -428,7 +431,6 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
         Map<String, String> header = new HashMap<>();
         header.put("Content-Type", "application/json");
         String response = null;
-        tokenTimeStamp = System.currentTimeMillis();
         try (Response httpResponse =
             OkHttpClientUtil.doPostV1("http://" + tcAddress + "/api/v1/auth/login", param, header, 1000)) {
             if (httpResponse != null) {
@@ -442,6 +444,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                         throw new AuthenticationFailedException("Authentication failed! you should configure the correct username and password.");
                     }
                     jwtToken = jsonNode.get("data").asText();
+                    tokenTimeStamp = System.currentTimeMillis();
                 } else {
                     //authorized failed,throw exception to kill process
                     throw new AuthenticationFailedException("Authentication failed! you should configure the correct username and password.");
