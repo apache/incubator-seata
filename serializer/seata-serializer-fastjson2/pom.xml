@@ -22,22 +22,30 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>org.apache.seata</groupId>
-        <artifactId>seata-parent</artifactId>
+        <artifactId>seata-serializer</artifactId>
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>seata-serializer</artifactId>
-    <packaging>pom</packaging>
-    <name>seata-serializer ${project.version}</name>
-    <description>serializer top parent for Seata built with Maven</description>
+    <artifactId>seata-serializer-fastjson2</artifactId>
+    <packaging>jar</packaging>
+    <name>seata-serializer-fastjson2 ${project.version}</name>
+    <description>serializer-fastjson2 for Seata built with Maven</description>
 
-    <modules>
-        <module>seata-serializer-all</module>
-        <module>seata-serializer-protobuf</module>
-        <module>seata-serializer-seata</module>
-        <module>seata-serializer-kryo</module>
-        <module>seata-serializer-hessian</module>
-        <module>seata-serializer-fastjson2</module>
-    </modules>
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba.fastjson2</groupId>
+            <artifactId>fastjson2</artifactId>
+        </dependency>
+    </dependencies>
 
 </project>
