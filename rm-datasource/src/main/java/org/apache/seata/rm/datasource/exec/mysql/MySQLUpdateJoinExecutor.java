@@ -311,6 +311,6 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
     }
 
     private String getDbVersion() {
-        return statementProxy.getConnectionProxy().getDataSourceProxy().getKernelVersion();
+        return statementProxy.getConnectionProxy().getDataSourceProxy().getDataSourceProxyMetadata().getKernelVersion();
     }
 }

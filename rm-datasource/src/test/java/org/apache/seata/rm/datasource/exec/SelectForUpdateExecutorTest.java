@@ -19,6 +19,8 @@ package org.apache.seata.rm.datasource.exec;
 import java.lang.reflect.Field;
 import java.sql.Types;
 import java.util.List;
+import java.util.Properties;
+
 import com.alibaba.druid.mock.MockStatement;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.sql.SQLUtils;
@@ -70,6 +72,7 @@ public class SelectForUpdateExecutorTest {
         DruidDataSource dataSource = new DruidDataSource();
         dataSource.setUrl("jdbc:mock:xxx");
         dataSource.setDriver(mockDriver);
+        dataSource.setConnectProperties(new Properties());
 
         DataSourceProxy dataSourceProxy = DataSourceProxyTest.getDataSourceProxy(dataSource);
 
