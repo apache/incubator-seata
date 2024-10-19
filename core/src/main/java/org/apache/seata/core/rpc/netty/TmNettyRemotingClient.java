@@ -46,6 +46,8 @@ import org.apache.seata.core.rpc.processor.client.ClientOnResponseProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.apache.seata.common.util.StringUtils.isNotBlank;
+
 /**
  * The rm netty client.
  *
@@ -187,7 +189,7 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
         registerProcessor();
         if (initialized.compareAndSet(false, true)) {
             super.init();
-            if (org.apache.seata.common.util.StringUtils.isNotBlank(transactionServiceGroup)) {
+            if (isNotBlank(transactionServiceGroup)) {
                 initConnection();
             }
         }
@@ -247,7 +249,7 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
     private void registerProcessor() {
         // 1.registry TC response processor
         ClientOnResponseProcessor onResponseProcessor =
-                new ClientOnResponseProcessor(mergeMsgMap, super.getFutures(), getTransactionMessageHandler());
+                new ClientOnResponseProcessor(mergeMsgMap, super.getFutures(), childToParentMap, getTransactionMessageHandler());
         super.registerProcessor(MessageType.TYPE_SEATA_MERGE_RESULT, onResponseProcessor, null);
         super.registerProcessor(MessageType.TYPE_GLOBAL_BEGIN_RESULT, onResponseProcessor, null);
         super.registerProcessor(MessageType.TYPE_GLOBAL_COMMIT_RESULT, onResponseProcessor, null);

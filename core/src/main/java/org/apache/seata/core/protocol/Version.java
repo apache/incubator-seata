@@ -39,6 +39,7 @@ public class Version {
     private static final String CURRENT = VersionInfo.VERSION;
     private static final String VERSION_0_7_1 = "0.7.1";
     private static final String VERSION_1_5_0 = "1.5.0";
+    private static final String VERSION_2_3_0 = "2.3.0";
     private static final int MAX_VERSION_DOT = 3;
 
     /**
@@ -86,15 +87,21 @@ public class Version {
      * @return true: client version is above or equal version 1.5.0, false: on the contrary
      */
     public static boolean isAboveOrEqualVersion150(String version) {
-        boolean isAboveOrEqualVersion150 = false;
+        return isAboveOrEqualVersion(version, VERSION_1_5_0);
+    }
+
+    public static boolean isAboveOrEqualVersion230(String version) {
+        return isAboveOrEqualVersion(version, VERSION_2_3_0);
+    }
+
+    public static boolean isAboveOrEqualVersion(String clientVersion, String divideVersion) {
+        boolean isAboveOrEqualVersion = false;
         try {
-            long clientVersion = convertVersion(version);
-            long divideVersion = convertVersion(VERSION_1_5_0);
-            isAboveOrEqualVersion150 = clientVersion >= divideVersion;
+            isAboveOrEqualVersion = convertVersion(clientVersion) >= convertVersion(divideVersion);
         } catch (Exception e) {
-            LOGGER.error("convert version error, clientVersion:{}", version, e);
+            LOGGER.error("convert version error, clientVersion:{}", clientVersion, e);
         }
-        return isAboveOrEqualVersion150;
+        return isAboveOrEqualVersion;
     }
 
     public static long convertVersion(String version) throws IncompatibleVersionException {

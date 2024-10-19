@@ -21,10 +21,9 @@ import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.ConfigurationTestHelper;
 import org.apache.seata.common.XID;
 import org.apache.seata.common.util.NetUtil;
-import org.apache.seata.core.protocol.ResultCode;
-import org.apache.seata.core.protocol.transaction.BranchRegisterRequest;
-import org.apache.seata.core.protocol.transaction.BranchRegisterResponse;
-import org.apache.seata.mockserver.MockServer;
+import org.apache.seata.core.model.GlobalStatus;
+import org.apache.seata.core.protocol.transaction.GlobalCommitRequest;
+import org.apache.seata.core.protocol.transaction.GlobalCommitResponse;
 import org.apache.seata.saga.engine.db.AbstractServerTest;
 import org.apache.seata.common.util.UUIDGenerator;
 import org.apache.seata.server.coordinator.DefaultCoordinator;
@@ -40,6 +39,7 @@ import java.lang.management.ManagementFactory;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -58,7 +58,7 @@ public class TmNettyClientTest extends AbstractServerTest {
     }
 
     public static ThreadPoolExecutor initMessageExecutor() {
-        return new ThreadPoolExecutor(100, 500, 500, TimeUnit.SECONDS,
+        return new ThreadPoolExecutor(5, 5, 500, TimeUnit.SECONDS,
             new LinkedBlockingQueue(20000), new ThreadPoolExecutor.CallerRunsPolicy());
     }
 
@@ -176,16 +176,16 @@ public class TmNettyClientTest extends AbstractServerTest {
         String serverAddress = "0.0.0.0:8091";
         Channel channel = TmNettyRemotingClient.getInstance().getClientChannelManager().acquireChannel(serverAddress);
         Assertions.assertNotNull(channel);
-
-        BranchRegisterRequest request = new BranchRegisterRequest();
+        GlobalCommitRequest request = new GlobalCommitRequest();
         request.setXid("127.0.0.1:8091:1249853");
-        request.setLockKey("lock key testSendMsgWithResponse");
-        request.setResourceId("resourceId1");
-        BranchRegisterResponse branchRegisterResponse = (BranchRegisterResponse) tmNettyRemotingClient.sendSyncRequest(request);
-        Assertions.assertNotNull(branchRegisterResponse);
-        Assertions.assertEquals(ResultCode.Failed, branchRegisterResponse.getResultCode());
-        Assertions.assertEquals("TransactionException[Could not found global transaction xid = 127.0.0.1:8091:1249853, may be has finished.]",
-            branchRegisterResponse.getMsg());
+        GlobalCommitResponse globalCommitResponse = null;
+        try {
+            globalCommitResponse = (GlobalCommitResponse)tmNettyRemotingClient.sendSyncRequest(request);
+        } catch (TimeoutException e) {
+            throw new RuntimeException(e);
+        }
+        Assertions.assertNotNull(globalCommitResponse);
+        Assertions.assertEquals(GlobalStatus.Finished, globalCommitResponse.getGlobalStatus());
         nettyRemotingServer.destroy();
         tmNettyRemotingClient.destroy();
     }
