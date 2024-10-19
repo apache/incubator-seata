@@ -16,8 +16,6 @@
  */
 package io.seata.tm.api;
 
-import java.util.concurrent.TimeUnit;
-
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timeout;
 import io.netty.util.TimerTask;
@@ -27,6 +25,8 @@ import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.logger.StackTraceLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * The type Default failure handler.
@@ -75,6 +75,11 @@ public class DefaultFailureHandlerImpl implements FailureHandler {
             new String[] {tx.getXid()});
         TIMER.newTimeout(new DefaultFailureHandlerImpl.CheckTimerTask(tx, GlobalStatus.RollbackRetrying),
             SCHEDULE_INTERVAL_SECONDS, TimeUnit.SECONDS);
+    }
+
+    @Override
+    public void onBeginRateLimitedFailure(org.apache.seata.tm.api.GlobalTransaction globalTransaction, Throwable cause) {
+        LOGGER.warn("Failed to begin transaction due to RateLimit. ", cause);
     }
 
     protected class CheckTimerTask implements TimerTask {

@@ -54,6 +54,12 @@ public interface TransactionalExecutor {
         BeginFailure,
 
         /**
+         * Begin failure of rate limited code.
+         */
+        //
+        BeginFailedRateLimited,
+
+        /**
          * Commit failure code.
          */
         //

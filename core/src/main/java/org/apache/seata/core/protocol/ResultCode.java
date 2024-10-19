@@ -32,7 +32,12 @@ public enum  ResultCode {
      * Success result code.
      */
     // Success
-    Success;
+    Success,
+
+    /**
+     * Rate limited result code.
+     */
+    RateLimited;
 
     /**
      * Get result code.

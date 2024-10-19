@@ -130,4 +130,8 @@ enum TransactionExceptionCodeProto {
      */
     FailedStore = 17;
 
+    /**
+     * BeginFailedRateLimited
+     */
+    BeginFailedRateLimited = 18;
 }
