@@ -63,6 +63,9 @@ public class Http2DispatchHandler extends ChannelDuplexHandler {
             requestDataNode = objectMapper.createObjectNode();
             requestDataNode.putIfAbsent("param", ParameterParser.convertParamMap(queryStringDecoder.parameters()));
             requestDataNode.putPOJO("channel", ctx.channel());
+            if (http2HeadersFrame.isEndStream()) {
+                invoke(ctx);
+            }
         } else if (msg instanceof Http2DataFrame) {
             ObjectMapper objectMapper = new ObjectMapper();
             Http2DataFrame http2DataFrame = (Http2DataFrame) msg;
@@ -79,12 +82,13 @@ public class Http2DispatchHandler extends ChannelDuplexHandler {
         HttpInvocation httpInvocation = ControllerManager.getHttpInvocation(path);
         Object httpController = httpInvocation.getController();
         Method handleMethod = httpInvocation.getMethod();
+        handleMethod.setAccessible(true);
         Object[] args = ParameterParser.getArgValues(httpInvocation.getParamMetaData(), handleMethod, requestDataNode);
         Object result = handleMethod.invoke(httpController, args);
         if (requestDataNode.get("channel") == null) {
             return;
         }
 
-        ctx.writeAndFlush(new DefaultHttp2DataFrame(Unpooled.wrappedBuffer(objectMapper.writeValueAsBytes(result))));
+        ctx.writeAndFlush(new DefaultHttp2DataFrame(Unpooled.wrappedBuffer(objectMapper.writeValueAsBytes(result)), true));
     }
 }
