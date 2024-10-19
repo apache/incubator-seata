@@ -60,15 +60,22 @@ public class HttpDispatchHandler extends SimpleChannelInboundHandler<HttpRequest
         }
 
         HttpInvocation httpInvocation = ControllerManager.getHttpInvocation(path);
-        Object httpController = httpInvocation.getController();
-        Method handleMethod = httpInvocation.getMethod();
-        Object[] args = ParameterParser.getArgValues(httpInvocation.getParamMetaData(), handleMethod, requestDataNode);
-        Object result = handleMethod.invoke(httpController, args);
-        if (requestDataNode.get("channel") == null) {
+        if (httpInvocation != null) {
+            Object httpController = httpInvocation.getController();
+            Method handleMethod = httpInvocation.getMethod();
+            handleMethod.setAccessible(true);
+            Object[] args = ParameterParser.getArgValues(httpInvocation.getParamMetaData(), handleMethod, requestDataNode);
+            Object result = handleMethod.invoke(httpController, args);
+            if (requestDataNode.get("channel") == null) {
+                return;
+            }
+            FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.wrappedBuffer(objectMapper.writeValueAsBytes(result)));
+            response.headers().set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
+            ctx.writeAndFlush(response);
             return;
         }
-        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.wrappedBuffer(objectMapper.writeValueAsBytes(result)));
-        response.headers().set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
+
+        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND, Unpooled.wrappedBuffer(Unpooled.EMPTY_BUFFER));
         ctx.writeAndFlush(response);
     }
 }

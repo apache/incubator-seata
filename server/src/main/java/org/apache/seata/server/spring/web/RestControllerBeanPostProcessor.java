@@ -16,6 +16,7 @@
  */
 package org.apache.seata.server.spring.web;
 
+import com.google.common.collect.Lists;
 import org.apache.seata.core.rpc.netty.http.ControllerManager;
 import org.apache.seata.core.rpc.netty.http.HttpInvocation;
 import org.apache.seata.core.rpc.netty.http.ParamMetaData;
@@ -36,6 +37,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,18 +68,18 @@ public class RestControllerBeanPostProcessor implements BeanPostProcessor {
 
         Class<?> httpControllerClass = bean.getClass();
         RequestMapping requestMapping = httpControllerClass.getAnnotation(RequestMapping.class);
-        String[] prePaths;
+        List<String> prePaths;
         if (requestMapping != null) {
-            prePaths = requestMapping.value();
+            prePaths = Arrays.asList(requestMapping.value());
         } else {
-            prePaths = new String[]{""};
+            prePaths = new ArrayList<>();
         }
-        Method[] methods = httpControllerClass.getMethods();
+        Method[] methods = httpControllerClass.getDeclaredMethods();
         for (Method method : methods) {
             for (Class<? extends Annotation> annotationType : MAPPING_CLASS) {
                 Annotation annotation = method.getAnnotation(annotationType);
                 if (annotation != null) {
-                    String[] postPaths = getAnnotationValue(annotation);
+                    List<String> postPaths = getAnnotationValue(annotation);
                     addPathMapping(bean, prePaths, method, postPaths);
                 }
             }
@@ -86,18 +88,18 @@ public class RestControllerBeanPostProcessor implements BeanPostProcessor {
         return bean;
     }
 
-    private static String[] getAnnotationValue(Annotation annotation) {
+    private static List<String> getAnnotationValue(Annotation annotation) {
         try {
-            Class<? extends Annotation> annotationClass = annotation.getClass();
-            Field valueField = annotationClass.getDeclaredField("value");
-            valueField.setAccessible(true);
-            return (String[]) valueField.get(annotation);
+            Class<? extends Annotation> annotationClass = annotation.annotationType();
+            Method valueMethod = annotationClass.getMethod("value");
+            valueMethod.setAccessible(true);
+            return Arrays.asList((String[]) valueMethod.invoke(annotation));
         } catch (Throwable e) {
-            return new String[]{};
+            return new ArrayList<>();
         }
     }
 
-    private static void addPathMapping(Object httpController, String[] prePaths, Method method, String[] postPaths) {
+    private static void addPathMapping(Object httpController, List<String> prePaths, Method method, List<String> postPaths) {
         Class<?>[] parameterTypes = method.getParameterTypes();
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
         ParamMetaData[] paramMetaDatas = new ParamMetaData[parameterTypes.length];
@@ -116,6 +118,15 @@ public class RestControllerBeanPostProcessor implements BeanPostProcessor {
             paramMetaData.setParamConvertType(paramConvertType);
             paramMetaDatas[i] = paramMetaData;
         }
+        int maxSize = Math.max(prePaths.size(), postPaths.size());
+        for (int i = prePaths.size(); i < maxSize; i++) {
+            prePaths.add("/");
+        }
+
+        for (int i = postPaths.size(); i < maxSize; i++) {
+            postPaths.add("/");
+        }
+
         for (String prePath : prePaths) {
             for (String postPath : postPaths) {
                 String fullPath = (prePath + "/" + postPath).replaceAll("(/)+", "/");
