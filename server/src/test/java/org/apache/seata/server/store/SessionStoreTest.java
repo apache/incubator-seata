@@ -19,6 +19,7 @@ package org.apache.seata.server.store;
 import java.io.File;
 
 import org.apache.seata.common.XID;
+import org.apache.seata.common.store.SessionMode;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.constants.ConfigurationKeys;
@@ -31,7 +32,6 @@ import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.session.SessionHelper;
 import org.apache.seata.server.session.SessionHolder;
-import org.apache.seata.server.store.StoreConfig.SessionMode;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;

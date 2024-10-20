@@ -26,6 +26,7 @@ import java.util.stream.Stream;
 
 import javax.annotation.Resource;
 
+import org.apache.seata.common.store.SessionMode;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.result.PageResult;
 import org.apache.seata.core.exception.TransactionException;
@@ -39,7 +40,6 @@ import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.session.SessionHolder;
 import org.apache.seata.server.session.SessionManager;
-import org.apache.seata.server.store.StoreConfig.SessionMode;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
