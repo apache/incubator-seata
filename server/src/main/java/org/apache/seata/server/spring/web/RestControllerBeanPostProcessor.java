@@ -16,7 +16,6 @@
  */
 package org.apache.seata.server.spring.web;
 
-import com.google.common.collect.Lists;
 import org.apache.seata.core.rpc.netty.http.ControllerManager;
 import org.apache.seata.core.rpc.netty.http.HttpInvocation;
 import org.apache.seata.core.rpc.netty.http.ParamMetaData;
@@ -34,7 +33,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
