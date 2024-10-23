@@ -213,6 +213,8 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
         }
     }
 
+
+
     private static String queryHttpAddress(String clusterName, String group) {
         List<Node> nodeList = METADATA.getNodes(clusterName, group);
         List<String> addressList = null;
@@ -336,20 +338,39 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
     }
 
     @Override
-    public List<InetSocketAddress> refreshAliveLookup(String transactionServiceGroup,
-        List<InetSocketAddress> aliveAddress) {
+    public List<InetSocketAddress> refreshAliveLookup(String transactionServiceGroup, List<InetSocketAddress> aliveAddress) {
         if (METADATA.isRaftMode()) {
+            // Perform health check on current alive addresses
+            List<InetSocketAddress> healthCheckedNodes = performHealthCheck(aliveAddress);
             Node leader = METADATA.getLeader(getServiceGroup(transactionServiceGroup));
             InetSocketAddress leaderAddress = convertInetSocketAddress(leader);
             return ALIVE_NODES.put(transactionServiceGroup,
-                aliveAddress.isEmpty() ? aliveAddress : aliveAddress.parallelStream().filter(inetSocketAddress -> {
-                    // Since only follower will turn into leader, only the follower node needs to be listened to
-                    return inetSocketAddress.getPort() != leaderAddress.getPort() || !inetSocketAddress.getAddress()
-                        .getHostAddress().equals(leaderAddress.getAddress().getHostAddress());
-                }).collect(Collectors.toList()));
+                    healthCheckedNodes.parallelStream().filter(inetSocketAddress -> {
+                        return inetSocketAddress.getPort() != leaderAddress.getPort() || !inetSocketAddress.getAddress()
+                                .getHostAddress().equals(leaderAddress.getAddress().getHostAddress());
+                    }).collect(Collectors.toList()));
         } else {
             return RegistryService.super.refreshAliveLookup(transactionServiceGroup, aliveAddress);
         }
+    }
+
+    private boolean isNodeAlive(InetSocketAddress inetSocketAddress) {
+        // Simple health check mechanism (e.g., a ping or HTTP request)
+        try {
+            // For simplicity, this can be replaced with actual ping or health-check logic
+            String url = "http://" + inetSocketAddress.getAddress().getHostAddress() + ":" + inetSocketAddress.getPort() + "/health";
+            CloseableHttpResponse response = HttpClientUtil.doGet(url, new HashMap<>(), new HashMap<>(), 1000);
+            return response != null && response.getStatusLine().getStatusCode() == HttpStatus.SC_OK;
+        } catch (IOException e) {
+            LOGGER.error("Health check failed for node: {}", inetSocketAddress, e);
+            return false;
+        }
+    }
+
+    private List<InetSocketAddress> performHealthCheck(List<InetSocketAddress> nodes) {
+        return nodes.parallelStream()
+                .filter(this::isNodeAlive)  // Perform health check in parallel
+                .collect(Collectors.toList());  // Collect alive nodes
     }
 
     private static void acquireClusterMetaDataByClusterName(String clusterName) {
