@@ -24,7 +24,7 @@ import org.apache.seata.saga.statelang.domain.impl.ServiceTaskStateImpl;
 import org.apache.seata.saga.statelang.parser.StateParser;
 
 /**
- * ServcieTaskTask parser
+ * ServiceTaskTask parser
  *
  */
 public class ServiceTaskStateParser extends AbstractTaskStateParser implements StateParser<ServiceTaskState> {

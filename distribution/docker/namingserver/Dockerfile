@@ -25,7 +25,7 @@
 # 1. docker run --name=seata-namingserver -d seata-namingserver:2.2.0-dev
 #
 # https://hub.docker.com/r/apache/seata-namingserver
-FROM openjdk:8u342
+FROM eclipse-temurin:8u422-b05-jdk
 
 # set label
 LABEL maintainer="Seata <seata.apache.org>"
@@ -37,8 +37,8 @@ ADD bin/ /seata-namingserver/bin
 ADD lib/ /seata-namingserver/lib
 ADD conf/ /seata-namingserver/conf
 ADD target /seata-namingserver/target
-ADD ../LICENSE ./LICENSE
-ADD ../NOTICE ./LICENSE
+ADD LICENSE /LICENSE
+ADD NOTICE /NOTICE
 
 # set extra environment
 ENV LOADER_PATH="/seata-namingserver/lib"
