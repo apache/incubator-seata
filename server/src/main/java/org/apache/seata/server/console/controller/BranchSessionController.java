@@ -16,16 +16,19 @@
  */
 package org.apache.seata.server.console.controller;
 
-import javax.annotation.Resource;
+import io.swagger.annotations.Api;
 import org.apache.seata.server.console.service.BranchSessionService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.annotation.Resource;
 
 /**
  * Branch Session Controller
  */
 @RestController
-@RequestMapping("console/branchSession")
+@Api(tags = "Branch session APIs")
+@RequestMapping("/api/v1/console/branchSession")
 public class BranchSessionController {
 
     @Resource(type = BranchSessionService.class)

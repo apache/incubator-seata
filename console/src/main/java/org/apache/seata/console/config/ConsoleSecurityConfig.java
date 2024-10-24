@@ -17,18 +17,18 @@
 package org.apache.seata.console.config;
 
 import org.apache.seata.common.util.StringUtils;
-import org.apache.seata.console.filter.JwtAuthenticationTokenFilter;
+import org.apache.seata.console.filter.ConsoleAuthenticationTokenFilter;
 import org.apache.seata.console.security.CustomUserDetailsServiceImpl;
 import org.apache.seata.console.security.JwtAuthenticationEntryPoint;
 import org.apache.seata.console.utils.JwtTokenUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.BeanIds;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -44,8 +44,8 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
  *
  */
 @Configuration(proxyBeanMethods = false)
-@EnableGlobalMethodSecurity(prePostEnabled = true)
-public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+@Order(2)
+public class ConsoleSecurityConfig extends WebSecurityConfigurerAdapter {
 
     /**
      * The constant AUTHORIZATION_HEADER.
@@ -53,9 +53,19 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     public static final String AUTHORIZATION_HEADER = "Authorization";
 
     /**
+     * The constant REFRESH_TOKEN.
+     */
+    public static final String REFRESH_TOKEN = "refresh_token";
+
+    /**
      * The constant AUTHORIZATION_TOKEN.
      */
     public static final String AUTHORIZATION_TOKEN = "access_token";
+
+    /**
+     * The constant ACCESS_TOKEN_NEAR_EXPIRATION.
+     */
+    public static final String ACCESS_TOKEN_NEAR_EXPIRATION = "Access_token_near_expiration";
 
     /**
      * The constant SECURITY_IGNORE_URLS_SPILT_CHAR.
@@ -68,18 +78,21 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     public static final String TOKEN_PREFIX = "Bearer ";
 
     @Autowired
+    @Qualifier("consoleUserDetailsService")
     private CustomUserDetailsServiceImpl userDetailsService;
 
     @Autowired
+    @Qualifier("consoleJwtAuthenticationEntryPoint")
     private JwtAuthenticationEntryPoint unauthorizedHandler;
 
     @Autowired
+    @Qualifier("consoleJwtTokenUtils")
     private JwtTokenUtils tokenProvider;
 
     @Autowired
     private Environment env;
 
-    @Bean(name = BeanIds.AUTHENTICATION_MANAGER)
+    @Bean("consoleAuthenticationManager")
     @Override
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
@@ -92,7 +105,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(WebSecurity web) {
-        String ignoreURLs = env.getProperty("seata.security.ignore.urls", "/**");
+        String ignoreURLs = env.getProperty("console.ignore.urls", "/**");
         for (String ignoreURL : ignoreURLs.trim().split(SECURITY_IGNORE_URLS_SPILT_CHAR)) {
             web.ignoring().antMatchers(ignoreURL.trim());
         }
@@ -110,9 +123,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             csrf.ignoringAntMatchers(csrfIgnoreUrls.trim().split(SECURITY_IGNORE_URLS_SPILT_CHAR));
         }
         csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
-            // don't disable csrf, jwt may be implemented based on cookies
-        http.addFilterBefore(new JwtAuthenticationTokenFilter(tokenProvider),
-            UsernamePasswordAuthenticationFilter.class);
+        // don't disable csrf, jwt may be implemented based on cookies
+        http.antMatcher("/api/v1/**").addFilterBefore(new ConsoleAuthenticationTokenFilter(tokenProvider),
+                UsernamePasswordAuthenticationFilter.class);
 
         // disable cache
         http.headers().cacheControl();
@@ -123,7 +136,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
      *
      * @return the password encoder
      */
-    @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
