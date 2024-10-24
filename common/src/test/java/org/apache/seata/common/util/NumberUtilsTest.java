@@ -36,4 +36,12 @@ public class NumberUtilsTest {
     public void testToInReturnParsedValue() {
         Assertions.assertEquals(10, NumberUtils.toInt("10", 9));
     }
+
+    @Test
+    public void testBytesAndLong() {
+        Long a = 123456L;
+        byte[] bytes = NumberUtils.longToBytes(a);
+        long b = NumberUtils.bytesToLong(bytes);
+        Assertions.assertEquals(a, b);
+    }
 }

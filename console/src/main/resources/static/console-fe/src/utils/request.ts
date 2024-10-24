@@ -90,3 +90,50 @@ const request = () => {
 };
 
 export default request();
+
+
+const clusterRequest = () => {
+  const instance: AxiosInstance = axios.create({
+    baseURL: 'metadata/v1',
+    method: 'get',
+  });
+
+  instance.interceptors.request.use((config: AxiosRequestConfig) => {
+    let authHeader: string | null = localStorage.getItem(AUTHORIZATION_HEADER);
+    // add jwt header
+    config.headers[AUTHORIZATION_HEADER] = authHeader;
+    return config;
+  })
+
+  instance.interceptors.response.use(
+    (response: AxiosResponse): Promise<any> => {
+      const isSuccess = get(response, 'data.success');
+      if (response.status === 200 || isSuccess) {
+        return Promise.resolve(get(response, 'data'));
+      } else {
+        const errorText =
+          get(response, 'data.errMsg') ||
+          response.statusText;
+        Message.error(errorText);
+        return Promise.reject(response);
+      }
+    },
+    error => {
+      if (error.response) {
+        const { status } = error.response;
+        if (status === 403 || status === 401) {
+          (window as any).globalHistory.replace('/login');
+          return;
+        }
+        Message.error(`HTTP ERROR: ${status}`);
+      } else {
+        Message.error(API_GENERAL_ERROR_MESSAGE);
+      }
+      return Promise.reject(error);
+    }
+  );
+
+  return instance;
+};
+
+export const configRequest = clusterRequest();

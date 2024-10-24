@@ -108,6 +108,8 @@ public class Server {
 
         serverInstance.serverInstanceInit();
         // let ServerRunner do destroy instead ShutdownHook, see https://github.com/seata/seata/issues/4028
+
+        ServerRunner.addToFirstDisposable(coordinator);
         ServerRunner.addDisposable(coordinator);
         nettyRemotingServer.init();
     }
