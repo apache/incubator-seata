@@ -108,12 +108,8 @@ public class FileLocker extends AbstractLocker {
                     failFast = true;
                     break;
                 }
-                if (canLock) {
-                    canLock = false;
-                    if (autoCommit) {
-                        break;
-                    }
-                }
+                canLock = false;
+                break;
             }
         }
         if (failFast) {

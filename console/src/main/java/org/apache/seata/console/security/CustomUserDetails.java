@@ -22,7 +22,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 
 /**
- * custem user
+ * custom user
  *
  */
 public class CustomUserDetails implements UserDetails {

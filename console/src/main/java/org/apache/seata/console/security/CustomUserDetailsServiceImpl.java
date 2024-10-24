@@ -25,7 +25,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
 
 /**
- * Custem user service
+ * Custom user service
  *
  */
 @Service("consoleUserDetailsService")
