@@ -213,9 +213,10 @@ public class SessionConverter {
             return Collections.emptySet();
         }
 
-        final Set<BranchSessionVO> result = new HashSet<>(branchSessions.size());
+        List<BranchSession> safeBranchSessions = new ArrayList<>(branchSessions);
+        final Set<BranchSessionVO> result = new HashSet<>(safeBranchSessions.size());
 
-        for (BranchSession session : branchSessions) {
+        for (BranchSession session : safeBranchSessions) {
             result.add(new BranchSessionVO(
                     session.getXid(),
                     session.getTransactionId(),
