@@ -84,11 +84,15 @@ jobs:
       - name: "Set up QEMU"
         id: qemu
         uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+      - name: "Set up Docker Buildx"
+        uses: docker/setup-buildx-action@v3
       # step 3
       - name: "Build with Maven on 'arm64v8/ubuntu:20.04' OS (Skip tests)"
         run: |
           docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
-            arm64v8/ubuntu:20.04 \
+            --platform linux/arm64 arm64v8/ubuntu:20.04 \
             bash -exc 'apt-get update -y && \
                        apt-get install maven -y && \
                        apt-get install -y python3 python3-pip python3-distutils && \
