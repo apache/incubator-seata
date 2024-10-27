@@ -16,6 +16,8 @@
  */
 package org.apache.seata.common.store;
 
+import org.apache.seata.common.util.StringUtils;
+
 /**
  * transaction log store mode
  *
@@ -55,6 +57,9 @@ public enum StoreMode {
      * @return the store mode
      */
     public static StoreMode get(String name) {
+        if (StringUtils.isEmpty(name)) {
+            return null;
+        }
         for (StoreMode sm : StoreMode.class.getEnumConstants()) {
             if (sm.name.equalsIgnoreCase(name)) {
                 return sm;

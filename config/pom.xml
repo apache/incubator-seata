@@ -41,5 +41,6 @@
         <module>seata-config-etcd3</module>
         <module>seata-config-consul</module>
         <module>seata-config-spring-cloud</module>
+        <module>seata-config-raft</module>
     </modules>
 </project>
