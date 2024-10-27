@@ -76,6 +76,8 @@
         <netty.version>4.1.101.Final</netty.version>
         <sofa.hessian.version>4.0.3</sofa.hessian.version>
         <sofa.bolt.version>1.6.7</sofa.bolt.version>
+        <rocksdbjni.version>8.8.1</rocksdbjni.version>
+
         <protobuf.version>3.25.4</protobuf.version>
         <grpc.version>1.66.0</grpc.version>
         <kryo.version>5.4.0</kryo.version>
@@ -233,6 +235,11 @@
                 <groupId>com.alipay.sofa</groupId>
                 <artifactId>bolt</artifactId>
                 <version>${sofa.bolt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.rocksdb</groupId>
+                <artifactId>rocksdbjni</artifactId>
+                <version>${rocksdbjni.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.alibaba</groupId>

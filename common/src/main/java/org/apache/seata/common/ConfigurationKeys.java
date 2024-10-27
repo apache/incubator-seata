@@ -1019,6 +1019,31 @@ public interface ConfigurationKeys {
      */
     String ROCKET_MQ_MSG_TIMEOUT = SERVER_PREFIX + "rocketmqMsgTimeout";
 
+    String CONFIG_STORE_PREFIX = FILE_ROOT_PREFIX_CONFIG + "raft" + FILE_CONFIG_SPLIT_CHAR + "db" + FILE_CONFIG_SPLIT_CHAR;
+
+    /**
+     * The constant CONFIG_STORE_TYPE
+     */
+    String CONFIG_STORE_TYPE = CONFIG_STORE_PREFIX + "type";
+
+    /**
+     * The constant CONFIG_STORE_DIR
+     */
+    String CONFIG_STORE_DIR = CONFIG_STORE_PREFIX + "dir";
+
+    /**
+     * The constant CONFIG_STORE_DESTROY_ON_SHUTDOWN
+     */
+    String CONFIG_STORE_DESTROY_ON_SHUTDOWN = CONFIG_STORE_PREFIX + "destroyOnShutdown";
+
+    /**
+     * The constant CONFIG_STORE_NAMESPACE
+     */
+    String CONFIG_STORE_NAMESPACE = CONFIG_STORE_PREFIX + "namespace";
+    /**
+     * The constant CONFIG_STORE_DATA_ID
+     */
+    String CONFIG_STORE_DATA_ID = CONFIG_STORE_PREFIX + "dataId";
     /**
      *
      */
@@ -1053,4 +1078,5 @@ public interface ConfigurationKeys {
      * The constant META_PREFIX
      */
     String META_PREFIX = SEATA_FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + "metadata.";
+
 }
