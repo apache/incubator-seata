@@ -38,6 +38,10 @@ public class ConfigurationChangeEvent {
         this(dataId, DEFAULT_NAMESPACE, null, newValue, ConfigurationChangeType.MODIFY);
     }
 
+    public ConfigurationChangeEvent(String namespace, String dataId, String newValue) {
+        this(dataId, namespace, null, newValue, ConfigurationChangeType.MODIFY);
+    }
+
     public ConfigurationChangeEvent(String dataId, String namespace, String oldValue, String newValue,
                                     ConfigurationChangeType type) {
         this.dataId = dataId;

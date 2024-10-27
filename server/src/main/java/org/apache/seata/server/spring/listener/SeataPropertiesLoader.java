@@ -21,6 +21,7 @@ import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.config.FileConfiguration;
 import org.apache.seata.config.file.FileConfig;
+import org.apache.seata.server.cluster.raft.RaftConfigServerManager;
 import org.apache.seata.server.store.StoreConfig;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -74,6 +75,8 @@ public class SeataPropertiesLoader implements ApplicationContextInitializer<Conf
             environment.getPropertySources().addLast(new PropertiesPropertySource("seataOldConfig", properties));
         }
         // Load by priority
+        RaftConfigServerManager.init();
+        RaftConfigServerManager.start();
         System.setProperty("sessionMode", StoreConfig.getSessionMode().getName());
         System.setProperty("lockMode", StoreConfig.getLockMode().getName());
     }
