@@ -78,8 +78,7 @@ class App extends React.Component<AppPropsType, AppStateType> {
   get menu() {
     const { locale }: AppPropsType = this.props;
     const { MenuRouter = {} } = locale;
-    const { overview, transactionInfo, globalLockInfo, configInfo, sagaStatemachineDesigner } = MenuRouter;
-
+    const { overview, transactionInfo, globalLockInfo, sagaStatemachineDesigner } = MenuRouter;
     return {
       items: [
         // {
@@ -93,10 +92,6 @@ class App extends React.Component<AppPropsType, AppStateType> {
         {
           key: '/globallock/list',
           label: globalLockInfo,
-        },
-        {
-          key: '/config/list',
-          label: configInfo,
         },
         {
           key: '/sagastatemachinedesigner',
