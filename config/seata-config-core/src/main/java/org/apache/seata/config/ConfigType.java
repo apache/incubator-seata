@@ -50,10 +50,6 @@ public enum ConfigType {
      */
     SpringCloudConfig,
     /**
-     * Raft config type
-     */
-    Raft,
-    /**
      * Custom config type
      */
     Custom;

@@ -131,11 +131,8 @@ public class RaftSnapshot implements Serializable {
         /**
          * leader metadata snapshot
          */
-        leader_metadata("leader_metadata"),
-        /**
-         * config snapshot
-         */
-        config("config");
+        leader_metadata("leader_metadata");
+
         final String type;
 
         SnapshotType(String type) {
