@@ -19,15 +19,12 @@ package org.apache.seata.core.rpc.processor.server;
 import io.netty.channel.ChannelHandlerContext;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.util.NetUtil;
-import org.apache.seata.core.protocol.RegisterRMRequest;
-import org.apache.seata.core.protocol.RegisterRMResponse;
-import org.apache.seata.core.protocol.RpcMessage;
-import org.apache.seata.core.protocol.Version;
-import org.apache.seata.core.rpc.netty.ChannelManager;
-import org.apache.seata.core.rpc.RemotingServer;
+import org.apache.seata.core.auth.AuthResult;
+import org.apache.seata.core.protocol.*;
 import org.apache.seata.core.rpc.RegisterCheckAuthHandler;
+import org.apache.seata.core.rpc.RemotingServer;
+import org.apache.seata.core.rpc.netty.ChannelManager;
 import org.apache.seata.core.rpc.processor.RemotingProcessor;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,34 +57,42 @@ public class RegRmProcessor implements RemotingProcessor {
     private void onRegRmMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage) {
         RegisterRMRequest message = (RegisterRMRequest) rpcMessage.getBody();
         String ipAndPort = NetUtil.toStringAddress(ctx.channel().remoteAddress());
-        boolean isSuccess = false;
-        String errorInfo = StringUtils.EMPTY;
+        RegisterRMResponse response = new RegisterRMResponse(false);
         try {
-            if (null == checkAuthHandler || checkAuthHandler.regResourceManagerCheckAuth(message)) {
+            AuthResult authResult = (checkAuthHandler != null) ? checkAuthHandler.regResourceManagerCheckAuth(message) : null;
+            if (checkAuthHandler == null || authResult.getResultCode().equals(ResultCode.Success)
+                    || authResult.getResultCode().equals(ResultCode.AccessTokenNearExpiration)) {
                 ChannelManager.registerRMChannel(message, ctx.channel());
                 Version.putChannelVersion(ctx.channel(), message.getVersion());
-                isSuccess = true;
+                response.setIdentified(true);
+                response.setResultCode(checkAuthHandler == null ? ResultCode.Success : authResult.getResultCode());
+                response.setExtraData(checkAuthHandler.fetchNewToken(authResult));
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("RM checkAuth for client:{},vgroup:{},applicationId:{} is OK", ipAndPort, message.getTransactionServiceGroup(), message.getApplicationId());
+                    LOGGER.debug("RM checkAuth for client:{},vgroup:{},applicationId:{} is OK",
+                            ipAndPort, message.getTransactionServiceGroup(), message.getApplicationId());
                 }
             } else {
+                if (authResult.getResultCode().equals(ResultCode.Failed)) {
+                    response.setMsg("RM checkAuth failed!Please check your username/password or token.");
+                } else if (authResult.getResultCode().equals(ResultCode.AccessTokenExpired)) {
+                    response.setMsg("RM checkAuth failed! The access token has been expired.");
+                } else if (authResult.getResultCode().equals(ResultCode.RefreshTokenExpired)) {
+                    response.setMsg("RM checkAuth failed! The refresh token has been expired.");
+                }
+                response.setResultCode(authResult.getResultCode());
                 if (LOGGER.isWarnEnabled()) {
-                    LOGGER.warn("RM checkAuth for client:{},vgroup:{},applicationId:{} is FAIL", ipAndPort, message.getTransactionServiceGroup(), message.getApplicationId());
+                    LOGGER.warn("RM checkAuth for client:{},vgroup:{},applicationId:{} is FAIL",
+                            ipAndPort, message.getTransactionServiceGroup(), message.getApplicationId());
                 }
             }
-        } catch (Exception exx) {
-            isSuccess = false;
-            errorInfo = exx.getMessage();
-            LOGGER.error("RM register fail, error message:{}", errorInfo);
-        }
-        RegisterRMResponse response = new RegisterRMResponse(isSuccess);
-        if (StringUtils.isNotEmpty(errorInfo)) {
-            response.setMsg(errorInfo);
+        } catch (IncompatibleVersionException e) {
+            LOGGER.error("RM register fail, error message:{}", e.getMessage());
+            response.setResultCode(ResultCode.Failed);
         }
         remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), response);
-        if (isSuccess && LOGGER.isInfoEnabled()) {
+        if (response.isIdentified() && LOGGER.isInfoEnabled()) {
             LOGGER.info("RM register success,message:{},channel:{},client version:{}", message, ctx.channel(),
-                message.getVersion());
+                    message.getVersion());
         }
     }
 

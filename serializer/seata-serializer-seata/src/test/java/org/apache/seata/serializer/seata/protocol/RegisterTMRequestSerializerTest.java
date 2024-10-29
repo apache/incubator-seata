@@ -17,14 +17,13 @@
 package org.apache.seata.serializer.seata.protocol;
 
 import io.netty.buffer.ByteBuf;
+import org.apache.seata.core.protocol.*;
 import org.apache.seata.serializer.seata.SeataSerializer;
-import org.apache.seata.core.protocol.AbstractIdentifyRequest;
-import org.apache.seata.core.protocol.RegisterTMRequest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.apache.seata.core.protocol.ProtocolConstants;
+
 import static io.netty.buffer.Unpooled.buffer;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -66,6 +65,19 @@ public class RegisterTMRequestSerializerTest {
         assertThat(registerTMRequest2.getExtraData()).isEqualTo(registerTMRequest.getExtraData());
         assertThat(registerTMRequest2.getTransactionServiceGroup()).isEqualTo(registerTMRequest.getTransactionServiceGroup());
         assertThat(registerTMRequest2.getVersion()).isEqualTo(registerTMRequest.getVersion());
+    }
+
+    @Test
+    public void test_codec1() {
+        RegisterTMResponse registerTMResponse = new RegisterTMResponse();
+        registerTMResponse.setIdentified(true);
+        registerTMResponse.setVersion("2.3.0-SNAPSHOT");
+        registerTMResponse.setResultCode(ResultCode.RefreshTokenExpired);
+        byte[] bytes = seataSerializer.serialize(registerTMResponse);
+        RegisterTMResponse registerTMResponse2 = seataSerializer.deserialize(bytes);
+        assertThat(registerTMResponse2.isIdentified()).isEqualTo(registerTMResponse.isIdentified());
+        assertThat(registerTMResponse2.getVersion()).isEqualTo(registerTMResponse.getVersion());
+        assertThat(registerTMResponse2.getResultCode()).isEqualTo(registerTMResponse.getResultCode());
     }
 
     /**
