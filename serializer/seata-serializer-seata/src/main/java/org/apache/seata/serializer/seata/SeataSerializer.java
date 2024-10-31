@@ -72,9 +72,10 @@ public class SeataSerializer implements Serializer {
         //typecode
         short typecode = byteBuffer.getShort();
         //msg body
-        byte[] body = new byte[byteBuffer.remaining()];
-        byteBuffer.get(body);
-        ByteBuffer in = ByteBuffer.wrap(body);
+//        byte[] body = new byte[byteBuffer.remaining()];
+//        byteBuffer.get(body);
+//        ByteBuffer in = ByteBuffer.wrap(body);
+        ByteBuffer in = byteBuffer.slice();
         //new Messgae
         AbstractMessage abstractMessage = MessageCodecFactory.getMessage(typecode);
         //get messageCodec

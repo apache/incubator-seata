@@ -32,7 +32,6 @@
     <modules>
         <module>seata-benchmark-baseline</module>
         <module>seata-benchmark-profiler</module>
-        <module>seata-benchmark-scenario</module>
     </modules>
 
 </project>
