@@ -25,7 +25,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Map;
@@ -498,27 +498,31 @@ public final class ReflectionUtil {
     }
 
     /**
-     * Recursively get clazz and their interfaces match condition method
-     * @param clazz clazz
-     * @param condition condition
+     * Recursively get clazz and their interfaces match matchCondition method-class mapping
+     *
+     * @param clazz     clazz
+     * @param matchCondition matchCondition
      * @return Set
      */
-    public static Set<Method> getMethod(Class<?> clazz, Predicate<Method> condition) {
-        Set<Method> resultMethodSet = new HashSet<>();
+    public static Map<Method, Class<?>> findMatchMethodClazzMap(Class<?> clazz, Predicate<Method> matchCondition) {
+        Map<Method, Class<?>> methodClassMap = new HashMap<>();
 
-        Set<Method> methods = new HashSet<>(Arrays.asList(clazz.getMethods()));
-        Set<Class<?>> interfaceClasses = getInterfaces(clazz);
-        for (Class<?> interClass : interfaceClasses) {
-            methods.addAll(Arrays.asList(interClass.getMethods()));
-        }
-
-        for (Method method : methods) {
-            if (condition.test(method)) {
-                resultMethodSet.add(method);
+        for (Method method : clazz.getMethods()) {
+            if (matchCondition.test(method)) {
+                methodClassMap.put(method, clazz);
             }
         }
 
-        return resultMethodSet;
+        Set<Class<?>> interfaceClasses = getInterfaces(clazz);
+        for (Class<?> interClass : interfaceClasses) {
+            for (Method method : clazz.getMethods()) {
+                if (matchCondition.test(method)) {
+                    methodClassMap.put(method, interClass);
+                }
+            }
+        }
+
+        return methodClassMap;
     }
 
     /**

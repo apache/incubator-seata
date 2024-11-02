@@ -37,7 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
-import java.util.Set;
+import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
 /**
@@ -94,13 +94,16 @@ public class RmClientTest {
      */
     @Deprecated
     private static void registryTccResource(Action1 target) {
-        Set<Method> methodsToProxy = ReflectionUtil.getMethod(target.getClass(), method -> method.isAnnotationPresent(TwoPhaseBusinessAction.class));
-        if (methodsToProxy.isEmpty()) {
+        Map<Method, Class<?>> matchMethodClazzMap = ReflectionUtil.findMatchMethodClazzMap(target.getClass(), method -> method.isAnnotationPresent(TwoPhaseBusinessAction.class));
+        if (matchMethodClazzMap.keySet().isEmpty()) {
             return;
         }
 
         try {
-            for (Method method : methodsToProxy) {
+            for (Map.Entry<Method, Class<?>> methodClassEntry : matchMethodClazzMap.entrySet()) {
+                Method method = methodClassEntry.getKey();
+                Class<?> methodClass = methodClassEntry.getValue();
+
                 TwoPhaseBusinessAction twoPhaseBusinessAction = method.getAnnotation(TwoPhaseBusinessAction.class);
                 TCCResource tccResource = new TCCResource();
                 if (StringUtils.isBlank(twoPhaseBusinessAction.name())) {
@@ -110,10 +113,10 @@ public class RmClientTest {
                 tccResource.setTargetBean(target);
                 tccResource.setPrepareMethod(method);
                 tccResource.setCommitMethodName(twoPhaseBusinessAction.commitMethod());
-                tccResource.setCommitMethod(target.getClass().getMethod(twoPhaseBusinessAction.commitMethod(),
+                tccResource.setCommitMethod(methodClass.getMethod(twoPhaseBusinessAction.commitMethod(),
                         twoPhaseBusinessAction.commitArgsClasses()));
                 tccResource.setRollbackMethodName(twoPhaseBusinessAction.rollbackMethod());
-                tccResource.setRollbackMethod(target.getClass().getMethod(twoPhaseBusinessAction.rollbackMethod(),
+                tccResource.setRollbackMethod(methodClass.getMethod(twoPhaseBusinessAction.rollbackMethod(),
                         twoPhaseBusinessAction.rollbackArgsClasses()));
                 // set argsClasses
                 tccResource.setCommitArgsClasses(twoPhaseBusinessAction.commitArgsClasses());

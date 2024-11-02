@@ -32,8 +32,7 @@ import org.apache.seata.saga.rm.interceptor.SagaAnnotationActionInterceptorHandl
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -45,23 +44,25 @@ public class SagaAnnotationActionInterceptorParser implements InterfaceParser {
 
     @Override
     public ProxyInvocationHandler parserInterfaceToProxy(Object target, String objectName) {
-        Set<Method> methodsToProxy = ReflectionUtil.getMethod(target.getClass(), method -> method.isAnnotationPresent(getAnnotationClass()));
+        Map<Method, Class<?>> methodClassMap = ReflectionUtil.findMatchMethodClazzMap(target.getClass(), method -> method.isAnnotationPresent(getAnnotationClass()));
+        Set<Method> methodsToProxy = methodClassMap.keySet();
         if (methodsToProxy.isEmpty()) {
             return null;
         }
 
         // register resource and enhance with interceptor
-        registerResource(target, methodsToProxy);
+        registerResource(target, methodClassMap);
 
         return new SagaAnnotationActionInterceptorHandler(target, methodsToProxy.stream().map(Method::getName).collect(Collectors.toSet()));
     }
 
-    private void registerResource(Object target, Set<Method> methodsToProxy) {
+    private void registerResource(Object target, Map<Method, Class<?>> methodClassMap) {
         try {
-            for (Method method : methodsToProxy) {
+            for (Map.Entry<Method, Class<?>> methodClassEntry : methodClassMap.entrySet()) {
+                Method method = methodClassEntry.getKey();
                 Annotation annotation = method.getAnnotation(getAnnotationClass());
                 if (annotation != null) {
-                    Resource resource = createResource(target, target.getClass(), annotation);
+                    Resource resource = createResource(target, methodClassEntry.getValue(), annotation);
                     //registry resource
                     DefaultResourceManager.get().registerResource(resource);
                 }
@@ -83,30 +84,9 @@ public class SagaAnnotationActionInterceptorParser implements InterfaceParser {
         return ifNeedEnhanceBean;
     }
 
-    protected Set<Method> parseProxyTargetMethod(Object target) {
-        Set<Method> methodsToProxy = new HashSet<>();
-        //check if it is TCC bean
-        Class<?> serviceClazz = target.getClass();
-        Set<Method> methods = new HashSet<>(Arrays.asList(serviceClazz.getMethods()));
-        Set<Class<?>> interfaceClasses = ReflectionUtil.getInterfaces(serviceClazz);
-        for (Class<?> interClass : interfaceClasses) {
-            methods.addAll(Arrays.asList(interClass.getMethods()));
-        }
-
-        Class<? extends Annotation> twoPhaseBusinessAction = getAnnotationClass();
-        for (Method method : methods) {
-            if (method.isAnnotationPresent(twoPhaseBusinessAction)) {
-                methodsToProxy.add(method);
-            }
-        }
-
-        return methodsToProxy;
-    }
-
     protected Class<? extends Annotation> getAnnotationClass() {
         return CompensationBusinessAction.class;
     }
-
 
     protected Resource createResource(Object targetBean, Class<?> serviceClass, Annotation annotation) throws NoSuchMethodException {
         CompensationBusinessAction compensationBusinessAction = (CompensationBusinessAction) annotation;

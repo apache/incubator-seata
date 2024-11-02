@@ -33,6 +33,7 @@ import org.apache.seata.rm.tcc.interceptor.TccActionInterceptorHandler;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -40,14 +41,14 @@ public class TccActionInterceptorParser implements InterfaceParser {
 
     @Override
     public ProxyInvocationHandler parserInterfaceToProxy(Object target, String objectName) {
-        // eliminate the bean without two phase annotation.
-        Set<Method> methodsToProxy = ReflectionUtil.getMethod(target.getClass(), method -> method.isAnnotationPresent(getAnnotationClass()));
+        Map<Method, Class<?>> methodClassMap = ReflectionUtil.findMatchMethodClazzMap(target.getClass(), method -> method.isAnnotationPresent(getAnnotationClass()));
+        Set<Method> methodsToProxy = methodClassMap.keySet();
         if (methodsToProxy.isEmpty()) {
             return null;
         }
 
         // register resource and enhance with interceptor
-        registerResource(target, methodsToProxy);
+        registerResource(target, methodClassMap);
 
         return new TccActionInterceptorHandler(target, methodsToProxy.stream().map(Method::getName).collect(Collectors.toSet()));
     }
@@ -62,12 +63,13 @@ public class TccActionInterceptorParser implements InterfaceParser {
         return ifNeedEnhanceBean;
     }
 
-    protected void registerResource(Object target, Set<Method> methodsToProxy) {
+    protected void registerResource(Object target, Map<Method, Class<?>> methodClassMap) {
         try {
-            for (Method method : methodsToProxy) {
+            for (Map.Entry<Method, Class<?>> methodClassEntry : methodClassMap.entrySet()) {
+                Method method = methodClassEntry.getKey();
                 Annotation annotation = method.getAnnotation(getAnnotationClass());
                 if (annotation != null) {
-                    Resource resource = createResource(target, target.getClass(), method, annotation);
+                    Resource resource = createResource(target, methodClassEntry.getValue(), method, annotation);
                     //registry resource
                     DefaultResourceManager.get().registerResource(resource);
                 }
@@ -76,6 +78,7 @@ public class TccActionInterceptorParser implements InterfaceParser {
             throw new FrameworkException(t, "register tcc resource error");
         }
     }
+
 
     protected Class<? extends Annotation> getAnnotationClass() {
         return TwoPhaseBusinessAction.class;

@@ -29,6 +29,7 @@ import org.apache.seata.rm.tcc.TCCResource;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -40,12 +41,14 @@ public class TccActionInterceptorParser extends org.apache.seata.rm.tcc.intercep
 
     @Override
     public ProxyInvocationHandler parserInterfaceToProxy(Object target, String objectName) {
-        Set<Method> methodsToProxy = ReflectionUtil.getMethod(target.getClass(), method -> method.isAnnotationPresent(getAnnotationClass()));
+        Map<Method, Class<?>> methodClassMap = ReflectionUtil.findMatchMethodClazzMap(target.getClass(), method -> method.isAnnotationPresent(getAnnotationClass()));
+        Set<Method> methodsToProxy = methodClassMap.keySet();
         if (methodsToProxy.isEmpty()) {
             return null;
         }
+
         // register resource and enhance with interceptor
-        registerResource(target, methodsToProxy);
+        registerResource(target, methodClassMap);
 
         return new TccActionInterceptorHandler(target, methodsToProxy.stream().map(Method::getName).collect(Collectors.toSet()));
     }
