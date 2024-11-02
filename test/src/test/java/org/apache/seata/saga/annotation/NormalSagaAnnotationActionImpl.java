@@ -22,7 +22,7 @@ import org.apache.seata.rm.tcc.api.BusinessActionContext;
 /**
  *
  */
-public class SagaAnnotationActionImpl implements SagaAnnotationAction {
+public class NormalSagaAnnotationActionImpl implements NormalSagaAnnotationAction {
 
     private boolean isCommit;
 

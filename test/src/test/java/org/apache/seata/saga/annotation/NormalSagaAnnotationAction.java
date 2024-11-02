@@ -27,7 +27,7 @@ import java.util.List;
  * The interface saga action.
  */
 @LocalTCC
-public interface SagaAnnotationAction {
+public interface NormalSagaAnnotationAction {
 
     /**
      * Prepare boolean.

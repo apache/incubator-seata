@@ -16,13 +16,6 @@
  */
 package org.apache.seata.saga.annotation.rm.interceptor.parser;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.GlobalStatus;
@@ -31,19 +24,25 @@ import org.apache.seata.core.model.TransactionManager;
 import org.apache.seata.integration.tx.api.interceptor.handler.ProxyInvocationHandler;
 import org.apache.seata.integration.tx.api.util.ProxyUtil;
 import org.apache.seata.rm.DefaultResourceManager;
-
 import org.apache.seata.saga.annotation.BranchSessionMock;
-import org.apache.seata.saga.annotation.SagaAnnotationAction;
-import org.apache.seata.saga.annotation.SagaAnnotationActionImpl;
+import org.apache.seata.saga.annotation.NormalSagaAnnotationActionImpl;
 import org.apache.seata.saga.annotation.SagaParam;
 import org.apache.seata.saga.rm.SagaAnnotationResourceManager;
 import org.apache.seata.saga.rm.interceptor.parser.SagaAnnotationActionInterceptorParser;
 import org.apache.seata.tm.TransactionManagerHolder;
 import org.apache.seata.tm.api.GlobalTransaction;
 import org.apache.seata.tm.api.GlobalTransactionContext;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  *
@@ -51,7 +50,6 @@ import org.junit.jupiter.api.Test;
 public class SagaActionInterceptorParserTest {
 
     public static String DEFAULT_XID = "default_xid";
-
 
     @BeforeAll
     public static void init() throws IOException {
@@ -61,21 +59,21 @@ public class SagaActionInterceptorParserTest {
         System.setProperty("service.vgroupMapping.default_tx_group", "default");
     }
 
+    @AfterEach
+    public void clearTccResource() {
+        DefaultResourceManager.get().getResourceManager(BranchType.SAGA_ANNOTATION).getManagedResources().clear();
+    }
 
     @Test
     void parserInterfaceToProxy() {
-        //given
-        SagaAnnotationActionImpl sagaAction = new SagaAnnotationActionImpl();
+        NormalSagaAnnotationActionImpl sagaAction = new NormalSagaAnnotationActionImpl();
 
         SagaAnnotationActionInterceptorParser sagaAnnotationActionInterceptorParser = new SagaAnnotationActionInterceptorParser();
 
-        //when
         ProxyInvocationHandler proxyInvocationHandler = sagaAnnotationActionInterceptorParser.parserInterfaceToProxy(sagaAction, "sagaAction");
-
-        //then
         Assertions.assertNotNull(proxyInvocationHandler);
-
     }
+
 
     @Test
     public void testSagaAnnotation_should_commit() throws TransactionException {
@@ -84,12 +82,10 @@ public class SagaActionInterceptorParserTest {
 
         TransactionManagerHolder.set(transactionManager);
 
-        SagaAnnotationActionImpl sagaAction = new SagaAnnotationActionImpl();
-        SagaAnnotationAction sagaActionProxy = ProxyUtil.createProxy(sagaAction);
+        NormalSagaAnnotationActionImpl sagaActionProxy = ProxyUtil.createProxy(new NormalSagaAnnotationActionImpl());
 
         SagaParam sagaParam = new SagaParam(2, "abc@163.com");
         List<String> listB = Arrays.asList("b");
-
 
         GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
 
@@ -110,25 +106,20 @@ public class SagaActionInterceptorParserTest {
             throw exx;
         }
 
-        Assertions.assertTrue(sagaAction.isCommit());
-
+        Assertions.assertTrue(sagaActionProxy.isCommit());
     }
 
     @Test
     public void testSagaAnnotation_should_rollback() throws TransactionException {
-        //given
-
         DefaultResourceManager.get();
         DefaultResourceManager.mockResourceManager(BranchType.SAGA_ANNOTATION, resourceManager);
 
         TransactionManagerHolder.set(transactionManager);
 
-        SagaAnnotationActionImpl sagaAction = new SagaAnnotationActionImpl();
-        SagaAnnotationAction sagaActionProxy = ProxyUtil.createProxy(sagaAction);
+        NormalSagaAnnotationActionImpl sagaActionProxy = ProxyUtil.createProxy(new NormalSagaAnnotationActionImpl());
 
         SagaParam sagaParam = new SagaParam(1, "abc@163.com");
         List<String> listB = Arrays.asList("b");
-
 
         GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
 
@@ -149,7 +140,7 @@ public class SagaActionInterceptorParserTest {
             throw exx;
         }
 
-        Assertions.assertFalse(sagaAction.isCommit());
+        Assertions.assertFalse(sagaActionProxy.isCommit());
     }
 
     private static Map<String, List<BranchSessionMock>> applicationDataMap = new ConcurrentHashMap<>();
