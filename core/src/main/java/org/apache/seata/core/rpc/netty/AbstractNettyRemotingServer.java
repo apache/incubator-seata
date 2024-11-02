@@ -29,9 +29,13 @@ import io.netty.handler.codec.DecoderException;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import org.apache.seata.common.util.NetUtil;
+import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.core.protocol.AbstractMessage;
 import org.apache.seata.core.protocol.HeartbeatMessage;
+import org.apache.seata.core.protocol.MergedWarpMessage;
 import org.apache.seata.core.protocol.ProtocolConstants;
 import org.apache.seata.core.protocol.RpcMessage;
+import org.apache.seata.core.protocol.Version;
 import org.apache.seata.core.rpc.RemotingServer;
 import org.apache.seata.core.rpc.RpcContext;
 import org.apache.seata.core.rpc.processor.Pair;
@@ -270,4 +274,32 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
         }
 
     }
+
+    @Override
+    protected void processMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception {
+        Object body = rpcMessage.getBody();
+        RpcContext rpcContext = ChannelManager.getContextFromIdentified(ctx.channel());
+        // If the client is not version 2.3.0 or higher, splitting MergedWarpMessage will result in the client’s mergeMsgMap not being cleared
+        if (body instanceof MergedWarpMessage && (StringUtils.isNotBlank(rpcContext.getVersion())
+            && Version.isAboveOrEqualVersion230(rpcContext.getVersion()))) {
+            MergedWarpMessage mergedWarpMessage = (MergedWarpMessage)body;
+            for (int i = 0; i < mergedWarpMessage.msgs.size(); i++) {
+                RpcMessage rpcMsg =
+                    buildRequestMessage(mergedWarpMessage.msgs.get(i), rpcMessage, mergedWarpMessage.msgIds.get(i));
+                super.processMessage(ctx, rpcMsg);
+            }
+        } else {
+            super.processMessage(ctx, rpcMessage);
+        }
+    }
+
+    private RpcMessage buildRequestMessage(AbstractMessage msg, RpcMessage rpcMessage,int id) {
+        RpcMessage rpcMsg = new RpcMessage();
+        rpcMsg.setId(id);
+        rpcMsg.setCodec(rpcMessage.getCodec());
+        rpcMsg.setCompressor(rpcMessage.getCompressor());
+        rpcMsg.setBody(msg);
+        return rpcMsg;
+    }
+
 }

@@ -226,6 +226,7 @@
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
+            <scope>test</scope>
         </dependency>
        <!--  if you run seata-server in IDE and use mysql8 as session store, please rewrite version to ${mysql8.jdbc.version}-->
         <dependency>

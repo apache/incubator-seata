@@ -194,30 +194,23 @@
                 <maven.git-commit-id.skip>false</maven.git-commit-id.skip>
             </properties>
         </profile>
-        <!-- profile: release-image-based-on-java8-slim -->
-        <profile>
-            <id>release-image-based-on-java8-slim</id>
-            <properties>
-                <image.tags>${project.version}-slim</image.tags>
-                <maven.git-commit-id.skip>false</maven.git-commit-id.skip>
-            </properties>
-        </profile>
         <!-- profile: release-image-based-on-java17 -->
         <profile>
             <id>release-image-based-on-java17</id>
             <properties>
-                <image.tags>${project.version}.jre17</image.tags>
+                <image.tags>${project.version}.jdk17</image.tags>
                 <maven.git-commit-id.skip>false</maven.git-commit-id.skip>
             </properties>
         </profile>
-        <!-- profile: release-image-based-on-java17-slim -->
+        <!-- profile: release-image-based-on-java21 -->
         <profile>
-            <id>release-image-based-on-java17-slim</id>
+            <id>release-image-based-on-java21</id>
             <properties>
-                <image.tags>${project.version}.jre17-slim</image.tags>
+                <image.tags>${project.version}.jdk21</image.tags>
                 <maven.git-commit-id.skip>false</maven.git-commit-id.skip>
             </properties>
         </profile>
+
         <!-- profile: checkstyle -->
         <profile>
             <id>checkstyle</id>

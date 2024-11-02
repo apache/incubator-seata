@@ -108,7 +108,7 @@ public class ColumnMetaTest {
     }
 
     @Test
-    public void testSetGetDemicalDigits() {
+    public void testSetGetDecimalDigits() {
         ColumnMeta columnMeta = new ColumnMeta();
         columnMeta.setDecimalDigits(2);
         assertEquals(2, columnMeta.getDecimalDigits());

@@ -25,7 +25,7 @@
 # 1. docker run --name=seata-server -d seata-server:2.2.0-dev
 #
 # https://hub.docker.com/r/apache/seata-server
-FROM openjdk:8u342
+FROM eclipse-temurin:8u422-b05-jdk
 
 # set label
 LABEL maintainer="Seata <seata.apache.org>"
@@ -38,8 +38,8 @@ ADD ext/ /seata-server/ext
 ADD lib/ /seata-server/lib
 ADD conf/ /seata-server/conf
 ADD target /seata-server/target
-ADD ../LICENSE ./LICENSE
-ADD ../NOTICE ./LICENSE
+ADD LICENSE /LICENSE
+ADD NOTICE /NOTICE
 
 # set extra environment
 ENV LOADER_PATH="/seata-server/lib"
