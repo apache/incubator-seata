@@ -19,14 +19,10 @@ package org.apache.seata.rm.datasource.undo.parser;
 import com.alibaba.fastjson2.JSONB;
 import com.alibaba.fastjson2.JSONReader;
 import com.alibaba.fastjson2.JSONWriter;
-import com.alibaba.fastjson2.reader.ObjectReaderProvider;
-import org.apache.seata.common.Constants;
 import org.apache.seata.common.executor.Initialize;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.rm.datasource.undo.BranchUndoLog;
 import org.apache.seata.rm.datasource.undo.UndoLogParser;
-
-import java.sql.Timestamp;
 
 @LoadLevel(name = Fastjson2UndoLogParser.NAME)
 public class Fastjson2UndoLogParser implements UndoLogParser, Initialize {
