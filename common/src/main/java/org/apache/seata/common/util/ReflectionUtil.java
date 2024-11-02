@@ -515,7 +515,7 @@ public final class ReflectionUtil {
 
         Set<Class<?>> interfaceClasses = getInterfaces(clazz);
         for (Class<?> interClass : interfaceClasses) {
-            for (Method method : clazz.getMethods()) {
+            for (Method method : interClass.getMethods()) {
                 if (matchCondition.test(method)) {
                     methodClassMap.put(method, interClass);
                 }
