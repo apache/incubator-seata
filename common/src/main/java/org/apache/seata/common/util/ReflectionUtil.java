@@ -23,13 +23,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
 
 /**
  * Reflection tools
@@ -493,6 +489,30 @@ public final class ReflectionUtil {
     public static Method getMethod(final Class<?> clazz, final String methodName)
             throws NoSuchMethodException, SecurityException {
         return getMethod(clazz, methodName, EMPTY_CLASS_ARRAY);
+    }
+
+    /**
+     * Recursively get clazz and their interfaces match condition method
+     * @param clazz clazz
+     * @param condition condition
+     * @return Set
+     */
+    public static Set<Method> getMethod(Class<?> clazz, Predicate<Method> condition) {
+        Set<Method> resultMethodSet = new HashSet<>();
+
+        Set<Method> methods = new HashSet<>(Arrays.asList(clazz.getMethods()));
+        Set<Class<?>> interfaceClasses = getInterfaces(clazz);
+        for (Class<?> interClass : interfaceClasses) {
+            methods.addAll(Arrays.asList(interClass.getMethods()));
+        }
+
+        for (Method method : methods) {
+            if (condition.test(method)) {
+                resultMethodSet.add(method);
+            }
+        }
+
+        return resultMethodSet;
     }
 
     /**

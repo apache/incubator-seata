@@ -14,11 +14,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.integration.tx.api.interceptor.parser;
+package org.apache.seata.saga.rm;
 
+import org.apache.seata.core.model.BranchType;
+import org.apache.seata.core.model.ResourceManager;
+import org.apache.seata.rm.AbstractRMHandler;
+import org.apache.seata.rm.DefaultResourceManager;
 
-public interface RegisterResourceParser {
+/**
+ * The type Rm handler SagaAnnotation.
+ */
+public class RMHandlerSagaAnnotation extends AbstractRMHandler {
 
-    void registerResource(Object target, String beanName);
+    @Override
+    protected ResourceManager getResourceManager() {
+        return DefaultResourceManager.get().getResourceManager(BranchType.SAGA_ANNOTATION);
+    }
+
+    @Override
+    public BranchType getBranchType() {
+        return BranchType.SAGA_ANNOTATION;
+    }
 
 }

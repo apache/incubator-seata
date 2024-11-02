@@ -14,25 +14,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.integration.tx.api.interceptor;
+package org.apache.seata.saga.annotation;
+
+import java.util.List;
+import org.apache.seata.rm.tcc.api.BusinessActionContext;
 
 /**
- * The  InvocationHandlerType enum
+ *
  */
-public enum InvocationHandlerType {
+public class SagaAnnotationActionImpl implements SagaAnnotationAction {
 
-    /**
-     * GlobalTransactional InvocationHandler
-     */
-    GlobalTransactional,
+    private boolean isCommit;
 
-    /**
-     * TwoPhase InvocationHandler
-     */
-    TwoPhaseAnnotation,
 
-    /**
-     * SagaAnnotation InvocationHandler
-     */
-    SagaAnnotation
+    @Override
+    public boolean commit(BusinessActionContext actionContext, int a, List b, SagaParam sagaParam) {
+        isCommit = true;
+        return a > 1;
+    }
+
+    @Override
+    public boolean compensation(BusinessActionContext actionContext, SagaParam param) {
+        isCommit = false;
+        return true;
+    }
+
+    public boolean isCommit() {
+        return isCommit;
+    }
 }
