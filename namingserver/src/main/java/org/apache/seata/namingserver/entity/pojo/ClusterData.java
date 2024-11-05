@@ -42,20 +42,20 @@ public class ClusterData {
     private String clusterType;
     private final Map<String, Unit> unitData;
     
-    private Lock lock = new ReentrantLock();
+    private final Lock lock = new ReentrantLock();
 
 
     public ClusterData() {
-        unitData = new ConcurrentHashMap<>(32);
+        this.unitData = new ConcurrentHashMap<>();
     }
 
     public ClusterData(String clusterName) {
-        unitData = new ConcurrentHashMap<>(32);
+        this.unitData = new ConcurrentHashMap<>();
         this.clusterName = clusterName;
     }
 
     public ClusterData(String clusterName, String clusterType) {
-        unitData = new ConcurrentHashMap<>(32);
+        unitData = new ConcurrentHashMap<>();
         this.clusterName = clusterName;
         this.clusterType = clusterType;
     }
@@ -125,12 +125,6 @@ public class ClusterData {
     }
 
     public boolean registerInstance(NamingServerNode instance, String unitName) {
-        // refresh node weight
-        Object weightValue = instance.getMetadata().get("weight");
-        if (weightValue != null) {
-            instance.setWeight(Double.parseDouble(String.valueOf(weightValue)));
-            instance.getMetadata().remove("weight");
-        }
         Unit currentUnit = unitData.computeIfAbsent(unitName, value -> {
             Unit unit = new Unit();
             List<NamingServerNode> instances = new CopyOnWriteArrayList<>();

@@ -141,4 +141,15 @@ public class ConfigurationChangeEvent {
         this.namespace = namespace;
         return this;
     }
+
+    @Override
+    public String toString() {
+        return "ConfigurationChangeEvent{" +
+            "dataId='" + dataId + '\'' +
+            ", oldValue='" + oldValue + '\'' +
+            ", newValue='" + newValue + '\'' +
+            ", namespace='" + namespace + '\'' +
+            ", changeType=" + changeType +
+            '}';
+    }
 }

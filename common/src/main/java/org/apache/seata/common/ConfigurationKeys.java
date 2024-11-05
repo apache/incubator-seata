@@ -628,6 +628,8 @@ public interface ConfigurationKeys {
     @Deprecated
     String ENABLE_CLIENT_BATCH_SEND_REQUEST = TRANSPORT_PREFIX + "enableClientBatchSendRequest";
 
+    String TRANSPORT_PROTOCOL = TRANSPORT_PREFIX + "protocol";
+
     /**
      * The constant ENABLE_TM_CLIENT_BATCH_SEND_REQUEST
      */
@@ -814,7 +816,7 @@ public interface ConfigurationKeys {
     /**
      * The constant NAMING_SERVER
      */
-    String NAMING_SERVER = "namingserver";
+    String NAMING_SERVER = "seata";
 
     /**
      * The constant APPLICATION_ID.

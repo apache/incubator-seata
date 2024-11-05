@@ -63,6 +63,7 @@ public interface DefaultValues {
     String DEFAULT_BOSS_THREAD_PREFIX = "NettyBoss";
     String DEFAULT_NIO_WORKER_THREAD_PREFIX = "NettyServerNIOWorker";
     String DEFAULT_EXECUTOR_THREAD_PREFIX = "NettyServerBizHandler";
+    String DEFAULT_PROTOCOL = "seata";
 
     boolean DEFAULT_TRANSPORT_HEARTBEAT = true;
     boolean DEFAULT_TRANSACTION_UNDO_DATA_VALIDATION = true;
@@ -259,7 +260,7 @@ public interface DefaultValues {
     /**
      * the const DEFAULT_METRICS_ENABLED
      */
-    boolean DEFAULT_METRICS_ENABLED = false;
+    boolean DEFAULT_METRICS_ENABLED = true;
 
     /**
      * the const DEFAULT_METRICS_REGISTRY_TYPE

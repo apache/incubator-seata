@@ -89,6 +89,8 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
      */
     protected final Map<Integer, MergeMessage> mergeMsgMap = new ConcurrentHashMap<>();
 
+    protected final Map<Integer, Integer> childToParentMap = new ConcurrentHashMap<>();
+
     /**
      * When batch sending is enabled, the message will be stored to basketMap
      * Send via asynchronous thread {@link AbstractNettyRemotingClient.MergedSendRunnable}
@@ -203,8 +205,15 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         RpcMessage rpcMessage = buildRequestMessage(msg, msg instanceof HeartbeatMessage
             ? ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST
             : ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY);
-        if (rpcMessage.getBody() instanceof MergeMessage) {
-            mergeMsgMap.put(rpcMessage.getId(), (MergeMessage) rpcMessage.getBody());
+        Object body = rpcMessage.getBody();
+        if (body instanceof MergeMessage) {
+            Integer parentId = rpcMessage.getId();
+            mergeMsgMap.put(parentId, (MergeMessage)rpcMessage.getBody());
+            if (body instanceof MergedWarpMessage) {
+                for (Integer msgId : ((MergedWarpMessage)rpcMessage.getBody()).msgIds) {
+                    childToParentMap.put(msgId, parentId);
+                }
+            }
         }
         super.sendAsync(channel, rpcMessage);
     }
@@ -370,6 +379,10 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                         // fast fail
                         for (Integer msgId : mergeMessage.msgIds) {
                             MessageFuture messageFuture = futures.remove(msgId);
+                            Integer parentId = childToParentMap.remove(msgId);
+                            if (parentId != null) {
+                                mergeMsgMap.remove(parentId);
+                            }
                             if (messageFuture != null) {
                                 messageFuture.setResultMessage(
                                     new RuntimeException(String.format("%s is unreachable", address), e));

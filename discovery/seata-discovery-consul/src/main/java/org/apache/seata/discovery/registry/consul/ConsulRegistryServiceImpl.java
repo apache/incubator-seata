@@ -75,6 +75,8 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
     private static final int THREAD_POOL_NUM = 1;
     private static final int MAP_INITIAL_CAPACITY = 8;
 
+    private String transactionServiceGroup;
+
     /**
      * default tcp check interval
      */
@@ -161,6 +163,7 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
 
     @Override
     public List<InetSocketAddress> lookup(String key) throws Exception {
+        transactionServiceGroup = key;
         final String cluster = getServiceGroup(key);
         if (cluster == null) {
             String missingDataId = PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key;
@@ -311,7 +314,7 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
 
         clusterAddressMap.put(cluster, addresses);
 
-        removeOfflineAddressesIfNecessary(cluster, addresses);
+        removeOfflineAddressesIfNecessary(transactionServiceGroup, cluster, addresses);
     }
 
     /**

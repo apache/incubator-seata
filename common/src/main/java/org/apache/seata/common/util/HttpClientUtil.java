@@ -17,6 +17,7 @@
 package org.apache.seata.common.util;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.config.RequestConfig;
@@ -51,7 +52,8 @@ public class HttpClientUtil {
     private static final Map<Integer/*timeout*/, CloseableHttpClient> HTTP_CLIENT_MAP = new ConcurrentHashMap<>();
 
     private static final PoolingHttpClientConnectionManager POOLING_HTTP_CLIENT_CONNECTION_MANAGER =
-            new PoolingHttpClientConnectionManager();
+        new PoolingHttpClientConnectionManager();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     static {
         POOLING_HTTP_CLIENT_CONNECTION_MANAGER.setMaxTotal(10);
@@ -70,7 +72,7 @@ public class HttpClientUtil {
 
     // post request
     public static CloseableHttpResponse doPost(String url, Map<String, String> params, Map<String, String> header,
-                                               int timeout) throws IOException {
+        int timeout) throws IOException {
         try {
             URIBuilder builder = new URIBuilder(url);
             URI uri = builder.build();
@@ -89,6 +91,10 @@ public class HttpClientUtil {
                     String requestBody = URLEncodedUtils.format(nameValuePairs, StandardCharsets.UTF_8);
                     StringEntity stringEntity = new StringEntity(requestBody, ContentType.APPLICATION_FORM_URLENCODED);
                     httpPost.setEntity(stringEntity);
+                } else if (ContentType.APPLICATION_JSON.getMimeType().equals(contentType)) {
+                    String requestBody = OBJECT_MAPPER.writeValueAsString(params);
+                    StringEntity stringEntity = new StringEntity(requestBody, ContentType.APPLICATION_JSON);
+                    httpPost.setEntity(stringEntity);
                 }
             }
             CloseableHttpClient client = HTTP_CLIENT_MAP.computeIfAbsent(timeout,
@@ -105,7 +111,7 @@ public class HttpClientUtil {
 
     // post request
     public static CloseableHttpResponse doPost(String url, String body, Map<String, String> header,
-                                               int timeout) throws IOException {
+        int timeout) throws IOException {
         try {
             URIBuilder builder = new URIBuilder(url);
             URI uri = builder.build();
@@ -136,7 +142,7 @@ public class HttpClientUtil {
 
     // get request
     public static CloseableHttpResponse doGet(String url, Map<String, String> param, Map<String, String> header,
-                                              int timeout) throws IOException {
+        int timeout) throws IOException {
         try {
             URIBuilder builder = new URIBuilder(url);
             if (param != null) {

@@ -42,7 +42,7 @@ import static org.apache.seata.common.NamingServerConstants.DEFAULT_VGROUP_MAPPI
 public class VGroupMappingDataBaseDAO {
     private static final Logger LOGGER = LoggerFactory.getLogger(VGroupMappingDataBaseDAO.class);
 
-    protected DataSource vGroupMappingDataSource = null;
+    protected DataSource vGroupMappingDataSource;
 
     protected final String vMapping;
 
@@ -98,7 +98,6 @@ public class VGroupMappingDataBaseDAO {
         PreparedStatement ps = null;
         try {
             conn = vGroupMappingDataSource.getConnection();
-            conn.setAutoCommit(true);
             ps = conn.prepareStatement(sql);
             ps.setString(1, vGroup);
             ps.setString(2, instance.getClusterName());

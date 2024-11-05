@@ -37,8 +37,8 @@ import static org.apache.seata.common.ConfigurationKeys.FILE_ROOT_TYPE;
 import static org.apache.seata.common.ConfigurationKeys.NAMING_SERVER;
 
 @RestController
-@RequestMapping("/naming/v1")
-public class NamingController {
+@RequestMapping("/vgroup/v1")
+public class VGroupMappingController {
 
     private VGroupMappingStoreManager vGroupMappingStoreManager;
 
@@ -46,8 +46,9 @@ public class NamingController {
 
     @PostConstruct
     private void init() {
-        if (StringUtils.equals(ConfigurationFactory.getInstance().getConfig(FILE_ROOT_REGISTRY
-                + FILE_CONFIG_SPLIT_CHAR + FILE_ROOT_TYPE), NAMING_SERVER)) {
+        String type =
+            ConfigurationFactory.getInstance().getConfig(FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + FILE_ROOT_TYPE);
+        if (StringUtils.equals(type, NAMING_SERVER)) {
             vGroupMappingStoreManager = SessionHolder.getRootVGroupMappingManager();
         }
     }
@@ -72,8 +73,6 @@ public class NamingController {
             result.setCode("500");
             result.setMessage("add vGroup failed!");
         }
-        // push the newest mapping relationship
-        vGroupMappingStoreManager.notifyMapping();
         return result;
     }
 
@@ -92,8 +91,6 @@ public class NamingController {
             result.setCode("500");
             result.setMessage("remove vGroup failed!");
         }
-        // push the newest mapping relationship
-        vGroupMappingStoreManager.notifyMapping();
         return result;
     }
 

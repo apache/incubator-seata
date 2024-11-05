@@ -21,3 +21,5 @@ org.apache.seata.rm.datasource.exec.sqlserver.SqlServerInsertExecutor
 org.apache.seata.rm.datasource.exec.mariadb.MariadbInsertExecutor
 org.apache.seata.rm.datasource.exec.polardbx.PolarDBXInsertExecutor
 org.apache.seata.rm.datasource.exec.dm.DmInsertExecutor
+org.apache.seata.rm.datasource.exec.oscar.OscarInsertExecutor
+org.apache.seata.rm.datasource.exec.kingbase.KingbaseInsertExecutor
