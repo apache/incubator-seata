@@ -30,10 +30,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
+import java.util.concurrent.locks.Condition;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import org.apache.seata.common.ConfigurationKeys;
+import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.NetUtil;
@@ -94,7 +95,9 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
     private ExecutorService batchResponseExecutorService;
 
     private final ConcurrentMap<Channel, BlockingQueue<QueueItem>> basketMap = new ConcurrentHashMap<>();
-    protected final Object batchResponseLock = new Object();
+    protected final ResourceLock batchResponseLock = new ResourceLock();
+    protected final Condition condition = batchResponseLock.newCondition();
+
     private volatile boolean isResponding = false;
     private static final int MAX_BATCH_RESPONSE_MILLS = 1;
     private static final int MAX_BATCH_RESPONSE_THREAD = 1;
@@ -215,8 +218,8 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
 
     private void notifyBatchRespondingThread() {
         if (!isResponding) {
-            synchronized (batchResponseLock) {
-                batchResponseLock.notifyAll();
+            try (ResourceLock ignored = batchResponseLock.obtain()){
+                condition.signalAll();
             }
         }
     }
@@ -242,12 +245,10 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
         @Override
         public void run() {
             while (true) {
-                synchronized (batchResponseLock) {
-                    try {
-                        batchResponseLock.wait(MAX_BATCH_RESPONSE_MILLS);
-                    } catch (InterruptedException e) {
-                        LOGGER.error("BatchResponseRunnable Interrupted error", e);
-                    }
+                try (ResourceLock ignored = batchResponseLock.obtain()){
+                    condition.await(MAX_BATCH_RESPONSE_MILLS, TimeUnit.MILLISECONDS);
+                } catch (InterruptedException e) {
+                    LOGGER.error("BatchResponseRunnable Interrupted error", e);
                 }
                 isResponding = true;
                 basketMap.forEach((channel, msgQueue) -> {

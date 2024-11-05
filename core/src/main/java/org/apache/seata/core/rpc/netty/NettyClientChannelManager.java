@@ -33,6 +33,7 @@ import io.netty.channel.Channel;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.exception.FrameworkErrorCode;
 import org.apache.seata.common.exception.FrameworkException;
+import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.StringUtils;
@@ -51,7 +52,7 @@ class NettyClientChannelManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NettyClientChannelManager.class);
 
-    private final ConcurrentMap<String, Object> channelLocks = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, ResourceLock> resourceLocks = new ConcurrentHashMap<>();
 
     private final ConcurrentMap<String, NettyPoolKey> poolKeyMap = new ConcurrentHashMap<>();
 
@@ -105,8 +106,8 @@ class NettyClientChannelManager {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("will connect to {}", serverAddress);
         }
-        Object lockObj = CollectionUtils.computeIfAbsent(channelLocks, serverAddress, key -> new Object());
-        synchronized (lockObj) {
+        ResourceLock lock = CollectionUtils.computeIfAbsent(resourceLocks, serverAddress, key -> new ResourceLock());
+        try (ResourceLock ignored = lock.obtain()){
             return doConnect(serverAddress);
         }
     }
@@ -118,9 +119,12 @@ class NettyClientChannelManager {
      * @param serverAddress server address
      */
     void releaseChannel(Channel channel, String serverAddress) {
-        if (channel == null || serverAddress == null) { return; }
-        try {
-            synchronized (channelLocks.get(serverAddress)) {
+        if (channel == null || serverAddress == null) {
+            return;
+        }
+        ResourceLock lock = resourceLocks.get(serverAddress);
+        if (lock != null) {
+            try (ResourceLock ignored = lock.obtain()) {
                 Channel ch = channels.get(serverAddress);
                 if (ch == null) {
                     nettyClientKeyPool.returnObject(poolKeyMap.get(serverAddress), channel);
@@ -134,9 +138,9 @@ class NettyClientChannelManager {
                 } else {
                     nettyClientKeyPool.returnObject(poolKeyMap.get(serverAddress), channel);
                 }
+            } catch (Exception exx) {
+                LOGGER.error(exx.getMessage());
             }
-        } catch (Exception exx) {
-            LOGGER.error(exx.getMessage());
         }
     }
 
@@ -151,6 +155,7 @@ class NettyClientChannelManager {
         try {
             if (channel.equals(channels.get(serverAddress))) {
                 channels.remove(serverAddress);
+                resourceLocks.remove(serverAddress);
             }
             nettyClientKeyPool.returnObject(poolKeyMap.get(serverAddress), channel);
         } catch (Exception exx) {

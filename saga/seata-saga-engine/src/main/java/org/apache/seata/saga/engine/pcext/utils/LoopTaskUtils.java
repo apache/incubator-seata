@@ -22,9 +22,11 @@ import java.util.EmptyStackException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import org.apache.seata.common.exception.FrameworkErrorCode;
+import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.NumberUtils;
 import org.apache.seata.common.util.StringUtils;
@@ -55,6 +57,8 @@ public class LoopTaskUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(LoopTaskUtils.class);
 
     public static final String LOOP_STATE_NAME_PATTERN = "-loop-";
+
+    private static final ConcurrentHashMap<LoopContextHolder, ResourceLock> HOLDER_LOCK_MAP = new ConcurrentHashMap<>();
 
     /**
      * get Loop Config from State
@@ -224,7 +228,8 @@ public class LoopTaskUtils {
         int nrOfCompletedInstances = currentLoopContext.getNrOfCompletedInstances().get();
 
         if (!currentLoopContext.isCompletionConditionSatisfied()) {
-            synchronized (currentLoopContext) {
+            try (ResourceLock lock = CollectionUtils.computeIfAbsent(HOLDER_LOCK_MAP, currentLoopContext, k -> new ResourceLock());
+                 ResourceLock ignored = lock.obtain()) {
                 if (!currentLoopContext.isCompletionConditionSatisfied()) {
                     Map<String, Object> stateMachineContext = (Map<String, Object>)context.getVariable(
                         DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);
@@ -242,6 +247,8 @@ public class LoopTaskUtils {
                         currentLoopContext.setCompletionConditionSatisfied(true);
                     }
                 }
+            } finally {
+                HOLDER_LOCK_MAP.remove(currentLoopContext);
             }
         }
 

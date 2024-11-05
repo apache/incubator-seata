@@ -14,40 +14,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.common.util;
+package org.apache.seata.common.lock;
 
-import org.apache.seata.common.lock.ResourceLock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * The type Uuid generator.
+ * The ResourceLock extends ReentrantLock and implements AutoCloseable,
+ * allowing it to be used in try-with-resources blocks without needing
+ * to unlock in a finally block.
+ *
+ * <h3>Example</h3>
+ * <pre>
+ * {@code
+ *   private final ResourceLock resourceLock = new ResourceLock();
+ *   try (ResourceLock lock = resourceLock.obtain()) {
+ *     // do something while holding the resource lock
+ *   }
+ * }
+ * </pre>
  */
-public class UUIDGenerator {
-
-    private static volatile IdWorker idWorker;
-    private final static ResourceLock resourceLock = new ResourceLock();
+public class ResourceLock extends ReentrantLock implements AutoCloseable {
 
     /**
-     * generate UUID using snowflake algorithm
+     * Obtain the lock.
      *
-     * @return UUID
+     * @return this ResourceLock
      */
-    public static long generateUUID() {
-        if (idWorker == null) {
-            try (ResourceLock ignored = resourceLock.obtain()) {
-                if (idWorker == null) {
-                    init(null);
-                }
-            }
-        }
-        return idWorker.nextId();
+    public ResourceLock obtain() {
+        lock();
+        return this;
     }
 
-    /**
-     * init IdWorker
-     *
-     * @param serverNode the server node id, consider as machine id in snowflake
-     */
-    public static void init(Long serverNode) {
-        idWorker = new IdWorker(serverNode);
+
+    @Override
+    public void close() {
+        this.unlock();
     }
 }

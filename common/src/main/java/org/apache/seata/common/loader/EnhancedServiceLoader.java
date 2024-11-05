@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.seata.common.Constants;
 import org.apache.seata.common.executor.Initialize;
+import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
 import org.slf4j.Logger;
@@ -235,8 +236,10 @@ public class EnhancedServiceLoader {
         serviceLoader.nameToDefinitionsMap.remove(activateName.toLowerCase());
         if (CollectionUtils.isNotEmpty(extensionDefinitions)) {
             for (ExtensionDefinition<S> definition : extensionDefinitions) {
-                serviceLoader.definitionToInstanceMap.remove(definition);
-
+                InnerEnhancedServiceLoader.Holder<Object> holder = serviceLoader.definitionToInstanceMap.remove(definition);
+                if (holder != null) {
+                    serviceLoader.holderLocks.remove(holder);
+                }
             }
         }
     }
@@ -289,6 +292,8 @@ public class EnhancedServiceLoader {
                 new ConcurrentHashMap<>();
         private final ConcurrentMap<String, List<ExtensionDefinition<S>>> nameToDefinitionsMap = new ConcurrentHashMap<>();
         private final ConcurrentMap<Class<?>, ExtensionDefinition<S>> classToDefinitionMap = new ConcurrentHashMap<>();
+        private final ConcurrentMap<Holder<Object>,ResourceLock> holderLocks = new ConcurrentHashMap<>();
+        private final ResourceLock resourceLock = new ResourceLock();
 
         private InnerEnhancedServiceLoader(Class<S> type) {
             this.type = type;
@@ -320,6 +325,9 @@ public class EnhancedServiceLoader {
         }
 
         private static void removeAllServiceLoader() {
+            SERVICE_LOADERS.values().forEach(loader -> {
+                loader.holderLocks.clear();
+            });
             SERVICE_LOADERS.clear();
         }
 
@@ -472,7 +480,8 @@ public class EnhancedServiceLoader {
                     key -> new Holder<>());
                 Object instance = holder.get();
                 if (instance == null) {
-                    synchronized (holder) {
+                    ResourceLock lock = CollectionUtils.computeIfAbsent(holderLocks, holder, key -> new ResourceLock());
+                    try (ResourceLock ignored = lock.obtain()) {
                         instance = holder.get();
                         if (instance == null) {
                             instance = createNewExtension(definition, loader, argTypes, args);
@@ -499,7 +508,7 @@ public class EnhancedServiceLoader {
         private List<Class<S>> loadAllExtensionClass(ClassLoader loader, boolean includeCompatible) {
             List<ExtensionDefinition<S>> definitions = definitionsHolder.get();
             if (definitions == null) {
-                synchronized (definitionsHolder) {
+                try (ResourceLock ignored = resourceLock.obtain()) {
                     definitions = definitionsHolder.get();
                     if (definitions == null) {
                         definitions = findAllExtensionDefinition(loader, includeCompatible);

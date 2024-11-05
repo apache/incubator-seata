@@ -28,6 +28,7 @@ import io.netty.channel.ChannelPromise;
 import io.netty.handler.codec.DecoderException;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
+import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.core.protocol.AbstractMessage;
@@ -177,9 +178,9 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
 
         @Override
         public void channelWritabilityChanged(ChannelHandlerContext ctx) {
-            synchronized (lock) {
+            try (ResourceLock ignored = resourceLock.obtain()){
                 if (ctx.channel().isWritable()) {
-                    lock.notifyAll();
+                    condition.signalAll();
                 }
             }
             ctx.fireChannelWritabilityChanged();

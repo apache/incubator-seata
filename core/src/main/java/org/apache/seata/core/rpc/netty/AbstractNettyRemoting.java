@@ -30,12 +30,15 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.locks.Condition;
+
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import org.apache.seata.common.exception.FrameworkErrorCode;
 import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
+import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.thread.PositiveAtomicCounter;
 import org.apache.seata.core.protocol.MessageFuture;
@@ -88,7 +91,8 @@ public abstract class AbstractNettyRemoting implements Disposable {
      */
     protected volatile long nowMills = 0;
     private static final int TIMEOUT_CHECK_INTERVAL = 3000;
-    protected final Object lock = new Object();
+    protected final ResourceLock resourceLock = new ResourceLock();
+    protected final Condition condition = resourceLock.newCondition();
     /**
      * The Is sending.
      */
@@ -119,7 +123,6 @@ public abstract class AbstractNettyRemoting implements Disposable {
                         }
                     }
                 }
-
                 nowMills = System.currentTimeMillis();
             }
         }, TIMEOUT_CHECK_INTERVAL, TIMEOUT_CHECK_INTERVAL, TimeUnit.MILLISECONDS);
@@ -343,7 +346,7 @@ public abstract class AbstractNettyRemoting implements Disposable {
 
     private void channelWritableCheck(Channel channel, Object msg) {
         int tryTimes = 0;
-        synchronized (lock) {
+        try (ResourceLock ignored = resourceLock.obtain()){
             while (!channel.isWritable()) {
                 try {
                     tryTimes++;
@@ -352,7 +355,7 @@ public abstract class AbstractNettyRemoting implements Disposable {
                         throw new FrameworkException("msg:" + ((msg == null) ? "null" : msg.toString()),
                             FrameworkErrorCode.ChannelIsNotWritable);
                     }
-                    lock.wait(NOT_WRITEABLE_CHECK_MILLS);
+                    condition.await(NOT_WRITEABLE_CHECK_MILLS, TimeUnit.MILLISECONDS);
                 } catch (InterruptedException exx) {
                     LOGGER.error(exx.getMessage());
                 }
