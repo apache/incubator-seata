@@ -71,8 +71,7 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
                         stateMachine.setStartState(parsedStatMachine.getStartState());
                         stateMachine.getStates().putAll(parsedStatMachine.getStates());
                         item.setValue(stateMachine);
-                        stateMachineMapById.put(stateMachine.getName() + "_" + stateMachine.getTenantId(),
-                            item);
+                        stateMachineMapById.put(stateMachineId, item);
                     }
                 }
             }
@@ -99,7 +98,7 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
                         stateMachine.setStartState(parsedStatMachine.getStartState());
                         stateMachine.getStates().putAll(parsedStatMachine.getStates());
                         item.setValue(stateMachine);
-                        stateMachineMapById.put(stateMachine.getId(), item);
+                        stateMachineMapByNameAndTenant.put(stateMachineName + "_" + tenantId, item);
                     }
 
                 }
