@@ -38,11 +38,6 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.seata</groupId>
-            <artifactId>seata-serializer-protobuf</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-discovery-core</artifactId>
             <version>${project.version}</version>
