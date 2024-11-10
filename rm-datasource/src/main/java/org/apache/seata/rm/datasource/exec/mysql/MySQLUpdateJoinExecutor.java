@@ -91,7 +91,11 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
             }
             String selectSQL = buildBeforeImageSQL(joinTable, tableItems[i], suffixCommonCondition, itemTableUpdateColumns);
             TableRecords tableRecords = buildTableRecords(getTableMeta(tableItems[i]), selectSQL, paramAppenderList);
-            beforeImagesMap.put(tableItems[i], tableRecords);
+            if (CollectionUtils.isNotEmpty(tableRecords.getRows())) {
+                //when building the after image, the table with empty records in before image is skipped
+                //link issue https://github.com/apache/incubator-seata/issues/6976
+                beforeImagesMap.put(tableItems[i], tableRecords);
+            }
         }
         return null;
     }
@@ -231,6 +235,9 @@ public class MySQLUpdateJoinExecutor<T, S extends Statement> extends UpdateExecu
 
     @Override
     protected void prepareUndoLog(TableRecords beforeImage, TableRecords afterImage) throws SQLException {
+        if (CollectionUtils.isEmpty(beforeImagesMap) && CollectionUtils.isEmpty(afterImagesMap)) {
+            return;
+        }
         if (CollectionUtils.isEmpty(beforeImagesMap) || CollectionUtils.isEmpty(afterImagesMap)) {
             throw new IllegalStateException("images can not be null");
         }
