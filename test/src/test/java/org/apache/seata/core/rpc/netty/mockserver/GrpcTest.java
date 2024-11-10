@@ -16,6 +16,7 @@
  */
 package org.apache.seata.core.rpc.netty.mockserver;
 
+import com.google.protobuf.Any;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
@@ -71,7 +72,7 @@ public class GrpcTest {
                 .setAbstractIdentifyRequest(abstractIdentifyRequestProto)
                 .build();
 
-        return GrpcMessageProto.newBuilder().putHeadMap(GrpcHeaderEnum.CODEC_TYPE.header, String.valueOf(SerializerType.GRPC.getCode())).setBody(registerTMRequestProto.toByteString()).build();
+        return GrpcMessageProto.newBuilder().putHeadMap(GrpcHeaderEnum.CODEC_TYPE.header, String.valueOf(SerializerType.GRPC.getCode())).setBody(Any.pack(registerTMRequestProto).toByteString()).build();
     }
 
     private GrpcMessageProto getGlobalBeginRequest() {
@@ -79,7 +80,7 @@ public class GrpcTest {
                 .setTransactionName("test-transaction")
                 .setTimeout(2000)
                 .build();
-        return GrpcMessageProto.newBuilder().putHeadMap(GrpcHeaderEnum.CODEC_TYPE.header, String.valueOf(SerializerType.GRPC.getCode())).setBody(globalBeginRequestProto.toByteString()).build();
+        return GrpcMessageProto.newBuilder().putHeadMap(GrpcHeaderEnum.CODEC_TYPE.header, String.valueOf(SerializerType.GRPC.getCode())).setBody(Any.pack(globalBeginRequestProto).toByteString()).build();
     }
 
     private GrpcMessageProto getBranchRegisterRequest() {
@@ -91,7 +92,7 @@ public class GrpcTest {
                 .setApplicationData("{\"mock\":\"mock\"}")
                 .build();
 
-        return GrpcMessageProto.newBuilder().putHeadMap(GrpcHeaderEnum.CODEC_TYPE.header, String.valueOf(SerializerType.GRPC.getCode())).setBody(branchRegisterRequestProto.toByteString()).build();
+        return GrpcMessageProto.newBuilder().putHeadMap(GrpcHeaderEnum.CODEC_TYPE.header, String.valueOf(SerializerType.GRPC.getCode())).setBody(Any.pack(branchRegisterRequestProto).toByteString()).build();
     }
 
     private GrpcMessageProto getGlobalCommitRequest() {
@@ -102,7 +103,7 @@ public class GrpcTest {
                 .setAbstractGlobalEndRequest(globalEndRequestProto)
                 .build();
 
-        return GrpcMessageProto.newBuilder().putHeadMap(GrpcHeaderEnum.CODEC_TYPE.header, String.valueOf(SerializerType.GRPC.getCode())).setBody(globalCommitRequestProto.toByteString()).build();
+        return GrpcMessageProto.newBuilder().putHeadMap(GrpcHeaderEnum.CODEC_TYPE.header, String.valueOf(SerializerType.GRPC.getCode())).setBody(Any.pack(globalCommitRequestProto).toByteString()).build();
     }
 
     private GrpcMessageProto getGlobalRollbackRequest() {
@@ -113,7 +114,7 @@ public class GrpcTest {
                 .setAbstractGlobalEndRequest(globalEndRequestProto)
                 .build();
 
-        return GrpcMessageProto.newBuilder().putHeadMap(GrpcHeaderEnum.CODEC_TYPE.header, String.valueOf(SerializerType.GRPC.getCode())).setBody(globalRollbackRequestProto.toByteString()).build();
+        return GrpcMessageProto.newBuilder().putHeadMap(GrpcHeaderEnum.CODEC_TYPE.header, String.valueOf(SerializerType.GRPC.getCode())).setBody(Any.pack(globalRollbackRequestProto).toByteString()).build();
     }
 
     @Test
