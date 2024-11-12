@@ -20,8 +20,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 
+import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.saga.engine.AsyncCallback;
@@ -44,6 +46,7 @@ import org.slf4j.LoggerFactory;
 public class EngineUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EngineUtils.class);
+    private static final ConcurrentHashMap<ExceptionMatch, ResourceLock> exceptionMatchLocks = new ConcurrentHashMap<>();
 
     /**
      * generate parent id
@@ -198,7 +201,7 @@ public class EngineUtils {
                 List<Class<? extends Exception>> exceptionClasses = exceptionMatch.getExceptionClasses();
                 if (CollectionUtils.isNotEmpty(exceptions)) {
                     if (exceptionClasses == null) {
-                        synchronized (exceptionMatch) {
+                        try (ResourceLock ignored = CollectionUtils.computeIfAbsent(exceptionMatchLocks, exceptionMatch, k -> new ResourceLock()).obtain()) {
                             exceptionClasses = exceptionMatch.getExceptionClasses();
                             if (exceptionClasses == null) {
 
@@ -230,6 +233,8 @@ public class EngineUtils {
                                 }
                                 exceptionMatch.setExceptionClasses(exceptionClasses);
                             }
+                        } finally {
+                            exceptionMatchLocks.remove(exceptionMatch);
                         }
                     }
 

@@ -29,6 +29,7 @@ import io.netty.util.concurrent.EventExecutorGroup;
 import org.apache.seata.common.DefaultValues;
 import org.apache.seata.common.exception.FrameworkErrorCode;
 import org.apache.seata.common.exception.FrameworkException;
+import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.CachedConfigurationChangeListener;
@@ -66,6 +67,7 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
     private final AtomicBoolean initialized = new AtomicBoolean(false);
     private static final long KEEP_ALIVE_TIME = Integer.MAX_VALUE;
     private static final int MAX_QUEUE_SIZE = 20000;
+    private static final ResourceLock RESOURCE_LOCK = new ResourceLock();
     private String applicationId;
     private String transactionServiceGroup;
 
@@ -128,7 +130,7 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
      */
     public static RmNettyRemotingClient getInstance() {
         if (instance == null) {
-            synchronized (RmNettyRemotingClient.class) {
+            try (ResourceLock ignored = RESOURCE_LOCK.obtain()) {
                 if (instance == null) {
                     NettyClientConfig nettyClientConfig = new NettyClientConfig();
                     final ThreadPoolExecutor messageExecutor = new ThreadPoolExecutor(

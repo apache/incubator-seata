@@ -20,9 +20,11 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.seata.common.exception.FrameworkErrorCode;
 import org.apache.seata.common.loader.LoadLevel;
+import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.saga.engine.StateMachineConfig;
@@ -60,6 +62,7 @@ import org.slf4j.LoggerFactory;
 public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceTaskHandlerInterceptor.class);
+    private final ConcurrentHashMap<ServiceTaskStateImpl, ResourceLock> taskStateLocks = new ConcurrentHashMap<>();
 
     @Override
     public boolean match(Class<? extends InterceptableStateHandler> clazz) {
@@ -312,7 +315,7 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
 
                 Map<Object, String> statusEvaluators = state.getStatusEvaluators();
                 if (statusEvaluators == null) {
-                    synchronized (state) {
+                    try (ResourceLock ignored = CollectionUtils.computeIfAbsent(taskStateLocks, state, k -> new ResourceLock()).obtain()) {
                         statusEvaluators = state.getStatusEvaluators();
                         if (statusEvaluators == null) {
                             statusEvaluators = new LinkedHashMap<>(statusMatchList.size());
@@ -328,6 +331,8 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
                             }
                         }
                         state.setStatusEvaluators(statusEvaluators);
+                    } finally {
+                        taskStateLocks.remove(state);
                     }
                 }
 

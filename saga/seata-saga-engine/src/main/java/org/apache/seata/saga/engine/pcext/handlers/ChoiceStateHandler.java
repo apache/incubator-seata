@@ -19,8 +19,11 @@ package org.apache.seata.saga.engine.pcext.handlers;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.seata.common.exception.FrameworkErrorCode;
+import org.apache.seata.common.lock.ResourceLock;
+import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.saga.engine.StateMachineConfig;
 import org.apache.seata.saga.engine.exception.EngineExecutionException;
@@ -41,19 +44,18 @@ import org.apache.seata.saga.statelang.domain.impl.ChoiceStateImpl;
  *
  */
 public class ChoiceStateHandler implements StateHandler {
+    private final ConcurrentHashMap<ChoiceStateImpl, ResourceLock> choiceStateLocks = new ConcurrentHashMap<>();
 
     @Override
     public void process(ProcessContext context) throws EngineExecutionException {
-
         StateInstruction instruction = context.getInstruction(StateInstruction.class);
         ChoiceStateImpl choiceState = (ChoiceStateImpl)instruction.getState(context);
 
         Map<Object, String> choiceEvaluators = choiceState.getChoiceEvaluators();
         if (choiceEvaluators == null) {
-            synchronized (choiceState) {
+            try (ResourceLock ignored = CollectionUtils.computeIfAbsent(choiceStateLocks, choiceState, k -> new ResourceLock()).obtain()) {
                 choiceEvaluators = choiceState.getChoiceEvaluators();
                 if (choiceEvaluators == null) {
-
                     List<ChoiceState.Choice> choices = choiceState.getChoices();
                     if (choices == null) {
                         choiceEvaluators = new LinkedHashMap<>(0);
@@ -68,6 +70,8 @@ public class ChoiceStateHandler implements StateHandler {
                     }
                     choiceState.setChoiceEvaluators(choiceEvaluators);
                 }
+            } finally {
+                choiceStateLocks.remove(choiceState);
             }
         }
 

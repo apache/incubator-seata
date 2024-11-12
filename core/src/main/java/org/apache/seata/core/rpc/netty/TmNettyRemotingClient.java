@@ -28,6 +28,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.seata.common.DefaultValues;
 import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
+import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.thread.RejectedPolicies;
 import org.apache.seata.common.util.NetUtil;
@@ -57,6 +58,7 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
     private static volatile TmNettyRemotingClient instance;
     private static final long KEEP_ALIVE_TIME = Integer.MAX_VALUE;
     private static final int MAX_QUEUE_SIZE = 2000;
+    private static final ResourceLock RESOURCE_LOCK = new ResourceLock();
     private final AtomicBoolean initialized = new AtomicBoolean(false);
     private String applicationId;
     private String transactionServiceGroup;
@@ -122,7 +124,7 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
      */
     public static TmNettyRemotingClient getInstance() {
         if (instance == null) {
-            synchronized (TmNettyRemotingClient.class) {
+            try (ResourceLock ignored = RESOURCE_LOCK.obtain()) {
                 if (instance == null) {
                     NettyClientConfig nettyClientConfig = new NettyClientConfig();
                     final ThreadPoolExecutor messageExecutor = new ThreadPoolExecutor(

@@ -24,6 +24,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.saga.engine.repo.StateMachineRepository;
@@ -45,7 +46,10 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StateMachineRepositoryImpl.class);
     private Map<String/** Name_Tenant **/, Item> stateMachineMapByNameAndTenant = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Item, ResourceLock> byNameAndTenantLocks = new ConcurrentHashMap<>();
     private Map<String/** Id **/, Item> stateMachineMapById = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Item, ResourceLock> byIdLocks = new ConcurrentHashMap<>();
+
     private StateLangStore stateLangStore;
     private SeqGenerator seqGenerator = new UUIDSeqGenerator();
     private String charset = "UTF-8";
@@ -57,7 +61,7 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
         Item item = CollectionUtils.computeIfAbsent(stateMachineMapById, stateMachineId,
             key -> new Item());
         if (item.getValue() == null && stateLangStore != null) {
-            synchronized (item) {
+            try (ResourceLock ignored = CollectionUtils.computeIfAbsent(byIdLocks, item, k -> new ResourceLock()).obtain()) {
                 if (item.getValue() == null) {
                     StateMachine stateMachine = stateLangStore.getStateMachineById(stateMachineId);
                     if (stateMachine != null) {
@@ -75,6 +79,8 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
                             item);
                     }
                 }
+            } finally {
+                byIdLocks.remove(item);
             }
         }
         return item.getValue();
@@ -85,7 +91,7 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
         Item item = CollectionUtils.computeIfAbsent(stateMachineMapByNameAndTenant, stateMachineName + "_" + tenantId,
             key -> new Item());
         if (item.getValue() == null && stateLangStore != null) {
-            synchronized (item) {
+            try (ResourceLock ignored = CollectionUtils.computeIfAbsent(byNameAndTenantLocks, item, k -> new ResourceLock()).obtain()) {
                 if (item.getValue() == null) {
                     StateMachine stateMachine = stateLangStore.getLastVersionStateMachine(stateMachineName, tenantId);
                     if (stateMachine != null) {
@@ -103,6 +109,8 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
                     }
 
                 }
+            } finally {
+                byNameAndTenantLocks.remove(item);
             }
         }
         return item.getValue();
