@@ -66,7 +66,6 @@ public class ProtocolEncoderV1 extends MessageToByteEncoder implements ProtocolE
 
     public void encode(RpcMessage message, ByteBuf out) {
         try {
-
             ProtocolRpcMessageV1 rpcMessage = new ProtocolRpcMessageV1();
             rpcMessage.rpcMsg2ProtocolMsg(message);
 

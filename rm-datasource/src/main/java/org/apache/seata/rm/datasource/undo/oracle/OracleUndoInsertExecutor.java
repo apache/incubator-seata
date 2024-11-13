@@ -33,7 +33,7 @@ import org.apache.seata.rm.datasource.undo.SQLUndoLog;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 
 /**
- * The type oralce undo insert executor.
+ * The type oracle undo insert executor.
  *
  */
 public class OracleUndoInsertExecutor extends AbstractUndoExecutor {
