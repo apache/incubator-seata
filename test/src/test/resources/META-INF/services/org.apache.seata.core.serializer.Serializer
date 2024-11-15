@@ -14,8 +14,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-org.apache.seata.rm.datasource.undo.parser.FastjsonUndoLogParser
-org.apache.seata.rm.datasource.undo.parser.JacksonUndoLogParser
-org.apache.seata.rm.datasource.undo.parser.ProtostuffUndoLogParser
-org.apache.seata.rm.datasource.undo.parser.KryoUndoLogParser
-org.apache.seata.rm.datasource.undo.parser.Fastjson2UndoLogParser
+org.apache.seata.serializer.protobuf.GrpcSerializer
