@@ -32,7 +32,7 @@ public class ScriptTaskStateImpl extends AbstractTaskState implements ScriptTask
     private String scriptContent;
 
     public ScriptTaskStateImpl() {
-        setType(StateType.SCRIPT_TASK.getValue());
+        setType(StateType.SCRIPT_TASK);
     }
 
     @Override

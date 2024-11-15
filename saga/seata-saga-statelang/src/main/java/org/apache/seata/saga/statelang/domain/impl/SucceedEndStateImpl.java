@@ -26,6 +26,6 @@ import org.apache.seata.saga.statelang.domain.SucceedEndState;
 public class SucceedEndStateImpl extends BaseState implements SucceedEndState {
 
     public SucceedEndStateImpl() {
-        setType(StateType.SUCCEED.getValue());
+        setType(StateType.SUCCEED);
     }
 }

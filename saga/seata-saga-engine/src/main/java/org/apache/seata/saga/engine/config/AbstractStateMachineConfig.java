@@ -54,6 +54,7 @@ import org.apache.seata.saga.proctrl.handler.RouterHandler;
 import org.apache.seata.saga.proctrl.impl.ProcessControllerImpl;
 import org.apache.seata.saga.proctrl.process.impl.CustomizeBusinessProcessor;
 import org.apache.seata.saga.statelang.domain.DomainConstants;
+import org.apache.seata.saga.statelang.domain.StateType;
 
 import javax.script.ScriptEngineManager;
 import java.io.InputStream;
@@ -248,13 +249,13 @@ public abstract class AbstractStateMachineConfig implements StateMachineConfig {
         stateMachineProcessRouter.initDefaultStateRouters();
         loadStateRouterInterceptors(stateMachineProcessRouter.getStateRouters());
 
-        Map<String, ProcessRouter> processRouterMap = new HashMap<>(1);
+        Map<String, ProcessRouter> processRouterMap = new HashMap<>(2);
         processRouterMap.put(ProcessType.STATE_LANG.getCode(), stateMachineProcessRouter);
         defaultRouterHandler.setProcessRouters(processRouterMap);
         return defaultRouterHandler;
     }
 
-    public void loadStateHandlerInterceptors(Map<String, StateHandler> stateHandlerMap) {
+    public void loadStateHandlerInterceptors(Map<StateType, StateHandler> stateHandlerMap) {
         for (StateHandler stateHandler : stateHandlerMap.values()) {
             if (stateHandler instanceof InterceptableStateHandler) {
                 InterceptableStateHandler interceptableStateHandler = (InterceptableStateHandler) stateHandler;
@@ -268,7 +269,7 @@ public abstract class AbstractStateMachineConfig implements StateMachineConfig {
         }
     }
 
-    public void loadStateRouterInterceptors(Map<String, StateRouter> stateRouterMap) {
+    public void loadStateRouterInterceptors(Map<StateType, StateRouter> stateRouterMap) {
         for (StateRouter stateRouter : stateRouterMap.values()) {
             if (stateRouter instanceof InterceptableStateRouter) {
                 InterceptableStateRouter interceptableStateRouter = (InterceptableStateRouter) stateRouter;

@@ -30,7 +30,7 @@ public class NoRecursiveSubStateMachineRule extends AbstractRule {
     @Override
     public boolean validate(StateMachine stateMachine) {
         for (State state: stateMachine.getStates().values()) {
-            if (!StateType.SUB_STATE_MACHINE.getValue().equals(state.getType())) {
+            if (!StateType.SUB_STATE_MACHINE.equals(state.getType())) {
                 continue;
             }
             if (stateMachine.getName().equals(((SubStateMachine) state).getStateMachineName())) {

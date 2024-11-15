@@ -38,7 +38,7 @@ public class ServiceTaskStateImpl extends AbstractTaskState implements ServiceTa
     private boolean isAsync;
 
     public ServiceTaskStateImpl() {
-        setType(StateType.SERVICE_TASK.getValue());
+        setType(StateType.SERVICE_TASK);
     }
 
     @Override

@@ -98,9 +98,9 @@ public class LoopTaskUtils {
      * @return the boolean
      */
     public static boolean matchLoop(State state) {
-        return state != null && (StateType.SERVICE_TASK.getValue().equals(state.getType())
-            || StateType.SCRIPT_TASK.getValue().equals(state.getType())
-            || StateType.SUB_STATE_MACHINE.getValue().equals(state.getType()));
+        return state != null && (StateType.SERVICE_TASK.equals(state.getType())
+            || StateType.SCRIPT_TASK.equals(state.getType())
+            || StateType.SUB_STATE_MACHINE.equals(state.getType()));
     }
 
     /**
@@ -382,7 +382,7 @@ public class LoopTaskUtils {
 
                     // compensate must be execute
                     State state = stateMachine.getState(next);
-                    if (StateType.COMPENSATION_TRIGGER.getValue().equals(state.getType())) {
+                    if (StateType.COMPENSATION_TRIGGER.equals(state.getType())) {
                         route = next;
                         break;
                     } else if (null == route) {

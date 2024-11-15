@@ -126,13 +126,13 @@ public class CompensationHolder {
         if (stateInstance.isIgnoreStatus()) {
             return false;
         }
-        if (StateType.SUB_STATE_MACHINE.getValue().equals(stateInstance.getType())) {
+        if (StateType.SUB_STATE_MACHINE.equals(stateInstance.getType())) {
 
             return (!ExecutionStatus.FA.equals(stateInstance.getStatus())) && (!ExecutionStatus.SU.equals(
                 stateInstance.getCompensationStatus()));
         } else {
 
-            return StateType.SERVICE_TASK.getValue().equals(stateInstance.getType()) && !stateInstance
+            return StateType.SERVICE_TASK.equals(stateInstance.getType()) && !stateInstance
                 .isForCompensation() && (!ExecutionStatus.FA.equals(stateInstance.getStatus())) && (!ExecutionStatus.SU
                 .equals(stateInstance.getCompensationStatus()));
         }

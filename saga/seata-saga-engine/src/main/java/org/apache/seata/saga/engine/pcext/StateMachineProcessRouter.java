@@ -42,7 +42,7 @@ import org.apache.seata.saga.statelang.domain.StateType;
  */
 public class StateMachineProcessRouter implements ProcessRouter {
 
-    private final Map<String, StateRouter> stateRouters = new ConcurrentHashMap<>();
+    private final Map<StateType, StateRouter> stateRouters = new ConcurrentHashMap<>();
 
     @Override
     public Instruction route(ProcessContext context) throws FrameworkException {
@@ -61,7 +61,7 @@ public class StateMachineProcessRouter implements ProcessRouter {
             state = stateMachine.getStates().get(stateInstruction.getStateName());
         }
 
-        String stateType = state.getType();
+        StateType stateType = state.getType();
 
         StateRouter router = stateRouters.get(stateType);
 
@@ -111,23 +111,23 @@ public class StateMachineProcessRouter implements ProcessRouter {
         }
 
         TaskStateRouter taskStateRouter = new TaskStateRouter();
-        stateRouters.put(StateType.SERVICE_TASK.getValue(), taskStateRouter);
-        stateRouters.put(StateType.SCRIPT_TASK.getValue(), taskStateRouter);
-        stateRouters.put(StateType.CHOICE.getValue(), taskStateRouter);
-        stateRouters.put(StateType.COMPENSATION_TRIGGER.getValue(), taskStateRouter);
-        stateRouters.put(StateType.SUB_STATE_MACHINE.getValue(), taskStateRouter);
-        stateRouters.put(StateType.SUB_MACHINE_COMPENSATION.getValue(), taskStateRouter);
-        stateRouters.put(StateType.LOOP_START.getValue(), taskStateRouter);
+        stateRouters.put(StateType.SERVICE_TASK, taskStateRouter);
+        stateRouters.put(StateType.SCRIPT_TASK, taskStateRouter);
+        stateRouters.put(StateType.CHOICE, taskStateRouter);
+        stateRouters.put(StateType.COMPENSATION_TRIGGER, taskStateRouter);
+        stateRouters.put(StateType.SUB_STATE_MACHINE, taskStateRouter);
+        stateRouters.put(StateType.SUB_MACHINE_COMPENSATION, taskStateRouter);
+        stateRouters.put(StateType.LOOP_START, taskStateRouter);
 
-        stateRouters.put(StateType.SUCCEED.getValue(), new EndStateRouter());
-        stateRouters.put(StateType.FAIL.getValue(), new EndStateRouter());
+        stateRouters.put(StateType.SUCCEED, new EndStateRouter());
+        stateRouters.put(StateType.FAIL, new EndStateRouter());
     }
 
-    public Map<String, StateRouter> getStateRouters() {
+    public Map<StateType, StateRouter> getStateRouters() {
         return stateRouters;
     }
 
-    public void setStateRouters(Map<String, StateRouter> stateRouters) {
+    public void setStateRouters(Map<StateType, StateRouter> stateRouters) {
         this.stateRouters.putAll(stateRouters);
     }
 }

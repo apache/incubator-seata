@@ -26,6 +26,6 @@ import org.apache.seata.saga.statelang.domain.StateType;
 public class CompensationTriggerStateImpl extends BaseState implements CompensationTriggerState {
 
     public CompensationTriggerStateImpl() {
-        setType(StateType.COMPENSATION_TRIGGER.getValue());
+        setType(StateType.COMPENSATION_TRIGGER);
     }
 }

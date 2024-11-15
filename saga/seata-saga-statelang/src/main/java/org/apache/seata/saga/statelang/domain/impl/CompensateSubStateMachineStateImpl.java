@@ -25,6 +25,6 @@ import org.apache.seata.saga.statelang.domain.StateType;
  */
 public class CompensateSubStateMachineStateImpl extends ServiceTaskStateImpl implements CompensateSubStateMachineState {
     public CompensateSubStateMachineStateImpl() {
-        setType(StateType.SUB_MACHINE_COMPENSATION.getValue());
+        setType(StateType.SUB_MACHINE_COMPENSATION);
     }
 }

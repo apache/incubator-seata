@@ -111,7 +111,7 @@ public class DefaultStatusDecisionStrategy implements StatusDecisionStrategy {
                     stateMachineInstance.setStatus(ExecutionStatus.UN);
                     hasSetStatus = true;
                 } else if (ExecutionStatus.SU.equals(stateInstance.getStatus())) {
-                    if (StateType.SERVICE_TASK.getValue().equals(stateInstance.getType())) {
+                    if (StateType.SERVICE_TASK.equals(stateInstance.getType())) {
                         if (stateInstance.isForUpdate() && !stateInstance.isForCompensation()) {
                             hasSuccessUpdateService = true;
                         }

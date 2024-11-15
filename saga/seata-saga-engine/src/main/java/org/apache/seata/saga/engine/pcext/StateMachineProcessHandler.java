@@ -43,13 +43,13 @@ import org.apache.seata.saga.statelang.domain.State;
  */
 public class StateMachineProcessHandler implements ProcessHandler {
 
-    private final Map<String, StateHandler> stateHandlers = new ConcurrentHashMap<>();
+    private final Map<StateType, StateHandler> stateHandlers = new ConcurrentHashMap<>();
 
     @Override
     public void process(ProcessContext context) throws FrameworkException {
         StateInstruction instruction = context.getInstruction(StateInstruction.class);
         State state = instruction.getState(context);
-        String stateType = state.getType();
+        StateType stateType = state.getType();
         StateHandler stateHandler = stateHandlers.get(stateType);
 
         List<StateHandlerInterceptor> interceptors = null;
@@ -88,23 +88,23 @@ public class StateMachineProcessHandler implements ProcessHandler {
             return;
         }
 
-        stateHandlers.put(StateType.SERVICE_TASK.getValue(), new ServiceTaskStateHandler());
-        stateHandlers.put(StateType.SCRIPT_TASK.getValue(), new ScriptTaskStateHandler());
-        stateHandlers.put(StateType.SUB_MACHINE_COMPENSATION.getValue(), new ServiceTaskStateHandler());
-        stateHandlers.put(StateType.SUB_STATE_MACHINE.getValue(), new SubStateMachineHandler());
-        stateHandlers.put(StateType.CHOICE.getValue(), new ChoiceStateHandler());
-        stateHandlers.put(StateType.SUCCEED.getValue(), new SucceedEndStateHandler());
-        stateHandlers.put(StateType.FAIL.getValue(), new FailEndStateHandler());
-        stateHandlers.put(StateType.COMPENSATION_TRIGGER.getValue(), new CompensationTriggerStateHandler());
-        stateHandlers.put(StateType.LOOP_START.getValue(), new LoopStartStateHandler());
+        stateHandlers.put(StateType.SERVICE_TASK, new ServiceTaskStateHandler());
+        stateHandlers.put(StateType.SCRIPT_TASK, new ScriptTaskStateHandler());
+        stateHandlers.put(StateType.SUB_MACHINE_COMPENSATION, new ServiceTaskStateHandler());
+        stateHandlers.put(StateType.SUB_STATE_MACHINE, new SubStateMachineHandler());
+        stateHandlers.put(StateType.CHOICE, new ChoiceStateHandler());
+        stateHandlers.put(StateType.SUCCEED, new SucceedEndStateHandler());
+        stateHandlers.put(StateType.FAIL, new FailEndStateHandler());
+        stateHandlers.put(StateType.COMPENSATION_TRIGGER, new CompensationTriggerStateHandler());
+        stateHandlers.put(StateType.LOOP_START, new LoopStartStateHandler());
 
     }
 
-    public Map<String, StateHandler> getStateHandlers() {
+    public Map<StateType, StateHandler> getStateHandlers() {
         return stateHandlers;
     }
 
-    public void setStateHandlers(Map<String, StateHandler> stateHandlers) {
+    public void setStateHandlers(Map<StateType, StateHandler> stateHandlers) {
         this.stateHandlers.putAll(stateHandlers);
     }
 }

@@ -31,7 +31,7 @@ public class SubStateMachineImpl extends ServiceTaskStateImpl implements SubStat
     private TaskState compensateStateObject;
 
     public SubStateMachineImpl() {
-        setType(StateType.SUB_STATE_MACHINE.getValue());
+        setType(StateType.SUB_STATE_MACHINE);
     }
 
     @Override

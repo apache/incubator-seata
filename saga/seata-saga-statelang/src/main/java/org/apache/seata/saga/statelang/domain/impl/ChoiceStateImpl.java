@@ -36,7 +36,7 @@ public class ChoiceStateImpl extends BaseState implements ChoiceState {
     private Map<Object, String> choiceEvaluators;
 
     public ChoiceStateImpl() {
-        setType(StateType.CHOICE.getValue());
+        setType(StateType.CHOICE);
     }
 
     @Override

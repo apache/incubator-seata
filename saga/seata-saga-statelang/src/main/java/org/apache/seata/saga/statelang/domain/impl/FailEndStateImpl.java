@@ -29,7 +29,7 @@ public class FailEndStateImpl extends BaseState implements FailEndState {
     private String message;
 
     public FailEndStateImpl() {
-        setType(StateType.FAIL.getValue());
+        setType(StateType.FAIL);
     }
 
     @Override

@@ -281,7 +281,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
 
         context.setVariable(lastForwardState.getName() + DomainConstants.VAR_NAME_RETRIED_STATE_INST_ID,
             lastForwardState.getId());
-        if (StateType.SUB_STATE_MACHINE.getValue().equals(lastForwardState.getType()) && !ExecutionStatus.SU
+        if (StateType.SUB_STATE_MACHINE.equals(lastForwardState.getType()) && !ExecutionStatus.SU
             .equals(lastForwardState.getCompensationStatus())) {
 
             context.setVariable(DomainConstants.VAR_NAME_IS_FOR_SUB_STATMACHINE_FORWARD, true);
@@ -419,7 +419,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
                     continue;
                 }
 
-                if (StateType.SUB_STATE_MACHINE.getValue().equals(stateInstance.getType())) {
+                if (StateType.SUB_STATE_MACHINE.equals(stateInstance.getType())) {
 
                     StateInstance finalState = stateInstance;
 

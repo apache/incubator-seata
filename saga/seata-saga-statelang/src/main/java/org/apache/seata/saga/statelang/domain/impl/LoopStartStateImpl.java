@@ -26,7 +26,7 @@ import org.apache.seata.saga.statelang.domain.LoopStartState;
 public class LoopStartStateImpl extends BaseState implements LoopStartState {
 
     public LoopStartStateImpl() {
-        setType(StateType.LOOP_START.getValue());
+        setType(StateType.LOOP_START);
     }
 
 }
