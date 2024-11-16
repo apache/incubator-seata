@@ -72,6 +72,11 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.apache.seata</groupId>
+            <artifactId>seata-serializer-protobuf</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-alts</artifactId>
         </dependency>

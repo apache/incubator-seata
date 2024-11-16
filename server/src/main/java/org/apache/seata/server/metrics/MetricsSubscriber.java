@@ -25,6 +25,7 @@ import com.google.common.eventbus.Subscribe;
 import org.apache.seata.core.event.ExceptionEvent;
 import org.apache.seata.core.event.GlobalTransactionEvent;
 import org.apache.seata.core.model.GlobalStatus;
+import org.apache.seata.metrics.Id;
 import org.apache.seata.metrics.registry.Registry;
 import org.apache.seata.server.event.EventBusManager;
 import org.slf4j.Logger;
@@ -48,21 +49,45 @@ public class MetricsSubscriber {
 
     public MetricsSubscriber(Registry registry) {
         this.registry = registry;
-        consumers = new HashMap<>();
-        consumers.put(GlobalStatus.Begin.name(), this::processGlobalStatusBegin);
-        consumers.put(GlobalStatus.Committed.name(), this::processGlobalStatusCommitted);
-        consumers.put(GlobalStatus.Rollbacked.name(), this::processGlobalStatusRollbacked);
+        this.consumers = initializeConsumers();
+    }
 
-        consumers.put(GlobalStatus.CommitFailed.name(), this::processGlobalStatusCommitFailed);
-        consumers.put(GlobalStatus.RollbackFailed.name(), this::processGlobalStatusRollbackFailed);
-        consumers.put(GlobalStatus.TimeoutRollbacked.name(), this::processGlobalStatusTimeoutRollbacked);
-        consumers.put(GlobalStatus.TimeoutRollbackFailed.name(), this::processGlobalStatusTimeoutRollbackFailed);
+    private Map<String, Consumer<GlobalTransactionEvent>> initializeConsumers() {
+        Map<String, Consumer<GlobalTransactionEvent>> consumerMap = new HashMap<>();
+        consumerMap.put(GlobalStatus.Begin.name(), this::processGlobalStatusBegin);
+        consumerMap.put(GlobalStatus.Committed.name(), this::processGlobalStatusCommitted);
+        consumerMap.put(GlobalStatus.Rollbacked.name(), this::processGlobalStatusRollbacked);
 
-        consumers.put(GlobalStatus.CommitRetryTimeout.name(), this::processGlobalStatusCommitRetryTimeout);
-        consumers.put(GlobalStatus.RollbackRetryTimeout.name(), this::processGlobalStatusTimeoutRollbackRetryTimeout);
+        consumerMap.put(GlobalStatus.CommitFailed.name(), this::processGlobalStatusCommitFailed);
+        consumerMap.put(GlobalStatus.RollbackFailed.name(), this::processGlobalStatusRollbackFailed);
+        consumerMap.put(GlobalStatus.TimeoutRollbacked.name(), this::processGlobalStatusTimeoutRollbacked);
+        consumerMap.put(GlobalStatus.TimeoutRollbackFailed.name(), this::processGlobalStatusTimeoutRollbackFailed);
 
-        consumers.put(STATUS_VALUE_AFTER_COMMITTED_KEY, this::processAfterGlobalCommitted);
-        consumers.put(STATUS_VALUE_AFTER_ROLLBACKED_KEY, this::processAfterGlobalRollbacked);
+        consumerMap.put(GlobalStatus.CommitRetryTimeout.name(), this::processGlobalStatusCommitRetryTimeout);
+        consumerMap.put(GlobalStatus.RollbackRetryTimeout.name(), this::processGlobalStatusTimeoutRollbackRetryTimeout);
+
+        consumerMap.put(STATUS_VALUE_AFTER_COMMITTED_KEY, this::processAfterGlobalCommitted);
+        consumerMap.put(STATUS_VALUE_AFTER_ROLLBACKED_KEY, this::processAfterGlobalRollbacked);
+        return consumerMap;
+    }
+
+    private void increaseCounter(Id counterId, GlobalTransactionEvent event) {
+        registry.getCounter(counterId.withTag(APP_ID_KEY, event.getApplicationId())
+            .withTag(GROUP_KEY, event.getGroup())).increase(1);
+    }
+    private void decreaseCounter(Id counterId, GlobalTransactionEvent event) {
+        registry.getCounter(counterId.withTag(APP_ID_KEY, event.getApplicationId())
+            .withTag(GROUP_KEY, event.getGroup())).decrease(1);
+    }
+
+    private void increaseSummary(Id summaryId, GlobalTransactionEvent event, long value) {
+        registry.getSummary(
+            summaryId.withTag(APP_ID_KEY, event.getApplicationId()).withTag(GROUP_KEY, event.getGroup())).increase(value);
+    }
+
+    private void increaseTimer(Id timerId, GlobalTransactionEvent event) {
+        registry.getTimer(
+            timerId.withTag(APP_ID_KEY, event.getApplicationId()).withTag(GROUP_KEY, event.getGroup())).record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
     }
 
     private void processGlobalStatusBegin(GlobalTransactionEvent event) {
@@ -72,124 +97,84 @@ public class MetricsSubscriber {
                 LOGGER.debug("subscribe:{},threadName:{}", object.toString(), Thread.currentThread().getName());
             }
         }
-        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE.withTag(APP_ID_KEY, event.getApplicationId())
-            .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        increaseCounter(MeterIdConstants.COUNTER_ACTIVE, event);
     }
 
     private void processGlobalStatusCommitted(GlobalTransactionEvent event) {
         if (event.isRetryGlobal()) {
             return;
         }
-        decreaseActive(event);
-        registry.getCounter(MeterIdConstants.COUNTER_COMMITTED
-                .withTag(APP_ID_KEY, event.getApplicationId())
-                .withTag(GROUP_KEY, event.getGroup())).increase(1);
-        registry.getSummary(MeterIdConstants.SUMMARY_COMMITTED
-                .withTag(APP_ID_KEY, event.getApplicationId())
-                .withTag(GROUP_KEY, event.getGroup())).increase(1);
-        registry.getTimer(MeterIdConstants.TIMER_COMMITTED
-                .withTag(APP_ID_KEY, event.getApplicationId())
-                .withTag(GROUP_KEY, event.getGroup()))
-                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
+        decreaseCounter(MeterIdConstants.COUNTER_ACTIVE, event);
+        increaseCounter(MeterIdConstants.COUNTER_COMMITTED, event);
+        increaseSummary(MeterIdConstants.SUMMARY_COMMITTED, event, 1);
+        increaseTimer(MeterIdConstants.TIMER_COMMITTED, event);
     }
 
     private void processGlobalStatusRollbacked(GlobalTransactionEvent event) {
         if (event.isRetryGlobal()) {
             return;
         }
-        decreaseActive(event);
-        registry.getCounter(MeterIdConstants.COUNTER_ROLLBACKED
-                .withTag(APP_ID_KEY, event.getApplicationId())
-                .withTag(GROUP_KEY, event.getGroup())).increase(1);
-        registry.getSummary(MeterIdConstants.SUMMARY_ROLLBACKED
-                .withTag(APP_ID_KEY, event.getApplicationId())
-                .withTag(GROUP_KEY, event.getGroup())).increase(1);
-        registry.getTimer(MeterIdConstants.TIMER_ROLLBACK
-                .withTag(APP_ID_KEY, event.getApplicationId())
-                .withTag(GROUP_KEY, event.getGroup()))
-                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
+        decreaseCounter(MeterIdConstants.COUNTER_ACTIVE, event);
+        increaseCounter(MeterIdConstants.COUNTER_ROLLBACKED, event);
+        increaseSummary(MeterIdConstants.SUMMARY_ROLLBACKED, event, 1);
+        increaseTimer(MeterIdConstants.TIMER_ROLLBACKED, event);
     }
 
     private void processAfterGlobalRollbacked(GlobalTransactionEvent event) {
         if (event.isRetryGlobal() && event.isRetryBranch()) {
-            decreaseActive(event);
+            decreaseCounter(MeterIdConstants.COUNTER_ACTIVE, event);
         }
-        registry.getCounter(MeterIdConstants.COUNTER_AFTER_ROLLBACKED
-            .withTag(APP_ID_KEY, event.getApplicationId())
-            .withTag(GROUP_KEY, event.getGroup())).increase(1);
-        registry.getSummary(MeterIdConstants.SUMMARY_AFTER_ROLLBACKED
-            .withTag(APP_ID_KEY, event.getApplicationId())
-            .withTag(GROUP_KEY, event.getGroup())).increase(1);
-        registry.getTimer(MeterIdConstants.TIMER_AFTER_ROLLBACKED
-            .withTag(APP_ID_KEY, event.getApplicationId())
-            .withTag(GROUP_KEY, event.getGroup()))
-            .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
+        increaseCounter(MeterIdConstants.COUNTER_AFTER_ROLLBACKED, event);
+        increaseSummary(MeterIdConstants.SUMMARY_AFTER_ROLLBACKED, event, 1);
+        increaseTimer(MeterIdConstants.TIMER_AFTER_ROLLBACKED, event);
     }
 
     private void processAfterGlobalCommitted(GlobalTransactionEvent event) {
         if (event.isRetryGlobal() && event.isRetryBranch()) {
-            decreaseActive(event);
+            decreaseCounter(MeterIdConstants.COUNTER_ACTIVE, event);
         }
-        registry.getCounter(MeterIdConstants.COUNTER_AFTER_COMMITTED
-            .withTag(APP_ID_KEY, event.getApplicationId())
-            .withTag(GROUP_KEY, event.getGroup())).increase(1);
-        registry.getSummary(MeterIdConstants.SUMMARY_AFTER_COMMITTED
-            .withTag(APP_ID_KEY, event.getApplicationId())
-            .withTag(GROUP_KEY, event.getGroup())).increase(1);
-        registry.getTimer(MeterIdConstants.TIMER_AFTER_COMMITTED
-            .withTag(APP_ID_KEY, event.getApplicationId())
-            .withTag(GROUP_KEY, event.getGroup()))
-            .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
+        increaseCounter(MeterIdConstants.COUNTER_AFTER_COMMITTED, event);
+        increaseSummary(MeterIdConstants.SUMMARY_AFTER_COMMITTED, event, 1);
+        increaseTimer(MeterIdConstants.TIMER_AFTER_COMMITTED, event);
     }
 
     private void processGlobalStatusCommitFailed(GlobalTransactionEvent event) {
-        decreaseActive(event);
+        decreaseCounter(MeterIdConstants.COUNTER_ACTIVE, event);
         reportFailed(event);
     }
 
     private void processGlobalStatusRollbackFailed(GlobalTransactionEvent event) {
-        decreaseActive(event);
+        decreaseCounter(MeterIdConstants.COUNTER_ACTIVE, event);
         reportFailed(event);
     }
 
     private void processGlobalStatusTimeoutRollbacked(GlobalTransactionEvent event) {
-        decreaseActive(event);
+        decreaseCounter(MeterIdConstants.COUNTER_ACTIVE, event);
     }
 
     private void processGlobalStatusTimeoutRollbackFailed(GlobalTransactionEvent event) {
-        decreaseActive(event);
-        reportTwoPhaseTimeout(event);
+        decreaseCounter(MeterIdConstants.COUNTER_ACTIVE, event);
+        increaseSummary(MeterIdConstants.SUMMARY_TWO_PHASE_TIMEOUT, event, 1);
+        reportFailed(event);
     }
 
     private void processGlobalStatusCommitRetryTimeout(GlobalTransactionEvent event) {
-        decreaseActive(event);
-        reportTwoPhaseTimeout(event);
+        decreaseCounter(MeterIdConstants.COUNTER_ACTIVE, event);
+        increaseSummary(MeterIdConstants.SUMMARY_TWO_PHASE_TIMEOUT, event, 1);
+        //The phase 2 retry timeout state should be considered a transaction failed
+        reportFailed(event);
     }
 
     private void processGlobalStatusTimeoutRollbackRetryTimeout(GlobalTransactionEvent event) {
-        decreaseActive(event);
-    }
-
-    private void decreaseActive(GlobalTransactionEvent event) {
-        registry.getCounter(MeterIdConstants.COUNTER_ACTIVE
-                .withTag(APP_ID_KEY, event.getApplicationId())
-                .withTag(GROUP_KEY, event.getGroup())).decrease(1);
+        decreaseCounter(MeterIdConstants.COUNTER_ACTIVE, event);
+        increaseSummary(MeterIdConstants.SUMMARY_TWO_PHASE_TIMEOUT, event, 1);
+        //The phase 2 retry timeout state should be considered a transaction failed
+        reportFailed(event);
     }
 
     private void reportFailed(GlobalTransactionEvent event) {
-        registry.getSummary(MeterIdConstants.SUMMARY_FAILED
-                .withTag(APP_ID_KEY, event.getApplicationId())
-                .withTag(GROUP_KEY, event.getGroup())).increase(1);
-        registry.getTimer(MeterIdConstants.TIMER_FAILED
-                .withTag(APP_ID_KEY, event.getApplicationId())
-                .withTag(GROUP_KEY, event.getGroup()))
-                .record(event.getEndTime() - event.getBeginTime(), TimeUnit.MILLISECONDS);
-    }
-
-    private void reportTwoPhaseTimeout(GlobalTransactionEvent event) {
-        registry.getSummary(MeterIdConstants.SUMMARY_TWO_PHASE_TIMEOUT
-                .withTag(APP_ID_KEY, event.getApplicationId())
-                .withTag(GROUP_KEY, event.getGroup())).increase(1);
+        increaseSummary(MeterIdConstants.SUMMARY_FAILED, event, 1);
+        increaseTimer(MeterIdConstants.TIMER_FAILED, event);
     }
 
 
