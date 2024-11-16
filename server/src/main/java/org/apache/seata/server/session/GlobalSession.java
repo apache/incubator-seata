@@ -31,6 +31,7 @@ import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.Constants;
 import org.apache.seata.common.DefaultValues;
 import org.apache.seata.common.XID;
+import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.common.util.BufferUtils;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.ConfigurationFactory;
@@ -107,6 +108,8 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private Set<SessionLifecycleListener> lifecycleListeners = new HashSet<>(2);
 
+    private final ResourceLock RESOURCE_LOCK = new ResourceLock();
+
     /**
      * Add boolean.
      *
@@ -129,7 +132,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * @return the boolean
      */
     public boolean remove(BranchSession branchSession) {
-        synchronized (this) {
+        try (ResourceLock ignored = RESOURCE_LOCK.obtain()) {
             return branchSessions.remove(branchSession);
         }
     }
@@ -328,7 +331,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     public void loadBranchs() {
         if (branchSessions == null && isLazyLoadBranch()) {
-            synchronized (this) {
+            try (ResourceLock ignored = RESOURCE_LOCK.obtain()) {
                 if (branchSessions == null && isLazyLoadBranch()) {
                     branchSessions = new ArrayList<>();
                     Optional.ofNullable(SessionHolder.getRootSessionManager().findGlobalSession(xid, true))
@@ -376,7 +379,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * @return the branch
      */
     public BranchSession getBranch(long branchId) {
-        synchronized (this) {
+        try (ResourceLock ignored = RESOURCE_LOCK.obtain()) {
             List<BranchSession> branchSessions = getBranchSessions();
             for (BranchSession branchSession : branchSessions) {
                 if (branchSession.getBranchId() == branchId) {
