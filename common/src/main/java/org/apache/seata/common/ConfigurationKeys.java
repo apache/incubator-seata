@@ -504,9 +504,15 @@ public interface ConfigurationKeys {
 
     /**
      * The constant ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE.
+     * This configuration is deprecated, please use {@link #ROLLBACK_FAILED_UNLOCK_ENABLE} instead.
      */
+    @Deprecated
     String ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE = SERVER_PREFIX + "rollbackRetryTimeoutUnlockEnable";
 
+    /**
+     * The constant ROLLBACK_FAILED_UNLOCK_ENABLE.
+     */
+    String ROLLBACK_FAILED_UNLOCK_ENABLE = SERVER_PREFIX + "rollbackFailedUnlockEnable";
     /**
      * the constant RETRY_DEAD_THRESHOLD
      */
