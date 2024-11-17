@@ -36,8 +36,7 @@ public class StateMachineUtils {
         Set<String> subsequentStates = new HashSet<>();
         // Next state
         subsequentStates.add(state.getNext());
-        StateType stateType = state.getType();
-        switch (stateType) {
+        switch (state.getType()) {
             case SCRIPT_TASK:
             case SERVICE_TASK:
             case SUB_STATE_MACHINE:
