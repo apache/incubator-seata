@@ -135,7 +135,7 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
         this(failureHandler, methodsToProxy);
         this.aspectTransactional = aspectTransactional;
     }
-
+    //代理逻辑
     @Override
     protected Object doInvoke(InvocationWrapper invocation) throws Throwable {
         Class<?> targetClass = invocation.getTarget().getClass();
