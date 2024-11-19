@@ -7,7 +7,6 @@ public class FailureHandlerHolderTest {
 
     @Test
     void testDefaultFailureHandler() {
-        Assertions.assertNotNull(FailureHandlerHolder.getFailureHandler());
         Assertions.assertTrue(FailureHandlerHolder.getFailureHandler() instanceof DefaultFailureHandlerImpl);
     }
 
