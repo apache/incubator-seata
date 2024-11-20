@@ -212,7 +212,7 @@ public class SessionHelper {
             boolean retryBranch =
                     currentStatus == GlobalStatus.TimeoutRollbackRetrying || currentStatus == GlobalStatus.RollbackRetrying;
             if (!currentStatus.equals(GlobalStatus.TimeoutRollbacked)
-                && SessionStatusValidator.isTimeoutGlobalStatus(currentStatus)) {
+                && SessionStatusValidator.isTimeoutRollbacking(currentStatus)) {
                 globalSession.changeGlobalStatus(GlobalStatus.TimeoutRollbacked);
             } else if (!globalSession.getStatus().equals(GlobalStatus.Rollbacked)) {
                 globalSession.changeGlobalStatus(GlobalStatus.Rollbacked);
@@ -255,7 +255,7 @@ public class SessionHelper {
         GlobalStatus currentStatus = globalSession.getStatus();
         if (isRetryTimeout) {
             globalSession.changeGlobalStatus(GlobalStatus.RollbackRetryTimeout);
-        } else if (SessionStatusValidator.isTimeoutGlobalStatus(currentStatus)) {
+        } else if (SessionStatusValidator.isTimeoutRollbacking(currentStatus)) {
             globalSession.changeGlobalStatus(GlobalStatus.TimeoutRollbackFailed);
         } else {
             globalSession.changeGlobalStatus(GlobalStatus.RollbackFailed);
