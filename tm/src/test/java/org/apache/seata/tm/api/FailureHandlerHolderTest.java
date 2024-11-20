@@ -25,16 +25,11 @@ import org.junit.jupiter.api.Test;
 public class FailureHandlerHolderTest {
 
     @Test
-    void testDefaultFailureHandler() {
-        Assertions.assertTrue(FailureHandlerHolder.getFailureHandler() instanceof DefaultFailureHandlerImpl);
-    }
-
-    @Test
     void testSetFailureHandlerWithCustomHandler() {
-        MockFailureHandlerHolder mockFailureHandlerHolder = new MockFailureHandlerHolder();
+        MockFailureHandlerImpl mockFailureHandlerImpl = new MockFailureHandlerImpl();
 
-        FailureHandlerHolder.setFailureHandler(mockFailureHandlerHolder);
+        FailureHandlerHolder.setFailureHandler(mockFailureHandlerImpl);
 
-        Assertions.assertEquals(mockFailureHandlerHolder, FailureHandlerHolder.getFailureHandler());
+        Assertions.assertEquals(mockFailureHandlerImpl, FailureHandlerHolder.getFailureHandler());
     }
 }

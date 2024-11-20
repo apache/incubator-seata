@@ -21,10 +21,12 @@ import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.protocol.ResultCode;
 import org.apache.seata.core.protocol.transaction.*;
 import org.apache.seata.core.rpc.netty.TmNettyRemotingClient;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
@@ -42,6 +44,8 @@ public class DefaultTransactionManagerTest {
 
     private DefaultTransactionManager defaultTransactionManager;
 
+    private MockedStatic<TmNettyRemotingClient> tmNettyRemotingClientMockedStatic;
+
     @Mock
     private TmNettyRemotingClient tmNettyRemotingClient;
 
@@ -49,8 +53,14 @@ public class DefaultTransactionManagerTest {
     @BeforeEach
     void init() {
         MockitoAnnotations.openMocks(this);
-        Mockito.mockStatic(TmNettyRemotingClient.class).when(TmNettyRemotingClient::getInstance).thenReturn(tmNettyRemotingClient);
+        tmNettyRemotingClientMockedStatic = Mockito.mockStatic(TmNettyRemotingClient.class);
+        tmNettyRemotingClientMockedStatic.when(TmNettyRemotingClient::getInstance).thenReturn(tmNettyRemotingClient);
         defaultTransactionManager = new DefaultTransactionManager();
+    }
+
+    @AfterEach
+    void destory(){
+        tmNettyRemotingClientMockedStatic.close();
     }
 
     @Test

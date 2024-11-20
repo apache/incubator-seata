@@ -16,7 +16,7 @@
  */
 package org.apache.seata.tm.api;
 
-public class MockFailureHandlerHolder implements FailureHandler{
+public class MockFailureHandlerImpl implements FailureHandler{
     @Override
     public void onBeginFailure(BaseTransaction tx, Throwable cause) {
 
