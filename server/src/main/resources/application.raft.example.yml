@@ -116,7 +116,7 @@ seata:
       enable-branch-async-remove: false #enable to asynchronous remove branchSession
   store:
     # support: file
-    mode: file
+    mode: raft
     file:
       dir: sessionStore
       max-branch-session-size: 16384
