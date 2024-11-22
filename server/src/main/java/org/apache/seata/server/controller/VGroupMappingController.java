@@ -44,15 +44,6 @@ public class VGroupMappingController {
 
     protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
-    @PostConstruct
-    private void init() {
-        String type =
-            ConfigurationFactory.getInstance().getConfig(FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + FILE_ROOT_TYPE);
-        if (StringUtils.equals(type, NAMING_SERVER)) {
-            vGroupMappingStoreManager = SessionHolder.getRootVGroupMappingManager();
-        }
-    }
-
     /**
      * add vGroup in cluster
      *
@@ -67,7 +58,7 @@ public class VGroupMappingController {
         mappingDO.setCluster(Instance.getInstance().getClusterName());
         mappingDO.setUnit(unit);
         mappingDO.setVGroup(vGroup);
-        boolean rst = vGroupMappingStoreManager.addVGroup(mappingDO);
+        boolean rst = SessionHolder.getRootVGroupMappingManager().addVGroup(mappingDO);
         Instance.getInstance().setTerm(System.currentTimeMillis());
         if (!rst) {
             result.setCode("500");
@@ -85,7 +76,7 @@ public class VGroupMappingController {
     @GetMapping("/removeVGroup")
     public Result<?> removeVGroup(@RequestParam String vGroup) {
         Result<?> result = new Result<>();
-        boolean rst = vGroupMappingStoreManager.removeVGroup(vGroup);
+        boolean rst = SessionHolder.getRootVGroupMappingManager().removeVGroup(vGroup);
         Instance.getInstance().setTerm(System.currentTimeMillis());
         if (!rst) {
             result.setCode("500");
