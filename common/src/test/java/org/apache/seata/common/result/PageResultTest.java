@@ -89,9 +89,14 @@ public class PageResultTest {
         BaseParam param = new BaseParam();
         param.setPageNum(0);
         param.setPageSize(0);
+        param.setTimeStart(1L);
+        param.setTimeEnd(2L);
         PageResult.checkPage(param);
         assertEquals(1, param.getPageNum());
         assertEquals(20, param.getPageSize());
+        assertEquals(1L, param.getTimeStart());
+        assertEquals(2L, param.getTimeEnd());
+        assertEquals("BaseParam{pageNum=1, pageSize=20, timeStart=1, timeEnd=2}", param.toString());
     }
 
     @Test

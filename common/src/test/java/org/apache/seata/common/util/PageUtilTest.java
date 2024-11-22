@@ -16,17 +16,45 @@
  */
 package org.apache.seata.common.util;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import org.apache.seata.common.exception.NotSupportYetException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.doNothing;
 
 /**
  * The page util test.
  *
  */
 public class PageUtilTest {
+
+    private int validPageNum;
+    private int validPageSize;
+    private String validTimeColumnName;
+    @InjectMocks
+    private PageUtil pageUtil;
+    @BeforeEach
+    void setUp() {
+        validPageNum = 1;
+        validPageSize = 10;
+        validTimeColumnName = "gmt_create";
+        MockitoAnnotations.initMocks(this);
+
+    }
 
     @Test
     public void testPageSql() {
@@ -68,5 +96,97 @@ public class PageUtilTest {
 
         assertThrows(NotSupportYetException.class, () -> PageUtil.countSql(sourceSql, "xxx"));
     }
+
+    @Test
+    void checkParam_ValidPageParams_DoesNotThrowException() {
+        assertDoesNotThrow(() -> PageUtil.checkParam(validPageNum, validPageSize));
+    }
+
+    @Test
+    void checkParam_PageNumBelowMin_ThrowsIllegalArgumentException() {
+        int invalidPageNum = PageUtil.MIN_PAGE_NUM - 1;
+        assertThrows(IllegalArgumentException.class, () -> PageUtil.checkParam(invalidPageNum, validPageSize));
+    }
+
+    @Test
+    void checkParam_PageNumAboveMax_ThrowsIllegalArgumentException() {
+        int invalidPageNum = PageUtil.MAX_PAGE_NUM + 1;
+        assertThrows(IllegalArgumentException.class, () -> PageUtil.checkParam(invalidPageNum, validPageSize));
+    }
+
+    @Test
+    void checkParam_PageSizeBelowMin_ThrowsIllegalArgumentException() {
+        int invalidPageSize = PageUtil.MIN_PAGE_SIZE - 1;
+        assertThrows(IllegalArgumentException.class, () -> PageUtil.checkParam(validPageNum, invalidPageSize));
+    }
+
+    @Test
+    void checkParam_PageSizeAboveMax_ThrowsIllegalArgumentException() {
+        int invalidPageSize = PageUtil.MAX_PAGE_SIZE + 1;
+        assertThrows(IllegalArgumentException.class, () -> PageUtil.checkParam(validPageNum, invalidPageSize));
+    }
+
+    @Test
+    void setObject_WithDateParameter_SetsDateCorrectly() throws SQLException {
+        List<Object> params = new ArrayList<>();
+        params.add(new Date(System.currentTimeMillis()));
+        params.add(123);
+
+        PreparedStatement preparedStatement = Mockito.mock(PreparedStatement.class);
+        doNothing().when(preparedStatement).setDate(anyInt(), any(java.sql.Date.class));
+
+        PageUtil.setObject(preparedStatement, params);
+
+        Mockito.verify(preparedStatement).setDate(anyInt(), any(java.sql.Date.class));
+    }
+
+    @Test
+    void setObject_WithNonDateParameter_SetsObjectCorrectly() throws SQLException {
+        List<Object> params = new ArrayList<>();
+        params.add("testString");
+
+        PreparedStatement preparedStatement = Mockito.mock(PreparedStatement.class);
+
+        PageUtil.setObject(preparedStatement, params);
+
+        Mockito.verify(preparedStatement, Mockito.times(1)).setObject(anyInt(), any());
+    }
+
+    @Test
+    void setObject_EmptyList_NoInteractionWithPreparedStatement() throws SQLException {
+        List<Object> params = new ArrayList<>();
+
+        PreparedStatement preparedStatement = Mockito.mock(PreparedStatement.class);
+
+        PageUtil.setObject(preparedStatement, params);
+
+        Mockito.verify(preparedStatement, Mockito.never()).setObject(anyInt(), any());
+    }
+
+    @Test
+    void setObject_NullList_NoInteractionWithPreparedStatement() throws SQLException {
+        List<Object> params = null;
+        PreparedStatement preparedStatement = Mockito.mock(PreparedStatement.class);
+
+        assertThrows(NullPointerException.class, () -> PageUtil.setObject(preparedStatement, params));
+    }
+
+
+    @Test
+    public void getTimeStartSql_SupportedDBTypes_ReturnsExpectedSQL() {
+        String[] supportedDBTypes = {"mysql", "oracle", "postgresql", "sqlserver", "dm", "oscar"};
+        String expectedSQL = " and FLOOR(gmt_create/1000) >= ? ";
+
+        for (String dbType : supportedDBTypes) {
+            assertEquals(expectedSQL, PageUtil.getTimeStartSql(dbType, validTimeColumnName));
+        }
+    }
+
+    @Test
+    public void getTimeStartSql_NotSupportedDBType_ThrowsIllegalArgumentException() {
+        String notSupportedDBType = "xxx";
+        assertThrows(IllegalArgumentException.class, () -> PageUtil.getTimeStartSql(notSupportedDBType, validTimeColumnName));
+    }
+
 
 }
