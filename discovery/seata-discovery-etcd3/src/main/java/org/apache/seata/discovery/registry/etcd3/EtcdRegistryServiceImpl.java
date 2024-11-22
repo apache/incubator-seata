@@ -75,6 +75,8 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
     private static final int MAP_INITIAL_CAPACITY = 8;
     private static final int THREAD_POOL_SIZE = 2;
     private ExecutorService executorService;
+
+    private String transactionServiceGroup;
     /**
      * TTL for lease
      */
@@ -181,6 +183,7 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
 
     @Override
     public List<InetSocketAddress> lookup(String key) throws Exception {
+        transactionServiceGroup = key;
         final String cluster = getServiceGroup(key);
         if (cluster == null) {
             String missingDataId = PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key;
@@ -252,7 +255,7 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
         }).collect(Collectors.toList());
         clusterAddressMap.put(cluster, new Pair<>(getResponse.getHeader().getRevision(), instanceList));
 
-        removeOfflineAddressesIfNecessary(cluster, instanceList);
+        removeOfflineAddressesIfNecessary(transactionServiceGroup, cluster, instanceList);
     }
 
     /**

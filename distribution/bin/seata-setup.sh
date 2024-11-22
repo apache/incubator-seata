@@ -150,7 +150,7 @@ else
 fi
 
 JAVA_OPT="${JAVA_OPT} -Dio.netty.leakDetectionLevel=advanced"
-JAVA_OPT="${JAVA_OPT} -Dapp.name=seata-server -Dapp.pid=${$} -Dapp.home=${BASEDIR} -Dbasedir=${BASEDIR}"
+JAVA_OPT="${JAVA_OPT} -Dapp.name=seata-server -Dapp.home=${BASEDIR} -Dbasedir=${BASEDIR}"
 
 if [ "$JMX_ENABLE" = "true" ]; then
   JMX_PORT=$JMX_PORT

@@ -227,7 +227,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         String xid = suspendedResourcesHolder.getXid();
         RootContext.bind(xid);
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Resumimg the transaction,xid = {}", xid);
+            LOGGER.debug("Resuming the transaction,xid = {}", xid);
         }
     }
 

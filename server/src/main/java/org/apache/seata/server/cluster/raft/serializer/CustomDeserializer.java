@@ -40,4 +40,5 @@ public class CustomDeserializer extends JsonDeserializer<Class<?>> {
             throw new RuntimeException(e.getMessage(), e);
         }
     }
+
 }

@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.Lock;
@@ -34,7 +35,6 @@ import org.apache.seata.common.metadata.namingserver.Unit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
 public class ClusterData {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterData.class);
@@ -42,20 +42,20 @@ public class ClusterData {
     private String clusterType;
     private final Map<String, Unit> unitData;
     
-    private Lock lock = new ReentrantLock();
+    private final Lock lock = new ReentrantLock();
 
 
     public ClusterData() {
-        unitData = new ConcurrentHashMap<>(32);
+        this.unitData = new ConcurrentHashMap<>();
     }
 
     public ClusterData(String clusterName) {
-        unitData = new ConcurrentHashMap<>(32);
+        this.unitData = new ConcurrentHashMap<>();
         this.clusterName = clusterName;
     }
 
     public ClusterData(String clusterName, String clusterType) {
-        unitData = new ConcurrentHashMap<>(32);
+        unitData = new ConcurrentHashMap<>();
         this.clusterName = clusterName;
         this.clusterType = clusterType;
     }
@@ -107,31 +107,27 @@ public class ClusterData {
     }
 
 
-    public Cluster getClusterByUnit(String unitName) {
+    public Cluster getClusterByUnits(Set<String> unitNames) {
         Cluster clusterResponse = new Cluster();
         clusterResponse.setClusterName(clusterName);
         clusterResponse.setClusterType(clusterType);
-        if (!StringUtils.hasLength(unitName)) {
-            clusterResponse.setUnitData(new ArrayList<>(unitData.values()));
+        if (CollectionUtils.isEmpty(unitNames)) {
+            clusterResponse.appendUnits(unitData.values());
         } else {
-            List<Unit> unitList = new ArrayList<>();
-            Optional.ofNullable(unitData.get(unitName)).ifPresent(unitList::add);
-            clusterResponse.setUnitData(unitList);
+            for (String unitName : unitNames) {
+                List<Unit> unitList = new ArrayList<>();
+                Optional.ofNullable(unitData.get(unitName)).ifPresent(unitList::add);
+                clusterResponse.appendUnits(unitList);
+            }
         }
 
         return clusterResponse;
     }
 
     public boolean registerInstance(NamingServerNode instance, String unitName) {
-        // refresh node weight
-        Object weightValue = instance.getMetadata().get("weight");
-        if (weightValue != null) {
-            instance.setWeight(Double.parseDouble(String.valueOf(weightValue)));
-            instance.getMetadata().remove("weight");
-        }
         Unit currentUnit = unitData.computeIfAbsent(unitName, value -> {
             Unit unit = new Unit();
-            List<Node> instances = new CopyOnWriteArrayList<>();
+            List<NamingServerNode> instances = new CopyOnWriteArrayList<>();
             unit.setUnitName(unitName);
             unit.setNamingInstanceList(instances);
             return unit;
@@ -139,11 +135,11 @@ public class ClusterData {
         // ensure that when adding an instance, the remove side will not delete the unit.
         lock.lock();
         try {
-            currentUnit.addInstance(instance);
+            return currentUnit.addInstance(instance);
         } finally {
             lock.unlock();
         }
-        return true;
+
     }
 
 

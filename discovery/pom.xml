@@ -40,6 +40,7 @@
         <module>seata-discovery-zk</module>
         <module>seata-discovery-redis</module>
         <module>seata-discovery-nacos</module>
+        <module>seata-discovery-namingserver</module>
         <module>seata-discovery-etcd3</module>
         <module>seata-discovery-sofa</module>
         <module>seata-discovery-raft</module>

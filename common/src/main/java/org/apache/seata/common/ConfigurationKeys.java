@@ -504,9 +504,15 @@ public interface ConfigurationKeys {
 
     /**
      * The constant ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE.
+     * This configuration is deprecated, please use {@link #ROLLBACK_FAILED_UNLOCK_ENABLE} instead.
      */
+    @Deprecated
     String ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE = SERVER_PREFIX + "rollbackRetryTimeoutUnlockEnable";
 
+    /**
+     * The constant ROLLBACK_FAILED_UNLOCK_ENABLE.
+     */
+    String ROLLBACK_FAILED_UNLOCK_ENABLE = SERVER_PREFIX + "rollbackFailedUnlockEnable";
     /**
      * the constant RETRY_DEAD_THRESHOLD
      */
@@ -627,6 +633,8 @@ public interface ConfigurationKeys {
      */
     @Deprecated
     String ENABLE_CLIENT_BATCH_SEND_REQUEST = TRANSPORT_PREFIX + "enableClientBatchSendRequest";
+
+    String TRANSPORT_PROTOCOL = TRANSPORT_PREFIX + "protocol";
 
     /**
      * The constant ENABLE_TM_CLIENT_BATCH_SEND_REQUEST
@@ -814,7 +822,7 @@ public interface ConfigurationKeys {
     /**
      * The constant NAMING_SERVER
      */
-    String NAMING_SERVER = "namingserver";
+    String NAMING_SERVER = "seata";
 
     /**
      * The constant APPLICATION_ID.
@@ -1033,9 +1041,9 @@ public interface ConfigurationKeys {
     String REGISTRY_NAMINGSERVER_CLUSTER = NAMINGSERVER_REGISTRY_PREFIX + "cluster";
 
     /**
-     * The constant MAPPING_TABLE_NAME
+     * The constant VGROUP_TABLE_NAME
      */
-    String MAPPING_TABLE_NAME = STORE_DB_PREFIX + FILE_CONFIG_SPLIT_CHAR + "mapping-table";
+    String VGROUP_TABLE_NAME = STORE_DB_PREFIX + FILE_CONFIG_SPLIT_CHAR + "vgroup-table";
 
     /**
      * The constant NAMESPACE_KEY

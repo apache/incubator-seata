@@ -78,7 +78,7 @@ public class SessionHolder {
     /**
      * The default vgroup mapping store dir
      */
-    public static final String DEFAULT_VGROUP_MAPPING_STORE_FILE_DIR = System.getProperty("user.dir");
+    public static final String DEFAULT_VGROUP_MAPPING_STORE_FILE_DIR = "vgroupStore";
 
     private static VGroupMappingStoreManager ROOT_VGROUP_MAPPING_MANAGER;
 
@@ -122,7 +122,8 @@ public class SessionHolder {
                 RaftServerManager.start();
             } else {
                 String vGroupMappingStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR,
-                    DEFAULT_VGROUP_MAPPING_STORE_FILE_DIR);
+                    DEFAULT_VGROUP_MAPPING_STORE_FILE_DIR)  + separator
+                        + System.getProperty(SERVER_SERVICE_PORT_CAMEL);
                 String sessionStorePath =
                     CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR) + separator
                         + System.getProperty(SERVER_SERVICE_PORT_CAMEL);
@@ -298,10 +299,7 @@ public class SessionHolder {
     //region get group mapping manager
     public static VGroupMappingStoreManager getRootVGroupMappingManager() {
         if (ROOT_VGROUP_MAPPING_MANAGER == null) {
-            init();
-            if (ROOT_VGROUP_MAPPING_MANAGER == null) {
-                throw new ShouldNeverHappenException("vGroupMappingManager is NOT init!");
-            }
+            throw new ShouldNeverHappenException("vGroupMappingManager is NOT init!");
         }
         return ROOT_VGROUP_MAPPING_MANAGER;
     }

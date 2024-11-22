@@ -105,7 +105,7 @@ public enum TransactionExceptionCode {
     /**
      * Failed to lock global transaction exception code.
      */
-    FailedLockGlobalTranscation,
+    FailedLockGlobalTransaction,
 
     /**
      * FailedWriteSession

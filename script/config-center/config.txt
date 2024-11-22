@@ -17,6 +17,7 @@
 
 #For details about configuration items, see https://seata.apache.org/zh-cn/docs/user/configurations
 #Transport configuration, for client and server
+transport.protocol=seata
 transport.type=TCP
 transport.server=NIO
 transport.heartbeat=true
@@ -112,6 +113,7 @@ store.db.maxConn=30
 store.db.globalTable=global_table
 store.db.branchTable=branch_table
 store.db.distributedLockTable=distributed_lock
+store.db.vgroupTable=vgroup-table
 store.db.queryLimit=100
 store.db.lockTable=lock_table
 store.db.maxWait=5000
@@ -138,7 +140,7 @@ server.recovery.rollbackingRetryPeriod=1000
 server.recovery.timeoutRetryPeriod=1000
 server.maxCommitRetryTimeout=-1
 server.maxRollbackRetryTimeout=-1
-server.rollbackRetryTimeoutUnlockEnable=false
+server.rollbackFailedUnlockEnable=false
 server.distributedLockExpireTime=10000
 server.session.branchAsyncQueueSize=5000
 server.session.enableBranchAsyncRemove=false
@@ -163,7 +165,7 @@ server.raft.sync=true
 
 
 #Metrics configuration, only for the server
-metrics.enabled=false
+metrics.enabled=true
 metrics.registryType=compact
 metrics.exporterList=prometheus
 metrics.exporterPrometheusPort=9898
