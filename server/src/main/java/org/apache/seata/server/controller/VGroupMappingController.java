@@ -18,7 +18,6 @@ package org.apache.seata.server.controller;
 
 import org.apache.seata.common.metadata.namingserver.Instance;
 import org.apache.seata.common.result.Result;
-import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.store.MappingDO;
@@ -28,13 +27,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.annotation.PostConstruct;
-
-import static org.apache.seata.common.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
-import static org.apache.seata.common.ConfigurationKeys.FILE_ROOT_REGISTRY;
-import static org.apache.seata.common.ConfigurationKeys.FILE_ROOT_TYPE;
-import static org.apache.seata.common.ConfigurationKeys.NAMING_SERVER;
 
 @RestController
 @RequestMapping("/vgroup/v1")
