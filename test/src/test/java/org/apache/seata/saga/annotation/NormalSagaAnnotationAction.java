@@ -17,7 +17,6 @@
 package org.apache.seata.saga.annotation;
 
 import org.apache.seata.rm.tcc.api.BusinessActionContext;
-import org.apache.seata.rm.tcc.api.BusinessActionContextParameter;
 
 import java.util.List;
 
@@ -27,10 +26,7 @@ import java.util.List;
 public interface NormalSagaAnnotationAction {
 
 
-    boolean commit(BusinessActionContext actionContext,
-                   @BusinessActionContextParameter("a") int a,
-                   @BusinessActionContextParameter(paramName = "b", index = 0) List b,
-                   @BusinessActionContextParameter(isParamInProperty = true) SagaParam sagaParam);
+    boolean commit(BusinessActionContext actionContext, int a, List b, SagaParam sagaParam);
 
     /**
      * Rollback boolean.
@@ -38,5 +34,5 @@ public interface NormalSagaAnnotationAction {
      * @param actionContext the action context
      * @return the boolean
      */
-    boolean compensation(BusinessActionContext actionContext, @BusinessActionContextParameter("sagaParam") SagaParam param);
+    boolean compensation(BusinessActionContext actionContext, SagaParam param);
 }
