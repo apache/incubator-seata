@@ -18,27 +18,15 @@ package org.apache.seata.saga.annotation;
 
 import org.apache.seata.rm.tcc.api.BusinessActionContext;
 import org.apache.seata.rm.tcc.api.BusinessActionContextParameter;
-import org.apache.seata.rm.tcc.api.LocalTCC;
-import org.apache.seata.saga.rm.api.CompensationBusinessAction;
 
 import java.util.List;
 
 /**
  * The interface saga action.
  */
-@LocalTCC
 public interface NormalSagaAnnotationAction {
 
-    /**
-     * Prepare boolean.
-     *
-     * @param actionContext the action context
-     * @param a             the a
-     * @param b             the b
-     * @param sagaParam     the saga param
-     * @return the boolean
-     */
-    @CompensationBusinessAction(name = "sagaActionForTest", compensationMethod = "compensation", compensationArgsClasses = {BusinessActionContext.class, SagaParam.class})
+
     boolean commit(BusinessActionContext actionContext,
                    @BusinessActionContextParameter("a") int a,
                    @BusinessActionContextParameter(paramName = "b", index = 0) List b,

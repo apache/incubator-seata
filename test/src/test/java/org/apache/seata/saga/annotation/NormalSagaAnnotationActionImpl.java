@@ -18,6 +18,7 @@ package org.apache.seata.saga.annotation;
 
 import java.util.List;
 import org.apache.seata.rm.tcc.api.BusinessActionContext;
+import org.apache.seata.saga.rm.api.CompensationBusinessAction;
 
 /**
  *
@@ -28,6 +29,7 @@ public class NormalSagaAnnotationActionImpl implements NormalSagaAnnotationActio
 
 
     @Override
+    @CompensationBusinessAction(name = "sagaActionForTest", compensationMethod = "compensation", compensationArgsClasses = {BusinessActionContext.class, SagaParam.class})
     public boolean commit(BusinessActionContext actionContext, int a, List b, SagaParam sagaParam) {
         isCommit = true;
         return a > 1;
