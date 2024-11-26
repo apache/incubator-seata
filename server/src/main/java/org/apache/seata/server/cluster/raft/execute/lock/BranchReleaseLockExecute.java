@@ -30,8 +30,16 @@ public class BranchReleaseLockExecute extends AbstractRaftMsgExecute {
     @Override
     public Boolean execute(RaftBaseMsg syncMsg) throws Throwable {
         RaftBranchSessionSyncMsg sessionSyncMsg = (RaftBranchSessionSyncMsg)syncMsg;
-        GlobalSession globalSession =
-            SessionHolder.getRootSessionManager().findGlobalSession(sessionSyncMsg.getBranchSession().getXid());
+        String xid = sessionSyncMsg.getBranchSession().getXid();
+        GlobalSession globalSession = SessionHolder.getRootSessionManager().findGlobalSession(xid);
+        if (globalSession == null) {
+            if (logger.isWarnEnabled()) {
+                logger.warn(
+                    "The transaction corresponding to the XID: {} does not exist, which may cause a two-phase concurrency issue, msg type: {}",
+                    xid, syncMsg.getMsgType());
+            }
+            return false;
+        }
         BranchSession branchSession = globalSession.getBranch(sessionSyncMsg.getBranchSession().getBranchId());
         if (branchSession != null) {
             if (logger.isDebugEnabled()) {

@@ -14,31 +14,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.tm;
+package org.apache.seata.tm.api.transaction;
 
-
-import org.apache.seata.common.exception.ShouldNeverHappenException;
-import org.apache.seata.core.model.TransactionManager;
-import org.apache.seata.tm.api.transaction.MockTransactionManager;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-class TransactionManagerHolderTest {
+/**
+ * the type SuspendedResourcesHolder
+ */
+public class SuspendedResourcesHolderTest {
 
-
-    @Test
-    void getTest() {
-        Assertions.assertThrows(ShouldNeverHappenException.class, () -> {   TransactionManagerHolder.set(null);
-            TransactionManagerHolder.get();});
-    }
-
+    private final static String DEFAULT_XID = "1234567890";
 
     @Test
-    void getInstanceTest() {
-        MockTransactionManager mockTransactionManager = new MockTransactionManager();
-        TransactionManagerHolder.set(mockTransactionManager);
-        TransactionManager transactionManager = TransactionManagerHolder.get();
-        Assertions.assertTrue(transactionManager instanceof MockTransactionManager);
+    void testIllegalArgumentException() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            new SuspendedResourcesHolder(null);
+        });
     }
 
+    @Test
+    void getXidTest() {
+        SuspendedResourcesHolder suspendedResourcesHolder = new SuspendedResourcesHolder(DEFAULT_XID);
+        Assertions.assertEquals(DEFAULT_XID, suspendedResourcesHolder.getXid());
+    }
 }

@@ -18,7 +18,6 @@ package org.apache.seata.server.controller;
 
 import org.apache.seata.common.metadata.namingserver.Instance;
 import org.apache.seata.common.result.Result;
-import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.store.MappingDO;
@@ -29,13 +28,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.PostConstruct;
-
-import static org.apache.seata.common.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
-import static org.apache.seata.common.ConfigurationKeys.FILE_ROOT_REGISTRY;
-import static org.apache.seata.common.ConfigurationKeys.FILE_ROOT_TYPE;
-import static org.apache.seata.common.ConfigurationKeys.NAMING_SERVER;
-
 @RestController
 @RequestMapping("/vgroup/v1")
 public class VGroupMappingController {
@@ -43,15 +35,6 @@ public class VGroupMappingController {
     private VGroupMappingStoreManager vGroupMappingStoreManager;
 
     protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
-
-    @PostConstruct
-    private void init() {
-        String type =
-            ConfigurationFactory.getInstance().getConfig(FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + FILE_ROOT_TYPE);
-        if (StringUtils.equals(type, NAMING_SERVER)) {
-            vGroupMappingStoreManager = SessionHolder.getRootVGroupMappingManager();
-        }
-    }
 
     /**
      * add vGroup in cluster
@@ -67,7 +50,7 @@ public class VGroupMappingController {
         mappingDO.setCluster(Instance.getInstance().getClusterName());
         mappingDO.setUnit(unit);
         mappingDO.setVGroup(vGroup);
-        boolean rst = vGroupMappingStoreManager.addVGroup(mappingDO);
+        boolean rst = SessionHolder.getRootVGroupMappingManager().addVGroup(mappingDO);
         Instance.getInstance().setTerm(System.currentTimeMillis());
         if (!rst) {
             result.setCode("500");
@@ -85,7 +68,7 @@ public class VGroupMappingController {
     @GetMapping("/removeVGroup")
     public Result<?> removeVGroup(@RequestParam String vGroup) {
         Result<?> result = new Result<>();
-        boolean rst = vGroupMappingStoreManager.removeVGroup(vGroup);
+        boolean rst = SessionHolder.getRootVGroupMappingManager().removeVGroup(vGroup);
         Instance.getInstance().setTerm(System.currentTimeMillis());
         if (!rst) {
             result.setCode("500");

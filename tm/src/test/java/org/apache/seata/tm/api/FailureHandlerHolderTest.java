@@ -14,31 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.tm;
+package org.apache.seata.tm.api;
 
-
-import org.apache.seata.common.exception.ShouldNeverHappenException;
-import org.apache.seata.core.model.TransactionManager;
-import org.apache.seata.tm.api.transaction.MockTransactionManager;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-class TransactionManagerHolderTest {
-
-
-    @Test
-    void getTest() {
-        Assertions.assertThrows(ShouldNeverHappenException.class, () -> {   TransactionManagerHolder.set(null);
-            TransactionManagerHolder.get();});
-    }
-
+/**
+ * the type FailureHandlerHolder
+ */
+public class FailureHandlerHolderTest {
 
     @Test
-    void getInstanceTest() {
-        MockTransactionManager mockTransactionManager = new MockTransactionManager();
-        TransactionManagerHolder.set(mockTransactionManager);
-        TransactionManager transactionManager = TransactionManagerHolder.get();
-        Assertions.assertTrue(transactionManager instanceof MockTransactionManager);
-    }
+    void testSetFailureHandlerWithCustomHandler() {
+        MockFailureHandlerImpl mockFailureHandlerImpl = new MockFailureHandlerImpl();
 
+        FailureHandlerHolder.setFailureHandler(mockFailureHandlerImpl);
+
+        Assertions.assertEquals(mockFailureHandlerImpl, FailureHandlerHolder.getFailureHandler());
+    }
 }
