@@ -18,7 +18,6 @@ package org.apache.seata.saga.statelang.parser.utils;
 
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.saga.statelang.domain.ChoiceState;
-import org.apache.seata.saga.statelang.domain.StateType;
 import org.apache.seata.saga.statelang.domain.State;
 import org.apache.seata.saga.statelang.domain.TaskState;
 
