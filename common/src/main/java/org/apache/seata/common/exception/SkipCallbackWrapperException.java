@@ -16,8 +16,6 @@
  */
 package org.apache.seata.common.exception;
 
-import org.apache.seata.common.lock.ResourceLock;
-
 /**
  * Skip Callback Wrapper Exception.
  * This exception class will make the semantics clearer.
@@ -25,17 +23,14 @@ import org.apache.seata.common.lock.ResourceLock;
  * @since above 1.4.2
  */
 public class SkipCallbackWrapperException extends RuntimeException {
-    private final ResourceLock resourceLock = new ResourceLock();
 
     public SkipCallbackWrapperException(Throwable cause) {
         super(cause);
     }
 
     @Override
-    public Throwable fillInStackTrace() {
-        try (ResourceLock ignored = resourceLock.obtain()) {
-            // do nothing
-            return null;
-        }
+    public synchronized Throwable fillInStackTrace() {
+        // do nothing
+        return null;
     }
 }
