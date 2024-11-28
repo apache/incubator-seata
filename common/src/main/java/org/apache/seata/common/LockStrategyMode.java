@@ -17,7 +17,7 @@
 package org.apache.seata.common;
 
 /**
- * @funkye
+ * @author funkye
  */
 public enum LockStrategyMode {
     /**
