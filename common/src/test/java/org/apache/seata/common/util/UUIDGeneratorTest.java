@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
- * @author <a href=mailto:ujjboy@qq.com>GengZhang</a>
+ *
  */
 class UUIDGeneratorTest {
 

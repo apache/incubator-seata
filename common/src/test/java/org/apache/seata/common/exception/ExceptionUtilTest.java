@@ -23,7 +23,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.UndeclaredThrowableException;
 
 /**
- * @author <a href=mailto:ujjboy@qq.com>GengZhang</a>
+ *
  */
 class ExceptionUtilTest {
 
