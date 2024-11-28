@@ -39,6 +39,11 @@ public class MockNettyRemotingServer extends AbstractNettyRemotingServer {
 
     private TransactionMessageHandler handler;
 
+    /**
+     * Sets handler.
+     *
+     * @param transactionMessageHandler the transaction message handler
+     */
     public void setHandler(TransactionMessageHandler transactionMessageHandler) {
         this.handler = transactionMessageHandler;
     }
@@ -56,7 +61,17 @@ public class MockNettyRemotingServer extends AbstractNettyRemotingServer {
      * @param messageExecutor the message executor
      */
     public MockNettyRemotingServer(ThreadPoolExecutor messageExecutor) {
-        super(messageExecutor, new NettyServerConfig());
+        this(messageExecutor, new NettyServerConfig());
+    }
+
+    /**
+     * Instantiates a new Mock netty remoting server.
+     *
+     * @param messageExecutor   the message executor
+     * @param nettyServerConfig the netty server config
+     */
+    public MockNettyRemotingServer(ThreadPoolExecutor messageExecutor, NettyServerConfig nettyServerConfig) {
+        super(messageExecutor, nettyServerConfig);
     }
 
     @Override

@@ -247,6 +247,8 @@ class NettyClientChannelManager {
                                 FrameworkErrorCode.NetConnect.getErrCode(), key, value.getMessage(), value);
                     });
                 }
+            }
+            if (availList.size() == failedMap.size()) {
                 String invalidAddress = StringUtils.join(failedMap.keySet().iterator(), ", ");
                 throw new FrameworkException("can not connect to [" + invalidAddress + "]");
             }

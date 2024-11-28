@@ -61,7 +61,7 @@
         <module>spring</module>
         <module>tcc</module>
         <module>test</module>
-        <module>test-mock-server</module>
+        <module>mock-server</module>
         <module>test-old-version</module>
         <module>tm</module>
         <module>metrics</module>
@@ -181,6 +181,7 @@
             <properties>
                 <image.publish.skip>false</image.publish.skip>
                 <dependencies.copy.skip>false</dependencies.copy.skip>
+                <mysql.copy.skip>false</mysql.copy.skip>
                 <mysql.jdbc.version>5.1.42</mysql.jdbc.version>
                 <mysql8.jdbc.version>8.0.27</mysql8.jdbc.version>
                 <maven.git-commit-id.skip>false</maven.git-commit-id.skip>
