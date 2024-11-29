@@ -29,7 +29,7 @@ import org.apache.seata.core.protocol.transaction.BranchRollbackResponse;
 import org.apache.seata.core.protocol.transaction.UndoLogDeleteRequest;
 import org.apache.seata.core.rpc.RemotingServer;
 import org.apache.seata.core.rpc.netty.ChannelManager;
-import org.apache.seata.server.session.BranchSession;
+import org.apache.seata.mockserver.model.MockBranchSession;
 
 /**
  * call rm
@@ -42,18 +42,17 @@ public class CallRm {
      * @param remotingServer
      * @return
      */
-    public static BranchStatus branchCommit(RemotingServer remotingServer, BranchSession branchSession) {
+    public static BranchStatus branchCommit(RemotingServer remotingServer, MockBranchSession branchSession) {
         BranchCommitRequest request = new BranchCommitRequest();
         setReq(request, branchSession);
         try {
-            BranchCommitResponse response = (BranchCommitResponse) remotingServer.sendSyncRequest(
-                    branchSession.getResourceId(), branchSession.getClientId(), request, false);
+            BranchCommitResponse response = (BranchCommitResponse)remotingServer.sendSyncRequest(
+                branchSession.getResourceId(), branchSession.getClientId(), request, false);
             return response.getBranchStatus();
         } catch (TimeoutException e) {
             throw new RuntimeException(e);
         }
     }
-
 
     /**
      * call branchRollback :TYPE_BRANCH_ROLLBACK = 5 , TYPE_BRANCH_ROLLBACK_RESULT = 6
@@ -61,13 +60,13 @@ public class CallRm {
      * @param remotingServer
      * @return
      */
-    public static BranchStatus branchRollback(RemotingServer remotingServer,  BranchSession branchSession) {
+    public static BranchStatus branchRollback(RemotingServer remotingServer, MockBranchSession branchSession) {
         BranchRollbackRequest request = new BranchRollbackRequest();
         setReq(request, branchSession);
 
         try {
-            BranchRollbackResponse response = (BranchRollbackResponse) remotingServer.sendSyncRequest(
-                    branchSession.getResourceId(), branchSession.getClientId(), request, false);
+            BranchRollbackResponse response = (BranchRollbackResponse)remotingServer.sendSyncRequest(
+                branchSession.getResourceId(), branchSession.getClientId(), request, false);
             return response.getBranchStatus();
         } catch (TimeoutException e) {
             throw new RuntimeException(e);
@@ -80,20 +79,21 @@ public class CallRm {
      * @param remotingServer
      * @return
      */
-    public static void deleteUndoLog(RemotingServer remotingServer, BranchSession branchSession) {
+    public static void deleteUndoLog(RemotingServer remotingServer, MockBranchSession branchSession) {
         UndoLogDeleteRequest request = new UndoLogDeleteRequest();
         request.setResourceId(branchSession.getResourceId());
-        request.setSaveDays((short) 1);
+        request.setSaveDays((short)1);
         request.setBranchType(BranchType.TCC);
         try {
-            Channel channel = ChannelManager.getChannel(branchSession.getResourceId(), branchSession.getClientId(), false);
+            Channel channel = ChannelManager.getChannel(branchSession.getResourceId(), branchSession.getClientId(),
+                false);
             remotingServer.sendAsyncRequest(channel, request);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static void setReq(AbstractBranchEndRequest request, BranchSession branchSession) {
+    private static void setReq(AbstractBranchEndRequest request, MockBranchSession branchSession) {
         request.setXid(branchSession.getXid());
         request.setBranchId(branchSession.getBranchId());
         request.setResourceId(branchSession.getResourceId());

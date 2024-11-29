@@ -147,6 +147,7 @@
         <image.tags>latest</image.tags>
 
         <dependencies.copy.skip>true</dependencies.copy.skip>
+        <mysql.copy.skip>true</mysql.copy.skip>
     </properties>
 
     <build>

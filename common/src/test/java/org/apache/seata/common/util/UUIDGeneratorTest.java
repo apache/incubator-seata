@@ -14,18 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.common;
+package org.apache.seata.common.util;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
- * Lock Strategy Mode
+ *
  */
-public enum LockStrategyMode {
-    /**
-     * Optimistic lock mode is recommended when resources are not reused in the current global transaction.
-     */
-    OPTIMISTIC,
-    /**
-     * Pessimistic lock mode is recommended when there may be repeated use of the same resource in a global transaction.
-     */
-    PESSIMISTIC
+class UUIDGeneratorTest {
+
+    @Test
+    void generateUUID() {
+        Assertions.assertTrue(UUIDGenerator.generateUUID() > 0);
+    }
 }
