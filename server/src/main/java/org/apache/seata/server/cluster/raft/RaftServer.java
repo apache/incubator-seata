@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+
 import com.alipay.sofa.jraft.Node;
 import com.alipay.sofa.jraft.RaftGroupService;
 import com.alipay.sofa.jraft.RouteTable;
@@ -28,22 +29,23 @@ import com.alipay.sofa.jraft.entity.PeerId;
 import com.alipay.sofa.jraft.option.NodeOptions;
 import com.alipay.sofa.jraft.rpc.RpcServer;
 import com.codahale.metrics.Slf4jReporter;
+import org.apache.commons.io.FileUtils;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.rpc.Disposable;
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_REPORTER_ENABLED;
 import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_REPORTER_INITIAL_DELAY;
-import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_SSL_CLIENT_KEYSTORE;
 import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_SSL_CLIENT_KEYSTORE_PASSWORD;
+import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_SSL_CLIENT_KEYSTORE_PATH;
 import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_SSL_ENABLED;
 import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_SSL_KEYSTORE_TYPE;
 import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_SSL_KMF_ALGORITHM;
-import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_SSL_SERVER_KEYSTORE;
 import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_SSL_SERVER_KEYSTORE_PASSWORD;
+import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_SSL_SERVER_KEYSTORE_PATH;
+import static org.apache.seata.common.DefaultValues.DEFAULT_RAFT_SSL_ENABLED;
 
 /**
  */
@@ -89,7 +91,7 @@ public class RaftServer implements Disposable, Closeable {
         this.node = this.raftGroupService.start(false);
         RouteTable.getInstance().updateConfiguration(groupId, node.getOptions().getInitialConf());
         // Enable SSL authentication for the Raft group if SSL is enabled.
-        boolean sslEnabled = ConfigurationFactory.getInstance().getBoolean(SERVER_RAFT_SSL_ENABLED, false);
+        boolean sslEnabled = ConfigurationFactory.getInstance().getBoolean(SERVER_RAFT_SSL_ENABLED, DEFAULT_RAFT_SSL_ENABLED);
         if (sslEnabled) {
             enableSSL();
         }
@@ -133,21 +135,30 @@ public class RaftServer implements Disposable, Closeable {
     }
 
     private void enableSSL() {
-        System.setProperty("bolt.server.ssl.enable", "true");
-        System.setProperty("bolt.server.ssl.clientAuth", "true");
-        System.setProperty("bolt.client.ssl.enable", "true");
+        setSystemProperty("bolt.server.ssl.enable", "true");
+        setSystemProperty("bolt.server.ssl.clientAuth", "true");
+        setSystemProperty("bolt.client.ssl.enable", "true");
 
         Configuration instance = ConfigurationFactory.getInstance();
-        System.setProperty("bolt.server.ssl.keystore", instance.getConfig(SERVER_RAFT_SSL_SERVER_KEYSTORE));
-        System.setProperty("bolt.server.ssl.keystore.password", instance.getConfig(SERVER_RAFT_SSL_SERVER_KEYSTORE_PASSWORD));
-        System.setProperty("bolt.server.ssl.keystore.type", instance.getConfig(SERVER_RAFT_SSL_KEYSTORE_TYPE));
-        System.setProperty("bolt.server.ssl.kmf.algorithm", instance.getConfig(SERVER_RAFT_SSL_KMF_ALGORITHM));
-        System.setProperty("bolt.client.ssl.keystore", instance.getConfig(SERVER_RAFT_SSL_CLIENT_KEYSTORE));
-        System.setProperty("bolt.client.ssl.keystore.password", instance.getConfig(SERVER_RAFT_SSL_CLIENT_KEYSTORE_PASSWORD));
-        System.setProperty("bolt.client.ssl.keystore.type", instance.getConfig(SERVER_RAFT_SSL_KEYSTORE_TYPE));
-        System.setProperty("bolt.client.ssl.tmf.algorithm", instance.getConfig(SERVER_RAFT_SSL_KMF_ALGORITHM));
+        setSystemProperty("bolt.server.ssl.keystore", instance.getConfig(SERVER_RAFT_SSL_SERVER_KEYSTORE_PATH));
+        setSystemProperty("bolt.server.ssl.keystore.password",
+            instance.getConfig(SERVER_RAFT_SSL_SERVER_KEYSTORE_PASSWORD));
+        setSystemProperty("bolt.server.ssl.keystore.type", instance.getConfig(SERVER_RAFT_SSL_KEYSTORE_TYPE));
+        setSystemProperty("bolt.server.ssl.kmf.algorithm", instance.getConfig(SERVER_RAFT_SSL_KMF_ALGORITHM));
+        setSystemProperty("bolt.client.ssl.keystore", instance.getConfig(SERVER_RAFT_SSL_CLIENT_KEYSTORE_PATH));
+        setSystemProperty("bolt.client.ssl.keystore.password",
+            instance.getConfig(SERVER_RAFT_SSL_CLIENT_KEYSTORE_PASSWORD));
+        setSystemProperty("bolt.client.ssl.keystore.type", instance.getConfig(SERVER_RAFT_SSL_KEYSTORE_TYPE));
+        setSystemProperty("bolt.client.ssl.tmf.algorithm", instance.getConfig(SERVER_RAFT_SSL_KMF_ALGORITHM));
 
         logger.info("Enable ssl communication between raft nodes");
+    }
+
+    private void setSystemProperty(String property, String value) {
+        if (value == null || value.isEmpty()) {
+            throw new IllegalArgumentException("Configuration value for " + property + " cannot be null or empty");
+        }
+        System.setProperty(property, value);
     }
 
 }
