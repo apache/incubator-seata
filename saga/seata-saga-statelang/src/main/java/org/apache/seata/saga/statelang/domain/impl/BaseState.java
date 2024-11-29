@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.apache.seata.saga.statelang.domain.State;
 import org.apache.seata.saga.statelang.domain.StateMachine;
+import org.apache.seata.saga.statelang.domain.StateType;
 
 /**
  * BaseState
@@ -28,7 +29,7 @@ import org.apache.seata.saga.statelang.domain.StateMachine;
 public abstract class BaseState implements State {
 
     private transient String name;
-    private String type;
+    private StateType type;
     private String comment;
     private String next;
     private Map<String, Object> extensions;
@@ -80,11 +81,11 @@ public abstract class BaseState implements State {
     }
 
     @Override
-    public String getType() {
+    public StateType getType() {
         return type;
     }
 
-    protected void setType(String type) {
+    protected void setType(StateType type) {
         this.type = type;
     }
 }
