@@ -66,7 +66,7 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
     /**
      * The Session map.
      */
-    private Map<String, GlobalSession> sessionMap = new ConcurrentHashMap<>(64);
+    protected Map<String, GlobalSession> sessionMap = new ConcurrentHashMap<>(64);
 
 
     /**

@@ -21,3 +21,5 @@ org.apache.seata.rm.datasource.undo.sqlserver.SqlServerUndoExecutorHolder
 org.apache.seata.rm.datasource.undo.mariadb.MariadbUndoExecutorHolder
 org.apache.seata.rm.datasource.undo.polardbx.PolarDBXUndoExecutorHolder
 org.apache.seata.rm.datasource.undo.dm.DmUndoExecutorHolder
+org.apache.seata.rm.datasource.undo.oscar.OscarUndoExecutorHolder
+org.apache.seata.rm.datasource.undo.kingbase.KingbaseUndoExecutorHolder

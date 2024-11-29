@@ -377,14 +377,18 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
             try (CloseableHttpResponse httpResponse =
                 HttpClientUtil.doGet("http://" + tcAddress + "/metadata/v1/cluster", param, header, 1000)) {
                 if (httpResponse != null) {
-                    if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                    int statusCode = httpResponse.getStatusLine().getStatusCode();
+                    if (statusCode == HttpStatus.SC_OK) {
                         response = EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
-                    } else if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
+                    } else if (statusCode == HttpStatus.SC_UNAUTHORIZED) {
                         if (StringUtils.isNotBlank(USERNAME) && StringUtils.isNotBlank(PASSWORD)) {
-                            throw new RetryableException("Authentication failed!");
+                            refreshToken(tcAddress);
+                            throw new RetryableException("Token refreshed, retrying request.");
                         } else {
                             throw new AuthenticationFailedException("Authentication failed! you should configure the correct username and password.");
                         }
+                    } else {
+                        throw new AuthenticationFailedException("Authentication failed! you should configure the correct username and password.");
                     }
                 }
                 MetadataResponse metadataResponse;
@@ -414,7 +418,6 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
         Map<String, String> header = new HashMap<>();
         header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
         String response = null;
-        tokenTimeStamp = System.currentTimeMillis();
         try (CloseableHttpResponse httpResponse =
             HttpClientUtil.doPost("http://" + tcAddress + "/api/v1/auth/login", param, header, 1000)) {
             if (httpResponse != null) {
@@ -427,6 +430,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                         throw new AuthenticationFailedException("Authentication failed! you should configure the correct username and password.");
                     }
                     jwtToken = jsonNode.get("data").asText();
+                    tokenTimeStamp = System.currentTimeMillis();
                 } else {
                     //authorized failed,throw exception to kill process
                     throw new AuthenticationFailedException("Authentication failed! you should configure the correct username and password.");

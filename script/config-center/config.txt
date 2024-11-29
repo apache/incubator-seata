@@ -17,6 +17,7 @@
 
 #For details about configuration items, see https://seata.apache.org/zh-cn/docs/user/configurations
 #Transport configuration, for client and server
+transport.protocol=seata
 transport.type=TCP
 transport.server=NIO
 transport.heartbeat=true
@@ -139,7 +140,7 @@ server.recovery.rollbackingRetryPeriod=1000
 server.recovery.timeoutRetryPeriod=1000
 server.maxCommitRetryTimeout=-1
 server.maxRollbackRetryTimeout=-1
-server.rollbackRetryTimeoutUnlockEnable=false
+server.rollbackFailedUnlockEnable=false
 server.distributedLockExpireTime=10000
 server.session.branchAsyncQueueSize=5000
 server.session.enableBranchAsyncRemove=false

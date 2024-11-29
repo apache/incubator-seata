@@ -23,3 +23,5 @@ org.apache.seata.core.store.db.sql.lock.SqlServerLockStoreSql
 org.apache.seata.core.store.db.sql.lock.MariadbLockStoreSql
 org.apache.seata.core.store.db.sql.lock.PolarDBXLockStoreSql
 org.apache.seata.core.store.db.sql.lock.DmLockStoreSql
+org.apache.seata.core.store.db.sql.lock.OscarLockStoreSql
+org.apache.seata.core.store.db.sql.lock.KingbaseLockStoreSql

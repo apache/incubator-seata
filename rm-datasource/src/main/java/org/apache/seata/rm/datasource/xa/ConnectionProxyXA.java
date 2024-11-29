@@ -163,6 +163,11 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
         if (currentAutoCommitStatus == autoCommit) {
             return;
         }
+        if (isReadOnly()) {
+            //If it is a read-only transaction, do nothing
+            currentAutoCommitStatus = autoCommit;
+            return;
+        }
         if (autoCommit) {
             // According to JDBC spec:
             // If this method is called during a transaction and the
@@ -210,8 +215,8 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
 
     @Override
     public synchronized void commit() throws SQLException {
-        if (currentAutoCommitStatus) {
-            // Ignore the committing on an autocommit session.
+        if (currentAutoCommitStatus || isReadOnly()) {
+            // Ignore the committing on an autocommit session and read-only transaction.
             return;
         }
         if (!xaActive || this.xaBranchXid == null) {
@@ -251,8 +256,8 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
 
     @Override
     public void rollback() throws SQLException {
-        if (currentAutoCommitStatus) {
-            // Ignore the committing on an autocommit session.
+        if (currentAutoCommitStatus || isReadOnly()) {
+            // Ignore the committing on an autocommit session and read-only transaction.
             return;
         }
         if (!xaActive || this.xaBranchXid == null) {

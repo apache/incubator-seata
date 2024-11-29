@@ -22,7 +22,7 @@ import org.apache.seata.saga.proctrl.eventing.EventBus;
 import org.apache.seata.saga.proctrl.eventing.EventPublisher;
 
 /**
- * ProcessCtrl Event Pulisher
+ * ProcessCtrl Event Publisher
  *
  */
 public class ProcessCtrlEventPublisher implements EventPublisher<ProcessContext> {

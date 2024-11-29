@@ -17,8 +17,9 @@ language: java
 sudo: false # faster builds
 
 jdk:
-  - openjdk11
   - openjdk8
+  - openjdk17
+  - openjdk21
 
 cache:
   directories:
@@ -28,10 +29,13 @@ install: true
 
 before_script:
   - if [ "$TRAVIS_JDK_VERSION" == "openjdk8" ]; then
-      export IMAGE_NAME="openjdk:8-jre-slim";
+      export IMAGE_NAME="eclipse-temurin:8u422-b05-jre";
     fi
-  - if [ "$TRAVIS_JDK_VERSION" == "openjdk11" ]; then
-      export IMAGE_NAME="openjdk:11-jre-stretch";
+  - if [ "$TRAVIS_JDK_VERSION" == "openjdk17" ]; then
+      export IMAGE_NAME="eclipse-temurin:17.0.12_7-jre";
+    fi
+  - if [ "$TRAVIS_JDK_VERSION" == "openjdk21" ]; then
+      export IMAGE_NAME="eclipse-temurin:21.0.4_7-jre";
     fi
 
 script:
