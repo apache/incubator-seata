@@ -947,12 +947,12 @@ public interface ConfigurationKeys {
     /**
      * The constant SERVER_RAFT_SSL_SERVER_KEYSTORE.
      */
-    String SERVER_RAFT_SSL_SERVER_KEYSTORE = SERVER_RAFT_SSL_SERVER + "keystore";
+    String SERVER_RAFT_SSL_SERVER_KEYSTORE_PATH = SERVER_RAFT_SSL_SERVER + "keystore.path";
 
     /**
      * The constant SERVER_RAFT_SSL_CLIENT_KEYSTORE.
      */
-    String SERVER_RAFT_SSL_CLIENT_KEYSTORE = SERVER_RAFT_SSL_CLIENT + "keystore";
+    String SERVER_RAFT_SSL_CLIENT_KEYSTORE_PATH = SERVER_RAFT_SSL_CLIENT + "keystore.path";
 
     /**
      * The constant SERVER_RAFT_SSL_SERVER_KEYSTORE_PASSWORD.
