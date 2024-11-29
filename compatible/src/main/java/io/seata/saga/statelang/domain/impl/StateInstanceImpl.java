@@ -21,6 +21,7 @@ import java.util.Date;
 import io.seata.saga.statelang.domain.ExecutionStatus;
 import io.seata.saga.statelang.domain.StateInstance;
 import io.seata.saga.statelang.domain.StateMachineInstance;
+import io.seata.saga.statelang.domain.StateType;
 
 /**
  * state execution instance
@@ -67,13 +68,17 @@ public class StateInstanceImpl implements StateInstance {
     }
 
     @Override
-    public String getType() {
-        return actual.getType();
+    public StateType getType() {
+        return StateType.wrap(actual.getType());
     }
 
     @Override
-    public void setType(String type) {
-        actual.setType(type);
+    public void setType(StateType type) {
+        if (type == null) {
+            actual.setType(null);
+        } else {
+            actual.setType(type.unwrap());
+        }
     }
 
     @Override
