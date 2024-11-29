@@ -178,7 +178,7 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
 
         @Override
         public void channelWritabilityChanged(ChannelHandlerContext ctx) {
-            try (ResourceLock ignored = resourceLock.obtain()){
+            try (ResourceLock ignored = resourceLock.obtain()) {
                 if (ctx.channel().isWritable()) {
                     condition.signalAll();
                 }

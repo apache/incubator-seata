@@ -107,7 +107,7 @@ class NettyClientChannelManager {
             LOGGER.info("will connect to {}", serverAddress);
         }
         ResourceLock lock = CollectionUtils.computeIfAbsent(resourceLocks, serverAddress, key -> new ResourceLock());
-        try (ResourceLock ignored = lock.obtain()){
+        try (ResourceLock ignored = lock.obtain()) {
             return doConnect(serverAddress);
         }
     }

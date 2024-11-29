@@ -85,7 +85,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     private static final long SCHEDULE_INTERVAL_MILLS = 10 * 1000L;
     private static final String MERGE_THREAD_PREFIX = "rpcMergeMessageSend";
     private final ResourceLock mergerLock = new ResourceLock();
-    private final Condition mergeCondition= mergerLock.newCondition();
+    private final Condition mergeCondition = mergerLock.newCondition();
 
     /**
      * When sending message type is {@link MergeMessage}, will be stored to mergeMsgMap.
@@ -166,7 +166,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                 LOGGER.debug("offer message: {}", rpcMessage.getBody());
             }
             if (!isSending) {
-                try (ResourceLock ignored = mergerLock.obtain()){
+                try (ResourceLock ignored = mergerLock.obtain()) {
                     mergeCondition.notifyAll();
                 }
             }
@@ -347,7 +347,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         @Override
         public void run() {
             while (true) {
-                try (ResourceLock ignored = mergerLock.obtain()){
+                try (ResourceLock ignored = mergerLock.obtain()) {
                     mergeCondition.await(MAX_MERGE_SEND_MILLS, TimeUnit.MILLISECONDS);
                 } catch (InterruptedException ignored) {
                 }
@@ -432,7 +432,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
 
         @Override
         public void channelWritabilityChanged(ChannelHandlerContext ctx) {
-            try (ResourceLock ignored = resourceLock.obtain()){
+            try (ResourceLock ignored = resourceLock.obtain()) {
                 if (ctx.channel().isWritable()) {
                     condition.signalAll();
                 }

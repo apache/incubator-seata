@@ -346,7 +346,7 @@ public abstract class AbstractNettyRemoting implements Disposable {
 
     private void channelWritableCheck(Channel channel, Object msg) {
         int tryTimes = 0;
-        try (ResourceLock ignored = resourceLock.obtain()){
+        try (ResourceLock ignored = resourceLock.obtain()) {
             while (!channel.isWritable()) {
                 try {
                     tryTimes++;

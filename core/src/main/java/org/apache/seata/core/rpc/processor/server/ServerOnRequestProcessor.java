@@ -218,7 +218,7 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
 
     private void notifyBatchRespondingThread() {
         if (!isResponding) {
-            try (ResourceLock ignored = batchResponseLock.obtain()){
+            try (ResourceLock ignored = batchResponseLock.obtain()) {
                 condition.signalAll();
             }
         }
@@ -245,7 +245,7 @@ public class ServerOnRequestProcessor implements RemotingProcessor, Disposable {
         @Override
         public void run() {
             while (true) {
-                try (ResourceLock ignored = batchResponseLock.obtain()){
+                try (ResourceLock ignored = batchResponseLock.obtain()) {
                     condition.await(MAX_BATCH_RESPONSE_MILLS, TimeUnit.MILLISECONDS);
                 } catch (InterruptedException e) {
                     LOGGER.error("BatchResponseRunnable Interrupted error", e);
