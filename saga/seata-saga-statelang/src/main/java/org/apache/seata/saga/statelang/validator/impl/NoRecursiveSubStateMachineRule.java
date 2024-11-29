@@ -16,7 +16,7 @@
  */
 package org.apache.seata.saga.statelang.validator.impl;
 
-import org.apache.seata.saga.statelang.domain.DomainConstants;
+import org.apache.seata.saga.statelang.domain.StateType;
 import org.apache.seata.saga.statelang.domain.State;
 import org.apache.seata.saga.statelang.domain.StateMachine;
 import org.apache.seata.saga.statelang.domain.SubStateMachine;
@@ -30,7 +30,7 @@ public class NoRecursiveSubStateMachineRule extends AbstractRule {
     @Override
     public boolean validate(StateMachine stateMachine) {
         for (State state: stateMachine.getStates().values()) {
-            if (!DomainConstants.STATE_TYPE_SUB_STATE_MACHINE.equals(state.getType())) {
+            if (!StateType.SUB_STATE_MACHINE.equals(state.getType())) {
                 continue;
             }
             if (stateMachine.getName().equals(((SubStateMachine) state).getStateMachineName())) {
