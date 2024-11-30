@@ -30,7 +30,7 @@ import org.apache.seata.rm.datasource.undo.UndoLogParser;
 public class FuryUndoLogParser implements UndoLogParser, Initialize {
     public static final String NAME = "fury";
 
-    private static final ThreadSafeFury fury = new ThreadLocalFury(classLoader -> Fury.builder()
+    private static final ThreadSafeFury FURY = new ThreadLocalFury(classLoader -> Fury.builder()
             .withLanguage(Language.JAVA)
             // In JAVA mode, classes cannot be registered by tag, and the different registration order between the server and the client will cause deserialization failure
             // In XLANG cross-language mode has problems with Java class serialization, such as enum classes [https://github.com/apache/fury/issues/1644].
@@ -56,12 +56,12 @@ public class FuryUndoLogParser implements UndoLogParser, Initialize {
 
     @Override
     public byte[] encode(BranchUndoLog branchUndoLog) {
-        return fury.serializeJavaObject(branchUndoLog);
+        return FURY.serializeJavaObject(branchUndoLog);
     }
 
     @Override
     public BranchUndoLog decode(byte[] bytes) {
-        return fury.deserializeJavaObject(bytes, BranchUndoLog.class);
+        return FURY.deserializeJavaObject(bytes, BranchUndoLog.class);
     }
 
 }
