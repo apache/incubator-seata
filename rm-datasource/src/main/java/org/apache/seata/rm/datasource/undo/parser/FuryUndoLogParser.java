@@ -16,9 +16,6 @@
  */
 package org.apache.seata.rm.datasource.undo.parser;
 
-import com.alibaba.fastjson2.JSONB;
-import com.alibaba.fastjson2.JSONReader;
-import com.alibaba.fastjson2.JSONWriter;
 import org.apache.fury.Fury;
 import org.apache.fury.ThreadLocalFury;
 import org.apache.fury.ThreadSafeFury;
