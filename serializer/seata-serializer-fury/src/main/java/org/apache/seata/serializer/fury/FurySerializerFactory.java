@@ -26,7 +26,7 @@ import org.apache.seata.core.serializer.SerializerSecurityRegistry;
 public class FurySerializerFactory {
     private static final FurySerializerFactory FACTORY = new FurySerializerFactory();
 
-    private static final ThreadSafeFury fury = new ThreadLocalFury(classLoader -> {
+    private static final ThreadSafeFury FURY = new ThreadLocalFury(classLoader -> {
         Fury f = Fury.builder()
                 .withLanguage(Language.JAVA)
                 // In JAVA mode, classes cannot be registered by tag, and the different registration order between the server and the client will cause deserialization failure
@@ -48,6 +48,6 @@ public class FurySerializerFactory {
     }
 
     public ThreadSafeFury get() {
-        return fury;
+        return FURY;
     }
 }
