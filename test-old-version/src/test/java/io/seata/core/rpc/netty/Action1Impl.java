@@ -16,11 +16,11 @@
  */
 package io.seata.core.rpc.netty;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import io.seata.rm.tcc.api.BusinessActionContext;
 import org.springframework.stereotype.Service;
-import vlsi.utils.CompactHashMap;
-
-import java.util.Map;
 
 /**
  * The type Action1.
@@ -28,8 +28,8 @@ import java.util.Map;
 @Service
 public class Action1Impl implements Action1 {
 
-    private static Map<String, Integer> commitMap = new CompactHashMap<>();
-    private static Map<String, Integer> rollbackMap = new CompactHashMap<>();
+    private static final Map<String, Integer> COMMIT_MAP = new HashMap<>();
+    private static final Map<String, Integer> ROLLBACK_MAP = new HashMap<>();
 
     @Override
     public String insert(Long reqId, Map<String, String> params) {
@@ -37,12 +37,11 @@ public class Action1Impl implements Action1 {
         return "prepare";
     }
 
-
     @Override
     public boolean commitTcc(BusinessActionContext actionContext) {
         String xid = actionContext.getXid();
         System.out.println("commitTcc:" + xid + "," + actionContext.getActionContext());
-        commitMap.compute(xid, (k, v) -> v == null ? 1 : v + 1);
+        COMMIT_MAP.compute(xid, (k, v) -> v == null ? 1 : v + 1);
         return true;
     }
 
@@ -50,15 +49,15 @@ public class Action1Impl implements Action1 {
     public boolean cancel(BusinessActionContext actionContext) {
         String xid = actionContext.getXid();
         System.out.println("cancelTcc:" + xid + "," + actionContext.getActionContext());
-        rollbackMap.compute(xid, (k, v) -> v == null ? 1 : v + 1);
+        ROLLBACK_MAP.compute(xid, (k, v) -> v == null ? 1 : v + 1);
         return true;
     }
 
     public static int getCommitTimes(String xid) {
-        return commitMap.getOrDefault(xid, 0);
+        return COMMIT_MAP.getOrDefault(xid, 0);
     }
 
     public static int getRollbackTimes(String xid) {
-        return rollbackMap.getOrDefault(xid, 0);
+        return ROLLBACK_MAP.getOrDefault(xid, 0);
     }
 }

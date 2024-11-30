@@ -21,6 +21,7 @@ import java.util.List;
 import org.apache.seata.common.exception.FrameworkErrorCode;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.saga.engine.exception.EngineExecutionException;
+import org.apache.seata.saga.statelang.domain.StateType;
 import org.apache.seata.saga.engine.pcext.utils.CompensationHolder;
 import org.apache.seata.saga.engine.strategy.StatusDecisionStrategy;
 import org.apache.seata.saga.engine.utils.ExceptionUtils;
@@ -110,7 +111,7 @@ public class DefaultStatusDecisionStrategy implements StatusDecisionStrategy {
                     stateMachineInstance.setStatus(ExecutionStatus.UN);
                     hasSetStatus = true;
                 } else if (ExecutionStatus.SU.equals(stateInstance.getStatus())) {
-                    if (DomainConstants.STATE_TYPE_SERVICE_TASK.equals(stateInstance.getType())) {
+                    if (StateType.SERVICE_TASK.equals(stateInstance.getType())) {
                         if (stateInstance.isForUpdate() && !stateInstance.isForCompensation()) {
                             hasSuccessUpdateService = true;
                         }

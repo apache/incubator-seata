@@ -38,6 +38,7 @@ import org.apache.seata.saga.engine.utils.ProcessContextBuilder;
 import org.apache.seata.saga.proctrl.ProcessContext;
 import org.apache.seata.saga.proctrl.ProcessType;
 import org.apache.seata.saga.statelang.domain.DomainConstants;
+import org.apache.seata.saga.statelang.domain.StateType;
 import org.apache.seata.saga.statelang.domain.ExecutionStatus;
 import org.apache.seata.saga.statelang.domain.State;
 import org.apache.seata.saga.statelang.domain.StateInstance;
@@ -280,7 +281,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
 
         context.setVariable(lastForwardState.getName() + DomainConstants.VAR_NAME_RETRIED_STATE_INST_ID,
             lastForwardState.getId());
-        if (DomainConstants.STATE_TYPE_SUB_STATE_MACHINE.equals(lastForwardState.getType()) && !ExecutionStatus.SU
+        if (StateType.SUB_STATE_MACHINE.equals(lastForwardState.getType()) && !ExecutionStatus.SU
             .equals(lastForwardState.getCompensationStatus())) {
 
             context.setVariable(DomainConstants.VAR_NAME_IS_FOR_SUB_STATMACHINE_FORWARD, true);
@@ -418,7 +419,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
                     continue;
                 }
 
-                if (DomainConstants.STATE_TYPE_SUB_STATE_MACHINE.equals(stateInstance.getType())) {
+                if (StateType.SUB_STATE_MACHINE.equals(stateInstance.getType())) {
 
                     StateInstance finalState = stateInstance;
 

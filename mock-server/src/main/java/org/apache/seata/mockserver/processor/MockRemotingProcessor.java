@@ -43,7 +43,6 @@ public class MockRemotingProcessor implements RemotingProcessor {
     public void process(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception {
         Object message = rpcMessage.getBody();
         LOGGER.info("process message : " + message);
-
     }
 
 

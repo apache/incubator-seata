@@ -71,12 +71,20 @@ public enum SerializerType {
      */
     FASTJSON2((byte)0x64),
 
+
     /**
-     * The fury.
+     * The grpc
      * <p>
      * Math.pow(2, 7)
      */
-    FURY((byte)0x128)
+    GRPC((byte) 0x128);
+
+    /**
+     * The fury.
+     * <p>
+     * Math.pow(2, 8)
+     */
+    FURY((byte)0x256)
     ;
 
     private final byte code;

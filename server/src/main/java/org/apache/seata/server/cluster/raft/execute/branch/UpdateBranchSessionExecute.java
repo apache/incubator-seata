@@ -33,8 +33,26 @@ public class UpdateBranchSessionExecute extends AbstractRaftMsgExecute {
     public Boolean execute(RaftBaseMsg syncMsg) throws Throwable {
         RaftBranchSessionSyncMsg sessionSyncMsg = (RaftBranchSessionSyncMsg)syncMsg;
         RaftSessionManager raftSessionManager = (RaftSessionManager) SessionHolder.getRootSessionManager(sessionSyncMsg.getGroup());
-        GlobalSession globalSession = raftSessionManager.findGlobalSession(sessionSyncMsg.getBranchSession().getXid());
-        BranchSession branchSession = globalSession.getBranch(sessionSyncMsg.getBranchSession().getBranchId());
+        String xid = sessionSyncMsg.getBranchSession().getXid();
+        GlobalSession globalSession = raftSessionManager.findGlobalSession(xid);
+        if (globalSession == null) {
+            if (logger.isWarnEnabled()) {
+                logger.warn(
+                    "The transaction corresponding to the XID: {} does not exist, which may cause a two-phase concurrency issue, msg type: {}",
+                    xid, syncMsg.getMsgType());
+            }
+            return false;
+        }
+        long branchId = sessionSyncMsg.getBranchSession().getBranchId();
+        BranchSession branchSession = globalSession.getBranch(branchId);
+        if (branchSession == null) {
+            if (logger.isWarnEnabled()) {
+                logger.warn(
+                    "The branch session corresponding to the branchId: {} does not exist, which may cause a two-phase concurrency issue, msg type: {}",
+                    sessionSyncMsg.getBranchSession().getBranchId(), syncMsg.getMsgType());
+            }
+            return false;
+        }
         BranchStatus status = BranchStatus.get(sessionSyncMsg.getBranchSession().getStatus());
         branchSession.setStatus(status);
         if (logger.isDebugEnabled()) {

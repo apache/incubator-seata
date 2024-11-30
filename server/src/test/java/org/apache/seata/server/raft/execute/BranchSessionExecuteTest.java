@@ -16,7 +16,11 @@
  */
 package org.apache.seata.server.raft.execute;
 
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.seata.common.XID;
 import org.apache.seata.common.util.NetUtil;
+import org.apache.seata.common.util.UUIDGenerator;
 import org.apache.seata.config.ConfigurationCache;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchStatus;
@@ -33,10 +37,8 @@ import org.apache.seata.server.session.SessionHolder;
 import org.apache.seata.server.storage.SessionConverter;
 import org.apache.seata.server.store.StoreConfig;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
@@ -51,8 +53,6 @@ class BranchSessionExecuteTest {
 
     private static GlobalSession GLOBAL_SESSION;
 
-    private static final String XID = "123:123";
-
     private static final long BRANCH_ID = 0L;
 
     @BeforeAll
@@ -61,10 +61,14 @@ class BranchSessionExecuteTest {
         SessionHolder.init(StoreConfig.SessionMode.RAFT);
         LockerManagerFactory.destroy();
         LockerManagerFactory.init(StoreConfig.LockMode.RAFT);
+        GLOBAL_SESSION = mockGlobalSession();
+        SessionHolder.getRootSessionManager().addGlobalSession(GLOBAL_SESSION);
     }
 
     @AfterAll
-    public static void destroy() throws TransactionException {
+    public static void destroy() throws Throwable {
+        testRemove();
+        SessionHolder.getRootSessionManager().removeGlobalSession(GLOBAL_SESSION);
         // Clear configuration
         ConfigurationCache.clear();
         System.clearProperty("server.raft.serverAddr");
@@ -75,75 +79,66 @@ class BranchSessionExecuteTest {
         LockerManagerFactory.destroy();
     }
 
-    @BeforeEach
-    public void addGlobalSession() throws TransactionException {
-        GLOBAL_SESSION = mockGlobalSession();
-        SessionHolder.getRootSessionManager().addGlobalSession(GLOBAL_SESSION);
-    }
 
-    @AfterEach
-    public void removeTestSession() throws TransactionException {
-        SessionHolder.getRootSessionManager().removeGlobalSession(GLOBAL_SESSION);
-    }
 
     @Test
     public void testAdd() throws Throwable {
-        BranchSession expected = mockBranchSession();
+        BranchSession expected = mockBranchSession(GLOBAL_SESSION.getXid(), GLOBAL_SESSION.getTransactionId());
 
         AddBranchSessionExecute execute = new AddBranchSessionExecute();
         boolean success = execute.execute(convertToBranchSessionMsg(expected));
         Assertions.assertTrue(success);
 
-        BranchSession branchSession = GLOBAL_SESSION.getBranch(BRANCH_ID);
+        BranchSession branchSession = GLOBAL_SESSION.getBranch(expected.getBranchId());
         assertBranchSessionValid(expected, branchSession);
     }
 
-    @Test
-    public void testRemove() throws Throwable {
-        GLOBAL_SESSION.add(mockBranchSession());
+    public static void testRemove() throws Throwable {
+        List<BranchSession> list = new ArrayList<>(GLOBAL_SESSION.getBranchSessions());
+        for (BranchSession branchSession : list) {
+            Assertions.assertNotNull(branchSession);
 
-        BranchSession branchSession = GLOBAL_SESSION.getBranch(BRANCH_ID);
-        Assertions.assertNotNull(branchSession);
+            RemoveBranchSessionExecute execute = new RemoveBranchSessionExecute();
+            boolean success = execute.execute(convertToBranchSessionMsg(branchSession));
+            Assertions.assertTrue(success);
 
-        RemoveBranchSessionExecute execute = new RemoveBranchSessionExecute();
-        boolean success = execute.execute(convertToBranchSessionMsg(branchSession));
-        Assertions.assertTrue(success);
-
-        branchSession = GLOBAL_SESSION.getBranch(BRANCH_ID);
-        Assertions.assertNull(branchSession);
+            branchSession = GLOBAL_SESSION.getBranch(branchSession.getBranchId());
+            Assertions.assertNull(branchSession);
+        }
     }
 
     @Test
     public void testUpdate() throws Throwable {
-        GLOBAL_SESSION.add(mockBranchSession());
+        BranchSession branchSession = mockBranchSession(GLOBAL_SESSION.getXid(), GLOBAL_SESSION.getTransactionId());
+        GLOBAL_SESSION.add(branchSession);
 
-        BranchSession branchSession = GLOBAL_SESSION.getBranch(BRANCH_ID);
+        branchSession = GLOBAL_SESSION.getBranch(branchSession.getBranchId());
         Assertions.assertNotNull(branchSession);
 
-        BranchSession expected = mockBranchSession();
-        expected.setStatus(BranchStatus.PhaseTwo_Committed);
+        branchSession.setStatus(BranchStatus.PhaseTwo_Committed);
         UpdateBranchSessionExecute execute = new UpdateBranchSessionExecute();
-        boolean success = execute.execute(convertToBranchSessionMsg(expected));
+        boolean success = execute.execute(convertToBranchSessionMsg(branchSession));
         Assertions.assertTrue(success);
 
-        branchSession = GLOBAL_SESSION.getBranch(BRANCH_ID);
-        assertBranchSessionValid(expected, branchSession);
+        branchSession = GLOBAL_SESSION.getBranch(branchSession.getBranchId());
+        assertBranchSessionValid(branchSession, branchSession);
     }
 
     private static GlobalSession mockGlobalSession() {
+        long txId = UUIDGenerator.generateUUID();
         GlobalSession session = new GlobalSession("test", "test", "test", 5000);
-        session.setXid(XID);
+        session.setXid(XID.generateXID(txId));
         session.setApplicationData("hello, world");
-        session.setTransactionId(123);
+        session.setTransactionId(txId);
         session.setBeginTime(System.currentTimeMillis());
         return session;
     }
 
-    private static BranchSession mockBranchSession() {
+    private static BranchSession mockBranchSession(String xid,long transactionId) {
         BranchSession session = new BranchSession();
-        session.setXid(XID);
-        session.setTransactionId(123);
-        session.setBranchId(BRANCH_ID);
+        session.setXid(xid);
+        session.setTransactionId(transactionId);
+        session.setBranchId(UUIDGenerator.generateUUID());
         session.setClientId("client");
         session.setResourceGroupId(DEFAULT_TX_GROUP);
         session.setResourceId("resource");

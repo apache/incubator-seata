@@ -50,7 +50,7 @@
                     </protocArtifact>
                     <pluginId>grpc-java</pluginId>
                     <pluginArtifact>
-                        io.grpc:protoc-gen-grpc-java:1.66.0:exe:${os.detected.classifier}
+                        io.grpc:protoc-gen-grpc-java:1.55.1:exe:${os.detected.classifier}
                     </pluginArtifact>
                 </configuration>
                 <executions>
@@ -69,6 +69,11 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-tm</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.seata</groupId>
+            <artifactId>seata-serializer-protobuf</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

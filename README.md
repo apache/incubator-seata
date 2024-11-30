@@ -7,7 +7,7 @@
 [![Build Status](https://github.com/apache/incubator-seata/workflows/build/badge.svg?branch=develop)](https://github.com/apache/incubator-seata/actions)
 [![codecov](https://codecov.io/gh/apache/incubator-seata/graph/badge.svg?token=tbmHt2ZfxO)](https://codecov.io/gh/apache/incubator-seata)
 [![license](https://img.shields.io/github/license/apache/incubator-seata.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
-[![maven](https://img.shields.io/maven-central/v/org.apache.seata/seata-all?versionSuffix=2.1.0)](https://central.sonatype.com/search?q=org.apache.seata%3Aseata-all)
+[![maven](https://img.shields.io/maven-central/v/org.apache.seata/seata-all?versionSuffix=2.2.0)](https://central.sonatype.com/search?q=org.apache.seata%3Aseata-all)
 
 ## What is Seata?
 
@@ -85,7 +85,7 @@ For more details about principle and design, please go to [Seata wiki page](http
 Depending on the scenario, choose one of the two dependencies: `org.apache.seata:seata-all` or `org.apache.seata:seata-spring-boot-starter`.
 ```xml
 <properties>
-  <seata.version>2.1.0</seata.version>
+  <seata.version>2.2.0</seata.version>
 </properties>
 
 <dependencies>

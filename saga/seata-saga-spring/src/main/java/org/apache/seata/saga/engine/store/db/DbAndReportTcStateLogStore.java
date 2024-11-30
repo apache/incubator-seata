@@ -53,6 +53,7 @@ import org.apache.seata.saga.statelang.domain.ExecutionStatus;
 import org.apache.seata.saga.statelang.domain.StateInstance;
 import org.apache.seata.saga.statelang.domain.StateMachine;
 import org.apache.seata.saga.statelang.domain.StateMachineInstance;
+import org.apache.seata.saga.statelang.domain.StateType;
 import org.apache.seata.saga.statelang.domain.impl.ServiceTaskStateImpl;
 import org.apache.seata.saga.statelang.domain.impl.StateInstanceImpl;
 import org.apache.seata.saga.statelang.domain.impl.StateMachineInstanceImpl;
@@ -843,7 +844,7 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
             statement.setString(1, stateInstance.getId());
             statement.setString(2, stateInstance.getMachineInstanceId());
             statement.setString(3, stateInstance.getName());
-            statement.setString(4, stateInstance.getType());
+            statement.setString(4, stateInstance.getType().getValue());
             statement.setTimestamp(5, new Timestamp(stateInstance.getGmtStarted().getTime()));
             statement.setString(6, stateInstance.getServiceName());
             statement.setString(7, stateInstance.getServiceMethod());
@@ -908,7 +909,7 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
             stateInstance.setId(resultSet.getString("id"));
             stateInstance.setMachineInstanceId(resultSet.getString("machine_inst_id"));
             stateInstance.setName(resultSet.getString("name"));
-            stateInstance.setType(resultSet.getString("type"));
+            stateInstance.setType(StateType.getStateType(resultSet.getString("type")));
             stateInstance.setBusinessKey(resultSet.getString("business_key"));
             stateInstance.setStatus(ExecutionStatus.valueOf(resultSet.getString("status")));
             stateInstance.setGmtStarted(resultSet.getTimestamp("gmt_started"));

@@ -170,6 +170,7 @@ public class SessionHolder {
     public static void reload(Collection<GlobalSession> allSessions, SessionMode storeMode, boolean acquireLock) {
         if ((SessionMode.FILE == storeMode || SessionMode.RAFT == storeMode)
             && CollectionUtils.isNotEmpty(allSessions)) {
+            long currentTimeMillis = System.currentTimeMillis();
             for (GlobalSession globalSession : allSessions) {
                 GlobalStatus globalStatus = globalSession.getStatus();
                 switch (globalStatus) {
@@ -227,12 +228,17 @@ public class SessionHolder {
                                 break;
                             case Begin:
                                 if (Objects.equals(storeMode, SessionMode.RAFT)) {
-                                    try {
-                                        globalSession.changeGlobalStatus(GlobalStatus.RollbackRetrying);
-                                        LOGGER.info("change global status: {}, xid: {}", globalSession.getStatus(),
-                                            globalSession.getXid());
-                                    } catch (TransactionException e) {
-                                        LOGGER.error("change global status fail: {}", e.getMessage(), e);
+                                    // Avoid rolling back the global session created after becoming the leader.
+                                    if (globalSession.getBeginTime() < currentTimeMillis) {
+                                        try {
+                                            globalSession.changeGlobalStatus(GlobalStatus.RollbackRetrying);
+                                            LOGGER.info("change global status: {}, xid: {}", globalSession.getStatus(),
+                                                globalSession.getXid());
+                                        } catch (TransactionException e) {
+                                            LOGGER.error("change global status fail: {}", e.getMessage(), e);
+                                        }
+                                    } else {
+                                        globalSession.setActive(true);
                                     }
                                 } else {
                                     globalSession.setActive(true);
