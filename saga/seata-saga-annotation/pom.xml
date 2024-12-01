@@ -21,48 +21,31 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
+        <artifactId>seata-saga</artifactId>
         <groupId>org.apache.seata</groupId>
-        <artifactId>seata-parent</artifactId>
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <packaging>pom</packaging>
-    <artifactId>seata-saga</artifactId>
-    <name>seata-saga ${project.version}</name>
-    <description>saga top parent for Seata built with Maven</description>
-
-    <modules>
-        <module>seata-saga-processctrl</module>
-        <module>seata-saga-statelang</module>
-        <module>seata-saga-engine</module>
-        <module>seata-saga-rm</module>
-        <module>seata-saga-engine-store</module>
-        <module>seata-saga-spring</module>
-        <module>seata-saga-annotation</module>
-    </modules>
+    <artifactId>seata-saga-annotation</artifactId>
+    <name>seata-saga-annotation ${project.version}</name>
+    <description>saga annotation module for Seata built with Maven</description>
 
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>seata-common</artifactId>
+            <artifactId>seata-core</artifactId>
             <version>${project.version}</version>
         </dependency>
-
         <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
-            <scope>provided</scope>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-rm</artifactId>
+            <version>${project.version}</version>
         </dependency>
-
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy-all</artifactId>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-integration-tx-api</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
+
 </project>

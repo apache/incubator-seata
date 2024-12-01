@@ -14,8 +14,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-org.apache.seata.server.transaction.at.ATCore
-org.apache.seata.server.transaction.tcc.TccCore
-org.apache.seata.server.transaction.saga.SagaCore
-org.apache.seata.server.transaction.xa.XACore
-org.apache.seata.server.transaction.saga.SagaAnnotationCore
+org.apache.seata.saga.rm.SagaAnnotationResourceManager

@@ -16,17 +16,22 @@
  */
 package io.seata.rm.tcc.interceptor.parser;
 
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
+import io.seata.rm.tcc.api.BusinessActionContext;
+import io.seata.rm.tcc.api.BusinessActionContextParameter;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import io.seata.rm.tcc.interceptor.TccActionInterceptorHandler;
+import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.common.util.ReflectionUtil;
+import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.core.model.Resource;
 import org.apache.seata.integration.tx.api.interceptor.handler.ProxyInvocationHandler;
-import org.apache.seata.integration.tx.api.interceptor.parser.DefaultResourceRegisterParser;
+import org.apache.seata.rm.tcc.TCCResource;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * The type Tcc action interceptor parser.
@@ -36,40 +41,72 @@ public class TccActionInterceptorParser extends org.apache.seata.rm.tcc.intercep
 
     @Override
     public ProxyInvocationHandler parserInterfaceToProxy(Object target, String objectName) {
-        // eliminate the bean without two phase annotation.
-        Set<String> methodsToProxy = this.tccProxyTargetMethod(target);
+        Map<Method, Class<?>> methodClassMap = ReflectionUtil.findMatchMethodClazzMap(target.getClass(), method -> method.isAnnotationPresent(getAnnotationClass()));
+        Set<Method> methodsToProxy = methodClassMap.keySet();
         if (methodsToProxy.isEmpty()) {
             return null;
         }
+
         // register resource and enhance with interceptor
-        DefaultResourceRegisterParser.get().registerResource(target, objectName);
-        return new TccActionInterceptorHandler(target, methodsToProxy);
+        registerResource(target, methodClassMap);
+
+        return new TccActionInterceptorHandler(target, methodsToProxy.stream().map(Method::getName).collect(Collectors.toSet()));
     }
 
-    private Set<String> tccProxyTargetMethod(Object target) {
-        Set<String> methodsToProxy = new HashSet<>();
-        //check if it is TCC bean
-        Class<?> tccServiceClazz = target.getClass();
-        Set<Method> methods = new HashSet<>(Arrays.asList(tccServiceClazz.getMethods()));
-        Set<Class<?>> interfaceClasses = ReflectionUtil.getInterfaces(tccServiceClazz);
-        if (interfaceClasses != null) {
-            for (Class<?> interClass : interfaceClasses) {
-                methods.addAll(Arrays.asList(interClass.getMethods()));
+    @Override
+    protected Class<? extends Annotation> getAnnotationClass() {
+        return TwoPhaseBusinessAction.class;
+    }
+
+    protected Resource createResource(Object target, Class<?> targetServiceClass, Method m, Annotation annotation) throws NoSuchMethodException {
+        TwoPhaseBusinessAction twoPhaseBusinessAction = (TwoPhaseBusinessAction) annotation;
+        TCCResource tccResource = new TCCResource();
+        if (StringUtils.isBlank(twoPhaseBusinessAction.name())) {
+            throw new FrameworkException("TCC bean name cannot be null or empty");
+        }
+        tccResource.setActionName(twoPhaseBusinessAction.name());
+        tccResource.setTargetBean(target);
+        tccResource.setPrepareMethod(m);
+        tccResource.setCommitMethodName(twoPhaseBusinessAction.commitMethod());
+        tccResource.setCommitMethod(targetServiceClass.getMethod(twoPhaseBusinessAction.commitMethod(),
+                twoPhaseBusinessAction.commitArgsClasses()));
+        tccResource.setRollbackMethodName(twoPhaseBusinessAction.rollbackMethod());
+        tccResource.setRollbackMethod(targetServiceClass.getMethod(twoPhaseBusinessAction.rollbackMethod(),
+                twoPhaseBusinessAction.rollbackArgsClasses()));
+        // set argsClasses
+        tccResource.setCommitArgsClasses(twoPhaseBusinessAction.commitArgsClasses());
+        tccResource.setRollbackArgsClasses(twoPhaseBusinessAction.rollbackArgsClasses());
+        // set phase two method's keys
+        tccResource.setPhaseTwoCommitKeys(this.getTwoPhaseArgs(tccResource.getCommitMethod(),
+                twoPhaseBusinessAction.commitArgsClasses()));
+        tccResource.setPhaseTwoRollbackKeys(this.getTwoPhaseArgs(tccResource.getRollbackMethod(),
+                twoPhaseBusinessAction.rollbackArgsClasses()));
+        return tccResource;
+    }
+
+    protected String[] getTwoPhaseArgs(Method method, Class<?>[] argsClasses) {
+        Annotation[][] parameterAnnotations = method.getParameterAnnotations();
+        String[] keys = new String[parameterAnnotations.length];
+        /*
+         * get parameter's key
+         * if method's parameter list is like
+         * (BusinessActionContext, @BusinessActionContextParameter("a") A a, @BusinessActionContextParameter("b") B b)
+         * the keys will be [null, a, b]
+         */
+        for (int i = 0; i < parameterAnnotations.length; i++) {
+            for (int j = 0; j < parameterAnnotations[i].length; j++) {
+                if (parameterAnnotations[i][j] instanceof BusinessActionContextParameter) {
+                    BusinessActionContextParameter param = (BusinessActionContextParameter) parameterAnnotations[i][j];
+                    String key = io.seata.integration.tx.api.interceptor.ActionContextUtil.getParamNameFromAnnotation(param);
+                    keys[i] = key;
+                    break;
+                }
+            }
+            if (keys[i] == null && !(argsClasses[i].equals(BusinessActionContext.class))) {
+                throw new IllegalArgumentException("non-BusinessActionContext parameter should use annotation " +
+                        "BusinessActionContextParameter");
             }
         }
-
-        TwoPhaseBusinessAction twoPhaseBusinessAction;
-        for (Method method : methods) {
-            twoPhaseBusinessAction = method.getAnnotation(TwoPhaseBusinessAction.class);
-            if (twoPhaseBusinessAction != null) {
-                methodsToProxy.add(method.getName());
-            }
-        }
-
-        if (methodsToProxy.isEmpty()) {
-            return Collections.emptySet();
-        }
-        // sofa:reference /  dubbo:reference, AOP
-        return methodsToProxy;
+        return keys;
     }
 }

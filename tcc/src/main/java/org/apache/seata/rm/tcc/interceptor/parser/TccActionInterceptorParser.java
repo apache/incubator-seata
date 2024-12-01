@@ -16,37 +16,41 @@
  */
 package org.apache.seata.rm.tcc.interceptor.parser;
 
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.common.util.ReflectionUtil;
+import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.core.model.Resource;
+import org.apache.seata.integration.tx.api.interceptor.ActionContextUtil;
 import org.apache.seata.integration.tx.api.interceptor.handler.ProxyInvocationHandler;
-import org.apache.seata.integration.tx.api.interceptor.parser.DefaultResourceRegisterParser;
 import org.apache.seata.integration.tx.api.interceptor.parser.IfNeedEnhanceBean;
 import org.apache.seata.integration.tx.api.interceptor.parser.InterfaceParser;
 import org.apache.seata.integration.tx.api.interceptor.parser.NeedEnhanceEnum;
 import org.apache.seata.integration.tx.api.remoting.parser.DefaultRemotingParser;
+import org.apache.seata.rm.DefaultResourceManager;
+import org.apache.seata.rm.tcc.TCCResource;
 import org.apache.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import org.apache.seata.rm.tcc.interceptor.TccActionInterceptorHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class TccActionInterceptorParser implements InterfaceParser {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TccActionInterceptorParser.class);
-
     @Override
     public ProxyInvocationHandler parserInterfaceToProxy(Object target, String objectName) {
-        // eliminate the bean without two phase annotation.
-        Set<String> methodsToProxy = this.tccProxyTargetMethod(target);
+        Map<Method, Class<?>> methodClassMap = ReflectionUtil.findMatchMethodClazzMap(target.getClass(), method -> method.isAnnotationPresent(getAnnotationClass()));
+        Set<Method> methodsToProxy = methodClassMap.keySet();
         if (methodsToProxy.isEmpty()) {
             return null;
         }
+
         // register resource and enhance with interceptor
-        DefaultResourceRegisterParser.get().registerResource(target, objectName);
-        return new TccActionInterceptorHandler(target, methodsToProxy);
+        registerResource(target, methodClassMap);
+
+        return new TccActionInterceptorHandler(target, methodsToProxy.stream().map(Method::getName).collect(Collectors.toSet()));
     }
 
     @Override
@@ -59,37 +63,50 @@ public class TccActionInterceptorParser implements InterfaceParser {
         return ifNeedEnhanceBean;
     }
 
-    /**
-     * is TCC proxy-bean/target-bean: LocalTCC , the proxy bean of sofa:reference/dubbo:reference
-     *
-     * @param target the remoting desc
-     * @return boolean boolean
-     */
-
-    private Set<String> tccProxyTargetMethod(Object target) {
-        Set<String> methodsToProxy = new HashSet<>();
-        //check if it is TCC bean
-        Class<?> tccServiceClazz = target.getClass();
-        Set<Method> methods = new HashSet<>(Arrays.asList(tccServiceClazz.getMethods()));
-        Set<Class<?>> interfaceClasses = ReflectionUtil.getInterfaces(tccServiceClazz);
-        if (interfaceClasses != null) {
-            for (Class<?> interClass : interfaceClasses) {
-                methods.addAll(Arrays.asList(interClass.getMethods()));
+    protected void registerResource(Object target, Map<Method, Class<?>> methodClassMap) {
+        try {
+            for (Map.Entry<Method, Class<?>> methodClassEntry : methodClassMap.entrySet()) {
+                Method method = methodClassEntry.getKey();
+                Annotation annotation = method.getAnnotation(getAnnotationClass());
+                if (annotation != null) {
+                    Resource resource = createResource(target, methodClassEntry.getValue(), method, annotation);
+                    //registry resource
+                    DefaultResourceManager.get().registerResource(resource);
+                }
             }
+        } catch (Throwable t) {
+            throw new FrameworkException(t, "register tcc resource error");
         }
+    }
 
-        TwoPhaseBusinessAction twoPhaseBusinessAction;
-        for (Method method : methods) {
-            twoPhaseBusinessAction = method.getAnnotation(TwoPhaseBusinessAction.class);
-            if (twoPhaseBusinessAction != null) {
-                methodsToProxy.add(method.getName());
-            }
-        }
 
-        if (methodsToProxy.isEmpty()) {
-            return Collections.emptySet();
+    protected Class<? extends Annotation> getAnnotationClass() {
+        return TwoPhaseBusinessAction.class;
+    }
+
+    protected Resource createResource(Object target, Class<?> targetServiceClass, Method m, Annotation annotation) throws NoSuchMethodException {
+        TwoPhaseBusinessAction twoPhaseBusinessAction = (TwoPhaseBusinessAction) annotation;
+        TCCResource tccResource = new TCCResource();
+        if (StringUtils.isBlank(twoPhaseBusinessAction.name())) {
+            throw new FrameworkException("TCC bean name cannot be null or empty");
         }
-        // sofa:reference /  dubbo:reference, AOP
-        return methodsToProxy;
+        tccResource.setActionName(twoPhaseBusinessAction.name());
+        tccResource.setTargetBean(target);
+        tccResource.setPrepareMethod(m);
+        tccResource.setCommitMethodName(twoPhaseBusinessAction.commitMethod());
+        tccResource.setCommitMethod(targetServiceClass.getMethod(twoPhaseBusinessAction.commitMethod(),
+                twoPhaseBusinessAction.commitArgsClasses()));
+        tccResource.setRollbackMethodName(twoPhaseBusinessAction.rollbackMethod());
+        tccResource.setRollbackMethod(targetServiceClass.getMethod(twoPhaseBusinessAction.rollbackMethod(),
+                twoPhaseBusinessAction.rollbackArgsClasses()));
+        // set argsClasses
+        tccResource.setCommitArgsClasses(twoPhaseBusinessAction.commitArgsClasses());
+        tccResource.setRollbackArgsClasses(twoPhaseBusinessAction.rollbackArgsClasses());
+        // set phase two method's keys
+        tccResource.setPhaseTwoCommitKeys(ActionContextUtil.getTwoPhaseArgs(tccResource.getCommitMethod(),
+                twoPhaseBusinessAction.commitArgsClasses()));
+        tccResource.setPhaseTwoRollbackKeys(ActionContextUtil.getTwoPhaseArgs(tccResource.getRollbackMethod(),
+                twoPhaseBusinessAction.rollbackArgsClasses()));
+        return tccResource;
     }
 }
