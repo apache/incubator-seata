@@ -362,31 +362,31 @@
                             <skip>${dependencies.copy.skip}</skip>
                         </configuration>
                     </execution>
-<!--                    <execution>-->
-<!--                        <id>copy-mysql</id>-->
-<!--                        <phase>package</phase>-->
-<!--                        <goals>-->
-<!--                            <goal>copy</goal>-->
-<!--                        </goals>-->
-<!--                        <configuration>-->
-<!--                            <artifactItems>-->
-<!--                                <artifactItem>-->
-<!--                                    <groupId>mysql</groupId>-->
-<!--                                    <artifactId>mysql-connector-java</artifactId>-->
-<!--                                    <version>${mysql.jdbc.version}</version>-->
-<!--                                </artifactItem>-->
-<!--                                <artifactItem>-->
-<!--                                    <groupId>mysql</groupId>-->
-<!--                                    <artifactId>mysql-connector-java</artifactId>-->
-<!--                                    <version>${mysql8.jdbc.version}</version>-->
-<!--                                </artifactItem>-->
-<!--                            </artifactItems>-->
-<!--                            <outputDirectory>-->
-<!--                                ${project.build.directory}/lib/jdbc-->
-<!--                            </outputDirectory>-->
-<!--                            <skip>${dependencies.copy.skip}</skip>-->
-<!--                        </configuration>-->
-<!--                    </execution>-->
+                    <execution>
+                        <id>copy-mysql</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>mysql</groupId>
+                                    <artifactId>mysql-connector-java</artifactId>
+                                    <version>${mysql.jdbc.version}</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>mysql</groupId>
+                                    <artifactId>mysql-connector-java</artifactId>
+                                    <version>${mysql8.jdbc.version}</version>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>
+                                ${project.build.directory}/lib/jdbc
+                            </outputDirectory>
+                            <skip>${mysql.copy.skip}</skip>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>

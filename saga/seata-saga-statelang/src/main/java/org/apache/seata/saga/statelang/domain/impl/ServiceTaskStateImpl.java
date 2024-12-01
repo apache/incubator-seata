@@ -20,7 +20,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.seata.saga.statelang.domain.DomainConstants;
+import org.apache.seata.saga.statelang.domain.StateType;
 import org.apache.seata.saga.statelang.domain.ServiceTaskState;
 
 /**
@@ -38,7 +38,7 @@ public class ServiceTaskStateImpl extends AbstractTaskState implements ServiceTa
     private boolean isAsync;
 
     public ServiceTaskStateImpl() {
-        setType(DomainConstants.STATE_TYPE_SERVICE_TASK);
+        setType(StateType.SERVICE_TASK);
     }
 
     @Override

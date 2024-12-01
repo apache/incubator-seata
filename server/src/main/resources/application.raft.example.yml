@@ -91,6 +91,23 @@ seata:
       serialization: jackson
       compressor: none
       sync: true # sync log&snapshot to disk
+      # raft nodes ssl config
+      ssl:
+        enabled: false
+        client:
+          keystore:
+            path: ssl/cbolt.pfx
+            password: seata
+            type: pkcs12
+        server:
+          keystore:
+            path: ssl/bolt.pfx
+            password: seata
+            type: pkcs12
+        kmf:
+          algorithm: SunX509
+        tmf:
+          algorithm: SunX509
     service-port: 8091 #If not configured, the default is '${server.port} + 1000'
     max-commit-retry-timeout: -1
     max-rollback-retry-timeout: -1

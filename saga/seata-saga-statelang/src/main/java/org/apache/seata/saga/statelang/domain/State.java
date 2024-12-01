@@ -43,7 +43,7 @@ public interface State {
      *
      * @return the state type
      */
-    String getType();
+    StateType getType();
 
     /**
      * next state name

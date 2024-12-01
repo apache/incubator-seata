@@ -895,6 +895,21 @@ public interface ConfigurationKeys {
     String SERVER_RAFT = SERVER_PREFIX + "raft.";
 
     /**
+     * The constant SERVER_RAFT_SSL.
+     */
+    String SERVER_RAFT_SSL = SERVER_RAFT + "ssl.";
+
+    /**
+     * The constant SERVER_RAFT_SSL_CLIENT.
+     */
+    String SERVER_RAFT_SSL_CLIENT = SERVER_RAFT_SSL + "client.";
+
+    /**
+     * The constant SERVER_RAFT_SSL_SERVER.
+     */
+    String SERVER_RAFT_SSL_SERVER = SERVER_RAFT_SSL + "server.";
+
+    /**
      * The constant SERVER_RAFT_SERVER_ADDR.
      */
     String SERVER_RAFT_SERVER_ADDR = SERVER_RAFT + "serverAddr";
@@ -923,6 +938,42 @@ public interface ConfigurationKeys {
      * The constant SERVER_RAFT_SYNC.
      */
     String SERVER_RAFT_SYNC = SERVER_RAFT + "sync";
+
+    /**
+     * The constant SERVER_RAFT_SSL_ENABLED.
+     */
+    String SERVER_RAFT_SSL_ENABLED = SERVER_RAFT_SSL + "enabled";
+
+    /**
+     * The constant SERVER_RAFT_SSL_SERVER_KEYSTORE.
+     */
+    String SERVER_RAFT_SSL_SERVER_KEYSTORE_PATH = SERVER_RAFT_SSL_SERVER + "keystore.path";
+
+    /**
+     * The constant SERVER_RAFT_SSL_CLIENT_KEYSTORE.
+     */
+    String SERVER_RAFT_SSL_CLIENT_KEYSTORE_PATH = SERVER_RAFT_SSL_CLIENT + "keystore.path";
+
+    /**
+     * The constant SERVER_RAFT_SSL_SERVER_KEYSTORE_PASSWORD.
+     */
+    String SERVER_RAFT_SSL_SERVER_KEYSTORE_PASSWORD = SERVER_RAFT_SSL_SERVER + "keystore.password";
+
+    /**
+     * The constant SERVER_RAFT_SSL_CLIENT_KEYSTORE_PASSWORD.
+     */
+    String SERVER_RAFT_SSL_CLIENT_KEYSTORE_PASSWORD = SERVER_RAFT_SSL_CLIENT + "keystore.password";
+
+
+    /**
+     * The constant SERVER_RAFT_SSL_KEYSTORE_TYPE.
+     */
+    String SERVER_RAFT_SSL_KEYSTORE_TYPE = SERVER_RAFT_SSL + "keystore.type";
+
+    /**
+     * The constant SERVER_RAFT_SSL_KMF_ALGORITHM.
+     */
+    String SERVER_RAFT_SSL_KMF_ALGORITHM = SERVER_RAFT_SSL + "kmf.algorithm";
 
     /**
      * The constant SERVER_RAFT_MAX_APPEND_BUFFER_SIZE.

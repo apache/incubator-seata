@@ -19,7 +19,7 @@ package org.apache.seata.saga.statelang.parser;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.seata.saga.statelang.domain.DomainConstants;
+import org.apache.seata.saga.statelang.domain.StateType;
 import org.apache.seata.saga.statelang.parser.impl.ChoiceStateParser;
 import org.apache.seata.saga.statelang.parser.impl.CompensateSubStateMachineStateParser;
 import org.apache.seata.saga.statelang.parser.impl.CompensationTriggerStateParser;
@@ -35,21 +35,21 @@ import org.apache.seata.saga.statelang.parser.impl.SucceedEndStateParser;
  */
 public class StateParserFactory {
 
-    protected static Map<String, StateParser> stateParserMap = new ConcurrentHashMap<>();
+    protected static Map<StateType, StateParser> stateParserMap = new ConcurrentHashMap<>();
 
     static {
-        stateParserMap.put(DomainConstants.STATE_TYPE_SERVICE_TASK, new ServiceTaskStateParser());
-        stateParserMap.put(DomainConstants.STATE_TYPE_CHOICE, new ChoiceStateParser());
-        stateParserMap.put(DomainConstants.STATE_TYPE_COMPENSATION_TRIGGER, new CompensationTriggerStateParser());
-        stateParserMap.put(DomainConstants.STATE_TYPE_FAIL, new FailEndStateParser());
-        stateParserMap.put(DomainConstants.STATE_TYPE_SUCCEED, new SucceedEndStateParser());
-        stateParserMap.put(DomainConstants.STATE_TYPE_SUB_STATE_MACHINE, new SubStateMachineParser());
-        stateParserMap.put(DomainConstants.STATE_TYPE_SUB_MACHINE_COMPENSATION,
+        stateParserMap.put(StateType.SERVICE_TASK, new ServiceTaskStateParser());
+        stateParserMap.put(StateType.CHOICE, new ChoiceStateParser());
+        stateParserMap.put(StateType.COMPENSATION_TRIGGER, new CompensationTriggerStateParser());
+        stateParserMap.put(StateType.FAIL, new FailEndStateParser());
+        stateParserMap.put(StateType.SUCCEED, new SucceedEndStateParser());
+        stateParserMap.put(StateType.SUB_STATE_MACHINE, new SubStateMachineParser());
+        stateParserMap.put(StateType.SUB_MACHINE_COMPENSATION,
             new CompensateSubStateMachineStateParser());
-        stateParserMap.put(DomainConstants.STATE_TYPE_SCRIPT_TASK, new ScriptTaskStateParser());
+        stateParserMap.put(StateType.SCRIPT_TASK, new ScriptTaskStateParser());
     }
 
-    public static StateParser getStateParser(String stateType) {
+    public static StateParser getStateParser(StateType stateType) {
         return stateParserMap.get(stateType);
     }
 }
