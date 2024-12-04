@@ -14,25 +14,52 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.integration.tx.api.interceptor;
+package org.apache.seata.saga.annotation;
+
+import org.apache.seata.rm.tcc.api.BusinessActionContextParameter;
 
 /**
- * The  InvocationHandlerType enum
+ * The type param.
  */
-public enum InvocationHandlerType {
+public class SagaParam {
 
     /**
-     * GlobalTransactional InvocationHandler
+     * The Num.
      */
-    GlobalTransactional,
+    protected int num;
 
     /**
-     * TwoPhase InvocationHandler
+     * The Email.
      */
-    TwoPhaseAnnotation,
+    @BusinessActionContextParameter(paramName = "email")
+    protected String email;
 
     /**
-     * SagaAnnotation InvocationHandler
+     * Instantiates a new param.
+     *
+     * @param num   the num
+     * @param email the email
      */
-    SagaAnnotation
+    public SagaParam(int num, String email) {
+        this.num = num;
+        this.email = email;
+    }
+
+    /**
+     * Gets num.
+     *
+     * @return the num
+     */
+    public int getNum() {
+        return num;
+    }
+
+    /**
+     * Sets num.
+     *
+     * @param num the num
+     */
+    public void setNum(int num) {
+        this.num = num;
+    }
 }

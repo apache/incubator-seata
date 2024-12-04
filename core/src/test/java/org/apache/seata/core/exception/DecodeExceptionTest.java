@@ -14,25 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.integration.tx.api.interceptor;
+package org.apache.seata.core.exception;
 
-/**
- * The  InvocationHandlerType enum
- */
-public enum InvocationHandlerType {
+import org.junit.jupiter.api.Test;
 
-    /**
-     * GlobalTransactional InvocationHandler
-     */
-    GlobalTransactional,
+import static org.junit.jupiter.api.Assertions.*;
 
-    /**
-     * TwoPhase InvocationHandler
-     */
-    TwoPhaseAnnotation,
+public class DecodeExceptionTest {
 
-    /**
-     * SagaAnnotation InvocationHandler
-     */
-    SagaAnnotation
+    @Test
+    public void testConstructorWithCause() {
+        Throwable cause = new RuntimeException("test");
+        DecodeException exception = new DecodeException(cause);
+        assertEquals(cause, exception.getCause());
+    }
 }
