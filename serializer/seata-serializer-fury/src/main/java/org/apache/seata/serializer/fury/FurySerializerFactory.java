@@ -39,7 +39,7 @@ public class FurySerializerFactory {
                 .build();
 
         // register allow class
-        f.getClassResolver().setClassChecker((classResolver,className)-> SerializerSecurityRegistry.getAllowClassPattern().contains(className));
+        f.getClassResolver().setClassChecker((classResolver,className) -> SerializerSecurityRegistry.getAllowClassPattern().contains(className));
         return f;
     });
 
