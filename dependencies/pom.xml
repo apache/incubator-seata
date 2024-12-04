@@ -127,7 +127,6 @@
         <kotlin-coroutines.version>1.7.3</kotlin-coroutines.version>
 
         <!-- # for web -->
-        <spring-webmvc.version>5.3.26</spring-webmvc.version>
         <tomcat-embed.version>9.0.90</tomcat-embed.version>
 
         <!-- # for test -->
@@ -880,12 +879,6 @@
                 <version>${rocketmq-version}</version>
             </dependency>
 
-            <!-- web -->
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-webmvc</artifactId>
-                <version>${spring-webmvc.version}</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 </project>
