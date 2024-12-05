@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
 import org.apache.seata.common.exception.ErrorCode;
 import org.apache.seata.common.exception.SeataRuntimeException;
 import org.slf4j.Logger;
@@ -108,11 +109,18 @@ public class RaftSnapshotSerializer {
                             .getCompressor(raftSnapshot.getCompressor()).decompress((byte[])raftSnapshot.getBody()))));
             return raftSnapshot;
         } catch (Exception e) {
-            LOGGER.info("Failed to read raft snapshot: {}", e.getMessage(), e);
-            if (e instanceof SeataRuntimeException) {
-                throw (SeataRuntimeException)e;
+            LOGGER.error("Failed to read raft snapshot: {}", e.getMessage(), e);
+            if (e instanceof RuntimeException) {
+                Throwable cause = e.getCause();
+                if (cause instanceof JsonMappingException) {
+                    Throwable jsonCause = cause.getCause();
+                    if (jsonCause instanceof SeataRuntimeException) {
+                        throw (SeataRuntimeException)jsonCause;
+                    }
+                }
+                throw (RuntimeException)e;
             }
-            throw new IOException(e);
+            throw new RuntimeException(e);
         }
     }
 
