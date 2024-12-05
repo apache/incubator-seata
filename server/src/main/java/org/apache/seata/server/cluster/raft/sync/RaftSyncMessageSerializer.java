@@ -25,6 +25,7 @@ import java.io.ObjectStreamClass;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import org.apache.seata.common.exception.ErrorCode;
 import org.apache.seata.common.exception.SeataRuntimeException;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
@@ -82,7 +83,6 @@ public class RaftSyncMessageSerializer {
                         throw new SeataRuntimeException(ErrorCode.ERR_DESERIALIZATION_SECURITY,
                             "Failed to deserialize object: " + desc.getName() + " is not permitted");
                     }
-
                     return super.resolveClass(desc);
                 }
             }) {
@@ -106,9 +106,16 @@ public class RaftSyncMessageSerializer {
                     .getCompressor(raftSyncMessage.getCompressor()).decompress((byte[])raftSyncMessage.getBody()))));
             return raftSyncMessage;
         } catch (Exception e) {
-            LOGGER.info("Failed to read raft synchronization log: {}", e.getMessage(), e);
-            if (e instanceof SeataRuntimeException) {
-                throw (SeataRuntimeException)e;
+            LOGGER.error("Failed to read raft synchronization log: {}", e.getMessage(), e);
+            if (e instanceof RuntimeException) {
+                Throwable cause = e.getCause();
+                if (cause instanceof JsonMappingException) {
+                    Throwable jsonCause = cause.getCause();
+                    if (jsonCause instanceof SeataRuntimeException) {
+                        throw (SeataRuntimeException)jsonCause;
+                    }
+                }
+                throw (RuntimeException)e;
             }
             throw new RuntimeException(e);
         }
