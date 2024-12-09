@@ -167,7 +167,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             }
             if (!isSending) {
                 try (ResourceLock ignored = mergerLock.obtain()) {
-                    mergeCondition.notifyAll();
+                    mergeCondition.signalAll();
                 }
             }
 
