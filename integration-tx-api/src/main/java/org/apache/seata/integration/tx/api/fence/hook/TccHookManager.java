@@ -42,7 +42,7 @@ public final class TccHookManager {
      */
     public static List<TccHook> getHooks() {
         if (CACHED_UNMODIFIABLE_HOOKS == null) {
-            try (ResourceLock ignored = LOCK.obtain()){
+            try (ResourceLock ignored = LOCK.obtain()) {
                 if (CACHED_UNMODIFIABLE_HOOKS == null) {
                     CACHED_UNMODIFIABLE_HOOKS = Collections.unmodifiableList(TCC_HOOKS);
                 }
