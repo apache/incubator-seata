@@ -16,7 +16,7 @@
  */
 package org.apache.seata.saga.statelang.domain.impl;
 
-import org.apache.seata.saga.statelang.domain.DomainConstants;
+import org.apache.seata.saga.statelang.domain.StateType;
 import org.apache.seata.saga.statelang.domain.LoopStartState;
 
 /**
@@ -26,7 +26,7 @@ import org.apache.seata.saga.statelang.domain.LoopStartState;
 public class LoopStartStateImpl extends BaseState implements LoopStartState {
 
     public LoopStartStateImpl() {
-        setType(DomainConstants.STATE_TYPE_LOOP_START);
+        setType(StateType.LOOP_START);
     }
 
 }

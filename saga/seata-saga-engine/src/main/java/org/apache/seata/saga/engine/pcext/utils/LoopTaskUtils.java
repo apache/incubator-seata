@@ -34,6 +34,7 @@ import org.apache.seata.saga.engine.StateMachineConfig;
 import org.apache.seata.saga.engine.exception.ForwardInvalidException;
 import org.apache.seata.saga.engine.expression.ExpressionResolver;
 import org.apache.seata.saga.engine.pcext.StateInstruction;
+import org.apache.seata.saga.statelang.domain.StateType;
 import org.apache.seata.saga.proctrl.ProcessContext;
 import org.apache.seata.saga.proctrl.impl.ProcessContextImpl;
 import org.apache.seata.saga.statelang.domain.DomainConstants;
@@ -101,9 +102,9 @@ public class LoopTaskUtils {
      * @return the boolean
      */
     public static boolean matchLoop(State state) {
-        return state != null && (DomainConstants.STATE_TYPE_SERVICE_TASK.equals(state.getType())
-            || DomainConstants.STATE_TYPE_SCRIPT_TASK.equals(state.getType())
-            || DomainConstants.STATE_TYPE_SUB_STATE_MACHINE.equals(state.getType()));
+        return state != null && (StateType.SERVICE_TASK.equals(state.getType())
+            || StateType.SCRIPT_TASK.equals(state.getType())
+            || StateType.SUB_STATE_MACHINE.equals(state.getType()));
     }
 
     /**
@@ -341,7 +342,7 @@ public class LoopTaskUtils {
         StateInstance lastRetriedStateInstance = LoopTaskUtils.findOutLastRetriedStateInstance(
             stateMachineInstance, LoopTaskUtils.generateLoopStateName(context, instruction.getStateName()));
 
-        if (null != lastRetriedStateInstance && DomainConstants.STATE_TYPE_SUB_STATE_MACHINE.equals(
+        if (null != lastRetriedStateInstance && StateType.SUB_STATE_MACHINE.getValue().equals(
             lastRetriedStateInstance.getType()) && !ExecutionStatus.SU.equals(
             lastRetriedStateInstance.getCompensationStatus())) {
 
@@ -388,7 +389,7 @@ public class LoopTaskUtils {
 
                     // compensate must be execute
                     State state = stateMachine.getState(next);
-                    if (DomainConstants.STATE_TYPE_COMPENSATION_TRIGGER.equals(state.getType())) {
+                    if (StateType.COMPENSATION_TRIGGER.equals(state.getType())) {
                         route = next;
                         break;
                     } else if (null == route) {

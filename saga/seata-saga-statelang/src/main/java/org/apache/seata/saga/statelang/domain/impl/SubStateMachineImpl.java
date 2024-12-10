@@ -16,7 +16,7 @@
  */
 package org.apache.seata.saga.statelang.domain.impl;
 
-import org.apache.seata.saga.statelang.domain.DomainConstants;
+import org.apache.seata.saga.statelang.domain.StateType;
 import org.apache.seata.saga.statelang.domain.SubStateMachine;
 import org.apache.seata.saga.statelang.domain.TaskState;
 
@@ -31,7 +31,7 @@ public class SubStateMachineImpl extends ServiceTaskStateImpl implements SubStat
     private TaskState compensateStateObject;
 
     public SubStateMachineImpl() {
-        setType(DomainConstants.STATE_TYPE_SUB_STATE_MACHINE);
+        setType(StateType.SUB_STATE_MACHINE);
     }
 
     @Override

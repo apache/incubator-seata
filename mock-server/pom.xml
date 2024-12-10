@@ -155,17 +155,12 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>seata-discovery-all</artifactId>
+            <artifactId>seata-discovery-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-serializer-all</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>seata-compressor-all</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
