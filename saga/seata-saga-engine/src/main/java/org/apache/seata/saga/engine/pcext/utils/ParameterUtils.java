@@ -38,8 +38,8 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  */
 public class ParameterUtils {
-    private static final ConcurrentHashMap<AbstractTaskState, ResourceLock> inTaskStateLocks = new ConcurrentHashMap<>();
-    private static final ConcurrentHashMap<AbstractTaskState, ResourceLock> outTaskStateLocks = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<AbstractTaskState, ResourceLock> IN_TASK_STATE_LOCKS = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<AbstractTaskState, ResourceLock> OUT_TASK_STATE_LOCKS = new ConcurrentHashMap<>();
 
     public static List<Object> createInputParams(ExpressionResolver expressionResolver,
                                                  StateInstanceImpl stateInstance,
@@ -51,7 +51,7 @@ public class ParameterUtils {
 
         List<Object> inputExpressions = serviceTaskState.getInputExpressions();
         if (inputExpressions == null) {
-            try (ResourceLock ignored = CollectionUtils.computeIfAbsent(inTaskStateLocks, serviceTaskState, k -> new ResourceLock()).obtain()) {
+            try (ResourceLock ignored = CollectionUtils.computeIfAbsent(IN_TASK_STATE_LOCKS, serviceTaskState, k -> new ResourceLock()).obtain()) {
                 inputExpressions = serviceTaskState.getInputExpressions();
                 if (inputExpressions == null) {
                     inputExpressions = new ArrayList<>(inputAssignments.size());
@@ -61,7 +61,7 @@ public class ParameterUtils {
                 }
                 serviceTaskState.setInputExpressions(inputExpressions);
             } finally {
-                inTaskStateLocks.remove(serviceTaskState);
+                IN_TASK_STATE_LOCKS.remove(serviceTaskState);
             }
         }
         List<Object> inputValues = new ArrayList<>(inputExpressions.size());
@@ -82,7 +82,7 @@ public class ParameterUtils {
 
         Map<String, Object> outputExpressions = serviceTaskState.getOutputExpressions();
         if (outputExpressions == null) {
-            try (ResourceLock ignored = CollectionUtils.computeIfAbsent(outTaskStateLocks, serviceTaskState, k -> new ResourceLock()).obtain()) {
+            try (ResourceLock ignored = CollectionUtils.computeIfAbsent(OUT_TASK_STATE_LOCKS, serviceTaskState, k -> new ResourceLock()).obtain()) {
                 outputExpressions = serviceTaskState.getOutputExpressions();
                 if (outputExpressions == null) {
                     outputExpressions = new LinkedHashMap<>(outputAssignments.size());
@@ -93,7 +93,7 @@ public class ParameterUtils {
                 }
                 serviceTaskState.setOutputExpressions(outputExpressions);
             } finally {
-                outTaskStateLocks.remove(serviceTaskState);
+                OUT_TASK_STATE_LOCKS.remove(serviceTaskState);
             }
         }
         Map<String, Object> outputValues = new LinkedHashMap<>(outputExpressions.size());

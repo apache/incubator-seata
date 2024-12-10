@@ -61,13 +61,13 @@ public class CompensationHolder {
      */
     private Stack<StateInstance> stateStackNeedCompensation = new Stack<>();
 
-    private static final ConcurrentHashMap<ProcessContext, ResourceLock> contextLocks = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<ProcessContext, ResourceLock> CONTEXT_LOCKS = new ConcurrentHashMap<>();
 
     public static CompensationHolder getCurrent(ProcessContext context, boolean forceCreate) {
         CompensationHolder compensationholder = (CompensationHolder)context.getVariable(
             DomainConstants.VAR_NAME_CURRENT_COMPENSATION_HOLDER);
         if (compensationholder == null && forceCreate) {
-            try (ResourceLock ignored = CollectionUtils.computeIfAbsent(contextLocks, context, k -> new ResourceLock()).obtain()) {
+            try (ResourceLock ignored = CollectionUtils.computeIfAbsent(CONTEXT_LOCKS, context, k -> new ResourceLock()).obtain()) {
                 compensationholder = (CompensationHolder)context.getVariable(
                     DomainConstants.VAR_NAME_CURRENT_COMPENSATION_HOLDER);
                 if (compensationholder == null) {
@@ -75,7 +75,7 @@ public class CompensationHolder {
                     context.setVariable(DomainConstants.VAR_NAME_CURRENT_COMPENSATION_HOLDER, compensationholder);
                 }
             } finally {
-                contextLocks.remove(context);
+                CONTEXT_LOCKS.remove(context);
             }
         }
         return compensationholder;

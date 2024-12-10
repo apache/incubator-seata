@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
 public class EngineUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EngineUtils.class);
-    private static final ConcurrentHashMap<ExceptionMatch, ResourceLock> exceptionMatchLocks = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<ExceptionMatch, ResourceLock> EXCEPTION_MATCH_LOCKS = new ConcurrentHashMap<>();
 
     /**
      * generate parent id
@@ -201,7 +201,7 @@ public class EngineUtils {
                 List<Class<? extends Exception>> exceptionClasses = exceptionMatch.getExceptionClasses();
                 if (CollectionUtils.isNotEmpty(exceptions)) {
                     if (exceptionClasses == null) {
-                        try (ResourceLock ignored = CollectionUtils.computeIfAbsent(exceptionMatchLocks, exceptionMatch, k -> new ResourceLock()).obtain()) {
+                        try (ResourceLock ignored = CollectionUtils.computeIfAbsent(EXCEPTION_MATCH_LOCKS, exceptionMatch, k -> new ResourceLock()).obtain()) {
                             exceptionClasses = exceptionMatch.getExceptionClasses();
                             if (exceptionClasses == null) {
 
@@ -234,7 +234,7 @@ public class EngineUtils {
                                 exceptionMatch.setExceptionClasses(exceptionClasses);
                             }
                         } finally {
-                            exceptionMatchLocks.remove(exceptionMatch);
+                            EXCEPTION_MATCH_LOCKS.remove(exceptionMatch);
                         }
                     }
 
