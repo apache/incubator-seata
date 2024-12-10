@@ -18,6 +18,7 @@ package org.apache.seata.core.rpc.netty;
 
 import io.netty.channel.Channel;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
+import org.apache.seata.common.lock.ResourceLock;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -148,9 +149,9 @@ class NettyClientChannelManagerTest {
     
     @SuppressWarnings("unchecked")
     private void setUpReleaseChannel() {
-        ConcurrentMap<String, Object> channelLocks =
-            (ConcurrentMap<String, Object>) getFieldValue("channelLocks", channelManager);
-        channelLocks.putIfAbsent("127.0.0.1:8091", new Object());
+        ConcurrentMap<String, ResourceLock> channelLocks =
+            (ConcurrentMap<String, ResourceLock>) getFieldValue("resourceLocks", channelManager);
+        channelLocks.putIfAbsent("127.0.0.1:8091", new ResourceLock());
         ConcurrentMap<String, NettyPoolKey> poolKeyMap =
             (ConcurrentMap<String, NettyPoolKey>) getFieldValue("poolKeyMap", channelManager);
         poolKeyMap.putIfAbsent("127.0.0.1:8091", nettyPoolKey);

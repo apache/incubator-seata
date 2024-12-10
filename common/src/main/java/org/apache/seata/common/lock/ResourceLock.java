@@ -46,6 +46,13 @@ public class ResourceLock extends ReentrantLock implements AutoCloseable {
     }
 
 
+    /**
+     * Unlock the resource lock.
+     *
+     * <p>This is typically used in try-with-resources blocks to automatically
+     * unlock the resource lock when the block is exited, regardless of whether
+     * an exception is thrown or not.
+     */
     @Override
     public void close() {
         this.unlock();
