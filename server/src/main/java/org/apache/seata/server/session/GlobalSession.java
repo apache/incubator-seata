@@ -108,7 +108,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private Set<SessionLifecycleListener> lifecycleListeners = new HashSet<>(2);
 
-    private final ResourceLock RESOURCE_LOCK = new ResourceLock();
+    private final ResourceLock resourceLock = new ResourceLock();
 
     /**
      * Add boolean.
@@ -132,7 +132,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * @return the boolean
      */
     public boolean remove(BranchSession branchSession) {
-        try (ResourceLock ignored = RESOURCE_LOCK.obtain()) {
+        try (ResourceLock ignored = resourceLock.obtain()) {
             return branchSessions.remove(branchSession);
         }
     }
@@ -331,7 +331,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     public void loadBranchs() {
         if (branchSessions == null && isLazyLoadBranch()) {
-            try (ResourceLock ignored = RESOURCE_LOCK.obtain()) {
+            try (ResourceLock ignored = resourceLock.obtain()) {
                 if (branchSessions == null && isLazyLoadBranch()) {
                     branchSessions = new ArrayList<>();
                     Optional.ofNullable(SessionHolder.getRootSessionManager().findGlobalSession(xid, true))
@@ -379,7 +379,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * @return the branch
      */
     public BranchSession getBranch(long branchId) {
-        try (ResourceLock ignored = RESOURCE_LOCK.obtain()) {
+        try (ResourceLock ignored = resourceLock.obtain()) {
             List<BranchSession> branchSessions = getBranchSessions();
             for (BranchSession branchSession : branchSessions) {
                 if (branchSession.getBranchId() == branchId) {
