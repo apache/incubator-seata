@@ -16,9 +16,12 @@
  */
 package org.apache.seata.common.lock;
 
+import org.apache.seata.common.util.CollectionUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.concurrent.ConcurrentHashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -53,6 +56,26 @@ public class ResourceLockTest {
             assertTrue(resourceLock.isHeldByCurrentThread(), "Lock should be held by current thread");
         }
         assertFalse(resourceLock.isHeldByCurrentThread(), "Lock should be released after second try-with-resources");
+    }
+
+    @Test
+    public void testResourceLockAutoRemovalFromMap() {
+        ConcurrentHashMap<String, ResourceLock> lockMap = new ConcurrentHashMap<>();
+        String key = "testKey";
+        // Use try-with-resources to obtain and release the lock
+        try (ResourceLock ignored = CollectionUtils.computeIfAbsent(lockMap, key, k -> new ResourceLock()).obtain()) {
+            // Do something while holding the lock
+            assertTrue(lockMap.containsKey(key));
+            assertTrue(lockMap.get(key).isHeldByCurrentThread());
+        } finally {
+            assertFalse(lockMap.get(key).isHeldByCurrentThread());
+            assertTrue(lockMap.containsKey(key));
+            // Remove the lock from the map
+            lockMap.remove(key);
+            assertFalse(lockMap.containsKey(key));
+        }
+        // Ensure the lock is removed from the map
+        assertFalse(lockMap.containsKey(key));
     }
 
     @Test

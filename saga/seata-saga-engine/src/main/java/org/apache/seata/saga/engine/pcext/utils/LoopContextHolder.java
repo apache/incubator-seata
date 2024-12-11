@@ -47,8 +47,7 @@ public class LoopContextHolder {
             DomainConstants.VAR_NAME_CURRENT_LOOP_CONTEXT_HOLDER);
 
         if (null == loopContextHolder && forceCreate) {
-            try (ResourceLock lock = CollectionUtils.computeIfAbsent(CONTEXT_LOCK_MAP, context, k -> new ResourceLock());
-                 ResourceLock ignored = lock.obtain()) {
+            try (ResourceLock ignored = CollectionUtils.computeIfAbsent(CONTEXT_LOCK_MAP, context, k -> new ResourceLock()).obtain()) {
                 loopContextHolder = (LoopContextHolder)context.getVariable(
                     DomainConstants.VAR_NAME_CURRENT_LOOP_CONTEXT_HOLDER);
                 if (null == loopContextHolder) {
