@@ -165,15 +165,16 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
     │   ├── failsafe-2.3.3.jar
     │   ├── failureaccess-1.0.1.jar
     │   ├── fastjson-1.2.83.jar
-    │   ├── grpc-api-1.66.0.jar
-    │   ├── grpc-context-1.66.0.jar
-    │   ├── grpc-core-1.66.0.jar
+    │   ├── fastjson2-2.0.52.jar
+    │   ├── grpc-api-1.55.1.jar
+    │   ├── grpc-context-1.55.1.jar
+    │   ├── grpc-core-1.55.1.jar
     │   ├── grpc-grpclb-1.27.1.jar
-    │   ├── grpc-netty-1.66.0.jar
-    │   ├── grpc-protobuf-1.66.0.jar
-    │   ├── grpc-protobuf-lite-1.66.0.jar
-    │   ├── grpc-stub-1.66.0.jar
-    │   ├── grpc-util-1.66.0.jar
+    │   ├── grpc-netty-1.55.1.jar
+    │   ├── grpc-protobuf-1.55.1.jar
+    │   ├── grpc-protobuf-lite-1.55.1.jar
+    │   ├── grpc-stub-1.55.1.jar
+    │   ├── grpc-util-1.55.1.jar
     │   ├── gson-2.9.1.jar
     │   ├── guava-32.1.3-jre.jar
     │   ├── guice-5.0.1.jar
@@ -272,9 +273,9 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
     │   ├── netty-transport-sctp-4.1.101.Final.jar
     │   ├── netty-transport-udt-4.1.101.Final.jar
     │   ├── objenesis-3.2.jar
-    │   ├── perfmark-api-0.27.0.jar
+    │   ├── perfmark-api-0.25.0.jar
     │   ├── postgresql-42.3.8.jar
-    │   ├── proto-google-common-protos-2.41.0.jar
+    │   ├── proto-google-common-protos-2.9.0.jar
     │   ├── protobuf-java-3.25.4.jar
     │   ├── protobuf-java-util-3.11.0.jar
     │   ├── reflectasm-1.11.9.jar
@@ -453,6 +454,8 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
 │   │   ├── jakarta.annotation-api-1.3.5.jar
 │   │   ├── janino-3.1.10.jar
 │   │   ├── jul-to-slf4j-1.7.36.jar
+│   │   ├── log4j-api-2.17.2.jar
+│   │   ├── log4j-to-slf4j-2.17.2.jar
 │   │   ├── logback-classic-1.2.12.jar
 │   │   ├── logback-core-1.2.12.jar
 │   │   ├── netty-all-4.1.101.Final.jar
@@ -489,7 +492,7 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
 │   │   ├── netty-transport-rxtx-4.1.101.Final.jar
 │   │   ├── netty-transport-sctp-4.1.101.Final.jar
 │   │   ├── netty-transport-udt-4.1.101.Final.jar
-│   │   ├── seata-common-2.2.0.jar
+│   │   ├── seata-common-2.3.0-SNAPSHOT.jar
 │   │   ├── slf4j-api-1.7.36.jar
 │   │   ├── snakeyaml-2.0.jar
 │   │   ├── spring-aop-5.3.39.jar
@@ -581,15 +584,16 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
     │   ├── failsafe-2.3.3.jar
     │   ├── failureaccess-1.0.1.jar
     │   ├── fastjson-1.2.83.jar
-    │   ├── grpc-api-1.66.0.jar
-    │   ├── grpc-context-1.66.0.jar
-    │   ├── grpc-core-1.66.0.jar
+    │   ├── fastjson2-2.0.52.jar
+    │   ├── grpc-api-1.55.1.jar
+    │   ├── grpc-context-1.55.1.jar
+    │   ├── grpc-core-1.55.1.jar
     │   ├── grpc-grpclb-1.27.1.jar
-    │   ├── grpc-netty-1.66.0.jar
-    │   ├── grpc-protobuf-1.66.0.jar
-    │   ├── grpc-protobuf-lite-1.66.0.jar
-    │   ├── grpc-stub-1.66.0.jar
-    │   ├── grpc-util-1.66.0.jar
+    │   ├── grpc-netty-1.55.1.jar
+    │   ├── grpc-protobuf-1.55.1.jar
+    │   ├── grpc-protobuf-lite-1.55.1.jar
+    │   ├── grpc-stub-1.55.1.jar
+    │   ├── grpc-util-1.55.1.jar
     │   ├── gson-2.9.1.jar
     │   ├── guava-32.1.3-jre.jar
     │   ├── guice-5.0.1.jar
@@ -689,9 +693,9 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
     │   ├── netty-transport-sctp-4.1.101.Final.jar
     │   ├── netty-transport-udt-4.1.101.Final.jar
     │   ├── objenesis-3.2.jar
-    │   ├── perfmark-api-0.27.0.jar
+    │   ├── perfmark-api-0.25.0.jar
     │   ├── postgresql-42.3.8.jar
-    │   ├── proto-google-common-protos-2.41.0.jar
+    │   ├── proto-google-common-protos-2.9.0.jar
     │   ├── protobuf-java-3.25.4.jar
     │   ├── protobuf-java-util-3.11.0.jar
     │   ├── reflectasm-1.11.9.jar

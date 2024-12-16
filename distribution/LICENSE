@@ -281,7 +281,7 @@ Apache-2.0 licenses
     io.grpc:grpc-api 1.55.1 Apache-2.0
     io.grpc:grpc-context 1.55.1 Apache-2.0
     io.grpc:grpc-core 1.55.1 Apache-2.0
-    io.grpc:grpc-grpclb 1.55.1 Apache-2.0
+    io.grpc:grpc-grpclb 1.27.1 Apache-2.0
     io.grpc:grpc-netty 1.55.1 Apache-2.0
     io.grpc:grpc-protobuf 1.55.1 Apache-2.0
     io.grpc:grpc-protobuf-lite 1.55.1 Apache-2.0
