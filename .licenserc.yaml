@@ -61,6 +61,7 @@ header:
     - 'ext/apm-seata-skywalking-plugin/config/agent.config'
     - 'server/src/main/resources/lua/redislocker/redislock.lua'
     - 'server/src/main/resources/banner.txt'
+    - 'namingserver/src/main/resources/banner.txt'
     - '**/*.json'
   comment: on-failure
 dependency:
