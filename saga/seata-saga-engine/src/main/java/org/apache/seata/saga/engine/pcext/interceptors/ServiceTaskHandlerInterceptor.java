@@ -391,13 +391,9 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
 
                     stateInstance.setStatus(ExecutionStatus.UN);
                     ExceptionUtils.NetExceptionType t = ExceptionUtils.getNetExceptionType(exp);
-                    if (t != null) {
-                        if (t.equals(ExceptionUtils.NetExceptionType.CONNECT_EXCEPTION)) {
-                            stateInstance.setStatus(ExecutionStatus.FA);
-                        } else if (t.equals(ExceptionUtils.NetExceptionType.READ_TIMEOUT_EXCEPTION)) {
-                            stateInstance.setStatus(ExecutionStatus.UN);
-                        }
-                    } else {
+                    if (t.equals(ExceptionUtils.NetExceptionType.CONNECT_EXCEPTION)) {
+                        stateInstance.setStatus(ExecutionStatus.FA);
+                    } else if (t.equals(ExceptionUtils.NetExceptionType.READ_TIMEOUT_EXCEPTION)) {
                         stateInstance.setStatus(ExecutionStatus.UN);
                     }
                 } else {
