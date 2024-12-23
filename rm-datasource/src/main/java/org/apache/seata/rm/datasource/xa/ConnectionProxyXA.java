@@ -70,7 +70,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
 
     private boolean shouldBeHeld = false;
 
-    private final ResourceLock RESOURCE_LOCK = new ResourceLock();
+    private final ResourceLock resourceLock = new ResourceLock();
 
     /**
      * Constructor of Connection Proxy for XA mode.
@@ -131,7 +131,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
      * @throws SQLException SQLException
      */
     public void xaCommit(String xid, long branchId, String applicationData) throws XAException {
-        try (ResourceLock ignored = RESOURCE_LOCK.obtain()) {
+        try (ResourceLock ignored = resourceLock.obtain()) {
             XAXid xaXid = XAXidBuilder.build(xid, branchId);
             xaResource.commit(xaXid, false);
             releaseIfNecessary();
@@ -145,7 +145,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
      * @param applicationData application data
      */
     public void xaRollback(String xid, long branchId, String applicationData) throws XAException {
-        try (ResourceLock ignored = RESOURCE_LOCK.obtain()) {
+        try (ResourceLock ignored = resourceLock.obtain()) {
             if (this.xaBranchXid != null) {
                 xaRollback(xaBranchXid);
             } else {
@@ -222,7 +222,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
 
     @Override
     public void commit() throws SQLException {
-        try (ResourceLock ignored = RESOURCE_LOCK.obtain()) {
+        try (ResourceLock ignored = resourceLock.obtain()) {
             if (currentAutoCommitStatus || isReadOnly()) {
                 // Ignore the committing on an autocommit session and read-only transaction.
                 return;
@@ -290,7 +290,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
     }
 
     private void start() throws XAException, SQLException {
-        try (ResourceLock ignored = RESOURCE_LOCK.obtain()) {
+        try (ResourceLock ignored = resourceLock.obtain()) {
             // 3. XA Start
             if (JdbcConstants.ORACLE.equals(resource.getDbType())) {
                 xaResource.start(this.xaBranchXid, SeataXAResource.ORATRANSLOOSE);
@@ -335,7 +335,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
 
     @Override
     public void close() throws SQLException {
-        try (ResourceLock ignored = RESOURCE_LOCK.obtain()) {
+        try (ResourceLock ignored = resourceLock.obtain()) {
             rollBacked = false;
             if (isHeld() && shouldBeHeld()) {
                 // if kept by a keeper, just hold the connection.
@@ -347,7 +347,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
     }
 
     protected void closeForce() throws SQLException {
-        try (ResourceLock ignored = RESOURCE_LOCK.obtain()) {
+        try (ResourceLock ignored = resourceLock.obtain()) {
             Connection physicalConn = getWrappedConnection();
             if (physicalConn instanceof PooledConnection) {
                 physicalConn = ((PooledConnection) physicalConn).getConnection();
@@ -418,6 +418,6 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
      * @return the RESOURCE_LOCK
      */
     public ResourceLock getResourceLock() {
-        return RESOURCE_LOCK;
+        return resourceLock;
     }
 }
