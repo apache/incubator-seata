@@ -218,12 +218,12 @@ Apache-2.0 licenses
 ========================================================================
 
     @ampproject/remapping 2.2.1 Apache-2.0
-    com.101tec:zkclient 0.11 Apache-2.0
     com.alibaba.nacos:nacos-api 1.4.6 Apache-2.0
     com.alibaba.nacos:nacos-client 1.4.6 Apache-2.0
     com.alibaba.nacos:nacos-common 1.4.6 Apache-2.0
-    com.alibaba:druid 1.2.7 Apache-2.0
+    com.alibaba:druid 1.2.20 Apache-2.0
     com.alibaba:fastjson 1.2.83 Apache-2.0
+    com.alibaba.fastjson2:fastjson2 2.0.52 Apache-2.0
     com.alipay.sofa.common:sofa-common-tools 1.0.12 Apache-2.0
     com.alipay.sofa:bolt 1.6.7 Apache-2.0
     com.alipay.sofa:hessian 4.0.3 Apache-2.0
@@ -243,7 +243,7 @@ Apache-2.0 licenses
     com.github.danielwegener:logback-kafka-appender 0.2.0-RC2 Apache-2.0
     com.github.vlsi.compactmap:compactmap 2.0 Apache-2.0
     com.google.android:annotations 4.1.1.4 Apache-2.0
-    com.google.api.grpc:proto-google-common-protos 1.17.0 Apache-2.0
+    com.google.api.grpc:proto-google-common-protos 2.9.0 Apache-2.0
     com.google.code.findbugs:jsr305 3.0.2 Apache-2.0
     com.google.code.gson:gson 2.8.9 Apache-2.0
     com.google.code.gson:gson 2.9.1 Apache-2.0
@@ -275,18 +275,17 @@ Apache-2.0 licenses
     commons-pool:commons-pool 1.6 Apache-2.0
     commons-validator:commons-validator 1.7 Apache-2.0
     de.javakaffee:kryo-serializers 0.45 Apache-2.0
-    htm 3.1.1 Apache-2.0
     io.etcd:jetcd-common 0.5.0 Apache-2.0
     io.etcd:jetcd-core 0.5.0 Apache-2.0
     io.etcd:jetcd-resolver 0.5.0 Apache-2.0
-    io.grpc:grpc-api 1.27.1 Apache-2.0
-    io.grpc:grpc-context 1.27.1 Apache-2.0
-    io.grpc:grpc-core 1.27.1 Apache-2.0
+    io.grpc:grpc-api 1.55.1 Apache-2.0
+    io.grpc:grpc-context 1.55.1 Apache-2.0
+    io.grpc:grpc-core 1.55.1 Apache-2.0
     io.grpc:grpc-grpclb 1.27.1 Apache-2.0
-    io.grpc:grpc-netty 1.27.1 Apache-2.0
-    io.grpc:grpc-protobuf 1.27.1 Apache-2.0
-    io.grpc:grpc-protobuf-lite 1.27.1 Apache-2.0
-    io.grpc:grpc-stub 1.27.1 Apache-2.0
+    io.grpc:grpc-netty 1.55.1 Apache-2.0
+    io.grpc:grpc-protobuf 1.55.1 Apache-2.0
+    io.grpc:grpc-protobuf-lite 1.55.1 Apache-2.0
+    io.grpc:grpc-stub 1.55.1 Apache-2.0
     io.jsonwebtoken:jjwt-api 0.10.5 Apache-2.0
     io.jsonwebtoken:jjwt-impl 0.10.5 Apache-2.0
     io.jsonwebtoken:jjwt-jackson 0.10.5 Apache-2.0
@@ -321,7 +320,7 @@ Apache-2.0 licenses
     io.netty:netty-transport-rxtx 4.1.101.Final Apache-2.0
     io.netty:netty-transport-sctp 4.1.101.Final Apache-2.0
     io.netty:netty-transport-udt 4.1.101.Final Apache-2.0
-    io.perfmark:perfmark-api 0.19.0 Apache-2.0
+    io.perfmark:perfmark-api 0.25.0 Apache-2.0
     io.prometheus:simpleclient 0.10.0 Apache-2.0
     io.prometheus:simpleclient 0.15.0 Apache-2.0
     io.prometheus:simpleclient_common 0.10.0 Apache-2.0
@@ -341,6 +340,10 @@ Apache-2.0 licenses
     org.apache.commons:commons-lang3 3.12.0 Apache-2.0
     org.apache.commons:commons-pool2 2.9.0 Apache-2.0
     org.apache.commons:commons-pool2 2.11.1 Apache-2.0
+    org.apache.curator:curator-recipes 5.1.0 Apache-2.0
+    org.apache.curator:curator-framework 5.1.0 Apache-2.0
+    org.apache.curator:curator-client 5.1.0 Apache-2.0
+    org.apache.curator:curator-test 5.1.0 Apache-2.0
     org.apache.dubbo.extensions:dubbo-filter-seata 1.0.2 Apache-2.0
     org.apache.httpcomponents:httpasyncclient 4.1.5 Apache-2.0
     org.apache.httpcomponents:httpclient 4.5.14 Apache-2.0
@@ -418,10 +421,6 @@ Apache-2.0 licenses
     org.springframework:spring-web 5.3.39 Apache-2.0
     org.springframework:spring-webmvc 5.3.39 Apache-2.0
     org.apache.commons:commons-math 2.2 Apache-2.0
-    org.apache.curator:curator-recipes:jar 5.1.0 Apache-2.0
-    org.apache.curator:curator-framework:jar 5.1.0 Apache-2.0
-    org.apache.curator:curator-client:jar 5.1.0 Apache-2.0
-    org.apache.curator:curator-test:jar 5.1.0 Apache-2.0
 
 ========================================================================
 BSD-2-Clause licenses
@@ -726,7 +725,7 @@ MIT licenses
     dva/node_modules/react-router-redux 5.0.0-alpha.9 MIT
     dva/node_modules/redux 3.7.2 MIT
     dva/node_modules/regenerator-runtime 0.11.1 MIT
-    elliptic 6.5.7 MIT
+    elliptic 6.6.0 MIT
     elliptic/node_modules/bn.js 4.12.0 MIT
     encoding 0.1.13 MIT
     encoding/node_modules/iconv-lite 0.6.3 MIT
