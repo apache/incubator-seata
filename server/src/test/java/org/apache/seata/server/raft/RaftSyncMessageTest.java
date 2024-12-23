@@ -20,6 +20,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,6 +77,33 @@ public class RaftSyncMessageTest {
             bytes =  bos.toByteArray();
         }
         Assertions.assertThrows(SeataRuntimeException.class,()->RaftSyncMessageSerializer.decode(bytes));
+    }
+
+    @Test
+    public void testSecurityMsgAndSnapshotSerialize() throws IOException {
+        String jndiUrl = "oracle://127.0.0.1:1234/test";
+        String basePayload = "{\"dataSourceName\":\"" + jndiUrl + "\",\"command\":\"123\"}";
+        String payload = "{\"obj\":\"" + Base64.getEncoder().encodeToString(basePayload.getBytes())
+            + "\",\"clz\":\"dm.jdbc.driver.DmdbJdbcRowSet\"}";
+        byte[] payloadBytes = payload.getBytes();
+        byte[] bytes;
+        RaftSyncMessage raftSyncMessage = new RaftSyncMessage();
+        raftSyncMessage.setBody(payloadBytes);
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(bos)) {
+            oos.writeObject(raftSyncMessage);
+            bytes = bos.toByteArray();
+        }
+        Assertions.assertThrows(SeataRuntimeException.class,()->RaftSyncMessageSerializer.decode(bytes));
+        RaftSnapshot raftSnapshot = new RaftSnapshot();
+        raftSnapshot.setBody(payloadBytes);
+        byte[] snapshotBytes;
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(bos)) {
+            oos.writeObject(raftSnapshot);
+            snapshotBytes = bos.toByteArray();
+        }
+        Assertions.assertThrows(SeataRuntimeException.class,()->RaftSnapshotSerializer.decode(snapshotBytes));
     }
 
     @Test
