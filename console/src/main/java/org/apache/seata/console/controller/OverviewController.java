@@ -16,22 +16,24 @@
  */
 package org.apache.seata.console.controller;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import org.apache.seata.common.result.Code;
 import org.apache.seata.common.result.SingleResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Overview
  *
  */
 @RestController
+@Api(tags = "Overview APIs")
 @RequestMapping("/api/v1/overview")
 public class OverviewController {
 
@@ -40,6 +42,7 @@ public class OverviewController {
      *
      * @return the data
      */
+    @ApiOperation("get data")
     @GetMapping(value = "/getData")
     public SingleResult<List> getData() {
         List<Map<String, Object>> result = new ArrayList<>();
@@ -50,7 +53,6 @@ public class OverviewController {
             hashMap.put("id", count);
             result.add(hashMap);
         }
-
-        return SingleResult.success(result);
+        return new SingleResult<>(Code.SUCCESS, result);
     }
 }

@@ -28,6 +28,8 @@ import javax.servlet.http.HttpServletRequest;
 import com.alipay.sofa.jraft.RouteTable;
 import com.alipay.sofa.jraft.conf.Configuration;
 import com.alipay.sofa.jraft.entity.PeerId;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.metadata.MetadataResponse;
 import org.apache.seata.common.metadata.Node;
@@ -55,6 +57,7 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 /**
  */
 @RestController
+@Api(tags = "Raft cluster APIs")
 @RequestMapping("/metadata/v1")
 public class ClusterController {
 
@@ -73,6 +76,7 @@ public class ClusterController {
         this.serverProperties = applicationContext.getBean(ServerProperties.class);
     }
 
+    @ApiOperation("changeCluster")
     @PostMapping("/changeCluster")
     public Result<?> changeCluster(@RequestParam String raftClusterStr) {
         Result<?> result = new Result<>();
@@ -89,6 +93,7 @@ public class ClusterController {
         return result;
     }
 
+    @ApiOperation("cluster")
     @GetMapping("/cluster")
     public MetadataResponse cluster(String group) {
         MetadataResponse metadataResponse = new MetadataResponse();
@@ -122,6 +127,7 @@ public class ClusterController {
         return metadataResponse;
     }
 
+    @ApiOperation("watch follower")
     @PostMapping("/watch")
     public void watch(HttpServletRequest request, @RequestParam Map<String, Object> groupTerms,
         @RequestParam(defaultValue = "28000") int timeout) {

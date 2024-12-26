@@ -18,6 +18,8 @@ package org.apache.seata.server.console.controller;
 
 import javax.annotation.Resource;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.apache.seata.common.result.PageResult;
 import org.apache.seata.server.console.param.GlobalLockParam;
 import org.apache.seata.server.console.vo.GlobalLockVO;
@@ -32,6 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
  * Global Lock Controller
  */
 @RestController
+@Api(tags = "Global lock APIs")
 @RequestMapping("/api/v1/console/globalLock")
 public class GlobalLockController {
 
@@ -43,6 +46,7 @@ public class GlobalLockController {
      * @param param the param
      * @return the list of GlobalLockVO
      */
+    @ApiOperation("query global lock")
     @GetMapping("query")
     public PageResult<GlobalLockVO> query(@ModelAttribute GlobalLockParam param) {
         return globalLockService.query(param);

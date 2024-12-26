@@ -29,7 +29,7 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_SERVER_ENABLE_CHECK_
 public abstract class AbstractCheckAuthHandler implements RegisterCheckAuthHandler {
 
     private static final Boolean ENABLE_CHECK_AUTH = ConfigurationFactory.getInstance().getBoolean(
-        ConfigurationKeys.SERVER_ENABLE_CHECK_AUTH, DEFAULT_SERVER_ENABLE_CHECK_AUTH);
+            ConfigurationKeys.SERVER_ENABLE_CHECK_AUTH, DEFAULT_SERVER_ENABLE_CHECK_AUTH);
 
     @Override
     public boolean regTransactionManagerCheckAuth(RegisterTMRequest request) {

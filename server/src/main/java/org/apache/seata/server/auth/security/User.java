@@ -14,32 +14,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.server.controller;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import org.apache.seata.server.ServerRunner;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+package org.apache.seata.server.auth.security;
 
 /**
+ * mock user info
+ *
  */
-@RestController
-@Api(tags = "Health APIs")
-public class HealthController {
+public class User {
+    /**
+     * The Username.
+     */
+    String username;
+    /**
+     * The Password.
+     */
+    String password;
 
-    private static final String OK = "ok";
-    private static final String NOT_OK = "not_ok";
 
-    @Autowired
-    private ServerRunner serverRunner;
+    //region Getter && Setter
 
-
-    @RequestMapping("/health")
-    @ApiOperation("health")
-    String healthCheck() {
-        return serverRunner.started() ? OK : NOT_OK;
+    public String getUsername() {
+        return username;
     }
 
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    //endregion
 }

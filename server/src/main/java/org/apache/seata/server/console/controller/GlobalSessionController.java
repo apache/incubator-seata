@@ -18,6 +18,8 @@ package org.apache.seata.server.console.controller;
 
 import javax.annotation.Resource;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.apache.seata.server.console.param.GlobalSessionParam;
 import org.apache.seata.common.result.PageResult;
 import org.apache.seata.server.console.vo.GlobalSessionVO;
@@ -31,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
  * Global Session Controller
  */
 @RestController
+@Api(tags = "Global session APIs")
 @RequestMapping("/api/v1/console/globalSession")
 public class GlobalSessionController {
 
@@ -42,6 +45,7 @@ public class GlobalSessionController {
      * @param param param for query globalSession
      * @return  the list of GlobalSessionVO
      */
+    @ApiOperation("query global session")
     @GetMapping("query")
     public PageResult<GlobalSessionVO> query(@ModelAttribute GlobalSessionParam param) {
         return globalSessionService.query(param);
