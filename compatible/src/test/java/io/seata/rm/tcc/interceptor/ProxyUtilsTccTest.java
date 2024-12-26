@@ -16,11 +16,6 @@
  */
 package io.seata.rm.tcc.interceptor;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
-
 import io.seata.core.context.RootContext;
 import io.seata.rm.tcc.NormalTccActionImpl;
 import io.seata.rm.tcc.TccParam;
@@ -32,8 +27,15 @@ import org.apache.seata.core.model.Resource;
 import org.apache.seata.core.model.ResourceManager;
 import org.apache.seata.integration.tx.api.util.ProxyUtil;
 import org.apache.seata.rm.DefaultResourceManager;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class ProxyUtilsTccTest {
 
@@ -41,6 +43,10 @@ public class ProxyUtilsTccTest {
 
     private final AtomicReference<String> branchReference = new AtomicReference<String>();
 
+    @BeforeEach
+    public void before() {
+        RootContext.bind(DEFAULT_XID);
+    }
 
     private final ResourceManager resourceManager = new ResourceManager() {
 
@@ -103,9 +109,6 @@ public class ProxyUtilsTccTest {
 
     @Test
     public void testTcc() {
-        //given
-        RootContext.bind(DEFAULT_XID);
-
         TccParam tccParam = new TccParam(1, "abc@163.com");
         List<String> listB = Collections.singletonList("b");
 
@@ -121,9 +124,6 @@ public class ProxyUtilsTccTest {
 
     @Test
     public void testTccThrowRawException() {
-        //given
-        RootContext.bind(DEFAULT_XID);
-
         TccParam tccParam = new TccParam(1, "abc@163.com");
         List<String> listB = Collections.singletonList("b");
 
@@ -137,6 +137,11 @@ public class ProxyUtilsTccTest {
     @Test
     public void testTccImplementOtherMethod(){
         Assertions.assertTrue(tccActionProxy.otherMethod());
+    }
+
+    @AfterEach
+    public void clear() {
+        RootContext.unbind();
     }
 
 

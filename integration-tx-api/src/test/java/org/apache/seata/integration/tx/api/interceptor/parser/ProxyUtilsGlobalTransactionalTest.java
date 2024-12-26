@@ -16,15 +16,13 @@
  */
 package org.apache.seata.integration.tx.api.interceptor.parser;
 
-import org.apache.seata.integration.tx.api.util.ProxyUtil;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.model.TransactionManager;
+import org.apache.seata.integration.tx.api.util.ProxyUtil;
 import org.apache.seata.tm.TransactionManagerHolder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import java.util.concurrent.atomic.AtomicReference;
 
 
 public class ProxyUtilsGlobalTransactionalTest {
@@ -36,8 +34,6 @@ public class ProxyUtilsGlobalTransactionalTest {
     public void testTcc() {
         //given
         BusinessImpl business = new BusinessImpl();
-
-        AtomicReference<String> branchReference = new AtomicReference<String>();
 
         Business businessProxy = ProxyUtil.createProxy(business);
 
