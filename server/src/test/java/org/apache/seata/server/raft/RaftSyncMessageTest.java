@@ -28,6 +28,7 @@ import java.util.Map;
 import org.apache.seata.common.exception.SeataRuntimeException;
 import org.apache.seata.common.metadata.ClusterRole;
 import org.apache.seata.common.metadata.Node;
+import org.apache.seata.common.store.SessionMode;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.server.cluster.raft.snapshot.RaftSnapshot;
@@ -44,7 +45,6 @@ import org.apache.seata.server.cluster.raft.sync.msg.dto.RaftClusterMetadata;
 import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.session.SessionHelper;
 import org.apache.seata.server.session.SessionHolder;
-import org.apache.seata.server.store.StoreConfig;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -59,7 +59,7 @@ public class RaftSyncMessageTest {
 
     @BeforeAll
     public static void setUp(ApplicationContext context){
-        SessionHolder.init(StoreConfig.SessionMode.FILE);
+        SessionHolder.init(SessionMode.FILE);
     }
 
     @AfterAll

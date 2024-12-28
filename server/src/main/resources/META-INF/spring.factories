@@ -16,5 +16,3 @@
 #
 org.springframework.context.ApplicationListener=\
 org.apache.seata.server.spring.listener.ServerApplicationListener
-org.springframework.context.ApplicationContextInitializer=\
-org.apache.seata.server.spring.listener.SeataPropertiesLoader

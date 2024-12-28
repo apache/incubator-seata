@@ -30,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 import io.netty.channel.Channel;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.seata.common.DefaultValues;
+import org.apache.seata.common.store.SessionMode;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.config.ConfigurationFactory;
@@ -216,7 +217,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         boolean enableBranchAsyncRemove = CONFIG.getBoolean(
                 ConfigurationKeys.ENABLE_BRANCH_ASYNC_REMOVE, DEFAULT_ENABLE_BRANCH_ASYNC_REMOVE);
         // create branchRemoveExecutor
-        if (enableBranchAsyncRemove && StoreConfig.getSessionMode() != StoreConfig.SessionMode.FILE) {
+        if (enableBranchAsyncRemove && StoreConfig.getSessionMode() != SessionMode.FILE) {
             branchRemoveExecutor = new ThreadPoolExecutor(BRANCH_ASYNC_POOL_SIZE, BRANCH_ASYNC_POOL_SIZE,
                     Integer.MAX_VALUE, TimeUnit.MILLISECONDS,
                     new ArrayBlockingQueue<>(
@@ -232,8 +233,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         if (null == instance) {
             synchronized (DefaultCoordinator.class) {
                 if (null == instance) {
-                    StoreConfig.SessionMode storeMode = StoreConfig.getSessionMode();
-                    instance = Objects.equals(StoreConfig.SessionMode.RAFT, storeMode)
+                    SessionMode storeMode = StoreConfig.getSessionMode();
+                    instance = Objects.equals(SessionMode.RAFT, storeMode)
                         ? new RaftCoordinator(remotingServer) : new DefaultCoordinator(remotingServer);
                 }
             }
