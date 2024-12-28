@@ -16,14 +16,8 @@
  */
 package org.apache.seata.rm.tcc.interceptor.parser;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.apache.seata.core.context.RootContext;
+import org.apache.seata.common.XID;
+import org.apache.seata.common.util.UUIDGenerator;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.GlobalStatus;
@@ -45,28 +39,95 @@ import org.apache.seata.tm.api.GlobalTransaction;
 import org.apache.seata.tm.api.GlobalTransactionContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 class TccActionInterceptorParserTest {
 
-    @BeforeAll
-    public static void init() throws IOException {
-        System.setProperty("config.type", "file");
-        System.setProperty("config.file.name", "file.conf");
-        System.setProperty("txServiceGroup", "default_tx_group");
-        System.setProperty("service.vgroupMapping.default_tx_group", "default");
+    private ResourceManager backResourceManager;
+    private TransactionManager backTransactionManager;
+
+    @BeforeEach
+    public void beforeEach() {
+        backResourceManager = DefaultResourceManager.get().getResourceManager(BranchType.TCC);
+        backTransactionManager = TransactionManagerHolder.get();
+        Map<String, List<BranchSessionMock>> applicationDataMap = new ConcurrentHashMap<>();
+
+        ResourceManager mockResourceManager = new TCCResourceManager() {
+
+            @Override
+            public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws TransactionException {
+
+                long branchId = System.currentTimeMillis();
+
+                List<BranchSessionMock> branches = applicationDataMap.computeIfAbsent(xid, s -> new ArrayList<>());
+                BranchSessionMock branchSessionMock = new BranchSessionMock();
+                branchSessionMock.setXid(xid);
+                branchSessionMock.setBranchType(branchType);
+                branchSessionMock.setResourceId(resourceId);
+                branchSessionMock.setApplicationData(applicationData);
+                branchSessionMock.setBranchId(branchId);
+
+                branches.add(branchSessionMock);
+
+                return branchId;
+            }
+        };
+        DefaultResourceManager.mockResourceManager(BranchType.TCC, mockResourceManager);
+
+        TransactionManager mockTransactionManager = new TransactionManager() {
+            @Override
+            public String begin(String applicationId, String transactionServiceGroup, String name, int timeout) throws TransactionException {
+                return XID.generateXID(UUIDGenerator.generateUUID());
+            }
+
+            @Override
+            public GlobalStatus commit(String xid) throws TransactionException {
+                List<BranchSessionMock> branches = applicationDataMap.computeIfAbsent(xid, s -> new ArrayList<>());
+                for (BranchSessionMock branch : branches) {
+                    mockResourceManager.branchCommit(branch.getBranchType(), branch.getXid(), branch.getBranchId(), branch.getResourceId(), branch.getApplicationData());
+                }
+                return GlobalStatus.Committed;
+            }
+
+            @Override
+            public GlobalStatus rollback(String xid) throws TransactionException {
+                List<BranchSessionMock> branches = applicationDataMap.computeIfAbsent(xid, s -> new ArrayList<>());
+                for (BranchSessionMock branch : branches) {
+                    mockResourceManager.branchRollback(branch.getBranchType(), branch.getXid(), branch.getBranchId(), branch.getResourceId(), branch.getApplicationData());
+                }
+
+                return GlobalStatus.Rollbacked;
+            }
+
+            @Override
+            public GlobalStatus getStatus(String xid) throws TransactionException {
+                return GlobalStatus.Begin;
+            }
+
+            @Override
+            public GlobalStatus globalReport(String xid, GlobalStatus globalStatus) throws TransactionException {
+                return globalStatus;
+            }
+        };
+        TransactionManagerHolder.set(mockTransactionManager);
     }
 
     @AfterEach
-    public void clearTccResource(){
-        resourceManager.getManagedResources().clear();
+    public void afterEach() {
+        DefaultResourceManager.mockResourceManager(BranchType.TCC, backResourceManager);
+        TransactionManagerHolder.set(backTransactionManager);
     }
+
 
     @Test
     void parserInterfaceToProxy() {
-
         //given
         TccActionInterceptorParser tccActionInterceptorParser = new TccActionInterceptorParser();
         NormalTccActionImpl tccAction = new NormalTccActionImpl();
@@ -76,21 +137,13 @@ class TccActionInterceptorParserTest {
 
         //then
         Assertions.assertNotNull(proxyInvocationHandler);
-
     }
 
 
     @Test
     public void testNestTcc_should_commit() throws Exception {
-        //given
-        RootContext.unbind();
-        DefaultResourceManager.get();
-        DefaultResourceManager.mockResourceManager(BranchType.TCC, resourceManager);
-
-        TransactionManagerHolder.set(transactionManager);
-
         TccActionImpl tccAction = new TccActionImpl();
-        TccAction tccActionProxy =  ProxyUtil.createProxy(tccAction);
+        TccAction tccActionProxy = ProxyUtil.createProxy(tccAction);
         Assertions.assertNotNull(tccActionProxy);
 
         NestTccActionImpl nestTccAction = new NestTccActionImpl();
@@ -137,15 +190,8 @@ class TccActionInterceptorParserTest {
 
     @Test
     public void testNestTcc_should_rollback() throws Exception {
-        //given
-        RootContext.unbind();
-        DefaultResourceManager.get();
-        DefaultResourceManager.mockResourceManager(BranchType.TCC, resourceManager);
-
-        TransactionManagerHolder.set(transactionManager);
-
         TccActionImpl tccAction = new TccActionImpl();
-        TccAction tccActionProxy =  ProxyUtil.createProxy(tccAction);
+        TccAction tccActionProxy = ProxyUtil.createProxy(tccAction);
         Assertions.assertNotNull(tccActionProxy);
 
         NestTccActionImpl nestTccAction = new NestTccActionImpl();
@@ -186,21 +232,13 @@ class TccActionInterceptorParserTest {
 
         Assertions.assertFalse(nestTccAction.isCommit());
         Assertions.assertFalse(tccAction.isCommit());
-
     }
 
 
     @Test
     public void testNestTcc_required_new_should_rollback_commit() throws Exception {
-        //given
-        RootContext.unbind();
-        DefaultResourceManager.get();
-        DefaultResourceManager.mockResourceManager(BranchType.TCC, resourceManager);
-
-        TransactionManagerHolder.set(transactionManager);
-
         TccActionImpl tccAction = new TccActionImpl();
-        TccAction tccActionProxy =  ProxyUtil.createProxy(tccAction);
+        TccAction tccActionProxy = ProxyUtil.createProxy(tccAction);
         Assertions.assertNotNull(tccActionProxy);
 
         NestTccActionImpl nestTccAction = new NestTccActionImpl();
@@ -244,18 +282,10 @@ class TccActionInterceptorParserTest {
     }
 
 
-
     @Test
     public void testNestTcc_required_new_should_both_commit() throws Exception {
-        //given
-        RootContext.unbind();
-        DefaultResourceManager.get();
-        DefaultResourceManager.mockResourceManager(BranchType.TCC, resourceManager);
-
-        TransactionManagerHolder.set(transactionManager);
-
         TccActionImpl tccAction = new TccActionImpl();
-        TccAction tccActionProxy =  ProxyUtil.createProxy(tccAction);
+        TccAction tccActionProxy = ProxyUtil.createProxy(tccAction);
         Assertions.assertNotNull(tccActionProxy);
 
         NestTccActionImpl nestTccAction = new NestTccActionImpl();
@@ -296,80 +326,6 @@ class TccActionInterceptorParserTest {
         Assertions.assertTrue(nestTccAction.isCommit());
         Assertions.assertTrue(tccAction.isCommit());
 
-    }
-
-
-
-    private static Map<String, List<BranchSessionMock>> applicationDataMap = new ConcurrentHashMap<>();
-
-
-    private static TransactionManager transactionManager = new TransactionManager() {
-        @Override
-        public String begin(String applicationId, String transactionServiceGroup, String name, int timeout) throws TransactionException {
-            return UUID.randomUUID().toString();
-        }
-
-        @Override
-        public GlobalStatus commit(String xid) throws TransactionException {
-            commitAll(xid);
-            return GlobalStatus.Committed;
-        }
-
-        @Override
-        public GlobalStatus rollback(String xid) throws TransactionException {
-
-            rollbackAll(xid);
-
-            return GlobalStatus.Rollbacked;
-        }
-
-        @Override
-        public GlobalStatus getStatus(String xid) throws TransactionException {
-            return GlobalStatus.Begin;
-        }
-
-        @Override
-        public GlobalStatus globalReport(String xid, GlobalStatus globalStatus) throws TransactionException {
-            return globalStatus;
-        }
-    };
-
-
-    private static ResourceManager resourceManager = new TCCResourceManager() {
-
-        @Override
-        public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws TransactionException {
-
-            long branchId = System.currentTimeMillis();
-
-            List<BranchSessionMock> branches = applicationDataMap.computeIfAbsent(xid, s -> new ArrayList<>());
-            BranchSessionMock branchSessionMock = new BranchSessionMock();
-            branchSessionMock.setXid(xid);
-            branchSessionMock.setBranchType(branchType);
-            branchSessionMock.setResourceId(resourceId);
-            branchSessionMock.setApplicationData(applicationData);
-            branchSessionMock.setBranchId(branchId);
-
-            branches.add(branchSessionMock);
-
-            return branchId;
-        }
-    };
-
-    public static void commitAll(String xid) throws TransactionException {
-
-        List<BranchSessionMock> branches = applicationDataMap.computeIfAbsent(xid, s -> new ArrayList<>());
-        for (BranchSessionMock branch : branches) {
-            resourceManager.branchCommit(branch.getBranchType(), branch.getXid(), branch.getBranchId(), branch.getResourceId(), branch.getApplicationData());
-        }
-    }
-
-    public static void rollbackAll(String xid) throws TransactionException {
-
-        List<BranchSessionMock> branches = applicationDataMap.computeIfAbsent(xid, s -> new ArrayList<>());
-        for (BranchSessionMock branch : branches) {
-            resourceManager.branchRollback(branch.getBranchType(), branch.getXid(), branch.getBranchId(), branch.getResourceId(), branch.getApplicationData());
-        }
     }
 
 }
