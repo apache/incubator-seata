@@ -17,6 +17,7 @@
 package org.apache.seata.common.loader;
 
 import org.apache.commons.lang.exception.NestableRuntimeException;
+import org.apache.seata.common.lock.ResourceLock;
 
 /**
  * The type Enhanced service not found exception.
@@ -24,6 +25,8 @@ import org.apache.commons.lang.exception.NestableRuntimeException;
  */
 public class EnhancedServiceNotFoundException extends NestableRuntimeException {
     private static final long serialVersionUID = 7748438218914409019L;
+
+    private final ResourceLock stackTraceLock = new ResourceLock();
 
     /**
      * Instantiates a new Enhanced service not found exception.
@@ -75,7 +78,9 @@ public class EnhancedServiceNotFoundException extends NestableRuntimeException {
     }
 
     @Override
-    public synchronized Throwable fillInStackTrace() {
-        return this;
+    public Throwable fillInStackTrace() {
+        try (ResourceLock ignored = stackTraceLock.obtain()) {
+            return this;
+        }
     }
 }
