@@ -113,14 +113,12 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     }
 
     private String buildAfterImageSQL(TableMeta tableMeta, TableRecords beforeImage) throws SQLException {
-        String prefix = "SELECT ";
-        String whereSql = SqlGenerateUtils.buildWhereConditionByPKs(tableMeta.getPrimaryKeyOnlyName(), beforeImage.pkRows().size(), getDbType());
-        String suffix = " FROM " + getFromTableInSQL() + " WHERE " + whereSql;
-        StringJoiner selectSQLJoiner = new StringJoiner(", ", prefix, suffix);
+        StringJoiner selectSQLJoiner = new StringJoiner(", ", "SELECT "
+                , " FROM " + getFromTableInSQL() + " WHERE ");
         SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer) sqlRecognizer;
         List<String> needUpdateColumns = getNeedColumns(tableMeta.getTableName(), sqlRecognizer.getTableAlias(), recognizer.getUpdateColumnsUnEscape());
         needUpdateColumns.forEach(selectSQLJoiner::add);
-        return selectSQLJoiner.toString();
+        return SqlGenerateUtils.buildSQLByPKs(selectSQLJoiner.toString(), "", tableMeta.getPrimaryKeyOnlyName(), beforeImage.pkRows().size(), getDbType());
     }
 
 }

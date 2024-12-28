@@ -200,7 +200,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     public void sendAsyncRequest(Channel channel, Object msg) {
         if (channel == null) {
             LOGGER.warn("sendAsyncRequest nothing, caused by null channel.");
-            return;
+            throw new FrameworkException(new Throwable("throw"), "frameworkException", FrameworkErrorCode.ChannelIsNotWritable);
         }
         RpcMessage rpcMessage = buildRequestMessage(msg, msg instanceof HeartbeatMessage
             ? ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST

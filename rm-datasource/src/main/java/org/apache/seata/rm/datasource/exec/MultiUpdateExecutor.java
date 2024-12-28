@@ -147,9 +147,8 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
             SQLUpdateRecognizer sqlUpdateRecognizer = (SQLUpdateRecognizer) sqlRecognizer;
             updateColumnsSet.addAll(sqlUpdateRecognizer.getUpdateColumnsUnEscape());
         }
-        StringBuilder prefix = new StringBuilder("SELECT ");
-        String suffix = " FROM " + getFromTableInSQL() + " WHERE " + SqlGenerateUtils.buildWhereConditionByPKs(tableMeta.getPrimaryKeyOnlyName(), beforeImage.pkRows().size(), getDbType());
-        StringJoiner selectSQLJoiner = new StringJoiner(", ", prefix.toString(), suffix);
+        StringJoiner selectSQLJoiner = new StringJoiner(", ", "SELECT ",
+                " FROM " + getFromTableInSQL() + " WHERE ");
         if (ONLY_CARE_UPDATE_COLUMNS) {
             if (!containsPK(new ArrayList<>(updateColumnsSet))) {
                 selectSQLJoiner.add(getColumnNamesInSQL(tableMeta.getEscapePkNameList(getDbType())));
@@ -162,7 +161,7 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
                 selectSQLJoiner.add(ColumnUtils.addEscape(columnName, getDbType()));
             }
         }
-        return selectSQLJoiner.toString();
+        return SqlGenerateUtils.buildSQLByPKs(selectSQLJoiner.toString(), "", tableMeta.getPrimaryKeyOnlyName(), beforeImage.pkRows().size(), getDbType());
     }
 
     protected String buildSuffixSql(String whereCondition) {

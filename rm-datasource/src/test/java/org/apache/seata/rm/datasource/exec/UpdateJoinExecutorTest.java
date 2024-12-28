@@ -32,7 +32,6 @@ import org.apache.seata.rm.datasource.ConnectionProxy;
 import org.apache.seata.rm.datasource.DataSourceProxy;
 import org.apache.seata.rm.datasource.DataSourceProxyTest;
 import org.apache.seata.rm.datasource.StatementProxy;
-import org.apache.seata.rm.datasource.exec.UpdateExecutor;
 import org.apache.seata.rm.datasource.exec.mysql.MySQLUpdateJoinExecutor;
 import org.apache.seata.rm.datasource.mock.MockDriver;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
@@ -58,6 +57,7 @@ public class UpdateJoinExecutorTest {
         };
         Object[][] beforeReturnValue = new Object[][]{
                 new Object[]{1, "Tom"},
+                new Object[]{2, "Tony"},
         };
         StatementProxy beforeMockStatementProxy = mockStatementProxy(returnValueColumnLabels, beforeReturnValue, columnMetas, indexMetas);
         String sql = "update t1 inner join t2 on t1.id = t2.id set t1.name = 'WILL',t2.name = 'WILL'";
@@ -69,6 +69,7 @@ public class UpdateJoinExecutorTest {
         TableRecords beforeImage = mySQLUpdateJoinExecutor.beforeImage();
         Object[][] afterReturnValue = new Object[][]{
                 new Object[]{1, "WILL"},
+                new Object[]{2, "Tony"},
         };
         StatementProxy afterMockStatementProxy = mockStatementProxy(returnValueColumnLabels, afterReturnValue, columnMetas, indexMetas);
         mySQLUpdateJoinExecutor.statementProxy = afterMockStatementProxy;
