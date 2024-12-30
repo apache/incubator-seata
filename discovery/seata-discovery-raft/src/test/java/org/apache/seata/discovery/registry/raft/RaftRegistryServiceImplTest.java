@@ -17,13 +17,18 @@
 package org.apache.seata.discovery.registry.raft;
 
 
-import org.apache.seata.common.util.HttpClientUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.seata.common.metadata.MetadataResponse;
+import org.apache.seata.common.metadata.Node;
+import org.apache.seata.common.util.*;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.StringEntity;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
@@ -33,7 +38,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Map;
+import java.util.*;
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -53,6 +58,7 @@ class RaftRegistryServiceImplTest {
         System.setProperty("registry.raft.password", "seata");
         System.setProperty("registry.raft.serverAddr", "127.0.0.1:8092");
         System.setProperty("registry.raft.tokenValidityInMilliseconds", "10000");
+        System.setProperty("registry.preferredNetworks", "10.10.*");
         ConfigurationFactory.getInstance();
     }
 
@@ -145,4 +151,28 @@ class RaftRegistryServiceImplTest {
         assertEquals(true, rst);
     }
 
+    /**
+     * RaftRegistryServiceImpl#controlEndpointStr()
+     * RaftRegistryServiceImpl#transactionEndpointStr()
+     */
+    @Test
+    public void testSelectEndpoint() throws JsonProcessingException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        String jsonString = "{\"nodes\":[{\"control\":{\"host\":\"v-0.svc-l.default.svc.cluster.local\",\"port\":7091},\"transaction\":{\"host\":\"v-0.svc-l.default.svc.cluster.local\",\"port\":8091},\"internal\":{\"host\":\"v-0.svc-l.default.svc.cluster.local\",\"port\":9091},\"group\":\"default\",\"role\":\"LEADER\",\"version\":\"2.3.0-SNAPSHOT\",\"metadata\":{\"external\":[{\"host\":\"192.168.105.7\",\"controlPort\":30071,\"transactionPort\":30091},{\"host\":\"10.10.105.7\",\"controlPort\":30071,\"transactionPort\":30091}]}},{\"control\":{\"host\":\"v-2.svc-l.default.svc.cluster.local\",\"port\":7091},\"transaction\":{\"host\":\"v-2.svc-l.default.svc.cluster.local\",\"port\":8091},\"internal\":{\"host\":\"v-2.svc-l.default.svc.cluster.local\",\"port\":9091},\"group\":\"default\",\"role\":\"FOLLOWER\",\"version\":\"2.3.0-SNAPSHOT\",\"metadata\":{\"external\":[{\"host\":\"192.168.105.7\",\"controlPort\":30073,\"transactionPort\":30093},{\"host\":\"10.10.105.7\",\"controlPort\":30073,\"transactionPort\":30093}]}},{\"control\":{\"host\":\"v-1.svc-l.default.svc.cluster.local\",\"port\":7091},\"transaction\":{\"host\":\"v-1.svc-l.default.svc.cluster.local\",\"port\":8091},\"internal\":{\"host\":\"v-1.svc-l.default.svc.cluster.local\",\"port\":9091},\"group\":\"default\",\"role\":\"FOLLOWER\",\"version\":\"2.3.0-SNAPSHOT\",\"metadata\":{\"external\":[{\"host\":\"192.168.105.7\",\"controlPort\":30072,\"transactionPort\":30092},{\"host\":\"10.10.105.7\",\"controlPort\":30072,\"transactionPort\":30092}]}}],\"storeMode\":\"raft\",\"term\":1}";
+
+        Method selectControlEndpointStrMethod = RaftRegistryServiceImpl.class.getDeclaredMethod("selectControlEndpointStr", Node.class);
+        selectControlEndpointStrMethod.setAccessible(true);
+        Method selectTransactionEndpointStrMethod = RaftRegistryServiceImpl.class.getDeclaredMethod("selectTransactionEndpointStr", Node.class);
+        selectTransactionEndpointStrMethod.setAccessible(true);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        MetadataResponse metadataResponse = objectMapper.readValue(jsonString, MetadataResponse.class);
+        List<Node> nodes = metadataResponse.getNodes();
+
+        for (Node node : nodes) {
+            String controlEndpointStr = (String) selectControlEndpointStrMethod.invoke(null, node);;
+            String transactionEndpointStr = (String) selectTransactionEndpointStrMethod.invoke(null, node);;
+            Assertions.assertTrue(controlEndpointStr.contains("10.10.105.7:3007"));
+            Assertions.assertTrue(transactionEndpointStr.contains("10.10.105.7:3009"));
+        }
+    }
 }
