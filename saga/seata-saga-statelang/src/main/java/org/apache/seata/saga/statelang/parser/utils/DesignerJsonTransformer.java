@@ -82,7 +82,7 @@ public class DesignerJsonTransformer {
             String stateId = (String) nodeObj.get("stateId");
             if (states.containsKey(stateId)) {
                 throw new RuntimeException(
-                        "Transform designer json to standard json failed, stateId[" + stateId + "] already exists, pls rename it.");
+                        "Transform designer json to standard json failed, stateId[" + stateId + "] already exists, please rename it.");
             }
 
             String comment = (String) nodeObj.get("label");
