@@ -55,7 +55,7 @@ public class SqlServerOperateRecognizerHolder implements SQLOperateRecognizerHol
 
     @Override
     public SQLRecognizer getSelectForUpdateRecognizer(String sql, SQLStatement ast) {
-        List<SQLHint> hints = ((SQLSelectStatement) ast).getSelect().getQueryBlock().getFrom().getHints();
+        List<SQLHint> hints = ((SQLSelectStatement) ast).getSelect().getFirstQueryBlock().getFrom().getHints();
         if (CollectionUtils.isNotEmpty(hints)) {
             List<String> hintsTexts = hints
                     .stream()

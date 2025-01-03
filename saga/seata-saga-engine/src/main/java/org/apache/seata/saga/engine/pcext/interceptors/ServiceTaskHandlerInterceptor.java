@@ -369,7 +369,7 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
                     }
 
                     EngineExecutionException exception = new EngineExecutionException("State [" + state.getName()
-                        + "] execute finished, but cannot matching status, pls check its status manually",
+                        + "] execute finished, but cannot matching status, please check its status manually",
                         FrameworkErrorCode.NoMatchedStatus);
                     if (LOGGER.isDebugEnabled()) {
                         LOGGER.debug("State[{}] execute finish with status[{}]", state.getName(),

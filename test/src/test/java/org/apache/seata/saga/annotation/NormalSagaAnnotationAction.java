@@ -14,11 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.integration.tx.api.interceptor.parser;
+package org.apache.seata.saga.annotation;
+
+import org.apache.seata.rm.tcc.api.BusinessActionContext;
+
+import java.util.List;
+
+/**
+ * The interface saga action.
+ */
+public interface NormalSagaAnnotationAction {
 
 
-public interface RegisterResourceParser {
+    boolean commit(BusinessActionContext actionContext, int a, List b, SagaParam sagaParam);
 
-    void registerResource(Object target, String beanName);
-
+    /**
+     * Rollback boolean.
+     *
+     * @param actionContext the action context
+     * @return the boolean
+     */
+    boolean compensation(BusinessActionContext actionContext, SagaParam param);
 }

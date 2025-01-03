@@ -127,7 +127,6 @@
         <kotlin-coroutines.version>1.7.3</kotlin-coroutines.version>
 
         <!-- # for web -->
-        <spring-webmvc.version>5.3.26</spring-webmvc.version>
         <tomcat-embed.version>9.0.90</tomcat-embed.version>
 
         <!-- # for test -->
@@ -137,6 +136,9 @@
         <janino-version>3.1.10</janino-version>
         <mockwebserver-version>4.12.0</mockwebserver-version>
         <native-lib-loader.version>2.4.0</native-lib-loader.version>
+
+        <!--  for fury  -->
+        <fury.version>0.8.0</fury.version>
     </properties>
 
     <dependencyManagement>
@@ -880,11 +882,11 @@
                 <version>${rocketmq-version}</version>
             </dependency>
 
-            <!-- web -->
+            <!-- Fury Serialize -->
             <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-webmvc</artifactId>
-                <version>${spring-webmvc.version}</version>
+                <groupId>org.apache.fury</groupId>
+                <artifactId>fury-core</artifactId>
+                <version>${fury.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

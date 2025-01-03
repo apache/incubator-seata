@@ -14,4 +14,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-org.apache.seata.rm.tcc.resource.parser.TccRegisterResourceParser
+org.apache.seata.saga.rm.RMHandlerSagaAnnotation

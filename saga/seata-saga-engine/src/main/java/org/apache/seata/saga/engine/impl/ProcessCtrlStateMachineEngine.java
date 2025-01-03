@@ -238,7 +238,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
         List<StateInstance> actList = stateMachineInstance.getStateList();
         if (CollectionUtils.isEmpty(actList)) {
             throw new ForwardInvalidException("StateMachineInstance[id:" + stateMachineInstId
-                + "] has no stateInstance, pls start a new StateMachine execution instead",
+                + "] has no stateInstance, please start a new StateMachine execution instead",
                 FrameworkErrorCode.OperationDenied);
         }
 

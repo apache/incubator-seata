@@ -16,6 +16,8 @@
  */
 package org.apache.seata.server.raft.execute;
 
+import org.apache.seata.common.store.LockMode;
+import org.apache.seata.common.store.SessionMode;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.seata.common.XID;
@@ -35,7 +37,6 @@ import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.session.SessionHolder;
 import org.apache.seata.server.storage.SessionConverter;
-import org.apache.seata.server.store.StoreConfig;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -58,9 +59,9 @@ class BranchSessionExecuteTest {
     @BeforeAll
     public static void setUp(ApplicationContext context) throws TransactionException {
         System.setProperty("server.raft.serverAddr", NetUtil.getLocalIp() + ":9091");
-        SessionHolder.init(StoreConfig.SessionMode.RAFT);
+        SessionHolder.init(SessionMode.RAFT);
         LockerManagerFactory.destroy();
-        LockerManagerFactory.init(StoreConfig.LockMode.RAFT);
+        LockerManagerFactory.init(LockMode.RAFT);
         GLOBAL_SESSION = mockGlobalSession();
         SessionHolder.getRootSessionManager().addGlobalSession(GLOBAL_SESSION);
     }
