@@ -58,6 +58,8 @@ public interface StarterConstants {
     String REGISTRY_SOFA_PREFIX = REGISTRY_PREFIX + ".sofa";
     String REGISTRY_CUSTOM_PREFIX = REGISTRY_PREFIX + ".custom";
 
+    String REGISTRY_METADATA_PREFIX = REGISTRY_PREFIX + ".metadata";
+
     String CONFIG_PREFIX = SEATA_PREFIX + ".config";
     String CONFIG_NACOS_PREFIX = CONFIG_PREFIX + ".nacos";
     String CONFIG_CONSUL_PREFIX = CONFIG_PREFIX + ".consul";

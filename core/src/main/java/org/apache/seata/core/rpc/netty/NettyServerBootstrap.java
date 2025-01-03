@@ -34,6 +34,8 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.XID;
+import org.apache.seata.common.metadata.Instance;
+import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.rpc.RemotingBootstrap;
@@ -170,9 +172,13 @@ public class NettyServerBootstrap implements RemotingBootstrap {
         try {
             this.serverBootstrap.bind(port).sync();
             LOGGER.info("Server started, service listen port: {}", getListenPort());
-            InetSocketAddress address = new InetSocketAddress(XID.getIpAddress(), XID.getPort());
+            Instance instance = Instance.getInstance();
+            // Lines 177-180 are just for compatibility with test cases
+            if (instance.getTransaction() == null) {
+                Instance.getInstance().setTransaction(new Node.Endpoint(XID.getIpAddress(), XID.getPort(), "netty"));
+            }
             for (RegistryService<?> registryService : MultiRegistryFactory.getInstances()) {
-                registryService.register(address);
+                registryService.register(Instance.getInstance());
             }
             initialized.set(true);
         } catch (SocketException se) {
@@ -189,9 +195,8 @@ public class NettyServerBootstrap implements RemotingBootstrap {
                 LOGGER.info("Shutting server down, the listen port: {}", XID.getPort());
             }
             if (initialized.get()) {
-                InetSocketAddress address = new InetSocketAddress(XID.getIpAddress(), XID.getPort());
                 for (RegistryService registryService : MultiRegistryFactory.getInstances()) {
-                    registryService.unregister(address);
+                    registryService.unregister(Instance.getInstance());
                     registryService.close();
                 }
                 //wait a few seconds for server transport
