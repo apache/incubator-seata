@@ -16,7 +16,7 @@
  */
 package org.apache.seata.server.storage.redis.store;
 
-import org.apache.seata.common.metadata.namingserver.Instance;
+import org.apache.seata.common.metadata.Instance;
 import org.apache.seata.core.store.MappingDO;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

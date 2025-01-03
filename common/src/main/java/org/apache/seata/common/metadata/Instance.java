@@ -14,27 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.common.metadata.namingserver;
+package org.apache.seata.common.metadata;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.seata.common.metadata.ClusterRole;
-import org.apache.seata.common.metadata.Node;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import static org.apache.seata.common.util.CollectionUtils.mapToJsonString;
-
-
 public class Instance {
     private String namespace;
     private String clusterName;
     private String unit;
-    private Node.Endpoint control = new Node.Endpoint();
-    private Node.Endpoint transaction = new Node.Endpoint();
+    private Node.Endpoint control;
+    private Node.Endpoint transaction;
     private double weight = 1.0;
     private boolean healthy = true;
     private long term;
@@ -167,25 +162,6 @@ public class Instance {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-    }
-
-
-    public Map<String, String> toMap() {
-        Map<String, String> resultMap = new HashMap<>();
-
-
-        resultMap.put("namespace", namespace);
-        resultMap.put("clusterName", clusterName);
-        resultMap.put("unit", unit);
-        resultMap.put("control", control.toString());
-        resultMap.put("transaction", transaction.toString());
-        resultMap.put("weight", String.valueOf(weight));
-        resultMap.put("healthy", String.valueOf(healthy));
-        resultMap.put("term", String.valueOf(term));
-        resultMap.put("timestamp", String.valueOf(timestamp));
-        resultMap.put("metadata", mapToJsonString(metadata));
-
-        return resultMap;
     }
 
     private static class SingletonHolder {
