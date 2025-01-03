@@ -22,6 +22,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.seata.common.XID;
+import org.apache.seata.common.metadata.Instance;
+import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.NumberUtils;
@@ -78,6 +80,7 @@ public class MockServer {
                     XID.setIpAddress(NetUtil.getLocalIp());
                     XID.setPort(port);
                     // init snowflake for transactionId, branchId
+                    Instance.getInstance().setTransaction(new Node.Endpoint(XID.getIpAddress(),XID.getPort(),"netty"));
                     UUIDGenerator.init(1L);
 
                     MockCoordinator coordinator = MockCoordinator.getInstance();

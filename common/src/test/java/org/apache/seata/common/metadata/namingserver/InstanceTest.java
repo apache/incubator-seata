@@ -19,6 +19,7 @@ package org.apache.seata.common.metadata.namingserver;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.seata.common.metadata.ClusterRole;
+import org.apache.seata.common.metadata.Instance;
 import org.apache.seata.common.metadata.Node;
 import org.junit.jupiter.api.Test;
 
