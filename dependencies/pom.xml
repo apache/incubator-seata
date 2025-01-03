@@ -136,6 +136,9 @@
         <janino-version>3.1.10</janino-version>
         <mockwebserver-version>4.12.0</mockwebserver-version>
         <native-lib-loader.version>2.4.0</native-lib-loader.version>
+
+        <!--  for fury  -->
+        <fury.version>0.8.0</fury.version>
     </properties>
 
     <dependencyManagement>
@@ -879,6 +882,12 @@
                 <version>${rocketmq-version}</version>
             </dependency>
 
+            <!-- Fury Serialize -->
+            <dependency>
+                <groupId>org.apache.fury</groupId>
+                <artifactId>fury-core</artifactId>
+                <version>${fury.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 </project>
