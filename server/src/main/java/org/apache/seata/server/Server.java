@@ -31,12 +31,11 @@ import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.rpc.netty.NettyRemotingServer;
 import org.apache.seata.core.rpc.netty.NettyServerConfig;
 import org.apache.seata.server.coordinator.DefaultCoordinator;
-import org.apache.seata.server.instance.ServerInstance;
+import org.apache.seata.server.instance.ServerInstanceFactory;
 import org.apache.seata.server.lock.LockerManagerFactory;
 import org.apache.seata.server.metrics.MetricsManager;
 import org.apache.seata.server.session.SessionHolder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
@@ -52,10 +51,9 @@ import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGIST
  */
 @Component("seataServer")
 public class Server {
-    private static final Logger LOGGER = LoggerFactory.getLogger(Server.class);
 
     @Resource
-    ServerInstance serverInstance;
+    ServerInstanceFactory serverInstanceFactory;
 
     /**
      * The entry point of application.
@@ -106,7 +104,7 @@ public class Server {
         coordinator.init();
         nettyRemotingServer.setHandler(coordinator);
 
-        serverInstance.serverInstanceInit();
+        serverInstanceFactory.serverInstanceInit();
         // let ServerRunner do destroy instead ShutdownHook, see https://github.com/seata/seata/issues/4028
         ServerRunner.addDisposable(coordinator);
         nettyRemotingServer.init();

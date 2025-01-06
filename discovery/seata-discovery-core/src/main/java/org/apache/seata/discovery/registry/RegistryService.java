@@ -16,6 +16,7 @@
  */
 package org.apache.seata.discovery.registry;
 
+import org.apache.seata.common.metadata.Instance;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.config.ConfigurationFactory;
 
@@ -61,7 +62,20 @@ public interface RegistryService<T> {
      * @param address the address
      * @throws Exception the exception
      */
+    @Deprecated
     void register(InetSocketAddress address) throws Exception;
+
+    /**
+     * Register.
+     *
+     * @param instance the address
+     * @throws Exception the exception
+     */
+    default void register(Instance instance) throws Exception {
+        InetSocketAddress inetSocketAddress =
+            new InetSocketAddress(instance.getTransaction().getHost(), instance.getTransaction().getPort());
+        register(inetSocketAddress);
+    }
 
     /**
      * Unregister.
@@ -69,7 +83,20 @@ public interface RegistryService<T> {
      * @param address the address
      * @throws Exception the exception
      */
+    @Deprecated
     void unregister(InetSocketAddress address) throws Exception;
+
+    /**
+     * Unregister.
+     *
+     * @param instance the instance
+     * @throws Exception the exception
+     */
+    default void unregister(Instance instance) throws Exception {
+        InetSocketAddress inetSocketAddress =
+            new InetSocketAddress(instance.getTransaction().getHost(), instance.getTransaction().getPort());
+        unregister(inetSocketAddress);
+    }
 
     /**
      * Subscribe.
