@@ -7,7 +7,7 @@ on:
     branches: [ 2.x, develop, master ]
 
 jobs:
-  # job 1: Test based on java 8 and 17. Do not checkstyle.
+  # job 1: Test based on java 8, 17 and 21. Do not checkstyle.
   build:
     name: "build"
     services:
@@ -28,7 +28,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        java: [ 8, 17 ]
+        java: [ 8, 17, 21 ]
     steps:
       # step 1
       - name: "Checkout"

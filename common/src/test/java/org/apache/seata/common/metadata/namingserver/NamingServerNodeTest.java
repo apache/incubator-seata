@@ -33,13 +33,16 @@ class NamingServerNodeTest {
     void toJsonString() throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         NamingServerNode node = new NamingServerNode();
-        Map<String, Object> map = new HashMap<>();
-        map.put("k", "v");
+        Map<String,Object> map = new HashMap<>();
+        map.put("k","v");
         node.setMetadata(map);
         node.setGroup("group");
-        node.setControl(new Node.Endpoint("1.1.1.1", 888));
-        node.setTransaction(new Node.Endpoint("2.2.2.2", 999));
-        assertEquals(node.toJsonString(objectMapper), objectMapper.writeValueAsString(node));
+        node.setUnit("unit");
+        node.setHealthy(true);
+        node.setTerm(111L);
+        node.setControl(new Node.Endpoint("1.1.1.1",888));
+        node.setTransaction(new Node.Endpoint("2.2.2.2",999));
+        assertEquals(node.toJsonString(objectMapper),objectMapper.writeValueAsString(node));
     }
 
     @Test

@@ -71,7 +71,7 @@
 
     <properties>
         <!-- seata version -->
-        <revision>2.3.0-SNAPSHOT</revision>
+        <revision>2.4.0-SNAPSHOT</revision>
 
         <!-- Compiler settings properties -->
         <java.version>1.8</java.version>
@@ -147,6 +147,7 @@
         <image.tags>latest</image.tags>
 
         <dependencies.copy.skip>true</dependencies.copy.skip>
+        <mysql.copy.skip>true</mysql.copy.skip>
     </properties>
 
     <build>

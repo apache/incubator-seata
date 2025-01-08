@@ -29,6 +29,10 @@ public enum InvocationHandlerType {
     /**
      * TwoPhase InvocationHandler
      */
-    TwoPhaseAnnotation
+    TwoPhaseAnnotation,
 
+    /**
+     * SagaAnnotation InvocationHandler
+     */
+    SagaAnnotation
 }

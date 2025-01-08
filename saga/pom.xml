@@ -38,6 +38,7 @@
         <module>seata-saga-rm</module>
         <module>seata-saga-engine-store</module>
         <module>seata-saga-spring</module>
+        <module>seata-saga-annotation</module>
     </modules>
 
     <dependencies>

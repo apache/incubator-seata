@@ -18,7 +18,7 @@ package org.apache.seata.server.storage.db.store;
 
 import org.apache.seata.common.exception.ErrorCode;
 import org.apache.seata.common.exception.SeataRuntimeException;
-import org.apache.seata.common.metadata.namingserver.Instance;
+import org.apache.seata.common.metadata.Instance;
 import org.apache.seata.common.util.IOUtil;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;

@@ -71,14 +71,14 @@ public interface StateInstance {
      *
      * @return state instance type
      */
-    String getType();
+    StateType getType();
 
     /**
      * set type
      *
      * @param type state instance type
      */
-    void setType(String type);
+    void setType(StateType type);
 
     /**
      * get service name

@@ -195,6 +195,85 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <version>${jib-maven-plugin.version}</version>
+                <configuration>
+                    <from>
+                        <image>${image.name}</image>
+                        <platforms>
+                            <platform>
+                                <os>linux</os>
+                                <architecture>amd64</architecture>
+                            </platform>
+                            <platform>
+                                <os>linux</os>
+                                <architecture>arm64</architecture>
+                            </platform>
+                        </platforms>
+                    </from>
+                    <to>
+                        <image>docker.io/apache/seata-naming-server</image>
+                        <tags>${image.tags}</tags>
+                        <auth>
+                            <username>${REGISTRY_USERNAME}</username>
+                            <password>${REGISTRY_PASSWORD}</password>
+                        </auth>
+                    </to>
+                    <container>
+                        <appRoot>/seata-naming-server</appRoot>
+                        <workingDirectory>/seata-naming-server</workingDirectory>
+                        <ports>
+                            <port>8080</port>
+                        </ports>
+                        <labels>
+                            <name>seata-naming-server</name>
+                            <git.commit.message.full>${git.commit.message.full}</git.commit.message.full>
+                            <git.remote.origin.url>${git.remote.origin.url}</git.remote.origin.url>
+                            <git.commit.id>${git.commit.id}</git.commit.id>
+                            <git.commit.time>${git.commit.time}</git.commit.time>
+                            <git.branch>${git.branch}</git.branch>
+                            <git.build.time>${git.build.time}</git.build.time>
+                            <git.build.version>${git.build.version}</git.build.version>
+                            <git.dirty>${git.dirty}</git.dirty>
+                            <mvn.build.version>${project.version}</mvn.build.version>
+                        </labels>
+                        <creationTime>USE_CURRENT_TIMESTAMP</creationTime>
+                        <entrypoint>
+                            <arg>/bin/bash</arg>
+                            <arg>/seata-naming-server-entrypoint.sh</arg>
+                        </entrypoint>
+                        <environment>
+                            <TZ>Asia/Shanghai</TZ>
+                        </environment>
+                    </container>
+                    <extraDirectories>
+                        <paths>
+                            <path>
+                                <from>src/main/resources/docker</from>
+                                <includes>seata-naming-server-entrypoint.sh</includes>
+                            </path>
+                            <path>
+                                <from>../distribution/bin</from>
+                                <includes>seata-namingserver-setup.sh</includes>
+                            </path>
+                        </paths>
+                    </extraDirectories>
+                    <skip>${image.publish.skip}</skip>
+                    <allowInsecureRegistries>true</allowInsecureRegistries>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
     </build>
 

@@ -18,6 +18,11 @@ package org.apache.seata.common.metadata.namingserver;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.seata.common.metadata.ClusterRole;
+import org.apache.seata.common.metadata.Instance;
+import org.apache.seata.common.metadata.Node;
+import org.junit.jupiter.api.Test;
+
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.seata.common.metadata.Node;
@@ -57,8 +62,6 @@ class InstanceTest {
         instanceB.getTransaction().setHost("127.0.0.1");
         instanceB.getTransaction().setPort(9090);
 
-
-        ;
         instanceC.getControl().setHost("127.0.0.1");
         instanceC.getControl().setPort(8081);
 
@@ -75,6 +78,14 @@ class InstanceTest {
         mmap.put("k", "v");
         map.put("k", mmap);
         instance.setMetadata(map);
+        instance.setNamespace("namespace");
+        instance.setClusterName("clustername");
+        instance.setRole(ClusterRole.LEADER);
+        instance.setUnit("unit");
+        instance.setWeight(100d);
+        instance.setHealthy(true);
+        instance.setTerm(100L);
+        instance.setTimestamp(System.currentTimeMillis());
         instance.setControl(new Node.Endpoint("1.1.1.1", 888));
         instance.setTransaction(new Node.Endpoint("2.2.2.2", 999));
         assertEquals(instance.toJsonString(objectMapper), objectMapper.writeValueAsString(instance));

@@ -132,6 +132,9 @@ seata:
       name:
   registry:
     type: file
+    # Supports address translation parameters, currently only supported in raft mode，
+    # if match the preferredNetworks rule return the first, eg: preferredNetworks = "192.168.*"
+    preferredNetworks: ""
     seata:
       server-addr: 127.0.0.1:8081
       namespace: public

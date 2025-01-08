@@ -24,6 +24,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.LinkedHashMap;
+import java.util.Optional;
+import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadLocalRandom;
@@ -38,6 +41,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.exception.AuthenticationFailedException;
+import org.apache.seata.common.exception.NotSupportYetException;
+import org.apache.seata.common.exception.ParseEndpointException;
 import org.apache.seata.common.exception.RetryableException;
 import org.apache.seata.common.metadata.Metadata;
 import org.apache.seata.common.metadata.MetadataResponse;
@@ -45,6 +50,7 @@ import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.HttpClientUtil;
+import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.ConfigChangeListener;
 import org.apache.seata.config.Configuration;
@@ -114,10 +120,13 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
      */
     private static final Map<String, List<InetSocketAddress>> ALIVE_NODES = new ConcurrentHashMap<>();
 
+    private static final String PREFERRED_NETWORKS;
+
     static {
         TOKEN_EXPIRE_TIME_IN_MILLISECONDS = CONFIG.getLong(getTokenExpireTimeInMillisecondsKey(), 29 * 60 * 1000L);
         USERNAME = CONFIG.getConfig(getRaftUserNameKey());
         PASSWORD = CONFIG.getConfig(getRaftPassWordKey());
+        PREFERRED_NETWORKS = CONFIG.getConfig(getPreferredNetworks());
     }
 
     private RaftRegistryServiceImpl() {
@@ -221,7 +230,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
             List<InetSocketAddress> inetSocketAddresses = ALIVE_NODES.get(CURRENT_TRANSACTION_SERVICE_GROUP);
             if (CollectionUtils.isEmpty(inetSocketAddresses)) {
                 addressList =
-                    nodeList.stream().map(node -> node.getControl().createAddress()).collect(Collectors.toList());
+                    nodeList.stream().map(RaftRegistryServiceImpl::selectControlEndpointStr).collect(Collectors.toList());
             } else {
                 stream = inetSocketAddresses.stream();
             }
@@ -234,15 +243,20 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
             Map<String, Node> map = new HashMap<>();
             if (CollectionUtils.isNotEmpty(nodeList)) {
                 for (Node node : nodeList) {
-                    map.put(new InetSocketAddress(node.getTransaction().getHost(), node.getTransaction().getPort()).getAddress().getHostAddress()
-                        + IP_PORT_SPLIT_CHAR + node.getTransaction().getPort(), node);
+                    InetSocketAddress inetSocketAddress = selectTransactionEndpoint(node);
+                    map.put(inetSocketAddress.getHostString()
+                        + IP_PORT_SPLIT_CHAR + inetSocketAddress.getPort(), node);
                 }
             }
             addressList = stream.map(inetSocketAddress -> {
-                String host = inetSocketAddress.getAddress().getHostAddress();
+                String host = NetUtil.toStringHost(inetSocketAddress);
                 Node node = map.get(host + IP_PORT_SPLIT_CHAR + inetSocketAddress.getPort());
+                InetSocketAddress controlEndpoint = null;
+                if (node != null) {
+                    controlEndpoint = selectControlEndpoint(node);
+                }
                 return host + IP_PORT_SPLIT_CHAR
-                    + (node != null ? node.getControl().getPort() : inetSocketAddress.getPort());
+                    + (controlEndpoint != null ? controlEndpoint.getPort() : inetSocketAddress.getPort());
             }).collect(Collectors.toList());
             return addressList.get(ThreadLocalRandom.current().nextInt(addressList.size()));
         }
@@ -263,6 +277,11 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
             REGISTRY_TYPE, PRO_PASSWORD_KEY);
     }
 
+    private static String getPreferredNetworks() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY,
+                "preferredNetworks");
+    }
+
     private static String getTokenExpireTimeInMillisecondsKey() {
         return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY,
             REGISTRY_TYPE, TOKEN_VALID_TIME_MS_KEY);
@@ -276,9 +295,85 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
         return System.currentTimeMillis() >= tokenExpiredTime;
     }
 
-    private InetSocketAddress convertInetSocketAddress(Node node) {
-        Node.Endpoint endpoint = node.getTransaction();
-        return new InetSocketAddress(endpoint.getHost(), endpoint.getPort());
+    private static String selectControlEndpointStr(Node node) {
+        InetSocketAddress control = selectControlEndpoint(node);
+        return NetUtil.toStringAddress(control);
+    }
+
+    private static String selectTransactionEndpointStr(Node node) {
+        InetSocketAddress transaction = selectTransactionEndpoint(node);
+        return NetUtil.toStringAddress(transaction);
+    }
+
+    private static InetSocketAddress selectControlEndpoint(Node node) {
+        return selectEndpoint("control", node);
+    }
+
+    private static InetSocketAddress selectTransactionEndpoint(Node node) {
+        return selectEndpoint("transaction", node);
+    }
+
+    private static InetSocketAddress selectEndpoint(String type, Node node) {
+        if (StringUtils.isBlank(PREFERRED_NETWORKS)) {
+            // Use the default method, directly using node.control and node.transaction
+            switch (type) {
+                case "control":
+                    return new InetSocketAddress(node.getControl().getHost(), node.getControl().getPort());
+                case "transaction":
+                    return new InetSocketAddress(node.getTransaction().getHost(), node.getTransaction().getPort());
+                default:
+                    throw new NotSupportYetException("SelectEndpoint is not support type: " + type);
+            }
+        }
+        Node.ExternalEndpoint externalEndpoint = selectExternalEndpoint(node, PREFERRED_NETWORKS.split(";"));
+        switch (type) {
+            case "control":
+                return new InetSocketAddress(externalEndpoint.getHost(), externalEndpoint.getControlPort());
+            case "transaction":
+                return new InetSocketAddress(externalEndpoint.getHost(), externalEndpoint.getTransactionPort());
+            default:
+                throw new NotSupportYetException("SelectEndpoint is not support type: " + type);
+        }
+    }
+
+    private static Node.ExternalEndpoint selectExternalEndpoint(Node node, String[] preferredNetworks) {
+        Map<String, Object> metadata = node.getMetadata();
+        if (CollectionUtils.isEmpty(metadata)) {
+            throw new ParseEndpointException("Node metadata is empty.");
+        }
+
+        Object external = metadata.get("external");
+
+        if (external instanceof List<?>) {
+            List<LinkedHashMap<String, Object>> externalEndpoints = (List<LinkedHashMap<String, Object>>) external;
+
+            if (CollectionUtils.isEmpty(externalEndpoints)) {
+                throw new ParseEndpointException("ExternalEndpoints should not be empty.");
+            }
+
+            for (LinkedHashMap<String, Object> externalEndpoint : externalEndpoints) {
+                String ip = Optional.ofNullable(externalEndpoint.get("host"))
+                        .map(Object::toString)
+                        .orElse("");
+
+                if (isPreferredNetwork(ip, Arrays.asList(preferredNetworks))) {
+                    return createExternalEndpoint(externalEndpoint, ip);
+                }
+            }
+        }
+        throw new ParseEndpointException("No ExternalEndpoints value matches.");
+    }
+
+    private static boolean isPreferredNetwork(String ip, List<String> preferredNetworks) {
+        return preferredNetworks.stream().anyMatch(regex ->
+                StringUtils.isNotBlank(regex) && (ip.matches(regex) || ip.startsWith(regex))
+        );
+    }
+
+    private static Node.ExternalEndpoint createExternalEndpoint(LinkedHashMap<String, Object> externalEndpoint, String ip) {
+        int controlPort = Integer.parseInt(externalEndpoint.get("controlPort").toString());
+        int transactionPort = Integer.parseInt(externalEndpoint.get("transactionPort").toString());
+        return new Node.ExternalEndpoint(ip, controlPort, transactionPort);
     }
 
     @Override
@@ -292,7 +387,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
             String clusterName = getServiceGroup(transactionServiceGroup);
             Node leader = METADATA.getLeader(clusterName);
             if (leader != null) {
-                return Collections.singletonList(convertInetSocketAddress(leader));
+                return Collections.singletonList(selectTransactionEndpoint(leader));
             }
         }
         return RegistryService.super.aliveLookup(transactionServiceGroup);
@@ -340,7 +435,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
         List<InetSocketAddress> aliveAddress) {
         if (METADATA.isRaftMode()) {
             Node leader = METADATA.getLeader(getServiceGroup(transactionServiceGroup));
-            InetSocketAddress leaderAddress = convertInetSocketAddress(leader);
+            InetSocketAddress leaderAddress = selectTransactionEndpoint(leader);
             return ALIVE_NODES.put(transactionServiceGroup,
                 aliveAddress.isEmpty() ? aliveAddress : aliveAddress.parallelStream().filter(inetSocketAddress -> {
                     // Since only follower will turn into leader, only the follower node needs to be listened to
@@ -478,7 +573,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
         }
         List<Node> nodes = METADATA.getNodes(clusterName);
         if (CollectionUtils.isNotEmpty(nodes)) {
-            return nodes.parallelStream().map(this::convertInetSocketAddress).collect(Collectors.toList());
+            return nodes.parallelStream().map(RaftRegistryServiceImpl::selectTransactionEndpoint).collect(Collectors.toList());
         }
         return Collections.emptyList();
     }
