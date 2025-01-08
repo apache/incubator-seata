@@ -106,8 +106,9 @@ class InstanceTest {
         instance.setNamespace("testNamespace");
         instance.setClusterName("testCluster");
         instance.setUnit("testUnit");
-        instance.getControl().setPort(1234);
-        instance.getTransaction().setPort(4321);
+        instance.setControl(new Node.Endpoint("127.0.0.1", 1234));
+        instance.setTransaction(new Node.Endpoint("127.0.0.1", 4321));
+
         instance.setWeight(0.5);
         instance.setHealthy(false);
         instance.setTerm(1);
