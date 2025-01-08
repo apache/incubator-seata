@@ -417,38 +417,38 @@ public class StringUtilsTest {
     }
 
     @Test
-    void join_NullIterator_ReturnsNull() {
+    void joinNullIteratorReturnsNull() {
         Assertions.assertNull(StringUtils.join(null, ","));
     }
 
     @Test
-    void join_EmptyIterator_ReturnsEmptyString() {
+    void joinEmptyReturnsEmptyString() {
         Assertions.assertEquals("", StringUtils.join(emptyIterator, ","));
     }
 
     @Test
-    void join_SingleElementIterator_ReturnsSingleElement() {
+    void joinSingleReturnsSingleElement() {
         Assertions.assertEquals("Hello", StringUtils.join(singleElementIterator, ","));
     }
 
     @Test
-    void join_MultipleElementsIterator_WithSeparator_ReturnsJoinedStringWithSeparator() {
+    void joinMultipleWithSeparatorReturnsSeparator() {
         Assertions.assertEquals("Hello,World,Java", StringUtils.join(multipleElementsIterator, ","));
     }
 
     @Test
-    void join_MultipleElementsIterator_NullSeparator_ReturnsJoinedStringWithoutSeparator() {
+    void joinMultipleSeparatorReturnsSeparator() {
         Assertions.assertEquals("HelloWorldJava", StringUtils.join(multipleElementsIterator, null));
     }
 
     @Test
-    void join_MultipleElementsIterator_EmptyAndNullValues_ReturnsJoinedString() {
+    void joinMultipleAndNullReturnsJoinedString() {
         Iterator<String> mixedIterator = Arrays.asList("Hello", "", "World", null, "Java").iterator();
         Assertions.assertEquals("Hello,,World,,Java", StringUtils.join(mixedIterator, ","));
     }
 
     @Test
-    void hasLength_NullCharSequence_ReturnsFalse() {
+    void hasLengthNullCharSequenceReturnsFalse() {
         String nullCharSequence = null;
         String emptyCharSequence = "";
         String singleCharSequence = "a";
@@ -460,7 +460,7 @@ public class StringUtilsTest {
     }
 
     @Test
-    void hasText_NullCharSequence_ReturnsFalse() {
+    void hasTextNullCharSequenceReturnsFalse() {
         String nullCharSequence = null;
         String emptyCharSequence = "";
         String singleCharSequence = "a";
