@@ -35,7 +35,7 @@ public class SeataRuntimeExceptionTest {
     }
 
     @Test
-    void testConstructor_WithErrorCodeCauseAndParams_ShouldSetMessageAndSQLMessageCorrectly() {
+    void testConstructorWithErrorCodeCauseAndParams() {
         SQLException cause = new SQLException("SQL Error", "S0001", 1000);
         SeataRuntimeException exception = new SeataRuntimeException(errorCode, cause, params);
         assertNotNull(exception);
@@ -45,27 +45,27 @@ public class SeataRuntimeExceptionTest {
     }
 
     @Test
-    void testToString_ShouldReturnLocalizedMessage() {
+    void testToStringShouldReturnLocalizedMessage() {
         SeataRuntimeException exception = new SeataRuntimeException(errorCode, params);
         assertEquals(exception.getLocalizedMessage(), exception.toString());
     }
 
     @Test
-    void testGetVendorCode_WithSQLExceptionCause_ShouldReturnVendorCode() {
+    void testGetVendorCodeWithSQLExceptionCause() {
         SQLException cause = new SQLException("SQL Error", "S0001", 1000);
         SeataRuntimeException exception = new SeataRuntimeException(errorCode, cause, params);
         assertEquals(1000, exception.getVendorCode());
     }
 
     @Test
-    void testGetSqlState_WithSQLExceptionCause_ShouldReturnSqlState() {
+    void testGetSqlStateWithSQLExceptionCause() {
         SQLException cause = new SQLException("SQL Error", "S0001", 1000);
         SeataRuntimeException exception = new SeataRuntimeException(errorCode, cause, params);
         assertEquals("S0001", exception.getSqlState());
     }
 
     @Test
-    void testGetVendorCode_WithSeataRuntimeExceptionCause_ShouldReturnVendorCode() {
+    void testGetVendorCodeWithSeataRuntimeExceptionCause() {
         SQLException innerCause = new SQLException("SQL Error", "S0001", 1000);
         SeataRuntimeException cause = new SeataRuntimeException(errorCode, innerCause, params);
         SeataRuntimeException exception = new SeataRuntimeException(errorCode, cause, params);
@@ -73,7 +73,7 @@ public class SeataRuntimeExceptionTest {
     }
 
     @Test
-    void testGetSqlState_WithSeataRuntimeExceptionCause_ShouldReturnSqlState() {
+    void testGetSqlStateWithSeataRuntimeExceptionCause() {
         SQLException innerCause = new SQLException("SQL Error", "S0001", 1000);
         SeataRuntimeException cause = new SeataRuntimeException(errorCode, innerCause, params);
         SeataRuntimeException exception = new SeataRuntimeException(errorCode, cause, params);

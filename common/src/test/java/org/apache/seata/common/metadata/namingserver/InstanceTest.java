@@ -61,13 +61,13 @@ class InstanceTest {
         assertEquals(instance.toJsonString(objectMapper), objectMapper.writeValueAsString(instance));
     }
 
-    @Test public void testGetInstanceShouldReturnSingletonInstance() {
+    @Test public void testGetInstance() {
         Instance anotherInstance = Instance.getInstance();
         instance = Instance.getInstance();
         assertEquals(instance, anotherInstance);
     }
 
-    @Test public void testJsonSerializationShouldSerializeAndDeserializeCorrectly() {
+    @Test public void testJsonSerializationShouldSerialize() {
         instance = Instance.getInstance();
         instance.setNamespace("testNamespace");
         instance.setClusterName("testCluster");
@@ -139,28 +139,28 @@ class InstanceTest {
         assertTrue(resultMap.get("metadata").contains("value1"));
     }
 
-    @Test void equalsSameInstanceReturnsTrue() {
+    @Test void testSameInstance() {
         instanceA = Instance.getInstance();
         instanceA.setControl(new Node.Endpoint("127.0.0.1", 8080));
         instanceA.setTransaction(new Node.Endpoint("127.0.0.1", 9090));
         assertEquals(instanceA, instanceA);
     }
 
-    @Test void equalsNullReturnsFalse() {
+    @Test void testNull() {
         instanceA = Instance.getInstance();
         instanceA.setControl(new Node.Endpoint("127.0.0.1", 8080));
         instanceA.setTransaction(new Node.Endpoint("127.0.0.1", 9090));
         assertNotEquals(instanceA, null);
     }
 
-    @Test void equalsDifferentClassReturnsFalse() {
+    @Test void testDifferentClass() {
         instanceA = Instance.getInstance();
         instanceA.setControl(new Node.Endpoint("127.0.0.1", 8080));
         instanceA.setTransaction(new Node.Endpoint("127.0.0.1", 9090));
         assertNotEquals(instanceA, "NotAnInstance");
     }
 
-    @Test void equalsSameFieldsReturnsTrue() {
+    @Test void testSameFields() {
         instanceA = Instance.getInstance();
         instanceA.setControl(new Node.Endpoint("127.0.0.1", 8080));
         instanceA.setTransaction(new Node.Endpoint("127.0.0.1", 9090));
@@ -170,7 +170,7 @@ class InstanceTest {
         assertEquals(instanceA, instanceB);
     }
 
-    @Test void equalsDifferentControlPortReturnsFalse() {
+    @Test void testDifferentControlPort() {
         instanceA = Instance.getInstance();
         instanceA.setControl(new Node.Endpoint("127.0.0.1", 8080));
         instanceA.setTransaction(new Node.Endpoint("127.0.0.1", 9090));
@@ -181,7 +181,7 @@ class InstanceTest {
         assertTrue(instanceA.equals(instanceC));
     }
 
-    @Test void equalsDifferentTransactionPortReturnsFalse() {
+    @Test void testDifferentTransactionPort() {
         instanceA = Instance.getInstance();
         instanceA.setControl(new Node.Endpoint("127.0.0.1", 8080));
         instanceA.setTransaction(new Node.Endpoint("127.0.0.1", 9090));

@@ -107,7 +107,7 @@ public class MetadataTest {
     }
 
     @Test
-    public void contains_ValidName_ReturnsTrue() {
+    public void containsValidNameReturnsTrue() {
         boolean result = StoreMode.contains(StoreMode.FILE.name());
         Assertions.assertEquals(true, result);
         result = StoreMode.contains("INVALID_NAME");

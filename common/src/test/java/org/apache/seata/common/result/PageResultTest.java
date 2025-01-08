@@ -36,7 +36,7 @@ public class PageResultTest {
     }
 
     @Test
-    void build_PageSizeDivisibleByListSize_CorrectPagination() {
+    void buildPageSizeDivisibleByListSize() {
         List<Long> list = new ArrayList<>();
         for (long i = 0; i < 100; i++) {
             list.add(i);
@@ -47,7 +47,7 @@ public class PageResultTest {
     }
 
     @Test
-    void build_PageSizeNotDivisibleByListSize_CorrectPagination() {
+    void buildPageSizeNotDivisibleByListSize() {
         List<Long> list = new ArrayList<>();
         for (long i = 0; i < 9; i++) {
             list.add(i);
@@ -58,7 +58,7 @@ public class PageResultTest {
     }
 
     @Test
-    void build_PageNumGreaterThanTotalPages_DefaultToLastPage() {
+    void buildPageNumGreaterThanTotalPages() {
         List<Long> list = new ArrayList<>();
         for (long i = 0; i < 5; i++) {
             list.add(i);
@@ -70,14 +70,14 @@ public class PageResultTest {
     }
 
     @Test
-    void failure_InvalidParams_ReturnsFailure() {
+    void failureInvalidParams() {
         PageResult pageResult = PageResult.failure("400", "error");
         assertEquals("400", pageResult.getCode());
         assertEquals("error", pageResult.getMessage());
     }
 
     @Test
-    void success_NoData_ReturnsEmptySuccess() {
+    void successNoData() {
         PageResult pageResult = PageResult.success();
         assertEquals(PageResult.SUCCESS_CODE, pageResult.getCode());
         assertEquals(PageResult.SUCCESS_MSG, pageResult.getMessage());
@@ -85,7 +85,7 @@ public class PageResultTest {
     }
 
     @Test
-    void success_WithData_ReturnsSuccess() {
+    void successWithData() {
         List<Long> list = new ArrayList<>();
         for (long i = 0; i < 5; i++) {
             list.add(i);
@@ -101,7 +101,7 @@ public class PageResultTest {
     }
 
     @Test
-    void checkPage_PageNumAndPageSizeDefaults_AppliesDefaults() {
+    void checkPag_PageNumAndPageSizeDefault() {
         BaseParam param = new BaseParam();
         param.setPageNum(0);
         param.setPageSize(0);
@@ -116,31 +116,31 @@ public class PageResultTest {
     }
 
     @Test
-    void getTotal_SetAndGet_ReturnsCorrectValue() {
+    void getTotalSetAndGet() {
         pageResult.setTotal(100);
         assertEquals(100, pageResult.getTotal().intValue());
     }
 
     @Test
-    void getPages_SetAndGet_ReturnsCorrectValue() {
+    void getPagesSetAndGet() {
         pageResult.setPages(10);
         assertEquals(10, pageResult.getPages().intValue());
     }
 
     @Test
-    void getPageNum_SetAndGet_ReturnsCorrectValue() {
+    void getPageNumSetAndGet() {
         pageResult.setPageNum(2);
         assertEquals(2, pageResult.getPageNum().intValue());
     }
 
     @Test
-    void getPageSize_SetAndGet_ReturnsCorrectValue() {
+    void getPageSizeSetAndGet() {
         pageResult.setPageSize(30);
         assertEquals(30, pageResult.getPageSize().intValue());
     }
 
     @Test
-    void getData_SetAndGet_ReturnsCorrectData() {
+    void getDataSetAndGet() {
         List<Long> list = new ArrayList<>();
         for (long i = 0; i < 5; i++) {
             list.add(i);

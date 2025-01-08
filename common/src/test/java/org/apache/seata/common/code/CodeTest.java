@@ -17,7 +17,6 @@
 package org.apache.seata.common.code;
 
 import org.apache.seata.common.result.Code;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -25,13 +24,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class CodeTest {
 
-    @BeforeEach
-    public void setUp() {
-        // No setup currently needed.
-    }
-
     @Test
-    public void testGetErrorMsg_WithValidCode_ReturnsExpectedMsg() {
+    public void testGetErrorMsgWithValidCodeReturnsExpectedMsg() {
         // Test case for SUCCESS
         assertEquals("ok", Code.SUCCESS.getMsg());
         // Test case for ERROR
@@ -41,13 +35,13 @@ public class CodeTest {
     }
 
     @Test
-    public void testGetErrorMsg_WithInvalidCode_ReturnsNull() {
+    public void testGetErrorMsgWithInvalidCodeReturnsNull() {
         // Test case for non-existing code
         assertNull(Code.getErrorMsg("404"));
     }
 
     @Test
-    public void testSetCodeAndMsg_UpdatesValuesCorrectly() {
+    public void testSetCodeAndMsgUpdatesValuesCorrectly() {
         // Test case to check if setCode and setMsg are working as expected
         Code.SUCCESS.setCode("201");
         Code.SUCCESS.setMsg("Created");
