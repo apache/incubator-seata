@@ -19,17 +19,11 @@ package org.apache.seata.common.exception;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.UndeclaredThrowableException;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.UndeclaredThrowableException;
-
-/**
- *
- */
 class ExceptionUtilTest {
     private Exception exception;
+
     @Test
     public void unwrap() {
         InvocationTargetException targetException = new InvocationTargetException(new RuntimeException("invocation"));
@@ -41,6 +35,7 @@ class ExceptionUtilTest {
         RuntimeException runtimeException = new RuntimeException("runtime");
         Assertions.assertInstanceOf(RuntimeException.class, ExceptionUtil.unwrap(runtimeException));
     }
+
     @Test
     public void unwrap_InvocationTargetException_ReturnsCause() {
         InvocationTargetException ite = new InvocationTargetException(exception, "test");
@@ -68,4 +63,4 @@ class ExceptionUtilTest {
         Throwable result = ExceptionUtil.unwrap(exception);
         Assertions.assertSame(exception, result, "Expected the unwrapped exception to be the same as the input when no wrapping is present.");
     }
-    }
+}
