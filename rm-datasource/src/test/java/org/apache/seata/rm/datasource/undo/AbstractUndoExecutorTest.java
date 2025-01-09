@@ -209,12 +209,12 @@ public class AbstractUndoExecutorTest extends BaseH2Test {
         pkRowValues.put("id1", pkId1Values);
         pkRowValues.put("id2", pkId2Values);
 
-        String sql = SqlGenerateUtils.buildWhereConditionByPKs(pkNameList, pkRowValues.get("id1").size(), JdbcConstants.MYSQL);
-        Assertions.assertEquals("(id1,id2) in ( (?,?),(?,?),(?,?) )", sql);
-        sql = SqlGenerateUtils.buildWhereConditionByPKs(pkNameList, pkRowValues.get("id1").size(), JdbcConstants.MARIADB);
-        Assertions.assertEquals("(id1,id2) in ( (?,?),(?,?),(?,?) )", sql);
-        sql = SqlGenerateUtils.buildWhereConditionByPKs(pkNameList, pkRowValues.get("id1").size(), JdbcConstants.POLARDBX);
-        Assertions.assertEquals("(id1,id2) in ( (?,?),(?,?),(?,?) )", sql);
+        List<SqlGenerateUtils.WhereSql> sql = SqlGenerateUtils.buildWhereConditionListByPKs(pkNameList, pkRowValues.get("id1").size(), JdbcConstants.MYSQL, 1000);
+        Assertions.assertEquals("(id1,id2) in ( (?,?),(?,?),(?,?) )", sql.get(0).getSql());
+        sql = SqlGenerateUtils.buildWhereConditionListByPKs(pkNameList, pkRowValues.get("id1").size(), JdbcConstants.MARIADB, 1000);
+        Assertions.assertEquals("(id1,id2) in ( (?,?),(?,?),(?,?) )", sql.get(0).getSql());
+        sql = SqlGenerateUtils.buildWhereConditionListByPKs(pkNameList, pkRowValues.get("id1").size(), JdbcConstants.POLARDBX, 1000);
+        Assertions.assertEquals("(id1,id2) in ( (?,?),(?,?),(?,?) )", sql.get(0).getSql());
     }
 
     @Test
@@ -227,12 +227,12 @@ public class AbstractUndoExecutorTest extends BaseH2Test {
         pkId1Values.add(new Field());
         pkRowValues.put("id1", pkId1Values);
 
-        String sql = SqlGenerateUtils.buildWhereConditionByPKs(pkNameList, pkRowValues.get("id1").size(), JdbcConstants.MYSQL);
-        Assertions.assertEquals("(id1) in ( (?) )", sql);
-        sql = SqlGenerateUtils.buildWhereConditionByPKs(pkNameList, pkRowValues.get("id1").size(), JdbcConstants.MARIADB);
-        Assertions.assertEquals("(id1) in ( (?) )", sql);
-        sql = SqlGenerateUtils.buildWhereConditionByPKs(pkNameList, pkRowValues.get("id1").size(), JdbcConstants.POLARDBX);
-        Assertions.assertEquals("(id1) in ( (?) )", sql);
+        List<SqlGenerateUtils.WhereSql> sql = SqlGenerateUtils.buildWhereConditionListByPKs(pkNameList, pkRowValues.get("id1").size(), JdbcConstants.MYSQL);
+        Assertions.assertEquals("(id1) in ( (?) )", sql.get(0).getSql());
+        sql = SqlGenerateUtils.buildWhereConditionListByPKs(pkNameList, pkRowValues.get("id1").size(), JdbcConstants.MARIADB);
+        Assertions.assertEquals("(id1) in ( (?) )", sql.get(0).getSql());
+        sql = SqlGenerateUtils.buildWhereConditionListByPKs(pkNameList, pkRowValues.get("id1").size(), JdbcConstants.POLARDBX);
+        Assertions.assertEquals("(id1) in ( (?) )", sql.get(0).getSql());
     }
 }
 

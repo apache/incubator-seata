@@ -17,6 +17,7 @@
 package org.apache.seata.rm.datasource.sql.struct;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,6 +30,7 @@ import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.CollectionUtils;
+import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.rm.datasource.DataSourceProxy;
 import org.apache.seata.sqlparser.struct.TableMetaCache;
@@ -99,6 +101,14 @@ public class TableMetaCacheFactory {
         }
     }
 
+    /**
+     * Remove the TableMetaRefreshHolder from the map.
+     */
+    private static void removeHolderFromMap(String resourceId) {
+        TABLE_META_REFRESH_HOLDER_MAP.remove(resourceId);
+        LOGGER.info("Removed TableMetaRefreshHolder for resourceId: {}", resourceId);
+    }
+
     static class TableMetaRefreshHolder {
         private long lastRefreshFinishTime;
         private DataSourceProxy dataSource;
@@ -133,6 +143,16 @@ public class TableMetaCacheFactory {
                             }
                             lastRefreshFinishTime = System.nanoTime();
                         }
+                    } catch (SQLException ex) {
+                        if (isDataSourceClosedException(ex)) {
+                            LOGGER.info("DataSource is closed, exiting refresh task for resourceId: {}", dataSource.getResourceId());
+                            removeHolderFromMap(dataSource.getResourceId());
+                            return;
+                        } else {
+                            // other error, avoid high CPU usage due to infinite loops caused by database exceptions
+                            LOGGER.error("Table refresh SQL error: {}", ex.getMessage(), ex);
+                            lastRefreshFinishTime = System.nanoTime();
+                        }
                     } catch (Exception exx) {
                         LOGGER.error("table refresh error:{}", exx.getMessage(), exx);
                         // Avoid high CPU usage due to infinite loops caused by database exceptions
@@ -142,7 +162,20 @@ public class TableMetaCacheFactory {
             });
         }
 
-
-
+        /**
+         * Helper method to determine if the exception is caused by the data source being closed.
+         *
+         * @param ex the SQLException to check
+         * @return true if the exception indicates the data source is closed; false otherwise
+         */
+        private boolean isDataSourceClosedException(SQLException ex) {
+            String message = ex.getMessage().toLowerCase();
+            String sqlState = ex.getSQLState();
+            // Most jdbc drivers use '08006' as the datasource close code.
+            if ("08006".equals(sqlState)) {
+                return true;
+            }
+            return StringUtils.isNotBlank(message) && message.contains("datasource") && message.contains("close");
+        }
     }
 }

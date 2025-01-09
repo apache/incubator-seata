@@ -36,6 +36,11 @@ public class SessionStatusValidator {
                 || status == GlobalStatus.TimeoutRollbackRetrying;
     }
 
+    public static boolean isTimeoutRollbacking(GlobalStatus status) {
+        return status == GlobalStatus.TimeoutRollbacking
+            || status == GlobalStatus.TimeoutRollbackRetrying;
+    }
+
     /**
      * is rollback global status
      *
@@ -47,6 +52,11 @@ public class SessionStatusValidator {
                 || status == GlobalStatus.Rollbacked
                 || status == GlobalStatus.RollbackFailed
                 || status == GlobalStatus.RollbackRetryTimeout;
+    }
+
+    public static boolean isEndGlobalStatus(GlobalStatus status) {
+        return status == GlobalStatus.Rollbacked || status == GlobalStatus.TimeoutRollbacked
+            || status == GlobalStatus.Committed || status == GlobalStatus.Finished;
     }
 
     /**

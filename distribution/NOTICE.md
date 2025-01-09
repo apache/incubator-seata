@@ -73,7 +73,7 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
 │   │   ├── netty-transport-rxtx-4.1.101.Final.jar
 │   │   ├── netty-transport-sctp-4.1.101.Final.jar
 │   │   ├── netty-transport-udt-4.1.101.Final.jar
-│   │   ├── seata-common-2.2.0.jar
+│   │   ├── seata-common-2.3.0.jar
 │   │   ├── slf4j-api-1.7.36.jar
 │   │   ├── snakeyaml-2.0.jar
 │   │   ├── spring-aop-5.3.39.jar
@@ -122,7 +122,7 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
     │       │   ├── apm-mysql-6.x-plugin-8.6.0.jar
     │       │   ├── apm-mysql-8.x-plugin-8.6.0.jar
     │       │   ├── apm-mysql-commons-8.6.0.jar
-    │       │   └── apm-seata-skywalking-plugin-2.2.0.jar
+    │       │   └── apm-seata-skywalking-plugin-2.3.0.jar
     │       └── skywalking-agent.jar
     ├── lib
     │   ├── DmJdbcDriver18-8.1.2.192.jar
@@ -165,15 +165,16 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
     │   ├── failsafe-2.3.3.jar
     │   ├── failureaccess-1.0.1.jar
     │   ├── fastjson-1.2.83.jar
-    │   ├── grpc-api-1.66.0.jar
-    │   ├── grpc-context-1.66.0.jar
-    │   ├── grpc-core-1.66.0.jar
+    │   ├── fastjson2-2.0.52.jar
+    │   ├── grpc-api-1.55.1.jar
+    │   ├── grpc-context-1.55.1.jar
+    │   ├── grpc-core-1.55.1.jar
     │   ├── grpc-grpclb-1.27.1.jar
-    │   ├── grpc-netty-1.66.0.jar
-    │   ├── grpc-protobuf-1.66.0.jar
-    │   ├── grpc-protobuf-lite-1.66.0.jar
-    │   ├── grpc-stub-1.66.0.jar
-    │   ├── grpc-util-1.66.0.jar
+    │   ├── grpc-netty-1.55.1.jar
+    │   ├── grpc-protobuf-1.55.1.jar
+    │   ├── grpc-protobuf-lite-1.55.1.jar
+    │   ├── grpc-stub-1.55.1.jar
+    │   ├── grpc-util-1.55.1.jar
     │   ├── gson-2.9.1.jar
     │   ├── guava-32.1.3-jre.jar
     │   ├── guice-5.0.1.jar
@@ -272,55 +273,55 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
     │   ├── netty-transport-sctp-4.1.101.Final.jar
     │   ├── netty-transport-udt-4.1.101.Final.jar
     │   ├── objenesis-3.2.jar
-    │   ├── perfmark-api-0.27.0.jar
+    │   ├── perfmark-api-0.25.0.jar
     │   ├── postgresql-42.3.8.jar
-    │   ├── proto-google-common-protos-2.41.0.jar
+    │   ├── proto-google-common-protos-2.9.0.jar
     │   ├── protobuf-java-3.25.4.jar
     │   ├── protobuf-java-util-3.11.0.jar
     │   ├── reflectasm-1.11.9.jar
     │   ├── registry-client-all-6.3.0.jar
     │   ├── rocksdbjni-8.8.1.jar
-    │   ├── seata-common-2.2.0.jar
-    │   ├── seata-compressor-all-2.2.0.jar
-    │   ├── seata-compressor-bzip2-2.2.0.jar
-    │   ├── seata-compressor-deflater-2.2.0.jar
-    │   ├── seata-compressor-gzip-2.2.0.jar
-    │   ├── seata-compressor-lz4-2.2.0.jar
-    │   ├── seata-compressor-zip-2.2.0.jar
-    │   ├── seata-compressor-zstd-2.2.0.jar
-    │   ├── seata-config-all-2.2.0.jar
-    │   ├── seata-config-apollo-2.2.0.jar
-    │   ├── seata-config-consul-2.2.0.jar
-    │   ├── seata-config-core-2.2.0.jar
-    │   ├── seata-config-etcd3-2.2.0.jar
-    │   ├── seata-config-nacos-2.2.0.jar
-    │   ├── seata-config-spring-cloud-2.2.0.jar
-    │   ├── seata-config-zk-2.2.0.jar
-    │   ├── seata-console-2.2.0.jar
-    │   ├── seata-core-2.2.0.jar
-    │   ├── seata-discovery-all-2.2.0.jar
-    │   ├── seata-discovery-consul-2.2.0.jar
-    │   ├── seata-discovery-core-2.2.0.jar
-    │   ├── seata-discovery-custom-2.2.0.jar
-    │   ├── seata-discovery-etcd3-2.2.0.jar
-    │   ├── seata-discovery-eureka-2.2.0.jar
-    │   ├── seata-discovery-nacos-2.2.0.jar
-    │   ├── seata-discovery-namingserver-2.2.0.jar
-    │   ├── seata-discovery-redis-2.2.0.jar
-    │   ├── seata-discovery-sofa-2.2.0.jar
-    │   ├── seata-discovery-zk-2.2.0.jar
-    │   ├── seata-metrics-all-2.2.0.jar
-    │   ├── seata-metrics-api-2.2.0.jar
-    │   ├── seata-metrics-core-2.2.0.jar
-    │   ├── seata-metrics-exporter-prometheus-2.2.0.jar
-    │   ├── seata-metrics-registry-compact-2.2.0.jar
-    │   ├── seata-serializer-all-2.2.0.jar
-    │   ├── seata-serializer-hessian-2.2.0.jar
-    │   ├── seata-serializer-kryo-2.2.0.jar
-    │   ├── seata-serializer-protobuf-2.2.0.jar
-    │   ├── seata-serializer-seata-2.2.0.jar
-    │   ├── seata-spring-autoconfigure-core-2.2.0.jar
-    │   ├── seata-spring-autoconfigure-server-2.2.0.jar
+    │   ├── seata-common-2.3.0.jar
+    │   ├── seata-compressor-all-2.3.0.jar
+    │   ├── seata-compressor-bzip2-2.3.0.jar
+    │   ├── seata-compressor-deflater-2.3.0.jar
+    │   ├── seata-compressor-gzip-2.3.0.jar
+    │   ├── seata-compressor-lz4-2.3.0.jar
+    │   ├── seata-compressor-zip-2.3.0.jar
+    │   ├── seata-compressor-zstd-2.3.0.jar
+    │   ├── seata-config-all-2.3.0.jar
+    │   ├── seata-config-apollo-2.3.0.jar
+    │   ├── seata-config-consul-2.3.0.jar
+    │   ├── seata-config-core-2.3.0.jar
+    │   ├── seata-config-etcd3-2.3.0.jar
+    │   ├── seata-config-nacos-2.3.0.jar
+    │   ├── seata-config-spring-cloud-2.3.0.jar
+    │   ├── seata-config-zk-2.3.0.jar
+    │   ├── seata-console-2.3.0.jar
+    │   ├── seata-core-2.3.0.jar
+    │   ├── seata-discovery-all-2.3.0.jar
+    │   ├── seata-discovery-consul-2.3.0.jar
+    │   ├── seata-discovery-core-2.3.0.jar
+    │   ├── seata-discovery-custom-2.3.0.jar
+    │   ├── seata-discovery-etcd3-2.3.0.jar
+    │   ├── seata-discovery-eureka-2.3.0.jar
+    │   ├── seata-discovery-nacos-2.3.0.jar
+    │   ├── seata-discovery-namingserver-2.3.0.jar
+    │   ├── seata-discovery-redis-2.3.0.jar
+    │   ├── seata-discovery-sofa-2.3.0.jar
+    │   ├── seata-discovery-zk-2.3.0.jar
+    │   ├── seata-metrics-all-2.3.0.jar
+    │   ├── seata-metrics-api-2.3.0.jar
+    │   ├── seata-metrics-core-2.3.0.jar
+    │   ├── seata-metrics-exporter-prometheus-2.3.0.jar
+    │   ├── seata-metrics-registry-compact-2.3.0.jar
+    │   ├── seata-serializer-all-2.3.0.jar
+    │   ├── seata-serializer-hessian-2.3.0.jar
+    │   ├── seata-serializer-kryo-2.3.0.jar
+    │   ├── seata-serializer-protobuf-2.3.0.jar
+    │   ├── seata-serializer-seata-2.3.0.jar
+    │   ├── seata-spring-autoconfigure-core-2.3.0.jar
+    │   ├── seata-spring-autoconfigure-server-2.3.0.jar
     │   ├── servo-core-0.12.21.jar
     │   ├── simpleclient-0.15.0.jar
     │   ├── simpleclient_common-0.15.0.jar
@@ -453,6 +454,8 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
 │   │   ├── jakarta.annotation-api-1.3.5.jar
 │   │   ├── janino-3.1.10.jar
 │   │   ├── jul-to-slf4j-1.7.36.jar
+│   │   ├── log4j-api-2.17.2.jar
+│   │   ├── log4j-to-slf4j-2.17.2.jar
 │   │   ├── logback-classic-1.2.12.jar
 │   │   ├── logback-core-1.2.12.jar
 │   │   ├── netty-all-4.1.101.Final.jar
@@ -489,7 +492,7 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
 │   │   ├── netty-transport-rxtx-4.1.101.Final.jar
 │   │   ├── netty-transport-sctp-4.1.101.Final.jar
 │   │   ├── netty-transport-udt-4.1.101.Final.jar
-│   │   ├── seata-common-2.2.0.jar
+│   │   ├── seata-common-2.3.0.jar
 │   │   ├── slf4j-api-1.7.36.jar
 │   │   ├── snakeyaml-2.0.jar
 │   │   ├── spring-aop-5.3.39.jar
@@ -538,7 +541,7 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
     │       │   ├── apm-mysql-6.x-plugin-8.6.0.jar
     │       │   ├── apm-mysql-8.x-plugin-8.6.0.jar
     │       │   ├── apm-mysql-commons-8.6.0.jar
-    │       │   └── apm-seata-skywalking-plugin-2.2.0.jar
+    │       │   └── apm-seata-skywalking-plugin-2.3.0.jar
     │       └── skywalking-agent.jar
     ├── lib
     │   ├── DmJdbcDriver18-8.1.2.192.jar
@@ -581,15 +584,16 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
     │   ├── failsafe-2.3.3.jar
     │   ├── failureaccess-1.0.1.jar
     │   ├── fastjson-1.2.83.jar
-    │   ├── grpc-api-1.66.0.jar
-    │   ├── grpc-context-1.66.0.jar
-    │   ├── grpc-core-1.66.0.jar
+    │   ├── fastjson2-2.0.52.jar
+    │   ├── grpc-api-1.55.1.jar
+    │   ├── grpc-context-1.55.1.jar
+    │   ├── grpc-core-1.55.1.jar
     │   ├── grpc-grpclb-1.27.1.jar
-    │   ├── grpc-netty-1.66.0.jar
-    │   ├── grpc-protobuf-1.66.0.jar
-    │   ├── grpc-protobuf-lite-1.66.0.jar
-    │   ├── grpc-stub-1.66.0.jar
-    │   ├── grpc-util-1.66.0.jar
+    │   ├── grpc-netty-1.55.1.jar
+    │   ├── grpc-protobuf-1.55.1.jar
+    │   ├── grpc-protobuf-lite-1.55.1.jar
+    │   ├── grpc-stub-1.55.1.jar
+    │   ├── grpc-util-1.55.1.jar
     │   ├── gson-2.9.1.jar
     │   ├── guava-32.1.3-jre.jar
     │   ├── guice-5.0.1.jar
@@ -689,55 +693,55 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
     │   ├── netty-transport-sctp-4.1.101.Final.jar
     │   ├── netty-transport-udt-4.1.101.Final.jar
     │   ├── objenesis-3.2.jar
-    │   ├── perfmark-api-0.27.0.jar
+    │   ├── perfmark-api-0.25.0.jar
     │   ├── postgresql-42.3.8.jar
-    │   ├── proto-google-common-protos-2.41.0.jar
+    │   ├── proto-google-common-protos-2.9.0.jar
     │   ├── protobuf-java-3.25.4.jar
     │   ├── protobuf-java-util-3.11.0.jar
     │   ├── reflectasm-1.11.9.jar
     │   ├── registry-client-all-6.3.0.jar
     │   ├── rocksdbjni-8.8.1.jar
-    │   ├── seata-common-2.2.0.jar
-    │   ├── seata-compressor-all-2.2.0.jar
-    │   ├── seata-compressor-bzip2-2.2.0.jar
-    │   ├── seata-compressor-deflater-2.2.0.jar
-    │   ├── seata-compressor-gzip-2.2.0.jar
-    │   ├── seata-compressor-lz4-2.2.0.jar
-    │   ├── seata-compressor-zip-2.2.0.jar
-    │   ├── seata-compressor-zstd-2.2.0.jar
-    │   ├── seata-config-all-2.2.0.jar
-    │   ├── seata-config-apollo-2.2.0.jar
-    │   ├── seata-config-consul-2.2.0.jar
-    │   ├── seata-config-core-2.2.0.jar
-    │   ├── seata-config-etcd3-2.2.0.jar
-    │   ├── seata-config-nacos-2.2.0.jar
-    │   ├── seata-config-spring-cloud-2.2.0.jar
-    │   ├── seata-config-zk-2.2.0.jar
-    │   ├── seata-console-2.2.0.jar
-    │   ├── seata-core-2.2.0.jar
-    │   ├── seata-discovery-all-2.2.0.jar
-    │   ├── seata-discovery-consul-2.2.0.jar
-    │   ├── seata-discovery-core-2.2.0.jar
-    │   ├── seata-discovery-custom-2.2.0.jar
-    │   ├── seata-discovery-etcd3-2.2.0.jar
-    │   ├── seata-discovery-eureka-2.2.0.jar
-    │   ├── seata-discovery-nacos-2.2.0.jar
-    │   ├── seata-discovery-namingserver-2.2.0.jar
-    │   ├── seata-discovery-redis-2.2.0.jar
-    │   ├── seata-discovery-sofa-2.2.0.jar
-    │   ├── seata-discovery-zk-2.2.0.jar
-    │   ├── seata-metrics-all-2.2.0.jar
-    │   ├── seata-metrics-api-2.2.0.jar
-    │   ├── seata-metrics-core-2.2.0.jar
-    │   ├── seata-metrics-exporter-prometheus-2.2.0.jar
-    │   ├── seata-metrics-registry-compact-2.2.0.jar
-    │   ├── seata-serializer-all-2.2.0.jar
-    │   ├── seata-serializer-hessian-2.2.0.jar
-    │   ├── seata-serializer-kryo-2.2.0.jar
-    │   ├── seata-serializer-protobuf-2.2.0.jar
-    │   ├── seata-serializer-seata-2.2.0.jar
-    │   ├── seata-spring-autoconfigure-core-2.2.0.jar
-    │   ├── seata-spring-autoconfigure-server-2.2.0.jar
+    │   ├── seata-common-2.3.0.jar
+    │   ├── seata-compressor-all-2.3.0.jar
+    │   ├── seata-compressor-bzip2-2.3.0.jar
+    │   ├── seata-compressor-deflater-2.3.0.jar
+    │   ├── seata-compressor-gzip-2.3.0.jar
+    │   ├── seata-compressor-lz4-2.3.0.jar
+    │   ├── seata-compressor-zip-2.3.0.jar
+    │   ├── seata-compressor-zstd-2.3.0.jar
+    │   ├── seata-config-all-2.3.0.jar
+    │   ├── seata-config-apollo-2.3.0.jar
+    │   ├── seata-config-consul-2.3.0.jar
+    │   ├── seata-config-core-2.3.0.jar
+    │   ├── seata-config-etcd3-2.3.0.jar
+    │   ├── seata-config-nacos-2.3.0.jar
+    │   ├── seata-config-spring-cloud-2.3.0.jar
+    │   ├── seata-config-zk-2.3.0.jar
+    │   ├── seata-console-2.3.0.jar
+    │   ├── seata-core-2.3.0.jar
+    │   ├── seata-discovery-all-2.3.0.jar
+    │   ├── seata-discovery-consul-2.3.0.jar
+    │   ├── seata-discovery-core-2.3.0.jar
+    │   ├── seata-discovery-custom-2.3.0.jar
+    │   ├── seata-discovery-etcd3-2.3.0.jar
+    │   ├── seata-discovery-eureka-2.3.0.jar
+    │   ├── seata-discovery-nacos-2.3.0.jar
+    │   ├── seata-discovery-namingserver-2.3.0.jar
+    │   ├── seata-discovery-redis-2.3.0.jar
+    │   ├── seata-discovery-sofa-2.3.0.jar
+    │   ├── seata-discovery-zk-2.3.0.jar
+    │   ├── seata-metrics-all-2.3.0.jar
+    │   ├── seata-metrics-api-2.3.0.jar
+    │   ├── seata-metrics-core-2.3.0.jar
+    │   ├── seata-metrics-exporter-prometheus-2.3.0.jar
+    │   ├── seata-metrics-registry-compact-2.3.0.jar
+    │   ├── seata-serializer-all-2.3.0.jar
+    │   ├── seata-serializer-hessian-2.3.0.jar
+    │   ├── seata-serializer-kryo-2.3.0.jar
+    │   ├── seata-serializer-protobuf-2.3.0.jar
+    │   ├── seata-serializer-seata-2.3.0.jar
+    │   ├── seata-spring-autoconfigure-core-2.3.0.jar
+    │   ├── seata-spring-autoconfigure-server-2.3.0.jar
     │   ├── servo-core-0.12.21.jar
     │   ├── simpleclient-0.15.0.jar
     │   ├── simpleclient_common-0.15.0.jar

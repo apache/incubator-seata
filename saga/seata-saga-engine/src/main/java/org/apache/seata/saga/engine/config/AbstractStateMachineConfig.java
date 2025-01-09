@@ -54,6 +54,7 @@ import org.apache.seata.saga.proctrl.handler.RouterHandler;
 import org.apache.seata.saga.proctrl.impl.ProcessControllerImpl;
 import org.apache.seata.saga.proctrl.process.impl.CustomizeBusinessProcessor;
 import org.apache.seata.saga.statelang.domain.DomainConstants;
+import org.apache.seata.saga.statelang.domain.StateType;
 
 import javax.script.ScriptEngineManager;
 import java.io.InputStream;
@@ -214,20 +215,8 @@ public abstract class AbstractStateMachineConfig implements StateMachineConfig {
     }
 
     public ProcessControllerImpl createProcessorController(ProcessCtrlEventPublisher eventPublisher) throws Exception {
-        StateMachineProcessRouter stateMachineProcessRouter = new StateMachineProcessRouter();
-        stateMachineProcessRouter.initDefaultStateRouters();
-        loadStateRouterInterceptors(stateMachineProcessRouter.getStateRouters());
-
-        StateMachineProcessHandler stateMachineProcessHandler = new StateMachineProcessHandler();
-        stateMachineProcessHandler.initDefaultHandlers();
-        loadStateHandlerInterceptors(stateMachineProcessHandler.getStateHandlers());
-
-        DefaultRouterHandler defaultRouterHandler = new DefaultRouterHandler();
-        defaultRouterHandler.setEventPublisher(eventPublisher);
-
-        Map<String, ProcessRouter> processRouterMap = new HashMap<>(1);
-        processRouterMap.put(ProcessType.STATE_LANG.getCode(), stateMachineProcessRouter);
-        defaultRouterHandler.setProcessRouters(processRouterMap);
+        StateMachineProcessHandler stateMachineProcessHandler = buildStateMachineProcessHandler();
+        DefaultRouterHandler defaultRouterHandler = buildDefaultRouterHandler(eventPublisher);
 
         CustomizeBusinessProcessor customizeBusinessProcessor = new CustomizeBusinessProcessor();
 
@@ -245,7 +234,28 @@ public abstract class AbstractStateMachineConfig implements StateMachineConfig {
         return processorController;
     }
 
-    public void loadStateHandlerInterceptors(Map<String, StateHandler> stateHandlerMap) {
+    private StateMachineProcessHandler buildStateMachineProcessHandler() {
+        StateMachineProcessHandler stateMachineProcessHandler = new StateMachineProcessHandler();
+        stateMachineProcessHandler.initDefaultHandlers();
+        loadStateHandlerInterceptors(stateMachineProcessHandler.getStateHandlers());
+        return stateMachineProcessHandler;
+    }
+
+    private DefaultRouterHandler buildDefaultRouterHandler(ProcessCtrlEventPublisher eventPublisher) {
+        DefaultRouterHandler defaultRouterHandler = new DefaultRouterHandler();
+        defaultRouterHandler.setEventPublisher(eventPublisher);
+
+        StateMachineProcessRouter stateMachineProcessRouter = new StateMachineProcessRouter();
+        stateMachineProcessRouter.initDefaultStateRouters();
+        loadStateRouterInterceptors(stateMachineProcessRouter.getStateRouters());
+
+        Map<String, ProcessRouter> processRouterMap = new HashMap<>(2);
+        processRouterMap.put(ProcessType.STATE_LANG.getCode(), stateMachineProcessRouter);
+        defaultRouterHandler.setProcessRouters(processRouterMap);
+        return defaultRouterHandler;
+    }
+
+    public void loadStateHandlerInterceptors(Map<StateType, StateHandler> stateHandlerMap) {
         for (StateHandler stateHandler : stateHandlerMap.values()) {
             if (stateHandler instanceof InterceptableStateHandler) {
                 InterceptableStateHandler interceptableStateHandler = (InterceptableStateHandler) stateHandler;
@@ -259,7 +269,7 @@ public abstract class AbstractStateMachineConfig implements StateMachineConfig {
         }
     }
 
-    public void loadStateRouterInterceptors(Map<String, StateRouter> stateRouterMap) {
+    public void loadStateRouterInterceptors(Map<StateType, StateRouter> stateRouterMap) {
         for (StateRouter stateRouter : stateRouterMap.values()) {
             if (stateRouter instanceof InterceptableStateRouter) {
                 InterceptableStateRouter interceptableStateRouter = (InterceptableStateRouter) stateRouter;

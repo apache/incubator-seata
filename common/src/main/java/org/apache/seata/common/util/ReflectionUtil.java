@@ -25,11 +25,13 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
 
 /**
  * Reflection tools
@@ -493,6 +495,34 @@ public final class ReflectionUtil {
     public static Method getMethod(final Class<?> clazz, final String methodName)
             throws NoSuchMethodException, SecurityException {
         return getMethod(clazz, methodName, EMPTY_CLASS_ARRAY);
+    }
+
+    /**
+     * Recursively get clazz and their interfaces match matchCondition method-class mapping
+     *
+     * @param clazz     clazz
+     * @param matchCondition matchCondition
+     * @return Set
+     */
+    public static Map<Method, Class<?>> findMatchMethodClazzMap(Class<?> clazz, Predicate<Method> matchCondition) {
+        Map<Method, Class<?>> methodClassMap = new HashMap<>();
+
+        for (Method method : clazz.getMethods()) {
+            if (matchCondition.test(method)) {
+                methodClassMap.put(method, clazz);
+            }
+        }
+
+        Set<Class<?>> interfaceClasses = getInterfaces(clazz);
+        for (Class<?> interClass : interfaceClasses) {
+            for (Method method : interClass.getMethods()) {
+                if (matchCondition.test(method)) {
+                    methodClassMap.put(method, interClass);
+                }
+            }
+        }
+
+        return methodClassMap;
     }
 
     /**

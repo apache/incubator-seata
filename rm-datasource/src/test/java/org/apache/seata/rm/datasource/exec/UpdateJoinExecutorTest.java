@@ -32,7 +32,6 @@ import org.apache.seata.rm.datasource.ConnectionProxy;
 import org.apache.seata.rm.datasource.DataSourceProxy;
 import org.apache.seata.rm.datasource.DataSourceProxyTest;
 import org.apache.seata.rm.datasource.StatementProxy;
-import org.apache.seata.rm.datasource.exec.UpdateExecutor;
 import org.apache.seata.rm.datasource.exec.mysql.MySQLUpdateJoinExecutor;
 import org.apache.seata.rm.datasource.mock.MockDriver;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
@@ -58,6 +57,7 @@ public class UpdateJoinExecutorTest {
         };
         Object[][] beforeReturnValue = new Object[][]{
                 new Object[]{1, "Tom"},
+                new Object[]{2, "Tony"},
         };
         StatementProxy beforeMockStatementProxy = mockStatementProxy(returnValueColumnLabels, beforeReturnValue, columnMetas, indexMetas);
         String sql = "update t1 inner join t2 on t1.id = t2.id set t1.name = 'WILL',t2.name = 'WILL'";
@@ -69,7 +69,38 @@ public class UpdateJoinExecutorTest {
         TableRecords beforeImage = mySQLUpdateJoinExecutor.beforeImage();
         Object[][] afterReturnValue = new Object[][]{
                 new Object[]{1, "WILL"},
+                new Object[]{2, "Tony"},
         };
+        StatementProxy afterMockStatementProxy = mockStatementProxy(returnValueColumnLabels, afterReturnValue, columnMetas, indexMetas);
+        mySQLUpdateJoinExecutor.statementProxy = afterMockStatementProxy;
+        TableRecords afterImage = mySQLUpdateJoinExecutor.afterImage(beforeImage);
+        Assertions.assertDoesNotThrow(()->mySQLUpdateJoinExecutor.prepareUndoLog(beforeImage, afterImage));
+    }
+
+    @Test
+    public void testEmptyUpdateJoinUndoLog() throws SQLException {
+        List<String> returnValueColumnLabels = Lists.newArrayList("id", "name");
+        Object[][] columnMetas = new Object[][]{
+                new Object[]{"", "", "t1", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
+                new Object[]{"", "", "t1", "name", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
+                new Object[]{"", "", "t2", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
+                new Object[]{"", "", "t2", "name", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
+                new Object[]{"", "", "t1 inner join t2 on t1.id = t2.id", "id", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
+                new Object[]{"", "", "t1 inner join t2 on t1.id = t2.id", "name", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
+        };
+        Object[][] indexMetas = new Object[][]{
+                new Object[]{"PRIMARY", "id", false, "", 3, 1, "A", 34},
+        };
+        Object[][] beforeReturnValue = new Object[][]{};
+        StatementProxy beforeMockStatementProxy = mockStatementProxy(returnValueColumnLabels, beforeReturnValue, columnMetas, indexMetas);
+        String sql = "update t1 inner join t2 on t1.id = t2.id set t1.name = 'WILL',t2.name = 'WILL'";
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
+        MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
+        UpdateExecutor mySQLUpdateJoinExecutor = new MySQLUpdateJoinExecutor(beforeMockStatementProxy, (statement, args) -> {
+            return null;
+        }, recognizer);
+        TableRecords beforeImage = mySQLUpdateJoinExecutor.beforeImage();
+        Object[][] afterReturnValue = new Object[][]{};
         StatementProxy afterMockStatementProxy = mockStatementProxy(returnValueColumnLabels, afterReturnValue, columnMetas, indexMetas);
         mySQLUpdateJoinExecutor.statementProxy = afterMockStatementProxy;
         TableRecords afterImage = mySQLUpdateJoinExecutor.afterImage(beforeImage);

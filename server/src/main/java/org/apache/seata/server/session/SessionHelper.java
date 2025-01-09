@@ -28,6 +28,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.apache.seata.common.ConfigurationKeys;
+import org.apache.seata.common.store.SessionMode;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
@@ -42,7 +43,6 @@ import org.apache.seata.server.cluster.raft.context.SeataClusterContext;
 import org.apache.seata.server.coordinator.DefaultCoordinator;
 import org.apache.seata.server.metrics.MetricsPublisher;
 import org.apache.seata.server.store.StoreConfig;
-import org.apache.seata.server.store.StoreConfig.SessionMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -212,7 +212,7 @@ public class SessionHelper {
             boolean retryBranch =
                     currentStatus == GlobalStatus.TimeoutRollbackRetrying || currentStatus == GlobalStatus.RollbackRetrying;
             if (!currentStatus.equals(GlobalStatus.TimeoutRollbacked)
-                && SessionStatusValidator.isTimeoutGlobalStatus(currentStatus)) {
+                && SessionStatusValidator.isTimeoutRollbacking(currentStatus)) {
                 globalSession.changeGlobalStatus(GlobalStatus.TimeoutRollbacked);
             } else if (!globalSession.getStatus().equals(GlobalStatus.Rollbacked)) {
                 globalSession.changeGlobalStatus(GlobalStatus.Rollbacked);
@@ -255,7 +255,7 @@ public class SessionHelper {
         GlobalStatus currentStatus = globalSession.getStatus();
         if (isRetryTimeout) {
             globalSession.changeGlobalStatus(GlobalStatus.RollbackRetryTimeout);
-        } else if (SessionStatusValidator.isTimeoutGlobalStatus(currentStatus)) {
+        } else if (SessionStatusValidator.isTimeoutRollbacking(currentStatus)) {
             globalSession.changeGlobalStatus(GlobalStatus.TimeoutRollbackFailed);
         } else {
             globalSession.changeGlobalStatus(GlobalStatus.RollbackFailed);
