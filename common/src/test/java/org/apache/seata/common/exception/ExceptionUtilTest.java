@@ -37,21 +37,21 @@ class ExceptionUtilTest {
     }
 
     @Test
-    public void unwrap_InvocationTargetException_ReturnsCause() {
+    public void unwrapInvocationTargetException() {
         InvocationTargetException ite = new InvocationTargetException(exception, "test");
         Throwable result = ExceptionUtil.unwrap(ite);
         Assertions.assertSame(exception, result, "Expected the unwrapped exception to be the cause of InvocationTargetException.");
     }
 
     @Test
-    public void unwrap_UndeclaredThrowableException_ReturnsCause() {
+    public void unwrapUndeclaredThrowableException() {
         UndeclaredThrowableException ute = new UndeclaredThrowableException(exception, "test");
         Throwable result = ExceptionUtil.unwrap(ute);
         Assertions.assertSame(exception, result, "Expected the unwrapped exception to be the cause of UndeclaredThrowableException.");
     }
 
     @Test
-    public void unwrap_NestedInvocationTargetException_ReturnsRootCause() {
+    public void unwrapNestedInvocationTargetException() {
         Exception rootCause = new Exception();
         InvocationTargetException ite = new InvocationTargetException(new UndeclaredThrowableException(rootCause, "test"), "test");
         Throwable result = ExceptionUtil.unwrap(ite);
@@ -59,7 +59,7 @@ class ExceptionUtilTest {
     }
 
     @Test
-    public void unwrap_NotWrappedException_ReturnsSameException() {
+    public void unwrapNotWrappedException() {
         Throwable result = ExceptionUtil.unwrap(exception);
         Assertions.assertSame(exception, result, "Expected the unwrapped exception to be the same as the input when no wrapping is present.");
     }

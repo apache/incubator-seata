@@ -101,7 +101,7 @@ public class PageResultTest {
     }
 
     @Test
-    void checkPag_PageNumAndPageSizeDefault() {
+    void checkPageNumAndPageSizeDefault() {
         BaseParam param = new BaseParam();
         param.setPageNum(0);
         param.setPageSize(0);
