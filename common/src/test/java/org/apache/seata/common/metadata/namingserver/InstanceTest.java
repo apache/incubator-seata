@@ -40,7 +40,8 @@ class InstanceTest {
     private Instance instanceB;
     private Instance instanceC;
 
-    @Test void toJsonString() throws JsonProcessingException {
+    @Test
+    void toJsonString() throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         Instance instance = Instance.getInstance();
         Map<String, Object> map = new HashMap<>();
@@ -61,13 +62,15 @@ class InstanceTest {
         assertEquals(instance.toJsonString(objectMapper), objectMapper.writeValueAsString(instance));
     }
 
-    @Test public void testGetInstance() {
+    @Test
+    public void testGetInstance() {
         Instance anotherInstance = Instance.getInstance();
         instance = Instance.getInstance();
         assertEquals(instance, anotherInstance);
     }
 
-    @Test public void testJsonSerializationShouldSerialize() {
+    @Test
+    public void testJsonSerializationShouldSerialize() {
         instance = Instance.getInstance();
         instance.setNamespace("testNamespace");
         instance.setClusterName("testCluster");
@@ -101,7 +104,8 @@ class InstanceTest {
         assertEquals(instance.getMetadata(), deserializedInstance.getMetadata());
     }
 
-    @Test public void testToMapShouldReturnCorrectMap() {
+    @Test
+    public void testToMapShouldReturnCorrectMap() {
         instance = Instance.getInstance();
         instance.setNamespace("testNamespace");
         instance.setClusterName("testCluster");
@@ -140,28 +144,32 @@ class InstanceTest {
         assertTrue(resultMap.get("metadata").contains("value1"));
     }
 
-    @Test void testSameInstance() {
+    @Test
+    public void testSameInstance() {
         instanceA = Instance.getInstance();
         instanceA.setControl(new Node.Endpoint("127.0.0.1", 8080));
         instanceA.setTransaction(new Node.Endpoint("127.0.0.1", 9090));
         assertEquals(instanceA, instanceA);
     }
 
-    @Test void testNull() {
+    @Test
+    public void testNull() {
         instanceA = Instance.getInstance();
         instanceA.setControl(new Node.Endpoint("127.0.0.1", 8080));
         instanceA.setTransaction(new Node.Endpoint("127.0.0.1", 9090));
         assertNotEquals(instanceA, null);
     }
 
-    @Test void testDifferentClass() {
+    @Test
+    public void testDifferentClass() {
         instanceA = Instance.getInstance();
         instanceA.setControl(new Node.Endpoint("127.0.0.1", 8080));
         instanceA.setTransaction(new Node.Endpoint("127.0.0.1", 9090));
         assertNotEquals(instanceA, "NotAnInstance");
     }
 
-    @Test void testSameFields() {
+    @Test
+    public void testSameFields() {
         instanceA = Instance.getInstance();
         instanceA.setControl(new Node.Endpoint("127.0.0.1", 8080));
         instanceA.setTransaction(new Node.Endpoint("127.0.0.1", 9090));
@@ -171,7 +179,8 @@ class InstanceTest {
         assertEquals(instanceA, instanceB);
     }
 
-    @Test void testDifferentControlPort() {
+    @Test
+    public void testDifferentControlPort() {
         instanceA = Instance.getInstance();
         instanceA.setControl(new Node.Endpoint("127.0.0.1", 8080));
         instanceA.setTransaction(new Node.Endpoint("127.0.0.1", 9090));
@@ -182,7 +191,8 @@ class InstanceTest {
         assertTrue(instanceA.equals(instanceC));
     }
 
-    @Test void testDifferentTransactionPort() {
+    @Test
+    public void testDifferentTransactionPort() {
         instanceA = Instance.getInstance();
         instanceA.setControl(new Node.Endpoint("127.0.0.1", 8080));
         instanceA.setTransaction(new Node.Endpoint("127.0.0.1", 9090));
