@@ -1,0 +1,59 @@
+package org.apache.seata.spring;
+
+import java.io.IOException;
+import org.apache.seata.integration.tx.api.interceptor.handler.ProxyInvocationHandler;
+import org.apache.seata.rm.tcc.interceptor.parser.TccActionInterceptorParser;
+import org.apache.seata.spring.tcc.EasyTccAction;
+import org.apache.seata.spring.tcc.EasyTccActionImpl;
+import org.apache.seata.spring.tcc.NormalTccAction;
+import org.apache.seata.spring.tcc.NormalTccActionImpl;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.springframework.aop.MethodBeforeAdvice;
+import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.aop.support.NameMatchMethodPointcutAdvisor;
+
+
+public class SpringLocalTccTest {
+
+
+    @BeforeAll
+    public static void init() throws IOException {
+        System.setProperty("config.type", "file");
+        System.setProperty("config.file.name", "file.conf");
+        System.setProperty("txServiceGroup", "default_tx_group");
+        System.setProperty("service.vgroupMapping.default_tx_group", "default");
+    }
+
+    @Test
+    void testParserInterfaceToProxyForSpringCGLIB() throws Exception {
+        //local tcc anno at interface
+        {
+            TccActionInterceptorParser tccActionInterceptorParser = new TccActionInterceptorParser();
+            EasyTccActionImpl tccAction = new EasyTccActionImpl();
+            EasyTccAction proxyTccAction = createSpringCGLIBProxy(tccAction, "doSomething", EasyTccAction.class);
+            ProxyInvocationHandler proxyInvocationHandler = tccActionInterceptorParser.parserInterfaceToProxy(proxyTccAction, proxyTccAction.getClass().getName());
+            Assertions.assertNotNull(proxyInvocationHandler);
+        }
+
+        //local tcc anno at interface impl
+        {
+            TccActionInterceptorParser tccActionInterceptorParser = new TccActionInterceptorParser();
+            NormalTccActionImpl tccAction = new NormalTccActionImpl();
+            NormalTccAction proxyTccAction = createSpringCGLIBProxy(tccAction, "doSomething", NormalTccAction.class);
+            ProxyInvocationHandler proxyInvocationHandler = tccActionInterceptorParser.parserInterfaceToProxy(proxyTccAction, proxyTccAction.getClass().getName());
+            Assertions.assertNotNull(proxyInvocationHandler);
+        }
+    }
+
+    private  <T> T createSpringCGLIBProxy(T target, String methodName, Class<T> interfaceClass) {
+        ProxyFactory proxyFactory = new ProxyFactory(target);
+        proxyFactory.setProxyTargetClass(true);
+        MethodBeforeAdvice advice = (method, args1, target1) -> System.out.println("test");
+        NameMatchMethodPointcutAdvisor advisor = new NameMatchMethodPointcutAdvisor(advice);
+        advisor.addMethodName(methodName);
+        proxyFactory.addAdvisor(advisor);
+        return interfaceClass.cast(proxyFactory.getProxy());
+    }
+}
