@@ -16,6 +16,7 @@
  */
 package org.apache.seata.spring.boot.autoconfigure.loader;
 
+import org.apache.seata.common.holder.ObjectHolder;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.ConfigurationFactory;
@@ -43,6 +44,7 @@ import static org.apache.seata.common.ConfigurationKeys.SEATA_FILE_PREFIX_ROOT_C
 import static org.apache.seata.common.ConfigurationKeys.SERVER_PREFIX;
 import static org.apache.seata.common.ConfigurationKeys.STORE_PREFIX;
 import static org.apache.seata.common.ConfigurationKeys.TRANSPORT_PREFIX;
+import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class SeataPropertiesLoader implements ApplicationContextInitializer<ConfigurableApplicationContext> {
@@ -53,6 +55,10 @@ public class SeataPropertiesLoader implements ApplicationContextInitializer<Conf
     @Override
     public void initialize(ConfigurableApplicationContext applicationContext) {
         ConfigurableEnvironment environment = applicationContext.getEnvironment();
+        if (ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT) == null) {
+            ObjectHolder.INSTANCE.setObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT,
+                    applicationContext.getEnvironment());
+        }
         FileConfiguration configuration = ConfigurationFactory.getOriginFileInstanceRegistry();
         FileConfig fileConfig = configuration.getFileConfig();
         Map<String, Object> configs = fileConfig.getAllConfig();
