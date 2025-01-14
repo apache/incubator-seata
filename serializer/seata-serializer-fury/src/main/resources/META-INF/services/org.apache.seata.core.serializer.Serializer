@@ -14,13 +14,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# Auto Configure
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-org.apache.seata.spring.boot.autoconfigure.SeataCoreAutoConfiguration
-
-# Environment Post Processors
-org.springframework.boot.env.EnvironmentPostProcessor=\
-org.apache.seata.spring.boot.autoconfigure.SeataCoreEnvironmentPostProcessor
-
-org.springframework.context.ApplicationContextInitializer=\
-org.apache.seata.spring.boot.autoconfigure.loader.SeataPropertiesLoader
+org.apache.seata.serializer.fury.FurySerializer
