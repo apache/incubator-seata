@@ -61,7 +61,6 @@ public class ServerInstanceFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(Server.class);
 
     public void serverInstanceInit() {
-        VGroupMappingStoreManager vGroupMappingStoreManager = SessionHolder.getRootVGroupMappingManager();
         ConfigurableEnvironment environment =
             (ConfigurableEnvironment)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT);
 
@@ -101,6 +100,7 @@ public class ServerInstanceFactory {
         }
         instance.setTransaction(new Node.Endpoint(XID.getIpAddress(), XID.getPort(), "netty"));
         if (StringUtils.equals(registryProperties.getType(), NAMING_SERVER)) {
+            VGroupMappingStoreManager vGroupMappingStoreManager = SessionHolder.getRootVGroupMappingManager();
             // load vgroup mapping relationship
             instance.addMetadata("vGroup", vGroupMappingStoreManager.loadVGroups());
             EXECUTOR_SERVICE =
