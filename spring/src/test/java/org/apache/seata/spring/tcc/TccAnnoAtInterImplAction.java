@@ -17,26 +17,32 @@
 package org.apache.seata.spring.tcc;
 
 import org.apache.seata.rm.tcc.api.BusinessActionContext;
-import org.apache.seata.rm.tcc.api.LocalTCC;
-import org.apache.seata.rm.tcc.api.TwoPhaseBusinessAction;
 
 
-@LocalTCC
-public class EasyTccActionImpl implements EasyTccAction {
+public interface TccAnnoAtInterImplAction {
 
-    @Override
-    @TwoPhaseBusinessAction(name = "easyActionForTest", commitMethod = "commit", rollbackMethod = "rollback")
-    public boolean prepare(BusinessActionContext actionContext) {
-        return false;
-    }
+    /**
+     * Prepare boolean.
+     *
+     * @param actionContext the action context
+     * @return the boolean
+     */
+    boolean prepare(BusinessActionContext actionContext);
 
-    @Override
-    public boolean commit(BusinessActionContext actionContext) {
-        return false;
-    }
+    /**
+     * Commit boolean.
+     *
+     * @param actionContext the action context
+     * @return the boolean
+     */
+    boolean commit(BusinessActionContext actionContext);
 
-    @Override
-    public boolean rollback(BusinessActionContext actionContext) {
-        return false;
-    }
+    /**
+     * Rollback boolean.
+     *
+     * @param actionContext the action context
+     * @return the boolean
+     */
+    boolean rollback(BusinessActionContext actionContext);
+
 }
