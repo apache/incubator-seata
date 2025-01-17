@@ -40,11 +40,13 @@ import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_REPORTER_ENA
 import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_REPORTER_INITIAL_DELAY;
 import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_SSL_CLIENT_KEYSTORE_PASSWORD;
 import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_SSL_CLIENT_KEYSTORE_PATH;
+import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_SSL_CLIENT_KEYSTORE_TYPE;
 import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_SSL_ENABLED;
-import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_SSL_KEYSTORE_TYPE;
 import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_SSL_KMF_ALGORITHM;
 import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_SSL_SERVER_KEYSTORE_PASSWORD;
 import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_SSL_SERVER_KEYSTORE_PATH;
+import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_SSL_SERVER_KEYSTORE_TYPE;
+import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_SSL_TMF_ALGORITHM;
 import static org.apache.seata.common.DefaultValues.DEFAULT_RAFT_SSL_ENABLED;
 
 /**
@@ -143,13 +145,13 @@ public class RaftServer implements Disposable, Closeable {
         setSystemProperty("bolt.server.ssl.keystore", instance.getConfig(SERVER_RAFT_SSL_SERVER_KEYSTORE_PATH));
         setSystemProperty("bolt.server.ssl.keystore.password",
             instance.getConfig(SERVER_RAFT_SSL_SERVER_KEYSTORE_PASSWORD));
-        setSystemProperty("bolt.server.ssl.keystore.type", instance.getConfig(SERVER_RAFT_SSL_KEYSTORE_TYPE));
+        setSystemProperty("bolt.server.ssl.keystore.type", instance.getConfig(SERVER_RAFT_SSL_SERVER_KEYSTORE_TYPE));
         setSystemProperty("bolt.server.ssl.kmf.algorithm", instance.getConfig(SERVER_RAFT_SSL_KMF_ALGORITHM));
         setSystemProperty("bolt.client.ssl.keystore", instance.getConfig(SERVER_RAFT_SSL_CLIENT_KEYSTORE_PATH));
         setSystemProperty("bolt.client.ssl.keystore.password",
             instance.getConfig(SERVER_RAFT_SSL_CLIENT_KEYSTORE_PASSWORD));
-        setSystemProperty("bolt.client.ssl.keystore.type", instance.getConfig(SERVER_RAFT_SSL_KEYSTORE_TYPE));
-        setSystemProperty("bolt.client.ssl.tmf.algorithm", instance.getConfig(SERVER_RAFT_SSL_KMF_ALGORITHM));
+        setSystemProperty("bolt.client.ssl.keystore.type", instance.getConfig(SERVER_RAFT_SSL_CLIENT_KEYSTORE_TYPE));
+        setSystemProperty("bolt.client.ssl.tmf.algorithm", instance.getConfig(SERVER_RAFT_SSL_TMF_ALGORITHM));
 
         logger.info("Enable ssl communication between raft nodes");
     }

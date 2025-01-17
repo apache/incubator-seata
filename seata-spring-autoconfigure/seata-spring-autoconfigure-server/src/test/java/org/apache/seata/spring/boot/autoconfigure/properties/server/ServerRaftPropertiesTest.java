@@ -16,6 +16,7 @@
  */
 package org.apache.seata.spring.boot.autoconfigure.properties.server;
 
+import org.apache.seata.spring.boot.autoconfigure.properties.server.raft.ServerRaftProperties;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
