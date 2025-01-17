@@ -26,6 +26,7 @@ import com.netflix.discovery.EurekaClient;
 import com.netflix.discovery.EurekaEventListener;
 import com.netflix.discovery.shared.Application;
 import org.apache.seata.common.exception.EurekaRegistryException;
+import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.StringUtils;
@@ -68,7 +69,7 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static final ConcurrentMap<String, List<EurekaEventListener>> LISTENER_SERVICE_MAP = new ConcurrentHashMap<>();
     private static final ConcurrentMap<String, List<InetSocketAddress>> CLUSTER_ADDRESS_MAP = new ConcurrentHashMap<>();
-    private static final ConcurrentMap<String, Object> CLUSTER_LOCK = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, ResourceLock> CLUSTER_LOCK = new ConcurrentHashMap<>();
 
     private static volatile ApplicationInfoManager applicationInfoManager;
     private static volatile CustomEurekaInstanceConfig instanceConfig;
@@ -140,8 +141,8 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
         }
         String clusterUpperName = clusterName.toUpperCase();
         if (!LISTENER_SERVICE_MAP.containsKey(clusterUpperName)) {
-            Object lock = CLUSTER_LOCK.computeIfAbsent(clusterUpperName, k -> new Object());
-            synchronized (lock) {
+            ResourceLock lock = CLUSTER_LOCK.computeIfAbsent(clusterUpperName, k -> new ResourceLock());
+            try (ResourceLock ignored = lock.obtain()) {
                 if (!LISTENER_SERVICE_MAP.containsKey(clusterUpperName)) {
                     refreshCluster(clusterUpperName);
                     subscribe(clusterUpperName, event -> {
