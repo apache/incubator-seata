@@ -16,12 +16,15 @@
  */
 package org.apache.seata.common.util;
 
+import org.apache.seata.common.lock.ResourceLock;
+
 /**
  * The type Uuid generator.
  */
 public class UUIDGenerator {
 
     private static volatile IdWorker idWorker;
+    private final static ResourceLock RESOURCE_LOCK = new ResourceLock();
 
     /**
      * generate UUID using snowflake algorithm
@@ -30,7 +33,7 @@ public class UUIDGenerator {
      */
     public static long generateUUID() {
         if (idWorker == null) {
-            synchronized (UUIDGenerator.class) {
+            try (ResourceLock ignored = RESOURCE_LOCK.obtain()) {
                 if (idWorker == null) {
                     init(null);
                 }

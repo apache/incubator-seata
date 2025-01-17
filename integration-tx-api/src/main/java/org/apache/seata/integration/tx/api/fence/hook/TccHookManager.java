@@ -20,11 +20,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.apache.seata.common.lock.ResourceLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class TccHookManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(TccHookManager.class);
+    private static final ResourceLock LOCK = new ResourceLock();
+
 
     private TccHookManager() {
 
@@ -40,7 +43,7 @@ public final class TccHookManager {
      */
     public static List<TccHook> getHooks() {
         if (CACHED_UNMODIFIABLE_HOOKS == null) {
-            synchronized (TccHookManager.class) {
+            try (ResourceLock ignored = LOCK.obtain()) {
                 if (CACHED_UNMODIFIABLE_HOOKS == null) {
                     CACHED_UNMODIFIABLE_HOOKS = Collections.unmodifiableList(TCC_HOOKS);
                 }
