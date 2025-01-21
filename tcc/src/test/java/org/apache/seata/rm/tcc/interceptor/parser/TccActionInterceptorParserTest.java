@@ -65,7 +65,7 @@ class TccActionInterceptorParserTest {
     }
 
     @Test
-    void parserInterfaceToProxy() {
+    void parserInterfaceToProxy() throws Exception {
 
         //given
         TccActionInterceptorParser tccActionInterceptorParser = new TccActionInterceptorParser();
