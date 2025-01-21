@@ -189,6 +189,12 @@ seata:
       vgroup-table: vgroup_table
       query-limit: 1000
       max-wait: 5000
+      druid:
+        timeBetweenEvictionRunsMillis: 120000
+        minEvictableIdleTimeMillis: 300000
+        testWhileIdle: true
+        testOnBorrow: false
+        keepAlive: false
     redis:
       mode: single
       # support: lua 、 pipeline

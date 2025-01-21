@@ -315,4 +315,10 @@ public interface DefaultValues {
     String DRUID_LOCATION = "lib/sqlparser/druid.jar";
 
     int DEFAULT_ROCKET_MQ_MSG_TIMEOUT = 60 * 1000;
+
+    long DEFAULT_DB_DRUID_TIME_BETWEEN_EVICTION_RUNS_MILLIS = 120000;
+    long DEFAULT_DB_DRUID_MIN_EVICTABLE_TIME_MILLIS = 300000;
+    boolean DEFAULT_DB_DRUID_TEST_WHILE_IDLE = true;
+    boolean DEFAULT_DB_DRUID_TEST_ON_BORROW = false;
+    boolean DEFAULT_DB_DRUID_KEEP_ALIVE = false;
 }
