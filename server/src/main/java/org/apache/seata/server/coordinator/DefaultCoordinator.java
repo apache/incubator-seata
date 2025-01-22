@@ -66,6 +66,7 @@ import org.apache.seata.core.rpc.TransactionMessageHandler;
 import org.apache.seata.core.rpc.netty.ChannelManager;
 import org.apache.seata.core.rpc.netty.NettyRemotingServer;
 import org.apache.seata.server.AbstractTCInboundHandler;
+import org.apache.seata.server.limit.LimitRequestDecorator;
 import org.apache.seata.server.metrics.MetricsPublisher;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
@@ -643,7 +644,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         AbstractTransactionRequestToTC transactionRequest = (AbstractTransactionRequestToTC) request;
         transactionRequest.setTCInboundHandler(this);
 
-        return transactionRequest.handle(context);
+        LimitRequestDecorator limitRequestDecorator = new LimitRequestDecorator(transactionRequest);
+        return limitRequestDecorator.handle(context);
     }
 
     @Override

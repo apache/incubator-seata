@@ -89,6 +89,7 @@
         <kafka-clients.version>3.6.1</kafka-clients.version>
         <snakeyaml.version>2.0</snakeyaml.version>
         <jackson-mapper.version>1.9.13</jackson-mapper.version>
+        <bucket4j.version>8.1.0</bucket4j.version>
 
         <!-- For test -->
         <junit-jupiter.version>5.8.2</junit-jupiter.version>
