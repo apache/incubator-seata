@@ -1122,6 +1122,31 @@ public interface ConfigurationKeys {
     String META_PREFIX = SEATA_FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + "metadata.";
 
     /**
+     * The constant RATE_LIMIT_PREFIX.
+     */
+    String RATE_LIMIT_PREFIX = SERVER_PREFIX + "ratelimit";
+
+    /**
+     * The constant RATE_LIMIT_BUCKET_TOKEN_NUM_PER_SECOND.
+     */
+    String RATE_LIMIT_BUCKET_TOKEN_NUM_PER_SECOND = RATE_LIMIT_PREFIX + ".bucketTokenNumPerSecond";
+
+    /**
+     * The constant RATE_LIMIT_ENABLE.
+     */
+    String RATE_LIMIT_ENABLE = RATE_LIMIT_PREFIX + ".enable";
+
+    /**
+     * The constant RATE_LIMIT_BUCKET_TOKEN_MAX_NUM.
+     */
+    String RATE_LIMIT_BUCKET_TOKEN_MAX_NUM = RATE_LIMIT_PREFIX + ".bucketTokenMaxNum";
+
+    /**
+     * The constant RATE_LIMIT_BUCKET_TOKEN_INITIAL_NUM.
+     */
+    String RATE_LIMIT_BUCKET_TOKEN_INITIAL_NUM = RATE_LIMIT_PREFIX + ".bucketTokenInitialNum";
+
+    /**
      * The constant SERVER_REGISTRY_METADATA_PREFIX
      */
     String SERVER_REGISTRY_METADATA_PREFIX = SERVER_PREFIX + FILE_ROOT_REGISTRY + ".metadata";

@@ -329,6 +329,13 @@
             <artifactId>jackson-mapper-asl</artifactId>
             <version>${jackson-mapper.version}</version>
         </dependency>
+
+        <!--rate limit-->
+        <dependency>
+            <groupId>com.bucket4j</groupId>
+            <artifactId>bucket4j_jdk8-core</artifactId>
+            <version>${bucket4j.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

@@ -109,4 +109,8 @@ public interface MeterIdConstants {
     Id SUMMARY_EXP =  new Id(IdConstants.SEATA_EXCEPTION)
             .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
             .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_SUMMARY);
+
+    Id SUMMARY_RATE_LIMIT = new Id(IdConstants.SEATA_RATE_LIMIT)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_SUMMARY);
 }

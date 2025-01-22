@@ -162,7 +162,10 @@ server.raft.serialization=jackson
 server.raft.compressor=none
 server.raft.sync=true
 
-
+server.ratelimit.enable=false
+server.ratelimit.bucketTokenNumPerSecond = 999999
+server.ratelimit.bucketTokenMaxNum = 999999
+server.ratelimit.bucketTokenInitialNum = 999999
 
 #Metrics configuration, only for the server
 metrics.enabled=true
