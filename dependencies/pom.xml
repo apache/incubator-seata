@@ -68,6 +68,7 @@
         <sofa.registry.version>6.3.0</sofa.registry.version>
         <motan.version>1.0.0</motan.version>
         <jcommander.version>1.82</jcommander.version>
+        <bucket4j.version>8.1.0</bucket4j.version>
         <commons-compress.version>1.21</commons-compress.version>
         <ant.version>1.10.12</ant.version>
         <lz4.version>1.7.1</lz4.version>
@@ -77,10 +78,11 @@
         <sofa.hessian.version>4.0.3</sofa.hessian.version>
         <sofa.bolt.version>1.6.7</sofa.bolt.version>
         <protobuf.version>3.25.4</protobuf.version>
-        <grpc.version>1.66.0</grpc.version>
+        <grpc.version>1.55.1</grpc.version>
         <kryo.version>5.4.0</kryo.version>
         <kryo-serializers.version>0.45</kryo-serializers.version>
         <hessian.version>4.0.63</hessian.version>
+        <fastjson2.version>2.0.52</fastjson2.version>
         <groovy.version>2.4.4</groovy.version>
         <zstd.version>1.5.0-4</zstd.version>
         <xstream.version>1.4.20</xstream.version>
@@ -126,7 +128,6 @@
         <kotlin-coroutines.version>1.7.3</kotlin-coroutines.version>
 
         <!-- # for web -->
-        <spring-webmvc.version>5.3.26</spring-webmvc.version>
         <tomcat-embed.version>9.0.90</tomcat-embed.version>
 
         <!-- # for test -->
@@ -136,6 +137,9 @@
         <janino-version>3.1.10</janino-version>
         <mockwebserver-version>4.12.0</mockwebserver-version>
         <native-lib-loader.version>2.4.0</native-lib-loader.version>
+
+        <!--  for fury  -->
+        <fury.version>0.8.0</fury.version>
     </properties>
 
     <dependencyManagement>
@@ -528,6 +532,10 @@
                         <groupId>com.google.guava</groupId>
                         <artifactId>guava</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>io.grpc</groupId>
+                        <artifactId>grpc-core</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
@@ -612,6 +620,11 @@
             </dependency>
 
             <dependency>
+                <groupId>com.bucket4j</groupId>
+                <artifactId>bucket4j_jdk8-core</artifactId>
+                <version>${bucket4j.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>io.grpc</groupId>
                 <artifactId>grpc-testing</artifactId>
                 <version>${grpc.version}</version>
@@ -661,6 +674,11 @@
                 <groupId>com.caucho</groupId>
                 <artifactId>hessian</artifactId>
                 <version>${hessian.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba.fastjson2</groupId>
+                <artifactId>fastjson2</artifactId>
+                <version>${fastjson2.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
@@ -870,11 +888,11 @@
                 <version>${rocketmq-version}</version>
             </dependency>
 
-            <!-- web -->
+            <!-- Fury Serialize -->
             <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-webmvc</artifactId>
-                <version>${spring-webmvc.version}</version>
+                <groupId>org.apache.fury</groupId>
+                <artifactId>fury-core</artifactId>
+                <version>${fury.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

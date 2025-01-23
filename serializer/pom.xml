@@ -37,6 +37,8 @@
         <module>seata-serializer-seata</module>
         <module>seata-serializer-kryo</module>
         <module>seata-serializer-hessian</module>
+        <module>seata-serializer-fastjson2</module>
+        <module>seata-serializer-fury</module>
     </modules>
 
 </project>

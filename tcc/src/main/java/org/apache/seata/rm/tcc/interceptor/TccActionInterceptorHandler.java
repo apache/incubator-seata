@@ -121,6 +121,7 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
             if (twoPhaseBusinessAction == null && targetBean.getClass() != null) {
                 Set<Class<?>> interfaceClasses = ReflectionUtil.getInterfaces(targetBean.getClass());
                 if (interfaceClasses != null) {
+                    NoSuchMethodException exception = null;
                     for (Class<?> interClass : interfaceClasses) {
                         try {
                             Method m = interClass.getMethod(method.getName(), method.getParameterTypes());
@@ -131,8 +132,11 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
                                 break;
                             }
                         } catch (NoSuchMethodException e) {
-                            throw new RuntimeException(e);
+                            exception = e;
                         }
+                    }
+                    if (twoPhaseBusinessAction == null && exception != null) {
+                        throw new RuntimeException(exception);
                     }
                 }
             }

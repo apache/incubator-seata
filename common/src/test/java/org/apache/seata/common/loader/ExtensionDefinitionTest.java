@@ -19,7 +19,9 @@ package org.apache.seata.common.loader;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-
+/**
+ * The type Extension definition test.
+ */
 public class ExtensionDefinitionTest {
 
     @Test
@@ -29,5 +31,24 @@ public class ExtensionDefinitionTest {
         ExtensionDefinition<ChineseHello> definition2
                 = new ExtensionDefinition<>("abc", 1, Scope.PROTOTYPE, ChineseHello.class);
         Assertions.assertEquals(definition2, definition);
+    }
+
+    @Test
+    public void testConstructorAndGetters() {
+        ExtensionDefinition<ChineseHello> definition =
+                new ExtensionDefinition<>("abc", 1, Scope.PROTOTYPE, ChineseHello.class);
+        Assertions.assertEquals("abc", definition.getName());
+        Assertions.assertEquals(1, definition.getOrder());
+        Assertions.assertEquals(Scope.PROTOTYPE, definition.getScope());
+        Assertions.assertEquals(ChineseHello.class, definition.getServiceClass());
+    }
+
+    @Test
+    public void testHashCode() {
+        ExtensionDefinition<ChineseHello> definition =
+                new ExtensionDefinition<>("abc", 1, Scope.PROTOTYPE, ChineseHello.class);
+        ExtensionDefinition<ChineseHello> definition2 =
+                new ExtensionDefinition<>("abc", 1, Scope.PROTOTYPE, ChineseHello.class);
+        Assertions.assertEquals(definition.hashCode(), definition2.hashCode());
     }
 }

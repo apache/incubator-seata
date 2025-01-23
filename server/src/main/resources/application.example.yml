@@ -139,7 +139,7 @@ seata:
     service-port: 8091 #If not configured, the default is '${server.port} + 1000'
     max-commit-retry-timeout: -1
     max-rollback-retry-timeout: -1
-    rollback-retry-timeout-unlock-enable: false
+    rollback-failed-unlock-enable: false
     enable-check-auth: true
     enable-parallel-request-handle: true
     enable-parallel-handle-branch: false
@@ -159,6 +159,11 @@ seata:
     session:
       branch-async-queue-size: 5000 #branch async remove queue size
       enable-branch-async-remove: false #enable to asynchronous remove branchSession
+    ratelimit:
+      enable: false
+      bucketTokenSecondNum: 999999
+      bucketTokenMaxNum: 999999
+      bucketTokenInitialNum: 999999
   store:
     # support: file 、 db 、 redis 、 raft
     mode: file

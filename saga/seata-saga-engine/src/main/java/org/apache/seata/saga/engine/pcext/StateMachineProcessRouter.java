@@ -33,6 +33,7 @@ import org.apache.seata.saga.proctrl.ProcessRouter;
 import org.apache.seata.saga.statelang.domain.DomainConstants;
 import org.apache.seata.saga.statelang.domain.State;
 import org.apache.seata.saga.statelang.domain.StateMachine;
+import org.apache.seata.saga.statelang.domain.StateType;
 
 /**
  * StateMachine ProcessRouter
@@ -41,7 +42,7 @@ import org.apache.seata.saga.statelang.domain.StateMachine;
  */
 public class StateMachineProcessRouter implements ProcessRouter {
 
-    private final Map<String, StateRouter> stateRouters = new ConcurrentHashMap<>();
+    private final Map<StateType, StateRouter> stateRouters = new ConcurrentHashMap<>();
 
     @Override
     public Instruction route(ProcessContext context) throws FrameworkException {
@@ -60,7 +61,7 @@ public class StateMachineProcessRouter implements ProcessRouter {
             state = stateMachine.getStates().get(stateInstruction.getStateName());
         }
 
-        String stateType = state.getType();
+        StateType stateType = state.getType();
 
         StateRouter router = stateRouters.get(stateType);
 
@@ -105,26 +106,28 @@ public class StateMachineProcessRouter implements ProcessRouter {
     }
 
     public void initDefaultStateRouters() {
-        if (this.stateRouters.isEmpty()) {
-            TaskStateRouter taskStateRouter = new TaskStateRouter();
-            this.stateRouters.put(DomainConstants.STATE_TYPE_SERVICE_TASK, taskStateRouter);
-            this.stateRouters.put(DomainConstants.STATE_TYPE_SCRIPT_TASK, taskStateRouter);
-            this.stateRouters.put(DomainConstants.STATE_TYPE_CHOICE, taskStateRouter);
-            this.stateRouters.put(DomainConstants.STATE_TYPE_COMPENSATION_TRIGGER, taskStateRouter);
-            this.stateRouters.put(DomainConstants.STATE_TYPE_SUB_STATE_MACHINE, taskStateRouter);
-            this.stateRouters.put(DomainConstants.STATE_TYPE_SUB_MACHINE_COMPENSATION, taskStateRouter);
-            this.stateRouters.put(DomainConstants.STATE_TYPE_LOOP_START, taskStateRouter);
-
-            this.stateRouters.put(DomainConstants.STATE_TYPE_SUCCEED, new EndStateRouter());
-            this.stateRouters.put(DomainConstants.STATE_TYPE_FAIL, new EndStateRouter());
+        if (!stateRouters.isEmpty()) {
+            return;
         }
+
+        TaskStateRouter taskStateRouter = new TaskStateRouter();
+        stateRouters.put(StateType.SERVICE_TASK, taskStateRouter);
+        stateRouters.put(StateType.SCRIPT_TASK, taskStateRouter);
+        stateRouters.put(StateType.CHOICE, taskStateRouter);
+        stateRouters.put(StateType.COMPENSATION_TRIGGER, taskStateRouter);
+        stateRouters.put(StateType.SUB_STATE_MACHINE, taskStateRouter);
+        stateRouters.put(StateType.SUB_MACHINE_COMPENSATION, taskStateRouter);
+        stateRouters.put(StateType.LOOP_START, taskStateRouter);
+
+        stateRouters.put(StateType.SUCCEED, new EndStateRouter());
+        stateRouters.put(StateType.FAIL, new EndStateRouter());
     }
 
-    public Map<String, StateRouter> getStateRouters() {
+    public Map<StateType, StateRouter> getStateRouters() {
         return stateRouters;
     }
 
-    public void setStateRouters(Map<String, StateRouter> stateRouters) {
+    public void setStateRouters(Map<StateType, StateRouter> stateRouters) {
         this.stateRouters.putAll(stateRouters);
     }
 }

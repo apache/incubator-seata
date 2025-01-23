@@ -31,8 +31,10 @@ import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.Constants;
 import org.apache.seata.common.DefaultValues;
 import org.apache.seata.common.XID;
+import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.common.util.BufferUtils;
 import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.common.util.UUIDGenerator;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.exception.GlobalTransactionException;
 import org.apache.seata.core.exception.TransactionException;
@@ -41,7 +43,6 @@ import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.model.LockStatus;
-import org.apache.seata.common.util.UUIDGenerator;
 import org.apache.seata.server.cluster.raft.RaftServerManager;
 import org.apache.seata.server.lock.LockerManagerFactory;
 import org.apache.seata.server.store.SessionStorable;
@@ -107,6 +108,9 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private Set<SessionLifecycleListener> lifecycleListeners = new HashSet<>(2);
 
+    private final ResourceLock resourceLock = new ResourceLock();
+
+
     /**
      * Add boolean.
      *
@@ -129,7 +133,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * @return the boolean
      */
     public boolean remove(BranchSession branchSession) {
-        synchronized (this) {
+        try (ResourceLock ignored = resourceLock.obtain()) {
             return branchSessions.remove(branchSession);
         }
     }
@@ -793,7 +797,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     public void queueToRetryRollback() throws TransactionException {
         GlobalStatus currentStatus = this.getStatus();
         GlobalStatus newStatus;
-        if (SessionStatusValidator.isTimeoutGlobalStatus(currentStatus)) {
+        if (GlobalStatus.TimeoutRollbacking == currentStatus) {
             newStatus = GlobalStatus.TimeoutRollbackRetrying;
         } else {
             newStatus = GlobalStatus.RollbackRetrying;

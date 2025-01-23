@@ -85,7 +85,7 @@ public interface MeterIdConstants {
         .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_TIMER)
         .withTag(IdConstants.STATUS_KEY, IdConstants.STATUS_VALUE_COMMITTED);
 
-    Id TIMER_ROLLBACK = new Id(IdConstants.SEATA_TRANSACTION)
+    Id TIMER_ROLLBACKED = new Id(IdConstants.SEATA_TRANSACTION)
         .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
         .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_TIMER)
         .withTag(IdConstants.STATUS_KEY, IdConstants.STATUS_VALUE_ROLLBACKED);
@@ -107,6 +107,10 @@ public interface MeterIdConstants {
 
 
     Id SUMMARY_EXP =  new Id(IdConstants.SEATA_EXCEPTION)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_SUMMARY);
+
+    Id SUMMARY_RATE_LIMIT = new Id(IdConstants.SEATA_RATE_LIMIT)
             .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
             .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_SUMMARY);
 }

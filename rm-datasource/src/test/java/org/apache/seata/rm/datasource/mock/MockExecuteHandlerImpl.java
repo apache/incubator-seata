@@ -70,7 +70,7 @@ public class MockExecuteHandlerImpl implements MockExecuteHandler {
         List<Object[]> metas = new ArrayList<>();
         if(asts.get(0) instanceof SQLSelectStatement) {
             SQLSelectStatement ast = (SQLSelectStatement) asts.get(0);
-            SQLSelectQueryBlock queryBlock = ast.getSelect().getQueryBlock();
+            SQLSelectQueryBlock queryBlock = ast.getSelect().getFirstQueryBlock();
             String tableName = "";
             if (queryBlock.getFrom() instanceof SQLExprTableSource) {
                 MySQLSelectForUpdateRecognizer recognizer = new MySQLSelectForUpdateRecognizer(sql, ast);

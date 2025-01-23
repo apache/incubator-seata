@@ -264,12 +264,22 @@
         </dependency>
         <dependency>
             <groupId>org.apache.seata</groupId>
+            <artifactId>seata-serializer-fury</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.seata</groupId>
             <artifactId>seata-serializer-kryo</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.seata</groupId>
             <artifactId>seata-serializer-hessian</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.seata</groupId>
+            <artifactId>seata-serializer-fastjson2</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -332,6 +342,11 @@
         <dependency>
             <groupId>org.apache.seata</groupId>
             <artifactId>seata-saga-spring</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.seata</groupId>
+            <artifactId>seata-saga-annotation</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

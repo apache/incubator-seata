@@ -25,6 +25,8 @@ public interface IdConstants {
 
     String SEATA_EXCEPTION = "seata.exception";
 
+    String SEATA_RATE_LIMIT = "seata.rate.limit";
+
     String APP_ID_KEY = "applicationId";
     
     String GROUP_KEY = "group";
@@ -79,4 +81,9 @@ public interface IdConstants {
 
     String STATUS_VALUE_AFTER_ROLLBACKED_KEY = "AfterRollbacked";
 
+    String LIMIT_TYPE_KEY = "limitType";
+
+    String CLIENT_ID_KEY = "clientId";
+
+    String HOST_AND_PORT = "hostAndPort";
 }

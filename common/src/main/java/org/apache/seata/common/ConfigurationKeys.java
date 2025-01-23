@@ -585,9 +585,15 @@ public interface ConfigurationKeys {
 
     /**
      * The constant ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE.
+     * This configuration is deprecated, please use {@link #ROLLBACK_FAILED_UNLOCK_ENABLE} instead.
      */
+    @Deprecated
     String ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE = SERVER_PREFIX + "rollbackRetryTimeoutUnlockEnable";
 
+    /**
+     * The constant ROLLBACK_FAILED_UNLOCK_ENABLE.
+     */
+    String ROLLBACK_FAILED_UNLOCK_ENABLE = SERVER_PREFIX + "rollbackFailedUnlockEnable";
     /**
      * the constant RETRY_DEAD_THRESHOLD
      */
@@ -970,6 +976,21 @@ public interface ConfigurationKeys {
     String SERVER_RAFT = SERVER_PREFIX + "raft.";
 
     /**
+     * The constant SERVER_RAFT_SSL.
+     */
+    String SERVER_RAFT_SSL = SERVER_RAFT + "ssl.";
+
+    /**
+     * The constant SERVER_RAFT_SSL_CLIENT.
+     */
+    String SERVER_RAFT_SSL_CLIENT = SERVER_RAFT_SSL + "client.";
+
+    /**
+     * The constant SERVER_RAFT_SSL_SERVER.
+     */
+    String SERVER_RAFT_SSL_SERVER = SERVER_RAFT_SSL + "server.";
+
+    /**
      * The constant SERVER_RAFT_SERVER_ADDR.
      */
     String SERVER_RAFT_SERVER_ADDR = SERVER_RAFT + "serverAddr";
@@ -998,6 +1019,52 @@ public interface ConfigurationKeys {
      * The constant SERVER_RAFT_SYNC.
      */
     String SERVER_RAFT_SYNC = SERVER_RAFT + "sync";
+
+    /**
+     * The constant SERVER_RAFT_SSL_ENABLED.
+     */
+    String SERVER_RAFT_SSL_ENABLED = SERVER_RAFT_SSL + "enabled";
+
+    /**
+     * The constant SERVER_RAFT_SSL_SERVER_KEYSTORE.
+     */
+    String SERVER_RAFT_SSL_SERVER_KEYSTORE_PATH = SERVER_RAFT_SSL_SERVER + "keystore.path";
+
+    /**
+     * The constant SERVER_RAFT_SSL_CLIENT_KEYSTORE.
+     */
+    String SERVER_RAFT_SSL_CLIENT_KEYSTORE_PATH = SERVER_RAFT_SSL_CLIENT + "keystore.path";
+
+    /**
+     * The constant SERVER_RAFT_SSL_SERVER_KEYSTORE_PASSWORD.
+     */
+    String SERVER_RAFT_SSL_SERVER_KEYSTORE_PASSWORD = SERVER_RAFT_SSL_SERVER + "keystore.password";
+
+    /**
+     * The constant SERVER_RAFT_SSL_CLIENT_KEYSTORE_PASSWORD.
+     */
+    String SERVER_RAFT_SSL_CLIENT_KEYSTORE_PASSWORD = SERVER_RAFT_SSL_CLIENT + "keystore.password";
+
+
+    /**
+     * The constant SERVER_RAFT_SSL_CLIENT_KEYSTORE_TYPE.
+     */
+    String SERVER_RAFT_SSL_CLIENT_KEYSTORE_TYPE = SERVER_RAFT_SSL_CLIENT + "keystore.type";
+
+    /**
+     * The constant SERVER_RAFT_SSL_SERVER_KEYSTORE_TYPE.
+     */
+    String SERVER_RAFT_SSL_SERVER_KEYSTORE_TYPE = SERVER_RAFT_SSL_SERVER + "keystore.type";
+
+    /**
+     * The constant SERVER_RAFT_SSL_KMF_ALGORITHM.
+     */
+    String SERVER_RAFT_SSL_KMF_ALGORITHM = SERVER_RAFT_SSL + "kmfAlgorithm";
+
+    /**
+     * The constant SERVER_RAFT_SSL_KMF_ALGORITHM.
+     */
+    String SERVER_RAFT_SSL_TMF_ALGORITHM = SERVER_RAFT_SSL + "tmfAlgorithm";
 
     /**
      * The constant SERVER_RAFT_MAX_APPEND_BUFFER_SIZE.
@@ -1134,4 +1201,40 @@ public interface ConfigurationKeys {
      * The constant META_PREFIX
      */
     String META_PREFIX = SEATA_FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + "metadata.";
+
+    /**
+     * The constant RATE_LIMIT_PREFIX.
+     */
+    String RATE_LIMIT_PREFIX = SERVER_PREFIX + "ratelimit";
+
+    /**
+     * The constant RATE_LIMIT_BUCKET_TOKEN_NUM_PER_SECOND.
+     */
+    String RATE_LIMIT_BUCKET_TOKEN_NUM_PER_SECOND = RATE_LIMIT_PREFIX + ".bucketTokenNumPerSecond";
+
+    /**
+     * The constant RATE_LIMIT_ENABLE.
+     */
+    String RATE_LIMIT_ENABLE = RATE_LIMIT_PREFIX + ".enable";
+
+    /**
+     * The constant RATE_LIMIT_BUCKET_TOKEN_MAX_NUM.
+     */
+    String RATE_LIMIT_BUCKET_TOKEN_MAX_NUM = RATE_LIMIT_PREFIX + ".bucketTokenMaxNum";
+
+    /**
+     * The constant RATE_LIMIT_BUCKET_TOKEN_INITIAL_NUM.
+     */
+    String RATE_LIMIT_BUCKET_TOKEN_INITIAL_NUM = RATE_LIMIT_PREFIX + ".bucketTokenInitialNum";
+
+    /**
+     * The constant SERVER_REGISTRY_METADATA_PREFIX
+     */
+    String SERVER_REGISTRY_METADATA_PREFIX = SERVER_PREFIX + FILE_ROOT_REGISTRY + ".metadata";
+
+    /**
+     * The constant SERVER_REGISTRY_METADATA_EXTERNAL
+     */
+    String SERVER_REGISTRY_METADATA_EXTERNAL = SERVER_REGISTRY_METADATA_PREFIX + ".external";
+
 }

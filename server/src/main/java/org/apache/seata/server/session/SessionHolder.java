@@ -29,6 +29,7 @@ import org.apache.seata.common.XID;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.common.exception.StoreException;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
+import org.apache.seata.common.store.SessionMode;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.Configuration;
@@ -42,7 +43,6 @@ import org.apache.seata.server.cluster.raft.RaftServerManager;
 import org.apache.seata.server.cluster.raft.context.SeataClusterContext;
 import org.apache.seata.server.lock.distributed.DistributedLockerFactory;
 import org.apache.seata.server.store.StoreConfig;
-import org.apache.seata.server.store.StoreConfig.SessionMode;
 import org.apache.seata.server.store.VGroupMappingStoreManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -170,6 +170,7 @@ public class SessionHolder {
     public static void reload(Collection<GlobalSession> allSessions, SessionMode storeMode, boolean acquireLock) {
         if ((SessionMode.FILE == storeMode || SessionMode.RAFT == storeMode)
             && CollectionUtils.isNotEmpty(allSessions)) {
+            long currentTimeMillis = System.currentTimeMillis();
             for (GlobalSession globalSession : allSessions) {
                 GlobalStatus globalStatus = globalSession.getStatus();
                 switch (globalStatus) {
@@ -227,12 +228,17 @@ public class SessionHolder {
                                 break;
                             case Begin:
                                 if (Objects.equals(storeMode, SessionMode.RAFT)) {
-                                    try {
-                                        globalSession.changeGlobalStatus(GlobalStatus.RollbackRetrying);
-                                        LOGGER.info("change global status: {}, xid: {}", globalSession.getStatus(),
-                                            globalSession.getXid());
-                                    } catch (TransactionException e) {
-                                        LOGGER.error("change global status fail: {}", e.getMessage(), e);
+                                    // Avoid rolling back the global session created after becoming the leader.
+                                    if (globalSession.getBeginTime() < currentTimeMillis) {
+                                        try {
+                                            globalSession.changeGlobalStatus(GlobalStatus.RollbackRetrying);
+                                            LOGGER.info("change global status: {}, xid: {}", globalSession.getStatus(),
+                                                globalSession.getXid());
+                                        } catch (TransactionException e) {
+                                            LOGGER.error("change global status fail: {}", e.getMessage(), e);
+                                        }
+                                    } else {
+                                        globalSession.setActive(true);
                                     }
                                 } else {
                                     globalSession.setActive(true);
