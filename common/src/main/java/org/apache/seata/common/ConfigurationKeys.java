@@ -285,6 +285,16 @@ public interface ConfigurationKeys {
     String STORE_DB_DRUID_PREFIX = "store.db.druid.";
 
     /**
+     * The constant STORE_DB_DRUID_PREFIX.
+     */
+    String STORE_DB_HIKARI_PREFIX = "store.db.hikari.";
+
+    /**
+     * The constant STORE_DB_DBCP_PREFIX.
+     */
+    String STORE_DB_DBCP_PREFIX = "store.db.dbcp.";
+
+    /**
      * The constant STORE_REDIS_PREFIX.
      */
     String STORE_REDIS_PREFIX = "store.redis.";
@@ -378,6 +388,47 @@ public interface ConfigurationKeys {
      * The constant STORE_DB_DRUID_KEEP_ALIVE.
      */
     String STORE_DB_DRUID_KEEP_ALIVE = STORE_DB_DRUID_PREFIX + "keepAlive";
+
+    /**
+     * The constant STORE_DB_HIKARI_IDLE_TIMEOUT.
+     */
+    String STORE_DB_HIKARI_IDLE_TIMEOUT = STORE_DB_HIKARI_PREFIX + "idleTimeout";
+
+    /**
+     * The constant STORE_DB_HIKARI_KEEPALIVE_TIME.
+     */
+    String STORE_DB_HIKARI_KEEPALIVE_TIME = STORE_DB_HIKARI_PREFIX + "keepaliveTime";
+
+    /**
+     * The constant STORE_DB_HIKARI_MAX_LIFE_TIME.
+     */
+    String STORE_DB_HIKARI_MAX_LIFE_TIME = STORE_DB_HIKARI_PREFIX + "maxLifetime";
+
+    /**
+     * The constant STORE_DB_HIKARI_VALIDATION_TIMEOUT.
+     */
+    String STORE_DB_HIKARI_VALIDATION_TIMEOUT = STORE_DB_HIKARI_PREFIX + "validationTimeout";
+
+    /**
+     * The constant STORE_DB_DBCP_TIME_BETWEEN_EVICTION_RUNS_MILLIS.
+     */
+    String STORE_DB_DBCP_TIME_BETWEEN_EVICTION_RUNS_MILLIS = STORE_DB_DBCP_PREFIX + "timeBetweenEvictionRunsMillis";
+
+    /**
+     * The constant STORE_DB_DBCP_MIN_EVICTABLE_TIME_MILLIS.
+     */
+    String STORE_DB_DBCP_MIN_EVICTABLE_TIME_MILLIS = STORE_DB_DBCP_PREFIX + "minEvictableIdleTimeMillis";
+
+    /**
+     * The constant STORE_DB_DBCP_TEST_WHILE_IDLE.
+     */
+    String STORE_DB_DBCP_TEST_WHILE_IDLE = STORE_DB_DBCP_PREFIX + "testWhileIdle";
+
+    /**
+     * The constant STORE_DB_DBCP_TEST_ON_BORROW.
+     */
+    String STORE_DB_DBCP_TEST_ON_BORROW = STORE_DB_DBCP_PREFIX + "testOnBorrow";
+
     /**
      * The constant LOCK_DB_TABLE.
      */

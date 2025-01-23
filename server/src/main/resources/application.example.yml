@@ -195,6 +195,16 @@ seata:
         testWhileIdle: true
         testOnBorrow: false
         keepAlive: false
+      hikari:
+        idleTimeout: 600000
+        keepaliveTime: 120000
+        maxLifetime: 1800000
+        validationTimeout: 5000
+      dbcp:
+        timeBetweenEvictionRunsMillis: 120000
+        minEvictableIdleTimeMillis: 300000
+        testWhileIdle: true
+        testOnBorrow: false
     redis:
       mode: single
       # support: lua 、 pipeline
