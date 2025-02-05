@@ -91,10 +91,10 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
 │   │   ├── spring-jcl-5.3.39.jar
 │   │   ├── spring-web-5.3.39.jar
 │   │   ├── spring-webmvc-5.3.39.jar
-│   │   ├── tomcat-annotations-api-9.0.83.jar
-│   │   ├── tomcat-embed-core-9.0.90.jar
-│   │   ├── tomcat-embed-el-9.0.90.jar
-│   │   └── tomcat-embed-websocket-9.0.90.jar
+│   │   ├── tomcat-annotations-api-9.0.98.jar
+│   │   ├── tomcat-embed-core-9.0.98.jar
+│   │   ├── tomcat-embed-el-9.0.98.jar
+│   │   └── tomcat-embed-websocket-9.0.98.jar
 │   └── target
 │       └── seata-namingserver.jar
 └── seata-server
@@ -354,10 +354,10 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
     │   ├── spring-test-5.3.39.jar
     │   ├── spring-web-5.3.39.jar
     │   ├── spring-webmvc-5.3.39.jar
-    │   ├── tomcat-annotations-api-9.0.83.jar
-    │   ├── tomcat-embed-core-9.0.90.jar
-    │   ├── tomcat-embed-el-9.0.90.jar
-    │   ├── tomcat-embed-websocket-9.0.90.jar
+    │   ├── tomcat-annotations-api-9.0.98.jar
+    │   ├── tomcat-embed-core-9.0.98.jar
+    │   ├── tomcat-embed-el-9.0.98.jar
+    │   ├── tomcat-embed-websocket-9.0.98.jar
     │   ├── xstream-1.4.20.jar
     │   ├── zookeeper-3.7.2.jar
     │   ├── zookeeper-jute-3.7.2.jar
@@ -510,10 +510,10 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
 │   │   ├── spring-jcl-5.3.39.jar
 │   │   ├── spring-web-5.3.39.jar
 │   │   ├── spring-webmvc-5.3.39.jar
-│   │   ├── tomcat-annotations-api-9.0.83.jar
-│   │   ├── tomcat-embed-core-9.0.90.jar
-│   │   ├── tomcat-embed-el-9.0.90.jar
-│   │   └── tomcat-embed-websocket-9.0.90.jar
+│   │   ├── tomcat-annotations-api-9.0.98.jar
+│   │   ├── tomcat-embed-core-9.0.98.jar
+│   │   ├── tomcat-embed-el-9.0.98.jar
+│   │   └── tomcat-embed-websocket-9.0.98.jar
 │   └── target
 │       └── seata-namingserver.jar
 └── seata-server
@@ -774,10 +774,10 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
     │   ├── spring-test-5.3.39.jar
     │   ├── spring-web-5.3.39.jar
     │   ├── spring-webmvc-5.3.39.jar
-    │   ├── tomcat-annotations-api-9.0.83.jar
-    │   ├── tomcat-embed-core-9.0.90.jar
-    │   ├── tomcat-embed-el-9.0.90.jar
-    │   ├── tomcat-embed-websocket-9.0.90.jar
+    │   ├── tomcat-annotations-api-9.0.98.jar
+    │   ├── tomcat-embed-core-9.0.98.jar
+    │   ├── tomcat-embed-el-9.0.98.jar
+    │   ├── tomcat-embed-websocket-9.0.98.jar
     │   ├── xstream-1.4.20.jar
     │   ├── zookeeper-3.7.2.jar
     │   ├── zookeeper-jute-3.7.2.jar
