@@ -31,6 +31,7 @@ import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.Constants;
 import org.apache.seata.common.DefaultValues;
 import org.apache.seata.common.XID;
+import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.common.util.BufferUtils;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.common.util.UUIDGenerator;
@@ -107,6 +108,9 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private Set<SessionLifecycleListener> lifecycleListeners = new HashSet<>(2);
 
+    private final ResourceLock resourceLock = new ResourceLock();
+
+
     /**
      * Add boolean.
      *
@@ -129,7 +133,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * @return the boolean
      */
     public boolean remove(BranchSession branchSession) {
-        synchronized (this) {
+        try (ResourceLock ignored = resourceLock.obtain()) {
             return branchSessions.remove(branchSession);
         }
     }
