@@ -298,6 +298,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
      * @param xid             the xid
      * @param branchId        the branch id
      * @throws TransactionException the transaction exception
+     * @throws BranchTransactionException the branch transaction exception
      */
     @Override
     public void undo(DataSourceProxy dataSourceProxy, String xid, long branchId) throws TransactionException {
@@ -363,6 +364,9 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                                     dataSourceProxy.getDbType(), sqlUndoLog);
                             undoExecutor.executeOn(connectionProxy);
                         }
+                    } catch (SQLIntegrityConstraintViolationException ex) {
+                        throw new BranchTransactionException(BranchRollbackFailed_Unretriable,
+                                String.format("Branch session rollback failed. xid = %s branchId = %s", xid, branchId), ex);
                     } finally {
                         // remove serializer name
                         removeCurrentSerializer();
