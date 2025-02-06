@@ -129,9 +129,7 @@ public abstract class AbstractService {
         }
         boolean result = DefaultCoordinator.getInstance().doBranchDelete(globalSession, branchSession);
         if (result) {
-            if (branchSession.isAT()) {
-                result = lockManager.releaseLock(branchSession);
-            }
+            result = branchSession.unlock();
             if (result) {
                 globalSession.removeBranch(branchSession);
                 return true;

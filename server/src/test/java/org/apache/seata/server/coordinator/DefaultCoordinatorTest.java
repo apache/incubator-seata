@@ -99,7 +99,7 @@ public class DefaultCoordinatorTest {
         RemotingServer remotingServer = new MockServerMessageSender();
         defaultCoordinator = DefaultCoordinator.getInstance(remotingServer);
         defaultCoordinator.setRemotingServer(remotingServer);
-        core = new DefaultCore(remotingServer);;
+        core = new DefaultCore(remotingServer);
     }
 
     @BeforeEach

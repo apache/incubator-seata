@@ -106,7 +106,7 @@ public class DefaultCoreForEventBusTest {
         coordinator.init();
         GlobalTransactionEventSubscriber subscriber = null;
         try {
-            DefaultCore core = new DefaultCore(remotingServer);;
+            DefaultCore core = new DefaultCore(remotingServer);
             SessionHolder.init(null);
             subscriber = new GlobalTransactionEventSubscriber();
             EventBusManager.get().unregisterAll();
