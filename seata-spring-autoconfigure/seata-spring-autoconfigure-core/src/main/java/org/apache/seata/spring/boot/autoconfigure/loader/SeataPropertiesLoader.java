@@ -14,14 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.server.spring.listener;
+package org.apache.seata.spring.boot.autoconfigure.loader;
 
+import org.apache.seata.common.holder.ObjectHolder;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.config.FileConfiguration;
 import org.apache.seata.config.file.FileConfig;
-import org.apache.seata.server.store.StoreConfig;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.Ordered;
@@ -29,6 +29,8 @@ import org.springframework.core.annotation.Order;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertiesPropertySource;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +44,7 @@ import static org.apache.seata.common.ConfigurationKeys.SEATA_FILE_PREFIX_ROOT_C
 import static org.apache.seata.common.ConfigurationKeys.SERVER_PREFIX;
 import static org.apache.seata.common.ConfigurationKeys.STORE_PREFIX;
 import static org.apache.seata.common.ConfigurationKeys.TRANSPORT_PREFIX;
+import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class SeataPropertiesLoader implements ApplicationContextInitializer<ConfigurableApplicationContext> {
@@ -52,6 +55,10 @@ public class SeataPropertiesLoader implements ApplicationContextInitializer<Conf
     @Override
     public void initialize(ConfigurableApplicationContext applicationContext) {
         ConfigurableEnvironment environment = applicationContext.getEnvironment();
+        if (ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT) == null) {
+            ObjectHolder.INSTANCE.setObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT,
+                    applicationContext.getEnvironment());
+        }
         FileConfiguration configuration = ConfigurationFactory.getOriginFileInstanceRegistry();
         FileConfig fileConfig = configuration.getFileConfig();
         Map<String, Object> configs = fileConfig.getAllConfig();
@@ -74,8 +81,30 @@ public class SeataPropertiesLoader implements ApplicationContextInitializer<Conf
             environment.getPropertySources().addLast(new PropertiesPropertySource("seataOldConfig", properties));
         }
         // Load by priority
-        System.setProperty("sessionMode", StoreConfig.getSessionMode().getName());
-        System.setProperty("lockMode", StoreConfig.getLockMode().getName());
+        loadSessionAndLockModes();
     }
 
+    public void loadSessionAndLockModes() {
+        try {
+            Class<?> storeConfigClass = Class.forName("org.apache.seata.server.store.StoreConfig");
+            Optional<String> sessionMode = invokeEnumMethod(storeConfigClass, "getSessionMode", "getName");
+            Optional<String> lockMode = invokeEnumMethod(storeConfigClass, "getLockMode", "getName");
+            sessionMode.ifPresent(value -> System.setProperty("sessionMode", value));
+            lockMode.ifPresent(value -> System.setProperty("lockMode", value));
+        } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+            // The exception is not printed because it is an expected behavior and does not affect the normal operation of the program.
+            // StoreConfig only exists on the server side
+        }
+    }
+
+    private Optional<String> invokeEnumMethod(Class<?> clazz, String enumMethodName, String getterMethodName)
+            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        Method enumMethod = clazz.getMethod(enumMethodName);
+        Object enumValue = enumMethod.invoke(null);
+        if (enumValue != null) {
+            Method getterMethod = enumValue.getClass().getMethod(getterMethodName);
+            return Optional.ofNullable((String) getterMethod.invoke(enumValue));
+        }
+        return Optional.empty();
+    }
 }

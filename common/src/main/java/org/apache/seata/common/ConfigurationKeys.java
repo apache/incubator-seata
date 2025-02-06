@@ -966,14 +966,24 @@ public interface ConfigurationKeys {
 
 
     /**
-     * The constant SERVER_RAFT_SSL_KEYSTORE_TYPE.
+     * The constant SERVER_RAFT_SSL_CLIENT_KEYSTORE_TYPE.
      */
-    String SERVER_RAFT_SSL_KEYSTORE_TYPE = SERVER_RAFT_SSL + "keystore.type";
+    String SERVER_RAFT_SSL_CLIENT_KEYSTORE_TYPE = SERVER_RAFT_SSL_CLIENT + "keystore.type";
+
+    /**
+     * The constant SERVER_RAFT_SSL_SERVER_KEYSTORE_TYPE.
+     */
+    String SERVER_RAFT_SSL_SERVER_KEYSTORE_TYPE = SERVER_RAFT_SSL_SERVER + "keystore.type";
 
     /**
      * The constant SERVER_RAFT_SSL_KMF_ALGORITHM.
      */
-    String SERVER_RAFT_SSL_KMF_ALGORITHM = SERVER_RAFT_SSL + "kmf.algorithm";
+    String SERVER_RAFT_SSL_KMF_ALGORITHM = SERVER_RAFT_SSL + "kmfAlgorithm";
+
+    /**
+     * The constant SERVER_RAFT_SSL_KMF_ALGORITHM.
+     */
+    String SERVER_RAFT_SSL_TMF_ALGORITHM = SERVER_RAFT_SSL + "tmfAlgorithm";
 
     /**
      * The constant SERVER_RAFT_MAX_APPEND_BUFFER_SIZE.
@@ -1110,4 +1120,40 @@ public interface ConfigurationKeys {
      * The constant META_PREFIX
      */
     String META_PREFIX = SEATA_FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + "metadata.";
+
+    /**
+     * The constant RATE_LIMIT_PREFIX.
+     */
+    String RATE_LIMIT_PREFIX = SERVER_PREFIX + "ratelimit";
+
+    /**
+     * The constant RATE_LIMIT_BUCKET_TOKEN_NUM_PER_SECOND.
+     */
+    String RATE_LIMIT_BUCKET_TOKEN_NUM_PER_SECOND = RATE_LIMIT_PREFIX + ".bucketTokenNumPerSecond";
+
+    /**
+     * The constant RATE_LIMIT_ENABLE.
+     */
+    String RATE_LIMIT_ENABLE = RATE_LIMIT_PREFIX + ".enable";
+
+    /**
+     * The constant RATE_LIMIT_BUCKET_TOKEN_MAX_NUM.
+     */
+    String RATE_LIMIT_BUCKET_TOKEN_MAX_NUM = RATE_LIMIT_PREFIX + ".bucketTokenMaxNum";
+
+    /**
+     * The constant RATE_LIMIT_BUCKET_TOKEN_INITIAL_NUM.
+     */
+    String RATE_LIMIT_BUCKET_TOKEN_INITIAL_NUM = RATE_LIMIT_PREFIX + ".bucketTokenInitialNum";
+
+    /**
+     * The constant SERVER_REGISTRY_METADATA_PREFIX
+     */
+    String SERVER_REGISTRY_METADATA_PREFIX = SERVER_PREFIX + FILE_ROOT_REGISTRY + ".metadata";
+
+    /**
+     * The constant SERVER_REGISTRY_METADATA_EXTERNAL
+     */
+    String SERVER_REGISTRY_METADATA_EXTERNAL = SERVER_REGISTRY_METADATA_PREFIX + ".external";
+
 }

@@ -27,6 +27,11 @@ public interface MessageType {
      */
     short VERSION_NOT_SUPPORT = -1;
     /**
+     * The constant TYPE_NOT_EXIST.
+     */
+    short TYPE_NOT_EXIST = 0;
+
+    /**
      * The constant TYPE_GLOBAL_BEGIN.
      */
     short TYPE_GLOBAL_BEGIN = 1;

@@ -53,4 +53,10 @@ public class NetAddressValidatorUtilTest {
         assertThat(NetAddressValidatorUtil.isIPv4Address("127.0.0.1")).isTrue();
         assertThat(NetAddressValidatorUtil.isIPv4Address("999.999.999.999")).isFalse();
     }
+
+    @Test
+    public void isLinkLocalIPv6WithZoneIndex() {
+        assertThat(NetAddressValidatorUtil.isLinkLocalIPv6WithZoneIndex("2409:8a5c:6730:4490:f0e8:b9ad:3b3d:e739%br0")).isTrue();
+        assertThat(NetAddressValidatorUtil.isLinkLocalIPv6WithZoneIndex("2409:8a5c:6730:4490:f0e8:b9ad:3b3d:e739%")).isFalse();
+    }
 }

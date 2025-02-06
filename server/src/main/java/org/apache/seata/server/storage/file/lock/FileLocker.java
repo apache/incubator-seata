@@ -97,7 +97,8 @@ public class FileLocker extends AbstractLocker {
             } else if (previousLockBranchSession.getTransactionId() == transactionId) {
                 // Locked by me before
             } else {
-                LOGGER.info("Global lock on [" + tableName + ":" + pk + "] is holding by " + previousLockBranchSession.getBranchId());
+                LOGGER.info("Global lock on [{}:{}] is holding by xid {} branchId {}", tableName, pk,
+                    previousLockBranchSession.getXid(), previousLockBranchSession.getBranchId());
                 try {
                     // Release all acquired locks.
                     branchSession.unlock();

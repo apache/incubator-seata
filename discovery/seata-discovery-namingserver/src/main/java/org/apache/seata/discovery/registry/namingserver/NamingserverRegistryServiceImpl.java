@@ -47,8 +47,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.ContentType;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
-import org.apache.seata.common.metadata.Node;
-import org.apache.seata.common.metadata.namingserver.Instance;
+import org.apache.seata.common.metadata.Instance;
 import org.apache.seata.common.metadata.namingserver.MetaResponse;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.CollectionUtils;
@@ -148,9 +147,11 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
 
     @Override
     public void register(InetSocketAddress address) throws Exception {
-        NetUtil.validAddress(address);
-        Instance instance = Instance.getInstance();
-        instance.setTransaction(new Node.Endpoint(address.getAddress().getHostAddress(), address.getPort(), "netty"));
+        register(Instance.getInstance());
+    }
+
+    @Override
+    public void register(Instance instance) throws Exception {
         instance.setTimestamp(System.currentTimeMillis());
         doRegister(instance, getNamingAddrs());
     }
@@ -198,11 +199,15 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
         }
     }
 
+
+
     @Override
-    public void unregister(InetSocketAddress address) {
-        NetUtil.validAddress(address);
-        Instance instance = Instance.getInstance();
-        instance.setTransaction(new Node.Endpoint(address.getAddress().getHostAddress(), address.getPort(), "netty"));
+    public void unregister(InetSocketAddress inetSocketAddress) {
+        unregister(Instance.getInstance());
+    }
+
+    @Override
+    public void unregister(Instance instance) {
         for (String urlSuffix : getNamingAddrs()) {
             String url = HTTP_PREFIX + urlSuffix + "/naming/v1/unregister?";
             String unit = instance.getUnit();

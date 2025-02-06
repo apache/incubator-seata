@@ -23,6 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
+import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.integration.tx.api.remoting.RemotingDesc;
 import org.apache.seata.integration.tx.api.remoting.RemotingParser;
@@ -42,6 +43,8 @@ public class DefaultRemotingParser {
      * all remoting beans beanName -> RemotingDesc
      */
     protected static Map<Object, RemotingDesc> remotingServiceMap = new ConcurrentHashMap<>();
+
+    private final ResourceLock resourceLock = new ResourceLock();
 
     private static class SingletonHolder {
         private static final DefaultRemotingParser INSTANCE = new DefaultRemotingParser();
@@ -79,7 +82,7 @@ public class DefaultRemotingParser {
      * @param remotingParser
      */
     public boolean registerRemotingParser(RemotingParser remotingParser) {
-        synchronized (this) {
+        try (ResourceLock ignored = resourceLock.obtain()) {
             return allRemotingParsers.add(remotingParser);
         }
     }

@@ -90,7 +90,23 @@ public class NetUtil {
      * @return the string
      */
     public static String toStringAddress(InetSocketAddress address) {
+        if (address.getAddress() == null) {
+            return address.getHostString() + ":" + address.getPort();
+        }
         return address.getAddress().getHostAddress() + ":" + address.getPort();
+    }
+
+    /**
+     * To string host string.
+     *
+     * @param address the address
+     * @return the string
+     */
+    public static String toStringHost(InetSocketAddress address) {
+        if (address.getAddress() == null) {
+            return address.getHostString();
+        }
+        return address.getAddress().getHostAddress();
     }
 
     /**
