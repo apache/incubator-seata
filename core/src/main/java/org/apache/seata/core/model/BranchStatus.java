@@ -108,7 +108,13 @@ public enum BranchStatus {
      * The results of the Phase one are read-only.
      * Description: After the branch prepare in the Oracle database, only purely read-only query statements were executed.
      */
-    PhaseOne_RDONLY(13);
+    PhaseOne_RDONLY(13),
+
+    /**
+     * Stop retry
+     * description:user operate to stop retry
+     */
+    STOP_RETRY(14);
 
     private int code;
 
