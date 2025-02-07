@@ -16,6 +16,7 @@
  */
 package org.apache.seata.server.transaction.saga;
 
+import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
@@ -42,5 +43,10 @@ public class SagaAnnotationCore extends AbstractCore {
     @Override
     public BranchType getHandleBranchType() {
         return BranchType.SAGA_ANNOTATION;
+    }
+
+    @Override
+    public BranchStatus branchDelete(GlobalSession globalSession, BranchSession branchSession) throws TransactionException {
+        throw new ShouldNeverHappenException("saga mode rm handler not support BranchDeleteRequest");
     }
 }

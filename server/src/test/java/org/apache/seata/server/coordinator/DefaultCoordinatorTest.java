@@ -148,7 +148,6 @@ public class DefaultCoordinatorTest {
         Long branchId = core.branchRegister(BranchType.AT, "abcd", clientId, xid, applicationData, lockKeys_2);
 
         Assertions.assertNotNull(branchId);
-
         Thread.sleep(100);
         defaultCoordinator.timeoutCheck();
         defaultCoordinator.handleRetryRollbacking();

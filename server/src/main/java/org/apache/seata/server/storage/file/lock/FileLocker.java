@@ -187,6 +187,14 @@ public class FileLocker extends AbstractLocker {
         LOCK_MAP.clear();
     }
 
+    public static ConcurrentMap<String, ConcurrentMap<String, ConcurrentMap<Integer, BucketLockMap>>> getLockMap() {
+        return LOCK_MAP;
+    }
+
+    public static int getBucketPerTable() {
+        return BUCKET_PER_TABLE;
+    }
+
     /**
      * Because bucket lock map will be key of HashMap(lockHolder), however {@link ConcurrentHashMap} overwrites
      * {@link Object#hashCode()} and {@link Object#equals(Object)}, that leads to hash key conflict in lockHolder.
@@ -197,7 +205,7 @@ public class FileLocker extends AbstractLocker {
         private final ConcurrentHashMap<String/* pk */, BranchSession/* branchSession */> bucketLockMap
             = new ConcurrentHashMap<>();
 
-        ConcurrentHashMap<String, BranchSession> get() {
+        public ConcurrentHashMap<String, BranchSession> get() {
             return bucketLockMap;
         }
 
