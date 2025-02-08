@@ -195,21 +195,21 @@ seata:
       query-limit: 1000
       max-wait: 5000
       druid:
-        timeBetweenEvictionRunsMillis: 120000
-        minEvictableIdleTimeMillis: 300000
-        testWhileIdle: true
-        testOnBorrow: false
-        keepAlive: false
+        time-between-eviction-runs-millis: 120000
+        min-evictable-idle-time-millis: 300000
+        test-while-idle: true
+        test-on-borrow: false
+        keep-alive: false
       hikari:
-        idleTimeout: 600000
-        keepaliveTime: 120000
-        maxLifetime: 1800000
-        validationTimeout: 5000
+        idle-timeout: 600000
+        keepalive-time: 120000
+        max-lifetime: 1800000
+        validation-timeout: 5000
       dbcp:
-        timeBetweenEvictionRunsMillis: 120000
-        minEvictableIdleTimeMillis: 300000
-        testWhileIdle: true
-        testOnBorrow: false
+        time-between-eviction-runs-millis: 120000
+        min-evictable-idle-time-millis: 300000
+        test-while-idle: true
+        test-on-borrow: false
     redis:
       mode: single
       # support: lua 、 pipeline
