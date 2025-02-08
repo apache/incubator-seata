@@ -285,7 +285,7 @@ public interface ConfigurationKeys {
     String STORE_DB_DRUID_PREFIX = "store.db.druid.";
 
     /**
-     * The constant STORE_DB_DRUID_PREFIX.
+     * The constant STORE_DB_HIKARI_PREFIX.
      */
     String STORE_DB_HIKARI_PREFIX = "store.db.hikari.";
 
