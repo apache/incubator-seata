@@ -16,9 +16,13 @@
  */
 package org.apache.seata.server.transaction.tcc;
 
+import org.apache.seata.core.exception.TransactionException;
+import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.rpc.RemotingServer;
 import org.apache.seata.server.coordinator.AbstractCore;
+import org.apache.seata.server.session.BranchSession;
+import org.apache.seata.server.session.GlobalSession;
 
 /**
  * The type tcc core.
@@ -33,5 +37,10 @@ public class TccCore extends AbstractCore {
     @Override
     public BranchType getHandleBranchType() {
         return BranchType.TCC;
+    }
+
+    @Override
+    public BranchStatus branchDelete(GlobalSession globalSession, BranchSession branchSession) throws TransactionException {
+        return super.branchRollback(globalSession, branchSession);
     }
 }
