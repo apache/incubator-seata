@@ -133,7 +133,6 @@
         <!-- # for test -->
         <mockito.version>4.11.0</mockito.version>
         <assertj-core.version>3.12.2</assertj-core.version>
-        <jetty-version>9.4.38.v20210224</jetty-version>
         <janino-version>3.1.10</janino-version>
         <mockwebserver-version>4.12.0</mockwebserver-version>
         <native-lib-loader.version>2.4.0</native-lib-loader.version>
@@ -866,16 +865,6 @@
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>
                 <version>${httpclient.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-security</artifactId>
-                <version>${jetty-version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-servlet</artifactId>
-                <version>${jetty-version}</version>
             </dependency>
             <dependency>
                 <groupId>org.codehaus.janino</groupId>
