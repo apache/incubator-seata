@@ -69,7 +69,7 @@
         <motan.version>1.0.0</motan.version>
         <jcommander.version>1.82</jcommander.version>
         <bucket4j.version>8.1.0</bucket4j.version>
-        <commons-compress.version>1.21</commons-compress.version>
+        <commons-compress.version>1.27.1</commons-compress.version>
         <ant.version>1.10.12</ant.version>
         <lz4.version>1.7.1</lz4.version>
         <jraft.version>1.3.14</jraft.version>
