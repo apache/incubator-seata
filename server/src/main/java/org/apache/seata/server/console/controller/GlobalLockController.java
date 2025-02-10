@@ -19,9 +19,13 @@ package org.apache.seata.server.console.controller;
 import javax.annotation.Resource;
 
 import org.apache.seata.common.result.PageResult;
+import org.apache.seata.common.result.SingleResult;
 import org.apache.seata.server.console.param.GlobalLockParam;
 import org.apache.seata.server.console.vo.GlobalLockVO;
 import org.apache.seata.server.console.service.GlobalLockService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,6 +38,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/console/globalLock")
 public class GlobalLockController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(GlobalLockController.class);
 
     @Resource(type = GlobalLockService.class)
     private GlobalLockService globalLockService;
@@ -48,4 +53,29 @@ public class GlobalLockController {
         return globalLockService.query(param);
     }
 
+    /**
+     * Delete global locks
+     *
+     * @param  param the param
+     * @return SingleResult<Void>
+     */
+    @DeleteMapping("delete")
+    public SingleResult<Void> delete(@ModelAttribute GlobalLockParam param) {
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("manual operation to delete the global lock, param: {}", param);
+        }
+        return globalLockService.deleteLock(param);
+    }
+
+    /**
+     * Check if the lock exist the branch session
+     *
+     * @param xid      xid
+     * @param branchId branch id
+     * @return the list of GlobalLockVO
+     */
+    @GetMapping("check")
+    public SingleResult<Boolean> check(String xid, String branchId) {
+        return globalLockService.check(xid, branchId);
+    }
 }

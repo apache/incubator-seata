@@ -61,6 +61,16 @@ const zhCn: ILocale = {
     showBranchSessionTitle: '查看分支信息',
     showGlobalLockTitle: '查看全局锁',
     branchSessionDialogTitle: '分支事务信息',
+    deleteGlobalSessionTitle: '删除全局事务',
+    forceDeleteGlobalSessionTitle: '强制删除全局事务',
+    stopGlobalSessionTitle: '停止全局事务重试',
+    startGlobalSessionTitle: '开启全局事务重试',
+    sendGlobalSessionTitle: '提交或回滚全局事务',
+    changeGlobalSessionTitle: '更新全局事务状态',
+    deleteBranchSessionTitle: '删除分支事务',
+    forceDeleteBranchSessionTitle: '强制删除分支事务',
+    stopBranchSessionTitle: '停止分支事务重启',
+    startBranchSessionTitle: '开启分支事务重试',
   },
   GlobalLockInfo: {
     title: '全局锁信息',
@@ -69,6 +79,8 @@ const zhCn: ILocale = {
     inputFilterPlaceholder: '请输入筛选条件',
     resetButtonLabel: '重置',
     searchButtonLabel: '搜索',
+    operateTitle: '操作',
+    deleteGlobalLockTitle: '删除全局锁',
   },
 };
 

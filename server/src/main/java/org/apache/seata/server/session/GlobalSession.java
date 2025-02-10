@@ -204,14 +204,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     /**
      * prevent could not handle committing and rollbacking transaction
-     * @return if true retry commit or roll back
-     */
-    public boolean isDeadSession() {
-        return (System.currentTimeMillis() - beginTime) > RETRY_DEAD_THRESHOLD;
-    }
-
-    /**
-     * prevent could not handle committing and rollbacking transaction
      * @return time to dead session. if not greater than 0, then deadSession
      */
     public long timeToDeadSession() {
@@ -791,11 +783,17 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     public void queueToRetryCommit() throws TransactionException {
+        if (this.status == GlobalStatus.StopCommitOrCommitRetry) {
+            return;
+        }
         changeGlobalStatus(GlobalStatus.CommitRetrying);
     }
 
     public void queueToRetryRollback() throws TransactionException {
         GlobalStatus currentStatus = this.getStatus();
+        if (currentStatus == GlobalStatus.StopRollbackOrRollbackRetry) {
+            return;
+        }
         GlobalStatus newStatus;
         if (GlobalStatus.TimeoutRollbacking == currentStatus) {
             newStatus = GlobalStatus.TimeoutRollbackRetrying;

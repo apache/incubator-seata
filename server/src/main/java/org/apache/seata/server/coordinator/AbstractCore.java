@@ -261,4 +261,14 @@ public abstract class AbstractCore implements Core {
     public void doGlobalReport(GlobalSession globalSession, String xid, GlobalStatus globalStatus) throws TransactionException {
 
     }
+
+    @Override
+    public Boolean doBranchDelete(GlobalSession globalSession, BranchSession branchSession) throws TransactionException {
+        return true;
+    }
+
+    @Override
+    public BranchStatus branchDelete(GlobalSession globalSession, BranchSession branchSession) throws TransactionException {
+        return null;
+    }
 }
