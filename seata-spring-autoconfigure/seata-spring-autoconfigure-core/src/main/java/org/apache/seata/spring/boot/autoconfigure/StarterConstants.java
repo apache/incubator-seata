@@ -86,6 +86,9 @@ public interface StarterConstants {
     String STORE_LOCK_PREFIX = STORE_PREFIX + ".lock";
     String STORE_FILE_PREFIX = STORE_PREFIX + ".file";
     String STORE_DB_PREFIX = STORE_PREFIX + ".db";
+    String STORE_DB_DRUID_PREFIX = STORE_DB_PREFIX + ".druid";
+    String STORE_DB_HIKARI_PREFIX = STORE_DB_PREFIX + ".hikari";
+    String STORE_DB_DBCP_PREFIX = STORE_DB_PREFIX + ".dbcp";
     String STORE_REDIS_PREFIX = STORE_PREFIX + ".redis";
     String STORE_REDIS_SINGLE_PREFIX = STORE_REDIS_PREFIX + ".single";
     String STORE_REDIS_SENTINEL_PREFIX = STORE_REDIS_PREFIX + ".sentinel";
