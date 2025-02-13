@@ -113,6 +113,8 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         xid = transactionManager.begin(null, null, name, timeout);
         status = GlobalStatus.Begin;
         RootContext.bind(xid);
+        RootContext.setTimeout(timeout);
+        RootContext.setBranchBeignTime(createTime);
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Begin new global transaction [{}]", xid);
         }
