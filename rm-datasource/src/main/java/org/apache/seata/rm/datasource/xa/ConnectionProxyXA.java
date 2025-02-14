@@ -310,7 +310,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
     public void close() throws SQLException {
         try (ResourceLock ignored = resourceLock.obtain()) {
             try {
-                if (xaActive && this.xaBranchXid != null && isHeld()) {
+                if (xaActive && this.xaBranchXid != null) {
                     // XA End: Success
                     try {
                         end(XAResource.TMSUCCESS);
