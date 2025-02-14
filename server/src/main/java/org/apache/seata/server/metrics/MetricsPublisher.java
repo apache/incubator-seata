@@ -18,8 +18,10 @@ package org.apache.seata.server.metrics;
 
 import org.apache.seata.core.event.EventBus;
 import org.apache.seata.core.event.GlobalTransactionEvent;
+import org.apache.seata.core.event.RateLimitEvent;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.server.event.EventBusManager;
+import org.apache.seata.server.limit.ratelimit.RateLimitInfo;
 import org.apache.seata.server.session.GlobalSession;
 
 /**
@@ -93,5 +95,15 @@ public class MetricsPublisher {
         EVENT_BUS.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
             globalSession.getTransactionName(), globalSession.getApplicationId(),
             globalSession.getTransactionServiceGroup(), globalSession.getBeginTime(), null, status, retryGlobal, retryBranch));
+    }
+
+    /**
+     * Post rate limit event.
+     *
+     * @param rateLimitInfo the rate limit info
+     */
+    public static void postRateLimitEvent(RateLimitInfo rateLimitInfo) {
+        EVENT_BUS.post(new RateLimitEvent(rateLimitInfo.getTraceId(), rateLimitInfo.getLimitType(), rateLimitInfo.getApplicationId(),
+            rateLimitInfo.getClientId(), rateLimitInfo.getServerIpAddressAndPort()));
     }
 }

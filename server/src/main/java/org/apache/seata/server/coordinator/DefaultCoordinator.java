@@ -66,6 +66,7 @@ import org.apache.seata.core.rpc.TransactionMessageHandler;
 import org.apache.seata.core.rpc.netty.ChannelManager;
 import org.apache.seata.core.rpc.netty.NettyRemotingServer;
 import org.apache.seata.server.AbstractTCInboundHandler;
+import org.apache.seata.server.limit.LimitRequestDecorator;
 import org.apache.seata.server.metrics.MetricsPublisher;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
@@ -247,6 +248,30 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             throw new IllegalArgumentException("The instance has not been created.");
         }
         return instance;
+    }
+
+    public boolean doGlobalCommit(GlobalSession globalSession, boolean retrying) throws TransactionException {
+        if (globalSession == null) {
+            return true;
+        }
+        return core.doGlobalCommit(globalSession, retrying);
+    }
+
+    public boolean doGlobalRollback(GlobalSession globalSession, boolean retrying) throws TransactionException {
+        if (globalSession == null) {
+            return true;
+        }
+        return core.doGlobalRollback(globalSession, retrying);
+    }
+
+    public Boolean doBranchDelete(GlobalSession globalSession, BranchSession branchSession) throws TransactionException {
+        if (globalSession == null) {
+            return true;
+        }
+        if (branchSession == null) {
+            return true;
+        }
+        return core.doBranchDelete(globalSession, branchSession);
     }
 
     /**
@@ -643,7 +668,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         AbstractTransactionRequestToTC transactionRequest = (AbstractTransactionRequestToTC) request;
         transactionRequest.setTCInboundHandler(this);
 
-        return transactionRequest.handle(context);
+        LimitRequestDecorator limitRequestDecorator = new LimitRequestDecorator(transactionRequest);
+        return limitRequestDecorator.handle(context);
     }
 
     @Override
@@ -693,7 +719,6 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     public void setRemotingServer(RemotingServer remotingServer) {
         this.remotingServer = remotingServer;
     }
-
     /**
      * the task to remove branchSession
      */

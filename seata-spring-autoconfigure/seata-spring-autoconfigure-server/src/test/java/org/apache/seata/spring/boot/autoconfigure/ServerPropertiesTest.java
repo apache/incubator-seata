@@ -20,12 +20,16 @@ import org.apache.seata.spring.boot.autoconfigure.properties.server.MetricsPrope
 import org.apache.seata.spring.boot.autoconfigure.properties.server.ServerProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.server.ServerRecoveryProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.server.ServerUndoProperties;
+import org.apache.seata.spring.boot.autoconfigure.properties.server.store.DbcpProperties;
+import org.apache.seata.spring.boot.autoconfigure.properties.server.store.DruidProperties;
+import org.apache.seata.spring.boot.autoconfigure.properties.server.store.HikariProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.server.store.StoreDBProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.server.store.StoreFileProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.server.store.StoreProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.server.store.StoreRedisProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.server.store.StoreRedisProperties.Sentinel;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -96,6 +100,35 @@ public class ServerPropertiesTest {
     @Test
     public void testStoreRedisPropertiesSentinel() {
         assertNull(context.getBean(Sentinel.class).getSentinelHosts());
+    }
+
+    @Test
+    public void testHikariProperties() {
+        HikariProperties hikariProperties = context.getBean(HikariProperties.class);
+        Assertions.assertEquals(600000, hikariProperties.getIdleTimeout());
+        Assertions.assertEquals(120000, hikariProperties.getKeepaliveTime());
+        Assertions.assertEquals(1800000, hikariProperties.getMaxLifetime());
+        Assertions.assertEquals(5000, hikariProperties.getValidationTimeout());
+    }
+
+    @Test
+    public void testDruidProperties() {
+        DruidProperties druidProperties = context.getBean(DruidProperties.class);
+
+        Assertions.assertEquals(120000, druidProperties.getTimeBetweenEvictionRunsMillis());
+        Assertions.assertEquals(300000, druidProperties.getMinEvictableIdleTimeMillis());
+        Assertions.assertEquals(false, druidProperties.getKeepAlive());
+        Assertions.assertEquals(false, druidProperties.getTestOnBorrow());
+        Assertions.assertEquals(true, druidProperties.getTestWhileIdle());
+    }
+
+    @Test
+    public void testDbcpProperties() {
+        DbcpProperties dbcpProperties = context.getBean(DbcpProperties.class);
+        Assertions.assertEquals(120000, dbcpProperties.getTimeBetweenEvictionRunsMillis());
+        Assertions.assertEquals(300000, dbcpProperties.getMinEvictableIdleTimeMillis());
+        Assertions.assertEquals(false, dbcpProperties.getTestOnBorrow());
+        Assertions.assertEquals(true, dbcpProperties.getTestWhileIdle());
     }
 
     @AfterAll
