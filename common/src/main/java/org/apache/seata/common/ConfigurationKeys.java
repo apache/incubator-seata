@@ -476,6 +476,11 @@ public interface ConfigurationKeys {
     String ROLLBACKING_RETRY_PERIOD = RECOVERY_PREFIX + "rollbackingRetryPeriod";
 
     /**
+     * The constant END_STATUS_RETRY_PERIOD.
+     */
+    String END_STATUS_RETRY_PERIOD = RECOVERY_PREFIX + "endstatusRetryPeriod";
+
+    /**
      * The constant TIMEOUT_RETRY_PERIOD.
      */
     String TIMEOUT_RETRY_PERIOD = RECOVERY_PREFIX + "timeoutRetryPeriod";
@@ -598,6 +603,11 @@ public interface ConfigurationKeys {
      * the constant RETRY_DEAD_THRESHOLD
      */
     String RETRY_DEAD_THRESHOLD = SERVER_PREFIX + "retryDeadThreshold";
+
+    /**
+     * the constant END_STATE_RETRY_DEAD_THRESHOLD
+     */
+    String END_STATE_RETRY_DEAD_THRESHOLD = SERVER_PREFIX + "endStateRetryDeadThreshold";
 
     /**
      * the constant DISTRIBUTED_LOCK_EXPIRE_TIME
