@@ -82,7 +82,7 @@ seata:
       server-executor-thread-prefix: NettyServerBizHandler
       share-boss-worker: false
       client-selector-thread-prefix: NettyClientSelector
-      client-selector-thread-size: 1
+      client-selector-thread-size: -1
       client-worker-thread-prefix: NettyClientWorkerThread
       worker-thread-size: default
       boss-thread-size: 1

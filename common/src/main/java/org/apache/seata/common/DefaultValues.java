@@ -103,7 +103,7 @@ public interface DefaultValues {
     /**
      * The constant DEFAULT_SELECTOR_THREAD_SIZE.
      */
-    int DEFAULT_SELECTOR_THREAD_SIZE = 1;
+    int DEFAULT_SELECTOR_THREAD_SIZE = -1;
     /**
      * The constant DEFAULT_BOSS_THREAD_SIZE.
      */
