@@ -35,6 +35,7 @@ public class ServerPropertiesTest {
         serverProperties.setRollbackRetryTimeoutUnlockEnable(true);
         serverProperties.setMaxCommitRetryTimeout(1L);
         serverProperties.setMaxRollbackRetryTimeout(1L);
+        serverProperties.setMaxEndStatusRetryTimeout(1L);
 
         Assertions.assertEquals(1, serverProperties.getXaerNotaRetryTimeout());
         Assertions.assertEquals(1, serverProperties.getRetryDeadThreshold());
@@ -47,5 +48,6 @@ public class ServerPropertiesTest {
         Assertions.assertTrue(serverProperties.getRollbackRetryTimeoutUnlockEnable());
         Assertions.assertEquals(1L, serverProperties.getMaxCommitRetryTimeout());
         Assertions.assertEquals(1L, serverProperties.getMaxRollbackRetryTimeout());
+        Assertions.assertEquals(1L, serverProperties.getMaxEndStatusRetryTimeout());
     }
 }
