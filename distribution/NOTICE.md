@@ -358,7 +358,7 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
     │   ├── tomcat-embed-core-9.0.98.jar
     │   ├── tomcat-embed-el-9.0.98.jar
     │   ├── tomcat-embed-websocket-9.0.98.jar
-    │   ├── xstream-1.4.20.jar
+    │   ├── xstream-1.4.21.jar
     │   ├── zookeeper-3.7.2.jar
     │   ├── zookeeper-jute-3.7.2.jar
     │   └── zstd-jni-1.5.0-4.jar
@@ -778,7 +778,7 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
     │   ├── tomcat-embed-core-9.0.98.jar
     │   ├── tomcat-embed-el-9.0.98.jar
     │   ├── tomcat-embed-websocket-9.0.98.jar
-    │   ├── xstream-1.4.20.jar
+    │   ├── xstream-1.4.21.jar
     │   ├── zookeeper-3.7.2.jar
     │   ├── zookeeper-jute-3.7.2.jar
     │   └── zstd-jni-1.5.0-4.jar
