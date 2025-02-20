@@ -21,10 +21,12 @@ import java.lang.reflect.Field;
 import io.netty.util.HashedWheelTimer;
 import io.seata.core.context.RootContext;
 import io.seata.tm.api.transaction.MyRuntimeException;
+import org.apache.seata.common.util.ReflectionUtil;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.model.TransactionManager;
 import org.apache.seata.tm.TransactionManagerHolder;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -37,10 +39,8 @@ class DefaultFailureHandlerImplTest {
     private static final String DEFAULT_XID = "1234567890";
     private static GlobalStatus globalStatus = GlobalStatus.Begin;
 
-    @BeforeAll
-    public static void init() {
-
-        TransactionManagerHolder.set(new TransactionManager() {
+    private TransactionManager getTransactionManager() {
+        return new TransactionManager() {
             @Override
             public String begin(String applicationId, String transactionServiceGroup, String name, int timeout)
                     throws TransactionException {
@@ -66,22 +66,26 @@ class DefaultFailureHandlerImplTest {
             public GlobalStatus globalReport(String xid, GlobalStatus globalStatus) throws TransactionException {
                 return globalStatus;
             }
-        });
+        };
     }
 
     @Test
-    void onBeginFailure() {
+    void onBeginFailure() throws Exception {
         RootContext.bind(DEFAULT_XID);
-        DefaultGlobalTransaction tx = (DefaultGlobalTransaction)GlobalTransactionContext.getCurrentOrCreate();
+        DefaultGlobalTransaction tx = (DefaultGlobalTransaction) GlobalTransactionContext.getCurrentOrCreate();
+        ReflectionUtil.setFieldValue(tx.getInstance(), "transactionManager", getTransactionManager());
+
         FailureHandler failureHandler = new DefaultFailureHandlerImpl();
         failureHandler.onBeginFailure(tx, new MyRuntimeException("").getCause());
     }
 
     @Test
-    void onCommitFailure() throws Exception{
+    void onCommitFailure() throws Exception {
 
         RootContext.bind(DEFAULT_XID);
-        DefaultGlobalTransaction tx = (DefaultGlobalTransaction)GlobalTransactionContext.getCurrentOrCreate();
+        DefaultGlobalTransaction tx = (DefaultGlobalTransaction) GlobalTransactionContext.getCurrentOrCreate();
+        ReflectionUtil.setFieldValue(tx.getInstance(), "transactionManager", getTransactionManager());
+
         FailureHandler failureHandler = new DefaultFailureHandlerImpl();
         failureHandler.onCommitFailure(tx, new MyRuntimeException("").getCause());
 
@@ -92,22 +96,22 @@ class DefaultFailureHandlerImplTest {
         HashedWheelTimer timer = (HashedWheelTimer) field.get(failureHandler);
         // assert timer pendingCount: first time is 1
         Long pendingTimeout = timer.pendingTimeouts();
-        Assertions.assertEquals(pendingTimeout,1L);
+        Assertions.assertEquals(pendingTimeout, 1L);
         //set globalStatus
-        globalStatus= GlobalStatus.Committed;
-        Thread.sleep(25*1000L);
+        globalStatus = GlobalStatus.Committed;
+        Thread.sleep(25 * 1000L);
         pendingTimeout = timer.pendingTimeouts();
-        LOGGER.info("pendingTimeout {}" ,pendingTimeout);
+        LOGGER.info("pendingTimeout {}", pendingTimeout);
         //all timer is done
-        Assertions.assertEquals(pendingTimeout,0L);
+        Assertions.assertEquals(pendingTimeout, 0L);
     }
 
     @Test
     void onRollbackFailure() throws Exception {
-
-
         RootContext.bind(DEFAULT_XID);
-        DefaultGlobalTransaction tx = (DefaultGlobalTransaction)GlobalTransactionContext.getCurrentOrCreate();
+        DefaultGlobalTransaction tx = (DefaultGlobalTransaction) GlobalTransactionContext.getCurrentOrCreate();
+        ReflectionUtil.setFieldValue(tx.getInstance(), "transactionManager", getTransactionManager());
+
         FailureHandler failureHandler = new DefaultFailureHandlerImpl();
 
         failureHandler.onRollbackFailure(tx, new MyRuntimeException("").getCause());
@@ -119,14 +123,14 @@ class DefaultFailureHandlerImplTest {
         HashedWheelTimer timer = (HashedWheelTimer) field.get(failureHandler);
         // assert timer pendingCount: first time is 1
         Long pendingTimeout = timer.pendingTimeouts();
-        Assertions.assertEquals(pendingTimeout,1L);
+        Assertions.assertEquals(pendingTimeout, 1L);
         //set globalStatus
-        globalStatus= GlobalStatus.Rollbacked;
-        Thread.sleep(25*1000L);
+        globalStatus = GlobalStatus.Rollbacked;
+        Thread.sleep(25 * 1000L);
         pendingTimeout = timer.pendingTimeouts();
-        LOGGER.info("pendingTimeout {}" ,pendingTimeout);
+        LOGGER.info("pendingTimeout {}", pendingTimeout);
         //all timer is done
-        Assertions.assertEquals(pendingTimeout,0L);
+        Assertions.assertEquals(pendingTimeout, 0L);
 
 
     }
