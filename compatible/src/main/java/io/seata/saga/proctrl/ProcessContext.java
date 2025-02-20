@@ -97,4 +97,10 @@ public interface ProcessContext extends org.apache.seata.saga.proctrl.ProcessCon
      * @return the get instruction
      */
     <T extends Instruction> T getInstruction(Class<T> clazz);
+
+    /**
+     * Gets get lock.
+     * @return the lock of the current process context
+     */
+    ResourceLock getLock();
 }

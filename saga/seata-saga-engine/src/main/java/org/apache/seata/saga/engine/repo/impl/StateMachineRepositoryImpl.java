@@ -24,6 +24,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.saga.engine.repo.StateMachineRepository;
@@ -57,7 +58,7 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
         Item item = CollectionUtils.computeIfAbsent(stateMachineMapById, stateMachineId,
             key -> new Item());
         if (item.getValue() == null && stateLangStore != null) {
-            synchronized (item) {
+            try (ResourceLock ignored = item.getLock().obtain()) {
                 if (item.getValue() == null) {
                     StateMachine stateMachine = stateLangStore.getStateMachineById(stateMachineId);
                     if (stateMachine != null) {
@@ -85,7 +86,7 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
         Item item = CollectionUtils.computeIfAbsent(stateMachineMapByNameAndTenant, stateMachineName + "_" + tenantId,
             key -> new Item());
         if (item.getValue() == null && stateLangStore != null) {
-            synchronized (item) {
+            try (ResourceLock ignored = item.getLock().obtain()) {
                 if (item.getValue() == null) {
                     StateMachine stateMachine = stateLangStore.getLastVersionStateMachine(stateMachineName, tenantId);
                     if (stateMachine != null) {
@@ -218,6 +219,7 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
     private static class Item {
 
         private StateMachine value;
+        private final ResourceLock lock = new ResourceLock();
 
         private Item() {
         }
@@ -232,6 +234,10 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
 
         public void setValue(StateMachine value) {
             this.value = value;
+        }
+
+        public ResourceLock getLock() {
+            return lock;
         }
     }
 }

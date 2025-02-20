@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.seata.common.exception.FrameworkErrorCode;
+import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.NumberUtils;
 import org.apache.seata.common.util.StringUtils;
@@ -225,7 +226,7 @@ public class LoopTaskUtils {
         int nrOfCompletedInstances = currentLoopContext.getNrOfCompletedInstances().get();
 
         if (!currentLoopContext.isCompletionConditionSatisfied()) {
-            synchronized (currentLoopContext) {
+            try (ResourceLock ignored = currentLoopContext.getLock().obtain()) {
                 if (!currentLoopContext.isCompletionConditionSatisfied()) {
                     Map<String, Object> stateMachineContext = (Map<String, Object>)context.getVariable(
                         DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);

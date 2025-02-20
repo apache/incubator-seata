@@ -23,6 +23,7 @@ import java.util.Map;
 
 import org.apache.seata.common.exception.FrameworkErrorCode;
 import org.apache.seata.common.loader.LoadLevel;
+import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.saga.engine.StateMachineConfig;
@@ -312,7 +313,7 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
 
                 Map<Object, String> statusEvaluators = state.getStatusEvaluators();
                 if (statusEvaluators == null) {
-                    synchronized (state) {
+                    try (ResourceLock ignored = state.getResourceLock().obtain()) {
                         statusEvaluators = state.getStatusEvaluators();
                         if (statusEvaluators == null) {
                             statusEvaluators = new LinkedHashMap<>(statusMatchList.size());

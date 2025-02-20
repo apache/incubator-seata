@@ -30,6 +30,7 @@ import org.apache.seata.saga.proctrl.Instruction;
 public class ProcessContextImpl implements HierarchicalProcessContext, ProcessContext {
 
     private final org.apache.seata.saga.proctrl.HierarchicalProcessContext actual;
+    private final ResourceLock LOCK = new ResourceLock();
 
     private ProcessContextImpl(org.apache.seata.saga.proctrl.HierarchicalProcessContext target) {
         this.actual = target;
@@ -96,6 +97,11 @@ public class ProcessContextImpl implements HierarchicalProcessContext, ProcessCo
     }
 
     @Override
+    public ResourceLock getLock() {
+        return LOCK;
+    }
+
+    @Override
     public boolean hasVariableLocal(String name) {
         return actual.hasVariableLocal(name);
     }
@@ -129,7 +135,6 @@ public class ProcessContextImpl implements HierarchicalProcessContext, ProcessCo
     public String toString() {
         return actual.toString();
     }
-
     public static ProcessContextImpl wrap(org.apache.seata.saga.proctrl.HierarchicalProcessContext target) {
         return new ProcessContextImpl(target);
     }

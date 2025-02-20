@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.saga.statelang.domain.StateType;
 import org.apache.seata.saga.statelang.domain.ServiceTaskState;
 
@@ -36,6 +37,7 @@ public class ServiceTaskStateImpl extends AbstractTaskState implements ServiceTa
     private Method method;
     private Map<Object, String> statusEvaluators;
     private boolean isAsync;
+    private final ResourceLock resourceLock = new ResourceLock();
 
     public ServiceTaskStateImpl() {
         setType(StateType.SERVICE_TASK);
@@ -99,5 +101,14 @@ public class ServiceTaskStateImpl extends AbstractTaskState implements ServiceTa
 
     public void setAsync(boolean async) {
         isAsync = async;
+    }
+
+    /**
+     * Get the ResourceLock for statusEvaluators
+     *
+     * @return the ResourceLock instance
+     */
+    public ResourceLock getResourceLock() {
+        return resourceLock;
     }
 }

@@ -29,6 +29,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.seata.common.exception.FrameworkErrorCode;
+import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.saga.engine.exception.EngineExecutionException;
 import org.apache.seata.saga.engine.invoker.ServiceInvoker;
@@ -56,6 +57,7 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
     private ApplicationContext applicationContext;
     private ThreadPoolExecutor threadPoolExecutor;
     private String sagaJsonParser;
+    private final ResourceLock stateLock = new ResourceLock();
 
     @Override
     public Object invoke(ServiceTaskState serviceTaskState, Object... input) throws Throwable {
@@ -92,12 +94,11 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
     }
 
     protected Object doInvoke(ServiceTaskStateImpl state, Object[] input) throws Throwable {
-
         Object bean = applicationContext.getBean(state.getServiceName());
 
         Method method = state.getMethod();
         if (method == null) {
-            synchronized (state) {
+            try (ResourceLock ignored = stateLock.obtain()) {
                 method = state.getMethod();
                 if (method == null) {
                     method = findMethod(bean.getClass(), state.getServiceMethod(), state.getParameterTypes());
@@ -112,7 +113,6 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
             throw new EngineExecutionException(
                     "No such method[" + state.getServiceMethod() + "] on BeanClass[" + bean.getClass() + "]",
                     FrameworkErrorCode.NoSuchMethod);
-
         }
 
         Object[] args = new Object[method.getParameterCount()];
