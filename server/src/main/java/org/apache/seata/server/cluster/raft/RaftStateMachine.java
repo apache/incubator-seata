@@ -390,8 +390,11 @@ public class RaftStateMachine extends StateMachineAdapter {
                 PeerId peerId = RouteTable.getInstance().selectLeader(group);
                 if (peerId != null) {
                     syncCurrentNodeInfo(peerId);
+                } else {
+                    initSync.compareAndSet(true, false);
                 }
             } catch (Exception e) {
+                initSync.compareAndSet(true, false);
                 LOGGER.error(e.getMessage(), e);
             }
         }
@@ -439,8 +442,11 @@ public class RaftStateMachine extends StateMachineAdapter {
                                 err);
                         }
                     }, 30000);
+            } else {
+                initSync.compareAndSet(true, false);
             }
         } catch (Exception e) {
+            initSync.compareAndSet(true, false);
             LOGGER.error(e.getMessage(), e);
         }
     }

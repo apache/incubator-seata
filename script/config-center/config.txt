@@ -32,7 +32,7 @@ transport.threadFactory.workerThreadPrefix=NettyServerNIOWorker
 transport.threadFactory.serverExecutorThreadPrefix=NettyServerBizHandler
 transport.threadFactory.shareBossWorker=false
 transport.threadFactory.clientSelectorThreadPrefix=NettyClientSelector
-transport.threadFactory.clientSelectorThreadSize=1
+transport.threadFactory.clientSelectorThreadSize=-1
 transport.threadFactory.clientWorkerThreadPrefix=NettyClientWorkerThread
 transport.threadFactory.bossThreadSize=1
 transport.threadFactory.workerThreadSize=default
@@ -118,6 +118,22 @@ store.db.queryLimit=100
 store.db.lockTable=lock_table
 store.db.maxWait=5000
 
+store.db.druid.timeBetweenEvictionRunsMillis=120000
+store.db.druid.minEvictableIdleTimeMillis=300000
+store.db.druid.testWhileIdle=true
+store.db.druid.testOnBorrow=false
+store.db.druid.keepAlive=false
+
+store.db.hikari.idleTimeout=600000
+store.db.hikari.keepaliveTime=120000
+store.db.hikari.maxLifetime=1800000
+store.db.hikari.validationTimeout=5000
+
+store.db.dbcp.timeBetweenEvictionRunsMillis=120000
+store.db.dbcp.minEvictableIdleTimeMillis=300000
+store.db.dbcp.testWhileIdle=true
+store.db.dbcp.testOnBorrow=false
+
 #These configurations are required if the `store mode` is `redis`. If `store.mode,store.lock.mode,store.session.mode` are not equal to `redis`, you can remove the configuration block.
 store.redis.mode=single
 store.redis.type=pipeline
@@ -137,6 +153,7 @@ store.redis.queryLimit=100
 server.recovery.committingRetryPeriod=1000
 server.recovery.asynCommittingRetryPeriod=1000
 server.recovery.rollbackingRetryPeriod=1000
+server.recovery.endstatusRetryPeriod=1000
 server.recovery.timeoutRetryPeriod=1000
 server.maxCommitRetryTimeout=-1
 server.maxRollbackRetryTimeout=-1

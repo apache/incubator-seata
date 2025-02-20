@@ -152,6 +152,7 @@ seata:
       committing-retry-period: 1000
       async-committing-retry-period: 1000
       rollbacking-retry-period: 1000
+      end-status-retry-period: 1000
       timeout-retry-period: 1000
     undo:
       log-save-days: 7
@@ -194,6 +195,22 @@ seata:
       vgroup-table: vgroup_table
       query-limit: 1000
       max-wait: 5000
+      druid:
+        time-between-eviction-runs-millis: 120000
+        min-evictable-idle-time-millis: 300000
+        test-while-idle: true
+        test-on-borrow: false
+        keep-alive: false
+      hikari:
+        idle-timeout: 600000
+        keepalive-time: 120000
+        max-lifetime: 1800000
+        validation-timeout: 5000
+      dbcp:
+        time-between-eviction-runs-millis: 120000
+        min-evictable-idle-time-millis: 300000
+        test-while-idle: true
+        test-on-borrow: false
     redis:
       mode: single
       # support: lua 、 pipeline

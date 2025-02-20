@@ -16,6 +16,7 @@
  */
 package org.apache.seata.server.console.service;
 
+import org.apache.seata.common.result.SingleResult;
 import org.apache.seata.server.console.param.GlobalSessionParam;
 import org.apache.seata.server.console.vo.GlobalSessionVO;
 import org.apache.seata.common.result.PageResult;
@@ -32,4 +33,51 @@ public interface GlobalSessionService {
      */
     PageResult<GlobalSessionVO> query(GlobalSessionParam param);
 
+    /**
+     * Delete the global session
+     *
+     * @param xid The xid
+     * @return SingleResult<Void>
+     */
+    SingleResult<Void> deleteGlobalSession(String xid);
+
+    /**
+     * Force delete the global session
+     *
+     * @param xid The xid
+     * @return SingleResult<Void>
+     */
+    SingleResult<Void> forceDeleteGlobalSession(String xid);
+
+    /**
+     * Stop the global session retry
+     *
+     * @param xid The xid
+     * @return SingleResult<Void>
+     */
+    SingleResult<Void> stopGlobalRetry(String xid);
+
+    /**
+     * Start the global session retry
+     *
+     * @param xid The xid
+     * @return SingleResult<Void>
+     */
+    SingleResult<Void> startGlobalRetry(String xid);
+
+    /**
+     * Send global session to commit or rollback to rm
+     *
+     * @param xid The xid
+     * @return SingleResult<Void>
+     */
+    SingleResult<Void> sendCommitOrRollback(String xid);
+
+    /**
+     * Change the global session status
+     *
+     * @param xid The xid
+     * @return SingleResult<Void>
+     */
+    SingleResult<Void> changeGlobalStatus(String xid);
 }

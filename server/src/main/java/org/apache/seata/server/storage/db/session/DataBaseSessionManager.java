@@ -138,7 +138,8 @@ public class DataBaseSessionManager extends AbstractSessionManager implements In
         return findGlobalSessions(
             new SessionCondition(GlobalStatus.UnKnown, GlobalStatus.Begin, GlobalStatus.Committing,
                 GlobalStatus.CommitRetrying, GlobalStatus.Rollbacking, GlobalStatus.RollbackRetrying,
-                GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbackRetrying, GlobalStatus.AsyncCommitting));
+                GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbackRetrying, GlobalStatus.AsyncCommitting,
+                GlobalStatus.StopRollbackOrRollbackRetry, GlobalStatus.StopCommitOrCommitRetry, GlobalStatus.Deleting));
     }
 
     @Override
