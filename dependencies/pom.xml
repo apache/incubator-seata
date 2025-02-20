@@ -84,10 +84,10 @@
         <fastjson2.version>2.0.52</fastjson2.version>
         <groovy.version>2.4.4</groovy.version>
         <zstd.version>1.5.0-4</zstd.version>
-        <xstream.version>1.4.20</xstream.version>
+        <xstream.version>1.4.21</xstream.version>
         <checker-qual.version>3.37.0</checker-qual.version>
         <error_prone_annotations.version>2.21.1</error_prone_annotations.version>
-        <tomcat-embed.version>9.0.90</tomcat-embed.version>
+        <tomcat-embed.version>9.0.98</tomcat-embed.version>
 
         <!-- The `httpcore` and `httpclient` have been removed in spring-boot 3.1.0 and above. -->
         <httpcore.version>4.4.16</httpcore.version>
@@ -132,7 +132,6 @@
         <!-- # for test -->
         <mockito.version>4.11.0</mockito.version>
         <assertj-core.version>3.12.2</assertj-core.version>
-        <jetty-version>9.4.38.v20210224</jetty-version>
         <janino-version>3.1.10</janino-version>
         <mockwebserver-version>4.12.0</mockwebserver-version>
         <native-lib-loader.version>2.4.0</native-lib-loader.version>
@@ -857,16 +856,6 @@
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>
                 <version>${httpclient.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-security</artifactId>
-                <version>${jetty-version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-servlet</artifactId>
-                <version>${jetty-version}</version>
             </dependency>
             <dependency>
                 <groupId>org.codehaus.janino</groupId>
