@@ -70,68 +70,80 @@ class DefaultFailureHandlerImplTest {
 
     @Test
     void onBeginFailure() throws Exception {
-        RootContext.bind(DEFAULT_XID);
-        GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
-        ReflectionUtil.setFieldValue(tx, "transactionManager", getTransactionManager());
+        try {
+            RootContext.bind(DEFAULT_XID);
+            GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
+            ReflectionUtil.setFieldValue(tx, "transactionManager", getTransactionManager());
 
-        FailureHandler failureHandler = new DefaultFailureHandlerImpl();
-        failureHandler.onBeginFailure(tx, new MyRuntimeException("").getCause());
+            FailureHandler failureHandler = new DefaultFailureHandlerImpl();
+            failureHandler.onBeginFailure(tx, new MyRuntimeException("").getCause());
+        } finally {
+            RootContext.unbind();
+        }
     }
 
     @Test
     void onCommitFailure() throws Exception {
 
-        RootContext.bind(DEFAULT_XID);
-        GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
-        //TransactionManagerHolder.set has interaction, using globalTransaction instance level tm
-        ReflectionUtil.setFieldValue(tx, "transactionManager", getTransactionManager());
+        try {
+            RootContext.bind(DEFAULT_XID);
+            GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
+            //TransactionManagerHolder.set has interaction, using globalTransaction instance level tm
+            ReflectionUtil.setFieldValue(tx, "transactionManager", getTransactionManager());
 
-        FailureHandler failureHandler = new DefaultFailureHandlerImpl();
-        failureHandler.onCommitFailure(tx, new MyRuntimeException("").getCause());
+            FailureHandler failureHandler = new DefaultFailureHandlerImpl();
+            failureHandler.onCommitFailure(tx, new MyRuntimeException("").getCause());
 
-        // get timer
-        Class<?> c = Class.forName("org.apache.seata.tm.api.DefaultFailureHandlerImpl");
-        Field field = c.getDeclaredField("TIMER");
-        field.setAccessible(true);
-        HashedWheelTimer timer = (HashedWheelTimer) field.get(failureHandler);
-        // assert timer pendingCount: first time is 1
-        Long pendingTimeout = timer.pendingTimeouts();
-        Assertions.assertEquals(pendingTimeout, 1L);
-        //set globalStatus
-        globalStatus = GlobalStatus.Committed;
-        Thread.sleep(25 * 1000L);
-        pendingTimeout = timer.pendingTimeouts();
-        LOGGER.info("pendingTimeout {}", pendingTimeout);
-        //all timer is done
-        Assertions.assertEquals(pendingTimeout, 0L);
+            // get timer
+            Class<?> c = Class.forName("org.apache.seata.tm.api.DefaultFailureHandlerImpl");
+            Field field = c.getDeclaredField("TIMER");
+            field.setAccessible(true);
+            HashedWheelTimer timer = (HashedWheelTimer) field.get(failureHandler);
+            // assert timer pendingCount: first time is 1
+            Long pendingTimeout = timer.pendingTimeouts();
+            Assertions.assertEquals(pendingTimeout, 1L);
+            //set globalStatus
+            globalStatus = GlobalStatus.Committed;
+            Thread.sleep(25 * 1000L);
+            pendingTimeout = timer.pendingTimeouts();
+            LOGGER.info("pendingTimeout {}", pendingTimeout);
+            //all timer is done
+            Assertions.assertEquals(pendingTimeout, 0L);
+        } finally {
+            RootContext.unbind();
+        }
     }
 
     @Test
     void onRollbackFailure() throws Exception {
 
 
-        RootContext.bind(DEFAULT_XID);
-        GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
-        ReflectionUtil.setFieldValue(tx, "transactionManager", getTransactionManager());
+        try {
+            RootContext.bind(DEFAULT_XID);
+            GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
+            ReflectionUtil.setFieldValue(tx, "transactionManager", getTransactionManager());
 
-        FailureHandler failureHandler = new DefaultFailureHandlerImpl();
-        failureHandler.onRollbackFailure(tx, new MyRuntimeException("").getCause());
+            FailureHandler failureHandler = new DefaultFailureHandlerImpl();
+            failureHandler.onRollbackFailure(tx, new MyRuntimeException("").getCause());
 
-        // get timer
-        Class<?> c = Class.forName("org.apache.seata.tm.api.DefaultFailureHandlerImpl");
-        Field field = c.getDeclaredField("TIMER");
-        field.setAccessible(true);
-        HashedWheelTimer timer = (HashedWheelTimer) field.get(failureHandler);
-        // assert timer pendingCount: first time is 1
-        Long pendingTimeout = timer.pendingTimeouts();
-        Assertions.assertEquals(pendingTimeout, 1L);
-        //set globalStatus
-        globalStatus = GlobalStatus.Rollbacked;
-        Thread.sleep(25 * 1000L);
-        pendingTimeout = timer.pendingTimeouts();
-        LOGGER.info("pendingTimeout {}", pendingTimeout);
-        //all timer is done
-        Assertions.assertEquals(pendingTimeout, 0L);
+            // get timer
+            Class<?> c = Class.forName("org.apache.seata.tm.api.DefaultFailureHandlerImpl");
+            Field field = c.getDeclaredField("TIMER");
+            field.setAccessible(true);
+            HashedWheelTimer timer = (HashedWheelTimer) field.get(failureHandler);
+            // assert timer pendingCount: first time is 1
+            Long pendingTimeout = timer.pendingTimeouts();
+            Assertions.assertEquals(pendingTimeout, 1L);
+            //set globalStatus
+            globalStatus = GlobalStatus.Rollbacked;
+            Thread.sleep(25 * 1000L);
+            pendingTimeout = timer.pendingTimeouts();
+            LOGGER.info("pendingTimeout {}", pendingTimeout);
+            //all timer is done
+            Assertions.assertEquals(pendingTimeout, 0L);
+        } finally {
+            RootContext.unbind();
+        }
 
 
     }
