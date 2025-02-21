@@ -20,6 +20,7 @@ import java.util.Map;
 
 import io.seata.saga.proctrl.HierarchicalProcessContext;
 import io.seata.saga.proctrl.ProcessContext;
+import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.saga.proctrl.Instruction;
 
 /**

@@ -35,7 +35,7 @@ public class ProcessContextImpl implements HierarchicalProcessContext, ProcessCo
     private Map<String, Object> variables = new ConcurrentHashMap<>();
     private Instruction instruction;
     private ProcessContext parent;
-    private final ResourceLock LOCK = new ResourceLock();
+    private final ResourceLock lock = new ResourceLock();
 
     @Override
     public Object getVariable(String name) {
@@ -129,7 +129,7 @@ public class ProcessContextImpl implements HierarchicalProcessContext, ProcessCo
 
     @Override
     public ResourceLock getLock() {
-        return LOCK;
+        return lock;
     }
 
     @Override

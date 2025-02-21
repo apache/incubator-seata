@@ -18,6 +18,7 @@ package io.seata.saga.proctrl;
 
 import java.util.Map;
 
+import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.saga.proctrl.Instruction;
 
 /**
