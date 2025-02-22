@@ -217,7 +217,7 @@ public class TmNettyClientTest extends AbstractServerTest {
         Channel channel = TmNettyRemotingClient.getInstance().getClientChannelManager().acquireChannel(serverAddress);
         Assertions.assertNotNull(channel);
 
-        // test 旧
+        // test old version
         RegisterTMRequest request = new RegisterTMRequest(applicationId, transactionServiceGroup);
         request.setVersion("");
         RegisterTMResponse response = (RegisterTMResponse)tmNettyRemotingClient.sendSyncRequest(request);
