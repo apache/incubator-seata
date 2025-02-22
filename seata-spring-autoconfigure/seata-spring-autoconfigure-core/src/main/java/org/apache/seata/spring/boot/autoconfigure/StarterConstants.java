@@ -58,6 +58,8 @@ public interface StarterConstants {
     String REGISTRY_SOFA_PREFIX = REGISTRY_PREFIX + ".sofa";
     String REGISTRY_CUSTOM_PREFIX = REGISTRY_PREFIX + ".custom";
 
+    String REGISTRY_METADATA_PREFIX = REGISTRY_PREFIX + ".metadata";
+
     String CONFIG_PREFIX = SEATA_PREFIX + ".config";
     String CONFIG_NACOS_PREFIX = CONFIG_PREFIX + ".nacos";
     String CONFIG_CONSUL_PREFIX = CONFIG_PREFIX + ".consul";
@@ -69,8 +71,12 @@ public interface StarterConstants {
 
 
     String SERVER_PREFIX = SEATA_PREFIX + ".server";
+    String SERVER_RATELIMIT_PREFIX = SERVER_PREFIX + ".ratelimit";
     String SERVER_UNDO_PREFIX = SERVER_PREFIX + ".undo";
     String SERVER_RAFT_PREFIX = SERVER_PREFIX + ".raft";
+    String SERVER_RAFT_SSL_PREFIX = SERVER_RAFT_PREFIX + ".ssl";
+    String SERVER_RAFT_SSL_CLIENT_KEYSTORE_PREFIX = SERVER_RAFT_SSL_PREFIX + ".client.keystore";
+    String SERVER_RAFT_SSL_SERVER_KEYSTORE_PREFIX = SERVER_RAFT_SSL_PREFIX + ".server.keystore";
     String SERVER_RECOVERY_PREFIX = SERVER_PREFIX + ".recovery";
 
     String METRICS_PREFIX = SEATA_PREFIX + ".metrics";
@@ -80,6 +86,9 @@ public interface StarterConstants {
     String STORE_LOCK_PREFIX = STORE_PREFIX + ".lock";
     String STORE_FILE_PREFIX = STORE_PREFIX + ".file";
     String STORE_DB_PREFIX = STORE_PREFIX + ".db";
+    String STORE_DB_DRUID_PREFIX = STORE_DB_PREFIX + ".druid";
+    String STORE_DB_HIKARI_PREFIX = STORE_DB_PREFIX + ".hikari";
+    String STORE_DB_DBCP_PREFIX = STORE_DB_PREFIX + ".dbcp";
     String STORE_REDIS_PREFIX = STORE_PREFIX + ".redis";
     String STORE_REDIS_SINGLE_PREFIX = STORE_REDIS_PREFIX + ".single";
     String STORE_REDIS_SENTINEL_PREFIX = STORE_REDIS_PREFIX + ".sentinel";

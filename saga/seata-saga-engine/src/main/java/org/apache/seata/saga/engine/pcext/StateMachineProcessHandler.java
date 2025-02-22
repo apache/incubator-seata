@@ -33,7 +33,7 @@ import org.apache.seata.saga.engine.pcext.handlers.SubStateMachineHandler;
 import org.apache.seata.saga.engine.pcext.handlers.SucceedEndStateHandler;
 import org.apache.seata.saga.proctrl.ProcessContext;
 import org.apache.seata.saga.proctrl.handler.ProcessHandler;
-import org.apache.seata.saga.statelang.domain.DomainConstants;
+import org.apache.seata.saga.statelang.domain.StateType;
 import org.apache.seata.saga.statelang.domain.State;
 
 /**
@@ -43,13 +43,13 @@ import org.apache.seata.saga.statelang.domain.State;
  */
 public class StateMachineProcessHandler implements ProcessHandler {
 
-    private final Map<String, StateHandler> stateHandlers = new ConcurrentHashMap<>();
+    private final Map<StateType, StateHandler> stateHandlers = new ConcurrentHashMap<>();
 
     @Override
     public void process(ProcessContext context) throws FrameworkException {
         StateInstruction instruction = context.getInstruction(StateInstruction.class);
         State state = instruction.getState(context);
-        String stateType = state.getType();
+        StateType stateType = state.getType();
         StateHandler stateHandler = stateHandlers.get(stateType);
 
         List<StateHandlerInterceptor> interceptors = null;
@@ -84,28 +84,27 @@ public class StateMachineProcessHandler implements ProcessHandler {
     }
 
     public void initDefaultHandlers() {
-        if (stateHandlers.isEmpty()) {
-            stateHandlers.put(DomainConstants.STATE_TYPE_SERVICE_TASK, new ServiceTaskStateHandler());
-
-            stateHandlers.put(DomainConstants.STATE_TYPE_SCRIPT_TASK, new ScriptTaskStateHandler());
-
-            stateHandlers.put(DomainConstants.STATE_TYPE_SUB_MACHINE_COMPENSATION, new ServiceTaskStateHandler());
-
-            stateHandlers.put(DomainConstants.STATE_TYPE_SUB_STATE_MACHINE, new SubStateMachineHandler());
-
-            stateHandlers.put(DomainConstants.STATE_TYPE_CHOICE, new ChoiceStateHandler());
-            stateHandlers.put(DomainConstants.STATE_TYPE_SUCCEED, new SucceedEndStateHandler());
-            stateHandlers.put(DomainConstants.STATE_TYPE_FAIL, new FailEndStateHandler());
-            stateHandlers.put(DomainConstants.STATE_TYPE_COMPENSATION_TRIGGER, new CompensationTriggerStateHandler());
-            stateHandlers.put(DomainConstants.STATE_TYPE_LOOP_START, new LoopStartStateHandler());
+        if (!stateHandlers.isEmpty()) {
+            return;
         }
+
+        stateHandlers.put(StateType.SERVICE_TASK, new ServiceTaskStateHandler());
+        stateHandlers.put(StateType.SCRIPT_TASK, new ScriptTaskStateHandler());
+        stateHandlers.put(StateType.SUB_MACHINE_COMPENSATION, new ServiceTaskStateHandler());
+        stateHandlers.put(StateType.SUB_STATE_MACHINE, new SubStateMachineHandler());
+        stateHandlers.put(StateType.CHOICE, new ChoiceStateHandler());
+        stateHandlers.put(StateType.SUCCEED, new SucceedEndStateHandler());
+        stateHandlers.put(StateType.FAIL, new FailEndStateHandler());
+        stateHandlers.put(StateType.COMPENSATION_TRIGGER, new CompensationTriggerStateHandler());
+        stateHandlers.put(StateType.LOOP_START, new LoopStartStateHandler());
+
     }
 
-    public Map<String, StateHandler> getStateHandlers() {
+    public Map<StateType, StateHandler> getStateHandlers() {
         return stateHandlers;
     }
 
-    public void setStateHandlers(Map<String, StateHandler> stateHandlers) {
+    public void setStateHandlers(Map<StateType, StateHandler> stateHandlers) {
         this.stateHandlers.putAll(stateHandlers);
     }
 }

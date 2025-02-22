@@ -20,6 +20,7 @@ import java.util.Map;
 
 import io.seata.saga.statelang.domain.State;
 import io.seata.saga.statelang.domain.StateMachine;
+import io.seata.saga.statelang.domain.StateType;
 
 /**
  * The type State.
@@ -45,8 +46,8 @@ public class StateImpl implements State {
     }
 
     @Override
-    public String getType() {
-        return actual.getType();
+    public StateType getType() {
+        return StateType.wrap(actual.getType());
     }
 
     @Override

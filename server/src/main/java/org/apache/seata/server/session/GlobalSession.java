@@ -19,6 +19,7 @@ package org.apache.seata.server.session;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -31,6 +32,7 @@ import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.Constants;
 import org.apache.seata.common.DefaultValues;
 import org.apache.seata.common.XID;
+import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.common.util.BufferUtils;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.common.util.UUIDGenerator;
@@ -79,6 +81,13 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     private static final int RETRY_DEAD_THRESHOLD = ConfigurationFactory.getInstance()
             .getInt(ConfigurationKeys.RETRY_DEAD_THRESHOLD, DefaultValues.DEFAULT_RETRY_DEAD_THRESHOLD);
 
+    /**
+     * If the global session's status is in an end state and currentTime - createTime >= END_STATE_RETRY_DEAD_THRESHOLD
+     * then the tx will be remand as need to retry rollback
+     */
+    private static final int END_STATE_RETRY_DEAD_THRESHOLD = ConfigurationFactory.getInstance()
+        .getInt(ConfigurationKeys.END_STATE_RETRY_DEAD_THRESHOLD, DefaultValues.DEFAULT_END_STATE_RETRY_DEAD_THRESHOLD);
+
     private String xid;
 
     private long transactionId;
@@ -107,6 +116,9 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private Set<SessionLifecycleListener> lifecycleListeners = new HashSet<>(2);
 
+    private final ResourceLock resourceLock = new ResourceLock();
+
+
     /**
      * Add boolean.
      *
@@ -129,7 +141,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * @return the boolean
      */
     public boolean remove(BranchSession branchSession) {
-        synchronized (this) {
+        try (ResourceLock ignored = resourceLock.obtain()) {
             return branchSessions.remove(branchSession);
         }
     }
@@ -199,19 +211,29 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     /**
-     * prevent could not handle committing and rollbacking transaction
-     * @return if true retry commit or roll back
-     */
-    public boolean isDeadSession() {
-        return (System.currentTimeMillis() - beginTime) > RETRY_DEAD_THRESHOLD;
-    }
-
-    /**
-     * prevent could not handle committing and rollbacking transaction
+     * prevent could not handle committing, rollbacking and rollbacked transaction
+     *
+     * If the global session's status is in end status, it returns the remaining time until the session reaches
+     * the end state retry dead threshold.
+     * For other statuses, it returns the remaining time until the session reaches the retry dead threshold.
+     *
      * @return time to dead session. if not greater than 0, then deadSession
      */
     public long timeToDeadSession() {
+        if (isEndStatus()) {
+            return beginTime + END_STATE_RETRY_DEAD_THRESHOLD - System.currentTimeMillis();
+        }
         return beginTime + RETRY_DEAD_THRESHOLD - System.currentTimeMillis();
+    }
+
+    private boolean isEndStatus() {
+        EnumSet<GlobalStatus> endStatuses = EnumSet.of(
+            GlobalStatus.Rollbacked,
+            GlobalStatus.TimeoutRollbacked,
+            GlobalStatus.Committed,
+            GlobalStatus.Finished
+        );
+        return endStatuses.contains(this.status);
     }
 
     @Override
@@ -787,11 +809,17 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     public void queueToRetryCommit() throws TransactionException {
+        if (this.status == GlobalStatus.StopCommitOrCommitRetry) {
+            return;
+        }
         changeGlobalStatus(GlobalStatus.CommitRetrying);
     }
 
     public void queueToRetryRollback() throws TransactionException {
         GlobalStatus currentStatus = this.getStatus();
+        if (currentStatus == GlobalStatus.StopRollbackOrRollbackRetry) {
+            return;
+        }
         GlobalStatus newStatus;
         if (GlobalStatus.TimeoutRollbacking == currentStatus) {
             newStatus = GlobalStatus.TimeoutRollbackRetrying;

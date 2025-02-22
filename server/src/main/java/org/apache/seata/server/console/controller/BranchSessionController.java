@@ -17,7 +17,13 @@
 package org.apache.seata.server.console.controller;
 
 import javax.annotation.Resource;
+
+import org.apache.seata.common.result.SingleResult;
 import org.apache.seata.server.console.service.BranchSessionService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -25,11 +31,70 @@ import org.springframework.web.bind.annotation.RestController;
  * Branch Session Controller
  */
 @RestController
-@RequestMapping("console/branchSession")
+@RequestMapping("/api/v1/console/branchSession")
 public class BranchSessionController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BranchSessionController.class);
 
     @Resource(type = BranchSessionService.class)
     private BranchSessionService branchSessionService;
 
+    /**
+     * Delete branch transaction
+     *
+     * @param xid      the branch of xid
+     * @param branchId the branch  id
+     * @return SingleResult<Void>
+     */
+    @DeleteMapping("deleteBranchSession")
+    public SingleResult<Void> deleteBranchSession(String xid, String branchId) {
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("manual operation to delete the branch session, xid: {} branchId: {}", xid, branchId);
+        }
+        return branchSessionService.deleteBranchSession(xid, branchId);
+    }
 
+    /**
+     * Delete branch transaction
+     *
+     * @param xid      the branch of xid
+     * @param branchId the branch  id
+     * @return SingleResult<Void>
+     */
+    @DeleteMapping("forceDeleteBranchSession")
+    public SingleResult<Void> forceDeleteBranchSession(String xid, String branchId) {
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("manual operation to delete the branch session, xid: {} branchId: {}", xid, branchId);
+        }
+        return branchSessionService.forceDeleteBranchSession(xid, branchId);
+    }
+
+    /**
+     * Stop branch transaction retry
+     *
+     * @param xid      the branch of xid
+     * @param branchId the branch  id
+     * @return SingleResult<Void>
+     */
+    @PutMapping("stopBranchSession")
+    public SingleResult<Void> stopBranchSession(String xid, String branchId) {
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("manual operation to stop the branch session, xid: {} branchId: {}", xid, branchId);
+        }
+        return branchSessionService.stopBranchRetry(xid, branchId);
+    }
+
+    /**
+     * Start branch transaction retry
+     *
+     * @param xid      the branch of xid
+     * @param branchId the branch  id
+     * @return SingleResult<Void>
+     */
+    @PutMapping("startBranchSession")
+    public SingleResult<Void> startBranchRetry(String xid, String branchId) {
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("manual operation to start the branch session, xid: {} branchId: {}", xid, branchId);
+        }
+        return branchSessionService.startBranchRetry(xid, branchId);
+    }
 }

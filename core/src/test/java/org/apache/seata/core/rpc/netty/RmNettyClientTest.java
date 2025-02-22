@@ -26,6 +26,7 @@ import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.config.ConfigurationCache;
 import org.apache.seata.core.model.Resource;
 import org.apache.seata.core.model.ResourceManager;
+import org.apache.seata.core.protocol.HeartbeatMessage;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -37,6 +38,7 @@ import org.slf4j.LoggerFactory;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Rm RPC client test.
@@ -95,5 +97,14 @@ class RmNettyClientTest {
         } catch (Exception ex) {
             throw new RuntimeException(ex.getMessage());
         }
+    }
+
+    @Test
+    public void testSendAsyncRequestWithNullChannelLogsWarning() {
+        RmNettyRemotingClient remotingClient = RmNettyRemotingClient.getInstance();
+        Object message = HeartbeatMessage.PING;
+        assertThrows(FrameworkException.class, () -> {
+            remotingClient.sendAsyncRequest(null, message);
+        });
     }
 }

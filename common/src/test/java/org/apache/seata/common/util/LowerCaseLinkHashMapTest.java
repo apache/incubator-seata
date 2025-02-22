@@ -26,6 +26,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 
 public class LowerCaseLinkHashMapTest {
@@ -122,11 +124,14 @@ public class LowerCaseLinkHashMapTest {
         Assertions.assertArrayEquals(values.toArray(), lowerCaseLinkHashMap.values().toArray());
     }
 
-    @Test
-    void getOrDefault() {
-        Assertions.assertEquals("Value", lowerCaseLinkHashMap.getOrDefault("Key", "abc"));
-        Assertions.assertEquals("Value", lowerCaseLinkHashMap.getOrDefault("key", "abc"));
-        Assertions.assertEquals("abc", lowerCaseLinkHashMap.getOrDefault("default", "abc"));
+    @ParameterizedTest
+    @CsvSource(value = {
+            "Value, Key, abc",
+            "Value, key, abc",
+            "abc, default, abc"
+    })
+    void getOrDefault1(String expected, String key, String defaultValue) {
+        Assertions.assertEquals(expected, lowerCaseLinkHashMap.getOrDefault(key, defaultValue));
     }
 
     @Test

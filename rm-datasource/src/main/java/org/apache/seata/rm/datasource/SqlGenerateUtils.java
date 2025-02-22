@@ -18,8 +18,10 @@ package org.apache.seata.rm.datasource;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 
 import org.apache.seata.rm.datasource.sql.struct.Field;
 import org.apache.seata.sqlparser.util.ColumnUtils;
@@ -36,32 +38,51 @@ public class SqlGenerateUtils {
 
     }
 
-    public static String buildWhereConditionByPKs(List<String> pkNameList, int rowSize, String dbType)
-        throws SQLException {
-        return buildWhereConditionByPKs(pkNameList, rowSize, dbType, MAX_IN_SIZE);
-
+    /**
+     * build full sql by pks.
+     * @param sqlPrefix sql prefix
+     * @param suffix sql suffix
+     * @param pkNameList pk column name list
+     * @param rowSize the row size of records
+     * @param dbType the type of database
+     * @return full sql
+     */
+    public static String buildSQLByPKs(String sqlPrefix, String suffix, List<String> pkNameList, int rowSize, String dbType) {
+        List<WhereSql> whereList = buildWhereConditionListByPKs(pkNameList, rowSize, dbType, MAX_IN_SIZE);
+        StringJoiner sqlJoiner = new StringJoiner(" UNION ");
+        whereList.forEach(whereSql -> sqlJoiner.add(sqlPrefix + " " + whereSql.getSql() + " " + suffix));
+        return sqlJoiner.toString();
     }
     /**
-     * each pk is a condition.the result will like :" (id,userCode) in ((?,?),(?,?)) or (id,userCode) in ((?,?),(?,?)
-     * ) or (id,userCode) in ((?,?))"
+     * each pk is a condition.the result will like :" [(id,userCode) in ((?,?),(?,?)), (id,userCode) in ((?,?),(?,?)
+     * ), (id,userCode) in ((?,?))]"
+     * Build where condition by pks string. size default MAX_IN_SIZE
+     *
+     * @param pkNameList pk column name list
+     * @param rowSize    the row size of records
+     * @param dbType     the type of database
+     * @return return where condition sql list.the sql can search all related records not just one.
+     */
+    public static List<WhereSql> buildWhereConditionListByPKs(List<String> pkNameList, int rowSize, String dbType) {
+        return buildWhereConditionListByPKs(pkNameList, rowSize, dbType, MAX_IN_SIZE);
+    }
+    /**
+     * each pk is a condition.the result will like :" [(id,userCode) in ((?,?),(?,?)), (id,userCode) in ((?,?),(?,?)
+     * ), (id,userCode) in ((?,?))]"
      * Build where condition by pks string.
      *
      * @param pkNameList pk column name list
      * @param rowSize    the row size of records
      * @param dbType     the type of database
      * @param maxInSize  the max in size
-     * @return return where condition sql string.the sql can search all related records not just one.
-     * @throws SQLException the sql exception
+     * @return return where condition sql list.the sql can search all related records not just one.
      */
-    public static String buildWhereConditionByPKs(List<String> pkNameList, int rowSize, String dbType, int maxInSize)
-        throws SQLException {
-        StringBuilder whereStr = new StringBuilder();
+    public static List<WhereSql> buildWhereConditionListByPKs(List<String> pkNameList, int rowSize, String dbType, int maxInSize) {
+        List<WhereSql> whereSqls = new ArrayList<>();
         //we must consider the situation of composite primary key
         int batchSize = rowSize % maxInSize == 0 ? rowSize / maxInSize : (rowSize / maxInSize) + 1;
         for (int batch = 0; batch < batchSize; batch++) {
-            if (batch > 0) {
-                whereStr.append(" or ");
-            }
+            StringBuilder whereStr = new StringBuilder();
             whereStr.append("(");
             for (int i = 0; i < pkNameList.size(); i++) {
                 if (i > 0) {
@@ -88,9 +109,10 @@ public class SqlGenerateUtils {
                 whereStr.append(")");
             }
             whereStr.append(" )");
+            whereSqls.add(new WhereSql(whereStr.toString(), eachSize, pkNameList.size()));
         }
 
-        return whereStr.toString();
+        return whereSqls;
     }
 
     /**
@@ -135,4 +157,38 @@ public class SqlGenerateUtils {
         return whereStr.toString();
     }
 
+    public static class WhereSql {
+        /**
+         * sql
+         */
+        private final String sql;
+
+        /**
+         * row size
+         */
+        private final int rowSize;
+
+        /**
+         * pk size
+         */
+        private final int pkSize;
+
+        public WhereSql(String sql, int rowSize, int pkSize) {
+            this.sql = sql;
+            this.rowSize = rowSize;
+            this.pkSize = pkSize;
+        }
+
+        public String getSql() {
+            return sql;
+        }
+
+        public int getRowSize() {
+            return rowSize;
+        }
+
+        public int getPkSize() {
+            return pkSize;
+        }
+    }
 }

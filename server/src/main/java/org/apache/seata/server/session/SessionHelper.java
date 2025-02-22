@@ -28,6 +28,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.apache.seata.common.ConfigurationKeys;
+import org.apache.seata.common.store.SessionMode;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
@@ -42,7 +43,6 @@ import org.apache.seata.server.cluster.raft.context.SeataClusterContext;
 import org.apache.seata.server.coordinator.DefaultCoordinator;
 import org.apache.seata.server.metrics.MetricsPublisher;
 import org.apache.seata.server.store.StoreConfig;
-import org.apache.seata.server.store.StoreConfig.SessionMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -451,6 +451,23 @@ public class SessionHelper {
         }
         if (isAsyncRemove) {
             COORDINATOR.doBranchRemoveAllAsync(globalSession);
+        }
+    }
+
+    public static void processEndState(GlobalSession globalSession) throws TransactionException {
+        GlobalStatus globalStatus = globalSession.getStatus();
+
+        switch (globalStatus) {
+            case Committed:
+            case Finished:
+                endCommitted(globalSession, true);
+                return;
+            case Rollbacked:
+            case TimeoutRollbacked:
+                endRollbacked(globalSession, true);
+                return;
+            default:
+                throw new TransactionException("Unsupported GlobalStatus:" + globalStatus);
         }
     }
 

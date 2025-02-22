@@ -19,11 +19,10 @@ package org.apache.seata.server.session;
 import java.io.IOException;
 import java.util.stream.Stream;
 
+import org.apache.seata.common.store.SessionMode;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.GlobalStatus;
-import org.apache.seata.server.store.StoreConfig;
-import org.apache.seata.server.session.SessionHolder;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -47,7 +46,7 @@ public class GlobalSessionTest {
 
     @BeforeAll
     public static void init(ApplicationContext context){
-        SessionHolder.init(StoreConfig.SessionMode.FILE);
+        SessionHolder.init(SessionMode.FILE);
     }
     @AfterAll
     public static void destroy(){

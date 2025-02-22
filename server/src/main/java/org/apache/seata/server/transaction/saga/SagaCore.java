@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 import io.netty.channel.Channel;
+import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.core.exception.GlobalTransactionException;
 import org.apache.seata.core.exception.TransactionException;
@@ -215,6 +216,11 @@ public class SagaCore extends AbstractCore {
                 LOGGER.info("Global[{}] will retry commit", globalSession.getXid());
             }
         }
+    }
+
+    @Override
+    public BranchStatus branchDelete(GlobalSession globalSession, BranchSession branchSession) throws TransactionException {
+        throw new ShouldNeverHappenException("saga mode rm handler not support BranchDeleteRequest");
     }
 
     /**

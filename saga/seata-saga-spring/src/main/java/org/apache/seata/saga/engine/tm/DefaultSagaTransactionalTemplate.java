@@ -16,15 +16,14 @@
  */
 package org.apache.seata.saga.engine.tm;
 
-import java.util.List;
-
 import org.apache.seata.common.exception.FrameworkErrorCode;
+import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.GlobalStatus;
-import org.apache.seata.core.rpc.netty.RmNettyRemotingClient;
 import org.apache.seata.core.rpc.ShutdownHook;
+import org.apache.seata.core.rpc.netty.RmNettyRemotingClient;
 import org.apache.seata.core.rpc.netty.TmNettyRemotingClient;
 import org.apache.seata.rm.DefaultResourceManager;
 import org.apache.seata.rm.RMClient;
@@ -39,7 +38,6 @@ import org.apache.seata.tm.api.TransactionalExecutor.ExecutionException;
 import org.apache.seata.tm.api.transaction.TransactionHook;
 import org.apache.seata.tm.api.transaction.TransactionHookManager;
 import org.apache.seata.tm.api.transaction.TransactionInfo;
-import org.apache.seata.common.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -48,6 +46,8 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
+
+import java.util.List;
 
 /**
  * Template of executing business logic with a global transaction for SAGA mode
@@ -93,7 +93,6 @@ public class DefaultSagaTransactionalTemplate
             triggerAfterBegin(tx);
         } catch (TransactionException txe) {
             throw new TransactionalExecutor.ExecutionException(tx, txe, TransactionalExecutor.Code.BeginFailure);
-
         }
         return tx;
     }
