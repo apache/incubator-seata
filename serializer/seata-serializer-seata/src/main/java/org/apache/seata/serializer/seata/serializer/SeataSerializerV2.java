@@ -11,7 +11,7 @@ public class SeataSerializerV2 extends SeataSerializerV1{
     protected SeataSerializerV2() {
     }
 
-    public static SeataSerializerV1 getInstance() {
+    public static SeataSerializerV2 getInstance() {
         if (instance == null) {
             synchronized (SeataSerializerV2.class) {
                 if (instance == null) {
