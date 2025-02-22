@@ -16,14 +16,14 @@
  */
 package org.apache.seata.common.result;
 
-import static org.apache.seata.common.result.Code.*;
+import static org.apache.seata.common.result.Code.SUCCESS;
 
 import java.io.Serializable;
 
 /**
  * The basic result
  */
-public class Result  implements Serializable {
+public class Result implements Serializable {
     private static final long serialVersionUID = 7761261124298767L;
 
     private final String code;
@@ -37,6 +37,7 @@ public class Result  implements Serializable {
         this.code = code;
         this.message = message;
     }
+
     public boolean isSuccess() {
         return this.code.equals(SUCCESS.code);
     }

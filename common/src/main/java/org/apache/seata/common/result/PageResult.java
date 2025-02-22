@@ -16,13 +16,12 @@
  */
 package org.apache.seata.common.result;
 
-import static org.apache.seata.common.result.Code.*;
+import static org.apache.seata.common.result.Code.SUCCESS;
 
 import java.util.List;
 
 /**
  * The page result
- *
  */
 public class PageResult<T> extends Result {
     private static final long serialVersionUID = 7761262662429121287L;
@@ -72,14 +71,14 @@ public class PageResult<T> extends Result {
         }
         final int offset = pageSize * (pageNum - 1);
         return PageResult.success(
-                list.subList(
-                        Math.min(offset, list.size()),
-                        Math.min(offset + pageSize, list.size())
-                ),
-                list.size(),
-                pages,
-                pageNum,
-                pageSize
+            list.subList(
+                Math.min(offset, list.size()),
+                Math.min(offset + pageSize, list.size())
+            ),
+            list.size(),
+            pages,
+            pageNum,
+            pageSize
         );
     }
 
@@ -105,9 +104,11 @@ public class PageResult<T> extends Result {
         return new PageResult<>(SUCCESS.code, SUCCESS.msg);
     }
 
-    public static <T> PageResult<T> success(List<T> data, Integer total, Integer pages, Integer pageNum, Integer pageSize) {
+    public static <T> PageResult<T> success(List<T> data, Integer total, Integer pages, Integer pageNum,
+        Integer pageSize) {
         return new PageResult<>(data, total, pages, pageNum, pageSize);
     }
+
     public static <T> PageResult<T> success(List<T> data, Integer total, Integer pageNum, Integer pageSize) {
         return new PageResult<>(data, total, pageNum, pageSize);
     }
