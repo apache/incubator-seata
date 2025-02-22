@@ -30,7 +30,7 @@ public class Result implements Serializable {
     private final String message;
 
     public Result() {
-        this(SUCCESS.code, SUCCESS.msg);
+        this(null, null);
     }
 
     public Result(String code, String message) {
