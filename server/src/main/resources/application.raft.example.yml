@@ -97,17 +97,15 @@ seata:
         client:
           keystore:
             path: ssl/cbolt.pfx
-            password: seata
+            password: 
             type: pkcs12
         server:
           keystore:
             path: ssl/bolt.pfx
-            password: seata
+            password: 
             type: pkcs12
-        kmf:
-          algorithm: SunX509
-        tmf:
-          algorithm: SunX509
+        kmf-algorithm: SunX509
+        tmf-algorithm: SunX509
     service-port: 8091 #If not configured, the default is '${server.port} + 1000'
     max-commit-retry-timeout: -1
     max-rollback-retry-timeout: -1
@@ -124,6 +122,7 @@ seata:
       committing-retry-period: 1000
       async-committing-retry-period: 1000
       rollbacking-retry-period: 1000
+      end-status-retry-period: 1000
       timeout-retry-period: 1000
     undo:
       log-save-days: 7
@@ -131,6 +130,11 @@ seata:
     session:
       branch-async-queue-size: 5000 #branch async remove queue size
       enable-branch-async-remove: false #enable to asynchronous remove branchSession
+    ratelimit:
+      enable: false
+      bucketTokenNumPerSecond: 999999
+      bucketTokenMaxNum: 999999
+      bucketTokenInitialNum: 999999
   store:
     # support: file
     mode: raft

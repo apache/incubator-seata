@@ -28,6 +28,7 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.epoll.EpollChannelOption;
+import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollMode;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
@@ -80,9 +81,15 @@ public class NettyClientBootstrap implements RemotingBootstrap {
         this.nettyClientConfig = nettyClientConfig;
         int selectorThreadSizeThreadSize = this.nettyClientConfig.getClientSelectorThreadSize();
         this.transactionRole = transactionRole;
-        this.eventLoopGroupWorker = new NioEventLoopGroup(selectorThreadSizeThreadSize,
-            new NamedThreadFactory(getThreadPrefix(this.nettyClientConfig.getClientSelectorThreadPrefix()),
-                selectorThreadSizeThreadSize));
+        if (NettyServerConfig.enableEpoll()) {
+            this.eventLoopGroupWorker = new EpollEventLoopGroup(selectorThreadSizeThreadSize,
+                new NamedThreadFactory(getThreadPrefix(this.nettyClientConfig.getClientSelectorThreadPrefix()),
+                    selectorThreadSizeThreadSize));
+        } else {
+            this.eventLoopGroupWorker = new NioEventLoopGroup(selectorThreadSizeThreadSize,
+                new NamedThreadFactory(getThreadPrefix(this.nettyClientConfig.getClientSelectorThreadPrefix()),
+                    selectorThreadSizeThreadSize));
+        }
         this.defaultEventExecutorGroup = eventExecutorGroup;
     }
 

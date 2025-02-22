@@ -16,6 +16,7 @@
  */
 package org.apache.seata.integration.tx.api.util;
 
+import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.integration.tx.api.interceptor.handler.DefaultInvocationHandler;
 import org.apache.seata.integration.tx.api.interceptor.handler.ProxyInvocationHandler;
 import org.apache.seata.integration.tx.api.interceptor.parser.DefaultInterfaceParser;
@@ -31,6 +32,7 @@ import static net.bytebuddy.matcher.ElementMatchers.isDeclaredBy;
 public class ProxyUtil {
 
     private static final Map<Object, Object> PROXYED_SET = new HashMap<>();
+    private static final ResourceLock RESOURCE_LOCK = new ResourceLock();
 
     public static <T> T createProxy(T target) {
         return createProxy(target, target.getClass().getName());
@@ -53,7 +55,7 @@ public class ProxyUtil {
      */
     public static <T> T createProxy(T target, String beanName) {
         try {
-            synchronized (PROXYED_SET) {
+            try (ResourceLock ignored = RESOURCE_LOCK.obtain()) {
                 if (PROXYED_SET.containsKey(target)) {
                     return (T) PROXYED_SET.get(target);
                 }

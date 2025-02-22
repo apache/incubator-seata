@@ -16,14 +16,12 @@
  */
 package org.apache.seata.common.metadata;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.seata.common.store.StoreMode;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-
-import java.util.ArrayList;
-import java.util.List;
-
 
 public class MetadataTest {
 
@@ -99,11 +97,25 @@ public class MetadataTest {
         Assertions.assertDoesNotThrow(() -> metadata.refreshMetadata("cluster", metadataResponse));
         metadataResponse.setNodes(new ArrayList<>());
         Assertions.assertDoesNotThrow(() -> metadata.refreshMetadata("cluster", metadataResponse));
+        metadataResponse.setStoreMode("unknown store");
+        Assertions.assertThrows(IllegalArgumentException.class, () -> metadata.refreshMetadata("cluster", metadataResponse));
     }
 
     @Test
     public void testToString() {
         Assertions.assertEquals("Metadata(leaders={}, clusterTerm={}, clusterNodes={\"cluster\"->{}}, storeMode=StoreMode.RAFT)", metadata.toString());
+    }
+
+    @Test
+    public void containsValidNameReturnsTrue() {
+        boolean result = StoreMode.contains(StoreMode.FILE.name());
+        Assertions.assertEquals(true, result);
+        result = StoreMode.contains("INVALID_NAME");
+        Assertions.assertEquals(false, result);
+        result = StoreMode.contains(null);
+        Assertions.assertEquals(false, result);
+        result = StoreMode.contains("");
+        Assertions.assertEquals(false, result);
     }
 
 }

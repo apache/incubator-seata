@@ -24,6 +24,3 @@ org.apache.seata.spring.boot.autoconfigure.SeataCoreEnvironmentPostProcessor
 
 org.springframework.context.ApplicationContextInitializer=\
 org.apache.seata.spring.boot.autoconfigure.loader.SeataPropertiesLoader
-
-org.springframework.context.ApplicationListener=\
-org.apache.seata.spring.boot.autoconfigure.listener.SeataApplicationListener
