@@ -73,7 +73,7 @@ public class AuthController {
 
             return SingleResult.success(authHeader);
         } catch (BadCredentialsException authentication) {
-            return SingleResult.failure(Code.LOGIN_FAILED);
+            return SingleResult.failure(Code.UNAUTHORIZED);
         }
     }
 }

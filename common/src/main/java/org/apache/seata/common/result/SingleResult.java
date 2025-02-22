@@ -17,7 +17,7 @@
 package org.apache.seata.common.result;
 
 import static org.apache.seata.common.result.Code.SUCCESS;
-import static org.apache.seata.common.result.Code.ERROR;
+import static org.apache.seata.common.result.Code.INTERNAL_SERVER_ERROR;
 
 /**
  * The single result
@@ -45,7 +45,7 @@ public class SingleResult<T> extends Result {
     }
 
     public static <T> SingleResult<T> failure(String msg) {
-        return failure(ERROR.code, msg);
+        return failure(INTERNAL_SERVER_ERROR.code, msg);
     }
 
     public static <T> SingleResult<T> success(String msg, T data) {

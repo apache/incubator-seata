@@ -25,11 +25,11 @@ public enum Code {
     /**
      * server error
      */
-    ERROR("500", "Server error"),
+    INTERNAL_SERVER_ERROR("500", "Server error"),
     /**
      * the custom error
      */
-    LOGIN_FAILED("401", "Login failed");
+    UNAUTHORIZED("401", "Login failed");
 
     /**
      * The Code.
