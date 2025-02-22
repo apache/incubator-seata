@@ -16,6 +16,8 @@
  */
 package org.apache.seata.common.result;
 
+import static org.apache.seata.common.result.Code.*;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -23,23 +25,23 @@ class SingleResultTest {
 
     @Test
     void testConstructor() {
-        SingleResult<String> result = new SingleResult<>("200", "OK", "Data");
-        Assertions.assertEquals("200", result.getCode());
-        Assertions.assertEquals("OK", result.getMessage());
+        SingleResult<String> result = new SingleResult<>("200", "ok", "Data");
+        Assertions.assertEquals(SUCCESS.code, result.getCode());
+        Assertions.assertEquals(SUCCESS.msg, result.getMessage());
         Assertions.assertEquals("Data", result.getData());
     }
 
     @Test
     void testFailureWithCodeAndMessage() {
-        SingleResult<String> result = SingleResult.failure("500", "Error");
-        Assertions.assertEquals("500", result.getCode());
-        Assertions.assertEquals("Error", result.getMessage());
+        SingleResult<String> result = SingleResult.failure("500", "Server error");
+        Assertions.assertEquals(ERROR.code, result.getCode());
+        Assertions.assertEquals(ERROR.msg, result.getMessage());
         Assertions.assertNull(result.getData());
     }
 
     @Test
     void testFailureWithErrorCode() {
-        SingleResult<String> result = SingleResult.failure(Code.LOGIN_FAILED);
+        SingleResult<String> result = SingleResult.failure(LOGIN_FAILED);
         Assertions.assertEquals("401", result.getCode());
         Assertions.assertEquals("Login failed", result.getMessage());
         Assertions.assertNull(result.getData());
@@ -47,10 +49,10 @@ class SingleResultTest {
 
     @Test
     void testSuccess() {
-        SingleResult<String> result = SingleResult.success("SuccessData");
-        Assertions.assertEquals(SingleResult.SUCCESS_CODE, result.getCode());
-        Assertions.assertEquals(SingleResult.SUCCESS_MSG, result.getMessage());
-        Assertions.assertEquals("SuccessData", result.getData());
+        SingleResult<String> result = SingleResult.successWithData("ok");
+        Assertions.assertEquals(SUCCESS.code, result.getCode());
+        Assertions.assertEquals(SUCCESS.msg, result.getMessage());
+        Assertions.assertEquals("ok", result.getData());
     }
 
     @Test

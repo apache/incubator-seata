@@ -16,55 +16,58 @@
  */
 package org.apache.seata.common.result;
 
-import java.io.Serializable;
-
+import static org.apache.seata.common.result.Code.*;
 
 /**
  * The single result
  */
-public class SingleResult<T> extends Result<T>  implements Serializable {
-    private static final long serialVersionUID = 77612626624298767L;
+public class SingleResult<T> extends Result {
+	private static final long serialVersionUID = 77612626624298767L;
 
-    /**
-     * the data
-     */
     private T data;
 
-    public SingleResult(String code, String message) {
-        super(code, message);
-    }
+	public SingleResult(String code, String message) {
+		super(code, message);
+	}
 
-    public SingleResult(String code, String message, T data) {
-        super(code, message);
+	public SingleResult(String code, String message, T data) {
+		super(code, message);
         this.data = data;
+	}
+
+	public static <T> SingleResult<T> failure(String code, String msg) {
+		return new SingleResult<>(code, msg);
+	}
+
+	public static <T> SingleResult<T> failure(Code errorCode) {
+		return failure(errorCode.code, errorCode.msg);
+	}
+
+	public static <T> SingleResult<T> failure(String msg) {
+		return failure(ERROR.code, msg);
+	}
+
+	public static <T> SingleResult<T> success(String msg, T data) {
+		return new SingleResult<>(SUCCESS.code, msg, data);
+	}
+
+    public static SingleResult<Void> success(String msg) {
+        return success(msg, null);
     }
 
-    public static <T> SingleResult<T> failure(String code, String msg) {
-        return new SingleResult<>(code, msg);
-    }
+	public static <T> SingleResult<T> success() {
+		return success(SUCCESS.msg, null);
+	}
 
-    public static <T> SingleResult<T> failure(Code errorCode) {
-        return new SingleResult(errorCode.getCode(), errorCode.getMsg());
-    }
-
-    public static <T> SingleResult<T> failure(String msg) {
-        return new SingleResult<>(FAIL_CODE, msg);
-    }
-
-    public static <T> SingleResult<T> success(T data) {
-        return new SingleResult<>(SUCCESS_CODE, SUCCESS_MSG,data);
-    }
-
-    public static <T> SingleResult<T> success() {
-        return new SingleResult<>(SUCCESS_CODE, SUCCESS_MSG, null);
-    }
+	public static <T> SingleResult<T> successWithData(T data) {
+		return success(SUCCESS.msg, data);
+	}
 
     public T getData() {
         return data;
     }
 
-    public void setData(T data) {
+    public void setData(final T data) {
         this.data = data;
     }
-
 }

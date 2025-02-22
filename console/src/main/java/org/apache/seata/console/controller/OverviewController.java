@@ -41,7 +41,7 @@ public class OverviewController {
      * @return the data
      */
     @GetMapping(value = "/getData")
-    public SingleResult<List> getData() {
+    public SingleResult<List<Map<String, Object>>> getData() {
         List<Map<String, Object>> result = new ArrayList<>();
         int count = 10;
         while (count-- > 0) {
@@ -51,6 +51,6 @@ public class OverviewController {
             result.add(hashMap);
         }
 
-        return SingleResult.success(result);
+        return SingleResult.successWithData(result);
     }
 }

@@ -19,7 +19,7 @@ package org.apache.seata.namingserver.controller;
 
 import org.apache.seata.common.metadata.namingserver.MetaResponse;
 import org.apache.seata.common.metadata.namingserver.NamingServerNode;
-import org.apache.seata.common.result.Result;
+import org.apache.seata.common.result.SingleResult;
 import org.apache.seata.namingserver.listener.Watcher;
 import org.apache.seata.namingserver.manager.ClusterWatcherManager;
 import org.apache.seata.namingserver.manager.NamingManager;
@@ -55,33 +55,27 @@ public class NamingController {
     private ClusterWatcherManager clusterWatcherManager;
 
     @PostMapping("/register")
-    public Result<String> registerInstance(@RequestParam String namespace,
+    public SingleResult<Void> registerInstance(@RequestParam String namespace,
                                            @RequestParam String clusterName,
                                            @RequestParam String unit,
                                            @RequestBody NamingServerNode registerBody) {
-        Result<String> result = new Result<>();
         boolean isSuccess = namingManager.registerInstance(registerBody, namespace, clusterName, unit);
         if (isSuccess) {
-            result.setMessage("node has registered successfully!");
+            return SingleResult.success("node has registered successfully!");
         } else {
-            result.setCode("500");
-            result.setMessage("node registered unsuccessfully!");
+            return SingleResult.failure("node registered unsuccessfully!");
         }
-        return result;
     }
 
     @PostMapping("/unregister")
-    public Result<String> unregisterInstance(@RequestParam String namespace, @RequestParam String clusterName,
+    public SingleResult<Void> unregisterInstance(@RequestParam String namespace, @RequestParam String clusterName,
         @RequestParam String unit, @RequestBody NamingServerNode registerBody) {
-        Result<String> result = new Result<>();
         boolean isSuccess = namingManager.unregisterInstance(namespace, clusterName, unit, registerBody);
         if (isSuccess) {
-            result.setMessage("node has unregistered successfully!");
+            return SingleResult.success("node has unregistered successfully!");
         } else {
-            result.setCode("500");
-            result.setMessage("node unregistered unsuccessfully!");
+            return SingleResult.failure("node unregistered unsuccessfully!");
         }
-        return result;
     }
 
     @GetMapping("/clusters")
@@ -96,29 +90,28 @@ public class NamingController {
     }
 
     @PostMapping("/addGroup")
-    public Result<String> addGroup(@RequestParam String namespace,
+    public SingleResult<Void> addGroup(@RequestParam String namespace,
                                       @RequestParam String clusterName,
                                       @RequestParam String unitName,
                                       @RequestParam String vGroup) {
 
-        Result<String> addGroupResult = namingManager.createGroup(namespace, vGroup, clusterName, unitName);
+        SingleResult<Void> addGroupResult = namingManager.createGroup(namespace, vGroup, clusterName, unitName);
         if (!addGroupResult.isSuccess()) {
             return addGroupResult;
         }
-        return new Result<>("200", "change vGroup " + vGroup + "to cluster " + clusterName + " successfully!");
+        return SingleResult.success("change vGroup " + vGroup + "to cluster " + clusterName + " successfully!");
     }
 
     @PostMapping("/changeGroup")
-    public Result<String> changeGroup(@RequestParam String namespace,
+    public SingleResult<Void> changeGroup(@RequestParam String namespace,
                                       @RequestParam String clusterName,
                                       @RequestParam String unitName,
                                       @RequestParam String vGroup) {
-
-        Result<String> addGroupResult = namingManager.changeGroup(namespace, vGroup, clusterName, unitName);
+        SingleResult<Void> addGroupResult = namingManager.changeGroup(namespace, vGroup, clusterName, unitName);
         if (!addGroupResult.isSuccess()) {
             return addGroupResult;
         }
-        return new Result<>("200", "change vGroup " + vGroup + "to cluster " + clusterName + " successfully!");
+        return SingleResult.success("change vGroup " + vGroup + "to cluster " + clusterName + " successfully!");
     }
 
     /**
@@ -146,6 +139,4 @@ public class NamingController {
                 .map(vgroup -> new WatcherVO(vgroup, clusterWatcherManager.getWatcherIpList(vgroup)))
                 .collect(Collectors.toList());
     }
-
-
 }
