@@ -219,6 +219,7 @@ public class TmNettyClientTest extends AbstractServerTest {
 
         // test old version
         RegisterTMRequest request = new RegisterTMRequest(applicationId, transactionServiceGroup);
+        // todo
         request.setVersion("");
         RegisterTMResponse response = (RegisterTMResponse)tmNettyRemotingClient.sendSyncRequest(request);
 
