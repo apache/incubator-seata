@@ -48,11 +48,13 @@ import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.metadata.namingserver.NamingServerNode;
 import org.apache.seata.common.metadata.namingserver.Unit;
 import org.apache.seata.common.result.Result;
+import org.apache.seata.common.result.SingleResult;
 import org.apache.seata.common.util.HttpClientUtil;
 import org.apache.seata.common.NamingServerConstants;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.namingserver.entity.bo.ClusterBO;
 import org.apache.seata.namingserver.entity.bo.NamespaceBO;
+import org.apache.seata.namingserver.entity.vo.NamespaceVO;
 import org.apache.seata.namingserver.listener.ClusterChangeEvent;
 import org.apache.seata.namingserver.entity.pojo.ClusterData;
 import org.apache.seata.namingserver.entity.vo.monitor.ClusterVO;
@@ -74,7 +76,7 @@ import static org.apache.seata.common.NamingServerConstants.CONSTANT_GROUP;
 public class NamingManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(NamingManager.class);
     private final ConcurrentMap<InetSocketAddress, Long> instanceLiveTable;
-    private volatile LoadingCache<String/* VGroup */, ConcurrentMap<String/* namespace */,NamespaceBO>> vGroupMap;
+    private volatile LoadingCache<String/* VGroup */, ConcurrentMap<String/* namespace */, NamespaceBO>> vGroupMap;
     private final ConcurrentMap<String/* namespace */,
         ConcurrentMap<String/* clusterName */, ClusterData>> namespaceClusterDataMap;
 
@@ -328,6 +330,15 @@ public class NamingManager {
         return clusterData.getInstanceList();
     }
 
+    public List<Node> getInstancesByVgroupAndNamespace(String namespace, String vgroup) {
+        List<Cluster> clusters = getClusterListByVgroup(vgroup, namespace);
+        if (CollectionUtils.isEmpty(clusters)) {
+            return Collections.emptyList();
+        } else {
+            return getInstances(namespace, clusters.get(0).getClusterName());
+        }
+    }
+
     public void instanceHeartBeatCheck() {
         for (String namespace : namespaceClusterDataMap.keySet()) {
             for (ClusterData clusterData : namespaceClusterDataMap.get(namespace).values()) {
@@ -403,6 +414,28 @@ public class NamingManager {
             }
         });
         return Optional.ofNullable(result.get()).orElseGet(() -> new Result<>("200", "change vGroup successfully!"));
+    }
+
+    public SingleResult<Map<String, NamespaceVO>> namespace() {
+        // namespace->cluster->vgroups
+        Map<String, NamespaceVO> namespaceVOs = new HashMap<>();
+        Map<String/* VGroup */, ConcurrentMap<String/* namespace */, NamespaceBO>> currentVGourpMap =
+            new HashMap<>(vGroupMap.asMap());
+        if (currentVGourpMap.isEmpty()) {
+            namespaceClusterDataMap.forEach((namespace, clusterDataMap) -> {
+                NamespaceVO namespaceVO = new NamespaceVO();
+                namespaceVO.setClusters(new ArrayList<>(clusterDataMap.keySet()));
+                namespaceVOs.put(namespace, namespaceVO);
+            });
+            return SingleResult.success(namespaceVOs);
+        }
+        currentVGourpMap.forEach((vGroup, namespaceMap) -> namespaceMap
+            .forEach((namespace, namespaceBO) -> namespaceBO.getClusterMap().forEach((clusterName, clusterBO) -> {
+                NamespaceVO namespaceVO = namespaceVOs.computeIfAbsent(namespace, value -> new NamespaceVO());
+                namespaceVO.getClusters().add(clusterName);
+                namespaceVO.getVgroups().add(vGroup);
+            })));
+        return SingleResult.success(namespaceVOs);
     }
 
 }

@@ -14,16 +14,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.namingserver;
+package org.apache.seata.namingserver.entity.vo;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import java.util.ArrayList;
+import java.util.List;
 
-@SpringBootApplication(scanBasePackages = {"org.apache.seata"})
-public class NamingserverApplication {
+public class NamespaceVO {
 
-    public static void main(String[] args) {
-        SpringApplication.run(NamingserverApplication.class, args);
+    List<String> clusters = new ArrayList<>();
+
+    List<String> vgroups = new ArrayList<>();
+
+    public List<String> getClusters() {
+        return clusters;
     }
 
+    public void setClusters(List<String> clusters) {
+        this.clusters = clusters;
+    }
+
+    public List<String> getVgroups() {
+        return vgroups;
+    }
+
+    public void setVgroups(List<String> vgroups) {
+        this.vgroups = vgroups;
+    }
 }
