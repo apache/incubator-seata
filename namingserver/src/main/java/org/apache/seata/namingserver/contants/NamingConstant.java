@@ -14,16 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.namingserver;
+package org.apache.seata.namingserver.contants;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+public interface NamingConstant {
 
-@SpringBootApplication(scanBasePackages = {"org.apache.seata"})
-public class NamingserverApplication {
+    String CONSOLE_PATTERN = "^/api/.*/console/.*";
 
-    public static void main(String[] args) {
-        SpringApplication.run(NamingserverApplication.class, args);
-    }
+    int DEFAULT_REQUEST_TIMEOUT = 5000;
+
+    int DEFAULT_CONNECTION_MAX_TOTAL = 100;
+
+    int DEFAULT_CONNECTION_MAX_PER_ROUTE = 20;
 
 }

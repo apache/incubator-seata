@@ -43,6 +43,12 @@ public class GlobalSessionParam extends BaseParam implements Serializable {
      * the transaction name
      */
     private String transactionName;
+
+    /**
+     * the vgroup
+     */
+    private String vgroup;
+    
     /**
      * if with branch
      * true: with branch session
@@ -90,14 +96,19 @@ public class GlobalSessionParam extends BaseParam implements Serializable {
         this.withBranch = withBranch;
     }
 
+    public String getVgroup() {
+        return vgroup;
+    }
+
+    public void setVgroup(String vgroup) {
+        this.vgroup = vgroup;
+    }
+
     @Override
     public String toString() {
-        return "GlobalSessionParam{" +
-                "xid='" + xid + '\'' +
-                ", applicationId='" + applicationId + '\'' +
-                ", status=" + status +
-                ", transactionName='" + transactionName + '\'' +
-                ", withBranch=" + withBranch +
-                '}';
+        return "GlobalSessionParam{" + "xid='" + xid + '\'' + ", applicationId='" + applicationId + '\'' + ", status="
+            + status + ", transactionName='" + transactionName + '\'' + ", vgroup='" + vgroup + '\'' + ", withBranch="
+            + withBranch + '}';
     }
+    
 }
