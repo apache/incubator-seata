@@ -429,7 +429,7 @@ public class NamingManager {
                 namespaceVO.setClusters(new ArrayList<>(clusterDataMap.keySet()));
                 namespaceVOs.put(namespace, namespaceVO);
             });
-            return SingleResult.success(namespaceVOs);
+            return SingleResult.successWithData(namespaceVOs);
         }
         currentVGourpMap.forEach((vGroup, namespaceMap) -> namespaceMap
             .forEach((namespace, namespaceBO) -> namespaceBO.getClusterMap().forEach((clusterName, clusterBO) -> {
@@ -437,7 +437,7 @@ public class NamingManager {
                 namespaceVO.getClusters().add(clusterName);
                 namespaceVO.getVgroups().add(vGroup);
             })));
-        return SingleResult.success(namespaceVOs);
+        return SingleResult.successWithData(namespaceVOs);
     }
 
 }

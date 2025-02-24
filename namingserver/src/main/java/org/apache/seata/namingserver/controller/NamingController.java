@@ -70,18 +70,15 @@ public class NamingController {
     }
 
     @PostMapping("/batchRegister")
-    public Result<String> batchRegisterInstance(@RequestParam String namespace,
+    public SingleResult<Void> batchRegisterInstance(@RequestParam String namespace,
                                            @RequestParam String clusterName,
                                            @RequestBody List<NamingServerNode> nodes) {
-        Result<String> result = new Result<>();
         boolean isSuccess = namingManager.registerInstances(nodes, namespace, clusterName);
         if (isSuccess) {
-            result.setMessage("node has registered successfully!");
+            return SingleResult.success("nodes have registered successfully!");
         } else {
-            result.setCode("500");
-            result.setMessage("node registered unsuccessfully!");
+            return SingleResult.failure("nodes registered unsuccessfully!");
         }
-        return result;
     }
 
     @PostMapping("/unregister")
