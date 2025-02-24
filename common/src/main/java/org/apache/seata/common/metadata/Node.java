@@ -33,9 +33,9 @@ public class Node {
 
     private Endpoint internal;
 
-    private double weight = 1.0;
-    private boolean healthy = true;
-    private long timeStamp;
+    protected double weight = 1.0;
+    protected boolean healthy = true;
+    protected long timeStamp;
 
     private String group;
     private ClusterRole role = ClusterRole.MEMBER;

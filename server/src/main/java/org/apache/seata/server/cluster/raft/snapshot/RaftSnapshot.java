@@ -128,6 +128,12 @@ public class RaftSnapshot implements Serializable {
          * session snapshot
          */
         session("session"),
+
+        /**
+         * vgroup mapping
+         */
+        vgroup_mapping("vgroup_mapping"),
+
         /**
          * leader metadata snapshot
          */

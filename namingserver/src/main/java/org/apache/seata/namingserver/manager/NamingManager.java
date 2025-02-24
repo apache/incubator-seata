@@ -32,6 +32,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -42,6 +43,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.ContentType;
 import org.apache.http.protocol.HTTP;
 import org.apache.seata.common.metadata.Cluster;
+import org.apache.seata.common.metadata.ClusterRole;
 import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.metadata.namingserver.NamingServerNode;
 import org.apache.seata.common.metadata.namingserver.Unit;
@@ -152,7 +154,9 @@ public class NamingManager {
             LOGGER.error("no instance in cluster {}", clusterName);
             return new Result<>("301", "no instance in cluster" + clusterName);
         } else {
-            Node node = nodeList.get(0);
+            Node node =
+                nodeList.stream().filter(n -> n.getRole() == ClusterRole.LEADER || n.getRole() == ClusterRole.MEMBER)
+                    .collect(Collectors.toList()).get(0);
             String controlHost = node.getControl().getHost();
             int controlPort = node.getControl().getPort();
             String httpUrl = NamingServerConstants.HTTP_PREFIX + controlHost + NamingServerConstants.IP_PORT_SPLIT_CHAR
@@ -231,6 +235,14 @@ public class NamingManager {
         });
     }
 
+    public boolean registerInstances(List<NamingServerNode> node, String namespace, String clusterName) {
+        boolean result = true;
+        for (NamingServerNode namingServerNode : node) {
+            result = registerInstance(namingServerNode, namespace, clusterName, namingServerNode.getUnit());
+        }
+        return result;
+    }
+
     public boolean registerInstance(NamingServerNode node, String namespace, String clusterName, String unitName) {
         try {
             Map<String, ClusterData> clusterDataHashMap =
@@ -245,16 +257,14 @@ public class NamingManager {
             // if extended metadata includes vgroup mapping relationship, add it in clusterData
             if (mappingObj instanceof Map) {
                 Map<String, String> vGroups = (Map<String, String>)mappingObj;
-                if (!CollectionUtils.isEmpty(vGroups)) {
-                    vGroups.forEach((k, v) -> {
-                        // In non-raft mode, a unit is one-to-one with a node, and the unitName is stored on the node.
-                        // In raft mode, the unitName is equal to the raft-group, so the node's unitName cannot be used.
-                        boolean changed = addGroup(namespace, clusterName, StringUtils.isBlank(v) ? unitName : v, k);
-                        if (hasChanged || changed) {
-                            notifyClusterChange(k, namespace, clusterName, unitName, node.getTerm());
-                        }
-                    });
-                }
+                vGroups.forEach((k, v) -> {
+                    // In non-raft mode, a unit is one-to-one with a node, and the unitName is stored on the node.
+                    // In raft mode, the unitName is equal to the raft-group, so the node's unitName cannot be used.
+                    boolean changed = addGroup(namespace, clusterName, StringUtils.isBlank(v) ? unitName : v, k);
+                    if (hasChanged || changed) {
+                        notifyClusterChange(k, namespace, clusterName, unitName, node.getTerm());
+                    }
+                });
             }
             instanceLiveTable.put(
                 new InetSocketAddress(node.getTransaction().getHost(), node.getTransaction().getPort()),
@@ -295,8 +305,8 @@ public class NamingManager {
 
     public List<Cluster> getClusterListByVgroup(String vGroup, String namespace) {
         // find the cluster where the transaction group is located
-        HashMap<String/* VGroup */, ConcurrentMap<String/* namespace */,NamespaceBO>> concurrentVgroupMap = new HashMap<>(vGroupMap.asMap());
-        ConcurrentMap<String/* namespace */, NamespaceBO> vgroupNamespaceMap = concurrentVgroupMap.get(vGroup);
+        Map<String/* VGroup */, ConcurrentMap<String/* namespace */,NamespaceBO>> concurrentVgroupMap = new HashMap<>(vGroupMap.asMap());
+        Map<String/* namespace */, NamespaceBO> vgroupNamespaceMap = concurrentVgroupMap.get(vGroup);
         List<Cluster> clusterList = new ArrayList<>();
         if (!CollectionUtils.isEmpty(vgroupNamespaceMap)) {
             NamespaceBO namespaceBO = vgroupNamespaceMap.get(namespace);
