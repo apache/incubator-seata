@@ -16,6 +16,14 @@
  */
 package org.apache.seata.server.storage.file.store;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.config.Configuration;
@@ -27,13 +35,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @LoadLevel(name = "file")
 public class FileVGroupMappingStoreManager implements VGroupMappingStoreManager {
@@ -50,6 +51,7 @@ public class FileVGroupMappingStoreManager implements VGroupMappingStoreManager 
 
     protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
+    ObjectMapper objectMapper = new ObjectMapper();
 
     public FileVGroupMappingStoreManager() {
     }
@@ -92,7 +94,7 @@ public class FileVGroupMappingStoreManager implements VGroupMappingStoreManager 
     }
 
     @Override
-    public HashMap<String, Object> readVGroups() {
+    public Map<String, Object> readVGroups() {
         Lock readLock = lock.readLock();
         readLock.lock();
         try {
@@ -103,7 +105,7 @@ public class FileVGroupMappingStoreManager implements VGroupMappingStoreManager 
     }
 
     @Override
-    public HashMap<String, Object> loadVGroups() {
+    public Map<String, Object> loadVGroups() {
         try {
             File fileToLoad = new File(storePath);
             if (!fileToLoad.exists()) {
@@ -123,7 +125,6 @@ public class FileVGroupMappingStoreManager implements VGroupMappingStoreManager 
             String fileContent = FileUtils.readFileToString(fileToLoad, "UTF-8");
 
             if (!fileContent.isEmpty()) {
-                ObjectMapper objectMapper = new ObjectMapper();
                 vGroupMapping = objectMapper.readValue(fileContent, new TypeReference<HashMap<String, Object>>() {
                 });
             }
@@ -138,9 +139,8 @@ public class FileVGroupMappingStoreManager implements VGroupMappingStoreManager 
 
     public boolean save(HashMap<String, Object> vGroupMapping) {
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
             String jsonMapping = objectMapper.writeValueAsString(vGroupMapping);
-            FileUtils.writeStringToFile(new File(storePath), jsonMapping, "UTF-8");
+            FileUtils.writeStringToFile(new File(storePath), jsonMapping, StandardCharsets.UTF_8);
             return true;
         } catch (IOException e) {
             LOGGER.error("mapping relationship saved failed! ", e);

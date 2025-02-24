@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import org.apache.seata.common.metadata.Cluster;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.namingserver.entity.pojo.ClusterData;
@@ -37,7 +36,7 @@ public class NamespaceBO {
         return clusterMap;
     }
 
-    public List<Cluster> getCluster(ConcurrentMap<String/* clusterName */, ClusterData> clusterDataMap) {
+    public List<Cluster> getCluster(Map<String/* clusterName */, ClusterData> clusterDataMap) {
         List<Cluster> list = new ArrayList<>();
         clusterMap.forEach((clusterName, unitNameSet) -> {
             ClusterData clusterData = clusterDataMap.get(clusterName);
