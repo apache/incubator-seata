@@ -14,24 +14,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.server.cluster.raft.execute;
+package org.apache.seata.namingserver.entity.vo;
 
-import org.apache.seata.server.session.SessionHolder;
-import org.apache.seata.server.store.VGroupMappingStoreManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.ArrayList;
+import java.util.List;
 
-import org.apache.seata.server.lock.LockerManagerFactory;
-import org.apache.seata.server.storage.raft.lock.RaftLockManager;
+public class NamespaceVO {
 
-/**
- */
-public abstract class AbstractRaftMsgExecute implements RaftMsgExecute<Boolean> {
+    List<String> clusters = new ArrayList<>();
 
-    protected final Logger logger = LoggerFactory.getLogger(getClass());
+    List<String> vgroups = new ArrayList<>();
 
-    protected RaftLockManager raftLockManager = (RaftLockManager)LockerManagerFactory.getLockManager();
+    public List<String> getClusters() {
+        return clusters;
+    }
 
-    protected VGroupMappingStoreManager raftVGroupMappingStoreManager = SessionHolder.getRootVGroupMappingManager();
+    public void setClusters(List<String> clusters) {
+        this.clusters = clusters;
+    }
 
+    public List<String> getVgroups() {
+        return vgroups;
+    }
+
+    public void setVgroups(List<String> vgroups) {
+        this.vgroups = vgroups;
+    }
 }
