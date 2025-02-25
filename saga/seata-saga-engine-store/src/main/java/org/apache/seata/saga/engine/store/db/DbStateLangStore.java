@@ -50,12 +50,8 @@ public class DbStateLangStore extends AbstractStore implements StateLangStore {
 
     @Override
     public StateMachine getLastVersionStateMachine(String stateMachineName, String tenantId) {
-        List<StateMachine> list = selectList(stateLangStoreSqls.getQueryStateMachinesByNameAndTenantSql(dbType),
-            RESULT_SET_TO_STATE_MACHINE, stateMachineName, tenantId);
-        if (CollectionUtils.isNotEmpty(list)) {
-            return list.get(0);
-        }
-        return null;
+        return selectOne(stateLangStoreSqls.getLastVersionStateMachine(dbType), RESULT_SET_TO_STATE_MACHINE,
+                stateMachineName, tenantId);
     }
 
     @Override

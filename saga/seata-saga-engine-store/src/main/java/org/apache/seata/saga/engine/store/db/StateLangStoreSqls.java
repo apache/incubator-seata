@@ -62,6 +62,10 @@ public class StateLangStoreSqls {
         return queryStateMachinesByNameAndTenantSql;
     }
 
+    public String getLastVersionStateMachine(String dbType) {
+        return getQueryStateMachinesByNameAndTenantSql(dbType) + " LIMIT 1";
+    }
+
     public String getInsertStateMachineSql(String dbType) {
         return insertStateMachineSql;
     }
