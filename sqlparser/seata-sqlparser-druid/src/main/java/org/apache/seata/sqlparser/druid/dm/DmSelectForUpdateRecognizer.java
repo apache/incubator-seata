@@ -76,7 +76,7 @@ public class DmSelectForUpdateRecognizer extends BaseDmRecognizer implements SQL
         if (select == null) {
             throw new SQLParsingException("should never happen!");
         }
-        SQLSelectQueryBlock selectQueryBlock = select.getQueryBlock();
+        SQLSelectQueryBlock selectQueryBlock = select.getFirstQueryBlock();
         if (selectQueryBlock == null) {
             throw new SQLParsingException("should never happen!");
         }

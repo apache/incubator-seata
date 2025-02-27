@@ -17,6 +17,7 @@
 package org.apache.seata.rm.datasource.util;
 
 import org.apache.seata.common.loader.EnhancedServiceLoader;
+import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.rm.BaseDataSourceResource;
 import org.apache.seata.rm.DefaultResourceManager;
 import org.apache.seata.sqlparser.SqlParserType;
@@ -33,10 +34,11 @@ import java.sql.SQLException;
 public final class JdbcUtils {
 
     private static volatile DbTypeParser dbTypeParser;
+    private final static ResourceLock RESOURCE_LOCK = new ResourceLock();
 
     static DbTypeParser getDbTypeParser() {
         if (dbTypeParser == null) {
-            synchronized (JdbcUtils.class) {
+            try (ResourceLock ignored = RESOURCE_LOCK.obtain()) {
                 if (dbTypeParser == null) {
                     dbTypeParser = EnhancedServiceLoader.load(DbTypeParser.class, SqlParserType.SQL_PARSER_TYPE_DRUID);
                 }

@@ -64,7 +64,7 @@ public class TmClientTest {
         LOGGER.info("globalReport ok:" + globalReport);
         Assertions.assertEquals(globalReport, GlobalStatus.Committed);
 
-        MockCoordinator.getInstance().setExepectedResult(xid, ResultCode.Failed);
+        MockCoordinator.getInstance().setExpectedResult(xid, ResultCode.Failed);
 //        GlobalStatus globalReport2 = tm.globalReport(xid, GlobalStatus.Committed);
 
         GlobalStatus rollback2 = tm.rollback(xid);

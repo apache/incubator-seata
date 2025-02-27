@@ -19,6 +19,7 @@ package org.apache.seata.integration.rocketmq;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.remoting.RPCHook;
 import org.apache.seata.common.exception.NotSupportYetException;
+import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.integration.tx.api.util.ProxyUtil;
 
@@ -29,7 +30,7 @@ public class SeataMQProducerFactory {
 
     public static final String ROCKET_TCC_NAME = "tccRocketMQ";
     public static final BranchType ROCKET_BRANCH_TYPE = BranchType.TCC;
-
+    private static final ResourceLock RESOURCE_LOCK = new ResourceLock();
     /**
      * Default Producer, it can be replaced to Map after multi-resource is supported
      */
@@ -42,7 +43,7 @@ public class SeataMQProducerFactory {
     public static SeataMQProducer createSingle(String nameServer, String namespace,
                                                String groupName, RPCHook rpcHook) throws MQClientException {
         if (defaultProducer == null) {
-            synchronized (SeataMQProducerFactory.class) {
+            try (ResourceLock ignored = RESOURCE_LOCK.obtain()) {
                 if (defaultProducer == null) {
                     defaultProducer = new SeataMQProducer(namespace, groupName, rpcHook);
                     defaultProducer.setNamesrvAddr(nameServer);

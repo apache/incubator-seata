@@ -59,7 +59,7 @@ public final class ConfigurationFactory {
     public static volatile FileConfiguration ORIGIN_FILE_INSTANCE = null;
 
     static {
-        initOriginConfiguraction();
+        initOriginConfiguration();
         load();
         maybeNeedOriginFileInstance();
     }
@@ -71,7 +71,7 @@ public final class ConfigurationFactory {
             extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("load Configuration from :{}",
-                    extConfiguration == null ? configuration.getClass().getSimpleName() : "Spring Configuration");
+                    extConfiguration == null ? configuration.getClass().getSimpleName() : extConfiguration.getClass().getSimpleName());
             }
         } catch (EnhancedServiceNotFoundException e) {
             if (LOGGER.isDebugEnabled()) {
@@ -83,7 +83,7 @@ public final class ConfigurationFactory {
         CURRENT_FILE_INSTANCE = extConfiguration == null ? configuration : extConfiguration;
     }
 
-    private static void initOriginConfiguraction() {
+    private static void initOriginConfiguration() {
         String seataConfigName = System.getProperty(SYSTEM_PROPERTY_SEATA_CONFIG_NAME);
         if (seataConfigName == null) {
             seataConfigName = System.getenv(ENV_SEATA_CONFIG_NAME);
@@ -225,7 +225,7 @@ public final class ConfigurationFactory {
 
     public static void reload() {
         ConfigurationCache.clear();
-        initOriginConfiguraction();
+        initOriginConfiguration();
         load();
         maybeNeedOriginFileInstance();
         instance = null;

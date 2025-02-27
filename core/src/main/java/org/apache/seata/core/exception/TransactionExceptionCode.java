@@ -31,7 +31,6 @@ public enum TransactionExceptionCode {
      * BeginFailed
      */
     BeginFailed,
-
     /**
      * Lock key conflict transaction exception code.
      */
@@ -105,7 +104,7 @@ public enum TransactionExceptionCode {
     /**
      * Failed to lock global transaction exception code.
      */
-    FailedLockGlobalTranscation,
+    FailedLockGlobalTransaction,
 
     /**
      * FailedWriteSession

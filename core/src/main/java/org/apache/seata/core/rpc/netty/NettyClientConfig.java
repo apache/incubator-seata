@@ -21,10 +21,10 @@ import org.apache.seata.core.constants.ConfigurationKeys;
 import org.apache.seata.core.rpc.TransportServerType;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST;
+import static org.apache.seata.common.DefaultValues.DEFAULT_PROTOCOL;
 import static org.apache.seata.common.DefaultValues.DEFAULT_RPC_RM_REQUEST_TIMEOUT;
 import static org.apache.seata.common.DefaultValues.DEFAULT_RPC_TM_REQUEST_TIMEOUT;
 import static org.apache.seata.common.DefaultValues.DEFAULT_SELECTOR_THREAD_PREFIX;
-import static org.apache.seata.common.DefaultValues.DEFAULT_SELECTOR_THREAD_SIZE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_WORKER_THREAD_PREFIX;
 
 /**
@@ -345,11 +345,13 @@ public class NettyClientConfig extends NettyBaseConfig {
 
     /**
      * Gets client selector thread size.
+     * If the configured thread size is less than or equal to 0, it returns the default value.
      *
-     * @return the client selector thread size
+     * @return the client selector thread size, or the default value if the configured size is invalid.
      */
     public int getClientSelectorThreadSize() {
-        return CONFIG.getInt(ConfigurationKeys.CLIENT_SELECTOR_THREAD_SIZE, DEFAULT_SELECTOR_THREAD_SIZE);
+        int threadSize = CONFIG.getInt(ConfigurationKeys.CLIENT_SELECTOR_THREAD_SIZE, WorkThreadMode.Default.getValue());
+        return threadSize > 0 ? threadSize : WorkThreadMode.Default.getValue();
     }
 
     /**
@@ -449,6 +451,10 @@ public class NettyClientConfig extends NettyBaseConfig {
      */
     public String getRmDispatchThreadPrefix() {
         return RPC_DISPATCH_THREAD_PREFIX + "_" + NettyPoolKey.TransactionRole.RMROLE.name();
+    }
+
+    public String getProtocol() {
+        return CONFIG.getConfig(org.apache.seata.common.ConfigurationKeys.TRANSPORT_PROTOCOL, DEFAULT_PROTOCOL);
     }
 
     @Deprecated

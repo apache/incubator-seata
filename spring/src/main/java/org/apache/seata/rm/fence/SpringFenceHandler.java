@@ -18,8 +18,12 @@ package org.apache.seata.rm.fence;
 
 import java.lang.reflect.Method;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -28,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.sql.DataSource;
 
+import org.apache.seata.common.Constants;
 import org.apache.seata.common.exception.ExceptionUtil;
 import org.apache.seata.common.exception.FrameworkErrorCode;
 import org.apache.seata.common.exception.SkipCallbackWrapperException;
@@ -41,10 +46,14 @@ import org.apache.seata.integration.tx.api.fence.store.CommonFenceDO;
 import org.apache.seata.integration.tx.api.fence.store.CommonFenceStore;
 import org.apache.seata.integration.tx.api.fence.store.db.CommonFenceStoreDataBaseDAO;
 import org.apache.seata.integration.tx.api.remoting.TwoPhaseResult;
+import org.apache.seata.rm.tcc.api.BusinessActionContext;
+import org.apache.seata.rm.tcc.api.BusinessActionContextUtil;
+import org.apache.seata.rm.tcc.utils.MethodUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
 /**
@@ -108,7 +117,8 @@ public class SpringFenceHandler implements FenceHandler {
      */
     @Override
     public Object prepareFence(String xid, Long branchId, String actionName, Callback<Object> targetCallback) {
-        return transactionTemplate.execute(status -> {
+        TransactionTemplate template = createTransactionTemplateForTransactionalMethod(null);
+        return template.execute(status -> {
             try {
                 Connection conn = DataSourceUtils.getConnection(dataSource);
                 boolean result = insertCommonFenceLog(conn, xid, branchId, actionName, CommonFenceConstant.STATUS_TRIED);
@@ -146,7 +156,8 @@ public class SpringFenceHandler implements FenceHandler {
     @Override
     public boolean commitFence(Method commitMethod, Object targetTCCBean,
                                       String xid, Long branchId, Object[] args) {
-        return transactionTemplate.execute(status -> {
+        TransactionTemplate template = createTransactionTemplateForTransactionalMethod(MethodUtils.getTransactionalAnnotationByMethod(commitMethod, targetTCCBean));
+        return template.execute(status -> {
             try {
                 Connection conn = DataSourceUtils.getConnection(dataSource);
                 CommonFenceDO commonFenceDO = COMMON_FENCE_DAO.queryCommonFenceDO(conn, xid, branchId);
@@ -188,7 +199,8 @@ public class SpringFenceHandler implements FenceHandler {
     @Override
     public boolean rollbackFence(Method rollbackMethod, Object targetTCCBean,
                                         String xid, Long branchId, Object[] args, String actionName) {
-        return transactionTemplate.execute(status -> {
+        TransactionTemplate template = createTransactionTemplateForTransactionalMethod(MethodUtils.getTransactionalAnnotationByMethod(rollbackMethod, targetTCCBean));
+        return template.execute(status -> {
             try {
                 Connection conn = DataSourceUtils.getConnection(dataSource);
                 CommonFenceDO commonFenceDO = COMMON_FENCE_DAO.queryCommonFenceDO(conn, xid, branchId);
@@ -218,6 +230,16 @@ public class SpringFenceHandler implements FenceHandler {
                 return result;
             } catch (Throwable t) {
                 status.setRollbackOnly();
+                Throwable cause = t.getCause();
+                if (cause != null && cause instanceof SQLException) {
+                    SQLException sqlException = (SQLException) cause;
+                    String sqlState = sqlException.getSQLState();
+                    int errorCode = sqlException.getErrorCode();
+                    if (Constants.DEAD_LOCK_SQL_STATE.equals(sqlState) && Constants.DEAD_LOCK_ERROR_CODE == errorCode) {
+                        // MySQL deadlock exception
+                        LOGGER.error("Common fence rollback fail. xid: {}, branchId: {}, This exception may be due to the deadlock caused by the transaction isolation level being Repeatable Read. The seata server will try to roll back again, so you can ignore this exception. (To avoid this exception, you can set transaction isolation to Read Committed.)", xid, branchId);
+                    }
+                }
                 throw new SkipCallbackWrapperException(t);
             }
         });
@@ -350,6 +372,31 @@ public class SpringFenceHandler implements FenceHandler {
             LOG_QUEUE.add(logIdentity);
         } catch (Exception e) {
             LOGGER.warn("Insert tcc fence record into queue for async delete error,xid:{},branchId:{}", xid, branchId, e);
+        }
+    }
+
+    /**
+     * Creating a transactionTemplate with business transactional attributes
+     * @param transactional Transactional annotation
+     * @return
+     */
+    private TransactionTemplate createTransactionTemplateForTransactionalMethod(Transactional transactional) {
+        Map<String, Object> businessActionContext = Optional.ofNullable(BusinessActionContextUtil.getContext()).map(BusinessActionContext::getActionContext).orElse(null);
+        if (transactional == null && businessActionContext == null) {
+            return transactionTemplate;
+        }
+        if (transactional != null) {
+            TransactionTemplate template = new TransactionTemplate(Objects.requireNonNull(transactionTemplate.getTransactionManager()));
+            template.setIsolationLevel(transactional.isolation().value());
+            return template;
+        } else {
+            boolean containIsolation = businessActionContext.containsKey(Constants.TX_ISOLATION);
+            if (!containIsolation) {
+                return transactionTemplate;
+            }
+            TransactionTemplate template = new TransactionTemplate(Objects.requireNonNull(transactionTemplate.getTransactionManager()));
+            template.setIsolationLevel((int) businessActionContext.get(Constants.TX_ISOLATION));
+            return template;
         }
     }
 

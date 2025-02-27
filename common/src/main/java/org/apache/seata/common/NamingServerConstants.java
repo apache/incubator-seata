@@ -25,7 +25,7 @@ public interface NamingServerConstants {
     /**
      * The constant HTTP_ADD_GROUP_SUFFIX
      */
-    String HTTP_ADD_GROUP_SUFFIX = "/naming/v1/addVGroup?";
+    String HTTP_ADD_GROUP_SUFFIX = "/vgroup/v1/addVGroup?";
 
     /**
      * The constant CONSTANT_UNIT
@@ -40,7 +40,7 @@ public interface NamingServerConstants {
     /**
      * The constant HTTP_REMOVE_GROUP_SUFFIX
      */
-    String HTTP_REMOVE_GROUP_SUFFIX = "/naming/v1/removeVGroup?";
+    String HTTP_REMOVE_GROUP_SUFFIX = "/vgroup/v1/removeVGroup?";
 
     /**
      * The constant IP_PORT_SPLIT_CHAR

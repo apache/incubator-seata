@@ -34,7 +34,7 @@ import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_E
 
 
 public class BasePropertiesTest {
-    protected static AnnotationConfigApplicationContext applicationContex;
+    protected static AnnotationConfigApplicationContext applicationContext;
     protected static final String STR_TEST_AAA = "aaa";
     protected static final String STR_TEST_BBB = "bbb";
     protected static final String STR_TEST_CCC = "ccc";
@@ -47,28 +47,28 @@ public class BasePropertiesTest {
 
     @BeforeEach
     public void setUp() throws IOException {
-        applicationContex = new AnnotationConfigApplicationContext(
+        applicationContext = new AnnotationConfigApplicationContext(
             new String[] {"org.apache.seata.spring.boot.autoconfigure.properties.config.test"});
         SeataCoreEnvironmentPostProcessor processor = new SeataCoreEnvironmentPostProcessor();
         processor.postProcessEnvironment(null, null);
 
         // set new applicationContex for test cases in extension test classes
-        ObjectHolder.INSTANCE.setObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT, applicationContex);
-        ObjectHolder.INSTANCE.setObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT, applicationContex.getEnvironment());
+        ObjectHolder.INSTANCE.setObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT, applicationContext);
+        ObjectHolder.INSTANCE.setObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT, applicationContext.getEnvironment());
         Properties properties=new Properties();
         ClassLoader classLoader = getClass().getClassLoader();
         File f = new File(classLoader.getResource("application-test.properties").getFile());
         try(InputStream in =new FileInputStream(f)) {
             properties.load(in);
         }
-        applicationContex.getEnvironment().getPropertySources().addFirst(new PropertiesPropertySource("serverProperties", properties));
+        applicationContext.getEnvironment().getPropertySources().addFirst(new PropertiesPropertySource("serverProperties", properties));
 
     }
 
     @AfterEach
     public void closeContext() {
-        if(applicationContex!=null) {
-            applicationContex.close();
+        if(applicationContext!=null) {
+            applicationContext.close();
         }
     }
 

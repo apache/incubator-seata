@@ -26,14 +26,17 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.seata.common.Constants;
 import org.apache.seata.common.holder.ObjectHolder;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
 
@@ -42,9 +45,19 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  * The type String utils test.
- *
  */
 public class StringUtilsTest {
+
+    private Iterator<String> emptyIterator;
+    private Iterator<String> singleElementIterator;
+    private Iterator<String> multipleElementsIterator;
+
+    @BeforeEach
+    void setUp() {
+        emptyIterator = Collections.emptyIterator();
+        singleElementIterator = Collections.singletonList("Hello").iterator();
+        multipleElementsIterator = Arrays.asList("Hello", "World", "Java").iterator();
+    }
 
     /**
      * Test is empty.
@@ -107,7 +120,7 @@ public class StringUtilsTest {
     }
 
     @Test
-    public void testHump2Line(){
+    public void testHump2Line() {
         assertThat(StringUtils.hump2Line("abc-d").equals("abcD")).isTrue();
         assertThat(StringUtils.hump2Line("aBc").equals("a-bc")).isTrue();
         assertThat(StringUtils.hump2Line("abc").equals("abc")).isTrue();
@@ -117,8 +130,8 @@ public class StringUtilsTest {
     public void testInputStream2String() throws IOException {
         assertNull(StringUtils.inputStream2String(null));
         String data = "abc\n"
-                + ":\"klsdf\n"
-                + "2ks,x:\".,-3sd˚ø≤ø¬≥";
+            + ":\"klsdf\n"
+            + "2ks,x:\".,-3sd˚ø≤ø¬≥";
         ByteArrayInputStream inputStream = new ByteArrayInputStream(data.getBytes(Constants.DEFAULT_CHARSET));
         assertThat(StringUtils.inputStream2String(inputStream)).isEqualTo(data);
     }
@@ -127,8 +140,8 @@ public class StringUtilsTest {
     void inputStream2Bytes() {
         assertNull(StringUtils.inputStream2Bytes(null));
         String data = "abc\n"
-                + ":\"klsdf\n"
-                + "2ks,x:\".,-3sd˚ø≤ø¬≥";
+            + ":\"klsdf\n"
+            + "2ks,x:\".,-3sd˚ø≤ø¬≥";
         byte[] bs = data.getBytes(Constants.DEFAULT_CHARSET);
         ByteArrayInputStream inputStream = new ByteArrayInputStream(data.getBytes(Constants.DEFAULT_CHARSET));
         assertThat(StringUtils.inputStream2Bytes(inputStream)).isEqualTo(bs);
@@ -249,7 +262,6 @@ public class StringUtilsTest {
         Assertions.assertEquals("{\"aaa\"->111, \"bbb\"->true, \"self\"->(this HashMap), \"list\"->[(ref HashMap), 'c']}", StringUtils.toString(map));
         Assertions.assertFalse(CycleDependencyHandler.isStarting());
 
-
         //case: Object
         Assertions.assertEquals("CycleDependency(s=\"a\", obj=null)", StringUtils.toString(CycleDependency.A));
         //case: Object, and cycle dependency
@@ -300,8 +312,7 @@ public class StringUtilsTest {
     }
 
     @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.TYPE)
-    @interface TestAnnotation {
+    @Target(ElementType.TYPE) @interface TestAnnotation {
         boolean test() default false;
     }
 
@@ -374,21 +385,21 @@ public class StringUtilsTest {
         public String toString() {
             toStringTriggered = true;
             return "(" +
-                    "s=" + s + "," +
-                    "obj=" + (obj != this ? String.valueOf(obj) : "(this CycleDependency)") +
-                    ')';
+                "s=" + s + "," +
+                "obj=" + (obj != this ? String.valueOf(obj) : "(this CycleDependency)") +
+                ')';
         }
     }
 
     @Test
     void checkDataSize() {
-        assertThat(StringUtils.checkDataSize("","testdata",10,false)).isEqualTo(Boolean.TRUE);
-        assertThat(StringUtils.checkDataSize("1234567","testdata",17,false)).isEqualTo(Boolean.TRUE);
-        assertThat(StringUtils.checkDataSize("1234567","testdata",4,false)).isEqualTo(Boolean.FALSE);
+        assertThat(StringUtils.checkDataSize("", "testdata", 10, false)).isEqualTo(Boolean.TRUE);
+        assertThat(StringUtils.checkDataSize("1234567", "testdata", 17, false)).isEqualTo(Boolean.TRUE);
+        assertThat(StringUtils.checkDataSize("1234567", "testdata", 4, false)).isEqualTo(Boolean.FALSE);
         Assertions.assertThrows(IllegalArgumentException.class, () ->
-                StringUtils.checkDataSize("1234567","testdata",6,true)
+            StringUtils.checkDataSize("1234567", "testdata", 6, true)
         );
-        assertThat( StringUtils.checkDataSize("1234567","testdata",6,false)).isEqualTo(Boolean.FALSE);
+        assertThat(StringUtils.checkDataSize("1234567", "testdata", 6, false)).isEqualTo(Boolean.FALSE);
     }
 
     @Test
@@ -403,5 +414,63 @@ public class StringUtilsTest {
         Assertions.assertFalse(StringUtils.hasUpperCase(null));
         Assertions.assertFalse(StringUtils.hasUpperCase("a"));
         Assertions.assertTrue(StringUtils.hasUpperCase("A"));
+    }
+
+    @Test
+    void joinNullIteratorReturnsNull() {
+        Assertions.assertNull(StringUtils.join(null, ","));
+    }
+
+    @Test
+    void joinEmptyReturnsEmptyString() {
+        Assertions.assertEquals("", StringUtils.join(emptyIterator, ","));
+    }
+
+    @Test
+    void joinSingleReturnsSingleElement() {
+        Assertions.assertEquals("Hello", StringUtils.join(singleElementIterator, ","));
+    }
+
+    @Test
+    void joinMultipleWithSeparatorReturnsSeparator() {
+        Assertions.assertEquals("Hello,World,Java", StringUtils.join(multipleElementsIterator, ","));
+    }
+
+    @Test
+    void joinMultipleSeparatorReturnsSeparator() {
+        Assertions.assertEquals("HelloWorldJava", StringUtils.join(multipleElementsIterator, null));
+    }
+
+    @Test
+    void joinMultipleAndNullReturnsJoinedString() {
+        Iterator<String> mixedIterator = Arrays.asList("Hello", "", "World", null, "Java").iterator();
+        Assertions.assertEquals("Hello,,World,,Java", StringUtils.join(mixedIterator, ","));
+    }
+
+    @Test
+    void hasLengthNullCharSequenceReturnsFalse() {
+        String nullCharSequence = null;
+        String emptyCharSequence = "";
+        String singleCharSequence = "a";
+        String multipleCharSequence = "abc";
+        Assertions.assertFalse(StringUtils.hasLength(nullCharSequence));
+        Assertions.assertFalse(StringUtils.hasLength(emptyCharSequence));
+        Assertions.assertTrue(StringUtils.hasLength(singleCharSequence));
+        Assertions.assertTrue(StringUtils.hasLength(multipleCharSequence));
+    }
+
+    @Test
+    void hasTextNullCharSequenceReturnsFalse() {
+        String nullCharSequence = null;
+        String emptyCharSequence = "";
+        String singleCharSequence = "a";
+        String multipleCharSequence = "abc";
+        String whitespaceCharSequence = " a b c ";
+        Assertions.assertFalse(StringUtils.hasText(nullCharSequence));
+        Assertions.assertFalse(StringUtils.hasText(emptyCharSequence));
+        Assertions.assertTrue(StringUtils.hasText(singleCharSequence));
+        Assertions.assertTrue(StringUtils.hasText(multipleCharSequence));
+        Assertions.assertFalse(StringUtils.hasText("   "));
+        Assertions.assertTrue(StringUtils.hasText(whitespaceCharSequence));
     }
 }

@@ -102,6 +102,11 @@ public interface Constants {
     String TX_ACTION_CONTEXT = "actionContext";
 
     /**
+     * isolation
+     */
+    String TX_ISOLATION = "isolation";
+
+    /**
      * default charset name
      */
     String DEFAULT_CHARSET_NAME = "UTF-8";
@@ -176,6 +181,10 @@ public interface Constants {
     String ROLLBACKING = "Rollbacking";
 
     /**
+     * The constant END
+     */
+    String END = "END";
+    /**
      * The constant AUTO_COMMIT
      */
     String AUTO_COMMIT = "autoCommit";
@@ -219,5 +228,15 @@ public interface Constants {
      * The constant JACKSON_JSON_TEXT_PREFIX
      */
     String JACKSON_JSON_TEXT_PREFIX = "{\"@class\":";
+
+    /**
+     * The constant DEAD_LOCK_SQL_STATE
+     */
+    String DEAD_LOCK_SQL_STATE = "40001";
+
+    /**
+     * The constant DEAD_LOCK_ERROR_CODE
+     */
+    int DEAD_LOCK_ERROR_CODE = 1213;
 
 }

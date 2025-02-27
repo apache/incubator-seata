@@ -84,6 +84,8 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     private static final Pattern DEFAULT_SLB_REGISTRY_PATTERN = Pattern.compile("(?!.*internal)(?=.*seata).*mse.aliyuncs.com");
     private static volatile Boolean useSLBWay;
 
+    private String transactionServiceGroup;
+
     private NacosRegistryServiceImpl() {
         String configForNacosSLB = FILE_CONFIG.getConfig(getNacosUrlPatternOfSLB());
         Pattern patternOfNacosRegistryForSLB = StringUtils.isBlank(configForNacosSLB)
@@ -145,6 +147,7 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
 
     @Override
     public List<InetSocketAddress> lookup(String key) throws Exception {
+        transactionServiceGroup = key;
         String clusterName = getServiceGroup(key);
         if (clusterName == null) {
             String missingDataId = PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key;
@@ -192,8 +195,9 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
                                     .map(eachInstance -> new InetSocketAddress(eachInstance.getIp(), eachInstance.getPort()))
                                     .collect(Collectors.toList());
                             CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
-
-                            removeOfflineAddressesIfNecessary(clusterName, newAddressList);
+                            if (StringUtils.isNotEmpty(transactionServiceGroup)) {
+                                removeOfflineAddressesIfNecessary(transactionServiceGroup, clusterName, newAddressList);
+                            }
                         }
                     });
                 }

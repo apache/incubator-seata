@@ -18,3 +18,5 @@ org.apache.seata.rm.datasource.undo.parser.FastjsonUndoLogParser
 org.apache.seata.rm.datasource.undo.parser.JacksonUndoLogParser
 org.apache.seata.rm.datasource.undo.parser.ProtostuffUndoLogParser
 org.apache.seata.rm.datasource.undo.parser.KryoUndoLogParser
+org.apache.seata.rm.datasource.undo.parser.Fastjson2UndoLogParser
+org.apache.seata.rm.datasource.undo.parser.FuryUndoLogParser

@@ -23,3 +23,5 @@ org.apache.seata.core.store.db.sql.log.SqlServerLogStoreSqls
 org.apache.seata.core.store.db.sql.log.MariadbLogStoreSqls
 org.apache.seata.core.store.db.sql.log.PolarDBXLogStoreSqls
 org.apache.seata.core.store.db.sql.log.DmLogStoreSqls
+org.apache.seata.core.store.db.sql.log.OscarLogStoreSqls
+org.apache.seata.core.store.db.sql.log.KingbaseLogStoreSqls

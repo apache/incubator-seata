@@ -28,6 +28,7 @@ import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.sqlparser.struct.ColumnMeta;
 import org.apache.seata.sqlparser.struct.IndexMeta;
 import org.apache.seata.sqlparser.struct.IndexType;
+import org.apache.seata.sqlparser.struct.SqlServerTableMeta;
 import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.sqlparser.util.ColumnUtils;
 import org.apache.seata.sqlparser.util.JdbcConstants;
@@ -47,28 +48,24 @@ public class SqlServerTableMetaCache extends AbstractTableMetaCache {
         StringBuilder cacheKey = new StringBuilder(resourceId);
         cacheKey.append(".");
 
-        //separate it to schemaName and tableName
-        String[] tableNameWithSchema = tableName.split("\\.");
-        String defaultTableName = tableNameWithSchema[tableNameWithSchema.length - 1];
-
         DatabaseMetaData databaseMetaData;
         try {
             databaseMetaData = connection.getMetaData();
         } catch (SQLException e) {
             LOGGER.error("Could not get connection, use default cache key {}", e.getMessage(), e);
-            return cacheKey.append(defaultTableName).toString();
+            return cacheKey.append(tableName).toString();
         }
 
         try {
             //prevent duplicated cache key
             if (databaseMetaData.supportsMixedCaseIdentifiers()) {
-                cacheKey.append(defaultTableName);
+                cacheKey.append(tableName);
             } else {
-                cacheKey.append(defaultTableName.toUpperCase());
+                cacheKey.append(tableName.toUpperCase());
             }
         } catch (SQLException e) {
             LOGGER.error("Could not get supportsMixedCaseIdentifiers in connection metadata, use default cache key {}", e.getMessage(), e);
-            return cacheKey.append(defaultTableName).toString();
+            return cacheKey.append(tableName).toString();
         }
 
         return cacheKey.toString();
@@ -86,8 +83,9 @@ public class SqlServerTableMetaCache extends AbstractTableMetaCache {
     }
 
     private TableMeta resultSetMetaToSchema(Connection connection, String tableName) throws SQLException {
-        TableMeta tm = new TableMeta();
+        SqlServerTableMeta tm = new SqlServerTableMeta();
         tm.setTableName(tableName);
+        tm.setOriginalTableName(tableName);
 
         tableName = ColumnUtils.delEscape(tableName, JdbcConstants.SQLSERVER);
         String[] schemaTable = tableName.split("\\.");
@@ -137,6 +135,9 @@ public class SqlServerTableMetaCache extends AbstractTableMetaCache {
                 col.setOrdinalPosition(rsColumns.getInt("ORDINAL_POSITION"));
                 col.setIsNullAble(rsColumns.getString("IS_NULLABLE"));
                 col.setIsAutoincrement(rsColumns.getString("IS_AUTOINCREMENT"));
+                if (col.isAutoincrement()) {
+                    tm.setTableIdentifyExistence(true);
+                }
 
                 if (tm.getAllColumns().containsKey(col.getColumnName())) {
                     throw new NotSupportYetException("Not support the table has the same column name with different case yet");
@@ -189,8 +190,8 @@ public class SqlServerTableMetaCache extends AbstractTableMetaCache {
             }
 
             while (rsTable.next()) {
-                String rsTableName = rsTable.getString("TABLE_NAME");
                 String rsTableSchema = rsTable.getString("TABLE_SCHEM");
+                String rsTableName = rsTable.getString("TABLE_NAME");
                 //set origin tableName with schema if necessary
                 if ("dbo".equalsIgnoreCase(rsTableSchema)) {
                     //for compatibility reasons, old clients generally do not have the 'dbo' default schema by default.

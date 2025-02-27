@@ -17,7 +17,7 @@
 package org.apache.seata.saga.statelang.domain.impl;
 
 import org.apache.seata.saga.statelang.domain.CompensationTriggerState;
-import org.apache.seata.saga.statelang.domain.DomainConstants;
+import org.apache.seata.saga.statelang.domain.StateType;
 
 /**
  * Triggering the "compensation" process for the state machine
@@ -26,6 +26,6 @@ import org.apache.seata.saga.statelang.domain.DomainConstants;
 public class CompensationTriggerStateImpl extends BaseState implements CompensationTriggerState {
 
     public CompensationTriggerStateImpl() {
-        setType(DomainConstants.STATE_TYPE_COMPENSATION_TRIGGER);
+        setType(StateType.COMPENSATION_TRIGGER);
     }
 }

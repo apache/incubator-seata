@@ -26,6 +26,7 @@ import org.apache.seata.common.exception.FrameworkErrorCode;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.saga.engine.exception.EngineExecutionException;
+import org.apache.seata.saga.statelang.domain.StateType;
 import org.apache.seata.saga.engine.utils.ExceptionUtils;
 import org.apache.seata.saga.proctrl.ProcessContext;
 import org.apache.seata.saga.statelang.domain.DomainConstants;
@@ -125,13 +126,13 @@ public class CompensationHolder {
         if (stateInstance.isIgnoreStatus()) {
             return false;
         }
-        if (DomainConstants.STATE_TYPE_SUB_STATE_MACHINE.equals(stateInstance.getType())) {
+        if (StateType.SUB_STATE_MACHINE.equals(stateInstance.getType())) {
 
             return (!ExecutionStatus.FA.equals(stateInstance.getStatus())) && (!ExecutionStatus.SU.equals(
                 stateInstance.getCompensationStatus()));
         } else {
 
-            return DomainConstants.STATE_TYPE_SERVICE_TASK.equals(stateInstance.getType()) && !stateInstance
+            return StateType.SERVICE_TASK.equals(stateInstance.getType()) && !stateInstance
                 .isForCompensation() && (!ExecutionStatus.FA.equals(stateInstance.getStatus())) && (!ExecutionStatus.SU
                 .equals(stateInstance.getCompensationStatus()));
         }

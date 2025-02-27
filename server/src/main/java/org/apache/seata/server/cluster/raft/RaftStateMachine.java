@@ -49,11 +49,15 @@ import org.apache.seata.common.XID;
 import org.apache.seata.common.holder.ObjectHolder;
 import org.apache.seata.common.metadata.ClusterRole;
 import org.apache.seata.common.metadata.Node;
+import org.apache.seata.common.store.SessionMode;
+import org.apache.seata.common.store.StoreMode;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.core.serializer.SerializerType;
 import org.apache.seata.server.cluster.raft.context.SeataClusterContext;
+import org.apache.seata.server.cluster.raft.execute.vgroup.VGroupAddExecute;
+import org.apache.seata.server.cluster.raft.execute.vgroup.VGroupRemoveExecute;
 import org.apache.seata.server.cluster.raft.processor.request.PutNodeMetadataRequest;
 import org.apache.seata.server.cluster.raft.processor.response.PutNodeMetadataResponse;
 import org.apache.seata.server.cluster.raft.snapshot.metadata.LeaderMetadataSnapshotFile;
@@ -86,11 +90,13 @@ import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_E
 import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
 import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.ADD_BRANCH_SESSION;
 import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.ADD_GLOBAL_SESSION;
+import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.ADD_VGROUP_MAPPING;
 import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.REFRESH_CLUSTER_METADATA;
 import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.RELEASE_BRANCH_SESSION_LOCK;
 import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.RELEASE_GLOBAL_SESSION_LOCK;
 import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.REMOVE_BRANCH_SESSION;
 import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.REMOVE_GLOBAL_SESSION;
+import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.REMOVE_VGROUP_MAPPING;
 import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.UPDATE_BRANCH_SESSION_STATUS;
 import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.UPDATE_GLOBAL_SESSION_STATUS;
 
@@ -140,7 +146,7 @@ public class RaftStateMachine extends StateMachineAdapter {
             return null;
         });
         registryStoreSnapshotFile(new LeaderMetadataSnapshotFile(group));
-        if (StoreConfig.StoreMode.RAFT.getName().equalsIgnoreCase(mode)) {
+        if (StoreMode.RAFT.getName().equalsIgnoreCase(mode)) {
             registryStoreSnapshotFile(new SessionSnapshotFile(group));
             EXECUTES.put(ADD_GLOBAL_SESSION, new AddGlobalSessionExecute());
             EXECUTES.put(ADD_BRANCH_SESSION, new AddBranchSessionExecute());
@@ -150,6 +156,8 @@ public class RaftStateMachine extends StateMachineAdapter {
             EXECUTES.put(REMOVE_GLOBAL_SESSION, new RemoveGlobalSessionExecute());
             EXECUTES.put(UPDATE_BRANCH_SESSION_STATUS, new UpdateBranchSessionExecute());
             EXECUTES.put(RELEASE_BRANCH_SESSION_LOCK, new BranchReleaseLockExecute());
+            EXECUTES.put(REMOVE_VGROUP_MAPPING, new VGroupRemoveExecute());
+            EXECUTES.put(ADD_VGROUP_MAPPING, new VGroupAddExecute());
             this.scheduledFuture =
                 RESYNC_METADATA_POOL.scheduleAtFixedRate(() -> syncCurrentNodeInfo(group), 10, 10, TimeUnit.SECONDS);
         }
@@ -180,7 +188,7 @@ public class RaftStateMachine extends StateMachineAdapter {
 
     @Override
     public void onSnapshotSave(final SnapshotWriter writer, final Closure done) {
-        if (!StringUtils.equals(StoreConfig.SessionMode.RAFT.getName(), mode)) {
+        if (!StringUtils.equals(SessionMode.RAFT.getName(), mode)) {
             done.run(Status.OK());
             return;
         }
@@ -198,7 +206,7 @@ public class RaftStateMachine extends StateMachineAdapter {
 
     @Override
     public boolean onSnapshotLoad(final SnapshotReader reader) {
-        if (!StringUtils.equals(StoreConfig.SessionMode.RAFT.getName(), mode)) {
+        if (!StringUtils.equals(SessionMode.RAFT.getName(), mode)) {
             return true;
         }
         if (isLeader()) {
@@ -232,11 +240,14 @@ public class RaftStateMachine extends StateMachineAdapter {
                 try {
                     // become the leader again,reloading global session
                     SessionHolder.reload(SessionHolder.getRootSessionManager().allSessions(),
-                        StoreConfig.SessionMode.RAFT, false);
+                        SessionMode.RAFT, false);
                 } finally {
                     SeataClusterContext.unbindGroup();
                 }
             });
+            Configuration conf = RouteTable.getInstance().getConfiguration(group);
+            // A member change might trigger a leader re-election. At this point, it’s necessary to filter out non-existent members and synchronize again.
+            changePeers(conf);
         }
     }
 
@@ -262,28 +273,40 @@ public class RaftStateMachine extends StateMachineAdapter {
     public void onConfigurationCommitted(Configuration conf) {
         LOGGER.info("groupId: {}, onConfigurationCommitted: {}.", group, conf);
         RouteTable.getInstance().updateConfiguration(group, conf);
+        // After a member change, the metadata needs to be synchronized again.
+        initSync.compareAndSet(true, false);
         if (isLeader()) {
-            lock.lock();
-            try {
-                List<PeerId> newFollowers = conf.getPeers();
-                Set<PeerId> newLearners = conf.getLearners();
-                List<Node> currentFollowers = raftClusterMetadata.getFollowers();
-                if (CollectionUtils.isNotEmpty(newFollowers)) {
-                    raftClusterMetadata.setFollowers(currentFollowers.stream()
-                        .filter(node -> contains(node, newFollowers)).collect(Collectors.toList()));
-                }
-                if (CollectionUtils.isNotEmpty(newLearners)) {
-                    raftClusterMetadata.setLearner(raftClusterMetadata.getLearner().stream()
-                        .filter(node -> contains(node, newLearners)).collect(Collectors.toList()));
-                }
-                syncMetadata();
-            } finally {
-                lock.unlock();
+            changePeers(conf);
+        }
+    }
+
+    private void changePeers(Configuration conf) {
+        lock.lock();
+        try {
+            List<PeerId> newFollowers = conf.getPeers();
+            Set<PeerId> newLearners = conf.getLearners();
+            List<Node> currentFollowers = raftClusterMetadata.getFollowers();
+            if (CollectionUtils.isNotEmpty(newFollowers)) {
+                raftClusterMetadata.setFollowers(currentFollowers.stream().filter(node -> contains(node, newFollowers))
+                    .collect(Collectors.toList()));
             }
+            if (CollectionUtils.isNotEmpty(newLearners)) {
+                raftClusterMetadata.setLearner(raftClusterMetadata.getLearner().stream()
+                    .filter(node -> contains(node, newLearners)).collect(Collectors.toList()));
+            } else {
+                raftClusterMetadata.setLearner(Collections.emptyList());
+            }
+            CompletableFuture.runAsync(this::syncMetadata, RESYNC_METADATA_POOL);
+        } finally {
+            lock.unlock();
         }
     }
 
     private boolean contains(Node node, Collection<PeerId> list) {
+        // This indicates that the node is of a lower version.
+        // When scaling up or down on a higher version
+        // you need to ensure that the cluster is consistent first
+        // otherwise, the lower version nodes may be removed.
         if (node.getInternal() == null) {
             return true;
         }
@@ -347,7 +370,7 @@ public class RaftStateMachine extends StateMachineAdapter {
         if (leaderNode == null || (leaderNode.getInternal() != null
             && !cureentPeerId.equals(new PeerId(leaderNode.getInternal().getHost(), leaderNode.getInternal().getPort())))) {
             Node leader =
-                raftClusterMetadata.createNode(XID.getIpAddress(), XID.getPort(), raftServer.getServerId().getPort(),
+                raftClusterMetadata.createNode(cureentPeerId.getIp(), XID.getPort(), raftServer.getServerId().getPort(),
                     Integer.parseInt(
                         ((Environment)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT))
                             .getProperty("server.port", String.valueOf(7091))),
@@ -367,17 +390,19 @@ public class RaftStateMachine extends StateMachineAdapter {
     }
 
     private void syncCurrentNodeInfo(String group) {
-        if (initSync.get()) {
-            return;
-        }
-        try {
-            RouteTable.getInstance().refreshLeader(RaftServerManager.getCliClientServiceInstance(), group, 1000);
-            PeerId peerId = RouteTable.getInstance().selectLeader(group);
-            if (peerId != null) {
-                syncCurrentNodeInfo(peerId);
+        if (initSync.compareAndSet(false, true)) {
+            try {
+                RouteTable.getInstance().refreshLeader(RaftServerManager.getCliClientServiceInstance(), group, 1000);
+                PeerId peerId = RouteTable.getInstance().selectLeader(group);
+                if (peerId != null) {
+                    syncCurrentNodeInfo(peerId);
+                } else {
+                    initSync.compareAndSet(true, false);
+                }
+            } catch (Exception e) {
+                initSync.compareAndSet(true, false);
+                LOGGER.error(e.getMessage(), e);
             }
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
         }
     }
 
@@ -385,10 +410,10 @@ public class RaftStateMachine extends StateMachineAdapter {
         try {
             // Ensure that the current leader must be version 2.1 or later to synchronize the operation
             Node leader = raftClusterMetadata.getLeader();
-            if (leader != null && StringUtils.isNotBlank(leader.getVersion()) && initSync.compareAndSet(false, true)) {
+            if (leader != null && StringUtils.isNotBlank(leader.getVersion())) {
                 RaftServer raftServer = RaftServerManager.getRaftServer(group);
                 PeerId cureentPeerId = raftServer.getServerId();
-                Node node = raftClusterMetadata.createNode(XID.getIpAddress(), XID.getPort(), cureentPeerId.getPort(),
+                Node node = raftClusterMetadata.createNode(cureentPeerId.getIp(), XID.getPort(), cureentPeerId.getPort(),
                     Integer.parseInt(
                         ((Environment)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT))
                             .getProperty("server.port", String.valueOf(7091))),
@@ -423,8 +448,11 @@ public class RaftStateMachine extends StateMachineAdapter {
                                 err);
                         }
                     }, 30000);
+            } else {
+                initSync.compareAndSet(true, false);
             }
         } catch (Exception e) {
+            initSync.compareAndSet(true, false);
             LOGGER.error(e.getMessage(), e);
         }
     }

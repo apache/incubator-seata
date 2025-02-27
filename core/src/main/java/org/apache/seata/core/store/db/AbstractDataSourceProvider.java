@@ -88,7 +88,7 @@ public abstract class AbstractDataSourceProvider implements DataSourceProvider, 
     public void validate() {
         //valid driver class name
         String driverClassName = getDriverClassName();
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        ClassLoader loader = getDriverClassLoader();
         if (null == loader) {
             throw new StoreException("class loader set error, you should not use the Bootstrap classloader");
         }
@@ -101,7 +101,7 @@ public abstract class AbstractDataSourceProvider implements DataSourceProvider, 
                 driverClassPath = folderPath + "/jdbc/";
             }
             throw new StoreException(String.format(
-                "the {%s} can't be found in the path %s, please copy database driver dependencies, such as `mysql-connector-java.jar` to the path.", driverClassName, driverClassPath));
+                    "The driver {%s} cannot be found in the path %s. Please ensure that the appropriate database driver dependencies are included in the classpath.", driverClassName, driverClassPath));
         }
 
     }

@@ -97,7 +97,8 @@ public class FileLocker extends AbstractLocker {
             } else if (previousLockBranchSession.getTransactionId() == transactionId) {
                 // Locked by me before
             } else {
-                LOGGER.info("Global lock on [" + tableName + ":" + pk + "] is holding by " + previousLockBranchSession.getBranchId());
+                LOGGER.info("Global lock on [{}:{}] is holding by xid {} branchId {}", tableName, pk,
+                    previousLockBranchSession.getXid(), previousLockBranchSession.getBranchId());
                 try {
                     // Release all acquired locks.
                     branchSession.unlock();
@@ -108,12 +109,8 @@ public class FileLocker extends AbstractLocker {
                     failFast = true;
                     break;
                 }
-                if (canLock) {
-                    canLock = false;
-                    if (autoCommit) {
-                        break;
-                    }
-                }
+                canLock = false;
+                break;
             }
         }
         if (failFast) {
@@ -190,6 +187,14 @@ public class FileLocker extends AbstractLocker {
         LOCK_MAP.clear();
     }
 
+    public static ConcurrentMap<String, ConcurrentMap<String, ConcurrentMap<Integer, BucketLockMap>>> getLockMap() {
+        return LOCK_MAP;
+    }
+
+    public static int getBucketPerTable() {
+        return BUCKET_PER_TABLE;
+    }
+
     /**
      * Because bucket lock map will be key of HashMap(lockHolder), however {@link ConcurrentHashMap} overwrites
      * {@link Object#hashCode()} and {@link Object#equals(Object)}, that leads to hash key conflict in lockHolder.
@@ -200,7 +205,7 @@ public class FileLocker extends AbstractLocker {
         private final ConcurrentHashMap<String/* pk */, BranchSession/* branchSession */> bucketLockMap
             = new ConcurrentHashMap<>();
 
-        ConcurrentHashMap<String, BranchSession> get() {
+        public ConcurrentHashMap<String, BranchSession> get() {
             return bucketLockMap;
         }
 

@@ -16,7 +16,7 @@
  */
 package org.apache.seata.saga.statelang.domain.impl;
 
-import org.apache.seata.saga.statelang.domain.DomainConstants;
+import org.apache.seata.saga.statelang.domain.StateType;
 import org.apache.seata.saga.statelang.domain.SucceedEndState;
 
 /**
@@ -26,6 +26,6 @@ import org.apache.seata.saga.statelang.domain.SucceedEndState;
 public class SucceedEndStateImpl extends BaseState implements SucceedEndState {
 
     public SucceedEndStateImpl() {
-        setType(DomainConstants.STATE_TYPE_SUCCEED);
+        setType(StateType.SUCCEED);
     }
 }

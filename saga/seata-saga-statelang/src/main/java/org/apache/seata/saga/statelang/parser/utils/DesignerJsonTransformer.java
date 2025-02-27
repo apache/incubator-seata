@@ -82,7 +82,7 @@ public class DesignerJsonTransformer {
             String stateId = (String) nodeObj.get("stateId");
             if (states.containsKey(stateId)) {
                 throw new RuntimeException(
-                        "Transform designer json to standard json failed, stateId[" + stateId + "] already exists, pls rename it.");
+                        "Transform designer json to standard json failed, stateId[" + stateId + "] already exists, please rename it.");
             }
 
             String comment = (String) nodeObj.get("label");
@@ -122,7 +122,7 @@ public class DesignerJsonTransformer {
                     machineJsonObject.put("StartState", targetStateId);
                     //Make sure 'StartState' is before 'States'
                     machineJsonObject.put("States", machineJsonObject.remove("States"));
-                } else if ("ServiceTask".equals(sourceType)) {
+                } else if ("ServiceTask".equals(sourceType) || "SubStateMachine".equals(sourceType)) {
                     if (targetNode != null && "Compensation".equals(targetNode.get("stateType"))) {
                         sourceState.put("CompensateState", targetStateId);
                     } else {

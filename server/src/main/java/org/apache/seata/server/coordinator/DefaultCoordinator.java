@@ -28,7 +28,9 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import io.netty.channel.Channel;
+import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.seata.common.DefaultValues;
+import org.apache.seata.common.store.SessionMode;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.config.ConfigurationFactory;
@@ -64,6 +66,7 @@ import org.apache.seata.core.rpc.TransactionMessageHandler;
 import org.apache.seata.core.rpc.netty.ChannelManager;
 import org.apache.seata.core.rpc.netty.NettyRemotingServer;
 import org.apache.seata.server.AbstractTCInboundHandler;
+import org.apache.seata.server.limit.LimitRequestDecorator;
 import org.apache.seata.server.metrics.MetricsPublisher;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
@@ -71,7 +74,6 @@ import org.apache.seata.server.session.SessionCondition;
 import org.apache.seata.server.session.SessionHelper;
 import org.apache.seata.server.session.SessionHolder;
 import org.apache.seata.server.store.StoreConfig;
-import org.apache.commons.lang.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -81,6 +83,7 @@ import static org.apache.seata.common.Constants.COMMITTING;
 import static org.apache.seata.common.Constants.RETRY_COMMITTING;
 import static org.apache.seata.common.Constants.RETRY_ROLLBACKING;
 import static org.apache.seata.common.Constants.ROLLBACKING;
+import static org.apache.seata.common.Constants.END;
 import static org.apache.seata.common.Constants.SYNC_PROCESSING;
 import static org.apache.seata.common.Constants.TX_TIMEOUT_CHECK;
 import static org.apache.seata.common.Constants.UNDOLOG_DELETE;
@@ -90,9 +93,10 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_ENABLE_BRANCH_ASYNC_
 import static org.apache.seata.common.DefaultValues.DEFAULT_MAX_COMMIT_RETRY_TIMEOUT;
 import static org.apache.seata.common.DefaultValues.DEFAULT_MAX_ROLLBACK_RETRY_TIMEOUT;
 import static org.apache.seata.common.DefaultValues.DEFAULT_ROLLBACKING_RETRY_PERIOD;
-import static org.apache.seata.common.DefaultValues.DEFAULT_ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE;
+import static org.apache.seata.common.DefaultValues.DEFAULT_ROLLBACK_FAILED_UNLOCK_ENABLE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_TIMEOUT_RETRY_PERIOD;
 import static org.apache.seata.common.DefaultValues.DEFAULT_UNDO_LOG_DELETE_PERIOD;
+import static org.apache.seata.common.DefaultValues.DEFAULT_END_STATUS_RETRY_PERIOD;
 
 /**
  * The type Default coordinator.
@@ -122,6 +126,12 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      */
     protected static final long ROLLBACKING_RETRY_PERIOD = CONFIG.getLong(ConfigurationKeys.ROLLBACKING_RETRY_PERIOD,
             DEFAULT_ROLLBACKING_RETRY_PERIOD);
+
+    /**
+     * The constant END_STATUS_RETRY_PERIOD.
+     */
+    protected static final long END_STATUS_RETRY_PERIOD = CONFIG.getLong(ConfigurationKeys.END_STATUS_RETRY_PERIOD,
+        DEFAULT_END_STATUS_RETRY_PERIOD);
 
     /**
      * The constant TIMEOUT_RETRY_PERIOD.
@@ -159,7 +169,10 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             ConfigurationKeys.MAX_ROLLBACK_RETRY_TIMEOUT, DEFAULT_MAX_ROLLBACK_RETRY_TIMEOUT);
 
     private static final boolean ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE = ConfigurationFactory.getInstance().getBoolean(
-            ConfigurationKeys.ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE, DEFAULT_ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE);
+            ConfigurationKeys.ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE, DEFAULT_ROLLBACK_FAILED_UNLOCK_ENABLE);
+
+    private static final boolean ROLLBACK_FAILED_UNLOCK_ENABLE = ConfigurationFactory.getInstance().getBoolean(
+        ConfigurationKeys.ROLLBACK_FAILED_UNLOCK_ENABLE, DEFAULT_ROLLBACK_FAILED_UNLOCK_ENABLE);
 
     private static final int RETRY_DEAD_THRESHOLD = ConfigurationFactory.getInstance()
         .getInt(org.apache.seata.common.ConfigurationKeys.RETRY_DEAD_THRESHOLD, DefaultValues.DEFAULT_RETRY_DEAD_THRESHOLD);
@@ -184,12 +197,15 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
     private final GlobalStatus[] retryRollbackingStatuses = new GlobalStatus[] {
         GlobalStatus.TimeoutRollbacking,
-        GlobalStatus.TimeoutRollbackRetrying, GlobalStatus.RollbackRetrying};
+        GlobalStatus.TimeoutRollbackRetrying,
+        GlobalStatus.RollbackRetrying
+    };
 
-    private final GlobalStatus[] retryCommittingStatuses = new GlobalStatus[] {GlobalStatus.CommitRetrying, GlobalStatus.Committed};
+    private final GlobalStatus[] retryCommittingStatuses = new GlobalStatus[] {GlobalStatus.CommitRetrying};
 
     private final GlobalStatus[] rollbackingStatuses = new GlobalStatus[] {GlobalStatus.Rollbacking};
     private final GlobalStatus[] committingStatuses = new GlobalStatus[] {GlobalStatus.Committing};
+    private final GlobalStatus[] endStatuses = new GlobalStatus[] {GlobalStatus.Rollbacked, GlobalStatus.TimeoutRollbacked, GlobalStatus.Committed, GlobalStatus.Finished};
 
     private final ThreadPoolExecutor branchRemoveExecutor;
 
@@ -213,7 +229,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         boolean enableBranchAsyncRemove = CONFIG.getBoolean(
                 ConfigurationKeys.ENABLE_BRANCH_ASYNC_REMOVE, DEFAULT_ENABLE_BRANCH_ASYNC_REMOVE);
         // create branchRemoveExecutor
-        if (enableBranchAsyncRemove && StoreConfig.getSessionMode() != StoreConfig.SessionMode.FILE) {
+        if (enableBranchAsyncRemove && StoreConfig.getSessionMode() != SessionMode.FILE) {
             branchRemoveExecutor = new ThreadPoolExecutor(BRANCH_ASYNC_POOL_SIZE, BRANCH_ASYNC_POOL_SIZE,
                     Integer.MAX_VALUE, TimeUnit.MILLISECONDS,
                     new ArrayBlockingQueue<>(
@@ -229,8 +245,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         if (null == instance) {
             synchronized (DefaultCoordinator.class) {
                 if (null == instance) {
-                    StoreConfig.SessionMode storeMode = StoreConfig.getSessionMode();
-                    instance = Objects.equals(StoreConfig.SessionMode.RAFT, storeMode)
+                    SessionMode storeMode = StoreConfig.getSessionMode();
+                    instance = Objects.equals(SessionMode.RAFT, storeMode)
                         ? new RaftCoordinator(remotingServer) : new DefaultCoordinator(remotingServer);
                 }
             }
@@ -243,6 +259,30 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
             throw new IllegalArgumentException("The instance has not been created.");
         }
         return instance;
+    }
+
+    public boolean doGlobalCommit(GlobalSession globalSession, boolean retrying) throws TransactionException {
+        if (globalSession == null) {
+            return true;
+        }
+        return core.doGlobalCommit(globalSession, retrying);
+    }
+
+    public boolean doGlobalRollback(GlobalSession globalSession, boolean retrying) throws TransactionException {
+        if (globalSession == null) {
+            return true;
+        }
+        return core.doGlobalRollback(globalSession, retrying);
+    }
+
+    public Boolean doBranchDelete(GlobalSession globalSession, BranchSession branchSession) throws TransactionException {
+        if (globalSession == null) {
+            return true;
+        }
+        if (branchSession == null) {
+            return true;
+        }
+        return core.doBranchDelete(globalSession, branchSession);
     }
 
     /**
@@ -341,15 +381,15 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     protected void timeoutCheck() {
         SessionCondition sessionCondition = new SessionCondition(GlobalStatus.Begin);
         sessionCondition.setLazyLoadBranch(true);
-        Collection<GlobalSession> beginGlobalsessions =
+        Collection<GlobalSession> beginGlobalSessions =
             SessionHolder.getRootSessionManager().findGlobalSessions(sessionCondition);
-        if (CollectionUtils.isEmpty(beginGlobalsessions)) {
+        if (CollectionUtils.isEmpty(beginGlobalSessions)) {
             return;
         }
-        if (!beginGlobalsessions.isEmpty() && LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Global transaction timeout check begin, size: {}", beginGlobalsessions.size());
+        if (!beginGlobalSessions.isEmpty() && LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Global transaction timeout check begin, size: {}", beginGlobalSessions.size());
         }
-        SessionHelper.forEach(beginGlobalsessions, globalSession -> {
+        SessionHelper.forEach(beginGlobalSessions, globalSession -> {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug(
                         globalSession.getXid() + " " + globalSession.getStatus() + " " + globalSession.getBeginTime() + " "
@@ -372,7 +412,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                 return true;
             });
         });
-        if (!beginGlobalsessions.isEmpty() && LOGGER.isDebugEnabled()) {
+        if (!beginGlobalSessions.isEmpty() && LOGGER.isDebugEnabled()) {
             LOGGER.debug("Global transaction timeout check end. ");
         }
 
@@ -394,7 +434,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         SessionHelper.forEach(rollbackingSessions, rollbackingSession -> {
             try {
                 if (isRetryTimeout(now, MAX_ROLLBACK_RETRY_TIMEOUT, rollbackingSession.getBeginTime())) {
-                    if (ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE) {
+                    if (ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE || ROLLBACK_FAILED_UNLOCK_ENABLE) {
                         rollbackingSession.clean();
                     }
 
@@ -403,6 +443,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     //The function of this 'return' is 'continue'.
                     return;
                 }
+
                 core.doGlobalRollback(rollbackingSession, true);
             } catch (TransactionException ex) {
                 LOGGER.error("Failed to retry rollbacking [{}] {} {}", rollbackingSession.getXid(), ex.getCode(), ex.getMessage());
@@ -520,7 +561,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         SessionHelper.forEach(needDoRollbackingSessions, rollbackingSession -> {
             try {
                 if (isRetryTimeout(now, MAX_ROLLBACK_RETRY_TIMEOUT, rollbackingSession.getBeginTime())) {
-                    if (ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE) {
+                    if (ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE || ROLLBACK_FAILED_UNLOCK_ENABLE) {
                         rollbackingSession.clean();
                     }
 
@@ -603,6 +644,58 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     }
 
     /**
+     * Handle end status by scheduled.
+     */
+    protected void handleEndStatesByScheduled() {
+        SessionCondition sessionCondition = new SessionCondition(endStatuses);
+        sessionCondition.setLazyLoadBranch(true);
+        List<GlobalSession> endStatusSessions =
+            SessionHolder.getRootSessionManager().findGlobalSessions(sessionCondition);
+        if (CollectionUtils.isEmpty(endStatusSessions)) {
+            endSchedule(RETRY_DEAD_THRESHOLD);
+            return;
+        }
+        long delay = END_STATUS_RETRY_PERIOD;
+        endStatusSessions.sort(Comparator.comparingLong(GlobalSession::getBeginTime));
+        List<GlobalSession> needDoEndStatusSessions = new ArrayList<>();
+        for (GlobalSession endStatusSession : endStatusSessions) {
+            long time = endStatusSession.timeToDeadSession();
+            if (time <= 0) {
+                needDoEndStatusSessions.add(endStatusSession);
+            } else {
+                delay = Math.max(time, END_STATUS_RETRY_PERIOD);
+                break;
+            }
+        }
+        long now = System.currentTimeMillis();
+        SessionHelper.forEach(needDoEndStatusSessions, endStatusSession -> {
+            try {
+                if (isRetryTimeout(now, MAX_ROLLBACK_RETRY_TIMEOUT, endStatusSession.getBeginTime())) {
+                    handleEndStateSession(endStatusSession);
+                }
+            } catch (TransactionException ex) {
+                LOGGER.error("Failed to handle end status session [{}] {} {}", endStatusSession.getXid(), ex.getCode(), ex.getMessage());
+            }
+        });
+        endSchedule(delay);
+    }
+
+    private void handleEndStateSession(GlobalSession globalSession) throws TransactionException {
+        SessionHelper.processEndState(globalSession);
+    }
+
+    private void endSchedule(long delay) {
+        syncProcessing.schedule(
+            () -> {
+                boolean called = SessionHolder.distributedLockAndExecute(END, this::handleEndStatesByScheduled);
+                if (!called) {
+                    endSchedule(END_STATUS_RETRY_PERIOD);
+                }
+            },
+            delay, TimeUnit.MILLISECONDS);
+    }
+
+    /**
      * Init.
      */
     public void init() {
@@ -629,6 +722,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         rollbackingSchedule(0);
 
         committingSchedule(0);
+
+        endSchedule(0);
     }
 
     @Override
@@ -639,7 +734,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         AbstractTransactionRequestToTC transactionRequest = (AbstractTransactionRequestToTC) request;
         transactionRequest.setTCInboundHandler(this);
 
-        return transactionRequest.handle(context);
+        LimitRequestDecorator limitRequestDecorator = new LimitRequestDecorator(transactionRequest);
+        return limitRequestDecorator.handle(context);
     }
 
     @Override
@@ -689,7 +785,6 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     public void setRemotingServer(RemotingServer remotingServer) {
         this.remotingServer = remotingServer;
     }
-
     /**
      * the task to remove branchSession
      */

@@ -21,6 +21,7 @@ import java.util.List;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.common.result.PageResult;
+import org.apache.seata.server.console.impl.AbstractBranchService;
 import org.apache.seata.server.console.vo.BranchSessionVO;
 import org.apache.seata.core.store.BranchTransactionDO;
 import org.apache.seata.server.console.service.BranchSessionService;
@@ -37,7 +38,7 @@ import org.springframework.stereotype.Component;
 @Component
 @org.springframework.context.annotation.Configuration
 @ConditionalOnExpression("#{'redis'.equals('${sessionMode}')}")
-public class BranchSessionRedisServiceImpl implements BranchSessionService {
+public class BranchSessionRedisServiceImpl extends AbstractBranchService implements BranchSessionService {
 
     @Override
     public PageResult<BranchSessionVO> queryByXid(String xid) {

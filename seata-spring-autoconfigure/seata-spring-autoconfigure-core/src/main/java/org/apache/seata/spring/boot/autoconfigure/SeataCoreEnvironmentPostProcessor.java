@@ -34,11 +34,13 @@ import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryCu
 import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryEtcd3Properties;
 import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryEurekaProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryNacosProperties;
+import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryNamingServerProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryRaftProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryRedisProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistrySofaProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryZooKeeperProperties;
+import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryMetadataProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.core.Ordered;
@@ -59,6 +61,7 @@ import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGIST
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_ETCD3_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_EUREKA_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_NACOS_PREFIX;
+import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_NAMINGSERVER_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_RAFT_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_REDIS_PREFIX;
@@ -67,6 +70,7 @@ import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGIST
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SHUTDOWN_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.THREAD_FACTORY_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.TRANSPORT_PREFIX;
+import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_METADATA_PREFIX;
 
 
 public class SeataCoreEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
@@ -88,6 +92,7 @@ public class SeataCoreEnvironmentPostProcessor implements EnvironmentPostProcess
             PROPERTY_BEAN_MAP.put(CONFIG_PREFIX, ConfigProperties.class);
             PROPERTY_BEAN_MAP.put(CONFIG_FILE_PREFIX, ConfigFileProperties.class);
             PROPERTY_BEAN_MAP.put(REGISTRY_PREFIX, RegistryProperties.class);
+            PROPERTY_BEAN_MAP.put(REGISTRY_METADATA_PREFIX, RegistryMetadataProperties.class);
 
             PROPERTY_BEAN_MAP.put(CONFIG_NACOS_PREFIX, ConfigNacosProperties.class);
             PROPERTY_BEAN_MAP.put(CONFIG_CONSUL_PREFIX, ConfigConsulProperties.class);
@@ -100,6 +105,7 @@ public class SeataCoreEnvironmentPostProcessor implements EnvironmentPostProcess
             PROPERTY_BEAN_MAP.put(REGISTRY_ETCD3_PREFIX, RegistryEtcd3Properties.class);
             PROPERTY_BEAN_MAP.put(REGISTRY_EUREKA_PREFIX, RegistryEurekaProperties.class);
             PROPERTY_BEAN_MAP.put(REGISTRY_NACOS_PREFIX, RegistryNacosProperties.class);
+            PROPERTY_BEAN_MAP.put(REGISTRY_NAMINGSERVER_PREFIX, RegistryNamingServerProperties.class);
             PROPERTY_BEAN_MAP.put(REGISTRY_REDIS_PREFIX, RegistryRedisProperties.class);
             PROPERTY_BEAN_MAP.put(REGISTRY_SOFA_PREFIX, RegistrySofaProperties.class);
             PROPERTY_BEAN_MAP.put(REGISTRY_ZK_PREFIX, RegistryZooKeeperProperties.class);

@@ -29,6 +29,7 @@ import org.apache.seata.common.XID;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.common.exception.StoreException;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
+import org.apache.seata.common.store.SessionMode;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.Configuration;
@@ -42,7 +43,6 @@ import org.apache.seata.server.cluster.raft.RaftServerManager;
 import org.apache.seata.server.cluster.raft.context.SeataClusterContext;
 import org.apache.seata.server.lock.distributed.DistributedLockerFactory;
 import org.apache.seata.server.store.StoreConfig;
-import org.apache.seata.server.store.StoreConfig.SessionMode;
 import org.apache.seata.server.store.VGroupMappingStoreManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,7 +78,7 @@ public class SessionHolder {
     /**
      * The default vgroup mapping store dir
      */
-    public static final String DEFAULT_VGROUP_MAPPING_STORE_FILE_DIR = System.getProperty("user.dir");
+    public static final String DEFAULT_VGROUP_MAPPING_STORE_FILE_DIR = "vgroupStore";
 
     private static VGroupMappingStoreManager ROOT_VGROUP_MAPPING_MANAGER;
 
@@ -109,20 +109,19 @@ public class SessionHolder {
 
             ROOT_VGROUP_MAPPING_MANAGER = EnhancedServiceLoader.load(VGroupMappingStoreManager.class, SessionMode.DB.getName());
         } else if (SessionMode.RAFT.equals(sessionMode) || SessionMode.FILE.equals(sessionMode)) {
-            RaftServerManager.init();
-            if (CollectionUtils.isNotEmpty(RaftServerManager.getRaftServers())) {
-                sessionMode = SessionMode.RAFT;
-            }
             if (SessionMode.RAFT.equals(sessionMode)) {
                 String group = CONFIG.getConfig(ConfigurationKeys.SERVER_RAFT_GROUP, DEFAULT_SEATA_GROUP);
                 ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, SessionMode.RAFT.getName(),
                     new Object[]{ROOT_SESSION_MANAGER_NAME});
                 SESSION_MANAGER_MAP = new HashMap<>();
                 SESSION_MANAGER_MAP.put(group, ROOT_SESSION_MANAGER);
+                ROOT_VGROUP_MAPPING_MANAGER = EnhancedServiceLoader.load(VGroupMappingStoreManager.class, SessionMode.RAFT.getName());
+                RaftServerManager.init();
                 RaftServerManager.start();
             } else {
                 String vGroupMappingStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR,
-                    DEFAULT_VGROUP_MAPPING_STORE_FILE_DIR);
+                    DEFAULT_VGROUP_MAPPING_STORE_FILE_DIR)  + separator
+                        + System.getProperty(SERVER_SERVICE_PORT_CAMEL);
                 String sessionStorePath =
                     CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR) + separator
                         + System.getProperty(SERVER_SERVICE_PORT_CAMEL);
@@ -169,6 +168,7 @@ public class SessionHolder {
     public static void reload(Collection<GlobalSession> allSessions, SessionMode storeMode, boolean acquireLock) {
         if ((SessionMode.FILE == storeMode || SessionMode.RAFT == storeMode)
             && CollectionUtils.isNotEmpty(allSessions)) {
+            long currentTimeMillis = System.currentTimeMillis();
             for (GlobalSession globalSession : allSessions) {
                 GlobalStatus globalStatus = globalSession.getStatus();
                 switch (globalStatus) {
@@ -208,6 +208,9 @@ public class SessionHolder {
                                 throw new RuntimeException(e);
                             }
                         }
+                    case StopCommitOrCommitRetry:
+                    case StopRollbackOrRollbackRetry:
+                    case Deleting:
                         break;
                     default: {
                         if (acquireLock) {
@@ -226,12 +229,17 @@ public class SessionHolder {
                                 break;
                             case Begin:
                                 if (Objects.equals(storeMode, SessionMode.RAFT)) {
-                                    try {
-                                        globalSession.changeGlobalStatus(GlobalStatus.RollbackRetrying);
-                                        LOGGER.info("change global status: {}, xid: {}", globalSession.getStatus(),
-                                            globalSession.getXid());
-                                    } catch (TransactionException e) {
-                                        LOGGER.error("change global status fail: {}", e.getMessage(), e);
+                                    // Avoid rolling back the global session created after becoming the leader.
+                                    if (globalSession.getBeginTime() < currentTimeMillis) {
+                                        try {
+                                            globalSession.changeGlobalStatus(GlobalStatus.RollbackRetrying);
+                                            LOGGER.info("change global status: {}, xid: {}", globalSession.getStatus(),
+                                                globalSession.getXid());
+                                        } catch (TransactionException e) {
+                                            LOGGER.error("change global status fail: {}", e.getMessage(), e);
+                                        }
+                                    } else {
+                                        globalSession.setActive(true);
                                     }
                                 } else {
                                     globalSession.setActive(true);
@@ -298,10 +306,7 @@ public class SessionHolder {
     //region get group mapping manager
     public static VGroupMappingStoreManager getRootVGroupMappingManager() {
         if (ROOT_VGROUP_MAPPING_MANAGER == null) {
-            init();
-            if (ROOT_VGROUP_MAPPING_MANAGER == null) {
-                throw new ShouldNeverHappenException("vGroupMappingManager is NOT init!");
-            }
+            throw new ShouldNeverHappenException("vGroupMappingManager is NOT init!");
         }
         return ROOT_VGROUP_MAPPING_MANAGER;
     }

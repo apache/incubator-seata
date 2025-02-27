@@ -243,10 +243,12 @@ class NettyClientChannelManager {
                             failedMap.values().stream().map(Throwable::getMessage).collect(Collectors.toSet()));
                 } else if (LOGGER.isDebugEnabled()) {
                     failedMap.forEach((key, value) -> {
-                        LOGGER.error("{} can not connect to {} cause:{} trace information:{}",
+                        LOGGER.error("{} can not connect to {} cause:{} trace information:",
                                 FrameworkErrorCode.NetConnect.getErrCode(), key, value.getMessage(), value);
                     });
                 }
+            }
+            if (availList.size() == failedMap.size()) {
                 String invalidAddress = StringUtils.join(failedMap.keySet().iterator(), ", ");
                 throw new FrameworkException("can not connect to [" + invalidAddress + "]");
             }

@@ -16,7 +16,7 @@
  */
 package org.apache.seata.saga.statelang.domain.impl;
 
-import org.apache.seata.saga.statelang.domain.DomainConstants;
+import org.apache.seata.saga.statelang.domain.StateType;
 import org.apache.seata.saga.statelang.domain.FailEndState;
 
 /**
@@ -29,7 +29,7 @@ public class FailEndStateImpl extends BaseState implements FailEndState {
     private String message;
 
     public FailEndStateImpl() {
-        setType(DomainConstants.STATE_TYPE_FAIL);
+        setType(StateType.FAIL);
     }
 
     @Override

@@ -17,6 +17,7 @@
 
 #For details about configuration items, see https://seata.apache.org/zh-cn/docs/user/configurations
 #Transport configuration, for client and server
+transport.protocol=seata
 transport.type=TCP
 transport.server=NIO
 transport.heartbeat=true
@@ -31,7 +32,7 @@ transport.threadFactory.workerThreadPrefix=NettyServerNIOWorker
 transport.threadFactory.serverExecutorThreadPrefix=NettyServerBizHandler
 transport.threadFactory.shareBossWorker=false
 transport.threadFactory.clientSelectorThreadPrefix=NettyClientSelector
-transport.threadFactory.clientSelectorThreadSize=1
+transport.threadFactory.clientSelectorThreadSize=-1
 transport.threadFactory.clientWorkerThreadPrefix=NettyClientWorkerThread
 transport.threadFactory.bossThreadSize=1
 transport.threadFactory.workerThreadSize=default
@@ -112,9 +113,26 @@ store.db.maxConn=30
 store.db.globalTable=global_table
 store.db.branchTable=branch_table
 store.db.distributedLockTable=distributed_lock
+store.db.vgroupTable=vgroup-table
 store.db.queryLimit=100
 store.db.lockTable=lock_table
 store.db.maxWait=5000
+
+store.db.druid.timeBetweenEvictionRunsMillis=120000
+store.db.druid.minEvictableIdleTimeMillis=300000
+store.db.druid.testWhileIdle=true
+store.db.druid.testOnBorrow=false
+store.db.druid.keepAlive=false
+
+store.db.hikari.idleTimeout=600000
+store.db.hikari.keepaliveTime=120000
+store.db.hikari.maxLifetime=1800000
+store.db.hikari.validationTimeout=5000
+
+store.db.dbcp.timeBetweenEvictionRunsMillis=120000
+store.db.dbcp.minEvictableIdleTimeMillis=300000
+store.db.dbcp.testWhileIdle=true
+store.db.dbcp.testOnBorrow=false
 
 #These configurations are required if the `store mode` is `redis`. If `store.mode,store.lock.mode,store.session.mode` are not equal to `redis`, you can remove the configuration block.
 store.redis.mode=single
@@ -135,10 +153,11 @@ store.redis.queryLimit=100
 server.recovery.committingRetryPeriod=1000
 server.recovery.asynCommittingRetryPeriod=1000
 server.recovery.rollbackingRetryPeriod=1000
+server.recovery.endstatusRetryPeriod=1000
 server.recovery.timeoutRetryPeriod=1000
 server.maxCommitRetryTimeout=-1
 server.maxRollbackRetryTimeout=-1
-server.rollbackRetryTimeoutUnlockEnable=false
+server.rollbackFailedUnlockEnable=false
 server.distributedLockExpireTime=10000
 server.session.branchAsyncQueueSize=5000
 server.session.enableBranchAsyncRemove=false
@@ -160,10 +179,13 @@ server.raft.serialization=jackson
 server.raft.compressor=none
 server.raft.sync=true
 
-
+server.ratelimit.enable=false
+server.ratelimit.bucketTokenNumPerSecond = 999999
+server.ratelimit.bucketTokenMaxNum = 999999
+server.ratelimit.bucketTokenInitialNum = 999999
 
 #Metrics configuration, only for the server
-metrics.enabled=false
+metrics.enabled=true
 metrics.registryType=compact
 metrics.exporterList=prometheus
 metrics.exporterPrometheusPort=9898
