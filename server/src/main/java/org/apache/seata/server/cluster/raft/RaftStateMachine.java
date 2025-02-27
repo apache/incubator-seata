@@ -370,7 +370,7 @@ public class RaftStateMachine extends StateMachineAdapter {
         if (leaderNode == null || (leaderNode.getInternal() != null
             && !cureentPeerId.equals(new PeerId(leaderNode.getInternal().getHost(), leaderNode.getInternal().getPort())))) {
             Node leader =
-                raftClusterMetadata.createNode(XID.getIpAddress(), XID.getPort(), raftServer.getServerId().getPort(),
+                raftClusterMetadata.createNode(cureentPeerId.getIp(), XID.getPort(), raftServer.getServerId().getPort(),
                     Integer.parseInt(
                         ((Environment)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT))
                             .getProperty("server.port", String.valueOf(7091))),
@@ -413,7 +413,7 @@ public class RaftStateMachine extends StateMachineAdapter {
             if (leader != null && StringUtils.isNotBlank(leader.getVersion())) {
                 RaftServer raftServer = RaftServerManager.getRaftServer(group);
                 PeerId cureentPeerId = raftServer.getServerId();
-                Node node = raftClusterMetadata.createNode(XID.getIpAddress(), XID.getPort(), cureentPeerId.getPort(),
+                Node node = raftClusterMetadata.createNode(cureentPeerId.getIp(), XID.getPort(), cureentPeerId.getPort(),
                     Integer.parseInt(
                         ((Environment)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT))
                             .getProperty("server.port", String.valueOf(7091))),

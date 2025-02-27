@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import com.alipay.remoting.serialization.SerializerManager;
@@ -39,6 +40,7 @@ import com.alipay.sofa.jraft.rpc.impl.cli.CliClientServiceImpl;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.XID;
 import org.apache.seata.common.store.SessionMode;
+import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.serializer.SerializerType;
@@ -117,12 +119,16 @@ public class RaftServerManager {
             if (port <= 0) {
                 // Highly available deployments require different nodes
                 for (PeerId peer : initConf.getPeers()) {
-                    if (StringUtils.equals(peer.getIp(), host)) {
-                        if (serverId != null) {
-                            throw new IllegalArgumentException(
-                                "server.raft.cluster has duplicate ip, For local debugging, use -Dserver.raftPort to specify the raft port");
+                    List<String> peerIps = NetUtil.getHostByName(peer.getIp());
+                    for (String peerIp : peerIps) {
+                        if (StringUtils.equals(peerIp, host)) {
+                            if (serverId != null) {
+                                throw new IllegalArgumentException(
+                                        "server.raft.cluster has duplicate ip, For local debugging, use -Dserver.raftPort to specify the raft port");
+                            }
+                            serverId = peer;
+                            break;
                         }
-                        serverId = peer;
                     }
                 }
             } else {

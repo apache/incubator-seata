@@ -31,6 +31,8 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.List;
+import java.util.ArrayList;
 
 
 /**
@@ -366,5 +368,28 @@ public class NetUtil {
             return "";
         }
         return str.replaceAll("[\\[\\]]", "");
+    }
+
+    public static List<String> getHostByName(String ipOrDomain) {
+        if (ipOrDomain == null) {
+            return null;
+        }
+        List<String> ipAddressList = new ArrayList<>();
+        if (isValidIPv4(ipOrDomain) || isValidIPv6(ipOrDomain)) {
+            ipAddressList.add(ipOrDomain);
+            return ipAddressList;
+        } else {
+            try {
+                InetAddress[] allByName = InetAddress.getAllByName(ipOrDomain);
+                for (InetAddress address : allByName) {
+                    ipAddressList.add(address.getHostAddress());
+                }
+                return ipAddressList;
+            } catch (UnknownHostException e) {
+                LOGGER.warn("Failed to resolve ip address, {}", e.getMessage());
+                ipAddressList.add(ipOrDomain);
+                return ipAddressList;
+            }
+        }
     }
 }
