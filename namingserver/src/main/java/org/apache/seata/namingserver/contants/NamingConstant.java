@@ -14,24 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.server.cluster.raft.execute;
+package org.apache.seata.namingserver.contants;
 
-import org.apache.seata.server.session.SessionHolder;
-import org.apache.seata.server.store.VGroupMappingStoreManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+public interface NamingConstant {
 
-import org.apache.seata.server.lock.LockerManagerFactory;
-import org.apache.seata.server.storage.raft.lock.RaftLockManager;
+    String CONSOLE_PATTERN = "^/api/.*/console/.*";
 
-/**
- */
-public abstract class AbstractRaftMsgExecute implements RaftMsgExecute<Boolean> {
+    int DEFAULT_REQUEST_TIMEOUT = 5000;
 
-    protected final Logger logger = LoggerFactory.getLogger(getClass());
+    int DEFAULT_CONNECTION_MAX_TOTAL = 100;
 
-    protected RaftLockManager raftLockManager = (RaftLockManager)LockerManagerFactory.getLockManager();
-
-    protected VGroupMappingStoreManager raftVGroupMappingStoreManager = SessionHolder.getRootVGroupMappingManager();
+    int DEFAULT_CONNECTION_MAX_PER_ROUTE = 20;
 
 }

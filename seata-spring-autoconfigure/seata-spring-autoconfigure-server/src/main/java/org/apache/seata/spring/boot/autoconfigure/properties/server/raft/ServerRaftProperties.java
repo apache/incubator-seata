@@ -29,7 +29,7 @@ public class ServerRaftProperties {
 
     private String serverAddr;
 
-    private String group;
+    private String group = "default";
 
     private Boolean autoJoin = false;
 

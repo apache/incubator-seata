@@ -14,24 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.server.cluster.raft.execute;
+package org.apache.seata.server.instance;
 
-import org.apache.seata.server.session.SessionHolder;
-import org.apache.seata.server.store.VGroupMappingStoreManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.seata.common.metadata.Instance;
 
-import org.apache.seata.server.lock.LockerManagerFactory;
-import org.apache.seata.server.storage.raft.lock.RaftLockManager;
+public interface SeataInstanceStrategy {
 
-/**
- */
-public abstract class AbstractRaftMsgExecute implements RaftMsgExecute<Boolean> {
+    Instance serverInstanceInit();
 
-    protected final Logger logger = LoggerFactory.getLogger(getClass());
+    void init();
 
-    protected RaftLockManager raftLockManager = (RaftLockManager)LockerManagerFactory.getLockManager();
+    Type type();
 
-    protected VGroupMappingStoreManager raftVGroupMappingStoreManager = SessionHolder.getRootVGroupMappingManager();
+    enum Type {
+        /**
+         * General type.
+         */
+        GENERAL,
+        /**
+         * Raft type.
+         */
+        RAFT
+    }
 
 }

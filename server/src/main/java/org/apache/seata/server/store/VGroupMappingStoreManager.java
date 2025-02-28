@@ -23,7 +23,6 @@ import org.apache.seata.discovery.registry.MultiRegistryFactory;
 import org.apache.seata.discovery.registry.RegistryService;
 
 import java.net.InetSocketAddress;
-import java.util.HashMap;
 import java.util.Map;
 
 public interface VGroupMappingStoreManager {
@@ -46,9 +45,9 @@ public interface VGroupMappingStoreManager {
      *
      * @return Key:vGroup,Value:unit
      */
-    HashMap<String, Object> loadVGroups();
+    Map<String, Object> loadVGroups();
 
-    default HashMap<String, Object> readVGroups() {
+    default Map<String, Object> readVGroups() {
         return loadVGroups();
     }
 
