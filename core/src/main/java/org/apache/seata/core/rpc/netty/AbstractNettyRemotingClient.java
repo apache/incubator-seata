@@ -229,7 +229,6 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     public void sendAsyncResponse(String serverAddress, RpcMessage rpcMessage, Object msg) {
         RpcMessage rpcMsg = buildResponseMessage(rpcMessage, msg, ProtocolConstants.MSGTYPE_RESPONSE);
         Channel channel = clientChannelManager.acquireChannel(serverAddress);
-        channelToRequestIds.computeIfAbsent(channel, ch -> ConcurrentHashMap.newKeySet()).add(rpcMessage.getId());
         super.sendAsync(channel, rpcMsg);
     }
 
@@ -541,28 +540,40 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     private void removeRequestIdFromChannel(Channel channel, Integer requestId) {
         if (channel == null) {
             if (requestId != null) {
-                LOGGER.warn("Attempted to remove requestId {} from a null channel.", requestId);
+                if (LOGGER.isWarnEnabled()) {
+                    LOGGER.warn("Attempted to remove requestId {} from a null channel.", requestId);
+                }
             } else {
-                LOGGER.warn("Attempted to remove a null requestId from a null channel.");
+                if (LOGGER.isWarnEnabled()) {
+                    LOGGER.warn("Attempted to remove a null requestId from a null channel.");
+                }
             }
             return;
         }
 
         if (requestId == null) {
-            LOGGER.warn("Attempted to remove a null requestId from channel {}.", channel);
+            if (LOGGER.isWarnEnabled()) {
+                LOGGER.warn("Attempted to remove a null requestId from channel {}.", channel);
+            }
             return;
         }
 
         channelToRequestIds.computeIfPresent(channel, (ch, requestIds) -> {
             boolean removed = requestIds.remove(requestId);
             if (removed) {
-                LOGGER.debug("Removed requestId {} from channel {}.", requestId, ch);
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Removed requestId {} from channel {}.", requestId, ch);
+                }
             } else {
-                LOGGER.warn("Attempted to remove non-existing requestId {} from channel {}.", requestId, ch);
+                if (LOGGER.isWarnEnabled()) {
+                    LOGGER.warn("Attempted to remove non-existing requestId {} from channel {}.", requestId, ch);
+                }
             }
 
             if (requestIds.isEmpty()) {
-                LOGGER.debug("No more requestIds associated with channel {}. Channel removed from mapping.", ch);
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("No more requestIds associated with channel {}. Channel removed from mapping.", ch);
+                }
                 return null;
             }
             return requestIds;
