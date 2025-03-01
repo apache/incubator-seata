@@ -16,16 +16,13 @@
  */
 package org.apache.seata.common.exception;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.UndeclaredThrowableException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.UndeclaredThrowableException;
-
-/**
- *
- */
 class ExceptionUtilTest {
+    private Exception exception;
 
     @Test
     public void unwrap() {
@@ -37,5 +34,33 @@ class ExceptionUtilTest {
 
         RuntimeException runtimeException = new RuntimeException("runtime");
         Assertions.assertInstanceOf(RuntimeException.class, ExceptionUtil.unwrap(runtimeException));
+    }
+
+    @Test
+    public void unwrapInvocationTargetException() {
+        InvocationTargetException ite = new InvocationTargetException(exception, "test");
+        Throwable result = ExceptionUtil.unwrap(ite);
+        Assertions.assertSame(exception, result, "Expected the unwrapped exception to be the cause of InvocationTargetException.");
+    }
+
+    @Test
+    public void unwrapUndeclaredThrowableException() {
+        UndeclaredThrowableException ute = new UndeclaredThrowableException(exception, "test");
+        Throwable result = ExceptionUtil.unwrap(ute);
+        Assertions.assertSame(exception, result, "Expected the unwrapped exception to be the cause of UndeclaredThrowableException.");
+    }
+
+    @Test
+    public void unwrapNestedInvocationTargetException() {
+        Exception rootCause = new Exception();
+        InvocationTargetException ite = new InvocationTargetException(new UndeclaredThrowableException(rootCause, "test"), "test");
+        Throwable result = ExceptionUtil.unwrap(ite);
+        Assertions.assertSame(rootCause, result, "Expected the unwrapped exception to be the root cause.");
+    }
+
+    @Test
+    public void unwrapNotWrappedException() {
+        Throwable result = ExceptionUtil.unwrap(exception);
+        Assertions.assertSame(exception, result, "Expected the unwrapped exception to be the same as the input when no wrapping is present.");
     }
 }

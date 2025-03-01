@@ -16,6 +16,7 @@
  */
 package org.apache.seata.mockserver.call;
 
+import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
 import io.netty.channel.Channel;
@@ -49,7 +50,7 @@ public class CallRm {
             BranchCommitResponse response = (BranchCommitResponse)remotingServer.sendSyncRequest(
                 branchSession.getResourceId(), branchSession.getClientId(), request, false);
             return response.getBranchStatus();
-        } catch (TimeoutException e) {
+        } catch (TimeoutException | IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -68,7 +69,7 @@ public class CallRm {
             BranchRollbackResponse response = (BranchRollbackResponse)remotingServer.sendSyncRequest(
                 branchSession.getResourceId(), branchSession.getClientId(), request, false);
             return response.getBranchStatus();
-        } catch (TimeoutException e) {
+        } catch (TimeoutException | IOException e) {
             throw new RuntimeException(e);
         }
     }

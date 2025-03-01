@@ -56,7 +56,7 @@ public class CorePropertiesTest {
         assertEquals("NettyServerBizHandler", context.getBean(ThreadFactoryProperties.class).getServerExecutorThreadPrefix());
         assertFalse(context.getBean(ThreadFactoryProperties.class).isShareBossWorker());
         assertEquals("NettyClientSelector", context.getBean(ThreadFactoryProperties.class).getClientSelectorThreadPrefix());
-        assertEquals(1, context.getBean(ThreadFactoryProperties.class).getClientSelectorThreadSize());
+        assertEquals(-1, context.getBean(ThreadFactoryProperties.class).getClientSelectorThreadSize());
         assertEquals("NettyClientWorkerThread", context.getBean(ThreadFactoryProperties.class).getClientWorkerThreadPrefix());
         assertEquals(1, context.getBean(ThreadFactoryProperties.class).getBossThreadSize());
         assertEquals("Default", context.getBean(ThreadFactoryProperties.class).getWorkerThreadSize());

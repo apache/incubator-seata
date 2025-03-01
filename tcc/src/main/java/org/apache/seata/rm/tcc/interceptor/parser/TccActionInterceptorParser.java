@@ -22,6 +22,7 @@ import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.core.model.Resource;
 import org.apache.seata.integration.tx.api.interceptor.ActionContextUtil;
 import org.apache.seata.integration.tx.api.interceptor.handler.ProxyInvocationHandler;
+import org.apache.seata.integration.tx.api.interceptor.parser.DefaultTargetClassParser;
 import org.apache.seata.integration.tx.api.interceptor.parser.IfNeedEnhanceBean;
 import org.apache.seata.integration.tx.api.interceptor.parser.InterfaceParser;
 import org.apache.seata.integration.tx.api.interceptor.parser.NeedEnhanceEnum;
@@ -40,8 +41,10 @@ import java.util.stream.Collectors;
 public class TccActionInterceptorParser implements InterfaceParser {
 
     @Override
-    public ProxyInvocationHandler parserInterfaceToProxy(Object target, String objectName) {
-        Map<Method, Class<?>> methodClassMap = ReflectionUtil.findMatchMethodClazzMap(target.getClass(), method -> method.isAnnotationPresent(getAnnotationClass()));
+    public ProxyInvocationHandler parserInterfaceToProxy(Object target, String objectName)
+            throws Exception {
+        Class<?> targetClass = DefaultTargetClassParser.get().findTargetClass(target);
+        Map<Method, Class<?>> methodClassMap = ReflectionUtil.findMatchMethodClazzMap(targetClass, method -> method.isAnnotationPresent(getAnnotationClass()));
         Set<Method> methodsToProxy = methodClassMap.keySet();
         if (methodsToProxy.isEmpty()) {
             return null;
