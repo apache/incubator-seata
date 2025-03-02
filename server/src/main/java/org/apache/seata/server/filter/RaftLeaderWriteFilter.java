@@ -1,0 +1,72 @@
+package org.apache.seata.server.filter;
+
+import org.apache.seata.common.store.SessionMode;
+import org.apache.seata.core.exception.TransactionException;
+import org.apache.seata.core.exception.TransactionExceptionCode;
+import org.apache.seata.server.cluster.listener.ClusterChangeEvent;
+import org.apache.seata.server.cluster.raft.context.SeataClusterContext;
+import org.apache.seata.server.store.StoreConfig;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.annotation.Conditional;
+import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Component;
+
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+
+/**
+ * Raft Leader Write Filter
+ */
+@Component
+@Conditional(RaftCondition.class)
+public class RaftLeaderWriteFilter implements Filter, ApplicationListener<ClusterChangeEvent> {
+
+    private static final Map<String, Boolean> GROUP_PREVENT = new ConcurrentHashMap<>();
+
+    @Override
+    public void init(FilterConfig filterConfig) throws ServletException {}
+
+    @Override
+    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
+                         FilterChain filterChain) throws IOException, ServletException {
+        HttpServletRequest httpRequest = (HttpServletRequest) servletRequest;
+        String method = httpRequest.getMethod();
+        if (!"GET".equalsIgnoreCase(method)) {
+            String group = SeataClusterContext.bindGroup();
+            if (!isPass(group)) {
+                throw new ServletException(new TransactionException(TransactionExceptionCode.NotRaftLeader,
+                        " The current TC is not a leader node, interrupt processing !"));
+            }
+        }
+
+        filterChain.doFilter(servletRequest, servletResponse);
+    }
+
+    @Override
+    public void onApplicationEvent(ClusterChangeEvent event) {
+        setPrevent(event.getGroup(), event.isLeader());
+    }
+
+    @Override
+    public void destroy() {}
+
+    public static void setPrevent(String group, boolean prevent) {
+        if (StoreConfig.getSessionMode() == SessionMode.RAFT) {
+            GROUP_PREVENT.put(group, prevent);
+        }
+    }
+
+    private boolean isPass(String group) {
+        // Non-raft mode always allows requests
+        return Optional.ofNullable(GROUP_PREVENT.get(group)).orElse(false);
+    }
+}

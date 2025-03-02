@@ -34,14 +34,39 @@ logging:
       topic: logback_to_logstash
 
 seata:
+  server:
+    raft:
+      group: default #此值代表该raft集群的group，client的事务分组对应的值要与之对应
+      server-addr: 192.168.0.111:9091,192.168.0.112:9091,192.168.0.113:9091 # 3台节点的ip和端口，端口为该节点的netty端口+1000，默认netty端口为8091
+      snapshot-interval: 600 # 600秒做一次数据的快照，以便raftlog的快速滚动，但是每次做快照如果内存中事务数据过多会导致每600秒产生一次业务rt的抖动，但是对于故障恢复比较友好，重启节点较快，可以调整为30分钟，1小时都行，具体按业务来，可以自行压测看看是否有抖动，在rt抖动和故障恢复中自行找个平衡点
+      apply-batch: 32 # 最多批量32次动作做一次提交raftlog
+      max-append-bufferSize: 262144 #日志存储缓冲区最大大小，默认256K
+      max-replicator-inflight-msgs: 256 #在启用 pipeline 请求情况下，最大 in-flight 请求数，默认256
+      disruptor-buffer-size: 16384 #内部 disruptor buffer 大小，如果是写入吞吐量较高场景，需要适当调高该值，默认 16384
+      election-timeout-ms: 1000 #超过多久没有leader的心跳开始重选举
+      reporter-enabled: false # raft自身的监控是否开启
+      reporter-initial-delay: 60 # 监控的区间间隔
+      serialization: jackson # 序列化方式，不要改动
+      compressor: none # raftlog的压缩方式，如gzip，zstd等
+      sync: true # raft日志的刷盘方式，默认是同步刷盘
   config:
     # support: nacos, consul, apollo, zk, etcd3
     type: file
   registry:
-    # support: nacos, eureka, redis, zk, consul, etcd3, sofa
-    type: file
+    type: seata
+    seata:
+      server-addr: 127.0.0.1:8081
+      cluster: default
+      namespace: public
+      heartbeat-period: 5000
+      metadata-max-age-ms: 30000
+      username: seata
+      password: seata
+      tokenValidityInMilliseconds: 1740000
   store:
     # support: file 、 db 、 redis 、 raft
-    mode: file
-  #  server:
-  #    service-port: 8091 #If not configured, the default is '${server.port} + 1000'
+    mode: raft # 使用raft存储模式
+    file:
+      dir: sessionStore # 该路径为raftlog及事务相关日志的存储位置，默认是相对路径，最好设置一个固定的位置
+    server:
+      service-port: 8091 #If not configured, the default is '${server.port} + 1000'
