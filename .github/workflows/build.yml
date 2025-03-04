@@ -30,7 +30,7 @@ jobs:
           - 2379:2379
         env:
           ALLOW_NONE_AUTHENTICATION: yes
-        #options: --health-cmd="curl -f http://127.0.0.1:2379/version" --health-interval=10s --health-timeout=5s --health-retries=3 --health-start-period=30s
+        options: --health-cmd="curl http://127.0.0.1:2379/version" --health-interval=15s --health-timeout=5s --health-retries=3 --health-start-period=30s
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
