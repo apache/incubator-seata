@@ -47,8 +47,8 @@ public class EtcdTest {
         //1.register
         registryService.register(inetSocketAddress);
         //2.get instance information
-        GetOption getOption = GetOption.newBuilder().withPrefix(buildRegistryKeyPrefix()).build();
-        long count = client.getKVClient().get(buildRegistryKeyPrefix(), getOption).get().getKvs().stream().filter(keyValue -> {
+        //GetOption getOption = GetOption.newBuilder().withPrefix(buildRegistryKeyPrefix()).build();
+        long count = client.getKVClient().get(buildRegistryKeyPrefix()).get().getKvs().stream().filter(keyValue -> {
             String[] instanceInfo = keyValue.getValue().toString(StandardCharsets.UTF_8).split(":");
             return HOST.equals(instanceInfo[0]) && PORT == Integer.parseInt(instanceInfo[1]);
         }).count();
