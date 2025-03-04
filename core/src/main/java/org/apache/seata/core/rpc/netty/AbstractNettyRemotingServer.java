@@ -16,6 +16,7 @@
  */
 package org.apache.seata.core.rpc.netty;
 
+import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeoutException;
@@ -68,28 +69,28 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
 
     @Override
     public Object sendSyncRequest(String resourceId, String clientId, Object msg, boolean tryOtherApp)
-        throws TimeoutException {
+            throws TimeoutException, IOException {
         Channel channel = ChannelManager.getChannel(resourceId, clientId, tryOtherApp);
         if (channel == null) {
-            throw new RuntimeException("rm client is not connected. dbkey:" + resourceId + ",clientId:" + clientId);
+            throw new IOException("rm client is not connected. dbkey:" + resourceId + ",clientId:" + clientId);
         }
         RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
         return super.sendSync(channel, rpcMessage, NettyServerConfig.getRpcRequestTimeout());
     }
 
     @Override
-    public Object sendSyncRequest(Channel channel, Object msg) throws TimeoutException {
+    public Object sendSyncRequest(Channel channel, Object msg) throws TimeoutException, IOException {
         if (channel == null) {
-            throw new RuntimeException("client is not connected");
+            throw new IOException("client is not connected");
         }
         RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
         return super.sendSync(channel, rpcMessage, NettyServerConfig.getRpcRequestTimeout());
     }
 
     @Override
-    public void sendAsyncRequest(Channel channel, Object msg) {
+    public void sendAsyncRequest(Channel channel, Object msg) throws IOException {
         if (channel == null) {
-            throw new RuntimeException("client is not connected");
+            throw new IOException("client is not connected");
         }
         RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY);
         super.sendAsync(channel, rpcMessage);

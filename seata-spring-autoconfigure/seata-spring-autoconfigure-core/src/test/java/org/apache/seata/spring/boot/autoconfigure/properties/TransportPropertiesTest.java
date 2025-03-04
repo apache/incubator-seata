@@ -36,6 +36,7 @@ public class TransportPropertiesTest {
         transportProperties.setRpcRmRequestTimeout(1);
         transportProperties.setRpcTmRequestTimeout(1);
         transportProperties.setRpcTcRequestTimeout(1);
+        transportProperties.setEnableClientSharedEventLoop(true);
 
         Assertions.assertEquals("server", transportProperties.getServer());
         Assertions.assertEquals("type", transportProperties.getType());
@@ -49,5 +50,6 @@ public class TransportPropertiesTest {
         Assertions.assertEquals(1, transportProperties.getRpcRmRequestTimeout());
         Assertions.assertEquals(1, transportProperties.getRpcTmRequestTimeout());
         Assertions.assertEquals(1, transportProperties.getRpcTcRequestTimeout());
+        Assertions.assertTrue(transportProperties.isEnableClientSharedEventLoop());
     }
 }

@@ -22,7 +22,7 @@ import Page from '@/components/Page';
 import { GlobalProps } from '@/module';
 import styled, { css } from 'styled-components';
 import getData, { changeGlobalData, deleteBranchData, deleteGlobalData, GlobalSessionParam, sendGlobalCommitOrRollback,
-  startBranchData, startGlobalData, stopBranchData, stopGlobalData, forceDeleteGlobalData, forceDeleteBranchData } from '@/service/transactionInfo';
+  startBranchData, startGlobalData, stopBranchData, stopGlobalData, forceDeleteGlobalData, forceDeleteBranchData, fetchNamespace } from '@/service/transactionInfo';
 import PropTypes from 'prop-types';
 import moment from 'moment';
 
@@ -48,6 +48,9 @@ type TransactionInfoState = {
   xid : string;
   currentBranchSession: Array<any>;
   globalSessionParam : GlobalSessionParam;
+  namespaceOptions: Map<string, { clusters: string[], vgroups: string[] }>;
+  clusters: Array<string>;
+  vgroups: Array<string>;
 }
 
 const statusList:Array<StatusType> = [
@@ -310,13 +313,48 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
       pageSize: 10,
       pageNum: 1,
     },
+    namespaceOptions: new Map<string, { clusters: string[], vgroups: string[] }>(),
+    clusters: [],
+    vgroups: [],
   };
-
   componentDidMount = () => {
     // search once by default
-    this.search();
+    this.loadNamespaces();
   }
-
+  loadNamespaces = async () => {
+    try {
+      const namespaces = await fetchNamespace();
+      const namespaceOptions = new Map<string, { clusters: string[], vgroups: string[] }>();
+      Object.keys(namespaces).forEach(namespaceKey => {
+        const namespaceData = namespaces[namespaceKey];
+        namespaceOptions.set(namespaceKey, {
+          clusters: namespaceData.clusters,
+          vgroups: namespaceData.vgroups,
+        });
+      });
+        if (namespaceOptions.size > 0) {
+            // Set default namespace to the first option
+            const firstNamespace = Array.from(namespaceOptions.keys())[0];
+            const selectedNamespace = namespaceOptions.get(firstNamespace);
+            this.setState({
+                namespaceOptions,
+                globalSessionParam: {
+                    ...this.state.globalSessionParam,
+                    namespace: firstNamespace,
+                    cluster: selectedNamespace ? selectedNamespace.clusters[0] : undefined,
+                },
+                clusters: selectedNamespace ? selectedNamespace.clusters : [],
+            });
+            this.search();
+        } else {
+            this.setState({
+                namespaceOptions,
+            });
+        }
+    } catch (error) {
+      console.error('Failed to fetch namespaces:', error);
+    }
+  }
   resetSearchFilter = () => {
     this.setState({
       globalSessionParam: {
@@ -345,10 +383,18 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
       // format time
       data.data.forEach((element: any) => {
         element.beginTime = (element.beginTime == null || element.beginTime === '') ? null : moment(Number(element.beginTime)).format('YYYY-MM-DD HH:mm:ss');
+        element.cluster = this.state.globalSessionParam.cluster;
+        element.namespace = this.state.globalSessionParam.namespace;
+        element.vgroup = this.state.globalSessionParam.vgroup;
+        element.branchSessionVOs.forEach((element: any) => {
+          element.cluster = this.state.globalSessionParam.cluster;
+          element.namespace = this.state.globalSessionParam.namespace;
+          element.vgroup = this.state.globalSessionParam.vgroup;
+        });
       });
 
       if (this.state.branchSessionDialogVisible) {
-        data.data.forEach((item:any) => {
+        data.data.forEach((item: any) => {
           if (item.xid == this.state.xid) {
             this.state.currentBranchSession = item.branchSessionVOs
           }
@@ -364,12 +410,20 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
     });
   }
 
-  searchFilterOnChange = (key:string, val:string) => {
-    this.setState({
-      globalSessionParam: Object.assign(this.state.globalSessionParam,
-        { [key]: val }),
-    });
-  }
+  searchFilterOnChange = (key: string, val: string) => {
+    if (key === 'namespace') {
+      const selectedNamespace = this.state.namespaceOptions.get(val);
+      this.setState({
+        clusters: selectedNamespace ? selectedNamespace.clusters : [],
+        vgroups: selectedNamespace ? selectedNamespace.vgroups : [],
+        globalSessionParam: Object.assign(this.state.globalSessionParam, {[key]: val}),
+      });
+    } else {
+      this.setState({
+        globalSessionParam: Object.assign(this.state.globalSessionParam, {[key]: val}),
+      });
+    }
+  };
 
   branchSessionSwitchOnChange = (checked: boolean, e: any) => {
     this.setState({
@@ -456,7 +510,12 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
             history.push({
               pathname: '/globallock/list',
               // @ts-ignore
-              query: { xid: record.xid },
+              query: {
+                xid: record.xid,
+                vgroup: record.vgroup,
+                namespace: this.state.globalSessionParam.namespace,
+                cluster: this.state.globalSessionParam.cluster
+              },
             });
           }}
         >
@@ -632,7 +691,12 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
             history.push({
               pathname: '/globallock/list',
               // @ts-ignore
-              query: { xid: record.xid },
+              query: {
+                xid: record.xid,
+                vgroup: record.vgroup,
+                namespace: this.state.globalSessionParam.namespace,
+                cluster: this.state.globalSessionParam.cluster
+              },
             });
           }}
         >
@@ -776,6 +840,9 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
     const { locale = {} } = this.props;
     const { title, subTitle, createTimeLabel,
       selectFilerPlaceholder,
+      selectNamespaceFilerPlaceholder,
+      selectClusterFilerPlaceholder,
+      selectVGroupFilerPlaceholder,
       inputFilterPlaceholder,
       branchSessionSwitchLabel,
       resetButtonLabel,
@@ -828,7 +895,38 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
               dataSource={statusList}
             />
           </FormItem>
-
+          <FormItem name="namespace" label="namespace">
+            <Select
+                hasClear
+                placeholder={selectNamespaceFilerPlaceholder}
+                onChange={(value: string) => {
+                  this.searchFilterOnChange('namespace', value);
+                }}
+                dataSource={Array.from(this.state.namespaceOptions.keys()).map(key => ({ label: key, value: key }))}
+                value={this.state.globalSessionParam.namespace}
+            />
+          </FormItem>
+          <FormItem name="cluster" label="cluster">
+            <Select
+                hasClear
+                placeholder={selectClusterFilerPlaceholder}
+                onChange={(value: string) => {
+                  this.searchFilterOnChange('cluster', value);
+                }}
+                dataSource={this.state.clusters.map(value => ({ label: value, value }))}
+                value={this.state.globalSessionParam.cluster}
+            />
+          </FormItem>
+          <FormItem name="vgroup" label="vgroup">
+            <Select
+                hasClear
+                placeholder={selectVGroupFilerPlaceholder}
+                onChange={(value: string) => {
+                  this.searchFilterOnChange('vgroup', value);
+                }}
+                dataSource={this.state.vgroups.map(value => ({ label: value, value }))}
+            />
+          </FormItem>
           {/* {branch session switch} */}
           <FormItem name="withBranch" label={branchSessionSwitchLabel}>
             <Switch

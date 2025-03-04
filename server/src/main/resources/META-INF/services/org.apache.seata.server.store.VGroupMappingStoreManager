@@ -17,3 +17,4 @@
 org.apache.seata.server.storage.db.store.DataBaseVGroupMappingStoreManager
 org.apache.seata.server.storage.file.store.FileVGroupMappingStoreManager
 org.apache.seata.server.storage.redis.store.RedisVGroupMappingStoreManager
+org.apache.seata.server.storage.raft.sore.RaftVGroupMappingStoreManager
