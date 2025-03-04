@@ -20,7 +20,6 @@ import java.util.Map;
 
 import io.seata.saga.proctrl.HierarchicalProcessContext;
 import io.seata.saga.proctrl.ProcessContext;
-import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.saga.proctrl.Instruction;
 
 /**
@@ -31,7 +30,6 @@ import org.apache.seata.saga.proctrl.Instruction;
 public class ProcessContextImpl implements HierarchicalProcessContext, ProcessContext {
 
     private final org.apache.seata.saga.proctrl.HierarchicalProcessContext actual;
-    private final ResourceLock lock = new ResourceLock();
 
     private ProcessContextImpl(org.apache.seata.saga.proctrl.HierarchicalProcessContext target) {
         this.actual = target;
@@ -95,11 +93,6 @@ public class ProcessContextImpl implements HierarchicalProcessContext, ProcessCo
     @Override
     public <T extends Instruction> T getInstruction(Class<T> clazz) {
         return actual.getInstruction(clazz);
-    }
-
-    @Override
-    public ResourceLock getLock() {
-        return lock;
     }
 
     @Override
