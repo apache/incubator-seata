@@ -42,24 +42,11 @@
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-api</artifactId>
-            <!--
             <scope>provided</scope>
-            -->
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-        </dependency>
-        <!--test-->
-        <dependency>
-            <groupId>io.etcd</groupId>
-            <artifactId>jetcd-launcher</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>testcontainers</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.scijava</groupId>
@@ -69,9 +56,7 @@
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-core</artifactId>
-            <!--
             <scope>provided</scope>
-            -->
         </dependency>
     </dependencies>
 </project>
