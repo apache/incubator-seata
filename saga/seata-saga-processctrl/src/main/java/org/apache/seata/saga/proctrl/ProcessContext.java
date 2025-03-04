@@ -16,8 +16,6 @@
  */
 package org.apache.seata.saga.proctrl;
 
-import org.apache.seata.common.lock.ResourceLock;
-
 import java.util.Map;
 
 /**
@@ -97,9 +95,4 @@ public interface ProcessContext {
      */
     <T extends Instruction> T getInstruction(Class<T> clazz);
 
-    /**
-     * Gets get lock.
-     * @return the lock of the current process context
-     */
-    ResourceLock getLock();
 }

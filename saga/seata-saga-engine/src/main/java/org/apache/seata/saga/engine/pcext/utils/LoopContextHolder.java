@@ -18,6 +18,7 @@ package org.apache.seata.saga.engine.pcext.utils;
 
 import java.util.Collection;
 import java.util.Stack;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.seata.common.lock.ResourceLock;
@@ -39,19 +40,22 @@ public class LoopContextHolder {
     private final Stack<Integer> forwardCounterStack = new Stack<>();
     private Collection collection;
     private final ResourceLock lock = new ResourceLock();
+    private static final ConcurrentHashMap<ProcessContext,ResourceLock> LOCK_MAP = new ConcurrentHashMap<>();
 
     public static LoopContextHolder getCurrent(ProcessContext context, boolean forceCreate) {
         LoopContextHolder loopContextHolder = (LoopContextHolder)context.getVariable(
             DomainConstants.VAR_NAME_CURRENT_LOOP_CONTEXT_HOLDER);
 
         if (null == loopContextHolder && forceCreate) {
-            try (ResourceLock ignored = context.getLock().obtain()) {
+            try (ResourceLock ignored = LOCK_MAP.computeIfAbsent(context, k -> new ResourceLock()).obtain()) {
                 loopContextHolder = (LoopContextHolder)context.getVariable(
                     DomainConstants.VAR_NAME_CURRENT_LOOP_CONTEXT_HOLDER);
                 if (null == loopContextHolder) {
                     loopContextHolder = new LoopContextHolder();
                     context.setVariable(DomainConstants.VAR_NAME_CURRENT_LOOP_CONTEXT_HOLDER, loopContextHolder);
                 }
+            } finally {
+                LOCK_MAP.remove(context);
             }
         }
         return loopContextHolder;
