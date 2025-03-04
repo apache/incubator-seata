@@ -43,7 +43,10 @@ seata:
     type: file
   registry:
     # support: nacos, eureka, redis, zk, consul, etcd3, sofa
-    type: file
+    type: etcd3
+    etcd3:
+      cluster: default
+      server-addr: http://127.0.0.1:2379
   store:
     # support: file 、 db 、 redis 、 raft
     mode: file

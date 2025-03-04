@@ -25,7 +25,7 @@ import io.etcd.jetcd.watch.WatchResponse;
 import org.apache.seata.discovery.registry.etcd3.EtcdRegistryProvider;
 import org.apache.seata.discovery.registry.etcd3.EtcdRegistryServiceImpl;
 import org.apache.seata.discovery.registry.RegistryService;
-import org.junit.Rule;
+
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
