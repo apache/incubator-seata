@@ -5,7 +5,6 @@ import io.etcd.jetcd.Client;
 import io.etcd.jetcd.KV;
 import io.etcd.jetcd.kv.GetResponse;
 import io.etcd.jetcd.test.EtcdClusterExtension;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
@@ -24,12 +23,15 @@ public class EtcdTest {
     public static final EtcdClusterExtension cluster = EtcdClusterExtension.builder()
             .withNodes(1)
             .build();
-    private static Client client;
+    private static final Client client = Client.builder().endpoints(cluster.clientEndpoints()).build();
 
+    /*
     @BeforeAll
     public static void beforeAll() {
         client = Client.builder().endpoints(cluster.clientEndpoints()).build();
     }
+
+     */
 
 
     @Test
