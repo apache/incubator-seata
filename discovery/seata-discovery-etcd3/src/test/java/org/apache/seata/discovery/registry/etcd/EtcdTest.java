@@ -27,45 +27,18 @@ public class EtcdTest {
     private static final String REGISTRY_KEY_PREFIX = "registry-seata-";
     private final static String HOST = "127.0.0.1";
     private final static int PORT = 8091;
-    private static EtcdCluster cluster;
-    private KV kvClient;
-    private Client client;
+
+    @RegisterExtension
+    public static final EtcdClusterExtension cluster = EtcdClusterExtension.builder()
+            .withNodes(1)
+            .build();
+    private static  Client client;
 
     @BeforeAll
     public static void beforeAll() {
-
-        EtcdClusterExtension clusterExtension = EtcdClusterExtension.builder()
-                .withClusterName("etcd-lease")
-                .withNodes(3)
-                .withSsl(false)
-                .build();
-        try {
-            cluster = clusterExtension.cluster();
-        } catch (Exception e) {
-            logger.error("Init etcd cluster failed");
-        }
-        cluster.start();
-
-    }
-
-    @BeforeEach
-    public void beforeEach() {
         client = Client.builder().endpoints(cluster.clientEndpoints()).build();
-        kvClient = client.getKVClient();
     }
 
-    @AfterEach
-    public void afterEach() {
-        if (client != null) {
-            client.close();
-        }
-
-    }
-
-    @AfterAll
-    public static void afterClass() {
-        cluster.close();
-    }
 
     @Test
     public void testRegister() throws Exception {
