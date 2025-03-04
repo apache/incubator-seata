@@ -25,12 +25,12 @@ jobs:
           SPRING_SECURITY_ENABLED: false
         options: --health-cmd="curl -f http://localhost:8848/nacos" --health-interval=10s --health-timeout=5s --health-retries=3 --health-start-period=30s
       etcd3:
-        image: bitnami/etcd:latest
+        image: bitnami/etcd:3.5
         ports:
           - 2379:2379
         env:
           ALLOW_NONE_AUTHENTICATION: yes
-        options: --health-cmd="curl http://127.0.0.1:2379/version" --health-interval=15s --health-timeout=5s --health-retries=3 --health-start-period=30s
+        options: --health-cmd="/opt/bitnami/scripts/etcd/healthcheck.sh" --health-interval=10s --health-timeout=5s --health-retries=5 --health-start-period=30s
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
