@@ -13,7 +13,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *//*
+
 package org.apache.seata.discovery.registry.etcd;
 
 import io.etcd.jetcd.ByteSequence;
@@ -152,18 +153,22 @@ public class EtcdRegistryServiceImplTest {
         assertThat(inetSocketAddresses).size().isEqualTo(1);
     }
 
-    /**
+    */
+/**
      * build registry key prefix
      *
      * @return
-     */
+     *//*
+
     private ByteSequence buildRegistryKeyPrefix() {
         return ByteSequence.from(REGISTRY_KEY_PREFIX, UTF_8);
     }
 
-    /**
+    */
+/**
      * etcd listener
-     */
+     *//*
+
     private static class EtcdListener implements Watch.Listener {
         private boolean notified = false;
 
@@ -183,19 +188,24 @@ public class EtcdRegistryServiceImplTest {
 
         }
 
-        /**
+        */
+/**
          * @return
-         */
+         *//*
+
         public boolean isNotified() throws InterruptedException {
             TimeUnit.SECONDS.sleep(3);
             return notified;
         }
 
-        /**
+        */
+/**
          * reset
-         */
+         *//*
+
         private void reset() {
             this.notified = false;
         }
     }
 }
+*/

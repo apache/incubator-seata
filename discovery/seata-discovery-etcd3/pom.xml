@@ -42,7 +42,9 @@
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-api</artifactId>
+            <!--
             <scope>provided</scope>
+            -->
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -63,6 +65,13 @@
             <groupId>org.scijava</groupId>
             <artifactId>native-lib-loader</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-core</artifactId>
+            <!--
+            <scope>provided</scope>
+            -->
         </dependency>
     </dependencies>
 </project>

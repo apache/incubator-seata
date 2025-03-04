@@ -58,7 +58,7 @@
         <jettison.version>1.5.4</jettison.version>
         <consul-clients.version>1.4.2</consul-clients.version>
         <nacos-client.version>1.4.6</nacos-client.version>
-        <etcd-client-v3.version>0.5.0</etcd-client-v3.version>
+        <etcd-client-v3.version>0.7.7</etcd-client-v3.version>
         <testcontainers.version>1.11.2</testcontainers.version>
         <guava.version>32.1.3-jre</guava.version>
         <javax-inject.version>1</javax-inject.version>
@@ -79,7 +79,7 @@
         <sofa.hessian.version>4.0.3</sofa.hessian.version>
         <sofa.bolt.version>1.6.7</sofa.bolt.version>
         <protobuf.version>3.25.4</protobuf.version>
-        <grpc.version>1.55.1</grpc.version>
+        <grpc.version>1.60.0</grpc.version>
         <kryo.version>5.4.0</kryo.version>
         <kryo-serializers.version>0.45</kryo-serializers.version>
         <hessian.version>4.0.63</hessian.version>
