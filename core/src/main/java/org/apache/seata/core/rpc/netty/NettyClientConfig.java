@@ -17,7 +17,7 @@
 package org.apache.seata.core.rpc.netty;
 
 import io.netty.channel.Channel;
-import org.apache.seata.core.constants.ConfigurationKeys;
+import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.core.rpc.TransportServerType;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST;
@@ -25,6 +25,7 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_PROTOCOL;
 import static org.apache.seata.common.DefaultValues.DEFAULT_RPC_RM_REQUEST_TIMEOUT;
 import static org.apache.seata.common.DefaultValues.DEFAULT_RPC_TM_REQUEST_TIMEOUT;
 import static org.apache.seata.common.DefaultValues.DEFAULT_SELECTOR_THREAD_PREFIX;
+import static org.apache.seata.common.DefaultValues.DEFAULT_ENABLE_CLIENT_USE_SHARED_EVENT_LOOP;
 import static org.apache.seata.common.DefaultValues.DEFAULT_WORKER_THREAD_PREFIX;
 
 /**
@@ -352,6 +353,10 @@ public class NettyClientConfig extends NettyBaseConfig {
     public int getClientSelectorThreadSize() {
         int threadSize = CONFIG.getInt(ConfigurationKeys.CLIENT_SELECTOR_THREAD_SIZE, WorkThreadMode.Default.getValue());
         return threadSize > 0 ? threadSize : WorkThreadMode.Default.getValue();
+    }
+
+    public boolean getEnableClientSharedEventLoop() {
+        return CONFIG.getBoolean(ConfigurationKeys.ENABLE_CLIENT_SHARED_EVENTLOOP, DEFAULT_ENABLE_CLIENT_USE_SHARED_EVENT_LOOP);
     }
 
     /**

@@ -710,6 +710,11 @@ public interface ConfigurationKeys {
     String WORKER_THREAD_SIZE = THREAD_FACTORY_PREFIX + "workerThreadSize";
 
     /**
+     * The constant ENABLE_SHARED_EVENTLOOP
+     */
+    String ENABLE_CLIENT_SHARED_EVENTLOOP = TRANSPORT_PREFIX + "enableClientSharedEventLoopGroup";
+
+    /**
      * The constant SHUTDOWN_PREFIX
      */
     String SHUTDOWN_PREFIX = TRANSPORT_PREFIX + "shutdown.";
