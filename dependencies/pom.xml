@@ -556,12 +556,6 @@
                 <version>${etcd-client-v3.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.etcd</groupId>
-                <artifactId>jetcd-test</artifactId>
-                <version>${etcd-client-v3.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
                 <groupId>org.testcontainers</groupId>
                 <artifactId>testcontainers</artifactId>
                 <version>${testcontainers.version}</version>
