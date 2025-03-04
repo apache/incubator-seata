@@ -95,6 +95,7 @@ seata:
     enable-rm-client-batch-send-request: true
     rpc-rm-request-timeout: 15000
     rpc-tm-request-timeout: 30000
+    enable-client-shared-event-loop-group: false
   config:
     type: file
     consul:
