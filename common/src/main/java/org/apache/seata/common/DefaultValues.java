@@ -123,6 +123,10 @@ public interface DefaultValues {
     @Deprecated
     boolean DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST = true;
     /**
+     * The constant DEFAULT_ENABLE_CLIENT_USE_SHARED_EVENT_LOOP.
+     */
+    boolean DEFAULT_ENABLE_CLIENT_USE_SHARED_EVENT_LOOP = false;
+    /**
      * The constant DEFAULT_ENABLE_TM_CLIENT_BATCH_SEND_REQUEST.
      */
     boolean DEFAULT_ENABLE_TM_CLIENT_BATCH_SEND_REQUEST = false;
