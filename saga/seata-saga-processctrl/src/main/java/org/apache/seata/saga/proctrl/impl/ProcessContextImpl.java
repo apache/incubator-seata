@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.saga.proctrl.HierarchicalProcessContext;
 import org.apache.seata.saga.proctrl.Instruction;
 import org.apache.seata.saga.proctrl.ProcessContext;
@@ -35,7 +34,6 @@ public class ProcessContextImpl implements HierarchicalProcessContext, ProcessCo
     private Map<String, Object> variables = new ConcurrentHashMap<>();
     private Instruction instruction;
     private ProcessContext parent;
-    private final ResourceLock lock = new ResourceLock();
 
     @Override
     public Object getVariable(String name) {
