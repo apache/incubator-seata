@@ -128,11 +128,6 @@ public class ProcessContextImpl implements HierarchicalProcessContext, ProcessCo
     }
 
     @Override
-    public ResourceLock getLock() {
-        return lock;
-    }
-
-    @Override
     public boolean hasVariableLocal(String name) {
         return variables.containsKey(name);
     }
