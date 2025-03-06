@@ -29,6 +29,7 @@ import org.apache.seata.server.store.VGroupMappingStoreManager;
 import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @LoadLevel(name = "db")
 public class DataBaseVGroupMappingStoreManager implements VGroupMappingStoreManager {
@@ -54,7 +55,7 @@ public class DataBaseVGroupMappingStoreManager implements VGroupMappingStoreMana
     }
 
     @Override
-    public HashMap<String, Object> loadVGroups() {
+    public Map<String, Object> loadVGroups() {
         List<MappingDO> mappingDOS = vGroupMappingDataBaseDAO.queryMappingDO();
         Instance instance = Instance.getInstance();
         HashMap<String, Object> mappings = new HashMap<>();

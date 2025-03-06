@@ -135,6 +135,6 @@ public class ExceptionUtils {
      */
     public static boolean isNetException(Throwable throwable) {
         NetExceptionType netExceptionType = getNetExceptionType(throwable);
-        return netExceptionType != null && netExceptionType != NetExceptionType.NOT_NET_EXCEPTION;
+        return netExceptionType != NetExceptionType.NOT_NET_EXCEPTION;
     }
 }

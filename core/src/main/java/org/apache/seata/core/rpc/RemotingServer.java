@@ -21,6 +21,7 @@ import org.apache.seata.core.protocol.RpcMessage;
 import org.apache.seata.core.rpc.processor.RemotingProcessor;
 import org.apache.seata.core.protocol.MessageType;
 
+import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeoutException;
 
@@ -41,7 +42,7 @@ public interface RemotingServer {
      * @return client result message
      * @throws TimeoutException TimeoutException
      */
-    Object sendSyncRequest(String resourceId, String clientId, Object msg, boolean tryOtherApp) throws TimeoutException;
+    Object sendSyncRequest(String resourceId, String clientId, Object msg, boolean tryOtherApp) throws TimeoutException, IOException;
 
     /**
      * server send sync request.
@@ -51,7 +52,7 @@ public interface RemotingServer {
      * @return client result message
      * @throws TimeoutException TimeoutException
      */
-    Object sendSyncRequest(Channel channel, Object msg) throws TimeoutException;
+    Object sendSyncRequest(Channel channel, Object msg) throws TimeoutException, IOException;
 
     /**
      * server send async request.
@@ -59,7 +60,7 @@ public interface RemotingServer {
      * @param channel client channel
      * @param msg     transaction message {@code org.apache.seata.core.protocol}
      */
-    void sendAsyncRequest(Channel channel, Object msg);
+    void sendAsyncRequest(Channel channel, Object msg) throws IOException;
 
     /**
      * server send async response.

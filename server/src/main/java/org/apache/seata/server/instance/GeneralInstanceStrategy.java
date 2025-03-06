@@ -16,51 +16,25 @@
  */
 package org.apache.seata.server.instance;
 
+import java.util.UUID;
+
 import org.apache.seata.common.XID;
 import org.apache.seata.common.holder.ObjectHolder;
 import org.apache.seata.common.metadata.Instance;
 import org.apache.seata.common.metadata.Node;
-import org.apache.seata.common.thread.NamedThreadFactory;
-import org.apache.seata.common.util.StringUtils;
-import org.apache.seata.server.Server;
-import org.apache.seata.server.ServerRunner;
-import org.apache.seata.server.session.SessionHolder;
 import org.apache.seata.server.store.StoreConfig;
-import org.apache.seata.server.store.VGroupMappingStoreManager;
-import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryNamingServerProperties;
-import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryProperties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.PropertySource;
-import org.springframework.stereotype.Component;
-
-import javax.annotation.Resource;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import static org.apache.seata.common.ConfigurationKeys.META_PREFIX;
-import static org.apache.seata.common.ConfigurationKeys.NAMING_SERVER;
 import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
 
+public class GeneralInstanceStrategy extends AbstractSeataInstanceStrategy {
 
-@Component("serverInstanceFactory")
-public class ServerInstanceFactory {
-    @Resource
-    private RegistryProperties registryProperties;
+    @Override
+    public Instance serverInstanceInit() {
 
-    protected static volatile ScheduledExecutorService EXECUTOR_SERVICE;
-
-    @Resource
-    private RegistryNamingServerProperties registryNamingServerProperties;
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(Server.class);
-
-    public void serverInstanceInit() {
         ConfigurableEnvironment environment =
             (ConfigurableEnvironment)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT);
 
@@ -83,8 +57,7 @@ public class ServerInstanceFactory {
         instance.setTerm(System.currentTimeMillis());
 
         // load node Endpoint
-        instance.setControl(new Node.Endpoint(XID.getIpAddress(),
-            Integer.parseInt(Objects.requireNonNull(environment.getProperty("server.port"))), "http"));
+        instance.setControl(new Node.Endpoint(XID.getIpAddress(), serverProperties.getPort(), "http"));
 
         // load metadata
         for (PropertySource<?> propertySource : environment.getPropertySources()) {
@@ -98,22 +71,12 @@ public class ServerInstanceFactory {
                 }
             }
         }
-        instance.setTransaction(new Node.Endpoint(XID.getIpAddress(), XID.getPort(), "netty"));
-        if (StringUtils.equals(registryProperties.getType(), NAMING_SERVER)) {
-            VGroupMappingStoreManager vGroupMappingStoreManager = SessionHolder.getRootVGroupMappingManager();
-            // load vgroup mapping relationship
-            instance.addMetadata("vGroup", vGroupMappingStoreManager.loadVGroups());
-            EXECUTOR_SERVICE =
-                new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("heartbeat-namingserver", 1, true));
-            EXECUTOR_SERVICE.scheduleAtFixedRate(() -> {
-                try {
-                    vGroupMappingStoreManager.notifyMapping();
-                } catch (Exception e) {
-                    LOGGER.error("Naming server register Exception", e);
-                }
-            }, registryNamingServerProperties.getHeartbeatPeriod(), registryNamingServerProperties.getHeartbeatPeriod(),
-                TimeUnit.MILLISECONDS);
-            ServerRunner.addDisposable(EXECUTOR_SERVICE::shutdown);
-        }
+        return instance;
     }
+
+    @Override
+    public Type type() {
+        return Type.GENERAL;
+    }
+
 }

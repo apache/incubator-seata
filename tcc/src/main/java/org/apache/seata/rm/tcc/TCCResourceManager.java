@@ -121,6 +121,7 @@ public class TCCResourceManager extends AbstractResourceManager {
             //BusinessActionContext
             businessActionContext = BusinessActionContextUtil.getBusinessActionContext(xid, branchId, resourceId,
                     applicationData);
+            businessActionContext.setBranchType(branchType);
 
             Object[] args = this.getTwoPhaseCommitArgs(tccResource, businessActionContext);
             //share actionContext implicitly
@@ -188,6 +189,8 @@ public class TCCResourceManager extends AbstractResourceManager {
             //BusinessActionContext
             businessActionContext = BusinessActionContextUtil.getBusinessActionContext(xid, branchId, resourceId,
                     applicationData);
+            businessActionContext.setBranchType(branchType);
+
             Object[] args = this.getTwoPhaseRollbackArgs(tccResource, businessActionContext);
             //share actionContext implicitly
             BusinessActionContextUtil.setContext(businessActionContext);

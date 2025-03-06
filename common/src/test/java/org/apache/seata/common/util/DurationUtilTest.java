@@ -17,56 +17,72 @@
 package org.apache.seata.common.util;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.stream.Stream;
 
 public class DurationUtilTest {
 
-    @Test
-    public void testParse() {
-        Assertions.assertEquals(-1L, DurationUtil.parse("").getSeconds());
-        Assertions.assertEquals(0L, DurationUtil.parse("8").getSeconds());
-        Assertions.assertEquals(8L, DurationUtil.parse("8").toMillis());
-        Assertions.assertEquals(0L, DurationUtil.parse("8ms").getSeconds());
-        Assertions.assertEquals(8L, DurationUtil.parse("8ms").toMillis());
-        Assertions.assertEquals(8L, DurationUtil.parse("8s").getSeconds());
-        Assertions.assertEquals(480L, DurationUtil.parse("8m").getSeconds());
-        Assertions.assertEquals(28800L, DurationUtil.parse("8h").getSeconds());
-        Assertions.assertEquals(691200L, DurationUtil.parse("8d").getSeconds());
-
-        Assertions.assertEquals(172800L,DurationUtil.parse("P2D").getSeconds());
-        Assertions.assertEquals(20L,DurationUtil.parse("PT20.345S").getSeconds());
-        Assertions.assertEquals(20345L,DurationUtil.parse("PT20.345S").toMillis());
-        Assertions.assertEquals(900L,DurationUtil.parse("PT15M").getSeconds());
-        Assertions.assertEquals(36000L,DurationUtil.parse("PT10H").getSeconds());
-        Assertions.assertEquals(8L,DurationUtil.parse("PT8S").getSeconds());
-        Assertions.assertEquals(86460L,DurationUtil.parse("P1DT1M").getSeconds());
-        Assertions.assertEquals(183840L,DurationUtil.parse("P2DT3H4M").getSeconds());
-        Assertions.assertEquals(-21420L,DurationUtil.parse("PT-6H3M").getSeconds());
-        Assertions.assertEquals(-21780L,DurationUtil.parse("-PT6H3M").getSeconds());
-        Assertions.assertEquals(21420L,DurationUtil.parse("-PT-6H+3M").getSeconds());
+    private static Stream<Arguments> provideValueSetsTestParseGetSeconds() {
+        return Stream.of(
+                Arguments.of(-1L, ""),
+                Arguments.of(0L, "8"),
+                Arguments.of(0L, "8ms"),
+                Arguments.of(8L, "8s"),
+                Arguments.of(480L, "8m"),
+                Arguments.of(28800L, "8h"),
+                Arguments.of(691200L, "8d"),
+                Arguments.of(172800L, "P2D"),
+                Arguments.of(20L, "PT20.345S"),
+                Arguments.of(900L, "PT15M"),
+                Arguments.of(36000L, "PT10H"),
+                Arguments.of(8L, "PT8S"),
+                Arguments.of(86460L, "P1DT1M"),
+                Arguments.of(183840L, "P2DT3H4M"),
+                Arguments.of(-21420L, "PT-6H3M"),
+                Arguments.of(-21780L, "-PT6H3M"),
+                Arguments.of(21420L, "-PT-6H+3M")
+        );
     }
 
-    @Test
-    public void testParseThrowException() {
-        Assertions.assertThrows(UnsupportedOperationException.class,
-                () -> DurationUtil.parse("a"));
+    @ParameterizedTest
+    @MethodSource("provideValueSetsTestParseGetSeconds")
+    public void testParseGetSeconds(long expected, String str) {
+        Assertions.assertEquals(expected,DurationUtil.parse(str).getSeconds());
+    }
 
-        Assertions.assertThrows(UnsupportedOperationException.class,
-                () -> DurationUtil.parse("as"));
+    private static Stream<Arguments> provideValueSetsTestParseToMillis() {
+        return Stream.of(
+                Arguments.of(8L, "8"),
+                Arguments.of(8L, "8ms"),
+                Arguments.of(20345L, "PT20.345S")
+        );
+    }
 
-        Assertions.assertThrows(UnsupportedOperationException.class,
-                () -> DurationUtil.parse("d"));
+    @ParameterizedTest
+    @MethodSource("provideValueSetsTestParseToMillis")
+    public void testParseToMillis(long expected, String str) {
+        Assertions.assertEquals(expected, DurationUtil.parse(str).toMillis());
+    }
 
-        Assertions.assertThrows(UnsupportedOperationException.class,
-                () -> DurationUtil.parse("h"));
+    private static Stream<Arguments> provideValueSetsTestParseThrowException() {
+        return Stream.of(
+                Arguments.of("a"),
+                Arguments.of("as"),
+                Arguments.of("d"),
+                Arguments.of("h"),
+                Arguments.of("m"),
+                Arguments.of("s"),
+                Arguments.of("ms")
+        );
+    }
 
+    @ParameterizedTest
+    @MethodSource("provideValueSetsTestParseThrowException")
+    public void testParseThrowException(String str) {
         Assertions.assertThrows(UnsupportedOperationException.class,
-                () -> DurationUtil.parse("m"));
-
-        Assertions.assertThrows(UnsupportedOperationException.class,
-                () -> DurationUtil.parse("s"));
-
-        Assertions.assertThrows(UnsupportedOperationException.class,
-                () -> DurationUtil.parse("ms"));
+                () -> DurationUtil.parse(str));
     }
 }
