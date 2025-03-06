@@ -47,8 +47,16 @@ public class SingleResult<T> extends Result<T>  implements Serializable {
         return new SingleResult(errorCode.getCode(), errorCode.getMsg());
     }
 
+    public static <T> SingleResult<T> failure(String msg) {
+        return new SingleResult<>(FAIL_CODE, msg);
+    }
+
     public static <T> SingleResult<T> success(T data) {
         return new SingleResult<>(SUCCESS_CODE, SUCCESS_MSG,data);
+    }
+
+    public static <T> SingleResult<T> success() {
+        return new SingleResult<>(SUCCESS_CODE, SUCCESS_MSG, null);
     }
 
     public T getData() {

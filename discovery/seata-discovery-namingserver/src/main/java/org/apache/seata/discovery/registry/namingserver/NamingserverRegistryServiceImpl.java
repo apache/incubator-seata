@@ -156,6 +156,9 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
         doRegister(instance, getNamingAddrs());
     }
 
+    public void doRegister(List<Instance> instance, List<String> urlList) {
+
+    }
     public void doRegister(Instance instance, List<String> urlList) {
         for (String urlSuffix : urlList) {
             // continue if name server node is unhealthy

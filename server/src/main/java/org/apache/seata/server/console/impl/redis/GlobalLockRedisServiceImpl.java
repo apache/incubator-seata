@@ -20,7 +20,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.seata.common.result.SingleResult;
 import org.apache.seata.common.util.CollectionUtils;
+import org.apache.seata.core.exception.TransactionException;
+import org.apache.seata.server.console.exception.ConsoleException;
+import org.apache.seata.server.console.impl.AbstractLockService;
+import org.apache.seata.server.session.BranchSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 import org.apache.seata.common.util.BeanUtils;
@@ -44,7 +52,8 @@ import static org.apache.seata.core.constants.RedisKeyConstants.SPLIT;
 @Component
 @org.springframework.context.annotation.Configuration
 @ConditionalOnExpression("#{'redis'.equals('${lockMode}')}")
-public class GlobalLockRedisServiceImpl implements GlobalLockService {
+public class GlobalLockRedisServiceImpl extends AbstractLockService implements GlobalLockService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(GlobalLockRedisServiceImpl.class);
 
     @Override
     public PageResult<GlobalLockVO> query(GlobalLockParam param) {
@@ -67,6 +76,26 @@ public class GlobalLockRedisServiceImpl implements GlobalLockService {
         } else {
             return PageResult.failure(ParameterRequired.getErrCode(),"only three parameters of tableName,pk,resourceId or Xid are supported");
         }
+    }
+
+    @Override
+    public SingleResult<Void> deleteLock(GlobalLockParam param) {
+        checkDeleteLock(param);
+        String rowKey = buildRowKey(param.getTableName(), param.getPk(), param.getResourceId());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("start to delete global lock,xid:{} branchId:{} row key:{} ",
+                    param.getXid(), param.getBranchId(), rowKey);
+        }
+        BranchSession branchSession = new BranchSession();
+        branchSession.setXid(param.getXid());
+        branchSession.setBranchId(Long.parseLong(param.getBranchId()));
+        try {
+            lockManager.releaseLock(branchSession);
+        } catch (TransactionException e) {
+            throw new ConsoleException(e, String.format("delete global lock," +
+                    "xid:%s ,branchId:%s ,row key:%s failed", param.getXid(), param.getBranchId(), rowKey));
+        }
+        return SingleResult.success();
     }
 
     private List<GlobalLockVO> queryGlobalLockByRowKey(String buildRowKey) {
@@ -115,4 +144,7 @@ public class GlobalLockRedisServiceImpl implements GlobalLockService {
         return vos;
     }
 
+    private String buildXidLockKey(String xid) {
+        return DEFAULT_REDIS_SEATA_GLOBAL_LOCK_PREFIX + xid;
+    }
 }

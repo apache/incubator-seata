@@ -122,6 +122,7 @@ seata:
       committing-retry-period: 1000
       async-committing-retry-period: 1000
       rollbacking-retry-period: 1000
+      end-status-retry-period: 1000
       timeout-retry-period: 1000
     undo:
       log-save-days: 7
@@ -129,6 +130,11 @@ seata:
     session:
       branch-async-queue-size: 5000 #branch async remove queue size
       enable-branch-async-remove: false #enable to asynchronous remove branchSession
+    ratelimit:
+      enable: false
+      bucketTokenNumPerSecond: 999999
+      bucketTokenMaxNum: 999999
+      bucketTokenInitialNum: 999999
   store:
     # support: file
     mode: raft

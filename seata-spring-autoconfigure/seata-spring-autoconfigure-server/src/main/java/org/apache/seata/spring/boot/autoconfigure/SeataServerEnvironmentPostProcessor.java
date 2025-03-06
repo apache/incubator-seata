@@ -17,9 +17,15 @@
 package org.apache.seata.spring.boot.autoconfigure;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.apache.seata.spring.boot.autoconfigure.properties.server.store.DbcpProperties;
+import org.apache.seata.spring.boot.autoconfigure.properties.server.store.DruidProperties;
+import org.apache.seata.spring.boot.autoconfigure.properties.server.store.HikariProperties;
+import org.apache.seata.spring.boot.autoconfigure.properties.server.ServerRateLimitProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.server.raft.ServerRaftSSLClientProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.server.raft.ServerRaftSSLProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.server.raft.ServerRaftSSLServerProperties;
+
 import org.apache.seata.spring.boot.autoconfigure.properties.server.store.StoreProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.server.MetricsProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.server.ServerProperties;
@@ -41,12 +47,16 @@ import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.METRIC
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_BEAN_MAP;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SERVER_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SERVER_RAFT_PREFIX;
+import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SERVER_RATELIMIT_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SERVER_RAFT_SSL_CLIENT_KEYSTORE_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SERVER_RAFT_SSL_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SERVER_RAFT_SSL_SERVER_KEYSTORE_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SERVER_RECOVERY_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SERVER_UNDO_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SESSION_PREFIX;
+import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.STORE_DB_DBCP_PREFIX;
+import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.STORE_DB_DRUID_PREFIX;
+import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.STORE_DB_HIKARI_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.STORE_DB_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.STORE_FILE_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.STORE_LOCK_PREFIX;
@@ -81,6 +91,9 @@ public class SeataServerEnvironmentPostProcessor implements EnvironmentPostProce
             PROPERTY_BEAN_MAP.put(STORE_LOCK_PREFIX, Lock.class);
             PROPERTY_BEAN_MAP.put(STORE_FILE_PREFIX, StoreFileProperties.class);
             PROPERTY_BEAN_MAP.put(STORE_DB_PREFIX, StoreDBProperties.class);
+            PROPERTY_BEAN_MAP.put(STORE_DB_DRUID_PREFIX, DruidProperties.class);
+            PROPERTY_BEAN_MAP.put(STORE_DB_HIKARI_PREFIX, HikariProperties.class);
+            PROPERTY_BEAN_MAP.put(STORE_DB_DBCP_PREFIX, DbcpProperties.class);
             PROPERTY_BEAN_MAP.put(STORE_REDIS_PREFIX, StoreRedisProperties.class);
             PROPERTY_BEAN_MAP.put(STORE_REDIS_SINGLE_PREFIX, StoreRedisProperties.Single.class);
             PROPERTY_BEAN_MAP.put(STORE_REDIS_SENTINEL_PREFIX, StoreRedisProperties.Sentinel.class);
@@ -90,6 +103,7 @@ public class SeataServerEnvironmentPostProcessor implements EnvironmentPostProce
             PROPERTY_BEAN_MAP.put(SERVER_RAFT_SSL_CLIENT_KEYSTORE_PREFIX, ServerRaftSSLClientProperties.class);
             PROPERTY_BEAN_MAP.put(SESSION_PREFIX, SessionProperties.class);
             PROPERTY_BEAN_MAP.put(STORE_PREFIX, StoreProperties.class);
+            PROPERTY_BEAN_MAP.put(SERVER_RATELIMIT_PREFIX, ServerRateLimitProperties.class);
         }
     }
 

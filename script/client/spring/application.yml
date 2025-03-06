@@ -82,7 +82,7 @@ seata:
       server-executor-thread-prefix: NettyServerBizHandler
       share-boss-worker: false
       client-selector-thread-prefix: NettyClientSelector
-      client-selector-thread-size: 1
+      client-selector-thread-size: -1
       client-worker-thread-prefix: NettyClientWorkerThread
       worker-thread-size: default
       boss-thread-size: 1
@@ -95,6 +95,7 @@ seata:
     enable-rm-client-batch-send-request: true
     rpc-rm-request-timeout: 15000
     rpc-tm-request-timeout: 30000
+    enable-client-shared-event-loop-group: false
   config:
     type: file
     consul:
