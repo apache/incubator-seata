@@ -62,6 +62,8 @@ public class DefaultCore implements Core {
     private static final boolean PARALLEL_HANDLE_BRANCH =
             ConfigurationFactory.getInstance().getBoolean(ENABLE_PARALLEL_HANDLE_BRANCH_KEY, false);
 
+    private static volatile DefaultCore instance;
+
     /**
      * get the Default core.
      *
@@ -76,7 +78,6 @@ public class DefaultCore implements Core {
             }
         }
     }
-
     /**
      * get core
      *
@@ -129,6 +130,64 @@ public class DefaultCore implements Core {
     public BranchStatus branchRollback(GlobalSession globalSession, BranchSession branchSession) throws TransactionException {
         return getCore(branchSession.getBranchType()).branchRollback(globalSession, branchSession);
     }
+
+    @Override
+    public BranchStatus branchDelete(GlobalSession globalSession, BranchSession branchSession) throws TransactionException {
+        return getCore(branchSession.getBranchType()).branchDelete(globalSession, branchSession);
+    }
+
+    @Override
+    public Boolean doBranchDelete(GlobalSession globalSession, BranchSession branchSession) throws TransactionException {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Start delete branch, xid:{}, branchId:{}, branchType:{}",
+                    globalSession.getXid(), branchSession.getBranchId(), branchSession.getBranchType());
+        }
+        if (globalSession.isSaga()) {
+            return true;
+        }
+        BranchStatus branchStatus = getCore(branchSession.getBranchType()).branchDelete(globalSession, branchSession);
+        switch (branchSession.getBranchType()) {
+            case AT:
+                // at branch delete use commit to delete
+                if (branchStatus.getCode() == BranchStatus.PhaseTwo_Committed.getCode()) {
+                    LOGGER.info("Delete AT branch failed, xid = {} branchId = {}", globalSession.getXid(), branchSession.getBranchId());
+                    return true;
+                }
+                break;
+            case TCC:
+                // tcc branch delete use rollback to delete
+                if (branchStatus.getCode() == BranchStatus.PhaseTwo_Rollbacked.getCode()) {
+                    LOGGER.info("Delete TCC branch failed, xid = {} branchId = {}", globalSession.getXid(), branchSession.getBranchId());
+                    return true;
+                }
+                break;
+            case XA:
+                // xa branch delete use rollback to delete
+                if (branchStatus.getCode() == BranchStatus.PhaseTwo_Rollbacked.getCode()) {
+                    return true;
+                }
+                // XAER_NOTA retry timeout, the resource had been rollback
+                if (isXaerNotaTimeout(globalSession, BranchStatus.get(branchStatus.getCode()))) {
+                    LOGGER.info("Delete branch XAER_NOTA retry timeout, xid = {} branchId = {}", globalSession.getXid(), branchSession.getBranchId());
+                    return true;
+                }
+                LOGGER.info("Delete XA branch failed, xid = {} branchId = {}", globalSession.getXid(), branchSession.getBranchId());
+                break;
+            default:
+                break;
+        }
+
+        // branch transaction can not roll back, stop retry and delete
+        if (branchStatus == BranchStatus.PhaseTwo_RollbackFailed_Unretryable) {
+            LOGGER.error("Delete branch transaction fail and stop retry, xid = {} branchId = {}", globalSession.getXid(), branchSession.getBranchId());
+            return true;
+        }
+
+        LOGGER.error("Delete branch transaction failed, xid = {} branchId = {} branchType = {}", globalSession.getXid(),
+                branchSession.getBranchId(), branchSession.getBranchType());
+        return false;
+    }
+
 
     @Override
     public String begin(String applicationId, String transactionServiceGroup, String name, int timeout)
@@ -218,6 +277,10 @@ public class DefaultCore implements Core {
                 if (currentStatus == BranchStatus.PhaseOne_RDONLY
                         && branchSession.getBranchType() == BranchType.XA) {
                     SessionHelper.removeBranch(globalSession, branchSession, !retrying);
+                    return CONTINUE;
+                }
+                // skip the branch session if not retry
+                if (retrying && BranchStatus.STOP_RETRY.equals(currentStatus)) {
                     return CONTINUE;
                 }
                 try {
@@ -320,6 +383,10 @@ public class DefaultCore implements Core {
                 BranchStatus currentBranchStatus = branchSession.getStatus();
                 if (currentBranchStatus == BranchStatus.PhaseOne_Failed) {
                     SessionHelper.removeBranch(globalSession, branchSession, !retrying);
+                    return CONTINUE;
+                }
+                // skip the branch session if not retry
+                if (retrying && BranchStatus.STOP_RETRY.equals(currentBranchStatus)) {
                     return CONTINUE;
                 }
                 try {

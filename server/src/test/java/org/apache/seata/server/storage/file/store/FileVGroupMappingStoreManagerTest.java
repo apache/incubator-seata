@@ -28,6 +28,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.Map;
+
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -58,7 +60,7 @@ public class FileVGroupMappingStoreManagerTest {
 
         assertTrue(fileVGroupMappingStoreManager.addVGroup(mappingDO));
 
-        HashMap<String, Object> vGroups = fileVGroupMappingStoreManager.loadVGroups();
+        Map<String, Object> vGroups = fileVGroupMappingStoreManager.loadVGroups();
         assertEquals(UNIT, vGroups.get(VGROUP_NAME));
     }
 
@@ -71,7 +73,7 @@ public class FileVGroupMappingStoreManagerTest {
         fileVGroupMappingStoreManager.addVGroup(mappingDO);
         assertTrue(fileVGroupMappingStoreManager.removeVGroup(VGROUP_NAME));
 
-        HashMap<String, Object> vGroups = fileVGroupMappingStoreManager.loadVGroups();
+        Map<String, Object> vGroups = fileVGroupMappingStoreManager.loadVGroups();
         assertNull(vGroups.get(VGROUP_NAME));
     }
 
@@ -82,7 +84,7 @@ public class FileVGroupMappingStoreManagerTest {
         File file = new File(STORE_PATH);
         FileUtils.writeStringToFile(file, "{\"testVGroup\":\"testUnit\"}", StandardCharsets.UTF_8);
 
-        HashMap<String, Object> actualMapping = fileVGroupMappingStoreManager.loadVGroups();
+        Map<String, Object> actualMapping = fileVGroupMappingStoreManager.loadVGroups();
         assertEquals(expectedMapping, actualMapping);
     }
 

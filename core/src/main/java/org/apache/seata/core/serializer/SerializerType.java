@@ -77,7 +77,15 @@ public enum SerializerType {
      * <p>
      * Math.pow(2, 7)
      */
-    GRPC((byte) 0x128);
+    GRPC((byte) 0x128),
+
+    /**
+     * The fury.
+     * <p>
+     * Math.pow(2, 8)
+     */
+    FURY((byte) 0x256)
+    ;
 
     private final byte code;
 

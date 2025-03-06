@@ -28,6 +28,7 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_RPC_RM_REQUEST_TIMEO
 import static org.apache.seata.common.DefaultValues.DEFAULT_RPC_TC_REQUEST_TIMEOUT;
 import static org.apache.seata.common.DefaultValues.DEFAULT_RPC_TM_REQUEST_TIMEOUT;
 import static org.apache.seata.common.DefaultValues.DEFAULT_TRANSPORT_HEARTBEAT;
+import static org.apache.seata.common.DefaultValues.DEFAULT_ENABLE_CLIENT_USE_SHARED_EVENT_LOOP;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.TRANSPORT_PREFIX;
 
 
@@ -91,6 +92,11 @@ public class TransportProperties {
      * rpcTcRequestTimeout
      */
     private long rpcTcRequestTimeout = DEFAULT_RPC_TC_REQUEST_TIMEOUT;
+
+    /**
+     * use shared event loop group
+     */
+    private boolean enableClientSharedEventLoop = DEFAULT_ENABLE_CLIENT_USE_SHARED_EVENT_LOOP;
 
 
     public String getType() {
@@ -193,8 +199,16 @@ public class TransportProperties {
         return rpcTcRequestTimeout;
     }
 
+    public boolean isEnableClientSharedEventLoop() {
+        return enableClientSharedEventLoop;
+    }
+
     public void setRpcTcRequestTimeout(long rpcTcRequestTimeout) {
         this.rpcTcRequestTimeout = rpcTcRequestTimeout;
+    }
+
+    public void setEnableClientSharedEventLoop(boolean useSharedEventLoop) {
+        this.enableClientSharedEventLoop = useSharedEventLoop;
     }
 
     public String getProtocol() {

@@ -18,6 +18,7 @@ package org.apache.seata.server.coordinator;
 
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.GlobalStatus;
+import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
 
 /**
@@ -56,4 +57,12 @@ public interface Core extends TransactionCoordinatorInbound, TransactionCoordina
      */
     void doGlobalReport(GlobalSession globalSession, String xid, GlobalStatus param) throws TransactionException;
 
+    /**
+     * Do branch delete.
+     *
+     * @param globalSession the global session
+     * @param branchSession the branch session
+     * @throws TransactionException the transaction exception
+     */
+    Boolean doBranchDelete(GlobalSession globalSession, BranchSession branchSession) throws TransactionException;
 }

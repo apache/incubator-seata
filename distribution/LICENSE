@@ -357,9 +357,9 @@ Apache-2.0 licenses
     org.apache.rocketmq:rocketmq-common 5.0.0 Apache-2.0
     org.apache.rocketmq:rocketmq-logging 5.0.0 Apache-2.0
     org.apache.rocketmq:rocketmq-remoting 5.0.0 Apache-2.0
-    org.apache.tomcat.embed:tomcat-embed-el 9.0.90 Apache-2.0
-    org.apache.tomcat.embed:tomcat-embed-websocket 9.0.90 Apache-2.0
-    org.apache.tomcat:tomcat-annotations-api 9.0.83 Apache-2.0
+    org.apache.tomcat.embed:tomcat-embed-el 9.0.98 Apache-2.0
+    org.apache.tomcat.embed:tomcat-embed-websocket 9.0.98 Apache-2.0
+    org.apache.tomcat:tomcat-annotations-api 9.0.98 Apache-2.0
     org.apache.yetus:audience-annotations 0.12.0 Apache-2.0
     org.awaitility:awaitility 4.0.3 Apache-2.0
     org.codehaus.groovy:groovy-all 2.4.4 Apache-2.0
@@ -406,7 +406,7 @@ Apache-2.0 licenses
     org.apache.zookeeper:zookeeper 3.7.2  Apache-2.0
     org.apache.zookeeper:zookeeper-jute 3.7.2  Apache-2.0
     org.apache.skywalking 8.4.0 Apache-2.0
-    org.apache.tomcat.embed:tomcat-embed-core 9.0.90 Apache-2.0
+    org.apache.tomcat.embed:tomcat-embed-core 9.0.98 Apache-2.0
     net.java.dev.jna:jna 5.5.0 Apache-2.0
     org.rocksdb:rocksdbjni 8.8.1 Apache-2.0
     org.springframework:spring-aop 5.3.39 Apache-2.0

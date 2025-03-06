@@ -30,13 +30,9 @@ public class NetAddressValidatorUtil {
 
     private static final String DOUBLE_COLON_FFFF = "::ffff:";
 
-    private static final String FE80 = "fe80:";
-
     private static final int ZERO = 0;
 
     private static final int SEVEN = 7;
-
-    private static final int FIVE = 5;
 
     private static final Pattern IPV4_PATTERN = Pattern
             .compile("^" + "(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)" + "(\\.(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}" + "$");
@@ -133,19 +129,17 @@ public class NetAddressValidatorUtil {
     }
 
     /**
-     * Check if <code>input</code> is a link local IPv6 address starting with "fe80:" and containing
+     * Check if <code>input</code> is a link local IPv6 address containing
      * a zone index with "%xxx". The zone index will not be checked.
      *
      * @param input ip-address to check
      * @return true if address part of <code>input</code> is in correct IPv6 notation.
      */
     public static boolean isLinkLocalIPv6WithZoneIndex(String input) {
-        if (input.length() > FIVE && input.substring(ZERO, FIVE).equalsIgnoreCase(FE80)) {
-            int lastIndex = input.lastIndexOf(PERCENT);
-            if (lastIndex > ZERO && lastIndex < (input.length() - 1)) {
-                String ipPart = input.substring(ZERO, lastIndex);
-                return isIPv6StdAddress(ipPart) || isIPv6HexCompressedAddress(ipPart);
-            }
+        int lastIndex = input.lastIndexOf(PERCENT);
+        if (lastIndex > ZERO && lastIndex < (input.length() - 1)) {
+            String ipPart = input.substring(ZERO, lastIndex);
+            return isIPv6StdAddress(ipPart) || isIPv6HexCompressedAddress(ipPart);
         }
         return false;
     }

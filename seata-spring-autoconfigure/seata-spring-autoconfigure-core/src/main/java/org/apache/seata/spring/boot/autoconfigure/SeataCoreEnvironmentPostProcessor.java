@@ -40,6 +40,7 @@ import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryRa
 import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryRedisProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistrySofaProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryZooKeeperProperties;
+import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryMetadataProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.env.EnvironmentPostProcessor;
 import org.springframework.core.Ordered;
@@ -69,6 +70,7 @@ import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGIST
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SHUTDOWN_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.THREAD_FACTORY_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.TRANSPORT_PREFIX;
+import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_METADATA_PREFIX;
 
 
 public class SeataCoreEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
@@ -90,6 +92,7 @@ public class SeataCoreEnvironmentPostProcessor implements EnvironmentPostProcess
             PROPERTY_BEAN_MAP.put(CONFIG_PREFIX, ConfigProperties.class);
             PROPERTY_BEAN_MAP.put(CONFIG_FILE_PREFIX, ConfigFileProperties.class);
             PROPERTY_BEAN_MAP.put(REGISTRY_PREFIX, RegistryProperties.class);
+            PROPERTY_BEAN_MAP.put(REGISTRY_METADATA_PREFIX, RegistryMetadataProperties.class);
 
             PROPERTY_BEAN_MAP.put(CONFIG_NACOS_PREFIX, ConfigNacosProperties.class);
             PROPERTY_BEAN_MAP.put(CONFIG_CONSUL_PREFIX, ConfigConsulProperties.class);

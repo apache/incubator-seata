@@ -17,6 +17,7 @@
 package org.apache.seata.server.console.service;
 
 import org.apache.seata.common.result.PageResult;
+import org.apache.seata.common.result.SingleResult;
 import org.apache.seata.server.console.param.GlobalLockParam;
 import org.apache.seata.server.console.vo.GlobalLockVO;
 
@@ -33,5 +34,20 @@ public interface GlobalLockService {
      */
     PageResult<GlobalLockVO> query(GlobalLockParam param);
 
+    /**
+     * Delete lock by xid and branchId
+     *
+     * @param param param
+     * @return SingleResult<Void>
+     */
+    SingleResult<Void> deleteLock(GlobalLockParam param);
 
+    /**
+     * Check if the lock exist the branch session
+     *
+     * @param xid      xid
+     * @param branchId branchId
+     * @return True-exist   False-not exist the branch session
+     */
+    SingleResult<Boolean> check(String xid, String branchId);
 }
