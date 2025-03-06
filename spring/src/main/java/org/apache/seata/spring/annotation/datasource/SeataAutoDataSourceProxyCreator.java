@@ -71,7 +71,7 @@ public class SeataAutoDataSourceProxyCreator extends AbstractAutoProxyCreator {
     @Override
     protected Object wrapIfNecessary(Object bean, String beanName, Object cacheKey) {
         // we only care DataSource bean
-        if (!(bean instanceof DataSource)) {
+        if (!(bean instanceof DataSource) || isAbstractRoutingDataSource(bean)) {
             return bean;
         }
 
@@ -106,6 +106,22 @@ public class SeataAutoDataSourceProxyCreator extends AbstractAutoProxyCreator {
         // else, put <origin, proxy> to holder and return originEnhancer
         DataSourceProxyHolder.put(origin, proxy);
         return originEnhancer;
+    }
+
+    /**
+     * Checks if the given bean is an instance of AbstractRoutingDataSource.
+     *
+     * @param bean the object to check
+     * @return true if the bean is an instance of AbstractRoutingDataSource, false otherwise
+     */
+    private boolean isAbstractRoutingDataSource(Object bean) {
+        try {
+            Class<?> clazz = Class.forName("org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource");
+            return clazz.isAssignableFrom(bean.getClass());
+        } catch (ClassNotFoundException e) {
+            // AbstractRoutingDataSource not found
+            return false;
+        }
     }
 
     SeataDataSourceProxy buildProxy(DataSource origin, String proxyMode) {
