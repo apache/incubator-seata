@@ -20,7 +20,6 @@
 - [[#6523](https://github.com/apache/incubator-seata/pull/6523)] 升级 alibaba/druid 的版本到1.2.20
 - [[#6566](https://github.com/apache/incubator-seata/pull/6566)] 支持GlobalTransactionScanner类中exposeProxy属性的配置
 - [[#6534](https://github.com/apache/incubator-seata/pull/6534)] 优化: 发送异步响应
-- [[#7193](https://github.com/apache/incubator-seata/pull/7193)] 自动跳过对AbstractRoutingDataSource类型数据源的代理
 
 ### refactor:
 
@@ -42,7 +41,6 @@
 - [funky-eyes](https://github.com/funky-eyes)
 - [tanyaofei](https://github.com/tanyaofei)
 - [wanghongzhou](https://github.com/wanghongzhou)
-- [iAmClever](https://github.com/iAmClever)
 
 
 同时，我们收到了社区反馈的很多有价值的issue和建议，非常感谢大家。
