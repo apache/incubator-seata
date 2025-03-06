@@ -24,6 +24,9 @@ export type GlobalSessionParam = {
   withBranch: boolean,
   pageSize: number,
   pageNum: number,
+  namespace?: string,
+  cluster?: string,
+  vgroup?: string,
   timeStart?: number,
   timeEnd?: number
 };
@@ -33,13 +36,27 @@ export type BranchSessionParam = {
   branchId?: string,
   applicationId?: string,
   status?: number,
+  namespace?: string,
+  cluster?: string,
+  vgroup?: string,
   transactionName?: string,
 };
+
+export async function fetchNamespace():Promise<any> {
+  const result = await request.get('/naming/namespace', {
+    method: 'get',
+  });
+  return result.data;
+}
 
 export default async function fetchData(params:GlobalSessionParam):Promise<any> {
   let result = await request('/console/globalSession/query', {
     method: 'get',
     params,
+    headers: {
+      'x-seata-namespace': params.namespace,
+      'x-seata-cluster': params.cluster,
+    },
   });
 
   return result;
@@ -47,10 +64,16 @@ export default async function fetchData(params:GlobalSessionParam):Promise<any> 
 
 export async function deleteGlobalData(params: GlobalSessionParam): Promise<any> {
   const xid = params.xid
+  const vgroup = params.vgroup
   let result = await request('/console/globalSession/deleteGlobalSession', {
     method: 'delete',
     params: {
-      xid
+      xid,
+      vgroup
+    },
+    headers: {
+      'x-seata-namespace': params.namespace,
+      'x-seata-cluster': params.cluster,
     },
   });
   return result;
@@ -58,10 +81,16 @@ export async function deleteGlobalData(params: GlobalSessionParam): Promise<any>
 
 export async function forceDeleteGlobalData(params: GlobalSessionParam): Promise<any> {
   const xid = params.xid
+  const vgroup = params.vgroup
   let result = await request('/console/globalSession/forceDeleteGlobalSession', {
     method: 'delete',
     params: {
-      xid
+      xid,
+      vgroup
+    },
+    headers: {
+      'x-seata-namespace': params.namespace,
+      'x-seata-cluster': params.cluster,
     },
   });
   return result;
@@ -69,10 +98,16 @@ export async function forceDeleteGlobalData(params: GlobalSessionParam): Promise
 
 export async function stopGlobalData(params: GlobalSessionParam): Promise<any> {
   const xid = params.xid
+  const vgroup = params.vgroup
   let result = await request('/console/globalSession/stopGlobalSession', {
     method: 'PUT',
     params: {
-      xid
+      xid,
+      vgroup
+    },
+    headers: {
+      'x-seata-namespace': params.namespace,
+      'x-seata-cluster': params.cluster,
     },
   });
   return result;
@@ -80,10 +115,16 @@ export async function stopGlobalData(params: GlobalSessionParam): Promise<any> {
 
 export async function startGlobalData(params: GlobalSessionParam): Promise<any> {
   const xid = params.xid
+  const vgroup = params.vgroup
   let result = await request('/console/globalSession/startGlobalSession', {
     method: 'PUT',
     params: {
-      xid
+      xid,
+      vgroup
+    },
+    headers: {
+      'x-seata-namespace': params.namespace,
+      'x-seata-cluster': params.cluster,
     },
   });
   return result;
@@ -91,10 +132,12 @@ export async function startGlobalData(params: GlobalSessionParam): Promise<any> 
 
 export async function sendGlobalCommitOrRollback(params: BranchSessionParam): Promise<any> {
   const xid = params.xid
+  const vgroup = params.vgroup
   let result = await request('/console/globalSession/sendCommitOrRollback', {
     method: 'PUT',
     params: {
-      xid
+      xid,
+      vgroup
     },
   });
   return result;
@@ -102,10 +145,16 @@ export async function sendGlobalCommitOrRollback(params: BranchSessionParam): Pr
 
 export async function changeGlobalData(params: GlobalSessionParam): Promise<any> {
   const xid = params.xid
+  const vgroup = params.vgroup
   let result = await request('/console/globalSession/changeGlobalStatus', {
     method: 'PUT',
     params: {
-      xid
+      xid,
+      vgroup
+    },
+    headers: {
+      'x-seata-namespace': params.namespace,
+      'x-seata-cluster': params.cluster,
     },
   });
   return result;
@@ -114,11 +163,17 @@ export async function changeGlobalData(params: GlobalSessionParam): Promise<any>
 export async function deleteBranchData(params: BranchSessionParam): Promise<any> {
   const xid = params.xid
   const branchId = params.branchId
+  const vgroup = params.vgroup
   let result = await request('/console/branchSession/deleteBranchSession', {
     method: 'delete',
     params: {
       xid,
-      branchId
+      branchId,
+      vgroup
+    },
+    headers: {
+      'x-seata-namespace': params.namespace,
+      'x-seata-cluster': params.cluster,
     },
   });
   return result;
@@ -127,11 +182,17 @@ export async function deleteBranchData(params: BranchSessionParam): Promise<any>
 export async function forceDeleteBranchData(params: BranchSessionParam): Promise<any> {
   const xid = params.xid
   const branchId = params.branchId
+  const vgroup = params.vgroup
   let result = await request('/console/branchSession/forceDeleteBranchSession', {
     method: 'delete',
     params: {
       xid,
-      branchId
+      branchId,
+      vgroup
+    },
+    headers: {
+      'x-seata-namespace': params.namespace,
+      'x-seata-cluster': params.cluster,
     },
   });
   return result;
@@ -140,11 +201,17 @@ export async function forceDeleteBranchData(params: BranchSessionParam): Promise
 export async function stopBranchData(params: BranchSessionParam): Promise<any> {
   const xid = params.xid
   const branchId = params.branchId
+  const vgroup = params.vgroup
   let result = await request('/console/branchSession/stopBranchSession', {
     method: 'PUT',
     params: {
       xid,
-      branchId
+      branchId,
+      vgroup
+    },
+    headers: {
+      'x-seata-namespace': params.namespace,
+      'x-seata-cluster': params.cluster,
     },
   });
   return result;
@@ -153,11 +220,17 @@ export async function stopBranchData(params: BranchSessionParam): Promise<any> {
 export async function startBranchData(params: BranchSessionParam): Promise<any> {
   const xid = params.xid
   const branchId = params.branchId
+  const vgroup = params.vgroup
   let result = await request('/console/branchSession/startBranchSession', {
     method: 'PUT',
     params: {
       xid,
-      branchId
+      branchId,
+      vgroup
+    },
+    headers: {
+      'x-seata-namespace': params.namespace,
+      'x-seata-cluster': params.cluster,
     },
   });
   return result;

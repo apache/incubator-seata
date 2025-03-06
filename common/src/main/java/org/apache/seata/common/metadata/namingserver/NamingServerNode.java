@@ -22,8 +22,6 @@ import java.util.Objects;
 
 
 public class NamingServerNode extends Node {
-    private double weight = 1.0;
-    private boolean healthy = true;
     private long term;
     private String unit;
 

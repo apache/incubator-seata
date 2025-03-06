@@ -87,6 +87,10 @@ public class GlobalSessionFileServiceImpl extends AbstractGlobalService implemen
                 &&
                 // transactionName
                 (isBlank(param.getTransactionName()) || session.getTransactionName().contains(param.getTransactionName()))
+                &&
+
+                // vgroup
+                (isBlank(param.getVgroup()) || session.getTransactionServiceGroup().equals(param.getVgroup()))
 
                 &&
                 // timeStart
