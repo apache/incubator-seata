@@ -25,12 +25,13 @@ jobs:
       - name: "Checkout"
         uses: actions/checkout@v3
       # step 2
-      - name: "Set up Maven"
-        uses: actions/setup-java@v3
+      - name: Setup Maven Action
+        uses: s4u/setup-maven-action@v1.7.0
         with:
-          distribution: 'apache'
-          java-version: '8'
-          maven-version: '3.6.3'
+          checkout-fetch-depth: 0
+          java-version: 8
+          java-distribution: temurin
+          maven-version: 3.8.7
 
       # step 3: Initializes the CodeQL tools for scanning.
       - name: "Initialize CodeQL"
