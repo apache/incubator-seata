@@ -27,6 +27,7 @@ transport.enableTcServerBatchSendResponse=false
 transport.rpcRmRequestTimeout=30000
 transport.rpcTmRequestTimeout=30000
 transport.rpcTcRequestTimeout=30000
+transport.enableClientSharedEventLoopGroup=false
 transport.threadFactory.bossThreadPrefix=NettyBoss
 transport.threadFactory.workerThreadPrefix=NettyServerNIOWorker
 transport.threadFactory.serverExecutorThreadPrefix=NettyServerBizHandler
