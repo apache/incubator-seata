@@ -28,7 +28,7 @@ jobs:
       - name: "Set up Maven"
         uses: actions/setup-java@v3
         with:
-          distribution: 'apache'
+          distribution: 'temurin'
           java-version: '8'
           maven-version: '3.6.3'
 
