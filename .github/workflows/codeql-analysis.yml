@@ -33,7 +33,6 @@ jobs:
           sudo mv apache-maven-$MAVEN_VERSION /opt/maven
           sudo rm -f /usr/bin/mvn  # Remove existing symbolic link if it exists
           sudo ln -s /opt/maven/bin/mvn /usr/bin/mvn  # Create new symbolic link
-      - run: mvn -v
       # step 3: Initializes the CodeQL tools for scanning.
       - name: "Initialize CodeQL"
         uses: github/codeql-action/init@v3
