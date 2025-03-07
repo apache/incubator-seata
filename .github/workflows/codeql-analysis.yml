@@ -25,6 +25,7 @@ jobs:
       - name: "Checkout"
         uses: actions/checkout@v3
       - run: mvn -v
+      - run: java -version
       # step 2
       - name: "Install Maven"
         run: |
