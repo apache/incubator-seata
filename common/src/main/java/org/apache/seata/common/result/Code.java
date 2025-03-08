@@ -34,12 +34,12 @@ public enum Code {
     /**
      * The Code.
      */
-    public String code;
+    public final String code;
 
     /**
      * The Msg.
      */
-    public String msg;
+    public final String msg;
 
     private Code(String code, String msg) {
         this.code = code;
@@ -56,30 +56,12 @@ public enum Code {
     }
 
     /**
-     * Sets code.
-     *
-     * @param code the code
-     */
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    /**
      * Gets msg.
      *
      * @return the msg
      */
     public String getMsg() {
         return msg;
-    }
-
-    /**
-     * Sets msg.
-     *
-     * @param msg the msg
-     */
-    public void setMsg(String msg) {
-        this.msg = msg;
     }
 
     /**
