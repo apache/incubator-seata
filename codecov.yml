@@ -41,4 +41,4 @@ ignore:
 comment:
   layout: "diff,flags,files,reach"
   behavior: default
-  require_changes: yes
+  require_changes: no
