@@ -28,11 +28,12 @@ coverage:
   precision: 2
   range: "50...100"
 ignore:
+ - "**/test/**"
  - "test/.*"
  - ".github/.*"
  - ".mvn/.*"
  - ".style/.*"
- - "*.md"
+ - "**/**.md"
  - "distribution/.*"
  - "rm-datasource/src/test/java/org/apache/seata/rm/datasource/mock"
  - "sqlparser/seata-sqlparser-antlr/src/main/java/org/apache/seata/sqlparser/antlr/mysql/antlr/.*"
