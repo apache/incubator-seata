@@ -16,14 +16,14 @@
  */
 package org.apache.seata.common.result;
 
-import java.io.Serializable;
+import static org.apache.seata.common.result.Code.SUCCESS;
+
 import java.util.List;
 
 /**
  * The page result
- *
  */
-public class PageResult<T> extends Result<T> implements Serializable {
+public class PageResult<T> extends Result {
     private static final long serialVersionUID = 7761262662429121287L;
 
     /**
@@ -55,7 +55,7 @@ public class PageResult<T> extends Result<T> implements Serializable {
     }
 
     public PageResult(List<T> data, Integer total, Integer pages, Integer pageNum, Integer pageSize) {
-        super(SUCCESS_CODE, SUCCESS_MSG);
+        super(SUCCESS.code, SUCCESS.msg);
         this.total = total;
         this.pages = pages;
         this.pageNum = pageNum;
@@ -71,19 +71,19 @@ public class PageResult<T> extends Result<T> implements Serializable {
         }
         final int offset = pageSize * (pageNum - 1);
         return PageResult.success(
-                list.subList(
-                        Math.min(offset, list.size()),
-                        Math.min(offset + pageSize, list.size())
-                ),
-                list.size(),
-                pages,
-                pageNum,
-                pageSize
+            list.subList(
+                Math.min(offset, list.size()),
+                Math.min(offset + pageSize, list.size())
+            ),
+            list.size(),
+            pages,
+            pageNum,
+            pageSize
         );
     }
 
     public PageResult(List<T> data, Integer total, Integer pageNum, Integer pageSize) {
-        super(SUCCESS_CODE, SUCCESS_MSG);
+        super(SUCCESS.code, SUCCESS.msg);
         this.total = total;
         this.pageNum = pageNum;
         this.pageSize = pageSize;
@@ -101,12 +101,14 @@ public class PageResult<T> extends Result<T> implements Serializable {
     }
 
     public static <T> PageResult<T> success() {
-        return new PageResult<>(SUCCESS_CODE, SUCCESS_MSG);
+        return new PageResult<>(SUCCESS.code, SUCCESS.msg);
     }
 
-    public static <T> PageResult<T> success(List<T> data, Integer total, Integer pages, Integer pageNum, Integer pageSize) {
+    public static <T> PageResult<T> success(List<T> data, Integer total, Integer pages, Integer pageNum,
+        Integer pageSize) {
         return new PageResult<>(data, total, pages, pageNum, pageSize);
     }
+
     public static <T> PageResult<T> success(List<T> data, Integer total, Integer pageNum, Integer pageSize) {
         return new PageResult<>(data, total, pageNum, pageSize);
     }
