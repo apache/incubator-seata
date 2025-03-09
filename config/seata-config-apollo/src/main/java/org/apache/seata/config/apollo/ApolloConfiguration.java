@@ -46,7 +46,6 @@ import static org.apache.seata.config.ConfigurationKeys.FILE_ROOT_CONFIG;
 
 /**
  * The type Apollo configuration.
- *
  */
 public class ApolloConfiguration extends AbstractConfiguration {
 
@@ -68,7 +67,7 @@ public class ApolloConfiguration extends AbstractConfiguration {
     private ExecutorService configOperateExecutor;
     private static final int CORE_CONFIG_OPERATE_THREAD = 1;
     private static final ConcurrentMap<String, Set<ConfigurationChangeListener>> LISTENER_SERVICE_MAP
-            = new ConcurrentHashMap<>();
+        = new ConcurrentHashMap<>();
     private static final int MAX_CONFIG_OPERATE_THREAD = 2;
     private static volatile ApolloConfiguration instance;
 
@@ -80,9 +79,9 @@ public class ApolloConfiguration extends AbstractConfiguration {
                 if (config == null) {
                     config = ConfigService.getConfig(FILE_CONFIG.getConfig(getApolloNamespaceKey(), DEFAULT_NAMESPACE));
                     configOperateExecutor = new ThreadPoolExecutor(CORE_CONFIG_OPERATE_THREAD,
-                            MAX_CONFIG_OPERATE_THREAD, Integer.MAX_VALUE, TimeUnit.MILLISECONDS,
-                            new LinkedBlockingQueue<>(),
-                            new NamedThreadFactory("apolloConfigOperate", MAX_CONFIG_OPERATE_THREAD));
+                        MAX_CONFIG_OPERATE_THREAD, Integer.MAX_VALUE, TimeUnit.MILLISECONDS,
+                        new LinkedBlockingQueue<>(),
+                        new NamedThreadFactory("apolloConfigOperate", MAX_CONFIG_OPERATE_THREAD));
                     config.addChangeListener(changeEvent -> {
                         for (String key : changeEvent.changedKeys()) {
                             if (!LISTENER_SERVICE_MAP.containsKey(key)) {
@@ -90,7 +89,7 @@ public class ApolloConfiguration extends AbstractConfiguration {
                             }
                             ConfigChange change = changeEvent.getChange(key);
                             ConfigurationChangeEvent event = new ConfigurationChangeEvent(key, change.getNamespace(),
-                                    change.getOldValue(), change.getNewValue(), getChangeType(change.getChangeType()));
+                                change.getOldValue(), change.getNewValue(), getChangeType(change.getChangeType()));
                             LISTENER_SERVICE_MAP.get(key).forEach(listener -> listener.onProcessEvent(event));
                         }
                     });
@@ -98,7 +97,6 @@ public class ApolloConfiguration extends AbstractConfiguration {
             }
         }
     }
-
 
     /**
      * Gets instance.
@@ -119,14 +117,13 @@ public class ApolloConfiguration extends AbstractConfiguration {
     @Override
     public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
         ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigFuture.ConfigOperation.GET,
-                timeoutMills);
+            timeoutMills);
         configOperateExecutor.submit(() -> {
             String result = config.getProperty(dataId, defaultValue);
             configFuture.setResult(result);
         });
-        return (String) configFuture.get();
+        return (String)configFuture.get();
     }
-
 
     @Override
     public boolean putConfig(String dataId, String content, long timeoutMills) {
@@ -148,8 +145,7 @@ public class ApolloConfiguration extends AbstractConfiguration {
         if (StringUtils.isBlank(dataId) || listener == null) {
             return;
         }
-        LISTENER_SERVICE_MAP.computeIfAbsent(dataId, key -> ConcurrentHashMap.newKeySet())
-                .add(listener);
+        LISTENER_SERVICE_MAP.computeIfAbsent(dataId, key -> ConcurrentHashMap.newKeySet()).add(listener);
     }
 
     @Override
@@ -235,8 +231,7 @@ public class ApolloConfiguration extends AbstractConfiguration {
         return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, REGISTRY_TYPE, APOLLO_CONFIG_SERVICE);
     }
 
-
-    private ConfigurationChangeType getChangeType(PropertyChangeType changeType) {
+    public ConfigurationChangeType getChangeType(PropertyChangeType changeType) {
         switch (changeType) {
             case ADDED:
                 return ConfigurationChangeType.ADD;
