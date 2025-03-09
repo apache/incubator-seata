@@ -33,6 +33,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.seata.common.metadata.ClusterRole;
 import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
@@ -48,6 +49,7 @@ import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.client.AsyncRestTemplate;
 
 
+import static org.apache.seata.common.Constants.RAFT_GROUP_HEADER;
 import static org.apache.seata.namingserver.contants.NamingConstant.CONSOLE_PATTERN;
 
 public class ConsoleRemotingFilter implements Filter {
@@ -80,7 +82,7 @@ public class ConsoleRemotingFilter implements Filter {
                     && (StringUtils.isNotBlank(cluster) || StringUtils.isNotBlank(vgroup))) {
                     List<Node> list = null;
                     if (StringUtils.isNotBlank(vgroup)) {
-                        list = namingManager.getInstancesByVgroupAndNamespace(namespace, vgroup);
+                        list = namingManager.getInstancesByVgroupAndNamespace(namespace, vgroup, StringUtils.equalsIgnoreCase(request.getMethod(), HttpMethod.GET.name()));
                     } else if (StringUtils.isNotBlank(cluster)) {
                         list = namingManager.getInstances(namespace, cluster);
                     }
@@ -88,7 +90,6 @@ public class ConsoleRemotingFilter implements Filter {
                         // Randomly select a node from the list
                         Node node = list.get(ThreadLocalRandom.current().nextInt(list.size()));
                         Node.Endpoint controlEndpoint = node.getControl();
-
                         if (controlEndpoint != null) {
                             // Construct the target URL
                             String targetUrl = "http://" + controlEndpoint.getHost() + ":" + controlEndpoint.getPort()
@@ -97,6 +98,9 @@ public class ConsoleRemotingFilter implements Filter {
 
                             // Copy headers from the original request
                             HttpHeaders headers = new HttpHeaders();
+                            if (node.getRole() == ClusterRole.LEADER) {
+                                headers.add(RAFT_GROUP_HEADER, node.getGroup());
+                            }
                             Collections.list(request.getHeaderNames())
                                 .forEach(headerName -> headers.add(headerName, request.getHeader(headerName)));
 
