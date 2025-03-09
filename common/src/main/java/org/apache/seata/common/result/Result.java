@@ -16,23 +16,21 @@
  */
 package org.apache.seata.common.result;
 
+import static org.apache.seata.common.result.Code.SUCCESS;
+
 import java.io.Serializable;
 
 /**
  * The basic result
  */
-public class Result<T>  implements Serializable {
+public class Result implements Serializable {
     private static final long serialVersionUID = 7761261124298767L;
 
-    public static final String SUCCESS_CODE = "200";
-    public static final String SUCCESS_MSG = "success";
-    public static final String FAIL_CODE = "500";
-
-
-    private String code = SUCCESS_CODE;
-    private String message = SUCCESS_MSG;
+    private final String code;
+    private final String message;
 
     public Result() {
+        this(null, null);
     }
 
     public Result(String code, String message) {
@@ -41,23 +39,14 @@ public class Result<T>  implements Serializable {
     }
 
     public boolean isSuccess() {
-        return SUCCESS_CODE.equals(this.code);
+        return this.code.equals(SUCCESS.code);
     }
 
     public String getCode() {
         return code;
     }
 
-    public void setCode(String code) {
-        this.code = code;
-    }
-
     public String getMessage() {
         return message;
     }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
 }
