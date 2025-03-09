@@ -1117,11 +1117,6 @@ public interface ConfigurationKeys {
     String SERVER_RAFT_COMPRESSOR = SERVER_RAFT + "compressor";
 
     /**
-     * The constant CLIENT_METADATA_MAX_AGE_MS.
-     */
-    String CLIENT_METADATA_MAX_AGE_MS = CLIENT_PREFIX + "metadataMaxAgeMs";
-
-    /**
      * The constant IS_USE_CLOUD_NAMESPACE_PARSING.
      */
     String IS_USE_CLOUD_NAMESPACE_PARSING = "isUseCloudNamespaceParsing";
