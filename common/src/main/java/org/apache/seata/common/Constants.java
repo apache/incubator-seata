@@ -239,4 +239,9 @@ public interface Constants {
      */
     int DEAD_LOCK_ERROR_CODE = 1213;
 
+    /**
+     * The constant RAFT_GROUP_HEADER
+     */
+    String RAFT_GROUP_HEADER = "X-SEATA-RAFT-GROUP";
+
 }

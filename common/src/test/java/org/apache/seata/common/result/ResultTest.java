@@ -14,29 +14,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.common.code;
+package org.apache.seata.common.result;
 
-import org.apache.seata.common.result.Code;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.apache.seata.common.result.Code.SUCCESS;
 
-public class CodeTest {
+class ResultTest {
 
     @Test
-    public void testGetErrorMsgWithValidCodeReturnsExpectedMsg() {
-        // Test case for SUCCESS
-        assertEquals("ok", Code.SUCCESS.getMsg());
-        // Test case for INTERNAL_SERVER_ERROR
-        assertEquals("Server error", Code.INTERNAL_SERVER_ERROR.getMsg());
-        // Test case for UNAUTHORIZED
-        assertEquals("Login failed", Code.UNAUTHORIZED.getMsg());
+    void testConstructor() {
+        Result result = new Result("200", "ok");
+        Assertions.assertEquals(SUCCESS.code, result.getCode());
+        Assertions.assertEquals(SUCCESS.msg, result.getMessage());
     }
 
     @Test
-    public void testGetErrorMsgWithInvalidCodeReturnsNull() {
-        // Test case for non-existing code
-        assertNull(Code.getErrorMsg("404"));
+    void testIsSuccess() {
+        Result result = new Result("200", "ok");
+        Assertions.assertTrue(result.isSuccess());
+    }
+
+    @Test
+    void testGetCode() {
+        Result result = new Result("200", "ok");
+        Assertions.assertEquals(SUCCESS.code, result.getCode());
+    }
+
+    @Test
+    void testGetMessage() {
+        Result result = new Result("200", "ok");
+        Assertions.assertEquals(SUCCESS.msg, result.getMessage());
     }
 }

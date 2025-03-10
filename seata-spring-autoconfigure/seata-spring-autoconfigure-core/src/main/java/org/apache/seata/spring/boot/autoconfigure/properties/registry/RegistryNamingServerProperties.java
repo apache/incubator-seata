@@ -30,6 +30,14 @@ public class RegistryNamingServerProperties {
 
     private int heartbeatPeriod = 5000;
 
+    private Long metadataMaxAgeMs = 30000L;
+
+    private String username;
+
+    private String password;
+
+    private Long tokenValidityInMilliseconds = 29 * 60 * 1000L;
+
     public String getCluster() {
         return cluster;
     }
@@ -63,4 +71,37 @@ public class RegistryNamingServerProperties {
     public void setHeartbeatPeriod(int heartbeatPeriod) {
         this.heartbeatPeriod = heartbeatPeriod;
     }
+
+    public Long getMetadataMaxAgeMs() {
+        return metadataMaxAgeMs;
+    }
+
+    public void setMetadataMaxAgeMs(Long metadataMaxAgeMs) {
+        this.metadataMaxAgeMs = metadataMaxAgeMs;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public Long getTokenValidityInMilliseconds() {
+        return tokenValidityInMilliseconds;
+    }
+
+    public void setTokenValidityInMilliseconds(Long tokenValidityInMilliseconds) {
+        this.tokenValidityInMilliseconds = tokenValidityInMilliseconds;
+    }
+
 }

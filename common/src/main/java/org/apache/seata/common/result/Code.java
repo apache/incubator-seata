@@ -25,21 +25,21 @@ public enum Code {
     /**
      * server error
      */
-    ERROR("500", "Server error"),
+    INTERNAL_SERVER_ERROR("500", "Server error"),
     /**
      * the custom error
      */
-    LOGIN_FAILED("401", "Login failed");
+    UNAUTHORIZED("401", "Login failed");
 
     /**
      * The Code.
      */
-    public String code;
+    public final String code;
 
     /**
      * The Msg.
      */
-    public String msg;
+    public final String msg;
 
     private Code(String code, String msg) {
         this.code = code;
@@ -56,30 +56,12 @@ public enum Code {
     }
 
     /**
-     * Sets code.
-     *
-     * @param code the code
-     */
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    /**
      * Gets msg.
      *
      * @return the msg
      */
     public String getMsg() {
         return msg;
-    }
-
-    /**
-     * Sets msg.
-     *
-     * @param msg the msg
-     */
-    public void setMsg(String msg) {
-        this.msg = msg;
     }
 
     /**

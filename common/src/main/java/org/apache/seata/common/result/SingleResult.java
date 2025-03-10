@@ -16,18 +16,15 @@
  */
 package org.apache.seata.common.result;
 
-import java.io.Serializable;
-
+import static org.apache.seata.common.result.Code.SUCCESS;
+import static org.apache.seata.common.result.Code.INTERNAL_SERVER_ERROR;
 
 /**
  * The single result
  */
-public class SingleResult<T> extends Result<T>  implements Serializable {
+public class SingleResult<T> extends Result {
     private static final long serialVersionUID = 77612626624298767L;
 
-    /**
-     * the data
-     */
     private T data;
 
     public SingleResult(String code, String message) {
@@ -44,27 +41,34 @@ public class SingleResult<T> extends Result<T>  implements Serializable {
     }
 
     public static <T> SingleResult<T> failure(Code errorCode) {
-        return new SingleResult(errorCode.getCode(), errorCode.getMsg());
+        return failure(errorCode.code, errorCode.msg);
     }
 
     public static <T> SingleResult<T> failure(String msg) {
-        return new SingleResult<>(FAIL_CODE, msg);
+        return failure(INTERNAL_SERVER_ERROR.code, msg);
     }
 
-    public static <T> SingleResult<T> success(T data) {
-        return new SingleResult<>(SUCCESS_CODE, SUCCESS_MSG,data);
+    public static <T> SingleResult<T> success(String msg, T data) {
+        return new SingleResult<>(SUCCESS.code, msg, data);
+    }
+
+    public static SingleResult<Void> success(String msg) {
+        return success(msg, null);
     }
 
     public static <T> SingleResult<T> success() {
-        return new SingleResult<>(SUCCESS_CODE, SUCCESS_MSG, null);
+        return success(SUCCESS.msg, null);
+    }
+
+    public static <T> SingleResult<T> successWithData(T data) {
+        return success(SUCCESS.msg, data);
     }
 
     public T getData() {
         return data;
     }
 
-    public void setData(T data) {
+    public void setData(final T data) {
         this.data = data;
     }
-
 }
