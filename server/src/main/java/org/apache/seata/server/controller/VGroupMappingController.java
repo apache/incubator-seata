@@ -17,7 +17,7 @@
 package org.apache.seata.server.controller;
 
 import org.apache.seata.common.metadata.Instance;
-import org.apache.seata.common.result.SingleResult;
+import org.apache.seata.common.result.Result;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.store.MappingDO;
@@ -40,11 +40,11 @@ public class VGroupMappingController {
      * add vGroup in cluster
      *
      * @param vGroup
-     * @param unit
-     * @return SingleResult
+     * @return
      */
     @GetMapping("/addVGroup")
-    public SingleResult<Void> addVGroup(@RequestParam String vGroup, @RequestParam String unit) {
+    public Result<?> addVGroup(@RequestParam String vGroup, @RequestParam String unit) {
+        Result<?> result = new Result<>();
         MappingDO mappingDO = new MappingDO();
         mappingDO.setNamespace(Instance.getInstance().getNamespace());
         mappingDO.setCluster(Instance.getInstance().getClusterName());
@@ -53,24 +53,29 @@ public class VGroupMappingController {
         boolean rst = SessionHolder.getRootVGroupMappingManager().addVGroup(mappingDO);
         Instance.getInstance().setTerm(System.currentTimeMillis());
         if (!rst) {
-            return SingleResult.failure("add vGroup failed!");
+            result.setCode("500");
+            result.setMessage("add vGroup failed!");
         }
-        return SingleResult.success();
+        return result;
     }
 
     /**
      * remove vGroup in cluster
      *
      * @param vGroup
-     * @return SingleResult
+     * @return
      */
     @GetMapping("/removeVGroup")
-    public SingleResult<Void> removeVGroup(@RequestParam String vGroup) {
+    public Result<?> removeVGroup(@RequestParam String vGroup) {
+        Result<?> result = new Result<>();
         boolean rst = SessionHolder.getRootVGroupMappingManager().removeVGroup(vGroup);
         Instance.getInstance().setTerm(System.currentTimeMillis());
         if (!rst) {
-            return SingleResult.failure("remove vGroup failed!");
+            result.setCode("500");
+            result.setMessage("remove vGroup failed!");
         }
-        return SingleResult.success();
+        return result;
     }
+
+
 }

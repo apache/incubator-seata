@@ -16,10 +16,6 @@
  */
 package org.apache.seata.common.result;
 
-import static org.apache.seata.common.result.Code.SUCCESS;
-import static org.apache.seata.common.result.Code.INTERNAL_SERVER_ERROR;
-import static org.apache.seata.common.result.Code.UNAUTHORIZED;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -27,31 +23,23 @@ class SingleResultTest {
 
     @Test
     void testConstructor() {
-        SingleResult<String> result = new SingleResult<>("200", "ok", "Data");
-        Assertions.assertEquals(SUCCESS.code, result.getCode());
-        Assertions.assertEquals(SUCCESS.msg, result.getMessage());
+        SingleResult<String> result = new SingleResult<>("200", "OK", "Data");
+        Assertions.assertEquals("200", result.getCode());
+        Assertions.assertEquals("OK", result.getMessage());
         Assertions.assertEquals("Data", result.getData());
     }
 
     @Test
     void testFailureWithCodeAndMessage() {
-        SingleResult<String> result = SingleResult.failure("500", "Server error");
-        Assertions.assertEquals(INTERNAL_SERVER_ERROR.code, result.getCode());
-        Assertions.assertEquals(INTERNAL_SERVER_ERROR.msg, result.getMessage());
-        Assertions.assertNull(result.getData());
-    }
-
-    @Test
-    void testFailureWithMessage() {
-        SingleResult<String> result = SingleResult.failure("Server error");
-        Assertions.assertEquals(INTERNAL_SERVER_ERROR.code, result.getCode());
-        Assertions.assertEquals("Server error", result.getMessage());
+        SingleResult<String> result = SingleResult.failure("500", "Error");
+        Assertions.assertEquals("500", result.getCode());
+        Assertions.assertEquals("Error", result.getMessage());
         Assertions.assertNull(result.getData());
     }
 
     @Test
     void testFailureWithErrorCode() {
-        SingleResult<String> result = SingleResult.failure(UNAUTHORIZED);
+        SingleResult<String> result = SingleResult.failure(Code.LOGIN_FAILED);
         Assertions.assertEquals("401", result.getCode());
         Assertions.assertEquals("Login failed", result.getMessage());
         Assertions.assertNull(result.getData());
@@ -59,34 +47,10 @@ class SingleResultTest {
 
     @Test
     void testSuccess() {
-        SingleResult<String> result = SingleResult.successWithData("ok");
-        Assertions.assertEquals(SUCCESS.code, result.getCode());
-        Assertions.assertEquals(SUCCESS.msg, result.getMessage());
-        Assertions.assertEquals("ok", result.getData());
-    }
-
-    @Test
-    void testSuccessWithoutData() {
-        SingleResult<String> result = SingleResult.success();
-        Assertions.assertEquals(SUCCESS.code, result.getCode());
-        Assertions.assertEquals(SUCCESS.msg, result.getMessage());
-        Assertions.assertNull(result.getData());
-    }
-
-    @Test
-    void testSuccessWithMessage() {
-        SingleResult<Void> result = SingleResult.success("ok");
-        Assertions.assertEquals(SUCCESS.code, result.getCode());
-        Assertions.assertEquals("ok", result.getMessage());
-        Assertions.assertNull(result.getData());
-    }
-
-    @Test
-    void testSuccessWithMessageAndData() {
-        SingleResult<String> result = SingleResult.success("ok", "Data");
-        Assertions.assertEquals(SUCCESS.code, result.getCode());
-        Assertions.assertEquals("ok", result.getMessage());
-        Assertions.assertEquals("Data", result.getData());
+        SingleResult<String> result = SingleResult.success("SuccessData");
+        Assertions.assertEquals(SingleResult.SUCCESS_CODE, result.getCode());
+        Assertions.assertEquals(SingleResult.SUCCESS_MSG, result.getMessage());
+        Assertions.assertEquals("SuccessData", result.getData());
     }
 
     @Test
