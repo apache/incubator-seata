@@ -28,9 +28,9 @@ public abstract class AbstractLockService extends AbstractService implements Glo
         try {
             commonCheckAndGetGlobalStatus(xid, branchId);
         } catch (IllegalArgumentException e) {
-            return SingleResult.successWithData(Boolean.FALSE);
+            return SingleResult.success(Boolean.FALSE);
         }
-        return SingleResult.successWithData(Boolean.TRUE);
+        return SingleResult.success(Boolean.TRUE);
     }
 
     protected void checkDeleteLock(GlobalLockParam param) {
