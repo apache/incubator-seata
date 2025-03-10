@@ -28,15 +28,24 @@ public class CodeTest {
     public void testGetErrorMsgWithValidCodeReturnsExpectedMsg() {
         // Test case for SUCCESS
         assertEquals("ok", Code.SUCCESS.getMsg());
-        // Test case for INTERNAL_SERVER_ERROR
-        assertEquals("Server error", Code.INTERNAL_SERVER_ERROR.getMsg());
-        // Test case for UNAUTHORIZED
-        assertEquals("Login failed", Code.UNAUTHORIZED.getMsg());
+        // Test case for ERROR
+        assertEquals("Server error", Code.ERROR.getMsg());
+        // Test case for LOGIN_FAILED
+        assertEquals("Login failed", Code.LOGIN_FAILED.getMsg());
     }
 
     @Test
     public void testGetErrorMsgWithInvalidCodeReturnsNull() {
         // Test case for non-existing code
         assertNull(Code.getErrorMsg("404"));
+    }
+
+    @Test
+    public void testSetCodeAndMsgUpdatesValuesCorrectly() {
+        // Test case to check if setCode and setMsg are working as expected
+        Code.SUCCESS.setCode("201");
+        Code.SUCCESS.setMsg("Created");
+        assertEquals("201", Code.SUCCESS.getCode());
+        assertEquals("Created", Code.SUCCESS.getMsg());
     }
 }
