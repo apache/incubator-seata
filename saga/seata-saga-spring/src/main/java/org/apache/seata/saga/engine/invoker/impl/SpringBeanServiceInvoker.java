@@ -57,7 +57,6 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
     private ApplicationContext applicationContext;
     private ThreadPoolExecutor threadPoolExecutor;
     private String sagaJsonParser;
-    private final ResourceLock stateLock = new ResourceLock();
 
     @Override
     public Object invoke(ServiceTaskState serviceTaskState, Object... input) throws Throwable {
@@ -98,7 +97,7 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
 
         Method method = state.getMethod();
         if (method == null) {
-            try (ResourceLock ignored = stateLock.obtain()) {
+            try (ResourceLock ignored = state.getResourceLock().obtain()) {
                 method = state.getMethod();
                 if (method == null) {
                     method = findMethod(bean.getClass(), state.getServiceMethod(), state.getParameterTypes());
