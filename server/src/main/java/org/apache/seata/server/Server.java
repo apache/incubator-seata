@@ -16,6 +16,7 @@
  */
 package org.apache.seata.server;
 
+import java.util.Optional;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -31,11 +32,10 @@ import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.rpc.netty.NettyRemotingServer;
 import org.apache.seata.core.rpc.netty.NettyServerConfig;
 import org.apache.seata.server.coordinator.DefaultCoordinator;
-import org.apache.seata.server.instance.ServerInstanceFactory;
+import org.apache.seata.server.instance.SeataInstanceStrategy;
 import org.apache.seata.server.lock.LockerManagerFactory;
 import org.apache.seata.server.metrics.MetricsManager;
 import org.apache.seata.server.session.SessionHolder;
-
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
@@ -53,7 +53,7 @@ import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGIST
 public class Server {
 
     @Resource
-    ServerInstanceFactory serverInstanceFactory;
+    SeataInstanceStrategy seataInstanceStrategy;
 
     /**
      * The entry point of application.
@@ -103,8 +103,7 @@ public class Server {
         LockerManagerFactory.init();
         coordinator.init();
         nettyRemotingServer.setHandler(coordinator);
-
-        serverInstanceFactory.serverInstanceInit();
+        Optional.ofNullable(seataInstanceStrategy).ifPresent(SeataInstanceStrategy::init);
         // let ServerRunner do destroy instead ShutdownHook, see https://github.com/seata/seata/issues/4028
         ServerRunner.addDisposable(coordinator);
         nettyRemotingServer.init();

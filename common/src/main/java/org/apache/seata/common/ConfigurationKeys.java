@@ -710,6 +710,11 @@ public interface ConfigurationKeys {
     String WORKER_THREAD_SIZE = THREAD_FACTORY_PREFIX + "workerThreadSize";
 
     /**
+     * The constant ENABLE_SHARED_EVENTLOOP
+     */
+    String ENABLE_CLIENT_SHARED_EVENTLOOP = TRANSPORT_PREFIX + "enableClientSharedEventLoopGroup";
+
+    /**
      * The constant SHUTDOWN_PREFIX
      */
     String SHUTDOWN_PREFIX = TRANSPORT_PREFIX + "shutdown.";
@@ -1110,11 +1115,6 @@ public interface ConfigurationKeys {
      * The constant SERVER_RAFT_COMPRESSOR.
      */
     String SERVER_RAFT_COMPRESSOR = SERVER_RAFT + "compressor";
-
-    /**
-     * The constant CLIENT_METADATA_MAX_AGE_MS.
-     */
-    String CLIENT_METADATA_MAX_AGE_MS = CLIENT_PREFIX + "metadataMaxAgeMs";
 
     /**
      * The constant IS_USE_CLOUD_NAMESPACE_PARSING.
