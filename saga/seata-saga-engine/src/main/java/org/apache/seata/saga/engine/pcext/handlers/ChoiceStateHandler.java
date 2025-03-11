@@ -44,7 +44,7 @@ import org.apache.seata.saga.statelang.domain.impl.ChoiceStateImpl;
  */
 public class ChoiceStateHandler implements StateHandler {
 
-    private final ConcurrentHashMap<ChoiceStateImpl, ResourceLock> STATE_LOCK_MAP = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<ChoiceStateImpl, ResourceLock> stateLockMap = new ConcurrentHashMap<>();
 
     @Override
     public void process(ProcessContext context) throws EngineExecutionException {
@@ -54,7 +54,7 @@ public class ChoiceStateHandler implements StateHandler {
 
         Map<Object, String> choiceEvaluators = choiceState.getChoiceEvaluators();
         if (choiceEvaluators == null) {
-            try (ResourceLock ignored = STATE_LOCK_MAP.computeIfAbsent(choiceState, k -> new ResourceLock()).obtain()) {
+            try (ResourceLock ignored = stateLockMap.computeIfAbsent(choiceState, k -> new ResourceLock()).obtain()) {
                 choiceEvaluators = choiceState.getChoiceEvaluators();
                 if (choiceEvaluators == null) {
 
@@ -73,7 +73,7 @@ public class ChoiceStateHandler implements StateHandler {
                     choiceState.setChoiceEvaluators(choiceEvaluators);
                 }
             } finally {
-                STATE_LOCK_MAP.remove(choiceState);
+                stateLockMap.remove(choiceState);
             }
         }
 
