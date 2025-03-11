@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 
+import static org.apache.seata.common.result.Code.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -41,7 +42,7 @@ public class PageResultTest {
         for (long i = 0; i < 100; i++) {
             list.add(i);
         }
-        PageResult pageResult = PageResult.build(list, 1, 10);
+        PageResult<Long> pageResult = PageResult.build(list, 1, 10);
         assertEquals(10, pageResult.getPages());
         assertEquals(10, pageResult.getData().size());
     }
@@ -52,7 +53,7 @@ public class PageResultTest {
         for (long i = 0; i < 9; i++) {
             list.add(i);
         }
-        PageResult pageResult = PageResult.build(list, 1, 10);
+        PageResult<Long> pageResult = PageResult.build(list, 1, 10);
         assertEquals(1, pageResult.getPages());
         assertEquals(9, pageResult.getData().size());
     }
@@ -63,7 +64,7 @@ public class PageResultTest {
         for (long i = 0; i < 5; i++) {
             list.add(i);
         }
-        PageResult pageResult = PageResult.build(list, 10, 2);
+        PageResult<Long> pageResult = PageResult.build(list, 10, 2);
         assertEquals(10, pageResult.getPageNum().intValue());
         assertEquals(3, pageResult.getPages().intValue());
         assertEquals(0, pageResult.getData().size());
@@ -71,16 +72,16 @@ public class PageResultTest {
 
     @Test
     void failureInvalidParams() {
-        PageResult pageResult = PageResult.failure("400", "error");
+        PageResult<Void> pageResult = PageResult.failure("400", "error");
         assertEquals("400", pageResult.getCode());
         assertEquals("error", pageResult.getMessage());
     }
 
     @Test
     void successNoData() {
-        PageResult pageResult = PageResult.success();
-        assertEquals(PageResult.SUCCESS_CODE, pageResult.getCode());
-        assertEquals(PageResult.SUCCESS_MSG, pageResult.getMessage());
+        PageResult<Void> pageResult = PageResult.success();
+        assertEquals(SUCCESS.code, pageResult.getCode());
+        assertEquals(SUCCESS.msg, pageResult.getMessage());
         assertNull(pageResult.getData());
     }
 
@@ -90,9 +91,9 @@ public class PageResultTest {
         for (long i = 0; i < 5; i++) {
             list.add(i);
         }
-        PageResult pageResult = PageResult.success(list, 5, 1, 5);
-        assertEquals(PageResult.SUCCESS_CODE, pageResult.getCode());
-        assertEquals(PageResult.SUCCESS_MSG, pageResult.getMessage());
+        PageResult<Long> pageResult = PageResult.success(list, 5, 1, 5);
+        assertEquals(SUCCESS.code, pageResult.getCode());
+        assertEquals(SUCCESS.msg, pageResult.getMessage());
         assertEquals(5, pageResult.getTotal().intValue());
         assertEquals(1, pageResult.getPageNum().intValue());
         assertEquals(5, pageResult.getPageSize().intValue());
