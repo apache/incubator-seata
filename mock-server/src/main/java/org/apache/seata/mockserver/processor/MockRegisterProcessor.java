@@ -53,7 +53,7 @@ public class MockRegisterProcessor implements RemotingProcessor {
     public void process(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception {
         String errorInfo = StringUtils.EMPTY;
         AbstractResultMessage response = null;
-        try{
+        try {
             if (role == Role.TM) {
                 RegisterTMRequest message = (RegisterTMRequest) rpcMessage.getBody();
                 LOGGER.info("reg message = " + message);
@@ -67,9 +67,9 @@ public class MockRegisterProcessor implements RemotingProcessor {
                 Version.putChannelVersion(ctx.channel(), message.getVersion());
                 response = new RegisterRMResponse();
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             errorInfo = e.getMessage();
-            LOGGER.error(role +" register fail, error message:{}", errorInfo);
+            LOGGER.error(role + " register fail, error message:{}", errorInfo);
         }
         if (StringUtils.isNotEmpty(errorInfo)) {
             response.setMsg(errorInfo);
