@@ -24,7 +24,11 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.server.cluster.raft.context.SeataClusterContext;
+
+
+import static org.apache.seata.common.Constants.RAFT_GROUP_HEADER;
 
 public class RaftGroupFilter implements Filter {
 
@@ -36,6 +40,9 @@ public class RaftGroupFilter implements Filter {
         throws IOException, ServletException {
         HttpServletRequest httpRequest = (HttpServletRequest)request;
         String unit = httpRequest.getParameter("unit");
+        if (StringUtils.isBlank(unit)) {
+            unit = httpRequest.getHeader(RAFT_GROUP_HEADER);
+        }
         if (unit != null) {
             SeataClusterContext.bindGroup(unit);
         }
