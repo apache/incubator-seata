@@ -64,7 +64,7 @@ public class RedisVGroupMappingStoreManager implements VGroupMappingStoreManager
     }
 
     @Override
-    public HashMap<String, Object> loadVGroups() {
+    public Map<String, Object> loadVGroups() {
         Instance instance = Instance.getInstance();
         String namespace = REDIS_PREFIX + instance.getNamespace();
         String clusterName = instance.getClusterName();

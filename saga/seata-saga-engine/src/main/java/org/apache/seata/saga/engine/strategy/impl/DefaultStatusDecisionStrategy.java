@@ -155,14 +155,10 @@ public class DefaultStatusDecisionStrategy implements StatusDecisionStrategy {
             stateMachineInstance.setStatus(ExecutionStatus.UN);
         } else {
             NetExceptionType t = ExceptionUtils.getNetExceptionType(exp);
-            if (t != null) {
-                if (t.equals(NetExceptionType.CONNECT_EXCEPTION) || t.equals(NetExceptionType.CONNECT_TIMEOUT_EXCEPTION)
-                    || t.equals(NetExceptionType.NOT_NET_EXCEPTION)) {
-                    stateMachineInstance.setStatus(ExecutionStatus.FA);
-                } else if (t.equals(NetExceptionType.READ_TIMEOUT_EXCEPTION)) {
-                    stateMachineInstance.setStatus(ExecutionStatus.UN);
-                }
-            } else {
+            if (t.equals(NetExceptionType.CONNECT_EXCEPTION) || t.equals(NetExceptionType.CONNECT_TIMEOUT_EXCEPTION)
+                || t.equals(NetExceptionType.NOT_NET_EXCEPTION)) {
+                stateMachineInstance.setStatus(ExecutionStatus.FA);
+            } else if (t.equals(NetExceptionType.READ_TIMEOUT_EXCEPTION)) {
                 stateMachineInstance.setStatus(ExecutionStatus.UN);
             }
         }
