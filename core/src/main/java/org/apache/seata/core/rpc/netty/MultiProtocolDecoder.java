@@ -90,7 +90,7 @@ public class MultiProtocolDecoder extends LengthFieldBasedFrameDecoder {
                 .put(ProtocolConstants.VERSION_1, new ProtocolDecoderV1())
                 .put(ProtocolConstants.VERSION_2, new ProtocolDecoderV2())
                 .build();
-        this.protocolEncoderMap =ImmutableMap.<Byte, ProtocolEncoder>builder()
+        this.protocolEncoderMap = ImmutableMap.<Byte, ProtocolEncoder>builder()
                 .put(ProtocolConstants.VERSION_0, new ProtocolEncoderV0())
                 .put(ProtocolConstants.VERSION_1, new ProtocolEncoderV1())
                 .put(ProtocolConstants.VERSION_2, new ProtocolEncoderV2())

@@ -120,7 +120,7 @@ public class ProtocolEncoderV0 extends MessageToByteEncoder implements ProtocolE
     }
 
     @Override
-    public byte protocolVersion(){
+    public byte protocolVersion() {
         return ProtocolConstants.VERSION_0;
     }
 }

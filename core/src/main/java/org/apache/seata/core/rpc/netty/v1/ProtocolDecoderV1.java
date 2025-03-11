@@ -161,7 +161,7 @@ public class ProtocolDecoderV1 extends LengthFieldBasedFrameDecoder implements P
     }
 
     @Override
-    public byte protocolVersion(){
+    public byte protocolVersion() {
         return ProtocolConstants.VERSION_1;
     }
 }
