@@ -25,6 +25,7 @@ import org.apache.seata.server.console.exception.ConsoleException;
 import org.apache.seata.server.store.StoreConfig;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Conditional;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.Filter;
@@ -56,7 +57,7 @@ public class RaftLeaderWriteFilter implements Filter, ApplicationListener<Cluste
                          FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest httpRequest = (HttpServletRequest) servletRequest;
         String method = httpRequest.getMethod();
-        if (!"GET".equalsIgnoreCase(method)) {
+        if (!HttpMethod.GET.name().equalsIgnoreCase(method)) {
             String group = SeataClusterContext.bindGroup();
             if (!isPass(group)) {
                 throw new ConsoleException(new TransactionException(TransactionExceptionCode.NotRaftLeader,
