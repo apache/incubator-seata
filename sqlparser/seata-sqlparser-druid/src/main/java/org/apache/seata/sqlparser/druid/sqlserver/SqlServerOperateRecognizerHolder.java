@@ -26,6 +26,8 @@ import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
 import com.alibaba.druid.sql.ast.statement.SQLExprHint;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
+import com.alibaba.druid.sql.ast.statement.SQLSubqueryTableSource;
+import com.alibaba.druid.sql.ast.statement.SQLTableSource;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.sqlparser.SQLRecognizer;
@@ -55,7 +57,13 @@ public class SqlServerOperateRecognizerHolder implements SQLOperateRecognizerHol
 
     @Override
     public SQLRecognizer getSelectForUpdateRecognizer(String sql, SQLStatement ast) {
-        List<SQLHint> hints = ((SQLSelectStatement) ast).getSelect().getFirstQueryBlock().getFrom().getHints();
+        SQLTableSource tableSource = ((SQLSelectStatement) ast).getSelect().getFirstQueryBlock().getFrom();
+
+        if (tableSource instanceof SQLSubqueryTableSource) {
+            return new SqlServerSelectForUpdateRecognizer(sql, ast);
+        }
+
+        List<SQLHint> hints = tableSource.getHints();
         if (CollectionUtils.isNotEmpty(hints)) {
             List<String> hintsTexts = hints
                     .stream()
@@ -72,6 +80,7 @@ public class SqlServerOperateRecognizerHolder implements SQLOperateRecognizerHol
                 return new SqlServerSelectForUpdateRecognizer(sql, ast);
             }
         }
+
         return null;
     }
 }
