@@ -45,8 +45,8 @@ import org.apache.seata.core.protocol.Protocol;
 import org.apache.seata.core.rpc.RemotingBootstrap;
 import org.apache.seata.core.rpc.netty.grpc.GrpcDecoder;
 import org.apache.seata.core.rpc.netty.grpc.GrpcEncoder;
-import org.apache.seata.core.rpc.netty.v1.ProtocolDecoderV1;
-import org.apache.seata.core.rpc.netty.v1.ProtocolEncoderV1;
+import org.apache.seata.core.rpc.netty.v2.ProtocolDecoderV2;
+import org.apache.seata.core.rpc.netty.v2.ProtocolEncoderV2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -157,8 +157,8 @@ public class NettyClientBootstrap implements RemotingBootstrap {
                         pipeline.addLast(new IdleStateHandler(nettyClientConfig.getChannelMaxReadIdleSeconds(),
                                 nettyClientConfig.getChannelMaxWriteIdleSeconds(),
                                 nettyClientConfig.getChannelMaxAllIdleSeconds()));
-                        pipeline.addLast(new ProtocolDecoderV1())
-                                .addLast(new ProtocolEncoderV1());
+                        pipeline.addLast(new ProtocolDecoderV2())
+                                .addLast(new ProtocolEncoderV2());
                         if (channelHandlers != null) {
                             addChannelPipelineLast(ch, channelHandlers);
                         }

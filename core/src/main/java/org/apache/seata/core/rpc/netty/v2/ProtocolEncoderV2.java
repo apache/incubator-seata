@@ -25,6 +25,6 @@ import org.apache.seata.core.rpc.netty.v1.ProtocolEncoderV1;
 public class ProtocolEncoderV2 extends ProtocolEncoderV1 {
     @Override
     public byte protocolVersion() {
-        return ProtocolConstants.VERSION_1;
+        return ProtocolConstants.VERSION_2;
     }
 }

@@ -14,5 +14,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-org.apache.seata.common.loader.LoaderTestImpl1
-org.apache.seata.common.loader.LoaderTestImpl2
+org.apache.seata.core.rpc.netty.CodecTestCheckAuthHandler

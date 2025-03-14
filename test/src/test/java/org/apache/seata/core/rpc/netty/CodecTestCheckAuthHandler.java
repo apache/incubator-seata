@@ -14,18 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.core.rpc.netty.v2;
+package org.apache.seata.core.rpc.netty;
 
-import org.apache.seata.core.protocol.ProtocolConstants;
-import org.apache.seata.core.rpc.netty.v1.ProtocolDecoderV1;
+import org.apache.seata.common.loader.LoadLevel;
+import org.apache.seata.core.protocol.RegisterTMRequest;
+import org.apache.seata.server.auth.DefaultCheckAuthHandler;
 
 /**
- * Decoder of protocol-v2
+ * the type CodecTestCheckAuthHandler
  **/
-public class ProtocolDecoderV2 extends ProtocolDecoderV1 {
+@LoadLevel(name = "codecTestCheckAuthHandler", order = 101)
+public class CodecTestCheckAuthHandler extends DefaultCheckAuthHandler {
+
+    public static String CODEC_TEST_REG_ERROR = "codec_test_reg_error";
 
     @Override
-    public byte protocolVersion() {
-        return ProtocolConstants.VERSION_2;
+    public boolean regTransactionManagerCheckAuth(RegisterTMRequest request) {
+        if(CODEC_TEST_REG_ERROR.equals(request.getExtraData())){
+            return false;
+        }
+        return super.regTransactionManagerCheckAuth(request);
     }
+
+
 }

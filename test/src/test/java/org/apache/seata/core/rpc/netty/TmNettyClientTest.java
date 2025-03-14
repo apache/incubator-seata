@@ -45,15 +45,17 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
+ *
  */
 public class TmNettyClientTest extends AbstractServerTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TmNettyClientTest.class);
 
     @BeforeAll
-    public static void init(){
+    public static void init() {
         ConfigurationTestHelper.putConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, "8091");
     }
+
     @AfterAll
     public static void after() {
         ConfigurationTestHelper.removeConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
@@ -61,7 +63,7 @@ public class TmNettyClientTest extends AbstractServerTest {
 
     public static ThreadPoolExecutor initMessageExecutor() {
         return new ThreadPoolExecutor(5, 5, 500, TimeUnit.SECONDS,
-            new LinkedBlockingQueue(20000), new ThreadPoolExecutor.CallerRunsPolicy());
+                new LinkedBlockingQueue(20000), new ThreadPoolExecutor.CallerRunsPolicy());
     }
 
     /**
@@ -182,7 +184,7 @@ public class TmNettyClientTest extends AbstractServerTest {
         request.setXid("127.0.0.1:8091:1249853");
         GlobalCommitResponse globalCommitResponse = null;
         try {
-            globalCommitResponse = (GlobalCommitResponse)tmNettyRemotingClient.sendSyncRequest(request);
+            globalCommitResponse = (GlobalCommitResponse) tmNettyRemotingClient.sendSyncRequest(request);
         } catch (TimeoutException e) {
             throw new RuntimeException(e);
         }
@@ -193,7 +195,7 @@ public class TmNettyClientTest extends AbstractServerTest {
     }
 
     @Test
-    public void testRegisterTMCodec() throws Exception {
+    public void testRegisterTMReg() throws Exception {
         ThreadPoolExecutor workingThreads = initMessageExecutor();
         NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
         new Thread(() -> {
@@ -208,31 +210,23 @@ public class TmNettyClientTest extends AbstractServerTest {
         }).start();
         Thread.sleep(3000);
 
-        String applicationId = "app 1";
+        String applicationId = "test-current-version";
         String transactionServiceGroup = "default_tx_group";
         TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup);
         tmNettyRemotingClient.init();
 
-        String serverAddress = "0.0.0.0:8091";
-        Channel channel = TmNettyRemotingClient.getInstance().getClientChannelManager().acquireChannel(serverAddress);
-        Assertions.assertNotNull(channel);
-
         // test old version
         RegisterTMRequest request = new RegisterTMRequest(applicationId, transactionServiceGroup);
-        // todo
-        request.setVersion("");
-        RegisterTMResponse response = (RegisterTMResponse)tmNettyRemotingClient.sendSyncRequest(request);
-
-
-
-
-//        Assertions.assertNotNull(globalCommitResponse);
-//        Assertions.assertEquals(GlobalStatus.Finished, globalCommitResponse.getGlobalStatus());
-
-
+        request.setExtraData(CodecTestCheckAuthHandler.CODEC_TEST_REG_ERROR);
+        RegisterTMResponse response = (RegisterTMResponse) tmNettyRemotingClient.sendSyncRequest(request);
+        if (response != null) {
+        }
+        Assertions.assertNotNull(response);
+        LOGGER.info("resp: {}", response);
+        Assertions.assertFalse(response.isIdentified());
+        Assertions.assertNotNull(response.isIdentified());
 
         nettyRemotingServer.destroy();
         tmNettyRemotingClient.destroy();
     }
-
 }
