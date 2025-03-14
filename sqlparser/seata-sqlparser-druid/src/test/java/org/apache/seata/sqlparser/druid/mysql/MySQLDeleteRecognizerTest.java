@@ -20,6 +20,7 @@ import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLDeleteStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.expr.MySqlOrderingExpr;
+import org.apache.seata.common.exception.NotSupportYetException;
 import org.apache.seata.sqlparser.ParametersHolder;
 import org.apache.seata.sqlparser.SQLType;
 import org.apache.seata.sqlparser.druid.AbstractRecognizerTest;
@@ -196,6 +197,12 @@ public class MySQLDeleteRecognizerTest extends AbstractRecognizerTest {
 
         MySQLDeleteRecognizer recognizer = new MySQLDeleteRecognizer(sql, asts.get(0));
         Assertions.assertNull(recognizer.getTableAlias());
+
+        sql = "DELETE t1 FROM t t1 WHERE t1.id = ?";
+        asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
+
+        recognizer = new MySQLDeleteRecognizer(sql, asts.get(0));
+        Assertions.assertEquals("t1", recognizer.getTableAlias());
     }
 
     @Test
@@ -327,6 +334,15 @@ public class MySQLDeleteRecognizerTest extends AbstractRecognizerTest {
             deleteAst.setWhere(new MySqlOrderingExpr());
             new MySQLDeleteRecognizer(s, deleteAst).getWhereCondition();
         });
+    }
+
+    @Test
+    public void testGetTableName() {
+        String sql = "DELETE t1 FROM t1 INNER JOIN t2 ON t1.id = t2.t1_id WHERE t1.id BETWEEN ? AND ?;";
+        SQLStatement statement = getSQLStatement(sql);
+
+        MySQLDeleteRecognizer mySQLDeleteRecognizer1 = new MySQLDeleteRecognizer(sql, statement);
+        Assertions.assertThrows(NotSupportYetException.class, mySQLDeleteRecognizer1::getTableName);
     }
 
     @Override
