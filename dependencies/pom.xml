@@ -86,7 +86,7 @@
         <fastjson2.version>2.0.52</fastjson2.version>
         <groovy.version>2.4.4</groovy.version>
         <zstd.version>1.5.0-4</zstd.version>
-        <jackson.version>2.16.0</jackson.version>
+        <jackson.version>2.18.3</jackson.version>
         <xstream.version>1.4.21</xstream.version>
         <checker-qual.version>3.37.0</checker-qual.version>
         <error_prone_annotations.version>2.21.1</error_prone_annotations.version>
