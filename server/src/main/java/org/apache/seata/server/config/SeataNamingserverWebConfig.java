@@ -16,10 +16,14 @@
  */
 package org.apache.seata.server.config;
 
+import org.apache.seata.server.filter.RaftCondition;
 import org.apache.seata.server.filter.RaftGroupFilter;
+import org.apache.seata.server.filter.RaftLeaderWriteFilter;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 
 @Configuration
 public class SeataNamingserverWebConfig {
@@ -32,4 +36,13 @@ public class SeataNamingserverWebConfig {
         return registrationBean;
     }
 
+    @Bean
+    @Conditional(RaftCondition.class)
+    @DependsOn("raftLeaderWriteFilter")
+    public FilterRegistrationBean<RaftLeaderWriteFilter> raftLeaderWriteServletFilter(RaftLeaderWriteFilter raftLeaderWriteFilter) {
+        FilterRegistrationBean<RaftLeaderWriteFilter> registrationBean = new FilterRegistrationBean<>();
+        registrationBean.setFilter(raftLeaderWriteFilter);
+        registrationBean.addUrlPatterns("/api/v1/console/*");
+        return registrationBean;
+    }
 }
