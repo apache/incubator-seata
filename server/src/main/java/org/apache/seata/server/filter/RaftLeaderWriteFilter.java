@@ -58,7 +58,7 @@ public class RaftLeaderWriteFilter implements Filter, ApplicationListener<Cluste
         HttpServletRequest httpRequest = (HttpServletRequest) servletRequest;
         String method = httpRequest.getMethod();
         if (!HttpMethod.GET.name().equalsIgnoreCase(method)) {
-            String group = SeataClusterContext.bindGroup();
+            String group = SeataClusterContext.getGroup();
             if (!isPass(group)) {
                 throw new ConsoleException(new TransactionException(TransactionExceptionCode.NotRaftLeader,
                         " The current TC is not a leader node, interrupt processing of transactions!"),
