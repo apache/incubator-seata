@@ -31,6 +31,8 @@ import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.XID;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.result.PageResult;
+import org.apache.seata.common.result.Result;
+import org.apache.seata.common.result.SingleResult;
 import org.apache.seata.common.store.SessionMode;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.UUIDGenerator;
@@ -38,12 +40,12 @@ import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.model.LockStatus;
+import org.apache.seata.server.console.exception.ConsoleException;
 import org.apache.seata.server.console.param.GlobalSessionParam;
 import org.apache.seata.server.console.service.BranchSessionService;
 import org.apache.seata.server.console.service.GlobalSessionService;
 import org.apache.seata.server.console.vo.GlobalSessionVO;
 import org.apache.seata.server.storage.file.session.FileSessionManager;
-import org.apache.seata.server.store.StoreConfig;
 import org.apache.seata.server.util.StoreUtil;
 import org.apache.commons.lang.time.DateUtils;
 import org.junit.jupiter.api.Assertions;
@@ -473,14 +475,10 @@ public class FileSessionManagerTest {
             GlobalSession globalSession = globalSessions.get(1);
             globalSession.changeGlobalStatus(GlobalStatus.CommitFailed);
             String xid = globalSession.getXid();
-            globalSessionService.changeGlobalStatus(xid);
-            Assertions.assertEquals(SessionHolder.findGlobalSession(xid).getStatus(),
-                    GlobalStatus.CommitRetrying);
-
+            SingleResult<Void> voidSingleResult = globalSessionService.changeGlobalStatus(xid);
+            Assertions.assertEquals(voidSingleResult.getCode(), Result.SUCCESS_CODE);
             globalSession.changeGlobalStatus(GlobalStatus.RollbackFailed);
-            globalSessionService.changeGlobalStatus(xid);
-            Assertions.assertEquals(SessionHolder.findGlobalSession(xid).getStatus(),
-                    GlobalStatus.RollbackRetrying);
+            Assertions.assertThrows(ConsoleException.class, () -> globalSessionService.changeGlobalStatus(xid));
         } finally {
             for (GlobalSession globalSession : globalSessions) {
                 globalSession.setStatus(GlobalStatus.Committed);
