@@ -73,6 +73,7 @@ import org.apache.seata.server.cluster.raft.execute.global.UpdateGlobalSessionEx
 import org.apache.seata.server.cluster.raft.execute.lock.BranchReleaseLockExecute;
 import org.apache.seata.server.cluster.raft.execute.lock.GlobalReleaseLockExecute;
 import org.apache.seata.server.cluster.listener.ClusterChangeEvent;
+import org.apache.seata.server.cluster.raft.snapshot.vgroup.VGroupSnapshotFile;
 import org.apache.seata.server.cluster.raft.sync.RaftSyncMessageSerializer;
 import org.apache.seata.server.cluster.raft.sync.msg.RaftBaseMsg;
 import org.apache.seata.server.cluster.raft.sync.msg.RaftClusterMetadataMsg;
@@ -148,6 +149,7 @@ public class RaftStateMachine extends StateMachineAdapter {
         registryStoreSnapshotFile(new LeaderMetadataSnapshotFile(group));
         if (StoreMode.RAFT.getName().equalsIgnoreCase(mode)) {
             registryStoreSnapshotFile(new SessionSnapshotFile(group));
+            registryStoreSnapshotFile(new VGroupSnapshotFile(group));
             EXECUTES.put(ADD_GLOBAL_SESSION, new AddGlobalSessionExecute());
             EXECUTES.put(ADD_BRANCH_SESSION, new AddBranchSessionExecute());
             EXECUTES.put(REMOVE_BRANCH_SESSION, new RemoveBranchSessionExecute());
