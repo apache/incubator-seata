@@ -112,6 +112,7 @@
         <postgresql.version>42.3.8</postgresql.version>
         <h2.version>1.4.181</h2.version>
         <mariadb.version>2.7.2</mariadb.version>
+        <kingbase.version>9.0.0</kingbase.version>
         <!-- db connection pool -->
         <druid.version>1.2.20</druid.version>
         <commons-dbcp2.version>2.9.0</commons-dbcp2.version>
@@ -904,6 +905,11 @@
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-annotations</artifactId>
                 <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.com.kingbase</groupId>
+                <artifactId>kingbase8</artifactId>
+                <version>${kingbase.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
