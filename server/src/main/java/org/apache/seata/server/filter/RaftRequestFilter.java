@@ -17,6 +17,7 @@
 package org.apache.seata.server.filter;
 
 import org.apache.seata.common.store.SessionMode;
+import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.exception.TransactionExceptionCode;
 import org.apache.seata.server.cluster.listener.ClusterChangeEvent;
@@ -40,12 +41,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static org.apache.seata.common.Constants.RAFT_GROUP_HEADER;
+
 /**
  * Raft Leader Write Filter
  */
 @Component
 @Conditional(RaftCondition.class)
-public class RaftLeaderWriteFilter implements Filter, ApplicationListener<ClusterChangeEvent> {
+public class RaftRequestFilter implements Filter, ApplicationListener<ClusterChangeEvent> {
 
     private static final Map<String, Boolean> GROUP_PREVENT = new ConcurrentHashMap<>();
 
@@ -53,20 +56,30 @@ public class RaftLeaderWriteFilter implements Filter, ApplicationListener<Cluste
     public void init(FilterConfig filterConfig) throws ServletException {}
 
     @Override
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse,
-                         FilterChain filterChain) throws IOException, ServletException {
-        HttpServletRequest httpRequest = (HttpServletRequest) servletRequest;
-        String method = httpRequest.getMethod();
-        if (!HttpMethod.GET.name().equalsIgnoreCase(method)) {
-            String group = SeataClusterContext.getGroup();
-            if (!isPass(group)) {
-                throw new ConsoleException(new TransactionException(TransactionExceptionCode.NotRaftLeader,
-                        " The current TC is not a leader node, interrupt processing of transactions!"),
-                        " The current TC is not a leader node, interrupt processing of transactions!");
-            }
+    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
+        throws IOException, ServletException {
+        HttpServletRequest httpRequest = (HttpServletRequest)servletRequest;
+        String group = httpRequest.getParameter("unit");
+        if (StringUtils.isBlank(group)) {
+            group = httpRequest.getHeader(RAFT_GROUP_HEADER);
         }
-
-        filterChain.doFilter(servletRequest, servletResponse);
+        if (group != null) {
+            SeataClusterContext.bindGroup(group);
+        }
+        try {
+            String method = httpRequest.getMethod();
+            if (!HttpMethod.GET.name().equalsIgnoreCase(method)) {
+                if (!isPass(group)) {
+                    throw new ConsoleException(
+                        new TransactionException(TransactionExceptionCode.NotRaftLeader,
+                            " The current TC is not a leader node, interrupt processing of transactions!"),
+                        " The current TC is not a leader node, interrupt processing of transactions!");
+                }
+            }
+            filterChain.doFilter(servletRequest, servletResponse);
+        } finally {
+            SeataClusterContext.unbindGroup();
+        }
     }
 
     @Override

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.server.console.vo;
+package org.apache.seata.server.console.entity.vo;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
