@@ -152,8 +152,8 @@ public abstract class AbstractGlobalService extends AbstractService implements G
         GlobalStatus globalStatus = globalSession.getStatus();
         try {
             if (FAIL_COMMIT_STATUS.contains(globalStatus)) {
-               boolean committed = doCommitGlobal(globalSession);
-               return committed ? SingleResult.success() : SingleResult.failure("Commit fail, please try again");
+                boolean committed = doCommitGlobal(globalSession);
+                return committed ? SingleResult.success() : SingleResult.failure("Commit fail, please try again");
             }
             if (FAIL_ROLLBACK_STATUS.contains(globalStatus)) {
                 boolean rollbacked = doRollbackGlobal(globalSession);
