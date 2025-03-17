@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.server.console.vo;
+package org.apache.seata.server.console.entity.vo;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -26,6 +26,7 @@ import java.util.List;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.core.constants.ServerTableColumnsName;
 import org.apache.seata.core.lock.RowLock;
+import org.apache.seata.server.console.entity.bo.GlobalLockQueryBO;
 
 /**
  * GlobalLockVO
@@ -46,6 +47,11 @@ public class GlobalLockVO {
 
     private String rowKey;
 
+    /**
+     * the vgroup
+     */
+    private String vgroup;
+
     private Long gmtCreate;
 
     private Long gmtModified;
@@ -55,13 +61,13 @@ public class GlobalLockVO {
      * @param rowLocks the RowLock list
      * @return the GlobalLockVO list
      */
-    public static List<GlobalLockVO> convert(List<RowLock> rowLocks) {
-        if (CollectionUtils.isEmpty(rowLocks)) {
+    public static List<GlobalLockVO> convert(List<GlobalLockQueryBO> globalLockQueryBOS) {
+        if (CollectionUtils.isEmpty(globalLockQueryBOS)) {
             return Collections.emptyList();
         }
-        final List<GlobalLockVO> result = new ArrayList<>(rowLocks.size());
-        for (RowLock rowLock : rowLocks) {
-            result.add(convert(rowLock));
+        final List<GlobalLockVO> result = new ArrayList<>(globalLockQueryBOS.size());
+        for (GlobalLockQueryBO globalLockQueryBO : globalLockQueryBOS) {
+            result.add(convert(globalLockQueryBO.getRowLock(), globalLockQueryBO.getGlobalSession().getTransactionServiceGroup()));
         }
 
         return result;
@@ -73,7 +79,7 @@ public class GlobalLockVO {
      * @param rowLock the RowLock
      * @return the GlobalLockVO
      */
-    public static GlobalLockVO convert(RowLock rowLock) {
+    public static GlobalLockVO convert(RowLock rowLock, String vgroup) {
         final GlobalLockVO globalLockVO = new GlobalLockVO();
         globalLockVO.setXid(rowLock.getXid());
         globalLockVO.setTransactionId(rowLock.getTransactionId());
@@ -82,6 +88,7 @@ public class GlobalLockVO {
         globalLockVO.setTableName(rowLock.getTableName());
         globalLockVO.setPk(rowLock.getPk());
         globalLockVO.setRowKey(rowLock.getRowKey());
+        globalLockVO.setVgroup(vgroup);
         return globalLockVO;
     }
 
@@ -180,16 +187,25 @@ public class GlobalLockVO {
 
     @Override
     public String toString() {
-        return "GlobalLockVO{" +
-                "xid='" + xid + '\'' +
-                ", transactionId=" + transactionId +
-                ", branchId=" + branchId +
-                ", resourceId='" + resourceId + '\'' +
-                ", tableName='" + tableName + '\'' +
-                ", pk='" + pk + '\'' +
-                ", rowKey='" + rowKey + '\'' +
-                ", gmtCreate=" + gmtCreate +
-                ", gmtModified=" + gmtModified +
-                '}';
+        return "GlobalLockVO{" + "xid='" + xid + '\'' + ", transactionId='" + transactionId + '\'' + ", branchId='"
+            + branchId + '\'' + ", resourceId='" + resourceId + '\'' + ", tableName='" + tableName + '\'' + ", pk='"
+            + pk + '\'' + ", rowKey='" + rowKey + '\'' + ", vgroup='" + vgroup + '\'' + ", gmtCreate=" + gmtCreate
+            + ", gmtModified=" + gmtModified + '}';
+    }
+
+    public void setTransactionId(String transactionId) {
+        this.transactionId = transactionId;
+    }
+
+    public void setBranchId(String branchId) {
+        this.branchId = branchId;
+    }
+
+    public String getVgroup() {
+        return vgroup;
+    }
+
+    public void setVgroup(String vgroup) {
+        this.vgroup = vgroup;
     }
 }
