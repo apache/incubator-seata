@@ -37,14 +37,11 @@ header:
 
   paths-ignore:
     - '.gitignore'
-    - '*.md'
     - 'LICENSE'
     - 'NOTICE'
     - 'DISCLAIMER'
-    - '**/*.md'
     - '.github/**'
     - '**/target/**'
-    - '**/*.iml'
     - 'changes/**'
     - 'style/**'
     - 'sessionStore/**'
