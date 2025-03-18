@@ -31,8 +31,6 @@ import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.XID;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.result.PageResult;
-import org.apache.seata.common.result.Result;
-import org.apache.seata.common.result.SingleResult;
 import org.apache.seata.common.store.SessionMode;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.UUIDGenerator;
@@ -475,8 +473,7 @@ public class FileSessionManagerTest {
             GlobalSession globalSession = globalSessions.get(1);
             globalSession.changeGlobalStatus(GlobalStatus.CommitFailed);
             String xid = globalSession.getXid();
-            SingleResult<Void> voidSingleResult = globalSessionService.changeGlobalStatus(xid);
-            Assertions.assertEquals(voidSingleResult.getCode(), Result.SUCCESS_CODE);
+            Assertions.assertThrows(ConsoleException.class, () -> globalSessionService.changeGlobalStatus(xid));
             globalSession.changeGlobalStatus(GlobalStatus.RollbackFailed);
             Assertions.assertThrows(ConsoleException.class, () -> globalSessionService.changeGlobalStatus(xid));
         } finally {
