@@ -139,6 +139,10 @@ export async function sendGlobalCommitOrRollback(params: BranchSessionParam): Pr
       xid,
       vgroup
     },
+    headers: {
+      'x-seata-namespace': params.namespace,
+      'x-seata-cluster': params.cluster,
+    },
   });
   return result;
 }

@@ -34,7 +34,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/console/branchSession")
 public class BranchSessionController {
     private static final Logger LOGGER = LoggerFactory.getLogger(BranchSessionController.class);
-
     @Resource(type = BranchSessionService.class)
     private BranchSessionService branchSessionService;
 
