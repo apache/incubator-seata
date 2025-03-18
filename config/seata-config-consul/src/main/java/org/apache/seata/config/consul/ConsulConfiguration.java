@@ -215,7 +215,7 @@ public class ConsulConfiguration extends AbstractConfiguration {
      *
      * @return client
      */
-    private static ConsulClient getConsulClient() {
+    public static ConsulClient getConsulClient() {
         if (client == null) {
             synchronized (ConsulConfiguration.class) {
                 if (client == null) {

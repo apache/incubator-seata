@@ -26,6 +26,8 @@ public class Result<T>  implements Serializable {
 
     public static final String SUCCESS_CODE = "200";
     public static final String SUCCESS_MSG = "success";
+    public static final String FAIL_CODE = "500";
+
 
     private String code = SUCCESS_CODE;
     private String message = SUCCESS_MSG;

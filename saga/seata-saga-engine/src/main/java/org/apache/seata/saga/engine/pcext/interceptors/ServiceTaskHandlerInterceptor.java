@@ -369,7 +369,7 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
                     }
 
                     EngineExecutionException exception = new EngineExecutionException("State [" + state.getName()
-                        + "] execute finished, but cannot matching status, pls check its status manually",
+                        + "] execute finished, but cannot matching status, please check its status manually",
                         FrameworkErrorCode.NoMatchedStatus);
                     if (LOGGER.isDebugEnabled()) {
                         LOGGER.debug("State[{}] execute finish with status[{}]", state.getName(),
@@ -391,13 +391,9 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
 
                     stateInstance.setStatus(ExecutionStatus.UN);
                     ExceptionUtils.NetExceptionType t = ExceptionUtils.getNetExceptionType(exp);
-                    if (t != null) {
-                        if (t.equals(ExceptionUtils.NetExceptionType.CONNECT_EXCEPTION)) {
-                            stateInstance.setStatus(ExecutionStatus.FA);
-                        } else if (t.equals(ExceptionUtils.NetExceptionType.READ_TIMEOUT_EXCEPTION)) {
-                            stateInstance.setStatus(ExecutionStatus.UN);
-                        }
-                    } else {
+                    if (t.equals(ExceptionUtils.NetExceptionType.CONNECT_EXCEPTION)) {
+                        stateInstance.setStatus(ExecutionStatus.FA);
+                    } else if (t.equals(ExceptionUtils.NetExceptionType.READ_TIMEOUT_EXCEPTION)) {
                         stateInstance.setStatus(ExecutionStatus.UN);
                     }
                 } else {

@@ -25,15 +25,61 @@ export type GlobalLockParam = {
   resourceId?: string,
   pageSize: number,
   pageNum: number,
+  namespace?: string,
+  cluster?: string,
+  vgroup?: string,
   timeStart?: number,
   timeEnd?: number
 };
 
- export default async function fetchData(params:GlobalLockParam):Promise<any> {
+export async function fetchNamespace():Promise<any> {
+  const result = await request.get('/naming/namespace', {
+    method: 'get',
+  });
+  return result.data;
+}
+
+export default async function fetchData(params:GlobalLockParam):Promise<any> {
   let result = await request('/console/globalLock/query', {
     method: 'get',
     params,
+    headers: {
+      'x-seata-namespace': params.namespace,
+      'x-seata-cluster': params.cluster,
+    },
   });
 
+  return result;
+}
+
+export async function deleteData(params: GlobalLockParam): Promise<any> {
+  let result = await request('/console/globalLock/delete', {
+    method: 'delete',
+    params,
+    headers: {
+      'x-seata-namespace': params.namespace,
+      'x-seata-cluster': params.cluster,
+  },
+  });
+  return result;
+}
+
+export async function checkData(params: GlobalLockParam): Promise<any> {
+  const xid = params.xid
+  const branchId = params.branchId
+  const vgroup = params.vgroup
+
+  let result = await request('/console/globalLock/check', {
+    method: 'get',
+    params: {
+      xid,
+      branchId,
+      vgroup: vgroup
+    },
+    headers: {
+      'x-seata-namespace': params.namespace,
+      'x-seata-cluster': params.cluster,
+    },
+  });
   return result;
 }

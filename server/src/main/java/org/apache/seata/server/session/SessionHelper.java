@@ -454,6 +454,23 @@ public class SessionHelper {
         }
     }
 
+    public static void processEndState(GlobalSession globalSession) throws TransactionException {
+        GlobalStatus globalStatus = globalSession.getStatus();
+
+        switch (globalStatus) {
+            case Committed:
+            case Finished:
+                endCommitted(globalSession, true);
+                return;
+            case Rollbacked:
+            case TimeoutRollbacked:
+                endRollbacked(globalSession, true);
+                return;
+            default:
+                throw new TransactionException("Unsupported GlobalStatus:" + globalStatus);
+        }
+    }
+
     /**
      * if true, enable delete the branch asynchronously
      *

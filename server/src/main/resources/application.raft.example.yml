@@ -32,10 +32,6 @@ logging:
     kafka-appender:
       bootstrap-servers: 127.0.0.1:9092
       topic: logback_to_logstash
-console:
-  user:
-    username: seata
-    password: seata
 seata:
   config:
     # support: nacos 、 consul 、 apollo 、 zk  、 etcd3
@@ -76,6 +72,15 @@ seata:
     # support: nacos 、 eureka 、 redis 、 zk  、 consul 、 etcd3 、 sofa
     type: file
     preferred-networks: 30.240.*
+    seata:
+      server-addr: 127.0.0.1:8081
+      cluster: default
+      namespace: public
+      heartbeat-period: 5000
+      metadata-max-age-ms: 30000
+      username: seata
+      password: seata
+      tokenValidityInMilliseconds: 1740000
   server:
     raft:
       group: default
@@ -97,17 +102,15 @@ seata:
         client:
           keystore:
             path: ssl/cbolt.pfx
-            password: seata
+            password: 
             type: pkcs12
         server:
           keystore:
             path: ssl/bolt.pfx
-            password: seata
+            password: 
             type: pkcs12
-        kmf:
-          algorithm: SunX509
-        tmf:
-          algorithm: SunX509
+        kmf-algorithm: SunX509
+        tmf-algorithm: SunX509
     service-port: 8091 #If not configured, the default is '${server.port} + 1000'
     max-commit-retry-timeout: -1
     max-rollback-retry-timeout: -1
@@ -124,6 +127,7 @@ seata:
       committing-retry-period: 1000
       async-committing-retry-period: 1000
       rollbacking-retry-period: 1000
+      end-status-retry-period: 1000
       timeout-retry-period: 1000
     undo:
       log-save-days: 7
@@ -131,6 +135,11 @@ seata:
     session:
       branch-async-queue-size: 5000 #branch async remove queue size
       enable-branch-async-remove: false #enable to asynchronous remove branchSession
+    ratelimit:
+      enable: false
+      bucketTokenNumPerSecond: 999999
+      bucketTokenMaxNum: 999999
+      bucketTokenInitialNum: 999999
   store:
     # support: file
     mode: raft
@@ -155,9 +164,3 @@ seata:
       boss-thread-prefix: NettyBoss
       worker-thread-prefix: NettyServerNIOWorker
       boss-thread-size: 1
-  security:
-    secretKey: SeataSecretKey0c382ef121d778043159209298fd40bf3850a017
-    tokenValidityInMilliseconds: 1800000
-    csrf-ignore-urls: /metadata/v1/**
-    ignore:
-      urls: /,/**/*.css,/**/*.js,/**/*.html,/**/*.map,/**/*.svg,/**/*.png,/**/*.jpeg,/**/*.ico,/api/v1/auth/login,/version.json,/health,/error

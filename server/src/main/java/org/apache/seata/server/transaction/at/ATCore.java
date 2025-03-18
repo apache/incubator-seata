@@ -24,6 +24,7 @@ import org.apache.seata.common.exception.StoreException;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.core.exception.BranchTransactionException;
 import org.apache.seata.core.exception.TransactionException;
+import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.rpc.RemotingServer;
 import org.apache.seata.server.coordinator.AbstractCore;
@@ -101,4 +102,9 @@ public class ATCore extends AbstractCore {
         return lockManager.isLockable(xid, resourceId, lockKeys);
     }
 
+    @Override
+    public BranchStatus branchDelete(GlobalSession globalSession, BranchSession branchSession) throws TransactionException {
+        // AT mode use branch commit to delete undo log
+        return super.branchCommit(globalSession, branchSession);
+    }
 }

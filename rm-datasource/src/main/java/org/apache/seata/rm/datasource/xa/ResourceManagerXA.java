@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 import java.sql.SQLException;
 import javax.transaction.xa.XAException;
 import org.apache.seata.common.DefaultValues;
+import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.exception.TransactionException;
@@ -53,6 +54,7 @@ public class ResourceManagerXA extends AbstractDataSourceCacheResourceManager {
      * The Timer check xa branch two phase hold timeout.
      */
     protected volatile ScheduledExecutorService xaTwoPhaseTimeoutChecker;
+    private final ResourceLock resourceLock = new ResourceLock();
 
     @Override
     public void init() {
@@ -61,7 +63,7 @@ public class ResourceManagerXA extends AbstractDataSourceCacheResourceManager {
 
     public void initXaTwoPhaseTimeoutChecker() {
         if (xaTwoPhaseTimeoutChecker == null) {
-            synchronized (this) {
+            try (ResourceLock ignored = resourceLock.obtain()) {
                 if (xaTwoPhaseTimeoutChecker == null) {
                     boolean shouldBeHold = dataSourceCache.values().parallelStream().anyMatch(resource -> {
                         if (resource instanceof DataSourceProxyXA) {
@@ -81,7 +83,7 @@ public class ResourceManagerXA extends AbstractDataSourceCacheResourceManager {
                                         for (Map.Entry<String, ConnectionProxyXA> connectionEntry : keeper.entrySet()) {
                                             ConnectionProxyXA connection = connectionEntry.getValue();
                                             long now = System.currentTimeMillis();
-                                            synchronized (connection) {
+                                            try (ResourceLock ignored2 = connection.getResourceLock().obtain()) {
                                                 if (connection.getPrepareTime() != null
                                                     && now - connection.getPrepareTime() > TWO_PHASE_HOLD_TIMEOUT) {
                                                     try {

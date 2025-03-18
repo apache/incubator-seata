@@ -19,7 +19,7 @@ package org.apache.seata.server.storage.db.store;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.loader.LoadLevel;
-import org.apache.seata.common.metadata.namingserver.Instance;
+import org.apache.seata.common.metadata.Instance;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.store.MappingDO;
@@ -29,6 +29,7 @@ import org.apache.seata.server.store.VGroupMappingStoreManager;
 import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @LoadLevel(name = "db")
 public class DataBaseVGroupMappingStoreManager implements VGroupMappingStoreManager {
@@ -54,7 +55,7 @@ public class DataBaseVGroupMappingStoreManager implements VGroupMappingStoreMana
     }
 
     @Override
-    public HashMap<String, Object> loadVGroups() {
+    public Map<String, Object> loadVGroups() {
         List<MappingDO> mappingDOS = vGroupMappingDataBaseDAO.queryMappingDO();
         Instance instance = Instance.getInstance();
         HashMap<String, Object> mappings = new HashMap<>();

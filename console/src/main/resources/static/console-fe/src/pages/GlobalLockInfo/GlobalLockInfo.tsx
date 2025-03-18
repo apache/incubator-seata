@@ -15,17 +15,32 @@
  * limitations under the License.
  */
 import React from 'react';
-import { ConfigProvider, Table, Button, DatePicker, Form, Icon, Pagination, Input } from '@alicloud/console-components';
+import {
+  ConfigProvider,
+  Table,
+  Button,
+  DatePicker,
+  Form,
+  Icon,
+  Pagination,
+  Input,
+  Dialog,
+  Message,
+  Select
+} from '@alicloud/console-components';
 import Actions, { LinkButton } from '@alicloud/console-components-actions';
 import { withRouter } from 'react-router-dom';
 import Page from '@/components/Page';
 import { GlobalProps } from '@/module';
 import styled, { css } from 'styled-components';
-import getData, { GlobalLockParam } from '@/service/globalLockInfo';
+import getData, {checkData, deleteData, GlobalLockParam } from '@/service/globalLockInfo';
 import PropTypes from 'prop-types';
 import moment from 'moment';
 
 import './index.scss';
+import {get} from "lodash";
+import {enUsKey, getCurrentLanguage} from "@/reducers/locale";
+import {fetchNamespace} from "@/service/transactionInfo";
 
 const { RangePicker } = DatePicker;
 const FormItem = Form.Item;
@@ -33,11 +48,14 @@ const FormItem = Form.Item;
 type GlobalLockInfoState = {
   list: Array<any>;
   total: number;
+  namespaceOptions: Map<string, { clusters: string[], vgroups: string[] }>;
+  clusters: Array<string>;
+  vgroups: Array<string>;
   loading: boolean;
   globalLockParam: GlobalLockParam;
 }
 
- class GlobalLockInfo extends React.Component<GlobalProps, GlobalLockInfoState> {
+class GlobalLockInfo extends React.Component<GlobalProps, GlobalLockInfoState> {
   static displayName = 'GlobalLockInfo';
 
   static propTypes = {
@@ -53,17 +71,23 @@ type GlobalLockInfoState = {
       pageSize: 10,
       pageNum: 1,
     },
+    namespaceOptions: new Map<string, { clusters: string[], vgroups: string[] }>(),
+    clusters: [],
+    vgroups: [],
   }
 
   componentDidMount = () => {
     // @ts-ignore
     const { query } = this.props.history.location;
     if (query !== undefined) {
-      const { xid } = query;
-      if (xid !== undefined) {
+      const { xid,vgroup ,namespace,cluster} = query;
+      if (xid !== undefined && vgroup !== undefined) {
         this.setState({
           globalLockParam: {
             xid,
+            vgroup,
+            namespace,
+            cluster,
             pageSize: 10,
             pageNum: 1,
           },
@@ -71,10 +95,43 @@ type GlobalLockInfoState = {
         return;
       }
     }
-    // search once by default anyway
-    this.search();
+    this.loadNamespaces();
   }
-
+  loadNamespaces = async () => {
+    try {
+      const namespaces = await fetchNamespace();
+      const namespaceOptions = new Map<string, { clusters: string[], vgroups: string[] }>();
+      Object.keys(namespaces).forEach(namespaceKey => {
+        const namespaceData = namespaces[namespaceKey];
+        namespaceOptions.set(namespaceKey, {
+          clusters: namespaceData.clusters,
+          vgroups: namespaceData.vgroups,
+        });
+      });
+      if (namespaceOptions.size > 0) {
+        // Set default namespace to the first option
+        const firstNamespace = Array.from(namespaceOptions.keys())[0];
+        const selectedNamespace = namespaceOptions.get(firstNamespace);
+        this.setState({
+          namespaceOptions,
+          globalLockParam: {
+            ...this.state.globalLockParam,
+            namespace: firstNamespace,
+            cluster: selectedNamespace ? selectedNamespace.clusters[0] : undefined,
+          },
+          clusters: selectedNamespace ? selectedNamespace.clusters : [],
+          vgroups: selectedNamespace ? selectedNamespace.vgroups : [],
+        });
+        this.search();
+      } else {
+        this.setState({
+          namespaceOptions,
+        });
+      }
+    } catch (error) {
+      console.error('Failed to fetch namespaces:', error);
+    }
+  }
   resetSearchFilter = () => {
     this.setState({
       globalLockParam: {
@@ -101,6 +158,8 @@ type GlobalLockInfoState = {
       }
       // format time
       data.data.forEach((element: any) => {
+        element.cluster = this.state.globalLockParam.cluster;
+        element.namespace = this.state.globalLockParam.namespace;
         element.gmtCreate = (element.gmtCreate == null || element.gmtCreate === '') ? null : moment(Number(element.gmtCreate)).format('YYYY-MM-DD HH:mm:ss');
         element.gmtModified = (element.gmtModified == null || element.gmtModified === '') ? null : moment(Number(element.gmtModified)).format('YYYY-MM-DD HH:mm:ss');
       });
@@ -126,10 +185,19 @@ type GlobalLockInfoState = {
   }
 
   searchFilterOnChange = (key:string, val:string) => {
-    this.setState({
-      globalLockParam: Object.assign(this.state.globalLockParam,
-        { [key]: val }),
-    });
+    if (key === 'namespace') {
+      const selectedNamespace = this.state.namespaceOptions.get(val);
+      this.setState({
+        clusters: selectedNamespace ? selectedNamespace.clusters : [],
+        vgroups: selectedNamespace ? selectedNamespace.vgroups : [],
+        globalLockParam: Object.assign(this.state.globalLockParam, {[key]: val}),
+      });
+    } else {
+      this.setState({
+        globalLockParam: Object.assign(this.state.globalLockParam,
+            {[key]: val}),
+      });
+    }
   }
 
   paginationOnChange = (current: number, e: {}) => {
@@ -148,12 +216,56 @@ type GlobalLockInfoState = {
     this.search();
   }
 
+  deleteCell = (val: string, index: number, record: any) => {
+    const {locale = {}} = this.props;
+    const {
+      deleteGlobalLockTitle
+    } = locale;
+    let width = getCurrentLanguage() === enUsKey ? '120px' : '80px'
+    return (
+      <Actions style={{width: width}}>
+        <Button onClick={() => {
+          let addWarnning = ''
+          Dialog.confirm({
+            title: 'Confirm',
+            content: 'Are you sure you want to delete the global lock',
+            onOk: () => {
+              checkData(record).then((rsp) => {
+                addWarnning = rsp.data ? 'The branch transactions may be affected' : ''
+                Dialog.confirm({
+                  title: 'Warnning',
+                  content: <div dangerouslySetInnerHTML={{ __html: 'Dirty write problem exists' + '<br>' + addWarnning }}/>,
+                  onOk: () => {
+                    deleteData(record).then(() => {
+                      Message.success("Delete success")
+                      this.search()
+                    }).catch((rsp) => {
+                      Message.error(get(rsp, 'data.message'))
+                    })
+                  }
+                })
+              }).catch((rsp) => {
+                Message.error(get(rsp, 'data.message'))
+              })
+            }
+          });
+        }}>
+          {deleteGlobalLockTitle}
+        </Button>
+      </Actions>)
+  }
+
+
   render() {
     const { locale = {} } = this.props;
     const { title, subTitle, createTimeLabel,
       inputFilterPlaceholder,
+      selectNamespaceFilerPlaceholder,
+      selectClusterFilerPlaceholder,
+      selectVGroupFilerPlaceholder,
       searchButtonLabel,
       resetButtonLabel,
+      operateTitle,
     } = locale;
     return (
       <Page
@@ -205,7 +317,38 @@ type GlobalLockInfoState = {
               onChange={(value: string) => { this.searchFilterOnChange('branchId', value); }}
             />
           </FormItem>
-
+          <FormItem name="namespace" label="namespace">
+            <Select
+                hasClear
+                placeholder={selectNamespaceFilerPlaceholder}
+                onChange={(value: string) => {
+                  this.searchFilterOnChange('namespace', value);
+                }}
+                dataSource={Array.from(this.state.namespaceOptions.keys()).map(key => ({ label: key, value: key }))}
+                value={this.state.globalLockParam.namespace}
+            />
+          </FormItem>
+          <FormItem name="cluster" label="cluster">
+            <Select
+                hasClear
+                placeholder={selectClusterFilerPlaceholder}
+                onChange={(value: string) => {
+                  this.searchFilterOnChange('cluster', value);
+                }}
+                dataSource={this.state.clusters.map(value => ({ label: value, value }))}
+                value={this.state.globalLockParam.cluster}
+            />
+          </FormItem>
+          <FormItem name="vgroup" label="vgroup">
+            <Select
+                hasClear
+                placeholder={selectVGroupFilerPlaceholder}
+                onChange={(value: string) => {
+                  this.searchFilterOnChange('vgroup', value);
+                }}
+                dataSource={this.state.vgroups.map(value => ({ label: value, value }))}
+            />
+          </FormItem>
           {/* {reset search filter button} */}
           <FormItem>
             <Form.Reset onClick={this.resetSearchFilter}>
@@ -221,27 +364,28 @@ type GlobalLockInfoState = {
         </Form>
         {/* global lock table */}
         <div>
-        <Table dataSource={this.state.list} loading={this.state.loading}>
-          <Table.Column title="xid" dataIndex="xid" />
-          <Table.Column title="transactionId" dataIndex="transactionId" />
-          <Table.Column title="branchId" dataIndex="branchId" />
-          <Table.Column title="resourceId" dataIndex="resourceId" />
-          <Table.Column title="tableName" dataIndex="tableName" />
-          <Table.Column title="pk" dataIndex="pk" />
-          <Table.Column title="rowKey" dataIndex="rowKey" />
-          <Table.Column title="gmtCreate" dataIndex="gmtCreate" />
-          <Table.Column title="gmtModified" dataIndex="gmtModified" />
-        </Table>
-        <Pagination
-          total={this.state.total}
-          defaultCurrent={1}
-          current={this.state.globalLockParam.pageNum}
-          onChange={this.paginationOnChange}
-          pageSize={this.state.globalLockParam.pageSize}
-          pageSizeSelector="dropdown"
-          pageSizeList={[10, 20, 30, 40, 50]}
-          onPageSizeChange={this.paginationOnPageSizeChange}
-        />
+          <Table dataSource={this.state.list} loading={this.state.loading}>
+            <Table.Column title="xid" dataIndex="xid" />
+            <Table.Column title="transactionId" dataIndex="transactionId" />
+            <Table.Column title="branchId" dataIndex="branchId" />
+            <Table.Column title="resourceId" dataIndex="resourceId" />
+            <Table.Column title="tableName" dataIndex="tableName" />
+            <Table.Column title="pk" dataIndex="pk" />
+            <Table.Column title="rowKey" dataIndex="rowKey" />
+            <Table.Column title="gmtCreate" dataIndex="gmtCreate" />
+            <Table.Column title="gmtModified" dataIndex="gmtModified" />
+            <Table.Column title={operateTitle} cell={this.deleteCell}/>
+          </Table>
+          <Pagination
+            total={this.state.total}
+            defaultCurrent={1}
+            current={this.state.globalLockParam.pageNum}
+            onChange={this.paginationOnChange}
+            pageSize={this.state.globalLockParam.pageSize}
+            pageSizeSelector="dropdown"
+            pageSizeList={[10, 20, 30, 40, 50]}
+            onPageSizeChange={this.paginationOnPageSizeChange}
+          />
         </div>
       </Page>
     );

@@ -18,7 +18,7 @@ package org.apache.seata.server.storage.redis.store;
 
 import org.apache.seata.common.exception.RedisException;
 import org.apache.seata.common.loader.LoadLevel;
-import org.apache.seata.common.metadata.namingserver.Instance;
+import org.apache.seata.common.metadata.Instance;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.core.store.MappingDO;
 import org.apache.seata.server.storage.redis.JedisPooledFactory;
@@ -64,7 +64,7 @@ public class RedisVGroupMappingStoreManager implements VGroupMappingStoreManager
     }
 
     @Override
-    public HashMap<String, Object> loadVGroups() {
+    public Map<String, Object> loadVGroups() {
         Instance instance = Instance.getInstance();
         String namespace = REDIS_PREFIX + instance.getNamespace();
         String clusterName = instance.getClusterName();

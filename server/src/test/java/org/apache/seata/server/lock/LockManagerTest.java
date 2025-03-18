@@ -32,9 +32,9 @@ import org.apache.seata.common.result.PageResult;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.common.util.UUIDGenerator;
-import org.apache.seata.server.console.param.GlobalLockParam;
+import org.apache.seata.server.console.entity.param.GlobalLockParam;
 import org.apache.seata.server.console.service.GlobalLockService;
-import org.apache.seata.server.console.vo.GlobalLockVO;
+import org.apache.seata.server.console.entity.vo.GlobalLockVO;
 import org.apache.seata.server.lock.file.FileLockManagerForTest;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
@@ -434,6 +434,27 @@ public class LockManagerTest {
 
         return Stream.of(Arguments.of(globalSession1, globalSession2));
     }
+
+    static Stream<Arguments> globalSessionProvider() throws ParseException {
+        final BranchSession[] branchSessions2 = baseBranchSession("employee", "de:1,2;df:3,4;dg:5,6", "eg:7,8;ef:9,10");
+        final BranchSession branchSession3 = branchSessions2[0];
+        branchSession3.setTransactionId(123456L);
+
+        final BranchSession branchSession4 = branchSessions2[1];
+        branchSession4.setTransactionId(123456L);
+
+
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        GlobalSession globalSession = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test2", 6000);
+        globalSession.setXid("xid2:123456");
+        globalSession.add(branchSession3);
+        globalSession.add(branchSession4);
+        globalSession.setBeginTime(dateFormat.parse("2022-1-1 08:00:00").getTime());
+
+        return Stream.of(Arguments.of(globalSession));
+    }
+
 
     /**
      * Base branch sessions provider object [ ] [ ]. Could assign resource and lock keys.

@@ -21,8 +21,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.result.PageResult;
-import org.apache.seata.server.console.param.GlobalSessionParam;
-import org.apache.seata.server.console.vo.GlobalSessionVO;
+import org.apache.seata.server.console.impl.AbstractGlobalService;
+import org.apache.seata.server.console.entity.param.GlobalSessionParam;
+import org.apache.seata.server.console.entity.vo.GlobalSessionVO;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.server.console.service.GlobalSessionService;
 import org.apache.seata.server.session.GlobalSession;
@@ -45,7 +46,7 @@ import static org.apache.seata.server.storage.SessionConverter.convertToGlobalSe
 @Component
 @org.springframework.context.annotation.Configuration
 @ConditionalOnExpression("#{'redis'.equals('${sessionMode}')}")
-public class GlobalSessionRedisServiceImpl implements GlobalSessionService {
+public class GlobalSessionRedisServiceImpl extends AbstractGlobalService implements GlobalSessionService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalSessionRedisServiceImpl.class);
 

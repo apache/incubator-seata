@@ -103,7 +103,7 @@ public interface DefaultValues {
     /**
      * The constant DEFAULT_SELECTOR_THREAD_SIZE.
      */
-    int DEFAULT_SELECTOR_THREAD_SIZE = 1;
+    int DEFAULT_SELECTOR_THREAD_SIZE = -1;
     /**
      * The constant DEFAULT_BOSS_THREAD_SIZE.
      */
@@ -122,6 +122,10 @@ public interface DefaultValues {
      */
     @Deprecated
     boolean DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST = true;
+    /**
+     * The constant DEFAULT_ENABLE_CLIENT_USE_SHARED_EVENT_LOOP.
+     */
+    boolean DEFAULT_ENABLE_CLIENT_USE_SHARED_EVENT_LOOP = false;
     /**
      * The constant DEFAULT_ENABLE_TM_CLIENT_BATCH_SEND_REQUEST.
      */
@@ -311,6 +315,11 @@ public interface DefaultValues {
     int DEFAULT_RETRY_DEAD_THRESHOLD = 2 * 60 * 1000 + 10 * 1000;
 
     /**
+     * the constant DEFAULT_END_STATE_RETRY_DEAD_THRESHOLD
+     */
+    int DEFAULT_END_STATE_RETRY_DEAD_THRESHOLD = 10 * 1000;
+
+    /**
      * the constant TM_INTERCEPTOR_ORDER
      */
     int TM_INTERCEPTOR_ORDER = Integer.MIN_VALUE + 1000;
@@ -396,6 +405,11 @@ public interface DefaultValues {
      * the constant DEFAULT_ROLLBACKING_RETRY_PERIOD
      */
     int DEFAULT_ROLLBACKING_RETRY_PERIOD = 1000;
+
+    /**
+     * the constant DEFAULT_END_STATUS_RETRY_PERIOD
+     */
+    int DEFAULT_END_STATUS_RETRY_PERIOD = 30 * 1000;
 
     /**
      * the constant DEFAULT_TIMEOUT_RETRY_PERIOD
@@ -496,6 +510,27 @@ public interface DefaultValues {
      * The constant DEFAULT_ROCKET_MQ_MSG_TIMEOUT.
      */
     int DEFAULT_ROCKET_MQ_MSG_TIMEOUT = 60 * 1000;
+
+    long DEFAULT_DB_DRUID_TIME_BETWEEN_EVICTION_RUNS_MILLIS = 120000;
+    long DEFAULT_DB_DRUID_MIN_EVICTABLE_TIME_MILLIS = 300000;
+    boolean DEFAULT_DB_DRUID_TEST_WHILE_IDLE = true;
+    boolean DEFAULT_DB_DRUID_TEST_ON_BORROW = false;
+    boolean DEFAULT_DB_DRUID_KEEP_ALIVE = false;
+
+    long DEFAULT_DB_HIKARI_IDLE_TIMEOUT = 600000L;
+    long DEFAULT_DB_HIKARI_KEEPALIVE_TIME = 120000L;
+    long DEFAULT_DB_HIKARI_MAX_LIFE_TIME = 1800000L;
+    long DEFAULT_DB_HIKARI_VALIDATION_TIMEOUT = 5000L;
+
+    long DEFAULT_DB_DBCP_TIME_BETWEEN_EVICTION_RUNS_MILLIS = 120000;
+    long DEFAULT_DB_DBCP_MIN_EVICTABLE_TIME_MILLIS = 300000;
+    boolean DEFAULT_DB_DBCP_TEST_WHILE_IDLE = true;
+    boolean DEFAULT_DB_DBCP_TEST_ON_BORROW = false;
+
+    /**
+     * The constant DEFAULT_RATE_LIMIT_ENABLE.
+     */
+    boolean DEFAULT_RATE_LIMIT_ENABLE = false;
 
     /**
      * The constant DEFAULT_RAFT_SSL_ENABLED.
