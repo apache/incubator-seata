@@ -57,6 +57,7 @@ public class RootContextTest {
         assertThat(RootContext.getXID()).isEqualTo(DEFAULT_XID);
         assertThat(RootContext.unbind()).isEqualTo(DEFAULT_XID);
         assertThat(RootContext.getXID()).isNull();
+        RootContext.unbind();
     }
 
     /**
