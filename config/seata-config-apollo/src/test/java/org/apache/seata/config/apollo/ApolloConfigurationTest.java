@@ -18,13 +18,17 @@ package org.apache.seata.config.apollo;
 
 import java.io.IOException;
 
+import com.ctrip.framework.apollo.enums.PropertyChangeType;
 import org.apache.seata.common.exception.NotSupportYetException;
 import org.apache.seata.config.ConfigurationChangeEvent;
 import org.apache.seata.config.ConfigurationChangeListener;
+import org.apache.seata.config.ConfigurationChangeType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * The type Apollo configuration test.
@@ -54,13 +58,13 @@ public class ApolloConfigurationTest {
     @Test
     public void testGetConfig() {
         String value = apolloConfiguration.getConfig("seata.test");
-        Assertions.assertEquals("mockdata", value);
+        assertEquals("mockdata", value);
         value = apolloConfiguration.getConfig("seata.key");
         Assertions.assertNull(value);
         value = apolloConfiguration.getConfig("seata.key.1", "default");
-        Assertions.assertEquals("default", value);
+        assertEquals("default", value);
         value = apolloConfiguration.getLatestConfig("seata.key.2", "default", 3000);
-        Assertions.assertEquals("default", value);
+        assertEquals("default", value);
     }
 
     /**
@@ -91,12 +95,42 @@ public class ApolloConfigurationTest {
             }
         };
         apolloConfiguration.addConfigListener("seata.test", listener);
-        Assertions.assertEquals(1, apolloConfiguration.getConfigListeners("seata.test").size());
+        assertEquals(1, apolloConfiguration.getConfigListeners("seata.test").size());
         apolloConfiguration.removeConfigListener("seata.test", null);
-        Assertions.assertEquals(1, apolloConfiguration.getConfigListeners("seata.test").size());
+        assertEquals(1, apolloConfiguration.getConfigListeners("seata.test").size());
         apolloConfiguration.removeConfigListener("seata.test", listener);
-        Assertions.assertEquals(0, apolloConfiguration.getConfigListeners("seata.test").size());
+        assertEquals(0, apolloConfiguration.getConfigListeners("seata.test").size());
 
+    }
+
+    @Test
+    void testGetChangeTypeAdded() {
+        ConfigurationChangeType result = apolloConfiguration.getChangeType(PropertyChangeType.ADDED);
+        assertEquals(ConfigurationChangeType.ADD, result, "Should return ConfigurationChangeType.ADD for PropertyChangeType.ADDED");
+    }
+
+    @Test
+    void testGetChangeTypeDeleted() {
+        ConfigurationChangeType result = apolloConfiguration.getChangeType(PropertyChangeType.DELETED);
+        assertEquals(ConfigurationChangeType.DELETE, result, "Should return ConfigurationChangeType.DELETE for PropertyChangeType.DELETED");
+    }
+
+    @Test
+    void testGetChangeTypeModified() {
+        ConfigurationChangeType result = apolloConfiguration.getChangeType(PropertyChangeType.MODIFIED);
+        assertEquals(ConfigurationChangeType.MODIFY, result, "Should return ConfigurationChangeType.MODIFY for PropertyChangeType.MODIFIED");
+    }
+
+    @Test
+    void testGetTypeName() {
+        String result = apolloConfiguration.getTypeName();
+        assertEquals("apollo", result, "Should return 'apollo' as the type name");
+    }
+
+    @Test
+    void testGetApolloConfigService() {
+        String result = ApolloConfiguration.getApolloConfigService();
+        assertEquals("config.apollo.apolloConfigService", result, "Should return the correct Apollo config service string");
     }
 
     /**
