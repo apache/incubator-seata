@@ -36,13 +36,9 @@ header:
       limitations under the License.
 
   paths-ignore:
-    - '.gitignore'
     - 'LICENSE'
     - 'NOTICE'
     - 'DISCLAIMER'
-    - '**/target/**'
-    - 'sessionStore/**'
-    - 'test/src/test/resources/**'
     - 'saga/seata-saga-statemachine-designer/node_modules/**'
     - 'node_modules/**'
     - 'saga/seata-saga-statemachine-designer/**'
