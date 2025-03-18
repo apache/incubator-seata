@@ -40,7 +40,6 @@ header:
     - 'LICENSE'
     - 'NOTICE'
     - 'DISCLAIMER'
-    - '.github/**'
     - '**/target/**'
     - 'changes/**'
     - 'style/**'
