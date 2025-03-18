@@ -49,7 +49,7 @@ header:
     - 'console/src/main/resources/static/**'
     - 'server/src/main/resources/banner.txt'
     - 'namingserver/src/main/resources/banner.txt'
-    - '**/*.json'
+    - '**/*.json' #json files not support comments
   comment: on-failure
 dependency:
   files:
