@@ -31,7 +31,7 @@ import com.alipay.sofa.jraft.entity.PeerId;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.metadata.MetadataResponse;
 import org.apache.seata.common.metadata.Node;
-import org.apache.seata.common.result.SingleResult;
+import org.apache.seata.common.result.Result;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.server.cluster.manager.ClusterWatcherManager;
@@ -74,10 +74,11 @@ public class ClusterController {
     }
 
     @PostMapping("/changeCluster")
-    public SingleResult<Void> changeCluster(@RequestParam String raftClusterStr) {
+    public Result<?> changeCluster(@RequestParam String raftClusterStr) {
+        Result<?> result = new Result<>();
         final Configuration newConf = new Configuration();
         if (!newConf.parse(raftClusterStr)) {
-            return SingleResult.failure("fail to parse initConf:" + raftClusterStr);
+            result.setMessage("fail to parse initConf:" + raftClusterStr);
         } else {
             RaftServerManager.groups().forEach(group -> {
                 RaftServerManager.getCliServiceInstance().changePeers(group,
@@ -85,7 +86,7 @@ public class ClusterController {
                 RouteTable.getInstance().updateConfiguration(group, newConf);
             });
         }
-        return SingleResult.success("success");
+        return result;
     }
 
     @GetMapping("/cluster")

@@ -74,7 +74,7 @@ class Header extends React.Component<PropsType, StateType> {
 
   getUsername = () => {
     const token = window.localStorage.getItem(AUTHORIZATION_HEADER);
-    if (token) {
+    if (token && token !== "null") {
       const base64Url = token.split('.')[1];
       const base64 = base64Url.replace('-', '+').replace('_', '/');
       const parsedToken = JSON.parse(window.atob(base64));

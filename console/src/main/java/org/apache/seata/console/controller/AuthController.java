@@ -55,7 +55,7 @@ public class AuthController {
      * Seata is in broken states.
      */
     @PostMapping("/login")
-    public SingleResult<Void> login(HttpServletResponse response, @RequestBody User user) {
+    public SingleResult<String> login(HttpServletResponse response, @RequestBody User user) {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
             user.getUsername(), user.getPassword());
 
@@ -73,7 +73,7 @@ public class AuthController {
 
             return SingleResult.success(authHeader);
         } catch (BadCredentialsException authentication) {
-            return SingleResult.failure(Code.UNAUTHORIZED);
+            return SingleResult.failure(Code.LOGIN_FAILED);
         }
     }
 }

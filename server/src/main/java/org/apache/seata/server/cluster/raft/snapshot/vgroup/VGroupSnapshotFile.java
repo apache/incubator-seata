@@ -36,7 +36,7 @@ public class VGroupSnapshotFile implements Serializable, StoreSnapshotFile {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(VGroupSnapshotFile.class);
 
-    public static final String ROOT_MAPPING_MANAGER_NAME = "vgroup_mapping.json";
+    public static final String ROOT_MAPPING_MANAGER_NAME = "vgroup_mapping";
 
     String group;
 

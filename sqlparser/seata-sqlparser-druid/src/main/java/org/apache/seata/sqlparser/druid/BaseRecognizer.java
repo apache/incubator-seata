@@ -27,8 +27,6 @@ import com.alibaba.druid.sql.ast.expr.SQLInListExpr;
 import com.alibaba.druid.sql.ast.expr.SQLInSubQueryExpr;
 import com.alibaba.druid.sql.ast.expr.SQLMethodInvokeExpr;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
-import com.alibaba.druid.sql.ast.statement.SQLMergeStatement;
-import com.alibaba.druid.sql.ast.statement.SQLReplaceStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSubqueryTableSource;
 import com.alibaba.druid.sql.visitor.SQLASTVisitor;
 import com.alibaba.druid.sql.visitor.SQLASTVisitorAdapter;
@@ -130,20 +128,6 @@ public abstract class BaseRecognizer implements SQLRecognizer {
             public boolean visit(SQLSubqueryTableSource x) {
                 //just like: select * from (select * from t)
                 throw new NotSupportYetException("not support the sql syntax with SubQuery:" + x
-                        + "\nplease see the doc about SQL restrictions https://seata.apache.org/zh-cn/docs/user/sqlreference/dml");
-            }
-
-            @Override
-            public boolean visit(SQLReplaceStatement x) {
-                //just like: replace into t (id,dr) values (1,'2'), (2,'3')
-                throw new NotSupportYetException("not support the sql syntax with ReplaceStatement:" + x
-                        + "\nplease see the doc about SQL restrictions https://seata.apache.org/zh-cn/docs/user/sqlreference/dml");
-            }
-
-            @Override
-            public boolean visit(SQLMergeStatement x) {
-                //just like: merge into ... WHEN MATCHED THEN ...
-                throw new NotSupportYetException("not support the sql syntax with MergeStatement:" + x
                         + "\nplease see the doc about SQL restrictions https://seata.apache.org/zh-cn/docs/user/sqlreference/dml");
             }
 

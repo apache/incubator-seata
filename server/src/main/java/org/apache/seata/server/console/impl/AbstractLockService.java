@@ -18,7 +18,7 @@ package org.apache.seata.server.console.impl;
 
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.common.result.SingleResult;
-import org.apache.seata.server.console.param.GlobalLockParam;
+import org.apache.seata.server.console.entity.param.GlobalLockParam;
 import org.apache.seata.server.console.service.GlobalLockService;
 
 public abstract class AbstractLockService extends AbstractService implements GlobalLockService {
@@ -28,9 +28,9 @@ public abstract class AbstractLockService extends AbstractService implements Glo
         try {
             commonCheckAndGetGlobalStatus(xid, branchId);
         } catch (IllegalArgumentException e) {
-            return SingleResult.successWithData(Boolean.FALSE);
+            return SingleResult.success(Boolean.FALSE);
         }
-        return SingleResult.successWithData(Boolean.TRUE);
+        return SingleResult.success(Boolean.TRUE);
     }
 
     protected void checkDeleteLock(GlobalLockParam param) {
