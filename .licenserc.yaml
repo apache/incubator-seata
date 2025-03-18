@@ -42,13 +42,11 @@ header:
     - 'saga/seata-saga-statemachine-designer/node_modules/**'
     - 'node_modules/**'
     - 'saga/seata-saga-statemachine-designer/**'
-    - '**/src/test/resources/statelang/**'
     - 'console/src/main/resources/static/console-fe/**'
     - '**/org/apache/seata/sqlparser/antlr/**/*.g4'
     - '**/org/apache/seata/sqlparser/antlr/mysql/parser/*'
     - 'console/src/main/resources/static/**'
-    - 'server/src/main/resources/banner.txt'
-    - 'namingserver/src/main/resources/banner.txt'
+    - '**/*.txt'  #txt files not support comments
     - '**/*.json' #json files not support comments
   comment: on-failure
 dependency:
