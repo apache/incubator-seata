@@ -19,7 +19,7 @@ package org.apache.seata.server.cluster.raft.execute.vgroup;
 import org.apache.seata.server.cluster.raft.execute.AbstractRaftMsgExecute;
 import org.apache.seata.server.cluster.raft.sync.msg.RaftBaseMsg;
 import org.apache.seata.server.cluster.raft.sync.msg.RaftVGroupSyncMsg;
-import org.apache.seata.server.storage.raft.sore.RaftVGroupMappingStoreManager;
+import org.apache.seata.server.storage.raft.store.RaftVGroupMappingStoreManager;
 
 /**
  */
