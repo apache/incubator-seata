@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.server.storage.raft.sore;
+package org.apache.seata.server.storage.raft.store;
 
 import java.net.InetSocketAddress;
 import java.util.Collections;
