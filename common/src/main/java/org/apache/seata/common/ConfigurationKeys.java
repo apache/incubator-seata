@@ -710,6 +710,11 @@ public interface ConfigurationKeys {
     String WORKER_THREAD_SIZE = THREAD_FACTORY_PREFIX + "workerThreadSize";
 
     /**
+     * The constant ENABLE_SHARED_EVENTLOOP
+     */
+    String ENABLE_CLIENT_SHARED_EVENTLOOP = TRANSPORT_PREFIX + "enableClientSharedEventLoopGroup";
+
+    /**
      * The constant SHUTDOWN_PREFIX
      */
     String SHUTDOWN_PREFIX = TRANSPORT_PREFIX + "shutdown.";
@@ -1112,11 +1117,6 @@ public interface ConfigurationKeys {
     String SERVER_RAFT_COMPRESSOR = SERVER_RAFT + "compressor";
 
     /**
-     * The constant CLIENT_METADATA_MAX_AGE_MS.
-     */
-    String CLIENT_METADATA_MAX_AGE_MS = CLIENT_PREFIX + "metadataMaxAgeMs";
-
-    /**
      * The constant IS_USE_CLOUD_NAMESPACE_PARSING.
      */
     String IS_USE_CLOUD_NAMESPACE_PARSING = "isUseCloudNamespaceParsing";
@@ -1213,6 +1213,17 @@ public interface ConfigurationKeys {
     String META_PREFIX = SEATA_FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + "metadata.";
 
     /**
+     * The constant SERVER_REGISTRY_METADATA_PREFIX
+     */
+    String SERVER_REGISTRY_METADATA_PREFIX = SERVER_PREFIX + FILE_ROOT_REGISTRY + ".metadata";
+
+    /**
+     * The constant SERVER_REGISTRY_METADATA_EXTERNAL
+     */
+    String SERVER_REGISTRY_METADATA_EXTERNAL = SERVER_REGISTRY_METADATA_PREFIX + ".external";
+
+
+    /**
      * The constant RATE_LIMIT_PREFIX.
      */
     String RATE_LIMIT_PREFIX = SERVER_PREFIX + "ratelimit";
@@ -1236,15 +1247,5 @@ public interface ConfigurationKeys {
      * The constant RATE_LIMIT_BUCKET_TOKEN_INITIAL_NUM.
      */
     String RATE_LIMIT_BUCKET_TOKEN_INITIAL_NUM = RATE_LIMIT_PREFIX + ".bucketTokenInitialNum";
-
-    /**
-     * The constant SERVER_REGISTRY_METADATA_PREFIX
-     */
-    String SERVER_REGISTRY_METADATA_PREFIX = SERVER_PREFIX + FILE_ROOT_REGISTRY + ".metadata";
-
-    /**
-     * The constant SERVER_REGISTRY_METADATA_EXTERNAL
-     */
-    String SERVER_REGISTRY_METADATA_EXTERNAL = SERVER_REGISTRY_METADATA_PREFIX + ".external";
 
 }

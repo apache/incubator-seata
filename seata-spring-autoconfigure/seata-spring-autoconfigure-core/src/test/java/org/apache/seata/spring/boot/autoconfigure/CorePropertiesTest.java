@@ -70,6 +70,7 @@ public class CorePropertiesTest {
         assertEquals("seata", context.getBean(TransportProperties.class).getSerialization());
         assertEquals("none", context.getBean(TransportProperties.class).getCompressor());
         assertTrue(context.getBean(TransportProperties.class).isEnableClientBatchSendRequest());
+        assertFalse(context.getBean(TransportProperties.class).isEnableClientSharedEventLoop());
     }
 
     @Test

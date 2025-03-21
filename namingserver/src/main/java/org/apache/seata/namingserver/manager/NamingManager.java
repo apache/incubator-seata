@@ -215,7 +215,7 @@ public class NamingManager {
         try {
             ClusterBO clusterBO = vGroupMap.get(vGroup, k -> new ConcurrentHashMap<>())
                 .computeIfAbsent(namespace, k -> new NamespaceBO()).getCluster(clusterName);
-            if (clusterBO != null /**&& !clusterBO.getUnitNames().contains(unitName)**/) {
+            if (clusterBO != null) {
                 boolean needNotify = !clusterBO.getUnitNames().contains(unitName);
                 NamespaceBO namespaceBO = vGroupMap.getIfPresent(vGroup).get(namespace);
                 namespaceBO.removeOldCluster(clusterName);
@@ -321,21 +321,28 @@ public class NamingManager {
     }
 
     public List<Node> getInstances(String namespace, String clusterName) {
+        return getInstances(namespace, clusterName, false);
+    }
+
+    public List<Node> getInstances(String namespace, String clusterName, boolean readOnly) {
         Map<String, ClusterData> clusterDataHashMap = namespaceClusterDataMap.get(namespace);
         ClusterData clusterData = clusterDataHashMap.get(clusterName);
         if (clusterData == null) {
             LOGGER.warn("no instances in {} : {}", namespace, clusterName);
             return Collections.emptyList();
         }
-        return clusterData.getInstanceList();
+        return readOnly ? clusterData.getInstanceList()
+            : clusterData.getInstanceList().stream()
+                .filter(node -> node.getRole() == ClusterRole.LEADER || node.getRole() == ClusterRole.MEMBER)
+                .collect(Collectors.toList());
     }
 
-    public List<Node> getInstancesByVgroupAndNamespace(String namespace, String vgroup) {
+    public List<Node> getInstancesByVgroupAndNamespace(String namespace, String vgroup, boolean readOnly) {
         List<Cluster> clusters = getClusterListByVgroup(vgroup, namespace);
         if (CollectionUtils.isEmpty(clusters)) {
             return Collections.emptyList();
         } else {
-            return getInstances(namespace, clusters.get(0).getClusterName());
+            return getInstances(namespace, clusters.get(0).getClusterName(),readOnly);
         }
     }
 

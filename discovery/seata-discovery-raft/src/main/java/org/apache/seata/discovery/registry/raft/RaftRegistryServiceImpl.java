@@ -85,6 +85,8 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
 
     private static final String TOKEN_VALID_TIME_MS_KEY = "tokenValidityInMilliseconds";
 
+    private static final String META_DATA_MAX_AGE_MS = "metadataMaxAgeMs";
+
     private static final long TOKEN_EXPIRE_TIME_IN_MILLISECONDS;
 
     private static final String USERNAME;
@@ -175,7 +177,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                     REFRESH_METADATA_EXECUTOR = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
                         new LinkedBlockingQueue<>(), new NamedThreadFactory("refreshMetadata", 1, true));
                     REFRESH_METADATA_EXECUTOR.execute(() -> {
-                        long metadataMaxAgeMs = CONFIG.getLong(ConfigurationKeys.CLIENT_METADATA_MAX_AGE_MS, 30000L);
+                        long metadataMaxAgeMs = CONFIG.getLong(getMetadataMaxAgeMs(), 30000L);
                         long currentTime = System.currentTimeMillis();
                         while (!CLOSED.get()) {
                             try {
@@ -576,6 +578,11 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
             return nodes.parallelStream().map(RaftRegistryServiceImpl::selectTransactionEndpoint).collect(Collectors.toList());
         }
         return Collections.emptyList();
+    }
+
+    private static String getMetadataMaxAgeMs() {
+        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_REGISTRY,
+            REGISTRY_TYPE, META_DATA_MAX_AGE_MS);
     }
 
 }
