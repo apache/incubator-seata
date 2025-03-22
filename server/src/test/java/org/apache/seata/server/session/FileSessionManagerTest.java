@@ -17,6 +17,7 @@
 package org.apache.seata.server.session;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -39,7 +40,6 @@ import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.model.LockStatus;
 import org.apache.seata.core.rpc.RemotingServer;
-import org.apache.seata.server.console.exception.ConsoleException;
 import org.apache.seata.server.console.entity.param.GlobalSessionParam;
 import org.apache.seata.server.console.service.BranchSessionService;
 import org.apache.seata.server.console.service.GlobalSessionService;
@@ -486,6 +486,9 @@ public class FileSessionManagerTest {
                 globalSession.setStatus(GlobalStatus.Committed);
                 globalSession.end();
             }
+            Field instanceField = DefaultCoordinator.class.getDeclaredField("instance");
+            instanceField.setAccessible(true);
+            instanceField.set(null, null);
         }
     }
 
