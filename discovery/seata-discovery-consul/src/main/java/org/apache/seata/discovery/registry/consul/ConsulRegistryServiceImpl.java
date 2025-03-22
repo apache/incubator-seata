@@ -126,7 +126,6 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
         NetUtil.validAddress(address);
         doRegister(address);
         RegistryHeartBeats.addHeartBeat(REGISTRY_TYPE, address, this::doRegister);
-
     }
 
     private void doRegister(InetSocketAddress address) {
@@ -170,7 +169,6 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
             throw new ConfigNotFoundException("%s configuration item is required", missingDataId);
         }
         return lookupByCluster(cluster);
-
     }
 
     private List<InetSocketAddress> lookupByCluster(String cluster) throws Exception {
