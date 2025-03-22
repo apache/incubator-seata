@@ -78,6 +78,7 @@ public class VGroupSnapshotFile implements Serializable, StoreSnapshotFile {
             Map<String/*vgroup*/, MappingDO> map = (Map<String/*vgroup*/, MappingDO>)load(path);
             RaftVGroupMappingStoreManager raftVGroupMappingStoreManager =
                 (RaftVGroupMappingStoreManager)SessionHolder.getRootVGroupMappingManager();
+            raftVGroupMappingStoreManager.clear(group);
             raftVGroupMappingStoreManager.localAddVGroups(map, group);
             return true;
         } catch (final Exception e) {
