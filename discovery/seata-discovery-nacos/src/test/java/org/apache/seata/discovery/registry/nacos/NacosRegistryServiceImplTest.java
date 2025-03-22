@@ -18,16 +18,26 @@ package org.apache.seata.discovery.registry.nacos;
 
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
+import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
+
+import com.alibaba.nacos.api.naming.NamingService;
 import com.alibaba.nacos.api.naming.listener.EventListener;
+import com.alibaba.nacos.api.naming.pojo.Instance;
 
 import org.apache.seata.common.util.ReflectionUtil;
+import org.apache.seata.config.nacos.NacosConfiguration;
 import org.apache.seata.discovery.registry.RegistryService;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
 
 
 /**
@@ -35,6 +45,22 @@ import static org.mockito.Mockito.verify;
  *
  */
 public class NacosRegistryServiceImplTest {
+
+    @InjectMocks
+    private NacosRegistryServiceImpl registryService;
+
+    @Mock
+    private NamingService namingService;
+
+    private static final String HOST = "127.0.0.1";
+    private static final int PORT = 8091;
+    private static final String SERVICE_NAME = "seata-server";
+    private static final String GROUP_NAME = "DEFAULT_GROUP";
+
+    @BeforeEach
+    void setup() throws Exception {
+        MockitoAnnotations.openMocks(this);
+    }
 
     @Test
     public void testGetConfigProperties() throws Exception {
@@ -49,17 +75,44 @@ public class NacosRegistryServiceImplTest {
     @Test
     public void testRegister() throws Exception {
         RegistryService registryService = mock(NacosRegistryServiceImpl.class);
-        InetSocketAddress inetSocketAddress = new InetSocketAddress("127.0.0.1", 8091);
+        InetSocketAddress inetSocketAddress = new InetSocketAddress(HOST, PORT);
+
+        Instance instance = new Instance();
+        instance.setIp(HOST);
+        instance.setPort(PORT);
+        List<Instance> instanceList = Collections.singletonList(instance);
+
+        when(namingService.getAllInstances(SERVICE_NAME, GROUP_NAME)).thenReturn(instanceList);
+
         registryService.register(inetSocketAddress);
+
         verify(registryService).register(inetSocketAddress);
+
+        List<Instance> instances = namingService.getAllInstances(SERVICE_NAME, GROUP_NAME);
+        long count = instances.stream()
+                .filter(i -> HOST.equals(i.getIp()) && PORT == i.getPort())
+                .count();
+
+        assertEquals(1, count);
     }
 
     @Test
     public void testUnregister() throws Exception {
         RegistryService registryService = mock(NacosRegistryServiceImpl.class);
-        InetSocketAddress inetSocketAddress = new InetSocketAddress("127.0.0.1", 8091);
+        InetSocketAddress inetSocketAddress = new InetSocketAddress(HOST, PORT);
+
+        // mocks behavior of deregister
+        when(namingService.getAllInstances(SERVICE_NAME, GROUP_NAME)).thenReturn(Collections.emptyList());
+
         registryService.unregister(inetSocketAddress);
         verify(registryService).unregister(inetSocketAddress);
+
+        List<Instance> instances = namingService.getAllInstances(SERVICE_NAME, GROUP_NAME);
+        long count = instances.stream()
+                .filter(i -> HOST.equals(i.getIp()) && PORT == i.getPort())
+                .count();
+
+        assertEquals(0, count);
     }
 
     @Test
