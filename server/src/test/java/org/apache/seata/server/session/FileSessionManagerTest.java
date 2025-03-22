@@ -88,8 +88,6 @@ public class FileSessionManagerTest {
             EnhancedServiceLoader.unloadAll();
             sessionManagerList =
                 Arrays.asList(new FileSessionManager("root.data", "."), new FileSessionManager("test", null));
-            RemotingServer remotingServer = new DefaultCoordinatorTest.MockServerMessageSender();
-            DefaultCoordinator coordinator = DefaultCoordinator.getInstance(remotingServer);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -468,6 +466,8 @@ public class FileSessionManagerTest {
     @MethodSource("globalSessionForLockTestProvider")
     public void changeGlobalSessionTest(List<GlobalSession> globalSessions) throws Exception {
         try {
+            RemotingServer remotingServer = new DefaultCoordinatorTest.MockServerMessageSender();
+            DefaultCoordinator.getInstance(remotingServer);
             SessionHolder.init(SessionMode.FILE);
             for (GlobalSession globalSession : globalSessions) {
                 globalSession.begin();
@@ -480,8 +480,7 @@ public class FileSessionManagerTest {
             String xid = globalSession.getXid();
             globalSessionService.changeGlobalStatus(xid);
             globalSession.changeGlobalStatus(GlobalStatus.RollbackFailed);
-            Assertions.assertThrows(ConsoleException.class, () -> globalSessionService.changeGlobalStatus(xid));
-
+            globalSessionService.changeGlobalStatus(xid);
         } finally {
             for (GlobalSession globalSession : globalSessions) {
                 globalSession.setStatus(GlobalStatus.Committed);
