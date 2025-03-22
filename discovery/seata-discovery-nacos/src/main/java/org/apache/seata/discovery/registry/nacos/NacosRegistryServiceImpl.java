@@ -33,7 +33,6 @@ import com.alibaba.nacos.api.naming.listener.EventListener;
 import com.alibaba.nacos.api.naming.listener.NamingEvent;
 import com.alibaba.nacos.api.naming.pojo.Instance;
 import com.alibaba.nacos.api.naming.pojo.Service;
-
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.StringUtils;

@@ -27,7 +27,6 @@ import com.alibaba.nacos.api.naming.listener.EventListener;
 import com.alibaba.nacos.api.naming.pojo.Instance;
 
 import org.apache.seata.common.util.ReflectionUtil;
-import org.apache.seata.config.nacos.NacosConfiguration;
 import org.apache.seata.discovery.registry.RegistryService;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
