@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ScheduledExecutorService;
@@ -52,9 +53,13 @@ import org.apache.http.util.EntityUtils;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.exception.AuthenticationFailedException;
 import org.apache.seata.common.exception.RetryableException;
+import org.apache.seata.common.metadata.Cluster;
 import org.apache.seata.common.metadata.ClusterRole;
 import org.apache.seata.common.metadata.Instance;
+import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.metadata.namingserver.MetaResponse;
+import org.apache.seata.common.metadata.namingserver.NamingServerNode;
+import org.apache.seata.common.metadata.namingserver.Unit;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.HttpClientUtil;
@@ -111,8 +116,8 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
     private volatile boolean isSubscribed = false;
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private String namingServerAddressCache;
-    private static ConcurrentMap<String /* namingserver address */, AtomicInteger /* Number of Health Check Continues Failures */> AVAILABLE_NAMINGSERVER_MAP = new ConcurrentHashMap<>();
-    private static final ConcurrentMap<String/* vgroup */, List<InetSocketAddress>> VGROUP_ADDRESS_MAP = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String /* namingserver address */, AtomicInteger /* Number of Health Check Continues Failures */> AVAILABLE_NAMINGSERVER_MAP = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String/* vgroup */, List<NamingServerNode>> VGROUP_ADDRESS_MAP = new ConcurrentHashMap<>();
     private static final ConcurrentMap<String/* vgroup */, List<NamingListener>> LISTENER_SERVICE_MAP = new ConcurrentHashMap<>();
     protected static final ScheduledExecutorService
         SCHEDULED_THREAD_POOL_EXECUTOR = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("seata-namingser-scheduled", THREAD_POOL_NUM, true));
@@ -399,7 +404,10 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
             }, key);
         }
 
-        return VGROUP_ADDRESS_MAP.get(key);
+        return Optional.ofNullable(VGROUP_ADDRESS_MAP.get(key)).orElse(Collections.emptyList()).stream().map(node -> {
+            Node.Endpoint endpoint = node.getTransaction();
+            return new InetSocketAddress(endpoint.getHost(), endpoint.getPort());
+        }).collect(Collectors.toList());
     }
 
 
@@ -426,25 +434,36 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
             // jsonResponse -> MetaResponse
             MetaResponse metaResponse = OBJECT_MAPPER.readValue(jsonResponse, new TypeReference<MetaResponse>() {
             });
-            // MetaResponse -> endpoint list
-            List<InetSocketAddress> newAddressList = metaResponse.getClusterList().stream()
-                .flatMap(cluster -> cluster.getUnitData().stream())
-                .flatMap(unit -> unit.getNamingInstanceList().stream()
-                    .filter(namingServerNode -> namingServerNode.getRole() == ClusterRole.LEADER
-                        || namingServerNode.getRole() == ClusterRole.MEMBER)
-                    .map(namingInstance -> new InetSocketAddress(namingInstance.getTransaction().getHost(),
-                        namingInstance.getTransaction().getPort())))
-                .collect(Collectors.toList());
-            if (metaResponse.getTerm() > 0) {
-                term = metaResponse.getTerm();
-            }
-            VGROUP_ADDRESS_MAP.put(vGroup, newAddressList);
-            removeOfflineAddressesIfNecessary(vGroup,vGroup,newAddressList);
-            return newAddressList;
+            return handleMetadata(metaResponse, vGroup);
         } catch (IOException e) {
             LOGGER.error(e.getMessage());
             throw new RemoteException();
         }
+    }
+
+    public List<InetSocketAddress> handleMetadata(MetaResponse metaResponse, String vGroup) {
+        // MetaResponse -> endpoint list
+        List<NamingServerNode> newAddressList = new ArrayList<>();
+        if (metaResponse.getTerm() > 0) {
+            term = metaResponse.getTerm();
+        }
+        for (Cluster cluster : metaResponse.getClusterList()) {
+            for (Unit unitDatum : cluster.getUnitData()) {
+                // In raft mode, only the leader is cached, while in non-raft cluster mode, all nodes are cached.
+                newAddressList.addAll(unitDatum.getNamingInstanceList().stream()
+                    .filter(instance -> (instance.getRole() == ClusterRole.LEADER && instance.getTerm() >= term)
+                        || instance.getRole() == ClusterRole.MEMBER)
+                    .collect(Collectors.toList()));
+            }
+        }
+        List<InetSocketAddress> inetSocketAddresses = new ArrayList<>();
+        for (NamingServerNode node : newAddressList) {
+            Node.Endpoint endpoint = node.getTransaction();
+            inetSocketAddresses.add(new InetSocketAddress(endpoint.getHost(), endpoint.getPort()));
+        }
+        removeOfflineAddressesIfNecessary(vGroup, vGroup, inetSocketAddresses);
+        VGROUP_ADDRESS_MAP.put(vGroup, newAddressList);
+        return inetSocketAddresses;
     }
 
     @Override
@@ -487,8 +506,6 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
                                                       List<InetSocketAddress> aliveAddress) {
         Map<String, List<InetSocketAddress>> clusterAddressMap = CURRENT_ADDRESS_MAP.computeIfAbsent(transactionServiceGroup,
             key -> new ConcurrentHashMap<>());
-
-
         return clusterAddressMap.put(transactionServiceGroup, aliveAddress);
     }
 
@@ -530,7 +547,7 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
         String namingAddrsKey = String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_REGISTRY, REGISTRY_TYPE, NAMING_SERVICE_URL_KEY);
 
         String urlListStr = FILE_CONFIG.getConfig(namingAddrsKey);
-        if (urlListStr.isEmpty()) {
+        if (StringUtils.isBlank(urlListStr)) {
             throw new NamingRegistryException("Naming server url can not be null!");
         }
         return Arrays.stream(urlListStr.split(",")).collect(Collectors.toList());

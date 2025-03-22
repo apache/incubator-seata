@@ -16,13 +16,11 @@
  */
 package org.apache.seata.server.storage.raft.store;
 
-import java.net.InetSocketAddress;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import com.alipay.sofa.jraft.Closure;
-import org.apache.seata.common.XID;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.common.metadata.ClusterRole;
 import org.apache.seata.common.metadata.Instance;
@@ -39,12 +37,12 @@ import org.apache.seata.server.store.VGroupMappingStoreManager;
 public class RaftVGroupMappingStoreManager implements VGroupMappingStoreManager {
 
     private final static Map<String/*unit(raft group)*/, Map<String/*vgroup*/, MappingDO>> VGROUP_MAPPING =
-        new HashMap<>();
+        new ConcurrentHashMap<>();
 
 
     public boolean localAddVGroup(MappingDO mappingDO) {
         return VGROUP_MAPPING.computeIfAbsent(mappingDO.getUnit(), k -> new HashMap<>()).put(mappingDO.getVGroup(),
-            mappingDO) != null;
+            mappingDO) == null;
     }
 
     public void localAddVGroups(Map<String/*vgroup*/, MappingDO> vGroups, String unit) {
@@ -114,7 +112,11 @@ public class RaftVGroupMappingStoreManager implements VGroupMappingStoreManager 
     }
 
     public Map<String/*vgroup*/, MappingDO> loadVGroupsByUnit(String unit) {
-        return VGROUP_MAPPING.getOrDefault(unit, Collections.emptyMap());
+        return VGROUP_MAPPING.getOrDefault(unit, new HashMap<>());
+    }
+
+    public void clear(String unit) {
+        VGROUP_MAPPING.remove(unit);
     }
 
     @Override
@@ -123,19 +125,18 @@ public class RaftVGroupMappingStoreManager implements VGroupMappingStoreManager 
     }
 
     @Override
-   public void notifyMapping() {
+    public void notifyMapping() {
         Instance instance = Instance.getInstance();
         Map<String, Object> map = this.readVGroups();
         instance.addMetadata("vGroup", map);
-        for (String group : RaftServerManager.groups()) {
-            Instance node = instance.clone();
-            node.setRole(RaftServerManager.isLeader(group) ? ClusterRole.LEADER : ClusterRole.FOLLOWER);
-            Instance.getInstances().add(node);
-        }
         try {
-            InetSocketAddress address = new InetSocketAddress(XID.getIpAddress(), XID.getPort());
-            for (RegistryService<?> registryService : MultiRegistryFactory.getInstances()) {
-                registryService.register(address);
+            for (String group : RaftServerManager.groups()) {
+                Instance node = instance.clone();
+                node.setRole(RaftServerManager.isLeader(group) ? ClusterRole.LEADER : ClusterRole.FOLLOWER);
+                Instance.getInstances().add(node);
+                for (RegistryService<?> registryService : MultiRegistryFactory.getInstances()) {
+                    registryService.register(node);
+                }
             }
         } catch (Exception e) {
             throw new RuntimeException("vGroup mapping relationship notified failed! ", e);
