@@ -38,11 +38,14 @@ import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.model.LockStatus;
+import org.apache.seata.core.rpc.RemotingServer;
 import org.apache.seata.server.console.exception.ConsoleException;
 import org.apache.seata.server.console.entity.param.GlobalSessionParam;
 import org.apache.seata.server.console.service.BranchSessionService;
 import org.apache.seata.server.console.service.GlobalSessionService;
 import org.apache.seata.server.console.entity.vo.GlobalSessionVO;
+import org.apache.seata.server.coordinator.DefaultCoordinator;
+import org.apache.seata.server.coordinator.DefaultCoordinatorTest;
 import org.apache.seata.server.storage.file.session.FileSessionManager;
 import org.apache.seata.server.util.StoreUtil;
 import org.apache.commons.lang.time.DateUtils;
@@ -85,6 +88,8 @@ public class FileSessionManagerTest {
             EnhancedServiceLoader.unloadAll();
             sessionManagerList =
                 Arrays.asList(new FileSessionManager("root.data", "."), new FileSessionManager("test", null));
+            RemotingServer remotingServer = new DefaultCoordinatorTest.MockServerMessageSender();
+            DefaultCoordinator coordinator = DefaultCoordinator.getInstance(remotingServer);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -473,9 +478,10 @@ public class FileSessionManagerTest {
             GlobalSession globalSession = globalSessions.get(1);
             globalSession.changeGlobalStatus(GlobalStatus.CommitFailed);
             String xid = globalSession.getXid();
-            globalSessionService.changeGlobalStatus(xid);
+            Assertions.assertThrows(ConsoleException.class, () -> globalSessionService.changeGlobalStatus(xid));
             globalSession.changeGlobalStatus(GlobalStatus.RollbackFailed);
             Assertions.assertThrows(ConsoleException.class, () -> globalSessionService.changeGlobalStatus(xid));
+
         } finally {
             for (GlobalSession globalSession : globalSessions) {
                 globalSession.setStatus(GlobalStatus.Committed);
