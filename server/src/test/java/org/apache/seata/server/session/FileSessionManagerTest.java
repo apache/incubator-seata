@@ -465,9 +465,9 @@ public class FileSessionManagerTest {
     @ParameterizedTest
     @MethodSource("globalSessionForLockTestProvider")
     public void changeGlobalSessionTest(List<GlobalSession> globalSessions) throws Exception {
+        RemotingServer remotingServer = new DefaultCoordinatorTest.MockServerMessageSender();
+        DefaultCoordinator instance = DefaultCoordinator.getInstance(remotingServer);
         try {
-            RemotingServer remotingServer = new DefaultCoordinatorTest.MockServerMessageSender();
-            DefaultCoordinator.getInstance(remotingServer);
             SessionHolder.init(SessionMode.FILE);
             for (GlobalSession globalSession : globalSessions) {
                 globalSession.begin();
@@ -486,9 +486,7 @@ public class FileSessionManagerTest {
                 globalSession.setStatus(GlobalStatus.Committed);
                 globalSession.end();
             }
-            Field instanceField = DefaultCoordinator.class.getDeclaredField("instance");
-            instanceField.setAccessible(true);
-            instanceField.set(null, null);
+            instance.destroy();
         }
     }
 
