@@ -20,8 +20,10 @@ import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLDeleteStatement;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
+import com.alibaba.druid.sql.ast.statement.SQLReplaceStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import com.alibaba.druid.sql.ast.statement.SQLUpdateStatement;
+import org.apache.seata.common.exception.NotSupportYetException;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.sqlparser.SQLRecognizer;
 import org.apache.seata.sqlparser.SQLRecognizerFactory;
@@ -58,6 +60,14 @@ class DruidSQLRecognizerFactoryImpl implements SQLRecognizerFactory {
             } else if (ast instanceof SQLSelectStatement) {
                 recognizer = recognizerHolder.getSelectForUpdateRecognizer(sql, ast);
             }
+
+            // When recognizer is null, it indicates that recognizerHolder cannot allocate unsupported syntax, like merge and replace
+            if (ast instanceof SQLReplaceStatement) {
+                //just like:replace into t (id,dr) values (1,'2'), (2,'3')
+                throw new NotSupportYetException("not support the sql syntax with ReplaceStatement:" + ast +
+                        "\nplease see the doc about SQL restrictions https://seata.apache.org/zh-cn/docs/user/sqlreference/dml");
+            }
+
             if (recognizer != null && recognizer.isSqlSyntaxSupports()) {
                 if (recognizers == null) {
                     recognizers = new ArrayList<>();

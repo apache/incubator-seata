@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-@ControllerAdvice
+@ControllerAdvice(basePackages = "org.apache.seata.server.console.controller")
 @Component
 public class GlobalExceptionHandlerAdvice {
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandlerAdvice.class);
