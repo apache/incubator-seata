@@ -16,8 +16,10 @@
  */
 package org.apache.seata.discovery.registry.namingserver;
 
+import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,11 +32,19 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.http.entity.ContentType;
 import org.apache.http.protocol.HTTP;
 import org.apache.seata.common.holder.ObjectHolder;
+import org.apache.seata.common.metadata.Cluster;
+import org.apache.seata.common.metadata.ClusterRole;
+import org.apache.seata.common.metadata.Node;
+import org.apache.seata.common.metadata.namingserver.MetaResponse;
+import org.apache.seata.common.metadata.namingserver.NamingServerNode;
+import org.apache.seata.common.metadata.namingserver.Unit;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.common.util.HttpClientUtil;
 import org.apache.seata.discovery.registry.RegistryService;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.junit.After;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -47,16 +57,15 @@ import org.springframework.core.env.PropertiesPropertySource;
 import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@Disabled
 class NamingserverRegistryServiceImplTest {
 
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
 
     @BeforeAll
     public static void beforeClass() throws Exception {
-        System.setProperty("registry.namingserver.namespace", "dev");
-        System.setProperty("registry.namingserver.cluster", "cluster1");
-        System.setProperty("registry.namingserver.serverAddr", "127.0.0.1:8080");
+        System.setProperty("registry.seata.namespace", "dev");
+        System.setProperty("registry.seata.cluster", "cluster1");
+        System.setProperty("registry.seata.server-addr", "127.0.0.1:8080");
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 
         // 获取应用程序环境
@@ -68,9 +77,14 @@ class NamingserverRegistryServiceImplTest {
         PropertiesPropertySource customPropertySource = new PropertiesPropertySource("customSource", customProperties);
         propertySources.addLast(customPropertySource);
         ObjectHolder.INSTANCE.setObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT, environment);
-
     }
 
+    @AfterAll
+    public static void afterClass() {
+        System.clearProperty("registry.seata.namespace");
+        System.clearProperty("registry.seata.cluster");
+        System.clearProperty("registry.seata.server-addr");
+    }
 
     @Test
     public void unregister1() throws Exception {
@@ -82,6 +96,7 @@ class NamingserverRegistryServiceImplTest {
 
 
     @Test
+    @Disabled
     public void getNamingAddrsTest() {
         NamingserverRegistryServiceImpl namingserverRegistryService = NamingserverRegistryServiceImpl.getInstance();
         List<String> list = namingserverRegistryService.getNamingAddrs();
@@ -90,6 +105,7 @@ class NamingserverRegistryServiceImplTest {
 
 
     @Test
+    @Disabled
     public void getNamingAddrTest() {
         NamingserverRegistryServiceImpl namingserverRegistryService = NamingserverRegistryServiceImpl.getInstance();
         String addr = namingserverRegistryService.getNamingAddr();
@@ -98,14 +114,7 @@ class NamingserverRegistryServiceImplTest {
 
 
     @Test
-    public void convertTest() {
-        InetSocketAddress inetSocketAddress = new InetSocketAddress("127.0.0.1", 8088);
-        assertEquals(inetSocketAddress.getAddress().getHostAddress(), "127.0.0.1");
-        assertEquals(inetSocketAddress.getPort(), 8088);
-    }
-
-
-    @Test
+    @Disabled
     public void testRegister1() throws Exception {
 
         RegistryService registryService = new NamingserverRegistryProvider().provide();
@@ -117,7 +126,6 @@ class NamingserverRegistryServiceImplTest {
 
         //2.create vGroup in cluster
         createGroupInCluster("dev", "group1", "cluster1");
-
         //3.get instances
         List<InetSocketAddress> list = registryService.lookup("group1");
 
@@ -131,8 +139,46 @@ class NamingserverRegistryServiceImplTest {
 
     }
 
+    @Test
+    public void testHandleMetadata() throws Exception {
+        NamingserverRegistryServiceImpl registryService = NamingserverRegistryServiceImpl.getInstance();
+        // Use reflection to set the isSubscribed field to true
+        Field isSubscribedField = NamingserverRegistryServiceImpl.class.getDeclaredField("isSubscribed");
+        isSubscribedField.setAccessible(true);
+        isSubscribedField.set(registryService, true);
+
+        // Create a mock MetaResponse
+        MetaResponse metaResponse = new MetaResponse();
+        metaResponse.setTerm(1);
+
+        Cluster cluster = new Cluster();
+        Unit unit = new Unit();
+        List<NamingServerNode> namingInstanceList = new ArrayList<>();
+        NamingServerNode node = new NamingServerNode();
+        node.setRole(ClusterRole.LEADER);
+        node.setTerm(1);
+        node.setTransaction(new Node.Endpoint("127.0.0.1", 8091));
+        namingInstanceList.add(node);
+        unit.setNamingInstanceList(namingInstanceList);
+        List<Unit> unitData = new ArrayList<>();
+        unitData.add(unit);
+        cluster.setUnitData(unitData);
+        List<Cluster> clusterList = new ArrayList<>();
+        clusterList.add(cluster);
+        metaResponse.setClusterList(clusterList);
+
+        // Call the method to test
+        List<InetSocketAddress> result = registryService.handleMetadata(metaResponse, "testGroup");
+        registryService.lookup("testGroup");
+        // Verify the result
+        assertEquals(1, result.size());
+        assertEquals("127.0.0.1", result.get(0).getAddress().getHostAddress());
+        assertEquals(8091, result.get(0).getPort());
+        isSubscribedField.set(registryService, false);
+    }
 
     @Test
+    @Disabled
     public void testRegister2() throws Exception {
         NamingserverRegistryServiceImpl registryService = (NamingserverRegistryServiceImpl) new NamingserverRegistryProvider().provide();
         InetSocketAddress inetSocketAddress1 = new InetSocketAddress("127.0.0.1", 8088);
@@ -157,6 +203,7 @@ class NamingserverRegistryServiceImplTest {
 
 
     @Test
+    @Disabled
     public void testRegister3() throws Exception {
         NamingserverRegistryServiceImpl registryService = (NamingserverRegistryServiceImpl) new NamingserverRegistryProvider().provide();
         InetSocketAddress inetSocketAddress1 = new InetSocketAddress("127.0.0.1", 8088);
@@ -189,6 +236,7 @@ class NamingserverRegistryServiceImplTest {
 
 
     @Test
+    @Disabled
     public void testUnregister() throws Exception {
         RegistryService registryService = new NamingserverRegistryProvider().provide();
         InetSocketAddress inetSocketAddress1 = new InetSocketAddress("127.0.0.1", 8088);
@@ -214,7 +262,7 @@ class NamingserverRegistryServiceImplTest {
     }
 
 
-    //    @Disabled
+    @Disabled
     @Test
     public void testWatch() throws Exception {
         NamingserverRegistryServiceImpl registryService = (NamingserverRegistryServiceImpl) new NamingserverRegistryProvider().provide();
@@ -254,7 +302,7 @@ class NamingserverRegistryServiceImplTest {
 
     }
 
-    //    @Disabled
+    @Disabled
     @Test
     public void testSubscribe() throws Exception {
         NamingserverRegistryServiceImpl registryService = NamingserverRegistryServiceImpl.getInstance();
@@ -282,6 +330,7 @@ class NamingserverRegistryServiceImplTest {
 
 
     @Test
+    @Disabled
     public void testUnsubscribe() throws Exception {
         NamingserverRegistryServiceImpl registryService = (NamingserverRegistryServiceImpl) new NamingserverRegistryProvider().provide();
 
