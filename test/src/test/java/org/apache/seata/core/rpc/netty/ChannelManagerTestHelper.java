@@ -37,6 +37,4 @@ public class ChannelManagerTestHelper {
     private static NettyClientChannelManager getChannelManager(AbstractNettyRemotingClient remotingClient) {
         return remotingClient.getClientChannelManager();
     }
-
-
 }
