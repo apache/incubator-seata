@@ -28,13 +28,17 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentMap;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.mockStatic;
 
 public class EurekaRegistryServiceImplTest {
 
@@ -42,19 +46,17 @@ public class EurekaRegistryServiceImplTest {
     private ApplicationInfoManager mockAppInfoManager;
     private Application mockApplication;
     private InstanceInfo mockInstanceInfo;
-
     private EurekaRegistryServiceImpl registryService;
     EurekaEventListener mockEventListener;
 
     @BeforeEach
     public void setUp() throws Exception {
 
-        mockEurekaClient = Mockito.mock(EurekaClient.class);
-        mockAppInfoManager = Mockito.mock(ApplicationInfoManager.class);
-        mockApplication = Mockito.mock(Application.class);
-        mockInstanceInfo = Mockito.mock(InstanceInfo.class);
-        mockEventListener  = Mockito.mock(EurekaEventListener.class);
-
+        mockEurekaClient = mock(EurekaClient.class);
+        mockAppInfoManager = mock(ApplicationInfoManager.class);
+        mockApplication = mock(Application.class);
+        mockInstanceInfo = mock(InstanceInfo.class);
+        mockEventListener  = mock(EurekaEventListener.class);
 
         resetSingleton();
         registryService = EurekaRegistryServiceImpl.getInstance();
@@ -73,8 +75,6 @@ public class EurekaRegistryServiceImplTest {
         setStaticField(EurekaRegistryServiceImpl.class, "applicationInfoManager", null);
         setStaticField(EurekaRegistryServiceImpl.class, "eurekaClient", null);
         setStaticField(EurekaRegistryServiceImpl.class, "instanceConfig", null);
-
-
         clearStaticMap(EurekaRegistryServiceImpl.class, "LISTENER_SERVICE_MAP");
         clearStaticMap(EurekaRegistryServiceImpl.class, "CLUSTER_ADDRESS_MAP");
         clearStaticMap(EurekaRegistryServiceImpl.class, "CLUSTER_LOCK");
@@ -91,18 +91,15 @@ public class EurekaRegistryServiceImplTest {
     public void testRegister() throws Exception {
         InetSocketAddress address = new InetSocketAddress("127.0.0.1", 8091);
         registryService.register(address);
-
         CustomEurekaInstanceConfig instanceConfig = getInstanceConfig();
         Assertions.assertEquals( "127.0.0.1", instanceConfig.getIpAddress());
         Assertions.assertEquals( "default", instanceConfig.getAppname());
         verify(mockAppInfoManager).setInstanceStatus(InstanceInfo.InstanceStatus.UP);
-
     }
 
     @Test
     void testSubscribe() throws Exception {
         String testCluster = "TEST_CLUSTER";
-
         registryService.subscribe(testCluster, mockEventListener);
 
         // Verify that the listener is added to LISTENER_SERVICE_MAP
@@ -117,11 +114,7 @@ public class EurekaRegistryServiceImplTest {
     @Test
     void testUnsubscribe() throws Exception {
         String testCluster = "TEST_CLUSTER";
-
-
         registryService.subscribe(testCluster, mockEventListener);
-
-
         registryService.unsubscribe(testCluster, mockEventListener);
 
         // Verify that the listener is removed from LISTENER_SERVICE_MAP
@@ -135,21 +128,16 @@ public class EurekaRegistryServiceImplTest {
     @Test
     void testUnsubscribeWithNoExistingListeners() throws Exception {
         String testCluster = "NON_EXISTENT_CLUSTER";
-
-
         registryService.unsubscribe(testCluster, mockEventListener);
-
-
         verify(mockEurekaClient).unregisterEventListener(any());
     }
 
-    //
     @Test
     public void testUnregister() throws Exception {
         registryService.unregister(new InetSocketAddress("127.0.0.1", 8091));
         verify(mockAppInfoManager).setInstanceStatus(InstanceInfo.InstanceStatus.DOWN);
     }
-//
+
 @Test
     public void testLookup() throws Exception {
     Configuration mockConfig = mock(Configuration.class);
@@ -172,8 +160,6 @@ public class EurekaRegistryServiceImplTest {
         serviceGroupField.setAccessible(true);
         String actualServiceGroup = (String) serviceGroupField.get(registryService);
         Assertions.assertEquals("test-group", actualServiceGroup);
-
-
         Assertions.assertNotNull(addresses);
         Assertions.assertEquals(1, addresses.size());
         Assertions.assertEquals(new InetSocketAddress("192.168.1.1", 8091), addresses.get(0));
