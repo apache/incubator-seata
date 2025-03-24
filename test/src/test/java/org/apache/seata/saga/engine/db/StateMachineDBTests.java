@@ -27,9 +27,11 @@ import org.apache.seata.common.LockAndCallback;
 import org.apache.seata.common.SagaCostPrint;
 import org.apache.seata.common.exception.FrameworkErrorCode;
 import org.apache.seata.common.exception.StoreException;
+import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.GlobalStatus;
+import org.apache.seata.core.model.TransactionManager;
 import org.apache.seata.core.rpc.netty.RmNettyRemotingClient;
 import org.apache.seata.core.rpc.netty.TmNettyRemotingClient;
 import org.apache.seata.saga.engine.AsyncCallback;
@@ -43,13 +45,13 @@ import org.apache.seata.saga.rm.StateMachineEngineHolder;
 import org.apache.seata.saga.statelang.domain.DomainConstants;
 import org.apache.seata.saga.statelang.domain.ExecutionStatus;
 import org.apache.seata.saga.statelang.domain.StateMachineInstance;
+import org.apache.seata.tm.TransactionManagerHolder;
 import org.apache.seata.tm.api.GlobalTransaction;
 import org.apache.seata.tm.api.GlobalTransactionContext;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -68,6 +70,7 @@ public class StateMachineDBTests extends AbstractServerTest {
 
     @BeforeAll
     public static void initApplicationContext() throws InterruptedException {
+        TransactionManagerHolder.set(EnhancedServiceLoader.load(TransactionManager.class));
         startSeataServer();
         TmNettyRemotingClient.getInstance().destroy();
         RmNettyRemotingClient.getInstance().destroy();

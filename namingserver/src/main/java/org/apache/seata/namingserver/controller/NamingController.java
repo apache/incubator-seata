@@ -20,6 +20,8 @@ package org.apache.seata.namingserver.controller;
 import org.apache.seata.common.metadata.namingserver.MetaResponse;
 import org.apache.seata.common.metadata.namingserver.NamingServerNode;
 import org.apache.seata.common.result.Result;
+import org.apache.seata.common.result.SingleResult;
+import org.apache.seata.namingserver.entity.vo.NamespaceVO;
 import org.apache.seata.namingserver.listener.Watcher;
 import org.apache.seata.namingserver.manager.ClusterWatcherManager;
 import org.apache.seata.namingserver.manager.NamingManager;
@@ -39,14 +41,15 @@ import javax.annotation.Resource;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 
 @RestController
-@RequestMapping("/naming/v1")
+@RequestMapping(value = {"/naming/v1", "/api/v1/naming"})
 public class NamingController {
-    private static final Logger LOGGER = LoggerFactory.getLogger(NamingController.class);
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(NamingController.class);
 
     @Resource
     private NamingManager namingManager;
@@ -61,6 +64,21 @@ public class NamingController {
                                            @RequestBody NamingServerNode registerBody) {
         Result<String> result = new Result<>();
         boolean isSuccess = namingManager.registerInstance(registerBody, namespace, clusterName, unit);
+        if (isSuccess) {
+            result.setMessage("node has registered successfully!");
+        } else {
+            result.setCode("500");
+            result.setMessage("node registered unsuccessfully!");
+        }
+        return result;
+    }
+
+    @PostMapping("/batchRegister")
+    public Result<String> batchRegisterInstance(@RequestParam String namespace,
+                                           @RequestParam String clusterName,
+                                           @RequestBody List<NamingServerNode> nodes) {
+        Result<String> result = new Result<>();
+        boolean isSuccess = namingManager.registerInstances(nodes, namespace, clusterName);
         if (isSuccess) {
             result.setMessage("node has registered successfully!");
         } else {
@@ -96,10 +114,8 @@ public class NamingController {
     }
 
     @PostMapping("/addGroup")
-    public Result<String> addGroup(@RequestParam String namespace,
-                                      @RequestParam String clusterName,
-                                      @RequestParam String unitName,
-                                      @RequestParam String vGroup) {
+    public Result<String> addGroup(@RequestParam String namespace, @RequestParam String clusterName, String unitName,
+        @RequestParam String vGroup) {
 
         Result<String> addGroupResult = namingManager.createGroup(namespace, vGroup, clusterName, unitName);
         if (!addGroupResult.isSuccess()) {
@@ -113,12 +129,16 @@ public class NamingController {
                                       @RequestParam String clusterName,
                                       @RequestParam String unitName,
                                       @RequestParam String vGroup) {
-
         Result<String> addGroupResult = namingManager.changeGroup(namespace, vGroup, clusterName, unitName);
         if (!addGroupResult.isSuccess()) {
             return addGroupResult;
         }
         return new Result<>("200", "change vGroup " + vGroup + "to cluster " + clusterName + " successfully!");
+    }
+
+    @GetMapping("/namespace")
+    public SingleResult<Map<String, NamespaceVO>> namespaces() {
+        return namingManager.namespace();
     }
 
     /**

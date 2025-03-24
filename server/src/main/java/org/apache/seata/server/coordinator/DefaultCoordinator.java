@@ -83,6 +83,7 @@ import static org.apache.seata.common.Constants.COMMITTING;
 import static org.apache.seata.common.Constants.RETRY_COMMITTING;
 import static org.apache.seata.common.Constants.RETRY_ROLLBACKING;
 import static org.apache.seata.common.Constants.ROLLBACKING;
+import static org.apache.seata.common.Constants.END;
 import static org.apache.seata.common.Constants.SYNC_PROCESSING;
 import static org.apache.seata.common.Constants.TX_TIMEOUT_CHECK;
 import static org.apache.seata.common.Constants.UNDOLOG_DELETE;
@@ -95,6 +96,7 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_ROLLBACKING_RETRY_PE
 import static org.apache.seata.common.DefaultValues.DEFAULT_ROLLBACK_FAILED_UNLOCK_ENABLE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_TIMEOUT_RETRY_PERIOD;
 import static org.apache.seata.common.DefaultValues.DEFAULT_UNDO_LOG_DELETE_PERIOD;
+import static org.apache.seata.common.DefaultValues.DEFAULT_END_STATUS_RETRY_PERIOD;
 
 /**
  * The type Default coordinator.
@@ -124,6 +126,12 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      */
     protected static final long ROLLBACKING_RETRY_PERIOD = CONFIG.getLong(ConfigurationKeys.ROLLBACKING_RETRY_PERIOD,
             DEFAULT_ROLLBACKING_RETRY_PERIOD);
+
+    /**
+     * The constant END_STATUS_RETRY_PERIOD.
+     */
+    protected static final long END_STATUS_RETRY_PERIOD = CONFIG.getLong(ConfigurationKeys.END_STATUS_RETRY_PERIOD,
+        DEFAULT_END_STATUS_RETRY_PERIOD);
 
     /**
      * The constant TIMEOUT_RETRY_PERIOD.
@@ -189,12 +197,15 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
     private final GlobalStatus[] retryRollbackingStatuses = new GlobalStatus[] {
         GlobalStatus.TimeoutRollbacking,
-        GlobalStatus.TimeoutRollbackRetrying, GlobalStatus.RollbackRetrying};
+        GlobalStatus.TimeoutRollbackRetrying,
+        GlobalStatus.RollbackRetrying
+    };
 
-    private final GlobalStatus[] retryCommittingStatuses = new GlobalStatus[] {GlobalStatus.CommitRetrying, GlobalStatus.Committed};
+    private final GlobalStatus[] retryCommittingStatuses = new GlobalStatus[] {GlobalStatus.CommitRetrying};
 
     private final GlobalStatus[] rollbackingStatuses = new GlobalStatus[] {GlobalStatus.Rollbacking};
     private final GlobalStatus[] committingStatuses = new GlobalStatus[] {GlobalStatus.Committing};
+    private final GlobalStatus[] endStatuses = new GlobalStatus[] {GlobalStatus.Rollbacked, GlobalStatus.TimeoutRollbacked, GlobalStatus.Committed, GlobalStatus.Finished};
 
     private final ThreadPoolExecutor branchRemoveExecutor;
 
@@ -432,6 +443,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
                     //The function of this 'return' is 'continue'.
                     return;
                 }
+
                 core.doGlobalRollback(rollbackingSession, true);
             } catch (TransactionException ex) {
                 LOGGER.error("Failed to retry rollbacking [{}] {} {}", rollbackingSession.getXid(), ex.getCode(), ex.getMessage());
@@ -632,6 +644,58 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     }
 
     /**
+     * Handle end status by scheduled.
+     */
+    protected void handleEndStatesByScheduled() {
+        SessionCondition sessionCondition = new SessionCondition(endStatuses);
+        sessionCondition.setLazyLoadBranch(true);
+        List<GlobalSession> endStatusSessions =
+            SessionHolder.getRootSessionManager().findGlobalSessions(sessionCondition);
+        if (CollectionUtils.isEmpty(endStatusSessions)) {
+            endSchedule(RETRY_DEAD_THRESHOLD);
+            return;
+        }
+        long delay = END_STATUS_RETRY_PERIOD;
+        endStatusSessions.sort(Comparator.comparingLong(GlobalSession::getBeginTime));
+        List<GlobalSession> needDoEndStatusSessions = new ArrayList<>();
+        for (GlobalSession endStatusSession : endStatusSessions) {
+            long time = endStatusSession.timeToDeadSession();
+            if (time <= 0) {
+                needDoEndStatusSessions.add(endStatusSession);
+            } else {
+                delay = Math.max(time, END_STATUS_RETRY_PERIOD);
+                break;
+            }
+        }
+        long now = System.currentTimeMillis();
+        SessionHelper.forEach(needDoEndStatusSessions, endStatusSession -> {
+            try {
+                if (isRetryTimeout(now, MAX_ROLLBACK_RETRY_TIMEOUT, endStatusSession.getBeginTime())) {
+                    handleEndStateSession(endStatusSession);
+                }
+            } catch (TransactionException ex) {
+                LOGGER.error("Failed to handle end status session [{}] {} {}", endStatusSession.getXid(), ex.getCode(), ex.getMessage());
+            }
+        });
+        endSchedule(delay);
+    }
+
+    private void handleEndStateSession(GlobalSession globalSession) throws TransactionException {
+        SessionHelper.processEndState(globalSession);
+    }
+
+    private void endSchedule(long delay) {
+        syncProcessing.schedule(
+            () -> {
+                boolean called = SessionHolder.distributedLockAndExecute(END, this::handleEndStatesByScheduled);
+                if (!called) {
+                    endSchedule(END_STATUS_RETRY_PERIOD);
+                }
+            },
+            delay, TimeUnit.MILLISECONDS);
+    }
+
+    /**
      * Init.
      */
     public void init() {
@@ -658,6 +722,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         rollbackingSchedule(0);
 
         committingSchedule(0);
+
+        endSchedule(0);
     }
 
     @Override

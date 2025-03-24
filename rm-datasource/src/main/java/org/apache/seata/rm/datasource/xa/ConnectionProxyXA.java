@@ -183,6 +183,9 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
                 commit();
             }
         } else {
+            if (this.xaBranchXid != null && currentAutoCommitStatus) {
+                return;
+            }
             if (xaActive) {
                 throw new SQLException("should NEVER happen: setAutoCommit from true to false while xa branch is active");
             }
@@ -229,36 +232,6 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             }
             if (!xaActive || this.xaBranchXid == null) {
                 throw new SQLException("should NOT commit on an inactive session", SQLSTATE_XA_NOT_END);
-            }
-            try {
-                // XA End: Success
-                try {
-                    end(XAResource.TMSUCCESS);
-                } catch (SQLException sqle) {
-                    // Rollback immediately before the XA Branch Context is deleted.
-                    String xaBranchXid = this.xaBranchXid.toString();
-                    rollback();
-                    throw new SQLException("Branch " + xaBranchXid + " was rollbacked on committing since " + sqle.getMessage(), SQLSTATE_XA_NOT_END, sqle);
-                }
-                long now = System.currentTimeMillis();
-                checkTimeout(now);
-                setPrepareTime(now);
-                int prepare = xaResource.prepare(xaBranchXid);
-                // Based on the four databases: MySQL (8), Oracle (12c), Postgres (16), and MSSQL Server (2022),
-                // only Oracle has read-only optimization; the others do not provide read-only feedback.
-                // Therefore, the database type check can be eliminated here.
-                if (prepare == XAResource.XA_RDONLY) {
-                    // Branch Report to TC: RDONLY
-                    reportStatusToTC(BranchStatus.PhaseOne_RDONLY);
-                }
-            } catch (XAException xe) {
-                // Branch Report to TC: Failed
-                reportStatusToTC(BranchStatus.PhaseOne_Failed);
-                throw new SQLException(
-                        "Failed to end(TMSUCCESS)/prepare xa branch on " + xid + "-" + xaBranchXid.getBranchId() + " since " + xe
-                                .getMessage(), xe);
-            } finally {
-                cleanXABranchContext();
             }
         }
     }
@@ -336,13 +309,44 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
     @Override
     public void close() throws SQLException {
         try (ResourceLock ignored = resourceLock.obtain()) {
-            rollBacked = false;
-            if (isHeld() && shouldBeHeld()) {
-                // if kept by a keeper, just hold the connection.
-                return;
+            try {
+                if (xaActive && this.xaBranchXid != null) {
+                    // XA End: Success
+                    try {
+                        end(XAResource.TMSUCCESS);
+                    } catch (SQLException sqle) {
+                        // Rollback immediately before the XA Branch Context is deleted.
+                        String xaBranchXid = this.xaBranchXid.toString();
+                        rollback();
+                        throw new SQLException("Branch " + xaBranchXid + " was rollbacked on committing since " + sqle.getMessage(), SQLSTATE_XA_NOT_END, sqle);
+                    }
+                    long now = System.currentTimeMillis();
+                    checkTimeout(now);
+                    setPrepareTime(now);
+                    int prepare = xaResource.prepare(xaBranchXid);
+                    // Based on the four databases: MySQL (8), Oracle (12c), Postgres (16), and MSSQL Server (2022),
+                    // only Oracle has read-only optimization; the others do not provide read-only feedback.
+                    // Therefore, the database type check can be eliminated here.
+                    if (prepare == XAResource.XA_RDONLY) {
+                        // Branch Report to TC: RDONLY
+                        reportStatusToTC(BranchStatus.PhaseOne_RDONLY);
+                    }
+                }
+            } catch (XAException xe) {
+                // Branch Report to TC: Failed
+                reportStatusToTC(BranchStatus.PhaseOne_Failed);
+                throw new SQLException(
+                        "Failed to end(TMSUCCESS)/prepare xa branch on " + xid + "-" + xaBranchXid.getBranchId() + " since " + xe
+                                .getMessage(), xe);
+            } finally {
+                cleanXABranchContext();
+                rollBacked = false;
+                if (isHeld() && shouldBeHeld()) {
+                    // if kept by a keeper, just hold the connection.
+                } else {
+                    originalConnection.close();
+                }
             }
-            cleanXABranchContext();
-            originalConnection.close();
         }
     }
 
