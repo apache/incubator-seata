@@ -44,7 +44,9 @@
                 <groupId>org.xolstice.maven.plugins</groupId>
                 <artifactId>protobuf-maven-plugin</artifactId>
                 <configuration>
-                    <protoSourceRoot>${project.basedir}/src/test/resources/protobuf/org/apache/seata/protocol/transcation/</protoSourceRoot>
+                    <protoSourceRoot>
+                        ${project.basedir}/src/test/resources/protobuf/org/apache/seata/protocol/transcation/
+                    </protoSourceRoot>
                     <protocArtifact>
                         com.google.protobuf:protoc:3.25.4:exe:${os.detected.classifier}
                     </protocArtifact>
@@ -81,7 +83,7 @@
             <artifactId>grpc-alts</artifactId>
         </dependency>
 
-<!-- The actual spring-related dependencies that take effect are from the seata-dependencies module, not the seata-server module-->
+        <!-- The actual spring-related dependencies that take effect are from the seata-dependencies module, not the seata-server module-->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-server</artifactId>
@@ -187,6 +189,11 @@
             <artifactId>seata-saga-annotation</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
+        </dependency>
+        <!-- grpc class dependency javax.Generated -->
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
         </dependency>
     </dependencies>
 

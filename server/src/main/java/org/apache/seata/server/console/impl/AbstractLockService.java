@@ -18,7 +18,7 @@ package org.apache.seata.server.console.impl;
 
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.common.result.SingleResult;
-import org.apache.seata.server.console.param.GlobalLockParam;
+import org.apache.seata.server.console.entity.param.GlobalLockParam;
 import org.apache.seata.server.console.service.GlobalLockService;
 
 public abstract class AbstractLockService extends AbstractService implements GlobalLockService {

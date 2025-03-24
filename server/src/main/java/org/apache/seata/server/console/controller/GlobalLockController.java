@@ -20,8 +20,8 @@ import javax.annotation.Resource;
 
 import org.apache.seata.common.result.PageResult;
 import org.apache.seata.common.result.SingleResult;
-import org.apache.seata.server.console.param.GlobalLockParam;
-import org.apache.seata.server.console.vo.GlobalLockVO;
+import org.apache.seata.server.console.entity.param.GlobalLockParam;
+import org.apache.seata.server.console.entity.vo.GlobalLockVO;
 import org.apache.seata.server.console.service.GlobalLockService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,4 +78,5 @@ public class GlobalLockController {
     public SingleResult<Boolean> check(String xid, String branchId) {
         return globalLockService.check(xid, branchId);
     }
+
 }

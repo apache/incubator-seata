@@ -344,6 +344,7 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
                     cluster: selectedNamespace ? selectedNamespace.clusters[0] : undefined,
                 },
                 clusters: selectedNamespace ? selectedNamespace.clusters : [],
+                vgroups: selectedNamespace ? selectedNamespace.vgroups : [],
             });
             this.search();
         } else {

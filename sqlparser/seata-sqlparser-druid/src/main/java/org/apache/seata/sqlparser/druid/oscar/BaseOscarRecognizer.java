@@ -22,8 +22,7 @@ import com.alibaba.druid.sql.ast.expr.SQLInSubQueryExpr;
 import com.alibaba.druid.sql.ast.expr.SQLQueryExpr;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
-import com.alibaba.druid.sql.ast.statement.SQLMergeStatement;
-import com.alibaba.druid.sql.ast.statement.SQLReplaceStatement;
+import com.alibaba.druid.sql.ast.statement.SQLSubqueryTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLUpdateSetItem;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleSelectJoin;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleSelectSubqueryTableSource;
@@ -156,23 +155,9 @@ public abstract class BaseOscarRecognizer extends BaseRecognizer {
             }
 
             @Override
-            public boolean visit(OracleSelectSubqueryTableSource x) {
+            public boolean visit(SQLSubqueryTableSource x) {
                 //just like: select * from (select * from t) for update
                 throw new NotSupportYetException("not support the sql syntax with SubQuery:" + x
-                        + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
-            }
-
-            @Override
-            public boolean visit(SQLReplaceStatement x) {
-                //just like: replace into t (id,dr) values (1,'2'), (2,'3')
-                throw new NotSupportYetException("not support the sql syntax with ReplaceStatement:" + x
-                        + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
-            }
-
-            @Override
-            public boolean visit(SQLMergeStatement x) {
-                //just like: merge into ... WHEN MATCHED THEN ...
-                throw new NotSupportYetException("not support the sql syntax with MergeStatement:" + x
                         + "\nplease see the doc about SQL restrictions https://seata.io/zh-cn/docs/user/sqlreference/dml.html");
             }
 
