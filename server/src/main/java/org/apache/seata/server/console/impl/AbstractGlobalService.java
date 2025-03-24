@@ -150,16 +150,18 @@ public abstract class AbstractGlobalService extends AbstractService implements G
     public SingleResult<Void> changeGlobalStatus(String xid) {
         GlobalSession globalSession = checkGlobalSession(xid);
         GlobalStatus globalStatus = globalSession.getStatus();
-        GlobalStatus newStatus = FAIL_COMMIT_STATUS.contains(globalStatus) ? GlobalStatus.CommitRetrying :
-                FAIL_ROLLBACK_STATUS.contains(globalStatus) ? GlobalStatus.RollbackRetrying : null;
-        if (newStatus == null) {
-            throw new IllegalArgumentException("current global transaction status is not support to change");
-        }
         try {
-            globalSession.changeGlobalStatus(newStatus);
-            return SingleResult.success();
+            if (FAIL_COMMIT_STATUS.contains(globalStatus)) {
+                boolean committed = doCommitGlobal(globalSession);
+                return committed ? SingleResult.success() : SingleResult.failure("Commit fail, please try again");
+            }
+            if (FAIL_ROLLBACK_STATUS.contains(globalStatus)) {
+                boolean rollbacked = doRollbackGlobal(globalSession);
+                return rollbacked ? SingleResult.success() : SingleResult.failure("Rollback fail, please try again");
+            }
         } catch (Exception e) {
             throw new ConsoleException(e, String.format("change global status fail, xid:%s", xid));
         }
+        throw new IllegalArgumentException("current global transaction status is not support to change");
     }
 }
