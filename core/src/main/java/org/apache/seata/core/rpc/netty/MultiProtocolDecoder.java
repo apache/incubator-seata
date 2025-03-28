@@ -110,10 +110,12 @@ public class MultiProtocolDecoder extends LengthFieldBasedFrameDecoder {
                 frame = (ByteBuf) decoded;
                 ProtocolDecoder decoder = protocolDecoderMap.get(version);
                 if (decoder == null) {
+                    LOGGER.error("Decoder not found, version={}, use current version", version);
                     decoder = protocolDecoderMap.get(ProtocolConstants.VERSION);
                 }
                 ProtocolEncoder encoder = protocolEncoderMap.get(version);
                 if (encoder == null) {
+                    LOGGER.error("Encoder not found, version: {}, use current version", version);
                     encoder = protocolEncoderMap.get(ProtocolConstants.VERSION);
                 }
                 try {
