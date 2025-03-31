@@ -24,6 +24,9 @@ public class EurekaRegistryProviderTest {
 
     @Test
     void testProvide(){
-        assertThat(new EurekaRegistryProvider()).isInstanceOf(EurekaRegistryProvider.class);
+        EurekaRegistryProvider provider = new EurekaRegistryProvider();
+        assertThat(provider.provide()).isInstanceOf(EurekaRegistryServiceImpl.class);
+        assertThat(provider.provide()).isSameAs(provider.provide());
+
     }
 }

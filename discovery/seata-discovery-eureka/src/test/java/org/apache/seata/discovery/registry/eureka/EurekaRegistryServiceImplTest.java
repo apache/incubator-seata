@@ -23,6 +23,7 @@ import com.netflix.discovery.EurekaEventListener;
 import com.netflix.discovery.shared.Application;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.config.exception.ConfigNotFoundException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -98,6 +99,16 @@ public class EurekaRegistryServiceImplTest {
     }
 
     @Test
+    void testRegisterWhenEurekaClientIsNull() throws Exception {
+        setStaticField(EurekaRegistryServiceImpl.class, "eurekaClient", null);
+        InetSocketAddress address = new InetSocketAddress("127.0.0.1", 8091);
+        registryService.register(address);
+        verify(mockAppInfoManager, times(0)).setInstanceStatus(any());
+    }
+
+
+
+    @Test
     void testSubscribe() throws Exception {
         String testCluster = "TEST_CLUSTER";
         registryService.subscribe(testCluster, mockEventListener);
@@ -123,6 +134,13 @@ public class EurekaRegistryServiceImplTest {
 
         // Verify that the EurekaClient has deregistered the listener
         verify(mockEurekaClient, times(1)).unregisterEventListener(mockEventListener);
+    }
+
+    @Test
+    void testUnsubscribeWhenEurekaClientIsNull() throws Exception {
+        setStaticField(EurekaRegistryServiceImpl.class, "eurekaClient", null);
+        registryService.unsubscribe("TEST_CLUSTER", mockEventListener);
+        verify(mockEurekaClient, times(0)).unregisterEventListener(any());
     }
 
     @Test
@@ -165,6 +183,17 @@ public class EurekaRegistryServiceImplTest {
         Assertions.assertEquals(new InetSocketAddress("192.168.1.1", 8091), addresses.get(0));
     }
 }
+    @Test
+    void testLookUpWithNoClusterName(){
+        Configuration mockConfig = mock(Configuration.class);
+        when(mockConfig.getConfig("service.vgroupMapping.test-group")).thenReturn(null);
+        try (MockedStatic<ConfigurationFactory> mockedFactory = mockStatic(ConfigurationFactory.class)) {
+            mockedFactory.when(ConfigurationFactory::getInstance).thenReturn(mockConfig);
+            Assertions.assertThrows(ConfigNotFoundException.class,()->{
+                registryService.lookup("test-group");
+            });
+        }
+    }
 
     @Test
     public void testClose() throws Exception {
