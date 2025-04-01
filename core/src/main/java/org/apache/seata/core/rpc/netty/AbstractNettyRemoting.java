@@ -43,7 +43,9 @@ import org.apache.seata.core.protocol.MessageType;
 import org.apache.seata.core.protocol.MessageTypeAware;
 import org.apache.seata.core.protocol.ProtocolConstants;
 import org.apache.seata.core.protocol.RpcMessage;
+import org.apache.seata.core.protocol.VersionNotSupportMessage;
 import org.apache.seata.core.rpc.Disposable;
+import org.apache.seata.core.rpc.MsgVersionHelper;
 import org.apache.seata.core.rpc.hook.RpcHook;
 import org.apache.seata.core.rpc.processor.Pair;
 import org.apache.seata.core.rpc.processor.RemotingProcessor;
@@ -173,6 +175,12 @@ public abstract class AbstractNettyRemoting implements Disposable {
             LOGGER.warn("sendSync nothing, caused by null channel.");
             return null;
         }
+        if (MsgVersionHelper.versionNotSupport(channel, rpcMessage)) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Message sending will be skipped as the client version does not support it,{}", rpcMessage);
+            }
+            return new VersionNotSupportMessage();
+        }
 
         MessageFuture messageFuture = new MessageFuture();
         messageFuture.setRequestMessage(rpcMessage);
@@ -216,6 +224,12 @@ public abstract class AbstractNettyRemoting implements Disposable {
      * @param rpcMessage rpc message
      */
     protected void sendAsync(Channel channel, RpcMessage rpcMessage) {
+        if (MsgVersionHelper.versionNotSupport(channel, rpcMessage)) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Message sending will be skipped as the client version does not support it,{}", rpcMessage);
+            }
+            return;
+        }
         channelWritableCheck(channel, rpcMessage.getBody());
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("write message:" + rpcMessage.getBody() + ", channel:" + channel + ",active?"

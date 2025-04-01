@@ -14,19 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.discovery.registry.eureka;
+package org.apache.seata.core.protocol;
 
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
-public class EurekaRegistryProviderTest {
-
-    @Test
-    void testProvide(){
-        EurekaRegistryProvider provider = new EurekaRegistryProvider();
-        assertThat(provider.provide()).isInstanceOf(EurekaRegistryServiceImpl.class);
-        assertThat(provider.provide()).isSameAs(provider.provide());
-
+/**
+ * The type Version not support message.
+ *
+ */
+public class VersionNotSupportMessage extends AbstractMessage  {
+    @Override
+    public short getTypeCode() {
+        return MessageType.VERSION_NOT_SUPPORT;
     }
 }
