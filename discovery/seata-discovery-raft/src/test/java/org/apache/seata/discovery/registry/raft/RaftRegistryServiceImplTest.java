@@ -19,6 +19,7 @@ package org.apache.seata.discovery.registry.raft;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.seata.common.exception.ParseEndpointException;
 import org.apache.seata.common.metadata.MetadataResponse;
 import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.util.*;
@@ -41,8 +42,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -65,6 +65,11 @@ class RaftRegistryServiceImplTest {
     @AfterAll
     public static void adAfterClass() throws Exception {
         System.clearProperty("service.vgroupMapping.tx");
+        System.clearProperty("registry.raft.username");
+        System.clearProperty("registry.raft.password");
+        System.clearProperty("registry.raft.serverAddr");
+        System.clearProperty("registry.raft.tokenValidityInMilliseconds");
+        System.clearProperty("registry.preferredNetworks");
     }
 
     /**
@@ -174,5 +179,55 @@ class RaftRegistryServiceImplTest {
             Assertions.assertTrue(controlEndpointStr.contains("10.10.105.7:3007"));
             Assertions.assertTrue(transactionEndpointStr.contains("10.10.105.7:3009"));
         }
+    }
+
+    @Test
+    public void testSelectExternalEndpoint_NoMatch() throws Exception {
+        // Create a node with metadata including external endpoints that don't match preferred networks
+        Map<String, Object> metadata = new HashMap<>();
+        List<LinkedHashMap<String, Object>> externalList = new ArrayList<>();
+
+        LinkedHashMap<String, Object> external1 = new LinkedHashMap<>();
+        external1.put("host", "192.168.1.1");
+        external1.put("controlPort", 7091);
+        external1.put("transactionPort", 8091);
+        externalList.add(external1);
+
+        LinkedHashMap<String, Object> external2 = new LinkedHashMap<>();
+        external2.put("host", "172.16.1.1");  // Doesn't match preferred network
+        external2.put("controlPort", 7092);
+        external2.put("transactionPort", 8092);
+        externalList.add(external2);
+
+        metadata.put("external", externalList);
+
+        Node node = new Node();
+        node.setMetadata(metadata);
+
+        // Access private selectExternalEndpoint method via reflection
+        Method selectExternalEndpointMethod = RaftRegistryServiceImpl.class.getDeclaredMethod(
+                "selectExternalEndpoint", Node.class, String[].class);
+        selectExternalEndpointMethod.setAccessible(true);
+
+        // When selecting external endpoint, expect exception
+        Exception exception = assertThrows(Exception.class, () -> {
+            selectExternalEndpointMethod.invoke(
+                    null, node, new String[]{"10.10.*"});
+        });
+
+        // Then should receive ParseEndpointException
+        assertTrue(exception.getCause() instanceof ParseEndpointException);
+    }
+
+    /**
+     * Test instance initialization and singleton behavior
+     */
+    @Test
+    public void testGetInstance() {
+        RaftRegistryServiceImpl instance1 = RaftRegistryServiceImpl.getInstance();
+        RaftRegistryServiceImpl instance2 = RaftRegistryServiceImpl.getInstance();
+
+        assertNotNull(instance1);
+        assertSame(instance1, instance2);
     }
 }
