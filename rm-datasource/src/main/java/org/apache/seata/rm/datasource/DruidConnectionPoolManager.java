@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -19,7 +21,20 @@ public class DruidConnectionPoolManager extends AbstractConnectionPoolManager {
 
     private final Map<String, DruidDataSource> druidDataSourceMap = new ConcurrentHashMap<>();
 
-    public DruidConnectionPoolManager() {
+    private static DruidConnectionPoolManager INSTANCE;
+
+    public static DruidConnectionPoolManager getInstance() {
+        if (INSTANCE == null) {
+            synchronized (DruidConnectionPoolManager.class) {
+                if (INSTANCE == null) {
+                    INSTANCE = new DruidConnectionPoolManager();
+                }
+            }
+        }
+        return INSTANCE;
+    }
+
+    private DruidConnectionPoolManager() {
 
     }
 
@@ -34,18 +49,31 @@ public class DruidConnectionPoolManager extends AbstractConnectionPoolManager {
         return druidDataSourceMap.get(resourceId);
     }
 
+    public List<ConnectionPoolMetrics> getConnectionPoolMetricsList() {
+        List<ConnectionPoolMetrics> metricsList = new ArrayList<>();
+
+        druidDataSourceMap.forEach((resourceId, druidDataSource) -> {
+            ConnectionPoolMetrics metrics = getConnectionPoolMetrics(resourceId);
+            metricsList.add(metrics);
+        });
+
+        return metricsList;
+    }
+
     public ConnectionPoolMetrics getConnectionPoolMetrics(String resourceId) {
         DruidDataSource druidDataSource = druidDataSourceMap.get(resourceId);
         if (druidDataSource == null) {
             return null;
         }
 
-        ConnectionPoolMetrics connectionPoolMetrics = new ConnectionPoolMetrics();
-        connectionPoolMetrics.setActiveConnections(druidDataSource.getActiveCount());
-        connectionPoolMetrics.setCurrentConnections(druidDataSource.getMaxActive());
-        connectionPoolMetrics.setIdleConnections(druidDataSource.getPoolingCount());
+        ConnectionPoolMetrics metrics = new ConnectionPoolMetrics();
+        metrics.setResourceId(resourceId);
+        metrics.setCurrentTimeMillis(System.currentTimeMillis());
+        metrics.setActiveCount(druidDataSource.getActiveCount());
+        metrics.setMaxActive(druidDataSource.getMaxActive());
+        metrics.setIdleCount(druidDataSource.getPoolingCount());
 
-        return connectionPoolMetrics;
+        return metrics;
     }
 
     public void adjustPoolConfig(String resourceId, int maxActive, int minIdle) {

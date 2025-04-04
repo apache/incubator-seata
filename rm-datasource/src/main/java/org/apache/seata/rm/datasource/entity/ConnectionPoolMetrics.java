@@ -3,35 +3,57 @@ package org.apache.seata.rm.datasource.entity;
 
 public class ConnectionPoolMetrics {
 
-    private Integer currentConnections;
+    private String resourceId;
 
-    private Integer idleConnections;
+    private Long currentTimeMillis;
 
-    private Integer activeConnections;
+    private Integer activeCount;
 
-    public Integer getCurrentConnections() {
-        return currentConnections;
+    private Integer idleCount;
+
+    private Integer maxActive;
+
+    public ConnectionPoolMetrics(){
+
     }
 
-    public void setCurrentConnections(Integer currentConnections) {
-        this.currentConnections = currentConnections;
+    public String getResourceId() {
+        return resourceId;
     }
 
-    public Integer getIdleConnections() {
-        return idleConnections;
+    public void setResourceId(String resourceId) {
+        this.resourceId = resourceId;
     }
 
-    public void setIdleConnections(Integer idleConnections) {
-        this.idleConnections = idleConnections;
+    public Integer getActiveCount() {
+        return activeCount;
     }
 
-    public Integer getActiveConnections() {
-        return activeConnections;
+    public void setActiveCount(Integer activeCount) {
+        this.activeCount = activeCount;
     }
 
-    public void setActiveConnections(Integer activeConnections) {
-        this.activeConnections = activeConnections;
+    public Integer getIdleCount() {
+        return idleCount;
     }
 
+    public void setIdleCount(Integer idleCount) {
+        this.idleCount = idleCount;
+    }
 
+    public Integer getMaxActive() {
+        return maxActive;
+    }
+
+    public void setMaxActive(Integer maxActive) {
+        this.maxActive = maxActive;
+    }
+
+    public Long getCurrentTimeMillis() {
+        return currentTimeMillis;
+    }
+
+    public void setCurrentTimeMillis(Long currentTimeMillis) {
+        this.currentTimeMillis = currentTimeMillis;
+    }
 }
