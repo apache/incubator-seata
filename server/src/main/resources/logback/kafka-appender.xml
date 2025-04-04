@@ -19,10 +19,11 @@
 -->
 <included>
     <!-- kafka-appender properties -->
-    <springProperty name="KAFKA_BOOTSTRAP_SERVERS" source="logging.extend.kafka-appender.bootstrap-servers"
-                    defaultValue="127.0.0.1:9092"/>
-    <springProperty name="KAFKA_TOPIC" source="logging.extend.kafka-appender.topic"
-                    defaultValue="logback_to_logstash"/>
+    <springProperty name="KAFKA_BOOTSTRAP_SERVERS" source="logging.extend.kafka-appender.bootstrap-servers" defaultValue="127.0.0.1:9092"/>
+    <springProperty name="KAFKA_TOPIC" source="logging.extend.kafka-appender.topic" defaultValue="logback_to_logstash"/>
+    <springProperty name="KAFKA_ACKS" source="logging.extend.kafka-appender.producer.acks" defaultValue="0"/>
+    <springProperty name="KAFKA_LINGER_MS" source="logging.extend.kafka-appender.producer.linger-ms" defaultValue="1000"/>
+    <springProperty name="KAFKA_MAX_BLOCK_MS" source="logging.extend.kafka-appender.producer.max-block-ms" defaultValue="0"/>
 
     <appender name="KAFKA" class="com.github.danielwegener.logback.kafka.KafkaAppender">
         <encoder>
@@ -45,8 +46,8 @@
         <keyingStrategy class="com.github.danielwegener.logback.kafka.keying.NoKeyKeyingStrategy"/>
         <deliveryStrategy class="com.github.danielwegener.logback.kafka.delivery.AsynchronousDeliveryStrategy"/>
         <producerConfig>bootstrap.servers=${KAFKA_BOOTSTRAP_SERVERS}</producerConfig>
-        <producerConfig>acks=0</producerConfig>
-        <producerConfig>linger.ms=1000</producerConfig>
-        <producerConfig>max.block.ms=0</producerConfig>
+        <producerConfig>acks=${KAFKA_ACKS}</producerConfig>
+        <producerConfig>linger.ms=${KAFKA_LINGER_MS}</producerConfig>
+        <producerConfig>max.block.ms=${KAFKA_MAX_BLOCK_MS}</producerConfig>
     </appender>
 </included>
