@@ -1,24 +1,38 @@
 package org.apache.seata.rm;
 
-import org.apache.seata.common.exception.ShouldNeverHappenException;
-import org.apache.seata.core.model.BranchStatus;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.Map;
+import org.apache.seata.common.exception.ShouldNeverHappenException;
+import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.rm.datasource.xa.Holdable;
-
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 class BaseDataSourceResourceTest {
 
   static class DummyHoldable implements Holdable {
+
     private boolean held = false;
-    @Override public boolean isHeld() { return held; }
-    @Override public void setHeld(boolean held) { this.held = held; }
+
+    @Override
+    public boolean isHeld() {
+      return held;
+    }
+
+    @Override
+    public void setHeld(boolean held) {
+      this.held = held;
+    }
+
     @Override
     public boolean shouldBeHeld() {
       return true;
@@ -26,11 +40,16 @@ class BaseDataSourceResourceTest {
   }
 
   static class DummyResource extends BaseDataSourceResource<DummyHoldable> {
-    @Override public void setLogWriter(PrintWriter out) {}
+
+    @Override
+    public void setLogWriter(PrintWriter out) {
+    }
+
     @Override
     public java.sql.Connection getConnection() {
       return null;
     }
+
     @Override
     public java.sql.Connection getConnection(String username, String password) {
       return null;
