@@ -27,6 +27,7 @@ import java.util.stream.Stream;
 
 import javax.sql.DataSource;
 
+import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.common.exception.StoreException;
 import org.apache.seata.common.executor.Initialize;
 import org.apache.seata.common.util.ConfigTools;
@@ -60,7 +61,7 @@ public abstract class AbstractDataSourceProvider implements DataSourceProvider, 
 
     private final static String MYSQL8_DRIVER_CLASS_NAME = "com.mysql.cj.jdbc.Driver";
 
-    private final static String MYSQL_DRIVER_FILE_PREFIX = "mysql-connector-java-";
+    private final static String MYSQL_DRIVER_FILE_PREFIX = "mysql-connector-j";
 
     private final static Map<String, ClassLoader> MYSQL_DRIVER_LOADERS;
 
@@ -95,11 +96,20 @@ public abstract class AbstractDataSourceProvider implements DataSourceProvider, 
         try {
             loader.loadClass(driverClassName);
         } catch (ClassNotFoundException exx) {
-            String driverClassPath = null;
             String folderPath = System.getProperty("loader.path");
-            if (null != folderPath) {
-                driverClassPath = folderPath + "/jdbc/";
+            if (folderPath == null) {
+                folderPath = System.getProperty("java.class.path");
             }
+            String driverClassPath = Stream.of(folderPath.split(File.pathSeparator))
+                    .map(File::new)
+                    .filter(File::exists)
+                    .map(file -> file.isFile() ? file.getParentFile() : file)
+                    .filter(Objects::nonNull)
+                    .filter(File::isDirectory)
+                    .map(file -> new File(file, "jdbc"))
+                    .filter(File::exists)
+                    .filter(File::isDirectory)
+                    .distinct().findAny().orElseThrow(() -> new ShouldNeverHappenException("can not find jdbc folder")).getAbsolutePath();
             throw new StoreException(String.format(
                     "The driver {%s} cannot be found in the path %s. Please ensure that the appropriate database driver dependencies are included in the classpath.", driverClassName, driverClassPath));
         }
@@ -150,7 +160,10 @@ public abstract class AbstractDataSourceProvider implements DataSourceProvider, 
 
     private static Map<String, ClassLoader> createMysqlDriverClassLoaders() {
         Map<String, ClassLoader> loaders = new HashMap<>();
-        String cp = System.getProperty("java.class.path");
+        String cp = System.getProperty("loader.path");
+        if (cp == null) {
+            cp = System.getProperty("java.class.path");
+        }
         if (cp == null || cp.isEmpty()) {
             return loaders;
         }
