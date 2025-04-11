@@ -1,0 +1,97 @@
+package org.apache.seata.sqlparser.druid.oceanbase;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+import com.alibaba.druid.sql.ast.SQLExpr;
+import com.alibaba.druid.sql.ast.SQLOrderBy;
+import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
+import com.alibaba.druid.sql.dialect.oracle.visitor.OracleOutputVisitor;
+import com.alibaba.druid.sql.visitor.SQLASTOutputVisitor;
+
+import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.sqlparser.ParametersHolder;
+import org.apache.seata.sqlparser.druid.BaseRecognizer;
+import org.apache.seata.sqlparser.struct.Null;
+import org.apache.seata.sqlparser.util.JdbcConstants;
+
+public abstract class BaseOceanBaseRecognizer extends BaseRecognizer {
+
+    /**
+     * Instantiates a new OceanBase base recognizer
+     *
+     * @param originalSql the original sql
+     */
+    public BaseOceanBaseRecognizer(String originalSql) {
+        super(originalSql);
+    }
+
+    public SQLASTOutputVisitor createOracleOutputVisitor(final ParametersHolder parametersHolder,
+                                                         final ArrayList<List<Object>> paramAppenderList,
+                                                         final StringBuilder sb) {
+
+        return new OracleOutputVisitor(sb) {
+            @Override
+            public boolean visit(SQLVariantRefExpr x) {
+                if ("?".equals(x.getName())) {
+                    ArrayList<Object> oneParamValues = parametersHolder.getParameters().get(x.getIndex() + 1);
+                    if (paramAppenderList.isEmpty()) {
+                        oneParamValues.forEach(t -> paramAppenderList.add(new ArrayList<>()));
+                    }
+                    for (int i = 0; i < oneParamValues.size(); i++) {
+                        Object o = oneParamValues.get(i);
+                        paramAppenderList.get(i).add(o instanceof Null ? null : o);
+                    }
+                }
+                return super.visit(x);
+            }
+        };
+    }
+
+    public String getWhereCondition(SQLExpr where, final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppenderList) {
+        if (Objects.isNull(where)) {
+            return StringUtils.EMPTY;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        executeVisit(where, createOracleOutputVisitor(parametersHolder, paramAppenderList, sb));
+        return sb.toString();
+    }
+
+    public String getWhereCondition(SQLExpr where) {
+        if (Objects.isNull(where)) {
+            return StringUtils.EMPTY;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        executeVisit(where, new OracleOutputVisitor(sb));
+        return sb.toString();
+    }
+
+    protected String getOrderByCondition(SQLOrderBy sqlOrderBy) {
+        if (Objects.isNull(sqlOrderBy)) {
+            return StringUtils.EMPTY;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        executeOrderBy(sqlOrderBy, new OracleOutputVisitor(sb));
+
+        return sb.toString();
+    }
+
+    protected String getOrderByCondition(SQLOrderBy sqlOrderBy, final ParametersHolder parametersHolder,
+                                         final ArrayList<List<Object>> paramAppenderList) {
+        if (Objects.isNull(sqlOrderBy)) {
+            return StringUtils.EMPTY;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        executeOrderBy(sqlOrderBy, createOracleOutputVisitor(parametersHolder, paramAppenderList, sb));
+        return sb.toString();
+    }
+
+    public String getDbType() {
+        return JdbcConstants.OCEANBASE;
+    }
+}
