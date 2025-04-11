@@ -19,7 +19,6 @@ package org.apache.seata.rm.datasource.exec;
 import java.lang.reflect.Field;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -32,18 +31,15 @@ import org.apache.seata.rm.datasource.DataSourceProxy;
 import org.apache.seata.rm.datasource.DataSourceProxyTest;
 import org.apache.seata.rm.datasource.PreparedStatementProxy;
 import org.apache.seata.rm.datasource.StatementProxy;
-import org.apache.seata.rm.datasource.exec.StatementCallback;
 import org.apache.seata.rm.datasource.exec.mysql.MySQLInsertExecutor;
 import org.apache.seata.rm.datasource.mock.MockDriver;
 import org.apache.seata.rm.datasource.mock.MockMariadbDataSource;
-import org.apache.seata.rm.datasource.mock.MockResultSet;
-import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.sqlparser.SQLInsertRecognizer;
+import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mockito;
-
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -62,10 +58,6 @@ public class MariadbInsertExecutorTest extends MySQLInsertExecutorTest {
         statementProxy = mock(PreparedStatementProxy.class);
         when(statementProxy.getConnectionProxy()).thenReturn(connectionProxy);
         when(statementProxy.getTargetStatement()).thenReturn(statementProxy);
-
-        MockResultSet resultSet = new MockResultSet(statementProxy);
-        resultSet.mockResultSet(Arrays.asList("Variable_name", "Value"), new Object[][]{{"auto_increment_increment", "1"}});
-        when(statementProxy.getTargetStatement().executeQuery("SHOW VARIABLES LIKE 'auto_increment_increment'")).thenReturn(resultSet);
 
         StatementCallback statementCallback = mock(StatementCallback.class);
         sqlInsertRecognizer = mock(SQLInsertRecognizer.class);

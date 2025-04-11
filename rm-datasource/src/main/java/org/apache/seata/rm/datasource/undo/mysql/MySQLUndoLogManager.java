@@ -122,7 +122,7 @@ public class MySQLUndoLogManager extends AbstractUndoLogManager {
 
     @Override
     protected String getMaxAllowedPacket(DataSourceProxy dataSourceProxy) {
-        return dataSourceProxy.getVariableValue("max_allowed_packet");
+        return dataSourceProxy.getDataSourceProxyMetadata().getVariableValue("max_allowed_packet");
     }
 
     @Override

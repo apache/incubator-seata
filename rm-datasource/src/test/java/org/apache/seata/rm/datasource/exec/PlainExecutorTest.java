@@ -19,6 +19,8 @@ package org.apache.seata.rm.datasource.exec;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
+import java.util.Properties;
+
 import com.alibaba.druid.mock.MockStatement;
 import com.alibaba.druid.mock.MockStatementBase;
 import com.alibaba.druid.pool.DruidDataSource;
@@ -56,6 +58,7 @@ public class PlainExecutorTest {
         DruidDataSource dataSource = new DruidDataSource();
         dataSource.setUrl("jdbc:mock:xxx");
         dataSource.setDriver(mockDriver);
+        dataSource.setConnectProperties(new Properties());
 
         DataSourceProxy dataSourceProxy = DataSourceProxyTest.getDataSourceProxy(dataSource);
 

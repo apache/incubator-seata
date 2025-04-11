@@ -22,6 +22,7 @@ import java.sql.Types;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -77,6 +78,7 @@ public class MultiExecutorTest {
         DruidDataSource dataSource = new DruidDataSource();
         dataSource.setUrl("jdbc:mock:xxx");
         dataSource.setDriver(mockDriver);
+        dataSource.setConnectProperties(new Properties());
 
         DataSourceProxy dataSourceProxy = DataSourceProxyTest.getDataSourceProxy(dataSource);
 
