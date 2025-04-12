@@ -121,21 +121,10 @@ public abstract class AbstractGlobalService extends AbstractService implements G
             boolean res;
             if (RETRY_COMMIT_STATUS.contains(globalStatus) || GlobalStatus.Committing.equals(globalStatus)
                     || GlobalStatus.StopCommitOrCommitRetry.equals(globalStatus)) {
-                res = DefaultCoordinator.getInstance().doGlobalCommit(globalSession, false);
-                if (res && globalSession.hasBranch() && globalSession.hasATBranch()) {
-                    globalSession.clean();
-                    globalSession.asyncCommit();
-                } else if (res && SessionHolder.findGlobalSession(xid) != null) {
-                    globalSession.end();
-                }
+                res = doRetryCommitGlobal(globalSession);
             } else if (RETRY_ROLLBACK_STATUS.contains(globalStatus) || GlobalStatus.Rollbacking.equals(globalStatus)
                     || GlobalStatus.StopRollbackOrRollbackRetry.equals(globalStatus)) {
-                res = DefaultCoordinator.getInstance().doGlobalRollback(globalSession, false);
-                // the record is not deleted
-                if (res && SessionHolder.findGlobalSession(xid) != null) {
-                    globalSession.changeGlobalStatus(GlobalStatus.Rollbacked);
-                    globalSession.end();
-                }
+                res = doRetryRollbackGlobal(globalSession);
             } else {
                 throw new IllegalArgumentException("current global transaction status is not support to do");
             }
@@ -152,11 +141,11 @@ public abstract class AbstractGlobalService extends AbstractService implements G
         GlobalStatus globalStatus = globalSession.getStatus();
         try {
             if (FAIL_COMMIT_STATUS.contains(globalStatus)) {
-                boolean committed = doCommitGlobal(globalSession);
+                boolean committed = doRetryCommitGlobal(globalSession);
                 return committed ? SingleResult.success() : SingleResult.failure("Commit fail, please try again");
             }
             if (FAIL_ROLLBACK_STATUS.contains(globalStatus)) {
-                boolean rollbacked = doRollbackGlobal(globalSession);
+                boolean rollbacked = doRetryRollbackGlobal(globalSession);
                 return rollbacked ? SingleResult.success() : SingleResult.failure("Rollback fail, please try again");
             }
         } catch (Exception e) {
