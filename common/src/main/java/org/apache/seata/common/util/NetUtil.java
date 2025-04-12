@@ -138,18 +138,20 @@ public class NetUtil {
         if (address.charAt(0) == '[') {
             address = removeBrackets(address);
         }
-        String[] serverAddArr = null;
         int i = address.lastIndexOf(Constants.IP_PORT_SPLIT_CHAR);
         if (i > -1) {
-            serverAddArr = new String[2];
-            String hostAddress = address.substring(0,i);
+            String hostAddress = address.substring(0, i);
             if (hostAddress.contains("%")) {
                 hostAddress = hostAddress.substring(0, hostAddress.indexOf("%"));
             }
-            serverAddArr[0] = hostAddress;
-            serverAddArr[1] = address.substring(i + 1);
+            String portStr = address.substring(i + 1);
+            if (StringUtils.isBlank(hostAddress) || StringUtils.isBlank(portStr)) {
+                throw new IllegalArgumentException("Invalid endpoint format: " + address + ". Endpoint should be in the format ip:port.");
+            }
+            return new String[]{hostAddress, portStr};
+        } else {
+            throw new IllegalArgumentException("Invalid endpoint format: " + address + ". Endpoint should be in the format ip:port.");
         }
-        return serverAddArr;
     }
 
     /**
