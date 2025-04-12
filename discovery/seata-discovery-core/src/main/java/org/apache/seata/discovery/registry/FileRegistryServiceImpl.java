@@ -89,7 +89,7 @@ public class FileRegistryServiceImpl implements RegistryService<ConfigChangeList
         List<InetSocketAddress> inetSocketAddresses = new ArrayList<>();
         for (String endpoint : endpoints) {
             String[] ipAndPort = NetUtil.splitIPPortStr(endpoint);
-            if (ipAndPort.length != 2) {
+            if (ipAndPort == null || ipAndPort[0].isEmpty() || ipAndPort[1].isEmpty() ) {
                 throw new IllegalArgumentException("endpoint format should like ip:port, the invalid endpoint: " + endpoint);
             }
             inetSocketAddresses.add(new InetSocketAddress(ipAndPort[0], Integer.parseInt(ipAndPort[1])));
