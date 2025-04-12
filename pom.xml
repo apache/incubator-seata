@@ -289,6 +289,30 @@
                 </plugins>
             </build>
         </profile>
+        <!-- profile: dependency-check -->
+        <profile>
+            <id>dependency-check</id>
+            <build>
+                <plugins>
+                    <!-- dependency-check-maven -->
+                    <plugin>
+                        <groupId>org.owasp</groupId>
+                        <artifactId>dependency-check-maven</artifactId>
+                        <version>${dependency-check-maven.version}</version>
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>check</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
     <build>
@@ -398,22 +422,6 @@
                     <argLine>${maven.surefire.argLine}</argLine>
                     <excludes>${maven.surefire.excludes}</excludes>
                 </configuration>
-            </plugin>
-            <!-- dependency-check-maven -->
-            <plugin>
-                <groupId>org.owasp</groupId>
-                <artifactId>dependency-check-maven</artifactId>
-                <version>${dependency-check-maven.version}</version>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>
