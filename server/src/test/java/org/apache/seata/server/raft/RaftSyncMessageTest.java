@@ -107,7 +107,7 @@ public class RaftSyncMessageTest {
     }
 
     @Test
-    public void testMsgSerialize() throws IOException {
+    public void testGlobalSessionMsgSerializationAndDeserialization() throws IOException {
         RaftSyncMessage raftSyncMessage = new RaftSyncMessage();
         RaftGlobalSessionSyncMsg raftSessionSyncMsg = new RaftGlobalSessionSyncMsg();
         raftSessionSyncMsg.setGlobalSession(new GlobalTransactionDTO("123:123"));
@@ -118,7 +118,7 @@ public class RaftSyncMessageTest {
     }
 
     @Test
-    public void testMsgSerialize_2() throws IOException {
+    public void testBranchSessionMsgSerializationAndDeserialization() throws IOException {
         RaftSyncMessage raftSyncMessage2 = new RaftSyncMessage();
         RaftBranchSessionSyncMsg raftBranchSessionMsg = new RaftBranchSessionSyncMsg();
         raftBranchSessionMsg.setBranchSession(new BranchTransactionDTO("123:123", 1234));
