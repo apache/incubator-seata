@@ -18,6 +18,11 @@ package org.apache.seata.common.code;
 
 import org.apache.seata.common.result.Code;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -40,12 +45,20 @@ public class CodeTest {
         assertNull(Code.getErrorMsg("404"));
     }
 
-    @Test
-    public void testSetCodeAndMsgUpdatesValuesCorrectly() {
-        // Test case to check if setCode and setMsg are working as expected
-        Code.SUCCESS.setCode("201");
-        Code.SUCCESS.setMsg("Created");
-        assertEquals("201", Code.SUCCESS.getCode());
-        assertEquals("Created", Code.SUCCESS.getMsg());
+    static Stream<Arguments> codeSetterProvider() {
+        return Stream.of(
+                Arguments.of(Code.SUCCESS, "201", "Created"),
+                Arguments.of(Code.ERROR, "500", "Something went wrong"),
+                Arguments.of(Code.LOGIN_FAILED, "403", "Unauthorized")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("codeSetterProvider")
+    public void testSetCodeAndMsgUpdatesValuesCorrectly(Code code, String newCode, String newMsg) {
+        code.setCode(newCode);
+        code.setMsg(newMsg);
+        assertEquals(newCode, code.getCode());
+        assertEquals(newMsg, code.getMsg());
     }
 }
