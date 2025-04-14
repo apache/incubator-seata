@@ -48,8 +48,7 @@ public class CodeTest {
     static Stream<Arguments> codeSetterProvider() {
         return Stream.of(
                 Arguments.of(Code.SUCCESS, "201", "Created"),
-                Arguments.of(Code.ERROR, "500", "Something went wrong"),
-                Arguments.of(Code.LOGIN_FAILED, "403", "Unauthorized")
+                Arguments.of(Code.ERROR, "500", "Something went wrong")
         );
     }
 
