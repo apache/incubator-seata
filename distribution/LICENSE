@@ -234,9 +234,9 @@ Apache-2.0 licenses
     com.dameng:DmJdbcDriver18 8.1.2.192 Apache-2.0
     com.ecwid.consul:consul-api 1.4.2 Apache-2.0
     com.fasterxml.jackson.core:jackson-annotations 2.12.7 Apache-2.0
-    com.fasterxml.jackson.core:jackson-annotations 2.13.5 Apache-2.0
-    com.fasterxml.jackson.core:jackson-core 2.13.5 Apache-2.0
-    com.fasterxml.jackson.core:jackson-databind 2.13.5 Apache-2.0
+    com.fasterxml.jackson.core:jackson-annotations 2.18.3 Apache-2.0
+    com.fasterxml.jackson.core:jackson-core 2.18.3 Apache-2.0
+    com.fasterxml.jackson.core:jackson-databind 2.18.3 Apache-2.0
     com.fasterxml.jackson.datatype:jackson-datatype-jdk8 2.13.5 Apache-2.0
     com.fasterxml.jackson.module:jackson-module-parameter-names 2.13.5 Apache-2.0
     com.github.ben-manes.caffeine:caffeine 2.9.3 Apache-2.0
@@ -357,9 +357,9 @@ Apache-2.0 licenses
     org.apache.rocketmq:rocketmq-common 5.0.0 Apache-2.0
     org.apache.rocketmq:rocketmq-logging 5.0.0 Apache-2.0
     org.apache.rocketmq:rocketmq-remoting 5.0.0 Apache-2.0
-    org.apache.tomcat.embed:tomcat-embed-el 9.0.98 Apache-2.0
-    org.apache.tomcat.embed:tomcat-embed-websocket 9.0.98 Apache-2.0
-    org.apache.tomcat:tomcat-annotations-api 9.0.98 Apache-2.0
+    org.apache.tomcat.embed:tomcat-embed-el 9.0.99 Apache-2.0
+    org.apache.tomcat.embed:tomcat-embed-websocket 9.0.99 Apache-2.0
+    org.apache.tomcat:tomcat-annotations-api 9.0.99 Apache-2.0
     org.apache.yetus:audience-annotations 0.12.0 Apache-2.0
     org.awaitility:awaitility 4.0.3 Apache-2.0
     org.codehaus.groovy:groovy-all 2.4.4 Apache-2.0
@@ -406,7 +406,7 @@ Apache-2.0 licenses
     org.apache.zookeeper:zookeeper 3.7.2  Apache-2.0
     org.apache.zookeeper:zookeeper-jute 3.7.2  Apache-2.0
     org.apache.skywalking 8.4.0 Apache-2.0
-    org.apache.tomcat.embed:tomcat-embed-core 9.0.98 Apache-2.0
+    org.apache.tomcat.embed:tomcat-embed-core 9.0.99 Apache-2.0
     net.java.dev.jna:jna 5.5.0 Apache-2.0
     org.rocksdb:rocksdbjni 8.8.1 Apache-2.0
     org.springframework:spring-aop 5.3.39 Apache-2.0
@@ -421,6 +421,8 @@ Apache-2.0 licenses
     org.springframework:spring-web 5.3.39 Apache-2.0
     org.springframework:spring-webmvc 5.3.39 Apache-2.0
     org.apache.commons:commons-math 2.2 Apache-2.0
+    org.apache.commons:commons-compress 1.27.1 Apache-2.0
+    com.bucket4j:bucket4j_jdk8-core 8.1.0 Apache-2.0
 
 ========================================================================
 BSD-2-Clause licenses
@@ -478,7 +480,7 @@ BSD-3-Clause licenses
     universal-unit-tool 1.0.0 BSD-3-Clause
     universal-unit-tool/node_modules/universal-device 2.3.1 BSD-3-Clause
     warning 3.0.0 BSD-3-Clause
-    com.thoughtworks.xstream:xstream 1.4.20 BSD-3-Clause
+    com.thoughtworks.xstream:xstream 1.4.21 BSD-3-Clause
     org.antlr:ST4 4.3  The BSD License
     org.antlr:antlr-runtime 3.5.2 The BSD License
     org.antlr:antlr4 4.8 The BSD License
@@ -645,7 +647,7 @@ MIT licenses
     asn1.js 4.10.1 MIT
     asn1.js/node_modules/bn.js 4.12.0 MIT
     asynckit 0.4.0 MIT
-    axios 1.7.4 MIT
+    axios 1.8.2 MIT
     babel-plugin-emotion 10.2.2 MIT
     babel-plugin-emotion/node_modules/babel-plugin-macros 2.8.0 MIT
     babel-plugin-emotion/node_modules/convert-source-map 1.9.0 MIT
