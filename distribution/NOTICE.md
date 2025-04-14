@@ -130,9 +130,6 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
 │  │      tomcat-embed-el-9.0.99.jar
 │  │      tomcat-embed-websocket-9.0.99.jar
 │  │      
-│  ├─logs
-│  │      seata_namingserver_gc.log
-│  │      
 │  └─target
 │          seata-namingserver.jar
 │          
@@ -142,14 +139,10 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
     │  NOTICE
     │  
     ├─bin
-    │  │  seata-server.bat
-    │  │  seata-server.sh
-    │  │  seata-setup.sh
-    │  │  
-    │  └─sessionStore
-    │      └─8091
-    │              root.data
-    │              
+    │      seata-server.bat
+    │      seata-server.sh
+    │      seata-setup.sh
+    │      
     ├─conf
     │  │  application.example.yml
     │  │  application.raft.example.yml
@@ -402,9 +395,6 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
     │  └─jdbc
     │          NOTICE.md
     │          
-    ├─logs
-    │      seata_gc.log
-    │      
     ├─script
     │  ├─config-center
     │  │  │  config.txt
@@ -591,9 +581,6 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
 │  │      tomcat-embed-el-9.0.99.jar
 │  │      tomcat-embed-websocket-9.0.99.jar
 │  │      
-│  ├─logs
-│  │      seata_namingserver_gc.log
-│  │      
 │  └─target
 │          seata-namingserver.jar
 │          
@@ -603,14 +590,10 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
     │  NOTICE
     │  
     ├─bin
-    │  │  seata-server.bat
-    │  │  seata-server.sh
-    │  │  seata-setup.sh
-    │  │  
-    │  └─sessionStore
-    │      └─8091
-    │              root.data
-    │              
+    │      seata-server.bat
+    │      seata-server.sh
+    │      seata-setup.sh
+    │      
     ├─conf
     │  │  application.example.yml
     │  │  application.raft.example.yml
@@ -862,10 +845,8 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
     │  │  
     │  └─jdbc
     │          NOTICE.md
+    │          mysql-connector-java-8.0.28.jar
     │          
-    ├─logs
-    │      seata_gc.log
-    │      
     ├─script
     │  ├─config-center
     │  │  │  config.txt
