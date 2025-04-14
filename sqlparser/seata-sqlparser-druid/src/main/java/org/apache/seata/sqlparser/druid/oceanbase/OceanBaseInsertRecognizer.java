@@ -30,7 +30,6 @@ import com.alibaba.druid.sql.ast.expr.SQLValuableExpr;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
-import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleInsertStatement;
 import com.alibaba.druid.sql.dialect.oracle.visitor.OracleOutputVisitor;
 
 import org.apache.seata.common.util.CollectionUtils;

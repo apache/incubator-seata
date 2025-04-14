@@ -25,14 +25,12 @@ import com.alibaba.druid.sql.ast.statement.SQLDeleteStatement;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLJoinTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLTableSource;
-import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleDeleteStatement;
 import com.alibaba.druid.sql.dialect.oracle.visitor.OracleOutputVisitor;
 
 import org.apache.seata.common.exception.NotSupportYetException;
 import org.apache.seata.sqlparser.ParametersHolder;
 import org.apache.seata.sqlparser.SQLDeleteRecognizer;
 import org.apache.seata.sqlparser.SQLType;
-import org.apache.seata.sqlparser.druid.oracle.BaseOracleRecognizer;
 
 /**
  * The type oceanbase delete recognizer.

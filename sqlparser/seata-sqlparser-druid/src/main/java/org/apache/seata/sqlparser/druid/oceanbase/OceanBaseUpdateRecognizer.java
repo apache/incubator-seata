@@ -30,14 +30,12 @@ import com.alibaba.druid.sql.ast.statement.SQLJoinTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLUpdateSetItem;
 import com.alibaba.druid.sql.ast.statement.SQLUpdateStatement;
-import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleUpdateStatement;
 import com.alibaba.druid.sql.dialect.oracle.visitor.OracleOutputVisitor;
 
 import org.apache.seata.common.exception.NotSupportYetException;
 import org.apache.seata.sqlparser.ParametersHolder;
 import org.apache.seata.sqlparser.SQLType;
 import org.apache.seata.sqlparser.SQLUpdateRecognizer;
-import org.apache.seata.sqlparser.druid.oracle.BaseOracleRecognizer;
 import org.apache.seata.sqlparser.util.ColumnUtils;
 
 /**
