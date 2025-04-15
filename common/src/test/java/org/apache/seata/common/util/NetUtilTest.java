@@ -22,6 +22,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -106,7 +107,10 @@ public class NetUtilTest {
      */
     @Test
     public void testToInetSocketAddress1() {
-        assertThat(NetUtil.toInetSocketAddress("kadfskl").getHostName()).isEqualTo("kadfskl");
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            NetUtil.toInetSocketAddress("kadfskl").getHostName().equals("kadfskl");
+        });
+
     }
 
     /**
@@ -117,7 +121,7 @@ public class NetUtilTest {
         try {
             NetUtil.toLong("kdskdsfk");
         } catch (Exception e) {
-            assertThat(e).isInstanceOf(NullPointerException.class);
+            assertThat(e).isInstanceOf(IllegalArgumentException.class);
         }
     }
 
@@ -126,13 +130,14 @@ public class NetUtilTest {
      */
     @Test
     public void testToLong1() {
-        String[] split = "127.0.0.1".split("\\.");
+        String[] split = "127.0.0.1:8080".split("[.:]");
         long r = 0;
         r = r | (Long.parseLong(split[0]) << 40);
         r = r | (Long.parseLong(split[1]) << 32);
         r = r | (Long.parseLong(split[2]) << 24);
         r = r | (Long.parseLong(split[3]) << 16);
-        assertThat(NetUtil.toLong("127.0.0.1")).isEqualTo(r);
+        r = r | Long.parseLong(split[4]);
+        assertThat(NetUtil.toLong("127.0.0.1:8080")).isEqualTo(r);
 
     }
 
