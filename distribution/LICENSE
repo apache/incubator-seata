@@ -567,7 +567,7 @@ MIT licenses
     @alifd/next/node_modules/@alifd/field 1.5.8 MIT
     @alifd/next/node_modules/@alifd/validate 1.2.3 MIT
     @alifd/validate 1.4.0 MIT
-    @babel/code-frame 7.23.5 MIT
+    @babel/code-frame 7.26.2 MIT
     @babel/compat-data 7.23.5 MIT
     @babel/core 7.23.9 MIT
     @babel/generator 7.23.6 MIT
@@ -581,18 +581,17 @@ MIT licenses
     @babel/helper-plugin-utils 7.22.5 MIT
     @babel/helper-simple-access 7.22.5 MIT
     @babel/helper-split-export-declaration 7.22.6 MIT
-    @babel/helper-string-parser 7.23.4 MIT
-    @babel/helper-validator-identifier 7.22.20 MIT
+    @babel/helper-string-parser 7.25.9 MIT
+    @babel/helper-validator-identifier 7.25.9 MIT
     @babel/helper-validator-option 7.23.5 MIT
-    @babel/helpers 7.23.9 MIT
+    @babel/helpers 7.27.0 MIT
     @babel/highlight 7.23.4 MIT
-    @babel/parser 7.23.9 MIT
+    @babel/parser 7.27.0 MIT
     @babel/plugin-syntax-jsx 7.23.3 MIT
-    @babel/runtime 7.0.0-beta.46 MIT
-    @babel/runtime 7.23.9 MIT
-    @babel/template 7.23.9 MIT
+    @babel/runtime 7.27.0 MIT
+    @babel/template 7.27.0 MIT
     @babel/traverse 7.23.9 MIT
-    @babel/types 7.23.9 MIT
+    @babel/types 7.27.0 MIT
     @bpmn-io/cm-theme 0.1.0-alpha.2 MIT
     @bpmn-io/diagram-js-ui 0.2.2 MIT
     @bpmn-io/feel-editor 1.1.0 MIT
@@ -727,7 +726,7 @@ MIT licenses
     dva/node_modules/react-router-redux 5.0.0-alpha.9 MIT
     dva/node_modules/redux 3.7.2 MIT
     dva/node_modules/regenerator-runtime 0.11.1 MIT
-    elliptic 6.6.0 MIT
+    elliptic 6.6.1 MIT
     elliptic/node_modules/bn.js 4.12.0 MIT
     encoding 0.1.13 MIT
     encoding/node_modules/iconv-lite 0.6.3 MIT
@@ -824,7 +823,7 @@ MIT licenses
     path-intersection 2.2.1 MIT
     path-is-absolute 1.0.1 MIT
     path-parse 1.0.7 MIT
-    path-to-regexp 1.8.0 MIT
+    path-to-regexp 1.9.0 MIT
     path-type 4.0.0 MIT
     pbkdf2 3.1.2 MIT
     picomatch 2.3.1 MIT
