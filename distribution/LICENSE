@@ -233,7 +233,6 @@ Apache-2.0 licenses
     com.ctrip.framework.apollo:apollo-core 2.0.1 Apache-2.0
     com.dameng:DmJdbcDriver18 8.1.2.192 Apache-2.0
     com.ecwid.consul:consul-api 1.4.2 Apache-2.0
-    com.fasterxml.jackson.core:jackson-annotations 2.12.7 Apache-2.0
     com.fasterxml.jackson.core:jackson-annotations 2.18.3 Apache-2.0
     com.fasterxml.jackson.core:jackson-core 2.18.3 Apache-2.0
     com.fasterxml.jackson.core:jackson-databind 2.18.3 Apache-2.0
