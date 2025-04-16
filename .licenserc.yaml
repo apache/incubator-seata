@@ -36,33 +36,18 @@ header:
       limitations under the License.
 
   paths-ignore:
-    - '.gitignore'
-    - '*.md'
     - 'LICENSE'
     - 'NOTICE'
     - 'DISCLAIMER'
-    - '**/*.md'
-    - '.github/**'
-    - '**/target/**'
-    - '**/*.iml'
-    - 'changes/**'
-    - 'style/**'
-    - 'sessionStore/**'
-    - 'test/src/test/resources/**'
     - 'saga/seata-saga-statemachine-designer/node_modules/**'
     - 'node_modules/**'
     - 'saga/seata-saga-statemachine-designer/**'
-    - '**/src/test/resources/statelang/**'
     - 'console/src/main/resources/static/console-fe/**'
     - '**/org/apache/seata/sqlparser/antlr/**/*.g4'
     - '**/org/apache/seata/sqlparser/antlr/mysql/parser/*'
-    - '**/integration/**/*.proto'
     - 'console/src/main/resources/static/**'
-    - 'ext/apm-seata-skywalking-plugin/config/agent.config'
-    - 'server/src/main/resources/lua/redislocker/redislock.lua'
-    - 'server/src/main/resources/banner.txt'
-    - 'namingserver/src/main/resources/banner.txt'
-    - '**/*.json'
+    - '**/*.txt'  #txt files not support comments
+    - '**/*.json' #json files not support comments
   comment: on-failure
 dependency:
   files:

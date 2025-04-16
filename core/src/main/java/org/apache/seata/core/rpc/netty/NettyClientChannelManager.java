@@ -36,6 +36,7 @@ import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.core.protocol.Version;
 import org.apache.seata.discovery.registry.FileRegistryServiceImpl;
 import org.apache.seata.discovery.registry.RegistryFactory;
 import org.apache.seata.discovery.registry.RegistryService;
@@ -270,12 +271,13 @@ class NettyClientChannelManager {
         nettyClientKeyPool.invalidateObject(poolKeyMap.get(serverAddress), channel);
     }
 
-    void registerChannel(final String serverAddress, final Channel channel) {
+    void registerChannel(final String serverAddress, final Channel channel, String version) {
         Channel channelToServer = channels.get(serverAddress);
         if (channelToServer != null && channelToServer.isActive()) {
             return;
         }
         channels.put(serverAddress, channel);
+        Version.putChannelVersion(channel, version);
     }
 
     private Channel doConnect(String serverAddress) {

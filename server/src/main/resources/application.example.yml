@@ -28,14 +28,21 @@ logging:
     path: ${log.home:${user.home}/logs/seata}
   extend:
     logstash-appender:
+      # off by default
+      enabled: false
       destination: 127.0.0.1:4560
     kafka-appender:
+      # off by default
+      enabled: false
       bootstrap-servers: 127.0.0.1:9092
       topic: logback_to_logstash
-console:
-  user:
-    username: seata
-    password: seata
+      producer:
+        acks: 0
+        linger-ms: 1000
+        max-block-ms: 0
+    metric-appender:
+      # off by default
+      enabled: false
 seata:
   config:
     # support: nacos 、 consul 、 apollo 、 zk  、 etcd3
@@ -86,6 +93,10 @@ seata:
       cluster: default
       namespace: public
       heartbeat-period: 5000
+      metadata-max-age-ms: 30000
+      username: seata
+      password: seata
+      tokenValidityInMilliseconds: 1740000
     nacos:
       application: seata-server
       server-addr: 127.0.0.1:8848
@@ -134,7 +145,6 @@ seata:
       group: SEATA_GROUP
       address-wait-time: 3000
 
-
   server:
     service-port: 8091 #If not configured, the default is '${server.port} + 1000'
     max-commit-retry-timeout: -1
@@ -162,7 +172,7 @@ seata:
       enable-branch-async-remove: false #enable to asynchronous remove branchSession
     ratelimit:
       enable: false
-      bucketTokenSecondNum: 999999
+      bucketTokenNumPerSecond: 999999
       bucketTokenMaxNum: 999999
       bucketTokenInitialNum: 999999
   store:
@@ -242,9 +252,3 @@ seata:
       boss-thread-prefix: NettyBoss
       worker-thread-prefix: NettyServerNIOWorker
       boss-thread-size: 1
-  security:
-    secretKey: SeataSecretKey0c382ef121d778043159209298fd40bf3850a017
-    tokenValidityInMilliseconds: 1800000
-    csrf-ignore-urls: /metadata/v1/**
-    ignore:
-      urls: /,/**/*.css,/**/*.js,/**/*.html,/**/*.map,/**/*.svg,/**/*.png,/**/*.jpeg,/**/*.ico,/api/v1/auth/login,/version.json,/health,/error

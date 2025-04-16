@@ -28,15 +28,22 @@ logging:
     path: ${log.home:${user.home}/logs/seata}
   extend:
     logstash-appender:
+      # off by default
+      enabled: false
       destination: 127.0.0.1:4560
     kafka-appender:
+      # off by default
+      enabled: false
       bootstrap-servers: 127.0.0.1:9092
       topic: logback_to_logstash
+      producer:
+        acks: 0
+        linger-ms: 1000
+        max-block-ms: 0
+    metric-appender:
+      # off by default
+      enabled: false
 
-console:
-  user:
-    username: seata
-    password: seata
 seata:
   config:
     # support: nacos, consul, apollo, zk, etcd3
@@ -49,9 +56,3 @@ seata:
     mode: file
   #  server:
   #    service-port: 8091 #If not configured, the default is '${server.port} + 1000'
-  security:
-    secretKey: SeataSecretKey0c382ef121d778043159209298fd40bf3850a017
-    tokenValidityInMilliseconds: 1800000
-    csrf-ignore-urls: /metadata/v1/**
-    ignore:
-      urls: /,/**/*.css,/**/*.js,/**/*.html,/**/*.map,/**/*.svg,/**/*.png,/**/*.jpeg,/**/*.ico,/api/v1/auth/login,/version.json,/health,/error,/vgroup/v1/**
