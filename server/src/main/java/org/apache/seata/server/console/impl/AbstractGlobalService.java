@@ -20,10 +20,8 @@ import org.apache.seata.common.result.SingleResult;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.server.console.exception.ConsoleException;
 import org.apache.seata.server.console.service.GlobalSessionService;
-import org.apache.seata.server.coordinator.DefaultCoordinator;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
-import org.apache.seata.server.session.SessionHolder;
 
 import java.util.ArrayList;
 import java.util.List;
