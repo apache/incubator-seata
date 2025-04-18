@@ -63,6 +63,7 @@ jobs:
       - name: "Test with Maven on '${{ matrix.os }}' OS"
         if: ${{ ! startsWith(matrix.os, 'windows') }}
         run: |
+          export MAVEN_OPTS=-Didea.io.use.nio2=true;
           if [[ "${{ matrix.os }}" =~ "macos" ]]; then
              python3 -m ensurepip --upgrade;
              python3 -m pip install --upgrade pip setuptools;
@@ -77,6 +78,7 @@ jobs:
       - name: "Build with Maven on 'windows' OS (Skip tests)"
         if: ${{ startsWith(matrix.os, 'windows') }}
         run: | # Skip tests, because too many errors in unit-test.
+          set MAVEN_OPTS=-Didea.io.use.nio2=true;
           ./mvnw.cmd -version;
           ./mvnw.cmd clean install -P args-for-client-test -DskipTests -D spring-boot.version=${{ matrix.springboot }} -e -B -D org.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
 
@@ -119,6 +121,7 @@ jobs:
       - name: "Test with Maven on '${{ matrix.os }}' OS"
         if: ${{ ! startsWith(matrix.os, 'windows') }}
         run: |
+          export MAVEN_OPTS=-Didea.io.use.nio2=true;
           if [[ "${{ matrix.os }}" =~ "macos" ]]; then
              python3 -m ensurepip --upgrade;
              python3 -m pip install --upgrade pip setuptools;
@@ -133,5 +136,6 @@ jobs:
       - name: "Build with Maven on 'windows' OS (Skip tests)"
         if: ${{ startsWith(matrix.os, 'windows') }}
         run: | # Skip tests, because too many errors in unit-test.
+          set MAVEN_OPTS=-Didea.io.use.nio2=true;
           ./mvnw.cmd -version;
           ./mvnw.cmd clean install -P args-for-client-test -DskipTests -D spring-boot.version=${{ matrix.springboot }} -e -B -D org.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
