@@ -104,7 +104,7 @@ jobs:
           ubuntu-24.04,
         ]
         springboot: [
-          3.2.0  -D spring-framework.version=6.1.1 -D mockito.version=5.13.0,
+          3.2.0  -D spring-framework.version=6.1.1 -D mockito.version=5.13.0 -D junit-jupiter.version=5.11.2,
           3.1.6  -D spring-framework.version=6.0.14,
           3.0.13 -D spring-framework.version=6.0.14,
         ]
