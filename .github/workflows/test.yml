@@ -94,7 +94,7 @@ jobs:
           windows-2022, # Skip tests, because too many errors in unit-test.
         ]
         springboot: [
-          3.2.0  -D spring-framework.version=6.1.1 -D mockito.version=5.17.0,
+          3.2.0  -D spring-framework.version=6.1.1,
           3.1.6  -D spring-framework.version=6.0.14,
           3.0.13 -D spring-framework.version=6.0.14,
         ]
