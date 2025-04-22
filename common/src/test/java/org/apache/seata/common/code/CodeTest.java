@@ -18,20 +18,29 @@ package org.apache.seata.common.code;
 
 import org.apache.seata.common.result.Code;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class CodeTest {
 
-    @Test
-    public void testGetErrorMsgWithValidCodeReturnsExpectedMsg() {
-        // Test case for SUCCESS
-        assertEquals("ok", Code.SUCCESS.getMsg());
-        // Test case for ERROR
-        assertEquals("Server error", Code.ERROR.getMsg());
-        // Test case for LOGIN_FAILED
-        assertEquals("Login failed", Code.LOGIN_FAILED.getMsg());
+    static Stream<Arguments> codeMessageProvider() {
+        return Stream.of(
+                Arguments.of(Code.SUCCESS, "ok"), // Test case for SUCCESS
+                Arguments.of(Code.ERROR, "Server error"), // Test case for ERROR
+                Arguments.of(Code.LOGIN_FAILED, "Login failed") // Test case for LOGIN_FAILED
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("codeMessageProvider")
+    public void testGetErrorMsgWithValidCodeReturnsExpectedMsg(Code code, String expectedMsg) {
+        assertEquals(expectedMsg, code.getMsg());
     }
 
     @Test
