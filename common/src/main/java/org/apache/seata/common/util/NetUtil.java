@@ -148,6 +148,15 @@ public class NetUtil {
             if (StringUtils.isBlank(hostAddress) || StringUtils.isBlank(portStr)) {
                 throw new IllegalArgumentException("Invalid endpoint format: " + address + ". Endpoint should be in the format ip:port.");
             }
+            try {
+                int port = Integer.parseInt(portStr);
+                if (port < 1 || port > 65535) {
+                    throw new IllegalArgumentException("Invalid endpoint format: " + address + ". Port must be between 1 and 65535.");
+                }
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("Invalid endpoint format: " + address + ". Port must be a numeric value.", e);
+            }
+
             return new String[]{hostAddress, portStr};
         } else {
             throw new IllegalArgumentException("Invalid endpoint format: " + address + ". Endpoint should be in the format ip:port.");

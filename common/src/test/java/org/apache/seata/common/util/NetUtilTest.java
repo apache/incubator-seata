@@ -113,6 +113,39 @@ public class NetUtilTest {
 
     }
 
+    @Test
+    public void testToInetSocketAddressWhenHostOrPortIsEmpty() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            NetUtil.toInetSocketAddress(":");
+        });
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            NetUtil.toInetSocketAddress(":9001");
+        });
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            NetUtil.toInetSocketAddress("127.0.0.1:");
+        });
+    }
+
+    @Test
+    public void testToInetSocketAddressWhenPortIllegalRange() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            NetUtil.toInetSocketAddress("127.0.0.1:-1");
+        });
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            NetUtil.toInetSocketAddress("127.0.0.1:65539");
+        });
+    }
+
+    @Test
+    public void testToInetSocketAddressWhenPortNotNumber() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            NetUtil.toInetSocketAddress("127.0.0.1:hello");
+        });
+    }
+
     /**
      * Test to long.
      */
