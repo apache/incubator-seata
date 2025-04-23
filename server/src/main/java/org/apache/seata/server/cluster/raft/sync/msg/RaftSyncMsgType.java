@@ -57,5 +57,20 @@ public enum RaftSyncMsgType {
      */
     REFRESH_CLUSTER_METADATA,
 
-    CONFIG_OPERATION;
+
+    CONFIG_OPERATION,
+
+    /**
+     * add vgroup mapping
+     */
+    ADD_VGROUP_MAPPING,
+    /**
+     * remove vgroup mapping
+     */
+    REMOVE_VGROUP_MAPPING,
+    /**
+     * update vgroup mapping
+     */
+    UPDATE_VGROUP_MAPPING,;
+
 }

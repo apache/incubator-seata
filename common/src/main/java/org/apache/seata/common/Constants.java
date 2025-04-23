@@ -181,6 +181,10 @@ public interface Constants {
     String ROLLBACKING = "Rollbacking";
 
     /**
+     * The constant END
+     */
+    String END = "END";
+    /**
      * The constant AUTO_COMMIT
      */
     String AUTO_COMMIT = "autoCommit";
@@ -269,4 +273,9 @@ public interface Constants {
      * The constant CONFIGURATION_META_FILE_NAME
      */
     String CONFIGURATION_META_FILE_NAME = "configuration-meta.yml";
+
+    /**
+     * The constant RAFT_GROUP_HEADER
+     */
+    String RAFT_GROUP_HEADER = "X-SEATA-RAFT-GROUP";
 }

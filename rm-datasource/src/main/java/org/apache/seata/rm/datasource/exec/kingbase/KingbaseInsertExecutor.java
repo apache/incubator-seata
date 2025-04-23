@@ -40,7 +40,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * The type Postgresql insert executor.
+ * The type Kingbase insert executor.
  * 
  */
 @LoadLevel(name = JdbcConstants.KINGBASE, scope = Scope.PROTOTYPE)

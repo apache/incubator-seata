@@ -23,9 +23,9 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.apache.seata.server.console.impl.AbstractGlobalService;
-import org.apache.seata.server.console.param.GlobalSessionParam;
+import org.apache.seata.server.console.entity.param.GlobalSessionParam;
 import org.apache.seata.common.result.PageResult;
-import org.apache.seata.server.console.vo.GlobalSessionVO;
+import org.apache.seata.server.console.entity.vo.GlobalSessionVO;
 import org.apache.seata.server.console.service.GlobalSessionService;
 import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.session.SessionHolder;
@@ -87,6 +87,10 @@ public class GlobalSessionFileServiceImpl extends AbstractGlobalService implemen
                 &&
                 // transactionName
                 (isBlank(param.getTransactionName()) || session.getTransactionName().contains(param.getTransactionName()))
+                &&
+
+                // vgroup
+                (isBlank(param.getVgroup()) || session.getTransactionServiceGroup().equals(param.getVgroup()))
 
                 &&
                 // timeStart

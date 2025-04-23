@@ -26,7 +26,7 @@
     <conversionRule conversionWord="wex" converterClass="org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter" />
     <conversionRule conversionWord="wEx" converterClass="org.springframework.boot.logging.logback.ExtendedWhitespaceThrowableProxyConverter" />
     <!-- The custom conversion rules -->
-    <conversionRule conversionWord="wEx2" converterClass="org.apache.seata.server.logging.logback.ExtendedWhitespaceThrowableProxyConverter"/>
+    <conversionRule conversionWord="wEx2" converterClass="org.apache.seata.server.logging.logback.ExtendedArrowThrowableProxyConverter"/>
 
     <!-- common properties -->
     <springProperty name="PORT" source="server.port" defaultValue="7091"/>
