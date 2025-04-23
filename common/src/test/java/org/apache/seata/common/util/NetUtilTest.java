@@ -98,7 +98,7 @@ public class NetUtilTest {
         try {
             NetUtil.toInetSocketAddress("23939:ks");
         } catch (Exception e) {
-            assertThat(e).isInstanceOf(NumberFormatException.class);
+            assertThat(e).isInstanceOf(IllegalArgumentException.class);
         }
     }
 
