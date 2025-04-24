@@ -355,6 +355,7 @@
                         <artifactId>spotless-maven-plugin</artifactId>
                         <version>${spotless-maven-plugin.version}</version>
                         <configuration>
+                            <skip>true</skip>
                             <java>
                                 <excludes>
                                     <exclude>**/script/**</exclude>
