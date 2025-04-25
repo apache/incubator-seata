@@ -37,44 +37,47 @@ import java.util.Map;
  */
 public class DesignerJsonTransformer {
 
-    public static Map<String, Object> toStandardJson(Map<String, Object> designerJsonObject) {
+    public static boolean isDesignerJson(Map<String, Object> jsonObject) {
+        return jsonObject != null && jsonObject.containsKey("nodes") && jsonObject.containsKey("edges");
+    }
 
+    public static Map<String, Object> toStandardJson(Map<String, Object> designerJsonObject) {
         if (!isDesignerJson(designerJsonObject)) {
             return designerJsonObject;
         }
-        Map<String, Object> machineJsonObject = new LinkedHashMap<>();
 
         List<Object> nodes = (List) designerJsonObject.get("nodes");
-        if (CollectionUtils.isNotEmpty(nodes)) {
-            Map<String, Object> nodeMap = new LinkedHashMap<>(nodes.size());
-
-            for (Object node : nodes) {
-                Map<String, Object> nodeObj = (Map<String, Object>) node;
-
-                transformNode(machineJsonObject, nodeMap, nodeObj);
-            }
-
-            List<Object> edges = (List) designerJsonObject.get("edges");
-            if (CollectionUtils.isNotEmpty(edges)) {
-                for (Object edge : edges) {
-                    Map<String, Object> edgeObj = (Map<String, Object>) edge;
-                    transformEdge(machineJsonObject, nodes, nodeMap, edgeObj);
-                }
-            }
+        List<Object> edges = (List) designerJsonObject.get("edges");
+        if (CollectionUtils.isEmpty(nodes) || CollectionUtils.isEmpty(edges)) {
+            throw new RuntimeException("Nodes or edges are empty, please check them.");
         }
+
+        Map<String, Object> machineJsonObject = new LinkedHashMap<>();
+        Map<String, Object> nodeMap = new LinkedHashMap<>(nodes.size());
+
+        for (Object node : nodes) {
+            Map<String, Object> nodeObj = (Map<String, Object>) node;
+            transformNode(machineJsonObject, nodeMap, nodeObj);
+        }
+
+        for (Object edge : edges) {
+            Map<String, Object> edgeObj = (Map<String, Object>) edge;
+            transformEdge(machineJsonObject, nodes, nodeMap, edgeObj);
+        }
+
         return machineJsonObject;
     }
 
     private static void transformNode(Map<String, Object> machineJsonObject, Map<String, Object> nodeMap, Map<String, Object> nodeObj) {
         nodeMap.put((String) nodeObj.get("id"), nodeObj);
 
-        String type = (String) nodeObj.get("stateType");
+        String stateType = (String) nodeObj.get("stateType");
         Map<String, Object> propsObj = (Map<String, Object>) nodeObj.get("stateProps");
-        if ("Start".equals(type)) {
+        if ("Start".equals(stateType)) {
             if (propsObj != null && propsObj.containsKey("StateMachine")) {
                 machineJsonObject.putAll((Map<String, Object>) propsObj.get("StateMachine"));
             }
-        } else if (!"Catch".equals(type)) {
+        } else if (!"Catch".equals(stateType)) {
             Map<String, Object> states = (Map<String, Object>) CollectionUtils.computeIfAbsent(machineJsonObject, "States",
                 key -> new LinkedHashMap<>());
 
@@ -89,18 +92,18 @@ public class DesignerJsonTransformer {
             if (StringUtils.hasLength(comment)) {
                 stateJsonObject.put("Comment", comment);
             }
-            if (propsObj != null) {
-                stateJsonObject.putAll(propsObj);
-            }
 
-            states.put(stateId, stateJsonObject);
-
-            String stateType = (String) nodeObj.get("stateType");
             if ("Compensation".equals(stateType)) {
                 stateJsonObject.put("Type", "ServiceTask");
             } else {
                 stateJsonObject.put("Type", stateType);
             }
+
+            if (propsObj != null) {
+                stateJsonObject.putAll(propsObj);
+            }
+
+            states.put(stateId, stateJsonObject);
         }
     }
 
@@ -108,66 +111,75 @@ public class DesignerJsonTransformer {
     private static void transformEdge(Map<String, Object> machineJsonObject, List<Object> nodes, Map<String, Object> nodeMap, Map<String, Object> edgeObj) {
         String sourceId = (String) edgeObj.get("source");
         String targetId = (String) edgeObj.get("target");
-        if (StringUtils.hasLength(sourceId)) {
-            Map<String, Object> sourceNode = (Map<String, Object>) nodeMap.get(sourceId);
-            Map<String, Object> targetNode = (Map<String, Object>) nodeMap.get(targetId);
-
-            if (sourceNode != null) {
-                Map<String, Object> states = (Map<String, Object>) machineJsonObject.get("States");
-                Map<String, Object> sourceState = (Map<String, Object>) states.get((String) sourceNode.get("stateId"));
-                String targetStateId = (String) targetNode.get("stateId");
-
-                String sourceType = (String) sourceNode.get("stateType");
-                if ("Start".equals(sourceType)) {
-                    machineJsonObject.put("StartState", targetStateId);
-                    //Make sure 'StartState' is before 'States'
-                    machineJsonObject.put("States", machineJsonObject.remove("States"));
-                } else if ("ServiceTask".equals(sourceType) || "SubStateMachine".equals(sourceType)) {
-                    if (targetNode != null && "Compensation".equals(targetNode.get("stateType"))) {
-                        sourceState.put("CompensateState", targetStateId);
-                    } else {
-                        sourceState.put("Next", targetStateId);
-                    }
-                } else if ("Catch".equals(sourceType)) {
-                    Map<String, Object> catchAttachedNode = getCatchAttachedNode(sourceNode, nodes);
-                    if (catchAttachedNode == null) {
-                        throw new RuntimeException("'Catch' node[" + sourceNode.get("id") + "] is not attached on a 'ServiceTask' or 'ScriptTask'");
-                    }
-                    Map<String, Object> catchAttachedState = (Map<String, Object>) states.get(catchAttachedNode.get("stateId"));
-                    List<Object> catches = (List<Object>) CollectionUtils.computeIfAbsent(catchAttachedState, "Catch",
-                        key -> new ArrayList<>());
-
-                    Map<String, Object> edgeProps = (Map<String, Object>) edgeObj.get("stateProps");
-                    if (edgeProps != null) {
-                        Map<String, Object> catchObj = new LinkedHashMap<>();
-                        catchObj.put("Exceptions", edgeProps.get("Exceptions"));
-                        catchObj.put("Next", targetStateId);
-                        catches.add(catchObj);
-                    }
-                } else if ("Choice".equals(sourceType)) {
-                    List<Object> choices = (List<Object>) CollectionUtils.computeIfAbsent(sourceState, "Choices",
-                        key -> new ArrayList<>());
-
-                    Map<String, Object> edgeProps = (Map<String, Object>) edgeObj.get("stateProps");
-                    if (edgeProps != null) {
-                        if (Boolean.TRUE.equals(edgeProps.get("Default"))) {
-                            sourceState.put("Default", targetStateId);
-                        } else {
-                            Map<String, Object> choiceObj = new LinkedHashMap<>();
-                            choiceObj.put("Expression", edgeProps.get("Expression"));
-                            choiceObj.put("Next", targetStateId);
-                            choices.add(choiceObj);
-                        }
-                    }
-                } else {
-                    sourceState.put("Next", targetStateId);
-                }
-            }
+        if (!StringUtils.hasLength(sourceId) || !StringUtils.hasLength(targetId)) {
+            throw new RuntimeException("Edge[" + edgeObj.get("id") + "] source or target is nul");
         }
-    }
 
-    public static boolean isDesignerJson(Map<String, Object> jsonObject) {
-        return jsonObject != null && jsonObject.containsKey("nodes") && jsonObject.containsKey("edges");
+        Map<String, Object> sourceNode = (Map<String, Object>) nodeMap.get(sourceId);
+        Map<String, Object> targetNode = (Map<String, Object>) nodeMap.get(targetId);
+        if (sourceNode == null || targetNode == null) {
+            throw new RuntimeException("The edge[" + edgeObj.get("id") + "] references a non-existent source or target node. Ensure they are properly defined");
+        }
+
+        Map<String, Object> states = (Map<String, Object>) machineJsonObject.get("States");
+        Map<String, Object> sourceState = (Map<String, Object>) states.get((String) sourceNode.get("stateId"));
+        String targetStateId = (String) targetNode.get("stateId");
+
+        String sourceType = (String) sourceNode.get("stateType");
+        if ("Start".equals(sourceType)) {
+            machineJsonObject.put("StartState", targetStateId);
+            //Make sure 'StartState' is before 'States'
+            machineJsonObject.put("States", machineJsonObject.remove("States"));
+            return;
+        }
+
+        if ("ServiceTask".equals(sourceType) || "SubStateMachine".equals(sourceType)) {
+            if ("Compensation".equals(targetNode.get("stateType"))) {
+                sourceState.put("CompensateState", targetStateId);
+            } else {
+                sourceState.put("Next", targetStateId);
+            }
+            return;
+        }
+
+        if ("Catch".equals(sourceType)) {
+            Map<String, Object> catchAttachedNode = getCatchAttachedNode(sourceNode, nodes);
+            if (catchAttachedNode == null) {
+                throw new RuntimeException("'Catch' node[" + sourceNode.get("id") + "] is not attached on a 'ServiceTask' or 'ScriptTask'");
+            }
+            Map<String, Object> catchAttachedState = (Map<String, Object>) states.get(catchAttachedNode.get("stateId"));
+            List<Object> catches = (List<Object>) CollectionUtils.computeIfAbsent(catchAttachedState, "Catch",
+                    key -> new ArrayList<>());
+
+            Map<String, Object> edgeProps = (Map<String, Object>) edgeObj.get("stateProps");
+            if (edgeProps != null) {
+                Map<String, Object> catchObj = new LinkedHashMap<>();
+                catchObj.put("Exceptions", edgeProps.get("Exceptions"));
+                catchObj.put("Next", targetStateId);
+                catches.add(catchObj);
+            }
+            return;
+        }
+
+        if ("Choice".equals(sourceType)) {
+            List<Object> choices = (List<Object>) CollectionUtils.computeIfAbsent(sourceState, "Choices",
+                    key -> new ArrayList<>());
+
+            Map<String, Object> edgeProps = (Map<String, Object>) edgeObj.get("stateProps");
+            if (edgeProps != null) {
+                if (Boolean.TRUE.equals(edgeProps.get("Default"))) {
+                    sourceState.put("Default", targetStateId);
+                    return;
+                }
+                Map<String, Object> choiceObj = new LinkedHashMap<>();
+                choiceObj.put("Expression", edgeProps.get("Expression"));
+                choiceObj.put("Next", targetStateId);
+                choices.add(choiceObj);
+            }
+            return;
+        }
+
+        sourceState.put("Next", targetStateId);
     }
 
     private static Map<String, Object> getCatchAttachedNode(Map<String, Object> catchNode, List<Object> nodes) {
@@ -180,10 +192,12 @@ public class DesignerJsonTransformer {
 
         for (Object node : nodes) {
             Map<String, Object> nodeObj = (Map<String, Object>) node;
-            if (catchNode != nodeObj &&
-                    ("ServiceTask".equals(nodeObj.get("stateType"))
-                            || "ScriptTask".equals(nodeObj.get("stateType")))) {
+            if (catchNode == nodeObj) {
+                continue;
+            }
 
+            String stateType = (String) nodeObj.get("stateType");
+            if ("ServiceTask".equals(stateType) || "ScriptTask".equals(stateType)) {
                 Number nodeX = (Number) nodeObj.get("x");
                 Number nodeY = (Number) nodeObj.get("y");
 
@@ -194,7 +208,6 @@ public class DesignerJsonTransformer {
 
                 if (isBordersCoincided(catchNodeX, nodeX, catchWidth, nodeWidth)
                         && isBordersCoincided(catchNodeY, nodeY, catchHeight, nodeHeight)) {
-
                     return nodeObj;
                 }
             }
