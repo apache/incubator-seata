@@ -27,7 +27,6 @@ import javax.sql.XAConnection;
 
 import com.alibaba.druid.pool.DruidDataSource;
 
-import com.kingbase8.jdbc.KbConnection;
 import com.kingbase8.xa.KBXAConnection;
 import com.mysql.jdbc.JDBC4MySQLConnection;
 import com.mysql.jdbc.jdbc2.optional.JDBC4ConnectionWrapper;
@@ -36,6 +35,7 @@ import org.apache.seata.rm.datasource.mock.MockDataSource;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 import org.mockito.Mockito;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -126,6 +126,7 @@ public class DataSourceProxyXATest {
     }
 
     @Test
+    @DisabledIfSystemProperty(named = "druid.version", matches = "[0-1].[1-2].[0-7]", disabledReason = "druid 1.2.8 correct support kingbase")
     public void testGetKingbaseXaConnection() throws SQLException, ClassNotFoundException {
         // Mock
         Driver driver = Mockito.mock(Driver.class);
