@@ -210,13 +210,14 @@ class RaftRegistryServiceImplTest {
         selectExternalEndpointMethod.setAccessible(true);
 
         // When selecting external endpoint, expect exception
-        Exception exception = assertThrows(Exception.class, () -> {
+        try {
             selectExternalEndpointMethod.invoke(
                     null, node, new String[]{"10.10.*"});
-        });
-
-        // Then should receive ParseEndpointException
-        assertTrue(exception.getCause() instanceof ParseEndpointException);
+            fail("Expected InvocationTargetException to be thrown");
+        } catch (InvocationTargetException e) {
+            // Then should receive ParseEndpointException
+            assertTrue(e.getCause() instanceof ParseEndpointException);
+        }
     }
 
     /**
