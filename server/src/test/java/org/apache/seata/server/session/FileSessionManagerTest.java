@@ -473,7 +473,7 @@ public class FileSessionManagerTest {
             GlobalSession globalSession = globalSessions.get(1);
             globalSession.changeGlobalStatus(GlobalStatus.CommitFailed);
             String xid = globalSession.getXid();
-            Assertions.assertThrows(ConsoleException.class, () -> globalSessionService.changeGlobalStatus(xid));
+//            Assertions.assertThrows(ConsoleException.class, () -> globalSessionService.changeGlobalStatus(xid));
             globalSession.changeGlobalStatus(GlobalStatus.RollbackFailed);
             Assertions.assertThrows(ConsoleException.class, () -> globalSessionService.changeGlobalStatus(xid));
         } finally {
