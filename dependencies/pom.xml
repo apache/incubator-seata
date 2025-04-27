@@ -99,6 +99,7 @@
         <jwt.version>0.10.5</jwt.version>
         <prometheus.client.version>0.6.0</prometheus.client.version>
         <logback.version>1.3.14</logback.version>
+        <slf4j.version>2.0.17</slf4j.version>
         <logstash-logback-encoder.version>6.5</logstash-logback-encoder.version>
 
         <!-- redis -->
@@ -799,6 +800,11 @@
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-core</artifactId>
                 <version>${logback.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
             </dependency>
             <!-- logback appenders -->
             <dependency>
