@@ -149,7 +149,7 @@ public class DesignerJsonTransformer {
             }
             Map<String, Object> catchAttachedState = (Map<String, Object>) states.get(catchAttachedNode.get("stateId"));
             List<Object> catches = (List<Object>) CollectionUtils.computeIfAbsent(catchAttachedState, "Catch",
-                    key -> new ArrayList<>());
+                key -> new ArrayList<>());
 
             Map<String, Object> edgeProps = (Map<String, Object>) edgeObj.get("stateProps");
             if (edgeProps != null) {
@@ -163,7 +163,7 @@ public class DesignerJsonTransformer {
 
         if ("Choice".equals(sourceType)) {
             List<Object> choices = (List<Object>) CollectionUtils.computeIfAbsent(sourceState, "Choices",
-                    key -> new ArrayList<>());
+                key -> new ArrayList<>());
 
             Map<String, Object> edgeProps = (Map<String, Object>) edgeObj.get("stateProps");
             if (edgeProps != null) {
