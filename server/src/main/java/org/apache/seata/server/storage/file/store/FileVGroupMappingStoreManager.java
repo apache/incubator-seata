@@ -26,6 +26,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.apache.seata.common.loader.LoadLevel;
+import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.store.MappingDO;
@@ -109,29 +110,19 @@ public class FileVGroupMappingStoreManager implements VGroupMappingStoreManager 
         try {
             File fileToLoad = new File(storePath);
             if (!fileToLoad.exists()) {
-                try {
-                    // create new file to record vgroup mapping relationship
-                    boolean fileCreated = fileToLoad.createNewFile();
-                    if (fileCreated) {
-                        LOGGER.info("New vgroup file created at path: " + storePath);
-                    } else {
-                        LOGGER.warn("Failed to create a new vgroup file at path: " + storePath);
-                    }
-                } catch (IOException e) {
-                    LOGGER.error("Error while creating a new file: " + e.getMessage());
-                }
+                // create new file to record vgroup mapping relationship
+                FileUtils.writeStringToFile(fileToLoad, StringUtils.EMPTY, StandardCharsets.UTF_8);
             }
 
-            String fileContent = FileUtils.readFileToString(fileToLoad, "UTF-8");
+            String fileContent = FileUtils.readFileToString(fileToLoad, StandardCharsets.UTF_8);
 
             if (!fileContent.isEmpty()) {
                 vGroupMapping = objectMapper.readValue(fileContent, new TypeReference<HashMap<String, Object>>() {
                 });
             }
 
-
         } catch (Exception e) {
-            LOGGER.error("mapping relationship load failed! " + e);
+            throw new RuntimeException("mapping relationship load failed",e);
         }
         return vGroupMapping;
     }
@@ -143,7 +134,7 @@ public class FileVGroupMappingStoreManager implements VGroupMappingStoreManager 
             FileUtils.writeStringToFile(new File(storePath), jsonMapping, StandardCharsets.UTF_8);
             return true;
         } catch (IOException e) {
-            LOGGER.error("mapping relationship saved failed! ", e);
+            LOGGER.error("mapping relationship saved failed:{}", e.getMessage(), e);
             return false;
         }
     }
