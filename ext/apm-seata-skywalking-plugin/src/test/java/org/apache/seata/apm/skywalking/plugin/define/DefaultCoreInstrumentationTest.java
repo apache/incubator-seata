@@ -14,24 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.console;
+package org.apache.seata.apm.skywalking.plugin.define;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.junit.jupiter.api.Test;
 
-/**
- * The type Application.
- *
- */
-@SpringBootApplication(scanBasePackages = {"org.apache.seata.console"})
-public class Application {
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-    /**
-     * The entry point of application.
-     *
-     * @param args the input arguments
-     */
-    public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
+class DefaultCoreInstrumentationTest {
+
+    @Test
+    void testInterceptPointsNotEmpty() {
+        DefaultCoreInstrumentation target = new DefaultCoreInstrumentation();
+
+        assertNotNull(target.getConstructorsInterceptPoints());
+
+        assertNotNull(target.getInstanceMethodsInterceptPoints());
+        assertTrue(target.getInstanceMethodsInterceptPoints().length > 0);
     }
 }
