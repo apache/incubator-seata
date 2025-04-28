@@ -1,3 +1,19 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.seata.namingserver;
 
 import org.apache.seata.common.metadata.namingserver.Unit;
@@ -6,6 +22,7 @@ import org.apache.seata.namingserver.entity.pojo.ClusterData;
 import org.apache.seata.namingserver.entity.vo.NamespaceVO;
 import org.apache.seata.namingserver.entity.vo.monitor.ClusterVO;
 import org.apache.seata.namingserver.entity.vo.monitor.WatcherVO;
+import org.apache.seata.namingserver.listener.Watcher;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 
 @RunWith(SpringRunner.class)
@@ -29,13 +47,9 @@ class NamingEntityTest {
         ClusterBO clusterBO = new ClusterBO(unitNames1);
         assertNotNull(clusterBO);
         Set<String> actualUnitNames = clusterBO.getUnitNames();
-        assertAll(
-                () -> assertEquals(unitNames1.size(), actualUnitNames.size()),
-                () -> unitNames1.forEach(unit ->
-                        assertTrue(actualUnitNames.contains(unit))),
-                () -> actualUnitNames.forEach(unit ->
-                        assertTrue(unitNames1.contains(unit)))
-        );
+        assertEquals(unitNames1.size(), actualUnitNames.size());
+        unitNames1.forEach(unit -> assertTrue(actualUnitNames.contains(unit)));
+        actualUnitNames.forEach(unit -> assertTrue(unitNames1.contains(unit)));
 
         HashSet<String> unitNames2 = new HashSet<>();
         unitNames2.add("testClusterBO3");
@@ -159,5 +173,34 @@ class NamingEntityTest {
         assertEquals("testWatch", watcherVO2.getvGroup());
         assertEquals(1, watcherVO2.getWatcherIp().size());
         watcherIP2.forEach(unit -> assertTrue(watcherVO2.getWatcherIp().contains(unit)));
+    }
+
+    @Test
+    void testWatcher() {
+        String group = "testWatcher";
+        String asyncContext = "testAsyncContext";
+        int timeout = 10;
+        long term = new Random().nextLong();
+        String clientEndpoint = "clientEndpoint";
+        Watcher<String> watcher = new Watcher<>(group, asyncContext, timeout, term, clientEndpoint);
+
+        assertNotNull(watcher);
+        assertEquals(group, watcher.getGroup());
+        assertEquals(asyncContext, watcher.getAsyncContext());
+        assertEquals(term, watcher.getTerm());
+        assertEquals(clientEndpoint, watcher.getClientEndpoint());
+        assertEquals("http", watcher.getProtocol());
+        assertEquals(false, watcher.isDone());
+
+        watcher.setTerm(100);
+        watcher.setAsyncContext("newAsyncContext");
+        watcher.setClientEndpoint("newClientEndpoint");
+        watcher.setProtocol("gRPC");
+        watcher.setDone(true);
+        assertEquals(100, watcher.getTerm());
+        assertEquals("newAsyncContext", watcher.getAsyncContext());
+        assertEquals("newClientEndpoint", watcher.getClientEndpoint());
+        assertEquals("gRPC", watcher.getProtocol());
+        assertEquals(true, watcher.isDone());
     }
 }
