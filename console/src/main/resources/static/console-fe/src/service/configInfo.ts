@@ -16,65 +16,106 @@
  */
 import {configRequest} from '@/utils/request';
 
+export type ConfigParam = {
+  namespace: string,
+  dataId: string,
+  key?: string,
+  value?: string,
+  nsNamespace?: string,
+  nsCluster?: string,
+};
 
-export async function getConfig(params: { namespace: string, dataId: string}): Promise<any> {
+
+export async function getConfig(params: ConfigParam): Promise<any> {
   const result = await configRequest('/config/getAll', {
     method: 'get',
     params,
+    headers: {
+      'x-seata-namespace': params.nsNamespace,
+      'x-seata-cluster': params.nsCluster,
+    },
   });
   return result;
 }
 
-export async function putConfig(params: { namespace: string, dataId: string, key: string, value: string}): Promise<any> {
+export async function putConfig(params: ConfigParam): Promise<any> {
   const result = await configRequest('/config/put', {
     method: 'post',
     params,
+    headers: {
+      'x-seata-namespace': params.nsNamespace,
+      'x-seata-cluster': params.nsCluster,
+    },
   });
   return result;
 }
 
-export async function deleteConfig(params: { namespace: string, dataId: string, key: string }): Promise<any> {
+export async function deleteConfig(params: ConfigParam): Promise<any> {
   const result = await configRequest('/config/delete', {
     method: 'delete',
     params,
+    headers: {
+      'x-seata-namespace': params.nsNamespace,
+      'x-seata-cluster': params.nsCluster,
+    },
   });
   return result;
 }
 
-export async function deleteAllConfig(params: { namespace: string, dataId: string}): Promise<any> {
+export async function deleteAllConfig(params: ConfigParam): Promise<any> {
   const result = await configRequest('/config/deleteAll', {
     method: 'delete',
     params,
+    headers: {
+      'x-seata-namespace': params.nsNamespace,
+      'x-seata-cluster': params.nsCluster,
+    },
   });
   return result;
 }
 
-export async function uploadConfig(formData: FormData): Promise<any> {
+export async function uploadConfig(formData: FormData, params: ConfigParam): Promise<any> {
   const result = await configRequest('/config/upload', {
     method: 'post',
     data: formData,
+    headers: {
+      'x-seata-namespace': params.nsNamespace,
+      'x-seata-cluster': params.nsCluster,
+    },
   });
   return result;
 }
 
-export async function getClusterInfo(): Promise<any> {
+export async function getClusterInfo(params: ConfigParam): Promise<any> {
   const result = await configRequest('/config/cluster', {
     method: 'get',
+    headers: {
+      'x-seata-namespace': params.nsNamespace,
+      'x-seata-cluster': params.nsCluster,
+    },
   });
   return result;
 }
 
-export async function getAllNamespaces(): Promise<any> {
+export async function getAllNamespaces(params: ConfigParam): Promise<any> {
   const result = await configRequest('/config/getNamespaces', {
     method: 'get',
+    headers: {
+      'x-seata-namespace': params.nsNamespace,
+      'x-seata-cluster': params.nsCluster,
+    },
   });
   return result;
 }
 
-export async function getAllDataIds(params: { namespace: string}): Promise<any> {
+export async function getAllDataIds(params: ConfigParam): Promise<any> {
   const result = await configRequest('/config/getDataIds', {
     method: 'get',
     params,
+    headers: {
+      'x-seata-namespace': params.nsNamespace,
+      'x-seata-cluster': params.nsCluster,
+    },
   });
   return result;
 }

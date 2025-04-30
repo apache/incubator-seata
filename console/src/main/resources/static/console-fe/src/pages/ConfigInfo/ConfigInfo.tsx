@@ -19,10 +19,8 @@ import {
   ConfigProvider,
   Table,
   Button,
-  DatePicker,
   Form,
   Icon,
-  Pagination,
   Input,
   Dialog,
   Message,
@@ -31,7 +29,7 @@ import {
 } from '@alicloud/console-components';
 import { withRouter } from 'react-router-dom';
 
-import {getConfig, getClusterInfo, putConfig, deleteConfig, deleteAllConfig, getAllNamespaces, getAllDataIds, uploadConfig} from "@/service/configInfo";
+import {ConfigParam, getConfig, getClusterInfo, putConfig, deleteConfig, deleteAllConfig, getAllNamespaces, getAllDataIds, uploadConfig} from "@/service/configInfo";
 import Page from '@/components/Page';
 import { GlobalProps } from '@/module';
 import styled, { css } from 'styled-components';
@@ -39,6 +37,7 @@ import PropTypes from 'prop-types';
 import './index.scss';
 
 import moment from "moment/moment";
+import {fetchNamespace} from "@/service/transactionInfo";
 type ConfigInfoState = {
   configList: Array<any>;
   editDialogVisible: boolean;
@@ -52,11 +51,10 @@ type ConfigInfoState = {
   isRaft: boolean;
   namespaces: Array<string>;
   dataIds: Array<string>;
+  namespaceOptions: Map<string, { clusters: string[], vgroups: string[] }>;
+  clusters: Array<string>;
+  vgroups: Array<string>;
 }
-export type ConfigParam = {
-  namespace: string,
-  dataId: string,
-};
 
 type DialogInfo = {
   isEdit: boolean;
@@ -74,7 +72,7 @@ type DeleteDialogInfo = {
 type UploadDialogInfo = {
   namespace: string;
   dataId: string;
-  file: File;
+  file: File | null;
 }
 
 const FormItem = Form.Item;
@@ -118,11 +116,51 @@ class ConfigInfo extends React.Component<GlobalProps, ConfigInfoState> {
       file: null,
     },
     isRaft: false,
+    namespaceOptions: new Map<string, { clusters: string[], vgroups: string[] }>(),
+    clusters: [],
+    vgroups: [],
   }
 
   componentDidMount() {
-    this.init();
+    this.loadNamespaces().then(() => {
+      this.init();
+    });
     this.pollingInterval = setInterval(this.refreshConfigData, 10000); // 每10秒刷新一次
+  }
+  loadNamespaces = async () => {
+    try {
+      const namespaces = await fetchNamespace();
+      const namespaceOptions = new Map<string, { clusters: string[], vgroups: string[] }>();
+      Object.keys(namespaces).forEach(namespaceKey => {
+        const namespaceData = namespaces[namespaceKey];
+        namespaceOptions.set(namespaceKey, {
+          clusters: namespaceData.clusters,
+          vgroups: namespaceData.vgroups,
+        });
+      });
+      if (namespaceOptions.size > 0) {
+        // Set default namespace to the first option
+        const firstNamespace = Array.from(namespaceOptions.keys())[0];
+        const selectedNamespace = namespaceOptions.get(firstNamespace);
+        this.setState({
+          namespaceOptions,
+          configParam: {
+            ...this.state.configParam,
+            nsNamespace: firstNamespace,
+            nsCluster: selectedNamespace ? selectedNamespace.clusters[0] : undefined,
+          },
+          clusters: selectedNamespace ? selectedNamespace.clusters : [],
+          vgroups: selectedNamespace ? selectedNamespace.vgroups : [],
+        });
+        this.search();
+      } else {
+        this.setState({
+          namespaceOptions,
+        });
+      }
+    } catch (error) {
+      console.error('Failed to fetch namespaces:', error);
+    }
   }
   componentWillUnmount() {
     clearInterval(this.pollingInterval);
@@ -132,7 +170,7 @@ class ConfigInfo extends React.Component<GlobalProps, ConfigInfoState> {
     const { disableTitle } = this.props.locale;
     this.setState({ loading: true });
     try {
-      const response = await getClusterInfo();
+      const response = await getClusterInfo(this.state.configParam);
       const raftMode = response.configMode
       if (raftMode === 'raft') {
         this.setState({ isRaft: true, loading: false });
@@ -158,7 +196,7 @@ class ConfigInfo extends React.Component<GlobalProps, ConfigInfoState> {
   }
   fetchNamespaces = async () => {
     try {
-      const response = await getAllNamespaces();
+      const response = await getAllNamespaces(this.state.configParam);
       const result = response.result;
       this.setState({ namespaces: result });
     } catch (error) {
@@ -168,7 +206,7 @@ class ConfigInfo extends React.Component<GlobalProps, ConfigInfoState> {
 
   fetchDataIds = async (namespace: string) => {
     try {
-      const response = await getAllDataIds({ namespace });
+      const response = await getAllDataIds(this.state.configParam);
       const result = response.result;
       this.setState({ dataIds: result });
     } catch (error) {
@@ -179,7 +217,7 @@ class ConfigInfo extends React.Component<GlobalProps, ConfigInfoState> {
   fetchConfigList = async () => {
     this.setState({ loading: true });
     try {
-      const response = await getConfig({namespace: this.state.configParam.namespace, dataId: this.state.configParam.dataId});
+      const response = await getConfig(this.state.configParam);
       if (response.success && response.result){
         const { config } = response.result;
         console.log(config);
@@ -195,6 +233,14 @@ class ConfigInfo extends React.Component<GlobalProps, ConfigInfoState> {
     }
   }
   searchFilterOnChange = async (key:string, val:string) => {
+    if (key === 'nsNamespace') {
+      const selectedNamespace = this.state.namespaceOptions.get(val);
+      this.setState({
+        clusters: selectedNamespace ? selectedNamespace.clusters : [],
+        vgroups: selectedNamespace ? selectedNamespace.vgroups : [],
+        configParam: Object.assign(this.state.configParam, {[key]: val}),
+      });
+    }
     this.setState({
       configParam: Object.assign(this.state.configParam,
         { [key]: val }),
@@ -211,9 +257,11 @@ class ConfigInfo extends React.Component<GlobalProps, ConfigInfoState> {
     this.fetchConfigList();
   }
   resetSearchFilter = () => {
+    const { nsNamespace, nsCluster } = this.state.configParam;
     this.setState({
       configParam: {
-        // pagination info don`t reset
+        nsNamespace,
+        nsCluster,
         namespace: '',
         dataId: '',
       },
@@ -257,15 +305,20 @@ class ConfigInfo extends React.Component<GlobalProps, ConfigInfoState> {
         dataId: editDialogInfo.dataId,
         key: editDialogInfo.key,
         value: editDialogInfo.value,
+        nsNamespace: this.state.configParam.nsNamespace,
+        nsCluster: this.state.configParam.nsCluster,
       });
       if (response.success) {
         Message.success(operationSuccess);
+        const { nsNamespace, nsCluster } = this.state.configParam;
         this.setState({
           editDialogVisible: false,
           configParam: {
             namespace: editDialogInfo.namespace,
             dataId: editDialogInfo.dataId,
-          }
+            nsNamespace,
+            nsCluster,
+          },
         });
         this.fetchNamespaces();
         this.fetchDataIds(editDialogInfo.namespace);
@@ -285,7 +338,7 @@ class ConfigInfo extends React.Component<GlobalProps, ConfigInfoState> {
       content: deleteConfirmLabel + `${record.key} ?`,
       onOk: async () => {
         try {
-          const response = await deleteConfig({ namespace: this.state.configParam.namespace, dataId: this.state.configParam.dataId, key: record.key });
+          const response = await deleteConfig({ namespace: this.state.configParam.namespace, dataId: this.state.configParam.dataId, key: record.key, nsNamespace: this.state.configParam.nsNamespace, nsCluster: this.state.configParam.nsCluster});
           if (response.success) {
             Message.success(operationSuccess);
             this.fetchConfigList();
@@ -311,13 +364,16 @@ class ConfigInfo extends React.Component<GlobalProps, ConfigInfoState> {
       return;
     }
     try {
-      const response = await deleteAllConfig({ namespace, dataId });
+      const response = await deleteAllConfig({ namespace: namespace, dataId: dataId, nsNamespace: this.state.configParam.nsNamespace, nsCluster: this.state.configParam.nsCluster });
       if (response.success) {
         Message.success(operationSuccess);
+        const { nsNamespace, nsCluster } = this.state.configParam;
         this.setState({
           configParam: {
             namespace: namespace,
             dataId: dataId,
+            nsNamespace,
+            nsCluster,
           },
           deleteDialogVisible: false,
           deleteDialogInfo: { namespace: '', dataId: '' },
@@ -345,16 +401,19 @@ class ConfigInfo extends React.Component<GlobalProps, ConfigInfoState> {
     formData.append('file', file);
 
     try {
-      const response = await uploadConfig(formData);
+      const response = await uploadConfig(formData, this.state.configParam);
       if (response.success) {
         Message.success(operationSuccess);
+        const { nsNamespace, nsCluster } = this.state.configParam;
         this.setState({
           uploadDialogVisible: false,
           uploadDialogInfo: { namespace: '', dataId: '', file: null},
           configParam: {
             namespace: namespace,
             dataId: dataId,
-          }
+            nsNamespace,
+            nsCluster,
+          },
         });
         this.fetchNamespaces();
         this.fetchDataIds(namespace)
@@ -417,6 +476,9 @@ class ConfigInfo extends React.Component<GlobalProps, ConfigInfoState> {
       deleteButtonLabel,
       inputFilterPlaceholder,
       uploadFileButtonLabel,
+      selectNamespaceFilerPlaceholder,
+      selectClusterFilerPlaceholder,
+      selectVGroupFilerPlaceholder,
     } = locale;
 
     return (
@@ -455,6 +517,39 @@ class ConfigInfo extends React.Component<GlobalProps, ConfigInfoState> {
               hasClear={true}
             />
           </FormItem>
+          <FormItem name="nsNamespace" label="nsNamespace">
+            <Select
+              hasClear
+              placeholder={selectNamespaceFilerPlaceholder}
+              onChange={(value: string) => {
+                this.searchFilterOnChange('nsNamespace', value);
+              }}
+              dataSource={Array.from(this.state.namespaceOptions.keys()).map(key => ({ label: key, value: key }))}
+              value={this.state.configParam.nsNamespace}
+            />
+          </FormItem>
+          <FormItem name="nsCluster" label="nsCluster">
+            <Select
+              hasClear
+              placeholder={selectClusterFilerPlaceholder}
+              onChange={(value: string) => {
+                this.searchFilterOnChange('nsCluster', value);
+              }}
+              dataSource={this.state.clusters.map(value => ({ label: value, value }))}
+              value={this.state.configParam.nsCluster}
+            />
+          </FormItem>
+          <FormItem name="nsVgroup" label="nsVgroup">
+            <Select
+              hasClear
+              placeholder={selectVGroupFilerPlaceholder}
+              onChange={(value: string) => {
+                this.searchFilterOnChange('vgroup', value);
+              }}
+              dataSource={this.state.vgroups.map(value => ({ label: value, value }))}
+            />
+          </FormItem>
+
 
           {/* {reset search filter button} */}
           <FormItem>

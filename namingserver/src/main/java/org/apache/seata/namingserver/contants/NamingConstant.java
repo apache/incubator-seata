@@ -18,12 +18,11 @@ package org.apache.seata.namingserver.contants;
 
 public interface NamingConstant {
 
-    String CONSOLE_PATTERN = "^/api/.*/console/.*";
+    String CONSOLE_PATTERN = "^(?:/api/.*/console/.*|/metadata/.*/config/.*)$";
 
     int DEFAULT_REQUEST_TIMEOUT = 5000;
 
     int DEFAULT_CONNECTION_MAX_TOTAL = 100;
 
     int DEFAULT_CONNECTION_MAX_PER_ROUTE = 20;
-
 }
