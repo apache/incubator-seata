@@ -218,7 +218,7 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("register TM success. client version:{}, server version:{},channel:{}", registerTMRequest.getVersion(), registerTMResponse.getVersion(), channel);
         }
-        getClientChannelManager().registerChannel(serverAddress, channel);
+        getClientChannelManager().registerChannel(serverAddress, channel, registerTMRequest.getVersion());
     }
 
     @Override

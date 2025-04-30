@@ -105,6 +105,7 @@ public class MockTest {
         logger.info("branch register(0.6.1) ok, branchId=" + branchId);
         GlobalStatus commit = tm.commit(xid);
         Assertions.assertEquals(GlobalStatus.Committed, commit);
+        logger.info("branch commit(0.6.1) ok, branchId=" + branchId);
         return xid;
     }
 
@@ -119,6 +120,7 @@ public class MockTest {
         logger.info("branch register(0.6.1) ok, branchId=" + branchId);
         GlobalStatus rollback = tm.rollback(xid);
         Assertions.assertEquals(GlobalStatus.Rollbacked, rollback);
+        logger.info("branch rollback(0.6.1) ok, branchId=" + branchId);
         return xid;
     }
 }
