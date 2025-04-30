@@ -181,7 +181,7 @@ class NamingEntityTest {
         String asyncContext = "testAsyncContext";
         int timeout = 10;
         long term = new Random().nextLong();
-        String clientEndpoint = "clientEndpoint";
+        String clientEndpoint = "127.0.0.1";
         Watcher<String> watcher = new Watcher<>(group, asyncContext, timeout, term, clientEndpoint);
 
         assertNotNull(watcher);
@@ -194,12 +194,12 @@ class NamingEntityTest {
 
         watcher.setTerm(100);
         watcher.setAsyncContext("newAsyncContext");
-        watcher.setClientEndpoint("newClientEndpoint");
+        watcher.setClientEndpoint("127.0.0.2");
         watcher.setProtocol("gRPC");
         watcher.setDone(true);
         assertEquals(100, watcher.getTerm());
         assertEquals("newAsyncContext", watcher.getAsyncContext());
-        assertEquals("newClientEndpoint", watcher.getClientEndpoint());
+        assertEquals("127.0.0.2", watcher.getClientEndpoint());
         assertEquals("gRPC", watcher.getProtocol());
         assertEquals(true, watcher.isDone());
     }
