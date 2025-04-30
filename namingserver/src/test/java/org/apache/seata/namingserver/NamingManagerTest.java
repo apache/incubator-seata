@@ -31,13 +31,11 @@ import org.apache.seata.namingserver.manager.NamingManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.IOException;
@@ -47,7 +45,6 @@ import static org.apache.seata.common.NamingServerConstants.CONSTANT_GROUP;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest
 class NamingManagerTest {
 
@@ -207,7 +204,7 @@ class NamingManagerTest {
     }
 
     @Test
-    void testCreateGroup() throws IOException {
+    void testCreateGroup() {
         String namespace = "test-namespace";
         String clusterName = "test-cluster";
         String unitName = UUID.randomUUID().toString();
@@ -240,7 +237,7 @@ class NamingManagerTest {
 
         assertFalse(result.isSuccess());
         assertEquals("301", result.getCode());
-        assertEquals("no instance in cluster" + clusterName, result.getMessage());
+        assertEquals("no instance in cluster:" + clusterName, result.getMessage());
     }
 
     @Test

@@ -24,9 +24,7 @@ import org.apache.seata.namingserver.entity.vo.monitor.ClusterVO;
 import org.apache.seata.namingserver.entity.vo.monitor.WatcherVO;
 import org.apache.seata.namingserver.listener.Watcher;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -35,7 +33,6 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest
 class NamingEntityTest {
 
@@ -190,7 +187,7 @@ class NamingEntityTest {
         assertEquals(term, watcher.getTerm());
         assertEquals(clientEndpoint, watcher.getClientEndpoint());
         assertEquals("http", watcher.getProtocol());
-        assertEquals(false, watcher.isDone());
+        assertFalse(watcher.isDone());
 
         watcher.setTerm(100);
         watcher.setAsyncContext("newAsyncContext");
@@ -201,6 +198,6 @@ class NamingEntityTest {
         assertEquals("newAsyncContext", watcher.getAsyncContext());
         assertEquals("127.0.0.2", watcher.getClientEndpoint());
         assertEquals("gRPC", watcher.getProtocol());
-        assertEquals(true, watcher.isDone());
+        assertTrue(watcher.isDone());
     }
 }
