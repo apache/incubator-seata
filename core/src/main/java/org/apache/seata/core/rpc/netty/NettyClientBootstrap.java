@@ -36,6 +36,7 @@ import io.netty.handler.codec.http2.Http2FrameCodecBuilder;
 import io.netty.handler.codec.http2.Http2MultiplexHandler;
 import io.netty.handler.codec.http2.Http2StreamChannelBootstrap;
 import io.netty.handler.timeout.IdleStateHandler;
+import io.netty.incubator.channel.uring.IOUringEventLoopGroup;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import io.netty.util.concurrent.EventExecutorGroup;
 import io.netty.util.internal.PlatformDependent;
@@ -246,14 +247,26 @@ public class NettyClientBootstrap implements RemotingBootstrap {
     }
 
     private EventLoopGroup createEventLoopGroupWorker(int selectorThreadSizeThreadSize) {
-        if (NettyServerConfig.enableEpoll()) {
-            return new EpollEventLoopGroup(selectorThreadSizeThreadSize,
-                new NamedThreadFactory(getThreadPrefix(this.nettyClientConfig.getClientSelectorThreadPrefix()),
-                    selectorThreadSizeThreadSize));
+        if (NettyServerConfig.enableIoUring()) {
+            return new IOUringEventLoopGroup(
+                    selectorThreadSizeThreadSize,
+                    new NamedThreadFactory(
+                            getThreadPrefix(this.nettyClientConfig.getClientSelectorThreadPrefix()),
+                            selectorThreadSizeThreadSize));
         }
 
-        return new NioEventLoopGroup(selectorThreadSizeThreadSize,
-            new NamedThreadFactory(getThreadPrefix(this.nettyClientConfig.getClientSelectorThreadPrefix()),
-                selectorThreadSizeThreadSize));
+        if (NettyServerConfig.enableEpoll()) {
+            return new EpollEventLoopGroup(
+                    selectorThreadSizeThreadSize,
+                    new NamedThreadFactory(
+                            getThreadPrefix(this.nettyClientConfig.getClientSelectorThreadPrefix()),
+                            selectorThreadSizeThreadSize));
+        }
+
+        return new NioEventLoopGroup(
+                selectorThreadSizeThreadSize,
+                new NamedThreadFactory(
+                        getThreadPrefix(this.nettyClientConfig.getClientSelectorThreadPrefix()),
+                        selectorThreadSizeThreadSize));
     }
 }

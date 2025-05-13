@@ -28,8 +28,11 @@ import io.netty.channel.kqueue.KQueueServerSocketChannel;
 import io.netty.channel.kqueue.KQueueSocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.incubator.channel.uring.IOUringServerSocketChannel;
+import io.netty.incubator.channel.uring.IOUringSocketChannel;
 import io.netty.util.NettyRuntime;
 import io.netty.util.internal.PlatformDependent;
+import org.apache.seata.common.DefaultValues;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.constants.ConfigurationKeys;
@@ -66,6 +69,12 @@ public class NettyBaseConfig {
      * The constant SHARE_BOSS_WORKER.
      */
     protected static final boolean SHARE_BOSS_WORKER = CONFIG.getBoolean(ConfigurationKeys.SHARE_BOSS_WORKER);
+
+    /**
+    * The constant SERVER_CHANNEL_MAX_WRITE_BUFFER_SIZE.
+    */
+    protected static final boolean ENABLE_SERVER_IO_URING = CONFIG.getBoolean(ConfigurationKeys.SERVER_IO_URING_ENABLE,
+    DefaultValues.DEFAULT_SERVER_IO_URING_ENABLE);
 
     /**
      * The constant WORKER_THREAD_SIZE.
@@ -149,16 +158,27 @@ public class NettyBaseConfig {
                         CLIENT_CHANNEL_CLAZZ = null;
                     }
                 } else {
-                    if (TRANSPORT_PROTOCOL_TYPE == TransportProtocolType.TCP) {
-                        SERVER_CHANNEL_CLAZZ = EpollServerSocketChannel.class;
-                        CLIENT_CHANNEL_CLAZZ = EpollSocketChannel.class;
-                    } else if (TRANSPORT_PROTOCOL_TYPE == TransportProtocolType.UNIX_DOMAIN_SOCKET) {
-                        SERVER_CHANNEL_CLAZZ = EpollServerDomainSocketChannel.class;
-                        CLIENT_CHANNEL_CLAZZ = EpollDomainSocketChannel.class;
+                    if (ENABLE_SERVER_IO_URING) {
+                        if (TRANSPORT_PROTOCOL_TYPE == TransportProtocolType.TCP) {
+                            SERVER_CHANNEL_CLAZZ = IOUringServerSocketChannel.class;
+                            CLIENT_CHANNEL_CLAZZ = IOUringSocketChannel.class;
+                        } else {
+                            raiseUnsupportedTransportError();
+                            SERVER_CHANNEL_CLAZZ = null;
+                            CLIENT_CHANNEL_CLAZZ = null;
+                        }
                     } else {
-                        raiseUnsupportedTransportError();
-                        SERVER_CHANNEL_CLAZZ = null;
-                        CLIENT_CHANNEL_CLAZZ = null;
+                        if (TRANSPORT_PROTOCOL_TYPE == TransportProtocolType.TCP) {
+                            SERVER_CHANNEL_CLAZZ = EpollServerSocketChannel.class;
+                            CLIENT_CHANNEL_CLAZZ = EpollSocketChannel.class;
+                        } else if (TRANSPORT_PROTOCOL_TYPE == TransportProtocolType.UNIX_DOMAIN_SOCKET) {
+                            SERVER_CHANNEL_CLAZZ = EpollServerDomainSocketChannel.class;
+                            CLIENT_CHANNEL_CLAZZ = EpollDomainSocketChannel.class;
+                        } else {
+                            raiseUnsupportedTransportError();
+                            SERVER_CHANNEL_CLAZZ = null;
+                            CLIENT_CHANNEL_CLAZZ = null;
+                        }
                     }
                 }
                 break;

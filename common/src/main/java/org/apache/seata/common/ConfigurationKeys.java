@@ -1248,4 +1248,8 @@ public interface ConfigurationKeys {
      */
     String RATE_LIMIT_BUCKET_TOKEN_INITIAL_NUM = RATE_LIMIT_PREFIX + ".bucketTokenInitialNum";
 
+    /**
+     * The constant SERVER_IO_URING_ENABLE.
+     */
+    String SERVER_IO_URING_ENABLE = SERVER_PREFIX + "ioUring.enable";
 }

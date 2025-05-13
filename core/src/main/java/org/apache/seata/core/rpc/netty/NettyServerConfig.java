@@ -19,6 +19,8 @@ package org.apache.seata.core.rpc.netty;
 import io.netty.channel.ServerChannel;
 import io.netty.channel.epoll.Epoll;
 import io.netty.channel.epoll.EpollServerSocketChannel;
+import io.netty.incubator.channel.uring.IOUring;
+import io.netty.incubator.channel.uring.IOUringServerSocketChannel;
 import org.apache.seata.common.DefaultValues;
 import org.apache.seata.core.constants.ConfigurationKeys;
 
@@ -74,7 +76,6 @@ public class NettyServerConfig extends NettyBaseConfig {
      */
     public static final Class<? extends ServerChannel> SERVER_CHANNEL_CLAZZ = NettyBaseConfig.SERVER_CHANNEL_CLAZZ;
 
-
     /**
      * Gets server selector threads.
      *
@@ -102,6 +103,16 @@ public class NettyServerConfig extends NettyBaseConfig {
         return NettyBaseConfig.SERVER_CHANNEL_CLAZZ.equals(EpollServerSocketChannel.class)
             && Epoll.isAvailable();
 
+    }
+
+    /**
+     * Enable io-uring boolean.
+     *
+     * @return the boolean
+     */
+    public static boolean enableIoUring() {
+        return NettyBaseConfig.SERVER_CHANNEL_CLAZZ.equals(IOUringServerSocketChannel.class)
+            && IOUring.isAvailable();
     }
 
     /**

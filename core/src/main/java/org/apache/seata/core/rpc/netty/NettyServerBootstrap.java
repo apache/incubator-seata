@@ -32,6 +32,7 @@ import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
+import io.netty.incubator.channel.uring.IOUringEventLoopGroup;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.XID;
 import org.apache.seata.common.metadata.Instance;
@@ -65,17 +66,32 @@ public class NettyServerBootstrap implements RemotingBootstrap {
     public NettyServerBootstrap(NettyServerConfig nettyServerConfig) {
         this.nettyServerConfig = nettyServerConfig;
         if (NettyServerConfig.enableEpoll()) {
-            this.eventLoopGroupBoss = new EpollEventLoopGroup(nettyServerConfig.getBossThreadSize(),
-                new NamedThreadFactory(nettyServerConfig.getBossThreadPrefix(), nettyServerConfig.getBossThreadSize()));
-            this.eventLoopGroupWorker = new EpollEventLoopGroup(nettyServerConfig.getServerWorkerThreads(),
-                new NamedThreadFactory(nettyServerConfig.getWorkerThreadPrefix(),
-                    nettyServerConfig.getServerWorkerThreads()));
+            this.eventLoopGroupBoss = new EpollEventLoopGroup(
+                    nettyServerConfig.getBossThreadSize(),
+                    new NamedThreadFactory(
+                            nettyServerConfig.getBossThreadPrefix(), nettyServerConfig.getBossThreadSize()));
+            this.eventLoopGroupWorker = new EpollEventLoopGroup(
+                    nettyServerConfig.getServerWorkerThreads(),
+                    new NamedThreadFactory(
+                            nettyServerConfig.getWorkerThreadPrefix(), nettyServerConfig.getServerWorkerThreads()));
+        } else if (NettyServerConfig.enableIoUring()) {
+            this.eventLoopGroupBoss = new IOUringEventLoopGroup(
+                    nettyServerConfig.getBossThreadSize(),
+                    new NamedThreadFactory(
+                            nettyServerConfig.getBossThreadPrefix(), nettyServerConfig.getBossThreadSize()));
+            this.eventLoopGroupWorker = new IOUringEventLoopGroup(
+                    nettyServerConfig.getServerWorkerThreads(),
+                    new NamedThreadFactory(
+                            nettyServerConfig.getWorkerThreadPrefix(), nettyServerConfig.getServerWorkerThreads()));
         } else {
-            this.eventLoopGroupBoss = new NioEventLoopGroup(nettyServerConfig.getBossThreadSize(),
-                new NamedThreadFactory(nettyServerConfig.getBossThreadPrefix(), nettyServerConfig.getBossThreadSize()));
-            this.eventLoopGroupWorker = new NioEventLoopGroup(nettyServerConfig.getServerWorkerThreads(),
-                new NamedThreadFactory(nettyServerConfig.getWorkerThreadPrefix(),
-                    nettyServerConfig.getServerWorkerThreads()));
+            this.eventLoopGroupBoss = new NioEventLoopGroup(
+                    nettyServerConfig.getBossThreadSize(),
+                    new NamedThreadFactory(
+                            nettyServerConfig.getBossThreadPrefix(), nettyServerConfig.getBossThreadSize()));
+            this.eventLoopGroupWorker = new NioEventLoopGroup(
+                    nettyServerConfig.getServerWorkerThreads(),
+                    new NamedThreadFactory(
+                            nettyServerConfig.getWorkerThreadPrefix(), nettyServerConfig.getServerWorkerThreads()));
         }
 
         if (nettyServerConfig.getServerListenPort() > 0) {

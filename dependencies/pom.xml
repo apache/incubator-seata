@@ -70,6 +70,7 @@
         <motan.version>1.0.0</motan.version>
         <jcommander.version>1.82</jcommander.version>
         <bucket4j.version>8.1.0</bucket4j.version>
+        <netty-io-uring.version>0.0.26.Final</netty-io-uring.version>
         <commons-compress.version>1.27.1</commons-compress.version>
         <ant.version>1.10.12</ant.version>
         <lz4.version>1.7.1</lz4.version>
@@ -627,6 +628,11 @@
                 <groupId>com.bucket4j</groupId>
                 <artifactId>bucket4j_jdk8-core</artifactId>
                 <version>${bucket4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.netty.incubator</groupId>
+                <artifactId>netty-incubator-transport-native-io_uring</artifactId>
+                <version>${netty-io-uring.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.grpc</groupId>
