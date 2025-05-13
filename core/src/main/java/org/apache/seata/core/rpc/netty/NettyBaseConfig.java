@@ -74,7 +74,7 @@ public class NettyBaseConfig {
     * The constant SERVER_CHANNEL_MAX_WRITE_BUFFER_SIZE.
     */
     protected static final boolean ENABLE_SERVER_IO_URING = CONFIG.getBoolean(ConfigurationKeys.SERVER_IO_URING_ENABLE,
-    DefaultValues.DEFAULT_SERVER_IO_URING_ENABLE);
+        DefaultValues.DEFAULT_SERVER_IO_URING_ENABLE);
 
     /**
      * The constant WORKER_THREAD_SIZE.
