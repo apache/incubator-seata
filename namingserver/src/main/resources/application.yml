@@ -25,10 +25,6 @@ logging:
   config: classpath:logback-spring.xml
   file:
     path: ${log.home:${user.home}/logs/seata}
-console:
-  user:
-    username: seata
-    password: seata
 heartbeat:
   threshold: 90000
   period: 60000
