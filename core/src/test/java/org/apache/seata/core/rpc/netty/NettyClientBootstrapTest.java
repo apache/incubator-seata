@@ -19,7 +19,8 @@ package org.apache.seata.core.rpc.netty;
 import static org.mockito.Mockito.when;
 
 import io.netty.channel.EventLoopGroup;
-import io.netty.incubator.channel.uring.IOUring;import io.netty.incubator.channel.uring.IOUringEventLoopGroup;
+import io.netty.incubator.channel.uring.IOUring;
+import io.netty.incubator.channel.uring.IOUringEventLoopGroup;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
