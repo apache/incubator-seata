@@ -14,44 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.console.security;
+package org.apache.seata.apm.skywalking.plugin.define;
 
-/**
- * mock user info
- *
- */
-public class User {
-    /**
-     * The Username.
-     */
-    String username;
-    /**
-     * The Password.
-     */
-    String password;
+import org.junit.jupiter.api.Test;
 
-    public User(String username, String password) {
-        this.username = username;
-        this.password = password;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+class DefaultCoreInstrumentationTest {
+
+    @Test
+    void testInterceptPointsNotEmpty() {
+        DefaultCoreInstrumentation target = new DefaultCoreInstrumentation();
+
+        assertNotNull(target.getConstructorsInterceptPoints());
+
+        assertNotNull(target.getInstanceMethodsInterceptPoints());
+        assertTrue(target.getInstanceMethodsInterceptPoints().length > 0);
     }
-
-    //region Getter && Setter
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    //endregion
 }

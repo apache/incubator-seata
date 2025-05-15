@@ -21,6 +21,9 @@ on:
     branches: [ 2.x, develop, master ]
   pull_request:
     branches: [ 2.x, develop, master ]
+    types: [opened, reopened, synchronize]
+    paths-ignore:
+      - '**.md'
 
 jobs:
   # job 1: Test based on java 8, 17 and 21. Do not checkstyle.
@@ -63,20 +66,37 @@ jobs:
       # step 4
       - name: "Print maven version"
         run: ./mvnw -version
-      # step 5.1
+      # step 5
+      - name: "Restore local maven repository cache"
+        uses: actions/cache/restore@v4
+        id: cache-maven-repository
+        with:
+         path: ~/.m2/repository
+         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}-${{ env.TODAY }}
+         restore-keys: |
+           ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+           ${{ runner.os }}-maven-
+      # step 6.1
       - name: "Test, Check style, Check PMD, Check license with Maven and Java8"
         if: matrix.java == '8'
         run: |
           ./mvnw -T 4C clean test \
                  -Dcheckstyle.skip=false -Dpmd.skip=false -Dlicense.skip=false -DredisCaseEnabled=true \
                  -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
-      # step 5.2
+      # step 6.2
       - name: "Test with Maven and Java${{ matrix.java }}"
         if: matrix.java != '8'
         run: |
           ./mvnw -T 4C clean test \
                  -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
-      # step 6
+      # step 7
+      - name: "Save local maven repository cache"
+        uses: actions/cache/save@v4
+        if: steps.cache-maven-repository.outputs.cache-hit != 'true'
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}-${{ env.TODAY }}
+      # step 8
       - name: "Codecov"
         if: matrix.java == '8'
         uses: codecov/codecov-action@v4.0.1

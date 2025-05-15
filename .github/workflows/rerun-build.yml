@@ -14,24 +14,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+name: Rerun build
 
-server:
-  port: 8081
+on:
+  workflow_run:
+    workflows: ["build"]
+    types:
+      - completed
 
-spring:
-  application:
-    name: seata-namingserver
-logging:
-  config: classpath:logback-spring.xml
-  file:
-    path: ${log.home:${user.home}/logs/seata}
-heartbeat:
-  threshold: 90000
-  period: 60000
-seata:
-  security:
-    secretKey: SeataSecretKey0c382ef121d778043159209298fd40bf3850a017
-    tokenValidityInMilliseconds: 1800000
-    csrf-ignore-urls: /naming/v1/**,/api/v1/naming/**
-    ignore:
-      urls: /,/**/*.css,/**/*.js,/**/*.html,/**/*.map,/**/*.svg,/**/*.png,/**/*.jpeg,/**/*.ico,/api/v1/auth/login,/version.json,/naming/v1/health,/error
+permissions:
+  actions: write
+
+jobs:
+  rerun:
+    if: github.event.workflow_run.conclusion == 'failure' && fromJSON(github.event.workflow_run.run_attempt) < 2
+    runs-on: ubuntu-latest
+    steps:
+      - name: rerun ${{ github.event.workflow_run.id }}
+        env:
+          GH_REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh run watch ${{ github.event.workflow_run.id }} > /dev/null 2>&1
+          gh run rerun ${{ github.event.workflow_run.id }} --failed
