@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.ConfigurationChangeListener;
@@ -33,6 +35,8 @@ import org.apache.seata.config.processor.ConfigProcessor;
  *
  */
 public interface ConfigStoreManager {
+    static final Logger logger = LoggerFactory.getLogger(ConfigStoreManager.class);
+
     String get(String namespace, String dataId, String key);
 
     Map<String, Object> getAll(String namespace, String dataId);
@@ -90,6 +94,7 @@ public interface ConfigStoreManager {
             properties.forEach((k, v) -> configs.put(k.toString(), v));
             return configs;
         } catch (IOException e) {
+            logger.warn("Failed to convert configuration string to map. Config string: '{}'. Error: {}", configStr, e.getMessage(), e);
             return new HashMap<>();
         }
     }

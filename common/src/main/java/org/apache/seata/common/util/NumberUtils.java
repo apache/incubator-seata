@@ -16,6 +16,8 @@
  */
 package org.apache.seata.common.util;
 
+import java.nio.ByteBuffer;
+
 /**
  * Number utility
  *
@@ -62,20 +64,16 @@ public class NumberUtils {
     }
 
     public static byte[] longToBytes(long x) {
-        byte[] result = new byte[8];
-        for (int i = 7; i >= 0; i--) {
-            result[i] = (byte)(x & 0xFF);
-            x >>= 8;
-        }
-        return result;
+        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+        buffer.putLong(x);
+        return buffer.array();
     }
 
     public static long bytesToLong(byte[] bytes) {
-        long result = 0;
-        for (int i = 0; i < 8; i++) {
-            result <<= 8;
-            result |= bytes[i] & 0xFF;
+        if (bytes == null || bytes.length != Long.BYTES) {
+            throw new IllegalArgumentException("Input byte array must be non-null and have 8 bytes.");
         }
-        return result;
+        ByteBuffer buffer = ByteBuffer.wrap(bytes);
+        return buffer.getLong();
     }
 }

@@ -83,15 +83,12 @@ public class RocksDBFactory {
 
     private static void checkPath(String dbPath) throws IOException {
         File directory = new File(dbPath);
-        String message;
         if (directory.exists()) {
             if (!directory.isDirectory()) {
-                message = "File " + directory + " exists and is not a directory. Unable to create directory.";
-                throw new IOException(message);
+                throw new IOException("File " + directory + " exists and is not a directory. Unable to create directory.");
             }
-        } else if (!directory.mkdirs() && !directory.isDirectory()) {
-            message = "Unable to create directory " + directory;
-            throw new IOException(message);
+        } else if (!directory.mkdirs()) {
+            throw new IOException("Unable to create directory " + directory);
         }
     }
 }

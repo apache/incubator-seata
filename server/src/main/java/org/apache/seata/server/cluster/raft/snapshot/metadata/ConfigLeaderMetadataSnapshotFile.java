@@ -62,7 +62,7 @@ public class ConfigLeaderMetadataSnapshotFile implements Serializable, StoreSnap
                 }
             }
         } catch (IOException e) {
-            LOGGER.error("Fail to save groupId: {} snapshot {}", group, path, e);
+            LOGGER.error("Fail to save groupId: {} snapshot {}, err {}", group, path, e.getMessage(), e);
         }
         return new Status(RaftError.EIO, "Fail to save groupId: " + group + " snapshot %s", path);
     }
@@ -80,7 +80,7 @@ public class ConfigLeaderMetadataSnapshotFile implements Serializable, StoreSnap
                     .setRaftLeaderMetadata(raftClusterMetadata);
             return true;
         } catch (final Exception e) {
-            LOGGER.error("fail to load snapshot from {}", path, e);
+            LOGGER.error("fail to load snapshot from {}, err {}", path, e.getMessage(), e);
             return false;
         }
     }

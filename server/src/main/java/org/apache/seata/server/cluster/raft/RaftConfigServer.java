@@ -39,7 +39,7 @@ import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_REPORTER_ENA
 import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_REPORTER_INITIAL_DELAY;
 
 public class RaftConfigServer implements Disposable, Closeable {
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    private static final Logger LOGGER = LoggerFactory.getLogger(RaftConfigServer.class);
     private final RaftConfigStateMachine raftStateMachine;
     private final String groupId;
     private final String groupPath;
@@ -80,7 +80,7 @@ public class RaftConfigServer implements Disposable, Closeable {
         RouteTable.getInstance().updateConfiguration(groupId, node.getOptions().getInitialConf());
         if (reporterEnabled) {
             final Slf4jReporter reporter = Slf4jReporter.forRegistry(node.getNodeMetrics().getMetricRegistry())
-                    .outputTo(logger).convertRatesTo(TimeUnit.SECONDS)
+                    .outputTo(LOGGER).convertRatesTo(TimeUnit.SECONDS)
                     .convertDurationsTo(TimeUnit.MILLISECONDS).build();
             reporter.start(ConfigurationFactory.CURRENT_FILE_INSTANCE.getInt(SERVER_RAFT_REPORTER_INITIAL_DELAY, 60),
                     TimeUnit.MINUTES);
@@ -112,7 +112,7 @@ public class RaftConfigServer implements Disposable, Closeable {
             try {
                 r.join();
             } catch (InterruptedException e) {
-                logger.warn("Interrupted when RaftServer destroying", e);
+                LOGGER.warn("Interrupted when RaftServer destroying", e);
             }
         });
     }
