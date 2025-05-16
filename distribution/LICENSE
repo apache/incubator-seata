@@ -451,8 +451,8 @@ BSD-3-Clause licenses
     driver-universal 3.5.0 BSD-3-Clause see:licenses/driver-universal-BSD-3-Clause
     driver-weex 2.1.0 BSD-3-Clause see:licenses/driver-weex-BSD-3-Clause
     driver-weex/node_modules/style-unit 3.0.5 BSD-3-Clause see:licenses/driver-weex-BSD-3-Clause
-    dva-core/node_modules/warning 3.0.0 BSD-3-Clause see:licenses/TODO
-    dva/node_modules/hoist-non-react-statics 2.5.5 BSD-3-Clause see:licenses/TODO
+    dva-core/node_modules/warning 3.0.0 BSD-3-Clause see:licenses/warning-BSD-3-Clause
+    dva/node_modules/hoist-non-react-statics 2.5.5 BSD-3-Clause see:licenses/hoist-non-react-statics-BSD-3-Clause
     flat 5.0.2 BSD-3-Clause see:licenses/flat-BSD-3-Clause
     hoist-non-react-statics 2.5.5 BSD-3-Clause see:licenses/hoist-non-react-statics-BSD-3-Clause
     hoist-non-react-statics 3.3.2 BSD-3-Clause see:licenses/hoist-non-react-statics-BSD-3-Clause
@@ -478,7 +478,7 @@ BSD-3-Clause licenses
     universal-transition 1.1.1 BSD-3-Clause see:licenses/universal-BSD-3-Clause
     universal-unit-tool 1.0.0 BSD-3-Clause see:licenses/universal-BSD-3-Clause
     universal-unit-tool/node_modules/universal-device 2.3.1 BSD-3-Clause see:licenses/universal-BSD-3-Clause
-    warning 3.0.0 BSD-3-Clause see:licenses/TODO
+    warning 3.0.0 BSD-3-Clause see:licenses/warning-BSD-3-Clause
     com.thoughtworks.xstream:xstream 1.4.21 BSD-3-Clause see:licenses/xstream-BSD-3-Clause
     org.antlr:ST4 4.3  The BSD License see:licenses/antlr4-ST4-BSD
     org.antlr:antlr-runtime 3.5.2 The BSD License see:licenses/antlr3-BSD
@@ -495,63 +495,63 @@ CDDL-1.0 licenses
 ========================================================================
 
     javax.ws.rs:jsr311-api 1.1.1 CDDL-1.0 see:licenses/CDDL-1.0
-    org.glassfish:javax.json 1.0.4 CDDL-1.0 see:licenses/CDDL-1.0
-    com.sun.jersey.contribs:jersey-apache-client4 1.19.1 CDDL-1.0 see:licenses/CDDL-1.0
-    com.sun.jersey:jersey-client 1.19.1 CDDL-1.0 see:licenses/CDDL-1.0
-    com.sun.jersey:jersey-core 1.19.1 CDDL-1.0 see:licenses/CDDL-1.0
 
 ========================================================================
 CDDL+GPL-1.1 licenses
 ========================================================================
 
     javax.servlet:javax.servlet-api 4.0.1 CDDL+GPL-1.1 see:licenses/CDDL+GPL-1.1
+    org.glassfish:javax.json 1.0.4 CDDL+GPL-1.1 see:licenses/CDDL+GPL-1.1
+    com.sun.jersey.contribs:jersey-apache-client4 1.19.1 CDDL+GPL-1.1 see:licenses/CDDL+GPL-1.1
+    com.sun.jersey:jersey-client 1.19.1 CDDL+GPL-1.1 see:licenses/CDDL+GPL-1.1
+    com.sun.jersey:jersey-core 1.19.1 CDDL+GPL-1.1 see:licenses/CDDL+GPL-1.1
 
 ========================================================================
 EPL-1.0  licenses
 ========================================================================
 
-    ch.qos.logback:logback-classic 1.2.12 EPL-1.0
-    ch.qos.logback:logback-core 1.2.12 EPL-1.0
+    ch.qos.logback:logback-classic 1.2.12 EPL-1.0 see:licenses/EPL-1.0
+    ch.qos.logback:logback-core 1.2.12 EPL-1.0 see:licenses/EPL-1.0
 
 ========================================================================
 EPL-2.0 licenses
 ========================================================================
 
-    jakarta.annotation:jakarta.annotation-api 1.3.5 EPL-2.0
+    jakarta.annotation:jakarta.annotation-api 1.3.5 EPL-2.0 see:licenses/EPL-2.0
 
 ========================================================================
 ISC licenses
 ========================================================================
 
-    @ungap/promise-all-settled 1.1.2 ISC
-    anymatch 3.1.3 ISC
-    browser-stdout 1.3.1 ISC
-    browserify-sign 4.2.3 ISC
-    cliui 8.0.1 ISC
-    css-color-keywords 1.0.0 ISC
-    electron-to-chromium 1.4.681 ISC
-    fs.realpath 1.0.0 ISC
-    get-caller-file 2.0.5 ISC
-    glob 7.2.3 ISC
-    glob-parent 5.1.2 ISC
-    inflight 1.0.6 ISC
-    inherits 2.0.4 ISC
-    inherits-browser 0.1.0 ISC
-    isexe 2.0.0 ISC
-    lru-cache 5.1.1 ISC
-    minimalistic-assert 1.0.1 ISC
-    minimatch 3.1.2 ISC
-    once 1.4.0 ISC
-    parse-asn1 5.1.7 ISC
-    picocolors 1.0.0 ISC
-    semver 6.3.1 ISC
-    which 2.0.2 ISC
-    wide-align 1.1.3 ISC
-    wrappy 1.0.2 ISC
-    y18n 5.0.8 ISC
-    yallist 3.1.1 ISC
-    yaml 1.10.2 ISC
-    yargs-parser 20.2.4 ISC
+    @ungap/promise-all-settled 1.1.2 ISC see:licenses/ungap-ISC
+    anymatch 3.1.3 ISC see:licenses/anymatch-ISC
+    browser-stdout 1.3.1 ISC see:licenses/browser-stdout-ISC
+    browserify-sign 4.2.3 ISC see:licenses/browserify-sign-ISC
+    cliui 8.0.1 ISC see:licenses/cliui-ISC
+    css-color-keywords 1.0.0 ISC see:licenses/css-color-keywords-ISC
+    electron-to-chromium 1.4.681 ISC see:licenses/electron-to-chromium-ISC
+    fs.realpath 1.0.0 ISC see:licenses/fs.realpath-ISC
+    get-caller-file 2.0.5 ISC see:licenses/get-caller-file-ISC
+    glob 7.2.3 ISC see:licenses/glob-ISC
+    glob-parent 5.1.2 ISC see:licenses/glob-parent-ISC
+    inflight 1.0.6 ISC see:licenses/inflight-ISC
+    inherits 2.0.4 ISC see:licenses/inherits-ISC
+    inherits-browser 0.1.0 ISC see:licenses/inherits-browser-ISC
+    isexe 2.0.0 ISC see:licenses/isexe-ISC
+    lru-cache 5.1.1 ISC see:licenses/lru-cache-ISC
+    minimalistic-assert 1.0.1 ISC see:licenses/minimalistic-assert-ISC
+    minimatch 3.1.2 ISC see:licenses/minimatch-ISC
+    once 1.4.0 ISC see:licenses/once-ISC
+    parse-asn1 5.1.7 ISC see:licenses/parse-asn1-ISC
+    picocolors 1.0.0 ISC see:licenses/picocolors-ISC
+    semver 6.3.1 ISC see:licenses/semver-ISC
+    which 2.0.2 ISC see:licenses/which-ISC
+    wide-align 1.1.3 ISC see:licenses/wide-align-ISC
+    wrappy 1.0.2 ISC see:licenses/wrappy-ISC
+    y18n 5.0.8 ISC see:licenses/y18n-ISC
+    yallist 3.1.1 ISC see:licenses/yallist-ISC
+    yaml 1.10.2 ISC see:licenses/yaml-ISC
+    yargs-parser 20.2.4 ISC see:licenses/yargs-parser-ISC
 
 ========================================================================
 MIT licenses
