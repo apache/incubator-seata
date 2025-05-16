@@ -615,7 +615,7 @@ MIT licenses
     @emotion/memoize 0.7.4 MIT see:licenses/emotion-memoize-MIT
     @emotion/serialize 0.11.16 MIT see:licenses/emotion-serialize-MIT
     @emotion/serialize/node_modules/csstype 2.6.21 MIT see:licenses/csstype-MIT
-    @emotion/sheet 0.9.4 MIT see:licenses/TODO
+    @emotion/sheet 0.9.4 MIT see:licenses/emotion-sheet-MIT
     @emotion/stylis 0.8.5 MIT see:licenses/TODO
     @emotion/unitless 0.7.5 MIT see:licenses/TODO
     @emotion/utils 0.11.3 MIT see:licenses/TODO
