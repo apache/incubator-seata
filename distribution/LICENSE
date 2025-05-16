@@ -435,16 +435,16 @@ BSD-2-Clause licenses
 BSD-3-Clause licenses
 ========================================================================
 
-    @uni/action-sheet 1.0.8 BSD-3-Clause see:licenses/uni-BSD-2-Clause
-    @uni/clipboard 1.0.9 BSD-3-Clause see:licenses/uni-BSD-2-Clause
-    @uni/env 1.1.1 BSD-3-Clause see:licenses/uni-BSD-2-Clause
-    @uni/file 1.1.1 BSD-3-Clause see:licenses/uni-BSD-2-Clause
-    @uni/image 1.1.3 BSD-3-Clause see:licenses/uni-BSD-2-Clause
-    @uni/navigate 1.0.11 BSD-3-Clause see:licenses/uni-BSD-2-Clause
-    @uni/page-scroll-to 1.0.0 BSD-3-Clause see:licenses/uni-BSD-2-Clause
-    @uni/vibrate 1.0.1 BSD-3-Clause see:licenses/uni-BSD-2-Clause
-    @uni/video 1.0.8 BSD-3-Clause see:licenses/uni-BSD-2-Clause
-    babel-plugin-emotion/node_modules/source-map 0.5.7 BSD-3-Clause
+    @uni/action-sheet 1.0.8 BSD-3-Clause see:licenses/uni-BSD-3-Clause
+    @uni/clipboard 1.0.9 BSD-3-Clause see:licenses/uni-BSD-3-Clause
+    @uni/env 1.1.1 BSD-3-Clause see:licenses/uni-BSD-3-Clause
+    @uni/file 1.1.1 BSD-3-Clause see:licenses/uni-BSD-3-Clause
+    @uni/image 1.1.3 BSD-3-Clause see:licenses/uni-BSD-3-Clause
+    @uni/navigate 1.0.11 BSD-3-Clause see:licenses/uni-BSD-3-Clause
+    @uni/page-scroll-to 1.0.0 BSD-3-Clause see:licenses/uni-BSD-3-Clause
+    @uni/vibrate 1.0.1 BSD-3-Clause see:licenses/uni-BSD-3-Clause
+    @uni/video 1.0.8 BSD-3-Clause see:licenses/uni-BSD-3-Clause
+    babel-plugin-emotion/node_modules/source-map 0.5.7 BSD-3-Clause see:licenses/source-map-BSD-3-Clause
     driver-dom 2.2.2 BSD-3-Clause see:licenses/driver-dom-BSD-3-Clause
     driver-dom/node_modules/style-unit 3.0.5 BSD-3-Clause see:licenses/driver-dom-BSD-3-Clause
     driver-miniapp 0.1.5 BSD-3-Clause see:licenses/driver-miniapp-BSD-3-Clause

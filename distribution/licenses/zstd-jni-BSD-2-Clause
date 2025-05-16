@@ -1,5 +1,3 @@
-zstd-jni: JNI binding for Zstd
-
 Copyright (c) 2015-present, Luben Karavelov/ All rights reserved.
 
 BSD-2-Clause License https://opensource.org/license/bsd-2-clause
