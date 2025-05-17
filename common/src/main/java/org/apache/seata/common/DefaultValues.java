@@ -538,7 +538,7 @@ public interface DefaultValues {
     boolean DEFAULT_RAFT_SSL_ENABLED = false;
 
     /**
-     * The constant DEFAULT_RAFT_SSL_KEY_PATH.
+     * The constant DEFAULT_TRANSPORT_IO_IO_URING_ENABLE.
      */
-    boolean DEFAULT_SERVER_IO_URING_ENABLE = false;
+    boolean DEFAULT_TRANSPORT_IO_IO_URING_ENABLE = false;
 }

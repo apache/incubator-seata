@@ -252,3 +252,5 @@ seata:
       boss-thread-prefix: NettyBoss
       worker-thread-prefix: NettyServerNIOWorker
       boss-thread-size: 1
+    io:
+      ioUringEnable: false

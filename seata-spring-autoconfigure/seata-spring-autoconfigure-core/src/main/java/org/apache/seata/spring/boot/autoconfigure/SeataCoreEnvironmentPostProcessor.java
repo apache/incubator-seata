@@ -16,36 +16,6 @@
  */
 package org.apache.seata.spring.boot.autoconfigure;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-import org.apache.seata.spring.boot.autoconfigure.properties.LogProperties;
-import org.apache.seata.spring.boot.autoconfigure.properties.ShutdownProperties;
-import org.apache.seata.spring.boot.autoconfigure.properties.ThreadFactoryProperties;
-import org.apache.seata.spring.boot.autoconfigure.properties.TransportProperties;
-import org.apache.seata.spring.boot.autoconfigure.properties.config.ConfigApolloProperties;
-import org.apache.seata.spring.boot.autoconfigure.properties.config.ConfigConsulProperties;
-import org.apache.seata.spring.boot.autoconfigure.properties.config.ConfigCustomProperties;
-import org.apache.seata.spring.boot.autoconfigure.properties.config.ConfigEtcd3Properties;
-import org.apache.seata.spring.boot.autoconfigure.properties.config.ConfigFileProperties;
-import org.apache.seata.spring.boot.autoconfigure.properties.config.ConfigNacosProperties;
-import org.apache.seata.spring.boot.autoconfigure.properties.config.ConfigProperties;
-import org.apache.seata.spring.boot.autoconfigure.properties.config.ConfigZooKeeperProperties;
-import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryConsulProperties;
-import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryCustomProperties;
-import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryEtcd3Properties;
-import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryEurekaProperties;
-import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryNacosProperties;
-import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryNamingServerProperties;
-import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryProperties;
-import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryRaftProperties;
-import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryRedisProperties;
-import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistrySofaProperties;
-import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryZooKeeperProperties;
-import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryMetadataProperties;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.env.EnvironmentPostProcessor;
-import org.springframework.core.Ordered;
-import org.springframework.core.env.ConfigurableEnvironment;
-
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_APOLLO_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_CONSUL_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_CUSTOM_PREFIX;
@@ -60,6 +30,7 @@ import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGIST
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_CUSTOM_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_ETCD3_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_EUREKA_PREFIX;
+import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_METADATA_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_NACOS_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_NAMINGSERVER_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_PREFIX;
@@ -70,8 +41,37 @@ import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGIST
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SHUTDOWN_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.THREAD_FACTORY_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.TRANSPORT_PREFIX;
-import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_METADATA_PREFIX;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+import org.apache.seata.spring.boot.autoconfigure.properties.LogProperties;
+import org.apache.seata.spring.boot.autoconfigure.properties.ShutdownProperties;
+import org.apache.seata.spring.boot.autoconfigure.properties.ThreadFactoryProperties;
+import org.apache.seata.spring.boot.autoconfigure.properties.TransportIoProperties;
+import org.apache.seata.spring.boot.autoconfigure.properties.TransportProperties;
+import org.apache.seata.spring.boot.autoconfigure.properties.config.ConfigApolloProperties;
+import org.apache.seata.spring.boot.autoconfigure.properties.config.ConfigConsulProperties;
+import org.apache.seata.spring.boot.autoconfigure.properties.config.ConfigCustomProperties;
+import org.apache.seata.spring.boot.autoconfigure.properties.config.ConfigEtcd3Properties;
+import org.apache.seata.spring.boot.autoconfigure.properties.config.ConfigFileProperties;
+import org.apache.seata.spring.boot.autoconfigure.properties.config.ConfigNacosProperties;
+import org.apache.seata.spring.boot.autoconfigure.properties.config.ConfigProperties;
+import org.apache.seata.spring.boot.autoconfigure.properties.config.ConfigZooKeeperProperties;
+import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryConsulProperties;
+import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryCustomProperties;
+import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryEtcd3Properties;
+import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryEurekaProperties;
+import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryMetadataProperties;
+import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryNacosProperties;
+import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryNamingServerProperties;
+import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryProperties;
+import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryRaftProperties;
+import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryRedisProperties;
+import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistrySofaProperties;
+import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryZooKeeperProperties;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.env.EnvironmentPostProcessor;
+import org.springframework.core.Ordered;
+import org.springframework.core.env.ConfigurableEnvironment;
 
 public class SeataCoreEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 
@@ -116,7 +116,7 @@ public class SeataCoreEnvironmentPostProcessor implements EnvironmentPostProcess
             PROPERTY_BEAN_MAP.put(TRANSPORT_PREFIX, TransportProperties.class);
             PROPERTY_BEAN_MAP.put(SHUTDOWN_PREFIX, ShutdownProperties.class);
             PROPERTY_BEAN_MAP.put(LOG_PREFIX, LogProperties.class);
+            PROPERTY_BEAN_MAP.put(StarterConstants.TRANSPORT_IO_PREFIX, TransportIoProperties.class);
         }
     }
-
 }

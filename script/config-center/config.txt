@@ -40,7 +40,7 @@ transport.threadFactory.workerThreadSize=default
 transport.shutdown.wait=3
 transport.serialization=seata
 transport.compressor=none
-
+transport.io.ioUringEnable=false
 #Transaction routing rules configuration, only for the client
 service.vgroupMapping.default_tx_group=default
 #If you use a registry, you can ignore it

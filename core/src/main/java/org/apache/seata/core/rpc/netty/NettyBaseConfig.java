@@ -16,6 +16,8 @@
  */
 package org.apache.seata.core.rpc.netty;
 
+import static org.apache.seata.common.DefaultValues.DEFAULT_TRANSPORT_HEARTBEAT;
+
 import io.netty.channel.Channel;
 import io.netty.channel.ServerChannel;
 import io.netty.channel.epoll.EpollDomainSocketChannel;
@@ -32,17 +34,15 @@ import io.netty.incubator.channel.uring.IOUringServerSocketChannel;
 import io.netty.incubator.channel.uring.IOUringSocketChannel;
 import io.netty.util.NettyRuntime;
 import io.netty.util.internal.PlatformDependent;
+import org.apache.commons.lang.StringUtils;
 import org.apache.seata.common.DefaultValues;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.constants.ConfigurationKeys;
 import org.apache.seata.core.rpc.TransportProtocolType;
 import org.apache.seata.core.rpc.TransportServerType;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.apache.seata.common.DefaultValues.DEFAULT_TRANSPORT_HEARTBEAT;
 
 /**
  * The type Netty base config.
@@ -71,10 +71,10 @@ public class NettyBaseConfig {
     protected static final boolean SHARE_BOSS_WORKER = CONFIG.getBoolean(ConfigurationKeys.SHARE_BOSS_WORKER);
 
     /**
-    * The constant SERVER_CHANNEL_MAX_WRITE_BUFFER_SIZE.
-    */
-    protected static final boolean ENABLE_SERVER_IO_URING = CONFIG.getBoolean(ConfigurationKeys.SERVER_IO_URING_ENABLE,
-        DefaultValues.DEFAULT_SERVER_IO_URING_ENABLE);
+     * The constant SERVER_CHANNEL_MAX_WRITE_BUFFER_SIZE.
+     */
+    protected static final boolean TRANSPORT_IO_IO_URING_ENABLE = CONFIG.getBoolean(
+            ConfigurationKeys.TRANSPORT_IO_IO_URING_ENABLE, DefaultValues.DEFAULT_TRANSPORT_IO_IO_URING_ENABLE);
 
     /**
      * The constant WORKER_THREAD_SIZE.
@@ -158,7 +158,7 @@ public class NettyBaseConfig {
                         CLIENT_CHANNEL_CLAZZ = null;
                     }
                 } else {
-                    if (ENABLE_SERVER_IO_URING) {
+                    if (TRANSPORT_IO_IO_URING_ENABLE) {
                         if (TRANSPORT_PROTOCOL_TYPE == TransportProtocolType.TCP) {
                             SERVER_CHANNEL_CLAZZ = IOUringServerSocketChannel.class;
                             CLIENT_CHANNEL_CLAZZ = IOUringSocketChannel.class;

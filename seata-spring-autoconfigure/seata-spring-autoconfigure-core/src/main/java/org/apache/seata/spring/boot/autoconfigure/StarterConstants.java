@@ -17,9 +17,7 @@
 package org.apache.seata.spring.boot.autoconfigure;
 
 import java.util.HashMap;
-
 import org.apache.seata.config.ConfigurationKeys;
-
 
 public interface StarterConstants {
     String SEATA_PREFIX = "seata";
@@ -69,9 +67,9 @@ public interface StarterConstants {
     String CONFIG_FILE_PREFIX = CONFIG_PREFIX + ".file";
     String CONFIG_CUSTOM_PREFIX = CONFIG_PREFIX + ".custom";
 
-
     String SERVER_PREFIX = SEATA_PREFIX + ".server";
     String SERVER_RATELIMIT_PREFIX = SERVER_PREFIX + ".ratelimit";
+    String TRANSPORT_IO_PREFIX = TRANSPORT_PREFIX + ".io";
     String SERVER_UNDO_PREFIX = SERVER_PREFIX + ".undo";
     String SERVER_RAFT_PREFIX = SERVER_PREFIX + ".raft";
     String SERVER_RAFT_SSL_PREFIX = SERVER_RAFT_PREFIX + ".ssl";
@@ -97,14 +95,13 @@ public interface StarterConstants {
 
     String REGEX_SPLIT_CHAR = ";";
 
-
     int MAP_CAPACITY = 64;
     HashMap<String, Class<?>> PROPERTY_BEAN_MAP = new HashMap<>(MAP_CAPACITY);
     /**
      * The following special keys need to be normalized.
      */
     String SPECIAL_KEY_GROUPLIST = "grouplist";
+
     String SPECIAL_KEY_SERVICE = "service";
     String SPECIAL_KEY_VGROUP_MAPPING = "vgroupMapping";
-
 }

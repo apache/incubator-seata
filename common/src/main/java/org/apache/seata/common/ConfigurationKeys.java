@@ -1249,7 +1249,12 @@ public interface ConfigurationKeys {
     String RATE_LIMIT_BUCKET_TOKEN_INITIAL_NUM = RATE_LIMIT_PREFIX + ".bucketTokenInitialNum";
 
     /**
-     * The constant SERVER_IO_URING_ENABLE.
+     * The constant TRANSPORT_IO_PREFIX.
      */
-    String SERVER_IO_URING_ENABLE = SERVER_PREFIX + "ioUring.enable";
+    String TRANSPORT_IO_PREFIX = TRANSPORT_PREFIX + "io.";
+
+    /**
+     * The constant TRANSPORT_IO_IO_URING_ENABLE.
+     */
+    String TRANSPORT_IO_IO_URING_ENABLE = TRANSPORT_IO_PREFIX + "ioUringEnable";
 }
