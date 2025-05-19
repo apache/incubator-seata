@@ -16,12 +16,18 @@
  */
 package org.apache.seata.core.rpc.netty;
 
+import io.netty.channel.ChannelException;
+import io.netty.channel.ChannelId;
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadLocalRandom;
@@ -82,6 +88,9 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     private static final long SCHEDULE_DELAY_MILLS = 60 * 1000L;
     private static final long SCHEDULE_INTERVAL_MILLS = 10 * 1000L;
     private static final String MERGE_THREAD_PREFIX = "rpcMergeMessageSend";
+
+    private final CopyOnWriteArrayList<ChannelEventListener> channelEventListeners = new CopyOnWriteArrayList<>();
+
     protected final Object mergeLock = new Object();
 
     /**
@@ -130,7 +139,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         super(messageExecutor);
         this.transactionRole = transactionRole;
         clientBootstrap = new NettyClientBootstrap(nettyClientConfig, eventExecutorGroup, transactionRole);
-        clientBootstrap.setChannelHandlers(new ClientHandler());
+        clientBootstrap.setChannelHandlers(new ClientHandler(), new ChannelEventHandler(this));
         clientChannelManager = new NettyClientChannelManager(
             new NettyPoolableFactory(this, clientBootstrap), getPoolKeyFunction(), nettyClientConfig);
     }
@@ -335,6 +344,201 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
      * @return the Rpc Request Timeout
      */
     protected abstract long getRpcRequestTimeout();
+
+
+    /**
+     * Registers a channel event listener to receive channel events.
+     * If the listener is already registered, it will not be added again.
+     *
+     * @param channelEventListener the channel event listener to register
+     */
+    @Override
+    public void registerChannelEventListener(ChannelEventListener channelEventListener) {
+        if (channelEventListener != null) {
+            channelEventListeners.addIfAbsent(channelEventListener);
+            LOGGER.info("register channel event listener: {}", channelEventListener.getClass().getName());
+        }
+    }
+
+    /**
+     * Unregisters a previously registered channel event listener.
+     *
+     * @param channelEventListener the channel event listener to unregister
+     */
+    @Override
+    public void unregisterChannelEventListener(ChannelEventListener channelEventListener) {
+        if (channelEventListener != null) {
+            channelEventListeners.remove(channelEventListener);
+            LOGGER.info("unregister channel event listener: {}", channelEventListener.getClass().getName());
+        }
+    }
+
+    /**
+     * Handles channel active events from Netty.
+     * Fires a CONNECTED event to all registered listeners.
+     *
+     * @param channel the channel that became active
+     */
+    public void onChannelActive(Channel channel) {
+        fireChannelEvent(channel, ChannelEventType.CONNECTED);
+    }
+
+    /**
+     * Handles channel inactive events from Netty.
+     * Fires a DISCONNECTED event to all registered listeners and cleans up resources.
+     *
+     * @param channel the channel that became inactive
+     */
+    public void onChannelInactive(Channel channel) {
+        fireChannelEvent(channel, ChannelEventType.DISCONNECTED);
+        cleanupResourcesForChannel(channel);
+    }
+
+    /**
+     * Handles channel exception events from Netty.
+     * Fires an EXCEPTION event to all registered listeners and cleans up resources.
+     *
+     * @param channel the channel where the exception occurred
+     * @param cause the throwable that represents the exception
+     */
+    public void onChannelException(Channel channel, Throwable cause) {
+        fireChannelEvent(channel, ChannelEventType.EXCEPTION, cause);
+        cleanupResourcesForChannel(channel);
+    }
+
+    /**
+     * Handles channel idle events from Netty.
+     * Fires an IDLE event to all registered listeners.
+     *
+     * @param channel the channel that became idle
+     */
+    public void onChannelIdle(Channel channel) {
+        fireChannelEvent(channel, ChannelEventType.IDLE);
+    }
+
+    /**
+     * Cleans up resources associated with a channel that has been disconnected.
+     * This includes collecting message IDs for the channel and cleaning up their futures.
+     *
+     * @param channel the channel for which resources should be cleaned up
+     */
+    protected void cleanupResourcesForChannel(Channel channel) {
+        if (channel == null) {
+            return;
+        }
+        ChannelException cause = new ChannelException(
+            String.format("Channel disconnected: %s", channel.remoteAddress()));
+
+        Set<Integer> messageIds = collectMessageIdsForChannel(channel.id());
+        cleanupFuturesForMessageIds(messageIds, cause);
+
+        LOGGER.info("Cleaned up {} pending requests for disconnected channel: {}",
+            messageIds.size(), channel.remoteAddress());
+    }
+
+    /**
+     * Collects message IDs associated with a specific channel.
+     * This is used during channel cleanup to identify pending requests.
+     *
+     * @param channelId the ID of the channel
+     * @return a set of message IDs associated with the channel
+     */
+    private Set<Integer> collectMessageIdsForChannel(ChannelId channelId) {
+        Set<Integer> messageIds = new HashSet<>();
+
+        String serverAddress = null;
+        for (Map.Entry<String, Channel> entry : clientChannelManager.getChannels().entrySet()) {
+            Channel channel = entry.getValue();
+            if (channelId.equals(channel.id())) {
+                serverAddress = entry.getKey();
+                break;
+            }
+        }
+
+        if (serverAddress == null) {
+            return messageIds;
+        }
+
+        Iterator<Map.Entry<Integer, MergeMessage>> it = mergeMsgMap.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<Integer, MergeMessage> entry = it.next();
+            MergeMessage mergeMessage = entry.getValue();
+
+            if (mergeMessage instanceof MergedWarpMessage) {
+                MergedWarpMessage warpMessage = (MergedWarpMessage) mergeMessage;
+
+                BlockingQueue<RpcMessage> basket = basketMap.get(serverAddress);
+                if (basket != null && !basket.isEmpty()) {
+                    messageIds.addAll(warpMessage.msgIds);
+                    it.remove();
+                }
+            }
+        }
+
+        return messageIds;
+    }
+
+    /**
+     * Cleans up futures for a set of message IDs.
+     * This completes futures with an exception to notify waiting threads.
+     *
+     * @param messageIds the set of message IDs whose futures should be cleaned up
+     * @param cause the exception to set as the result for each future
+     */
+    private void cleanupFuturesForMessageIds(Set<Integer> messageIds, Exception cause) {
+        for (Integer messageId : messageIds) {
+            MessageFuture future = futures.remove(messageId);
+            if (future != null) {
+                future.setResultMessage(cause);
+            }
+        }
+    }
+
+    /**
+     * Fires a channel event without an associated cause.
+     * This is an overloaded version that calls {@link #fireChannelEvent(Channel, ChannelEventType, Throwable)}
+     * with a null cause.
+     *
+     * @param channel the channel associated with the event
+     * @param eventType the type of event that occurred
+     */
+    protected void fireChannelEvent(Channel channel, ChannelEventType eventType) {
+        fireChannelEvent(channel, eventType, null);
+    }
+
+    /**
+     * Fires a channel event to all registered listeners.
+     * This method dispatches the event to the appropriate method on each listener
+     * based on the event type.
+     *
+     * @param channel the channel associated with the event
+     * @param eventType the type of event that occurred
+     * @param cause the cause of the event (maybe null for certain event types)
+     */
+    protected void fireChannelEvent(Channel channel, ChannelEventType eventType, Throwable cause) {
+        for (ChannelEventListener listener : channelEventListeners) {
+            try {
+                switch (eventType) {
+                    case CONNECTED:
+                        listener.onChannelConnected(channel);
+                        break;
+                    case DISCONNECTED:
+                        listener.onChannelDisconnected(channel);
+                        break;
+                    case EXCEPTION:
+                        listener.onChannelException(channel, cause);
+                        break;
+                    case IDLE:
+                        listener.onChannelIdle(channel);
+                        break;
+                    default:
+                        break;
+                }
+            } catch (Exception e) {
+                LOGGER.warn("Error while firing channel {} event", eventType, e);
+            }
+        }
+    }
 
     /**
      * The type Merged send runnable.
