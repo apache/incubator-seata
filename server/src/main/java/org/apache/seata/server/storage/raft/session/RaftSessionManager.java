@@ -16,10 +16,17 @@
  */
 package org.apache.seata.server.storage.raft.session;
 
+import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.ADD_BRANCH_SESSION;
+import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.ADD_GLOBAL_SESSION;
+import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.REMOVE_BRANCH_SESSION;
+import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.REMOVE_GLOBAL_SESSION;
+import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.UPDATE_BRANCH_SESSION_STATUS;
+import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.UPDATE_GLOBAL_SESSION_STATUS;
+
+import com.alipay.sofa.jraft.Closure;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import com.alipay.sofa.jraft.Closure;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.common.loader.Scope;
 import org.apache.seata.common.util.CollectionUtils;
@@ -32,18 +39,11 @@ import org.apache.seata.server.cluster.raft.sync.msg.RaftBranchSessionSyncMsg;
 import org.apache.seata.server.cluster.raft.sync.msg.RaftGlobalSessionSyncMsg;
 import org.apache.seata.server.cluster.raft.sync.msg.dto.BranchTransactionDTO;
 import org.apache.seata.server.cluster.raft.sync.msg.dto.GlobalTransactionDTO;
+import org.apache.seata.server.cluster.raft.util.RaftTaskUtil;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.storage.SessionConverter;
 import org.apache.seata.server.storage.file.session.FileSessionManager;
-import org.apache.seata.server.cluster.raft.util.RaftTaskUtil;
-
-import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.ADD_BRANCH_SESSION;
-import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.ADD_GLOBAL_SESSION;
-import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.REMOVE_BRANCH_SESSION;
-import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.REMOVE_GLOBAL_SESSION;
-import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.UPDATE_BRANCH_SESSION_STATUS;
-import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.UPDATE_GLOBAL_SESSION_STATUS;
 
 /**
  */
@@ -66,6 +66,7 @@ public class RaftSessionManager extends FileSessionManager {
 
     @Override
     public void onBegin(GlobalSession globalSession) throws TransactionException {
+        globalSession.checkSize();
         CompletableFuture<Boolean> completableFuture = new CompletableFuture<>();
         Closure closure = status -> {
             if (status.isOk()) {
@@ -77,8 +78,8 @@ public class RaftSessionManager extends FileSessionManager {
                 }
             } else {
                 try {
-                    completableFuture.completeExceptionally(
-                        new TransactionException(TransactionExceptionCode.NotRaftLeader,
+                    completableFuture.completeExceptionally(new TransactionException(
+                            TransactionExceptionCode.NotRaftLeader,
                             "seata raft state machine exception: " + status.getErrorMsg()));
                 } finally {
                     try {
@@ -100,8 +101,7 @@ public class RaftSessionManager extends FileSessionManager {
         GlobalSession globalSession = sessionMap.remove(session.getXid());
         if (globalSession != null) {
             List<BranchSession> branchSessionList = globalSession.getBranchSessions();
-            // For the follower, the following code will not be executed because when the follower receives the remove global session
-            // the branch session on the leader side has already been completely cleared.
+            // For the follower, this code will not execute because, by the time the follower receives the remove global session request, the branch sessions on the leader side have already been completely cleared.
             if (CollectionUtils.isNotEmpty(branchSessionList)) {
                 for (BranchSession branchSession : branchSessionList) {
                     branchSession.unlock();
@@ -119,40 +119,42 @@ public class RaftSessionManager extends FileSessionManager {
             if (closureStatus.isOk()) {
                 globalSession.setStatus(globalStatus);
                 if (GlobalStatus.RollbackRetrying.equals(globalSession.getStatus())
-                    || GlobalStatus.Rollbacking.equals(globalSession.getStatus())
-                    || GlobalStatus.TimeoutRollbacking.equals(globalSession.getStatus())) {
+                        || GlobalStatus.Rollbacking.equals(globalSession.getStatus())
+                        || GlobalStatus.TimeoutRollbacking.equals(globalSession.getStatus())) {
                     globalSession.getBranchSessions().parallelStream()
-                        .forEach(branchSession -> branchSession.setLockStatus(LockStatus.Rollbacking));
+                            .forEach(branchSession -> branchSession.setLockStatus(LockStatus.Rollbacking));
                 }
                 completableFuture.complete(true);
             } else {
-                completableFuture.completeExceptionally(
-                    new TransactionException(TransactionExceptionCode.NotRaftLeader,
+                completableFuture.completeExceptionally(new TransactionException(
+                        TransactionExceptionCode.NotRaftLeader,
                         "seata raft state machine exception: " + closureStatus.getErrorMsg()));
             }
         };
         GlobalTransactionDTO globalTransactionDO = new GlobalTransactionDTO(globalSession.getXid());
         globalTransactionDO.setStatus(globalStatus.getCode());
         RaftGlobalSessionSyncMsg raftSyncMsg =
-            new RaftGlobalSessionSyncMsg(UPDATE_GLOBAL_SESSION_STATUS, globalTransactionDO);
+                new RaftGlobalSessionSyncMsg(UPDATE_GLOBAL_SESSION_STATUS, globalTransactionDO);
         RaftTaskUtil.createTask(closure, raftSyncMsg, completableFuture);
     }
 
     @Override
-    public void onBranchStatusChange(GlobalSession globalSession, BranchSession branchSession,
-        BranchStatus branchStatus) throws TransactionException {
+    public void onBranchStatusChange(
+            GlobalSession globalSession, BranchSession branchSession, BranchStatus branchStatus)
+            throws TransactionException {
         CompletableFuture<Boolean> completableFuture = new CompletableFuture<>();
         Closure closure = closureStatus -> {
             if (closureStatus.isOk()) {
                 branchSession.setStatus(branchStatus);
                 completableFuture.complete(true);
             } else {
-                completableFuture.completeExceptionally(
-                    new TransactionException(TransactionExceptionCode.NotRaftLeader,
+                completableFuture.completeExceptionally(new TransactionException(
+                        TransactionExceptionCode.NotRaftLeader,
                         "seata raft state machine exception: " + closureStatus.getErrorMsg()));
             }
         };
-        BranchTransactionDTO branchTransactionDO = new BranchTransactionDTO(globalSession.getXid(), branchSession.getBranchId());
+        BranchTransactionDTO branchTransactionDO =
+                new BranchTransactionDTO(globalSession.getXid(), branchSession.getBranchId());
         branchTransactionDO.setStatus(branchStatus.getCode());
         RaftBranchSessionSyncMsg raftSyncMsg =
                 new RaftBranchSessionSyncMsg(UPDATE_BRANCH_SESSION_STATUS, branchTransactionDO);
@@ -161,6 +163,7 @@ public class RaftSessionManager extends FileSessionManager {
 
     @Override
     public void onAddBranch(GlobalSession globalSession, BranchSession branchSession) throws TransactionException {
+        branchSession.checkSize();
         CompletableFuture<Boolean> completableFuture = new CompletableFuture<>();
         branchSession.setStatus(BranchStatus.Registered);
         Closure closure = status -> {
@@ -168,8 +171,8 @@ public class RaftSessionManager extends FileSessionManager {
                 completableFuture.complete(globalSession.add(branchSession));
             } else {
                 try {
-                    completableFuture.completeExceptionally(
-                        new TransactionException(TransactionExceptionCode.NotRaftLeader,
+                    completableFuture.completeExceptionally(new TransactionException(
+                            TransactionExceptionCode.NotRaftLeader,
                             "seata raft state machine exception: " + status.getErrorMsg()));
                 } finally {
                     try {
@@ -193,13 +196,13 @@ public class RaftSessionManager extends FileSessionManager {
             if (closureStatus.isOk()) {
                 completableFuture.complete(globalSession.remove(branchSession));
             } else {
-                completableFuture.completeExceptionally(
-                    new TransactionException(TransactionExceptionCode.NotRaftLeader,
+                completableFuture.completeExceptionally(new TransactionException(
+                        TransactionExceptionCode.NotRaftLeader,
                         "seata raft state machine exception: " + closureStatus.getErrorMsg()));
             }
         };
         BranchTransactionDTO branchTransactionDO =
-            new BranchTransactionDTO(globalSession.getXid(), branchSession.getBranchId());
+                new BranchTransactionDTO(globalSession.getXid(), branchSession.getBranchId());
         RaftBranchSessionSyncMsg raftSyncMsg = new RaftBranchSessionSyncMsg(REMOVE_BRANCH_SESSION, branchTransactionDO);
         RaftTaskUtil.createTask(closure, raftSyncMsg, completableFuture);
     }
@@ -220,8 +223,8 @@ public class RaftSessionManager extends FileSessionManager {
                     completableFuture.completeExceptionally(e);
                 }
             } else {
-                completableFuture.completeExceptionally(
-                    new TransactionException(TransactionExceptionCode.NotRaftLeader,
+                completableFuture.completeExceptionally(new TransactionException(
+                        TransactionExceptionCode.NotRaftLeader,
                         "seata raft state machine exception: " + status.getErrorMsg()));
             }
         };
@@ -245,5 +248,4 @@ public class RaftSessionManager extends FileSessionManager {
 
     @Override
     public void destroy() {}
-
 }
