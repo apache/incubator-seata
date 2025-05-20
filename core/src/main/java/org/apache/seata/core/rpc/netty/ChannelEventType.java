@@ -16,38 +16,27 @@
  */
 package org.apache.seata.core.rpc.netty;
 
-import io.netty.channel.Channel;
-
 /**
- * The interface Channel event listener.
+ * Enum representing different types of channel events.
  */
-public interface ChannelEventListener {
+public enum ChannelEventType {
     /**
-     * On channel connect.
-     *
-     * @param channel    the channel
+     * Channel connected.
      */
-    default void onChannelConnected(final Channel channel) {}
+    CONNECTED,
 
     /**
-     * On channel close.
-     *
-     * @param channel    the channel
+     * Channel disconnected.
      */
-    default void onChannelDisconnected(final Channel channel) {}
+    DISCONNECTED,
 
     /**
-     * On channel exception.
-     *
-     * @param channel    the channel
-     * @param cause      the cause
+     * Channel exception.
      */
-    default void onChannelException(final Channel channel, Throwable cause) {}
+    EXCEPTION,
 
     /**
-     * On channel idle.
-     *
-     * @param channel    the channel
+     * Channel idle.
      */
-    default void onChannelIdle(final Channel channel) {}
+    IDLE
 }
