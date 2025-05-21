@@ -16,16 +16,16 @@
 #
 
 codecov:
-  require_ci_to_pass: yes
+  require_ci_to_pass: true
+  branch: 2.x
 coverage:
   status:
-    patch: yes
+    patch: true
     project:
       default:
         threshold: 1%
         if_not_found: success
-        target: 2.x
-    changes: yes  #only care the changed files
+    changes: false
   precision: 2
   range: "50...100"
 ignore:
@@ -42,4 +42,4 @@ ignore:
 comment:
   layout: "diff,flags,files,reach"
   behavior: default
-  require_changes: no
+  require_changes: false
