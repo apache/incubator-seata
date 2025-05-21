@@ -21,6 +21,7 @@ import java.util.concurrent.TimeoutException;
 import io.netty.channel.Channel;
 import org.apache.seata.core.protocol.AbstractMessage;
 import org.apache.seata.core.protocol.RpcMessage;
+import org.apache.seata.core.rpc.netty.ChannelEventListener;
 import org.apache.seata.core.rpc.netty.RmNettyRemotingClient;
 import org.apache.seata.core.rpc.netty.TmNettyRemotingClient;
 import org.apache.seata.core.rpc.processor.RemotingProcessor;
@@ -101,4 +102,18 @@ public interface RemotingClient {
      * @param executor    thread pool
      */
     void registerProcessor(final int messageType, final RemotingProcessor processor, final ExecutorService executor);
+
+    /**
+     * register channel event listener
+     *
+     * @param channelEventListener {@link ChannelEventListener}
+     */
+    void registerChannelEventListener(ChannelEventListener channelEventListener);
+
+    /**
+     * unregister channel event listener
+     *
+     * @param channelEventListener {@link ChannelEventListener}
+     */
+    void unregisterChannelEventListener(ChannelEventListener channelEventListener);
 }

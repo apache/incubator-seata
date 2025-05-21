@@ -24,7 +24,8 @@ coverage:
       default:
         threshold: 1%
         if_not_found: success
-    changes: no
+        target: 2.x
+    changes: yes  #only care the changed files
   precision: 2
   range: "50...100"
 ignore:
