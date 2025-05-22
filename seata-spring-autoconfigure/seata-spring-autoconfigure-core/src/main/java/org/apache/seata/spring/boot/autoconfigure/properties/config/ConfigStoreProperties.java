@@ -26,7 +26,7 @@ import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.CONFIG
 @ConfigurationProperties(prefix = CONFIG_STORE_PREFIX)
 public class ConfigStoreProperties {
     /**
-     * rocksdb, (leveldb, caffeine)
+     * rocksdb, (will support leveldb and caffeine in the future)
      */
     private String type = "rocksdb";
     private String dir = "configStore";
