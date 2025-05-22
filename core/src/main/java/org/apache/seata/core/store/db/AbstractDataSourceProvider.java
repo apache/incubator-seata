@@ -16,6 +16,9 @@
  */
 package org.apache.seata.core.store.db;
 
+import static org.apache.seata.common.DefaultValues.DEFAULT_DB_MAX_CONN;
+import static org.apache.seata.common.DefaultValues.DEFAULT_DB_MIN_CONN;
+
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -24,9 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
-
 import javax.sql.DataSource;
-
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.common.exception.StoreException;
 import org.apache.seata.common.executor.Initialize;
@@ -39,12 +40,9 @@ import org.apache.seata.core.constants.DBType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.apache.seata.common.DefaultValues.DEFAULT_DB_MAX_CONN;
-import static org.apache.seata.common.DefaultValues.DEFAULT_DB_MIN_CONN;
-
 /**
  * The abstract datasource provider
- * 
+ *
  */
 public abstract class AbstractDataSourceProvider implements DataSourceProvider, Initialize {
 
@@ -57,18 +55,18 @@ public abstract class AbstractDataSourceProvider implements DataSourceProvider, 
      */
     protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
-    private final static String MYSQL_DRIVER_CLASS_NAME = "com.mysql.jdbc.Driver";
+    private static final String MYSQL_DRIVER_CLASS_NAME = "com.mysql.jdbc.Driver";
 
-    private final static String MYSQL8_DRIVER_CLASS_NAME = "com.mysql.cj.jdbc.Driver";
+    private static final String MYSQL8_DRIVER_CLASS_NAME = "com.mysql.cj.jdbc.Driver";
 
-    private final static String MYSQL_DRIVER_FILE_PREFIX = "mysql-connector-j";
+    private static final String MYSQL_DRIVER_FILE_PREFIX = "mysql-connector-j";
 
-    private final static Map<String, ClassLoader> MYSQL_DRIVER_LOADERS;
+    private static final Map<String, ClassLoader> DRIVER_LOADERS;
 
     private static final long DEFAULT_DB_MAX_WAIT = 5000;
 
     static {
-        MYSQL_DRIVER_LOADERS = createMysqlDriverClassLoaders();
+        DRIVER_LOADERS = createMysqlDriverClassLoaders();
     }
 
     @Override
@@ -87,7 +85,7 @@ public abstract class AbstractDataSourceProvider implements DataSourceProvider, 
     }
 
     public void validate() {
-        //valid driver class name
+        // valid driver class name
         String driverClassName = getDriverClassName();
         ClassLoader loader = getDriverClassLoader();
         if (null == loader) {
@@ -106,14 +104,21 @@ public abstract class AbstractDataSourceProvider implements DataSourceProvider, 
                     .map(file -> file.isFile() ? file.getParentFile() : file)
                     .filter(Objects::nonNull)
                     .filter(File::isDirectory)
-                    .map(file -> new File(file, "jdbc"))
+                    // Only the MySQL driver needs to be placed in the jdbc folder.
+                    .map(file -> (MYSQL8_DRIVER_CLASS_NAME.equals(driverClassName)
+                                    || MYSQL_DRIVER_CLASS_NAME.equals(driverClassName))
+                            ? new File(file, "jdbc")
+                            : file)
                     .filter(File::exists)
                     .filter(File::isDirectory)
-                    .distinct().findAny().orElseThrow(() -> new ShouldNeverHappenException("can not find jdbc folder")).getAbsolutePath();
+                    .distinct()
+                    .findAny()
+                    .map(File::getAbsolutePath)
+                    .orElseThrow(() -> new ShouldNeverHappenException("cannot find jdbc folder"));
             throw new StoreException(String.format(
-                    "The driver {%s} cannot be found in the path %s. Please ensure that the appropriate database driver dependencies are included in the classpath.", driverClassName, driverClassPath));
+                    "The driver {%s} cannot be found in the path %s. Please ensure that the appropriate database driver dependencies are included in the classpath.",
+                    driverClassName, driverClassPath));
         }
-
     }
     /**
      * generate the datasource
@@ -139,7 +144,7 @@ public abstract class AbstractDataSourceProvider implements DataSourceProvider, 
         String driverClassName = CONFIG.getConfig(ConfigurationKeys.STORE_DB_DRIVER_CLASS_NAME);
         if (StringUtils.isBlank(driverClassName)) {
             throw new StoreException(
-                String.format("the {%s} can't be empty", ConfigurationKeys.STORE_DB_DRIVER_CLASS_NAME));
+                    String.format("the {%s} can't be empty", ConfigurationKeys.STORE_DB_DRIVER_CLASS_NAME));
         }
         return driverClassName;
     }
@@ -150,12 +155,12 @@ public abstract class AbstractDataSourceProvider implements DataSourceProvider, 
      * @return the db max wait
      */
     protected Long getMaxWait() {
-        Long maxWait = CONFIG.getLong(ConfigurationKeys.STORE_DB_MAX_WAIT, DEFAULT_DB_MAX_WAIT);
-        return maxWait;
+        return CONFIG.getLong(ConfigurationKeys.STORE_DB_MAX_WAIT, DEFAULT_DB_MAX_WAIT);
     }
 
     protected ClassLoader getDriverClassLoader() {
-        return MYSQL_DRIVER_LOADERS.getOrDefault(getDriverClassName(), ClassLoader.getSystemClassLoader());
+        return DRIVER_LOADERS.getOrDefault(
+                getDriverClassName(), this.getClass().getClassLoader());
     }
 
     private static Map<String, ClassLoader> createMysqlDriverClassLoaders() {
@@ -168,39 +173,39 @@ public abstract class AbstractDataSourceProvider implements DataSourceProvider, 
             return loaders;
         }
         Stream.of(cp.split(File.pathSeparator))
-            .map(File::new)
-            .filter(File::exists)
-            .map(file -> file.isFile() ? file.getParentFile() : file)
-            .filter(Objects::nonNull)
-            .filter(File::isDirectory)
-            .map(file -> new File(file, "jdbc"))
-            .filter(File::exists)
-            .filter(File::isDirectory)
-            .distinct()
-            .flatMap(file -> {
-                File[] files = file.listFiles((f, name) -> name.startsWith(MYSQL_DRIVER_FILE_PREFIX));
-                if (files != null) {
-                    return Stream.of(files);
-                } else {
-                    return Stream.of();
-                }
-            })
-            .forEach(file -> {
-                if (loaders.containsKey(MYSQL8_DRIVER_CLASS_NAME) && loaders.containsKey(MYSQL_DRIVER_CLASS_NAME)) {
-                    return;
-                }
-                try {
-                    URL url = file.toURI().toURL();
-                    ClassLoader loader = new URLClassLoader(new URL[]{url}, ClassLoader.getSystemClassLoader());
-                    try {
-                        loader.loadClass(MYSQL8_DRIVER_CLASS_NAME);
-                        loaders.putIfAbsent(MYSQL8_DRIVER_CLASS_NAME, loader);
-                    } catch (ClassNotFoundException e) {
-                        loaders.putIfAbsent(MYSQL_DRIVER_CLASS_NAME, loader);
+                .map(File::new)
+                .filter(File::exists)
+                .map(file -> file.isFile() ? file.getParentFile() : file)
+                .filter(Objects::nonNull)
+                .filter(File::isDirectory)
+                .map(file -> new File(file, "jdbc"))
+                .filter(File::exists)
+                .filter(File::isDirectory)
+                .distinct()
+                .flatMap(file -> {
+                    File[] files = file.listFiles((f, name) -> name.startsWith(MYSQL_DRIVER_FILE_PREFIX));
+                    if (files != null) {
+                        return Stream.of(files);
+                    } else {
+                        return Stream.of();
                     }
-                } catch (MalformedURLException ignore) {
-                }
-            });
+                })
+                .forEach(file -> {
+                    if (loaders.containsKey(MYSQL8_DRIVER_CLASS_NAME) && loaders.containsKey(MYSQL_DRIVER_CLASS_NAME)) {
+                        return;
+                    }
+                    try {
+                        URL url = file.toURI().toURL();
+                        ClassLoader loader = new URLClassLoader(new URL[] {url}, ClassLoader.getSystemClassLoader());
+                        try {
+                            loader.loadClass(MYSQL8_DRIVER_CLASS_NAME);
+                            loaders.putIfAbsent(MYSQL8_DRIVER_CLASS_NAME, loader);
+                        } catch (ClassNotFoundException e) {
+                            loaders.putIfAbsent(MYSQL_DRIVER_CLASS_NAME, loader);
+                        }
+                    } catch (MalformedURLException ignore) {
+                    }
+                });
         return loaders;
     }
 
@@ -243,8 +248,8 @@ public abstract class AbstractDataSourceProvider implements DataSourceProvider, 
                 password = ConfigTools.publicDecrypt(password, publicKey);
             } catch (Exception e) {
                 LOGGER.error(
-                    "decryption failed,please confirm whether the ciphertext and secret key are correct! error msg: {}",
-                    e.getMessage());
+                        "decryption failed,please confirm whether the ciphertext and secret key are correct! error msg: {}",
+                        e.getMessage());
             }
         }
         return password;
@@ -292,5 +297,4 @@ public abstract class AbstractDataSourceProvider implements DataSourceProvider, 
     protected String getPublicKey() {
         return CONFIG.getConfig(ConfigurationKeys.STORE_PUBLIC_KEY);
     }
-
 }
