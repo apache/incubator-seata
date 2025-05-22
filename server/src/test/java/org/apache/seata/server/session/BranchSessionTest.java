@@ -16,8 +16,10 @@
  */
 package org.apache.seata.server.session;
 
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
 
+import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.common.util.UUIDGenerator;
 import org.junit.jupiter.api.Assertions;
@@ -50,7 +52,7 @@ public class BranchSessionTest {
      */
     @ParameterizedTest
     @MethodSource("branchSessionProvider")
-    public void codecTest(BranchSession branchSession) {
+    public void codecTest(BranchSession branchSession) throws TransactionException {
         byte[] result = branchSession.encode();
         Assertions.assertNotNull(result);
         BranchSession expected = new BranchSession();
@@ -61,7 +63,24 @@ public class BranchSessionTest {
         Assertions.assertEquals(branchSession.getLockKey(), expected.getLockKey());
         Assertions.assertEquals(branchSession.getClientId(), expected.getClientId());
         Assertions.assertEquals(branchSession.getApplicationData(), expected.getApplicationData());
+    }
 
+    @ParameterizedTest
+    @MethodSource("branchSessionProvider")
+    public void checkSizeTest(BranchSession branchSession) throws TransactionException {
+        Assertions.assertDoesNotThrow(branchSession::checkSize);
+        int size = 28 * 1024;
+        String alphanumeric = "!@#$%^&*()ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        StringBuilder sb = new StringBuilder(size);
+        for (int i = 0; i < size; i++) {
+            sb.append(alphanumeric.charAt(ThreadLocalRandom.current().nextInt(alphanumeric.length())));
+        }
+        String str = sb.toString();
+        branchSession.setLockKey(str);
+        Assertions.assertThrows(TransactionException.class, branchSession::checkSize);
+        branchSession.setLockKey(null);
+        branchSession.setApplicationData(str);
+        Assertions.assertThrows(TransactionException.class, branchSession::checkSize);
     }
 
     /**

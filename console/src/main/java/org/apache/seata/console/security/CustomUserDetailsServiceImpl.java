@@ -16,8 +16,10 @@
  */
 package org.apache.seata.console.security;
 
+import java.util.UUID;
 import javax.annotation.PostConstruct;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -32,10 +34,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class CustomUserDetailsServiceImpl implements UserDetailsService {
 
-    @Value("${console.user.username}")
+    private static final Logger LOGGER = LoggerFactory.getLogger(CustomUserDetailsServiceImpl.class);
+
+    @Value("${console.user.username:seata}")
     private String username;
 
-    @Value("${console.user.password}")
+    @Value("${console.user.password:}")
     private String password;
 
     private User user;
@@ -45,10 +49,23 @@ public class CustomUserDetailsServiceImpl implements UserDetailsService {
      */
     @PostConstruct
     public void init() {
-        // TODO: get userInfo by db
-        user = new User();
-        user.setUsername(username);
-        user.setPassword(new BCryptPasswordEncoder().encode(password));
+        if (!password.isEmpty()) {
+            user = new User(username, new BCryptPasswordEncoder().encode(password));
+            return;
+        }
+
+        password = generateRandomPassword();
+        LOGGER.info(
+                "No password was configured. A random password has been generated for security purposes. You may either:\n"
+                        + "1. Use the auto-generated password: [{}]\n"
+                        + "2. Set a custom password in the configuration.",
+                password);
+
+        user = new User(username, new BCryptPasswordEncoder().encode(password));
+    }
+
+    private String generateRandomPassword() {
+        return UUID.randomUUID().toString().replace("-", "").substring(0, 8);
     }
 
     @Override

@@ -84,6 +84,26 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
                 }
             }
         });
+
+        registerChannelEventListener(new ChannelEventListener() {
+            @Override public void onChannelConnected(Channel channel) {
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Channel active: {}", channel.remoteAddress());
+                }
+            }
+
+            @Override public void onChannelDisconnected(Channel channel) {
+                LOGGER.warn("Channel inactive: {}", channel.remoteAddress());
+            }
+
+            @Override public void onChannelException(Channel channel, Throwable cause) {
+                LOGGER.error("Channel exception: {}", channel.remoteAddress(), cause);
+            }
+
+            @Override public void onChannelIdle(Channel channel) {
+                LOGGER.warn("Channel idle: {}", channel.remoteAddress());
+            }
+        });
     }
 
     /**

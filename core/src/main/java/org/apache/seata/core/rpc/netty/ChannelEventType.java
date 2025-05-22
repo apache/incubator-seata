@@ -14,44 +14,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.console.security;
+package org.apache.seata.core.rpc.netty;
 
 /**
- * mock user info
- *
+ * Enum representing different types of channel events.
  */
-public class User {
+public enum ChannelEventType {
     /**
-     * The Username.
+     * Channel connected.
      */
-    String username;
+    CONNECTED,
+
     /**
-     * The Password.
+     * Channel disconnected.
      */
-    String password;
+    DISCONNECTED,
 
-    public User(String username, String password) {
-        this.username = username;
-        this.password = password;
-    }
+    /**
+     * Channel exception.
+     */
+    EXCEPTION,
 
-    //region Getter && Setter
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    //endregion
+    /**
+     * Channel idle.
+     */
+    IDLE
 }

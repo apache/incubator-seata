@@ -16,19 +16,21 @@
  */
 package org.apache.seata.server.session;
 
+import static org.apache.seata.core.model.LockStatus.Locked;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
 import org.apache.seata.common.util.BufferUtils;
 import org.apache.seata.common.util.CompressUtil;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.LockStatus;
+import org.apache.seata.server.cluster.raft.RaftServerManager;
 import org.apache.seata.server.lock.LockManager;
 import org.apache.seata.server.lock.LockerManagerFactory;
 import org.apache.seata.server.storage.file.lock.FileLocker;
@@ -36,8 +38,6 @@ import org.apache.seata.server.store.SessionStorable;
 import org.apache.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.apache.seata.core.model.LockStatus.Locked;
 
 /**
  * The type Branch session.
@@ -49,8 +49,8 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     private static final int MAX_BRANCH_SESSION_SIZE = StoreConfig.getMaxBranchSessionSize();
 
-    private static ThreadLocal<ByteBuffer> byteBufferThreadLocal = ThreadLocal.withInitial(() -> ByteBuffer.allocate(
-        MAX_BRANCH_SESSION_SIZE));
+    private static ThreadLocal<ByteBuffer> byteBufferThreadLocal =
+            ThreadLocal.withInitial(() -> ByteBuffer.allocate(MAX_BRANCH_SESSION_SIZE));
 
     private String xid;
 
@@ -336,33 +336,11 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
         byte[] xidBytes = xid != null ? xid.getBytes() : null;
 
         byte branchTypeByte = branchType != null ? (byte) branchType.ordinal() : -1;
-
-        int size = calBranchSessionSize(resourceIdBytes, lockKeyBytes, clientIdBytes, applicationDataBytes, xidBytes);
-
-        if (size > MAX_BRANCH_SESSION_SIZE) {
-            if (lockKeyBytes == null) {
-                throw new RuntimeException("branch session size exceeded, size : " + size + " maxBranchSessionSize : "
-                    + MAX_BRANCH_SESSION_SIZE);
-            }
-            // try compress lockkey
-            try {
-                size -= lockKeyBytes.length;
-                lockKeyBytes = CompressUtil.compress(lockKeyBytes);
-            } catch (IOException e) {
-                LOGGER.error("compress lockKey error", e);
-            } finally {
-                size += lockKeyBytes.length;
-            }
-
-            if (size > MAX_BRANCH_SESSION_SIZE) {
-                throw new RuntimeException(
-                    "compress branch session size exceeded, compressSize : " + size + " maxBranchSessionSize : "
-                        + MAX_BRANCH_SESSION_SIZE);
-            }
+        if (!RaftServerManager.isRaftMode()) {
+            checkSize(resourceIdBytes, lockKeyBytes, clientIdBytes, applicationDataBytes, xidBytes);
         }
-
         ByteBuffer byteBuffer = byteBufferThreadLocal.get();
-        //recycle
+        // recycle
         byteBuffer.clear();
 
         byteBuffer.putLong(transactionId);
@@ -383,10 +361,10 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
         }
 
         if (clientIdBytes != null) {
-            byteBuffer.putShort((short)clientIdBytes.length);
+            byteBuffer.putShort((short) clientIdBytes.length);
             byteBuffer.put(clientIdBytes);
         } else {
-            byteBuffer.putShort((short)0);
+            byteBuffer.putShort((short) 0);
         }
 
         if (applicationDataBytes != null) {
@@ -405,31 +383,116 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
         byteBuffer.put(branchTypeByte);
 
-        byteBuffer.put((byte)status.getCode());
-        byteBuffer.put((byte)lockStatus.getCode());
+        byteBuffer.put((byte) status.getCode());
+        byteBuffer.put((byte) lockStatus.getCode());
         BufferUtils.flip(byteBuffer);
         byte[] result = new byte[byteBuffer.limit()];
         byteBuffer.get(result);
         return result;
     }
 
-    private int calBranchSessionSize(byte[] resourceIdBytes, byte[] lockKeyBytes, byte[] clientIdBytes,
-                                     byte[] applicationDataBytes, byte[] xidBytes) {
-        final int size = 8 // trascationId
-            + 8 // branchId
-            + 4 // resourceIdBytes.length
-            + 4 // lockKeyBytes.length
-            + 2 // clientIdBytes.length
-            + 4 // applicationDataBytes.length
-            + 4 // xidBytes.size
-            + 1 // statusCode
-            + (resourceIdBytes == null ? 0 : resourceIdBytes.length)
-            + (lockKeyBytes == null ? 0 : lockKeyBytes.length)
-            + (clientIdBytes == null ? 0 : clientIdBytes.length)
-            + (applicationDataBytes == null ? 0 : applicationDataBytes.length)
-            + (xidBytes == null ? 0 : xidBytes.length)
-            + 1; //branchType
-        return size;
+    /**
+     * Checks if the serialized size of the branch session exceeds the configured maximum limit.
+     * This method calculates the size based on the current state of the branch session's fields
+     * (resourceId, lockKey, clientId, applicationData, xid). If the size exceeds the limit,
+     * it attempts to compress the lockKey and re-checks the size.
+     *
+     * @throws TransactionException if the calculated size of the branch session (after potential lockKey compression)
+     *                              exceeds the {@link StoreConfig#getMaxBranchSessionSize()}.
+     */
+    public void checkSize() throws TransactionException {
+        byte[] resourceIdBytes = resourceId != null ? resourceId.getBytes() : null;
+
+        byte[] lockKeyBytes = lockKey != null ? lockKey.getBytes() : null;
+
+        byte[] clientIdBytes = clientId != null ? clientId.getBytes() : null;
+
+        byte[] applicationDataBytes = applicationData != null ? applicationData.getBytes() : null;
+
+        byte[] xidBytes = xid != null ? xid.getBytes() : null;
+
+        try {
+            checkSize(resourceIdBytes, lockKeyBytes, clientIdBytes, applicationDataBytes, xidBytes);
+        } catch (RuntimeException e) {
+            throw new TransactionException(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Checks if the serialized size of the branch session exceeds the configured maximum limit.
+     * This method calculates the size based on the current state of the branch session's fields
+     * (resourceId, lockKey, clientId, applicationData, xid). If the size exceeds the limit,
+     * it attempts to compress the lockKey and re-checks the size.
+     * @param resourceIdBytes      Byte array representation of the resource ID.
+     * @param lockKeyBytes         Byte array representation of the lock key.
+     * @param clientIdBytes        Byte array representation of the client ID.
+     * @param applicationDataBytes Byte array representation of the application data.
+     * @param xidBytes             Byte array representation of the XID.
+     * @throws TransactionException if the calculated size of the branch session (after potential lockKey compression)
+     *                              exceeds the {@link StoreConfig#getMaxBranchSessionSize()}.
+     */
+    private void checkSize(
+            byte[] resourceIdBytes,
+            byte[] lockKeyBytes,
+            byte[] clientIdBytes,
+            byte[] applicationDataBytes,
+            byte[] xidBytes) {
+
+        int size = calBranchSessionSize(resourceIdBytes, lockKeyBytes, clientIdBytes, applicationDataBytes, xidBytes);
+
+        if (size > MAX_BRANCH_SESSION_SIZE) {
+            if (lockKeyBytes == null) {
+                throw new RuntimeException("branch session size exceeded, size : " + size + " maxBranchSessionSize : "
+                        + MAX_BRANCH_SESSION_SIZE);
+            }
+            // try compress lockkey
+            try {
+                size -= lockKeyBytes.length;
+                lockKeyBytes = CompressUtil.compress(lockKeyBytes);
+            } catch (IOException e) {
+                LOGGER.error("compress lockKey error", e);
+            } finally {
+                size += lockKeyBytes.length;
+            }
+
+            if (size > MAX_BRANCH_SESSION_SIZE) {
+                throw new RuntimeException("compress branch session size exceeded, compressSize : " + size
+                        + " maxBranchSessionSize : " + MAX_BRANCH_SESSION_SIZE);
+            }
+        }
+    }
+
+    /**
+     * Calculates the total size of the branch session in bytes based on its constituent parts.
+     * This includes fixed-size fields and the variable lengths of string fields represented as byte arrays.
+     *
+     * @param resourceIdBytes      Byte array representation of the resource ID.
+     * @param lockKeyBytes         Byte array representation of the lock key.
+     * @param clientIdBytes        Byte array representation of the client ID.
+     * @param applicationDataBytes Byte array representation of the application data.
+     * @param xidBytes             Byte array representation of the XID.
+     * @return The calculated total size of the branch session in bytes.
+     */
+    private int calBranchSessionSize(
+            byte[] resourceIdBytes,
+            byte[] lockKeyBytes,
+            byte[] clientIdBytes,
+            byte[] applicationDataBytes,
+            byte[] xidBytes) {
+        return 8 // trascationId
+                + 8 // branchId
+                + 4 // resourceIdBytes.length
+                + 4 // lockKeyBytes.length
+                + 2 // clientIdBytes.length
+                + 4 // applicationDataBytes.length
+                + 4 // xidBytes.size
+                + 1 // statusCode
+                + (resourceIdBytes == null ? 0 : resourceIdBytes.length)
+                + (lockKeyBytes == null ? 0 : lockKeyBytes.length)
+                + (clientIdBytes == null ? 0 : clientIdBytes.length)
+                + (applicationDataBytes == null ? 0 : applicationDataBytes.length)
+                + (xidBytes == null ? 0 : xidBytes.length)
+                + 1;
     }
 
     @Override
@@ -456,7 +519,6 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
             } else {
                 this.lockKey = new String(byLockKey);
             }
-
         }
         short clientIdLen = byteBuffer.getShort();
         if (clientIdLen > 0) {
@@ -482,5 +544,4 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
         }
         this.status = BranchStatus.get(byteBuffer.get());
     }
-
 }
