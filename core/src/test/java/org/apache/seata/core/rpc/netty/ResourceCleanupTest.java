@@ -53,6 +53,7 @@ class ResourceCleanupTest {
     private Map<Integer, MergeMessage> mergeMsgMap;
     private Map<String, BlockingQueue<RpcMessage>> basketMap;
     private Map<String, Channel> channels;
+    private Map<Integer, Integer> childToParentMap;
 
     @BeforeEach
     void setUp() throws Exception {
@@ -77,6 +78,10 @@ class ResourceCleanupTest {
         Field channelsField = clientChannelManager.getClass().getDeclaredField("channels");
         channelsField.setAccessible(true);
         channels = (Map<String, Channel>) channelsField.get(clientChannelManager);
+
+        Field childToParentMapField = AbstractNettyRemotingClient.class.getDeclaredField("childToParentMap");
+        childToParentMapField.setAccessible(true);
+        childToParentMap = (Map<Integer, Integer>) childToParentMapField.get(client);
     }
 
     @Test
@@ -97,8 +102,12 @@ class ResourceCleanupTest {
         int parentId = 100;
         MergedWarpMessage mergeMessage = new MergedWarpMessage();
         mergeMessage.msgIds = new ArrayList<>();
+
         mergeMessage.msgIds.add(1);
+        childToParentMap.put(1, parentId);
+
         mergeMessage.msgIds.add(2);
+        childToParentMap.put(2, parentId);
 
         mergeMsgMap.put(parentId, mergeMessage);
 
@@ -114,6 +123,9 @@ class ResourceCleanupTest {
 
         assertFalse(futures.containsKey(1), "Future ID 1 has not been removed");
         assertFalse(futures.containsKey(2), "Future ID 2 has not been removed");
+
+        assertNull(childToParentMap.get(1), "Child to parent map should not contain ID 1");
+        assertNull(childToParentMap.get(2), "Child to parent map should not contain ID 2");
 
         assertThrows(RuntimeException.class, () -> messageFuture1.get(0, java.util.concurrent.TimeUnit.MILLISECONDS));
         assertThrows(RuntimeException.class, () -> messageFuture2.get(0, java.util.concurrent.TimeUnit.MILLISECONDS));
