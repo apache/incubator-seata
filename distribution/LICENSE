@@ -211,7 +211,7 @@ licenses.
 Apache-1.1 licenses
 ========================================================================
 
-    com.caucho:hessian 4.0.63 Apache-1.1
+    com.caucho:hessian 4.0.63 Apache-1.1 see:licenses/Apache-1.1
 
 ========================================================================
 Apache-2.0 licenses
@@ -426,489 +426,484 @@ Apache-2.0 licenses
 BSD-2-Clause licenses
 ========================================================================
 
-    org.postgresql:postgresql 42.3.8 BSD-2-Clause
-    webidl-conversions 3.0.1 BSD-2-Clause
-    com.github.luben:zstd-jni 1.5.0-4 BSD 2-Clause
+    org.postgresql:postgresql 42.3.8 BSD-2-Clause see:licenses/postgresql-BSD-2-Clause
+    webidl-conversions 3.0.1 BSD-2-Clause see:licenses/webidl-conversions-BSD-2-Clause
+    com.github.luben:zstd-jni 1.5.0-4 BSD 2-Clause see:licenses/zstd-jni-BSD-2-Clause
 
 ========================================================================
 BSD-3-Clause licenses
 ========================================================================
 
-    @uni/action-sheet 1.0.8 BSD-3-Clause
-    @uni/clipboard 1.0.9 BSD-3-Clause
-    @uni/env 1.1.1 BSD-3-Clause
-    @uni/file 1.1.1 BSD-3-Clause
-    @uni/image 1.1.3 BSD-3-Clause
-    @uni/navigate 1.0.11 BSD-3-Clause
-    @uni/page-scroll-to 1.0.0 BSD-3-Clause
-    @uni/vibrate 1.0.1 BSD-3-Clause
-    @uni/video 1.0.8 BSD-3-Clause
-    babel-plugin-emotion/node_modules/source-map 0.5.7 BSD-3-Clause
-    driver-dom 2.2.2 BSD-3-Clause
-    driver-dom/node_modules/style-unit 3.0.5 BSD-3-Clause
-    driver-miniapp 0.1.5 BSD-3-Clause
-    driver-universal 3.5.0 BSD-3-Clause
-    driver-weex 2.1.0 BSD-3-Clause
-    driver-weex/node_modules/style-unit 3.0.5 BSD-3-Clause
-    dva-core/node_modules/warning 3.0.0 BSD-3-Clause
-    dva/node_modules/hoist-non-react-statics 2.5.5 BSD-3-Clause
-    flat 5.0.2 BSD-3-Clause
-    hoist-non-react-statics 2.5.5 BSD-3-Clause
-    hoist-non-react-statics 3.3.2 BSD-3-Clause
-    rax 1.2.3 BSD-3-Clause
-    rax-children 1.0.0 BSD-3-Clause
-    rax-clone-element 1.0.0 BSD-3-Clause
-    rax-create-factory 1.0.0 BSD-3-Clause
-    rax-is-valid-element 1.0.1 BSD-3-Clause
-    react-transition-group 2.9.0 BSD-3-Clause
-    serialize-javascript 5.0.1 BSD-3-Clause
-    source-map 0.5.7 BSD-3-Clause
-    sprintf-js 1.0.3 BSD-3-Clause
-    style-unit 2.0.1 BSD-3-Clause
-    style-unit 3.0.5 BSD-3-Clause
-    style-unit/node_modules/universal-env 2.0.0 BSD-3-Clause
-    universal-choose-image 1.3.0 BSD-3-Clause
-    universal-device 1.0.3 BSD-3-Clause
-    universal-device 2.3.1 BSD-3-Clause
-    universal-env 0.6.6 BSD-3-Clause
-    universal-env 2.0.0 BSD-3-Clause
-    universal-panresponder 0.6.5 BSD-3-Clause
-    universal-panresponder/node_modules/universal-env 0.6.6 BSD-3-Clause
-    universal-transition 1.1.1 BSD-3-Clause
-    universal-unit-tool 1.0.0 BSD-3-Clause
-    universal-unit-tool/node_modules/universal-device 2.3.1 BSD-3-Clause
-    warning 3.0.0 BSD-3-Clause
-    com.thoughtworks.xstream:xstream 1.4.20 BSD-3-Clause
-    org.antlr:ST4 4.3  The BSD License
-    org.antlr:antlr-runtime 3.5.2 The BSD License
-    org.antlr:antlr4 4.8 The BSD License
-    org.codehaus.janino:commons-compiler 3.1.10 BSD-3-Clause
-    org.codehaus.janino:janino 3.1.10 BSD-3-Clause
-    org.antlr:stringtemplate 3.2.1 BSD-3-Clause
-    antlr:antlr 2.7.7 BSD-3-Clause
-    org.antlr:antlr4-runtime 4.8 BSD-3-Clause
-    org.abego.treelayout:org.abego.treelayout.core 1.0.3 BSD-3-Clause
+    @uni/action-sheet 1.0.8 BSD-3-Clause see:licenses/uni-BSD-3-Clause
+    @uni/clipboard 1.0.9 BSD-3-Clause see:licenses/uni-BSD-3-Clause
+    @uni/env 1.1.1 BSD-3-Clause see:licenses/uni-BSD-3-Clause
+    @uni/file 1.1.1 BSD-3-Clause see:licenses/uni-BSD-3-Clause
+    @uni/image 1.1.3 BSD-3-Clause see:licenses/uni-BSD-3-Clause
+    @uni/navigate 1.0.11 BSD-3-Clause see:licenses/uni-BSD-3-Clause
+    @uni/page-scroll-to 1.0.0 BSD-3-Clause see:licenses/uni-BSD-3-Clause
+    @uni/vibrate 1.0.1 BSD-3-Clause see:licenses/uni-BSD-3-Clause
+    @uni/video 1.0.8 BSD-3-Clause see:licenses/uni-BSD-3-Clause
+    babel-plugin-emotion/node_modules/source-map 0.5.7 BSD-3-Clause see:licenses/source-map-BSD-3-Clause
+    driver-dom 2.2.2 BSD-3-Clause see:licenses/driver-dom-BSD-3-Clause
+    driver-dom/node_modules/style-unit 3.0.5 BSD-3-Clause see:licenses/driver-dom-BSD-3-Clause
+    driver-miniapp 0.1.5 BSD-3-Clause see:licenses/driver-miniapp-BSD-3-Clause
+    driver-universal 3.5.0 BSD-3-Clause see:licenses/driver-universal-BSD-3-Clause
+    driver-weex 2.1.0 BSD-3-Clause see:licenses/driver-weex-BSD-3-Clause
+    driver-weex/node_modules/style-unit 3.0.5 BSD-3-Clause see:licenses/driver-weex-BSD-3-Clause
+    dva-core/node_modules/warning 3.0.0 BSD-3-Clause see:licenses/warning-BSD-3-Clause
+    dva/node_modules/hoist-non-react-statics 2.5.5 BSD-3-Clause see:licenses/hoist-non-react-statics-BSD-3-Clause
+    flat 5.0.2 BSD-3-Clause see:licenses/flat-BSD-3-Clause
+    hoist-non-react-statics 2.5.5 BSD-3-Clause see:licenses/hoist-non-react-statics-BSD-3-Clause
+    hoist-non-react-statics 3.3.2 BSD-3-Clause see:licenses/hoist-non-react-statics-BSD-3-Clause
+    rax 1.2.3 BSD-3-Clause see:licenses/rax-BSD-3-Clause
+    rax-children 1.0.0 BSD-3-Clause see:licenses/rax-BSD-3-Clause
+    rax-clone-element 1.0.0 BSD-3-Clause see:licenses/rax-BSD-3-Clause
+    rax-create-factory 1.0.0 BSD-3-Clause see:licenses/rax-BSD-3-Clause
+    rax-is-valid-element 1.0.1 BSD-3-Clause see:licenses/rax-BSD-3-Clause
+    react-transition-group 2.9.0 BSD-3-Clause see:licenses/react-transition-group-BSD-3-Clause
+    serialize-javascript 5.0.1 BSD-3-Clause see:licenses/serialize-javascript-BSD-3-Clause
+    source-map 0.5.7 BSD-3-Clause see:licenses/source-map-BSD-3-Clause
+    sprintf-js 1.0.3 BSD-3-Clause see:licenses/sprintf-js-BSD-3-Clause
+    style-unit 2.0.1 BSD-3-Clause see:licenses/rax-BSD-3-Clause
+    style-unit 3.0.5 BSD-3-Clause see:licenses/rax-BSD-3-Clause
+    style-unit/node_modules/universal-env 2.0.0 BSD-3-Clause see:licenses/rax-BSD-3-Clause
+    universal-choose-image 1.3.0 BSD-3-Clause see:licenses/universal-BSD-3-Clause
+    universal-device 1.0.3 BSD-3-Clause see:licenses/universal-BSD-3-Clause
+    universal-device 2.3.1 BSD-3-Clause see:licenses/universal-BSD-3-Clause
+    universal-env 0.6.6 BSD-3-Clause see:licenses/universal-BSD-3-Clause
+    universal-env 2.0.0 BSD-3-Clause see:licenses/universal-BSD-3-Clause
+    universal-panresponder 0.6.5 BSD-3-Clause see:licenses/universal-BSD-3-Clause
+    universal-panresponder/node_modules/universal-env 0.6.6 BSD-3-Clause see:licenses/universal-BSD-3-Clause
+    universal-transition 1.1.1 BSD-3-Clause see:licenses/universal-BSD-3-Clause
+    universal-unit-tool 1.0.0 BSD-3-Clause see:licenses/universal-BSD-3-Clause
+    universal-unit-tool/node_modules/universal-device 2.3.1 BSD-3-Clause see:licenses/universal-BSD-3-Clause
+    warning 3.0.0 BSD-3-Clause see:licenses/warning-BSD-3-Clause
+    com.thoughtworks.xstream:xstream 1.4.21 BSD-3-Clause see:licenses/xstream-BSD-3-Clause
+    org.antlr:ST4 4.3  The BSD License see:licenses/antlr4-ST4-BSD
+    org.antlr:antlr-runtime 3.5.2 The BSD License see:licenses/antlr3-BSD
+    org.antlr:antlr4 4.8 The BSD License see:licenses/antlr4-BSD
+    org.codehaus.janino:commons-compiler 3.1.10 BSD-3-Clause see:licenses/janino-BSD-3-Clause
+    org.codehaus.janino:janino 3.1.10 BSD-3-Clause see:licenses/janino-BSD-3-Clause
+    org.antlr:stringtemplate 3.2.1 BSD-3-Clause see:licenses/antlr-stringtemplate3-BSD-3-Clause
+    antlr:antlr 2.7.7 BSD-3-Clause see:licenses/antlr2-BSD-3-Clause
+    org.antlr:antlr4-runtime 4.8 BSD-3-Clause see:licenses/antlr4-BSD
+    org.abego.treelayout:org.abego.treelayout.core 1.0.3 BSD-3-Clause see:licenses/abego-treelayout-BSD-3-Clause
 
 ========================================================================
 CDDL-1.0 licenses
 ========================================================================
 
-    javax.servlet:javax.servlet-api 4.0.1 CDDL-1.0
-    javax.ws.rs:jsr311-api 1.1.1 CDDL-1.0
-    org.glassfish:javax.json 1.0.4 CDDL-1.0
-    com.sun.jersey.contribs:jersey-apache-client4 1.19.1 CDDL-1.0
-    com.sun.jersey:jersey-client 1.19.1 CDDL-1.0
-    com.sun.jersey:jersey-core 1.19.1 CDDL-1.0
+    javax.ws.rs:jsr311-api 1.1.1 CDDL-1.0 see:licenses/CDDL-1.0
+
+========================================================================
+CDDL+GPL-1.1 licenses
+========================================================================
+
+    javax.servlet:javax.servlet-api 4.0.1 CDDL+GPL-1.1 see:licenses/CDDL+GPL-1.1
+    org.glassfish:javax.json 1.0.4 CDDL+GPL-1.1 see:licenses/CDDL+GPL-1.1
+    com.sun.jersey.contribs:jersey-apache-client4 1.19.1 CDDL+GPL-1.1 see:licenses/CDDL+GPL-1.1
+    com.sun.jersey:jersey-client 1.19.1 CDDL+GPL-1.1 see:licenses/CDDL+GPL-1.1
+    com.sun.jersey:jersey-core 1.19.1 CDDL+GPL-1.1 see:licenses/CDDL+GPL-1.1
 
 ========================================================================
 EPL-1.0  licenses
 ========================================================================
 
-    ch.qos.logback:logback-classic 1.2.12 EPL-1.0
-    ch.qos.logback:logback-core 1.2.12 EPL-1.0
+    ch.qos.logback:logback-classic 1.2.12 EPL-1.0 see:licenses/EPL-1.0
+    ch.qos.logback:logback-core 1.2.12 EPL-1.0 see:licenses/EPL-1.0
 
 ========================================================================
 EPL-2.0 licenses
 ========================================================================
 
-    jakarta.annotation:jakarta.annotation-api 1.3.5 EPL-2.0
+    jakarta.annotation:jakarta.annotation-api 1.3.5 EPL-2.0 see:licenses/EPL-2.0
 
 ========================================================================
 ISC licenses
 ========================================================================
 
-    @ungap/promise-all-settled 1.1.2 ISC
-    anymatch 3.1.3 ISC
-    browser-stdout 1.3.1 ISC
-    browserify-sign 4.2.3 ISC
-    cliui 8.0.1 ISC
-    css-color-keywords 1.0.0 ISC
-    electron-to-chromium 1.4.681 ISC
-    fs.realpath 1.0.0 ISC
-    get-caller-file 2.0.5 ISC
-    glob 7.2.3 ISC
-    glob-parent 5.1.2 ISC
-    inflight 1.0.6 ISC
-    inherits 2.0.4 ISC
-    inherits-browser 0.1.0 ISC
-    isexe 2.0.0 ISC
-    lru-cache 5.1.1 ISC
-    minimalistic-assert 1.0.1 ISC
-    minimatch 3.1.2 ISC
-    once 1.4.0 ISC
-    parse-asn1 5.1.7 ISC
-    picocolors 1.0.0 ISC
-    semver 6.3.1 ISC
-    which 2.0.2 ISC
-    wide-align 1.1.3 ISC
-    wrappy 1.0.2 ISC
-    y18n 5.0.8 ISC
-    yallist 3.1.1 ISC
-    yaml 1.10.2 ISC
-    yargs-parser 20.2.4 ISC
+    @ungap/promise-all-settled 1.1.2 ISC see:licenses/ungap-ISC
+    anymatch 3.1.3 ISC see:licenses/anymatch-ISC
+    browser-stdout 1.3.1 ISC see:licenses/browser-stdout-ISC
+    browserify-sign 4.2.3 ISC see:licenses/browserify-sign-ISC
+    cliui 8.0.1 ISC see:licenses/cliui-ISC
+    css-color-keywords 1.0.0 ISC see:licenses/css-color-keywords-ISC
+    electron-to-chromium 1.4.681 ISC see:licenses/electron-to-chromium-ISC
+    fs.realpath 1.0.0 ISC see:licenses/fs.realpath-ISC
+    get-caller-file 2.0.5 ISC see:licenses/get-caller-file-ISC
+    glob 7.2.3 ISC see:licenses/glob-ISC
+    glob-parent 5.1.2 ISC see:licenses/glob-parent-ISC
+    inflight 1.0.6 ISC see:licenses/inflight-ISC
+    inherits 2.0.4 ISC see:licenses/inherits-ISC
+    inherits-browser 0.1.0 ISC see:licenses/inherits-browser-ISC
+    isexe 2.0.0 ISC see:licenses/isexe-ISC
+    lru-cache 5.1.1 ISC see:licenses/lru-cache-ISC
+    minimalistic-assert 1.0.1 ISC see:licenses/minimalistic-assert-ISC
+    minimatch 3.1.2 ISC see:licenses/minimatch-ISC
+    once 1.4.0 ISC see:licenses/once-ISC
+    parse-asn1 5.1.7 ISC see:licenses/parse-asn1-ISC
+    picocolors 1.0.0 ISC see:licenses/picocolors-ISC
+    semver 6.3.1 ISC see:licenses/semver-ISC
+    which 2.0.2 ISC see:licenses/which-ISC
+    wide-align 1.1.3 ISC see:licenses/wide-align-ISC
+    wrappy 1.0.2 ISC see:licenses/wrappy-ISC
+    y18n 5.0.8 ISC see:licenses/y18n-ISC
+    yallist 3.1.1 ISC see:licenses/yallist-ISC
+    yaml 1.10.2 ISC see:licenses/yaml-ISC
+    yargs-parser 20.2.4 ISC see:licenses/yargs-parser-ISC
 
 ========================================================================
 MIT licenses
 ========================================================================
 
-    @alicloud/console-components 1.6.2 MIT
-    @alicloud/console-components-actions 1.1.1 MIT
+    @alicloud/console-components 1.6.2 MIT see:licenses/alicloud-console-components-MIT
+    @alicloud/console-components-actions 1.1.1 MIT see:licenses/alicloud-console-components-actions-MIT
     @alicloud/console-components-app-layout 1.1.4 MIT
     @alicloud/console-components-console-menu 1.2.12 MIT
     @alicloud/css-var-utils 0.1.0 MIT
     @alifd/babel-runtime-jsx-style-transform 1.0.0 MIT
-    @alifd/field 1.7.0 MIT
+    @alifd/field 1.7.0 MIT see:licenses/alifd-field-MIT
     @alifd/meet-react 2.9.9 MIT
     @alifd/meet-react-component-one 1.3.2 MIT
-    @alifd/meet-react/node_modules/classnames 2.2.6 MIT
-    @alifd/next 1.24.18 MIT
-    @alifd/next/node_modules/@alifd/field 1.5.8 MIT
-    @alifd/next/node_modules/@alifd/validate 1.2.3 MIT
-    @alifd/validate 1.4.0 MIT
-    @babel/code-frame 7.23.5 MIT
-    @babel/compat-data 7.23.5 MIT
-    @babel/core 7.23.9 MIT
-    @babel/generator 7.23.6 MIT
-    @babel/helper-annotate-as-pure 7.22.5 MIT
-    @babel/helper-compilation-targets 7.23.6 MIT
-    @babel/helper-environment-visitor 7.22.20 MIT
-    @babel/helper-function-name 7.23.0 MIT
-    @babel/helper-hoist-variables 7.22.5 MIT
-    @babel/helper-module-imports 7.22.15 MIT
-    @babel/helper-module-transforms 7.23.3 MIT
-    @babel/helper-plugin-utils 7.22.5 MIT
-    @babel/helper-simple-access 7.22.5 MIT
-    @babel/helper-split-export-declaration 7.22.6 MIT
-    @babel/helper-string-parser 7.23.4 MIT
-    @babel/helper-validator-identifier 7.22.20 MIT
-    @babel/helper-validator-option 7.23.5 MIT
-    @babel/helpers 7.23.9 MIT
-    @babel/highlight 7.23.4 MIT
-    @babel/parser 7.23.9 MIT
-    @babel/plugin-syntax-jsx 7.23.3 MIT
-    @babel/runtime 7.0.0-beta.46 MIT
-    @babel/runtime 7.23.9 MIT
-    @babel/template 7.23.9 MIT
-    @babel/traverse 7.23.9 MIT
-    @babel/types 7.23.9 MIT
-    @bpmn-io/cm-theme 0.1.0-alpha.2 MIT
-    @bpmn-io/diagram-js-ui 0.2.2 MIT
-    @bpmn-io/feel-editor 1.1.0 MIT
-    @bpmn-io/feel-lint 1.2.0 MIT
-    @bpmn-io/properties-panel 3.16.0 MIT
-    @codemirror/autocomplete 6.12.0 MIT
-    @codemirror/commands 6.3.3 MIT
-    @codemirror/language 6.10.0 MIT
-    @codemirror/lint 6.4.2 MIT
-    @codemirror/state 6.4.0 MIT
-    @codemirror/view 6.23.0 MIT
-    @emotion/cache 10.0.29 MIT
-    @emotion/core 10.3.1 MIT
-    @emotion/css 10.0.27 MIT
-    @emotion/hash 0.8.0 MIT
-    @emotion/is-prop-valid 0.8.8 MIT
-    @emotion/memoize 0.7.4 MIT
-    @emotion/serialize 0.11.16 MIT
-    @emotion/serialize/node_modules/csstype 2.6.21 MIT
-    @emotion/sheet 0.9.4 MIT
-    @emotion/stylis 0.8.5 MIT
-    @emotion/unitless 0.7.5 MIT
-    @emotion/utils 0.11.3 MIT
-    @emotion/weak-memoize 0.2.5 MIT
-    @jridgewell/gen-mapping 0.3.4 MIT
-    @jridgewell/resolve-uri 3.1.2 MIT
-    @jridgewell/set-array 1.1.2 MIT
-    @jridgewell/sourcemap-codec 1.4.15 MIT
-    @jridgewell/trace-mapping 0.3.23 MIT
-    @lezer/common 1.2.1 MIT
-    @lezer/highlight 1.2.0 MIT
-    @lezer/lr 1.4.0 MIT
-    @lezer/markdown 1.2.0 MIT
-    @types/history 4.7.11 MIT
-    @types/hoist-non-react-statics 3.3.5 MIT
-    @types/isomorphic-fetch 0.0.34 MIT
-    @types/parse-json 4.0.2 MIT
-    @types/prop-types 15.7.11 MIT
-    @types/react 16.14.56 MIT
-    @types/react-dom 16.9.24 MIT
-    @types/react-router 5.1.20 MIT
-    @types/react-router-dom 16.9.24 MIT
-    @types/react-router  5.1.20 MIT
-    @types/react-router-redux 5.0.27 MIT
-    @types/scheduler 0.16.8 MIT
-    @types/use-sync-external-store 0.0.3 MIT
-    ansi-colors 4.1.1 MIT
-    ansi-regex 3.0.1 MIT
-    ansi-regex 5.0.1 MIT
-    ansi-styles 3.2.1 MIT
-    argparse 1.0.10 MIT
-    asn1.js 4.10.1 MIT
-    asn1.js/node_modules/bn.js 4.12.0 MIT
-    asynckit 0.4.0 MIT
-    axios 1.7.4 MIT
-    babel-plugin-emotion 10.2.2 MIT
-    babel-plugin-emotion/node_modules/babel-plugin-macros 2.8.0 MIT
-    babel-plugin-emotion/node_modules/convert-source-map 1.9.0 MIT
-    babel-plugin-emotion/node_modules/cosmiconfig 6.0.0 MIT
-    babel-plugin-styled-components 2.1.4 MIT
-    babel-plugin-syntax-jsx 6.18.0 MIT
-    babel-runtime 6.26.0 MIT
-    babel-runtime/node_modules/regenerator-runtime 0.11.1 MIT
-    balanced-match 1.0.2 MIT
-    bignumber.js 9.1.2 MIT
-    bn.js 5.2.1 MIT
-    brace-expansion 1.1.11 MIT
-    braces 3.0.2 MIT
-    braces 3.0.3 MIT
-    braces 2.3.1 MIT
-    brorand 1.1.0 MIT
-    browserify-aes 1.2.0 MIT
-    browserify-rsa 4.1.0 MIT
-    browserify-sign/node_modules/hash-base 3.0.4 MIT
-    browserify-sign/node_modules/isarray 1.0.0 MIT
-    browserify-sign/node_modules/readable-stream 2.3.8 MIT
-    browserify-sign/node_modules/readable-stream/node_modules/safe-buffer 5.1.2 MIT
-    browserify-sign/node_modules/string_decoder 1.1.1 MIT
-    browserify-sign/node_modules/string_decoder/node_modules/safe-buffer 5.1.2 MIT
-    browserslist 4.23.0 MIT
-    buffer-xor 1.0.3 MIT
-    callsites 3.1.0 MIT
-    camelcase 6.3.0 MIT
-    camelize 1.0.1 MIT
-    chalk 2.4.2 MIT
-    chalk 4.1.2 MIT
-    chokidar 3.5.1 MIT
-    cipher-base 1.0.4 MIT
-    classnames 2.2.6 MIT
-    classnames 2.5.1 MIT
-    classnames 2.5.1 MIT
-    clsx 2.1.0 MIT
-    color-convert 1.9.3 MIT
-    color-convert 2.0.1 MIT
-    color-name 1.1.3 MIT
-    color-name 1.1.4 MIT
-    combined-stream 1.0.8 MIT
-    component-event 0.2.1 MIT
-    concat-map 0.0.1 MIT
-    convert-source-map 2.0.0 MIT
-    core-js 2.6.12 MIT
-    cosmiconfig 6.0.0 MIT
-    core-util-is 1.0.3 MIT
-    create-hash 1.2.0 MIT
-    create-hmac 1.1.7 MIT
-    crelt 1.0.6 MIT
-    css-to-react-native 2.3.2 MIT
-    css-to-react-native/node_modules/postcss-value-parser 3.3.1 MIT
-    csstype 3.1.3 MIT
-    dayjs 1.11.10 MIT
-    debug 4.3.6 MIT
-    decamelize 4.0.0 MIT
-    decode-uri-component 0.4.1 MIT
-    delayed-stream 1.0.0 MIT
-    diagram-js 12.8.1 MIT
-    diagram-js-grid 0.2.0 MIT
-    didi 9.0.2 MIT
-    dom-helpers 3.4.0 MIT
-    dom-walk 0.1.2 MIT
-    dom7 3.0.0 MIT
-    domify 1.4.2 MIT
-    dva 2.4.1 MIT
-    dva-core 1.4.0 MIT
-    dva-core/node_modules/@babel/runtime 7.0.0-beta.46 MIT
-    dva-core/node_modules/redux 3.7.2 MIT
-    dva-core/node_modules/regenerator-runtime 0.11.1 MIT
-    dva/node_modules/@babel/runtime 7.0.0-beta.46 MIT
-    dva/node_modules/@types/react-router-dom 4.3.5 MIT
-    dva/node_modules/react-redux 5.0.7 MIT
-    dva/node_modules/react-router 4.3.1 MIT
-    dva/node_modules/react-router-dom 4.3.1 MIT
-    dva/node_modules/react-router-redux 5.0.0-alpha.9 MIT
-    dva/node_modules/redux 3.7.2 MIT
-    dva/node_modules/regenerator-runtime 0.11.1 MIT
-    elliptic 6.6.0 MIT
-    elliptic/node_modules/bn.js 4.12.0 MIT
-    encoding 0.1.13 MIT
-    encoding/node_modules/iconv-lite 0.6.3 MIT
-    error-ex 1.3.2 MIT
-    escalade 3.1.2 MIT
-    escape-string-regexp 1.0.5 MIT
-    escape-string-regexp 4.0.0 MIT
-    evp_bytestokey 1.0.3 MIT
-    feelers 1.2.0 MIT
-    feelin 2.3.0 MIT
-    fill-range 7.0.1 MIT
-    find-root 1.1.0 MIT
-    find-up 5.0.0 MIT
-    flatten 1.0.3 MIT
-    focus-trap 7.5.4 MIT
-    follow-redirects 1.15.6 MIT
-    form-data 4.0.0 MIT
-    fsevents 2.3.3 MIT
-    function-bind 1.1.2 MIT
-    gensync 1.0.0-beta.2 MIT
-    global 4.4.0 MIT
-    globals 11.12.0 MIT
-    growl 1.10.5 MIT
-    hammerjs 2.0.8 MIT
-    has-flag 3.0.0 MIT
-    hash-base 3.1.0 MIT
-    hash.js 1.1.7 MIT
-    hasown 2.0.1 MIT
-    he 1.2.0 MIT
-    history 4.10.1 MIT
-    hmac-drbg 1.0.1 MIT
-    iconv-lite 0.6.3 MIT
-    import-fresh 3.3.0 MIT
-    invariant 2.2.4 MIT
-    is-arrayish 0.2.1 MIT
-    is-binary-path 2.1.0 MIT
-    is-core-module 2.13.1 MIT
-    is-extglob 2.1.1 MIT
-    is-fullwidth-code-point 2.0.0 MIT
-    is-fullwidth-code-point 3.0.0 MIT
-    is-glob 4.0.3 MIT
-    is-number 7.0.0 MIT
-    is-plain-obj 2.1.0 MIT
-    is-plain-object 2.0.4 MIT
-    is-what 3.14.1 MIT
-    isarray 0.0.1 MIT
-    isobject 3.0.1 MIT
-    isomorphic-fetch 2.2.1 MIT
-    jquery 3.7.1 MIT
-    js-tokens 4.0.0 MIT
-    js-tokens 4.0.0 MIT
-    jsesc 2.5.2 MIT
-    json-parse-even-better-errors 2.3.1 MIT
-    json5 2.2.3 MIT
-    lang-feel 2.0.0 MIT
-    lezer-feel 1.2.4 MIT
-    lines-and-columns 1.2.4 MIT
-    loader-utils 3.2.1 MIT
-    locate-path 6.0.0 MIT
-    lodash 4.17.21 MIT
-    lodash-es 4.17.21 MIT
-    lodash.clonedeep 4.5.0 MIT
-    log-symbols 4.0.0 MIT
-    loose-envify 1.4.0 MIT
-    loose-envify 1.4.0 MIT
-    luxon 3.4.4 MIT
-    md5.js 1.3.5 MIT
-    memoize-one 5.2.1 MIT
-    merge-anything 2.4.4 MIT
-    mime-db 1.52.0 MIT
-    mime-types 2.1.35 MIT
-    min-dash 4.2.1 MIT
-    min-document 2.19.0 MIT
-    min-dom 4.1.0 MIT
-    minimalistic-crypto-utils 1.0.1 MIT
-    mocha 8.4.0 MIT
-    moment 2.30.1 MIT
-    ms 2.1.2 MIT
-    nanoid 3.1.31 MIT
-    node-fetch 2.6.7 MIT
-    node-releases 2.0.14 MIT
-    normalize-path 3.0.0 MIT
-    object-assign 4.1.1 MIT
-    object-assign 4.1.1 MIT
-    object-refs 0.3.0 MIT
-    omit.js 2.0.2 MIT
-    p-limit 3.1.0 MIT
-    p-locate 5.0.0 MIT
-    org.checkerframework:checker-qual 3.37.0 MIT
-    parent-module 1.0.1 MIT
-    parse-asn1/node_modules/hash-base 3.0.4 MIT
-    parse-json 5.2.0 MIT
-    path-exists 4.0.0 MIT
-    path-intersection 2.2.1 MIT
-    path-is-absolute 1.0.1 MIT
-    path-parse 1.0.7 MIT
-    path-to-regexp 1.8.0 MIT
-    path-type 4.0.0 MIT
-    pbkdf2 3.1.2 MIT
-    picomatch 2.3.1 MIT
-    postcss-value-parser 3.3.1 MIT
-    preact 10.19.3 MIT
-    process 0.11.10 MIT
-    process-nextick-args 2.0.1 MIT
-    prop-types 15.8.1 MIT
-    prop-types 15.8.1 MIT
-    proxy-from-env 1.1.0 MIT
-    randombytes 2.1.0 MIT
-    react 16.14.0 MIT
-    react 16.14.0 MIT
-    react-dom 16.14.0 MIT
-    react-is 16.13.1 MIT
-    react-is 16.13.1 MIT
-    react-lifecycles-compat 3.0.4 MIT
-    react-loading-skeleton 2.2.0 MIT
-    react-redux 8.1.3 MIT
-    react-redux/node_modules/react-is 18.2.0 MIT
-    react-router 5.3.4 MIT
-    react-router-dom 4.3.1 MIT
-    react-router-dom 5.3.4 MIT
-    react-router-redux 4.0.8 MIT
-    react-router-redux 5.0.0-alpha.9 MIT
-    readable-stream 3.6.2 MIT
-    readdirp 3.5.0 MIT
-    redux 3.7.2 MIT
-    redux 5.0.1 MIT
-    redux-saga 0.16.2 MIT
-    redux-thunk 3.1.0 MIT
-    regenerator-runtime 0.14.1 MIT
-    require-directory 2.1.1 MIT
-    resize-observer-polyfill 1.5.1 MIT
-    resolve 1.22.8 MIT
-    resolve-from 4.0.0 MIT
-    resolve-pathname 3.0.0 MIT
-    ripemd160 2.0.2 MIT
-    sha.js 2.4.11 MIT
-    safe-buffer 5.2.1 MIT
-    safer-buffer 2.1.2 MIT
-    scheduler 0.19.1 MIT
-    shallow-element-equals 1.0.1 MIT
-    ssr-window 3.0.0 MIT
-    string-width 2.1.1 MIT
-    string-width 4.2.3 MIT
-    string_decoder 1.3.0 MIT
-    strip-ansi 4.0.0 MIT
-    strip-ansi 6.0.1 MIT
-    strip-json-comments 3.1.1 MIT
-    style-equal 1.0.0 MIT
-    style-mod 4.1.0 MIT
-    styled-components 4.4.1 MIT
-    stylis 3.5.4 MIT
-    stylis-rule-sheet 0.0.10 MIT
-    supports-color 5.5.0 MIT
-    supports-color 7.2.0 MIT
-    supports-color 8.1.1 MIT
-    supports-preserve-symlinks-flag 1.0.0 MIT
-    svelte 3.59.2 MIT
-    swiper 6.5.1 MIT
-    symbol-observable 1.2.0 MIT
-    tabbable 6.2.0 MIT
-    tiny-invariant 1.3.3 MIT
-    tiny-svg 3.0.1 MIT
-    tiny-warning 1.0.3 MIT
-    to-fast-properties 2.0.0 MIT
-    to-regex-range 5.0.1 MIT
-    tr46 0.0.3 MIT
-    update-browserslist-db 1.0.13 MIT
-    use-sync-external-store 1.2.0 MIT
-    util-deprecate 1.0.2 MIT
-    value-equal 1.0.1 MIT
-    w3c-keyname 2.2.8 MIT
-    warning 4.0.3 MIT
-    whatwg-fetch 3.6.20 MIT
-    whatwg-url 5.0.0 MIT
-    wrap-ansi 7.0.0 MIT
-    yamljs 0.3.0 MIT
-    yargs 16.2.0 MIT
-    yargs-unparser 2.0.0 MIT
-    yocto-queue 0.1.0 MIT
-    org.slf4j:jul-to-slf4j 1.7.36  MIT
-    org.slf4j:slf4j-api 1.7.36  MIT
-    redis.clients:jedis 3.8.0 MIT
-    org.checkerframework:checker-qual 3.37.0 MIT
+    @alifd/meet-react/node_modules/classnames 2.2.6 MIT see:licenses/classnames-MIT
+    @alifd/next 1.24.18 MIT see:licenses/alifd-next-MIT
+    @alifd/next/node_modules/@alifd/field 1.5.8 MIT see:licenses/alifd-field-MIT
+    @alifd/next/node_modules/@alifd/validate 1.2.3 MIT see:licenses/alifd-validate-MIT
+    @alifd/validate 1.4.0 MIT see:licenses/alifd-validate-MIT
+    @babel/code-frame 7.26.2 MIT see:licenses/babel-code-frame-MIT
+    @babel/compat-data 7.23.5 MIT see:licenses/babel-compat-data-MIT
+    @babel/core 7.23.9 MIT see:licenses/babel-core-MIT
+    @babel/generator 7.23.6 MIT see:licenses/babel-generator-MIT
+    @babel/helper-annotate-as-pure 7.22.5 MIT see:licenses/babel-helper-annotate-as-pure-MIT
+    @babel/helper-compilation-targets 7.23.6 MIT see:licenses/babel-helper-compilation-targets-MIT
+    @babel/helper-environment-visitor 7.22.20 MIT see:licenses/babel-helper-environment-visitor-MIT
+    @babel/helper-function-name 7.23.0 MIT see:licenses/babel-helper-function-name-MIT
+    @babel/helper-hoist-variables 7.22.5 MIT see:licenses/babel-helper-hoist-variables-MIT
+    @babel/helper-module-imports 7.22.15 MIT see:licenses/babel-helper-module-imports-MIT
+    @babel/helper-module-transforms 7.23.3 MIT see:licenses/babel-helper-module-transforms-MIT
+    @babel/helper-plugin-utils 7.22.5 MIT see:licenses/babel-helper-plugin-utils-MIT
+    @babel/helper-simple-access 7.22.5 MIT see:licenses/babel-helper-simple-access-MIT
+    @babel/helper-split-export-declaration 7.22.6 MIT see:licenses/babel-helper-split-export-declaration-MIT
+    @babel/helper-string-parser 7.25.9 MIT see:licenses/babel-helper-string-parser-MIT
+    @babel/helper-validator-identifier 7.25.9 MIT see:licenses/babel-helper-validator-identifier-MIT
+    @babel/helper-validator-option 7.23.5 MIT see:licenses/babel-helper-validator-option-MIT
+    @babel/helpers 7.27.0 MIT see:licenses/babel-helpers-MIT
+    @babel/highlight 7.23.4 MIT see:licenses/babel-highlight-MIT
+    @babel/parser 7.27.0 MIT see:licenses/babel-parser-MIT
+    @babel/plugin-syntax-jsx 7.23.3 MIT see:licenses/babel-plugin-syntax-jsx-MIT
+    @babel/runtime 7.27.0 MIT see:licenses/babel-runtime-MIT
+    @babel/template 7.27.0 MIT see:licenses/babel-template-MIT
+    @babel/traverse 7.23.9 MIT see:licenses/babel-traverse-MIT
+    @babel/types 7.27.0 MIT see:licenses/babel-types-MIT
+    @bpmn-io/cm-theme 0.1.0-alpha.2 MIT see:licenses/bpmn-io-cm-theme-MIT
+    @bpmn-io/diagram-js-ui 0.2.2 MIT see:licenses/bpmn-io-diagram-js-ui-MIT
+    @bpmn-io/feel-editor 1.1.0 MIT see:licenses/bpmn-io-feel-editor-MIT
+    @bpmn-io/feel-lint 1.2.0 MIT see:licenses/bpmn-io-feel-lint-MIT
+    @bpmn-io/properties-panel 3.16.0 MIT see:licenses/bpmn-io-properties-panel-MIT
+    @codemirror/autocomplete 6.12.0 MIT see:licenses/codemirror-autocomplete-MIT
+    @codemirror/commands 6.3.3 MIT see:licenses/codemirror-commands-MIT
+    @codemirror/language 6.10.0 MIT see:licenses/codemirror-language-MIT
+    @codemirror/lint 6.4.2 MIT see:licenses/codemirror-lint-MIT
+    @codemirror/state 6.4.0 MIT see:licenses/codemirror-state-MIT
+    @codemirror/view 6.23.0 MIT see:licenses/codemirror-view-MIT
+    @emotion/cache 10.0.29 MIT see:licenses/emotion-cache-MIT
+    @emotion/core 10.3.1 MIT see:licenses/emotion-core-MIT
+    @emotion/css 10.0.27 MIT see:licenses/emotion-css-MIT
+    @emotion/hash 0.8.0 MIT see:licenses/emotion-hash-MIT
+    @emotion/is-prop-valid 0.8.8 MIT see:licenses/emotion-is-prop-valid-MIT
+    @emotion/memoize 0.7.4 MIT see:licenses/emotion-memoize-MIT
+    @emotion/serialize 0.11.16 MIT see:licenses/emotion-serialize-MIT
+    @emotion/serialize/node_modules/csstype 2.6.21 MIT see:licenses/csstype-MIT
+    @emotion/sheet 0.9.4 MIT see:licenses/emotion-sheet-MIT
+    @emotion/stylis 0.8.5 MIT see:licenses/emotion-stylis-MIT
+    @emotion/unitless 0.7.5 MIT see:licenses/emotion-unitless-MIT
+    @emotion/utils 0.11.3 MIT see:licenses/emotion-utils-MIT
+    @emotion/weak-memoize 0.2.5 MIT see:licenses/emotion-weak-memoize-MIT
+    @jridgewell/gen-mapping 0.3.4 MIT see:licenses/jridgewell-gen-mapping-MIT
+    @jridgewell/resolve-uri 3.1.2 MIT see:licenses/jridgewell-resolve-uri-MIT
+    @jridgewell/set-array 1.1.2 MIT see:licenses/jridgewell-set-array-MIT
+    @jridgewell/sourcemap-codec 1.4.15 MIT see:licenses/jridgewell-sourcemap-codec-MIT
+    @jridgewell/trace-mapping 0.3.23 MIT see:licenses/jridgewell-trace-mapping-MIT
+    @lezer/common 1.2.1 MIT see:licenses/lezer-common-MIT
+    @lezer/highlight 1.2.0 MIT see:licenses/lezer-highlight-MIT
+    @lezer/lr 1.4.0 MIT see:licenses/lezer-lr-MIT
+    @lezer/markdown 1.2.0 MIT see:licenses/lezer-markdown-MIT
+    @types/history 4.7.11 MIT see:licenses/types-history-MIT
+    @types/hoist-non-react-statics 3.3.5 MIT see:licenses/types-hoist-non-react-statics-MIT
+    @types/isomorphic-fetch 0.0.34 MIT see:licenses/types-isomorphic-fetch-MIT
+    @types/parse-json 4.0.2 MIT see:licenses/types-parse-json-MIT
+    @types/prop-types 15.7.11 MIT see:licenses/types-prop-types-MIT
+    @types/react 16.14.56 MIT see:licenses/types-react-MIT
+    @types/react-dom 16.9.24 MIT see:licenses/types-react-dom-MIT
+    @types/react-router 5.1.20 MIT see:licenses/types-react-router-MIT
+    @types/react-router-dom 16.9.24 MIT see:licenses/types-react-router-dom-MIT
+    @types/react-router-redux 5.0.27 MIT see:licenses/types-react-router-redux-MIT
+    @types/scheduler 0.16.8 MIT see:licenses/types-scheduler-MIT
+    @types/use-sync-external-store 0.0.3 MIT see:licenses/types-use-sync-external-store-MIT
+    ansi-colors 4.1.1 MIT see:licenses/ansi-colors-MIT
+    ansi-regex 3.0.1 MIT see:licenses/ansi-regex-MIT
+    ansi-regex 5.0.1 MIT see:licenses/ansi-regex-MIT
+    ansi-styles 3.2.1 MIT see:licenses/ansi-styles-MIT
+    argparse 1.0.10 MIT see:licenses/argparse-MIT
+    asn1.js 4.10.1 MIT see:licenses/asn1.js-MIT
+    asn1.js/node_modules/bn.js 4.12.0 MIT see:licenses/bn.js-MIT
+    asynckit 0.4.0 MIT see:licenses/asynckit-MIT
+    axios 1.8.2 MIT see:licenses/axios-MIT
+    babel-plugin-emotion 10.2.2 MIT see:licenses/babel-plugin-emotion-MIT
+    babel-plugin-emotion/node_modules/babel-plugin-macros 2.8.0 MIT see:licenses/babel-plugin-emotion-MIT
+    babel-plugin-emotion/node_modules/convert-source-map 1.9.0 MIT see:licenses/convert-source-map-MIT
+    babel-plugin-emotion/node_modules/cosmiconfig 6.0.0 MIT see:licenses/cosmiconfig-MIT
+    babel-plugin-styled-components 2.1.4 MIT see:licenses/babel-plugin-styled-components-MIT
+    babel-plugin-syntax-jsx 6.18.0 MIT see:licenses/babel-plugin-syntax-jsx-MIT
+    babel-runtime 6.26.0 MIT see:licenses/babel-runtime-MIT
+    babel-runtime/node_modules/regenerator-runtime 0.11.1 MIT see:licenses/regenerator-runtime-MIT
+    balanced-match 1.0.2 MIT see:licenses/balanced-match-MIT
+    bignumber.js 9.1.2 MIT see:licenses/bignumber.js-MIT
+    bn.js 5.2.1 MIT see:licenses/bn.js-MIT
+    brace-expansion 1.1.11 MIT see:licenses/brace-expansion-MIT
+    braces 3.0.2 MIT see:licenses/braces-3.0.2-MIT
+    braces 3.0.3 MIT see:licenses/braces-MIT
+    braces 2.3.1 MIT see:licenses/braces-2.3.1-MIT
+    brorand 1.1.0 MIT see:licenses/brorand-MIT
+    browserify-aes 1.2.0 MIT see:licenses/browserify-aes-MIT
+    browserify-rsa 4.1.0 MIT see:licenses/browserify-rsa-MIT
+    browserify-sign/node_modules/hash-base 3.0.4 MIT see:licenses/hash-base-MIT
+    browserify-sign/node_modules/isarray 1.0.0 MIT see:licenses/isarray-MIT
+    browserify-sign/node_modules/readable-stream 2.3.8 MIT see:licenses/readable-stream-MIT
+    browserify-sign/node_modules/readable-stream/node_modules/safe-buffer 5.1.2 MIT see:licenses/safe-buffer-MIT
+    browserify-sign/node_modules/string_decoder 1.1.1 MIT see:licenses/string-decoder-MIT
+    browserify-sign/node_modules/string_decoder/node_modules/safe-buffer 5.1.2 MIT see:licenses/safe-buffer-MIT
+    browserslist 4.23.0 MIT see:licenses/browserslist-MIT
+    buffer-xor 1.0.3 MIT see:licenses/buffer-xor-MIT
+    callsites 3.1.0 MIT see:licenses/callsites-MIT
+    camelcase 6.3.0 MIT see:licenses/camelcase-MIT
+    camelize 1.0.1 MIT see:licenses/camelize-MIT
+    chalk 2.4.2 MIT see:licenses/chalk-MIT
+    chalk 4.1.2 MIT see:licenses/chalk-MIT
+    chokidar 3.5.1 MIT see:licenses/chokidar-MIT
+    cipher-base 1.0.4 MIT see:licenses/cipher-base-MIT
+    classnames 2.2.6 MIT see:licenses/classnames-MIT
+    classnames 2.5.1 MIT see:licenses/classnames-2.5.1-MIT
+    clsx 2.1.0 MIT see:licenses/clsx-MIT
+    color-convert 1.9.3 MIT see:licenses/color-convert-MIT
+    color-convert 2.0.1 MIT see:licenses/color-convert-MIT
+    color-name 1.1.3 MIT see:licenses/color-name-MIT
+    color-name 1.1.4 MIT see:licenses/color-name-MIT
+    combined-stream 1.0.8 MIT see:licenses/combined-stream-MIT
+    component-event 0.2.1 MIT see:licenses/component-event-MIT
+    concat-map 0.0.1 MIT see:licenses/concat-map-MIT
+    convert-source-map 2.0.0 MIT see:licenses/convert-source-map-MIT
+    core-js 2.6.12 MIT see:licenses/core-js-MIT
+    cosmiconfig 6.0.0 MIT see:licenses/cosmiconfig-MIT
+    core-util-is 1.0.3 MIT see:licenses/core-util-is-MIT
+    create-hash 1.2.0 MIT see:licenses/create-hash-MIT
+    create-hmac 1.1.7 MIT see:licenses/create-hmac-MIT
+    crelt 1.0.6 MIT see:licenses/crelt-MIT
+    css-to-react-native 2.3.2 MIT see:licenses/css-to-react-native-MIT
+    css-to-react-native/node_modules/postcss-value-parser 3.3.1 MIT see:licenses/postcss-value-parse-MIT
+    csstype 3.1.3 MIT see:licenses/csstype-MIT
+    dayjs 1.11.10 MIT see:licenses/dayjs-MIT
+    debug 4.3.6 MIT see:licenses/debug-MIT
+    decamelize 4.0.0 MIT see:licenses/decamelize-MIT
+    decode-uri-component 0.4.1 MIT see:licenses/decode-uri-component-MIT
+    delayed-stream 1.0.0 MIT see:licenses/delayed-stream-MIT
+    diagram-js 12.8.1 MIT see:licenses/diagram-js-MIT
+    diagram-js-grid 0.2.0 MIT see:licenses/diagram-js-grid-MIT
+    didi 9.0.2 MIT see:licenses/didi-MIT
+    dom-helpers 3.4.0 MIT see:licenses/dom-helpers-MIT
+    dom-walk 0.1.2 MIT see:licenses/dom-walk-MIT
+    dom7 3.0.0 MIT see:licenses/dom7-MIT
+    domify 1.4.2 MIT see:licenses/domify-MIT
+    dva 2.4.1 MIT see:licenses/dva-MIT
+    dva-core 1.4.0 MIT see:licenses/dva-core-MIT
+    dva-core/node_modules/@babel/runtime 7.0.0-beta.46 MIT see:licenses/babel-runtime-MIT
+    dva-core/node_modules/redux 3.7.2 MIT see:licenses/redux-MIT
+    dva-core/node_modules/regenerator-runtime 0.11.1 MIT see:licenses/regenerator-runtime-MIT
+    dva/node_modules/@babel/runtime 7.0.0-beta.46 MIT see:licenses/babel-runtime-MIT
+    dva/node_modules/@types/react-router-dom 4.3.5 MIT see:licenses/types-react-router-dom-MIT
+    dva/node_modules/react-redux 5.0.7 MIT see:licenses/react-redux-MIT
+    dva/node_modules/react-router 4.3.1 MIT see:licenses/react-router-MIT
+    dva/node_modules/react-router-dom 4.3.1 MIT see:licenses/react-router-dom-MIT
+    dva/node_modules/react-router-redux 5.0.0-alpha.9 MIT see:licenses/react-router-redux-MIT
+    dva/node_modules/redux 3.7.2 MIT see:licenses/redux-MIT
+    dva/node_modules/regenerator-runtime 0.11.1 MIT see:licenses/regenerator-runtime-MIT
+    elliptic 6.6.1 MIT see:licenses/elliptic-MIT
+    elliptic/node_modules/bn.js 4.12.0 MIT see:licenses/bn.js-MIT
+    encoding 0.1.13 MIT see:licenses/encoding-MIT
+    encoding/node_modules/iconv-lite 0.6.3 MIT see:licenses/iconv-lite-MIT
+    error-ex 1.3.2 MIT see:licenses/error-ex-MIT
+    escalade 3.1.2 MIT see:licenses/escalade-MIT
+    escape-string-regexp 1.0.5 MIT see:licenses/escape-string-regexp-MIT
+    escape-string-regexp 4.0.0 MIT see:licenses/escape-string-regexp-MIT
+    evp_bytestokey 1.0.3 MIT see:licenses/evp_bytestokey-MIT
+    feelers 1.2.0 MIT see:licenses/feelers-MIT
+    feelin 2.3.0 MIT see:licenses/feelin-MIT
+    fill-range 7.0.1 MIT see:licenses/fill-range-MIT
+    find-root 1.1.0 MIT see:licenses/find-root-MIT
+    find-up 5.0.0 MIT see:licenses/find-up-MIT
+    flatten 1.0.3 MIT see:licenses/flatten-MIT
+    focus-trap 7.5.4 MIT see:licenses/focus-trap-MIT
+    follow-redirects 1.15.6 MIT see:licenses/follow-redirects-MIT
+    form-data 4.0.0 MIT see:licenses/form-data-MIT
+    fsevents 2.3.3 MIT see:licenses/fsevents-MIT
+    function-bind 1.1.2 MIT see:licenses/function-bind-MIT
+    gensync 1.0.0-beta.2 MIT see:licenses/gensync-MIT
+    global 4.4.0 MIT see:licenses/global-MIT
+    globals 11.12.0 MIT see:licenses/globals-MIT
+    growl 1.10.5 MIT see:licenses/growl-MIT
+    hammerjs 2.0.8 MIT see:licenses/hammerjs-MIT
+    has-flag 3.0.0 MIT see:licenses/has-flag-MIT
+    hash-base 3.1.0 MIT see:licenses/hash-base-MIT
+    hash.js 1.1.7 MIT see:licenses/hash.js-MIT
+    hasown 2.0.1 MIT see:licenses/hasown-MIT
+    he 1.2.0 MIT see:licenses/he-MIT
+    history 4.10.1 MIT see:licenses/history-MIT
+    hmac-drbg 1.0.1 MIT see:licenses/hmac-drbg-MIT
+    iconv-lite 0.6.3 MIT see:licenses/iconv-lite-MIT
+    import-fresh 3.3.0 MIT see:licenses/import-fresh-MIT
+    invariant 2.2.4 MIT see:licenses/invariant-MIT
+    is-arrayish 0.2.1 MIT see:licenses/is-arrayish-MIT
+    is-binary-path 2.1.0 MIT see:licenses/is-binary-path-MIT
+    is-core-module 2.13.1 MIT see:licenses/is-core-module-MIT
+    is-extglob 2.1.1 MIT see:licenses/is-extglob-MIT
+    is-fullwidth-code-point 2.0.0 MIT see:licenses/is-fullwidth-code-point-MIT
+    is-fullwidth-code-point 3.0.0 MIT see:licenses/is-fullwidth-code-point-MIT
+    is-glob 4.0.3 MIT see:licenses/is-glob-MIT
+    is-number 7.0.0 MIT see:licenses/is-number-MIT
+    is-plain-obj 2.1.0 MIT see:licenses/is-plain-obj-MIT
+    is-plain-object 2.0.4 MIT see:licenses/is-plain-object-MIT
+    is-what 3.14.1 MIT see:licenses/is-what-MIT
+    isarray 0.0.1 MIT see:licenses/isarray-MIT
+    isobject 3.0.1 MIT see:licenses/isobject-MIT
+    isomorphic-fetch 2.2.1 MIT see:licenses/isomorphic-fetch-MIT
+    jquery 3.7.1 MIT see:licenses/jquery-MIT
+    js-tokens 4.0.0 MIT see:licenses/js-tokens-MIT
+    jsesc 2.5.2 MIT see:licenses/jsesc-MIT
+    json-parse-even-better-errors 2.3.1 MIT see:licenses/json-parse-even-better-errors-MIT
+    json5 2.2.3 MIT see:licenses/json5-MIT
+    lang-feel 2.0.0 MIT see:licenses/lang-feel-MIT
+    lezer-feel 1.2.4 MIT see:licenses/lezer-feel-MIT
+    lines-and-columns 1.2.4 MIT see:licenses/lines-and-columns-MIT
+    loader-utils 3.2.1 MIT see:licenses/loader-utils-MIT
+    locate-path 6.0.0 MIT see:licenses/locate-path-MIT
+    lodash 4.17.21 MIT see:licenses/lodash-MIT
+    lodash-es 4.17.21 MIT see:licenses/lodash-es-MIT
+    lodash.clonedeep 4.5.0 MIT see:licenses/lodash.clonedeep-MIT
+    log-symbols 4.0.0 MIT see:licenses/log-symbols-MIT
+    loose-envify 1.4.0 MIT see:licenses/loose-envify-MIT
+    luxon 3.4.4 MIT see:licenses/luxon-MIT
+    md5.js 1.3.5 MIT see:licenses/md5.js-MIT
+    memoize-one 5.2.1 MIT see:licenses/memoize-one-MIT
+    merge-anything 2.4.4 MIT see:licenses/merge-anything-MIT
+    mime-db 1.52.0 MIT see:licenses/mime-db-MIT
+    mime-types 2.1.35 MIT see:licenses/mime-types-MIT
+    min-dash 4.2.1 MIT see:licenses/min-dash-MIT
+    min-document 2.19.0 MIT see:licenses/min-document-MIT
+    min-dom 4.1.0 MIT see:licenses/min-dom-MIT
+    minimalistic-crypto-utils 1.0.1 MIT see:licenses/minimalistic-crypto-utils-MIT
+    mocha 8.4.0 MIT see:licenses/mocha-MIT
+    moment 2.30.1 MIT see:licenses/moment-MIT
+    ms 2.1.2 MIT see:licenses/ms-MIT
+    nanoid 3.1.31 MIT see:licenses/nanoid-MIT
+    node-fetch 2.6.7 MIT see:licenses/node-fetch-MIT
+    node-releases 2.0.14 MIT see:licenses/node-releases-MIT
+    normalize-path 3.0.0 MIT see:licenses/normalize-path-MIT
+    object-assign 4.1.1 MIT see:licenses/object-assign-MIT
+    object-refs 0.3.0 MIT see:licenses/object-refs-MIT
+    omit.js 2.0.2 MIT see:licenses/omit.js-MIT
+    p-limit 3.1.0 MIT see:licenses/p-limit-MIT
+    p-locate 5.0.0 MIT see:licenses/p-locate-MIT
+    org.checkerframework:checker-qual 3.37.0 MIT see:licenses/checker-qual-MIT
+    parent-module 1.0.1 MIT see:licenses/parent-module-MIT
+    parse-asn1/node_modules/hash-base 3.0.4 MIT see:licenses/hash-base-MIT
+    parse-json 5.2.0 MIT see:licenses/parse-json-MIT
+    path-exists 4.0.0 MIT see:licenses/path-exists-MIT
+    path-intersection 2.2.1 MIT see:licenses/path-intersection-MIT
+    path-is-absolute 1.0.1 MIT see:licenses/path-is-absolute-MIT
+    path-parse 1.0.7 MIT see:licenses/path-parse-MIT
+    path-to-regexp 1.9.0 MIT see:licenses/path-to-regexp-MIT
+    path-type 4.0.0 MIT see:licenses/path-type-MIT
+    pbkdf2 3.1.2 MIT see:licenses/pbkdf2-MIT
+    picomatch 2.3.1 MIT see:licenses/picomatch-MIT
+    postcss-value-parser 3.3.1 MIT see:licenses/postcss-value-parser-MIT
+    preact 10.19.3 MIT see:licenses/preact-MIT
+    process 0.11.10 MIT see:licenses/process-MIT
+    process-nextick-args 2.0.1 MIT see:licenses/process-nextick-args-MIT
+    prop-types 15.8.1 MIT see:licenses/prop-types-MIT
+    proxy-from-env 1.1.0 MIT see:licenses/proxy-from-env-MIT
+    randombytes 2.1.0 MIT see:licenses/randombytes-MIT
+    react 16.14.0 MIT see:licenses/react-MIT
+    react-dom 16.14.0 MIT see:licenses/react-dom-MIT
+    react-is 16.13.1 MIT see:licenses/react-is-MIT
+    react-lifecycles-compat 3.0.4 MIT see:licenses/react-lifecycles-compat-MIT
+    react-loading-skeleton 2.2.0 MIT see:licenses/react-loading-skeleton-MIT
+    react-redux 8.1.3 MIT see:licenses/react-redux-MIT
+    react-redux/node_modules/react-is 18.2.0 MIT see:licenses/react-is-MIT
+    react-router 5.3.4 MIT see:licenses/react-router-MIT
+    react-router-dom 4.3.1 MIT see:licenses/react-router-dom-MIT
+    react-router-dom 5.3.4 MIT see:licenses/react-router-dom-MIT
+    react-router-redux 4.0.8 MIT see:licenses/react-router-redux-MIT
+    react-router-redux 5.0.0-alpha.9 MIT see:licenses/react-router-redux-MIT
+    readable-stream 3.6.2 MIT see:licenses/readable-stream-MIT
+    readdirp 3.5.0 MIT see:licenses/readdirp-MIT
+    redux 3.7.2 MIT see:licenses/redux-MIT
+    redux 5.0.1 MIT see:licenses/redux-MIT
+    redux-saga 0.16.2 MIT see:licenses/redux-saga-MIT
+    redux-thunk 3.1.0 MIT see:licenses/redux-thunk-MIT
+    regenerator-runtime 0.14.1 MIT see:licenses/regenerator-runtime-MIT
+    require-directory 2.1.1 MIT see:licenses/require-directory-MIT
+    resize-observer-polyfill 1.5.1 MIT see:licenses/resize-observer-polyfill-MIT
+    resolve 1.22.8 MIT see:licenses/resolve-MIT
+    resolve-from 4.0.0 MIT see:licenses/resolve-from-MIT
+    resolve-pathname 3.0.0 MIT see:licenses/resolve-pathname-MIT
+    ripemd160 2.0.2 MIT see:licenses/ripemd160-MIT
+    sha.js 2.4.11 MIT see:licenses/sha.js-MIT
+    safe-buffer 5.2.1 MIT see:licenses/safe-buffer-MIT
+    safer-buffer 2.1.2 MIT see:licenses/safer-buffer-MIT
+    scheduler 0.19.1 MIT see:licenses/scheduler-MIT
+    shallow-element-equals 1.0.1 MIT see:licenses/shallow-element-equals-MIT
+    ssr-window 3.0.0 MIT see:licenses/ssr-window-MIT
+    string-width 2.1.1 MIT see:licenses/string-width-MIT
+    string-width 4.2.3 MIT see:licenses/string-width-MIT
+    string_decoder 1.3.0 MIT see:licenses/string_decoder-MIT
+    strip-ansi 4.0.0 MIT see:licenses/strip-ansi-MIT
+    strip-ansi 6.0.1 MIT see:licenses/strip-ansi-MIT
+    strip-json-comments 3.1.1 MIT see:licenses/strip-json-comments-MIT
+    style-equal 1.0.0 MIT see:licenses/style-equal-MIT
+    style-mod 4.1.0 MIT see:licenses/style-mod-MIT
+    styled-components 4.4.1 MIT see:licenses/styled-components-MIT
+    stylis 3.5.4 MIT see:licenses/stylis-MIT
+    stylis-rule-sheet 0.0.10 MIT see:licenses/stylis-rule-sheet-MIT
+    supports-color 5.5.0 MIT see:licenses/supports-color-MIT
+    supports-color 7.2.0 MIT see:licenses/supports-color-MIT
+    supports-color 8.1.1 MIT see:licenses/supports-color-MIT
+    supports-preserve-symlinks-flag 1.0.0 MIT see:licenses/supports-preserve-symlinks-flag-MIT
+    svelte 3.59.2 MIT see:licenses/svelte-MIT
+    swiper 6.5.1 MIT see:licenses/swiper-MIT
+    symbol-observable 1.2.0 MIT see:licenses/symbol-observable-MIT
+    tabbable 6.2.0 MIT see:licenses/tabbable-MIT
+    tiny-invariant 1.3.3 MIT see:licenses/tiny-invariant-MIT
+    tiny-svg 3.0.1 MIT see:licenses/tiny-svg-MIT
+    tiny-warning 1.0.3 MIT see:licenses/tiny-warning-MIT
+    to-fast-properties 2.0.0 MIT see:licenses/to-fast-properties-MIT
+    to-regex-range 5.0.1 MIT see:licenses/to-regex-range-MIT
+    tr46 0.0.3 MIT see:licenses/tr46-MIT
+    update-browserslist-db 1.0.13 MIT see:licenses/update-browserslist-db-MIT
+    use-sync-external-store 1.2.0 MIT see:licenses/use-sync-external-store-MIT
+    util-deprecate 1.0.2 MIT see:licenses/util-deprecate-MIT
+    value-equal 1.0.1 MIT see:licenses/value-equal-MIT
+    w3c-keyname 2.2.8 MIT see:licenses/w3c-keyname-MIT
+    warning 4.0.3 MIT see:licenses/warning-MIT
+    whatwg-fetch 3.6.20 MIT see:licenses/whatwg-fetch-MIT
+    whatwg-url 5.0.0 MIT see:licenses/whatwg-url-MIT
+    wrap-ansi 7.0.0 MIT see:licenses/wrap-ansi-MIT
+    yamljs 0.3.0 MIT see:licenses/yamljs-MIT
+    yargs 16.2.0 MIT see:licenses/yargs-MIT
+    yargs-unparser 2.0.0 MIT see:licenses/yargs-unparser-MIT
+    yocto-queue 0.1.0 MIT see:licenses/yocto-queue-MIT
+    org.slf4j:jul-to-slf4j 1.7.36  MIT see:licenses/jul-to-slf4j-MIT
+    org.slf4j:slf4j-api 1.7.36  MIT see:licenses/slf4j-api-MIT
+    redis.clients:jedis 3.8.0 MIT see:licenses/jedis-MIT
 
 ========================================================================
 Public Domain licenses
@@ -920,33 +915,33 @@ Public Domain licenses
 Python-2.0 licenses
 ========================================================================
 
-    argparse 2.0.1 Python-2.0
+    argparse 2.0.1 Python-2.0 see:licenses/Python-2.0
 
 ========================================================================
 SIL licenses
 ========================================================================
 
-    bpmn-font 0.12.1 SIL
+    bpmn-font 0.12.1 SIL see:licenses/bpmn-font-SIL
 
 ========================================================================
 Unicode, Inc licenses
 ========================================================================
 
-    com.ibm.icu:icu4j 61.1 Unicode, Inc
+    com.ibm.icu:icu4j 61.1 Unicode, Inc see:licenses/icu4j-Unicode
 
 ========================================================================
 Mozilla Public License Version 2.0
 ========================================================================
 
-    com.h2database:h2 2.1.214 MPL-2.0
+    com.h2database:h2 2.1.214 MPL-2.0 see:licenses/h2-MPL-2.0
 
 ========================================================================
 Indiana University Extreme! Lab Software License
 ========================================================================
 
-    io.github.x-stream:mxparser 1.2.2 Indiana University Extreme! Lab Software License
+    io.github.x-stream:mxparser 1.2.2 Indiana University Extreme! Lab Software License see:licenses/mxparser-IUELSL
 ========================================================================
 0BSD licenses
 ========================================================================
 
-    tslib 2.6.2 0BSD
+    tslib 2.6.2 0BSD see:licenses/tslib-OBSD

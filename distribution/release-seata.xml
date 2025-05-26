@@ -44,6 +44,20 @@
         </fileSet>
 
         <fileSet>
+            <includes>
+                <include>licenses/*</include>
+            </includes>
+            <outputDirectory>seata-namingserver/</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <includes>
+                <include>licenses/*</include>
+            </includes>
+            <outputDirectory>seata-server/</outputDirectory>
+        </fileSet>
+
+        <fileSet>
             <directory>../server/src/main/resources/logback/</directory>
             <outputDirectory>seata-server/conf/logback/</outputDirectory>
             <includes>
