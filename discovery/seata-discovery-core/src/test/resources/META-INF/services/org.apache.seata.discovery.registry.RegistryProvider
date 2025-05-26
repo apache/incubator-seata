@@ -14,32 +14,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-codecov:
-  require_ci_to_pass: true
-  branch: 2.x
-coverage:
-  status:
-    patch: true
-    project:
-      default:
-        threshold: 1%
-        if_not_found: success
-    changes: false
-  precision: 2
-  range: "50...100"
-ignore:
- - "**/test/**"
- - "test/.*"
- - ".github/.*"
- - ".mvn/.*"
- - ".style/.*"
- - "**/**.md"
- - "distribution/.*"
- - "rm-datasource/src/test/java/org/apache/seata/rm/datasource/mock"
- - "sqlparser/seata-sqlparser-antlr/src/main/java/org/apache/seata/sqlparser/antlr/mysql/antlr/.*"
- - "sqlparser/seata-sqlparser-antlr/src/main/java/org/apache/seata/sqlparser/antlr/mysql/parser/.*"
-comment:
-  layout: "diff,flags,files,reach"
-  behavior: default
-  require_changes: false
+org.apache.seata.discovery.registry.MockNacosRegistryProvider 
