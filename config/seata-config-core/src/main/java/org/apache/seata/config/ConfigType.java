@@ -52,7 +52,11 @@ public enum ConfigType {
     /**
      * Custom config type
      */
-    Custom;
+    Custom,
+    /**
+     * Redis config type
+     */
+    Redis;
 
     /**
      * Gets type.

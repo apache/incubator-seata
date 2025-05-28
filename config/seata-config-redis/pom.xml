@@ -17,30 +17,35 @@
     limitations under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>org.apache.seata</groupId>
-        <artifactId>seata-parent</artifactId>
+        <artifactId>seata-config</artifactId>
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>seata-config</artifactId>
-    <packaging>pom</packaging>
-    <name>seata-config ${project.version}</name>
-    <description>config top parent for Seata built with Maven</description>
+    <artifactId>seata-config-redis</artifactId>
+    <name>seata-config-redis ${project.version}</name>
+    <description>config-redis for Seata built with Maven</description>
 
-    <modules>
-        <module>seata-config-core</module>
-        <module>seata-config-custom</module>
-        <module>seata-config-apollo</module>
-        <module>seata-config-nacos</module>
-        <module>seata-config-zk</module>
-        <module>seata-config-all</module>
-        <module>seata-config-etcd3</module>
-        <module>seata-config-consul</module>
-        <module>seata-config-spring-cloud</module>
-        <module>seata-config-redis</module>
-    </modules>
-</project>
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.seata</groupId>
+            <artifactId>seata-config-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+</project> 

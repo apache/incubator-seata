@@ -45,7 +45,7 @@ logging:
       enabled: false
 seata:
   config:
-    # support: nacos 、 consul 、 apollo 、 zk  、 etcd3
+    # support: nacos 、 consul 、 apollo 、 zk  、 etcd3 、 redis
     type: file
     nacos:
       server-addr: 127.0.0.1:8848
@@ -82,6 +82,12 @@ seata:
     etcd3:
       server-addr: http://localhost:2379
       key: seata.properties
+    redis:
+      server-addr: 127.0.0.1:6379
+      db: 0
+      password:
+      cluster: default
+      timeout: 0
   registry:
     # support: nacos 、 eureka 、 redis 、 zk  、 consul 、 etcd3 、 sofa 、 seata
     type: file
