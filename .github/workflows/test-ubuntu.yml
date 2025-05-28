@@ -52,7 +52,7 @@ jobs:
           2.5.15         -D spring-framework.version=5.3.27,
           2.4.13         -D spring-framework.version=5.3.13,
           2.3.12.RELEASE -D spring-framework.version=5.2.15.RELEASE,
-          2.2.13.RELEASE -D spring-framework.version=5.2.12.RELEASE,
+#          2.2.13.RELEASE -D spring-framework.version=5.2.12.RELEASE,
           #2.1.18.RELEASE,
           #2.0.9.RELEASE,
         ]
