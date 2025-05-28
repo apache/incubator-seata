@@ -46,6 +46,9 @@ header:
     - '**/org/apache/seata/sqlparser/antlr/**/*.g4'
     - '**/org/apache/seata/sqlparser/antlr/mysql/parser/*'
     - 'console/src/main/resources/static/**'
+    - 'distribution/licenses/**'
+    - 'distribution/LICENSE'
+    - 'distribution/NOTICE'
     - '**/*.txt'  #txt files not support comments
     - '**/*.json' #json files not support comments
   comment: on-failure
