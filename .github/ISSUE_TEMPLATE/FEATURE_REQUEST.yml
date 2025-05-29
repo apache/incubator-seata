@@ -1,0 +1,42 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+name: Feature Request
+description: Suggest an idea for Seata
+
+body:
+- type: markdown
+  attributes:
+    value: |
+      Please do not use this issue template to report security vulnerabilities but refer to our [security policy](https://github.com/seata/seata/security/policy).
+      **For major feature requests impacting the roadmap**, please submit them to [our Mailing List](mailto:dev@seata.apache.org) for broader discussion!
+
+- type: textarea
+  attributes:
+    label: Why you need it?
+    description: Is your feature request related to a problem? Please describe in details
+
+- type: textarea
+  attributes:
+    label: How it could be?
+    description: A clear and concise description of what you want to happen. You can explain more about input of the feature, and output of it.
+
+- type: textarea
+  attributes:
+    label: Other related information
+    description: Add any other context or screenshots about the feature request here.
+  

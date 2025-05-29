@@ -133,7 +133,7 @@ You can view the full documentation from Seata Official Website: [Seata Website 
 
 ## Reporting bugs
 
-Please follow the [template](./.github/ISSUE_TEMPLATE/BUG_REPORT.md) for reporting any issues.
+Please follow the [template](./.github/ISSUE_TEMPLATE/BUG_REPORT.yml) for reporting any issues.
 
 ## Security
 
