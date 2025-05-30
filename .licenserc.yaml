@@ -40,7 +40,7 @@ header:
     - 'NOTICE'
     - 'DISCLAIMER'
     - '**/org/apache/seata/sqlparser/antlr/**/*.g4'
-    - '**/org/apache/seata/sqlparser/antlr/mysql/parser/*'
+    - '**/org/apache/seata/sqlparser/antlr/mysql/parser/*' #generate file
     - 'distribution/licenses/**'
     - 'distribution/LICENSE'
     - 'distribution/NOTICE'
@@ -53,6 +53,7 @@ header:
     - '**/.babelrc' #json format
     - '**/.eslintrc' #js format
     - '**/.prettierrc' #json format
+    - 'console/src/main/resources/static/console-fe/public/css/console1412.css' #generate css
   comment: on-failure
 dependency:
   files:
