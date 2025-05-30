@@ -39,18 +39,21 @@ header:
     - 'LICENSE'
     - 'NOTICE'
     - 'DISCLAIMER'
-    - 'saga/seata-saga-statemachine-designer/node_modules/**'
-    - 'node_modules/**'
-    - 'saga/seata-saga-statemachine-designer/**'
-    - 'console/src/main/resources/static/console-fe/**'
     - '**/org/apache/seata/sqlparser/antlr/**/*.g4'
-    - '**/org/apache/seata/sqlparser/antlr/mysql/parser/*'
-    - 'console/src/main/resources/static/**'
+    - '**/org/apache/seata/sqlparser/antlr/mysql/parser/*' #generate file
     - 'distribution/licenses/**'
     - 'distribution/LICENSE'
     - 'distribution/NOTICE'
     - '**/*.txt'  #txt files not support comments
     - '**/*.json' #json files not support comments
+    - '**/*.png'
+    - '**/*.jpg'
+    - '**/*.jpeg'
+    - '**/*.ico'
+    - '**/.babelrc' #json format
+    - '**/.eslintrc' #json format
+    - '**/.prettierrc' #json format
+    - 'console/src/main/resources/static/console-fe/public/css/console1412.css' #generate css
   comment: on-failure
 dependency:
   files:
