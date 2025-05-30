@@ -1,3 +1,20 @@
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    (the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+    
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+
 # Seata Saga State Machine Designer
 
 Due to the discontinuation of maintenance for the old version of the Saga State Machine Designer's underlying framework, ggeditor, and the numerous vulnerabilities exposed by ggeditor, which affected the overall security of the project, we have chosen to refactor the State Machine Designer. We are using a new framework, diagram-js, as the foundation for building the new designer. This document covers aspects such as the usage guide for the diagram-js framework, the implementation approach of the designer, code structure, and more, aiming to provide a document that facilitates community collaboration.
