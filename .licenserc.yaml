@@ -50,6 +50,9 @@ header:
     - '**/*.jpg'
     - '**/*.jpeg'
     - '**/*.ico'
+    - '**/.babelrc' #json format
+    - '**/.eslintrc' #js format
+    - '**/.prettierrc' #json format
   comment: on-failure
 dependency:
   files:
