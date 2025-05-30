@@ -51,7 +51,7 @@ header:
     - '**/*.jpeg'
     - '**/*.ico'
     - '**/.babelrc' #json format
-    - '**/.eslintrc' #js format
+    - '**/.eslintrc' #json format
     - '**/.prettierrc' #json format
     - 'console/src/main/resources/static/console-fe/public/css/console1412.css' #generate css
   comment: on-failure
