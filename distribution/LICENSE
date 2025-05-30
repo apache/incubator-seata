@@ -356,9 +356,9 @@ Apache-2.0 licenses
     org.apache.rocketmq:rocketmq-common 5.0.0 Apache-2.0
     org.apache.rocketmq:rocketmq-logging 5.0.0 Apache-2.0
     org.apache.rocketmq:rocketmq-remoting 5.0.0 Apache-2.0
-    org.apache.tomcat.embed:tomcat-embed-el 9.0.99 Apache-2.0
-    org.apache.tomcat.embed:tomcat-embed-websocket 9.0.99 Apache-2.0
-    org.apache.tomcat:tomcat-annotations-api 9.0.99 Apache-2.0
+    org.apache.tomcat.embed:tomcat-embed-el 9.0.105 Apache-2.0
+    org.apache.tomcat.embed:tomcat-embed-websocket 9.0.105 Apache-2.0
+    org.apache.tomcat:tomcat-annotations-api 9.0.105 Apache-2.0
     org.apache.yetus:audience-annotations 0.12.0 Apache-2.0
     org.awaitility:awaitility 4.0.3 Apache-2.0
     org.codehaus.groovy:groovy-all 2.4.4 Apache-2.0
@@ -495,16 +495,11 @@ CDDL-1.0 licenses
 ========================================================================
 
     javax.ws.rs:jsr311-api 1.1.1 CDDL-1.0 see:licenses/CDDL-1.0
-
-========================================================================
-CDDL+GPL-1.1 licenses
-========================================================================
-
-    javax.servlet:javax.servlet-api 4.0.1 CDDL+GPL-1.1 see:licenses/CDDL+GPL-1.1
-    org.glassfish:javax.json 1.0.4 CDDL+GPL-1.1 see:licenses/CDDL+GPL-1.1
-    com.sun.jersey.contribs:jersey-apache-client4 1.19.1 CDDL+GPL-1.1 see:licenses/CDDL+GPL-1.1
-    com.sun.jersey:jersey-client 1.19.1 CDDL+GPL-1.1 see:licenses/CDDL+GPL-1.1
-    com.sun.jersey:jersey-core 1.19.1 CDDL+GPL-1.1 see:licenses/CDDL+GPL-1.1
+    javax.servlet:javax.servlet-api 4.0.1 CDDL-1.0 see:licenses/CDDL-1.0
+    org.glassfish:javax.json 1.0.4 CDDL-1.0 see:licenses/CDDL-1.0
+    com.sun.jersey.contribs:jersey-apache-client4 1.19.1 CDDL-1.0 see:licenses/CDDL-1.0
+    com.sun.jersey:jersey-client 1.19.1 CDDL-1.0 see:licenses/CDDL-1.0
+    com.sun.jersey:jersey-core 1.19.1 CDDL-1.0 see:licenses/CDDL-1.0
 
 ========================================================================
 EPL-1.0  licenses
