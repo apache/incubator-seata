@@ -65,11 +65,8 @@ public class OrderUtilTest {
         assertThat(OrderUtil.lowerOrEquals(advisor12, advisor11)).isTrue();
         assertThat(OrderUtil.lowerOrEquals(advisor22, advisor21)).isTrue();
 
-        // Case: source is null -> treated as Integer.MAX_VALUE, so MAX > 0 => should return true
         assertThat(OrderUtil.lowerThan(null, 0)).isTrue();
-        // Case: target is null -> treated as Integer.MAX_VALUE, so 0 < MAX => should return false
         assertThat(OrderUtil.lowerThan(0, null)).isFalse();
-        // Case: both null -> both treated as MAX => not lower than
         assertThat(OrderUtil.lowerThan((Integer) null, null)).isFalse();
     }
 
@@ -104,11 +101,8 @@ public class OrderUtilTest {
         assertThat(OrderUtil.higherOrEquals(advisor11, advisor12)).isTrue();
         assertThat(OrderUtil.higherOrEquals(advisor21, advisor22)).isTrue();
 
-        // Case: source is null -> treated as Integer.MAX_VALUE, so MAX > 0 => should return false
         assertThat(OrderUtil.higherThan(null, 0)).isFalse();
-        // Case: target is null -> treated as Integer.MAX_VALUE, so 0 < MAX => should return true
         assertThat(OrderUtil.higherThan(0, null)).isTrue();
-        // Case: both null -> both treated as MAX => not lower than
         assertThat(OrderUtil.higherThan((Integer) null, null)).isFalse();
     }
 
