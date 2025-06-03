@@ -50,7 +50,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class ChannelEventHandlerIntegrationTest {
 
-    private static final int SERVER_PORT = 8091;
+    private static final int SERVER_PORT = 8919;
     private static final String SERVER_HOST = "127.0.0.1";
     private static final int TIMEOUT_SECONDS = 5;
 

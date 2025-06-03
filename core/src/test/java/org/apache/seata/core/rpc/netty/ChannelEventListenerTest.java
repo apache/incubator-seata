@@ -17,6 +17,7 @@
 package org.apache.seata.core.rpc.netty;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ChannelEventListenerTest {
@@ -35,6 +37,9 @@ class ChannelEventListenerTest {
 
     @Mock
     private Channel channel;
+
+    @Mock
+    private ChannelId channelId;
 
     private TestChannelEventListener testListener;
 
@@ -79,6 +84,7 @@ class ChannelEventListenerTest {
 
     @Test
     void testChannelDisconnectedEvent() {
+        when(channel.id()).thenReturn(channelId);
         AbstractNettyRemotingClient spyClient = spy(client);
         spyClient.onChannelInactive(channel);
 
@@ -89,6 +95,7 @@ class ChannelEventListenerTest {
 
     @Test
     void testChannelExceptionEvent() {
+        when(channel.id()).thenReturn(channelId);
         AbstractNettyRemotingClient spyClient = spy(client);
         Exception testException = new RuntimeException("Test exception");
         spyClient.onChannelException(channel, testException);
