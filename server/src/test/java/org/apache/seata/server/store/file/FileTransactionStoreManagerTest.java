@@ -26,9 +26,9 @@ import java.util.List;
 import org.apache.seata.common.store.SessionMode;
 import org.apache.seata.server.session.SessionHolder;
 import org.assertj.core.util.Files;
-import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -50,12 +50,12 @@ import org.springframework.context.ApplicationContext;
 @SpringBootTest
 public class FileTransactionStoreManagerTest {
 
-    @BeforeAll
-    public static void init(ApplicationContext context){
+    @BeforeEach
+    public void setUp(){
         SessionHolder.init(SessionMode.FILE);
     }
-    @AfterAll
-    public static void destroy(){
+    @AfterEach
+    public void tearDown(){
         SessionHolder.destroy();
     }
 
