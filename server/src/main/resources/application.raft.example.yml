@@ -14,14 +14,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 server:
-  port: 7091
-
+  port: 8091
 spring:
   application:
     name: seata-server
-
+  main:
+    web-application-type: none
 logging:
   config: classpath:logback-spring.xml
   file:
@@ -122,7 +121,7 @@ seata:
             type: pkcs12
         kmf-algorithm: SunX509
         tmf-algorithm: SunX509
-    service-port: 8091 #If not configured, the default is '${server.port} + 1000'
+    service-port: 8091 #If not configured, the default is '${server.port}'
     max-commit-retry-timeout: -1
     max-rollback-retry-timeout: -1
     rollback-retry-timeout-unlock-enable: false
