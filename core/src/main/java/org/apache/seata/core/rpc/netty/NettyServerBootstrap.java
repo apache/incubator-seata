@@ -38,6 +38,10 @@ import org.apache.seata.common.metadata.Instance;
 import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.core.protocol.detector.Http2Detector;
+import org.apache.seata.core.protocol.detector.HttpDetector;
+import org.apache.seata.core.protocol.detector.ProtocolDetector;
+import org.apache.seata.core.protocol.detector.SeataDetector;
 import org.apache.seata.core.rpc.RemotingBootstrap;
 import org.apache.seata.discovery.registry.MultiRegistryFactory;
 import org.apache.seata.discovery.registry.RegistryService;
@@ -66,16 +70,18 @@ public class NettyServerBootstrap implements RemotingBootstrap {
         this.nettyServerConfig = nettyServerConfig;
         if (NettyServerConfig.enableEpoll()) {
             this.eventLoopGroupBoss = new EpollEventLoopGroup(nettyServerConfig.getBossThreadSize(),
-                new NamedThreadFactory(nettyServerConfig.getBossThreadPrefix(), nettyServerConfig.getBossThreadSize()));
+                    new NamedThreadFactory(nettyServerConfig.getBossThreadPrefix(),
+                            nettyServerConfig.getBossThreadSize(), false));
             this.eventLoopGroupWorker = new EpollEventLoopGroup(nettyServerConfig.getServerWorkerThreads(),
-                new NamedThreadFactory(nettyServerConfig.getWorkerThreadPrefix(),
-                    nettyServerConfig.getServerWorkerThreads()));
+                    new NamedThreadFactory(nettyServerConfig.getWorkerThreadPrefix(),
+                            nettyServerConfig.getServerWorkerThreads(), false));
         } else {
             this.eventLoopGroupBoss = new NioEventLoopGroup(nettyServerConfig.getBossThreadSize(),
-                new NamedThreadFactory(nettyServerConfig.getBossThreadPrefix(), nettyServerConfig.getBossThreadSize()));
+                    new NamedThreadFactory(nettyServerConfig.getBossThreadPrefix(),
+                            nettyServerConfig.getBossThreadSize(), false));
             this.eventLoopGroupWorker = new NioEventLoopGroup(nettyServerConfig.getServerWorkerThreads(),
-                new NamedThreadFactory(nettyServerConfig.getWorkerThreadPrefix(),
-                    nettyServerConfig.getServerWorkerThreads()));
+                    new NamedThreadFactory(nettyServerConfig.getWorkerThreadPrefix(),
+                            nettyServerConfig.getServerWorkerThreads(), false));
         }
 
         if (nettyServerConfig.getServerListenPort() > 0) {
@@ -165,7 +171,7 @@ public class NettyServerBootstrap implements RemotingBootstrap {
                 @Override
                 public void initChannel(SocketChannel ch) {
                     ch.pipeline().addLast(new IdleStateHandler(nettyServerConfig.getChannelMaxReadIdleSeconds(), 0, 0))
-                            .addLast(new ProtocolDetectHandler(NettyServerBootstrap.this));
+                            .addLast(new ProtocolDetectHandler(new ProtocolDetector[]{new Http2Detector(getChannelHandlers()), new SeataDetector(getChannelHandlers()), new HttpDetector()}));
                 }
             });
 
