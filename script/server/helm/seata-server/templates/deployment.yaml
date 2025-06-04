@@ -47,6 +47,7 @@ spec:
             {{- range .Values.volume }}
             - name: {{ .name }}
               mountPath: {{ .mountPath }}
+              subPath: {{ .subPath }}
             {{- end}}
           {{- end}}
         {{- if .Values.env }}
