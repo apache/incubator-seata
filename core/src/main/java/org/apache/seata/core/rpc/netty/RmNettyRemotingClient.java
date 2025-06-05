@@ -25,7 +25,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 import io.netty.channel.Channel;
-import io.netty.util.concurrent.EventExecutorGroup;
 import org.apache.seata.common.DefaultValues;
 import org.apache.seata.common.exception.FrameworkErrorCode;
 import org.apache.seata.common.exception.FrameworkException;
@@ -108,9 +107,9 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
         });
     }
 
-    private RmNettyRemotingClient(NettyClientConfig nettyClientConfig, EventExecutorGroup eventExecutorGroup,
+    private RmNettyRemotingClient(NettyClientConfig nettyClientConfig,
                                   ThreadPoolExecutor messageExecutor) {
-        super(nettyClientConfig, eventExecutorGroup, messageExecutor, TransactionRole.RMROLE);
+        super(nettyClientConfig, messageExecutor, TransactionRole.RMROLE);
         // set enableClientBatchSendRequest
         Configuration configuration = ConfigurationFactory.getInstance();
         this.enableClientBatchSendRequest = configuration.getBoolean(ConfigurationKeys.ENABLE_RM_CLIENT_BATCH_SEND_REQUEST,
@@ -156,7 +155,7 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
                         KEEP_ALIVE_TIME, TimeUnit.SECONDS, new LinkedBlockingQueue<>(MAX_QUEUE_SIZE),
                         new NamedThreadFactory(nettyClientConfig.getRmDispatchThreadPrefix(),
                             nettyClientConfig.getClientWorkerThreads()), new ThreadPoolExecutor.CallerRunsPolicy());
-                    instance = new RmNettyRemotingClient(nettyClientConfig, null, messageExecutor);
+                    instance = new RmNettyRemotingClient(nettyClientConfig, messageExecutor);
                 }
             }
         }
