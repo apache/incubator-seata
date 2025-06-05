@@ -36,7 +36,6 @@ import io.netty.handler.codec.http2.Http2FrameCodecBuilder;
 import io.netty.handler.codec.http2.Http2MultiplexHandler;
 import io.netty.handler.codec.http2.Http2StreamChannelBootstrap;
 import io.netty.handler.timeout.IdleStateHandler;
-import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import io.netty.util.concurrent.EventExecutorGroup;
 import io.netty.util.internal.PlatformDependent;
 import org.apache.seata.common.exception.FrameworkException;
@@ -70,7 +69,7 @@ public class NettyClientBootstrap implements RemotingBootstrap {
     private final NettyPoolKey.TransactionRole transactionRole;
     private final EventLoopGroup eventLoopGroupWorker;
 
-    private EventExecutorGroup defaultEventExecutorGroup;
+    private final EventExecutorGroup defaultEventExecutorGroup;
     private ChannelHandler[] channelHandlers;
 
     public NettyClientBootstrap(NettyClientConfig nettyClientConfig, final EventExecutorGroup eventExecutorGroup,
@@ -122,11 +121,6 @@ public class NettyClientBootstrap implements RemotingBootstrap {
 
     @Override
     public void start() {
-        if (this.defaultEventExecutorGroup == null) {
-            this.defaultEventExecutorGroup = new DefaultEventExecutorGroup(nettyClientConfig.getClientWorkerThreads(),
-                new NamedThreadFactory(getThreadPrefix(nettyClientConfig.getClientWorkerThreadPrefix()),
-                    nettyClientConfig.getClientWorkerThreads()));
-        }
         this.bootstrap.group(eventLoopGroupWorker).channel(
             nettyClientConfig.getClientChannelClazz()).option(
             ChannelOption.TCP_NODELAY, true).option(ChannelOption.SO_KEEPALIVE, true).option(
