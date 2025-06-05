@@ -121,7 +121,7 @@ public class OrderUtilTest {
         assertThat(OrderUtil.lower(Ordered.LOWEST_PRECEDENCE, 1)).isEqualTo(Ordered.LOWEST_PRECEDENCE);
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> OrderUtil.lower(1, -1));
-        assertThat((OrderUtil.lower(null, 1))).isEqualTo(Integer.MAX_VALUE);
+        assertThat(OrderUtil.lower(null, 1)).isEqualTo(Integer.MAX_VALUE);
     }
 
     @Test
