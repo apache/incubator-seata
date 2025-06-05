@@ -20,6 +20,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.apache.seata.common.rpc.http.HttpContext;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
@@ -83,11 +84,11 @@ class ParameterParserTest {
         ObjectNode bodyNode = paramMap.putObject("body");
         bodyNode.put("field1", "value1");
         bodyNode.put("field2", "value2");
-
+        HttpContext httpContext = new HttpContext(null,null,false);
         Object[] args = ParameterParser.getArgValues(
                 new ParamMetaData[]{paramMetaData},
                 method,
-                paramMap
+                paramMap, httpContext
         );
 
         assertEquals(1, args.length);

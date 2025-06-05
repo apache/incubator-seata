@@ -40,7 +40,6 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Component;
-import org.springframework.web.context.support.GenericWebApplicationContext;
 
 
 import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
@@ -96,7 +95,7 @@ public class Server {
         if (coordinator instanceof ApplicationListener) {
             beanFactory.registerSingleton(NettyRemotingServer.class.getName(), nettyRemotingServer);
             beanFactory.registerSingleton(DefaultCoordinator.class.getName(), coordinator);
-            ((GenericWebApplicationContext) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
+            ((ConfigurableApplicationContext) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
                     .addApplicationListener((ApplicationListener<?>) coordinator);
         }
         //log store mode : file, db, redis
