@@ -22,22 +22,24 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import io.netty.channel.Channel;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.List;
 import java.util.Map;
+import org.apache.seata.common.rpc.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static com.fasterxml.jackson.databind.SerializationFeature.FAIL_ON_EMPTY_BEANS;
 
 public class ParameterParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ParameterParser.class);
 
-    private static final ObjectMapper OBJECT_MAPPER =
-            new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
+        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false).configure(FAIL_ON_EMPTY_BEANS, false);
 
-    public static ObjectNode convertParamMap(Map<String, List<String>> paramMap) throws JsonProcessingException {
+    public static ObjectNode convertParamMap(Map<String, List<String>> paramMap) {
         ObjectNode paramNode = OBJECT_MAPPER.createObjectNode();
         for (Map.Entry<String, List<String>> entry : paramMap.entrySet()) {
             List<String> list = entry.getValue();
@@ -56,43 +58,39 @@ public class ParameterParser {
         return paramNode;
     }
 
-    public static Object[] getArgValues(ParamMetaData[] paramMetaDatas, Method handleMethod, ObjectNode paramMap)
-            throws JsonProcessingException {
+    public static Object[] getArgValues(ParamMetaData[] paramMetaDatas, Method handleMethod, ObjectNode paramMap,
+        HttpContext httpContext) throws JsonProcessingException {
         Class<?>[] parameterTypes = handleMethod.getParameterTypes();
         Parameter[] parameters = handleMethod.getParameters();
-        return getParameters(parameterTypes, paramMetaDatas, parameters, paramMap);
+        return getParameters(parameterTypes, paramMetaDatas, parameters, paramMap, httpContext);
     }
 
-    private static Object[] getParameters(
-            Class<?>[] parameterTypes, ParamMetaData[] paramMetaDatas, Parameter[] parameters, ObjectNode paramMap)
-            throws JsonProcessingException {
+    private static Object[] getParameters(Class<?>[] parameterTypes, ParamMetaData[] paramMetaDatas,
+        Parameter[] parameters, ObjectNode paramMap, HttpContext httpContext) throws JsonProcessingException {
         int length = parameterTypes.length;
         Object[] ret = new Object[length];
         for (int i = 0; i < length; i++) {
             Class<?> parameterType = parameterTypes[i];
             String parameterName = parameters[i].getName();
             ParamMetaData paramMetaData = paramMetaDatas[i];
-            ret[i] = getArgValue(parameterType, parameterName, paramMetaData, paramMap);
-            if (!parameterType.isAssignableFrom(ret[i].getClass())) {
-                LOGGER.error(
-                        "[HttpDispatchHandler] not compatible parameter type, expect {}, but {}",
-                        parameterType,
-                        ret[i].getClass());
+            Object value = getArgValue(parameterType, parameterName, paramMetaData, paramMap, httpContext);
+            if (value != null && !parameterType.isAssignableFrom(value.getClass())) {
+                LOGGER.error("[HttpDispatchHandler] not compatible parameter type, expect {}, but {}", parameterType,
+                    ret[i].getClass());
                 ret[i] = null;
+            } else {
+                ret[i] = value;
             }
         }
 
         return ret;
     }
 
-    private static Object getArgValue(
-            Class<?> parameterType, String parameterName, ParamMetaData paramMetaData, ObjectNode paramMap)
-            throws JsonProcessingException {
+    private static Object getArgValue(Class<?> parameterType, String parameterName, ParamMetaData paramMetaData,
+        ObjectNode paramMap, HttpContext httpContext) {
         ParamMetaData.ParamConvertType paramConvertType = paramMetaData.getParamConvertType();
-        if (parameterType.equals(Channel.class)) {
-            JsonNode jsonNode = paramMap.get("channel");
-            paramMap.putPOJO("channel", null);
-            return OBJECT_MAPPER.convertValue(jsonNode, Channel.class);
+        if (parameterType.equals(HttpContext.class)) {
+            return httpContext;
         } else if (ParamMetaData.ParamConvertType.MODEL_ATTRIBUTE.equals(paramConvertType)) {
             JsonNode param = paramMap.get("param");
             return OBJECT_MAPPER.convertValue(param, parameterType);
@@ -100,7 +98,15 @@ public class ParameterParser {
             JsonNode body = paramMap.get("body");
             return OBJECT_MAPPER.convertValue(body, parameterType);
         } else {
-            return paramMap.get("param").get(parameterName).asText(null);
+            JsonNode paramNode = paramMap.get("param");
+            if (paramNode != null) {
+                JsonNode jsonNode = paramNode.get(parameterName);
+                if (jsonNode != null) {
+                    String value = jsonNode.asText(null);
+                    return value != null ? OBJECT_MAPPER.convertValue(value, parameterType) : null;
+                }
+            }
+            return null;
         }
     }
 }
