@@ -19,7 +19,8 @@
 -->
 <assembly>
     <id>${project.version}-incubating-bin</id>
-    <includeBaseDirectory>false</includeBaseDirectory>
+    <includeBaseDirectory>true</includeBaseDirectory>
+    <baseDirectory>apache-seata-${project.version}-incubating-bin</baseDirectory>
     <formats>
         <format>dir</format>
         <format>tar.gz</format>
