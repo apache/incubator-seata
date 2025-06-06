@@ -27,7 +27,6 @@ import io.netty.channel.ChannelId;
 import io.netty.channel.ChannelPromise;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
-import io.netty.util.concurrent.EventExecutorGroup;
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 import java.util.HashSet;
@@ -143,12 +142,11 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
 
     public AbstractNettyRemotingClient(
         NettyClientConfig nettyClientConfig,
-        EventExecutorGroup eventExecutorGroup,
         ThreadPoolExecutor messageExecutor,
         NettyPoolKey.TransactionRole transactionRole) {
         super(messageExecutor);
         this.transactionRole = transactionRole;
-        clientBootstrap = new NettyClientBootstrap(nettyClientConfig, eventExecutorGroup, transactionRole);
+        clientBootstrap = new NettyClientBootstrap(nettyClientConfig, transactionRole);
         clientBootstrap.setChannelHandlers(new ClientHandler(), new ChannelEventHandler(this));
         clientChannelManager = new NettyClientChannelManager(
             new NettyPoolableFactory(this, clientBootstrap), getPoolKeyFunction(), nettyClientConfig);
