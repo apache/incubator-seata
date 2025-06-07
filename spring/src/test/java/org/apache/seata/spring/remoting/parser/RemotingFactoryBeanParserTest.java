@@ -66,6 +66,17 @@ public class RemotingFactoryBeanParserTest {
             mockedDefaultRemotingParser.close();
         }
     }
+    
+    /**
+     * Create a proxy test service
+     *
+     * @return the proxied test service
+     */
+    private TestService createProxyTestService() {
+        TestService testService = new TestServiceImpl();
+        ProxyFactory proxyFactory = new ProxyFactory(testService);
+        return (TestService) proxyFactory.getProxy();
+    }
 
     @Test
     public void testConstructorWithNullApplicationContext() {
@@ -84,9 +95,7 @@ public class RemotingFactoryBeanParserTest {
     @Test
     public void testGetRemotingFactoryBeanWithProxyBeanButNoFactoryBean() {
         // Create proxy object
-        TestService testService = new TestServiceImpl();
-        ProxyFactory proxyFactory = new ProxyFactory(testService);
-        TestService proxyTestService = (TestService) proxyFactory.getProxy();
+        TestService proxyTestService = createProxyTestService();
         
         // Mock applicationContext behavior
         Mockito.when(applicationContext.containsBean("&testService")).thenReturn(false);
@@ -99,9 +108,7 @@ public class RemotingFactoryBeanParserTest {
     @Test
     public void testGetRemotingFactoryBeanWithProxyBeanAndFactoryBean() {
         // Create proxy object
-        TestService testService = new TestServiceImpl();
-        ProxyFactory proxyFactory = new ProxyFactory(testService);
-        TestService proxyTestService = (TestService) proxyFactory.getProxy();
+        TestService proxyTestService = createProxyTestService();
         
         // Mock applicationContext behavior
         Mockito.when(applicationContext.containsBean("&testService")).thenReturn(true);
@@ -122,9 +129,7 @@ public class RemotingFactoryBeanParserTest {
     @Test
     public void testIsReferenceWithFactoryBean() {
         // Create proxy object
-        TestService testService = new TestServiceImpl();
-        ProxyFactory proxyFactory = new ProxyFactory(testService);
-        TestService proxyTestService = (TestService) proxyFactory.getProxy();
+        TestService proxyTestService = createProxyTestService();
         
         Object factoryBean = new Object();
         
@@ -150,9 +155,7 @@ public class RemotingFactoryBeanParserTest {
     @Test
     public void testIsServiceWithFactoryBean() {
         // Create proxy object
-        TestService testService = new TestServiceImpl();
-        ProxyFactory proxyFactory = new ProxyFactory(testService);
-        TestService proxyTestService = (TestService) proxyFactory.getProxy();
+        TestService proxyTestService = createProxyTestService();
         
         Object factoryBean = new Object();
         
@@ -184,9 +187,7 @@ public class RemotingFactoryBeanParserTest {
     @Test
     public void testGetServiceDescWithFactoryBean() throws FrameworkException {
         // Create proxy object
-        TestService testService = new TestServiceImpl();
-        ProxyFactory proxyFactory = new ProxyFactory(testService);
-        TestService proxyTestService = (TestService) proxyFactory.getProxy();
+        TestService proxyTestService = createProxyTestService();
         
         Object factoryBean = new Object();
         RemotingDesc expectedDesc = new RemotingDesc();
