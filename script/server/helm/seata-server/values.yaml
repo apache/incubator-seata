@@ -17,6 +17,8 @@
 
 replicaCount: 1
 
+namespace: default
+
 image:
   repository: seataio/seata-server
   tag: latest
@@ -30,3 +32,9 @@ env:
   seataPort: "8091"
   storeMode: "file"
   serverNode: "1"
+
+volume:
+  - name: seata-config
+    mountPath: /seata-server/resources/application.yml
+    subPath: application.yml
+    hostPath: /root/workspace/seata/seata-config/application.yml

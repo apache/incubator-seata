@@ -47,6 +47,7 @@ public class RaftServerTest {
     public static void setUp(ApplicationContext context) {
         LockerManagerFactory.destroy();
         SessionHolder.destroy();
+        RaftServerManager.destroy();
     }
     @BeforeEach
     public  void init() {
@@ -62,6 +63,7 @@ public class RaftServerTest {
         StoreConfig.setStartupParameter("file", "file", "file");
         LockerManagerFactory.destroy();
         SessionHolder.destroy();
+        RaftServerManager.destroy();
     }
 
     @Test

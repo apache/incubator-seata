@@ -43,6 +43,7 @@ import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.metadata.MetadataResponse;
 import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.result.Result;
+import org.apache.seata.common.rpc.http.HttpContext;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.ConfigType;
 import org.apache.seata.config.ConfigurationFactory;
@@ -68,6 +69,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -78,8 +80,6 @@ import static org.apache.seata.common.ConfigurationKeys.STORE_MODE;
 import static org.apache.seata.common.Constants.RAFT_CONFIG_GROUP;
 import static org.apache.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 
-/**
- */
 @RestController
 @RequestMapping("/metadata/v1")
 public class ClusterController {
@@ -88,6 +88,7 @@ public class ClusterController {
 
     @Resource
     private ClusterWatcherManager clusterWatcherManager;
+
 
     @Resource
     private ClusterConfigWatcherManager clusterConfigWatcherManager;
@@ -107,6 +108,7 @@ public class ClusterController {
             put("yaml", "yaml");
         }
     };
+
     @PostConstruct
     private void init() {
         this.serverProperties = applicationContext.getBean(ServerProperties.class);
@@ -130,21 +132,6 @@ public class ClusterController {
                     RouteTable.getInstance().getConfiguration(group), newConf);
                 RouteTable.getInstance().updateConfiguration(group, newConf);
             });
-        }
-        return result;
-    }
-
-    @PostMapping("/changeConfigCluster")
-    public Result<?> changeConfigCluster(@RequestParam String raftClusterStr) {
-        Result<?> result = new Result<>();
-        final Configuration newConf = new Configuration();
-        if (!newConf.parse(raftClusterStr)) {
-            result.setMessage("fail to parse initConf:" + raftClusterStr);
-        } else {
-            String group = RaftConfigServerManager.getGroup();
-            RaftConfigServerManager.getCliServiceInstance().changePeers(group,
-                    RouteTable.getInstance().getConfiguration(group), newConf);
-            RouteTable.getInstance().updateConfiguration(group, newConf);
         }
         return result;
     }
@@ -364,13 +351,16 @@ public class ClusterController {
     }
 
     @PostMapping("/watch")
-    public void watch(HttpServletRequest request, @RequestParam Map<String, Object> groupTerms,
-        @RequestParam(defaultValue = "28000") int timeout) {
-        AsyncContext context = request.startAsync();
-        context.setTimeout(0L);
+    public void watch(HttpContext context, @RequestBody Map<String, Object> groupTerms,
+        @RequestParam(defaultValue = "28000") Integer timeout) {
+        context.setAsync(true);
+        if (timeout == null) {
+            timeout = 28000;
+        }
+        Integer finalTimeout = timeout;
         groupTerms.forEach((group, term) -> {
-            Watcher<AsyncContext> watcher =
-                new Watcher<>(group, context, timeout, Long.parseLong(String.valueOf(term)));
+            Watcher<HttpContext> watcher =
+                new Watcher<>(group, context, finalTimeout, Long.parseLong(String.valueOf(term)));
             clusterWatcherManager.registryWatcher(watcher);
         });
     }

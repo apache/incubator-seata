@@ -22,7 +22,6 @@ import com.alibaba.druid.sql.ast.statement.SQLDeleteStatement;
 import com.alibaba.druid.sql.dialect.oracle.ast.expr.OracleArgumentExpr;
 import org.apache.seata.sqlparser.ParametersHolder;
 import org.apache.seata.sqlparser.SQLType;
-import org.apache.seata.sqlparser.druid.kingbase.KingbaseDeleteRecognizer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
