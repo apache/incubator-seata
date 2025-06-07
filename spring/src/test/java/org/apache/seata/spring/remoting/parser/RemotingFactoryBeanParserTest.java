@@ -111,12 +111,15 @@ public class RemotingFactoryBeanParserTest {
         TestService proxyTestService = createProxyTestService();
         
         // Mock applicationContext behavior
+        Object expectedFactoryBean = new Object();
         Mockito.when(applicationContext.containsBean("&testService")).thenReturn(true);
-        Mockito.when(applicationContext.getBean("&testService")).thenReturn(new Object());
+        Mockito.when(applicationContext.getBean("&testService")).thenReturn(expectedFactoryBean);
         
         // Test
         Object result = remotingFactoryBeanParser.getRemotingFactoryBean(proxyTestService, "testService");
-        Assertions.assertNotNull(result);
+        
+        // Alternative to assertNotNull - check that result is the same as our expected object
+        Assertions.assertSame(expectedFactoryBean, result);
     }
     
     @Test
