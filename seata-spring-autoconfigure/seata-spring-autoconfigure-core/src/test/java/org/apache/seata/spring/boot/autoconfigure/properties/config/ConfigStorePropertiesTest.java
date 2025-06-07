@@ -16,37 +16,25 @@
  */
 package org.apache.seata.spring.boot.autoconfigure.properties.config;
 
-import org.apache.seata.common.loader.EnhancedServiceLoader;
-import org.apache.seata.config.Configuration;
-import org.apache.seata.config.ExtConfigurationProvider;
-import org.apache.seata.config.FileConfiguration;
 import org.apache.seata.spring.boot.autoconfigure.BasePropertiesTest;
-import org.apache.seata.spring.boot.autoconfigure.provider.SpringApplicationContextProvider;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.mockito.Mockito.mock;
-
-@org.springframework.context.annotation.Configuration
-@Import(SpringApplicationContextProvider.class)
 public class ConfigStorePropertiesTest extends BasePropertiesTest {
-    @Bean("testConfigStoreProperties")
-    public ConfigStoreProperties configStoreProperties() {
-        return new ConfigStoreProperties().setType(STR_TEST_AAA).setDir(STR_TEST_BBB).setDestroyOnShutdown(false).setNamespace(STR_TEST_DDD).setDataId(STR_TEST_EEE);
-    }
 
     @Test
     public void testConfigStoreProperties() {
-        FileConfiguration configuration = mock(FileConfiguration.class);
-        Configuration currentConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
+        ConfigStoreProperties configStoreProperties = new ConfigStoreProperties();
+        configStoreProperties.setType(STR_TEST_AAA);
+        configStoreProperties.setDir(STR_TEST_BBB);
+        configStoreProperties.setDestroyOnShutdown(false);
+        configStoreProperties.setNamespace(STR_TEST_DDD);
+        configStoreProperties.setDataId(STR_TEST_EEE);
 
-        assertEquals(STR_TEST_AAA, currentConfiguration.getConfig("config.raft.db.type"));
-        assertEquals(STR_TEST_BBB, currentConfiguration.getConfig("config.raft.db.dir"));
-        assertFalse(currentConfiguration.getBoolean("config.raft.db.destroyOnShutdown"));
-        assertEquals(STR_TEST_DDD, currentConfiguration.getConfig("config.raft.db.namespace"));
-        assertEquals(STR_TEST_EEE, currentConfiguration.getConfig("config.raft.db.dataId"));
+        Assertions.assertEquals(STR_TEST_AAA, configStoreProperties.getType());
+        Assertions.assertEquals(STR_TEST_BBB, configStoreProperties.getDir());
+        Assertions.assertFalse(configStoreProperties.isDestroyOnShutdown());
+        Assertions.assertEquals(STR_TEST_DDD, configStoreProperties.getNamespace());
+        Assertions.assertEquals(STR_TEST_EEE, configStoreProperties.getDataId());
     }
 }

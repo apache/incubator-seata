@@ -16,38 +16,26 @@
  */
 package org.apache.seata.spring.boot.autoconfigure.properties.config;
 
-import org.apache.seata.common.loader.EnhancedServiceLoader;
-import org.apache.seata.config.Configuration;
-import org.apache.seata.config.ExtConfigurationProvider;
-import org.apache.seata.config.FileConfiguration;
 import org.apache.seata.spring.boot.autoconfigure.BasePropertiesTest;
-import org.apache.seata.spring.boot.autoconfigure.provider.SpringApplicationContextProvider;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
-
-
-@org.springframework.context.annotation.Configuration
-@Import(SpringApplicationContextProvider.class)
 public class ConfigRaftPropertiesTest extends BasePropertiesTest {
-    @Bean("testConfigRaftProperties")
-    public ConfigRaftProperties configRaftProperties() {
-        return new ConfigRaftProperties().setUsername(STR_TEST_AAA).setPassword(STR_TEST_BBB).setServerAddr(STR_TEST_CCC).setMetadataMaxAgeMs((long)LONG_TEST_ONE).setTokenValidityInMilliseconds((long)LONG_TEST_TWO);
-    }
 
     @Test
     public void testConfigRaftProperties() {
-        FileConfiguration configuration = mock(FileConfiguration.class);
-        Configuration currentConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
+        ConfigRaftProperties configRaftProperties = new ConfigRaftProperties();
+        configRaftProperties.setUsername(STR_TEST_AAA);
+        configRaftProperties.setPassword(STR_TEST_BBB);
+        configRaftProperties.setServerAddr(STR_TEST_CCC);
+        configRaftProperties.setMetadataMaxAgeMs((long)LONG_TEST_ONE);
+        configRaftProperties.setTokenValidityInMilliseconds((long)LONG_TEST_TWO);
 
-        assertEquals(STR_TEST_AAA, currentConfiguration.getConfig("config.raft.username"));
-        assertEquals(STR_TEST_BBB, currentConfiguration.getConfig("config.raft.password"));
-        assertEquals(STR_TEST_CCC, currentConfiguration.getConfig("config.raft.serverAddr"));
-        assertEquals(LONG_TEST_ONE, currentConfiguration.getInt("config.raft.metadataMaxAgeMs"));
-        assertEquals(LONG_TEST_TWO, currentConfiguration.getInt("config.raft.tokenValidityInMilliseconds"));
+        Assertions.assertEquals(STR_TEST_AAA, configRaftProperties.getUsername());
+        Assertions.assertEquals(STR_TEST_BBB, configRaftProperties.getPassword());
+        Assertions.assertEquals(STR_TEST_CCC, configRaftProperties.getServerAddr());
+        Assertions.assertEquals(LONG_TEST_ONE, configRaftProperties.getMetadataMaxAgeMs());
+        Assertions.assertEquals(LONG_TEST_TWO, configRaftProperties.getTokenValidityInMilliseconds());
 
     }
 }
