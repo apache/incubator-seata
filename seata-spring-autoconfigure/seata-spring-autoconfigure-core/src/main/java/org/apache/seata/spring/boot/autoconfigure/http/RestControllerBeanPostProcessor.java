@@ -31,9 +31,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.ValueConstants;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -106,10 +108,18 @@ public class RestControllerBeanPostProcessor implements BeanPostProcessor {
         Class<?>[] parameterTypes = method.getParameterTypes();
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
         ParamMetaData[] paramMetaDatas = new ParamMetaData[parameterTypes.length];
+        Parameter[] parameters = method.getParameters();
         for (int i = 0; i < parameterTypes.length; i++) {
+            Annotation matchedAnnotation = null;
             Class<? extends Annotation> parameterAnnotationType = null;
             if (parameterAnnotations[i] != null && parameterAnnotations[i].length > 0) {
-                parameterAnnotationType = parameterAnnotations[i][0].annotationType();
+                for (Annotation annotation : parameterAnnotations[i]) {
+                    if (MAPPING_PARAM_TYPE.containsKey(annotation.annotationType())) {
+                        parameterAnnotationType = annotation.annotationType();
+                        matchedAnnotation = annotation;
+                        break;
+                    }
+                }
             }
 
             if (parameterAnnotationType == null) {
@@ -119,6 +129,28 @@ public class RestControllerBeanPostProcessor implements BeanPostProcessor {
             ParamMetaData paramMetaData = new ParamMetaData();
             ParamMetaData.ParamConvertType paramConvertType = MAPPING_PARAM_TYPE.get(parameterAnnotationType);
             paramMetaData.setParamConvertType(paramConvertType);
+
+
+            if(parameterAnnotationType == RequestParam.class){
+                RequestParam requestParam = (RequestParam) matchedAnnotation;
+                String name = null;
+                boolean required = true;
+                String defaultValue = ValueConstants.DEFAULT_NONE;
+
+                if (requestParam != null) {
+                    name = !"".equals(requestParam.value()) ? requestParam.value() : requestParam.name();
+                    required = requestParam.required();
+                    defaultValue = requestParam.defaultValue();
+                }
+
+                if (name == null || name.isEmpty()) {
+                    name = parameters[i].getName();
+                }
+
+                paramMetaData.setParamName(name);
+                paramMetaData.setRequired(required);
+                paramMetaData.setDefaultValue(defaultValue);
+            }
             paramMetaDatas[i] = paramMetaData;
         }
         int maxSize = Math.max(prePaths.size(), postPaths.size());

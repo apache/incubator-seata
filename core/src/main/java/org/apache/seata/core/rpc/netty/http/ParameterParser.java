@@ -39,6 +39,9 @@ public class ParameterParser {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false).configure(FAIL_ON_EMPTY_BEANS, false);
 
+    private static final String DEFAULT_NONE = "\n\t\t\n\t\t\n\ue000\ue001\ue002\n\t\t\t\t\n";
+
+
     public static ObjectNode convertParamMap(Map<String, List<String>> paramMap) {
         ObjectNode paramNode = OBJECT_MAPPER.createObjectNode();
         for (Map.Entry<String, List<String>> entry : paramMap.entrySet()) {
@@ -97,6 +100,27 @@ public class ParameterParser {
         } else if (ParamMetaData.ParamConvertType.REQUEST_BODY.equals(paramConvertType)) {
             JsonNode body = paramMap.get("body");
             return OBJECT_MAPPER.convertValue(body, parameterType);
+        } else if (ParamMetaData.ParamConvertType.REQUEST_PARAM.equals(paramConvertType)) {
+            JsonNode body = paramMap.get("param");
+            String paramName = paramMetaData.getParamName();
+            if (body != null && paramName != null) {
+                JsonNode jsonNode = body.get(paramName);
+                if (jsonNode != null && !jsonNode.isNull()) {
+                    String value = jsonNode.asText(null);
+                    return OBJECT_MAPPER.convertValue(value, parameterType);
+                }
+            }
+
+            String defaultValue = paramMetaData.getDefaultValue();
+            if (defaultValue != null && !defaultValue.equals(DEFAULT_NONE)) {
+                return OBJECT_MAPPER.convertValue(defaultValue, parameterType);
+            }
+
+            if (paramMetaData.isRequired()) {
+                throw new IllegalArgumentException("Required request parameter '" + paramName + "' is missing");
+            }
+
+            return null;
         } else {
             JsonNode paramNode = paramMap.get("param");
             if (paramNode != null) {
