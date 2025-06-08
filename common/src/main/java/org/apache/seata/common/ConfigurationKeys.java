@@ -645,6 +645,26 @@ public interface ConfigurationKeys {
     String KEEP_ALIVE_TIME = TRANSPORT_PREFIX + "keepAliveTime";
 
     /**
+     * The constant MIN_HTTP_POOL_SIZE.
+     */
+    String MIN_HTTP_POOL_SIZE = TRANSPORT_PREFIX + "minHttpPoolSize";
+
+    /**
+     * The constant MAX_HTTP_POOL_SIZE.
+     */
+    String MAX_HTTP_POOL_SIZE = TRANSPORT_PREFIX + "maxHttpPoolSize";
+
+    /**
+     * The constant MAX_HTTP_TASK_QUEUE_SIZE.
+     */
+    String MAX_HTTP_TASK_QUEUE_SIZE = TRANSPORT_PREFIX + "maxHttpTaskQueueSize";
+
+    /**
+     * The constant HTTP_POOL_KEEP_ALIVE_TIME.
+     */
+    String HTTP_POOL_KEEP_ALIVE_TIME = TRANSPORT_PREFIX + "httpPoolKeepAliveTime";
+
+    /**
      * The constant TRANSPORT_TYPE
      */
     String TRANSPORT_TYPE = TRANSPORT_PREFIX + "type";

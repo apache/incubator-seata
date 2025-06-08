@@ -40,6 +40,11 @@ transport.threadFactory.workerThreadSize=default
 transport.shutdown.wait=3
 transport.serialization=seata
 transport.compressor=none
+#HTTP thread pool
+transport.minHttpPoolSize=10
+transport.maxHttpPoolSize=100
+transport.maxHttpTaskQueueSize=1000
+transport.httpPoolKeepAliveTime=500
 
 #Transaction routing rules configuration, only for the client
 service.vgroupMapping.default_tx_group=default

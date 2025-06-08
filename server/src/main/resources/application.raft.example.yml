@@ -168,6 +168,11 @@ seata:
   transport:
     rpc-tc-request-timeout: 15000
     enable-tc-server-batch-send-response: false
+    # HTTP thread pool
+    min-http-pool-size: 10
+    max-http-pool-size: 100
+    max-http-task-queue-size: 1000
+    http-pool-keep-alive-time: 500
     shutdown:
       wait: 3
     thread-factory:

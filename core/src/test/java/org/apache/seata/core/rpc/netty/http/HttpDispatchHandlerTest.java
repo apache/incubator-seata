@@ -25,12 +25,11 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
-
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -55,19 +54,20 @@ class HttpDispatchHandlerTest {
 
     @Test
     void testGetRequestWithParameters() throws Exception {
-        try (MockedStatic<ControllerManager> mocked = Mockito.mockStatic(ControllerManager.class)) {
-            Method method = TestController.class.getMethod("handleRequest", String.class);
-            ParamMetaData paramMetaData = new ParamMetaData();
-            paramMetaData.setParamConvertType(ParamMetaData.ParamConvertType.REQUEST_PARAM);
-            ParamMetaData[] paramMetaDatas = new ParamMetaData[]{paramMetaData};
-            HttpInvocation invocation = new HttpInvocation();
-            invocation.setController(testController);
-            invocation.setMethod(method);
-            invocation.setParamMetaData(paramMetaDatas);
+        Method method = TestController.class.getMethod("handleRequest", String.class);
+        ParamMetaData paramMetaData = new ParamMetaData();
+        paramMetaData.setParamConvertType(ParamMetaData.ParamConvertType.REQUEST_PARAM);
+        ParamMetaData[] paramMetaDatas = new ParamMetaData[]{paramMetaData};
 
-            mocked.when(() -> ControllerManager.getHttpInvocation("/test"))
-                    .thenReturn(invocation);
+        HttpInvocation invocation = new HttpInvocation();
+        invocation.setController(testController);
+        invocation.setMethod(method);
+        invocation.setPath("/test");
+        invocation.setParamMetaData(paramMetaDatas);
 
+        ControllerManager.addHttpInvocation(invocation);
+
+        try {
             HttpRequest request = new DefaultFullHttpRequest(
                     HttpVersion.HTTP_1_1,
                     HttpMethod.GET,
@@ -76,49 +76,68 @@ class HttpDispatchHandlerTest {
 
             channel.writeInbound(request);
 
-            FullHttpResponse response = channel.readOutbound();
+            FullHttpResponse response = waitForResponse(5000);
             assertEquals(HttpResponseStatus.OK, response.status());
             String content = response.content().toString(StandardCharsets.UTF_8);
             assertTrue(content.contains("Processed: testValue"));
+        } finally {
+            clearControllerManager();
         }
     }
 
     @Test
     void testRequestToNonexistentPath() {
-        try (MockedStatic<ControllerManager> mocked = Mockito.mockStatic(ControllerManager.class)) {
-            mocked.when(() -> ControllerManager.getHttpInvocation("/notfound"))
-                    .thenReturn(null);
+        HttpRequest request = new DefaultFullHttpRequest(
+                HttpVersion.HTTP_1_1,
+                HttpMethod.GET,
+                "/notfound"
+        );
 
-            HttpRequest request = new DefaultFullHttpRequest(
-                    HttpVersion.HTTP_1_1,
-                    HttpMethod.GET,
-                    "/notfound"
-            );
+        channel.writeInbound(request);
 
-            channel.writeInbound(request);
-
-            FullHttpResponse response = channel.readOutbound();
-            assertEquals(HttpResponseStatus.NOT_FOUND, response.status());
-        }
+        FullHttpResponse response = waitForResponse(5000);
+        assertEquals(HttpResponseStatus.NOT_FOUND, response.status());
     }
 
     @Test
     void testHttpHeadMethod() {
-        try (MockedStatic<ControllerManager> mocked = Mockito.mockStatic(ControllerManager.class)) {
-            mocked.when(() -> ControllerManager.getHttpInvocation("/head"))
-                    .thenReturn(null);
+        HttpRequest request = new DefaultFullHttpRequest(
+                HttpVersion.HTTP_1_1,
+                HttpMethod.HEAD,
+                "/head"
+        );
 
-            HttpRequest request = new DefaultFullHttpRequest(
-                    HttpVersion.HTTP_1_1,
-                    HttpMethod.HEAD,
-                    "/head"
-            );
+        channel.writeInbound(request);
 
-            channel.writeInbound(request);
+        FullHttpResponse response = waitForResponse(5000);
+        assertEquals(HttpResponseStatus.NOT_FOUND, response.status());
+        assertEquals(0, response.content().readableBytes());
+    }
 
-            FullHttpResponse response = channel.readOutbound();
-            assertEquals(HttpResponseStatus.NOT_FOUND, response.status());
-            assertEquals(0, response.content().readableBytes());
+    private FullHttpResponse waitForResponse(long timeoutMs) {
+        long startTime = System.currentTimeMillis();
+        FullHttpResponse response = null;
+
+        while (response == null && (System.currentTimeMillis() - startTime) < timeoutMs) {
+            response = channel.readOutbound();
+            if (response == null) {
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new RuntimeException("Interrupted while waiting for response", e);
+                }
+            }
         }
+
+        return response;
+    }
+
+    private void clearControllerManager() throws Exception {
+        Field field = ControllerManager.class.getDeclaredField("HTTP_CONTROLLER_MAP");
+        field.setAccessible(true);
+        Map<String, HttpInvocation> map = (java.util.Map<String, HttpInvocation>) field.get(null);
+        map.clear();
+
     }
 }
