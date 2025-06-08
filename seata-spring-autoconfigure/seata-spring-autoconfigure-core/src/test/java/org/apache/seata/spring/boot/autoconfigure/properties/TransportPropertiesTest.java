@@ -37,6 +37,10 @@ public class TransportPropertiesTest {
         transportProperties.setRpcTmRequestTimeout(1);
         transportProperties.setRpcTcRequestTimeout(1);
         transportProperties.setEnableClientSharedEventLoop(true);
+        transportProperties.setMinHttpPoolSize(20);
+        transportProperties.setMaxHttpPoolSize(200);
+        transportProperties.setMaxHttpTaskQueueSize(2000);
+        transportProperties.setHttpPoolKeepAliveTime(600);
 
         Assertions.assertEquals("server", transportProperties.getServer());
         Assertions.assertEquals("type", transportProperties.getType());
@@ -51,5 +55,9 @@ public class TransportPropertiesTest {
         Assertions.assertEquals(1, transportProperties.getRpcTmRequestTimeout());
         Assertions.assertEquals(1, transportProperties.getRpcTcRequestTimeout());
         Assertions.assertTrue(transportProperties.isEnableClientSharedEventLoop());
+        Assertions.assertEquals(20, transportProperties.getMinHttpPoolSize());
+        Assertions.assertEquals(200, transportProperties.getMaxHttpPoolSize());
+        Assertions.assertEquals(2000, transportProperties.getMaxHttpTaskQueueSize());
+        Assertions.assertEquals(600, transportProperties.getHttpPoolKeepAliveTime());
     }
 }

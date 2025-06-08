@@ -23,6 +23,10 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_ENABLE_CLIENT_BATCH_
 import static org.apache.seata.common.DefaultValues.DEFAULT_ENABLE_RM_CLIENT_BATCH_SEND_REQUEST;
 import static org.apache.seata.common.DefaultValues.DEFAULT_ENABLE_TC_SERVER_BATCH_SEND_RESPONSE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_ENABLE_TM_CLIENT_BATCH_SEND_REQUEST;
+import static org.apache.seata.common.DefaultValues.DEFAULT_HTTP_POOL_KEEP_ALIVE_TIME;
+import static org.apache.seata.common.DefaultValues.DEFAULT_MAX_HTTP_POOL_SIZE;
+import static org.apache.seata.common.DefaultValues.DEFAULT_MAX_HTTP_TASK_QUEUE_SIZE;
+import static org.apache.seata.common.DefaultValues.DEFAULT_MIN_HTTP_POOL_SIZE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_PROTOCOL;
 import static org.apache.seata.common.DefaultValues.DEFAULT_RPC_RM_REQUEST_TIMEOUT;
 import static org.apache.seata.common.DefaultValues.DEFAULT_RPC_TC_REQUEST_TIMEOUT;
@@ -97,6 +101,26 @@ public class TransportProperties {
      * use shared event loop group
      */
     private boolean enableClientSharedEventLoop = DEFAULT_ENABLE_CLIENT_USE_SHARED_EVENT_LOOP;
+
+    /**
+     * minimum HTTP pool size
+     */
+    private int minHttpPoolSize = DEFAULT_MIN_HTTP_POOL_SIZE;
+
+    /**
+     * maximum HTTP pool size
+     */
+    private int maxHttpPoolSize = DEFAULT_MAX_HTTP_POOL_SIZE;
+
+    /**
+     * maximum HTTP task queue size
+     */
+    private int maxHttpTaskQueueSize = DEFAULT_MAX_HTTP_TASK_QUEUE_SIZE;
+
+    /**
+     * HTTP pool keep alive time
+     */
+    private int httpPoolKeepAliveTime = DEFAULT_HTTP_POOL_KEEP_ALIVE_TIME;
 
 
     public String getType() {
@@ -217,5 +241,37 @@ public class TransportProperties {
 
     public void setProtocol(String protocol) {
         this.protocol = protocol;
+    }
+
+    public int getMinHttpPoolSize() {
+        return minHttpPoolSize;
+    }
+
+    public void setMinHttpPoolSize(int minHttpPoolSize) {
+        this.minHttpPoolSize = minHttpPoolSize;
+    }
+
+    public int getMaxHttpPoolSize() {
+        return maxHttpPoolSize;
+    }
+
+    public void setMaxHttpPoolSize(int maxHttpPoolSize) {
+        this.maxHttpPoolSize = maxHttpPoolSize;
+    }
+
+    public int getMaxHttpTaskQueueSize() {
+        return maxHttpTaskQueueSize;
+    }
+
+    public void setMaxHttpTaskQueueSize(int maxHttpTaskQueueSize) {
+        this.maxHttpTaskQueueSize = maxHttpTaskQueueSize;
+    }
+
+    public int getHttpPoolKeepAliveTime() {
+        return httpPoolKeepAliveTime;
+    }
+
+    public void setHttpPoolKeepAliveTime(int httpPoolKeepAliveTime) {
+        this.httpPoolKeepAliveTime = httpPoolKeepAliveTime;
     }
 }
