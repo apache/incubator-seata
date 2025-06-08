@@ -25,7 +25,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * The type OrderUtil test
- *
  */
 public class OrderUtilTest {
 
@@ -65,6 +64,17 @@ public class OrderUtilTest {
         assertThat(OrderUtil.lowerOrEquals(advisor21, advisor11)).isTrue();
         assertThat(OrderUtil.lowerOrEquals(advisor12, advisor11)).isTrue();
         assertThat(OrderUtil.lowerOrEquals(advisor22, advisor21)).isTrue();
+
+        assertThat(OrderUtil.lowerThan(null, 0)).isTrue();
+        assertThat(OrderUtil.lowerThan(0, null)).isFalse();
+        assertThat(OrderUtil.lowerThan((Integer) null, null)).isFalse();
+    }
+
+    @Test
+    public void test_lowerOrEquals_nullCases() {
+        assertThat(OrderUtil.lowerOrEquals(null, 0)).isTrue(); // MAX >= 0
+        assertThat(OrderUtil.lowerOrEquals(0, null)).isFalse(); // 0 >= MAX → false
+        assertThat(OrderUtil.lowerOrEquals((Integer) null, null)).isTrue(); // MAX >= MAX
     }
 
     @Test
@@ -90,6 +100,18 @@ public class OrderUtilTest {
         assertThat(OrderUtil.higherOrEquals(advisor11, advisor21)).isTrue();
         assertThat(OrderUtil.higherOrEquals(advisor11, advisor12)).isTrue();
         assertThat(OrderUtil.higherOrEquals(advisor21, advisor22)).isTrue();
+
+        assertThat(OrderUtil.higherThan(null, 0)).isFalse();
+        assertThat(OrderUtil.higherThan(0, null)).isTrue();
+        assertThat(OrderUtil.higherThan((Integer) null, null)).isFalse();
+    }
+
+
+    @Test
+    public void test_higherOrEquals_nullCases() {
+        assertThat(OrderUtil.higherOrEquals(null, 0)).isFalse(); //MAX >= 0
+        assertThat((OrderUtil.higherOrEquals(0, null))).isTrue(); // 0 <= MAX
+        assertThat(OrderUtil.higherOrEquals((Integer) null, null)).isTrue(); // MAX <= MAX
     }
 
     @Test
@@ -99,6 +121,7 @@ public class OrderUtilTest {
         assertThat(OrderUtil.lower(Ordered.LOWEST_PRECEDENCE, 1)).isEqualTo(Ordered.LOWEST_PRECEDENCE);
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> OrderUtil.lower(1, -1));
+        assertThat(OrderUtil.lower(null, 1)).isEqualTo(Integer.MAX_VALUE);
     }
 
     @Test
@@ -108,5 +131,7 @@ public class OrderUtilTest {
         assertThat(OrderUtil.higher(Ordered.HIGHEST_PRECEDENCE, 1)).isEqualTo(Ordered.HIGHEST_PRECEDENCE);
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> OrderUtil.higher(1, -1));
+
+        assertThat(OrderUtil.higher(null, 1)).isEqualTo(Integer.MAX_VALUE - 1);
     }
 }
