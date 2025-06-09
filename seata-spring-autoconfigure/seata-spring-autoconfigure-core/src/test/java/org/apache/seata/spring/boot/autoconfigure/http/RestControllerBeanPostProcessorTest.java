@@ -18,12 +18,19 @@ package org.apache.seata.spring.boot.autoconfigure.http;
 
 import org.apache.seata.core.rpc.netty.http.ControllerManager;
 import org.apache.seata.core.rpc.netty.http.HttpInvocation;
+import org.apache.seata.core.rpc.netty.http.ParamMetaData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Nonnull;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 
 public class RestControllerBeanPostProcessorTest {
@@ -53,6 +60,59 @@ public class RestControllerBeanPostProcessorTest {
         verify(controllerManager).addHttpInvocation(httpInvocation);
     }
 
+    @Test
+    public void testRegisterHttpInvocationWithCorrectMetadata() {
+        // Mock the bean and its annotations
+        TestApiController controller = new TestApiController();
+
+        // Call the method under test
+        processor.postProcessAfterInitialization(controller, "testApiController");
+
+        // Verify whether the parsed data is correct
+        HttpInvocation getInvocation = ControllerManager.getHttpInvocation("/api/get");
+        assertNotNull(getInvocation, "getMethod should be registered");
+        assertEquals("getMethod", getInvocation.getMethod().getName());
+        assertSame(controller, getInvocation.getController());
+
+        // Verify whether the defaultValue attribute "value" of @RequestParam is correct
+        ParamMetaData[] getParams = getInvocation.getParamMetaData();
+        assertEquals(1, getParams.length);
+        assertEquals("param", getParams[0].getParamName());
+        assertEquals("defaultValue", getParams[0].getDefaultValue());
+        assertEquals(ParamMetaData.ParamConvertType.REQUEST_PARAM, getParams[0].getParamConvertType());
+
+        // Verify whether the default value of the "required" attribute of @RequestParam is correct
+        assertTrue(getParams[0].isRequired());
+
+        HttpInvocation postInvocation = ControllerManager.getHttpInvocation("/api/post");
+        assertNotNull(postInvocation, "postMethod should be registered");
+        assertEquals("postMethod", postInvocation.getMethod().getName());
+        assertSame(controller, postInvocation.getController());
+
+        // Verify whether the value of the "name" attribute of @RequestParam is correct
+        ParamMetaData[] postParams = postInvocation.getParamMetaData();
+        assertEquals(1, postParams.length);
+        assertEquals("requestBody", postParams[0].getParamName());
+        assertEquals(ParamMetaData.ParamConvertType.REQUEST_PARAM, postParams[0].getParamConvertType());
+
+        HttpInvocation updateInvocation = ControllerManager.getHttpInvocation("/api/update");
+        assertNotNull(updateInvocation, "updateMethod should be registered");
+        assertEquals("updateMethod", updateInvocation.getMethod().getName());
+        assertSame(controller, updateInvocation.getController());
+
+        ParamMetaData[] updateParams = updateInvocation.getParamMetaData();
+        assertEquals(2, updateParams.length);
+
+        // Verify whether the value attribute of @RequestParam is correct
+        assertEquals("userName", updateParams[0].getParamName());
+        assertEquals(ParamMetaData.ParamConvertType.REQUEST_PARAM, updateParams[0].getParamConvertType());
+        assertEquals("age", updateParams[1].getParamName());
+
+        // Verify whether @RequestParam can be correctly parsed when there are multiple annotations before a parameter
+        assertEquals(ParamMetaData.ParamConvertType.REQUEST_PARAM, updateParams[1].getParamConvertType());
+        assertEquals(false, updateParams[1].isRequired());
+    }
+
     @RestController
     @RequestMapping("/base")
     static class TestController {
@@ -67,7 +127,25 @@ public class RestControllerBeanPostProcessorTest {
             return "POST";
         }
     }
+
+    @RestController
+    @RequestMapping("/api")
+    static class TestApiController {
+
+        @GetMapping("/get")
+        public String getMethod(@RequestParam(defaultValue = "defaultValue") String param) {
+            return "GET";
+        }
+
+        @PostMapping("/post")
+        public String postMethod(@RequestParam(name = "requestBody") String body) {
+            return "POST";
+        }
+
+        @GetMapping("/update")
+        public String updateMethod(@RequestParam(value = "userName") String name,
+                                   @Nonnull @RequestParam(required = false) Integer age) {
+            return "update";
+        }
+    }
 }
-
-
-

@@ -130,7 +130,6 @@ public class RestControllerBeanPostProcessor implements BeanPostProcessor {
             ParamMetaData.ParamConvertType paramConvertType = MAPPING_PARAM_TYPE.get(parameterAnnotationType);
             paramMetaData.setParamConvertType(paramConvertType);
 
-
             if(parameterAnnotationType == RequestParam.class){
                 RequestParam requestParam = (RequestParam) matchedAnnotation;
                 String name = null;
