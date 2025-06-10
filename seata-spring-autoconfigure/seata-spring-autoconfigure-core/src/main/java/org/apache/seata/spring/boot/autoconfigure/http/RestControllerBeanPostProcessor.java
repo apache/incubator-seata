@@ -148,7 +148,7 @@ public class RestControllerBeanPostProcessor implements BeanPostProcessor {
                     }
                     required = requestParam.required();
                     defaultValue = requestParam.defaultValue();
-                    if(DEFAULT_NONE.equals(defaultValue)){
+                    if(!DEFAULT_NONE.equals(defaultValue)){
                         required = false;
                     }
                 }

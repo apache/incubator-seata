@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Nonnull;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -80,10 +81,9 @@ public class RestControllerBeanPostProcessorTest {
         assertEquals("param", getParams[0].getParamName());
         assertEquals("defaultValue", getParams[0].getDefaultValue());
         assertEquals(ParamMetaData.ParamConvertType.REQUEST_PARAM, getParams[0].getParamConvertType());
+        assertFalse(getParams[0].isRequired());
 
         // Verify whether the default value of the "required" attribute of @RequestParam is correct
-        assertTrue(getParams[0].isRequired());
-
         HttpInvocation postInvocation = ControllerManager.getHttpInvocation("/api/post");
         assertNotNull(postInvocation, "postMethod should be registered");
         assertEquals("postMethod", postInvocation.getMethod().getName());
@@ -110,7 +110,7 @@ public class RestControllerBeanPostProcessorTest {
 
         // Verify whether @RequestParam can be correctly parsed when there are multiple annotations before a parameter
         assertEquals(ParamMetaData.ParamConvertType.REQUEST_PARAM, updateParams[1].getParamConvertType());
-        assertEquals(false, updateParams[1].isRequired());
+        assertFalse(updateParams[1].isRequired());
     }
 
     @RestController

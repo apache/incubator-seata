@@ -34,6 +34,10 @@ import org.slf4j.LoggerFactory;
 
 import static com.fasterxml.jackson.databind.SerializationFeature.FAIL_ON_EMPTY_BEANS;
 
+/**
+ * A utility class for parsing HTTP request parameters and converting them into Java objects.
+ * Supports various parameter types including request params, request body, model attributes, etc.
+ */
 public class ParameterParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ParameterParser.class);
