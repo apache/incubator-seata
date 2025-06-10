@@ -31,7 +31,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.ValueConstants;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -132,7 +131,7 @@ public class RestControllerBeanPostProcessor implements BeanPostProcessor {
             ParamMetaData.ParamConvertType paramConvertType = MAPPING_PARAM_TYPE.get(parameterAnnotationType);
             paramMetaData.setParamConvertType(paramConvertType);
 
-            if(parameterAnnotationType == RequestParam.class){
+            if (parameterAnnotationType == RequestParam.class) {
                 RequestParam requestParam = (RequestParam) matchedAnnotation;
                 String paramName = null;
                 boolean required = true;
@@ -148,7 +147,7 @@ public class RestControllerBeanPostProcessor implements BeanPostProcessor {
                     }
                     required = requestParam.required();
                     defaultValue = requestParam.defaultValue();
-                    if(!DEFAULT_NONE.equals(defaultValue)){
+                    if (!DEFAULT_NONE.equals(defaultValue)) {
                         required = false;
                     }
                 }
