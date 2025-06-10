@@ -134,13 +134,13 @@
         </file>
 
         <file>
-            <source>NOTICE</source>
+            <source>NOTICE-server</source>
             <destName>NOTICE</destName>
             <outputDirectory>seata-server/</outputDirectory>
         </file>
 
         <file>
-            <source>NOTICE</source>
+            <source>NOTICE-namingserver</source>
             <destName>NOTICE</destName>
             <outputDirectory>seata-namingserver/</outputDirectory>
         </file>
