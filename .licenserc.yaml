@@ -49,8 +49,8 @@ header:
     - '**/*.jpg'
     - '**/*.jpeg'
     - '**/*.ico'
-    - '**/.tokens'
-    - '**/.interp'
+    - '**/*.tokens'
+    - '**/*.interp'
     - '**/.babelrc' #json format
     - '**/.eslintrc' #json format
     - '**/.prettierrc' #json format
