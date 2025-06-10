@@ -127,7 +127,6 @@ public class ParameterParser {
             if (paramMetaData.isRequired()) {
                 throw new IllegalArgumentException("Required request parameter '" + paramName + "' is missing");
             }
-
             return null;
         } else {
             JsonNode paramNode = paramMap.get("param");
