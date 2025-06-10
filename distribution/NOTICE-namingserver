@@ -10,68 +10,68 @@ Jackson-core NOTICE
 
 ========================================================================
 
-# Jackson JSON processor
+    # Jackson JSON processor
 
-Jackson is a high-performance, Free/Open Source JSON processing library.
-It was originally written by Tatu Saloranta (tatu.saloranta@iki.fi), and has
-been in development since 2007.
-It is currently developed by a community of developers.
+    Jackson is a high-performance, Free/Open Source JSON processing library.
+    It was originally written by Tatu Saloranta (tatu.saloranta@iki.fi), and has
+    been in development since 2007.
+    It is currently developed by a community of developers.
 
-## Licensing
+    ## Licensing
 
-Jackson 2.x core and extension components are licensed under Apache License 2.0
-To find the details that apply to this artifact see the accompanying LICENSE file.
+    Jackson 2.x core and extension components are licensed under Apache License 2.0
+    To find the details that apply to this artifact see the accompanying LICENSE file.
 
-## Credits
+    ## Credits
 
-A list of contributors may be found from CREDITS(-2.x) file, which is included
-in some artifacts (usually source distributions); but is always available
-from the source code management (SCM) system project uses.
-
-========================================================================
-
-jakarta NOTICE
+    A list of contributors may be found from CREDITS(-2.x) file, which is included
+    in some artifacts (usually source distributions); but is always available
+    from the source code management (SCM) system project uses.
 
 ========================================================================
 
-# Notices for Jakarta Annotations
+Jakarta NOTICE
 
-This content is produced and maintained by the Jakarta Annotations project.
+========================================================================
 
- * Project home: https://projects.eclipse.org/projects/ee4j.ca
+    # Notices for Jakarta Annotations
 
-## Trademarks
+    This content is produced and maintained by the Jakarta Annotations project.
 
-Jakarta Annotations is a trademark of the Eclipse Foundation.
+     * Project home: https://projects.eclipse.org/projects/ee4j.ca
 
-## Declared Project Licenses
+    ## Trademarks
 
-This program and the accompanying materials are made available under the terms
-of the Eclipse Public License v. 2.0 which is available at
-http://www.eclipse.org/legal/epl-2.0. This Source Code may also be made
-available under the following Secondary Licenses when the conditions for such
-availability set forth in the Eclipse Public License v. 2.0 are satisfied: GNU
-General Public License, version 2 with the GNU Classpath Exception which is
-available at https://www.gnu.org/software/classpath/license.html.
+    Jakarta Annotations is a trademark of the Eclipse Foundation.
 
-SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
+    ## Declared Project Licenses
 
-## Source Code
+    This program and the accompanying materials are made available under the terms
+    of the Eclipse Public License v. 2.0 which is available at
+    http://www.eclipse.org/legal/epl-2.0. This Source Code may also be made
+    available under the following Secondary Licenses when the conditions for such
+    availability set forth in the Eclipse Public License v. 2.0 are satisfied: GNU
+    General Public License, version 2 with the GNU Classpath Exception which is
+    available at https://www.gnu.org/software/classpath/license.html.
 
-The project maintains the following source code repositories:
+    SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
 
- * https://github.com/eclipse-ee4j/common-annotations-api
+    ## Source Code
 
-## Third-party Content
+    The project maintains the following source code repositories:
 
-## Cryptography
+     * https://github.com/eclipse-ee4j/common-annotations-api
 
-Content may contain encryption software. The country in which you are currently
-may have restrictions on the import, possession, and use, and/or re-export to
-another country, of encryption software. BEFORE using any encryption software,
-please check the country's laws, regulations and policies concerning the import,
-possession, or use, and re-export of encryption software, to see if this is
-permitted.
+    ## Third-party Content
+
+    ## Cryptography
+
+    Content may contain encryption software. The country in which you are currently
+    may have restrictions on the import, possession, and use, and/or re-export to
+    another country, of encryption software. BEFORE using any encryption software,
+    please check the country's laws, regulations and policies concerning the import,
+    possession, or use, and re-export of encryption software, to see if this is
+    permitted.
 
 ========================================================================
 
@@ -79,17 +79,17 @@ Spring Framework NOTICE
 
 ========================================================================
 
-Spring Framework 5.3.39
-Copyright (c) 2002-2024 Pivotal, Inc.
+    Spring Framework 5.3.39
+    Copyright (c) 2002-2024 Pivotal, Inc.
 
-This product is licensed to you under the Apache License, Version 2.0
-(the "License"). You may not use this product except in compliance with
-the License.
+    This product is licensed to you under the Apache License, Version 2.0
+    (the "License"). You may not use this product except in compliance with
+    the License.
 
-This product may include a number of subcomponents with separate
-copyright notices and license terms. Your use of the source code for
-these subcomponents is subject to the terms and conditions of the
-subcomponent's license, as noted in the license.txt file.
+    This product may include a number of subcomponents with separate
+    copyright notices and license terms. Your use of the source code for
+    these subcomponents is subject to the terms and conditions of the
+    subcomponent's license, as noted in the license.txt file.
 
 ========================================================================
 
@@ -97,12 +97,12 @@ Spring Boot NOTICE
 
 ========================================================================
 
-Spring Boot 2.7.18
-Copyright (c) 2012-2023 VMware, Inc.
+    Spring Boot 2.7.18
+    Copyright (c) 2012-2023 VMware, Inc.
 
-This product is licensed to you under the Apache License, Version 2.0
-(the "License"). You may not use this product except in compliance with
-the License.
+    This product is licensed to you under the Apache License, Version 2.0
+    (the "License"). You may not use this product except in compliance with
+    the License.
 
 ========================================================================
 
