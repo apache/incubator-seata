@@ -221,6 +221,9 @@ Apache-2.0 licenses
     org.apache.httpcomponents:httpclient 4.5.14 Apache-2.0
     org.apache.httpcomponents:httpcore 4.4.16 Apache-2.0
     org.apache.httpcomponents:httpcore-nio 4.4.16 Apache-2.0
+    com.fasterxml.jackson.core:jackson-annotations 2.13.5 Apache-2.0
+    com.fasterxml.jackson.core:jackson-core 2.13.5 Apache-2.0
+    com.fasterxml.jackson.core:jackson-databind 2.13.5 Apache-2.0
     com.fasterxml.jackson.datatype:jackson-datatype-jdk8 2.13.5 Apache-2.0
     com.fasterxml.jackson.datatype:jackson-datatype-jsr310 2.13.5 Apache-2.0
     com.fasterxml.jackson.module:jackson-module-parameter-names 2.13.5 Apache-2.0
@@ -241,6 +244,7 @@ Apache-2.0 licenses
     io.netty:netty-codec-socks 4.1.101.Final Apache-2.0
     io.netty:netty-codec-stomp 4.1.101.Final Apache-2.0
     io.netty:netty-codec-xml 4.1.101.Final Apache-2.0
+    io.netty:netty-common 4.1.101.Final Apache-2.0
     io.netty:netty-handler 4.1.101.Final Apache-2.0
     io.netty:netty-handler-proxy 4.1.101.Final Apache-2.0
     io.netty:netty-handler-ssl-ocsp 4.1.101.Final Apache-2.0
@@ -281,6 +285,8 @@ Apache-2.0 licenses
     org.springframework.security:spring-security-web 5.7.11 Apache-2.0
     org.springframework:spring-web 5.3.39 Apache-2.0
     org.springframework:spring-webmvc 5.3.39 Apache-2.0
+    org.apache.tomcat:tomcat-annotations-api 9.0.83 Apache-2.0
+    org.apache.tomcat.embed:tomcat-embed-core 9.0.105 Apache-2.0
     org.apache.tomcat.embed:tomcat-embed-el 9.0.105 Apache-2.0
     org.apache.tomcat.embed:tomcat-embed-websocket 9.0.105 Apache-2.0
 
