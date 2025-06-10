@@ -26,6 +26,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
 import org.apache.seata.common.rpc.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,21 +103,23 @@ public class ParameterParser {
             JsonNode body = paramMap.get("body");
             return OBJECT_MAPPER.convertValue(body, parameterType);
         } else if (ParamMetaData.ParamConvertType.REQUEST_PARAM.equals(paramConvertType)) {
-            JsonNode body = paramMap.get("param");
             String paramName = paramMetaData.getParamName();
-            if (body != null && paramName != null) {
-                JsonNode jsonNode = body.get(paramName);
-                if (jsonNode != null && !jsonNode.isNull()) {
-                    String value = jsonNode.asText(null);
-                    return OBJECT_MAPPER.convertValue(value, parameterType);
-                }
+            JsonNode jsonNode = Optional.ofNullable(paramMap.get("param"))
+                    .map(body -> body.get(paramName))
+                    .orElse(null);
+
+            // Step 1: If body exists and contains paramName, use its value first
+            if (jsonNode != null && !jsonNode.isNull()) {
+                return OBJECT_MAPPER.convertValue(jsonNode, parameterType);
             }
 
+            // Step 2: If the parameter is missing but a defaultValue is set, use the defaultValue
             String defaultValue = paramMetaData.getDefaultValue();
             if (defaultValue != null && !defaultValue.equals(DEFAULT_NONE)) {
                 return OBJECT_MAPPER.convertValue(defaultValue, parameterType);
             }
 
+            // Step 3: If the parameter is required but no value or defaultValue is provided, throw an exception
             if (paramMetaData.isRequired()) {
                 throw new IllegalArgumentException("Required request parameter '" + paramName + "' is missing");
             }

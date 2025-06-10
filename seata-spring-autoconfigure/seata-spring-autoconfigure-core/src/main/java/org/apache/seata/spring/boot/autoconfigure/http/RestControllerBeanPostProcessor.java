@@ -42,6 +42,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.springframework.web.bind.annotation.ValueConstants.DEFAULT_NONE;
+
 /**
  * Handles classes annotated with @RestController to establish a request path -> controller mapping relationship
  *
@@ -132,21 +134,26 @@ public class RestControllerBeanPostProcessor implements BeanPostProcessor {
 
             if(parameterAnnotationType == RequestParam.class){
                 RequestParam requestParam = (RequestParam) matchedAnnotation;
-                String name = null;
+                String paramName = null;
                 boolean required = true;
-                String defaultValue = ValueConstants.DEFAULT_NONE;
+                String defaultValue = null;
 
                 if (requestParam != null) {
-                    name = !"".equals(requestParam.value()) ? requestParam.value() : requestParam.name();
+                    paramName = requestParam.name();
+                    if (paramName.isEmpty()) {
+                        paramName = requestParam.value();
+                    }
+                    if (paramName.isEmpty()) {
+                        paramName = parameters[i].getName();
+                    }
                     required = requestParam.required();
                     defaultValue = requestParam.defaultValue();
+                    if(DEFAULT_NONE.equals(defaultValue)){
+                        required = false;
+                    }
                 }
 
-                if (name == null || name.isEmpty()) {
-                    name = parameters[i].getName();
-                }
-
-                paramMetaData.setParamName(name);
+                paramMetaData.setParamName(paramName);
                 paramMetaData.setRequired(required);
                 paramMetaData.setDefaultValue(defaultValue);
             }
