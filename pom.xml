@@ -44,7 +44,7 @@
         <module>compatible</module>
         <module>dependencies</module>
         <module>discovery</module>
-        <module>distribution</module>
+        <!--<module>distribution</module>--> <!-- excluded from source release -->
         <module>integration/rpc-core</module>
         <module>integration/dubbo</module>
         <module>integration/dubbo-alibaba</module>
@@ -60,9 +60,9 @@
         <module>rocketmq</module>
         <module>spring</module>
         <module>tcc</module>
-        <module>test</module>
+        <!--<module>test</module>--> <!-- excluded from source release -->
         <module>mock-server</module>
-        <module>test-old-version</module>
+        <!--<module>test-old-version</module>--> <!-- excluded from source release -->
         <module>tm</module>
         <module>metrics</module>
         <module>serializer</module>
@@ -379,6 +379,32 @@
                                     <goal>apply</goal>
                                 </goals>
                                 <phase>process-sources</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>source-release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>src/assembly/source-release.xml</descriptor>
+                            </descriptors>
+                            <finalName>apache-seata-${project.version}-incubating-src</finalName>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>make-source-assembly</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>single</goal>
+                                </goals>
                             </execution>
                         </executions>
                     </plugin>
