@@ -132,12 +132,12 @@ public class RestControllerBeanPostProcessor implements BeanPostProcessor {
             paramMetaData.setParamConvertType(paramConvertType);
 
             if (parameterAnnotationType == RequestParam.class) {
-                RequestParam requestParam = (RequestParam) matchedAnnotation;
                 String paramName = null;
                 boolean required = true;
                 String defaultValue = null;
 
-                if (requestParam != null) {
+                if (matchedAnnotation != null) {
+                    RequestParam requestParam = (RequestParam) matchedAnnotation;
                     paramName = requestParam.name();
                     if (paramName.isEmpty()) {
                         paramName = requestParam.value();
