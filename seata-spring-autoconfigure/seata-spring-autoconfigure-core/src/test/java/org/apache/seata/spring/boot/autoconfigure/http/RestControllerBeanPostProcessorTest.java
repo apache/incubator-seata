@@ -22,7 +22,7 @@ import org.apache.seata.core.rpc.netty.http.HttpInvocation;
 import org.apache.seata.core.rpc.netty.http.ParamMetaData;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -39,12 +39,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.mockito.Mockito.verify;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.times;
 
 public class RestControllerBeanPostProcessorTest {
-
-    @Mock
-    private ControllerManager controllerManager;
 
     private RestControllerBeanPostProcessor processor;
 
@@ -59,13 +58,13 @@ public class RestControllerBeanPostProcessorTest {
         // Mock the bean and its annotations
         TestController mockBean = new TestController();
 
-        // Call the method under test
-        processor.postProcessAfterInitialization(mockBean, "testController");
+        try (MockedStatic<ControllerManager> mocked = mockStatic(ControllerManager.class)) {
+            // Call the method under test
+            processor.postProcessAfterInitialization(mockBean, "testController");
 
-        // Verify that the paths were added correctly
-        HttpInvocation httpInvocation = new HttpInvocation();
-        httpInvocation.setPath("/path");
-        verify(controllerManager).addHttpInvocation(httpInvocation);
+            // Verify that the paths were added correctly
+            mocked.verify(() -> ControllerManager.addHttpInvocation(any(HttpInvocation.class)), times(2));
+        }
     }
 
     @Test
