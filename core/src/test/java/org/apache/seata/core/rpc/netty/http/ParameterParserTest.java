@@ -189,6 +189,29 @@ class ParameterParserTest {
         assertNull(args[0]);
     }
 
+    @Test
+    void testGetArgValuesWithJavaBeanParam() throws Exception {
+        Method method = TestClassB.class.getMethod("objectMethod", User.class);
+
+        ParamMetaData paramMetaData = new ParamMetaData();
+        paramMetaData.setParamConvertType(ParamMetaData.ParamConvertType.MODEL_ATTRIBUTE);
+        ObjectNode paramMap = objectMapper.createObjectNode();
+        ObjectNode bodyNode = paramMap.putObject("param");
+        bodyNode.put("name", "LiHua");
+        bodyNode.put("age", 10);
+        HttpContext httpContext = new HttpContext(null, null, false);
+        Object[] args = ParameterParser.getArgValues(
+                new ParamMetaData[]{paramMetaData},
+                method,
+                paramMap, httpContext
+        );
+
+        assertEquals(1, args.length);
+        assertTrue(args[0] instanceof User);
+        assertEquals("LiHua", ((User) args[0]).name);
+        assertEquals(10, ((User) args[0]).age);
+    }
+
 
     // Test support class
     class TestClass {
@@ -200,6 +223,29 @@ class ParameterParserTest {
     class TestClassA{
         public void objectMethod(String userName){
 
+        }
+    }
+
+    // Test support classB
+    class TestClassB{
+        public void objectMethod(User user){
+
+        }
+    }
+
+    static class User{
+        String name;
+        Integer age;
+
+        public User(){
+        }
+
+        public void setName(String name){
+            this.name = name;
+        }
+
+        public void setAge(Integer age){
+            this.age = age;
         }
     }
 }
