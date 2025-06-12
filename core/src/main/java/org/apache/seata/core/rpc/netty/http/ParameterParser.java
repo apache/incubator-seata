@@ -98,7 +98,7 @@ public class ParameterParser {
     private static Object getArgValue(Class<?> parameterType, String parameterName, ParamMetaData paramMetaData,
         ObjectNode paramMap, HttpContext httpContext) {
         ParamMetaData.ParamConvertType paramConvertType = paramMetaData.getParamConvertType();
-        if (parameterType == null || parameterType.equals(HttpContext.class)) {
+        if (parameterType.equals(HttpContext.class)) {
             return httpContext;
         } else if (ParamMetaData.ParamConvertType.MODEL_ATTRIBUTE.equals(paramConvertType)) {
             JsonNode param = paramMap.get("param");
