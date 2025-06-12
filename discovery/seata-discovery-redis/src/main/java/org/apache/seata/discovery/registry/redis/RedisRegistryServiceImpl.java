@@ -52,7 +52,6 @@ import redis.clients.jedis.ScanResult;
 
 /**
  * The type Redis registry service.
- *
  */
 public class RedisRegistryServiceImpl implements RegistryService<RedisListener> {
 
@@ -244,7 +243,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
                 switch (eventType) {
                     case RedisListener.REGISTER:
                         CollectionUtils.computeIfAbsent(CLUSTER_ADDRESS_MAP, clusterName, value -> ConcurrentHashMap.newKeySet(2))
-                            .add(NetUtil.toInetSocketAddress(serverAddr));
+                                .add(NetUtil.toInetSocketAddress(serverAddr));
                         break;
                     case RedisListener.UN_REGISTER:
                         removeServerAddressByPushEmptyProtection(clusterName, serverAddr);
@@ -258,13 +257,12 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
     }
 
     /**
-     *
      * if the serverAddr is unique in the address list and
      * the callback cluster is current cluster, then enable push-empty protection
      * Otherwise, remove it.
      *
      * @param notifyCluserName notifyCluserName
-     * @param serverAddr serverAddr
+     * @param serverAddr       serverAddr
      */
     private void removeServerAddressByPushEmptyProtection(String notifyCluserName, String serverAddr) {
 
@@ -288,9 +286,39 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
 
     @Override
     public void close() {
-        threadPoolExecutorForSubscribe.shutdown();
-        threadPoolExecutorForUpdateMap.shutdown();
-        RegistryHeartBeats.close();
+        // Shut down the ThreadPoolExecutors
+        if (threadPoolExecutorForSubscribe != null && !threadPoolExecutorForSubscribe.isShutdown()) {
+            threadPoolExecutorForSubscribe.shutdown();
+
+            try {
+                if (!threadPoolExecutorForSubscribe.awaitTermination(5, TimeUnit.SECONDS)) {
+                    threadPoolExecutorForSubscribe.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                LOGGER.warn("ExecutorService threadPoolExecutorForSubscribe shutdown interrupted. Forcing shutdown.");
+                threadPoolExecutorForSubscribe.shutdownNow();
+            } finally {
+                threadPoolExecutorForSubscribe = null;
+            }
+        }
+
+        if (threadPoolExecutorForUpdateMap != null && !threadPoolExecutorForUpdateMap.isShutdown()) {
+            threadPoolExecutorForUpdateMap.shutdown();
+
+            try {
+                if (!threadPoolExecutorForUpdateMap.awaitTermination(5, TimeUnit.SECONDS)) {
+                    threadPoolExecutorForUpdateMap.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                LOGGER.warn("ExecutorService threadPoolExecutorForUpdateMap shutdown interrupted. Forcing shutdown.");
+                threadPoolExecutorForUpdateMap.shutdownNow();
+            } finally {
+                threadPoolExecutorForUpdateMap = null;
+            }
+        }
+
+        RegistryHeartBeats.close(REGISTRY_TYPE);
+
         jedisPool.destroy();
     }
 

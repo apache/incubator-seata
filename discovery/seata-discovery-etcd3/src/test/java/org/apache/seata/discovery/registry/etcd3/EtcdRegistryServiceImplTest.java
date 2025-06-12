@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.discovery.registry.etcd;
+package org.apache.seata.discovery.registry.etcd3;
 
 import io.etcd.jetcd.ByteSequence;
 import io.etcd.jetcd.Client;
@@ -23,8 +23,6 @@ import io.etcd.jetcd.launcher.junit4.EtcdClusterResource;
 import io.etcd.jetcd.options.DeleteOption;
 import io.etcd.jetcd.options.GetOption;
 import io.etcd.jetcd.watch.WatchResponse;
-import org.apache.seata.discovery.registry.etcd3.EtcdRegistryProvider;
-import org.apache.seata.discovery.registry.etcd3.EtcdRegistryServiceImpl;
 import org.apache.seata.discovery.registry.RegistryService;
 import org.junit.Rule;
 import org.junit.jupiter.api.AfterAll;
