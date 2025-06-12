@@ -16,6 +16,7 @@
  */
 package org.apache.seata.discovery.registry.nacos;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Properties;
 
@@ -23,6 +24,7 @@ import org.apache.seata.common.util.ReflectionUtil;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  * The type Nacos registry serivce impl test
@@ -38,6 +40,27 @@ public class NacosRegistryServiceImplTest {
         System.setProperty("contextPath", "/bar");
         properties = (Properties) ReflectionUtil.invokeMethod(null, method);
         Assertions.assertThat(properties.getProperty("contextPath")).isEqualTo("/bar");
+    }
+
+    @Test
+    public void testClose() throws Exception {
+        NacosRegistryServiceImpl instance = NacosRegistryServiceImpl.getInstance();
+        NacosRegistryServiceImpl.getNamingInstance();
+
+        Field useSLBWayField = NacosRegistryServiceImpl.class.getDeclaredField("useSLBWay");
+        useSLBWayField.setAccessible(true);
+        useSLBWayField.set(instance, true);
+        NacosRegistryServiceImpl.getNamingMaintainInstance();
+
+        instance.close();
+
+        Field namingField = NacosRegistryServiceImpl.class.getDeclaredField("naming");
+        namingField.setAccessible(true);
+        assertNull(namingField.get(null));
+
+        Field namingMaintainField = NacosRegistryServiceImpl.class.getDeclaredField("namingMaintain");
+        namingMaintainField.setAccessible(true);
+        assertNull(namingMaintainField.get(null));
     }
 
 

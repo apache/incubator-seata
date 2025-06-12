@@ -225,12 +225,34 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
 
     @Override
     public void close() throws Exception {
-        if (lifeKeeper != null) {
-            lifeKeeper.stop();
-            if (lifeKeeperFuture != null) {
-                lifeKeeperFuture.get(3, TimeUnit.SECONDS);
+        // Shut down the ThreadPoolExecutor
+        if (executorService != null && !executorService.isShutdown()) {
+            executorService.shutdown();
+
+            try {
+                if (!executorService.awaitTermination(5, TimeUnit.SECONDS)) {
+                    executorService.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                LOGGER.warn("ExecutorService shutdown interrupted. Forcing shutdown.");
+                executorService.shutdownNow();
+            } finally {
+                executorService = null;
             }
         }
+
+        // Close the Etcd client and release the underlying connection
+        if (client != null) {
+            try {
+                client.close();
+            } catch (Exception e) {
+                LOGGER.warn("Failed to close Etcd client: {}", e.getMessage());
+            } finally {
+                client = null;
+            }
+        }
+
+        RegistryHeartBeats.close(REGISTRY_TYPE);
     }
 
     /**

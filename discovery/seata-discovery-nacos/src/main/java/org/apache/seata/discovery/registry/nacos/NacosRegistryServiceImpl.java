@@ -47,7 +47,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The type Nacos registry service.
- *
  */
 public class NacosRegistryServiceImpl implements RegistryService<EventListener> {
 
@@ -208,7 +207,25 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
 
     @Override
     public void close() throws Exception {
+        if (naming != null) {
+            try {
+                naming.shutDown();
+            } catch (Exception e) {
+                LOGGER.warn("Error while shutting down Nacos NamingService", e);
+            } finally {
+                naming = null;
+            }
+        }
 
+        if (useSLBWay && namingMaintain != null) {
+            try {
+                namingMaintain.shutDown();
+            } catch (Exception e) {
+                LOGGER.warn("Error while shutting down Nacos NamingMaintainService", e);
+            } finally {
+                namingMaintain = null;
+            }
+        }
     }
 
     /**
@@ -272,8 +289,9 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
 
     /**
      * init nacos auth properties
-     *
+     * <p>
      * username/password > ak/sk > ramRoleName
+     *
      * @param sourceProperties the source properties
      * @return auth properties
      */
