@@ -18,6 +18,7 @@ package org.apache.seata.server.lock;
 
 import org.apache.seata.core.store.DefaultDistributedLocker;
 import org.apache.seata.core.store.DistributedLocker;
+import org.apache.seata.server.DynamicPortTestConfig;
 import org.apache.seata.server.lock.distributed.DistributedLockerFactory;
 import org.apache.seata.server.storage.redis.lock.RedisDistributedLocker;
 import org.junit.jupiter.api.AfterEach;
@@ -25,11 +26,13 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 
 /**
  * @description Distributed locker factory test
  */
 @SpringBootTest
+@Import(DynamicPortTestConfig.class)
 public class DistributedLockerFactoryTest {
 
     @BeforeEach

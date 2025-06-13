@@ -18,6 +18,7 @@ package org.apache.seata.server.storage.file.store;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.seata.core.store.MappingDO;
+import org.apache.seata.server.DynamicPortTestConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,13 +30,14 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-
+import org.springframework.context.annotation.Import;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @SpringBootTest
+@Import(DynamicPortTestConfig.class)
 public class FileVGroupMappingStoreManagerTest {
 
     private FileVGroupMappingStoreManager fileVGroupMappingStoreManager;

@@ -25,6 +25,7 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.protocol.HTTP;
 import org.apache.seata.common.holder.ObjectHolder;
 import org.apache.seata.common.util.HttpClientUtil;
+import org.apache.seata.server.DynamicPortTestConfig;
 import org.apache.seata.server.cluster.listener.ClusterChangeEvent;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -35,6 +36,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 
 
@@ -42,8 +44,8 @@ import static org.apache.seata.common.ConfigurationKeys.SERVER_SERVICE_PORT_CAME
 import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
 
 @SpringBootTest
-@TestPropertySource(locations = "classpath:test-cluster-controller.properties")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@Import(DynamicPortTestConfig.class)
 class ClusterControllerTest {
 
     @BeforeAll

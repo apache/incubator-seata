@@ -26,18 +26,21 @@ import org.apache.seata.core.constants.ConfigurationKeys;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.GlobalStatus;
+import org.apache.seata.server.DynamicPortTestConfig;
 import org.apache.seata.server.lock.LockManager;
 import org.apache.seata.server.lock.file.FileLockManagerForTest;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.session.SessionHelper;
 import org.apache.seata.server.session.SessionHolder;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Import;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
 import static java.io.File.separator;
@@ -47,6 +50,7 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
  * The type Session store test.
  */
 @SpringBootTest
+@Import(DynamicPortTestConfig.class)
 public class SessionStoreTest {
 
     @BeforeAll
@@ -81,6 +85,11 @@ public class SessionStoreTest {
         }
         LockManager lockManager = new FileLockManagerForTest();
         lockManager.cleanAllLocks();
+    }
+
+    @AfterEach
+    public void after() throws Exception {
+        clean();
     }
 
     /**

@@ -75,8 +75,10 @@ public class RegistryHeartBeats {
         }, period, period, TimeUnit.MILLISECONDS);
     }
 
-    public static void close() {
-        HEARTBEAT_SCHEDULED.shutdown();
+    public static void close(String registryType) {
+        if (getHeartbeatEnabled(registryType)) {
+            HEARTBEAT_SCHEDULED.shutdown();
+        }
     }
 
     private static long getHeartbeatPeriod(String registryType) {

@@ -16,6 +16,7 @@
  */
 package org.apache.seata.server.store;
 
+import org.apache.seata.server.DynamicPortTestConfig;
 import org.apache.seata.server.cluster.raft.sync.msg.RaftGlobalSessionSyncMsg;
 import org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType;
 import org.apache.seata.server.cluster.raft.sync.msg.dto.GlobalTransactionDTO;
@@ -29,10 +30,12 @@ import org.apache.seata.server.cluster.raft.sync.RaftSyncMessageSerializer;
 import org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMessage;
 import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.storage.SessionConverter;
+import org.springframework.context.annotation.Import;
 
 /**
  */
 @SpringBootTest
+@Import(DynamicPortTestConfig.class)
 public class RaftSyncMessageSerializerTest {
     @BeforeAll
     public static void setUp(ApplicationContext context) {

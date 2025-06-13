@@ -24,6 +24,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.apache.seata.common.store.SessionMode;
+import org.apache.seata.server.DynamicPortTestConfig;
 import org.apache.seata.server.session.SessionHolder;
 import org.assertj.core.util.Files;
 import org.junit.jupiter.api.AfterEach;
@@ -44,10 +45,12 @@ import org.apache.seata.server.storage.file.store.FileTransactionStoreManager;
 import org.apache.seata.server.store.StoreConfig;
 import org.apache.seata.server.store.TransactionStoreManager;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Import;
 
 /**
  */
 @SpringBootTest
+@Import(DynamicPortTestConfig.class)
 public class FileTransactionStoreManagerTest {
 
     @BeforeEach
