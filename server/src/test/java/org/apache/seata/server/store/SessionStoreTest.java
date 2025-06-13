@@ -33,6 +33,7 @@ import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.session.SessionHelper;
 import org.apache.seata.server.session.SessionHolder;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -84,6 +85,11 @@ public class SessionStoreTest {
         }
         LockManager lockManager = new FileLockManagerForTest();
         lockManager.cleanAllLocks();
+    }
+
+    @AfterEach
+    public void after() throws Exception {
+        clean();
     }
 
     /**
