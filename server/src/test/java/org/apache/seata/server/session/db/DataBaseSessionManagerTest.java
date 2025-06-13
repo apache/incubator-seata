@@ -30,6 +30,7 @@ import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.common.util.UUIDGenerator;
+import org.apache.seata.server.DynamicPortTestConfig;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.session.SessionCondition;
@@ -44,6 +45,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Import;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 
@@ -52,6 +54,7 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
  *
  */
 @SpringBootTest
+@Import(DynamicPortTestConfig.class)
 public class DataBaseSessionManagerTest {
 
     static SessionManager sessionManager = null;

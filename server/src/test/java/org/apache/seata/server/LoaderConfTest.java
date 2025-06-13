@@ -21,12 +21,14 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 
 /**
  *
  */
 @SpringBootTest
+@Import(DynamicPortTestConfig.class)
 public class LoaderConfTest {
 
     static Environment environment;
