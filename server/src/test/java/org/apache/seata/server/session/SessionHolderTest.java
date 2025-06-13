@@ -21,6 +21,7 @@ import java.io.IOException;
 import org.apache.seata.common.XID;
 import org.apache.seata.common.store.SessionMode;
 import org.apache.seata.core.constants.ConfigurationKeys;
+import org.apache.seata.server.DynamicPortTestConfig;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,6 +30,7 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 
 import static org.apache.seata.common.Constants.ASYNC_COMMITTING;
 import static org.apache.seata.common.Constants.RETRY_COMMITTING;
@@ -45,6 +47,7 @@ import static java.io.File.separator;
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @SpringBootTest
+@Import(DynamicPortTestConfig.class)
 public class SessionHolderTest {
     private String pathname;
 

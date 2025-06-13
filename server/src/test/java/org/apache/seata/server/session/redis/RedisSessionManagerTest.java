@@ -28,6 +28,7 @@ import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.common.util.UUIDGenerator;
+import org.apache.seata.server.DynamicPortTestConfig;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.session.SessionCondition;
@@ -42,7 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
-
+import org.springframework.context.annotation.Import;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 
@@ -50,6 +51,7 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
  */
 @SpringBootTest
 @EnabledIfSystemProperty(named = "redisCaseEnabled", matches = "true")
+@Import(DynamicPortTestConfig.class)
 public class RedisSessionManagerTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RedisSessionManagerTest.class);
