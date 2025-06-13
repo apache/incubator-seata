@@ -44,7 +44,6 @@
         <module>compatible</module>
         <module>dependencies</module>
         <module>discovery</module>
-        <!--<module>distribution</module>--> <!-- excluded from source release -->
         <module>integration/rpc-core</module>
         <module>integration/dubbo</module>
         <module>integration/dubbo-alibaba</module>
@@ -60,9 +59,7 @@
         <module>rocketmq</module>
         <module>spring</module>
         <module>tcc</module>
-        <!--<module>test</module>--> <!-- excluded from source release -->
         <module>mock-server</module>
-        <!--<module>test-old-version</module>--> <!-- excluded from source release -->
         <module>tm</module>
         <module>metrics</module>
         <module>serializer</module>
@@ -385,8 +382,50 @@
                 </plugins>
             </build>
         </profile>
+
+        <!-- profile: source-release -->
         <profile>
             <id>source-release</id>
+            <modules>
+                <module>build</module>
+                <module>all</module>
+                <module>bom</module>
+                <module>common</module>
+                <module>config</module>
+                <module>console</module>
+                <module>core</module>
+                <module>compatible</module>
+                <module>dependencies</module>
+                <module>discovery</module>
+                <module>integration/rpc-core</module>
+                <module>integration/dubbo</module>
+                <module>integration/dubbo-alibaba</module>
+                <module>integration/sofa-rpc</module>
+                <module>integration/motan</module>
+                <module>integration/grpc</module>
+                <module>integration/http</module>
+                <module>integration/http-jakarta</module>
+                <module>integration/hsf</module>
+                <module>integration/brpc</module>
+                <module>rm</module>
+                <module>rm-datasource</module>
+                <module>rocketmq</module>
+                <module>spring</module>
+                <module>tcc</module>
+                <module>mock-server</module>
+                <module>tm</module>
+                <module>metrics</module>
+                <module>serializer</module>
+                <module>seata-spring-boot-starter</module>
+                <module>seata-spring-autoconfigure</module>
+                <module>compressor</module>
+                <module>saga</module>
+                <module>sqlparser</module>
+                <module>server</module>
+                <module>ext/apm-seata-skywalking-plugin</module>
+                <module>integration-tx-api</module>
+                <module>namingserver</module>
+            </modules>
             <build>
                 <plugins>
                     <plugin>
@@ -410,6 +449,22 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+        <profile>
+            <id>include-test-modules</id>
+            <activation>
+                <file>
+                    <exists>test/pom.xml</exists>
+                </file>
+                <property>
+                    <name>!excludeTestModules</name>
+                </property>
+            </activation>
+            <modules>
+                <module>distribution</module>
+                <module>test</module>
+                <module>test-old-version</module>
+            </modules>
         </profile>
     </profiles>
 
