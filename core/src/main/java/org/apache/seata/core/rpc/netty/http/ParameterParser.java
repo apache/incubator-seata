@@ -26,18 +26,27 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
 import org.apache.seata.common.rpc.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static com.fasterxml.jackson.databind.SerializationFeature.FAIL_ON_EMPTY_BEANS;
 
+/**
+ * A utility class for parsing HTTP request parameters and converting them into Java objects.
+ * Supports various parameter types including request params, request body, model attributes, etc.
+ */
 public class ParameterParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ParameterParser.class);
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false).configure(FAIL_ON_EMPTY_BEANS, false);
+
+    private static final String DEFAULT_NONE = "\n\t\t\n\t\t\n\ue000\ue001\ue002\n\t\t\t\t\n";
+
 
     public static ObjectNode convertParamMap(Map<String, List<String>> paramMap) {
         ObjectNode paramNode = OBJECT_MAPPER.createObjectNode();
@@ -89,7 +98,7 @@ public class ParameterParser {
     private static Object getArgValue(Class<?> parameterType, String parameterName, ParamMetaData paramMetaData,
         ObjectNode paramMap, HttpContext httpContext) {
         ParamMetaData.ParamConvertType paramConvertType = paramMetaData.getParamConvertType();
-        if (parameterType.equals(HttpContext.class)) {
+        if (HttpContext.class.equals(parameterType)) {
             return httpContext;
         } else if (ParamMetaData.ParamConvertType.MODEL_ATTRIBUTE.equals(paramConvertType)) {
             JsonNode param = paramMap.get("param");
@@ -97,6 +106,28 @@ public class ParameterParser {
         } else if (ParamMetaData.ParamConvertType.REQUEST_BODY.equals(paramConvertType)) {
             JsonNode body = paramMap.get("body");
             return OBJECT_MAPPER.convertValue(body, parameterType);
+        } else if (ParamMetaData.ParamConvertType.REQUEST_PARAM.equals(paramConvertType)) {
+            String paramName = paramMetaData.getParamName();
+            JsonNode jsonNode = Optional.ofNullable(paramMap.get("param"))
+                    .map(body -> body.get(paramName))
+                    .orElse(null);
+
+            // Step 1: If body exists and contains paramName, use its value first
+            if (jsonNode != null && !jsonNode.isNull()) {
+                return OBJECT_MAPPER.convertValue(jsonNode, parameterType);
+            }
+
+            // Step 2: If the parameter is missing but a defaultValue is set, use the defaultValue
+            String defaultValue = paramMetaData.getDefaultValue();
+            if (defaultValue != null && !defaultValue.equals(DEFAULT_NONE)) {
+                return OBJECT_MAPPER.convertValue(defaultValue, parameterType);
+            }
+
+            // Step 3: If the parameter is required but no value or defaultValue is provided, throw an exception
+            if (paramMetaData.isRequired()) {
+                throw new IllegalArgumentException("Required request parameter '" + paramName + "' is missing");
+            }
+            return null;
         } else {
             JsonNode paramNode = paramMap.get("param");
             if (paramNode != null) {

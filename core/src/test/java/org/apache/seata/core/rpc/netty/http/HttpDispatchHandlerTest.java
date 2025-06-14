@@ -57,6 +57,7 @@ class HttpDispatchHandlerTest {
         Method method = TestController.class.getMethod("handleRequest", String.class);
         ParamMetaData paramMetaData = new ParamMetaData();
         paramMetaData.setParamConvertType(ParamMetaData.ParamConvertType.REQUEST_PARAM);
+        paramMetaData.setParamName("param");
         ParamMetaData[] paramMetaDatas = new ParamMetaData[]{paramMetaData};
 
         HttpInvocation invocation = new HttpInvocation();
