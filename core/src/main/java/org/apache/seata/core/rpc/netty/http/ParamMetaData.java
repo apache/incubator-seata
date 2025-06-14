@@ -20,12 +20,42 @@ public class ParamMetaData {
 
     private ParamConvertType paramConvertType;
 
+    private String paramName;
+
+    private boolean required;
+
+    private String defaultValue;
+
     public ParamConvertType getParamConvertType() {
         return paramConvertType;
     }
 
     public void setParamConvertType(ParamConvertType paramConvertType) {
         this.paramConvertType = paramConvertType;
+    }
+
+    public String getParamName() {
+        return paramName;
+    }
+
+    public void setParamName(String paramName) {
+        this.paramName = paramName;
+    }
+
+    public boolean isRequired() {
+        return required;
+    }
+
+    public void setRequired(boolean required) {
+        this.required = required;
+    }
+
+    public String getDefaultValue() {
+        return defaultValue;
+    }
+
+    public void setDefaultValue(String defaultValue) {
+        this.defaultValue = defaultValue;
     }
 
     public enum ParamConvertType {

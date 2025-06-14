@@ -48,6 +48,9 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * A Netty HTTP request handler that dispatches incoming requests to corresponding controller methods
+ */
 public class HttpDispatchHandler extends SimpleChannelInboundHandler<HttpRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpDispatchHandler.class);

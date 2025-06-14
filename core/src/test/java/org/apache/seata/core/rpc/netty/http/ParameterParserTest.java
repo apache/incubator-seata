@@ -30,11 +30,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ParameterParserTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private static final String DEFAULT_NONE = "\n\t\t\n\t\t\n\ue000\ue001\ue002\n\t\t\t\t\n";
 
     @Test
     void testConvertParamMapWithSingleValue() throws JsonProcessingException {
@@ -95,9 +100,152 @@ class ParameterParserTest {
         assertNotNull(args[0]);
     }
 
-    // 测试辅助类
+    @Test
+    void testGetArgValuesWithRequestParam() throws Exception {
+        Method method = TestClassA.class.getMethod("objectMethod", String.class);
+
+        ParamMetaData paramMetaData = new ParamMetaData();
+        paramMetaData.setParamConvertType(ParamMetaData.ParamConvertType.REQUEST_PARAM);
+        paramMetaData.setParamName("userName");
+        paramMetaData.setDefaultValue("a");
+        paramMetaData.setRequired(false);
+
+        ObjectNode paramMap = objectMapper.createObjectNode();
+        ObjectNode bodyNode = paramMap.putObject("param");
+        bodyNode.put("userName", "LiHua");
+        HttpContext httpContext = new HttpContext(null,null,false);
+        Object[] args = ParameterParser.getArgValues(
+                new ParamMetaData[]{paramMetaData},
+                method,
+                paramMap, httpContext
+        );
+
+        assertEquals(1, args.length);
+        assertNotNull(args[0]);
+        assertEquals("LiHua", args[0]);
+    }
+
+    @Test
+    void testGetArgValuesWithRequestParamAndDefaultValue() throws Exception {
+        Method method = TestClassA.class.getMethod("objectMethod", String.class);
+
+        ParamMetaData paramMetaData = new ParamMetaData();
+        paramMetaData.setParamConvertType(ParamMetaData.ParamConvertType.REQUEST_PARAM);
+        paramMetaData.setParamName("userName");
+        paramMetaData.setDefaultValue("XiaMing");
+        paramMetaData.setRequired(false);
+
+        ObjectNode paramMap = objectMapper.createObjectNode();
+        HttpContext httpContext = new HttpContext(null,null,false);
+        Object[] args = ParameterParser.getArgValues(
+                new ParamMetaData[]{paramMetaData},
+                method,
+                paramMap, httpContext
+        );
+
+        assertEquals(1, args.length);
+        assertNotNull(args[0]);
+        assertEquals("XiaMing", args[0]);
+    }
+
+    @Test
+    void testGetArgValuesWithRequestParamThrowException() throws Exception {
+        Method method = TestClassA.class.getMethod("objectMethod", String.class);
+
+        ParamMetaData paramMetaData = new ParamMetaData();
+        paramMetaData.setParamConvertType(ParamMetaData.ParamConvertType.REQUEST_PARAM);
+        paramMetaData.setParamName("userName");
+        paramMetaData.setDefaultValue(DEFAULT_NONE);
+        paramMetaData.setRequired(true);
+        assertThrows(IllegalArgumentException.class, () ->{
+            ObjectNode paramMap = objectMapper.createObjectNode();
+            HttpContext httpContext = new HttpContext(null,null,false);
+            ParameterParser.getArgValues(
+                    new ParamMetaData[]{paramMetaData},
+                    method,
+                    paramMap, httpContext
+            );
+        });
+    }
+
+    @Test
+    void testGetArgValuesWithRequestParamAndReturnNull() throws Exception {
+        Method method = TestClassA.class.getMethod("objectMethod", String.class);
+
+        ParamMetaData paramMetaData = new ParamMetaData();
+        paramMetaData.setParamConvertType(ParamMetaData.ParamConvertType.REQUEST_PARAM);
+        paramMetaData.setParamName("userName");
+        paramMetaData.setRequired(false);
+
+        ObjectNode paramMap = objectMapper.createObjectNode();
+        HttpContext httpContext = new HttpContext(null,null,false);
+        Object[] args = ParameterParser.getArgValues(
+                new ParamMetaData[]{paramMetaData},
+                method,
+                paramMap, httpContext
+        );
+
+        assertEquals(1, args.length);
+        assertNull(args[0]);
+    }
+
+    @Test
+    void testGetArgValuesWithJavaBeanParam() throws Exception {
+        Method method = TestClassB.class.getMethod("objectMethod", User.class);
+
+        ParamMetaData paramMetaData = new ParamMetaData();
+        paramMetaData.setParamConvertType(ParamMetaData.ParamConvertType.MODEL_ATTRIBUTE);
+        ObjectNode paramMap = objectMapper.createObjectNode();
+        ObjectNode bodyNode = paramMap.putObject("param");
+        bodyNode.put("name", "LiHua");
+        bodyNode.put("age", 10);
+        HttpContext httpContext = new HttpContext(null, null, false);
+        Object[] args = ParameterParser.getArgValues(
+                new ParamMetaData[]{paramMetaData},
+                method,
+                paramMap, httpContext
+        );
+
+        assertEquals(1, args.length);
+        assertTrue(args[0] instanceof User);
+        assertEquals("LiHua", ((User) args[0]).name);
+        assertEquals(10, ((User) args[0]).age);
+    }
+
+
+    // Test support class
     class TestClass {
         public void objectMethod(Object obj) {
+        }
+    }
+
+    // Test support classA
+    class TestClassA{
+        public void objectMethod(String userName){
+
+        }
+    }
+
+    // Test support classB
+    class TestClassB{
+        public void objectMethod(User user){
+
+        }
+    }
+
+    static class User{
+        String name;
+        Integer age;
+
+        public User(){
+        }
+
+        public void setName(String name){
+            this.name = name;
+        }
+
+        public void setAge(Integer age){
+            this.age = age;
         }
     }
 }
