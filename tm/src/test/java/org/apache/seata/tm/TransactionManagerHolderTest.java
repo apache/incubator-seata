@@ -18,18 +18,38 @@ package org.apache.seata.tm;
 
 
 import org.apache.seata.common.exception.ShouldNeverHappenException;
+import org.apache.seata.core.exception.TransactionException;
+import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.model.TransactionManager;
 import org.apache.seata.tm.api.transaction.MockTransactionManager;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class TransactionManagerHolderTest {
 
+    private TransactionManager backTransactionManager;
+
+    @BeforeEach
+    public void beforeEach() {
+        backTransactionManager = TransactionManagerHolder.get();
+    }
+
+    @AfterEach
+    public void afterEach() {
+        TransactionManagerHolder.set(backTransactionManager);
+    }
+
 
     @Test
     void getTest() {
-        Assertions.assertThrows(ShouldNeverHappenException.class, () -> {   TransactionManagerHolder.set(null);
-            TransactionManagerHolder.get();});
+        Assertions.assertThrows(ShouldNeverHappenException.class, () -> {
+            TransactionManagerHolder.set(null);
+            TransactionManagerHolder.get();
+        });
     }
 
 
@@ -38,7 +58,7 @@ class TransactionManagerHolderTest {
         MockTransactionManager mockTransactionManager = new MockTransactionManager();
         TransactionManagerHolder.set(mockTransactionManager);
         TransactionManager transactionManager = TransactionManagerHolder.get();
-        Assertions.assertTrue(transactionManager instanceof MockTransactionManager);
+        Assertions.assertInstanceOf(MockTransactionManager.class, transactionManager);
     }
 
 }

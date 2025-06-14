@@ -17,12 +17,14 @@
 package org.apache.seata.discovery.registry;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.Constants;
-import org.apache.seata.common.exception.NotSupportYetException;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.ConfigurationFactory;
@@ -31,7 +33,6 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The type multiple Registry factory.
- *
  */
 public class MultiRegistryFactory {
 
@@ -48,25 +49,27 @@ public class MultiRegistryFactory {
 
     private static List<RegistryService> buildRegistryServices() {
         List<RegistryService> registryServices = new ArrayList<>();
-        String registryTypeNamesStr =
-            ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig(ConfigurationKeys.FILE_ROOT_REGISTRY
-                + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + ConfigurationKeys.FILE_ROOT_TYPE);
+
+        String registryTypeNamesStr = ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig(
+                ConfigurationKeys.FILE_ROOT_REGISTRY + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + ConfigurationKeys.FILE_ROOT_TYPE);
+
+        // If blank, use default configuration
         if (StringUtils.isBlank(registryTypeNamesStr)) {
             registryTypeNamesStr = RegistryType.File.name();
         }
-        String[] registryTypeNames = registryTypeNamesStr.split(Constants.REGISTRY_TYPE_SPLIT_CHAR);
-        if (registryTypeNames.length > 1) {
-            LOGGER.info("use multi registry center type: {}", registryTypeNamesStr);
+
+        Set<String> registryTypeNames = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        registryTypeNames.addAll(Arrays.asList(registryTypeNamesStr.split(Constants.REGISTRY_TYPE_SPLIT_CHAR)));
+
+        if (registryTypeNames.size() > 1) {
+            LOGGER.info("use multi registry center type: {}", registryTypeNames);
         }
+
         for (String registryTypeName : registryTypeNames) {
-            RegistryType registryType;
-            try {
-                registryType = RegistryType.getType(registryTypeName);
-            } catch (Exception exx) {
-                throw new NotSupportYetException("not support registry type: " + registryTypeName);
-            }
+            RegistryType registryType = RegistryType.getType(registryTypeName);
+
             RegistryService registryService = EnhancedServiceLoader
-                .load(RegistryProvider.class, Objects.requireNonNull(registryType).name()).provide();
+                    .load(RegistryProvider.class, Objects.requireNonNull(registryType).name()).provide();
             registryServices.add(registryService);
         }
         return registryServices;

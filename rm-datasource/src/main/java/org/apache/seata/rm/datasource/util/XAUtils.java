@@ -69,6 +69,8 @@ public class XAUtils {
                         return createXAConnection(physicalConn, "org.mariadb.jdbc.MariaXaConnection", dbType);
                     case JdbcConstants.POSTGRESQL:
                         return PGUtils.createXAConnection(physicalConn);
+                    case JdbcConstants.KINGBASE:
+                        return createXAConnection(physicalConn, "com.kingbase8.xa.KBXAConnection", dbType);
                     default:
                         throw new SQLException("xa not support dbType: " + dbType);
                 }
@@ -81,7 +83,7 @@ public class XAUtils {
     private static XAConnection createXAConnection(Connection physicalConnection, String xaConnectionClassName,
                                                    String dbType) throws XAException, SQLException {
         try {
-            Class xaConnectionClass = Class.forName(xaConnectionClassName);
+            Class<?> xaConnectionClass = Class.forName(xaConnectionClassName);
             Constructor<XAConnection> constructor = getConstructorByDBType(xaConnectionClass, dbType);
             if (constructor == null) {
                 throw new SQLException("xa not support dbType: " + dbType);
@@ -107,8 +109,11 @@ public class XAUtils {
                     return xaConnectionClass.getConstructor(Connection.class);
                 case JdbcConstants.MARIADB:
                     //MariaXaConnection(MariaDbConnection connection)
-                    Class mariaXaConnectionClass = Class.forName("org.mariadb.jdbc.MariaDbConnection");
+                    Class<?> mariaXaConnectionClass = Class.forName("org.mariadb.jdbc.MariaDbConnection");
                     return xaConnectionClass.getConstructor(mariaXaConnectionClass);
+                case JdbcConstants.KINGBASE:
+                    Class<?> kingbaseConnectionClass = Class.forName("com.kingbase8.core.BaseConnection");
+                    return xaConnectionClass.getConstructor(kingbaseConnectionClass);
                 default:
                     throw new SQLException("xa reflect not support dbType: " + dbType);
             }
@@ -129,6 +134,9 @@ public class XAUtils {
         try {
             switch (dbType) {
                 case JdbcConstants.ORACLE:
+                    result.add(params[0]);
+                    return result;
+                case JdbcConstants.KINGBASE:
                     result.add(params[0]);
                     return result;
                 case JdbcConstants.MARIADB:

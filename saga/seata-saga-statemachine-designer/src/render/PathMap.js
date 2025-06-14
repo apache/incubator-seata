@@ -19,26 +19,28 @@
 
 // helpers //////////////////////
 
-// copied and adjusted from https://github.com/adobe-webplatform/Snap.svg/blob/master/src/svg.js
+// Regular expression to match tokens in the format {tokenName}
 const tokenRegex = /\{([^{}]+)\}/g;
-const objNotationRegex = /(?:(?:^|\.)(.+?)(?=\[|\.|$|\()|\[('|")(.+?)\2\])(\(\))?/g; // matches .xxxxx or ["xxxxx"] to run over object properties
+// Regular expression to match object property access using dot notation or bracket notation
+// It captures properties accessed either directly (e.g., `obj.prop`)
+// or indirectly (e.g., `obj['prop']` or `obj[prop]`), as well as function calls (e.g., `obj.method()`)
+const objNotationRegex = /(?:(?:^|\.)(.+?)(?=\[|\.|$|\()|\[('|")(.+?)\2\])(\(\))?/g;
 
 function replacer(all, key, obj) {
-  let res = obj;
-  key.replace(objNotationRegex, (_, name, quote, quotedName, isFunc) => {
-    name = name || quotedName;
-    if (res) {
-      if (name in res) {
-        res = res[name];
-      }
-      if (typeof res === 'function' && isFunc) {
-        res = res();
+  let result = obj;
+  key.replace(objNotationRegex, (_, name, quote, quotedName, isFunction) => {
+    const propertyName = name || quotedName;
+    if (result && propertyName in result) {
+      result = result[propertyName];
+
+      // If the result is a function and is marked as a function, call it to get a "real" value
+      if (typeof result === 'function' && isFunction) {
+        result = result();
       }
     }
   });
-  res = `${res == null || res === obj ? all : res}`;
-
-  return res;
+  //Return the final alternative result, or all if result has not changed
+  return `${result == null || result === obj ? all : result}`;
 }
 
 function format(str, obj) {

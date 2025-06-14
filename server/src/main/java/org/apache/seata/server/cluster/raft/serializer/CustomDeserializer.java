@@ -17,6 +17,8 @@
 package org.apache.seata.server.cluster.raft.serializer;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
@@ -29,7 +31,13 @@ public class CustomDeserializer extends JsonDeserializer<Class<?>> {
 
     String currentPackage = "org.apache.seata.server";
 
-    String permitPackage = "org.apache.seata";
+    private static final List<String> PERMIT_PACKAGES = new ArrayList<>();
+
+    static {
+        PERMIT_PACKAGES.add("org.apache.seata");
+        // The storage structure of vgroup is a map.
+        PERMIT_PACKAGES.add("java.util.HashMap");
+    }
 
     @Override
     public Class<?> deserialize(JsonParser jsonParser, DeserializationContext deserializationContext)
@@ -38,11 +46,13 @@ public class CustomDeserializer extends JsonDeserializer<Class<?>> {
         if (className.startsWith(oldPackage)) {
             className = className.replaceFirst(oldPackage, currentPackage);
         }
-        if (className.startsWith(permitPackage)) {
-            try {
-                return Class.forName(className);
-            } catch (ClassNotFoundException e) {
-                throw new RuntimeException(e.getMessage(), e);
+        for (String permitPackage : PERMIT_PACKAGES) {
+            if (className.startsWith(permitPackage)) {
+                try {
+                    return Class.forName(className);
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException(e.getMessage(), e);
+                }
             }
         }
         throw new SeataRuntimeException(ErrorCode.ERR_DESERIALIZATION_SECURITY,

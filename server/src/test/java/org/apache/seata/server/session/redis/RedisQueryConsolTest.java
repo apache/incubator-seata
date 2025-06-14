@@ -20,20 +20,23 @@ import javax.annotation.Resource;
 
 import com.alibaba.fastjson.JSON;
 import org.apache.seata.common.result.PageResult;
-import org.apache.seata.server.console.param.GlobalLockParam;
-import org.apache.seata.server.console.param.GlobalSessionParam;
+import org.apache.seata.server.DynamicPortTestConfig;
+import org.apache.seata.server.console.entity.param.GlobalLockParam;
+import org.apache.seata.server.console.entity.param.GlobalSessionParam;
 import org.apache.seata.server.console.service.GlobalLockService;
 import org.apache.seata.server.console.service.GlobalSessionService;
-import org.apache.seata.server.console.vo.GlobalLockVO;
-import org.apache.seata.server.console.vo.GlobalSessionVO;
+import org.apache.seata.server.console.entity.vo.GlobalLockVO;
+import org.apache.seata.server.console.entity.vo.GlobalSessionVO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 
 /**
  */
 @SpringBootTest
 @EnabledIfSystemProperty(named = "redisCaseEnabled", matches = "true")
+@Import(DynamicPortTestConfig.class)
 public class RedisQueryConsolTest {
 
     /**

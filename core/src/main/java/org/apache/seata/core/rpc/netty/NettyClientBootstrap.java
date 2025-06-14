@@ -36,8 +36,6 @@ import io.netty.handler.codec.http2.Http2FrameCodecBuilder;
 import io.netty.handler.codec.http2.Http2MultiplexHandler;
 import io.netty.handler.codec.http2.Http2StreamChannelBootstrap;
 import io.netty.handler.timeout.IdleStateHandler;
-import io.netty.util.concurrent.DefaultEventExecutorGroup;
-import io.netty.util.concurrent.EventExecutorGroup;
 import io.netty.util.internal.PlatformDependent;
 import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.common.thread.NamedThreadFactory;
@@ -69,11 +67,9 @@ public class NettyClientBootstrap implements RemotingBootstrap {
     private final AtomicBoolean initialized = new AtomicBoolean(false);
     private final NettyPoolKey.TransactionRole transactionRole;
     private final EventLoopGroup eventLoopGroupWorker;
-
-    private EventExecutorGroup defaultEventExecutorGroup;
     private ChannelHandler[] channelHandlers;
 
-    public NettyClientBootstrap(NettyClientConfig nettyClientConfig, final EventExecutorGroup eventExecutorGroup,
+    public NettyClientBootstrap(NettyClientConfig nettyClientConfig,
                                 NettyPoolKey.TransactionRole transactionRole) {
         if (nettyClientConfig == null) {
             nettyClientConfig = new NettyClientConfig();
@@ -94,7 +90,6 @@ public class NettyClientBootstrap implements RemotingBootstrap {
         } else {
             eventLoopGroupWorker = createEventLoopGroupWorker(selectorThreadSizeThreadSize);
         }
-        this.defaultEventExecutorGroup = eventExecutorGroup;
     }
 
     /**
@@ -122,11 +117,6 @@ public class NettyClientBootstrap implements RemotingBootstrap {
 
     @Override
     public void start() {
-        if (this.defaultEventExecutorGroup == null) {
-            this.defaultEventExecutorGroup = new DefaultEventExecutorGroup(nettyClientConfig.getClientWorkerThreads(),
-                new NamedThreadFactory(getThreadPrefix(nettyClientConfig.getClientWorkerThreadPrefix()),
-                    nettyClientConfig.getClientWorkerThreads()));
-        }
         this.bootstrap.group(eventLoopGroupWorker).channel(
             nettyClientConfig.getClientChannelClazz()).option(
             ChannelOption.TCP_NODELAY, true).option(ChannelOption.SO_KEEPALIVE, true).option(
@@ -175,9 +165,6 @@ public class NettyClientBootstrap implements RemotingBootstrap {
     public void shutdown() {
         try {
             eventLoopGroupWorker.shutdownGracefully();
-            if (this.defaultEventExecutorGroup != null) {
-                this.defaultEventExecutorGroup.shutdownGracefully();
-            }
         } catch (Exception exx) {
             LOGGER.error("Failed to shutdown: {}", exx.getMessage());
         }

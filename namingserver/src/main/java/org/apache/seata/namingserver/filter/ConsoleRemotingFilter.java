@@ -35,6 +35,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.seata.common.metadata.ClusterRole;
 import org.apache.seata.common.metadata.Node;
+import org.apache.seata.common.metadata.namingserver.NamingServerNode;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.namingserver.manager.NamingManager;
@@ -88,7 +89,7 @@ public class ConsoleRemotingFilter implements Filter {
                     }
                     if (CollectionUtils.isNotEmpty(list)) {
                         // Randomly select a node from the list
-                        Node node = list.get(ThreadLocalRandom.current().nextInt(list.size()));
+                        NamingServerNode node = (NamingServerNode) list.get(ThreadLocalRandom.current().nextInt(list.size()));
                         Node.Endpoint controlEndpoint = node.getControl();
                         if (controlEndpoint != null) {
                             // Construct the target URL
@@ -99,7 +100,7 @@ public class ConsoleRemotingFilter implements Filter {
                             // Copy headers from the original request
                             HttpHeaders headers = new HttpHeaders();
                             if (node.getRole() == ClusterRole.LEADER) {
-                                headers.add(RAFT_GROUP_HEADER, node.getGroup());
+                                headers.add(RAFT_GROUP_HEADER, node.getUnit());
                             }
                             Collections.list(request.getHeaderNames())
                                 .forEach(headerName -> headers.add(headerName, request.getHeader(headerName)));

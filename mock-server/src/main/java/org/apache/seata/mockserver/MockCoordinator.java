@@ -31,6 +31,7 @@ import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.protocol.AbstractMessage;
 import org.apache.seata.core.protocol.AbstractResultMessage;
 import org.apache.seata.core.protocol.ResultCode;
+import org.apache.seata.core.protocol.Version;
 import org.apache.seata.core.protocol.transaction.AbstractGlobalEndResponse;
 import org.apache.seata.core.protocol.transaction.AbstractTransactionRequestToTC;
 import org.apache.seata.core.protocol.transaction.AbstractTransactionResponse;
@@ -215,6 +216,10 @@ public class MockCoordinator implements TCInboundHandler, TransactionMessageHand
         branchSessions.forEach(branch -> {
             CallRm.branchRollback(remotingServer, branch);
             IntStream.range(0, retry).forEach(i -> CallRm.branchRollback(remotingServer, branch));
+            if (Version.isV0(rpcContext.getVersion())) {
+                //test MsgVersionHelper and skip
+                CallRm.deleteUndoLog(remotingServer, branch);
+            }
         });
         branchMap.remove(request.getXid());
         globalStatusMap.remove(request.getXid());

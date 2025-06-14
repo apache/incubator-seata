@@ -69,6 +69,11 @@ public class NettyServerConfig extends NettyBaseConfig {
     private static boolean ENABLE_TC_SERVER_BATCH_SEND_RESPONSE = CONFIG.getBoolean(ConfigurationKeys.ENABLE_TC_SERVER_BATCH_SEND_RESPONSE,
         DefaultValues.DEFAULT_ENABLE_TC_SERVER_BATCH_SEND_RESPONSE);
 
+    private static int minHttpPoolSize = CONFIG.getInt(ConfigurationKeys.MIN_HTTP_POOL_SIZE, 10);
+    private static int maxHttpPoolSize = CONFIG.getInt(ConfigurationKeys.MAX_HTTP_POOL_SIZE, 100);
+    private static int maxHttpTaskQueueSize = CONFIG.getInt(ConfigurationKeys.MAX_HTTP_TASK_QUEUE_SIZE, 1000);
+    private static int httpKeepAliveTime = CONFIG.getInt(ConfigurationKeys.HTTP_POOL_KEEP_ALIVE_TIME, 500);
+
     /**
      * The Server channel clazz.
      */
@@ -313,6 +318,22 @@ public class NettyServerConfig extends NettyBaseConfig {
 
     public static int getKeepAliveTime() {
         return keepAliveTime;
+    }
+
+    public static int getMinHttpPoolSize() {
+        return minHttpPoolSize;
+    }
+
+    public static int getMaxHttpPoolSize() {
+        return maxHttpPoolSize;
+    }
+
+    public static int getMaxHttpTaskQueueSize() {
+        return maxHttpTaskQueueSize;
+    }
+
+    public static int getHttpKeepAliveTime() {
+        return httpKeepAliveTime;
     }
 
     /**

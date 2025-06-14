@@ -147,6 +147,14 @@ public abstract class AbstractService {
         return true;
     }
 
+    protected boolean doRetryCommitGlobal(GlobalSession globalSession) throws TransactionException {
+        return DefaultCoordinator.getInstance().doGlobalCommit(globalSession, true);
+    }
+
+    protected boolean doRetryRollbackGlobal(GlobalSession globalSession) throws TransactionException {
+        return DefaultCoordinator.getInstance().doGlobalRollback(globalSession, true);
+    }
+
     protected static class CheckResult {
         private GlobalSession globalSession;
         private BranchSession branchSession;

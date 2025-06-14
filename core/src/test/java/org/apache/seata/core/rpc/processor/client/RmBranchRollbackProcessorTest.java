@@ -16,11 +16,25 @@
  */
 package org.apache.seata.core.rpc.processor.client;
 
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.core.protocol.RpcMessage;
 import org.apache.seata.core.protocol.transaction.BranchRollbackRequest;
@@ -32,28 +46,21 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * The type Rm branch rollback processor test.
  */
 public class RmBranchRollbackProcessorTest {
+    private static final String CLASS_NAME = "org.apache.seata.core.rpc.processor.client.RmBranchRollbackProcessor";
+
+    private final List<Logger> watchedLoggers = new ArrayList<>();
+    private final ListAppender<ILoggingEvent> logWatcher = new ListAppender<>();
+
     private ChannelHandlerContext mockCtx;
     private RpcMessage mockRpcMessage;
     private TransactionMessageHandler mockHandler;
     private RemotingClient mockRemotingClient;
-    private Logger mockLogger;
-    private MockedStatic<LoggerFactory> mockedLoggerFactory;
     private MockedStatic<NetUtil> mockedNetUtil;
     private RmBranchRollbackProcessor processor;
 
@@ -66,12 +73,19 @@ public class RmBranchRollbackProcessorTest {
         mockRpcMessage = mock(RpcMessage.class);
         mockHandler = mock(TransactionMessageHandler.class);
         mockRemotingClient = mock(RemotingClient.class);
-        mockLogger = mock(Logger.class);
-
-        mockedLoggerFactory = Mockito.mockStatic(LoggerFactory.class);
-        mockedLoggerFactory.when(() -> LoggerFactory.getLogger(RmBranchRollbackProcessor.class)).thenReturn(mockLogger);
         mockedNetUtil = Mockito.mockStatic(NetUtil.class);
+        logWatcher.start();
+        setUpLogger();
         processor = new RmBranchRollbackProcessor(mockHandler, mockRemotingClient);
+    }
+
+    /**
+     * Tear down.
+     */
+    @AfterEach
+    void tearDown() {
+        watchedLoggers.forEach(Logger::detachAndStopAllAppenders);
+        mockedNetUtil.close();
     }
 
     /**
@@ -86,13 +100,14 @@ public class RmBranchRollbackProcessorTest {
         Channel mockChannel = mock(Channel.class);
         when(mockCtx.channel()).thenReturn(mockChannel);
         when(mockChannel.remoteAddress()).thenReturn(mockAddress);
-        mockedNetUtil.when(() -> NetUtil.toStringAddress(any(SocketAddress.class))).thenReturn("127.0.0.1:8091");
+        mockedNetUtil
+                .when(() -> NetUtil.toStringAddress(any(SocketAddress.class)))
+                .thenReturn("127.0.0.1:8091");
 
         BranchRollbackRequest mockRequest = mock(BranchRollbackRequest.class);
         BranchRollbackResponse mockResponse = mock(BranchRollbackResponse.class);
         when(mockRpcMessage.getBody()).thenReturn(mockRequest);
         when(mockHandler.onRequest(mockRequest, null)).thenReturn(mockResponse);
-        when(mockLogger.isInfoEnabled()).thenReturn(true);
 
         // Act
         processor.process(mockCtx, mockRpcMessage);
@@ -103,30 +118,31 @@ public class RmBranchRollbackProcessorTest {
     }
 
     /**
-     * Process should not log when info disabled.
+     * Process print log info when level is info.
      *
      * @throws Exception the exception
      */
     @Test
-    void process_ShouldNotLog_WhenInfoDisabled() throws Exception {
+    void processShouldPrintLogInfoWhenLevelIsInfo() throws Exception {
         // Arrange
         InetSocketAddress mockAddress = new InetSocketAddress("127.0.0.1", 8091);
         Channel mockChannel = mock(Channel.class);
         when(mockCtx.channel()).thenReturn(mockChannel);
         when(mockChannel.remoteAddress()).thenReturn(mockAddress);
-        mockedNetUtil.when(() -> NetUtil.toStringAddress(any(SocketAddress.class))).thenReturn("127.0.0.1:8091");
+        mockedNetUtil
+                .when(() -> NetUtil.toStringAddress(any(SocketAddress.class)))
+                .thenReturn("127.0.0.1:8091");
 
         BranchRollbackRequest mockRequest = mock(BranchRollbackRequest.class);
         BranchRollbackResponse mockResponse = mock(BranchRollbackResponse.class);
         when(mockRpcMessage.getBody()).thenReturn(mockRequest);
         when(mockHandler.onRequest(mockRequest, null)).thenReturn(mockResponse);
-        when(mockLogger.isInfoEnabled()).thenReturn(false);
 
         // Act
         processor.process(mockCtx, mockRpcMessage);
 
         // Assert
-        verify(mockLogger, never()).info(anyString(), (Object[])any());
+        assertTrue(getLogs(Level.INFO).stream().anyMatch(log -> log.startsWith("rm handle branch rollback process:")));
     }
 
     /**
@@ -141,7 +157,9 @@ public class RmBranchRollbackProcessorTest {
         Channel mockChannel = mock(Channel.class);
         when(mockCtx.channel()).thenReturn(mockChannel);
         when(mockChannel.remoteAddress()).thenReturn(mockAddress);
-        mockedNetUtil.when(() -> NetUtil.toStringAddress(any(SocketAddress.class))).thenReturn("127.0.0.1:8091");
+        mockedNetUtil
+                .when(() -> NetUtil.toStringAddress(any(SocketAddress.class)))
+                .thenReturn("127.0.0.1:8091");
 
         BranchRollbackRequest mockRequest = mock(BranchRollbackRequest.class);
         BranchRollbackResponse mockResponse = mock(BranchRollbackResponse.class);
@@ -155,16 +173,20 @@ public class RmBranchRollbackProcessorTest {
         processor.process(mockCtx, mockRpcMessage);
 
         // Assert
-        verify(mockLogger).error(eq("send response error: {}"), eq("Network error"), eq(simulatedError));
+        assertTrue(getLogs(Level.ERROR).stream().anyMatch(log -> log.equals("send response error: Network error")));
     }
 
-    /**
-     * Tear down.
-     */
-    @AfterEach
-    void tearDown() {
-        mockedLoggerFactory.close();
-        mockedNetUtil.close();
+    private List<String> getLogs(Level level) {
+        return logWatcher.list.stream()
+                .filter(event -> event.getLoggerName().endsWith(CLASS_NAME)
+                        && event.getLevel().equals(level))
+                .map(ILoggingEvent::getFormattedMessage)
+                .collect(Collectors.toList());
     }
 
+    private void setUpLogger() {
+        Logger logger = ((Logger) LoggerFactory.getLogger(CLASS_NAME));
+        logger.addAppender(logWatcher);
+        watchedLoggers.add(logger);
+    }
 }

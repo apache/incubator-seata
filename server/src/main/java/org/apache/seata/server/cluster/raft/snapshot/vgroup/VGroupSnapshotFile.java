@@ -28,7 +28,7 @@ import org.apache.seata.core.store.MappingDO;
 import org.apache.seata.server.cluster.raft.snapshot.RaftSnapshot;
 import org.apache.seata.server.cluster.raft.snapshot.StoreSnapshotFile;
 import org.apache.seata.server.session.SessionHolder;
-import org.apache.seata.server.storage.raft.sore.RaftVGroupMappingStoreManager;
+import org.apache.seata.server.storage.raft.store.RaftVGroupMappingStoreManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +36,7 @@ public class VGroupSnapshotFile implements Serializable, StoreSnapshotFile {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(VGroupSnapshotFile.class);
 
-    public static final String ROOT_MAPPING_MANAGER_NAME = "vgroup_mapping.json";
+    public static final String ROOT_MAPPING_MANAGER_NAME = "vgroup_mapping";
 
     String group;
 
@@ -78,6 +78,7 @@ public class VGroupSnapshotFile implements Serializable, StoreSnapshotFile {
             Map<String/*vgroup*/, MappingDO> map = (Map<String/*vgroup*/, MappingDO>)load(path);
             RaftVGroupMappingStoreManager raftVGroupMappingStoreManager =
                 (RaftVGroupMappingStoreManager)SessionHolder.getRootVGroupMappingManager();
+            raftVGroupMappingStoreManager.clear(group);
             raftVGroupMappingStoreManager.localAddVGroups(map, group);
             return true;
         } catch (final Exception e) {

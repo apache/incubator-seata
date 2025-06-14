@@ -21,21 +21,24 @@ import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.model.TransactionManager;
 import org.apache.seata.tm.TransactionManagerHolder;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 
 class GlobalTransactionContextTest {
     private static final String DEFAULT_XID = "1234567890";
 
-    @BeforeAll
-    public static void init() {
+    private TransactionManager backTransactionManager;
+
+    @BeforeEach
+    public void init() {
+        backTransactionManager = TransactionManagerHolder.get();
 
         TransactionManagerHolder.set(new TransactionManager() {
             @Override
-            public String begin(String applicationId, String transactionServiceGroup, String name, int timeout)
-                    throws TransactionException {
+            public String begin(String applicationId, String transactionServiceGroup, String name, int timeout) throws TransactionException {
                 return DEFAULT_XID;
             }
 
@@ -67,6 +70,10 @@ class GlobalTransactionContextTest {
         tx = GlobalTransactionContext.reload(DEFAULT_XID);
         GlobalTransaction finalTx = tx;
         Assertions.assertThrows(IllegalStateException.class, finalTx::begin);
+    }
 
+    @AfterEach
+    public void afterEach() {
+        TransactionManagerHolder.set(backTransactionManager);
     }
 }

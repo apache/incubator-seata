@@ -16,19 +16,24 @@
  */
 package org.apache.seata.server.config;
 
-import org.apache.seata.server.filter.RaftGroupFilter;
+import org.apache.seata.server.filter.RaftCondition;
+import org.apache.seata.server.filter.RaftRequestFilter;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 
 @Configuration
 public class SeataNamingserverWebConfig {
 
     @Bean
-    public FilterRegistrationBean<RaftGroupFilter> raftGroupFilter() {
-        FilterRegistrationBean<RaftGroupFilter> registrationBean = new FilterRegistrationBean<>();
-        registrationBean.setFilter(new RaftGroupFilter());
-        registrationBean.addUrlPatterns("/vgroup/v1/*");
+    @Conditional(RaftCondition.class)
+    @DependsOn("raftRequestFilter")
+    public FilterRegistrationBean<RaftRequestFilter> raftRequestServletFilter(RaftRequestFilter raftRequestFilter) {
+        FilterRegistrationBean<RaftRequestFilter> registrationBean = new FilterRegistrationBean<>();
+        registrationBean.setFilter(raftRequestFilter);
+        registrationBean.addUrlPatterns("/api/v1/console/*", "/vgroup/v1/*");
         return registrationBean;
     }
 

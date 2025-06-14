@@ -208,8 +208,10 @@
    subcomponents is subject to the terms and conditions of the following
    licenses.
 
-   For the org.apache.seata.sqlparser.antlr.mysql.antlr.MySqlLexer.g4 and
-   org.apache.seata.sqlparser.antlr.mysql.antlr.MySqlParser.g4:
+   ========================================================================
+    MIT licenses
+   ========================================================================
+   For the org.apache.seata.sqlparser.antlr.mysql.antlr.MySqlLexer.g4, org.apache.seata.sqlparser.antlr.mysql.antlr.MySqlParser.g4, as well as the source code files in the org/apache/seata/sqlparser/antlr/mysql/parser/ package, which are generated from these two .g4 files.
 
    This product contains a portion of the antlr/grammars-v4 project, which is published at
    https://github.com/antlr/grammars-v4. The code is licensed under an MIT License:
@@ -236,3 +238,8 @@
       LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
       OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
       THE SOFTWARE.
+
+   ========================================================================
+    Apache 2.0 licenses
+   ========================================================================
+   For the mvnw and mvnw.cmd files, they are copied from https://github.com/apache/maven-wrapper. The code is licensed under an Apache 2.0 License.

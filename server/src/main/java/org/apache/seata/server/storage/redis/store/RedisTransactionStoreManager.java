@@ -43,7 +43,7 @@ import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.store.BranchTransactionDO;
 import org.apache.seata.core.store.GlobalTransactionDO;
-import org.apache.seata.server.console.param.GlobalSessionParam;
+import org.apache.seata.server.console.entity.param.GlobalSessionParam;
 import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.session.SessionCondition;
 import org.apache.seata.server.session.SessionStatusValidator;

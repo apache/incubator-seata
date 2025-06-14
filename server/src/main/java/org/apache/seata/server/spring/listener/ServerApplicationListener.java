@@ -16,8 +16,12 @@
  */
 package org.apache.seata.server.spring.listener;
 
-import java.util.Properties;
+import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
+import static org.apache.seata.core.constants.ConfigurationKeys.ENV_SEATA_PORT_KEY;
+import static org.apache.seata.core.constants.ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL;
+import static org.apache.seata.core.constants.ConfigurationKeys.SERVER_SERVICE_PORT_CONFIG;
 
+import java.util.Properties;
 import org.apache.seata.common.holder.ObjectHolder;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.spring.boot.autoconfigure.SeataCoreEnvironmentPostProcessor;
@@ -31,12 +35,6 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.PropertiesPropertySource;
 
-import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
-import static org.apache.seata.common.DefaultValues.SERVICE_OFFSET_SPRING_BOOT;
-import static org.apache.seata.core.constants.ConfigurationKeys.ENV_SEATA_PORT_KEY;
-import static org.apache.seata.core.constants.ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL;
-import static org.apache.seata.core.constants.ConfigurationKeys.SERVER_SERVICE_PORT_CONFIG;
-
 /**
  */
 public class ServerApplicationListener implements GenericApplicationListener {
@@ -44,20 +42,21 @@ public class ServerApplicationListener implements GenericApplicationListener {
     @Override
     public boolean supportsEventType(ResolvableType eventType) {
         return eventType.getRawClass() != null
-                && (ApplicationEnvironmentPreparedEvent.class.isAssignableFrom(eventType.getRawClass()) ||
-                ApplicationReadyEvent.class.isAssignableFrom(eventType.getRawClass()));
+                && (ApplicationEnvironmentPreparedEvent.class.isAssignableFrom(eventType.getRawClass())
+                        || ApplicationReadyEvent.class.isAssignableFrom(eventType.getRawClass()));
     }
 
     @Override
     public void onApplicationEvent(ApplicationEvent event) {
-        if (event instanceof ApplicationReadyEvent && Boolean.parseBoolean(System.getProperty("production.deploy.output"))) {
+        if (event instanceof ApplicationReadyEvent
+                && Boolean.parseBoolean(System.getProperty("production.deploy.output"))) {
             System.setProperty("ENV_LOG_SYS_BOOT_COMPLETED", "true");
             return;
         }
         if (!(event instanceof ApplicationEnvironmentPreparedEvent)) {
             return;
         }
-        ApplicationEnvironmentPreparedEvent environmentPreparedEvent = (ApplicationEnvironmentPreparedEvent)event;
+        ApplicationEnvironmentPreparedEvent environmentPreparedEvent = (ApplicationEnvironmentPreparedEvent) event;
         ConfigurableEnvironment environment = environmentPreparedEvent.getEnvironment();
         ObjectHolder.INSTANCE.setObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT, environment);
         SeataCoreEnvironmentPostProcessor.init();
@@ -67,7 +66,7 @@ public class ServerApplicationListener implements GenericApplicationListener {
 
         // port: -p > -D > env > yml > default
 
-        //-p 8091
+        // -p 8091
         if (args != null && args.length >= 2) {
             for (int i = 0; i < args.length; ++i) {
                 if ("-p".equalsIgnoreCase(args[i]) && i < args.length - 1) {
@@ -84,26 +83,26 @@ public class ServerApplicationListener implements GenericApplicationListener {
             return;
         }
 
-        //docker -e SEATA_PORT=8091
+        // docker -e SEATA_PORT=8091
         String envPort = environment.getProperty(ENV_SEATA_PORT_KEY, String.class);
         if (StringUtils.isNotBlank(envPort)) {
             setTargetPort(environment, envPort, true);
             return;
         }
 
-        //yml properties server.service-port=8091
+        // yml properties server.service-port=8091
         String configPort = environment.getProperty(SERVER_SERVICE_PORT_CONFIG, String.class);
         if (StringUtils.isNotBlank(configPort)) {
             setTargetPort(environment, configPort, false);
             return;
         }
 
-        // server.port=7091
+        // server.port=8091
         String serverPort = environment.getProperty("server.port", String.class);
         if (StringUtils.isBlank(serverPort)) {
-            serverPort = "8080";
+            serverPort = "8091";
         }
-        String servicePort = String.valueOf(Integer.parseInt(serverPort) + SERVICE_OFFSET_SPRING_BOOT);
+        String servicePort = String.valueOf(Integer.parseInt(serverPort));
         setTargetPort(environment, servicePort, true);
     }
 

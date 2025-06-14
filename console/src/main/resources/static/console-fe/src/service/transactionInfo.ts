@@ -130,7 +130,7 @@ export async function startGlobalData(params: GlobalSessionParam): Promise<any> 
   return result;
 }
 
-export async function sendGlobalCommitOrRollback(params: BranchSessionParam): Promise<any> {
+export async function sendGlobalCommitOrRollback(params: GlobalSessionParam): Promise<any> {
   const xid = params.xid
   const vgroup = params.vgroup
   let result = await request('/console/globalSession/sendCommitOrRollback', {
@@ -138,6 +138,10 @@ export async function sendGlobalCommitOrRollback(params: BranchSessionParam): Pr
     params: {
       xid,
       vgroup
+    },
+    headers: {
+      'x-seata-namespace': params.namespace,
+      'x-seata-cluster': params.cluster,
     },
   });
   return result;

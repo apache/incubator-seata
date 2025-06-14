@@ -63,7 +63,7 @@ public class MultiProtocolDecoder extends LengthFieldBasedFrameDecoder {
     private final Map<Byte, ProtocolDecoder> protocolDecoderMap;
 
     private final Map<Byte, ProtocolEncoder> protocolEncoderMap;
-    
+
     private final ChannelHandler[] channelHandlers;
 
     public MultiProtocolDecoder(ChannelHandler... channelHandlers) {
@@ -115,7 +115,15 @@ public class MultiProtocolDecoder extends LengthFieldBasedFrameDecoder {
             if (decoded instanceof ByteBuf) {
                 frame = (ByteBuf) decoded;
                 ProtocolDecoder decoder = protocolDecoderMap.get(version);
+                if (decoder == null) {
+                    LOGGER.error("Decoder not found, version={}, use current version({})", version,ProtocolConstants.VERSION);
+                    decoder = protocolDecoderMap.get(ProtocolConstants.VERSION);
+                }
                 ProtocolEncoder encoder = protocolEncoderMap.get(version);
+                if (encoder == null) {
+                    LOGGER.error("Encoder not found, version: {}, use current version({})", version,ProtocolConstants.VERSION);
+                    encoder = protocolEncoderMap.get(ProtocolConstants.VERSION);
+                }
                 try {
                     if (decoder == null || encoder == null) {
                         throw new UnsupportedOperationException("Unsupported version: " + version);
@@ -125,8 +133,8 @@ public class MultiProtocolDecoder extends LengthFieldBasedFrameDecoder {
                     if (version != ProtocolConstants.VERSION_0) {
                         frame.release();
                     }
-                    ctx.pipeline().addLast((ChannelHandler)decoder);
-                    ctx.pipeline().addLast((ChannelHandler)encoder);
+                    ctx.pipeline().addLast((ChannelHandler) decoder);
+                    ctx.pipeline().addLast((ChannelHandler) encoder);
                     if (channelHandlers != null) {
                         ctx.pipeline().addLast(channelHandlers);
                     }

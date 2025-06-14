@@ -16,11 +16,25 @@
  */
 package org.apache.seata.core.rpc.processor.client;
 
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.core.protocol.RpcMessage;
 import org.apache.seata.core.protocol.transaction.BranchCommitRequest;
@@ -32,28 +46,21 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * The type Rm branch commit processor test.
  */
 public class RmBranchCommitProcessorTest {
+    private static final String CLASS_NAME = "org.apache.seata.core.rpc.processor.client.RmBranchCommitProcessor";
+
+    private final List<Logger> watchedLoggers = new ArrayList<>();
+    private final ListAppender<ILoggingEvent> logWatcher = new ListAppender<>();
+
     private ChannelHandlerContext mockCtx;
     private RpcMessage mockRpcMessage;
     private TransactionMessageHandler mockHandler;
     private RemotingClient mockRemotingClient;
-    private Logger mockLogger;
-    private MockedStatic<LoggerFactory> mockedLoggerFactory;
     private MockedStatic<NetUtil> mockedNetUtil;
     private RmBranchCommitProcessor processor;
 
@@ -66,15 +73,10 @@ public class RmBranchCommitProcessorTest {
         mockRpcMessage = mock(RpcMessage.class);
         mockHandler = mock(TransactionMessageHandler.class);
         mockRemotingClient = mock(RemotingClient.class);
-        mockLogger = mock(Logger.class);
-        when(mockLogger.isInfoEnabled()).thenReturn(true);
-        mockedLoggerFactory = Mockito.mockStatic(LoggerFactory.class);
-        mockedLoggerFactory.when(() -> LoggerFactory.getLogger(RmBranchCommitProcessor.class)).thenReturn(mockLogger);
-
+        logWatcher.start();
+        setUpLogger();
         mockedNetUtil = Mockito.mockStatic(NetUtil.class);
-
         processor = new RmBranchCommitProcessor(mockHandler, mockRemotingClient);
-        //setField(null, "LOGGER", mockLogger);
     }
 
     /**
@@ -82,7 +84,7 @@ public class RmBranchCommitProcessorTest {
      */
     @AfterEach
     void tearDown() {
-        mockedLoggerFactory.close();
+        watchedLoggers.forEach(Logger::detachAndStopAllAppenders);
         mockedNetUtil.close();
     }
 
@@ -97,13 +99,14 @@ public class RmBranchCommitProcessorTest {
         Channel mockChannel = mock(Channel.class);
         when(mockCtx.channel()).thenReturn(mockChannel);
         when(mockChannel.remoteAddress()).thenReturn(mockAddress);
-        mockedNetUtil.when(() -> NetUtil.toStringAddress(any(SocketAddress.class))).thenReturn("127.0.0.1:8091");
+        mockedNetUtil
+                .when(() -> NetUtil.toStringAddress(any(SocketAddress.class)))
+                .thenReturn("127.0.0.1:8091");
 
         BranchCommitRequest mockRequest = mock(BranchCommitRequest.class);
         BranchCommitResponse mockResponse = mock(BranchCommitResponse.class);
         when(mockRpcMessage.getBody()).thenReturn(mockRequest);
         when(mockHandler.onRequest(mockRequest, null)).thenReturn(mockResponse);
-        when(mockLogger.isInfoEnabled()).thenReturn(true);
 
         processor.process(mockCtx, mockRpcMessage);
 
@@ -122,7 +125,9 @@ public class RmBranchCommitProcessorTest {
         Channel mockChannel = mock(Channel.class);
         when(mockCtx.channel()).thenReturn(mockChannel);
         when(mockChannel.remoteAddress()).thenReturn(mockAddress);
-        mockedNetUtil.when(() -> NetUtil.toStringAddress(any(SocketAddress.class))).thenReturn("127.0.0.1:8091");
+        mockedNetUtil
+                .when(() -> NetUtil.toStringAddress(any(SocketAddress.class)))
+                .thenReturn("127.0.0.1:8091");
 
         BranchCommitRequest mockRequest = mock(BranchCommitRequest.class);
         BranchCommitResponse mockResponse = mock(BranchCommitResponse.class);
@@ -134,31 +139,46 @@ public class RmBranchCommitProcessorTest {
 
         processor.process(mockCtx, mockRpcMessage);
 
-        verify(mockLogger).error(eq("branch commit error: {}"), eq("Network failure"), eq(simulatedError));
+        assertTrue(getLogs(Level.ERROR).stream().anyMatch(log -> log.equals("branch commit error: Network failure")));
     }
 
     /**
-     * Process should not log debug when disabled.
+     * Process print log info when level is info.
      *
      * @throws Exception the exception
      */
     @Test
-    void processShouldNotLogDebugWhenDisabled() throws Exception {
+    void processShouldPrintLogInfoWhenLevelIsInfo() throws Exception {
         InetSocketAddress mockAddress = new InetSocketAddress("127.0.0.1", 8091);
         Channel mockChannel = mock(Channel.class);
         when(mockCtx.channel()).thenReturn(mockChannel);
         when(mockChannel.remoteAddress()).thenReturn(mockAddress);
-        mockedNetUtil.when(() -> NetUtil.toStringAddress(any(SocketAddress.class))).thenReturn("127.0.0.1:8091");
+        mockedNetUtil
+                .when(() -> NetUtil.toStringAddress(any(SocketAddress.class)))
+                .thenReturn("127.0.0.1:8091");
 
         BranchCommitRequest mockRequest = mock(BranchCommitRequest.class);
         BranchCommitResponse mockResponse = mock(BranchCommitResponse.class);
         when(mockRpcMessage.getBody()).thenReturn(mockRequest);
         when(mockHandler.onRequest(mockRequest, null)).thenReturn(mockResponse);
-        when(mockLogger.isInfoEnabled()).thenReturn(true);
-        when(mockLogger.isDebugEnabled()).thenReturn(false);
-
         processor.process(mockCtx, mockRpcMessage);
 
-        verify(mockLogger, never()).debug(anyString(), (Object[])any());
+        assertTrue(
+                getLogs(Level.INFO).stream().anyMatch(log -> log.startsWith("rm client handle branch commit process:"))
+        );
+    }
+
+    private List<String> getLogs(Level level) {
+        return logWatcher.list.stream()
+                .filter(event -> event.getLoggerName().endsWith(CLASS_NAME)
+                        && event.getLevel().equals(level))
+                .map(ILoggingEvent::getFormattedMessage)
+                .collect(Collectors.toList());
+    }
+
+    private void setUpLogger() {
+        Logger logger = ((Logger) LoggerFactory.getLogger(CLASS_NAME));
+        logger.addAppender(logWatcher);
+        watchedLoggers.add(logger);
     }
 }

@@ -25,7 +25,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 import io.netty.channel.Channel;
-import io.netty.util.concurrent.EventExecutorGroup;
 import org.apache.seata.common.DefaultValues;
 import org.apache.seata.common.exception.FrameworkErrorCode;
 import org.apache.seata.common.exception.FrameworkException;
@@ -86,11 +85,31 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
                 getClientChannelManager().initReconnect(transactionServiceGroup, failFast);
             }
         }
+
+        registerChannelEventListener(new ChannelEventListener() {
+            @Override public void onChannelConnected(Channel channel) {
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Channel active: {}", channel.remoteAddress());
+                }
+            }
+
+            @Override public void onChannelDisconnected(Channel channel) {
+                LOGGER.warn("Channel inactive: {}", channel.remoteAddress());
+            }
+
+            @Override public void onChannelException(Channel channel, Throwable cause) {
+                LOGGER.error("Channel exception: {}", channel.remoteAddress(), cause);
+            }
+
+            @Override public void onChannelIdle(Channel channel) {
+                LOGGER.warn("Channel idle: {}", channel.remoteAddress());
+            }
+        });
     }
 
-    private RmNettyRemotingClient(NettyClientConfig nettyClientConfig, EventExecutorGroup eventExecutorGroup,
+    private RmNettyRemotingClient(NettyClientConfig nettyClientConfig,
                                   ThreadPoolExecutor messageExecutor) {
-        super(nettyClientConfig, eventExecutorGroup, messageExecutor, TransactionRole.RMROLE);
+        super(nettyClientConfig, messageExecutor, TransactionRole.RMROLE);
         // set enableClientBatchSendRequest
         Configuration configuration = ConfigurationFactory.getInstance();
         this.enableClientBatchSendRequest = configuration.getBoolean(ConfigurationKeys.ENABLE_RM_CLIENT_BATCH_SEND_REQUEST,
@@ -136,7 +155,7 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
                         KEEP_ALIVE_TIME, TimeUnit.SECONDS, new LinkedBlockingQueue<>(MAX_QUEUE_SIZE),
                         new NamedThreadFactory(nettyClientConfig.getRmDispatchThreadPrefix(),
                             nettyClientConfig.getClientWorkerThreads()), new ThreadPoolExecutor.CallerRunsPolicy());
-                    instance = new RmNettyRemotingClient(nettyClientConfig, null, messageExecutor);
+                    instance = new RmNettyRemotingClient(nettyClientConfig, messageExecutor);
                 }
             }
         }
@@ -178,7 +197,7 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("register RM success. client version:{}, server version:{},channel:{}", registerRMRequest.getVersion(), registerRMResponse.getVersion(), channel);
         }
-        getClientChannelManager().registerChannel(serverAddress, channel);
+        getClientChannelManager().registerChannel(serverAddress, channel, registerRMRequest.getVersion());
         String dbKey = getMergedResourceKeys();
         if (registerRMRequest.getResourceIds() != null) {
             if (!registerRMRequest.getResourceIds().equals(dbKey)) {

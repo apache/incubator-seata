@@ -17,7 +17,7 @@
 package org.apache.seata.server.console.service;
 
 import org.apache.seata.common.result.SingleResult;
-import org.apache.seata.server.console.vo.BranchSessionVO;
+import org.apache.seata.server.console.entity.vo.BranchSessionVO;
 import org.apache.seata.common.result.PageResult;
 
 /**

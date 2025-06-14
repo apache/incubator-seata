@@ -37,7 +37,7 @@ import org.apache.seata.core.store.db.DataSourceProvider;
 import org.apache.seata.core.store.db.sql.log.LogStoreSqlsFactory;
 import org.apache.seata.server.console.impl.AbstractBranchService;
 import org.apache.seata.server.console.service.BranchSessionService;
-import org.apache.seata.server.console.vo.BranchSessionVO;
+import org.apache.seata.server.console.entity.vo.BranchSessionVO;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 

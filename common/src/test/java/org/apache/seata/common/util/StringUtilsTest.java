@@ -33,11 +33,16 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
+
 import org.apache.seata.common.Constants;
 import org.apache.seata.common.holder.ObjectHolder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.opentest4j.AssertionFailedError;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -62,29 +67,49 @@ public class StringUtilsTest {
     /**
      * Test is empty.
      */
-    @Test
-    public void testIsNullOrEmpty() {
-
-        assertThat(StringUtils.isNullOrEmpty(null)).isTrue();
-        assertThat(StringUtils.isNullOrEmpty("abc")).isFalse();
-        assertThat(StringUtils.isNullOrEmpty("")).isTrue();
-        assertThat(StringUtils.isNullOrEmpty(" ")).isFalse();
+    @ParameterizedTest
+    @MethodSource("provideForIsNullOrEmpty")
+    void testIsNullOrEmpty(String input, boolean expected) {
+        assertThat(StringUtils.isNullOrEmpty(input)).isEqualTo(expected);
     }
 
-    @Test
-    public void testIsBlank() {
-        assertThat(StringUtils.isBlank(null)).isTrue();
-        assertThat(StringUtils.isBlank("abc")).isFalse();
-        assertThat(StringUtils.isBlank("")).isTrue();
-        assertThat(StringUtils.isBlank(" ")).isTrue();
+    static Stream<Arguments> provideForIsNullOrEmpty() {
+        return Stream.of(
+                Arguments.of(null, true),
+                Arguments.of("abc", false),
+                Arguments.of("", true),
+                Arguments.of(" ", false)
+        );
     }
 
-    @Test
-    public void testIsNotBlank() {
-        assertThat(StringUtils.isNotBlank(null)).isFalse();
-        assertThat(StringUtils.isNotBlank("abc")).isTrue();
-        assertThat(StringUtils.isNotBlank("")).isFalse();
-        assertThat(StringUtils.isNotBlank(" ")).isFalse();
+    @ParameterizedTest
+    @MethodSource("provideForIsBlank")
+    void testIsBlank(String input, boolean expected) {
+        assertThat(StringUtils.isBlank(input)).isEqualTo(expected);
+    }
+
+    static Stream<Arguments> provideForIsBlank() {
+        return Stream.of(
+                Arguments.of(null, true),
+                Arguments.of("abc", false),
+                Arguments.of("", true),
+                Arguments.of(" ", true)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideForIsNotBlank")
+    void testIsNotBlank(String input, boolean expected) {
+        assertThat(StringUtils.isNotBlank(input)).isEqualTo(expected);
+    }
+
+    static Stream<Arguments> provideForIsNotBlank() {
+        return Stream.of(
+                Arguments.of(null, false),
+                Arguments.of("abc", true),
+                Arguments.of("", false),
+                Arguments.of(" ", false)
+        );
     }
 
     @Test

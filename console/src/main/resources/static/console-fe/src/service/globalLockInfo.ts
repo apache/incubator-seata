@@ -67,12 +67,14 @@ export async function deleteData(params: GlobalLockParam): Promise<any> {
 export async function checkData(params: GlobalLockParam): Promise<any> {
   const xid = params.xid
   const branchId = params.branchId
+  const vgroup = params.vgroup
 
   let result = await request('/console/globalLock/check', {
     method: 'get',
     params: {
       xid,
-      branchId
+      branchId,
+      vgroup: vgroup
     },
     headers: {
       'x-seata-namespace': params.namespace,

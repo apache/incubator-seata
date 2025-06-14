@@ -63,7 +63,7 @@ public class RaftServerInstanceStrategy extends AbstractSeataInstanceStrategy
         instance.setUnit(unit);
         // load cluster type
         String clusterType = String.valueOf(StoreConfig.getSessionMode());
-        instance.addMetadata("cluster-type", "raft".equals(clusterType) ? clusterType : "default");
+        instance.addMetadata("cluster-type", "raft".equalsIgnoreCase(clusterType) ? clusterType : "default");
         RaftStateMachine stateMachine = RaftServerManager.getRaftServer(unit).getRaftStateMachine();
         long term = RaftServerManager.getRaftServer(unit).getRaftStateMachine().getCurrentTerm().get();
         instance.setTerm(term);
@@ -100,8 +100,9 @@ public class RaftServerInstanceStrategy extends AbstractSeataInstanceStrategy
     @EventListener
     @Async
     public void onChangeEvent(ClusterChangeEvent event) {
-        Instance.getInstance().setTerm(event.getTerm());
-        Instance.getInstance().setRole(event.isLeader() ? ClusterRole.LEADER : ClusterRole.FOLLOWER);
+        Instance instance = Instance.getInstance();
+        instance.setTerm(event.getTerm());
+        instance.setRole(event.isLeader() ? ClusterRole.LEADER : ClusterRole.FOLLOWER);
         SessionHolder.getRootVGroupMappingManager().notifyMapping();
     }
 

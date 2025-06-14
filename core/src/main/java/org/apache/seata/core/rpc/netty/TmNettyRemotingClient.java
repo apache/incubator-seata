@@ -23,7 +23,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 import io.netty.channel.Channel;
-import io.netty.util.concurrent.EventExecutorGroup;
 import org.apache.commons.lang.StringUtils;
 import org.apache.seata.common.DefaultValues;
 import org.apache.seata.common.exception.FrameworkException;
@@ -66,9 +65,8 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
 
 
     private TmNettyRemotingClient(NettyClientConfig nettyClientConfig,
-                                  EventExecutorGroup eventExecutorGroup,
                                   ThreadPoolExecutor messageExecutor) {
-        super(nettyClientConfig, eventExecutorGroup, messageExecutor, NettyPoolKey.TransactionRole.TMROLE);
+        super(nettyClientConfig, messageExecutor, NettyPoolKey.TransactionRole.TMROLE);
         this.signer = EnhancedServiceLoader.load(AuthSigner.class);
         // set enableClientBatchSendRequest
         Configuration configuration = ConfigurationFactory.getInstance();
@@ -82,6 +80,26 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
                 if (ConfigurationKeys.ENABLE_TM_CLIENT_BATCH_SEND_REQUEST.equals(dataId) && StringUtils.isNotBlank(newValue)) {
                     enableClientBatchSendRequest = Boolean.parseBoolean(newValue);
                 }
+            }
+        });
+
+        registerChannelEventListener(new ChannelEventListener() {
+            @Override public void onChannelConnected(Channel channel) {
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Channel active: {}", channel.remoteAddress());
+                }
+            }
+
+            @Override public void onChannelDisconnected(Channel channel) {
+                LOGGER.warn("Channel inactive: {}", channel.remoteAddress());
+            }
+
+            @Override public void onChannelException(Channel channel, Throwable cause) {
+                LOGGER.error("Channel exception: {}", channel.remoteAddress(), cause);
+            }
+
+            @Override public void onChannelIdle(Channel channel) {
+                LOGGER.warn("Channel idle: {}", channel.remoteAddress());
             }
         });
     }
@@ -132,7 +150,7 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
                             new NamedThreadFactory(nettyClientConfig.getTmDispatchThreadPrefix(),
                                     nettyClientConfig.getClientWorkerThreads()),
                             RejectedPolicies.runsOldestTaskPolicy());
-                    instance = new TmNettyRemotingClient(nettyClientConfig, null, messageExecutor);
+                    instance = new TmNettyRemotingClient(nettyClientConfig, messageExecutor);
                 }
             }
         }
@@ -218,7 +236,7 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("register TM success. client version:{}, server version:{},channel:{}", registerTMRequest.getVersion(), registerTMResponse.getVersion(), channel);
         }
-        getClientChannelManager().registerChannel(serverAddress, channel);
+        getClientChannelManager().registerChannel(serverAddress, channel, registerTMRequest.getVersion());
     }
 
     @Override

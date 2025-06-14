@@ -27,6 +27,7 @@ import javax.sql.XAConnection;
 
 import com.alibaba.druid.pool.DruidDataSource;
 
+import com.kingbase8.xa.KBXAConnection;
 import com.mysql.jdbc.JDBC4MySQLConnection;
 import com.mysql.jdbc.jdbc2.optional.JDBC4ConnectionWrapper;
 import org.apache.seata.core.context.RootContext;
@@ -34,6 +35,7 @@ import org.apache.seata.rm.datasource.mock.MockDataSource;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 import org.mockito.Mockito;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -120,6 +122,41 @@ public class DataSourceProxyXATest {
         XAConnection xaConnection = connectionProxyXA.getWrappedXAConnection();
         Connection connectionInXA = xaConnection.getConnection();
         Assertions.assertEquals("org.mariadb.jdbc.MariaDbConnection", connectionInXA.getClass().getName());
+        tearDown();
+    }
+
+    @Test
+    @DisabledIfSystemProperty(named = "druid.version", matches = "[0-1].[1-2].[0-7]", disabledReason = "druid 1.2.8 correct support kingbase")
+    public void testGetKingbaseXaConnection() throws SQLException, ClassNotFoundException {
+        // Mock
+        Driver driver = Mockito.mock(Driver.class);
+        Class clazz = Class.forName("com.kingbase8.jdbc.KbConnection");
+        Connection connection = (Connection)(Mockito.mock(clazz));
+        Mockito.when(connection.getAutoCommit()).thenReturn(true);
+        DatabaseMetaData metaData = Mockito.mock(DatabaseMetaData.class);
+        Mockito.when(metaData.getURL()).thenReturn("jdbc:kingbase8:xxx");
+        Mockito.when(connection.getMetaData()).thenReturn(metaData);
+        Mockito.when(driver.connect(any(), any())).thenReturn(connection);
+
+        DruidDataSource druidDataSource = new DruidDataSource();
+        druidDataSource.setDriver(driver);
+        DataSourceProxyXA dataSourceProxyXA = new DataSourceProxyXA(druidDataSource);
+        Connection connFromDataSourceProxyXA = dataSourceProxyXA.getConnection();
+        Assertions.assertFalse(connFromDataSourceProxyXA instanceof ConnectionProxyXA);
+        RootContext.bind("test");
+        connFromDataSourceProxyXA = dataSourceProxyXA.getConnection();
+
+        Assertions.assertTrue(connFromDataSourceProxyXA instanceof ConnectionProxyXA);
+        ConnectionProxyXA connectionProxyXA = (ConnectionProxyXA)dataSourceProxyXA.getConnection();
+
+        Connection wrappedConnection = connectionProxyXA.getWrappedConnection();
+        Assertions.assertTrue(wrappedConnection instanceof PooledConnection);
+
+        Connection wrappedPhysicalConn = ((PooledConnection)wrappedConnection).getConnection();
+        Assertions.assertSame(wrappedPhysicalConn, connection);
+
+        XAConnection xaConnection = connectionProxyXA.getWrappedXAConnection();
+        Assertions.assertEquals(xaConnection.getClass(), KBXAConnection.class);
         tearDown();
     }
 

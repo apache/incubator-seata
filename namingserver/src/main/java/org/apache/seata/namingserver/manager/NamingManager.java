@@ -116,7 +116,7 @@ public class NamingManager {
             try {
                 instanceHeartBeatCheck();
             } catch (Exception e) {
-                LOGGER.error("Heart Beat Check Exception", e);
+                LOGGER.error("Heart Beat Check Exception:{}", e.getMessage(), e);
             }
         }, heartbeatCheckTimePeriod, heartbeatCheckTimePeriod, TimeUnit.MILLISECONDS);
     }
@@ -132,7 +132,7 @@ public class NamingManager {
                 clusterVOHashMap.put(clusterName, ClusterVO.convertFromClusterData(clusterData));
             }
         } else {
-            LOGGER.warn("no cluster in namespace:" + namespace);
+            LOGGER.warn("no cluster in namespace:{}", namespace);
         }
 
         vGroupMap.asMap().forEach((vGroup, namespaceMap) -> {
@@ -154,7 +154,7 @@ public class NamingManager {
         List<Node> nodeList = getInstances(namespace, clusterName);
         if (nodeList == null || nodeList.size() == 0) {
             LOGGER.error("no instance in cluster {}", clusterName);
-            return new Result<>("301", "no instance in cluster" + clusterName);
+            return new Result<>("301", "no instance in cluster:" + clusterName);
         } else {
             Node node =
                 nodeList.stream().filter(n -> n.getRole() == ClusterRole.LEADER || n.getRole() == ClusterRole.MEMBER)
@@ -176,7 +176,7 @@ public class NamingManager {
                 }
                 LOGGER.info("namespace: {} add vGroup: {} in new cluster: {} successfully!", namespace, vGroup, clusterName);
             } catch (IOException e) {
-                LOGGER.warn("add vGroup in new cluster failed");
+                LOGGER.error("add vGroup in new cluster failed:{}", e.getMessage(), e);
                 return new Result<>("500", "add vGroup in new cluster failed");
             }
         }
@@ -203,7 +203,7 @@ public class NamingManager {
                 LOGGER.info("namespace: {} remove vGroup: {} in new cluster: {} successfully!", namespace, vGroup,
                     clusterName);
             } catch (IOException e) {
-                LOGGER.warn("handle removing vGroup in old cluster failed");
+                LOGGER.error("handle removing vGroup in old cluster failed:{}", e.getMessage(), e);
                 return new Result<>("500",
                     "handle removing vGroup " + vGroup + " in old cluster " + clusterName + " failed");
             }
@@ -215,7 +215,7 @@ public class NamingManager {
         try {
             ClusterBO clusterBO = vGroupMap.get(vGroup, k -> new ConcurrentHashMap<>())
                 .computeIfAbsent(namespace, k -> new NamespaceBO()).getCluster(clusterName);
-            if (clusterBO != null /**&& !clusterBO.getUnitNames().contains(unitName)**/) {
+            if (clusterBO != null) {
                 boolean needNotify = !clusterBO.getUnitNames().contains(unitName);
                 NamespaceBO namespaceBO = vGroupMap.getIfPresent(vGroup).get(namespace);
                 namespaceBO.removeOldCluster(clusterName);
@@ -225,7 +225,7 @@ public class NamingManager {
                 return needNotify;
             }
         } catch (Exception e) {
-            LOGGER.error("change vGroup mapping failed:{}", vGroup, e);
+            LOGGER.error("change vGroup mapping failed,vGroup:{},error:{}", vGroup, e.getMessage(), e);
         }
         return false;
     }
@@ -246,6 +246,9 @@ public class NamingManager {
     }
 
     public boolean registerInstance(NamingServerNode node, String namespace, String clusterName, String unitName) {
+        if (node == null) {
+            return false;
+        }
         try {
             Map<String, ClusterData> clusterDataHashMap =
                 namespaceClusterDataMap.computeIfAbsent(namespace, k -> new ConcurrentHashMap<>());
@@ -272,7 +275,7 @@ public class NamingManager {
                 new InetSocketAddress(node.getTransaction().getHost(), node.getTransaction().getPort()),
                 System.currentTimeMillis());
         } catch (Exception e) {
-            LOGGER.error("Instance registered failed!", e);
+            LOGGER.error("Instance registered failed:{}", e.getMessage(), e);
             return false;
         }
         return true;
@@ -299,7 +302,7 @@ public class NamingManager {
                 }
             }
         } catch (Exception e) {
-            LOGGER.error("Instance unregistered failed!", e);
+            LOGGER.error("Instance unregistered failed:{}", e.getMessage(), e);
             return false;
         }
         return true;
@@ -326,6 +329,10 @@ public class NamingManager {
 
     public List<Node> getInstances(String namespace, String clusterName, boolean readOnly) {
         Map<String, ClusterData> clusterDataHashMap = namespaceClusterDataMap.get(namespace);
+        if (clusterDataHashMap == null) {
+            LOGGER.warn("no clusters in namespace: {}", namespace);
+            return Collections.emptyList();
+        }
         ClusterData clusterData = clusterDataHashMap.get(clusterName);
         if (clusterData == null) {
             LOGGER.warn("no instances in {} : {}", namespace, clusterName);
