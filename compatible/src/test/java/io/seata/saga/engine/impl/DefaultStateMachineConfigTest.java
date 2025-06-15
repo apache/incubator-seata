@@ -20,12 +20,16 @@ package io.seata.saga.engine.impl;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.script.ScriptEngineManager;
+
 import io.seata.saga.engine.expression.ExpressionFactory;
 import io.seata.saga.engine.expression.ExpressionFactoryManager;
 import io.seata.saga.engine.repo.StateLogRepository;
 import io.seata.saga.engine.repo.StateMachineRepository;
 import org.apache.seata.saga.engine.expression.Expression;
 import org.apache.seata.saga.engine.expression.ExpressionResolver;
+import org.apache.seata.saga.engine.strategy.StatusDecisionStrategy;
+import org.apache.seata.saga.proctrl.eventing.impl.ProcessCtrlEventPublisher;
 import org.apache.seata.saga.statelang.domain.StateInstance;
 import org.apache.seata.saga.statelang.domain.StateMachine;
 import org.apache.seata.saga.statelang.domain.StateMachineInstance;
@@ -33,7 +37,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.apache.seata.saga.engine.config.AbstractStateMachineConfig.DEFAULT_SERVICE_INVOKE_TIMEOUT;
+import static org.apache.seata.saga.engine.config.AbstractStateMachineConfig.DEFAULT_TRANS_OPERATION_TIMEOUT;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -149,11 +154,87 @@ public class DefaultStateMachineConfigTest {
         when(mockStateLogRepository.getStateMachineInstanceByBusinessKey("key", "")).thenReturn(
             mockStateMachineInstance);
         StateLogRepository getStateLogRepository = defaultStateMachineConfig.getStateLogRepository();
-        assertNotNull(getStateLogRepository);
-        assertEquals(mockStateInstanceName,
+        Assertions.assertNotNull(getStateLogRepository);
+        Assertions.assertEquals(mockStateInstanceName,
             getStateLogRepository.getStateInstance(mockStateMachineInstanceName, "").getName());
-        assertEquals(mockMachineId,
+        Assertions.assertEquals(mockMachineId,
             getStateLogRepository.getStateMachineInstance(mockStateMachineInstanceName).getMachineId());
-        assertEquals("key", getStateLogRepository.getStateMachineInstanceByBusinessKey("key", "").getBusinessKey());
+        Assertions.assertEquals("key",
+            getStateLogRepository.getStateMachineInstanceByBusinessKey("key", "").getBusinessKey());
+    }
+
+    @Test
+    public void testCharset() {
+        String charset = defaultStateMachineConfig.getCharset();
+        Assertions.assertEquals("UTF-8", charset);
+
+        String newCharset = "ISO-8859-1";
+        defaultStateMachineConfig.setCharset(newCharset);
+        Assertions.assertEquals(newCharset, defaultStateMachineConfig.getCharset());
+    }
+
+    @Test
+    public void testAsyncProcessCtrlEventPublisher() {
+        ProcessCtrlEventPublisher asyncProcessCtrlEventPublisher
+            = defaultStateMachineConfig.getAsyncProcessCtrlEventPublisher();
+        Assertions.assertNull(asyncProcessCtrlEventPublisher);
+
+        defaultStateMachineConfig.setAsyncProcessCtrlEventPublisher(new ProcessCtrlEventPublisher());
+        Assertions.assertNotNull(defaultStateMachineConfig.getAsyncProcessCtrlEventPublisher());
+    }
+
+    @Test
+    public void testGetExpressionResolver() {
+        Assertions.assertNull(defaultStateMachineConfig.getExpressionResolver());
+
+        ExpressionResolver expressionResolver = mock(ExpressionResolver.class);
+        defaultStateMachineConfig.setExpressionResolver(expressionResolver);
+        Assertions.assertEquals(expressionResolver, defaultStateMachineConfig.getExpressionResolver());
+    }
+
+    @Test
+    public void testStatusDecisionStrategy() {
+        Assertions.assertNull(defaultStateMachineConfig.getStatusDecisionStrategy());
+
+        StatusDecisionStrategy statusDecisionStrategy = mock(StatusDecisionStrategy.class);
+        defaultStateMachineConfig.setStatusDecisionStrategy(statusDecisionStrategy);
+        Assertions.assertEquals(statusDecisionStrategy, defaultStateMachineConfig.getStatusDecisionStrategy());
+    }
+
+    @Test
+    public void testServiceInvokerManager() {
+        Assertions.assertNull(defaultStateMachineConfig.getServiceInvokerManager());
+
+        org.apache.seata.saga.engine.invoker.ServiceInvokerManager serviceInvokerManager = mock(
+            org.apache.seata.saga.engine.invoker.ServiceInvokerManager.class);
+        defaultStateMachineConfig.setServiceInvokerManager(serviceInvokerManager);
+        Assertions.assertEquals(serviceInvokerManager, defaultStateMachineConfig.getServiceInvokerManager());
+    }
+
+    @Test
+    public void testTransOperationTimeout() {
+        Assertions.assertEquals(DEFAULT_TRANS_OPERATION_TIMEOUT, defaultStateMachineConfig.getTransOperationTimeout());
+
+        int timeout = 1000;
+        defaultStateMachineConfig.setTransOperationTimeout(timeout);
+        Assertions.assertEquals(timeout, defaultStateMachineConfig.getTransOperationTimeout());
+    }
+
+    @Test
+    public void testServiceInvokeTimeout() {
+        Assertions.assertEquals(DEFAULT_SERVICE_INVOKE_TIMEOUT, defaultStateMachineConfig.getServiceInvokeTimeout());
+
+        int timeout = 2000;
+        defaultStateMachineConfig.setServiceInvokeTimeout(timeout);
+        Assertions.assertEquals(timeout, defaultStateMachineConfig.getServiceInvokeTimeout());
+    }
+
+    @Test
+    public void testScriptEngineManager() {
+        Assertions.assertNull(defaultStateMachineConfig.getScriptEngineManager());
+
+        ScriptEngineManager scriptEngineManager = mock(ScriptEngineManager.class);
+        defaultStateMachineConfig.setScriptEngineManager(scriptEngineManager);
+        Assertions.assertEquals(scriptEngineManager, defaultStateMachineConfig.getScriptEngineManager());
     }
 }
