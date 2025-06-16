@@ -74,8 +74,8 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_SAGA_JSON_PARSER;
  */
 public abstract class AbstractStateMachineConfig implements StateMachineConfig {
 
-    private static final int DEFAULT_TRANS_OPERATION_TIMEOUT = 60000 * 30;
-    private static final int DEFAULT_SERVICE_INVOKE_TIMEOUT = 60000 * 5;
+    public static final int DEFAULT_TRANS_OPERATION_TIMEOUT = 60000 * 30;
+    public static final int DEFAULT_SERVICE_INVOKE_TIMEOUT = 60000 * 5;
 
     private ExpressionFactoryManager expressionFactoryManager;
     private ExpressionResolver expressionResolver;
