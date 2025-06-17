@@ -43,7 +43,9 @@ header:
     - '**/org/apache/seata/sqlparser/antlr/mysql/parser/*' #generate file
     - 'distribution/licenses/**'
     - 'distribution/LICENSE'
+    - 'distribution/LICENSE-*'
     - 'distribution/NOTICE'
+    - 'distribution/NOTICE-*'
     - '**/*.txt'  #txt files not support comments
     - '**/*.json' #json files not support comments
     - '**/*.png'
