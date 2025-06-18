@@ -22,6 +22,7 @@ import org.apache.seata.common.XID;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.store.SessionMode;
 import org.apache.seata.common.store.StoreMode;
+import org.apache.seata.server.DynamicPortTestConfig;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -29,6 +30,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Import;
 import redis.clients.jedis.Jedis;
 import org.apache.seata.core.store.DistributedLockDO;
 import org.apache.seata.core.store.DistributedLocker;
@@ -42,6 +44,7 @@ import org.apache.seata.server.storage.redis.JedisPooledFactory;
  */
 @SpringBootTest
 @EnabledIfSystemProperty(named = "redisCaseEnabled", matches = "true")
+@Import(DynamicPortTestConfig.class)
 public class RedisDistributedLockerTest {
 
     private String retryRollbacking = "RetryRollbacking";

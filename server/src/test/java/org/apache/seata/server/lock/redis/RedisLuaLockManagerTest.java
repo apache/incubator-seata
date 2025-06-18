@@ -20,6 +20,7 @@ import java.io.IOException;
 
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.core.lock.Locker;
+import org.apache.seata.server.DynamicPortTestConfig;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.storage.redis.lock.RedisLockManager;
 import org.apache.seata.server.storage.redis.lock.RedisLuaLocker;
@@ -28,6 +29,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Import;
 
 /**
  * RedisLocker use lua script
@@ -35,6 +37,7 @@ import org.springframework.context.ApplicationContext;
  */
 @SpringBootTest
 @EnabledIfSystemProperty(named = "redisCaseEnabled", matches = "true")
+@Import(DynamicPortTestConfig.class)
 public class RedisLuaLockManagerTest extends RedisLockManagerTest {
 
     /**

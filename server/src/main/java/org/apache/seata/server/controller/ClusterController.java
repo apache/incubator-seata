@@ -111,13 +111,9 @@ public class ClusterController {
     public void watch(HttpContext context, @RequestBody Map<String, Object> groupTerms,
         @RequestParam(defaultValue = "28000") Integer timeout) {
         context.setAsync(true);
-        if (timeout == null) {
-            timeout = 28000;
-        }
-        Integer finalTimeout = timeout;
         groupTerms.forEach((group, term) -> {
             Watcher<HttpContext> watcher =
-                new Watcher<>(group, context, finalTimeout, Long.parseLong(String.valueOf(term)));
+                new Watcher<>(group, context, timeout, Long.parseLong(String.valueOf(term)));
             clusterWatcherManager.registryWatcher(watcher);
         });
     }

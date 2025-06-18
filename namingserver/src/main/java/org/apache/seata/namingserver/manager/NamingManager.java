@@ -246,6 +246,9 @@ public class NamingManager {
     }
 
     public boolean registerInstance(NamingServerNode node, String namespace, String clusterName, String unitName) {
+        if (node == null) {
+            return false;
+        }
         try {
             Map<String, ClusterData> clusterDataHashMap =
                 namespaceClusterDataMap.computeIfAbsent(namespace, k -> new ConcurrentHashMap<>());
@@ -326,6 +329,10 @@ public class NamingManager {
 
     public List<Node> getInstances(String namespace, String clusterName, boolean readOnly) {
         Map<String, ClusterData> clusterDataHashMap = namespaceClusterDataMap.get(namespace);
+        if (clusterDataHashMap == null) {
+            LOGGER.warn("no clusters in namespace: {}", namespace);
+            return Collections.emptyList();
+        }
         ClusterData clusterData = clusterDataHashMap.get(clusterName);
         if (clusterData == null) {
             LOGGER.warn("no instances in {} : {}", namespace, clusterName);

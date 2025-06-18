@@ -21,6 +21,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import com.github.danielwegener.logback.kafka.KafkaAppender;
 import net.logstash.logback.appender.LogstashTcpSocketAppender;
+import org.apache.seata.server.DynamicPortTestConfig;
 import org.apache.seata.server.logging.logback.appender.MetricLogbackAppender;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -30,9 +31,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.lang.reflect.Field;
 import java.util.Iterator;
-
+import org.springframework.context.annotation.Import;
 
 @SpringBootTest
+@Import(DynamicPortTestConfig.class)
 public class AppenderTest {
 
     @BeforeAll

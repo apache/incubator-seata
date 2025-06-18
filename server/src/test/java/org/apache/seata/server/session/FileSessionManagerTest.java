@@ -37,6 +37,7 @@ import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.model.LockStatus;
+import org.apache.seata.server.DynamicPortTestConfig;
 import org.apache.seata.server.console.entity.param.GlobalSessionParam;
 import org.apache.seata.server.console.service.BranchSessionService;
 import org.apache.seata.server.console.service.GlobalSessionService;
@@ -53,6 +54,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Import;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 
@@ -62,6 +64,7 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
  * @since 2019 /1/22
  */
 @SpringBootTest
+@Import(DynamicPortTestConfig.class)
 public class FileSessionManagerTest {
 
 
