@@ -34,6 +34,10 @@ public class StateLangStoreSqls {
     private static final String INSERT_STATE_MACHINE_SQL = "INSERT INTO ${TABLE_PREFIX}state_machine_def ("
         + STATE_MACHINE_FIELDS + ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
+    private static final String GET_LAST_VERSION_STATE_MACHINE_SQL = "SELECT " + STATE_MACHINE_FIELDS
+            + " FROM ${TABLE_PREFIX}state_machine_def WHERE name = ? AND tenant_id = ? " +
+            "AND gmt_create = ( SELECT MAX(gmt_create) FROM ${TABLE_PREFIX}state_machine_def WHERE name = ? AND tenant_id = ? )";
+
     private static final String TABLE_PREFIX_REGEX = "\\$\\{TABLE_PREFIX}";
 
     private String tablePrefix;
@@ -41,6 +45,7 @@ public class StateLangStoreSqls {
     private String getGetStateMachineByIdSql;
     private String queryStateMachinesByNameAndTenantSql;
     private String insertStateMachineSql;
+    private String getLastVersionStateMachine;
 
     public StateLangStoreSqls(String tablePrefix) {
         this.tablePrefix = tablePrefix;
@@ -52,6 +57,7 @@ public class StateLangStoreSqls {
         queryStateMachinesByNameAndTenantSql = QUERY_STATE_MACHINES_BY_NAME_AND_TENANT_SQL.replaceAll(
             TABLE_PREFIX_REGEX, tablePrefix);
         insertStateMachineSql = INSERT_STATE_MACHINE_SQL.replaceAll(TABLE_PREFIX_REGEX, tablePrefix);
+        getLastVersionStateMachine = GET_LAST_VERSION_STATE_MACHINE_SQL.replaceAll(TABLE_PREFIX_REGEX, tablePrefix);
     }
 
     public String getGetStateMachineByIdSql(String dbType) {
@@ -60,6 +66,10 @@ public class StateLangStoreSqls {
 
     public String getQueryStateMachinesByNameAndTenantSql(String dbType) {
         return queryStateMachinesByNameAndTenantSql;
+    }
+
+    public String getLastVersionStateMachine(String dbType) {
+        return getLastVersionStateMachine;
     }
 
     public String getInsertStateMachineSql(String dbType) {
