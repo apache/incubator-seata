@@ -27,6 +27,7 @@ import org.apache.seata.common.DefaultValues;
 import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
@@ -62,11 +63,11 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
 
     private volatile boolean rollBacked = false;
 
-    private volatile Long branchRegisterTime = null;
+    private volatile Long branchBeginTime = null;
 
     private volatile Long prepareTime = null;
 
-    private static final Integer TIMEOUT = Math.max(BRANCH_EXECUTION_TIMEOUT, DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT);
+    private volatile Integer timeout = null;
 
     private boolean shouldBeHeld = false;
 
@@ -92,6 +93,15 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             this.currentAutoCommitStatus = this.originalConnection.getAutoCommit();
             if (!currentAutoCommitStatus) {
                 throw new IllegalStateException("Connection[autocommit=false] as default is NOT supported");
+            }
+            Integer transactionTimeout = RootContext.getTimeout();
+            if (transactionTimeout == null) {
+                transactionTimeout = DefaultValues.DEFAULT_GLOBAL_TRANSACTION_TIMEOUT;
+            }
+            timeout = Math.max(BRANCH_EXECUTION_TIMEOUT, transactionTimeout);
+            branchBeginTime = RootContext.getBranchBeignTime();
+            if(branchBeginTime == null) {
+            	branchBeginTime = System.currentTimeMillis();
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -193,7 +203,6 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
             long branchId;
             try {
                 // 1. register branch to TC then get the branch message
-                branchRegisterTime = System.currentTimeMillis();
                 branchId = DefaultResourceManager.get().branchRegister(BranchType.XA, resource.getResourceId(), null, xid, null,
                         null);
             } catch (TransactionException te) {
@@ -291,7 +300,6 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
 
     private void cleanXABranchContext() {
         xaEnded = false;
-        branchRegisterTime = null;
         prepareTime = null;
         xaActive = false;
         if (!isHeld()) {
@@ -300,7 +308,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
     }
 
     private void checkTimeout(Long now) throws XAException {
-        if (now - branchRegisterTime > TIMEOUT) {
+        if (now - branchBeginTime > timeout) {
             xaRollback(xaBranchXid);
             throw new XAException("XA branch timeout error");
         }

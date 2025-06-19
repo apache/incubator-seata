@@ -59,6 +59,11 @@ public class RootContext {
      * The constant KEY_TIMEOUT.
      */
     public static final String KEY_TIMEOUT = "TX_TIMEOUT";
+    
+    /**
+     * The constant KEY_BRANCH_BEIGN_TIME.
+     */
+    public static final String KEY_BRANCH_BEIGN_TIME = "TX_BRANCH_BEIGN_TIME";
 
     /**
      * The constant MDC_KEY_XID for logback
@@ -140,6 +145,14 @@ public class RootContext {
 
     public static void setTimeout(Integer timeout) {
         CONTEXT_HOLDER.put(KEY_TIMEOUT,timeout);
+    }
+    
+    public static Long getBranchBeignTime() {
+    	return (Long) CONTEXT_HOLDER.get(KEY_BRANCH_BEIGN_TIME);
+    }
+    
+    public static void setBranchBeignTime(Long branchBeignTime) {
+    	CONTEXT_HOLDER.put(KEY_BRANCH_BEIGN_TIME,branchBeignTime);
     }
 
     /**
