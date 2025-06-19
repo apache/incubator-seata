@@ -24,8 +24,8 @@ import org.apache.seata.spring.util.SpringProxyUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 
-
-public class RemotingFactoryBeanParser extends AbstractedRemotingParser {
+@Deprecated
+public class RemotingFactoryBeanParser {
 
     public ApplicationContext applicationContext;
 
@@ -54,7 +54,7 @@ public class RemotingFactoryBeanParser extends AbstractedRemotingParser {
         return factoryBean;
     }
 
-    @Override
+//    @Override
     public boolean isReference(Object bean, String beanName) {
         Object factoryBean = getRemotingFactoryBean(bean, beanName);
         if (factoryBean == null) {
@@ -63,7 +63,7 @@ public class RemotingFactoryBeanParser extends AbstractedRemotingParser {
         return DefaultRemotingParser.get().isReference(factoryBean, getFactoryBeanName(beanName));
     }
 
-    @Override
+//    @Override
     public boolean isService(Object bean, String beanName) {
         Object factoryBean = getRemotingFactoryBean(bean, beanName);
         if (factoryBean == null) {
@@ -72,12 +72,12 @@ public class RemotingFactoryBeanParser extends AbstractedRemotingParser {
         return DefaultRemotingParser.get().isService(factoryBean, getFactoryBeanName(beanName));
     }
 
-    @Override
+//    @Override
     public boolean isService(Class<?> beanClass) throws FrameworkException {
         return false;
     }
 
-    @Override
+//    @Override
     public RemotingDesc getServiceDesc(Object bean, String beanName) throws FrameworkException {
         Object factoryBean = getRemotingFactoryBean(bean, beanName);
         if (factoryBean == null) {
@@ -90,7 +90,7 @@ public class RemotingFactoryBeanParser extends AbstractedRemotingParser {
         return "&" + beanName;
     }
 
-    @Override
+//    @Override
     public short getProtocol() {
         return 0;
     }
