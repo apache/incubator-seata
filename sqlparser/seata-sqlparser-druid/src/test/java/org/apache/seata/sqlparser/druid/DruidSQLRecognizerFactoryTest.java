@@ -156,13 +156,7 @@ public class DruidSQLRecognizerFactoryTest {
         Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql3, JdbcConstants.MYSQL));
         Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql3, JdbcConstants.MARIADB));
         Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql3, JdbcConstants.POLARDBX));
-
-        // When dbtype are DM and SQLSERVER, druid cannot parse the sql syntax 'replace'
-        try {
-            recognizerFactory.create(sql3, JdbcConstants.DM);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql3, JdbcConstants.DM));
 
         String sql5 = "insert into a select * from b";
         Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql5, JdbcConstants.MYSQL));
