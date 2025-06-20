@@ -38,42 +38,47 @@ import java.util.List;
 class DruidSQLRecognizerFactoryImpl implements SQLRecognizerFactory {
     @Override
     public List<SQLRecognizer> create(String sql, String dbType) {
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, DruidDbTypeAdapter.getAdaptiveDbType(dbType));
-        if (CollectionUtils.isEmpty(asts)) {
-            throw new UnsupportedOperationException("Unsupported SQL: " + sql);
-        }
-        if (asts.size() > 1 && !(asts.stream().allMatch(statement -> statement instanceof SQLUpdateStatement)
-                || asts.stream().allMatch(statement -> statement instanceof SQLDeleteStatement))) {
-            throw new UnsupportedOperationException("ONLY SUPPORT SAME TYPE (UPDATE OR DELETE) MULTI SQL -" + sql);
-        }
         List<SQLRecognizer> recognizers = null;
         SQLRecognizer recognizer = null;
-        for (SQLStatement ast : asts) {
-            SQLOperateRecognizerHolder recognizerHolder =
-                    SQLOperateRecognizerHolderFactory.getSQLRecognizerHolder(dbType.toLowerCase());
-            if (ast instanceof SQLInsertStatement) {
-                recognizer = recognizerHolder.getInsertRecognizer(sql, ast);
-            } else if (ast instanceof SQLUpdateStatement) {
-                recognizer = recognizerHolder.getUpdateRecognizer(sql, ast);
-            } else if (ast instanceof SQLDeleteStatement) {
-                recognizer = recognizerHolder.getDeleteRecognizer(sql, ast);
-            } else if (ast instanceof SQLSelectStatement) {
-                recognizer = recognizerHolder.getSelectForUpdateRecognizer(sql, ast);
+        try {
+            List<SQLStatement> asts = SQLUtils.parseStatements(sql, DruidDbTypeAdapter.getAdaptiveDbType(dbType));
+            if (CollectionUtils.isEmpty(asts)) {
+                throw new UnsupportedOperationException("Unsupported SQL: " + sql);
             }
-
-            // When recognizer is null, it indicates that recognizerHolder cannot allocate unsupported syntax, like merge and replace
-            if (ast instanceof SQLReplaceStatement) {
-                //just like:replace into t (id,dr) values (1,'2'), (2,'3')
-                throw new NotSupportYetException("not support the sql syntax with ReplaceStatement:" + ast +
-                        "\nplease see the doc about SQL restrictions https://seata.apache.org/zh-cn/docs/user/sqlreference/dml");
+            if (asts.size() > 1 && !(asts.stream().allMatch(statement -> statement instanceof SQLUpdateStatement)
+                    || asts.stream().allMatch(statement -> statement instanceof SQLDeleteStatement))) {
+                throw new UnsupportedOperationException("ONLY SUPPORT SAME TYPE (UPDATE OR DELETE) MULTI SQL -" + sql);
             }
-
-            if (recognizer != null && recognizer.isSqlSyntaxSupports()) {
-                if (recognizers == null) {
-                    recognizers = new ArrayList<>();
+            for (SQLStatement ast : asts) {
+                SQLOperateRecognizerHolder recognizerHolder =
+                        SQLOperateRecognizerHolderFactory.getSQLRecognizerHolder(dbType.toLowerCase());
+                if (ast instanceof SQLInsertStatement) {
+                    recognizer = recognizerHolder.getInsertRecognizer(sql, ast);
+                } else if (ast instanceof SQLUpdateStatement) {
+                    recognizer = recognizerHolder.getUpdateRecognizer(sql, ast);
+                } else if (ast instanceof SQLDeleteStatement) {
+                    recognizer = recognizerHolder.getDeleteRecognizer(sql, ast);
+                } else if (ast instanceof SQLSelectStatement) {
+                    recognizer = recognizerHolder.getSelectForUpdateRecognizer(sql, ast);
                 }
-                recognizers.add(recognizer);
+
+                // When recognizer is null, it indicates that recognizerHolder cannot allocate unsupported syntax, like merge and replace
+                if (ast instanceof SQLReplaceStatement) {
+                    //just like:replace into t (id,dr) values (1,'2'), (2,'3')
+                    throw new NotSupportYetException("not support the sql syntax with ReplaceStatement:" + ast +
+                            "\nplease see the doc about SQL restrictions https://seata.apache.org/zh-cn/docs/user/sqlreference/dml");
+                }
+
+                if (recognizer != null && recognizer.isSqlSyntaxSupports()) {
+                    if (recognizers == null) {
+                        recognizers = new ArrayList<>();
+                    }
+                    recognizers.add(recognizer);
+                }
             }
+        } catch (com.alibaba.druid.sql.parser.ParserException e) {
+            throw new NotSupportYetException("not support the sql syntax: " + sql + 
+                    "\nplease see the doc about SQL restrictions https://seata.apache.org/zh-cn/docs/user/sqlreference/dml", e);
         }
         return recognizers;
     }
