@@ -73,7 +73,7 @@ class DruidSQLRecognizerFactoryImpl implements SQLRecognizerFactory {
                 recognizer = recognizerHolder.getSelectForUpdateRecognizer(sql, ast);
             }
 
-            // When recognizer is null, it indicates that recognizerHolder cannot allocate unsupported syntax, like merge and replace
+            // When recognizer is null,it indicates that recognizerHolder cannot allocate unsupported syntax, like merge and replace
             if (ast instanceof SQLReplaceStatement) {
                 //just like:replace into t (id,dr) values (1,'2'), (2,'3')
                 throw new NotSupportYetException("not support the sql syntax with ReplaceStatement:" + ast +
