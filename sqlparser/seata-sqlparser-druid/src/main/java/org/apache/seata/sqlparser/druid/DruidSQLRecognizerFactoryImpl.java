@@ -76,10 +76,27 @@ class DruidSQLRecognizerFactoryImpl implements SQLRecognizerFactory {
                     recognizers.add(recognizer);
                 }
             }
-        } catch (com.alibaba.druid.sql.parser.ParserException e) {
-            throw new NotSupportYetException("not support the sql syntax: " + sql + 
-                    "\nplease see the doc about SQL restrictions https://seata.apache.org/zh-cn/docs/user/sqlreference/dml", e);
+        } catch (RuntimeException e) {
+            // Check if it is ParserException by class name, avoid direct reference
+            if (isParserException(e)) {
+                throw new NotSupportYetException("not support the sql syntax: " + sql + 
+                        "\nplease see the doc about SQL restrictions https://seata.apache.org/zh-cn/docs/user/sqlreference/dml", e);
+            }
+            // Other RuntimeExceptions continue to be thrown without conversion,Ensure that other original test classes can run normally
+            throw e;
         }
         return recognizers;
+    }
+    
+    /**
+     * Check if the exception is a Druid ParserException
+     * Use class name comparison to avoid directly referencing the ParserException class
+     */
+    private boolean isParserException(Throwable e) {
+        if (e == null) {
+            return false;
+        }
+        String className = e.getClass().getName();
+        return "com.alibaba.druid.sql.parser.ParserException".equals(className);
     }
 }
