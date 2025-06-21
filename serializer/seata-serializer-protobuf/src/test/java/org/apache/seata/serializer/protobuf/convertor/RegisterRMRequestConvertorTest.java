@@ -16,12 +16,11 @@
  */
 package org.apache.seata.serializer.protobuf.convertor;
 
-import org.apache.seata.serializer.protobuf.generated.RegisterRMRequestProto;
 import org.apache.seata.core.protocol.RegisterRMRequest;
+import org.apache.seata.serializer.protobuf.generated.RegisterRMRequestProto;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
 
 public class RegisterRMRequestConvertorTest {
 
@@ -44,6 +43,5 @@ public class RegisterRMRequestConvertorTest {
         assertThat((real.getTransactionServiceGroup())).isEqualTo(registerRMRequest.getTransactionServiceGroup());
         assertThat((real.getExtraData())).isEqualTo(registerRMRequest.getExtraData());
         assertThat((real.getApplicationId())).isEqualTo(registerRMRequest.getApplicationId());
-
     }
 }

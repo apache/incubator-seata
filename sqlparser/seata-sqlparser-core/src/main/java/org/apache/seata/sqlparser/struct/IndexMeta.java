@@ -16,11 +16,11 @@
  */
 package org.apache.seata.sqlparser.struct;
 
+import org.apache.commons.lang.ArrayUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
-import org.apache.commons.lang.ArrayUtils;
 
 /**
  * The type Index meta.
@@ -41,8 +41,7 @@ public class IndexMeta {
     /**
      * Instantiates a new Index meta.
      */
-    public IndexMeta() {
-    }
+    public IndexMeta() {}
 
     /**
      * Gets values.
@@ -214,7 +213,7 @@ public class IndexMeta {
         if (!(o instanceof IndexMeta)) {
             return false;
         }
-        IndexMeta indexMeta = (IndexMeta)o;
+        IndexMeta indexMeta = (IndexMeta) o;
         if (!ArrayUtils.isEquals(indexMeta.values, this.values)) {
             return false;
         }

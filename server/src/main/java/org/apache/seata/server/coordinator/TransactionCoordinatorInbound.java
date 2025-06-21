@@ -24,6 +24,4 @@ import org.apache.seata.core.model.TransactionManager;
  *
  * @since 1.1.0
  */
-public interface TransactionCoordinatorInbound extends ResourceManagerOutbound, TransactionManager {
-
-}
+public interface TransactionCoordinatorInbound extends ResourceManagerOutbound, TransactionManager {}

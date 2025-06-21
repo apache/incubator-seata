@@ -17,11 +17,6 @@
 
 package io.seata.saga.engine.impl;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.script.ScriptEngineManager;
-
 import io.seata.saga.engine.expression.ExpressionFactory;
 import io.seata.saga.engine.expression.ExpressionFactoryManager;
 import io.seata.saga.engine.repo.StateLogRepository;
@@ -36,6 +31,10 @@ import org.apache.seata.saga.statelang.domain.StateMachineInstance;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import javax.script.ScriptEngineManager;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.apache.seata.saga.engine.config.AbstractStateMachineConfig.DEFAULT_SERVICE_INVOKE_TIMEOUT;
 import static org.apache.seata.saga.engine.config.AbstractStateMachineConfig.DEFAULT_TRANS_OPERATION_TIMEOUT;
@@ -67,9 +66,7 @@ public class DefaultStateMachineConfigTest {
                     }
 
                     @Override
-                    public void setValue(Object value, Object elContext) {
-
-                    }
+                    public void setValue(Object value, Object elContext) {}
 
                     @Override
                     public String getExpressionString() {
@@ -93,18 +90,16 @@ public class DefaultStateMachineConfigTest {
 
             @Override
             public void setExpressionFactoryManager(
-                org.apache.seata.saga.engine.expression.ExpressionFactoryManager expressionFactoryManager) {
-
-            }
+                    org.apache.seata.saga.engine.expression.ExpressionFactoryManager expressionFactoryManager) {}
         });
         Assertions.assertNotNull(defaultStateMachineConfig.getExpressionResolver());
         expressionFactoryManager.setExpressionFactoryMap(expressionFactoryMap);
         defaultStateMachineConfig.setExpressionFactoryManager(expressionFactoryManager);
-        ExpressionFactory retrievedFactory = defaultStateMachineConfig.getExpressionFactoryManager()
-            .getExpressionFactory("type");
+        ExpressionFactory retrievedFactory =
+                defaultStateMachineConfig.getExpressionFactoryManager().getExpressionFactory("type");
         String mockValue = "mock";
-        Assertions.assertEquals(mockValue, retrievedFactory.createExpression(mockValue).getExpressionString());
-
+        Assertions.assertEquals(
+                mockValue, retrievedFactory.createExpression(mockValue).getExpressionString());
     }
 
     @Test
@@ -116,20 +111,24 @@ public class DefaultStateMachineConfigTest {
         String mockStateMachineName = "mockStateMachine";
         StateMachine mockStateMachine = mock(StateMachine.class);
         when(mockStateMachine.getName()).thenReturn(mockStateMachineName);
-        org.apache.seata.saga.engine.repo.StateMachineRepository sateMachineRepository = mock(
-            org.apache.seata.saga.engine.repo.StateMachineRepository.class);
-        when(sateMachineRepository.getStateMachine(mockStateMachineName, "", "")).thenReturn(mockStateMachine);
+        org.apache.seata.saga.engine.repo.StateMachineRepository sateMachineRepository =
+                mock(org.apache.seata.saga.engine.repo.StateMachineRepository.class);
+        when(sateMachineRepository.getStateMachine(mockStateMachineName, "", ""))
+                .thenReturn(mockStateMachine);
         when(sateMachineRepository.getStateMachine(mockStateMachineName, "")).thenReturn(mockStateMachine);
         when(sateMachineRepository.getStateMachineById(mockStateMachineName)).thenReturn(mockStateMachine);
         defaultStateMachineConfig.setStateMachineRepository(sateMachineRepository);
         StateMachineRepository getRepository = defaultStateMachineConfig.getStateMachineRepository();
         Assertions.assertNotNull(getRepository);
-        Assertions.assertEquals(mockStateMachineName,
-            getRepository.getStateMachineById(mockStateMachineName).getName());
-        Assertions.assertEquals(mockStateMachineName,
-            getRepository.getStateMachine(mockStateMachineName, "").getName());
-        Assertions.assertEquals(mockStateMachineName,
-            getRepository.getStateMachine(mockStateMachineName, "", "").getName());
+        Assertions.assertEquals(
+                mockStateMachineName,
+                getRepository.getStateMachineById(mockStateMachineName).getName());
+        Assertions.assertEquals(
+                mockStateMachineName,
+                getRepository.getStateMachine(mockStateMachineName, "").getName());
+        Assertions.assertEquals(
+                mockStateMachineName,
+                getRepository.getStateMachine(mockStateMachineName, "", "").getName());
     }
 
     @Test
@@ -137,8 +136,8 @@ public class DefaultStateMachineConfigTest {
         defaultStateMachineConfig.setStateLogRepository(null);
         assertNotNull(defaultStateMachineConfig.getStateLogRepository());
 
-        org.apache.seata.saga.engine.repo.StateLogRepository mockStateLogRepository = mock(
-            org.apache.seata.saga.engine.repo.StateLogRepository.class);
+        org.apache.seata.saga.engine.repo.StateLogRepository mockStateLogRepository =
+                mock(org.apache.seata.saga.engine.repo.StateLogRepository.class);
         defaultStateMachineConfig.setStateLogRepository(mockStateLogRepository);
         StateInstance mockStateInstance = mock(StateInstance.class);
         StateMachineInstance mockStateMachineInstance = mock(StateMachineInstance.class);
@@ -148,19 +147,29 @@ public class DefaultStateMachineConfigTest {
         when(mockStateMachineInstance.getBusinessKey()).thenReturn("key");
         String mockStateMachineInstanceName = "mockStateMachineInstanceId";
         when(mockStateInstance.getName()).thenReturn(mockStateInstanceName);
-        when(mockStateLogRepository.getStateInstance(mockStateMachineInstanceName, "")).thenReturn(mockStateInstance);
-        when(mockStateLogRepository.getStateMachineInstance(mockStateMachineInstanceName)).thenReturn(
-            mockStateMachineInstance);
-        when(mockStateLogRepository.getStateMachineInstanceByBusinessKey("key", "")).thenReturn(
-            mockStateMachineInstance);
+        when(mockStateLogRepository.getStateInstance(mockStateMachineInstanceName, ""))
+                .thenReturn(mockStateInstance);
+        when(mockStateLogRepository.getStateMachineInstance(mockStateMachineInstanceName))
+                .thenReturn(mockStateMachineInstance);
+        when(mockStateLogRepository.getStateMachineInstanceByBusinessKey("key", ""))
+                .thenReturn(mockStateMachineInstance);
         StateLogRepository getStateLogRepository = defaultStateMachineConfig.getStateLogRepository();
         Assertions.assertNotNull(getStateLogRepository);
-        Assertions.assertEquals(mockStateInstanceName,
-            getStateLogRepository.getStateInstance(mockStateMachineInstanceName, "").getName());
-        Assertions.assertEquals(mockMachineId,
-            getStateLogRepository.getStateMachineInstance(mockStateMachineInstanceName).getMachineId());
-        Assertions.assertEquals("key",
-            getStateLogRepository.getStateMachineInstanceByBusinessKey("key", "").getBusinessKey());
+        Assertions.assertEquals(
+                mockStateInstanceName,
+                getStateLogRepository
+                        .getStateInstance(mockStateMachineInstanceName, "")
+                        .getName());
+        Assertions.assertEquals(
+                mockMachineId,
+                getStateLogRepository
+                        .getStateMachineInstance(mockStateMachineInstanceName)
+                        .getMachineId());
+        Assertions.assertEquals(
+                "key",
+                getStateLogRepository
+                        .getStateMachineInstanceByBusinessKey("key", "")
+                        .getBusinessKey());
     }
 
     @Test
@@ -175,8 +184,8 @@ public class DefaultStateMachineConfigTest {
 
     @Test
     public void testAsyncProcessCtrlEventPublisher() {
-        ProcessCtrlEventPublisher asyncProcessCtrlEventPublisher
-            = defaultStateMachineConfig.getAsyncProcessCtrlEventPublisher();
+        ProcessCtrlEventPublisher asyncProcessCtrlEventPublisher =
+                defaultStateMachineConfig.getAsyncProcessCtrlEventPublisher();
         Assertions.assertNull(asyncProcessCtrlEventPublisher);
 
         defaultStateMachineConfig.setAsyncProcessCtrlEventPublisher(new ProcessCtrlEventPublisher());
@@ -205,8 +214,8 @@ public class DefaultStateMachineConfigTest {
     public void testServiceInvokerManager() {
         Assertions.assertNull(defaultStateMachineConfig.getServiceInvokerManager());
 
-        org.apache.seata.saga.engine.invoker.ServiceInvokerManager serviceInvokerManager = mock(
-            org.apache.seata.saga.engine.invoker.ServiceInvokerManager.class);
+        org.apache.seata.saga.engine.invoker.ServiceInvokerManager serviceInvokerManager =
+                mock(org.apache.seata.saga.engine.invoker.ServiceInvokerManager.class);
         defaultStateMachineConfig.setServiceInvokerManager(serviceInvokerManager);
         Assertions.assertEquals(serviceInvokerManager, defaultStateMachineConfig.getServiceInvokerManager());
     }

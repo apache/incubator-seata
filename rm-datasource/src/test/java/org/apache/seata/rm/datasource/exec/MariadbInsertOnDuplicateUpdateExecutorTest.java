@@ -16,10 +16,18 @@
  */
 package org.apache.seata.rm.datasource.exec;
 
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
+import org.apache.seata.common.exception.NotSupportYetException;
+import org.apache.seata.rm.datasource.ConnectionProxy;
+import org.apache.seata.rm.datasource.PreparedStatementProxy;
+import org.apache.seata.rm.datasource.exec.mariadb.MariadbInsertOnDuplicateUpdateExecutor;
+import org.apache.seata.rm.datasource.sql.struct.TableRecords;
+import org.apache.seata.sqlparser.SQLInsertRecognizer;
+import org.apache.seata.sqlparser.struct.TableMeta;
+import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -29,21 +37,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.seata.rm.datasource.exec.StatementCallback;
-import org.apache.seata.rm.datasource.exec.mariadb.MariadbInsertOnDuplicateUpdateExecutor;
-import org.apache.seata.sqlparser.struct.TableMeta;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-
-import org.apache.seata.common.exception.NotSupportYetException;
-import org.apache.seata.rm.datasource.ConnectionProxy;
-import org.apache.seata.rm.datasource.PreparedStatementProxy;
-import org.apache.seata.rm.datasource.sql.struct.TableRecords;
-import org.apache.seata.sqlparser.SQLInsertRecognizer;
-import org.apache.seata.sqlparser.util.JdbcConstants;
-
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class MariadbInsertOnDuplicateUpdateExecutorTest extends MySQLInsertOnDuplicateUpdateExecutorTest {
 
@@ -61,9 +57,10 @@ public class MariadbInsertOnDuplicateUpdateExecutorTest extends MySQLInsertOnDup
         StatementCallback statementCallback = mock(StatementCallback.class);
         sqlInsertRecognizer = mock(SQLInsertRecognizer.class);
         tableMeta = mock(TableMeta.class);
-        insertOrUpdateExecutor = Mockito.spy(new MariadbInsertOnDuplicateUpdateExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
+        insertOrUpdateExecutor = Mockito.spy(
+                new MariadbInsertOnDuplicateUpdateExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
 
-        pkIndexMap = new HashMap<String,Integer>(){
+        pkIndexMap = new HashMap<String, Integer>() {
             {
                 put(ID_COLUMN, pkIndex);
             }
@@ -72,53 +69,60 @@ public class MariadbInsertOnDuplicateUpdateExecutorTest extends MySQLInsertOnDup
 
     @Test
     @Override
-    public void TestBuildImageParameters(){
+    public void TestBuildImageParameters() {
         mockParameters();
         List<List<Object>> rows = new ArrayList<>();
-        rows.add(Arrays.asList("?","?","?","?"));
-        rows.add(Arrays.asList("?","?","?","?"));
+        rows.add(Arrays.asList("?", "?", "?", "?"));
+        rows.add(Arrays.asList("?", "?", "?", "?"));
         when(sqlInsertRecognizer.getInsertRows(pkIndexMap.values())).thenReturn(rows);
         mockInsertColumns();
         doReturn(pkIndexMap).when(insertOrUpdateExecutor).getPkIndex();
-        Map<String, ArrayList<Object>> imageParameterMap = insertOrUpdateExecutor.buildImageParameters(sqlInsertRecognizer);
-        Assertions.assertEquals(imageParameterMap.toString(),mockImageParameterMap().toString());
+        Map<String, ArrayList<Object>> imageParameterMap =
+                insertOrUpdateExecutor.buildImageParameters(sqlInsertRecognizer);
+        Assertions.assertEquals(
+                imageParameterMap.toString(), mockImageParameterMap().toString());
     }
 
     @Test
     @Override
-    public void TestBuildImageParameters_contain_constant(){
+    public void TestBuildImageParameters_contain_constant() {
         mockImageParameterMap_contain_constant();
         List<List<Object>> insertRows = new ArrayList<>();
-        insertRows.add(Arrays.asList("?","?","?","userStatus1"));
-        insertRows.add(Arrays.asList("?","?","?","userStatus2"));
+        insertRows.add(Arrays.asList("?", "?", "?", "userStatus1"));
+        insertRows.add(Arrays.asList("?", "?", "?", "userStatus2"));
         when(sqlInsertRecognizer.getInsertRows(pkIndexMap.values())).thenReturn(insertRows);
         mockInsertColumns();
         doReturn(pkIndexMap).when(insertOrUpdateExecutor).getPkIndex();
-        Map<String, ArrayList<Object>> imageParameterMap = insertOrUpdateExecutor.buildImageParameters(sqlInsertRecognizer);
-        Assertions.assertEquals(imageParameterMap.toString(),mockImageParameterMap().toString());
+        Map<String, ArrayList<Object>> imageParameterMap =
+                insertOrUpdateExecutor.buildImageParameters(sqlInsertRecognizer);
+        Assertions.assertEquals(
+                imageParameterMap.toString(), mockImageParameterMap().toString());
     }
 
     @Test
     @Override
-    public void testBuildImageSQL(){
-        String selectSQLStr = "SELECT *  FROM null WHERE (user_id = ? )  OR (id = ? )  OR (user_id = ? )  OR (id = ? ) ";
+    public void testBuildImageSQL() {
+        String selectSQLStr =
+                "SELECT *  FROM null WHERE (user_id = ? )  OR (id = ? )  OR (user_id = ? )  OR (id = ? ) ";
         String paramAppenderListStr = "[[userId1, 100], [userId2, 101]]";
         mockImageParameterMap_contain_constant();
         List<List<Object>> insertRows = new ArrayList<>();
-        insertRows.add(Arrays.asList("?","?","?","userStatus1"));
-        insertRows.add(Arrays.asList("?","?","?","userStatus2"));
+        insertRows.add(Arrays.asList("?", "?", "?", "userStatus1"));
+        insertRows.add(Arrays.asList("?", "?", "?", "userStatus2"));
         when(sqlInsertRecognizer.getInsertRows(pkIndexMap.values())).thenReturn(insertRows);
         mockInsertColumns();
         mockAllIndexes();
         doReturn(pkIndexMap).when(insertOrUpdateExecutor).getPkIndex();
         String selectSQL = insertOrUpdateExecutor.buildImageSQL(tableMeta);
-        Assertions.assertEquals(selectSQLStr,selectSQL);
-        Assertions.assertEquals(paramAppenderListStr,insertOrUpdateExecutor.getParamAppenderList().toString());
+        Assertions.assertEquals(selectSQLStr, selectSQL);
+        Assertions.assertEquals(
+                paramAppenderListStr,
+                insertOrUpdateExecutor.getParamAppenderList().toString());
     }
 
     @Test
     @Override
-    public void testBeforeImage(){
+    public void testBeforeImage() {
         mockImageParameterMap_contain_constant();
         List<List<Object>> insertRows = new ArrayList<>();
         insertRows.add(Arrays.asList("?,?,?,userStatus1"));
@@ -131,16 +135,19 @@ public class MariadbInsertOnDuplicateUpdateExecutorTest extends MySQLInsertOnDup
             TableRecords tableRecords = new TableRecords();
             String selectSQL = insertOrUpdateExecutor.buildImageSQL(tableMeta);
             ArrayList<List<Object>> paramAppenderList = insertOrUpdateExecutor.getParamAppenderList();
-            doReturn(tableRecords).when(insertOrUpdateExecutor).buildTableRecords2(tableMeta,selectSQL,paramAppenderList, Collections.emptyList());
+            doReturn(tableRecords)
+                    .when(insertOrUpdateExecutor)
+                    .buildTableRecords2(tableMeta, selectSQL, paramAppenderList, Collections.emptyList());
             TableRecords tableRecordsResult = insertOrUpdateExecutor.beforeImage();
-            Assertions.assertEquals(tableRecords,tableRecordsResult);
+            Assertions.assertEquals(tableRecords, tableRecordsResult);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
     }
+
     @Test
     @Override
-    public void testBeforeImageWithNoUnique(){
+    public void testBeforeImageWithNoUnique() {
         mockImageParameterMap_contain_constant();
         List<List<Object>> insertRows = new ArrayList<>();
         insertRows.add(Arrays.asList("?,?,?,userStatus1"));
@@ -153,5 +160,4 @@ public class MariadbInsertOnDuplicateUpdateExecutorTest extends MySQLInsertOnDup
             insertOrUpdateExecutor.beforeImage();
         });
     }
-
 }

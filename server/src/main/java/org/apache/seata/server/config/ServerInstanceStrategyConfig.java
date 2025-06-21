@@ -37,5 +37,4 @@ public class ServerInstanceStrategyConfig {
         }
         return new GeneralInstanceStrategy();
     }
-
 }

@@ -16,13 +16,13 @@
  */
 package org.apache.seata.server.limit.ratelimit;
 
+import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.XID;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.util.NumberUtils;
 import org.apache.seata.config.CachedConfigurationChangeListener;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationChangeEvent;
-import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.exception.TransactionExceptionCode;
 import org.apache.seata.core.protocol.MessageType;
@@ -80,10 +80,14 @@ public class RateLimiterHandler extends AbstractTransactionRequestHandler implem
                 GlobalBeginResponse response = new GlobalBeginResponse();
                 response.setTransactionExceptionCode(TransactionExceptionCode.BeginFailed);
                 response.setResultCode(ResultCode.Failed);
-                RateLimitInfo rateLimitInfo = RateLimitInfo.generateRateLimitInfo(context.getApplicationId(),
-                        RateLimitInfo.GLOBAL_BEGIN_FAILED, context.getClientId(), XID.getIpAddressAndPort());
+                RateLimitInfo rateLimitInfo = RateLimitInfo.generateRateLimitInfo(
+                        context.getApplicationId(),
+                        RateLimitInfo.GLOBAL_BEGIN_FAILED,
+                        context.getClientId(),
+                        XID.getIpAddressAndPort());
                 MetricsPublisher.postRateLimitEvent(rateLimitInfo);
-                response.setMsg(String.format("TransactionException[rate limit exception, rate limit info: %s]", rateLimitInfo));
+                response.setMsg(String.format(
+                        "TransactionException[rate limit exception, rate limit info: %s]", rateLimitInfo));
                 return response;
             }
         }

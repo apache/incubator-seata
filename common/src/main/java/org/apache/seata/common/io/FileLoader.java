@@ -55,16 +55,14 @@ public class FileLoader {
         URL resourceUrl = FileLoader.class.getClassLoader().getResource("");
         String[] tryPaths;
         if (resourceUrl != null) {
-            tryPaths = new String[]{
+            tryPaths = new String[] {
                 // first: project dir
                 resourceUrl.getPath() + decodedPath,
                 // second: system path
                 decodedPath
             };
         } else {
-            tryPaths = new String[]{
-                decodedPath
-            };
+            tryPaths = new String[] {decodedPath};
         }
 
         for (String tryPath : tryPaths) {
@@ -76,5 +74,4 @@ public class FileLoader {
 
         return null;
     }
-
 }

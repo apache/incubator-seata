@@ -16,12 +16,6 @@
  */
 package org.apache.seata.metrics.registry.compact;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Supplier;
-
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.metrics.Counter;
@@ -29,9 +23,15 @@ import org.apache.seata.metrics.Gauge;
 import org.apache.seata.metrics.Id;
 import org.apache.seata.metrics.Measurement;
 import org.apache.seata.metrics.Meter;
-import org.apache.seata.metrics.registry.Registry;
 import org.apache.seata.metrics.Summary;
 import org.apache.seata.metrics.Timer;
+import org.apache.seata.metrics.registry.Registry;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 
 /**
  * Compact Registry implement, this registry only compute all Measurements when call measure method and do not cache
@@ -43,26 +43,28 @@ public class CompactRegistry implements Registry {
 
     @Override
     public <T extends Number> Gauge<T> getGauge(Id id, Supplier<T> supplier) {
-        return (Gauge<T>)CollectionUtils.computeIfAbsent(METERS, id.getMeterKey(), key -> new CompactGauge<>(
-                new Id(id.getName()).withTag(id.getTags()), supplier));
+        return (Gauge<T>) CollectionUtils.computeIfAbsent(
+                METERS,
+                id.getMeterKey(),
+                key -> new CompactGauge<>(new Id(id.getName()).withTag(id.getTags()), supplier));
     }
 
     @Override
     public Counter getCounter(Id id) {
-        return (Counter)CollectionUtils.computeIfAbsent(METERS, id.getMeterKey(), key -> new CompactCounter(
-                new Id(id.getName()).withTag(id.getTags())));
+        return (Counter) CollectionUtils.computeIfAbsent(
+                METERS, id.getMeterKey(), key -> new CompactCounter(new Id(id.getName()).withTag(id.getTags())));
     }
 
     @Override
     public Summary getSummary(Id id) {
-        return (Summary)CollectionUtils.computeIfAbsent(METERS, id.getMeterKey(), key -> new CompactSummary(
-                new Id(id.getName()).withTag(id.getTags())));
+        return (Summary) CollectionUtils.computeIfAbsent(
+                METERS, id.getMeterKey(), key -> new CompactSummary(new Id(id.getName()).withTag(id.getTags())));
     }
 
     @Override
     public Timer getTimer(Id id) {
-        return (Timer)CollectionUtils.computeIfAbsent(METERS, id.getMeterKey(), key -> new CompactTimer(
-                new Id(id.getName()).withTag(id.getTags())));
+        return (Timer) CollectionUtils.computeIfAbsent(
+                METERS, id.getMeterKey(), key -> new CompactTimer(new Id(id.getName()).withTag(id.getTags())));
     }
 
     @Override
@@ -71,8 +73,7 @@ public class CompactRegistry implements Registry {
         if (METERS.isEmpty()) {
             return measurements;
         }
-        METERS.values().iterator()
-                .forEachRemaining(meter -> meter.measure().forEach(measurements::add));
+        METERS.values().iterator().forEachRemaining(meter -> meter.measure().forEach(measurements::add));
         return measurements;
     }
 

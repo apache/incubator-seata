@@ -16,11 +16,9 @@
  */
 package org.apache.seata.server.lock.file;
 
-import java.util.stream.Stream;
-
 import org.apache.seata.common.XID;
-import org.apache.seata.core.model.BranchType;
 import org.apache.seata.common.util.UUIDGenerator;
+import org.apache.seata.core.model.BranchType;
 import org.apache.seata.server.DynamicPortTestConfig;
 import org.apache.seata.server.lock.LockManager;
 import org.apache.seata.server.session.BranchSession;
@@ -33,8 +31,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
 
-import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
+import java.util.stream.Stream;
 
+import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 
 /**
  * The type Default lock manager impl test.
@@ -53,11 +52,9 @@ public class FileLockManagerImplTest {
 
     private static final String lockKey = "tb_1:13";
 
-
     @BeforeAll
-    public static void setup(ApplicationContext context){
+    public static void setup(ApplicationContext context) {}
 
-    }
     /**
      * Acquire lock test.
      *
@@ -103,5 +100,4 @@ public class FileLockManagerImplTest {
         branchSession.setApplicationData("{\"data\":\"test\"}");
         return Stream.of(branchSession);
     }
-
 }

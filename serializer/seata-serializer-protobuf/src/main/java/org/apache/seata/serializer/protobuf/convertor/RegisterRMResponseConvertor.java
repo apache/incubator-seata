@@ -16,47 +16,53 @@
  */
 package org.apache.seata.serializer.protobuf.convertor;
 
+import org.apache.seata.core.protocol.RegisterRMResponse;
+import org.apache.seata.core.protocol.ResultCode;
 import org.apache.seata.serializer.protobuf.generated.AbstractIdentifyResponseProto;
 import org.apache.seata.serializer.protobuf.generated.AbstractMessageProto;
 import org.apache.seata.serializer.protobuf.generated.AbstractResultMessageProto;
 import org.apache.seata.serializer.protobuf.generated.MessageTypeProto;
 import org.apache.seata.serializer.protobuf.generated.RegisterRMResponseProto;
 import org.apache.seata.serializer.protobuf.generated.ResultCodeProto;
-import org.apache.seata.core.protocol.RegisterRMResponse;
-import org.apache.seata.core.protocol.ResultCode;
-
 
 public class RegisterRMResponseConvertor implements PbConvertor<RegisterRMResponse, RegisterRMResponseProto> {
     @Override
     public RegisterRMResponseProto convert2Proto(RegisterRMResponse registerRMResponse) {
         final short typeCode = registerRMResponse.getTypeCode();
 
-        final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder().setMessageType(
-            MessageTypeProto.forNumber(typeCode)).build();
+        final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder()
+                .setMessageType(MessageTypeProto.forNumber(typeCode))
+                .build();
 
         final String msg = registerRMResponse.getMsg();
 
-        //for code
+        // for code
         if (registerRMResponse.getResultCode() == null) {
             if (registerRMResponse.isIdentified()) {
                 registerRMResponse.setResultCode(ResultCode.Success);
             } else {
                 registerRMResponse.setResultCode(ResultCode.Failed);
-
             }
         }
 
-        final AbstractResultMessageProto abstractResultMessageProto = AbstractResultMessageProto.newBuilder().setMsg(
-            msg == null ? "" : msg).setResultCode(ResultCodeProto.valueOf(registerRMResponse.getResultCode().name()))
-            .setAbstractMessage(abstractMessage).build();
+        final AbstractResultMessageProto abstractResultMessageProto = AbstractResultMessageProto.newBuilder()
+                .setMsg(msg == null ? "" : msg)
+                .setResultCode(ResultCodeProto.valueOf(
+                        registerRMResponse.getResultCode().name()))
+                .setAbstractMessage(abstractMessage)
+                .build();
 
         final String extraData = registerRMResponse.getExtraData();
         AbstractIdentifyResponseProto abstractIdentifyResponseProto = AbstractIdentifyResponseProto.newBuilder()
-            .setAbstractResultMessage(abstractResultMessageProto).setExtraData(extraData == null ? "" : extraData)
-            .setVersion(registerRMResponse.getVersion()).setIdentified(registerRMResponse.isIdentified()).build();
+                .setAbstractResultMessage(abstractResultMessageProto)
+                .setExtraData(extraData == null ? "" : extraData)
+                .setVersion(registerRMResponse.getVersion())
+                .setIdentified(registerRMResponse.isIdentified())
+                .build();
 
-        RegisterRMResponseProto result = RegisterRMResponseProto.newBuilder().setAbstractIdentifyResponse(
-            abstractIdentifyResponseProto).build();
+        RegisterRMResponseProto result = RegisterRMResponseProto.newBuilder()
+                .setAbstractIdentifyResponse(abstractIdentifyResponseProto)
+                .build();
 
         return result;
     }
@@ -65,15 +71,18 @@ public class RegisterRMResponseConvertor implements PbConvertor<RegisterRMRespon
     public RegisterRMResponse convert2Model(RegisterRMResponseProto registerRMResponseProto) {
         RegisterRMResponse registerRMRequest = new RegisterRMResponse();
 
-        AbstractIdentifyResponseProto abstractIdentifyRequestProto = registerRMResponseProto
-            .getAbstractIdentifyResponse();
+        AbstractIdentifyResponseProto abstractIdentifyRequestProto =
+                registerRMResponseProto.getAbstractIdentifyResponse();
         registerRMRequest.setExtraData(abstractIdentifyRequestProto.getExtraData());
         registerRMRequest.setVersion(abstractIdentifyRequestProto.getVersion());
         registerRMRequest.setIdentified(abstractIdentifyRequestProto.getIdentified());
 
-        registerRMRequest.setMsg(abstractIdentifyRequestProto.getAbstractResultMessage().getMsg());
-        registerRMRequest.setResultCode(
-            ResultCode.valueOf(abstractIdentifyRequestProto.getAbstractResultMessage().getResultCode().name()));
+        registerRMRequest.setMsg(
+                abstractIdentifyRequestProto.getAbstractResultMessage().getMsg());
+        registerRMRequest.setResultCode(ResultCode.valueOf(abstractIdentifyRequestProto
+                .getAbstractResultMessage()
+                .getResultCode()
+                .name()));
 
         return registerRMRequest;
     }

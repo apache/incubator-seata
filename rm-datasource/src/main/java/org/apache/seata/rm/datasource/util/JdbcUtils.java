@@ -30,11 +30,10 @@ import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
 
-
 public final class JdbcUtils {
 
     private static volatile DbTypeParser dbTypeParser;
-    private final static ResourceLock RESOURCE_LOCK = new ResourceLock();
+    private static final ResourceLock RESOURCE_LOCK = new ResourceLock();
 
     static DbTypeParser getDbTypeParser() {
         if (dbTypeParser == null) {
@@ -47,8 +46,7 @@ public final class JdbcUtils {
         return dbTypeParser;
     }
 
-    private JdbcUtils() {
-    }
+    private JdbcUtils() {}
 
     public static String getDbType(String jdbcUrl) {
         return getDbTypeParser().parseFromJdbcUrl(jdbcUrl).toLowerCase();
@@ -61,7 +59,8 @@ public final class JdbcUtils {
      * @param dataSource the DataSource instance
      * @param resourceGroupId the given resource group ID
      */
-    public static void initDataSourceResource(BaseDataSourceResource dataSourceResource, DataSource dataSource, String resourceGroupId) {
+    public static void initDataSourceResource(
+            BaseDataSourceResource dataSourceResource, DataSource dataSource, String resourceGroupId) {
         dataSourceResource.setResourceGroupId(resourceGroupId);
         try (Connection connection = dataSource.getConnection()) {
             String jdbcUrl = connection.getMetaData().getURL();
@@ -75,7 +74,8 @@ public final class JdbcUtils {
         DefaultResourceManager.get().registerResource(dataSourceResource);
     }
 
-    public static void initXADataSourceResource(BaseDataSourceResource dataSourceResource, XADataSource dataSource, String resourceGroupId) {
+    public static void initXADataSourceResource(
+            BaseDataSourceResource dataSourceResource, XADataSource dataSource, String resourceGroupId) {
         dataSourceResource.setResourceGroupId(resourceGroupId);
         try {
             XAConnection xaConnection = dataSource.getXAConnection();
@@ -123,7 +123,7 @@ public final class JdbcUtils {
         }
 
         try {
-            return (Driver)clazz.newInstance();
+            return (Driver) clazz.newInstance();
         } catch (IllegalAccessException | InstantiationException e) {
             throw new SQLException(e.getMessage(), e);
         }

@@ -57,7 +57,7 @@ public class LoadBalancePropertiesTest {
     public void testLoadBalanceProperties() {
         FileConfiguration configuration = mock(FileConfiguration.class);
         Configuration currentConfiguration =
-            EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
+                EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
         System.setProperty("seata.client.loadBalance.virtualNodes", "30");
         assertEquals(30, currentConfiguration.getInt("client.loadBalance.virtualNodes"));
         System.setProperty("seata.client.loadBalance.type", "test");

@@ -16,11 +16,11 @@
  */
 package org.apache.seata.core.rpc;
 
-import java.util.PriorityQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.PriorityQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * ensure the shutdownHook is singleton
@@ -117,4 +117,3 @@ public class ShutdownHook extends Thread {
         }
     }
 }
-

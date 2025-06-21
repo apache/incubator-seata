@@ -30,8 +30,7 @@ public abstract class AbstractTransactionRequestHandler {
      */
     protected AbstractTransactionRequestHandler abstractTransactionRequestHandler;
 
-    public AbstractTransactionRequestHandler() {
-    }
+    public AbstractTransactionRequestHandler() {}
 
     /**
      * next handler handle
@@ -45,7 +44,8 @@ public abstract class AbstractTransactionRequestHandler {
         return originRequest.handle(context);
     }
 
-    public abstract AbstractTransactionResponse handle(AbstractTransactionRequestToTC originRequest, RpcContext context);
+    public abstract AbstractTransactionResponse handle(
+            AbstractTransactionRequestToTC originRequest, RpcContext context);
 
     public void setTransactionRequestLimitHandler(AbstractTransactionRequestHandler abstractTransactionRequestHandler) {
         this.abstractTransactionRequestHandler = abstractTransactionRequestHandler;

@@ -16,15 +16,15 @@
  */
 package org.apache.seata.sqlparser.struct;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class IndexMetaTest {
     @Test
@@ -268,8 +268,7 @@ public class IndexMetaTest {
         columnMeta2.setCaseSensitive(false);
 
         // Check if hash codes are different for different objects
-        assertNotEquals(columnMeta1.hashCode(), columnMeta2.hashCode(),
-                "Hash codes should be different for non-equal objects");
+        assertNotEquals(
+                columnMeta1.hashCode(), columnMeta2.hashCode(), "Hash codes should be different for non-equal objects");
     }
-
 }

@@ -76,19 +76,21 @@ public class MultiProtocolDecoder extends LengthFieldBasedFrameDecoder {
 
     public MultiProtocolDecoder(int maxFrameLength, ChannelHandler[] channelHandlers) {
         /*
-        int maxFrameLength,      
+        int maxFrameLength,
         int lengthFieldOffset,  magic code is 2B, and version is 1B, and then FullLength. so value is 3
         int lengthFieldLength,  FullLength is int(4B). so values is 4
         int lengthAdjustment,   FullLength include all data and read 7 bytes before, so the left length is (FullLength-7). so values is -7
         int initialBytesToStrip we will check magic code and version self, so do not strip any bytes. so values is 0
         */
         super(maxFrameLength, 3, 4, -7, 0);
-        this.protocolDecoderMap =
-                ImmutableMap.<Byte, ProtocolDecoder>builder().put(ProtocolConstants.VERSION_0, new ProtocolDecoderV0())
-                        .put(ProtocolConstants.VERSION_1, new ProtocolDecoderV1()).build();
-        this.protocolEncoderMap =
-                ImmutableMap.<Byte, ProtocolEncoder>builder().put(ProtocolConstants.VERSION_0, new ProtocolEncoderV0())
-                        .put(ProtocolConstants.VERSION_1, new ProtocolEncoderV1()).build();
+        this.protocolDecoderMap = ImmutableMap.<Byte, ProtocolDecoder>builder()
+                .put(ProtocolConstants.VERSION_0, new ProtocolDecoderV0())
+                .put(ProtocolConstants.VERSION_1, new ProtocolDecoderV1())
+                .build();
+        this.protocolEncoderMap = ImmutableMap.<Byte, ProtocolEncoder>builder()
+                .put(ProtocolConstants.VERSION_0, new ProtocolEncoderV0())
+                .put(ProtocolConstants.VERSION_1, new ProtocolEncoderV1())
+                .build();
         this.channelHandlers = channelHandlers;
     }
 
@@ -110,12 +112,18 @@ public class MultiProtocolDecoder extends LengthFieldBasedFrameDecoder {
                 frame = (ByteBuf) decoded;
                 ProtocolDecoder decoder = protocolDecoderMap.get(version);
                 if (decoder == null) {
-                    LOGGER.error("Decoder not found, version={}, use current version({})", version,ProtocolConstants.VERSION);
+                    LOGGER.error(
+                            "Decoder not found, version={}, use current version({})",
+                            version,
+                            ProtocolConstants.VERSION);
                     decoder = protocolDecoderMap.get(ProtocolConstants.VERSION);
                 }
                 ProtocolEncoder encoder = protocolEncoderMap.get(version);
                 if (encoder == null) {
-                    LOGGER.error("Encoder not found, version: {}, use current version({})", version,ProtocolConstants.VERSION);
+                    LOGGER.error(
+                            "Encoder not found, version: {}, use current version({})",
+                            version,
+                            ProtocolConstants.VERSION);
                     encoder = protocolEncoderMap.get(ProtocolConstants.VERSION);
                 }
                 try {
@@ -148,8 +156,7 @@ public class MultiProtocolDecoder extends LengthFieldBasedFrameDecoder {
             frame.markReaderIndex();
             byte b0 = frame.readByte();
             byte b1 = frame.readByte();
-            if (ProtocolConstants.MAGIC_CODE_BYTES[0] != b0
-                    || ProtocolConstants.MAGIC_CODE_BYTES[1] != b1) {
+            if (ProtocolConstants.MAGIC_CODE_BYTES[0] != b0 || ProtocolConstants.MAGIC_CODE_BYTES[1] != b1) {
                 throw new IllegalArgumentException("Unknown magic code: " + b0 + ", " + b1);
             }
 
@@ -160,7 +167,6 @@ public class MultiProtocolDecoder extends LengthFieldBasedFrameDecoder {
         return -1;
     }
 
-
     protected boolean isV0(ByteBuf in) {
         boolean isV0 = false;
         in.markReaderIndex();
@@ -169,9 +175,7 @@ public class MultiProtocolDecoder extends LengthFieldBasedFrameDecoder {
         // v1/v2/v3 : b2 = version
         // v0 : 1st byte in FLAG(2byte:0x10/0x20/0x40/0x80)
         byte b2 = in.readByte();
-        if (ProtocolConstants.MAGIC_CODE_BYTES[0] == b0
-                && ProtocolConstants.MAGIC_CODE_BYTES[1] == b1
-                && 0 == b2) {
+        if (ProtocolConstants.MAGIC_CODE_BYTES[0] == b0 && ProtocolConstants.MAGIC_CODE_BYTES[1] == b1 && 0 == b2) {
             isV0 = true;
         }
 

@@ -16,11 +16,11 @@
  */
 package org.apache.seata.saga.statelang.domain.impl;
 
-import java.util.List;
-import java.util.Map;
-
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.saga.statelang.domain.TaskState;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * The state of the execution task (abstract class), the specific task to be executed is determined by the subclass
@@ -35,7 +35,7 @@ public abstract class AbstractTaskState extends BaseState implements TaskState {
     private List<ExceptionMatch> catches;
     private List<Object> input;
     private Map<String, Object> output;
-    private Map<String, String> status;//Map<String/* expression */, String /* status */>
+    private Map<String, String> status; // Map<String/* expression */, String /* status */>
     private List<Object> inputExpressions;
     private Map<String, Object> outputExpressions;
     private boolean isPersist = true;

@@ -89,12 +89,9 @@ class ParameterParserTest {
         ObjectNode bodyNode = paramMap.putObject("body");
         bodyNode.put("field1", "value1");
         bodyNode.put("field2", "value2");
-        HttpContext httpContext = new HttpContext(null,null,false);
-        Object[] args = ParameterParser.getArgValues(
-                new ParamMetaData[]{paramMetaData},
-                method,
-                paramMap, httpContext
-        );
+        HttpContext httpContext = new HttpContext(null, null, false);
+        Object[] args =
+                ParameterParser.getArgValues(new ParamMetaData[] {paramMetaData}, method, paramMap, httpContext);
 
         assertEquals(1, args.length);
         assertNotNull(args[0]);
@@ -113,12 +110,9 @@ class ParameterParserTest {
         ObjectNode paramMap = objectMapper.createObjectNode();
         ObjectNode bodyNode = paramMap.putObject("param");
         bodyNode.put("userName", "LiHua");
-        HttpContext httpContext = new HttpContext(null,null,false);
-        Object[] args = ParameterParser.getArgValues(
-                new ParamMetaData[]{paramMetaData},
-                method,
-                paramMap, httpContext
-        );
+        HttpContext httpContext = new HttpContext(null, null, false);
+        Object[] args =
+                ParameterParser.getArgValues(new ParamMetaData[] {paramMetaData}, method, paramMap, httpContext);
 
         assertEquals(1, args.length);
         assertNotNull(args[0]);
@@ -136,12 +130,9 @@ class ParameterParserTest {
         paramMetaData.setRequired(false);
 
         ObjectNode paramMap = objectMapper.createObjectNode();
-        HttpContext httpContext = new HttpContext(null,null,false);
-        Object[] args = ParameterParser.getArgValues(
-                new ParamMetaData[]{paramMetaData},
-                method,
-                paramMap, httpContext
-        );
+        HttpContext httpContext = new HttpContext(null, null, false);
+        Object[] args =
+                ParameterParser.getArgValues(new ParamMetaData[] {paramMetaData}, method, paramMap, httpContext);
 
         assertEquals(1, args.length);
         assertNotNull(args[0]);
@@ -157,14 +148,10 @@ class ParameterParserTest {
         paramMetaData.setParamName("userName");
         paramMetaData.setDefaultValue(DEFAULT_NONE);
         paramMetaData.setRequired(true);
-        assertThrows(IllegalArgumentException.class, () ->{
+        assertThrows(IllegalArgumentException.class, () -> {
             ObjectNode paramMap = objectMapper.createObjectNode();
-            HttpContext httpContext = new HttpContext(null,null,false);
-            ParameterParser.getArgValues(
-                    new ParamMetaData[]{paramMetaData},
-                    method,
-                    paramMap, httpContext
-            );
+            HttpContext httpContext = new HttpContext(null, null, false);
+            ParameterParser.getArgValues(new ParamMetaData[] {paramMetaData}, method, paramMap, httpContext);
         });
     }
 
@@ -178,12 +165,9 @@ class ParameterParserTest {
         paramMetaData.setRequired(false);
 
         ObjectNode paramMap = objectMapper.createObjectNode();
-        HttpContext httpContext = new HttpContext(null,null,false);
-        Object[] args = ParameterParser.getArgValues(
-                new ParamMetaData[]{paramMetaData},
-                method,
-                paramMap, httpContext
-        );
+        HttpContext httpContext = new HttpContext(null, null, false);
+        Object[] args =
+                ParameterParser.getArgValues(new ParamMetaData[] {paramMetaData}, method, paramMap, httpContext);
 
         assertEquals(1, args.length);
         assertNull(args[0]);
@@ -200,11 +184,8 @@ class ParameterParserTest {
         bodyNode.put("name", "LiHua");
         bodyNode.put("age", 10);
         HttpContext httpContext = new HttpContext(null, null, false);
-        Object[] args = ParameterParser.getArgValues(
-                new ParamMetaData[]{paramMetaData},
-                method,
-                paramMap, httpContext
-        );
+        Object[] args =
+                ParameterParser.getArgValues(new ParamMetaData[] {paramMetaData}, method, paramMap, httpContext);
 
         assertEquals(1, args.length);
         assertTrue(args[0] instanceof User);
@@ -212,39 +193,32 @@ class ParameterParserTest {
         assertEquals(10, ((User) args[0]).age);
     }
 
-
     // Test support class
     class TestClass {
-        public void objectMethod(Object obj) {
-        }
+        public void objectMethod(Object obj) {}
     }
 
     // Test support classA
-    class TestClassA{
-        public void objectMethod(String userName){
-
-        }
+    class TestClassA {
+        public void objectMethod(String userName) {}
     }
 
     // Test support classB
-    class TestClassB{
-        public void objectMethod(User user){
-
-        }
+    class TestClassB {
+        public void objectMethod(User user) {}
     }
 
-    static class User{
+    static class User {
         String name;
         Integer age;
 
-        public User(){
-        }
+        public User() {}
 
-        public void setName(String name){
+        public void setName(String name) {
             this.name = name;
         }
 
-        public void setAge(Integer age){
+        public void setAge(Integer age) {
             this.age = age;
         }
     }

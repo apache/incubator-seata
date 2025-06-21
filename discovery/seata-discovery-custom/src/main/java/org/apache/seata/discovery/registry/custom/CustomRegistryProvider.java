@@ -26,7 +26,6 @@ import org.apache.seata.discovery.registry.RegistryType;
 
 import java.util.stream.Stream;
 
-
 @LoadLevel(name = "Custom")
 public class CustomRegistryProvider implements RegistryProvider {
     private static final String FILE_CONFIG_KEY_PREFIX = "registry.custom.name";
@@ -38,8 +37,7 @@ public class CustomRegistryProvider implements RegistryProvider {
         if (StringUtils.isBlank(name)) {
             throw new IllegalArgumentException("name value of custom registry type must not be blank");
         }
-        if (Stream.of(RegistryType.values())
-                .anyMatch(ct -> ct.name().equalsIgnoreCase(name))) {
+        if (Stream.of(RegistryType.values()).anyMatch(ct -> ct.name().equalsIgnoreCase(name))) {
             throw new IllegalArgumentException(String.format("custom registry type name %s is not allowed", name));
         }
         customName = name;

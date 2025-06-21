@@ -49,5 +49,4 @@ public class PutNodeInfoRequestProcessor implements RpcProcessor<PutNodeMetadata
     public String interest() {
         return PutNodeMetadataRequest.class.getName();
     }
-
 }

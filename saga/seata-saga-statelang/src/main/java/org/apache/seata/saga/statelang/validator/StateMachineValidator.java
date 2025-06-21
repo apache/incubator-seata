@@ -34,7 +34,7 @@ public class StateMachineValidator {
      */
     public void validate(StateMachine stateMachine) throws ValidationException {
         List<Rule> rules = RuleFactory.getRules();
-        for (Rule rule: rules) {
+        for (Rule rule : rules) {
             boolean pass;
             try {
                 pass = rule.validate(stateMachine);

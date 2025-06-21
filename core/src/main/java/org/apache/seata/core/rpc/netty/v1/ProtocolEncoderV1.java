@@ -19,12 +19,12 @@ package org.apache.seata.core.rpc.netty.v1;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
-import org.apache.seata.core.rpc.netty.ProtocolEncoder;
-import org.apache.seata.core.serializer.Serializer;
 import org.apache.seata.core.compressor.Compressor;
 import org.apache.seata.core.compressor.CompressorFactory;
 import org.apache.seata.core.protocol.ProtocolConstants;
 import org.apache.seata.core.protocol.RpcMessage;
+import org.apache.seata.core.rpc.netty.ProtocolEncoder;
+import org.apache.seata.core.serializer.Serializer;
 import org.apache.seata.core.serializer.SerializerServiceLoader;
 import org.apache.seata.core.serializer.SerializerType;
 import org.slf4j.Logger;
@@ -63,7 +63,6 @@ public class ProtocolEncoderV1 extends MessageToByteEncoder implements ProtocolE
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolEncoderV1.class);
 
-
     public void encode(RpcMessage message, ByteBuf out) {
         try {
             ProtocolRpcMessageV1 rpcMessage = new ProtocolRpcMessageV1();
@@ -92,9 +91,10 @@ public class ProtocolEncoderV1 extends MessageToByteEncoder implements ProtocolE
 
             byte[] bodyBytes = null;
             if (messageType != ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST
-                && messageType != ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE) {
+                    && messageType != ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE) {
                 // heartbeat has no body
-                Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(rpcMessage.getCodec()), ProtocolConstants.VERSION_1);
+                Serializer serializer = SerializerServiceLoader.load(
+                        SerializerType.getByCode(rpcMessage.getCodec()), ProtocolConstants.VERSION_1);
                 bodyBytes = serializer.serialize(rpcMessage.getBody());
                 Compressor compressor = CompressorFactory.getCompressor(rpcMessage.getCompressor());
                 bodyBytes = compressor.compress(bodyBytes);
@@ -113,7 +113,6 @@ public class ProtocolEncoderV1 extends MessageToByteEncoder implements ProtocolE
             out.writeShort(headLength);
             out.writerIndex(writeIndex);
 
-
         } catch (Throwable e) {
             LOGGER.error("Encode request error!", e);
             // todo
@@ -125,7 +124,7 @@ public class ProtocolEncoderV1 extends MessageToByteEncoder implements ProtocolE
     protected void encode(ChannelHandlerContext ctx, Object msg, ByteBuf out) throws Exception {
         try {
             if (msg instanceof RpcMessage) {
-                this.encode((RpcMessage)msg, out);
+                this.encode((RpcMessage) msg, out);
             } else {
                 throw new UnsupportedOperationException("Not support this class:" + msg.getClass());
             }
@@ -133,5 +132,4 @@ public class ProtocolEncoderV1 extends MessageToByteEncoder implements ProtocolE
             LOGGER.error("Encode request error!", e);
         }
     }
-
 }

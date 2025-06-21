@@ -36,7 +36,8 @@ class NettyBaseConfigTest {
     @Test
     void test_enum_WorkThreadMode_getModeByName() {
         for (NettyBaseConfig.WorkThreadMode value : NettyBaseConfig.WorkThreadMode.values()) {
-            Assertions.assertEquals(NettyBaseConfig.WorkThreadMode.getModeByName(value.name().toLowerCase()), value);
+            Assertions.assertEquals(
+                    NettyBaseConfig.WorkThreadMode.getModeByName(value.name().toLowerCase()), value);
         }
         Assertions.assertNull(NettyBaseConfig.WorkThreadMode.getModeByName(null));
         Assertions.assertNull(NettyBaseConfig.WorkThreadMode.getModeByName("null"));

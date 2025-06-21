@@ -16,12 +16,6 @@
  */
 package org.apache.seata.server;
 
-import java.util.Optional;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
-import javax.annotation.Resource;
 import org.apache.seata.common.XID;
 import org.apache.seata.common.holder.ObjectHolder;
 import org.apache.seata.common.thread.NamedThreadFactory;
@@ -41,6 +35,11 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
+import java.util.Optional;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGEX_SPLIT_CHAR;
@@ -61,20 +60,24 @@ public class Server {
      * @param args the input arguments
      */
     public void start(String[] args) {
-        //initialize the parameter parser
-        //Note that the parameter parser should always be the first line to execute.
-        //Because, here we need to parse the parameters needed for startup.
+        // initialize the parameter parser
+        // Note that the parameter parser should always be the first line to execute.
+        // Because, here we need to parse the parameters needed for startup.
         ParameterParser parameterParser = new ParameterParser(args);
 
-        //initialize the metrics
+        // initialize the metrics
         MetricsManager.get().init();
 
-        ThreadPoolExecutor workingThreads = new ThreadPoolExecutor(NettyServerConfig.getMinServerPoolSize(),
-                NettyServerConfig.getMaxServerPoolSize(), NettyServerConfig.getKeepAliveTime(), TimeUnit.SECONDS,
+        ThreadPoolExecutor workingThreads = new ThreadPoolExecutor(
+                NettyServerConfig.getMinServerPoolSize(),
+                NettyServerConfig.getMaxServerPoolSize(),
+                NettyServerConfig.getKeepAliveTime(),
+                TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(NettyServerConfig.getMaxTaskQueueSize()),
-                new NamedThreadFactory("ServerHandlerThread", NettyServerConfig.getMaxServerPoolSize()), new ThreadPoolExecutor.CallerRunsPolicy());
+                new NamedThreadFactory("ServerHandlerThread", NettyServerConfig.getMaxServerPoolSize()),
+                new ThreadPoolExecutor.CallerRunsPolicy());
 
-        //127.0.0.1 and 0.0.0.0 are not valid here.
+        // 127.0.0.1 and 0.0.0.0 are not valid here.
         if (NetUtil.isValidIp(parameterParser.getHost(), false)) {
             XID.setIpAddress(parameterParser.getHost());
         } else {
@@ -88,9 +91,9 @@ public class Server {
         NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
         XID.setPort(nettyRemotingServer.getListenPort());
         UUIDGenerator.init(parameterParser.getServerNode());
-        ConfigurableListableBeanFactory beanFactory =
-                ((ConfigurableApplicationContext) ObjectHolder.INSTANCE
-                        .getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT)).getBeanFactory();
+        ConfigurableListableBeanFactory beanFactory = ((ConfigurableApplicationContext)
+                        ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
+                .getBeanFactory();
         DefaultCoordinator coordinator = DefaultCoordinator.getInstance(nettyRemotingServer);
         if (coordinator instanceof ApplicationListener) {
             beanFactory.registerSingleton(NettyRemotingServer.class.getName(), nettyRemotingServer);
@@ -98,7 +101,7 @@ public class Server {
             ((ConfigurableApplicationContext) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
                     .addApplicationListener((ApplicationListener<?>) coordinator);
         }
-        //log store mode : file, db, redis
+        // log store mode : file, db, redis
         SessionHolder.init();
         LockerManagerFactory.init();
         coordinator.init();

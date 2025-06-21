@@ -31,7 +31,8 @@ public class TransactionExceptionCodeTest {
     @Test
     public void testDeprecatedAnnotation() {
         // Test that TransactionExceptionCode is marked as @Deprecated
-        assertTrue(TransactionExceptionCode.class.isAnnotationPresent(Deprecated.class),
+        assertTrue(
+                TransactionExceptionCode.class.isAnnotationPresent(Deprecated.class),
                 "TransactionExceptionCode should be marked as @Deprecated");
     }
 
@@ -68,16 +69,15 @@ public class TransactionExceptionCodeTest {
     public void testEnumOrdinals() {
         // Test that ordinals are consistent (important for serialization)
         TransactionExceptionCode[] values = TransactionExceptionCode.values();
-        
+
         assertEquals(0, TransactionExceptionCode.Unknown.ordinal());
         assertEquals(1, TransactionExceptionCode.BeginFailed.ordinal());
         assertEquals(2, TransactionExceptionCode.LockKeyConflict.ordinal());
         assertEquals(3, TransactionExceptionCode.IO.ordinal());
-        
+
         // Test that ordinals are sequential
         for (int i = 0; i < values.length; i++) {
-            assertEquals(i, values[i].ordinal(),
-                    "Ordinal should be sequential for index: " + i);
+            assertEquals(i, values[i].ordinal(), "Ordinal should be sequential for index: " + i);
         }
     }
 
@@ -85,10 +85,9 @@ public class TransactionExceptionCodeTest {
     public void testGetByIntOrdinal() {
         // Test getting exception code by int ordinal
         TransactionExceptionCode[] values = TransactionExceptionCode.values();
-        
+
         for (int i = 0; i < values.length; i++) {
-            assertEquals(values[i], TransactionExceptionCode.get(i),
-                    "Should get correct enum value for ordinal: " + i);
+            assertEquals(values[i], TransactionExceptionCode.get(i), "Should get correct enum value for ordinal: " + i);
         }
     }
 
@@ -104,11 +103,16 @@ public class TransactionExceptionCodeTest {
     @Test
     public void testGetInvalidOrdinal() {
         // Test that invalid ordinals throw IllegalArgumentException
-        assertThrows(IllegalArgumentException.class, () -> TransactionExceptionCode.get(-1),
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> TransactionExceptionCode.get(-1),
                 "Should throw IllegalArgumentException for negative ordinal");
-        assertThrows(IllegalArgumentException.class, () -> TransactionExceptionCode.get(100),
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> TransactionExceptionCode.get(100),
                 "Should throw IllegalArgumentException for ordinal > max value");
-        assertThrows(IllegalArgumentException.class, 
+        assertThrows(
+                IllegalArgumentException.class,
                 () -> TransactionExceptionCode.get(TransactionExceptionCode.values().length),
                 "Should throw IllegalArgumentException for ordinal >= values length");
     }
@@ -117,10 +121,11 @@ public class TransactionExceptionCodeTest {
     public void testConvertTransactionExceptionCode() {
         // Test conversion to Apache Seata TransactionExceptionCode
         for (TransactionExceptionCode code : TransactionExceptionCode.values()) {
-            org.apache.seata.core.exception.TransactionExceptionCode converted = 
-                    code.convertTransactionExceptionCode();
+            org.apache.seata.core.exception.TransactionExceptionCode converted = code.convertTransactionExceptionCode();
             assertNotNull(converted, "Converted exception code should not be null for: " + code);
-            assertEquals(code.ordinal(), converted.ordinal(),
+            assertEquals(
+                    code.ordinal(),
+                    converted.ordinal(),
                     "Converted exception code should have same ordinal for: " + code);
         }
     }
@@ -139,7 +144,8 @@ public class TransactionExceptionCodeTest {
         assertEquals("BeginFailed", TransactionExceptionCode.BeginFailed.name());
         assertEquals("LockKeyConflict", TransactionExceptionCode.LockKeyConflict.name());
         assertEquals("BranchRollbackFailed_Retriable", TransactionExceptionCode.BranchRollbackFailed_Retriable.name());
-        assertEquals("BranchRollbackFailed_Unretriable", TransactionExceptionCode.BranchRollbackFailed_Unretriable.name());
+        assertEquals(
+                "BranchRollbackFailed_Unretriable", TransactionExceptionCode.BranchRollbackFailed_Unretriable.name());
         assertEquals("GlobalTransactionNotExist", TransactionExceptionCode.GlobalTransactionNotExist.name());
         assertEquals("TransactionTimeout", TransactionExceptionCode.TransactionTimeout.name());
     }
@@ -147,28 +153,28 @@ public class TransactionExceptionCodeTest {
     @Test
     public void testExceptionCodeCategories() {
         // Test that different categories of exceptions exist
-        
+
         // Connection/IO related
         assertNotNull(TransactionExceptionCode.IO);
         assertNotNull(TransactionExceptionCode.FailedWriteSession);
         assertNotNull(TransactionExceptionCode.FailedStore);
-        
+
         // Transaction lifecycle
         assertNotNull(TransactionExceptionCode.BeginFailed);
         assertNotNull(TransactionExceptionCode.TransactionTimeout);
         assertNotNull(TransactionExceptionCode.CommitHeuristic);
-        
+
         // Branch operations
         assertNotNull(TransactionExceptionCode.BranchRegisterFailed);
         assertNotNull(TransactionExceptionCode.BranchReportFailed);
         assertNotNull(TransactionExceptionCode.BranchRollbackFailed_Retriable);
         assertNotNull(TransactionExceptionCode.BranchRollbackFailed_Unretriable);
-        
+
         // Lock operations
         assertNotNull(TransactionExceptionCode.LockKeyConflict);
         assertNotNull(TransactionExceptionCode.LockKeyConflictFailFast);
         assertNotNull(TransactionExceptionCode.LockableCheckFailed);
-        
+
         // Global transaction states
         assertNotNull(TransactionExceptionCode.GlobalTransactionNotExist);
         assertNotNull(TransactionExceptionCode.GlobalTransactionNotActive);
@@ -188,14 +194,13 @@ public class TransactionExceptionCodeTest {
     public void testBidirectionalCompatibility() {
         // Test that conversion is bidirectional compatible
         for (TransactionExceptionCode originalCode : TransactionExceptionCode.values()) {
-            org.apache.seata.core.exception.TransactionExceptionCode apacheCode = 
+            org.apache.seata.core.exception.TransactionExceptionCode apacheCode =
                     originalCode.convertTransactionExceptionCode();
-            
+
             // Convert back using ordinal
             TransactionExceptionCode backConverted = TransactionExceptionCode.get(apacheCode.ordinal());
-            
-            assertEquals(originalCode, backConverted,
-                    "Bidirectional conversion should work for: " + originalCode);
+
+            assertEquals(originalCode, backConverted, "Bidirectional conversion should work for: " + originalCode);
         }
     }
-} 
+}

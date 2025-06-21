@@ -21,11 +21,9 @@ import java.io.OutputStream;
 import java.sql.Blob;
 import java.sql.SQLException;
 
-
 public class MockBlob implements Blob {
 
-    public MockBlob() {
-    }
+    public MockBlob() {}
 
     @Override
     public long length() throws SQLException {
@@ -68,14 +66,10 @@ public class MockBlob implements Blob {
     }
 
     @Override
-    public void truncate(long len) throws SQLException {
-
-    }
+    public void truncate(long len) throws SQLException {}
 
     @Override
-    public void free() throws SQLException {
-
-    }
+    public void free() throws SQLException {}
 
     @Override
     public InputStream getBinaryStream(long pos, long length) throws SQLException {

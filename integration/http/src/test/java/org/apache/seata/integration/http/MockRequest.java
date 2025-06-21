@@ -23,7 +23,6 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-
 public class MockRequest {
     private String url;
     private Map<String, String> header = new HashMap<>();
@@ -47,7 +46,7 @@ public class MockRequest {
         return path;
     }
 
-    public MockRequest(String url, Map<String, String> header, String body, String path,String method) {
+    public MockRequest(String url, Map<String, String> header, String body, String path, String method) {
 
         this.url = url;
         this.header = header;
@@ -82,6 +81,4 @@ public class MockRequest {
     public String getUrl() {
         return url;
     }
-
-
 }

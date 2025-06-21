@@ -23,5 +23,4 @@ import org.apache.seata.common.loader.LoadLevel;
  *
  */
 @LoadLevel(name = "polardb-x")
-public class PolarDBXLogStoreSqls extends MysqlLogStoreSqls {
-}
+public class PolarDBXLogStoreSqls extends MysqlLogStoreSqls {}

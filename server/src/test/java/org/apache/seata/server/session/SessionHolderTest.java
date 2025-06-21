@@ -16,8 +16,6 @@
  */
 package org.apache.seata.server.session;
 
-import java.io.File;
-import java.io.IOException;
 import org.apache.seata.common.XID;
 import org.apache.seata.common.store.SessionMode;
 import org.apache.seata.core.constants.ConfigurationKeys;
@@ -32,6 +30,10 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 
+import java.io.File;
+import java.io.IOException;
+
+import static java.io.File.separator;
 import static org.apache.seata.common.Constants.ASYNC_COMMITTING;
 import static org.apache.seata.common.Constants.RETRY_COMMITTING;
 import static org.apache.seata.common.Constants.RETRY_ROLLBACKING;
@@ -39,7 +41,6 @@ import static org.apache.seata.common.Constants.TX_TIMEOUT_CHECK;
 import static org.apache.seata.common.Constants.UNDOLOG_DELETE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
 import static org.apache.seata.server.session.SessionHolder.ROOT_SESSION_MANAGER_NAME;
-import static java.io.File.separator;
 
 /**
  * The type Session holder test.
@@ -54,11 +55,12 @@ public class SessionHolderTest {
     @BeforeEach
     public void before() {
         String sessionStorePath =
-            SessionHolder.CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR) + separator
-                + XID.getPort();
-        //delete file previously created
+                SessionHolder.CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR)
+                        + separator
+                        + XID.getPort();
+        // delete file previously created
         pathname = sessionStorePath + File.separator + ROOT_SESSION_MANAGER_NAME;
-       // SessionHolder.init(StoreMode.REDIS.getName());
+        // SessionHolder.init(StoreMode.REDIS.getName());
     }
 
     @Test
@@ -86,61 +88,61 @@ public class SessionHolderTest {
         }
     }
 
-//    @Test
+    //    @Test
     @Order(2)
     public void test_retryRollbackingLock() {
         Assertions.assertTrue(SessionHolder.acquireDistributedLock(RETRY_ROLLBACKING));
     }
 
-//    @Test
+    //    @Test
     @Order(3)
     public void test_unRetryRollbackingLock() {
         Assertions.assertTrue(SessionHolder.releaseDistributedLock(RETRY_ROLLBACKING));
     }
 
-//    @Test
+    //    @Test
     @Order(4)
     public void test_retryCommittingLock() {
         Assertions.assertTrue(SessionHolder.acquireDistributedLock(RETRY_COMMITTING));
     }
 
-//    @Test
+    //    @Test
     @Order(5)
     public void test_unRetryCommittingLock() {
         Assertions.assertTrue(SessionHolder.releaseDistributedLock(RETRY_COMMITTING));
     }
 
-//    @Test
+    //    @Test
     @Order(6)
     public void test_asyncCommittingLock() {
         Assertions.assertTrue(SessionHolder.acquireDistributedLock(ASYNC_COMMITTING));
     }
 
-//    @Test
+    //    @Test
     @Order(7)
     public void test_unAsyncCommittingLock() {
         Assertions.assertTrue(SessionHolder.releaseDistributedLock(ASYNC_COMMITTING));
     }
 
-//    @Test
+    //    @Test
     @Order(8)
     public void test_txTimeoutCheckLock() {
         Assertions.assertTrue(SessionHolder.acquireDistributedLock(TX_TIMEOUT_CHECK));
     }
 
-//    @Test
+    //    @Test
     @Order(9)
     public void test_unTxTimeoutCheckLock() {
         Assertions.assertTrue(SessionHolder.releaseDistributedLock(TX_TIMEOUT_CHECK));
     }
 
-//    @Test
+    //    @Test
     @Order(10)
     public void test_undoLogDeleteLock() {
         Assertions.assertTrue(SessionHolder.acquireDistributedLock(UNDOLOG_DELETE));
     }
 
-//    @Test
+    //    @Test
     @Order(11)
     public void test_unUndoLogDeleteLock() {
         Assertions.assertTrue(SessionHolder.releaseDistributedLock(UNDOLOG_DELETE));

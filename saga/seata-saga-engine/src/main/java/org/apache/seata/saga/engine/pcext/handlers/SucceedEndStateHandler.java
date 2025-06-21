@@ -28,6 +28,6 @@ public class SucceedEndStateHandler implements StateHandler {
 
     @Override
     public void process(ProcessContext context) throws EngineExecutionException {
-        //Do Nothing
+        // Do Nothing
     }
 }

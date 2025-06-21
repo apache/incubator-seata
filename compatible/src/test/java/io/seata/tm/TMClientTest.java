@@ -16,8 +16,8 @@
  */
 package io.seata.tm;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit test for TMClient class
@@ -33,8 +33,8 @@ public class TMClientTest {
     @Test
     public void testDeprecationAnnotation() {
         // Test that the TMClient class is marked as deprecated
-        Assertions.assertTrue(TMClient.class.isAnnotationPresent(Deprecated.class),
-                "TMClient should be marked as @Deprecated");
+        Assertions.assertTrue(
+                TMClient.class.isAnnotationPresent(Deprecated.class), "TMClient should be marked as @Deprecated");
     }
 
     @Test
@@ -42,7 +42,7 @@ public class TMClientTest {
         // Test that we can create an instance of TMClient
         TMClient tmClient = new TMClient();
         Assertions.assertNotNull(tmClient);
-        
+
         // Test that it's an instance of Apache Seata's TMClient
         Assertions.assertTrue(tmClient instanceof org.apache.seata.tm.TMClient);
     }
@@ -51,11 +51,11 @@ public class TMClientTest {
     public void testClassStructure() {
         // Test class modifiers
         int modifiers = TMClient.class.getModifiers();
-        Assertions.assertTrue(java.lang.reflect.Modifier.isPublic(modifiers),
-                "TMClient should be public");
-        
+        Assertions.assertTrue(java.lang.reflect.Modifier.isPublic(modifiers), "TMClient should be public");
+
         // Test superclass
-        Assertions.assertEquals(org.apache.seata.tm.TMClient.class,
+        Assertions.assertEquals(
+                org.apache.seata.tm.TMClient.class,
                 TMClient.class.getSuperclass(),
                 "TMClient should extend Apache Seata's TMClient");
     }
@@ -63,25 +63,24 @@ public class TMClientTest {
     @Test
     public void testPackageName() {
         // Test that the package is the expected compatible package
-        Assertions.assertEquals("io.seata.tm", 
-                TMClient.class.getPackage().getName(),
-                "TMClient should be in io.seata.tm package");
+        Assertions.assertEquals(
+                "io.seata.tm", TMClient.class.getPackage().getName(), "TMClient should be in io.seata.tm package");
     }
 
     @Test
     public void testMethodInheritance() throws Exception {
         // Test that important methods are inherited from parent class
         TMClient tmClient = new TMClient();
-        
+
         // Check if the class has inherited methods (through reflection)
         // We can verify that it has the same methods as the parent class
         java.lang.reflect.Method[] parentMethods = org.apache.seata.tm.TMClient.class.getDeclaredMethods();
         java.lang.reflect.Method[] childMethods = TMClient.class.getDeclaredMethods();
-        
+
         // The child class should have access to parent methods through inheritance
         // Since this is a simple extension, we mainly test that the inheritance works
-        Assertions.assertTrue(tmClient instanceof org.apache.seata.tm.TMClient,
-                "TMClient should inherit from Apache Seata TMClient");
+        Assertions.assertTrue(
+                tmClient instanceof org.apache.seata.tm.TMClient, "TMClient should inherit from Apache Seata TMClient");
     }
 
     @Test
@@ -89,8 +88,8 @@ public class TMClientTest {
         // Test that compatible TMClient can be used wherever Apache Seata TMClient is expected
         TMClient compatibleClient = new TMClient();
         org.apache.seata.tm.TMClient apacheClient = compatibleClient;
-        
+
         Assertions.assertNotNull(apacheClient);
         Assertions.assertSame(compatibleClient, apacheClient);
     }
-} 
+}

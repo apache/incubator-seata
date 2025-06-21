@@ -40,7 +40,8 @@ public class BatchResultMessageConvertorTest {
         BatchResultMessageConvertor pbConvertor = new BatchResultMessageConvertor();
         BatchResultMessageProto batchResultMessageProto = pbConvertor.convert2Proto(batchResultMessage);
         BatchResultMessage model = pbConvertor.convert2Model(batchResultMessageProto);
-        BranchCommitResponse decodeModel = (BranchCommitResponse)model.getResultMessages().get(0);
+        BranchCommitResponse decodeModel =
+                (BranchCommitResponse) model.getResultMessages().get(0);
         assertThat(decodeModel.getXid()).isEqualTo(branchCommitResponse.getXid());
         assertThat(decodeModel.getBranchId()).isEqualTo(branchCommitResponse.getBranchId());
         assertThat(decodeModel.getResultCode()).isEqualTo(branchCommitResponse.getResultCode());

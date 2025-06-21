@@ -16,32 +16,33 @@
  */
 package org.apache.seata.server.console.impl.redis;
 
+import org.apache.seata.common.result.PageResult;
+import org.apache.seata.common.result.SingleResult;
+import org.apache.seata.common.util.BeanUtils;
+import org.apache.seata.common.util.CollectionUtils;
+import org.apache.seata.core.exception.TransactionException;
+import org.apache.seata.server.console.entity.param.GlobalLockParam;
+import org.apache.seata.server.console.entity.vo.GlobalLockVO;
+import org.apache.seata.server.console.exception.ConsoleException;
+import org.apache.seata.server.console.impl.AbstractLockService;
+import org.apache.seata.server.console.service.GlobalLockService;
+import org.apache.seata.server.session.BranchSession;
+import org.apache.seata.server.storage.redis.JedisPooledFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.stereotype.Component;
+import redis.clients.jedis.Jedis;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.seata.common.result.SingleResult;
-import org.apache.seata.common.util.CollectionUtils;
-import org.apache.seata.core.exception.TransactionException;
-import org.apache.seata.server.console.exception.ConsoleException;
-import org.apache.seata.server.console.impl.AbstractLockService;
-import org.apache.seata.server.session.BranchSession;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
-import org.springframework.stereotype.Component;
-import org.apache.seata.common.util.BeanUtils;
-import org.apache.seata.server.console.entity.param.GlobalLockParam;
-import org.apache.seata.common.result.PageResult;
-import org.apache.seata.server.console.entity.vo.GlobalLockVO;
-import org.apache.seata.server.console.service.GlobalLockService;
-import org.apache.seata.server.storage.redis.JedisPooledFactory;
-import redis.clients.jedis.Jedis;
 import static org.apache.seata.common.Constants.ROW_LOCK_KEY_SPLIT_CHAR;
 import static org.apache.seata.common.exception.FrameworkErrorCode.ParameterRequired;
-import static org.apache.seata.common.util.StringUtils.isNotBlank;
 import static org.apache.seata.common.result.PageResult.checkPage;
+import static org.apache.seata.common.util.StringUtils.isNotBlank;
 import static org.apache.seata.core.constants.RedisKeyConstants.DEFAULT_REDIS_SEATA_GLOBAL_LOCK_PREFIX;
 import static org.apache.seata.core.constants.RedisKeyConstants.DEFAULT_REDIS_SEATA_ROW_LOCK_PREFIX;
 import static org.apache.seata.core.constants.RedisKeyConstants.SPLIT;
@@ -64,17 +65,19 @@ public class GlobalLockRedisServiceImpl extends AbstractLockService implements G
         if (isNotBlank(param.getXid())) {
             globalLockVos = queryGlobalByXid(param.getXid());
             total = globalLockVos.size();
-            return PageResult.success(globalLockVos,total,param.getPageNum(),param.getPageSize());
+            return PageResult.success(globalLockVos, total, param.getPageNum(), param.getPageSize());
         } else if (isNotBlank(param.getTableName()) && isNotBlank(param.getPk()) && isNotBlank(param.getResourceId())) {
-            //SEATA_ROW_LOCK_jdbc:mysql://116.62.62.26/seata-order^^^order^^^2188
+            // SEATA_ROW_LOCK_jdbc:mysql://116.62.62.26/seata-order^^^order^^^2188
             String tableName = param.getTableName();
             String pk = param.getPk();
             String resourceId = param.getResourceId();
-            globalLockVos = queryGlobalLockByRowKey(buildRowKey(tableName,pk,resourceId));
+            globalLockVos = queryGlobalLockByRowKey(buildRowKey(tableName, pk, resourceId));
             total = globalLockVos.size();
-            return PageResult.success(globalLockVos,total,param.getPageNum(),param.getPageSize());
+            return PageResult.success(globalLockVos, total, param.getPageNum(), param.getPageSize());
         } else {
-            return PageResult.failure(ParameterRequired.getErrCode(),"only three parameters of tableName,pk,resourceId or Xid are supported");
+            return PageResult.failure(
+                    ParameterRequired.getErrCode(),
+                    "only three parameters of tableName,pk,resourceId or Xid are supported");
         }
     }
 
@@ -83,8 +86,11 @@ public class GlobalLockRedisServiceImpl extends AbstractLockService implements G
         checkDeleteLock(param);
         String rowKey = buildRowKey(param.getTableName(), param.getPk(), param.getResourceId());
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("start to delete global lock,xid:{} branchId:{} row key:{} ",
-                    param.getXid(), param.getBranchId(), rowKey);
+            LOGGER.debug(
+                    "start to delete global lock,xid:{} branchId:{} row key:{} ",
+                    param.getXid(),
+                    param.getBranchId(),
+                    rowKey);
         }
         BranchSession branchSession = new BranchSession();
         branchSession.setXid(param.getXid());
@@ -92,8 +98,11 @@ public class GlobalLockRedisServiceImpl extends AbstractLockService implements G
         try {
             lockManager.releaseLock(branchSession);
         } catch (TransactionException e) {
-            throw new ConsoleException(e, String.format("delete global lock," +
-                    "xid:%s ,branchId:%s ,row key:%s failed", param.getXid(), param.getBranchId(), rowKey));
+            throw new ConsoleException(
+                    e,
+                    String.format(
+                            "delete global lock," + "xid:%s ,branchId:%s ,row key:%s failed",
+                            param.getXid(), param.getBranchId(), rowKey));
         }
         return SingleResult.success();
     }
@@ -102,10 +111,9 @@ public class GlobalLockRedisServiceImpl extends AbstractLockService implements G
         return readGlobalLockByRowKey(buildRowKey);
     }
 
-    private String buildRowKey(String tableName, String pk,String resourceId) {
+    private String buildRowKey(String tableName, String pk, String resourceId) {
         return DEFAULT_REDIS_SEATA_ROW_LOCK_PREFIX + resourceId + SPLIT + tableName + SPLIT + pk;
     }
-
 
     private List<GlobalLockVO> queryGlobalByXid(String xid) {
         return readGlobalLockByXid(DEFAULT_REDIS_SEATA_GLOBAL_LOCK_PREFIX + xid);
@@ -117,10 +125,10 @@ public class GlobalLockRedisServiceImpl extends AbstractLockService implements G
             Map<String, String> mapGlobalKeys = jedis.hgetAll(key);
             if (CollectionUtils.isNotEmpty(mapGlobalKeys)) {
                 List<String> rowLockKeys = new ArrayList<>();
-                mapGlobalKeys.forEach((k,v) -> rowLockKeys.addAll(Arrays.asList(v.split(ROW_LOCK_KEY_SPLIT_CHAR))));
+                mapGlobalKeys.forEach((k, v) -> rowLockKeys.addAll(Arrays.asList(v.split(ROW_LOCK_KEY_SPLIT_CHAR))));
                 for (String rowLoclKey : rowLockKeys) {
                     Map<String, String> mapRowLockKey = jedis.hgetAll(rowLoclKey);
-                    GlobalLockVO vo = (GlobalLockVO)BeanUtils.mapToObject(mapRowLockKey, GlobalLockVO.class);
+                    GlobalLockVO vo = (GlobalLockVO) BeanUtils.mapToObject(mapRowLockKey, GlobalLockVO.class);
                     if (vo != null) {
                         vos.add(vo);
                     }
@@ -131,12 +139,11 @@ public class GlobalLockRedisServiceImpl extends AbstractLockService implements G
         return vos;
     }
 
-
     private List<GlobalLockVO> readGlobalLockByRowKey(String key) {
         List<GlobalLockVO> vos = new ArrayList<>();
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             Map<String, String> map = jedis.hgetAll(key);
-            GlobalLockVO vo = (GlobalLockVO)BeanUtils.mapToObject(map, GlobalLockVO.class);
+            GlobalLockVO vo = (GlobalLockVO) BeanUtils.mapToObject(map, GlobalLockVO.class);
             if (vo != null) {
                 vos.add(vo);
             }

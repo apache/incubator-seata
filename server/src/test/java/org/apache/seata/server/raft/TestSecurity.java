@@ -18,15 +18,15 @@ package org.apache.seata.server.raft;
 
 public class TestSecurity implements java.io.Serializable {
 
-	private static final long serialVersionUID = 543214259201495900L;
+    private static final long serialVersionUID = 543214259201495900L;
 
-	String a = "test";
+    String a = "test";
 
-	public String getA() {
-		return a;
-	}
+    public String getA() {
+        return a;
+    }
 
-	public void setA(String a) {
-		this.a = a;
-	}
+    public void setA(String a) {
+        this.a = a;
+    }
 }

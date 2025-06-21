@@ -16,11 +16,11 @@
  */
 package org.apache.seata.serializer.seata.protocol.transaction;
 
-import java.nio.ByteBuffer;
-
 import io.netty.buffer.ByteBuf;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.protocol.transaction.AbstractBranchEndRequest;
+
+import java.nio.ByteBuffer;
 
 /**
  * The type Abstract branch end request codec.
@@ -35,7 +35,7 @@ public abstract class AbstractBranchEndRequestCodec extends AbstractTransactionR
 
     @Override
     public <T> void encode(T t, ByteBuf out) {
-        AbstractBranchEndRequest abstractBranchEndRequest = (AbstractBranchEndRequest)t;
+        AbstractBranchEndRequest abstractBranchEndRequest = (AbstractBranchEndRequest) t;
         String xid = abstractBranchEndRequest.getXid();
         long branchId = abstractBranchEndRequest.getBranchId();
         BranchType branchType = abstractBranchEndRequest.getBranchType();
@@ -45,12 +45,12 @@ public abstract class AbstractBranchEndRequestCodec extends AbstractTransactionR
         // 1. xid
         if (xid != null) {
             byte[] bs = xid.getBytes(UTF8);
-            out.writeShort((short)bs.length);
+            out.writeShort((short) bs.length);
             if (bs.length > 0) {
                 out.writeBytes(bs);
             }
         } else {
-            out.writeShort((short)0);
+            out.writeShort((short) 0);
         }
         // 2. Branch Id
         out.writeLong(branchId);
@@ -59,12 +59,12 @@ public abstract class AbstractBranchEndRequestCodec extends AbstractTransactionR
         // 4. Resource Id
         if (resourceId != null) {
             byte[] bs = resourceId.getBytes(UTF8);
-            out.writeShort((short)bs.length);
+            out.writeShort((short) bs.length);
             if (bs.length > 0) {
                 out.writeBytes(bs);
             }
         } else {
-            out.writeShort((short)0);
+            out.writeShort((short) 0);
         }
 
         // 5. Application Data
@@ -81,7 +81,7 @@ public abstract class AbstractBranchEndRequestCodec extends AbstractTransactionR
 
     @Override
     public <T> void decode(T t, ByteBuffer in) {
-        AbstractBranchEndRequest abstractBranchEndRequest = (AbstractBranchEndRequest)t;
+        AbstractBranchEndRequest abstractBranchEndRequest = (AbstractBranchEndRequest) t;
 
         int xidLen = 0;
         if (in.remaining() >= 2) {
@@ -138,5 +138,4 @@ public abstract class AbstractBranchEndRequestCodec extends AbstractTransactionR
             abstractBranchEndRequest.setApplicationData(new String(bs, UTF8));
         }
     }
-
 }

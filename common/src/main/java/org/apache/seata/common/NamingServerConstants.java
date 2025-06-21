@@ -51,5 +51,4 @@ public interface NamingServerConstants {
      * The constant DEFAULT_VGROUP_MAPPING
      */
     String DEFAULT_VGROUP_MAPPING = "vgroup_table";
-
 }

@@ -30,18 +30,23 @@ import org.apache.skywalking.apm.network.trace.component.ComponentsDefine;
 
 import java.lang.reflect.Method;
 
-
 public class DefaultCoreDoGlobalCommitInterceptor implements InstanceMethodsAroundInterceptor {
 
     @Override
-    public void beforeMethod(EnhancedInstance objInst, Method method, Object[] allArguments, Class<?>[] argumentsTypes,
-                             MethodInterceptResult result) throws Throwable {
+    public void beforeMethod(
+            EnhancedInstance objInst,
+            Method method,
+            Object[] allArguments,
+            Class<?>[] argumentsTypes,
+            MethodInterceptResult result)
+            throws Throwable {
         RpcMessage rpcMessage = (RpcMessage) allArguments[0];
         if (!(rpcMessage.getBody() instanceof AbstractMessage)) {
             return;
         }
 
-        AbstractSpan activeSpan = ContextManager.createLocalSpan(ComponentsDefine.SEATA.getName() + "/TC/doGlobalCommit");
+        AbstractSpan activeSpan =
+                ContextManager.createLocalSpan(ComponentsDefine.SEATA.getName() + "/TC/doGlobalCommit");
         activeSpan.setComponent(ComponentsDefine.SEATA);
 
         String xid = SWSeataUtils.convertXid(rpcMessage);
@@ -51,8 +56,9 @@ public class DefaultCoreDoGlobalCommitInterceptor implements InstanceMethodsArou
     }
 
     @Override
-    public Object afterMethod(EnhancedInstance objInst, Method method, Object[] allArguments, Class<?>[] argumentsTypes,
-                              Object ret) throws Throwable {
+    public Object afterMethod(
+            EnhancedInstance objInst, Method method, Object[] allArguments, Class<?>[] argumentsTypes, Object ret)
+            throws Throwable {
         RpcMessage rpcMessage = (RpcMessage) allArguments[0];
         if (rpcMessage.getBody() instanceof AbstractMessage) {
             ContextManager.stopSpan();
@@ -61,7 +67,6 @@ public class DefaultCoreDoGlobalCommitInterceptor implements InstanceMethodsArou
     }
 
     @Override
-    public void handleMethodException(EnhancedInstance objInst, Method method, Object[] allArguments,
-                                      Class<?>[] argumentsTypes, Throwable t) {
-    }
+    public void handleMethodException(
+            EnhancedInstance objInst, Method method, Object[] allArguments, Class<?>[] argumentsTypes, Throwable t) {}
 }

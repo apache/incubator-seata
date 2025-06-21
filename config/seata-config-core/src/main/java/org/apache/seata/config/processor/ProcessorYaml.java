@@ -16,7 +16,6 @@
  */
 package org.apache.seata.config.processor;
 
-
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.common.util.MapUtil;
 import org.yaml.snakeyaml.LoaderOptions;
@@ -40,5 +39,4 @@ public class ProcessorYaml implements Processor {
         properties.putAll(MapUtil.getFlattenedMap(configMap));
         return properties;
     }
-
 }

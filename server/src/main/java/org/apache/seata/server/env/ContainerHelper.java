@@ -98,5 +98,4 @@ public class ContainerHelper {
     public static String getLockStoreMode() {
         return StringUtils.trimToNull(System.getenv(ENV_LOCK_STORE_MODE_KEY));
     }
-
 }

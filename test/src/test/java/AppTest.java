@@ -48,11 +48,9 @@ public class AppTest {
         TMClient.init(APPLICATION_ID, TX_SERVICE_GROUP);
         RMClient.init(APPLICATION_ID, TX_SERVICE_GROUP);
 
-        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
-                "basic-test-context.xml");
+        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("basic-test-context.xml");
 
-        final JdbcTemplate jdbcTemplate = (JdbcTemplate) context
-                .getBean("jdbcTemplate");
+        final JdbcTemplate jdbcTemplate = (JdbcTemplate) context.getBean("jdbcTemplate");
 
         jdbcTemplate.update("delete from undo_log");
         jdbcTemplate.update("delete from user0");
@@ -67,7 +65,7 @@ public class AppTest {
                     if (LOGGER.isInfoEnabled()) {
                         LOGGER.info("Exception Rollback Business Begin ...");
                     }
-                    jdbcTemplate.update("update user0 set name = 'xxx' where id = ?", new Object[]{1});
+                    jdbcTemplate.update("update user0 set name = 'xxx' where id = ?", new Object[] {1});
                     jdbcTemplate.update("insert into user1 (id, name, gmt) values (1, 'user1', '2019-01-01')");
                     throw bizException;
                 }
@@ -79,23 +77,20 @@ public class AppTest {
                     txInfo.setName(TX_NAME);
                     return txInfo;
                 }
-
             });
         } catch (TransactionalExecutor.ExecutionException e) {
             TransactionalExecutor.Code code = e.getCode();
             if (code == TransactionalExecutor.Code.RollbackDone) {
                 Throwable businessEx = e.getOriginalException();
                 if (businessEx instanceof MyBusinessException) {
-                    Assertions.assertEquals(((MyBusinessException) businessEx).getBusinessErrorCode(),
-                            bizException.businessErrorCode);
+                    Assertions.assertEquals(
+                            ((MyBusinessException) businessEx).getBusinessErrorCode(), bizException.businessErrorCode);
                 }
             } else {
                 Assertions.assertFalse(false, "Not expected," + e.getMessage());
-
             }
         }
         new ApplicationKeeper(context).keep();
-
     }
 
     private static class MyBusinessException extends Exception {

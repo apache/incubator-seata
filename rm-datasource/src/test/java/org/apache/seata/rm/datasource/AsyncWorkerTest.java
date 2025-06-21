@@ -16,7 +16,6 @@
  */
 package org.apache.seata.rm.datasource;
 
-import org.apache.seata.rm.datasource.AsyncWorker;
 import org.apache.seata.core.model.BranchStatus;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -29,7 +28,6 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 class AsyncWorkerTest {
 
@@ -59,7 +57,8 @@ class AsyncWorkerTest {
     }
 
     private List<AsyncWorker.Phase2Context> getRandomContexts() {
-        return random.ints().limit(16)
+        return random.ints()
+                .limit(16)
                 .mapToObj(String::valueOf)
                 .flatMap(this::generateContextStream)
                 .collect(Collectors.toList());

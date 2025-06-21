@@ -38,7 +38,6 @@ import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_SSL_ENABLED;
 import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_SSL_KMF_ALGORITHM;
 import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_SSL_SERVER_KEYSTORE_PATH;
 import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_SSL_TMF_ALGORITHM;
-import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SERVER_RAFT_SSL_PREFIX;
 
 @SpringBootTest
 @Import(DynamicPortTestConfig.class)
@@ -64,13 +63,18 @@ public class RaftServerTest {
 
     @Test
     public void initRaftServerStart() {
-        Assertions.assertDoesNotThrow(()-> ConfigurationFactory.getInstance().getConfig(SERVER_RAFT_SSL_ENABLED));
-        Assertions.assertDoesNotThrow(()-> ConfigurationFactory.getInstance().getConfig(SERVER_RAFT_SSL_CLIENT_KEYSTORE_PATH));
-        Assertions.assertDoesNotThrow(()-> ConfigurationFactory.getInstance().getConfig(SERVER_RAFT_SSL_SERVER_KEYSTORE_PATH));
-        Assertions.assertDoesNotThrow(()-> ConfigurationFactory.getInstance().getConfig(SERVER_RAFT_SSL_KMF_ALGORITHM));
-        Assertions.assertDoesNotThrow(()-> ConfigurationFactory.getInstance().getConfig(SERVER_RAFT_SSL_TMF_ALGORITHM));
+        Assertions.assertDoesNotThrow(() -> ConfigurationFactory.getInstance().getConfig(SERVER_RAFT_SSL_ENABLED));
+        Assertions.assertDoesNotThrow(
+                () -> ConfigurationFactory.getInstance().getConfig(SERVER_RAFT_SSL_CLIENT_KEYSTORE_PATH));
+        Assertions.assertDoesNotThrow(
+                () -> ConfigurationFactory.getInstance().getConfig(SERVER_RAFT_SSL_SERVER_KEYSTORE_PATH));
+        Assertions.assertDoesNotThrow(
+                () -> ConfigurationFactory.getInstance().getConfig(SERVER_RAFT_SSL_KMF_ALGORITHM));
+        Assertions.assertDoesNotThrow(
+                () -> ConfigurationFactory.getInstance().getConfig(SERVER_RAFT_SSL_TMF_ALGORITHM));
         System.setProperty("server.raftPort", "9091");
-        System.setProperty(ConfigurationKeys.SERVER_RAFT_SERVER_ADDR,
+        System.setProperty(
+                ConfigurationKeys.SERVER_RAFT_SERVER_ADDR,
                 XID.getIpAddress() + ":9091" + "," + XID.getIpAddress() + ":9092" + "," + XID.getIpAddress() + ":9093");
         StoreConfig.setStartupParameter("raft", "raft", "raft");
         Assertions.assertDoesNotThrow(RaftServerManager::init);
@@ -90,10 +94,10 @@ public class RaftServerTest {
 
     @Test
     public void initRaftServerFailByRaftPortNull() {
-        System.setProperty(ConfigurationKeys.SERVER_RAFT_SERVER_ADDR,
+        System.setProperty(
+                ConfigurationKeys.SERVER_RAFT_SERVER_ADDR,
                 XID.getIpAddress() + ":9091" + "," + XID.getIpAddress() + ":9092" + "," + XID.getIpAddress() + ":9093");
         StoreConfig.setStartupParameter("raft", "raft", "raft");
         Assertions.assertThrows(IllegalArgumentException.class, RaftServerManager::init);
     }
-
 }

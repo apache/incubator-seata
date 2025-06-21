@@ -21,12 +21,9 @@ import java.io.IOException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
-
 public class DeflaterUtil {
 
-    private DeflaterUtil() {
-
-    }
+    private DeflaterUtil() {}
 
     private static final int BUFFER_SIZE = 8192;
 
@@ -73,5 +70,4 @@ public class DeflaterUtil {
             throw new RuntimeException("Deflater decompress error", e);
         }
     }
-
 }

@@ -40,7 +40,7 @@ public class SupportSqlWhereMethod {
     }
 
     /**
-     * 
+     *
      * @param methodName
      * @return boolean
      */

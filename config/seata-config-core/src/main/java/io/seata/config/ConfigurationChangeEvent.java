@@ -31,9 +31,7 @@ public class ConfigurationChangeEvent {
     /**
      * Instantiates a new Configuration change event.
      */
-    public ConfigurationChangeEvent() {
-
-    }
+    public ConfigurationChangeEvent() {}
 
     /**
      * Instantiates a new Configuration change event.
@@ -54,8 +52,8 @@ public class ConfigurationChangeEvent {
      * @param newValue  the new value
      * @param type      the type
      */
-    public ConfigurationChangeEvent(String dataId, String namespace, String oldValue, String newValue,
-                                    ConfigurationChangeType type) {
+    public ConfigurationChangeEvent(
+            String dataId, String namespace, String oldValue, String newValue, ConfigurationChangeType type) {
         this.dataId = dataId;
         this.namespace = namespace;
         this.oldValue = oldValue;

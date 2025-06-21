@@ -20,7 +20,6 @@ import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationProvider;
 
-
 @LoadLevel(name = "Consul", order = 1)
 public class ConsulConfigurationProvider implements ConfigurationProvider {
     @Override

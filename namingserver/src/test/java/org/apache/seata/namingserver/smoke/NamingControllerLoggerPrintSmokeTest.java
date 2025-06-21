@@ -17,14 +17,14 @@
 
 package org.apache.seata.namingserver.smoke;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import org.apache.seata.namingserver.NamingserverApplication;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(
         classes = NamingserverApplication.class,

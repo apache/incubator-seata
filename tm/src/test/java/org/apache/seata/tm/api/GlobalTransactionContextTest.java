@@ -16,7 +16,6 @@
  */
 package org.apache.seata.tm.api;
 
-
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.model.TransactionManager;
@@ -25,7 +24,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 
 class GlobalTransactionContextTest {
     private static final String DEFAULT_XID = "1234567890";
@@ -38,7 +36,8 @@ class GlobalTransactionContextTest {
 
         TransactionManagerHolder.set(new TransactionManager() {
             @Override
-            public String begin(String applicationId, String transactionServiceGroup, String name, int timeout) throws TransactionException {
+            public String begin(String applicationId, String transactionServiceGroup, String name, int timeout)
+                    throws TransactionException {
                 return DEFAULT_XID;
             }
 

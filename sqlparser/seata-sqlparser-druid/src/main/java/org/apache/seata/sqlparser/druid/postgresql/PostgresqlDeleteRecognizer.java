@@ -27,9 +27,9 @@ import org.apache.seata.common.exception.NotSupportYetException;
 import org.apache.seata.sqlparser.ParametersHolder;
 import org.apache.seata.sqlparser.SQLDeleteRecognizer;
 import org.apache.seata.sqlparser.SQLType;
+
 import java.util.ArrayList;
 import java.util.List;
-
 
 public class PostgresqlDeleteRecognizer extends BasePostgresqlRecognizer implements SQLDeleteRecognizer {
 
@@ -90,8 +90,8 @@ public class PostgresqlDeleteRecognizer extends BasePostgresqlRecognizer impleme
     }
 
     @Override
-    public String getWhereCondition(final ParametersHolder parametersHolder,
-                                    final ArrayList<List<Object>> paramAppenderList) {
+    public String getWhereCondition(
+            final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppenderList) {
         SQLExpr where = ast.getWhere();
         return super.getWhereCondition(where, parametersHolder, paramAppenderList);
     }
@@ -104,25 +104,25 @@ public class PostgresqlDeleteRecognizer extends BasePostgresqlRecognizer impleme
 
     @Override
     public String getLimitCondition() {
-        //postgre does not have limit condition in delete statement
+        // postgre does not have limit condition in delete statement
         return null;
     }
 
     @Override
     public String getLimitCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
-        //postgre does not have limit condition in delete statement
+        // postgre does not have limit condition in delete statement
         return null;
     }
 
     @Override
     public String getOrderByCondition() {
-        //postgre does not have order by condition in delete statement
+        // postgre does not have order by condition in delete statement
         return null;
     }
 
     @Override
     public String getOrderByCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
-        //postgre does not have order by condition in delete statement
+        // postgre does not have order by condition in delete statement
         return null;
     }
 

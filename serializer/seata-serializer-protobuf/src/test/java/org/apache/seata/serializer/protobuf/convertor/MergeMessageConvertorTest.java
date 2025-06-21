@@ -16,16 +16,15 @@
  */
 package org.apache.seata.serializer.protobuf.convertor;
 
-import org.apache.seata.serializer.protobuf.generated.MergedWarpMessageProto;
 import org.apache.seata.core.protocol.AbstractMessage;
 import org.apache.seata.core.protocol.MergedWarpMessage;
 import org.apache.seata.core.protocol.transaction.GlobalBeginRequest;
+import org.apache.seata.serializer.protobuf.generated.MergedWarpMessageProto;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
 
 public class MergeMessageConvertorTest {
 
@@ -38,18 +37,14 @@ public class MergeMessageConvertorTest {
         mergedWarpMessage.msgs = msgs;
 
         MergedWarpMessageConvertor pbConvertor = new MergedWarpMessageConvertor();
-        MergedWarpMessageProto globalBeginRequestProto = pbConvertor.convert2Proto(
-            mergedWarpMessage);
+        MergedWarpMessageProto globalBeginRequestProto = pbConvertor.convert2Proto(mergedWarpMessage);
 
         MergedWarpMessage model = pbConvertor.convert2Model(globalBeginRequestProto);
 
-        GlobalBeginRequest decodeModel = (GlobalBeginRequest)model.msgs.get(0);
-        assertThat(decodeModel.getTransactionName()).isEqualTo(
-            globalBeginRequest.getTransactionName());
+        GlobalBeginRequest decodeModel = (GlobalBeginRequest) model.msgs.get(0);
+        assertThat(decodeModel.getTransactionName()).isEqualTo(globalBeginRequest.getTransactionName());
         assertThat(decodeModel.getTimeout()).isEqualTo(globalBeginRequest.getTimeout());
-        assertThat(
-            decodeModel.getTypeCode()).isEqualTo(globalBeginRequest.getTypeCode());
-
+        assertThat(decodeModel.getTypeCode()).isEqualTo(globalBeginRequest.getTypeCode());
     }
 
     private GlobalBeginRequest buildGlobalBeginRequest() {

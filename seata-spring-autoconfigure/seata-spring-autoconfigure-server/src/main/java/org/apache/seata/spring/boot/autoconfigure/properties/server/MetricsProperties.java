@@ -25,7 +25,6 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_METRICS_REGISTRY_TYP
 import static org.apache.seata.common.DefaultValues.DEFAULT_PROMETHEUS_PORT;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.METRICS_PREFIX;
 
-
 @Component
 @ConfigurationProperties(prefix = METRICS_PREFIX)
 public class MetricsProperties {
@@ -33,7 +32,6 @@ public class MetricsProperties {
     private String registryType = DEFAULT_METRICS_REGISTRY_TYPE;
     private String exporterList = DEFAULT_METRICS_EXPORTER_LIST;
     private int exporterPrometheusPort = DEFAULT_PROMETHEUS_PORT;
-
 
     public Boolean getEnabled() {
         return enabled;

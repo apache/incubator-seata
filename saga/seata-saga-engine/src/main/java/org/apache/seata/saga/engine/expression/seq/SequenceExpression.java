@@ -35,9 +35,7 @@ public class SequenceExpression implements Expression {
     }
 
     @Override
-    public void setValue(Object value, Object elContext) {
-
-    }
+    public void setValue(Object value, Object elContext) {}
 
     @Override
     public String getExpressionString() {

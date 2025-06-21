@@ -16,26 +16,23 @@
  */
 package org.apache.seata.integration.tx.api.fence.hook;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-
 import org.apache.seata.common.lock.ResourceLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public final class TccHookManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(TccHookManager.class);
     private static final ResourceLock LOCK = new ResourceLock();
 
-
-    private TccHookManager() {
-
-    }
+    private TccHookManager() {}
 
     private static final List<TccHook> TCC_HOOKS = new CopyOnWriteArrayList<>();
     // Cache unmodifiable lists
-    private volatile static List<TccHook> CACHED_UNMODIFIABLE_HOOKS = null;
+    private static volatile List<TccHook> CACHED_UNMODIFIABLE_HOOKS = null;
 
     /**
      * get the hooks

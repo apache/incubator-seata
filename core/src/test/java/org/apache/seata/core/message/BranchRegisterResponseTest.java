@@ -18,7 +18,6 @@ package org.apache.seata.core.message;
 
 import org.apache.seata.core.protocol.ResultCode;
 import org.apache.seata.core.protocol.transaction.BranchRegisterResponse;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -39,8 +38,7 @@ public class BranchRegisterResponseTest {
         branchRegisterResponse.setResultCode(ResultCode.Success);
         branchRegisterResponse.setMsg("");
         Assertions.assertEquals(
-            "BranchRegisterResponse{branchId=123457, resultCode=Success, msg=''}",
-            branchRegisterResponse.toString());
-
+                "BranchRegisterResponse{branchId=123457, resultCode=Success, msg=''}",
+                branchRegisterResponse.toString());
     }
 }

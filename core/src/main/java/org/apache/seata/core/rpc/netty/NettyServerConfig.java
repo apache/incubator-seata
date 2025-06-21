@@ -37,37 +37,38 @@ public class NettyServerConfig extends NettyBaseConfig {
 
     private int serverSelectorThreads = Integer.parseInt(System.getProperty(
             ConfigurationKeys.TRANSPORT_PREFIX + "serverSelectorThreads", String.valueOf(WORKER_THREAD_SIZE)));
-    private int serverSocketSendBufSize = Integer.parseInt(System.getProperty(
-            ConfigurationKeys.TRANSPORT_PREFIX + "serverSocketSendBufSize", String.valueOf(153600)));
-    private int serverSocketResvBufSize = Integer.parseInt(System.getProperty(
-            ConfigurationKeys.TRANSPORT_PREFIX + "serverSocketResvBufSize", String.valueOf(153600)));
+    private int serverSocketSendBufSize = Integer.parseInt(
+            System.getProperty(ConfigurationKeys.TRANSPORT_PREFIX + "serverSocketSendBufSize", String.valueOf(153600)));
+    private int serverSocketResvBufSize = Integer.parseInt(
+            System.getProperty(ConfigurationKeys.TRANSPORT_PREFIX + "serverSocketResvBufSize", String.valueOf(153600)));
     private int serverWorkerThreads = Integer.parseInt(System.getProperty(
             ConfigurationKeys.TRANSPORT_PREFIX + "serverWorkerThreads", String.valueOf(WORKER_THREAD_SIZE)));
-    private int soBackLogSize = Integer.parseInt(System.getProperty(
-            ConfigurationKeys.TRANSPORT_PREFIX + "soBackLogSize", String.valueOf(1024)));
+    private int soBackLogSize = Integer.parseInt(
+            System.getProperty(ConfigurationKeys.TRANSPORT_PREFIX + "soBackLogSize", String.valueOf(1024)));
     private int writeBufferHighWaterMark = Integer.parseInt(System.getProperty(
             ConfigurationKeys.TRANSPORT_PREFIX + "writeBufferHighWaterMark", String.valueOf(67108864)));
     private int writeBufferLowWaterMark = Integer.parseInt(System.getProperty(
             ConfigurationKeys.TRANSPORT_PREFIX + "writeBufferLowWaterMark", String.valueOf(1048576)));
     private int serverListenPort = 0;
-    private static final long RPC_TC_REQUEST_TIMEOUT = CONFIG.getLong(ConfigurationKeys.RPC_TC_REQUEST_TIMEOUT, DEFAULT_RPC_TC_REQUEST_TIMEOUT);
+    private static final long RPC_TC_REQUEST_TIMEOUT =
+            CONFIG.getLong(ConfigurationKeys.RPC_TC_REQUEST_TIMEOUT, DEFAULT_RPC_TC_REQUEST_TIMEOUT);
     private int serverChannelMaxIdleTimeSeconds = Integer.parseInt(System.getProperty(
             ConfigurationKeys.TRANSPORT_PREFIX + "serverChannelMaxIdleTimeSeconds", String.valueOf(30)));
     private static final String EPOLL_WORKER_THREAD_PREFIX = "NettyServerEPollWorker";
-    private static int minServerPoolSize = Integer.parseInt(System.getProperty(
-            ConfigurationKeys.MIN_SERVER_POOL_SIZE, "50"));
-    private static int maxServerPoolSize = Integer.parseInt(System.getProperty(
-            ConfigurationKeys.MAX_SERVER_POOL_SIZE, "500"));
-    private static int maxTaskQueueSize = Integer.parseInt(System.getProperty(
-            ConfigurationKeys.MAX_TASK_QUEUE_SIZE, "20000"));
-    private static int keepAliveTime = Integer.parseInt(System.getProperty(
-            ConfigurationKeys.KEEP_ALIVE_TIME, "500"));
+    private static int minServerPoolSize =
+            Integer.parseInt(System.getProperty(ConfigurationKeys.MIN_SERVER_POOL_SIZE, "50"));
+    private static int maxServerPoolSize =
+            Integer.parseInt(System.getProperty(ConfigurationKeys.MAX_SERVER_POOL_SIZE, "500"));
+    private static int maxTaskQueueSize =
+            Integer.parseInt(System.getProperty(ConfigurationKeys.MAX_TASK_QUEUE_SIZE, "20000"));
+    private static int keepAliveTime = Integer.parseInt(System.getProperty(ConfigurationKeys.KEEP_ALIVE_TIME, "500"));
     private static int minBranchResultPoolSize = Integer.parseInt(System.getProperty(
             ConfigurationKeys.MIN_BRANCH_RESULT_POOL_SIZE, String.valueOf(WorkThreadMode.Pin.getValue())));
     private static int maxBranchResultPoolSize = Integer.parseInt(System.getProperty(
             ConfigurationKeys.MAX_BRANCH_RESULT_POOL_SIZE, String.valueOf(WorkThreadMode.Pin.getValue())));
-    private static boolean ENABLE_TC_SERVER_BATCH_SEND_RESPONSE = CONFIG.getBoolean(ConfigurationKeys.ENABLE_TC_SERVER_BATCH_SEND_RESPONSE,
-        DefaultValues.DEFAULT_ENABLE_TC_SERVER_BATCH_SEND_RESPONSE);
+    private static boolean ENABLE_TC_SERVER_BATCH_SEND_RESPONSE = CONFIG.getBoolean(
+            ConfigurationKeys.ENABLE_TC_SERVER_BATCH_SEND_RESPONSE,
+            DefaultValues.DEFAULT_ENABLE_TC_SERVER_BATCH_SEND_RESPONSE);
 
     private static int minHttpPoolSize = CONFIG.getInt(ConfigurationKeys.MIN_HTTP_POOL_SIZE, 10);
     private static int maxHttpPoolSize = CONFIG.getInt(ConfigurationKeys.MAX_HTTP_POOL_SIZE, 100);
@@ -78,7 +79,6 @@ public class NettyServerConfig extends NettyBaseConfig {
      * The Server channel clazz.
      */
     public static final Class<? extends ServerChannel> SERVER_CHANNEL_CLAZZ = NettyBaseConfig.SERVER_CHANNEL_CLAZZ;
-
 
     /**
      * Gets server selector threads.
@@ -104,9 +104,7 @@ public class NettyServerConfig extends NettyBaseConfig {
      * @return the boolean
      */
     public static boolean enableEpoll() {
-        return NettyBaseConfig.SERVER_CHANNEL_CLAZZ.equals(EpollServerSocketChannel.class)
-            && Epoll.isAvailable();
-
+        return NettyBaseConfig.SERVER_CHANNEL_CLAZZ.equals(EpollServerSocketChannel.class) && Epoll.isAvailable();
     }
 
     /**
@@ -272,8 +270,9 @@ public class NettyServerConfig extends NettyBaseConfig {
      * @return the string
      */
     public String getWorkerThreadPrefix() {
-        return CONFIG.getConfig(ConfigurationKeys.WORKER_THREAD_PREFIX,
-            enableEpoll() ? EPOLL_WORKER_THREAD_PREFIX : DEFAULT_NIO_WORKER_THREAD_PREFIX);
+        return CONFIG.getConfig(
+                ConfigurationKeys.WORKER_THREAD_PREFIX,
+                enableEpoll() ? EPOLL_WORKER_THREAD_PREFIX : DEFAULT_NIO_WORKER_THREAD_PREFIX);
     }
 
     /**
@@ -282,8 +281,7 @@ public class NettyServerConfig extends NettyBaseConfig {
      * @return the string
      */
     public String getExecutorThreadPrefix() {
-        return CONFIG.getConfig(ConfigurationKeys.SERVER_EXECUTOR_THREAD_PREFIX,
-            DEFAULT_EXECUTOR_THREAD_PREFIX);
+        return CONFIG.getConfig(ConfigurationKeys.SERVER_EXECUTOR_THREAD_PREFIX, DEFAULT_EXECUTOR_THREAD_PREFIX);
     }
 
     /**

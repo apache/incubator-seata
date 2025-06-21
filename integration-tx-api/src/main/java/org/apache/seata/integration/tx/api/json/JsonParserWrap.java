@@ -18,7 +18,6 @@ package org.apache.seata.integration.tx.api.json;
 
 import org.apache.seata.common.exception.JsonParseException;
 
-
 public class JsonParserWrap implements JsonParser {
 
     private JsonParser jsonParser;

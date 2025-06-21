@@ -24,14 +24,14 @@ import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.rm.datasource.StatementProxy;
 import org.apache.seata.rm.datasource.exec.BaseInsertExecutor;
 import org.apache.seata.rm.datasource.exec.StatementCallback;
-import org.apache.seata.sqlparser.struct.ColumnMeta;
 import org.apache.seata.sqlparser.SQLInsertRecognizer;
 import org.apache.seata.sqlparser.SQLRecognizer;
+import org.apache.seata.sqlparser.struct.ColumnMeta;
 import org.apache.seata.sqlparser.struct.Defaultable;
 import org.apache.seata.sqlparser.struct.Sequenceable;
+import org.apache.seata.sqlparser.struct.SqlDefaultExpr;
 import org.apache.seata.sqlparser.struct.SqlMethodExpr;
 import org.apache.seata.sqlparser.struct.SqlSequenceExpr;
-import org.apache.seata.sqlparser.struct.SqlDefaultExpr;
 import org.apache.seata.sqlparser.util.ColumnUtils;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
@@ -59,8 +59,8 @@ public class PostgresqlInsertExecutor extends BaseInsertExecutor implements Sequ
      * @param statementCallback the statement callback
      * @param sqlRecognizer     the sql recognizer
      */
-    public PostgresqlInsertExecutor(StatementProxy statementProxy, StatementCallback statementCallback,
-                                    SQLRecognizer sqlRecognizer) {
+    public PostgresqlInsertExecutor(
+            StatementProxy statementProxy, StatementCallback statementCallback, SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }
 
@@ -101,7 +101,7 @@ public class PostgresqlInsertExecutor extends BaseInsertExecutor implements Sequ
      * @return true: contain at least one pk column. false: do not contain any pk columns
      */
     public boolean containsAnyPk() {
-        SQLInsertRecognizer recognizer = (SQLInsertRecognizer)sqlRecognizer;
+        SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
         List<String> insertColumns = recognizer.getInsertColumns();
         if (CollectionUtils.isEmpty(insertColumns)) {
             return false;
@@ -111,8 +111,9 @@ public class PostgresqlInsertExecutor extends BaseInsertExecutor implements Sequ
             return false;
         }
         List<String> newColumns = ColumnUtils.delEscape(insertColumns, getDbType());
-        return pkColumnNameList.stream().anyMatch(pkColumn -> newColumns.contains(pkColumn)
-            || CollectionUtils.toUpperList(newColumns).contains(pkColumn.toUpperCase()));
+        return pkColumnNameList.stream()
+                .anyMatch(pkColumn -> newColumns.contains(pkColumn)
+                        || CollectionUtils.toUpperList(newColumns).contains(pkColumn.toUpperCase()));
     }
 
     @Override
@@ -123,7 +124,10 @@ public class PostgresqlInsertExecutor extends BaseInsertExecutor implements Sequ
             List<Object> pkValues = pkValuesMap.get(pkKey);
             for (int i = 0; i < pkValues.size(); i++) {
                 if (!pkKey.isEmpty() && pkValues.get(i) instanceof SqlSequenceExpr) {
-                    pkValues.set(i, getPkValuesBySequence((SqlSequenceExpr) pkValues.get(i), pkKey).get(0));
+                    pkValues.set(
+                            i,
+                            getPkValuesBySequence((SqlSequenceExpr) pkValues.get(i), pkKey)
+                                    .get(0));
                 } else if (!pkKey.isEmpty() && pkValues.get(i) instanceof SqlMethodExpr) {
                     pkValues.set(i, getGeneratedKeys(pkKey).get(0));
                 } else if (!pkValues.isEmpty() && pkValues.get(i) instanceof SqlDefaultExpr) {
@@ -182,5 +186,4 @@ public class PostgresqlInsertExecutor extends BaseInsertExecutor implements Sequ
     public String getSequenceSql(SqlSequenceExpr expr) {
         return "SELECT currval(" + expr.getSequence() + ")";
     }
-
 }

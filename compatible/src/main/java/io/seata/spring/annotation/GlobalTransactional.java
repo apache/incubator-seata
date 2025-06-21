@@ -16,15 +16,15 @@
  */
 package io.seata.spring.annotation;
 
+import io.seata.common.LockStrategyMode;
+import io.seata.tm.api.transaction.Propagation;
+import org.apache.seata.common.DefaultValues;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
-import io.seata.common.LockStrategyMode;
-import io.seata.tm.api.transaction.Propagation;
-import org.apache.seata.common.DefaultValues;
 
 @Deprecated
 @Retention(RetentionPolicy.RUNTIME)
@@ -117,5 +117,4 @@ public @interface GlobalTransactional {
      * @return lock strategy mode
      */
     LockStrategyMode lockStrategyMode() default LockStrategyMode.PESSIMISTIC;
-
 }

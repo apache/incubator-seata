@@ -16,11 +16,6 @@
  */
 package org.apache.seata.console.utils;
 
-import java.util.Date;
-import java.util.List;
-
-import javax.crypto.spec.SecretKeySpec;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -38,6 +33,10 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
+
+import javax.crypto.spec.SecretKeySpec;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Jwt token tool
@@ -80,13 +79,17 @@ public class JwtTokenUtils {
         /**
          * Key
          */
-        SecretKeySpec secretKeySpec = new SecretKeySpec(Decoders.BASE64.decode(secretKey),
-            SignatureAlgorithm.HS256.getJcaName());
+        SecretKeySpec secretKeySpec =
+                new SecretKeySpec(Decoders.BASE64.decode(secretKey), SignatureAlgorithm.HS256.getJcaName());
         /**
          * create token
          */
-        return Jwts.builder().setSubject(authentication.getName()).claim(AUTHORITIES_KEY, "").setExpiration(
-            expirationDate).signWith(secretKeySpec, SignatureAlgorithm.HS256).compact();
+        return Jwts.builder()
+                .setSubject(authentication.getName())
+                .claim(AUTHORITIES_KEY, "")
+                .setExpiration(expirationDate)
+                .signWith(secretKeySpec, SignatureAlgorithm.HS256)
+                .compact();
     }
 
     /**
@@ -99,10 +102,11 @@ public class JwtTokenUtils {
         /**
          *  parse the payload of token
          */
-        Claims claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
+        Claims claims =
+                Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
 
-        List<GrantedAuthority> authorities = AuthorityUtils.commaSeparatedStringToAuthorityList(
-            (String)claims.get(AUTHORITIES_KEY));
+        List<GrantedAuthority> authorities =
+                AuthorityUtils.commaSeparatedStringToAuthorityList((String) claims.get(AUTHORITIES_KEY));
 
         User principal = new User(claims.getSubject(), "", authorities);
         return new UsernamePasswordAuthenticationToken(principal, "", authorities);

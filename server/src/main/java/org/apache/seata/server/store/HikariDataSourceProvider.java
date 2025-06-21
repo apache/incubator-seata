@@ -63,17 +63,19 @@ public class HikariDataSourceProvider extends AbstractDataSourceProvider {
         config.setInitializationFailTimeout(-1);
         config.setTransactionIsolation(IsolationLevel.TRANSACTION_READ_COMMITTED.name());
         config.setConnectionTestQuery(getValidationQuery(getDBType()));
-        long idleTimeout = CONFIG.getLong(ConfigurationKeys.STORE_DB_HIKARI_IDLE_TIMEOUT, DEFAULT_DB_HIKARI_IDLE_TIMEOUT);
+        long idleTimeout =
+                CONFIG.getLong(ConfigurationKeys.STORE_DB_HIKARI_IDLE_TIMEOUT, DEFAULT_DB_HIKARI_IDLE_TIMEOUT);
         config.setIdleTimeout(idleTimeout < 0 ? DEFAULT_DB_HIKARI_IDLE_TIMEOUT : idleTimeout);
-        long keepaliveTime = CONFIG.getLong(ConfigurationKeys.STORE_DB_HIKARI_KEEPALIVE_TIME, DEFAULT_DB_HIKARI_KEEPALIVE_TIME);
+        long keepaliveTime =
+                CONFIG.getLong(ConfigurationKeys.STORE_DB_HIKARI_KEEPALIVE_TIME, DEFAULT_DB_HIKARI_KEEPALIVE_TIME);
         config.setKeepaliveTime(keepaliveTime < 0 ? DEFAULT_DB_HIKARI_KEEPALIVE_TIME : keepaliveTime);
-        long maxLifeTime = CONFIG.getLong(ConfigurationKeys.STORE_DB_HIKARI_MAX_LIFE_TIME, DEFAULT_DB_HIKARI_MAX_LIFE_TIME);
+        long maxLifeTime =
+                CONFIG.getLong(ConfigurationKeys.STORE_DB_HIKARI_MAX_LIFE_TIME, DEFAULT_DB_HIKARI_MAX_LIFE_TIME);
         config.setMaxLifetime(maxLifeTime < 0 ? DEFAULT_DB_HIKARI_MAX_LIFE_TIME : maxLifeTime);
-        long validationTimeout = CONFIG.getLong(ConfigurationKeys.STORE_DB_HIKARI_VALIDATION_TIMEOUT, DEFAULT_DB_HIKARI_VALIDATION_TIMEOUT);
+        long validationTimeout = CONFIG.getLong(
+                ConfigurationKeys.STORE_DB_HIKARI_VALIDATION_TIMEOUT, DEFAULT_DB_HIKARI_VALIDATION_TIMEOUT);
         config.setValidationTimeout(validationTimeout < 0 ? DEFAULT_DB_HIKARI_VALIDATION_TIMEOUT : validationTimeout);
 
         return new HikariDataSource(config);
-
-
     }
 }

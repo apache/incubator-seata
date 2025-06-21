@@ -63,6 +63,4 @@ public class BranchTypeTest {
     public void testGetException() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> BranchType.get(NONE));
     }
-
-
 }

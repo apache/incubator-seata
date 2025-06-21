@@ -16,35 +16,19 @@
  */
 package org.apache.seata.core.serializer;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
-
 import org.apache.seata.core.exception.TransactionExceptionCode;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.GlobalStatus;
+import org.apache.seata.core.protocol.BatchResultMessage;
 import org.apache.seata.core.protocol.HeartbeatMessage;
 import org.apache.seata.core.protocol.MergeResultMessage;
+import org.apache.seata.core.protocol.MergedWarpMessage;
 import org.apache.seata.core.protocol.RegisterRMRequest;
 import org.apache.seata.core.protocol.RegisterRMResponse;
 import org.apache.seata.core.protocol.RegisterTMRequest;
 import org.apache.seata.core.protocol.RegisterTMResponse;
 import org.apache.seata.core.protocol.ResultCode;
-import org.apache.seata.core.protocol.BatchResultMessage;
-import org.apache.seata.core.protocol.MergedWarpMessage;
 import org.apache.seata.core.protocol.RpcMessage;
 import org.apache.seata.core.protocol.transaction.BranchCommitRequest;
 import org.apache.seata.core.protocol.transaction.BranchCommitResponse;
@@ -67,6 +51,22 @@ import org.apache.seata.core.protocol.transaction.GlobalRollbackResponse;
 import org.apache.seata.core.protocol.transaction.GlobalStatusRequest;
 import org.apache.seata.core.protocol.transaction.GlobalStatusResponse;
 import org.apache.seata.core.protocol.transaction.UndoLogDeleteRequest;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 /**
  * Serializer Security Registry
@@ -115,13 +115,32 @@ public class SerializerSecurityRegistry {
     }
 
     private static Class<?>[] getBasicClassType() {
-        return new Class[] {Boolean.class, Byte.class, Character.class, Double.class, Float.class, Integer.class,
-            Long.class, Short.class, Number.class, Class.class, String.class};
+        return new Class[] {
+            Boolean.class,
+            Byte.class,
+            Character.class,
+            Double.class,
+            Float.class,
+            Integer.class,
+            Long.class,
+            Short.class,
+            Number.class,
+            Class.class,
+            String.class
+        };
     }
 
     private static Class<?>[] getCollectionClassType() {
-        return new Class[] {ArrayList.class, LinkedList.class, HashSet.class,
-            LinkedHashSet.class, TreeSet.class, HashMap.class, LinkedHashMap.class, TreeMap.class};
+        return new Class[] {
+            ArrayList.class,
+            LinkedList.class,
+            HashSet.class,
+            LinkedHashSet.class,
+            TreeSet.class,
+            HashMap.class,
+            LinkedHashMap.class,
+            TreeMap.class
+        };
     }
 
     private static String getSeataClassPattern() {
@@ -129,7 +148,9 @@ public class SerializerSecurityRegistry {
     }
 
     private static String[] getDenyClassPatternList() {
-        return new String[] {"javax.naming.InitialContext", "javax.net.ssl.*", "com.unboundid.ldap.*", "java.lang.Runtime"};
+        return new String[] {
+            "javax.naming.InitialContext", "javax.net.ssl.*", "com.unboundid.ldap.*", "java.lang.Runtime"
+        };
     }
 
     private static Set<Class<?>> getProtocolType() {
@@ -137,7 +158,8 @@ public class SerializerSecurityRegistry {
 
         try {
             String packageName = "org.apache.seata.core.protocol";
-            Enumeration<URL> packageDir = Thread.currentThread().getContextClassLoader().getResources(packageName.replace(".", "/"));
+            Enumeration<URL> packageDir =
+                    Thread.currentThread().getContextClassLoader().getResources(packageName.replace(".", "/"));
             while (packageDir.hasMoreElements()) {
                 String filePath = packageDir.nextElement().getFile();
                 findProtocolClassByPackage(filePath, packageName, classNameSet);
@@ -196,8 +218,8 @@ public class SerializerSecurityRegistry {
             }
             for (File path : files) {
                 if (path.isDirectory()) {
-                    findProtocolClassByPackage(path.getAbsolutePath(), rootPackageName + "." + path.getName(),
-                        classNameSet);
+                    findProtocolClassByPackage(
+                            path.getAbsolutePath(), rootPackageName + "." + path.getName(), classNameSet);
                 } else {
                     findProtocolClassByPackage(path.getAbsolutePath(), rootPackageName, classNameSet);
                 }
@@ -206,10 +228,11 @@ public class SerializerSecurityRegistry {
             if (matchProtocol(file.getName())) {
                 String className = file.getName().substring(0, file.getName().length() - CLASS_POSTFIX.length());
                 try {
-                    classNameSet.add(
-                        Thread.currentThread().getContextClassLoader().loadClass(rootPackageName + '.' + className));
+                    classNameSet.add(Thread.currentThread()
+                            .getContextClassLoader()
+                            .loadClass(rootPackageName + '.' + className));
                 } catch (ClassNotFoundException ignore) {
-                    //ignore interface
+                    // ignore interface
                 }
             }
         }
@@ -223,13 +246,17 @@ public class SerializerSecurityRegistry {
         if (fileName.startsWith(ABSTRACT_CLASS_ID)) {
             return false;
         }
-        if (fileName.contains(REQUEST_CLASS_ID) || fileName.contains(RESPONSE_CLASS_ID) || fileName.endsWith(MESSAGE_CLASS_ID)) {
+        if (fileName.contains(REQUEST_CLASS_ID)
+                || fileName.contains(RESPONSE_CLASS_ID)
+                || fileName.endsWith(MESSAGE_CLASS_ID)) {
             return true;
         }
         return false;
     }
 
     private static Class<?>[] getProtocolInnerFields() {
-        return new Class<?>[] {ResultCode.class, GlobalStatus.class, BranchStatus.class, BranchType.class, TransactionExceptionCode.class};
+        return new Class<?>[] {
+            ResultCode.class, GlobalStatus.class, BranchStatus.class, BranchType.class, TransactionExceptionCode.class
+        };
     }
 }

@@ -16,14 +16,14 @@
  */
 package io.seata.spi;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.ResourceManager;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class SPITest {
 
@@ -31,9 +31,13 @@ public class SPITest {
     public void testRmSPIOrder() {
         EnhancedServiceLoader.unload(ResourceManager.class);
         List<ResourceManager> resourceManagers = EnhancedServiceLoader.loadAll(ResourceManager.class);
-        List<ResourceManager> list = resourceManagers.stream().filter(resourceManager -> resourceManager.getBranchType().equals(BranchType.SAGA)).collect(Collectors.toList());
+        List<ResourceManager> list = resourceManagers.stream()
+                .filter(resourceManager -> resourceManager.getBranchType().equals(BranchType.SAGA))
+                .collect(Collectors.toList());
         Assertions.assertNotNull(list);
         ResourceManager resourceManager = list.get(list.size() - 1);
-        Assertions.assertEquals("io.seata.saga.rm.SagaResourceManager", resourceManager.getClass().getName());
+        Assertions.assertEquals(
+                "io.seata.saga.rm.SagaResourceManager",
+                resourceManager.getClass().getName());
     }
 }

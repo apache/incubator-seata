@@ -16,55 +16,41 @@
  */
 package org.apache.seata.rm.datasource.sql.struct.cache;
 
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.Collections;
-
 import com.alibaba.druid.pool.DruidDataSource;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.rm.datasource.DataSourceProxy;
 import org.apache.seata.rm.datasource.DataSourceProxyTest;
 import org.apache.seata.rm.datasource.mock.MockDriver;
+import org.apache.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import org.apache.seata.sqlparser.struct.ColumnMeta;
 import org.apache.seata.sqlparser.struct.IndexMeta;
 import org.apache.seata.sqlparser.struct.IndexType;
 import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.sqlparser.struct.TableMetaCache;
-import org.apache.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static org.mockito.Mockito.mock;
-
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.Collections;
 
 public class SqlServerTableMetaCacheTest {
-    private static Object[][] columnMetas =
-            new Object[][]{
-                    new Object[]{"", "", "st1", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
-                    new Object[]{"", "", "st1", "name1", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES",
-                            "NO"},
-                    new Object[]{"", "", "st1", "name2", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 3, "YES",
-                            "NO"},
-                    new Object[]{"", "", "st1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 4, "YES",
-                            "NO"}
-            };
-    private static Object[][] indexMetas =
-            new Object[][]{
-                    new Object[]{"id", "id", false, "", 3, 0, "A", 34L},
-                    new Object[]{"name1", "name1", false, "", 3, 1, "A", 34L},
-                    new Object[]{"name2", "name2", true, "", 3, 2, "A", 34L},
-            };
+    private static Object[][] columnMetas = new Object[][] {
+        new Object[] {"", "", "st1", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
+        new Object[] {"", "", "st1", "name1", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
+        new Object[] {"", "", "st1", "name2", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 3, "YES", "NO"},
+        new Object[] {"", "", "st1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 4, "YES", "NO"}
+    };
+    private static Object[][] indexMetas = new Object[][] {
+        new Object[] {"id", "id", false, "", 3, 0, "A", 34L},
+        new Object[] {"name1", "name1", false, "", 3, 1, "A", 34L},
+        new Object[] {"name2", "name2", true, "", 3, 2, "A", 34L},
+    };
 
-    private static Object[][] pkMetas =
-            new Object[][]{
-                    new Object[]{"id"}
-            };
+    private static Object[][] pkMetas = new Object[][] {new Object[] {"id"}};
 
-    private static Object[][] tableMetas =
-            new Object[][]{
-                    new Object[]{"", "m", "st1"}
-            };
+    private static Object[][] tableMetas = new Object[][] {new Object[] {"", "m", "st1"}};
 
     private TableMetaCache getTableMetaCache() {
         return TableMetaCacheFactory.getTableMetaCache(JdbcConstants.SQLSERVER);
@@ -74,8 +60,7 @@ public class SqlServerTableMetaCacheTest {
     public void testTableMeta() {
         TableMetaCache tableMetaCache = getTableMetaCache();
         Assertions.assertNotNull(tableMetaCache);
-        Assertions.assertThrows(IllegalArgumentException.class,
-                () -> tableMetaCache.getTableMeta(null, null, null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> tableMetaCache.getTableMeta(null, null, null));
     }
 
     /**
@@ -91,7 +76,8 @@ public class SqlServerTableMetaCacheTest {
 
         DataSourceProxy proxy = DataSourceProxyTest.getDataSourceProxy(dataSource);
 
-        TableMeta tableMeta = getTableMetaCache().getTableMeta(proxy.getPlainConnection(), "m.st1", proxy.getResourceId());
+        TableMeta tableMeta =
+                getTableMetaCache().getTableMeta(proxy.getPlainConnection(), "m.st1", proxy.getResourceId());
 
         Assertions.assertEquals("m.st1", tableMeta.getTableName());
         Assertions.assertEquals("m.st1", tableMeta.getOriginalTableName());
@@ -112,13 +98,13 @@ public class SqlServerTableMetaCacheTest {
         Assertions.assertEquals(indexMetas.length, tableMeta.getAllIndexes().size());
 
         assertIndexMetaEquals(indexMetas[0], tableMeta.getAllIndexes().get("id"));
-        Assertions.assertEquals(IndexType.PRIMARY, tableMeta.getAllIndexes().get("id").getIndextype());
+        Assertions.assertEquals(
+                IndexType.PRIMARY, tableMeta.getAllIndexes().get("id").getIndextype());
         assertIndexMetaEquals(indexMetas[1], tableMeta.getAllIndexes().get("name1"));
-        Assertions.assertEquals(IndexType.UNIQUE, tableMeta.getAllIndexes().get("name1").getIndextype());
+        Assertions.assertEquals(
+                IndexType.UNIQUE, tableMeta.getAllIndexes().get("name1").getIndextype());
 
-        indexMetas =
-                new Object[][]{
-                };
+        indexMetas = new Object[][] {};
         mockDriver.setMockIndexMetasReturnValue(indexMetas);
         Assertions.assertThrows(ShouldNeverHappenException.class, () -> {
             getTableMetaCache().getTableMeta(proxy.getPlainConnection(), "st2", proxy.getResourceId());
@@ -129,7 +115,7 @@ public class SqlServerTableMetaCacheTest {
             getTableMetaCache().getTableMeta(proxy.getPlainConnection(), "st2", proxy.getResourceId());
         });
 
-        //can not cover the way to get from connection because the mockConnection not support
+        // can not cover the way to get from connection because the mockConnection not support
     }
 
     private void assertColumnMetaEquals(Object[] expected, ColumnMeta actual) {

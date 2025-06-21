@@ -16,8 +16,8 @@
  */
 package io.seata.core.serializer;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit test for Serializer interface
@@ -48,31 +48,29 @@ public class SerializerTest {
     @Test
     public void testSerializerInterfaceInheritance() {
         // Test that Serializer extends from Apache Seata's Serializer
-        Assertions.assertTrue(org.apache.seata.core.serializer.Serializer.class
-                .isAssignableFrom(Serializer.class));
+        Assertions.assertTrue(org.apache.seata.core.serializer.Serializer.class.isAssignableFrom(Serializer.class));
     }
 
     @Test
     public void testDeprecationAnnotation() {
         // Test that the Serializer interface is marked as deprecated
-        Assertions.assertTrue(Serializer.class.isAnnotationPresent(Deprecated.class),
-                "Serializer should be marked as @Deprecated");
+        Assertions.assertTrue(
+                Serializer.class.isAnnotationPresent(Deprecated.class), "Serializer should be marked as @Deprecated");
     }
 
     @Test
     public void testInterfaceStructure() {
         // Test interface modifiers
         int modifiers = Serializer.class.getModifiers();
-        Assertions.assertTrue(java.lang.reflect.Modifier.isInterface(modifiers),
-                "Serializer should be an interface");
-        Assertions.assertTrue(java.lang.reflect.Modifier.isPublic(modifiers),
-                "Serializer should be public");
+        Assertions.assertTrue(java.lang.reflect.Modifier.isInterface(modifiers), "Serializer should be an interface");
+        Assertions.assertTrue(java.lang.reflect.Modifier.isPublic(modifiers), "Serializer should be public");
     }
 
     @Test
     public void testPackageName() {
         // Test that the package is the expected compatible package
-        Assertions.assertEquals("io.seata.core.serializer", 
+        Assertions.assertEquals(
+                "io.seata.core.serializer",
                 Serializer.class.getPackage().getName(),
                 "Serializer should be in io.seata.core.serializer package");
     }
@@ -81,7 +79,7 @@ public class SerializerTest {
     public void testMethodInheritance() throws Exception {
         // Test that the interface has the expected methods from the parent interface
         MockSerializer mockSerializer = new MockSerializer();
-        
+
         // Test that the mock serializer implements both interfaces
         Assertions.assertTrue(mockSerializer instanceof Serializer);
         Assertions.assertTrue(mockSerializer instanceof org.apache.seata.core.serializer.Serializer);
@@ -92,7 +90,7 @@ public class SerializerTest {
         // Test that compatible Serializer can be used wherever Apache Seata Serializer is expected
         MockSerializer compatibleSerializer = new MockSerializer();
         org.apache.seata.core.serializer.Serializer apacheSerializer = compatibleSerializer;
-        
+
         Assertions.assertNotNull(apacheSerializer);
         Assertions.assertSame(compatibleSerializer, apacheSerializer);
     }
@@ -101,14 +99,14 @@ public class SerializerTest {
     public void testImplementationFunctionality() {
         // Test basic functionality of a mock implementation
         MockSerializer serializer = new MockSerializer();
-        
+
         String testObject = "Hello World";
-        
+
         // Test serialize method
         byte[] serialized = serializer.serialize(testObject);
         Assertions.assertNotNull(serialized);
         Assertions.assertTrue(serialized.length > 0);
-        
+
         // Test deserialize method
         String deserialized = serializer.deserialize(serialized);
         Assertions.assertNotNull(deserialized);
@@ -121,7 +119,7 @@ public class SerializerTest {
         java.lang.reflect.Method serializeMethod = Serializer.class.getMethod("serialize", Object.class);
         Assertions.assertNotNull(serializeMethod);
         Assertions.assertEquals(byte[].class, serializeMethod.getReturnType());
-        
+
         java.lang.reflect.Method deserializeMethod = Serializer.class.getMethod("deserialize", byte[].class);
         Assertions.assertNotNull(deserializeMethod);
         Assertions.assertEquals(Object.class, deserializeMethod.getReturnType());
@@ -133,7 +131,7 @@ public class SerializerTest {
         MockSerializer mockSerializer = new MockSerializer();
         Serializer serializer = mockSerializer;
         Object obj = serializer;
-        
+
         Assertions.assertTrue(obj instanceof org.apache.seata.core.serializer.Serializer);
         Assertions.assertTrue(obj instanceof Serializer);
     }
@@ -142,18 +140,18 @@ public class SerializerTest {
     public void testGenericMethods() {
         // Test generic method usage
         MockSerializer serializer = new MockSerializer();
-        
+
         // Test with different types
         Integer intValue = 42;
         byte[] intSerialized = serializer.serialize(intValue);
         String intDeserialized = serializer.deserialize(intSerialized);
         Assertions.assertEquals("42", intDeserialized);
-        
+
         // Test with null
         byte[] nullSerialized = serializer.serialize(null);
         Assertions.assertNotNull(nullSerialized);
         Assertions.assertEquals(0, nullSerialized.length);
-        
+
         String nullDeserialized = serializer.deserialize(null);
         Assertions.assertNull(nullDeserialized);
     }
@@ -162,9 +160,9 @@ public class SerializerTest {
     public void testMethodSignatures() {
         // Test that all required methods are present with correct signatures
         java.lang.reflect.Method[] methods = Serializer.class.getMethods();
-        
+
         boolean hasSerialize = false, hasDeserialize = false;
-        
+
         for (java.lang.reflect.Method method : methods) {
             if (method.getName().equals("serialize") && method.getParameterCount() == 1) {
                 hasSerialize = true;
@@ -172,8 +170,8 @@ public class SerializerTest {
                 hasDeserialize = true;
             }
         }
-        
+
         Assertions.assertTrue(hasSerialize, "Serializer should have serialize method");
         Assertions.assertTrue(hasDeserialize, "Serializer should have deserialize method");
     }
-} 
+}

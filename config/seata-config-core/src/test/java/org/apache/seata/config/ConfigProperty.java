@@ -16,10 +16,8 @@
  */
 package org.apache.seata.config;
 
-
 public interface ConfigProperty {
     final String ENV_PROPERTY_KEY = "seataEnv";
     final String SYSTEM_PROPERTY_SEATA_CONFIG_NAME = "seata.config.name";
     final String REGISTRY_CONF_DEFAULT = "registry";
-
 }

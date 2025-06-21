@@ -32,7 +32,8 @@ public class GlobalStatusTest {
     @Test
     public void testDeprecatedAnnotation() {
         // Test that GlobalStatus is marked as @Deprecated
-        assertTrue(GlobalStatus.class.isAnnotationPresent(Deprecated.class),
+        assertTrue(
+                GlobalStatus.class.isAnnotationPresent(Deprecated.class),
                 "GlobalStatus should be marked as @Deprecated");
     }
 
@@ -106,68 +107,77 @@ public class GlobalStatusTest {
     @Test
     public void testGetInvalidCode() {
         // Test that invalid codes throw IllegalArgumentException
-        assertThrows(IllegalArgumentException.class, () -> GlobalStatus.get(-1),
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> GlobalStatus.get(-1),
                 "Should throw IllegalArgumentException for negative code");
-        assertThrows(IllegalArgumentException.class, () -> GlobalStatus.get(100),
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> GlobalStatus.get(100),
                 "Should throw IllegalArgumentException for code > max value");
-        assertThrows(IllegalArgumentException.class, () -> GlobalStatus.get(GlobalStatus.values().length),
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> GlobalStatus.get(GlobalStatus.values().length),
                 "Should throw IllegalArgumentException for code >= values length");
     }
 
     @Test
     public void testIsOnePhaseTimeout() {
         // Test timeout status detection
-        assertTrue(GlobalStatus.isOnePhaseTimeout(GlobalStatus.TimeoutRollbacking),
+        assertTrue(
+                GlobalStatus.isOnePhaseTimeout(GlobalStatus.TimeoutRollbacking),
                 "TimeoutRollbacking should be one phase timeout");
-        assertTrue(GlobalStatus.isOnePhaseTimeout(GlobalStatus.TimeoutRollbackRetrying),
+        assertTrue(
+                GlobalStatus.isOnePhaseTimeout(GlobalStatus.TimeoutRollbackRetrying),
                 "TimeoutRollbackRetrying should be one phase timeout");
-        assertTrue(GlobalStatus.isOnePhaseTimeout(GlobalStatus.TimeoutRollbacked),
+        assertTrue(
+                GlobalStatus.isOnePhaseTimeout(GlobalStatus.TimeoutRollbacked),
                 "TimeoutRollbacked should be one phase timeout");
-        assertTrue(GlobalStatus.isOnePhaseTimeout(GlobalStatus.TimeoutRollbackFailed),
+        assertTrue(
+                GlobalStatus.isOnePhaseTimeout(GlobalStatus.TimeoutRollbackFailed),
                 "TimeoutRollbackFailed should be one phase timeout");
 
         // Test non-timeout statuses
-        assertFalse(GlobalStatus.isOnePhaseTimeout(GlobalStatus.Begin),
-                "Begin should not be one phase timeout");
-        assertFalse(GlobalStatus.isOnePhaseTimeout(GlobalStatus.Committed),
-                "Committed should not be one phase timeout");
-        assertFalse(GlobalStatus.isOnePhaseTimeout(GlobalStatus.Rollbacked),
-                "Rollbacked should not be one phase timeout");
+        assertFalse(GlobalStatus.isOnePhaseTimeout(GlobalStatus.Begin), "Begin should not be one phase timeout");
+        assertFalse(
+                GlobalStatus.isOnePhaseTimeout(GlobalStatus.Committed), "Committed should not be one phase timeout");
+        assertFalse(
+                GlobalStatus.isOnePhaseTimeout(GlobalStatus.Rollbacked), "Rollbacked should not be one phase timeout");
     }
 
     @Test
     public void testIsTwoPhaseSuccess() {
         // Test two phase success status detection
-        assertTrue(GlobalStatus.isTwoPhaseSuccess(GlobalStatus.Committed),
-                "Committed should be two phase success");
-        assertTrue(GlobalStatus.isTwoPhaseSuccess(GlobalStatus.Rollbacked),
-                "Rollbacked should be two phase success");
-        assertTrue(GlobalStatus.isTwoPhaseSuccess(GlobalStatus.TimeoutRollbacked),
+        assertTrue(GlobalStatus.isTwoPhaseSuccess(GlobalStatus.Committed), "Committed should be two phase success");
+        assertTrue(GlobalStatus.isTwoPhaseSuccess(GlobalStatus.Rollbacked), "Rollbacked should be two phase success");
+        assertTrue(
+                GlobalStatus.isTwoPhaseSuccess(GlobalStatus.TimeoutRollbacked),
                 "TimeoutRollbacked should be two phase success");
 
         // Test non-success statuses
-        assertFalse(GlobalStatus.isTwoPhaseSuccess(GlobalStatus.Begin),
-                "Begin should not be two phase success");
-        assertFalse(GlobalStatus.isTwoPhaseSuccess(GlobalStatus.Committing),
-                "Committing should not be two phase success");
-        assertFalse(GlobalStatus.isTwoPhaseSuccess(GlobalStatus.CommitFailed),
+        assertFalse(GlobalStatus.isTwoPhaseSuccess(GlobalStatus.Begin), "Begin should not be two phase success");
+        assertFalse(
+                GlobalStatus.isTwoPhaseSuccess(GlobalStatus.Committing), "Committing should not be two phase success");
+        assertFalse(
+                GlobalStatus.isTwoPhaseSuccess(GlobalStatus.CommitFailed),
                 "CommitFailed should not be two phase success");
-        assertFalse(GlobalStatus.isTwoPhaseSuccess(GlobalStatus.RollbackFailed),
+        assertFalse(
+                GlobalStatus.isTwoPhaseSuccess(GlobalStatus.RollbackFailed),
                 "RollbackFailed should not be two phase success");
     }
 
     @Test
     public void testIsTwoPhaseHeuristic() {
         // Test two phase heuristic status detection
-        assertTrue(GlobalStatus.isTwoPhaseHeuristic(GlobalStatus.Finished),
-                "Finished should be two phase heuristic");
+        assertTrue(GlobalStatus.isTwoPhaseHeuristic(GlobalStatus.Finished), "Finished should be two phase heuristic");
 
         // Test non-heuristic statuses
-        assertFalse(GlobalStatus.isTwoPhaseHeuristic(GlobalStatus.Begin),
-                "Begin should not be two phase heuristic");
-        assertFalse(GlobalStatus.isTwoPhaseHeuristic(GlobalStatus.Committed),
+        assertFalse(GlobalStatus.isTwoPhaseHeuristic(GlobalStatus.Begin), "Begin should not be two phase heuristic");
+        assertFalse(
+                GlobalStatus.isTwoPhaseHeuristic(GlobalStatus.Committed),
                 "Committed should not be two phase heuristic");
-        assertFalse(GlobalStatus.isTwoPhaseHeuristic(GlobalStatus.Rollbacked),
+        assertFalse(
+                GlobalStatus.isTwoPhaseHeuristic(GlobalStatus.Rollbacked),
                 "Rollbacked should not be two phase heuristic");
     }
 
@@ -177,8 +187,8 @@ public class GlobalStatusTest {
         for (GlobalStatus status : GlobalStatus.values()) {
             org.apache.seata.core.model.GlobalStatus converted = status.convertGlobalStatus();
             assertNotNull(converted, "Converted status should not be null for: " + status);
-            assertEquals(status.getCode(), converted.getCode(),
-                    "Converted status should have same code for: " + status);
+            assertEquals(
+                    status.getCode(), converted.getCode(), "Converted status should have same code for: " + status);
         }
     }
 
@@ -204,8 +214,7 @@ public class GlobalStatusTest {
     public void testEnumOrdinals() {
         // Test that ordinals match codes for consistent ordering
         for (GlobalStatus status : GlobalStatus.values()) {
-            assertEquals(status.ordinal(), status.getCode(),
-                    "Ordinal should match code for status: " + status);
+            assertEquals(status.ordinal(), status.getCode(), "Ordinal should match code for status: " + status);
         }
     }
 
@@ -213,21 +222,21 @@ public class GlobalStatusTest {
     public void testPhaseStatusGroups() {
         // Test phase 1 statuses
         assertEquals(1, GlobalStatus.Begin.getCode(), "Begin should be phase 1");
-        
+
         // Test phase 2 running statuses (transient states)
-        assertTrue(GlobalStatus.Committing.getCode() >= 2 && GlobalStatus.Committing.getCode() <= 8,
+        assertTrue(
+                GlobalStatus.Committing.getCode() >= 2 && GlobalStatus.Committing.getCode() <= 8,
                 "Committing should be in phase 2 running range");
-        assertTrue(GlobalStatus.Rollbacking.getCode() >= 2 && GlobalStatus.Rollbacking.getCode() <= 8,
+        assertTrue(
+                GlobalStatus.Rollbacking.getCode() >= 2 && GlobalStatus.Rollbacking.getCode() <= 8,
                 "Rollbacking should be in phase 2 running range");
-        assertTrue(GlobalStatus.AsyncCommitting.getCode() >= 2 && GlobalStatus.AsyncCommitting.getCode() <= 8,
+        assertTrue(
+                GlobalStatus.AsyncCommitting.getCode() >= 2 && GlobalStatus.AsyncCommitting.getCode() <= 8,
                 "AsyncCommitting should be in phase 2 running range");
-        
+
         // Test phase 2 final statuses
-        assertTrue(GlobalStatus.Committed.getCode() >= 9,
-                "Committed should be in final status range");
-        assertTrue(GlobalStatus.Rollbacked.getCode() >= 9,
-                "Rollbacked should be in final status range");
-        assertTrue(GlobalStatus.Finished.getCode() >= 9,
-                "Finished should be in final status range");
+        assertTrue(GlobalStatus.Committed.getCode() >= 9, "Committed should be in final status range");
+        assertTrue(GlobalStatus.Rollbacked.getCode() >= 9, "Rollbacked should be in final status range");
+        assertTrue(GlobalStatus.Finished.getCode() >= 9, "Finished should be in final status range");
     }
-} 
+}

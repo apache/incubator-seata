@@ -35,11 +35,11 @@ import io.netty.handler.codec.http.QueryStringDecoder;
 import io.netty.handler.codec.http.multipart.Attribute;
 import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
 import io.netty.handler.codec.http.multipart.InterfaceHttpData;
+import org.apache.seata.common.rpc.http.HttpContext;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.core.rpc.netty.NettyServerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.seata.common.rpc.http.HttpContext;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.ExecutorService;
@@ -66,8 +66,7 @@ public class HttpDispatchHandler extends SimpleChannelInboundHandler<HttpRequest
             TimeUnit.SECONDS,
             new LinkedBlockingQueue<>(NettyServerConfig.getMaxHttpTaskQueueSize()),
             new NamedThreadFactory("HTTPHandlerThread", NettyServerConfig.getMaxHttpPoolSize()),
-            new ThreadPoolExecutor.AbortPolicy()
-    );
+            new ThreadPoolExecutor.AbortPolicy());
 
     static {
         Runtime.getRuntime().addShutdownHook(new Thread(HTTP_HANDLER_THREADS::shutdown));
@@ -76,7 +75,8 @@ public class HttpDispatchHandler extends SimpleChannelInboundHandler<HttpRequest
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, HttpRequest httpRequest) {
         try {
-            boolean keepAlive = HttpUtil.isKeepAlive(httpRequest) && httpRequest.protocolVersion().isKeepAliveDefault();
+            boolean keepAlive = HttpUtil.isKeepAlive(httpRequest)
+                    && httpRequest.protocolVersion().isKeepAliveDefault();
             QueryStringDecoder queryStringDecoder = new QueryStringDecoder(httpRequest.uri());
             String path = queryStringDecoder.path();
             HttpInvocation httpInvocation = ControllerManager.getHttpInvocation(path);
@@ -112,8 +112,8 @@ public class HttpDispatchHandler extends SimpleChannelInboundHandler<HttpRequest
 
             Object httpController = httpInvocation.getController();
             Method handleMethod = httpInvocation.getMethod();
-            Object[] args = ParameterParser.getArgValues(httpInvocation.getParamMetaData(), handleMethod,
-                    requestDataNode, httpContext);
+            Object[] args = ParameterParser.getArgValues(
+                    httpInvocation.getParamMetaData(), handleMethod, requestDataNode, httpContext);
 
             try {
                 HTTP_HANDLER_THREADS.execute(() -> {
@@ -142,16 +142,17 @@ public class HttpDispatchHandler extends SimpleChannelInboundHandler<HttpRequest
         }
     }
 
-    private void sendResponse(ChannelHandlerContext ctx, boolean keepAlive, Object result) throws JsonProcessingException {
+    private void sendResponse(ChannelHandlerContext ctx, boolean keepAlive, Object result)
+            throws JsonProcessingException {
         FullHttpResponse response;
         if (result != null) {
             byte[] body = OBJECT_MAPPER.writeValueAsBytes(result);
-            response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK,
-                    Unpooled.wrappedBuffer(body));
+            response = new DefaultFullHttpResponse(
+                    HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.wrappedBuffer(body));
             response.headers().set(HttpHeaderNames.CONTENT_LENGTH, body.length);
         } else {
-            response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK,
-                    Unpooled.wrappedBuffer(Unpooled.EMPTY_BUFFER));
+            response = new DefaultFullHttpResponse(
+                    HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.wrappedBuffer(Unpooled.EMPTY_BUFFER));
         }
         if (!keepAlive) {
             ctx.writeAndFlush(response).addListeners(ChannelFutureListener.CLOSE);
@@ -161,8 +162,8 @@ public class HttpDispatchHandler extends SimpleChannelInboundHandler<HttpRequest
     }
 
     private void sendErrorResponse(ChannelHandlerContext ctx, HttpResponseStatus status, boolean keepAlive) {
-        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status,
-                Unpooled.wrappedBuffer(Unpooled.EMPTY_BUFFER));
+        FullHttpResponse response = new DefaultFullHttpResponse(
+                HttpVersion.HTTP_1_1, status, Unpooled.wrappedBuffer(Unpooled.EMPTY_BUFFER));
         if (!keepAlive) {
             ctx.writeAndFlush(response).addListeners(ChannelFutureListener.CLOSE);
         } else {
@@ -170,4 +171,3 @@ public class HttpDispatchHandler extends SimpleChannelInboundHandler<HttpRequest
         }
     }
 }
-

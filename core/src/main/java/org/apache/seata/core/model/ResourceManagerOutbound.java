@@ -36,8 +36,14 @@ public interface ResourceManagerOutbound {
      * @return the long
      * @throws TransactionException the transaction exception
      */
-    Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws
-        TransactionException;
+    Long branchRegister(
+            BranchType branchType,
+            String resourceId,
+            String clientId,
+            String xid,
+            String applicationData,
+            String lockKeys)
+            throws TransactionException;
 
     /**
      * Branch report.
@@ -49,7 +55,8 @@ public interface ResourceManagerOutbound {
      * @param applicationData the application data
      * @throws TransactionException the transaction exception
      */
-    void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status, String applicationData) throws TransactionException;
+    void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status, String applicationData)
+            throws TransactionException;
 
     /**
      * Lock query boolean.
@@ -62,5 +69,5 @@ public interface ResourceManagerOutbound {
      * @throws TransactionException the transaction exception
      */
     boolean lockQuery(BranchType branchType, String resourceId, String xid, String lockKeys)
-        throws TransactionException;
+            throws TransactionException;
 }

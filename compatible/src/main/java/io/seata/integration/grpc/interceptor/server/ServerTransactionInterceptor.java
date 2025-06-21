@@ -21,6 +21,4 @@ package io.seata.integration.grpc.interceptor.server;
  */
 @Deprecated
 public class ServerTransactionInterceptor
-    extends org.apache.seata.integration.grpc.interceptor.server.ServerTransactionInterceptor {
-
-}
+        extends org.apache.seata.integration.grpc.interceptor.server.ServerTransactionInterceptor {}

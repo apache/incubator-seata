@@ -16,11 +16,9 @@
  */
 package org.apache.seata.common.loader;
 
-
 /**
  * The interface Hello1.
  *
  * @date 2022/5/22 11:07 下午
  */
-public interface Hello1 {
-}
+public interface Hello1 {}

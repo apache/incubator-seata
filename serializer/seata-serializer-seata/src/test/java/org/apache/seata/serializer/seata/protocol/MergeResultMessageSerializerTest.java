@@ -16,14 +16,15 @@
  */
 package org.apache.seata.serializer.seata.protocol;
 
-import org.apache.seata.serializer.seata.SeataSerializer;
 import org.apache.seata.core.exception.TransactionExceptionCode;
 import org.apache.seata.core.protocol.AbstractResultMessage;
 import org.apache.seata.core.protocol.MergeResultMessage;
+import org.apache.seata.core.protocol.ProtocolConstants;
 import org.apache.seata.core.protocol.ResultCode;
 import org.apache.seata.core.protocol.transaction.GlobalBeginResponse;
+import org.apache.seata.serializer.seata.SeataSerializer;
 import org.junit.jupiter.api.Test;
-import org.apache.seata.core.protocol.ProtocolConstants;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -41,7 +42,7 @@ public class MergeResultMessageSerializerTest {
      * Test codec.
      */
     @Test
-    public void test_codec(){
+    public void test_codec() {
         MergeResultMessage mergeResultMessage = new MergeResultMessage();
         final AbstractResultMessage[] msgs = new AbstractResultMessage[2];
         final GlobalBeginResponse globalBeginResponse1 = buildGlobalBeginResponse("a1");
@@ -60,16 +61,16 @@ public class MergeResultMessageSerializerTest {
         assertThat(globalBeginResponse21.getExtraData()).isEqualTo(globalBeginResponse1.getExtraData());
         assertThat(globalBeginResponse21.getMsg()).isEqualTo(globalBeginResponse1.getMsg());
         assertThat(globalBeginResponse21.getResultCode()).isEqualTo(globalBeginResponse1.getResultCode());
-        assertThat(globalBeginResponse21.getTransactionExceptionCode()).isEqualTo(globalBeginResponse1.getTransactionExceptionCode());
-
+        assertThat(globalBeginResponse21.getTransactionExceptionCode())
+                .isEqualTo(globalBeginResponse1.getTransactionExceptionCode());
 
         GlobalBeginResponse globalBeginResponse22 = (GlobalBeginResponse) mergeResultMessage2.msgs[1];
         assertThat(globalBeginResponse22.getXid()).isEqualTo(globalBeginResponse2.getXid());
         assertThat(globalBeginResponse22.getExtraData()).isEqualTo(globalBeginResponse2.getExtraData());
         assertThat(globalBeginResponse22.getMsg()).isEqualTo(globalBeginResponse2.getMsg());
         assertThat(globalBeginResponse22.getResultCode()).isEqualTo(globalBeginResponse2.getResultCode());
-        assertThat(globalBeginResponse22.getTransactionExceptionCode()).isEqualTo(globalBeginResponse2.getTransactionExceptionCode());
-
+        assertThat(globalBeginResponse22.getTransactionExceptionCode())
+                .isEqualTo(globalBeginResponse2.getTransactionExceptionCode());
     }
 
     private GlobalBeginResponse buildGlobalBeginResponse(String xid) {

@@ -16,9 +16,6 @@
  */
 package org.apache.seata.core.rpc.netty.v1;
 
-import java.util.List;
-import java.util.Map;
-
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
@@ -35,6 +32,8 @@ import org.apache.seata.core.serializer.SerializerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+import java.util.Map;
 
 /**
  * <pre>
@@ -88,8 +87,7 @@ public class ProtocolDecoderV1 extends LengthFieldBasedFrameDecoder implements P
     public RpcMessage decodeFrame(ByteBuf frame) {
         byte b0 = frame.readByte();
         byte b1 = frame.readByte();
-        if (ProtocolConstants.MAGIC_CODE_BYTES[0] != b0
-            || ProtocolConstants.MAGIC_CODE_BYTES[1] != b1) {
+        if (ProtocolConstants.MAGIC_CODE_BYTES[0] != b0 || ProtocolConstants.MAGIC_CODE_BYTES[1] != b1) {
             throw new IllegalArgumentException("Unknown magic code: " + b0 + ", " + b1);
         }
 
@@ -146,7 +144,7 @@ public class ProtocolDecoderV1 extends LengthFieldBasedFrameDecoder implements P
         try {
             decoded = super.decode(ctx, in);
             if (decoded instanceof ByteBuf) {
-                ByteBuf frame = (ByteBuf)decoded;
+                ByteBuf frame = (ByteBuf) decoded;
                 try {
                     return decodeFrame(frame);
                 } finally {
@@ -159,5 +157,4 @@ public class ProtocolDecoderV1 extends LengthFieldBasedFrameDecoder implements P
         }
         return decoded;
     }
-
 }

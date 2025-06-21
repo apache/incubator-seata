@@ -16,14 +16,14 @@
  */
 package org.apache.seata.metrics.registry.compact;
 
-import java.util.Arrays;
-
 import org.apache.seata.metrics.Clock;
 import org.apache.seata.metrics.Id;
+import org.apache.seata.metrics.IdConstants;
 import org.apache.seata.metrics.Measurement;
 import org.apache.seata.metrics.Summary;
 import org.apache.seata.metrics.SystemClock;
-import org.apache.seata.metrics.IdConstants;
+
+import java.util.Arrays;
 
 /**
  * Compact Summary implement with SummaryValue
@@ -48,12 +48,15 @@ public class CompactSummary implements Summary {
 
     public CompactSummary(Id id, Clock clock) {
         this.id = id;
-        this.countId = new Id(id.getName()).withTag(id.getTags())
-            .withTag(IdConstants.STATISTIC_KEY, IdConstants.STATISTIC_VALUE_COUNT);
-        this.totalId = new Id(id.getName()).withTag(id.getTags())
-            .withTag(IdConstants.STATISTIC_KEY, IdConstants.STATISTIC_VALUE_TOTAL);
-        this.tpsId = new Id(id.getName()).withTag(id.getTags())
-            .withTag(IdConstants.STATISTIC_KEY, IdConstants.STATISTIC_VALUE_TPS);
+        this.countId = new Id(id.getName())
+                .withTag(id.getTags())
+                .withTag(IdConstants.STATISTIC_KEY, IdConstants.STATISTIC_VALUE_COUNT);
+        this.totalId = new Id(id.getName())
+                .withTag(id.getTags())
+                .withTag(IdConstants.STATISTIC_KEY, IdConstants.STATISTIC_VALUE_TOTAL);
+        this.tpsId = new Id(id.getName())
+                .withTag(id.getTags())
+                .withTag(IdConstants.STATISTIC_KEY, IdConstants.STATISTIC_VALUE_TPS);
         this.value = new SummaryValue(clock.getCurrentMilliseconds());
         this.clock = clock;
     }
@@ -88,8 +91,9 @@ public class CompactSummary implements Summary {
         SummaryValue value = this.value;
         double time = clock.getCurrentMilliseconds();
         this.value = new SummaryValue(time);
-        return Arrays.asList(new Measurement(countId, time, value.getCount()),
-            new Measurement(totalId, time, value.getTotal()),
-            new Measurement(tpsId, time, value.getTps(time)));
+        return Arrays.asList(
+                new Measurement(countId, time, value.getCount()),
+                new Measurement(totalId, time, value.getTotal()),
+                new Measurement(tpsId, time, value.getTps(time)));
     }
 }

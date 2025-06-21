@@ -82,8 +82,8 @@ public class Message {
      * Print 7.
      */
     public void print7() {
-        throw new FrameworkException(new Throwable("throw"), "frameworkException",
-            FrameworkErrorCode.ChannelIsNotWritable);
+        throw new FrameworkException(
+                new Throwable("throw"), "frameworkException", FrameworkErrorCode.ChannelIsNotWritable);
     }
 
     /**
@@ -99,5 +99,4 @@ public class Message {
     public void print9() {
         throw new FrameworkException(new Throwable(), "frameworkExceptionMsg");
     }
-
 }

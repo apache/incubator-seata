@@ -16,21 +16,6 @@
  */
 package org.apache.seata.server.session;
 
-import static org.apache.seata.core.model.GlobalStatus.AsyncCommitting;
-import static org.apache.seata.core.model.GlobalStatus.CommitRetrying;
-import static org.apache.seata.core.model.GlobalStatus.Committing;
-
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.Constants;
 import org.apache.seata.common.DefaultValues;
@@ -53,6 +38,22 @@ import org.apache.seata.server.store.SessionStorable;
 import org.apache.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+import static org.apache.seata.core.model.GlobalStatus.AsyncCommitting;
+import static org.apache.seata.core.model.GlobalStatus.CommitRetrying;
+import static org.apache.seata.core.model.GlobalStatus.Committing;
 
 /**
  * The type Global session.

@@ -16,20 +16,20 @@
  */
 package org.apache.seata.rm.datasource.exec.polardbx;
 
-import java.sql.Statement;
-
 import org.apache.seata.rm.datasource.StatementProxy;
 import org.apache.seata.rm.datasource.exec.StatementCallback;
 import org.apache.seata.rm.datasource.exec.mysql.MySQLUpdateJoinExecutor;
 import org.apache.seata.sqlparser.SQLRecognizer;
+
+import java.sql.Statement;
 
 /**
  * Update join executor for PolarDB-X
  *
  */
 public class PolarDBXUpdateJoinExecutor<T, S extends Statement> extends MySQLUpdateJoinExecutor<T, S> {
-    public PolarDBXUpdateJoinExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback,
-                                      SQLRecognizer sqlRecognizer) {
+    public PolarDBXUpdateJoinExecutor(
+            StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback, SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
         this.isLowerSupportGroupByPksVersion = false;
     }

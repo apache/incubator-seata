@@ -38,6 +38,6 @@ public class FurySerializer implements Serializer {
             throw new IllegalArgumentException("bytes is null");
         }
         ThreadSafeFury threadSafeFury = FurySerializerFactory.getInstance().get();
-        return  (T) threadSafeFury.deserialize(bytes);
+        return (T) threadSafeFury.deserialize(bytes);
     }
 }

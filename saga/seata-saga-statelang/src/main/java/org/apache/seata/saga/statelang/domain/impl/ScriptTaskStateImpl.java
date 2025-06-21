@@ -16,8 +16,8 @@
  */
 package org.apache.seata.saga.statelang.domain.impl;
 
-import org.apache.seata.saga.statelang.domain.StateType;
 import org.apache.seata.saga.statelang.domain.ScriptTaskState;
+import org.apache.seata.saga.statelang.domain.StateType;
 
 /**
  * A state used to execute script such as groovy

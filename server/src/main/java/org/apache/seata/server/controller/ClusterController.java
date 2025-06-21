@@ -16,12 +16,6 @@
  */
 package org.apache.seata.server.controller;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import javax.annotation.Resource;
-
 import com.alipay.sofa.jraft.RouteTable;
 import com.alipay.sofa.jraft.conf.Configuration;
 import com.alipay.sofa.jraft.entity.PeerId;
@@ -46,6 +40,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import static org.apache.seata.common.ConfigurationKeys.STORE_MODE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 
@@ -66,8 +66,8 @@ public class ClusterController {
             result.setMessage("fail to parse initConf:" + raftClusterStr);
         } else {
             RaftServerManager.groups().forEach(group -> {
-                RaftServerManager.getCliServiceInstance().changePeers(group,
-                    RouteTable.getInstance().getConfiguration(group), newConf);
+                RaftServerManager.getCliServiceInstance()
+                        .changePeers(group, RouteTable.getInstance().getConfiguration(group), newConf);
                 RouteTable.getInstance().updateConfiguration(group, newConf);
             });
         }
@@ -78,8 +78,8 @@ public class ClusterController {
     public MetadataResponse cluster(String group) {
         MetadataResponse metadataResponse = new MetadataResponse();
         if (StringUtils.isBlank(group)) {
-            group =
-                ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SERVER_RAFT_GROUP, DEFAULT_SEATA_GROUP);
+            group = ConfigurationFactory.getInstance()
+                    .getConfig(ConfigurationKeys.SERVER_RAFT_GROUP, DEFAULT_SEATA_GROUP);
         }
         RaftServer raftServer = RaftServerManager.getRaftServer(group);
         if (raftServer != null) {
@@ -91,8 +91,12 @@ public class ClusterController {
                 PeerId leader = routeTable.selectLeader(group);
                 if (leader != null) {
                     Set<Node> nodes = new HashSet<>();
-                    RaftClusterMetadata raftClusterMetadata = raftServer.getRaftStateMachine().getRaftLeaderMetadata();
-                    Node leaderNode = raftServer.getRaftStateMachine().getRaftLeaderMetadata().getLeader();
+                    RaftClusterMetadata raftClusterMetadata =
+                            raftServer.getRaftStateMachine().getRaftLeaderMetadata();
+                    Node leaderNode = raftServer
+                            .getRaftStateMachine()
+                            .getRaftLeaderMetadata()
+                            .getLeader();
                     leaderNode.setGroup(group);
                     nodes.add(leaderNode);
                     nodes.addAll(raftClusterMetadata.getLearner());
@@ -108,14 +112,14 @@ public class ClusterController {
     }
 
     @PostMapping("/watch")
-    public void watch(HttpContext context, @RequestBody Map<String, Object> groupTerms,
-        @RequestParam(defaultValue = "28000") Integer timeout) {
+    public void watch(
+            HttpContext context,
+            @RequestBody Map<String, Object> groupTerms,
+            @RequestParam(defaultValue = "28000") Integer timeout) {
         context.setAsync(true);
         groupTerms.forEach((group, term) -> {
-            Watcher<HttpContext> watcher =
-                new Watcher<>(group, context, timeout, Long.parseLong(String.valueOf(term)));
+            Watcher<HttpContext> watcher = new Watcher<>(group, context, timeout, Long.parseLong(String.valueOf(term)));
             clusterWatcherManager.registryWatcher(watcher);
         });
     }
-
 }

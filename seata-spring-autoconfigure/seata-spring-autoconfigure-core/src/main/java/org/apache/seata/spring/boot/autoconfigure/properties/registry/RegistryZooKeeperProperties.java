@@ -21,7 +21,6 @@ import org.springframework.stereotype.Component;
 
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_ZK_PREFIX;
 
-
 @Component
 @ConfigurationProperties(prefix = REGISTRY_ZK_PREFIX)
 public class RegistryZooKeeperProperties {
@@ -67,6 +66,7 @@ public class RegistryZooKeeperProperties {
         this.connectTimeout = connectTimeout;
         return this;
     }
+
     public String getUsername() {
         return username;
     }
@@ -75,6 +75,7 @@ public class RegistryZooKeeperProperties {
         this.username = username;
         return this;
     }
+
     public String getPassword() {
         return password;
     }

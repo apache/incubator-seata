@@ -67,8 +67,12 @@ public class HsfTransactionProviderFilter implements ServerFilter {
                     LOGGER.debug("unbind xid [{}] branchType [{}] from RootContext", unbindXid, previousBranchType);
                 }
                 if (!rpcXid.toString().equalsIgnoreCase(unbindXid)) {
-                    LOGGER.warn("xid in change during RPC from {} to {},branchType from {} to {}", rpcXid, unbindXid,
-                        rpcBranchType != null ? rpcBranchType : "AT", previousBranchType);
+                    LOGGER.warn(
+                            "xid in change during RPC from {} to {},branchType from {} to {}",
+                            rpcXid,
+                            unbindXid,
+                            rpcBranchType != null ? rpcBranchType : "AT",
+                            previousBranchType);
                     if (unbindXid != null) {
                         RootContext.bind(unbindXid);
                         LOGGER.warn("bind xid [{}] back to RootContext", unbindXid);
@@ -85,7 +89,5 @@ public class HsfTransactionProviderFilter implements ServerFilter {
     }
 
     @Override
-    public void onResponse(Invocation invocation, RPCResult rpcResult) {
-
-    }
+    public void onResponse(Invocation invocation, RPCResult rpcResult) {}
 }

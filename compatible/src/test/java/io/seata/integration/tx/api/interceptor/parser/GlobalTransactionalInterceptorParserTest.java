@@ -30,25 +30,25 @@ public class GlobalTransactionalInterceptorParserTest {
     @Test
     void parserInterfaceToProxy() throws Exception {
 
-        //given
+        // given
         BusinessImpl business = new BusinessImpl();
 
-        GlobalTransactionalInterceptorParser
-	        globalTransactionalInterceptorParser = new GlobalTransactionalInterceptorParser();
+        GlobalTransactionalInterceptorParser globalTransactionalInterceptorParser =
+                new GlobalTransactionalInterceptorParser();
         FailureHandler failureHandler = new DefaultFailureHandlerImpl();
 
         FailureHandlerHolder.setFailureHandler(failureHandler);
 
-        //when
-        ProxyInvocationHandler proxyInvocationHandler = globalTransactionalInterceptorParser.parserInterfaceToProxy(business, business.getClass().getName());
+        // when
+        ProxyInvocationHandler proxyInvocationHandler = globalTransactionalInterceptorParser.parserInterfaceToProxy(
+                business, business.getClass().getName());
 
-        //then
+        // then
         Assertions.assertNotNull(proxyInvocationHandler);
 
         Assertions.assertEquals(proxyInvocationHandler.getClass(), GlobalTransactionalInterceptorHandler.class);
 
-        Business  businessProxy = ProxyUtil.createProxy(business);
+        Business businessProxy = ProxyUtil.createProxy(business);
         Assertions.assertNotEquals(businessProxy, business);
-
     }
 }

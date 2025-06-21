@@ -16,11 +16,11 @@
  */
 package io.seata.saga.statelang.domain.impl;
 
-import java.util.Map;
-
 import io.seata.saga.statelang.domain.State;
 import io.seata.saga.statelang.domain.StateMachine;
 import io.seata.saga.statelang.domain.StateType;
+
+import java.util.Map;
 
 /**
  * The type State.
@@ -33,7 +33,6 @@ public class StateImpl implements State {
     private StateImpl(org.apache.seata.saga.statelang.domain.State actual) {
         this.actual = actual;
     }
-
 
     @Override
     public String getName() {

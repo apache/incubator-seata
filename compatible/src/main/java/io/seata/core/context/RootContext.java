@@ -16,13 +16,11 @@
  */
 package io.seata.core.context;
 
-
-import java.util.Map;
+import io.seata.core.model.BranchType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
-import io.seata.core.model.BranchType;
+import java.util.Map;
 
 /**
  * The type Root context.

@@ -41,9 +41,8 @@ public class ResourceUtil {
     }
 
     public static Resource[] getResources(String[] locationArr) {
-        return Stream
-            .of(Optional.ofNullable(locationArr).orElse(new String[0]))
-            .flatMap(location -> Stream.of(getResources(location)))
-            .toArray(Resource[]::new);
+        return Stream.of(Optional.ofNullable(locationArr).orElse(new String[0]))
+                .flatMap(location -> Stream.of(getResources(location)))
+                .toArray(Resource[]::new);
     }
 }

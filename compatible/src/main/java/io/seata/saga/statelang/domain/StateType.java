@@ -67,7 +67,6 @@ public enum StateType {
      */
     LOOP_START("LoopStart");
 
-
     private String value;
 
     StateType(String value) {
@@ -87,7 +86,6 @@ public enum StateType {
 
         throw new IllegalArgumentException("Unknown StateType[" + value + "]");
     }
-
 
     public static StateType wrap(org.apache.seata.saga.statelang.domain.StateType target) {
         if (target == null) {
@@ -141,5 +139,4 @@ public enum StateType {
                 throw new IllegalArgumentException("Cannot convert " + this.name());
         }
     }
-
 }

@@ -76,16 +76,13 @@ public class AbstractLockerTest {
             }
 
             @Override
-            public void updateLockStatus(String xid, LockStatus lockStatus) {
-
-            }
+            public void updateLockStatus(String xid, LockStatus lockStatus) {}
         };
         List<RowLock> locks = getRowLocks();
 
         // Call the convertToLockDO method
         return locker.convertToLockDO(locks);
     }
-
 
     @Test
     public void testGetRowKey() {
@@ -111,9 +108,7 @@ public class AbstractLockerTest {
             }
 
             @Override
-            public void updateLockStatus(String xid, LockStatus lockStatus) {
-
-            }
+            public void updateLockStatus(String xid, LockStatus lockStatus) {}
         };
 
         // Call the getRowKey method

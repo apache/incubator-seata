@@ -79,6 +79,4 @@ public interface RemotingParser {
      * @return protocol
      */
     short getProtocol();
-
-
 }

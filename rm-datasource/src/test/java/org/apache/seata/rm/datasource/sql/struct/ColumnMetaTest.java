@@ -20,7 +20,6 @@ import org.apache.seata.sqlparser.struct.ColumnMeta;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-
 public class ColumnMetaTest {
 
     @Test
@@ -102,6 +101,5 @@ public class ColumnMetaTest {
         other = new ColumnMeta();
         other.setIsAutoincrement("");
         Assertions.assertNotEquals(columnMeta, other);
-
     }
 }

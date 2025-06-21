@@ -24,45 +24,30 @@ import org.apache.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.sqlparser.struct.TableMetaCache;
 import org.apache.seata.sqlparser.util.JdbcConstants;
-import java.sql.SQLException;
-import java.sql.Types;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.sql.SQLException;
+import java.sql.Types;
 
 public class DmTableMetaCacheTest {
 
-    private static Object[][] columnMetas =
-        new Object[][] {
-            new Object[] {"", "", "dt1", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
-            new Object[] {
-                "", "", "dt1", "name1", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES",
-                "NO"},
-            new Object[] {
-                "", "", "dt1", "name2", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 3, "YES",
-                "NO"},
-            new Object[] {
-                "", "", "dt1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 4, "YES",
-                "NO"}
-        };
+    private static Object[][] columnMetas = new Object[][] {
+        new Object[] {"", "", "dt1", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
+        new Object[] {"", "", "dt1", "name1", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
+        new Object[] {"", "", "dt1", "name2", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 3, "YES", "NO"},
+        new Object[] {"", "", "dt1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 4, "YES", "NO"}
+    };
 
-    private static Object[][] indexMetas =
-        new Object[][] {
-            new Object[] {"id", "id", false, "", 3, 0, "A", 34},
-            new Object[] {"name1", "name1", false, "", 3, 1, "A", 34},
-            new Object[] {"name2", "name2", true, "", 3, 2, "A", 34},
-        };
+    private static Object[][] indexMetas = new Object[][] {
+        new Object[] {"id", "id", false, "", 3, 0, "A", 34},
+        new Object[] {"name1", "name1", false, "", 3, 1, "A", 34},
+        new Object[] {"name2", "name2", true, "", 3, 2, "A", 34},
+    };
 
-    private static Object[][] pkMetas =
-        new Object[][] {
-            new Object[] {"id"}
-        };
+    private static Object[][] pkMetas = new Object[][] {new Object[] {"id"}};
 
-    private static Object[][] tableMetas =
-            new Object[][]{
-                    new Object[]{"", "t", "dt1"}
-            };
+    private static Object[][] tableMetas = new Object[][] {new Object[] {"", "t", "dt1"}};
 
     @Test
     public void getTableMetaTest() throws SQLException {

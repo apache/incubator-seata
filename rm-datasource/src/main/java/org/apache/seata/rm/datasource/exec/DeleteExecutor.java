@@ -16,19 +16,19 @@
  */
 package org.apache.seata.rm.datasource.exec;
 
+import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.rm.datasource.StatementProxy;
+import org.apache.seata.rm.datasource.sql.struct.TableRecords;
+import org.apache.seata.sqlparser.SQLDeleteRecognizer;
+import org.apache.seata.sqlparser.SQLRecognizer;
+import org.apache.seata.sqlparser.struct.TableMeta;
+import org.apache.seata.sqlparser.util.ColumnUtils;
+
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
-
-import org.apache.seata.common.util.StringUtils;
-import org.apache.seata.sqlparser.util.ColumnUtils;
-import org.apache.seata.rm.datasource.StatementProxy;
-import org.apache.seata.sqlparser.struct.TableMeta;
-import org.apache.seata.rm.datasource.sql.struct.TableRecords;
-import org.apache.seata.sqlparser.SQLDeleteRecognizer;
-import org.apache.seata.sqlparser.SQLRecognizer;
 
 /**
  * The type Delete executor.
@@ -46,8 +46,8 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
      * @param statementCallback the statement callback
      * @param sqlRecognizer     the sql recognizer
      */
-    public DeleteExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback,
-                          SQLRecognizer sqlRecognizer) {
+    public DeleteExecutor(
+            StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback, SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }
 
@@ -60,7 +60,8 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         return buildTableRecords(tmeta, selectSQL, paramAppenderList);
     }
 
-    protected String buildBeforeImageSQL(SQLDeleteRecognizer visitor, TableMeta tableMeta, ArrayList<List<Object>> paramAppenderList) {
+    protected String buildBeforeImageSQL(
+            SQLDeleteRecognizer visitor, TableMeta tableMeta, ArrayList<List<Object>> paramAppenderList) {
         String whereCondition = buildWhereCondition(visitor, paramAppenderList);
         String orderByCondition = buildOrderCondition(visitor, paramAppenderList);
         String limitCondition = buildLimitCondition(visitor, paramAppenderList);

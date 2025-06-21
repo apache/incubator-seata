@@ -16,8 +16,8 @@
  */
 package org.apache.seata.serializer.seata.protocol.transaction;
 
-import org.apache.seata.serializer.seata.protocol.AbstractMessageCodec;
 import org.apache.seata.core.protocol.transaction.AbstractTransactionRequest;
+import org.apache.seata.serializer.seata.protocol.AbstractMessageCodec;
 
 /**
  * The type Abstract transaction request codec.

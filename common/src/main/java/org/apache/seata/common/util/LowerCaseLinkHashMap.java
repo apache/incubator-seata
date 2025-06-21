@@ -16,12 +16,12 @@
  */
 package org.apache.seata.common.util;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.Collection;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -210,5 +210,4 @@ public class LowerCaseLinkHashMap<V> implements Map<String, V> {
     public String toString() {
         return targetMap.toString();
     }
-
 }

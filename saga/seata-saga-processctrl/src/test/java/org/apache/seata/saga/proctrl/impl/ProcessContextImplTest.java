@@ -16,11 +16,11 @@
  */
 package org.apache.seata.saga.proctrl.impl;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * ProcessContextImplTest
@@ -73,7 +73,6 @@ public class ProcessContextImplTest {
         context.setVariable("key", "value");
         Assertions.assertEquals("value", context.getVariableLocally("key"));
     }
-
 
     @Test
     public void testSetVariablesLocally() {

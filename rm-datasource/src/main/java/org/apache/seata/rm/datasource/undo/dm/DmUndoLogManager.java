@@ -16,7 +16,6 @@
  */
 package org.apache.seata.rm.datasource.undo.dm;
 
-
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.core.compressor.CompressorType;
@@ -34,24 +33,25 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.Set;
 
-
 @LoadLevel(name = JdbcConstants.DM)
 public class DmUndoLogManager extends AbstractUndoLogManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DmUndoLogManager.class);
 
-    protected static final String DELETE_SUB_UNDO_LOG_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME + " WHERE \""
-            + ClientTableColumnsName.UNDO_LOG_CONTEXT.toUpperCase() + "\" = ? AND " + ClientTableColumnsName.UNDO_LOG_XID + " = ?";
+    protected static final String DELETE_SUB_UNDO_LOG_SQL =
+            "DELETE FROM " + UNDO_LOG_TABLE_NAME + " WHERE \"" + ClientTableColumnsName.UNDO_LOG_CONTEXT.toUpperCase()
+                    + "\" = ? AND " + ClientTableColumnsName.UNDO_LOG_XID + " = ?";
 
-    private static final String INSERT_UNDO_LOG_SQL = "INSERT INTO " + UNDO_LOG_TABLE_NAME +
-            " (" + ClientTableColumnsName.UNDO_LOG_BRANCH_XID + ", "
-            + ClientTableColumnsName.UNDO_LOG_XID + ", \"" + ClientTableColumnsName.UNDO_LOG_CONTEXT.toUpperCase() + "\", "
+    private static final String INSERT_UNDO_LOG_SQL = "INSERT INTO " + UNDO_LOG_TABLE_NAME + " ("
+            + ClientTableColumnsName.UNDO_LOG_BRANCH_XID + ", "
+            + ClientTableColumnsName.UNDO_LOG_XID + ", \"" + ClientTableColumnsName.UNDO_LOG_CONTEXT.toUpperCase()
+            + "\", "
             + ClientTableColumnsName.UNDO_LOG_ROLLBACK_INFO + ", " + ClientTableColumnsName.UNDO_LOG_LOG_STATUS + ", "
             + ClientTableColumnsName.UNDO_LOG_LOG_CREATED + ", " + ClientTableColumnsName.UNDO_LOG_LOG_MODIFIED + ")"
             + "VALUES (?, ?, ?, ?, ?, sysdate, sysdate)";
 
-    private static final String DELETE_UNDO_LOG_BY_CREATE_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME +
-            " WHERE " + ClientTableColumnsName.UNDO_LOG_LOG_CREATED + " <= ? and ROWNUM <= ?";
+    private static final String DELETE_UNDO_LOG_BY_CREATE_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME + " WHERE "
+            + ClientTableColumnsName.UNDO_LOG_LOG_CREATED + " <= ? and ROWNUM <= ?";
 
     /**
      * Delete undo log.
@@ -64,7 +64,7 @@ public class DmUndoLogManager extends AbstractUndoLogManager {
     @Override
     public void deleteUndoLog(String xid, long branchId, Connection conn) throws SQLException {
         try (PreparedStatement deletePST = conn.prepareStatement(DELETE_UNDO_LOG_SQL);
-             PreparedStatement deleteSubPST = conn.prepareStatement(DELETE_SUB_UNDO_LOG_SQL)) {
+                PreparedStatement deleteSubPST = conn.prepareStatement(DELETE_SUB_UNDO_LOG_SQL)) {
             deletePST.setLong(1, branchId);
             deletePST.setString(2, xid);
             deletePST.executeUpdate();
@@ -97,11 +97,12 @@ public class DmUndoLogManager extends AbstractUndoLogManager {
         String batchDeleteSql = toBatchDeleteUndoLogSql(xidSize, branchIdSize);
         String batchDeleteSubSql = toBatchDeleteSubUndoLogSql(xidSize, branchIdSize);
         try (PreparedStatement deletePST = conn.prepareStatement(batchDeleteSql);
-             PreparedStatement deleteSubPST = conn.prepareStatement(batchDeleteSubSql)) {
+                PreparedStatement deleteSubPST = conn.prepareStatement(batchDeleteSubSql)) {
             int paramsIndex = 1;
             for (Long branchId : branchIds) {
                 deletePST.setLong(paramsIndex, branchId);
-                deleteSubPST.setString(paramsIndex, UndoLogConstants.BRANCH_ID_KEY + CollectionUtils.KV_SPLIT + branchId);
+                deleteSubPST.setString(
+                        paramsIndex, UndoLogConstants.BRANCH_ID_KEY + CollectionUtils.KV_SPLIT + branchId);
                 paramsIndex++;
             }
             for (String xid : xids) {
@@ -127,8 +128,12 @@ public class DmUndoLogManager extends AbstractUndoLogManager {
 
     protected static String toBatchDeleteSubUndoLogSql(int xidSize, int branchIdSize) {
         StringBuilder sqlBuilder = new StringBuilder(64);
-        sqlBuilder.append("DELETE FROM ").append(UNDO_LOG_TABLE_NAME).append(" WHERE \"").append(
-                ClientTableColumnsName.UNDO_LOG_CONTEXT.toUpperCase()).append("\" IN ");
+        sqlBuilder
+                .append("DELETE FROM ")
+                .append(UNDO_LOG_TABLE_NAME)
+                .append(" WHERE \"")
+                .append(ClientTableColumnsName.UNDO_LOG_CONTEXT.toUpperCase())
+                .append("\" IN ");
         appendInParam(branchIdSize, sqlBuilder);
         sqlBuilder.append(" AND ").append(ClientTableColumnsName.UNDO_LOG_XID).append(" IN ");
         appendInParam(xidSize, sqlBuilder);
@@ -154,19 +159,26 @@ public class DmUndoLogManager extends AbstractUndoLogManager {
     }
 
     @Override
-    protected void insertUndoLogWithNormal(String xid, long branchId, String rollbackCtx, byte[] undoLogContent,
-                                           Connection conn) throws SQLException {
-        insertUndoLog(xid, branchId,rollbackCtx, undoLogContent, State.Normal, conn);
+    protected void insertUndoLogWithNormal(
+            String xid, long branchId, String rollbackCtx, byte[] undoLogContent, Connection conn) throws SQLException {
+        insertUndoLog(xid, branchId, rollbackCtx, undoLogContent, State.Normal, conn);
     }
 
     @Override
-    protected void insertUndoLogWithGlobalFinished(String xid, long branchId, UndoLogParser parser, Connection conn) throws SQLException {
-        insertUndoLog(xid, branchId, buildContext(parser.getName(), CompressorType.NONE), parser.getDefaultContent(),
-                State.GlobalFinished, conn);
+    protected void insertUndoLogWithGlobalFinished(String xid, long branchId, UndoLogParser parser, Connection conn)
+            throws SQLException {
+        insertUndoLog(
+                xid,
+                branchId,
+                buildContext(parser.getName(), CompressorType.NONE),
+                parser.getDefaultContent(),
+                State.GlobalFinished,
+                conn);
     }
 
-    private void insertUndoLog(String xid, long branchID, String rollbackCtx, byte[] undoLogContent,
-                               State state, Connection conn) throws SQLException {
+    private void insertUndoLog(
+            String xid, long branchID, String rollbackCtx, byte[] undoLogContent, State state, Connection conn)
+            throws SQLException {
         try (PreparedStatement pst = conn.prepareStatement(INSERT_UNDO_LOG_SQL)) {
             pst.setLong(1, branchID);
             pst.setString(2, xid);
@@ -181,5 +193,4 @@ public class DmUndoLogManager extends AbstractUndoLogManager {
             throw (SQLException) e;
         }
     }
-
 }

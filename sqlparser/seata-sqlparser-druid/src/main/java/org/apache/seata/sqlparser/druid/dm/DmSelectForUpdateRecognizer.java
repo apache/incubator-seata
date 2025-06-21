@@ -48,7 +48,7 @@ public class DmSelectForUpdateRecognizer extends BaseDmRecognizer implements SQL
      */
     public DmSelectForUpdateRecognizer(String originalSQL, SQLStatement ast) {
         super(originalSQL);
-        this.ast = (SQLSelectStatement)ast;
+        this.ast = (SQLSelectStatement) ast;
     }
 
     @Override
@@ -57,8 +57,8 @@ public class DmSelectForUpdateRecognizer extends BaseDmRecognizer implements SQL
     }
 
     @Override
-    public String getWhereCondition(final ParametersHolder parametersHolder,
-        final ArrayList<List<Object>> paramAppenderList) {
+    public String getWhereCondition(
+            final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppenderList) {
         SQLSelectQueryBlock selectQueryBlock = getSelect();
         SQLExpr where = selectQueryBlock.getWhere();
         return super.getWhereCondition(where, parametersHolder, paramAppenderList);
@@ -103,7 +103,7 @@ public class DmSelectForUpdateRecognizer extends BaseDmRecognizer implements SQL
                 return false;
             }
         };
-        visitor.visit((SQLExprTableSource)tableSource);
+        visitor.visit((SQLExprTableSource) tableSource);
         return sb.toString();
     }
 

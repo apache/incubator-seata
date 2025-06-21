@@ -16,6 +16,10 @@
  */
 package io.seata;
 
+import io.seata.core.exception.TransactionException;
+import io.seata.core.model.BranchType;
+import io.seata.core.model.GlobalStatus;
+import io.seata.core.model.TransactionManager;
 import io.seata.core.rpc.netty.Action1Impl;
 import io.seata.core.rpc.netty.ProtocolTestConstants;
 import io.seata.core.rpc.netty.RmClientTest;
@@ -23,10 +27,6 @@ import io.seata.core.rpc.netty.RmRpcClient;
 import io.seata.core.rpc.netty.TmClientTest;
 import io.seata.core.rpc.netty.TmRpcClient;
 import io.seata.rm.DefaultResourceManager;
-import io.seata.core.exception.TransactionException;
-import io.seata.core.model.BranchType;
-import io.seata.core.model.GlobalStatus;
-import io.seata.core.model.TransactionManager;
 import org.apache.seata.mockserver.MockCoordinator;
 import org.apache.seata.mockserver.MockServer;
 import org.junit.jupiter.api.AfterAll;
@@ -98,7 +98,8 @@ public class MockTest {
         TransactionManager tm = TmClientTest.getTm();
         DefaultResourceManager rm = RmClientTest.getRm(RESOURCE_ID);
 
-        String xid = tm.begin(ProtocolTestConstants.APPLICATION_ID, ProtocolTestConstants.SERVICE_GROUP, "test-commit", 60000);
+        String xid = tm.begin(
+                ProtocolTestConstants.APPLICATION_ID, ProtocolTestConstants.SERVICE_GROUP, "test-commit", 60000);
         logger.info("doTestCommit(0.6.1) xid:{}", xid);
         MockCoordinator.getInstance().setExpectedRetry(xid, times);
         Long branchId = rm.branchRegister(BranchType.TCC, RESOURCE_ID, "1", xid, "{\"mock\":\"mock\"}", "1");
@@ -113,7 +114,8 @@ public class MockTest {
         TransactionManager tm = TmClientTest.getTm();
         DefaultResourceManager rm = RmClientTest.getRm(RESOURCE_ID);
 
-        String xid = tm.begin(ProtocolTestConstants.APPLICATION_ID, ProtocolTestConstants.SERVICE_GROUP, "test-rollback", 60000);
+        String xid = tm.begin(
+                ProtocolTestConstants.APPLICATION_ID, ProtocolTestConstants.SERVICE_GROUP, "test-rollback", 60000);
         logger.info("doTestRollback(0.6.1) xid:{}", xid);
         MockCoordinator.getInstance().setExpectedRetry(xid, times);
         Long branchId = rm.branchRegister(BranchType.TCC, RESOURCE_ID, "1", xid, "{\"mock\":\"mock\"}", "1");

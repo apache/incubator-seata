@@ -28,12 +28,12 @@ import static net.bytebuddy.matcher.ElementMatchers.takesArgument;
 import static net.bytebuddy.matcher.ElementMatchers.takesArguments;
 import static org.apache.skywalking.apm.agent.core.plugin.match.NameMatch.byName;
 
-
 public class DefaultCoreInstrumentation extends ClassInstanceMethodsEnhancePluginDefine {
 
     private static final String ENHANCE_CLASS_TM = "org.apache.seata.server.coordinator.DefaultCore";
 
-    private static final String INTERCEPTOR_CLASS = "org.apache.seata.apm.skywalking.plugin.DefaultCoreDoGlobalCommitInterceptor";
+    private static final String INTERCEPTOR_CLASS =
+            "org.apache.seata.apm.skywalking.plugin.DefaultCoreDoGlobalCommitInterceptor";
 
     @Override
     public ConstructorInterceptPoint[] getConstructorsInterceptPoints() {
@@ -42,7 +42,7 @@ public class DefaultCoreInstrumentation extends ClassInstanceMethodsEnhancePlugi
 
     @Override
     public InstanceMethodsInterceptPoint[] getInstanceMethodsInterceptPoints() {
-        return new InstanceMethodsInterceptPoint[]{
+        return new InstanceMethodsInterceptPoint[] {
             new InstanceMethodsInterceptPoint() {
                 @Override
                 public ElementMatcher<MethodDescription> getMethodsMatcher() {
@@ -62,9 +62,11 @@ public class DefaultCoreInstrumentation extends ClassInstanceMethodsEnhancePlugi
             new InstanceMethodsInterceptPoint() {
                 @Override
                 public ElementMatcher<MethodDescription> getMethodsMatcher() {
-                    return named("processCommitRequest").and(takesArguments(3))
+                    return named("processCommitRequest")
+                            .and(takesArguments(3))
                             .and(takesArgument(0, named("org.apache.seata.core.protocol.RpcMessage")))
-                            .and(takesArgument(1, named("org.apache.seata.core.protocol.transaction.GlobalCommitRequest")))
+                            .and(takesArgument(
+                                    1, named("org.apache.seata.core.protocol.transaction.GlobalCommitRequest")))
                             .and(takesArgument(2, named("io.netty.channel.ChannelHandlerContext")));
                 }
 
@@ -81,9 +83,11 @@ public class DefaultCoreInstrumentation extends ClassInstanceMethodsEnhancePlugi
             new InstanceMethodsInterceptPoint() {
                 @Override
                 public ElementMatcher<MethodDescription> getMethodsMatcher() {
-                    return named("processRollbackRequest").and(takesArguments(3))
+                    return named("processRollbackRequest")
+                            .and(takesArguments(3))
                             .and(takesArgument(0, named("org.apache.seata.core.protocol.RpcMessage")))
-                            .and(takesArgument(1, named("org.apache.seata.core.protocol.transaction.GlobalRollbackRequest")))
+                            .and(takesArgument(
+                                    1, named("org.apache.seata.core.protocol.transaction.GlobalRollbackRequest")))
                             .and(takesArgument(2, named("io.netty.channel.ChannelHandlerContext")));
                 }
 
@@ -104,5 +108,4 @@ public class DefaultCoreInstrumentation extends ClassInstanceMethodsEnhancePlugi
     protected ClassMatch enhanceClass() {
         return byName(ENHANCE_CLASS_TM);
     }
-
 }

@@ -17,25 +17,22 @@
 package org.apache.seata.core.protocol;
 
 import io.netty.buffer.ByteBuf;
+
 import static io.netty.buffer.Unpooled.buffer;
 
 /**
  * RegisterTMRequest Test
- * 
- * 
+ *
+ *
  *
  */
-
 public class RegisterTMRequestTest {
 
-	private static RegisterTMRequest registerTMRequest;
-	private static AbstractIdentifyRequest air;
-	private static final String APP_ID = "applicationId";
-	private static final String TSG = "transactionServiceGroup";
-	private static final String ED = "extraData";
-	private static final short TYPE_CODE = 101;
-	private static final ByteBuf BB = buffer(128);
-	
-
-	
+    private static RegisterTMRequest registerTMRequest;
+    private static AbstractIdentifyRequest air;
+    private static final String APP_ID = "applicationId";
+    private static final String TSG = "transactionServiceGroup";
+    private static final String ED = "extraData";
+    private static final short TYPE_CODE = 101;
+    private static final ByteBuf BB = buffer(128);
 }

@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-
 public class ObjectHolderTest {
 
     @BeforeEach
@@ -31,8 +30,7 @@ public class ObjectHolderTest {
     }
 
     @AfterEach
-    void tearDown() {
-    }
+    void tearDown() {}
 
     @Test
     public void testGetObjectByName() {
@@ -45,7 +43,7 @@ public class ObjectHolderTest {
     public void testGetObjectByClass() {
         Assertions.assertNotNull(ObjectHolder.INSTANCE.getObject(ObjectHolderTest.class));
         // object not exist in ObjectHolder.INSTANCE
-        Assertions.assertThrows(ShouldNeverHappenException.class,
-            () -> ObjectHolder.INSTANCE.getObject(ObjectHolder.class));
+        Assertions.assertThrows(
+                ShouldNeverHappenException.class, () -> ObjectHolder.INSTANCE.getObject(ObjectHolder.class));
     }
 }

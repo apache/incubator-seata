@@ -16,8 +16,6 @@
  */
 package org.apache.seata.server.session.redis;
 
-import java.util.Date;
-
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.GlobalStatus;
@@ -31,6 +29,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+
+import java.util.Date;
 
 /**
  * The session converter utils
@@ -58,15 +58,17 @@ public class SessionConverterTest {
         globalTransactionDO.setGmtModified(date);
 
         GlobalSession globalSession = SessionConverter.convertGlobalSession(globalTransactionDO);
-        Assertions.assertEquals(globalTransactionDO.getXid(),globalSession.getXid());
-        Assertions.assertEquals(globalTransactionDO.getTransactionId(),globalSession.getTransactionId());
-        Assertions.assertEquals(globalTransactionDO.getStatus(),globalSession.getStatus().getCode());
-        Assertions.assertEquals(globalTransactionDO.getApplicationId(),globalSession.getApplicationId());
-        Assertions.assertEquals(globalTransactionDO.getTransactionServiceGroup(),globalSession.getTransactionServiceGroup());
-        Assertions.assertEquals(globalTransactionDO.getTransactionName(),globalSession.getTransactionName());
-        Assertions.assertEquals(globalTransactionDO.getTimeout(),globalSession.getTimeout());
-        Assertions.assertEquals(globalTransactionDO.getBeginTime(),globalSession.getBeginTime());
-        Assertions.assertEquals(globalTransactionDO.getApplicationData(),globalSession.getApplicationData());
+        Assertions.assertEquals(globalTransactionDO.getXid(), globalSession.getXid());
+        Assertions.assertEquals(globalTransactionDO.getTransactionId(), globalSession.getTransactionId());
+        Assertions.assertEquals(
+                globalTransactionDO.getStatus(), globalSession.getStatus().getCode());
+        Assertions.assertEquals(globalTransactionDO.getApplicationId(), globalSession.getApplicationId());
+        Assertions.assertEquals(
+                globalTransactionDO.getTransactionServiceGroup(), globalSession.getTransactionServiceGroup());
+        Assertions.assertEquals(globalTransactionDO.getTransactionName(), globalSession.getTransactionName());
+        Assertions.assertEquals(globalTransactionDO.getTimeout(), globalSession.getTimeout());
+        Assertions.assertEquals(globalTransactionDO.getBeginTime(), globalSession.getBeginTime());
+        Assertions.assertEquals(globalTransactionDO.getApplicationData(), globalSession.getApplicationData());
     }
 
     @Test
@@ -93,15 +95,18 @@ public class SessionConverterTest {
         branchTransactionDO.setGmtModified(date);
 
         BranchSession branchSession = SessionConverter.convertBranchSession(branchTransactionDO);
-        Assertions.assertEquals(branchTransactionDO.getXid(),branchSession.getXid());
-        Assertions.assertEquals(branchTransactionDO.getTransactionId(),branchSession.getTransactionId());
-        Assertions.assertEquals(branchTransactionDO.getBranchId(),branchSession.getBranchId());
-        Assertions.assertEquals(branchTransactionDO.getResourceGroupId(),branchSession.getResourceGroupId());
-        Assertions.assertEquals(branchTransactionDO.getResourceId(),branchSession.getResourceId());
-        Assertions.assertEquals(branchTransactionDO.getBranchType(),branchSession.getBranchType().name());
-        Assertions.assertEquals(branchTransactionDO.getStatus(),branchSession.getStatus().getCode());
-        Assertions.assertEquals(branchTransactionDO.getClientId(),branchSession.getClientId());
-        Assertions.assertEquals(branchTransactionDO.getApplicationData(),branchSession.getApplicationData());
+        Assertions.assertEquals(branchTransactionDO.getXid(), branchSession.getXid());
+        Assertions.assertEquals(branchTransactionDO.getTransactionId(), branchSession.getTransactionId());
+        Assertions.assertEquals(branchTransactionDO.getBranchId(), branchSession.getBranchId());
+        Assertions.assertEquals(branchTransactionDO.getResourceGroupId(), branchSession.getResourceGroupId());
+        Assertions.assertEquals(branchTransactionDO.getResourceId(), branchSession.getResourceId());
+        Assertions.assertEquals(
+                branchTransactionDO.getBranchType(),
+                branchSession.getBranchType().name());
+        Assertions.assertEquals(
+                branchTransactionDO.getStatus(), branchSession.getStatus().getCode());
+        Assertions.assertEquals(branchTransactionDO.getClientId(), branchSession.getClientId());
+        Assertions.assertEquals(branchTransactionDO.getApplicationData(), branchSession.getApplicationData());
     }
 
     @Test
@@ -115,7 +120,7 @@ public class SessionConverterTest {
     public void testConvertGlobalTransactionDONotNull() {
         Date date = new Date();
         long now = date.getTime();
-        GlobalSession globalSession = new GlobalSession("application1","fsp_tx","createOrder",60);
+        GlobalSession globalSession = new GlobalSession("application1", "fsp_tx", "createOrder", 60);
         globalSession.setXid("192.168.158.80:8091:39372760251957248");
         globalSession.setTransactionId(39372760251957248L);
         globalSession.setStatus(GlobalStatus.Begin);
@@ -123,16 +128,17 @@ public class SessionConverterTest {
         globalSession.setApplicationData("id=1,product=2");
         GlobalTransactionDO globalTransactionDO = SessionConverter.convertGlobalTransactionDO(globalSession);
 
-        Assertions.assertEquals(globalSession.getXid(),globalTransactionDO.getXid());
-        Assertions.assertEquals(globalSession.getTransactionId(),globalTransactionDO.getTransactionId());
-        Assertions.assertEquals(globalSession.getStatus().getCode(),globalTransactionDO.getStatus());
-        Assertions.assertEquals(globalSession.getTransactionName(),globalTransactionDO.getTransactionName());
-        Assertions.assertEquals(globalSession.getApplicationId(),globalTransactionDO.getApplicationId());
-        Assertions.assertEquals(globalSession.getTransactionServiceGroup(),globalTransactionDO.getTransactionServiceGroup());
-        Assertions.assertEquals(globalSession.getTransactionName(),globalTransactionDO.getTransactionName());
-        Assertions.assertEquals(globalSession.getTimeout(),globalTransactionDO.getTimeout());
-        Assertions.assertEquals(globalSession.getBeginTime(),globalTransactionDO.getBeginTime());
-        Assertions.assertEquals(globalSession.getApplicationData(),globalTransactionDO.getApplicationData());
+        Assertions.assertEquals(globalSession.getXid(), globalTransactionDO.getXid());
+        Assertions.assertEquals(globalSession.getTransactionId(), globalTransactionDO.getTransactionId());
+        Assertions.assertEquals(globalSession.getStatus().getCode(), globalTransactionDO.getStatus());
+        Assertions.assertEquals(globalSession.getTransactionName(), globalTransactionDO.getTransactionName());
+        Assertions.assertEquals(globalSession.getApplicationId(), globalTransactionDO.getApplicationId());
+        Assertions.assertEquals(
+                globalSession.getTransactionServiceGroup(), globalTransactionDO.getTransactionServiceGroup());
+        Assertions.assertEquals(globalSession.getTransactionName(), globalTransactionDO.getTransactionName());
+        Assertions.assertEquals(globalSession.getTimeout(), globalTransactionDO.getTimeout());
+        Assertions.assertEquals(globalSession.getBeginTime(), globalTransactionDO.getBeginTime());
+        Assertions.assertEquals(globalSession.getApplicationData(), globalTransactionDO.getApplicationData());
     }
 
     @Test
@@ -159,15 +165,15 @@ public class SessionConverterTest {
         branchSession.setApplicationData("abc=123");
 
         BranchTransactionDO branchTransactionDO = SessionConverter.convertBranchTransactionDO(branchSession);
-        Assertions.assertEquals(branchSession.getXid(),branchTransactionDO.getXid());
-        Assertions.assertEquals(branchSession.getResourceId(),branchTransactionDO.getResourceId());
-        Assertions.assertEquals(branchSession.getTransactionId(),branchTransactionDO.getTransactionId());
-        Assertions.assertEquals(branchSession.getBranchId(),branchTransactionDO.getBranchId());
-        Assertions.assertEquals(branchSession.getBranchType().name(),branchTransactionDO.getBranchType());
-        Assertions.assertEquals(branchSession.getResourceGroupId(),branchTransactionDO.getResourceGroupId());
-        Assertions.assertEquals(branchSession.getClientId(),branchTransactionDO.getClientId());
-        Assertions.assertEquals(branchSession.getStatus().getCode(),branchTransactionDO.getStatus());
-        Assertions.assertEquals(branchSession.getApplicationData(),branchTransactionDO.getApplicationData());
+        Assertions.assertEquals(branchSession.getXid(), branchTransactionDO.getXid());
+        Assertions.assertEquals(branchSession.getResourceId(), branchTransactionDO.getResourceId());
+        Assertions.assertEquals(branchSession.getTransactionId(), branchTransactionDO.getTransactionId());
+        Assertions.assertEquals(branchSession.getBranchId(), branchTransactionDO.getBranchId());
+        Assertions.assertEquals(branchSession.getBranchType().name(), branchTransactionDO.getBranchType());
+        Assertions.assertEquals(branchSession.getResourceGroupId(), branchTransactionDO.getResourceGroupId());
+        Assertions.assertEquals(branchSession.getClientId(), branchTransactionDO.getClientId());
+        Assertions.assertEquals(branchSession.getStatus().getCode(), branchTransactionDO.getStatus());
+        Assertions.assertEquals(branchSession.getApplicationData(), branchTransactionDO.getApplicationData());
     }
 
     @Test

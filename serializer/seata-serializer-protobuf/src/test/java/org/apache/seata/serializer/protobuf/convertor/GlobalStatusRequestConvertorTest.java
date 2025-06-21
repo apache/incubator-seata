@@ -16,12 +16,11 @@
  */
 package org.apache.seata.serializer.protobuf.convertor;
 
-import org.apache.seata.serializer.protobuf.generated.GlobalStatusRequestProto;
 import org.apache.seata.core.protocol.transaction.GlobalStatusRequest;
+import org.apache.seata.serializer.protobuf.generated.GlobalStatusRequestProto;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
 
 public class GlobalStatusRequestConvertorTest {
 
@@ -32,12 +31,10 @@ public class GlobalStatusRequestConvertorTest {
         globalStatusRequest.setExtraData("extraData");
         globalStatusRequest.setXid("xid");
         GlobalStatusRequestConvertor convertor = new GlobalStatusRequestConvertor();
-        GlobalStatusRequestProto proto = convertor.convert2Proto(
-            globalStatusRequest);
+        GlobalStatusRequestProto proto = convertor.convert2Proto(globalStatusRequest);
         GlobalStatusRequest real = convertor.convert2Model(proto);
         assertThat((real.getTypeCode())).isEqualTo(globalStatusRequest.getTypeCode());
         assertThat((real.getXid())).isEqualTo(globalStatusRequest.getXid());
         assertThat((real.getExtraData())).isEqualTo(globalStatusRequest.getExtraData());
-
     }
 }

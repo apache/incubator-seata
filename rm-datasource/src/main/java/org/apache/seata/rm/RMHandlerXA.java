@@ -34,5 +34,4 @@ public class RMHandlerXA extends AbstractRMHandler {
     public BranchType getBranchType() {
         return BranchType.XA;
     }
-
 }

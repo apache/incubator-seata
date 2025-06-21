@@ -28,8 +28,8 @@ import org.apache.seata.serializer.protobuf.manager.ProtobufConvertManager;
 public class GrpcSerializer implements Serializer {
     @Override
     public <T> byte[] serialize(T t) {
-        PbConvertor pbConvertor = ProtobufConvertManager.getInstance()
-                .fetchConvertor(t.getClass().getName());
+        PbConvertor pbConvertor =
+                ProtobufConvertManager.getInstance().fetchConvertor(t.getClass().getName());
         Any grpcBody = Any.pack((Message) pbConvertor.convert2Proto(t));
 
         return grpcBody.toByteArray();
@@ -39,7 +39,8 @@ public class GrpcSerializer implements Serializer {
     public <T> T deserialize(byte[] bytes) {
         try {
             Any body = Any.parseFrom(bytes);
-            final Class clazz = ProtobufConvertManager.getInstance().fetchProtoClass(getTypeNameFromTypeUrl(body.getTypeUrl()));
+            final Class clazz =
+                    ProtobufConvertManager.getInstance().fetchProtoClass(getTypeNameFromTypeUrl(body.getTypeUrl()));
             if (body.is(clazz)) {
                 Object ob = body.unpack(clazz);
                 PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchReversedConvertor(clazz.getName());

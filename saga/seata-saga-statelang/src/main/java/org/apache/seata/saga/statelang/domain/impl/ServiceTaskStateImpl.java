@@ -16,12 +16,12 @@
  */
 package org.apache.seata.saga.statelang.domain.impl;
 
+import org.apache.seata.saga.statelang.domain.ServiceTaskState;
+import org.apache.seata.saga.statelang.domain.StateType;
+
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.seata.saga.statelang.domain.StateType;
-import org.apache.seata.saga.statelang.domain.ServiceTaskState;
 
 /**
  * A state used to invoke a service

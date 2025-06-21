@@ -16,9 +16,7 @@
  */
 package org.apache.seata.namingserver.listener;
 
-
 import static org.apache.seata.namingserver.listener.Watcher.Protocol.HTTP;
-
 
 public class Watcher<T> {
 
@@ -104,5 +102,4 @@ public class Watcher<T> {
         String GRPC = "grpc";
         String HTTP = "http";
     }
-
 }

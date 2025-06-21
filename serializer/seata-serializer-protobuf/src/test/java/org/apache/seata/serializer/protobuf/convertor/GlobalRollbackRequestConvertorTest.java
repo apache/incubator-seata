@@ -16,12 +16,11 @@
  */
 package org.apache.seata.serializer.protobuf.convertor;
 
-import org.apache.seata.serializer.protobuf.generated.GlobalRollbackRequestProto;
 import org.apache.seata.core.protocol.transaction.GlobalRollbackRequest;
+import org.apache.seata.serializer.protobuf.generated.GlobalRollbackRequestProto;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
 
 public class GlobalRollbackRequestConvertorTest {
 
@@ -33,8 +32,7 @@ public class GlobalRollbackRequestConvertorTest {
         globalRollbackRequest.setXid("xid");
 
         GlobalRollbackRequestConvertor convertor = new GlobalRollbackRequestConvertor();
-        GlobalRollbackRequestProto proto = convertor.convert2Proto(
-            globalRollbackRequest);
+        GlobalRollbackRequestProto proto = convertor.convert2Proto(globalRollbackRequest);
         GlobalRollbackRequest real = convertor.convert2Model(proto);
         assertThat((real.getTypeCode())).isEqualTo(globalRollbackRequest.getTypeCode());
         assertThat((real.getXid())).isEqualTo(globalRollbackRequest.getXid());

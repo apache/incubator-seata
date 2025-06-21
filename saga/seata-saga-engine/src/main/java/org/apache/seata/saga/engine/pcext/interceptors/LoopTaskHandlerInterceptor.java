@@ -16,12 +16,6 @@
  */
 package org.apache.seata.saga.engine.pcext.interceptors;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Semaphore;
-
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.saga.engine.exception.EngineExecutionException;
 import org.apache.seata.saga.engine.pcext.InterceptableStateHandler;
@@ -41,6 +35,12 @@ import org.apache.seata.saga.statelang.domain.StateInstance;
 import org.apache.seata.saga.statelang.domain.TaskState.Loop;
 import org.apache.seata.saga.statelang.domain.impl.AbstractTaskState;
 
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Semaphore;
+
 /**
  * State Interceptor For ServiceTask, SubStateMachine, ScriptTask With Loop Attribute
  *
@@ -50,10 +50,10 @@ public class LoopTaskHandlerInterceptor implements StateHandlerInterceptor {
 
     @Override
     public boolean match(Class<? extends InterceptableStateHandler> clazz) {
-        return clazz != null &&
-            (ServiceTaskStateHandler.class.isAssignableFrom(clazz)
-                || SubStateMachineHandler.class.isAssignableFrom(clazz)
-                || ScriptTaskHandlerInterceptor.class.isAssignableFrom(clazz));
+        return clazz != null
+                && (ServiceTaskStateHandler.class.isAssignableFrom(clazz)
+                        || SubStateMachineHandler.class.isAssignableFrom(clazz)
+                        || ScriptTaskHandlerInterceptor.class.isAssignableFrom(clazz));
     }
 
     @Override
@@ -61,7 +61,7 @@ public class LoopTaskHandlerInterceptor implements StateHandlerInterceptor {
 
         if (context.hasVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE)) {
             StateInstruction instruction = context.getInstruction(StateInstruction.class);
-            AbstractTaskState currentState = (AbstractTaskState)instruction.getState(context);
+            AbstractTaskState currentState = (AbstractTaskState) instruction.getState(context);
 
             int loopCounter;
             Loop loop;
@@ -70,23 +70,27 @@ public class LoopTaskHandlerInterceptor implements StateHandlerInterceptor {
             if (context.hasVariable(DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE)) {
                 // compensate condition should get stateToBeCompensated 's config
                 CompensationHolder compensationHolder = CompensationHolder.getCurrent(context, true);
-                StateInstance stateToBeCompensated = compensationHolder.getStatesNeedCompensation().get(currentState.getName());
-                AbstractTaskState compensateState = (AbstractTaskState)stateToBeCompensated.getStateMachineInstance()
-                    .getStateMachine().getState(EngineUtils.getOriginStateName(stateToBeCompensated));
+                StateInstance stateToBeCompensated =
+                        compensationHolder.getStatesNeedCompensation().get(currentState.getName());
+                AbstractTaskState compensateState = (AbstractTaskState) stateToBeCompensated
+                        .getStateMachineInstance()
+                        .getStateMachine()
+                        .getState(EngineUtils.getOriginStateName(stateToBeCompensated));
                 loop = compensateState.getLoop();
                 loopCounter = LoopTaskUtils.reloadLoopCounter(stateToBeCompensated.getName());
             } else {
                 loop = currentState.getLoop();
-                loopCounter = (int)context.getVariable(DomainConstants.LOOP_COUNTER);
+                loopCounter = (int) context.getVariable(DomainConstants.LOOP_COUNTER);
             }
 
             Collection collection = LoopContextHolder.getCurrent(context, true).getCollection();
-            Map<String, Object> contextVariables = (Map<String, Object>)context.getVariable(
-                DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);
+            Map<String, Object> contextVariables =
+                    (Map<String, Object>) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);
             Map<String, Object> copyContextVariables = new ConcurrentHashMap<>(contextVariables);
             copyContextVariables.put(loop.getElementIndexName(), loopCounter);
             copyContextVariables.put(loop.getElementVariableName(), iterator(collection, loopCounter));
-            ((HierarchicalProcessContext)context).setVariableLocally(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT, copyContextVariables);
+            ((HierarchicalProcessContext) context)
+                    .setVariableLocally(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT, copyContextVariables);
         }
     }
 
@@ -95,21 +99,23 @@ public class LoopTaskHandlerInterceptor implements StateHandlerInterceptor {
 
         if (context.hasVariable(DomainConstants.VAR_NAME_IS_LOOP_STATE)) {
 
-            StateInstance stateInstance = (StateInstance)context.getVariable(DomainConstants.VAR_NAME_STATE_INST);
-            if (null != stateInstance && !LoopContextHolder.getCurrent(context, true).isFailEnd()) {
+            StateInstance stateInstance = (StateInstance) context.getVariable(DomainConstants.VAR_NAME_STATE_INST);
+            if (null != stateInstance
+                    && !LoopContextHolder.getCurrent(context, true).isFailEnd()) {
                 if (!ExecutionStatus.SU.equals(stateInstance.getStatus())) {
                     LoopContextHolder.getCurrent(context, true).setFailEnd(true);
                 }
             }
 
-            Exception exp = (Exception)((HierarchicalProcessContext)context).getVariableLocally(DomainConstants.VAR_NAME_CURRENT_EXCEPTION);
+            Exception exp = (Exception) ((HierarchicalProcessContext) context)
+                    .getVariableLocally(DomainConstants.VAR_NAME_CURRENT_EXCEPTION);
             if (exp == null) {
                 exp = e;
             }
 
             if (null != e) {
                 if (context.hasVariable(DomainConstants.LOOP_SEMAPHORE)) {
-                    Semaphore semaphore = (Semaphore)context.getVariable(DomainConstants.LOOP_SEMAPHORE);
+                    Semaphore semaphore = (Semaphore) context.getVariable(DomainConstants.LOOP_SEMAPHORE);
                     semaphore.release();
                 }
             }
@@ -117,10 +123,11 @@ public class LoopTaskHandlerInterceptor implements StateHandlerInterceptor {
             if (null != exp) {
                 LoopContextHolder.getCurrent(context, true).setFailEnd(true);
             } else {
-                LoopContextHolder.getCurrent(context, true).getNrOfCompletedInstances().incrementAndGet();
+                LoopContextHolder.getCurrent(context, true)
+                        .getNrOfCompletedInstances()
+                        .incrementAndGet();
             }
             LoopContextHolder.getCurrent(context, true).getNrOfActiveInstances().decrementAndGet();
-
         }
     }
 
@@ -134,5 +141,4 @@ public class LoopTaskHandlerInterceptor implements StateHandlerInterceptor {
         }
         return value;
     }
-
 }

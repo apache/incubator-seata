@@ -16,38 +16,37 @@
  */
 package org.apache.seata.server.console.impl.file;
 
+import org.apache.seata.common.result.PageResult;
+import org.apache.seata.common.result.SingleResult;
+import org.apache.seata.common.util.CollectionUtils;
+import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.core.exception.TransactionException;
+import org.apache.seata.core.lock.RowLock;
+import org.apache.seata.server.console.entity.bo.GlobalLockQueryBO;
+import org.apache.seata.server.console.entity.param.GlobalLockParam;
+import org.apache.seata.server.console.entity.vo.GlobalLockVO;
+import org.apache.seata.server.console.exception.ConsoleException;
+import org.apache.seata.server.console.impl.AbstractLockService;
+import org.apache.seata.server.console.impl.redis.GlobalLockRedisServiceImpl;
+import org.apache.seata.server.console.service.GlobalLockService;
+import org.apache.seata.server.lock.LockerManagerFactory;
+import org.apache.seata.server.session.BranchSession;
+import org.apache.seata.server.session.GlobalSession;
+import org.apache.seata.server.session.SessionHolder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.stereotype.Component;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.seata.common.result.SingleResult;
-import org.apache.seata.common.util.CollectionUtils;
-import org.apache.seata.common.util.StringUtils;
-import org.apache.seata.core.exception.TransactionException;
-import org.apache.seata.server.console.entity.bo.GlobalLockQueryBO;
-import org.apache.seata.server.console.exception.ConsoleException;
-import org.apache.seata.server.console.impl.AbstractLockService;
-import org.apache.seata.server.console.impl.redis.GlobalLockRedisServiceImpl;
-import org.apache.seata.server.console.entity.param.GlobalLockParam;
-import org.apache.seata.common.result.PageResult;
-import org.apache.seata.server.console.entity.vo.GlobalLockVO;
-import org.apache.seata.core.lock.RowLock;
-import org.apache.seata.server.console.service.GlobalLockService;
-import org.apache.seata.server.lock.LockerManagerFactory;
-import org.apache.seata.server.session.BranchSession;
-import org.apache.seata.server.session.GlobalSession;
-import org.apache.seata.server.session.SessionHolder;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
-import org.springframework.stereotype.Component;
-
+import static java.util.Objects.isNull;
 import static org.apache.seata.common.util.StringUtils.isBlank;
 import static org.apache.seata.server.console.entity.vo.GlobalLockVO.convert;
-import static java.util.Objects.isNull;
 
 /**
  * Global Lock File ServiceImpl
@@ -63,8 +62,8 @@ public class GlobalLockFileServiceImpl extends AbstractLockService implements Gl
     public PageResult<GlobalLockVO> query(GlobalLockParam param) {
         checkParam(param);
 
-        final Collection<GlobalSession> allSessions = SessionHolder.getRootSessionManager().allSessions();
-
+        final Collection<GlobalSession> allSessions =
+                SessionHolder.getRootSessionManager().allSessions();
 
         List<GlobalLockQueryBO> result = allSessions.parallelStream()
                 .filter(obtainGlobalSessionPredicate(param))
@@ -75,31 +74,33 @@ public class GlobalLockFileServiceImpl extends AbstractLockService implements Gl
                 .collect(Collectors.toList());
 
         return PageResult.build(convert(result), param.getPageNum(), param.getPageSize());
-
     }
 
     @Override
     public SingleResult<Void> deleteLock(GlobalLockParam param) {
         checkDeleteLock(param);
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("start to delete global lock,xid:{} branchId:{}",
-                    param.getXid(), param.getBranchId());
+            LOGGER.debug("start to delete global lock,xid:{} branchId:{}", param.getXid(), param.getBranchId());
         }
         GlobalSession globalSession = SessionHolder.getRootSessionManager().findGlobalSession(param.getXid(), true);
         if (globalSession != null) {
             List<BranchSession> branchSessions = globalSession.getBranchSessions().stream()
-                .filter(branchSession -> branchSession.getBranchId() == Long.parseLong(param.getBranchId()))
-                .collect(Collectors.toList());
+                    .filter(branchSession -> branchSession.getBranchId() == Long.parseLong(param.getBranchId()))
+                    .collect(Collectors.toList());
 
             if (branchSessions.size() != 1) {
-                throw new ConsoleException(new UnsupportedOperationException("branch session size is not one"),
-                    String.format("delete global lock," + "xid:%s ,branchId:%s", param.getXid(), param.getBranchId()));
+                throw new ConsoleException(
+                        new UnsupportedOperationException("branch session size is not one"),
+                        String.format(
+                                "delete global lock," + "xid:%s ,branchId:%s", param.getXid(), param.getBranchId()));
             }
             try {
                 lockManager.releaseLock(branchSessions.get(0));
             } catch (TransactionException e) {
-                throw new ConsoleException(e,
-                    String.format("delete global lock," + "xid:%s ,branchId:%s", param.getXid(), param.getBranchId()));
+                throw new ConsoleException(
+                        e,
+                        String.format(
+                                "delete global lock," + "xid:%s ,branchId:%s", param.getXid(), param.getBranchId()));
             }
         }
         return SingleResult.success();
@@ -123,12 +124,12 @@ public class GlobalLockFileServiceImpl extends AbstractLockService implements Gl
         final List<RowLock> rowLocks = LockerManagerFactory.getLockManager().collectRowLocks(branchSession);
 
         if (StringUtils.isNotBlank(tableName)) {
-            return rowLocks.parallelStream().filter(rowLock -> rowLock.getTableName().contains(param.getTableName()));
+            return rowLocks.parallelStream()
+                    .filter(rowLock -> rowLock.getTableName().contains(param.getTableName()));
         }
 
         return rowLocks.stream();
     }
-
 
     /**
      * check the param
@@ -151,8 +152,6 @@ public class GlobalLockFileServiceImpl extends AbstractLockService implements Gl
         } catch (NumberFormatException e) {
             param.setBranchId(null);
         }
-
-
     }
 
     /**
@@ -164,17 +163,14 @@ public class GlobalLockFileServiceImpl extends AbstractLockService implements Gl
     private Predicate<? super BranchSession> obtainBranchSessionPredicate(GlobalLockParam param) {
         return branchSession -> {
             // transactionId
-            return (isBlank(param.getTransactionId()) ||
-                    String.valueOf(branchSession.getTransactionId()).contains(param.getTransactionId()))
-
+            return (isBlank(param.getTransactionId())
+                            || String.valueOf(branchSession.getTransactionId()).contains(param.getTransactionId()))
                     &&
                     // branch id
-                    (isBlank(param.getBranchId()) ||
-                            String.valueOf(branchSession.getBranchId()).contains(param.getBranchId()))
-                    ;
+                    (isBlank(param.getBranchId())
+                            || String.valueOf(branchSession.getBranchId()).contains(param.getBranchId()));
         };
     }
-
 
     /**
      * obtain the global session condition
@@ -187,21 +183,16 @@ public class GlobalLockFileServiceImpl extends AbstractLockService implements Gl
         return globalSession -> {
             // first, there must be withBranchSession
             return CollectionUtils.isNotEmpty(globalSession.getBranchSessions())
-
                     &&
                     // The second is other conditions
                     // xid
                     (isBlank(param.getXid()) || globalSession.getXid().contains(param.getXid()))
-
                     &&
                     // timeStart
                     (isNull(param.getTimeStart()) || param.getTimeStart() / 1000 >= globalSession.getBeginTime() / 1000)
-
                     &&
                     // timeEnd
                     (isNull(param.getTimeEnd()) || param.getTimeEnd() / 1000 <= globalSession.getBeginTime() / 1000);
-
         };
     }
-
 }

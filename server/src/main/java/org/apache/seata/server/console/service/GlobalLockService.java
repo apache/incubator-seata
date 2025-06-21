@@ -21,7 +21,6 @@ import org.apache.seata.common.result.SingleResult;
 import org.apache.seata.server.console.entity.param.GlobalLockParam;
 import org.apache.seata.server.console.entity.vo.GlobalLockVO;
 
-
 /**
  * Global lock service
  */

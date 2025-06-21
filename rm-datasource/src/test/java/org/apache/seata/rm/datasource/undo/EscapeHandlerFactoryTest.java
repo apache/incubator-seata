@@ -21,7 +21,6 @@ import org.apache.seata.sqlparser.EscapeHandlerFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-
 public class EscapeHandlerFactoryTest {
 
     @Test
@@ -29,6 +28,7 @@ public class EscapeHandlerFactoryTest {
         EscapeHandlerFactory escapeHandlerFactory = new EscapeHandlerFactory();
         Assertions.assertNotNull(escapeHandlerFactory);
 
-        Assertions.assertThrows(EnhancedServiceNotFoundException.class, () -> EscapeHandlerFactory.getEscapeHandler("unknow"));
+        Assertions.assertThrows(
+                EnhancedServiceNotFoundException.class, () -> EscapeHandlerFactory.getEscapeHandler("unknow"));
     }
 }

@@ -20,7 +20,6 @@ import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationProvider;
 
-
 @LoadLevel(name = "ZK", order = 1)
 public class ZookeeperConfigurationProvider implements ConfigurationProvider {
     @Override

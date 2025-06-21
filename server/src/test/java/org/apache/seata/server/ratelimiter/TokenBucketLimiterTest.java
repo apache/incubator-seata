@@ -20,7 +20,6 @@ import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.server.DynamicPortTestConfig;
 import org.apache.seata.server.limit.ratelimit.RateLimiter;
 import org.apache.seata.server.limit.ratelimit.TokenBucketLimiter;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -41,7 +40,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @SpringBootTest
 @Import(DynamicPortTestConfig.class)
 public class TokenBucketLimiterTest {
-    
+
     /**
      * Logger for TokenBucketLimiterTest
      **/
@@ -49,14 +48,18 @@ public class TokenBucketLimiterTest {
 
     @Test
     public void testPerformanceOfTokenBucketLimiter() throws InterruptedException {
-        RateLimiter rateLimiter = new TokenBucketLimiter(true, 1,
-                10, 10);
+        RateLimiter rateLimiter = new TokenBucketLimiter(true, 1, 10, 10);
         int threads = 10;
         final int count = 100;
         final CountDownLatch cnt = new CountDownLatch(count * threads);
 
-        final ThreadPoolExecutor service1 = new ThreadPoolExecutor(threads, threads, 0L, TimeUnit.MILLISECONDS,
-                new SynchronousQueue<Runnable>(), new NamedThreadFactory("test1", false));
+        final ThreadPoolExecutor service1 = new ThreadPoolExecutor(
+                threads,
+                threads,
+                0L,
+                TimeUnit.MILLISECONDS,
+                new SynchronousQueue<Runnable>(),
+                new NamedThreadFactory("test1", false));
         AtomicInteger totalPass = new AtomicInteger();
         AtomicInteger totalReject = new AtomicInteger();
         StopWatch totalStopWatch = new StopWatch();
@@ -89,8 +92,11 @@ public class TokenBucketLimiterTest {
         }
         cnt.await();
         totalStopWatch.stop();
-        LOGGER.info("total time:{}ms, total pass:{}, total reject:{}", totalStopWatch.getLastTaskTimeMillis(),
-                totalPass.get(), totalReject.get());
+        LOGGER.info(
+                "total time:{}ms, total pass:{}, total reject:{}",
+                totalStopWatch.getLastTaskTimeMillis(),
+                totalPass.get(),
+                totalReject.get());
         Assertions.assertNotEquals(0, totalReject.get());
     }
 }

@@ -22,12 +22,12 @@ import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import org.apache.seata.sqlparser.ParametersHolder;
 import org.apache.seata.sqlparser.SQLParsingException;
 import org.apache.seata.sqlparser.SQLType;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class DmSelectForUpdateRecognizerTest {
 
@@ -48,12 +48,14 @@ public class DmSelectForUpdateRecognizerTest {
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
 
         DmSelectForUpdateRecognizer recognizer = new DmSelectForUpdateRecognizer(sql, asts.get(0));
-        String whereCondition = recognizer.getWhereCondition(new ParametersHolder() {
-            @Override
-            public Map<Integer, ArrayList<Object>> getParameters() {
-                return null;
-            }
-        }, new ArrayList<>());
+        String whereCondition = recognizer.getWhereCondition(
+                new ParametersHolder() {
+                    @Override
+                    public Map<Integer, ArrayList<Object>> getParameters() {
+                        return null;
+                    }
+                },
+                new ArrayList<>());
         Assertions.assertEquals("", whereCondition);
     }
 
@@ -67,7 +69,7 @@ public class DmSelectForUpdateRecognizerTest {
 
         Assertions.assertEquals("", whereCondition);
 
-        //test for select was null
+        // test for select was null
         Assertions.assertThrows(SQLParsingException.class, () -> {
             String s = "select * from t for update";
             List<SQLStatement> sqlStatements = SQLUtils.parseStatements(s, DB_TYPE);
@@ -76,7 +78,7 @@ public class DmSelectForUpdateRecognizerTest {
             new DmSelectForUpdateRecognizer(s, selectAst).getWhereCondition();
         });
 
-        //test for query was null
+        // test for query was null
         Assertions.assertThrows(SQLParsingException.class, () -> {
             String s = "select * from t";
             List<SQLStatement> sqlStatements = SQLUtils.parseStatements(s, DB_TYPE);

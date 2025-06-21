@@ -37,7 +37,7 @@ public class EscapeHandlerFactory {
      * @return keyword checker
      */
     public static EscapeHandler getEscapeHandler(String dbType) {
-        return CollectionUtils.computeIfAbsent(ESCAPE_HANDLER_MAP, dbType,
-            key -> EnhancedServiceLoader.load(EscapeHandler.class, dbType));
+        return CollectionUtils.computeIfAbsent(
+                ESCAPE_HANDLER_MAP, dbType, key -> EnhancedServiceLoader.load(EscapeHandler.class, dbType));
     }
 }

@@ -16,12 +16,13 @@
  */
 package org.apache.seata.server.cluster.raft.serializer;
 
-import java.io.IOException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.core.serializer.Serializer;
+
+import java.io.IOException;
 
 /**
  */
@@ -30,10 +31,9 @@ public class JacksonSerializer implements Serializer {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-
     static {
         SimpleModule module = new SimpleModule();
-        module.addDeserializer(Class.class,new CustomDeserializer());
+        module.addDeserializer(Class.class, new CustomDeserializer());
         OBJECT_MAPPER.registerModule(module);
     }
 
@@ -51,7 +51,7 @@ public class JacksonSerializer implements Serializer {
     public <T> T deserialize(byte[] bytes) {
         try {
             JsonInfo jsonInfo = OBJECT_MAPPER.readValue(bytes, JsonInfo.class);
-            return (T)OBJECT_MAPPER.readValue(jsonInfo.getObj(), jsonInfo.getClz());
+            return (T) OBJECT_MAPPER.readValue(jsonInfo.getObj(), jsonInfo.getClz());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -63,8 +63,7 @@ public class JacksonSerializer implements Serializer {
 
         Class<?> clz;
 
-        public JsonInfo() {
-        }
+        public JsonInfo() {}
 
         public JsonInfo(byte[] obj, Class<?> clz) {
             this.obj = obj;
@@ -87,5 +86,4 @@ public class JacksonSerializer implements Serializer {
             this.clz = clz;
         }
     }
-
 }

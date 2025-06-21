@@ -56,12 +56,13 @@ public class SqlServerOperateRecognizerHolderTest extends AbstractRecognizerTest
 
     @Test
     public void getSelectForUpdateTest() {
-        //test with lock
+        // test with lock
         String sql = "SELECT name FROM t1 WITH (ROWLOCK, UPDLOCK) WHERE id = 'id1'";
         SQLStatement sqlStatement = getSQLStatement(sql);
-        Assertions.assertNotNull(new SqlServerOperateRecognizerHolder().getSelectForUpdateRecognizer(sql, sqlStatement));
+        Assertions.assertNotNull(
+                new SqlServerOperateRecognizerHolder().getSelectForUpdateRecognizer(sql, sqlStatement));
 
-        //test with no lock
+        // test with no lock
         sql = "SELECT name FROM t1 WHERE id = 'id1'";
         sqlStatement = getSQLStatement(sql);
         Assertions.assertNull(new SqlServerOperateRecognizerHolder().getSelectForUpdateRecognizer(sql, sqlStatement));

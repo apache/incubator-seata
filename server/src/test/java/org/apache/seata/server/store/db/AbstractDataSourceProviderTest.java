@@ -16,8 +16,6 @@
  */
 package org.apache.seata.server.store.db;
 
-import javax.sql.DataSource;
-
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.loader.EnhancedServiceNotFoundException;
 import org.apache.seata.config.ConfigurationFactory;
@@ -33,6 +31,8 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
+
+import javax.sql.DataSource;
 
 /**
  */
@@ -58,17 +58,17 @@ public class AbstractDataSourceProviderTest {
     }
 
     @AfterEach
-     void tearDown() {
+    void tearDown() {
         EnhancedServiceLoader.unloadAll();
         ConfigurationFactory.reload();
         System.clearProperty("store.db.driverClassName");
     }
 
-
     @Test
     @Order(1)
     public void testDbcpDataSourceProvider() {
-        DataSource dataSource = EnhancedServiceLoader.load(DataSourceProvider.class, dbcpDatasourceType).provide();
+        DataSource dataSource = EnhancedServiceLoader.load(DataSourceProvider.class, dbcpDatasourceType)
+                .provide();
         Assertions.assertNotNull(dataSource);
     }
 
@@ -77,10 +77,12 @@ public class AbstractDataSourceProviderTest {
     public void testLoadMysqlDriver() {
         System.setProperty("loader.path", "/tmp");
         System.setProperty("store.db.driverClassName", mysqlJdbcDriver);
-        DataSource dataSource = EnhancedServiceLoader.load(DataSourceProvider.class, dbcpDatasourceType).provide();
+        DataSource dataSource = EnhancedServiceLoader.load(DataSourceProvider.class, dbcpDatasourceType)
+                .provide();
         Assertions.assertNotNull(dataSource);
         System.setProperty("store.db.driverClassName", mysql8JdbcDriver);
-        dataSource = EnhancedServiceLoader.load(DataSourceProvider.class, dbcpDatasourceType).provide();
+        dataSource = EnhancedServiceLoader.load(DataSourceProvider.class, dbcpDatasourceType)
+                .provide();
         Assertions.assertNotNull(dataSource);
     }
 
@@ -88,7 +90,8 @@ public class AbstractDataSourceProviderTest {
     @Order(3)
     public void testLoadDMDriver() {
         System.setProperty("store.db.driverClassName", "dm.jdbc.driver.DmDriver");
-        DataSource dataSource = EnhancedServiceLoader.load(DataSourceProvider.class, dbcpDatasourceType).provide();
+        DataSource dataSource = EnhancedServiceLoader.load(DataSourceProvider.class, dbcpDatasourceType)
+                .provide();
         Assertions.assertNotNull(dataSource);
     }
 
@@ -97,21 +100,24 @@ public class AbstractDataSourceProviderTest {
     public void testLoadDriverFailed() {
         System.setProperty("store.db.driverClassName", "dm.jdbc.driver.DmDriver1");
         Assertions.assertThrows(EnhancedServiceNotFoundException.class, () -> {
-            EnhancedServiceLoader.load(DataSourceProvider.class, dbcpDatasourceType).provide();
+            EnhancedServiceLoader.load(DataSourceProvider.class, dbcpDatasourceType)
+                    .provide();
         });
     }
 
     @Test
     @Order(5)
     public void testDruidDataSourceProvider() {
-        DataSource dataSource = EnhancedServiceLoader.load(DataSourceProvider.class, druidDatasourceType).provide();
+        DataSource dataSource = EnhancedServiceLoader.load(DataSourceProvider.class, druidDatasourceType)
+                .provide();
         Assertions.assertNotNull(dataSource);
     }
 
     @Test
     @Order(6)
     public void testHikariDataSourceProvider() {
-        DataSource dataSource = EnhancedServiceLoader.load(DataSourceProvider.class, hikariDatasourceType).provide();
+        DataSource dataSource = EnhancedServiceLoader.load(DataSourceProvider.class, hikariDatasourceType)
+                .provide();
         Assertions.assertNotNull(dataSource);
     }
 
@@ -122,5 +128,4 @@ public class AbstractDataSourceProviderTest {
         Class<?> driverClass = Class.forName(mysqlJdbcDriver, true, classLoader);
         Assertions.assertNotNull(driverClass);
     }
-
 }

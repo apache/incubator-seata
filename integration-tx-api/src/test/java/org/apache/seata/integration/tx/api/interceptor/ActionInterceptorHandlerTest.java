@@ -16,14 +16,14 @@
  */
 package org.apache.seata.integration.tx.api.interceptor;
 
+import org.apache.seata.rm.tcc.api.BusinessActionContext;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.seata.rm.tcc.api.BusinessActionContext;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
 /**
  * The type Action interceptor handler test.
@@ -43,19 +43,18 @@ public class ActionInterceptorHandlerTest {
      */
     @Test
     public void testBusinessActionContext() throws NoSuchMethodException {
-        Method prepareMethod = TestAction.class.getDeclaredMethod("prepare",
-                BusinessActionContext.class, int.class, List.class, TestParam.class);
+        Method prepareMethod = TestAction.class.getDeclaredMethod(
+                "prepare", BusinessActionContext.class, int.class, List.class, TestParam.class);
         List<Object> list = new ArrayList<>();
         list.add("b");
         TestParam tccParam = new TestParam(1, "abc@ali.com");
 
-        Map<String, Object>  paramContext = actionInterceptorHandler.fetchActionRequestContext(prepareMethod,
-                new Object[]{null, 10, list, tccParam});
+        Map<String, Object> paramContext = actionInterceptorHandler.fetchActionRequestContext(
+                prepareMethod, new Object[] {null, 10, list, tccParam});
         System.out.println(paramContext);
 
         Assertions.assertEquals(10, paramContext.get("a"));
         Assertions.assertEquals("b", paramContext.get("b"));
         Assertions.assertEquals("abc@ali.com", paramContext.get("email"));
     }
-
 }

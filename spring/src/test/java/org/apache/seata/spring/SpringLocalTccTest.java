@@ -16,7 +16,6 @@
  */
 package org.apache.seata.spring;
 
-import java.io.IOException;
 import org.apache.seata.integration.tx.api.interceptor.handler.ProxyInvocationHandler;
 import org.apache.seata.rm.tcc.interceptor.parser.TccActionInterceptorParser;
 import org.apache.seata.spring.tcc.TccAnnoAtInterAction;
@@ -30,9 +29,9 @@ import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.NameMatchMethodPointcutAdvisor;
 
+import java.io.IOException;
 
 public class SpringLocalTccTest {
-
 
     @BeforeAll
     public static void init() throws IOException {
@@ -44,26 +43,30 @@ public class SpringLocalTccTest {
 
     @Test
     void testParserInterfaceToProxyForSpringCGLIB() throws Exception {
-        //local tcc anno at interface impl
+        // local tcc anno at interface impl
         {
             TccActionInterceptorParser tccActionInterceptorParser = new TccActionInterceptorParser();
             TccAnnoAtInterImplActionImpl tccAction = new TccAnnoAtInterImplActionImpl();
-            TccAnnoAtInterImplAction proxyTccAction = createSpringCGLIBProxy(tccAction, "doSomething", TccAnnoAtInterImplAction.class);
-            ProxyInvocationHandler proxyInvocationHandler = tccActionInterceptorParser.parserInterfaceToProxy(proxyTccAction, proxyTccAction.getClass().getName());
+            TccAnnoAtInterImplAction proxyTccAction =
+                    createSpringCGLIBProxy(tccAction, "doSomething", TccAnnoAtInterImplAction.class);
+            ProxyInvocationHandler proxyInvocationHandler = tccActionInterceptorParser.parserInterfaceToProxy(
+                    proxyTccAction, proxyTccAction.getClass().getName());
             Assertions.assertNotNull(proxyInvocationHandler);
         }
 
-        //local tcc anno at interface
+        // local tcc anno at interface
         {
             TccActionInterceptorParser tccActionInterceptorParser = new TccActionInterceptorParser();
             TccAnnoAtInterActionImpl tccAction = new TccAnnoAtInterActionImpl();
-            TccAnnoAtInterAction proxyTccAction = createSpringCGLIBProxy(tccAction, "doSomething", TccAnnoAtInterAction.class);
-            ProxyInvocationHandler proxyInvocationHandler = tccActionInterceptorParser.parserInterfaceToProxy(proxyTccAction, proxyTccAction.getClass().getName());
+            TccAnnoAtInterAction proxyTccAction =
+                    createSpringCGLIBProxy(tccAction, "doSomething", TccAnnoAtInterAction.class);
+            ProxyInvocationHandler proxyInvocationHandler = tccActionInterceptorParser.parserInterfaceToProxy(
+                    proxyTccAction, proxyTccAction.getClass().getName());
             Assertions.assertNotNull(proxyInvocationHandler);
         }
     }
 
-    private  <T> T createSpringCGLIBProxy(T target, String methodName, Class<T> interfaceClass) {
+    private <T> T createSpringCGLIBProxy(T target, String methodName, Class<T> interfaceClass) {
         ProxyFactory proxyFactory = new ProxyFactory(target);
         proxyFactory.setProxyTargetClass(true);
         MethodBeforeAdvice advice = (method, args1, target1) -> System.out.println("test");
