@@ -16,17 +16,16 @@
  */
 package org.apache.seata.serializer.protobuf.convertor;
 
-import org.apache.seata.serializer.protobuf.generated.MergedResultMessageProto;
 import org.apache.seata.core.exception.TransactionExceptionCode;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.protocol.AbstractResultMessage;
 import org.apache.seata.core.protocol.MergeResultMessage;
 import org.apache.seata.core.protocol.ResultCode;
 import org.apache.seata.core.protocol.transaction.GlobalCommitResponse;
+import org.apache.seata.serializer.protobuf.generated.MergedResultMessageProto;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
 
 public class MergeResultMessageConvertorTest {
 
@@ -47,12 +46,12 @@ public class MergeResultMessageConvertorTest {
         MergedResultMessageProto proto = convertor.convert2Proto(mergeResultMessage);
         MergeResultMessage real = convertor.convert2Model(proto);
 
-        GlobalCommitResponse realObj = (GlobalCommitResponse)real.getMsgs()[0];
+        GlobalCommitResponse realObj = (GlobalCommitResponse) real.getMsgs()[0];
 
         assertThat((realObj.getTypeCode())).isEqualTo(globalCommitResponse.getTypeCode());
         assertThat((realObj.getMsg())).isEqualTo(globalCommitResponse.getMsg());
         assertThat((realObj.getResultCode())).isEqualTo(globalCommitResponse.getResultCode());
-        assertThat((realObj.getTransactionExceptionCode())).isEqualTo(
-            globalCommitResponse.getTransactionExceptionCode());
+        assertThat((realObj.getTransactionExceptionCode()))
+                .isEqualTo(globalCommitResponse.getTransactionExceptionCode());
     }
 }

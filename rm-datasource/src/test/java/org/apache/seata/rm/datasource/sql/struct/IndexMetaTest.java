@@ -23,7 +23,6 @@ import org.apache.seata.sqlparser.struct.IndexType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-
 public class IndexMetaTest {
 
     @Test
@@ -49,7 +48,7 @@ public class IndexMetaTest {
         Assertions.assertNotEquals(indexMeta, other);
 
         other = new IndexMeta();
-        other.setType((short)1);
+        other.setType((short) 1);
         Assertions.assertNotEquals(indexMeta, other);
 
         other = new IndexMeta();
@@ -59,14 +58,14 @@ public class IndexMetaTest {
 
         other = new IndexMeta();
         other.setAscOrDesc("");
-        //prevent npe and make the unit test go equals ascOrDesc
+        // prevent npe and make the unit test go equals ascOrDesc
         other.setIndextype(IndexType.NORMAL);
         indexMeta.setIndextype(IndexType.NORMAL);
         Assertions.assertNotEquals(indexMeta, other);
 
         other = new IndexMeta();
         other.setOrdinalPosition(1);
-        //prevent npe and make the unit test go equals ordinal position
+        // prevent npe and make the unit test go equals ordinal position
         other.setIndextype(IndexType.NORMAL);
         indexMeta.setIndextype(IndexType.NORMAL);
         Assertions.assertNotEquals(indexMeta, other);
@@ -76,5 +75,4 @@ public class IndexMetaTest {
         indexMeta.setIndextype(IndexType.NORMAL);
         Assertions.assertEquals(indexMeta, other);
     }
-
 }

@@ -16,8 +16,6 @@
  */
 package org.apache.seata.rm.datasource.exec;
 
-import org.apache.seata.rm.datasource.exec.LockRetryController;
-import org.apache.seata.rm.datasource.exec.LockWaitTimeoutException;
 import org.apache.seata.common.DefaultValues;
 import org.apache.seata.config.ConfigurationChangeEvent;
 import org.apache.seata.core.constants.ConfigurationKeys;
@@ -29,7 +27,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
-
 
 public class LockRetryControllerTest {
 
@@ -49,21 +46,26 @@ public class LockRetryControllerTest {
     @Test
     void testRetryNotExceeded() {
         LockRetryController controller = new LockRetryController();
-        assertDoesNotThrow(() -> {
-            for (int times = 0; times < config.getLockRetryTimes(); times++) {
-                controller.sleep(new RuntimeException("test"));
-            }
-        }, "should not throw anything when retry not exceeded");
+        assertDoesNotThrow(
+                () -> {
+                    for (int times = 0; times < config.getLockRetryTimes(); times++) {
+                        controller.sleep(new RuntimeException("test"));
+                    }
+                },
+                "should not throw anything when retry not exceeded");
     }
 
     @Test
     void testRetryExceeded() {
         LockRetryController controller = new LockRetryController();
-        Assertions.assertThrows(LockWaitTimeoutException.class, () -> {
-            for (int times = 0; times <= config.getLockRetryTimes(); times++) {
-                controller.sleep(new RuntimeException("test"));
-            }
-        }, "should throw LockWaitTimeoutException when retry exceeded");
+        Assertions.assertThrows(
+                LockWaitTimeoutException.class,
+                () -> {
+                    for (int times = 0; times <= config.getLockRetryTimes(); times++) {
+                        controller.sleep(new RuntimeException("test"));
+                    }
+                },
+                "should throw LockWaitTimeoutException when retry exceeded");
     }
 
     @Test
@@ -97,13 +99,15 @@ public class LockRetryControllerTest {
         event.setDataId(ConfigurationKeys.CLIENT_LOCK_RETRY_INTERVAL);
         event.setNewValue("not a number");
         config.onChangeEvent(event);
-        String message3 = "should fallback to default value when receive an illegal config value of CLIENT_LOCK_RETRY_INTERVAL";
+        String message3 =
+                "should fallback to default value when receive an illegal config value of CLIENT_LOCK_RETRY_INTERVAL";
         assertEquals(defaultRetryInterval, config.getGlobalLockRetryInterval(), message3);
 
         event.setDataId(ConfigurationKeys.CLIENT_LOCK_RETRY_TIMES);
         event.setNewValue("not a number");
         config.onChangeEvent(event);
-        String message4 = "should fallback to default value when receive an illegal config value of CLIENT_LOCK_RETRY_TIMES";
+        String message4 =
+                "should fallback to default value when receive an illegal config value of CLIENT_LOCK_RETRY_TIMES";
         assertEquals(defaultRetryTimes, config.getGlobalLockRetryTimes(), message4);
     }
 

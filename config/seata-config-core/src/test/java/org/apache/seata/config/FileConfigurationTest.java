@@ -16,9 +16,6 @@
  */
 package org.apache.seata.config;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -26,12 +23,15 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 class FileConfigurationTest {
 
     Logger logger = LoggerFactory.getLogger(FileConfigurationTest.class);
 
     @BeforeAll
-   static void setUp() {
+    static void setUp() {
         System.setProperty("file.listener.enabled", "true");
         ConfigurationCache.clear();
     }
@@ -50,23 +50,30 @@ class FileConfigurationTest {
         CountDownLatch countDownLatch = new CountDownLatch(1);
         String dataId = "service.disableGlobalTransaction";
         boolean value = fileConfig.getBoolean(dataId);
-        fileConfig.addConfigListener(dataId, (CachedConfigurationChangeListener)event -> {
-            logger.info("before dataId: {}, oldValue: {}, newValue: {}", event.getDataId(), event.getOldValue(),
-                event.getNewValue());
-            Assertions.assertEquals(Boolean.parseBoolean(event.getNewValue()),
-                !Boolean.parseBoolean(event.getOldValue()));
-            logger.info("after dataId: {}, oldValue: {}, newValue: {}", event.getDataId(), event.getOldValue(),
-                event.getNewValue());
+        fileConfig.addConfigListener(dataId, (CachedConfigurationChangeListener) event -> {
+            logger.info(
+                    "before dataId: {}, oldValue: {}, newValue: {}",
+                    event.getDataId(),
+                    event.getOldValue(),
+                    event.getNewValue());
+            Assertions.assertEquals(
+                    Boolean.parseBoolean(event.getNewValue()), !Boolean.parseBoolean(event.getOldValue()));
+            logger.info(
+                    "after dataId: {}, oldValue: {}, newValue: {}",
+                    event.getDataId(),
+                    event.getOldValue(),
+                    event.getNewValue());
             countDownLatch.countDown();
         });
         System.setProperty(dataId, String.valueOf(!value));
-        logger.info(System.currentTimeMillis()+", dataId: {}, oldValue: {}", dataId, value);
-        countDownLatch.await(60,TimeUnit.SECONDS);
-        logger.info(System.currentTimeMillis()+", dataId: {}, currenValue: {}", dataId, fileConfig.getBoolean(dataId));
+        logger.info(System.currentTimeMillis() + ", dataId: {}, oldValue: {}", dataId, value);
+        countDownLatch.await(60, TimeUnit.SECONDS);
+        logger.info(
+                System.currentTimeMillis() + ", dataId: {}, currenValue: {}", dataId, fileConfig.getBoolean(dataId));
         Assertions.assertNotEquals(fileConfig.getBoolean(dataId), value);
-        //wait for loop safety, loop time is LISTENER_CONFIG_INTERVAL=1s
+        // wait for loop safety, loop time is LISTENER_CONFIG_INTERVAL=1s
         CountDownLatch countDownLatch2 = new CountDownLatch(1);
-        fileConfig.addConfigListener("file.listener.enabled", (CachedConfigurationChangeListener)event -> {
+        fileConfig.addConfigListener("file.listener.enabled", (CachedConfigurationChangeListener) event -> {
             if (!Boolean.parseBoolean(event.getNewValue())) {
                 countDownLatch2.countDown();
             }
@@ -74,7 +81,7 @@ class FileConfigurationTest {
         System.setProperty("file.listener.enabled", "false");
         countDownLatch2.await(10, TimeUnit.SECONDS);
         System.setProperty(dataId, String.valueOf(value));
-        //sleep for a period of time to simulate waiting for a cache refresh.Actually, it doesn't trigger.
+        // sleep for a period of time to simulate waiting for a cache refresh.Actually, it doesn't trigger.
         Thread.sleep(1000);
 
         boolean currentValue = fileConfig.getBoolean(dataId);
@@ -108,7 +115,5 @@ class FileConfigurationTest {
         Assertions.assertEquals(content4, value);
         String content5 = fileConfig.getConfig("mockDataId2");
         Assertions.assertEquals(content5, value);
-
     }
-
 }

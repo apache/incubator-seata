@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
-
 class RepeatRegistrationExceptionTest {
 
     @Test
@@ -35,7 +34,6 @@ class RepeatRegistrationExceptionTest {
                 }),
                 () -> assertThrowsExactly(RepeatRegistrationException.class, () -> {
                     throw new RepeatRegistrationException(new Throwable("error"));
-                })
-        );
+                }));
     }
 }

@@ -42,15 +42,15 @@ public class SeataPropertiesTest {
         seataProperties.setUseJdkProxy(true);
         Assertions.assertTrue(seataProperties.isUseJdkProxy());
 
-        String[] excludesForAutoProxying = new String[]{"test"};
+        String[] excludesForAutoProxying = new String[] {"test"};
         seataProperties.setExcludesForAutoProxying(excludesForAutoProxying);
         Assertions.assertEquals(excludesForAutoProxying, seataProperties.getExcludesForAutoProxying());
 
-        String[] scanPackages = new String[]{"com"};
+        String[] scanPackages = new String[] {"com"};
         seataProperties.setScanPackages(scanPackages);
         Assertions.assertEquals(scanPackages, seataProperties.getScanPackages());
 
-        String[] excludesForScanning = new String[]{"com"};
+        String[] excludesForScanning = new String[] {"com"};
         seataProperties.setExcludesForScanning(excludesForScanning);
         Assertions.assertEquals(excludesForScanning, seataProperties.getExcludesForScanning());
 

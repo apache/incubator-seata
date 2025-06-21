@@ -16,10 +16,10 @@
  */
 package org.apache.seata.sqlparser.druid;
 
-import java.util.List;
-
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
+
+import java.util.List;
 
 /**
  * The type Abstract my sql recognizer test.
@@ -39,5 +39,4 @@ public abstract class AbstractRecognizerTest {
     }
 
     public abstract String getDbType();
-
 }

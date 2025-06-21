@@ -16,11 +16,10 @@
  */
 package org.apache.seata.integration.tx.api.fence;
 
-import java.lang.reflect.Method;
-import java.util.Date;
-
 import org.apache.seata.common.executor.Callback;
 
+import java.lang.reflect.Method;
+import java.util.Date;
 
 public class DefaultCommonFenceHandler implements FenceHandler {
 
@@ -57,7 +56,8 @@ public class DefaultCommonFenceHandler implements FenceHandler {
     }
 
     @Override
-    public boolean rollbackFence(Method rollbackMethod, Object targetTCCBean, String xid, Long branchId, Object[] args, String actionName) {
+    public boolean rollbackFence(
+            Method rollbackMethod, Object targetTCCBean, String xid, Long branchId, Object[] args, String actionName) {
         check();
         return fenceHandler.rollbackFence(rollbackMethod, targetTCCBean, xid, branchId, args, actionName);
     }

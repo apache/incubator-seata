@@ -16,7 +16,6 @@
  */
 package org.apache.seata.core.protocol;
 
-
 /**
  * The type Abstract identify request.
  *

@@ -30,7 +30,23 @@ jobs:
     if: github.event.workflow_run.conclusion == 'failure' && fromJSON(github.event.workflow_run.run_attempt) < 2
     runs-on: ubuntu-latest
     steps:
+      - name: Check if failure is due to spotless
+        id: check-spotless
+        env:
+          GH_REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          LOGS=$(gh run view ${{ github.event.workflow_run.id }} --log)
+          if echo "$LOGS" | grep -i "Run 'mvn spotless:apply' to fix these violations."; then
+            echo "spotless_failure=true" >> $GITHUB_OUTPUT
+            echo "Build failed due to specific spotless instruction. Will not retry."
+          else
+            echo "spotless_failure=false" >> $GITHUB_OUTPUT
+            echo "Build failed for other reasons or a different spotless issue. Will retry."
+          fi
+
       - name: rerun ${{ github.event.workflow_run.id }}
+        if: steps.check-spotless.outputs.spotless_failure != 'true'
         env:
           GH_REPO: ${{ github.repository }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

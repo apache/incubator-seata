@@ -16,7 +16,6 @@
  */
 package org.apache.seata.core.exception;
 
-
 public class DecodeException extends Exception {
 
     public DecodeException(Throwable throwable) {

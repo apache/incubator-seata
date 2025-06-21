@@ -16,7 +16,6 @@
  */
 package org.apache.seata.core.compressor;
 
-
 public interface Compressor {
 
     /**
@@ -32,5 +31,4 @@ public interface Compressor {
      * @return the byte[]
      */
     byte[] decompress(byte[] bytes);
-
 }

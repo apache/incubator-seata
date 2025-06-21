@@ -53,7 +53,8 @@ public class FastjsonUndoLogParser implements UndoLogParser, Initialize {
 
     @Override
     public byte[] encode(BranchUndoLog branchUndoLog) {
-        String json = JSON.toJSONString(branchUndoLog, filter, SerializerFeature.WriteClassName, SerializerFeature.WriteDateUseDateFormat);
+        String json = JSON.toJSONString(
+                branchUndoLog, filter, SerializerFeature.WriteClassName, SerializerFeature.WriteDateUseDateFormat);
         return json.getBytes(Constants.DEFAULT_CHARSET);
     }
 

@@ -16,12 +16,10 @@
  */
 package org.apache.seata.server.controller;
 
-import org.apache.seata.server.DynamicPortTestConfig;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 
 @Disabled
 @SpringBootTest
@@ -31,7 +29,7 @@ class VGroupMappingControllerTest {
 
     @Test
     void addVGroup() {
-        vGroupMappingController.addVGroup("group1","unit1");
+        vGroupMappingController.addVGroup("group1", "unit1");
     }
 
     @Test

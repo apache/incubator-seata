@@ -47,5 +47,4 @@ public interface TccAnnoAtInterAction {
      * @return the boolean
      */
     boolean rollback(BusinessActionContext actionContext);
-
 }

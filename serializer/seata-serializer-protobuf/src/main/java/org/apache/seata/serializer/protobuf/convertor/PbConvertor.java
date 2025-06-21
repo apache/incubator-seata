@@ -16,7 +16,6 @@
  */
 package org.apache.seata.serializer.protobuf.convertor;
 
-
 public interface PbConvertor<T, S> {
 
     public S convert2Proto(T t);

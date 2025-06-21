@@ -56,7 +56,7 @@ public class DmInsertRecognizer extends BaseDmRecognizer implements SQLInsertRec
      */
     public DmInsertRecognizer(String originalSQL, SQLStatement ast) {
         super(originalSQL);
-        this.ast = (SQLInsertStatement)ast;
+        this.ast = (SQLInsertStatement) ast;
     }
 
     @Override
@@ -99,7 +99,7 @@ public class DmInsertRecognizer extends BaseDmRecognizer implements SQLInsertRec
         List<String> list = new ArrayList<>(columnSQLExprs.size());
         for (SQLExpr expr : columnSQLExprs) {
             if (expr instanceof SQLIdentifierExpr) {
-                list.add(((SQLIdentifierExpr)expr).getName());
+                list.add(((SQLIdentifierExpr) expr).getName());
             } else {
                 wrapSQLParsingException(expr);
             }

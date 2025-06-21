@@ -23,7 +23,6 @@ import org.apache.seata.integration.brpc.server.EchoService;
 
 import java.util.Objects;
 
-
 public class EchoServiceImpl implements EchoService {
     @Override
     public Echo.EchoResponse echo(Echo.EchoRequest request) {
@@ -36,5 +35,4 @@ public class EchoServiceImpl implements EchoService {
         }
         return responseBuilder.build();
     }
-
 }

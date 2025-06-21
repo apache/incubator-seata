@@ -85,6 +85,7 @@ public abstract class AbstractStateMachineConfig implements StateMachineConfig {
      * NullAble
      */
     private StateLogStore stateLogStore;
+
     private StateMachineRepository stateMachineRepository;
     /**
      * NullAble
@@ -134,10 +135,12 @@ public abstract class AbstractStateMachineConfig implements StateMachineConfig {
 
             SequenceExpressionFactory sequenceExpressionFactory = new SequenceExpressionFactory();
             sequenceExpressionFactory.setSeqGenerator(seqGenerator);
-            expressionFactoryManager.putExpressionFactory(DomainConstants.EXPRESSION_TYPE_SEQUENCE, sequenceExpressionFactory);
+            expressionFactoryManager.putExpressionFactory(
+                    DomainConstants.EXPRESSION_TYPE_SEQUENCE, sequenceExpressionFactory);
 
             ExceptionMatchExpressionFactory exceptionMatchExpressionFactory = new ExceptionMatchExpressionFactory();
-            expressionFactoryManager.putExpressionFactory(DomainConstants.EXPRESSION_TYPE_EXCEPTION, exceptionMatchExpressionFactory);
+            expressionFactoryManager.putExpressionFactory(
+                    DomainConstants.EXPRESSION_TYPE_EXCEPTION, exceptionMatchExpressionFactory);
         }
 
         // init expressionResolver
@@ -259,7 +262,8 @@ public abstract class AbstractStateMachineConfig implements StateMachineConfig {
         for (StateHandler stateHandler : stateHandlerMap.values()) {
             if (stateHandler instanceof InterceptableStateHandler) {
                 InterceptableStateHandler interceptableStateHandler = (InterceptableStateHandler) stateHandler;
-                List<StateHandlerInterceptor> interceptorList = EnhancedServiceLoader.loadAll(StateHandlerInterceptor.class);
+                List<StateHandlerInterceptor> interceptorList =
+                        EnhancedServiceLoader.loadAll(StateHandlerInterceptor.class);
                 for (StateHandlerInterceptor interceptor : interceptorList) {
                     if (interceptor.match(interceptableStateHandler.getClass())) {
                         interceptableStateHandler.addInterceptor(interceptor);
@@ -273,7 +277,8 @@ public abstract class AbstractStateMachineConfig implements StateMachineConfig {
         for (StateRouter stateRouter : stateRouterMap.values()) {
             if (stateRouter instanceof InterceptableStateRouter) {
                 InterceptableStateRouter interceptableStateRouter = (InterceptableStateRouter) stateRouter;
-                List<StateRouterInterceptor> interceptorList = EnhancedServiceLoader.loadAll(StateRouterInterceptor.class);
+                List<StateRouterInterceptor> interceptorList =
+                        EnhancedServiceLoader.loadAll(StateRouterInterceptor.class);
                 for (StateRouterInterceptor interceptor : interceptorList) {
                     if (interceptor.match(interceptableStateRouter.getClass())) {
                         interceptableStateRouter.addInterceptor(interceptor);
@@ -405,13 +410,11 @@ public abstract class AbstractStateMachineConfig implements StateMachineConfig {
         this.seqGenerator = seqGenerator;
     }
 
-    public void setSyncProcessCtrlEventPublisher(
-            ProcessCtrlEventPublisher syncProcessCtrlEventPublisher) {
+    public void setSyncProcessCtrlEventPublisher(ProcessCtrlEventPublisher syncProcessCtrlEventPublisher) {
         this.syncProcessCtrlEventPublisher = syncProcessCtrlEventPublisher;
     }
 
-    public void setAsyncProcessCtrlEventPublisher(
-            ProcessCtrlEventPublisher asyncProcessCtrlEventPublisher) {
+    public void setAsyncProcessCtrlEventPublisher(ProcessCtrlEventPublisher asyncProcessCtrlEventPublisher) {
         this.asyncProcessCtrlEventPublisher = asyncProcessCtrlEventPublisher;
     }
 

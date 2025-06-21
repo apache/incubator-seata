@@ -16,14 +16,14 @@
  */
 package org.apache.seata.sqlparser.antlr;
 
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.apache.seata.sqlparser.antlr.mysql.MySqlContext;
 import org.apache.seata.sqlparser.antlr.mysql.listener.SelectSpecificationSqlListener;
 import org.apache.seata.sqlparser.antlr.mysql.parser.MySqlLexer;
 import org.apache.seata.sqlparser.antlr.mysql.parser.MySqlParser;
 import org.apache.seata.sqlparser.antlr.mysql.stream.ANTLRNoCaseStringStream;
 import org.apache.seata.sqlparser.antlr.mysql.visit.StatementSqlVisitor;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -95,7 +95,8 @@ public class MySQLSelectForUpdateRecognizerForListenerTest {
         walker.walk(new SelectSpecificationSqlListener(listenerSqlContext), rootContext);
 
         Assertions.assertEquals("t1", listenerSqlContext.getTableName());
-        Assertions.assertEquals("phone", listenerSqlContext.getQueryColumnNames().get(2).getColumnName());
+        Assertions.assertEquals(
+                "phone", listenerSqlContext.getQueryColumnNames().get(2).getColumnName());
         Assertions.assertEquals("id = 'id1'", listenerSqlContext.getWhereCondition());
     }
 
@@ -122,10 +123,13 @@ public class MySQLSelectForUpdateRecognizerForListenerTest {
         walker.walk(new SelectSpecificationSqlListener(mySqlContext), rootContext);
 
         Assertions.assertEquals("t2", mySqlContext.getTableName());
-        Assertions.assertEquals("phone", mySqlContext.getQueryColumnNames().get(2).getColumnName());
+        Assertions.assertEquals(
+                "phone", mySqlContext.getQueryColumnNames().get(2).getColumnName());
         Assertions.assertEquals("id = 'id'", mySqlContext.getWhereCondition());
-        Assertions.assertEquals("id", mySqlContext.getQueryWhereColumnNames().get(0).getQueryWhereColumnName());
-        Assertions.assertEquals("'id'", mySqlContext.getQueryWhereValColumnNames().get(0).getQueryWhereValColumnName());
+        Assertions.assertEquals(
+                "id", mySqlContext.getQueryWhereColumnNames().get(0).getQueryWhereColumnName());
+        Assertions.assertEquals(
+                "'id'", mySqlContext.getQueryWhereValColumnNames().get(0).getQueryWhereValColumnName());
     }
 
     /**
@@ -134,7 +138,8 @@ public class MySQLSelectForUpdateRecognizerForListenerTest {
     @Test
     public void selectForUpdateRecognizerTest_3() {
 
-        String sql = "SELECT name,phone FROM t1 WHERE id = 1 and username = '11' and age = 'a' or hz = '1' or aa = 1 FOR UPDATE";
+        String sql =
+                "SELECT name,phone FROM t1 WHERE id = 1 and username = '11' and age = 'a' or hz = '1' or aa = 1 FOR UPDATE";
 
         String visitorText = baseStatementSqlVisitor(sql);
 
@@ -150,12 +155,15 @@ public class MySQLSelectForUpdateRecognizerForListenerTest {
         ParseTreeWalker walker = new ParseTreeWalker();
         walker.walk(new SelectSpecificationSqlListener(mySqlContext), rootContext);
 
-
         Assertions.assertEquals("t1", mySqlContext.getTableName());
-        Assertions.assertEquals("name", mySqlContext.getQueryColumnNames().get(0).getColumnName());
-        Assertions.assertEquals("username", mySqlContext.getQueryWhereColumnNames().get(1).getQueryWhereColumnName());
-        Assertions.assertEquals("'a'", mySqlContext.getQueryWhereValColumnNames().get(2).getQueryWhereValColumnName());
-        Assertions.assertEquals("id = 1 and username = '11' and age = 'a' or hz = '1' or aa = 1", mySqlContext.getWhereCondition());
+        Assertions.assertEquals(
+                "name", mySqlContext.getQueryColumnNames().get(0).getColumnName());
+        Assertions.assertEquals(
+                "username", mySqlContext.getQueryWhereColumnNames().get(1).getQueryWhereColumnName());
+        Assertions.assertEquals(
+                "'a'", mySqlContext.getQueryWhereValColumnNames().get(2).getQueryWhereValColumnName());
+        Assertions.assertEquals(
+                "id = 1 and username = '11' and age = 'a' or hz = '1' or aa = 1", mySqlContext.getWhereCondition());
     }
 
     /**
@@ -181,9 +189,12 @@ public class MySQLSelectForUpdateRecognizerForListenerTest {
         walker.walk(new SelectSpecificationSqlListener(mySqlContext), rootContext);
 
         Assertions.assertEquals("t1", mySqlContext.getTableName());
-        Assertions.assertEquals("name1", mySqlContext.getQueryColumnNames().get(0).getColumnName());
-        Assertions.assertEquals("id", mySqlContext.getQueryWhereColumnNames().get(0).getQueryWhereColumnName());
-        Assertions.assertEquals("101", mySqlContext.getQueryWhereValColumnNames().get(1).getQueryWhereValColumnName());
+        Assertions.assertEquals(
+                "name1", mySqlContext.getQueryColumnNames().get(0).getColumnName());
+        Assertions.assertEquals(
+                "id", mySqlContext.getQueryWhereColumnNames().get(0).getQueryWhereColumnName());
+        Assertions.assertEquals(
+                "101", mySqlContext.getQueryWhereValColumnNames().get(1).getQueryWhereValColumnName());
         Assertions.assertEquals("id IN (100,101)", mySqlContext.getWhereCondition());
     }
 
@@ -210,9 +221,12 @@ public class MySQLSelectForUpdateRecognizerForListenerTest {
         walker.walk(new SelectSpecificationSqlListener(mySqlContext), rootContext);
 
         Assertions.assertEquals("t1", mySqlContext.getTableName());
-        Assertions.assertEquals("name1", mySqlContext.getQueryColumnNames().get(0).getColumnName());
-        Assertions.assertEquals("id", mySqlContext.getQueryWhereColumnNames().get(1).getQueryWhereColumnName());
-        Assertions.assertEquals("3", mySqlContext.getQueryWhereValColumnNames().get(2).getQueryWhereValColumnName());
+        Assertions.assertEquals(
+                "name1", mySqlContext.getQueryColumnNames().get(0).getColumnName());
+        Assertions.assertEquals(
+                "id", mySqlContext.getQueryWhereColumnNames().get(1).getQueryWhereColumnName());
+        Assertions.assertEquals(
+                "3", mySqlContext.getQueryWhereValColumnNames().get(2).getQueryWhereValColumnName());
         Assertions.assertEquals("name = 1 and id between 2 and 3 or img = '11'", mySqlContext.getWhereCondition());
     }
 }

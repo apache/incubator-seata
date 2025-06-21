@@ -16,8 +16,6 @@
  */
 package org.apache.seata.integration.http;
 
-import java.util.List;
-
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.lang.Nullable;
@@ -37,59 +35,45 @@ import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.util.List;
+
 /**
  * The Web Mvc Configurer Adapter
  *
  */
 public interface WebMvcConfigurerAdapter extends WebMvcConfigurer {
 
-    default void configurePathMatch(PathMatchConfigurer configurer) {
-    }
+    default void configurePathMatch(PathMatchConfigurer configurer) {}
 
-    default void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
-    }
+    default void configureContentNegotiation(ContentNegotiationConfigurer configurer) {}
 
-    default void configureAsyncSupport(AsyncSupportConfigurer configurer) {
-    }
+    default void configureAsyncSupport(AsyncSupportConfigurer configurer) {}
 
-    default void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
-    }
+    default void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {}
 
-    default void addFormatters(FormatterRegistry registry) {
-    }
+    default void addFormatters(FormatterRegistry registry) {}
 
-    default void addInterceptors(InterceptorRegistry registry) {
-    }
+    default void addInterceptors(InterceptorRegistry registry) {}
 
-    default void addResourceHandlers(ResourceHandlerRegistry registry) {
-    }
+    default void addResourceHandlers(ResourceHandlerRegistry registry) {}
 
-    default void addCorsMappings(CorsRegistry registry) {
-    }
+    default void addCorsMappings(CorsRegistry registry) {}
 
-    default void addViewControllers(ViewControllerRegistry registry) {
-    }
+    default void addViewControllers(ViewControllerRegistry registry) {}
 
-    default void configureViewResolvers(ViewResolverRegistry registry) {
-    }
+    default void configureViewResolvers(ViewResolverRegistry registry) {}
 
-    default void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
-    }
+    default void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {}
 
-    default void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
-    }
+    default void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {}
 
-    default void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-    }
+    default void configureMessageConverters(List<HttpMessageConverter<?>> converters) {}
 
-    default void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-    }
+    default void extendMessageConverters(List<HttpMessageConverter<?>> converters) {}
 
-    default void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
-    }
+    default void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {}
 
-    default void extendHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
-    }
+    default void extendHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {}
 
     @Nullable
     default Validator getValidator() {
@@ -100,5 +84,4 @@ public interface WebMvcConfigurerAdapter extends WebMvcConfigurer {
     default MessageCodesResolver getMessageCodesResolver() {
         return null;
     }
-
 }

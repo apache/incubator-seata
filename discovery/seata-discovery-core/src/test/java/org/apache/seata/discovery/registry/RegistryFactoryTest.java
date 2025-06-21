@@ -16,13 +16,13 @@
  */
 package org.apache.seata.discovery.registry;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.exception.NotSupportYetException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -32,8 +32,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 public class RegistryFactoryTest {
 
-    private static final String REGISTRY_TYPE_KEY =
-            ConfigurationKeys.FILE_ROOT_REGISTRY + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + ConfigurationKeys.FILE_ROOT_TYPE;
+    private static final String REGISTRY_TYPE_KEY = ConfigurationKeys.FILE_ROOT_REGISTRY
+            + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
+            + ConfigurationKeys.FILE_ROOT_TYPE;
 
     @AfterEach
     public void tearDown() {
@@ -60,8 +61,8 @@ public class RegistryFactoryTest {
         System.setProperty(REGISTRY_TYPE_KEY, invalidRegistryType);
 
         assertThatThrownBy(RegistryFactoryTest::invokeBuildRegistryService)
-            .isExactlyInstanceOf(NotSupportYetException.class)
-            .hasMessage("not support registry type: " + invalidRegistryType);
+                .isExactlyInstanceOf(NotSupportYetException.class)
+                .hasMessage("not support registry type: " + invalidRegistryType);
     }
 
     /**

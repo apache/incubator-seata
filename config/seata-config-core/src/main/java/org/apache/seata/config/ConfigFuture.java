@@ -16,7 +16,6 @@
  */
 package org.apache.seata.config;
 
-
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,7 +98,11 @@ public class ConfigFuture {
         } catch (ExecutionException e) {
             throw new ShouldNeverHappenException("Should not get results in a multi-threaded environment", e);
         } catch (TimeoutException e) {
-            LOGGER.error("config operation timeout,cost:{} ms,op:{},dataId:{}", System.currentTimeMillis() - start, operation.name(), dataId);
+            LOGGER.error(
+                    "config operation timeout,cost:{} ms,op:{},dataId:{}",
+                    System.currentTimeMillis() - start,
+                    operation.name(),
+                    dataId);
             return getFailResult();
         } catch (InterruptedException exx) {
             LOGGER.error("config operate interrupted,error:{}", exx.getMessage(), exx);

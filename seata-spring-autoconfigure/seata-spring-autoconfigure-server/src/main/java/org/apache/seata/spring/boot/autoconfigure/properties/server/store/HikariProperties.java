@@ -21,7 +21,6 @@ import org.springframework.stereotype.Component;
 
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.STORE_DB_HIKARI_PREFIX;
 
-
 @Component
 @ConfigurationProperties(prefix = STORE_DB_HIKARI_PREFIX)
 public class HikariProperties {
@@ -68,11 +67,10 @@ public class HikariProperties {
 
     @Override
     public String toString() {
-        return "HikariProperties{" +
-                "idleTimeout=" + idleTimeout +
-                ", keepaliveTime=" + keepaliveTime +
-                ", maxLifetime=" + maxLifetime +
-                ", validationTimeout=" + validationTimeout +
-                '}';
+        return "HikariProperties{" + "idleTimeout="
+                + idleTimeout + ", keepaliveTime="
+                + keepaliveTime + ", maxLifetime="
+                + maxLifetime + ", validationTimeout="
+                + validationTimeout + '}';
     }
 }

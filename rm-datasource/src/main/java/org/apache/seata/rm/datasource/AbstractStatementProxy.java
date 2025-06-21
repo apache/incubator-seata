@@ -61,7 +61,7 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
      * @throws SQLException the sql exception
      */
     public AbstractStatementProxy(AbstractConnectionProxy connectionProxy, T targetStatement, String targetSQL)
-        throws SQLException {
+            throws SQLException {
         this.connectionProxy = connectionProxy;
         this.targetStatement = targetStatement;
         this.targetSQL = targetSQL;
@@ -108,7 +108,6 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
     @Override
     public void close() throws SQLException {
         targetStatement.close();
-
     }
 
     @Override
@@ -119,7 +118,6 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
     @Override
     public void setMaxFieldSize(int max) throws SQLException {
         targetStatement.setMaxFieldSize(max);
-
     }
 
     @Override
@@ -130,13 +128,11 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
     @Override
     public void setMaxRows(int max) throws SQLException {
         targetStatement.setMaxRows(max);
-
     }
 
     @Override
     public void setEscapeProcessing(boolean enable) throws SQLException {
         targetStatement.setEscapeProcessing(enable);
-
     }
 
     @Override
@@ -147,13 +143,11 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
     @Override
     public void setQueryTimeout(int seconds) throws SQLException {
         targetStatement.setQueryTimeout(seconds);
-
     }
 
     @Override
     public void cancel() throws SQLException {
         targetStatement.cancel();
-
     }
 
     @Override
@@ -164,13 +158,11 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
     @Override
     public void clearWarnings() throws SQLException {
         targetStatement.clearWarnings();
-
     }
 
     @Override
     public void setCursorName(String name) throws SQLException {
         targetStatement.setCursorName(name);
-
     }
 
     @Override
@@ -191,7 +183,6 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
     @Override
     public void setFetchDirection(int direction) throws SQLException {
         targetStatement.setFetchDirection(direction);
-
     }
 
     @Override
@@ -202,7 +193,6 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
     @Override
     public void setFetchSize(int rows) throws SQLException {
         targetStatement.setFetchSize(rows);
-
     }
 
     @Override
@@ -223,7 +213,6 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
     @Override
     public void addBatch(String sql) throws SQLException {
         targetStatement.addBatch(sql);
-
     }
 
     @Override
@@ -251,9 +240,9 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
     public ResultSet getGeneratedKeys() throws SQLException {
         ResultSet rs = targetStatement.getGeneratedKeys();
         if (null == scrollableGeneratedKeysCache || !rs.isAfterLast()) {
-            //Conditions for flushing the cache:
-            //1.originally not cached
-            //2.the original ResultSet was not traversed, including executed repeatedly
+            // Conditions for flushing the cache:
+            // 1.originally not cached
+            // 2.the original ResultSet was not traversed, including executed repeatedly
             scrollableGeneratedKeysCache = RowSetProvider.newFactory().createCachedRowSet();
             scrollableGeneratedKeysCache.populate(rs);
         }
@@ -273,7 +262,6 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
     @Override
     public void setPoolable(boolean poolable) throws SQLException {
         targetStatement.setPoolable(poolable);
-
     }
 
     @Override

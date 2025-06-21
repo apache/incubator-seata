@@ -45,5 +45,4 @@ public class ClusterNotFoundException extends RuntimeException {
     public ClusterNotFoundException(Throwable cause) {
         super(cause);
     }
-
 }

@@ -24,14 +24,16 @@ public class RmTransactionExceptionTest {
 
     @Test
     public void testConstructorWithCode() {
-        RmTransactionException exception = new RmTransactionException(TransactionExceptionCode.BranchRollbackFailed_Retriable);
+        RmTransactionException exception =
+                new RmTransactionException(TransactionExceptionCode.BranchRollbackFailed_Retriable);
         assertEquals(TransactionExceptionCode.BranchRollbackFailed_Retriable, exception.getCode());
     }
 
     @Test
     public void testConstructorWithCodeAndCause() {
         Throwable cause = new RuntimeException("test");
-        RmTransactionException exception = new RmTransactionException(TransactionExceptionCode.BranchRollbackFailed_Retriable, cause);
+        RmTransactionException exception =
+                new RmTransactionException(TransactionExceptionCode.BranchRollbackFailed_Retriable, cause);
         assertEquals(TransactionExceptionCode.BranchRollbackFailed_Retriable, exception.getCode());
         assertEquals(cause, exception.getCause());
     }
@@ -44,7 +46,8 @@ public class RmTransactionExceptionTest {
 
     @Test
     public void testConstructorWithCodeAndMessage() {
-        RmTransactionException exception = new RmTransactionException(TransactionExceptionCode.BranchRollbackFailed_Retriable, "test message");
+        RmTransactionException exception =
+                new RmTransactionException(TransactionExceptionCode.BranchRollbackFailed_Retriable, "test message");
         assertEquals(TransactionExceptionCode.BranchRollbackFailed_Retriable, exception.getCode());
         assertEquals("test message", exception.getMessage());
     }
@@ -67,7 +70,8 @@ public class RmTransactionExceptionTest {
     @Test
     public void testConstructorWithCodeMessageAndCause() {
         Throwable cause = new RuntimeException("test");
-        RmTransactionException exception = new RmTransactionException(TransactionExceptionCode.BranchRollbackFailed_Retriable, "test message", cause);
+        RmTransactionException exception = new RmTransactionException(
+                TransactionExceptionCode.BranchRollbackFailed_Retriable, "test message", cause);
         assertEquals(TransactionExceptionCode.BranchRollbackFailed_Retriable, exception.getCode());
         assertEquals("test message", exception.getMessage());
         assertEquals(cause, exception.getCause());

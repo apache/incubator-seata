@@ -16,9 +16,6 @@
  */
 package org.apache.seata.rm.datasource.undo.sqlserver;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.rm.datasource.SqlGenerateUtils;
@@ -29,6 +26,8 @@ import org.apache.seata.rm.datasource.undo.SQLUndoLog;
 import org.apache.seata.sqlparser.util.ColumnUtils;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class SqlServerUndoUpdateExecutor extends BaseSqlServerUndoExecutor {
     /**
@@ -53,12 +52,13 @@ public class SqlServerUndoUpdateExecutor extends BaseSqlServerUndoExecutor {
         List<Field> nonPkFields = row.nonPrimaryKeys();
         // update sql undo log before image all field come from table meta. need add escape.
         // see BaseTransactionalExecutor#buildTableRecords
-        String updateColumns = nonPkFields.stream().map(
-            field -> ColumnUtils.addEscape(field.getName(), JdbcConstants.SQLSERVER) + " = ?").collect(
-            Collectors.joining(", "));
+        String updateColumns = nonPkFields.stream()
+                .map(field -> ColumnUtils.addEscape(field.getName(), JdbcConstants.SQLSERVER) + " = ?")
+                .collect(Collectors.joining(", "));
 
-        List<String> pkNameList = getOrderedPkList(beforeImage, row, JdbcConstants.SQLSERVER).stream().map(Field::getName)
-            .collect(Collectors.toList());
+        List<String> pkNameList = getOrderedPkList(beforeImage, row, JdbcConstants.SQLSERVER).stream()
+                .map(Field::getName)
+                .collect(Collectors.toList());
         String whereSql = SqlGenerateUtils.buildWhereConditionByPKs(pkNameList, JdbcConstants.SQLSERVER);
 
         return "UPDATE " + sqlUndoLog.getTableName() + " SET " + updateColumns + " WHERE " + whereSql;

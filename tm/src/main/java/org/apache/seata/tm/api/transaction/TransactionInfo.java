@@ -16,12 +16,11 @@
  */
 package org.apache.seata.tm.api.transaction;
 
-import java.io.Serializable;
-import java.util.Set;
-
 import org.apache.seata.common.LockStrategyMode;
 import org.apache.seata.common.util.CollectionUtils;
 
+import java.io.Serializable;
+import java.util.Set;
 
 public final class TransactionInfo implements Serializable {
 
@@ -86,7 +85,7 @@ public final class TransactionInfo implements Serializable {
         if (this.propagation != null) {
             return this.propagation;
         }
-        //default propagation
+        // default propagation
         return Propagation.REQUIRED;
     }
 
@@ -117,5 +116,4 @@ public final class TransactionInfo implements Serializable {
     public void setLockStrategyMode(LockStrategyMode lockStrategyMode) {
         this.lockStrategyMode = lockStrategyMode;
     }
-
 }

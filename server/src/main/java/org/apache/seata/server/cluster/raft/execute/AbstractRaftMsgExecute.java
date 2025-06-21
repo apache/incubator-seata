@@ -16,13 +16,12 @@
  */
 package org.apache.seata.server.cluster.raft.execute;
 
+import org.apache.seata.server.lock.LockerManagerFactory;
 import org.apache.seata.server.session.SessionHolder;
+import org.apache.seata.server.storage.raft.lock.RaftLockManager;
 import org.apache.seata.server.store.VGroupMappingStoreManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.apache.seata.server.lock.LockerManagerFactory;
-import org.apache.seata.server.storage.raft.lock.RaftLockManager;
 
 /**
  */
@@ -30,8 +29,7 @@ public abstract class AbstractRaftMsgExecute implements RaftMsgExecute<Boolean> 
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-    protected RaftLockManager raftLockManager = (RaftLockManager)LockerManagerFactory.getLockManager();
+    protected RaftLockManager raftLockManager = (RaftLockManager) LockerManagerFactory.getLockManager();
 
     protected VGroupMappingStoreManager raftVGroupMappingStoreManager = SessionHolder.getRootVGroupMappingManager();
-
 }

@@ -16,13 +16,11 @@
  */
 package org.apache.seata.rm.datasource.undo.oracle.keyword;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
 import org.apache.seata.sqlparser.EscapeHandler;
 import org.apache.seata.sqlparser.EscapeHandlerFactory;
 import org.apache.seata.sqlparser.util.JdbcConstants;
-
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class OracleEscapeHandlerTest {
 
@@ -31,5 +29,4 @@ public class OracleEscapeHandlerTest {
         EscapeHandler escapeHandler = EscapeHandlerFactory.getEscapeHandler(JdbcConstants.ORACLE);
         Assertions.assertNotNull(escapeHandler);
     }
-
 }

@@ -26,7 +26,6 @@ public class IfNeedEnhanceBeanTest {
 
     private IfNeedEnhanceBean enhanceBean;
 
-
     @BeforeEach
     public void setUp() {
         enhanceBean = new IfNeedEnhanceBean();

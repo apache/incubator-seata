@@ -16,10 +16,10 @@
  */
 package org.apache.seata.discovery.loadbalance;
 
+import org.apache.seata.common.loader.LoadLevel;
+
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
-
-import org.apache.seata.common.loader.LoadLevel;
 
 /**
  * The type Random load balance.

@@ -16,14 +16,14 @@
  */
 package org.apache.seata.common.exception;
 
+import org.apache.commons.lang.StringUtils;
+import org.apache.seata.common.loader.EnhancedServiceLoader;
+
 import java.text.MessageFormat;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.Set;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.seata.common.loader.EnhancedServiceLoader;
 
 public class ResourceBundleUtil {
 
@@ -45,7 +45,7 @@ public class ResourceBundleUtil {
         try {
             this.remoteBundle = EnhancedServiceLoader.load(AbstractRemoteResourceBundle.class);
         } catch (Throwable e) {
-            //ignore
+            // ignore
         }
     }
 
@@ -62,7 +62,7 @@ public class ResourceBundleUtil {
         if (StringUtils.isBlank(msg)) {
             return msg;
         }
-        return MessageFormat.format(msg, (Object[])params);
+        return MessageFormat.format(msg, (Object[]) params);
     }
 
     public String getMessage(String key, int code, String type, String... params) {
@@ -71,8 +71,11 @@ public class ResourceBundleUtil {
         }
         StringBuilder sb = new StringBuilder();
 
-        sb.append(getFormattedMessage("ERR_PREFIX")).append(" ").append(getFormattedMessage(key)).append(" ").append(
-            getFormattedMessage("ERR_POSTFIX"));
+        sb.append(getFormattedMessage("ERR_PREFIX"))
+                .append(" ")
+                .append(getFormattedMessage(key))
+                .append(" ")
+                .append(getFormattedMessage("ERR_POSTFIX"));
         String msg = sb.toString();
         msg = parseStringValue(msg, new HashSet<String>());
         msg = StringUtils.replace(msg, "{code}", String.valueOf(code));
@@ -85,7 +88,7 @@ public class ResourceBundleUtil {
         if (StringUtils.isBlank(msg)) {
             return msg;
         }
-        return MessageFormat.format(msg, (Object[])params);
+        return MessageFormat.format(msg, (Object[]) params);
     }
 
     protected String getFormattedMessage(String key) {
@@ -107,8 +110,8 @@ public class ResourceBundleUtil {
             if (endIndex != -1) {
                 String placeholder = buf.substring(startIndex + DEFAULT_PLACEHOLDER_PREFIX.length(), endIndex);
                 if (!visitedPlaceholders.add(placeholder)) {
-                    throw new SeataRuntimeException(ErrorCode.ERR_CONFIG,
-                        "Duplicate placeholders exist '" + placeholder + "' in bundle.");
+                    throw new SeataRuntimeException(
+                            ErrorCode.ERR_CONFIG, "Duplicate placeholders exist '" + placeholder + "' in bundle.");
                 }
                 placeholder = parseStringValue(placeholder, visitedPlaceholders);
                 try {
@@ -118,12 +121,12 @@ public class ResourceBundleUtil {
                         buf.replace(startIndex, endIndex + DEFAULT_PLACEHOLDER_SUFFIX.length(), propVal);
                         startIndex = buf.indexOf(DEFAULT_PLACEHOLDER_PREFIX, startIndex + propVal.length());
                     } else {
-                        throw new SeataRuntimeException(ErrorCode.ERR_CONFIG,
-                            "Could not resolve placeholder '" + placeholder + "'");
+                        throw new SeataRuntimeException(
+                                ErrorCode.ERR_CONFIG, "Could not resolve placeholder '" + placeholder + "'");
                     }
                 } catch (Exception ex) {
-                    throw new SeataRuntimeException(ErrorCode.ERR_CONFIG,
-                        "Could not resolve placeholder '" + placeholder + "'");
+                    throw new SeataRuntimeException(
+                            ErrorCode.ERR_CONFIG, "Could not resolve placeholder '" + placeholder + "'");
                 }
                 visitedPlaceholders.remove(placeholder);
             } else {
@@ -168,5 +171,4 @@ public class ResourceBundleUtil {
     private String resolvePlaceholder(String placeholder) {
         return getFormattedMessage(placeholder);
     }
-
 }

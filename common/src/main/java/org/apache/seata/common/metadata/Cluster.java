@@ -27,9 +27,7 @@ public class Cluster {
     private String clusterType;
     private List<Unit> unitData = new ArrayList<>();
 
-
-    public Cluster() {
-    }
+    public Cluster() {}
 
     public String getClusterName() {
         return clusterName;
@@ -62,8 +60,4 @@ public class Cluster {
     public void appendUnit(Unit unitData) {
         this.unitData.add(unitData);
     }
-
-
 }
-
-

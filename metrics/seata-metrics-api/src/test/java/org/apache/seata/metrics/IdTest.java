@@ -19,7 +19,6 @@ package org.apache.seata.metrics;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-
 import static org.junit.jupiter.api.Assertions.*;
 
 public class IdTest {
@@ -42,7 +41,7 @@ public class IdTest {
 
     @Test
     public void testGetTags() {
-        assertFalse(( id.getTags()).iterator().hasNext());
+        assertFalse((id.getTags()).iterator().hasNext());
     }
 
     @Test

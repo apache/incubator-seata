@@ -21,7 +21,6 @@ import org.springframework.stereotype.Component;
 
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.STORE_DB_DBCP_PREFIX;
 
-
 @Component
 @ConfigurationProperties(prefix = STORE_DB_DBCP_PREFIX)
 public class DbcpProperties {
@@ -68,11 +67,10 @@ public class DbcpProperties {
 
     @Override
     public String toString() {
-        return "DbcpProperties{" +
-                "timeBetweenEvictionRunsMillis=" + timeBetweenEvictionRunsMillis +
-                ", minEvictableIdleTimeMillis=" + minEvictableIdleTimeMillis +
-                ", testWhileIdle=" + testWhileIdle +
-                ", testOnBorrow=" + testOnBorrow +
-                '}';
+        return "DbcpProperties{" + "timeBetweenEvictionRunsMillis="
+                + timeBetweenEvictionRunsMillis + ", minEvictableIdleTimeMillis="
+                + minEvictableIdleTimeMillis + ", testWhileIdle="
+                + testWhileIdle + ", testOnBorrow="
+                + testOnBorrow + '}';
     }
 }

@@ -16,9 +16,9 @@
  */
 package org.apache.seata.saga.statelang.parser.impl;
 
-import java.util.Map;
-
 import org.apache.seata.saga.statelang.domain.impl.BaseState;
+
+import java.util.Map;
 
 /**
  * BaseStatePaser
@@ -28,9 +28,9 @@ public abstract class BaseStatePaser {
 
     protected void parseBaseAttributes(BaseState state, Object node) {
 
-        Map<String, Object> nodeMap = (Map<String, Object>)node;
-        state.setComment((String)nodeMap.get("Comment"));
-        state.setNext((String)nodeMap.get("Next"));
-        state.setExtensions((Map<String, Object>)nodeMap.get("Extensions"));
+        Map<String, Object> nodeMap = (Map<String, Object>) node;
+        state.setComment((String) nodeMap.get("Comment"));
+        state.setNext((String) nodeMap.get("Next"));
+        state.setExtensions((Map<String, Object>) nodeMap.get("Extensions"));
     }
 }

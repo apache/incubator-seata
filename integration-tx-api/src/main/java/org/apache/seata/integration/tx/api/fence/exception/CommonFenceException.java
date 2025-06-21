@@ -48,5 +48,4 @@ public class CommonFenceException extends FrameworkException {
     public CommonFenceException(Throwable th, String msg) {
         super(th, msg);
     }
-
 }

@@ -25,7 +25,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.sql.DataSource;
 
-
 public class SpringFenceConfig extends CommonFenceConfig implements InitializingBean {
 
     /**
@@ -58,6 +57,4 @@ public class SpringFenceConfig extends CommonFenceConfig implements Initializing
             throw new CommonFenceException(FrameworkErrorCode.TransactionManagerNeedInjected);
         }
     }
-
-
 }

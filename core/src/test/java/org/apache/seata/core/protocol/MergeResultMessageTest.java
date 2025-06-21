@@ -63,8 +63,7 @@ public class MergeResultMessageTest {
 
         Assertions.assertEquals(
                 "MergeResultMessage RegisterRMResponse{version='1', extraData='null', identified=true, resultCode=Failed, msg='null'}\nRegisterTMResponse{version='2', extraData='null', identified=true, resultCode=Success, msg='null'}\n",
-                mergeResultMessage.toString()
-        );
+                mergeResultMessage.toString());
     }
 
     private GlobalBeginResponse buildGlobalBeginResponse() {
@@ -75,5 +74,4 @@ public class MergeResultMessageTest {
         globalBeginResponse.setResultCode(ResultCode.Success);
         return globalBeginResponse;
     }
-
 }

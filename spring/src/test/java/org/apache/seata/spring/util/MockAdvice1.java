@@ -19,13 +19,11 @@ package org.apache.seata.spring.util;
 import org.aopalliance.aop.Advice;
 import org.springframework.core.Ordered;
 
-
 public class MockAdvice1 implements Advice, Ordered {
 
     private Integer order;
 
-    public MockAdvice1() {
-    }
+    public MockAdvice1() {}
 
     public MockAdvice1(Integer order) {
         this.order = order;

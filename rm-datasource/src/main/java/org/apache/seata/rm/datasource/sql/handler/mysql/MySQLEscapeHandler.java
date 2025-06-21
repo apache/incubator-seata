@@ -16,16 +16,16 @@
  */
 package org.apache.seata.rm.datasource.sql.handler.mysql;
 
-import java.util.Arrays;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.sqlparser.EscapeHandler;
 import org.apache.seata.sqlparser.EscapeSymbol;
 import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.sqlparser.util.JdbcConstants;
+
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * The type MySQL keyword checker.
@@ -34,7 +34,8 @@ import org.apache.seata.sqlparser.util.JdbcConstants;
 @LoadLevel(name = JdbcConstants.MYSQL)
 public class MySQLEscapeHandler implements EscapeHandler {
 
-    protected Set<String> keywordSet = Arrays.stream(MySQLKeyword.values()).map(MySQLKeyword::name).collect(Collectors.toSet());
+    protected Set<String> keywordSet =
+            Arrays.stream(MySQLKeyword.values()).map(MySQLKeyword::name).collect(Collectors.toSet());
     private static final EscapeSymbol ESCAPE_SYMBOL = new EscapeSymbol('`');
 
     /**
@@ -1103,7 +1104,6 @@ public class MySQLEscapeHandler implements EscapeHandler {
         }
     }
 
-
     @Override
     public boolean checkIfKeyWords(String fieldOrTableName) {
         if (keywordSet.contains(fieldOrTableName)) {
@@ -1113,7 +1113,6 @@ public class MySQLEscapeHandler implements EscapeHandler {
             fieldOrTableName = fieldOrTableName.toUpperCase();
         }
         return keywordSet.contains(fieldOrTableName);
-
     }
 
     @Override

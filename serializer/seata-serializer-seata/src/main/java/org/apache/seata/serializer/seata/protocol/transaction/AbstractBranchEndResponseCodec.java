@@ -16,11 +16,11 @@
  */
 package org.apache.seata.serializer.seata.protocol.transaction;
 
-import java.nio.ByteBuffer;
-
 import io.netty.buffer.ByteBuf;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.protocol.transaction.AbstractBranchEndResponse;
+
+import java.nio.ByteBuffer;
 
 /**
  * The type Abstract branch end response codec.
@@ -37,19 +37,19 @@ public abstract class AbstractBranchEndResponseCodec extends AbstractTransaction
     public <T> void encode(T t, ByteBuf out) {
         super.encode(t, out);
 
-        AbstractBranchEndResponse abstractBranchEndResponse = (AbstractBranchEndResponse)t;
+        AbstractBranchEndResponse abstractBranchEndResponse = (AbstractBranchEndResponse) t;
         String xid = abstractBranchEndResponse.getXid();
         long branchId = abstractBranchEndResponse.getBranchId();
         BranchStatus branchStatus = abstractBranchEndResponse.getBranchStatus();
 
         if (xid != null) {
             byte[] bs = xid.getBytes(UTF8);
-            out.writeShort((short)bs.length);
+            out.writeShort((short) bs.length);
             if (bs.length > 0) {
                 out.writeBytes(bs);
             }
         } else {
-            out.writeShort((short)0);
+            out.writeShort((short) 0);
         }
         out.writeLong(branchId);
         out.writeByte(branchStatus.getCode());
@@ -59,7 +59,7 @@ public abstract class AbstractBranchEndResponseCodec extends AbstractTransaction
     public <T> void decode(T t, ByteBuffer in) {
         super.decode(t, in);
 
-        AbstractBranchEndResponse abstractBranchEndResponse = (AbstractBranchEndResponse)t;
+        AbstractBranchEndResponse abstractBranchEndResponse = (AbstractBranchEndResponse) t;
         short xidLen = in.getShort();
         if (xidLen > 0) {
             byte[] bs = new byte[xidLen];
@@ -69,5 +69,4 @@ public abstract class AbstractBranchEndResponseCodec extends AbstractTransaction
         abstractBranchEndResponse.setBranchId(in.getLong());
         abstractBranchEndResponse.setBranchStatus(BranchStatus.get(in.get()));
     }
-
 }

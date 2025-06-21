@@ -34,10 +34,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.apache.seata.common.ConfigurationKeys.VGROUP_TABLE_NAME;
 import static org.apache.seata.common.ConfigurationKeys.REGISTRY_NAMINGSERVER_CLUSTER;
+import static org.apache.seata.common.ConfigurationKeys.VGROUP_TABLE_NAME;
 import static org.apache.seata.common.NamingServerConstants.DEFAULT_VGROUP_MAPPING;
-
 
 public class VGroupMappingDataBaseDAO {
     private static final Logger LOGGER = LoggerFactory.getLogger(VGroupMappingDataBaseDAO.class);
@@ -110,8 +109,7 @@ public class VGroupMappingDataBaseDAO {
     }
 
     public List<MappingDO> queryMappingDO() {
-        String sql = "SELECT vgroup,namespace, cluster FROM " + vMapping
-                + " WHERE cluster = ?";
+        String sql = "SELECT vgroup,namespace, cluster FROM " + vMapping + " WHERE cluster = ?";
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -138,6 +136,4 @@ public class VGroupMappingDataBaseDAO {
 
         return result;
     }
-
-
 }

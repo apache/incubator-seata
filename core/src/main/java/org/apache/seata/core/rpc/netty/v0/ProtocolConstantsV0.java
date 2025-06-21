@@ -21,7 +21,7 @@ package org.apache.seata.core.rpc.netty.v0;
  *
  **/
 public class ProtocolConstantsV0 {
-    public static short MAGIC = (short)0xdada;
+    public static short MAGIC = (short) 0xdada;
 
     public static int HEAD_LENGTH = 14;
     public static final short FLAG_REQUEST = 0x80;

@@ -31,10 +31,12 @@ public class ExecuteTemplateXA {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExecuteTemplateXA.class);
 
-    public static <T, S extends Statement> T execute(AbstractConnectionProxyXA connectionProxyXA,
-                                                     StatementCallback<T, S> statementCallback,
-                                                     S targetStatement,
-                                                     Object... args) throws SQLException {
+    public static <T, S extends Statement> T execute(
+            AbstractConnectionProxyXA connectionProxyXA,
+            StatementCallback<T, S> statementCallback,
+            S targetStatement,
+            Object... args)
+            throws SQLException {
         boolean autoCommitStatus = connectionProxyXA.getAutoCommit();
         if (autoCommitStatus) {
             // XA Start
@@ -54,9 +56,10 @@ public class ExecuteTemplateXA {
                     } catch (SQLException sqle) {
                         // log and ignore the rollback failure.
                         LOGGER.warn(
-                            "Failed to rollback xa branch of " + connectionProxyXA.xid +
-                                "(caused by SQL execution failure(" + ex.getMessage() + ") since " + sqle.getMessage(),
-                            sqle);
+                                "Failed to rollback xa branch of " + connectionProxyXA.xid
+                                        + "(caused by SQL execution failure(" + ex.getMessage() + ") since "
+                                        + sqle.getMessage(),
+                                sqle);
                     }
                 }
 
@@ -65,7 +68,6 @@ public class ExecuteTemplateXA {
                 } else {
                     throw new SQLException(ex);
                 }
-
             }
             if (autoCommitStatus) {
                 try {
@@ -73,18 +75,21 @@ public class ExecuteTemplateXA {
                     connectionProxyXA.commit();
                 } catch (Throwable ex) {
                     LOGGER.warn(
-                        "Failed to commit xa branch of " + connectionProxyXA.xid + ") since " + ex.getMessage(),
-                        ex);
+                            "Failed to commit xa branch of " + connectionProxyXA.xid + ") since " + ex.getMessage(),
+                            ex);
                     // XA End & Rollback
-                    if (!(ex instanceof SQLException) || !AbstractConnectionProxyXA.SQLSTATE_XA_NOT_END.equalsIgnoreCase(((SQLException) ex).getSQLState())) {
+                    if (!(ex instanceof SQLException)
+                            || !AbstractConnectionProxyXA.SQLSTATE_XA_NOT_END.equalsIgnoreCase(
+                                    ((SQLException) ex).getSQLState())) {
                         try {
                             connectionProxyXA.rollback();
                         } catch (SQLException sqle) {
                             // log and ignore the rollback failure.
                             LOGGER.warn(
-                                "Failed to rollback xa branch of " + connectionProxyXA.xid +
-                                    "(caused by commit failure(" + ex.getMessage() + ") since " + sqle.getMessage(),
-                                sqle);
+                                    "Failed to rollback xa branch of " + connectionProxyXA.xid
+                                            + "(caused by commit failure(" + ex.getMessage() + ") since "
+                                            + sqle.getMessage(),
+                                    sqle);
                         }
                     }
 
@@ -93,7 +98,6 @@ public class ExecuteTemplateXA {
                     } else {
                         throw new SQLException(ex);
                     }
-
                 }
             }
             return res;
@@ -101,7 +105,6 @@ public class ExecuteTemplateXA {
             if (autoCommitStatus) {
                 connectionProxyXA.setAutoCommit(true);
             }
-
         }
     }
 }

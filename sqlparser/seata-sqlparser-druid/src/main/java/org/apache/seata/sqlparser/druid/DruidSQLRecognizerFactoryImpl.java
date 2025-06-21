@@ -43,7 +43,7 @@ class DruidSQLRecognizerFactoryImpl implements SQLRecognizerFactory {
             sqlStatements = SQLUtils.parseStatements(sql, DruidDbTypeAdapter.getAdaptiveDbType(dbType));
         } catch (RuntimeException e) {
             if (isParserException(e)) {
-                throw new NotSupportYetException("not support the sql syntax: " + sql + 
+                throw new NotSupportYetException("not support the sql syntax: " + sql +
                         "\nplease see the doc about SQL restrictions https://seata.apache.org/zh-cn/docs/user/sqlreference/dml", e);
             }
             throw e;
@@ -52,14 +52,13 @@ class DruidSQLRecognizerFactoryImpl implements SQLRecognizerFactory {
         if (CollectionUtils.isEmpty(sqlStatements)) {
             throw new UnsupportedOperationException("Unsupported SQL: " + sql);
         }
-        if (sqlStatements.size() > 1 && !(sqlStatements.stream().allMatch(statement -> statement instanceof SQLUpdateStatement)
-                || sqlStatements.stream().allMatch(statement -> statement instanceof SQLDeleteStatement))) {
+        if (sqlStatements.size() > 1
+                && !(sqlStatements.stream().allMatch(statement -> statement instanceof SQLUpdateStatement)
+                        || sqlStatements.stream().allMatch(statement -> statement instanceof SQLDeleteStatement))) {
             throw new UnsupportedOperationException("ONLY SUPPORT SAME TYPE (UPDATE OR DELETE) MULTI SQL -" + sql);
         }
-
         List<SQLRecognizer> recognizers = null;
         SQLRecognizer recognizer = null;
-        
         for (SQLStatement sqlStatement : sqlStatements) {
             SQLOperateRecognizerHolder recognizerHolder =
                     SQLOperateRecognizerHolderFactory.getSQLRecognizerHolder(dbType.toLowerCase());
@@ -73,9 +72,13 @@ class DruidSQLRecognizerFactoryImpl implements SQLRecognizerFactory {
                 recognizer = recognizerHolder.getSelectForUpdateRecognizer(sql, sqlStatement);
             }
 
+            // When recognizer is null, it indicates that recognizerHolder cannot allocate unsupported syntax, like
+            // merge and replace
             if (sqlStatement instanceof SQLReplaceStatement) {
-                throw new NotSupportYetException("not support the sql syntax with ReplaceStatement:" + sqlStatement +
-                        "\nplease see the doc about SQL restrictions https://seata.apache.org/zh-cn/docs/user/sqlreference/dml");
+                // just like:replace into t (id,dr) values (1,'2'), (2,'3')
+                throw new NotSupportYetException(
+                        "not support the sql syntax with ReplaceStatement:" + sqlStatement
+                                + "\nplease see the doc about SQL restrictions https://seata.apache.org/zh-cn/docs/user/sqlreference/dml");
             }
 
             if (recognizer != null && recognizer.isSqlSyntaxSupports()) {
@@ -85,10 +88,9 @@ class DruidSQLRecognizerFactoryImpl implements SQLRecognizerFactory {
                 recognizers.add(recognizer);
             }
         }
-        
         return recognizers;
     }
-    
+
     /**
      * Check if the exception is a Druid ParserException
      * Use class name comparison to avoid directly referencing the ParserException class

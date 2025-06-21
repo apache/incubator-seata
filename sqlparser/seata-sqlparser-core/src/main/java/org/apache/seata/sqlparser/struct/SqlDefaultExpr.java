@@ -32,12 +32,10 @@ public class SqlDefaultExpr {
         return instance;
     }
 
-    private SqlDefaultExpr() {
-    }
+    private SqlDefaultExpr() {}
 
     @Override
     public String toString() {
         return "DEFAULT";
     }
-
 }

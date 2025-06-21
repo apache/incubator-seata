@@ -16,7 +16,6 @@
  */
 package org.apache.seata.core.store;
 
-
 import java.util.List;
 
 /**
@@ -131,5 +130,4 @@ public interface LogStore {
      * @return the current max session id
      */
     long getCurrentMaxSessionId(long high, long low);
-
 }

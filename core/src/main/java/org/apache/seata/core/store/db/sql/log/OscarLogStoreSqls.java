@@ -16,12 +16,10 @@
  */
 package org.apache.seata.core.store.db.sql.log;
 
-
 import org.apache.seata.common.loader.LoadLevel;
 
 /**
  * Database log store oscar sql
  */
 @LoadLevel(name = "oscar")
-public class OscarLogStoreSqls extends OracleLogStoreSqls {
-}
+public class OscarLogStoreSqls extends OracleLogStoreSqls {}

@@ -16,8 +16,6 @@
  */
 package org.apache.seata.config.zk;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import org.apache.curator.test.TestingServer;
 import org.apache.seata.config.ConfigurationChangeEvent;
 import org.apache.seata.config.ConfigurationChangeListener;
@@ -28,6 +26,9 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The type zk configuration test
@@ -123,5 +124,4 @@ public class ZkConfigurationTest {
         }
         Assertions.assertTrue(listened[0]);
     }
-
 }

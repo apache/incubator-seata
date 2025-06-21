@@ -16,7 +16,6 @@
  */
 package org.apache.seata.core.protocol.transaction;
 
-
 import org.apache.seata.core.protocol.AbstractMessage;
 import org.apache.seata.core.rpc.RpcContext;
 
@@ -33,5 +32,4 @@ public abstract class AbstractTransactionRequest extends AbstractMessage {
      * @return the abstract transaction response
      */
     public abstract AbstractTransactionResponse handle(RpcContext rpcContext);
-
 }

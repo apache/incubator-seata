@@ -21,5 +21,4 @@ package io.seata.config;
  * Notes: used for io.seata SPI interface
  */
 @Deprecated
-public interface Processor extends org.apache.seata.config.processor.Processor {
-}
+public interface Processor extends org.apache.seata.config.processor.Processor {}

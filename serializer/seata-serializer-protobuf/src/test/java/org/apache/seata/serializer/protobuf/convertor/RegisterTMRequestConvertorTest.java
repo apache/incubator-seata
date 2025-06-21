@@ -16,12 +16,11 @@
  */
 package org.apache.seata.serializer.protobuf.convertor;
 
-import org.apache.seata.serializer.protobuf.generated.RegisterTMRequestProto;
 import org.apache.seata.core.protocol.RegisterTMRequest;
+import org.apache.seata.serializer.protobuf.generated.RegisterTMRequestProto;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
 
 public class RegisterTMRequestConvertorTest {
 

@@ -20,6 +20,4 @@ package org.apache.seata.saga.statelang.domain;
  * End State
  *
  */
-public interface EndState extends State {
-
-}
+public interface EndState extends State {}

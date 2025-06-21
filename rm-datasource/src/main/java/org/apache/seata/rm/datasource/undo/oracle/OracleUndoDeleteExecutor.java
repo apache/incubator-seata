@@ -18,12 +18,12 @@ package org.apache.seata.rm.datasource.undo.oracle;
 
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.common.util.CollectionUtils;
-import org.apache.seata.sqlparser.util.ColumnUtils;
 import org.apache.seata.rm.datasource.sql.struct.Field;
 import org.apache.seata.rm.datasource.sql.struct.Row;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
 import org.apache.seata.rm.datasource.undo.AbstractUndoExecutor;
 import org.apache.seata.rm.datasource.undo.SQLUndoLog;
+import org.apache.seata.sqlparser.util.ColumnUtils;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 
 import java.util.ArrayList;
@@ -59,15 +59,14 @@ public class OracleUndoDeleteExecutor extends AbstractUndoExecutor {
         }
         Row row = beforeImageRows.get(0);
         List<Field> fields = new ArrayList<>(row.nonPrimaryKeys());
-        fields.addAll(getOrderedPkList(beforeImage,row,JdbcConstants.ORACLE));
+        fields.addAll(getOrderedPkList(beforeImage, row, JdbcConstants.ORACLE));
 
         // delete sql undo log before image all field come from table meta, need add escape.
         // see BaseTransactionalExecutor#buildTableRecords
         String insertColumns = fields.stream()
-            .map(field -> ColumnUtils.addEscape(field.getName(), JdbcConstants.ORACLE))
-            .collect(Collectors.joining(", "));
-        String insertValues = fields.stream().map(field -> "?")
-            .collect(Collectors.joining(", "));
+                .map(field -> ColumnUtils.addEscape(field.getName(), JdbcConstants.ORACLE))
+                .collect(Collectors.joining(", "));
+        String insertValues = fields.stream().map(field -> "?").collect(Collectors.joining(", "));
 
         return String.format(INSERT_SQL_TEMPLATE, sqlUndoLog.getTableName(), insertColumns, insertValues);
     }

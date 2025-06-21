@@ -16,13 +16,6 @@
  */
 package org.apache.seata.sqlparser.druid.sqlserver;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.alibaba.druid.sql.ast.SQLStatement;
 import org.apache.seata.sqlparser.ParametersHolder;
 import org.apache.seata.sqlparser.SQLType;
@@ -31,6 +24,13 @@ import org.apache.seata.sqlparser.druid.BaseRecognizer;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The type SqlServer delete recognizer test.
@@ -159,10 +159,8 @@ public class SqlServerDeleteRecognizerTest extends AbstractRecognizerTest {
 
         Assertions.assertEquals(sql, sqlServerDeleteRecognizer.getOriginalSQL());
         Assertions.assertEquals("t1", sqlServerDeleteRecognizer.getTableName());
-        Assertions.assertEquals("EXISTS (\n" +
-                "\tSELECT *\n" +
-                "\tFROM t1\n" +
-                ")", sqlServerDeleteRecognizer.getWhereCondition());
+        Assertions.assertEquals(
+                "EXISTS (\n" + "\tSELECT *\n" + "\tFROM t1\n" + ")", sqlServerDeleteRecognizer.getWhereCondition());
     }
 
     /**

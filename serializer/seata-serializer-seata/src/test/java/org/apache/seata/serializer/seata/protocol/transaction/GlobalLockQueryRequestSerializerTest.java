@@ -16,13 +16,14 @@
  */
 package org.apache.seata.serializer.seata.protocol.transaction;
 
-import org.apache.seata.core.protocol.ProtocolConstants;
-import org.apache.seata.serializer.seata.SeataSerializer;
 import org.apache.seata.core.model.BranchType;
+import org.apache.seata.core.protocol.ProtocolConstants;
 import org.apache.seata.core.protocol.transaction.GlobalLockQueryRequest;
+import org.apache.seata.serializer.seata.SeataSerializer;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
 /**
  * The type Global lock query request codec test.
  *
@@ -38,7 +39,7 @@ public class GlobalLockQueryRequestSerializerTest {
      * Test codec.
      */
     @Test
-    public void test_codec(){
+    public void test_codec() {
         GlobalLockQueryRequest globalLockQueryRequest = new GlobalLockQueryRequest();
         globalLockQueryRequest.setApplicationData("aaaa");
         globalLockQueryRequest.setBranchType(BranchType.TCC);
@@ -56,5 +57,4 @@ public class GlobalLockQueryRequestSerializerTest {
         assertThat(globalLockQueryRequest2.getResourceId()).isEqualTo(globalLockQueryRequest.getResourceId());
         assertThat(globalLockQueryRequest2.getXid()).isEqualTo(globalLockQueryRequest.getXid());
     }
-
 }

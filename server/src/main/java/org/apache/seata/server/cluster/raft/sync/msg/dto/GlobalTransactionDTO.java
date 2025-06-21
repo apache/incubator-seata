@@ -30,5 +30,4 @@ public class GlobalTransactionDTO extends GlobalTransactionDO {
     public GlobalTransactionDTO() {
         super();
     }
-
 }

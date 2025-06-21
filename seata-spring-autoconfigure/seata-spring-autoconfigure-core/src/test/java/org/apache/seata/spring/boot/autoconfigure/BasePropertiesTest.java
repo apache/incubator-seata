@@ -16,11 +16,10 @@
  */
 package org.apache.seata.spring.boot.autoconfigure;
 
+import org.apache.seata.common.holder.ObjectHolder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-
-import org.apache.seata.common.holder.ObjectHolder;
 import org.springframework.core.env.PropertiesPropertySource;
 
 import java.io.File;
@@ -31,7 +30,6 @@ import java.util.Properties;
 
 import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
 import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
-
 
 public class BasePropertiesTest {
     protected static AnnotationConfigApplicationContext applicationContext;
@@ -48,28 +46,30 @@ public class BasePropertiesTest {
     @BeforeEach
     public void setUp() throws IOException {
         applicationContext = new AnnotationConfigApplicationContext(
-            new String[] {"org.apache.seata.spring.boot.autoconfigure.properties.config.test"});
+                new String[] {"org.apache.seata.spring.boot.autoconfigure.properties.config.test"});
         SeataCoreEnvironmentPostProcessor processor = new SeataCoreEnvironmentPostProcessor();
         processor.postProcessEnvironment(null, null);
 
         // set new applicationContex for test cases in extension test classes
         ObjectHolder.INSTANCE.setObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT, applicationContext);
-        ObjectHolder.INSTANCE.setObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT, applicationContext.getEnvironment());
-        Properties properties=new Properties();
+        ObjectHolder.INSTANCE.setObject(
+                OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT, applicationContext.getEnvironment());
+        Properties properties = new Properties();
         ClassLoader classLoader = getClass().getClassLoader();
         File f = new File(classLoader.getResource("application-test.properties").getFile());
-        try(InputStream in =new FileInputStream(f)) {
+        try (InputStream in = new FileInputStream(f)) {
             properties.load(in);
         }
-        applicationContext.getEnvironment().getPropertySources().addFirst(new PropertiesPropertySource("serverProperties", properties));
-
+        applicationContext
+                .getEnvironment()
+                .getPropertySources()
+                .addFirst(new PropertiesPropertySource("serverProperties", properties));
     }
 
     @AfterEach
     public void closeContext() {
-        if(applicationContext!=null) {
+        if (applicationContext != null) {
             applicationContext.close();
         }
     }
-
 }

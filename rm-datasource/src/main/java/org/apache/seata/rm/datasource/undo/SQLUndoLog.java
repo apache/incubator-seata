@@ -16,10 +16,9 @@
  */
 package org.apache.seata.rm.datasource.undo;
 
-
-import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
 import org.apache.seata.sqlparser.SQLType;
+import org.apache.seata.sqlparser.struct.TableMeta;
 
 /**
  * The type Sql undo log.

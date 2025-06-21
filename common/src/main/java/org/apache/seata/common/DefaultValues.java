@@ -165,17 +165,17 @@ public interface DefaultValues {
      * The constant DEFAULT_MIN_HTTP_POOL_SIZE.
      */
     int DEFAULT_MIN_HTTP_POOL_SIZE = 10;
-    
+
     /**
      * The constant DEFAULT_MAX_HTTP_POOL_SIZE.
      */
     int DEFAULT_MAX_HTTP_POOL_SIZE = 100;
-    
+
     /**
      * The constant DEFAULT_MAX_HTTP_TASK_QUEUE_SIZE.
      */
     int DEFAULT_MAX_HTTP_TASK_QUEUE_SIZE = 1000;
-    
+
     /**
      * The constant DEFAULT_HTTP_POOL_KEEP_ALIVE_TIME.
      */
@@ -265,7 +265,7 @@ public interface DefaultValues {
     /**
      * The constant SERVICE_DEFAULT_PORT.
      */
-    //currently not use and will be delete in the next version
+    // currently not use and will be delete in the next version
     @Deprecated
     int SERVICE_DEFAULT_PORT = 8091;
 

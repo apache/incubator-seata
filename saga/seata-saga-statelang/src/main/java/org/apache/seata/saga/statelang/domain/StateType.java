@@ -67,7 +67,6 @@ public enum StateType {
      */
     LOOP_START("LoopStart");
 
-
     private String value;
 
     StateType(String value) {
@@ -87,5 +86,4 @@ public enum StateType {
 
         throw new IllegalArgumentException("Unknown StateType[" + value + "]");
     }
-
 }

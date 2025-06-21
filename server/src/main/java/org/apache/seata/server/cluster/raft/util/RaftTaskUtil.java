@@ -16,10 +16,6 @@
  */
 package org.apache.seata.server.cluster.raft.util;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import com.alipay.sofa.jraft.Closure;
 import com.alipay.sofa.jraft.entity.Task;
 import org.apache.seata.core.exception.GlobalTransactionException;
@@ -30,12 +26,17 @@ import org.apache.seata.server.cluster.raft.context.SeataClusterContext;
 import org.apache.seata.server.cluster.raft.sync.RaftSyncMessageSerializer;
 import org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMessage;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+
 /**
  */
 public class RaftTaskUtil {
 
     public static boolean createTask(Closure done, Object data, CompletableFuture<Boolean> completableFuture)
-        throws TransactionException {
+            throws TransactionException {
         final Task task = new Task();
         if (data != null) {
             RaftSyncMessage raftSyncMessage = new RaftSyncMessage();
@@ -46,9 +47,10 @@ public class RaftTaskUtil {
                 throw new TransactionException(e);
             }
         }
-        task.setDone(done == null ? status -> {
-        } : done);
-        RaftServerManager.getRaftServer(SeataClusterContext.getGroup()).getNode().apply(task);
+        task.setDone(done == null ? status -> {} : done);
+        RaftServerManager.getRaftServer(SeataClusterContext.getGroup())
+                .getNode()
+                .apply(task);
         if (completableFuture != null) {
             return futureGet(completableFuture);
         }
@@ -56,7 +58,7 @@ public class RaftTaskUtil {
     }
 
     public static boolean createTask(Closure done, CompletableFuture<Boolean> completableFuture)
-        throws TransactionException {
+            throws TransactionException {
         return createTask(done, null, completableFuture);
     }
 
@@ -64,16 +66,15 @@ public class RaftTaskUtil {
         try {
             return completableFuture.get();
         } catch (InterruptedException e) {
-            throw new GlobalTransactionException(TransactionExceptionCode.FailedWriteSession,
-                "Fail to store global session: " + e.getMessage());
+            throw new GlobalTransactionException(
+                    TransactionExceptionCode.FailedWriteSession, "Fail to store global session: " + e.getMessage());
         } catch (ExecutionException e) {
             if (e.getCause() instanceof TransactionException) {
-                throw (TransactionException)e.getCause();
+                throw (TransactionException) e.getCause();
             } else {
-                throw new GlobalTransactionException(TransactionExceptionCode.FailedWriteSession,
-                    "Fail to store global session: " + e.getMessage());
+                throw new GlobalTransactionException(
+                        TransactionExceptionCode.FailedWriteSession, "Fail to store global session: " + e.getMessage());
             }
         }
     }
-
 }

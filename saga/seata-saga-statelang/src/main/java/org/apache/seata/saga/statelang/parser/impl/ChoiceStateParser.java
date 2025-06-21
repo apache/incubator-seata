@@ -16,15 +16,15 @@
  */
 package org.apache.seata.saga.statelang.parser.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.seata.saga.statelang.domain.ChoiceState;
 import org.apache.seata.saga.statelang.domain.ChoiceState.Choice;
 import org.apache.seata.saga.statelang.domain.impl.ChoiceStateImpl;
 import org.apache.seata.saga.statelang.domain.impl.ChoiceStateImpl.ChoiceImpl;
 import org.apache.seata.saga.statelang.parser.StateParser;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Single item selection state parser
@@ -38,21 +38,21 @@ public class ChoiceStateParser extends BaseStatePaser implements StateParser<Cho
         ChoiceStateImpl choiceState = new ChoiceStateImpl();
         parseBaseAttributes(choiceState, node);
 
-        Map<String, Object> nodeMap = (Map<String, Object>)node;
-        List<Object> choiceObjList = (List<Object>)nodeMap.get("Choices");
+        Map<String, Object> nodeMap = (Map<String, Object>) node;
+        List<Object> choiceObjList = (List<Object>) nodeMap.get("Choices");
         List<Choice> choiceStateList = new ArrayList<>(choiceObjList.size());
         for (Object choiceObj : choiceObjList) {
 
-            Map<String, Object> choiceObjMap = (Map<String, Object>)choiceObj;
+            Map<String, Object> choiceObjMap = (Map<String, Object>) choiceObj;
             ChoiceImpl choice = new ChoiceImpl();
-            choice.setExpression((String)choiceObjMap.get("Expression"));
-            choice.setNext((String)choiceObjMap.get("Next"));
+            choice.setExpression((String) choiceObjMap.get("Expression"));
+            choice.setNext((String) choiceObjMap.get("Next"));
 
             choiceStateList.add(choice);
         }
         choiceState.setChoices(choiceStateList);
 
-        choiceState.setDefaultChoice((String)nodeMap.get("Default"));
+        choiceState.setDefaultChoice((String) nodeMap.get("Default"));
 
         return choiceState;
     }

@@ -16,11 +16,8 @@
  */
 package org.apache.seata.rm.datasource.sql.handler;
 
-import java.util.List;
-
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
-
 import org.apache.seata.sqlparser.druid.mysql.MySQLInsertRecognizer;
 import org.apache.seata.sqlparser.druid.mysql.MySQLUpdateRecognizer;
 import org.apache.seata.sqlparser.druid.oracle.OracleInsertRecognizer;
@@ -30,6 +27,8 @@ import org.apache.seata.sqlparser.druid.postgresql.PostgresqlUpdateRecognizer;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
 
 /**
  * The type Escape handler test.
@@ -41,7 +40,7 @@ public class EscapeHandlerTest {
      */
     @Test
     public void testUpdateColumnsEscape() {
-        //mysql
+        // mysql
         String sql1 = "update t set `a` = 1, `b` = 2, `c` = 3";
         List<SQLStatement> astsMysql = SQLUtils.parseStatements(sql1, JdbcConstants.MYSQL);
         MySQLUpdateRecognizer regMysql = new MySQLUpdateRecognizer(sql1, astsMysql.get(0));
@@ -54,7 +53,7 @@ public class EscapeHandlerTest {
             Assertions.assertTrue(updateColumn.contains("`"));
         }
 
-        //oracle
+        // oracle
         String sql2 = "update t set \"a\" = 1, \"b\" = 2, \"c\" = 3";
         List<SQLStatement> astsOracle = SQLUtils.parseStatements(sql2, JdbcConstants.ORACLE);
         OracleUpdateRecognizer regOracle = new OracleUpdateRecognizer(sql2, astsOracle.get(0));
@@ -67,7 +66,7 @@ public class EscapeHandlerTest {
             Assertions.assertTrue(updateColumn.contains("\""));
         }
 
-        //postgresql
+        // postgresql
         String sql3 = "update t set \"a\" = 1, \"b\" = 2, \"c\" = 3";
         List<SQLStatement> astsPgsql = SQLUtils.parseStatements(sql2, JdbcConstants.POSTGRESQL);
         PostgresqlUpdateRecognizer regPgsql = new PostgresqlUpdateRecognizer(sql3, astsPgsql.get(0));
@@ -79,7 +78,6 @@ public class EscapeHandlerTest {
         for (String updateColumn : updateColPgsql) {
             Assertions.assertTrue(updateColumn.contains("\""));
         }
-
     }
 
     /**
@@ -99,7 +97,7 @@ public class EscapeHandlerTest {
             Assertions.assertTrue(insertColumn.contains("`"));
         }
 
-        //oracle
+        // oracle
         String sql2 = "insert into t(\"id\", \"no\", \"name\", \"age\") values (1, 'no001', 'aaa', '20')";
         List<SQLStatement> astsOracle = SQLUtils.parseStatements(sql2, JdbcConstants.ORACLE);
         OracleInsertRecognizer regOracle = new OracleInsertRecognizer(sql2, astsOracle.get(0));
@@ -112,7 +110,7 @@ public class EscapeHandlerTest {
             Assertions.assertTrue(insertCol.contains("\""));
         }
 
-        //postgresql
+        // postgresql
         String sql3 = "insert into t(\"id\", \"no\", \"name\", \"age\") values (1, 'no001', 'aaa', '20')";
         List<SQLStatement> astsPgsql = SQLUtils.parseStatements(sql2, JdbcConstants.POSTGRESQL);
         PostgresqlInsertRecognizer regPgsql = new PostgresqlInsertRecognizer(sql3, astsPgsql.get(0));

@@ -18,7 +18,6 @@ package org.apache.seata.sqlparser.druid.mariadb;
 
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
-
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.sqlparser.SQLRecognizer;
 import org.apache.seata.sqlparser.druid.SQLOperateRecognizerHolder;

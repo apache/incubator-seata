@@ -55,7 +55,8 @@ import static org.springframework.web.bind.annotation.ValueConstants.DEFAULT_NON
 public class RestControllerBeanPostProcessor implements BeanPostProcessor {
 
     private static final List<Class<? extends Annotation>> MAPPING_CLASS = new ArrayList<>();
-    private static final Map<Class<? extends Annotation>, ParamMetaData.ParamConvertType> MAPPING_PARAM_TYPE = new HashMap<>();
+    private static final Map<Class<? extends Annotation>, ParamMetaData.ParamConvertType> MAPPING_PARAM_TYPE =
+            new HashMap<>();
     private static final Set<Class<?>> SIMPLE_TYPE = new HashSet<>();
     private static final Set<Class<?>> SPECIAL_INJECTED_TYPE = new HashSet<>();
 
@@ -135,7 +136,8 @@ public class RestControllerBeanPostProcessor implements BeanPostProcessor {
         }
     }
 
-    private static void addPathMapping(Object httpController, List<String> prePaths, Method method, List<String> postPaths) {
+    private static void addPathMapping(
+            Object httpController, List<String> prePaths, Method method, List<String> postPaths) {
         Class<?>[] parameterTypes = method.getParameterTypes();
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
         ParamMetaData[] paramMetaDatas = new ParamMetaData[parameterTypes.length];
@@ -152,7 +154,8 @@ public class RestControllerBeanPostProcessor implements BeanPostProcessor {
                     }
                 }
             }
-            ParamMetaData paramMetaData = buildParamMetaData(matchedAnnotation, parameterTypes[i], parameterAnnotationType, parameters[i]);
+            ParamMetaData paramMetaData =
+                    buildParamMetaData(matchedAnnotation, parameterTypes[i], parameterAnnotationType, parameters[i]);
             paramMetaDatas[i] = paramMetaData;
         }
         int maxSize = Math.max(prePaths.size(), postPaths.size());
@@ -177,8 +180,11 @@ public class RestControllerBeanPostProcessor implements BeanPostProcessor {
         }
     }
 
-    private static ParamMetaData buildParamMetaData(Annotation matchedAnnotation, Class<?> parameterType,
-                                                    Class<? extends Annotation> parameterAnnotationType, Parameter parameter) {
+    private static ParamMetaData buildParamMetaData(
+            Annotation matchedAnnotation,
+            Class<?> parameterType,
+            Class<? extends Annotation> parameterAnnotationType,
+            Parameter parameter) {
         ParamMetaData paramMetaData = new ParamMetaData();
 
         // No annotation on the parameter: resolve the default annotation type based on the parameter type
@@ -191,7 +197,7 @@ public class RestControllerBeanPostProcessor implements BeanPostProcessor {
                 paramMetaData.setRequired(true);
                 paramMetaData.setDefaultValue(DEFAULT_NONE);
             }
-        // Annotation is present on the parameter; proceed with standard parsing logic
+            // Annotation is present on the parameter; proceed with standard parsing logic
         } else {
             ParamMetaData.ParamConvertType paramConvertType = MAPPING_PARAM_TYPE.get(parameterAnnotationType);
             paramMetaData.setParamConvertType(paramConvertType);
@@ -232,12 +238,12 @@ public class RestControllerBeanPostProcessor implements BeanPostProcessor {
     private static Class<? extends Annotation> resolveDefaultAnnotationType(Class<?> paramType) {
         if (SPECIAL_INJECTED_TYPE.stream().anyMatch(t -> t.isAssignableFrom(paramType))) {
             return null;
-        } else if (paramType.isPrimitive() || SIMPLE_TYPE.contains(paramType)
+        } else if (paramType.isPrimitive()
+                || SIMPLE_TYPE.contains(paramType)
                 || org.springframework.web.multipart.MultipartFile.class.isAssignableFrom(paramType)) {
             return RequestParam.class;
         } else {
             return ModelAttribute.class;
         }
     }
-
 }

@@ -38,21 +38,24 @@ import static io.netty.util.CharsetUtil.UTF_8;
 import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 import static org.assertj.core.api.Assertions.assertThat;
 
-
 @Disabled
 public class EtcdRegistryServiceImplTest {
     private static final String REGISTRY_KEY_PREFIX = "registry-seata-";
     private static final String CLUSTER_NAME = "default";
-    @Rule
-    private final static EtcdClusterResource etcd = new EtcdClusterResource(CLUSTER_NAME, 1);
 
-    private final Client client = Client.builder().endpoints(etcd.getClientEndpoints()).build();
-    private final static String HOST = "127.0.0.1";
-    private final static int PORT = 8091;
+    @Rule
+    private static final EtcdClusterResource etcd = new EtcdClusterResource(CLUSTER_NAME, 1);
+
+    private final Client client =
+            Client.builder().endpoints(etcd.getClientEndpoints()).build();
+    private static final String HOST = "127.0.0.1";
+    private static final int PORT = 8091;
 
     @BeforeAll
     public static void beforeClass() throws Exception {
-        System.setProperty(EtcdRegistryServiceImpl.TEST_ENDPONT, etcd.getClientEndpoints().get(0).toString());
+        System.setProperty(
+                EtcdRegistryServiceImpl.TEST_ENDPONT,
+                etcd.getClientEndpoints().get(0).toString());
     }
 
     @AfterAll
@@ -64,55 +67,61 @@ public class EtcdRegistryServiceImplTest {
     public void testRegister() throws Exception {
         RegistryService registryService = new EtcdRegistryProvider().provide();
         InetSocketAddress inetSocketAddress = new InetSocketAddress(HOST, PORT);
-        //1.register
+        // 1.register
         registryService.register(inetSocketAddress);
-        //2.get instance information
-        GetOption getOption = GetOption.newBuilder().withPrefix(buildRegistryKeyPrefix()).build();
-        long count = client.getKVClient().get(buildRegistryKeyPrefix(), getOption).get().getKvs().stream().filter(keyValue -> {
-            String[] instanceInfo = keyValue.getValue().toString(UTF_8).split(":");
-            return HOST.equals(instanceInfo[0]) && PORT == Integer.parseInt(instanceInfo[1]);
-        }).count();
+        // 2.get instance information
+        GetOption getOption =
+                GetOption.newBuilder().withPrefix(buildRegistryKeyPrefix()).build();
+        long count = client.getKVClient().get(buildRegistryKeyPrefix(), getOption).get().getKvs().stream()
+                .filter(keyValue -> {
+                    String[] instanceInfo = keyValue.getValue().toString(UTF_8).split(":");
+                    return HOST.equals(instanceInfo[0]) && PORT == Integer.parseInt(instanceInfo[1]);
+                })
+                .count();
         assertThat(count).isEqualTo(1);
     }
-
 
     @Test
     public void testUnregister() throws Exception {
         RegistryService registryService = new EtcdRegistryProvider().provide();
         InetSocketAddress inetSocketAddress = new InetSocketAddress(HOST, PORT);
-        //1.register
+        // 1.register
         registryService.register(inetSocketAddress);
-        //2.get instance information
-        GetOption getOption = GetOption.newBuilder().withPrefix(buildRegistryKeyPrefix()).build();
-        long count = client.getKVClient().get(buildRegistryKeyPrefix(), getOption).get().getKvs().stream().filter(keyValue -> {
-            String[] instanceInfo = keyValue.getValue().toString(UTF_8).split(":");
-            return HOST.equals(instanceInfo[0]) && PORT == Integer.parseInt(instanceInfo[1]);
-        }).count();
+        // 2.get instance information
+        GetOption getOption =
+                GetOption.newBuilder().withPrefix(buildRegistryKeyPrefix()).build();
+        long count = client.getKVClient().get(buildRegistryKeyPrefix(), getOption).get().getKvs().stream()
+                .filter(keyValue -> {
+                    String[] instanceInfo = keyValue.getValue().toString(UTF_8).split(":");
+                    return HOST.equals(instanceInfo[0]) && PORT == Integer.parseInt(instanceInfo[1]);
+                })
+                .count();
         assertThat(count).isEqualTo(1);
-        //3.unregister
+        // 3.unregister
         registryService.unregister(inetSocketAddress);
-        //4.again get instance information
+        // 4.again get instance information
         getOption = GetOption.newBuilder().withPrefix(buildRegistryKeyPrefix()).build();
-        count = client.getKVClient().get(buildRegistryKeyPrefix(), getOption).get().getKvs().stream().filter(keyValue -> {
-            String[] instanceInfo = keyValue.getValue().toString(UTF_8).split(":");
-            return HOST.equals(instanceInfo[0]) && PORT == Integer.parseInt(instanceInfo[1]);
-        }).count();
+        count = client.getKVClient().get(buildRegistryKeyPrefix(), getOption).get().getKvs().stream()
+                .filter(keyValue -> {
+                    String[] instanceInfo = keyValue.getValue().toString(UTF_8).split(":");
+                    return HOST.equals(instanceInfo[0]) && PORT == Integer.parseInt(instanceInfo[1]);
+                })
+                .count();
         assertThat(count).isEqualTo(0);
-
-
     }
 
     @Test
     public void testSubscribe() throws Exception {
         RegistryService registryService = new EtcdRegistryProvider().provide();
         InetSocketAddress inetSocketAddress = new InetSocketAddress(HOST, PORT);
-        //1.register
+        // 1.register
         registryService.register(inetSocketAddress);
-        //2.subscribe
+        // 2.subscribe
         EtcdListener etcdListener = new EtcdListener();
         registryService.subscribe(CLUSTER_NAME, etcdListener);
-        //3.delete instance,see if the listener can be notified
-        DeleteOption deleteOption = DeleteOption.newBuilder().withPrefix(buildRegistryKeyPrefix()).build();
+        // 3.delete instance,see if the listener can be notified
+        DeleteOption deleteOption =
+                DeleteOption.newBuilder().withPrefix(buildRegistryKeyPrefix()).build();
         client.getKVClient().delete(buildRegistryKeyPrefix(), deleteOption).get();
         assertThat(etcdListener.isNotified()).isTrue();
     }
@@ -121,21 +130,24 @@ public class EtcdRegistryServiceImplTest {
     public void testUnsubscribe() throws Exception {
         RegistryService registryService = new EtcdRegistryProvider().provide();
         InetSocketAddress inetSocketAddress = new InetSocketAddress(HOST, PORT);
-        //1.register
+        // 1.register
         registryService.register(inetSocketAddress);
-        //2.subscribe
+        // 2.subscribe
         EtcdListener etcdListener = new EtcdListener();
         registryService.subscribe(CLUSTER_NAME, etcdListener);
-        //3.delete instance,see if the listener can be notified
-        DeleteOption deleteOption = DeleteOption.newBuilder().withPrefix(buildRegistryKeyPrefix()).build();
+        // 3.delete instance,see if the listener can be notified
+        DeleteOption deleteOption =
+                DeleteOption.newBuilder().withPrefix(buildRegistryKeyPrefix()).build();
         client.getKVClient().delete(buildRegistryKeyPrefix(), deleteOption).get();
         assertThat(etcdListener.isNotified()).isTrue();
-        //4.unsubscribe
+        // 4.unsubscribe
         registryService.unsubscribe(CLUSTER_NAME, etcdListener);
-        //5.reset
+        // 5.reset
         etcdListener.reset();
-        //6.put instance,the listener should not be notified
-        client.getKVClient().put(buildRegistryKeyPrefix(), ByteSequence.from("test", UTF_8)).get();
+        // 6.put instance,the listener should not be notified
+        client.getKVClient()
+                .put(buildRegistryKeyPrefix(), ByteSequence.from("test", UTF_8))
+                .get();
         assertThat(etcdListener.isNotified()).isFalse();
     }
 
@@ -143,9 +155,9 @@ public class EtcdRegistryServiceImplTest {
     public void testLookup() throws Exception {
         RegistryService registryService = new EtcdRegistryProvider().provide();
         InetSocketAddress inetSocketAddress = new InetSocketAddress(HOST, PORT);
-        //1.register
+        // 1.register
         registryService.register(inetSocketAddress);
-        //2.lookup
+        // 2.lookup
         List<InetSocketAddress> inetSocketAddresses = registryService.lookup(DEFAULT_TX_GROUP);
         assertThat(inetSocketAddresses).size().isEqualTo(1);
     }
@@ -168,18 +180,13 @@ public class EtcdRegistryServiceImplTest {
         @Override
         public void onNext(WatchResponse response) {
             notified = true;
-
         }
 
         @Override
-        public void onError(Throwable throwable) {
-
-        }
+        public void onError(Throwable throwable) {}
 
         @Override
-        public void onCompleted() {
-
-        }
+        public void onCompleted() {}
 
         /**
          * @return

@@ -16,9 +16,6 @@
  */
 package org.apache.seata.serializer.seata.protocol;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.protocol.AbstractResultMessage;
 import org.apache.seata.core.protocol.BatchResultMessage;
@@ -27,6 +24,9 @@ import org.apache.seata.core.protocol.ResultCode;
 import org.apache.seata.core.protocol.transaction.BranchCommitResponse;
 import org.apache.seata.serializer.seata.SeataSerializer;
 import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -41,7 +41,6 @@ public class BatchResultMessageSerializerTest {
      * The Seata codec.
      */
     SeataSerializer seataSerializer = new SeataSerializer(ProtocolConstants.VERSION);
-
 
     @Test
     public void testCodec() {
@@ -67,12 +66,14 @@ public class BatchResultMessageSerializerTest {
         assertThat(batchResultMessage2.getMsgIds().get(1)).isEqualTo(2222);
 
         // validate msgs
-        BranchCommitResponse branchCommitResponse11 = (BranchCommitResponse) batchResultMessage2.getResultMessages().get(0);
+        BranchCommitResponse branchCommitResponse11 =
+                (BranchCommitResponse) batchResultMessage2.getResultMessages().get(0);
         assertThat(branchCommitResponse11.getBranchId()).isEqualTo(12345678L);
         assertThat(branchCommitResponse11.getXid()).isEqualTo("x1");
         assertThat(branchCommitResponse11.getResultCode()).isEqualTo(ResultCode.Success);
         assertThat(branchCommitResponse11.getBranchStatus()).isEqualTo(BranchStatus.PhaseTwo_Committed);
-        BranchCommitResponse branchCommitResponse22 = (BranchCommitResponse) batchResultMessage2.getResultMessages().get(1);
+        BranchCommitResponse branchCommitResponse22 =
+                (BranchCommitResponse) batchResultMessage2.getResultMessages().get(1);
         assertThat(branchCommitResponse22.getBranchId()).isEqualTo(87654321L);
         assertThat(branchCommitResponse22.getXid()).isEqualTo("x2");
         assertThat(branchCommitResponse11.getResultCode()).isEqualTo(ResultCode.Success);

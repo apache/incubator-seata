@@ -16,11 +16,7 @@
  */
 package org.apache.seata.config.nacos;
 
-import java.lang.reflect.Method;
-import java.util.Properties;
-
 import com.alibaba.nacos.api.exception.NacosException;
-
 import org.apache.seata.common.util.ReflectionUtil;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
@@ -28,6 +24,9 @@ import org.apache.seata.config.Dispose;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+
+import java.lang.reflect.Method;
+import java.util.Properties;
 
 /**
  * The type Nacos configuration test
@@ -41,7 +40,7 @@ public class NacosConfigurationTest {
         System.clearProperty("seataEnv");
         configuration = NacosConfiguration.getInstance();
         if (configuration instanceof Dispose) {
-            ((Dispose)configuration).dispose();
+            ((Dispose) configuration).dispose();
         }
         ConfigurationFactory.reload();
         configuration = NacosConfiguration.getInstance();
@@ -51,13 +50,12 @@ public class NacosConfigurationTest {
     public void testGetConfigProperties() throws Exception {
         Assertions.assertNotNull(configuration);
         Method method = ReflectionUtil.getMethod(NacosConfiguration.class, "getConfigProperties");
-        //do not use `ConfigurationFactory.getInstance()`, it's a proxy object
-        Properties properties = (Properties)method.invoke(configuration);
+        // do not use `ConfigurationFactory.getInstance()`, it's a proxy object
+        Properties properties = (Properties) method.invoke(configuration);
         Assertions.assertEquals("/bar", properties.getProperty("contextPath"));
         System.setProperty("contextPath", "/foo");
-        properties = (Properties)method.invoke(configuration);
+        properties = (Properties) method.invoke(configuration);
         Assertions.assertEquals("/foo", properties.getProperty("contextPath"));
         System.clearProperty("contextPath");
     }
-
 }

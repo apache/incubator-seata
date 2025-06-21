@@ -16,18 +16,6 @@
  */
 package org.apache.seata.core.store.db;
 
-import static org.apache.seata.common.DefaultValues.DEFAULT_DB_MAX_CONN;
-import static org.apache.seata.common.DefaultValues.DEFAULT_DB_MIN_CONN;
-
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Stream;
-import javax.sql.DataSource;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.common.exception.StoreException;
 import org.apache.seata.common.executor.Initialize;
@@ -39,6 +27,19 @@ import org.apache.seata.core.constants.ConfigurationKeys;
 import org.apache.seata.core.constants.DBType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.sql.DataSource;
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Stream;
+
+import static org.apache.seata.common.DefaultValues.DEFAULT_DB_MAX_CONN;
+import static org.apache.seata.common.DefaultValues.DEFAULT_DB_MIN_CONN;
 
 /**
  * The abstract datasource provider
@@ -159,8 +160,7 @@ public abstract class AbstractDataSourceProvider implements DataSourceProvider, 
     }
 
     protected ClassLoader getDriverClassLoader() {
-        return DRIVER_LOADERS.getOrDefault(
-                getDriverClassName(), this.getClass().getClassLoader());
+        return DRIVER_LOADERS.getOrDefault(getDriverClassName(), this.getClass().getClassLoader());
     }
 
     private static Map<String, ClassLoader> createMysqlDriverClassLoaders() {

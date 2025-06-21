@@ -19,10 +19,11 @@ package org.apache.seata.rm.datasource;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.rm.datasource.sql.SQLVisitorFactory;
-import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import org.apache.seata.sqlparser.SQLRecognizer;
 import org.apache.seata.sqlparser.SQLType;
+import org.apache.seata.sqlparser.struct.TableMeta;
+
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.CallableStatement;
@@ -112,11 +113,15 @@ public abstract class AbstractConnectionProxy implements Connection {
             if (sqlRecognizers != null && sqlRecognizers.size() == 1) {
                 SQLRecognizer sqlRecognizer = sqlRecognizers.get(0);
                 if (sqlRecognizer != null && sqlRecognizer.getSQLType() == SQLType.INSERT) {
-                    TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(dbType).getTableMeta(getTargetConnection(),
-                            sqlRecognizer.getTableName(), getDataSourceProxy().getResourceId());
-                    String[] pkNameArray = new String[tableMeta.getPrimaryKeyOnlyName().size()];
+                    TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(dbType)
+                            .getTableMeta(
+                                    getTargetConnection(),
+                                    sqlRecognizer.getTableName(),
+                                    getDataSourceProxy().getResourceId());
+                    String[] pkNameArray =
+                            new String[tableMeta.getPrimaryKeyOnlyName().size()];
                     tableMeta.getPrimaryKeyOnlyName().toArray(pkNameArray);
-                    targetPreparedStatement = getTargetConnection().prepareStatement(sql,pkNameArray);
+                    targetPreparedStatement = getTargetConnection().prepareStatement(sql, pkNameArray);
                 }
             }
         }
@@ -160,7 +165,6 @@ public abstract class AbstractConnectionProxy implements Connection {
     @Override
     public void setReadOnly(boolean readOnly) throws SQLException {
         targetConnection.setReadOnly(readOnly);
-
     }
 
     @Override
@@ -171,7 +175,6 @@ public abstract class AbstractConnectionProxy implements Connection {
     @Override
     public void setCatalog(String catalog) throws SQLException {
         targetConnection.setCatalog(catalog);
-
     }
 
     @Override
@@ -182,7 +185,6 @@ public abstract class AbstractConnectionProxy implements Connection {
     @Override
     public void setTransactionIsolation(int level) throws SQLException {
         targetConnection.setTransactionIsolation(level);
-
     }
 
     @Override
@@ -198,7 +200,6 @@ public abstract class AbstractConnectionProxy implements Connection {
     @Override
     public void clearWarnings() throws SQLException {
         targetConnection.clearWarnings();
-
     }
 
     @Override
@@ -210,8 +211,8 @@ public abstract class AbstractConnectionProxy implements Connection {
     @Override
     public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency)
             throws SQLException {
-        PreparedStatement preparedStatement = targetConnection.prepareStatement(sql, resultSetType,
-                resultSetConcurrency);
+        PreparedStatement preparedStatement =
+                targetConnection.prepareStatement(sql, resultSetType, resultSetConcurrency);
         return new PreparedStatementProxy(this, preparedStatement, sql);
     }
 
@@ -229,13 +230,11 @@ public abstract class AbstractConnectionProxy implements Connection {
     @Override
     public void setTypeMap(Map<String, Class<?>> map) throws SQLException {
         targetConnection.setTypeMap(map);
-
     }
 
     @Override
     public void setHoldability(int holdability) throws SQLException {
         targetConnection.setHoldability(holdability);
-
     }
 
     @Override
@@ -246,22 +245,22 @@ public abstract class AbstractConnectionProxy implements Connection {
     @Override
     public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability)
             throws SQLException {
-        Statement statement = targetConnection.createStatement(resultSetType, resultSetConcurrency,
-                resultSetHoldability);
+        Statement statement =
+                targetConnection.createStatement(resultSetType, resultSetConcurrency, resultSetHoldability);
         return new StatementProxy<Statement>(this, statement);
     }
 
     @Override
-    public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency,
-                                              int resultSetHoldability) throws SQLException {
-        PreparedStatement preparedStatement = targetConnection.prepareStatement(sql, resultSetType,
-                resultSetConcurrency, resultSetHoldability);
+    public PreparedStatement prepareStatement(
+            String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
+        PreparedStatement preparedStatement =
+                targetConnection.prepareStatement(sql, resultSetType, resultSetConcurrency, resultSetHoldability);
         return new PreparedStatementProxy(this, preparedStatement, sql);
     }
 
     @Override
-    public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency,
-                                         int resultSetHoldability) throws SQLException {
+    public CallableStatement prepareCall(
+            String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
         RootContext.assertNotInGlobalTransaction();
         return targetConnection.prepareCall(sql, resultSetType, resultSetConcurrency, resultSetHoldability);
     }
@@ -312,13 +311,11 @@ public abstract class AbstractConnectionProxy implements Connection {
     @Override
     public void setClientInfo(String name, String value) throws SQLClientInfoException {
         targetConnection.setClientInfo(name, value);
-
     }
 
     @Override
     public void setClientInfo(Properties properties) throws SQLClientInfoException {
         targetConnection.setClientInfo(properties);
-
     }
 
     @Override
@@ -344,7 +341,6 @@ public abstract class AbstractConnectionProxy implements Connection {
     @Override
     public void setSchema(String schema) throws SQLException {
         targetConnection.setSchema(schema);
-
     }
 
     @Override
@@ -355,7 +351,6 @@ public abstract class AbstractConnectionProxy implements Connection {
     @Override
     public void abort(Executor executor) throws SQLException {
         targetConnection.abort(executor);
-
     }
 
     @Override

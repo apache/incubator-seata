@@ -43,7 +43,7 @@ import java.lang.annotation.Target;
  * .TccActionInterceptor#invoke(MethodInvocation)// RM: the interceptor of TCC mode
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD,ElementType.TYPE})
+@Target({ElementType.METHOD, ElementType.TYPE})
 @Inherited
 public @interface GlobalTransactional {
 
@@ -132,5 +132,4 @@ public @interface GlobalTransactional {
      * @return lock strategy mode
      */
     LockStrategyMode lockStrategyMode() default LockStrategyMode.PESSIMISTIC;
-
 }

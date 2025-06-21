@@ -16,6 +16,12 @@
  */
 package io.seata.rm.datasource.mock;
 
+import com.alibaba.druid.util.jdbc.ResultSetBase;
+import com.google.common.collect.Lists;
+import org.apache.seata.sqlparser.struct.ColumnMeta;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.ResultSetMetaData;
@@ -23,14 +29,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.alibaba.druid.util.jdbc.ResultSetBase;
-
-import com.google.common.collect.Lists;
-import org.apache.seata.sqlparser.struct.ColumnMeta;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 
 public class MockResultSet extends ResultSetBase {
 
@@ -66,7 +64,7 @@ public class MockResultSet extends ResultSetBase {
      * @param mockReturnValue
      * @return
      */
-    public MockResultSet mockResultSet(List<String> mockColumnLabels, Object[][] mockReturnValue){
+    public MockResultSet mockResultSet(List<String> mockColumnLabels, Object[][] mockReturnValue) {
         this.columnLabels = mockColumnLabels;
         for (int i = 0; i < mockReturnValue.length; i++) {
             Object[] row = mockReturnValue[i];

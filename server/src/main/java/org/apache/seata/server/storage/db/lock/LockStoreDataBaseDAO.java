@@ -16,18 +16,6 @@
  */
 package org.apache.seata.server.storage.db.lock;
 
-import java.sql.BatchUpdateException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import javax.sql.DataSource;
 import org.apache.seata.common.exception.DataAccessException;
 import org.apache.seata.common.exception.StoreException;
 import org.apache.seata.common.util.CollectionUtils;
@@ -46,6 +34,18 @@ import org.apache.seata.core.store.db.sql.lock.LockStoreSqlFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.sql.DataSource;
+import java.sql.BatchUpdateException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_LOCK_DB_TABLE;
 import static org.apache.seata.core.exception.TransactionExceptionCode.LockKeyConflictFailFast;
@@ -113,7 +113,9 @@ public class LockStoreDataBaseDAO implements LockStore {
         Set<String> dbExistedRowKeys = new HashSet<>();
         boolean originalAutoCommit = true;
         if (lockDOs.size() > 1) {
-            lockDOs = lockDOs.stream().filter(LambdaUtils.distinctByKey(LockDO::getRowKey)).collect(Collectors.toList());
+            lockDOs = lockDOs.stream()
+                    .filter(LambdaUtils.distinctByKey(LockDO::getRowKey))
+                    .collect(Collectors.toList());
         }
         try {
             conn = lockStoreDataSource.getConnection();
@@ -123,12 +125,13 @@ public class LockStoreDataBaseDAO implements LockStore {
             }
             List<LockDO> unrepeatedLockDOs = lockDOs;
 
-            //check lock
+            // check lock
             if (!skipCheckLock) {
 
                 boolean canLock = true;
-                //query
-                String checkLockSQL = LockStoreSqlFactory.getLogStoreSql(dbType).getCheckLockableSql(lockTable, lockDOs.size());
+                // query
+                String checkLockSQL =
+                        LockStoreSqlFactory.getLogStoreSql(dbType).getCheckLockableSql(lockTable, lockDOs.size());
                 ps = conn.prepareStatement(checkLockSQL);
                 for (int i = 0; i < lockDOs.size(); i++) {
                     ps.setString(i + 1, lockDOs.get(i).getRowKey());
@@ -143,7 +146,12 @@ public class LockStoreDataBaseDAO implements LockStore {
                             String dbPk = rs.getString(ServerTableColumnsName.LOCK_TABLE_PK);
                             String dbTableName = rs.getString(ServerTableColumnsName.LOCK_TABLE_TABLE_NAME);
                             long dbBranchId = rs.getLong(ServerTableColumnsName.LOCK_TABLE_BRANCH_ID);
-                            LOGGER.info("Global lock on [{}:{}] is holding by xid {} branchId {}", dbTableName, dbPk, dbXID, dbBranchId);
+                            LOGGER.info(
+                                    "Global lock on [{}:{}] is holding by xid {} branchId {}",
+                                    dbTableName,
+                                    dbPk,
+                                    dbXID,
+                                    dbBranchId);
                         }
                         if (!autoCommit) {
                             int status = rs.getInt(ServerTableColumnsName.LOCK_TABLE_STATUS);
@@ -166,7 +174,8 @@ public class LockStoreDataBaseDAO implements LockStore {
                 }
                 // If the lock has been exists in db, remove it from the lockDOs
                 if (CollectionUtils.isNotEmpty(dbExistedRowKeys)) {
-                    unrepeatedLockDOs = lockDOs.stream().filter(lockDO -> !dbExistedRowKeys.contains(lockDO.getRowKey()))
+                    unrepeatedLockDOs = lockDOs.stream()
+                            .filter(lockDO -> !dbExistedRowKeys.contains(lockDO.getRowKey()))
                             .collect(Collectors.toList());
                 }
                 if (CollectionUtils.isEmpty(unrepeatedLockDOs)) {
@@ -180,7 +189,11 @@ public class LockStoreDataBaseDAO implements LockStore {
                 LockDO lockDO = unrepeatedLockDOs.get(0);
                 if (!doAcquireLock(conn, lockDO)) {
                     if (LOGGER.isInfoEnabled()) {
-                        LOGGER.info("Global lock acquire failed, xid {} branchId {} pk {}", lockDO.getXid(), lockDO.getBranchId(), lockDO.getPk());
+                        LOGGER.info(
+                                "Global lock acquire failed, xid {} branchId {} pk {}",
+                                lockDO.getXid(),
+                                lockDO.getBranchId(),
+                                lockDO.getPk());
                     }
                     conn.rollback();
                     return false;
@@ -188,8 +201,13 @@ public class LockStoreDataBaseDAO implements LockStore {
             } else {
                 if (!doAcquireLocks(conn, unrepeatedLockDOs)) {
                     if (LOGGER.isInfoEnabled()) {
-                        LOGGER.info("Global lock batch acquire failed, xid {} branchId {} pks {}", unrepeatedLockDOs.get(0).getXid(),
-                            unrepeatedLockDOs.get(0).getBranchId(), unrepeatedLockDOs.stream().map(lockDO -> lockDO.getPk()).collect(Collectors.toList()));
+                        LOGGER.info(
+                                "Global lock batch acquire failed, xid {} branchId {} pks {}",
+                                unrepeatedLockDOs.get(0).getXid(),
+                                unrepeatedLockDOs.get(0).getBranchId(),
+                                unrepeatedLockDOs.stream()
+                                        .map(lockDO -> lockDO.getPk())
+                                        .collect(Collectors.toList()));
                     }
                     conn.rollback();
                     return false;
@@ -226,8 +244,9 @@ public class LockStoreDataBaseDAO implements LockStore {
             conn = lockStoreDataSource.getConnection();
             conn.setAutoCommit(true);
 
-            //batch release lock
-            String batchDeleteSQL = LockStoreSqlFactory.getLogStoreSql(dbType).getBatchDeleteLockSql(lockTable, lockDOs.size());
+            // batch release lock
+            String batchDeleteSQL =
+                    LockStoreSqlFactory.getLogStoreSql(dbType).getBatchDeleteLockSql(lockTable, lockDOs.size());
             ps = conn.prepareStatement(batchDeleteSQL);
             ps.setString(1, lockDOs.get(0).getXid());
             for (int i = 0; i < lockDOs.size(); i++) {
@@ -249,7 +268,7 @@ public class LockStoreDataBaseDAO implements LockStore {
         try {
             conn = lockStoreDataSource.getConnection();
             conn.setAutoCommit(true);
-            //batch release lock by branch list
+            // batch release lock by branch list
             String batchDeleteSQL = LockStoreSqlFactory.getLogStoreSql(dbType).getBatchDeleteLockSqlByXid(lockTable);
             ps = conn.prepareStatement(batchDeleteSQL);
             ps.setString(1, xid);
@@ -269,8 +288,9 @@ public class LockStoreDataBaseDAO implements LockStore {
         try {
             conn = lockStoreDataSource.getConnection();
             conn.setAutoCommit(true);
-            //batch release lock by branchId
-            String batchDeleteSQL = LockStoreSqlFactory.getLogStoreSql(dbType).getBatchDeleteLockSqlByBranchId(lockTable);
+            // batch release lock by branchId
+            String batchDeleteSQL =
+                    LockStoreSqlFactory.getLogStoreSql(dbType).getBatchDeleteLockSqlByBranchId(lockTable);
             ps = conn.prepareStatement(batchDeleteSQL);
             ps.setLong(1, branchId);
             ps.executeUpdate();
@@ -302,9 +322,9 @@ public class LockStoreDataBaseDAO implements LockStore {
     @Override
     public void updateLockStatus(String xid, LockStatus lockStatus) {
         String updateStatusLockByGlobalSql =
-            LockStoreSqlFactory.getLogStoreSql(dbType).getBatchUpdateStatusLockByGlobalSql(lockTable);
+                LockStoreSqlFactory.getLogStoreSql(dbType).getBatchUpdateStatusLockByGlobalSql(lockTable);
         try (Connection conn = lockStoreDataSource.getConnection();
-            PreparedStatement ps = conn.prepareStatement(updateStatusLockByGlobalSql)) {
+                PreparedStatement ps = conn.prepareStatement(updateStatusLockByGlobalSql)) {
             conn.setAutoCommit(true);
             ps.setInt(1, lockStatus.getCode());
             ps.setString(2, xid);
@@ -324,7 +344,7 @@ public class LockStoreDataBaseDAO implements LockStore {
     protected boolean doAcquireLock(Connection conn, LockDO lockDO) {
         PreparedStatement ps = null;
         try {
-            //insert
+            // insert
             String insertLockSQL = LockStoreSqlFactory.getLogStoreSql(dbType).getInsertLockSQL(lockTable);
             ps = conn.prepareStatement(insertLockSQL);
             ps.setString(1, lockDO.getXid());
@@ -356,7 +376,7 @@ public class LockStoreDataBaseDAO implements LockStore {
     protected boolean doAcquireLocks(Connection conn, List<LockDO> lockDOs) throws SQLException {
         PreparedStatement ps = null;
         try {
-            //insert
+            // insert
             String insertLockSQL = LockStoreSqlFactory.getLogStoreSql(dbType).getInsertLockSQL(lockTable);
             ps = conn.prepareStatement(insertLockSQL);
             for (LockDO lockDO : lockDOs) {
@@ -373,7 +393,7 @@ public class LockStoreDataBaseDAO implements LockStore {
             return ps.executeBatch().length == lockDOs.size();
         } catch (SQLIntegrityConstraintViolationException e) {
             LOGGER.error("Global lock batch acquire error: {}", e.getMessage(), e);
-            //return false,let the caller go to conn.rollback()
+            // return false,let the caller go to conn.rollback()
             return false;
         } catch (BatchUpdateException e) {
             Throwable cause = e.getCause();
@@ -406,8 +426,9 @@ public class LockStoreDataBaseDAO implements LockStore {
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
-            //query
-            String checkLockSQL = LockStoreSqlFactory.getLogStoreSql(dbType).getCheckLockableSql(lockTable, lockDOs.size());
+            // query
+            String checkLockSQL =
+                    LockStoreSqlFactory.getLogStoreSql(dbType).getCheckLockableSql(lockTable, lockDOs.size());
             ps = conn.prepareStatement(checkLockSQL);
             for (int i = 0; i < lockDOs.size(); i++) {
                 ps.setString(i + 1, lockDOs.get(i).getRowKey());

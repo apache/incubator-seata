@@ -35,7 +35,6 @@ public enum ErrorCode {
      * The error code of the transaction exception.
      */
 
-
     /**
      * The error code of the sql exception
      */
@@ -114,5 +113,4 @@ public enum ErrorCode {
          */
         Other;
     }
-
 }

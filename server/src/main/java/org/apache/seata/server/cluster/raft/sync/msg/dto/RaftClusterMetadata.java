@@ -16,16 +16,18 @@
  */
 package org.apache.seata.server.cluster.raft.sync.msg.dto;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import org.apache.seata.common.holder.ObjectHolder;
 import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.core.protocol.Version;
 import org.springframework.core.env.ConfigurableEnvironment;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
 
 /**
@@ -42,26 +44,28 @@ public class RaftClusterMetadata implements Serializable {
 
     private long term;
 
-    public RaftClusterMetadata() {
-    }
+    public RaftClusterMetadata() {}
 
     public RaftClusterMetadata(long term) {
         this.term = term;
     }
 
-    public Node createNode(String host, int txPort, int internalPort, int controlPort, String group,
-        Map<String, Object> metadata) {
+    public Node createNode(
+            String host, int txPort, int internalPort, int controlPort, String group, Map<String, Object> metadata) {
         Node node = new Node();
         node.setTransaction(node.createEndpoint(host, txPort, "seata"));
         node.setControl(node.createEndpoint(host, controlPort, "http"));
         node.setGroup(group);
         node.setVersion(Version.getCurrent());
         node.setInternal(node.createEndpoint(host, internalPort, "raft"));
-        ConfigurableEnvironment environment = (ConfigurableEnvironment) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT);
-        String seataRegistryMetadataExternalValue = environment.resolvePlaceholders("${SEATA_REGISTRY_METADATA_EXTERNAL:${seata.registry.metadata.external:}}");
+        ConfigurableEnvironment environment =
+                (ConfigurableEnvironment) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT);
+        String seataRegistryMetadataExternalValue = environment.resolvePlaceholders(
+                "${SEATA_REGISTRY_METADATA_EXTERNAL:${seata.registry.metadata.external:}}");
         if (metadata != null) {
             if (StringUtils.isNotEmpty(seataRegistryMetadataExternalValue)) {
-                Map<String, Object> newMetadata = node.updateMetadataWithExternalEndpoints(metadata, node.createExternalEndpoints(seataRegistryMetadataExternalValue));
+                Map<String, Object> newMetadata = node.updateMetadataWithExternalEndpoints(
+                        metadata, node.createExternalEndpoints(seataRegistryMetadataExternalValue));
                 Optional.ofNullable(newMetadata).ifPresent(node::setMetadata);
             } else {
                 node.setMetadata(metadata);

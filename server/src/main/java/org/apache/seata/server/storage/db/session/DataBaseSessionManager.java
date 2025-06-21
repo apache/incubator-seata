@@ -16,8 +16,6 @@
  */
 package org.apache.seata.server.storage.db.session;
 
-import java.util.Collection;
-import java.util.List;
 import org.apache.seata.common.exception.StoreException;
 import org.apache.seata.common.executor.Initialize;
 import org.apache.seata.common.loader.LoadLevel;
@@ -33,6 +31,9 @@ import org.apache.seata.server.storage.db.store.DataBaseTransactionStoreManager;
 import org.apache.seata.server.store.TransactionStoreManager.LogOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Collection;
+import java.util.List;
 
 /**
  * The Data base session manager.
@@ -64,7 +65,6 @@ public class DataBaseSessionManager extends AbstractSessionManager implements In
         if (!ret) {
             throw new StoreException("addGlobalSession failed.");
         }
-
     }
 
     @Override
@@ -86,7 +86,7 @@ public class DataBaseSessionManager extends AbstractSessionManager implements In
     /**
      * remove globalSession 1. rootSessionManager remove normal globalSession 2. retryCommitSessionManager and
      * retryRollbackSessionManager remove retry expired globalSession
-     * 
+     *
      * @param session the session
      * @throws TransactionException the transaction exception
      */
@@ -135,11 +135,19 @@ public class DataBaseSessionManager extends AbstractSessionManager implements In
     @Override
     public Collection<GlobalSession> allSessions() {
         // all data
-        return findGlobalSessions(
-            new SessionCondition(GlobalStatus.UnKnown, GlobalStatus.Begin, GlobalStatus.Committing,
-                GlobalStatus.CommitRetrying, GlobalStatus.Rollbacking, GlobalStatus.RollbackRetrying,
-                GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbackRetrying, GlobalStatus.AsyncCommitting,
-                GlobalStatus.StopRollbackOrRollbackRetry, GlobalStatus.StopCommitOrCommitRetry, GlobalStatus.Deleting));
+        return findGlobalSessions(new SessionCondition(
+                GlobalStatus.UnKnown,
+                GlobalStatus.Begin,
+                GlobalStatus.Committing,
+                GlobalStatus.CommitRetrying,
+                GlobalStatus.Rollbacking,
+                GlobalStatus.RollbackRetrying,
+                GlobalStatus.TimeoutRollbacking,
+                GlobalStatus.TimeoutRollbackRetrying,
+                GlobalStatus.AsyncCommitting,
+                GlobalStatus.StopRollbackOrRollbackRetry,
+                GlobalStatus.StopCommitOrCommitRetry,
+                GlobalStatus.Deleting));
     }
 
     @Override
@@ -150,7 +158,7 @@ public class DataBaseSessionManager extends AbstractSessionManager implements In
 
     @Override
     public <T> T lockAndExecute(GlobalSession globalSession, GlobalSession.LockCallable<T> lockCallable)
-        throws TransactionException {
+            throws TransactionException {
         return lockCallable.call();
     }
 }

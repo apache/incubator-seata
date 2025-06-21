@@ -27,26 +27,27 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-
 public class DruidIsolationTest {
-    private final static String TEST_SQL = "insert into t_table_1 values(?, ?)";
+    private static final String TEST_SQL = "insert into t_table_1 values(?, ?)";
 
     @Test
     public void testDruidIsolation() throws Exception {
-        DruidDelegatingSQLRecognizerFactory recognizerFactory = (DruidDelegatingSQLRecognizerFactory) EnhancedServiceLoader.load(SQLRecognizerFactory.class, SqlParserType.SQL_PARSER_TYPE_DRUID);
+        DruidDelegatingSQLRecognizerFactory recognizerFactory = (DruidDelegatingSQLRecognizerFactory)
+                EnhancedServiceLoader.load(SQLRecognizerFactory.class, SqlParserType.SQL_PARSER_TYPE_DRUID);
         Assertions.assertNotNull(recognizerFactory);
         List<SQLRecognizer> sqlRecognizer = recognizerFactory.create(TEST_SQL, JdbcConstants.MYSQL);
         Assertions.assertNotNull(sqlRecognizer);
         DruidLoader druidLoaderForTest = new DruidLoaderForTest();
         recognizerFactory.setClassLoader(new DruidIsolationClassLoader(druidLoaderForTest));
         // because druid-test.jar not exists, so NoClassDefFoundError should be threw
-        Assertions.assertThrows(NoClassDefFoundError.class, () -> recognizerFactory.create(TEST_SQL, JdbcConstants.MYSQL));
+        Assertions.assertThrows(
+                NoClassDefFoundError.class, () -> recognizerFactory.create(TEST_SQL, JdbcConstants.MYSQL));
     }
 
     @AfterAll
-    public static void afterClass(){
-        DruidDelegatingSQLRecognizerFactory recognizerFactory = (DruidDelegatingSQLRecognizerFactory) EnhancedServiceLoader.load(SQLRecognizerFactory.class,
-                               SqlParserType.SQL_PARSER_TYPE_DRUID);
+    public static void afterClass() {
+        DruidDelegatingSQLRecognizerFactory recognizerFactory = (DruidDelegatingSQLRecognizerFactory)
+                EnhancedServiceLoader.load(SQLRecognizerFactory.class, SqlParserType.SQL_PARSER_TYPE_DRUID);
         recognizerFactory.setClassLoader(DruidIsolationTest.class.getClassLoader());
     }
 }

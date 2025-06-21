@@ -16,14 +16,13 @@
  */
 package org.apache.seata.serializer.protobuf.convertor;
 
-import org.apache.seata.serializer.protobuf.generated.BranchReportRequestProto;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.protocol.transaction.BranchReportRequest;
+import org.apache.seata.serializer.protobuf.generated.BranchReportRequestProto;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
 
 public class BranchReportRequestConvertorTest {
 
@@ -36,8 +35,7 @@ public class BranchReportRequestConvertorTest {
         branchReportRequest.setBranchId(123);
         branchReportRequest.setResourceId("resourceId");
         branchReportRequest.setXid("xid");
-        branchReportRequest.setBranchType(
-            BranchType.AT);
+        branchReportRequest.setBranchType(BranchType.AT);
         branchReportRequest.setStatus(BranchStatus.PhaseOne_Done);
         BranchReportRequestConvertor convertor = new BranchReportRequestConvertor();
         BranchReportRequestProto proto = convertor.convert2Proto(branchReportRequest);
@@ -49,6 +47,5 @@ public class BranchReportRequestConvertorTest {
         assertThat(real.getBranchId()).isEqualTo(branchReportRequest.getBranchId());
         assertThat(real.getApplicationData()).isEqualTo(branchReportRequest.getApplicationData());
         assertThat(real.getStatus()).isEqualTo(branchReportRequest.getStatus());
-
     }
 }

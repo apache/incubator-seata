@@ -21,17 +21,16 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 
-
 class SimpleFileConfigTest {
 
     @Test
     void getString() {
         SimpleFileConfig config = new SimpleFileConfig();
         Assertions.assertEquals(File.pathSeparator, config.getString("path.separator"));
-        
+
         config = new SimpleFileConfig(new File("file.conf"), "");
         Assertions.assertEquals("default", config.getString("service.vgroupMapping.default_tx_group"));
-        
+
         config = new SimpleFileConfig(new File("src/test/resources/file"), "file:");
         Assertions.assertEquals("default", config.getString("service.vgroupMapping.default_tx_group"));
     }

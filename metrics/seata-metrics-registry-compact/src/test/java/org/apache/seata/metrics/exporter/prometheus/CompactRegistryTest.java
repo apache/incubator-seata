@@ -33,6 +33,7 @@ import static org.mockito.Mockito.when;
 public class CompactRegistryTest {
     @Mock
     private Id id;
+
     @Mock
     private Supplier<Number> supplier;
 
@@ -70,7 +71,7 @@ public class CompactRegistryTest {
         sortedMap.put("testTag", "testValue");
         when(id.getTags()).thenReturn(sortedMap.entrySet());
         when(id.getMeterKey()).thenReturn("testKey");
-        Counter counter = (Counter)compactRegistry.getCounter(id);
+        Counter counter = (Counter) compactRegistry.getCounter(id);
 
         Id id2 = new Id(id.getName()).withTag(id.getTags());
         assertEquals(id2.getName(), counter.getId().getName());
@@ -107,5 +108,4 @@ public class CompactRegistryTest {
         assertEquals(id2.getTags(), timer.getId().getTags());
         compactRegistry.clearUp();
     }
-
 }

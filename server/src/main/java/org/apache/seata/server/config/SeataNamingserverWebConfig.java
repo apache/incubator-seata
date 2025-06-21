@@ -36,5 +36,4 @@ public class SeataNamingserverWebConfig {
         registrationBean.addUrlPatterns("/api/v1/console/*", "/vgroup/v1/*");
         return registrationBean;
     }
-
 }

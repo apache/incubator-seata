@@ -30,13 +30,15 @@ import org.apache.seata.core.model.BranchType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 @Spi(scope = Scope.SINGLETON)
-@Activation(key = {MotanConstants.NODE_TYPE_SERVICE, MotanConstants.NODE_TYPE_REFERER}, sequence = 100)
+@Activation(
+        key = {MotanConstants.NODE_TYPE_SERVICE, MotanConstants.NODE_TYPE_REFERER},
+        sequence = 100)
 public class MotanTransactionFilter implements Filter {
     private static final Logger LOGGER = LoggerFactory.getLogger(MotanTransactionFilter.class);
 
-    public MotanTransactionFilter(){}
+    public MotanTransactionFilter() {}
+
     @Override
     public Response filter(final Caller<?> caller, final Request request) {
         String currentXid = RootContext.getXID();
@@ -44,7 +46,12 @@ public class MotanTransactionFilter implements Filter {
         String requestXid = getRpcXid(request);
         String rpcBranchType = getBranchType(request);
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("context in RootContext[{},{}], context in RpcContext[{},{}]", currentXid, branchType, requestXid, rpcBranchType);
+            LOGGER.debug(
+                    "context in RootContext[{},{}], context in RpcContext[{},{}]",
+                    currentXid,
+                    branchType,
+                    requestXid,
+                    rpcBranchType);
         }
         boolean bind = false;
         if (currentXid != null) {
@@ -60,7 +67,6 @@ public class MotanTransactionFilter implements Filter {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("bind [{}] to RootContext", requestXid);
             }
-
         }
         try {
             return caller.call(request);
@@ -78,7 +84,7 @@ public class MotanTransactionFilter implements Filter {
                     LOGGER.warn("xid has changed, during RPC from [{}] to [{}]", requestXid, unbindXid);
                     if (unbindXid != null) {
                         RootContext.bind(unbindXid);
-                        LOGGER.warn("bind [{}}] back to RootContext",unbindXid);
+                        LOGGER.warn("bind [{}}] back to RootContext", unbindXid);
                         if (BranchType.TCC == previousBranchType) {
                             RootContext.bindBranchType(BranchType.TCC);
                             LOGGER.warn("bind branchType [{}] back to RootContext", previousBranchType);
@@ -105,5 +111,4 @@ public class MotanTransactionFilter implements Filter {
     private String getBranchType(Request request) {
         return request.getAttachments().get(RootContext.KEY_BRANCH_TYPE);
     }
-
 }

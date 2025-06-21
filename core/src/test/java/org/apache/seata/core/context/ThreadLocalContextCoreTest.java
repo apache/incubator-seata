@@ -25,13 +25,13 @@ import static org.junit.jupiter.api.Assertions.*;
  * The type Thread local context core test.
  */
 public class ThreadLocalContextCoreTest {
-    private static ThreadLocalContextCore contextCore ;
-
+    private static ThreadLocalContextCore contextCore;
 
     @BeforeAll
     public static void setUp() {
         contextCore = new ThreadLocalContextCore();
     }
+
     @Test
     public void testPutAndGet() {
         // Test putting and getting a value

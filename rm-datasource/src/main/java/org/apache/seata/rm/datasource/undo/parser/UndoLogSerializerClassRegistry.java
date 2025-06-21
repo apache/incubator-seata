@@ -16,6 +16,15 @@
  */
 package org.apache.seata.rm.datasource.undo.parser;
 
+import com.esotericsoftware.kryo.serializers.DefaultSerializers;
+import de.javakaffee.kryoserializers.ArraysAsListSerializer;
+import de.javakaffee.kryoserializers.BitSetSerializer;
+import de.javakaffee.kryoserializers.GregorianCalendarSerializer;
+import de.javakaffee.kryoserializers.RegexSerializer;
+import de.javakaffee.kryoserializers.URISerializer;
+import de.javakaffee.kryoserializers.UUIDSerializer;
+import org.apache.seata.rm.datasource.undo.BranchUndoLog;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
@@ -37,14 +46,6 @@ import java.util.UUID;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
-import com.esotericsoftware.kryo.serializers.DefaultSerializers;
-import de.javakaffee.kryoserializers.ArraysAsListSerializer;
-import de.javakaffee.kryoserializers.BitSetSerializer;
-import de.javakaffee.kryoserializers.GregorianCalendarSerializer;
-import de.javakaffee.kryoserializers.RegexSerializer;
-import de.javakaffee.kryoserializers.URISerializer;
-import de.javakaffee.kryoserializers.UUIDSerializer;
-import org.apache.seata.rm.datasource.undo.BranchUndoLog;
 
 /**
  * Provide a unified serialization registry, this class used for {@code seata-serializer-fst}
@@ -93,7 +94,7 @@ public class UndoLogSerializerClassRegistry {
         // register branchUndoLog
         registerClass(BranchUndoLog.class);
     }
-    
+
     /**
      * only supposed to be called at startup time
      *

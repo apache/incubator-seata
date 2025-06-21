@@ -16,12 +16,6 @@
  */
 package org.apache.seata.rm.datasource.undo.mysql;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.rm.datasource.SqlGenerateUtils;
@@ -31,6 +25,12 @@ import org.apache.seata.rm.datasource.sql.struct.TableRecords;
 import org.apache.seata.rm.datasource.undo.AbstractUndoExecutor;
 import org.apache.seata.rm.datasource.undo.SQLUndoLog;
 import org.apache.seata.sqlparser.util.JdbcConstants;
+
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * The type My sql undo insert executor.
@@ -55,22 +55,23 @@ public class MySQLUndoInsertExecutor extends AbstractUndoExecutor {
         if (CollectionUtils.isEmpty(afterImageRows)) {
             throw new ShouldNeverHappenException("Invalid UNDO LOG");
         }
-        return generateDeleteSql(afterImageRows,afterImage);
+        return generateDeleteSql(afterImageRows, afterImage);
     }
 
     @Override
     protected void undoPrepare(PreparedStatement undoPST, ArrayList<Field> undoValues, List<Field> pkValueList)
             throws SQLException {
         int undoIndex = 0;
-        for (Field pkField:pkValueList) {
+        for (Field pkField : pkValueList) {
             undoIndex++;
             undoPST.setObject(undoIndex, pkField.getValue(), pkField.getType());
         }
     }
 
     private String generateDeleteSql(List<Row> rows, TableRecords afterImage) {
-        List<String> pkNameList = getOrderedPkList(afterImage, rows.get(0), JdbcConstants.MYSQL).stream().map(
-            e -> e.getName()).collect(Collectors.toList());
+        List<String> pkNameList = getOrderedPkList(afterImage, rows.get(0), JdbcConstants.MYSQL).stream()
+                .map(e -> e.getName())
+                .collect(Collectors.toList());
         String whereSql = SqlGenerateUtils.buildWhereConditionByPKs(pkNameList, JdbcConstants.MYSQL);
         return String.format(DELETE_SQL_TEMPLATE, sqlUndoLog.getTableName(), whereSql);
     }

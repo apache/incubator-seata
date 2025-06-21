@@ -18,7 +18,6 @@ package org.apache.seata.config.file;
 
 import java.util.Map;
 
-
 public interface FileConfig {
     /**
      * @param path path expression
@@ -30,5 +29,4 @@ public interface FileConfig {
      * @return the all config
      */
     Map<String, Object> getAllConfig();
-
 }

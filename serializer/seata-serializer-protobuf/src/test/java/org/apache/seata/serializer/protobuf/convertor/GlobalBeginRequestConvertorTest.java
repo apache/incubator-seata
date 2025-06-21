@@ -16,12 +16,11 @@
  */
 package org.apache.seata.serializer.protobuf.convertor;
 
-import org.apache.seata.serializer.protobuf.generated.GlobalBeginRequestProto;
 import org.apache.seata.core.protocol.transaction.GlobalBeginRequest;
+import org.apache.seata.serializer.protobuf.generated.GlobalBeginRequestProto;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
 
 public class GlobalBeginRequestConvertorTest {
 
@@ -38,6 +37,5 @@ public class GlobalBeginRequestConvertorTest {
         assertThat(real.getTypeCode()).isEqualTo(globalBeginRequest.getTypeCode());
         assertThat(real.getTimeout()).isEqualTo(globalBeginRequest.getTimeout());
         assertThat(real.getTransactionName()).isEqualTo(globalBeginRequest.getTransactionName());
-
     }
 }

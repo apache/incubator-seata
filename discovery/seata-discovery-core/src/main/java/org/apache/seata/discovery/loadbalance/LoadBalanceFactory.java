@@ -45,7 +45,6 @@ public class LoadBalanceFactory {
 
     public static final String LEAST_ACTIVE_LOAD_BALANCE = "LeastActiveLoadBalance";
 
-
     /**
      * Get instance.
      *

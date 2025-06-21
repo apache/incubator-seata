@@ -49,7 +49,7 @@ public class OscarSelectForUpdateRecognizer extends BaseOscarRecognizer implemen
      */
     public OscarSelectForUpdateRecognizer(String originalSQL, SQLStatement ast) {
         super(originalSQL);
-        this.ast = (SQLSelectStatement)ast;
+        this.ast = (SQLSelectStatement) ast;
     }
 
     @Override
@@ -58,8 +58,8 @@ public class OscarSelectForUpdateRecognizer extends BaseOscarRecognizer implemen
     }
 
     @Override
-    public String getWhereCondition(final ParametersHolder parametersHolder,
-        final ArrayList<List<Object>> paramAppenderList) {
+    public String getWhereCondition(
+            final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppenderList) {
         SQLSelectQueryBlock selectQueryBlock = getSelect();
         SQLExpr where = selectQueryBlock.getWhere();
         return super.getWhereCondition(where, parametersHolder, paramAppenderList);
@@ -74,13 +74,13 @@ public class OscarSelectForUpdateRecognizer extends BaseOscarRecognizer implemen
 
     @Override
     public String getLimitCondition() {
-        //oscar does not support limit or rownum yet
+        // oscar does not support limit or rownum yet
         return null;
     }
 
     @Override
     public String getLimitCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
-        //oscar does not support limit or rownum yet
+        // oscar does not support limit or rownum yet
         return null;
     }
 
@@ -128,7 +128,7 @@ public class OscarSelectForUpdateRecognizer extends BaseOscarRecognizer implemen
                 return false;
             }
         };
-        visitor.visit((SQLExprTableSource)tableSource);
+        visitor.visit((SQLExprTableSource) tableSource);
         return sb.toString();
     }
 

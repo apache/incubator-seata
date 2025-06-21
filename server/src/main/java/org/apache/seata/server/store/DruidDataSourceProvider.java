@@ -16,13 +16,12 @@
  */
 package org.apache.seata.server.store;
 
-import javax.sql.DataSource;
-
+import com.alibaba.druid.pool.DruidDataSource;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.loader.LoadLevel;
-import com.alibaba.druid.pool.DruidDataSource;
 import org.apache.seata.core.store.db.AbstractDataSourceProvider;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_DB_DRUID_KEEP_ALIVE;
@@ -50,13 +49,24 @@ public class DruidDataSourceProvider extends AbstractDataSourceProvider {
         ds.setMinIdle(getMinConn());
         ds.setMaxWait(getMaxWait());
 
-        long timeBetweenEvictionRunsMillis = CONFIG.getLong(ConfigurationKeys.STORE_DB_DRUID_TIME_BETWEEN_EVICTION_RUNS_MILLIS, DEFAULT_DB_DRUID_TIME_BETWEEN_EVICTION_RUNS_MILLIS);
-        ds.setTimeBetweenEvictionRunsMillis(timeBetweenEvictionRunsMillis < 0 ? DEFAULT_DB_DRUID_TIME_BETWEEN_EVICTION_RUNS_MILLIS : timeBetweenEvictionRunsMillis);
-        long minEvictableIdleTimeMillis = CONFIG.getLong(ConfigurationKeys.STORE_DB_DRUID_MIN_EVICTABLE_TIME_MILLIS, DEFAULT_DB_DRUID_MIN_EVICTABLE_TIME_MILLIS);
-        ds.setMinEvictableIdleTimeMillis(minEvictableIdleTimeMillis < 0 ? DEFAULT_DB_DRUID_MIN_EVICTABLE_TIME_MILLIS : minEvictableIdleTimeMillis);
-        boolean testWhileIdle = CONFIG.getBoolean(ConfigurationKeys.STORE_DB_DRUID_TEST_WHILE_IDLE, DEFAULT_DB_DRUID_TEST_WHILE_IDLE);
+        long timeBetweenEvictionRunsMillis = CONFIG.getLong(
+                ConfigurationKeys.STORE_DB_DRUID_TIME_BETWEEN_EVICTION_RUNS_MILLIS,
+                DEFAULT_DB_DRUID_TIME_BETWEEN_EVICTION_RUNS_MILLIS);
+        ds.setTimeBetweenEvictionRunsMillis(
+                timeBetweenEvictionRunsMillis < 0
+                        ? DEFAULT_DB_DRUID_TIME_BETWEEN_EVICTION_RUNS_MILLIS
+                        : timeBetweenEvictionRunsMillis);
+        long minEvictableIdleTimeMillis = CONFIG.getLong(
+                ConfigurationKeys.STORE_DB_DRUID_MIN_EVICTABLE_TIME_MILLIS, DEFAULT_DB_DRUID_MIN_EVICTABLE_TIME_MILLIS);
+        ds.setMinEvictableIdleTimeMillis(
+                minEvictableIdleTimeMillis < 0
+                        ? DEFAULT_DB_DRUID_MIN_EVICTABLE_TIME_MILLIS
+                        : minEvictableIdleTimeMillis);
+        boolean testWhileIdle =
+                CONFIG.getBoolean(ConfigurationKeys.STORE_DB_DRUID_TEST_WHILE_IDLE, DEFAULT_DB_DRUID_TEST_WHILE_IDLE);
         ds.setTestWhileIdle(testWhileIdle);
-        boolean testOnBorrow = CONFIG.getBoolean(ConfigurationKeys.STORE_DB_DRUID_TEST_ON_BORROW, DEFAULT_DB_DRUID_TEST_ON_BORROW);
+        boolean testOnBorrow =
+                CONFIG.getBoolean(ConfigurationKeys.STORE_DB_DRUID_TEST_ON_BORROW, DEFAULT_DB_DRUID_TEST_ON_BORROW);
         ds.setTestOnBorrow(testOnBorrow);
         boolean keepAlive = CONFIG.getBoolean(ConfigurationKeys.STORE_DB_DRUID_KEEP_ALIVE, DEFAULT_DB_DRUID_KEEP_ALIVE);
         ds.setKeepAlive(keepAlive);

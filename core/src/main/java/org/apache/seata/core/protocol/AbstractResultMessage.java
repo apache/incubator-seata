@@ -20,7 +20,7 @@ package org.apache.seata.core.protocol;
  * The type Abstract result message.
  *
  */
-public abstract class AbstractResultMessage extends AbstractMessage  {
+public abstract class AbstractResultMessage extends AbstractMessage {
 
     protected ResultCode resultCode;
 
@@ -61,5 +61,4 @@ public abstract class AbstractResultMessage extends AbstractMessage  {
     public void setMsg(String msg) {
         this.msg = msg;
     }
-
 }

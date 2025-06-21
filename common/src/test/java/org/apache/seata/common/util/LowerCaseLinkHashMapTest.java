@@ -16,12 +16,6 @@
  */
 package org.apache.seata.common.util;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,6 +23,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class LowerCaseLinkHashMapTest {
 
@@ -40,16 +39,14 @@ public class LowerCaseLinkHashMapTest {
     }
 
     @BeforeEach
-    void setUp() {
-    }
+    void setUp() {}
 
     @AfterEach
-    void tearDown() {
-    }
+    void tearDown() {}
 
     @Test
     void size() {
-        Assertions.assertEquals(2,lowerCaseLinkHashMap.size());
+        Assertions.assertEquals(2, lowerCaseLinkHashMap.size());
     }
 
     @Test
@@ -75,7 +72,7 @@ public class LowerCaseLinkHashMapTest {
 
     @Test
     void get() {
-        Assertions.assertEquals("Value",lowerCaseLinkHashMap.get("key"));
+        Assertions.assertEquals("Value", lowerCaseLinkHashMap.get("key"));
         // not exist
         Assertions.assertNull(lowerCaseLinkHashMap.get("key12"));
         Assertions.assertNull(lowerCaseLinkHashMap.get(123));
@@ -92,9 +89,9 @@ public class LowerCaseLinkHashMapTest {
         Assertions.assertNull(map.remove(123));
         map.put("keyPut", "valuePut");
         Assertions.assertEquals("valuePut", map.get("keyPut"));
-        Assertions.assertFalse( map.remove("keyPut","VALUEPUT"));
+        Assertions.assertFalse(map.remove("keyPut", "VALUEPUT"));
         Assertions.assertEquals("valuePut", map.get("keyPut"));
-        Assertions.assertTrue(map.remove("keyPut","valuePut"));
+        Assertions.assertTrue(map.remove("keyPut", "valuePut"));
         Assertions.assertNull(map.get("keyPut"));
         Assertions.assertFalse(map.remove(123, 123));
     }
@@ -121,15 +118,12 @@ public class LowerCaseLinkHashMapTest {
         List<String> values = new ArrayList<>();
         values.add("Value");
         values.add("Value2");
-        Assertions.assertArrayEquals(values.toArray(), lowerCaseLinkHashMap.values().toArray());
+        Assertions.assertArrayEquals(
+                values.toArray(), lowerCaseLinkHashMap.values().toArray());
     }
 
     @ParameterizedTest
-    @CsvSource(value = {
-            "Value, Key, abc",
-            "Value, key, abc",
-            "abc, default, abc"
-    })
+    @CsvSource(value = {"Value, Key, abc", "Value, key, abc", "abc, default, abc"})
     void getOrDefault1(String expected, String key, String defaultValue) {
         Assertions.assertEquals(expected, lowerCaseLinkHashMap.getOrDefault(key, defaultValue));
     }
@@ -169,12 +163,12 @@ public class LowerCaseLinkHashMapTest {
         Map<String, Object> map = new LowerCaseLinkHashMap<>(lowerCaseLinkHashMap);
         Object replace = map.replace("key", "replace");
         Assertions.assertEquals("Value", replace);
-        Assertions.assertEquals("replace",map.get("key"));
+        Assertions.assertEquals("replace", map.get("key"));
 
         boolean result = map.replace("key2", "value2", "replace");
         Assertions.assertFalse(result);
         Assertions.assertEquals("Value2", map.get("key2"));
-        
+
         result = map.replace("key2", "Value2", "replace");
         Assertions.assertTrue(result);
         Assertions.assertEquals("replace", map.get("key2"));
@@ -195,15 +189,15 @@ public class LowerCaseLinkHashMapTest {
     @Test
     void computeIfPresent() {
         Map<String, Object> map = new LowerCaseLinkHashMap<>(lowerCaseLinkHashMap);
-        Object result = map.computeIfPresent("key", (key,value)-> key.toUpperCase());
+        Object result = map.computeIfPresent("key", (key, value) -> key.toUpperCase());
         Assertions.assertEquals("KEY", result);
         Assertions.assertEquals("KEY", map.get("key"));
 
         result = map.computeIfPresent("key", (key, value) -> null);
         Assertions.assertNull(result);
         Assertions.assertFalse(map.containsKey("key"));
-        
-        result = map.computeIfPresent("computeIfPresent", (key,value)-> key.toUpperCase());
+
+        result = map.computeIfPresent("computeIfPresent", (key, value) -> key.toUpperCase());
         Assertions.assertNull(result);
         Assertions.assertFalse(map.containsKey("computeIfPresent"));
     }
@@ -211,7 +205,7 @@ public class LowerCaseLinkHashMapTest {
     @Test
     void compute() {
         Map<String, Object> map = new LowerCaseLinkHashMap<>(lowerCaseLinkHashMap);
-        Object result = map.compute("key", (key,value)-> key.toUpperCase());
+        Object result = map.compute("key", (key, value) -> key.toUpperCase());
         Assertions.assertEquals("KEY", result);
         Assertions.assertEquals("KEY", map.get("key"));
 
@@ -219,7 +213,7 @@ public class LowerCaseLinkHashMapTest {
         Assertions.assertNull(result);
         Assertions.assertFalse(map.containsKey("key"));
 
-        result = map.compute("compute", (key,value)-> key.toUpperCase());
+        result = map.compute("compute", (key, value) -> key.toUpperCase());
         Assertions.assertEquals("COMPUTE", result);
         Assertions.assertEquals("COMPUTE", map.get("compute"));
     }
@@ -227,7 +221,8 @@ public class LowerCaseLinkHashMapTest {
     @Test
     void merge() {
         Map<String, Object> map = new LowerCaseLinkHashMap<>(lowerCaseLinkHashMap);
-        Object result = map.merge("key", "merge",(oldValue,value)-> oldValue.toString().toUpperCase());
+        Object result = map.merge(
+                "key", "merge", (oldValue, value) -> oldValue.toString().toUpperCase());
         Assertions.assertEquals("VALUE", result);
         Assertions.assertEquals("VALUE", map.get("key"));
 
@@ -235,7 +230,8 @@ public class LowerCaseLinkHashMapTest {
         Assertions.assertNull(result);
         Assertions.assertFalse(map.containsKey("key"));
 
-        result = map.merge("compute", "merge", (oldValue, value) -> oldValue.toString().toUpperCase());
+        result = map.merge(
+                "compute", "merge", (oldValue, value) -> oldValue.toString().toUpperCase());
         Assertions.assertEquals("merge", result);
         Assertions.assertEquals("merge", map.get("compute"));
     }
@@ -263,5 +259,4 @@ public class LowerCaseLinkHashMapTest {
         map.put("toString", "toString2");
         Assertions.assertNotEquals(lowerCaseLinkHashMap.toString(), map.toString());
     }
-    
 }

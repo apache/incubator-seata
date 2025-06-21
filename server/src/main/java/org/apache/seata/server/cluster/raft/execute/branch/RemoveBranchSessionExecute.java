@@ -30,18 +30,23 @@ public class RemoveBranchSessionExecute extends AbstractRaftMsgExecute {
 
     @Override
     public Boolean execute(RaftBaseMsg syncMsg) throws Throwable {
-        RaftBranchSessionSyncMsg sessionSyncMsg = (RaftBranchSessionSyncMsg)syncMsg;
-        RaftSessionManager raftSessionManager = (RaftSessionManager) SessionHolder.getRootSessionManager(sessionSyncMsg.getGroup());
-        GlobalSession globalSession = raftSessionManager.findGlobalSession(sessionSyncMsg.getBranchSession().getXid());
+        RaftBranchSessionSyncMsg sessionSyncMsg = (RaftBranchSessionSyncMsg) syncMsg;
+        RaftSessionManager raftSessionManager =
+                (RaftSessionManager) SessionHolder.getRootSessionManager(sessionSyncMsg.getGroup());
+        GlobalSession globalSession = raftSessionManager.findGlobalSession(
+                sessionSyncMsg.getBranchSession().getXid());
         if (globalSession != null) {
-            BranchSession branchSession = globalSession.getBranch(sessionSyncMsg.getBranchSession().getBranchId());
+            BranchSession branchSession =
+                    globalSession.getBranch(sessionSyncMsg.getBranchSession().getBranchId());
             if (branchSession != null) {
                 raftLockManager.localReleaseLock(branchSession);
                 globalSession.remove(branchSession);
             }
             if (logger.isDebugEnabled()) {
-                logger.debug("removeBranch xid: {},branchId: {}", globalSession.getXid(),
-                    sessionSyncMsg.getBranchSession().getBranchId());
+                logger.debug(
+                        "removeBranch xid: {},branchId: {}",
+                        globalSession.getXid(),
+                        sessionSyncMsg.getBranchSession().getBranchId());
             }
         }
         return true;

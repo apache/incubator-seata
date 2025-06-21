@@ -17,6 +17,7 @@
 package org.apache.seata.core.rpc;
 
 import io.netty.channel.ChannelHandlerContext;
+import org.apache.commons.lang.StringUtils;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.core.protocol.AbstractMessage;
@@ -31,7 +32,6 @@ import org.apache.seata.core.protocol.RegisterTMResponse;
 import org.apache.seata.core.protocol.RpcMessage;
 import org.apache.seata.core.protocol.Version;
 import org.apache.seata.core.rpc.netty.ChannelManager;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,12 +73,16 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
         Object message = request.getBody();
         RpcContext rpcContext = ChannelManager.getContextFromIdentified(ctx.channel());
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("server received:{},clientIp:{},vgroup:{}", message,
-                NetUtil.toIpAddress(ctx.channel().remoteAddress()), rpcContext.getTransactionServiceGroup());
+            LOGGER.debug(
+                    "server received:{},clientIp:{},vgroup:{}",
+                    message,
+                    NetUtil.toIpAddress(ctx.channel().remoteAddress()),
+                    rpcContext.getTransactionServiceGroup());
         } else {
             try {
-                logQueue.put(message + ",clientIp:" + NetUtil.toIpAddress(ctx.channel().remoteAddress()) + ",vgroup:"
-                    + rpcContext.getTransactionServiceGroup());
+                logQueue.put(message + ",clientIp:"
+                        + NetUtil.toIpAddress(ctx.channel().remoteAddress()) + ",vgroup:"
+                        + rpcContext.getTransactionServiceGroup());
             } catch (InterruptedException e) {
                 LOGGER.error("put message to logQueue error: {}", e.getMessage(), e);
             }
@@ -106,8 +110,9 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
     }
 
     @Override
-    public void onRegRmMessage(RpcMessage request, ChannelHandlerContext ctx, RegisterCheckAuthHandler checkAuthHandler) {
-        RegisterRMRequest message = (RegisterRMRequest)request.getBody();
+    public void onRegRmMessage(
+            RpcMessage request, ChannelHandlerContext ctx, RegisterCheckAuthHandler checkAuthHandler) {
+        RegisterRMRequest message = (RegisterRMRequest) request.getBody();
         String ipAndPort = NetUtil.toStringAddress(ctx.channel().remoteAddress());
         boolean isSuccess = false;
         String errorInfo = StringUtils.EMPTY;
@@ -117,7 +122,11 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
                 Version.putChannelVersion(ctx.channel(), message.getVersion());
                 isSuccess = true;
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("checkAuth for client:{},vgroup:{},applicationId:{} is OK", ipAndPort, message.getTransactionServiceGroup(), message.getApplicationId());
+                    LOGGER.debug(
+                            "checkAuth for client:{},vgroup:{},applicationId:{} is OK",
+                            ipAndPort,
+                            message.getTransactionServiceGroup(),
+                            message.getApplicationId());
                 }
             }
         } catch (Exception exx) {
@@ -131,14 +140,18 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
         }
         getServerMessageSender().sendAsyncResponse(request, ctx.channel(), response);
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("RM register success,message:{},channel:{},client version:{}", message, ctx.channel(),
-                message.getVersion());
+            LOGGER.info(
+                    "RM register success,message:{},channel:{},client version:{}",
+                    message,
+                    ctx.channel(),
+                    message.getVersion());
         }
     }
 
     @Override
-    public void onRegTmMessage(RpcMessage request, ChannelHandlerContext ctx, RegisterCheckAuthHandler checkAuthHandler) {
-        RegisterTMRequest message = (RegisterTMRequest)request.getBody();
+    public void onRegTmMessage(
+            RpcMessage request, ChannelHandlerContext ctx, RegisterCheckAuthHandler checkAuthHandler) {
+        RegisterTMRequest message = (RegisterTMRequest) request.getBody();
         String ipAndPort = NetUtil.toStringAddress(ctx.channel().remoteAddress());
         Version.putChannelVersion(ctx.channel(), message.getVersion());
         boolean isSuccess = false;
@@ -149,7 +162,11 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
                 Version.putChannelVersion(ctx.channel(), message.getVersion());
                 isSuccess = true;
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("checkAuth for client:{},vgroup:{},applicationId:{} is OK", ipAndPort, message.getTransactionServiceGroup(), message.getApplicationId());
+                    LOGGER.debug(
+                            "checkAuth for client:{},vgroup:{},applicationId:{} is OK",
+                            ipAndPort,
+                            message.getTransactionServiceGroup(),
+                            message.getApplicationId());
                 }
             }
         } catch (Exception exx) {
@@ -163,8 +180,11 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
         }
         getServerMessageSender().sendAsyncResponse(request, ctx.channel(), response);
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("TM register success,message:{},channel:{},client version:{}", message, ctx.channel(),
-                message.getVersion());
+            LOGGER.info(
+                    "TM register success,message:{},channel:{},client version:{}",
+                    message,
+                    ctx.channel(),
+                    message.getVersion());
         }
     }
 
@@ -184,9 +204,13 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
      * Init.
      */
     public void init() {
-        ExecutorService mergeSendExecutorService = new ThreadPoolExecutor(MAX_LOG_SEND_THREAD, MAX_LOG_SEND_THREAD,
-            KEEP_ALIVE_TIME, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(),
-            new NamedThreadFactory(THREAD_PREFIX, MAX_LOG_SEND_THREAD, true));
+        ExecutorService mergeSendExecutorService = new ThreadPoolExecutor(
+                MAX_LOG_SEND_THREAD,
+                MAX_LOG_SEND_THREAD,
+                KEEP_ALIVE_TIME,
+                TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<Runnable>(),
+                new NamedThreadFactory(THREAD_PREFIX, MAX_LOG_SEND_THREAD, true));
         mergeSendExecutorService.submit(new BatchLogRunnable());
     }
 
@@ -233,9 +257,7 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
                 } catch (InterruptedException exx) {
                     LOGGER.error("batch log busy sleep error:{}", exx.getMessage(), exx);
                 }
-
             }
         }
     }
-
 }

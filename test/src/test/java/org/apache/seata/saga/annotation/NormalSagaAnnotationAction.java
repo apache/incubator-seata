@@ -25,7 +25,6 @@ import java.util.List;
  */
 public interface NormalSagaAnnotationAction {
 
-
     boolean commit(BusinessActionContext actionContext, int a, List b, SagaParam sagaParam);
 
     /**

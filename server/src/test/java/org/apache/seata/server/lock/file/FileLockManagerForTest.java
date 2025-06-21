@@ -17,9 +17,9 @@
 package org.apache.seata.server.lock.file;
 
 import org.apache.seata.core.lock.Locker;
+import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.storage.file.lock.FileLockManager;
 import org.apache.seata.server.storage.file.lock.FileLocker;
-import org.apache.seata.server.session.BranchSession;
 
 /**
  */

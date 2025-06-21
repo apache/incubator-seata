@@ -28,5 +28,4 @@ public abstract class AbstractTransactionRequestToTCCodec extends AbstractTransa
     public Class<?> getMessageClassType() {
         return AbstractTransactionRequestToTC.class;
     }
-
 }

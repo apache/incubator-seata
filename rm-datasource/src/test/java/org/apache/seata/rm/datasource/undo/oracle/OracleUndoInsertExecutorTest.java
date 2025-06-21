@@ -17,11 +17,11 @@
 package org.apache.seata.rm.datasource.undo.oracle;
 
 import org.apache.seata.rm.datasource.sql.struct.Row;
-import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
 import org.apache.seata.rm.datasource.undo.BaseExecutorTest;
 import org.apache.seata.rm.datasource.undo.SQLUndoLog;
 import org.apache.seata.sqlparser.SQLType;
+import org.apache.seata.sqlparser.struct.TableMeta;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -29,7 +29,6 @@ import org.mockito.Mockito;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 
 public class OracleUndoInsertExecutorTest extends BaseExecutorTest {
 
@@ -51,7 +50,7 @@ public class OracleUndoInsertExecutorTest extends BaseExecutorTest {
 
     public OracleUndoInsertExecutor upperCase() {
         TableMeta tableMeta = Mockito.mock(TableMeta.class);
-        Mockito.when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{"ID"}));
+        Mockito.when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[] {"ID"}));
         Mockito.when(tableMeta.getTableName()).thenReturn("TABLE_NAME");
 
         TableRecords beforeImage = new TableRecords();
@@ -91,5 +90,4 @@ public class OracleUndoInsertExecutorTest extends BaseExecutorTest {
 
         return new OracleUndoInsertExecutor(sqlUndoLog);
     }
-
 }

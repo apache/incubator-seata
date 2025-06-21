@@ -27,8 +27,7 @@ public class ClusterBO {
         this.unitNames = unitNames;
     }
 
-    public ClusterBO() {
-    }
+    public ClusterBO() {}
 
     public Set<String> getUnitNames() {
         return unitNames;

@@ -16,18 +16,7 @@
  */
 package org.apache.seata.rm.datasource.undo.polardbx;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-
 import com.alibaba.druid.pool.DruidDataSource;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
@@ -54,6 +43,16 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+
 /**
  * Undo log manager test for PolarDB-X
  *
@@ -61,16 +60,53 @@ import org.junit.jupiter.api.Test;
 public class PolarDBXUndoLogManagerTest {
 
     List<String> returnValueColumnLabels = Lists.newArrayList("log_status");
-    Object[][] returnValue = new Object[][]{
-            new Object[]{1},
-            new Object[]{2},
+    Object[][] returnValue = new Object[][] {
+        new Object[] {1}, new Object[] {2},
     };
-    Object[][] columnMetas = new Object[][]{
-            new Object[]{"", "", "table_plain_executor_test", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
-            new Object[]{"", "", "table_plain_executor_test", "name", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
+    Object[][] columnMetas = new Object[][] {
+        new Object[] {
+            "",
+            "",
+            "table_plain_executor_test",
+            "id",
+            Types.INTEGER,
+            "INTEGER",
+            64,
+            0,
+            10,
+            1,
+            "",
+            "",
+            0,
+            0,
+            64,
+            1,
+            "NO",
+            "YES"
+        },
+        new Object[] {
+            "",
+            "",
+            "table_plain_executor_test",
+            "name",
+            Types.VARCHAR,
+            "VARCHAR",
+            64,
+            0,
+            10,
+            0,
+            "",
+            "",
+            0,
+            0,
+            64,
+            2,
+            "YES",
+            "NO"
+        },
     };
-    Object[][] indexMetas = new Object[][]{
-            new Object[]{"PRIMARY", "id", false, "", 3, 1, "A", 34},
+    Object[][] indexMetas = new Object[][] {
+        new Object[] {"PRIMARY", "id", false, "", 3, 1, "A", 34},
     };
 
     private DruidDataSource dataSource;
@@ -85,7 +121,9 @@ public class PolarDBXUndoLogManagerTest {
 
     @BeforeAll
     public static void setup() {
-        EnhancedServiceLoader.load(SQLOperateRecognizerHolder.class, JdbcConstants.POLARDBX,
+        EnhancedServiceLoader.load(
+                SQLOperateRecognizerHolder.class,
+                JdbcConstants.POLARDBX,
                 SQLOperateRecognizerHolderFactory.class.getClassLoader());
     }
 
@@ -97,7 +135,8 @@ public class PolarDBXUndoLogManagerTest {
         dataSource.setDriver(mockDriver);
 
         dataSourceProxy = DataSourceProxyTest.getDataSourceProxy(dataSource);
-        connectionProxy = new ConnectionProxy(dataSourceProxy, dataSource.getConnection().getConnection());
+        connectionProxy =
+                new ConnectionProxy(dataSourceProxy, dataSource.getConnection().getConnection());
         undoLogManager = new PolarDBXUndoLogManager();
         tableMeta = new TableMeta();
         tableMeta.setTableName("table_plain_executor_test");
@@ -105,16 +144,20 @@ public class PolarDBXUndoLogManagerTest {
 
     @Test
     public void testDeleteUndoLogByLogCreated() throws SQLException {
-        Assertions.assertEquals(0, undoLogManager.deleteUndoLogByLogCreated(new Date(), 3000, dataSource.getConnection()));
-        Assertions.assertDoesNotThrow(() -> undoLogManager.deleteUndoLogByLogCreated(new Date(), 3000, connectionProxy));
+        Assertions.assertEquals(
+                0, undoLogManager.deleteUndoLogByLogCreated(new Date(), 3000, dataSource.getConnection()));
+        Assertions.assertDoesNotThrow(
+                () -> undoLogManager.deleteUndoLogByLogCreated(new Date(), 3000, connectionProxy));
     }
 
     @Test
     public void testInsertUndoLog() {
-        Assertions.assertDoesNotThrow(() -> undoLogManager.insertUndoLogWithGlobalFinished("xid", 1L, new JacksonUndoLogParser(),
-                dataSource.getConnection()));
-        Assertions.assertDoesNotThrow(() -> undoLogManager.insertUndoLogWithNormal("xid", 1L, "", new byte[]{}, dataSource.getConnection()));
-        Assertions.assertDoesNotThrow(() -> undoLogManager.deleteUndoLogByLogCreated(new Date(), 3000, connectionProxy));
+        Assertions.assertDoesNotThrow(() -> undoLogManager.insertUndoLogWithGlobalFinished(
+                "xid", 1L, new JacksonUndoLogParser(), dataSource.getConnection()));
+        Assertions.assertDoesNotThrow(
+                () -> undoLogManager.insertUndoLogWithNormal("xid", 1L, "", new byte[] {}, dataSource.getConnection()));
+        Assertions.assertDoesNotThrow(
+                () -> undoLogManager.deleteUndoLogByLogCreated(new Date(), 3000, connectionProxy));
     }
 
     @Test
@@ -133,12 +176,15 @@ public class PolarDBXUndoLogManagerTest {
 
     @Test
     public void testBatchDeleteUndoLog() {
-        Assertions.assertDoesNotThrow(() -> undoLogManager.batchDeleteUndoLog(Sets.newHashSet("xid"), Sets.newHashSet(1L), dataSource.getConnection()));
-        Assertions.assertDoesNotThrow(() -> undoLogManager.batchDeleteUndoLog(Sets.newHashSet("xid"), Sets.newHashSet(1L), connectionProxy));
+        Assertions.assertDoesNotThrow(() -> undoLogManager.batchDeleteUndoLog(
+                Sets.newHashSet("xid"), Sets.newHashSet(1L), dataSource.getConnection()));
+        Assertions.assertDoesNotThrow(
+                () -> undoLogManager.batchDeleteUndoLog(Sets.newHashSet("xid"), Sets.newHashSet(1L), connectionProxy));
     }
 
     @Test
-    public void testFlushUndoLogs() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, NoSuchFieldException {
+    public void testFlushUndoLogs()
+            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, NoSuchFieldException {
         connectionProxy.bind("xid");
         ConnectionContext context = connectionProxy.getContext();
         Method method = context.getClass().getDeclaredMethod("setBranchId", Long.class);
@@ -155,7 +201,8 @@ public class PolarDBXUndoLogManagerTest {
     }
 
     @Test
-    public void testNeedCompress() throws NoSuchFieldException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+    public void testNeedCompress()
+            throws NoSuchFieldException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         SQLUndoLog smallUndoItem = getUndoLogItem(1);
         BranchUndoLog smallBranchUndoLog = new BranchUndoLog();
         smallBranchUndoLog.setBranchId(1L);

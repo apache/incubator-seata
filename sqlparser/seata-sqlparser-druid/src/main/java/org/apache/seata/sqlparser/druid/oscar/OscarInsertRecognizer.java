@@ -56,7 +56,7 @@ public class OscarInsertRecognizer extends BaseOscarRecognizer implements SQLIns
      */
     public OscarInsertRecognizer(String originalSQL, SQLStatement ast) {
         super(originalSQL);
-        this.ast = (SQLInsertStatement)ast;
+        this.ast = (SQLInsertStatement) ast;
     }
 
     @Override
@@ -99,7 +99,7 @@ public class OscarInsertRecognizer extends BaseOscarRecognizer implements SQLIns
         List<String> list = new ArrayList<>(columnSQLExprs.size());
         for (SQLExpr expr : columnSQLExprs) {
             if (expr instanceof SQLIdentifierExpr) {
-                list.add(((SQLIdentifierExpr)expr).getName());
+                list.add(((SQLIdentifierExpr) expr).getName());
             } else {
                 wrapSQLParsingException(expr);
             }

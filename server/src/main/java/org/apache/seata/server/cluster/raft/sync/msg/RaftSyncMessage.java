@@ -33,9 +33,9 @@ public class RaftSyncMessage implements java.io.Serializable {
     private static final long serialVersionUID = 8225279734319945365L;
     private byte codec = SerializerType.getByName(DEFAULT_RAFT_SERIALIZATION).getCode();
 
-    private byte compressor = CompressorType
-        .getByName(ConfigurationFactory.getInstance().getConfig(SERVER_RAFT_COMPRESSOR, DEFAULT_RAFT_COMPRESSOR))
-        .getCode();
+    private byte compressor = CompressorType.getByName(
+                    ConfigurationFactory.getInstance().getConfig(SERVER_RAFT_COMPRESSOR, DEFAULT_RAFT_COMPRESSOR))
+            .getCode();
 
     private Object body;
 
@@ -111,5 +111,4 @@ public class RaftSyncMessage implements java.io.Serializable {
     public String toString() {
         return StringUtils.toString(this);
     }
-
 }

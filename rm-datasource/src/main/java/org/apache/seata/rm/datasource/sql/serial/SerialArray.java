@@ -42,18 +42,16 @@ public class SerialArray implements java.sql.Array, java.io.Serializable {
     private String baseTypeName;
     private int len;
 
-    public SerialArray() {
-    }
+    public SerialArray() {}
 
     public SerialArray(java.sql.Array array) throws SerialException, SQLException {
         if (array == null) {
-            throw new SQLException("Cannot instantiate a SerialArray " +
-                    "object with a null Array object");
+            throw new SQLException("Cannot instantiate a SerialArray " + "object with a null Array object");
         }
 
         if ((elements = (Object[]) array.getArray()) == null) {
-            throw new SQLException("Invalid Array object. Calls to Array.getArray() " +
-                    "return null value which cannot be serialized");
+            throw new SQLException("Invalid Array object. Calls to Array.getArray() "
+                    + "return null value which cannot be serialized");
         }
 
         baseType = array.getBaseType();
@@ -173,17 +171,15 @@ public class SerialArray implements java.sql.Array, java.io.Serializable {
 
         if (obj instanceof SerialArray) {
             SerialArray sa = (SerialArray) obj;
-            return baseType == sa.baseType &&
-                    baseTypeName.equals(sa.baseTypeName) &&
-                    Arrays.equals(elements, sa.elements);
+            return baseType == sa.baseType
+                    && baseTypeName.equals(sa.baseTypeName)
+                    && Arrays.equals(elements, sa.elements);
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return (((31 + Arrays.hashCode(elements)) * 31 + len) * 31 +
-                baseType) * 31 + baseTypeName.hashCode();
+        return (((31 + Arrays.hashCode(elements)) * 31 + len) * 31 + baseType) * 31 + baseTypeName.hashCode();
     }
-
 }

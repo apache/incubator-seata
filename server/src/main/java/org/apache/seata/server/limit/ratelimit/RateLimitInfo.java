@@ -53,11 +53,10 @@ public class RateLimitInfo {
      */
     private String serverIpAddressAndPort;
 
-    private RateLimitInfo() {
-    }
+    private RateLimitInfo() {}
 
-    public static RateLimitInfo generateRateLimitInfo(String applicationId, String type,
-                                                      String clientId, String serverIpAddressAndPort) {
+    public static RateLimitInfo generateRateLimitInfo(
+            String applicationId, String type, String clientId, String serverIpAddressAndPort) {
         RateLimitInfo rateLimitInfo = new RateLimitInfo();
         rateLimitInfo.setTraceId(String.valueOf(UUIDGenerator.generateUUID()));
         rateLimitInfo.setLimitType(type);
@@ -109,12 +108,11 @@ public class RateLimitInfo {
 
     @Override
     public String toString() {
-        return "RateLimitInfo{" +
-                "traceId='" + traceId + '\'' +
-                ", limitType='" + limitType + '\'' +
-                ", applicationId='" + applicationId + '\'' +
-                ", clientId='" + clientId + '\'' +
-                ", serverIpAddressAndPort='" + serverIpAddressAndPort + '\'' +
-                '}';
+        return "RateLimitInfo{" + "traceId='"
+                + traceId + '\'' + ", limitType='"
+                + limitType + '\'' + ", applicationId='"
+                + applicationId + '\'' + ", clientId='"
+                + clientId + '\'' + ", serverIpAddressAndPort='"
+                + serverIpAddressAndPort + '\'' + '}';
     }
 }

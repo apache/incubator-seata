@@ -18,7 +18,6 @@ package org.apache.seata.core.protocol.transaction;
 
 import org.apache.seata.core.protocol.MessageType;
 
-
 /**
  * The type Global lock query response.
  *

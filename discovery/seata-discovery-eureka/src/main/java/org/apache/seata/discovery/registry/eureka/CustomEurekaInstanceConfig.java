@@ -16,9 +16,9 @@
  */
 package org.apache.seata.discovery.registry.eureka;
 
-import org.apache.seata.common.util.StringUtils;
 import com.netflix.appinfo.EurekaInstanceConfig;
 import com.netflix.appinfo.MyDataCenterInstanceConfig;
+import org.apache.seata.common.util.StringUtils;
 
 /**
  * override MyDataCenterInstanceConfig for set value,

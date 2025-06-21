@@ -16,15 +16,15 @@
  */
 package org.apache.seata.rm.datasource.undo.polardbx;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.seata.rm.datasource.sql.struct.Field;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
 import org.apache.seata.rm.datasource.undo.SQLUndoLog;
 import org.apache.seata.rm.datasource.undo.mysql.MySQLUndoInsertExecutor;
+
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Undo insert executor for PolarDB-X

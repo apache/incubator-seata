@@ -19,7 +19,6 @@ package org.apache.seata.core.message;
 import org.apache.seata.core.protocol.MessageType;
 import org.apache.seata.core.protocol.RegisterTMResponse;
 import org.apache.seata.core.protocol.ResultCode;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -39,7 +38,8 @@ public class RegisterTMResponseTest {
         registerTMResponse.setVersion("1");
         registerTMResponse.setIdentified(true);
         registerTMResponse.setResultCode(ResultCode.Success);
-        Assertions.assertEquals("RegisterTMResponse{version='1', extraData='null', identified=true, resultCode=Success, msg='null'}",
+        Assertions.assertEquals(
+                "RegisterTMResponse{version='1', extraData='null', identified=true, resultCode=Success, msg='null'}",
                 registerTMResponse.toString());
     }
 

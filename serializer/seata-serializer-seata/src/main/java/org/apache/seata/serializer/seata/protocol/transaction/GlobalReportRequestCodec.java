@@ -37,12 +37,12 @@ public class GlobalReportRequestCodec extends AbstractGlobalEndRequestCodec {
     public <T> void encode(T t, ByteBuf out) {
         super.encode(t, out);
 
-        GlobalReportRequest reportRequest = (GlobalReportRequest)t;
+        GlobalReportRequest reportRequest = (GlobalReportRequest) t;
         GlobalStatus globalStatus = reportRequest.getGlobalStatus();
         if (globalStatus != null) {
-            out.writeByte((byte)globalStatus.getCode());
+            out.writeByte((byte) globalStatus.getCode());
         } else {
-            out.writeByte((byte)-1);
+            out.writeByte((byte) -1);
         }
     }
 
@@ -50,7 +50,7 @@ public class GlobalReportRequestCodec extends AbstractGlobalEndRequestCodec {
     public <T> void decode(T t, ByteBuffer in) {
         super.decode(t, in);
 
-        GlobalReportRequest reportRequest = (GlobalReportRequest)t;
+        GlobalReportRequest reportRequest = (GlobalReportRequest) t;
         byte b = in.get();
         if (b > -1) {
             reportRequest.setGlobalStatus(GlobalStatus.get(b));

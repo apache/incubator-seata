@@ -69,8 +69,7 @@ public class NettyClientBootstrap implements RemotingBootstrap {
     private final EventLoopGroup eventLoopGroupWorker;
     private ChannelHandler[] channelHandlers;
 
-    public NettyClientBootstrap(NettyClientConfig nettyClientConfig,
-                                NettyPoolKey.TransactionRole transactionRole) {
+    public NettyClientBootstrap(NettyClientConfig nettyClientConfig, NettyPoolKey.TransactionRole transactionRole) {
         if (nettyClientConfig == null) {
             nettyClientConfig = new NettyClientConfig();
             if (LOGGER.isInfoEnabled()) {
@@ -117,12 +116,14 @@ public class NettyClientBootstrap implements RemotingBootstrap {
 
     @Override
     public void start() {
-        this.bootstrap.group(eventLoopGroupWorker).channel(
-            nettyClientConfig.getClientChannelClazz()).option(
-            ChannelOption.TCP_NODELAY, true).option(ChannelOption.SO_KEEPALIVE, true).option(
-            ChannelOption.CONNECT_TIMEOUT_MILLIS, nettyClientConfig.getConnectTimeoutMillis()).option(
-            ChannelOption.SO_SNDBUF, nettyClientConfig.getClientSocketSndBufSize()).option(ChannelOption.SO_RCVBUF,
-            nettyClientConfig.getClientSocketRcvBufSize());
+        this.bootstrap
+                .group(eventLoopGroupWorker)
+                .channel(nettyClientConfig.getClientChannelClazz())
+                .option(ChannelOption.TCP_NODELAY, true)
+                .option(ChannelOption.SO_KEEPALIVE, true)
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, nettyClientConfig.getConnectTimeoutMillis())
+                .option(ChannelOption.SO_SNDBUF, nettyClientConfig.getClientSocketSndBufSize())
+                .option(ChannelOption.SO_RCVBUF, nettyClientConfig.getClientSocketRcvBufSize());
 
         if (nettyClientConfig.enableNative()) {
             if (PlatformDependent.isOsx()) {
@@ -130,31 +131,31 @@ public class NettyClientBootstrap implements RemotingBootstrap {
                     LOGGER.info("client run on macOS");
                 }
             } else {
-                bootstrap.option(EpollChannelOption.EPOLL_MODE, EpollMode.EDGE_TRIGGERED)
-                    .option(EpollChannelOption.TCP_QUICKACK, true);
+                bootstrap
+                        .option(EpollChannelOption.EPOLL_MODE, EpollMode.EDGE_TRIGGERED)
+                        .option(EpollChannelOption.TCP_QUICKACK, true);
             }
         }
 
-        bootstrap.handler(
-            new ChannelInitializer<SocketChannel>() {
-                @Override
-                public void initChannel(SocketChannel ch) {
-                    ChannelPipeline pipeline = ch.pipeline();
-                    if (nettyClientConfig.getProtocol().equals(Protocol.GRPC.value)) {
-                        pipeline.addLast(Http2FrameCodecBuilder.forClient().build())
-                                .addLast(new Http2MultiplexHandler(new ChannelDuplexHandler()));
-                    } else {
-                        pipeline.addLast(new IdleStateHandler(nettyClientConfig.getChannelMaxReadIdleSeconds(),
-                                nettyClientConfig.getChannelMaxWriteIdleSeconds(),
-                                nettyClientConfig.getChannelMaxAllIdleSeconds()));
-                        pipeline.addLast(new ProtocolDecoderV1())
-                                .addLast(new ProtocolEncoderV1());
-                        if (channelHandlers != null) {
-                            addChannelPipelineLast(ch, channelHandlers);
-                        }
+        bootstrap.handler(new ChannelInitializer<SocketChannel>() {
+            @Override
+            public void initChannel(SocketChannel ch) {
+                ChannelPipeline pipeline = ch.pipeline();
+                if (nettyClientConfig.getProtocol().equals(Protocol.GRPC.value)) {
+                    pipeline.addLast(Http2FrameCodecBuilder.forClient().build())
+                            .addLast(new Http2MultiplexHandler(new ChannelDuplexHandler()));
+                } else {
+                    pipeline.addLast(new IdleStateHandler(
+                            nettyClientConfig.getChannelMaxReadIdleSeconds(),
+                            nettyClientConfig.getChannelMaxWriteIdleSeconds(),
+                            nettyClientConfig.getChannelMaxAllIdleSeconds()));
+                    pipeline.addLast(new ProtocolDecoderV1()).addLast(new ProtocolEncoderV1());
+                    if (channelHandlers != null) {
+                        addChannelPipelineLast(ch, channelHandlers);
                     }
                 }
-            });
+            }
+        });
 
         if (initialized.compareAndSet(false, true) && LOGGER.isInfoEnabled()) {
             LOGGER.info("NettyClientBootstrap has started");
@@ -195,9 +196,11 @@ public class NettyClientBootstrap implements RemotingBootstrap {
                     @Override
                     public void handlerAdded(ChannelHandlerContext ctx) {
                         Channel channel = ctx.channel();
-                        channel.pipeline().addLast(new IdleStateHandler(nettyClientConfig.getChannelMaxReadIdleSeconds(),
-                                nettyClientConfig.getChannelMaxWriteIdleSeconds(),
-                                nettyClientConfig.getChannelMaxAllIdleSeconds()));
+                        channel.pipeline()
+                                .addLast(new IdleStateHandler(
+                                        nettyClientConfig.getChannelMaxReadIdleSeconds(),
+                                        nettyClientConfig.getChannelMaxWriteIdleSeconds(),
+                                        nettyClientConfig.getChannelMaxAllIdleSeconds()));
                         channel.pipeline().addLast(new GrpcDecoder());
                         channel.pipeline().addLast(new GrpcEncoder());
                         if (channelHandlers != null) {
@@ -234,13 +237,17 @@ public class NettyClientBootstrap implements RemotingBootstrap {
 
     private EventLoopGroup createEventLoopGroupWorker(int selectorThreadSizeThreadSize) {
         if (NettyServerConfig.enableEpoll()) {
-            return new EpollEventLoopGroup(selectorThreadSizeThreadSize,
-                new NamedThreadFactory(getThreadPrefix(this.nettyClientConfig.getClientSelectorThreadPrefix()),
-                    selectorThreadSizeThreadSize));
+            return new EpollEventLoopGroup(
+                    selectorThreadSizeThreadSize,
+                    new NamedThreadFactory(
+                            getThreadPrefix(this.nettyClientConfig.getClientSelectorThreadPrefix()),
+                            selectorThreadSizeThreadSize));
         }
 
-        return new NioEventLoopGroup(selectorThreadSizeThreadSize,
-            new NamedThreadFactory(getThreadPrefix(this.nettyClientConfig.getClientSelectorThreadPrefix()),
-                selectorThreadSizeThreadSize));
+        return new NioEventLoopGroup(
+                selectorThreadSizeThreadSize,
+                new NamedThreadFactory(
+                        getThreadPrefix(this.nettyClientConfig.getClientSelectorThreadPrefix()),
+                        selectorThreadSizeThreadSize));
     }
 }

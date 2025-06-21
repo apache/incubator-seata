@@ -54,8 +54,7 @@ public class ConfigBeansScannerCheckerTest {
                 // Bean names containing but not ending with Properties should return true
                 Arguments.of("PropertiesTest", true),
                 // Bean names containing but not ending with Config should return true
-                Arguments.of("ConfigTest", true)
-        );
+                Arguments.of("ConfigTest", true));
     }
 
     /**
@@ -85,4 +84,4 @@ public class ConfigBeansScannerCheckerTest {
         Assertions.assertFalse(doCheck("applicationProperties"));
         Assertions.assertFalse(doCheck("serverConfig"));
     }
-} 
+}

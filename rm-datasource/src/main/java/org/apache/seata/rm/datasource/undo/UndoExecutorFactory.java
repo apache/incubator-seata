@@ -46,7 +46,7 @@ public class UndoExecutorFactory {
                 result = holder.getDeleteExecutor(sqlUndoLog);
                 break;
             default:
-                throw new NotSupportYetException(String.format("sql type: %s not support",sqlUndoLog.getSqlType()));
+                throw new NotSupportYetException(String.format("sql type: %s not support", sqlUndoLog.getSqlType()));
         }
         return result;
     }

@@ -16,12 +16,13 @@
  */
 package org.apache.seata.server.session;
 
-import java.util.Collection;
-import java.util.List;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.rpc.Disposable;
+
+import java.util.Collection;
+import java.util.List;
 
 /**
  * The interface Session manager.
@@ -43,7 +44,7 @@ public interface SessionManager extends Disposable {
      * @param xid the xid
      * @return the global session
      */
-    GlobalSession findGlobalSession(String xid) ;
+    GlobalSession findGlobalSession(String xid);
 
     /**
      * Find global session global session.

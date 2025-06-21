@@ -52,10 +52,7 @@ public class HttpDetector implements ProtocolDetector {
 
     @Override
     public ChannelHandler[] getHandlers() {
-        return new ChannelHandler[]{
-            new HttpServerCodec(),
-            new HttpObjectAggregator(1048576),
-            new HttpDispatchHandler()
+        return new ChannelHandler[] {new HttpServerCodec(), new HttpObjectAggregator(1048576), new HttpDispatchHandler()
         };
     }
 }

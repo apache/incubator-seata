@@ -37,13 +37,16 @@ import java.lang.reflect.Method;
  * The RemoteProcessor deal.
  *
  */
-public class RemotingProcessorProcessInterceptor implements
-        InstanceMethodsAroundInterceptor {
+public class RemotingProcessorProcessInterceptor implements InstanceMethodsAroundInterceptor {
 
     @Override
-    public void beforeMethod(EnhancedInstance objInst, Method method,
-                             Object[] allArguments, Class<?>[] argumentsTypes,
-                             MethodInterceptResult result) throws Throwable {
+    public void beforeMethod(
+            EnhancedInstance objInst,
+            Method method,
+            Object[] allArguments,
+            Class<?>[] argumentsTypes,
+            MethodInterceptResult result)
+            throws Throwable {
         RpcMessage rpcMessage = (RpcMessage) allArguments[1];
         String operationName = SWSeataUtils.convertOperationName(rpcMessage);
         ContextCarrier contextCarrier = new ContextCarrier();
@@ -63,9 +66,9 @@ public class RemotingProcessorProcessInterceptor implements
     }
 
     @Override
-    public Object afterMethod(EnhancedInstance objInst, Method method,
-                              Object[] allArguments, Class<?>[] argumentsTypes,
-                              Object ret) throws Throwable {
+    public Object afterMethod(
+            EnhancedInstance objInst, Method method, Object[] allArguments, Class<?>[] argumentsTypes, Object ret)
+            throws Throwable {
         RpcMessage rpcMessage = (RpcMessage) allArguments[0];
         if (rpcMessage.getBody() instanceof AbstractMessage) {
             ContextManager.stopSpan();
@@ -74,8 +77,6 @@ public class RemotingProcessorProcessInterceptor implements
     }
 
     @Override
-    public void handleMethodException(EnhancedInstance objInst,
-                                      Method method, Object[] allArguments,
-                                      Class<?>[] argumentsTypes, Throwable t) {
-    }
+    public void handleMethodException(
+            EnhancedInstance objInst, Method method, Object[] allArguments, Class<?>[] argumentsTypes, Throwable t) {}
 }

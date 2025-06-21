@@ -16,7 +16,6 @@
  */
 package org.apache.seata.saga.annotation;
 
-
 import org.apache.seata.core.model.BranchType;
 
 public class BranchSessionMock {
@@ -29,12 +28,9 @@ public class BranchSessionMock {
 
     private String resourceId;
 
-
     private BranchType branchType;
 
-
     private String applicationData;
-
 
     public String getXid() {
         return xid;

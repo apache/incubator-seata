@@ -16,7 +16,6 @@
  */
 package org.apache.seata.serializer.seata.protocol.transaction;
 
-
 import org.apache.seata.core.protocol.transaction.BranchRollbackResponse;
 
 /**
@@ -29,5 +28,4 @@ public class BranchRollbackResponseCodec extends AbstractBranchEndResponseCodec 
     public Class<?> getMessageClassType() {
         return BranchRollbackResponse.class;
     }
-
 }

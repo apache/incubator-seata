@@ -55,5 +55,4 @@ public interface SQLOperateRecognizerHolder {
      * @return the SelectForUpdate recognizer
      */
     SQLRecognizer getSelectForUpdateRecognizer(String sql);
-
 }

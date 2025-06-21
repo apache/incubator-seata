@@ -16,10 +16,10 @@
  */
 package org.apache.seata.serializer.seata.protocol.transaction;
 
-import org.apache.seata.core.protocol.ProtocolConstants;
-import org.apache.seata.serializer.seata.SeataSerializer;
 import org.apache.seata.core.model.BranchType;
+import org.apache.seata.core.protocol.ProtocolConstants;
 import org.apache.seata.core.protocol.transaction.UndoLogDeleteRequest;
+import org.apache.seata.serializer.seata.SeataSerializer;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,11 +39,11 @@ public class UndoLogDeleteRequestSerializerTest {
      * Test codec.
      */
     @Test
-    public void test_codec(){
+    public void test_codec() {
         UndoLogDeleteRequest logDeleteRequest1 = new UndoLogDeleteRequest();
         logDeleteRequest1.setBranchType(BranchType.AT);
         logDeleteRequest1.setResourceId("t");
-        logDeleteRequest1.setSaveDays((short)7);
+        logDeleteRequest1.setSaveDays((short) 7);
 
         byte[] bytes = seataSerializer.serialize(logDeleteRequest1);
 
@@ -53,5 +53,4 @@ public class UndoLogDeleteRequestSerializerTest {
         assertThat(logDeleteRequest2.getResourceId()).isEqualTo(logDeleteRequest1.getResourceId());
         assertThat(logDeleteRequest2.getSaveDays()).isEqualTo(logDeleteRequest1.getSaveDays());
     }
-
 }

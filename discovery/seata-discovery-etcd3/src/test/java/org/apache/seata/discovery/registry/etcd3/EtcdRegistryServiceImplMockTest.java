@@ -16,19 +16,6 @@
  */
 package org.apache.seata.discovery.registry.etcd3;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
-import static org.junit.Assert.assertNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import io.etcd.jetcd.ByteSequence;
 import io.etcd.jetcd.Client;
 import io.etcd.jetcd.KV;
@@ -44,18 +31,6 @@ import io.etcd.jetcd.lease.LeaseTimeToLiveResponse;
 import io.etcd.jetcd.options.GetOption;
 import io.etcd.jetcd.options.PutOption;
 import io.etcd.jetcd.options.WatchOption;
-
-import java.lang.reflect.Field;
-import java.net.InetSocketAddress;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.config.exception.ConfigNotFoundException;
@@ -71,6 +46,30 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+
+import java.lang.reflect.Field;
+import java.net.InetSocketAddress;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
+import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class EtcdRegistryServiceImplMockTest {
@@ -250,7 +249,8 @@ public class EtcdRegistryServiceImplMockTest {
     public void testClose() throws Exception {
         // 1.condition: executorService shutdown with exception
         when(executorService.isShutdown()).thenReturn(false);
-        when(executorService.awaitTermination(5, TimeUnit.SECONDS)).thenThrow(new InterruptedException("Test interruption"));
+        when(executorService.awaitTermination(5, TimeUnit.SECONDS))
+                .thenThrow(new InterruptedException("Test interruption"));
         registryService.close();
 
         verify(executorService).shutdown();
@@ -275,7 +275,8 @@ public class EtcdRegistryServiceImplMockTest {
 
     private GetResponse createMockGetResponse(List<String> addresses) {
         // Create mock ResponseHeader
-        ResponseHeader mockHeader = ResponseHeader.newBuilder().setRevision(12345L).build();
+        ResponseHeader mockHeader =
+                ResponseHeader.newBuilder().setRevision(12345L).build();
 
         // Create mock KeyValue list
         List<KeyValue> mockKeyValues = addresses.stream()
@@ -287,7 +288,8 @@ public class EtcdRegistryServiceImplMockTest {
                 .collect(Collectors.toList());
 
         // Create mock RangeResponse
-        RangeResponse mockRangeResponse = RangeResponse.newBuilder().setHeader(mockHeader).build();
+        RangeResponse mockRangeResponse =
+                RangeResponse.newBuilder().setHeader(mockHeader).build();
 
         // Create mock GetResponse
         GetResponse mockGetResponse = spy(new GetResponse(mockRangeResponse, ByteSequence.EMPTY));

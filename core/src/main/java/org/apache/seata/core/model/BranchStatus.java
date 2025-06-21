@@ -16,7 +16,6 @@
  */
 package org.apache.seata.core.model;
 
-
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 
 /**
@@ -103,7 +102,6 @@ public enum BranchStatus {
      */
     PhaseTwo_RollbackFailed_XAER_NOTA_Retryable(12),
 
-
     /**
      * The results of the Phase one are read-only.
      * Description: After the branch prepare in the Oracle database, only purely read-only query statements were executed.
@@ -131,7 +129,6 @@ public enum BranchStatus {
         return code;
     }
 
-
     /**
      * Get branch status.
      *
@@ -139,7 +136,7 @@ public enum BranchStatus {
      * @return the branch status
      */
     public static BranchStatus get(byte code) {
-        return get((int)code);
+        return get((int) code);
     }
 
     /**
@@ -157,5 +154,4 @@ public enum BranchStatus {
         }
         return value;
     }
-
 }

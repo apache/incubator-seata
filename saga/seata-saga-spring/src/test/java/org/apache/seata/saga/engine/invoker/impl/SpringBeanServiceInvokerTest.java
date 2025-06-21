@@ -16,17 +16,17 @@
  */
 package org.apache.seata.saga.engine.invoker.impl;
 
-import java.util.Collections;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
 import org.apache.seata.saga.statelang.domain.impl.AbstractTaskState;
 import org.apache.seata.saga.statelang.domain.impl.ServiceTaskStateImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.context.ApplicationContext;
+
+import java.util.Collections;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.when;
@@ -38,7 +38,7 @@ public class SpringBeanServiceInvokerTest {
     @Test
     public void testInvokeByClassParam() throws Throwable {
         SpringBeanServiceInvoker springBeanServiceInvoker = new SpringBeanServiceInvoker();
-        Object[] input = new Object[]{"param"};
+        Object[] input = new Object[] {"param"};
         ServiceTaskStateImpl serviceTaskState = new ServiceTaskStateImpl();
         serviceTaskState.setServiceName("mockService");
         serviceTaskState.setServiceMethod("mockInvoke");
@@ -46,8 +46,8 @@ public class SpringBeanServiceInvokerTest {
         MockService mockService = new MockService();
         ApplicationContext applicationContext = Mockito.mock(ApplicationContext.class);
         when(applicationContext.getBean(anyString())).thenReturn(mockService);
-        springBeanServiceInvoker.setThreadPoolExecutor(new ThreadPoolExecutor(1,
-                1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<>()));
+        springBeanServiceInvoker.setThreadPoolExecutor(
+                new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<>()));
         springBeanServiceInvoker.setApplicationContext(applicationContext);
 
         String output = (String) springBeanServiceInvoker.invoke(serviceTaskState, input);
@@ -57,7 +57,7 @@ public class SpringBeanServiceInvokerTest {
     @Test
     public void testInvokeByPrimitiveParam() throws Throwable {
         SpringBeanServiceInvoker springBeanServiceInvoker = new SpringBeanServiceInvoker();
-        Object[] input = new Object[]{false};
+        Object[] input = new Object[] {false};
         ServiceTaskStateImpl serviceTaskState = new ServiceTaskStateImpl();
         serviceTaskState.setServiceName("mockService");
         serviceTaskState.setServiceMethod("mockInvoke");
@@ -66,8 +66,8 @@ public class SpringBeanServiceInvokerTest {
         serviceTaskState.setMethod(mockService.getClass().getMethod("mockInvoke", boolean.class));
         ApplicationContext applicationContext = Mockito.mock(ApplicationContext.class);
         when(applicationContext.getBean(anyString())).thenReturn(mockService);
-        springBeanServiceInvoker.setThreadPoolExecutor(new ThreadPoolExecutor(1,
-                1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<>()));
+        springBeanServiceInvoker.setThreadPoolExecutor(
+                new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<>()));
         springBeanServiceInvoker.setApplicationContext(applicationContext);
 
         boolean output = (boolean) springBeanServiceInvoker.invoke(serviceTaskState, input);
@@ -77,7 +77,7 @@ public class SpringBeanServiceInvokerTest {
     @Test
     public void testInvokeRetryFailed() throws Throwable {
         SpringBeanServiceInvoker springBeanServiceInvoker = new SpringBeanServiceInvoker();
-        Object[] input = new Object[]{"param"};
+        Object[] input = new Object[] {"param"};
         ServiceTaskStateImpl serviceTaskState = new ServiceTaskStateImpl();
         serviceTaskState.setServiceName("mockService");
         serviceTaskState.setServiceMethod("mockInvokeRetry");
@@ -89,17 +89,18 @@ public class SpringBeanServiceInvokerTest {
         MockService mockService = new MockService();
         ApplicationContext applicationContext = Mockito.mock(ApplicationContext.class);
         when(applicationContext.getBean(anyString())).thenReturn(mockService);
-        springBeanServiceInvoker.setThreadPoolExecutor(new ThreadPoolExecutor(1,
-                1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<>()));
+        springBeanServiceInvoker.setThreadPoolExecutor(
+                new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<>()));
         springBeanServiceInvoker.setApplicationContext(applicationContext);
 
-        Assertions.assertThrows(java.lang.RuntimeException.class, () -> springBeanServiceInvoker.invoke(serviceTaskState, input));
+        Assertions.assertThrows(
+                java.lang.RuntimeException.class, () -> springBeanServiceInvoker.invoke(serviceTaskState, input));
     }
 
     @Test
     public void testInvokeRetrySuccess() throws Throwable {
         SpringBeanServiceInvoker springBeanServiceInvoker = new SpringBeanServiceInvoker();
-        Object[] input = new Object[]{"param"};
+        Object[] input = new Object[] {"param"};
         ServiceTaskStateImpl serviceTaskState = new ServiceTaskStateImpl();
         serviceTaskState.setServiceName("mockService");
         serviceTaskState.setServiceMethod("mockInvokeRetry");
@@ -111,8 +112,8 @@ public class SpringBeanServiceInvokerTest {
         MockService mockService = new MockService();
         ApplicationContext applicationContext = Mockito.mock(ApplicationContext.class);
         when(applicationContext.getBean(anyString())).thenReturn(mockService);
-        springBeanServiceInvoker.setThreadPoolExecutor(new ThreadPoolExecutor(1,
-                1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<>()));
+        springBeanServiceInvoker.setThreadPoolExecutor(
+                new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<>()));
         springBeanServiceInvoker.setApplicationContext(applicationContext);
 
         String output = (String) springBeanServiceInvoker.invoke(serviceTaskState, input);
@@ -122,7 +123,7 @@ public class SpringBeanServiceInvokerTest {
     @Test
     public void testInvokeAsync() throws Throwable {
         SpringBeanServiceInvoker springBeanServiceInvoker = new SpringBeanServiceInvoker();
-        Object[] input = new Object[]{"param"};
+        Object[] input = new Object[] {"param"};
         ServiceTaskStateImpl serviceTaskState = new ServiceTaskStateImpl();
         serviceTaskState.setServiceName("mockService");
         serviceTaskState.setServiceMethod("mockInvoke");
@@ -131,8 +132,8 @@ public class SpringBeanServiceInvokerTest {
         MockService mockService = new MockService();
         ApplicationContext applicationContext = Mockito.mock(ApplicationContext.class);
         when(applicationContext.getBean(anyString())).thenReturn(mockService);
-        springBeanServiceInvoker.setThreadPoolExecutor(new ThreadPoolExecutor(1,
-                1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<>()));
+        springBeanServiceInvoker.setThreadPoolExecutor(
+                new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingDeque<>()));
         springBeanServiceInvoker.setApplicationContext(applicationContext);
 
         String output = (String) springBeanServiceInvoker.invoke(serviceTaskState, input);
@@ -142,7 +143,7 @@ public class SpringBeanServiceInvokerTest {
     @Test
     public void testInvokeAsyncButSync() throws Throwable {
         SpringBeanServiceInvoker springBeanServiceInvoker = new SpringBeanServiceInvoker();
-        Object[] input = new Object[]{"param"};
+        Object[] input = new Object[] {"param"};
         ServiceTaskStateImpl serviceTaskState = new ServiceTaskStateImpl();
         serviceTaskState.setServiceName("mockService");
         serviceTaskState.setServiceMethod("mockInvoke");

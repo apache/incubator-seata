@@ -16,7 +16,6 @@
  */
 package org.apache.seata.server.storage.db.lock;
 
-import javax.sql.DataSource;
 import org.apache.seata.common.executor.Initialize;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.loader.LoadLevel;
@@ -28,6 +27,8 @@ import org.apache.seata.core.store.db.DataSourceProvider;
 import org.apache.seata.server.lock.AbstractLockManager;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
+
+import javax.sql.DataSource;
 
 /**
  * The type db lock manager.
@@ -44,8 +45,10 @@ public class DataBaseLockManager extends AbstractLockManager implements Initiali
     @Override
     public void init() {
         // init dataSource
-        String datasourceType = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
-        DataSource lockStoreDataSource = EnhancedServiceLoader.load(DataSourceProvider.class, datasourceType).provide();
+        String datasourceType =
+                ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
+        DataSource lockStoreDataSource = EnhancedServiceLoader.load(DataSourceProvider.class, datasourceType)
+                .provide();
         locker = new DataBaseLocker(lockStoreDataSource);
     }
 
@@ -73,5 +76,4 @@ public class DataBaseLockManager extends AbstractLockManager implements Initiali
             return false;
         }
     }
-
 }
