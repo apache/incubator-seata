@@ -16,12 +16,12 @@
  */
 package org.apache.seata.serializer.seata.protocol;
 
-import java.nio.ByteBuffer;
-
 import io.netty.buffer.ByteBuf;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.core.protocol.AbstractResultMessage;
 import org.apache.seata.core.protocol.ResultCode;
+
+import java.nio.ByteBuffer;
 
 /**
  * The type Abstract result message codec.
@@ -36,7 +36,7 @@ public abstract class AbstractResultMessageCodec extends AbstractMessageCodec {
 
     @Override
     public <T> void encode(T t, ByteBuf out) {
-        AbstractResultMessage abstractResultMessage = (AbstractResultMessage)t;
+        AbstractResultMessage abstractResultMessage = (AbstractResultMessage) t;
         ResultCode resultCode = abstractResultMessage.getResultCode();
         String resultMsg = abstractResultMessage.getMsg();
 
@@ -50,17 +50,17 @@ public abstract class AbstractResultMessageCodec extends AbstractMessageCodec {
                     msg = resultMsg;
                 }
                 byte[] bs = msg.getBytes(UTF8);
-                out.writeShort((short)bs.length);
+                out.writeShort((short) bs.length);
                 out.writeBytes(bs);
             } else {
-                out.writeShort((short)0);
+                out.writeShort((short) 0);
             }
         }
     }
 
     @Override
     public <T> void decode(T t, ByteBuffer in) {
-        AbstractResultMessage abstractResultMessage = (AbstractResultMessage)t;
+        AbstractResultMessage abstractResultMessage = (AbstractResultMessage) t;
 
         ResultCode resultCode = ResultCode.get(in.get());
         abstractResultMessage.setResultCode(resultCode);
@@ -73,5 +73,4 @@ public abstract class AbstractResultMessageCodec extends AbstractMessageCodec {
             }
         }
     }
-
 }

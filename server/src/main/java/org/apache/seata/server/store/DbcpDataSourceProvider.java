@@ -16,9 +16,9 @@
  */
 package org.apache.seata.server.store;
 
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.loader.LoadLevel;
-import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.seata.core.store.db.AbstractDataSourceProvider;
 
 import javax.sql.DataSource;
@@ -56,13 +56,24 @@ public class DbcpDataSourceProvider extends AbstractDataSourceProvider {
         ds.setConnectionProperties("useUnicode=yes;characterEncoding=utf8;socketTimeout=5000;connectTimeout=500");
         ds.setDefaultTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
 
-        long timeBetweenEvictionRunsMillis = CONFIG.getLong(ConfigurationKeys.STORE_DB_DBCP_TIME_BETWEEN_EVICTION_RUNS_MILLIS, DEFAULT_DB_DBCP_TIME_BETWEEN_EVICTION_RUNS_MILLIS);
-        ds.setTimeBetweenEvictionRunsMillis(timeBetweenEvictionRunsMillis < 0 ? DEFAULT_DB_DBCP_TIME_BETWEEN_EVICTION_RUNS_MILLIS : timeBetweenEvictionRunsMillis);
-        long minEvictableIdleTimeMillis = CONFIG.getLong(ConfigurationKeys.STORE_DB_DBCP_MIN_EVICTABLE_TIME_MILLIS, DEFAULT_DB_DBCP_MIN_EVICTABLE_TIME_MILLIS);
-        ds.setMinEvictableIdleTimeMillis(minEvictableIdleTimeMillis < 0 ? DEFAULT_DB_DBCP_MIN_EVICTABLE_TIME_MILLIS : minEvictableIdleTimeMillis);
-        boolean testWhileIdle = CONFIG.getBoolean(ConfigurationKeys.STORE_DB_DBCP_TEST_WHILE_IDLE, DEFAULT_DB_DBCP_TEST_WHILE_IDLE);
+        long timeBetweenEvictionRunsMillis = CONFIG.getLong(
+                ConfigurationKeys.STORE_DB_DBCP_TIME_BETWEEN_EVICTION_RUNS_MILLIS,
+                DEFAULT_DB_DBCP_TIME_BETWEEN_EVICTION_RUNS_MILLIS);
+        ds.setTimeBetweenEvictionRunsMillis(
+                timeBetweenEvictionRunsMillis < 0
+                        ? DEFAULT_DB_DBCP_TIME_BETWEEN_EVICTION_RUNS_MILLIS
+                        : timeBetweenEvictionRunsMillis);
+        long minEvictableIdleTimeMillis = CONFIG.getLong(
+                ConfigurationKeys.STORE_DB_DBCP_MIN_EVICTABLE_TIME_MILLIS, DEFAULT_DB_DBCP_MIN_EVICTABLE_TIME_MILLIS);
+        ds.setMinEvictableIdleTimeMillis(
+                minEvictableIdleTimeMillis < 0
+                        ? DEFAULT_DB_DBCP_MIN_EVICTABLE_TIME_MILLIS
+                        : minEvictableIdleTimeMillis);
+        boolean testWhileIdle =
+                CONFIG.getBoolean(ConfigurationKeys.STORE_DB_DBCP_TEST_WHILE_IDLE, DEFAULT_DB_DBCP_TEST_WHILE_IDLE);
         ds.setTestWhileIdle(testWhileIdle);
-        boolean testOnBorrow = CONFIG.getBoolean(ConfigurationKeys.STORE_DB_DBCP_TEST_ON_BORROW, DEFAULT_DB_DBCP_TEST_ON_BORROW);
+        boolean testOnBorrow =
+                CONFIG.getBoolean(ConfigurationKeys.STORE_DB_DBCP_TEST_ON_BORROW, DEFAULT_DB_DBCP_TEST_ON_BORROW);
         ds.setTestOnBorrow(testOnBorrow);
         return ds;
     }

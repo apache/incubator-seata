@@ -19,7 +19,6 @@ package org.apache.seata.integration.tx.api.interceptor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-
 public class DefaultInvocationWrapper implements InvocationWrapper {
     private Object proxy;
     private Object delegate;
@@ -63,6 +62,5 @@ public class DefaultInvocationWrapper implements InvocationWrapper {
             }
             throw t;
         }
-
     }
 }

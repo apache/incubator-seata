@@ -25,5 +25,4 @@ import org.apache.seata.sqlparser.util.JdbcConstants;
  *
  */
 @LoadLevel(name = JdbcConstants.MARIADB)
-public class MariadbEscapeHandler extends MySQLEscapeHandler {
-}
+public class MariadbEscapeHandler extends MySQLEscapeHandler {}

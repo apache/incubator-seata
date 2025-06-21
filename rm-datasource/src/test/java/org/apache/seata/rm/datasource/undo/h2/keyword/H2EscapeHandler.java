@@ -20,7 +20,5 @@ import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.rm.datasource.sql.handler.mysql.MySQLEscapeHandler;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 
-
 @LoadLevel(name = JdbcConstants.H2)
-public class H2EscapeHandler extends MySQLEscapeHandler {
-}
+public class H2EscapeHandler extends MySQLEscapeHandler {}

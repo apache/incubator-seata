@@ -26,5 +26,4 @@ import org.apache.seata.core.protocol.RpcMessage;
 public interface ProtocolDecoder {
 
     RpcMessage decodeFrame(ByteBuf in);
-
 }

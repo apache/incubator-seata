@@ -16,17 +16,13 @@
  */
 package org.apache.seata.spring.annotation.scannercheckers;
 
-import java.util.HashSet;
-import java.util.Set;
-import javax.annotation.Nullable;
-
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.spring.annotation.GlobalLock;
 import org.apache.seata.spring.annotation.GlobalTransactionScanner;
 import org.apache.seata.spring.annotation.GlobalTransactional;
 import org.apache.seata.spring.annotation.ScannerChecker;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -36,6 +32,10 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.util.MultiValueMap;
+
+import javax.annotation.Nullable;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Scope scanner checker.
@@ -82,7 +82,8 @@ public class ScopeBeansScannerChecker implements ScannerChecker {
      * Match the '@Scope' beans, and check whether exclusion is required.
      */
     @Override
-    public boolean check(Object bean, String beanName, @Nullable ConfigurableListableBeanFactory beanFactory) throws Exception {
+    public boolean check(Object bean, String beanName, @Nullable ConfigurableListableBeanFactory beanFactory)
+            throws Exception {
         if (beanFactory == null) {
             // the beanFactory is null, pass this checker
             return true;
@@ -104,7 +105,7 @@ public class ScopeBeansScannerChecker implements ScannerChecker {
 
         // if found the AnnotatedBeanDefinition, do check
         if (beanDefinition != null) {
-            AnnotatedBeanDefinition annotatedBeanDefinition = (AnnotatedBeanDefinition)beanDefinition;
+            AnnotatedBeanDefinition annotatedBeanDefinition = (AnnotatedBeanDefinition) beanDefinition;
             if (annotatedBeanDefinition.getFactoryMethodMetadata() != null) {
                 if (this.hasExcludeScope(beanName, annotatedBeanDefinition.getFactoryMethodMetadata())) {
                     // found the target @Scope, do not scan
@@ -122,7 +123,8 @@ public class ScopeBeansScannerChecker implements ScannerChecker {
     }
 
     private boolean hasExcludeScope(String beanName, AnnotatedTypeMetadata annotatedTypeMetadata) {
-        MultiValueMap<String, Object> scopeAttributes = annotatedTypeMetadata.getAllAnnotationAttributes(Scope.class.getName());
+        MultiValueMap<String, Object> scopeAttributes =
+                annotatedTypeMetadata.getAllAnnotationAttributes(Scope.class.getName());
         if (scopeAttributes == null || scopeAttributes.isEmpty()) {
             // not found @Scope
             return false;
@@ -133,10 +135,14 @@ public class ScopeBeansScannerChecker implements ScannerChecker {
             if (scopeName != null) {
                 if (EXCLUDE_SCOPE_SET.contains(scopeName.toString().toLowerCase())) {
                     if (LOGGER.isInfoEnabled()) {
-                        LOGGER.info("Exclude bean `{}` from the `{}`, cause of `@Scope(scopeName = \"{}\")`. " +
-                                        "`@{}` and `@{}` will be invalid in this bean. Please refactor the code if you want to continue using it.",
-                                beanName, GlobalTransactionScanner.class.getSimpleName(), scopeName.toString(),
-                                GlobalTransactional.class.getSimpleName(), GlobalLock.class.getSimpleName());
+                        LOGGER.info(
+                                "Exclude bean `{}` from the `{}`, cause of `@Scope(scopeName = \"{}\")`. "
+                                        + "`@{}` and `@{}` will be invalid in this bean. Please refactor the code if you want to continue using it.",
+                                beanName,
+                                GlobalTransactionScanner.class.getSimpleName(),
+                                scopeName.toString(),
+                                GlobalTransactional.class.getSimpleName(),
+                                GlobalLock.class.getSimpleName());
                     }
 
                     // found @Scope and the scopeName is in the `EXCLUDE_SCOPE_SET`, do not scan

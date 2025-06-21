@@ -16,13 +16,13 @@
  */
 package org.apache.seata.integration.tx.api.interceptor.handler;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.Optional;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.integration.tx.api.interceptor.InvocationWrapper;
 import org.apache.seata.integration.tx.api.interceptor.NestInterceptorHandlerWrapper;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.Optional;
 
 public abstract class AbstractProxyInvocationHandler implements ProxyInvocationHandler {
 
@@ -34,7 +34,8 @@ public abstract class AbstractProxyInvocationHandler implements ProxyInvocationH
 
     @Override
     public Object invoke(InvocationWrapper invocation) throws Throwable {
-        if (CollectionUtils.isNotEmpty(getMethodsToProxy()) && !getMethodsToProxy().contains(invocation.getMethod().getName())) {
+        if (CollectionUtils.isNotEmpty(getMethodsToProxy())
+                && !getMethodsToProxy().contains(invocation.getMethod().getName())) {
             return invocation.proceed();
         }
         if (nextInvocationHandlerChain != null) {
@@ -43,9 +44,12 @@ public abstract class AbstractProxyInvocationHandler implements ProxyInvocationH
         return doInvoke(invocation);
     }
 
-    public  <T extends Annotation> T getAnnotation(Method method, Class<?> targetClass, Class<T> annotationClass) {
-        return Optional.ofNullable(method).map(m -> m.getAnnotation(annotationClass))
-            .orElse(Optional.ofNullable(targetClass).map(t -> t.getAnnotation(annotationClass)).orElse(null));
+    public <T extends Annotation> T getAnnotation(Method method, Class<?> targetClass, Class<T> annotationClass) {
+        return Optional.ofNullable(method)
+                .map(m -> m.getAnnotation(annotationClass))
+                .orElse(Optional.ofNullable(targetClass)
+                        .map(t -> t.getAnnotation(annotationClass))
+                        .orElse(null));
     }
 
     @Override

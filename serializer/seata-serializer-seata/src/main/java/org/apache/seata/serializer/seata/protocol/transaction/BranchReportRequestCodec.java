@@ -16,12 +16,12 @@
  */
 package org.apache.seata.serializer.seata.protocol.transaction;
 
-import java.nio.ByteBuffer;
-
 import io.netty.buffer.ByteBuf;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.protocol.transaction.BranchReportRequest;
+
+import java.nio.ByteBuffer;
 
 /**
  * The type Branch report request codec.
@@ -36,7 +36,7 @@ public class BranchReportRequestCodec extends AbstractTransactionRequestToTCCode
 
     @Override
     public <T> void encode(T t, ByteBuf out) {
-        BranchReportRequest branchReportRequest = (BranchReportRequest)t;
+        BranchReportRequest branchReportRequest = (BranchReportRequest) t;
         String xid = branchReportRequest.getXid();
         long branchId = branchReportRequest.getBranchId();
         BranchStatus status = branchReportRequest.getStatus();
@@ -47,12 +47,12 @@ public class BranchReportRequestCodec extends AbstractTransactionRequestToTCCode
         // 1. xid
         if (xid != null) {
             byte[] bs = xid.getBytes(UTF8);
-            out.writeShort((short)bs.length);
+            out.writeShort((short) bs.length);
             if (bs.length > 0) {
                 out.writeBytes(bs);
             }
         } else {
-            out.writeShort((short)0);
+            out.writeShort((short) 0);
         }
         // 2. Branch Id
         out.writeLong(branchId);
@@ -61,12 +61,12 @@ public class BranchReportRequestCodec extends AbstractTransactionRequestToTCCode
         // 4. Resource Id
         if (resourceId != null) {
             byte[] bs = resourceId.getBytes(UTF8);
-            out.writeShort((short)bs.length);
+            out.writeShort((short) bs.length);
             if (bs.length > 0) {
                 out.writeBytes(bs);
             }
         } else {
-            out.writeShort((short)0);
+            out.writeShort((short) 0);
         }
 
         // 5. Application Data
@@ -79,13 +79,13 @@ public class BranchReportRequestCodec extends AbstractTransactionRequestToTCCode
         } else {
             out.writeInt(0);
         }
-        //6. branchType
+        // 6. branchType
         out.writeByte(branchType.ordinal());
     }
 
     @Override
     public <T> void decode(T t, ByteBuffer in) {
-        BranchReportRequest branchReportRequest = (BranchReportRequest)t;
+        BranchReportRequest branchReportRequest = (BranchReportRequest) t;
 
         short xidLen = in.getShort();
         if (xidLen > 0) {
@@ -110,5 +110,4 @@ public class BranchReportRequestCodec extends AbstractTransactionRequestToTCCode
         }
         branchReportRequest.setBranchType(BranchType.get(in.get()));
     }
-
 }

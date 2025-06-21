@@ -58,8 +58,7 @@ public class DistributedLockDO {
         this.expireTime = expireTime;
     }
 
-    public DistributedLockDO() {
-    }
+    public DistributedLockDO() {}
 
     public DistributedLockDO(String lockKey, String lockValue, Long expireTime) {
         this.lockKey = lockKey;

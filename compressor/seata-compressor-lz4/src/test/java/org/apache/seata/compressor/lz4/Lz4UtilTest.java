@@ -19,7 +19,6 @@ package org.apache.seata.compressor.lz4;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-
 class Lz4UtilTest {
     @Test
     public void testCompress() {
@@ -34,5 +33,4 @@ class Lz4UtilTest {
             Lz4Util.decompress(null);
         });
     }
-
 }

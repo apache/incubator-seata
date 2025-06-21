@@ -47,6 +47,6 @@ class RegistryTypeTest {
 
     @Test
     void values() {
-        Assertions.assertArrayEquals(new RegistryType[]{RegistryType.COMPACT}, RegistryType.values());
+        Assertions.assertArrayEquals(new RegistryType[] {RegistryType.COMPACT}, RegistryType.values());
     }
 }

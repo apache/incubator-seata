@@ -111,14 +111,12 @@ public class XABranchXid implements XAXid {
             xid = byteArray2String(globalTransactionId);
         }
 
-
         if (branchQualifier == null || branchQualifier.length == 0) {
             branchId = 0L;
         } else {
             String bs = byteArray2String(branchQualifier).substring(BRANCH_ID_PREFIX.length());
             branchId = Long.parseLong(bs);
         }
-
     }
 
     @Override

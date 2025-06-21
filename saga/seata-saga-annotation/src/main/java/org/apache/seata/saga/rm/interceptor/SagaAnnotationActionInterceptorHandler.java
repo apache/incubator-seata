@@ -54,44 +54,42 @@ public class SagaAnnotationActionInterceptorHandler extends AbstractProxyInvocat
         this.methodsToProxy = methodsToProxy;
     }
 
-
     @Override
     protected Object doInvoke(InvocationWrapper invocation) throws Throwable {
         if (!RootContext.inGlobalTransaction() || RootContext.inSagaBranch()) {
-            //not in transaction, or this interceptor is disabled
+            // not in transaction, or this interceptor is disabled
             return invocation.proceed();
         }
         Method method = invocation.getMethod();
         Annotation businessAction = parseAnnotation(method);
 
-        //try method
+        // try method
         if (businessAction != null) {
-            //save the xid
+            // save the xid
             String xid = RootContext.getXID();
-            //save the previous branchType
+            // save the previous branchType
             BranchType previousBranchType = RootContext.getBranchType();
-            //if not TCC, bind TCC branchType
+            // if not TCC, bind TCC branchType
             if (getBranchType() != previousBranchType) {
                 RootContext.bindBranchType(getBranchType());
             }
             try {
                 TwoPhaseBusinessActionParam businessActionParam = createTwoPhaseBusinessActionParam(businessAction);
-                return actionInterceptorHandler.proceed(method, invocation.getArguments(), xid, businessActionParam,
-                        invocation::proceed);
+                return actionInterceptorHandler.proceed(
+                        method, invocation.getArguments(), xid, businessActionParam, invocation::proceed);
             } finally {
-                //if not TCC, unbind branchType
+                // if not TCC, unbind branchType
                 if (getBranchType() != previousBranchType) {
                     RootContext.unbindBranchType();
                 }
-                //MDC remove branchId
+                // MDC remove branchId
                 MDC.remove(RootContext.MDC_KEY_BRANCH_ID);
             }
         }
 
-        //not TCC try method
+        // not TCC try method
         return invocation.proceed();
     }
-
 
     @Override
     public Set<String> getMethodsToProxy() {
@@ -156,5 +154,4 @@ public class SagaAnnotationActionInterceptorHandler extends AbstractProxyInvocat
     private Class<? extends Annotation> getAnnotationClass() {
         return CompensationBusinessAction.class;
     }
-
 }

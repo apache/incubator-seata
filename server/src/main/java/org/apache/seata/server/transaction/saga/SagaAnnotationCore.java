@@ -35,8 +35,9 @@ public class SagaAnnotationCore extends AbstractCore {
     }
 
     @Override
-    public BranchStatus branchCommit(GlobalSession globalSession, BranchSession branchSession) throws TransactionException {
-        //SAGA_ANNOTATION branch type, just mock commit
+    public BranchStatus branchCommit(GlobalSession globalSession, BranchSession branchSession)
+            throws TransactionException {
+        // SAGA_ANNOTATION branch type, just mock commit
         return BranchStatus.PhaseTwo_Committed;
     }
 
@@ -46,7 +47,8 @@ public class SagaAnnotationCore extends AbstractCore {
     }
 
     @Override
-    public BranchStatus branchDelete(GlobalSession globalSession, BranchSession branchSession) throws TransactionException {
+    public BranchStatus branchDelete(GlobalSession globalSession, BranchSession branchSession)
+            throws TransactionException {
         throw new ShouldNeverHappenException("saga mode rm handler not support BranchDeleteRequest");
     }
 }

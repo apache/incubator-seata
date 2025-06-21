@@ -208,84 +208,6 @@
                 <maven.git-commit-id.skip>false</maven.git-commit-id.skip>
             </properties>
         </profile>
-
-        <!-- profile: checkstyle -->
-        <profile>
-            <id>checkstyle</id>
-            <activation>
-                <jdk>[1.8,)</jdk>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>com.mycila</groupId>
-                        <artifactId>license-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <phase>generate-sources</phase>
-                                <goals>
-                                    <goal>remove</goal>
-                                    <goal>format</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <quiet>true</quiet>
-                            <header>${user.dir}/style/copyright</header>
-                            <includes>
-                                <include>**/src/main/java/**</include>
-                                <include>**/src/test/java/**</include>
-                                <include>**/*.xml</include>
-                                <include>**/*.sql</include>
-                                <include>**/*.conf</include>
-                                <include>**/*.yml</include>
-                                <include>**/*.yaml</include>
-                                <include>**/*.sh</include>
-                                <include>**/*.bat</include>
-                                <include>**/*.lua</include>
-                                <include>**/*.properties</include>
-                                <include>**/*.txt</include>
-                                <include>**/*.def</include>
-                            </includes>
-                            <excludes>
-                                <exclude>**/script/**</exclude>
-                                <exclude>**/generated/**</exclude>
-                                <exclude>**/antlr/mysql/parser/*.*</exclude>
-                                <exclude>**/antlr/mysql/antlr/*.*</exclude>
-                                <exclude>**/antlr/mysql/stream/ANTLRNoCaseStringStream.java</exclude>
-                            </excludes>
-                            <strictCheck>true</strictCheck>
-                            <mapping>
-                                <java>SLASHSTAR_STYLE</java>
-                                <lua>DOUBLEBAR_STYLE</lua>
-                                <conf>SCRIPT_STYLE</conf>
-                                <def>SCRIPT_STYLE</def>
-                            </mapping>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-checkstyle-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>validate</id>
-                                <phase>validate</phase>
-                                <configuration>
-                                    <configLocation>${user.dir}/style/seata_checkstyle.xml</configLocation>
-                                    <suppressionsLocation>${user.dir}/style/seata_suppressions.xml</suppressionsLocation>
-                                    <encoding>UTF-8</encoding>
-                                    <consoleOutput>true</consoleOutput>
-                                    <failsOnError>true</failsOnError>
-                                </configuration>
-                                <goals>
-                                    <goal>checkstyle</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
         <!-- profile: dependency-check -->
         <profile>
             <id>dependency-check</id>
@@ -352,7 +274,6 @@
                         <artifactId>spotless-maven-plugin</artifactId>
                         <version>${spotless-maven-plugin.version}</version>
                         <configuration>
-                            <skip>true</skip>
                             <java>
                                 <excludes>
                                     <exclude>**/script/**</exclude>
@@ -361,13 +282,15 @@
                                     <exclude>**/antlr/mysql/antlr/*.*</exclude>
                                     <exclude>**/antlr/mysql/stream/ANTLRNoCaseStringStream.java</exclude>
                                 </excludes>
-                                <ratchetFrom>HEAD</ratchetFrom>
                                 <palantirJavaFormat>
                                     <version>${palantirJavaFormat.version}</version>
                                 </palantirJavaFormat>
                                 <removeUnusedImports/>
                                 <trimTrailingWhitespace/>
                                 <endWithNewline/>
+                                <importOrder>
+                                    <order>,javax|java,\#</order>
+                                </importOrder>
                             </java>
                         </configuration>
                         <executions>

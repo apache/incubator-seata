@@ -40,6 +40,4 @@ public interface ReloadableStore {
      * @return the boolean
      */
     boolean hasRemaining(boolean isHistory);
-
-
 }

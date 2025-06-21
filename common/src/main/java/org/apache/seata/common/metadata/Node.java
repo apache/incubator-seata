@@ -19,11 +19,12 @@ package org.apache.seata.common.metadata;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.seata.common.exception.ParseEndpointException;
+
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.List;
-import java.util.ArrayList;
 
 public class Node {
 
@@ -173,7 +174,7 @@ public class Node {
 
         @Override
         public int hashCode() {
-            return Objects.hash(host,port,protocol);
+            return Objects.hash(host, port, protocol);
         }
 
         @Override
@@ -185,9 +186,9 @@ public class Node {
                 return false;
             }
             Endpoint endpoint = (Endpoint) o;
-            return Objects.equals(endpoint.host,this.host)
-                    && Objects.equals(endpoint.port,this.port)
-                    && Objects.equals(endpoint.protocol,this.protocol);
+            return Objects.equals(endpoint.host, this.host)
+                    && Objects.equals(endpoint.port, this.port)
+                    && Objects.equals(endpoint.protocol, this.protocol);
         }
 
         @Override
@@ -222,7 +223,8 @@ public class Node {
         return externalEndpoints;
     }
 
-    public Map<String, Object> updateMetadataWithExternalEndpoints(Map<String, Object> metadata, List<Node.ExternalEndpoint> externalEndpoints) {
+    public Map<String, Object> updateMetadataWithExternalEndpoints(
+            Map<String, Object> metadata, List<Node.ExternalEndpoint> externalEndpoints) {
         Object obj = metadata.get("external");
         if (obj == null) {
             if (!externalEndpoints.isEmpty()) {

@@ -42,8 +42,9 @@ class DruidSQLRecognizerFactoryImpl implements SQLRecognizerFactory {
         if (CollectionUtils.isEmpty(asts)) {
             throw new UnsupportedOperationException("Unsupported SQL: " + sql);
         }
-        if (asts.size() > 1 && !(asts.stream().allMatch(statement -> statement instanceof SQLUpdateStatement)
-                || asts.stream().allMatch(statement -> statement instanceof SQLDeleteStatement))) {
+        if (asts.size() > 1
+                && !(asts.stream().allMatch(statement -> statement instanceof SQLUpdateStatement)
+                        || asts.stream().allMatch(statement -> statement instanceof SQLDeleteStatement))) {
             throw new UnsupportedOperationException("ONLY SUPPORT SAME TYPE (UPDATE OR DELETE) MULTI SQL -" + sql);
         }
         List<SQLRecognizer> recognizers = null;
@@ -61,11 +62,13 @@ class DruidSQLRecognizerFactoryImpl implements SQLRecognizerFactory {
                 recognizer = recognizerHolder.getSelectForUpdateRecognizer(sql, ast);
             }
 
-            // When recognizer is null, it indicates that recognizerHolder cannot allocate unsupported syntax, like merge and replace
+            // When recognizer is null, it indicates that recognizerHolder cannot allocate unsupported syntax, like
+            // merge and replace
             if (ast instanceof SQLReplaceStatement) {
-                //just like:replace into t (id,dr) values (1,'2'), (2,'3')
-                throw new NotSupportYetException("not support the sql syntax with ReplaceStatement:" + ast +
-                        "\nplease see the doc about SQL restrictions https://seata.apache.org/zh-cn/docs/user/sqlreference/dml");
+                // just like:replace into t (id,dr) values (1,'2'), (2,'3')
+                throw new NotSupportYetException(
+                        "not support the sql syntax with ReplaceStatement:" + ast
+                                + "\nplease see the doc about SQL restrictions https://seata.apache.org/zh-cn/docs/user/sqlreference/dml");
             }
 
             if (recognizer != null && recognizer.isSqlSyntaxSupports()) {

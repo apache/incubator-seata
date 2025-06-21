@@ -28,5 +28,4 @@ public class BranchReportResponseCodec extends AbstractTransactionResponseCodec 
     public Class<?> getMessageClassType() {
         return BranchReportResponse.class;
     }
-
 }

@@ -16,11 +16,10 @@
  */
 package org.apache.seata.spring.annotation;
 
-import java.lang.reflect.Method;
-
-import org.apache.seata.integration.tx.api.interceptor.InvocationWrapper;
 import org.aopalliance.intercept.MethodInvocation;
+import org.apache.seata.integration.tx.api.interceptor.InvocationWrapper;
 
+import java.lang.reflect.Method;
 
 public class AdapterInvocationWrapper implements InvocationWrapper {
 

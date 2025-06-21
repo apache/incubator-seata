@@ -22,5 +22,4 @@ import org.apache.seata.common.loader.LoadLevel;
  * Database log store h2 sql
  */
 @LoadLevel(name = "h2")
-public class H2LogStoreSqls extends MysqlLogStoreSqls {
-}
+public class H2LogStoreSqls extends MysqlLogStoreSqls {}

@@ -30,7 +30,7 @@ public class RMHandlerTCC extends AbstractRMHandler {
 
     @Override
     public void handle(UndoLogDeleteRequest request) {
-        //DO nothing
+        // DO nothing
     }
 
     @Override
@@ -42,5 +42,4 @@ public class RMHandlerTCC extends AbstractRMHandler {
     public BranchType getBranchType() {
         return BranchType.TCC;
     }
-
 }

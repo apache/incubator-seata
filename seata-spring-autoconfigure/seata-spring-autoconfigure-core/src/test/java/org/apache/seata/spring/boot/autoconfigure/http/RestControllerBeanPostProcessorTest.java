@@ -188,8 +188,8 @@ public class RestControllerBeanPostProcessorTest {
         }
 
         @GetMapping("/update")
-        public String updateMethod(@RequestParam(value = "userName") String name,
-                                   @Nonnull @RequestParam(required = false) Integer age) {
+        public String updateMethod(
+                @RequestParam(value = "userName") String name, @Nonnull @RequestParam(required = false) Integer age) {
             return "update";
         }
     }
@@ -214,7 +214,7 @@ public class RestControllerBeanPostProcessorTest {
         }
     }
 
-    static class User{
+    static class User {
         String name;
         Integer age;
     }

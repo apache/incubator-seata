@@ -24,7 +24,6 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
 public class TransactionInfoTest {
 
     private static final String IO_EXCEPTION_SHORT_NAME = "IOException";
@@ -33,7 +32,7 @@ public class TransactionInfoTest {
     public void testRollBackOn() {
         TransactionInfo txInfo = new TransactionInfo();
 
-        //default true
+        // default true
         assertThat(txInfo.rollbackOn(new IllegalArgumentException())).isTrue();
         assertThat(txInfo.rollbackOn(new Exception())).isTrue();
         assertThat(txInfo.rollbackOn(new IOException())).isTrue();

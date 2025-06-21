@@ -16,12 +16,12 @@
  */
 package org.apache.seata.rm.datasource.undo.mysql;
 
+import org.apache.seata.rm.datasource.sql.struct.Row;
+import org.apache.seata.rm.datasource.sql.struct.TableRecords;
 import org.apache.seata.rm.datasource.undo.BaseExecutorTest;
 import org.apache.seata.rm.datasource.undo.SQLUndoLog;
 import org.apache.seata.sqlparser.SQLType;
-import org.apache.seata.rm.datasource.sql.struct.Row;
 import org.apache.seata.sqlparser.struct.TableMeta;
-import org.apache.seata.rm.datasource.sql.struct.TableRecords;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -31,15 +31,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-
 public class MySQLUndoUpdateExecutorTest extends BaseExecutorTest {
 
     private static MySQLUndoUpdateExecutor executor;
-    
+
     @BeforeAll
-    public static void init(){
+    public static void init() {
         TableMeta tableMeta = Mockito.mock(TableMeta.class);
-        Mockito.when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{"id"}));
+        Mockito.when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[] {"id"}));
         Mockito.when(tableMeta.getTableName()).thenReturn("table_name");
 
         TableRecords beforeImage = new TableRecords();
@@ -93,5 +92,4 @@ public class MySQLUndoUpdateExecutorTest extends BaseExecutorTest {
     public void getUndoRows() {
         Assertions.assertEquals(executor.getUndoRows(), executor.getSqlUndoLog().getBeforeImage());
     }
-
 }

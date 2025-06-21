@@ -25,7 +25,6 @@ import java.io.Writer;
 import java.sql.Clob;
 import java.sql.SQLException;
 
-
 public class MockClob implements Clob {
 
     @Override
@@ -79,14 +78,10 @@ public class MockClob implements Clob {
     }
 
     @Override
-    public void truncate(long len) throws SQLException {
-
-    }
+    public void truncate(long len) throws SQLException {}
 
     @Override
-    public void free() throws SQLException {
-
-    }
+    public void free() throws SQLException {}
 
     @Override
     public Reader getCharacterStream(long pos, long length) throws SQLException {

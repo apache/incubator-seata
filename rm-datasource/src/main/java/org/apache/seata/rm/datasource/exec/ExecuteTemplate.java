@@ -16,10 +16,6 @@
  */
 package org.apache.seata.rm.datasource.exec;
 
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.List;
-
 import org.apache.seata.common.exception.NotSupportYetException;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.util.CollectionUtils;
@@ -40,6 +36,10 @@ import org.apache.seata.sqlparser.SQLRecognizer;
 import org.apache.seata.sqlparser.SQLType;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.List;
+
 /**
  * The type Execute template.
  *
@@ -57,9 +57,9 @@ public class ExecuteTemplate {
      * @return the t
      * @throws SQLException the sql exception
      */
-    public static <T, S extends Statement> T execute(StatementProxy<S> statementProxy,
-                                                     StatementCallback<T, S> statementCallback,
-                                                     Object... args) throws SQLException {
+    public static <T, S extends Statement> T execute(
+            StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback, Object... args)
+            throws SQLException {
         return execute(null, statementProxy, statementCallback, args);
     }
 
@@ -75,10 +75,12 @@ public class ExecuteTemplate {
      * @return the t
      * @throws SQLException the sql exception
      */
-    public static <T, S extends Statement> T execute(List<SQLRecognizer> sqlRecognizers,
-                                                     StatementProxy<S> statementProxy,
-                                                     StatementCallback<T, S> statementCallback,
-                                                     Object... args) throws SQLException {
+    public static <T, S extends Statement> T execute(
+            List<SQLRecognizer> sqlRecognizers,
+            StatementProxy<S> statementProxy,
+            StatementCallback<T, S> statementCallback,
+            Object... args)
+            throws SQLException {
         if (!RootContext.requireGlobalLock() && BranchType.AT != RootContext.getBranchType()) {
             // Just work as original statement
             return statementCallback.execute(statementProxy.getTargetStatement(), args);
@@ -86,9 +88,7 @@ public class ExecuteTemplate {
 
         String dbType = statementProxy.getConnectionProxy().getDbType();
         if (CollectionUtils.isEmpty(sqlRecognizers)) {
-            sqlRecognizers = SQLVisitorFactory.get(
-                    statementProxy.getTargetSQL(),
-                    dbType);
+            sqlRecognizers = SQLVisitorFactory.get(statementProxy.getTargetSQL(), dbType);
         }
         Executor<T> executor;
         if (CollectionUtils.isEmpty(sqlRecognizers)) {
@@ -98,9 +98,11 @@ public class ExecuteTemplate {
                 SQLRecognizer sqlRecognizer = sqlRecognizers.get(0);
                 switch (sqlRecognizer.getSQLType()) {
                     case INSERT:
-                        executor = EnhancedServiceLoader.load(InsertExecutor.class, dbType,
-                                    new Class[]{StatementProxy.class, StatementCallback.class, SQLRecognizer.class},
-                                    new Object[]{statementProxy, statementCallback, sqlRecognizer});
+                        executor = EnhancedServiceLoader.load(
+                                InsertExecutor.class,
+                                dbType,
+                                new Class[] {StatementProxy.class, StatementCallback.class, SQLRecognizer.class},
+                                new Object[] {statementProxy, statementCallback, sqlRecognizer});
                         break;
                     case UPDATE:
                         if (JdbcConstants.SQLSERVER.equalsIgnoreCase(dbType)) {
@@ -118,7 +120,8 @@ public class ExecuteTemplate {
                         break;
                     case SELECT_FOR_UPDATE:
                         if (JdbcConstants.SQLSERVER.equalsIgnoreCase(dbType)) {
-                            executor = new SqlServerSelectForUpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                            executor = new SqlServerSelectForUpdateExecutor<>(
+                                    statementProxy, statementCallback, sqlRecognizer);
                         } else {
                             executor = new SelectForUpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
                         }
@@ -126,15 +129,16 @@ public class ExecuteTemplate {
                     case INSERT_ON_DUPLICATE_UPDATE:
                         switch (dbType) {
                             case JdbcConstants.MYSQL:
-                                executor =
-                                        new MySQLInsertOnDuplicateUpdateExecutor(statementProxy, statementCallback, sqlRecognizer);
+                                executor = new MySQLInsertOnDuplicateUpdateExecutor(
+                                        statementProxy, statementCallback, sqlRecognizer);
                                 break;
                             case JdbcConstants.MARIADB:
-                                executor =
-                                        new MariadbInsertOnDuplicateUpdateExecutor(statementProxy, statementCallback, sqlRecognizer);
+                                executor = new MariadbInsertOnDuplicateUpdateExecutor(
+                                        statementProxy, statementCallback, sqlRecognizer);
                                 break;
                             case JdbcConstants.POLARDBX:
-                                executor = new PolarDBXInsertOnDuplicateUpdateExecutor(statementProxy, statementCallback, sqlRecognizer);
+                                executor = new PolarDBXInsertOnDuplicateUpdateExecutor(
+                                        statementProxy, statementCallback, sqlRecognizer);
                                 break;
                             default:
                                 throw new NotSupportYetException(dbType + " not support to INSERT_ON_DUPLICATE_UPDATE");
@@ -143,16 +147,20 @@ public class ExecuteTemplate {
                     case UPDATE_JOIN:
                         switch (dbType) {
                             case JdbcConstants.MYSQL:
-                                executor = new MySQLUpdateJoinExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                                executor =
+                                        new MySQLUpdateJoinExecutor<>(statementProxy, statementCallback, sqlRecognizer);
                                 break;
                             case JdbcConstants.MARIADB:
-                                executor = new MariadbUpdateJoinExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                                executor = new MariadbUpdateJoinExecutor<>(
+                                        statementProxy, statementCallback, sqlRecognizer);
                                 break;
                             case JdbcConstants.POLARDBX:
-                                executor = new PolarDBXUpdateJoinExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                                executor = new PolarDBXUpdateJoinExecutor<>(
+                                        statementProxy, statementCallback, sqlRecognizer);
                                 break;
                             default:
-                                throw new NotSupportYetException(dbType + " not support to " + SQLType.UPDATE_JOIN.name());
+                                throw new NotSupportYetException(
+                                        dbType + " not support to " + SQLType.UPDATE_JOIN.name());
                         }
                         break;
                     default:
@@ -175,5 +183,4 @@ public class ExecuteTemplate {
         }
         return rs;
     }
-
 }

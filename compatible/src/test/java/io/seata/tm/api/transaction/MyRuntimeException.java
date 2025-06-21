@@ -16,7 +16,6 @@
  */
 package io.seata.tm.api.transaction;
 
-
 public class MyRuntimeException extends RuntimeException {
 
     public MyRuntimeException(String msg) {

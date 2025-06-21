@@ -16,19 +16,13 @@
  */
 package org.apache.seata.server.store.db;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.List;
-
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.IOUtil;
 import org.apache.seata.core.store.BranchTransactionDO;
 import org.apache.seata.core.store.GlobalTransactionDO;
 import org.apache.seata.server.DynamicPortTestConfig;
 import org.apache.seata.server.storage.db.store.LogStoreDataBaseDAO;
-import org.apache.commons.dbcp2.BasicDataSource;
 import org.h2.store.fs.FileUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
@@ -38,19 +32,25 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.List;
+
 /**
  */
 @SpringBootTest
 @Import(DynamicPortTestConfig.class)
 public class LogStoreDataBaseDAOTest {
 
-    static LogStoreDataBaseDAO logStoreDataBaseDAO  = null;
+    static LogStoreDataBaseDAO logStoreDataBaseDAO = null;
 
     static BasicDataSource dataSource = null;
 
     @BeforeAll
-    public static void start(ApplicationContext context){
-        dataSource =  new BasicDataSource();
+    public static void start(ApplicationContext context) {
+        dataSource = new BasicDataSource();
         dataSource.setDriverClassName("org.h2.Driver");
         dataSource.setUrl("jdbc:h2:./db_store/log");
         dataSource.setUsername("sa");
@@ -74,16 +74,20 @@ public class LogStoreDataBaseDAOTest {
                 s.execute("drop table global_table");
             } catch (Exception e) {
             }
-//            xid, transaction_id, status, application_id, transaction_service_group, transaction_name, timeout, begin_time, application_data, gmt_create, gmt_modified
-            s.execute("CREATE TABLE global_table ( xid varchar(96) primary key,  transaction_id long , STATUS int,  application_id varchar(32), transaction_service_group varchar(32) ,transaction_name varchar(128) ,timeout int,  begin_time long, application_data varchar(500), gmt_create TIMESTAMP(6) ,gmt_modified TIMESTAMP(6) ) ");
+            //            xid, transaction_id, status, application_id, transaction_service_group, transaction_name,
+            // timeout, begin_time, application_data, gmt_create, gmt_modified
+            s.execute(
+                    "CREATE TABLE global_table ( xid varchar(96) primary key,  transaction_id long , STATUS int,  application_id varchar(32), transaction_service_group varchar(32) ,transaction_name varchar(128) ,timeout int,  begin_time long, application_data varchar(500), gmt_create TIMESTAMP(6) ,gmt_modified TIMESTAMP(6) ) ");
             System.out.println("create table global_table success.");
 
             try {
                 s.execute("drop table branch_table");
             } catch (Exception e) {
             }
-//            xid, transaction_id, branch_id, resource_group_id, resource_id, lock_key, branch_type, status, client_id, application_data, gmt_create, gmt_modified
-            s.execute("CREATE TABLE branch_table ( xid varchar(96),  transaction_id long , branch_id long primary key, resource_group_id varchar(32), resource_id varchar(32) ,lock_key varchar(64) ,branch_type varchar(32) ,  status int , client_id varchar(128),  application_data varchar(500),  gmt_create TIMESTAMP(6) ,gmt_modified TIMESTAMP(6) ) ");
+            //            xid, transaction_id, branch_id, resource_group_id, resource_id, lock_key, branch_type, status,
+            // client_id, application_data, gmt_create, gmt_modified
+            s.execute(
+                    "CREATE TABLE branch_table ( xid varchar(96),  transaction_id long , branch_id long primary key, resource_group_id varchar(32), resource_id varchar(32) ,lock_key varchar(64) ,branch_type varchar(32) ,  status int , client_id varchar(128),  application_data varchar(500),  gmt_create TIMESTAMP(6) ,gmt_modified TIMESTAMP(6) ) ");
             System.out.println("create table branch_table success.");
 
         } catch (Exception e) {
@@ -109,33 +113,33 @@ public class LogStoreDataBaseDAOTest {
         boolean ret = logStoreDataBaseDAO.insertGlobalTransactionDO(globalTransactionDO);
         Assertions.assertTrue(ret);
 
-
         GlobalTransactionDO globalTransactionDO_db = logStoreDataBaseDAO.queryGlobalTransactionDO("abc-123:978786");
         Assertions.assertNotNull(globalTransactionDO_db);
 
         Assertions.assertEquals(globalTransactionDO_db.getBeginTime(), globalTransactionDO_db.getBeginTime());
-        Assertions.assertEquals(globalTransactionDO_db.getTransactionName(), globalTransactionDO_db.getTransactionName());
+        Assertions.assertEquals(
+                globalTransactionDO_db.getTransactionName(), globalTransactionDO_db.getTransactionName());
         Assertions.assertEquals(globalTransactionDO_db.getTransactionId(), globalTransactionDO_db.getTransactionId());
         Assertions.assertEquals(globalTransactionDO_db.getStatus(), globalTransactionDO_db.getStatus());
         Assertions.assertEquals(globalTransactionDO_db.getTimeout(), globalTransactionDO_db.getTimeout());
-        Assertions.assertEquals(globalTransactionDO_db.getTransactionServiceGroup(), globalTransactionDO_db.getTransactionServiceGroup());
+        Assertions.assertEquals(
+                globalTransactionDO_db.getTransactionServiceGroup(),
+                globalTransactionDO_db.getTransactionServiceGroup());
         Assertions.assertEquals(globalTransactionDO_db.getApplicationId(), globalTransactionDO_db.getApplicationId());
         Assertions.assertNotNull(globalTransactionDO_db.getGmtCreate());
         Assertions.assertNotNull(globalTransactionDO_db.getGmtModified());
-
 
         String delSql = "delete from global_table where xid= 'abc-123:978786'";
         Connection conn = null;
         Statement stmt = null;
         try {
             conn = dataSource.getConnection();
-            //delete
+            // delete
             stmt = conn.createStatement();
             stmt.execute(delSql);
         } finally {
             IOUtil.close(stmt, conn);
         }
-
     }
 
     @Test
@@ -159,11 +163,14 @@ public class LogStoreDataBaseDAOTest {
 
         Assertions.assertEquals(globalTransactionDO_db.getXid(), globalTransactionDO_db.getXid());
         Assertions.assertEquals(globalTransactionDO_db.getBeginTime(), globalTransactionDO_db.getBeginTime());
-        Assertions.assertEquals(globalTransactionDO_db.getTransactionName(), globalTransactionDO_db.getTransactionName());
+        Assertions.assertEquals(
+                globalTransactionDO_db.getTransactionName(), globalTransactionDO_db.getTransactionName());
         Assertions.assertEquals(globalTransactionDO_db.getTransactionId(), globalTransactionDO_db.getTransactionId());
         Assertions.assertEquals(globalTransactionDO_db.getStatus(), globalTransactionDO_db.getStatus());
         Assertions.assertEquals(globalTransactionDO_db.getTimeout(), globalTransactionDO_db.getTimeout());
-        Assertions.assertEquals(globalTransactionDO_db.getTransactionServiceGroup(), globalTransactionDO_db.getTransactionServiceGroup());
+        Assertions.assertEquals(
+                globalTransactionDO_db.getTransactionServiceGroup(),
+                globalTransactionDO_db.getTransactionServiceGroup());
         Assertions.assertEquals(globalTransactionDO_db.getApplicationId(), globalTransactionDO_db.getApplicationId());
         Assertions.assertNotNull(globalTransactionDO_db.getGmtCreate());
         Assertions.assertNotNull(globalTransactionDO_db.getGmtModified());
@@ -173,13 +180,12 @@ public class LogStoreDataBaseDAOTest {
         Statement stmt = null;
         try {
             conn = dataSource.getConnection();
-            //delete
+            // delete
             stmt = conn.createStatement();
             stmt.execute(delSql);
         } finally {
             IOUtil.close(stmt, conn);
         }
-
     }
 
     @Test
@@ -229,15 +235,18 @@ public class LogStoreDataBaseDAOTest {
             Assertions.assertTrue(ret);
         }
 
-        List<GlobalTransactionDO> globalTransactionDOs = logStoreDataBaseDAO.queryGlobalTransactionDO(new int[]{1}, 10);
+        List<GlobalTransactionDO> globalTransactionDOs =
+                logStoreDataBaseDAO.queryGlobalTransactionDO(new int[] {1}, 10);
         Assertions.assertNotNull(globalTransactionDOs);
         Assertions.assertEquals(2, globalTransactionDOs.size());
 
-        if("abc-123:5657".equals(globalTransactionDOs.get(0).getXid()) && "abc-123:1267".equals(globalTransactionDOs.get(1).getXid())){
+        if ("abc-123:5657".equals(globalTransactionDOs.get(0).getXid())
+                && "abc-123:1267".equals(globalTransactionDOs.get(1).getXid())) {
             Assertions.assertTrue(true);
-        }else if("abc-123:5657".equals(globalTransactionDOs.get(1).getXid()) && "abc-123:1267".equals(globalTransactionDOs.get(0).getXid())){
+        } else if ("abc-123:5657".equals(globalTransactionDOs.get(1).getXid())
+                && "abc-123:1267".equals(globalTransactionDOs.get(0).getXid())) {
             Assertions.assertTrue(true);
-        }else {
+        } else {
             Assertions.fail();
         }
 
@@ -300,13 +309,13 @@ public class LogStoreDataBaseDAOTest {
             Assertions.assertTrue(ret);
         }
 
-        List<GlobalTransactionDO> globalTransactionDOs = logStoreDataBaseDAO.queryGlobalTransactionDO(new int[]{1}, 1);
+        List<GlobalTransactionDO> globalTransactionDOs = logStoreDataBaseDAO.queryGlobalTransactionDO(new int[] {1}, 1);
         Assertions.assertNotNull(globalTransactionDOs);
         Assertions.assertEquals(1, globalTransactionDOs.size());
 
-        if("abc-123:1267".equals(globalTransactionDOs.get(0).getXid())){
+        if ("abc-123:1267".equals(globalTransactionDOs.get(0).getXid())) {
             Assertions.assertTrue(true);
-        }else {
+        } else {
             Assertions.fail();
         }
 
@@ -320,7 +329,6 @@ public class LogStoreDataBaseDAOTest {
         } finally {
             IOUtil.close(stmt, conn);
         }
-
     }
 
     @Test
@@ -350,7 +358,7 @@ public class LogStoreDataBaseDAOTest {
             rs = stmt.executeQuery(sql);
             if (rs.next()) {
                 Assertions.assertTrue(true);
-            } else{
+            } else {
                 Assertions.fail();
             }
 
@@ -385,15 +393,15 @@ public class LogStoreDataBaseDAOTest {
             conn = dataSource.getConnection();
             stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
-            if(rs.next()){
+            if (rs.next()) {
                 Assertions.assertTrue(true);
                 Assertions.assertEquals(1, rs.getInt("status"));
-            }else{
+            } else {
                 Assertions.fail();
             }
             rs.close();
 
-            //update
+            // update
             globalTransactionDO.setStatus(2);
             Assertions.assertTrue(logStoreDataBaseDAO.updateGlobalTransactionDO(globalTransactionDO));
 
@@ -401,18 +409,17 @@ public class LogStoreDataBaseDAOTest {
             if (rs.next()) {
                 Assertions.assertTrue(true);
                 Assertions.assertEquals(2, rs.getInt("status"));
-            } else{
+            } else {
                 Assertions.fail();
             }
             rs.close();
 
-            //delete
+            // delete
             stmt.execute(delSql);
 
         } finally {
             IOUtil.close(stmt, conn);
         }
-
     }
 
     @Test
@@ -447,26 +454,25 @@ public class LogStoreDataBaseDAOTest {
             }
             rs.close();
 
-            //update
+            // update
             globalTransactionDO.setStatus(2);
-            Assertions.assertTrue(logStoreDataBaseDAO.updateGlobalTransactionDO(globalTransactionDO,1));
+            Assertions.assertTrue(logStoreDataBaseDAO.updateGlobalTransactionDO(globalTransactionDO, 1));
 
             rs = stmt.executeQuery(sql);
             if (rs.next()) {
                 Assertions.assertTrue(true);
                 Assertions.assertEquals(2, rs.getInt("status"));
-            } else{
+            } else {
                 Assertions.assertTrue(false);
             }
             rs.close();
 
-            //delete
+            // delete
             stmt.execute(delSql);
 
         } finally {
             IOUtil.close(stmt, conn);
         }
-
     }
 
     @Test
@@ -485,10 +491,10 @@ public class LogStoreDataBaseDAOTest {
         boolean ret = logStoreDataBaseDAO.insertGlobalTransactionDO(globalTransactionDO);
         Assertions.assertTrue(ret);
 
-        //delete
+        // delete
         Assertions.assertTrue(logStoreDataBaseDAO.deleteGlobalTransactionDO(globalTransactionDO));
 
-        //check
+        // check
 
         String sql = "select * from global_table where xid= 'abc-123:555'";
         Connection conn = null;
@@ -499,7 +505,7 @@ public class LogStoreDataBaseDAOTest {
             ResultSet rs = stmt.executeQuery(sql);
             if (rs.next()) {
                 Assertions.fail();
-            } else{
+            } else {
                 Assertions.assertTrue(true);
             }
             rs.close();
@@ -511,7 +517,7 @@ public class LogStoreDataBaseDAOTest {
     @Test
     public void queryBranchTransactionDO() throws SQLException {
         {
-            //creata data for test
+            // creata data for test
             BranchTransactionDO branchTransactionDO = new BranchTransactionDO();
             branchTransactionDO.setResourceId("qqqq");
             branchTransactionDO.setXid("abc-123:6789");
@@ -529,7 +535,7 @@ public class LogStoreDataBaseDAOTest {
             Assertions.assertTrue(ret);
         }
         {
-            //creata data for test
+            // creata data for test
             BranchTransactionDO branchTransactionDO = new BranchTransactionDO();
             branchTransactionDO.setResourceId("qqqq");
             branchTransactionDO.setXid("abc-123:6789");
@@ -553,7 +559,8 @@ public class LogStoreDataBaseDAOTest {
 
         if (78563453 == rets.get(0).getBranchId() && 345465676 == rets.get(1).getBranchId()) {
             Assertions.assertTrue(true);
-        } else if (78563453 == rets.get(1).getBranchId() && 345465676 == rets.get(0).getBranchId()) {
+        } else if (78563453 == rets.get(1).getBranchId()
+                && 345465676 == rets.get(0).getBranchId()) {
             Assertions.assertTrue(true);
         } else {
             Assertions.fail();
@@ -591,7 +598,6 @@ public class LogStoreDataBaseDAOTest {
         boolean ret = logStoreDataBaseDAO.insertBranchTransactionDO(branchTransactionDO);
         Assertions.assertTrue(ret);
 
-
         String sql = "select * from branch_table where xid= 'abc-123:7777' and branch_id = 1234508";
         String delSql = "delete from branch_table where xid= 'abc-123:7777' and branch_id = 1234508";
         Connection conn = null;
@@ -611,7 +617,6 @@ public class LogStoreDataBaseDAOTest {
         } finally {
             IOUtil.close(stmt, conn);
         }
-
     }
 
     @Test
@@ -675,7 +680,6 @@ public class LogStoreDataBaseDAOTest {
         boolean ret = logStoreDataBaseDAO.insertBranchTransactionDO(branchTransactionDO);
         Assertions.assertTrue(ret);
 
-
         String sql = "select * from branch_table where xid= 'abc-123:9999' and branch_id = 34567798";
         String delSql = "delete from branch_table where xid= 'abc-123:9999' and branch_id = 34567798";
         Connection conn = null;
@@ -692,7 +696,7 @@ public class LogStoreDataBaseDAOTest {
             }
             rs.close();
 
-            //delete
+            // delete
             logStoreDataBaseDAO.deleteBranchTransactionDO(branchTransactionDO);
 
             rs = stmt.executeQuery(sql);
@@ -713,5 +717,4 @@ public class LogStoreDataBaseDAOTest {
         dataSource.close();
         FileUtils.deleteRecursive("db_store", true);
     }
-
 }

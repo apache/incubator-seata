@@ -23,11 +23,11 @@ import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.logging.Logger;
 
-
 public class MockDataSource implements DataSource {
     @Override
     public Connection getConnection() throws SQLException {
-        return new MockConnection(new MockDriver(), "jdbc:mysql://127.0.0.1:3306/seata?rewriteBatchedStatements=true", null);
+        return new MockConnection(
+                new MockDriver(), "jdbc:mysql://127.0.0.1:3306/seata?rewriteBatchedStatements=true", null);
     }
 
     @Override
@@ -51,14 +51,10 @@ public class MockDataSource implements DataSource {
     }
 
     @Override
-    public void setLogWriter(PrintWriter out) throws SQLException {
-
-    }
+    public void setLogWriter(PrintWriter out) throws SQLException {}
 
     @Override
-    public void setLoginTimeout(int seconds) throws SQLException {
-
-    }
+    public void setLoginTimeout(int seconds) throws SQLException {}
 
     @Override
     public int getLoginTimeout() throws SQLException {

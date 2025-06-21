@@ -21,10 +21,10 @@ import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.core.model.Result;
 import org.apache.seata.rm.datasource.sql.struct.Field;
 import org.apache.seata.rm.datasource.sql.struct.Row;
-import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
 import org.apache.seata.rm.datasource.undo.AbstractUndoLogManager;
 import org.apache.seata.rm.datasource.undo.parser.FastjsonUndoLogParser;
+import org.apache.seata.sqlparser.struct.TableMeta;
 
 import java.math.BigDecimal;
 import java.sql.Date;
@@ -32,11 +32,11 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.HashMap;
-import java.util.Comparator;
 import java.util.stream.Collectors;
 
 /**
@@ -45,9 +45,7 @@ import java.util.stream.Collectors;
  */
 public class DataCompareUtils {
 
-    private DataCompareUtils() {
-
-    }
+    private DataCompareUtils() {}
 
     /**
      * Is field equals result.
@@ -63,13 +61,13 @@ public class DataCompareUtils {
             if (f1 == null) {
                 return Result.build(false);
             } else {
-                if (StringUtils.equalsIgnoreCase(f0.getName(), f1.getName())
-                        && f0.getType() == f1.getType()) {
+                if (StringUtils.equalsIgnoreCase(f0.getName(), f1.getName()) && f0.getType() == f1.getType()) {
                     if (f0.getValue() == null) {
                         return Result.build(f1.getValue() == null);
                     } else {
                         if (f1.getValue() == null) {
-                            return Result.buildWithParams(false, "Field not equals, name {}, new value is null", f0.getName());
+                            return Result.buildWithParams(
+                                    false, "Field not equals, name {}, new value is null", f0.getName());
                         } else {
                             String currentSerializer = AbstractUndoLogManager.getCurrentSerializer();
                             if (StringUtils.equals(currentSerializer, FastjsonUndoLogParser.NAME)) {
@@ -79,12 +77,23 @@ public class DataCompareUtils {
                             if (result) {
                                 return Result.ok();
                             } else {
-                                return Result.buildWithParams(false, "Field not equals, name {}, old value {}, new value {}", f0.getName(), f0.getValue(), f1.getValue());
+                                return Result.buildWithParams(
+                                        false,
+                                        "Field not equals, name {}, old value {}, new value {}",
+                                        f0.getName(),
+                                        f0.getValue(),
+                                        f1.getValue());
                             }
                         }
                     }
                 } else {
-                    return Result.buildWithParams(false, "Field not equals, old name {} type {}, new name {} type {}", f0.getName(), f0.getType(), f1.getName(), f1.getType());
+                    return Result.buildWithParams(
+                            false,
+                            "Field not equals, old name {} type {}, new name {} type {}",
+                            f0.getName(),
+                            f0.getType(),
+                            f1.getName(),
+                            f1.getType());
                 }
             }
         }
@@ -147,7 +156,7 @@ public class DataCompareUtils {
             }
             if (beforeImage.getTableName().equalsIgnoreCase(afterImage.getTableName())
                     && CollectionUtils.isSizeEquals(beforeImage.getRows(), afterImage.getRows())) {
-                //when image is EmptyTableRecords, getTableMeta will throw an exception
+                // when image is EmptyTableRecords, getTableMeta will throw an exception
                 if (CollectionUtils.isEmpty(beforeImage.getRows())) {
                     return Result.ok();
                 }
@@ -191,7 +200,11 @@ public class DataCompareUtils {
                 Field oldField = oldRowEntry.getValue();
                 Field newField = newRow.get(fieldName);
                 if (newField == null) {
-                    return Result.buildWithParams(false, "compare row failed, rowKey {}, fieldName {}, reason [newField is null]", key, fieldName);
+                    return Result.buildWithParams(
+                            false,
+                            "compare row failed, rowKey {}, fieldName {}, reason [newField is null]",
+                            key,
+                            fieldName);
                 }
                 Result<Boolean> oldEqualsNewFieldResult = isFieldEquals(oldField, newField);
                 if (!oldEqualsNewFieldResult.getResult()) {
@@ -213,7 +226,7 @@ public class DataCompareUtils {
         // {value of primaryKey, value of all columns}
         Map<String, Map<String, Field>> rowMap = new HashMap<>();
         for (Row row : rowList) {
-            //ensure the order of column
+            // ensure the order of column
             List<Field> rowFieldList = row.getFields().stream()
                     .sorted(Comparator.comparing(Field::getName))
                     .collect(Collectors.toList());
@@ -236,6 +249,4 @@ public class DataCompareUtils {
         }
         return rowMap;
     }
-
-
 }

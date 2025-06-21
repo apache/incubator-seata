@@ -14,8 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import java.util.Date;
-
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchStatus;
@@ -33,6 +31,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jdbc.UncategorizedSQLException;
 import org.springframework.jdbc.core.JdbcTemplate;
+
+import java.util.Date;
 
 /**
  * The type Data source basic test.
@@ -55,16 +55,12 @@ public class LocalTransactionWithGlobalLockDataSourceBasicTest {
         // Mock DataSourceManager
         initClient();
         DefaultResourceManager.mockResourceManager(BranchType.AT, new MockDataSourceManager());
-        context = new ClassPathXmlApplicationContext(
-                "basic-test-context.xml");
-        jdbcTemplate = (JdbcTemplate) context
-                .getBean("jdbcTemplate");
-        directJdbcTemplate = (JdbcTemplate) context
-                .getBean("directJdbcTemplate");
+        context = new ClassPathXmlApplicationContext("basic-test-context.xml");
+        jdbcTemplate = (JdbcTemplate) context.getBean("jdbcTemplate");
+        directJdbcTemplate = (JdbcTemplate) context.getBean("directJdbcTemplate");
 
         directJdbcTemplate.execute("delete from user0");
         directJdbcTemplate.execute("delete from user1");
-
     }
 
     /**
@@ -73,8 +69,7 @@ public class LocalTransactionWithGlobalLockDataSourceBasicTest {
     @Test
     public void testInsert() {
         RootContext.bindGlobalLockFlag();
-        jdbcTemplate.update("insert into user0 (id, name, gmt) values (?, ?, ?)",
-                new Object[]{2, "xxx", new Date()});
+        jdbcTemplate.update("insert into user0 (id, name, gmt) values (?, ?, ?)", new Object[] {2, "xxx", new Date()});
     }
 
     /**
@@ -86,8 +81,8 @@ public class LocalTransactionWithGlobalLockDataSourceBasicTest {
         new AbstractLockConflictExecuteTemplate() {
             @Override
             public void doExecute() {
-                jdbcTemplate.update("insert into user0 (id, name, gmt) values (?, ?, ?)",
-                        new Object[]{3, "xxx", new Date()});
+                jdbcTemplate.update(
+                        "insert into user0 (id, name, gmt) values (?, ?, ?)", new Object[] {3, "xxx", new Date()});
             }
         }.execute();
     }
@@ -98,7 +93,7 @@ public class LocalTransactionWithGlobalLockDataSourceBasicTest {
     @Test
     public void testUpdate() {
         RootContext.bindGlobalLockFlag();
-        jdbcTemplate.update("update user0 a set a.name = 'yyyy' where a.id = ?", new Object[]{1});
+        jdbcTemplate.update("update user0 a set a.name = 'yyyy' where a.id = ?", new Object[] {1});
     }
 
     @Test
@@ -108,8 +103,7 @@ public class LocalTransactionWithGlobalLockDataSourceBasicTest {
         new AbstractLockConflictExecuteTemplate() {
             @Override
             public void doExecute() {
-                jdbcTemplate.update("update user0 a set a.name = 'yyyy' where a.id = ?", new Object[]{1});
-
+                jdbcTemplate.update("update user0 a set a.name = 'yyyy' where a.id = ?", new Object[] {1});
             }
         }.execute();
     }
@@ -120,32 +114,29 @@ public class LocalTransactionWithGlobalLockDataSourceBasicTest {
     @Test
     public void testUpdateWithAlias1() {
 
-        directJdbcTemplate.update("delete from User1 where Id = ?",
-                new Object[]{1});
-        directJdbcTemplate.update("insert into User1 (Id, Name, gMt) values (?, ?, ?)",
-                new Object[]{1, "xxx", new Date()});
+        directJdbcTemplate.update("delete from User1 where Id = ?", new Object[] {1});
+        directJdbcTemplate.update(
+                "insert into User1 (Id, Name, gMt) values (?, ?, ?)", new Object[] {1, "xxx", new Date()});
 
         RootContext.bindGlobalLockFlag();
-        jdbcTemplate.update("update User1 a set a.Name = 'yyy' where a.Name = ?", new Object[]{"xxx"});
+        jdbcTemplate.update("update User1 a set a.Name = 'yyy' where a.Name = ?", new Object[] {"xxx"});
     }
 
     @Test
     public void testUpdateWithAlias1WithLockConflict() {
 
-        directJdbcTemplate.update("delete from User1 where Id = ?",
-                new Object[]{1});
-        directJdbcTemplate.update("insert into User1 (Id, Name, gMt) values (?, ?, ?)",
-                new Object[]{1, "xxx", new Date()});
+        directJdbcTemplate.update("delete from User1 where Id = ?", new Object[] {1});
+        directJdbcTemplate.update(
+                "insert into User1 (Id, Name, gMt) values (?, ?, ?)", new Object[] {1, "xxx", new Date()});
 
         RootContext.bindGlobalLockFlag();
         new AbstractLockConflictExecuteTemplate() {
 
             @Override
             public void doExecute() {
-                jdbcTemplate.update("update User1 a set a.Name = 'yyy' where a.Name = ?", new Object[]{"xxx"});
+                jdbcTemplate.update("update User1 a set a.Name = 'yyy' where a.Name = ?", new Object[] {"xxx"});
             }
         };
-
     }
 
     /**
@@ -154,7 +145,7 @@ public class LocalTransactionWithGlobalLockDataSourceBasicTest {
     @Test
     public void testDelete() {
         RootContext.bindGlobalLockFlag();
-        jdbcTemplate.update("delete from user0 where id = ?", new Object[]{2});
+        jdbcTemplate.update("delete from user0 where id = ?", new Object[] {2});
     }
 
     /**
@@ -167,7 +158,7 @@ public class LocalTransactionWithGlobalLockDataSourceBasicTest {
 
             @Override
             public void doExecute() {
-                jdbcTemplate.update("delete from user0 where id = ?", new Object[]{2});
+                jdbcTemplate.update("delete from user0 where id = ?", new Object[] {2});
             }
         };
     }
@@ -178,7 +169,7 @@ public class LocalTransactionWithGlobalLockDataSourceBasicTest {
     @Test
     public void testSelectForUpdate() {
         RootContext.bindGlobalLockFlag();
-        jdbcTemplate.queryForRowSet("select a.name from user0 a where a.id = ? for update", new Object[]{1});
+        jdbcTemplate.queryForRowSet("select a.name from user0 a where a.id = ? for update", new Object[] {1});
     }
 
     /**
@@ -191,7 +182,7 @@ public class LocalTransactionWithGlobalLockDataSourceBasicTest {
 
             @Override
             public void doExecute() {
-                jdbcTemplate.queryForRowSet("select a.name from user0 a where a.id = ? for update", new Object[]{1});
+                jdbcTemplate.queryForRowSet("select a.name from user0 a where a.id = ? for update", new Object[] {1});
             }
         };
     }
@@ -199,13 +190,21 @@ public class LocalTransactionWithGlobalLockDataSourceBasicTest {
     public static class MockDataSourceManager extends DataSourceManager {
 
         @Override
-        public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys)
+        public Long branchRegister(
+                BranchType branchType,
+                String resourceId,
+                String clientId,
+                String xid,
+                String applicationData,
+                String lockKeys)
                 throws TransactionException {
             throw new RuntimeException("this method should not be called!");
         }
 
         @Override
-        public void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status, String applicationData) throws TransactionException {
+        public void branchReport(
+                BranchType branchType, String xid, long branchId, BranchStatus status, String applicationData)
+                throws TransactionException {
             throw new RuntimeException("this method should not be called!");
         }
 
@@ -216,22 +215,21 @@ public class LocalTransactionWithGlobalLockDataSourceBasicTest {
         }
 
         @Override
-        public void registerResource(Resource resource) {
-
-        }
+        public void registerResource(Resource resource) {}
 
         @Override
-        public void unregisterResource(Resource resource) {
-
-        }
+        public void unregisterResource(Resource resource) {}
 
         @Override
-        public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId, String applicationData) throws TransactionException {
+        public BranchStatus branchCommit(
+                BranchType branchType, String xid, long branchId, String resourceId, String applicationData)
+                throws TransactionException {
             throw new RuntimeException("this method should not be called!");
         }
 
         @Override
-        public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId, String applicationData)
+        public BranchStatus branchRollback(
+                BranchType branchType, String xid, long branchId, String resourceId, String applicationData)
                 throws TransactionException {
             throw new RuntimeException("this method should not be called!");
         }
@@ -268,7 +266,6 @@ public class LocalTransactionWithGlobalLockDataSourceBasicTest {
         }
 
         public abstract void doExecute();
-
     }
 
     /**

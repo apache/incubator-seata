@@ -67,8 +67,8 @@ public class NettyRemotingClientSendSyncInterceptorTest {
         rpcMessage.setBody(request);
         rpcMessage.setHeadMap(new HashMap<>());
 
-        Object[] allArguments = new Object[] { channel, rpcMessage };
-        Class<?>[] argumentTypes = new Class[] { Channel.class, RpcMessage.class };
+        Object[] allArguments = new Object[] {channel, rpcMessage};
+        Class<?>[] argumentTypes = new Class[] {Channel.class, RpcMessage.class};
 
         try (MockedStatic<ContextManager> contextManagerMockedStatic = Mockito.mockStatic(ContextManager.class)) {
             AbstractSpan span = mock(AbstractSpan.class);
@@ -86,7 +86,7 @@ public class NettyRemotingClientSendSyncInterceptorTest {
         }
 
         // afterMethod should call ContextManager.stopSpan if body is AbstractMessage
-        Object[] afterArgs = new Object[] { rpcMessage };
+        Object[] afterArgs = new Object[] {rpcMessage};
         try (MockedStatic<ContextManager> contextManagerMockedStatic = Mockito.mockStatic(ContextManager.class)) {
             contextManagerMockedStatic.when(ContextManager::stopSpan).then(invocation -> null);
 

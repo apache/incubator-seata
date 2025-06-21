@@ -16,13 +16,9 @@
  */
 package org.apache.seata.at.mysql;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.Statement;
-
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.util.JdbcUtils;
-
+import org.apache.seata.common.util.UUIDGenerator;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchStatus;
@@ -33,13 +29,15 @@ import org.apache.seata.rm.datasource.DataSourceManager;
 import org.apache.seata.rm.datasource.DataSourceProxy;
 import org.apache.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
-import org.apache.seata.common.util.UUIDGenerator;
 import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
 
 /**
  */
@@ -54,7 +52,6 @@ public class MysqlUpdateJoinTest {
     private static final String mysql_username = "demo";
     private static final String mysql_password = "demo";
     private static final String mysql_driverClassName = JdbcUtils.MYSQL_DRIVER;
-
 
     @Test
     @Disabled
@@ -74,7 +71,6 @@ public class MysqlUpdateJoinTest {
         helperStat.close();
         helperConn.close();
     }
-
 
     private void doTestPhase2(boolean globalCommit, String updateSql) throws Throwable {
         // init DataSource: helper
@@ -96,13 +92,13 @@ public class MysqlUpdateJoinTest {
         // >>> query before image
         helperConn = helperDS.getConnection();
         helperStat = helperConn.createStatement();
-        table1HelperRes = helperStat.executeQuery("select * from t where id = " + testRecordId );
-        TableMeta table1Meta = TableMetaCacheFactory.getTableMetaCache(JdbcConstants.MYSQL).getTableMeta(dataSourceProxy.getPlainConnection(),
-                "t", dataSourceProxy.getResourceId());
+        table1HelperRes = helperStat.executeQuery("select * from t where id = " + testRecordId);
+        TableMeta table1Meta = TableMetaCacheFactory.getTableMetaCache(JdbcConstants.MYSQL)
+                .getTableMeta(dataSourceProxy.getPlainConnection(), "t", dataSourceProxy.getResourceId());
         TableRecords table1BeforeImage = TableRecords.buildRecords(table1Meta, table1HelperRes);
         table2HelperRes = helperStat.executeQuery("select * from t1 where id = " + testRecordId1);
-        TableMeta table2Meta = TableMetaCacheFactory.getTableMetaCache(JdbcConstants.MYSQL).getTableMeta(dataSourceProxy.getPlainConnection(),
-                "t1", dataSourceProxy.getResourceId());
+        TableMeta table2Meta = TableMetaCacheFactory.getTableMetaCache(JdbcConstants.MYSQL)
+                .getTableMeta(dataSourceProxy.getPlainConnection(), "t1", dataSourceProxy.getResourceId());
         TableRecords table2BeforeImage = TableRecords.buildRecords(table2Meta, table2HelperRes);
         // >>> update record should not throw exception
         Assertions.assertDoesNotThrow(() -> testStat.execute(updateSql));
@@ -113,10 +109,21 @@ public class MysqlUpdateJoinTest {
 
         if (globalCommit) {
             // >>> Global Tx Phase 2: commit should not throw exception
-            Assertions.assertDoesNotThrow(() -> DefaultResourceManager.get().branchCommit(dataSourceProxy.getBranchType(), mockXid, mockBranchId,
-                    dataSourceProxy.getResourceId(), null));
+            Assertions.assertDoesNotThrow(() -> DefaultResourceManager.get()
+                    .branchCommit(
+                            dataSourceProxy.getBranchType(),
+                            mockXid,
+                            mockBranchId,
+                            dataSourceProxy.getResourceId(),
+                            null));
         } else {
-            DefaultResourceManager.get().branchRollback(dataSourceProxy.getBranchType(), mockXid, mockBranchId, dataSourceProxy.getResourceId(), null);
+            DefaultResourceManager.get()
+                    .branchRollback(
+                            dataSourceProxy.getBranchType(),
+                            mockXid,
+                            mockBranchId,
+                            dataSourceProxy.getResourceId(),
+                            null);
             // >>> Global Tx Phase 2: rollback have a check,rollbacked record must equal to before image
             helperConn = helperDS.getConnection();
             helperStat = helperConn.createStatement();
@@ -124,8 +131,10 @@ public class MysqlUpdateJoinTest {
             TableRecords table1CurrentImage = TableRecords.buildRecords(table1Meta, table1HelperRes);
             table2HelperRes = helperStat.executeQuery("select * from t1 where id = " + testRecordId1);
             TableRecords table2CurrentImage = TableRecords.buildRecords(table2Meta, table2HelperRes);
-            Assertions.assertTrue(DataCompareUtils.isRecordsEquals(table1BeforeImage, table1CurrentImage).getResult());
-            Assertions.assertTrue(DataCompareUtils.isRecordsEquals(table2BeforeImage, table2CurrentImage).getResult());
+            Assertions.assertTrue(DataCompareUtils.isRecordsEquals(table1BeforeImage, table1CurrentImage)
+                    .getResult());
+            Assertions.assertTrue(DataCompareUtils.isRecordsEquals(table2BeforeImage, table2CurrentImage)
+                    .getResult());
             table1HelperRes.close();
             table2HelperRes.close();
             helperStat.close();
@@ -139,15 +148,22 @@ public class MysqlUpdateJoinTest {
         // mock the RM of AT
         DefaultResourceManager.mockResourceManager(BranchType.AT, new DataSourceManager() {
             @Override
-            public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws TransactionException {
+            public Long branchRegister(
+                    BranchType branchType,
+                    String resourceId,
+                    String clientId,
+                    String xid,
+                    String applicationData,
+                    String lockKeys)
+                    throws TransactionException {
                 return mockBranchId;
             }
 
             @Override
-            public void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status, String applicationData) throws TransactionException {
-            }
+            public void branchReport(
+                    BranchType branchType, String xid, long branchId, BranchStatus status, String applicationData)
+                    throws TransactionException {}
         });
-
     }
 
     private static DruidDataSource createNewDruidDataSource() throws Throwable {

@@ -21,5 +21,4 @@ package io.seata.tm;
  *
  */
 @Deprecated
-public class TMClient extends org.apache.seata.tm.TMClient {
-}
+public class TMClient extends org.apache.seata.tm.TMClient {}

@@ -20,6 +20,4 @@ package org.apache.seata.saga.statelang.domain;
  * SucceedEndState
  *
  */
-public interface SucceedEndState extends EndState {
-
-}
+public interface SucceedEndState extends EndState {}

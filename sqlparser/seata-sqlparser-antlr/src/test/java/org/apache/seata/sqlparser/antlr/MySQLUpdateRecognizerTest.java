@@ -16,14 +16,14 @@
  */
 package org.apache.seata.sqlparser.antlr;
 
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.apache.seata.sqlparser.antlr.mysql.MySqlContext;
 import org.apache.seata.sqlparser.antlr.mysql.listener.UpdateSpecificationSqlListener;
 import org.apache.seata.sqlparser.antlr.mysql.parser.MySqlLexer;
 import org.apache.seata.sqlparser.antlr.mysql.parser.MySqlParser;
 import org.apache.seata.sqlparser.antlr.mysql.stream.ANTLRNoCaseStringStream;
 import org.apache.seata.sqlparser.antlr.mysql.visit.StatementSqlVisitor;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -70,8 +70,10 @@ public class MySQLUpdateRecognizerTest {
 
         Assertions.assertEquals("t1", mySqlContext.getTableName());
         Assertions.assertEquals(1, mySqlContext.getUpdateForValues().size());
-        Assertions.assertEquals("a.id", mySqlContext.getUpdateForWhereColumnNames().get(0).getUpdateWhereColumnName());
-        Assertions.assertEquals("a.name", mySqlContext.getUpdateFoColumnNames().get(0).getUpdateColumn());
+        Assertions.assertEquals(
+                "a.id", mySqlContext.getUpdateForWhereColumnNames().get(0).getUpdateWhereColumnName());
+        Assertions.assertEquals(
+                "a.name", mySqlContext.getUpdateFoColumnNames().get(0).getUpdateColumn());
         Assertions.assertEquals("a.id = 'id1'", mySqlContext.getWhereCondition());
         Assertions.assertEquals("a", mySqlContext.getTableAlias());
     }
@@ -96,10 +98,14 @@ public class MySQLUpdateRecognizerTest {
         walker.walk(new UpdateSpecificationSqlListener(mySqlContext), rootContext);
 
         Assertions.assertEquals("t1", mySqlContext.getTableName());
-        Assertions.assertEquals("name1", mySqlContext.getUpdateFoColumnNames().get(0).getUpdateColumn());
-        Assertions.assertEquals("name1", mySqlContext.getUpdateForValues().get(0).getUpdateValue());
-        Assertions.assertEquals("name2", mySqlContext.getUpdateFoColumnNames().get(1).getUpdateColumn());
-        Assertions.assertEquals("name2", mySqlContext.getUpdateForValues().get(1).getUpdateValue());
+        Assertions.assertEquals(
+                "name1", mySqlContext.getUpdateFoColumnNames().get(0).getUpdateColumn());
+        Assertions.assertEquals(
+                "name1", mySqlContext.getUpdateForValues().get(0).getUpdateValue());
+        Assertions.assertEquals(
+                "name2", mySqlContext.getUpdateFoColumnNames().get(1).getUpdateColumn());
+        Assertions.assertEquals(
+                "name2", mySqlContext.getUpdateForValues().get(1).getUpdateValue());
         Assertions.assertEquals("id = 'id1'", mySqlContext.getWhereCondition());
     }
 
@@ -127,9 +133,12 @@ public class MySQLUpdateRecognizerTest {
 
         System.out.println(updateForWhereValColumnNames);
 
-        Assertions.assertEquals("?", mySqlContext.getUpdateForWhereValColumnNames().get(0).getUpdateWhereValColumnName());
-        Assertions.assertEquals("name1", mySqlContext.getUpdateFoColumnNames().get(0).getUpdateColumn());
-        Assertions.assertEquals("name2", mySqlContext.getUpdateFoColumnNames().get(1).getUpdateColumn());
+        Assertions.assertEquals(
+                "?", mySqlContext.getUpdateForWhereValColumnNames().get(0).getUpdateWhereValColumnName());
+        Assertions.assertEquals(
+                "name1", mySqlContext.getUpdateFoColumnNames().get(0).getUpdateColumn());
+        Assertions.assertEquals(
+                "name2", mySqlContext.getUpdateFoColumnNames().get(1).getUpdateColumn());
         Assertions.assertEquals("id = ?", mySqlContext.getWhereCondition());
     }
 
@@ -153,11 +162,15 @@ public class MySQLUpdateRecognizerTest {
         ParseTreeWalker walker = new ParseTreeWalker();
         walker.walk(new UpdateSpecificationSqlListener(mySqlContext), rootContext);
 
-        Assertions.assertEquals("1", mySqlContext.getUpdateForWhereValColumnNames().get(0).getUpdateWhereValColumnName());
+        Assertions.assertEquals(
+                "1", mySqlContext.getUpdateForWhereValColumnNames().get(0).getUpdateWhereValColumnName());
         Assertions.assertEquals("t1", mySqlContext.getTableName());
-        Assertions.assertEquals("t.name1", mySqlContext.getUpdateFoColumnNames().get(0).getUpdateColumn());
-        Assertions.assertEquals("'name1'", mySqlContext.getUpdateForValues().get(0).getUpdateValue());
-        Assertions.assertEquals("t.name2", mySqlContext.getUpdateFoColumnNames().get(1).getUpdateColumn());
+        Assertions.assertEquals(
+                "t.name1", mySqlContext.getUpdateFoColumnNames().get(0).getUpdateColumn());
+        Assertions.assertEquals(
+                "'name1'", mySqlContext.getUpdateForValues().get(0).getUpdateValue());
+        Assertions.assertEquals(
+                "t.name2", mySqlContext.getUpdateFoColumnNames().get(1).getUpdateColumn());
         Assertions.assertEquals("id in (1,2)", mySqlContext.getWhereCondition());
         Assertions.assertEquals("t", mySqlContext.getTableAlias());
     }
@@ -182,10 +195,14 @@ public class MySQLUpdateRecognizerTest {
         ParseTreeWalker walker = new ParseTreeWalker();
         walker.walk(new UpdateSpecificationSqlListener(mySqlContext), rootContext);
         Assertions.assertEquals("t1", mySqlContext.getTableName());
-        Assertions.assertEquals("name1", mySqlContext.getUpdateFoColumnNames().get(0).getUpdateColumn());
-        Assertions.assertEquals("'name1'", mySqlContext.getUpdateForValues().get(0).getUpdateValue());
-        Assertions.assertEquals("name2", mySqlContext.getUpdateFoColumnNames().get(1).getUpdateColumn());
-        Assertions.assertEquals("2", mySqlContext.getUpdateForWhereValColumnNames().get(1).getUpdateWhereValColumnName());
+        Assertions.assertEquals(
+                "name1", mySqlContext.getUpdateFoColumnNames().get(0).getUpdateColumn());
+        Assertions.assertEquals(
+                "'name1'", mySqlContext.getUpdateForValues().get(0).getUpdateValue());
+        Assertions.assertEquals(
+                "name2", mySqlContext.getUpdateFoColumnNames().get(1).getUpdateColumn());
+        Assertions.assertEquals(
+                "2", mySqlContext.getUpdateForWhereValColumnNames().get(1).getUpdateWhereValColumnName());
         Assertions.assertEquals("id between 1 and 2", mySqlContext.getWhereCondition());
     }
 }

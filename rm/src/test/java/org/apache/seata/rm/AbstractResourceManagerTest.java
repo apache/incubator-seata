@@ -55,14 +55,16 @@ public class AbstractResourceManagerTest {
         }
 
         @Override
-        public BranchStatus branchCommit(BranchType branchType, String xid, long branchId,
-                                         String resourceId, String applicationData) throws TransactionException {
+        public BranchStatus branchCommit(
+                BranchType branchType, String xid, long branchId, String resourceId, String applicationData)
+                throws TransactionException {
             throw new UnsupportedOperationException("Not implemented for test.");
         }
 
         @Override
-        public BranchStatus branchRollback(BranchType branchType, String xid, long branchId,
-                                           String resourceId, String applicationData) throws TransactionException {
+        public BranchStatus branchRollback(
+                BranchType branchType, String xid, long branchId, String resourceId, String applicationData)
+                throws TransactionException {
             throw new UnsupportedOperationException("Not implemented for test.");
         }
 
@@ -71,7 +73,6 @@ public class AbstractResourceManagerTest {
             return new HashMap<>();
         }
     };
-
 
     @Test
     void testBranchRegisterSuccess() throws Exception {
@@ -101,8 +102,9 @@ public class AbstractResourceManagerTest {
             mockedStatic.when(RmNettyRemotingClient::getInstance).thenReturn(mockClient);
             Mockito.when(mockClient.sendSyncRequest(any())).thenReturn(mockResponse);
 
-            assertThrows(RmTransactionException.class, () ->
-                    rm.branchRegister(BranchType.AT, "res1", "client1", "xid123", "appData", "lockKeys"));
+            assertThrows(
+                    RmTransactionException.class,
+                    () -> rm.branchRegister(BranchType.AT, "res1", "client1", "xid123", "appData", "lockKeys"));
         }
     }
 
@@ -113,8 +115,9 @@ public class AbstractResourceManagerTest {
             mockedStatic.when(RmNettyRemotingClient::getInstance).thenReturn(mockClient);
             Mockito.when(mockClient.sendSyncRequest(any())).thenThrow(new TimeoutException("timeout"));
 
-            RmTransactionException exception = assertThrows(RmTransactionException.class, () ->
-                    rm.branchRegister(BranchType.AT, "res1", "client1", "xid123", "appData", "lockKeys"));
+            RmTransactionException exception = assertThrows(
+                    RmTransactionException.class,
+                    () -> rm.branchRegister(BranchType.AT, "res1", "client1", "xid123", "appData", "lockKeys"));
             assertTrue(exception.getMessage().contains("timeout"));
         }
     }
@@ -129,8 +132,8 @@ public class AbstractResourceManagerTest {
             mockedStatic.when(RmNettyRemotingClient::getInstance).thenReturn(mockClient);
             Mockito.when(mockClient.sendSyncRequest(any())).thenReturn(mockResponse);
 
-            assertDoesNotThrow(() ->
-                    rm.branchReport(BranchType.AT, "xid123", 100L, BranchStatus.PhaseOne_Done, "appData"));
+            assertDoesNotThrow(
+                    () -> rm.branchReport(BranchType.AT, "xid123", 100L, BranchStatus.PhaseOne_Done, "appData"));
         }
     }
 
@@ -146,8 +149,9 @@ public class AbstractResourceManagerTest {
             mockedStatic.when(RmNettyRemotingClient::getInstance).thenReturn(mockClient);
             Mockito.when(mockClient.sendSyncRequest(any())).thenReturn(mockResponse);
 
-            assertThrows(RmTransactionException.class, () ->
-                    rm.branchReport(BranchType.AT, "xid123", 100L, BranchStatus.PhaseOne_Failed, "appData"));
+            assertThrows(
+                    RmTransactionException.class,
+                    () -> rm.branchReport(BranchType.AT, "xid123", 100L, BranchStatus.PhaseOne_Failed, "appData"));
         }
     }
 
@@ -173,8 +177,8 @@ public class AbstractResourceManagerTest {
             mockedStatic.when(RmNettyRemotingClient::getInstance).thenReturn(mockClient);
             Mockito.when(mockClient.sendSyncRequest(any())).thenThrow(new TimeoutException("timeout"));
 
-            RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                    rm.getGlobalStatus(BranchType.AT, "xid123"));
+            RuntimeException ex =
+                    assertThrows(RuntimeException.class, () -> rm.getGlobalStatus(BranchType.AT, "xid123"));
             assertTrue(ex.getMessage().contains("timeout"));
         }
     }
@@ -204,5 +208,4 @@ public class AbstractResourceManagerTest {
     void testLockQueryDefaultFalse() throws TransactionException {
         assertFalse(rm.lockQuery(BranchType.AT, "resId", "xid123", "lockKeys"));
     }
-
 }

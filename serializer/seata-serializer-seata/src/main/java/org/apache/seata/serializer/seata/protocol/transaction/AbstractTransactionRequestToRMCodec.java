@@ -28,5 +28,4 @@ public abstract class AbstractTransactionRequestToRMCodec extends AbstractTransa
     public Class<?> getMessageClassType() {
         return AbstractTransactionRequestToRM.class;
     }
-
 }

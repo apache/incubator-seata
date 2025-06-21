@@ -16,13 +16,6 @@
  */
 package org.apache.seata.server.coordinator;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.stream.Stream;
-
 import io.netty.channel.Channel;
 import org.apache.seata.common.DefaultValues;
 import org.apache.seata.common.XID;
@@ -63,6 +56,13 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
+
+import java.io.IOException;
+import java.util.Collection;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.stream.Stream;
 
 /**
  * The type DefaultCoordinator test.
@@ -143,7 +143,6 @@ public class DefaultCoordinatorTest {
         Assertions.assertEquals(result, BranchStatus.PhaseTwo_Rollbacked);
     }
 
-
     @Test
     public void test_handleRetryRollbacking() throws TransactionException, InterruptedException {
 
@@ -157,12 +156,13 @@ public class DefaultCoordinatorTest {
 
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
         Assertions.assertNull(globalSession);
-
     }
 
     @Test
-    @EnabledOnJre({JRE.JAVA_8, JRE.JAVA_11}) // `ReflectionUtil.modifyStaticFinalField` does not supported java17 and above versions
-    public void test_handleRetryRollbackingTimeOut() throws TransactionException, InterruptedException, NoSuchFieldException, IllegalAccessException {
+    @EnabledOnJre({JRE.JAVA_8, JRE.JAVA_11
+    }) // `ReflectionUtil.modifyStaticFinalField` does not supported java17 and above versions
+    public void test_handleRetryRollbackingTimeOut()
+            throws TransactionException, InterruptedException, NoSuchFieldException, IllegalAccessException {
         String xid = core.begin(applicationId, txServiceGroup, txName, 10);
         Long branchId = core.branchRegister(BranchType.AT, "abcd", clientId, xid, applicationData, lockKeys_2);
 
@@ -172,7 +172,8 @@ public class DefaultCoordinatorTest {
         Assertions.assertNotNull(branchId);
 
         ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "MAX_ROLLBACK_RETRY_TIMEOUT", 10L);
-        ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE", false);
+        ReflectionUtil.modifyStaticFinalField(
+                defaultCoordinator.getClass(), "ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE", false);
         TimeUnit.MILLISECONDS.sleep(100);
         globalSession.queueToRetryRollback();
         defaultCoordinator.handleRetryRollbacking();
@@ -181,15 +182,21 @@ public class DefaultCoordinatorTest {
             Assertions.assertTrue(lockSize > 0);
         } finally {
             globalSession.closeAndClean();
-            ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "MAX_ROLLBACK_RETRY_TIMEOUT",
-                ConfigurationFactory.getInstance().getLong(ConfigurationKeys.MAX_ROLLBACK_RETRY_TIMEOUT, DefaultValues.DEFAULT_MAX_ROLLBACK_RETRY_TIMEOUT));
+            ReflectionUtil.modifyStaticFinalField(
+                    defaultCoordinator.getClass(),
+                    "MAX_ROLLBACK_RETRY_TIMEOUT",
+                    ConfigurationFactory.getInstance()
+                            .getLong(
+                                    ConfigurationKeys.MAX_ROLLBACK_RETRY_TIMEOUT,
+                                    DefaultValues.DEFAULT_MAX_ROLLBACK_RETRY_TIMEOUT));
         }
     }
 
     @Test
-    @EnabledOnJre({JRE.JAVA_8, JRE.JAVA_11}) // `ReflectionUtil.modifyStaticFinalField` does not supported java17 and above versions
-    public void test_handleRetryRollbackingTimeOut_unlock() throws TransactionException, InterruptedException,
-        NoSuchFieldException, IllegalAccessException {
+    @EnabledOnJre({JRE.JAVA_8, JRE.JAVA_11
+    }) // `ReflectionUtil.modifyStaticFinalField` does not supported java17 and above versions
+    public void test_handleRetryRollbackingTimeOut_unlock()
+            throws TransactionException, InterruptedException, NoSuchFieldException, IllegalAccessException {
         String xid = core.begin(applicationId, txServiceGroup, txName, 10);
         Long branchId = core.branchRegister(BranchType.AT, "abcd", clientId, xid, applicationData, lockKeys_2);
 
@@ -199,7 +206,8 @@ public class DefaultCoordinatorTest {
         Assertions.assertNotNull(branchId);
 
         ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "MAX_ROLLBACK_RETRY_TIMEOUT", 10L);
-        ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE", true);
+        ReflectionUtil.modifyStaticFinalField(
+                defaultCoordinator.getClass(), "ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE", true);
         TimeUnit.MILLISECONDS.sleep(100);
 
         globalSession.queueToRetryRollback();
@@ -210,16 +218,23 @@ public class DefaultCoordinatorTest {
             Assertions.assertEquals(0, lockSize);
         } finally {
             globalSession.closeAndClean();
-            ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "MAX_ROLLBACK_RETRY_TIMEOUT",
-                ConfigurationFactory.getInstance().getLong(ConfigurationKeys.MAX_ROLLBACK_RETRY_TIMEOUT, DefaultValues.DEFAULT_MAX_ROLLBACK_RETRY_TIMEOUT));
+            ReflectionUtil.modifyStaticFinalField(
+                    defaultCoordinator.getClass(),
+                    "MAX_ROLLBACK_RETRY_TIMEOUT",
+                    ConfigurationFactory.getInstance()
+                            .getLong(
+                                    ConfigurationKeys.MAX_ROLLBACK_RETRY_TIMEOUT,
+                                    DefaultValues.DEFAULT_MAX_ROLLBACK_RETRY_TIMEOUT));
         }
     }
 
     @AfterAll
     public static void afterClass() throws Exception {
 
-        Collection<GlobalSession> globalSessions = SessionHolder.getRootSessionManager().allSessions();
-        Collection<GlobalSession> asyncGlobalSessions = SessionHolder.getRootSessionManager().allSessions();
+        Collection<GlobalSession> globalSessions =
+                SessionHolder.getRootSessionManager().allSessions();
+        Collection<GlobalSession> asyncGlobalSessions =
+                SessionHolder.getRootSessionManager().allSessions();
         for (GlobalSession asyncGlobalSession : asyncGlobalSessions) {
             asyncGlobalSession.closeAndClean();
         }
@@ -242,17 +257,14 @@ public class DefaultCoordinatorTest {
     static Stream<Arguments> xidAndBranchIdProviderForRollback() throws Exception {
         String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
         Long branchId = core.branchRegister(BranchType.AT, resourceId, clientId, xid, applicationData, lockKeys_2);
-        return Stream.of(
-            Arguments.of(xid, branchId)
-        );
+        return Stream.of(Arguments.of(xid, branchId));
     }
-
 
     public static class MockServerMessageSender implements RemotingServer {
 
         @Override
         public Object sendSyncRequest(String resourceId, String clientId, Object message, boolean tryOtherApp)
-            throws TimeoutException {
+                throws TimeoutException {
             if (message instanceof BranchCommitRequest) {
                 final BranchCommitResponse branchCommitResponse = new BranchCommitResponse();
                 branchCommitResponse.setBranchStatus(BranchStatus.PhaseTwo_Committed);
@@ -272,18 +284,12 @@ public class DefaultCoordinatorTest {
         }
 
         @Override
-        public void sendAsyncRequest(Channel channel, Object msg) {
-
-        }
+        public void sendAsyncRequest(Channel channel, Object msg) {}
 
         @Override
-        public void sendAsyncResponse(RpcMessage request, Channel channel, Object msg) {
-
-        }
+        public void sendAsyncResponse(RpcMessage request, Channel channel, Object msg) {}
 
         @Override
-        public void registerProcessor(int messageType, RemotingProcessor processor, ExecutorService executor) {
-
-        }
+        public void registerProcessor(int messageType, RemotingProcessor processor, ExecutorService executor) {}
     }
 }

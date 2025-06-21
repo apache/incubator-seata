@@ -28,8 +28,7 @@ public class LockWaitTimeoutException extends SQLException {
     /**
      * Instantiates a new Lock wait timeout exception.
      */
-    public LockWaitTimeoutException() {
-    }
+    public LockWaitTimeoutException() {}
 
     /**
      * Instantiates a new Lock wait timeout exception.

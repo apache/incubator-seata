@@ -41,7 +41,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-
 public class ClientPropertiesTest {
     private static AnnotationConfigApplicationContext context;
 
@@ -49,7 +48,6 @@ public class ClientPropertiesTest {
     public static void initContext() {
         context = new AnnotationConfigApplicationContext("org.apache.seata.spring.boot.autoconfigure.properties");
     }
-
 
     @Test
     public void testSeataProperties() {
@@ -60,7 +58,6 @@ public class ClientPropertiesTest {
         assertEquals("AT", context.getBean(SeataProperties.class).getDataSourceProxyMode());
         assertFalse(context.getBean(SeataProperties.class).isUseJdkProxy());
     }
-
 
     @Test
     public void testLockProperties() {
@@ -75,7 +72,7 @@ public class ClientPropertiesTest {
         assertEquals(5, context.getBean(RmProperties.class).getReportRetryCount());
         assertTrue(context.getBean(RmProperties.class).isTableMetaCheckEnable());
         assertFalse(context.getBean(RmProperties.class).isReportSuccessEnable());
-        assertEquals(60000L,context.getBean(RmProperties.class).getTableMetaCheckerInterval());
+        assertEquals(60000L, context.getBean(RmProperties.class).getTableMetaCheckerInterval());
         assertFalse(context.getBean(RmProperties.class).isSagaRetryPersistModeUpdate());
         assertFalse(context.getBean(RmProperties.class).isSagaCompensatePersistModeUpdate());
     }
@@ -90,19 +87,26 @@ public class ClientPropertiesTest {
         assertFalse(serviceProperties.isDisableGlobalTransaction());
     }
 
-
     @Test
     public void testTmProperties() {
-        assertEquals(DEFAULT_TM_COMMIT_RETRY_COUNT, context.getBean(TmProperties.class).getCommitRetryCount());
-        assertEquals(DEFAULT_TM_ROLLBACK_RETRY_COUNT, context.getBean(TmProperties.class).getRollbackRetryCount());
-        assertEquals(DEFAULT_GLOBAL_TRANSACTION_TIMEOUT, context.getBean(TmProperties.class).getDefaultGlobalTransactionTimeout());
+        assertEquals(
+                DEFAULT_TM_COMMIT_RETRY_COUNT,
+                context.getBean(TmProperties.class).getCommitRetryCount());
+        assertEquals(
+                DEFAULT_TM_ROLLBACK_RETRY_COUNT,
+                context.getBean(TmProperties.class).getRollbackRetryCount());
+        assertEquals(
+                DEFAULT_GLOBAL_TRANSACTION_TIMEOUT,
+                context.getBean(TmProperties.class).getDefaultGlobalTransactionTimeout());
     }
 
     @Test
     public void testUndoProperties() {
         assertTrue(context.getBean(UndoProperties.class).isDataValidation());
         assertEquals("jackson", context.getBean(UndoProperties.class).getLogSerialization());
-        assertEquals(DEFAULT_TRANSACTION_UNDO_LOG_TABLE, context.getBean(UndoProperties.class).getLogTable());
+        assertEquals(
+                DEFAULT_TRANSACTION_UNDO_LOG_TABLE,
+                context.getBean(UndoProperties.class).getLogTable());
     }
 
     @Test
@@ -110,7 +114,6 @@ public class ClientPropertiesTest {
         assertEquals("XID", context.getBean(LoadBalanceProperties.class).getType());
         assertEquals(10, context.getBean(LoadBalanceProperties.class).getVirtualNodes());
     }
-
 
     @AfterAll
     public static void closeContext() {

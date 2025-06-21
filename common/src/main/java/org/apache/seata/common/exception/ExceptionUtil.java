@@ -21,8 +21,7 @@ import java.lang.reflect.UndeclaredThrowableException;
 
 public class ExceptionUtil {
 
-    private ExceptionUtil() {
-    }
+    private ExceptionUtil() {}
 
     public static Throwable unwrap(Throwable wrapped) {
         Throwable unwrapped = wrapped;
@@ -36,5 +35,4 @@ public class ExceptionUtil {
             }
         }
     }
-
 }

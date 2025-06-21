@@ -30,8 +30,8 @@ import org.apache.seata.sqlparser.util.JdbcConstants;
  */
 @LoadLevel(name = JdbcConstants.POLARDBX, scope = Scope.PROTOTYPE)
 public class PolarDBXInsertOnDuplicateUpdateExecutor extends MySQLInsertOnDuplicateUpdateExecutor {
-    public PolarDBXInsertOnDuplicateUpdateExecutor(StatementProxy statementProxy, StatementCallback statementCallback,
-                                                   SQLRecognizer sqlRecognizer) {
+    public PolarDBXInsertOnDuplicateUpdateExecutor(
+            StatementProxy statementProxy, StatementCallback statementCallback, SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }
 }

@@ -70,16 +70,17 @@ public class TccAnnotationProcessor implements BeanPostProcessor {
             return;
         }
 
-        ReflectionUtils.doWithFields(bean.getClass(), field -> {
-            Annotation reference = field.getAnnotation(annotation);
-            if (reference == null) {
-                return;
-            }
+        ReflectionUtils.doWithFields(
+                bean.getClass(),
+                field -> {
+                    Annotation reference = field.getAnnotation(annotation);
+                    if (reference == null) {
+                        return;
+                    }
 
-            addTccAdvise(bean, beanName, field, field.getType());
-
-        }, field -> !Modifier.isStatic(field.getModifiers())
-                && (field.isAnnotationPresent(annotation)));
+                    addTccAdvise(bean, beanName, field, field.getType());
+                },
+                field -> !Modifier.isStatic(field.getModifiers()) && (field.isAnnotationPresent(annotation)));
 
         PROXIED_SET.add(beanName);
     }
@@ -93,22 +94,24 @@ public class TccAnnotationProcessor implements BeanPostProcessor {
      * @param serviceClass   the serviceClass
      * @throws IllegalAccessException the illegal access exception
      */
-    public void addTccAdvise(Object bean, String beanName, Field field, Class serviceClass) throws IllegalAccessException {
+    public void addTccAdvise(Object bean, String beanName, Field field, Class serviceClass)
+            throws IllegalAccessException {
         Object fieldValue = field.get(bean);
         if (fieldValue == null) {
             return;
         }
         for (Method method : field.getType().getMethods()) {
-            if (!Modifier.isStatic(method.getModifiers()) && (method.isAnnotationPresent(TwoPhaseBusinessAction.class))) {
+            if (!Modifier.isStatic(method.getModifiers())
+                    && (method.isAnnotationPresent(TwoPhaseBusinessAction.class))) {
 
                 Object proxyBean = ProxyUtil.createProxy(bean, beanName);
                 field.setAccessible(true);
                 field.set(bean, proxyBean);
-                LOGGER.info("Bean[" + bean.getClass().getName() + "] with name [" + field.getName() + "] would use proxy");
+                LOGGER.info(
+                        "Bean[" + bean.getClass().getName() + "] with name [" + field.getName() + "] would use proxy");
             }
         }
     }
-
 
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
@@ -122,6 +125,4 @@ public class TccAnnotationProcessor implements BeanPostProcessor {
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         return bean;
     }
-
 }
-

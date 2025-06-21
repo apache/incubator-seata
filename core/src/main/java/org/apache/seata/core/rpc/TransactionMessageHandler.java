@@ -41,5 +41,4 @@ public interface TransactionMessageHandler {
      * @param context  context of the RPC
      */
     void onResponse(AbstractResultMessage response, RpcContext context);
-
 }

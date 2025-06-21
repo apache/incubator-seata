@@ -41,5 +41,4 @@ public interface Defaultable {
      * @throws SQLException the sql exception
      */
     List<Object> getPkValuesByDefault(String pkKey) throws SQLException;
-
 }

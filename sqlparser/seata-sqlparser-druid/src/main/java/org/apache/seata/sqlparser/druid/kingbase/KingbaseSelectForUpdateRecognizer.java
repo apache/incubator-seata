@@ -49,7 +49,7 @@ public class KingbaseSelectForUpdateRecognizer extends BaseKingbaseRecognizer im
      */
     public KingbaseSelectForUpdateRecognizer(String originalSQL, SQLStatement ast) {
         super(originalSQL);
-        this.ast = (SQLSelectStatement)ast;
+        this.ast = (SQLSelectStatement) ast;
     }
 
     @Override
@@ -58,8 +58,8 @@ public class KingbaseSelectForUpdateRecognizer extends BaseKingbaseRecognizer im
     }
 
     @Override
-    public String getWhereCondition(final ParametersHolder parametersHolder,
-                                    final ArrayList<List<Object>> paramAppenderList) {
+    public String getWhereCondition(
+            final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppenderList) {
         SQLSelectQueryBlock selectQueryBlock = getSelect();
         SQLExpr where = selectQueryBlock.getWhere();
         return super.getWhereCondition(where, parametersHolder, paramAppenderList);
@@ -74,13 +74,13 @@ public class KingbaseSelectForUpdateRecognizer extends BaseKingbaseRecognizer im
 
     @Override
     public String getLimitCondition() {
-        //kingbase does not support limit or rownum yet
+        // kingbase does not support limit or rownum yet
         return null;
     }
 
     @Override
     public String getLimitCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
-        //kingbase does not support limit or rownum yet
+        // kingbase does not support limit or rownum yet
         return null;
     }
 
@@ -128,7 +128,7 @@ public class KingbaseSelectForUpdateRecognizer extends BaseKingbaseRecognizer im
                 return false;
             }
         };
-        visitor.visit((SQLExprTableSource)tableSource);
+        visitor.visit((SQLExprTableSource) tableSource);
         return sb.toString();
     }
 

@@ -16,9 +16,9 @@
  */
 package org.apache.seata.sqlparser.struct;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class NullTest {
 
@@ -33,5 +33,4 @@ public class NullTest {
         String expected = "NULL";
         assertEquals(expected.trim(), Null.get().toString().trim());
     }
-
 }

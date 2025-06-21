@@ -16,15 +16,15 @@
  */
 package org.apache.seata.metrics.registry.compact;
 
-import java.util.Arrays;
-import java.util.concurrent.TimeUnit;
-
 import org.apache.seata.metrics.Clock;
 import org.apache.seata.metrics.Id;
+import org.apache.seata.metrics.IdConstants;
 import org.apache.seata.metrics.Measurement;
 import org.apache.seata.metrics.SystemClock;
 import org.apache.seata.metrics.Timer;
-import org.apache.seata.metrics.IdConstants;
+
+import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Compact Timer implement with TimerValue
@@ -51,14 +51,18 @@ public class CompactTimer implements Timer {
 
     public CompactTimer(Id id, Clock clock) {
         this.id = id;
-        this.countId = new Id(id.getName()).withTag(id.getTags())
-            .withTag(IdConstants.STATISTIC_KEY, IdConstants.STATISTIC_VALUE_COUNT);
-        this.totalId = new Id(id.getName()).withTag(id.getTags())
-            .withTag(IdConstants.STATISTIC_KEY, IdConstants.STATISTIC_VALUE_TOTAL);
-        this.maxId = new Id(id.getName()).withTag(id.getTags())
-            .withTag(IdConstants.STATISTIC_KEY, IdConstants.STATISTIC_VALUE_MAX);
-        this.averageId = new Id(id.getName()).withTag(id.getTags())
-            .withTag(IdConstants.STATISTIC_KEY, IdConstants.STATISTIC_VALUE_AVERAGE);
+        this.countId = new Id(id.getName())
+                .withTag(id.getTags())
+                .withTag(IdConstants.STATISTIC_KEY, IdConstants.STATISTIC_VALUE_COUNT);
+        this.totalId = new Id(id.getName())
+                .withTag(id.getTags())
+                .withTag(IdConstants.STATISTIC_KEY, IdConstants.STATISTIC_VALUE_TOTAL);
+        this.maxId = new Id(id.getName())
+                .withTag(id.getTags())
+                .withTag(IdConstants.STATISTIC_KEY, IdConstants.STATISTIC_VALUE_MAX);
+        this.averageId = new Id(id.getName())
+                .withTag(id.getTags())
+                .withTag(IdConstants.STATISTIC_KEY, IdConstants.STATISTIC_VALUE_AVERAGE);
         this.value = new TimerValue();
         this.clock = clock;
     }
@@ -95,13 +99,14 @@ public class CompactTimer implements Timer {
 
     @Override
     public Iterable<Measurement> measure() {
-        //reset value when measure
+        // reset value when measure
         double time = clock.getCurrentMilliseconds();
         TimerValue value = this.value;
         this.value = new TimerValue();
-        return Arrays.asList(new Measurement(countId, time, value.getCount()),
-            new Measurement(totalId, time, value.getTotal() * 0.001),
-            new Measurement(maxId, time, value.getMax() * 0.001),
-            new Measurement(averageId, time, value.getAverage() * 0.001));
+        return Arrays.asList(
+                new Measurement(countId, time, value.getCount()),
+                new Measurement(totalId, time, value.getTotal() * 0.001),
+                new Measurement(maxId, time, value.getMax() * 0.001),
+                new Measurement(averageId, time, value.getAverage() * 0.001));
     }
 }

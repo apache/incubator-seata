@@ -28,15 +28,16 @@ public class ExtendedArrowThrowableProxyConverter extends ExtendedThrowableProxy
     public static final String SEPARATOR = System.getProperty("line.separator");
     public static final String START_ARROW = "==> ";
     public static final String END_ARROW = " <==";
+
     @Override
     protected String throwableProxyToString(IThrowableProxy tp) {
         StringBuilder throwBuilder = new StringBuilder();
-        throwBuilder.append(START_ARROW)
-            .append(SEPARATOR)
-            .append(super.throwableProxyToString(tp))
-            .append(END_ARROW)
-            .append(SEPARATOR);
+        throwBuilder
+                .append(START_ARROW)
+                .append(SEPARATOR)
+                .append(super.throwableProxyToString(tp))
+                .append(END_ARROW)
+                .append(SEPARATOR);
         return throwBuilder.toString();
     }
-
 }

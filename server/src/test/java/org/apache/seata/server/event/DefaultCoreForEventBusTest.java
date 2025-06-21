@@ -16,14 +16,6 @@
  */
 package org.apache.seata.server.event;
 
-import java.io.IOException;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
 import org.apache.seata.common.store.SessionMode;
@@ -47,6 +39,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
+
+import java.io.IOException;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Test events come from Default Core.
@@ -81,10 +81,11 @@ public class DefaultCoreForEventBusTest {
             @Subscribe
             @AllowConcurrentEvents
             public void processGlobalTransactionEvent(GlobalTransactionEvent event) {
-                AtomicInteger counter = eventCounters.computeIfAbsent(event.getStatus(),
-                        status -> new AtomicInteger(0));
+                AtomicInteger counter =
+                        eventCounters.computeIfAbsent(event.getStatus(), status -> new AtomicInteger(0));
                 counter.addAndGet(1);
-                //System.out.println("current status:" + event.getName() + "," + event.getStatus() + "," + eventCounters.size());
+                // System.out.println("current status:" + event.getName() + "," + event.getStatus() + "," +
+                // eventCounters.size());
                 if (null != downLatch) {
                     downLatch.countDown();
                 }
@@ -115,43 +116,64 @@ public class DefaultCoreForEventBusTest {
             EventBusManager.get().unregisterAll();
             EventBusManager.get().register(subscriber);
 
-            //start and commit a transaction
+            // start and commit a transaction
             subscriber.setDownLatch(new CountDownLatch(DELAY_HANDLE_SESSION ? 3 : 4));
             String xid = core.begin("test_app_id", "default_group", "test_tran_name", 30000);
             core.commit(xid);
 
-
-            //we need sleep for a short while because default canBeCommittedAsync() is true
+            // we need sleep for a short while because default canBeCommittedAsync() is true
             subscriber.getDownLatch().await();
-            Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.Begin.name()).get());
-            Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.AsyncCommitting.name()).get());
+            Assertions.assertEquals(
+                    1,
+                    subscriber.getEventCounters().get(GlobalStatus.Begin.name()).get());
+            Assertions.assertEquals(
+                    1,
+                    subscriber
+                            .getEventCounters()
+                            .get(GlobalStatus.AsyncCommitting.name())
+                            .get());
             // after event and sync event
-            Assertions.assertEquals(DELAY_HANDLE_SESSION ? 1 : 2,
-                subscriber.getEventCounters().get(GlobalStatus.Committed.name()).get());
+            Assertions.assertEquals(
+                    DELAY_HANDLE_SESSION ? 1 : 2,
+                    subscriber
+                            .getEventCounters()
+                            .get(GlobalStatus.Committed.name())
+                            .get());
 
-            //start and rollback transaction
+            // start and rollback transaction
             subscriber.setDownLatch(new CountDownLatch(3));
             xid = core.begin("test_app_id", "default_group", "test_tran_name2", 30000);
             core.rollback(xid);
-            //sleep for retryRollback
+            // sleep for retryRollback
             Thread.sleep(1500);
-            //check
+            // check
             subscriber.getDownLatch().await();
-            Assertions.assertEquals(2, subscriber.getEventCounters().get(GlobalStatus.Begin.name()).get());
-            //Because of the delayed deletion of GlobalSession, and without changing the status of the Session,
-            Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.Rollbacking.name()).get());
+            Assertions.assertEquals(
+                    2,
+                    subscriber.getEventCounters().get(GlobalStatus.Begin.name()).get());
+            // Because of the delayed deletion of GlobalSession, and without changing the status of the Session,
+            Assertions.assertEquals(
+                    1,
+                    subscriber
+                            .getEventCounters()
+                            .get(GlobalStatus.Rollbacking.name())
+                            .get());
             Assertions.assertNotNull(subscriber.getEventCounters().get(GlobalStatus.Rollbacked.name()));
 
-            //start more one new transaction for test timeout and let this transaction immediately timeout
+            // start more one new transaction for test timeout and let this transaction immediately timeout
             subscriber.setDownLatch(new CountDownLatch(1));
             core.begin("test_app_id", "default_group", "test_tran_name3", 0);
 
-            //sleep for check ->  DefaultCoordinator.timeoutCheck
+            // sleep for check ->  DefaultCoordinator.timeoutCheck
             Thread.sleep(2000);
 
-            //at lease retry once because DefaultCoordinator.timeoutCheck is 1 second
+            // at lease retry once because DefaultCoordinator.timeoutCheck is 1 second
             subscriber.downLatch.await(5000, TimeUnit.MILLISECONDS);
-            Assertions.assertTrue(subscriber.getEventCounters().get(GlobalStatus.TimeoutRollbacking.name()).get() >= 1);
+            Assertions.assertTrue(subscriber
+                            .getEventCounters()
+                            .get(GlobalStatus.TimeoutRollbacking.name())
+                            .get()
+                    >= 1);
         } finally {
             // call SpringContextShutdownHook
             if (null != subscriber) {
@@ -165,5 +187,4 @@ public class DefaultCoreForEventBusTest {
         Optional.ofNullable(DefaultCoordinator.getInstance()).ifPresent(DefaultCoordinator::destroy);
         Optional.ofNullable(MetricsManager.get().getRegistry()).ifPresent(Registry::clearUp);
     }
-
 }

@@ -24,14 +24,22 @@ import org.apache.seata.core.context.RootContext;
  */
 public class JakartaTransactionPropagationInterceptor extends TransactionPropagationInterceptor {
 
-    //@Override
-    public boolean preHandle(jakarta.servlet.http.HttpServletRequest request, jakarta.servlet.http.HttpServletResponse response, Object handler) {
+    // @Override
+    public boolean preHandle(
+            jakarta.servlet.http.HttpServletRequest request,
+            jakarta.servlet.http.HttpServletResponse response,
+            Object handler) {
         String rpcXid = request.getHeader(RootContext.KEY_XID);
         return this.bindXid(rpcXid);
     }
 
-    //@Override
-    public void afterCompletion(jakarta.servlet.http.HttpServletRequest request, jakarta.servlet.http.HttpServletResponse response, Object handler, Exception ex) throws Exception {
+    // @Override
+    public void afterCompletion(
+            jakarta.servlet.http.HttpServletRequest request,
+            jakarta.servlet.http.HttpServletResponse response,
+            Object handler,
+            Exception ex)
+            throws Exception {
         if (RootContext.inGlobalTransaction()) {
             String rpcXid = request.getHeader(RootContext.KEY_XID);
             this.cleanXid(rpcXid);

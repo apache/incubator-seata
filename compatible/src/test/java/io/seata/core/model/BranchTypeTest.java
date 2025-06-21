@@ -16,8 +16,8 @@
  */
 package io.seata.core.model;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit test for BranchType enum
@@ -36,30 +36,18 @@ public class BranchTypeTest {
     @Test
     public void testBranchTypeCompatibility() {
         // Test that compatible BranchType has same values as Apache Seata BranchType
-        
+
         // Test AT branch type
-        Assertions.assertEquals(
-            org.apache.seata.core.model.BranchType.AT.ordinal(),
-            BranchType.AT.ordinal()
-        );
-        
+        Assertions.assertEquals(org.apache.seata.core.model.BranchType.AT.ordinal(), BranchType.AT.ordinal());
+
         // Test TCC branch type
-        Assertions.assertEquals(
-            org.apache.seata.core.model.BranchType.TCC.ordinal(),
-            BranchType.TCC.ordinal()
-        );
-        
+        Assertions.assertEquals(org.apache.seata.core.model.BranchType.TCC.ordinal(), BranchType.TCC.ordinal());
+
         // Test SAGA branch type
-        Assertions.assertEquals(
-            org.apache.seata.core.model.BranchType.SAGA.ordinal(),
-            BranchType.SAGA.ordinal()
-        );
-        
+        Assertions.assertEquals(org.apache.seata.core.model.BranchType.SAGA.ordinal(), BranchType.SAGA.ordinal());
+
         // Test XA branch type
-        Assertions.assertEquals(
-            org.apache.seata.core.model.BranchType.XA.ordinal(),
-            BranchType.XA.ordinal()
-        );
+        Assertions.assertEquals(org.apache.seata.core.model.BranchType.XA.ordinal(), BranchType.XA.ordinal());
     }
 
     @Test
@@ -93,7 +81,7 @@ public class BranchTypeTest {
         // Test the values() method
         BranchType[] values = BranchType.values();
         Assertions.assertTrue(values.length >= 4);
-        
+
         // Verify all expected types are present
         boolean hasAT = false, hasTCC = false, hasSAGA = false, hasXA = false;
         for (BranchType type : values) {
@@ -112,7 +100,7 @@ public class BranchTypeTest {
                     break;
             }
         }
-        
+
         Assertions.assertTrue(hasAT, "AT branch type should be present");
         Assertions.assertTrue(hasTCC, "TCC branch type should be present");
         Assertions.assertTrue(hasSAGA, "SAGA branch type should be present");
@@ -135,4 +123,4 @@ public class BranchTypeTest {
             BranchType.valueOf("INVALID");
         });
     }
-} 
+}

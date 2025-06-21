@@ -39,8 +39,9 @@ public class DataBaseVGroupMappingStoreManager implements VGroupMappingStoreMana
 
     public DataBaseVGroupMappingStoreManager() {
         String datasourceType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
-        //init dataSource
-        DataSource vGroupMappingDataSource = EnhancedServiceLoader.load(DataSourceProvider.class, datasourceType).provide();
+        // init dataSource
+        DataSource vGroupMappingDataSource = EnhancedServiceLoader.load(DataSourceProvider.class, datasourceType)
+                .provide();
         vGroupMappingDataBaseDAO = new VGroupMappingDataBaseDAO(vGroupMappingDataSource);
     }
 
@@ -66,6 +67,4 @@ public class DataBaseVGroupMappingStoreManager implements VGroupMappingStoreMana
         }
         return mappings;
     }
-
-
 }

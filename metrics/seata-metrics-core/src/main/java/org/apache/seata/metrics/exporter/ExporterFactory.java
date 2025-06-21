@@ -16,16 +16,16 @@
  */
 package org.apache.seata.metrics.exporter;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.constants.ConfigurationKeys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_METRICS_EXPORTER_LIST;
 
@@ -38,18 +38,20 @@ public class ExporterFactory {
 
     public static List<Exporter> getInstanceList() {
         List<Exporter> exporters = new ArrayList<>();
-        String exporterTypeNameList = ConfigurationFactory.getInstance().getConfig(
-            ConfigurationKeys.METRICS_PREFIX + ConfigurationKeys.METRICS_EXPORTER_LIST, DEFAULT_METRICS_EXPORTER_LIST);
+        String exporterTypeNameList = ConfigurationFactory.getInstance()
+                .getConfig(
+                        ConfigurationKeys.METRICS_PREFIX + ConfigurationKeys.METRICS_EXPORTER_LIST,
+                        DEFAULT_METRICS_EXPORTER_LIST);
         if (!StringUtils.isNullOrEmpty(exporterTypeNameList)) {
             String[] exporterTypeNames = exporterTypeNameList.split(",");
             for (String exporterTypeName : exporterTypeNames) {
                 ExporterType exporterType;
                 try {
                     exporterType = ExporterType.getType(exporterTypeName);
-                    exporters.add(
-                        EnhancedServiceLoader.load(Exporter.class, Objects.requireNonNull(exporterType).getName()));
+                    exporters.add(EnhancedServiceLoader.load(
+                            Exporter.class, Objects.requireNonNull(exporterType).getName()));
                 } catch (Exception exx) {
-                    LOGGER.error("not support metrics exporter type: {}",exporterTypeName, exx);
+                    LOGGER.error("not support metrics exporter type: {}", exporterTypeName, exx);
                 }
             }
         }

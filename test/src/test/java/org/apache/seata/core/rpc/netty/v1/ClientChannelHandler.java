@@ -20,7 +20,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.concurrent.DefaultPromise;
 import org.apache.seata.core.protocol.RpcMessage;
-import org.apache.seata.core.rpc.netty.ProtocolRpcMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +50,7 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof RpcMessage) {
-            RpcMessage rpcMessage = (RpcMessage)msg;
+            RpcMessage rpcMessage = (RpcMessage) msg;
             int msgId = rpcMessage.getId();
             DefaultPromise future = (DefaultPromise) client.futureMap.remove(msgId);
             if (future != null) {
@@ -59,15 +58,13 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
             } else {
                 LOGGER.warn("miss msg id:{}", msgId);
             }
-        }else {
+        } else {
             LOGGER.warn("msg is not ProtocolRpcMessage");
         }
-
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, final Throwable cause) throws Exception {
         LOGGER.warn("", cause);
     }
-
 }

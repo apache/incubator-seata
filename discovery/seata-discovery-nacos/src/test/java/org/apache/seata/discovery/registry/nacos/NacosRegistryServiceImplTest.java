@@ -16,13 +16,13 @@
  */
 package org.apache.seata.discovery.registry.nacos;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.Properties;
-
 import org.apache.seata.common.util.ReflectionUtil;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -62,6 +62,4 @@ public class NacosRegistryServiceImplTest {
         namingMaintainField.setAccessible(true);
         assertNull(namingMaintainField.get(null));
     }
-
-
 }

@@ -16,9 +16,9 @@
  */
 package org.apache.seata.rm.datasource.exec;
 
-import java.sql.Statement;
-
 import org.apache.seata.rm.datasource.StatementProxy;
+
+import java.sql.Statement;
 
 /**
  * The type Plain executor.

@@ -16,35 +16,12 @@
  */
 package org.apache.seata.rm.datasource;
 
-import java.io.ByteArrayInputStream;
-import java.io.CharArrayReader;
-import java.math.BigDecimal;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.sql.Date;
-import java.sql.JDBCType;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.sql.Types;
-import java.sql.ResultSet;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Objects;
-
 import com.alibaba.druid.mock.MockArray;
 import com.alibaba.druid.mock.MockNClob;
 import com.alibaba.druid.mock.MockRef;
 import com.alibaba.druid.mock.MockSQLXML;
 import com.alibaba.druid.pool.DruidDataSource;
-
 import com.google.common.collect.Lists;
-import org.apache.seata.rm.datasource.AbstractConnectionProxy;
-import org.apache.seata.rm.datasource.AbstractPreparedStatementProxy;
-import org.apache.seata.rm.datasource.ConnectionProxy;
-import org.apache.seata.rm.datasource.DataSourceProxy;
-import org.apache.seata.rm.datasource.PreparedStatementProxy;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.rm.datasource.mock.MockBlob;
 import org.apache.seata.rm.datasource.mock.MockClob;
@@ -61,6 +38,22 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayInputStream;
+import java.io.CharArrayReader;
+import java.math.BigDecimal;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.sql.Date;
+import java.sql.JDBCType;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.sql.Types;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Objects;
 
 public class PreparedStatementProxyTest {
 
@@ -72,8 +65,46 @@ public class PreparedStatementProxyTest {
     };
 
     private static Object[][] columnMetas = new Object[][] {
-        new Object[] {"", "", "table_prepared_statement_proxy", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
-        new Object[] {"", "", "table_prepared_statement_proxy", "name", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
+        new Object[] {
+            "",
+            "",
+            "table_prepared_statement_proxy",
+            "id",
+            Types.INTEGER,
+            "INTEGER",
+            64,
+            0,
+            10,
+            1,
+            "",
+            "",
+            0,
+            0,
+            64,
+            1,
+            "NO",
+            "YES"
+        },
+        new Object[] {
+            "",
+            "",
+            "table_prepared_statement_proxy",
+            "name",
+            Types.VARCHAR,
+            "VARCHAR",
+            64,
+            0,
+            10,
+            0,
+            "",
+            "",
+            0,
+            0,
+            64,
+            2,
+            "YES",
+            "NO"
+        },
     };
 
     private static Object[][] indexMetas = new Object[][] {
@@ -92,19 +123,23 @@ public class PreparedStatementProxyTest {
         dataSource.setDriver(mockDriver);
         DataSourceProxy dataSourceProxy = DataSourceProxyTest.getDataSourceProxy(dataSource);
 
-        ConnectionProxy connectionProxy = new ConnectionProxy(dataSourceProxy, dataSource.getConnection().getConnection());
+        ConnectionProxy connectionProxy =
+                new ConnectionProxy(dataSourceProxy, dataSource.getConnection().getConnection());
 
         String sql = "update prepared_statement_proxy set name = ?";
 
         PreparedStatement preparedStatement = mockDriver.createSeataMockPreparedStatement(
-            (MockConnection)connectionProxy.getTargetConnection(), sql);
+                (MockConnection) connectionProxy.getTargetConnection(), sql);
 
         preparedStatementProxy = new PreparedStatementProxy(connectionProxy, preparedStatement, sql);
-        unusedConstructorPreparedStatementProxy = new TestUnusedConstructorPreparedStatementProxy(connectionProxy, preparedStatement);
-        EnhancedServiceLoader.load(SQLOperateRecognizerHolder.class, JdbcConstants.MYSQL,
-            SQLOperateRecognizerHolderFactory.class.getClassLoader());
-        DruidDelegatingSQLRecognizerFactory recognizerFactory = (DruidDelegatingSQLRecognizerFactory) EnhancedServiceLoader
-            .load(SQLRecognizerFactory.class, SqlParserType.SQL_PARSER_TYPE_DRUID);
+        unusedConstructorPreparedStatementProxy =
+                new TestUnusedConstructorPreparedStatementProxy(connectionProxy, preparedStatement);
+        EnhancedServiceLoader.load(
+                SQLOperateRecognizerHolder.class,
+                JdbcConstants.MYSQL,
+                SQLOperateRecognizerHolderFactory.class.getClassLoader());
+        DruidDelegatingSQLRecognizerFactory recognizerFactory = (DruidDelegatingSQLRecognizerFactory)
+                EnhancedServiceLoader.load(SQLRecognizerFactory.class, SqlParserType.SQL_PARSER_TYPE_DRUID);
     }
 
     @Test
@@ -131,30 +166,35 @@ public class PreparedStatementProxyTest {
     @Test
     public void testGetSetParamsByIndex() {
         preparedStatementProxy.setParamByIndex(1, "xxx");
-        Assertions.assertEquals("xxx",  preparedStatementProxy.getParamsByIndex(1).get(0));
+        Assertions.assertEquals(
+                "xxx", preparedStatementProxy.getParamsByIndex(1).get(0));
     }
 
     @Test
     public void testSetParam() throws SQLException, MalformedURLException {
         preparedStatementProxy.clearParameters();
         preparedStatementProxy.setNull(1, JDBCType.DECIMAL.getVendorTypeNumber());
-        Assertions.assertEquals(Null.get(), preparedStatementProxy.getParamsByIndex(1).get(0));
+        Assertions.assertEquals(
+                Null.get(), preparedStatementProxy.getParamsByIndex(1).get(0));
         preparedStatementProxy.clearParameters();
 
         preparedStatementProxy.setNull(1, JDBCType.DECIMAL.getVendorTypeNumber(), "NULL");
-        Assertions.assertEquals(Null.get(), preparedStatementProxy.getParamsByIndex(1).get(0));
+        Assertions.assertEquals(
+                Null.get(), preparedStatementProxy.getParamsByIndex(1).get(0));
         preparedStatementProxy.clearParameters();
 
         preparedStatementProxy.setBoolean(1, true);
         Assertions.assertEquals(true, preparedStatementProxy.getParamsByIndex(1).get(0));
         preparedStatementProxy.clearParameters();
 
-        preparedStatementProxy.setByte(1, (byte)0);
-        Assertions.assertEquals((byte)0, preparedStatementProxy.getParamsByIndex(1).get(0));
+        preparedStatementProxy.setByte(1, (byte) 0);
+        Assertions.assertEquals(
+                (byte) 0, preparedStatementProxy.getParamsByIndex(1).get(0));
         preparedStatementProxy.clearParameters();
 
-        preparedStatementProxy.setShort(1, (short)0);
-        Assertions.assertEquals((short)0, preparedStatementProxy.getParamsByIndex(1).get(0));
+        preparedStatementProxy.setShort(1, (short) 0);
+        Assertions.assertEquals(
+                (short) 0, preparedStatementProxy.getParamsByIndex(1).get(0));
         preparedStatementProxy.clearParameters();
 
         preparedStatementProxy.setInt(1, 0);
@@ -174,7 +214,8 @@ public class PreparedStatementProxyTest {
         preparedStatementProxy.clearParameters();
 
         preparedStatementProxy.setBigDecimal(1, new BigDecimal(0));
-        Assertions.assertEquals(new BigDecimal(0), preparedStatementProxy.getParamsByIndex(1).get(0));
+        Assertions.assertEquals(
+                new BigDecimal(0), preparedStatementProxy.getParamsByIndex(1).get(0));
         preparedStatementProxy.clearParameters();
 
         preparedStatementProxy.setString(1, "x");
@@ -186,7 +227,8 @@ public class PreparedStatementProxyTest {
         preparedStatementProxy.clearParameters();
 
         preparedStatementProxy.setBytes(1, "x".getBytes());
-        Assertions.assertTrue(Objects.deepEquals("x".getBytes(), preparedStatementProxy.getParamsByIndex(1).get(0)));
+        Assertions.assertTrue(Objects.deepEquals(
+                "x".getBytes(), preparedStatementProxy.getParamsByIndex(1).get(0)));
         preparedStatementProxy.clearParameters();
 
         Date date = new Date(System.currentTimeMillis());
@@ -209,40 +251,49 @@ public class PreparedStatementProxyTest {
 
         Timestamp timestamp = new Timestamp(System.currentTimeMillis());
         preparedStatementProxy.setTimestamp(1, timestamp);
-        Assertions.assertEquals(timestamp, preparedStatementProxy.getParamsByIndex(1).get(0));
+        Assertions.assertEquals(
+                timestamp, preparedStatementProxy.getParamsByIndex(1).get(0));
         preparedStatementProxy.clearParameters();
 
         preparedStatementProxy.setTimestamp(1, timestamp, Calendar.getInstance());
-        Assertions.assertEquals(timestamp, preparedStatementProxy.getParamsByIndex(1).get(0));
+        Assertions.assertEquals(
+                timestamp, preparedStatementProxy.getParamsByIndex(1).get(0));
         preparedStatementProxy.clearParameters();
 
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream("x".getBytes(), 0, 1);
         preparedStatementProxy.setAsciiStream(1, byteArrayInputStream);
-        Assertions.assertEquals(byteArrayInputStream, preparedStatementProxy.getParamsByIndex(1).get(0));
+        Assertions.assertEquals(
+                byteArrayInputStream, preparedStatementProxy.getParamsByIndex(1).get(0));
         preparedStatementProxy.clearParameters();
 
         preparedStatementProxy.setAsciiStream(1, byteArrayInputStream, 1L);
-        Assertions.assertEquals(byteArrayInputStream, preparedStatementProxy.getParamsByIndex(1).get(0));
+        Assertions.assertEquals(
+                byteArrayInputStream, preparedStatementProxy.getParamsByIndex(1).get(0));
         preparedStatementProxy.clearParameters();
 
         preparedStatementProxy.setAsciiStream(1, byteArrayInputStream);
-        Assertions.assertEquals(byteArrayInputStream, preparedStatementProxy.getParamsByIndex(1).get(0));
+        Assertions.assertEquals(
+                byteArrayInputStream, preparedStatementProxy.getParamsByIndex(1).get(0));
         preparedStatementProxy.clearParameters();
 
         preparedStatementProxy.setUnicodeStream(1, byteArrayInputStream, 1);
-        Assertions.assertEquals(byteArrayInputStream, preparedStatementProxy.getParamsByIndex(1).get(0));
+        Assertions.assertEquals(
+                byteArrayInputStream, preparedStatementProxy.getParamsByIndex(1).get(0));
         preparedStatementProxy.clearParameters();
 
         preparedStatementProxy.setBinaryStream(1, byteArrayInputStream);
-        Assertions.assertEquals(byteArrayInputStream, preparedStatementProxy.getParamsByIndex(1).get(0));
+        Assertions.assertEquals(
+                byteArrayInputStream, preparedStatementProxy.getParamsByIndex(1).get(0));
         preparedStatementProxy.clearParameters();
 
         preparedStatementProxy.setBinaryStream(1, byteArrayInputStream, 1L);
-        Assertions.assertEquals(byteArrayInputStream, preparedStatementProxy.getParamsByIndex(1).get(0));
+        Assertions.assertEquals(
+                byteArrayInputStream, preparedStatementProxy.getParamsByIndex(1).get(0));
         preparedStatementProxy.clearParameters();
 
         preparedStatementProxy.setBinaryStream(1, byteArrayInputStream, 1);
-        Assertions.assertEquals(byteArrayInputStream, preparedStatementProxy.getParamsByIndex(1).get(0));
+        Assertions.assertEquals(
+                byteArrayInputStream, preparedStatementProxy.getParamsByIndex(1).get(0));
         preparedStatementProxy.clearParameters();
 
         preparedStatementProxy.setObject(1, 1, JDBCType.INTEGER.getVendorTypeNumber());
@@ -261,23 +312,28 @@ public class PreparedStatementProxyTest {
 
         CharArrayReader charArrayReader = new CharArrayReader("x".toCharArray());
         preparedStatementProxy.setCharacterStream(1, charArrayReader, 1);
-        Assertions.assertEquals(charArrayReader, preparedStatementProxy.getParamsByIndex(1).get(0));
+        Assertions.assertEquals(
+                charArrayReader, preparedStatementProxy.getParamsByIndex(1).get(0));
         preparedStatementProxy.clearParameters();
 
         preparedStatementProxy.setCharacterStream(1, charArrayReader, 1L);
-        Assertions.assertEquals(charArrayReader, preparedStatementProxy.getParamsByIndex(1).get(0));
+        Assertions.assertEquals(
+                charArrayReader, preparedStatementProxy.getParamsByIndex(1).get(0));
         preparedStatementProxy.clearParameters();
 
         preparedStatementProxy.setCharacterStream(1, charArrayReader);
-        Assertions.assertEquals(charArrayReader, preparedStatementProxy.getParamsByIndex(1).get(0));
+        Assertions.assertEquals(
+                charArrayReader, preparedStatementProxy.getParamsByIndex(1).get(0));
         preparedStatementProxy.clearParameters();
 
         preparedStatementProxy.setNCharacterStream(1, charArrayReader);
-        Assertions.assertEquals(charArrayReader, preparedStatementProxy.getParamsByIndex(1).get(0));
+        Assertions.assertEquals(
+                charArrayReader, preparedStatementProxy.getParamsByIndex(1).get(0));
         preparedStatementProxy.clearParameters();
 
         preparedStatementProxy.setNCharacterStream(1, charArrayReader, 1L);
-        Assertions.assertEquals(charArrayReader, preparedStatementProxy.getParamsByIndex(1).get(0));
+        Assertions.assertEquals(
+                charArrayReader, preparedStatementProxy.getParamsByIndex(1).get(0));
         preparedStatementProxy.clearParameters();
 
         MockRef ref = new MockRef();
@@ -291,11 +347,13 @@ public class PreparedStatementProxyTest {
         preparedStatementProxy.clearParameters();
 
         preparedStatementProxy.setBlob(1, byteArrayInputStream);
-        Assertions.assertEquals(byteArrayInputStream, preparedStatementProxy.getParamsByIndex(1).get(0));
+        Assertions.assertEquals(
+                byteArrayInputStream, preparedStatementProxy.getParamsByIndex(1).get(0));
         preparedStatementProxy.clearParameters();
 
         preparedStatementProxy.setBlob(1, byteArrayInputStream, 1L);
-        Assertions.assertEquals(byteArrayInputStream, preparedStatementProxy.getParamsByIndex(1).get(0));
+        Assertions.assertEquals(
+                byteArrayInputStream, preparedStatementProxy.getParamsByIndex(1).get(0));
         preparedStatementProxy.clearParameters();
 
         MockClob clob = new MockClob();
@@ -304,29 +362,35 @@ public class PreparedStatementProxyTest {
         preparedStatementProxy.clearParameters();
 
         preparedStatementProxy.setClob(1, charArrayReader, 1L);
-        Assertions.assertEquals(charArrayReader, preparedStatementProxy.getParamsByIndex(1).get(0));
+        Assertions.assertEquals(
+                charArrayReader, preparedStatementProxy.getParamsByIndex(1).get(0));
         preparedStatementProxy.clearParameters();
 
         preparedStatementProxy.setClob(1, charArrayReader);
-        Assertions.assertEquals(charArrayReader, preparedStatementProxy.getParamsByIndex(1).get(0));
+        Assertions.assertEquals(
+                charArrayReader, preparedStatementProxy.getParamsByIndex(1).get(0));
         preparedStatementProxy.clearParameters();
 
         MockNClob nclob = new MockNClob();
         preparedStatementProxy.setNClob(1, nclob);
-        Assertions.assertEquals(nclob, preparedStatementProxy.getParamsByIndex(1).get(0));
+        Assertions.assertEquals(
+                nclob, preparedStatementProxy.getParamsByIndex(1).get(0));
         preparedStatementProxy.clearParameters();
 
         preparedStatementProxy.setNClob(1, charArrayReader, 1L);
-        Assertions.assertEquals(charArrayReader, preparedStatementProxy.getParamsByIndex(1).get(0));
+        Assertions.assertEquals(
+                charArrayReader, preparedStatementProxy.getParamsByIndex(1).get(0));
         preparedStatementProxy.clearParameters();
 
         preparedStatementProxy.setNClob(1, charArrayReader);
-        Assertions.assertEquals(charArrayReader, preparedStatementProxy.getParamsByIndex(1).get(0));
+        Assertions.assertEquals(
+                charArrayReader, preparedStatementProxy.getParamsByIndex(1).get(0));
         preparedStatementProxy.clearParameters();
 
         MockArray array = new MockArray();
         preparedStatementProxy.setArray(1, array);
-        Assertions.assertEquals(array, preparedStatementProxy.getParamsByIndex(1).get(0));
+        Assertions.assertEquals(
+                array, preparedStatementProxy.getParamsByIndex(1).get(0));
         preparedStatementProxy.clearParameters();
 
         Assertions.assertNotNull(preparedStatementProxy.getMetaData());
@@ -339,7 +403,8 @@ public class PreparedStatementProxyTest {
 
         MockSQLXML sqlxml = new MockSQLXML();
         preparedStatementProxy.setSQLXML(1, sqlxml);
-        Assertions.assertEquals(sqlxml, preparedStatementProxy.getParamsByIndex(1).get(0));
+        Assertions.assertEquals(
+                sqlxml, preparedStatementProxy.getParamsByIndex(1).get(0));
         preparedStatementProxy.clearParameters();
 
         Assertions.assertNotNull(preparedStatementProxy.getParameters());
@@ -350,7 +415,8 @@ public class PreparedStatementProxyTest {
      */
     private static class TestUnusedConstructorPreparedStatementProxy extends AbstractPreparedStatementProxy {
 
-        public TestUnusedConstructorPreparedStatementProxy(AbstractConnectionProxy connectionProxy, PreparedStatement targetStatement) throws SQLException {
+        public TestUnusedConstructorPreparedStatementProxy(
+                AbstractConnectionProxy connectionProxy, PreparedStatement targetStatement) throws SQLException {
             super(connectionProxy, targetStatement);
         }
 

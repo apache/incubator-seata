@@ -16,14 +16,14 @@
  */
 package org.apache.seata.metrics.registry;
 
-import java.util.function.Supplier;
-
 import org.apache.seata.metrics.Counter;
 import org.apache.seata.metrics.Gauge;
 import org.apache.seata.metrics.Id;
 import org.apache.seata.metrics.Measurement;
 import org.apache.seata.metrics.Summary;
 import org.apache.seata.metrics.Timer;
+
+import java.util.function.Supplier;
 
 /**
  * Registry interface for metrics

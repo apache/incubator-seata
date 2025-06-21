@@ -16,7 +16,6 @@
  */
 package org.apache.seata.rm.datasource.exec;
 
-
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.rm.datasource.StatementProxy;
 import org.apache.seata.rm.datasource.exec.sqlserver.SqlServerMultiDeleteExecutor;
@@ -56,7 +55,10 @@ public class MultiExecutor<T, S extends Statement> extends AbstractDMLBaseExecut
      * @param statementCallback the statement callback
      * @param sqlRecognizers    the sql recognizers
      */
-    public MultiExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback, List<SQLRecognizer> sqlRecognizers) {
+    public MultiExecutor(
+            StatementProxy<S> statementProxy,
+            StatementCallback<T, S> statementCallback,
+            List<SQLRecognizer> sqlRecognizers) {
         super(statementProxy, statementCallback, sqlRecognizers);
     }
 
@@ -69,7 +71,7 @@ public class MultiExecutor<T, S extends Statement> extends AbstractDMLBaseExecut
      */
     @Override
     protected TableRecords beforeImage() throws SQLException {
-        //group by sqlType
+        // group by sqlType
         multiSqlGroup = sqlRecognizers.stream().collect(Collectors.groupingBy(t -> t.getTableName()));
         AbstractDMLBaseExecutor<T, S> executor = null;
         for (List<SQLRecognizer> value : multiSqlGroup.values()) {
@@ -89,7 +91,8 @@ public class MultiExecutor<T, S extends Statement> extends AbstractDMLBaseExecut
                     }
                     break;
                 default:
-                    throw new UnsupportedOperationException("not support sql" + value.get(0).getOriginalSQL());
+                    throw new UnsupportedOperationException(
+                            "not support sql" + value.get(0).getOriginalSQL());
             }
             TableRecords beforeImage = executor.beforeImage();
             beforeImagesMap.put(value.get(0), beforeImage);
@@ -117,7 +120,8 @@ public class MultiExecutor<T, S extends Statement> extends AbstractDMLBaseExecut
                     }
                     break;
                 default:
-                    throw new UnsupportedOperationException("not support sql" + value.get(0).getOriginalSQL());
+                    throw new UnsupportedOperationException(
+                            "not support sql" + value.get(0).getOriginalSQL());
             }
             beforeImage = beforeImagesMap.get(value.get(0));
             TableRecords afterImage = executor.afterImage(beforeImage);
@@ -125,7 +129,6 @@ public class MultiExecutor<T, S extends Statement> extends AbstractDMLBaseExecut
         }
         return null;
     }
-
 
     @Override
     protected void prepareUndoLog(TableRecords beforeImage, TableRecords afterImage) throws SQLException {
@@ -139,7 +142,8 @@ public class MultiExecutor<T, S extends Statement> extends AbstractDMLBaseExecut
             afterImage = afterImagesMap.get(recognizer);
             if (SQLType.UPDATE == sqlRecognizer.getSQLType()) {
                 if (beforeImage.getRows().size() != afterImage.getRows().size()) {
-                    throw new ShouldNeverHappenException("Before image size is not equaled to after image size, probably because you updated the primary keys.");
+                    throw new ShouldNeverHappenException(
+                            "Before image size is not equaled to after image size, probably because you updated the primary keys.");
                 }
             }
             super.prepareUndoLog(beforeImage, afterImage);

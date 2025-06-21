@@ -19,7 +19,6 @@ package org.apache.seata.sqlparser.druid;
 import com.alibaba.druid.util.JdbcUtils;
 import org.apache.seata.sqlparser.util.DbTypeParser;
 
-
 class DruidDbTypeParserImpl implements DbTypeParser {
     @Override
     public String parseFromJdbcUrl(String jdbcUrl) {

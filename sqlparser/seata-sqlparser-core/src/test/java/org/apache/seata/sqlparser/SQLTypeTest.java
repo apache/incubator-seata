@@ -16,10 +16,10 @@
  */
 package org.apache.seata.sqlparser;
 
+import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-
-import org.junit.jupiter.api.Test;
 
 public class SQLTypeTest {
 
@@ -39,8 +39,9 @@ public class SQLTypeTest {
 
     @Test
     public void testValueOfInvalid() {
-        assertThrows(IllegalArgumentException.class, () -> SQLType.valueOf(100),
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> SQLType.valueOf(100),
                 "Should throw IllegalArgumentException for invalid value");
     }
-
 }

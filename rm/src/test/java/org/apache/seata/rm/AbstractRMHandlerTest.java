@@ -150,4 +150,3 @@ class AbstractRMHandlerTest {
         }
     }
 }
-

@@ -16,12 +16,12 @@
  */
 package org.apache.seata.core.rpc.netty.mockserver;
 
-import java.util.Map;
-
 import org.apache.seata.rm.tcc.api.BusinessActionContext;
 import org.apache.seata.rm.tcc.api.BusinessActionContextParameter;
 import org.apache.seata.rm.tcc.api.LocalTCC;
 import org.apache.seata.rm.tcc.api.TwoPhaseBusinessAction;
+
+import java.util.Map;
 
 /**
  * The interface Action1.
@@ -30,16 +30,17 @@ import org.apache.seata.rm.tcc.api.TwoPhaseBusinessAction;
 @LocalTCC
 public interface Action1 {
 
-    @TwoPhaseBusinessAction(name = "mock-action", commitMethod = "commitTcc", rollbackMethod = "cancel"
-//            , useTCCFence = true
-    )
-    String insert(@BusinessActionContextParameter Long reqId,
-            @BusinessActionContextParameter(paramName = "params") Map<String, String> params
-    );
-
+    @TwoPhaseBusinessAction(
+            name = "mock-action",
+            commitMethod = "commitTcc",
+            rollbackMethod = "cancel"
+            //            , useTCCFence = true
+            )
+    String insert(
+            @BusinessActionContextParameter Long reqId,
+            @BusinessActionContextParameter(paramName = "params") Map<String, String> params);
 
     boolean commitTcc(BusinessActionContext actionContext);
-
 
     boolean cancel(BusinessActionContext actionContext);
 }

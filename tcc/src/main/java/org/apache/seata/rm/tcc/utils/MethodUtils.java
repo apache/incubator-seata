@@ -16,13 +16,11 @@
  */
 package org.apache.seata.rm.tcc.utils;
 
-import java.lang.reflect.Method;
-
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.transaction.annotation.Transactional;
 
-
+import java.lang.reflect.Method;
 
 public class MethodUtils {
     /**

@@ -19,7 +19,6 @@ package org.apache.seata.compressor.gzip;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.core.compressor.Compressor;
 
-
 @LoadLevel(name = "GZIP")
 public class GzipCompressor implements Compressor {
 
@@ -32,5 +31,4 @@ public class GzipCompressor implements Compressor {
     public byte[] decompress(byte[] bytes) {
         return GzipUtil.decompress(bytes);
     }
-
 }

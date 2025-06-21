@@ -27,5 +27,4 @@ import org.springframework.stereotype.Component;
 @Component
 @org.springframework.context.annotation.Configuration
 @ConditionalOnExpression("#{'raft'.equals('${lockMode}')}")
-public class GlobalLockRaftServiceImpl extends GlobalLockFileServiceImpl {
-}
+public class GlobalLockRaftServiceImpl extends GlobalLockFileServiceImpl {}

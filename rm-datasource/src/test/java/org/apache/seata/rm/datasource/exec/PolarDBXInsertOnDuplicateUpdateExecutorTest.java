@@ -16,15 +16,6 @@
  */
 package org.apache.seata.rm.datasource.exec;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.seata.rm.datasource.exec.StatementCallback;
 import org.apache.seata.common.exception.NotSupportYetException;
 import org.apache.seata.rm.datasource.ConnectionProxy;
 import org.apache.seata.rm.datasource.PreparedStatementProxy;
@@ -37,6 +28,14 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -62,7 +61,8 @@ public class PolarDBXInsertOnDuplicateUpdateExecutorTest extends MySQLInsertOnDu
         StatementCallback statementCallback = mock(StatementCallback.class);
         sqlInsertRecognizer = mock(SQLInsertRecognizer.class);
         tableMeta = mock(TableMeta.class);
-        insertOrUpdateExecutor = Mockito.spy(new PolarDBXInsertOnDuplicateUpdateExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
+        insertOrUpdateExecutor = Mockito.spy(
+                new PolarDBXInsertOnDuplicateUpdateExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
 
         pkIndexMap = new HashMap<String, Integer>() {
             {
@@ -81,8 +81,10 @@ public class PolarDBXInsertOnDuplicateUpdateExecutorTest extends MySQLInsertOnDu
         when(sqlInsertRecognizer.getInsertRows(pkIndexMap.values())).thenReturn(rows);
         mockInsertColumns();
         doReturn(pkIndexMap).when(insertOrUpdateExecutor).getPkIndex();
-        Map<String, ArrayList<Object>> imageParameterMap = insertOrUpdateExecutor.buildImageParameters(sqlInsertRecognizer);
-        Assertions.assertEquals(imageParameterMap.toString(), mockImageParameterMap().toString());
+        Map<String, ArrayList<Object>> imageParameterMap =
+                insertOrUpdateExecutor.buildImageParameters(sqlInsertRecognizer);
+        Assertions.assertEquals(
+                imageParameterMap.toString(), mockImageParameterMap().toString());
     }
 
     @Test
@@ -95,14 +97,17 @@ public class PolarDBXInsertOnDuplicateUpdateExecutorTest extends MySQLInsertOnDu
         when(sqlInsertRecognizer.getInsertRows(pkIndexMap.values())).thenReturn(insertRows);
         mockInsertColumns();
         doReturn(pkIndexMap).when(insertOrUpdateExecutor).getPkIndex();
-        Map<String, ArrayList<Object>> imageParameterMap = insertOrUpdateExecutor.buildImageParameters(sqlInsertRecognizer);
-        Assertions.assertEquals(imageParameterMap.toString(), mockImageParameterMap().toString());
+        Map<String, ArrayList<Object>> imageParameterMap =
+                insertOrUpdateExecutor.buildImageParameters(sqlInsertRecognizer);
+        Assertions.assertEquals(
+                imageParameterMap.toString(), mockImageParameterMap().toString());
     }
 
     @Test
     @Override
     public void testBuildImageSQL() {
-        String selectSQLStr = "SELECT *  FROM null WHERE (user_id = ? )  OR (id = ? )  OR (user_id = ? )  OR (id = ? ) ";
+        String selectSQLStr =
+                "SELECT *  FROM null WHERE (user_id = ? )  OR (id = ? )  OR (user_id = ? )  OR (id = ? ) ";
         String paramAppenderListStr = "[[userId1, 100], [userId2, 101]]";
         mockImageParameterMap_contain_constant();
         List<List<Object>> insertRows = new ArrayList<>();
@@ -114,7 +119,9 @@ public class PolarDBXInsertOnDuplicateUpdateExecutorTest extends MySQLInsertOnDu
         doReturn(pkIndexMap).when(insertOrUpdateExecutor).getPkIndex();
         String selectSQL = insertOrUpdateExecutor.buildImageSQL(tableMeta);
         Assertions.assertEquals(selectSQLStr, selectSQL);
-        Assertions.assertEquals(paramAppenderListStr, insertOrUpdateExecutor.getParamAppenderList().toString());
+        Assertions.assertEquals(
+                paramAppenderListStr,
+                insertOrUpdateExecutor.getParamAppenderList().toString());
     }
 
     @Test
@@ -132,7 +139,9 @@ public class PolarDBXInsertOnDuplicateUpdateExecutorTest extends MySQLInsertOnDu
             TableRecords tableRecords = new TableRecords();
             String selectSQL = insertOrUpdateExecutor.buildImageSQL(tableMeta);
             ArrayList<List<Object>> paramAppenderList = insertOrUpdateExecutor.getParamAppenderList();
-            doReturn(tableRecords).when(insertOrUpdateExecutor).buildTableRecords2(tableMeta, selectSQL, paramAppenderList, Collections.emptyList());
+            doReturn(tableRecords)
+                    .when(insertOrUpdateExecutor)
+                    .buildTableRecords2(tableMeta, selectSQL, paramAppenderList, Collections.emptyList());
             TableRecords tableRecordsResult = insertOrUpdateExecutor.beforeImage();
             Assertions.assertEquals(tableRecords, tableRecordsResult);
         } catch (SQLException throwables) {

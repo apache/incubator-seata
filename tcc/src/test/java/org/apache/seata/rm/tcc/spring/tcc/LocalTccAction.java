@@ -23,5 +23,4 @@ import org.apache.seata.rm.tcc.api.LocalTCC;
  *
  */
 @LocalTCC
-public interface LocalTccAction extends TccAction {
-}
+public interface LocalTccAction extends TccAction {}

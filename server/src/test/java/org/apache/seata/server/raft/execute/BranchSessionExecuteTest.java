@@ -16,11 +16,9 @@
  */
 package org.apache.seata.server.raft.execute;
 
+import org.apache.seata.common.XID;
 import org.apache.seata.common.store.LockMode;
 import org.apache.seata.common.store.SessionMode;
-import java.util.ArrayList;
-import java.util.List;
-import org.apache.seata.common.XID;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.UUIDGenerator;
 import org.apache.seata.config.ConfigurationCache;
@@ -46,8 +44,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
 
-import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
+import java.util.ArrayList;
+import java.util.List;
 
+import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 
 /**
  */
@@ -82,8 +82,6 @@ class BranchSessionExecuteTest {
         SessionHolder.init(null);
         LockerManagerFactory.destroy();
     }
-
-
 
     @Test
     public void testAdd() throws Throwable {
@@ -138,7 +136,7 @@ class BranchSessionExecuteTest {
         return session;
     }
 
-    private static BranchSession mockBranchSession(String xid,long transactionId) {
+    private static BranchSession mockBranchSession(String xid, long transactionId) {
         BranchSession session = new BranchSession();
         session.setXid(xid);
         session.setTransactionId(transactionId);

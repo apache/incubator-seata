@@ -16,17 +16,16 @@
  */
 package org.apache.seata.spring.annotation;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
 import org.apache.seata.integration.tx.api.interceptor.SeataInterceptor;
 import org.apache.seata.integration.tx.api.interceptor.SeataInterceptorPosition;
 import org.apache.seata.integration.tx.api.interceptor.handler.ProxyInvocationHandler;
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.core.Ordered;
 import org.springframework.util.Assert;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class AdapterSpringSeataInterceptor implements MethodInterceptor, SeataInterceptor, Ordered {
 

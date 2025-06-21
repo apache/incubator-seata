@@ -20,21 +20,21 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-
 class RegistryConfigurationFactoryTest {
 
     @Test
     void getInstance() {
-        System.setProperty(ConfigProperty.ENV_PROPERTY_KEY,"test");
+        System.setProperty(ConfigProperty.ENV_PROPERTY_KEY, "test");
         System.setProperty(ConfigProperty.SYSTEM_PROPERTY_SEATA_CONFIG_NAME, ConfigProperty.REGISTRY_CONF_DEFAULT);
         ConfigurationFactory.reload();
-        Assertions.assertEquals(ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig("config.file.name"),"file-test.conf");
+        Assertions.assertEquals(
+                ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig("config.file.name"), "file-test.conf");
         Configuration instance = ConfigurationFactory.getInstance();
         Assertions.assertEquals(instance.getConfig("service.default.grouplist"), "127.0.0.1:8091");
-
     }
+
     @AfterAll
-    public static void afterAll(){
+    public static void afterAll() {
         System.clearProperty(ConfigProperty.ENV_PROPERTY_KEY);
         System.clearProperty(ConfigProperty.SYSTEM_PROPERTY_SEATA_CONFIG_NAME);
         ConfigurationFactory.reload();

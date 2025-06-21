@@ -23,7 +23,6 @@ import com.alibaba.dubbo.rpc.Invoker;
 import com.alibaba.dubbo.rpc.Result;
 import com.alibaba.dubbo.rpc.RpcContext;
 import com.alibaba.dubbo.rpc.RpcException;
-
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.core.constants.DubboConstants;
 import org.apache.seata.core.context.RootContext;
@@ -34,7 +33,9 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Alibaba dubbo transaction provider filter.
  */
-@Activate(group = {DubboConstants.PROVIDER}, order = 100)
+@Activate(
+        group = {DubboConstants.PROVIDER},
+        order = 100)
 public class AlibabaDubboTransactionProviderFilter implements Filter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AlibabaDubboTransactionProviderFilter.class);
@@ -71,8 +72,12 @@ public class AlibabaDubboTransactionProviderFilter implements Filter {
                     LOGGER.debug("unbind xid [{}] branchType [{}] from RootContext", unbindXid, previousBranchType);
                 }
                 if (!rpcXid.equalsIgnoreCase(unbindXid)) {
-                    LOGGER.warn("xid in change during RPC from {} to {},branchType from {} to {}", rpcXid, unbindXid,
-                        rpcBranchType != null ? rpcBranchType : BranchType.AT, previousBranchType);
+                    LOGGER.warn(
+                            "xid in change during RPC from {} to {},branchType from {} to {}",
+                            rpcXid,
+                            unbindXid,
+                            rpcBranchType != null ? rpcBranchType : BranchType.AT,
+                            previousBranchType);
                     if (unbindXid != null) {
                         RootContext.bind(unbindXid);
                         LOGGER.warn("bind xid [{}] back to RootContext", unbindXid);

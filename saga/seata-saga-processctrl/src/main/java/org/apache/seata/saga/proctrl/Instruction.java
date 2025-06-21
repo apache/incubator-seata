@@ -20,6 +20,4 @@ package org.apache.seata.saga.proctrl;
  * Instruction
  *
  */
-public interface Instruction {
-
-}
+public interface Instruction {}

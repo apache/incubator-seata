@@ -16,9 +16,8 @@
  */
 package org.apache.seata.common.loader;
 
-
 @LoadLevel(name = "JapaneseHello", order = Integer.MAX_VALUE)
-public class JapaneseHello implements Hello2{
+public class JapaneseHello implements Hello2 {
 
     private final String msg;
 

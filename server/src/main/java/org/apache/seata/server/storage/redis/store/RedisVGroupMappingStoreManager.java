@@ -71,7 +71,7 @@ public class RedisVGroupMappingStoreManager implements VGroupMappingStoreManager
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             Map<String, String> mappingKeyMap = jedis.hgetAll(namespace);
             HashMap<String, Object> result = new HashMap<>();
-            mappingKeyMap.forEach((vgroup,clusterNameValue) -> {
+            mappingKeyMap.forEach((vgroup, clusterNameValue) -> {
                 if (StringUtils.equals(clusterName, clusterNameValue)) {
                     result.put(vgroup, null);
                 }

@@ -29,17 +29,14 @@ public class ConfigurationChangeEvent {
     private ConfigurationChangeType changeType;
     private static final String DEFAULT_NAMESPACE = "DEFAULT";
 
-
-    public ConfigurationChangeEvent(){
-
-    }
+    public ConfigurationChangeEvent() {}
 
     public ConfigurationChangeEvent(String dataId, String newValue) {
         this(dataId, DEFAULT_NAMESPACE, null, newValue, ConfigurationChangeType.MODIFY);
     }
 
-    public ConfigurationChangeEvent(String dataId, String namespace, String oldValue, String newValue,
-                                    ConfigurationChangeType type) {
+    public ConfigurationChangeEvent(
+            String dataId, String namespace, String oldValue, String newValue, ConfigurationChangeType type) {
         this.dataId = dataId;
         this.namespace = namespace;
         this.oldValue = oldValue;
@@ -144,12 +141,11 @@ public class ConfigurationChangeEvent {
 
     @Override
     public String toString() {
-        return "ConfigurationChangeEvent{" +
-            "dataId='" + dataId + '\'' +
-            ", oldValue='" + oldValue + '\'' +
-            ", newValue='" + newValue + '\'' +
-            ", namespace='" + namespace + '\'' +
-            ", changeType=" + changeType +
-            '}';
+        return "ConfigurationChangeEvent{" + "dataId='"
+                + dataId + '\'' + ", oldValue='"
+                + oldValue + '\'' + ", newValue='"
+                + newValue + '\'' + ", namespace='"
+                + namespace + '\'' + ", changeType="
+                + changeType + '}';
     }
 }

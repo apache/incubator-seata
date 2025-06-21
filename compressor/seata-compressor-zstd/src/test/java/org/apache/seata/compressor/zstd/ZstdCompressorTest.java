@@ -38,7 +38,7 @@ public class ZstdCompressorTest {
 
         ZstdCompressor compressor = new ZstdCompressor();
         long start = 0;
-        for (int i = 0; i < 1010; i ++) {
+        for (int i = 0; i < 1010; i++) {
             if (i == 10) {
                 start = System.currentTimeMillis();
             }

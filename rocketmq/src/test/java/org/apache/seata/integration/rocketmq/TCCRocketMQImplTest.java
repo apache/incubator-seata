@@ -16,9 +16,6 @@
  */
 package org.apache.seata.integration.rocketmq;
 
-import java.lang.reflect.Field;
-import java.net.UnknownHostException;
-import java.util.concurrent.TimeoutException;
 import org.apache.rocketmq.client.exception.MQBrokerException;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.impl.producer.DefaultMQProducerImpl;
@@ -35,6 +32,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
+
+import java.lang.reflect.Field;
+import java.net.UnknownHostException;
+import java.util.concurrent.TimeoutException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -60,6 +61,7 @@ public class TCCRocketMQImplTest {
 
     @Mock
     private DefaultMQProducerImpl producerImpl;
+
     @Mock
     private BusinessActionContext businessActionContext;
 
@@ -96,7 +98,8 @@ public class TCCRocketMQImplTest {
 
             SendResult mockSendResult = mockSendResultWithId();
             when(mockSendResult.getSendStatus()).thenReturn(SendStatus.SEND_OK);
-            when(producer.doSendMessageInTransaction(message, timeout, xid, branchId)).thenReturn(mockSendResult);
+            when(producer.doSendMessageInTransaction(message, timeout, xid, branchId))
+                    .thenReturn(mockSendResult);
 
             SendResult result = prepareTccRocketMQ.prepare(message, timeout);
 
@@ -125,8 +128,8 @@ public class TCCRocketMQImplTest {
             when(businessActionContext.getXid()).thenReturn(xid);
             when(businessActionContext.getBranchId()).thenReturn(branchId);
 
-            when(producer.doSendMessageInTransaction(message, timeout, xid, branchId)).thenThrow(
-                new MQClientException("Test exception", null));
+            when(producer.doSendMessageInTransaction(message, timeout, xid, branchId))
+                    .thenThrow(new MQClientException("Test exception", null));
 
             assertThrows(MQClientException.class, () -> prepareTccRocketMQ.prepare(message, timeout));
 
@@ -140,112 +143,128 @@ public class TCCRocketMQImplTest {
 
     @Test
     void testCommitSuccess()
-        throws UnknownHostException, MQBrokerException, RemotingException, InterruptedException, TimeoutException,
-        TransactionException {
+            throws UnknownHostException, MQBrokerException, RemotingException, InterruptedException, TimeoutException,
+                    TransactionException {
 
         Message message = new Message(TEST_TOPIC, "testBody".getBytes());
         SendResult sendResult = mockSendResultWithId();
 
-        when(businessActionContext.getActionContext("ROCKET_MSG", Message.class)).thenReturn(message);
-        when(businessActionContext.getActionContext("ROCKET_SEND_RESULT", SendResult.class)).thenReturn(sendResult);
+        when(businessActionContext.getActionContext("ROCKET_MSG", Message.class))
+                .thenReturn(message);
+        when(businessActionContext.getActionContext("ROCKET_SEND_RESULT", SendResult.class))
+                .thenReturn(sendResult);
         when(businessActionContext.getXid()).thenReturn("testXid");
         when(businessActionContext.getBranchId()).thenReturn(123L);
 
         boolean result = tccRocketMQ.commit(businessActionContext);
 
         assertTrue(result);
-        verify(producerImpl).endTransaction(eq(message), eq(sendResult), eq(LocalTransactionState.COMMIT_MESSAGE),
-            isNull());
+        verify(producerImpl)
+                .endTransaction(eq(message), eq(sendResult), eq(LocalTransactionState.COMMIT_MESSAGE), isNull());
     }
-
-
 
     @Test
     void testCommitWithNullMessageOrResult() {
 
-        when(businessActionContext.getActionContext("ROCKET_MSG", Message.class)).thenReturn(null);
-        when(businessActionContext.getActionContext("ROCKET_SEND_RESULT", SendResult.class)).thenReturn(
-                mock(SendResult.class));
+        when(businessActionContext.getActionContext("ROCKET_MSG", Message.class))
+                .thenReturn(null);
+        when(businessActionContext.getActionContext("ROCKET_SEND_RESULT", SendResult.class))
+                .thenReturn(mock(SendResult.class));
         assertThrows(TransactionException.class, () -> tccRocketMQ.commit(businessActionContext));
 
-        when(businessActionContext.getActionContext("ROCKET_MSG", Message.class)).thenReturn(new Message());
-        when(businessActionContext.getActionContext("ROCKET_SEND_RESULT", SendResult.class)).thenReturn(null);
+        when(businessActionContext.getActionContext("ROCKET_MSG", Message.class))
+                .thenReturn(new Message());
+        when(businessActionContext.getActionContext("ROCKET_SEND_RESULT", SendResult.class))
+                .thenReturn(null);
         assertThrows(TransactionException.class, () -> tccRocketMQ.commit(businessActionContext));
     }
 
     @Test
     void testCommitWithException()
-        throws UnknownHostException, MQBrokerException, RemotingException, InterruptedException, TimeoutException {
+            throws UnknownHostException, MQBrokerException, RemotingException, InterruptedException, TimeoutException {
 
         Message message = new Message(TEST_TOPIC, "testBody".getBytes());
         SendResult sendResult = mockSendResultWithId();
 
-        when(businessActionContext.getActionContext("ROCKET_MSG", Message.class)).thenReturn(message);
-        when(businessActionContext.getActionContext("ROCKET_SEND_RESULT", SendResult.class)).thenReturn(sendResult);
+        when(businessActionContext.getActionContext("ROCKET_MSG", Message.class))
+                .thenReturn(message);
+        when(businessActionContext.getActionContext("ROCKET_SEND_RESULT", SendResult.class))
+                .thenReturn(sendResult);
 
-        doThrow(new MQBrokerException(1, "Test exception")).when(producerImpl)
-            .endTransaction(any(), any(), any(), any());
+        doThrow(new MQBrokerException(1, "Test exception"))
+                .when(producerImpl)
+                .endTransaction(any(), any(), any(), any());
 
         assertThrows(MQBrokerException.class, () -> tccRocketMQ.commit(businessActionContext));
     }
 
     @Test
     void testRollbackSuccess()
-        throws UnknownHostException, MQBrokerException, RemotingException, InterruptedException, TransactionException {
+            throws UnknownHostException, MQBrokerException, RemotingException, InterruptedException,
+                    TransactionException {
 
         Message message = new Message(TEST_TOPIC, "testBody".getBytes());
         SendResult sendResult = mockSendResultWithId();
 
-        when(businessActionContext.getActionContext("ROCKET_MSG", Message.class)).thenReturn(message);
-        when(businessActionContext.getActionContext("ROCKET_SEND_RESULT", SendResult.class)).thenReturn(sendResult);
+        when(businessActionContext.getActionContext("ROCKET_MSG", Message.class))
+                .thenReturn(message);
+        when(businessActionContext.getActionContext("ROCKET_SEND_RESULT", SendResult.class))
+                .thenReturn(sendResult);
         when(businessActionContext.getXid()).thenReturn("testXid");
         when(businessActionContext.getBranchId()).thenReturn(123L);
 
         boolean result = tccRocketMQ.rollback(businessActionContext);
 
         assertTrue(result);
-        verify(producerImpl).endTransaction(eq(message), eq(sendResult), eq(LocalTransactionState.ROLLBACK_MESSAGE),
-            isNull());
+        verify(producerImpl)
+                .endTransaction(eq(message), eq(sendResult), eq(LocalTransactionState.ROLLBACK_MESSAGE), isNull());
     }
 
     @Test
     void testRollbackWithNullMessageOrResult()
-        throws UnknownHostException, MQBrokerException, RemotingException, InterruptedException, TransactionException {
+            throws UnknownHostException, MQBrokerException, RemotingException, InterruptedException,
+                    TransactionException {
 
         when(businessActionContext.getXid()).thenReturn("testXid");
         when(businessActionContext.getBranchId()).thenReturn(123L);
 
         SendResult sendResult = mock(SendResult.class);
-        when(businessActionContext.getActionContext("ROCKET_MSG", Message.class)).thenReturn(null);
-        when(businessActionContext.getActionContext("ROCKET_SEND_RESULT", SendResult.class)).thenReturn(sendResult);
+        when(businessActionContext.getActionContext("ROCKET_MSG", Message.class))
+                .thenReturn(null);
+        when(businessActionContext.getActionContext("ROCKET_SEND_RESULT", SendResult.class))
+                .thenReturn(sendResult);
         boolean result = tccRocketMQ.rollback(businessActionContext);
         assertTrue(result);
 
         Message message = new Message(TEST_TOPIC, "testBody".getBytes());
-        when(businessActionContext.getActionContext("ROCKET_MSG", Message.class)).thenReturn(message);
-        when(businessActionContext.getActionContext("ROCKET_SEND_RESULT", SendResult.class)).thenReturn(null);
+        when(businessActionContext.getActionContext("ROCKET_MSG", Message.class))
+                .thenReturn(message);
+        when(businessActionContext.getActionContext("ROCKET_SEND_RESULT", SendResult.class))
+                .thenReturn(null);
         boolean result2 = tccRocketMQ.rollback(businessActionContext);
         assertTrue(result2);
     }
 
     @Test
     void testRollbackWithException()
-        throws UnknownHostException, MQBrokerException, RemotingException, InterruptedException {
+            throws UnknownHostException, MQBrokerException, RemotingException, InterruptedException {
 
         Message message = new Message(TEST_TOPIC, "testBody".getBytes());
         SendResult sendResult = mockSendResultWithId();
 
-        when(businessActionContext.getActionContext("ROCKET_MSG", Message.class)).thenReturn(message);
-        when(businessActionContext.getActionContext("ROCKET_SEND_RESULT", SendResult.class)).thenReturn(sendResult);
+        when(businessActionContext.getActionContext("ROCKET_MSG", Message.class))
+                .thenReturn(message);
+        when(businessActionContext.getActionContext("ROCKET_SEND_RESULT", SendResult.class))
+                .thenReturn(sendResult);
         when(businessActionContext.getXid()).thenReturn("testXid");
         when(businessActionContext.getBranchId()).thenReturn(123L);
 
-        doThrow(new MQBrokerException(1, "Test exception")).when(producerImpl)
-            .endTransaction(any(), any(), any(), any());
+        doThrow(new MQBrokerException(1, "Test exception"))
+                .when(producerImpl)
+                .endTransaction(any(), any(), any(), any());
 
         assertThrows(MQBrokerException.class, () -> tccRocketMQ.rollback(businessActionContext));
     }
-
 
     private static SendResult mockSendResultWithId() {
         SendResult mock = mock(SendResult.class);

@@ -16,16 +16,6 @@
  */
 package org.apache.seata.discovery.registry.sofa;
 
-import java.net.InetSocketAddress;
-import java.util.List;
-import java.util.Map;
-import java.util.ArrayList;
-import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
 import com.alipay.sofa.registry.client.api.RegistryClient;
 import com.alipay.sofa.registry.client.api.RegistryClientConfig;
 import com.alipay.sofa.registry.client.api.SubscriberDataObserver;
@@ -35,12 +25,22 @@ import com.alipay.sofa.registry.client.api.registration.SubscriberRegistration;
 import com.alipay.sofa.registry.client.provider.DefaultRegistryClient;
 import com.alipay.sofa.registry.client.provider.DefaultRegistryClientConfigBuilder;
 import com.alipay.sofa.registry.core.model.ScopeEnum;
+import org.apache.commons.lang.StringUtils;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.config.exception.ConfigNotFoundException;
 import org.apache.seata.discovery.registry.RegistryService;
-import org.apache.commons.lang.StringUtils;
+
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static org.apache.seata.config.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
 import static org.apache.seata.config.ConfigurationKeys.FILE_ROOT_REGISTRY;
@@ -72,8 +72,8 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
     private static final String HOST_SEPERATOR = ":";
     private static final String REGISTRY_TYPE = "sofa";
 
-    private static final ConcurrentMap<String, List<SubscriberDataObserver>> LISTENER_SERVICE_MAP
-        = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, List<SubscriberDataObserver>> LISTENER_SERVICE_MAP =
+            new ConcurrentHashMap<>();
     private static final ConcurrentMap<String, List<InetSocketAddress>> CLUSTER_ADDRESS_MAP = new ConcurrentHashMap<>();
     private static Properties registryProps;
     private static volatile RegistryClient registryClient;
@@ -82,8 +82,7 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
 
     private String transactionServiceGroup;
 
-    private SofaRegistryServiceImpl() {
-    }
+    private SofaRegistryServiceImpl() {}
 
     /**
      * Gets instance.
@@ -127,11 +126,12 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
                     final String portStr = StringUtils.substringAfter(address, HOST_SEPERATOR);
 
                     RegistryClientConfig config = DefaultRegistryClientConfigBuilder.start()
-                        .setAppName(getApplicationName())
-                        .setDataCenter(registryProps.getProperty(PRO_DATACENTER_KEY))
-                        .setZone(registryProps.getProperty(PRO_REGION_KEY))
-                        .setRegistryEndpoint(StringUtils.substringBefore(address, HOST_SEPERATOR))
-                        .setRegistryEndpointPort(Integer.parseInt(portStr)).build();
+                            .setAppName(getApplicationName())
+                            .setDataCenter(registryProps.getProperty(PRO_DATACENTER_KEY))
+                            .setZone(registryProps.getProperty(PRO_REGION_KEY))
+                            .setRegistryEndpoint(StringUtils.substringBefore(address, HOST_SEPERATOR))
+                            .setRegistryEndpointPort(Integer.parseInt(portStr))
+                            .build();
 
                     DefaultRegistryClient result = new DefaultRegistryClient(config);
                     result.init();
@@ -148,8 +148,7 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
         subscriberRegistration.setScopeEnum(ScopeEnum.global);
         subscriberRegistration.setGroup(registryProps.getProperty(PRO_GROUP_KEY));
 
-        LISTENER_SERVICE_MAP.computeIfAbsent(cluster, key -> new ArrayList<>())
-                .add(listener);
+        LISTENER_SERVICE_MAP.computeIfAbsent(cluster, key -> new ArrayList<>()).add(listener);
         getRegistryInstance().register(subscriberRegistration);
     }
 
@@ -181,10 +180,9 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
                 respondRegistries.countDown();
             });
 
-            //wait max for first lookup
+            // wait max for first lookup
             final String property = registryProps.getProperty(PRO_ADDRESS_WAIT_TIME_KEY);
             respondRegistries.await(Integer.parseInt(property), TimeUnit.MILLISECONDS);
-
         }
         return CLUSTER_ADDRESS_MAP.get(clusterName);
     }
@@ -204,9 +202,7 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
     }
 
     @Override
-    public void close() throws Exception {
-
-    }
+    public void close() throws Exception {}
 
     private static Properties getNamingProperties() {
         Properties properties = new Properties();
@@ -259,7 +255,8 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
         }
 
         if (System.getProperty(SOFA_FILEKEY_PREFIX + PRO_ADDRESS_WAIT_TIME_KEY) != null) {
-            properties.setProperty(PRO_ADDRESS_WAIT_TIME_KEY, System.getProperty(SOFA_FILEKEY_PREFIX + PRO_ADDRESS_WAIT_TIME_KEY));
+            properties.setProperty(
+                    PRO_ADDRESS_WAIT_TIME_KEY, System.getProperty(SOFA_FILEKEY_PREFIX + PRO_ADDRESS_WAIT_TIME_KEY));
         } else {
             String group = FILE_CONFIG.getConfig(getSofaAddressWaitTimeFileKey());
             if (group == null) {

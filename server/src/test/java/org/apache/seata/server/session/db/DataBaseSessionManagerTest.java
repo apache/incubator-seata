@@ -16,20 +16,14 @@
  */
 package org.apache.seata.server.session.db;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Collection;
-
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.seata.common.XID;
 import org.apache.seata.common.util.IOUtil;
+import org.apache.seata.common.util.UUIDGenerator;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.GlobalStatus;
-import org.apache.seata.common.util.UUIDGenerator;
 import org.apache.seata.server.DynamicPortTestConfig;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
@@ -38,7 +32,6 @@ import org.apache.seata.server.session.SessionManager;
 import org.apache.seata.server.storage.db.session.DataBaseSessionManager;
 import org.apache.seata.server.storage.db.store.DataBaseTransactionStoreManager;
 import org.apache.seata.server.storage.db.store.LogStoreDataBaseDAO;
-import org.apache.commons.dbcp2.BasicDataSource;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -46,6 +39,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 
@@ -59,7 +59,7 @@ public class DataBaseSessionManagerTest {
 
     static SessionManager sessionManager = null;
 
-    static LogStoreDataBaseDAO logStoreDataBaseDAO  = null;
+    static LogStoreDataBaseDAO logStoreDataBaseDAO = null;
 
     static BasicDataSource dataSource = null;
 
@@ -68,7 +68,7 @@ public class DataBaseSessionManagerTest {
         DataBaseSessionManager tempSessionManager = new DataBaseSessionManager();
         DataBaseTransactionStoreManager transactionStoreManager = DataBaseTransactionStoreManager.getInstance();
 
-        dataSource =  new BasicDataSource();
+        dataSource = new BasicDataSource();
         dataSource.setDriverClassName("org.h2.Driver");
         dataSource.setUrl("jdbc:h2:./db_store/db_session");
         dataSource.setUsername("sa");
@@ -100,14 +100,16 @@ public class DataBaseSessionManagerTest {
                 s.execute("drop table global_table");
             } catch (Exception e) {
             }
-            s.execute("CREATE TABLE global_table ( xid varchar(96),  transaction_id long , STATUS int,  application_id varchar(32), transaction_service_group varchar(32) ,transaction_name varchar(128) ,timeout int,  begin_time long, application_data varchar(500), gmt_create TIMESTAMP(6) ,gmt_modified TIMESTAMP(6) ) ");
+            s.execute(
+                    "CREATE TABLE global_table ( xid varchar(96),  transaction_id long , STATUS int,  application_id varchar(32), transaction_service_group varchar(32) ,transaction_name varchar(128) ,timeout int,  begin_time long, application_data varchar(500), gmt_create TIMESTAMP(6) ,gmt_modified TIMESTAMP(6) ) ");
             System.out.println("create table global_table success.");
 
             try {
                 s.execute("drop table branch_table");
             } catch (Exception e) {
             }
-            s.execute("CREATE TABLE branch_table ( xid varchar(96),  transaction_id long , branch_id long, resource_group_id varchar(32), resource_id varchar(32) ,lock_key varchar(64) ,branch_type varchar(32) ,  status int , client_id varchar(128),  application_data varchar(500),  gmt_create TIMESTAMP(6) ,gmt_modified TIMESTAMP(6) ) ");
+            s.execute(
+                    "CREATE TABLE branch_table ( xid varchar(96),  transaction_id long , branch_id long, resource_group_id varchar(32), resource_id varchar(32) ,lock_key varchar(64) ,branch_type varchar(32) ,  status int , client_id varchar(128),  application_data varchar(500),  gmt_create TIMESTAMP(6) ,gmt_modified TIMESTAMP(6) ) ");
             System.out.println("create table branch_table success.");
 
         } catch (Exception e) {
@@ -117,11 +119,9 @@ public class DataBaseSessionManagerTest {
         }
     }
 
-
     @Test
     public void test_addGlobalSession() throws TransactionException, SQLException {
-        GlobalSession session = GlobalSession.createGlobalSession("test",
-            "test", "test123", 100);
+        GlobalSession session = GlobalSession.createGlobalSession("test", "test", "test123", 100);
         String xid = XID.generateXID(session.getTransactionId());
         session.setXid(xid);
         session.setTransactionId(146757978);
@@ -131,31 +131,29 @@ public class DataBaseSessionManagerTest {
 
         sessionManager.addGlobalSession(session);
 
-        String sql = "select * from global_table where xid= '"+xid+"'";
-        String delSql = "delete from global_table where xid= '"+xid+"'";
+        String sql = "select * from global_table where xid= '" + xid + "'";
+        String delSql = "delete from global_table where xid= '" + xid + "'";
         Connection conn = null;
-        try{
+        try {
             conn = dataSource.getConnection();
             ResultSet rs = conn.createStatement().executeQuery(sql);
-            if(rs.next()){
+            if (rs.next()) {
                 Assertions.assertTrue(true);
-            }else{
+            } else {
                 Assertions.fail();
             }
 
             conn.createStatement().execute(delSql);
-        }finally {
-            if(conn != null){
+        } finally {
+            if (conn != null) {
                 conn.close();
             }
         }
     }
 
-
     @Test
     public void test_updateGlobalSessionStatus() throws TransactionException, SQLException {
-        GlobalSession session = GlobalSession.createGlobalSession("test",
-            "test", "test123", 100);
+        GlobalSession session = GlobalSession.createGlobalSession("test", "test", "test123", 100);
         String xid = XID.generateXID(session.getTransactionId());
         session.setXid(xid);
         session.setTransactionId(146757978);
@@ -167,22 +165,22 @@ public class DataBaseSessionManagerTest {
 
         sessionManager.updateGlobalSessionStatus(session, GlobalStatus.Committing);
 
-        String sql = "select * from global_table where xid= '"+xid+"'";
-        String delSql = "delete from global_table where xid= '"+xid+"'";
+        String sql = "select * from global_table where xid= '" + xid + "'";
+        String delSql = "delete from global_table where xid= '" + xid + "'";
         Connection conn = null;
-        try{
+        try {
             conn = dataSource.getConnection();
             ResultSet rs = conn.createStatement().executeQuery(sql);
-            if(rs.next()){
+            if (rs.next()) {
                 Assertions.assertTrue(true);
                 Assertions.assertEquals(rs.getInt("status"), GlobalStatus.Committing.getCode());
-            }else{
+            } else {
                 Assertions.fail();
             }
 
             conn.createStatement().execute(delSql);
-        }finally {
-            if(conn != null){
+        } finally {
+            if (conn != null) {
                 conn.close();
             }
         }
@@ -190,8 +188,7 @@ public class DataBaseSessionManagerTest {
 
     @Test
     public void test_removeGlobalSession() throws Exception {
-        GlobalSession session = GlobalSession.createGlobalSession("test",
-            "test", "test123", 100);
+        GlobalSession session = GlobalSession.createGlobalSession("test", "test", "test123", 100);
         String xid = XID.generateXID(session.getTransactionId());
         session.setXid(xid);
         session.setTransactionId(146757978);
@@ -201,33 +198,33 @@ public class DataBaseSessionManagerTest {
 
         sessionManager.addGlobalSession(session);
 
-        String sql = "select * from global_table where xid= '"+xid+"'";
-        String delSql = "delete from global_table where xid= '"+xid+"'";
+        String sql = "select * from global_table where xid= '" + xid + "'";
+        String delSql = "delete from global_table where xid= '" + xid + "'";
         Connection conn = null;
-        try{
+        try {
             conn = dataSource.getConnection();
             ResultSet rs = conn.createStatement().executeQuery(sql);
-            if(rs.next()){
+            if (rs.next()) {
                 Assertions.assertTrue(true);
-            }else{
+            } else {
                 Assertions.fail();
             }
             rs.close();
 
-            //delete
+            // delete
             sessionManager.removeGlobalSession(session);
 
             rs = conn.createStatement().executeQuery(sql);
-            if(rs.next()){
+            if (rs.next()) {
                 Assertions.fail();
-            }else{
+            } else {
                 Assertions.assertTrue(true);
             }
             rs.close();
 
             conn.createStatement().execute(delSql);
-        }finally {
-            if(conn != null){
+        } finally {
+            if (conn != null) {
                 conn.close();
             }
         }
@@ -235,8 +232,7 @@ public class DataBaseSessionManagerTest {
 
     @Test
     public void test_findGlobalSession() throws Exception {
-        GlobalSession session = GlobalSession.createGlobalSession("test",
-            "test", "test123", 100);
+        GlobalSession session = GlobalSession.createGlobalSession("test", "test", "test123", 100);
         String xid = XID.generateXID(session.getTransactionId());
         session.setXid(xid);
         session.setTransactionId(146757978);
@@ -259,23 +255,21 @@ public class DataBaseSessionManagerTest {
         Assertions.assertEquals(globalSession_db.getTimeout(), session.getTimeout());
         Assertions.assertEquals(globalSession_db.getStatus(), session.getStatus());
 
-        String delSql = "delete from global_table where xid= '"+xid+"'";
+        String delSql = "delete from global_table where xid= '" + xid + "'";
         Connection conn = null;
-        try{
+        try {
             conn = dataSource.getConnection();
             conn.createStatement().execute(delSql);
-        }finally {
-            if(conn != null){
+        } finally {
+            if (conn != null) {
                 conn.close();
             }
         }
     }
 
-
     @Test
     public void test_addBranchSession() throws Exception {
-        GlobalSession globalSession = GlobalSession.createGlobalSession("test",
-            "test", "test123", 100);
+        GlobalSession globalSession = GlobalSession.createGlobalSession("test", "test", "test123", 100);
         String xid = XID.generateXID(globalSession.getTransactionId());
         globalSession.setXid(xid);
         globalSession.setTransactionId(146757978);
@@ -296,31 +290,30 @@ public class DataBaseSessionManagerTest {
 
         sessionManager.addBranchSession(globalSession, branchSession);
 
-        String sql = "select * from branch_table where xid= '"+xid+"'";
-        String delSql = "delete from branch_table where xid= '"+xid+"'" + ";" + "delete from global_table where xid= '"+xid+"'";
+        String sql = "select * from branch_table where xid= '" + xid + "'";
+        String delSql = "delete from branch_table where xid= '" + xid + "'" + ";"
+                + "delete from global_table where xid= '" + xid + "'";
         Connection conn = null;
-        try{
+        try {
             conn = dataSource.getConnection();
             ResultSet rs = conn.createStatement().executeQuery(sql);
-            if(rs.next()){
+            if (rs.next()) {
                 Assertions.assertTrue(true);
-            }else{
+            } else {
                 Assertions.fail();
             }
 
             conn.createStatement().execute(delSql);
-        }finally {
-            if(conn != null){
+        } finally {
+            if (conn != null) {
                 conn.close();
             }
         }
     }
 
-
     @Test
     public void test_updateBranchSessionStatus() throws Exception {
-        GlobalSession globalSession = GlobalSession.createGlobalSession("test",
-            "test", "test123", 100);
+        GlobalSession globalSession = GlobalSession.createGlobalSession("test", "test", "test123", 100);
         String xid = XID.generateXID(globalSession.getTransactionId());
         globalSession.setXid(xid);
         globalSession.setTransactionId(146757978);
@@ -345,22 +338,23 @@ public class DataBaseSessionManagerTest {
         branchSession.setStatus(BranchStatus.PhaseOne_Timeout);
         sessionManager.updateBranchSessionStatus(branchSession, BranchStatus.PhaseOne_Timeout);
 
-        String sql = "select * from branch_table where xid= '"+xid+"'";
-        String delSql = "delete from branch_table where xid= '"+xid+"'" + ";" + "delete from global_table where xid= '"+xid+"'";
+        String sql = "select * from branch_table where xid= '" + xid + "'";
+        String delSql = "delete from branch_table where xid= '" + xid + "'" + ";"
+                + "delete from global_table where xid= '" + xid + "'";
         Connection conn = null;
-        try{
+        try {
             conn = dataSource.getConnection();
             ResultSet rs = conn.createStatement().executeQuery(sql);
-            if(rs.next()){
+            if (rs.next()) {
                 Assertions.assertTrue(true);
                 Assertions.assertEquals(rs.getInt("status"), BranchStatus.PhaseOne_Timeout.getCode());
-            }else{
+            } else {
                 Assertions.fail();
             }
 
             conn.createStatement().execute(delSql);
-        }finally {
-            if(conn != null){
+        } finally {
+            if (conn != null) {
                 conn.close();
             }
         }
@@ -368,8 +362,7 @@ public class DataBaseSessionManagerTest {
 
     @Test
     public void test_removeBranchSession() throws Exception {
-        GlobalSession globalSession = GlobalSession.createGlobalSession("test",
-            "test", "test123", 100);
+        GlobalSession globalSession = GlobalSession.createGlobalSession("test", "test", "test123", 100);
         String xid = XID.generateXID(globalSession.getTransactionId());
         globalSession.setXid(xid);
         globalSession.setTransactionId(146757978);
@@ -393,31 +386,30 @@ public class DataBaseSessionManagerTest {
 
         sessionManager.removeBranchSession(globalSession, branchSession);
 
-        String sql = "select * from branch_table where xid= '"+xid+"'";
-        String delSql = "delete from branch_table where xid= '"+xid+"'" + ";" + "delete from global_table where xid= '"+xid+"'";
+        String sql = "select * from branch_table where xid= '" + xid + "'";
+        String delSql = "delete from branch_table where xid= '" + xid + "'" + ";"
+                + "delete from global_table where xid= '" + xid + "'";
         Connection conn = null;
-        try{
+        try {
             conn = dataSource.getConnection();
             ResultSet rs = conn.createStatement().executeQuery(sql);
-            if(rs.next()){
+            if (rs.next()) {
                 Assertions.fail();
-            }else{
+            } else {
                 Assertions.assertTrue(true);
             }
 
             conn.createStatement().execute(delSql);
-        }finally {
-            if(conn != null){
+        } finally {
+            if (conn != null) {
                 conn.close();
             }
         }
     }
 
-
     @Test
     public void test_allSessions() throws Exception {
-        GlobalSession globalSession = GlobalSession.createGlobalSession("test",
-            "test", "test123", 100);
+        GlobalSession globalSession = GlobalSession.createGlobalSession("test", "test", "test123", 100);
         String xid = XID.generateXID(globalSession.getTransactionId());
         globalSession.setXid(xid);
         globalSession.setTransactionId(146757978);
@@ -441,7 +433,6 @@ public class DataBaseSessionManagerTest {
         branchSession.setStatus(BranchStatus.PhaseOne_Done);
 
         sessionManager.addBranchSession(globalSession, branchSession);
-
 
         BranchSession branchSession2 = new BranchSession();
         branchSession2.setBranchId(UUIDGenerator.generateUUID());
@@ -470,13 +461,14 @@ public class DataBaseSessionManagerTest {
         Assertions.assertNotNull(globalSession_db.getBranch(1L));
         Assertions.assertNotNull(globalSession_db.getBranch(2L));
 
-        String delSql = "delete from branch_table where xid= '"+xid+"'" + ";" + "delete from global_table where xid= '"+xid+"'";
+        String delSql = "delete from branch_table where xid= '" + xid + "'" + ";"
+                + "delete from global_table where xid= '" + xid + "'";
         Connection conn = null;
-        try{
+        try {
             conn = dataSource.getConnection();
             conn.createStatement().execute(delSql);
-        }finally {
-            if(conn != null){
+        } finally {
+            if (conn != null) {
                 conn.close();
             }
         }
@@ -486,8 +478,7 @@ public class DataBaseSessionManagerTest {
     public void test_findGlobalSessions() throws TransactionException, SQLException {
         String xid = null;
         {
-            GlobalSession globalSession = GlobalSession.createGlobalSession("test",
-                "test", "test123", 100);
+            GlobalSession globalSession = GlobalSession.createGlobalSession("test", "test", "test123", 100);
             xid = XID.generateXID(globalSession.getTransactionId());
             globalSession.setXid(xid);
             globalSession.setTransactionId(146757978);
@@ -513,8 +504,7 @@ public class DataBaseSessionManagerTest {
         }
         String xid2 = null;
         {
-            GlobalSession globalSession = GlobalSession.createGlobalSession("test",
-                "test", "test123", 100);
+            GlobalSession globalSession = GlobalSession.createGlobalSession("test", "test", "test123", 100);
             xid2 = XID.generateXID(globalSession.getTransactionId());
             globalSession.setXid(xid);
             globalSession.setTransactionId(146757978);
@@ -539,8 +529,7 @@ public class DataBaseSessionManagerTest {
             sessionManager.addBranchSession(globalSession, branchSession);
         }
 
-
-        Collection<GlobalSession> rets = sessionManager.findGlobalSessions(new SessionCondition( GlobalStatus.Begin));
+        Collection<GlobalSession> rets = sessionManager.findGlobalSessions(new SessionCondition(GlobalStatus.Begin));
         Assertions.assertNotNull(rets);
         Assertions.assertEquals(1, rets.size());
 
@@ -551,15 +540,17 @@ public class DataBaseSessionManagerTest {
 
         Assertions.assertNotNull(globalSession_db.getBranch(1L));
 
-        String delSql = "delete from branch_table where xid= '"+xid+"'" + ";" + "delete from global_table where xid= '"+xid+"'";
-        String delSql2 = "delete from branch_table where xid= '"+xid2+"'" + ";" + "delete from global_table where xid= '"+xid2+"'";
+        String delSql = "delete from branch_table where xid= '" + xid + "'" + ";"
+                + "delete from global_table where xid= '" + xid + "'";
+        String delSql2 = "delete from branch_table where xid= '" + xid2 + "'" + ";"
+                + "delete from global_table where xid= '" + xid2 + "'";
         Connection conn = null;
-        try{
+        try {
             conn = dataSource.getConnection();
             conn.createStatement().execute(delSql);
             conn.createStatement().execute(delSql2);
-        }finally {
-            if(conn != null){
+        } finally {
+            if (conn != null) {
                 conn.close();
             }
         }
@@ -576,8 +567,7 @@ public class DataBaseSessionManagerTest {
         final String finalTxName = sb.toString();
         sb.append("1321465454545436");
 
-        GlobalSession session = GlobalSession.createGlobalSession("test",
-            "test", sb.toString(), 100);
+        GlobalSession session = GlobalSession.createGlobalSession("test", "test", sb.toString(), 100);
         String xid = XID.generateXID(session.getTransactionId());
         session.setXid(xid);
         session.setTransactionId(146757978);
@@ -592,13 +582,13 @@ public class DataBaseSessionManagerTest {
 
         Assertions.assertEquals(globalSession_db.getTransactionName(), finalTxName);
 
-        String delSql = "delete from global_table where xid= '"+xid+"'";
+        String delSql = "delete from global_table where xid= '" + xid + "'";
         Connection conn = null;
-        try{
+        try {
             conn = dataSource.getConnection();
             conn.createStatement().execute(delSql);
-        }finally {
-            if(conn != null){
+        } finally {
+            if (conn != null) {
                 conn.close();
             }
         }
@@ -608,5 +598,4 @@ public class DataBaseSessionManagerTest {
     public static void setDown() throws SQLException {
         dataSource.close();
     }
-
 }

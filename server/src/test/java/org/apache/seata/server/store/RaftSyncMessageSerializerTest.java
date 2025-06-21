@@ -17,19 +17,18 @@
 package org.apache.seata.server.store;
 
 import org.apache.seata.server.DynamicPortTestConfig;
+import org.apache.seata.server.cluster.raft.sync.RaftSyncMessageSerializer;
 import org.apache.seata.server.cluster.raft.sync.msg.RaftGlobalSessionSyncMsg;
+import org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMessage;
 import org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType;
 import org.apache.seata.server.cluster.raft.sync.msg.dto.GlobalTransactionDTO;
+import org.apache.seata.server.session.GlobalSession;
+import org.apache.seata.server.storage.SessionConverter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
-
-import org.apache.seata.server.cluster.raft.sync.RaftSyncMessageSerializer;
-import org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMessage;
-import org.apache.seata.server.session.GlobalSession;
-import org.apache.seata.server.storage.SessionConverter;
 import org.springframework.context.annotation.Import;
 
 /**
@@ -38,9 +37,7 @@ import org.springframework.context.annotation.Import;
 @Import(DynamicPortTestConfig.class)
 public class RaftSyncMessageSerializerTest {
     @BeforeAll
-    public static void setUp(ApplicationContext context) {
-
-    }
+    public static void setUp(ApplicationContext context) {}
 
     @Test
     public void testSerializerTest() throws Exception {
@@ -48,7 +45,7 @@ public class RaftSyncMessageSerializerTest {
         raftSessionSyncMsg.setMsgType(RaftSyncMsgType.ADD_GLOBAL_SESSION);
         GlobalSession session = GlobalSession.createGlobalSession("test", "test", "test123", 100);
         GlobalTransactionDTO globalTransactionDTO = new GlobalTransactionDTO();
-        SessionConverter.convertGlobalTransactionDO(globalTransactionDTO,session);
+        SessionConverter.convertGlobalTransactionDO(globalTransactionDTO, session);
         raftSessionSyncMsg.setGlobalSession(globalTransactionDTO);
         RaftSyncMessage raftSyncMessage = new RaftSyncMessage();
         raftSyncMessage.setBody(raftSessionSyncMsg);
@@ -58,5 +55,4 @@ public class RaftSyncMessageSerializerTest {
         Assertions.assertTrue(raftSessionSyncMsg2.getGlobalSession().getXid().equals(session.getXid()));
         Assertions.assertTrue(raftSessionSyncMsg.getMsgType().equals(raftSessionSyncMsg2.getMsgType()));
     }
-
 }

@@ -16,18 +16,17 @@
  */
 package org.apache.seata.integration.rpc.core;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.model.BranchType;
 
+import java.util.HashMap;
+import java.util.Map;
 
 public interface ProviderRpcFilter<T> extends BaseRpcFilter<T> {
 
-    String[] TRX_CONTEXT_KEYS = new String[] {RootContext.KEY_XID, RootContext.KEY_XID.toLowerCase(),
-        RootContext.KEY_BRANCH_TYPE};
+    String[] TRX_CONTEXT_KEYS =
+            new String[] {RootContext.KEY_XID, RootContext.KEY_XID.toLowerCase(), RootContext.KEY_BRANCH_TYPE};
 
     String LOW_KEY_XID = "tx_xid";
 
@@ -75,7 +74,6 @@ public interface ProviderRpcFilter<T> extends BaseRpcFilter<T> {
                     default:
                         throw new IllegalArgumentException("wrong context:" + TRX_CONTEXT_KEYS[i]);
                 }
-
             }
         }
     }
@@ -102,7 +100,6 @@ public interface ProviderRpcFilter<T> extends BaseRpcFilter<T> {
                 default:
                     throw new IllegalArgumentException("wrong context:" + TRX_CONTEXT_KEYS[i]);
             }
-
         }
         return contextMap;
     }
@@ -110,5 +107,4 @@ public interface ProviderRpcFilter<T> extends BaseRpcFilter<T> {
     default void resetRootContexts(Map<String, String> contextMap) {
         bindRequestToContexts(contextMap);
     }
-
 }

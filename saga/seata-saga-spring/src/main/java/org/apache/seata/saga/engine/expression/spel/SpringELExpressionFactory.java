@@ -43,8 +43,8 @@ public class SpringELExpressionFactory implements ExpressionFactory {
     @Override
     public Expression createExpression(String expression) {
         org.springframework.expression.Expression defaultExpression = parser.parseExpression(expression);
-        EvaluationContext evaluationContext = ((SpelExpression)defaultExpression).getEvaluationContext();
-        ((StandardEvaluationContext)evaluationContext).setBeanResolver(new AppContextBeanResolver());
+        EvaluationContext evaluationContext = ((SpelExpression) defaultExpression).getEvaluationContext();
+        ((StandardEvaluationContext) evaluationContext).setBeanResolver(new AppContextBeanResolver());
         return new SpringELExpression(defaultExpression);
     }
 
@@ -54,6 +54,5 @@ public class SpringELExpressionFactory implements ExpressionFactory {
         public Object resolve(EvaluationContext context, String beanName) throws AccessException {
             return applicationContext.getBean(beanName);
         }
-
     }
 }

@@ -29,21 +29,19 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 import javax.sql.DataSource;
-
 import java.sql.SQLException;
 
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.never;
-
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class SeataAutoDataSourceProxyTest {
 
@@ -59,8 +57,8 @@ class SeataAutoDataSourceProxyTest {
         String[] excludes = new String[0];
         String dataSourceProxyMode = BranchType.AT.name();
 
-        advice= spy(new SeataAutoDataSourceProxyAdvice(dataSourceProxyMode));
-        Object[] advices = new Object[]{new DefaultIntroductionAdvisor(advice)};
+        advice = spy(new SeataAutoDataSourceProxyAdvice(dataSourceProxyMode));
+        Object[] advices = new Object[] {new DefaultIntroductionAdvisor(advice)};
 
         creator = spy(new SeataAutoDataSourceProxyCreator(useJdkProxy, excludes, dataSourceProxyMode));
         doReturn(advices).when(creator).getAdvicesAndAdvisorsForBean(any(), anyString(), any());
@@ -133,10 +131,12 @@ class SeataAutoDataSourceProxyTest {
         verify(creator, times(2)).buildProxy(any(), anyString());
     }
 
-    private void testProxy(DataSource origin, SeataDataSourceProxy proxy, Class<?> dataSourceConfiguration) throws SQLException {
+    private void testProxy(DataSource origin, SeataDataSourceProxy proxy, Class<?> dataSourceConfiguration)
+            throws SQLException {
         doReturn(proxy).when(creator).buildProxy(any(), anyString());
 
-        ApplicationContext context = new AnnotationConfigApplicationContext(ProxyConfiguration.class, dataSourceConfiguration);
+        ApplicationContext context =
+                new AnnotationConfigApplicationContext(ProxyConfiguration.class, dataSourceConfiguration);
         DataSource enhancer = context.getBean(PRIMARY_NAME, DataSource.class);
 
         assertTrue(enhancer instanceof SeataProxy);

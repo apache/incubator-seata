@@ -25,7 +25,6 @@ import java.util.List;
 public interface SQLUpdateRecognizer extends WhereRecognizer {
     String MULTI_TABLE_NAME_SEPERATOR = "#";
 
-
     /**
      * Gets update columns.
      *

@@ -16,6 +16,13 @@
  */
 package org.apache.seata.server.env;
 
+import org.apache.seata.common.util.CollectionUtils;
+import org.apache.seata.common.util.MapUtil;
+import org.apache.seata.common.util.NumberUtils;
+import org.apache.seata.common.util.StringUtils;
+import org.springframework.util.ResourceUtils;
+import org.yaml.snakeyaml.Yaml;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -23,13 +30,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 import java.util.Properties;
-
-import org.apache.seata.common.util.CollectionUtils;
-import org.apache.seata.common.util.MapUtil;
-import org.apache.seata.common.util.NumberUtils;
-import org.apache.seata.common.util.StringUtils;
-import org.springframework.util.ResourceUtils;
-import org.yaml.snakeyaml.Yaml;
 
 /**
  */
@@ -80,7 +80,7 @@ public class PortHelper {
             String portNum = null;
             if (fileName.endsWith("yml")) {
                 Map<String, Object> yamlMap = new Yaml().load(inputStream);
-                Map<String, Object> configMap =  MapUtil.getFlattenedMap(yamlMap);
+                Map<String, Object> configMap = MapUtil.getFlattenedMap(yamlMap);
                 if (CollectionUtils.isNotEmpty(configMap)) {
                     Object serverPort = configMap.get("server.port");
                     if (null != serverPort) {
@@ -96,7 +96,7 @@ public class PortHelper {
                 try {
                     port = Integer.parseInt(portNum);
                 } catch (NumberFormatException exx) {
-                    //ignore
+                    // ignore
                 }
             }
         } finally {
@@ -105,8 +105,8 @@ public class PortHelper {
             }
         }
         return port;
-
     }
+
     private static File getConfigFromStartup() {
 
         String configLocation = System.getProperty("spring.config.location");
@@ -126,9 +126,5 @@ public class PortHelper {
             }
         }
         return null;
-
     }
-
-
 }
-

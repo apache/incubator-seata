@@ -21,11 +21,11 @@ import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.core.rpc.TransportServerType;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST;
+import static org.apache.seata.common.DefaultValues.DEFAULT_ENABLE_CLIENT_USE_SHARED_EVENT_LOOP;
 import static org.apache.seata.common.DefaultValues.DEFAULT_PROTOCOL;
 import static org.apache.seata.common.DefaultValues.DEFAULT_RPC_RM_REQUEST_TIMEOUT;
 import static org.apache.seata.common.DefaultValues.DEFAULT_RPC_TM_REQUEST_TIMEOUT;
 import static org.apache.seata.common.DefaultValues.DEFAULT_SELECTOR_THREAD_PREFIX;
-import static org.apache.seata.common.DefaultValues.DEFAULT_ENABLE_CLIENT_USE_SHARED_EVENT_LOOP;
 import static org.apache.seata.common.DefaultValues.DEFAULT_WORKER_THREAD_PREFIX;
 
 /**
@@ -42,8 +42,10 @@ public class NettyClientConfig extends NettyBaseConfig {
     private int perHostMaxConn = 2;
     private static final int PER_HOST_MIN_CONN = 2;
     private int pendingConnSize = Integer.MAX_VALUE;
-    private static final long RPC_RM_REQUEST_TIMEOUT = CONFIG.getLong(ConfigurationKeys.RPC_RM_REQUEST_TIMEOUT, DEFAULT_RPC_RM_REQUEST_TIMEOUT);
-    private static final long RPC_TM_REQUEST_TIMEOUT = CONFIG.getLong(ConfigurationKeys.RPC_TM_REQUEST_TIMEOUT, DEFAULT_RPC_TM_REQUEST_TIMEOUT);
+    private static final long RPC_RM_REQUEST_TIMEOUT =
+            CONFIG.getLong(ConfigurationKeys.RPC_RM_REQUEST_TIMEOUT, DEFAULT_RPC_RM_REQUEST_TIMEOUT);
+    private static final long RPC_TM_REQUEST_TIMEOUT =
+            CONFIG.getLong(ConfigurationKeys.RPC_TM_REQUEST_TIMEOUT, DEFAULT_RPC_TM_REQUEST_TIMEOUT);
     private static String vgroup;
     private static String clientAppName;
     private static int clientType;
@@ -59,7 +61,8 @@ public class NettyClientConfig extends NettyBaseConfig {
     private static final boolean DEFAULT_POOL_TEST_BORROW = true;
     private static final boolean DEFAULT_POOL_TEST_RETURN = true;
     private static final boolean DEFAULT_POOL_LIFO = true;
-    private static final boolean ENABLE_CLIENT_BATCH_SEND_REQUEST = CONFIG.getBoolean(ConfigurationKeys.ENABLE_CLIENT_BATCH_SEND_REQUEST, DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST);
+    private static final boolean ENABLE_CLIENT_BATCH_SEND_REQUEST = CONFIG.getBoolean(
+            ConfigurationKeys.ENABLE_CLIENT_BATCH_SEND_REQUEST, DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST);
 
     /**
      * Gets connect timeout millis.
@@ -351,12 +354,14 @@ public class NettyClientConfig extends NettyBaseConfig {
      * @return the client selector thread size, or the default value if the configured size is invalid.
      */
     public int getClientSelectorThreadSize() {
-        int threadSize = CONFIG.getInt(ConfigurationKeys.CLIENT_SELECTOR_THREAD_SIZE, WorkThreadMode.Default.getValue());
+        int threadSize =
+                CONFIG.getInt(ConfigurationKeys.CLIENT_SELECTOR_THREAD_SIZE, WorkThreadMode.Default.getValue());
         return threadSize > 0 ? threadSize : WorkThreadMode.Default.getValue();
     }
 
     public boolean getEnableClientSharedEventLoop() {
-        return CONFIG.getBoolean(ConfigurationKeys.ENABLE_CLIENT_SHARED_EVENTLOOP, DEFAULT_ENABLE_CLIENT_USE_SHARED_EVENT_LOOP);
+        return CONFIG.getBoolean(
+                ConfigurationKeys.ENABLE_CLIENT_SHARED_EVENTLOOP, DEFAULT_ENABLE_CLIENT_USE_SHARED_EVENT_LOOP);
     }
 
     /**
@@ -466,5 +471,4 @@ public class NettyClientConfig extends NettyBaseConfig {
     public static boolean isEnableClientBatchSendRequest() {
         return ENABLE_CLIENT_BATCH_SEND_REQUEST;
     }
-
 }

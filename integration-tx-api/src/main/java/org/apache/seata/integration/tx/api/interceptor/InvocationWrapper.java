@@ -18,7 +18,6 @@ package org.apache.seata.integration.tx.api.interceptor;
 
 import java.lang.reflect.Method;
 
-
 public interface InvocationWrapper {
 
     Method getMethod();
@@ -30,6 +29,4 @@ public interface InvocationWrapper {
     Object[] getArguments();
 
     Object proceed() throws Throwable;
-
-
 }

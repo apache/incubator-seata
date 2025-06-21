@@ -36,7 +36,6 @@ public interface EscapeHandler {
      */
     boolean checkIfKeyWords(String fieldOrTableName);
 
-
     /**
      * check whether given field or table name use keywords. the method has database special logic.
      * @param columnName the column or table name
@@ -57,7 +56,8 @@ public interface EscapeHandler {
     default boolean containsEscape(String fieldOrTableName) {
         fieldOrTableName = fieldOrTableName.trim();
         EscapeSymbol escapeSymbol = getEscapeSymbol();
-        return fieldOrTableName.charAt(0) == escapeSymbol.getLeftSymbol() && fieldOrTableName.charAt(fieldOrTableName.length() - 1) == escapeSymbol.getRightSymbol();
+        return fieldOrTableName.charAt(0) == escapeSymbol.getLeftSymbol()
+                && fieldOrTableName.charAt(fieldOrTableName.length() - 1) == escapeSymbol.getRightSymbol();
     }
 
     /**
@@ -91,23 +91,37 @@ public interface EscapeHandler {
             String str = escapeChar.getRightSymbol() + DOT;
             int dotIndex = colName.indexOf(str);
             if (dotIndex > -1) {
-                return new StringBuilder().append(colName.substring(0, dotIndex + str.length())).append(escapeChar.getLeftSymbol())
-                    .append(colName.substring(dotIndex + str.length())).append(escapeChar.getRightSymbol()).toString();
+                return new StringBuilder()
+                        .append(colName.substring(0, dotIndex + str.length()))
+                        .append(escapeChar.getLeftSymbol())
+                        .append(colName.substring(dotIndex + str.length()))
+                        .append(escapeChar.getRightSymbol())
+                        .toString();
             }
             // like scheme."id" scheme.`id`
             str = DOT + escapeChar.getLeftSymbol();
             dotIndex = colName.indexOf(str);
             if (dotIndex > -1) {
-                return new StringBuilder().append(escapeChar.getLeftSymbol()).append(colName.substring(0, dotIndex)).append(escapeChar.getRightSymbol())
-                    .append(colName.substring(dotIndex)).toString();
+                return new StringBuilder()
+                        .append(escapeChar.getLeftSymbol())
+                        .append(colName.substring(0, dotIndex))
+                        .append(escapeChar.getRightSymbol())
+                        .append(colName.substring(dotIndex))
+                        .toString();
             }
 
             str = DOT;
             dotIndex = colName.indexOf(str);
             if (dotIndex > -1) {
-                return new StringBuilder().append(escapeChar.getLeftSymbol()).append(colName.substring(0, dotIndex)).append(escapeChar.getRightSymbol())
-                    .append(DOT).append(escapeChar.getLeftSymbol()).append(colName.substring(dotIndex + str.length())).append(
-                        escapeChar.getRightSymbol()).toString();
+                return new StringBuilder()
+                        .append(escapeChar.getLeftSymbol())
+                        .append(colName.substring(0, dotIndex))
+                        .append(escapeChar.getRightSymbol())
+                        .append(DOT)
+                        .append(escapeChar.getLeftSymbol())
+                        .append(colName.substring(dotIndex + str.length()))
+                        .append(escapeChar.getRightSymbol())
+                        .toString();
             }
         }
 
@@ -118,7 +132,6 @@ public interface EscapeHandler {
         colName.getChars(0, colName.length(), buf, 1);
 
         return new String(buf).intern();
-
     }
 
     /**
@@ -134,13 +147,15 @@ public interface EscapeHandler {
             return colName;
         }
         EscapeSymbol escapeChar = getEscapeSymbol();
-        if (colName.charAt(0) == escapeChar.getLeftSymbol() && colName.charAt(colName.length() - 1) == escapeChar.getRightSymbol()) {
+        if (colName.charAt(0) == escapeChar.getLeftSymbol()
+                && colName.charAt(colName.length() - 1) == escapeChar.getRightSymbol()) {
             // like "scheme"."id" `scheme`.`id`
             String str = escapeChar.getRightSymbol() + DOT + escapeChar.getLeftSymbol();
             int index = colName.indexOf(str);
             if (index > -1) {
-                return colName.substring(1, index) + DOT + colName.substring(index + str.length(),
-                    colName.length() - 1);
+                return colName.substring(1, index)
+                        + DOT
+                        + colName.substring(index + str.length(), colName.length() - 1);
             }
             return colName.substring(1, colName.length() - 1);
         } else {
@@ -154,11 +169,11 @@ public interface EscapeHandler {
             str = DOT + escapeChar.getLeftSymbol();
             index = colName.indexOf(str);
             if (index > -1 && colName.charAt(colName.length() - 1) == escapeChar.getRightSymbol()) {
-                return colName.substring(0, index) + DOT + colName.substring(index + str.length(),
-                    colName.length() - 1);
+                return colName.substring(0, index)
+                        + DOT
+                        + colName.substring(index + str.length(), colName.length() - 1);
             }
         }
         return colName;
     }
-
 }

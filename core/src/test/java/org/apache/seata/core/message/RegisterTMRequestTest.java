@@ -37,7 +37,8 @@ public class RegisterTMRequestTest {
         registerTMRequest.setApplicationId("seata");
         registerTMRequest.setTransactionServiceGroup("daliy_2019");
         registerTMRequest.setVersion("2019-snapshot");
-        Assertions.assertEquals("RegisterTMRequest{version='2019-snapshot', applicationId='seata', transactionServiceGroup='daliy_2019', extraData=''}",
+        Assertions.assertEquals(
+                "RegisterTMRequest{version='2019-snapshot', applicationId='seata', transactionServiceGroup='daliy_2019', extraData=''}",
                 registerTMRequest.toString());
     }
 }

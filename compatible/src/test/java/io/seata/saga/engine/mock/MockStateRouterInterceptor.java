@@ -25,7 +25,6 @@ import org.apache.seata.saga.statelang.domain.State;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class MockStateRouterInterceptor implements StateRouterInterceptor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockStateRouterInterceptor.class);
@@ -36,7 +35,8 @@ public class MockStateRouterInterceptor implements StateRouterInterceptor {
     }
 
     @Override
-    public void postRoute(ProcessContext context, State state, Instruction instruction, Exception e) throws EngineExecutionException {
+    public void postRoute(ProcessContext context, State state, Instruction instruction, Exception e)
+            throws EngineExecutionException {
         LOGGER.info("test StateRouterInterceptor postRoute");
     }
 

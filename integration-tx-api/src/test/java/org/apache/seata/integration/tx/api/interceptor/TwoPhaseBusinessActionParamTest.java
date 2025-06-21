@@ -16,13 +16,13 @@
  */
 package org.apache.seata.integration.tx.api.interceptor;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.seata.common.Constants;
 import org.apache.seata.core.model.BranchType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;

@@ -52,7 +52,7 @@ public interface SessionLifecycleListener {
      * @throws TransactionException the transaction exception
      */
     void onBranchStatusChange(GlobalSession globalSession, BranchSession branchSession, BranchStatus status)
-        throws TransactionException;
+            throws TransactionException;
 
     /**
      * On add branch.
@@ -95,5 +95,4 @@ public interface SessionLifecycleListener {
      * @throws TransactionException the transaction exception
      */
     void onFailEnd(GlobalSession globalSession) throws TransactionException;
-
 }

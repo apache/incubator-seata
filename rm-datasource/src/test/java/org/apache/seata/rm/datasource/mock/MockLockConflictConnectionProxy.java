@@ -16,14 +16,13 @@
  */
 package org.apache.seata.rm.datasource.mock;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Savepoint;
-
 import org.apache.seata.rm.datasource.ConnectionProxy;
 import org.apache.seata.rm.datasource.DataSourceProxy;
 import org.apache.seata.rm.datasource.exec.LockConflictException;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Savepoint;
 
 public class MockLockConflictConnectionProxy extends ConnectionProxy {
     /**
@@ -32,8 +31,7 @@ public class MockLockConflictConnectionProxy extends ConnectionProxy {
      * @param dataSourceProxy  the data source proxy
      * @param targetConnection the target connection
      */
-    public MockLockConflictConnectionProxy(DataSourceProxy dataSourceProxy,
-                                           Connection targetConnection) {
+    public MockLockConflictConnectionProxy(DataSourceProxy dataSourceProxy, Connection targetConnection) {
         super(dataSourceProxy, targetConnection);
     }
 

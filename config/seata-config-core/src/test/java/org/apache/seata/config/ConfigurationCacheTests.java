@@ -16,12 +16,11 @@
  */
 package org.apache.seata.config;
 
-import java.time.Duration;
-
 import org.apache.seata.common.util.DurationUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 
 public class ConfigurationCacheTests {
 
@@ -65,14 +64,12 @@ public class ConfigurationCacheTests {
         Assertions.assertNull(test);
     }
 
-
     public static class TestListener implements ConfigurationChangeListener {
 
         @Override
         public void onChangeEvent(ConfigurationChangeEvent event) {
-            Assertions.assertEquals(Boolean.parseBoolean(event.getNewValue()),
-                !Boolean.parseBoolean(event.getOldValue()));
+            Assertions.assertEquals(
+                    Boolean.parseBoolean(event.getNewValue()), !Boolean.parseBoolean(event.getOldValue()));
         }
     }
-
 }

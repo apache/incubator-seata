@@ -16,21 +16,21 @@
  */
 package org.apache.seata.saga.engine.db;
 
-import java.io.File;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
 import org.apache.seata.common.XID;
 import org.apache.seata.common.util.NetUtil;
+import org.apache.seata.common.util.UUIDGenerator;
 import org.apache.seata.core.rpc.ShutdownHook;
 import org.apache.seata.core.rpc.netty.NettyRemotingServer;
 import org.apache.seata.core.rpc.netty.NettyServerConfig;
 import org.apache.seata.server.ParameterParser;
-import org.apache.seata.common.util.UUIDGenerator;
 import org.apache.seata.server.coordinator.DefaultCoordinator;
 import org.apache.seata.server.metrics.MetricsManager;
 import org.apache.seata.server.session.SessionHolder;
+
+import java.io.File;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Abstract Server Test
@@ -38,57 +38,56 @@ import org.apache.seata.server.session.SessionHolder;
  */
 public abstract class AbstractServerTest {
 
-
     private static NettyRemotingServer nettyServer;
-    private static final ThreadPoolExecutor workingThreads = new ThreadPoolExecutor(100, 500, 500, TimeUnit.SECONDS,
-            new LinkedBlockingQueue(20000), new ThreadPoolExecutor.CallerRunsPolicy());
+    private static final ThreadPoolExecutor workingThreads = new ThreadPoolExecutor(
+            100, 500, 500, TimeUnit.SECONDS, new LinkedBlockingQueue(20000), new ThreadPoolExecutor.CallerRunsPolicy());
 
     protected static void startSeataServer() throws InterruptedException {
         (new Thread(new Runnable() {
-            public void run() {
-                File file = new File("sessionStore/root.data");
-                if(file.exists()){
-                    file.delete();
-                }
+                    public void run() {
+                        File file = new File("sessionStore/root.data");
+                        if (file.exists()) {
+                            file.delete();
+                        }
 
-                ParameterParser parameterParser = new ParameterParser();
+                        ParameterParser parameterParser = new ParameterParser();
 
-                //initialize the metrics
-                MetricsManager.get().init();
+                        // initialize the metrics
+                        MetricsManager.get().init();
 
-                NettyServerConfig nettyServerConfig = new NettyServerConfig();
-                nettyServerConfig.setServerListenPort(8091);
-                nettyServer = new NettyRemotingServer(workingThreads, nettyServerConfig);
-                UUIDGenerator.init(parameterParser.getServerNode());
-                //log store mode : file、db
-                SessionHolder.init();
+                        NettyServerConfig nettyServerConfig = new NettyServerConfig();
+                        nettyServerConfig.setServerListenPort(8091);
+                        nettyServer = new NettyRemotingServer(workingThreads, nettyServerConfig);
+                        UUIDGenerator.init(parameterParser.getServerNode());
+                        // log store mode : file、db
+                        SessionHolder.init();
 
-                DefaultCoordinator coordinator = DefaultCoordinator.getInstance(nettyServer);
-                coordinator.init();
-                nettyServer.setHandler(coordinator);
+                        DefaultCoordinator coordinator = DefaultCoordinator.getInstance(nettyServer);
+                        coordinator.init();
+                        nettyServer.setHandler(coordinator);
 
-                // register ShutdownHook
-                ShutdownHook.getInstance().addDisposable(coordinator);
+                        // register ShutdownHook
+                        ShutdownHook.getInstance().addDisposable(coordinator);
 
-                //127.0.0.1 and 0.0.0.0 are not valid here.
-                if (NetUtil.isValidIp(parameterParser.getHost(), false)) {
-                    XID.setIpAddress(parameterParser.getHost());
-                } else {
-                    XID.setIpAddress(NetUtil.getLocalIp());
-                }
-                XID.setPort(nettyServer.getListenPort());
+                        // 127.0.0.1 and 0.0.0.0 are not valid here.
+                        if (NetUtil.isValidIp(parameterParser.getHost(), false)) {
+                            XID.setIpAddress(parameterParser.getHost());
+                        } else {
+                            XID.setIpAddress(NetUtil.getLocalIp());
+                        }
+                        XID.setPort(nettyServer.getListenPort());
 
-                nettyServer.init();
-            }
-        })).start();
+                        nettyServer.init();
+                    }
+                }))
+                .start();
         Thread.sleep(5000);
     }
 
     protected static final void stopSeataServer() throws InterruptedException {
-        if(nettyServer != null){
+        if (nettyServer != null) {
             nettyServer.destroy();
             Thread.sleep(5000);
         }
     }
-
 }

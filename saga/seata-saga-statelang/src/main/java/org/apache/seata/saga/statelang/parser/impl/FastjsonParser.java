@@ -32,18 +32,21 @@ public class FastjsonParser implements JsonParser {
     private static final SerializerFeature[] SERIALIZER_FEATURES = new SerializerFeature[] {
         SerializerFeature.DisableCircularReferenceDetect,
         SerializerFeature.WriteDateUseDateFormat,
-        SerializerFeature.WriteClassName };
+        SerializerFeature.WriteClassName
+    };
 
     private static final SerializerFeature[] SERIALIZER_FEATURES_PRETTY = new SerializerFeature[] {
         SerializerFeature.DisableCircularReferenceDetect,
         SerializerFeature.WriteDateUseDateFormat,
         SerializerFeature.WriteClassName,
-        SerializerFeature.PrettyFormat };
+        SerializerFeature.PrettyFormat
+    };
 
     private static final SerializerFeature[] FEATURES_PRETTY = new SerializerFeature[] {
         SerializerFeature.DisableCircularReferenceDetect,
         SerializerFeature.WriteDateUseDateFormat,
-        SerializerFeature.PrettyFormat };
+        SerializerFeature.PrettyFormat
+    };
 
     public static final String NAME = "fastjson";
 
@@ -67,16 +70,13 @@ public class FastjsonParser implements JsonParser {
         if (prettyPrint) {
             if (ignoreAutoType) {
                 return JSON.toJSONString(o, FEATURES_PRETTY);
-            }
-            else {
+            } else {
                 return JSON.toJSONString(o, SERIALIZER_FEATURES_PRETTY);
             }
-        }
-        else {
+        } else {
             if (ignoreAutoType) {
                 return JSON.toJSONString(o);
-            }
-            else {
+            } else {
                 return JSON.toJSONString(o, SERIALIZER_FEATURES);
             }
         }
@@ -86,8 +86,7 @@ public class FastjsonParser implements JsonParser {
     public <T> T parse(String json, Class<T> type, boolean ignoreAutoType) {
         if (ignoreAutoType) {
             return JSON.parseObject(json, type, Feature.IgnoreAutoType, Feature.OrderedField);
-        }
-        else {
+        } else {
             return JSON.parseObject(json, type, Feature.SupportAutoType, Feature.OrderedField);
         }
     }

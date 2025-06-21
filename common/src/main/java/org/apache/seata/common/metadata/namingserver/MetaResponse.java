@@ -24,8 +24,7 @@ public class MetaResponse {
     private List<Cluster> clusterList;
     private long term;
 
-    public MetaResponse() {
-    }
+    public MetaResponse() {}
 
     public MetaResponse(List<Cluster> clusterList, long term) {
         this.clusterList = clusterList;

@@ -16,16 +16,16 @@
  */
 package org.apache.seata.core.event;
 
+import org.apache.seata.common.thread.NamedThreadFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
-import org.apache.seata.common.thread.NamedThreadFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Default event bus implement with Guava EventBus.
@@ -44,11 +44,18 @@ public class GuavaEventBus implements EventBus {
         if (!async) {
             this.eventBus = new com.google.common.eventbus.EventBus(identifier);
         } else {
-            final ExecutorService eventExecutor = new ThreadPoolExecutor(1, 1, Integer.MAX_VALUE, TimeUnit.MILLISECONDS,
-                new ArrayBlockingQueue<>(2048), new NamedThreadFactory(identifier, 1, true), (r, executor) -> {
-
-                LOGGER.warn("eventBus executor queue is full, size:{}", executor.getQueue().size());
-            });
+            final ExecutorService eventExecutor = new ThreadPoolExecutor(
+                    1,
+                    1,
+                    Integer.MAX_VALUE,
+                    TimeUnit.MILLISECONDS,
+                    new ArrayBlockingQueue<>(2048),
+                    new NamedThreadFactory(identifier, 1, true),
+                    (r, executor) -> {
+                        LOGGER.warn(
+                                "eventBus executor queue is full, size:{}",
+                                executor.getQueue().size());
+                    });
             this.eventBus = new com.google.common.eventbus.AsyncEventBus(identifier, eventExecutor);
         }
     }
@@ -66,7 +73,6 @@ public class GuavaEventBus implements EventBus {
             this.eventBus.unregister(subscriber);
         }
     }
-
 
     @Override
     public void unregisterAll() {

@@ -16,7 +16,6 @@
  */
 package org.apache.seata.integration.tx.api.fence.hook;
 
-
 import org.apache.seata.rm.tcc.api.BusinessActionContext;
 
 public interface TccHook {

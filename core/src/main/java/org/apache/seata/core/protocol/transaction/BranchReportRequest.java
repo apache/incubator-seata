@@ -18,8 +18,8 @@ package org.apache.seata.core.protocol.transaction;
 
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
-import org.apache.seata.core.rpc.RpcContext;
 import org.apache.seata.core.protocol.MessageType;
+import org.apache.seata.core.rpc.RpcContext;
 
 /**
  * The type Branch report request.
@@ -151,7 +151,6 @@ public class BranchReportRequest extends AbstractTransactionRequestToTC {
     public short getTypeCode() {
         return MessageType.TYPE_BRANCH_STATUS_REPORT;
     }
-
 
     @Override
     public AbstractTransactionResponse handle(RpcContext rpcContext) {

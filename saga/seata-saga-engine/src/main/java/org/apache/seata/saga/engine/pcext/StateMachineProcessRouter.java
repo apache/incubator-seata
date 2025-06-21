@@ -16,11 +16,6 @@
  */
 package org.apache.seata.saga.engine.pcext;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.saga.engine.StateMachineConfig;
@@ -34,6 +29,11 @@ import org.apache.seata.saga.statelang.domain.DomainConstants;
 import org.apache.seata.saga.statelang.domain.State;
 import org.apache.seata.saga.statelang.domain.StateMachine;
 import org.apache.seata.saga.statelang.domain.StateType;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * StateMachine ProcessRouter
@@ -54,10 +54,11 @@ public class StateMachineProcessRouter implements ProcessRouter {
             state = stateInstruction.getTemporaryState();
             stateInstruction.setTemporaryState(null);
         } else {
-            StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
-                DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
-            StateMachine stateMachine = stateMachineConfig.getStateMachineRepository().getStateMachine(
-                stateInstruction.getStateMachineName(), stateInstruction.getTenantId());
+            StateMachineConfig stateMachineConfig =
+                    (StateMachineConfig) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
+            StateMachine stateMachine = stateMachineConfig
+                    .getStateMachineRepository()
+                    .getStateMachine(stateInstruction.getStateMachineName(), stateInstruction.getTenantId());
             state = stateMachine.getStates().get(stateInstruction.getStateName());
         }
 
@@ -69,7 +70,7 @@ public class StateMachineProcessRouter implements ProcessRouter {
 
         List<StateRouterInterceptor> interceptors = null;
         if (router instanceof InterceptableStateRouter) {
-            interceptors = ((InterceptableStateRouter)router).getInterceptors();
+            interceptors = ((InterceptableStateRouter) router).getInterceptors();
         }
 
         List<StateRouterInterceptor> executedInterceptors = null;
@@ -96,7 +97,7 @@ public class StateMachineProcessRouter implements ProcessRouter {
                 }
             }
 
-            //if 'Succeed' or 'Fail' State did not configured, we must end the state machine
+            // if 'Succeed' or 'Fail' State did not configured, we must end the state machine
             if (instruction == null && !stateInstruction.isEnd()) {
                 EngineUtils.endStateMachine(context);
             }

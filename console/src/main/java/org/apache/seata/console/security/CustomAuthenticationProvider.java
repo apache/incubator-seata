@@ -37,8 +37,8 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
 
-        String username = (String)authentication.getPrincipal();
-        String password = (String)authentication.getCredentials();
+        String username = (String) authentication.getPrincipal();
+        String password = (String) authentication.getCredentials();
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
         if (!password.equals(userDetails.getPassword())) {
@@ -51,5 +51,4 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
     public boolean supports(Class<?> aClass) {
         return aClass.equals(UsernamePasswordAuthenticationToken.class);
     }
-
 }
