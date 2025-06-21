@@ -166,8 +166,7 @@ public class DruidSQLRecognizerFactoryTest {
                 NotSupportYetException.class, () -> recognizerFactory.create(sql3, JdbcConstants.MARIADB));
         Assertions.assertThrows(
                 NotSupportYetException.class, () -> recognizerFactory.create(sql3, JdbcConstants.POLARDBX));
-        Assertions.assertThrows(
-                NotSupportYetException.class, () -> recognizerFactory.create(sql3, JdbcConstants.DM));
+        Assertions.assertThrows(NotSupportYetException.class, () -> recognizerFactory.create(sql3, JdbcConstants.DM));
 
         String sql5 = "insert into a select * from b";
         Assertions.assertThrows(

@@ -43,8 +43,10 @@ class DruidSQLRecognizerFactoryImpl implements SQLRecognizerFactory {
             sqlStatements = SQLUtils.parseStatements(sql, DruidDbTypeAdapter.getAdaptiveDbType(dbType));
         } catch (RuntimeException e) {
             if (isParserException(e)) {
-                throw new NotSupportYetException("not support the sql syntax: " + sql +
-                        "\nplease see the doc about SQL restrictions https://seata.apache.org/zh-cn/docs/user/sqlreference/dml", e);
+                throw new NotSupportYetException(
+                        "not support the sql syntax: " + sql
+                                + "\nplease see the doc about SQL restrictions https://seata.apache.org/zh-cn/docs/user/sqlreference/dml",
+                        e);
             }
             throw e;
         }
