@@ -162,6 +162,26 @@ public interface DefaultValues {
     String DEFAULT_PROTOCOL = "seata";
 
     /**
+     * The constant DEFAULT_MIN_HTTP_POOL_SIZE.
+     */
+    int DEFAULT_MIN_HTTP_POOL_SIZE = 10;
+    
+    /**
+     * The constant DEFAULT_MAX_HTTP_POOL_SIZE.
+     */
+    int DEFAULT_MAX_HTTP_POOL_SIZE = 100;
+    
+    /**
+     * The constant DEFAULT_MAX_HTTP_TASK_QUEUE_SIZE.
+     */
+    int DEFAULT_MAX_HTTP_TASK_QUEUE_SIZE = 1000;
+    
+    /**
+     * The constant DEFAULT_HTTP_POOL_KEEP_ALIVE_TIME.
+     */
+    int DEFAULT_HTTP_POOL_KEEP_ALIVE_TIME = 500;
+
+    /**
      * The constant DEFAULT_TRANSPORT_HEARTBEAT.
      */
     boolean DEFAULT_TRANSPORT_HEARTBEAT = true;

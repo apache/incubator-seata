@@ -34,11 +34,17 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
+import static org.springframework.web.bind.annotation.ValueConstants.DEFAULT_NONE;
 
 /**
  * Handles classes annotated with @RestController to establish a request path -> controller mapping relationship
@@ -50,6 +56,8 @@ public class RestControllerBeanPostProcessor implements BeanPostProcessor {
 
     private static final List<Class<? extends Annotation>> MAPPING_CLASS = new ArrayList<>();
     private static final Map<Class<? extends Annotation>, ParamMetaData.ParamConvertType> MAPPING_PARAM_TYPE = new HashMap<>();
+    private static final Set<Class<?>> SIMPLE_TYPE = new HashSet<>();
+    private static final Set<Class<?>> SPECIAL_INJECTED_TYPE = new HashSet<>();
 
     static {
         MAPPING_CLASS.add(GetMapping.class);
@@ -61,6 +69,31 @@ public class RestControllerBeanPostProcessor implements BeanPostProcessor {
         MAPPING_PARAM_TYPE.put(RequestParam.class, ParamMetaData.ParamConvertType.REQUEST_PARAM);
         MAPPING_PARAM_TYPE.put(RequestBody.class, ParamMetaData.ParamConvertType.REQUEST_BODY);
         MAPPING_PARAM_TYPE.put(ModelAttribute.class, ParamMetaData.ParamConvertType.MODEL_ATTRIBUTE);
+
+        SIMPLE_TYPE.add(String.class);
+        SIMPLE_TYPE.add(Integer.class);
+        SIMPLE_TYPE.add(int.class);
+        SIMPLE_TYPE.add(Long.class);
+        SIMPLE_TYPE.add(long.class);
+        SIMPLE_TYPE.add(Boolean.class);
+        SIMPLE_TYPE.add(boolean.class);
+        SIMPLE_TYPE.add(Double.class);
+        SIMPLE_TYPE.add(double.class);
+        SIMPLE_TYPE.add(Float.class);
+        SIMPLE_TYPE.add(float.class);
+        SIMPLE_TYPE.add(Short.class);
+        SIMPLE_TYPE.add(short.class);
+        SIMPLE_TYPE.add(Byte.class);
+        SIMPLE_TYPE.add(byte.class);
+        SIMPLE_TYPE.add(Character.class);
+        SIMPLE_TYPE.add(char.class);
+        SIMPLE_TYPE.add(java.math.BigDecimal.class);
+        SIMPLE_TYPE.add(java.math.BigInteger.class);
+        SIMPLE_TYPE.add(java.util.Date.class);
+        SIMPLE_TYPE.add(java.time.LocalDate.class);
+        SIMPLE_TYPE.add(java.time.LocalDateTime.class);
+
+        SPECIAL_INJECTED_TYPE.add(org.apache.seata.common.rpc.http.HttpContext.class);
     }
 
     @Override
@@ -106,19 +139,20 @@ public class RestControllerBeanPostProcessor implements BeanPostProcessor {
         Class<?>[] parameterTypes = method.getParameterTypes();
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
         ParamMetaData[] paramMetaDatas = new ParamMetaData[parameterTypes.length];
+        Parameter[] parameters = method.getParameters();
         for (int i = 0; i < parameterTypes.length; i++) {
+            Annotation matchedAnnotation = null;
             Class<? extends Annotation> parameterAnnotationType = null;
             if (parameterAnnotations[i] != null && parameterAnnotations[i].length > 0) {
-                parameterAnnotationType = parameterAnnotations[i][0].annotationType();
+                for (Annotation annotation : parameterAnnotations[i]) {
+                    if (MAPPING_PARAM_TYPE.containsKey(annotation.annotationType())) {
+                        parameterAnnotationType = annotation.annotationType();
+                        matchedAnnotation = annotation;
+                        break;
+                    }
+                }
             }
-
-            if (parameterAnnotationType == null) {
-                parameterAnnotationType = RequestParam.class;
-            }
-
-            ParamMetaData paramMetaData = new ParamMetaData();
-            ParamMetaData.ParamConvertType paramConvertType = MAPPING_PARAM_TYPE.get(parameterAnnotationType);
-            paramMetaData.setParamConvertType(paramConvertType);
+            ParamMetaData paramMetaData = buildParamMetaData(matchedAnnotation, parameterTypes[i], parameterAnnotationType, parameters[i]);
             paramMetaDatas[i] = paramMetaData;
         }
         int maxSize = Math.max(prePaths.size(), postPaths.size());
@@ -143,5 +177,67 @@ public class RestControllerBeanPostProcessor implements BeanPostProcessor {
         }
     }
 
+    private static ParamMetaData buildParamMetaData(Annotation matchedAnnotation, Class<?> parameterType,
+                                                    Class<? extends Annotation> parameterAnnotationType, Parameter parameter) {
+        ParamMetaData paramMetaData = new ParamMetaData();
+
+        // No annotation on the parameter: resolve the default annotation type based on the parameter type
+        if (parameterAnnotationType == null) {
+            parameterAnnotationType = resolveDefaultAnnotationType(parameterType);
+            ParamMetaData.ParamConvertType paramConvertType = MAPPING_PARAM_TYPE.get(parameterAnnotationType);
+            paramMetaData.setParamConvertType(paramConvertType);
+            if (parameterAnnotationType == RequestParam.class) {
+                paramMetaData.setParamName(parameter.getName());
+                paramMetaData.setRequired(true);
+                paramMetaData.setDefaultValue(DEFAULT_NONE);
+            }
+        // Annotation is present on the parameter; proceed with standard parsing logic
+        } else {
+            ParamMetaData.ParamConvertType paramConvertType = MAPPING_PARAM_TYPE.get(parameterAnnotationType);
+            paramMetaData.setParamConvertType(paramConvertType);
+            if (parameterAnnotationType == RequestParam.class) {
+                RequestParam requestParam = (RequestParam) matchedAnnotation;
+                boolean required = true;
+                String defaultValue = null;
+                String paramName = Optional.ofNullable(requestParam.name())
+                        .filter(name -> !name.isEmpty())
+                        .orElseGet(() -> {
+                            String value = requestParam.value();
+                            return !value.isEmpty() ? value : parameter.getName();
+                        });
+
+                required = requestParam.required();
+                defaultValue = requestParam.defaultValue();
+
+                if (!DEFAULT_NONE.equals(defaultValue)) {
+                    required = false;
+                }
+
+                paramMetaData.setParamName(paramName);
+                paramMetaData.setRequired(required);
+                paramMetaData.setDefaultValue(defaultValue);
+            }
+        }
+
+        return paramMetaData;
+    }
+
+    /**
+     * Determines the default annotation type for a parameter based on its class.
+     * Returns:
+     * - null for special injected types (e.g., HttpContext),
+     * - RequestParam for primitives, simple types, or MultipartFile,
+     * - ModelAttribute for all others.
+     */
+    private static Class<? extends Annotation> resolveDefaultAnnotationType(Class<?> paramType) {
+        if (SPECIAL_INJECTED_TYPE.stream().anyMatch(t -> t.isAssignableFrom(paramType))) {
+            return null;
+        } else if (paramType.isPrimitive() || SIMPLE_TYPE.contains(paramType)
+                || org.springframework.web.multipart.MultipartFile.class.isAssignableFrom(paramType)) {
+            return RequestParam.class;
+        } else {
+            return ModelAttribute.class;
+        }
+    }
 
 }

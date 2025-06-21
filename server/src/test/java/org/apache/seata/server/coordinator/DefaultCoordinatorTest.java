@@ -43,6 +43,7 @@ import org.apache.seata.core.protocol.transaction.BranchRollbackRequest;
 import org.apache.seata.core.protocol.transaction.BranchRollbackResponse;
 import org.apache.seata.core.rpc.RemotingServer;
 import org.apache.seata.core.rpc.processor.RemotingProcessor;
+import org.apache.seata.server.DynamicPortTestConfig;
 import org.apache.seata.server.metrics.MetricsManager;
 import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.session.SessionHolder;
@@ -61,12 +62,14 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Import;
 
 /**
  * The type DefaultCoordinator test.
  *
  */
 @SpringBootTest
+@Import(DynamicPortTestConfig.class)
 public class DefaultCoordinatorTest {
     private static DefaultCoordinator defaultCoordinator;
 

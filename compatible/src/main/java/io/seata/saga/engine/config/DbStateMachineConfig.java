@@ -70,16 +70,21 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
         try {
             Configuration configuration = ConfigurationFactory.getInstance();
             if (configuration != null) {
-                this.rmReportSuccessEnable = configuration.getBoolean(ConfigurationKeys.CLIENT_REPORT_SUCCESS_ENABLE, DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE);
-                this.sagaBranchRegisterEnable = configuration.getBoolean(ConfigurationKeys.CLIENT_SAGA_BRANCH_REGISTER_ENABLE, DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE);
-                setSagaJsonParser(configuration.getConfig(ConfigurationKeys.CLIENT_SAGA_JSON_PARSER, DEFAULT_SAGA_JSON_PARSER));
+                this.rmReportSuccessEnable = configuration.getBoolean(ConfigurationKeys.CLIENT_REPORT_SUCCESS_ENABLE,
+                    DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE);
+                this.sagaBranchRegisterEnable = configuration.getBoolean(
+                    ConfigurationKeys.CLIENT_SAGA_BRANCH_REGISTER_ENABLE, DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE);
+                setSagaJsonParser(
+                    configuration.getConfig(ConfigurationKeys.CLIENT_SAGA_JSON_PARSER, DEFAULT_SAGA_JSON_PARSER));
                 this.applicationId = configuration.getConfig(ConfigurationKeys.APPLICATION_ID);
                 this.txServiceGroup = configuration.getConfig(ConfigurationKeys.TX_SERVICE_GROUP);
                 this.accessKey = configuration.getConfig(ConfigurationKeys.ACCESS_KEY, null);
                 this.secretKey = configuration.getConfig(ConfigurationKeys.SECRET_KEY, null);
-                setSagaRetryPersistModeUpdate(configuration.getBoolean(ConfigurationKeys.CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE,
+                setSagaRetryPersistModeUpdate(
+                    configuration.getBoolean(ConfigurationKeys.CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE,
                         DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE));
-                setSagaCompensatePersistModeUpdate(configuration.getBoolean(ConfigurationKeys.CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE,
+                setSagaCompensatePersistModeUpdate(
+                    configuration.getBoolean(ConfigurationKeys.CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE,
                         DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE));
             }
         } catch (Exception e) {
@@ -123,14 +128,7 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
             }
 
             if (sagaTransactionalTemplate == null) {
-                DefaultSagaTransactionalTemplate defaultSagaTransactionalTemplate = new DefaultSagaTransactionalTemplate();
-                defaultSagaTransactionalTemplate.setApplicationContext(getApplicationContext());
-                defaultSagaTransactionalTemplate.setApplicationId(applicationId);
-                defaultSagaTransactionalTemplate.setTxServiceGroup(txServiceGroup);
-                defaultSagaTransactionalTemplate.setAccessKey(accessKey);
-                defaultSagaTransactionalTemplate.setSecretKey(secretKey);
-                defaultSagaTransactionalTemplate.afterPropertiesSet();
-                sagaTransactionalTemplate = defaultSagaTransactionalTemplate;
+                sagaTransactionalTemplate = buildDefaultSagaTransactionalTemplate();
             }
 
             dbStateLogStore.setSagaTransactionalTemplate(sagaTransactionalTemplate);
@@ -151,10 +149,25 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
         super.afterPropertiesSet();
     }
 
+    public SagaTransactionalTemplate buildDefaultSagaTransactionalTemplate() {
+        DefaultSagaTransactionalTemplate defaultSagaTransactionalTemplate = new DefaultSagaTransactionalTemplate();
+        defaultSagaTransactionalTemplate.setApplicationContext(getApplicationContext());
+        defaultSagaTransactionalTemplate.setApplicationId(applicationId);
+        defaultSagaTransactionalTemplate.setTxServiceGroup(txServiceGroup);
+        defaultSagaTransactionalTemplate.setAccessKey(accessKey);
+        defaultSagaTransactionalTemplate.setSecretKey(secretKey);
+        try {
+            defaultSagaTransactionalTemplate.afterPropertiesSet();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return defaultSagaTransactionalTemplate;
+    }
+
     @Override
     public void destroy() throws Exception {
         if ((sagaTransactionalTemplate != null) && (sagaTransactionalTemplate instanceof DisposableBean)) {
-            ((DisposableBean) sagaTransactionalTemplate).destroy();
+            ((DisposableBean)sagaTransactionalTemplate).destroy();
         }
     }
 

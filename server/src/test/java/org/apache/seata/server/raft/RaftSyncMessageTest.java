@@ -32,6 +32,7 @@ import org.apache.seata.common.store.SessionMode;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.server.cluster.raft.execute.config.ConfigOperationType;
+import org.apache.seata.server.DynamicPortTestConfig;
 import org.apache.seata.server.cluster.raft.snapshot.RaftSnapshot;
 import org.apache.seata.server.cluster.raft.sync.RaftSyncMessageSerializer;
 import org.apache.seata.server.cluster.raft.snapshot.RaftSnapshotSerializer;
@@ -54,10 +55,12 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Import;
 
 /**
  */
 @SpringBootTest
+@Import(DynamicPortTestConfig.class)
 public class RaftSyncMessageTest {
 
     @BeforeAll
