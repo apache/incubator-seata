@@ -46,6 +46,20 @@ transport.maxHttpPoolSize=100
 transport.maxHttpTaskQueueSize=1000
 transport.httpPoolKeepAliveTime=500
 
+transport.serverSocketSendBufSize=153600
+transport.serverSocketResvBufSize=153600
+transport.writeBufferHighWaterMark=67108864
+transport.writeBufferLowWaterMark=1048576
+
+transport.soBackLogSize=1024
+transport.serverChannelMaxIdleTimeSeconds=30
+
+transport.minServerPoolSize=50
+transport.maxServerPoolSize=500
+transport.maxTaskQueueSize=20000
+transport.keepAliveTime=500
+
+
 #Transaction routing rules configuration, only for the client
 service.vgroupMapping.default_tx_group=default
 #If you use a registry, you can ignore it

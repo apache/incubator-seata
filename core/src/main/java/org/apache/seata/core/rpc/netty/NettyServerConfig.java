@@ -26,54 +26,74 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_BOSS_THREAD_PREFIX;
 import static org.apache.seata.common.DefaultValues.DEFAULT_BOSS_THREAD_SIZE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_EXECUTOR_THREAD_PREFIX;
 import static org.apache.seata.common.DefaultValues.DEFAULT_NIO_WORKER_THREAD_PREFIX;
-import static org.apache.seata.common.DefaultValues.DEFAULT_RPC_TC_REQUEST_TIMEOUT;
 import static org.apache.seata.common.DefaultValues.DEFAULT_SHUTDOWN_TIMEOUT_SEC;
 
 /**
  * The type Netty server config.
- *
  */
 public class NettyServerConfig extends NettyBaseConfig {
-
-    private int serverSelectorThreads = Integer.parseInt(System.getProperty(
-            ConfigurationKeys.TRANSPORT_PREFIX + "serverSelectorThreads", String.valueOf(WORKER_THREAD_SIZE)));
-    private int serverSocketSendBufSize = Integer.parseInt(
-            System.getProperty(ConfigurationKeys.TRANSPORT_PREFIX + "serverSocketSendBufSize", String.valueOf(153600)));
-    private int serverSocketResvBufSize = Integer.parseInt(
-            System.getProperty(ConfigurationKeys.TRANSPORT_PREFIX + "serverSocketResvBufSize", String.valueOf(153600)));
-    private int serverWorkerThreads = Integer.parseInt(System.getProperty(
-            ConfigurationKeys.TRANSPORT_PREFIX + "serverWorkerThreads", String.valueOf(WORKER_THREAD_SIZE)));
-    private int soBackLogSize = Integer.parseInt(
-            System.getProperty(ConfigurationKeys.TRANSPORT_PREFIX + "soBackLogSize", String.valueOf(1024)));
-    private int writeBufferHighWaterMark = Integer.parseInt(System.getProperty(
-            ConfigurationKeys.TRANSPORT_PREFIX + "writeBufferHighWaterMark", String.valueOf(67108864)));
-    private int writeBufferLowWaterMark = Integer.parseInt(System.getProperty(
-            ConfigurationKeys.TRANSPORT_PREFIX + "writeBufferLowWaterMark", String.valueOf(1048576)));
     private int serverListenPort = 0;
-    private static final long RPC_TC_REQUEST_TIMEOUT =
-            CONFIG.getLong(ConfigurationKeys.RPC_TC_REQUEST_TIMEOUT, DEFAULT_RPC_TC_REQUEST_TIMEOUT);
-    private int serverChannelMaxIdleTimeSeconds = Integer.parseInt(System.getProperty(
-            ConfigurationKeys.TRANSPORT_PREFIX + "serverChannelMaxIdleTimeSeconds", String.valueOf(30)));
     private static final String EPOLL_WORKER_THREAD_PREFIX = "NettyServerEPollWorker";
-    private static int minServerPoolSize =
-            Integer.parseInt(System.getProperty(ConfigurationKeys.MIN_SERVER_POOL_SIZE, "50"));
-    private static int maxServerPoolSize =
-            Integer.parseInt(System.getProperty(ConfigurationKeys.MAX_SERVER_POOL_SIZE, "500"));
-    private static int maxTaskQueueSize =
-            Integer.parseInt(System.getProperty(ConfigurationKeys.MAX_TASK_QUEUE_SIZE, "20000"));
-    private static int keepAliveTime = Integer.parseInt(System.getProperty(ConfigurationKeys.KEEP_ALIVE_TIME, "500"));
-    private static int minBranchResultPoolSize = Integer.parseInt(System.getProperty(
-            ConfigurationKeys.MIN_BRANCH_RESULT_POOL_SIZE, String.valueOf(WorkThreadMode.Pin.getValue())));
-    private static int maxBranchResultPoolSize = Integer.parseInt(System.getProperty(
-            ConfigurationKeys.MAX_BRANCH_RESULT_POOL_SIZE, String.valueOf(WorkThreadMode.Pin.getValue())));
+
+    // Network Buffer Config
+    private int serverSocketSendBufSize = CONFIG.getInt(
+            ConfigurationKeys.TRANSPORT_PREFIX + "serverSocketSendBufSize",
+            DefaultValues.DEFAULT_SERVER_SOCKET_SEND_BUF_SIZE);
+    private int serverSocketResvBufSize = CONFIG.getInt(
+            ConfigurationKeys.TRANSPORT_PREFIX + "serverSocketResvBufSize",
+            DefaultValues.DEFAULT_SERVER_SOCKET_RESV_BUF_SIZE);
+    private int writeBufferHighWaterMark = CONFIG.getInt(
+            ConfigurationKeys.TRANSPORT_PREFIX + "writeBufferHighWaterMark",
+            DefaultValues.DEFAULT_WRITE_BUFFER_HIGH_WATER_MARK);
+    private int writeBufferLowWaterMark = CONFIG.getInt(
+            ConfigurationKeys.TRANSPORT_PREFIX + "writeBufferLowWaterMark",
+            DefaultValues.DEFAULT_WRITE_BUFFER_LOW_WATER_MARK);
+
+    // Connection Management
+    private int soBackLogSize =
+            CONFIG.getInt(ConfigurationKeys.TRANSPORT_PREFIX + "soBackLogSize", DefaultValues.DEFAULT_SO_BACK_LOG_SIZE);
+    private int serverChannelMaxIdleTimeSeconds = CONFIG.getInt(
+            ConfigurationKeys.TRANSPORT_PREFIX + "serverChannelMaxIdleTimeSeconds",
+            DefaultValues.DEFAULT_SERVER_CHANNEL_MAX_IDLE_TIME_SECONDS);
+
+    // RPC Configuration
+    private static final long RPC_TC_REQUEST_TIMEOUT =
+            CONFIG.getLong(ConfigurationKeys.RPC_TC_REQUEST_TIMEOUT, DefaultValues.DEFAULT_RPC_TC_REQUEST_TIMEOUT);
     private static boolean ENABLE_TC_SERVER_BATCH_SEND_RESPONSE = CONFIG.getBoolean(
             ConfigurationKeys.ENABLE_TC_SERVER_BATCH_SEND_RESPONSE,
             DefaultValues.DEFAULT_ENABLE_TC_SERVER_BATCH_SEND_RESPONSE);
 
-    private static int minHttpPoolSize = CONFIG.getInt(ConfigurationKeys.MIN_HTTP_POOL_SIZE, 10);
-    private static int maxHttpPoolSize = CONFIG.getInt(ConfigurationKeys.MAX_HTTP_POOL_SIZE, 100);
-    private static int maxHttpTaskQueueSize = CONFIG.getInt(ConfigurationKeys.MAX_HTTP_TASK_QUEUE_SIZE, 1000);
-    private static int httpKeepAliveTime = CONFIG.getInt(ConfigurationKeys.HTTP_POOL_KEEP_ALIVE_TIME, 500);
+    // Thread Pool Config
+    private int serverSelectorThreads = Integer.parseInt(System.getProperty(
+            ConfigurationKeys.TRANSPORT_PREFIX + "serverSelectorThreads", String.valueOf(WORKER_THREAD_SIZE)));
+    private int serverWorkerThreads = Integer.parseInt(System.getProperty(
+            ConfigurationKeys.TRANSPORT_PREFIX + "serverWorkerThreads", String.valueOf(WORKER_THREAD_SIZE)));
+
+    // Seata and Grpc Protocol Thread Pool
+    private static int minServerPoolSize =
+            CONFIG.getInt(ConfigurationKeys.MIN_SERVER_POOL_SIZE, DefaultValues.DEFAULT_MIN_SERVER_POOL_SIZE);
+    private static int maxServerPoolSize =
+            CONFIG.getInt(ConfigurationKeys.MAX_SERVER_POOL_SIZE, DefaultValues.DEFAULT_MAX_SERVER_POOL_SIZE);
+    private static int maxTaskQueueSize =
+            CONFIG.getInt(ConfigurationKeys.MAX_TASK_QUEUE_SIZE, DefaultValues.DEFAULT_MAX_TASK_QUEUE_SIZE);
+    private static int keepAliveTime =
+            CONFIG.getInt(ConfigurationKeys.KEEP_ALIVE_TIME, DefaultValues.DEFAULT_KEEP_ALIVE_TIME);
+
+    // HTTP Protocol Thread Pool
+    private static int minHttpPoolSize =
+            CONFIG.getInt(ConfigurationKeys.MIN_HTTP_POOL_SIZE, DefaultValues.DEFAULT_MIN_HTTP_POOL_SIZE);
+    private static int maxHttpPoolSize =
+            CONFIG.getInt(ConfigurationKeys.MAX_HTTP_POOL_SIZE, DefaultValues.DEFAULT_MAX_HTTP_POOL_SIZE);
+    private static int maxHttpTaskQueueSize =
+            CONFIG.getInt(ConfigurationKeys.MAX_HTTP_TASK_QUEUE_SIZE, DefaultValues.DEFAULT_MAX_HTTP_TASK_QUEUE_SIZE);
+    private static int httpKeepAliveTime =
+            CONFIG.getInt(ConfigurationKeys.HTTP_POOL_KEEP_ALIVE_TIME, DefaultValues.DEFAULT_HTTP_POOL_KEEP_ALIVE_TIME);
+
+    // Branch Result Thread Pool
+    private static int minBranchResultPoolSize = Integer.parseInt(System.getProperty(
+            ConfigurationKeys.MIN_BRANCH_RESULT_POOL_SIZE, String.valueOf(WorkThreadMode.Pin.getValue())));
+    private static int maxBranchResultPoolSize = Integer.parseInt(System.getProperty(
+            ConfigurationKeys.MAX_BRANCH_RESULT_POOL_SIZE, String.valueOf(WorkThreadMode.Pin.getValue())));
 
     /**
      * The Server channel clazz.
@@ -335,6 +355,15 @@ public class NettyServerConfig extends NettyBaseConfig {
     }
 
     /**
+     * Get the tc server batch send response enable
+     *
+     * @return true or false
+     */
+    public static boolean isEnableTcServerBatchSendResponse() {
+        return ENABLE_TC_SERVER_BATCH_SEND_RESPONSE;
+    }
+
+    /**
      * Get the min size for branch result thread pool
      *
      * @return the int
@@ -342,6 +371,7 @@ public class NettyServerConfig extends NettyBaseConfig {
     public static int getMinBranchResultPoolSize() {
         return minBranchResultPoolSize;
     }
+
     /**
      * Get the max size for branch result thread pool
      *
@@ -349,14 +379,5 @@ public class NettyServerConfig extends NettyBaseConfig {
      */
     public static int getMaxBranchResultPoolSize() {
         return maxBranchResultPoolSize;
-    }
-
-    /**
-     * Get the tc server batch send response enable
-     *
-     * @return true or false
-     */
-    public static boolean isEnableTcServerBatchSendResponse() {
-        return ENABLE_TC_SERVER_BATCH_SEND_RESPONSE;
     }
 }

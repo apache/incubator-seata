@@ -182,6 +182,56 @@ public interface DefaultValues {
     int DEFAULT_HTTP_POOL_KEEP_ALIVE_TIME = 500;
 
     /**
+     * The constant DEFAULT_SERVER_SOCKET_SEND_BUF_SIZE.
+     */
+    int DEFAULT_SERVER_SOCKET_SEND_BUF_SIZE = 153600;
+
+    /**
+     * The constant DEFAULT_SERVER_SOCKET_RESV_BUF_SIZE.
+     */
+    int DEFAULT_SERVER_SOCKET_RESV_BUF_SIZE = 153600;
+
+    /**
+     * The constant DEFAULT_WRITE_BUFFER_HIGH_WATER_MARK.
+     */
+    int DEFAULT_WRITE_BUFFER_HIGH_WATER_MARK = 67108864;
+
+    /**
+     * The constant DEFAULT_WRITE_BUFFER_LOW_WATER_MARK.
+     */
+    int DEFAULT_WRITE_BUFFER_LOW_WATER_MARK = 1048576;
+
+    /**
+     * The constant DEFAULT_SO_BACK_LOG_SIZE.
+     */
+    int DEFAULT_SO_BACK_LOG_SIZE = 1024;
+
+    /**
+     * The constant DEFAULT_SERVER_CHANNEL_MAX_IDLE_TIME_SECONDS.
+     */
+    int DEFAULT_SERVER_CHANNEL_MAX_IDLE_TIME_SECONDS = 30;
+
+    /**
+     * The constant DEFAULT_MIN_SERVER_POOL_SIZE.
+     */
+    int DEFAULT_MIN_SERVER_POOL_SIZE = 50;
+
+    /**
+     * The constant DEFAULT_MAX_SERVER_POOL_SIZE.
+     */
+    int DEFAULT_MAX_SERVER_POOL_SIZE = 500;
+
+    /**
+     * The constant DEFAULT_MAX_TASK_QUEUE_SIZE.
+     */
+    int DEFAULT_MAX_TASK_QUEUE_SIZE = 20000;
+
+    /**
+     * The constant DEFAULT_KEEP_ALIVE_TIME.
+     */
+    int DEFAULT_KEEP_ALIVE_TIME = 500;
+
+    /**
      * The constant DEFAULT_TRANSPORT_HEARTBEAT.
      */
     boolean DEFAULT_TRANSPORT_HEARTBEAT = true;
