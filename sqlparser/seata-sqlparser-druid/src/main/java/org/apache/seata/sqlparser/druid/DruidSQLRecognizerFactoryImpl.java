@@ -38,36 +38,48 @@ import java.util.List;
 class DruidSQLRecognizerFactoryImpl implements SQLRecognizerFactory {
     @Override
     public List<SQLRecognizer> create(String sql, String dbType) {
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, DruidDbTypeAdapter.getAdaptiveDbType(dbType));
-        if (CollectionUtils.isEmpty(asts)) {
+        List<SQLStatement> sqlStatements;
+        try {
+            sqlStatements = SQLUtils.parseStatements(sql, DruidDbTypeAdapter.getAdaptiveDbType(dbType));
+        } catch (RuntimeException e) {
+            if (isParserException(e)) {
+                throw new NotSupportYetException(
+                        "not support the sql syntax: " + sql
+                                + "\nplease see the doc about SQL restrictions https://seata.apache.org/zh-cn/docs/user/sqlreference/dml",
+                        e);
+            }
+            throw e;
+        }
+
+        if (CollectionUtils.isEmpty(sqlStatements)) {
             throw new UnsupportedOperationException("Unsupported SQL: " + sql);
         }
-        if (asts.size() > 1
-                && !(asts.stream().allMatch(statement -> statement instanceof SQLUpdateStatement)
-                        || asts.stream().allMatch(statement -> statement instanceof SQLDeleteStatement))) {
+        if (sqlStatements.size() > 1
+                && !(sqlStatements.stream().allMatch(statement -> statement instanceof SQLUpdateStatement)
+                        || sqlStatements.stream().allMatch(statement -> statement instanceof SQLDeleteStatement))) {
             throw new UnsupportedOperationException("ONLY SUPPORT SAME TYPE (UPDATE OR DELETE) MULTI SQL -" + sql);
         }
         List<SQLRecognizer> recognizers = null;
         SQLRecognizer recognizer = null;
-        for (SQLStatement ast : asts) {
+        for (SQLStatement sqlStatement : sqlStatements) {
             SQLOperateRecognizerHolder recognizerHolder =
                     SQLOperateRecognizerHolderFactory.getSQLRecognizerHolder(dbType.toLowerCase());
-            if (ast instanceof SQLInsertStatement) {
-                recognizer = recognizerHolder.getInsertRecognizer(sql, ast);
-            } else if (ast instanceof SQLUpdateStatement) {
-                recognizer = recognizerHolder.getUpdateRecognizer(sql, ast);
-            } else if (ast instanceof SQLDeleteStatement) {
-                recognizer = recognizerHolder.getDeleteRecognizer(sql, ast);
-            } else if (ast instanceof SQLSelectStatement) {
-                recognizer = recognizerHolder.getSelectForUpdateRecognizer(sql, ast);
+            if (sqlStatement instanceof SQLInsertStatement) {
+                recognizer = recognizerHolder.getInsertRecognizer(sql, sqlStatement);
+            } else if (sqlStatement instanceof SQLUpdateStatement) {
+                recognizer = recognizerHolder.getUpdateRecognizer(sql, sqlStatement);
+            } else if (sqlStatement instanceof SQLDeleteStatement) {
+                recognizer = recognizerHolder.getDeleteRecognizer(sql, sqlStatement);
+            } else if (sqlStatement instanceof SQLSelectStatement) {
+                recognizer = recognizerHolder.getSelectForUpdateRecognizer(sql, sqlStatement);
             }
 
             // When recognizer is null, it indicates that recognizerHolder cannot allocate unsupported syntax, like
             // merge and replace
-            if (ast instanceof SQLReplaceStatement) {
+            if (sqlStatement instanceof SQLReplaceStatement) {
                 // just like:replace into t (id,dr) values (1,'2'), (2,'3')
                 throw new NotSupportYetException(
-                        "not support the sql syntax with ReplaceStatement:" + ast
+                        "not support the sql syntax with ReplaceStatement:" + sqlStatement
                                 + "\nplease see the doc about SQL restrictions https://seata.apache.org/zh-cn/docs/user/sqlreference/dml");
             }
 
@@ -79,5 +91,17 @@ class DruidSQLRecognizerFactoryImpl implements SQLRecognizerFactory {
             }
         }
         return recognizers;
+    }
+
+    /**
+     * Check if the exception is a Druid ParserException
+     * Use class name comparison to avoid directly referencing the ParserException class
+     */
+    private boolean isParserException(Throwable e) {
+        if (e == null) {
+            return false;
+        }
+        String className = e.getClass().getName();
+        return "com.alibaba.druid.sql.parser.ParserException".equals(className);
     }
 }
