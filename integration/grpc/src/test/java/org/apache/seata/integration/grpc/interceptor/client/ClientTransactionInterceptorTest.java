@@ -73,8 +73,7 @@ class ClientTransactionInterceptorTest {
         RootContext.bindBranchType(branchType);
 
         // Mock channel.newCall(...) to return our delegate call
-        Mockito.<ClientCall<String, String>>when(channel.newCall(any(), any()))
-                .thenReturn(delegateCall);
+        Mockito.<ClientCall<String, String>>when(channel.newCall(any(), any())).thenReturn(delegateCall);
 
         // Metadata that will be passed into the call
         Metadata requestHeaders = new Metadata();
@@ -102,12 +101,10 @@ class ClientTransactionInterceptorTest {
         RootContext.unbindBranchType();
     }
 
-
     @Test
     void testInterceptCall_withoutXid_shouldNotInjectHeaders() {
         // ready
-        Mockito.<ClientCall<String, String>>when(channel.newCall(any(), any()))
-                .thenReturn(delegateCall);
+        Mockito.<ClientCall<String, String>>when(channel.newCall(any(), any())).thenReturn(delegateCall);
         Metadata metadata = new Metadata();
 
         // act
@@ -122,8 +119,7 @@ class ClientTransactionInterceptorTest {
     @Test
     void testOnHeaders_shouldDelegateToOriginalListener() {
         // ready
-        Mockito.<ClientCall<String, String>>when(channel.newCall(any(), any()))
-                .thenReturn(delegateCall);
+        Mockito.<ClientCall<String, String>>when(channel.newCall(any(), any())).thenReturn(delegateCall);
 
         Metadata requestHeaders = new Metadata();
         Metadata responseHeaders = new Metadata();
@@ -144,7 +140,4 @@ class ClientTransactionInterceptorTest {
         // Assert
         verify(listener).onHeaders(responseHeaders);
     }
-
-
 }
-

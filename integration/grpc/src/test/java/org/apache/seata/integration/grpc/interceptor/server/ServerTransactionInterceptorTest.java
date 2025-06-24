@@ -18,8 +18,8 @@ package org.apache.seata.integration.grpc.interceptor.server;
 
 import io.grpc.Metadata;
 import io.grpc.ServerCall;
-import io.grpc.ServerCallHandler;
 import io.grpc.ServerCall.Listener;
+import io.grpc.ServerCallHandler;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.integration.grpc.interceptor.GrpcHeaderKey;
 import org.junit.jupiter.api.BeforeEach;
@@ -79,7 +79,6 @@ class ServerTransactionInterceptorTest {
         assertEquals("lower-xid", getRpcXidMethod.invoke(interceptor, metadataLower));
     }
 
-
     @Test
     void testGetBranchName_shouldReturnCorrectValue() throws Exception {
         Metadata metadata = new Metadata();
@@ -92,5 +91,4 @@ class ServerTransactionInterceptorTest {
 
         assertEquals("branch-type", branchName);
     }
-
 }

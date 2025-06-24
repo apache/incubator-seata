@@ -21,13 +21,6 @@ import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.model.BranchType;
 
-/**
- * ServerListenerProxy acts as a proxy wrapper for a gRPC ServerCall.Listener,
- * managing the binding and cleanup of the global transaction context (XID and branch type)
- * during the lifecycle of a gRPC server call.
- *
- * @param <ReqT> the type of the request message
- */
 import java.util.Map;
 import java.util.Objects;
 
