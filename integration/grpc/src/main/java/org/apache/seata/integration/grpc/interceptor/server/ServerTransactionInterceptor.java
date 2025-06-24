@@ -27,9 +27,23 @@ import io.grpc.ServerInterceptor;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.integration.grpc.interceptor.GrpcHeaderKey;
 
-
+/**
+ * ServerTransactionInterceptor intercepts incoming gRPC calls on the server side
+ * to extract global transaction context information (XID and branch type) from request metadata,
+ * and injects this context into a ServerListenerProxy to manage transaction context lifecycle.
+ */
 public class ServerTransactionInterceptor implements ServerInterceptor {
 
+    /**
+     * Intercepts a gRPC call to extract transaction context and wrap the ServerCall.Listener.
+     *
+     * @param serverCall       the gRPC ServerCall object
+     * @param metadata         the request metadata (headers)
+     * @param serverCallHandler the next handler in the interceptor chain
+     * @param <ReqT>           the request type
+     * @param <RespT>          the response type
+     * @return a wrapped ServerCall.Listener that manages transaction context
+     */
     @Override
     public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(
         ServerCall<ReqT, RespT> serverCall,
@@ -44,9 +58,8 @@ public class ServerTransactionInterceptor implements ServerInterceptor {
     }
 
     /**
-     * get rpc xid
-     * @param metadata
-     * @return
+     * Extracts the global transaction ID (XID) from metadata headers,
+     * supporting both uppercase and lowercase keys.
      */
     private String getRpcXid(Metadata metadata) {
         String rpcXid = metadata.get(GrpcHeaderKey.XID_HEADER_KEY);
@@ -56,6 +69,9 @@ public class ServerTransactionInterceptor implements ServerInterceptor {
         return rpcXid;
     }
 
+    /**
+     * Extracts the branch transaction type name from metadata headers.
+     */
     private String getBranchName(Metadata metadata) {
         return metadata.get(GrpcHeaderKey.BRANCH_HEADER_KEY);
     }
