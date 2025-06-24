@@ -21,9 +21,8 @@ import org.apache.seata.common.LockStrategyMode;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.tm.api.transaction.Propagation;
 
-
 public class AspectTransactional {
-    
+
     /**
      * Global transaction timeoutMills in MILLISECONDS.
      */
@@ -80,9 +79,17 @@ public class AspectTransactional {
 
     public AspectTransactional() {}
 
-    public AspectTransactional(int timeoutMills, String name, Class<? extends Throwable>[] rollbackFor,
-        String[] rollbackForClassName, Class<? extends Throwable>[] noRollbackFor, String[] noRollbackForClassName,
-        Propagation propagation, int lockRetryInterval, int lockRetryTimes, LockStrategyMode lockStrategyMode) {
+    public AspectTransactional(
+            int timeoutMills,
+            String name,
+            Class<? extends Throwable>[] rollbackFor,
+            String[] rollbackForClassName,
+            Class<? extends Throwable>[] noRollbackFor,
+            String[] noRollbackForClassName,
+            Propagation propagation,
+            int lockRetryInterval,
+            int lockRetryTimes,
+            LockStrategyMode lockStrategyMode) {
         this.timeoutMills = timeoutMills;
         this.name = name;
         this.rollbackFor = rollbackFor;
@@ -179,5 +186,4 @@ public class AspectTransactional {
     public String toString() {
         return StringUtils.toString(this);
     }
-
 }

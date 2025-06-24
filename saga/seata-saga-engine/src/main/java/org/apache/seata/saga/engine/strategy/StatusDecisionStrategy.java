@@ -56,6 +56,6 @@ public interface StatusDecisionStrategy {
      * @param specialPolicy is special policy
      * @return the boolean
      */
-    boolean decideMachineForwardExecutionStatus(StateMachineInstance stateMachineInstance, Exception exp,
-                                                boolean specialPolicy);
+    boolean decideMachineForwardExecutionStatus(
+            StateMachineInstance stateMachineInstance, Exception exp, boolean specialPolicy);
 }

@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.zip.GZIPInputStream;
 
-
 public class GzipUtilTest {
 
     @Test
@@ -50,7 +49,6 @@ public class GzipUtilTest {
             byte[] bytes = {0x1, 0x2};
             GzipUtil.decompress(bytes);
         });
-
     }
 
     @Test
@@ -62,5 +60,4 @@ public class GzipUtilTest {
 
         Assertions.assertEquals("aa", new String(decompress));
     }
-
 }

@@ -16,15 +16,15 @@
  */
 package org.apache.seata.rm.datasource;
 
+import org.apache.seata.rm.datasource.sql.struct.Field;
+import org.apache.seata.sqlparser.util.ColumnUtils;
+
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
-
-import org.apache.seata.rm.datasource.sql.struct.Field;
-import org.apache.seata.sqlparser.util.ColumnUtils;
 
 /**
  * generate sql and set value to sql
@@ -34,9 +34,7 @@ public class SqlGenerateUtils {
 
     private static final int MAX_IN_SIZE = 1000;
 
-    private SqlGenerateUtils() {
-
-    }
+    private SqlGenerateUtils() {}
 
     /**
      * build full sql by pks.
@@ -47,7 +45,8 @@ public class SqlGenerateUtils {
      * @param dbType the type of database
      * @return full sql
      */
-    public static String buildSQLByPKs(String sqlPrefix, String suffix, List<String> pkNameList, int rowSize, String dbType) {
+    public static String buildSQLByPKs(
+            String sqlPrefix, String suffix, List<String> pkNameList, int rowSize, String dbType) {
         List<WhereSql> whereList = buildWhereConditionListByPKs(pkNameList, rowSize, dbType, MAX_IN_SIZE);
         StringJoiner sqlJoiner = new StringJoiner(" UNION ");
         whereList.forEach(whereSql -> sqlJoiner.add(sqlPrefix + " " + whereSql.getSql() + " " + suffix));
@@ -77,9 +76,10 @@ public class SqlGenerateUtils {
      * @param maxInSize  the max in size
      * @return return where condition sql list.the sql can search all related records not just one.
      */
-    public static List<WhereSql> buildWhereConditionListByPKs(List<String> pkNameList, int rowSize, String dbType, int maxInSize) {
+    public static List<WhereSql> buildWhereConditionListByPKs(
+            List<String> pkNameList, int rowSize, String dbType, int maxInSize) {
         List<WhereSql> whereSqls = new ArrayList<>();
-        //we must consider the situation of composite primary key
+        // we must consider the situation of composite primary key
         int batchSize = rowSize % maxInSize == 0 ? rowSize / maxInSize : (rowSize / maxInSize) + 1;
         for (int batch = 0; batch < batchSize; batch++) {
             StringBuilder whereStr = new StringBuilder();
@@ -92,10 +92,10 @@ public class SqlGenerateUtils {
             }
             whereStr.append(") in ( ");
 
-            int eachSize = (batch == batchSize - 1) ? (rowSize % maxInSize == 0 ? maxInSize : rowSize % maxInSize)
-                : maxInSize;
+            int eachSize =
+                    (batch == batchSize - 1) ? (rowSize % maxInSize == 0 ? maxInSize : rowSize % maxInSize) : maxInSize;
             for (int i = 0; i < eachSize; i++) {
-                //each row is a bracket
+                // each row is a bracket
                 if (i > 0) {
                     whereStr.append(",");
                 }
@@ -123,8 +123,9 @@ public class SqlGenerateUtils {
      * @param pst preparedStatement
      * @throws SQLException SQLException
      */
-    public static void setParamForPk(List<Map<String, Field>> pkRowsList, List<String> pkColumnNameList,
-                                     PreparedStatement pst) throws SQLException {
+    public static void setParamForPk(
+            List<Map<String, Field>> pkRowsList, List<String> pkColumnNameList, PreparedStatement pst)
+            throws SQLException {
         int paramIndex = 1;
         for (int i = 0; i < pkRowsList.size(); i++) {
             Map<String, Field> rowData = pkRowsList.get(i);
@@ -145,7 +146,7 @@ public class SqlGenerateUtils {
      */
     public static String buildWhereConditionByPKs(List<String> pkNameList, String dbType) {
         StringBuilder whereStr = new StringBuilder();
-        //we must consider the situation of composite primary key
+        // we must consider the situation of composite primary key
         for (int i = 0; i < pkNameList.size(); i++) {
             if (i > 0) {
                 whereStr.append(" and ");

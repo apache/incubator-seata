@@ -26,10 +26,10 @@ public class ExtensionDefinitionTest {
 
     @Test
     public void testEquals() {
-        ExtensionDefinition<ChineseHello> definition
-                = new ExtensionDefinition<>("abc", 1, Scope.PROTOTYPE, ChineseHello.class);
-        ExtensionDefinition<ChineseHello> definition2
-                = new ExtensionDefinition<>("abc", 1, Scope.PROTOTYPE, ChineseHello.class);
+        ExtensionDefinition<ChineseHello> definition =
+                new ExtensionDefinition<>("abc", 1, Scope.PROTOTYPE, ChineseHello.class);
+        ExtensionDefinition<ChineseHello> definition2 =
+                new ExtensionDefinition<>("abc", 1, Scope.PROTOTYPE, ChineseHello.class);
         Assertions.assertEquals(definition2, definition);
     }
 

@@ -54,12 +54,14 @@ public class SeataSpringFenceAutoConfiguration {
     public SpringFenceConfig springFenceConfig(
             DataSource dataSource,
             PlatformTransactionManager transactionManager,
-            @Qualifier(SPRING_FENCE_DATA_SOURCE_BEAN_NAME) @Autowired(required = false) DataSource springFenceDataSource,
-            @Qualifier(SPRING_FENCE_TRANSACTION_MANAGER_BEAN_NAME) @Autowired(required = false) PlatformTransactionManager springFenceTransactionManager) {
-        SpringFenceConfig springFenceConfig = new SpringFenceConfig(springFenceDataSource != null ? springFenceDataSource : dataSource,
+            @Qualifier(SPRING_FENCE_DATA_SOURCE_BEAN_NAME) @Autowired(required = false)
+                    DataSource springFenceDataSource,
+            @Qualifier(SPRING_FENCE_TRANSACTION_MANAGER_BEAN_NAME) @Autowired(required = false)
+                    PlatformTransactionManager springFenceTransactionManager) {
+        SpringFenceConfig springFenceConfig = new SpringFenceConfig(
+                springFenceDataSource != null ? springFenceDataSource : dataSource,
                 springFenceTransactionManager != null ? springFenceTransactionManager : transactionManager);
         ObjectHolder.INSTANCE.setObject(BEAN_NAME_SPRING_FENCE_CONFIG, springFenceConfig);
         return springFenceConfig;
     }
-
 }

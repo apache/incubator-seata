@@ -29,5 +29,4 @@ public class HealthController {
     public Result<?> healthCheck() {
         return new Result<>();
     }
-
 }

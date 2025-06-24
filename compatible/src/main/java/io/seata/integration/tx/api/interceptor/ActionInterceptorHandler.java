@@ -16,14 +16,14 @@
  */
 package io.seata.integration.tx.api.interceptor;
 
+import io.seata.rm.tcc.api.BusinessActionContext;
+import io.seata.rm.tcc.api.BusinessActionContextParameter;
+import org.apache.seata.rm.tcc.api.ParamType;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
-
-import io.seata.rm.tcc.api.BusinessActionContext;
-import io.seata.rm.tcc.api.BusinessActionContextParameter;
-import org.apache.seata.rm.tcc.api.ParamType;
 
 /**
  * Handler the Tx Participant Aspect : Setting Context, Creating Branch Record
@@ -31,7 +31,8 @@ import org.apache.seata.rm.tcc.api.ParamType;
 @Deprecated
 public class ActionInterceptorHandler extends org.apache.seata.integration.tx.api.interceptor.ActionInterceptorHandler {
 
-    protected BusinessActionContext getOrCreateActionContextAndResetToArguments(Class<?>[] parameterTypes, Object[] arguments) {
+    protected BusinessActionContext getOrCreateActionContextAndResetToArguments(
+            Class<?>[] parameterTypes, Object[] arguments) {
         BusinessActionContext actionContext = null;
 
         // get the action context from arguments
@@ -40,7 +41,8 @@ public class ActionInterceptorHandler extends org.apache.seata.integration.tx.ap
             if (BusinessActionContext.class.isAssignableFrom(parameterType)) {
                 actionContext = (BusinessActionContext) arguments[argIndex];
                 if (actionContext == null) {
-                    // If the action context exists in arguments but is null, create a new one and reset the action context to the arguments
+                    // If the action context exists in arguments but is null, create a new one and reset the action
+                    // context to the arguments
                     actionContext = new BusinessActionContext();
                     arguments[argIndex] = actionContext;
                 } else {
@@ -59,7 +61,6 @@ public class ActionInterceptorHandler extends org.apache.seata.integration.tx.ap
         return actionContext;
     }
 
-
     /**
      * Extracting context data from parameters, add them to the context
      *
@@ -76,7 +77,8 @@ public class ActionInterceptorHandler extends org.apache.seata.integration.tx.ap
             for (int j = 0; j < parameterAnnotations[i].length; j++) {
                 if (parameterAnnotations[i][j] instanceof BusinessActionContextParameter) {
                     // get annotation
-                    BusinessActionContextParameter annotation = (BusinessActionContextParameter) parameterAnnotations[i][j];
+                    BusinessActionContextParameter annotation =
+                            (BusinessActionContextParameter) parameterAnnotations[i][j];
                     if (arguments[i] == null) {
                         throw new IllegalArgumentException("@BusinessActionContextParameter 's params can not null");
                     }
@@ -88,7 +90,8 @@ public class ActionInterceptorHandler extends org.apache.seata.integration.tx.ap
                     }
 
                     // load param by the config of annotation, and then put into the context
-                    ActionContextUtil.loadParamByAnnotationAndPutToContext(ParamType.PARAM, "", paramObject, annotation, context);
+                    ActionContextUtil.loadParamByAnnotationAndPutToContext(
+                            ParamType.PARAM, "", paramObject, annotation, context);
                 }
             }
         }

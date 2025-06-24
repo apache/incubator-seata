@@ -22,5 +22,4 @@ import java.io.Serializable;
  * The interface Merge message.
  *
  */
-public interface MergeMessage extends Serializable {
-}
+public interface MergeMessage extends Serializable {}

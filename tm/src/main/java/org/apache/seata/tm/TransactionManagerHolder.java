@@ -65,7 +65,5 @@ public class TransactionManagerHolder {
         SingletonHolder.INSTANCE = mock;
     }
 
-    private TransactionManagerHolder() {
-
-    }
+    private TransactionManagerHolder() {}
 }

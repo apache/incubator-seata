@@ -21,19 +21,17 @@ import java.io.Serializable;
 /**
  * The basic result
  */
-public class Result<T>  implements Serializable {
+public class Result<T> implements Serializable {
     private static final long serialVersionUID = 7761261124298767L;
 
     public static final String SUCCESS_CODE = "200";
     public static final String SUCCESS_MSG = "success";
     public static final String FAIL_CODE = "500";
 
-
     private String code = SUCCESS_CODE;
     private String message = SUCCESS_MSG;
 
-    public Result() {
-    }
+    public Result() {}
 
     public Result(String code, String message) {
         this.code = code;
@@ -59,5 +57,4 @@ public class Result<T>  implements Serializable {
     public void setMessage(String message) {
         this.message = message;
     }
-
 }

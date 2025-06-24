@@ -16,8 +16,8 @@
  */
 package org.apache.seata.sqlparser.antlr.mysql.visit;
 
-import org.apache.seata.sqlparser.antlr.mysql.parser.MySqlParserBaseVisitor;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import org.apache.seata.sqlparser.antlr.mysql.parser.MySqlParserBaseVisitor;
 
 /**
  * StatementSqlVisitor
@@ -63,6 +63,4 @@ public class StatementSqlVisitor extends MySqlParserBaseVisitor<StringBuilder> {
         }
         return true;
     }
-
-
 }

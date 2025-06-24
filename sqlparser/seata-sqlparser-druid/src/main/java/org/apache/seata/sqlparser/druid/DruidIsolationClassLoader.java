@@ -27,9 +27,10 @@ import java.util.List;
  *
  */
 class DruidIsolationClassLoader extends URLClassLoader {
-    private final static String[] DRUID_CLASS_PREFIX = new String[]{"com.alibaba.druid.", "org.apache.seata.sqlparser.druid."};
+    private static final String[] DRUID_CLASS_PREFIX =
+            new String[] {"com.alibaba.druid.", "org.apache.seata.sqlparser.druid."};
 
-    private final static DruidIsolationClassLoader INSTANCE = new DruidIsolationClassLoader(DefaultDruidLoader.get());
+    private static final DruidIsolationClassLoader INSTANCE = new DruidIsolationClassLoader(DefaultDruidLoader.get());
 
     DruidIsolationClassLoader(DruidLoader druidLoader) {
         super(getDruidUrls(druidLoader), DruidIsolationClassLoader.class.getClassLoader());

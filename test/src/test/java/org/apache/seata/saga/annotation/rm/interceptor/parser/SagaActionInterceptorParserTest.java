@@ -63,7 +63,14 @@ public class SagaActionInterceptorParserTest {
         ResourceManager mockResourceManager = new SagaAnnotationResourceManager() {
 
             @Override
-            public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws TransactionException {
+            public Long branchRegister(
+                    BranchType branchType,
+                    String resourceId,
+                    String clientId,
+                    String xid,
+                    String applicationData,
+                    String lockKeys)
+                    throws TransactionException {
 
                 long branchId = System.currentTimeMillis();
 
@@ -84,7 +91,8 @@ public class SagaActionInterceptorParserTest {
 
         TransactionManager mockTransactionManager = new TransactionManager() {
             @Override
-            public String begin(String applicationId, String transactionServiceGroup, String name, int timeout) throws TransactionException {
+            public String begin(String applicationId, String transactionServiceGroup, String name, int timeout)
+                    throws TransactionException {
                 return XID.generateXID(UUIDGenerator.generateUUID());
             }
 
@@ -97,7 +105,12 @@ public class SagaActionInterceptorParserTest {
             public GlobalStatus rollback(String xid) throws TransactionException {
                 List<BranchSessionMock> branches = applicationDataMap.computeIfAbsent(xid, s -> new ArrayList<>());
                 for (BranchSessionMock branch : branches) {
-                    mockResourceManager.branchRollback(branch.getBranchType(), branch.getXid(), branch.getBranchId(), branch.getResourceId(), branch.getApplicationData());
+                    mockResourceManager.branchRollback(
+                            branch.getBranchType(),
+                            branch.getXid(),
+                            branch.getBranchId(),
+                            branch.getResourceId(),
+                            branch.getApplicationData());
                 }
 
                 return GlobalStatus.Rollbacked;
@@ -126,12 +139,13 @@ public class SagaActionInterceptorParserTest {
     void parserInterfaceToProxy() {
         NormalSagaAnnotationActionImpl sagaAction = new NormalSagaAnnotationActionImpl();
 
-        SagaAnnotationActionInterceptorParser sagaAnnotationActionInterceptorParser = new SagaAnnotationActionInterceptorParser();
+        SagaAnnotationActionInterceptorParser sagaAnnotationActionInterceptorParser =
+                new SagaAnnotationActionInterceptorParser();
 
-        ProxyInvocationHandler proxyInvocationHandler = sagaAnnotationActionInterceptorParser.parserInterfaceToProxy(sagaAction, "sagaAction");
+        ProxyInvocationHandler proxyInvocationHandler =
+                sagaAnnotationActionInterceptorParser.parserInterfaceToProxy(sagaAction, "sagaAction");
         Assertions.assertNotNull(proxyInvocationHandler);
     }
-
 
     @Test
     public void testSagaAnnotation_should_commit() throws TransactionException {
@@ -182,6 +196,4 @@ public class SagaActionInterceptorParserTest {
 
         Assertions.assertFalse(sagaActionProxy.isCommit());
     }
-
-
 }

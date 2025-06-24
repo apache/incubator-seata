@@ -22,8 +22,7 @@ package org.apache.seata.rm.datasource.xa;
  */
 public class XAXidBuilder {
 
-    private XAXidBuilder() {
-    }
+    private XAXidBuilder() {}
 
     public static final XAXid build(String xid, long branchId) {
         return new XABranchXid(xid, branchId);

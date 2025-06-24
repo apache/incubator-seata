@@ -16,12 +16,12 @@
  */
 package org.apache.seata.compressor.bzip2;
 
+import org.apache.tools.bzip2.CBZip2InputStream;
+import org.apache.tools.bzip2.CBZip2OutputStream;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-
-import org.apache.tools.bzip2.CBZip2InputStream;
-import org.apache.tools.bzip2.CBZip2OutputStream;
 
 /**
  * the BZip2 Util

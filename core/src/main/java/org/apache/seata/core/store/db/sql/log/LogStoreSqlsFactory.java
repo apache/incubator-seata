@@ -22,7 +22,6 @@ import org.apache.seata.common.util.CollectionUtils;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-
 public class LogStoreSqlsFactory {
 
     private static Map<String, LogStoreSqls> LOG_STORE_SQLS_MAP = new ConcurrentHashMap<>();
@@ -33,7 +32,9 @@ public class LogStoreSqlsFactory {
      * @return the LogStoreSqls
      */
     public static LogStoreSqls getLogStoreSqls(String dbType) {
-        return CollectionUtils.computeIfAbsent(LOG_STORE_SQLS_MAP, dbType,
-            key -> EnhancedServiceLoader.load(LogStoreSqls.class, dbType.toLowerCase()));
+        return CollectionUtils.computeIfAbsent(
+                LOG_STORE_SQLS_MAP,
+                dbType,
+                key -> EnhancedServiceLoader.load(LogStoreSqls.class, dbType.toLowerCase()));
     }
 }

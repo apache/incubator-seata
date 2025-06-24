@@ -19,6 +19,7 @@ package org.apache.seata.serializer.protobuf.convertor;
 import org.apache.seata.core.exception.TransactionExceptionCode;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.protocol.ResultCode;
+import org.apache.seata.core.protocol.transaction.GlobalCommitResponse;
 import org.apache.seata.serializer.protobuf.generated.AbstractGlobalEndResponseProto;
 import org.apache.seata.serializer.protobuf.generated.AbstractMessageProto;
 import org.apache.seata.serializer.protobuf.generated.AbstractResultMessageProto;
@@ -28,33 +29,41 @@ import org.apache.seata.serializer.protobuf.generated.GlobalStatusProto;
 import org.apache.seata.serializer.protobuf.generated.MessageTypeProto;
 import org.apache.seata.serializer.protobuf.generated.ResultCodeProto;
 import org.apache.seata.serializer.protobuf.generated.TransactionExceptionCodeProto;
-import org.apache.seata.core.protocol.transaction.GlobalCommitResponse;
-
 
 public class GlobalCommitResponseConvertor implements PbConvertor<GlobalCommitResponse, GlobalCommitResponseProto> {
     @Override
     public GlobalCommitResponseProto convert2Proto(GlobalCommitResponse globalCommitResponse) {
         final short typeCode = globalCommitResponse.getTypeCode();
 
-        final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder().setMessageType(
-            MessageTypeProto.forNumber(typeCode)).build();
+        final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder()
+                .setMessageType(MessageTypeProto.forNumber(typeCode))
+                .build();
 
         final String msg = globalCommitResponse.getMsg();
-        final AbstractResultMessageProto abstractResultMessageProto = AbstractResultMessageProto.newBuilder().setMsg(
-            msg == null ? "" : msg).setResultCode(ResultCodeProto.valueOf(globalCommitResponse.getResultCode().name()))
-            .setAbstractMessage(abstractMessage).build();
+        final AbstractResultMessageProto abstractResultMessageProto = AbstractResultMessageProto.newBuilder()
+                .setMsg(msg == null ? "" : msg)
+                .setResultCode(ResultCodeProto.valueOf(
+                        globalCommitResponse.getResultCode().name()))
+                .setAbstractMessage(abstractMessage)
+                .build();
 
-        AbstractTransactionResponseProto abstractTransactionResponseProto = AbstractTransactionResponseProto
-            .newBuilder().setAbstractResultMessage(abstractResultMessageProto).setTransactionExceptionCode(
-                TransactionExceptionCodeProto.valueOf(globalCommitResponse.getTransactionExceptionCode().name()))
-            .build();
+        AbstractTransactionResponseProto abstractTransactionResponseProto =
+                AbstractTransactionResponseProto.newBuilder()
+                        .setAbstractResultMessage(abstractResultMessageProto)
+                        .setTransactionExceptionCode(TransactionExceptionCodeProto.valueOf(globalCommitResponse
+                                .getTransactionExceptionCode()
+                                .name()))
+                        .build();
 
         AbstractGlobalEndResponseProto abstractGlobalEndResponseProto = AbstractGlobalEndResponseProto.newBuilder()
-            .setAbstractTransactionResponse(abstractTransactionResponseProto).setGlobalStatus(
-                GlobalStatusProto.valueOf(globalCommitResponse.getGlobalStatus().name())).build();
+                .setAbstractTransactionResponse(abstractTransactionResponseProto)
+                .setGlobalStatus(GlobalStatusProto.valueOf(
+                        globalCommitResponse.getGlobalStatus().name()))
+                .build();
 
-        GlobalCommitResponseProto result = GlobalCommitResponseProto.newBuilder().setAbstractGlobalEndResponse(
-            abstractGlobalEndResponseProto).build();
+        GlobalCommitResponseProto result = GlobalCommitResponseProto.newBuilder()
+                .setAbstractGlobalEndResponse(abstractGlobalEndResponseProto)
+                .build();
 
         return result;
     }
@@ -62,19 +71,19 @@ public class GlobalCommitResponseConvertor implements PbConvertor<GlobalCommitRe
     @Override
     public GlobalCommitResponse convert2Model(GlobalCommitResponseProto globalCommitResponseProto) {
         GlobalCommitResponse branchRegisterResponse = new GlobalCommitResponse();
-        final AbstractGlobalEndResponseProto abstractGlobalEndResponse = globalCommitResponseProto
-            .getAbstractGlobalEndResponse();
-        AbstractTransactionResponseProto abstractResultMessage = abstractGlobalEndResponse
-            .getAbstractTransactionResponse();
-        branchRegisterResponse.setMsg(abstractResultMessage.getAbstractResultMessage().getMsg());
-        branchRegisterResponse.setResultCode(
-            ResultCode.valueOf(abstractResultMessage.getAbstractResultMessage().getResultCode().name()));
-        branchRegisterResponse.setTransactionExceptionCode(
-            TransactionExceptionCode.valueOf(abstractResultMessage.getTransactionExceptionCode().name()));
+        final AbstractGlobalEndResponseProto abstractGlobalEndResponse =
+                globalCommitResponseProto.getAbstractGlobalEndResponse();
+        AbstractTransactionResponseProto abstractResultMessage =
+                abstractGlobalEndResponse.getAbstractTransactionResponse();
+        branchRegisterResponse.setMsg(
+                abstractResultMessage.getAbstractResultMessage().getMsg());
+        branchRegisterResponse.setResultCode(ResultCode.valueOf(
+                abstractResultMessage.getAbstractResultMessage().getResultCode().name()));
+        branchRegisterResponse.setTransactionExceptionCode(TransactionExceptionCode.valueOf(
+                abstractResultMessage.getTransactionExceptionCode().name()));
         branchRegisterResponse.setGlobalStatus(
-            GlobalStatus.valueOf(abstractGlobalEndResponse.getGlobalStatus().name()));
+                GlobalStatus.valueOf(abstractGlobalEndResponse.getGlobalStatus().name()));
 
         return branchRegisterResponse;
-
     }
 }

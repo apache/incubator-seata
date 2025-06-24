@@ -16,17 +16,7 @@
  */
 package org.apache.seata.rm.datasource.xa;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.Driver;
-import java.sql.SQLException;
-
-import javax.sql.DataSource;
-import javax.sql.PooledConnection;
-import javax.sql.XAConnection;
-
 import com.alibaba.druid.pool.DruidDataSource;
-
 import com.kingbase8.xa.KBXAConnection;
 import com.mysql.jdbc.JDBC4MySQLConnection;
 import com.mysql.jdbc.jdbc2.optional.JDBC4ConnectionWrapper;
@@ -37,6 +27,14 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 import org.mockito.Mockito;
+
+import javax.sql.DataSource;
+import javax.sql.PooledConnection;
+import javax.sql.XAConnection;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.Driver;
+import java.sql.SQLException;
 
 import static org.mockito.ArgumentMatchers.any;
 
@@ -76,12 +74,12 @@ public class DataSourceProxyXATest {
         connFromDataSourceProxyXA = dataSourceProxyXA.getConnection();
 
         Assertions.assertTrue(connFromDataSourceProxyXA instanceof ConnectionProxyXA);
-        ConnectionProxyXA connectionProxyXA = (ConnectionProxyXA)dataSourceProxyXA.getConnection();
+        ConnectionProxyXA connectionProxyXA = (ConnectionProxyXA) dataSourceProxyXA.getConnection();
 
         Connection wrappedConnection = connectionProxyXA.getWrappedConnection();
         Assertions.assertTrue(wrappedConnection instanceof PooledConnection);
 
-        Connection wrappedPhysicalConn = ((PooledConnection)wrappedConnection).getConnection();
+        Connection wrappedPhysicalConn = ((PooledConnection) wrappedConnection).getConnection();
         Assertions.assertSame(wrappedPhysicalConn, connection);
 
         XAConnection xaConnection = connectionProxyXA.getWrappedXAConnection();
@@ -95,7 +93,7 @@ public class DataSourceProxyXATest {
         // Mock
         Driver driver = Mockito.mock(Driver.class);
         Class clazz = Class.forName("org.mariadb.jdbc.MariaDbConnection");
-        Connection connection = (Connection)(Mockito.mock(clazz));
+        Connection connection = (Connection) (Mockito.mock(clazz));
         Mockito.when(connection.getAutoCommit()).thenReturn(true);
         DatabaseMetaData metaData = Mockito.mock(DatabaseMetaData.class);
         Mockito.when(metaData.getURL()).thenReturn("jdbc:mariadb:xxx");
@@ -111,27 +109,31 @@ public class DataSourceProxyXATest {
         connFromDataSourceProxyXA = dataSourceProxyXA.getConnection();
 
         Assertions.assertTrue(connFromDataSourceProxyXA instanceof ConnectionProxyXA);
-        ConnectionProxyXA connectionProxyXA = (ConnectionProxyXA)dataSourceProxyXA.getConnection();
+        ConnectionProxyXA connectionProxyXA = (ConnectionProxyXA) dataSourceProxyXA.getConnection();
 
         Connection wrappedConnection = connectionProxyXA.getWrappedConnection();
         Assertions.assertTrue(wrappedConnection instanceof PooledConnection);
 
-        Connection wrappedPhysicalConn = ((PooledConnection)wrappedConnection).getConnection();
+        Connection wrappedPhysicalConn = ((PooledConnection) wrappedConnection).getConnection();
         Assertions.assertSame(wrappedPhysicalConn, connection);
 
         XAConnection xaConnection = connectionProxyXA.getWrappedXAConnection();
         Connection connectionInXA = xaConnection.getConnection();
-        Assertions.assertEquals("org.mariadb.jdbc.MariaDbConnection", connectionInXA.getClass().getName());
+        Assertions.assertEquals(
+                "org.mariadb.jdbc.MariaDbConnection", connectionInXA.getClass().getName());
         tearDown();
     }
 
     @Test
-    @DisabledIfSystemProperty(named = "druid.version", matches = "[0-1].[1-2].[0-7]", disabledReason = "druid 1.2.8 correct support kingbase")
+    @DisabledIfSystemProperty(
+            named = "druid.version",
+            matches = "[0-1].[1-2].[0-7]",
+            disabledReason = "druid 1.2.8 correct support kingbase")
     public void testGetKingbaseXaConnection() throws SQLException, ClassNotFoundException {
         // Mock
         Driver driver = Mockito.mock(Driver.class);
         Class clazz = Class.forName("com.kingbase8.jdbc.KbConnection");
-        Connection connection = (Connection)(Mockito.mock(clazz));
+        Connection connection = (Connection) (Mockito.mock(clazz));
         Mockito.when(connection.getAutoCommit()).thenReturn(true);
         DatabaseMetaData metaData = Mockito.mock(DatabaseMetaData.class);
         Mockito.when(metaData.getURL()).thenReturn("jdbc:kingbase8:xxx");
@@ -147,12 +149,12 @@ public class DataSourceProxyXATest {
         connFromDataSourceProxyXA = dataSourceProxyXA.getConnection();
 
         Assertions.assertTrue(connFromDataSourceProxyXA instanceof ConnectionProxyXA);
-        ConnectionProxyXA connectionProxyXA = (ConnectionProxyXA)dataSourceProxyXA.getConnection();
+        ConnectionProxyXA connectionProxyXA = (ConnectionProxyXA) dataSourceProxyXA.getConnection();
 
         Connection wrappedConnection = connectionProxyXA.getWrappedConnection();
         Assertions.assertTrue(wrappedConnection instanceof PooledConnection);
 
-        Connection wrappedPhysicalConn = ((PooledConnection)wrappedConnection).getConnection();
+        Connection wrappedPhysicalConn = ((PooledConnection) wrappedConnection).getConnection();
         Assertions.assertSame(wrappedPhysicalConn, connection);
 
         XAConnection xaConnection = connectionProxyXA.getWrappedXAConnection();

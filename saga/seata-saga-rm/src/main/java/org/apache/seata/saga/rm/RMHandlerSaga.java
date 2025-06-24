@@ -30,7 +30,7 @@ public class RMHandlerSaga extends AbstractRMHandler {
 
     @Override
     public void handle(UndoLogDeleteRequest request) {
-        //DO nothing
+        // DO nothing
     }
 
     /**
@@ -47,5 +47,4 @@ public class RMHandlerSaga extends AbstractRMHandler {
     public BranchType getBranchType() {
         return BranchType.SAGA;
     }
-
 }

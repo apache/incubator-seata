@@ -16,14 +16,14 @@
  */
 package org.apache.seata.core.protocol;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import io.netty.channel.Channel;
-import org.apache.seata.common.util.NetUtil;
 import org.apache.commons.lang.StringUtils;
+import org.apache.seata.common.util.NetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The type Version.
@@ -37,6 +37,7 @@ public class Version {
      * The constant CURRENT.
      */
     private static final String CURRENT = VersionInfo.VERSION;
+
     private static final String VERSION_0_7_1 = "0.7.1";
     private static final String VERSION_1_5_0 = "1.5.0";
     private static final String VERSION_2_3_0 = "2.3.0";
@@ -47,9 +48,7 @@ public class Version {
      */
     public static final Map<String, String> VERSION_MAP = new ConcurrentHashMap<>();
 
-    private Version() {
-
-    }
+    private Version() {}
 
     /**
      * Gets current.
@@ -157,6 +156,7 @@ public class Version {
     }
 
     private static long calculatePartValue(String partNumeric, int size, int index) {
-        return Long.parseLong(partNumeric) * Double.valueOf(Math.pow(100, size - index)).longValue();
+        return Long.parseLong(partNumeric)
+                * Double.valueOf(Math.pow(100, size - index)).longValue();
     }
 }

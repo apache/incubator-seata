@@ -16,16 +16,15 @@
  */
 package io.seata.rm.datasource.xa;
 
+import org.apache.seata.core.model.BranchType;
+import org.apache.seata.rm.datasource.SeataDataSourceProxy;
+
+import javax.sql.DataSource;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.logging.Logger;
-
-import javax.sql.DataSource;
-
-import org.apache.seata.core.model.BranchType;
-import org.apache.seata.rm.datasource.SeataDataSourceProxy;
 
 /**
  * DataSource proxy for XA mode.

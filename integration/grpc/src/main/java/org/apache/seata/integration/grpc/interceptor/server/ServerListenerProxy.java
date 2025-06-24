@@ -16,9 +16,6 @@
  */
 package org.apache.seata.integration.grpc.interceptor.server;
 
-import java.util.Map;
-import java.util.Objects;
-
 import io.grpc.ServerCall;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.core.context.RootContext;
@@ -31,6 +28,9 @@ import org.apache.seata.core.model.BranchType;
  *
  * @param <ReqT> the type of the request message
  */
+import java.util.Map;
+import java.util.Objects;
+
 public class ServerListenerProxy<ReqT> extends ServerCall.Listener<ReqT> {
     private ServerCall.Listener<ReqT> target;
     private final String xid;

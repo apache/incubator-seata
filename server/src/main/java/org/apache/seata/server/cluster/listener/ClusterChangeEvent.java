@@ -16,8 +16,9 @@
  */
 package org.apache.seata.server.cluster.listener;
 
-import java.time.Clock;
 import org.springframework.context.ApplicationEvent;
+
+import java.time.Clock;
 
 /**
  */

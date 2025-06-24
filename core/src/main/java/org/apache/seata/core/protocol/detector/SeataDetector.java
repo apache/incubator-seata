@@ -45,6 +45,6 @@ public class SeataDetector implements ProtocolDetector {
     public ChannelHandler[] getHandlers() {
         MultiProtocolDecoder multiProtocolDecoder = new MultiProtocolDecoder(serverHandlers);
 
-        return new ChannelHandler[]{multiProtocolDecoder};
+        return new ChannelHandler[] {multiProtocolDecoder};
     }
 }

@@ -19,7 +19,6 @@ package org.apache.seata.config.processor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-
 class ConfigDataTypeTest {
 
     @Test
@@ -36,10 +35,10 @@ class ConfigDataTypeTest {
     void getTypeBySuffix() {
         ConfigDataType configDataType = ConfigDataType.getTypeBySuffix("yml");
         Assertions.assertEquals(ConfigDataType.yaml, configDataType);
-        
+
         configDataType = ConfigDataType.getTypeBySuffix("yaml");
         Assertions.assertEquals(ConfigDataType.yaml, configDataType);
-        
+
         configDataType = ConfigDataType.getTypeBySuffix("properties");
         Assertions.assertEquals(ConfigDataType.properties, configDataType);
 

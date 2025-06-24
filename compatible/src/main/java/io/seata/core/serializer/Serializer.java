@@ -21,5 +21,4 @@ package io.seata.core.serializer;
  * Notes: used for io.seata SPI interface
  */
 @Deprecated
-public interface Serializer extends org.apache.seata.core.serializer.Serializer {
-}
+public interface Serializer extends org.apache.seata.core.serializer.Serializer {}

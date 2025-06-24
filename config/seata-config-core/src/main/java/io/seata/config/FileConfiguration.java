@@ -16,9 +16,9 @@
  */
 package io.seata.config;
 
-import java.util.Set;
-
 import org.apache.seata.common.exception.NotSupportYetException;
+
+import java.util.Set;
 
 /**
  * The type File configuration.
@@ -47,7 +47,7 @@ public class FileConfiguration extends AbstractConfiguration {
      * @param target the target
      */
     public FileConfiguration(org.apache.seata.config.Configuration target) {
-        this.target = (org.apache.seata.config.FileConfiguration)target;
+        this.target = (org.apache.seata.config.FileConfiguration) target;
     }
 
     /**

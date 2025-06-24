@@ -20,5 +20,4 @@ package org.apache.seata.sqlparser;
  * The interface Sql delete recognizer.
  *
  */
-public interface SQLDeleteRecognizer extends WhereRecognizer {
-}
+public interface SQLDeleteRecognizer extends WhereRecognizer {}

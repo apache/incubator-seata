@@ -32,12 +32,10 @@ public class NotPlaceholderExpr {
         return instance;
     }
 
-    private NotPlaceholderExpr() {
-    }
+    private NotPlaceholderExpr() {}
 
     @Override
     public String toString() {
         return "NOT_PLACEHOLDER";
     }
-
 }

@@ -32,7 +32,7 @@ public interface TccAction {
      * @param i the
      * @return the boolean
      */
-    @TwoPhaseBusinessAction(name = "tccActionForSpringTest" , commitMethod = "commit", rollbackMethod = "rollback")
+    @TwoPhaseBusinessAction(name = "tccActionForSpringTest", commitMethod = "commit", rollbackMethod = "rollback")
     boolean prepare(BusinessActionContext actionContext, int i);
 
     /**

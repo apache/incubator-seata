@@ -23,15 +23,15 @@ package org.apache.seata.saga.statelang.domain;
 public interface DomainConstants {
     String COMPENSATE_SUB_MACHINE_STATE_NAME_PREFIX = "_compensate_sub_machine_state_";
 
-    //region Service Types
+    // region Service Types
     String SERVICE_TYPE_SPRING_BEAN = "SpringBean";
-    //endregion
+    // endregion
 
-    //region System Variables
+    // region System Variables
     String VAR_NAME_STATEMACHINE_CONTEXT = "context";
     String VAR_NAME_INPUT_PARAMS = "inputParams";
     String VAR_NAME_OUTPUT_PARAMS = "outputParams";
-    String VAR_NAME_CURRENT_EXCEPTION = "currentException";//exception of current state
+    String VAR_NAME_CURRENT_EXCEPTION = "currentException"; // exception of current state
     String VAR_NAME_BUSINESSKEY = "_business_key_";
     String VAR_NAME_SUB_MACHINE_PARENT_ID = "_sub_machine_parent_id_";
     String VAR_NAME_CURRENT_CHOICE = "_current_choice_";
@@ -58,7 +58,7 @@ public interface DomainConstants {
     String VAR_NAME_IS_ASYNC_EXECUTION = "_is_async_execution_";
     String VAR_NAME_IS_LOOP_STATE = "_is_loop_state_";
     String VAR_NAME_CURRENT_LOOP_CONTEXT_HOLDER = "_current_loop_context_holder_";
-    //endregion
+    // endregion
 
     // region of loop
     String LOOP_COUNTER = "loopCounter";
@@ -80,7 +80,7 @@ public interface DomainConstants {
     String EXPRESSION_TYPE_SEQUENCE = "Sequence";
     String EXPRESSION_TYPE_EXCEPTION = "Exception";
 
-    String SEPERATOR_PARENT_ID      = ":";
+    String SEPERATOR_PARENT_ID = ":";
 
-    String DEFAULT_JSON_PARSER      = "fastjson";
+    String DEFAULT_JSON_PARSER = "fastjson";
 }

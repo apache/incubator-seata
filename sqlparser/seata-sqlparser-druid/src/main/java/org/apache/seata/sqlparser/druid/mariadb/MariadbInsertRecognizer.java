@@ -34,5 +34,4 @@ public class MariadbInsertRecognizer extends MySQLInsertRecognizer {
     public MariadbInsertRecognizer(String originalSQL, SQLStatement ast) {
         super(originalSQL, ast);
     }
-
 }

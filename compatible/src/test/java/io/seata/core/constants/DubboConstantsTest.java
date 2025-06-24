@@ -16,8 +16,8 @@
  */
 package io.seata.core.constants;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
 
@@ -29,30 +29,32 @@ public class DubboConstantsTest {
     @Test
     public void testDubboConstantsInheritance() {
         // Test that DubboConstants extends from Apache Seata's DubboConstants
-        Assertions.assertTrue(org.apache.seata.core.constants.DubboConstants.class
-                .isAssignableFrom(DubboConstants.class));
+        Assertions.assertTrue(
+                org.apache.seata.core.constants.DubboConstants.class.isAssignableFrom(DubboConstants.class));
     }
 
     @Test
     public void testConstantsCompatibility() throws Exception {
         // Test that all constants in Apache Seata's DubboConstants are accessible in compatible version
         Field[] apacheFields = org.apache.seata.core.constants.DubboConstants.class.getDeclaredFields();
-        
+
         for (Field apacheField : apacheFields) {
-            if (java.lang.reflect.Modifier.isStatic(apacheField.getModifiers()) && 
-                java.lang.reflect.Modifier.isPublic(apacheField.getModifiers()) &&
-                java.lang.reflect.Modifier.isFinal(apacheField.getModifiers())) {
-                
+            if (java.lang.reflect.Modifier.isStatic(apacheField.getModifiers())
+                    && java.lang.reflect.Modifier.isPublic(apacheField.getModifiers())
+                    && java.lang.reflect.Modifier.isFinal(apacheField.getModifiers())) {
+
                 try {
                     // Try to access the field through the compatible class
                     Field compatField = DubboConstants.class.getField(apacheField.getName());
-                    
+
                     // Compare values
                     Object apacheValue = apacheField.get(null);
                     Object compatValue = compatField.get(null);
-                    
-                    Assertions.assertEquals(apacheValue, compatValue, 
-                        "Constant " + apacheField.getName() + " should have the same value in both classes");
+
+                    Assertions.assertEquals(
+                            apacheValue,
+                            compatValue,
+                            "Constant " + apacheField.getName() + " should have the same value in both classes");
                 } catch (NoSuchFieldException e) {
                     // This is acceptable for inherited constants
                     // The constant should still be accessible through inheritance
@@ -72,7 +74,8 @@ public class DubboConstantsTest {
     @Test
     public void testDeprecationAnnotation() {
         // Test that the DubboConstants class is marked as deprecated
-        Assertions.assertTrue(DubboConstants.class.isAnnotationPresent(Deprecated.class),
+        Assertions.assertTrue(
+                DubboConstants.class.isAnnotationPresent(Deprecated.class),
                 "DubboConstants should be marked as @Deprecated");
     }
 
@@ -81,7 +84,7 @@ public class DubboConstantsTest {
         // Test that we can create an instance of DubboConstants
         DubboConstants constants = new DubboConstants();
         Assertions.assertNotNull(constants);
-        
+
         // Test that it's an instance of Apache Seata's DubboConstants
         Assertions.assertTrue(constants instanceof org.apache.seata.core.constants.DubboConstants);
     }
@@ -90,11 +93,11 @@ public class DubboConstantsTest {
     public void testClassStructure() {
         // Test class modifiers
         int modifiers = DubboConstants.class.getModifiers();
-        Assertions.assertTrue(java.lang.reflect.Modifier.isPublic(modifiers),
-                "DubboConstants should be public");
-        
+        Assertions.assertTrue(java.lang.reflect.Modifier.isPublic(modifiers), "DubboConstants should be public");
+
         // Test superclass
-        Assertions.assertEquals(org.apache.seata.core.constants.DubboConstants.class,
+        Assertions.assertEquals(
+                org.apache.seata.core.constants.DubboConstants.class,
                 DubboConstants.class.getSuperclass(),
                 "DubboConstants should extend Apache Seata's DubboConstants");
     }
@@ -102,8 +105,9 @@ public class DubboConstantsTest {
     @Test
     public void testPackageName() {
         // Test that the package is the expected compatible package
-        Assertions.assertEquals("io.seata.core.constants", 
+        Assertions.assertEquals(
+                "io.seata.core.constants",
                 DubboConstants.class.getPackage().getName(),
                 "DubboConstants should be in io.seata.core.constants package");
     }
-} 
+}

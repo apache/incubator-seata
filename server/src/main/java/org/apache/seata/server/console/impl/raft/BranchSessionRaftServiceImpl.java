@@ -27,5 +27,4 @@ import org.springframework.stereotype.Component;
 @Component
 @org.springframework.context.annotation.Configuration
 @ConditionalOnExpression("#{'raft'.equals('${sessionMode}')}")
-public class BranchSessionRaftServiceImpl extends BranchSessionFileServiceImpl {
-}
+public class BranchSessionRaftServiceImpl extends BranchSessionFileServiceImpl {}

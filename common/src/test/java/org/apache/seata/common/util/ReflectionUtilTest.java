@@ -16,6 +16,12 @@
  */
 package org.apache.seata.common.util;
 
+import org.apache.seata.common.BranchDO;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledOnJre;
+import org.junit.jupiter.api.condition.JRE;
+
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -26,23 +32,16 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.seata.common.BranchDO;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledOnJre;
-import org.junit.jupiter.api.condition.JRE;
-
 public class ReflectionUtilTest {
 
-    //Prevent jvm from optimizing final
+    // Prevent jvm from optimizing final
     public static final String testValue = (null != null ? "hello" : "hello");
 
     public final String testValue2 = (null != null ? "hello world" : "hello world");
 
     @Test
     public void testGetClassByName() throws ClassNotFoundException {
-        Assertions.assertEquals(String.class,
-                ReflectionUtil.getClassByName("java.lang.String"));
+        Assertions.assertEquals(String.class, ReflectionUtil.getClassByName("java.lang.String"));
     }
 
     @Test
@@ -74,64 +73,61 @@ public class ReflectionUtilTest {
 
     @Test
     public void testGetFieldValue() throws NoSuchFieldException {
-        Assertions.assertEquals("d",
-                ReflectionUtil.getFieldValue(new DurationUtil(), "DAY_UNIT"));
+        Assertions.assertEquals("d", ReflectionUtil.getFieldValue(new DurationUtil(), "DAY_UNIT"));
         Assertions.assertThrows(ClassCastException.class, () -> {
             Integer var = ReflectionUtil.getFieldValue(new DurationUtil(), "DAY_UNIT");
         });
 
-        Assertions.assertThrows(IllegalArgumentException.class,
-                () -> ReflectionUtil.getFieldValue(null, "a1b2c3"));
-        Assertions.assertThrows(NoSuchFieldException.class,
-                () -> ReflectionUtil.getFieldValue(new Object(), "A1B2C3"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> ReflectionUtil.getFieldValue(null, "a1b2c3"));
+        Assertions.assertThrows(NoSuchFieldException.class, () -> ReflectionUtil.getFieldValue(new Object(), "A1B2C3"));
     }
 
     @Test
     public void testInvokeMethod() throws NoSuchMethodException, InvocationTargetException {
         Assertions.assertEquals(0, ReflectionUtil.invokeMethod("", "length"));
-        Assertions.assertEquals(3,
-                ReflectionUtil.invokeMethod("foo", "length"));
+        Assertions.assertEquals(3, ReflectionUtil.invokeMethod("foo", "length"));
 
-        Assertions.assertThrows(NoSuchMethodException.class,
-                () -> ReflectionUtil.invokeMethod("", "size"));
+        Assertions.assertThrows(NoSuchMethodException.class, () -> ReflectionUtil.invokeMethod("", "size"));
     }
 
     @Test
     public void testInvokeMethod2() throws NoSuchMethodException, InvocationTargetException {
-        Assertions.assertEquals(0, ReflectionUtil
-                .invokeMethod("", "length", null, ReflectionUtil.EMPTY_ARGS));
-        Assertions.assertEquals(3, ReflectionUtil
-                .invokeMethod("foo", "length", null, ReflectionUtil.EMPTY_ARGS));
+        Assertions.assertEquals(0, ReflectionUtil.invokeMethod("", "length", null, ReflectionUtil.EMPTY_ARGS));
+        Assertions.assertEquals(3, ReflectionUtil.invokeMethod("foo", "length", null, ReflectionUtil.EMPTY_ARGS));
 
-        Assertions.assertThrows(NoSuchMethodException.class, () -> ReflectionUtil
-                .invokeMethod("", "size", null, ReflectionUtil.EMPTY_ARGS));
+        Assertions.assertThrows(
+                NoSuchMethodException.class,
+                () -> ReflectionUtil.invokeMethod("", "size", null, ReflectionUtil.EMPTY_ARGS));
     }
 
     @Test
     public void testInvokeMethod3() throws NoSuchMethodException, InvocationTargetException {
-        Assertions.assertEquals("0", ReflectionUtil.invokeStaticMethod(
-                String.class, "valueOf",
-                new Class<?>[]{int.class}, 0));
-        Assertions.assertEquals("123", ReflectionUtil.invokeStaticMethod(
-                String.class, "valueOf",
-                new Class<?>[]{int.class}, new Object[]{123}));
+        Assertions.assertEquals(
+                "0", ReflectionUtil.invokeStaticMethod(String.class, "valueOf", new Class<?>[] {int.class}, 0));
+        Assertions.assertEquals(
+                "123",
+                ReflectionUtil.invokeStaticMethod(
+                        String.class, "valueOf", new Class<?>[] {int.class}, new Object[] {123}));
 
-        Assertions.assertThrows(NoSuchMethodException.class, () -> ReflectionUtil
-                .invokeStaticMethod(String.class, "size", null, ReflectionUtil.EMPTY_ARGS));
+        Assertions.assertThrows(
+                NoSuchMethodException.class,
+                () -> ReflectionUtil.invokeStaticMethod(String.class, "size", null, ReflectionUtil.EMPTY_ARGS));
     }
 
     @Test
     public void testGetInterfaces() {
-        Assertions.assertArrayEquals(new Object[]{Serializable.class},
+        Assertions.assertArrayEquals(
+                new Object[] {Serializable.class},
                 ReflectionUtil.getInterfaces(Serializable.class).toArray());
 
-        Assertions.assertArrayEquals(new Object[]{
-                        Map.class, Cloneable.class, Serializable.class},
+        Assertions.assertArrayEquals(
+                new Object[] {Map.class, Cloneable.class, Serializable.class},
                 ReflectionUtil.getInterfaces(HashMap.class).toArray());
     }
 
     @Test
-    @EnabledOnJre({JRE.JAVA_8, JRE.JAVA_11}) // `ReflectionUtil.modifyStaticFinalField` does not supported java17 and above versions
+    @EnabledOnJre({JRE.JAVA_8, JRE.JAVA_11
+    }) // `ReflectionUtil.modifyStaticFinalField` does not supported java17 and above versions
     public void testModifyStaticFinalField() throws NoSuchFieldException, IllegalAccessException {
         Assertions.assertEquals("hello", testValue);
         ReflectionUtil.modifyStaticFinalField(ReflectionUtilTest.class, "testValue", "hello world");
@@ -143,8 +139,7 @@ public class ReflectionUtilTest {
         });
     }
 
-
-    //region test the method 'getAllFields'
+    // region test the method 'getAllFields'
 
     @Test
     public void testGetAllFields() {
@@ -185,27 +180,32 @@ public class ReflectionUtilTest {
 
     @Test
     public void testMethodToString() throws NoSuchMethodException {
-        Assertions.assertEquals("Method<ReflectionUtilTest.testMethodToString()>",
-            ReflectionUtil.methodToString(this.getClass().getMethod("testMethodToString")));
+        Assertions.assertEquals(
+                "Method<ReflectionUtilTest.testMethodToString()>",
+                ReflectionUtil.methodToString(this.getClass().getMethod("testMethodToString")));
     }
 
     @Test
     public void testAnnotationToString() throws NoSuchMethodException {
-        Assertions.assertEquals("@Test()", ReflectionUtil
-            .annotationToString(this.getClass().getMethod("testAnnotationToString").getAnnotation(Test.class)));
+        Assertions.assertEquals(
+                "@Test()",
+                ReflectionUtil.annotationToString(
+                        this.getClass().getMethod("testAnnotationToString").getAnnotation(Test.class)));
     }
 
     @Test
-    @EnabledOnJre({JRE.JAVA_8, JRE.JAVA_11}) // `ReflectionUtil.modifyStaticFinalField` does not supported java17 and above versions
+    @EnabledOnJre({JRE.JAVA_8, JRE.JAVA_11
+    }) // `ReflectionUtil.modifyStaticFinalField` does not supported java17 and above versions
     public void testGetAnnotationValues() throws NoSuchMethodException, NoSuchFieldException {
-        Assertions.assertEquals(new LinkedHashMap<>(), ReflectionUtil
-            .getAnnotationValues(this.getClass().getMethod("testGetAnnotationValues").getAnnotation(Test.class)));
+        Assertions.assertEquals(
+                new LinkedHashMap<>(),
+                ReflectionUtil.getAnnotationValues(
+                        this.getClass().getMethod("testGetAnnotationValues").getAnnotation(Test.class)));
     }
 
-    //region the test class and interface
+    // region the test class and interface
 
-    class EmptyClass {
-    }
+    class EmptyClass {}
 
     class TestClass extends TestSuperClass implements TestInterface {
 
@@ -232,10 +232,9 @@ public class ReflectionUtilTest {
         }
     }
 
-    interface TestInterface {
-    }
+    interface TestInterface {}
 
-    //endregion
+    // endregion
 
-    //endregion
+    // endregion
 }

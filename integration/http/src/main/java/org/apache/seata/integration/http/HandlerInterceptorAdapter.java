@@ -29,13 +29,19 @@ import javax.servlet.http.HttpServletResponse;
  */
 public interface HandlerInterceptorAdapter extends HandlerInterceptor {
 
-    default boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+    default boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
+            throws Exception {
         return true;
     }
 
-    default void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable ModelAndView modelAndView) throws Exception {
-    }
+    default void postHandle(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            Object handler,
+            @Nullable ModelAndView modelAndView)
+            throws Exception {}
 
-    default void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable Exception ex) throws Exception {
-    }
+    default void afterCompletion(
+            HttpServletRequest request, HttpServletResponse response, Object handler, @Nullable Exception ex)
+            throws Exception {}
 }

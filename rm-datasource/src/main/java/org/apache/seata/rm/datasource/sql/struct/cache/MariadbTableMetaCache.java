@@ -37,7 +37,7 @@ public class MariadbTableMetaCache extends MysqlTableMetaCache {
     protected TableMeta fetchSchema(Connection connection, String tableName) throws SQLException {
         String sql = "SELECT * FROM " + ColumnUtils.addEscape(tableName, JdbcConstants.MARIADB) + " LIMIT 1";
         try (Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+                ResultSet rs = stmt.executeQuery(sql)) {
             return resultSetMetaToSchema(rs.getMetaData(), connection.getMetaData(), tableName);
         } catch (SQLException sqlEx) {
             throw sqlEx;
@@ -45,5 +45,4 @@ public class MariadbTableMetaCache extends MysqlTableMetaCache {
             throw new SQLException(String.format("Failed to fetch schema of %s", tableName), e);
         }
     }
-
 }

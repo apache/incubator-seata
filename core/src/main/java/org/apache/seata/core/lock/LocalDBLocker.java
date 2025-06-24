@@ -16,8 +16,9 @@
  */
 package org.apache.seata.core.lock;
 
-import java.util.List;
 import org.apache.seata.core.model.LockStatus;
+
+import java.util.List;
 
 /**
  * The type Local db locker.
@@ -46,7 +47,5 @@ public class LocalDBLocker extends AbstractLocker {
     }
 
     @Override
-    public void updateLockStatus(String xid, LockStatus lockStatus) {
-    }
-
+    public void updateLockStatus(String xid, LockStatus lockStatus) {}
 }

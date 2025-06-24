@@ -16,7 +16,6 @@
  */
 package org.apache.seata.integration.sofa.rpc;
 
-
 public interface HelloService {
 
     String sayHello(String name, int age);

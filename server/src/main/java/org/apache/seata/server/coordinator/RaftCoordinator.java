@@ -43,14 +43,16 @@ public class RaftCoordinator extends DefaultCoordinator implements ApplicationLi
     }
 
     @Override
-    public <T extends AbstractTransactionRequest, S extends AbstractTransactionResponse> void exceptionHandleTemplate(Callback<T, S> callback, T request, S response) {
+    public <T extends AbstractTransactionRequest, S extends AbstractTransactionResponse> void exceptionHandleTemplate(
+            Callback<T, S> callback, T request, S response) {
         String group = SeataClusterContext.bindGroup();
         try {
             if (!isPass(group)) {
-                throw new TransactionException(TransactionExceptionCode.NotRaftLeader,
+                throw new TransactionException(
+                        TransactionExceptionCode.NotRaftLeader,
                         " The current TC is not a leader node, interrupt processing !");
             }
-            super.exceptionHandleTemplate(callback,request,response);
+            super.exceptionHandleTemplate(callback, request, response);
         } catch (TransactionException tex) {
             LOGGER.error("Catch TransactionException while do RPC, request: {}", request, tex);
             callback.onTransactionException(request, response, tex);
@@ -70,10 +72,8 @@ public class RaftCoordinator extends DefaultCoordinator implements ApplicationLi
         }
     }
 
-
     @Override
     public void onApplicationEvent(ClusterChangeEvent event) {
         setPrevent(event.getGroup(), event.isLeader());
     }
-
 }

@@ -63,8 +63,10 @@ public class GrpcDecoder extends ChannelDuplexHandler {
             while (srcPos < readableBytes) {
                 // The first byte defaults to 0, indicating that no decompression is required
                 // Read the value of the next four bytes as the length of the body
-                int length = ((bytes[srcPos + 1] & 0xFF) << 24) | ((bytes[srcPos + 2] & 0xFF) << 16)
-                        | ((bytes[srcPos + 3] & 0xFF) << 8) | (bytes[srcPos + 4] & 0xFF);
+                int length = ((bytes[srcPos + 1] & 0xFF) << 24)
+                        | ((bytes[srcPos + 2] & 0xFF) << 16)
+                        | ((bytes[srcPos + 3] & 0xFF) << 8)
+                        | (bytes[srcPos + 4] & 0xFF);
 
                 byte[] data = new byte[length];
                 System.arraycopy(bytes, srcPos + 5, data, 0, length);
@@ -94,8 +96,9 @@ public class GrpcDecoder extends ChannelDuplexHandler {
                         bodyBytes = compressor.decompress(bodyBytes);
                     }
                     String codecValue = headMap.get(GrpcHeaderEnum.CODEC_TYPE.header);
-                    int codec = StringUtils.isBlank(codecValue) ? SerializerType.GRPC.getCode()
-                        : Integer.parseInt(codecValue);
+                    int codec = StringUtils.isBlank(codecValue)
+                            ? SerializerType.GRPC.getCode()
+                            : Integer.parseInt(codecValue);
                     SerializerType serializerType = SerializerType.getByCode(codec);
                     rpcMsg.setCodec(serializerType.getCode());
                     Serializer serializer = SerializerServiceLoader.load(serializerType);
@@ -111,7 +114,6 @@ public class GrpcDecoder extends ChannelDuplexHandler {
             ReferenceCountUtil.release(content);
         }
     }
-
 
     public void onHeadersRead(ChannelHandlerContext ctx, Http2HeadersFrame headersFrame) throws Exception {
         // TODO Subsequent decompression logic is possible

@@ -22,8 +22,6 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.io.IOException;
 
-
-
 class YamlFileConfigTest {
 
     @Test

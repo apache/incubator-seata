@@ -27,11 +27,11 @@ public class HessianSerializerFactory extends SerializerFactory {
 
     private HessianSerializerFactory() {
         super();
-        //Serialization whitelist
+        // Serialization whitelist
         super.getClassFactory().setWhitelist(true);
-        //register allow types
+        // register allow types
         registerAllowTypes();
-        //register deny types
+        // register deny types
         registerDenyTypes();
     }
 

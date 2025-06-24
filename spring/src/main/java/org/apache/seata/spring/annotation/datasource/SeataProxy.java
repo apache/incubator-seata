@@ -16,6 +16,4 @@
  */
 package org.apache.seata.spring.annotation.datasource;
 
-
-public interface SeataProxy {
-}
+public interface SeataProxy {}

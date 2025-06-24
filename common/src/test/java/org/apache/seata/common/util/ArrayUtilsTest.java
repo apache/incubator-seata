@@ -19,20 +19,19 @@ package org.apache.seata.common.util;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-
 public class ArrayUtilsTest {
 
     @Test
     public void testToArray() {
         Assertions.assertNull(ArrayUtils.toArray(null));
 
-        Object obj = new String[]{"1", "2", "3"};
+        Object obj = new String[] {"1", "2", "3"};
         Object[] array = ArrayUtils.toArray(obj);
-        Assertions.assertArrayEquals(new String[]{"1", "2", "3"}, array);
+        Assertions.assertArrayEquals(new String[] {"1", "2", "3"}, array);
 
-        Object obj1 = new String[]{};
+        Object obj1 = new String[] {};
         Object[] array1 = ArrayUtils.toArray(obj1);
-        Assertions.assertArrayEquals(new String[]{}, array1);
+        Assertions.assertArrayEquals(new String[] {}, array1);
     }
 
     @Test
@@ -45,13 +44,13 @@ public class ArrayUtilsTest {
     @Test
     public void testToString() {
         Assertions.assertEquals("null", ArrayUtils.toString((Object[]) null));
-        Assertions.assertEquals("[]", ArrayUtils.toString(new Object[]{}));
-        Assertions.assertEquals("[\"1\", \"2\", \"3\"]", ArrayUtils.toString(new String[]{"1", "2", "3"}));
+        Assertions.assertEquals("[]", ArrayUtils.toString(new Object[] {}));
+        Assertions.assertEquals("[\"1\", \"2\", \"3\"]", ArrayUtils.toString(new String[] {"1", "2", "3"}));
 
         Assertions.assertEquals("null", ArrayUtils.toString((Object) null));
-        Assertions.assertEquals("[]", ArrayUtils.toString((Object) new Object[]{}));
+        Assertions.assertEquals("[]", ArrayUtils.toString((Object) new Object[] {}));
         Assertions.assertEquals("123", ArrayUtils.toString(123));
-        Assertions.assertEquals("[1, 2, 3]", ArrayUtils.toString((Object) new int[]{1, 2, 3}));
-        Assertions.assertEquals("[\"1\", \"2\", \"3\"]", ArrayUtils.toString((Object) new String[]{"1", "2", "3"}));
+        Assertions.assertEquals("[1, 2, 3]", ArrayUtils.toString((Object) new int[] {1, 2, 3}));
+        Assertions.assertEquals("[\"1\", \"2\", \"3\"]", ArrayUtils.toString((Object) new String[] {"1", "2", "3"}));
     }
 }

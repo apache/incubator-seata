@@ -24,7 +24,6 @@ import org.apache.seata.tm.api.GlobalTransaction;
 import org.apache.seata.tm.api.GlobalTransactionRole;
 import org.apache.seata.tm.api.transaction.SuspendedResourcesHolder;
 
-
 public class MockGlobalTransaction implements GlobalTransaction {
 
     private String xid;
@@ -58,19 +57,13 @@ public class MockGlobalTransaction implements GlobalTransaction {
     }
 
     @Override
-    public void begin(int timeout, String name) throws TransactionException {
-
-    }
+    public void begin(int timeout, String name) throws TransactionException {}
 
     @Override
-    public void commit() throws TransactionException {
-
-    }
+    public void commit() throws TransactionException {}
 
     @Override
-    public void rollback() throws TransactionException {
-
-    }
+    public void rollback() throws TransactionException {}
 
     @Override
     public SuspendedResourcesHolder suspend() throws TransactionException {
@@ -78,16 +71,12 @@ public class MockGlobalTransaction implements GlobalTransaction {
     }
 
     @Override
-    public SuspendedResourcesHolder suspend(boolean clean)
-            throws TransactionException {
+    public SuspendedResourcesHolder suspend(boolean clean) throws TransactionException {
         return null;
     }
 
     @Override
-    public void resume(SuspendedResourcesHolder suspendedResourcesHolder)
-            throws TransactionException {
-
-    }
+    public void resume(SuspendedResourcesHolder suspendedResourcesHolder) throws TransactionException {}
 
     @Override
     public GlobalStatus getStatus() throws TransactionException {
@@ -100,9 +89,7 @@ public class MockGlobalTransaction implements GlobalTransaction {
     }
 
     @Override
-    public void globalReport(GlobalStatus globalStatus) throws TransactionException {
-
-    }
+    public void globalReport(GlobalStatus globalStatus) throws TransactionException {}
 
     @Override
     public GlobalStatus getLocalStatus() {

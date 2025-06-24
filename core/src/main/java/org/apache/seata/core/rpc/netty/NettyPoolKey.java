@@ -142,7 +142,8 @@ public class NettyPoolKey {
         }
         final NettyPoolKey other = (NettyPoolKey) obj;
 
-        return Objects.equals(other.address, this.address) && Objects.equals(other.transactionRole, this.transactionRole);
+        return Objects.equals(other.address, this.address)
+                && Objects.equals(other.transactionRole, this.transactionRole);
     }
 
     /**

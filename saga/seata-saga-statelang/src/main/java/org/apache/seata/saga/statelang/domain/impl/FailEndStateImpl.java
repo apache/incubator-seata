@@ -16,8 +16,8 @@
  */
 package org.apache.seata.saga.statelang.domain.impl;
 
-import org.apache.seata.saga.statelang.domain.StateType;
 import org.apache.seata.saga.statelang.domain.FailEndState;
+import org.apache.seata.saga.statelang.domain.StateType;
 
 /**
  * FailEndState

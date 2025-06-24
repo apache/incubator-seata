@@ -16,20 +16,13 @@
  */
 package org.apache.seata.server.lock.db;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.util.IOUtil;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.store.LockDO;
 import org.apache.seata.server.DynamicPortTestConfig;
 import org.apache.seata.server.storage.db.lock.LockStoreDataBaseDAO;
-import org.apache.commons.dbcp2.BasicDataSource;
 import org.h2.store.fs.FileUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
@@ -39,19 +32,26 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  */
 @SpringBootTest
 @Import(DynamicPortTestConfig.class)
 public class DataBaseLockStoreDAOTest {
 
-    static LockStoreDataBaseDAO dataBaseLockStoreDAO  = null;
+    static LockStoreDataBaseDAO dataBaseLockStoreDAO = null;
 
     static BasicDataSource dataSource = null;
 
     @BeforeAll
-    public static void start(ApplicationContext context){
-        dataSource =  new BasicDataSource();
+    public static void start(ApplicationContext context) {
+        dataSource = new BasicDataSource();
         dataSource.setDriverClassName("org.h2.Driver");
         dataSource.setUrl("jdbc:h2:./db_store/lock");
         dataSource.setUsername("sa");
@@ -74,7 +74,8 @@ public class DataBaseLockStoreDAOTest {
                 stmt.execute("drop table lock_table");
             } catch (Exception e) {
             }
-            stmt.execute("CREATE TABLE lock_table ( xid varchar(96) ,  transaction_id long , branch_id long, resource_id varchar(32) ,table_name varchar(32) ,pk varchar(32) ,  row_key  varchar(128) primary key not null , status  integer , gmt_create TIMESTAMP(6) ,gmt_modified TIMESTAMP(6) ) ");
+            stmt.execute(
+                    "CREATE TABLE lock_table ( xid varchar(96) ,  transaction_id long , branch_id long, resource_id varchar(32) ,table_name varchar(32) ,pk varchar(32) ,  row_key  varchar(128) primary key not null , status  integer , gmt_create TIMESTAMP(6) ,gmt_modified TIMESTAMP(6) ) ");
             System.out.println("create table lock_table success.");
 
         } catch (Exception e) {
@@ -87,13 +88,13 @@ public class DataBaseLockStoreDAOTest {
     @Test
     public void test_acquireLocks() throws SQLException {
         List<LockDO> lockDOs = new ArrayList<>();
-        for(int i = 0; i < 3; i++){
+        for (int i = 0; i < 3; i++) {
             LockDO lock = new LockDO();
             lock.setResourceId("abc");
             lock.setXid("abc-123:123");
             lock.setTransactionId(123L);
             lock.setBranchId((long) i);
-            lock.setRowKey("test_acquireLocks-"+i);
+            lock.setRowKey("test_acquireLocks-" + i);
             lock.setPk(String.valueOf(i));
             lock.setTableName("t");
             lockDOs.add(lock);
@@ -102,11 +103,11 @@ public class DataBaseLockStoreDAOTest {
         boolean ret = dataBaseLockStoreDAO.acquireLock(lockDOs);
         Assertions.assertTrue(ret);
 
-        String sql = "select * from lock_table where xid = 'abc-123:123' and table_name  = 't' " +
-                "and row_key in ('test_acquireLocks-0','test_acquireLocks-1','test_acquireLocks-2')"  ;
-        Connection conn =  null;
+        String sql = "select * from lock_table where xid = 'abc-123:123' and table_name  = 't' "
+                + "and row_key in ('test_acquireLocks-0','test_acquireLocks-1','test_acquireLocks-2')";
+        Connection conn = null;
         ResultSet rs = null;
-        try{
+        try {
             conn = dataSource.getConnection();
             rs = conn.createStatement().executeQuery(sql);
             if (rs.next()) {
@@ -119,20 +120,18 @@ public class DataBaseLockStoreDAOTest {
         }
 
         Assertions.assertTrue(dataBaseLockStoreDAO.unLock(lockDOs));
-
     }
-
 
     @Test
     public void test_re_acquireLocks() throws SQLException {
         List<LockDO> lockDOs = new ArrayList<>();
-        for(int i = 0; i < 3; i++){
+        for (int i = 0; i < 3; i++) {
             LockDO lock = new LockDO();
             lock.setResourceId("abc");
             lock.setXid("abc-123:123");
             lock.setTransactionId(123L);
             lock.setBranchId((long) i);
-            lock.setRowKey("test_re_acquireLocks-"+i);
+            lock.setRowKey("test_re_acquireLocks-" + i);
             lock.setPk(String.valueOf(i));
             lock.setTableName("t");
             lockDOs.add(lock);
@@ -141,11 +140,11 @@ public class DataBaseLockStoreDAOTest {
         boolean ret = dataBaseLockStoreDAO.acquireLock(lockDOs);
         Assertions.assertTrue(ret);
 
-        String sql = "select * from lock_table where xid = 'abc-123:123' and table_name  = 't' " +
-                "and row_key in ('test_re_acquireLocks-0','test_re_acquireLocks-1','test_re_acquireLocks-2')"  ;
-        Connection conn =  null;
+        String sql = "select * from lock_table where xid = 'abc-123:123' and table_name  = 't' "
+                + "and row_key in ('test_re_acquireLocks-0','test_re_acquireLocks-1','test_re_acquireLocks-2')";
+        Connection conn = null;
         ResultSet rs = null;
-        try{
+        try {
             conn = dataSource.getConnection();
             rs = conn.createStatement().executeQuery(sql);
             if (rs.next()) {
@@ -157,23 +156,22 @@ public class DataBaseLockStoreDAOTest {
             IOUtil.close(rs, conn);
         }
 
-        //lock again
+        // lock again
         Assertions.assertTrue(dataBaseLockStoreDAO.acquireLock(lockDOs));
 
         Assertions.assertTrue(dataBaseLockStoreDAO.unLock(lockDOs));
-
     }
 
     @Test
     public void tes_unLocks() throws SQLException {
         List<LockDO> lockDOs = new ArrayList<>();
-        for(int i = 0; i < 3; i++){
+        for (int i = 0; i < 3; i++) {
             LockDO lock = new LockDO();
             lock.setResourceId("abc");
             lock.setXid("abc-456:123");
             lock.setTransactionId(123L);
             lock.setBranchId((long) i);
-            lock.setRowKey("tes_unLocks-"+i);
+            lock.setRowKey("tes_unLocks-" + i);
             lock.setPk(String.valueOf(i));
             lock.setTableName("t");
             lockDOs.add(lock);
@@ -182,11 +180,11 @@ public class DataBaseLockStoreDAOTest {
         boolean ret = dataBaseLockStoreDAO.acquireLock(lockDOs);
         Assertions.assertTrue(ret);
 
-        String sql = "select * from lock_table where xid = 'abc-456:123' and table_name  = 't' " +
-                "and row_key in ('tes_unLocks-0','tes_unLocks-1','tes_unLocks-2')"  ;
-        Connection conn =  null;
+        String sql = "select * from lock_table where xid = 'abc-456:123' and table_name  = 't' "
+                + "and row_key in ('tes_unLocks-0','tes_unLocks-1','tes_unLocks-2')";
+        Connection conn = null;
         ResultSet rs = null;
-        try{
+        try {
             conn = dataSource.getConnection();
             rs = conn.createStatement().executeQuery(sql);
             if (rs.next()) {
@@ -196,7 +194,7 @@ public class DataBaseLockStoreDAOTest {
             }
             rs.close();
 
-            //unlock
+            // unlock
             Assertions.assertTrue(dataBaseLockStoreDAO.unLock(lockDOs));
 
             rs = conn.createStatement().executeQuery(sql);
@@ -208,21 +206,18 @@ public class DataBaseLockStoreDAOTest {
         } finally {
             IOUtil.close(rs, conn);
         }
-
-
     }
 
-
     @Test
-    public void test_isLockable_can(){
+    public void test_isLockable_can() {
         List<LockDO> lockDOs = new ArrayList<>();
-        for(int i = 0; i < 3; i++){
+        for (int i = 0; i < 3; i++) {
             LockDO lock = new LockDO();
             lock.setResourceId("abc");
             lock.setXid("abc-678:123");
             lock.setTransactionId(123L);
             lock.setBranchId((long) i);
-            lock.setRowKey("test_isLockable_can-"+i);
+            lock.setRowKey("test_isLockable_can-" + i);
             lock.setPk(String.valueOf(i));
             lock.setTableName("t");
             lockDOs.add(lock);
@@ -231,20 +226,20 @@ public class DataBaseLockStoreDAOTest {
         boolean ret = dataBaseLockStoreDAO.acquireLock(lockDOs);
         Assertions.assertTrue(ret);
 
-        //unlock
+        // unlock
         Assertions.assertTrue(dataBaseLockStoreDAO.unLock(lockDOs));
     }
 
     @Test
     public void test_isLockable_cannot() throws SQLException {
         List<LockDO> lockDOs = new ArrayList<>();
-        for(int i = 0; i < 3; i++){
+        for (int i = 0; i < 3; i++) {
             LockDO lock = new LockDO();
             lock.setResourceId("abc");
             lock.setXid("abc-123:222");
             lock.setTransactionId(222L);
             lock.setBranchId((long) i);
-            lock.setRowKey("test_isLockable_cannot-"+i);
+            lock.setRowKey("test_isLockable_cannot-" + i);
             lock.setPk(String.valueOf(i));
             lock.setTableName("t");
             lockDOs.add(lock);
@@ -253,11 +248,11 @@ public class DataBaseLockStoreDAOTest {
         boolean ret = dataBaseLockStoreDAO.acquireLock(lockDOs);
         Assertions.assertTrue(ret);
 
-        String sql = "select * from lock_table where xid = 'abc-123:222' and table_name  = 't' " +
-                "and row_key in ('test_isLockable_cannot-0','test_isLockable_cannot-1','test_isLockable_cannot-2')"  ;
-        Connection conn =  null;
+        String sql = "select * from lock_table where xid = 'abc-123:222' and table_name  = 't' "
+                + "and row_key in ('test_isLockable_cannot-0','test_isLockable_cannot-1','test_isLockable_cannot-2')";
+        Connection conn = null;
         ResultSet rs = null;
-        try{
+        try {
             conn = dataSource.getConnection();
             rs = conn.createStatement().executeQuery(sql);
             if (rs.next()) {
@@ -270,13 +265,13 @@ public class DataBaseLockStoreDAOTest {
         }
 
         List<LockDO> lockDOs_2 = new ArrayList<>();
-        for(int i = 0; i < 3; i++){
+        for (int i = 0; i < 3; i++) {
             LockDO lock = new LockDO();
             lock.setResourceId("abc");
             lock.setXid("abc-123:333");
             lock.setTransactionId(333L);
             lock.setBranchId((long) i);
-            lock.setRowKey("test_isLockable_cannot-"+i);
+            lock.setRowKey("test_isLockable_cannot-" + i);
             lock.setPk(String.valueOf(i));
             lock.setTableName("t");
             lockDOs_2.add(lock);
@@ -284,19 +279,18 @@ public class DataBaseLockStoreDAOTest {
 
         boolean ret2 = dataBaseLockStoreDAO.acquireLock(lockDOs_2);
         Assertions.assertFalse(ret2);
-
     }
 
     @Test
     public void test_isLockable_cannot1() throws SQLException {
         List<LockDO> lockDOs = new ArrayList<>();
-        for(int i = 0; i < 3; i++) {
+        for (int i = 0; i < 3; i++) {
             LockDO lock = new LockDO();
             lock.setResourceId("abc");
             lock.setXid("abc-123:222");
             lock.setTransactionId(222L);
             lock.setBranchId(1L);
-            lock.setRowKey("test_isLockable_cannot1-"+i);
+            lock.setRowKey("test_isLockable_cannot1-" + i);
             lock.setPk(String.valueOf(i));
             lock.setTableName("t");
             lockDOs.add(lock);
@@ -305,11 +299,11 @@ public class DataBaseLockStoreDAOTest {
         boolean ret = dataBaseLockStoreDAO.acquireLock(lockDOs, true, true);
         Assertions.assertTrue(ret);
 
-        String sql = "select * from lock_table where xid = 'abc-123:222' and table_name  = 't' " +
-                "and row_key in ('test_isLockable_cannot1-0','test_isLockable_cannot1-1','test_isLockable_cannot1-2')"  ;
-        Connection conn =  null;
+        String sql = "select * from lock_table where xid = 'abc-123:222' and table_name  = 't' "
+                + "and row_key in ('test_isLockable_cannot1-0','test_isLockable_cannot1-1','test_isLockable_cannot1-2')";
+        Connection conn = null;
         ResultSet rs = null;
-        try{
+        try {
             conn = dataSource.getConnection();
             rs = conn.createStatement().executeQuery(sql);
             if (rs.next()) {
@@ -322,13 +316,13 @@ public class DataBaseLockStoreDAOTest {
         }
 
         List<LockDO> lockDOs_2 = new ArrayList<>();
-        for(int i = 0; i < 3; i++) {
+        for (int i = 0; i < 3; i++) {
             LockDO lock = new LockDO();
             lock.setResourceId("abc");
             lock.setXid("abc-123:333");
             lock.setTransactionId(333L);
             lock.setBranchId(2L);
-            lock.setRowKey("test_isLockable_cannot1-"+i);
+            lock.setRowKey("test_isLockable_cannot1-" + i);
             lock.setPk(String.valueOf(i));
             lock.setTableName("t");
             lockDOs_2.add(lock);
@@ -336,12 +330,10 @@ public class DataBaseLockStoreDAOTest {
 
         boolean ret2 = dataBaseLockStoreDAO.acquireLock(lockDOs_2, true, true);
         Assertions.assertFalse(ret2);
-
     }
 
     @AfterAll
-    public static void clearStoreDB(){
+    public static void clearStoreDB() {
         FileUtils.deleteRecursive("db_store", true);
     }
-
 }

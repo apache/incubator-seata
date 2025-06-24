@@ -24,7 +24,6 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_DB_MIN_CONN;
 import static org.apache.seata.common.DefaultValues.DEFAULT_QUERY_LIMIT;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.STORE_DB_PREFIX;
 
-
 @Component
 @ConfigurationProperties(prefix = STORE_DB_PREFIX)
 public class StoreDBProperties {
@@ -177,5 +176,4 @@ public class StoreDBProperties {
         this.vgroupTable = vgroupTable;
         return this;
     }
-
 }

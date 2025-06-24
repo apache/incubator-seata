@@ -16,7 +16,6 @@
  */
 package org.apache.seata.core.store.db.sql.distributed.lock;
 
-
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.loader.EnhancedServiceNotFoundException;
 import org.slf4j.Logger;

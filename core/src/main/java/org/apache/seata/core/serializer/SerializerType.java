@@ -27,50 +27,49 @@ public enum SerializerType {
      * <p>
      * Math.pow(2, 0)
      */
-    SEATA((byte)0x1),
+    SEATA((byte) 0x1),
 
     /**
      * The protobuf, 'org.apache.seata:seata-serializer-protobuf' dependency must be referenced manually.
      * <p>
      * Math.pow(2, 1)
      */
-    PROTOBUF((byte)0x2),
+    PROTOBUF((byte) 0x2),
 
     /**
      * The kryo.
      * <p>
      * Math.pow(2, 2)
      */
-    KRYO((byte)0x4),
+    KRYO((byte) 0x4),
 
     /**
      * The fst but it's been removed.
      * <p>
      * Math.pow(2, 3)
      */
-    FST((byte)0x8),
+    FST((byte) 0x8),
 
     /**
      * The hessian.
      * <p>
      * Math.pow(2, 4)
      */
-    HESSIAN((byte)0x16),
+    HESSIAN((byte) 0x16),
 
     /**
      * The jackson.
      * <p>
      * Math.pow(2, 5)
      */
-    JACKSON((byte)0x32),
+    JACKSON((byte) 0x32),
 
     /**
      * The fastjson2.
      * <p>
      * Math.pow(2, 6)
      */
-    FASTJSON2((byte)0x64),
-
+    FASTJSON2((byte) 0x64),
 
     /**
      * The grpc
@@ -84,8 +83,7 @@ public enum SerializerType {
      * <p>
      * Math.pow(2, 8)
      */
-    FURY((byte) 0x256)
-    ;
+    FURY((byte) 0x256);
 
     private final byte code;
 
@@ -107,7 +105,7 @@ public enum SerializerType {
         }
         if (code == SerializerType.FST.getCode()) {
             throw new IllegalArgumentException(
-                "Since fst is no longer maintained, this serialization extension has been removed from version 2.0 for security and stability reasons.");
+                    "Since fst is no longer maintained, this serialization extension has been removed from version 2.0 for security and stability reasons.");
         }
         throw new IllegalArgumentException("unknown codec:" + code);
     }

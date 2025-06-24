@@ -16,6 +16,29 @@
  */
 package org.apache.seata.server.console.impl.db;
 
+import org.apache.seata.common.ConfigurationKeys;
+import org.apache.seata.common.exception.StoreException;
+import org.apache.seata.common.loader.EnhancedServiceLoader;
+import org.apache.seata.common.result.PageResult;
+import org.apache.seata.common.result.SingleResult;
+import org.apache.seata.common.util.IOUtil;
+import org.apache.seata.common.util.PageUtil;
+import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.config.Configuration;
+import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.core.store.db.DataSourceProvider;
+import org.apache.seata.core.store.db.sql.lock.LockStoreSqlFactory;
+import org.apache.seata.server.console.entity.param.GlobalLockParam;
+import org.apache.seata.server.console.entity.vo.GlobalLockVO;
+import org.apache.seata.server.console.exception.ConsoleException;
+import org.apache.seata.server.console.impl.AbstractLockService;
+import org.apache.seata.server.console.service.GlobalLockService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.stereotype.Component;
+
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -23,33 +46,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.sql.DataSource;
-
-import org.apache.seata.common.ConfigurationKeys;
-import org.apache.seata.common.exception.StoreException;
-import org.apache.seata.common.loader.EnhancedServiceLoader;
-import org.apache.seata.common.result.SingleResult;
-import org.apache.seata.common.util.IOUtil;
-import org.apache.seata.common.util.PageUtil;
-import org.apache.seata.common.util.StringUtils;
-import org.apache.seata.config.Configuration;
-import org.apache.seata.config.ConfigurationFactory;
-import org.apache.seata.common.result.PageResult;
-import org.apache.seata.core.store.db.DataSourceProvider;
-import org.apache.seata.core.store.db.sql.lock.LockStoreSqlFactory;
-import org.apache.seata.server.console.exception.ConsoleException;
-import org.apache.seata.server.console.impl.AbstractLockService;
-import org.apache.seata.server.console.entity.param.GlobalLockParam;
-import org.apache.seata.server.console.service.GlobalLockService;
-import org.apache.seata.server.console.entity.vo.GlobalLockVO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
-import org.springframework.stereotype.Component;
-
 import static org.apache.seata.common.DefaultValues.DEFAULT_LOCK_DB_TABLE;
 import static org.apache.seata.core.constants.RedisKeyConstants.SPLIT;
-
 
 /**
  * Global Lock DB ServiceImpl
@@ -77,7 +75,8 @@ public class GlobalLockDBServiceImpl extends AbstractLockService implements Glob
         if (StringUtils.isBlank(dbDataSource)) {
             throw new IllegalArgumentException(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE + " should not be blank");
         }
-        dataSource = EnhancedServiceLoader.load(DataSourceProvider.class, dbDataSource).provide();
+        dataSource = EnhancedServiceLoader.load(DataSourceProvider.class, dbDataSource)
+                .provide();
     }
 
     @Override
@@ -127,18 +126,24 @@ public class GlobalLockDBServiceImpl extends AbstractLockService implements Glob
         checkDeleteLock(param);
         String rowKey = buildRowKey(param.getTableName(), param.getPk(), param.getResourceId());
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("start to delete global lock,xid:{} branchId:{} row key:{} ",
-                    param.getXid(), param.getBranchId(), rowKey);
+            LOGGER.debug(
+                    "start to delete global lock,xid:{} branchId:{} row key:{} ",
+                    param.getXid(),
+                    param.getBranchId(),
+                    rowKey);
         }
         String deleteLockSql = LockStoreSqlFactory.getLogStoreSql(dbType).getDeleteLockSql(lockTable);
         try (Connection conn = dataSource.getConnection();
-             PreparedStatement ps = conn.prepareStatement(deleteLockSql)) {
+                PreparedStatement ps = conn.prepareStatement(deleteLockSql)) {
             ps.setString(1, rowKey);
             ps.setString(2, param.getXid());
             ps.executeUpdate();
         } catch (Exception e) {
-            throw new ConsoleException(e, String.format("delete global lock," +
-                    "xid:%s ,branchId:%s ,row key:%s failed", param.getXid(), param.getBranchId(), rowKey));
+            throw new ConsoleException(
+                    e,
+                    String.format(
+                            "delete global lock," + "xid:%s ,branchId:%s ,row key:%s failed",
+                            param.getXid(), param.getBranchId(), rowKey));
         }
         return SingleResult.success();
     }
@@ -176,5 +181,4 @@ public class GlobalLockDBServiceImpl extends AbstractLockService implements Glob
         String whereCondition = whereConditionBuilder.toString();
         return whereCondition.replaceFirst("and", "where");
     }
-
 }

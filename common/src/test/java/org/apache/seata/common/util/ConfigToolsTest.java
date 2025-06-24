@@ -16,11 +16,10 @@
  */
 package org.apache.seata.common.util;
 
-import java.security.KeyPair;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.security.KeyPair;
 
 public class ConfigToolsTest {
 
@@ -56,5 +55,4 @@ public class ConfigToolsTest {
         String pw = ConfigTools.privateDecrypt(byte2Base64, privateKeyStr);
         Assertions.assertEquals(pw, password);
     }
-
 }

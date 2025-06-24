@@ -27,14 +27,15 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-
 class ConfigFutureTest {
 
-    
     @Test
-    void testGet() throws NoSuchFieldException, IllegalAccessException, ExecutionException, InterruptedException, TimeoutException {
+    void testGet()
+            throws NoSuchFieldException, IllegalAccessException, ExecutionException, InterruptedException,
+                    TimeoutException {
         // mainly test exception scene
-        ConfigFuture configFuture = Mockito.spy(new ConfigFuture("file.conf", "defaultValue", ConfigFuture.ConfigOperation.GET));
+        ConfigFuture configFuture =
+                Mockito.spy(new ConfigFuture("file.conf", "defaultValue", ConfigFuture.ConfigOperation.GET));
 
         Field originField = ReflectionUtil.getField(ConfigFuture.class, "origin");
         CompletableFuture<Object> origin = (CompletableFuture<Object>) originField.get(configFuture);
@@ -46,16 +47,15 @@ class ConfigFutureTest {
 
         Mockito.doThrow(ExecutionException.class).when(origin).get(Mockito.anyLong(), Mockito.any());
         Assertions.assertThrows(ShouldNeverHappenException.class, configFuture::get);
-        
+
         Mockito.doThrow(TimeoutException.class).when(origin).get(Mockito.anyLong(), Mockito.any());
         Assertions.assertEquals("defaultValue", configFuture.get());
-        
+
         Mockito.doThrow(InterruptedException.class).when(origin).get(Mockito.anyLong(), Mockito.any());
         Assertions.assertEquals("defaultValue", configFuture.get());
 
         Mockito.doReturn(null).when(origin).get(Mockito.anyLong(), Mockito.any());
         Assertions.assertEquals("defaultValue", configFuture.get());
-        
 
         // set another config operation
         configFuture.setOperation(ConfigFuture.ConfigOperation.PUT);
@@ -68,7 +68,7 @@ class ConfigFutureTest {
 
         Mockito.doThrow(InterruptedException.class).when(origin).get(Mockito.anyLong(), Mockito.any());
         Assertions.assertEquals(Boolean.FALSE, configFuture.get());
-        
+
         Mockito.doReturn(null).when(origin).get(Mockito.anyLong(), Mockito.any());
         Assertions.assertEquals(Boolean.FALSE, configFuture.get());
     }

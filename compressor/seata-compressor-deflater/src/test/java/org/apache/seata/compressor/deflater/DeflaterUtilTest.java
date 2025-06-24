@@ -19,7 +19,6 @@ package org.apache.seata.compressor.deflater;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-
 public class DeflaterUtilTest {
 
     @Test
@@ -42,5 +41,4 @@ public class DeflaterUtilTest {
         byte[] decompress = DeflaterUtil.decompress(compress);
         Assertions.assertEquals("seata", new String(decompress));
     }
-
 }

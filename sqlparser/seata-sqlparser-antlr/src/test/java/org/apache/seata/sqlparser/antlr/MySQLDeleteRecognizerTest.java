@@ -16,14 +16,14 @@
  */
 package org.apache.seata.sqlparser.antlr;
 
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.apache.seata.sqlparser.antlr.mysql.MySqlContext;
 import org.apache.seata.sqlparser.antlr.mysql.listener.DeleteSpecificationSqlListener;
 import org.apache.seata.sqlparser.antlr.mysql.parser.MySqlLexer;
 import org.apache.seata.sqlparser.antlr.mysql.parser.MySqlParser;
 import org.apache.seata.sqlparser.antlr.mysql.stream.ANTLRNoCaseStringStream;
 import org.apache.seata.sqlparser.antlr.mysql.visit.StatementSqlVisitor;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -72,7 +72,6 @@ public class MySQLDeleteRecognizerTest {
         Assertions.assertEquals("t", mySqlContext.getTableAlias());
     }
 
-
     /**
      * Delete recognizer test 1.
      */
@@ -93,11 +92,10 @@ public class MySQLDeleteRecognizerTest {
         ParseTreeWalker walker = new ParseTreeWalker();
         walker.walk(new DeleteSpecificationSqlListener(mySqlContext), rootContext);
 
-        Assertions.assertEquals("'id1'",
-                mySqlContext.getDeleteForWhereValColumnNames().get(0).getDeleteWhereValColumnName());
+        Assertions.assertEquals(
+                "'id1'", mySqlContext.getDeleteForWhereValColumnNames().get(0).getDeleteWhereValColumnName());
         Assertions.assertEquals("id = 'id1'", mySqlContext.getWhereCondition());
     }
-
 
     /**
      * Delete recognizer test 1.
@@ -119,8 +117,8 @@ public class MySQLDeleteRecognizerTest {
         ParseTreeWalker walker = new ParseTreeWalker();
         walker.walk(new DeleteSpecificationSqlListener(mySqlContext), rootContext);
 
-        Assertions.assertEquals("?",
-                mySqlContext.getDeleteForWhereValColumnNames().get(0).getDeleteWhereValColumnName());
+        Assertions.assertEquals(
+                "?", mySqlContext.getDeleteForWhereValColumnNames().get(0).getDeleteWhereValColumnName());
         Assertions.assertEquals("id = ?", mySqlContext.getWhereCondition());
     }
 
@@ -145,7 +143,8 @@ public class MySQLDeleteRecognizerTest {
         walker.walk(new DeleteSpecificationSqlListener(mySqlContext), rootContext);
 
         Assertions.assertEquals("t1", mySqlContext.getTableName());
-        Assertions.assertEquals("2", mySqlContext.getDeleteForWhereValColumnNames().get(1).getDeleteWhereValColumnName());
+        Assertions.assertEquals(
+                "2", mySqlContext.getDeleteForWhereValColumnNames().get(1).getDeleteWhereValColumnName());
         Assertions.assertEquals("id IN (1,2)", mySqlContext.getWhereCondition());
     }
 
@@ -169,7 +168,8 @@ public class MySQLDeleteRecognizerTest {
         ParseTreeWalker walker = new ParseTreeWalker();
         walker.walk(new DeleteSpecificationSqlListener(mySqlContext), rootContext);
 
-        Assertions.assertEquals("'id'", mySqlContext.getDeleteForWhereValColumnNames().get(1).getDeleteWhereValColumnName());
+        Assertions.assertEquals(
+                "'id'", mySqlContext.getDeleteForWhereValColumnNames().get(1).getDeleteWhereValColumnName());
         Assertions.assertEquals("id between 1 AND 'id'", mySqlContext.getWhereCondition());
     }
 }

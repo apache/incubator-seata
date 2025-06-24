@@ -63,6 +63,4 @@ public class DataAccessException extends StoreException {
     public DataAccessException(Throwable cause, String msg, FrameworkErrorCode errCode) {
         super(cause, msg, errCode);
     }
-
-
 }

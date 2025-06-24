@@ -16,10 +16,10 @@
  */
 package org.apache.seata.server.env;
 
-import java.io.IOException;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
 
 /**
  */
@@ -27,12 +27,11 @@ class PortHelperTest {
 
     @Test
     public void testGetPortFromEnvOrStartup() {
-        Assertions.assertEquals(0,PortHelper.getPortFromEnvOrStartup(new String[]{}));
+        Assertions.assertEquals(0, PortHelper.getPortFromEnvOrStartup(new String[] {}));
     }
 
     @Test
     public void testGetPortFromConfigFile() throws IOException {
-        Assertions.assertEquals(8091,PortHelper.getPortFromConfigFile());
+        Assertions.assertEquals(8091, PortHelper.getPortFromConfigFile());
     }
-
 }

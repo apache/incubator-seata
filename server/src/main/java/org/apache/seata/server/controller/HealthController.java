@@ -32,10 +32,8 @@ public class HealthController {
     @Autowired
     private ServerRunner serverRunner;
 
-
     @RequestMapping("/health")
     String healthCheck() {
         return serverRunner.started() ? OK : NOT_OK;
     }
-
 }

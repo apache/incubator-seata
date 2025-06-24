@@ -16,14 +16,6 @@
  */
 package org.apache.seata.server.session;
 
-import static org.apache.seata.core.model.LockStatus.Locked;
-
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import org.apache.seata.common.util.BufferUtils;
 import org.apache.seata.common.util.CompressUtil;
 import org.apache.seata.core.exception.TransactionException;
@@ -38,6 +30,15 @@ import org.apache.seata.server.store.SessionStorable;
 import org.apache.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static org.apache.seata.core.model.LockStatus.Locked;
 
 /**
  * The type Branch session.

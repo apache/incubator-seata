@@ -31,5 +31,4 @@ public class LambdaUtils {
         Map<Object, Boolean> seen = new ConcurrentHashMap<>();
         return object -> seen.putIfAbsent(keyExtractor.apply(object), Boolean.TRUE) == null;
     }
-
 }

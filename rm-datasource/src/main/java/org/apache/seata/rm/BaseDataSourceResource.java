@@ -16,15 +16,6 @@
  */
 package org.apache.seata.rm;
 
-import java.io.PrintWriter;
-import java.sql.Driver;
-import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
-import javax.sql.DataSource;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
@@ -35,6 +26,16 @@ import org.apache.seata.core.model.Resource;
 import org.apache.seata.rm.datasource.SeataDataSourceProxy;
 import org.apache.seata.rm.datasource.xa.Holdable;
 import org.apache.seata.rm.datasource.xa.Holder;
+
+import javax.sql.DataSource;
+import java.io.PrintWriter;
+import java.sql.Driver;
+import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 /**
  * Base class of those DataSources working as Seata Resource.
@@ -58,8 +59,10 @@ public abstract class BaseDataSourceResource<T extends Holdable> implements Seat
 
     private Map<String, T> keeper = new ConcurrentHashMap<>();
 
-    private static final Cache<String, BranchStatus> BRANCH_STATUS_CACHE =
-            CacheBuilder.newBuilder().maximumSize(1024).expireAfterAccess(10, TimeUnit.MINUTES).build();
+    private static final Cache<String, BranchStatus> BRANCH_STATUS_CACHE = CacheBuilder.newBuilder()
+            .maximumSize(1024)
+            .expireAfterAccess(10, TimeUnit.MINUTES)
+            .build();
 
     /**
      * Gets target data source.
@@ -114,7 +117,6 @@ public abstract class BaseDataSourceResource<T extends Holdable> implements Seat
         this.driver = driver;
     }
 
-
     @Override
     public <T> T unwrap(Class<T> iface) throws SQLException {
         if (iface == null) {
@@ -131,7 +133,6 @@ public abstract class BaseDataSourceResource<T extends Holdable> implements Seat
     @Override
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
         return iface != null && iface.isInstance(this);
-
     }
 
     protected void dataSourceCheck() {
@@ -175,8 +176,8 @@ public abstract class BaseDataSourceResource<T extends Holdable> implements Seat
         if (value.isHeld()) {
             T x = keeper.get(key);
             if (x != value) {
-                throw new ShouldNeverHappenException("something wrong with keeper, keeping[" + x +
-                    "] but[" + value + "] is also kept with the same key[" + key + "]");
+                throw new ShouldNeverHappenException("something wrong with keeper, keeping[" + x + "] but[" + value
+                        + "] is also kept with the same key[" + key + "]");
             }
             return value;
         }
@@ -189,8 +190,8 @@ public abstract class BaseDataSourceResource<T extends Holdable> implements Seat
     public T release(String key, T value) {
         T x = keeper.remove(key);
         if (x != value) {
-            throw new ShouldNeverHappenException("something wrong with keeper, released[" + x +
-                "] but[" + value + "] is wanted with key[" + key + "]");
+            throw new ShouldNeverHappenException("something wrong with keeper, released[" + x + "] but[" + value
+                    + "] is wanted with key[" + key + "]");
         }
         value.setHeld(false);
         return x;

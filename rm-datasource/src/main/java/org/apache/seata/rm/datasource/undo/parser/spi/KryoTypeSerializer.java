@@ -38,5 +38,4 @@ public interface KryoTypeSerializer<T> {
      * @return serializer
      */
     Serializer serializer();
-
 }

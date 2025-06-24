@@ -27,6 +27,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication(scanBasePackages = {"org.apache.seata"})
 public class NamingserverApplication implements ApplicationRunner {
     private static final Logger LOGGER = LoggerFactory.getLogger(NamingserverApplication.class);
+
     @Value("${server.port}")
     private int port;
 

@@ -16,12 +16,6 @@
  */
 package org.apache.seata.rm.tcc;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.UndeclaredThrowableException;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.apache.seata.common.Constants;
 import org.apache.seata.common.exception.ExceptionUtil;
 import org.apache.seata.common.exception.RepeatRegistrationException;
@@ -38,6 +32,12 @@ import org.apache.seata.integration.tx.api.remoting.TwoPhaseResult;
 import org.apache.seata.rm.AbstractResourceManager;
 import org.apache.seata.rm.tcc.api.BusinessActionContext;
 import org.apache.seata.rm.tcc.api.BusinessActionContextUtil;
+
+import java.lang.reflect.Method;
+import java.lang.reflect.UndeclaredThrowableException;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * TCC resource manager
@@ -72,7 +72,8 @@ public class TCCResourceManager extends AbstractResourceManager {
             Object newResourceBean = newResource.getTargetBean();
             Object oldResourceBean = oldResource.getTargetBean();
             if (newResourceBean != oldResourceBean) {
-                throw new RepeatRegistrationException(String.format("Same TCC resource name <%s> between method1 <%s> of class1 <%s> and method2 <%s> of class2 <%s>, should be unique",
+                throw new RepeatRegistrationException(String.format(
+                        "Same TCC resource name <%s> between method1 <%s> of class1 <%s> and method2 <%s> of class2 <%s>, should be unique",
                         resourceId,
                         newResource.getPrepareMethod().getName(),
                         newResourceBean.getClass().getName(),
@@ -105,26 +106,29 @@ public class TCCResourceManager extends AbstractResourceManager {
      * @throws TransactionException TransactionException
      */
     @Override
-    public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId,
-                                     String applicationData) throws TransactionException {
+    public BranchStatus branchCommit(
+            BranchType branchType, String xid, long branchId, String resourceId, String applicationData)
+            throws TransactionException {
         TCCResource tccResource = getTCCResource(resourceId);
         if (tccResource == null) {
-            throw new ShouldNeverHappenException(String.format("TCC resource is not exist, resourceId: %s", resourceId));
+            throw new ShouldNeverHappenException(
+                    String.format("TCC resource is not exist, resourceId: %s", resourceId));
         }
         Object targetTCCBean = tccResource.getTargetBean();
         Method commitMethod = tccResource.getCommitMethod();
         if (targetTCCBean == null || commitMethod == null) {
-            throw new ShouldNeverHappenException(String.format("TCC resource is not available, resourceId: %s", resourceId));
+            throw new ShouldNeverHappenException(
+                    String.format("TCC resource is not available, resourceId: %s", resourceId));
         }
         BusinessActionContext businessActionContext = null;
         try {
-            //BusinessActionContext
-            businessActionContext = BusinessActionContextUtil.getBusinessActionContext(xid, branchId, resourceId,
-                    applicationData);
+            // BusinessActionContext
+            businessActionContext =
+                    BusinessActionContextUtil.getBusinessActionContext(xid, branchId, resourceId, applicationData);
             businessActionContext.setBranchType(branchType);
 
             Object[] args = this.getTwoPhaseCommitArgs(tccResource, businessActionContext);
-            //share actionContext implicitly
+            // share actionContext implicitly
             BusinessActionContextUtil.setContext(businessActionContext);
             doBeforeTccCommit(xid, branchId, tccResource.getActionName(), businessActionContext);
             Object ret;
@@ -132,7 +136,8 @@ public class TCCResourceManager extends AbstractResourceManager {
             // add idempotent and anti hanging
             if (Boolean.TRUE.equals(businessActionContext.getActionContext(Constants.USE_COMMON_FENCE))) {
                 try {
-                    result = DefaultCommonFenceHandler.get().commitFence(commitMethod, targetTCCBean, xid, branchId, args);
+                    result = DefaultCommonFenceHandler.get()
+                            .commitFence(commitMethod, targetTCCBean, xid, branchId, args);
                 } catch (SkipCallbackWrapperException | UndeclaredThrowableException e) {
                     throw e.getCause();
                 }
@@ -140,15 +145,20 @@ public class TCCResourceManager extends AbstractResourceManager {
                 ret = commitMethod.invoke(targetTCCBean, args);
                 if (ret != null) {
                     if (ret instanceof TwoPhaseResult) {
-                        result = ((TwoPhaseResult)ret).isSuccess();
+                        result = ((TwoPhaseResult) ret).isSuccess();
                     } else {
-                        result = (boolean)ret;
+                        result = (boolean) ret;
                     }
                 } else {
                     result = true;
                 }
             }
-            LOGGER.info("TCC resource commit result : {}, xid: {}, branchId: {}, resourceId: {}", result, xid, branchId, resourceId);
+            LOGGER.info(
+                    "TCC resource commit result : {}, xid: {}, branchId: {}, resourceId: {}",
+                    result,
+                    xid,
+                    branchId,
+                    resourceId);
             return result ? BranchStatus.PhaseTwo_Committed : BranchStatus.PhaseTwo_CommitFailed_Retryable;
         } catch (Throwable t) {
             String msg = String.format("commit TCC resource error, resourceId: %s, xid: %s.", resourceId, xid);
@@ -173,26 +183,29 @@ public class TCCResourceManager extends AbstractResourceManager {
      * @throws TransactionException TransactionException
      */
     @Override
-    public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId,
-                                       String applicationData) throws TransactionException {
+    public BranchStatus branchRollback(
+            BranchType branchType, String xid, long branchId, String resourceId, String applicationData)
+            throws TransactionException {
         TCCResource tccResource = getTCCResource(resourceId);
         if (tccResource == null) {
-            throw new ShouldNeverHappenException(String.format("TCC resource is not exist, resourceId: %s", resourceId));
+            throw new ShouldNeverHappenException(
+                    String.format("TCC resource is not exist, resourceId: %s", resourceId));
         }
         Object targetTCCBean = tccResource.getTargetBean();
         Method rollbackMethod = tccResource.getRollbackMethod();
         if (targetTCCBean == null || rollbackMethod == null) {
-            throw new ShouldNeverHappenException(String.format("TCC resource is not available, resourceId: %s", resourceId));
+            throw new ShouldNeverHappenException(
+                    String.format("TCC resource is not available, resourceId: %s", resourceId));
         }
         BusinessActionContext businessActionContext = null;
         try {
-            //BusinessActionContext
-            businessActionContext = BusinessActionContextUtil.getBusinessActionContext(xid, branchId, resourceId,
-                    applicationData);
+            // BusinessActionContext
+            businessActionContext =
+                    BusinessActionContextUtil.getBusinessActionContext(xid, branchId, resourceId, applicationData);
             businessActionContext.setBranchType(branchType);
 
             Object[] args = this.getTwoPhaseRollbackArgs(tccResource, businessActionContext);
-            //share actionContext implicitly
+            // share actionContext implicitly
             BusinessActionContextUtil.setContext(businessActionContext);
             doBeforeTccRollback(xid, branchId, tccResource.getActionName(), businessActionContext);
             Object ret;
@@ -200,8 +213,9 @@ public class TCCResourceManager extends AbstractResourceManager {
             // add idempotent and anti hanging
             if (Boolean.TRUE.equals(businessActionContext.getActionContext(Constants.USE_COMMON_FENCE))) {
                 try {
-                    result = DefaultCommonFenceHandler.get().rollbackFence(rollbackMethod, targetTCCBean, xid, branchId,
-                            args, tccResource.getActionName());
+                    result = DefaultCommonFenceHandler.get()
+                            .rollbackFence(
+                                    rollbackMethod, targetTCCBean, xid, branchId, args, tccResource.getActionName());
                 } catch (SkipCallbackWrapperException | UndeclaredThrowableException e) {
                     throw e.getCause();
                 }
@@ -209,15 +223,20 @@ public class TCCResourceManager extends AbstractResourceManager {
                 ret = rollbackMethod.invoke(targetTCCBean, args);
                 if (ret != null) {
                     if (ret instanceof TwoPhaseResult) {
-                        result = ((TwoPhaseResult)ret).isSuccess();
+                        result = ((TwoPhaseResult) ret).isSuccess();
                     } else {
-                        result = (boolean)ret;
+                        result = (boolean) ret;
                     }
                 } else {
                     result = true;
                 }
             }
-            LOGGER.info("TCC resource rollback result : {}, xid: {}, branchId: {}, resourceId: {}", result, xid, branchId, resourceId);
+            LOGGER.info(
+                    "TCC resource rollback result : {}, xid: {}, branchId: {}, resourceId: {}",
+                    result,
+                    xid,
+                    branchId,
+                    resourceId);
             return result ? BranchStatus.PhaseTwo_Rollbacked : BranchStatus.PhaseTwo_RollbackFailed_Retryable;
         } catch (Throwable t) {
             String msg = String.format("rollback TCC resource error, resourceId: %s, xid: %s.", resourceId, xid);
@@ -338,7 +357,8 @@ public class TCCResourceManager extends AbstractResourceManager {
         return getTwoPhaseMethodParams(keys, argsRollbackClasses, businessActionContext);
     }
 
-    protected Object[] getTwoPhaseMethodParams(String[] keys, Class<?>[] argsClasses, BusinessActionContext businessActionContext) {
+    protected Object[] getTwoPhaseMethodParams(
+            String[] keys, Class<?>[] argsClasses, BusinessActionContext businessActionContext) {
         Object[] args = new Object[argsClasses.length];
         for (int i = 0; i < argsClasses.length; i++) {
             if (argsClasses[i].equals(BusinessActionContext.class)) {

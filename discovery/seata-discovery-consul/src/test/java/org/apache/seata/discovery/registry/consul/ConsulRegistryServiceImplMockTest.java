@@ -16,26 +16,10 @@
  */
 package org.apache.seata.discovery.registry.consul;
 
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import com.ecwid.consul.transport.RawResponse;
 import com.ecwid.consul.v1.ConsulClient;
 import com.ecwid.consul.v1.Response;
 import com.ecwid.consul.v1.health.model.HealthService;
-
-import java.lang.reflect.Field;
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
-
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.config.exception.ConfigNotFoundException;
@@ -47,6 +31,21 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+
+import java.lang.reflect.Field;
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
+
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ConsulRegistryServiceImplMockTest {
@@ -105,8 +104,11 @@ public class ConsulRegistryServiceImplMockTest {
         Assertions.assertNotNull(getMap("notifiers").get(TEST_CLUSTER_NAME));
         verify(executorService).submit(any(Runnable.class));
 
-        try (MockedStatic<ConfigurationFactory> configurationFactoryMockedStatic = Mockito.mockStatic(ConfigurationFactory.class)) {
-            configurationFactoryMockedStatic.when(ConfigurationFactory::getInstance).thenReturn(configuration);
+        try (MockedStatic<ConfigurationFactory> configurationFactoryMockedStatic =
+                Mockito.mockStatic(ConfigurationFactory.class)) {
+            configurationFactoryMockedStatic
+                    .when(ConfigurationFactory::getInstance)
+                    .thenReturn(configuration);
 
             // normal condition
             when(configuration.getConfig(any())).thenReturn(TEST_CLUSTER_NAME);
@@ -138,7 +140,8 @@ public class ConsulRegistryServiceImplMockTest {
         verifyCloseResults(executorService, true);
     }
 
-    private ExecutorService mockExecutorService(boolean awaitTerminationResult, InterruptedException exception) throws Exception {
+    private ExecutorService mockExecutorService(boolean awaitTerminationResult, InterruptedException exception)
+            throws Exception {
         ExecutorService executorService = mock(ExecutorService.class);
         when(executorService.isShutdown()).thenReturn(false);
 
@@ -164,7 +167,7 @@ public class ConsulRegistryServiceImplMockTest {
 
         Field clientField = ConsulRegistryServiceImpl.class.getDeclaredField("notifiers");
         clientField.setAccessible(true);
-        ConcurrentMap notifiers = (ConcurrentMap)clientField.get(service);
+        ConcurrentMap notifiers = (ConcurrentMap) clientField.get(service);
         assertTrue(notifiers.isEmpty());
 
         Field executorServiceField = ConsulRegistryServiceImpl.class.getDeclaredField("notifierExecutor");

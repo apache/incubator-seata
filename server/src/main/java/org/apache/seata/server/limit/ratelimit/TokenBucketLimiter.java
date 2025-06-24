@@ -16,6 +16,9 @@
  */
 package org.apache.seata.server.limit.ratelimit;
 
+import io.github.bucket4j.Bandwidth;
+import io.github.bucket4j.Bucket;
+import io.github.bucket4j.Refill;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.executor.Initialize;
 import org.apache.seata.common.loader.LoadLevel;
@@ -23,10 +26,6 @@ import org.apache.seata.common.loader.Scope;
 import org.apache.seata.common.util.NumberUtils;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
-
-import io.github.bucket4j.Bandwidth;
-import io.github.bucket4j.Bucket;
-import io.github.bucket4j.Refill;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,8 +69,8 @@ public class TokenBucketLimiter implements RateLimiter, Initialize {
 
     public TokenBucketLimiter() {}
 
-    public TokenBucketLimiter(boolean enable, Integer bucketTokenNumPerSecond,
-                              Integer bucketTokenMaxNum, Integer bucketTokenInitialNum) {
+    public TokenBucketLimiter(
+            boolean enable, Integer bucketTokenNumPerSecond, Integer bucketTokenMaxNum, Integer bucketTokenInitialNum) {
         this.enable = enable;
         this.bucketTokenNumPerSecond = bucketTokenNumPerSecond;
         this.bucketTokenMaxNum = bucketTokenMaxNum;
@@ -85,21 +84,20 @@ public class TokenBucketLimiter implements RateLimiter, Initialize {
         this.enable = config.getBoolean(ConfigurationKeys.RATE_LIMIT_ENABLE);
         this.bucketTokenNumPerSecond = NumberUtils.toInt(
                 config.getConfig(ConfigurationKeys.RATE_LIMIT_BUCKET_TOKEN_NUM_PER_SECOND),
-                DEFAULT_BUCKET_TOKEN_NUM_PER_SECOND
-        );
+                DEFAULT_BUCKET_TOKEN_NUM_PER_SECOND);
         this.bucketTokenMaxNum = NumberUtils.toInt(
-                config.getConfig(ConfigurationKeys.RATE_LIMIT_BUCKET_TOKEN_MAX_NUM),
-                DEFAULT_BUCKET_TOKEN_MAX_NUM
-        );
+                config.getConfig(ConfigurationKeys.RATE_LIMIT_BUCKET_TOKEN_MAX_NUM), DEFAULT_BUCKET_TOKEN_MAX_NUM);
         this.bucketTokenInitialNum = NumberUtils.toInt(
                 config.getConfig(ConfigurationKeys.RATE_LIMIT_BUCKET_TOKEN_INITIAL_NUM),
-                DEFAULT_BUCKET_TOKEN_INITIAL_NUM
-        );
+                DEFAULT_BUCKET_TOKEN_INITIAL_NUM);
 
         if (this.enable) {
             initBucket();
-            LOGGER.info("TokenBucketLimiter init success, bucketTokenNumPerSecond: {}, tokenMaxNum: {}, tokenInitialNum: {}",
-                    this.bucketTokenNumPerSecond, this.bucketTokenMaxNum, this.bucketTokenInitialNum);
+            LOGGER.info(
+                    "TokenBucketLimiter init success, bucketTokenNumPerSecond: {}, tokenMaxNum: {}, tokenInitialNum: {}",
+                    this.bucketTokenNumPerSecond,
+                    this.bucketTokenMaxNum,
+                    this.bucketTokenInitialNum);
         }
     }
 
@@ -117,8 +115,11 @@ public class TokenBucketLimiter implements RateLimiter, Initialize {
 
         if (this.enable) {
             initBucket();
-            LOGGER.info("TokenBucketLimiter reInit success, bucketTokenNumPerSecond: {}, tokenMaxNum: {}, tokenInitialNum: {}",
-                    this.bucketTokenNumPerSecond, this.bucketTokenMaxNum, this.bucketTokenInitialNum);
+            LOGGER.info(
+                    "TokenBucketLimiter reInit success, bucketTokenNumPerSecond: {}, tokenMaxNum: {}, tokenInitialNum: {}",
+                    this.bucketTokenNumPerSecond,
+                    this.bucketTokenMaxNum,
+                    this.bucketTokenInitialNum);
             return;
         }
         LOGGER.info("TokenBucketLimiter reInit success, The limiter is disabled");
@@ -140,13 +141,12 @@ public class TokenBucketLimiter implements RateLimiter, Initialize {
     }
 
     private void initBucket() {
-        Bandwidth limit = Bandwidth.classic(this.bucketTokenMaxNum, Refill.greedy(this.bucketTokenNumPerSecond,
-                Duration.ofSeconds(1)));
+        Bandwidth limit = Bandwidth.classic(
+                this.bucketTokenMaxNum, Refill.greedy(this.bucketTokenNumPerSecond, Duration.ofSeconds(1)));
         Bucket bucket = Bucket.builder().addLimit(limit).build();
         if (this.bucketTokenInitialNum > 0) {
             bucket.addTokens(this.bucketTokenInitialNum);
         }
         this.bucket = bucket;
     }
-
 }

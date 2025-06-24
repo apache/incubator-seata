@@ -53,5 +53,4 @@ public class ServerHeartbeatProcessor implements RemotingProcessor {
             LOGGER.debug("received PING from {}", ctx.channel().remoteAddress());
         }
     }
-
 }

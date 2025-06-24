@@ -16,8 +16,6 @@
  */
 package org.apache.seata.config.consul;
 
-import java.net.InetSocketAddress;
-
 import com.ecwid.consul.v1.ConsulClient;
 import com.ecwid.consul.v1.Response;
 import com.ecwid.consul.v1.kv.model.GetValue;
@@ -28,6 +26,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
+
+import java.net.InetSocketAddress;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -59,19 +59,19 @@ class ConsulConfigurationTest {
         // Setup static mocks
         when(mockFileConfig.getConfig(anyString(), anyString())).thenReturn("seata.properties");
         when(mockFileConfig.getConfig(anyString())).thenReturn("localhost:8500");
-        mockedNetUtil.when(() -> NetUtil.toInetSocketAddress("127.0.0.1:8500")).thenReturn(
-            new InetSocketAddress("localhost", 8500));
+        mockedNetUtil
+                .when(() -> NetUtil.toInetSocketAddress("127.0.0.1:8500"))
+                .thenReturn(new InetSocketAddress("localhost", 8500));
 
         GetValue mockValue = mock(GetValue.class);
         when(mockValue.getDecodedValue()).thenReturn("testValue");
         Response<GetValue> mockResponse = new Response<>(mockValue, 1L, false, 1L);
-        when(mockConsulClient.getKVValue("seata.properties", (String)null)).thenReturn(mockResponse);
+        when(mockConsulClient.getKVValue("seata.properties", (String) null)).thenReturn(mockResponse);
 
         setField(null, "client", mockConsulClient);
 
         // Initialize singleton
         consulConfig = ConsulConfiguration.getInstance();
-
     }
 
     @AfterEach
@@ -92,7 +92,7 @@ class ConsulConfigurationTest {
         GetValue mockValue = mock(GetValue.class);
         when(mockValue.getDecodedValue()).thenReturn("testValue");
         Response<GetValue> mockResponse = new Response<>(mockValue, 1L, false, 1L);
-        when(mockConsulClient.getKVValue("testKey", (String)null)).thenReturn(mockResponse);
+        when(mockConsulClient.getKVValue("testKey", (String) null)).thenReturn(mockResponse);
 
         String result = consulConfig.getLatestConfig("testKey", "default", 3000);
         assertEquals("testValue", result);
@@ -102,8 +102,8 @@ class ConsulConfigurationTest {
     void testPutConfigIfAbsent() {
         // Mock atomic put response
         Response<Boolean> casResponse = new Response<>(true, 1L, false, 1L);
-        when(mockConsulClient.setKVValue(anyString(), anyString(), any(), any(PutParams.class))).thenReturn(
-            casResponse);
+        when(mockConsulClient.setKVValue(anyString(), anyString(), any(), any(PutParams.class)))
+                .thenReturn(casResponse);
 
         assertTrue(consulConfig.putConfigIfAbsent("atomicKey", "atomicValue", 3000));
     }
@@ -114,7 +114,7 @@ class ConsulConfigurationTest {
         GetValue initValue = mock(GetValue.class);
         when(initValue.getDecodedValue()).thenReturn("val1");
         Response<GetValue> initResponse = new Response<>(initValue, 1L, false, 1L);
-        when(mockConsulClient.getKVValue(eq("key1"), (String)isNull())).thenReturn(initResponse);
+        when(mockConsulClient.getKVValue(eq("key1"), (String) isNull())).thenReturn(initResponse);
 
         ConsulConfiguration newInstance = ConsulConfiguration.getInstance();
 

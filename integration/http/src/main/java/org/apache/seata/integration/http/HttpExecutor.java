@@ -65,5 +65,4 @@ public interface HttpExecutor {
      * @throws IOException the io exception
      */
     <T, K> K executePut(String host, String path, T paramObject, Class<K> returnType) throws IOException;
-
 }

@@ -16,26 +16,25 @@
  */
 package org.apache.seata.rm.datasource.undo.sqlserver;
 
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import com.alibaba.druid.mock.MockPreparedStatement;
 import org.apache.seata.rm.datasource.mock.MockConnection;
 import org.apache.seata.rm.datasource.mock.MockDriver;
 import org.apache.seata.rm.datasource.sql.struct.Field;
 import org.apache.seata.rm.datasource.sql.struct.Row;
-import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
 import org.apache.seata.rm.datasource.undo.BaseExecutorTest;
 import org.apache.seata.rm.datasource.undo.SQLUndoLog;
 import org.apache.seata.sqlparser.SQLType;
+import org.apache.seata.sqlparser.struct.TableMeta;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class SqlServerUndoInsertExecutorTest extends BaseExecutorTest {
     private static SqlServerUndoInsertExecutor executor;

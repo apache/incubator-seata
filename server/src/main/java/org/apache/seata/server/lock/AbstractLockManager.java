@@ -16,9 +16,6 @@
  */
 package org.apache.seata.server.lock;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import org.apache.seata.common.XID;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
@@ -29,6 +26,10 @@ import org.apache.seata.core.model.LockStatus;
 import org.apache.seata.server.session.BranchSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * The type Abstract lock manager.
@@ -47,7 +48,8 @@ public abstract class AbstractLockManager implements LockManager {
     }
 
     @Override
-    public boolean acquireLock(BranchSession branchSession, boolean autoCommit, boolean skipCheckLock) throws TransactionException {
+    public boolean acquireLock(BranchSession branchSession, boolean autoCommit, boolean skipCheckLock)
+            throws TransactionException {
         if (branchSession == null) {
             throw new IllegalArgumentException("branchSession can't be null for memory/file locker.");
         }
@@ -93,7 +95,6 @@ public abstract class AbstractLockManager implements LockManager {
             return false;
         }
     }
-
 
     @Override
     public void cleanAllLocks() throws TransactionException {
@@ -154,8 +155,8 @@ public abstract class AbstractLockManager implements LockManager {
      * @param branchID      the branch id
      * @return the list
      */
-    protected List<RowLock> collectRowLocks(String lockKey, String resourceId, String xid, Long transactionId,
-        Long branchID) {
+    protected List<RowLock> collectRowLocks(
+            String lockKey, String resourceId, String xid, Long transactionId, Long branchID) {
         List<RowLock> locks = new ArrayList<>();
 
         String[] tableGroupedLockKeys = lockKey.split(";");
@@ -188,10 +189,9 @@ public abstract class AbstractLockManager implements LockManager {
         }
         return locks;
     }
-    
+
     @Override
     public void updateLockStatus(String xid, LockStatus lockStatus) {
         this.getLocker().updateLockStatus(xid, lockStatus);
     }
-
 }

@@ -29,8 +29,7 @@ import java.util.function.Function;
  */
 public class CollectionUtils {
 
-    private CollectionUtils() {
-    }
+    private CollectionUtils() {}
 
     /**
      * Is empty boolean.

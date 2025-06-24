@@ -19,7 +19,6 @@ package org.apache.seata.common.exception;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-
 public class AuthenticationFailedExceptionTest {
 
     @Test

@@ -19,6 +19,7 @@ package org.apache.seata.core.store.db.sql.distributed.lock;
 import org.apache.seata.core.constants.ServerTableColumnsName;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class BaseDistributedLockSqlTest {
@@ -33,28 +34,28 @@ class BaseDistributedLockSqlTest {
 
     @Test
     void testGetSelectDistributeForUpdateSql() {
-        String expected = "SELECT " + ServerTableColumnsName.DISTRIBUTED_LOCK_KEY + "," +
-                ServerTableColumnsName.DISTRIBUTED_LOCK_VALUE + "," + ServerTableColumnsName.DISTRIBUTED_LOCK_EXPIRE +
-                " FROM " + testTable + " WHERE " + ServerTableColumnsName.DISTRIBUTED_LOCK_KEY + " = ? FOR UPDATE";
+        String expected = "SELECT " + ServerTableColumnsName.DISTRIBUTED_LOCK_KEY + ","
+                + ServerTableColumnsName.DISTRIBUTED_LOCK_VALUE
+                + "," + ServerTableColumnsName.DISTRIBUTED_LOCK_EXPIRE + " FROM "
+                + testTable + " WHERE " + ServerTableColumnsName.DISTRIBUTED_LOCK_KEY + " = ? FOR UPDATE";
         String actual = baseDistributedLockSql.getSelectDistributeForUpdateSql(testTable);
         assertEquals(expected, actual);
     }
 
     @Test
     void testGetInsertSql() {
-        String expected = "INSERT INTO " + testTable + "(" +
-                ServerTableColumnsName.DISTRIBUTED_LOCK_KEY + "," +
-                ServerTableColumnsName.DISTRIBUTED_LOCK_VALUE + "," + ServerTableColumnsName.DISTRIBUTED_LOCK_EXPIRE +
-                ") VALUES (?, ?, ?)";
+        String expected = "INSERT INTO " + testTable + "(" + ServerTableColumnsName.DISTRIBUTED_LOCK_KEY
+                + "," + ServerTableColumnsName.DISTRIBUTED_LOCK_VALUE
+                + "," + ServerTableColumnsName.DISTRIBUTED_LOCK_EXPIRE + ") VALUES (?, ?, ?)";
         String actual = baseDistributedLockSql.getInsertSql(testTable);
         assertEquals(expected, actual);
     }
 
     @Test
     void testGetUpdateSql() {
-        String expected = "UPDATE " + testTable + " SET " +
-                ServerTableColumnsName.DISTRIBUTED_LOCK_VALUE + "=?, " + ServerTableColumnsName.DISTRIBUTED_LOCK_EXPIRE + "=?" +
-                " WHERE " + ServerTableColumnsName.DISTRIBUTED_LOCK_KEY + "=?";
+        String expected = "UPDATE " + testTable + " SET " + ServerTableColumnsName.DISTRIBUTED_LOCK_VALUE
+                + "=?, " + ServerTableColumnsName.DISTRIBUTED_LOCK_EXPIRE + "=?" + " WHERE "
+                + ServerTableColumnsName.DISTRIBUTED_LOCK_KEY + "=?";
         String actual = baseDistributedLockSql.getUpdateSql(testTable);
         assertEquals(expected, actual);
     }

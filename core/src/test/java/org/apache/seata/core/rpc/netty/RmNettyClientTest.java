@@ -16,11 +16,6 @@
  */
 package org.apache.seata.core.rpc.netty;
 
-import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.config.ConfigurationCache;
@@ -33,12 +28,15 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Rm RPC client test.
@@ -88,7 +86,7 @@ class RmNettyClientTest {
         Assertions.assertThrows(FrameworkException.class, newClient::init);
         System.setProperty(ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "false");
     }
-    
+
     private AtomicBoolean getInitializeStatus(final RmNettyRemotingClient rmNettyRemotingClient) {
         try {
             Field field = rmNettyRemotingClient.getClass().getDeclaredField("initialized");

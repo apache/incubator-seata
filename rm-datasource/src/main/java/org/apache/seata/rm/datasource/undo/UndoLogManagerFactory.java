@@ -16,12 +16,11 @@
  */
 package org.apache.seata.rm.datasource.undo;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.util.CollectionUtils;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class UndoLogManagerFactory {
 
@@ -34,7 +33,7 @@ public class UndoLogManagerFactory {
      * @return undo log manager.
      */
     public static UndoLogManager getUndoLogManager(String dbType) {
-        return CollectionUtils.computeIfAbsent(UNDO_LOG_MANAGER_MAP, dbType,
-            key -> EnhancedServiceLoader.load(UndoLogManager.class, dbType));
+        return CollectionUtils.computeIfAbsent(
+                UNDO_LOG_MANAGER_MAP, dbType, key -> EnhancedServiceLoader.load(UndoLogManager.class, dbType));
     }
 }

@@ -16,14 +16,14 @@
  */
 package org.apache.seata.metrics.registry.compact;
 
-import java.util.Collections;
-import java.util.concurrent.atomic.AtomicLong;
-
 import org.apache.seata.metrics.Clock;
 import org.apache.seata.metrics.Counter;
 import org.apache.seata.metrics.Id;
 import org.apache.seata.metrics.Measurement;
 import org.apache.seata.metrics.SystemClock;
+
+import java.util.Collections;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Compact Counter implement with AtomicLong

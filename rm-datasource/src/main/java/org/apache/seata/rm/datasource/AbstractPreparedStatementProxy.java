@@ -18,6 +18,7 @@ package org.apache.seata.rm.datasource;
 
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.sqlparser.struct.Null;
+
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
@@ -47,7 +48,7 @@ import java.util.Map;
  *
  */
 public abstract class AbstractPreparedStatementProxy extends StatementProxy<PreparedStatement>
-    implements PreparedStatement {
+        implements PreparedStatement {
 
     /**
      * The Parameters.
@@ -66,8 +67,9 @@ public abstract class AbstractPreparedStatementProxy extends StatementProxy<Prep
      * @param targetSQL       the target sql
      * @throws SQLException the sql exception
      */
-    public AbstractPreparedStatementProxy(AbstractConnectionProxy connectionProxy, PreparedStatement targetStatement,
-                                          String targetSQL) throws SQLException {
+    public AbstractPreparedStatementProxy(
+            AbstractConnectionProxy connectionProxy, PreparedStatement targetStatement, String targetSQL)
+            throws SQLException {
         super(connectionProxy, targetStatement, targetSQL);
         initParameterHolder();
     }
@@ -80,7 +82,7 @@ public abstract class AbstractPreparedStatementProxy extends StatementProxy<Prep
      * @throws SQLException the sql exception
      */
     public AbstractPreparedStatementProxy(AbstractConnectionProxy connectionProxy, PreparedStatement targetStatement)
-        throws SQLException {
+            throws SQLException {
         super(connectionProxy, targetStatement);
         initParameterHolder();
     }

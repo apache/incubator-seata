@@ -16,13 +16,12 @@
  */
 package org.apache.seata.serializer.protobuf.convertor;
 
-import org.apache.seata.serializer.protobuf.generated.BranchRegisterRequestProto;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.protocol.transaction.BranchRegisterRequest;
+import org.apache.seata.serializer.protobuf.generated.BranchRegisterRequestProto;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
 
 public class BranchRegisterRequestConvertorTest {
 
@@ -37,8 +36,7 @@ public class BranchRegisterRequestConvertorTest {
         branchRegisterRequest.setXid("xid");
 
         BranchRegisterRequestConvertor convertor = new BranchRegisterRequestConvertor();
-        BranchRegisterRequestProto proto = convertor.convert2Proto(
-            branchRegisterRequest);
+        BranchRegisterRequestProto proto = convertor.convert2Proto(branchRegisterRequest);
         BranchRegisterRequest real = convertor.convert2Model(proto);
 
         assertThat(real.getTypeCode()).isEqualTo(branchRegisterRequest.getTypeCode());

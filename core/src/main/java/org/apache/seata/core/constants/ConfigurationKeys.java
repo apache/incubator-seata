@@ -22,5 +22,4 @@ package org.apache.seata.core.constants;
  * @deprecated The constants are moved to {@link org.apache.seata.common.ConfigurationKeys}
  */
 @Deprecated
-public interface ConfigurationKeys extends org.apache.seata.common.ConfigurationKeys {
-}
+public interface ConfigurationKeys extends org.apache.seata.common.ConfigurationKeys {}

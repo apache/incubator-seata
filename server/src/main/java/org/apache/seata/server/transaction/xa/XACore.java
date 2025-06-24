@@ -40,16 +40,16 @@ public class XACore extends AbstractCore {
     }
 
     @Override
-    public void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status,
-                             String applicationData) throws TransactionException {
+    public void branchReport(
+            BranchType branchType, String xid, long branchId, BranchStatus status, String applicationData)
+            throws TransactionException {
         super.branchReport(branchType, xid, branchId, status, applicationData);
-        if (BranchStatus.PhaseOne_Failed == status) {
-
-        }
+        if (BranchStatus.PhaseOne_Failed == status) {}
     }
 
     @Override
-    public BranchStatus branchDelete(GlobalSession globalSession, BranchSession branchSession) throws TransactionException {
+    public BranchStatus branchDelete(GlobalSession globalSession, BranchSession branchSession)
+            throws TransactionException {
         // use rollback to release the branch resource
         return super.branchRollback(globalSession, branchSession);
     }

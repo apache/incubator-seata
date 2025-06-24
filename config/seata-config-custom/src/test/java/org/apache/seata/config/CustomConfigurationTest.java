@@ -16,11 +16,11 @@
  */
 package org.apache.seata.config;
 
-import java.io.InputStream;
-import java.util.Properties;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.io.InputStream;
+import java.util.Properties;
 
 public class CustomConfigurationTest {
     @Test
@@ -29,7 +29,8 @@ public class CustomConfigurationTest {
         Configuration configuration = ConfigurationFactory.getInstance();
         Assertions.assertNotNull(configuration);
         Properties properties;
-        try (InputStream input = CustomConfigurationForTest.class.getClassLoader().getResourceAsStream("custom_for_test.properties")) {
+        try (InputStream input =
+                CustomConfigurationForTest.class.getClassLoader().getResourceAsStream("custom_for_test.properties")) {
             properties = new Properties();
             properties.load(input);
         }

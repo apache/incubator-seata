@@ -33,7 +33,8 @@ public class GlobalTransactionRoleTest {
     @Test
     public void testDeprecatedAnnotation() {
         // Test that GlobalTransactionRole is marked as @Deprecated
-        assertTrue(GlobalTransactionRole.class.isAnnotationPresent(Deprecated.class),
+        assertTrue(
+                GlobalTransactionRole.class.isAnnotationPresent(Deprecated.class),
                 "GlobalTransactionRole should be marked as @Deprecated");
     }
 
@@ -54,10 +55,8 @@ public class GlobalTransactionRoleTest {
     @Test
     public void testEnumOrdinals() {
         // Test that ordinals are consistent
-        assertEquals(0, GlobalTransactionRole.Launcher.ordinal(), 
-                "Launcher should have ordinal 0");
-        assertEquals(1, GlobalTransactionRole.Participant.ordinal(), 
-                "Participant should have ordinal 1");
+        assertEquals(0, GlobalTransactionRole.Launcher.ordinal(), "Launcher should have ordinal 0");
+        assertEquals(1, GlobalTransactionRole.Participant.ordinal(), "Participant should have ordinal 1");
     }
 
     @Test
@@ -70,24 +69,25 @@ public class GlobalTransactionRoleTest {
     @Test
     public void testValueOf() {
         // Test valueOf method
-        assertEquals(GlobalTransactionRole.Launcher, 
-                GlobalTransactionRole.valueOf("Launcher"));
-        assertEquals(GlobalTransactionRole.Participant, 
-                GlobalTransactionRole.valueOf("Participant"));
+        assertEquals(GlobalTransactionRole.Launcher, GlobalTransactionRole.valueOf("Launcher"));
+        assertEquals(GlobalTransactionRole.Participant, GlobalTransactionRole.valueOf("Participant"));
     }
 
     @Test
     public void testValueOfInvalid() {
         // Test valueOf with invalid name
-        assertThrows(IllegalArgumentException.class, 
+        assertThrows(
+                IllegalArgumentException.class,
                 () -> GlobalTransactionRole.valueOf("InvalidRole"),
                 "Should throw IllegalArgumentException for invalid role name");
-        
-        assertThrows(IllegalArgumentException.class, 
+
+        assertThrows(
+                IllegalArgumentException.class,
                 () -> GlobalTransactionRole.valueOf("launcher"),
                 "Should throw IllegalArgumentException for lowercase role name");
-        
-        assertThrows(IllegalArgumentException.class, 
+
+        assertThrows(
+                IllegalArgumentException.class,
                 () -> GlobalTransactionRole.valueOf("LAUNCHER"),
                 "Should throw IllegalArgumentException for uppercase role name");
     }
@@ -116,60 +116,66 @@ public class GlobalTransactionRoleTest {
         assertEquals(GlobalTransactionRole.Participant, GlobalTransactionRole.Participant);
         assertNotEquals(GlobalTransactionRole.Launcher, GlobalTransactionRole.Participant);
         assertNotEquals(GlobalTransactionRole.Participant, GlobalTransactionRole.Launcher);
-        
+
         // Test hashCode consistency
-        assertEquals(GlobalTransactionRole.Launcher.hashCode(), 
-                GlobalTransactionRole.Launcher.hashCode());
-        assertEquals(GlobalTransactionRole.Participant.hashCode(), 
-                GlobalTransactionRole.Participant.hashCode());
+        assertEquals(GlobalTransactionRole.Launcher.hashCode(), GlobalTransactionRole.Launcher.hashCode());
+        assertEquals(GlobalTransactionRole.Participant.hashCode(), GlobalTransactionRole.Participant.hashCode());
     }
 
     @Test
     public void testCompatibilityWithApacheSeata() {
         // Test that enum names match Apache Seata equivalents
         // This ensures compatibility when converting between packages
-        
+
         for (GlobalTransactionRole role : GlobalTransactionRole.values()) {
             // Test that Apache Seata has equivalent enum value
-            assertDoesNotThrow(() -> {
-                org.apache.seata.tm.api.GlobalTransactionRole.valueOf(role.name());
-            }, "Apache Seata should have equivalent role: " + role.name());
+            assertDoesNotThrow(
+                    () -> {
+                        org.apache.seata.tm.api.GlobalTransactionRole.valueOf(role.name());
+                    },
+                    "Apache Seata should have equivalent role: " + role.name());
         }
-        
+
         // Test reverse compatibility
-        for (org.apache.seata.tm.api.GlobalTransactionRole apacheRole : 
+        for (org.apache.seata.tm.api.GlobalTransactionRole apacheRole :
                 org.apache.seata.tm.api.GlobalTransactionRole.values()) {
-            assertDoesNotThrow(() -> {
-                GlobalTransactionRole.valueOf(apacheRole.name());
-            }, "Compatible package should have equivalent role: " + apacheRole.name());
+            assertDoesNotThrow(
+                    () -> {
+                        GlobalTransactionRole.valueOf(apacheRole.name());
+                    },
+                    "Compatible package should have equivalent role: " + apacheRole.name());
         }
     }
 
     @Test
     public void testEnumCompareTo() {
         // Test enum comparison (based on ordinal)
-        assertTrue(GlobalTransactionRole.Launcher.compareTo(GlobalTransactionRole.Participant) < 0,
+        assertTrue(
+                GlobalTransactionRole.Launcher.compareTo(GlobalTransactionRole.Participant) < 0,
                 "Launcher should come before Participant");
-        assertTrue(GlobalTransactionRole.Participant.compareTo(GlobalTransactionRole.Launcher) > 0,
+        assertTrue(
+                GlobalTransactionRole.Participant.compareTo(GlobalTransactionRole.Launcher) > 0,
                 "Participant should come after Launcher");
-        assertEquals(0, GlobalTransactionRole.Launcher.compareTo(GlobalTransactionRole.Launcher),
+        assertEquals(
+                0,
+                GlobalTransactionRole.Launcher.compareTo(GlobalTransactionRole.Launcher),
                 "Same enum should compare equal");
     }
 
     @Test
     public void testSemanticMeaning() {
         // Test the semantic meaning based on documentation comments
-        
+
         // Launcher: The one begins the current global transaction
-        assertNotNull(GlobalTransactionRole.Launcher, 
-                "Launcher role should exist for transaction initiator");
-        
+        assertNotNull(GlobalTransactionRole.Launcher, "Launcher role should exist for transaction initiator");
+
         // Participant: The one just joins into a existing global transaction
-        assertNotNull(GlobalTransactionRole.Participant, 
-                "Participant role should exist for transaction joiner");
-        
+        assertNotNull(GlobalTransactionRole.Participant, "Participant role should exist for transaction joiner");
+
         // Ensure they are different
-        assertNotEquals(GlobalTransactionRole.Launcher, GlobalTransactionRole.Participant,
+        assertNotEquals(
+                GlobalTransactionRole.Launcher,
+                GlobalTransactionRole.Participant,
                 "Launcher and Participant should be different roles");
     }
-} 
+}

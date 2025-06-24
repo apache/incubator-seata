@@ -59,15 +59,13 @@ import static org.mockito.Mockito.when;
  * Tests for {@link SeataSagaAutoConfiguration} to verify conditional bean registration.
  */
 @SpringBootTest(
-        classes = {
-                SeataSagaAutoConfigurationTest.TestConfig.class
-        },
+        classes = {SeataSagaAutoConfigurationTest.TestConfig.class},
         properties = {
-                "seata.enabled=true",
-                "seata.saga.enabled=true",
-                "spring.application.name=testApp",
-                "seata.tx-service-group=testTxGroup",
-                "seata.saga.state-machine.enable-async=true"
+            "seata.enabled=true",
+            "seata.saga.enabled=true",
+            "spring.application.name=testApp",
+            "seata.tx-service-group=testTxGroup",
+            "seata.saga.state-machine.enable-async=true"
         })
 class SeataSagaAutoConfigurationTest {
     @Autowired
@@ -103,7 +101,12 @@ class SeataSagaAutoConfigurationTest {
 
     @Configuration
     @EnableConfigurationProperties(SeataProperties.class)
-    @ImportAutoConfiguration({DataSourceAutoConfiguration.class, SeataCoreAutoConfiguration.class, SeataAutoConfiguration.class, SeataSagaAutoConfiguration.class})
+    @ImportAutoConfiguration({
+        DataSourceAutoConfiguration.class,
+        SeataCoreAutoConfiguration.class,
+        SeataAutoConfiguration.class,
+        SeataSagaAutoConfiguration.class
+    })
     static class TestConfig {
         @Bean
         public DataSource dataSource() throws SQLException {

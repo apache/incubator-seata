@@ -16,10 +16,8 @@
  */
 package org.apache.seata.integration.http;
 
-
 import java.io.IOException;
 import java.io.OutputStream;
-
 
 public class MockResponse {
 
@@ -31,15 +29,15 @@ public class MockResponse {
 
     public String write(String content) throws IOException {
         StringBuilder httpResponse = new StringBuilder();
-        httpResponse.append("HTTP/1.1 200 OK\n")
+        httpResponse
+                .append("HTTP/1.1 200 OK\n")
                 .append("Content-Type:application/json\n")
                 .append("\r\n")
                 .append(content);
         if (outputStream == null) {
-            //local call
+            // local call
             return content;
-        }
-        else {
+        } else {
             outputStream.write(httpResponse.toString().getBytes());
             outputStream.close();
             return "success";

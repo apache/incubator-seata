@@ -16,17 +16,7 @@
  */
 package org.apache.seata.server.storage.raft.session;
 
-import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.ADD_BRANCH_SESSION;
-import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.ADD_GLOBAL_SESSION;
-import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.REMOVE_BRANCH_SESSION;
-import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.REMOVE_GLOBAL_SESSION;
-import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.UPDATE_BRANCH_SESSION_STATUS;
-import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.UPDATE_GLOBAL_SESSION_STATUS;
-
 import com.alipay.sofa.jraft.Closure;
-import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.common.loader.Scope;
 import org.apache.seata.common.util.CollectionUtils;
@@ -44,6 +34,17 @@ import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.storage.SessionConverter;
 import org.apache.seata.server.storage.file.session.FileSessionManager;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
+import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.ADD_BRANCH_SESSION;
+import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.ADD_GLOBAL_SESSION;
+import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.REMOVE_BRANCH_SESSION;
+import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.REMOVE_GLOBAL_SESSION;
+import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.UPDATE_BRANCH_SESSION_STATUS;
+import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.UPDATE_GLOBAL_SESSION_STATUS;
 
 /**
  */
@@ -101,7 +102,8 @@ public class RaftSessionManager extends FileSessionManager {
         GlobalSession globalSession = sessionMap.remove(session.getXid());
         if (globalSession != null) {
             List<BranchSession> branchSessionList = globalSession.getBranchSessions();
-            // For the follower, this code will not execute because, by the time the follower receives the remove global session request, the branch sessions on the leader side have already been completely cleared.
+            // For the follower, this code will not execute because, by the time the follower receives the remove global
+            // session request, the branch sessions on the leader side have already been completely cleared.
             if (CollectionUtils.isNotEmpty(branchSessionList)) {
                 for (BranchSession branchSession : branchSessionList) {
                     branchSession.unlock();

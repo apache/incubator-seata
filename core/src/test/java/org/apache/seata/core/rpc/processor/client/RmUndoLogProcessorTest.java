@@ -54,7 +54,9 @@ public class RmUndoLogProcessorTest {
         mockLogger = mock(Logger.class);
 
         mockedLoggerFactory = Mockito.mockStatic(LoggerFactory.class);
-        mockedLoggerFactory.when(() -> LoggerFactory.getLogger(RmUndoLogProcessor.class)).thenReturn(mockLogger);
+        mockedLoggerFactory
+                .when(() -> LoggerFactory.getLogger(RmUndoLogProcessor.class))
+                .thenReturn(mockLogger);
 
         processor = new RmUndoLogProcessor(mockHandler);
     }

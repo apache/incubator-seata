@@ -16,20 +16,7 @@
  */
 package org.apache.seata.discovery.registry.zk;
 
-import java.net.InetSocketAddress;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.recipes.cache.CuratorCache;
@@ -49,10 +36,23 @@ import org.apache.seata.config.exception.ConfigNotFoundException;
 import org.apache.seata.discovery.registry.RegistryService;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
-
-import com.google.common.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.InetSocketAddress;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 /**
  * zookeeper path as /registry/zk/
@@ -75,24 +75,25 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<CuratorCach
     private static final String CONNECT_TIME_OUT_KEY = "connectTimeout";
     private static final int DEFAULT_SESSION_TIMEOUT = 6000;
     private static final int DEFAULT_CONNECT_TIMEOUT = 2000;
-    private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE
-        + FILE_CONFIG_SPLIT_CHAR;
-    private static final String ROOT_PATH = ZK_PATH_SPLIT_CHAR + FILE_ROOT_REGISTRY + ZK_PATH_SPLIT_CHAR + REGISTRY_TYPE
-        + ZK_PATH_SPLIT_CHAR;
-    private static final String ROOT_PATH_WITHOUT_SUFFIX = ZK_PATH_SPLIT_CHAR + FILE_ROOT_REGISTRY + ZK_PATH_SPLIT_CHAR
-        + REGISTRY_TYPE;
+    private static final String FILE_CONFIG_KEY_PREFIX =
+            FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR;
+    private static final String ROOT_PATH =
+            ZK_PATH_SPLIT_CHAR + FILE_ROOT_REGISTRY + ZK_PATH_SPLIT_CHAR + REGISTRY_TYPE + ZK_PATH_SPLIT_CHAR;
+    private static final String ROOT_PATH_WITHOUT_SUFFIX =
+            ZK_PATH_SPLIT_CHAR + FILE_ROOT_REGISTRY + ZK_PATH_SPLIT_CHAR + REGISTRY_TYPE;
     private static final ConcurrentMap<String, List<InetSocketAddress>> CLUSTER_ADDRESS_MAP = new ConcurrentHashMap<>();
-    private static final ConcurrentMap<String, List<CuratorCacheListener>> LISTENER_SERVICE_MAP = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, List<CuratorCacheListener>> LISTENER_SERVICE_MAP =
+            new ConcurrentHashMap<>();
     private static final ConcurrentMap<String, Object> CLUSTER_LOCK = new ConcurrentHashMap<>();
     private static Map<String, CuratorCache> nodeCacheMap = new ConcurrentHashMap<>();
 
     private static final int REGISTERED_PATH_SET_SIZE = 1;
-    private static final Set<String> REGISTERED_PATH_SET = Collections.synchronizedSet(new HashSet<>(REGISTERED_PATH_SET_SIZE));
+    private static final Set<String> REGISTERED_PATH_SET =
+            Collections.synchronizedSet(new HashSet<>(REGISTERED_PATH_SET_SIZE));
 
     private String transactionServiceGroup;
 
-    private ZookeeperRegisterServiceImpl() {
-    }
+    private ZookeeperRegisterServiceImpl() {}
 
     static ZookeeperRegisterServiceImpl getInstance() {
         if (instance == null) {
@@ -162,8 +163,9 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<CuratorCach
             createPersistent(path);
         }
         subscribeChildChanges(path, listener);
-        LISTENER_SERVICE_MAP.computeIfAbsent(cluster, key -> new CopyOnWriteArrayList<>())
-            .add(listener);
+        LISTENER_SERVICE_MAP
+                .computeIfAbsent(cluster, key -> new CopyOnWriteArrayList<>())
+                .add(listener);
     }
 
     private void subscribeChildChanges(String path, CuratorCacheListener listener) {
@@ -173,7 +175,6 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<CuratorCach
         }
         nodeCache.listenable().addListener(listener);
         nodeCache.start();
-
     }
 
     private void unsubscribeChildChanges(String path, CuratorCacheListener listener) {
@@ -194,12 +195,11 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<CuratorCach
             List<CuratorCacheListener> subscribeList = LISTENER_SERVICE_MAP.get(cluster);
             if (subscribeList != null) {
                 List<CuratorCacheListener> newSubscribeList = subscribeList.stream()
-                    .filter(eventListener -> !eventListener.equals(listener))
-                    .collect(Collectors.toList());
+                        .filter(eventListener -> !eventListener.equals(listener))
+                        .collect(Collectors.toList());
                 LISTENER_SERVICE_MAP.put(cluster, newSubscribeList);
             }
         }
-
     }
 
     /**
@@ -234,7 +234,8 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<CuratorCach
                         return null;
                     }
 
-                    List<String> childClusterPath = getClientInstance().getChildren().forPath(ROOT_PATH + clusterName);
+                    List<String> childClusterPath =
+                            getClientInstance().getChildren().forPath(ROOT_PATH + clusterName);
                     refreshClusterAddressMap(clusterName, childClusterPath);
                     subscribeCluster(clusterName);
                 }
@@ -253,11 +254,12 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<CuratorCach
         if (zkClient == null) {
             synchronized (ZookeeperRegisterServiceImpl.class) {
                 if (zkClient == null) {
-                    zkClient = buildZkClient(FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY),
-                        FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + SESSION_TIME_OUT_KEY, DEFAULT_SESSION_TIMEOUT),
-                        FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + CONNECT_TIME_OUT_KEY, DEFAULT_CONNECT_TIMEOUT),
-                        FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + AUTH_USERNAME),
-                        FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + AUTH_PASSWORD));
+                    zkClient = buildZkClient(
+                            FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY),
+                            FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + SESSION_TIME_OUT_KEY, DEFAULT_SESSION_TIMEOUT),
+                            FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + CONNECT_TIME_OUT_KEY, DEFAULT_CONNECT_TIMEOUT),
+                            FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + AUTH_USERNAME),
+                            FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + AUTH_PASSWORD));
                 }
             }
         }
@@ -267,10 +269,10 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<CuratorCach
     // visible for test.
     CuratorFramework buildZkClient(String address, int sessionTimeout, int connectTimeout, String... authInfo) {
         CuratorFrameworkFactory.Builder builder = CuratorFrameworkFactory.builder()
-            .connectString(address)
-            .retryPolicy(new RetryNTimes(1, 1000))
-            .connectionTimeoutMs(connectTimeout)
-            .sessionTimeoutMs(sessionTimeout);
+                .connectString(address)
+                .retryPolicy(new RetryNTimes(1, 1000))
+                .connectionTimeoutMs(connectTimeout)
+                .sessionTimeoutMs(sessionTimeout);
         if (authInfo != null && authInfo.length == 2) {
             if (!StringUtils.isBlank(authInfo[0]) && !StringUtils.isBlank(authInfo[1])) {
                 StringBuilder auth = new StringBuilder(authInfo[0]).append(":").append(authInfo[1]);
@@ -328,17 +330,22 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<CuratorCach
     private void subscribeCluster(String cluster) throws Exception {
         String path = ROOT_PATH + cluster;
         CuratorCacheListenerBuilder builder = CuratorCacheListener.builder();
-        CuratorCacheListener listener = builder.forPathChildrenCache(path, getClientInstance(), new PathChildrenCacheListener() {
-            @Override
-            public void childEvent(CuratorFramework client, PathChildrenCacheEvent event) throws Exception {
-                List<String> currentChilds = getClientInstance().getChildren().forPath(path);
-                if (CollectionUtils.isEmpty(currentChilds) && CLUSTER_ADDRESS_MAP.get(cluster) != null) {
-                    CLUSTER_ADDRESS_MAP.remove(cluster);
-                } else if (!CollectionUtils.isEmpty(currentChilds)) {
-                    ZookeeperRegisterServiceImpl.this.refreshClusterAddressMap(cluster, currentChilds);
-                }
-            }
-        }).build();
+        CuratorCacheListener listener = builder.forPathChildrenCache(
+                        path, getClientInstance(), new PathChildrenCacheListener() {
+                            @Override
+                            public void childEvent(CuratorFramework client, PathChildrenCacheEvent event)
+                                    throws Exception {
+                                List<String> currentChilds =
+                                        getClientInstance().getChildren().forPath(path);
+                                if (CollectionUtils.isEmpty(currentChilds)
+                                        && CLUSTER_ADDRESS_MAP.get(cluster) != null) {
+                                    CLUSTER_ADDRESS_MAP.remove(cluster);
+                                } else if (!CollectionUtils.isEmpty(currentChilds)) {
+                                    ZookeeperRegisterServiceImpl.this.refreshClusterAddressMap(cluster, currentChilds);
+                                }
+                            }
+                        })
+                .build();
 
         subscribe(cluster, listener);
     }
@@ -363,7 +370,8 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<CuratorCach
     }
 
     private String getClusterName() {
-        String clusterConfigName = String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_REGISTRY, REGISTRY_TYPE, REGISTRY_CLUSTER);
+        String clusterConfigName =
+                String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_REGISTRY, REGISTRY_TYPE, REGISTRY_CLUSTER);
         return FILE_CONFIG.getConfig(clusterConfigName);
     }
 
@@ -399,7 +407,11 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<CuratorCach
     protected void createEphemeral(String path, String data) {
         byte[] dataBytes = data.getBytes(CHARSET);
         try {
-            getClientInstance().create().creatingParentsIfNeeded().withMode(CreateMode.EPHEMERAL).forPath(path, dataBytes);
+            getClientInstance()
+                    .create()
+                    .creatingParentsIfNeeded()
+                    .withMode(CreateMode.EPHEMERAL)
+                    .forPath(path, dataBytes);
         } catch (KeeperException.NodeExistsException e) {
             try {
                 getClientInstance().setData().forPath(path, dataBytes);

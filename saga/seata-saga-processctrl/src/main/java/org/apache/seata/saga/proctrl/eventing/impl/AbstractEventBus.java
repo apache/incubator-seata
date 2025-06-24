@@ -16,11 +16,11 @@
  */
 package org.apache.seata.saga.proctrl.eventing.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.seata.saga.proctrl.eventing.EventBus;
 import org.apache.seata.saga.proctrl.eventing.EventConsumer;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Abstract Event Bus

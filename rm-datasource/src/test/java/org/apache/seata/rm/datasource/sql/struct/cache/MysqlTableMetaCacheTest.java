@@ -16,28 +16,24 @@
  */
 package org.apache.seata.rm.datasource.sql.struct.cache;
 
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.Collections;
-
-import org.apache.seata.rm.datasource.DataSourceProxyTest;
-import org.apache.seata.rm.datasource.mock.MockDriver;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
 import com.alibaba.druid.pool.DruidDataSource;
-
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.rm.datasource.DataSourceProxy;
+import org.apache.seata.rm.datasource.DataSourceProxyTest;
+import org.apache.seata.rm.datasource.mock.MockDriver;
+import org.apache.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import org.apache.seata.sqlparser.struct.ColumnMeta;
 import org.apache.seata.sqlparser.struct.IndexMeta;
 import org.apache.seata.sqlparser.struct.IndexType;
 import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.sqlparser.struct.TableMetaCache;
-import org.apache.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-import static org.mockito.Mockito.mock;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.Collections;
 
 /**
  * The table meta fetch test.
@@ -45,28 +41,20 @@ import static org.mockito.Mockito.mock;
  */
 public class MysqlTableMetaCacheTest {
 
-    private static Object[][] columnMetas =
-        new Object[][] {
-            new Object[] {"", "", "mt1", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
-            new Object[] {"", "", "mt1", "name1", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES",
-                "NO"},
-            new Object[] {"", "", "mt1", "name2", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 3, "YES",
-                "NO"},
-            new Object[] {"", "", "mt1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 4, "YES",
-                "NO"}
-        };
+    private static Object[][] columnMetas = new Object[][] {
+        new Object[] {"", "", "mt1", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
+        new Object[] {"", "", "mt1", "name1", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
+        new Object[] {"", "", "mt1", "name2", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 3, "YES", "NO"},
+        new Object[] {"", "", "mt1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 4, "YES", "NO"}
+    };
 
-    private static Object[][] indexMetas =
-        new Object[][] {
-            new Object[] {"PRIMARY", "id", false, "", 3, 0, "A", 34L},
-            new Object[] {"name1", "name1", false, "", 3, 1, "A", 34L},
-            new Object[] {"name2", "name2", true, "", 3, 2, "A", 34L},
-        };
+    private static Object[][] indexMetas = new Object[][] {
+        new Object[] {"PRIMARY", "id", false, "", 3, 0, "A", 34L},
+        new Object[] {"name1", "name1", false, "", 3, 1, "A", 34L},
+        new Object[] {"name2", "name2", true, "", 3, 2, "A", 34L},
+    };
 
-    private static Object[][] tableMetas =
-            new Object[][]{
-                    new Object[]{"seata", "", "mt1"}
-            };
+    private static Object[][] tableMetas = new Object[][] {new Object[] {"seata", "", "mt1"}};
 
     @Test
     public void testTableMeta() {
@@ -95,7 +83,8 @@ public class MysqlTableMetaCacheTest {
 
         DataSourceProxy proxy = DataSourceProxyTest.getDataSourceProxy(dataSource);
 
-        TableMeta tableMeta = getTableMetaCache().getTableMeta(proxy.getPlainConnection(), "mt1", proxy.getResourceId());
+        TableMeta tableMeta =
+                getTableMetaCache().getTableMeta(proxy.getPlainConnection(), "mt1", proxy.getResourceId());
 
         Assertions.assertEquals("mt1", tableMeta.getTableName());
         Assertions.assertEquals("mt1", tableMeta.getOriginalTableName());
@@ -116,13 +105,13 @@ public class MysqlTableMetaCacheTest {
         Assertions.assertEquals(indexMetas.length, tableMeta.getAllIndexes().size());
 
         assertIndexMetaEquals(indexMetas[0], tableMeta.getAllIndexes().get("PRIMARY"));
-        Assertions.assertEquals(IndexType.PRIMARY, tableMeta.getAllIndexes().get("PRIMARY").getIndextype());
+        Assertions.assertEquals(
+                IndexType.PRIMARY, tableMeta.getAllIndexes().get("PRIMARY").getIndextype());
         assertIndexMetaEquals(indexMetas[1], tableMeta.getAllIndexes().get("name1"));
-        Assertions.assertEquals(IndexType.UNIQUE, tableMeta.getAllIndexes().get("name1").getIndextype());
+        Assertions.assertEquals(
+                IndexType.UNIQUE, tableMeta.getAllIndexes().get("name1").getIndextype());
 
-        indexMetas =
-            new Object[][] {
-            };
+        indexMetas = new Object[][] {};
         mockDriver.setMockIndexMetasReturnValue(indexMetas);
         Assertions.assertThrows(ShouldNeverHappenException.class, () -> {
             getTableMetaCache().getTableMeta(proxy.getPlainConnection(), "mt2", proxy.getResourceId());
@@ -132,7 +121,6 @@ public class MysqlTableMetaCacheTest {
         Assertions.assertThrows(ShouldNeverHappenException.class, () -> {
             getTableMetaCache().getTableMeta(proxy.getPlainConnection(), "mt2", proxy.getResourceId());
         });
-
     }
 
     @Test
@@ -145,19 +133,22 @@ public class MysqlTableMetaCacheTest {
 
         DataSourceProxy dataSourceProxy = DataSourceProxyTest.getDataSourceProxy(druidDataSource);
 
-        TableMeta tableMeta = getTableMetaCache().getTableMeta(dataSourceProxy.getPlainConnection(), "t1",
-            dataSourceProxy.getResourceId());
-        //change the columns meta
-        columnMetas =
-            new Object[][] {
-                new Object[] {"", "", "mt1", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
-                new Object[] {"", "", "mt1", "name1", Types.VARCHAR, "VARCHAR", 65, 0, 10, 0, "", "", 0, 0, 64, 2, "YES",
-                    "NO"},
-                new Object[] {"", "", "mt1", "name2", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 3, "YES",
-                    "NO"},
-                new Object[] {"", "", "mt1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 4, "YES",
-                    "NO"}
-            };
+        TableMeta tableMeta = getTableMetaCache()
+                .getTableMeta(dataSourceProxy.getPlainConnection(), "t1", dataSourceProxy.getResourceId());
+        // change the columns meta
+        columnMetas = new Object[][] {
+            new Object[] {"", "", "mt1", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"
+            },
+            new Object[] {
+                "", "", "mt1", "name1", Types.VARCHAR, "VARCHAR", 65, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"
+            },
+            new Object[] {
+                "", "", "mt1", "name2", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 3, "YES", "NO"
+            },
+            new Object[] {
+                "", "", "mt1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 4, "YES", "NO"
+            }
+        };
         mockDriver.setMockColumnsMetasReturnValue(columnMetas);
         getTableMetaCache().refresh(dataSourceProxy.getPlainConnection(), dataSourceProxy.getResourceId());
     }
@@ -184,7 +175,7 @@ public class MysqlTableMetaCacheTest {
     private void assertIndexMetaEquals(Object[] expected, IndexMeta actual) {
         Assertions.assertEquals(expected[0], actual.getIndexName());
         Assertions.assertEquals(expected[3], actual.getIndexQualifier());
-        Assertions.assertEquals(expected[4], (int)actual.getType());
+        Assertions.assertEquals(expected[4], (int) actual.getType());
         Assertions.assertEquals(expected[5], actual.getOrdinalPosition());
         Assertions.assertEquals(expected[6], actual.getAscOrDesc());
         Assertions.assertEquals(expected[7], actual.getCardinality());

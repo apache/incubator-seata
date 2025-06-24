@@ -16,13 +16,13 @@
  */
 package org.apache.seata.metrics.registry;
 
-import java.util.Objects;
-
 import org.apache.seata.common.exception.NotSupportYetException;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.constants.ConfigurationKeys;
+
+import java.util.Objects;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_METRICS_REGISTRY_TYPE;
 
@@ -33,15 +33,18 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_METRICS_REGISTRY_TYP
 public class RegistryFactory {
     public static Registry getInstance() {
         RegistryType registryType;
-        String registryTypeName = ConfigurationFactory.getInstance().getConfig(
-            ConfigurationKeys.METRICS_PREFIX + ConfigurationKeys.METRICS_REGISTRY_TYPE, DEFAULT_METRICS_REGISTRY_TYPE);
+        String registryTypeName = ConfigurationFactory.getInstance()
+                .getConfig(
+                        ConfigurationKeys.METRICS_PREFIX + ConfigurationKeys.METRICS_REGISTRY_TYPE,
+                        DEFAULT_METRICS_REGISTRY_TYPE);
         if (!StringUtils.isNullOrEmpty(registryTypeName)) {
             try {
                 registryType = RegistryType.getType(registryTypeName);
             } catch (Exception exx) {
                 throw new NotSupportYetException("not support metrics registry type: " + registryTypeName);
             }
-            return EnhancedServiceLoader.load(Registry.class, Objects.requireNonNull(registryType).getName());
+            return EnhancedServiceLoader.load(
+                    Registry.class, Objects.requireNonNull(registryType).getName());
         }
         return null;
     }

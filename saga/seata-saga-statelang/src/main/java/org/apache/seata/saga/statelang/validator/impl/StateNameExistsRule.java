@@ -30,9 +30,9 @@ public class StateNameExistsRule extends AbstractRule {
 
     @Override
     public boolean validate(StateMachine stateMachine) {
-        for (State state: stateMachine.getStates().values()) {
+        for (State state : stateMachine.getStates().values()) {
             Set<String> subsequentStates = StateMachineUtils.getAllPossibleSubsequentStates(state);
-            for (String subsequentState: subsequentStates) {
+            for (String subsequentState : subsequentStates) {
                 if (stateMachine.getState(subsequentState) == null) {
                     hint = String.format("Subsequent state [%s] of [%s] does not exist", subsequentState, state);
                     return false;

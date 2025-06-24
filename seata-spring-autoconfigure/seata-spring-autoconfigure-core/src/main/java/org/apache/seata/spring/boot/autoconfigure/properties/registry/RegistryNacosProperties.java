@@ -21,7 +21,6 @@ import org.springframework.stereotype.Component;
 
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_NACOS_PREFIX;
 
-
 @Component
 @ConfigurationProperties(prefix = REGISTRY_NACOS_PREFIX)
 public class RegistryNacosProperties {
@@ -38,6 +37,7 @@ public class RegistryNacosProperties {
     private String slbPattern;
     private String contextPath;
     private String clientApplication;
+
     public String getServerAddr() {
         return serverAddr;
     }

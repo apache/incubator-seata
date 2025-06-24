@@ -54,7 +54,6 @@ public class SeataMQProducerSendTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SeataMQProducerSendTest.class);
 
-
     private static final String TOPIC = "seata-test";
     private static final String NAME_SERVER = "127.0.0.1:9876";
 
@@ -62,7 +61,8 @@ public class SeataMQProducerSendTest {
 
     @BeforeAll
     public static void before() throws MQClientException {
-        ConfigurationTestHelper.putConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, String.valueOf(ProtocolTestConstants.MOCK_SERVER_PORT));
+        ConfigurationTestHelper.putConfig(
+                ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, String.valueOf(ProtocolTestConstants.MOCK_SERVER_PORT));
         MockServer.start(ProtocolTestConstants.MOCK_SERVER_PORT);
         producer = SeataMQProducerFactory.createSingle(NAME_SERVER, "test");
         // should start mq server here
@@ -76,7 +76,8 @@ public class SeataMQProducerSendTest {
     }
 
     @Test
-    public void testSendCommit() throws MQBrokerException, RemotingException, InterruptedException, MQClientException, TransactionException {
+    public void testSendCommit()
+            throws MQBrokerException, RemotingException, InterruptedException, MQClientException, TransactionException {
         TransactionManager tm = getTmAndBegin();
 
         CountDownLatch countDownLatch = new CountDownLatch(1);
@@ -92,7 +93,7 @@ public class SeataMQProducerSendTest {
 
     @Test
     public void testSendRollback()
-        throws MQBrokerException, RemotingException, InterruptedException, MQClientException, TransactionException {
+            throws MQBrokerException, RemotingException, InterruptedException, MQClientException, TransactionException {
         TransactionManager tm = getTmAndBegin();
 
         CountDownLatch countDownLatch = new CountDownLatch(1);
@@ -112,12 +113,11 @@ public class SeataMQProducerSendTest {
         }
     }
 
-
     private static MQPushConsumer startConsume(CountDownLatch countDownLatch) throws MQClientException {
         DefaultMQPushConsumer consumer = new DefaultMQPushConsumer("yourGroup");
         consumer.setNamesrvAddr(NAME_SERVER);
         consumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_FIRST_OFFSET);
-        consumer.subscribe(TOPIC,"*");
+        consumer.subscribe(TOPIC, "*");
         consumer.registerMessageListener((MessageListenerConcurrently) (msg, context) -> {
             LOGGER.info("%s Receive New Messages: {} {}", Thread.currentThread().getName(), msg);
             countDownLatch.countDown();
@@ -127,11 +127,11 @@ public class SeataMQProducerSendTest {
         return consumer;
     }
 
-
     private static TransactionManager getTmAndBegin() throws TransactionException {
         TransactionManager tm = TmClientTest.getTm();
         RMClient.init(ProtocolTestConstants.APPLICATION_ID, ProtocolTestConstants.SERVICE_GROUP);
-        String xid = tm.begin(ProtocolTestConstants.APPLICATION_ID, ProtocolTestConstants.SERVICE_GROUP, "testRocket", 60000);
+        String xid = tm.begin(
+                ProtocolTestConstants.APPLICATION_ID, ProtocolTestConstants.SERVICE_GROUP, "testRocket", 60000);
         RootContext.bind(xid);
         return tm;
     }

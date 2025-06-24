@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
  */
 public class SuspendedResourcesHolderTest {
 
-    private final static String DEFAULT_XID = "1234567890";
+    private static final String DEFAULT_XID = "1234567890";
 
     @Test
     void testIllegalArgumentException() {

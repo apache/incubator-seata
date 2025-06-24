@@ -16,15 +16,6 @@
  */
 package org.apache.seata.core.rpc.netty.v1;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Future;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.protocol.RpcMessage;
@@ -33,6 +24,15 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Future;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  */
@@ -73,14 +73,19 @@ public class ProtocolV1SerializerTest {
             final AtomicInteger tag = new AtomicInteger(0);
             final AtomicInteger success = new AtomicInteger(0);
             // no queue
-            final ThreadPoolExecutor service1 = new ThreadPoolExecutor(threads, threads, 0L, TimeUnit.MILLISECONDS,
-                    new SynchronousQueue<>(), new NamedThreadFactory("client-", false));
+            final ThreadPoolExecutor service1 = new ThreadPoolExecutor(
+                    threads,
+                    threads,
+                    0L,
+                    TimeUnit.MILLISECONDS,
+                    new SynchronousQueue<>(),
+                    new NamedThreadFactory("client-", false));
             for (int i = 0; i < threads; i++) {
                 service1.execute(() -> {
                     while (tag.getAndIncrement() < runTimes) {
                         try {
                             Future future = client.sendRpc(head, body);
-                            RpcMessage resp = (RpcMessage)future.get(10, TimeUnit.SECONDS);
+                            RpcMessage resp = (RpcMessage) future.get(10, TimeUnit.SECONDS);
                             if (resp != null) {
                                 success.incrementAndGet();
                             }
@@ -93,7 +98,7 @@ public class ProtocolV1SerializerTest {
                 });
             }
 
-            cnt.await(10,TimeUnit.SECONDS);
+            cnt.await(10, TimeUnit.SECONDS);
             LOGGER.info("success {}/{}", success.get(), runTimes);
             Assertions.assertEquals(success.get(), runTimes);
             service1.shutdown();

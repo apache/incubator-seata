@@ -20,7 +20,6 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.util.Pool;
 import org.apache.seata.core.serializer.SerializerSecurityRegistry;
 
-
 public class KryoSerializerFactory {
 
     private static final KryoSerializerFactory FACTORY = new KryoSerializerFactory();
@@ -32,7 +31,7 @@ public class KryoSerializerFactory {
             Kryo kryo = new Kryo();
             kryo.setReferences(true);
 
-            //Serialization whitelist
+            // Serialization whitelist
             kryo.setRegistrationRequired(true);
 
             // register allow class
@@ -57,5 +56,4 @@ public class KryoSerializerFactory {
         }
         pool.free(kryoSerializer.getKryo());
     }
-
 }

@@ -51,7 +51,7 @@ public class DbStateMachineConfigTest {
         Assertions.assertTrue(config.isRmReportSuccessEnable());
         Assertions.assertTrue(config.isSagaBranchRegisterEnable());
 
-        //can not find seata-server address, so it should throw an exception
+        // can not find seata-server address, so it should throw an exception
         Assertions.assertThrows(RuntimeException.class, () -> config.buildDefaultSagaTransactionalTemplate());
     }
 }

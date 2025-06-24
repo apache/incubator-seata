@@ -50,7 +50,7 @@ public class Http2Detector implements ProtocolDetector {
 
     @Override
     public ChannelHandler[] getHandlers() {
-        return new ChannelHandler[]{
+        return new ChannelHandler[] {
             Http2FrameCodecBuilder.forServer().build(),
             new Http2MultiplexHandler(new ChannelInitializer<Http2StreamChannel>() {
                 @Override

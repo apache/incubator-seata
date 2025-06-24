@@ -27,11 +27,10 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-
 public class TableMetaTest {
 
-    private final String COLUMN_ID="id";
-    private final String COLUMN_USERCODE="userCode";
+    private final String COLUMN_ID = "id";
+    private final String COLUMN_USERCODE = "userCode";
 
     @Test
     public void testTableMeta() {
@@ -84,20 +83,18 @@ public class TableMetaTest {
         tableMeta.getAllIndexes().put("id", primary);
 
         Assertions.assertNotNull(tableMeta.getPrimaryKeyMap());
-
-
     }
 
     @Test
     public void testGetPrimaryKeyOnlyName() {
         TableMeta tableMeta = new TableMeta();
-        ColumnMeta columnIdMeta=new ColumnMeta();
+        ColumnMeta columnIdMeta = new ColumnMeta();
         columnIdMeta.setColumnName(COLUMN_ID);
         IndexMeta primary = new IndexMeta();
         primary.setIndextype(IndexType.PRIMARY);
         primary.setValues(Lists.newArrayList(columnIdMeta));
 
-        ColumnMeta columnUserCodeMeta=new ColumnMeta();
+        ColumnMeta columnUserCodeMeta = new ColumnMeta();
         columnUserCodeMeta.setColumnName(COLUMN_USERCODE);
         IndexMeta primary2 = new IndexMeta();
         primary2.setIndextype(IndexType.PRIMARY);
@@ -106,9 +103,9 @@ public class TableMetaTest {
         tableMeta.getAllIndexes().put(COLUMN_ID, primary);
         tableMeta.getAllIndexes().put(COLUMN_USERCODE, primary2);
 
-        List<String> pkColumnName=tableMeta.getPrimaryKeyOnlyName();
-        Assertions.assertEquals("id",pkColumnName.get(0));
-        Assertions.assertEquals("userCode",pkColumnName.get(1));
+        List<String> pkColumnName = tableMeta.getPrimaryKeyOnlyName();
+        Assertions.assertEquals("id", pkColumnName.get(0));
+        Assertions.assertEquals("userCode", pkColumnName.get(1));
     }
 
     @Test
@@ -127,9 +124,10 @@ public class TableMetaTest {
     public void testContainsPK() {
         TableMeta tableMeta = new TableMeta();
         Assertions.assertFalse(tableMeta.containsPK(null));
-        Throwable exception = Assertions.assertThrows(NotSupportYetException.class, () -> tableMeta.containsPK(Lists.newArrayList("id")));
-        Assertions.assertEquals(tableMeta.getTableName() + " needs to contain the primary key.",
-            exception.getMessage());
+        Throwable exception = Assertions.assertThrows(
+                NotSupportYetException.class, () -> tableMeta.containsPK(Lists.newArrayList("id")));
+        Assertions.assertEquals(
+                tableMeta.getTableName() + " needs to contain the primary key.", exception.getMessage());
         IndexMeta primary = new IndexMeta();
         primary.setIndextype(IndexType.PRIMARY);
         ColumnMeta columnMeta = new ColumnMeta();

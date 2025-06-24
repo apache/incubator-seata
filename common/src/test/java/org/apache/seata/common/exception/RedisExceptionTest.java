@@ -19,7 +19,6 @@ package org.apache.seata.common.exception;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-
 public class RedisExceptionTest {
 
     @Test
@@ -42,6 +41,5 @@ public class RedisExceptionTest {
         Assertions.assertThrowsExactly(RedisException.class, () -> {
             throw new RedisException(new Throwable("error"), "error");
         });
-
     }
 }
