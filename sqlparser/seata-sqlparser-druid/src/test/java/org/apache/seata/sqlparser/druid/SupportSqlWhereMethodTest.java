@@ -30,20 +30,38 @@ public class SupportSqlWhereMethodTest {
     }
 
     @Test
-    public void testAddAndCheck() {
+    public void testDefaultMethodSupport() {
         SupportSqlWhereMethod supportSqlWhereMethod = SupportSqlWhereMethod.getInstance();
-
-        // test default method
         Assertions.assertTrue(supportSqlWhereMethod.checkIsSupport("FIND_IN_SET"));
-        Assertions.assertTrue(supportSqlWhereMethod.checkIsSupport("find_in_set"));
+    }
 
-        // test add new method
+    @Test
+    public void testCaseInsensitiveSupport() {
+        SupportSqlWhereMethod supportSqlWhereMethod = SupportSqlWhereMethod.getInstance();
+        Assertions.assertTrue(supportSqlWhereMethod.checkIsSupport("find_in_set"));
+        Assertions.assertTrue(supportSqlWhereMethod.checkIsSupport("Find_In_Set"));
+    }
+
+    @Test
+    public void testAddNewMethod() {
+        SupportSqlWhereMethod supportSqlWhereMethod = SupportSqlWhereMethod.getInstance();
         String newMethod = "CONCAT";
         supportSqlWhereMethod.add(newMethod);
         Assertions.assertTrue(supportSqlWhereMethod.checkIsSupport(newMethod));
-        Assertions.assertTrue(supportSqlWhereMethod.checkIsSupport(newMethod.toLowerCase()));
+    }
 
-        // test unsupported method
+    @Test
+    public void testAddedMethodCaseInsensitive() {
+        SupportSqlWhereMethod supportSqlWhereMethod = SupportSqlWhereMethod.getInstance();
+        String newMethod = "SUBSTRING";
+        supportSqlWhereMethod.add(newMethod);
+        Assertions.assertTrue(supportSqlWhereMethod.checkIsSupport(newMethod.toLowerCase()));
+        Assertions.assertTrue(supportSqlWhereMethod.checkIsSupport(newMethod.toUpperCase()));
+    }
+
+    @Test
+    public void testUnsupportedMethod() {
+        SupportSqlWhereMethod supportSqlWhereMethod = SupportSqlWhereMethod.getInstance();
         Assertions.assertFalse(supportSqlWhereMethod.checkIsSupport("NOT_SUPPORT_METHOD"));
     }
 }
