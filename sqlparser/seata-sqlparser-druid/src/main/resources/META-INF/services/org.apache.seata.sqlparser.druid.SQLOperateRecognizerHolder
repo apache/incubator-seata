@@ -15,6 +15,7 @@
 # limitations under the License.
 #
 org.apache.seata.sqlparser.druid.mysql.MySQLOperateRecognizerHolder
+org.apache.seata.sqlparser.druid.oceanbase.OceanBaseOperateRecognizerHolder
 org.apache.seata.sqlparser.druid.mariadb.MariadbOperateRecognizerHolder
 org.apache.seata.sqlparser.druid.oracle.OracleOperateRecognizerHolder
 org.apache.seata.sqlparser.druid.postgresql.PostgresqlOperateRecognizerHolder

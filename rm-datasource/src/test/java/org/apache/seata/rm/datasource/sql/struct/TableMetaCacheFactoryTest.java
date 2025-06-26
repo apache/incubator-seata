@@ -18,6 +18,7 @@ package org.apache.seata.rm.datasource.sql.struct;
 
 import org.apache.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import org.apache.seata.rm.datasource.sql.struct.cache.MariadbTableMetaCache;
+import org.apache.seata.rm.datasource.sql.struct.cache.OceanBaseTableMetaCache;
 import org.apache.seata.rm.datasource.sql.struct.cache.PolarDBXTableMetaCache;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -38,6 +39,7 @@ public class TableMetaCacheFactoryTest {
         Assertions.assertTrue(TableMetaCacheFactory.getTableMetaCache(JdbcConstants.MARIADB) instanceof MariadbTableMetaCache);
         Assertions.assertTrue(TableMetaCacheFactory.getTableMetaCache(JdbcConstants.POLARDBX) instanceof PolarDBXTableMetaCache);
         Assertions.assertTrue(TableMetaCacheFactory.getTableMetaCache(JdbcConstants.ORACLE) instanceof OracleTableMetaCache);
+        Assertions.assertTrue(TableMetaCacheFactory.getTableMetaCache(JdbcConstants.OCEANBASE) instanceof OceanBaseTableMetaCache);
         Assertions.assertEquals(TableMetaCacheFactory.getTableMetaCache(JdbcConstants.ORACLE), TableMetaCacheFactory.getTableMetaCache(JdbcConstants.ORACLE));
         Assertions.assertEquals(TableMetaCacheFactory.getTableMetaCache(JdbcConstants.MYSQL), TableMetaCacheFactory.getTableMetaCache(JdbcConstants.MYSQL));
         Assertions.assertThrows(EnhancedServiceNotFoundException.class, () -> {

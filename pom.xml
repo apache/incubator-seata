@@ -289,6 +289,101 @@
                 </plugins>
             </build>
         </profile>
+        <!-- profile: dependency-check -->
+        <profile>
+            <id>dependency-check</id>
+            <build>
+                <plugins>
+                    <!-- dependency-check-maven -->
+                    <plugin>
+                        <groupId>org.owasp</groupId>
+                        <artifactId>dependency-check-maven</artifactId>
+                        <version>${dependency-check-maven.version}</version>
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>check</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <!-- profile: spotless -->
+        <profile>
+            <id>jdk9-jdk11-spotless</id>
+            <activation>
+                <jdk>[1.8, 11)</jdk>
+            </activation>
+            <properties>
+                <palantirJavaFormat.version>1.1.0</palantirJavaFormat.version>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>jdk11-jdk21-spotless</id>
+            <activation>
+                <jdk>[11, 21)</jdk>
+            </activation>
+            <properties>
+                <palantirJavaFormat.version>2.28.0</palantirJavaFormat.version>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>jdk21-spotless</id>
+            <activation>
+                <jdk>[21,)</jdk>
+            </activation>
+            <properties>
+                <palantirJavaFormat.version>2.39.0</palantirJavaFormat.version>
+            </properties>
+        </profile>
+        <profile>
+            <id>java11+</id>
+            <activation>
+                <jdk>[11,)</jdk>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.diffplug.spotless</groupId>
+                        <artifactId>spotless-maven-plugin</artifactId>
+                        <version>${spotless-maven-plugin.version}</version>
+                        <configuration>
+                            <java>
+                                <excludes>
+                                    <exclude>**/script/**</exclude>
+                                    <exclude>**/generated/**</exclude>
+                                    <exclude>**/antlr/mysql/parser/*.*</exclude>
+                                    <exclude>**/antlr/mysql/antlr/*.*</exclude>
+                                    <exclude>**/antlr/mysql/stream/ANTLRNoCaseStringStream.java</exclude>
+                                </excludes>
+                                <ratchetFrom>HEAD</ratchetFrom>
+                                <palantirJavaFormat>
+                                    <version>${palantirJavaFormat.version}</version>
+                                </palantirJavaFormat>
+                                <removeUnusedImports/>
+                                <trimTrailingWhitespace/>
+                                <endWithNewline/>
+                            </java>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>apply</goal>
+                                </goals>
+                                <phase>process-sources</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
     <build>
@@ -398,22 +493,6 @@
                     <argLine>${maven.surefire.argLine}</argLine>
                     <excludes>${maven.surefire.excludes}</excludes>
                 </configuration>
-            </plugin>
-            <!-- dependency-check-maven -->
-            <plugin>
-                <groupId>org.owasp</groupId>
-                <artifactId>dependency-check-maven</artifactId>
-                <version>${dependency-check-maven.version}</version>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>
