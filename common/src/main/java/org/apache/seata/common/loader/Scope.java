@@ -30,5 +30,4 @@ public enum Scope {
      * The extension will be loaded in multi instance mode
      */
     PROTOTYPE
-
 }

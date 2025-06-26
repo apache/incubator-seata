@@ -67,17 +67,21 @@ public class ScriptTaskStateHandler implements StateHandler, InterceptableStateH
             List<Object> input = (List<Object>) context.getVariable(DomainConstants.VAR_NAME_INPUT_PARAMS);
 
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug(">>>>>>>>>>>>>>>>>>>>>> Start to execute ScriptTaskState[{}], ScriptType[{}], Input:{}",
-                        state.getName(), scriptType, input);
+                LOGGER.debug(
+                        ">>>>>>>>>>>>>>>>>>>>>> Start to execute ScriptTaskState[{}], ScriptType[{}], Input:{}",
+                        state.getName(),
+                        scriptType,
+                        input);
             }
 
-            StateMachineConfig stateMachineConfig = (StateMachineConfig) context.getVariable(
-                    DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
+            StateMachineConfig stateMachineConfig =
+                    (StateMachineConfig) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
 
-            ScriptEngine scriptEngine = getScriptEngineFromCache(scriptType, stateMachineConfig.getScriptEngineManager());
+            ScriptEngine scriptEngine =
+                    getScriptEngineFromCache(scriptType, stateMachineConfig.getScriptEngineManager());
             if (scriptEngine == null) {
-                throw new EngineExecutionException("No such ScriptType[" + scriptType + "]",
-                        FrameworkErrorCode.ObjectNotExists);
+                throw new EngineExecutionException(
+                        "No such ScriptType[" + scriptType + "]", FrameworkErrorCode.ObjectNotExists);
             }
 
             Bindings bindings = null;
@@ -94,7 +98,7 @@ public class ScriptTaskStateHandler implements StateHandler, InterceptableStateH
                         if (inputMap != null && inputMap.containsKey(property)) {
                             bindings.put(property, inputMap.get(property));
                         } else {
-                            //if we do not bind the null value property, groovy will throw MissingPropertyException
+                            // if we do not bind the null value property, groovy will throw MissingPropertyException
                             bindings.put(property, null);
                         }
                     }
@@ -102,36 +106,40 @@ public class ScriptTaskStateHandler implements StateHandler, InterceptableStateH
             }
             if (bindings != null) {
                 result = scriptEngine.eval(scriptContent, bindings);
-            }
-            else {
+            } else {
                 result = scriptEngine.eval(scriptContent);
             }
 
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("<<<<<<<<<<<<<<<<<<<<<< ScriptTaskState[{}], ScriptType[{}], Execute finish. result: {}",
-                        state.getName(), scriptType, result);
+                LOGGER.debug(
+                        "<<<<<<<<<<<<<<<<<<<<<< ScriptTaskState[{}], ScriptType[{}], Execute finish. result: {}",
+                        state.getName(),
+                        scriptType,
+                        result);
             }
 
             if (result != null) {
-                ((HierarchicalProcessContext) context).setVariableLocally(DomainConstants.VAR_NAME_OUTPUT_PARAMS,
-                        result);
+                ((HierarchicalProcessContext) context)
+                        .setVariableLocally(DomainConstants.VAR_NAME_OUTPUT_PARAMS, result);
             }
 
         } catch (Throwable e) {
 
-            LOGGER.error("<<<<<<<<<<<<<<<<<<<<<< ScriptTaskState[{}], ScriptTaskState[{}] Execute failed.",
-                    state.getName(), scriptType, e);
+            LOGGER.error(
+                    "<<<<<<<<<<<<<<<<<<<<<< ScriptTaskState[{}], ScriptTaskState[{}] Execute failed.",
+                    state.getName(),
+                    scriptType,
+                    e);
 
             ((HierarchicalProcessContext) context).setVariableLocally(DomainConstants.VAR_NAME_CURRENT_EXCEPTION, e);
 
             EngineUtils.handleException(context, state, e);
         }
-
     }
 
     protected ScriptEngine getScriptEngineFromCache(String scriptType, ScriptEngineManager scriptEngineManager) {
-        return CollectionUtils.computeIfAbsent(scriptEngineCache, scriptType,
-            key -> scriptEngineManager.getEngineByName(scriptType));
+        return CollectionUtils.computeIfAbsent(
+                scriptEngineCache, scriptType, key -> scriptEngineManager.getEngineByName(scriptType));
     }
 
     @Override

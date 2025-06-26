@@ -24,8 +24,7 @@ import java.lang.reflect.Array;
  */
 public class ArrayUtils {
 
-    private ArrayUtils() {
-    }
+    private ArrayUtils() {}
 
     /**
      * arrayObj cast to Object[]
@@ -105,7 +104,7 @@ public class ArrayUtils {
         if (arrayObj.getClass().getComponentType().isPrimitive()) {
             return toString(toArray(arrayObj));
         } else {
-            return toString((Object[])arrayObj);
+            return toString((Object[]) arrayObj);
         }
     }
 }

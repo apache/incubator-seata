@@ -26,10 +26,10 @@ import org.apache.skywalking.apm.agent.core.plugin.match.ClassMatch;
 import static net.bytebuddy.matcher.ElementMatchers.named;
 import static org.apache.skywalking.apm.agent.core.plugin.match.MultiClassNameMatch.byMultiClassMatch;
 
-
 public class RemotingProcessorInstrumentation extends ClassInstanceMethodsEnhancePluginDefine {
 
-    private static final String INTERCEPTOR_CLASS = "org.apache.seata.apm.skywalking.plugin.RemotingProcessorProcessInterceptor";
+    private static final String INTERCEPTOR_CLASS =
+            "org.apache.seata.apm.skywalking.plugin.RemotingProcessorProcessInterceptor";
 
     @Override
     public ConstructorInterceptPoint[] getConstructorsInterceptPoints() {
@@ -38,7 +38,7 @@ public class RemotingProcessorInstrumentation extends ClassInstanceMethodsEnhanc
 
     @Override
     public InstanceMethodsInterceptPoint[] getInstanceMethodsInterceptPoints() {
-        return new InstanceMethodsInterceptPoint[]{
+        return new InstanceMethodsInterceptPoint[] {
             new InstanceMethodsInterceptPoint() {
                 @Override
                 public ElementMatcher<MethodDescription> getMethodsMatcher() {
@@ -60,15 +60,16 @@ public class RemotingProcessorInstrumentation extends ClassInstanceMethodsEnhanc
 
     @Override
     protected ClassMatch enhanceClass() {
-        return byMultiClassMatch("org.apache.seata.core.rpc.processor.client.ClientHeartbeatProcessor",
-            "org.apache.seata.core.rpc.processor.client.ClientOnResponseProcessor",
-            "org.apache.seata.core.rpc.processor.client.RmBranchCommitProcessor",
-            "org.apache.seata.core.rpc.processor.client.RmBranchRollbackProcessor",
-            "org.apache.seata.core.rpc.processor.client.RmUndoLogProcessor",
-            "org.apache.seata.core.rpc.processor.server.RegRmProcessor",
-            "org.apache.seata.core.rpc.processor.server.RegTmProcessor",
-            "org.apache.seata.core.rpc.processor.server.ServerHeartbeatProcessor",
-            "org.apache.seata.core.rpc.processor.server.ServerOnRequestProcessor",
-            "org.apache.seata.core.rpc.processor.server.ServerOnResponseProcessor");
+        return byMultiClassMatch(
+                "org.apache.seata.core.rpc.processor.client.ClientHeartbeatProcessor",
+                "org.apache.seata.core.rpc.processor.client.ClientOnResponseProcessor",
+                "org.apache.seata.core.rpc.processor.client.RmBranchCommitProcessor",
+                "org.apache.seata.core.rpc.processor.client.RmBranchRollbackProcessor",
+                "org.apache.seata.core.rpc.processor.client.RmUndoLogProcessor",
+                "org.apache.seata.core.rpc.processor.server.RegRmProcessor",
+                "org.apache.seata.core.rpc.processor.server.RegTmProcessor",
+                "org.apache.seata.core.rpc.processor.server.ServerHeartbeatProcessor",
+                "org.apache.seata.core.rpc.processor.server.ServerOnRequestProcessor",
+                "org.apache.seata.core.rpc.processor.server.ServerOnResponseProcessor");
     }
 }

@@ -45,10 +45,10 @@ public class ResultTest {
     @Test
     public void testGetErrMsgParams() {
         // Create a Result with error message parameters
-        Result<String> result = new Result<>(null, null, new Object[]{"param1", "param2"});
+        Result<String> result = new Result<>(null, null, new Object[] {"param1", "param2"});
 
         // Test the getErrMsgParams method
-        assertArrayEquals(new Object[]{"param1", "param2"}, result.getErrMsgParams());
+        assertArrayEquals(new Object[] {"param1", "param2"}, result.getErrMsgParams());
     }
 
     @Test
@@ -92,6 +92,6 @@ public class ResultTest {
         // Test the getResult, getErrMsg, and getErrMsgParams methods
         assertEquals("Hello", result.getResult());
         assertEquals("Invalid {0} value: {1}", result.getErrMsg());
-        assertArrayEquals(new Object[]{"parameter", 42}, result.getErrMsgParams());
+        assertArrayEquals(new Object[] {"parameter", 42}, result.getErrMsgParams());
     }
 }

@@ -21,7 +21,6 @@ import org.springframework.stereotype.Component;
 
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_PREFIX;
 
-
 @Component
 @ConfigurationProperties(prefix = CONFIG_PREFIX)
 public class ConfigProperties {
@@ -32,7 +31,7 @@ public class ConfigProperties {
     /**
      * properties,yaml(only type in nacos, zk, consul, etcd3)
      */
-    private String dataType ;
+    private String dataType;
 
     public String getType() {
         return type;

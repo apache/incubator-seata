@@ -25,7 +25,6 @@ import com.alibaba.druid.sql.ast.statement.SQLJoinTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLTableSource;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlDeleteStatement;
 import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlOutputVisitor;
-
 import org.apache.seata.common.exception.NotSupportYetException;
 import org.apache.seata.sqlparser.ParametersHolder;
 import org.apache.seata.sqlparser.SQLDeleteRecognizer;
@@ -50,7 +49,7 @@ public class MySQLDeleteRecognizer extends BaseMySQLRecognizer implements SQLDel
      */
     public MySQLDeleteRecognizer(String originalSQL, SQLStatement ast) {
         super(originalSQL);
-        this.ast = (MySqlDeleteStatement)ast;
+        this.ast = (MySqlDeleteStatement) ast;
     }
 
     @Override
@@ -100,8 +99,8 @@ public class MySQLDeleteRecognizer extends BaseMySQLRecognizer implements SQLDel
     }
 
     @Override
-    public String getWhereCondition(final ParametersHolder parametersHolder,
-                                    final ArrayList<List<Object>> paramAppenderList) {
+    public String getWhereCondition(
+            final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppenderList) {
         SQLExpr where = ast.getWhere();
         return super.getWhereCondition(where, parametersHolder, paramAppenderList);
     }

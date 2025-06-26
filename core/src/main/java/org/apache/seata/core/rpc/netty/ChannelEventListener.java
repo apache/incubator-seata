@@ -20,39 +20,34 @@ import io.netty.channel.Channel;
 
 /**
  * The interface Channel event listener.
- *
  */
-@Deprecated
 public interface ChannelEventListener {
     /**
      * On channel connect.
      *
-     * @param remoteAddr the remote addr
      * @param channel    the channel
      */
-    void onChannelConnect(final String remoteAddr, final Channel channel);
+    default void onChannelConnected(final Channel channel) {}
 
     /**
      * On channel close.
      *
-     * @param remoteAddr the remote addr
      * @param channel    the channel
      */
-    void onChannelClose(final String remoteAddr, final Channel channel);
+    default void onChannelDisconnected(final Channel channel) {}
 
     /**
      * On channel exception.
      *
-     * @param remoteAddr the remote addr
      * @param channel    the channel
+     * @param cause      the cause
      */
-    void onChannelException(final String remoteAddr, final Channel channel);
+    default void onChannelException(final Channel channel, Throwable cause) {}
 
     /**
      * On channel idle.
      *
-     * @param remoteAddr the remote addr
      * @param channel    the channel
      */
-    void onChannelIdle(final String remoteAddr, final Channel channel);
+    default void onChannelIdle(final Channel channel) {}
 }

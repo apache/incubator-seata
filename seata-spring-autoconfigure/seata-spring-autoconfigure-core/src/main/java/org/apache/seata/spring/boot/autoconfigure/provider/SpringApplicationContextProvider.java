@@ -28,7 +28,8 @@ import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CO
 /**
  * The type spring application context provider
  */
-public class SpringApplicationContextProvider implements ApplicationContextAware, ApplicationListener<ContextClosedEvent> {
+public class SpringApplicationContextProvider
+        implements ApplicationContextAware, ApplicationListener<ContextClosedEvent> {
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {

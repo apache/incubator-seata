@@ -34,5 +34,4 @@ public class MariadbDeleteRecognizer extends MySQLDeleteRecognizer {
     public MariadbDeleteRecognizer(String originalSQL, SQLStatement ast) {
         super(originalSQL, ast);
     }
-
 }

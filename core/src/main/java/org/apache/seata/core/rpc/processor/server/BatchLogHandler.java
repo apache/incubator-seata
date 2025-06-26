@@ -16,6 +16,10 @@
  */
 package org.apache.seata.core.rpc.processor.server;
 
+import org.apache.seata.common.thread.NamedThreadFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -24,10 +28,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
-import org.apache.seata.common.thread.NamedThreadFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * handle ServerOnRequestProcessor and ServerOnResponseProcessor log print.
@@ -49,9 +49,13 @@ public class BatchLogHandler {
     private static final long BUSY_SLEEP_MILLS = 5L;
 
     static {
-        ExecutorService mergeSendExecutorService = new ThreadPoolExecutor(MAX_LOG_SEND_THREAD, MAX_LOG_SEND_THREAD,
-            KEEP_ALIVE_TIME, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
-            new NamedThreadFactory(THREAD_PREFIX, MAX_LOG_SEND_THREAD, true));
+        ExecutorService mergeSendExecutorService = new ThreadPoolExecutor(
+                MAX_LOG_SEND_THREAD,
+                MAX_LOG_SEND_THREAD,
+                KEEP_ALIVE_TIME,
+                TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<>(),
+                new NamedThreadFactory(THREAD_PREFIX, MAX_LOG_SEND_THREAD, true));
         mergeSendExecutorService.submit(new BatchLogRunnable());
     }
 
@@ -87,9 +91,7 @@ public class BatchLogHandler {
                 } catch (InterruptedException exx) {
                     LOGGER.error("batch log busy sleep error:{}", exx.getMessage(), exx);
                 }
-
             }
         }
     }
-
 }

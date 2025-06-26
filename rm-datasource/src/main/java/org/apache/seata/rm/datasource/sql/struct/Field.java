@@ -44,8 +44,7 @@ public class Field implements java.io.Serializable {
     /**
      * Instantiates a new Field.
      */
-    public Field() {
-    }
+    public Field() {}
 
     /**
      * Instantiates a new Field.

@@ -27,5 +27,4 @@ public interface CachedConfigurationChangeListener extends ConfigurationChangeLi
         }
         CONFIGURATION_CACHE.onProcessEvent(event);
     }
-
 }

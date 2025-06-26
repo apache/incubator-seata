@@ -16,13 +16,12 @@
  */
 package org.apache.seata.serializer.protobuf.convertor;
 
-import org.apache.seata.serializer.protobuf.generated.BranchRollbackRequestProto;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.protocol.transaction.BranchRollbackRequest;
+import org.apache.seata.serializer.protobuf.generated.BranchRollbackRequestProto;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
 
 public class BranchRollbackRequestConvertorTest {
 
@@ -37,8 +36,7 @@ public class BranchRollbackRequestConvertorTest {
         branchRegisterRequest.setBranchId(123);
 
         BranchRollbackRequestConvertor convertor = new BranchRollbackRequestConvertor();
-        BranchRollbackRequestProto proto = convertor.convert2Proto(
-            branchRegisterRequest);
+        BranchRollbackRequestProto proto = convertor.convert2Proto(branchRegisterRequest);
 
         BranchRollbackRequest real = convertor.convert2Model(proto);
 
@@ -48,6 +46,5 @@ public class BranchRollbackRequestConvertorTest {
         assertThat((real.getXid())).isEqualTo(branchRegisterRequest.getXid());
         assertThat((real.getResourceId())).isEqualTo(branchRegisterRequest.getResourceId());
         assertThat((real.getBranchId())).isEqualTo(branchRegisterRequest.getBranchId());
-
     }
 }

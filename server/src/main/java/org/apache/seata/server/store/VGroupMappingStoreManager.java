@@ -67,5 +67,4 @@ public interface VGroupMappingStoreManager {
             throw new RuntimeException("vGroup mapping relationship notified failed! ", e);
         }
     }
-
 }

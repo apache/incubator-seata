@@ -23,7 +23,6 @@ import org.springframework.stereotype.Component;
 
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
 
-
 @Component
 @ConfigurationProperties(prefix = SEATA_PREFIX)
 public class SeataProperties {

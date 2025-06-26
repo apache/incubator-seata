@@ -27,5 +27,4 @@ public interface MessageTypeAware {
      * @return the type code
      */
     short getTypeCode();
-
 }

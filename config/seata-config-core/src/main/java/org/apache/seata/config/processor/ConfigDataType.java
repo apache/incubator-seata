@@ -24,12 +24,11 @@ public enum ConfigDataType {
     /**
      * data type yaml
      */
-    yaml("yaml","yml"),
+    yaml("yaml", "yml"),
     /**
      * data type properties
      */
     properties("properties");
-
 
     /**
      * suffix support data type

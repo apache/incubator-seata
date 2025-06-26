@@ -74,17 +74,16 @@ public class JacksonJsonParser implements JsonParser {
             if (prettyPrint) {
                 if (ignoreAutoType) {
                     return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(o);
-                }
-                else {
-                    return objectMapperWithAutoType.writerWithDefaultPrettyPrinter().writeValueAsString(o);
+                } else {
+                    return objectMapperWithAutoType
+                            .writerWithDefaultPrettyPrinter()
+                            .writeValueAsString(o);
                 }
 
-            }
-            else {
+            } else {
                 if (ignoreAutoType) {
                     return objectMapper.writeValueAsString(o);
-                }
-                else {
+                } else {
                     return objectMapperWithAutoType.writeValueAsString(o);
                 }
             }
@@ -101,8 +100,7 @@ public class JacksonJsonParser implements JsonParser {
             }
             if (ignoreAutoType) {
                 return objectMapper.readValue(json, type);
-            }
-            else {
+            } else {
                 return objectMapperWithAutoType.readValue(json, type);
             }
         } catch (IOException e) {

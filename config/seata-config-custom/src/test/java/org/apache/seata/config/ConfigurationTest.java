@@ -16,12 +16,11 @@
  */
 package org.apache.seata.config;
 
-import java.time.Duration;
-
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import java.time.Duration;
 
+import static org.assertj.core.api.Assertions.assertThat;
 
 class ConfigurationTest {
 
@@ -29,14 +28,14 @@ class ConfigurationTest {
     private static final String DEFAULT_POSTFIX = "_default";
 
     private static final String STRING_VALUE = "aaaa";
-    private static final short SHORT_VALUE = (short)1;
+    private static final short SHORT_VALUE = (short) 1;
     private static final int INT_VALUE = 2;
     private static final long LONG_VALUE = 3L;
     private static final Duration DURATION_VALUE = Duration.ofSeconds(4);
     private static final boolean BOOLEAN_VALUE = true;
 
     private static final String DEFAULT_STRING_VALUE = "BBBB";
-    private static final short DEFAULT_SHORT_VALUE = (short)2;
+    private static final short DEFAULT_SHORT_VALUE = (short) 2;
     private static final int DEFAULT_INT_VALUE = 3;
     private static final long DEFAULT_LONG_VALUE = 4L;
     private static final Duration DEFAULT_DURATION_VALUE = Duration.ofSeconds(5);
@@ -47,40 +46,46 @@ class ConfigurationTest {
         String dataId;
         Configuration configuration = ConfigurationFactory.getInstance();
 
-        //string
+        // string
         dataId = "string";
         assertThat(configuration.getConfig(dataId)).isEqualTo(STRING_VALUE);
         assertThat(configuration.getConfig(dataId + NULL_POSTFIX)).isNull();
-        assertThat(configuration.getConfig(dataId + DEFAULT_POSTFIX, DEFAULT_STRING_VALUE)).isEqualTo(DEFAULT_STRING_VALUE);
+        assertThat(configuration.getConfig(dataId + DEFAULT_POSTFIX, DEFAULT_STRING_VALUE))
+                .isEqualTo(DEFAULT_STRING_VALUE);
 
-        //short
+        // short
         dataId = "short";
         assertThat(configuration.getShort(dataId)).isEqualTo(SHORT_VALUE);
         assertThat(configuration.getShort(dataId + NULL_POSTFIX)).isEqualTo(AbstractConfiguration.DEFAULT_SHORT);
-        assertThat(configuration.getShort(dataId + DEFAULT_POSTFIX, DEFAULT_SHORT_VALUE)).isEqualTo(DEFAULT_SHORT_VALUE);
+        assertThat(configuration.getShort(dataId + DEFAULT_POSTFIX, DEFAULT_SHORT_VALUE))
+                .isEqualTo(DEFAULT_SHORT_VALUE);
 
-        //int
+        // int
         dataId = "int";
         assertThat(configuration.getInt(dataId)).isEqualTo(INT_VALUE);
         assertThat(configuration.getInt(dataId + NULL_POSTFIX)).isEqualTo(AbstractConfiguration.DEFAULT_INT);
-        assertThat(configuration.getInt(dataId + DEFAULT_POSTFIX, DEFAULT_INT_VALUE)).isEqualTo(DEFAULT_INT_VALUE);
+        assertThat(configuration.getInt(dataId + DEFAULT_POSTFIX, DEFAULT_INT_VALUE))
+                .isEqualTo(DEFAULT_INT_VALUE);
 
-        //long
+        // long
         dataId = "long";
         assertThat(configuration.getLong(dataId)).isEqualTo(LONG_VALUE);
         assertThat(configuration.getLong(dataId + NULL_POSTFIX)).isEqualTo(AbstractConfiguration.DEFAULT_LONG);
-        assertThat(configuration.getLong(dataId + DEFAULT_POSTFIX, DEFAULT_LONG_VALUE)).isEqualTo(DEFAULT_LONG_VALUE);
+        assertThat(configuration.getLong(dataId + DEFAULT_POSTFIX, DEFAULT_LONG_VALUE))
+                .isEqualTo(DEFAULT_LONG_VALUE);
 
-        //duration
+        // duration
         dataId = "duration";
         assertThat(configuration.getDuration(dataId)).isEqualTo(DURATION_VALUE);
         assertThat(configuration.getDuration(dataId + NULL_POSTFIX)).isEqualTo(AbstractConfiguration.DEFAULT_DURATION);
-        assertThat(configuration.getDuration(dataId + DEFAULT_POSTFIX, DEFAULT_DURATION_VALUE)).isEqualTo(DEFAULT_DURATION_VALUE);
+        assertThat(configuration.getDuration(dataId + DEFAULT_POSTFIX, DEFAULT_DURATION_VALUE))
+                .isEqualTo(DEFAULT_DURATION_VALUE);
 
-        //boolean
+        // boolean
         dataId = "boolean";
         assertThat(configuration.getBoolean(dataId)).isEqualTo(BOOLEAN_VALUE);
         assertThat(configuration.getBoolean(dataId + NULL_POSTFIX)).isEqualTo(AbstractConfiguration.DEFAULT_BOOLEAN);
-        assertThat(configuration.getBoolean(dataId + DEFAULT_POSTFIX, DEFAULT_BOOLEAN_VALUE)).isEqualTo(DEFAULT_BOOLEAN_VALUE);
+        assertThat(configuration.getBoolean(dataId + DEFAULT_POSTFIX, DEFAULT_BOOLEAN_VALUE))
+                .isEqualTo(DEFAULT_BOOLEAN_VALUE);
     }
 }

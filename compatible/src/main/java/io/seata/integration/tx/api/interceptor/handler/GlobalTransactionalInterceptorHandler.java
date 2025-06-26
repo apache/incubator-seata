@@ -16,10 +16,6 @@
  */
 package io.seata.integration.tx.api.interceptor.handler;
 
-import java.lang.reflect.Method;
-import java.util.Objects;
-import java.util.Set;
-
 import io.seata.spring.annotation.GlobalLock;
 import io.seata.spring.annotation.GlobalTransactional;
 import org.apache.seata.common.LockStrategyMode;
@@ -27,20 +23,26 @@ import org.apache.seata.core.model.GlobalLockConfig;
 import org.apache.seata.integration.tx.api.annotation.AspectTransactional;
 import org.apache.seata.tm.api.transaction.Propagation;
 
+import java.lang.reflect.Method;
+import java.util.Objects;
+import java.util.Set;
+
 /**
  * The type Global transactional interceptor handler.
  */
 @Deprecated
 public class GlobalTransactionalInterceptorHandler
-    extends org.apache.seata.integration.tx.api.interceptor.handler.GlobalTransactionalInterceptorHandler {
+        extends org.apache.seata.integration.tx.api.interceptor.handler.GlobalTransactionalInterceptorHandler {
 
-    public GlobalTransactionalInterceptorHandler(org.apache.seata.tm.api.FailureHandler failureHandler,
-                                                 Set<String> methodsToProxy) {
+    public GlobalTransactionalInterceptorHandler(
+            org.apache.seata.tm.api.FailureHandler failureHandler, Set<String> methodsToProxy) {
         super(failureHandler, methodsToProxy);
     }
 
-    public GlobalTransactionalInterceptorHandler(org.apache.seata.tm.api.FailureHandler failureHandler,
-                                                 Set<String> methodsToProxy, AspectTransactional aspectTransactional) {
+    public GlobalTransactionalInterceptorHandler(
+            org.apache.seata.tm.api.FailureHandler failureHandler,
+            Set<String> methodsToProxy,
+            AspectTransactional aspectTransactional) {
         super(failureHandler, methodsToProxy, aspectTransactional);
     }
 
@@ -59,15 +61,21 @@ public class GlobalTransactionalInterceptorHandler
 
     @Override
     public AspectTransactional getAspectTransactional(Method method, Class<?> targetClass) {
-        final GlobalTransactional globalTransactionalAnnotation = getAnnotation(method, targetClass,
-            GlobalTransactional.class);
-        return globalTransactionalAnnotation != null ? new AspectTransactional(
-            globalTransactionalAnnotation.timeoutMills(), globalTransactionalAnnotation.name(),
-            globalTransactionalAnnotation.rollbackFor(), globalTransactionalAnnotation.rollbackForClassName(),
-            globalTransactionalAnnotation.noRollbackFor(), globalTransactionalAnnotation.noRollbackForClassName(),
-            propagation2ApacheSeataPropagation(globalTransactionalAnnotation.propagation()),
-            globalTransactionalAnnotation.lockRetryInterval(), globalTransactionalAnnotation.lockRetryTimes(),
-            lockStrategyMode2ApacheSeataLockStrategyMode(globalTransactionalAnnotation.lockStrategyMode())) : null;
+        final GlobalTransactional globalTransactionalAnnotation =
+                getAnnotation(method, targetClass, GlobalTransactional.class);
+        return globalTransactionalAnnotation != null
+                ? new AspectTransactional(
+                        globalTransactionalAnnotation.timeoutMills(),
+                        globalTransactionalAnnotation.name(),
+                        globalTransactionalAnnotation.rollbackFor(),
+                        globalTransactionalAnnotation.rollbackForClassName(),
+                        globalTransactionalAnnotation.noRollbackFor(),
+                        globalTransactionalAnnotation.noRollbackForClassName(),
+                        propagation2ApacheSeataPropagation(globalTransactionalAnnotation.propagation()),
+                        globalTransactionalAnnotation.lockRetryInterval(),
+                        globalTransactionalAnnotation.lockRetryTimes(),
+                        lockStrategyMode2ApacheSeataLockStrategyMode(globalTransactionalAnnotation.lockStrategyMode()))
+                : null;
     }
 
     private Propagation propagation2ApacheSeataPropagation(io.seata.tm.api.transaction.Propagation propagation) {
@@ -88,11 +96,10 @@ public class GlobalTransactionalInterceptorHandler
     }
 
     private LockStrategyMode lockStrategyMode2ApacheSeataLockStrategyMode(
-        io.seata.common.LockStrategyMode lockStrategyMode) {
+            io.seata.common.LockStrategyMode lockStrategyMode) {
         if (Objects.requireNonNull(lockStrategyMode) == io.seata.common.LockStrategyMode.OPTIMISTIC) {
             return LockStrategyMode.OPTIMISTIC;
         }
         return LockStrategyMode.PESSIMISTIC;
     }
-
 }

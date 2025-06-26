@@ -121,7 +121,6 @@ public class HSFRemotingParser extends AbstractedRemotingParser {
         return null;
     }
 
-
     @Override
     public short getProtocol() {
         return Protocols.HSF;

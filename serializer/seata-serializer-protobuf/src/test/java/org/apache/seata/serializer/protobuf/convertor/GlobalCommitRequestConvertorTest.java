@@ -16,12 +16,11 @@
  */
 package org.apache.seata.serializer.protobuf.convertor;
 
-import org.apache.seata.serializer.protobuf.generated.GlobalCommitRequestProto;
 import org.apache.seata.core.protocol.transaction.GlobalCommitRequest;
+import org.apache.seata.serializer.protobuf.generated.GlobalCommitRequestProto;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
 
 public class GlobalCommitRequestConvertorTest {
 

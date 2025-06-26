@@ -16,26 +16,24 @@
  */
 package org.apache.seata.namingserver.controller;
 
-
 import org.apache.seata.common.metadata.namingserver.MetaResponse;
 import org.apache.seata.common.metadata.namingserver.NamingServerNode;
 import org.apache.seata.common.result.Result;
 import org.apache.seata.common.result.SingleResult;
 import org.apache.seata.namingserver.entity.vo.NamespaceVO;
+import org.apache.seata.namingserver.entity.vo.monitor.ClusterVO;
+import org.apache.seata.namingserver.entity.vo.monitor.WatcherVO;
 import org.apache.seata.namingserver.listener.Watcher;
 import org.apache.seata.namingserver.manager.ClusterWatcherManager;
 import org.apache.seata.namingserver.manager.NamingManager;
-import org.apache.seata.namingserver.entity.vo.monitor.ClusterVO;
-import org.apache.seata.namingserver.entity.vo.monitor.WatcherVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.GetMapping;
-
 
 import javax.annotation.Resource;
 import javax.servlet.AsyncContext;
@@ -43,7 +41,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
 
 @RestController
 @RequestMapping(value = {"/naming/v1", "/api/v1/naming"})
@@ -58,10 +55,11 @@ public class NamingController {
     private ClusterWatcherManager clusterWatcherManager;
 
     @PostMapping("/register")
-    public Result<String> registerInstance(@RequestParam String namespace,
-                                           @RequestParam String clusterName,
-                                           @RequestParam String unit,
-                                           @RequestBody NamingServerNode registerBody) {
+    public Result<String> registerInstance(
+            @RequestParam String namespace,
+            @RequestParam String clusterName,
+            @RequestParam String unit,
+            @RequestBody NamingServerNode registerBody) {
         Result<String> result = new Result<>();
         boolean isSuccess = namingManager.registerInstance(registerBody, namespace, clusterName, unit);
         if (isSuccess) {
@@ -74,9 +72,10 @@ public class NamingController {
     }
 
     @PostMapping("/batchRegister")
-    public Result<String> batchRegisterInstance(@RequestParam String namespace,
-                                           @RequestParam String clusterName,
-                                           @RequestBody List<NamingServerNode> nodes) {
+    public Result<String> batchRegisterInstance(
+            @RequestParam String namespace,
+            @RequestParam String clusterName,
+            @RequestBody List<NamingServerNode> nodes) {
         Result<String> result = new Result<>();
         boolean isSuccess = namingManager.registerInstances(nodes, namespace, clusterName);
         if (isSuccess) {
@@ -89,8 +88,11 @@ public class NamingController {
     }
 
     @PostMapping("/unregister")
-    public Result<String> unregisterInstance(@RequestParam String namespace, @RequestParam String clusterName,
-        @RequestParam String unit, @RequestBody NamingServerNode registerBody) {
+    public Result<String> unregisterInstance(
+            @RequestParam String namespace,
+            @RequestParam String clusterName,
+            @RequestParam String unit,
+            @RequestBody NamingServerNode registerBody) {
         Result<String> result = new Result<>();
         boolean isSuccess = namingManager.unregisterInstance(namespace, clusterName, unit, registerBody);
         if (isSuccess) {
@@ -109,13 +111,16 @@ public class NamingController {
 
     @GetMapping("/discovery")
     public MetaResponse discovery(@RequestParam String vGroup, @RequestParam String namespace) {
-        return new MetaResponse(namingManager.getClusterListByVgroup(vGroup, namespace),
-                clusterWatcherManager.getTermByvGroup(vGroup));
+        return new MetaResponse(
+                namingManager.getClusterListByVgroup(vGroup, namespace), clusterWatcherManager.getTermByvGroup(vGroup));
     }
 
     @PostMapping("/addGroup")
-    public Result<String> addGroup(@RequestParam String namespace, @RequestParam String clusterName, String unitName,
-        @RequestParam String vGroup) {
+    public Result<String> addGroup(
+            @RequestParam String namespace,
+            @RequestParam String clusterName,
+            String unitName,
+            @RequestParam String vGroup) {
 
         Result<String> addGroupResult = namingManager.createGroup(namespace, vGroup, clusterName, unitName);
         if (!addGroupResult.isSuccess()) {
@@ -125,10 +130,11 @@ public class NamingController {
     }
 
     @PostMapping("/changeGroup")
-    public Result<String> changeGroup(@RequestParam String namespace,
-                                      @RequestParam String clusterName,
-                                      @RequestParam String unitName,
-                                      @RequestParam String vGroup) {
+    public Result<String> changeGroup(
+            @RequestParam String namespace,
+            @RequestParam String clusterName,
+            @RequestParam String unitName,
+            @RequestParam String vGroup) {
         Result<String> addGroupResult = namingManager.changeGroup(namespace, vGroup, clusterName, unitName);
         if (!addGroupResult.isSuccess()) {
             return addGroupResult;
@@ -147,15 +153,16 @@ public class NamingController {
      * @param timeout    The timeout duration
      * @param request    The client's HTTP request
      */
-
     @PostMapping("/watch")
-    public void watch(@RequestParam String clientTerm,
-                      @RequestParam String vGroup,
-                      @RequestParam String timeout,
-                      HttpServletRequest request) {
+    public void watch(
+            @RequestParam String clientTerm,
+            @RequestParam String vGroup,
+            @RequestParam String timeout,
+            HttpServletRequest request) {
         AsyncContext context = request.startAsync();
         context.setTimeout(0L);
-        Watcher<AsyncContext> watcher = new Watcher<>(vGroup, context, Integer.parseInt(timeout), Long.parseLong(clientTerm), request.getRemoteAddr());
+        Watcher<AsyncContext> watcher = new Watcher<>(
+                vGroup, context, Integer.parseInt(timeout), Long.parseLong(clientTerm), request.getRemoteAddr());
         clusterWatcherManager.registryWatcher(watcher);
     }
 
@@ -166,6 +173,4 @@ public class NamingController {
                 .map(vgroup -> new WatcherVO(vgroup, clusterWatcherManager.getWatcherIpList(vgroup)))
                 .collect(Collectors.toList());
     }
-
-
 }

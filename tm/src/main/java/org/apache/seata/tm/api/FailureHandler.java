@@ -53,5 +53,4 @@ public interface FailureHandler<T extends BaseTransaction> {
      * @param originalException the originalException
      */
     void onRollbacking(T tx, Throwable originalException);
-
 }

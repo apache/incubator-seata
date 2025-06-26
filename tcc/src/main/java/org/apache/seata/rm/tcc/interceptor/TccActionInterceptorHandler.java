@@ -16,13 +16,6 @@
  */
 package org.apache.seata.rm.tcc.interceptor;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.apache.seata.common.Constants;
 import org.apache.seata.common.DefaultValues;
 import org.apache.seata.common.holder.ObjectHolder;
@@ -42,14 +35,20 @@ import org.apache.seata.rm.tcc.utils.MethodUtils;
 import org.slf4j.MDC;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static org.apache.seata.common.ConfigurationKeys.TCC_ACTION_INTERCEPTOR_ORDER;
 import static org.apache.seata.common.Constants.BEAN_NAME_SPRING_FENCE_CONFIG;
 
 public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler {
 
-    private static final int ORDER_NUM = ConfigurationFactory.getInstance().getInt(TCC_ACTION_INTERCEPTOR_ORDER,
-            DefaultValues.TCC_ACTION_INTERCEPTOR_ORDER);
+    private static final int ORDER_NUM = ConfigurationFactory.getInstance()
+            .getInt(TCC_ACTION_INTERCEPTOR_ORDER, DefaultValues.TCC_ACTION_INTERCEPTOR_ORDER);
 
     protected ActionInterceptorHandler actionInterceptorHandler = new ActionInterceptorHandler();
 
@@ -66,39 +65,39 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
     @Override
     protected Object doInvoke(InvocationWrapper invocation) throws Throwable {
         if (!RootContext.inGlobalTransaction() || RootContext.inSagaBranch()) {
-            //not in transaction, or this interceptor is disabled
+            // not in transaction, or this interceptor is disabled
             return invocation.proceed();
         }
         Method method = invocation.getMethod();
         Annotation businessAction = parseAnnotation(method);
 
-        //try method
+        // try method
         if (businessAction != null) {
-            //save the xid
+            // save the xid
             String xid = RootContext.getXID();
-            //save the previous branchType
+            // save the previous branchType
             BranchType previousBranchType = RootContext.getBranchType();
-            //if not TCC, bind TCC branchType
+            // if not TCC, bind TCC branchType
             if (getBranchType() != previousBranchType) {
                 RootContext.bindBranchType(getBranchType());
             }
             try {
                 TwoPhaseBusinessActionParam businessActionParam = createTwoPhaseBusinessActionParam(businessAction);
                 initTransactionalAnnotationContext(method, targetBean, businessActionParam.getBusinessActionContext());
-                //Handler the TCC Aspect, and return the business result
-                return actionInterceptorHandler.proceed(method, invocation.getArguments(), xid, businessActionParam,
-                        invocation::proceed);
+                // Handler the TCC Aspect, and return the business result
+                return actionInterceptorHandler.proceed(
+                        method, invocation.getArguments(), xid, businessActionParam, invocation::proceed);
             } finally {
-                //if not TCC, unbind branchType
+                // if not TCC, unbind branchType
                 if (getBranchType() != previousBranchType) {
                     RootContext.unbindBranchType();
                 }
-                //MDC remove branchId
+                // MDC remove branchId
                 MDC.remove(RootContext.MDC_KEY_BRANCH_ID);
             }
         }
 
-        //not TCC try method
+        // not TCC try method
         return invocation.proceed();
     }
 
@@ -108,10 +107,12 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
      * @param targetBean               the target bean
      * @param businessActionContext    the business action context
      */
-    private void initTransactionalAnnotationContext(Method method, Object targetBean, Map<String, Object> businessActionContext) {
+    private void initTransactionalAnnotationContext(
+            Method method, Object targetBean, Map<String, Object> businessActionContext) {
         Transactional transactionalAnnotation = MethodUtils.getTransactionalAnnotationByMethod(method, targetBean);
         if (transactionalAnnotation != null) {
-            businessActionContext.put(Constants.TX_ISOLATION, transactionalAnnotation.isolation().value());
+            businessActionContext.put(
+                    Constants.TX_ISOLATION, transactionalAnnotation.isolation().value());
         }
     }
 
@@ -153,7 +154,7 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
         businessActionParam.setUseCommonFence(businessAction.useTCCFence());
         businessActionParam.setBranchType(getBranchType());
         Map<String, Object> businessActionContextMap = new HashMap<>(4);
-        //the phase two method name
+        // the phase two method name
         businessActionContextMap.put(Constants.COMMIT_METHOD, businessAction.commitMethod());
         businessActionContextMap.put(Constants.ROLLBACK_METHOD, businessAction.rollbackMethod());
         businessActionContextMap.put(Constants.ACTION_NAME, businessAction.name());
@@ -184,7 +185,8 @@ public class TccActionInterceptorHandler extends AbstractProxyInvocationHandler 
      * @param twoPhaseBusinessAction the twoPhaseBusinessAction
      */
     private void initCommonFenceCleanTask(Annotation twoPhaseBusinessAction) {
-        CommonFenceConfig commonFenceConfig = (CommonFenceConfig) ObjectHolder.INSTANCE.getObject(BEAN_NAME_SPRING_FENCE_CONFIG);
+        CommonFenceConfig commonFenceConfig =
+                (CommonFenceConfig) ObjectHolder.INSTANCE.getObject(BEAN_NAME_SPRING_FENCE_CONFIG);
         if (commonFenceConfig == null || commonFenceConfig.getInitialized().get()) {
             return;
         }

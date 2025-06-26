@@ -25,5 +25,4 @@ import org.apache.seata.spring.annotation.GlobalTransactionScanner;
  * (Object, String, Object)
  */
 @Deprecated
-public interface ScannerChecker extends org.apache.seata.spring.annotation.ScannerChecker {
-}
+public interface ScannerChecker extends org.apache.seata.spring.annotation.ScannerChecker {}

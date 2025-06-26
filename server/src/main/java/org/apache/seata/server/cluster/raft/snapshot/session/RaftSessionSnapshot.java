@@ -16,12 +16,6 @@
  */
 package org.apache.seata.server.cluster.raft.snapshot.session;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.GlobalStatus;
@@ -31,13 +25,20 @@ import org.apache.seata.server.session.GlobalSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RaftSessionSnapshot implements java.io.Serializable  {
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+
+public class RaftSessionSnapshot implements java.io.Serializable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RaftSessionSnapshot.class);
 
     private static final long serialVersionUID = -2257327786007900291L;
 
-    private Map<byte[]/*global session*/, List<byte[]>/*branch sessions*/> globalsessions = new ConcurrentHashMap<>();
+    private Map<byte[] /*global session*/, List<byte[]> /*branch sessions*/> globalsessions = new ConcurrentHashMap<>();
 
     public Map<byte[], List<byte[]>> getGlobalsessions() {
         return globalsessions;
@@ -65,9 +66,9 @@ public class RaftSessionSnapshot implements java.io.Serializable  {
                 globalSession.add(branchSession);
             });
             if (GlobalStatus.Rollbacking.equals(globalSession.getStatus())
-                || GlobalStatus.TimeoutRollbacking.equals(globalSession.getStatus())) {
+                    || GlobalStatus.TimeoutRollbacking.equals(globalSession.getStatus())) {
                 globalSession.getBranchSessions().parallelStream()
-                    .forEach(branchSession -> branchSession.setLockStatus(LockStatus.Rollbacking));
+                        .forEach(branchSession -> branchSession.setLockStatus(LockStatus.Rollbacking));
             }
             sessionMap.put(globalSession.getXid(), globalSession);
         });
@@ -79,9 +80,11 @@ public class RaftSessionSnapshot implements java.io.Serializable  {
         if (CollectionUtils.isEmpty(globalSession.getBranchSessions())) {
             globalsessions.put(globalSessionByte, Collections.emptyList());
         } else {
-            globalsessions.put(globalSessionByte, globalSession.getBranchSessions().parallelStream()
-                .map(branch -> branch.encode()).collect(Collectors.toList()));
+            globalsessions.put(
+                    globalSessionByte,
+                    globalSession.getBranchSessions().parallelStream()
+                            .map(branch -> branch.encode())
+                            .collect(Collectors.toList()));
         }
     }
-
 }

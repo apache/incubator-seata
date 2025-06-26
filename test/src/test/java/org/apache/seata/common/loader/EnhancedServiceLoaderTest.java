@@ -16,10 +16,10 @@
  */
 package org.apache.seata.common.loader;
 
-import java.util.List;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
 
 /**
  * test  EnhancedServiceLoader
@@ -27,18 +27,16 @@ import org.junit.jupiter.api.Test;
 public class EnhancedServiceLoaderTest {
 
     @Test
-    public void testLoadBeanByOrder(){
-        LoaderTestSPI loader  = EnhancedServiceLoader.load(LoaderTestSPI.class, EnhancedServiceLoaderTest.class.getClassLoader());
+    public void testLoadBeanByOrder() {
+        LoaderTestSPI loader =
+                EnhancedServiceLoader.load(LoaderTestSPI.class, EnhancedServiceLoaderTest.class.getClassLoader());
         System.out.println(loader.echo());
         Assertions.assertEquals("impl_2", loader.echo());
     }
 
     @Test
-    public void testLoadAll(){
+    public void testLoadAll() {
         List<LoaderTestSPI> list = EnhancedServiceLoader.loadAll(LoaderTestSPI.class);
         Assertions.assertEquals(2, list.size());
     }
-
-
 }
-

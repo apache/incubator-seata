@@ -16,9 +16,10 @@
  */
 package org.apache.seata.core.rpc.processor.client;
 
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import org.apache.seata.core.protocol.HeartbeatMessage;
@@ -29,17 +30,16 @@ import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.mockito.ArgumentMatchers;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -47,11 +47,14 @@ import static org.mockito.Mockito.when;
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ClientHeartbeatProcessorTest {
+    private static final String CLASS_NAME = "org.apache.seata.core.rpc.processor.client.ClientHeartbeatProcessor";
+
+    private final List<Logger> watchedLoggers = new ArrayList<>();
+    private final ListAppender<ILoggingEvent> logWatcher = new ListAppender<>();
+
     private ClientHeartbeatProcessor processor;
     private ChannelHandlerContext mockCtx;
     private RpcMessage mockRpcMessage;
-    private Logger mockLogger;
-    private MockedStatic<LoggerFactory> mockedLoggerFactory;
 
     /**
      * Sets up.
@@ -60,12 +63,17 @@ public class ClientHeartbeatProcessorTest {
     void setUp() {
         mockCtx = mock(ChannelHandlerContext.class);
         mockRpcMessage = mock(RpcMessage.class);
-        mockLogger = mock(Logger.class);
-
-        // Mock static LoggerFactory to control LOGGER behavior
-        mockedLoggerFactory = Mockito.mockStatic(LoggerFactory.class);
-        mockedLoggerFactory.when(() -> LoggerFactory.getLogger(ClientHeartbeatProcessor.class)).thenReturn(mockLogger);
+        logWatcher.start();
+        setUpLogger();
         processor = new ClientHeartbeatProcessor();
+    }
+
+    /**
+     * Tear down.
+     */
+    @AfterEach
+    void tearDown() {
+        watchedLoggers.forEach(Logger::detachAndStopAllAppenders);
     }
 
     /**
@@ -84,14 +92,14 @@ public class ClientHeartbeatProcessorTest {
         when(mockChannel.remoteAddress()).thenReturn(mockRemoteAddress);
 
         when(mockRpcMessage.getBody()).thenReturn(HeartbeatMessage.PONG);
-        when(mockLogger.isDebugEnabled()).thenReturn(true);
         assertTrue(LoggerFactory.getLogger(ClientHeartbeatProcessor.class).isDebugEnabled());
 
         // Act
         processor.process(mockCtx, mockRpcMessage);
 
         // Assert
-        verify(mockLogger).debug("received PONG from {}", mockRemoteAddress);
+        assertTrue(
+                getLogs(Level.DEBUG).stream().anyMatch(log -> log.equals("received PONG from " + mockRemoteAddress)));
     }
 
     /**
@@ -104,22 +112,25 @@ public class ClientHeartbeatProcessorTest {
     void process_ShouldNotLog_WhenReceiveNonPongMessage() throws Exception {
         // Arrange
         when(mockRpcMessage.getBody()).thenReturn("OTHER_MESSAGE");
-        when(mockLogger.isDebugEnabled()).thenReturn(true);
 
         // Act
         processor.process(mockCtx, mockRpcMessage);
 
         // Assert
-        verify(mockLogger, never()).debug(anyString(), ArgumentMatchers.<Object[]>any());
+        assertTrue(getLogs(Level.DEBUG).isEmpty());
     }
 
-    /**
-     * Tear down.
-     */
-    @AfterEach
-    void tearDown() {
-        if (mockedLoggerFactory != null) {
-            mockedLoggerFactory.close();
-        }
+    private List<String> getLogs(Level level) {
+        return logWatcher.list.stream()
+                .filter(event -> event.getLoggerName().endsWith(CLASS_NAME)
+                        && event.getLevel().equals(level))
+                .map(ILoggingEvent::getFormattedMessage)
+                .collect(Collectors.toList());
+    }
+
+    private void setUpLogger() {
+        Logger logger = ((Logger) LoggerFactory.getLogger(CLASS_NAME));
+        logger.addAppender(logWatcher);
+        watchedLoggers.add(logger);
     }
 }

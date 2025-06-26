@@ -101,18 +101,26 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         String csrfIgnoreUrls = env.getProperty("seata.security.csrf-ignore-urls");
-        CsrfConfigurer<HttpSecurity> csrf = http.authorizeRequests().anyRequest().authenticated().and()
-            // custom token authorize exception handler
-            .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
-            // since we use jwt, session is not necessary
-            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).disable().csrf();
+        CsrfConfigurer<HttpSecurity> csrf = http.authorizeRequests()
+                .anyRequest()
+                .authenticated()
+                .and()
+                // custom token authorize exception handler
+                .exceptionHandling()
+                .authenticationEntryPoint(unauthorizedHandler)
+                .and()
+                // since we use jwt, session is not necessary
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .disable()
+                .csrf();
         if (StringUtils.isNotBlank(csrfIgnoreUrls)) {
             csrf.ignoringAntMatchers(csrfIgnoreUrls.trim().split(SECURITY_IGNORE_URLS_SPILT_CHAR));
         }
         csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
-            // don't disable csrf, jwt may be implemented based on cookies
-        http.addFilterBefore(new JwtAuthenticationTokenFilter(tokenProvider),
-            UsernamePasswordAuthenticationFilter.class);
+        // don't disable csrf, jwt may be implemented based on cookies
+        http.addFilterBefore(
+                new JwtAuthenticationTokenFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class);
 
         // disable cache
         http.headers().cacheControl();
@@ -127,5 +135,4 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
 }

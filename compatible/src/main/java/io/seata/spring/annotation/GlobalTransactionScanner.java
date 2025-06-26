@@ -93,7 +93,8 @@ public class GlobalTransactionScanner extends org.apache.seata.spring.annotation
      * @param exposeProxy        the exposeProxy
      * @param failureHandlerHook the failure handler hook
      */
-    public GlobalTransactionScanner(String applicationId, String txServiceGroup, boolean exposeProxy, FailureHandler failureHandlerHook) {
+    public GlobalTransactionScanner(
+            String applicationId, String txServiceGroup, boolean exposeProxy, FailureHandler failureHandlerHook) {
         super(applicationId, txServiceGroup, exposeProxy, failureHandlerHook);
     }
 
@@ -105,7 +106,8 @@ public class GlobalTransactionScanner extends org.apache.seata.spring.annotation
      * @param mode               the mode
      * @param failureHandlerHook the failure handler hook
      */
-    public GlobalTransactionScanner(String applicationId, String txServiceGroup, int mode, FailureHandler failureHandlerHook) {
+    public GlobalTransactionScanner(
+            String applicationId, String txServiceGroup, int mode, FailureHandler failureHandlerHook) {
         super(applicationId, txServiceGroup, mode, false, failureHandlerHook);
     }
 
@@ -118,7 +120,12 @@ public class GlobalTransactionScanner extends org.apache.seata.spring.annotation
      * @param exposeProxy        the exposeProxy
      * @param failureHandlerHook the failure handler hook
      */
-    public GlobalTransactionScanner(String applicationId, String txServiceGroup, int mode, boolean exposeProxy, FailureHandler failureHandlerHook) {
+    public GlobalTransactionScanner(
+            String applicationId,
+            String txServiceGroup,
+            int mode,
+            boolean exposeProxy,
+            FailureHandler failureHandlerHook) {
         super(applicationId, txServiceGroup, mode, exposeProxy, failureHandlerHook);
     }
 
@@ -127,23 +134,32 @@ public class GlobalTransactionScanner extends org.apache.seata.spring.annotation
             LOGGER.info("Initializing Global Transaction Clients ... ");
         }
         if (DEFAULT_TX_GROUP_OLD.equals(getTxServiceGroup())) {
-            LOGGER.warn("the default value of seata.tx-service-group: {} has already changed to {} since Seata 1.5, " +
-                            "please change your default configuration as soon as possible " +
-                            "and we don't recommend you to use default tx-service-group's value provided by seata",
-                    DEFAULT_TX_GROUP_OLD, DEFAULT_TX_GROUP);
+            LOGGER.warn(
+                    "the default value of seata.tx-service-group: {} has already changed to {} since Seata 1.5, "
+                            + "please change your default configuration as soon as possible "
+                            + "and we don't recommend you to use default tx-service-group's value provided by seata",
+                    DEFAULT_TX_GROUP_OLD,
+                    DEFAULT_TX_GROUP);
         }
         if (StringUtils.isNullOrEmpty(getApplicationId()) || StringUtils.isNullOrEmpty(getTxServiceGroup())) {
-            throw new IllegalArgumentException(String.format("applicationId: %s, txServiceGroup: %s", getApplicationId(), getTxServiceGroup()));
+            throw new IllegalArgumentException(
+                    String.format("applicationId: %s, txServiceGroup: %s", getApplicationId(), getTxServiceGroup()));
         }
-        //init TM
+        // init TM
         TMClient.init(getApplicationId(), getTxServiceGroup(), getAccessKey(), getSecretKey());
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Transaction Manager Client is initialized. applicationId[{}] txServiceGroup[{}]", getApplicationId(), getTxServiceGroup());
+            LOGGER.info(
+                    "Transaction Manager Client is initialized. applicationId[{}] txServiceGroup[{}]",
+                    getApplicationId(),
+                    getTxServiceGroup());
         }
-        //init RM
+        // init RM
         RMClient.init(getApplicationId(), getTxServiceGroup());
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Resource Manager is initialized. applicationId[{}] txServiceGroup[{}]", getApplicationId(), getTxServiceGroup());
+            LOGGER.info(
+                    "Resource Manager is initialized. applicationId[{}] txServiceGroup[{}]",
+                    getApplicationId(),
+                    getTxServiceGroup());
         }
 
         if (LOGGER.isInfoEnabled()) {

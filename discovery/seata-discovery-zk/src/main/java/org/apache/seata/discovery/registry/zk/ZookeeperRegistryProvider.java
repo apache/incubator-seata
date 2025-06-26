@@ -20,7 +20,6 @@ import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.discovery.registry.RegistryProvider;
 import org.apache.seata.discovery.registry.RegistryService;
 
-
 @LoadLevel(name = "ZK", order = 1)
 public class ZookeeperRegistryProvider implements RegistryProvider {
     @Override

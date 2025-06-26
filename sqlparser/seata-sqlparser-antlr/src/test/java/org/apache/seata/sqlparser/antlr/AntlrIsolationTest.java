@@ -26,16 +26,16 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-
 public class AntlrIsolationTest {
 
-    String TEST_SQL = "SELECT name,phone FROM t1 WHERE id = 1 and username = '11' and age = 'a' or hz = '1' or aa = 1 FOR UPDATE";
+    String TEST_SQL =
+            "SELECT name,phone FROM t1 WHERE id = 1 and username = '11' and age = 'a' or hz = '1' or aa = 1 FOR UPDATE";
 
     @Test
     public void testAntlrIsolation() {
-        AntlrDelegatingSQLRecognizerFactory recognizerFactory = (AntlrDelegatingSQLRecognizerFactory) EnhancedServiceLoader.load(SQLRecognizerFactory.class, SqlParserType.SQL_PARSER_TYPE_ANTLR);
+        AntlrDelegatingSQLRecognizerFactory recognizerFactory = (AntlrDelegatingSQLRecognizerFactory)
+                EnhancedServiceLoader.load(SQLRecognizerFactory.class, SqlParserType.SQL_PARSER_TYPE_ANTLR);
         List<SQLRecognizer> sqlRecognizer = recognizerFactory.create(TEST_SQL, JdbcConstants.MYSQL);
         Assertions.assertNotNull(sqlRecognizer);
     }
-
 }

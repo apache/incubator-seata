@@ -36,5 +36,4 @@ public class RegistryMeterKeyTest {
         Assertions.assertNotEquals(meterKey2, meterKey1);
         Assertions.assertEquals(meterKey3, meterKey1);
     }
-
 }

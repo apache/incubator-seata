@@ -64,7 +64,8 @@ public class GrpcEncoder extends ChannelOutboundHandlerAdapter {
         ByteString dataBytes;
         if (messageType != ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST
                 && messageType != ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE) {
-            Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(SerializerType.GRPC.getCode()));
+            Serializer serializer =
+                    SerializerServiceLoader.load(SerializerType.getByCode(SerializerType.GRPC.getCode()));
             byte[] serializedBytes = serializer.serialize(body);
             Compressor compressor = CompressorFactory.getCompressor(rpcMessage.getCompressor());
             dataBytes = ByteString.copyFrom(compressor.compress(serializedBytes));
@@ -95,5 +96,4 @@ public class GrpcEncoder extends ChannelOutboundHandlerAdapter {
             ctx.writeAndFlush(new DefaultHttp2DataFrame(Unpooled.wrappedBuffer(messageWithPrefix)));
         }
     }
-
 }

@@ -21,6 +21,7 @@ import java.sql.SQLException;
 public class SeataRuntimeException extends RuntimeException {
     private int vendorCode;
     private String sqlState;
+
     public SeataRuntimeException(ErrorCode errorCode, String... params) {
         super(errorCode.getMessage(params));
         this.vendorCode = errorCode.getCode();

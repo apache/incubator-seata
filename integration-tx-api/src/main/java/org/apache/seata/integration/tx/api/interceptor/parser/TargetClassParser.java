@@ -16,11 +16,9 @@
  */
 package org.apache.seata.integration.tx.api.interceptor.parser;
 
-
 public interface TargetClassParser {
 
     Class<?> findTargetClass(Object target) throws Exception;
 
     Class<?>[] findInterfaces(Object target) throws Exception;
-
 }

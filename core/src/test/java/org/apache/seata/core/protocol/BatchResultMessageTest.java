@@ -46,7 +46,8 @@ class BatchResultMessageTest {
     void setResultMessages() {
         BatchResultMessage batchResultMessage = new BatchResultMessage();
 
-        List<AbstractResultMessage> resultMessages = Arrays.asList(new RegisterTMResponse(), new RegisterRMResponse(false));
+        List<AbstractResultMessage> resultMessages =
+                Arrays.asList(new RegisterTMResponse(), new RegisterRMResponse(false));
         batchResultMessage.setResultMessages(resultMessages);
 
         Assertions.assertIterableEquals(resultMessages, batchResultMessage.getResultMessages());

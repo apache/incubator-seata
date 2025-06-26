@@ -182,7 +182,6 @@ public class ProtocolRpcMessageV1 implements ProtocolRpcMessage {
         return rpcMessage;
     }
 
-
     @Override
     public void rpcMsg2ProtocolMsg(RpcMessage rpcMessage) {
         this.body = rpcMessage.getBody();

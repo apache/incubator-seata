@@ -16,9 +16,9 @@
  */
 package org.apache.seata.rm.datasource;
 
-import javax.sql.DataSource;
-
 import org.apache.seata.core.model.BranchType;
+
+import javax.sql.DataSource;
 
 /**
  * The interface Seata data source.

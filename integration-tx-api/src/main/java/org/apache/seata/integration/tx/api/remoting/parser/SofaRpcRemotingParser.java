@@ -27,14 +27,11 @@ import org.apache.seata.integration.tx.api.remoting.RemotingDesc;
  */
 public class SofaRpcRemotingParser extends AbstractedRemotingParser {
 
-
     @Override
-    public boolean isReference(Object bean, String beanName)
-            throws FrameworkException {
+    public boolean isReference(Object bean, String beanName) throws FrameworkException {
         String beanClassName = bean.getClass().getName();
         return "com.alipay.sofa.runtime.spring.factory.ReferenceFactoryBean".equals(beanClassName);
     }
-
 
     @Override
     public boolean isService(Object bean, String beanName) throws FrameworkException {
@@ -55,7 +52,7 @@ public class SofaRpcRemotingParser extends AbstractedRemotingParser {
         }
         try {
             RemotingDesc serviceBeanDesc = new RemotingDesc();
-            Class<?> interfaceClass = (Class<?>)ReflectionUtil.invokeMethod(bean, "getInterfaceClass");
+            Class<?> interfaceClass = (Class<?>) ReflectionUtil.invokeMethod(bean, "getInterfaceClass");
             String interfaceClassName = ReflectionUtil.getFieldValue(bean, "interfaceType");
             String uniqueId = ReflectionUtil.getFieldValue(bean, "uniqueId");
             serviceBeanDesc.setServiceClass(interfaceClass);

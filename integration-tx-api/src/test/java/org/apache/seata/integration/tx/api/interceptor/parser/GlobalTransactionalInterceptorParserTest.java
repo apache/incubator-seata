@@ -20,23 +20,22 @@ import org.apache.seata.integration.tx.api.interceptor.handler.ProxyInvocationHa
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-
 public class GlobalTransactionalInterceptorParserTest {
 
     @Test
     void parserInterfaceToProxy() throws Exception {
 
-        //given
+        // given
         BusinessImpl business = new BusinessImpl();
 
-        GlobalTransactionalInterceptorParser globalTransactionalInterceptorParser = new GlobalTransactionalInterceptorParser();
+        GlobalTransactionalInterceptorParser globalTransactionalInterceptorParser =
+                new GlobalTransactionalInterceptorParser();
 
-        //when
-        ProxyInvocationHandler proxyInvocationHandler = globalTransactionalInterceptorParser.parserInterfaceToProxy(business, business.getClass().getName());
+        // when
+        ProxyInvocationHandler proxyInvocationHandler = globalTransactionalInterceptorParser.parserInterfaceToProxy(
+                business, business.getClass().getName());
 
-        //then
+        // then
         Assertions.assertNotNull(proxyInvocationHandler);
-
-
     }
 }

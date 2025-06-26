@@ -16,9 +16,6 @@
  */
 package io.seata.saga.rm;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import io.seata.saga.statelang.domain.ExecutionStatus;
 import io.seata.saga.statelang.domain.StateMachineInstance;
 import org.apache.seata.common.exception.FrameworkErrorCode;
@@ -34,6 +31,9 @@ import org.apache.seata.saga.rm.SagaResource;
 import org.apache.seata.saga.statelang.domain.RecoverStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The type Saga resource manager.
@@ -51,8 +51,7 @@ public class SagaResourceManager extends AbstractResourceManager {
     /**
      * Instantiates a new saga resource manager.
      */
-    public SagaResourceManager() {
-    }
+    public SagaResourceManager() {}
 
     /**
      * registry saga resource
@@ -61,7 +60,7 @@ public class SagaResourceManager extends AbstractResourceManager {
      */
     @Override
     public void registerResource(Resource resource) {
-        SagaResource sagaResource = (SagaResource)resource;
+        SagaResource sagaResource = (SagaResource) resource;
         sagaResourceCache.put(sagaResource.getResourceId(), sagaResource);
         super.registerResource(sagaResource);
     }
@@ -83,28 +82,30 @@ public class SagaResourceManager extends AbstractResourceManager {
      * @throws TransactionException the transaction exception
      */
     @Override
-    public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId,
-                                     String applicationData) throws TransactionException {
+    public BranchStatus branchCommit(
+            BranchType branchType, String xid, long branchId, String resourceId, String applicationData)
+            throws TransactionException {
         try {
-            StateMachineInstance machineInstance = StateMachineEngineHolder.getStateMachineEngine().forward(xid, null);
+            StateMachineInstance machineInstance =
+                    StateMachineEngineHolder.getStateMachineEngine().forward(xid, null);
 
             if (ExecutionStatus.SU.equals(machineInstance.getStatus())
-                && machineInstance.getCompensationStatus() == null) {
+                    && machineInstance.getCompensationStatus() == null) {
                 return BranchStatus.PhaseTwo_Committed;
             } else if (ExecutionStatus.SU.equals(machineInstance.getCompensationStatus())) {
                 return BranchStatus.PhaseTwo_Rollbacked;
-            } else if (ExecutionStatus.FA.equals(machineInstance.getCompensationStatus()) || ExecutionStatus.UN.equals(
-                machineInstance.getCompensationStatus())) {
+            } else if (ExecutionStatus.FA.equals(machineInstance.getCompensationStatus())
+                    || ExecutionStatus.UN.equals(machineInstance.getCompensationStatus())) {
                 return BranchStatus.PhaseTwo_RollbackFailed_Retryable;
             } else if (ExecutionStatus.FA.equals(machineInstance.getStatus())
-                && machineInstance.getCompensationStatus() == null) {
+                    && machineInstance.getCompensationStatus() == null) {
                 return BranchStatus.PhaseOne_Failed;
             }
 
         } catch (ForwardInvalidException e) {
             LOGGER.error("StateMachine forward failed, xid: " + xid, e);
 
-            //if StateMachineInstanceNotExists stop retry
+            // if StateMachineInstanceNotExists stop retry
             if (FrameworkErrorCode.StateMachineInstanceNotExists.equals(e.getErrcode())) {
                 return BranchStatus.PhaseTwo_Committed;
             }
@@ -126,29 +127,32 @@ public class SagaResourceManager extends AbstractResourceManager {
      * @throws TransactionException the transaction exception
      */
     @Override
-    public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId,
-                                       String applicationData) throws TransactionException {
+    public BranchStatus branchRollback(
+            BranchType branchType, String xid, long branchId, String resourceId, String applicationData)
+            throws TransactionException {
         try {
-            StateMachineInstance stateMachineInstance = StateMachineEngineHolder.getStateMachineEngine().reloadStateMachineInstance(xid);
+            StateMachineInstance stateMachineInstance =
+                    StateMachineEngineHolder.getStateMachineEngine().reloadStateMachineInstance(xid);
             if (stateMachineInstance == null) {
                 return BranchStatus.PhaseTwo_Rollbacked;
             }
-            if (RecoverStrategy.Forward.equals(stateMachineInstance.getStateMachine().getRecoverStrategy())
-                && (GlobalStatus.TimeoutRollbacking.name().equals(applicationData)
-                        || GlobalStatus.TimeoutRollbackRetrying.name().equals(applicationData))) {
+            if (RecoverStrategy.Forward.equals(
+                            stateMachineInstance.getStateMachine().getRecoverStrategy())
+                    && (GlobalStatus.TimeoutRollbacking.name().equals(applicationData)
+                            || GlobalStatus.TimeoutRollbackRetrying.name().equals(applicationData))) {
                 LOGGER.warn("Retry by custom recover strategy [Forward] on timeout, SAGA global[{}]", xid);
                 return BranchStatus.PhaseTwo_CommitFailed_Retryable;
             }
 
-            stateMachineInstance = StateMachineEngineHolder.getStateMachineEngine().compensate(xid,
-                null);
+            stateMachineInstance =
+                    StateMachineEngineHolder.getStateMachineEngine().compensate(xid, null);
             if (ExecutionStatus.SU.equals(stateMachineInstance.getCompensationStatus())) {
                 return BranchStatus.PhaseTwo_Rollbacked;
             }
         } catch (EngineExecutionException e) {
             LOGGER.error("StateMachine compensate failed, xid: " + xid, e);
 
-            //if StateMachineInstanceNotExists stop retry
+            // if StateMachineInstanceNotExists stop retry
             if (FrameworkErrorCode.StateMachineInstanceNotExists.equals(e.getErrcode())) {
                 return BranchStatus.PhaseTwo_Rollbacked;
             }

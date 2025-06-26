@@ -59,11 +59,9 @@ public class BranchDO {
         return testByte;
     }
 
-    public BranchDO() {
-    }
+    public BranchDO() {}
 
-    public BranchDO(String xid, Long transactionId, Integer status, Double test,
-            Date gmtCreate) {
+    public BranchDO(String xid, Long transactionId, Integer status, Double test, Date gmtCreate) {
         this.xid = xid;
         this.transactionId = transactionId;
         this.status = status;

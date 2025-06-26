@@ -16,6 +16,7 @@
  */
 package org.apache.seata.common.util;
 
+import javax.crypto.Cipher;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.KeyPair;
@@ -25,8 +26,6 @@ import java.security.PublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
-import javax.crypto.Cipher;
-
 
 public class ConfigTools {
 
@@ -115,5 +114,4 @@ public class ConfigTools {
     public static byte[] base642Byte(String base64Key) {
         return Base64.getDecoder().decode(base64Key);
     }
-
 }

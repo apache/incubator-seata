@@ -152,5 +152,4 @@ public interface MessageType {
      * the constant TYPE_BATCH_RESULT_MSG
      */
     short TYPE_BATCH_RESULT_MSG = 121;
-
 }

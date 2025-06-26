@@ -1,3 +1,20 @@
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one or more
+    contributor license agreements.  See the NOTICE file distributed with
+    this work for additional information regarding copyright ownership.
+    The ASF licenses this file to You under the Apache License, Version 2.0
+    (the "License"); you may not use this file except in compliance with
+    the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+    
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+-->
+
 # Seata Saga state machine designer
 
 由于旧版 Saga 状态机设计器的基座框架 ggeditor 不再维护，且 ggeditor 暴露出来的漏洞较多，影响了项目整体安全性。所以我们采取重构状态机设计器的做法，并使用新框架 diagram-js 为基座构建新的设计器。本文档涵盖 diagram-js 框架使用指南、设计器实现思路、代码结构等方面，旨在提供一个文档方便社区协作。

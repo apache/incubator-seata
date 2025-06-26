@@ -16,13 +16,13 @@
  */
 package org.apache.seata.serializer.seata.protocol;
 
-import org.apache.seata.serializer.seata.SeataSerializer;
+import org.apache.seata.core.protocol.ProtocolConstants;
 import org.apache.seata.core.protocol.RegisterRMResponse;
 import org.apache.seata.core.protocol.ResultCode;
+import org.apache.seata.serializer.seata.SeataSerializer;
 import org.junit.jupiter.api.Test;
-import org.apache.seata.core.protocol.ProtocolConstants;
-import static org.assertj.core.api.Assertions.assertThat;
 
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * The type Register rm response codec test.
@@ -39,7 +39,7 @@ public class RegisterRMResponseSerializerTest {
      * Test codec.
      */
     @Test
-    public void test_codec(){
+    public void test_codec() {
         RegisterRMResponse registerRMResponse = new RegisterRMResponse();
         registerRMResponse.setExtraData("abc123");
         registerRMResponse.setIdentified(true);
@@ -54,8 +54,8 @@ public class RegisterRMResponseSerializerTest {
         assertThat(registerRMRespons2.isIdentified()).isEqualTo(registerRMResponse.isIdentified());
         assertThat(registerRMRespons2.getVersion()).isEqualTo(registerRMResponse.getVersion());
 
-//        Assert.assertEquals(registerRMRespons2.getExtraData(), registerRMResponse.getExtraData());
-//        Assert.assertEquals(registerRMRespons2.getMsg(), registerRMResponse.getMsg());
-//        Assert.assertEquals(registerRMRespons2.getByCode(), registerRMResponse.getByCode());
+        //        Assert.assertEquals(registerRMRespons2.getExtraData(), registerRMResponse.getExtraData());
+        //        Assert.assertEquals(registerRMRespons2.getMsg(), registerRMResponse.getMsg());
+        //        Assert.assertEquals(registerRMRespons2.getByCode(), registerRMResponse.getByCode());
     }
 }

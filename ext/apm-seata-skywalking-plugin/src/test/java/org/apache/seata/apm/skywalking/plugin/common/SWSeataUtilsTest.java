@@ -24,7 +24,6 @@ import org.apache.seata.core.protocol.transaction.GlobalBeginRequest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-
 public class SWSeataUtilsTest {
 
     @Test

@@ -68,5 +68,6 @@ public enum RaftSyncMsgType {
     /**
      * update vgroup mapping
      */
-    UPDATE_VGROUP_MAPPING,;
+    UPDATE_VGROUP_MAPPING,
+    ;
 }

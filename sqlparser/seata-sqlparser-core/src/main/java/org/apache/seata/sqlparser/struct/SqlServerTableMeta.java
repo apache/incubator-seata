@@ -33,5 +33,4 @@ public class SqlServerTableMeta extends TableMeta {
     public void setTableIdentifyExistence(boolean tableIdentifyExistence) {
         this.tableIdentifyExistence = tableIdentifyExistence;
     }
-
 }

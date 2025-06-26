@@ -31,8 +31,7 @@ public class RaftGlobalSessionSyncMsg extends RaftBaseMsg {
         this.globalSession = globalSession;
     }
 
-    public RaftGlobalSessionSyncMsg() {
-    }
+    public RaftGlobalSessionSyncMsg() {}
 
     public GlobalTransactionDTO getGlobalSession() {
         return globalSession;
@@ -46,6 +45,4 @@ public class RaftGlobalSessionSyncMsg extends RaftBaseMsg {
     public String toString() {
         return StringUtils.toString(this);
     }
-
-
 }

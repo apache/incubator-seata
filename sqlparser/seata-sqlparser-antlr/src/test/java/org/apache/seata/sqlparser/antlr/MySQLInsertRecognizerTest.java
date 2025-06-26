@@ -16,12 +16,12 @@
  */
 package org.apache.seata.sqlparser.antlr;
 
+import org.antlr.v4.runtime.CommonTokenStream;
 import org.apache.seata.sqlparser.antlr.mysql.MySqlContext;
 import org.apache.seata.sqlparser.antlr.mysql.parser.MySqlLexer;
 import org.apache.seata.sqlparser.antlr.mysql.parser.MySqlParser;
 import org.apache.seata.sqlparser.antlr.mysql.stream.ANTLRNoCaseStringStream;
 import org.apache.seata.sqlparser.antlr.mysql.visit.InsertStatementSqlVisitor;
-import org.antlr.v4.runtime.CommonTokenStream;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -55,9 +55,13 @@ public class MySQLInsertRecognizerTest {
         visitor.visit(rootContext);
 
         Assertions.assertEquals("t1", visitorSqlContext.tableName);
-        Assertions.assertEquals(Collections.singletonList("id"), Arrays.asList(visitorSqlContext.getInsertColumnNames().get(0).getInsertColumnName()));
+        Assertions.assertEquals(
+                Collections.singletonList("id"),
+                Arrays.asList(visitorSqlContext.getInsertColumnNames().get(0).getInsertColumnName()));
         Assertions.assertEquals(1, visitorSqlContext.insertRows);
-        Assertions.assertEquals(Arrays.asList("1"), visitorSqlContext.getInsertForValColumnNames().get(0));
+        Assertions.assertEquals(
+                Arrays.asList("1"),
+                visitorSqlContext.getInsertForValColumnNames().get(0));
     }
 
     /**
@@ -81,11 +85,17 @@ public class MySQLInsertRecognizerTest {
         visitor.visit(rootContext);
 
         Assertions.assertEquals("t1", visitorSqlContext.tableName);
-        Assertions.assertEquals(Arrays.asList("name1", "name2"), visitorSqlContext.getInsertColumnNames().stream().map(insert -> {
-            return insert.getInsertColumnName();
-        }).collect(Collectors.toList()));
+        Assertions.assertEquals(
+                Arrays.asList("name1", "name2"),
+                visitorSqlContext.getInsertColumnNames().stream()
+                        .map(insert -> {
+                            return insert.getInsertColumnName();
+                        })
+                        .collect(Collectors.toList()));
         Assertions.assertEquals(1, visitorSqlContext.insertRows);
-        Assertions.assertEquals(Arrays.asList("name1", "12"), visitorSqlContext.getInsertForValColumnNames().get(0));
+        Assertions.assertEquals(
+                Arrays.asList("name1", "12"),
+                visitorSqlContext.getInsertForValColumnNames().get(0));
     }
 
     /**
@@ -108,16 +118,21 @@ public class MySQLInsertRecognizerTest {
         InsertStatementSqlVisitor visitor = new InsertStatementSqlVisitor(visitorSqlContext);
         visitor.visit(rootContext);
 
-
         Assertions.assertEquals("t1", visitorSqlContext.tableName);
-        Assertions.assertEquals("name2", visitorSqlContext.getInsertColumnNames().get(1).getInsertColumnName());
+        Assertions.assertEquals(
+                "name2", visitorSqlContext.getInsertColumnNames().get(1).getInsertColumnName());
 
         Integer insertRows = visitorSqlContext.insertRows;
         Assertions.assertEquals(3, insertRows);
 
-        Assertions.assertEquals(Arrays.asList("name1", "name2"), visitorSqlContext.getInsertForValColumnNames().get(0));
-        Assertions.assertEquals(Arrays.asList("name3", "name4"), visitorSqlContext.getInsertForValColumnNames().get(1));
-        Assertions.assertEquals(Arrays.asList("name5", "name6"), visitorSqlContext.getInsertForValColumnNames().get(2));
+        Assertions.assertEquals(
+                Arrays.asList("name1", "name2"),
+                visitorSqlContext.getInsertForValColumnNames().get(0));
+        Assertions.assertEquals(
+                Arrays.asList("name3", "name4"),
+                visitorSqlContext.getInsertForValColumnNames().get(1));
+        Assertions.assertEquals(
+                Arrays.asList("name5", "name6"),
+                visitorSqlContext.getInsertForValColumnNames().get(2));
     }
-
 }

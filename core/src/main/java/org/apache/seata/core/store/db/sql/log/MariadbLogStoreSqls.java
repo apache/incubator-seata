@@ -22,5 +22,4 @@ import org.apache.seata.common.loader.LoadLevel;
  * Database log store mariadb sql
  */
 @LoadLevel(name = "mariadb")
-public class MariadbLogStoreSqls extends MysqlLogStoreSqls {
-}
+public class MariadbLogStoreSqls extends MysqlLogStoreSqls {}

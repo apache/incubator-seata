@@ -16,14 +16,14 @@
  */
 package org.apache.seata.rm.datasource.undo.mariadb;
 
+import org.apache.seata.common.loader.LoadLevel;
+import org.apache.seata.rm.datasource.undo.UndoLogParser;
+import org.apache.seata.rm.datasource.undo.mysql.MySQLUndoLogManager;
+import org.apache.seata.sqlparser.util.JdbcConstants;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Date;
-import org.apache.seata.rm.datasource.undo.UndoLogParser;
-import org.apache.seata.rm.datasource.undo.mysql.MySQLUndoLogManager;
-import org.apache.seata.common.loader.LoadLevel;
-import org.apache.seata.sqlparser.util.JdbcConstants;
-
 
 @LoadLevel(name = JdbcConstants.MARIADB)
 public class MariadbUndoLogManager extends MySQLUndoLogManager {
@@ -34,14 +34,14 @@ public class MariadbUndoLogManager extends MySQLUndoLogManager {
     }
 
     @Override
-    protected void insertUndoLogWithNormal(String xid, long branchId, String rollbackCtx, byte[] undoLogContent,
-        Connection conn) throws SQLException {
+    protected void insertUndoLogWithNormal(
+            String xid, long branchId, String rollbackCtx, byte[] undoLogContent, Connection conn) throws SQLException {
         super.insertUndoLogWithNormal(xid, branchId, rollbackCtx, undoLogContent, conn);
     }
 
     @Override
     protected void insertUndoLogWithGlobalFinished(String xid, long branchId, UndoLogParser parser, Connection conn)
-        throws SQLException {
+            throws SQLException {
         super.insertUndoLogWithGlobalFinished(xid, branchId, parser, conn);
     }
 }

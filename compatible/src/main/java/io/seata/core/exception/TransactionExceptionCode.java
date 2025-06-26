@@ -143,7 +143,6 @@ public enum TransactionExceptionCode {
      */
     Broken;
 
-
     /**
      * Get transaction exception code.
      *
@@ -151,7 +150,7 @@ public enum TransactionExceptionCode {
      * @return the transaction exception code
      */
     public static TransactionExceptionCode get(byte ordinal) {
-        return get((int)ordinal);
+        return get((int) ordinal);
     }
 
     /**
@@ -173,5 +172,4 @@ public enum TransactionExceptionCode {
     public org.apache.seata.core.exception.TransactionExceptionCode convertTransactionExceptionCode() {
         return org.apache.seata.core.exception.TransactionExceptionCode.get(this.ordinal());
     }
-
 }

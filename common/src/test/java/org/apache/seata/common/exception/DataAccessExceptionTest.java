@@ -38,12 +38,16 @@ public class DataAccessExceptionTest {
 
     @Test
     public void testConstructorWithMessageAndFrameworkErrorCode() {
-        exceptionAsserts(new DataAccessException(FrameworkErrorCode.UnknownAppError.getErrMessage(), FrameworkErrorCode.UnknownAppError));
+        exceptionAsserts(new DataAccessException(
+                FrameworkErrorCode.UnknownAppError.getErrMessage(), FrameworkErrorCode.UnknownAppError));
     }
 
     @Test
     public void testConstructorWithCauseExceptionMessageAndFrameworkErrorCode() {
-        exceptionAsserts(new DataAccessException(new Throwable(), FrameworkErrorCode.UnknownAppError.getErrMessage(), FrameworkErrorCode.UnknownAppError));
+        exceptionAsserts(new DataAccessException(
+                new Throwable(),
+                FrameworkErrorCode.UnknownAppError.getErrMessage(),
+                FrameworkErrorCode.UnknownAppError));
     }
 
     @Test
@@ -52,7 +56,9 @@ public class DataAccessExceptionTest {
     }
 
     private static void exceptionAsserts(DataAccessException exception) {
-        assertThat(exception).isInstanceOf(DataAccessException.class).hasMessage(FrameworkErrorCode.UnknownAppError.getErrMessage());
+        assertThat(exception)
+                .isInstanceOf(DataAccessException.class)
+                .hasMessage(FrameworkErrorCode.UnknownAppError.getErrMessage());
         assertThat(exception.getErrcode()).isEqualTo(FrameworkErrorCode.UnknownAppError);
     }
 }

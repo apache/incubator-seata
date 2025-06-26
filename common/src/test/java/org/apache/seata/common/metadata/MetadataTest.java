@@ -16,12 +16,13 @@
  */
 package org.apache.seata.common.metadata;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.seata.common.store.StoreMode;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MetadataTest {
 
@@ -69,7 +70,8 @@ public class MetadataTest {
         Assertions.assertEquals(StoreMode.RAFT, metadata.getStoreMode());
     }
 
-    @Test void testIsRaftMode() {
+    @Test
+    void testIsRaftMode() {
         Assertions.assertTrue(metadata.isRaftMode());
     }
 
@@ -98,12 +100,15 @@ public class MetadataTest {
         metadataResponse.setNodes(new ArrayList<>());
         Assertions.assertDoesNotThrow(() -> metadata.refreshMetadata("cluster", metadataResponse));
         metadataResponse.setStoreMode("unknown store");
-        Assertions.assertThrows(IllegalArgumentException.class, () -> metadata.refreshMetadata("cluster", metadataResponse));
+        Assertions.assertThrows(
+                IllegalArgumentException.class, () -> metadata.refreshMetadata("cluster", metadataResponse));
     }
 
     @Test
     public void testToString() {
-        Assertions.assertEquals("Metadata(leaders={}, clusterTerm={}, clusterNodes={\"cluster\"->{}}, storeMode=StoreMode.RAFT)", metadata.toString());
+        Assertions.assertEquals(
+                "Metadata(leaders={}, clusterTerm={}, clusterNodes={\"cluster\"->{}}, storeMode=StoreMode.RAFT)",
+                metadata.toString());
     }
 
     @Test
@@ -117,5 +122,4 @@ public class MetadataTest {
         result = StoreMode.contains("");
         Assertions.assertEquals(false, result);
     }
-
 }

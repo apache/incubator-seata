@@ -40,5 +40,4 @@ public class BranchTransactionDTO extends BranchTransactionDO {
     public void setLockKey(String lockKey) {
         this.lockKey = lockKey;
     }
-
 }

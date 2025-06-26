@@ -19,7 +19,8 @@
 -->
 <assembly>
     <id>${project.version}-incubating-bin</id>
-    <includeBaseDirectory>false</includeBaseDirectory>
+    <includeBaseDirectory>true</includeBaseDirectory>
+    <baseDirectory>apache-seata-${project.version}-incubating-bin</baseDirectory>
     <formats>
         <format>dir</format>
         <format>tar.gz</format>
@@ -41,6 +42,20 @@
             </includes>
             <outputDirectory>seata-server/</outputDirectory>
             <fileMode>0755</fileMode>
+        </fileSet>
+
+        <fileSet>
+            <includes>
+                <include>licenses/*</include>
+            </includes>
+            <outputDirectory>seata-namingserver/</outputDirectory>
+        </fileSet>
+
+        <fileSet>
+            <includes>
+                <include>licenses/*</include>
+            </includes>
+            <outputDirectory>seata-server/</outputDirectory>
         </fileSet>
 
         <fileSet>
@@ -103,13 +118,13 @@
         </file>
 
         <file>
-            <source>LICENSE</source>
+            <source>LICENSE-server</source>
             <destName>LICENSE</destName>
             <outputDirectory>seata-server/</outputDirectory>
         </file>
 
         <file>
-            <source>LICENSE</source>
+            <source>LICENSE-namingserver</source>
             <destName>LICENSE</destName>
             <outputDirectory>seata-namingserver/</outputDirectory>
         </file>
@@ -120,13 +135,13 @@
         </file>
 
         <file>
-            <source>NOTICE</source>
+            <source>NOTICE-server</source>
             <destName>NOTICE</destName>
             <outputDirectory>seata-server/</outputDirectory>
         </file>
 
         <file>
-            <source>NOTICE</source>
+            <source>NOTICE-namingserver</source>
             <destName>NOTICE</destName>
             <outputDirectory>seata-namingserver/</outputDirectory>
         </file>

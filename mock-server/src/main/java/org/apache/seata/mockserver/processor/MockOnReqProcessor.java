@@ -16,10 +16,6 @@
  */
 package org.apache.seata.mockserver.processor;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import io.netty.channel.ChannelHandlerContext;
 import org.apache.seata.core.protocol.AbstractMessage;
 import org.apache.seata.core.protocol.AbstractResultMessage;
@@ -33,12 +29,15 @@ import org.apache.seata.core.rpc.netty.ChannelManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Mock Remoting Processor
  **/
 public class MockOnReqProcessor extends MockRemotingProcessor {
     protected static final Logger LOGGER = LoggerFactory.getLogger(MockOnReqProcessor.class);
-
 
     public MockOnReqProcessor(RemotingServer remotingServer, TransactionMessageHandler handler) {
         super(remotingServer, handler);
@@ -60,7 +59,8 @@ public class MockOnReqProcessor extends MockRemotingProcessor {
                 AbstractMessage msg = mmsg.msgs.get(i);
                 resList.add(handler.onRequest(msg, rpcContext));
             }
-            AbstractResultMessage[] resultMsgs = Arrays.copyOf(resList.toArray(), resList.size(), AbstractResultMessage[].class);
+            AbstractResultMessage[] resultMsgs =
+                    Arrays.copyOf(resList.toArray(), resList.size(), AbstractResultMessage[].class);
             resultMessage.setMsgs(resultMsgs);
             remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), resultMessage);
             LOGGER.info("sendAsyncResponse: {}", resultMessage);
@@ -71,6 +71,4 @@ public class MockOnReqProcessor extends MockRemotingProcessor {
             LOGGER.info("sendAsyncResponse: {}", result);
         }
     }
-
-
 }

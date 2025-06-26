@@ -19,7 +19,6 @@ package org.apache.seata.rm.datasource.sql.struct;
 import java.util.ArrayList;
 import java.util.List;
 
-
 /**
  * The type Row.
  *
@@ -33,8 +32,7 @@ public class Row implements java.io.Serializable {
     /**
      * Instantiates a new Row.
      */
-    public Row() {
-    }
+    public Row() {}
 
     /**
      * Gets fields.

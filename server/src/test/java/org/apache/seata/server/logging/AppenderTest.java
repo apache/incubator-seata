@@ -21,18 +21,20 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import com.github.danielwegener.logback.kafka.KafkaAppender;
 import net.logstash.logback.appender.LogstashTcpSocketAppender;
+import org.apache.seata.server.DynamicPortTestConfig;
 import org.apache.seata.server.logging.logback.appender.MetricLogbackAppender;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.impl.StaticLoggerBinder;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 
 import java.lang.reflect.Field;
 import java.util.Iterator;
 
-
 @SpringBootTest
+@Import(DynamicPortTestConfig.class)
 public class AppenderTest {
 
     @BeforeAll
@@ -46,7 +48,8 @@ public class AppenderTest {
     @Test
     public void testAppenderEnabled() {
         LoggerContext lc = (LoggerContext) StaticLoggerBinder.getSingleton().getLoggerFactory();
-        Iterator<Appender<ILoggingEvent>> appenderIterator = lc.getLogger("ROOT").iteratorForAppenders();
+        Iterator<Appender<ILoggingEvent>> appenderIterator =
+                lc.getLogger("ROOT").iteratorForAppenders();
 
         while (appenderIterator.hasNext()) {
             Appender<ILoggingEvent> appender = appenderIterator.next();
@@ -54,7 +57,8 @@ public class AppenderTest {
                 KafkaAppender<ILoggingEvent> kafkaAppender = (KafkaAppender<ILoggingEvent>) appender;
 
                 try {
-                    // use reflection to obtain the "protect topic" fields of the abstract class inherited by the appender instance
+                    // use reflection to obtain the "protect topic" fields of the abstract class inherited by the
+                    // appender instance
                     Class<?> kafkaAppenderClass = kafkaAppender.getClass();
                     Field topicField = getDeclaredFieldRecursive(kafkaAppenderClass, "topic");
                     topicField.setAccessible(true);
@@ -77,8 +81,7 @@ public class AppenderTest {
         }
     }
 
-    private static Field getDeclaredFieldRecursive(Class<?> clazz, String fieldName)
-            throws NoSuchFieldException {
+    private static Field getDeclaredFieldRecursive(Class<?> clazz, String fieldName) throws NoSuchFieldException {
         try {
             return clazz.getDeclaredField(fieldName);
         } catch (NoSuchFieldException e) {

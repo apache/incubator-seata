@@ -28,7 +28,8 @@ import java.sql.Types;
 public class MySQLJsonHelper {
     public static String convertIfJson(Field field, TableMeta tableMeta) {
         ColumnMeta columnMeta = tableMeta.getColumnMeta(field.getName());
-        if (columnMeta != null && columnMeta.getDataType() == Types.OTHER
+        if (columnMeta != null
+                && columnMeta.getDataType() == Types.OTHER
                 && "JSON".equals(columnMeta.getDataTypeName())) {
             return "CONVERT(? USING utf8mb4)";
         }

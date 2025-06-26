@@ -30,48 +30,51 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
 
 @Component
 public class ClusterWatcherManager implements ClusterChangeListener {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private static final Map<String/* vgroup */, Queue<Watcher<?>>> WATCHERS = new ConcurrentHashMap<>();
+    private static final Map<String /* vgroup */, Queue<Watcher<?>>> WATCHERS = new ConcurrentHashMap<>();
 
-    private static final Map<String/* vgroup */, Long> GROUP_UPDATE_TIME = new ConcurrentHashMap<>();
+    private static final Map<String /* vgroup */, Long> GROUP_UPDATE_TIME = new ConcurrentHashMap<>();
 
     private final ScheduledThreadPoolExecutor scheduledThreadPoolExecutor =
-        new ScheduledThreadPoolExecutor(1, new CustomizableThreadFactory("long-polling"));
+            new ScheduledThreadPoolExecutor(1, new CustomizableThreadFactory("long-polling"));
 
     @PostConstruct
     public void init() {
         // Responds to monitors that time out
-        scheduledThreadPoolExecutor.scheduleAtFixedRate(() -> {
-            for (String group : WATCHERS.keySet()) {
-                Optional.ofNullable(WATCHERS.remove(group))
-                        .ifPresent(watchers -> watchers.parallelStream().forEach(watcher -> {
-                            if (System.currentTimeMillis() >= watcher.getTimeout()) {
-                                notify(watcher, HttpStatus.NOT_MODIFIED.value());
-                            }
-                            if (!watcher.isDone()) {
-                                // Re-register
-                                registryWatcher(watcher);
-                            }
-                        }));
-            }
-        }, 1, 1, TimeUnit.SECONDS);
+        scheduledThreadPoolExecutor.scheduleAtFixedRate(
+                () -> {
+                    for (String group : WATCHERS.keySet()) {
+                        Optional.ofNullable(WATCHERS.remove(group))
+                                .ifPresent(watchers -> watchers.parallelStream().forEach(watcher -> {
+                                    if (System.currentTimeMillis() >= watcher.getTimeout()) {
+                                        notify(watcher, HttpStatus.NOT_MODIFIED.value());
+                                    }
+                                    if (!watcher.isDone()) {
+                                        // Re-register
+                                        registryWatcher(watcher);
+                                    }
+                                }));
+                    }
+                },
+                1,
+                1,
+                TimeUnit.SECONDS);
     }
 
     @Override
@@ -96,7 +99,9 @@ public class ClusterWatcherManager implements ClusterChangeListener {
         HttpServletResponse httpServletResponse = (HttpServletResponse) asyncContext.getResponse();
         watcher.setDone(true);
         if (logger.isDebugEnabled()) {
-            logger.debug("notify cluster change event to: {}", asyncContext.getRequest().getRemoteAddr());
+            logger.debug(
+                    "notify cluster change event to: {}",
+                    asyncContext.getRequest().getRemoteAddr());
         }
         httpServletResponse.setStatus(statusCode);
         asyncContext.complete();
@@ -106,7 +111,8 @@ public class ClusterWatcherManager implements ClusterChangeListener {
         String group = watcher.getGroup();
         Long term = GROUP_UPDATE_TIME.get(group);
         if (term == null || watcher.getTerm() >= term) {
-            WATCHERS.computeIfAbsent(group, value -> new ConcurrentLinkedQueue<>()).add(watcher);
+            WATCHERS.computeIfAbsent(group, value -> new ConcurrentLinkedQueue<>())
+                    .add(watcher);
         } else {
             notify(watcher);
         }
@@ -128,5 +134,4 @@ public class ClusterWatcherManager implements ClusterChangeListener {
     public long getTermByvGroup(String vGroup) {
         return GROUP_UPDATE_TIME.getOrDefault(vGroup, 0L);
     }
-
 }

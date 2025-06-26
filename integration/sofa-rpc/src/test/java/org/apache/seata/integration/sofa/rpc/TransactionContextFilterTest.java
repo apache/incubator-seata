@@ -31,7 +31,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-
 public class TransactionContextFilterTest {
 
     @Test
@@ -45,8 +44,11 @@ public class TransactionContextFilterTest {
 
         { // C
             ServerConfig serverConfig1 = new ServerConfig()
-                    .setStopTimeout(0).setPort(22222)
-                    .setQueues(5).setCoreThreads(1).setMaxThreads(1);
+                    .setStopTimeout(0)
+                    .setPort(22222)
+                    .setQueues(5)
+                    .setCoreThreads(1)
+                    .setMaxThreads(1);
             helloServiceImpl = new HelloServiceImpl();
             ProviderConfig<HelloService> providerConfig = new ProviderConfig<HelloService>()
                     .setInterfaceId(HelloService.class.getName())
@@ -66,8 +68,11 @@ public class TransactionContextFilterTest {
             helloServiceRef = consumerConfig.refer();
 
             ServerConfig serverConfig2 = new ServerConfig()
-                    .setStopTimeout(0).setPort(22223)
-                    .setQueues(5).setCoreThreads(1).setMaxThreads(1);
+                    .setStopTimeout(0)
+                    .setPort(22223)
+                    .setQueues(5)
+                    .setCoreThreads(1)
+                    .setMaxThreads(1);
             helloServiceProxy = new HelloServiceProxy(helloServiceRef);
             ProviderConfig<HelloService> providerConfig = new ProviderConfig<HelloService>()
                     .setInterfaceId(HelloService.class.getName())

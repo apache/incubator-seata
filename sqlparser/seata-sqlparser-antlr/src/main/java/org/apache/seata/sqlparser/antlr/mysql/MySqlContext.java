@@ -95,7 +95,6 @@ public class MySqlContext {
      */
     public List<SQL> updateFoColumnNames = new ArrayList<>();
 
-
     /**
      * Update object value collection
      */
@@ -155,13 +154,11 @@ public class MySqlContext {
         deleteForWhereValColumnNames.add(sql);
     }
 
-
     public void addUpdateWhereValColumnNames(String columnName) {
         SQL sql = new SQL();
         sql.setUpdateWhereValColumnName(columnName);
         updateForWhereValColumnNames.add(sql);
     }
-
 
     public void addUpdateWhereColumnNames(String columnName) {
         SQL sql = new SQL();

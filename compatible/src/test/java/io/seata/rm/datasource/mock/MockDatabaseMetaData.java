@@ -26,57 +26,52 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
-  */
+ */
 public class MockDatabaseMetaData implements DatabaseMetaData {
 
     protected MockConnection connection;
 
     private static List<String> columnMetaColumnLabels = Arrays.asList(
-        "TABLE_CAT",
-        "TABLE_SCHEM",
-        "TABLE_NAME",
-        "COLUMN_NAME",
-        "DATA_TYPE",
-        "TYPE_NAME",
-        "COLUMN_SIZE",
-        "DECIMAL_DIGITS",
-        "NUM_PREC_RADIX",
-        "NULLABLE",
-        "REMARKS",
-        "COLUMN_DEF",
-        "SQL_DATA_TYPE",
-        "SQL_DATETIME_SUB",
-        "CHAR_OCTET_LENGTH",
-        "ORDINAL_POSITION",
-        "IS_NULLABLE",
-        "IS_AUTOINCREMENT"
-    );
+            "TABLE_CAT",
+            "TABLE_SCHEM",
+            "TABLE_NAME",
+            "COLUMN_NAME",
+            "DATA_TYPE",
+            "TYPE_NAME",
+            "COLUMN_SIZE",
+            "DECIMAL_DIGITS",
+            "NUM_PREC_RADIX",
+            "NULLABLE",
+            "REMARKS",
+            "COLUMN_DEF",
+            "SQL_DATA_TYPE",
+            "SQL_DATETIME_SUB",
+            "CHAR_OCTET_LENGTH",
+            "ORDINAL_POSITION",
+            "IS_NULLABLE",
+            "IS_AUTOINCREMENT");
 
     private static List<String> indexMetaColumnLabels = Arrays.asList(
-        "INDEX_NAME",
-        "COLUMN_NAME",
-        "NON_UNIQUE",
-        "INDEX_QUALIFIER",
-        "TYPE",
-        "ORDINAL_POSITION",
-        "ASC_OR_DESC",
-        "CARDINALITY"
-    );
+            "INDEX_NAME",
+            "COLUMN_NAME",
+            "NON_UNIQUE",
+            "INDEX_QUALIFIER",
+            "TYPE",
+            "ORDINAL_POSITION",
+            "ASC_OR_DESC",
+            "CARDINALITY");
 
-    private static List<String> pkMetaColumnLabels = Arrays.asList(
-        "PK_NAME"
-    );
+    private static List<String> pkMetaColumnLabels = Arrays.asList("PK_NAME");
 
     private static List<String> mockColumnsMetasLabels = Arrays.asList(
-        "SCOPE",
-        "COLUMN_NAME",
-        "DATA_TYPE",
-        "TYPE_NAME",
-        "COLUMN_SIZE",
-        "BUFFER_LENGTH",
-        "DECIMAL_DIGITS",
-        "PSEUDO_COLUMN"
-    );
+            "SCOPE",
+            "COLUMN_NAME",
+            "DATA_TYPE",
+            "TYPE_NAME",
+            "COLUMN_SIZE",
+            "BUFFER_LENGTH",
+            "DECIMAL_DIGITS",
+            "PSEUDO_COLUMN");
 
     private Object[][] columnsMetasReturnValue;
 
@@ -689,19 +684,20 @@ public class MockDatabaseMetaData implements DatabaseMetaData {
 
     @Override
     public ResultSet getProcedures(String catalog, String schemaPattern, String procedureNamePattern)
-        throws SQLException {
+            throws SQLException {
         return null;
     }
 
     @Override
-    public ResultSet getProcedureColumns(String catalog, String schemaPattern, String procedureNamePattern,
-                                         String columnNamePattern) throws SQLException {
+    public ResultSet getProcedureColumns(
+            String catalog, String schemaPattern, String procedureNamePattern, String columnNamePattern)
+            throws SQLException {
         return null;
     }
 
     @Override
     public ResultSet getTables(String catalog, String schemaPattern, String tableNamePattern, String[] types)
-        throws SQLException {
+            throws SQLException {
         return null;
     }
 
@@ -722,46 +718,48 @@ public class MockDatabaseMetaData implements DatabaseMetaData {
 
     @Override
     public ResultSet getColumns(String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern)
-        throws SQLException {
+            throws SQLException {
         List<Object[]> metas = new ArrayList<>();
         for (Object[] meta : columnsMetasReturnValue) {
             if (tableNamePattern.equals(meta[2].toString())) {
                 metas.add(meta);
             }
         }
-        if(metas.isEmpty()){
+        if (metas.isEmpty()) {
             metas = Arrays.asList(columnsMetasReturnValue);
         }
         return new MockResultSet(this.connection.createStatement())
-            .mockResultSet(columnMetaColumnLabels, metas.toArray(new Object[0][]));
+                .mockResultSet(columnMetaColumnLabels, metas.toArray(new Object[0][]));
     }
 
     @Override
     public ResultSet getColumnPrivileges(String catalog, String schema, String table, String columnNamePattern)
-        throws SQLException {
+            throws SQLException {
         return null;
     }
 
     @Override
     public ResultSet getTablePrivileges(String catalog, String schemaPattern, String tableNamePattern)
-        throws SQLException {
+            throws SQLException {
         return null;
     }
 
     @Override
     public ResultSet getBestRowIdentifier(String catalog, String schema, String table, int scope, boolean nullable)
-        throws SQLException {
+            throws SQLException {
         return null;
     }
 
     @Override
     public ResultSet getVersionColumns(String catalog, String schema, String table) throws SQLException {
-        return new MockResultSet(this.connection.createStatement()).mockResultSet(mockColumnsMetasLabels, mockColumnsMetasReturnValue);
+        return new MockResultSet(this.connection.createStatement())
+                .mockResultSet(mockColumnsMetasLabels, mockColumnsMetasReturnValue);
     }
 
     @Override
     public ResultSet getPrimaryKeys(String catalog, String schema, String table) throws SQLException {
-        return new MockResultSet(this.connection.createStatement()).mockResultSet(pkMetaColumnLabels, pkMetasReturnValue);
+        return new MockResultSet(this.connection.createStatement())
+                .mockResultSet(pkMetaColumnLabels, pkMetasReturnValue);
     }
 
     @Override
@@ -775,9 +773,14 @@ public class MockDatabaseMetaData implements DatabaseMetaData {
     }
 
     @Override
-    public ResultSet getCrossReference(String parentCatalog, String parentSchema, String parentTable,
-                                       String foreignCatalog, String foreignSchema, String foreignTable)
-        throws SQLException {
+    public ResultSet getCrossReference(
+            String parentCatalog,
+            String parentSchema,
+            String parentTable,
+            String foreignCatalog,
+            String foreignSchema,
+            String foreignTable)
+            throws SQLException {
         return null;
     }
 
@@ -788,7 +791,7 @@ public class MockDatabaseMetaData implements DatabaseMetaData {
 
     @Override
     public ResultSet getIndexInfo(String catalog, String schema, String table, boolean unique, boolean approximate)
-        throws SQLException {
+            throws SQLException {
         return new MockResultSet(this.connection.createStatement())
                 .mockResultSet(indexMetaColumnLabels, indexMetasReturnValue);
     }
@@ -855,7 +858,7 @@ public class MockDatabaseMetaData implements DatabaseMetaData {
 
     @Override
     public ResultSet getUDTs(String catalog, String schemaPattern, String typeNamePattern, int[] types)
-        throws SQLException {
+            throws SQLException {
         return null;
     }
 
@@ -895,8 +898,9 @@ public class MockDatabaseMetaData implements DatabaseMetaData {
     }
 
     @Override
-    public ResultSet getAttributes(String catalog, String schemaPattern, String typeNamePattern,
-                                   String attributeNamePattern) throws SQLException {
+    public ResultSet getAttributes(
+            String catalog, String schemaPattern, String typeNamePattern, String attributeNamePattern)
+            throws SQLException {
         return null;
     }
 
@@ -972,19 +976,21 @@ public class MockDatabaseMetaData implements DatabaseMetaData {
 
     @Override
     public ResultSet getFunctions(String catalog, String schemaPattern, String functionNamePattern)
-        throws SQLException {
+            throws SQLException {
         return null;
     }
 
     @Override
-    public ResultSet getFunctionColumns(String catalog, String schemaPattern, String functionNamePattern,
-                                        String columnNamePattern) throws SQLException {
+    public ResultSet getFunctionColumns(
+            String catalog, String schemaPattern, String functionNamePattern, String columnNamePattern)
+            throws SQLException {
         return null;
     }
 
     @Override
-    public ResultSet getPseudoColumns(String catalog, String schemaPattern, String tableNamePattern,
-                                      String columnNamePattern) throws SQLException {
+    public ResultSet getPseudoColumns(
+            String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern)
+            throws SQLException {
         return null;
     }
 

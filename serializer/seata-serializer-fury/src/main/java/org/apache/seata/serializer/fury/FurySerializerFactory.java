@@ -29,17 +29,21 @@ public class FurySerializerFactory {
     private static final ThreadSafeFury FURY = new ThreadLocalFury(classLoader -> {
         Fury f = Fury.builder()
                 .withLanguage(Language.JAVA)
-                // In JAVA mode, classes cannot be registered by tag, and the different registration order between the server and the client will cause deserialization failure
-                // In XLANG cross-language mode has problems with Java class serialization, such as enum classes [https://github.com/apache/fury/issues/1644].
+                // In JAVA mode, classes cannot be registered by tag, and the different registration order between the
+                // server and the client will cause deserialization failure
+                // In XLANG cross-language mode has problems with Java class serialization, such as enum classes
+                // [https://github.com/apache/fury/issues/1644].
                 .requireClassRegistration(false)
-                //enable reference tracking for shared/circular reference.
+                // enable reference tracking for shared/circular reference.
                 .withRefTracking(true)
                 .withClassLoader(classLoader)
                 .withCompatibleMode(CompatibleMode.COMPATIBLE)
                 .build();
 
         // register allow class
-        f.getClassResolver().setClassChecker((classResolver,className) -> SerializerSecurityRegistry.getAllowClassPattern().contains(className));
+        f.getClassResolver()
+                .setClassChecker((classResolver, className) ->
+                        SerializerSecurityRegistry.getAllowClassPattern().contains(className));
         return f;
     });
 

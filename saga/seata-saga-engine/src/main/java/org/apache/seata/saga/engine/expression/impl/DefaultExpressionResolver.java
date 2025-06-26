@@ -58,7 +58,6 @@ public class DefaultExpressionResolver implements ExpressionResolver {
         int dot = expressionStr.indexOf(".", struct.typeStart);
         int leftBracket = expressionStr.indexOf("{", struct.typeStart);
 
-
         boolean isOldEvaluatorStyle = false;
         if (struct.typeStart == 0) {
             if (leftBracket < 0 && dot < 0) {

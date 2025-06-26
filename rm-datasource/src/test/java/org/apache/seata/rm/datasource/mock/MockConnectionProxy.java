@@ -16,12 +16,11 @@
  */
 package org.apache.seata.rm.datasource.mock;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
 import org.apache.seata.rm.datasource.ConnectionProxy;
 import org.apache.seata.rm.datasource.DataSourceProxy;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 
 public class MockConnectionProxy extends ConnectionProxy {
     /**
@@ -30,13 +29,12 @@ public class MockConnectionProxy extends ConnectionProxy {
      * @param dataSourceProxy  the data source proxy
      * @param targetConnection the target connection
      */
-    public MockConnectionProxy(DataSourceProxy dataSourceProxy,
-                               Connection targetConnection) {
+    public MockConnectionProxy(DataSourceProxy dataSourceProxy, Connection targetConnection) {
         super(dataSourceProxy, targetConnection);
     }
 
     @Override
     public void checkLock(String lockKeys) throws SQLException {
-        //do nothing
+        // do nothing
     }
 }

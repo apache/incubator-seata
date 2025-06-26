@@ -16,15 +16,14 @@
  */
 package org.apache.seata.serializer.protobuf.convertor;
 
-import org.apache.seata.serializer.protobuf.generated.GlobalRollbackResponseProto;
 import org.apache.seata.core.exception.TransactionExceptionCode;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.protocol.ResultCode;
 import org.apache.seata.core.protocol.transaction.GlobalRollbackResponse;
+import org.apache.seata.serializer.protobuf.generated.GlobalRollbackResponseProto;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
 
 public class GlobalRollbackResponseConvertorTest {
 
@@ -37,13 +36,12 @@ public class GlobalRollbackResponseConvertorTest {
         globalRollbackResponse.setResultCode(ResultCode.Failed);
         globalRollbackResponse.setTransactionExceptionCode(TransactionExceptionCode.BranchRegisterFailed);
         GlobalRollbackResponseConvertor convertor = new GlobalRollbackResponseConvertor();
-        GlobalRollbackResponseProto proto = convertor.convert2Proto(
-            globalRollbackResponse);
+        GlobalRollbackResponseProto proto = convertor.convert2Proto(globalRollbackResponse);
         GlobalRollbackResponse real = convertor.convert2Model(proto);
         assertThat((real.getTypeCode())).isEqualTo(globalRollbackResponse.getTypeCode());
         assertThat((real.getMsg())).isEqualTo(globalRollbackResponse.getMsg());
         assertThat((real.getResultCode())).isEqualTo(globalRollbackResponse.getResultCode());
-        assertThat((real.getTransactionExceptionCode())).isEqualTo(
-            globalRollbackResponse.getTransactionExceptionCode());
+        assertThat((real.getTransactionExceptionCode()))
+                .isEqualTo(globalRollbackResponse.getTransactionExceptionCode());
     }
 }

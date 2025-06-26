@@ -30,9 +30,9 @@ import org.apache.seata.sqlparser.ParametersHolder;
 import org.apache.seata.sqlparser.SQLParsingException;
 import org.apache.seata.sqlparser.SQLSelectRecognizer;
 import org.apache.seata.sqlparser.SQLType;
+
 import java.util.ArrayList;
 import java.util.List;
-
 
 public class PostgresqlSelectForUpdateRecognizer extends BasePostgresqlRecognizer implements SQLSelectRecognizer {
 
@@ -55,8 +55,8 @@ public class PostgresqlSelectForUpdateRecognizer extends BasePostgresqlRecognize
     }
 
     @Override
-    public String getWhereCondition(final ParametersHolder parametersHolder,
-        final ArrayList<List<Object>> paramAppenderList) {
+    public String getWhereCondition(
+            final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppenderList) {
         SQLSelectQueryBlock selectQueryBlock = getSelect();
         SQLExpr where = selectQueryBlock.getWhere();
         return super.getWhereCondition(where, parametersHolder, paramAppenderList);

@@ -16,11 +16,11 @@
  */
 package org.apache.seata.serializer.seata.protocol.transaction;
 
-import java.nio.ByteBuffer;
-
 import io.netty.buffer.ByteBuf;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.protocol.transaction.BranchRegisterRequest;
+
+import java.nio.ByteBuffer;
 
 /**
  * The type Branch register request codec.
@@ -35,7 +35,7 @@ public class BranchRegisterRequestCodec extends AbstractTransactionRequestToTCCo
 
     @Override
     public <T> void encode(T t, ByteBuf out) {
-        BranchRegisterRequest branchRegisterRequest = (BranchRegisterRequest)t;
+        BranchRegisterRequest branchRegisterRequest = (BranchRegisterRequest) t;
 
         String xid = branchRegisterRequest.getXid();
         BranchType branchType = branchRegisterRequest.getBranchType();
@@ -46,12 +46,12 @@ public class BranchRegisterRequestCodec extends AbstractTransactionRequestToTCCo
         // 1. xid
         if (xid != null) {
             byte[] bs = xid.getBytes(UTF8);
-            out.writeShort((short)bs.length);
+            out.writeShort((short) bs.length);
             if (bs.length > 0) {
                 out.writeBytes(bs);
             }
         } else {
-            out.writeShort((short)0);
+            out.writeShort((short) 0);
         }
         // 2. Branch Type
         out.writeByte(branchType.ordinal());
@@ -59,12 +59,12 @@ public class BranchRegisterRequestCodec extends AbstractTransactionRequestToTCCo
         // 3. Resource Id
         if (resourceId != null) {
             byte[] bs = resourceId.getBytes(UTF8);
-            out.writeShort((short)bs.length);
+            out.writeShort((short) bs.length);
             if (bs.length > 0) {
                 out.writeBytes(bs);
             }
         } else {
-            out.writeShort((short)0);
+            out.writeShort((short) 0);
         }
 
         // 4. Lock Key
@@ -78,7 +78,7 @@ public class BranchRegisterRequestCodec extends AbstractTransactionRequestToTCCo
             out.writeInt(0);
         }
 
-        //5. applicationData
+        // 5. applicationData
         if (applicationData != null) {
             byte[] applicationDataBytes = applicationData.getBytes(UTF8);
             out.writeInt(applicationDataBytes.length);
@@ -92,7 +92,7 @@ public class BranchRegisterRequestCodec extends AbstractTransactionRequestToTCCo
 
     @Override
     public <T> void decode(T t, ByteBuffer in) {
-        BranchRegisterRequest branchRegisterRequest = (BranchRegisterRequest)t;
+        BranchRegisterRequest branchRegisterRequest = (BranchRegisterRequest) t;
 
         short xidLen = in.getShort();
         if (xidLen > 0) {
@@ -122,5 +122,4 @@ public class BranchRegisterRequestCodec extends AbstractTransactionRequestToTCCo
             branchRegisterRequest.setApplicationData(new String(bs, UTF8));
         }
     }
-
 }

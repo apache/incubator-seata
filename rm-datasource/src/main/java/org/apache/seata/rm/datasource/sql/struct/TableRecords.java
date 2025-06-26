@@ -16,6 +16,17 @@
  */
 package org.apache.seata.rm.datasource.sql.struct;
 
+import org.apache.seata.common.exception.ShouldNeverHappenException;
+import org.apache.seata.rm.datasource.exception.TableMetaException;
+import org.apache.seata.rm.datasource.sql.serial.SerialArray;
+import org.apache.seata.sqlparser.struct.ColumnMeta;
+import org.apache.seata.sqlparser.struct.TableMeta;
+
+import javax.sql.rowset.serial.SerialBlob;
+import javax.sql.rowset.serial.SerialClob;
+import javax.sql.rowset.serial.SerialDatalink;
+import javax.sql.rowset.serial.SerialJavaObject;
+import javax.sql.rowset.serial.SerialRef;
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
@@ -30,16 +41,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.sql.rowset.serial.SerialBlob;
-import javax.sql.rowset.serial.SerialClob;
-import javax.sql.rowset.serial.SerialDatalink;
-import javax.sql.rowset.serial.SerialJavaObject;
-import javax.sql.rowset.serial.SerialRef;
-import org.apache.seata.common.exception.ShouldNeverHappenException;
-import org.apache.seata.rm.datasource.exception.TableMetaException;
-import org.apache.seata.rm.datasource.sql.serial.SerialArray;
-import org.apache.seata.sqlparser.struct.ColumnMeta;
-import org.apache.seata.sqlparser.struct.TableMeta;
 
 import static org.apache.seata.rm.datasource.exec.oracle.OracleJdbcType.TIMESTAMP_WITH_LOCAL_TIME_ZONE;
 import static org.apache.seata.rm.datasource.exec.oracle.OracleJdbcType.TIMESTAMP_WITH_TIME_ZONE;
@@ -99,9 +100,7 @@ public class TableRecords implements java.io.Serializable {
     /**
      * Instantiates a new Table records.
      */
-    public TableRecords() {
-
-    }
+    public TableRecords() {}
 
     /**
      * Instantiates a new Table records.
@@ -148,15 +147,15 @@ public class TableRecords implements java.io.Serializable {
      *
      * @return return a list. each element of list is a map,the map hold the pk column name as a key and field as the value
      */
-    public List<Map<String,Field>> pkRows() {
+    public List<Map<String, Field>> pkRows() {
         final Map<String, ColumnMeta> primaryKeyMap = getTableMeta().getPrimaryKeyMap();
-        List<Map<String,Field>> pkRows = new ArrayList<>();
+        List<Map<String, Field>> pkRows = new ArrayList<>();
         for (Row row : rows) {
             List<Field> fields = row.getFields();
-            Map<String,Field> rowMap = new HashMap<>(3);
+            Map<String, Field> rowMap = new HashMap<>(3);
             for (Field field : fields) {
                 if (primaryKeyMap.containsKey(field.getName())) {
-                    rowMap.put(field.getName(),field);
+                    rowMap.put(field.getName(), field);
                 }
             }
             pkRows.add(rowMap);
@@ -201,7 +200,7 @@ public class TableRecords implements java.io.Serializable {
             List<Field> fields = new ArrayList<>(columnCount);
             for (int i = 1; i <= columnCount; i++) {
                 String colName = resultSetMetaData.getColumnName(i);
-                ColumnMeta col = getColumnMeta(tmeta,colName);
+                ColumnMeta col = getColumnMeta(tmeta, colName);
                 int dataType = col.getDataType();
                 Field field = new Field();
                 field.setName(col.getColumnName());
@@ -270,7 +269,7 @@ public class TableRecords implements java.io.Serializable {
      * @param tmeta the table meta
      * @param colName the column nmae
      */
-    private static ColumnMeta getColumnMeta(TableMeta tmeta , String colName) throws SQLException {
+    private static ColumnMeta getColumnMeta(TableMeta tmeta, String colName) throws SQLException {
         ColumnMeta col = tmeta.getColumnMeta(colName);
         if (col == null) {
             throw new TableMetaException(tmeta.getTableName(), colName);
@@ -322,7 +321,7 @@ public class TableRecords implements java.io.Serializable {
         }
 
         @Override
-        public List<Map<String,Field>> pkRows() {
+        public List<Map<String, Field>> pkRows() {
             return new ArrayList<>();
         }
 

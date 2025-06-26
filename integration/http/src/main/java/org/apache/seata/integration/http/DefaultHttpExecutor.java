@@ -34,23 +34,17 @@ public class DefaultHttpExecutor extends AbstractHttpExecutor {
 
     private static DefaultHttpExecutor instance = new DefaultHttpExecutor();
 
-    private DefaultHttpExecutor() {
-    }
+    private DefaultHttpExecutor() {}
 
     public static DefaultHttpExecutor getInstance() {
         return instance;
     }
 
     @Override
-    public <T> void buildClientEntity(CloseableHttpClient httpClient, T paramObject) {
-
-    }
+    public <T> void buildClientEntity(CloseableHttpClient httpClient, T paramObject) {}
 
     @Override
-    public <T> void buildGetHeaders(Map<String, String> headers, T paramObject) {
-
-    }
-
+    public <T> void buildGetHeaders(Map<String, String> headers, T paramObject) {}
 
     @Override
     public String initGetUrl(String host, String path, Map<String, String> querys) {
@@ -95,13 +89,10 @@ public class DefaultHttpExecutor extends AbstractHttpExecutor {
         }
 
         return sbUrl.toString();
-
     }
 
     @Override
-    public <T> void buildPostHeaders(Map<String, String> headers, T t) {
-
-    }
+    public <T> void buildPostHeaders(Map<String, String> headers, T t) {}
 
     @Override
     public <T> StringEntity buildEntity(StringEntity entity, T t) {
@@ -111,11 +102,9 @@ public class DefaultHttpExecutor extends AbstractHttpExecutor {
     @Override
     public <K> K convertResult(HttpResponse response, Class<K> clazz) {
 
-
         if (clazz == HttpResponse.class) {
             return (K) response;
         }
         return null;
     }
-
 }

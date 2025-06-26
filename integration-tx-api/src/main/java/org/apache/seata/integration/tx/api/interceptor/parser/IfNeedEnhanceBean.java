@@ -37,5 +37,4 @@ public class IfNeedEnhanceBean {
     public void setNeedEnhanceEnum(NeedEnhanceEnum needEnhanceEnum) {
         this.needEnhanceEnum = needEnhanceEnum;
     }
-
 }

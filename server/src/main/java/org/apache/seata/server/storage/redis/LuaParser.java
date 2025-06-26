@@ -16,6 +16,17 @@
  */
 package org.apache.seata.server.storage.redis;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.seata.common.exception.StoreException;
+import org.apache.seata.common.io.FileLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.exceptions.JedisDataException;
+import redis.clients.jedis.exceptions.JedisNoScriptException;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -26,18 +37,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import org.apache.seata.common.exception.StoreException;
-import org.apache.seata.common.io.FileLoader;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.exceptions.JedisDataException;
-import redis.clients.jedis.exceptions.JedisNoScriptException;
 
 /**
  * lua related utils
@@ -54,7 +53,7 @@ public class LuaParser {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-    public final static class LuaResult implements Serializable {
+    public static final class LuaResult implements Serializable {
         private static final long serialVersionUID = -4160065043902060730L;
         private Boolean success;
         private String status;
@@ -84,16 +83,13 @@ public class LuaParser {
             this.data = data;
         }
 
-        @Override public String toString() {
-            return "LuaResult{" +
-                "success=" + success +
-                ", type='" + status + '\'' +
-                ", data='" + data + '\'' +
-                '}';
+        @Override
+        public String toString() {
+            return "LuaResult{" + "success=" + success + ", type='" + status + '\'' + ", data='" + data + '\'' + '}';
         }
     }
 
-    public final static class LuaErrorStatus {
+    public static final class LuaErrorStatus {
 
         public static final String ANOTHER_ROLLBACKING = "AnotherRollbackIng";
 
@@ -151,14 +147,14 @@ public class LuaParser {
     public static <T> List<T> getListFromJson(String json, Class<T> classz) {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            return objectMapper.readValue(json, new TypeReference<List<T>>() {
-            });
+            return objectMapper.readValue(json, new TypeReference<List<T>>() {});
         } catch (JsonProcessingException e) {
             throw new StoreException(e.getMessage());
         }
     }
 
-    public static Object jedisEvalSha(Jedis jedis, String luaSHA, String luaFileName, List<String> keys, List<String> args) {
+    public static Object jedisEvalSha(
+            Jedis jedis, String luaSHA, String luaFileName, List<String> keys, List<String> args) {
         try {
             return jedis.evalsha(luaSHA, keys, args);
         } catch (JedisNoScriptException e) {

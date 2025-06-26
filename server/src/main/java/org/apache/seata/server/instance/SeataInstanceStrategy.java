@@ -36,5 +36,4 @@ public interface SeataInstanceStrategy {
          */
         RAFT
     }
-
 }

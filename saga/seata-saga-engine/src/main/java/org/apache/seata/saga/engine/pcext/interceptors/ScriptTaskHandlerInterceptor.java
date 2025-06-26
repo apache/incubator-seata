@@ -46,8 +46,7 @@ public class ScriptTaskHandlerInterceptor implements StateHandlerInterceptor {
 
     @Override
     public boolean match(Class<? extends InterceptableStateHandler> clazz) {
-        return clazz != null &&
-                ScriptTaskStateHandler.class.isAssignableFrom(clazz);
+        return clazz != null && ScriptTaskStateHandler.class.isAssignableFrom(clazz);
     }
 
     @Override
@@ -55,26 +54,26 @@ public class ScriptTaskHandlerInterceptor implements StateHandlerInterceptor {
 
         StateInstruction instruction = context.getInstruction(StateInstruction.class);
 
-        StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(
-            DomainConstants.VAR_NAME_STATEMACHINE_INST);
-        StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
-            DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
+        StateMachineInstance stateMachineInstance =
+                (StateMachineInstance) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_INST);
+        StateMachineConfig stateMachineConfig =
+                (StateMachineConfig) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
 
-        Map<String, Object> contextVariables = (Map<String, Object>)context.getVariable(
-            DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);
-        ScriptTaskStateImpl state = (ScriptTaskStateImpl)instruction.getState(context);
+        Map<String, Object> contextVariables =
+                (Map<String, Object>) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);
+        ScriptTaskStateImpl state = (ScriptTaskStateImpl) instruction.getState(context);
         List<Object> serviceInputParams = null;
         if (contextVariables != null) {
             try {
-                serviceInputParams = ParameterUtils.createInputParams(stateMachineConfig.getExpressionResolver(), null,
-                    state, contextVariables);
+                serviceInputParams = ParameterUtils.createInputParams(
+                        stateMachineConfig.getExpressionResolver(), null, state, contextVariables);
             } catch (Exception e) {
 
                 String message = "Task [" + state.getName()
-                    + "] input parameters assign failed, please check 'Input' expression:" + e.getMessage();
+                        + "] input parameters assign failed, please check 'Input' expression:" + e.getMessage();
 
-                EngineExecutionException exception = ExceptionUtils.createEngineExecutionException(e,
-                    FrameworkErrorCode.VariablesAssignError, message, stateMachineInstance, state.getName());
+                EngineExecutionException exception = ExceptionUtils.createEngineExecutionException(
+                        e, FrameworkErrorCode.VariablesAssignError, message, stateMachineInstance, state.getName());
 
                 EngineUtils.failStateMachine(context, exception);
 
@@ -82,42 +81,42 @@ public class ScriptTaskHandlerInterceptor implements StateHandlerInterceptor {
             }
         }
 
-        ((HierarchicalProcessContext)context).setVariableLocally(DomainConstants.VAR_NAME_INPUT_PARAMS,
-            serviceInputParams);
+        ((HierarchicalProcessContext) context)
+                .setVariableLocally(DomainConstants.VAR_NAME_INPUT_PARAMS, serviceInputParams);
     }
 
     @Override
     public void postProcess(ProcessContext context, Exception exp) throws EngineExecutionException {
 
         StateInstruction instruction = context.getInstruction(StateInstruction.class);
-        ScriptTaskStateImpl state = (ScriptTaskStateImpl)instruction.getState(context);
+        ScriptTaskStateImpl state = (ScriptTaskStateImpl) instruction.getState(context);
 
-        StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(
-            DomainConstants.VAR_NAME_STATEMACHINE_INST);
+        StateMachineInstance stateMachineInstance =
+                (StateMachineInstance) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_INST);
 
-        StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
-            DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
+        StateMachineConfig stateMachineConfig =
+                (StateMachineConfig) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
 
         if (exp == null) {
-            exp = (Exception)context.getVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION);
+            exp = (Exception) context.getVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION);
         }
 
-        Map<String, Object> contextVariables = (Map<String, Object>)context.getVariable(
-            DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);
+        Map<String, Object> contextVariables =
+                (Map<String, Object>) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);
         Object serviceOutputParams = context.getVariable(DomainConstants.VAR_NAME_OUTPUT_PARAMS);
         if (serviceOutputParams != null) {
             try {
                 Map<String, Object> outputVariablesToContext = ParameterUtils.createOutputParams(
-                    stateMachineConfig.getExpressionResolver(), state, serviceOutputParams);
+                        stateMachineConfig.getExpressionResolver(), state, serviceOutputParams);
                 if (CollectionUtils.isNotEmpty(outputVariablesToContext)) {
                     contextVariables.putAll(outputVariablesToContext);
                 }
             } catch (Exception e) {
                 String message = "Task [" + state.getName()
-                    + "] output parameters assign failed, please check 'Output' expression:" + e.getMessage();
+                        + "] output parameters assign failed, please check 'Output' expression:" + e.getMessage();
 
-                EngineExecutionException exception = ExceptionUtils.createEngineExecutionException(e,
-                    FrameworkErrorCode.VariablesAssignError, message, stateMachineInstance, state.getName());
+                EngineExecutionException exception = ExceptionUtils.createEngineExecutionException(
+                        e, FrameworkErrorCode.VariablesAssignError, message, stateMachineInstance, state.getName());
 
                 EngineUtils.failStateMachine(context, exception);
 
@@ -128,13 +127,13 @@ public class ScriptTaskHandlerInterceptor implements StateHandlerInterceptor {
         context.removeVariable(DomainConstants.VAR_NAME_OUTPUT_PARAMS);
         context.removeVariable(DomainConstants.VAR_NAME_INPUT_PARAMS);
 
-        if (exp != null && context.getVariable(DomainConstants.VAR_NAME_IS_EXCEPTION_NOT_CATCH) != null
-            && (Boolean)context.getVariable(DomainConstants.VAR_NAME_IS_EXCEPTION_NOT_CATCH)) {
-            //If there is an exception and there is no catch, need to exit the state machine to execute.
+        if (exp != null
+                && context.getVariable(DomainConstants.VAR_NAME_IS_EXCEPTION_NOT_CATCH) != null
+                && (Boolean) context.getVariable(DomainConstants.VAR_NAME_IS_EXCEPTION_NOT_CATCH)) {
+            // If there is an exception and there is no catch, need to exit the state machine to execute.
 
             context.removeVariable(DomainConstants.VAR_NAME_IS_EXCEPTION_NOT_CATCH);
             EngineUtils.failStateMachine(context, exp);
         }
-
     }
 }

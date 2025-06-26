@@ -94,31 +94,31 @@ public class StoreConfig {
      * @return
      */
     private static StoreMode getStoreMode() {
-        //startup
+        // startup
         if (null != storeMode) {
             return storeMode;
         }
-        //env
+        // env
         String storeModeEnv = ContainerHelper.getStoreMode();
         if (StringUtils.isNotBlank(storeModeEnv)) {
             return StoreMode.get(storeModeEnv);
         }
-        //config
+        // config
         String storeModeConfig = CONFIGURATION.getConfig(ConfigurationKeys.STORE_MODE, SERVER_DEFAULT_STORE_MODE);
         return StoreMode.get(storeModeConfig);
     }
 
     public static SessionMode getSessionMode() {
-        //startup
+        // startup
         if (null != sessionMode) {
             return sessionMode;
         }
-        //env
+        // env
         String sessionModeEnv = ContainerHelper.getSessionStoreMode();
         if (StringUtils.isNotBlank(sessionModeEnv)) {
             return SessionMode.get(sessionModeEnv);
         }
-        //config
+        // config
         String sessionModeConfig = CONFIGURATION.getConfig(ConfigurationKeys.STORE_SESSION_MODE);
         if (StringUtils.isNotBlank(sessionModeConfig)) {
             return SessionMode.get(sessionModeConfig);
@@ -128,16 +128,16 @@ public class StoreConfig {
     }
 
     public static LockMode getLockMode() {
-        //startup
+        // startup
         if (null != lockMode) {
             return lockMode;
         }
-        //env
+        // env
         String lockModeEnv = ContainerHelper.getLockStoreMode();
         if (StringUtils.isNotBlank(lockModeEnv)) {
             return LockMode.get(lockModeEnv);
         }
-        //config
+        // config
         String lockModeConfig = CONFIGURATION.getConfig(ConfigurationKeys.STORE_LOCK_MODE);
         if (StringUtils.isNotBlank(lockModeConfig)) {
             return LockMode.get(lockModeConfig);

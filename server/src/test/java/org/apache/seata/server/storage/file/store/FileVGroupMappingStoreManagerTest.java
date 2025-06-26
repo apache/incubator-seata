@@ -18,11 +18,13 @@ package org.apache.seata.server.storage.file.store;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.seata.core.store.MappingDO;
+import org.apache.seata.server.DynamicPortTestConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,12 +32,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @SpringBootTest
+@Import(DynamicPortTestConfig.class)
 public class FileVGroupMappingStoreManagerTest {
 
     private FileVGroupMappingStoreManager fileVGroupMappingStoreManager;
@@ -108,7 +110,7 @@ public class FileVGroupMappingStoreManagerTest {
 
     @Test
     public void testAddVGroupFailure() {
-        FileVGroupMappingStoreManager spyManager = spy(new FileVGroupMappingStoreManager( "src/test/resources"));
+        FileVGroupMappingStoreManager spyManager = spy(new FileVGroupMappingStoreManager("src/test/resources"));
         doReturn(false).when(spyManager).save(any(HashMap.class));
         MappingDO mappingDO = new MappingDO();
         mappingDO.setVGroup(VGROUP_NAME);

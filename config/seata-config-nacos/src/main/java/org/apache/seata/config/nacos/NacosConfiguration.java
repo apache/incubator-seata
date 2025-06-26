@@ -16,19 +16,10 @@
  */
 package org.apache.seata.config.nacos;
 
-import java.io.IOException;
-import java.util.Enumeration;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
 import com.alibaba.nacos.api.NacosFactory;
 import com.alibaba.nacos.api.config.ConfigService;
 import com.alibaba.nacos.api.config.listener.AbstractSharedListener;
 import com.alibaba.nacos.api.exception.NacosException;
-
 import org.apache.seata.common.exception.NotSupportYetException;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
@@ -43,6 +34,13 @@ import org.apache.seata.config.processor.ConfigProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.util.Enumeration;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * The type Nacos configuration.
@@ -70,8 +68,8 @@ public class NacosConfiguration extends AbstractConfiguration implements Dispose
     private Configuration fileConfig = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static volatile ConfigService configService;
     private static final int MAP_INITIAL_CAPACITY = 8;
-    private static volatile ConcurrentMap<String, ConcurrentMap<ConfigurationChangeListener, NacosListener>> CONFIG_LISTENERS_MAP
-            = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
+    private static volatile ConcurrentMap<String, ConcurrentMap<ConfigurationChangeListener, NacosListener>>
+            CONFIG_LISTENERS_MAP = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
     private static volatile Properties seataConfig = new Properties();
 
     /**
@@ -162,7 +160,8 @@ public class NacosConfiguration extends AbstractConfiguration implements Dispose
         }
         try {
             NacosListener nacosListener = new NacosListener(dataId, listener);
-            CONFIG_LISTENERS_MAP.computeIfAbsent(dataId, key -> new ConcurrentHashMap<>())
+            CONFIG_LISTENERS_MAP
+                    .computeIfAbsent(dataId, key -> new ConcurrentHashMap<>())
                     .put(listener, nacosListener);
             configService.addListener(dataId, getNacosGroup(), nacosListener);
         } catch (Exception exx) {
@@ -229,7 +228,9 @@ public class NacosConfiguration extends AbstractConfiguration implements Dispose
         if (!initNacosAuthProperties(properties)) {
             LOGGER.info("Nacos config auth properties empty.");
         }
-        String contextPath = StringUtils.isNotBlank(System.getProperty(CONTEXT_PATH)) ? System.getProperty(CONTEXT_PATH) : fileConfig.getConfig(getNacosContextPathKey());
+        String contextPath = StringUtils.isNotBlank(System.getProperty(CONTEXT_PATH))
+                ? System.getProperty(CONTEXT_PATH)
+                : fileConfig.getConfig(getNacosContextPathKey());
         if (StringUtils.isNotBlank(contextPath)) {
             properties.setProperty(CONTEXT_PATH, contextPath);
         }
@@ -244,9 +245,13 @@ public class NacosConfiguration extends AbstractConfiguration implements Dispose
      * @return auth properties
      */
     private boolean initNacosAuthProperties(Properties sourceProperties) {
-        String userName = StringUtils.isNotBlank(System.getProperty(USER_NAME)) ? System.getProperty(USER_NAME) : fileConfig.getConfig(getNacosUserName());
+        String userName = StringUtils.isNotBlank(System.getProperty(USER_NAME))
+                ? System.getProperty(USER_NAME)
+                : fileConfig.getConfig(getNacosUserName());
         if (StringUtils.isNotBlank(userName)) {
-            String password = StringUtils.isNotBlank(System.getProperty(PASSWORD)) ? System.getProperty(PASSWORD) : fileConfig.getConfig(getNacosPassword());
+            String password = StringUtils.isNotBlank(System.getProperty(PASSWORD))
+                    ? System.getProperty(PASSWORD)
+                    : fileConfig.getConfig(getNacosPassword());
             if (StringUtils.isNotBlank(password)) {
                 sourceProperties.setProperty(USER_NAME, userName);
                 sourceProperties.setProperty(PASSWORD, password);
@@ -254,10 +259,16 @@ public class NacosConfiguration extends AbstractConfiguration implements Dispose
                 return true;
             }
         } else {
-            String accessKey = StringUtils.isNotBlank(System.getProperty(ACCESS_KEY)) ? System.getProperty(ACCESS_KEY) : fileConfig.getConfig(getNacosAccessKey());
-            String ramRoleName = StringUtils.isNotBlank(System.getProperty(RAM_ROLE_NAME_KEY)) ? System.getProperty(RAM_ROLE_NAME_KEY) : fileConfig.getConfig(getNacosRamRoleNameKey());
+            String accessKey = StringUtils.isNotBlank(System.getProperty(ACCESS_KEY))
+                    ? System.getProperty(ACCESS_KEY)
+                    : fileConfig.getConfig(getNacosAccessKey());
+            String ramRoleName = StringUtils.isNotBlank(System.getProperty(RAM_ROLE_NAME_KEY))
+                    ? System.getProperty(RAM_ROLE_NAME_KEY)
+                    : fileConfig.getConfig(getNacosRamRoleNameKey());
             if (StringUtils.isNotBlank(accessKey)) {
-                String secretKey = StringUtils.isNotBlank(System.getProperty(SECRET_KEY)) ? System.getProperty(SECRET_KEY) : fileConfig.getConfig(getNacosSecretKey());
+                String secretKey = StringUtils.isNotBlank(System.getProperty(SECRET_KEY))
+                        ? System.getProperty(SECRET_KEY)
+                        : fileConfig.getConfig(getNacosSecretKey());
                 if (StringUtils.isNotBlank(secretKey)) {
                     sourceProperties.put(ACCESS_KEY, accessKey);
                     sourceProperties.put(SECRET_KEY, secretKey);
@@ -274,41 +285,60 @@ public class NacosConfiguration extends AbstractConfiguration implements Dispose
     }
 
     public static String getNacosNameSpaceFileKey() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, PRO_NAMESPACE_KEY);
+        return String.join(
+                ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR,
+                ConfigurationKeys.FILE_ROOT_CONFIG,
+                CONFIG_TYPE,
+                PRO_NAMESPACE_KEY);
     }
 
     public static String getNacosAddrFileKey() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, PRO_SERVER_ADDR_KEY);
+        return String.join(
+                ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR,
+                ConfigurationKeys.FILE_ROOT_CONFIG,
+                CONFIG_TYPE,
+                PRO_SERVER_ADDR_KEY);
     }
 
     public static String getNacosGroupKey() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, GROUP_KEY);
+        return String.join(
+                ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, GROUP_KEY);
     }
 
     public static String getNacosDataIdKey() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, NACOS_DATA_ID_KEY);
+        return String.join(
+                ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR,
+                ConfigurationKeys.FILE_ROOT_CONFIG,
+                CONFIG_TYPE,
+                NACOS_DATA_ID_KEY);
     }
 
     public static String getNacosUserName() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE,
-                USER_NAME);
+        return String.join(
+                ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, USER_NAME);
     }
 
     public static String getNacosPassword() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE,
-                PASSWORD);
+        return String.join(
+                ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, PASSWORD);
     }
 
     public static String getNacosAccessKey() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, ACCESS_KEY);
+        return String.join(
+                ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, ACCESS_KEY);
     }
 
     public static String getNacosSecretKey() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, SECRET_KEY);
+        return String.join(
+                ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, SECRET_KEY);
     }
 
     public static String getNacosRamRoleNameKey() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, RAM_ROLE_NAME_KEY);
+        return String.join(
+                ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR,
+                ConfigurationKeys.FILE_ROOT_CONFIG,
+                CONFIG_TYPE,
+                RAM_ROLE_NAME_KEY);
     }
 
     private String getNacosGroup() {
@@ -337,7 +367,11 @@ public class NacosConfiguration extends AbstractConfiguration implements Dispose
     }
 
     private static String getNacosContextPathKey() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, CONTEXT_PATH);
+        return String.join(
+                ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR,
+                ConfigurationKeys.FILE_ROOT_CONFIG,
+                CONFIG_TYPE,
+                CONTEXT_PATH);
     }
 
     private void initSeataConfig() {
@@ -354,7 +388,6 @@ public class NacosConfiguration extends AbstractConfiguration implements Dispose
             LOGGER.error("init config properties error", e);
         }
     }
-
 
     @Override
     public String getTypeName() {
@@ -407,7 +440,7 @@ public class NacosConfiguration extends AbstractConfiguration implements Dispose
 
         @Override
         public void innerReceive(String dataId, String group, String configInfo) {
-            //The new configuration method to puts all configurations into a dateId
+            // The new configuration method to puts all configurations into a dateId
             if (getNacosDataId().equals(dataId)) {
                 Properties seataConfigNew = new Properties();
                 if (StringUtils.isNotBlank(configInfo)) {
@@ -419,8 +452,9 @@ public class NacosConfiguration extends AbstractConfiguration implements Dispose
                     }
                 }
 
-                //Get all the monitored dataids and judge whether it has been modified
-                for (Map.Entry<String, ConcurrentMap<ConfigurationChangeListener, NacosListener>> entry : CONFIG_LISTENERS_MAP.entrySet()) {
+                // Get all the monitored dataids and judge whether it has been modified
+                for (Map.Entry<String, ConcurrentMap<ConfigurationChangeListener, NacosListener>> entry :
+                        CONFIG_LISTENERS_MAP.entrySet()) {
                     String listenedDataId = entry.getKey();
                     String propertyOld = seataConfig.getProperty(listenedDataId, "");
                     String propertyNew = seataConfigNew.getProperty(listenedDataId, "");
@@ -441,11 +475,12 @@ public class NacosConfiguration extends AbstractConfiguration implements Dispose
                 return;
             }
 
-            //Compatible with old writing
-            ConfigurationChangeEvent event = new ConfigurationChangeEvent().setDataId(dataId).setNewValue(configInfo)
+            // Compatible with old writing
+            ConfigurationChangeEvent event = new ConfigurationChangeEvent()
+                    .setDataId(dataId)
+                    .setNewValue(configInfo)
                     .setNamespace(group);
             listener.onProcessEvent(event);
         }
     }
-
 }

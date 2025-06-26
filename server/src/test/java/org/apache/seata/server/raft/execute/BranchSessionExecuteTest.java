@@ -16,17 +16,16 @@
  */
 package org.apache.seata.server.raft.execute;
 
+import org.apache.seata.common.XID;
 import org.apache.seata.common.store.LockMode;
 import org.apache.seata.common.store.SessionMode;
-import java.util.ArrayList;
-import java.util.List;
-import org.apache.seata.common.XID;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.UUIDGenerator;
 import org.apache.seata.config.ConfigurationCache;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
+import org.apache.seata.server.DynamicPortTestConfig;
 import org.apache.seata.server.cluster.raft.execute.branch.AddBranchSessionExecute;
 import org.apache.seata.server.cluster.raft.execute.branch.RemoveBranchSessionExecute;
 import org.apache.seata.server.cluster.raft.execute.branch.UpdateBranchSessionExecute;
@@ -43,13 +42,17 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Import;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
-
 
 /**
  */
 @SpringBootTest
+@Import(DynamicPortTestConfig.class)
 class BranchSessionExecuteTest {
 
     private static GlobalSession GLOBAL_SESSION;
@@ -79,8 +82,6 @@ class BranchSessionExecuteTest {
         SessionHolder.init(null);
         LockerManagerFactory.destroy();
     }
-
-
 
     @Test
     public void testAdd() throws Throwable {
@@ -135,7 +136,7 @@ class BranchSessionExecuteTest {
         return session;
     }
 
-    private static BranchSession mockBranchSession(String xid,long transactionId) {
+    private static BranchSession mockBranchSession(String xid, long transactionId) {
         BranchSession session = new BranchSession();
         session.setXid(xid);
         session.setTransactionId(transactionId);

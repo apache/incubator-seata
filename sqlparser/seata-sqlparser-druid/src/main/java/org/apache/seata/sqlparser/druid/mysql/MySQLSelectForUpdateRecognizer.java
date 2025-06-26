@@ -50,7 +50,7 @@ public class MySQLSelectForUpdateRecognizer extends BaseMySQLRecognizer implemen
      */
     public MySQLSelectForUpdateRecognizer(String originalSQL, SQLStatement ast) {
         super(originalSQL);
-        this.ast = (SQLSelectStatement)ast;
+        this.ast = (SQLSelectStatement) ast;
     }
 
     @Override
@@ -59,8 +59,8 @@ public class MySQLSelectForUpdateRecognizer extends BaseMySQLRecognizer implemen
     }
 
     @Override
-    public String getWhereCondition(final ParametersHolder parametersHolder,
-        final ArrayList<List<Object>> paramAppenderList) {
+    public String getWhereCondition(
+            final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppenderList) {
         SQLSelectQueryBlock selectQueryBlock = getSelect();
         SQLExpr where = selectQueryBlock.getWhere();
         return super.getWhereCondition(where, parametersHolder, paramAppenderList);
@@ -129,7 +129,7 @@ public class MySQLSelectForUpdateRecognizer extends BaseMySQLRecognizer implemen
                 return false;
             }
         };
-        visitor.visit((SQLExprTableSource)tableSource);
+        visitor.visit((SQLExprTableSource) tableSource);
         return sb.toString();
     }
 

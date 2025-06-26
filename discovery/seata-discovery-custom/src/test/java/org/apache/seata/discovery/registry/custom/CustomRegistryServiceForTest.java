@@ -52,5 +52,4 @@ public class CustomRegistryServiceForTest implements RegistryService<ConfigChang
     public void close() throws Exception {
         throw new UnsupportedOperationException();
     }
-
 }

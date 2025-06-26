@@ -16,6 +16,34 @@
  */
 package org.apache.seata.rm.datasource.undo.mysql;
 
+import com.alibaba.druid.pool.DruidDataSource;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import org.apache.seata.common.loader.EnhancedServiceLoader;
+import org.apache.seata.rm.datasource.ConnectionContext;
+import org.apache.seata.rm.datasource.ConnectionProxy;
+import org.apache.seata.rm.datasource.DataSourceProxy;
+import org.apache.seata.rm.datasource.DataSourceProxyTest;
+import org.apache.seata.rm.datasource.mock.MockDriver;
+import org.apache.seata.rm.datasource.sql.struct.Row;
+import org.apache.seata.rm.datasource.sql.struct.TableRecords;
+import org.apache.seata.rm.datasource.undo.*;
+import org.apache.seata.rm.datasource.undo.AbstractUndoLogManager;
+import org.apache.seata.rm.datasource.undo.BranchUndoLog;
+import org.apache.seata.rm.datasource.undo.parser.JacksonUndoLogParser;
+import org.apache.seata.sqlparser.SQLRecognizerFactory;
+import org.apache.seata.sqlparser.SQLType;
+import org.apache.seata.sqlparser.SqlParserType;
+import org.apache.seata.sqlparser.druid.DruidDelegatingSQLRecognizerFactory;
+import org.apache.seata.sqlparser.druid.SQLOperateRecognizerHolder;
+import org.apache.seata.sqlparser.druid.SQLOperateRecognizerHolderFactory;
+import org.apache.seata.sqlparser.struct.TableMeta;
+import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -26,46 +54,53 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import com.alibaba.druid.pool.DruidDataSource;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import org.apache.seata.common.loader.EnhancedServiceLoader;
-import org.apache.seata.rm.datasource.ConnectionContext;
-import org.apache.seata.rm.datasource.ConnectionProxy;
-import org.apache.seata.rm.datasource.DataSourceProxy;
-import org.apache.seata.rm.datasource.DataSourceProxyTest;
-import org.apache.seata.rm.datasource.mock.MockDriver;
-import org.apache.seata.rm.datasource.sql.struct.Row;
-import org.apache.seata.rm.datasource.undo.*;
-import org.apache.seata.sqlparser.struct.TableMeta;
-import org.apache.seata.rm.datasource.sql.struct.TableRecords;
-import org.apache.seata.rm.datasource.undo.parser.JacksonUndoLogParser;
-import org.apache.seata.sqlparser.SQLRecognizerFactory;
-import org.apache.seata.sqlparser.SQLType;
-import org.apache.seata.sqlparser.SqlParserType;
-import org.apache.seata.sqlparser.druid.DruidDelegatingSQLRecognizerFactory;
-import org.apache.seata.sqlparser.druid.SQLOperateRecognizerHolder;
-import org.apache.seata.sqlparser.druid.SQLOperateRecognizerHolderFactory;
-import org.apache.seata.sqlparser.util.JdbcConstants;
-import org.apache.seata.rm.datasource.undo.AbstractUndoLogManager;
-import org.apache.seata.rm.datasource.undo.BranchUndoLog;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-
 public class MySQLUndoLogManagerTest {
 
     List<String> returnValueColumnLabels = Lists.newArrayList("log_status");
     Object[][] returnValue = new Object[][] {
-        new Object[] {1},
-        new Object[] {2},
+        new Object[] {1}, new Object[] {2},
     };
     Object[][] columnMetas = new Object[][] {
-        new Object[] {"", "", "table_plain_executor_test", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
-        new Object[] {"", "", "table_plain_executor_test", "name", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
+        new Object[] {
+            "",
+            "",
+            "table_plain_executor_test",
+            "id",
+            Types.INTEGER,
+            "INTEGER",
+            64,
+            0,
+            10,
+            1,
+            "",
+            "",
+            0,
+            0,
+            64,
+            1,
+            "NO",
+            "YES"
+        },
+        new Object[] {
+            "",
+            "",
+            "table_plain_executor_test",
+            "name",
+            Types.VARCHAR,
+            "VARCHAR",
+            64,
+            0,
+            10,
+            0,
+            "",
+            "",
+            0,
+            0,
+            64,
+            2,
+            "YES",
+            "NO"
+        },
     };
     Object[][] indexMetas = new Object[][] {
         new Object[] {"PRIMARY", "id", false, "", 3, 1, "A", 34},
@@ -82,11 +117,13 @@ public class MySQLUndoLogManagerTest {
     private TableMeta tableMeta;
 
     @BeforeAll
-    public static void setup(){
-        EnhancedServiceLoader.load(SQLOperateRecognizerHolder.class, JdbcConstants.MYSQL,
-            SQLOperateRecognizerHolderFactory.class.getClassLoader());
-        DruidDelegatingSQLRecognizerFactory recognizerFactory = (DruidDelegatingSQLRecognizerFactory) EnhancedServiceLoader
-            .load(SQLRecognizerFactory.class, SqlParserType.SQL_PARSER_TYPE_DRUID);
+    public static void setup() {
+        EnhancedServiceLoader.load(
+                SQLOperateRecognizerHolder.class,
+                JdbcConstants.MYSQL,
+                SQLOperateRecognizerHolderFactory.class.getClassLoader());
+        DruidDelegatingSQLRecognizerFactory recognizerFactory = (DruidDelegatingSQLRecognizerFactory)
+                EnhancedServiceLoader.load(SQLRecognizerFactory.class, SqlParserType.SQL_PARSER_TYPE_DRUID);
     }
 
     @BeforeEach
@@ -98,7 +135,8 @@ public class MySQLUndoLogManagerTest {
 
         dataSourceProxy = DataSourceProxyTest.getDataSourceProxy(dataSource);
 
-        connectionProxy = new ConnectionProxy(dataSourceProxy, dataSource.getConnection().getConnection());
+        connectionProxy =
+                new ConnectionProxy(dataSourceProxy, dataSource.getConnection().getConnection());
         undoLogManager = new MySQLUndoLogManager();
         tableMeta = new TableMeta();
         tableMeta.setTableName("table_plain_executor_test");
@@ -106,19 +144,22 @@ public class MySQLUndoLogManagerTest {
 
     @Test
     public void testDeleteUndoLogByLogCreated() throws SQLException {
-        Assertions.assertEquals(0, undoLogManager.deleteUndoLogByLogCreated(new Date(), 3000, dataSource.getConnection()));
-        Assertions.assertDoesNotThrow(() -> undoLogManager.deleteUndoLogByLogCreated(new Date(), 3000, connectionProxy));
+        Assertions.assertEquals(
+                0, undoLogManager.deleteUndoLogByLogCreated(new Date(), 3000, dataSource.getConnection()));
+        Assertions.assertDoesNotThrow(
+                () -> undoLogManager.deleteUndoLogByLogCreated(new Date(), 3000, connectionProxy));
     }
 
     @Test
     public void testInsertUndoLog() throws SQLException {
-        Assertions.assertDoesNotThrow(() -> undoLogManager.insertUndoLogWithGlobalFinished("xid", 1L, new JacksonUndoLogParser(),
-            dataSource.getConnection()));
+        Assertions.assertDoesNotThrow(() -> undoLogManager.insertUndoLogWithGlobalFinished(
+                "xid", 1L, new JacksonUndoLogParser(), dataSource.getConnection()));
 
-        Assertions.assertDoesNotThrow(() -> undoLogManager.insertUndoLogWithNormal("xid", 1L, "", new byte[]{}, dataSource.getConnection()));
+        Assertions.assertDoesNotThrow(
+                () -> undoLogManager.insertUndoLogWithNormal("xid", 1L, "", new byte[] {}, dataSource.getConnection()));
 
-        Assertions.assertDoesNotThrow(() -> undoLogManager.deleteUndoLogByLogCreated(new Date(), 3000, connectionProxy));
-
+        Assertions.assertDoesNotThrow(
+                () -> undoLogManager.deleteUndoLogByLogCreated(new Date(), 3000, connectionProxy));
     }
 
     @Test
@@ -138,13 +179,16 @@ public class MySQLUndoLogManagerTest {
 
     @Test
     public void testBatchDeleteUndoLog() {
-        Assertions.assertDoesNotThrow(() -> undoLogManager.batchDeleteUndoLog(Sets.newHashSet("xid"), Sets.newHashSet(1L), dataSource.getConnection()));
+        Assertions.assertDoesNotThrow(() -> undoLogManager.batchDeleteUndoLog(
+                Sets.newHashSet("xid"), Sets.newHashSet(1L), dataSource.getConnection()));
 
-        Assertions.assertDoesNotThrow(() -> undoLogManager.batchDeleteUndoLog(Sets.newHashSet("xid"), Sets.newHashSet(1L), connectionProxy));
+        Assertions.assertDoesNotThrow(
+                () -> undoLogManager.batchDeleteUndoLog(Sets.newHashSet("xid"), Sets.newHashSet(1L), connectionProxy));
     }
 
     @Test
-    public void testFlushUndoLogs() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, NoSuchFieldException {
+    public void testFlushUndoLogs()
+            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, NoSuchFieldException {
         connectionProxy.bind("xid");
         ConnectionContext context = connectionProxy.getContext();
         Method method = context.getClass().getDeclaredMethod("setBranchId", Long.class);
@@ -161,7 +205,8 @@ public class MySQLUndoLogManagerTest {
     }
 
     @Test
-    public void testNeedCompress() throws NoSuchFieldException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+    public void testNeedCompress()
+            throws NoSuchFieldException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         SQLUndoLog smallUndoItem = getUndoLogItem(1);
         BranchUndoLog smallBranchUndoLog = new BranchUndoLog();
         smallBranchUndoLog.setBranchId(1L);
@@ -198,7 +243,7 @@ public class MySQLUndoLogManagerTest {
         rowsField.setAccessible(true);
 
         List<Row> rows = new ArrayList<>(size);
-        for (int i = 0; i < size; i ++) {
+        for (int i = 0; i < size; i++) {
             Row row = new Row();
             row.add(new org.apache.seata.rm.datasource.sql.struct.Field("id", 1, "value_id_" + i));
             row.add(new org.apache.seata.rm.datasource.sql.struct.Field("name", 1, "value_name_" + i));

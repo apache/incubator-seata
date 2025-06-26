@@ -16,11 +16,6 @@
  */
 package org.apache.seata.saga.engine.pcext;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.saga.engine.pcext.handlers.ChoiceStateHandler;
@@ -33,8 +28,13 @@ import org.apache.seata.saga.engine.pcext.handlers.SubStateMachineHandler;
 import org.apache.seata.saga.engine.pcext.handlers.SucceedEndStateHandler;
 import org.apache.seata.saga.proctrl.ProcessContext;
 import org.apache.seata.saga.proctrl.handler.ProcessHandler;
-import org.apache.seata.saga.statelang.domain.StateType;
 import org.apache.seata.saga.statelang.domain.State;
+import org.apache.seata.saga.statelang.domain.StateType;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * StateMachine ProcessHandler
@@ -54,7 +54,7 @@ public class StateMachineProcessHandler implements ProcessHandler {
 
         List<StateHandlerInterceptor> interceptors = null;
         if (stateHandler instanceof InterceptableStateHandler) {
-            interceptors = ((InterceptableStateHandler)stateHandler).getInterceptors();
+            interceptors = ((InterceptableStateHandler) stateHandler).getInterceptors();
         }
 
         List<StateHandlerInterceptor> executedInterceptors = null;
@@ -97,7 +97,6 @@ public class StateMachineProcessHandler implements ProcessHandler {
         stateHandlers.put(StateType.FAIL, new FailEndStateHandler());
         stateHandlers.put(StateType.COMPENSATION_TRIGGER, new CompensationTriggerStateHandler());
         stateHandlers.put(StateType.LOOP_START, new LoopStartStateHandler());
-
     }
 
     public Map<StateType, StateHandler> getStateHandlers() {

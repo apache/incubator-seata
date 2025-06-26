@@ -47,7 +47,7 @@ public class KingbaseDeleteRecognizer extends BaseKingbaseRecognizer implements 
      */
     public KingbaseDeleteRecognizer(String originalSQL, SQLStatement ast) {
         super(originalSQL);
-        this.ast = (SQLDeleteStatement)ast;
+        this.ast = (SQLDeleteStatement) ast;
     }
 
     @Override
@@ -94,8 +94,8 @@ public class KingbaseDeleteRecognizer extends BaseKingbaseRecognizer implements 
     }
 
     @Override
-    public String getWhereCondition(final ParametersHolder parametersHolder,
-                                    final ArrayList<List<Object>> paramAppenderList) {
+    public String getWhereCondition(
+            final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppenderList) {
         SQLExpr where = ast.getWhere();
         return super.getWhereCondition(where, parametersHolder, paramAppenderList);
     }
@@ -108,25 +108,25 @@ public class KingbaseDeleteRecognizer extends BaseKingbaseRecognizer implements 
 
     @Override
     public String getLimitCondition() {
-        //kingbase does not support limit or rownum yet
+        // kingbase does not support limit or rownum yet
         return null;
     }
 
     @Override
     public String getLimitCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
-        //kingbase does not support limit or rownum yet
+        // kingbase does not support limit or rownum yet
         return null;
     }
 
     @Override
     public String getOrderByCondition() {
-        //kingbase does not support order by yet
+        // kingbase does not support order by yet
         return null;
     }
 
     @Override
     public String getOrderByCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList) {
-        //kingbase does not support order by yet
+        // kingbase does not support order by yet
         return null;
     }
 

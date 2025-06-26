@@ -16,7 +16,6 @@
  */
 package org.apache.seata.common.util;
 
-
 public class IOUtil {
 
     /**
@@ -43,5 +42,4 @@ public class IOUtil {
             }
         }
     }
-
 }

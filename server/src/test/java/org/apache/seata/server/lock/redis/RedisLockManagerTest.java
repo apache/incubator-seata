@@ -17,11 +17,10 @@
 package org.apache.seata.server.lock.redis;
 
 import org.apache.seata.common.exception.StoreException;
-import java.io.IOException;
-
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.lock.Locker;
 import org.apache.seata.core.model.LockStatus;
+import org.apache.seata.server.DynamicPortTestConfig;
 import org.apache.seata.server.lock.LockManager;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.storage.redis.JedisPooledFactory;
@@ -33,14 +32,18 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Import;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
+
+import java.io.IOException;
 
 /**
  */
 @SpringBootTest
 @EnabledIfSystemProperty(named = "redisCaseEnabled", matches = "true")
+@Import(DynamicPortTestConfig.class)
 public class RedisLockManagerTest {
     static LockManager lockManager = null;
 
@@ -58,7 +61,8 @@ public class RedisLockManagerTest {
         JedisPoolConfig poolConfig = new JedisPoolConfig();
         poolConfig.setMinIdle(1);
         poolConfig.setMaxIdle(10);
-        JedisPooledFactory.getJedisPoolInstance(new JedisPool(poolConfig, "127.0.0.1", 6379, 60000)).getResource();
+        JedisPooledFactory.getJedisPoolInstance(new JedisPool(poolConfig, "127.0.0.1", 6379, 60000))
+                .getResource();
         lockManager = new RedisLockManagerForTest();
     }
 
@@ -121,8 +125,8 @@ public class RedisLockManagerTest {
         branchSession2.setBranchId(1242354576);
         branchSession2.setResourceId("abcss");
         branchSession2.setLockKey("t1:8");
-        Assertions.assertTrue(lockManager.isLockable(branchSession2.getXid(), branchSession2.getResourceId(),
-            branchSession2.getLockKey()));
+        Assertions.assertTrue(lockManager.isLockable(
+                branchSession2.getXid(), branchSession2.getResourceId(), branchSession2.getLockKey()));
         Assertions.assertTrue(lockManager.releaseLock(branchSession));
     }
 
@@ -136,8 +140,7 @@ public class RedisLockManagerTest {
 
     public static class RedisLockManagerForTest extends RedisLockManager {
 
-        public RedisLockManagerForTest() {
-        }
+        public RedisLockManagerForTest() {}
 
         @Override
         public Locker getLocker(BranchSession branchSession) {

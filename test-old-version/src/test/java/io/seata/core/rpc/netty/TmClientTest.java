@@ -34,28 +34,27 @@ public class TmClientTest {
     public static void testTm() throws Exception {
         TransactionManager tm = getTm();
 
-        //globalBegin:TYPE_GLOBAL_BEGIN = 1 , TYPE_GLOBAL_BEGIN_RESULT = 2
-        String xid = tm.begin(ProtocolTestConstants.APPLICATION_ID,
-                ProtocolTestConstants.SERVICE_GROUP, "test", 60000);
+        // globalBegin:TYPE_GLOBAL_BEGIN = 1 , TYPE_GLOBAL_BEGIN_RESULT = 2
+        String xid = tm.begin(ProtocolTestConstants.APPLICATION_ID, ProtocolTestConstants.SERVICE_GROUP, "test", 60000);
         LOGGER.info("globalBegin ok:xid=" + xid);
 
-        //globalCommit:TYPE_GLOBAL_COMMIT = 7 , TYPE_GLOBAL_COMMIT_RESULT = 8
+        // globalCommit:TYPE_GLOBAL_COMMIT = 7 , TYPE_GLOBAL_COMMIT_RESULT = 8
         GlobalStatus commit = tm.commit(xid);
         LOGGER.info("globalCommit ok:" + commit);
         Assertions.assertEquals(commit, GlobalStatus.Committed);
 
-        //globalRollback:TYPE_GLOBAL_ROLLBACK = 9 , TYPE_GLOBAL_ROLLBACK_RESULT = 10
+        // globalRollback:TYPE_GLOBAL_ROLLBACK = 9 , TYPE_GLOBAL_ROLLBACK_RESULT = 10
         GlobalStatus rollback = tm.rollback(xid);
         LOGGER.info("globalRollback ok:" + rollback);
         Assertions.assertEquals(rollback, GlobalStatus.Rollbacked);
 
-        //getStatus:TYPE_GLOBAL_STATUS = 15 , TYPE_GLOBAL_STATUS_RESULT = 16
+        // getStatus:TYPE_GLOBAL_STATUS = 15 , TYPE_GLOBAL_STATUS_RESULT = 16
         GlobalStatus status = tm.getStatus(xid);
         LOGGER.info("getStatus ok:" + status);
         Assertions.assertEquals(status, GlobalStatus.Rollbacked);
 
-        //globalReport:TYPE_GLOBAL_REPORT = 17 , TYPE_GLOBAL_REPORT_RESULT = 18 (0.6.1 not support)
-//        GlobalStatus globalReport = tm.globalReport(xid, GlobalStatus.Committed);
+        // globalReport:TYPE_GLOBAL_REPORT = 17 , TYPE_GLOBAL_REPORT_RESULT = 18 (0.6.1 not support)
+        //        GlobalStatus globalReport = tm.globalReport(xid, GlobalStatus.Committed);
 
         GlobalStatus rollback2 = tm.rollback(xid);
         LOGGER.info("globalRollback ok:" + rollback2);
@@ -65,8 +64,8 @@ public class TmClientTest {
         if (tm == null) {
             synchronized (TmClientTest.class) {
                 if (tm == null) {
-                    TmRpcClient tmRpcClient = TmRpcClient.getInstance(ProtocolTestConstants.APPLICATION_ID,
-                            ProtocolTestConstants.SERVICE_GROUP);
+                    TmRpcClient tmRpcClient = TmRpcClient.getInstance(
+                            ProtocolTestConstants.APPLICATION_ID, ProtocolTestConstants.SERVICE_GROUP);
                     tmRpcClient.init();
                     tm = new DefaultTransactionManager();
                 }
@@ -74,6 +73,4 @@ public class TmClientTest {
         }
         return tm;
     }
-
-
 }

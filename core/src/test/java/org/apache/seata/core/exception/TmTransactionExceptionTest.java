@@ -24,14 +24,16 @@ public class TmTransactionExceptionTest {
 
     @Test
     public void testConstructorWithCode() {
-        TmTransactionException exception = new TmTransactionException(TransactionExceptionCode.GlobalTransactionNotExist);
+        TmTransactionException exception =
+                new TmTransactionException(TransactionExceptionCode.GlobalTransactionNotExist);
         assertEquals(TransactionExceptionCode.GlobalTransactionNotExist, exception.getCode());
     }
 
     @Test
     public void testConstructorWithCodeAndCause() {
         Throwable cause = new RuntimeException("test");
-        TmTransactionException exception = new TmTransactionException(TransactionExceptionCode.GlobalTransactionNotExist, cause);
+        TmTransactionException exception =
+                new TmTransactionException(TransactionExceptionCode.GlobalTransactionNotExist, cause);
         assertEquals(TransactionExceptionCode.GlobalTransactionNotExist, exception.getCode());
         assertEquals(cause, exception.getCause());
     }
@@ -44,7 +46,8 @@ public class TmTransactionExceptionTest {
 
     @Test
     public void testConstructorWithCodeAndMessage() {
-        TmTransactionException exception = new TmTransactionException(TransactionExceptionCode.GlobalTransactionNotExist, "test message");
+        TmTransactionException exception =
+                new TmTransactionException(TransactionExceptionCode.GlobalTransactionNotExist, "test message");
         assertEquals(TransactionExceptionCode.GlobalTransactionNotExist, exception.getCode());
         assertEquals("test message", exception.getMessage());
     }
@@ -67,7 +70,8 @@ public class TmTransactionExceptionTest {
     @Test
     public void testConstructorWithCodeMessageAndCause() {
         Throwable cause = new RuntimeException("test");
-        TmTransactionException exception = new TmTransactionException(TransactionExceptionCode.GlobalTransactionNotExist, "test message", cause);
+        TmTransactionException exception =
+                new TmTransactionException(TransactionExceptionCode.GlobalTransactionNotExist, "test message", cause);
         assertEquals(TransactionExceptionCode.GlobalTransactionNotExist, exception.getCode());
         assertEquals("test message", exception.getMessage());
         assertEquals(cause, exception.getCause());

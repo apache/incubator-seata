@@ -17,9 +17,11 @@
 package org.apache.seata.server.storage.raft.store;
 
 import org.apache.seata.core.store.MappingDO;
+import org.apache.seata.server.DynamicPortTestConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,78 +30,84 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
+@Import(DynamicPortTestConfig.class)
 public class RaftVGroupMappingStoreManagerTest {
 
-	private RaftVGroupMappingStoreManager raftVGroupMappingStoreManager;
+    private RaftVGroupMappingStoreManager raftVGroupMappingStoreManager;
 
-	@BeforeEach
-	public void setUp() {
-		raftVGroupMappingStoreManager = new RaftVGroupMappingStoreManager();
-		raftVGroupMappingStoreManager.clear("unit1");
-	}
+    @BeforeEach
+    public void setUp() {
+        raftVGroupMappingStoreManager = new RaftVGroupMappingStoreManager();
+        raftVGroupMappingStoreManager.clear("unit1");
+    }
 
-	@Test
-	public void testLocalAddVGroup() {
-		MappingDO mappingDO = new MappingDO();
-		mappingDO.setUnit("unit1");
-		mappingDO.setVGroup("vgroup2");
+    @Test
+    public void testLocalAddVGroup() {
+        MappingDO mappingDO = new MappingDO();
+        mappingDO.setUnit("unit1");
+        mappingDO.setVGroup("vgroup2");
 
-		boolean result = raftVGroupMappingStoreManager.localAddVGroup(mappingDO);
+        boolean result = raftVGroupMappingStoreManager.localAddVGroup(mappingDO);
 
-		assertTrue(result);
-		assertEquals(mappingDO, raftVGroupMappingStoreManager.loadVGroupsByUnit("unit1").get("vgroup2"));
-	}
+        assertTrue(result);
+        assertEquals(
+                mappingDO,
+                raftVGroupMappingStoreManager.loadVGroupsByUnit("unit1").get("vgroup2"));
+    }
 
-	@Test
-	public void testLocalAddVGroups() {
-		Map<String, MappingDO> vGroups = new HashMap<>();
-		MappingDO mappingDO1 = new MappingDO();
-		mappingDO1.setUnit("unit1");
-		mappingDO1.setVGroup("vgroup1");
-		vGroups.put("vgroup1", mappingDO1);
+    @Test
+    public void testLocalAddVGroups() {
+        Map<String, MappingDO> vGroups = new HashMap<>();
+        MappingDO mappingDO1 = new MappingDO();
+        mappingDO1.setUnit("unit1");
+        mappingDO1.setVGroup("vgroup1");
+        vGroups.put("vgroup1", mappingDO1);
 
-		MappingDO mappingDO2 = new MappingDO();
-		mappingDO2.setUnit("unit1");
-		mappingDO2.setVGroup("vgroup2");
-		vGroups.put("vgroup2", mappingDO2);
+        MappingDO mappingDO2 = new MappingDO();
+        mappingDO2.setUnit("unit1");
+        mappingDO2.setVGroup("vgroup2");
+        vGroups.put("vgroup2", mappingDO2);
 
-		raftVGroupMappingStoreManager.localAddVGroups(vGroups, "unit1");
+        raftVGroupMappingStoreManager.localAddVGroups(vGroups, "unit1");
 
-		assertEquals(mappingDO1, raftVGroupMappingStoreManager.loadVGroupsByUnit("unit1").get("vgroup1"));
-		assertEquals(mappingDO2, raftVGroupMappingStoreManager.loadVGroupsByUnit("unit1").get("vgroup2"));
-	}
+        assertEquals(
+                mappingDO1,
+                raftVGroupMappingStoreManager.loadVGroupsByUnit("unit1").get("vgroup1"));
+        assertEquals(
+                mappingDO2,
+                raftVGroupMappingStoreManager.loadVGroupsByUnit("unit1").get("vgroup2"));
+    }
 
-	@Test
-	public void testLocalRemoveVGroup() {
-		MappingDO mappingDO = new MappingDO();
-		mappingDO.setUnit("unit1");
-		mappingDO.setVGroup("vgroup1");
+    @Test
+    public void testLocalRemoveVGroup() {
+        MappingDO mappingDO = new MappingDO();
+        mappingDO.setUnit("unit1");
+        mappingDO.setVGroup("vgroup1");
 
-		raftVGroupMappingStoreManager.localAddVGroup(mappingDO);
-		boolean result = raftVGroupMappingStoreManager.localRemoveVGroup("vgroup1");
+        raftVGroupMappingStoreManager.localAddVGroup(mappingDO);
+        boolean result = raftVGroupMappingStoreManager.localRemoveVGroup("vgroup1");
 
-		assertTrue(result);
-		assertTrue(raftVGroupMappingStoreManager.loadVGroupsByUnit("unit1").isEmpty());
-	}
+        assertTrue(result);
+        assertTrue(raftVGroupMappingStoreManager.loadVGroupsByUnit("unit1").isEmpty());
+    }
 
-	@Test
-	public void testLoadVGroupsByUnit() {
-		MappingDO mappingDO1 = new MappingDO();
-		mappingDO1.setUnit("unit1");
-		mappingDO1.setVGroup("vgroup1");
+    @Test
+    public void testLoadVGroupsByUnit() {
+        MappingDO mappingDO1 = new MappingDO();
+        mappingDO1.setUnit("unit1");
+        mappingDO1.setVGroup("vgroup1");
 
-		MappingDO mappingDO2 = new MappingDO();
-		mappingDO2.setUnit("unit1");
-		mappingDO2.setVGroup("vgroup2");
+        MappingDO mappingDO2 = new MappingDO();
+        mappingDO2.setUnit("unit1");
+        mappingDO2.setVGroup("vgroup2");
 
-		raftVGroupMappingStoreManager.localAddVGroup(mappingDO1);
-		raftVGroupMappingStoreManager.localAddVGroup(mappingDO2);
+        raftVGroupMappingStoreManager.localAddVGroup(mappingDO1);
+        raftVGroupMappingStoreManager.localAddVGroup(mappingDO2);
 
-		Map<String, MappingDO> result = raftVGroupMappingStoreManager.loadVGroupsByUnit("unit1");
+        Map<String, MappingDO> result = raftVGroupMappingStoreManager.loadVGroupsByUnit("unit1");
 
-		assertEquals(2, result.size());
-		assertEquals(mappingDO1, result.get("vgroup1"));
-		assertEquals(mappingDO2, result.get("vgroup2"));
-	}
-
+        assertEquals(2, result.size());
+        assertEquals(mappingDO1, result.get("vgroup1"));
+        assertEquals(mappingDO2, result.get("vgroup2"));
+    }
 }

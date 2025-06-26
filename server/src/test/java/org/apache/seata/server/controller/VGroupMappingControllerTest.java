@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-
 @Disabled
 @SpringBootTest
 class VGroupMappingControllerTest {
@@ -30,7 +29,7 @@ class VGroupMappingControllerTest {
 
     @Test
     void addVGroup() {
-        vGroupMappingController.addVGroup("group1","unit1");
+        vGroupMappingController.addVGroup("group1", "unit1");
     }
 
     @Test

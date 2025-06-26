@@ -22,12 +22,12 @@ import org.apache.seata.core.constants.ServerTableColumnsName;
 @LoadLevel(name = "sqlserver")
 public class BaseDistributedLockSqlServer extends BaseDistributedLockSql {
 
-    protected static final String SELECT_FOR_UPDATE_SQL = "SELECT " + ALL_COLUMNS + " FROM " + DISTRIBUTED_LOCK_TABLE_PLACE_HOLD
-            + " WITH (ROWLOCK, UPDLOCK, HOLDLOCK) WHERE " + ServerTableColumnsName.DISTRIBUTED_LOCK_KEY + " = ?";
+    protected static final String SELECT_FOR_UPDATE_SQL = "SELECT " + ALL_COLUMNS + " FROM "
+            + DISTRIBUTED_LOCK_TABLE_PLACE_HOLD + " WITH (ROWLOCK, UPDLOCK, HOLDLOCK) WHERE "
+            + ServerTableColumnsName.DISTRIBUTED_LOCK_KEY + " = ?";
 
     @Override
     public String getSelectDistributeForUpdateSql(String distributedLockTable) {
         return SELECT_FOR_UPDATE_SQL.replace(DISTRIBUTED_LOCK_TABLE_PLACE_HOLD, distributedLockTable);
     }
-
 }

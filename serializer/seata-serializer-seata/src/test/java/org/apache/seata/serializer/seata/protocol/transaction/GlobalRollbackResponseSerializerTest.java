@@ -16,12 +16,12 @@
  */
 package org.apache.seata.serializer.seata.protocol.transaction;
 
-import org.apache.seata.core.protocol.ProtocolConstants;
-import org.apache.seata.serializer.seata.SeataSerializer;
 import org.apache.seata.core.exception.TransactionExceptionCode;
 import org.apache.seata.core.model.GlobalStatus;
+import org.apache.seata.core.protocol.ProtocolConstants;
 import org.apache.seata.core.protocol.ResultCode;
 import org.apache.seata.core.protocol.transaction.GlobalRollbackResponse;
+import org.apache.seata.serializer.seata.SeataSerializer;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,7 +41,7 @@ public class GlobalRollbackResponseSerializerTest {
      * Test codec.
      */
     @Test
-    public void test_codec(){
+    public void test_codec() {
         GlobalRollbackResponse globalRollbackResponse = new GlobalRollbackResponse();
         globalRollbackResponse.setGlobalStatus(GlobalStatus.AsyncCommitting);
         globalRollbackResponse.setMsg("aaa");
@@ -54,7 +54,7 @@ public class GlobalRollbackResponseSerializerTest {
         assertThat(globalRollbackResponse2.getGlobalStatus()).isEqualTo(globalRollbackResponse.getGlobalStatus());
         assertThat(globalRollbackResponse2.getMsg()).isEqualTo(globalRollbackResponse.getMsg());
         assertThat(globalRollbackResponse2.getResultCode()).isEqualTo(globalRollbackResponse.getResultCode());
-        assertThat(globalRollbackResponse2.getTransactionExceptionCode()).isEqualTo(globalRollbackResponse.getTransactionExceptionCode());
+        assertThat(globalRollbackResponse2.getTransactionExceptionCode())
+                .isEqualTo(globalRollbackResponse.getTransactionExceptionCode());
     }
-
 }

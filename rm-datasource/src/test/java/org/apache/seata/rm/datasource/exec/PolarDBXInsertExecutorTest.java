@@ -16,13 +16,6 @@
  */
 package org.apache.seata.rm.datasource.exec;
 
-import java.lang.reflect.Field;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-
 import com.alibaba.druid.mock.MockStatement;
 import com.alibaba.druid.mock.MockStatementBase;
 import com.alibaba.druid.pool.DruidDataSource;
@@ -32,7 +25,6 @@ import org.apache.seata.rm.datasource.DataSourceProxy;
 import org.apache.seata.rm.datasource.DataSourceProxyTest;
 import org.apache.seata.rm.datasource.PreparedStatementProxy;
 import org.apache.seata.rm.datasource.StatementProxy;
-import org.apache.seata.rm.datasource.exec.StatementCallback;
 import org.apache.seata.rm.datasource.exec.polardbx.PolarDBXInsertExecutor;
 import org.apache.seata.rm.datasource.mock.MockDriver;
 import org.apache.seata.rm.datasource.mock.MockResultSet;
@@ -41,6 +33,13 @@ import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mockito;
+
+import java.lang.reflect.Field;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -67,13 +66,16 @@ public class PolarDBXInsertExecutorTest extends MySQLInsertExecutorTest {
         when(statementProxy.getTargetStatement()).thenReturn(statementProxy);
 
         MockResultSet resultSet = new MockResultSet(statementProxy);
-        resultSet.mockResultSet(Arrays.asList("Variable_name", "Value"), new Object[][]{{"auto_increment_increment", "1"}});
-        when(statementProxy.getTargetStatement().executeQuery("SHOW VARIABLES LIKE 'auto_increment_increment'")).thenReturn(resultSet);
+        resultSet.mockResultSet(
+                Arrays.asList("Variable_name", "Value"), new Object[][] {{"auto_increment_increment", "1"}});
+        when(statementProxy.getTargetStatement().executeQuery("SHOW VARIABLES LIKE 'auto_increment_increment'"))
+                .thenReturn(resultSet);
 
         StatementCallback statementCallback = mock(StatementCallback.class);
         sqlInsertRecognizer = mock(SQLInsertRecognizer.class);
         tableMeta = mock(TableMeta.class);
-        insertExecutor = Mockito.spy(new PolarDBXInsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
+        insertExecutor =
+                Mockito.spy(new PolarDBXInsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
 
         pkIndexMap = new HashMap<String, Integer>() {
             {
@@ -84,24 +86,125 @@ public class PolarDBXInsertExecutorTest extends MySQLInsertExecutorTest {
         // new test init property
         List<String> returnValueColumnLabels = Lists.newArrayList("id", "user_id", "name", "sex", "update_time");
         Object[][] returnValue = new Object[][] {
-                new Object[] {1, 1, "will", 1, 0},
+            new Object[] {1, 1, "will", 1, 0},
         };
         Object[][] columnMetas = new Object[][] {
-                new Object[] {"", "", "table_insert_executor_test", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 2, "NO", "NO"},
-                new Object[] {"", "", "table_insert_executor_test", "user_id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 2, "NO", "NO"},
-                new Object[] {"", "", "table_insert_executor_test", "name", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "NO", "NO"},
-                new Object[] {"", "", "table_insert_executor_test", "sex", Types.INTEGER, "INTEGER", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "NO", "NO"},
-                new Object[] {"", "", "table_insert_executor_test", "update_time", Types.INTEGER, "INTEGER", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
+            new Object[] {
+                "",
+                "",
+                "table_insert_executor_test",
+                "id",
+                Types.INTEGER,
+                "INTEGER",
+                64,
+                0,
+                10,
+                1,
+                "",
+                "",
+                0,
+                0,
+                64,
+                2,
+                "NO",
+                "NO"
+            },
+            new Object[] {
+                "",
+                "",
+                "table_insert_executor_test",
+                "user_id",
+                Types.INTEGER,
+                "INTEGER",
+                64,
+                0,
+                10,
+                1,
+                "",
+                "",
+                0,
+                0,
+                64,
+                2,
+                "NO",
+                "NO"
+            },
+            new Object[] {
+                "",
+                "",
+                "table_insert_executor_test",
+                "name",
+                Types.VARCHAR,
+                "VARCHAR",
+                64,
+                0,
+                10,
+                0,
+                "",
+                "",
+                0,
+                0,
+                64,
+                2,
+                "NO",
+                "NO"
+            },
+            new Object[] {
+                "",
+                "",
+                "table_insert_executor_test",
+                "sex",
+                Types.INTEGER,
+                "INTEGER",
+                64,
+                0,
+                10,
+                0,
+                "",
+                "",
+                0,
+                0,
+                64,
+                2,
+                "NO",
+                "NO"
+            },
+            new Object[] {
+                "",
+                "",
+                "table_insert_executor_test",
+                "update_time",
+                Types.INTEGER,
+                "INTEGER",
+                64,
+                0,
+                10,
+                0,
+                "",
+                "",
+                0,
+                0,
+                64,
+                2,
+                "YES",
+                "NO"
+            },
         };
         Object[][] indexMetas = new Object[][] {
-                new Object[] {"PRIMARY", "id", false, "", 3, 1, "A", 34},
-                new Object[] {"PRIMARY", "user_id", false, "", 3, 1, "A", 34},
+            new Object[] {"PRIMARY", "id", false, "", 3, 1, "A", 34},
+            new Object[] {"PRIMARY", "user_id", false, "", 3, 1, "A", 34},
         };
-        Object[][] onUpdateColumnsReturnValue = new Object[][] {
-                new Object[]{0, "update_time", Types.INTEGER, "INTEGER", 64, 10, 0, 0}
-        };
+        Object[][] onUpdateColumnsReturnValue =
+                new Object[][] {new Object[] {0, "update_time", Types.INTEGER, "INTEGER", 64, 10, 0, 0}};
 
-        MockDriver mockDriver = new MockDriver(returnValueColumnLabels, returnValue, columnMetas, indexMetas, null, onUpdateColumnsReturnValue, new Object[][]{});
+        MockDriver mockDriver = new MockDriver(
+                returnValueColumnLabels,
+                returnValue,
+                columnMetas,
+                indexMetas,
+                null,
+                onUpdateColumnsReturnValue,
+                new Object[][] {});
         DruidDataSource dataSource = new DruidDataSource();
         dataSource.setUrl("jdbc:mock:xxx1");
         dataSource.setDriver(mockDriver);
@@ -111,8 +214,10 @@ public class PolarDBXInsertExecutorTest extends MySQLInsertExecutorTest {
             Field field = dataSourceProxy.getClass().getDeclaredField("dbType");
             field.setAccessible(true);
             field.set(newDataSourceProxy, "mysql");
-            ConnectionProxy newConnectionProxy = new ConnectionProxy(newDataSourceProxy, dataSource.getConnection().getConnection());
-            MockStatementBase mockStatement = new MockStatement(dataSource.getConnection().getConnection());
+            ConnectionProxy newConnectionProxy = new ConnectionProxy(
+                    newDataSourceProxy, dataSource.getConnection().getConnection());
+            MockStatementBase mockStatement =
+                    new MockStatement(dataSource.getConnection().getConnection());
             newStatementProxy = new StatementProxy(newConnectionProxy, mockStatement);
         } catch (Exception e) {
             throw new RuntimeException("init failed");

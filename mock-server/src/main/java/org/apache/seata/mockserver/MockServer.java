@@ -16,11 +16,6 @@
  */
 package org.apache.seata.mockserver;
 
-import java.lang.management.ManagementFactory;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
 import org.apache.seata.common.XID;
 import org.apache.seata.common.metadata.Instance;
 import org.apache.seata.common.metadata.Node;
@@ -33,6 +28,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+import java.lang.management.ManagementFactory;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import static org.apache.seata.common.ConfigurationKeys.ENV_SEATA_PORT_KEY;
 
@@ -68,10 +68,14 @@ public class MockServer {
             synchronized (MockServer.class) {
                 if (!inited) {
                     inited = true;
-                    workingThreads = new ThreadPoolExecutor(50,
-                            50, 500, TimeUnit.SECONDS,
+                    workingThreads = new ThreadPoolExecutor(
+                            50,
+                            50,
+                            500,
+                            TimeUnit.SECONDS,
                             new LinkedBlockingQueue<>(20000),
-                            new NamedThreadFactory("ServerHandlerThread", 500), new ThreadPoolExecutor.CallerRunsPolicy());
+                            new NamedThreadFactory("ServerHandlerThread", 500),
+                            new ThreadPoolExecutor.CallerRunsPolicy());
                     NettyServerConfig config = new NettyServerConfig();
                     config.setServerListenPort(port);
                     nettyRemotingServer = new MockNettyRemotingServer(workingThreads, config);
@@ -80,7 +84,8 @@ public class MockServer {
                     XID.setIpAddress(NetUtil.getLocalIp());
                     XID.setPort(port);
                     // init snowflake for transactionId, branchId
-                    Instance.getInstance().setTransaction(new Node.Endpoint(XID.getIpAddress(),XID.getPort(),"netty"));
+                    Instance.getInstance()
+                            .setTransaction(new Node.Endpoint(XID.getIpAddress(), XID.getPort(), "netty"));
                     UUIDGenerator.init(1L);
 
                     MockCoordinator coordinator = MockCoordinator.getInstance();
@@ -90,15 +95,15 @@ public class MockServer {
                     Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            LOGGER.info("system is closing , pid info: " + ManagementFactory.getRuntimeMXBean().getName());
+                            LOGGER.info("system is closing , pid info: "
+                                    + ManagementFactory.getRuntimeMXBean().getName());
                         }
                     }));
-                    LOGGER.info("pid info: " + ManagementFactory.getRuntimeMXBean().getName());
+                    LOGGER.info(
+                            "pid info: " + ManagementFactory.getRuntimeMXBean().getName());
                 }
             }
         }
-
-
     }
 
     public static void close() {

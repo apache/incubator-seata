@@ -16,7 +16,6 @@
  */
 package org.apache.seata.common.exception;
 
-
 /**
  * Exception indicating authentication failure. This exception is typically thrown
  * when the authentication process fails, and it extends SecurityException to

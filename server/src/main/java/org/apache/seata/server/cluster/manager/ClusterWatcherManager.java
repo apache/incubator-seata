@@ -16,16 +16,15 @@
  */
 package org.apache.seata.server.cluster.manager;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import javax.annotation.PostConstruct;
-import javax.servlet.AsyncContext;
-import javax.servlet.http.HttpServletResponse;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.http.DefaultFullHttpResponse;
+import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpResponse;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpVersion;
+import org.apache.seata.common.rpc.http.HttpContext;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.server.cluster.listener.ClusterChangeEvent;
 import org.apache.seata.server.cluster.listener.ClusterChangeListener;
@@ -36,8 +35,15 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-/**
- */
+import javax.annotation.PostConstruct;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 @Component
 public class ClusterWatcherManager implements ClusterChangeListener {
 
@@ -48,29 +54,30 @@ public class ClusterWatcherManager implements ClusterChangeListener {
     private static final Map<String, Long> GROUP_UPDATE_TIME = new ConcurrentHashMap<>();
 
     private final ScheduledThreadPoolExecutor scheduledThreadPoolExecutor =
-        new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("long-polling", 1));
+            new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("long-polling", 1));
 
     @PostConstruct
     public void init() {
         // Responds to monitors that time out
-        scheduledThreadPoolExecutor.scheduleAtFixedRate(() -> {
-            for (String group : WATCHERS.keySet()) {
-                Optional.ofNullable(WATCHERS.remove(group))
-                    .ifPresent(watchers -> watchers.parallelStream().forEach(watcher -> {
-                        if (System.currentTimeMillis() >= watcher.getTimeout()) {
-                            HttpServletResponse httpServletResponse =
-                                (HttpServletResponse)((AsyncContext)watcher.getAsyncContext()).getResponse();
-                            watcher.setDone(true);
-                            httpServletResponse.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-                            ((AsyncContext)watcher.getAsyncContext()).complete();
-                        }
-                        if (!watcher.isDone()) {
-                            // Re-register
-                            registryWatcher(watcher);
-                        }
-                    }));
-            }
-        }, 1, 1, TimeUnit.SECONDS);
+        scheduledThreadPoolExecutor.scheduleAtFixedRate(
+                () -> {
+                    for (String group : WATCHERS.keySet()) {
+                        Optional.ofNullable(WATCHERS.remove(group))
+                                .ifPresent(watchers -> watchers.parallelStream().forEach(watcher -> {
+                                    if (System.currentTimeMillis() >= watcher.getTimeout()) {
+                                        watcher.setDone(true);
+                                        sendWatcherResponse(watcher, HttpResponseStatus.NOT_MODIFIED);
+                                    }
+                                    if (!watcher.isDone()) {
+                                        // Re-register
+                                        registryWatcher(watcher);
+                                    }
+                                }));
+                    }
+                },
+                1,
+                1,
+                TimeUnit.SECONDS);
     }
 
     @Override
@@ -81,29 +88,50 @@ public class ClusterWatcherManager implements ClusterChangeListener {
             GROUP_UPDATE_TIME.put(event.getGroup(), event.getTerm());
             // Notifications are made of changes in cluster information
             Optional.ofNullable(WATCHERS.remove(event.getGroup()))
-                .ifPresent(watchers -> watchers.parallelStream().forEach(this::notify));
+                    .ifPresent(watchers -> watchers.parallelStream().forEach(this::notifyWatcher));
         }
     }
 
-    private void notify(Watcher<?> watcher) {
-        AsyncContext asyncContext = (AsyncContext)watcher.getAsyncContext();
-        HttpServletResponse httpServletResponse = (HttpServletResponse)asyncContext.getResponse();
+    private void notifyWatcher(Watcher<?> watcher) {
         watcher.setDone(true);
-        if (logger.isDebugEnabled()) {
-            logger.debug("notify cluster change event to: {}", asyncContext.getRequest().getRemoteAddr());
+        sendWatcherResponse(watcher, HttpResponseStatus.OK);
+    }
+
+    private void sendWatcherResponse(Watcher<?> watcher, HttpResponseStatus nettyStatus) {
+        Object context = watcher.getAsyncContext();
+        if (!(context instanceof HttpContext)) {
+            logger.warn(
+                    "Unsupported context type for watcher on group {}: {}",
+                    watcher.getGroup(),
+                    context != null ? context.getClass().getName() : "null");
+            return;
         }
-        httpServletResponse.setStatus(HttpServletResponse.SC_OK);
-        asyncContext.complete();
+        HttpContext httpContext = (HttpContext) context;
+        ChannelHandlerContext ctx = httpContext.getContext();
+        if (ctx.channel().isActive()) {
+            HttpResponse response =
+                    new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, nettyStatus, Unpooled.EMPTY_BUFFER);
+            response.headers().set(HttpHeaderNames.CONTENT_LENGTH, 0);
+
+            if (!httpContext.isKeepAlive()) {
+                ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+            } else {
+                ctx.writeAndFlush(response);
+            }
+        } else {
+            logger.warn(
+                    "Netty channel is not active for watcher on group {}, cannot send response.", watcher.getGroup());
+        }
     }
 
     public void registryWatcher(Watcher<?> watcher) {
         String group = watcher.getGroup();
         Long term = GROUP_UPDATE_TIME.get(group);
         if (term == null || watcher.getTerm() >= term) {
-            WATCHERS.computeIfAbsent(group, value -> new ConcurrentLinkedQueue<>()).add(watcher);
+            WATCHERS.computeIfAbsent(group, value -> new ConcurrentLinkedQueue<>())
+                    .add(watcher);
         } else {
-            notify(watcher);
+            notifyWatcher(watcher);
         }
     }
-
 }

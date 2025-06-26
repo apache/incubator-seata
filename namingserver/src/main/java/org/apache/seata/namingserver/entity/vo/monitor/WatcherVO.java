@@ -22,8 +22,7 @@ public class WatcherVO {
     private String vGroup;
     private List<String> watcherIp;
 
-    public WatcherVO() {
-    }
+    public WatcherVO() {}
 
     public WatcherVO(String vGroup, List<String> watcherIp) {
         this.vGroup = vGroup;

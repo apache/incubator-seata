@@ -23,7 +23,7 @@ import org.apache.seata.core.rpc.RpcContext;
  * The type Global lock query request.
  *
  */
-public class GlobalLockQueryRequest extends BranchRegisterRequest  {
+public class GlobalLockQueryRequest extends BranchRegisterRequest {
 
     @Override
     public short getTypeCode() {
@@ -34,5 +34,4 @@ public class GlobalLockQueryRequest extends BranchRegisterRequest  {
     public AbstractTransactionResponse handle(RpcContext rpcContext) {
         return handler.handle(this, rpcContext);
     }
-
 }

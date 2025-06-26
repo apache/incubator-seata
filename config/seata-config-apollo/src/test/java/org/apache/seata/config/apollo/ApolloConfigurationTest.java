@@ -16,8 +16,6 @@
  */
 package org.apache.seata.config.apollo;
 
-import java.io.IOException;
-
 import com.ctrip.framework.apollo.enums.PropertyChangeType;
 import org.apache.seata.common.exception.NotSupportYetException;
 import org.apache.seata.config.ConfigurationChangeEvent;
@@ -27,6 +25,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -90,9 +90,7 @@ public class ApolloConfigurationTest {
     public void testListener() {
         ConfigurationChangeListener listener = new ConfigurationChangeListener() {
             @Override
-            public void onChangeEvent(ConfigurationChangeEvent event) {
-
-            }
+            public void onChangeEvent(ConfigurationChangeEvent event) {}
         };
         apolloConfiguration.addConfigListener("seata.test", listener);
         assertEquals(1, apolloConfiguration.getConfigListeners("seata.test").size());
@@ -100,25 +98,33 @@ public class ApolloConfigurationTest {
         assertEquals(1, apolloConfiguration.getConfigListeners("seata.test").size());
         apolloConfiguration.removeConfigListener("seata.test", listener);
         assertEquals(0, apolloConfiguration.getConfigListeners("seata.test").size());
-
     }
 
     @Test
     void testGetChangeTypeAdded() {
         ConfigurationChangeType result = apolloConfiguration.getChangeType(PropertyChangeType.ADDED);
-        assertEquals(ConfigurationChangeType.ADD, result, "Should return ConfigurationChangeType.ADD for PropertyChangeType.ADDED");
+        assertEquals(
+                ConfigurationChangeType.ADD,
+                result,
+                "Should return ConfigurationChangeType.ADD for PropertyChangeType.ADDED");
     }
 
     @Test
     void testGetChangeTypeDeleted() {
         ConfigurationChangeType result = apolloConfiguration.getChangeType(PropertyChangeType.DELETED);
-        assertEquals(ConfigurationChangeType.DELETE, result, "Should return ConfigurationChangeType.DELETE for PropertyChangeType.DELETED");
+        assertEquals(
+                ConfigurationChangeType.DELETE,
+                result,
+                "Should return ConfigurationChangeType.DELETE for PropertyChangeType.DELETED");
     }
 
     @Test
     void testGetChangeTypeModified() {
         ConfigurationChangeType result = apolloConfiguration.getChangeType(PropertyChangeType.MODIFIED);
-        assertEquals(ConfigurationChangeType.MODIFY, result, "Should return ConfigurationChangeType.MODIFY for PropertyChangeType.MODIFIED");
+        assertEquals(
+                ConfigurationChangeType.MODIFY,
+                result,
+                "Should return ConfigurationChangeType.MODIFY for PropertyChangeType.MODIFIED");
     }
 
     @Test
@@ -130,7 +136,8 @@ public class ApolloConfigurationTest {
     @Test
     void testGetApolloConfigService() {
         String result = ApolloConfiguration.getApolloConfigService();
-        assertEquals("config.apollo.apolloConfigService", result, "Should return the correct Apollo config service string");
+        assertEquals(
+                "config.apollo.apolloConfigService", result, "Should return the correct Apollo config service string");
     }
 
     /**
@@ -143,5 +150,4 @@ public class ApolloConfigurationTest {
         System.clearProperty("seataEnv");
         apolloMockServer.stop();
     }
-
 }

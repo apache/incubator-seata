@@ -16,8 +16,9 @@
  */
 package org.apache.seata.server.cluster.raft.processor.request;
 
-import java.io.Serializable;
 import org.apache.seata.common.metadata.Node;
+
+import java.io.Serializable;
 
 public class PutNodeMetadataRequest implements Serializable {
 

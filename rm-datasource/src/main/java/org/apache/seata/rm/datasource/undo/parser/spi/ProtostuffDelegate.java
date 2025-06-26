@@ -31,5 +31,4 @@ public interface ProtostuffDelegate<T> {
      * @return delegate
      */
     Delegate<T> create();
-
 }

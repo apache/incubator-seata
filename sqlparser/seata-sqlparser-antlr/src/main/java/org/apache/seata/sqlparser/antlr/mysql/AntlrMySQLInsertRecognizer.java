@@ -16,15 +16,15 @@
  */
 package org.apache.seata.sqlparser.antlr.mysql;
 
-import org.apache.seata.sqlparser.util.ColumnUtils;
+import org.antlr.v4.runtime.CommonTokenStream;
 import org.apache.seata.sqlparser.SQLInsertRecognizer;
 import org.apache.seata.sqlparser.SQLType;
 import org.apache.seata.sqlparser.antlr.mysql.parser.MySqlLexer;
 import org.apache.seata.sqlparser.antlr.mysql.parser.MySqlParser;
 import org.apache.seata.sqlparser.antlr.mysql.stream.ANTLRNoCaseStringStream;
 import org.apache.seata.sqlparser.antlr.mysql.visit.InsertStatementSqlVisitor;
+import org.apache.seata.sqlparser.util.ColumnUtils;
 import org.apache.seata.sqlparser.util.JdbcConstants;
-import org.antlr.v4.runtime.CommonTokenStream;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -90,7 +90,9 @@ public class AntlrMySQLInsertRecognizer implements SQLInsertRecognizer {
             return new ArrayList<>();
         }
 
-        return insertColumnNames.stream().map(insertColumns -> insertColumns.getColumnName()).collect(Collectors.toList());
+        return insertColumnNames.stream()
+                .map(insertColumns -> insertColumns.getColumnName())
+                .collect(Collectors.toList());
     }
 
     @Override

@@ -35,7 +35,6 @@ public class StatusRpcHookTest {
         hook.doBeforeRequest("192.168.1.1:8080", new RpcMessage());
 
         assertEquals(1, status.getActive(), "Active count should be incremented");
-
     }
 
     @Test
@@ -49,7 +48,7 @@ public class StatusRpcHookTest {
 
         assertEquals(1, status.getActive(), "Active count should be incremented");
 
-        hook.doAfterResponse("192.168.2.1:8080", new RpcMessage(),null);
+        hook.doAfterResponse("192.168.2.1:8080", new RpcMessage(), null);
 
         assertEquals(0, status.getActive(), "Active count should be decremented");
         assertEquals(1, status.getTotal(), "Active count should be incremented");

@@ -24,8 +24,7 @@ import org.apache.seata.common.exception.FrameworkErrorCode;
  */
 public class ForwardInvalidException extends EngineExecutionException {
 
-    public ForwardInvalidException() {
-    }
+    public ForwardInvalidException() {}
 
     public ForwardInvalidException(FrameworkErrorCode err) {
         super(err);

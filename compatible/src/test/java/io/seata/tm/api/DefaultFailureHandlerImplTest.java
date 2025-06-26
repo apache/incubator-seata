@@ -99,12 +99,12 @@ class DefaultFailureHandlerImplTest {
             // assert timer pendingCount: first time is 1
             Long pendingTimeout = timer.pendingTimeouts();
             Assertions.assertEquals(pendingTimeout, 1L);
-            //set globalStatus
+            // set globalStatus
             globalStatus = GlobalStatus.Committed;
             Thread.sleep(25 * 1000L);
             pendingTimeout = timer.pendingTimeouts();
             LOGGER.info("pendingTimeout {}", pendingTimeout);
-            //all timer is done
+            // all timer is done
             Assertions.assertEquals(pendingTimeout, 0L);
         } finally {
             RootContext.unbind();
@@ -130,18 +130,15 @@ class DefaultFailureHandlerImplTest {
             // assert timer pendingCount: first time is 1
             Long pendingTimeout = timer.pendingTimeouts();
             Assertions.assertEquals(pendingTimeout, 1L);
-            //set globalStatus
+            // set globalStatus
             globalStatus = GlobalStatus.Rollbacked;
             Thread.sleep(25 * 1000L);
             pendingTimeout = timer.pendingTimeouts();
             LOGGER.info("pendingTimeout {}", pendingTimeout);
-            //all timer is done
+            // all timer is done
             Assertions.assertEquals(pendingTimeout, 0L);
         } finally {
             RootContext.unbind();
         }
-
     }
-
-
 }

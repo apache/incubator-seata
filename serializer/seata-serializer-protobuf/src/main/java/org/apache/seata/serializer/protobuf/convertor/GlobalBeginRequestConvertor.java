@@ -16,12 +16,11 @@
  */
 package org.apache.seata.serializer.protobuf.convertor;
 
+import org.apache.seata.core.protocol.transaction.GlobalBeginRequest;
 import org.apache.seata.serializer.protobuf.generated.AbstractMessageProto;
 import org.apache.seata.serializer.protobuf.generated.AbstractTransactionRequestProto;
 import org.apache.seata.serializer.protobuf.generated.GlobalBeginRequestProto;
 import org.apache.seata.serializer.protobuf.generated.MessageTypeProto;
-import org.apache.seata.core.protocol.transaction.GlobalBeginRequest;
-
 
 public class GlobalBeginRequestConvertor implements PbConvertor<GlobalBeginRequest, GlobalBeginRequestProto> {
 
@@ -29,15 +28,20 @@ public class GlobalBeginRequestConvertor implements PbConvertor<GlobalBeginReque
     public GlobalBeginRequestProto convert2Proto(GlobalBeginRequest globalBeginRequest) {
         final short typeCode = globalBeginRequest.getTypeCode();
 
-        final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder().setMessageType(
-            MessageTypeProto.forNumber(typeCode)).build();
+        final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder()
+                .setMessageType(MessageTypeProto.forNumber(typeCode))
+                .build();
 
-        final AbstractTransactionRequestProto abstractTransactionRequestProto = AbstractTransactionRequestProto
-            .newBuilder().setAbstractMessage(abstractMessage).build();
+        final AbstractTransactionRequestProto abstractTransactionRequestProto =
+                AbstractTransactionRequestProto.newBuilder()
+                        .setAbstractMessage(abstractMessage)
+                        .build();
 
-        GlobalBeginRequestProto result = GlobalBeginRequestProto.newBuilder().setTimeout(
-            globalBeginRequest.getTimeout()).setTransactionName(globalBeginRequest.getTransactionName())
-            .setAbstractTransactionRequest(abstractTransactionRequestProto).build();
+        GlobalBeginRequestProto result = GlobalBeginRequestProto.newBuilder()
+                .setTimeout(globalBeginRequest.getTimeout())
+                .setTransactionName(globalBeginRequest.getTransactionName())
+                .setAbstractTransactionRequest(abstractTransactionRequestProto)
+                .build();
         return result;
     }
 

@@ -16,13 +16,12 @@
  */
 package org.apache.seata.saga.statelang.parser.impl;
 
-import java.util.Map;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.saga.statelang.domain.DomainConstants;
 import org.apache.seata.saga.statelang.domain.RecoverStrategy;
 import org.apache.seata.saga.statelang.domain.State;
-import org.apache.seata.saga.statelang.domain.StateType;
 import org.apache.seata.saga.statelang.domain.StateMachine;
+import org.apache.seata.saga.statelang.domain.StateType;
 import org.apache.seata.saga.statelang.domain.impl.AbstractTaskState;
 import org.apache.seata.saga.statelang.domain.impl.BaseState;
 import org.apache.seata.saga.statelang.domain.impl.StateMachineImpl;
@@ -35,6 +34,8 @@ import org.apache.seata.saga.statelang.parser.utils.DesignerJsonTransformer;
 import org.apache.seata.saga.statelang.validator.StateMachineValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Map;
 
 /**
  * State machine language parser

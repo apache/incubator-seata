@@ -16,7 +16,6 @@
  */
 package org.apache.seata.core.protocol.transaction;
 
-
 import org.apache.seata.core.exception.TransactionExceptionCode;
 import org.apache.seata.core.protocol.AbstractResultMessage;
 
@@ -45,5 +44,4 @@ public abstract class AbstractTransactionResponse extends AbstractResultMessage 
     public void setTransactionExceptionCode(TransactionExceptionCode transactionExceptionCode) {
         this.transactionExceptionCode = transactionExceptionCode;
     }
-
 }
