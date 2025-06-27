@@ -39,7 +39,6 @@ import static org.apache.seata.metrics.IdConstants.HOST_AND_PORT;
 import static org.apache.seata.metrics.IdConstants.LIMIT_TYPE_KEY;
 import static org.apache.seata.metrics.IdConstants.STATUS_VALUE_AFTER_COMMITTED_KEY;
 import static org.apache.seata.metrics.IdConstants.STATUS_VALUE_AFTER_ROLLBACKED_KEY;
-import static org.apache.seata.metrics.IdConstants.TRANSACTION_ID_KEY;
 import static org.apache.seata.metrics.IdConstants.TRANSACTION_NAME_KEY;
 
 /**
@@ -104,7 +103,6 @@ public class MetricsSubscriber {
         registry.getSummary(summaryId
                 .withTag(APP_ID_KEY, event.getApplicationId())
                 .withTag(GROUP_KEY, event.getGroup())
-                .withTag(TRANSACTION_ID_KEY, String.valueOf(event.getId()))
                 .withTag(TRANSACTION_NAME_KEY, event.getName())
         ).increase(value);
     }

@@ -29,8 +29,6 @@ public interface IdConstants {
 
     String APP_ID_KEY = "applicationId";
 
-    String TRANSACTION_ID_KEY = "transactionId";
-
     String TRANSACTION_NAME_KEY = "transactionName";
 
     String GROUP_KEY = "group";
