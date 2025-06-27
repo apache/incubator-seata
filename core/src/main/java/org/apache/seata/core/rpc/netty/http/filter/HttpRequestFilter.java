@@ -7,10 +7,15 @@ public interface HttpRequestFilter {
     /**
      * Filter order, lower value runs earlier
      */
-    int getOrder();
+    default int getOrder(){
+        return 0;
+    }
 
     /**
      * Main filter logic
      */
     void filter(HttpRequest request, HttpRequestParamWrapper paramWrapper) throws FilterException;
+
+    boolean shouldFilter();
+
 }

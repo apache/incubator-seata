@@ -38,6 +38,10 @@ import io.netty.handler.codec.http.multipart.InterfaceHttpData;
 import org.apache.seata.common.rpc.http.HttpContext;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.core.rpc.netty.NettyServerConfig;
+import org.apache.seata.core.rpc.netty.http.filter.FilterException;
+import org.apache.seata.core.rpc.netty.http.filter.HttpRequestFilterChain;
+import org.apache.seata.core.rpc.netty.http.filter.HttpRequestFilterManager;
+import org.apache.seata.core.rpc.netty.http.filter.HttpRequestParamWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,6 +78,21 @@ public class HttpDispatchHandler extends SimpleChannelInboundHandler<HttpRequest
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, HttpRequest httpRequest) {
+
+        try {
+            HttpRequestParamWrapper paramWrapper = new HttpRequestParamWrapper(httpRequest);
+            HttpRequestFilterChain filterChain = HttpRequestFilterManager.getFilterChain();
+            filterChain.doFilter(httpRequest, paramWrapper);
+        } catch (FilterException e) {
+            LOGGER.warn("Request blocked by filter: {}", e.getMessage());
+            sendErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST, false);
+            return;
+        } catch (Exception e) {
+            LOGGER.error("Unexpected error during filter execution: {}", e.getMessage(), e);
+            sendErrorResponse(ctx, HttpResponseStatus.INTERNAL_SERVER_ERROR, false);
+            return;
+        }
+
         try {
             boolean keepAlive = HttpUtil.isKeepAlive(httpRequest)
                     && httpRequest.protocolVersion().isKeepAliveDefault();
