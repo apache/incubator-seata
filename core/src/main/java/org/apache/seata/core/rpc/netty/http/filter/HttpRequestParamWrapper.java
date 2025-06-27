@@ -14,7 +14,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Wrapper for HTTP request parameters from multiple sources: query, form, header, JSON body.
@@ -117,19 +120,4 @@ public class HttpRequestParamWrapper {
         return all;
     }
 
-    public Map<String, List<String>> getQueryParams() {
-        return queryParams;
-    }
-
-    public Map<String, List<String>> getFormParams() {
-        return formParams;
-    }
-
-    public Map<String, List<String>> getHeaderParams() {
-        return headerParams;
-    }
-
-    public Map<String, List<String>> getJsonParams() {
-        return jsonParams;
-    }
 }
