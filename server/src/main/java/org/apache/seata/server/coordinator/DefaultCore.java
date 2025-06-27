@@ -470,7 +470,7 @@ public class DefaultCore implements Core {
                                             "Rollback branch transaction fail and will retry, xid = {} branchId = {}",
                                             globalSession.getXid(),
                                             branchSession.getBranchId());
-                                    if (shouldQueueToRetryRollback(retrying,globalSession)) {
+                                    if (shouldQueueToRetryRollback(retrying, globalSession)) {
                                         globalSession.queueToRetryRollback();
                                     }
                                     return false;
@@ -486,7 +486,7 @@ public class DefaultCore implements Core {
                                         String.valueOf(retrying),
                                         ex.getMessage()
                                     });
-                            if (shouldQueueToRetryRollback(retrying,globalSession)) {
+                            if (shouldQueueToRetryRollback(retrying, globalSession)) {
                                 globalSession.queueToRetryRollback();
                             }
                             throw new TransactionException(ex);

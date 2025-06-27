@@ -323,9 +323,7 @@ public class DefaultCoreTest {
         globalSession.addBranch(branchSession);
         globalSession.changeBranchStatus(branchSession, BranchStatus.Registered);
         globalSession.changeGlobalStatus(GlobalStatus.TimeoutRollbacking);
-        core.mockCore(
-                BranchType.AT,
-                new MockCore(BranchStatus.PhaseTwo_Committed, BranchStatus.Registered));
+        core.mockCore(BranchType.AT, new MockCore(BranchStatus.PhaseTwo_Committed, BranchStatus.Registered));
         core.doGlobalRollback(globalSession, true);
         Assertions.assertEquals(GlobalStatus.TimeoutRollbackRetrying, globalSession.getStatus());
     }
