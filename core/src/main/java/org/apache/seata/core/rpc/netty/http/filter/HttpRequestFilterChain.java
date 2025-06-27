@@ -33,4 +33,11 @@ public class HttpRequestFilterChain {
             filter.filter(request, paramWrapper);
         }
     }
+
+    /**
+     * Get internal filter list (for unit test only).
+     */
+    List<HttpRequestFilter> getFilters() {
+        return filters;
+    }
 }
