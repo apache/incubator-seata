@@ -18,7 +18,7 @@ package org.apache.seata.core.rpc.netty.http.filter;
 
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.config.ConfigurationKeys;
-import org.apache.seata.core.rpc.netty.http.filter.impl.XssHttpRequestFilter;
+import org.apache.seata.core.rpc.netty.http.filter.impl.XSSHttpRequestFilter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +33,7 @@ public class HttpRequestFilterManager {
                 .getBoolean(ConfigurationKeys.SERVER_HTTP_FILTERS_ENABLED, true);
 
         if (globalEnabled) {
-            addIfEnabled(new XssHttpRequestFilter());
+            addIfEnabled(new XSSHttpRequestFilter());
         }
 
         filters.sort((a, b) -> Integer.compare(a.getOrder(), b.getOrder()));

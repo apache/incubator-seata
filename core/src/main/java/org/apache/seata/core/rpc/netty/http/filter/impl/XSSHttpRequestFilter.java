@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
 /**
  * Filter to detect and block potential XSS attack vectors in HTTP request parameters.
  */
-public class XssHttpRequestFilter implements HttpRequestFilter {
+public class XSSHttpRequestFilter implements HttpRequestFilter {
 
     private static final String[] XSS_KEYWORDS = {
             "<script>", "</script>", "javascript:", "vbscript:", "data:", "expression(",
