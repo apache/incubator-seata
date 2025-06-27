@@ -96,5 +96,4 @@ public interface IdConstants {
     String STATUS_VALUE_ROLLBACK_RETRYING_KEY = "RollbackRetrying";
 
     String STATUS_VALUE_TIMEOUT_ROLLBACK_RETRYING_KEY = "TimeoutRollbackRetrying";
-
 }
