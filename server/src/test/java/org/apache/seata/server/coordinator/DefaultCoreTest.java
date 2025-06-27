@@ -308,6 +308,12 @@ public class DefaultCoreTest {
         Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.RollbackRetrying);
     }
 
+    /**
+     * Do TimeoutRollbacking test.
+     *
+     * @param xid the xid
+     * @throws Exception the exception
+     */
     @ParameterizedTest
     @MethodSource("xidProvider")
     public void doGlobalRollbackTimeoutRollbackingRetryingTest(String xid) throws Exception {
