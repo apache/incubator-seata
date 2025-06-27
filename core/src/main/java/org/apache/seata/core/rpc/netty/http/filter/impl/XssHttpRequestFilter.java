@@ -19,40 +19,79 @@ package org.apache.seata.core.rpc.netty.http.filter.impl;
 import io.netty.handler.codec.http.HttpRequest;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.config.ConfigurationKeys;
-import org.apache.seata.core.rpc.netty.http.filter.FilterException;
+import org.apache.seata.core.exception.HttpRequestFilterException;
 import org.apache.seata.core.rpc.netty.http.filter.HttpRequestFilter;
 import org.apache.seata.core.rpc.netty.http.filter.HttpRequestParamWrapper;
 
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
+/**
+ * Filter to detect and block potential XSS attack vectors in HTTP request parameters.
+ */
 public class XssHttpRequestFilter implements HttpRequestFilter {
+
+    private static final String[] XSS_KEYWORDS = {
+            "<script>", "</script>", "javascript:", "vbscript:", "data:", "expression(",
+            "onerror", "onload", "onclick", "onmouseover", "onfocus", "onblur",
+            "onmouseenter", "onmouseleave", "onkeydown", "onkeyup", "onchange",
+            "<iframe>", "<img>", "<svg>", "<embed>", "<object>", "<style>", "<link>"
+    };
+
+    private static final Pattern EVENT_HANDLER_PATTERN = Pattern.compile("on\\w+\\s*=\\s*['\"].*?['\"]", Pattern.CASE_INSENSITIVE);
 
     @Override
     public int getOrder() {
         return 1;
     }
 
+    /**
+     * Checks all request parameters for XSS risks and throws if found.
+     */
     @Override
-    public void filter(HttpRequest request, HttpRequestParamWrapper paramWrapper) throws FilterException {
+    public void filter(HttpRequest request, HttpRequestParamWrapper paramWrapper) throws HttpRequestFilterException {
         Map<String, List<String>> allParams = paramWrapper.getAllParamsAsMultiMap();
         for (Map.Entry<String, List<String>> entry : allParams.entrySet()) {
             for (String value : entry.getValue()) {
                 if (value != null && containsXssRisk(value)) {
-                    throw new FilterException("XSS risk detected in param: " + entry.getKey() + ", value: " + value);
+                    throw new HttpRequestFilterException("XSS risk detected in param: " + entry.getKey() + ", value: " + value);
                 }
             }
         }
     }
 
+    /**
+     * Returns whether this XSS filter is enabled via configuration.
+     */
     @Override
-    public boolean shouldFilter() {
+    public boolean shouldApply() {
         return ConfigurationFactory.getInstance()
                 .getBoolean(ConfigurationKeys.SERVER_HTTP_FILTER_XSS_ENABLED, true);
     }
 
+    /**
+     * Basic check for common XSS patterns in a string value.
+     */
     private boolean containsXssRisk(String value) {
-        String lower = value.toLowerCase();
-        return lower.contains("<script>") || lower.contains("</script>") || lower.contains("onerror") || lower.contains("onload");
+        if (value == null) {
+            return false;
+        }
+
+        String normalized = value.toLowerCase().replaceAll("\\s+", "");
+
+        for (String keyword : XSS_KEYWORDS) {
+            if (normalized.contains(keyword)) {
+                return true;
+            }
+        }
+
+
+        if (EVENT_HANDLER_PATTERN.matcher(value).find()) {
+            return true;
+        }
+
+        return false;
     }
 }
+

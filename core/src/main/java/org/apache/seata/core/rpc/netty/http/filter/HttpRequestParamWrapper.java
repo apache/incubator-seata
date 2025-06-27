@@ -60,7 +60,7 @@ public class HttpRequestParamWrapper {
 
     private void parseQueryParams(FullHttpRequest request) {
         QueryStringDecoder decoder = new QueryStringDecoder(request.uri());
-        decoder.parameters().forEach(queryParams::put);
+        queryParams.putAll(decoder.parameters());
     }
 
     private void parseHeaders(FullHttpRequest request) {

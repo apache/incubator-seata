@@ -17,6 +17,7 @@
 package org.apache.seata.core.rpc.netty.http.filter;
 
 import io.netty.handler.codec.http.HttpRequest;
+import org.apache.seata.core.exception.HttpRequestFilterException;
 
 import java.util.List;
 
@@ -27,7 +28,7 @@ public class HttpRequestFilterChain {
         this.filters = filters;
     }
 
-    public void doFilter(HttpRequest request, HttpRequestParamWrapper paramWrapper) throws FilterException {
+    public void doFilter(HttpRequest request, HttpRequestParamWrapper paramWrapper) throws HttpRequestFilterException {
         for (HttpRequestFilter filter : filters) {
             filter.filter(request, paramWrapper);
         }

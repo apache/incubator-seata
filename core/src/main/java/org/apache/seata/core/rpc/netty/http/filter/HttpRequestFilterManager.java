@@ -33,9 +33,7 @@ public class HttpRequestFilterManager {
                 .getBoolean(ConfigurationKeys.SERVER_HTTP_FILTERS_ENABLED, true);
 
         if (globalEnabled) {
-            // 注册所有 filter，
             addIfEnabled(new XssHttpRequestFilter());
-
         }
 
         filters.sort((a, b) -> Integer.compare(a.getOrder(), b.getOrder()));
@@ -43,7 +41,7 @@ public class HttpRequestFilterManager {
     }
 
     private static void addIfEnabled(HttpRequestFilter filter) {
-        if (filter.shouldFilter()) {
+        if (filter.shouldApply()) {
             filters.add(filter);
         }
     }

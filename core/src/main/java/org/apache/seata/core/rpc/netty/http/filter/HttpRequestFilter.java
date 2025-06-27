@@ -17,21 +17,27 @@
 package org.apache.seata.core.rpc.netty.http.filter;
 
 import io.netty.handler.codec.http.HttpRequest;
+import org.apache.seata.core.exception.HttpRequestFilterException;
 
+/**
+ * Interface for Netty HTTP request filters with order and enable control.
+ */
 public interface HttpRequestFilter {
 
     /**
-     * Filter order, lower value runs earlier
+     * Filter execution order; lower values run first.
      */
     default int getOrder(){
         return 0;
     }
 
     /**
-     * Main filter logic
+     * Executes the filter logic.
      */
-    void filter(HttpRequest request, HttpRequestParamWrapper paramWrapper) throws FilterException;
+    void filter(HttpRequest request, HttpRequestParamWrapper paramWrapper) throws HttpRequestFilterException;
 
-    boolean shouldFilter();
-
+    /**
+     * Determines if the filter should run.
+     */
+    boolean shouldApply();
 }

@@ -14,14 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.core.rpc.netty.http.filter;
+package org.apache.seata.core.exception;
 
-public class FilterException extends RuntimeException {
-    public FilterException(String message) {
+/**
+ * The type  HttpRequestFilter exception.
+ *
+ */
+public class HttpRequestFilterException extends RuntimeException {
+    public HttpRequestFilterException(String message) {
         super(message);
     }
 
-    public FilterException(String message, Throwable cause) {
+    public HttpRequestFilterException(String message, Throwable cause) {
         super(message, cause);
     }
 }
