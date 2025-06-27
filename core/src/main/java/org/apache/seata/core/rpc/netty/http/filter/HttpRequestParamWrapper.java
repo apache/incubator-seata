@@ -22,10 +22,10 @@ import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpRequest;
+import io.netty.handler.codec.http.QueryStringDecoder;
 import io.netty.handler.codec.http.multipart.Attribute;
 import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
 import io.netty.handler.codec.http.multipart.InterfaceHttpData;
-import io.netty.handler.codec.http.QueryStringDecoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,8 +81,8 @@ public class HttpRequestParamWrapper {
         try {
             if (contentType.contains("application/json")) {
                 parseJsonBody(bodyStr);
-            } else if (contentType.contains("application/x-www-form-urlencoded") ||
-                    contentType.contains("multipart/form-data")) {
+            } else if (contentType.contains("application/x-www-form-urlencoded")
+                    || contentType.contains("multipart/form-data")) {
                 parseFormBody(request);
             }
         } catch (Exception e) {
@@ -110,7 +110,9 @@ public class HttpRequestParamWrapper {
             for (InterfaceHttpData data : decoder.getBodyHttpDatas()) {
                 if (data.getHttpDataType() == InterfaceHttpData.HttpDataType.Attribute) {
                     Attribute attr = (Attribute) data;
-                    formParams.computeIfAbsent(attr.getName(), k -> new ArrayList<>()).add(attr.getValue());
+                    formParams
+                            .computeIfAbsent(attr.getName(), k -> new ArrayList<>())
+                            .add(attr.getValue());
                 }
             }
         } catch (Exception e) {
@@ -128,12 +130,15 @@ public class HttpRequestParamWrapper {
     public Map<String, List<String>> getAllParamsAsMultiMap() {
         Map<String, List<String>> all = new HashMap<>();
 
-        queryParams.forEach((k, v) -> all.computeIfAbsent(k, key -> new ArrayList<>()).addAll(v));
-        formParams.forEach((k, v) -> all.computeIfAbsent(k, key -> new ArrayList<>()).addAll(v));
-        headerParams.forEach((k, v) -> all.computeIfAbsent(k, key -> new ArrayList<>()).addAll(v));
-        jsonParams.forEach((k, v) -> all.computeIfAbsent(k, key -> new ArrayList<>()).addAll(v));
+        queryParams.forEach(
+                (k, v) -> all.computeIfAbsent(k, key -> new ArrayList<>()).addAll(v));
+        formParams.forEach(
+                (k, v) -> all.computeIfAbsent(k, key -> new ArrayList<>()).addAll(v));
+        headerParams.forEach(
+                (k, v) -> all.computeIfAbsent(k, key -> new ArrayList<>()).addAll(v));
+        jsonParams.forEach(
+                (k, v) -> all.computeIfAbsent(k, key -> new ArrayList<>()).addAll(v));
 
         return all;
     }
-
 }

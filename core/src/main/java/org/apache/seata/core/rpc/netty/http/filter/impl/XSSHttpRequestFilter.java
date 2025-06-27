@@ -33,13 +33,34 @@ import java.util.regex.Pattern;
 public class XSSHttpRequestFilter implements HttpRequestFilter {
 
     private static final String[] XSS_KEYWORDS = {
-            "<script>", "</script>", "javascript:", "vbscript:", "data:", "expression(",
-            "onerror", "onload", "onclick", "onmouseover", "onfocus", "onblur",
-            "onmouseenter", "onmouseleave", "onkeydown", "onkeyup", "onchange",
-            "<iframe>", "<img>", "<svg>", "<embed>", "<object>", "<style>", "<link>"
+        "<script>",
+        "</script>",
+        "javascript:",
+        "vbscript:",
+        "data:",
+        "expression(",
+        "onerror",
+        "onload",
+        "onclick",
+        "onmouseover",
+        "onfocus",
+        "onblur",
+        "onmouseenter",
+        "onmouseleave",
+        "onkeydown",
+        "onkeyup",
+        "onchange",
+        "<iframe>",
+        "<img>",
+        "<svg>",
+        "<embed>",
+        "<object>",
+        "<style>",
+        "<link>"
     };
 
-    private static final Pattern EVENT_HANDLER_PATTERN = Pattern.compile("on\\w+\\s*=\\s*['\"].*?['\"]", Pattern.CASE_INSENSITIVE);
+    private static final Pattern EVENT_HANDLER_PATTERN =
+            Pattern.compile("on\\w+\\s*=\\s*['\"].*?['\"]", Pattern.CASE_INSENSITIVE);
 
     @Override
     public int getOrder() {
@@ -55,7 +76,8 @@ public class XSSHttpRequestFilter implements HttpRequestFilter {
         for (Map.Entry<String, List<String>> entry : allParams.entrySet()) {
             for (String value : entry.getValue()) {
                 if (value != null && containsXssRisk(value)) {
-                    throw new HttpRequestFilterException("XSS risk detected in param: " + entry.getKey() + ", value: " + value);
+                    throw new HttpRequestFilterException(
+                            "XSS risk detected in param: " + entry.getKey() + ", value: " + value);
                 }
             }
         }
@@ -66,8 +88,7 @@ public class XSSHttpRequestFilter implements HttpRequestFilter {
      */
     @Override
     public boolean shouldApply() {
-        return ConfigurationFactory.getInstance()
-                .getBoolean(ConfigurationKeys.SERVER_HTTP_FILTER_XSS_ENABLED, true);
+        return ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.SERVER_HTTP_FILTER_XSS_ENABLED, true);
     }
 
     /**
@@ -86,7 +107,6 @@ public class XSSHttpRequestFilter implements HttpRequestFilter {
             }
         }
 
-
         if (EVENT_HANDLER_PATTERN.matcher(value).find()) {
             return true;
         }
@@ -94,4 +114,3 @@ public class XSSHttpRequestFilter implements HttpRequestFilter {
         return false;
     }
 }
-

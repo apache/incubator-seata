@@ -27,7 +27,7 @@ public interface HttpRequestFilter {
     /**
      * Filter execution order; lower values run first.
      */
-    default int getOrder(){
+    default int getOrder() {
         return 0;
     }
 
