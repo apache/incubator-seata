@@ -101,10 +101,10 @@ public class MetricsSubscriber {
 
     private void increaseSummaryWithDetail(Id summaryId, GlobalTransactionEvent event, long value) {
         registry.getSummary(summaryId
-                .withTag(APP_ID_KEY, event.getApplicationId())
-                .withTag(GROUP_KEY, event.getGroup())
-                .withTag(TRANSACTION_NAME_KEY, event.getName())
-        ).increase(value);
+                        .withTag(APP_ID_KEY, event.getApplicationId())
+                        .withTag(GROUP_KEY, event.getGroup())
+                        .withTag(TRANSACTION_NAME_KEY, event.getName()))
+                .increase(value);
     }
 
     private void increaseTimer(Id timerId, GlobalTransactionEvent event) {
