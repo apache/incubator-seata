@@ -17,6 +17,7 @@
 package org.apache.seata.core.rpc.netty.http.filter;
 
 import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.config.ConfigurationKeys;
 import org.apache.seata.core.rpc.netty.http.filter.impl.XssHttpRequestFilter;
 
 import java.util.ArrayList;
@@ -28,7 +29,8 @@ public class HttpRequestFilterManager {
     private static final HttpRequestFilterChain filterChain;
 
     static {
-        boolean globalEnabled = ConfigurationFactory.getInstance().getBoolean("server.http.filters.enabled", true);
+        boolean globalEnabled = ConfigurationFactory.getInstance()
+                .getBoolean(ConfigurationKeys.SERVER_HTTP_FILTERS_ENABLED, true);
 
         if (globalEnabled) {
             // 注册所有 filter，

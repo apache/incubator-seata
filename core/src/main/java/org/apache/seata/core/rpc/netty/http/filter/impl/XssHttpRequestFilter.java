@@ -18,6 +18,7 @@ package org.apache.seata.core.rpc.netty.http.filter.impl;
 
 import io.netty.handler.codec.http.HttpRequest;
 import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.config.ConfigurationKeys;
 import org.apache.seata.core.rpc.netty.http.filter.FilterException;
 import org.apache.seata.core.rpc.netty.http.filter.HttpRequestFilter;
 import org.apache.seata.core.rpc.netty.http.filter.HttpRequestParamWrapper;
@@ -46,10 +47,8 @@ public class XssHttpRequestFilter implements HttpRequestFilter {
 
     @Override
     public boolean shouldFilter() {
-        String configKey = "server.http.filter.xss.enabled";
-        String configValue = ConfigurationFactory.getInstance().getConfig(configKey);
-
-        return configValue == null || !"false".equalsIgnoreCase(configValue);
+        return ConfigurationFactory.getInstance()
+                .getBoolean(ConfigurationKeys.SERVER_HTTP_FILTER_XSS_ENABLED, true);
     }
 
     private boolean containsXssRisk(String value) {
