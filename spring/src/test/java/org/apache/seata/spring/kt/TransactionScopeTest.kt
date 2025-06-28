@@ -28,6 +28,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -74,19 +75,29 @@ class TransactionScopeTest {
         })
     }
 
+    @AfterEach
+    fun tearDown() {
+        // 清理全局状态，避免影响其他测试
+        RootContext.unbind()
+    }
 
     @Test
     @Throws(NoSuchMethodException::class)
     fun testGlobalTransactional() {
-        RootContext.bind(DEFAULT_XID)
-        val globalTransactionContext = GlobalTransactionContext.getCurrentOrCreate()
-        globalTransactionContext.begin()
-        println(RootContext.getXID())
-        val mockClassAnnotation = MockMethodAnnotation()
-        val xid = runBlocking {
-            mockClassAnnotation.doBiz()
+        try {
+            RootContext.bind(DEFAULT_XID)
+            val globalTransactionContext = GlobalTransactionContext.getCurrentOrCreate()
+            globalTransactionContext.begin()
+            println(RootContext.getXID())
+            val mockClassAnnotation = MockMethodAnnotation()
+            val xid = runBlocking {
+                mockClassAnnotation.doBiz()
+            }
+            Assertions.assertNotNull(xid)
+        } finally {
+            // 确保测试结束后清理状态
+            RootContext.unbind()
         }
-        Assertions.assertNotNull(xid)
     }
 
     private open class MockMethodAnnotation {
