@@ -23,8 +23,13 @@ import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
+import org.apache.seata.core.exception.HttpRequestFilterException;
+import org.apache.seata.core.rpc.netty.http.filter.HttpRequestFilterChain;
+import org.apache.seata.core.rpc.netty.http.filter.HttpRequestFilterManager;
+import org.apache.seata.core.rpc.netty.http.filter.HttpRequestParamWrapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -33,6 +38,10 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 
 class HttpDispatchHandlerTest {
 
@@ -102,6 +111,29 @@ class HttpDispatchHandlerTest {
         FullHttpResponse response = waitForResponse(5000);
         assertEquals(HttpResponseStatus.NOT_FOUND, response.status());
         assertEquals(0, response.content().readableBytes());
+    }
+
+    @Test
+    void testRequestFilteredByHttpRequestFilter() throws Exception {
+        HttpRequestFilterChain mockFilterChain = mock(HttpRequestFilterChain.class);
+
+        doThrow(new HttpRequestFilterException("Mock filter block"))
+                .when(mockFilterChain)
+                .doFilter(any(), any(HttpRequestParamWrapper.class));
+
+        MockedStatic<HttpRequestFilterManager> mockedStatic = mockStatic(HttpRequestFilterManager.class);
+        mockedStatic.when(HttpRequestFilterManager::getFilterChain).thenReturn(mockFilterChain);
+
+        try {
+            HttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/any");
+
+            channel.writeInbound(request);
+
+            FullHttpResponse response = waitForResponse(5000);
+            assertEquals(HttpResponseStatus.BAD_REQUEST, response.status());
+        } finally {
+            mockedStatic.close();
+        }
     }
 
     private FullHttpResponse waitForResponse(long timeoutMs) {

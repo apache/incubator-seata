@@ -71,7 +71,7 @@ public class XSSHttpRequestFilter implements HttpRequestFilter {
      * Checks all request parameters for XSS risks and throws if found.
      */
     @Override
-    public void filter(HttpRequest request, HttpRequestParamWrapper paramWrapper) throws HttpRequestFilterException {
+    public void doFilter(HttpRequest request, HttpRequestParamWrapper paramWrapper) throws HttpRequestFilterException {
         Map<String, List<String>> allParams = paramWrapper.getAllParamsAsMultiMap();
         for (Map.Entry<String, List<String>> entry : allParams.entrySet()) {
             for (String value : entry.getValue()) {

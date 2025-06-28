@@ -86,8 +86,8 @@ public class HttpRequestParamWrapperTest {
         ByteBuf buf = Unpooled.copiedBuffer(formBody, StandardCharsets.UTF_8);
         when(req.content()).thenReturn(buf);
 
-        DefaultFullHttpRequest realReq = new DefaultFullHttpRequest(
-                HttpVersion.HTTP_1_1, HttpMethod.POST, "/path", buf.retainedDuplicate());
+        DefaultFullHttpRequest realReq =
+                new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/path", buf.retainedDuplicate());
         realReq.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/x-www-form-urlencoded");
 
         HttpRequestParamWrapper wrapper = new HttpRequestParamWrapper(realReq);

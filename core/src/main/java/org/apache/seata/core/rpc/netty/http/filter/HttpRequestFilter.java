@@ -34,7 +34,7 @@ public interface HttpRequestFilter {
     /**
      * Executes the filter logic.
      */
-    void filter(HttpRequest request, HttpRequestParamWrapper paramWrapper) throws HttpRequestFilterException;
+    void doFilter(HttpRequest request, HttpRequestParamWrapper paramWrapper) throws HttpRequestFilterException;
 
     /**
      * Determines if the filter should run.

@@ -30,7 +30,7 @@ public class HttpRequestFilterChain {
 
     public void doFilter(HttpRequest request, HttpRequestParamWrapper paramWrapper) throws HttpRequestFilterException {
         for (HttpRequestFilter filter : filters) {
-            filter.filter(request, paramWrapper);
+            filter.doFilter(request, paramWrapper);
         }
     }
 

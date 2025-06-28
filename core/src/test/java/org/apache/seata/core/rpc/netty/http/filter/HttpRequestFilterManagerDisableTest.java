@@ -27,7 +27,8 @@ class HttpRequestFilterManagerDisableTest {
     void testGlobalDisabled() {
         try (MockedStatic<ConfigurationFactory> mockedStatic = mockStatic(ConfigurationFactory.class)) {
             when(ConfigurationFactory.getInstance()).thenReturn(mockConfig);
-            when(mockConfig.getBoolean(ConfigurationKeys.SERVER_HTTP_FILTERS_ENABLED, true)).thenReturn(false);
+            when(mockConfig.getBoolean(ConfigurationKeys.SERVER_HTTP_FILTERS_ENABLED, true))
+                    .thenReturn(false);
 
             HttpRequestFilterChain filterChain = HttpRequestFilterManager.getFilterChain();
             List<HttpRequestFilter> filters = filterChain.getFilters();
@@ -40,8 +41,10 @@ class HttpRequestFilterManagerDisableTest {
     void testXssDisabledIndividually() {
         try (MockedStatic<ConfigurationFactory> mockedStatic = mockStatic(ConfigurationFactory.class)) {
             when(ConfigurationFactory.getInstance()).thenReturn(mockConfig);
-            when(mockConfig.getBoolean(ConfigurationKeys.SERVER_HTTP_FILTERS_ENABLED, true)).thenReturn(true);
-            when(mockConfig.getBoolean(ConfigurationKeys.SERVER_HTTP_FILTER_XSS_ENABLED, true)).thenReturn(false);
+            when(mockConfig.getBoolean(ConfigurationKeys.SERVER_HTTP_FILTERS_ENABLED, true))
+                    .thenReturn(true);
+            when(mockConfig.getBoolean(ConfigurationKeys.SERVER_HTTP_FILTER_XSS_ENABLED, true))
+                    .thenReturn(false);
 
             HttpRequestFilterChain filterChain = HttpRequestFilterManager.getFilterChain();
             List<HttpRequestFilter> filters = filterChain.getFilters();
