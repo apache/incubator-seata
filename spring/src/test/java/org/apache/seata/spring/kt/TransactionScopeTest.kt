@@ -44,10 +44,10 @@ class TransactionScopeTest {
 
     @BeforeEach
     fun setUp() {
-        // 备份原始的TransactionManager
+        // Backup the original TransactionManager
         backupTransactionManager = TransactionManagerHolder.get()
         
-        // 设置我们的mock TransactionManager
+        // Set up our mock TransactionManager
         TransactionManagerHolder.set(object : TransactionManager {
             @Throws(TransactionException::class)
             override fun begin(
@@ -83,24 +83,24 @@ class TransactionScopeTest {
             }
         })
         
-        // 清理上下文
+        // Clean up context
         RootContext.unbind()
         println("BeforeEach: RootContext.getXID() = ${RootContext.getXID()}")
     }
 
     @AfterEach
     fun tearDown() {
-        // 清理全局状态，避免影响其他测试
+        // Clean up global state to avoid affecting other tests
         RootContext.unbind()
         
-        // 恢复原始的TransactionManager
+        // Restore original TransactionManager
         backupTransactionManager?.let { TransactionManagerHolder.set(it) }
     }
 
     @Test
     @Throws(NoSuchMethodException::class)
     fun testGlobalTransactionalInCoroutineNotWorking() {
-        // 测试@GlobalTransactional在协程中不能正常工作（这是预期行为）
+        // Test that @GlobalTransactional does not work properly in coroutines (expected behavior)
         try {
             RootContext.bind(DEFAULT_XID)
             val globalTransactionContext = GlobalTransactionContext.getCurrentOrCreate()
@@ -112,7 +112,7 @@ class TransactionScopeTest {
                 mockClassAnnotation.doBiz()
             }
             
-            // 验证在协程中@GlobalTransactional由于上下文切换而无法维持事务上下文
+            // Verify that @GlobalTransactional cannot maintain transaction context in coroutines due to context switching
             Assertions.assertNull(xid, "@GlobalTransactional should not work in coroutines due to context switching")
         } finally {
             RootContext.unbind()
@@ -122,7 +122,7 @@ class TransactionScopeTest {
     @Test
     @Throws(NoSuchMethodException::class) 
     fun testGlobalTransactionalWithCoroutineContext() {
-        // 测试@GlobalTransactional配合TransactionCoroutineContext可以正常工作
+        // Test that @GlobalTransactional works properly with TransactionCoroutineContext
         try {
             RootContext.bind(DEFAULT_XID)
             val globalTransactionContext = GlobalTransactionContext.getCurrentOrCreate()
@@ -134,7 +134,7 @@ class TransactionScopeTest {
                 mockClassAnnotation.doBiz()
             }
             
-            // 使用TransactionCoroutineContext应该能维持事务上下文
+            // Using TransactionCoroutineContext should be able to maintain transaction context
             Assertions.assertNotNull(xid, "@GlobalTransactional should work with TransactionCoroutineContext")
             Assertions.assertEquals(DEFAULT_XID, xid)
         } finally {
@@ -145,30 +145,30 @@ class TransactionScopeTest {
     @Test
     @Throws(NoSuchMethodException::class)
     fun testTransactionScope() {
-        // 由于TransactionManagerHolder的单例问题，我们改为测试transactionScope的基本功能
-        // 而不是依赖真正的事务管理器
+        // Due to TransactionManagerHolder singleton issues, we test basic functionality of transactionScope
+        // instead of relying on the real transaction manager
         println("testTransactionScope start: RootContext.getXID() = ${RootContext.getXID()}")
         
         try {
             var capturedXid: String? = null
             
-            // 模拟transactionScope的行为，但使用简化的逻辑
+            // Simulate transactionScope behavior with simplified logic
             runBlocking {
-                // 手动绑定一个XID来模拟事务开始
+                // Manually bind an XID to simulate transaction start
                 RootContext.bind(DEFAULT_XID)
                 println("Manually bound XID: ${RootContext.getXID()}")
                 
-                // 在协程上下文中传播事务
+                // Propagate transaction in coroutine context
                 withContext(org.apache.seata.spring.kt.support.TransactionCoroutineContext()) {
                     capturedXid = RootContext.getXID()
                     println("Inside coroutine with TransactionCoroutineContext: $capturedXid")
                 }
                 
-                // 清理
+                // Clean up
                 RootContext.unbind()
             }
             
-            // 验证事务上下文能在协程中传播
+            // Verify that transaction context can be propagated in coroutines
             println("Final captured xid = $capturedXid")
             Assertions.assertNotNull(capturedXid, "TransactionCoroutineContext should propagate transaction context")
             Assertions.assertEquals(DEFAULT_XID, capturedXid)
@@ -182,30 +182,30 @@ class TransactionScopeTest {
     @Test
     @Throws(NoSuchMethodException::class)
     fun testTransactionCoroutineContextBranches() {
-        // 测试TransactionCoroutineContext的所有代码分支以达到100%覆盖率
+        // Test all code branches of TransactionCoroutineContext to achieve 100% coverage
         try {
             val originalXid = "originalXid"
             val newXid = "newXid"
             
             runBlocking {
-                // 场景1：测试restoreThreadContext中的RootContext.bind(oldState)分支
+                // Scenario 1: Test RootContext.bind(oldState) branch in restoreThreadContext
                 RootContext.bind(originalXid)
                 println("Bound original XID: ${RootContext.getXID()}")
                 
-                // 创建TransactionCoroutineContext时传入不同的XID
-                // 这样oldState(originalXid) != xid(newXid)，会触发bind(oldState)分支
+                // Create TransactionCoroutineContext with different XID
+                // This way oldState(originalXid) != xid(newXid), triggering bind(oldState) branch
                 withContext(org.apache.seata.spring.kt.support.TransactionCoroutineContext(newXid)) {
                     println("Inside coroutine with different XID: ${RootContext.getXID()}")
                     Assertions.assertEquals(newXid, RootContext.getXID())
                 }
                 
-                // 退出协程后，应该恢复到originalXid
+                // After exiting coroutine, should restore to originalXid
                 println("After coroutine, restored XID: ${RootContext.getXID()}")
                 Assertions.assertEquals(originalXid, RootContext.getXID())
                 
                 RootContext.unbind()
                 
-                // 场景2：测试当没有事务上下文时的情况
+                // Scenario 2: Test when no transaction context exists
                 Assertions.assertNull(RootContext.getXID())
                 
                 withContext(org.apache.seata.spring.kt.support.TransactionCoroutineContext(DEFAULT_XID)) {
@@ -213,35 +213,35 @@ class TransactionScopeTest {
                     Assertions.assertEquals(DEFAULT_XID, RootContext.getXID())
                 }
                 
-                // 退出协程后，应该清理XID
+                // After exiting coroutine, should clear XID
                 println("After coroutine, XID should be null: ${RootContext.getXID()}")
                 Assertions.assertNull(RootContext.getXID())
                 
-                // 场景3：测试当传入null XID时的情况
+                // Scenario 3: Test when passing null XID
                 RootContext.bind(originalXid)
                 withContext(org.apache.seata.spring.kt.support.TransactionCoroutineContext(null)) {
                     println("Inside coroutine with null XID: ${RootContext.getXID()}")
-                    // 根据TransactionCoroutineContext的实际实现：
-                    // 当xid为null时，updateThreadContext不会改变当前上下文
-                    // 所以XID仍然是originalXid
+                    // According to TransactionCoroutineContext's actual implementation:
+                    // When xid is null, updateThreadContext doesn't change current context
+                    // So XID remains as originalXid
                     Assertions.assertEquals(originalXid, RootContext.getXID())
                 }
                 
-                // 退出协程后，应该恢复到originalXid（实际上没有变化）
+                // After exiting coroutine, should restore to originalXid (actually no change)
                 println("After null XID coroutine, restored XID: ${RootContext.getXID()}")
                 Assertions.assertEquals(originalXid, RootContext.getXID())
                 
-                // 场景4：测试真正的null XID场景 - 从无上下文开始，传入null
+                // Scenario 4: Test real null XID scenario - starting from no context, passing null
                 RootContext.unbind()
                 Assertions.assertNull(RootContext.getXID())
                 
                 withContext(org.apache.seata.spring.kt.support.TransactionCoroutineContext(null)) {
                     println("Inside coroutine with null XID and no previous context: ${RootContext.getXID()}")
-                    // 当没有之前的上下文且xid为null时，应该保持null
+                    // When no previous context exists and xid is null, should remain null
                     Assertions.assertNull(RootContext.getXID())
                 }
                 
-                // 退出协程后，应该还是null
+                // After exiting coroutine, should still be null
                 println("After null XID coroutine from null context: ${RootContext.getXID()}")
                 Assertions.assertNull(RootContext.getXID())
             }
@@ -251,14 +251,14 @@ class TransactionScopeTest {
             e.printStackTrace()
             throw e
         } finally {
-            // 确保清理
+            // Ensure cleanup
             RootContext.unbind()
         }
     }
 
     private open class MockMethodAnnotationWithoutContext {
         /**
-         * @GlobalTransactional在协程中不使用TransactionCoroutineContext时会丢失上下文
+         * @GlobalTransactional loses context when used in coroutines without TransactionCoroutineContext
          */
         @GlobalTransactional(name = "doBiz")
         suspend fun doBiz(): String? = io {
@@ -266,14 +266,14 @@ class TransactionScopeTest {
         }
 
         suspend fun <T> io(block: suspend CoroutineScope.() -> T): T {
-            // 不添加TransactionCoroutineContext，会导致事务上下文丢失
+            // Without adding TransactionCoroutineContext, transaction context will be lost
             return withContext(Dispatchers.IO, block)
         }
     }
 
     private open class MockMethodAnnotationWithContext {
         /**
-         * @GlobalTransactional配合TransactionCoroutineContext使用
+         * @GlobalTransactional used with TransactionCoroutineContext
          */
         @GlobalTransactional(name = "doBiz")
         suspend fun doBiz(): String? = io {
@@ -281,21 +281,21 @@ class TransactionScopeTest {
         }
 
         suspend fun <T> io(block: suspend CoroutineScope.() -> T): T {
-            // 添加TransactionCoroutineContext来传播事务上下文
+            // Add TransactionCoroutineContext to propagate transaction context
             return withContext(Dispatchers.IO + TransactionCoroutineContext(), block)
         }
     }
 
     private open class MockMethodScope {
         /**
-         * 使用transactionScope，不需要@GlobalTransactional注解
+         * Use transactionScope, no need for @GlobalTransactional annotation
          */
         suspend fun doBiz(): String? = io {
             return@io RootContext.getXID()
         }
 
         suspend fun <T> io(block: suspend CoroutineScope.() -> T): T {
-            // 在transactionScope内部，事务上下文会自动传播
+            // Inside transactionScope, transaction context is automatically propagated
             return withContext(Dispatchers.IO, block)
         }
     }
