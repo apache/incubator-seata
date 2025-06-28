@@ -41,7 +41,6 @@ import org.apache.seata.core.exception.HttpRequestFilterException;
 import org.apache.seata.core.rpc.netty.NettyServerConfig;
 import org.apache.seata.core.rpc.netty.http.filter.HttpRequestFilterChain;
 import org.apache.seata.core.rpc.netty.http.filter.HttpRequestFilterManager;
-import org.apache.seata.core.rpc.netty.http.filter.HttpRequestParamWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,9 +79,8 @@ public class HttpDispatchHandler extends SimpleChannelInboundHandler<HttpRequest
     protected void channelRead0(ChannelHandlerContext ctx, HttpRequest httpRequest) {
 
         try {
-            HttpRequestParamWrapper paramWrapper = new HttpRequestParamWrapper(httpRequest);
             HttpRequestFilterChain filterChain = HttpRequestFilterManager.getFilterChain();
-            filterChain.doFilter(httpRequest, paramWrapper);
+            filterChain.doFilter(httpRequest);
         } catch (HttpRequestFilterException e) {
             LOGGER.warn("Request blocked by filter: {}", e.getMessage());
             sendErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST, false);

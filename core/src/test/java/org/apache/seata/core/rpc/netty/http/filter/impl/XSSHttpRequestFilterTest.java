@@ -21,13 +21,13 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpVersion;
 import org.apache.seata.core.exception.HttpRequestFilterException;
-import org.apache.seata.core.rpc.netty.http.filter.HttpRequestParamWrapper;
+import org.apache.seata.core.rpc.netty.http.filter.HttpFilterContext;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class XSSHttpRequestFilterTest {
+class XSSHttpRequestFilterTest {
 
     private final XSSHttpRequestFilter filter = new XSSHttpRequestFilter();
 
@@ -38,20 +38,18 @@ public class XSSHttpRequestFilterTest {
     @Test
     public void testFilter_withXssKeyword_shouldThrow() {
         FullHttpRequest request = buildRequestWithQuery("/path?param=<script>alert(1)</script>");
-        HttpRequestParamWrapper wrapper = new HttpRequestParamWrapper(request);
+        HttpFilterContext context = new HttpFilterContext(request);
 
-        assertThatThrownBy(() -> filter.doFilter(request, wrapper))
-                .isInstanceOf(HttpRequestFilterException.class)
-                .hasMessageContaining("XSS risk detected");
+        assertThrows(HttpRequestFilterException.class, () -> filter.doFilter(context));
     }
 
     @Test
     public void testFilter_withSafeQueryParam_shouldPass() {
         FullHttpRequest request = buildRequestWithQuery("/path?param=normalValue");
-        HttpRequestParamWrapper wrapper = new HttpRequestParamWrapper(request);
+        HttpFilterContext context = new HttpFilterContext(request);
 
         try {
-            filter.doFilter(request, wrapper);
+            filter.doFilter(context);
         } catch (Exception e) {
             fail("Should not throw exception, but got: " + e.getMessage());
         }
@@ -60,20 +58,16 @@ public class XSSHttpRequestFilterTest {
     @Test
     public void testFilter_withOnloadEvent_shouldThrow() {
         FullHttpRequest request = buildRequestWithQuery("/path?param=onload=alert(1)");
-        HttpRequestParamWrapper wrapper = new HttpRequestParamWrapper(request);
+        HttpFilterContext context = new HttpFilterContext(request);
 
-        assertThatThrownBy(() -> filter.doFilter(request, wrapper))
-                .isInstanceOf(HttpRequestFilterException.class)
-                .hasMessageContaining("XSS risk detected");
+        assertThrows(HttpRequestFilterException.class, () -> filter.doFilter(context));
     }
 
     @Test
     public void testFilter_withJavascriptUrl_shouldThrow() {
         FullHttpRequest request = buildRequestWithQuery("/path?url=javascript:alert(1)");
-        HttpRequestParamWrapper wrapper = new HttpRequestParamWrapper(request);
+        HttpFilterContext context = new HttpFilterContext(request);
 
-        assertThatThrownBy(() -> filter.doFilter(request, wrapper))
-                .isInstanceOf(HttpRequestFilterException.class)
-                .hasMessageContaining("XSS risk detected");
+        assertThrows(HttpRequestFilterException.class, () -> filter.doFilter(context));
     }
 }

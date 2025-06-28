@@ -17,28 +17,31 @@
 package org.apache.seata.core.rpc.netty.http.filter;
 
 import io.netty.handler.codec.http.HttpRequest;
-import org.apache.seata.core.exception.HttpRequestFilterException;
 
-import java.util.List;
+public class HttpFilterContext {
 
-public class HttpRequestFilterChain {
-    private final List<HttpRequestFilter> filters;
+    private final HttpRequest request;
+    private HttpRequestParamWrapper paramWrapper;
 
-    public HttpRequestFilterChain(List<HttpRequestFilter> filters) {
-        this.filters = filters;
+    public HttpFilterContext(HttpRequest request) {
+        this.request = request;
     }
 
-    public void doFilter(HttpRequest request) throws HttpRequestFilterException {
-        HttpFilterContext context = new HttpFilterContext(request);
-        for (HttpRequestFilter filter : filters) {
-            filter.doFilter(context);
-        }
+    public HttpRequest getRequest() {
+        return request;
     }
 
     /**
-     * Get internal filter list (for unit test only).
+     * Lazily initialize paramWrapper; parse body, query, header, and form parameters only when needed.
      */
-    List<HttpRequestFilter> getFilters() {
-        return filters;
+    public HttpRequestParamWrapper getParamWrapper() {
+        if (paramWrapper == null) {
+            synchronized(this) {
+                if (paramWrapper == null) {
+                    paramWrapper = new HttpRequestParamWrapper(request);
+                }
+            }
+        }
+        return paramWrapper;
     }
 }

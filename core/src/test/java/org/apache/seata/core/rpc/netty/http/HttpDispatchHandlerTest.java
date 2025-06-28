@@ -26,7 +26,6 @@ import io.netty.handler.codec.http.HttpVersion;
 import org.apache.seata.core.exception.HttpRequestFilterException;
 import org.apache.seata.core.rpc.netty.http.filter.HttpRequestFilterChain;
 import org.apache.seata.core.rpc.netty.http.filter.HttpRequestFilterManager;
-import org.apache.seata.core.rpc.netty.http.filter.HttpRequestParamWrapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
@@ -119,7 +118,7 @@ class HttpDispatchHandlerTest {
 
         doThrow(new HttpRequestFilterException("Mock filter block"))
                 .when(mockFilterChain)
-                .doFilter(any(), any(HttpRequestParamWrapper.class));
+                .doFilter(any());
 
         MockedStatic<HttpRequestFilterManager> mockedStatic = mockStatic(HttpRequestFilterManager.class);
         mockedStatic.when(HttpRequestFilterManager::getFilterChain).thenReturn(mockFilterChain);

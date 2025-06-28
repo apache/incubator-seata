@@ -20,6 +20,7 @@ import io.netty.handler.codec.http.HttpRequest;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.config.ConfigurationKeys;
 import org.apache.seata.core.exception.HttpRequestFilterException;
+import org.apache.seata.core.rpc.netty.http.filter.HttpFilterContext;
 import org.apache.seata.core.rpc.netty.http.filter.HttpRequestFilter;
 import org.apache.seata.core.rpc.netty.http.filter.HttpRequestParamWrapper;
 
@@ -71,8 +72,8 @@ public class XSSHttpRequestFilter implements HttpRequestFilter {
      * Checks all request parameters for XSS risks and throws if found.
      */
     @Override
-    public void doFilter(HttpRequest request, HttpRequestParamWrapper paramWrapper) throws HttpRequestFilterException {
-        Map<String, List<String>> allParams = paramWrapper.getAllParamsAsMultiMap();
+    public void doFilter(HttpFilterContext context) throws HttpRequestFilterException {
+        Map<String, List<String>> allParams = context.getParamWrapper().getAllParamsAsMultiMap();
         for (Map.Entry<String, List<String>> entry : allParams.entrySet()) {
             for (String value : entry.getValue()) {
                 if (value != null && containsXssRisk(value)) {
