@@ -162,16 +162,6 @@ public interface ConfigurationKeys {
     String SERVER_PREFIX = "server.";
 
     /**
-     * The constant SERVER_HTTP_PREFIX.
-     */
-    String SERVER_HTTP_PREFIX = SERVER_PREFIX + "http.";
-
-    /**
-     * The constant SERVER_HTTP_FILTER_PREFIX.
-     */
-    String SERVER_HTTP_FILTER_PREFIX = SERVER_HTTP_PREFIX + "filter.";
-
-    /**
      * The constant TRANSPORT_PREFIX.
      */
     String TRANSPORT_PREFIX = "transport.";
@@ -459,16 +449,6 @@ public interface ConfigurationKeys {
      * The constant SERVER_SERVICE_PORT_CONFIG.
      */
     String SERVER_SERVICE_PORT_CONFIG = SEATA_PREFIX + SERVER_PREFIX + "service-port";
-
-    /**
-     * The constant SERVER_HTTP_FILTERS_ENABLED.
-     */
-    String SERVER_HTTP_FILTERS_ENABLED = SERVER_HTTP_PREFIX + "filters.enabled";
-
-    /**
-     * The constant SERVER_HTTP_FILTER_XSS_ENABLED.
-     */
-    String SERVER_HTTP_FILTER_XSS_ENABLED = SERVER_HTTP_FILTER_PREFIX + "xss.enabled";
 
     /**
      * The constant ENV_SEATA_PORT_KEY.
@@ -1154,6 +1134,23 @@ public interface ConfigurationKeys {
      * The constant SERVER_RAFT_COMPRESSOR.
      */
     String SERVER_RAFT_COMPRESSOR = SERVER_RAFT + "compressor";
+
+    /**
+     * The constant SERVER_HTTP.
+     */
+    String SERVER_HTTP = SERVER_PREFIX + "http.";
+
+    String SERVER_HTTP_FILTER_PREFIX = SERVER_HTTP + "filter.";
+
+    /**
+     * The constant SERVER_HTTP_FILTERS_ENABLED.
+     */
+    String SERVER_HTTP_FILTER_ENABLE = SERVER_HTTP_FILTER_PREFIX + "enabled";
+
+    /**
+     * The constant SERVER_HTTP_FILTER_XSS_ENABLED.
+     */
+    String SERVER_HTTP_FILTER_XSS_FILTER_ENABLE = SERVER_HTTP_FILTER_PREFIX + "xss.enabled";
 
     /**
      * The constant IS_USE_CLOUD_NAMESPACE_PARSING.

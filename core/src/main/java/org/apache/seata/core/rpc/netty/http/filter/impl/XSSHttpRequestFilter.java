@@ -89,7 +89,7 @@ public class XSSHttpRequestFilter implements HttpRequestFilter {
      */
     @Override
     public boolean shouldApply() {
-        return ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.SERVER_HTTP_FILTER_XSS_ENABLED, true);
+        return ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.SERVER_HTTP_FILTER_XSS_FILTER_ENABLE, true);
     }
 
     /**

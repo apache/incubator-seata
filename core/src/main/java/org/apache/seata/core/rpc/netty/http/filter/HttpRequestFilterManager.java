@@ -30,7 +30,7 @@ public class HttpRequestFilterManager {
 
     static {
         boolean globalEnabled =
-                ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.SERVER_HTTP_FILTERS_ENABLED, true);
+                ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.SERVER_HTTP_FILTER_ENABLE, true);
 
         if (globalEnabled) {
             addIfEnabled(new XSSHttpRequestFilter());

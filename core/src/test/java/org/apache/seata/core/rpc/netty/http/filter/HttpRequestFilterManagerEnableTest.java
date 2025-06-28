@@ -40,9 +40,9 @@ class HttpRequestFilterManagerEnableTest {
 
             when(ConfigurationFactory.getInstance()).thenReturn(mockConfig);
 
-            when(mockConfig.getBoolean(ConfigurationKeys.SERVER_HTTP_FILTERS_ENABLED, true))
+            when(mockConfig.getBoolean(ConfigurationKeys.SERVER_HTTP_FILTER_ENABLE, true))
                     .thenReturn(true);
-            when(mockConfig.getBoolean(ConfigurationKeys.SERVER_HTTP_FILTER_XSS_ENABLED, true))
+            when(mockConfig.getBoolean(ConfigurationKeys.SERVER_HTTP_FILTER_XSS_FILTER_ENABLE, true))
                     .thenReturn(true);
 
             HttpRequestFilterChain filterChain = HttpRequestFilterManager.getFilterChain();
