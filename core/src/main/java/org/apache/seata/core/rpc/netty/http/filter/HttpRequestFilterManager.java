@@ -21,6 +21,7 @@ import org.apache.seata.config.ConfigurationKeys;
 import org.apache.seata.core.rpc.netty.http.filter.impl.XSSHttpRequestFilter;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class HttpRequestFilterManager {
@@ -36,7 +37,7 @@ public class HttpRequestFilterManager {
             addIfEnabled(new XSSHttpRequestFilter());
         }
 
-        filters.sort((a, b) -> Integer.compare(a.getOrder(), b.getOrder()));
+        filters.sort(Comparator.comparingInt(HttpRequestFilter::getOrder));
         filterChain = new HttpRequestFilterChain(filters);
     }
 
