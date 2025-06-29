@@ -19,6 +19,8 @@ package org.apache.seata.core.rpc.netty.http.filter;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpRequest;
@@ -75,15 +77,19 @@ public class HttpRequestParamWrapper {
             return;
         }
 
-        ByteBuf content = request.content();
-        String bodyStr = content.toString(StandardCharsets.UTF_8);
+        ByteBuf originalContent = request.content();
+        ByteBuf copiedBuf = Unpooled.copiedBuffer(originalContent);
+
+        String bodyStr = copiedBuf.toString(StandardCharsets.UTF_8);
 
         try {
             if (contentType.contains("application/json")) {
                 parseJsonBody(bodyStr);
             } else if (contentType.contains("application/x-www-form-urlencoded")
                     || contentType.contains("multipart/form-data")) {
-                parseFormBody(request);
+                FullHttpRequest copiedRequest = new DefaultFullHttpRequest(
+                        request.protocolVersion(), request.method(), request.uri(), copiedBuf);
+                parseFormBody(copiedRequest);
             }
         } catch (Exception e) {
             LOGGER.warn("Failed to parse HTTP body: {}", e.getMessage(), e);

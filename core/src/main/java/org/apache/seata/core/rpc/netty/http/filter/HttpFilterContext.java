@@ -36,7 +36,7 @@ public class HttpFilterContext {
      */
     public HttpRequestParamWrapper getParamWrapper() {
         if (paramWrapper == null) {
-            synchronized(this) {
+            synchronized (this) {
                 if (paramWrapper == null) {
                     paramWrapper = new HttpRequestParamWrapper(request);
                 }

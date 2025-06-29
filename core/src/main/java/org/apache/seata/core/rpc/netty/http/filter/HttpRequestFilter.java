@@ -16,7 +16,6 @@
  */
 package org.apache.seata.core.rpc.netty.http.filter;
 
-import io.netty.handler.codec.http.HttpRequest;
 import org.apache.seata.core.exception.HttpRequestFilterException;
 
 /**

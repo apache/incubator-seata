@@ -19,7 +19,6 @@ package org.apache.seata.spring.boot.autoconfigure.properties.server.filter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SERVER_HTTP_FILTER_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SERVER_HTTP_FILTER_XSS_PREFIX;
 
 @Component
@@ -34,5 +33,4 @@ public class ServerHttpXSSFilterProperties {
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
-
 }

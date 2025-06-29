@@ -20,11 +20,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SERVER_HTTP_FILTER_PREFIX;
+
 @Component
 @ConfigurationProperties(prefix = SERVER_HTTP_FILTER_PREFIX)
 public class ServerHttpFiltersProperties {
     private boolean enabled = true;
-
 
     public boolean isEnabled() {
         return enabled;
@@ -33,5 +33,4 @@ public class ServerHttpFiltersProperties {
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
-
 }

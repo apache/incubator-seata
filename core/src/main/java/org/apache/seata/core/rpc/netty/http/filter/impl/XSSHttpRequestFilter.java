@@ -16,13 +16,11 @@
  */
 package org.apache.seata.core.rpc.netty.http.filter.impl;
 
-import io.netty.handler.codec.http.HttpRequest;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.config.ConfigurationKeys;
 import org.apache.seata.core.exception.HttpRequestFilterException;
 import org.apache.seata.core.rpc.netty.http.filter.HttpFilterContext;
 import org.apache.seata.core.rpc.netty.http.filter.HttpRequestFilter;
-import org.apache.seata.core.rpc.netty.http.filter.HttpRequestParamWrapper;
 
 import java.util.List;
 import java.util.Map;
@@ -89,7 +87,8 @@ public class XSSHttpRequestFilter implements HttpRequestFilter {
      */
     @Override
     public boolean shouldApply() {
-        return ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.SERVER_HTTP_FILTER_XSS_FILTER_ENABLE, true);
+        return ConfigurationFactory.getInstance()
+                .getBoolean(ConfigurationKeys.SERVER_HTTP_FILTER_XSS_FILTER_ENABLE, true);
     }
 
     /**

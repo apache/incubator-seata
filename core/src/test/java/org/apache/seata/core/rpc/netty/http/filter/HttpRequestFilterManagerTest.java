@@ -19,6 +19,7 @@ package org.apache.seata.core.rpc.netty.http.filter;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.config.ConfigurationKeys;
+import org.apache.seata.core.rpc.netty.http.filter.impl.XSSHttpRequestFilter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
@@ -30,42 +31,31 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
-class HttpRequestFilterManagerDisableTest {
-
+class HttpRequestFilterManagerTest {
     private Configuration mockConfig;
 
     @BeforeEach
-    public void setup() {
+    public void setup() throws Exception {
         mockConfig = mock(Configuration.class);
     }
 
     @Test
-    void testGlobalDisabled() {
+    void testGlobalEnabledTrueAndXssEnabledTrue() throws Exception {
+
         try (MockedStatic<ConfigurationFactory> mockedStatic = mockStatic(ConfigurationFactory.class)) {
+
             when(ConfigurationFactory.getInstance()).thenReturn(mockConfig);
-            when(mockConfig.getBoolean(ConfigurationKeys.SERVER_HTTP_FILTER_ENABLE, true))
-                    .thenReturn(false);
 
-            HttpRequestFilterChain filterChain = HttpRequestFilterManager.getFilterChain();
-            List<HttpRequestFilter> filters = filterChain.getFilters();
-
-            assertThat(filters).isEmpty();
-        }
-    }
-
-    @Test
-    void testXssDisabledIndividually() {
-        try (MockedStatic<ConfigurationFactory> mockedStatic = mockStatic(ConfigurationFactory.class)) {
-            when(ConfigurationFactory.getInstance()).thenReturn(mockConfig);
             when(mockConfig.getBoolean(ConfigurationKeys.SERVER_HTTP_FILTER_ENABLE, true))
                     .thenReturn(true);
             when(mockConfig.getBoolean(ConfigurationKeys.SERVER_HTTP_FILTER_XSS_FILTER_ENABLE, true))
-                    .thenReturn(false);
+                    .thenReturn(true);
 
             HttpRequestFilterChain filterChain = HttpRequestFilterManager.getFilterChain();
             List<HttpRequestFilter> filters = filterChain.getFilters();
 
-            assertThat(filters).isEmpty();
+            assertThat(filters).isNotEmpty();
+            assertThat(filters.get(0)).isInstanceOf(XSSHttpRequestFilter.class);
         }
     }
 }
