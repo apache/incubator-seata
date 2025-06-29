@@ -182,7 +182,8 @@ server.distributedLockExpireTime=10000
 server.session.branchAsyncQueueSize=5000
 server.session.enableBranchAsyncRemove=false
 server.enableParallelRequestHandle=true
-server.enableParallelHandleBranch=false
+server.enableParallelRequestHandle=true
+server.retryDeadThreshold=70000
 server.applicationDataLimit=64000
 server.applicationDataLimitCheck=false
 
