@@ -27,9 +27,12 @@ body:
   attributes:
     label: Check Ahead
     options:
-    - label: >
-        I have searched the [issues](https://github.com/seata/seata/issues) of this repository and believe that this is not a duplicate.
-      required: true
+      - label: >
+          I have searched the [issues](https://github.com/seata/seata/issues) of this repository and believe that this is not a duplicate.
+        required: true
+      - label: >
+          I am willing to try to fix this bug myself.
+        required: false
 
 - type: textarea
   attributes:
