@@ -59,7 +59,7 @@ public class XSSHttpRequestFilter implements HttpRequestFilter {
     };
 
     private static final Pattern EVENT_HANDLER_PATTERN =
-            Pattern.compile("on\\w+\\s*=\\s*['\"].*?['\"]", Pattern.CASE_INSENSITIVE);
+            Pattern.compile("on[a-zA-Z0-9]*\\s*=\\s*['\"][^'\"]*['\"]", Pattern.CASE_INSENSITIVE);
 
     @Override
     public int getOrder() {
