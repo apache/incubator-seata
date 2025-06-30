@@ -104,6 +104,21 @@ public interface MeterIdConstants {
             .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_TIMER)
             .withTag(IdConstants.STATUS_KEY, IdConstants.STATUS_VALUE_AFTER_COMMITTED_KEY);
 
+    Id SUMMARY_COMMIT_RETRYING = new Id(IdConstants.SEATA_TRANSACTION)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_SUMMARY)
+            .withTag(IdConstants.STATUS_KEY, IdConstants.STATUS_VALUE_COMMIT_RETRYING_KEY);
+
+    Id SUMMARY_ROLLBACK_RETRYING = new Id(IdConstants.SEATA_TRANSACTION)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_SUMMARY)
+            .withTag(IdConstants.STATUS_KEY, IdConstants.STATUS_VALUE_ROLLBACK_RETRYING_KEY);
+
+    Id SUMMARY_TIMEOUT_ROLLBACK_RETRYING = new Id(IdConstants.SEATA_TRANSACTION)
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_SUMMARY)
+            .withTag(IdConstants.STATUS_KEY, IdConstants.STATUS_VALUE_TIMEOUT_ROLLBACK_RETRYING_KEY);
+
     Id SUMMARY_EXP = new Id(IdConstants.SEATA_EXCEPTION)
             .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_TC)
             .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_SUMMARY);
