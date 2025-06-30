@@ -47,11 +47,12 @@ public class XAUtils {
         return createXAConnection(physicalConn, dataSourceResource.getDriver(), dataSourceResource.getDbType());
     }
 
+
     public static XAConnection createXAConnection(Connection physicalConn, Driver driver, String dbType)
             throws SQLException {
         if (JdbcConstants.MYSQL.equals(dbType)) {
             return MySqlUtils.createXAConnection(driver, physicalConn);
-        } else {
+        }  else {
             try {
                 switch (dbType) {
                     case JdbcConstants.ORACLE:
@@ -70,6 +71,8 @@ public class XAUtils {
                         return PGUtils.createXAConnection(physicalConn);
                     case JdbcConstants.KINGBASE:
                         return createXAConnection(physicalConn, "com.kingbase8.xa.KBXAConnection", dbType);
+                    case JdbcConstants.DM:
+                        return createXAConnection(physicalConn,"dm.jdbc.driver.DmdbXAConnection",dbType);
                     default:
                         throw new SQLException("xa not support dbType: " + dbType);
                 }
@@ -114,6 +117,9 @@ public class XAUtils {
                 case JdbcConstants.KINGBASE:
                     Class<?> kingbaseConnectionClass = Class.forName("com.kingbase8.core.BaseConnection");
                     return xaConnectionClass.getConstructor(kingbaseConnectionClass);
+                case JdbcConstants.DM:
+                    // 达梦
+                    return xaConnectionClass.getConstructor(Connection.class);
                 default:
                     throw new SQLException("xa reflect not support dbType: " + dbType);
             }
@@ -145,6 +151,12 @@ public class XAUtils {
                         Object mariaDbConnectionInstance = mariaDbConnectionClass.cast(params[0]);
                         result.add(mariaDbConnectionInstance);
                         return result;
+                    }
+                case JdbcConstants.DM:
+                    Class<?> dmConnectionClass = Class.forName("dm.jdbc.driver.DmdbConnection");
+                    if (dmConnectionClass.isInstance(params[0])) {
+                        result.add(dmConnectionClass.cast(params[0]));
+                        return (List<T>) result;
                     }
                 default:
                     throw new SQLException("xa reflect not support dbType: " + dbType);
