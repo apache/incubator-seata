@@ -29,6 +29,8 @@ public interface IdConstants {
 
     String APP_ID_KEY = "applicationId";
 
+    String TRANSACTION_NAME_KEY = "transactionName";
+
     String GROUP_KEY = "group";
 
     String NAME_KEY = "name";
@@ -86,4 +88,10 @@ public interface IdConstants {
     String CLIENT_ID_KEY = "clientId";
 
     String HOST_AND_PORT = "hostAndPort";
+
+    String STATUS_VALUE_COMMIT_RETRYING_KEY = "CommitRetrying";
+
+    String STATUS_VALUE_ROLLBACK_RETRYING_KEY = "RollbackRetrying";
+
+    String STATUS_VALUE_TIMEOUT_ROLLBACK_RETRYING_KEY = "TimeoutRollbackRetrying";
 }
