@@ -26,8 +26,8 @@ import java.util.List;
 
 public class HttpRequestFilterManager {
 
-    private static final List<HttpRequestFilter> filters = new ArrayList<>();
-    private static final HttpRequestFilterChain filterChain;
+    private static final List<HttpRequestFilter> HTTP_REQUEST_FILTERS = new ArrayList<>();
+    private static final HttpRequestFilterChain HTTP_REQUEST_FILTER_CHAIN;
 
     static {
         boolean globalEnabled =
@@ -37,17 +37,17 @@ public class HttpRequestFilterManager {
             addIfEnabled(new XSSHttpRequestFilter());
         }
 
-        filters.sort(Comparator.comparingInt(HttpRequestFilter::getOrder));
-        filterChain = new HttpRequestFilterChain(filters);
+        HTTP_REQUEST_FILTERS.sort(Comparator.comparingInt(HttpRequestFilter::getOrder));
+        HTTP_REQUEST_FILTER_CHAIN = new HttpRequestFilterChain(HTTP_REQUEST_FILTERS);
     }
 
     private static void addIfEnabled(HttpRequestFilter filter) {
         if (filter.shouldApply()) {
-            filters.add(filter);
+            HTTP_REQUEST_FILTERS.add(filter);
         }
     }
 
     public static HttpRequestFilterChain getFilterChain() {
-        return filterChain;
+        return HTTP_REQUEST_FILTER_CHAIN;
     }
 }

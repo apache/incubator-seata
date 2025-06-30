@@ -21,7 +21,7 @@ import io.netty.handler.codec.http.HttpRequest;
 public class HttpFilterContext {
 
     private final HttpRequest request;
-    private HttpRequestParamWrapper paramWrapper;
+    private volatile HttpRequestParamWrapper paramWrapper;
 
     public HttpFilterContext(HttpRequest request) {
         this.request = request;
