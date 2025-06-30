@@ -87,9 +87,10 @@ public class HttpRequestParamWrapper {
                 parseJsonBody(bodyStr);
             } else if (contentType.contains("application/x-www-form-urlencoded")
                     || contentType.contains("multipart/form-data")) {
-                // codeql[ssrf] - Copying the request body here does not pose an SSRF risk
+                // Replace user-controlled URI with constant string during internal FullHttpRequest construction for
+                // decoding form parameters.
                 FullHttpRequest copiedRequest = new DefaultFullHttpRequest(
-                        request.protocolVersion(), request.method(), request.uri(), copiedBuf);
+                        request.protocolVersion(), request.method(), "/internal-safe-uri", copiedBuf);
                 parseFormBody(copiedRequest);
             }
         } catch (Exception e) {
