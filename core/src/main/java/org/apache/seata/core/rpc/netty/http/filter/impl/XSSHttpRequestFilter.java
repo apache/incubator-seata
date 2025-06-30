@@ -63,10 +63,12 @@ public class XSSHttpRequestFilter implements HttpRequestFilter {
 
     private static final int ON_REPEAT_LIMIT = 5;
 
-    private static final Pattern ON_REPEAT_PATTERN = Pattern.compile("(on){" + ON_REPEAT_LIMIT + ",}", Pattern.CASE_INSENSITIVE);
+    private static final Pattern ON_REPEAT_PATTERN =
+            Pattern.compile("(on){" + ON_REPEAT_LIMIT + ",}", Pattern.CASE_INSENSITIVE);
 
-    private static final Pattern EVENT_HANDLER_PATTERN =
-            Pattern.compile("\\bon([a-zA-Z0-9]{1," + MAX_EVENT_HANDLER_LENGTH + "}?)\\s*=\\s*['\"][^'\"]*['\"]", Pattern.CASE_INSENSITIVE);
+    private static final Pattern EVENT_HANDLER_PATTERN = Pattern.compile(
+            "\\bon([a-zA-Z0-9]{1," + MAX_EVENT_HANDLER_LENGTH + "}?)\\s*=\\s*['\"][^'\"]*['\"]",
+            Pattern.CASE_INSENSITIVE);
 
     @Override
     public int getOrder() {
