@@ -24,6 +24,7 @@ import org.apache.seata.core.rpc.netty.http.filter.HttpRequestFilter;
 
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -58,8 +59,14 @@ public class XSSHttpRequestFilter implements HttpRequestFilter {
         "<link>"
     };
 
+    private static final int MAX_EVENT_HANDLER_LENGTH = 50;
+
+    private static final int ON_REPEAT_LIMIT = 5;
+
+    private static final Pattern ON_REPEAT_PATTERN = Pattern.compile("(on){" + ON_REPEAT_LIMIT + ",}", Pattern.CASE_INSENSITIVE);
+
     private static final Pattern EVENT_HANDLER_PATTERN =
-            Pattern.compile("on[a-zA-Z0-9]*\\s*=\\s*['\"][^'\"]*['\"]", Pattern.CASE_INSENSITIVE);
+            Pattern.compile("\\bon([a-zA-Z0-9]{1," + MAX_EVENT_HANDLER_LENGTH + "}?)\\s*=\\s*['\"][^'\"]*['\"]", Pattern.CASE_INSENSITIVE);
 
     @Override
     public int getOrder() {
@@ -74,7 +81,7 @@ public class XSSHttpRequestFilter implements HttpRequestFilter {
         Map<String, List<String>> allParams = context.getParamWrapper().getAllParamsAsMultiMap();
         for (Map.Entry<String, List<String>> entry : allParams.entrySet()) {
             for (String value : entry.getValue()) {
-                if (value != null && containsXssRisk(value)) {
+                if (containsXssRisk(value)) {
                     throw new HttpRequestFilterException(
                             "XSS risk detected in param: " + entry.getKey() + ", value: " + value);
                 }
@@ -107,10 +114,18 @@ public class XSSHttpRequestFilter implements HttpRequestFilter {
             }
         }
 
-        if (EVENT_HANDLER_PATTERN.matcher(value).find()) {
+        if (ON_REPEAT_PATTERN.matcher(value).find()) {
             return true;
         }
 
+        Matcher matcher = EVENT_HANDLER_PATTERN.matcher(value);
+        while (matcher.find()) {
+            String eventName = matcher.group(1);
+            if (eventName.length() > MAX_EVENT_HANDLER_LENGTH) {
+                return true;
+            }
+            return true;
+        }
         return false;
     }
 }

@@ -70,4 +70,70 @@ class XSSHttpRequestFilterTest {
 
         assertThrows(HttpRequestFilterException.class, () -> filter.doFilter(context));
     }
+
+    @Test
+    void testFilter_withRepeatedOn_shouldThrow() {
+        FullHttpRequest request = buildRequestWithQuery("/test?param=ononononon123='xxx'");
+        HttpFilterContext context = new HttpFilterContext(request);
+
+        assertThrows(HttpRequestFilterException.class, () -> filter.doFilter(context));
+    }
+
+    @Test
+    void testFilter_withShortEventName_shouldThrow() {
+        FullHttpRequest request = buildRequestWithQuery("/test?param=onclick=\"doSomething()\"");
+        HttpFilterContext context = new HttpFilterContext(request);
+
+        assertThrows(HttpRequestFilterException.class, () -> filter.doFilter(context));
+    }
+
+    @Test
+    void testFilter_withLongEventName_shouldThrow() {
+        String longEventName = "on" + new String(new char[50]).replace('\0', 'a');
+        FullHttpRequest request = buildRequestWithQuery("/test?param=" + longEventName + "=\"xss\"");
+        HttpFilterContext context = new HttpFilterContext(request);
+
+        assertThrows(HttpRequestFilterException.class, () -> filter.doFilter(context));
+    }
+
+    /**
+     * The simulated attacker constructs long onononononon... Characters,
+     * attempting to freeze the regular expression backtracking
+     */
+    @Test
+    public void testFilter_withLongOnString_shouldThrowQuickly() {
+        StringBuilder attackBuilder = new StringBuilder("on");
+        for (int i = 0; i < 10000; i++) {
+            attackBuilder.append("on");
+        }
+        attackBuilder.append("=alert(1)");
+
+        String attackString = attackBuilder.toString();
+
+        FullHttpRequest request = buildRequestWithQuery("/path?param=" + attackString);
+        HttpFilterContext context = new HttpFilterContext(request);
+
+        // 验证不会超时，并且能正常抛出 HttpRequestFilterException
+        assertThrows(HttpRequestFilterException.class, () -> filter.doFilter(context));
+    }
+
+    /**
+     * Simulate an extremely long but not continuously on ordinary long text to avoid accidental damage
+     */
+    @Test
+    public void testFilter_withNormalLongText_shouldPass() {
+        StringBuilder longText = new StringBuilder();
+        for (int i = 0; i < 20000; i++) {
+            longText.append("safeText");
+        }
+
+        FullHttpRequest request = buildRequestWithQuery("/path?param=" + longText);
+        HttpFilterContext context = new HttpFilterContext(request);
+
+        try {
+            filter.doFilter(context);
+        } catch (HttpRequestFilterException e) {
+            throw new AssertionError("非XSS文本不应该被误拦", e);
+        }
+    }
 }
