@@ -87,6 +87,7 @@ public class HttpRequestParamWrapper {
                 parseJsonBody(bodyStr);
             } else if (contentType.contains("application/x-www-form-urlencoded")
                     || contentType.contains("multipart/form-data")) {
+                // codeql[ssrf] - Copying the request body here does not pose an SSRF risk
                 FullHttpRequest copiedRequest = new DefaultFullHttpRequest(
                         request.protocolVersion(), request.method(), request.uri(), copiedBuf);
                 parseFormBody(copiedRequest);
