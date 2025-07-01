@@ -71,7 +71,7 @@ public class XAUtils {
                     case JdbcConstants.KINGBASE:
                         return createXAConnection(physicalConn, "com.kingbase8.xa.KBXAConnection", dbType);
                     case JdbcConstants.DM:
-                        return createXAConnection(physicalConn,"dm.jdbc.driver.DmdbXAConnection",dbType);
+                        return createXAConnection(physicalConn,"dm.jdbc.driver.DmdbXAConnection", dbType);
                     default:
                         throw new SQLException("xa not support dbType: " + dbType);
                 }

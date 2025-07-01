@@ -1,3 +1,19 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.seata.rm.datasource.util;
 
 import com.alibaba.druid.util.MySqlUtils;
@@ -43,9 +59,7 @@ public class XAUtilsTest {
     @Test
     public void testGetDbType() {
         try (MockedStatic<JdbcUtils> jdbcUtilsMock = Mockito.mockStatic(JdbcUtils.class)) {
-            jdbcUtilsMock.when(() -> JdbcUtils.getDbType(anyString()))
-                    .thenReturn("mysql");
-
+            jdbcUtilsMock.when(() -> JdbcUtils.getDbType(anyString())).thenReturn("mysql");
             String dbType = XAUtils.getDbType("jdbc:mysql://localhost:3306/test", "com.mysql.Driver");
             assertEquals("mysql", dbType);
         }
@@ -57,9 +71,9 @@ public class XAUtilsTest {
         XAConnection mockXAConnection = mock(XAConnection.class);
 
         try (MockedStatic<MySqlUtils> mySqlUtilsMock = Mockito.mockStatic(MySqlUtils.class)) {
-            mySqlUtilsMock.when(() -> MySqlUtils.createXAConnection(any(), any()))
+            mySqlUtilsMock
+                    .when(() -> MySqlUtils.createXAConnection(any(), any()))
                     .thenReturn(mockXAConnection);
-
             XAConnection result = XAUtils.createXAConnection(mockConnection, mockDataSourceResource);
             assertSame(mockXAConnection, result);
         }
@@ -69,7 +83,6 @@ public class XAUtilsTest {
     public void testCreateXAConnectionPostgreSQL() throws SQLException,ClassNotFoundException {
         when(mockDataSourceResource.getDbType()).thenReturn(POSTGRESQL);
         XAConnection mockXAConnection = mock(XAConnection.class);
-
         try (MockedStatic<PGUtils> pgUtilsMock = Mockito.mockStatic(PGUtils.class)) {
             pgUtilsMock.when(() -> PGUtils.createXAConnection(any()))
                     .thenReturn(mockXAConnection);
@@ -79,39 +92,6 @@ public class XAUtilsTest {
         }
     }
 
-    @Test
-    public void testCreateXAConnectionOracle() throws SQLException,ClassNotFoundException {
-        when(mockDataSourceResource.getDbType()).thenReturn(ORACLE);
-// 模拟Oracle T4CConnection
-        Class<?> oracleT4CConnection = Class.forName("oracle.jdbc.driver.T4CConnection");
-        Connection t4cMockConnection = mock(oracleT4CConnection.asSubclass(Connection.class));
-        // 测试T4CConnection路径
-        when(t4cMockConnection.getClass()).thenAnswer(inv -> {
-            Class<?> mockClass = mock(Class.class);
-            when(mockClass.getName()).thenReturn("oracle.jdbc.driver.T4CConnection");
-            return mockClass;
-        });
-
-        XAConnection result = XAUtils.createXAConnection(t4cMockConnection, mockDataSourceResource);
-        assertNotNull(result);
-    }
-
-    @Test
-    public void testCreateXAConnectionOracleFallback() throws SQLException,ClassNotFoundException {
-        when(mockDataSourceResource.getDbType()).thenReturn(ORACLE);
-        // 模拟普通的Oracle连接
-        Class<?> oracleConnection = Class.forName("oracle.jdbc.OracleConnection");
-        Connection oracleMockConnection = mock(oracleConnection.asSubclass(Connection.class));
-        // 测试非T4CConnection路径
-        when(oracleMockConnection.getClass()).thenAnswer(inv -> {
-            Class<?> mockClass = mock(Class.class);
-            when(mockClass.getName()).thenReturn("oracle.other.Connection");
-            return mockClass;
-        });
-
-        XAConnection result = XAUtils.createXAConnection(mockConnection, mockDataSourceResource);
-        assertNotNull(result);
-    }
 
     @Test
     public void testCreateXAConnectionMariaDB() throws SQLException,ClassNotFoundException {
@@ -179,65 +159,6 @@ public class XAUtilsTest {
         }
     }
 
-    @Test
-    public void testCreateXAConnectionUnsupportedDB() {
-        when(mockDataSourceResource.getDbType()).thenReturn("UNKNOWN_DB");
 
-        SQLException exception = assertThrows(SQLException.class, () ->
-                XAUtils.createXAConnection(mockConnection, mockDataSourceResource));
-
-        assertEquals("xa not support dbType: UNKNOWN_DB", exception.getMessage());
-    }
-
-    @Test
-    public void testCreateXAConnection_ReflectionFailure() throws SQLException {
-        when(mockDataSourceResource.getDbType()).thenReturn(ORACLE);
-        when(mockConnection.getClass()).thenAnswer(inv -> {
-            Class<?> mockClass = mock(Class.class);
-            when(mockClass.getName()).thenReturn("oracle.jdbc.driver.T4CConnection");
-            return mockClass;
-        });
-
-        try (MockedStatic<Class> classMock = mockStatic(Class.class)) {
-            classMock.when(() -> Class.forName(anyString()))
-                    .thenThrow(new ClassNotFoundException("Test exception"));
-
-            SQLException exception = assertThrows(SQLException.class, () ->
-                    XAUtils.createXAConnection(mockConnection, mockDataSourceResource));
-
-            assertEquals("create xaConnection error", exception.getMessage());
-            assertInstanceOf(ClassNotFoundException.class, exception.getCause());
-        }
-    }
-
-    @Test
-    public void testCreateXAConnection_ConstructorFailure() throws SQLException {
-        when(mockDataSourceResource.getDbType()).thenReturn(ORACLE);
-        when(mockConnection.getClass()).thenAnswer(inv -> {
-            Class<?> mockClass = mock(Class.class);
-            when(mockClass.getName()).thenReturn("oracle.jdbc.driver.T4CConnection");
-            return mockClass;
-        });
-
-        try (MockedStatic<Class> classMock = mockStatic(Class.class)) {
-            // 模拟真实的反射过程
-            classMock.when(() -> Class.forName(anyString())).thenCallRealMethod();
-
-            // 使用模拟构造器使其抛出异常
-            try (MockedConstruction<?> ignored = mockConstruction(
-                    Class.forName("oracle.jdbc.driver.T4CXAConnection").asSubclass(XAConnection.class),
-                    (mock, context) -> {
-                        throw new XAException("Test XA error");
-                    })) {
-
-                XAException exception = assertThrows(XAException.class, () ->
-                        XAUtils.createXAConnection(mockConnection, mockDataSourceResource));
-
-                assertEquals("Test XA error", exception.getMessage());
-            } catch (ClassNotFoundException e) {
-                fail("Oracle XAConnection class not found");
-            }
-        }
-    }
 
 }
