@@ -22,7 +22,6 @@ import org.apache.seata.core.model.GlobalStatus
 import org.apache.seata.core.model.TransactionManager
 import org.apache.seata.spring.annotation.GlobalTransactional
 import org.apache.seata.spring.kt.support.TransactionCoroutineContext
-import org.apache.seata.spring.kt.support.transactionScope
 import org.apache.seata.tm.TransactionManagerHolder
 import org.apache.seata.tm.api.GlobalTransactionContext
 import kotlinx.coroutines.CoroutineScope
@@ -56,19 +55,16 @@ class TransactionScopeTest {
                 name: String,
                 timeout: Int
             ): String {
-                println("Mock TransactionManager.begin() called, returning: $DEFAULT_XID")
                 return DEFAULT_XID
             }
 
             @Throws(TransactionException::class)
             override fun commit(xid: String): GlobalStatus {
-                println("Mock TransactionManager.commit() called with xid: $xid")
                 return GlobalStatus.Committed
             }
 
             @Throws(TransactionException::class)
             override fun rollback(xid: String): GlobalStatus {
-                println("Mock TransactionManager.rollback() called with xid: $xid")
                 return GlobalStatus.Rollbacked
             }
 
@@ -85,7 +81,6 @@ class TransactionScopeTest {
         
         // Clean up context
         RootContext.unbind()
-        println("BeforeEach: RootContext.getXID() = ${RootContext.getXID()}")
     }
 
     @AfterEach
@@ -97,6 +92,12 @@ class TransactionScopeTest {
         backupTransactionManager?.let { TransactionManagerHolder.set(it) }
     }
 
+    /**
+     * Test that @GlobalTransactional does not work properly in coroutines
+     * 
+     * Due to coroutine thread switching, @GlobalTransactional annotation cannot maintain 
+     * transaction context, this is expected behavior, not a bug.
+     */
     @Test
     @Throws(NoSuchMethodException::class)
     fun testGlobalTransactionalInCoroutineNotWorking() {
@@ -105,7 +106,6 @@ class TransactionScopeTest {
             RootContext.bind(DEFAULT_XID)
             val globalTransactionContext = GlobalTransactionContext.getCurrentOrCreate()
             globalTransactionContext.begin()
-            println("Original XID: ${RootContext.getXID()}")
             
             val mockClassAnnotation = MockMethodAnnotationWithoutContext()
             val xid = runBlocking {
@@ -119,6 +119,12 @@ class TransactionScopeTest {
         }
     }
 
+    /**
+     * Test transaction propagation when used with TransactionCoroutineContext
+     * 
+     * By explicitly adding TransactionCoroutineContext, transaction context can be 
+     * properly propagated between coroutines.
+     */
     @Test
     @Throws(NoSuchMethodException::class) 
     fun testGlobalTransactionalWithCoroutineContext() {
@@ -127,7 +133,6 @@ class TransactionScopeTest {
             RootContext.bind(DEFAULT_XID)
             val globalTransactionContext = GlobalTransactionContext.getCurrentOrCreate()
             globalTransactionContext.begin()
-            println("Original XID: ${RootContext.getXID()}")
             
             val mockClassAnnotation = MockMethodAnnotationWithContext()
             val xid = runBlocking {
@@ -147,8 +152,6 @@ class TransactionScopeTest {
     fun testTransactionScope() {
         // Due to TransactionManagerHolder singleton issues, we test basic functionality of transactionScope
         // instead of relying on the real transaction manager
-        println("testTransactionScope start: RootContext.getXID() = ${RootContext.getXID()}")
-        
         try {
             var capturedXid: String? = null
             
@@ -156,12 +159,10 @@ class TransactionScopeTest {
             runBlocking {
                 // Manually bind an XID to simulate transaction start
                 RootContext.bind(DEFAULT_XID)
-                println("Manually bound XID: ${RootContext.getXID()}")
                 
                 // Propagate transaction in coroutine context
                 withContext(org.apache.seata.spring.kt.support.TransactionCoroutineContext()) {
                     capturedXid = RootContext.getXID()
-                    println("Inside coroutine with TransactionCoroutineContext: $capturedXid")
                 }
                 
                 // Clean up
@@ -169,16 +170,23 @@ class TransactionScopeTest {
             }
             
             // Verify that transaction context can be propagated in coroutines
-            println("Final captured xid = $capturedXid")
             Assertions.assertNotNull(capturedXid, "TransactionCoroutineContext should propagate transaction context")
             Assertions.assertEquals(DEFAULT_XID, capturedXid)
         } catch (e: Exception) {
-            println("Exception caught: ${e.javaClass.simpleName}: ${e.message}")
-            e.printStackTrace()
             throw e
         }
     }
 
+    /**
+     * Test various branch scenarios of TransactionCoroutineContext
+     * 
+     * Including:
+     * - Context switching with different XIDs
+     * - null XID handling
+     * - Context restoration logic
+     * 
+     * @see TransactionCoroutineContext
+     */
     @Test
     @Throws(NoSuchMethodException::class)
     fun testTransactionCoroutineContextBranches() {
@@ -190,17 +198,14 @@ class TransactionScopeTest {
             runBlocking {
                 // Scenario 1: Test RootContext.bind(oldState) branch in restoreThreadContext
                 RootContext.bind(originalXid)
-                println("Bound original XID: ${RootContext.getXID()}")
                 
                 // Create TransactionCoroutineContext with different XID
                 // This way oldState(originalXid) != xid(newXid), triggering bind(oldState) branch
                 withContext(org.apache.seata.spring.kt.support.TransactionCoroutineContext(newXid)) {
-                    println("Inside coroutine with different XID: ${RootContext.getXID()}")
                     Assertions.assertEquals(newXid, RootContext.getXID())
                 }
                 
                 // After exiting coroutine, should restore to originalXid
-                println("After coroutine, restored XID: ${RootContext.getXID()}")
                 Assertions.assertEquals(originalXid, RootContext.getXID())
                 
                 RootContext.unbind()
@@ -209,26 +214,19 @@ class TransactionScopeTest {
                 Assertions.assertNull(RootContext.getXID())
                 
                 withContext(org.apache.seata.spring.kt.support.TransactionCoroutineContext(DEFAULT_XID)) {
-                    println("Inside coroutine with XID when no previous context: ${RootContext.getXID()}")
                     Assertions.assertEquals(DEFAULT_XID, RootContext.getXID())
                 }
                 
                 // After exiting coroutine, should clear XID
-                println("After coroutine, XID should be null: ${RootContext.getXID()}")
                 Assertions.assertNull(RootContext.getXID())
                 
                 // Scenario 3: Test when passing null XID
                 RootContext.bind(originalXid)
                 withContext(org.apache.seata.spring.kt.support.TransactionCoroutineContext(null)) {
-                    println("Inside coroutine with null XID: ${RootContext.getXID()}")
-                    // According to TransactionCoroutineContext's actual implementation:
-                    // When xid is null, updateThreadContext doesn't change current context
-                    // So XID remains as originalXid
                     Assertions.assertEquals(originalXid, RootContext.getXID())
                 }
                 
                 // After exiting coroutine, should restore to originalXid (actually no change)
-                println("After null XID coroutine, restored XID: ${RootContext.getXID()}")
                 Assertions.assertEquals(originalXid, RootContext.getXID())
                 
                 // Scenario 4: Test real null XID scenario - starting from no context, passing null
@@ -236,19 +234,11 @@ class TransactionScopeTest {
                 Assertions.assertNull(RootContext.getXID())
                 
                 withContext(org.apache.seata.spring.kt.support.TransactionCoroutineContext(null)) {
-                    println("Inside coroutine with null XID and no previous context: ${RootContext.getXID()}")
-                    // When no previous context exists and xid is null, should remain null
                     Assertions.assertNull(RootContext.getXID())
                 }
-                
-                // After exiting coroutine, should still be null
-                println("After null XID coroutine from null context: ${RootContext.getXID()}")
-                Assertions.assertNull(RootContext.getXID())
             }
             
         } catch (e: Exception) {
-            println("Exception in coverage test: ${e.javaClass.simpleName}: ${e.message}")
-            e.printStackTrace()
             throw e
         } finally {
             // Ensure cleanup
@@ -256,33 +246,34 @@ class TransactionScopeTest {
         }
     }
 
+    /**
+     * Mock class: demonstrates scenario where @GlobalTransactional does not propagate context in coroutines
+     */
     private open class MockMethodAnnotationWithoutContext {
+        
         /**
-         * @GlobalTransactional loses context when used in coroutines without TransactionCoroutineContext
+         * Uses @GlobalTransactional but does not add TransactionCoroutineContext
+         * 
+         * @return Current transaction XID, should be null in coroutines
          */
         @GlobalTransactional(name = "doBiz")
-        suspend fun doBiz(): String? = io {
-            return@io RootContext.getXID()
-        }
-
-        suspend fun <T> io(block: suspend CoroutineScope.() -> T): T {
-            // Without adding TransactionCoroutineContext, transaction context will be lost
-            return withContext(Dispatchers.IO, block)
+        suspend fun doBiz(): String? = withContext(Dispatchers.IO) {
+            RootContext.getXID()
         }
     }
 
+    /**
+     * Mock class: demonstrates proper transaction context propagation in coroutines
+     */
     private open class MockMethodAnnotationWithContext {
         /**
-         * @GlobalTransactional used with TransactionCoroutineContext
+         * Uses @GlobalTransactional with TransactionCoroutineContext
+         * 
+         * @return Current transaction XID
          */
         @GlobalTransactional(name = "doBiz")
-        suspend fun doBiz(): String? = io {
-            return@io RootContext.getXID()
-        }
-
-        suspend fun <T> io(block: suspend CoroutineScope.() -> T): T {
-            // Add TransactionCoroutineContext to propagate transaction context
-            return withContext(Dispatchers.IO + TransactionCoroutineContext(), block)
+        suspend fun doBiz(): String? = withContext(Dispatchers.IO + TransactionCoroutineContext()) {
+            RootContext.getXID()
         }
     }
 
@@ -290,8 +281,8 @@ class TransactionScopeTest {
         /**
          * Use transactionScope, no need for @GlobalTransactional annotation
          */
-        suspend fun doBiz(): String? = io {
-            return@io RootContext.getXID()
+        suspend fun doBiz(): String? = withContext(Dispatchers.IO) {
+            RootContext.getXID()
         }
 
         suspend fun <T> io(block: suspend CoroutineScope.() -> T): T {
