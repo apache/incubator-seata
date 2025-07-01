@@ -31,7 +31,7 @@ public class ServerProperties {
     private Boolean enableCheckAuth = true;
     private Boolean enableParallelRequestHandle = true;
     private Boolean enableParallelHandleBranch = false;
-    private Integer retryDeadThreshold = 130000;
+    private Integer retryDeadThreshold = 70000;
     private Integer servicePort;
     private Integer xaerNotaRetryTimeout = 60000;
 
