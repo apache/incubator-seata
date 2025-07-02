@@ -18,18 +18,23 @@ package org.apache.seata.core.protocol.detector;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
+import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http2.Http2FrameCodecBuilder;
+import io.netty.handler.codec.http2.Http2HeadersFrame;
 import io.netty.handler.codec.http2.Http2MultiplexHandler;
 import io.netty.handler.codec.http2.Http2StreamChannel;
 import io.netty.util.CharsetUtil;
 import org.apache.seata.core.rpc.netty.grpc.GrpcDecoder;
 import org.apache.seata.core.rpc.netty.grpc.GrpcEncoder;
+import org.apache.seata.core.rpc.netty.http.Http2HttpHandler;
 
 public class Http2Detector implements ProtocolDetector {
     private static final byte[] HTTP2_PREFIX_BYTES = "PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n".getBytes(CharsetUtil.UTF_8);
-    private ChannelHandler[] serverHandlers;
+    private final ChannelHandler[] serverHandlers;
 
     public Http2Detector(ChannelHandler[] serverHandlers) {
         this.serverHandlers = serverHandlers;
@@ -55,12 +60,29 @@ public class Http2Detector implements ProtocolDetector {
             new Http2MultiplexHandler(new ChannelInitializer<Http2StreamChannel>() {
                 @Override
                 protected void initChannel(Http2StreamChannel ch) {
-                    final ChannelPipeline p = ch.pipeline();
-                    p.addLast(new GrpcDecoder());
-                    p.addLast(new GrpcEncoder());
-                    p.addLast(serverHandlers);
+                    ch.pipeline().addLast(new Http2SelectorHandler());
                 }
             })
         };
+    }
+
+    private class Http2SelectorHandler extends ChannelInboundHandlerAdapter {
+        @Override
+        public void channelRead(ChannelHandlerContext ctx, Object msg) {
+            if (msg instanceof Http2HeadersFrame) {
+                Http2HeadersFrame headersFrame = (Http2HeadersFrame) msg;
+                CharSequence contentType = headersFrame.headers().get(HttpHeaderNames.CONTENT_TYPE);
+                final ChannelPipeline p = ctx.pipeline();
+                if (contentType != null && contentType.toString().endsWith("grpc")) {
+                    p.addLast(new GrpcDecoder());
+                    p.addLast(new GrpcEncoder());
+                    p.addLast(serverHandlers);
+                } else {
+                    p.addLast(new Http2HttpHandler());
+                }
+                p.remove(this);
+            }
+            ctx.fireChannelRead(msg);
+        }
     }
 }
