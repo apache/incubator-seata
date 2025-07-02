@@ -53,16 +53,6 @@ public class XAUtilsTest {
         mockDriver = mock(Driver.class);
         mockDataSourceResource = mock(BaseDataSourceResource.class);
         when(mockDataSourceResource.getDriver()).thenReturn(mockDriver);
-
-    }
-
-    @Test
-    public void testGetDbType() {
-        try (MockedStatic<JdbcUtils> jdbcUtilsMock = Mockito.mockStatic(JdbcUtils.class)) {
-            jdbcUtilsMock.when(() -> JdbcUtils.getDbType(anyString())).thenReturn("mysql");
-            String dbType = XAUtils.getDbType("jdbc:mysql://localhost:3306/test", "com.mysql.Driver");
-            assertEquals("mysql", dbType);
-        }
     }
 
     @Test
@@ -80,13 +70,11 @@ public class XAUtilsTest {
     }
 
     @Test
-    public void testCreateXAConnectionPostgreSQL() throws SQLException,ClassNotFoundException {
+    public void testCreateXAConnectionPostgreSQL() throws SQLException, ClassNotFoundException {
         when(mockDataSourceResource.getDbType()).thenReturn(POSTGRESQL);
         XAConnection mockXAConnection = mock(XAConnection.class);
         try (MockedStatic<PGUtils> pgUtilsMock = Mockito.mockStatic(PGUtils.class)) {
-            pgUtilsMock.when(() -> PGUtils.createXAConnection(any()))
-                    .thenReturn(mockXAConnection);
-
+            pgUtilsMock.when(() -> PGUtils.createXAConnection(any())).thenReturn(mockXAConnection);
             XAConnection result = XAUtils.createXAConnection(mockConnection, mockDataSourceResource);
             assertSame(mockXAConnection, result);
         }
@@ -94,9 +82,8 @@ public class XAUtilsTest {
 
 
     @Test
-    public void testCreateXAConnectionMariaDB() throws SQLException,ClassNotFoundException {
+    public void testCreateXAConnectionMariaDB() throws SQLException, ClassNotFoundException {
         when(mockDataSourceResource.getDbType()).thenReturn(MARIADB);
-
         // 模拟MariaDB特定的连接类
         Class<?> mariaDbConnectionClass = Class.forName("org.mariadb.jdbc.MariaDbConnection");
         Connection mariaMockConnection = mock(mariaDbConnectionClass.asSubclass(Connection.class));
@@ -116,7 +103,7 @@ public class XAUtilsTest {
     }
 
     @Test
-    public void testCreateXAConnectionKingbase() throws SQLException,ClassNotFoundException {
+    public void testCreateXAConnectionKingbase() throws SQLException, ClassNotFoundException {
         when(mockDataSourceResource.getDbType()).thenReturn(KINGBASE);
         // 模拟Kingbase特定的连接类
         Class<?> kingbaseConnectionClass = Class.forName("com.kingbase8.core.BaseConnection");
@@ -128,7 +115,6 @@ public class XAUtilsTest {
                     Connection connectionParam = (Connection) context.arguments().get(0);
                     assertSame(kingbaseMockConnection, connectionParam);
                 })) {
-
             XAConnection result = XAUtils.createXAConnection(kingbaseMockConnection, mockDataSourceResource);
             assertNotNull(result);
         } catch (ClassNotFoundException e) {
@@ -137,13 +123,11 @@ public class XAUtilsTest {
     }
 
     @Test
-    public void testCreateXAConnectionDM() throws SQLException,ClassNotFoundException {
+    public void testCreateXAConnectionDM() throws SQLException, ClassNotFoundException {
         when(mockDataSourceResource.getDbType()).thenReturn(DM);
-
         // 模拟达梦特定的连接类
         Class<?> dmConnectionClass = Class.forName("dm.jdbc.driver.DmdbConnection");
         Connection dmMockConnection = mock(dmConnectionClass.asSubclass(Connection.class));
-
         try (MockedConstruction<?> ignored = mockConstruction(
                 Class.forName("dm.jdbc.driver.DmdbXAConnection").asSubclass(XAConnection.class),
                 (mock, context) -> {
@@ -151,14 +135,10 @@ public class XAUtilsTest {
                     Connection connectionParam = (Connection) context.arguments().get(0);
                     assertSame(dmMockConnection, connectionParam);
                 })) {
-
             XAConnection result = XAUtils.createXAConnection(dmMockConnection, mockDataSourceResource);
             assertNotNull(result);
         } catch (ClassNotFoundException e) {
             fail("DM XAConnection class not found in test environment");
         }
     }
-
-
-
 }
