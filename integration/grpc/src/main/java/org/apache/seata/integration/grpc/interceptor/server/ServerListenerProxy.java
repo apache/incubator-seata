@@ -20,20 +20,23 @@ import io.grpc.ServerCall;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.model.BranchType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.Objects;
 
 public class ServerListenerProxy<ReqT> extends ServerCall.Listener<ReqT> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ServerListenerProxy.class);
-
     private ServerCall.Listener<ReqT> target;
     private final String xid;
 
     private final Map<String, String> context;
 
+    /**
+     * Constructs a ServerListenerProxy.
+     *
+     * @param xid     the global transaction id to bind
+     * @param context the context map containing metadata such as branch type
+     * @param target  the original ServerCall.Listener to delegate calls to
+     */
     public ServerListenerProxy(String xid, Map<String, String> context, ServerCall.Listener<ReqT> target) {
         super();
         Objects.requireNonNull(target);
@@ -42,11 +45,18 @@ public class ServerListenerProxy<ReqT> extends ServerCall.Listener<ReqT> {
         this.context = context;
     }
 
+    /**
+     * Delegates onMessage call to the target listener.
+     */
     @Override
     public void onMessage(ReqT message) {
         target.onMessage(message);
     }
 
+    /**
+     * Cleans up previous transaction context and binds new XID and branch type (if applicable)
+     * before delegating onHalfClose call to the target listener.
+     */
     @Override
     public void onHalfClose() {
         cleanContext();
@@ -75,6 +85,10 @@ public class ServerListenerProxy<ReqT> extends ServerCall.Listener<ReqT> {
         target.onReady();
     }
 
+    /**
+     * Cleans up the transaction context from RootContext to avoid thread context pollution.
+     * Unbinds XID and branch type if previously set.
+     */
     private void cleanContext() {
         RootContext.unbind();
         BranchType previousBranchType = RootContext.getBranchType();

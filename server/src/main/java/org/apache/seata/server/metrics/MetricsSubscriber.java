@@ -39,6 +39,7 @@ import static org.apache.seata.metrics.IdConstants.HOST_AND_PORT;
 import static org.apache.seata.metrics.IdConstants.LIMIT_TYPE_KEY;
 import static org.apache.seata.metrics.IdConstants.STATUS_VALUE_AFTER_COMMITTED_KEY;
 import static org.apache.seata.metrics.IdConstants.STATUS_VALUE_AFTER_ROLLBACKED_KEY;
+import static org.apache.seata.metrics.IdConstants.TRANSACTION_NAME_KEY;
 
 /**
  * Event subscriber for metrics
@@ -72,6 +73,11 @@ public class MetricsSubscriber {
 
         consumerMap.put(STATUS_VALUE_AFTER_COMMITTED_KEY, this::processAfterGlobalCommitted);
         consumerMap.put(STATUS_VALUE_AFTER_ROLLBACKED_KEY, this::processAfterGlobalRollbacked);
+
+        consumerMap.put(GlobalStatus.CommitRetrying.name(), this::processGlobalStatusCommitRetrying);
+        consumerMap.put(GlobalStatus.RollbackRetrying.name(), this::processGlobalStatusRollbackRetrying);
+        consumerMap.put(GlobalStatus.TimeoutRollbackRetrying.name(), this::processGlobalStatusTimeoutRollbackRetrying);
+
         return consumerMap;
     }
 
@@ -90,6 +96,14 @@ public class MetricsSubscriber {
     private void increaseSummary(Id summaryId, GlobalTransactionEvent event, long value) {
         registry.getSummary(
                         summaryId.withTag(APP_ID_KEY, event.getApplicationId()).withTag(GROUP_KEY, event.getGroup()))
+                .increase(value);
+    }
+
+    private void increaseSummaryWithDetail(Id summaryId, GlobalTransactionEvent event, long value) {
+        registry.getSummary(summaryId
+                        .withTag(APP_ID_KEY, event.getApplicationId())
+                        .withTag(GROUP_KEY, event.getGroup())
+                        .withTag(TRANSACTION_NAME_KEY, event.getName()))
                 .increase(value);
     }
 
@@ -181,6 +195,18 @@ public class MetricsSubscriber {
         increaseSummary(MeterIdConstants.SUMMARY_TWO_PHASE_TIMEOUT, event, 1);
         // The phase 2 retry timeout state should be considered a transaction failed
         reportFailed(event);
+    }
+
+    private void processGlobalStatusCommitRetrying(GlobalTransactionEvent event) {
+        increaseSummaryWithDetail(MeterIdConstants.SUMMARY_COMMIT_RETRYING, event, 1);
+    }
+
+    private void processGlobalStatusRollbackRetrying(GlobalTransactionEvent event) {
+        increaseSummaryWithDetail(MeterIdConstants.SUMMARY_ROLLBACK_RETRYING, event, 1);
+    }
+
+    private void processGlobalStatusTimeoutRollbackRetrying(GlobalTransactionEvent event) {
+        increaseSummaryWithDetail(MeterIdConstants.SUMMARY_TIMEOUT_ROLLBACK_RETRYING, event, 1);
     }
 
     private void reportFailed(GlobalTransactionEvent event) {
