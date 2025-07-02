@@ -24,7 +24,6 @@ import org.apache.seata.spring.annotation.GlobalTransactional
 import org.apache.seata.spring.kt.support.TransactionCoroutineContext
 import org.apache.seata.tm.TransactionManagerHolder
 import org.apache.seata.tm.api.GlobalTransactionContext
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -325,37 +324,6 @@ class TransactionScopeTest {
         @GlobalTransactional(name = "doBiz")
         suspend fun doBiz(): String? = withContext(Dispatchers.IO + TransactionCoroutineContext()) {
             RootContext.getXID()
-        }
-    }
-
-    /**
-     * Mock class for testing transactionScope functionality.
-     * 
-     * This class demonstrates usage patterns where transactionScope
-     * can be used without requiring @GlobalTransactional annotations.
-     */
-    private open class MockMethodScope {
-        
-        /**
-         * A business method that can be used within transactionScope.
-         * No @GlobalTransactional annotation needed when called within transactionScope.
-         * 
-         * @return Current transaction XID
-         */
-        suspend fun doBiz(): String? = withContext(Dispatchers.IO) {
-            RootContext.getXID()
-        }
-
-        /**
-         * A helper method for IO operations within transaction context.
-         * Inside transactionScope, transaction context is automatically propagated.
-         * 
-         * @param T the return type of the block
-         * @param block the suspend block to execute in IO context
-         * @return the result of executing the block
-         */
-        suspend fun <T> io(block: suspend CoroutineScope.() -> T): T {
-            return withContext(Dispatchers.IO, block)
         }
     }
 }
