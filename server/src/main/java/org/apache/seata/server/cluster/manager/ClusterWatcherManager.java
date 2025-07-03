@@ -49,7 +49,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private static final Map<String, Queue<Watcher<?>>> WATCHERS = new ConcurrentHashMap<>();
+    private static final Map<String, Queue<Watcher<HttpContext>>> WATCHERS = new ConcurrentHashMap<>();
 
     private static final Map<String, Long> GROUP_UPDATE_TIME = new ConcurrentHashMap<>();
 
@@ -92,13 +92,13 @@ public class ClusterWatcherManager implements ClusterChangeListener {
         }
     }
 
-    private void notifyWatcher(Watcher<?> watcher) {
+    private void notifyWatcher(Watcher<HttpContext> watcher) {
         watcher.setDone(true);
         sendWatcherResponse(watcher, HttpResponseStatus.OK);
     }
 
-    private void sendWatcherResponse(Watcher<?> watcher, HttpResponseStatus nettyStatus) {
-        Object context = watcher.getAsyncContext();
+    private void sendWatcherResponse(Watcher<HttpContext> watcher, HttpResponseStatus nettyStatus) {
+        HttpContext context = watcher.getAsyncContext();
         if (!(context instanceof HttpContext)) {
             logger.warn(
                     "Unsupported context type for watcher on group {}: {}",
@@ -106,25 +106,27 @@ public class ClusterWatcherManager implements ClusterChangeListener {
                     context != null ? context.getClass().getName() : "null");
             return;
         }
-        HttpContext httpContext = (HttpContext) context;
-        ChannelHandlerContext ctx = httpContext.getContext();
-        if (ctx.channel().isActive()) {
-            HttpResponse response =
-                    new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, nettyStatus, Unpooled.EMPTY_BUFFER);
-            response.headers().set(HttpHeaderNames.CONTENT_LENGTH, 0);
+        ChannelHandlerContext ctx = context.getContext();
+        if (!context.isHttp2()) {
+            if (ctx.channel().isActive()) {
+                HttpResponse response =
+                        new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, nettyStatus, Unpooled.EMPTY_BUFFER);
+                response.headers().set(HttpHeaderNames.CONTENT_LENGTH, 0);
 
-            if (!httpContext.isKeepAlive()) {
-                ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+                if (!context.isKeepAlive()) {
+                    ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+                } else {
+                    ctx.writeAndFlush(response);
+                }
             } else {
-                ctx.writeAndFlush(response);
+                logger.warn(
+                        "Netty channel is not active for watcher on group {}, cannot send response.",
+                        watcher.getGroup());
             }
-        } else {
-            logger.warn(
-                    "Netty channel is not active for watcher on group {}, cannot send response.", watcher.getGroup());
         }
     }
 
-    public void registryWatcher(Watcher<?> watcher) {
+    public void registryWatcher(Watcher<HttpContext> watcher) {
         String group = watcher.getGroup();
         Long term = GROUP_UPDATE_TIME.get(group);
         if (term == null || watcher.getTerm() >= term) {
