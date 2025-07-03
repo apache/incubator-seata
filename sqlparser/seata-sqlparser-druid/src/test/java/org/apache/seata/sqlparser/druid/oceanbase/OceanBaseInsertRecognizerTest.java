@@ -16,20 +16,18 @@
  */
 package org.apache.seata.sqlparser.druid.oceanbase;
 
-import java.util.Collections;
-import java.util.List;
-
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
 import com.alibaba.druid.sql.dialect.oracle.ast.expr.OracleBinaryDoubleExpr;
-import org.apache.seata.sqlparser.druid.oceanbase.OceanBaseInsertRecognizer;
-
 import org.apache.seata.sqlparser.SQLParsingException;
 import org.apache.seata.sqlparser.SQLType;
 import org.apache.seata.sqlparser.struct.NotPlaceholderExpr;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.util.Collections;
+import java.util.List;
 
 public class OceanBaseInsertRecognizerTest {
 
@@ -65,7 +63,7 @@ public class OceanBaseInsertRecognizerTest {
     @Test
     public void testGetInsertColumns() {
 
-        //test for no column
+        // test for no column
         String sql = "insert into t values (?)";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
 
@@ -73,7 +71,7 @@ public class OceanBaseInsertRecognizerTest {
         List<String> insertColumns = recognizer.getInsertColumns();
         Assertions.assertNull(insertColumns);
 
-        //test for normal
+        // test for normal
         sql = "insert into t(a) values (?)";
         asts = SQLUtils.parseStatements(sql, DB_TYPE);
 
@@ -81,11 +79,11 @@ public class OceanBaseInsertRecognizerTest {
         insertColumns = recognizer.getInsertColumns();
         Assertions.assertEquals(1, insertColumns.size());
 
-        //test for exception
+        // test for exception
         Assertions.assertThrows(SQLParsingException.class, () -> {
             String s = "insert into t(a) values (?)";
             List<SQLStatement> sqlStatements = SQLUtils.parseStatements(s, DB_TYPE);
-            SQLInsertStatement sqlInsertStatement = (SQLInsertStatement)sqlStatements.get(0);
+            SQLInsertStatement sqlInsertStatement = (SQLInsertStatement) sqlStatements.get(0);
             sqlInsertStatement.getColumns().add(new OracleBinaryDoubleExpr());
 
             OceanBaseInsertRecognizer OceanBaseInsertRecognizer = new OceanBaseInsertRecognizer(s, sqlInsertStatement);
@@ -96,7 +94,7 @@ public class OceanBaseInsertRecognizerTest {
     @Test
     public void testGetInsertRows() {
         final int pkIndex = 0;
-        //test for null value
+        // test for null value
         String sql = "insert into t(id, no, name, age, time) values (id_seq.nextval, null, 'a', ?, now())";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
 
@@ -104,11 +102,11 @@ public class OceanBaseInsertRecognizerTest {
         List<List<Object>> insertRows = recognizer.getInsertRows(Collections.singletonList(pkIndex));
         Assertions.assertEquals(1, insertRows.size());
 
-        //test for exception
+        // test for exception
         Assertions.assertThrows(SQLParsingException.class, () -> {
             String s = "insert into t(a) values (?)";
             List<SQLStatement> sqlStatements = SQLUtils.parseStatements(s, DB_TYPE);
-            SQLInsertStatement sqlInsertStatement = (SQLInsertStatement)sqlStatements.get(0);
+            SQLInsertStatement sqlInsertStatement = (SQLInsertStatement) sqlStatements.get(0);
             sqlInsertStatement.getValuesList().get(0).getValues().set(pkIndex, new OracleBinaryDoubleExpr());
 
             OceanBaseInsertRecognizer OceanBaseInsertRecognizer = new OceanBaseInsertRecognizer(s, sqlInsertStatement);

@@ -1,23 +1,18 @@
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership. 
- * The ASF licenses this file to You under the Apache License, Version 2.0 
- * (the "License"); you may not use this file except in compliance with 
- * the License. You may obtain a copy of the License at 
- * http://www.apache.org/licenses/LICENSE-2.0 
- * Unless required by applicable law or agreed to in writing, software 
- * distributed under the License is distributed on an "AS IS" BASIS, 
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
- * See the License for the specific language governing permissions and 
- * limitations under the License. 
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.apache.seata.rm.datasource.sql.struct.cache;
-
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 import org.apache.seata.common.exception.NotSupportYetException;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
@@ -29,6 +24,10 @@ import org.apache.seata.sqlparser.struct.IndexType;
 import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -70,8 +69,9 @@ public class OceanBaseTableMetaCache extends AbstractTableMetaCache {
         // to avoid refresh failure caused by missing catalog information
         tm.setOriginalTableName(tableName);
         String[] schemaTable = tableName.split("\\.");
-        //oceanbase username is schemaName
-        String schemaName = schemaTable.length > 1 ? schemaTable[0] : dbmd.getUserName().split("@")[0];
+        // oceanbase username is schemaName
+        String schemaName =
+                schemaTable.length > 1 ? schemaTable[0] : dbmd.getUserName().split("@")[0];
         tableName = schemaTable.length > 1 ? schemaTable[1] : tableName;
         if (schemaName.contains("\"")) {
             schemaName = schemaName.replace("\"", "");
@@ -90,8 +90,8 @@ public class OceanBaseTableMetaCache extends AbstractTableMetaCache {
         tm.setCaseSensitive(StringUtils.hasLowerCase(tableName));
 
         try (ResultSet rsColumns = dbmd.getColumns("", schemaName, tableName, "%");
-             ResultSet rsIndex = dbmd.getIndexInfo(null, schemaName, tableName, false, true);
-             ResultSet rsPrimary = dbmd.getPrimaryKeys(null, schemaName, tableName)) {
+                ResultSet rsIndex = dbmd.getIndexInfo(null, schemaName, tableName, false, true);
+                ResultSet rsPrimary = dbmd.getPrimaryKeys(null, schemaName, tableName)) {
             while (rsColumns.next()) {
                 ColumnMeta col = new ColumnMeta();
                 col.setTableCat(rsColumns.getString("TABLE_CAT"));
@@ -114,7 +114,8 @@ public class OceanBaseTableMetaCache extends AbstractTableMetaCache {
                 col.setCaseSensitive(StringUtils.hasLowerCase(col.getColumnName()));
 
                 if (tm.getAllColumns().containsKey(col.getColumnName())) {
-                    throw new NotSupportYetException("Not support the table has the same column name with different case yet");
+                    throw new NotSupportYetException(
+                            "Not support the table has the same column name with different case yet");
                 }
                 tm.getAllColumns().put(col.getColumnName(), col);
             }
@@ -149,7 +150,8 @@ public class OceanBaseTableMetaCache extends AbstractTableMetaCache {
                 }
             }
             if (tm.getAllIndexes().isEmpty()) {
-                throw new ShouldNeverHappenException(String.format("Could not found any index in the table: %s", tableName));
+                throw new ShouldNeverHappenException(
+                        String.format("Could not found any index in the table: %s", tableName));
             }
 
             // Handle primary key constraint naming issues in Oracle.

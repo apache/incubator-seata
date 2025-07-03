@@ -16,15 +16,6 @@
  */
 package org.apache.seata.rm.datasource.exec;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.seata.common.exception.NotSupportYetException;
 import org.apache.seata.rm.datasource.ConnectionProxy;
 import org.apache.seata.rm.datasource.PreparedStatementProxy;
@@ -40,6 +31,15 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -88,14 +88,18 @@ public class OceanBaseInsertExecutorTest {
         tableMeta = mock(TableMeta.class);
         insertExecutor = Mockito.spy(new OracleInsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
 
-        pkIndexMap = new HashMap<String, Integer>() {{
-            put(ID_COLUMN, pkIndexId);
-        }};
+        pkIndexMap = new HashMap<String, Integer>() {
+            {
+                put(ID_COLUMN, pkIndexId);
+            }
+        };
 
-        multiPkIndexMap = new HashMap<String, Integer>() {{
-            put(ID_COLUMN, pkIndexId);
-            put(USER_ID_COLUMN, pkIndexUserId);
-        }};
+        multiPkIndexMap = new HashMap<String, Integer>() {
+            {
+                put(ID_COLUMN, pkIndexId);
+                put(USER_ID_COLUMN, pkIndexUserId);
+            }
+        };
     }
 
     @Test
@@ -103,7 +107,7 @@ public class OceanBaseInsertExecutorTest {
         mockInsertColumns();
         SqlSequenceExpr expr = mockParametersPkWithSeq();
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
-        when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{ID_COLUMN}));
+        when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[] {ID_COLUMN}));
         List<Object> pkValuesSeq = new ArrayList<>();
         pkValuesSeq.add(PK_VALUE_ID);
 
@@ -120,7 +124,7 @@ public class OceanBaseInsertExecutorTest {
         mockInsertColumns();
         SqlSequenceExpr expr = mockParametersMultiPkWithSeq();
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
-        when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{ID_COLUMN, USER_ID_COLUMN}));
+        when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[] {ID_COLUMN, USER_ID_COLUMN}));
         List<Object> pkValuesSeqId = new ArrayList<>();
         pkValuesSeqId.add(PK_VALUE_ID);
         List<Object> pkValuesSeqUserId = new ArrayList<>();
@@ -143,12 +147,12 @@ public class OceanBaseInsertExecutorTest {
         mockParametersPkWithAuto();
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
         doReturn(pkIndexMap).when(insertExecutor).getPkIndex();
-        when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{ID_COLUMN}));
-        doReturn(Arrays.asList(new Object[]{PK_VALUE_ID})).when(insertExecutor).getGeneratedKeys(ID_COLUMN);
+        when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[] {ID_COLUMN}));
+        doReturn(Arrays.asList(new Object[] {PK_VALUE_ID})).when(insertExecutor).getGeneratedKeys(ID_COLUMN);
         Map<String, List<Object>> pkValuesByAuto = insertExecutor.getPkValues();
 
         verify(insertExecutor).getGeneratedKeys(ID_COLUMN);
-        Assertions.assertEquals(pkValuesByAuto.get(ID_COLUMN), Arrays.asList(new Object[]{PK_VALUE_ID}));
+        Assertions.assertEquals(pkValuesByAuto.get(ID_COLUMN), Arrays.asList(new Object[] {PK_VALUE_ID}));
     }
 
     @Test
@@ -157,12 +161,10 @@ public class OceanBaseInsertExecutorTest {
         mockParametersMultiPkWithAuto();
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
         doReturn(multiPkIndexMap).when(insertExecutor).getPkIndex();
-        when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{ID_COLUMN, USER_ID_COLUMN}));
+        when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[] {ID_COLUMN, USER_ID_COLUMN}));
         Assertions.assertThrows(NotSupportYetException.class, () -> {
             insertExecutor.getPkValues();
         });
-
-
     }
 
     @Test
@@ -195,7 +197,6 @@ public class OceanBaseInsertExecutorTest {
         Assertions.assertThrows(NotSupportYetException.class, () -> {
             insertExecutor.getPkValuesByColumn();
         });
-
     }
 
     @Test
@@ -219,7 +220,8 @@ public class OceanBaseInsertExecutorTest {
         List<String> columns = new ArrayList<>();
         when(sqlInsertRecognizer.getInsertColumns()).thenReturn(columns);
         when(sqlInsertRecognizer.insertColumnsIsEmpty()).thenReturn(true);
-        Assertions.assertIterableEquals(mockPkValuesFromColumn.entrySet(), insertExecutor.getPkValues().entrySet());
+        Assertions.assertIterableEquals(
+                mockPkValuesFromColumn.entrySet(), insertExecutor.getPkValues().entrySet());
 
         // situation2: insert columns contain the pk column
         columns = new ArrayList<>();
@@ -227,7 +229,8 @@ public class OceanBaseInsertExecutorTest {
         columns.add(USER_NAME_COLUMN);
         when(sqlInsertRecognizer.getInsertColumns()).thenReturn(columns);
         when(sqlInsertRecognizer.insertColumnsIsEmpty()).thenReturn(false);
-        Assertions.assertIterableEquals(mockPkValuesFromColumn.entrySet(), insertExecutor.getPkValues().entrySet());
+        Assertions.assertIterableEquals(
+                mockPkValuesFromColumn.entrySet(), insertExecutor.getPkValues().entrySet());
 
         // situation3: insert columns are not empty and do not contain the pk column
         columns = new ArrayList<>();
@@ -235,8 +238,8 @@ public class OceanBaseInsertExecutorTest {
         when(sqlInsertRecognizer.getInsertColumns()).thenReturn(columns);
         when(sqlInsertRecognizer.insertColumnsIsEmpty()).thenReturn(false);
         Assertions.assertIterableEquals(
-            Collections.singletonMap(ID_COLUMN, mockPkValuesAutoGenerated).entrySet(),
-            insertExecutor.getPkValues().entrySet());
+                Collections.singletonMap(ID_COLUMN, mockPkValuesAutoGenerated).entrySet(),
+                insertExecutor.getPkValues().entrySet());
     }
 
     @Test
@@ -264,7 +267,9 @@ public class OceanBaseInsertExecutorTest {
         List<String> insertColumns = new ArrayList<>();
         when(sqlInsertRecognizer.getInsertColumns()).thenReturn(insertColumns);
         when(sqlInsertRecognizer.insertColumnsIsEmpty()).thenReturn(true);
-        Assertions.assertIterableEquals(mockAllPkValuesFromColumn.entrySet(), insertExecutor.getPkValues().entrySet());
+        Assertions.assertIterableEquals(
+                mockAllPkValuesFromColumn.entrySet(),
+                insertExecutor.getPkValues().entrySet());
 
         // situation2: insert columns contain all pk columns
         insertColumns = new ArrayList<>();
@@ -273,7 +278,9 @@ public class OceanBaseInsertExecutorTest {
         insertColumns.add(USER_NAME_COLUMN);
         when(sqlInsertRecognizer.getInsertColumns()).thenReturn(insertColumns);
         when(sqlInsertRecognizer.insertColumnsIsEmpty()).thenReturn(false);
-        Assertions.assertIterableEquals(mockAllPkValuesFromColumn.entrySet(), insertExecutor.getPkValues().entrySet());
+        Assertions.assertIterableEquals(
+                mockAllPkValuesFromColumn.entrySet(),
+                insertExecutor.getPkValues().entrySet());
 
         // situation3: insert columns contain partial pk columns
         insertColumns = new ArrayList<>();
@@ -288,7 +295,8 @@ public class OceanBaseInsertExecutorTest {
 
         Map<String, List<Object>> expectPkValues = new HashMap<>(mockPkValuesFromColumn_ID);
         expectPkValues.put(USER_ID_COLUMN, mockPkValuesAutoGenerated_USER_ID);
-        Assertions.assertIterableEquals(expectPkValues.entrySet(), insertExecutor.getPkValues().entrySet());
+        Assertions.assertIterableEquals(
+                expectPkValues.entrySet(), insertExecutor.getPkValues().entrySet());
 
         // situation4: insert columns are not empty and do not contain the pk column
         insertColumns = new ArrayList<>();
@@ -301,7 +309,8 @@ public class OceanBaseInsertExecutorTest {
         expectPkValues = new HashMap<>();
         expectPkValues.put(ID_COLUMN, mockPkValuesAutoGenerated_ID);
         expectPkValues.put(USER_ID_COLUMN, mockPkValuesAutoGenerated_USER_ID);
-        Assertions.assertIterableEquals(expectPkValues.entrySet(), insertExecutor.getPkValues().entrySet());
+        Assertions.assertIterableEquals(
+                expectPkValues.entrySet(), insertExecutor.getPkValues().entrySet());
     }
 
     @Test
@@ -446,6 +455,4 @@ public class OceanBaseInsertExecutorTest {
         rows.add(Arrays.asList(Null.get(), "xx", "xx", "xx"));
         when(sqlInsertRecognizer.getInsertRows(pkIndexMap.values())).thenReturn(rows);
     }
-
-
 }
