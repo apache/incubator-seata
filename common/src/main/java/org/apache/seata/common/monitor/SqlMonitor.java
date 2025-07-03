@@ -16,7 +16,6 @@
  */
 package org.apache.seata.common.monitor;
 
-
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -34,8 +33,7 @@ public class SqlMonitor {
     private final Map<String, Integer> txnHistogram = new ConcurrentHashMap<>();
     private final Map<String, Integer> holdHistogram = new ConcurrentHashMap<>();
 
-    private SqlMonitor() {
-    }
+    private SqlMonitor() {}
 
     public static SqlMonitor getInstance() {
         return INSTANCE;
@@ -80,7 +78,6 @@ public class SqlMonitor {
         this.maxSlowEntries = maxEntries;
     }
 
-
     public List<SlowSqlEntry> getSlowSqlList() {
         return new ArrayList<>(slowSqlQueue);
     }
@@ -92,7 +89,6 @@ public class SqlMonitor {
     public Map<String, Integer> getHoldHistogram() {
         return new LinkedHashMap<>(holdHistogram);
     }
-
 
     private String chooseTxnBucket(long ms) {
         if (ms <= 50) {
@@ -109,7 +105,6 @@ public class SqlMonitor {
             return "3s+";
         }
     }
-
 
     private String chooseHoldBucket(long ms) {
         if (ms <= 50) {
@@ -139,4 +134,3 @@ public class SqlMonitor {
         holdHistogram.clear();
     }
 }
-

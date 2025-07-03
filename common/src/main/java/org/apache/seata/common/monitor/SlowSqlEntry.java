@@ -24,7 +24,6 @@ public class SlowSqlEntry {
     private final long executionTimeMillis;
     private final Instant timestamp;
 
-
     public SlowSqlEntry(String sql, long executionTimeMillis, Instant timestamp) {
         this.sql = sql;
         this.executionTimeMillis = executionTimeMillis;
@@ -34,6 +33,7 @@ public class SlowSqlEntry {
     public String getSql() {
         return sql;
     }
+
     public long getExecutionTimeMillis() {
         return executionTimeMillis;
     }
@@ -42,14 +42,11 @@ public class SlowSqlEntry {
         return timestamp;
     }
 
-
     @Override
     public String toString() {
-        return "SlowSqlEntry{" +
-                "sql='" + sql + '\'' +
-                ", executionTimeMillis=" + executionTimeMillis +
-                ", timestamp=" + timestamp +
-                '}';
+        return "SlowSqlEntry{" + "sql='"
+                + sql + '\'' + ", executionTimeMillis="
+                + executionTimeMillis + ", timestamp="
+                + timestamp + '}';
     }
 }
-

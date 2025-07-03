@@ -19,7 +19,6 @@ package org.apache.seata.common.monitor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -73,12 +72,9 @@ public class SqlMonitorTest {
                     slowSqlList.stream()
                             .map(SlowSqlEntry::getSql)
                             .anyMatch(sql -> sql.equals("SELECT * FROM orders WHERE id = " + finalI)),
-                    "Entry with id = " + finalI + " should have been evicted"
-            );
-
+                    "Entry with id = " + finalI + " should have been evicted");
         }
     }
-
 
     @Test
     public void testRecordForFastSql() {
