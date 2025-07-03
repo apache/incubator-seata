@@ -90,7 +90,7 @@
         <xstream.version>1.4.21</xstream.version>
         <checker-qual.version>3.37.0</checker-qual.version>
         <error_prone_annotations.version>2.21.1</error_prone_annotations.version>
-        <tomcat-embed.version>9.0.104</tomcat-embed.version>
+        <tomcat-embed.version>9.0.106</tomcat-embed.version>
 
         <!-- The `httpcore` and `httpclient` have been removed in spring-boot 3.1.0 and above. -->
         <httpcore.version>4.4.16</httpcore.version>
@@ -132,7 +132,7 @@
         <kotlin-coroutines.version>1.7.3</kotlin-coroutines.version>
 
         <!-- # for web -->
-        <tomcat-embed.version>9.0.104</tomcat-embed.version>
+        <tomcat-embed.version>9.0.106</tomcat-embed.version>
 
         <!-- # for test -->
         <mockito.version>4.11.0</mockito.version>
