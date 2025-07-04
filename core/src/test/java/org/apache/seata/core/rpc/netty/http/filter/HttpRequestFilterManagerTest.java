@@ -16,46 +16,97 @@
  */
 package org.apache.seata.core.rpc.netty.http.filter;
 
-import org.apache.seata.config.Configuration;
-import org.apache.seata.config.ConfigurationFactory;
-import org.apache.seata.config.ConfigurationKeys;
-import org.apache.seata.core.rpc.netty.http.filter.impl.XSSHttpRequestFilter;
-import org.junit.jupiter.api.BeforeEach;
+import org.apache.seata.common.loader.EnhancedServiceLoader;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 
+import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 class HttpRequestFilterManagerTest {
-    private Configuration mockConfig;
 
-    @BeforeEach
-    public void setup() throws Exception {
-        mockConfig = mock(Configuration.class);
+    interface MockFilter extends HttpRequestFilter {}
+
+    @AfterEach
+    void reset() throws Exception {
+        Field filtersField = HttpRequestFilterManager.class.getDeclaredField("HTTP_REQUEST_FILTERS");
+        filtersField.setAccessible(true);
+        List<?> filters = (List<?>) filtersField.get(null);
+        filters.clear();
+
+        Field chainField = HttpRequestFilterManager.class.getDeclaredField("HTTP_REQUEST_FILTER_CHAIN");
+        chainField.setAccessible(true);
+        chainField.set(null, null);
+
+        Field initializedField = HttpRequestFilterManager.class.getDeclaredField("initialized");
+        initializedField.setAccessible(true);
+        initializedField.setBoolean(null, false);
     }
 
     @Test
-    void testGlobalEnabledTrueAndXssEnabledTrue() throws Exception {
+    void testInitializeFilters_andGetFilterChain() {
+        MockFilter filter1 = mock(MockFilter.class);
+        MockFilter filter2 = mock(MockFilter.class);
 
-        try (MockedStatic<ConfigurationFactory> mockedStatic = mockStatic(ConfigurationFactory.class)) {
+        when(filter1.shouldApply()).thenReturn(true);
+        when(filter1.getOrder()).thenReturn(10);
+        when(filter2.shouldApply()).thenReturn(true);
+        when(filter2.getOrder()).thenReturn(5);
 
-            when(ConfigurationFactory.getInstance()).thenReturn(mockConfig);
+        try (MockedStatic<EnhancedServiceLoader> mockedLoader = mockStatic(EnhancedServiceLoader.class)) {
+            mockedLoader
+                    .when(() -> EnhancedServiceLoader.loadAll(HttpRequestFilter.class))
+                    .thenReturn(Arrays.asList(filter1, filter2));
 
-            when(mockConfig.getBoolean(ConfigurationKeys.SERVER_HTTP_FILTER_ENABLE, true))
-                    .thenReturn(true);
-            when(mockConfig.getBoolean(ConfigurationKeys.SERVER_HTTP_FILTER_XSS_FILTER_ENABLE, true))
-                    .thenReturn(true);
+            // init
+            HttpRequestFilterManager.initializeFilters();
 
-            HttpRequestFilterChain filterChain = HttpRequestFilterManager.getFilterChain();
-            List<HttpRequestFilter> filters = filterChain.getFilters();
+            // init again,expect no add
+            HttpRequestFilterManager.initializeFilters();
 
-            assertThat(filters).isNotEmpty();
-            assertThat(filters.get(0)).isInstanceOf(XSSHttpRequestFilter.class);
+            HttpRequestFilterChain chain = HttpRequestFilterManager.getFilterChain();
+            assertNotNull(chain);
+
+            List<HttpRequestFilter> filters = chain.getFilters();
+            assertEquals(2, filters.size());
+            assertSame(filter2, filters.get(0));
+            assertSame(filter1, filters.get(1));
         }
+    }
+
+    @Test
+    void testInitializeFilters_filterShouldApplyFalse() {
+        MockFilter filter = mock(MockFilter.class);
+        when(filter.shouldApply()).thenReturn(false);
+
+        try (MockedStatic<EnhancedServiceLoader> mockedLoader = mockStatic(EnhancedServiceLoader.class)) {
+            mockedLoader
+                    .when(() -> EnhancedServiceLoader.loadAll(HttpRequestFilter.class))
+                    .thenReturn(Arrays.asList(filter));
+
+            HttpRequestFilterManager.initializeFilters();
+
+            HttpRequestFilterChain chain = HttpRequestFilterManager.getFilterChain();
+            assertNotNull(chain);
+            assertTrue(chain.getFilters().isEmpty(), "Filters list should be empty when shouldApply returns false");
+        }
+    }
+
+    @Test
+    void testGetFilterChain_beforeInitialization_shouldThrow() {
+        IllegalStateException exception =
+                assertThrows(IllegalStateException.class, HttpRequestFilterManager::getFilterChain);
+        assertEquals("HttpRequestFilterManager not initialized.", exception.getMessage());
     }
 }

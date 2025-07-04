@@ -16,9 +16,7 @@
  */
 package org.apache.seata.core.rpc.netty.http.filter;
 
-import org.apache.seata.config.ConfigurationFactory;
-import org.apache.seata.config.ConfigurationKeys;
-import org.apache.seata.core.rpc.netty.http.filter.impl.XSSHttpRequestFilter;
+import org.apache.seata.common.loader.EnhancedServiceLoader;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -27,27 +25,31 @@ import java.util.List;
 public class HttpRequestFilterManager {
 
     private static final List<HttpRequestFilter> HTTP_REQUEST_FILTERS = new ArrayList<>();
-    private static final HttpRequestFilterChain HTTP_REQUEST_FILTER_CHAIN;
+    private static HttpRequestFilterChain HTTP_REQUEST_FILTER_CHAIN;
 
-    static {
-        boolean globalEnabled =
-                ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.SERVER_HTTP_FILTER_ENABLE, true);
+    private static volatile boolean initialized = false;
 
-        if (globalEnabled) {
-            addIfEnabled(new XSSHttpRequestFilter());
+    public static synchronized void initializeFilters() {
+        if (initialized) {
+            return;
+        }
+
+        List<HttpRequestFilter> httpRequestFilters = EnhancedServiceLoader.loadAll(HttpRequestFilter.class);
+        for (HttpRequestFilter filter : httpRequestFilters) {
+            if (filter.shouldApply()) {
+                HTTP_REQUEST_FILTERS.add(filter);
+            }
         }
 
         HTTP_REQUEST_FILTERS.sort(Comparator.comparingInt(HttpRequestFilter::getOrder));
         HTTP_REQUEST_FILTER_CHAIN = new HttpRequestFilterChain(HTTP_REQUEST_FILTERS);
-    }
-
-    private static void addIfEnabled(HttpRequestFilter filter) {
-        if (filter.shouldApply()) {
-            HTTP_REQUEST_FILTERS.add(filter);
-        }
+        initialized = true;
     }
 
     public static HttpRequestFilterChain getFilterChain() {
+        if (!initialized) {
+            throw new IllegalStateException("HttpRequestFilterManager not initialized.");
+        }
         return HTTP_REQUEST_FILTER_CHAIN;
     }
 }

@@ -38,6 +38,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
@@ -76,7 +77,10 @@ class HttpDispatchHandlerTest {
 
         ControllerManager.addHttpInvocation(invocation);
 
-        try {
+        try (MockedStatic<HttpRequestFilterManager> mockedStatic = mockStatic(HttpRequestFilterManager.class)) {
+            HttpRequestFilterChain mockChain = mock(HttpRequestFilterChain.class);
+            doNothing().when(mockChain).doFilter(any());
+            mockedStatic.when(HttpRequestFilterManager::getFilterChain).thenReturn(mockChain);
             HttpRequest request =
                     new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/test?param=testValue");
 
@@ -93,23 +97,33 @@ class HttpDispatchHandlerTest {
 
     @Test
     void testRequestToNonexistentPath() {
-        HttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/notfound");
+        try (MockedStatic<HttpRequestFilterManager> mockedStatic = mockStatic(HttpRequestFilterManager.class)) {
+            HttpRequestFilterChain mockChain = mock(HttpRequestFilterChain.class);
+            doNothing().when(mockChain).doFilter(any());
+            mockedStatic.when(HttpRequestFilterManager::getFilterChain).thenReturn(mockChain);
+            HttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/notfound");
 
-        channel.writeInbound(request);
+            channel.writeInbound(request);
 
-        FullHttpResponse response = waitForResponse(5000);
-        assertEquals(HttpResponseStatus.NOT_FOUND, response.status());
+            FullHttpResponse response = waitForResponse(5000);
+            assertEquals(HttpResponseStatus.NOT_FOUND, response.status());
+        }
     }
 
     @Test
     void testHttpHeadMethod() {
-        HttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.HEAD, "/head");
+        try (MockedStatic<HttpRequestFilterManager> mockedStatic = mockStatic(HttpRequestFilterManager.class)) {
+            HttpRequestFilterChain mockChain = mock(HttpRequestFilterChain.class);
+            doNothing().when(mockChain).doFilter(any());
+            mockedStatic.when(HttpRequestFilterManager::getFilterChain).thenReturn(mockChain);
+            HttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.HEAD, "/head");
 
-        channel.writeInbound(request);
+            channel.writeInbound(request);
 
-        FullHttpResponse response = waitForResponse(5000);
-        assertEquals(HttpResponseStatus.NOT_FOUND, response.status());
-        assertEquals(0, response.content().readableBytes());
+            FullHttpResponse response = waitForResponse(5000);
+            assertEquals(HttpResponseStatus.NOT_FOUND, response.status());
+            assertEquals(0, response.content().readableBytes());
+        }
     }
 
     @Test
