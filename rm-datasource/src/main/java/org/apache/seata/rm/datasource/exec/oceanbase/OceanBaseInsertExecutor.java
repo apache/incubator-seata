@@ -40,10 +40,10 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * The type Oracle insert executor.
+ * The type Oceanbase oracle  model insert executor.
  *
  */
-@LoadLevel(name = JdbcConstants.ORACLE, scope = Scope.PROTOTYPE)
+@LoadLevel(name = JdbcConstants.OCEANBASE, scope = Scope.PROTOTYPE)
 public class OceanBaseInsertExecutor extends BaseInsertExecutor implements Sequenceable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OceanBaseInsertExecutor.class);

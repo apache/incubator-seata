@@ -20,7 +20,7 @@ import org.apache.seata.common.exception.NotSupportYetException;
 import org.apache.seata.rm.datasource.ConnectionProxy;
 import org.apache.seata.rm.datasource.PreparedStatementProxy;
 import org.apache.seata.rm.datasource.StatementProxy;
-import org.apache.seata.rm.datasource.exec.oracle.OracleInsertExecutor;
+import org.apache.seata.rm.datasource.exec.oceanbase.OceanBaseInsertExecutor;
 import org.apache.seata.sqlparser.SQLInsertRecognizer;
 import org.apache.seata.sqlparser.struct.ColumnMeta;
 import org.apache.seata.sqlparser.struct.Null;
@@ -65,7 +65,7 @@ public class OceanBaseInsertExecutorTest {
 
     private TableMeta tableMeta;
 
-    private OracleInsertExecutor insertExecutor;
+    private OceanBaseInsertExecutor insertExecutor;
 
     private final int pkIndexId = 0;
 
@@ -86,7 +86,8 @@ public class OceanBaseInsertExecutorTest {
         statementCallback = mock(StatementCallback.class);
         sqlInsertRecognizer = mock(SQLInsertRecognizer.class);
         tableMeta = mock(TableMeta.class);
-        insertExecutor = Mockito.spy(new OracleInsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
+        insertExecutor =
+                Mockito.spy(new OceanBaseInsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
 
         pkIndexMap = new HashMap<String, Integer>() {
             {
@@ -176,7 +177,8 @@ public class OceanBaseInsertExecutorTest {
         when(statementProxy.getConnectionProxy()).thenReturn(connectionProxy);
         when(connectionProxy.getDbType()).thenReturn(JdbcConstants.OCEANBASE);
 
-        insertExecutor = Mockito.spy(new OracleInsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
+        insertExecutor =
+                Mockito.spy(new OceanBaseInsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
 
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
 

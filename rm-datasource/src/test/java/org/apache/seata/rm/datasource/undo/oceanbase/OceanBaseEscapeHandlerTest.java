@@ -16,31 +16,17 @@
  */
 package org.apache.seata.rm.datasource.undo.oceanbase;
 
-import org.apache.seata.common.loader.LoadLevel;
-import org.apache.seata.rm.datasource.undo.AbstractUndoExecutor;
-import org.apache.seata.rm.datasource.undo.SQLUndoLog;
-import org.apache.seata.rm.datasource.undo.UndoExecutorHolder;
+import org.apache.seata.sqlparser.EscapeHandler;
+import org.apache.seata.sqlparser.EscapeHandlerFactory;
 import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-/**
- * The Type OracleUndoExecutorHolder
- *
- */
-@LoadLevel(name = JdbcConstants.OCEANBASE)
-public class OceanBaseUndoExecutorHolder implements UndoExecutorHolder {
+public class OceanBaseEscapeHandlerTest {
 
-    @Override
-    public AbstractUndoExecutor getInsertExecutor(SQLUndoLog sqlUndoLog) {
-        return new OceanBaseUndoInsertExecutor(sqlUndoLog);
-    }
-
-    @Override
-    public AbstractUndoExecutor getUpdateExecutor(SQLUndoLog sqlUndoLog) {
-        return new OceanBaseUndoUpdateExecutor(sqlUndoLog);
-    }
-
-    @Override
-    public AbstractUndoExecutor getDeleteExecutor(SQLUndoLog sqlUndoLog) {
-        return new OceanBaseUndoDeleteExecutor(sqlUndoLog);
+    @Test
+    public void testOracleKeywordChecker() {
+        EscapeHandler escapeHandler = EscapeHandlerFactory.getEscapeHandler(JdbcConstants.ORACLE);
+        Assertions.assertNotNull(escapeHandler);
     }
 }

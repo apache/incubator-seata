@@ -515,7 +515,7 @@ public class OceanBaseEscapeHandler implements EscapeHandler {
         if (isKeyWord) {
             return true;
         }
-        // oracle
+        // oceanbase oracle mode
         // we are recommend table name and column name must uppercase.
         // if exists full uppercase, the table name or column name doesn't bundle escape symbol.
         // create\read    table TABLE "table" "TABLE"
