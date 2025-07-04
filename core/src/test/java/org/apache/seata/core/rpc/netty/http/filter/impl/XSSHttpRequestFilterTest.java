@@ -148,7 +148,7 @@ class XSSHttpRequestFilterTest {
         try {
             filter.doFilter(context);
         } catch (HttpRequestFilterException e) {
-            throw new AssertionError("非XSS文本不应该被误拦", e);
+            throw new AssertionError("Non-xss text should not be mistakenly blocked", e);
         }
     }
 
