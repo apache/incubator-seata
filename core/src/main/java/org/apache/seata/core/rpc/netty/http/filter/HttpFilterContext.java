@@ -16,29 +16,27 @@
  */
 package org.apache.seata.core.rpc.netty.http.filter;
 
-import io.netty.handler.codec.http.HttpRequest;
+import java.util.function.Supplier;
 
-public class HttpFilterContext {
-
-    private final HttpRequest request;
+public class HttpFilterContext<T> {
+    private final T request;
+    private final Supplier<HttpRequestParamWrapper> paramWrapperSupplier;
     private volatile HttpRequestParamWrapper paramWrapper;
 
-    public HttpFilterContext(HttpRequest request) {
+    public HttpFilterContext(T request, Supplier<HttpRequestParamWrapper> paramWrapperSupplier) {
         this.request = request;
+        this.paramWrapperSupplier = paramWrapperSupplier;
     }
 
-    public HttpRequest getRequest() {
+    public T getRequest() {
         return request;
     }
 
-    /**
-     * Lazily initialize paramWrapper; parse body, query, header, and form parameters only when needed.
-     */
     public HttpRequestParamWrapper getParamWrapper() {
         if (paramWrapper == null) {
             synchronized (this) {
                 if (paramWrapper == null) {
-                    paramWrapper = new HttpRequestParamWrapper(request);
+                    paramWrapper = paramWrapperSupplier.get();
                 }
             }
         }

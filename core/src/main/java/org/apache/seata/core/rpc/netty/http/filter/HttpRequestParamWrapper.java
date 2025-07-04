@@ -28,6 +28,8 @@ import io.netty.handler.codec.http.QueryStringDecoder;
 import io.netty.handler.codec.http.multipart.Attribute;
 import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
 import io.netty.handler.codec.http.multipart.InterfaceHttpData;
+import io.netty.handler.codec.http2.Http2Headers;
+import org.apache.seata.core.rpc.netty.http.SimpleHttp2Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,14 +62,71 @@ public class HttpRequestParamWrapper {
         parseBody(fullRequest);
     }
 
+    public HttpRequestParamWrapper(SimpleHttp2Request request) {
+        parseQueryParams(request.getPath());
+        parseHeaders(request.getHeaders());
+
+        String contentType = (String) request.getHeaders().get(HttpHeaderNames.CONTENT_TYPE);
+        if (contentType == null) {
+            return;
+        }
+
+        try {
+            if (contentType.contains("application/json")) {
+                parseJsonBody(request.getBody());
+            } else if (contentType.contains("application/x-www-form-urlencoded")) {
+                parseFormUrlEncodedBody(request.getBody());
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Failed to parse HTTP/2 body: {}", e.getMessage(), e);
+        }
+    }
+
     private void parseQueryParams(FullHttpRequest request) {
         QueryStringDecoder decoder = new QueryStringDecoder(request.uri());
+        queryParams.putAll(decoder.parameters());
+    }
+
+    private void parseQueryParams(String path) {
+        QueryStringDecoder decoder = new QueryStringDecoder(path);
         queryParams.putAll(decoder.parameters());
     }
 
     private void parseHeaders(FullHttpRequest request) {
         for (Map.Entry<String, String> entry : request.headers()) {
             headerParams.computeIfAbsent(entry.getKey(), k -> new ArrayList<>()).add(entry.getValue());
+        }
+    }
+
+    private void parseHeaders(Http2Headers headers) {
+        for (Map.Entry<CharSequence, CharSequence> entry : headers) {
+            headerParams
+                    .computeIfAbsent(entry.getKey().toString(), k -> new ArrayList<>())
+                    .add(entry.getValue().toString());
+        }
+    }
+
+    private void parseFormUrlEncodedBody(String body) {
+        if (body == null || body.trim().isEmpty()) {
+            return;
+        }
+        String[] pairs = body.split("&");
+        for (String pair : pairs) {
+            String[] kv = pair.split("=", 2);
+            if (kv.length == 2) {
+                String key = decode(kv[0]);
+                String value = decode(kv[1]);
+                formParams.computeIfAbsent(key, k -> new ArrayList<>()).add(value);
+            }
+        }
+    }
+
+    private String decode(String s) {
+        try {
+            return java.net.URLDecoder.decode(s, StandardCharsets.UTF_8.name());
+        } catch (Exception e) {
+            LOGGER.warn("Failed to decode form field: {}", s, e);
+            return s;
         }
     }
 

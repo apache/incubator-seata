@@ -21,22 +21,14 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.DefaultFullHttpResponse;
-import io.netty.handler.codec.http.FullHttpResponse;
-import io.netty.handler.codec.http.HttpHeaderNames;
-import io.netty.handler.codec.http.HttpMethod;
-import io.netty.handler.codec.http.HttpRequest;
-import io.netty.handler.codec.http.HttpResponseStatus;
-import io.netty.handler.codec.http.HttpUtil;
-import io.netty.handler.codec.http.HttpVersion;
-import io.netty.handler.codec.http.QueryStringDecoder;
+import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.multipart.Attribute;
 import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
 import io.netty.handler.codec.http.multipart.InterfaceHttpData;
 import org.apache.seata.common.rpc.http.HttpContext;
 import org.apache.seata.core.exception.HttpRequestFilterException;
-import org.apache.seata.core.rpc.netty.http.filter.HttpRequestFilterChain;
-import org.apache.seata.core.rpc.netty.http.filter.HttpRequestFilterManager;
+import org.apache.seata.core.rpc.netty.http.filter.HttpFilterContext;
+import org.apache.seata.core.rpc.netty.http.filter.HttpRequestParamWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,10 +44,10 @@ public class HttpDispatchHandler extends BaseHttpChannelHandler<HttpRequest> {
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, HttpRequest httpRequest) {
-
         try {
-            HttpRequestFilterChain filterChain = HttpRequestFilterManager.getFilterChain();
-            filterChain.doFilter(httpRequest);
+            HttpFilterContext<HttpRequest> context =
+                    new HttpFilterContext<>(httpRequest, () -> new HttpRequestParamWrapper(httpRequest));
+            doFilterInternal(context);
         } catch (HttpRequestFilterException e) {
             LOGGER.warn("Request blocked by filter: {}", e.getMessage());
             sendErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST, false);

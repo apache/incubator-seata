@@ -19,7 +19,11 @@ package org.apache.seata.core.rpc.netty.http;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.core.exception.HttpRequestFilterException;
 import org.apache.seata.core.rpc.netty.NettyServerConfig;
+import org.apache.seata.core.rpc.netty.http.filter.HttpFilterContext;
+import org.apache.seata.core.rpc.netty.http.filter.HttpRequestFilterChain;
+import org.apache.seata.core.rpc.netty.http.filter.HttpRequestFilterManager;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -43,5 +47,13 @@ public abstract class BaseHttpChannelHandler<T> extends SimpleChannelInboundHand
 
     static {
         Runtime.getRuntime().addShutdownHook(new Thread(HTTP_HANDLER_THREADS::shutdown));
+    }
+
+    /**
+     * The filter has a unified entry point and is called by subclasses at an appropriate time
+     */
+    protected final void doFilterInternal(HttpFilterContext<?> context) throws HttpRequestFilterException {
+        HttpRequestFilterChain filterChain = HttpRequestFilterManager.getFilterChain();
+        filterChain.doFilter(context);
     }
 }

@@ -22,6 +22,7 @@ import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpVersion;
 import org.apache.seata.core.exception.HttpRequestFilterException;
 import org.apache.seata.core.rpc.netty.http.filter.HttpFilterContext;
+import org.apache.seata.core.rpc.netty.http.filter.HttpRequestParamWrapper;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.fail;
@@ -38,7 +39,7 @@ class XSSHttpRequestFilterTest {
     @Test
     public void testFilter_withXssKeyword_shouldThrow() {
         FullHttpRequest request = buildRequestWithQuery("/path?param=<script>alert(1)</script>");
-        HttpFilterContext context = new HttpFilterContext(request);
+        HttpFilterContext context = new HttpFilterContext(request, () -> new HttpRequestParamWrapper(request));
 
         assertThrows(HttpRequestFilterException.class, () -> filter.doFilter(context));
     }
@@ -46,7 +47,7 @@ class XSSHttpRequestFilterTest {
     @Test
     public void testFilter_withSafeQueryParam_shouldPass() {
         FullHttpRequest request = buildRequestWithQuery("/path?param=normalValue");
-        HttpFilterContext context = new HttpFilterContext(request);
+        HttpFilterContext context = new HttpFilterContext(request, () -> new HttpRequestParamWrapper(request));
 
         try {
             filter.doFilter(context);
@@ -58,7 +59,7 @@ class XSSHttpRequestFilterTest {
     @Test
     public void testFilter_withOnloadEvent_shouldThrow() {
         FullHttpRequest request = buildRequestWithQuery("/path?param=onload=alert(1)");
-        HttpFilterContext context = new HttpFilterContext(request);
+        HttpFilterContext context = new HttpFilterContext(request, () -> new HttpRequestParamWrapper(request));
 
         assertThrows(HttpRequestFilterException.class, () -> filter.doFilter(context));
     }
@@ -66,7 +67,7 @@ class XSSHttpRequestFilterTest {
     @Test
     public void testFilter_withJavascriptUrl_shouldThrow() {
         FullHttpRequest request = buildRequestWithQuery("/path?url=javascript:alert(1)");
-        HttpFilterContext context = new HttpFilterContext(request);
+        HttpFilterContext context = new HttpFilterContext(request, () -> new HttpRequestParamWrapper(request));
 
         assertThrows(HttpRequestFilterException.class, () -> filter.doFilter(context));
     }
@@ -74,7 +75,7 @@ class XSSHttpRequestFilterTest {
     @Test
     void testFilter_withRepeatedOn_shouldThrow() {
         FullHttpRequest request = buildRequestWithQuery("/test?param=ononononon123='xxx'");
-        HttpFilterContext context = new HttpFilterContext(request);
+        HttpFilterContext context = new HttpFilterContext(request, () -> new HttpRequestParamWrapper(request));
 
         assertThrows(HttpRequestFilterException.class, () -> filter.doFilter(context));
     }
@@ -82,7 +83,7 @@ class XSSHttpRequestFilterTest {
     @Test
     void testFilter_withShortEventName_shouldThrow() {
         FullHttpRequest request = buildRequestWithQuery("/test?param=onclick=\"doSomething()\"");
-        HttpFilterContext context = new HttpFilterContext(request);
+        HttpFilterContext context = new HttpFilterContext(request, () -> new HttpRequestParamWrapper(request));
 
         assertThrows(HttpRequestFilterException.class, () -> filter.doFilter(context));
     }
@@ -91,7 +92,7 @@ class XSSHttpRequestFilterTest {
     void testFilter_withLongEventName_shouldThrow() {
         String longEventName = "on" + new String(new char[50]).replace('\0', 'a');
         FullHttpRequest request = buildRequestWithQuery("/test?param=" + longEventName + "=\"xss\"");
-        HttpFilterContext context = new HttpFilterContext(request);
+        HttpFilterContext context = new HttpFilterContext(request, () -> new HttpRequestParamWrapper(request));
 
         assertThrows(HttpRequestFilterException.class, () -> filter.doFilter(context));
     }
@@ -111,9 +112,8 @@ class XSSHttpRequestFilterTest {
         String attackString = attackBuilder.toString();
 
         FullHttpRequest request = buildRequestWithQuery("/path?param=" + attackString);
-        HttpFilterContext context = new HttpFilterContext(request);
+        HttpFilterContext context = new HttpFilterContext(request, () -> new HttpRequestParamWrapper(request));
 
-        // 验证不会超时，并且能正常抛出 HttpRequestFilterException
         assertThrows(HttpRequestFilterException.class, () -> filter.doFilter(context));
     }
 
@@ -128,7 +128,7 @@ class XSSHttpRequestFilterTest {
         }
 
         FullHttpRequest request = buildRequestWithQuery("/path?param=" + longText);
-        HttpFilterContext context = new HttpFilterContext(request);
+        HttpFilterContext context = new HttpFilterContext(request, () -> new HttpRequestParamWrapper(request));
 
         try {
             filter.doFilter(context);
