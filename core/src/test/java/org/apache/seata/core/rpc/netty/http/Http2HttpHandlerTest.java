@@ -135,7 +135,7 @@ class Http2HttpHandlerTest {
         channel.writeInbound(dataFrame);
 
         Http2StreamFrame frame1 = null, frame2 = null;
-        long deadline = System.currentTimeMillis() + 5000; // 最多等5秒
+        long deadline = System.currentTimeMillis() + 5000;
         while ((frame1 == null || frame2 == null) && System.currentTimeMillis() < deadline) {
             if (frame1 == null) frame1 = channel.readOutbound();
             if (frame2 == null) frame2 = channel.readOutbound();
@@ -165,6 +165,64 @@ class Http2HttpHandlerTest {
         Http2StreamFrame responseHeadersFrame = channel.readOutbound();
         assertTrue(responseHeadersFrame instanceof DefaultHttp2HeadersFrame);
         DefaultHttp2HeadersFrame respHeaders = (DefaultHttp2HeadersFrame) responseHeadersFrame;
+        assertEquals("400", respHeaders.headers().status().toString());
+    }
+
+    @Test
+    void testHttp2GetRequestWithXSSParam_shouldBeBlocked() {
+        Http2Headers headers = new DefaultHttp2Headers();
+        headers.method("GET");
+        headers.path("/test?param=<script>alert(1)</script>");
+        Http2HeadersFrame headersFrame = new DefaultHttp2HeadersFrame(headers, true);
+
+        channel.writeInbound(headersFrame);
+
+        Http2StreamFrame responseHeadersFrame = waitForHttp2Response(3000);
+        assertNotNull(responseHeadersFrame);
+        assertTrue(responseHeadersFrame instanceof DefaultHttp2HeadersFrame);
+        DefaultHttp2HeadersFrame respHeaders = (DefaultHttp2HeadersFrame) responseHeadersFrame;
+
+        assertEquals("400", respHeaders.headers().status().toString());
+    }
+
+    @Test
+    void testHttp2GetRequestWithOnloadParam_shouldBeBlocked() {
+        Http2Headers headers = new DefaultHttp2Headers();
+        headers.method("GET");
+        headers.path("/test?param=onload=alert(1)");
+        Http2HeadersFrame headersFrame = new DefaultHttp2HeadersFrame(headers, true);
+
+        channel.writeInbound(headersFrame);
+
+        Http2StreamFrame responseHeadersFrame = waitForHttp2Response(3000);
+        assertNotNull(responseHeadersFrame);
+        assertTrue(responseHeadersFrame instanceof DefaultHttp2HeadersFrame);
+        DefaultHttp2HeadersFrame respHeaders = (DefaultHttp2HeadersFrame) responseHeadersFrame;
+
+        assertEquals("400", respHeaders.headers().status().toString());
+    }
+
+    @Test
+    void testHttp2PostRequestWithXssJson_shouldBeBlocked() throws Exception {
+        String maliciousJson = "{\"param\": \"<script>alert('xss')</script>\"}";
+
+        Http2Headers headers = new DefaultHttp2Headers();
+        headers.method("POST");
+        headers.path("/test?param=abc");
+        headers.set("content-type", "application/json");
+
+        Http2HeadersFrame headersFrame = new DefaultHttp2HeadersFrame(headers, false);
+        DefaultHttp2DataFrame dataFrame =
+                new DefaultHttp2DataFrame(Unpooled.copiedBuffer(maliciousJson, StandardCharsets.UTF_8), true);
+
+        channel.writeInbound(headersFrame);
+        channel.writeInbound(dataFrame);
+
+        Http2StreamFrame responseHeadersFrame = waitForHttp2Response(3000);
+        assertNotNull(responseHeadersFrame);
+        assertTrue(responseHeadersFrame instanceof DefaultHttp2HeadersFrame);
+        DefaultHttp2HeadersFrame respHeaders = (DefaultHttp2HeadersFrame) responseHeadersFrame;
+
         assertEquals("400", respHeaders.headers().status().toString());
     }
 

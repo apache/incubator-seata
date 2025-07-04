@@ -20,9 +20,13 @@ import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpVersion;
+import io.netty.handler.codec.http2.DefaultHttp2Headers;
+import io.netty.handler.codec.http2.Http2Headers;
 import org.apache.seata.core.exception.HttpRequestFilterException;
+import org.apache.seata.core.rpc.netty.http.SimpleHttp2Request;
 import org.apache.seata.core.rpc.netty.http.filter.HttpFilterContext;
 import org.apache.seata.core.rpc.netty.http.filter.HttpRequestParamWrapper;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.fail;
@@ -34,6 +38,17 @@ class XSSHttpRequestFilterTest {
 
     private FullHttpRequest buildRequestWithQuery(String uri) {
         return new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, uri);
+    }
+
+    private SimpleHttp2Request buildSafeRequest() {
+        Http2Headers headers = new DefaultHttp2Headers().method("GET").path("/test?param=safeValue");
+        return new SimpleHttp2Request(HttpMethod.GET, "/test?param=safeValue", headers, null);
+    }
+
+    private SimpleHttp2Request buildMaliciousRequest(String paramValue) {
+        String encoded = "/test?param=" + paramValue;
+        Http2Headers headers = new DefaultHttp2Headers().method("GET").path(encoded);
+        return new SimpleHttp2Request(HttpMethod.GET, encoded, headers, null);
     }
 
     @Test
@@ -135,5 +150,64 @@ class XSSHttpRequestFilterTest {
         } catch (HttpRequestFilterException e) {
             throw new AssertionError("非XSS文本不应该被误拦", e);
         }
+    }
+
+    @Test
+    void testSafeRequest_shouldPassFilter() {
+        SimpleHttp2Request req = buildSafeRequest();
+        HttpFilterContext<SimpleHttp2Request> context =
+                new HttpFilterContext<>(req, () -> new HttpRequestParamWrapper(req));
+
+        try {
+            filter.doFilter(context);
+        } catch (HttpRequestFilterException e) {
+            Assertions.fail("Safe request was incorrectly blocked: " + e.getMessage());
+        }
+    }
+
+    @Test
+    void testMaliciousRequest_script_shouldBeBlocked() {
+        SimpleHttp2Request req = buildMaliciousRequest("<script>alert(1)</script>");
+        HttpFilterContext<SimpleHttp2Request> context =
+                new HttpFilterContext<>(req, () -> new HttpRequestParamWrapper(req));
+
+        assertThrows(HttpRequestFilterException.class, () -> filter.doFilter(context));
+    }
+
+    @Test
+    void testMaliciousRequest_onclick_shouldBeBlocked() {
+        SimpleHttp2Request req = buildMaliciousRequest("onclick=doSomething()");
+        HttpFilterContext<SimpleHttp2Request> context =
+                new HttpFilterContext<>(req, () -> new HttpRequestParamWrapper(req));
+
+        assertThrows(HttpRequestFilterException.class, () -> filter.doFilter(context));
+    }
+
+    @Test
+    void testPostJsonRequest_withXss_shouldBeBlocked() {
+        Http2Headers headers =
+                new DefaultHttp2Headers().method("POST").path("/test").add("content-type", "application/json");
+        String body = "{\"param\": \"<script>alert('xss')</script>\"}";
+
+        SimpleHttp2Request req = new SimpleHttp2Request(HttpMethod.POST, "/test", headers, body);
+        HttpFilterContext<SimpleHttp2Request> context =
+                new HttpFilterContext<>(req, () -> new HttpRequestParamWrapper(req));
+
+        assertThrows(HttpRequestFilterException.class, () -> filter.doFilter(context));
+    }
+
+    @Test
+    void testPostFormRequest_withXss_shouldBeBlocked() {
+        Http2Headers headers = new DefaultHttp2Headers()
+                .method("POST")
+                .path("/test")
+                .add("content-type", "application/x-www-form-urlencoded");
+        String body = "param=<script>alert('xss')</script>";
+
+        SimpleHttp2Request req = new SimpleHttp2Request(HttpMethod.POST, "/test", headers, body);
+        HttpFilterContext<SimpleHttp2Request> context =
+                new HttpFilterContext<>(req, () -> new HttpRequestParamWrapper(req));
+
+        assertThrows(HttpRequestFilterException.class, () -> filter.doFilter(context));
     }
 }

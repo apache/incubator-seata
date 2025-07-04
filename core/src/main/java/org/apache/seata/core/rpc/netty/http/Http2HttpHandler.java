@@ -126,7 +126,7 @@ public class Http2HttpHandler extends BaseHttpChannelHandler<Http2StreamFrame> {
             handle(httpController, handleMethod, args, ctx, httpContext);
         } catch (HttpRequestFilterException e) {
             LOGGER.warn("Request blocked by filter while processing HTTP2 request: {}", e.getMessage());
-            sendErrorResponse(ctx, HttpResponseStatus.INTERNAL_SERVER_ERROR);
+            sendErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST);
         } catch (Exception e) {
             LOGGER.error("Exception occurred while processing HTTP2 request: {}", e.getMessage(), e);
             sendErrorResponse(ctx, HttpResponseStatus.INTERNAL_SERVER_ERROR);
