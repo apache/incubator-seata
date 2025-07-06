@@ -92,7 +92,8 @@ public class FurySerializerTest {
                 .withRefTracking(true)
                 .withCompatibleMode(CompatibleMode.COMPATIBLE)
                 .build();
-        Assertions.assertThrows(DeserializationException.class, () -> furySerializer.deserialize(fury.serialize(testUnSafeSerializer)));
+        Assertions.assertThrows(
+                DeserializationException.class, () -> furySerializer.deserialize(fury.serialize(testUnSafeSerializer)));
     }
 
     @Test
