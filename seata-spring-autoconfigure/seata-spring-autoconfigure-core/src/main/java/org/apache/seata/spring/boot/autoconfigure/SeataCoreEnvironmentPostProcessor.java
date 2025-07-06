@@ -16,33 +16,6 @@
  */
 package org.apache.seata.spring.boot.autoconfigure;
 
-import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_APOLLO_PREFIX;
-import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_CONSUL_PREFIX;
-import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_CUSTOM_PREFIX;
-import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_ETCD3_PREFIX;
-import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_FILE_PREFIX;
-import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_NACOS_PREFIX;
-import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_PREFIX;
-import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_ZK_PREFIX;
-import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.LOG_PREFIX;
-import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_BEAN_MAP;
-import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_CONSUL_PREFIX;
-import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_CUSTOM_PREFIX;
-import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_ETCD3_PREFIX;
-import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_EUREKA_PREFIX;
-import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_METADATA_PREFIX;
-import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_NACOS_PREFIX;
-import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_NAMINGSERVER_PREFIX;
-import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_PREFIX;
-import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_RAFT_PREFIX;
-import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_REDIS_PREFIX;
-import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_SOFA_PREFIX;
-import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_ZK_PREFIX;
-import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SHUTDOWN_PREFIX;
-import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.THREAD_FACTORY_PREFIX;
-import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.TRANSPORT_PREFIX;
-
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.seata.spring.boot.autoconfigure.properties.LogProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.ShutdownProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.ThreadFactoryProperties;

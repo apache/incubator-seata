@@ -16,16 +16,17 @@
  */
 package org.apache.seata.core.rpc.netty;
 
-import static org.mockito.Mockito.when;
-
 import io.netty.channel.EventLoopGroup;
 import io.netty.incubator.channel.uring.IOUring;
+import io.netty.incubator.channel.uring.IOUringEventLoopGroup;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class NettyClientBootstrapTest {
@@ -66,14 +67,16 @@ class NettyClientBootstrapTest {
         try (MockedStatic<NettyServerConfig> mockedStatic = org.mockito.Mockito.mockStatic(NettyServerConfig.class)) {
             mockedStatic.when(NettyServerConfig::enableIoUring).thenReturn(true);
             if (IOUring.isAvailable()) {
-                 NettyClientBootstrap tmNettyClientBootstrap =
-                                                    new NettyClientBootstrap(nettyClientConfig, eventExecutorGroup, NettyPoolKey.TransactionRole.TMROLE);
-                                  EventLoopGroup tmEventLoopGroupWorker = getEventLoopGroupWorker(tmNettyClientBootstrap);
-                                  Assertions.assertTrue(tmEventLoopGroupWorker instanceof IOUringEventLoopGroup);
+                NettyClientBootstrap tmNettyClientBootstrap = new NettyClientBootstrap(
+                        nettyClientConfig, NettyPoolKey.TransactionRole.TMROLE);
+                EventLoopGroup tmEventLoopGroupWorker = getEventLoopGroupWorker(tmNettyClientBootstrap);
+                Assertions.assertTrue(tmEventLoopGroupWorker instanceof IOUringEventLoopGroup);
 
             } else {
-                Assertions.assertThrows(UnsatisfiedLinkError.class,
-                 () -> new NettyClientBootstrap(nettyClientConfig, eventExecutorGroup, NettyPoolKey.TransactionRole.TMROLE));
+                Assertions.assertThrows(
+                        UnsatisfiedLinkError.class,
+                        () -> new NettyClientBootstrap(
+                                nettyClientConfig, NettyPoolKey.TransactionRole.TMROLE));
             }
         }
     }

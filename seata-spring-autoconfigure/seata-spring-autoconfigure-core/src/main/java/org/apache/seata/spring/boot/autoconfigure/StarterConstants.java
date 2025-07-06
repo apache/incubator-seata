@@ -16,7 +16,6 @@
  */
 package org.apache.seata.spring.boot.autoconfigure;
 
-import java.util.HashMap;
 import org.apache.seata.config.ConfigurationKeys;
 
 import java.util.HashMap;

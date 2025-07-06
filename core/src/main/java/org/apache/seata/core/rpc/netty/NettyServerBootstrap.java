@@ -27,7 +27,6 @@ import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
-
 import io.netty.incubator.channel.uring.IOUringEventLoopGroup;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.XID;
@@ -90,6 +89,7 @@ public class NettyServerBootstrap implements RemotingBootstrap {
                     nettyServerConfig.getServerWorkerThreads(),
                     new NamedThreadFactory(
                             nettyServerConfig.getWorkerThreadPrefix(), nettyServerConfig.getServerWorkerThreads()));
+            System.out.println("Using IOUringEventLoopGroup for Netty server");
         } else {
             this.eventLoopGroupBoss = new NioEventLoopGroup(
                     nettyServerConfig.getBossThreadSize(),

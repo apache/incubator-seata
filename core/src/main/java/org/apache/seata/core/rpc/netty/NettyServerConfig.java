@@ -135,8 +135,7 @@ public class NettyServerConfig extends NettyBaseConfig {
      * @return the boolean
      */
     public static boolean enableIoUring() {
-        return NettyBaseConfig.SERVER_CHANNEL_CLAZZ.equals(IOUringServerSocketChannel.class)
-            && IOUring.isAvailable();
+        return NettyBaseConfig.SERVER_CHANNEL_CLAZZ.equals(IOUringServerSocketChannel.class) && IOUring.isAvailable();
     }
 
     /**

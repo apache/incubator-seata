@@ -16,10 +16,10 @@
  */
 package org.apache.seata.spring.boot.autoconfigure.properties;
 
-import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.TRANSPORT_IO_PREFIX;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
+
+import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.TRANSPORT_IO_PREFIX;
 
 @Component
 @ConfigurationProperties(prefix = TRANSPORT_IO_PREFIX)

@@ -16,8 +16,6 @@
  */
 package org.apache.seata.core.rpc.netty;
 
-import static org.apache.seata.common.DefaultValues.DEFAULT_TRANSPORT_HEARTBEAT;
-
 import io.netty.channel.Channel;
 import io.netty.channel.ServerChannel;
 import io.netty.channel.epoll.EpollDomainSocketChannel;
@@ -43,6 +41,8 @@ import org.apache.seata.core.rpc.TransportProtocolType;
 import org.apache.seata.core.rpc.TransportServerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.apache.seata.common.DefaultValues.DEFAULT_TRANSPORT_HEARTBEAT;
 
 /**
  * The type Netty base config.
