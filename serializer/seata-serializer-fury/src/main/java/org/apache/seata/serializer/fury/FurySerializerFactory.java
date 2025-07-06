@@ -21,6 +21,7 @@ import org.apache.fury.ThreadLocalFury;
 import org.apache.fury.ThreadSafeFury;
 import org.apache.fury.config.CompatibleMode;
 import org.apache.fury.config.Language;
+import org.apache.fury.resolver.AllowListChecker;
 import org.apache.seata.core.serializer.SerializerSecurityRegistry;
 
 public class FurySerializerFactory {
@@ -41,9 +42,9 @@ public class FurySerializerFactory {
                 .build();
 
         // register allow class
-        f.getClassResolver()
-                .setClassChecker((classResolver, className) ->
-                        SerializerSecurityRegistry.getAllowClassPattern().contains(className));
+        AllowListChecker checker = new AllowListChecker(AllowListChecker.CheckLevel.STRICT);
+        f.getClassResolver().setClassChecker(checker);
+        checker.allowClasses(SerializerSecurityRegistry.getAllowClassPattern());
         return f;
     });
 
