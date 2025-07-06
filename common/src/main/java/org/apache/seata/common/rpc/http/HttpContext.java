@@ -17,37 +17,45 @@
 package org.apache.seata.common.rpc.http;
 
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.HttpRequest;
 
-public class HttpContext {
+public class HttpContext<T> {
 
-    HttpRequest request;
+    public static final String HTTP_1_1 = "HTTP/1.1";
+    public static final String HTTP_2_0 = "HTTP/2.0";
 
-    ChannelHandlerContext context;
+    private T request;
 
-    boolean keepAlive;
+    private ChannelHandlerContext context;
 
-    boolean async = false;
+    private boolean keepAlive;
 
-    public HttpContext(HttpRequest request, ChannelHandlerContext context, boolean keepAlive) {
+    private boolean async = false;
+
+    private String httpVersion;
+
+    public HttpContext(T request, ChannelHandlerContext context, boolean keepAlive, String httpVersion) {
         this.request = request;
         this.context = context;
         this.keepAlive = keepAlive;
+        this.httpVersion = httpVersion;
     }
 
-    public boolean isAsync() {
-        return async;
+    public HttpContext(T request, ChannelHandlerContext context, boolean keepAlive) {
+        this.request = request;
+        this.context = context;
+        this.keepAlive = keepAlive;
+        this.httpVersion = HTTP_1_1;
     }
 
-    public void setAsync(boolean async) {
-        this.async = async;
+    public boolean isHttp2() {
+        return HTTP_2_0.equals(httpVersion);
     }
 
-    public HttpRequest getRequest() {
+    public T getRequest() {
         return request;
     }
 
-    public void setRequest(HttpRequest request) {
+    public void setRequest(T request) {
         this.request = request;
     }
 
@@ -65,5 +73,21 @@ public class HttpContext {
 
     public void setKeepAlive(boolean keepAlive) {
         this.keepAlive = keepAlive;
+    }
+
+    public boolean isAsync() {
+        return async;
+    }
+
+    public void setAsync(boolean async) {
+        this.async = async;
+    }
+
+    public String getHttpVersion() {
+        return httpVersion;
+    }
+
+    public void setHttpVersion(String httpVersion) {
+        this.httpVersion = httpVersion;
     }
 }
