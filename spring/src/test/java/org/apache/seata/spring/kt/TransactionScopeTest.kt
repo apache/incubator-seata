@@ -108,9 +108,6 @@ class TransactionScopeTest {
      */
     @AfterEach
     fun tearDown() {
-        // Clean up global state to avoid affecting other tests
-        RootContext.unbind()
-        
         // Restore original TransactionManager
         backupTransactionManager?.let { TransactionManagerHolder.set(it) }
     }
