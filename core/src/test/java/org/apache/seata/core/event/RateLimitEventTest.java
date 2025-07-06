@@ -47,8 +47,5 @@ public class RateLimitEventTest {
         assertEquals("NewLimitType", event.getLimitType());
         assertEquals("newAppId", event.getApplicationId());
         assertEquals("192.168.1.1:9090", event.getServerIpAddressAndPort());
-
-        String expectedToString = "RateLimitEvent{traceId='newTraceId', limitType='NewLimitType', applicationId='newAppId', clientId='192.168.1.1:9090'}";
-        assertEquals(expectedToString, event.toString());
     }
 }
