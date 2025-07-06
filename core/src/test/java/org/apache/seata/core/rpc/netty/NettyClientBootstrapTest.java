@@ -67,16 +67,15 @@ class NettyClientBootstrapTest {
         try (MockedStatic<NettyServerConfig> mockedStatic = org.mockito.Mockito.mockStatic(NettyServerConfig.class)) {
             mockedStatic.when(NettyServerConfig::enableIoUring).thenReturn(true);
             if (IOUring.isAvailable()) {
-                NettyClientBootstrap tmNettyClientBootstrap = new NettyClientBootstrap(
-                        nettyClientConfig, NettyPoolKey.TransactionRole.TMROLE);
+                NettyClientBootstrap tmNettyClientBootstrap =
+                        new NettyClientBootstrap(nettyClientConfig, NettyPoolKey.TransactionRole.TMROLE);
                 EventLoopGroup tmEventLoopGroupWorker = getEventLoopGroupWorker(tmNettyClientBootstrap);
                 Assertions.assertTrue(tmEventLoopGroupWorker instanceof IOUringEventLoopGroup);
 
             } else {
                 Assertions.assertThrows(
                         UnsatisfiedLinkError.class,
-                        () -> new NettyClientBootstrap(
-                                nettyClientConfig, NettyPoolKey.TransactionRole.TMROLE));
+                        () -> new NettyClientBootstrap(nettyClientConfig, NettyPoolKey.TransactionRole.TMROLE));
             }
         }
     }
