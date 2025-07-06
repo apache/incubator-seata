@@ -16,9 +16,6 @@
  */
 package org.apache.seata.saga.engine.db.mockserver;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.seata.common.LockAndCallback;
 import org.apache.seata.common.SagaCostPrint;
 import org.apache.seata.saga.engine.StateMachineEngine;
@@ -32,6 +29,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * State machine async tests with db log store
  *
@@ -42,8 +42,8 @@ public class StateMachineAsyncDBMockServerTests {
 
     @BeforeAll
     public static void initApplicationContext() throws InterruptedException {
-        ApplicationContext applicationContext = new ClassPathXmlApplicationContext(
-                "classpath:saga/spring/statemachine_engine_db_mockserver_test.xml");
+        ApplicationContext applicationContext =
+                new ClassPathXmlApplicationContext("classpath:saga/spring/statemachine_engine_db_mockserver_test.xml");
         stateMachineEngine = applicationContext.getBean("stateMachineEngine", StateMachineEngine.class);
         StateMachineEngineHolder.setStateMachineEngine(stateMachineEngine);
     }
@@ -58,7 +58,8 @@ public class StateMachineAsyncDBMockServerTests {
             paramMap.put("barThrowException", "true");
 
             LockAndCallback lockAndCallback = new LockAndCallback();
-            StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
+            StateMachineInstance inst =
+                    stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
             lockAndCallback.waitingForFinish(inst);
 
             Assertions.assertNotNull(inst.getException());
@@ -76,7 +77,8 @@ public class StateMachineAsyncDBMockServerTests {
             paramMap.put("barThrowException", "true");
 
             LockAndCallback lockAndCallback = new LockAndCallback();
-            StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
+            StateMachineInstance inst =
+                    stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
             lockAndCallback.waitingForFinish(inst);
 
             Assertions.assertNotNull(inst.getException());
@@ -94,7 +96,8 @@ public class StateMachineAsyncDBMockServerTests {
             paramMap.put("barThrowException", "true");
 
             LockAndCallback lockAndCallback = new LockAndCallback();
-            StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
+            StateMachineInstance inst =
+                    stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
             lockAndCallback.waitingForFinish(inst);
 
             Assertions.assertNotNull(inst.getException());
@@ -112,7 +115,8 @@ public class StateMachineAsyncDBMockServerTests {
             paramMap.put("barThrowException", "true");
 
             LockAndCallback lockAndCallback = new LockAndCallback();
-            StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
+            StateMachineInstance inst =
+                    stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
             lockAndCallback.waitingForFinish(inst);
 
             Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
@@ -130,7 +134,8 @@ public class StateMachineAsyncDBMockServerTests {
             paramMap.put("barThrowException", "true");
 
             LockAndCallback lockAndCallback = new LockAndCallback();
-            StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
+            StateMachineInstance inst =
+                    stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
             lockAndCallback.waitingForFinish(inst);
 
             Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
@@ -147,7 +152,8 @@ public class StateMachineAsyncDBMockServerTests {
             paramMap.put("barThrowException", "true");
 
             LockAndCallback lockAndCallback = new LockAndCallback();
-            StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
+            StateMachineInstance inst =
+                    stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
             lockAndCallback.waitingForFinish(inst);
 
             Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
@@ -167,10 +173,11 @@ public class StateMachineAsyncDBMockServerTests {
             paramMap.put("people", people);
 
             LockAndCallback lockAndCallback = new LockAndCallback();
-            StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
+            StateMachineInstance inst =
+                    stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
             lockAndCallback.waitingForFinish(inst);
 
-            People peopleResult = (People)inst.getEndParams().get("complexParameterMethodResult");
+            People peopleResult = (People) inst.getEndParams().get("complexParameterMethodResult");
             Assertions.assertNotNull(peopleResult);
             Assertions.assertEquals(people.getName(), peopleResult.getName());
 
@@ -187,7 +194,8 @@ public class StateMachineAsyncDBMockServerTests {
             paramMap.put("a", 1);
 
             LockAndCallback lockAndCallback = new LockAndCallback();
-            StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
+            StateMachineInstance inst =
+                    stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
             lockAndCallback.waitingForFinish(inst);
 
             Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());

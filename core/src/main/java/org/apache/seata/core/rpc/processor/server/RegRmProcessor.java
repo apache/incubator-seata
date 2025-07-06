@@ -17,17 +17,17 @@
 package org.apache.seata.core.rpc.processor.server;
 
 import io.netty.channel.ChannelHandlerContext;
+import org.apache.commons.lang.StringUtils;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.core.protocol.RegisterRMRequest;
 import org.apache.seata.core.protocol.RegisterRMResponse;
 import org.apache.seata.core.protocol.RpcMessage;
 import org.apache.seata.core.protocol.Version;
-import org.apache.seata.core.rpc.netty.ChannelManager;
-import org.apache.seata.core.rpc.RemotingServer;
 import org.apache.seata.core.rpc.RegisterCheckAuthHandler;
+import org.apache.seata.core.rpc.RemotingServer;
+import org.apache.seata.core.rpc.netty.ChannelManager;
 import org.apache.seata.core.rpc.processor.RemotingProcessor;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,11 +68,19 @@ public class RegRmProcessor implements RemotingProcessor {
                 Version.putChannelVersion(ctx.channel(), message.getVersion());
                 isSuccess = true;
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("RM checkAuth for client:{},vgroup:{},applicationId:{} is OK", ipAndPort, message.getTransactionServiceGroup(), message.getApplicationId());
+                    LOGGER.debug(
+                            "RM checkAuth for client:{},vgroup:{},applicationId:{} is OK",
+                            ipAndPort,
+                            message.getTransactionServiceGroup(),
+                            message.getApplicationId());
                 }
             } else {
                 if (LOGGER.isWarnEnabled()) {
-                    LOGGER.warn("RM checkAuth for client:{},vgroup:{},applicationId:{} is FAIL", ipAndPort, message.getTransactionServiceGroup(), message.getApplicationId());
+                    LOGGER.warn(
+                            "RM checkAuth for client:{},vgroup:{},applicationId:{} is FAIL",
+                            ipAndPort,
+                            message.getTransactionServiceGroup(),
+                            message.getApplicationId());
                 }
             }
         } catch (Exception exx) {
@@ -86,9 +94,11 @@ public class RegRmProcessor implements RemotingProcessor {
         }
         remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), response);
         if (isSuccess && LOGGER.isInfoEnabled()) {
-            LOGGER.info("RM register success,message:{},channel:{},client version:{}", message, ctx.channel(),
-                message.getVersion());
+            LOGGER.info(
+                    "RM register success,message:{},channel:{},client version:{}",
+                    message,
+                    ctx.channel(),
+                    message.getVersion());
         }
     }
-
 }

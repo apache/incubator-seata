@@ -16,7 +16,6 @@
  */
 package org.apache.seata.serializer.seata.protocol.transaction;
 
-
 import org.apache.seata.core.protocol.transaction.BranchCommitResponse;
 
 /**

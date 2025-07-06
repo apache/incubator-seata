@@ -16,14 +16,14 @@
  */
 package org.apache.seata.core.store.db.sql.lock;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.seata.common.exception.NotSupportYetException;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.constants.ConfigurationKeys;
 import org.apache.seata.core.constants.ServerTableColumnsName;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * the database abstract lock store sql interface
@@ -60,15 +60,15 @@ public class AbstractLockStoreSql implements LockStoreSql {
     /**
      * The constant LOCK_TABLE_BRANCH_ID_WHERE_CONDITION_PLACE_HOLD.
      */
-    protected static final String LOCK_TABLE_BRANCH_ID_WHERE_CONDITION_PLACE_HOLD = " #lock_table_branch_id_where_condition# ";
-
+    protected static final String LOCK_TABLE_BRANCH_ID_WHERE_CONDITION_PLACE_HOLD =
+            " #lock_table_branch_id_where_condition# ";
 
     /**
      * The constant ALL_COLUMNS.
      * xid, transaction_id, branch_id, resource_id, table_name, pk, row_key, gmt_create, gmt_modified, status
      */
-    protected static final String ALL_COLUMNS =
-        ServerTableColumnsName.LOCK_TABLE_XID + ", " + ServerTableColumnsName.LOCK_TABLE_TRANSACTION_ID + ", "
+    protected static final String ALL_COLUMNS = ServerTableColumnsName.LOCK_TABLE_XID + ", "
+            + ServerTableColumnsName.LOCK_TABLE_TRANSACTION_ID + ", "
             + ServerTableColumnsName.LOCK_TABLE_BRANCH_ID + ", " + ServerTableColumnsName.LOCK_TABLE_RESOURCE_ID + ", "
             + ServerTableColumnsName.LOCK_TABLE_TABLE_NAME + ", " + ServerTableColumnsName.LOCK_TABLE_PK + ", "
             + ServerTableColumnsName.LOCK_TABLE_ROW_KEY + ", " + ServerTableColumnsName.LOCK_TABLE_GMT_CREATE + ", "
@@ -77,46 +77,46 @@ public class AbstractLockStoreSql implements LockStoreSql {
     /**
      * The constant DELETE_LOCK_SQL.
      */
-    private static final String DELETE_LOCK_SQL = "delete from " + LOCK_TABLE_PLACE_HOLD
-        + " where " + ServerTableColumnsName.LOCK_TABLE_ROW_KEY + " = ? and " + ServerTableColumnsName.LOCK_TABLE_XID + " = ?";
+    private static final String DELETE_LOCK_SQL = "delete from " + LOCK_TABLE_PLACE_HOLD + " where "
+            + ServerTableColumnsName.LOCK_TABLE_ROW_KEY + " = ? and " + ServerTableColumnsName.LOCK_TABLE_XID + " = ?";
 
     /**
      * The constant BATCH_DELETE_LOCK_SQL.
      */
-    private static final String BATCH_DELETE_LOCK_SQL = "delete from " + LOCK_TABLE_PLACE_HOLD
-        + " where " + ServerTableColumnsName.LOCK_TABLE_XID + " = ? and (" + LOCK_TABLE_PK_WHERE_CONDITION_PLACE_HOLD + ") ";
+    private static final String BATCH_DELETE_LOCK_SQL = "delete from " + LOCK_TABLE_PLACE_HOLD + " where "
+            + ServerTableColumnsName.LOCK_TABLE_XID + " = ? and (" + LOCK_TABLE_PK_WHERE_CONDITION_PLACE_HOLD + ") ";
 
     /**
      * The constant BATCH_DELETE_LOCK_BY_BRANCH_ID_SQL.
      */
-    private static final String BATCH_DELETE_LOCK_BY_BRANCH_ID_SQL = "delete from " + LOCK_TABLE_PLACE_HOLD
-            + " where " + ServerTableColumnsName.LOCK_TABLE_BRANCH_ID + " = ? ";
+    private static final String BATCH_DELETE_LOCK_BY_BRANCH_ID_SQL =
+            "delete from " + LOCK_TABLE_PLACE_HOLD + " where " + ServerTableColumnsName.LOCK_TABLE_BRANCH_ID + " = ? ";
 
     /**
      * The constant BATCH_UPDATE_STATUS_LOCK_BY_GLOBAL_SQL.
      */
-    private static final String BATCH_UPDATE_STATUS_LOCK_BY_GLOBAL_SQL = "update " + LOCK_TABLE_PLACE_HOLD + " set "
-        + ServerTableColumnsName.LOCK_TABLE_STATUS + " = ? where " + ServerTableColumnsName.LOCK_TABLE_XID + " = ? ";
+    private static final String BATCH_UPDATE_STATUS_LOCK_BY_GLOBAL_SQL =
+            "update " + LOCK_TABLE_PLACE_HOLD + " set " + ServerTableColumnsName.LOCK_TABLE_STATUS + " = ? where "
+                    + ServerTableColumnsName.LOCK_TABLE_XID + " = ? ";
 
     /**
      * The constant BATCH_DELETE_LOCK_BY_BRANCHS_SQL.
      */
-    private static final String BATCH_DELETE_LOCK_BY_BRANCHS_SQL = "delete from " + LOCK_TABLE_PLACE_HOLD
-        + " where " + ServerTableColumnsName.LOCK_TABLE_XID + " = ? ";
-
+    private static final String BATCH_DELETE_LOCK_BY_BRANCHS_SQL =
+            "delete from " + LOCK_TABLE_PLACE_HOLD + " where " + ServerTableColumnsName.LOCK_TABLE_XID + " = ? ";
 
     /**
      * The constant QUERY_LOCK_SQL.
      */
-    private static final String QUERY_LOCK_SQL = "select " + ALL_COLUMNS + " from " + LOCK_TABLE_PLACE_HOLD
-        + " where " + ServerTableColumnsName.LOCK_TABLE_ROW_KEY + " = ? ";
+    private static final String QUERY_LOCK_SQL = "select " + ALL_COLUMNS + " from " + LOCK_TABLE_PLACE_HOLD + " where "
+            + ServerTableColumnsName.LOCK_TABLE_ROW_KEY + " = ? ";
 
     /**
      * The constant CHECK_LOCK_SQL.
      */
     private static final String CHECK_LOCK_SQL = "select " + ALL_COLUMNS + " from " + LOCK_TABLE_PLACE_HOLD
-        + " where " + LOCK_TABLE_PK_WHERE_CONDITION_PLACE_HOLD
-        + " order by status desc ";
+            + " where " + LOCK_TABLE_PK_WHERE_CONDITION_PLACE_HOLD
+            + " order by status desc ";
 
     /**
      * The constant QUERY_ALL_LOCK.
@@ -143,8 +143,10 @@ public class AbstractLockStoreSql implements LockStoreSql {
     public String getBatchDeleteLockSql(String lockTable, int rowSize) {
         List<String> pkNameList = new ArrayList<>();
         pkNameList.add(ServerTableColumnsName.LOCK_TABLE_ROW_KEY);
-        String whereCondition = buildWhereConditionByPKs(pkNameList,rowSize,MAX_IN_SIZE);
-        return BATCH_DELETE_LOCK_SQL.replace(LOCK_TABLE_PLACE_HOLD, lockTable).replace(LOCK_TABLE_PK_WHERE_CONDITION_PLACE_HOLD, whereCondition);
+        String whereCondition = buildWhereConditionByPKs(pkNameList, rowSize, MAX_IN_SIZE);
+        return BATCH_DELETE_LOCK_SQL
+                .replace(LOCK_TABLE_PLACE_HOLD, lockTable)
+                .replace(LOCK_TABLE_PK_WHERE_CONDITION_PLACE_HOLD, whereCondition);
     }
 
     @Override
@@ -166,8 +168,10 @@ public class AbstractLockStoreSql implements LockStoreSql {
     public String getCheckLockableSql(String lockTable, int rowSize) {
         List<String> pkNameList = new ArrayList<>();
         pkNameList.add(ServerTableColumnsName.LOCK_TABLE_ROW_KEY);
-        String whereCondition = buildWhereConditionByPKs(pkNameList,rowSize,MAX_IN_SIZE);
-        return CHECK_LOCK_SQL.replace(LOCK_TABLE_PLACE_HOLD, lockTable).replace(LOCK_TABLE_PK_WHERE_CONDITION_PLACE_HOLD, whereCondition);
+        String whereCondition = buildWhereConditionByPKs(pkNameList, rowSize, MAX_IN_SIZE);
+        return CHECK_LOCK_SQL
+                .replace(LOCK_TABLE_PLACE_HOLD, lockTable)
+                .replace(LOCK_TABLE_PK_WHERE_CONDITION_PLACE_HOLD, whereCondition);
     }
 
     @Override
@@ -187,7 +191,7 @@ public class AbstractLockStoreSql implements LockStoreSql {
      */
     private String buildWhereConditionByPKs(List<String> pkNameList, int rowSize, int maxInSize) {
         StringBuilder whereStr = new StringBuilder();
-        //we must consider the situation of composite primary key
+        // we must consider the situation of composite primary key
         int batchSize = rowSize % maxInSize == 0 ? rowSize / maxInSize : (rowSize / maxInSize) + 1;
         for (int batch = 0; batch < batchSize; batch++) {
             if (batch > 0) {
@@ -207,10 +211,10 @@ public class AbstractLockStoreSql implements LockStoreSql {
             }
             whereStr.append(" in ( ");
 
-            int eachSize = (batch == batchSize - 1) ? (rowSize % maxInSize == 0 ? maxInSize : rowSize % maxInSize)
-                : maxInSize;
+            int eachSize =
+                    (batch == batchSize - 1) ? (rowSize % maxInSize == 0 ? maxInSize : rowSize % maxInSize) : maxInSize;
             for (int i = 0; i < eachSize; i++) {
-                //each row is a bracket
+                // each row is a bracket
                 if (i > 0) {
                     whereStr.append(",");
                 }
@@ -232,6 +236,4 @@ public class AbstractLockStoreSql implements LockStoreSql {
 
         return whereStr.toString();
     }
-
-
 }

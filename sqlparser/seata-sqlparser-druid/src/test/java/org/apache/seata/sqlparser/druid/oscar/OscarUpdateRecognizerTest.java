@@ -24,7 +24,6 @@ import com.alibaba.druid.sql.dialect.oracle.ast.expr.OracleCursorExpr;
 import org.apache.seata.sqlparser.ParametersHolder;
 import org.apache.seata.sqlparser.SQLParsingException;
 import org.apache.seata.sqlparser.SQLType;
-import org.apache.seata.sqlparser.druid.oscar.OscarUpdateRecognizer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -64,7 +63,7 @@ public class OscarUpdateRecognizerTest {
         updateColumns = recognizer.getUpdateColumns();
         Assertions.assertEquals(updateColumns.size(), 3);
 
-        //test with error
+        // test with error
         Assertions.assertThrows(SQLParsingException.class, () -> {
             String s = "update t set a = a";
             List<SQLStatement> sqlStatements = SQLUtils.parseStatements(s, DB_TYPE);
@@ -98,7 +97,7 @@ public class OscarUpdateRecognizerTest {
         Assertions.assertThrows(SQLParsingException.class, () -> {
             String s = "update t set a = ?";
             List<SQLStatement> sqlStatements = SQLUtils.parseStatements(s, DB_TYPE);
-            SQLUpdateStatement sqlUpdateStatement = (SQLUpdateStatement)sqlStatements.get(0);
+            SQLUpdateStatement sqlUpdateStatement = (SQLUpdateStatement) sqlStatements.get(0);
             List<SQLUpdateSetItem> updateSetItems = sqlUpdateStatement.getItems();
             for (SQLUpdateSetItem updateSetItem : updateSetItems) {
                 updateSetItem.setValue(new OracleCursorExpr());
@@ -115,12 +114,14 @@ public class OscarUpdateRecognizerTest {
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
 
         OscarUpdateRecognizer recognizer = new OscarUpdateRecognizer(sql, asts.get(0));
-        String whereCondition = recognizer.getWhereCondition(new ParametersHolder() {
-            @Override
-            public Map<Integer,ArrayList<Object>> getParameters() {
-                return null;
-            }
-        }, new ArrayList<>());
+        String whereCondition = recognizer.getWhereCondition(
+                new ParametersHolder() {
+                    @Override
+                    public Map<Integer, ArrayList<Object>> getParameters() {
+                        return null;
+                    }
+                },
+                new ArrayList<>());
 
         Assertions.assertEquals("", whereCondition);
     }

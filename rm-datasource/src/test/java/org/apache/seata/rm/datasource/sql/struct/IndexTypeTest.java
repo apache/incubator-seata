@@ -20,7 +20,6 @@ import org.apache.seata.sqlparser.struct.IndexType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-
 public class IndexTypeTest {
 
     @Test
@@ -30,5 +29,4 @@ public class IndexTypeTest {
             IndexType.valueOf(4);
         });
     }
-
 }

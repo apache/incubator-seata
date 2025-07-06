@@ -16,10 +16,10 @@
  */
 package org.apache.seata.server.console.service;
 
+import org.apache.seata.common.result.PageResult;
 import org.apache.seata.common.result.SingleResult;
 import org.apache.seata.server.console.entity.param.GlobalSessionParam;
 import org.apache.seata.server.console.entity.vo.GlobalSessionVO;
-import org.apache.seata.common.result.PageResult;
 
 /**
  * Global session service

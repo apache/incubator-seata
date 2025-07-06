@@ -16,32 +16,37 @@
  */
 package org.apache.seata.serializer.protobuf.convertor;
 
+import org.apache.seata.core.protocol.transaction.GlobalRollbackRequest;
 import org.apache.seata.serializer.protobuf.generated.AbstractGlobalEndRequestProto;
 import org.apache.seata.serializer.protobuf.generated.AbstractMessageProto;
 import org.apache.seata.serializer.protobuf.generated.AbstractTransactionRequestProto;
 import org.apache.seata.serializer.protobuf.generated.GlobalRollbackRequestProto;
 import org.apache.seata.serializer.protobuf.generated.MessageTypeProto;
-import org.apache.seata.core.protocol.transaction.GlobalRollbackRequest;
-
 
 public class GlobalRollbackRequestConvertor implements PbConvertor<GlobalRollbackRequest, GlobalRollbackRequestProto> {
     @Override
     public GlobalRollbackRequestProto convert2Proto(GlobalRollbackRequest globalRollbackRequest) {
         final short typeCode = globalRollbackRequest.getTypeCode();
 
-        final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder().setMessageType(
-            MessageTypeProto.forNumber(typeCode)).build();
+        final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder()
+                .setMessageType(MessageTypeProto.forNumber(typeCode))
+                .build();
 
-        final AbstractTransactionRequestProto abstractTransactionRequestProto = AbstractTransactionRequestProto
-            .newBuilder().setAbstractMessage(abstractMessage).build();
+        final AbstractTransactionRequestProto abstractTransactionRequestProto =
+                AbstractTransactionRequestProto.newBuilder()
+                        .setAbstractMessage(abstractMessage)
+                        .build();
 
         final String extraData = globalRollbackRequest.getExtraData();
         AbstractGlobalEndRequestProto abstractGlobalEndRequestProto = AbstractGlobalEndRequestProto.newBuilder()
-            .setAbstractTransactionRequest(abstractTransactionRequestProto).setXid(globalRollbackRequest.getXid())
-            .setExtraData(extraData == null ? "" : extraData).build();
+                .setAbstractTransactionRequest(abstractTransactionRequestProto)
+                .setXid(globalRollbackRequest.getXid())
+                .setExtraData(extraData == null ? "" : extraData)
+                .build();
 
-        GlobalRollbackRequestProto result = GlobalRollbackRequestProto.newBuilder().setAbstractGlobalEndRequest(
-            abstractGlobalEndRequestProto).build();
+        GlobalRollbackRequestProto result = GlobalRollbackRequestProto.newBuilder()
+                .setAbstractGlobalEndRequest(abstractGlobalEndRequestProto)
+                .build();
 
         return result;
     }
@@ -49,8 +54,10 @@ public class GlobalRollbackRequestConvertor implements PbConvertor<GlobalRollbac
     @Override
     public GlobalRollbackRequest convert2Model(GlobalRollbackRequestProto globalRollbackRequestProto) {
         GlobalRollbackRequest branchCommitRequest = new GlobalRollbackRequest();
-        branchCommitRequest.setExtraData(globalRollbackRequestProto.getAbstractGlobalEndRequest().getExtraData());
-        branchCommitRequest.setXid(globalRollbackRequestProto.getAbstractGlobalEndRequest().getXid());
+        branchCommitRequest.setExtraData(
+                globalRollbackRequestProto.getAbstractGlobalEndRequest().getExtraData());
+        branchCommitRequest.setXid(
+                globalRollbackRequestProto.getAbstractGlobalEndRequest().getXid());
         return branchCommitRequest;
     }
 }

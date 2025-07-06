@@ -52,7 +52,7 @@ public class ConfigProcessor {
      * @return data type
      */
     public static String resolverConfigDataType(String dataId) {
-        return resolverConfigDataType(FILE_CONFIG.getConfig(getDataTypeKey()),dataId,DEFAULT_DATA_TYPE);
+        return resolverConfigDataType(FILE_CONFIG.getConfig(getDataTypeKey()), dataId, DEFAULT_DATA_TYPE);
     }
 
     /**
@@ -63,7 +63,7 @@ public class ConfigProcessor {
      * @param defaultDataType the default data type
      * @return data type
      */
-    public static String resolverConfigDataType(String dataType,String dataId,String defaultDataType) {
+    public static String resolverConfigDataType(String dataType, String dataId, String defaultDataType) {
         if (StringUtils.isNotBlank(dataType)) {
             return dataType;
         }
@@ -77,11 +77,12 @@ public class ConfigProcessor {
         } catch (IllegalArgumentException e) {
             return defaultDataType;
         }
-
     }
 
     private static String getDataTypeKey() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, ConfigurationKeys.DATA_TYPE);
+        return String.join(
+                ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR,
+                ConfigurationKeys.FILE_ROOT_CONFIG,
+                ConfigurationKeys.DATA_TYPE);
     }
-
 }

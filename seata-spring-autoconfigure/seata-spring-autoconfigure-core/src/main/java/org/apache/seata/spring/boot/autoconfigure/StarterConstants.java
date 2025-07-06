@@ -19,6 +19,8 @@ package org.apache.seata.spring.boot.autoconfigure;
 import java.util.HashMap;
 import org.apache.seata.config.ConfigurationKeys;
 
+import java.util.HashMap;
+
 public interface StarterConstants {
     String SEATA_PREFIX = "seata";
     String SEATA_SPRING_CLOUD_ALIBABA_PREFIX = "spring.cloud.alibaba.seata";

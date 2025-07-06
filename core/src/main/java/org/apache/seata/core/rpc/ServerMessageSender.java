@@ -50,7 +50,7 @@ public interface ServerMessageSender {
      * @throws TimeoutException the timeout exception
      */
     Object sendSyncRequest(String resourceId, String clientId, Object message, long timeout)
-        throws IOException, TimeoutException;
+            throws IOException, TimeoutException;
 
     /**
      * Sync call to RM
@@ -97,6 +97,4 @@ public interface ServerMessageSender {
      * @throws TimeoutException the timeout exception
      */
     Object sendASyncRequest(Channel channel, Object message) throws IOException, TimeoutException;
-
-
 }

@@ -19,7 +19,6 @@ package org.apache.seata.core.rpc.hook;
 import org.apache.seata.common.rpc.RpcStatus;
 import org.apache.seata.core.protocol.RpcMessage;
 
-
 public class StatusRpcHook implements RpcHook {
 
     @Override

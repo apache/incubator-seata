@@ -16,9 +16,6 @@
  */
 package org.apache.seata.rm.datasource;
 
-import org.apache.seata.rm.datasource.ConnectionProxy;
-import org.apache.seata.rm.datasource.ConnectionProxy.LockRetryPolicy;
-import org.apache.seata.rm.datasource.DataSourceProxy;
 import org.apache.seata.common.LockStrategyMode;
 import org.apache.seata.core.context.GlobalLockConfigHolder;
 import org.apache.seata.core.exception.TransactionException;
@@ -26,6 +23,7 @@ import org.apache.seata.core.exception.TransactionExceptionCode;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.GlobalLockConfig;
 import org.apache.seata.rm.DefaultResourceManager;
+import org.apache.seata.rm.datasource.ConnectionProxy.LockRetryPolicy;
 import org.apache.seata.rm.datasource.exec.LockWaitTimeoutException;
 import org.apache.seata.rm.datasource.mock.MockConnection;
 import org.apache.seata.rm.datasource.mock.MockDriver;
@@ -46,23 +44,25 @@ import java.lang.reflect.Modifier;
  * ConnectionProxy test
  *
  */
-@EnabledOnJre({JRE.JAVA_8, JRE.JAVA_11}) // `ReflectionUtil.modifyStaticFinalField` does not supported java17 and above versions
+@EnabledOnJre({JRE.JAVA_8, JRE.JAVA_11
+}) // `ReflectionUtil.modifyStaticFinalField` does not supported java17 and above versions
 public class ConnectionProxyTest {
     private DataSourceProxy dataSourceProxy;
 
-    private final static String TEST_RESOURCE_ID = "testResourceId";
+    private static final String TEST_RESOURCE_ID = "testResourceId";
 
-    private final static String TEST_XID = "testXid";
+    private static final String TEST_XID = "testXid";
 
-    private final static String lockKey = "order:123";
+    private static final String lockKey = "order:123";
 
-    private final static String DB_TYPE = "mysql";
+    private static final String DB_TYPE = "mysql";
 
     private Field branchRollbackFlagField;
 
     @BeforeEach
     public void initBeforeEach() throws Exception {
-        branchRollbackFlagField = LockRetryPolicy.class.getDeclaredField("LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT");
+        branchRollbackFlagField =
+                LockRetryPolicy.class.getDeclaredField("LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT");
         Field modifiersField = Field.class.getDeclaredField("modifiers");
         modifiersField.setAccessible(true);
         modifiersField.setInt(branchRollbackFlagField, branchRollbackFlagField.getModifiers() & ~Modifier.FINAL);
@@ -71,12 +71,17 @@ public class ConnectionProxyTest {
         Assertions.assertTrue(branchRollbackFlag);
 
         dataSourceProxy = Mockito.mock(DataSourceProxy.class);
-        Mockito.when(dataSourceProxy.getResourceId())
-                .thenReturn(TEST_RESOURCE_ID);
+        Mockito.when(dataSourceProxy.getResourceId()).thenReturn(TEST_RESOURCE_ID);
         Mockito.when(dataSourceProxy.getDbType()).thenReturn(DB_TYPE);
         DefaultResourceManager rm = Mockito.mock(DefaultResourceManager.class);
 
-        Mockito.when(rm.branchRegister(BranchType.AT, dataSourceProxy.getResourceId(), null, TEST_XID, "{\"autoCommit\":false}", lockKey))
+        Mockito.when(rm.branchRegister(
+                        BranchType.AT,
+                        dataSourceProxy.getResourceId(),
+                        null,
+                        TEST_XID,
+                        "{\"autoCommit\":false}",
+                        lockKey))
                 .thenThrow(new TransactionException(TransactionExceptionCode.LockKeyConflict));
         DefaultResourceManager defaultResourceManager = DefaultResourceManager.get();
         Assertions.assertNotNull(defaultResourceManager);
@@ -92,7 +97,8 @@ public class ConnectionProxyTest {
         preGlobalLockConfig.setLockRetryInterval(10);
         preGlobalLockConfig.setLockStrategyMode(LockStrategyMode.PESSIMISTIC);
         GlobalLockConfig globalLockConfig = GlobalLockConfigHolder.setAndReturnPrevious(preGlobalLockConfig);
-        ConnectionProxy connectionProxy = new ConnectionProxy(dataSourceProxy, new MockConnection(new MockDriver(), "", null));
+        ConnectionProxy connectionProxy =
+                new ConnectionProxy(dataSourceProxy, new MockConnection(new MockDriver(), "", null));
         connectionProxy.bind(TEST_XID);
         SQLUndoLog sqlUndoLog = new SQLUndoLog();
         TableRecords beforeImage = new TableRecords();

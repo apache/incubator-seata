@@ -16,17 +16,14 @@
  */
 package org.apache.seata.rm.datasource.sql.struct;
 
-import org.apache.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
-import org.apache.seata.rm.datasource.sql.struct.cache.MariadbTableMetaCache;
-import org.apache.seata.rm.datasource.sql.struct.cache.PolarDBXTableMetaCache;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
 import org.apache.seata.common.loader.EnhancedServiceNotFoundException;
+import org.apache.seata.rm.datasource.sql.struct.cache.MariadbTableMetaCache;
 import org.apache.seata.rm.datasource.sql.struct.cache.MysqlTableMetaCache;
 import org.apache.seata.rm.datasource.sql.struct.cache.OracleTableMetaCache;
+import org.apache.seata.rm.datasource.sql.struct.cache.PolarDBXTableMetaCache;
 import org.apache.seata.sqlparser.util.JdbcConstants;
-
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class TableMetaCacheFactoryTest {
 
@@ -34,12 +31,20 @@ public class TableMetaCacheFactoryTest {
 
     @Test
     public void getTableMetaCache() {
-        Assertions.assertTrue(TableMetaCacheFactory.getTableMetaCache(JdbcConstants.MYSQL) instanceof MysqlTableMetaCache);
-        Assertions.assertTrue(TableMetaCacheFactory.getTableMetaCache(JdbcConstants.MARIADB) instanceof MariadbTableMetaCache);
-        Assertions.assertTrue(TableMetaCacheFactory.getTableMetaCache(JdbcConstants.POLARDBX) instanceof PolarDBXTableMetaCache);
-        Assertions.assertTrue(TableMetaCacheFactory.getTableMetaCache(JdbcConstants.ORACLE) instanceof OracleTableMetaCache);
-        Assertions.assertEquals(TableMetaCacheFactory.getTableMetaCache(JdbcConstants.ORACLE), TableMetaCacheFactory.getTableMetaCache(JdbcConstants.ORACLE));
-        Assertions.assertEquals(TableMetaCacheFactory.getTableMetaCache(JdbcConstants.MYSQL), TableMetaCacheFactory.getTableMetaCache(JdbcConstants.MYSQL));
+        Assertions.assertTrue(
+                TableMetaCacheFactory.getTableMetaCache(JdbcConstants.MYSQL) instanceof MysqlTableMetaCache);
+        Assertions.assertTrue(
+                TableMetaCacheFactory.getTableMetaCache(JdbcConstants.MARIADB) instanceof MariadbTableMetaCache);
+        Assertions.assertTrue(
+                TableMetaCacheFactory.getTableMetaCache(JdbcConstants.POLARDBX) instanceof PolarDBXTableMetaCache);
+        Assertions.assertTrue(
+                TableMetaCacheFactory.getTableMetaCache(JdbcConstants.ORACLE) instanceof OracleTableMetaCache);
+        Assertions.assertEquals(
+                TableMetaCacheFactory.getTableMetaCache(JdbcConstants.ORACLE),
+                TableMetaCacheFactory.getTableMetaCache(JdbcConstants.ORACLE));
+        Assertions.assertEquals(
+                TableMetaCacheFactory.getTableMetaCache(JdbcConstants.MYSQL),
+                TableMetaCacheFactory.getTableMetaCache(JdbcConstants.MYSQL));
         Assertions.assertThrows(EnhancedServiceNotFoundException.class, () -> {
             TableMetaCacheFactory.getTableMetaCache(NOT_EXIST_SQL_TYPE);
         });

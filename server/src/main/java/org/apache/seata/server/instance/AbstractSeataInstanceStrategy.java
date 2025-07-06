@@ -16,14 +16,6 @@
  */
 package org.apache.seata.server.instance;
 
-import java.util.Optional;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.annotation.Resource;
 import org.apache.seata.common.metadata.Instance;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.StringUtils;
@@ -36,6 +28,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.context.ApplicationContext;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.annotation.Resource;
+import java.util.Optional;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.apache.seata.common.ConfigurationKeys.NAMING_SERVER;
 
@@ -56,6 +56,7 @@ public abstract class AbstractSeataInstanceStrategy implements SeataInstanceStra
     protected static volatile ScheduledExecutorService EXECUTOR_SERVICE;
 
     protected AtomicBoolean init = new AtomicBoolean(false);
+
     @PostConstruct
     public void postConstruct() {
         this.serverProperties = applicationContext.getBean(ServerProperties.class);
@@ -72,16 +73,19 @@ public abstract class AbstractSeataInstanceStrategy implements SeataInstanceStra
             // load vgroup mapping relationship
             instance.addMetadata("vGroup", vGroupMappingStoreManager.loadVGroups());
             EXECUTOR_SERVICE = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("scheduledExcuter", 1, true));
-            EXECUTOR_SERVICE.scheduleAtFixedRate(() -> {
-                try {
-                    if (instance.getTerm() > 0) {
-                        SessionHolder.getRootVGroupMappingManager().notifyMapping();
-                    }
-                } catch (Exception e) {
-                    logger.error("Naming server register Exception", e);
-                }
-            }, registryNamingServerProperties.getHeartbeatPeriod(), registryNamingServerProperties.getHeartbeatPeriod(),
-                TimeUnit.MILLISECONDS);
+            EXECUTOR_SERVICE.scheduleAtFixedRate(
+                    () -> {
+                        try {
+                            if (instance.getTerm() > 0) {
+                                SessionHolder.getRootVGroupMappingManager().notifyMapping();
+                            }
+                        } catch (Exception e) {
+                            logger.error("Naming server register Exception", e);
+                        }
+                    },
+                    registryNamingServerProperties.getHeartbeatPeriod(),
+                    registryNamingServerProperties.getHeartbeatPeriod(),
+                    TimeUnit.MILLISECONDS);
         }
     }
 
@@ -89,5 +93,4 @@ public abstract class AbstractSeataInstanceStrategy implements SeataInstanceStra
     public void destroy() {
         Optional.ofNullable(EXECUTOR_SERVICE).ifPresent(ScheduledExecutorService::shutdown);
     }
-
 }

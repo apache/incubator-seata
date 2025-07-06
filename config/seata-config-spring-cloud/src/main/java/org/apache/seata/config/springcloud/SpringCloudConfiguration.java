@@ -16,8 +16,6 @@
  */
 package org.apache.seata.config.springcloud;
 
-import java.util.Set;
-
 import org.apache.seata.common.holder.ObjectHolder;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.AbstractConfiguration;
@@ -25,6 +23,8 @@ import org.apache.seata.config.ConfigurationChangeListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
+
+import java.util.Set;
 
 public class SpringCloudConfiguration extends AbstractConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(SpringCloudConfiguration.class);
@@ -43,9 +43,7 @@ public class SpringCloudConfiguration extends AbstractConfiguration {
         return instance;
     }
 
-    private SpringCloudConfiguration() {
-
-    }
+    private SpringCloudConfiguration() {}
 
     @Override
     public String getTypeName() {
@@ -83,8 +81,7 @@ public class SpringCloudConfiguration extends AbstractConfiguration {
     }
 
     @Override
-    public void removeConfigListener(String dataId, ConfigurationChangeListener listener) {
-    }
+    public void removeConfigListener(String dataId, ConfigurationChangeListener listener) {}
 
     @Override
     public Set<ConfigurationChangeListener> getConfigListeners(String dataId) {

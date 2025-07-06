@@ -42,5 +42,4 @@ public interface InsertExecutor<T> extends Executor<T> {
      * @throws SQLException the sql exception
      */
     Map<String, List<Object>> getPkValuesByColumn() throws SQLException;
-
 }

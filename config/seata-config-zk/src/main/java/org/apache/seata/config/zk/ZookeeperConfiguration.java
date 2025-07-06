@@ -16,20 +16,6 @@
  */
 package org.apache.seata.config.zk;
 
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.Enumeration;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.recipes.cache.ChildData;
@@ -51,6 +37,21 @@ import org.apache.zookeeper.KeeperException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Enumeration;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 import static org.apache.seata.config.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
 import static org.apache.seata.config.ConfigurationKeys.FILE_ROOT_CONFIG;
 import static org.apache.seata.config.ConfigurationKeys.SEATA_FILE_ROOT_CONFIG;
@@ -59,7 +60,7 @@ import static org.apache.seata.config.ConfigurationKeys.SEATA_FILE_ROOT_CONFIG;
  * The type Zookeeper configuration.
  */
 public class ZookeeperConfiguration extends AbstractConfiguration {
-    private final static Logger LOGGER = LoggerFactory.getLogger(ZookeeperConfiguration.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ZookeeperConfiguration.class);
 
     private static final String CONFIG_TYPE = "zk";
     private static final String ZK_PATH_SPLIT_CHAR = "/";
@@ -76,15 +77,19 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
     private static final int DEFAULT_SESSION_TIMEOUT = 6000;
     private static final int DEFAULT_CONNECT_TIMEOUT = 2000;
     private static final String DEFAULT_CONFIG_PATH = ROOT_PATH + "/seata.properties";
-    private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + CONFIG_TYPE
-        + FILE_CONFIG_SPLIT_CHAR;
-    private static final ExecutorService CONFIG_EXECUTOR = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM,
-        Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
-        new NamedThreadFactory("ZKConfigThread", THREAD_POOL_NUM));
+    private static final String FILE_CONFIG_KEY_PREFIX =
+            FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + CONFIG_TYPE + FILE_CONFIG_SPLIT_CHAR;
+    private static final ExecutorService CONFIG_EXECUTOR = new ThreadPoolExecutor(
+            THREAD_POOL_NUM,
+            THREAD_POOL_NUM,
+            Integer.MAX_VALUE,
+            TimeUnit.MILLISECONDS,
+            new LinkedBlockingQueue<>(),
+            new NamedThreadFactory("ZKConfigThread", THREAD_POOL_NUM));
     private static volatile CuratorFramework zkClient;
     private static final int MAP_INITIAL_CAPACITY = 8;
-    private static final ConcurrentMap<String, ConcurrentMap<ConfigurationChangeListener, NodeCacheListenerImpl>> CONFIG_LISTENERS_MAP
-        = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
+    private static final ConcurrentMap<String, ConcurrentMap<ConfigurationChangeListener, NodeCacheListenerImpl>>
+            CONFIG_LISTENERS_MAP = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
     private static volatile Properties seataConfig = new Properties();
     static final Charset CHARSET = StandardCharsets.UTF_8;
     private static Map<String, CuratorCache> nodeCacheMap = new ConcurrentHashMap<>();
@@ -98,17 +103,20 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
             synchronized (ZookeeperConfiguration.class) {
                 if (zkClient == null) {
                     String serverAddr = FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY);
-                    int sessionTimeout = FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + SESSION_TIMEOUT_KEY, DEFAULT_SESSION_TIMEOUT);
-                    int connectTimeout = FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + CONNECT_TIMEOUT_KEY, DEFAULT_CONNECT_TIMEOUT);
+                    int sessionTimeout =
+                            FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + SESSION_TIMEOUT_KEY, DEFAULT_SESSION_TIMEOUT);
+                    int connectTimeout =
+                            FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + CONNECT_TIMEOUT_KEY, DEFAULT_CONNECT_TIMEOUT);
                     CuratorFrameworkFactory.Builder builder = CuratorFrameworkFactory.builder()
-                        .connectString(serverAddr)
-                        .retryPolicy(new RetryNTimes(1, 1000))
-                        .connectionTimeoutMs(connectTimeout)
-                        .sessionTimeoutMs(sessionTimeout);
+                            .connectString(serverAddr)
+                            .retryPolicy(new RetryNTimes(1, 1000))
+                            .connectionTimeoutMs(connectTimeout)
+                            .sessionTimeoutMs(sessionTimeout);
                     String username = FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + AUTH_USERNAME);
                     String password = FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + AUTH_PASSWORD);
                     if (!StringUtils.isBlank(username) && !StringUtils.isBlank(password)) {
-                        StringBuilder auth = new StringBuilder(username).append(":").append(password);
+                        StringBuilder auth =
+                                new StringBuilder(username).append(":").append(password);
                         builder.authorization("digest", auth.toString().getBytes());
                     }
                     zkClient = builder.build();
@@ -156,8 +164,7 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
         FutureTask<String> future = new FutureTask<>(() -> {
             String path = buildPath(dataId);
             if (!checkExists(path)) {
-                LOGGER.warn("config {} is not existed, return defaultValue {} ",
-                    dataId, defaultValue);
+                LOGGER.warn("config {} is not existed, return defaultValue {} ", dataId, defaultValue);
                 return defaultValue;
             }
             String value1 = readData(path);
@@ -167,8 +174,11 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
         try {
             return future.get(timeoutMills, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
-            LOGGER.error("getConfig {} error or timeout, return defaultValue {}, exception:{} ",
-                dataId, defaultValue, e.getMessage());
+            LOGGER.error(
+                    "getConfig {} error or timeout, return defaultValue {}, exception:{} ",
+                    dataId,
+                    defaultValue,
+                    e.getMessage());
             return defaultValue;
         }
     }
@@ -206,8 +216,7 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
         try {
             return future.get(timeoutMills, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
-            LOGGER.error("putConfig {}, value: {} is error or timeout, exception: {}",
-                dataId, content, e.getMessage());
+            LOGGER.error("putConfig {}, value: {} is error or timeout, exception: {}", dataId, content, e.getMessage());
             return false;
         }
     }
@@ -256,7 +265,6 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
             LOGGER.error("removeConfig {} is error or timeout, exception:{}", dataId, e.getMessage());
             return false;
         }
-
     }
 
     protected boolean deletePath(String path) {
@@ -280,14 +288,16 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
         if (!seataConfig.isEmpty()) {
             NodeCacheListenerImpl zkListener = new NodeCacheListenerImpl(dataId, listener);
             CuratorCacheListener.builder().forAll(zkListener).build();
-            CONFIG_LISTENERS_MAP.computeIfAbsent(dataId, key -> new ConcurrentHashMap<>())
-                .put(listener, zkListener);
+            CONFIG_LISTENERS_MAP
+                    .computeIfAbsent(dataId, key -> new ConcurrentHashMap<>())
+                    .put(listener, zkListener);
             return;
         }
         if (checkExists(path)) {
             NodeCacheListenerImpl zkListener = new NodeCacheListenerImpl(path, listener);
-            CONFIG_LISTENERS_MAP.computeIfAbsent(dataId, key -> new ConcurrentHashMap<>())
-                .put(listener, zkListener);
+            CONFIG_LISTENERS_MAP
+                    .computeIfAbsent(dataId, key -> new ConcurrentHashMap<>())
+                    .put(listener, zkListener);
             addDataListener(path, zkListener);
         }
     }
@@ -304,7 +314,8 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
                 for (ConfigurationChangeListener entry : configChangeListeners) {
                     if (listener.equals(entry)) {
                         NodeCacheListenerImpl zkListener = null;
-                        Map<ConfigurationChangeListener, NodeCacheListenerImpl> configListeners = CONFIG_LISTENERS_MAP.get(dataId);
+                        Map<ConfigurationChangeListener, NodeCacheListenerImpl> configListeners =
+                                CONFIG_LISTENERS_MAP.get(dataId);
                         if (configListeners != null) {
                             zkListener = configListeners.get(listener);
                             configListeners.remove(entry);
@@ -321,7 +332,8 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
 
     @Override
     public Set<ConfigurationChangeListener> getConfigListeners(String dataId) {
-        ConcurrentMap<ConfigurationChangeListener, NodeCacheListenerImpl> configListeners = CONFIG_LISTENERS_MAP.get(dataId);
+        ConcurrentMap<ConfigurationChangeListener, NodeCacheListenerImpl> configListeners =
+                CONFIG_LISTENERS_MAP.get(dataId);
         if (CollectionUtils.isNotEmpty(configListeners)) {
             return configListeners.keySet();
         } else {
@@ -393,17 +405,19 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
                     }
                 }
 
-                for (Map.Entry<String, ConcurrentMap<ConfigurationChangeListener, NodeCacheListenerImpl>> entry : CONFIG_LISTENERS_MAP.entrySet()) {
+                for (Map.Entry<String, ConcurrentMap<ConfigurationChangeListener, NodeCacheListenerImpl>> entry :
+                        CONFIG_LISTENERS_MAP.entrySet()) {
                     String listenedDataId = entry.getKey();
                     String propertyOld = seataConfig.getProperty(listenedDataId, "");
                     String propertyNew = seataConfigNew.getProperty(listenedDataId, "");
                     if (!propertyOld.equals(propertyNew)) {
                         ConfigurationChangeEvent event = new ConfigurationChangeEvent()
-                            .setDataId(listenedDataId)
-                            .setNewValue(propertyNew)
-                            .setChangeType(ConfigurationChangeType.MODIFY);
+                                .setDataId(listenedDataId)
+                                .setNewValue(propertyNew)
+                                .setChangeType(ConfigurationChangeType.MODIFY);
 
-                        ConcurrentMap<ConfigurationChangeListener, NodeCacheListenerImpl> configListeners = entry.getValue();
+                        ConcurrentMap<ConfigurationChangeListener, NodeCacheListenerImpl> configListeners =
+                                entry.getValue();
                         for (ConfigurationChangeListener configListener : configListeners.keySet()) {
                             configListener.onProcessEvent(event);
                         }
@@ -416,14 +430,17 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
                 if (type == Type.NODE_DELETED) {
                     // Node is deleted.
                     String dataId = path.replaceFirst(ROOT_PATH + ZK_PATH_SPLIT_CHAR, "");
-                    ConfigurationChangeEvent event = new ConfigurationChangeEvent().setDataId(dataId).setChangeType(
-                        ConfigurationChangeType.DELETE);
+                    ConfigurationChangeEvent event = new ConfigurationChangeEvent()
+                            .setDataId(dataId)
+                            .setChangeType(ConfigurationChangeType.DELETE);
                     listener.onProcessEvent(event);
                 } else {
                     // Node is changed.
                     String dataId = path.replaceFirst(ROOT_PATH + ZK_PATH_SPLIT_CHAR, "");
-                    ConfigurationChangeEvent event = new ConfigurationChangeEvent().setDataId(dataId).setNewValue(o.toString())
-                        .setChangeType(ConfigurationChangeType.MODIFY);
+                    ConfigurationChangeEvent event = new ConfigurationChangeEvent()
+                            .setDataId(dataId)
+                            .setNewValue(o.toString())
+                            .setChangeType(ConfigurationChangeType.MODIFY);
                     listener.onProcessEvent(event);
                 }
             }

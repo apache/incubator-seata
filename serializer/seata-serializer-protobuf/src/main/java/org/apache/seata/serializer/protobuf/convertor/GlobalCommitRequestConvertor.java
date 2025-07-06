@@ -16,42 +16,48 @@
  */
 package org.apache.seata.serializer.protobuf.convertor;
 
+import org.apache.seata.core.protocol.transaction.GlobalCommitRequest;
 import org.apache.seata.serializer.protobuf.generated.AbstractGlobalEndRequestProto;
 import org.apache.seata.serializer.protobuf.generated.AbstractMessageProto;
 import org.apache.seata.serializer.protobuf.generated.AbstractTransactionRequestProto;
 import org.apache.seata.serializer.protobuf.generated.GlobalCommitRequestProto;
 import org.apache.seata.serializer.protobuf.generated.MessageTypeProto;
-import org.apache.seata.core.protocol.transaction.GlobalCommitRequest;
-
 
 public class GlobalCommitRequestConvertor implements PbConvertor<GlobalCommitRequest, GlobalCommitRequestProto> {
     @Override
     public GlobalCommitRequestProto convert2Proto(GlobalCommitRequest globalCommitRequest) {
         final short typeCode = globalCommitRequest.getTypeCode();
 
-        final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder().setMessageType(
-            MessageTypeProto.forNumber(typeCode)).build();
+        final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder()
+                .setMessageType(MessageTypeProto.forNumber(typeCode))
+                .build();
 
-        final AbstractTransactionRequestProto abstractTransactionRequestProto = AbstractTransactionRequestProto
-            .newBuilder().setAbstractMessage(abstractMessage).build();
+        final AbstractTransactionRequestProto abstractTransactionRequestProto =
+                AbstractTransactionRequestProto.newBuilder()
+                        .setAbstractMessage(abstractMessage)
+                        .build();
 
         final String extraData = globalCommitRequest.getExtraData();
         AbstractGlobalEndRequestProto abstractGlobalEndRequestProto = AbstractGlobalEndRequestProto.newBuilder()
-            .setAbstractTransactionRequest(abstractTransactionRequestProto).setXid(globalCommitRequest.getXid())
-            .setExtraData(extraData == null ? "" : extraData).build();
+                .setAbstractTransactionRequest(abstractTransactionRequestProto)
+                .setXid(globalCommitRequest.getXid())
+                .setExtraData(extraData == null ? "" : extraData)
+                .build();
 
-        GlobalCommitRequestProto result = GlobalCommitRequestProto.newBuilder().setAbstractGlobalEndRequest(
-            abstractGlobalEndRequestProto).build();
+        GlobalCommitRequestProto result = GlobalCommitRequestProto.newBuilder()
+                .setAbstractGlobalEndRequest(abstractGlobalEndRequestProto)
+                .build();
 
         return result;
-
     }
 
     @Override
     public GlobalCommitRequest convert2Model(GlobalCommitRequestProto globalCommitRequestProto) {
         GlobalCommitRequest branchCommitRequest = new GlobalCommitRequest();
-        branchCommitRequest.setExtraData(globalCommitRequestProto.getAbstractGlobalEndRequest().getExtraData());
-        branchCommitRequest.setXid(globalCommitRequestProto.getAbstractGlobalEndRequest().getXid());
+        branchCommitRequest.setExtraData(
+                globalCommitRequestProto.getAbstractGlobalEndRequest().getExtraData());
+        branchCommitRequest.setXid(
+                globalCommitRequestProto.getAbstractGlobalEndRequest().getXid());
         return branchCommitRequest;
     }
 }

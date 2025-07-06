@@ -77,10 +77,6 @@ public class RedisKeyConstants {
      */
     public static final String REDIS_KEY_GLOBAL_GMT_MODIFIED = "gmtModified";
 
-
-
-
-
     /**
      * The constant redis key of branch transaction name branchId
      */
@@ -160,5 +156,4 @@ public class RedisKeyConstants {
      * The constant DEFAULT_LOG_QUERY_LIMIT.
      */
     public static final int DEFAULT_LOG_QUERY_LIMIT = 100;
-
 }

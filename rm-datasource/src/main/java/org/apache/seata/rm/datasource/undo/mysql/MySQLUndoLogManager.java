@@ -16,17 +16,6 @@
  */
 package org.apache.seata.rm.datasource.undo.mysql;
 
-import java.io.ByteArrayInputStream;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.common.util.CollectionUtils;
@@ -43,6 +32,16 @@ import org.apache.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayInputStream;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 @LoadLevel(name = JdbcConstants.MYSQL)
 public class MySQLUndoLogManager extends AbstractUndoLogManager {
@@ -52,15 +51,15 @@ public class MySQLUndoLogManager extends AbstractUndoLogManager {
     /**
      * branch_id, xid, context, rollback_info, log_status, log_created, log_modified
      */
-    private static final String INSERT_UNDO_LOG_SQL = "INSERT INTO " + UNDO_LOG_TABLE_NAME +
-            " (" + ClientTableColumnsName.UNDO_LOG_BRANCH_XID + ", " + ClientTableColumnsName.UNDO_LOG_XID + ", "
+    private static final String INSERT_UNDO_LOG_SQL = "INSERT INTO " + UNDO_LOG_TABLE_NAME + " ("
+            + ClientTableColumnsName.UNDO_LOG_BRANCH_XID + ", " + ClientTableColumnsName.UNDO_LOG_XID + ", "
             + ClientTableColumnsName.UNDO_LOG_CONTEXT + ", " + ClientTableColumnsName.UNDO_LOG_ROLLBACK_INFO + ", "
             + ClientTableColumnsName.UNDO_LOG_LOG_STATUS + ", " + ClientTableColumnsName.UNDO_LOG_LOG_CREATED + ", "
             + ClientTableColumnsName.UNDO_LOG_LOG_MODIFIED + ")"
             + " VALUES (?, ?, ?, ?, ?, now(6), now(6))";
 
-    private static final String DELETE_UNDO_LOG_BY_CREATE_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME +
-            " WHERE " + ClientTableColumnsName.UNDO_LOG_LOG_CREATED + " <= ? LIMIT ?";
+    private static final String DELETE_UNDO_LOG_BY_CREATE_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME + " WHERE "
+            + ClientTableColumnsName.UNDO_LOG_LOG_CREATED + " <= ? LIMIT ?";
 
     @Override
     public int deleteUndoLogByLogCreated(Date logCreated, int limitRows, Connection conn) throws SQLException {
@@ -81,13 +80,18 @@ public class MySQLUndoLogManager extends AbstractUndoLogManager {
     }
 
     @Override
-    protected Pair<Integer, List<byte[]>> getSubRollbackInfo(Connection conn, String subIds, Long branchId, String xid) throws SQLException {
+    protected Pair<Integer, List<byte[]>> getSubRollbackInfo(Connection conn, String subIds, Long branchId, String xid)
+            throws SQLException {
         if (StringUtils.isBlank(subIds)) {
             return new Pair<>(0, Collections.emptyList());
         }
         StringBuilder sqlBuilder = new StringBuilder(64);
-        sqlBuilder.append("SELECT * FROM ").append(UNDO_LOG_TABLE_NAME).append(" WHERE ")
-                .append(ClientTableColumnsName.UNDO_LOG_BRANCH_XID).append(" IN ");
+        sqlBuilder
+                .append("SELECT * FROM ")
+                .append(UNDO_LOG_TABLE_NAME)
+                .append(" WHERE ")
+                .append(ClientTableColumnsName.UNDO_LOG_BRANCH_XID)
+                .append(" IN ");
         String[] split = StringUtils.split(subIds, UndoLogConstants.SUB_SPLIT_KEY);
         appendInParam(split.length, sqlBuilder);
         sqlBuilder.append(" AND ").append(ClientTableColumnsName.UNDO_LOG_XID).append(" = ?");
@@ -126,8 +130,8 @@ public class MySQLUndoLogManager extends AbstractUndoLogManager {
     }
 
     @Override
-    protected void insertUndoLogWithNormal(String xid, long branchId, String rollbackCtx, byte[] undoLogContent,
-                                           Connection conn) throws SQLException {
+    protected void insertUndoLogWithNormal(
+            String xid, long branchId, String rollbackCtx, byte[] undoLogContent, Connection conn) throws SQLException {
         Map<String, String> decodeMap = CollectionUtils.decodeMap(rollbackCtx);
         String maxAllowedPacketStr = decodeMap.get(UndoLogConstants.MAX_ALLOWED_PACKET);
         long maxAllowedPacket = 1024 * 1024; // 1MB -> mysql5.6 default value
@@ -166,12 +170,20 @@ public class MySQLUndoLogManager extends AbstractUndoLogManager {
     }
 
     @Override
-    protected void insertUndoLogWithGlobalFinished(String xid, long branchId, UndoLogParser parser, Connection conn) throws SQLException {
-        insertUndoLog(xid, branchId, buildContext(parser.getName(), CompressorType.NONE), parser.getDefaultContent(), State.GlobalFinished, conn);
+    protected void insertUndoLogWithGlobalFinished(String xid, long branchId, UndoLogParser parser, Connection conn)
+            throws SQLException {
+        insertUndoLog(
+                xid,
+                branchId,
+                buildContext(parser.getName(), CompressorType.NONE),
+                parser.getDefaultContent(),
+                State.GlobalFinished,
+                conn);
     }
 
-    private void insertUndoLog(String xid, long branchId, String rollbackCtx, byte[] undoLogContent,
-                               State state, Connection conn) throws SQLException {
+    private void insertUndoLog(
+            String xid, long branchId, String rollbackCtx, byte[] undoLogContent, State state, Connection conn)
+            throws SQLException {
         try (PreparedStatement pst = conn.prepareStatement(INSERT_UNDO_LOG_SQL)) {
             pst.setLong(1, branchId);
             pst.setString(2, xid);
@@ -186,5 +198,4 @@ public class MySQLUndoLogManager extends AbstractUndoLogManager {
             throw (SQLException) e;
         }
     }
-
 }

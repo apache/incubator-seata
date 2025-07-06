@@ -31,5 +31,4 @@ public interface RemotingService {
      * Shutdown.
      */
     void shutdown();
-
 }

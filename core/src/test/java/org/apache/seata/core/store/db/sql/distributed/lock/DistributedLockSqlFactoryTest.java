@@ -17,6 +17,7 @@
 package org.apache.seata.core.store.db.sql.distributed.lock;
 
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class DistributedLockSqlFactoryTest {

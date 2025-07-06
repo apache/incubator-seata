@@ -16,5 +16,4 @@
  */
 package org.apache.seata.tm.api;
 
-public interface BaseTransaction {
-}
+public interface BaseTransaction {}

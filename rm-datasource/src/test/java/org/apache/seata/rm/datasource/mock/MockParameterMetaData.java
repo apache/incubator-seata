@@ -19,7 +19,6 @@ package org.apache.seata.rm.datasource.mock;
 import java.sql.ParameterMetaData;
 import java.sql.SQLException;
 
-
 public class MockParameterMetaData implements ParameterMetaData {
 
     private int parameterCount;

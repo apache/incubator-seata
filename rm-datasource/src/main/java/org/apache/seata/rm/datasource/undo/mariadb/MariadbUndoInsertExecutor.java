@@ -16,14 +16,15 @@
  */
 package org.apache.seata.rm.datasource.undo.mariadb;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.seata.rm.datasource.sql.struct.Field;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
 import org.apache.seata.rm.datasource.undo.SQLUndoLog;
 import org.apache.seata.rm.datasource.undo.mysql.MySQLUndoInsertExecutor;
+
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The type Mariadb undo insert executor.
@@ -47,7 +48,7 @@ public class MariadbUndoInsertExecutor extends MySQLUndoInsertExecutor {
 
     @Override
     protected void undoPrepare(PreparedStatement undoPST, ArrayList<Field> undoValues, List<Field> pkValueList)
-        throws SQLException {
+            throws SQLException {
         super.undoPrepare(undoPST, undoValues, pkValueList);
     }
 
@@ -55,5 +56,4 @@ public class MariadbUndoInsertExecutor extends MySQLUndoInsertExecutor {
     protected TableRecords getUndoRows() {
         return super.getUndoRows();
     }
-
 }

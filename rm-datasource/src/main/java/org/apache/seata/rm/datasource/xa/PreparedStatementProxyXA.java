@@ -48,82 +48,75 @@ public class PreparedStatementProxyXA extends StatementProxyXA implements Prepar
     }
 
     private PreparedStatement getTargetStatement() {
-        return (PreparedStatement)targetStatement;
+        return (PreparedStatement) targetStatement;
     }
 
     @Override
     public ResultSet executeQuery() throws SQLException {
-        return ExecuteTemplateXA.execute(connectionProxyXA, (statement, args) -> statement.executeQuery(), getTargetStatement());
+        return ExecuteTemplateXA.execute(
+                connectionProxyXA, (statement, args) -> statement.executeQuery(), getTargetStatement());
     }
 
     @Override
     public int executeUpdate() throws SQLException {
-        return ExecuteTemplateXA.execute(connectionProxyXA, (statement, args) -> statement.executeUpdate(), getTargetStatement());
+        return ExecuteTemplateXA.execute(
+                connectionProxyXA, (statement, args) -> statement.executeUpdate(), getTargetStatement());
     }
 
     @Override
     public boolean execute() throws SQLException {
-        return ExecuteTemplateXA.execute(connectionProxyXA, (statement, args) -> statement.execute(), getTargetStatement());
+        return ExecuteTemplateXA.execute(
+                connectionProxyXA, (statement, args) -> statement.execute(), getTargetStatement());
     }
 
     @Override
     public void setNull(int parameterIndex, int sqlType) throws SQLException {
         getTargetStatement().setNull(parameterIndex, sqlType);
-
     }
 
     @Override
     public void setBoolean(int parameterIndex, boolean x) throws SQLException {
         getTargetStatement().setBoolean(parameterIndex, x);
-
     }
 
     @Override
     public void setByte(int parameterIndex, byte x) throws SQLException {
         getTargetStatement().setByte(parameterIndex, x);
-
     }
 
     @Override
     public void setShort(int parameterIndex, short x) throws SQLException {
         getTargetStatement().setShort(parameterIndex, x);
-
     }
 
     @Override
     public void setInt(int parameterIndex, int x) throws SQLException {
         getTargetStatement().setInt(parameterIndex, x);
-
     }
 
     @Override
     public void setLong(int parameterIndex, long x) throws SQLException {
         getTargetStatement().setLong(parameterIndex, x);
-
     }
 
     @Override
     public void setFloat(int parameterIndex, float x) throws SQLException {
         getTargetStatement().setFloat(parameterIndex, x);
-
     }
 
     @Override
     public void setDouble(int parameterIndex, double x) throws SQLException {
         getTargetStatement().setDouble(parameterIndex, x);
-
     }
 
     @Override
     public void setBigDecimal(int parameterIndex, BigDecimal x) throws SQLException {
         getTargetStatement().setBigDecimal(parameterIndex, x);
-
     }
 
     @Override
     public void setString(int parameterIndex, String x) throws SQLException {
         getTargetStatement().setString(parameterIndex, x);
-
     }
 
     @Override
@@ -134,55 +127,46 @@ public class PreparedStatementProxyXA extends StatementProxyXA implements Prepar
     @Override
     public void setDate(int parameterIndex, Date x) throws SQLException {
         getTargetStatement().setDate(parameterIndex, x);
-
     }
 
     @Override
     public void setTime(int parameterIndex, Time x) throws SQLException {
         getTargetStatement().setTime(parameterIndex, x);
-
     }
 
     @Override
     public void setTimestamp(int parameterIndex, Timestamp x) throws SQLException {
         getTargetStatement().setTimestamp(parameterIndex, x);
-
     }
 
     @Override
     public void setAsciiStream(int parameterIndex, InputStream x, int length) throws SQLException {
         getTargetStatement().setAsciiStream(parameterIndex, x);
-
     }
 
     @Override
     public void setUnicodeStream(int parameterIndex, InputStream x, int length) throws SQLException {
         getTargetStatement().setUnicodeStream(parameterIndex, x, length);
-
     }
 
     @Override
     public void setBinaryStream(int parameterIndex, InputStream x, int length) throws SQLException {
         getTargetStatement().setBinaryStream(parameterIndex, x, length);
-
     }
 
     @Override
     public void clearParameters() throws SQLException {
         getTargetStatement().clearParameters();
-
     }
 
     @Override
     public void setObject(int parameterIndex, Object x, int targetSqlType) throws SQLException {
         getTargetStatement().setObject(parameterIndex, x, targetSqlType);
-
     }
 
     @Override
     public void setObject(int parameterIndex, Object x) throws SQLException {
         getTargetStatement().setObject(parameterIndex, x);
-
     }
 
     @Override
@@ -198,25 +182,21 @@ public class PreparedStatementProxyXA extends StatementProxyXA implements Prepar
     @Override
     public void setRef(int parameterIndex, Ref x) throws SQLException {
         getTargetStatement().setRef(parameterIndex, x);
-
     }
 
     @Override
     public void setBlob(int parameterIndex, Blob x) throws SQLException {
         getTargetStatement().setBlob(parameterIndex, x);
-
     }
 
     @Override
     public void setClob(int parameterIndex, Clob x) throws SQLException {
         getTargetStatement().setClob(parameterIndex, x);
-
     }
 
     @Override
     public void setArray(int parameterIndex, Array x) throws SQLException {
         getTargetStatement().setArray(parameterIndex, x);
-
     }
 
     @Override
@@ -232,25 +212,21 @@ public class PreparedStatementProxyXA extends StatementProxyXA implements Prepar
     @Override
     public void setTime(int parameterIndex, Time x, Calendar cal) throws SQLException {
         getTargetStatement().setTime(parameterIndex, x, cal);
-
     }
 
     @Override
     public void setTimestamp(int parameterIndex, Timestamp x, Calendar cal) throws SQLException {
         getTargetStatement().setTimestamp(parameterIndex, x, cal);
-
     }
 
     @Override
     public void setNull(int parameterIndex, int sqlType, String typeName) throws SQLException {
         getTargetStatement().setNull(parameterIndex, sqlType, typeName);
-
     }
 
     @Override
     public void setURL(int parameterIndex, URL x) throws SQLException {
         getTargetStatement().setURL(parameterIndex, x);
-
     }
 
     @Override
@@ -261,13 +237,11 @@ public class PreparedStatementProxyXA extends StatementProxyXA implements Prepar
     @Override
     public void setRowId(int parameterIndex, RowId x) throws SQLException {
         getTargetStatement().setRowId(parameterIndex, x);
-
     }
 
     @Override
     public void setNString(int parameterIndex, String value) throws SQLException {
         getTargetStatement().setNString(parameterIndex, value);
-
     }
 
     @Override

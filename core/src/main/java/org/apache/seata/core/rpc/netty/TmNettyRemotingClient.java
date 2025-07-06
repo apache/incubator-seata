@@ -16,14 +16,7 @@
  */
 package org.apache.seata.core.rpc.netty;
 
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Function;
-
 import io.netty.channel.Channel;
-import io.netty.util.concurrent.EventExecutorGroup;
 import org.apache.commons.lang.StringUtils;
 import org.apache.seata.common.DefaultValues;
 import org.apache.seata.common.exception.FrameworkException;
@@ -46,6 +39,12 @@ import org.apache.seata.core.rpc.processor.client.ClientOnResponseProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
+
 import static org.apache.seata.common.util.StringUtils.isNotBlank;
 
 /**
@@ -64,24 +63,48 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
     private String accessKey;
     private String secretKey;
 
-
-    private TmNettyRemotingClient(NettyClientConfig nettyClientConfig,
-                                  EventExecutorGroup eventExecutorGroup,
-                                  ThreadPoolExecutor messageExecutor) {
-        super(nettyClientConfig, eventExecutorGroup, messageExecutor, NettyPoolKey.TransactionRole.TMROLE);
+    private TmNettyRemotingClient(NettyClientConfig nettyClientConfig, ThreadPoolExecutor messageExecutor) {
+        super(nettyClientConfig, messageExecutor, NettyPoolKey.TransactionRole.TMROLE);
         this.signer = EnhancedServiceLoader.load(AuthSigner.class);
         // set enableClientBatchSendRequest
         Configuration configuration = ConfigurationFactory.getInstance();
-        this.enableClientBatchSendRequest = configuration.getBoolean(ConfigurationKeys.ENABLE_TM_CLIENT_BATCH_SEND_REQUEST,
+        this.enableClientBatchSendRequest = configuration.getBoolean(
+                ConfigurationKeys.ENABLE_TM_CLIENT_BATCH_SEND_REQUEST,
                 DefaultValues.DEFAULT_ENABLE_TM_CLIENT_BATCH_SEND_REQUEST);
-        configuration.addConfigListener(ConfigurationKeys.ENABLE_TM_CLIENT_BATCH_SEND_REQUEST, new CachedConfigurationChangeListener() {
+        configuration.addConfigListener(
+                ConfigurationKeys.ENABLE_TM_CLIENT_BATCH_SEND_REQUEST, new CachedConfigurationChangeListener() {
+                    @Override
+                    public void onChangeEvent(ConfigurationChangeEvent event) {
+                        String dataId = event.getDataId();
+                        String newValue = event.getNewValue();
+                        if (ConfigurationKeys.ENABLE_TM_CLIENT_BATCH_SEND_REQUEST.equals(dataId)
+                                && StringUtils.isNotBlank(newValue)) {
+                            enableClientBatchSendRequest = Boolean.parseBoolean(newValue);
+                        }
+                    }
+                });
+
+        registerChannelEventListener(new ChannelEventListener() {
             @Override
-            public void onChangeEvent(ConfigurationChangeEvent event) {
-                String dataId = event.getDataId();
-                String newValue = event.getNewValue();
-                if (ConfigurationKeys.ENABLE_TM_CLIENT_BATCH_SEND_REQUEST.equals(dataId) && StringUtils.isNotBlank(newValue)) {
-                    enableClientBatchSendRequest = Boolean.parseBoolean(newValue);
+            public void onChannelConnected(Channel channel) {
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Channel active: {}", channel.remoteAddress());
                 }
+            }
+
+            @Override
+            public void onChannelDisconnected(Channel channel) {
+                LOGGER.warn("Channel inactive: {}", channel.remoteAddress());
+            }
+
+            @Override
+            public void onChannelException(Channel channel, Throwable cause) {
+                LOGGER.error("Channel exception: {}", channel.remoteAddress(), cause);
+            }
+
+            @Override
+            public void onChannelIdle(Channel channel) {
+                LOGGER.warn("Channel idle: {}", channel.remoteAddress());
             }
         });
     }
@@ -106,7 +129,8 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
      * @param secretKey               the secret key
      * @return the instance
      */
-    public static TmNettyRemotingClient getInstance(String applicationId, String transactionServiceGroup, String accessKey, String secretKey) {
+    public static TmNettyRemotingClient getInstance(
+            String applicationId, String transactionServiceGroup, String accessKey, String secretKey) {
         TmNettyRemotingClient tmRpcClient = getInstance();
         tmRpcClient.setApplicationId(applicationId);
         tmRpcClient.setTransactionServiceGroup(transactionServiceGroup);
@@ -126,13 +150,16 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
                 if (instance == null) {
                     NettyClientConfig nettyClientConfig = new NettyClientConfig();
                     final ThreadPoolExecutor messageExecutor = new ThreadPoolExecutor(
-                            nettyClientConfig.getClientWorkerThreads(), nettyClientConfig.getClientWorkerThreads(),
-                            KEEP_ALIVE_TIME, TimeUnit.SECONDS,
+                            nettyClientConfig.getClientWorkerThreads(),
+                            nettyClientConfig.getClientWorkerThreads(),
+                            KEEP_ALIVE_TIME,
+                            TimeUnit.SECONDS,
                             new LinkedBlockingQueue<>(MAX_QUEUE_SIZE),
-                            new NamedThreadFactory(nettyClientConfig.getTmDispatchThreadPrefix(),
+                            new NamedThreadFactory(
+                                    nettyClientConfig.getTmDispatchThreadPrefix(),
                                     nettyClientConfig.getClientWorkerThreads()),
                             RejectedPolicies.runsOldestTaskPolicy());
-                    instance = new TmNettyRemotingClient(nettyClientConfig, null, messageExecutor);
+                    instance = new TmNettyRemotingClient(nettyClientConfig, messageExecutor);
                 }
             }
         }
@@ -211,23 +238,28 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
     }
 
     @Override
-    public void onRegisterMsgSuccess(String serverAddress, Channel channel, Object response,
-                                     AbstractMessage requestMessage) {
+    public void onRegisterMsgSuccess(
+            String serverAddress, Channel channel, Object response, AbstractMessage requestMessage) {
         RegisterTMRequest registerTMRequest = (RegisterTMRequest) requestMessage;
         RegisterTMResponse registerTMResponse = (RegisterTMResponse) response;
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("register TM success. client version:{}, server version:{},channel:{}", registerTMRequest.getVersion(), registerTMResponse.getVersion(), channel);
+            LOGGER.info(
+                    "register TM success. client version:{}, server version:{},channel:{}",
+                    registerTMRequest.getVersion(),
+                    registerTMResponse.getVersion(),
+                    channel);
         }
         getClientChannelManager().registerChannel(serverAddress, channel, registerTMRequest.getVersion());
     }
 
     @Override
-    public void onRegisterMsgFail(String serverAddress, Channel channel, Object response,
-                                  AbstractMessage requestMessage) {
+    public void onRegisterMsgFail(
+            String serverAddress, Channel channel, Object response, AbstractMessage requestMessage) {
         RegisterTMRequest registerTMRequest = (RegisterTMRequest) requestMessage;
         RegisterTMResponse registerTMResponse = (RegisterTMResponse) response;
         String errMsg = String.format(
-                "register TM failed. client version: %s,server version: %s, errorMsg: %s, " + "channel: %s", registerTMRequest.getVersion(), registerTMResponse.getVersion(), registerTMResponse.getMsg(), channel);
+                "register TM failed. client version: %s,server version: %s, errorMsg: %s, " + "channel: %s",
+                registerTMRequest.getVersion(), registerTMResponse.getVersion(), registerTMResponse.getMsg(), channel);
         throw new FrameworkException(errMsg);
     }
 
@@ -248,8 +280,8 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
 
     private void registerProcessor() {
         // 1.registry TC response processor
-        ClientOnResponseProcessor onResponseProcessor =
-                new ClientOnResponseProcessor(mergeMsgMap, super.getFutures(), childToParentMap, getTransactionMessageHandler());
+        ClientOnResponseProcessor onResponseProcessor = new ClientOnResponseProcessor(
+                mergeMsgMap, super.getFutures(), childToParentMap, getTransactionMessageHandler());
         super.registerProcessor(MessageType.TYPE_SEATA_MERGE_RESULT, onResponseProcessor, null);
         super.registerProcessor(MessageType.TYPE_GLOBAL_BEGIN_RESULT, onResponseProcessor, null);
         super.registerProcessor(MessageType.TYPE_GLOBAL_COMMIT_RESULT, onResponseProcessor, null);
@@ -274,23 +306,30 @@ public final class TmNettyRemotingClient extends AbstractNettyRemotingClient {
         }
         String digest = signer.sign(digestSource, secretKey);
         StringBuilder sb = new StringBuilder();
-        sb.append(RegisterTMRequest.UDATA_AK).append(org.apache.seata.common.ConfigurationKeys.EXTRA_DATA_KV_CHAR).append(accessKey).append(
-            org.apache.seata.common.ConfigurationKeys.EXTRA_DATA_SPLIT_CHAR);
-        sb.append(RegisterTMRequest.UDATA_DIGEST).append(org.apache.seata.common.ConfigurationKeys.EXTRA_DATA_KV_CHAR).append(digest).append(
-            org.apache.seata.common.ConfigurationKeys.EXTRA_DATA_SPLIT_CHAR);
-        sb.append(RegisterTMRequest.UDATA_TIMESTAMP).append(org.apache.seata.common.ConfigurationKeys.EXTRA_DATA_KV_CHAR).append(timestamp).append(
-            org.apache.seata.common.ConfigurationKeys.EXTRA_DATA_SPLIT_CHAR);
-        sb.append(RegisterTMRequest.UDATA_AUTH_VERSION).append(
-            org.apache.seata.common.ConfigurationKeys.EXTRA_DATA_KV_CHAR).append(signer.getSignVersion()).append(
-            org.apache.seata.common.ConfigurationKeys.EXTRA_DATA_SPLIT_CHAR);
+        sb.append(RegisterTMRequest.UDATA_AK)
+                .append(org.apache.seata.common.ConfigurationKeys.EXTRA_DATA_KV_CHAR)
+                .append(accessKey)
+                .append(org.apache.seata.common.ConfigurationKeys.EXTRA_DATA_SPLIT_CHAR);
+        sb.append(RegisterTMRequest.UDATA_DIGEST)
+                .append(org.apache.seata.common.ConfigurationKeys.EXTRA_DATA_KV_CHAR)
+                .append(digest)
+                .append(org.apache.seata.common.ConfigurationKeys.EXTRA_DATA_SPLIT_CHAR);
+        sb.append(RegisterTMRequest.UDATA_TIMESTAMP)
+                .append(org.apache.seata.common.ConfigurationKeys.EXTRA_DATA_KV_CHAR)
+                .append(timestamp)
+                .append(org.apache.seata.common.ConfigurationKeys.EXTRA_DATA_SPLIT_CHAR);
+        sb.append(RegisterTMRequest.UDATA_AUTH_VERSION)
+                .append(org.apache.seata.common.ConfigurationKeys.EXTRA_DATA_KV_CHAR)
+                .append(signer.getSignVersion())
+                .append(org.apache.seata.common.ConfigurationKeys.EXTRA_DATA_SPLIT_CHAR);
         return sb.toString();
     }
 
     private void initConnection() {
-        boolean failFast = ConfigurationFactory.getInstance().getBoolean(
-                ConfigurationKeys.ENABLE_TM_CLIENT_CHANNEL_CHECK_FAIL_FAST,
-                DefaultValues.DEFAULT_CLIENT_CHANNEL_CHECK_FAIL_FAST);
+        boolean failFast = ConfigurationFactory.getInstance()
+                .getBoolean(
+                        ConfigurationKeys.ENABLE_TM_CLIENT_CHANNEL_CHECK_FAIL_FAST,
+                        DefaultValues.DEFAULT_CLIENT_CHANNEL_CHECK_FAIL_FAST);
         getClientChannelManager().initReconnect(transactionServiceGroup, failFast);
     }
-
 }

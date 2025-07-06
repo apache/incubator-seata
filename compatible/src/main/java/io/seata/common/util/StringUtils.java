@@ -16,7 +16,6 @@
  */
 package io.seata.common.util;
 
-
 import java.io.InputStream;
 import java.util.Iterator;
 
@@ -68,7 +67,7 @@ public class StringUtils {
      * @return boolean
      */
     public static boolean equals(String a, String b) {
-        return org.apache.seata.common.util.StringUtils.equals(a,b);
+        return org.apache.seata.common.util.StringUtils.equals(a, b);
     }
 
     /**
@@ -79,7 +78,7 @@ public class StringUtils {
      * @return the boolean
      */
     public static boolean equalsIgnoreCase(String a, String b) {
-        return org.apache.seata.common.util.StringUtils.equalsIgnoreCase(a,b);
+        return org.apache.seata.common.util.StringUtils.equalsIgnoreCase(a, b);
     }
 
     /**
@@ -172,7 +171,7 @@ public class StringUtils {
      * @return boolean
      */
     public static boolean checkDataSize(String data, String dataName, int errorSize, boolean throwIfErr) {
-        return org.apache.seata.common.util.StringUtils.checkDataSize(data,dataName,errorSize,throwIfErr);
+        return org.apache.seata.common.util.StringUtils.checkDataSize(data, dataName, errorSize, throwIfErr);
     }
 
     public static boolean hasLowerCase(String str) {
@@ -184,8 +183,6 @@ public class StringUtils {
     }
 
     public static String join(Iterator iterator, String separator) {
-        return org.apache.seata.common.util.StringUtils.join(iterator,separator);
+        return org.apache.seata.common.util.StringUtils.join(iterator, separator);
     }
-
 }
-

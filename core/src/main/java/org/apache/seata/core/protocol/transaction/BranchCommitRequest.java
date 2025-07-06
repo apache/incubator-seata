@@ -34,6 +34,4 @@ public class BranchCommitRequest extends AbstractBranchEndRequest {
     public AbstractTransactionResponse handle(RpcContext rpcContext) {
         return handler.handle(this);
     }
-
-
 }

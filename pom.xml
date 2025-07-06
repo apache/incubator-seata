@@ -44,7 +44,6 @@
         <module>compatible</module>
         <module>dependencies</module>
         <module>discovery</module>
-        <module>distribution</module>
         <module>integration/rpc-core</module>
         <module>integration/dubbo</module>
         <module>integration/dubbo-alibaba</module>
@@ -60,9 +59,7 @@
         <module>rocketmq</module>
         <module>spring</module>
         <module>tcc</module>
-        <module>test</module>
         <module>mock-server</module>
-        <module>test-old-version</module>
         <module>tm</module>
         <module>metrics</module>
         <module>serializer</module>
@@ -211,84 +208,6 @@
                 <maven.git-commit-id.skip>false</maven.git-commit-id.skip>
             </properties>
         </profile>
-
-        <!-- profile: checkstyle -->
-        <profile>
-            <id>checkstyle</id>
-            <activation>
-                <jdk>[1.8,)</jdk>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>com.mycila</groupId>
-                        <artifactId>license-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <phase>generate-sources</phase>
-                                <goals>
-                                    <goal>remove</goal>
-                                    <goal>format</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <quiet>true</quiet>
-                            <header>${user.dir}/style/copyright</header>
-                            <includes>
-                                <include>**/src/main/java/**</include>
-                                <include>**/src/test/java/**</include>
-                                <include>**/*.xml</include>
-                                <include>**/*.sql</include>
-                                <include>**/*.conf</include>
-                                <include>**/*.yml</include>
-                                <include>**/*.yaml</include>
-                                <include>**/*.sh</include>
-                                <include>**/*.bat</include>
-                                <include>**/*.lua</include>
-                                <include>**/*.properties</include>
-                                <include>**/*.txt</include>
-                                <include>**/*.def</include>
-                            </includes>
-                            <excludes>
-                                <exclude>**/script/**</exclude>
-                                <exclude>**/generated/**</exclude>
-                                <exclude>**/antlr/mysql/parser/*.*</exclude>
-                                <exclude>**/antlr/mysql/antlr/*.*</exclude>
-                                <exclude>**/antlr/mysql/stream/ANTLRNoCaseStringStream.java</exclude>
-                            </excludes>
-                            <strictCheck>true</strictCheck>
-                            <mapping>
-                                <java>SLASHSTAR_STYLE</java>
-                                <lua>DOUBLEBAR_STYLE</lua>
-                                <conf>SCRIPT_STYLE</conf>
-                                <def>SCRIPT_STYLE</def>
-                            </mapping>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-checkstyle-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>validate</id>
-                                <phase>validate</phase>
-                                <configuration>
-                                    <configLocation>${user.dir}/style/seata_checkstyle.xml</configLocation>
-                                    <suppressionsLocation>${user.dir}/style/seata_suppressions.xml</suppressionsLocation>
-                                    <encoding>UTF-8</encoding>
-                                    <consoleOutput>true</consoleOutput>
-                                    <failsOnError>true</failsOnError>
-                                </configuration>
-                                <goals>
-                                    <goal>checkstyle</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
         <!-- profile: dependency-check -->
         <profile>
             <id>dependency-check</id>
@@ -363,13 +282,15 @@
                                     <exclude>**/antlr/mysql/antlr/*.*</exclude>
                                     <exclude>**/antlr/mysql/stream/ANTLRNoCaseStringStream.java</exclude>
                                 </excludes>
-                                <ratchetFrom>HEAD</ratchetFrom>
                                 <palantirJavaFormat>
                                     <version>${palantirJavaFormat.version}</version>
                                 </palantirJavaFormat>
                                 <removeUnusedImports/>
                                 <trimTrailingWhitespace/>
                                 <endWithNewline/>
+                                <importOrder>
+                                    <order>,javax|java,\#</order>
+                                </importOrder>
                             </java>
                         </configuration>
                         <executions>
@@ -383,6 +304,90 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+
+        <!-- profile: source-release -->
+        <profile>
+            <id>source-release</id>
+            <modules>
+                <module>build</module>
+                <module>all</module>
+                <module>bom</module>
+                <module>common</module>
+                <module>config</module>
+                <module>console</module>
+                <module>core</module>
+                <module>compatible</module>
+                <module>dependencies</module>
+                <module>discovery</module>
+                <module>integration/rpc-core</module>
+                <module>integration/dubbo</module>
+                <module>integration/dubbo-alibaba</module>
+                <module>integration/sofa-rpc</module>
+                <module>integration/motan</module>
+                <module>integration/grpc</module>
+                <module>integration/http</module>
+                <module>integration/http-jakarta</module>
+                <module>integration/hsf</module>
+                <module>integration/brpc</module>
+                <module>rm</module>
+                <module>rm-datasource</module>
+                <module>rocketmq</module>
+                <module>spring</module>
+                <module>tcc</module>
+                <module>mock-server</module>
+                <module>tm</module>
+                <module>metrics</module>
+                <module>serializer</module>
+                <module>seata-spring-boot-starter</module>
+                <module>seata-spring-autoconfigure</module>
+                <module>compressor</module>
+                <module>saga</module>
+                <module>sqlparser</module>
+                <module>server</module>
+                <module>ext/apm-seata-skywalking-plugin</module>
+                <module>integration-tx-api</module>
+                <module>namingserver</module>
+            </modules>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>src/assembly/source-release.xml</descriptor>
+                            </descriptors>
+                            <finalName>apache-seata-${project.version}-incubating-src</finalName>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>make-source-assembly</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>single</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>include-test-modules</id>
+            <activation>
+                <file>
+                    <exists>test/pom.xml</exists>
+                </file>
+                <property>
+                    <name>!excludeTestModules</name>
+                </property>
+            </activation>
+            <modules>
+                <module>distribution</module>
+                <module>test</module>
+                <module>test-old-version</module>
+            </modules>
         </profile>
     </profiles>
 
@@ -481,6 +486,14 @@
                         <goals>
                             <goal>report</goal>
                         </goals>
+                    </execution>
+                    <execution>
+                        <id>report-aggregate</id>
+                        <goals>
+                            <goal>report</goal>
+                            <goal>report-aggregate</goal>
+                        </goals>
+                        <phase>test</phase>
                     </execution>
                 </executions>
             </plugin>

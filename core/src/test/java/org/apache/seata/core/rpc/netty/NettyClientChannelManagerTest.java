@@ -44,38 +44,37 @@ import static org.mockito.Mockito.when;
  */
 @ExtendWith(MockitoExtension.class)
 class NettyClientChannelManagerTest {
-    
+
     private NettyClientChannelManager channelManager;
-    
+
     @Mock
     private NettyPoolableFactory poolableFactory;
-    
+
     @Mock
     private Function<String, NettyPoolKey> poolKeyFunction;
-    
+
     private NettyClientConfig nettyClientConfig = new NettyClientConfig();
-    
+
     @Mock
     private NettyPoolKey nettyPoolKey;
-    
+
     @Mock
     private Channel channel;
-    
+
     @Mock
     private Channel newChannel;
-    
+
     @Mock
     private GenericKeyedObjectPool keyedObjectPool;
-    
+
     @BeforeEach
     void setUp() {
         channelManager = new NettyClientChannelManager(poolableFactory, poolKeyFunction, nettyClientConfig);
     }
-    
+
     @AfterEach
-    void tearDown() {
-    }
-    
+    void tearDown() {}
+
     @Test
     void assertAcquireChannelFromPool() {
         setupPoolFactory(nettyPoolKey, channel);
@@ -83,13 +82,13 @@ class NettyClientChannelManagerTest {
         verify(poolableFactory).makeObject(nettyPoolKey);
         Assertions.assertEquals(actual, channel);
     }
-    
+
     private void setupPoolFactory(final NettyPoolKey nettyPoolKey, final Channel channel) {
         when(poolKeyFunction.apply(anyString())).thenReturn(nettyPoolKey);
         when(poolableFactory.makeObject(nettyPoolKey)).thenReturn(channel);
         when(poolableFactory.validateObject(nettyPoolKey, channel)).thenReturn(true);
     }
-    
+
     @Test
     void assertAcquireChannelFromCache() {
         channelManager.getChannels().putIfAbsent("localhost", channel);
@@ -98,7 +97,7 @@ class NettyClientChannelManagerTest {
         verify(poolableFactory, times(0)).makeObject(nettyPoolKey);
         Assertions.assertEquals(actual, channel);
     }
-    
+
     @Test
     void assertAcquireChannelFromPoolContainsInactiveCache() {
         channelManager.getChannels().putIfAbsent("localhost", channel);
@@ -108,13 +107,13 @@ class NettyClientChannelManagerTest {
         verify(poolableFactory).makeObject(nettyPoolKey);
         Assertions.assertEquals(actual, newChannel);
     }
-    
+
     @Test
     void assertReconnect() {
         channelManager.getChannels().putIfAbsent("127.0.0.1:8091", channel);
         channelManager.reconnect(DEFAULT_TX_GROUP);
     }
-    
+
     @Test
     @SuppressWarnings("unchecked")
     void assertReleaseChannelWhichCacheIsEmpty() throws Exception {
@@ -123,7 +122,7 @@ class NettyClientChannelManagerTest {
         channelManager.releaseChannel(channel, "127.0.0.1:8091");
         verify(keyedObjectPool).returnObject(nettyPoolKey, channel);
     }
-    
+
     @Test
     @SuppressWarnings("unchecked")
     void assertReleaseCachedChannel() throws Exception {
@@ -134,7 +133,7 @@ class NettyClientChannelManagerTest {
         assertTrue(channelManager.getChannels().isEmpty());
         verify(keyedObjectPool).returnObject(nettyPoolKey, channel);
     }
-    
+
     @Test
     @SuppressWarnings("unchecked")
     void assertReleaseChannelNotEqualToCache() throws Exception {
@@ -145,17 +144,17 @@ class NettyClientChannelManagerTest {
         assertEquals(1, channelManager.getChannels().size());
         verify(keyedObjectPool).returnObject(nettyPoolKey, channel);
     }
-    
+
     @SuppressWarnings("unchecked")
     private void setUpReleaseChannel() {
         ConcurrentMap<String, Object> channelLocks =
-            (ConcurrentMap<String, Object>) getFieldValue("channelLocks", channelManager);
+                (ConcurrentMap<String, Object>) getFieldValue("channelLocks", channelManager);
         channelLocks.putIfAbsent("127.0.0.1:8091", new Object());
         ConcurrentMap<String, NettyPoolKey> poolKeyMap =
-            (ConcurrentMap<String, NettyPoolKey>) getFieldValue("poolKeyMap", channelManager);
+                (ConcurrentMap<String, NettyPoolKey>) getFieldValue("poolKeyMap", channelManager);
         poolKeyMap.putIfAbsent("127.0.0.1:8091", nettyPoolKey);
     }
-    
+
     private Object getFieldValue(final String fieldName, final Object targetObject) {
         try {
             Field field = targetObject.getClass().getDeclaredField(fieldName);
@@ -165,7 +164,7 @@ class NettyClientChannelManagerTest {
             throw new RuntimeException(ex);
         }
     }
-    
+
     @SuppressWarnings("unchecked")
     private void setNettyClientKeyPool() {
         try {

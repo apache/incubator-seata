@@ -31,7 +31,6 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-
 @LoadLevel(name = FileConfigFactory.YAML_TYPE, order = 1, scope = Scope.PROTOTYPE)
 public class YamlFileConfig implements FileConfig {
 
@@ -53,7 +52,7 @@ public class YamlFileConfig implements FileConfig {
             Object value = entry.getValue();
             if (value != null) {
                 if (value instanceof Map) {
-                    flattenConfig(key, (Map<String, Object>)value, flatMap);
+                    flattenConfig(key, (Map<String, Object>) value, flatMap);
                 } else {
                     flatMap.put(key, String.valueOf(value));
                 }

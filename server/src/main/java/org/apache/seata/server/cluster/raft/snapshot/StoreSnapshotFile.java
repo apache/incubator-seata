@@ -16,12 +16,13 @@
  */
 package org.apache.seata.server.cluster.raft.snapshot;
 
-import java.io.File;
-import java.io.IOException;
 import com.alipay.sofa.jraft.Status;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
 import org.apache.commons.io.FileUtils;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
  */
@@ -55,7 +56,4 @@ public interface StoreSnapshotFile {
         RaftSnapshot raftSnapshot = RaftSnapshotSerializer.decode(FileUtils.readFileToByteArray(new File(path)));
         return raftSnapshot.getBody();
     }
-
-
-
 }

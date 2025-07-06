@@ -16,7 +16,6 @@
  */
 package org.apache.seata.common.metadata;
 
-
 public enum ClusterRole {
 
     /**
@@ -35,7 +34,7 @@ public enum ClusterRole {
      * cluster mode member
      */
     MEMBER(3);
-    
+
     private int roleCode;
 
     ClusterRole(int roleCode) {
@@ -49,5 +48,4 @@ public enum ClusterRole {
     public void setRoleCode(int roleCode) {
         this.roleCode = roleCode;
     }
-
 }

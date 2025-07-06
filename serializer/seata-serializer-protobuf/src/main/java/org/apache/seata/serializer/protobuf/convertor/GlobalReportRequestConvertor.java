@@ -16,35 +16,41 @@
  */
 package org.apache.seata.serializer.protobuf.convertor;
 
+import org.apache.seata.core.model.GlobalStatus;
+import org.apache.seata.core.protocol.transaction.GlobalReportRequest;
 import org.apache.seata.serializer.protobuf.generated.AbstractGlobalEndRequestProto;
 import org.apache.seata.serializer.protobuf.generated.AbstractMessageProto;
 import org.apache.seata.serializer.protobuf.generated.AbstractTransactionRequestProto;
 import org.apache.seata.serializer.protobuf.generated.GlobalReportRequestProto;
 import org.apache.seata.serializer.protobuf.generated.GlobalStatusProto;
 import org.apache.seata.serializer.protobuf.generated.MessageTypeProto;
-import org.apache.seata.core.model.GlobalStatus;
-import org.apache.seata.core.protocol.transaction.GlobalReportRequest;
-
 
 public class GlobalReportRequestConvertor implements PbConvertor<GlobalReportRequest, GlobalReportRequestProto> {
     @Override
     public GlobalReportRequestProto convert2Proto(GlobalReportRequest globalReportRequest) {
         final short typeCode = globalReportRequest.getTypeCode();
 
-        final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder().setMessageType(
-            MessageTypeProto.forNumber(typeCode)).build();
+        final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder()
+                .setMessageType(MessageTypeProto.forNumber(typeCode))
+                .build();
 
-        final AbstractTransactionRequestProto abstractTransactionRequestProto = AbstractTransactionRequestProto
-            .newBuilder().setAbstractMessage(abstractMessage).build();
+        final AbstractTransactionRequestProto abstractTransactionRequestProto =
+                AbstractTransactionRequestProto.newBuilder()
+                        .setAbstractMessage(abstractMessage)
+                        .build();
 
         final String extraData = globalReportRequest.getExtraData();
         AbstractGlobalEndRequestProto abstractGlobalEndRequestProto = AbstractGlobalEndRequestProto.newBuilder()
-            .setAbstractTransactionRequest(abstractTransactionRequestProto).setXid(globalReportRequest.getXid())
-            .setExtraData(extraData == null ? "" : extraData).build();
+                .setAbstractTransactionRequest(abstractTransactionRequestProto)
+                .setXid(globalReportRequest.getXid())
+                .setExtraData(extraData == null ? "" : extraData)
+                .build();
 
-        GlobalReportRequestProto result = GlobalReportRequestProto.newBuilder().setAbstractGlobalEndRequest(
-            abstractGlobalEndRequestProto).setGlobalStatus(
-            GlobalStatusProto.valueOf(globalReportRequest.getGlobalStatus().name())).build();
+        GlobalReportRequestProto result = GlobalReportRequestProto.newBuilder()
+                .setAbstractGlobalEndRequest(abstractGlobalEndRequestProto)
+                .setGlobalStatus(GlobalStatusProto.valueOf(
+                        globalReportRequest.getGlobalStatus().name()))
+                .build();
 
         return result;
     }
@@ -52,9 +58,12 @@ public class GlobalReportRequestConvertor implements PbConvertor<GlobalReportReq
     @Override
     public GlobalReportRequest convert2Model(GlobalReportRequestProto globalReportRequestProto) {
         GlobalReportRequest globalReportRequest = new GlobalReportRequest();
-        globalReportRequest.setExtraData(globalReportRequestProto.getAbstractGlobalEndRequest().getExtraData());
-        globalReportRequest.setXid(globalReportRequestProto.getAbstractGlobalEndRequest().getXid());
-        globalReportRequest.setGlobalStatus(GlobalStatus.valueOf(globalReportRequestProto.getGlobalStatus().name()));
+        globalReportRequest.setExtraData(
+                globalReportRequestProto.getAbstractGlobalEndRequest().getExtraData());
+        globalReportRequest.setXid(
+                globalReportRequestProto.getAbstractGlobalEndRequest().getXid());
+        globalReportRequest.setGlobalStatus(
+                GlobalStatus.valueOf(globalReportRequestProto.getGlobalStatus().name()));
         return globalReportRequest;
     }
 }

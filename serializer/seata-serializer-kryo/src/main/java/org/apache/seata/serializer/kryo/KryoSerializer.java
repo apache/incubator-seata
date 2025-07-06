@@ -20,7 +20,6 @@ import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.core.protocol.AbstractMessage;
 import org.apache.seata.core.serializer.Serializer;
 
-
 @LoadLevel(name = "KRYO")
 public class KryoSerializer implements Serializer {
 
@@ -35,7 +34,6 @@ public class KryoSerializer implements Serializer {
         } finally {
             KryoSerializerFactory.getInstance().returnKryo(kryoSerializer);
         }
-
     }
 
     @Override
@@ -49,7 +47,5 @@ public class KryoSerializer implements Serializer {
         } finally {
             KryoSerializerFactory.getInstance().returnKryo(kryoSerializer);
         }
-
     }
-
 }

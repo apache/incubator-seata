@@ -18,7 +18,6 @@ package org.apache.seata.core.message;
 
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.protocol.transaction.BranchReportRequest;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -39,8 +38,7 @@ public class BranchReportRequestTest {
         branchReportRequest.setStatus(BranchStatus.PhaseOne_Timeout);
         branchReportRequest.setApplicationData("test app data");
         Assertions.assertEquals(
-            "BranchReportRequest{xid='127.0.0.1:8091:1249853', branchId=3, resourceId='resource003', status=PhaseOne_Timeout, applicationData='test app data', branchType=AT}",
-            branchReportRequest.toString());
+                "BranchReportRequest{xid='127.0.0.1:8091:1249853', branchId=3, resourceId='resource003', status=PhaseOne_Timeout, applicationData='test app data', branchType=AT}",
+                branchReportRequest.toString());
     }
-
 }

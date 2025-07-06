@@ -35,12 +35,12 @@ public class EndStateRouterInterceptor implements StateRouterInterceptor {
 
     @Override
     public void preRoute(ProcessContext context, State state) throws EngineExecutionException {
-        //Do Nothing
+        // Do Nothing
     }
 
     @Override
     public void postRoute(ProcessContext context, State state, Instruction instruction, Exception e)
-        throws EngineExecutionException {
+            throws EngineExecutionException {
         EngineUtils.endStateMachine(context);
     }
 

@@ -24,5 +24,4 @@ import org.apache.seata.common.loader.LoadLevel;
  * @since 1.8.0
  */
 @LoadLevel(name = "dm")
-public class DmLockStoreSql extends MysqlLockStoreSql {
-}
+public class DmLockStoreSql extends MysqlLockStoreSql {}

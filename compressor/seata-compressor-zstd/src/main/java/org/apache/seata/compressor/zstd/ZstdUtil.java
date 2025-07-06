@@ -41,10 +41,10 @@ public class ZstdUtil {
 
         long size = Zstd.decompressedSize(bytes);
         if (size < 0 || size > MAX_COMPRESSED_SIZE) {
-            throw new IllegalArgumentException(
-                "Invalid decompressed size: " + size + ", the value of size ranges from 0 to " + MAX_COMPRESSED_SIZE);
+            throw new IllegalArgumentException("Invalid decompressed size: " + size
+                    + ", the value of size ranges from 0 to " + MAX_COMPRESSED_SIZE);
         }
-        byte[] decompressBytes = new byte[(int)size];
+        byte[] decompressBytes = new byte[(int) size];
         Zstd.decompress(decompressBytes, bytes);
         return decompressBytes;
     }

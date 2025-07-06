@@ -49,5 +49,4 @@ public class GlobalBeginResponseTest {
         GlobalBeginResponse globalBeginResponse = new GlobalBeginResponse();
         Assertions.assertEquals(MessageType.TYPE_GLOBAL_BEGIN_RESULT, globalBeginResponse.getTypeCode());
     }
-
 }

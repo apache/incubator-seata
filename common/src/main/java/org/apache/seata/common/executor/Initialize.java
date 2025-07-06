@@ -26,5 +26,4 @@ public interface Initialize {
      * init method
      */
     void init();
-
 }

@@ -22,13 +22,11 @@ import com.alibaba.dubbo.rpc.Invoker;
 import com.alibaba.dubbo.rpc.Result;
 import com.alibaba.dubbo.rpc.RpcException;
 
-
 public class MockInvoker implements Invoker<Object> {
 
     private Runnable runnable;
 
-    public MockInvoker() {
-    }
+    public MockInvoker() {}
 
     public MockInvoker(Runnable runnable) {
         this.runnable = runnable;
@@ -58,7 +56,5 @@ public class MockInvoker implements Invoker<Object> {
     }
 
     @Override
-    public void destroy() {
-
-    }
+    public void destroy() {}
 }

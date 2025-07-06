@@ -29,7 +29,6 @@ public class ClusterVO {
     private List<String /*vgroup*/> vGroupMapping;
     private final List<Unit> unitData;
 
-
     public ClusterVO() {
         this.vGroupMapping = new ArrayList<>();
         this.unitData = new ArrayList<>();

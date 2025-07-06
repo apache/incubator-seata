@@ -16,17 +16,6 @@
  */
 package org.apache.seata.integration.tx.api.fence.store.db;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
-import java.sql.Timestamp;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.apache.seata.common.DefaultValues;
 import org.apache.seata.common.exception.DataAccessException;
 import org.apache.seata.common.exception.FrameworkErrorCode;
@@ -38,6 +27,17 @@ import org.apache.seata.integration.tx.api.fence.store.CommonFenceStore;
 import org.apache.seata.integration.tx.api.fence.store.db.sql.CommonFenceStoreSqls;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
+import java.sql.Timestamp;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * The type Common Fence store data base dao
@@ -130,7 +130,10 @@ public class CommonFenceStoreDataBaseDAO implements CommonFenceStore {
             ps.setTimestamp(6, now);
             return ps.executeUpdate() > 0;
         } catch (SQLIntegrityConstraintViolationException e) {
-            throw new CommonFenceException(String.format("Insert tcc fence record duplicate key exception. xid= %s, branchId= %s", commonFenceDO.getXid(), commonFenceDO.getBranchId()),
+            throw new CommonFenceException(
+                    String.format(
+                            "Insert tcc fence record duplicate key exception. xid= %s, branchId= %s",
+                            commonFenceDO.getXid(), commonFenceDO.getBranchId()),
                     FrameworkErrorCode.DuplicateKeyException);
         } catch (SQLException e) {
             throw new StoreException(e);

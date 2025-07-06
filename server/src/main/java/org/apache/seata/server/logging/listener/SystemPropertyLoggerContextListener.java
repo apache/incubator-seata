@@ -44,8 +44,7 @@ public class SystemPropertyLoggerContextListener extends ContextAwareBase implem
     }
 
     @Override
-    public void stop() {
-    }
+    public void stop() {}
 
     @Override
     public boolean isStarted() {
@@ -58,18 +57,14 @@ public class SystemPropertyLoggerContextListener extends ContextAwareBase implem
     }
 
     @Override
-    public void onStart(LoggerContext context) {
-    }
+    public void onStart(LoggerContext context) {}
 
     @Override
-    public void onReset(LoggerContext context) {
-    }
+    public void onReset(LoggerContext context) {}
 
     @Override
-    public void onStop(LoggerContext context) {
-    }
+    public void onStop(LoggerContext context) {}
 
     @Override
-    public void onLevelChange(Logger logger, Level level) {
-    }
+    public void onLevelChange(Logger logger, Level level) {}
 }

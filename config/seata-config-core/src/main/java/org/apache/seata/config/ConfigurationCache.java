@@ -16,6 +16,9 @@
  */
 package org.apache.seata.config;
 
+import org.apache.seata.common.util.DurationUtil;
+import org.apache.seata.common.util.StringUtils;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.HashMap;
@@ -25,16 +28,14 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.seata.common.util.DurationUtil;
-import org.apache.seata.common.util.StringUtils;
-
 /**
  */
 public class ConfigurationCache implements ConfigurationChangeListener {
 
     private static final String PROXY_METHOD_PREFIX = "get";
 
-    private static final String[] NOT_PROXY_METHOD_NAMES = new String[] {PROXY_METHOD_PREFIX + "LatestConfig", PROXY_METHOD_PREFIX + "ConfigListeners"};
+    private static final String[] NOT_PROXY_METHOD_NAMES =
+            new String[] {PROXY_METHOD_PREFIX + "LatestConfig", PROXY_METHOD_PREFIX + "ConfigListeners"};
     private static final Map<String, ObjectWrapper> CONFIG_CACHE = new ConcurrentHashMap<>();
 
     private static final Set<String> DATA_ID_CACHED = new HashSet<>();
@@ -60,8 +61,9 @@ public class ConfigurationCache implements ConfigurationChangeListener {
             } else {
                 Object newValue = new ObjectWrapper(event.getNewValue(), null).convertData(oldWrapper.getType());
                 if (!Objects.equals(oldWrapper.getData(), newValue)) {
-                    CONFIG_CACHE.put(event.getDataId(),
-                        new ObjectWrapper(newValue, oldWrapper.getType(), oldWrapper.getLastDefaultValue()));
+                    CONFIG_CACHE.put(
+                            event.getDataId(),
+                            new ObjectWrapper(newValue, oldWrapper.getType(), oldWrapper.getLastDefaultValue()));
                 }
             }
         } else {
@@ -70,35 +72,34 @@ public class ConfigurationCache implements ConfigurationChangeListener {
     }
 
     public Configuration proxy(Configuration originalConfiguration) throws Exception {
-        return (Configuration)Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[]{Configuration.class}
-            , (proxy, method, args) -> {
-                if (isProxyTargetMethod(method)) {
-                    String rawDataId = (String)args[0];
-                    ObjectWrapper wrapper = CONFIG_CACHE.get(rawDataId);
-                    ObjectWrapper.ConfigType type =
-                        ObjectWrapper.getTypeByName(method.getName().substring(PROXY_METHOD_PREFIX.length()));
-                    Object defaultValue = null;
-                    if (args.length > 1
-                            && method.getParameterTypes()[1].getSimpleName().equalsIgnoreCase(type.name())) {
-                        defaultValue = args[1];
-                    }
-                    if (null == wrapper
-                            || (null != defaultValue && !Objects.equals(defaultValue, wrapper.lastDefaultValue))) {
-                        if (DATA_ID_CACHED.add(rawDataId)) {
-                            originalConfiguration.addConfigListener(rawDataId, this);
+        return (Configuration) Proxy.newProxyInstance(
+                this.getClass().getClassLoader(), new Class[] {Configuration.class}, (proxy, method, args) -> {
+                    if (isProxyTargetMethod(method)) {
+                        String rawDataId = (String) args[0];
+                        ObjectWrapper wrapper = CONFIG_CACHE.get(rawDataId);
+                        ObjectWrapper.ConfigType type =
+                                ObjectWrapper.getTypeByName(method.getName().substring(PROXY_METHOD_PREFIX.length()));
+                        Object defaultValue = null;
+                        if (args.length > 1
+                                && method.getParameterTypes()[1].getSimpleName().equalsIgnoreCase(type.name())) {
+                            defaultValue = args[1];
                         }
-                        Object result = method.invoke(originalConfiguration, args);
-                        // The wrapper.data only exists in the cache when it is not null.
-                        if (result != null) {
-                            wrapper = new ObjectWrapper(result, type, defaultValue);
-                            CONFIG_CACHE.put(rawDataId, wrapper);
+                        if (null == wrapper
+                                || (null != defaultValue && !Objects.equals(defaultValue, wrapper.lastDefaultValue))) {
+                            if (DATA_ID_CACHED.add(rawDataId)) {
+                                originalConfiguration.addConfigListener(rawDataId, this);
+                            }
+                            Object result = method.invoke(originalConfiguration, args);
+                            // The wrapper.data only exists in the cache when it is not null.
+                            if (result != null) {
+                                wrapper = new ObjectWrapper(result, type, defaultValue);
+                                CONFIG_CACHE.put(rawDataId, wrapper);
+                            }
                         }
+                        return wrapper == null ? null : wrapper.convertData(type);
                     }
-                    return wrapper == null ? null : wrapper.convertData(type);
-                }
-                return method.invoke(originalConfiguration, args);
-            }
-        );
+                    return method.invoke(originalConfiguration, args);
+                });
     }
 
     private boolean isProxyTargetMethod(Method method) {

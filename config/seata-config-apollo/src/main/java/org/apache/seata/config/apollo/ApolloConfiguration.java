@@ -16,15 +16,6 @@
  */
 package org.apache.seata.config.apollo;
 
-import java.util.Properties;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
 import com.ctrip.framework.apollo.Config;
 import com.ctrip.framework.apollo.ConfigService;
 import com.ctrip.framework.apollo.enums.PropertyChangeType;
@@ -40,6 +31,15 @@ import org.apache.seata.config.ConfigurationChangeEvent;
 import org.apache.seata.config.ConfigurationChangeListener;
 import org.apache.seata.config.ConfigurationChangeType;
 import org.apache.seata.config.ConfigurationFactory;
+
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import static org.apache.seata.config.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
 import static org.apache.seata.config.ConfigurationKeys.FILE_ROOT_CONFIG;
@@ -66,8 +66,8 @@ public class ApolloConfiguration extends AbstractConfiguration {
     private static volatile Config config;
     private ExecutorService configOperateExecutor;
     private static final int CORE_CONFIG_OPERATE_THREAD = 1;
-    private static final ConcurrentMap<String, Set<ConfigurationChangeListener>> LISTENER_SERVICE_MAP
-        = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, Set<ConfigurationChangeListener>> LISTENER_SERVICE_MAP =
+            new ConcurrentHashMap<>();
     private static final int MAX_CONFIG_OPERATE_THREAD = 2;
     private static volatile ApolloConfiguration instance;
 
@@ -78,18 +78,25 @@ public class ApolloConfiguration extends AbstractConfiguration {
             synchronized (ApolloConfiguration.class) {
                 if (config == null) {
                     config = ConfigService.getConfig(FILE_CONFIG.getConfig(getApolloNamespaceKey(), DEFAULT_NAMESPACE));
-                    configOperateExecutor = new ThreadPoolExecutor(CORE_CONFIG_OPERATE_THREAD,
-                        MAX_CONFIG_OPERATE_THREAD, Integer.MAX_VALUE, TimeUnit.MILLISECONDS,
-                        new LinkedBlockingQueue<>(),
-                        new NamedThreadFactory("apolloConfigOperate", MAX_CONFIG_OPERATE_THREAD));
+                    configOperateExecutor = new ThreadPoolExecutor(
+                            CORE_CONFIG_OPERATE_THREAD,
+                            MAX_CONFIG_OPERATE_THREAD,
+                            Integer.MAX_VALUE,
+                            TimeUnit.MILLISECONDS,
+                            new LinkedBlockingQueue<>(),
+                            new NamedThreadFactory("apolloConfigOperate", MAX_CONFIG_OPERATE_THREAD));
                     config.addChangeListener(changeEvent -> {
                         for (String key : changeEvent.changedKeys()) {
                             if (!LISTENER_SERVICE_MAP.containsKey(key)) {
                                 continue;
                             }
                             ConfigChange change = changeEvent.getChange(key);
-                            ConfigurationChangeEvent event = new ConfigurationChangeEvent(key, change.getNamespace(),
-                                change.getOldValue(), change.getNewValue(), getChangeType(change.getChangeType()));
+                            ConfigurationChangeEvent event = new ConfigurationChangeEvent(
+                                    key,
+                                    change.getNamespace(),
+                                    change.getOldValue(),
+                                    change.getNewValue(),
+                                    getChangeType(change.getChangeType()));
                             LISTENER_SERVICE_MAP.get(key).forEach(listener -> listener.onProcessEvent(event));
                         }
                     });
@@ -116,13 +123,13 @@ public class ApolloConfiguration extends AbstractConfiguration {
 
     @Override
     public String getLatestConfig(String dataId, String defaultValue, long timeoutMills) {
-        ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigFuture.ConfigOperation.GET,
-            timeoutMills);
+        ConfigFuture configFuture =
+                new ConfigFuture(dataId, defaultValue, ConfigFuture.ConfigOperation.GET, timeoutMills);
         configOperateExecutor.submit(() -> {
             String result = config.getProperty(dataId, defaultValue);
             configFuture.setResult(result);
         });
-        return (String)configFuture.get();
+        return (String) configFuture.get();
     }
 
     @Override
@@ -145,7 +152,9 @@ public class ApolloConfiguration extends AbstractConfiguration {
         if (StringUtils.isBlank(dataId) || listener == null) {
             return;
         }
-        LISTENER_SERVICE_MAP.computeIfAbsent(dataId, key -> ConcurrentHashMap.newKeySet()).add(listener);
+        LISTENER_SERVICE_MAP
+                .computeIfAbsent(dataId, key -> ConcurrentHashMap.newKeySet())
+                .add(listener);
     }
 
     @Override
@@ -196,7 +205,8 @@ public class ApolloConfiguration extends AbstractConfiguration {
                 System.setProperty(PROP_APOLLO_CONFIG_SERVICE, apolloConfigService);
             } else {
                 if (StringUtils.isBlank(System.getProperty(PROP_APOLLO_META))) {
-                    throw new RuntimeException("Apollo configuration initialized failed,please check the value of apolloMeta and apolloConfigService");
+                    throw new RuntimeException(
+                            "Apollo configuration initialized failed,please check the value of apolloMeta and apolloConfigService");
                 }
             }
         }

@@ -20,7 +20,7 @@ package org.apache.seata.common.loader;
  * The type LatinHello
  *
  */
-@LoadLevel(name = "LatinHello",order = 3, scope = Scope.PROTOTYPE)
+@LoadLevel(name = "LatinHello", order = 3, scope = Scope.PROTOTYPE)
 public class LatinHello implements Hello {
     @Override
     public String say() {

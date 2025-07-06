@@ -23,9 +23,8 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_QUERY_LIMIT;
 import static org.apache.seata.common.DefaultValues.DEFAULT_REDIS_MAX_IDLE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_REDIS_MIN_IDLE;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.STORE_REDIS_PREFIX;
-import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.STORE_REDIS_SINGLE_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.STORE_REDIS_SENTINEL_PREFIX;
-
+import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.STORE_REDIS_SINGLE_PREFIX;
 
 @Component
 @ConfigurationProperties(prefix = STORE_REDIS_PREFIX)
@@ -34,6 +33,7 @@ public class StoreRedisProperties {
      * single, sentinel
      */
     private String mode = "single";
+
     private String type = "pipeline";
     private Integer maxConn = DEFAULT_REDIS_MAX_IDLE;
     private String password = null;

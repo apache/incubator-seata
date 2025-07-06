@@ -28,13 +28,12 @@ class SkipCallbackWrapperExceptionTest {
         assertThrowsExactly(SkipCallbackWrapperException.class, () -> {
             throw new SkipCallbackWrapperException(new Throwable("error"));
         });
-
     }
 
     @Test
     void testFillInStackTrace() {
-        SkipCallbackWrapperException skipCallbackWrapperException = new SkipCallbackWrapperException(new Throwable("error"));
+        SkipCallbackWrapperException skipCallbackWrapperException =
+                new SkipCallbackWrapperException(new Throwable("error"));
         assertNull(skipCallbackWrapperException.fillInStackTrace());
-
     }
 }

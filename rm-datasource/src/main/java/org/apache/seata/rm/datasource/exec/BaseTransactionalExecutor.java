@@ -16,6 +16,29 @@
  */
 package org.apache.seata.rm.datasource.exec;
 
+import org.apache.seata.common.DefaultValues;
+import org.apache.seata.common.exception.ShouldNeverHappenException;
+import org.apache.seata.common.util.CollectionUtils;
+import org.apache.seata.common.util.IOUtil;
+import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.core.constants.ConfigurationKeys;
+import org.apache.seata.core.context.RootContext;
+import org.apache.seata.rm.datasource.ConnectionProxy;
+import org.apache.seata.rm.datasource.SqlGenerateUtils;
+import org.apache.seata.rm.datasource.StatementProxy;
+import org.apache.seata.rm.datasource.sql.struct.Field;
+import org.apache.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
+import org.apache.seata.rm.datasource.sql.struct.TableRecords;
+import org.apache.seata.rm.datasource.undo.SQLUndoLog;
+import org.apache.seata.sqlparser.ParametersHolder;
+import org.apache.seata.sqlparser.SQLInsertRecognizer;
+import org.apache.seata.sqlparser.SQLRecognizer;
+import org.apache.seata.sqlparser.SQLType;
+import org.apache.seata.sqlparser.WhereRecognizer;
+import org.apache.seata.sqlparser.struct.TableMeta;
+import org.apache.seata.sqlparser.util.ColumnUtils;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -29,30 +52,6 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.seata.common.DefaultValues;
-import org.apache.seata.common.exception.ShouldNeverHappenException;
-import org.apache.seata.common.util.CollectionUtils;
-import org.apache.seata.common.util.IOUtil;
-import org.apache.seata.common.util.StringUtils;
-import org.apache.seata.config.ConfigurationFactory;
-import org.apache.seata.core.constants.ConfigurationKeys;
-import org.apache.seata.core.context.RootContext;
-import org.apache.seata.sqlparser.util.ColumnUtils;
-import org.apache.seata.rm.datasource.ConnectionProxy;
-import org.apache.seata.rm.datasource.SqlGenerateUtils;
-import org.apache.seata.rm.datasource.StatementProxy;
-import org.apache.seata.rm.datasource.sql.struct.Field;
-import org.apache.seata.sqlparser.struct.TableMeta;
-import org.apache.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
-import org.apache.seata.rm.datasource.sql.struct.TableRecords;
-import org.apache.seata.rm.datasource.undo.SQLUndoLog;
-import org.apache.seata.sqlparser.ParametersHolder;
-import org.apache.seata.sqlparser.SQLInsertRecognizer;
-import org.apache.seata.sqlparser.SQLRecognizer;
-import org.apache.seata.sqlparser.SQLType;
-import org.apache.seata.sqlparser.WhereRecognizer;
-
-
 import static org.apache.seata.rm.datasource.exec.AbstractDMLBaseExecutor.WHERE;
 
 /**
@@ -63,8 +62,10 @@ import static org.apache.seata.rm.datasource.exec.AbstractDMLBaseExecutor.WHERE;
  */
 public abstract class BaseTransactionalExecutor<T, S extends Statement> implements Executor<T> {
 
-    private static final boolean ONLY_CARE_UPDATE_COLUMNS = ConfigurationFactory.getInstance().getBoolean(
-            ConfigurationKeys.TRANSACTION_UNDO_ONLY_CARE_UPDATE_COLUMNS, DefaultValues.DEFAULT_ONLY_CARE_UPDATE_COLUMNS);
+    private static final boolean ONLY_CARE_UPDATE_COLUMNS = ConfigurationFactory.getInstance()
+            .getBoolean(
+                    ConfigurationKeys.TRANSACTION_UNDO_ONLY_CARE_UPDATE_COLUMNS,
+                    DefaultValues.DEFAULT_ONLY_CARE_UPDATE_COLUMNS);
 
     /**
      * The Statement proxy.
@@ -95,8 +96,8 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * @param statementCallback the statement callback
      * @param sqlRecognizer     the sql recognizer
      */
-    public BaseTransactionalExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback,
-        SQLRecognizer sqlRecognizer) {
+    public BaseTransactionalExecutor(
+            StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback, SQLRecognizer sqlRecognizer) {
         this.statementProxy = statementProxy;
         this.statementCallback = statementCallback;
         this.sqlRecognizer = sqlRecognizer;
@@ -109,8 +110,10 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * @param statementCallback the statement callback
      * @param sqlRecognizers    the multi sql recognizer
      */
-    public BaseTransactionalExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback,
-        List<SQLRecognizer> sqlRecognizers) {
+    public BaseTransactionalExecutor(
+            StatementProxy<S> statementProxy,
+            StatementCallback<T, S> statementCallback,
+            List<SQLRecognizer> sqlRecognizers) {
         this.statementProxy = statementProxy;
         this.statementCallback = statementCallback;
         this.sqlRecognizers = sqlRecognizers;
@@ -136,7 +139,6 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      */
     protected abstract T doExecute(Object... args) throws Throwable;
 
-
     /**
      * build buildWhereCondition
      *
@@ -151,8 +153,10 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         } else {
             whereCondition = recognizer.getWhereCondition();
         }
-        //process batch operation
-        if (StringUtils.isNotBlank(whereCondition) && CollectionUtils.isNotEmpty(paramAppenderList) && paramAppenderList.size() > 1) {
+        // process batch operation
+        if (StringUtils.isNotBlank(whereCondition)
+                && CollectionUtils.isNotEmpty(paramAppenderList)
+                && paramAppenderList.size() > 1) {
             StringBuilder whereConditionSb = new StringBuilder();
             whereConditionSb.append(" ( ").append(whereCondition).append(" ) ");
             for (int i = 1; i < paramAppenderList.size(); i++) {
@@ -204,7 +208,9 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * @return
      */
     protected String getColumnNameWithTablePrefix(String table, String tableAlias, String columnName) {
-        return tableAlias == null ? (table == null ? columnName : table + "." + columnName) : (tableAlias + "." + columnName);
+        return tableAlias == null
+                ? (table == null ? columnName : table + "." + columnName)
+                : (tableAlias + "." + columnName);
     }
 
     /**
@@ -215,10 +221,11 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * @param columnNames the column names
      * @return
      */
-    protected List<String> getColumnNamesWithTablePrefixList(String table,String tableAlias,List<String> columnNames) {
+    protected List<String> getColumnNamesWithTablePrefixList(
+            String table, String tableAlias, List<String> columnNames) {
         List<String> columnNameWithTablePrefix = new ArrayList<>();
         for (String columnName : columnNames) {
-            columnNameWithTablePrefix.add(this.getColumnNameWithTablePrefix(table,tableAlias,columnName));
+            columnNameWithTablePrefix.add(this.getColumnNameWithTablePrefix(table, tableAlias, columnName));
         }
         return columnNameWithTablePrefix;
     }
@@ -231,7 +238,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * @param columnNameList the column name
      * @return the column name in sql
      */
-    protected String getColumnNamesWithTablePrefix(String table,String tableAlias, List<String> columnNameList) {
+    protected String getColumnNamesWithTablePrefix(String table, String tableAlias, List<String> columnNameList) {
         if (CollectionUtils.isEmpty(columnNameList)) {
             return null;
         }
@@ -322,7 +329,10 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         }
         ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
         tableMeta = TableMetaCacheFactory.getTableMetaCache(connectionProxy.getDbType())
-            .getTableMeta(connectionProxy.getTargetConnection(), tableName, connectionProxy.getDataSourceProxy().getResourceId());
+                .getTableMeta(
+                        connectionProxy.getTargetConnection(),
+                        tableName,
+                        connectionProxy.getDataSourceProxy().getResourceId());
         return tableMeta;
     }
 
@@ -347,14 +357,13 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * @param columns the column name list
      * @return true: contains pk false: not contains pk
      */
-    protected boolean containsPK(String tableName,List<String> columns) {
+    protected boolean containsPK(String tableName, List<String> columns) {
         if (CollectionUtils.isEmpty(columns)) {
             return false;
         }
         List<String> newColumns = ColumnUtils.delEscape(columns, getDbType());
         return getTableMeta(tableName).containsPK(newColumns);
     }
-
 
     /**
      * compare column name and primary key name
@@ -364,7 +373,8 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      */
     protected boolean containPK(String columnName) {
         String newColumnName = ColumnUtils.delEscape(columnName, getDbType());
-        return CollectionUtils.toUpperList(getTableMeta().getPrimaryKeyOnlyName()).contains(newColumnName.toUpperCase());
+        return CollectionUtils.toUpperList(getTableMeta().getPrimaryKeyOnlyName())
+                .contains(newColumnName.toUpperCase());
     }
 
     /**
@@ -396,7 +406,8 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         }
         if (SQLType.UPDATE == sqlRecognizer.getSQLType()) {
             if (beforeImage.getRows().size() != afterImage.getRows().size()) {
-                throw new ShouldNeverHappenException("Before image size is not equaled to after image size, probably because you updated the primary keys.");
+                throw new ShouldNeverHappenException(
+                        "Before image size is not equaled to after image size, probably because you updated the primary keys.");
             }
         }
         ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
@@ -485,7 +496,8 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * @return a tableRecords
      * @throws SQLException the sql exception
      */
-    protected TableRecords buildTableRecords(TableMeta tableMeta, String selectSQL, ArrayList<List<Object>> paramAppenderList) throws SQLException {
+    protected TableRecords buildTableRecords(
+            TableMeta tableMeta, String selectSQL, ArrayList<List<Object>> paramAppenderList) throws SQLException {
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
@@ -513,7 +525,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * @throws SQLException the sql exception
      */
     protected TableRecords buildTableRecords(Map<String, List<Object>> pkValuesMap) throws SQLException {
-        SQLInsertRecognizer recognizer = (SQLInsertRecognizer)sqlRecognizer;
+        SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
         List<String> pkColumnNameList = getTableMeta().getPrimaryKeyOnlyName();
         String prefix = "SELECT ";
         StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
@@ -524,10 +536,11 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         StringJoiner selectSQLJoin = new StringJoiner(", ", prefix, suffix.toString());
         List<String> insertColumnsUnEscape = recognizer.getInsertColumnsUnEscape();
         List<String> needColumns =
-            getNeedColumns(tableMeta.getTableName(), sqlRecognizer.getTableAlias(), insertColumnsUnEscape);
+                getNeedColumns(tableMeta.getTableName(), sqlRecognizer.getTableAlias(), insertColumnsUnEscape);
         needColumns.forEach(selectSQLJoin::add);
         PreparedStatement ps = null;
-        String sqlStr = SqlGenerateUtils.buildSQLByPKs(selectSQLJoin.toString(), "", pkColumnNameList, rowSize, getDbType());
+        String sqlStr =
+                SqlGenerateUtils.buildSQLByPKs(selectSQLJoin.toString(), "", pkColumnNameList, rowSize, getDbType());
         ResultSet rs = null;
         try {
             ps = statementProxy.getConnection().prepareStatement(sqlStr);
@@ -535,7 +548,8 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
             for (int r = 0; r < rowSize; r++) {
                 for (int c = 0; c < pkColumnNameList.size(); c++) {
                     List<Object> pkColumnValueList = pkValuesMap.get(pkColumnNameList.get(c));
-                    int dataType = tableMeta.getColumnMeta(pkColumnNameList.get(c)).getDataType();
+                    int dataType =
+                            tableMeta.getColumnMeta(pkColumnNameList.get(c)).getDataType();
                     ps.setObject(paramIndex, pkColumnValueList.get(r), dataType);
                     paramIndex++;
                 }
@@ -555,13 +569,11 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
                 List<String> pkNameList = tableMeta.getEscapePkNameList(getDbType());
                 if (CollectionUtils.isNotEmpty(pkNameList)) {
                     if (StringUtils.isNotBlank(tableAlias)) {
-                        needUpdateColumns.addAll(
-                                ColumnUtils.delEscape(getColumnNamesWithTablePrefixList(table, tableAlias, pkNameList), getDbType())
-                        );
+                        needUpdateColumns.addAll(ColumnUtils.delEscape(
+                                getColumnNamesWithTablePrefixList(table, tableAlias, pkNameList), getDbType()));
                     } else {
                         needUpdateColumns.addAll(
-                                ColumnUtils.delEscape(getColumnNamesInSQLList(pkNameList), getDbType())
-                        );
+                                ColumnUtils.delEscape(getColumnNamesInSQLList(pkNameList), getDbType()));
                     }
                 }
             }
@@ -582,7 +594,9 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
             }
             allColumns.forEach(needUpdateColumns::add);
         }
-        return needUpdateColumns.stream().map(column -> ColumnUtils.addEscape(column, getDbType(), tableMeta)).collect(Collectors.toList());
+        return needUpdateColumns.stream()
+                .map(column -> ColumnUtils.addEscape(column, getDbType(), tableMeta))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -593,5 +607,4 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     protected String getDbType() {
         return statementProxy.getConnectionProxy().getDbType();
     }
-
 }

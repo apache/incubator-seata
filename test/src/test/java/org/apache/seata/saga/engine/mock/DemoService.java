@@ -25,22 +25,22 @@ import java.util.Map;
 public class DemoService {
 
     public Map<String, Object> foo(Map<String, Object> input) {
-        if(input == null){
+        if (input == null) {
             return null;
         }
         Integer sleepTime = (Integer) input.get("sleepTime");
-        if(sleepTime != null){
+        if (sleepTime != null) {
             try {
                 Thread.sleep(sleepTime);
             } catch (InterruptedException e) {
                 throw new DemoException(e);
             }
         }
-        if("true".equals(input.get("throwException"))){
+        if ("true".equals(input.get("throwException"))) {
             throw new DemoException("foo execute failed");
         }
-        if("true".equals(input.get("throwExceptionRandomly"))){
-            if(Math.random() > 0.5){
+        if ("true".equals(input.get("throwExceptionRandomly"))) {
+            if (Math.random() > 0.5) {
                 throw new DemoException("foo execute failed");
             }
         }
@@ -48,14 +48,14 @@ public class DemoService {
     }
 
     public Map<String, Object> compensateFoo(Map<String, Object> input) {
-        if(input == null){
+        if (input == null) {
             return null;
         }
-        if("true".equals(input.get("throwException"))){
+        if ("true".equals(input.get("throwException"))) {
             throw new DemoException("compensateFoo execute failed");
         }
-        if("true".equals(input.get("throwExceptionRandomly"))){
-            if(Math.random() > 0.8){
+        if ("true".equals(input.get("throwExceptionRandomly"))) {
+            if (Math.random() > 0.8) {
                 throw new DemoException("compensateFoo execute failed");
             }
         }
@@ -63,22 +63,22 @@ public class DemoService {
     }
 
     public Map<String, Object> bar(Map<String, Object> input) {
-        if(input == null){
+        if (input == null) {
             return null;
         }
         Integer sleepTime = (Integer) input.get("sleepTime");
-        if(sleepTime != null){
+        if (sleepTime != null) {
             try {
                 Thread.sleep(sleepTime);
             } catch (InterruptedException e) {
                 throw new DemoException(e);
             }
         }
-        if("true".equals(input.get("throwException"))){
+        if ("true".equals(input.get("throwException"))) {
             throw new DemoException("bar execute failed");
         }
-        if("true".equals(input.get("throwExceptionRandomly"))){
-            if(Math.random() > 0.5){
+        if ("true".equals(input.get("throwExceptionRandomly"))) {
+            if (Math.random() > 0.5) {
                 throw new DemoException("bar execute failed");
             }
         }
@@ -86,25 +86,31 @@ public class DemoService {
     }
 
     public Map<String, Object> compensateBar(Map<String, Object> input) {
-        if(input == null){
+        if (input == null) {
             return null;
         }
-        if("true".equals(input.get("throwException"))){
+        if ("true".equals(input.get("throwException"))) {
             throw new DemoException("compensateBar execute failed");
         }
-        if("true".equals(input.get("throwExceptionRandomly"))){
-            if(Math.random() > 0.8){
+        if ("true".equals(input.get("throwExceptionRandomly"))) {
+            if (Math.random() > 0.8) {
                 throw new DemoException("compensateBar execute failed");
             }
         }
         return input;
     }
 
-    public People complexParameterMethod(String name, int age, People people, People[] peopleArrya, List<People> peopleList, Map<String, People> peopleMap){
+    public People complexParameterMethod(
+            String name,
+            int age,
+            People people,
+            People[] peopleArrya,
+            List<People> peopleList,
+            Map<String, People> peopleMap) {
         return people;
     }
 
-    public Career interfaceParameterMethod(Career career){
+    public Career interfaceParameterMethod(Career career) {
         return career;
     }
 
@@ -113,8 +119,7 @@ public class DemoService {
         double random = Math.random();
         if (random > 0.5) {
             throw new DemoException("randomExceptionMethod execute failed");
-        }
-        else {
+        } else {
             throw new RuntimeException(new ConnectException("Connect Exception"));
         }
     }
@@ -169,9 +174,7 @@ public class DemoService {
         }
     }
 
-    public interface Career {
-
-    }
+    public interface Career {}
 
     public static class Engineer implements Career {
         private String name;

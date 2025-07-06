@@ -55,7 +55,5 @@ public class HsfTransactionConsumerFilter implements ClientFilter {
     }
 
     @Override
-    public void onResponse(Invocation invocation, RPCResult rpcResult) {
-
-    }
+    public void onResponse(Invocation invocation, RPCResult rpcResult) {}
 }

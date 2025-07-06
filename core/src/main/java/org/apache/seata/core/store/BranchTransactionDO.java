@@ -16,10 +16,10 @@
  */
 package org.apache.seata.core.store;
 
-import java.util.Date;
-
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.core.model.BranchStatus;
+
+import java.util.Date;
 
 /**
  * branch transaction data object
@@ -265,5 +265,4 @@ public class BranchTransactionDO implements Comparable<BranchTransactionDO>, jav
     public int compareTo(BranchTransactionDO branchTransactionDO) {
         return this.getGmtCreate().compareTo(branchTransactionDO.getGmtCreate());
     }
-
 }

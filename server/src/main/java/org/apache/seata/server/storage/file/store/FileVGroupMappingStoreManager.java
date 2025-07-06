@@ -16,6 +16,18 @@
  */
 package org.apache.seata.server.storage.file.store;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.io.FileUtils;
+import org.apache.seata.common.loader.LoadLevel;
+import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.config.Configuration;
+import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.core.store.MappingDO;
+import org.apache.seata.server.store.VGroupMappingStoreManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -24,18 +36,6 @@ import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
-import org.apache.seata.common.loader.LoadLevel;
-import org.apache.seata.common.util.StringUtils;
-import org.apache.seata.config.Configuration;
-import org.apache.seata.config.ConfigurationFactory;
-import org.apache.seata.core.store.MappingDO;
-import org.apache.seata.server.store.VGroupMappingStoreManager;
-import org.apache.commons.io.FileUtils;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @LoadLevel(name = "file")
 public class FileVGroupMappingStoreManager implements VGroupMappingStoreManager {
@@ -49,13 +49,11 @@ public class FileVGroupMappingStoreManager implements VGroupMappingStoreManager 
 
     HashMap<String, Object> vGroupMapping = new HashMap<>();
 
-
     protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
     ObjectMapper objectMapper = new ObjectMapper();
 
-    public FileVGroupMappingStoreManager() {
-    }
+    public FileVGroupMappingStoreManager() {}
 
     public FileVGroupMappingStoreManager(String mappingStoreFilePath) {
         storePath = mappingStoreFilePath + File.separator + ROOT_MAPPING_MANAGER_NAME;
@@ -117,16 +115,14 @@ public class FileVGroupMappingStoreManager implements VGroupMappingStoreManager 
             String fileContent = FileUtils.readFileToString(fileToLoad, StandardCharsets.UTF_8);
 
             if (!fileContent.isEmpty()) {
-                vGroupMapping = objectMapper.readValue(fileContent, new TypeReference<HashMap<String, Object>>() {
-                });
+                vGroupMapping = objectMapper.readValue(fileContent, new TypeReference<HashMap<String, Object>>() {});
             }
 
         } catch (Exception e) {
-            throw new RuntimeException("mapping relationship load failed",e);
+            throw new RuntimeException("mapping relationship load failed", e);
         }
         return vGroupMapping;
     }
-
 
     public boolean save(HashMap<String, Object> vGroupMapping) {
         try {

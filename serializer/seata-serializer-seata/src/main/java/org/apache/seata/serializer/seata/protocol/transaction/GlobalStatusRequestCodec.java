@@ -28,5 +28,4 @@ public class GlobalStatusRequestCodec extends AbstractGlobalEndRequestCodec {
     public Class<?> getMessageClassType() {
         return GlobalStatusRequest.class;
     }
-
 }

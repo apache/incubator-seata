@@ -18,7 +18,6 @@ package org.apache.seata.integration.motan;
 
 import org.apache.seata.core.context.RootContext;
 
-
 public class XIDServiceImpl implements XIDService {
 
     @Override

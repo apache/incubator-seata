@@ -95,5 +95,4 @@ public interface TCInboundHandler {
      * @return the global report response
      */
     GlobalReportResponse handle(GlobalReportRequest globalReport, RpcContext rpcContext);
-
 }

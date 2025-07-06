@@ -16,8 +16,6 @@
  */
 package org.apache.seata.server.storage.file.lock;
 
-import java.util.List;
-
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.lock.Locker;
@@ -26,6 +24,8 @@ import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.storage.raft.lock.RaftLockManager;
 import org.slf4j.MDC;
+
+import java.util.List;
 
 import static org.apache.seata.core.context.RootContext.MDC_KEY_BRANCH_ID;
 
@@ -48,13 +48,13 @@ public class FileLockManager extends AbstractLockManager {
         for (BranchSession branchSession : branchSessions) {
             try {
                 MDC.put(MDC_KEY_BRANCH_ID, String.valueOf(branchSession.getBranchId()));
-                releaseLockResult = this instanceof RaftLockManager ? super.releaseLock(branchSession)
-                    : this.releaseLock(branchSession);
+                releaseLockResult = this instanceof RaftLockManager
+                        ? super.releaseLock(branchSession)
+                        : this.releaseLock(branchSession);
             } finally {
                 MDC.remove(MDC_KEY_BRANCH_ID);
             }
         }
         return releaseLockResult;
     }
-
 }

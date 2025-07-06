@@ -33,7 +33,6 @@ public class MockRemotingProcessor implements RemotingProcessor {
     protected RemotingServer remotingServer;
     protected final TransactionMessageHandler handler;
 
-
     public MockRemotingProcessor(RemotingServer remotingServer, TransactionMessageHandler handler) {
         this.remotingServer = remotingServer;
         this.handler = handler;
@@ -44,6 +43,4 @@ public class MockRemotingProcessor implements RemotingProcessor {
         Object message = rpcMessage.getBody();
         LOGGER.info("process message : " + message);
     }
-
-
 }

@@ -19,7 +19,6 @@ package org.apache.seata.common.metadata;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-
 public class ClusterRoleTest {
 
     @Test

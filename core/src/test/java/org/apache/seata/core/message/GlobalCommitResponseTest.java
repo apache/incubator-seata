@@ -19,7 +19,6 @@ package org.apache.seata.core.message;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.protocol.ResultCode;
 import org.apache.seata.core.protocol.transaction.GlobalCommitResponse;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -45,7 +44,8 @@ public class GlobalCommitResponseTest {
 
         System.out.println(globalCommitResponse.toString());
 
-        Assertions.assertEquals("GlobalCommitResponse{globalStatus=Committed, resultCode=Success, msg='OK'}", globalCommitResponse.toString());
+        Assertions.assertEquals(
+                "GlobalCommitResponse{globalStatus=Committed, resultCode=Success, msg='OK'}",
+                globalCommitResponse.toString());
     }
-
 }

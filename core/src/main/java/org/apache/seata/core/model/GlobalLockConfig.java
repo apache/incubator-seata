@@ -18,7 +18,6 @@ package org.apache.seata.core.model;
 
 import org.apache.seata.common.LockStrategyMode;
 
-
 public class GlobalLockConfig {
 
     private int lockRetryInterval;
@@ -50,5 +49,4 @@ public class GlobalLockConfig {
     public void setLockStrategyMode(LockStrategyMode lockStrategyMode) {
         this.lockStrategyMode = lockStrategyMode;
     }
-
 }

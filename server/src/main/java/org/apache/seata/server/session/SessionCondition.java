@@ -33,8 +33,7 @@ public class SessionCondition {
     /**
      * Instantiates a new Session condition.
      */
-    public SessionCondition() {
-    }
+    public SessionCondition() {}
 
     /**
      * Instantiates a new Session condition.
@@ -141,5 +140,4 @@ public class SessionCondition {
     public void setLazyLoadBranch(boolean lazyLoadBranch) {
         this.lazyLoadBranch = lazyLoadBranch;
     }
-
 }

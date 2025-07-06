@@ -21,9 +21,7 @@ import org.apache.seata.sqlparser.antlr.mysql.parser.MySqlParser;
 import org.apache.seata.sqlparser.antlr.mysql.parser.MySqlParserBaseListener;
 import org.apache.seata.sqlparser.antlr.mysql.visit.StatementSqlVisitor;
 
-
 public class UpdateSpecificationSqlListener extends MySqlParserBaseListener {
-
 
     private MySqlContext sqlQueryContext;
 
@@ -46,7 +44,8 @@ public class UpdateSpecificationSqlListener extends MySqlParserBaseListener {
     }
 
     @Override
-    public void enterFullColumnNameExpressionAtomForUpdate(MySqlParser.FullColumnNameExpressionAtomForUpdateContext ctx) {
+    public void enterFullColumnNameExpressionAtomForUpdate(
+            MySqlParser.FullColumnNameExpressionAtomForUpdateContext ctx) {
 
         sqlQueryContext.addUpdateWhereColumnNames(ctx.getText());
         super.enterFullColumnNameExpressionAtomForUpdate(ctx);
@@ -82,5 +81,4 @@ public class UpdateSpecificationSqlListener extends MySqlParserBaseListener {
 
         super.enterUpdatedElement(ctx);
     }
-
 }

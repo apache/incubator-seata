@@ -22,7 +22,6 @@ import org.springframework.stereotype.Component;
 
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.COMPRESS_PREFIX;
 
-
 @Component
 @ConfigurationProperties(prefix = COMPRESS_PREFIX)
 public class UndoCompressProperties {

@@ -40,7 +40,8 @@ public class TccCore extends AbstractCore {
     }
 
     @Override
-    public BranchStatus branchDelete(GlobalSession globalSession, BranchSession branchSession) throws TransactionException {
+    public BranchStatus branchDelete(GlobalSession globalSession, BranchSession branchSession)
+            throws TransactionException {
         return super.branchRollback(globalSession, branchSession);
     }
 }

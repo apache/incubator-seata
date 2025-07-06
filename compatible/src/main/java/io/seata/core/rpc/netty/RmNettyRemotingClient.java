@@ -23,14 +23,14 @@ package io.seata.core.rpc.netty;
 @Deprecated
 public class RmNettyRemotingClient {
 
-    private static final org.apache.seata.core.rpc.netty.RmNettyRemotingClient INSTANCE = org.apache.seata.core.rpc.netty.RmNettyRemotingClient.getInstance();
+    private static final org.apache.seata.core.rpc.netty.RmNettyRemotingClient INSTANCE =
+            org.apache.seata.core.rpc.netty.RmNettyRemotingClient.getInstance();
 
     private static class RmNettyRemotingClientInstance {
         private static final RmNettyRemotingClient INSTANCE = new RmNettyRemotingClient();
     }
 
-    private RmNettyRemotingClient() {
-    }
+    private RmNettyRemotingClient() {}
 
     public static RmNettyRemotingClient getInstance() {
         return RmNettyRemotingClientInstance.INSTANCE;

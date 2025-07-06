@@ -22,11 +22,9 @@ import org.apache.seata.common.util.CollectionUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class DefaultTargetClassParser implements TargetClassParser {
 
     protected static List<TargetClassParser> allTargetClassParsers = new ArrayList<>();
-
 
     private static class SingletonHolder {
         private static final DefaultTargetClassParser INSTANCE = new DefaultTargetClassParser();

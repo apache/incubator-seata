@@ -19,7 +19,6 @@ package org.apache.seata.spring;
 import org.apache.seata.integration.tx.api.interceptor.parser.TargetClassParser;
 import org.apache.seata.spring.util.SpringProxyUtils;
 
-
 public class SpringTargetClassParser implements TargetClassParser {
     @Override
     public Class<?> findTargetClass(Object target) throws Exception {

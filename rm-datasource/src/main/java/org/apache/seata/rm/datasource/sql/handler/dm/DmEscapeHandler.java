@@ -34,7 +34,8 @@ import java.util.stream.Collectors;
 @LoadLevel(name = JdbcConstants.DM)
 public class DmEscapeHandler implements EscapeHandler {
 
-    private Set<String> keywordSet = Arrays.stream(DmKeyword.values()).map(DmKeyword::name).collect(Collectors.toSet());
+    private Set<String> keywordSet =
+            Arrays.stream(DmKeyword.values()).map(DmKeyword::name).collect(Collectors.toSet());
 
     /**
      * dm keyword
@@ -514,7 +515,6 @@ public class DmEscapeHandler implements EscapeHandler {
         PASSWORD_GRACE_TIME("PASSWORD_GRACE_TIME"),
         PASSWORD_LIFE_TIME("PASSWORD_LIFE_TIME"),
 
-
         PASSWORD_LOCK_TIME("PASSWORD_LOCK_TIME"),
         PASSWORD_POLICY("PASSWORD_POLICY"),
         PASSWORD_REUSE_MAX("PASSWORD_REUSE_MAX"),
@@ -803,7 +803,6 @@ public class DmEscapeHandler implements EscapeHandler {
             fieldOrTableName = fieldOrTableName.toUpperCase();
         }
         return keywordSet.contains(fieldOrTableName);
-
     }
 
     @Override

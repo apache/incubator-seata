@@ -19,7 +19,6 @@ package org.apache.seata.core.message;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.protocol.ResultCode;
 import org.apache.seata.core.protocol.transaction.BranchCommitResponse;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -41,9 +40,7 @@ public class BranchCommitResponseTest {
         branchCommitResponse.setResultCode(ResultCode.Success);
         branchCommitResponse.setMsg("");
         Assertions.assertEquals(
-            "BranchCommitResponse{xid='127.0.0.1:8091:123456', branchId=2345678, branchStatus=PhaseOne_Done, resultCode=Success, msg=''}",
-            branchCommitResponse.toString());
-
+                "BranchCommitResponse{xid='127.0.0.1:8091:123456', branchId=2345678, branchStatus=PhaseOne_Done, resultCode=Success, msg=''}",
+                branchCommitResponse.toString());
     }
-
 }

@@ -30,16 +30,17 @@ import java.util.Map;
 @LocalTCC
 public interface Action1 {
 
-    @TwoPhaseBusinessAction(name = "mock-action", commitMethod = "commitTcc", rollbackMethod = "cancel"
-//            , useTCCFence = true
-    )
-    String insert(@BusinessActionContextParameter Long reqId,
-            @BusinessActionContextParameter(paramName = "params") Map<String, String> params
-    );
-
+    @TwoPhaseBusinessAction(
+            name = "mock-action",
+            commitMethod = "commitTcc",
+            rollbackMethod = "cancel"
+            //            , useTCCFence = true
+            )
+    String insert(
+            @BusinessActionContextParameter Long reqId,
+            @BusinessActionContextParameter(paramName = "params") Map<String, String> params);
 
     boolean commitTcc(BusinessActionContext actionContext);
-
 
     boolean cancel(BusinessActionContext actionContext);
 }

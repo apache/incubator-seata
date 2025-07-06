@@ -22,26 +22,22 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.Properties;
 
-
 class ConfigProcessorTest {
 
     @Test
     void processConfig() throws IOException {
-        String yamlString = "store:\n" +
-                "  mode: db\n" +
-                "  db: \n" +
-                "    datasource: druid\n" +
-                "    dbType: mysql\n" +
-                "    driverClassName: com.mysql.jdbc.Driver\n" +
-                "    url: jdbc:mysql://127.0.0.1:3306/server_seata\n" +
-                "    user: root\n" +
-                "    password: 'root'\n";
+        String yamlString = "store:\n" + "  mode: db\n"
+                + "  db: \n"
+                + "    datasource: druid\n"
+                + "    dbType: mysql\n"
+                + "    driverClassName: com.mysql.jdbc.Driver\n"
+                + "    url: jdbc:mysql://127.0.0.1:3306/server_seata\n"
+                + "    user: root\n"
+                + "    password: 'root'\n";
 
         final Properties properties = ConfigProcessor.processConfig(yamlString, "yaml");
         Assertions.assertEquals(properties.getProperty("store.mode"), "db");
-
     }
-
 
     @Test
     void resolverConfigDataType() {
@@ -68,6 +64,4 @@ class ConfigProcessorTest {
         dataType = ConfigProcessor.resolverConfigDataType("a");
         Assertions.assertEquals(dataType, "properties");
     }
-
-
 }

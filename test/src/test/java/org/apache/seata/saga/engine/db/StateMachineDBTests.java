@@ -16,13 +16,6 @@
  */
 package org.apache.seata.saga.engine.db;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
 import org.apache.seata.common.LockAndCallback;
 import org.apache.seata.common.SagaCostPrint;
 import org.apache.seata.common.exception.FrameworkErrorCode;
@@ -56,6 +49,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 /**
  * State machine tests with db log store
  *
@@ -74,7 +74,8 @@ public class StateMachineDBTests extends AbstractServerTest {
         startSeataServer();
         TmNettyRemotingClient.getInstance().destroy();
         RmNettyRemotingClient.getInstance().destroy();
-        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:saga/spring/statemachine_engine_db_test.xml");
+        ApplicationContext applicationContext =
+                new ClassPathXmlApplicationContext("classpath:saga/spring/statemachine_engine_db_test.xml");
         stateMachineEngine = applicationContext.getBean("stateMachineEngine", StateMachineEngine.class);
         StateMachineEngineHolder.setStateMachineEngine(stateMachineEngine);
     }
@@ -177,8 +178,8 @@ public class StateMachineDBTests extends AbstractServerTest {
             Assertions.assertNotNull(businessKey);
             System.out.println("====== businessKey :" + businessKey);
 
-            String contextBusinessKey = (String) inst.getEndParams().get(
-                    inst.getStateList().get(0).getName() + DomainConstants.VAR_NAME_BUSINESSKEY);
+            String contextBusinessKey = (String) inst.getEndParams()
+                    .get(inst.getStateList().get(0).getName() + DomainConstants.VAR_NAME_BUSINESSKEY);
             Assertions.assertNotNull(contextBusinessKey);
             System.out.println("====== context businessKey :" + businessKey);
         });
@@ -259,7 +260,7 @@ public class StateMachineDBTests extends AbstractServerTest {
 
             StateMachineInstance instance = stateMachineEngine.start(stateMachineName, null, paramMap);
 
-            People peopleResult = (People)instance.getEndParams().get("complexParameterMethodResult");
+            People peopleResult = (People) instance.getEndParams().get("complexParameterMethodResult");
             Assertions.assertNotNull(peopleResult);
             Assertions.assertEquals(people.getName(), peopleResult.getName());
 
@@ -283,7 +284,7 @@ public class StateMachineDBTests extends AbstractServerTest {
 
             GlobalTransaction globalTransaction = getGlobalTransaction(inst);
             Assertions.assertNotNull(globalTransaction);
-            //End with Rollbacked = Finished
+            // End with Rollbacked = Finished
             Assertions.assertEquals(GlobalStatus.Finished, globalTransaction.getStatus());
         });
     }
@@ -346,18 +347,24 @@ public class StateMachineDBTests extends AbstractServerTest {
             System.out.println("====== GlobalStatus: " + globalTransaction.getStatus());
 
             // waiting for global transaction recover
-            while (!(ExecutionStatus.SU.equals(inst.getStatus()) || ExecutionStatus.SU.equals(inst.getCompensationStatus()))) {
+            while (!(ExecutionStatus.SU.equals(inst.getStatus())
+                    || ExecutionStatus.SU.equals(inst.getCompensationStatus()))) {
                 System.out.println("====== GlobalStatus: " + globalTransaction.getStatus());
                 Thread.sleep(1000);
-                inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
+                inst = stateMachineEngine
+                        .getStateMachineConfig()
+                        .getStateLogStore()
+                        .getStateMachineInstance(inst.getId());
             }
         });
     }
 
     @Test
     public void testReloadStateMachineInstance() {
-        StateMachineInstance instance = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(
-                "10.15.232.93:8091:2019567124");
+        StateMachineInstance instance = stateMachineEngine
+                .getStateMachineConfig()
+                .getStateLogStore()
+                .getStateMachineInstance("10.15.232.93:8091:2019567124");
         System.out.println(instance);
     }
 
@@ -386,13 +393,13 @@ public class StateMachineDBTests extends AbstractServerTest {
         String stateMachineName = "simpleCachesStateMachine";
 
         SagaCostPrint.executeAndPrint("3-16", () -> {
-
             Map<String, Object> paramMap = new HashMap<>(2);
             paramMap.put("a", 1);
             paramMap.put("barThrowException", "true");
 
             LockAndCallback lockAndCallback = new LockAndCallback();
-            StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
+            StateMachineInstance inst =
+                    stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
             lockAndCallback.waitingForFinish(inst);
 
             Assertions.assertNotNull(inst.getException());
@@ -410,7 +417,8 @@ public class StateMachineDBTests extends AbstractServerTest {
             paramMap.put("barThrowException", "true");
 
             LockAndCallback lockAndCallback = new LockAndCallback();
-            StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
+            StateMachineInstance inst =
+                    stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
             lockAndCallback.waitingForFinish(inst);
 
             Assertions.assertNotNull(inst.getException());
@@ -428,7 +436,8 @@ public class StateMachineDBTests extends AbstractServerTest {
             paramMap.put("barThrowException", "true");
 
             LockAndCallback lockAndCallback = new LockAndCallback();
-            StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
+            StateMachineInstance inst =
+                    stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
             lockAndCallback.waitingForFinish(inst);
 
             Assertions.assertNotNull(inst.getException());
@@ -450,7 +459,8 @@ public class StateMachineDBTests extends AbstractServerTest {
             paramMap.put("barThrowException", "true");
 
             LockAndCallback lockAndCallback = new LockAndCallback();
-            StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
+            StateMachineInstance inst =
+                    stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
             lockAndCallback.waitingForFinish(inst);
 
             Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
@@ -531,7 +541,8 @@ public class StateMachineDBTests extends AbstractServerTest {
             paramMap.put("barThrowException", "true");
 
             LockAndCallback lockAndCallback = new LockAndCallback();
-            StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
+            StateMachineInstance inst =
+                    stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
             lockAndCallback.waitingForFinish(inst);
 
             Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
@@ -553,7 +564,8 @@ public class StateMachineDBTests extends AbstractServerTest {
             paramMap.put("barThrowException", "true");
 
             LockAndCallback lockAndCallback = new LockAndCallback();
-            StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
+            StateMachineInstance inst =
+                    stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
             lockAndCallback.waitingForFinish(inst);
 
             Assertions.assertEquals(ExecutionStatus.UN, inst.getStatus());
@@ -573,7 +585,8 @@ public class StateMachineDBTests extends AbstractServerTest {
             paramMap.put("a", 1);
 
             LockAndCallback lockAndCallback = new LockAndCallback();
-            StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
+            StateMachineInstance inst =
+                    stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
             lockAndCallback.waitingForFinish(inst);
 
             Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
@@ -589,107 +602,105 @@ public class StateMachineDBTests extends AbstractServerTest {
     @Test
     @Disabled("FIXME: Sometimes it takes a lot of time")
     public void testStateMachineTransTimeout() throws Exception {
-        ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(1500);
+        ((DefaultStateMachineConfig) stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(1500);
 
-        //first state timeout
+        // first state timeout
         Map<String, Object> paramMap = new HashMap<>(3);
         paramMap.put("a", 1);
 
-        //timeout rollback after state machine finished (first state success)
+        // timeout rollback after state machine finished (first state success)
         paramMap.put("fooSleepTime", sleepTime);
         doTestStateMachineTransTimeout(paramMap, 1);
 
-        //timeout rollback before state machine finished (first state success)
+        // timeout rollback before state machine finished (first state success)
         paramMap.put("fooSleepTime", sleepTimeLong);
         doTestStateMachineTransTimeout(paramMap, 2);
 
-        //timeout rollback after state machine finished (first state fail)
+        // timeout rollback after state machine finished (first state fail)
         paramMap.put("fooSleepTime", sleepTime);
         paramMap.put("fooThrowException", "true");
         doTestStateMachineTransTimeout(paramMap, 3);
 
-        //timeout rollback before state machine finished (first state fail)
+        // timeout rollback before state machine finished (first state fail)
         paramMap.put("fooSleepTime", sleepTimeLong);
         paramMap.put("fooThrowException", "true");
         doTestStateMachineTransTimeout(paramMap, 4);
 
-
-        //last state timeout
+        // last state timeout
         paramMap = new HashMap<>(3);
         paramMap.put("a", 1);
 
-        //timeout rollback after state machine finished (last state success)
+        // timeout rollback after state machine finished (last state success)
         paramMap.put("barSleepTime", sleepTime);
         doTestStateMachineTransTimeout(paramMap, 5);
 
-        //timeout rollback before state machine finished (last state success)
+        // timeout rollback before state machine finished (last state success)
         paramMap.put("barSleepTime", sleepTimeLong);
         doTestStateMachineTransTimeout(paramMap, 6);
 
-        //timeout rollback after state machine finished (last state fail)
+        // timeout rollback after state machine finished (last state fail)
         paramMap.put("barSleepTime", sleepTime);
         paramMap.put("barThrowException", "true");
         doTestStateMachineTransTimeout(paramMap, 7);
 
-        //timeout rollback before state machine finished (last state fail)
+        // timeout rollback before state machine finished (last state fail)
         paramMap.put("barSleepTime", sleepTimeLong);
         paramMap.put("barThrowException", "true");
         doTestStateMachineTransTimeout(paramMap, 8);
 
-        ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(60000 * 30);
+        ((DefaultStateMachineConfig) stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(60000 * 30);
     }
 
     @Test
     @Disabled("FIXME: Sometimes it takes a lot of time")
     public void testStateMachineTransTimeoutAsync() throws Exception {
-        ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(1500);
+        ((DefaultStateMachineConfig) stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(1500);
 
-        //first state timeout
+        // first state timeout
         Map<String, Object> paramMap = new HashMap<>(3);
         paramMap.put("a", 1);
 
-        //timeout rollback after state machine finished (first state success)
+        // timeout rollback after state machine finished (first state success)
         paramMap.put("fooSleepTime", sleepTime);
         doTestStateMachineTransTimeoutAsync(paramMap, 1);
 
-        //timeout rollback before state machine finished (first state success)
+        // timeout rollback before state machine finished (first state success)
         paramMap.put("fooSleepTime", sleepTimeLong);
         doTestStateMachineTransTimeoutAsync(paramMap, 2);
 
-        //timeout rollback after state machine finished (first state fail)
+        // timeout rollback after state machine finished (first state fail)
         paramMap.put("fooSleepTime", sleepTime);
         paramMap.put("fooThrowException", "true");
         doTestStateMachineTransTimeoutAsync(paramMap, 3);
 
-        //timeout rollback before state machine finished (first state fail)
+        // timeout rollback before state machine finished (first state fail)
         paramMap.put("fooSleepTime", sleepTimeLong);
         paramMap.put("fooThrowException", "true");
         doTestStateMachineTransTimeoutAsync(paramMap, 4);
 
-
-        //last state timeout
+        // last state timeout
         paramMap = new HashMap<>(3);
         paramMap.put("a", 1);
 
-        //timeout rollback after state machine finished (last state success)
+        // timeout rollback after state machine finished (last state success)
         paramMap.put("barSleepTime", sleepTime);
         doTestStateMachineTransTimeoutAsync(paramMap, 5);
 
-        //timeout rollback before state machine finished (last state success)
+        // timeout rollback before state machine finished (last state success)
         paramMap.put("barSleepTime", sleepTimeLong);
         doTestStateMachineTransTimeoutAsync(paramMap, 6);
 
-        //timeout rollback after state machine finished (last state fail)
+        // timeout rollback after state machine finished (last state fail)
         paramMap.put("barSleepTime", sleepTime);
         paramMap.put("barThrowException", "true");
         doTestStateMachineTransTimeoutAsync(paramMap, 7);
 
-        //timeout rollback before state machine finished (last state fail)
+        // timeout rollback before state machine finished (last state fail)
         paramMap.put("barSleepTime", sleepTimeLong);
         paramMap.put("barThrowException", "true");
         doTestStateMachineTransTimeoutAsync(paramMap, 8);
 
-        ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(60000 * 30);
+        ((DefaultStateMachineConfig) stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(60000 * 30);
     }
 
     @Test
@@ -698,12 +709,16 @@ public class StateMachineDBTests extends AbstractServerTest {
         String businessKey = "bizKey";
 
         SagaCostPrint.executeAndPrint("3-24", () -> {
-            Assertions.assertDoesNotThrow(() -> stateMachineEngine.startWithBusinessKey(stateMachineName, null, businessKey, new HashMap<>()));
+            Assertions.assertDoesNotThrow(() ->
+                    stateMachineEngine.startWithBusinessKey(stateMachineName, null, businessKey, new HashMap<>()));
         });
 
         SagaCostPrint.executeAndPrint("3-25", () -> {
             // use same biz key to mock exception
-            Assertions.assertThrows(StoreException.class, () -> stateMachineEngine.startWithBusinessKey(stateMachineName, null, businessKey, new HashMap<>()));
+            Assertions.assertThrows(
+                    StoreException.class,
+                    () -> stateMachineEngine.startWithBusinessKey(
+                            stateMachineName, null, businessKey, new HashMap<>()));
             Assertions.assertNull(RootContext.getXID());
         });
     }
@@ -941,7 +956,10 @@ public class StateMachineDBTests extends AbstractServerTest {
             } catch (EngineExecutionException e) {
                 e.printStackTrace();
 
-                inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(e.getStateMachineInstanceId());
+                inst = stateMachineEngine
+                        .getStateMachineConfig()
+                        .getStateLogStore()
+                        .getStateMachineInstance(e.getStateMachineInstanceId());
             }
 
             GlobalTransaction globalTransaction = getGlobalTransaction(inst);
@@ -952,11 +970,14 @@ public class StateMachineDBTests extends AbstractServerTest {
             while (!ExecutionStatus.SU.equals(inst.getCompensationStatus())) {
                 System.out.println("====== GlobalStatus: " + globalTransaction.getStatus());
                 Thread.sleep(2500);
-                inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
+                inst = stateMachineEngine
+                        .getStateMachineConfig()
+                        .getStateLogStore()
+                        .getStateMachineInstance(inst.getId());
             }
 
-            Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus())
-                    || ExecutionStatus.SU.equals(inst.getStatus()));
+            Assertions.assertTrue(
+                    ExecutionStatus.UN.equals(inst.getStatus()) || ExecutionStatus.SU.equals(inst.getStatus()));
             Assertions.assertEquals(ExecutionStatus.SU, inst.getCompensationStatus());
         });
     }
@@ -966,7 +987,8 @@ public class StateMachineDBTests extends AbstractServerTest {
 
         SagaCostPrint.executeAndPrint("3-37-" + i, () -> {
             LockAndCallback lockAndCallback = new LockAndCallback();
-            StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
+            StateMachineInstance inst =
+                    stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
             lockAndCallback.waitingForFinish(inst);
 
             GlobalTransaction globalTransaction = getGlobalTransaction(inst);
@@ -977,11 +999,14 @@ public class StateMachineDBTests extends AbstractServerTest {
             while (!ExecutionStatus.SU.equals(inst.getCompensationStatus())) {
                 System.out.println("====== GlobalStatus: " + globalTransaction.getStatus());
                 Thread.sleep(2500);
-                inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
+                inst = stateMachineEngine
+                        .getStateMachineConfig()
+                        .getStateLogStore()
+                        .getStateMachineInstance(inst.getId());
             }
 
-            Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus())
-                    || ExecutionStatus.SU.equals(inst.getStatus()));
+            Assertions.assertTrue(
+                    ExecutionStatus.UN.equals(inst.getStatus()) || ExecutionStatus.SU.equals(inst.getStatus()));
             Assertions.assertEquals(ExecutionStatus.SU, inst.getCompensationStatus());
         });
     }
@@ -989,57 +1014,57 @@ public class StateMachineDBTests extends AbstractServerTest {
     @Test
     @Disabled("FIXME")
     public void testStateMachineCustomRecoverStrategyOnTimeout() throws Exception {
-        ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(1500);
+        ((DefaultStateMachineConfig) stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(1500);
 
-        //first state timeout
+        // first state timeout
         Map<String, Object> paramMap = new HashMap<>(3);
         paramMap.put("a", 1);
 
-        //timeout forward after state machine finished (first state success)
+        // timeout forward after state machine finished (first state success)
         paramMap.put("fooSleepTime", sleepTime);
         doTestStateMachineCustomRecoverStrategyOnTimeout(paramMap, 1);
 
-        //timeout forward before state machine finished (first state success)
+        // timeout forward before state machine finished (first state success)
         paramMap.put("fooSleepTime", sleepTimeLong);
         doTestStateMachineCustomRecoverStrategyOnTimeout(paramMap, 2);
 
-        //timeout forward after state machine finished (first state fail randomly)
+        // timeout forward after state machine finished (first state fail randomly)
         paramMap.put("fooSleepTime", sleepTime);
         paramMap.put("fooThrowExceptionRandomly", "true");
         doTestStateMachineCustomRecoverStrategyOnTimeout(paramMap, 3);
 
-        //timeout forward before state machine finished (first state fail randomly)
+        // timeout forward before state machine finished (first state fail randomly)
         paramMap.put("fooSleepTime", sleepTimeLong);
         paramMap.put("fooThrowExceptionRandomly", "true");
         doTestStateMachineCustomRecoverStrategyOnTimeout(paramMap, 4);
 
-
-        //last state timeout
+        // last state timeout
         paramMap = new HashMap<>(3);
         paramMap.put("a", 1);
 
-        //timeout forward after state machine finished (last state success)
+        // timeout forward after state machine finished (last state success)
         paramMap.put("barSleepTime", sleepTime);
         doTestStateMachineCustomRecoverStrategyOnTimeout(paramMap, 5);
 
-        //timeout forward before state machine finished (last state success)
+        // timeout forward before state machine finished (last state success)
         paramMap.put("barSleepTime", sleepTimeLong);
         doTestStateMachineCustomRecoverStrategyOnTimeout(paramMap, 6);
 
-        //timeout forward after state machine finished (last state fail randomly)
+        // timeout forward after state machine finished (last state fail randomly)
         paramMap.put("barSleepTime", sleepTime);
         paramMap.put("barThrowExceptionRandomly", "true");
         doTestStateMachineCustomRecoverStrategyOnTimeout(paramMap, 7);
 
-        //timeout forward before state machine finished (last state fail randomly)
+        // timeout forward before state machine finished (last state fail randomly)
         paramMap.put("barSleepTime", sleepTimeLong);
         paramMap.put("barThrowExceptionRandomly", "true");
         doTestStateMachineCustomRecoverStrategyOnTimeout(paramMap, 8);
 
-        ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(60000 * 30);
+        ((DefaultStateMachineConfig) stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(60000 * 30);
     }
 
-    private void doTestStateMachineCustomRecoverStrategyOnTimeout(Map<String, Object> paramMap, int i) throws Exception {
+    private void doTestStateMachineCustomRecoverStrategyOnTimeout(Map<String, Object> paramMap, int i)
+            throws Exception {
         String stateMachineName = "simpleStateMachineWithRecoverStrategy";
 
         SagaCostPrint.executeAndPrint("3-38-" + i, () -> {
@@ -1049,7 +1074,10 @@ public class StateMachineDBTests extends AbstractServerTest {
             } catch (EngineExecutionException e) {
                 e.printStackTrace();
 
-                inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(e.getStateMachineInstanceId());
+                inst = stateMachineEngine
+                        .getStateMachineConfig()
+                        .getStateLogStore()
+                        .getStateMachineInstance(e.getStateMachineInstanceId());
             }
 
             GlobalTransaction globalTransaction = getGlobalTransaction(inst);
@@ -1062,7 +1090,10 @@ public class StateMachineDBTests extends AbstractServerTest {
                 System.out.println("====== GlobalStatus: " + globalTransaction.getStatus());
                 System.out.println("====== StateMachineInstanceStatus: " + inst.getStatus());
                 Thread.sleep(2500);
-                inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
+                inst = stateMachineEngine
+                        .getStateMachineConfig()
+                        .getStateLogStore()
+                        .getStateMachineInstance(inst.getId());
             }
 
             Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
@@ -1073,62 +1104,63 @@ public class StateMachineDBTests extends AbstractServerTest {
     @Test
     @Disabled("FIXME")
     public void testStateMachineCustomRecoverStrategyOnTimeoutAsync() throws Exception {
-        ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(1500);
+        ((DefaultStateMachineConfig) stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(1500);
 
-        //first state timeout
+        // first state timeout
         Map<String, Object> paramMap = new HashMap<>(3);
         paramMap.put("a", 1);
 
-        //timeout forward after state machine finished (first state success)
+        // timeout forward after state machine finished (first state success)
         paramMap.put("fooSleepTime", sleepTime);
         doTestStateMachineCustomRecoverStrategyOnTimeoutAsync(paramMap, 1);
 
-        //timeout forward before state machine finished (first state success)
+        // timeout forward before state machine finished (first state success)
         paramMap.put("fooSleepTime", sleepTimeLong);
         doTestStateMachineCustomRecoverStrategyOnTimeoutAsync(paramMap, 2);
 
-        //timeout forward after state machine finished (first state fail randomly)
+        // timeout forward after state machine finished (first state fail randomly)
         paramMap.put("fooSleepTime", sleepTime);
         paramMap.put("fooThrowExceptionRandomly", "true");
         doTestStateMachineCustomRecoverStrategyOnTimeoutAsync(paramMap, 3);
 
-        //timeout forward before state machine finished (first state fail randomly)
+        // timeout forward before state machine finished (first state fail randomly)
         paramMap.put("fooSleepTime", sleepTimeLong);
         paramMap.put("fooThrowExceptionRandomly", "true");
         doTestStateMachineCustomRecoverStrategyOnTimeoutAsync(paramMap, 4);
 
-
-        //last state timeout
+        // last state timeout
         paramMap = new HashMap<>(3);
         paramMap.put("a", 1);
 
-        //timeout forward after state machine finished (last state success)
+        // timeout forward after state machine finished (last state success)
         paramMap.put("barSleepTime", sleepTime);
         doTestStateMachineCustomRecoverStrategyOnTimeoutAsync(paramMap, 5);
 
-        //timeout forward before state machine finished (last state success)
+        // timeout forward before state machine finished (last state success)
         paramMap.put("barSleepTime", sleepTimeLong);
         doTestStateMachineCustomRecoverStrategyOnTimeoutAsync(paramMap, 6);
 
-        //timeout forward after state machine finished (last state fail randomly)
+        // timeout forward after state machine finished (last state fail randomly)
         paramMap.put("barSleepTime", sleepTime);
         paramMap.put("barThrowExceptionRandomly", "true");
         doTestStateMachineCustomRecoverStrategyOnTimeoutAsync(paramMap, 7);
 
-        //timeout forward before state machine finished (last state fail randomly)
+        // timeout forward before state machine finished (last state fail randomly)
         paramMap.put("barSleepTime", sleepTimeLong);
         paramMap.put("barThrowExceptionRandomly", "true");
         doTestStateMachineCustomRecoverStrategyOnTimeoutAsync(paramMap, 8);
 
-        ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(60000 * 30);
+        ((DefaultStateMachineConfig) stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(60000 * 30);
     }
 
-    private void doTestStateMachineCustomRecoverStrategyOnTimeoutAsync(Map<String, Object> paramMap, int i) throws Exception {
+    private void doTestStateMachineCustomRecoverStrategyOnTimeoutAsync(Map<String, Object> paramMap, int i)
+            throws Exception {
         String stateMachineName = "simpleStateMachineWithRecoverStrategy";
 
         SagaCostPrint.executeAndPrint("3-39-" + i, () -> {
             LockAndCallback lockAndCallback = new LockAndCallback();
-            StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
+            StateMachineInstance inst =
+                    stateMachineEngine.startAsync(stateMachineName, null, paramMap, lockAndCallback.getCallback());
             lockAndCallback.waitingForFinish(inst);
 
             GlobalTransaction globalTransaction = getGlobalTransaction(inst);
@@ -1141,7 +1173,10 @@ public class StateMachineDBTests extends AbstractServerTest {
                 System.out.println("====== GlobalStatus: " + globalTransaction.getStatus());
                 System.out.println("====== StateMachineInstanceStatus: " + inst.getStatus());
                 Thread.sleep(2500);
-                inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
+                inst = stateMachineEngine
+                        .getStateMachineConfig()
+                        .getStateLogStore()
+                        .getStateMachineInstance(inst.getId());
             }
 
             Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());

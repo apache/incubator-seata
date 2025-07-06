@@ -39,15 +39,23 @@ header:
     - 'LICENSE'
     - 'NOTICE'
     - 'DISCLAIMER'
-    - 'saga/seata-saga-statemachine-designer/node_modules/**'
-    - 'node_modules/**'
-    - 'saga/seata-saga-statemachine-designer/**'
-    - 'console/src/main/resources/static/console-fe/**'
     - '**/org/apache/seata/sqlparser/antlr/**/*.g4'
-    - '**/org/apache/seata/sqlparser/antlr/mysql/parser/*'
-    - 'console/src/main/resources/static/**'
+    - 'distribution/licenses/**'
+    - 'distribution/LICENSE'
+    - 'distribution/LICENSE-*'
+    - 'distribution/NOTICE'
+    - 'distribution/NOTICE-*'
     - '**/*.txt'  #txt files not support comments
     - '**/*.json' #json files not support comments
+    - '**/*.png'
+    - '**/*.jpg'
+    - '**/*.jpeg'
+    - '**/*.ico'
+    - '**/*.tokens'
+    - '**/*.interp'
+    - '**/.babelrc' #json format
+    - '**/.eslintrc' #json format
+    - '**/.prettierrc' #json format
   comment: on-failure
 dependency:
   files:

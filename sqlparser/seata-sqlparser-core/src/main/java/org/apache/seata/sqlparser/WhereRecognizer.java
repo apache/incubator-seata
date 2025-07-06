@@ -70,5 +70,4 @@ public interface WhereRecognizer extends SQLRecognizer {
      * @return the order by condition
      */
     String getOrderByCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenderList);
-
 }

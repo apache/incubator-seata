@@ -19,12 +19,13 @@ package org.apache.seata.integration.grpc.interceptor;
 import io.grpc.Metadata;
 import org.apache.seata.core.context.RootContext;
 
-
 public interface GrpcHeaderKey {
 
     Metadata.Key<String> XID_HEADER_KEY = Metadata.Key.of(RootContext.KEY_XID, Metadata.ASCII_STRING_MARSHALLER);
 
-    Metadata.Key<String> XID_HEADER_KEY_LOWERCASE = Metadata.Key.of(RootContext.KEY_XID.toLowerCase(), Metadata.ASCII_STRING_MARSHALLER);
+    Metadata.Key<String> XID_HEADER_KEY_LOWERCASE =
+            Metadata.Key.of(RootContext.KEY_XID.toLowerCase(), Metadata.ASCII_STRING_MARSHALLER);
 
-    Metadata.Key<String> BRANCH_HEADER_KEY = Metadata.Key.of(RootContext.KEY_BRANCH_TYPE, Metadata.ASCII_STRING_MARSHALLER);
+    Metadata.Key<String> BRANCH_HEADER_KEY =
+            Metadata.Key.of(RootContext.KEY_BRANCH_TYPE, Metadata.ASCII_STRING_MARSHALLER);
 }

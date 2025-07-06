@@ -16,22 +16,21 @@
  */
 package org.apache.seata.rm.datasource.mock;
 
+import com.alibaba.druid.mock.MockStatementBase;
+import com.alibaba.druid.mock.handler.MockExecuteHandler;
+import com.alibaba.druid.sql.SQLUtils;
+import com.alibaba.druid.sql.ast.SQLStatement;
+import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
+import com.alibaba.druid.sql.ast.statement.SQLSelectQueryBlock;
+import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
+import org.apache.seata.sqlparser.druid.mysql.MySQLSelectForUpdateRecognizer;
+import org.apache.seata.sqlparser.util.JdbcConstants;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
-import com.alibaba.druid.sql.ast.statement.SQLSelectQueryBlock;
-import com.alibaba.druid.sql.SQLUtils;
-import com.alibaba.druid.sql.ast.SQLStatement;
-import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
-import org.apache.seata.sqlparser.druid.mysql.MySQLSelectForUpdateRecognizer;
-import org.apache.seata.sqlparser.util.JdbcConstants;
-import com.alibaba.druid.mock.MockStatementBase;
-import com.alibaba.druid.mock.handler.MockExecuteHandler;
-
 
 public class MockExecuteHandlerImpl implements MockExecuteHandler {
 
@@ -54,7 +53,10 @@ public class MockExecuteHandlerImpl implements MockExecuteHandler {
      * Instantiate MockExecuteHandlerImpl
      * @param mockReturnValue
      */
-    public MockExecuteHandlerImpl(List<String> mockReturnValueColumnLabels, Object[][] mockReturnValue, Object[][] mockColumnsMetasReturnValue) {
+    public MockExecuteHandlerImpl(
+            List<String> mockReturnValueColumnLabels,
+            Object[][] mockReturnValue,
+            Object[][] mockColumnsMetasReturnValue) {
         this.mockReturnValueColumnLabels = mockReturnValueColumnLabels;
         this.mockReturnValue = mockReturnValue;
         this.mockColumnsMetasReturnValue = mockColumnsMetasReturnValue;
@@ -63,12 +65,12 @@ public class MockExecuteHandlerImpl implements MockExecuteHandler {
     @Override
     public ResultSet executeQuery(MockStatementBase statement, String sql) throws SQLException {
         MockResultSet resultSet = new MockResultSet(statement);
-        //mock the return value
+        // mock the return value
         resultSet.mockResultSet(mockReturnValueColumnLabels, mockReturnValue);
-        //mock the rs meta data
+        // mock the rs meta data
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
         List<Object[]> metas = new ArrayList<>();
-        if(asts.get(0) instanceof SQLSelectStatement) {
+        if (asts.get(0) instanceof SQLSelectStatement) {
             SQLSelectStatement ast = (SQLSelectStatement) asts.get(0);
             SQLSelectQueryBlock queryBlock = ast.getSelect().getFirstQueryBlock();
             String tableName = "";
@@ -76,7 +78,7 @@ public class MockExecuteHandlerImpl implements MockExecuteHandler {
                 MySQLSelectForUpdateRecognizer recognizer = new MySQLSelectForUpdateRecognizer(sql, ast);
                 tableName = recognizer.getTableName();
             } else {
-                //select * from t inner join t1...
+                // select * from t inner join t1...
                 tableName = queryBlock.getFrom().toString();
             }
             for (Object[] meta : mockColumnsMetasReturnValue) {
@@ -85,8 +87,8 @@ public class MockExecuteHandlerImpl implements MockExecuteHandler {
                 }
             }
         }
-        if(metas.isEmpty()){
-            //eg:select * from dual
+        if (metas.isEmpty()) {
+            // eg:select * from dual
             metas = Arrays.asList(mockColumnsMetasReturnValue);
         }
         resultSet.mockResultSetMetaData(metas.toArray(new Object[0][]));

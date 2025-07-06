@@ -18,7 +18,6 @@ package org.apache.seata.config.file;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.common.loader.Scope;
 import org.apache.seata.config.FileConfigFactory;
@@ -28,8 +27,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-
-@LoadLevel(name = FileConfigFactory.DEFAULT_TYPE,scope = Scope.PROTOTYPE)
+@LoadLevel(name = FileConfigFactory.DEFAULT_TYPE, scope = Scope.PROTOTYPE)
 public class SimpleFileConfig implements FileConfig {
 
     private Config fileConfig;
@@ -54,9 +52,7 @@ public class SimpleFileConfig implements FileConfig {
 
     @Override
     public Map<String, Object> getAllConfig() {
-        return fileConfig.entrySet().stream().collect(HashMap::new, (m, e) ->
-                        m.put(e.getKey(), e.getValue().unwrapped()),
-            HashMap::putAll);
+        return fileConfig.entrySet().stream()
+                .collect(HashMap::new, (m, e) -> m.put(e.getKey(), e.getValue().unwrapped()), HashMap::putAll);
     }
-
 }

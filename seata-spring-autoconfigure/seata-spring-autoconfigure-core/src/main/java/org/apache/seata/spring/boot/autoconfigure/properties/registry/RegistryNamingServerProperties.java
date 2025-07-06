@@ -103,5 +103,4 @@ public class RegistryNamingServerProperties {
     public void setTokenValidityInMilliseconds(Long tokenValidityInMilliseconds) {
         this.tokenValidityInMilliseconds = tokenValidityInMilliseconds;
     }
-
 }

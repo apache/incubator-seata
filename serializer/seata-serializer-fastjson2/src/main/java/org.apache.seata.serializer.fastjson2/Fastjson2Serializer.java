@@ -30,6 +30,10 @@ public class Fastjson2Serializer implements Serializer {
 
     @Override
     public <T> T deserialize(byte[] bytes) {
-        return (T) JSONB.parseObject(bytes, Object.class, Fastjson2SerializerFactory.getInstance().getFilter(), Fastjson2SerializerFactory.getInstance().getJsonReaderFeatureList());
+        return (T) JSONB.parseObject(
+                bytes,
+                Object.class,
+                Fastjson2SerializerFactory.getInstance().getFilter(),
+                Fastjson2SerializerFactory.getInstance().getJsonReaderFeatureList());
     }
 }

@@ -46,5 +46,4 @@ public interface JacksonSerializer<T> {
      * @return json deserializer
      */
     JsonDeserializer<? extends T> deser();
-
 }

@@ -22,6 +22,7 @@ import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.config.ConfigurationCache;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.GlobalStatus;
+import org.apache.seata.server.DynamicPortTestConfig;
 import org.apache.seata.server.cluster.raft.execute.global.AddGlobalSessionExecute;
 import org.apache.seata.server.cluster.raft.execute.global.RemoveGlobalSessionExecute;
 import org.apache.seata.server.cluster.raft.execute.global.UpdateGlobalSessionExecute;
@@ -39,14 +40,15 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
-
+import org.springframework.context.annotation.Import;
 
 /**
  */
 @SpringBootTest
+@Import(DynamicPortTestConfig.class)
 class GlobalSessionExecuteTest {
     @BeforeAll
-    public static void setUp(ApplicationContext context){
+    public static void setUp(ApplicationContext context) {
         System.setProperty("server.raft.serverAddr", NetUtil.getLocalIp() + ":9091");
         SessionHolder.init(SessionMode.RAFT);
         LockerManagerFactory.destroy();
@@ -54,7 +56,7 @@ class GlobalSessionExecuteTest {
     }
 
     @AfterAll
-    public static void destroy(){
+    public static void destroy() {
         // Clear configuration
         ConfigurationCache.clear();
         System.clearProperty("server.raft.serverAddr");
@@ -148,5 +150,4 @@ class GlobalSessionExecuteTest {
         sessionMsg.setGlobalSession(dto);
         return sessionMsg;
     }
-
 }

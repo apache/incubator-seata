@@ -14,14 +14,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 server:
-  port: 7091
-
+  port: 8091
 spring:
   application:
     name: seata-server
-
+  main:
+    web-application-type: none
 logging:
   config: classpath:logback-spring.xml
   file:

@@ -16,10 +16,10 @@
  */
 package org.apache.seata.sqlparser.struct;
 
+import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-
-import org.junit.jupiter.api.Test;
 
 public class SqlSequenceExprTest {
 
@@ -58,5 +58,4 @@ public class SqlSequenceExprTest {
         expr.setFunction("newFunction");
         assertEquals("newFunction", expr.getFunction(), "Function should be 'newFunction'.");
     }
-
 }

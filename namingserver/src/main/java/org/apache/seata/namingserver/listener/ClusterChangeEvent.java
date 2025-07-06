@@ -20,11 +20,9 @@ import org.springframework.context.ApplicationEvent;
 
 import java.time.Clock;
 
-
 public class ClusterChangeEvent extends ApplicationEvent {
 
     private String group;
-
 
     private long term;
 

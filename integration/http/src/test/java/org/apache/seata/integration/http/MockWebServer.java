@@ -32,42 +32,40 @@ import java.util.Map;
 
 import static org.apache.seata.integration.http.AbstractHttpExecutor.convertParamOfJsonString;
 
-
 public class MockWebServer {
 
     private Map<String, String> urlServletMap = new HashMap<>();
 
-
     public void start(int port) {
         initServletMapping();
         new Thread(() -> {
-            ServerSocket serverSocket = null;
-            try {
-                serverSocket = new ServerSocket(port);
-                Socket socket = serverSocket.accept();
-                InputStream inputStream = socket.getInputStream();
-                OutputStream outputStream = socket.getOutputStream();
-
-                MockRequest myRequest = new MockRequest(inputStream);
-                MockResponse myResponse = new MockResponse(outputStream);
-
-                dispatch(myRequest, myResponse);
-                socket.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            } finally {
-                if (serverSocket != null) {
+                    ServerSocket serverSocket = null;
                     try {
-                        serverSocket.close();
+                        serverSocket = new ServerSocket(port);
+                        Socket socket = serverSocket.accept();
+                        InputStream inputStream = socket.getInputStream();
+                        OutputStream outputStream = socket.getOutputStream();
+
+                        MockRequest myRequest = new MockRequest(inputStream);
+                        MockResponse myResponse = new MockResponse(outputStream);
+
+                        dispatch(myRequest, myResponse);
+                        socket.close();
                     } catch (IOException e) {
                         e.printStackTrace();
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    } finally {
+                        if (serverSocket != null) {
+                            try {
+                                serverSocket.close();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
                     }
-                }
-            }
-        }).start();
-
+                })
+                .start();
     }
 
     public void initServletMapping() {
@@ -125,8 +123,7 @@ public class MockWebServer {
 
     private HttpTest.Person boxing(MockRequest myRequest) {
         Map params = null;
-        if ("get".equals(myRequest.getMethod()))
-            params = getUrlParams(myRequest.getUrl());
+        if ("get".equals(myRequest.getMethod())) params = getUrlParams(myRequest.getUrl());
         else if ("post".equals(myRequest.getMethod())) {
             params = getBodyParams(myRequest.getBody());
         }
@@ -137,7 +134,6 @@ public class MockWebServer {
         Map<String, String> map = convertParamOfJsonString(body, HttpTest.Person.class);
         return map;
     }
-
 
     public static Map<String, Object> getUrlParams(String param) {
         Map<String, Object> map = new HashMap<String, Object>(0);
@@ -157,6 +153,5 @@ public class MockWebServer {
             }
         }
         return map;
-
     }
 }

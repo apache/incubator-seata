@@ -16,16 +16,11 @@
  */
 package org.apache.seata.integration.http;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.parser.ParserConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -42,6 +37,10 @@ import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.core.context.RootContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Abstract http executor.
@@ -91,18 +90,18 @@ public abstract class AbstractHttpExecutor implements HttpExecutor {
         if (paramObject != null) {
             String content;
             if (paramObject instanceof String) {
-                String sParam = (String)paramObject;
+                String sParam = (String) paramObject;
                 JSONObject jsonObject = null;
                 try {
                     Object obj = JSON.parse(sParam, LOCAL_CONFIG);
                     if (obj instanceof JSONObject) {
-                        jsonObject = (JSONObject)obj;
+                        jsonObject = (JSONObject) obj;
                     } else {
-                        jsonObject = (JSONObject)JSON.toJSON(obj);
+                        jsonObject = (JSONObject) JSON.toJSON(obj);
                     }
                     content = jsonObject.toJSONString();
                 } catch (JSONException e) {
-                    //Interface provider process parse exception
+                    // Interface provider process parse exception
                     if (LOGGER.isWarnEnabled()) {
                         LOGGER.warn(e.getMessage());
                     }
@@ -111,14 +110,16 @@ public abstract class AbstractHttpExecutor implements HttpExecutor {
 
             } else {
                 content = JSON.toJSONString(paramObject);
-            } entity = new StringEntity(content, ContentType.APPLICATION_JSON);
+            }
+            entity = new StringEntity(content, ContentType.APPLICATION_JSON);
         }
 
         return buildEntity(entity, paramObject);
     }
 
     @Override
-    public <K> K executeGet(String host, String path, Map<String, String> paramObject, Class<K> returnType) throws IOException {
+    public <K> K executeGet(String host, String path, Map<String, String> paramObject, Class<K> returnType)
+            throws IOException {
 
         Args.notNull(returnType, "returnType");
         Args.notNull(host, "host");
@@ -141,8 +142,12 @@ public abstract class AbstractHttpExecutor implements HttpExecutor {
 
     protected abstract <T> void buildClientEntity(CloseableHttpClient httpClient, T paramObject);
 
-    private <K> K wrapHttpExecute(Class<K> returnType, CloseableHttpClient httpClient, HttpUriRequest httpUriRequest,
-                                  Map<String, String> headers) throws IOException {
+    private <K> K wrapHttpExecute(
+            Class<K> returnType,
+            CloseableHttpClient httpClient,
+            HttpUriRequest httpUriRequest,
+            Map<String, String> headers)
+            throws IOException {
         CloseableHttpResponse response;
         String xid = RootContext.getXID();
         if (xid != null) {
@@ -167,18 +172,18 @@ public abstract class AbstractHttpExecutor implements HttpExecutor {
 
     protected abstract String initGetUrl(String host, String path, Map<String, String> paramObject);
 
-
     protected abstract <T> void buildPostHeaders(Map<String, String> headers, T t);
 
     protected abstract <T> StringEntity buildEntity(StringEntity entity, T t);
 
     protected abstract <K> K convertResult(HttpResponse response, Class<K> clazz);
 
-
     public static Map<String, String> convertParamOfBean(Object sourceParam) {
         return CollectionUtils.toStringMap(JSON.parseObject(
-            JSON.toJSONString(sourceParam, SerializerFeature.WriteNullStringAsEmpty,
-                SerializerFeature.WriteMapNullValue), Map.class, LOCAL_CONFIG));
+                JSON.toJSONString(
+                        sourceParam, SerializerFeature.WriteNullStringAsEmpty, SerializerFeature.WriteMapNullValue),
+                Map.class,
+                LOCAL_CONFIG));
     }
 
     public static <T> Map<String, String> convertParamOfJsonString(String jsonStr, Class<T> returnType) {

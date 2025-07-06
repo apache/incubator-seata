@@ -34,32 +34,33 @@ public class NetAddressValidatorUtil {
 
     private static final int SEVEN = 7;
 
-    private static final Pattern IPV4_PATTERN = Pattern
-            .compile("^" + "(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)" + "(\\.(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}" + "$");
+    private static final Pattern IPV4_PATTERN = Pattern.compile(
+            "^" + "(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)" + "(\\.(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}" + "$");
 
-    private static final Pattern IPV6_STD_PATTERN = Pattern
-            .compile("^" + "(?:[0-9a-fA-F]{1,4}:){7}" + "[0-9a-fA-F]{1,4}" + "$");
+    private static final Pattern IPV6_STD_PATTERN =
+            Pattern.compile("^" + "(?:[0-9a-fA-F]{1,4}:){7}" + "[0-9a-fA-F]{1,4}" + "$");
 
-    private static final Pattern IPV6_HEX_COMPRESSED_PATTERN = Pattern
-            .compile("^" + "(" + "(?:[0-9A-Fa-f]{1,4}" + "(?::[0-9A-Fa-f]{1,4})*)?" + ")" + "::"
+    private static final Pattern IPV6_HEX_COMPRESSED_PATTERN =
+            Pattern.compile("^" + "(" + "(?:[0-9A-Fa-f]{1,4}" + "(?::[0-9A-Fa-f]{1,4})*)?" + ")" + "::" + "("
+                    + "(?:[0-9A-Fa-f]{1,4}" + "(?::[0-9A-Fa-f]{1,4})*)?" + ")" + "$");
 
-                    + "(" + "(?:[0-9A-Fa-f]{1,4}" + "(?::[0-9A-Fa-f]{1,4})*)?" + ")" + "$");
+    private static final Pattern IPV6_MIXED_COMPRESSED_REGEX =
+            Pattern.compile("^" + "(" + "(?:[0-9A-Fa-f]{1,4}" + "(?::[0-9A-Fa-f]{1,4})*)?" + ")" + "::" + "("
+                    + "(?:[0-9A-Fa-f]{1,4}:" + "(?:[0-9A-Fa-f]{1,4}:)*)?" + ")" + "$");
 
-    private static final Pattern IPV6_MIXED_COMPRESSED_REGEX = Pattern.compile(
-            "^" + "(" + "(?:[0-9A-Fa-f]{1,4}" + "(?::[0-9A-Fa-f]{1,4})*)?" + ")" + "::" + "(" + "(?:[0-9A-Fa-f]{1,4}:"
-                    + "(?:[0-9A-Fa-f]{1,4}:)*)?" + ")" + "$");
-
-    private static final Pattern IPV6_MIXED_UNCOMPRESSED_REGEX = Pattern
-            .compile("^" + "(?:[0-9a-fA-F]{1,4}:){6}" + "$");
-
+    private static final Pattern IPV6_MIXED_UNCOMPRESSED_REGEX =
+            Pattern.compile("^" + "(?:[0-9a-fA-F]{1,4}:){6}" + "$");
 
     public static boolean isIPv4Address(final String input) {
         return IPV4_PATTERN.matcher(input).matches();
     }
 
     public static boolean isIPv6Address(final String input) {
-        return isIPv6StdAddress(input) || isIPv6HexCompressedAddress(input) || isLinkLocalIPv6WithZoneIndex(input)
-                || isIPv6IPv4MappedAddress(input) || isIPv6MixedAddress(input);
+        return isIPv6StdAddress(input)
+                || isIPv6HexCompressedAddress(input)
+                || isLinkLocalIPv6WithZoneIndex(input)
+                || isIPv6IPv4MappedAddress(input)
+                || isIPv6MixedAddress(input);
     }
 
     /**
@@ -101,14 +102,16 @@ public class NetAddressValidatorUtil {
         if (splitIndex == -1) {
             return false;
         }
-        //the last part is a ipv4 address
+        // the last part is a ipv4 address
         boolean ipv4PartValid = isIPv4Address(input.substring(splitIndex + 1));
         String ipV6Part = input.substring(ZERO, splitIndex + 1);
         if (DOUBLE_COLON.equals(ipV6Part)) {
             return ipv4PartValid;
         }
-        boolean ipV6UncompressedDetected = IPV6_MIXED_UNCOMPRESSED_REGEX.matcher(ipV6Part).matches();
-        boolean ipV6CompressedDetected = IPV6_MIXED_COMPRESSED_REGEX.matcher(ipV6Part).matches();
+        boolean ipV6UncompressedDetected =
+                IPV6_MIXED_UNCOMPRESSED_REGEX.matcher(ipV6Part).matches();
+        boolean ipV6CompressedDetected =
+                IPV6_MIXED_COMPRESSED_REGEX.matcher(ipV6Part).matches();
         return ipv4PartValid && (ipV6UncompressedDetected || ipV6CompressedDetected);
     }
 

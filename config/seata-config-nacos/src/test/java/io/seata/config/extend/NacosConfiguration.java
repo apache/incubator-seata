@@ -16,19 +16,10 @@
  */
 package io.seata.config.extend;
 
-import java.io.IOException;
-import java.util.Enumeration;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
 import com.alibaba.nacos.api.NacosFactory;
 import com.alibaba.nacos.api.config.ConfigService;
 import com.alibaba.nacos.api.config.listener.AbstractSharedListener;
 import com.alibaba.nacos.api.exception.NacosException;
-
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import io.seata.config.ConfigurationChangeEvent;
@@ -40,6 +31,14 @@ import org.apache.seata.config.ConfigurationKeys;
 import org.apache.seata.config.processor.ConfigProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.Enumeration;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Test for io.seata.config SPI impl
@@ -67,7 +66,7 @@ public class NacosConfiguration extends io.seata.config.AbstractConfiguration {
     private static volatile ConfigService configService;
     private static final int MAP_INITIAL_CAPACITY = 8;
     private static final ConcurrentMap<String, ConcurrentMap<ConfigurationChangeListener, NacosListener>>
-        CONFIG_LISTENERS_MAP = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
+            CONFIG_LISTENERS_MAP = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
     private static volatile Properties seataConfig = new Properties();
 
     /**
@@ -157,7 +156,9 @@ public class NacosConfiguration extends io.seata.config.AbstractConfiguration {
         }
         try {
             NacosListener nacosListener = new NacosListener(dataId, listener);
-            CONFIG_LISTENERS_MAP.computeIfAbsent(dataId, key -> new ConcurrentHashMap<>()).put(listener, nacosListener);
+            CONFIG_LISTENERS_MAP
+                    .computeIfAbsent(dataId, key -> new ConcurrentHashMap<>())
+                    .put(listener, nacosListener);
             configService.addListener(dataId, getNacosGroup(), nacosListener);
         } catch (Exception exx) {
             LOGGER.error("add nacos listener error:{}", exx.getMessage(), exx);
@@ -224,23 +225,32 @@ public class NacosConfiguration extends io.seata.config.AbstractConfiguration {
     }
 
     public static String getNacosNameSpaceFileKey() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE,
-            PRO_NAMESPACE_KEY);
+        return String.join(
+                ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR,
+                ConfigurationKeys.FILE_ROOT_CONFIG,
+                CONFIG_TYPE,
+                PRO_NAMESPACE_KEY);
     }
 
     public static String getNacosAddrFileKey() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE,
-            PRO_SERVER_ADDR_KEY);
+        return String.join(
+                ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR,
+                ConfigurationKeys.FILE_ROOT_CONFIG,
+                CONFIG_TYPE,
+                PRO_SERVER_ADDR_KEY);
     }
 
     public static String getNacosGroupKey() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE,
-            GROUP_KEY);
+        return String.join(
+                ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, GROUP_KEY);
     }
 
     public static String getNacosDataIdKey() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE,
-            NACOS_DATA_ID_KEY);
+        return String.join(
+                ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR,
+                ConfigurationKeys.FILE_ROOT_CONFIG,
+                CONFIG_TYPE,
+                NACOS_DATA_ID_KEY);
     }
 
     private static String getNacosGroup() {
@@ -260,7 +270,7 @@ public class NacosConfiguration extends io.seata.config.AbstractConfiguration {
 
         Enumeration<?> enumeration = seataConfig.propertyNames();
         while (enumeration.hasMoreElements()) {
-            String key = (String)enumeration.nextElement();
+            String key = (String) enumeration.nextElement();
             String property = seataConfig.getProperty(key);
             sb.append(key).append("=").append(property).append("\n");
         }
@@ -301,7 +311,7 @@ public class NacosConfiguration extends io.seata.config.AbstractConfiguration {
         @Override
         public void innerReceive(String dataId, String group, String configInfo) {
             try {
-                //The new configuration method to puts all configurations into a dateId
+                // The new configuration method to puts all configurations into a dateId
                 if (getNacosDataId().equals(dataId)) {
                     Properties seataConfigNew = new Properties();
                     if (StringUtils.isNotBlank(configInfo)) {
@@ -312,18 +322,20 @@ public class NacosConfiguration extends io.seata.config.AbstractConfiguration {
                             return;
                         }
                     }
-                    //Get all the monitored dataids and judge whether it has been modified
+                    // Get all the monitored dataids and judge whether it has been modified
                     for (Map.Entry<String, ConcurrentMap<ConfigurationChangeListener, NacosListener>> entry :
-                        CONFIG_LISTENERS_MAP.entrySet()) {
+                            CONFIG_LISTENERS_MAP.entrySet()) {
                         String listenedDataId = entry.getKey();
                         String propertyOld = seataConfig.getProperty(listenedDataId, "");
                         String propertyNew = seataConfigNew.getProperty(listenedDataId, "");
                         if (!propertyOld.equals(propertyNew)) {
-                            ConfigurationChangeEvent event = new ConfigurationChangeEvent().setDataId(listenedDataId)
-                                .setNewValue(propertyNew).setNamespace(group);
+                            ConfigurationChangeEvent event = new ConfigurationChangeEvent()
+                                    .setDataId(listenedDataId)
+                                    .setNewValue(propertyNew)
+                                    .setNamespace(group);
 
-                            ConcurrentMap<ConfigurationChangeListener, NacosListener> configListeners
-                                = entry.getValue();
+                            ConcurrentMap<ConfigurationChangeListener, NacosListener> configListeners =
+                                    entry.getValue();
                             for (ConfigurationChangeListener configListener : configListeners.keySet()) {
                                 configListener.onProcessEvent(event);
                             }
@@ -336,11 +348,12 @@ public class NacosConfiguration extends io.seata.config.AbstractConfiguration {
             } catch (Exception e) {
                 LOGGER.error("innerReceive error: {}", e.getMessage(), e);
             }
-            //Compatible with old writing
-            ConfigurationChangeEvent event = new ConfigurationChangeEvent().setDataId(dataId).setNewValue(configInfo)
-                .setNamespace(group);
+            // Compatible with old writing
+            ConfigurationChangeEvent event = new ConfigurationChangeEvent()
+                    .setDataId(dataId)
+                    .setNewValue(configInfo)
+                    .setNamespace(group);
             listener.onProcessEvent(event);
         }
     }
-
 }

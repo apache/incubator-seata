@@ -32,7 +32,9 @@ public class SpringApplicationContextProviderRegistrar implements ImportBeanDefi
     @Override
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
         if (!registry.containsBeanDefinition(BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER)) {
-            AbstractBeanDefinition beanDefinition = BeanDefinitionBuilder.genericBeanDefinition(SpringApplicationContextProvider.class).getBeanDefinition();
+            AbstractBeanDefinition beanDefinition = BeanDefinitionBuilder.genericBeanDefinition(
+                            SpringApplicationContextProvider.class)
+                    .getBeanDefinition();
             registry.registerBeanDefinition(BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER, beanDefinition);
         }
     }

@@ -16,18 +16,17 @@
  */
 package org.apache.seata.discovery.loadbalance;
 
-import static org.apache.seata.discovery.loadbalance.LoadBalanceFactory.XID_LOAD_BALANCE;
-
-
-import java.net.InetSocketAddress;
-import java.util.List;
-import java.util.Objects;
-
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.common.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.InetSocketAddress;
+import java.util.List;
+import java.util.Objects;
+
+import static org.apache.seata.discovery.loadbalance.LoadBalanceFactory.XID_LOAD_BALANCE;
 
 /**
  * The type xid load balance.
@@ -35,11 +34,11 @@ import org.slf4j.LoggerFactory;
  */
 @LoadLevel(name = XID_LOAD_BALANCE)
 public class XIDLoadBalance implements LoadBalance {
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(XIDLoadBalance.class);
 
-    private static final LoadBalance RANDOM_LOAD_BALANCE = EnhancedServiceLoader.load(LoadBalance.class,
-        LoadBalanceFactory.RANDOM_LOAD_BALANCE);
+    private static final LoadBalance RANDOM_LOAD_BALANCE =
+            EnhancedServiceLoader.load(LoadBalance.class, LoadBalanceFactory.RANDOM_LOAD_BALANCE);
 
     @Override
     public <T> T select(List<T> invokers, String xid) throws Exception {
@@ -53,14 +52,13 @@ public class XIDLoadBalance implements LoadBalance {
             String ip = serverAddress.substring(0, index);
             InetSocketAddress xidInetSocketAddress = new InetSocketAddress(ip, port);
             for (T invoker : invokers) {
-                InetSocketAddress inetSocketAddress = (InetSocketAddress)invoker;
+                InetSocketAddress inetSocketAddress = (InetSocketAddress) invoker;
                 if (Objects.equals(xidInetSocketAddress, inetSocketAddress)) {
-                    return (T)inetSocketAddress;
+                    return (T) inetSocketAddress;
                 }
             }
             LOGGER.error("not found seata-server channel,xid: {}, try use random load balance", xid);
         }
         return RANDOM_LOAD_BALANCE.select(invokers, xid);
     }
-
 }

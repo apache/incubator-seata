@@ -16,7 +16,6 @@
  */
 package org.apache.seata.common.result;
 
-
 public enum Code {
     /**
      * response success
@@ -98,4 +97,3 @@ public enum Code {
         return null;
     }
 }
-

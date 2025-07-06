@@ -62,8 +62,5 @@ public class Unit {
         }
         nodeList.add(node);
         return true;
-
     }
-
-
 }

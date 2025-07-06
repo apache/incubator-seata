@@ -20,20 +20,21 @@ package org.apache.seata.saga.engine.invoker.impl;
  * MockService
  */
 public class MockService {
-   private int times;
+    private int times;
 
-   public String mockInvoke(String param) {
-      return param;
-   }
+    public String mockInvoke(String param) {
+        return param;
+    }
 
-   public boolean mockInvoke(boolean param) {
-      return param;
-   }
-   public String mockInvokeRetry(String param) {
-      times++;
-      if (times > 2) {
-         return param;
-      }
-      throw new RuntimeException("mockInvokeRetry");
-   }
+    public boolean mockInvoke(boolean param) {
+        return param;
+    }
+
+    public String mockInvokeRetry(String param) {
+        times++;
+        if (times > 2) {
+            return param;
+        }
+        throw new RuntimeException("mockInvokeRetry");
+    }
 }

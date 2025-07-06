@@ -16,10 +16,10 @@
  */
 package org.apache.seata.serializer.seata.protocol;
 
-import java.nio.ByteBuffer;
-
 import io.netty.buffer.ByteBuf;
 import org.apache.seata.core.protocol.AbstractIdentifyRequest;
+
+import java.nio.ByteBuffer;
 
 /**
  * The type Abstract identify request codec.
@@ -39,7 +39,7 @@ public abstract class AbstractIdentifyRequestCodec extends AbstractMessageCodec 
      * @param out the out
      */
     protected <T> void doEncode(T t, ByteBuf out) {
-        AbstractIdentifyRequest abstractIdentifyRequest = (AbstractIdentifyRequest)t;
+        AbstractIdentifyRequest abstractIdentifyRequest = (AbstractIdentifyRequest) t;
         String version = abstractIdentifyRequest.getVersion();
         String applicationId = abstractIdentifyRequest.getApplicationId();
         String transactionServiceGroup = abstractIdentifyRequest.getTransactionServiceGroup();
@@ -47,44 +47,43 @@ public abstract class AbstractIdentifyRequestCodec extends AbstractMessageCodec 
 
         if (version != null) {
             byte[] bs = version.getBytes(UTF8);
-            out.writeShort((short)bs.length);
+            out.writeShort((short) bs.length);
             if (bs.length > 0) {
                 out.writeBytes(bs);
             }
         } else {
-            out.writeShort((short)0);
+            out.writeShort((short) 0);
         }
 
         if (applicationId != null) {
             byte[] bs = applicationId.getBytes(UTF8);
-            out.writeShort((short)bs.length);
+            out.writeShort((short) bs.length);
             if (bs.length > 0) {
                 out.writeBytes(bs);
             }
         } else {
-            out.writeShort((short)0);
+            out.writeShort((short) 0);
         }
 
         if (transactionServiceGroup != null) {
             byte[] bs = transactionServiceGroup.getBytes(UTF8);
-            out.writeShort((short)bs.length);
+            out.writeShort((short) bs.length);
             if (bs.length > 0) {
                 out.writeBytes(bs);
             }
         } else {
-            out.writeShort((short)0);
+            out.writeShort((short) 0);
         }
 
         if (extraData != null) {
             byte[] bs = extraData.getBytes(UTF8);
-            out.writeShort((short)bs.length);
+            out.writeShort((short) bs.length);
             if (bs.length > 0) {
                 out.writeBytes(bs);
             }
         } else {
-            out.writeShort((short)0);
+            out.writeShort((short) 0);
         }
-
     }
 
     @Override
@@ -94,15 +93,15 @@ public abstract class AbstractIdentifyRequestCodec extends AbstractMessageCodec 
 
     @Override
     public <T> void decode(T t, ByteBuffer in) {
-        AbstractIdentifyRequest abstractIdentifyRequest = (AbstractIdentifyRequest)t;
+        AbstractIdentifyRequest abstractIdentifyRequest = (AbstractIdentifyRequest) t;
 
-        //version len
+        // version len
         short len = 0;
         if (in.remaining() < 2) {
             return;
         }
         len = in.getShort();
-        //version
+        // version
         if (in.remaining() < len) {
             return;
         }
@@ -110,12 +109,12 @@ public abstract class AbstractIdentifyRequestCodec extends AbstractMessageCodec 
         in.get(bs);
         abstractIdentifyRequest.setVersion(new String(bs, UTF8));
 
-        //applicationId len
+        // applicationId len
         if (in.remaining() < 2) {
             return;
         }
         len = in.getShort();
-        //applicationId
+        // applicationId
         if (in.remaining() < len) {
             return;
         }
@@ -123,13 +122,13 @@ public abstract class AbstractIdentifyRequestCodec extends AbstractMessageCodec 
         in.get(bs);
         abstractIdentifyRequest.setApplicationId(new String(bs, UTF8));
 
-        //transactionServiceGroup len
+        // transactionServiceGroup len
         if (in.remaining() < 2) {
             return;
         }
         len = in.getShort();
 
-        //transactionServiceGroup
+        // transactionServiceGroup
         if (in.remaining() < len) {
             return;
         }
@@ -137,7 +136,7 @@ public abstract class AbstractIdentifyRequestCodec extends AbstractMessageCodec 
         in.get(bs);
         abstractIdentifyRequest.setTransactionServiceGroup(new String(bs, UTF8));
 
-        //ExtraData len
+        // ExtraData len
         if (in.remaining() < 2) {
             return;
         }
@@ -148,8 +147,7 @@ public abstract class AbstractIdentifyRequestCodec extends AbstractMessageCodec 
             in.get(bs);
             abstractIdentifyRequest.setExtraData(new String(bs, UTF8));
         } else {
-            //maybe null
+            // maybe null
         }
     }
-
 }

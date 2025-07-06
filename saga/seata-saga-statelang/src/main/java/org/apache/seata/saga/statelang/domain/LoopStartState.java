@@ -20,6 +20,4 @@ package org.apache.seata.saga.statelang.domain;
  * Loop Starter
  *
  */
-public interface LoopStartState extends State {
-
-}
+public interface LoopStartState extends State {}

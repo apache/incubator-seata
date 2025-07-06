@@ -23,6 +23,4 @@ package io.seata.core.store.db.sql.lock;
  * Notes: used for io.seata SPI interface
  */
 @Deprecated
-public interface LockStoreSql extends org.apache.seata.core.store.db.sql.lock.LockStoreSql {
-
-}
+public interface LockStoreSql extends org.apache.seata.core.store.db.sql.lock.LockStoreSql {}

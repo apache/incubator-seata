@@ -34,8 +34,7 @@ public abstract class AbstractDataSourceCacheResourceManager extends AbstractRes
     /**
      * Instantiates a new Data source manager.
      */
-    public AbstractDataSourceCacheResourceManager() {
-    }
+    public AbstractDataSourceCacheResourceManager() {}
 
     @Override
     public abstract void init();
@@ -50,5 +49,4 @@ public abstract class AbstractDataSourceCacheResourceManager extends AbstractRes
         dataSourceCache.put(resource.getResourceId(), resource);
         super.registerResource(resource);
     }
-
 }

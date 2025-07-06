@@ -16,6 +16,11 @@
  */
 package org.apache.seata.saga.statelang.domain.impl;
 
+import org.apache.seata.saga.statelang.domain.ExecutionStatus;
+import org.apache.seata.saga.statelang.domain.StateInstance;
+import org.apache.seata.saga.statelang.domain.StateMachine;
+import org.apache.seata.saga.statelang.domain.StateMachineInstance;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -23,11 +28,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import org.apache.seata.saga.statelang.domain.ExecutionStatus;
-import org.apache.seata.saga.statelang.domain.StateInstance;
-import org.apache.seata.saga.statelang.domain.StateMachine;
-import org.apache.seata.saga.statelang.domain.StateMachineInstance;
 
 /**
  * state machine execution instance

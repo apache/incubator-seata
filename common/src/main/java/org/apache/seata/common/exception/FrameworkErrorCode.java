@@ -40,27 +40,42 @@ public enum FrameworkErrorCode {
     /**
      * 0101 ~ 0199 Network related error. (Not connected, disconnected, dispatched, etc.)
      */
-    NetConnect("0101", "Can not connect to the server", "Please check if the seata service is started. Is the network connection to the seata server normal?"),
+    NetConnect(
+            "0101",
+            "Can not connect to the server",
+            "Please check if the seata service is started. Is the network connection to the seata server normal?"),
 
     /**
      * The Net reg appname.
      */
-    NetRegAppname("0102", "Register client app name failed", "Please check if the seata service is started. Is the network connection to the seata server normal?"),
+    NetRegAppname(
+            "0102",
+            "Register client app name failed",
+            "Please check if the seata service is started. Is the network connection to the seata server normal?"),
 
     /**
      * The Net disconnect.
      */
-    NetDisconnect("0103", "Seata connection closed", "The network is disconnected. Please check the network connection to the client or seata server."),
+    NetDisconnect(
+            "0103",
+            "Seata connection closed",
+            "The network is disconnected. Please check the network connection to the client or seata server."),
 
     /**
      * The Net dispatch.
      */
-    NetDispatch("0104", "Dispatch error", "Network processing error. Please check the network connection to the client or seata server."),
+    NetDispatch(
+            "0104",
+            "Dispatch error",
+            "Network processing error. Please check the network connection to the client or seata server."),
 
     /**
      * The Net on message.
      */
-    NetOnMessage("0105", "On message error", "Network processing error. Please check the network connection to the client or seata server."),
+    NetOnMessage(
+            "0105",
+            "On message error",
+            "Network processing error. Please check the network connection to the client or seata server."),
     /**
      * Get channel error framework error code.
      */
@@ -217,27 +232,31 @@ public enum FrameworkErrorCode {
     /**
      * TCC fence datasource need injected
      */
-    DateSourceNeedInjected("0501","TCC fence datasource need injected","TCC fence datasource need injected"),
+    DateSourceNeedInjected("0501", "TCC fence datasource need injected", "TCC fence datasource need injected"),
 
     /**
      * TCC fence record not exists
      */
-    RecordNotExists("0502","TCC fence record not exists","TCC fence record not exists"),
+    RecordNotExists("0502", "TCC fence record not exists", "TCC fence record not exists"),
 
     /**
      * Insert tcc fence record error
      */
-    InsertRecordError("0503","Insert tcc fence record error","Insert tcc fence record error"),
+    InsertRecordError("0503", "Insert tcc fence record error", "Insert tcc fence record error"),
 
     /**
      * Insert tcc fence record duplicate key exception
      */
-    DuplicateKeyException("0504", "Insert tcc fence record duplicate key exception", "Insert tcc fence record duplicate key exception"),
+    DuplicateKeyException(
+            "0504",
+            "Insert tcc fence record duplicate key exception",
+            "Insert tcc fence record duplicate key exception"),
 
     /**
      * TCC fence transactionManager need injected
      */
-    TransactionManagerNeedInjected("0505","TCC fence transactionManager need injected","TCC fence transactionManager need injected"),
+    TransactionManagerNeedInjected(
+            "0505", "TCC fence transactionManager need injected", "TCC fence transactionManager need injected"),
 
     /**
      * Undefined error

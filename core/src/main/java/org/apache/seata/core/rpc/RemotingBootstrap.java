@@ -32,5 +32,4 @@ public interface RemotingBootstrap {
      * Shutdown.
      */
     void shutdown();
-
 }

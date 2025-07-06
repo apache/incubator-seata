@@ -16,12 +16,12 @@
  */
 package org.apache.seata.server.console.entity.vo;
 
+import org.apache.seata.core.constants.ServerTableColumnsName;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Set;
-
-import org.apache.seata.core.constants.ServerTableColumnsName;
 
 /**
  * GlobalSessionVO
@@ -52,21 +52,19 @@ public class GlobalSessionVO {
 
     private Set<BranchSessionVO> branchSessionVOs;
 
+    public GlobalSessionVO() {}
 
-    public GlobalSessionVO() {
-
-    }
-
-    public GlobalSessionVO(String xid,
-                           Long transactionId,
-                           Integer status,
-                           String applicationId,
-                           String transactionServiceGroup,
-                           String transactionName,
-                           Long timeout,
-                           Long beginTime,
-                           String applicationData,
-                           Set<BranchSessionVO> branchSessionVOs) {
+    public GlobalSessionVO(
+            String xid,
+            Long transactionId,
+            Integer status,
+            String applicationId,
+            String transactionServiceGroup,
+            String transactionName,
+            Long timeout,
+            Long beginTime,
+            String applicationData,
+            Set<BranchSessionVO> branchSessionVOs) {
         this.xid = xid;
         this.transactionId = String.valueOf(transactionId);
         this.status = status;
@@ -181,7 +179,8 @@ public class GlobalSessionVO {
         globalSessionVO.setTransactionId(rs.getLong(ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_ID));
         globalSessionVO.setStatus(rs.getInt(ServerTableColumnsName.GLOBAL_TABLE_STATUS));
         globalSessionVO.setApplicationId(rs.getString(ServerTableColumnsName.GLOBAL_TABLE_APPLICATION_ID));
-        globalSessionVO.setTransactionServiceGroup(rs.getString(ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_SERVICE_GROUP));
+        globalSessionVO.setTransactionServiceGroup(
+                rs.getString(ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_SERVICE_GROUP));
         globalSessionVO.setTransactionName(rs.getString(ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_NAME));
         globalSessionVO.setTimeout(rs.getLong(ServerTableColumnsName.GLOBAL_TABLE_TIMEOUT));
         globalSessionVO.setBeginTime(rs.getLong(ServerTableColumnsName.GLOBAL_TABLE_BEGIN_TIME));
@@ -199,19 +198,18 @@ public class GlobalSessionVO {
 
     @Override
     public String toString() {
-        return "GlobalSessionVO{" +
-                "xid='" + xid + '\'' +
-                ", transactionId=" + transactionId +
-                ", status=" + status +
-                ", applicationId='" + applicationId + '\'' +
-                ", transactionServiceGroup='" + transactionServiceGroup + '\'' +
-                ", transactionName='" + transactionName + '\'' +
-                ", timeout=" + timeout +
-                ", beginTime=" + beginTime +
-                ", applicationData='" + applicationData + '\'' +
-                ", gmtCreate=" + gmtCreate +
-                ", gmtModified=" + gmtModified +
-                ", branchSessionVOs=" + branchSessionVOs +
-                '}';
+        return "GlobalSessionVO{" + "xid='"
+                + xid + '\'' + ", transactionId="
+                + transactionId + ", status="
+                + status + ", applicationId='"
+                + applicationId + '\'' + ", transactionServiceGroup='"
+                + transactionServiceGroup + '\'' + ", transactionName='"
+                + transactionName + '\'' + ", timeout="
+                + timeout + ", beginTime="
+                + beginTime + ", applicationData='"
+                + applicationData + '\'' + ", gmtCreate="
+                + gmtCreate + ", gmtModified="
+                + gmtModified + ", branchSessionVOs="
+                + branchSessionVOs + '}';
     }
 }

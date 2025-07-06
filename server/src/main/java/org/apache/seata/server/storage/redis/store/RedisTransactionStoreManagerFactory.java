@@ -37,9 +37,11 @@ public class RedisTransactionStoreManagerFactory {
         if (instance == null) {
             synchronized (RedisTransactionStoreManagerFactory.class) {
                 if (instance == null) {
-                    String storeRedisType = CONFIG.getConfig(ConfigurationKeys.STORE_REDIS_TYPE, STORE_REDIS_TYPE_PIPELINE);
-                    instance = STORE_REDIS_TYPE_PIPELINE.equals(storeRedisType) ?
-                        new RedisTransactionStoreManager() : new RedisLuaTransactionStoreManager();
+                    String storeRedisType =
+                            CONFIG.getConfig(ConfigurationKeys.STORE_REDIS_TYPE, STORE_REDIS_TYPE_PIPELINE);
+                    instance = STORE_REDIS_TYPE_PIPELINE.equals(storeRedisType)
+                            ? new RedisTransactionStoreManager()
+                            : new RedisLuaTransactionStoreManager();
                 }
             }
         }

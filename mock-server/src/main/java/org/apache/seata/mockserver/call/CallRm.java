@@ -16,9 +16,6 @@
  */
 package org.apache.seata.mockserver.call;
 
-import java.io.IOException;
-import java.util.concurrent.TimeoutException;
-
 import io.netty.channel.Channel;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
@@ -31,6 +28,9 @@ import org.apache.seata.core.protocol.transaction.UndoLogDeleteRequest;
 import org.apache.seata.core.rpc.RemotingServer;
 import org.apache.seata.core.rpc.netty.ChannelManager;
 import org.apache.seata.mockserver.model.MockBranchSession;
+
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 /**
  * call rm
@@ -47,8 +47,8 @@ public class CallRm {
         BranchCommitRequest request = new BranchCommitRequest();
         setReq(request, branchSession);
         try {
-            BranchCommitResponse response = (BranchCommitResponse)remotingServer.sendSyncRequest(
-                branchSession.getResourceId(), branchSession.getClientId(), request, false);
+            BranchCommitResponse response = (BranchCommitResponse) remotingServer.sendSyncRequest(
+                    branchSession.getResourceId(), branchSession.getClientId(), request, false);
             return response.getBranchStatus();
         } catch (TimeoutException | IOException e) {
             throw new RuntimeException(e);
@@ -66,8 +66,8 @@ public class CallRm {
         setReq(request, branchSession);
 
         try {
-            BranchRollbackResponse response = (BranchRollbackResponse)remotingServer.sendSyncRequest(
-                branchSession.getResourceId(), branchSession.getClientId(), request, false);
+            BranchRollbackResponse response = (BranchRollbackResponse) remotingServer.sendSyncRequest(
+                    branchSession.getResourceId(), branchSession.getClientId(), request, false);
             return response.getBranchStatus();
         } catch (TimeoutException | IOException e) {
             throw new RuntimeException(e);
@@ -83,11 +83,11 @@ public class CallRm {
     public static void deleteUndoLog(RemotingServer remotingServer, MockBranchSession branchSession) {
         UndoLogDeleteRequest request = new UndoLogDeleteRequest();
         request.setResourceId(branchSession.getResourceId());
-        request.setSaveDays((short)1);
+        request.setSaveDays((short) 1);
         request.setBranchType(BranchType.TCC);
         try {
-            Channel channel = ChannelManager.getChannel(branchSession.getResourceId(), branchSession.getClientId(),
-                false);
+            Channel channel =
+                    ChannelManager.getChannel(branchSession.getResourceId(), branchSession.getClientId(), false);
             remotingServer.sendAsyncRequest(channel, request);
         } catch (Exception e) {
             throw new RuntimeException(e);

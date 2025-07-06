@@ -21,7 +21,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import org.apache.seata.core.exception.DecodeException;
 import org.apache.seata.core.protocol.HeartbeatMessage;
-
 import org.apache.seata.core.protocol.ProtocolConstants;
 import org.apache.seata.core.protocol.RpcMessage;
 import org.apache.seata.core.rpc.netty.ProtocolDecoder;
@@ -130,7 +129,8 @@ public class ProtocolDecoderV0 extends LengthFieldBasedFrameDecoder implements P
             bs2[1] = (byte) (0x00FF & typeCode);
             System.arraycopy(bs, 0, bs2, 2, length);
             byte codecType = isSeataCodec ? SerializerType.SEATA.getCode() : SerializerType.HESSIAN.getCode();
-            Serializer serializer = SerializerServiceLoader.load(SerializerType.getByCode(codecType), ProtocolConstants.VERSION_0);
+            Serializer serializer =
+                    SerializerServiceLoader.load(SerializerType.getByCode(codecType), ProtocolConstants.VERSION_0);
             rpcMessage.setBody(serializer.deserialize(bs2));
         } catch (Exception e) {
             LOGGER.error("decode error", e);

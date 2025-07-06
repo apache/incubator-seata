@@ -18,11 +18,10 @@ package org.apache.seata.common.result;
 
 import java.io.Serializable;
 
-
 /**
  * The single result
  */
-public class SingleResult<T> extends Result<T>  implements Serializable {
+public class SingleResult<T> extends Result<T> implements Serializable {
     private static final long serialVersionUID = 77612626624298767L;
 
     /**
@@ -52,7 +51,7 @@ public class SingleResult<T> extends Result<T>  implements Serializable {
     }
 
     public static <T> SingleResult<T> success(T data) {
-        return new SingleResult<>(SUCCESS_CODE, SUCCESS_MSG,data);
+        return new SingleResult<>(SUCCESS_CODE, SUCCESS_MSG, data);
     }
 
     public static <T> SingleResult<T> success() {
@@ -66,5 +65,4 @@ public class SingleResult<T> extends Result<T>  implements Serializable {
     public void setData(T data) {
         this.data = data;
     }
-
 }

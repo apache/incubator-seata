@@ -19,9 +19,7 @@ package org.apache.seata.spring.boot.autoconfigure.properties.server.raft;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SERVER_RAFT_PREFIX;
-
 
 @Component
 @ConfigurationProperties(prefix = SERVER_RAFT_PREFIX)
@@ -176,5 +174,4 @@ public class ServerRaftProperties {
     public void setSync(boolean sync) {
         this.sync = sync;
     }
-
 }

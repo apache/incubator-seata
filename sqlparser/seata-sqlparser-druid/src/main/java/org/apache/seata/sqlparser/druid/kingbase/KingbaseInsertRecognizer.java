@@ -55,7 +55,7 @@ public class KingbaseInsertRecognizer extends BaseKingbaseRecognizer implements 
      */
     public KingbaseInsertRecognizer(String originalSQL, SQLStatement ast) {
         super(originalSQL);
-        this.ast = (SQLInsertStatement)ast;
+        this.ast = (SQLInsertStatement) ast;
     }
 
     @Override
@@ -98,7 +98,7 @@ public class KingbaseInsertRecognizer extends BaseKingbaseRecognizer implements 
         List<String> list = new ArrayList<>(columnSQLExprs.size());
         for (SQLExpr expr : columnSQLExprs) {
             if (expr instanceof SQLIdentifierExpr) {
-                list.add(((SQLIdentifierExpr)expr).getName());
+                list.add(((SQLIdentifierExpr) expr).getName());
             } else {
                 wrapSQLParsingException(expr);
             }

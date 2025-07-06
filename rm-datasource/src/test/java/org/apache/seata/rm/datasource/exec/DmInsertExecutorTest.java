@@ -16,7 +16,6 @@
  */
 package org.apache.seata.rm.datasource.exec;
 
-import org.apache.seata.rm.datasource.exec.StatementCallback;
 import org.apache.seata.common.exception.NotSupportYetException;
 import org.apache.seata.rm.datasource.ConnectionProxy;
 import org.apache.seata.rm.datasource.PreparedStatementProxy;
@@ -28,22 +27,22 @@ import org.apache.seata.sqlparser.struct.Null;
 import org.apache.seata.sqlparser.struct.SqlSequenceExpr;
 import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
 
 public class DmInsertExecutorTest {
 
@@ -81,9 +80,11 @@ public class DmInsertExecutorTest {
         tableMeta = mock(TableMeta.class);
         insertExecutor = Mockito.spy(new DmInsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
 
-        pkIndexMap = new HashMap<String, Integer>() {{
-            put(ID_COLUMN, pkIndex);
-        }};
+        pkIndexMap = new HashMap<String, Integer>() {
+            {
+                put(ID_COLUMN, pkIndex);
+            }
+        };
     }
 
     @Test
@@ -147,7 +148,6 @@ public class DmInsertExecutorTest {
         Assertions.assertThrows(NotSupportYetException.class, () -> {
             insertExecutor.getPkValuesByColumn();
         });
-
     }
 
     private List<String> mockInsertColumns() {
@@ -212,5 +212,4 @@ public class DmInsertExecutorTest {
         rows.add(Arrays.asList(Null.get(), "xx", "xx", "xx"));
         when(sqlInsertRecognizer.getInsertRows(pkIndexMap.values())).thenReturn(rows);
     }
-
 }

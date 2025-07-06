@@ -16,17 +16,17 @@
  */
 package org.apache.seata.rm.datasource.undo;
 
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.seata.common.util.IOUtil;
 import org.apache.seata.rm.datasource.ConnectionProxy;
 import org.apache.seata.rm.datasource.DataSourceProxy;
 import org.apache.seata.rm.datasource.DataSourceProxyTest;
-import org.apache.seata.sqlparser.struct.ColumnMeta;
 import org.apache.seata.rm.datasource.sql.struct.Field;
 import org.apache.seata.rm.datasource.sql.struct.KeyType;
 import org.apache.seata.rm.datasource.sql.struct.Row;
-import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
-import org.apache.commons.dbcp2.BasicDataSource;
+import org.apache.seata.sqlparser.struct.ColumnMeta;
+import org.apache.seata.sqlparser.struct.TableMeta;
 import org.h2.store.fs.FileUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -39,9 +39,8 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.Arrays;
 
-
 public abstract class BaseH2Test {
-    
+
     static BasicDataSource dataSource = null;
 
     static ConnectionProxy connection = null;
@@ -49,7 +48,7 @@ public abstract class BaseH2Test {
     static DataSourceProxy dataSourceProxy = null;
 
     static TableMeta tableMeta = null;
-    
+
     @BeforeAll
     public static void start() throws SQLException {
         dataSource = new BasicDataSource();
@@ -109,8 +108,8 @@ public abstract class BaseH2Test {
 
     protected static TableMeta mockTableMeta() {
         TableMeta tableMeta = Mockito.mock(TableMeta.class);
-        Mockito.when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{"ID"}));
-        Mockito.when(tableMeta.getEscapePkNameList("h2")).thenReturn(Arrays.asList(new String[]{"ID"}));
+        Mockito.when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[] {"ID"}));
+        Mockito.when(tableMeta.getEscapePkNameList("h2")).thenReturn(Arrays.asList(new String[] {"ID"}));
         Mockito.when(tableMeta.getTableName()).thenReturn("table_name");
         ColumnMeta meta0 = Mockito.mock(ColumnMeta.class);
         Mockito.when(meta0.getDataType()).thenReturn(Types.INTEGER);

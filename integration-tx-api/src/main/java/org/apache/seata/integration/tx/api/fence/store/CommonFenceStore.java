@@ -86,5 +86,4 @@ public interface CommonFenceStore {
      * @param logTableName logTableName
      */
     void setLogTableName(String logTableName);
-
 }

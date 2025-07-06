@@ -53,12 +53,13 @@ public class DmUndoUpdateExecutor extends AbstractUndoExecutor {
         List<Field> nonPkFields = row.nonPrimaryKeys();
         // update sql undo log before image all field come from table meta. need add escape.
         // see BaseTransactionalExecutor#buildTableRecords
-        String updateColumns = nonPkFields.stream().map(
-            field -> ColumnUtils.addEscape(field.getName(), JdbcConstants.DM) + " = ?").collect(
-            Collectors.joining(", "));
+        String updateColumns = nonPkFields.stream()
+                .map(field -> ColumnUtils.addEscape(field.getName(), JdbcConstants.DM) + " = ?")
+                .collect(Collectors.joining(", "));
 
-        List<String> pkNameList = getOrderedPkList(beforeImage, row, JdbcConstants.DM).stream().map(
-            e -> e.getName()).collect(Collectors.toList());
+        List<String> pkNameList = getOrderedPkList(beforeImage, row, JdbcConstants.DM).stream()
+                .map(e -> e.getName())
+                .collect(Collectors.toList());
         String whereSql = SqlGenerateUtils.buildWhereConditionByPKs(pkNameList, JdbcConstants.DM);
 
         return String.format(UPDATE_SQL_TEMPLATE, sqlUndoLog.getTableName(), updateColumns, whereSql);

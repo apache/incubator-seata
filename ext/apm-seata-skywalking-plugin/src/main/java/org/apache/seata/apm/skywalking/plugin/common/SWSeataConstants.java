@@ -18,19 +18,19 @@ package org.apache.seata.apm.skywalking.plugin.common;
 
 import org.apache.seata.core.protocol.transaction.AbstractBranchEndRequest;
 import org.apache.seata.core.protocol.transaction.AbstractBranchEndResponse;
+import org.apache.seata.core.protocol.transaction.AbstractGlobalEndRequest;
 import org.apache.seata.core.protocol.transaction.BranchRegisterRequest;
 import org.apache.seata.core.protocol.transaction.GlobalBeginResponse;
-import org.apache.seata.core.protocol.transaction.AbstractGlobalEndRequest;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
-
 
 public class SWSeataConstants {
 
     private static final Set<String> TRANSACTION_MANAGER_OPERATION_NAME_MAPPING = new HashSet<>();
 
-    public static final HashMap<String,Class> TRANSACTION_TRANSMISSION_CLASS_NAME_MAPPING = new HashMap<>();
+    public static final HashMap<String, Class> TRANSACTION_TRANSMISSION_CLASS_NAME_MAPPING = new HashMap<>();
 
     static {
         TRANSACTION_MANAGER_OPERATION_NAME_MAPPING.add("GlobalBeginRequest");
@@ -41,7 +41,6 @@ public class SWSeataConstants {
         TRANSACTION_MANAGER_OPERATION_NAME_MAPPING.add("GlobalCommitResponse");
         TRANSACTION_MANAGER_OPERATION_NAME_MAPPING.add("GlobalReportRequest");
         TRANSACTION_MANAGER_OPERATION_NAME_MAPPING.add("GlobalReportResponse");
-
 
         TRANSACTION_TRANSMISSION_CLASS_NAME_MAPPING.put("BranchCommitRequest", AbstractBranchEndRequest.class);
         TRANSACTION_TRANSMISSION_CLASS_NAME_MAPPING.put("BranchCommitResponse", AbstractBranchEndResponse.class);
