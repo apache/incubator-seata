@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.transaction.PlatformTransactionManager;
+
 import javax.sql.DataSource;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -63,4 +64,3 @@ class SpringFenceConfigTest {
                 .hasMessageContaining(FrameworkErrorCode.TransactionManagerNeedInjected.getErrMessage());
     }
 }
-
