@@ -1,3 +1,19 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.seata.spring.rm.fence;
 
 import org.apache.seata.common.exception.FrameworkErrorCode;
@@ -142,7 +158,6 @@ class SpringFenceHandlerTest {
 
     @Test
     void testRollbackFence_insertSuspended() throws Exception {
-        // 模拟 record 不存在
         when(fenceStore.queryCommonFenceDO(any(), anyString(), anyLong())).thenReturn(null);
         when(fenceStore.insertCommonFenceDO(any(), any())).thenReturn(true);
 
@@ -170,10 +185,8 @@ class SpringFenceHandlerTest {
         xidSet.add("xid-1");
         xidSet.add("xid-2");
 
-        // 第一次查出一批 xids
         when(fenceStore.queryEndStatusXidsByDate(any(), eq(now), anyInt()))
                 .thenReturn(xidSet)
-                // 第二次查空表示结束
                 .thenReturn(Collections.emptySet());
 
         when(fenceStore.deleteTCCFenceDO(any(), anyList())).thenReturn(xidSet.size());
@@ -182,62 +195,6 @@ class SpringFenceHandlerTest {
         assertEquals(xidSet.size(), deleted);
     }
 
-    /*@Test
-    void testFenceLogCleanRunnableDeletesSuccessfully() throws Exception {
-        // 构造待清理的 xid 和 branchId
-        String xid = "xid-clean";
-        long branchId = 100L;
-
-        Class<?> fenceLogIdentityClass = Class.forName("org.apache.seata.rm.fence.SpringFenceHandler$FenceLogIdentity");
-
-        Constructor<?> constructor = fenceLogIdentityClass.getDeclaredConstructor();
-        constructor.setAccessible(true);
-        Object logIdentity = constructor.newInstance();
-
-        Method setXidMethod = fenceLogIdentityClass.getDeclaredMethod("setXid", String.class);
-        setXidMethod.setAccessible(true);
-        setXidMethod.invoke(logIdentity, xid);
-
-        Method setBranchIdMethod = fenceLogIdentityClass.getDeclaredMethod("setBranchId", Long.class);
-        setBranchIdMethod.setAccessible(true);
-        setBranchIdMethod.invoke(logIdentity, branchId);
-
-        Field queueField = SpringFenceHandler.class.getDeclaredField("LOG_QUEUE");
-        queueField.setAccessible(true);
-        LinkedBlockingQueue<Object> queue = (LinkedBlockingQueue<Object>) queueField.get(null);
-        queue.clear();
-        queue.add(logIdentity);
-
-        // mock 静态方法 deleteFence 返回 true
-        try (MockedStatic<SpringFenceHandler> mockedStatic = mockStatic(SpringFenceHandler.class)) {
-            mockedStatic.when(() -> SpringFenceHandler.deleteFence(eq(xid), anyLong())).thenReturn(true);
-
-            // 获取 FenceLogCleanRunnable 的类
-            Class<?> fenceLogCleanRunnableClass = null;
-            for (Class<?> innerClass : SpringFenceHandler.class.getDeclaredClasses()) {
-                if ("FenceLogCleanRunnable".equals(innerClass.getSimpleName())) {
-                    fenceLogCleanRunnableClass = innerClass;
-                    break;
-                }
-            }
-            assertNotNull(fenceLogCleanRunnableClass, "FenceLogCleanRunnable class not found");
-
-            // 实例化 Runnable
-            Constructor<?> cleanRunnableConstructor = fenceLogCleanRunnableClass.getDeclaredConstructor();
-            cleanRunnableConstructor.setAccessible(true);
-            Runnable cleanRunnable = (Runnable) cleanRunnableConstructor.newInstance();
-
-            // 直接在当前线程调用 run()，确保静态 mock 生效
-            cleanRunnable.run();
-
-            // 验证静态方法调用次数
-            mockedStatic.verify(() -> SpringFenceHandler.deleteFence(xid, branchId), times(1));
-        }
-    }*/
-
-    /**
-     * 反射设置静态 final 字段（绕过 COMMON_FENCE_DAO 访问限制）
-     */
     static void setStaticFinalField(Class<?> clazz, String fieldName, Object value) throws Exception {
         Field field = clazz.getDeclaredField(fieldName);
         field.setAccessible(true);
@@ -249,9 +206,6 @@ class SpringFenceHandlerTest {
         field.set(null, value);
     }
 
-    /**
-     * 模拟 TCC bean
-     */
     public static class TestTCC {
         public boolean commitMethod() {
             return true;
