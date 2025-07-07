@@ -16,14 +16,20 @@
  */
 package org.apache.seata.serializer.fury;
 
+import org.apache.fury.Fury;
+import org.apache.fury.config.CompatibleMode;
+import org.apache.fury.exception.DeserializationException;
+import org.apache.fury.exception.InsecureException;
 import org.apache.seata.core.exception.TransactionExceptionCode;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.protocol.ResultCode;
 import org.apache.seata.core.protocol.transaction.BranchCommitRequest;
 import org.apache.seata.core.protocol.transaction.BranchCommitResponse;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.seata.test.TestUnSafeSerializer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -75,5 +81,25 @@ public class FurySerializerTest {
         assertThat(t.getBranchStatus()).isEqualTo(branchCommitResponse.getBranchStatus());
         assertThat(t.getMsg()).isEqualTo(branchCommitResponse.getMsg());
         assertThat(t.getResultCode()).isEqualTo(branchCommitResponse.getResultCode());
+    }
+
+    @Test
+    public void testUnSafeDeserializer() {
+        // Test deserialization of an object that is not in allow list
+        TestUnSafeSerializer testUnSafeSerializer = new TestUnSafeSerializer();
+        Fury fury = Fury.builder()
+                .requireClassRegistration(false)
+                .withRefTracking(true)
+                .withCompatibleMode(CompatibleMode.COMPATIBLE)
+                .build();
+        Assertions.assertThrows(
+                DeserializationException.class, () -> furySerializer.deserialize(fury.serialize(testUnSafeSerializer)));
+    }
+
+    @Test
+    public void testUnSafeSerializer() {
+        // Test serialization of an object that is not in allow list
+        TestUnSafeSerializer testUnSafeSerializer = new TestUnSafeSerializer();
+        Assertions.assertThrows(InsecureException.class, () -> furySerializer.serialize(testUnSafeSerializer));
     }
 }
