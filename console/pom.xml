@@ -203,6 +203,10 @@
                         </goals>
                         <phase>generate-resources</phase>
                         <configuration>
+                            <!-- 增加 Node.js 内存限制 -->
+                            <environmentVariables>
+                                <NODE_OPTIONS>--max_old_space_size=4096</NODE_OPTIONS>
+                            </environmentVariables>
                             <arguments>run build</arguments>
                             <environmentVariables>
                                 <VERSION>${project.version}</VERSION>
