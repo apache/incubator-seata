@@ -16,16 +16,15 @@
  */
 package org.apache.seata.rm.datasource.combine;
 
-
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.rm.datasource.xa.ConnectionProxyXA;
+
 import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 
 public class CombineConnectionHolder {
     private static final ThreadLocal<Map<String, Map<Object, ConnectionProxyXA>>> CONNECTION_HOLDER =
@@ -41,15 +40,14 @@ public class CombineConnectionHolder {
 
     public static Collection<ConnectionProxyXA> getDsConn() {
         Map<Object, ConnectionProxyXA> connectionMap = CONNECTION_HOLDER.get().get(RootContext.getXID());
-        return connectionMap != null ?
-                connectionMap.values() :
-                Collections.emptyList();
+        return connectionMap != null ? connectionMap.values() : Collections.emptyList();
     }
 
     public static void putConnection(DataSource dataSource, ConnectionProxyXA connection) throws SQLException {
         Map<String, Map<Object, ConnectionProxyXA>> concurrentHashMap = CONNECTION_HOLDER.get();
         String xid = RootContext.getXID();
-        Map<Object, ConnectionProxyXA> connectionProxyMap = concurrentHashMap.computeIfAbsent(xid, k -> new ConcurrentHashMap<>());
+        Map<Object, ConnectionProxyXA> connectionProxyMap =
+                concurrentHashMap.computeIfAbsent(xid, k -> new ConcurrentHashMap<>());
 
         if (connectionProxyMap.putIfAbsent(dataSource, connection) == null) {
             connection.setAutoCommit(false);

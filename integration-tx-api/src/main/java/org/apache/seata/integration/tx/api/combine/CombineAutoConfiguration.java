@@ -23,7 +23,4 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 @ComponentScan(basePackages = "org.apache.seata.integration.tx.api.combine")
 @Configuration
 @EnableAspectJAutoProxy(proxyTargetClass = true)
-public class CombineAutoConfiguration {
-
-}
-
+public class CombineAutoConfiguration {}

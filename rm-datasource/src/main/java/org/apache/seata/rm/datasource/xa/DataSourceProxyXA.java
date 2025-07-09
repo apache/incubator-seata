@@ -115,7 +115,7 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
         if (!RootContext.inGlobalTransaction()) {
             return connection;
         }
-        ConnectionProxyXA connectionProxyXA = (ConnectionProxyXA)getConnectionProxyXA(connection);
+        ConnectionProxyXA connectionProxyXA = (ConnectionProxyXA) getConnectionProxyXA(connection);
         if (CombineContext.get()) {
             CombineConnectionHolder.putConnection(this.dataSource, connectionProxyXA);
         }

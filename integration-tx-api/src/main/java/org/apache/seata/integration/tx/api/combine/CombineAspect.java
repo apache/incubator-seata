@@ -16,7 +16,6 @@
  */
 package org.apache.seata.integration.tx.api.combine;
 
-
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.rm.datasource.combine.CombineConnectionHolder;
 import org.apache.seata.rm.datasource.combine.CombineContext;
@@ -36,7 +35,7 @@ public class CombineAspect {
     @Around("@annotation(org.apache.seata.spring.annotation.CombineTransactional)")
     public Object handleCombine(ProceedingJoinPoint joinPoint) throws Throwable {
         if (!RootContext.inGlobalTransaction() || !RootContext.inXABranch()) {
-            //not in transaction, or this interceptor is disabled
+            // not in transaction, or this interceptor is disabled
             return joinPoint.proceed();
         }
 
@@ -57,7 +56,9 @@ public class CombineAspect {
             }
             return result;
         } catch (Exception e) {
-            LOGGER.error(String.format("Failed to handle,xid: %s occur exp msg: %s", RootContext.getXID(), e.getMessage()), e);
+            LOGGER.error(
+                    String.format("Failed to handle,xid: %s occur exp msg: %s", RootContext.getXID(), e.getMessage()),
+                    e);
             CombineContext.clear();
             // doRollback
             for (ConnectionProxyXA conn : CombineConnectionHolder.getDsConn()) {

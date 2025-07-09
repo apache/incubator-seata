@@ -22,14 +22,16 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class CombineContext {
-    private static final ThreadLocal<Map<String,Boolean>> COMBINE_ASPECT = ThreadLocal.withInitial(ConcurrentHashMap::new);;
+    private static final ThreadLocal<Map<String, Boolean>> COMBINE_ASPECT =
+            ThreadLocal.withInitial(ConcurrentHashMap::new);
+    ;
 
     /**
      * @return
      *    false: 指定的key已经存在（重复进入切面）
      *    true: 指定的key不存在（第一次进入切面）
      */
-    public static boolean set(){
+    public static boolean set() {
         String xid = RootContext.getXID();
         if (xid != null) {
             return !Boolean.TRUE.equals(COMBINE_ASPECT.get().putIfAbsent(xid, Boolean.TRUE));
@@ -37,7 +39,7 @@ public class CombineContext {
         return false;
     }
 
-    public static boolean get(){
+    public static boolean get() {
         String xid = RootContext.getXID();
         if (xid == null) {
             return false;
@@ -45,7 +47,7 @@ public class CombineContext {
         return Boolean.TRUE.equals(COMBINE_ASPECT.get().get(xid));
     }
 
-    public static void clear(){
+    public static void clear() {
         String xid = RootContext.getXID();
         if (xid != null) {
             COMBINE_ASPECT.get().remove(xid);
