@@ -24,7 +24,7 @@ import org.apache.seata.server.cluster.raft.sync.msg.RaftBaseMsg;
 /**
  * The type of closure for configuration sync in raft
  */
-public class ConfigClosure  implements Closure {
+public class ConfigClosure implements Closure {
 
     private RaftBaseMsg raftBaseMsg;
     private ConfigOperationResponse response;

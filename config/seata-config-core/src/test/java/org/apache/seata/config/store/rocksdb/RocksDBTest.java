@@ -16,25 +16,25 @@
  */
 package org.apache.seata.config.store.rocksdb;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import static org.apache.seata.common.Constants.DEFAULT_STORE_DATA_ID;
 import static org.apache.seata.common.Constants.DEFAULT_STORE_NAMESPACE;
-
 
 class RocksDBTest {
     private static RocksDBConfigStoreManager configStoreManager;
 
     private static final String dataId = DEFAULT_STORE_DATA_ID;
     private static final String namespace = DEFAULT_STORE_NAMESPACE;
+
     @BeforeAll
     static void setUp() {
         configStoreManager = RocksDBConfigStoreManager.getInstance();
@@ -53,7 +53,6 @@ class RocksDBTest {
         Assertions.assertNotNull(configStoreManager);
     }
 
-
     @Test
     void crudTest() {
         configStoreManager.deleteAll(namespace, dataId);
@@ -66,21 +65,19 @@ class RocksDBTest {
         Assertions.assertEquals(updateValue, configStoreManager.get(namespace, dataId, key));
         Assertions.assertTrue(configStoreManager.delete(namespace, dataId, key));
         Assertions.assertNull(configStoreManager.get(namespace, dataId, key));
-
     }
 
     @Test
     void uploadConfigTest() {
         configStoreManager.deleteAll(namespace, dataId);
         HashMap<String, Object> uploadConfigs = new HashMap<>();
-        uploadConfigs.put("aaa","111");
-        uploadConfigs.put("bbb","222");
+        uploadConfigs.put("aaa", "111");
+        uploadConfigs.put("bbb", "222");
         Assertions.assertTrue(configStoreManager.putAll(namespace, dataId, uploadConfigs));
         Assertions.assertEquals(uploadConfigs, configStoreManager.getAll(namespace, dataId));
         configStoreManager.deleteAll(namespace, dataId);
         Assertions.assertTrue(configStoreManager.isEmpty(namespace, dataId));
     }
-
 
     @Test
     void multiGroupTest() {
@@ -103,7 +100,6 @@ class RocksDBTest {
         Assertions.assertNull(configStoreManager.get(namespace, group2, key));
     }
 
-
     @Test
     void multiNamespaceAndGroupTest() {
         configStoreManager.clearData();
@@ -115,17 +111,20 @@ class RocksDBTest {
         List<String> dataIds = Arrays.asList(dataId1, dataId2);
         String key = "aaa";
         // put and get
-        Assertions.assertTrue(configStoreManager.put(namespace1, dataId1, key , "11"));
-        Assertions.assertTrue(configStoreManager.put(namespace1, dataId2, key , "12"));
-        Assertions.assertTrue(configStoreManager.put(namespace2, dataId1, key , "21"));
-        Assertions.assertTrue(configStoreManager.put(namespace2, dataId2, key , "22"));
+        Assertions.assertTrue(configStoreManager.put(namespace1, dataId1, key, "11"));
+        Assertions.assertTrue(configStoreManager.put(namespace1, dataId2, key, "12"));
+        Assertions.assertTrue(configStoreManager.put(namespace2, dataId1, key, "21"));
+        Assertions.assertTrue(configStoreManager.put(namespace2, dataId2, key, "22"));
         Assertions.assertEquals("11", configStoreManager.get(namespace1, dataId1, key));
         Assertions.assertEquals("12", configStoreManager.get(namespace1, dataId2, key));
         Assertions.assertEquals("21", configStoreManager.get(namespace2, dataId1, key));
         Assertions.assertEquals("22", configStoreManager.get(namespace2, dataId2, key));
-        Assertions.assertEquals(namespaces.size(), configStoreManager.getAllNamespaces().size());
-        Assertions.assertEquals(dataIds.size(), configStoreManager.getAllDataIds(namespace1).size());
-        Assertions.assertEquals(dataIds.size(), configStoreManager.getAllDataIds(namespace2).size());
+        Assertions.assertEquals(
+                namespaces.size(), configStoreManager.getAllNamespaces().size());
+        Assertions.assertEquals(
+                dataIds.size(), configStoreManager.getAllDataIds(namespace1).size());
+        Assertions.assertEquals(
+                dataIds.size(), configStoreManager.getAllDataIds(namespace2).size());
         // delete
         Assertions.assertTrue(configStoreManager.delete(namespace1, dataId1, key));
         Assertions.assertTrue(configStoreManager.delete(namespace1, dataId2, key));
@@ -145,18 +144,22 @@ class RocksDBTest {
         String dataId1 = "dataId1";
         String dataId2 = "dataId2";
         HashMap<String, Map<String, Object>> configMap = new HashMap<String, Map<String, Object>>();
-        HashMap<String, Object> map1 = new HashMap<String, Object>() {{
-            put(dataId1, "11");
-            put(dataId2, "12");
-        }};
-        HashMap<String, Object> map2 = new HashMap<String, Object>() {{
-            put(dataId1, "21");
-            put(dataId2, "22");
-        }};
-        configMap.put(namespace1,map1);
-        configMap.put(namespace2,map2);
+        HashMap<String, Object> map1 = new HashMap<String, Object>() {
+            {
+                put(dataId1, "11");
+                put(dataId2, "12");
+            }
+        };
+        HashMap<String, Object> map2 = new HashMap<String, Object>() {
+            {
+                put(dataId1, "21");
+                put(dataId2, "22");
+            }
+        };
+        configMap.put(namespace1, map1);
+        configMap.put(namespace2, map2);
         // ensure default namespace
-        configMap.put("default",new HashMap<>());
+        configMap.put("default", new HashMap<>());
         Assertions.assertTrue(configStoreManager.putConfigMap(configMap));
         Map<String, Map<String, Object>> other = configStoreManager.getConfigMap();
 
@@ -164,7 +167,7 @@ class RocksDBTest {
         Assertions.assertEquals(configMap.get(namespace2), other.get(namespace2));
         Assertions.assertEquals(configMap.get("default"), other.get("default"));
 
-        Assertions.assertDoesNotThrow(()->configStoreManager.getAll(namespace1, dataId1));
+        Assertions.assertDoesNotThrow(() -> configStoreManager.getAll(namespace1, dataId1));
     }
 
     @Test

@@ -29,7 +29,6 @@ public class ConfigWatcher<T> {
 
     private long timeout;
 
-
     private String protocol = HTTP;
 
     public ConfigWatcher(String namespace, String dataId, T asyncContext, int timeout) {

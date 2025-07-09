@@ -42,7 +42,6 @@ public class CustomDeserializer extends JsonDeserializer<Class<?>> {
         PERMIT_PACKAGES.add("java.util.LinkedHashMap");
     }
 
-
     @Override
     public Class<?> deserialize(JsonParser jsonParser, DeserializationContext deserializationContext)
             throws IOException {

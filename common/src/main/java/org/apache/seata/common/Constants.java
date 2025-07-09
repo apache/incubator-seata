@@ -247,7 +247,6 @@ public interface Constants {
     /**
      * The constant DEFAULT_STORE_NAMESPACE in raft configuration
      */
-
     String DEFAULT_STORE_NAMESPACE = "default";
     /**
      * The constant DEFAULT_STORE_DATA_ID in raft configuration

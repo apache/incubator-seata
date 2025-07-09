@@ -16,10 +16,10 @@
  */
 package org.apache.seata.server.cluster.raft.sync.msg.dto;
 
-import java.io.Serializable;
-
 import org.apache.seata.server.cluster.raft.execute.config.ConfigOperationType;
 import org.apache.seata.server.cluster.raft.processor.request.ConfigOperationRequest;
+
+import java.io.Serializable;
 
 public class ConfigOperationDTO implements Serializable {
     private static final long serialVersionUID = -1237293571963636954L;
@@ -30,8 +30,7 @@ public class ConfigOperationDTO implements Serializable {
     private String key;
     private Object value;
 
-    public ConfigOperationDTO() {
-    }
+    public ConfigOperationDTO() {}
 
     public ConfigOperationDTO(ConfigOperationType optType, String namespace, String dataId, String key, Object value) {
         this.optType = optType;
@@ -82,17 +81,21 @@ public class ConfigOperationDTO implements Serializable {
     }
 
     public static ConfigOperationDTO convertConfigRequest2Dto(ConfigOperationRequest request) {
-        return new ConfigOperationDTO(request.getOptType(), request.getNamespace(), request.getDataId(), request.getKey(), request.getValue());
+        return new ConfigOperationDTO(
+                request.getOptType(),
+                request.getNamespace(),
+                request.getDataId(),
+                request.getKey(),
+                request.getValue());
     }
 
     @Override
     public String toString() {
-        return "ConfigOperationDTO{" +
-                "optType=" + optType +
-                ", namespace='" + namespace + '\'' +
-                ", dataId='" + dataId + '\'' +
-                ", key='" + key + '\'' +
-                ", value=" + value +
-                '}';
+        return "ConfigOperationDTO{" + "optType="
+                + optType + ", namespace='"
+                + namespace + '\'' + ", dataId='"
+                + dataId + '\'' + ", key='"
+                + key + '\'' + ", value="
+                + value + '}';
     }
 }

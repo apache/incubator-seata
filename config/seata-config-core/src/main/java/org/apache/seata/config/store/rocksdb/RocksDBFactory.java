@@ -16,18 +16,18 @@
  */
 package org.apache.seata.config.store.rocksdb;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-
 import org.rocksdb.ColumnFamilyDescriptor;
 import org.rocksdb.ColumnFamilyHandle;
 import org.rocksdb.DBOptions;
-import org.rocksdb.RocksDB;
 import org.rocksdb.Options;
+import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
 
 /**
  * The RocksDB Factory
@@ -38,12 +38,15 @@ public class RocksDBFactory {
 
     private static volatile RocksDB instance = null;
 
-
     static {
         RocksDB.loadLibrary();
     }
 
-    public static RocksDB getInstance(String dbPath, DBOptions dbOptions, List<ColumnFamilyDescriptor> columnFamilyDescriptors, List<ColumnFamilyHandle> columnFamilyHandles) {
+    public static RocksDB getInstance(
+            String dbPath,
+            DBOptions dbOptions,
+            List<ColumnFamilyDescriptor> columnFamilyDescriptors,
+            List<ColumnFamilyHandle> columnFamilyHandles) {
         if (instance == null) {
             synchronized (RocksDBFactory.class) {
                 if (instance == null) {
@@ -54,7 +57,11 @@ public class RocksDBFactory {
         return instance;
     }
 
-    private static RocksDB build(String dbPath, DBOptions dbOptions, List<ColumnFamilyDescriptor> columnFamilyDescriptors, List<ColumnFamilyHandle> columnFamilyHandles) {
+    private static RocksDB build(
+            String dbPath,
+            DBOptions dbOptions,
+            List<ColumnFamilyDescriptor> columnFamilyDescriptors,
+            List<ColumnFamilyHandle> columnFamilyHandles) {
         try {
             checkPath(dbPath);
             return RocksDB.open(dbOptions, dbPath, columnFamilyDescriptors, columnFamilyHandles);
@@ -63,7 +70,6 @@ public class RocksDBFactory {
             return null;
         }
     }
-
 
     public static synchronized void close() {
         if (instance != null) {
@@ -85,7 +91,8 @@ public class RocksDBFactory {
         File directory = new File(dbPath);
         if (directory.exists()) {
             if (!directory.isDirectory()) {
-                throw new IOException("File " + directory + " exists and is not a directory. Unable to create directory.");
+                throw new IOException(
+                        "File " + directory + " exists and is not a directory. Unable to create directory.");
             }
         } else if (!directory.mkdirs()) {
             throw new IOException("Unable to create directory " + directory);

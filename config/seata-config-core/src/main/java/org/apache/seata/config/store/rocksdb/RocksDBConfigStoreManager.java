@@ -16,22 +16,6 @@
  */
 package org.apache.seata.config.store.rocksdb;
 
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.stream.Collectors;
-
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.NumberUtils;
@@ -53,6 +37,22 @@ import org.rocksdb.WriteBatch;
 import org.rocksdb.WriteOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.Collectors;
 
 import static org.apache.seata.common.ConfigurationKeys.CLIENT_PREFIX;
 import static org.apache.seata.common.ConfigurationKeys.CONFIG_STORE_DATA_ID;
@@ -89,17 +89,25 @@ public class RocksDBConfigStoreManager implements ConfigStoreManager {
     private static final DBOptions DB_OPTIONS = RocksDBOptionsFactory.getDBOptions();
     private static final Map<String, ReentrantReadWriteLock> LOCK_MAP = new ConcurrentHashMap<>();
     private static final int MAP_INITIAL_CAPACITY = 8;
-    private static final ConcurrentMap<String/*namespace*/, Map<String/*dataId*/, Set<ConfigurationChangeListener>>> CONFIG_LISTENERS_MAP = new ConcurrentHashMap<>(
-            MAP_INITIAL_CAPACITY);
+    private static final ConcurrentMap<String /*namespace*/, Map<String /*dataId*/, Set<ConfigurationChangeListener>>>
+            CONFIG_LISTENERS_MAP = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
 
-    //====================================NON COMMON FILED===================================
+    // ====================================NON COMMON FILED===================================
     private static volatile RocksDBConfigStoreManager instance;
     private RocksDB rocksdb;
     private final Map<String, ColumnFamilyHandle> columnFamilyHandleMap = new ConcurrentHashMap<>();
     private static final String VERSION_COLUMN_FAMILY = "config_version";
-    private static final List<String> PREFIX_LIST = Arrays.asList(FILE_ROOT_PREFIX_CONFIG, FILE_ROOT_PREFIX_REGISTRY, SERVER_PREFIX, CLIENT_PREFIX, SERVICE_PREFIX,
-            STORE_PREFIX, METRICS_PREFIX, TRANSPORT_PREFIX, LOG_PREFIX, TCC_PREFIX);
-
+    private static final List<String> PREFIX_LIST = Arrays.asList(
+            FILE_ROOT_PREFIX_CONFIG,
+            FILE_ROOT_PREFIX_REGISTRY,
+            SERVER_PREFIX,
+            CLIENT_PREFIX,
+            SERVICE_PREFIX,
+            STORE_PREFIX,
+            METRICS_PREFIX,
+            TRANSPORT_PREFIX,
+            LOG_PREFIX,
+            TCC_PREFIX);
 
     public static RocksDBConfigStoreManager getInstance() {
         if (instance == null) {
@@ -128,12 +136,17 @@ public class RocksDBConfigStoreManager implements ConfigStoreManager {
             List<byte[]> cfs = RocksDB.listColumnFamilies(options, DB_PATH);
             for (byte[] cf : cfs) {
                 String namespace = new String(cf);
-                descriptors.add(new ColumnFamilyDescriptor(cf, RocksDBOptionsFactory.getColumnFamilyOptionsMap(namespace)));
+                descriptors.add(
+                        new ColumnFamilyDescriptor(cf, RocksDBOptionsFactory.getColumnFamilyOptionsMap(namespace)));
             }
             // create default column family and config version column family
             if (CollectionUtils.isEmpty(descriptors)) {
-                descriptors.add(new ColumnFamilyDescriptor(RocksDB.DEFAULT_COLUMN_FAMILY, RocksDBOptionsFactory.getColumnFamilyOptionsMap(new String(RocksDB.DEFAULT_COLUMN_FAMILY))));
-                descriptors.add(new ColumnFamilyDescriptor(VERSION_COLUMN_FAMILY.getBytes(DEFAULT_CHARSET), RocksDBOptionsFactory.getColumnFamilyOptionsMap(VERSION_COLUMN_FAMILY)));
+                descriptors.add(new ColumnFamilyDescriptor(
+                        RocksDB.DEFAULT_COLUMN_FAMILY,
+                        RocksDBOptionsFactory.getColumnFamilyOptionsMap(new String(RocksDB.DEFAULT_COLUMN_FAMILY))));
+                descriptors.add(new ColumnFamilyDescriptor(
+                        VERSION_COLUMN_FAMILY.getBytes(DEFAULT_CHARSET),
+                        RocksDBOptionsFactory.getColumnFamilyOptionsMap(VERSION_COLUMN_FAMILY)));
             }
             this.rocksdb = RocksDBFactory.getInstance(DB_PATH, DB_OPTIONS, descriptors, handles);
             for (ColumnFamilyHandle handle : handles) {
@@ -151,7 +164,8 @@ public class RocksDBConfigStoreManager implements ConfigStoreManager {
                 handle = columnFamilyHandleMap.get(namespace);
                 if (handle == null) {
                     handle = rocksdb.createColumnFamily(new ColumnFamilyDescriptor(
-                            namespace.getBytes(DEFAULT_CHARSET), RocksDBOptionsFactory.getColumnFamilyOptionsMap(namespace)));
+                            namespace.getBytes(DEFAULT_CHARSET),
+                            RocksDBOptionsFactory.getColumnFamilyOptionsMap(namespace)));
                     columnFamilyHandleMap.put(namespace, handle);
                 }
             }
@@ -166,16 +180,16 @@ public class RocksDBConfigStoreManager implements ConfigStoreManager {
         if (isEmpty(CURRENT_NAMESPACE, CURRENT_DATA_ID)) {
             Map<String, Object> configs = new HashMap<>();
             Map<String, Object> seataConfigs = new HashMap<>();
-            String pathDataId = String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR,
-                    ConfigurationKeys.FILE_ROOT_CONFIG, FILE_TYPE, NAME_KEY);
+            String pathDataId = String.join(
+                    ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, FILE_TYPE, NAME_KEY);
             String name = FILE_CONFIG.getConfig(pathDataId);
             // create FileConfiguration for read file.conf
             Optional<FileConfiguration> originFileInstance = Optional.ofNullable(new FileConfiguration(name));
-            originFileInstance
-                    .ifPresent(fileConfiguration -> configs.putAll(fileConfiguration.getFileConfig().getAllConfig()));
+            originFileInstance.ifPresent(fileConfiguration ->
+                    configs.putAll(fileConfiguration.getFileConfig().getAllConfig()));
             configs.forEach((k, v) -> {
                 if (v instanceof String) {
-                    if (StringUtils.isEmpty((String)v)) {
+                    if (StringUtils.isEmpty((String) v)) {
                         return;
                     }
                 }
@@ -189,7 +203,10 @@ public class RocksDBConfigStoreManager implements ConfigStoreManager {
                 }
             });
             putAll(CURRENT_NAMESPACE, CURRENT_DATA_ID, seataConfigs);
-            LOGGER.info("Load initialization configuration file sucessfully in namespace: {}, dataId: {}", CURRENT_NAMESPACE, CURRENT_DATA_ID);
+            LOGGER.info(
+                    "Load initialization configuration file sucessfully in namespace: {}, dataId: {}",
+                    CURRENT_NAMESPACE,
+                    CURRENT_DATA_ID);
         }
     }
 
@@ -370,7 +387,6 @@ public class RocksDBConfigStoreManager implements ConfigStoreManager {
         return false;
     }
 
-
     /**
      * Get all key-values pairs in all namespaces, mainly used for backup or snapshot
      * @return Map(namespace -> Map(dataId -> value))
@@ -411,7 +427,8 @@ public class RocksDBConfigStoreManager implements ConfigStoreManager {
      */
     @Override
     public Boolean putConfigMap(Map<String, Map<String, Object>> configMap) {
-        try (WriteBatch batch = new WriteBatch(); WriteOptions writeOptions = new WriteOptions()) {
+        try (WriteBatch batch = new WriteBatch();
+                WriteOptions writeOptions = new WriteOptions()) {
             for (Map.Entry<String, Map<String, Object>> entry : configMap.entrySet()) {
                 String namespace = entry.getKey();
                 Map<String, Object> configs = entry.getValue();
@@ -419,8 +436,11 @@ public class RocksDBConfigStoreManager implements ConfigStoreManager {
                 lock.writeLock().lock();
                 try {
                     ColumnFamilyHandle handle = getOrCreateColumnFamilyHandle(namespace);
-                    for (Map.Entry<String, Object> nsEntry : configs .entrySet()) {
-                        batch.put(handle, nsEntry.getKey().getBytes(DEFAULT_CHARSET), nsEntry.getValue().toString().getBytes(DEFAULT_CHARSET));
+                    for (Map.Entry<String, Object> nsEntry : configs.entrySet()) {
+                        batch.put(
+                                handle,
+                                nsEntry.getKey().getBytes(DEFAULT_CHARSET),
+                                nsEntry.getValue().toString().getBytes(DEFAULT_CHARSET));
                     }
                 } catch (RocksDBException e) {
                     LOGGER.error("Failed to put configMap in namespace : {}", namespace, e);
@@ -435,7 +455,11 @@ public class RocksDBConfigStoreManager implements ConfigStoreManager {
                 for (Map.Entry<String, Object> kv : configs.entrySet()) {
                     String dataId = kv.getKey();
                     updateConfigVersion(namespace, dataId);
-                    notifyConfigChange(namespace, dataId, new ConfigurationChangeEvent(namespace, kv.getKey(), kv.getValue().toString()));
+                    notifyConfigChange(
+                            namespace,
+                            dataId,
+                            new ConfigurationChangeEvent(
+                                    namespace, kv.getKey(), kv.getValue().toString()));
                 }
             }
             return true;
@@ -452,7 +476,8 @@ public class RocksDBConfigStoreManager implements ConfigStoreManager {
     @Override
     public Boolean clearData() {
         Map<String, Set<String>> clearDataMap = new HashMap<>();
-        try (WriteBatch batch = new WriteBatch(); WriteOptions writeOptions = new WriteOptions()) {
+        try (WriteBatch batch = new WriteBatch();
+                WriteOptions writeOptions = new WriteOptions()) {
             for (ColumnFamilyHandle handle : columnFamilyHandleMap.values()) {
                 String namespace = new String(handle.getName());
                 ReentrantReadWriteLock lock = acquireLock(namespace);
@@ -644,15 +669,14 @@ public class RocksDBConfigStoreManager implements ConfigStoreManager {
         LOGGER.info("DB destroyed, the db path is: {}.", DB_PATH);
     }
 
-
     @Override
     public void addConfigListener(String namespace, String dataId, ConfigurationChangeListener listener) {
         if (StringUtils.isBlank(namespace) || StringUtils.isBlank(dataId) || listener == null) {
             return;
         }
-        Map<String, Set<ConfigurationChangeListener>> listenerMap = CONFIG_LISTENERS_MAP.computeIfAbsent(namespace, k -> new ConcurrentHashMap<>());
-        listenerMap.computeIfAbsent(dataId, k -> ConcurrentHashMap.newKeySet())
-                .add(listener);
+        Map<String, Set<ConfigurationChangeListener>> listenerMap =
+                CONFIG_LISTENERS_MAP.computeIfAbsent(namespace, k -> new ConcurrentHashMap<>());
+        listenerMap.computeIfAbsent(dataId, k -> ConcurrentHashMap.newKeySet()).add(listener);
     }
 
     @Override
@@ -677,7 +701,6 @@ public class RocksDBConfigStoreManager implements ConfigStoreManager {
         }
         putConfigVersion(namespace, dataId, version + 1);
     }
-
 
     private void notifyConfigChange(String namespace, String dataId, ConfigurationChangeEvent event) {
         Map<String, Set<ConfigurationChangeListener>> listenerMap = CONFIG_LISTENERS_MAP.get(namespace);

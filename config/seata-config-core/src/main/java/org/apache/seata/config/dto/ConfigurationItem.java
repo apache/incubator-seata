@@ -60,6 +60,4 @@ public class ConfigurationItem implements Serializable {
     public void setDefaultValue(Object defaultValue) {
         this.defaultValue = defaultValue;
     }
-
-
 }

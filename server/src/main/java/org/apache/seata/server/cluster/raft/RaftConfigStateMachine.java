@@ -16,24 +16,6 @@
  */
 package org.apache.seata.server.cluster.raft;
 
-import java.nio.ByteBuffer;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.stream.Collectors;
-
 import com.alipay.sofa.jraft.Closure;
 import com.alipay.sofa.jraft.Iterator;
 import com.alipay.sofa.jraft.RouteTable;
@@ -77,11 +59,28 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.env.Environment;
 
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
+
 import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
 import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
 import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.CONFIG_OPERATION;
 import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.REFRESH_CLUSTER_METADATA;
-
 
 /**
  * The type raft config state machine.
@@ -99,7 +98,8 @@ public class RaftConfigStateMachine extends StateMachineAdapter {
 
     private final Lock lock = new ReentrantLock();
 
-    private static final ScheduledThreadPoolExecutor RESYNC_METADATA_POOL = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("reSyncMetadataPool", 1, true));
+    private static final ScheduledThreadPoolExecutor RESYNC_METADATA_POOL =
+            new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("reSyncMetadataPool", 1, true));
 
     /**
      * Leader term
@@ -162,7 +162,8 @@ public class RaftConfigStateMachine extends StateMachineAdapter {
                 ByteBuffer byteBuffer = iterator.getData();
                 // if data is empty, it is only a heartbeat event and can be ignored
                 if (byteBuffer != null && byteBuffer.hasRemaining()) {
-                    RaftBaseMsg msg = (RaftBaseMsg) RaftSyncMessageSerializer.decode(byteBuffer.array()).getBody();
+                    RaftBaseMsg msg = (RaftBaseMsg)
+                            RaftSyncMessageSerializer.decode(byteBuffer.array()).getBody();
                     // follower executes the corresponding task
                     if (LOGGER.isDebugEnabled()) {
                         LOGGER.debug("sync msg: {}", msg);
@@ -205,6 +206,7 @@ public class RaftConfigStateMachine extends StateMachineAdapter {
         LOGGER.info("groupId: {}, onSnapshotLoad cost: {} ms.", group, System.currentTimeMillis() - current);
         return true;
     }
+
     @Override
     public void onLeaderStart(final long term) {
         boolean leader = isLeader();
@@ -214,7 +216,8 @@ public class RaftConfigStateMachine extends StateMachineAdapter {
         syncMetadata();
         if (!leader && RaftConfigServerManager.isRaftMode()) {
             Configuration conf = RouteTable.getInstance().getConfiguration(group);
-            // A member change might trigger a leader re-election. At this point, it’s necessary to filter out non-existent members and synchronize again.
+            // A member change might trigger a leader re-election. At this point, it’s necessary to filter out
+            // non-existent members and synchronize again.
             changePeers(conf);
         }
     }
@@ -247,6 +250,7 @@ public class RaftConfigStateMachine extends StateMachineAdapter {
             changePeers(conf);
         }
     }
+
     private void changePeers(Configuration conf) {
         lock.lock();
         try {
@@ -254,12 +258,14 @@ public class RaftConfigStateMachine extends StateMachineAdapter {
             Set<PeerId> newLearners = conf.getLearners();
             List<Node> currentFollowers = raftClusterMetadata.getFollowers();
             if (CollectionUtils.isNotEmpty(newFollowers)) {
-                raftClusterMetadata.setFollowers(currentFollowers.stream().filter(node -> contains(node, newFollowers))
+                raftClusterMetadata.setFollowers(currentFollowers.stream()
+                        .filter(node -> contains(node, newFollowers))
                         .collect(Collectors.toList()));
             }
             if (CollectionUtils.isNotEmpty(newLearners)) {
                 raftClusterMetadata.setLearner(raftClusterMetadata.getLearner().stream()
-                        .filter(node -> contains(node, newLearners)).collect(Collectors.toList()));
+                        .filter(node -> contains(node, newLearners))
+                        .collect(Collectors.toList()));
             } else {
                 raftClusterMetadata.setLearner(Collections.emptyList());
             }
@@ -277,7 +283,8 @@ public class RaftConfigStateMachine extends StateMachineAdapter {
         if (node.getInternal() == null) {
             return true;
         }
-        PeerId nodePeer = new PeerId(node.getInternal().getHost(), node.getInternal().getPort());
+        PeerId nodePeer =
+                new PeerId(node.getInternal().getHost(), node.getInternal().getPort());
         return list.contains(nodePeer);
     }
 
@@ -287,8 +294,8 @@ public class RaftConfigStateMachine extends StateMachineAdapter {
             try {
                 RaftClusterMetadataMsg raftClusterMetadataMsg =
                         new RaftClusterMetadataMsg(changeOrInitRaftClusterMetadata());
-                RaftConfigTaskUtil.createTask(status -> refreshClusterMetadata(raftClusterMetadataMsg),
-                        raftClusterMetadataMsg, null);
+                RaftConfigTaskUtil.createTask(
+                        status -> refreshClusterMetadata(raftClusterMetadataMsg), raftClusterMetadataMsg, null);
             } catch (Exception e) {
                 LOGGER.error(e.getMessage(), e);
             } finally {
@@ -333,15 +340,22 @@ public class RaftConfigStateMachine extends StateMachineAdapter {
         Node leaderNode = raftClusterMetadata.getLeader();
         RaftConfigServer raftServer = RaftConfigServerManager.getRaftServer();
         PeerId cureentPeerId = raftServer.getServerId();
-        // After the re-election, the leader information may be different from the latest leader, and you need to replace the leader information
-        if (leaderNode == null || (leaderNode.getInternal() != null
-                && !cureentPeerId.equals(new PeerId(leaderNode.getInternal().getHost(), leaderNode.getInternal().getPort())))) {
-            Node leader =
-                    raftClusterMetadata.createNode(XID.getIpAddress() == null ? NetUtil.getLocalIp() : XID.getIpAddress(), XID.getPort() <= 0 ? 8091 : XID.getPort(), raftServer.getServerId().getPort(),
-                            Integer.parseInt(
-                                    ((Environment) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT))
-                                            .getProperty("server.port", String.valueOf(7091))),
-                            group, Collections.emptyMap());
+        // After the re-election, the leader information may be different from the latest leader, and you need to
+        // replace the leader information
+        if (leaderNode == null
+                || (leaderNode.getInternal() != null
+                        && !cureentPeerId.equals(new PeerId(
+                                leaderNode.getInternal().getHost(),
+                                leaderNode.getInternal().getPort())))) {
+            Node leader = raftClusterMetadata.createNode(
+                    XID.getIpAddress() == null ? NetUtil.getLocalIp() : XID.getIpAddress(),
+                    XID.getPort() <= 0 ? 8091 : XID.getPort(),
+                    raftServer.getServerId().getPort(),
+                    Integer.parseInt(
+                            ((Environment) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT))
+                                    .getProperty("server.port", String.valueOf(7091))),
+                    group,
+                    Collections.emptyMap());
             leader.setRole(ClusterRole.LEADER);
             raftClusterMetadata.setLeader(leader);
         }
@@ -350,19 +364,19 @@ public class RaftConfigStateMachine extends StateMachineAdapter {
 
     public void refreshClusterMetadata(RaftBaseMsg syncMsg) {
         // Directly receive messages from the leader and update the cluster metadata
-        raftClusterMetadata = ((RaftClusterMetadataMsg)syncMsg).getRaftClusterMetadata();
+        raftClusterMetadata = ((RaftClusterMetadataMsg) syncMsg).getRaftClusterMetadata();
         if (ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT) != null) {
-            ((ApplicationEventPublisher)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
+            ((ApplicationEventPublisher) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
                     .publishEvent(new ClusterChangeEvent(this, group, raftClusterMetadata.getTerm(), this.isLeader()));
             LOGGER.info("groupId: {}, refresh cluster metadata: {}", group, raftClusterMetadata);
         }
-
     }
 
     private void syncCurrentNodeInfo(String group) {
         if (initSync.compareAndSet(false, true)) {
             try {
-                RouteTable.getInstance().refreshLeader(RaftConfigServerManager.getCliClientServiceInstance(), group, 1000);
+                RouteTable.getInstance()
+                        .refreshLeader(RaftConfigServerManager.getCliClientServiceInstance(), group, 1000);
                 PeerId peerId = RouteTable.getInstance().selectLeader(group);
                 if (peerId != null) {
                     syncCurrentNodeInfo(peerId);
@@ -380,41 +394,57 @@ public class RaftConfigStateMachine extends StateMachineAdapter {
             if (leader != null && StringUtils.isNotBlank(leader.getVersion())) {
                 RaftConfigServer raftServer = RaftConfigServerManager.getRaftServer();
                 PeerId cureentPeerId = raftServer.getServerId();
-                Node node = raftClusterMetadata.createNode(XID.getIpAddress() == null ? NetUtil.getLocalIp() : XID.getIpAddress(), XID.getPort() <= 0 ? 8091 : XID.getPort(), cureentPeerId.getPort(),
-                        Integer.parseInt(
-                                ((Environment)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT))
-                                        .getProperty("server.port", String.valueOf(7091))),
-                        group, Collections.emptyMap());
+                Node node = raftClusterMetadata.createNode(
+                        XID.getIpAddress() == null ? NetUtil.getLocalIp() : XID.getIpAddress(),
+                        XID.getPort() <= 0 ? 8091 : XID.getPort(),
+                        cureentPeerId.getPort(),
+                        Integer.parseInt(((Environment)
+                                        ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT))
+                                .getProperty("server.port", String.valueOf(7091))),
+                        group,
+                        Collections.emptyMap());
                 InvokeContext invokeContext = new InvokeContext();
                 PutNodeMetadataRequest putNodeInfoRequest = new PutNodeMetadataRequest(node);
                 Configuration configuration = RouteTable.getInstance().getConfiguration(group);
                 node.setRole(
                         configuration.getPeers().contains(cureentPeerId) ? ClusterRole.FOLLOWER : ClusterRole.LEARNER);
-                invokeContext.put(com.alipay.remoting.InvokeContext.BOLT_CUSTOM_SERIALIZER,
-                        SerializerType.JACKSON.getCode());
+                invokeContext.put(
+                        com.alipay.remoting.InvokeContext.BOLT_CUSTOM_SERIALIZER, SerializerType.JACKSON.getCode());
                 CliClientServiceImpl cliClientService =
-                        (CliClientServiceImpl)RaftConfigServerManager.getCliClientServiceInstance();
+                        (CliClientServiceImpl) RaftConfigServerManager.getCliClientServiceInstance();
                 // The previous leader may be an old snapshot or log playback, which is not accurate, and you
                 // need to get the leader again
-                cliClientService.getRpcClient().invokeAsync(leaderPeerId.getEndpoint(), putNodeInfoRequest,
-                    invokeContext, (result, err) -> {
-                        if (err == null) {
-                            PutNodeMetadataResponse putNodeMetadataResponse = (PutNodeMetadataResponse)result;
-                            if (putNodeMetadataResponse.isSuccess()) {
-                                scheduledFuture.cancel(true);
-                                LOGGER.info("sync node info to leader: {}, result: {}", leaderPeerId, result);
-                            } else {
-                                initSync.compareAndSet(true, false);
-                                LOGGER.info(
-                                        "sync node info to leader: {}, result: {}, retry will be made at the time of the re-election or after 10 seconds",
-                                        leaderPeerId, result);
-                            }
-                        } else {
-                            initSync.compareAndSet(true, false);
-                            LOGGER.error("sync node info to leader: {}, error: {}", leaderPeerId, err.getMessage(),
-                                    err);
-                        }
-                    }, 30000);
+                cliClientService
+                        .getRpcClient()
+                        .invokeAsync(
+                                leaderPeerId.getEndpoint(),
+                                putNodeInfoRequest,
+                                invokeContext,
+                                (result, err) -> {
+                                    if (err == null) {
+                                        PutNodeMetadataResponse putNodeMetadataResponse =
+                                                (PutNodeMetadataResponse) result;
+                                        if (putNodeMetadataResponse.isSuccess()) {
+                                            scheduledFuture.cancel(true);
+                                            LOGGER.info(
+                                                    "sync node info to leader: {}, result: {}", leaderPeerId, result);
+                                        } else {
+                                            initSync.compareAndSet(true, false);
+                                            LOGGER.info(
+                                                    "sync node info to leader: {}, result: {}, retry will be made at the time of the re-election or after 10 seconds",
+                                                    leaderPeerId,
+                                                    result);
+                                        }
+                                    } else {
+                                        initSync.compareAndSet(true, false);
+                                        LOGGER.error(
+                                                "sync node info to leader: {}, error: {}",
+                                                leaderPeerId,
+                                                err.getMessage(),
+                                                err);
+                                    }
+                                },
+                                30000);
             }
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
@@ -424,7 +454,8 @@ public class RaftConfigStateMachine extends StateMachineAdapter {
     public void changeNodeMetadata(Node node) {
         lock.lock();
         try {
-            List<Node> list = node.getRole() == ClusterRole.FOLLOWER ? raftClusterMetadata.getFollowers()
+            List<Node> list = node.getRole() == ClusterRole.FOLLOWER
+                    ? raftClusterMetadata.getFollowers()
                     : raftClusterMetadata.getLearner();
             // If the node currently exists, modify it
             for (Node follower : list) {
@@ -450,6 +481,4 @@ public class RaftConfigStateMachine extends StateMachineAdapter {
             lock.unlock();
         }
     }
-
-
 }

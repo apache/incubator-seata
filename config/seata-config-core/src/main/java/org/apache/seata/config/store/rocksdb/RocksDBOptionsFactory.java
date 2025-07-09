@@ -16,9 +16,6 @@
  */
 package org.apache.seata.config.store.rocksdb;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
@@ -28,11 +25,13 @@ import org.rocksdb.CompressionType;
 import org.rocksdb.DBOptions;
 import org.rocksdb.util.SizeUnit;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import static java.io.File.separator;
 import static org.apache.seata.common.ConfigurationKeys.CONFIG_STORE_DESTROY_ON_SHUTDOWN;
 import static org.apache.seata.common.ConfigurationKeys.CONFIG_STORE_DIR;
 import static org.apache.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
-
 
 /**
  * The RocksDB options builder
@@ -43,7 +42,9 @@ public class RocksDBOptionsFactory {
 
     public static final String ROCKSDB_SUFFIX = "rocksdb";
     private static volatile DBOptions options = null;
-    private static final Map<String/*namespace*/, ColumnFamilyOptions> COLUMN_FAMILY_OPTIONS_MAP = new ConcurrentHashMap<>();
+    private static final Map<String /*namespace*/, ColumnFamilyOptions> COLUMN_FAMILY_OPTIONS_MAP =
+            new ConcurrentHashMap<>();
+
     public static DBOptions getDBOptions() {
         if (options == null) {
             synchronized (RocksDBOptionsFactory.class) {
@@ -68,6 +69,7 @@ public class RocksDBOptionsFactory {
         }
         return opts;
     }
+
     public static String getDBPath() {
         String dir = FILE_CONFIG.getConfig(CONFIG_STORE_DIR);
         String group = FILE_CONFIG.getConfig(ConfigurationKeys.SERVER_RAFT_GROUP, DEFAULT_SEATA_GROUP);
@@ -124,5 +126,4 @@ public class RocksDBOptionsFactory {
         options = null;
         COLUMN_FAMILY_OPTIONS_MAP.clear();
     }
-
 }

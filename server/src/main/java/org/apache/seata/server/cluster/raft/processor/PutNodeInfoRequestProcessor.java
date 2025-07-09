@@ -28,7 +28,6 @@ import org.apache.seata.server.cluster.raft.RaftStateMachine;
 import org.apache.seata.server.cluster.raft.processor.request.PutNodeMetadataRequest;
 import org.apache.seata.server.cluster.raft.processor.response.PutNodeMetadataResponse;
 
-
 public class PutNodeInfoRequestProcessor implements RpcProcessor<PutNodeMetadataRequest> {
 
     public PutNodeInfoRequestProcessor() {
@@ -46,7 +45,8 @@ public class PutNodeInfoRequestProcessor implements RpcProcessor<PutNodeMetadata
         }
     }
 
-    private static void changeConfigGroupRequest(String group, Node node, RpcContext rpcCtx, PutNodeMetadataRequest request) {
+    private static void changeConfigGroupRequest(
+            String group, Node node, RpcContext rpcCtx, PutNodeMetadataRequest request) {
         if (RaftConfigServerManager.isLeader()) {
             RaftConfigServer raftServer = RaftConfigServerManager.getRaftServer();
             RaftConfigStateMachine raftStateMachine = raftServer.getRaftStateMachine();
@@ -57,7 +57,8 @@ public class PutNodeInfoRequestProcessor implements RpcProcessor<PutNodeMetadata
         }
     }
 
-    private static void changeNormalGroupRequest(String group, Node node, RpcContext rpcCtx, PutNodeMetadataRequest request) {
+    private static void changeNormalGroupRequest(
+            String group, Node node, RpcContext rpcCtx, PutNodeMetadataRequest request) {
         if (RaftServerManager.isLeader(group)) {
             RaftServer raftServer = RaftServerManager.getRaftServer(group);
             RaftStateMachine raftStateMachine = raftServer.getRaftStateMachine();

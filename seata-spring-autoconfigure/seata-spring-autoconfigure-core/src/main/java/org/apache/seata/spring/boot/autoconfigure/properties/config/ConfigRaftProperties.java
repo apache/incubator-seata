@@ -78,5 +78,4 @@ public class ConfigRaftProperties {
         this.serverAddr = serverAddr;
         return this;
     }
-
 }

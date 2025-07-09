@@ -50,10 +50,6 @@ public class ConfigDataResponse<T> implements Serializable {
 
     @Override
     public String toString() {
-        return "ConfigDataResponse{" +
-                "result=" + result +
-                ", errMsg='" + errMsg + '\'' +
-                ", success=" + success +
-                '}';
+        return "ConfigDataResponse{" + "result=" + result + ", errMsg='" + errMsg + '\'' + ", success=" + success + '}';
     }
 }

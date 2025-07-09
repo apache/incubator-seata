@@ -16,11 +16,11 @@
  */
 package org.apache.seata.config.store;
 
-import java.util.Objects;
-
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
+
+import java.util.Objects;
 
 import static org.apache.seata.common.ConfigurationKeys.CONFIG_STORE_TYPE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_DB_TYPE;
@@ -34,7 +34,9 @@ public class ConfigStoreManagerFactory {
             synchronized (ConfigStoreManagerFactory.class) {
                 if (instance == null) {
                     String dbType = FILE_CONFIG.getConfig(CONFIG_STORE_TYPE, DEFAULT_DB_TYPE);
-                    instance = EnhancedServiceLoader.load(ConfigStoreManagerProvider.class, Objects.requireNonNull(dbType), false).provide();
+                    instance = EnhancedServiceLoader.load(
+                                    ConfigStoreManagerProvider.class, Objects.requireNonNull(dbType), false)
+                            .provide();
                 }
             }
         }

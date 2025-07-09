@@ -16,10 +16,10 @@
  */
 package org.apache.seata.server.cluster.raft.processor.request;
 
+import org.apache.seata.server.cluster.raft.execute.config.ConfigOperationType;
+
 import java.io.Serializable;
 import java.util.Map;
-
-import org.apache.seata.server.cluster.raft.execute.config.ConfigOperationType;
 
 public class ConfigOperationRequest implements Serializable {
     private static final long serialVersionUID = -1149573667621259458L;
@@ -29,8 +29,7 @@ public class ConfigOperationRequest implements Serializable {
     private String key;
     private Object value;
 
-    public ConfigOperationRequest() {
-    }
+    public ConfigOperationRequest() {}
 
     public ConfigOperationRequest(ConfigOperationType optType, String namespace, String dataId) {
         this.optType = optType;
@@ -38,14 +37,15 @@ public class ConfigOperationRequest implements Serializable {
         this.dataId = dataId;
     }
 
-    public ConfigOperationRequest(ConfigOperationType optType,String namespace, String dataId, String key) {
+    public ConfigOperationRequest(ConfigOperationType optType, String namespace, String dataId, String key) {
         this.optType = optType;
         this.namespace = namespace;
         this.dataId = dataId;
         this.key = key;
     }
 
-    public ConfigOperationRequest(ConfigOperationType optType, String namespace, String dataId, String key, Object value) {
+    public ConfigOperationRequest(
+            ConfigOperationType optType, String namespace, String dataId, String key, Object value) {
         this.optType = optType;
         this.namespace = namespace;
         this.dataId = dataId;
@@ -64,6 +64,7 @@ public class ConfigOperationRequest implements Serializable {
     public static ConfigOperationRequest buildDeleteRequest(String namespace, String dataId, String key) {
         return new ConfigOperationRequest(ConfigOperationType.DELETE, namespace, dataId, key);
     }
+
     public static ConfigOperationRequest buildDeleteAllRequest(String namespace, String dataId) {
         return new ConfigOperationRequest(ConfigOperationType.DELETE_ALL, namespace, dataId);
     }
@@ -72,7 +73,8 @@ public class ConfigOperationRequest implements Serializable {
         return new ConfigOperationRequest(ConfigOperationType.GET_ALL, namespace, dataId);
     }
 
-    public static ConfigOperationRequest buildUploadRequest(String namespace, String dataId, Map<String, Object> configMap) {
+    public static ConfigOperationRequest buildUploadRequest(
+            String namespace, String dataId, Map<String, Object> configMap) {
         return new ConfigOperationRequest(ConfigOperationType.UPLOAD, namespace, dataId, null, configMap);
     }
 
@@ -84,10 +86,10 @@ public class ConfigOperationRequest implements Serializable {
         return new ConfigOperationRequest(ConfigOperationType.GET_DATA_IDS, namespace, null);
     }
 
-
     public ConfigOperationType getOptType() {
         return optType;
     }
+
     public void setOptType(ConfigOperationType optType) {
         this.optType = optType;
     }
@@ -126,12 +128,11 @@ public class ConfigOperationRequest implements Serializable {
 
     @Override
     public String toString() {
-        return "ConfigOperationRequest{" +
-                "optType=" + optType +
-                ", namespace='" + namespace + '\'' +
-                ", dataId='" + dataId + '\'' +
-                ", key='" + key + '\'' +
-                ", value=" + value +
-                '}';
+        return "ConfigOperationRequest{" + "optType="
+                + optType + ", namespace='"
+                + namespace + '\'' + ", dataId='"
+                + dataId + '\'' + ", key='"
+                + key + '\'' + ", value="
+                + value + '}';
     }
 }

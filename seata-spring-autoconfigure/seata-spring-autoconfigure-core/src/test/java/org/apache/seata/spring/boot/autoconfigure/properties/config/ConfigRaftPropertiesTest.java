@@ -28,14 +28,13 @@ public class ConfigRaftPropertiesTest extends BasePropertiesTest {
         configRaftProperties.setUsername(STR_TEST_AAA);
         configRaftProperties.setPassword(STR_TEST_BBB);
         configRaftProperties.setServerAddr(STR_TEST_CCC);
-        configRaftProperties.setMetadataMaxAgeMs((long)LONG_TEST_ONE);
-        configRaftProperties.setTokenValidityInMilliseconds((long)LONG_TEST_TWO);
+        configRaftProperties.setMetadataMaxAgeMs((long) LONG_TEST_ONE);
+        configRaftProperties.setTokenValidityInMilliseconds((long) LONG_TEST_TWO);
 
         Assertions.assertEquals(STR_TEST_AAA, configRaftProperties.getUsername());
         Assertions.assertEquals(STR_TEST_BBB, configRaftProperties.getPassword());
         Assertions.assertEquals(STR_TEST_CCC, configRaftProperties.getServerAddr());
         Assertions.assertEquals(LONG_TEST_ONE, configRaftProperties.getMetadataMaxAgeMs());
         Assertions.assertEquals(LONG_TEST_TWO, configRaftProperties.getTokenValidityInMilliseconds());
-
     }
 }

@@ -50,8 +50,9 @@ public class RaftServerTest {
         SessionHolder.destroy();
         RaftServerManager.destroy();
     }
+
     @BeforeEach
-    public  void init() {
+    public void init() {
         System.setProperty("server.raftPort", "0");
         System.setProperty(ConfigurationKeys.SERVER_RAFT_SERVER_ADDR, "");
     }

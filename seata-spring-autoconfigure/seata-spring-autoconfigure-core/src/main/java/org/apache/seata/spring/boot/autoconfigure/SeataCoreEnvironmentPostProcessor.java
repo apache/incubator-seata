@@ -76,7 +76,6 @@ import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGIST
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SHUTDOWN_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.THREAD_FACTORY_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.TRANSPORT_PREFIX;
-import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_METADATA_PREFIX;
 
 public class SeataCoreEnvironmentPostProcessor implements EnvironmentPostProcessor, Ordered {
 

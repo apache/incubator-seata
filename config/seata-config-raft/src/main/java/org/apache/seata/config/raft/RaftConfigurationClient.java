@@ -16,26 +16,6 @@
  */
 package org.apache.seata.config.raft;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -71,6 +51,26 @@ import org.apache.seata.config.dto.ConfigurationItem;
 import org.apache.seata.config.store.ConfigStoreManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.apache.seata.common.ConfigurationKeys.CONFIG_STORE_DATA_ID;
 import static org.apache.seata.common.ConfigurationKeys.CONFIG_STORE_NAMESPACE;
@@ -114,10 +114,11 @@ public class RaftConfigurationClient extends AbstractConfiguration {
     private static volatile Properties seataConfig = new Properties();
     private static final AtomicLong CONFIG_VERSION = new AtomicLong(0);
     private static final int MAP_INITIAL_CAPACITY = 8;
-    private static final ConcurrentMap<String, ConcurrentMap<ConfigurationChangeListener, ConfigStoreListener>> CONFIG_LISTENERS_MAP
-            = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
+    private static final ConcurrentMap<String, ConcurrentMap<ConfigurationChangeListener, ConfigStoreListener>>
+            CONFIG_LISTENERS_MAP = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
 
     private static ConfigStoreListener CONFIG_LISTENER;
+
     static {
         USERNAME = FILE_CONFIG.getConfig(getRaftUsernameKey());
         PASSWORD = FILE_CONFIG.getConfig(getRaftPasswordKey());
@@ -144,7 +145,8 @@ public class RaftConfigurationClient extends AbstractConfiguration {
 
     private static void initClientConfig() {
         try {
-            Map<String, Object> configMap = acquireClusterConfigData(RAFT_CLUSTER, RAFT_GROUP, CONFIG_NAMESPACE, CONFIG_DATA_ID);
+            Map<String, Object> configMap =
+                    acquireClusterConfigData(RAFT_CLUSTER, RAFT_GROUP, CONFIG_NAMESPACE, CONFIG_DATA_ID);
             if (configMap != null) {
                 seataConfig.putAll(configMap);
             }
@@ -153,15 +155,16 @@ public class RaftConfigurationClient extends AbstractConfiguration {
         } catch (RetryableException e) {
             LOGGER.error("init config properties error:{}", e.getMessage(), e);
         }
-
     }
+
     private static String queryHttpAddress(String clusterName, String group) {
         List<Node> nodeList = METADATA.getNodes(clusterName, group);
         List<String> addressList = null;
         Stream<InetSocketAddress> stream = null;
         if (CollectionUtils.isNotEmpty(nodeList)) {
-            addressList =
-                    nodeList.stream().map(node -> node.getControl().createAddress()).collect(Collectors.toList());
+            addressList = nodeList.stream()
+                    .map(node -> node.getControl().createAddress())
+                    .collect(Collectors.toList());
         } else {
             stream = INIT_ADDRESSES.get(clusterName).stream();
         }
@@ -171,19 +174,29 @@ public class RaftConfigurationClient extends AbstractConfiguration {
             Map<String, Node> map = new HashMap<>();
             if (CollectionUtils.isNotEmpty(nodeList)) {
                 for (Node node : nodeList) {
-                    map.put(new InetSocketAddress(node.getTransaction().getHost(), node.getTransaction().getPort()).getAddress().getHostAddress()
-                            + IP_PORT_SPLIT_CHAR + node.getTransaction().getPort(), node);
+                    map.put(
+                            new InetSocketAddress(
+                                                    node.getTransaction().getHost(),
+                                                    node.getTransaction().getPort())
+                                            .getAddress()
+                                            .getHostAddress()
+                                    + IP_PORT_SPLIT_CHAR
+                                    + node.getTransaction().getPort(),
+                            node);
                 }
             }
             addressList = stream.map(inetSocketAddress -> {
-                String host = inetSocketAddress.getAddress().getHostAddress();
-                Node node = map.get(host + IP_PORT_SPLIT_CHAR + inetSocketAddress.getPort());
-                return host + IP_PORT_SPLIT_CHAR
-                        + (node != null ? node.getControl().getPort() : inetSocketAddress.getPort());
-            }).collect(Collectors.toList());
+                        String host = inetSocketAddress.getAddress().getHostAddress();
+                        Node node = map.get(host + IP_PORT_SPLIT_CHAR + inetSocketAddress.getPort());
+                        return host
+                                + IP_PORT_SPLIT_CHAR
+                                + (node != null ? node.getControl().getPort() : inetSocketAddress.getPort());
+                    })
+                    .collect(Collectors.toList());
             return addressList.get(ThreadLocalRandom.current().nextInt(addressList.size()));
         }
     }
+
     private static void acquireClusterMetaData(String clusterName, String group) throws RetryableException {
         String tcAddress = queryHttpAddress(clusterName, group);
         Map<String, String> header = new HashMap<>();
@@ -198,8 +211,8 @@ public class RaftConfigurationClient extends AbstractConfiguration {
             Map<String, String> param = new HashMap<>();
             // param.put("group", group);
             String response = null;
-            try (CloseableHttpResponse httpResponse =
-                         HttpClientUtil.doGet(HTTP_PREFIX + tcAddress + "/metadata/v1/config/cluster", param, header, 1000)) {
+            try (CloseableHttpResponse httpResponse = HttpClientUtil.doGet(
+                    HTTP_PREFIX + tcAddress + "/metadata/v1/config/cluster", param, header, 1000)) {
                 if (httpResponse != null) {
                     if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                         response = EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
@@ -207,7 +220,8 @@ public class RaftConfigurationClient extends AbstractConfiguration {
                         if (StringUtils.isNotBlank(USERNAME) && StringUtils.isNotBlank(PASSWORD)) {
                             throw new RetryableException("Authentication failed!");
                         } else {
-                            throw new AuthenticationFailedException("Authentication failed! you should configure the correct username and password.");
+                            throw new AuthenticationFailedException(
+                                    "Authentication failed! you should configure the correct username and password.");
                         }
                     }
                 }
@@ -227,7 +241,8 @@ public class RaftConfigurationClient extends AbstractConfiguration {
     }
 
     @SuppressWarnings("unchecked")
-    private static Map<String, Object> acquireClusterConfigData(String clusterName, String group, String configNamespace, String configDataId) throws RetryableException {
+    private static Map<String, Object> acquireClusterConfigData(
+            String clusterName, String group, String configNamespace, String configDataId) throws RetryableException {
         String tcAddress = queryHttpAddress(clusterName, group);
         Map<String, String> header = new HashMap<>();
         header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
@@ -243,7 +258,7 @@ public class RaftConfigurationClient extends AbstractConfiguration {
             param.put("dataId", configDataId);
             String response = null;
             try (CloseableHttpResponse httpResponse =
-                         HttpClientUtil.doGet(HTTP_PREFIX + tcAddress + "/metadata/v1/config/getAll", param, header, 1000)) {
+                    HttpClientUtil.doGet(HTTP_PREFIX + tcAddress + "/metadata/v1/config/getAll", param, header, 1000)) {
                 if (httpResponse != null) {
                     if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                         response = EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
@@ -251,7 +266,8 @@ public class RaftConfigurationClient extends AbstractConfiguration {
                         if (StringUtils.isNotBlank(USERNAME) && StringUtils.isNotBlank(PASSWORD)) {
                             throw new RetryableException("Authentication failed!");
                         } else {
-                            throw new AuthenticationFailedException("Authentication failed! you should configure the correct username and password.");
+                            throw new AuthenticationFailedException(
+                                    "Authentication failed! you should configure the correct username and password.");
                         }
                     }
                 }
@@ -259,18 +275,22 @@ public class RaftConfigurationClient extends AbstractConfiguration {
                 ConfigDataResponse<ConfigurationInfoDto> configDataResponse;
                 if (StringUtils.isNotBlank(response)) {
                     try {
-                        configDataResponse = OBJECT_MAPPER.readValue(response, new TypeReference<ConfigDataResponse<ConfigurationInfoDto>>() {
-                        });
+                        configDataResponse = OBJECT_MAPPER.readValue(
+                                response, new TypeReference<ConfigDataResponse<ConfigurationInfoDto>>() {});
                         if (configDataResponse.getSuccess()) {
                             ConfigurationInfoDto configurationInfoDto = configDataResponse.getResult();
                             Map<String, ConfigurationItem> configItemMap = configurationInfoDto.getConfig();
                             Map<String, Object> configMap = configItemMap.entrySet().stream()
-                                    .collect(Collectors.toMap(
-                                            Map.Entry::getKey, entry -> entry.getValue().getValue()));
-                            Long version = configurationInfoDto.getVersion() == null ? -1 : configurationInfoDto.getVersion();
+                                    .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue()
+                                            .getValue()));
+                            Long version =
+                                    configurationInfoDto.getVersion() == null ? -1 : configurationInfoDto.getVersion();
                             Long currentVersion = CONFIG_VERSION.get();
                             if (version < currentVersion) {
-                                LOGGER.info("The configuration version: {} of the server is lower than the current configuration: {} , it may be expired configuration.", version, CONFIG_VERSION.get());
+                                LOGGER.info(
+                                        "The configuration version: {} of the server is lower than the current configuration: {} , it may be expired configuration.",
+                                        version,
+                                        CONFIG_VERSION.get());
                                 throw new RetryableException("Expired configuration!");
                             } else {
                                 CONFIG_VERSION.set(version);
@@ -294,10 +314,16 @@ public class RaftConfigurationClient extends AbstractConfiguration {
         if (REFRESH_METADATA_EXECUTOR == null) {
             synchronized (INIT_ADDRESSES) {
                 if (REFRESH_METADATA_EXECUTOR == null) {
-                    REFRESH_METADATA_EXECUTOR = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
-                            new LinkedBlockingQueue<>(), new NamedThreadFactory("refreshMetadata", 1, true));
+                    REFRESH_METADATA_EXECUTOR = new ThreadPoolExecutor(
+                            1,
+                            1,
+                            0L,
+                            TimeUnit.MILLISECONDS,
+                            new LinkedBlockingQueue<>(),
+                            new NamedThreadFactory("refreshMetadata", 1, true));
                     REFRESH_METADATA_EXECUTOR.execute(() -> {
-                        long metadataMaxAgeMs = FILE_CONFIG.getLong(ConfigurationKeys.CLIENT_METADATA_MAX_AGE_MS, 30000L);
+                        long metadataMaxAgeMs =
+                                FILE_CONFIG.getLong(ConfigurationKeys.CLIENT_METADATA_MAX_AGE_MS, 30000L);
                         long currentTime = System.currentTimeMillis();
                         while (!CLOSED.get()) {
                             try {
@@ -317,7 +343,10 @@ public class RaftConfigurationClient extends AbstractConfiguration {
                                             if (e instanceof RetryableException) {
                                                 throw e;
                                             } else {
-                                                LOGGER.error("failed to get the leader address,error: {}", e.getMessage(), e);
+                                                LOGGER.error(
+                                                        "failed to get the leader address,error: {}",
+                                                        e.getMessage(),
+                                                        e);
                                             }
                                         }
                                     }
@@ -349,10 +378,16 @@ public class RaftConfigurationClient extends AbstractConfiguration {
         if (REFRESH_CONFIG_EXECUTOR == null) {
             synchronized (RaftConfigurationClient.class) {
                 if (REFRESH_CONFIG_EXECUTOR == null) {
-                    REFRESH_CONFIG_EXECUTOR = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
-                            new LinkedBlockingQueue<>(), new NamedThreadFactory("refreshConfig", 1, true));
+                    REFRESH_CONFIG_EXECUTOR = new ThreadPoolExecutor(
+                            1,
+                            1,
+                            0L,
+                            TimeUnit.MILLISECONDS,
+                            new LinkedBlockingQueue<>(),
+                            new NamedThreadFactory("refreshConfig", 1, true));
                     REFRESH_CONFIG_EXECUTOR.execute(() -> {
-                        long metadataMaxAgeMs = FILE_CONFIG.getLong(ConfigurationKeys.CLIENT_METADATA_MAX_AGE_MS, 30000L);
+                        long metadataMaxAgeMs =
+                                FILE_CONFIG.getLong(ConfigurationKeys.CLIENT_METADATA_MAX_AGE_MS, 30000L);
                         long currentTime = System.currentTimeMillis();
                         while (!CONFIG_CLOSED.get()) {
                             try {
@@ -364,7 +399,8 @@ public class RaftConfigurationClient extends AbstractConfiguration {
                                 // Cluster config changes or reaches timeout refresh time
                                 if (fetch) {
                                     try {
-                                        Map<String, Object> configMap = acquireClusterConfigData(RAFT_CLUSTER, RAFT_GROUP, CONFIG_NAMESPACE, CONFIG_DATA_ID);
+                                        Map<String, Object> configMap = acquireClusterConfigData(
+                                                RAFT_CLUSTER, RAFT_GROUP, CONFIG_NAMESPACE, CONFIG_DATA_ID);
                                         if (CollectionUtils.isNotEmpty(configMap)) {
                                             notifyConfigMayChange(configMap);
                                         }
@@ -400,6 +436,7 @@ public class RaftConfigurationClient extends AbstractConfiguration {
             }
         }
     }
+
     private static boolean watch() throws RetryableException {
         Map<String, String> header = new HashMap<>();
         header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
@@ -416,14 +453,15 @@ public class RaftConfigurationClient extends AbstractConfiguration {
                 header.put(AUTHORIZATION_HEADER, jwtToken);
             }
             try (CloseableHttpResponse response =
-                         HttpClientUtil.doPost(HTTP_PREFIX + tcAddress + "/metadata/v1/watch", param, header, 30000)) {
+                    HttpClientUtil.doPost(HTTP_PREFIX + tcAddress + "/metadata/v1/watch", param, header, 30000)) {
                 if (response != null) {
                     StatusLine statusLine = response.getStatusLine();
                     if (statusLine != null && statusLine.getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
                         if (StringUtils.isNotBlank(USERNAME) && StringUtils.isNotBlank(PASSWORD)) {
                             throw new RetryableException("Authentication failed!");
                         } else {
-                            throw new AuthenticationFailedException("Authentication failed! you should configure the correct username and password.");
+                            throw new AuthenticationFailedException(
+                                    "Authentication failed! you should configure the correct username and password.");
                         }
                     }
                     return statusLine != null && statusLine.getStatusCode() == HttpStatus.SC_OK;
@@ -452,14 +490,15 @@ public class RaftConfigurationClient extends AbstractConfiguration {
             header.put(AUTHORIZATION_HEADER, jwtToken);
         }
         try (CloseableHttpResponse response =
-                     HttpClientUtil.doPost(HTTP_PREFIX + tcAddress + "/metadata/v1/config/watch", param, header, 30000)) {
+                HttpClientUtil.doPost(HTTP_PREFIX + tcAddress + "/metadata/v1/config/watch", param, header, 30000)) {
             if (response != null) {
                 StatusLine statusLine = response.getStatusLine();
                 if (statusLine != null && statusLine.getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
                     if (StringUtils.isNotBlank(USERNAME) && StringUtils.isNotBlank(PASSWORD)) {
                         throw new RetryableException("Authentication failed!");
                     } else {
-                        throw new AuthenticationFailedException("Authentication failed! you should configure the correct username and password.");
+                        throw new AuthenticationFailedException(
+                                "Authentication failed! you should configure the correct username and password.");
                     }
                 }
                 return statusLine != null && statusLine.getStatusCode() == HttpStatus.SC_OK;
@@ -470,6 +509,7 @@ public class RaftConfigurationClient extends AbstractConfiguration {
         }
         return false;
     }
+
     private static void initClusterMetaData() {
         String clusterName = RAFT_CLUSTER;
         String group = RAFT_GROUP;
@@ -485,7 +525,8 @@ public class RaftConfigurationClient extends AbstractConfiguration {
                     list.add(new InetSocketAddress(host, port));
                 }
                 if (CollectionUtils.isEmpty(list)) {
-                    throw new SeataRuntimeException(ErrorCode.ERR_CONFIG,
+                    throw new SeataRuntimeException(
+                            ErrorCode.ERR_CONFIG,
                             "There are no valid raft addr! you should configure the correct [config.raft.server-addr] in the config file");
                 }
                 INIT_ADDRESSES.put(clusterName, list);
@@ -506,8 +547,6 @@ public class RaftConfigurationClient extends AbstractConfiguration {
         }
     }
 
-
-
     @Override
     public String getTypeName() {
         return CONFIG_TYPE;
@@ -523,9 +562,12 @@ public class RaftConfigurationClient extends AbstractConfiguration {
         String value = seataConfig.getProperty(dataId);
         if (value == null) {
             try {
-                Map<String, Object> configMap = acquireClusterConfigData(RAFT_CLUSTER, RAFT_GROUP, CONFIG_NAMESPACE, CONFIG_DATA_ID);
+                Map<String, Object> configMap =
+                        acquireClusterConfigData(RAFT_CLUSTER, RAFT_GROUP, CONFIG_NAMESPACE, CONFIG_DATA_ID);
                 if (CollectionUtils.isNotEmpty(configMap)) {
-                    value = configMap.get(dataId) == null ? null : configMap.get(dataId).toString();
+                    value = configMap.get(dataId) == null
+                            ? null
+                            : configMap.get(dataId).toString();
                 }
             } catch (RetryableException e) {
                 LOGGER.error(e.getMessage());
@@ -550,7 +592,8 @@ public class RaftConfigurationClient extends AbstractConfiguration {
             return;
         }
         ConfigStoreListener storeListener = new ConfigStoreListener(dataId, listener);
-        CONFIG_LISTENERS_MAP.computeIfAbsent(dataId, key -> new ConcurrentHashMap<>())
+        CONFIG_LISTENERS_MAP
+                .computeIfAbsent(dataId, key -> new ConcurrentHashMap<>())
                 .put(listener, storeListener);
     }
 
@@ -563,7 +606,8 @@ public class RaftConfigurationClient extends AbstractConfiguration {
         if (CollectionUtils.isNotEmpty(configChangeListeners)) {
             for (ConfigurationChangeListener entry : configChangeListeners) {
                 if (listener.equals(entry)) {
-                    Map<ConfigurationChangeListener, ConfigStoreListener> configListeners = CONFIG_LISTENERS_MAP.get(dataId);
+                    Map<ConfigurationChangeListener, ConfigStoreListener> configListeners =
+                            CONFIG_LISTENERS_MAP.get(dataId);
                     if (configListeners != null) {
                         configListeners.remove(entry);
                     }
@@ -575,7 +619,8 @@ public class RaftConfigurationClient extends AbstractConfiguration {
 
     @Override
     public Set<ConfigurationChangeListener> getConfigListeners(String dataId) {
-        ConcurrentMap<ConfigurationChangeListener, ConfigStoreListener> configListeners = CONFIG_LISTENERS_MAP.get(dataId);
+        ConcurrentMap<ConfigurationChangeListener, ConfigStoreListener> configListeners =
+                CONFIG_LISTENERS_MAP.get(dataId);
         if (CollectionUtils.isNotEmpty(configListeners)) {
             return configListeners.keySet();
         } else {
@@ -588,19 +633,36 @@ public class RaftConfigurationClient extends AbstractConfiguration {
         CONFIG_LISTENER.onChangeEvent(new ConfigurationChangeEvent(CONFIG_NAMESPACE, configStr));
     }
 
-
     private static String getRaftUsernameKey() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, USERNAME_KEY);
+        return String.join(
+                ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR,
+                ConfigurationKeys.FILE_ROOT_CONFIG,
+                CONFIG_TYPE,
+                USERNAME_KEY);
     }
+
     private static String getRaftPasswordKey() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, PASSWORD_KEY);
+        return String.join(
+                ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR,
+                ConfigurationKeys.FILE_ROOT_CONFIG,
+                CONFIG_TYPE,
+                PASSWORD_KEY);
     }
+
     private static String getRaftServerAddrKey() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, SERVER_ADDR_KEY);
+        return String.join(
+                ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR,
+                ConfigurationKeys.FILE_ROOT_CONFIG,
+                CONFIG_TYPE,
+                SERVER_ADDR_KEY);
     }
 
     private static String getTokenExpireTimeInMillisecondsKey() {
-        return String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, CONFIG_TYPE, TOKEN_VALID_TIME_MS_KEY);
+        return String.join(
+                ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR,
+                ConfigurationKeys.FILE_ROOT_CONFIG,
+                CONFIG_TYPE,
+                TOKEN_VALID_TIME_MS_KEY);
     }
 
     private static boolean isTokenExpired() {
@@ -612,7 +674,8 @@ public class RaftConfigurationClient extends AbstractConfiguration {
     }
 
     private static synchronized void refreshToken(String tcAddress) throws RetryableException {
-        // double-check if the token is expired inside the synchronized method to avoid repeated token refreshes in multiple threads
+        // double-check if the token is expired inside the synchronized method to avoid repeated token refreshes in
+        // multiple threads
         if (!isTokenExpired()) {
             return;
         }
@@ -630,20 +693,22 @@ public class RaftConfigurationClient extends AbstractConfiguration {
         String response = null;
         tokenTimeStamp = System.currentTimeMillis();
         try (CloseableHttpResponse httpResponse =
-                     HttpClientUtil.doPost(HTTP_PREFIX + tcAddress + "/api/v1/auth/login", param, header, 1000)) {
+                HttpClientUtil.doPost(HTTP_PREFIX + tcAddress + "/api/v1/auth/login", param, header, 1000)) {
             if (httpResponse != null) {
                 if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                     response = EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
                     JsonNode jsonNode = OBJECT_MAPPER.readTree(response);
                     String codeStatus = jsonNode.get("code").asText();
                     if (!StringUtils.equals(codeStatus, "200")) {
-                        //authorized failed,throw exception to kill process
-                        throw new AuthenticationFailedException("Authentication failed! you should configure the correct username and password.");
+                        // authorized failed,throw exception to kill process
+                        throw new AuthenticationFailedException(
+                                "Authentication failed! you should configure the correct username and password.");
                     }
                     jwtToken = jsonNode.get("data").asText();
                 } else {
-                    //authorized failed,throw exception to kill process
-                    throw new AuthenticationFailedException("Authentication failed! you should configure the correct username and password.");
+                    // authorized failed,throw exception to kill process
+                    throw new AuthenticationFailedException(
+                            "Authentication failed! you should configure the correct username and password.");
                 }
             }
         } catch (IOException e) {
@@ -659,6 +724,7 @@ public class RaftConfigurationClient extends AbstractConfiguration {
             this.dataId = dataId;
             this.listener = listener;
         }
+
         @Override
         public void onChangeEvent(ConfigurationChangeEvent event) {
             if (CONFIG_NAMESPACE.equals(event.getDataId())) {
@@ -667,8 +733,9 @@ public class RaftConfigurationClient extends AbstractConfiguration {
                 if (CollectionUtils.isNotEmpty(newConfigMap)) {
                     seataConfigNew.putAll(newConfigMap);
                 }
-                //Get all the monitored dataids and judge whether it has been modified
-                for (Map.Entry<String, ConcurrentMap<ConfigurationChangeListener, ConfigStoreListener>> entry : CONFIG_LISTENERS_MAP.entrySet()) {
+                // Get all the monitored dataids and judge whether it has been modified
+                for (Map.Entry<String, ConcurrentMap<ConfigurationChangeListener, ConfigStoreListener>> entry :
+                        CONFIG_LISTENERS_MAP.entrySet()) {
                     String listenedDataId = entry.getKey();
                     String propertyOld = seataConfig.getProperty(listenedDataId, "");
                     String propertyNew = seataConfigNew.getProperty(listenedDataId, "");
@@ -680,7 +747,8 @@ public class RaftConfigurationClient extends AbstractConfiguration {
                                 .setChangeType(ConfigurationChangeType.MODIFY);
 
                         // notify ConfigurationCache
-                        ConcurrentMap<ConfigurationChangeListener, ConfigStoreListener> configListeners = entry.getValue();
+                        ConcurrentMap<ConfigurationChangeListener, ConfigStoreListener> configListeners =
+                                entry.getValue();
                         for (ConfigurationChangeListener configListener : configListeners.keySet()) {
                             configListener.onProcessEvent(newEvent);
                         }
@@ -690,5 +758,4 @@ public class RaftConfigurationClient extends AbstractConfiguration {
             }
         }
     }
-
 }

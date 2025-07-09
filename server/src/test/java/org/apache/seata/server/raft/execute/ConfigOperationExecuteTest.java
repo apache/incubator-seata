@@ -16,8 +16,6 @@
  */
 package org.apache.seata.server.raft.execute;
 
-import javax.annotation.Resource;
-
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.config.ConfigurationCache;
@@ -29,6 +27,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
+
+import javax.annotation.Resource;
 
 @SpringBootTest
 class ConfigOperationExecuteTest {
@@ -55,7 +55,7 @@ class ConfigOperationExecuteTest {
     public static void destroy() {
         RaftConfigServerManager.destroy();
         ConfigurationCache.clear();
-        System.setProperty(ConfigurationKeys.SERVER_RAFT_SERVER_ADDR,"");
+        System.setProperty(ConfigurationKeys.SERVER_RAFT_SERVER_ADDR, "");
         Assertions.assertNull(RaftConfigServerManager.getRaftServer());
         System.clearProperty("config.type");
         System.clearProperty("registry.preferredNetworks");
@@ -69,12 +69,17 @@ class ConfigOperationExecuteTest {
         String value1 = "bbb";
         String key2 = "ccc";
         String value2 = "ddd";
-        Assertions.assertTrue(clusterController.getConfig(NAMESPACE,  DATA_ID, key1).isSuccess());
-        Assertions.assertTrue(clusterController.getAllConfig(NAMESPACE,  DATA_ID).isSuccess());
-        Assertions.assertTrue(clusterController.putConfig(NAMESPACE, DATA_ID, key1, value1).isSuccess());
-        Assertions.assertTrue(clusterController.putConfig(NAMESPACE, DATA_ID, key2, value2).isSuccess());
-        Assertions.assertTrue(clusterController.deleteConfig(NAMESPACE, DATA_ID, key1).isSuccess());
-        Assertions.assertTrue(clusterController.deleteAllConfig(NAMESPACE, DATA_ID).isSuccess());
+        Assertions.assertTrue(
+                clusterController.getConfig(NAMESPACE, DATA_ID, key1).isSuccess());
+        Assertions.assertTrue(clusterController.getAllConfig(NAMESPACE, DATA_ID).isSuccess());
+        Assertions.assertTrue(
+                clusterController.putConfig(NAMESPACE, DATA_ID, key1, value1).isSuccess());
+        Assertions.assertTrue(
+                clusterController.putConfig(NAMESPACE, DATA_ID, key2, value2).isSuccess());
+        Assertions.assertTrue(
+                clusterController.deleteConfig(NAMESPACE, DATA_ID, key1).isSuccess());
+        Assertions.assertTrue(
+                clusterController.deleteAllConfig(NAMESPACE, DATA_ID).isSuccess());
         Assertions.assertTrue(clusterController.getNamespaces().isSuccess());
         Assertions.assertTrue(clusterController.getDataIds(NAMESPACE).isSuccess());
     }

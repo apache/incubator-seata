@@ -16,13 +16,12 @@
  */
 package org.apache.seata.server.config;
 
-
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.seata.config.dto.ConfigurationItem;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.util.HashMap;
+import java.util.Map;
 
 class ConfigurationProcessorTest {
 
@@ -50,6 +49,5 @@ class ConfigurationProcessorTest {
         Assertions.assertEquals(value2, item2.getValue());
         Assertions.assertNull(item2.getDefaultValue());
         Assertions.assertNotNull(item2.getDescription());
-
     }
 }

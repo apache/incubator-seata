@@ -21,7 +21,6 @@ import org.springframework.stereotype.Component;
 
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_STORE_PREFIX;
 
-
 @Component
 @ConfigurationProperties(prefix = CONFIG_STORE_PREFIX)
 public class ConfigStoreProperties {
@@ -29,6 +28,7 @@ public class ConfigStoreProperties {
      * rocksdb, (will support leveldb and caffeine in the future)
      */
     private String type = "rocksdb";
+
     private String dir = "configStore";
     private boolean destroyOnShutdown = false;
     private String namespace = "default";

@@ -16,12 +16,6 @@
  */
 package org.apache.seata.config.raft;
 
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
 import org.apache.seata.common.exception.NotSupportYetException;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
@@ -36,11 +30,16 @@ import org.apache.seata.config.store.ConfigStoreManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 import static org.apache.seata.common.ConfigurationKeys.CONFIG_STORE_DATA_ID;
 import static org.apache.seata.common.ConfigurationKeys.CONFIG_STORE_NAMESPACE;
 import static org.apache.seata.common.Constants.DEFAULT_STORE_DATA_ID;
 import static org.apache.seata.common.Constants.DEFAULT_STORE_NAMESPACE;
-
 
 public class RaftConfigurationServer extends AbstractConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(RaftConfigurationServer.class);
@@ -52,8 +51,8 @@ public class RaftConfigurationServer extends AbstractConfiguration {
     private static final String CONFIG_TYPE = "raft";
     private static volatile Properties seataConfig = new Properties();
     private static final int MAP_INITIAL_CAPACITY = 8;
-    private static final ConcurrentMap<String, ConcurrentMap<ConfigurationChangeListener, ConfigStoreListener>> CONFIG_LISTENERS_MAP
-            = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
+    private static final ConcurrentMap<String, ConcurrentMap<ConfigurationChangeListener, ConfigStoreListener>>
+            CONFIG_LISTENERS_MAP = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
 
     private static void initServerConfig() {
         configStoreManager = ConfigStoreManagerFactory.getInstance();
@@ -66,7 +65,6 @@ public class RaftConfigurationServer extends AbstractConfiguration {
         ConfigStoreListener storeListener = new ConfigStoreListener(CURRENT_NAMESPACE, CURRENT_DATA_ID, null);
         configStoreManager.addConfigListener(CURRENT_NAMESPACE, CURRENT_DATA_ID, storeListener);
     }
-
 
     public static RaftConfigurationServer getInstance() {
         if (instance == null) {
@@ -118,7 +116,8 @@ public class RaftConfigurationServer extends AbstractConfiguration {
             return;
         }
         ConfigStoreListener storeListener = new ConfigStoreListener(CURRENT_NAMESPACE, dataId, listener);
-        CONFIG_LISTENERS_MAP.computeIfAbsent(dataId, key -> new ConcurrentHashMap<>())
+        CONFIG_LISTENERS_MAP
+                .computeIfAbsent(dataId, key -> new ConcurrentHashMap<>())
                 .put(listener, storeListener);
         configStoreManager.addConfigListener(CURRENT_NAMESPACE, dataId, storeListener);
     }
@@ -133,7 +132,8 @@ public class RaftConfigurationServer extends AbstractConfiguration {
             for (ConfigurationChangeListener entry : configChangeListeners) {
                 if (listener.equals(entry)) {
                     ConfigStoreListener storeListener = null;
-                    Map<ConfigurationChangeListener, ConfigStoreListener> configListeners = CONFIG_LISTENERS_MAP.get(dataId);
+                    Map<ConfigurationChangeListener, ConfigStoreListener> configListeners =
+                            CONFIG_LISTENERS_MAP.get(dataId);
                     if (configListeners != null) {
                         storeListener = configListeners.get(listener);
                         configListeners.remove(entry);
@@ -149,14 +149,14 @@ public class RaftConfigurationServer extends AbstractConfiguration {
 
     @Override
     public Set<ConfigurationChangeListener> getConfigListeners(String dataId) {
-        ConcurrentMap<ConfigurationChangeListener, ConfigStoreListener> configListeners = CONFIG_LISTENERS_MAP.get(dataId);
+        ConcurrentMap<ConfigurationChangeListener, ConfigStoreListener> configListeners =
+                CONFIG_LISTENERS_MAP.get(dataId);
         if (CollectionUtils.isNotEmpty(configListeners)) {
             return configListeners.keySet();
         } else {
             return null;
         }
     }
-
 
     /**
      * the type config change listener for raft config store
@@ -178,8 +178,9 @@ public class RaftConfigurationServer extends AbstractConfiguration {
                 Properties seataConfigNew = new Properties();
                 seataConfigNew.putAll(configStoreManager.getAll(CURRENT_NAMESPACE, CURRENT_DATA_ID));
 
-                //Get all the monitored dataids and judge whether it has been modified
-                for (Map.Entry<String, ConcurrentMap<ConfigurationChangeListener, ConfigStoreListener>> entry : CONFIG_LISTENERS_MAP.entrySet()) {
+                // Get all the monitored dataids and judge whether it has been modified
+                for (Map.Entry<String, ConcurrentMap<ConfigurationChangeListener, ConfigStoreListener>> entry :
+                        CONFIG_LISTENERS_MAP.entrySet()) {
                     String listenedDataId = entry.getKey();
                     String propertyOld = seataConfig.getProperty(listenedDataId, "");
                     String propertyNew = seataConfigNew.getProperty(listenedDataId, "");
@@ -190,7 +191,8 @@ public class RaftConfigurationServer extends AbstractConfiguration {
                                 .setNamespace(CURRENT_NAMESPACE)
                                 .setChangeType(ConfigurationChangeType.MODIFY);
 
-                        ConcurrentMap<ConfigurationChangeListener, ConfigStoreListener> configListeners = entry.getValue();
+                        ConcurrentMap<ConfigurationChangeListener, ConfigStoreListener> configListeners =
+                                entry.getValue();
                         for (ConfigurationChangeListener configListener : configListeners.keySet()) {
                             configListener.onProcessEvent(newEvent);
                         }

@@ -16,11 +16,6 @@
  */
 package org.apache.seata.server.cluster.raft.util;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-
 import com.alipay.sofa.jraft.Closure;
 import com.alipay.sofa.jraft.entity.Task;
 import org.apache.seata.core.exception.GlobalTransactionException;
@@ -29,6 +24,11 @@ import org.apache.seata.core.exception.TransactionExceptionCode;
 import org.apache.seata.server.cluster.raft.RaftConfigServerManager;
 import org.apache.seata.server.cluster.raft.sync.RaftSyncMessageSerializer;
 import org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMessage;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 /**
  */
@@ -45,8 +45,7 @@ public class RaftConfigTaskUtil {
                 throw new TransactionException(e);
             }
         }
-        task.setDone(done == null ? status -> {
-        } : done);
+        task.setDone(done == null ? status -> {} : done);
         RaftConfigServerManager.getRaftServer().getNode().apply(task);
         if (completableFuture != null) {
             return futureGet(completableFuture);
@@ -63,16 +62,15 @@ public class RaftConfigTaskUtil {
         try {
             return completableFuture.get();
         } catch (InterruptedException e) {
-            throw new GlobalTransactionException(TransactionExceptionCode.FailedWriteSession,
-                    "Fail to store global session: " + e.getMessage());
+            throw new GlobalTransactionException(
+                    TransactionExceptionCode.FailedWriteSession, "Fail to store global session: " + e.getMessage());
         } catch (ExecutionException e) {
             if (e.getCause() instanceof TransactionException) {
-                throw (TransactionException)e.getCause();
+                throw (TransactionException) e.getCause();
             } else {
-                throw new GlobalTransactionException(TransactionExceptionCode.FailedWriteSession,
-                        "Fail to store global session: " + e.getMessage());
+                throw new GlobalTransactionException(
+                        TransactionExceptionCode.FailedWriteSession, "Fail to store global session: " + e.getMessage());
             }
         }
     }
-
 }

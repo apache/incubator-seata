@@ -20,7 +20,6 @@ import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.config.store.ConfigStoreManager;
 import org.apache.seata.config.store.ConfigStoreManagerProvider;
 
-
 @LoadLevel(name = "Rocksdb", order = 1)
 public class RocksDBConfigStoreManagerProvider implements ConfigStoreManagerProvider {
     @Override

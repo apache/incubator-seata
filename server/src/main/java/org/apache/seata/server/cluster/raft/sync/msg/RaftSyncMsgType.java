@@ -57,7 +57,7 @@ public enum RaftSyncMsgType {
      */
     REFRESH_CLUSTER_METADATA,
 
-     /**
+    /**
      * config operation
      */
     CONFIG_OPERATION,

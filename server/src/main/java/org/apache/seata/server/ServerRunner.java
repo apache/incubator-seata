@@ -59,7 +59,6 @@ public class ServerRunner implements CommandLineRunner, DisposableBean, Applicat
     @Resource
     Server seataServer;
 
-
     @Override
     public void run(String... args) {
         try {

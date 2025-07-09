@@ -16,11 +16,6 @@
  */
 package org.apache.seata.server.config;
 
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.seata.common.Constants;
 import org.apache.seata.config.dto.ConfigurationItem;
 import org.apache.seata.config.dto.ConfigurationItemMeta;
@@ -30,6 +25,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.yaml.snakeyaml.Yaml;
 
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The configuration items processor

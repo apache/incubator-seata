@@ -25,8 +25,7 @@ public class ConfigOperationResponse implements Serializable {
     private boolean success;
     private String errMsg;
 
-    public ConfigOperationResponse() {
-    }
+    public ConfigOperationResponse() {}
 
     public Object getResult() {
         return result;

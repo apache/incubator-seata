@@ -19,10 +19,10 @@ package org.apache.seata.server;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import java.io.IOException;
+
 import static org.apache.seata.common.Constants.APPLICATION_TYPE_KEY;
 import static org.apache.seata.common.Constants.APPLICATION_TYPE_SERVER;
-
-import java.io.IOException;
 
 /**
  */

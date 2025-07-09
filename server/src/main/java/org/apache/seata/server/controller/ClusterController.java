@@ -16,24 +16,6 @@
  */
 package org.apache.seata.server.controller;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-import javax.servlet.AsyncContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.alipay.sofa.jraft.RouteTable;
 import com.alipay.sofa.jraft.conf.Configuration;
 import com.alipay.sofa.jraft.entity.PeerId;
@@ -75,6 +57,23 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+import javax.servlet.AsyncContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+
 import static org.apache.seata.common.ConfigurationKeys.SEATA_FILE_PREFIX_ROOT_CONFIG;
 import static org.apache.seata.common.ConfigurationKeys.STORE_MODE;
 import static org.apache.seata.common.Constants.RAFT_CONFIG_GROUP;
@@ -89,13 +88,13 @@ public class ClusterController {
     @Resource
     private ClusterWatcherManager clusterWatcherManager;
 
-
     @Resource
     private ClusterConfigWatcherManager clusterConfigWatcherManager;
 
     private ServerProperties serverProperties;
 
     private ConfigStoreManager configStoreManager;
+
     @Resource
     ApplicationContext applicationContext;
 
@@ -114,7 +113,8 @@ public class ClusterController {
         this.serverProperties = applicationContext.getBean(ServerProperties.class);
         // only initialize configStoreManager in raft configuration.
         String configType = ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig(ConfigurationKeys.FILE_ROOT_CONFIG
-                + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + ConfigurationKeys.FILE_ROOT_TYPE);
+                + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
+                + ConfigurationKeys.FILE_ROOT_TYPE);
         if (ConfigType.Raft.name().equalsIgnoreCase(configType)) {
             configStoreManager = ConfigStoreManagerFactory.getInstance();
         }
@@ -179,16 +179,22 @@ public class ClusterController {
         RaftConfigServer raftServer = RaftConfigServerManager.getRaftServer();
         if (raftServer != null) {
             String configType = ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig(ConfigurationKeys.FILE_ROOT_CONFIG
-                    + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + ConfigurationKeys.FILE_ROOT_TYPE);
+                    + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
+                    + ConfigurationKeys.FILE_ROOT_TYPE);
             metadataResponse.setConfigMode(configType);
             RouteTable routeTable = RouteTable.getInstance();
             try {
-                routeTable.refreshLeader(RaftConfigServerManager.getCliClientServiceInstance(), RAFT_CONFIG_GROUP , 1000);
+                routeTable.refreshLeader(
+                        RaftConfigServerManager.getCliClientServiceInstance(), RAFT_CONFIG_GROUP, 1000);
                 PeerId leader = routeTable.selectLeader(RAFT_CONFIG_GROUP);
                 if (leader != null) {
                     Set<Node> nodes = new HashSet<>();
-                    RaftClusterMetadata raftClusterMetadata = raftServer.getRaftStateMachine().getRaftLeaderMetadata();
-                    Node leaderNode = raftServer.getRaftStateMachine().getRaftLeaderMetadata().getLeader();
+                    RaftClusterMetadata raftClusterMetadata =
+                            raftServer.getRaftStateMachine().getRaftLeaderMetadata();
+                    Node leaderNode = raftServer
+                            .getRaftStateMachine()
+                            .getRaftLeaderMetadata()
+                            .getLeader();
                     leaderNode.setGroup(RAFT_CONFIG_GROUP);
                     nodes.add(leaderNode);
                     nodes.addAll(raftClusterMetadata.getLearner());
@@ -268,7 +274,10 @@ public class ClusterController {
     }
 
     @PostMapping("/config/upload")
-    public ConfigOperationResponse uploadConfig(@RequestParam("namespace") String namespace, @RequestParam("dataId") String dataId, @RequestParam("file") MultipartFile file) {
+    public ConfigOperationResponse uploadConfig(
+            @RequestParam("namespace") String namespace,
+            @RequestParam("dataId") String dataId,
+            @RequestParam("file") MultipartFile file) {
         try {
             checkParam(namespace, "namespace");
             checkParam(dataId, "dataId");
@@ -285,7 +294,8 @@ public class ClusterController {
         }
         StringBuilder sb = new StringBuilder();
         Map<String, Object> configMap = new HashMap<>();
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
+        try (BufferedReader reader =
+                new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 sb.append(line).append('\n');
@@ -337,11 +347,12 @@ public class ClusterController {
             return ConfigOperationResponse.fail("failed to get leader");
         }
         InvokeContext invokeContext = new InvokeContext();
-        invokeContext.put(com.alipay.remoting.InvokeContext.BOLT_CUSTOM_SERIALIZER,
-                SerializerType.JACKSON.getCode());
-        CliClientServiceImpl cliClientService = (CliClientServiceImpl)RaftConfigServerManager.getCliClientServiceInstance();
+        invokeContext.put(com.alipay.remoting.InvokeContext.BOLT_CUSTOM_SERIALIZER, SerializerType.JACKSON.getCode());
+        CliClientServiceImpl cliClientService =
+                (CliClientServiceImpl) RaftConfigServerManager.getCliClientServiceInstance();
         try {
-            return (ConfigOperationResponse)cliClientService.getRpcClient().invokeSync(leader.getEndpoint(), request, invokeContext, 1000);
+            return (ConfigOperationResponse)
+                    cliClientService.getRpcClient().invokeSync(leader.getEndpoint(), request, invokeContext, 1000);
         } catch (Exception e) {
             LOGGER.error("Failed to execute request: {}", request.toString());
             return ConfigOperationResponse.fail(e.getMessage());
@@ -367,8 +378,12 @@ public class ClusterController {
     }
 
     @PostMapping("/config/watch")
-    public void configWatch(HttpServletRequest request, @RequestParam String namespace, @RequestParam String dataId, @RequestParam(required = false) Long version,
-                      @RequestParam(defaultValue = "28000") int timeout) {
+    public void configWatch(
+            HttpServletRequest request,
+            @RequestParam String namespace,
+            @RequestParam String dataId,
+            @RequestParam(required = false) Long version,
+            @RequestParam(defaultValue = "28000") int timeout) {
         Long currentVersion = configStoreManager.getConfigVersion(namespace, dataId);
         // if the config version of client is lower than the server, return directly
         if (version == null || (currentVersion != null && version < currentVersion)) {
@@ -383,5 +398,4 @@ public class ClusterController {
         ConfigWatcher<AsyncContext> configWatcher = new ConfigWatcher<>(namespace, dataId, context, timeout);
         clusterConfigWatcherManager.registryWatcher(configWatcher);
     }
-
 }

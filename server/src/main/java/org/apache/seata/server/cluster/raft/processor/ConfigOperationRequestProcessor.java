@@ -27,9 +27,9 @@ import org.apache.seata.server.cluster.raft.sync.msg.closure.ConfigClosure;
 import org.apache.seata.server.cluster.raft.sync.msg.dto.ConfigOperationDTO;
 import org.apache.seata.server.cluster.raft.util.RaftConfigTaskUtil;
 
-
 public class ConfigOperationRequestProcessor implements RpcProcessor<ConfigOperationRequest> {
     private static final String NOT_LEADER = "not leader";
+
     @Override
     public void handleRequest(RpcContext rpcCtx, ConfigOperationRequest request) {
         if (RaftConfigServerManager.isLeader()) {

@@ -16,12 +16,6 @@
  */
 package org.apache.seata.server.cluster.raft.snapshot.config;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.Map;
-import java.util.Objects;
-
 import com.alipay.sofa.jraft.Status;
 import com.alipay.sofa.jraft.error.RaftError;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
@@ -36,6 +30,12 @@ import org.apache.seata.server.cluster.raft.snapshot.RaftSnapshot;
 import org.apache.seata.server.cluster.raft.snapshot.StoreSnapshotFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.Map;
+import java.util.Objects;
 
 import static org.apache.seata.common.ConfigurationKeys.CONFIG_STORE_TYPE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_DB_TYPE;
@@ -56,7 +56,9 @@ public class ConfigSnapshotFile implements Serializable, StoreSnapshotFile {
     public ConfigSnapshotFile(String group) {
         this.group = group;
         String dbType = FILE_CONFIG.getConfig(CONFIG_STORE_TYPE, DEFAULT_DB_TYPE);
-        configStoreManager = EnhancedServiceLoader.load(ConfigStoreManagerProvider.class, Objects.requireNonNull(dbType), false).provide();
+        configStoreManager = EnhancedServiceLoader.load(
+                        ConfigStoreManagerProvider.class, Objects.requireNonNull(dbType), false)
+                .provide();
     }
 
     @Override
@@ -66,7 +68,10 @@ public class ConfigSnapshotFile implements Serializable, StoreSnapshotFile {
         raftSnapshot.setBody(configMap);
         raftSnapshot.setType(RaftSnapshot.SnapshotType.config);
         LOGGER.info("groupId: {}, config size: {}", group, configMap.size());
-        String path = new StringBuilder(writer.getPath()).append(File.separator).append(fileName).toString();
+        String path = new StringBuilder(writer.getPath())
+                .append(File.separator)
+                .append(fileName)
+                .toString();
         try {
             if (save(raftSnapshot, path)) {
                 if (writer.addFile(fileName)) {
@@ -87,10 +92,13 @@ public class ConfigSnapshotFile implements Serializable, StoreSnapshotFile {
             LOGGER.error("Fail to find data file in {}", reader.getPath());
             return false;
         }
-        String path = new StringBuilder(reader.getPath()).append(File.separator).append(fileName).toString();
+        String path = new StringBuilder(reader.getPath())
+                .append(File.separator)
+                .append(fileName)
+                .toString();
         try {
             LOGGER.info("on snapshot load start index: {}", reader.load().getLastIncludedIndex());
-            Map<String, Map<String, Object>> configMap = (Map<String, Map<String, Object>>)load(path);
+            Map<String, Map<String, Object>> configMap = (Map<String, Map<String, Object>>) load(path);
             ConfigStoreManager configStoreManager = RocksDBConfigStoreManager.getInstance();
             configStoreManager.clearData();
             configStoreManager.putConfigMap(configMap);

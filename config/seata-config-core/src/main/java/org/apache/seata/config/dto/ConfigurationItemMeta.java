@@ -48,6 +48,7 @@ public class ConfigurationItemMeta implements Serializable {
     public Object getDefaultValue() {
         return defaultValue;
     }
+
     public Boolean getEncrypt() {
         return isEncrypt;
     }

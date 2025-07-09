@@ -16,11 +16,6 @@
  */
 package org.apache.seata.server.cluster.raft;
 
-import java.io.IOException;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-
 import com.alipay.remoting.serialization.SerializerManager;
 import com.alipay.sofa.jraft.CliService;
 import com.alipay.sofa.jraft.RaftServiceFactory;
@@ -48,6 +43,11 @@ import org.apache.seata.server.cluster.raft.processor.PutNodeInfoRequestProcesso
 import org.apache.seata.server.cluster.raft.serializer.JacksonBoltSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static java.io.File.separator;
 import static org.apache.seata.common.ConfigurationKeys.CONFIG_STORE_DIR;
@@ -89,7 +89,8 @@ public class RaftConfigServerManager {
         if (INIT.compareAndSet(false, true)) {
             String initConfStr = CONFIG.getConfig(ConfigurationKeys.SERVER_RAFT_SERVER_ADDR);
             String configTypeName = CONFIG.getConfig(org.apache.seata.config.ConfigurationKeys.FILE_ROOT_CONFIG
-                    + org.apache.seata.config.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + org.apache.seata.config.ConfigurationKeys.FILE_ROOT_TYPE);
+                    + org.apache.seata.config.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
+                    + org.apache.seata.config.ConfigurationKeys.FILE_ROOT_TYPE);
             RAFT_MODE = ConfigType.Raft.name().equalsIgnoreCase(configTypeName);
             if (!RAFT_MODE) {
                 return;
@@ -111,7 +112,9 @@ public class RaftConfigServerManager {
             String host = null;
             if (XID.getIpAddress() == null) {
                 String preferredNetworks = CONFIG.getConfig(REGISTRY_PREFERED_NETWORKS);
-                host = StringUtils.isNotBlank(preferredNetworks) ? NetUtil.getLocalIp(preferredNetworks.split(REGEX_SPLIT_CHAR)) : NetUtil.getLocalIp();
+                host = StringUtils.isNotBlank(preferredNetworks)
+                        ? NetUtil.getLocalIp(preferredNetworks.split(REGEX_SPLIT_CHAR))
+                        : NetUtil.getLocalIp();
             } else {
                 host = XID.getIpAddress();
             }
@@ -130,8 +133,8 @@ public class RaftConfigServerManager {
                 // Local debugging use
                 serverId = new PeerId(host, port);
             }
-            final String dataPath = CONFIG.getConfig(CONFIG_STORE_DIR, DEFAULT_DB_STORE_FILE_DIR)
-                    + separator + "raft" + separator + serverId.getPort();
+            final String dataPath = CONFIG.getConfig(CONFIG_STORE_DIR, DEFAULT_DB_STORE_FILE_DIR) + separator + "raft"
+                    + separator + serverId.getPort();
             try {
                 // Here you have raft RPC and business RPC using the same RPC server, and you can usually do this
                 // separately
@@ -143,6 +146,7 @@ public class RaftConfigServerManager {
             }
         }
     }
+
     public static void start() {
         if (!RAFT_MODE) {
             return;
@@ -164,13 +168,13 @@ public class RaftConfigServerManager {
                 throw new RuntimeException("start raft node fail!");
             }
         }
-        // Make sure to close it at the end, as other components may still use the configuration, such as ShutdownWaitTime.
+        // Make sure to close it at the end, as other components may still use the configuration, such as
+        // ShutdownWaitTime.
         ServerRunner.addDisposable(() -> {
             RaftConfigServerManager.destroy();
             ConfigStoreManagerFactory.destroy();
         });
     }
-
 
     public static void destroy() {
         if (raftServer != null) {
@@ -183,9 +187,11 @@ public class RaftConfigServerManager {
         RAFT_MODE = false;
         INIT.set(false);
     }
+
     public static boolean isRaftMode() {
         return RAFT_MODE;
     }
+
     public static RaftConfigServer getRaftServer() {
         return raftServer;
     }
@@ -207,14 +213,14 @@ public class RaftConfigServerManager {
 
         RouteTable routeTable = RouteTable.getInstance();
         try {
-            routeTable.refreshLeader(getCliClientServiceInstance(), RAFT_CONFIG_GROUP , 1000);
+            routeTable.refreshLeader(getCliClientServiceInstance(), RAFT_CONFIG_GROUP, 1000);
             return routeTable.selectLeader(RAFT_CONFIG_GROUP);
         } catch (Exception e) {
             LOGGER.error("there is an exception to getting the leader address: {}", e.getMessage(), e);
         }
         return null;
-
     }
+
     private static RaftOptions initRaftOptions() {
         RaftOptions raftOptions = new RaftOptions();
         raftOptions.setApplyBatch(CONFIG.getInt(SERVER_RAFT_APPLY_BATCH, raftOptions.getApplyBatch()));
@@ -237,15 +243,17 @@ public class RaftConfigServerManager {
         nodeOptions.setSnapshotIntervalSecs(snapshotInterval);
         nodeOptions.setRaftOptions(initRaftOptions());
         // set the election timeout to 1 second
-        nodeOptions
-                .setElectionTimeoutMs(CONFIG.getInt(SERVER_RAFT_ELECTION_TIMEOUT_MS, DEFAULT_SERVER_RAFT_ELECTION_TIMEOUT_MS));
+        nodeOptions.setElectionTimeoutMs(
+                CONFIG.getInt(SERVER_RAFT_ELECTION_TIMEOUT_MS, DEFAULT_SERVER_RAFT_ELECTION_TIMEOUT_MS));
         // set up the initial cluster configuration
         nodeOptions.setInitialConf(initConf);
         return nodeOptions;
     }
+
     public static String getGroup() {
         return GROUP;
     }
+
     private static class SingletonHandler {
         private static final CliService CLI_SERVICE = RaftServiceFactory.createAndInitCliService(new CliOptions());
         private static final CliClientService CLI_CLIENT_SERVICE = new CliClientServiceImpl();
@@ -253,7 +261,5 @@ public class RaftConfigServerManager {
         static {
             CLI_CLIENT_SERVICE.init(new CliOptions());
         }
-
     }
-
 }

@@ -20,10 +20,7 @@ import org.apache.seata.config.store.ConfigStoreManager;
 import org.apache.seata.config.store.ConfigStoreManagerFactory;
 import org.apache.seata.server.cluster.raft.execute.RaftMsgExecute;
 
-
-
 public abstract class AbstractRaftConfigMsgExecute implements RaftMsgExecute<Object> {
 
     protected ConfigStoreManager configStoreManager = ConfigStoreManagerFactory.getInstance();
-
 }

@@ -16,12 +16,6 @@
  */
 package org.apache.seata.server.cluster.raft;
 
-import java.io.Closeable;
-import java.io.File;
-import java.io.IOException;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-
 import com.alipay.sofa.jraft.Node;
 import com.alipay.sofa.jraft.RaftGroupService;
 import com.alipay.sofa.jraft.RouteTable;
@@ -34,6 +28,12 @@ import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.rpc.Disposable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.Closeable;
+import java.io.File;
+import java.io.IOException;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_REPORTER_ENABLED;
 import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_REPORTER_INITIAL_DELAY;
@@ -49,7 +49,12 @@ public class RaftConfigServer implements Disposable, Closeable {
     private RaftGroupService raftGroupService;
     private Node node;
 
-    public RaftConfigServer(final String dataPath, final String groupId, final PeerId serverId, final NodeOptions nodeOptions, final RpcServer rpcServer)
+    public RaftConfigServer(
+            final String dataPath,
+            final String groupId,
+            final PeerId serverId,
+            final NodeOptions nodeOptions,
+            final RpcServer rpcServer)
             throws IOException {
         this.groupId = groupId;
         this.groupPath = dataPath + File.separator + groupId;
@@ -72,17 +77,22 @@ public class RaftConfigServer implements Disposable, Closeable {
         nodeOptions.setRaftMetaUri(groupPath + File.separator + "raft_meta");
         // Snapshot, optional, is generally recommended
         nodeOptions.setSnapshotUri(groupPath + File.separator + "snapshot");
-        boolean reporterEnabled = ConfigurationFactory.CURRENT_FILE_INSTANCE.getBoolean(SERVER_RAFT_REPORTER_ENABLED, false);
+        boolean reporterEnabled =
+                ConfigurationFactory.CURRENT_FILE_INSTANCE.getBoolean(SERVER_RAFT_REPORTER_ENABLED, false);
         nodeOptions.setEnableMetrics(reporterEnabled);
         // Initialize the raft Group service framework
         this.raftGroupService = new RaftGroupService(groupId, serverId, nodeOptions, rpcServer, true);
         this.node = this.raftGroupService.start(false);
         RouteTable.getInstance().updateConfiguration(groupId, node.getOptions().getInitialConf());
         if (reporterEnabled) {
-            final Slf4jReporter reporter = Slf4jReporter.forRegistry(node.getNodeMetrics().getMetricRegistry())
-                    .outputTo(LOGGER).convertRatesTo(TimeUnit.SECONDS)
-                    .convertDurationsTo(TimeUnit.MILLISECONDS).build();
-            reporter.start(ConfigurationFactory.CURRENT_FILE_INSTANCE.getInt(SERVER_RAFT_REPORTER_INITIAL_DELAY, 60),
+            final Slf4jReporter reporter = Slf4jReporter.forRegistry(
+                            node.getNodeMetrics().getMetricRegistry())
+                    .outputTo(LOGGER)
+                    .convertRatesTo(TimeUnit.SECONDS)
+                    .convertDurationsTo(TimeUnit.MILLISECONDS)
+                    .build();
+            reporter.start(
+                    ConfigurationFactory.CURRENT_FILE_INSTANCE.getInt(SERVER_RAFT_REPORTER_INITIAL_DELAY, 60),
                     TimeUnit.MINUTES);
         }
     }
@@ -90,7 +100,6 @@ public class RaftConfigServer implements Disposable, Closeable {
     public Node getNode() {
         return this.node;
     }
-
 
     public RaftConfigStateMachine getRaftStateMachine() {
         return raftStateMachine;

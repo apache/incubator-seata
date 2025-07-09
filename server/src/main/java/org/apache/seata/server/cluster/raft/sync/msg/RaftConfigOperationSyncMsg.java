@@ -19,7 +19,6 @@ package org.apache.seata.server.cluster.raft.sync.msg;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.server.cluster.raft.sync.msg.dto.ConfigOperationDTO;
 
-
 public class RaftConfigOperationSyncMsg extends RaftBaseMsg {
 
     private static final long serialVersionUID = -3344345671349834321L;
@@ -30,8 +29,7 @@ public class RaftConfigOperationSyncMsg extends RaftBaseMsg {
         this.configOperation = configOperation;
     }
 
-    public RaftConfigOperationSyncMsg() {
-    }
+    public RaftConfigOperationSyncMsg() {}
 
     public ConfigOperationDTO getConfigOperation() {
         return configOperation;
@@ -41,5 +39,4 @@ public class RaftConfigOperationSyncMsg extends RaftBaseMsg {
     public String toString() {
         return StringUtils.toString(this);
     }
-
 }
