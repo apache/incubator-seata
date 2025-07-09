@@ -1215,7 +1215,7 @@ public interface ConfigurationKeys {
     /**
      * The constant VGROUP_TABLE_NAME
      */
-    String VGROUP_TABLE_NAME = STORE_DB_PREFIX + FILE_CONFIG_SPLIT_CHAR + "vgroup-table";
+    String VGROUP_TABLE_NAME = STORE_DB_PREFIX + "vgroupTable";
 
     /**
      * The constant NAMESPACE_KEY
