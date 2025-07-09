@@ -25,6 +25,7 @@ import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.rm.BaseDataSourceResource;
 import org.apache.seata.rm.DefaultResourceManager;
+import org.apache.seata.rm.datasource.combine.CombineContext;
 import org.apache.seata.rm.datasource.util.SeataXAResource;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
@@ -227,6 +228,9 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
     @Override
     public void commit() throws SQLException {
         try (ResourceLock ignored = resourceLock.obtain()) {
+            if (CombineContext.get()) {
+                return;
+            }
             if (currentAutoCommitStatus || isReadOnly()) {
                 // Ignore the committing on an autocommit session and read-only transaction.
                 return;
@@ -239,6 +243,9 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
 
     @Override
     public void rollback() throws SQLException {
+        if (CombineContext.get()) {
+            return;
+        }
         if (currentAutoCommitStatus || isReadOnly()) {
             // Ignore the committing on an autocommit session and read-only transaction.
             return;
@@ -312,6 +319,9 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
     @Override
     public void close() throws SQLException {
         try (ResourceLock ignored = resourceLock.obtain()) {
+            if (CombineContext.get()) {
+                return;
+            }
             try {
                 if (xaActive && this.xaBranchXid != null) {
                     // XA End: Success

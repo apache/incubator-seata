@@ -207,6 +207,10 @@ public class RootContext {
         return BranchType.SAGA == getBranchType();
     }
 
+    public static boolean inXABranch() {
+        return BranchType.XA == getBranchType();
+    }
+
     /**
      * get the branch type
      *
