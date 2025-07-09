@@ -25,15 +25,15 @@ import org.apache.seata.sqlparser.SqlParserType;
 
 import java.util.List;
 
-
 public class SQLVisitorFactory {
     /**
      * SQLRecognizerFactory.
      */
-    private final static SQLRecognizerFactory SQL_RECOGNIZER_FACTORY;
+    private static final SQLRecognizerFactory SQL_RECOGNIZER_FACTORY;
 
     static {
-        String sqlParserType = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SQL_PARSER_TYPE, SqlParserType.SQL_PARSER_TYPE_DRUID);
+        String sqlParserType = ConfigurationFactory.getInstance()
+                .getConfig(ConfigurationKeys.SQL_PARSER_TYPE, SqlParserType.SQL_PARSER_TYPE_DRUID);
         SQL_RECOGNIZER_FACTORY = EnhancedServiceLoader.load(SQLRecognizerFactory.class, sqlParserType);
     }
 
@@ -47,6 +47,4 @@ public class SQLVisitorFactory {
     public static List<SQLRecognizer> get(String sql, String dbType) {
         return SQL_RECOGNIZER_FACTORY.create(sql, dbType);
     }
-
-
 }

@@ -16,7 +16,6 @@
  */
 package org.apache.seata.config.exception;
 
-
 public class ConfigNotFoundException extends RuntimeException {
 
     public ConfigNotFoundException() {
@@ -39,8 +38,8 @@ public class ConfigNotFoundException extends RuntimeException {
         super(cause);
     }
 
-    protected ConfigNotFoundException(String message, Throwable cause, boolean enableSuppression,
-                                      boolean writableStackTrace) {
+    protected ConfigNotFoundException(
+            String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 }

@@ -83,7 +83,8 @@ public class RateLimitEvent implements Event {
         this.serverIpAddressAndPort = serverIpAddressAndPort;
     }
 
-    public RateLimitEvent(String traceId, String limitType, String applicationId, String clientId, String serverIpAddressAndPort) {
+    public RateLimitEvent(
+            String traceId, String limitType, String applicationId, String clientId, String serverIpAddressAndPort) {
         this.traceId = traceId;
         this.limitType = limitType;
         this.applicationId = applicationId;
@@ -93,12 +94,11 @@ public class RateLimitEvent implements Event {
 
     @Override
     public String toString() {
-        return "RateLimitEvent{" +
-                "traceId='" + traceId + '\'' +
-                ", limitType='" + limitType + '\'' +
-                ", applicationId='" + applicationId + '\'' +
-                ", clientId='" + clientId + '\'' +
-                ", serverIpAddressAndPort='" + serverIpAddressAndPort + '\'' +
-                '}';
+        return "RateLimitEvent{" + "traceId='"
+                + traceId + '\'' + ", limitType='"
+                + limitType + '\'' + ", applicationId='"
+                + applicationId + '\'' + ", clientId='"
+                + clientId + '\'' + ", serverIpAddressAndPort='"
+                + serverIpAddressAndPort + '\'' + '}';
     }
 }

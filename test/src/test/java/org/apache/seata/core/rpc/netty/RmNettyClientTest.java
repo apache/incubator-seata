@@ -16,13 +16,7 @@
  */
 package org.apache.seata.core.rpc.netty;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
+import io.netty.channel.Channel;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.ConfigurationTestHelper;
 import org.apache.seata.common.XID;
@@ -42,24 +36,35 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.netty.channel.Channel;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class RmNettyClientTest extends AbstractServerTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RmNettyClientTest.class);
 
     @BeforeAll
-    public static void init(){
+    public static void init() {
         ConfigurationTestHelper.putConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, "8091");
     }
+
     @AfterAll
     public static void after() {
         ConfigurationTestHelper.removeConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
     }
 
     public static ThreadPoolExecutor initMessageExecutor() {
-        return new ThreadPoolExecutor(5, 5, 500, TimeUnit.SECONDS,
-            new LinkedBlockingQueue<>(20000), new ThreadPoolExecutor.CallerRunsPolicy());
+        return new ThreadPoolExecutor(
+                5,
+                5,
+                500,
+                TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>(20000),
+                new ThreadPoolExecutor.CallerRunsPolicy());
     }
 
     @Test
@@ -67,30 +72,33 @@ public class RmNettyClientTest extends AbstractServerTest {
         ThreadPoolExecutor workingThreads = initMessageExecutor();
         NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
         new Thread(() -> {
-            SessionHolder.init(null);
-            nettyRemotingServer.setHandler(DefaultCoordinator.getInstance(nettyRemotingServer));
-            // set registry
-            XID.setIpAddress(NetUtil.getLocalIp());
-            XID.setPort(8091);
-            // init snowflake for transactionId, branchId
-            UUIDGenerator.init(1L);
-            nettyRemotingServer.init();
-        }).start();
+                    SessionHolder.init(null);
+                    nettyRemotingServer.setHandler(DefaultCoordinator.getInstance(nettyRemotingServer));
+                    // set registry
+                    XID.setIpAddress(NetUtil.getLocalIp());
+                    XID.setPort(8091);
+                    // init snowflake for transactionId, branchId
+                    UUIDGenerator.init(1L);
+                    nettyRemotingServer.init();
+                })
+                .start();
         Thread.sleep(3000);
 
         String applicationId = "app 1";
         String transactionServiceGroup = "default_tx_group";
-        RmNettyRemotingClient rmNettyRemotingClient = RmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup);
+        RmNettyRemotingClient rmNettyRemotingClient =
+                RmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup);
         rmNettyRemotingClient.setResourceManager(new TCCResourceManager());
         rmNettyRemotingClient.init();
         rmNettyRemotingClient.getClientChannelManager().initReconnect(transactionServiceGroup, true);
         String serverAddress = "0.0.0.0:8091";
-        Channel channel = RmNettyRemotingClient.getInstance().getClientChannelManager().acquireChannel(serverAddress);
+        Channel channel =
+                RmNettyRemotingClient.getInstance().getClientChannelManager().acquireChannel(serverAddress);
         Assertions.assertNotNull(channel);
 
         CountDownLatch latch = new CountDownLatch(3);
         for (int i = 0; i < 3; i++) {
-            CompletableFuture.runAsync(()->{
+            CompletableFuture.runAsync(() -> {
                 BranchRegisterRequest request = new BranchRegisterRequest();
                 request.setXid("127.0.0.1:8091:1249853");
                 request.setLockKey("lock key testSendMsgWithResponse");
@@ -103,14 +111,14 @@ public class RmNettyClientTest extends AbstractServerTest {
                 }
                 Assertions.assertNotNull(branchRegisterResponse);
                 Assertions.assertEquals(ResultCode.Failed, branchRegisterResponse.getResultCode());
-                Assertions.assertEquals("TransactionException[Could not found global transaction xid = 127.0.0.1:8091:1249853, may be has finished.]",
+                Assertions.assertEquals(
+                        "TransactionException[Could not found global transaction xid = 127.0.0.1:8091:1249853, may be has finished.]",
                         branchRegisterResponse.getMsg());
                 latch.countDown();
             });
         }
-        latch.await(10,TimeUnit.SECONDS);
+        latch.await(10, TimeUnit.SECONDS);
         nettyRemotingServer.destroy();
         rmNettyRemotingClient.destroy();
     }
-
 }

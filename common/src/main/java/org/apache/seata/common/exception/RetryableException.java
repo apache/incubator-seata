@@ -16,8 +16,6 @@
  */
 package org.apache.seata.common.exception;
 
-
-
 /**
  * Exception indicating a retryable failure. This exception is typically thrown
  * when a retryable process fails, and it extends RuntimeException to
@@ -65,4 +63,3 @@ public class RetryableException extends Exception {
         super(message, cause);
     }
 }
-

@@ -27,12 +27,17 @@ public class SpringCloudAlibabaConfigurationTest {
 
     @Test
     public void testSpringCloudAlibabaConfiguration() {
-        AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext("org.apache.seata.spring.boot.autoconfigure.properties");
+        AnnotationConfigApplicationContext applicationContext =
+                new AnnotationConfigApplicationContext("org.apache.seata.spring.boot.autoconfigure.properties");
         Properties properties = new Properties();
         properties.setProperty("spring.application.name", "test");
-        applicationContext.getEnvironment().getPropertySources().addFirst(new PropertiesPropertySource("my_test", properties));
+        applicationContext
+                .getEnvironment()
+                .getPropertySources()
+                .addFirst(new PropertiesPropertySource("my_test", properties));
 
-        SpringCloudAlibabaConfiguration springCloudAlibabaConfiguration = (SpringCloudAlibabaConfiguration) applicationContext.getBean("springCloudAlibabaConfiguration");
+        SpringCloudAlibabaConfiguration springCloudAlibabaConfiguration =
+                (SpringCloudAlibabaConfiguration) applicationContext.getBean("springCloudAlibabaConfiguration");
 
         // application id is null
         Assertions.assertEquals("test", springCloudAlibabaConfiguration.getApplicationId());

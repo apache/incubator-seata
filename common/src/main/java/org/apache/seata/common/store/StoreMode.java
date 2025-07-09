@@ -52,7 +52,7 @@ public enum StoreMode {
 
     /**
      * get value of store mode
-     * 
+     *
      * @param name the mode name
      * @return the store mode
      */
@@ -70,7 +70,7 @@ public enum StoreMode {
 
     /**
      * whether contains value of store mode
-     * 
+     *
      * @param name the mode name
      * @return the boolean
      */
@@ -85,5 +85,4 @@ public enum StoreMode {
     public String getName() {
         return name;
     }
-
 }

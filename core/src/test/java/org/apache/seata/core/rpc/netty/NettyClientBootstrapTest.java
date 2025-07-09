@@ -30,13 +30,16 @@ class NettyClientBootstrapTest {
 
     @Mock
     private NettyClientConfig nettyClientConfig;
+
     @Test
     void testSharedEventLoopGroupEnabled() {
         when(nettyClientConfig.getEnableClientSharedEventLoop()).thenReturn(true);
-        NettyClientBootstrap tmNettyClientBootstrap = new NettyClientBootstrap(nettyClientConfig, NettyPoolKey.TransactionRole.TMROLE);
+        NettyClientBootstrap tmNettyClientBootstrap =
+                new NettyClientBootstrap(nettyClientConfig, NettyPoolKey.TransactionRole.TMROLE);
         EventLoopGroup tmEventLoopGroupWorker = getEventLoopGroupWorker(tmNettyClientBootstrap);
 
-        NettyClientBootstrap rmNettyClientBootstrap = new NettyClientBootstrap(nettyClientConfig, NettyPoolKey.TransactionRole.RMROLE);
+        NettyClientBootstrap rmNettyClientBootstrap =
+                new NettyClientBootstrap(nettyClientConfig, NettyPoolKey.TransactionRole.RMROLE);
         EventLoopGroup rmEventLoopGroupWorker = getEventLoopGroupWorker(rmNettyClientBootstrap);
 
         Assertions.assertEquals(tmEventLoopGroupWorker, rmEventLoopGroupWorker);
@@ -45,10 +48,12 @@ class NettyClientBootstrapTest {
     @Test
     void testSharedEventLoopGroupDisabled() {
         when(nettyClientConfig.getEnableClientSharedEventLoop()).thenReturn(false);
-        NettyClientBootstrap tmNettyClientBootstrap = new NettyClientBootstrap(nettyClientConfig, NettyPoolKey.TransactionRole.TMROLE);
+        NettyClientBootstrap tmNettyClientBootstrap =
+                new NettyClientBootstrap(nettyClientConfig, NettyPoolKey.TransactionRole.TMROLE);
         EventLoopGroup tmEventLoopGroupWorker = getEventLoopGroupWorker(tmNettyClientBootstrap);
 
-        NettyClientBootstrap rmNettyClientBootstrap = new NettyClientBootstrap(nettyClientConfig, NettyPoolKey.TransactionRole.RMROLE);
+        NettyClientBootstrap rmNettyClientBootstrap =
+                new NettyClientBootstrap(nettyClientConfig, NettyPoolKey.TransactionRole.RMROLE);
         EventLoopGroup rmEventLoopGroupWorker = getEventLoopGroupWorker(rmNettyClientBootstrap);
 
         Assertions.assertNotEquals(tmEventLoopGroupWorker, rmEventLoopGroupWorker);

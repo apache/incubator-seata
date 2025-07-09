@@ -31,6 +31,7 @@ public class CompressorTypeTest {
         // Assert the returned type matches the expected type
         Assertions.assertEquals(expectedType, actualType);
     }
+
     @Test
     public void testGetByName() {
         String name = "gzip";

@@ -16,8 +16,9 @@
  */
 package org.apache.seata.rm.datasource.exec;
 
-import java.sql.SQLException;
 import org.apache.seata.core.exception.TransactionExceptionCode;
+
+import java.sql.SQLException;
 
 /**
  * The type Lock conflict exception.
@@ -43,5 +44,4 @@ public class LockConflictException extends SQLException {
     public void setCode(TransactionExceptionCode code) {
         this.code = code;
     }
-
 }

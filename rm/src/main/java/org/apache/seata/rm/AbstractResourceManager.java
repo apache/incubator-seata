@@ -16,7 +16,6 @@
  */
 package org.apache.seata.rm;
 
-import java.util.concurrent.TimeoutException;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.DefaultValues;
 import org.apache.seata.common.exception.NotSupportYetException;
@@ -42,6 +41,8 @@ import org.apache.seata.core.rpc.netty.RmNettyRemotingClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.TimeoutException;
+
 /**
  * abstract ResourceManager
  *
@@ -52,10 +53,11 @@ public abstract class AbstractResourceManager implements ResourceManager {
 
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
-    private static int appDataErrSize = CONFIG.getInt(ConfigurationKeys.RM_APPLICATION_DATA_SIZE_LIMIT,
-            DefaultValues.DEFAULT_APPLICATION_DATA_SIZE_LIMIT);
+    private static int appDataErrSize = CONFIG.getInt(
+            ConfigurationKeys.RM_APPLICATION_DATA_SIZE_LIMIT, DefaultValues.DEFAULT_APPLICATION_DATA_SIZE_LIMIT);
 
-    private static boolean throwDataSizeExp = CONFIG.getBoolean(ConfigurationKeys.RM_APPLICATION_DATA_SIZE_CHECK, false);
+    private static boolean throwDataSizeExp =
+            CONFIG.getBoolean(ConfigurationKeys.RM_APPLICATION_DATA_SIZE_CHECK, false);
     /**
      * registry branch record
      *
@@ -68,7 +70,14 @@ public abstract class AbstractResourceManager implements ResourceManager {
      * @throws TransactionException TransactionException
      */
     @Override
-    public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws TransactionException {
+    public Long branchRegister(
+            BranchType branchType,
+            String resourceId,
+            String clientId,
+            String xid,
+            String applicationData,
+            String lockKeys)
+            throws TransactionException {
         try {
             StringUtils.checkDataSize(applicationData, "applicationData", appDataErrSize, throwDataSizeExp);
 
@@ -79,20 +88,26 @@ public abstract class AbstractResourceManager implements ResourceManager {
             request.setBranchType(branchType);
             request.setApplicationData(applicationData);
 
-            BranchRegisterResponse response = (BranchRegisterResponse) RmNettyRemotingClient.getInstance().sendSyncRequest(request);
+            BranchRegisterResponse response =
+                    (BranchRegisterResponse) RmNettyRemotingClient.getInstance().sendSyncRequest(request);
             if (response.getResultCode() == ResultCode.Failed) {
-                throw new RmTransactionException(response.getTransactionExceptionCode(),
-                    String.format("branch register failed, xid: %s, errMsg: %s ", xid, response.getMsg()));
+                throw new RmTransactionException(
+                        response.getTransactionExceptionCode(),
+                        String.format("branch register failed, xid: %s, errMsg: %s ", xid, response.getMsg()));
             }
             if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("branch register success, xid:{}, branchId:{}, lockKeys:{}", xid, response.getBranchId(), lockKeys);
+                LOGGER.info(
+                        "branch register success, xid:{}, branchId:{}, lockKeys:{}",
+                        xid,
+                        response.getBranchId(),
+                        lockKeys);
             }
             return response.getBranchId();
         } catch (TimeoutException toe) {
             throw new RmTransactionException(TransactionExceptionCode.IO, "branch register timeout, xid:" + xid, toe);
         } catch (RuntimeException rex) {
-            throw new RmTransactionException(TransactionExceptionCode.BranchRegisterFailed,
-                "branch register exception, xid:" + xid, rex);
+            throw new RmTransactionException(
+                    TransactionExceptionCode.BranchRegisterFailed, "branch register exception, xid:" + xid, rex);
         }
     }
 
@@ -107,7 +122,9 @@ public abstract class AbstractResourceManager implements ResourceManager {
      * @throws TransactionException  TransactionException
      */
     @Override
-    public void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status, String applicationData) throws TransactionException {
+    public void branchReport(
+            BranchType branchType, String xid, long branchId, BranchStatus status, String applicationData)
+            throws TransactionException {
         try {
             StringUtils.checkDataSize(applicationData, "applicationData", appDataErrSize, throwDataSizeExp);
             BranchReportRequest request = new BranchReportRequest();
@@ -116,21 +133,24 @@ public abstract class AbstractResourceManager implements ResourceManager {
             request.setStatus(status);
             request.setApplicationData(applicationData);
 
-            BranchReportResponse response = (BranchReportResponse) RmNettyRemotingClient.getInstance().sendSyncRequest(request);
+            BranchReportResponse response =
+                    (BranchReportResponse) RmNettyRemotingClient.getInstance().sendSyncRequest(request);
             if (response.getResultCode() == ResultCode.Failed) {
-                throw new RmTransactionException(response.getTransactionExceptionCode(),
-                    String.format("branch report failed, xid: %s, errMsg: %s ", xid, response.getMsg()));
+                throw new RmTransactionException(
+                        response.getTransactionExceptionCode(),
+                        String.format("branch report failed, xid: %s, errMsg: %s ", xid, response.getMsg()));
             }
         } catch (TimeoutException toe) {
             throw new RmTransactionException(TransactionExceptionCode.IO, "branch report timeout, xid:" + xid, toe);
         } catch (RuntimeException rex) {
-            throw new RmTransactionException(TransactionExceptionCode.BranchReportFailed,
-                "branch report exception, xid:" + xid, rex);
+            throw new RmTransactionException(
+                    TransactionExceptionCode.BranchReportFailed, "branch report exception, xid:" + xid, rex);
         }
     }
 
     @Override
-    public boolean lockQuery(BranchType branchType, String resourceId, String xid, String lockKeys) throws TransactionException {
+    public boolean lockQuery(BranchType branchType, String resourceId, String xid, String lockKeys)
+            throws TransactionException {
         return false;
     }
 
@@ -149,7 +169,8 @@ public abstract class AbstractResourceManager implements ResourceManager {
         GlobalStatusRequest queryGlobalStatus = new GlobalStatusRequest();
         queryGlobalStatus.setXid(xid);
         try {
-            GlobalStatusResponse response = (GlobalStatusResponse) RmNettyRemotingClient.getInstance().sendSyncRequest(queryGlobalStatus);
+            GlobalStatusResponse response =
+                    (GlobalStatusResponse) RmNettyRemotingClient.getInstance().sendSyncRequest(queryGlobalStatus);
             return response.getGlobalStatus();
         } catch (TimeoutException e) {
             throw new RuntimeException(e);

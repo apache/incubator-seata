@@ -16,26 +16,16 @@
  */
 package org.apache.seata.server.lock;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Collection;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Stream;
-
-import javax.annotation.Resource;
-
+import org.apache.seata.common.result.PageResult;
 import org.apache.seata.common.store.SessionMode;
 import org.apache.seata.common.util.CollectionUtils;
-import org.apache.seata.common.result.PageResult;
+import org.apache.seata.common.util.UUIDGenerator;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchType;
-import org.apache.seata.common.util.UUIDGenerator;
 import org.apache.seata.server.DynamicPortTestConfig;
 import org.apache.seata.server.console.entity.param.GlobalLockParam;
-import org.apache.seata.server.console.service.GlobalLockService;
 import org.apache.seata.server.console.entity.vo.GlobalLockVO;
+import org.apache.seata.server.console.service.GlobalLockService;
 import org.apache.seata.server.lock.file.FileLockManagerForTest;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
@@ -50,6 +40,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
 
+import javax.annotation.Resource;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Collection;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Stream;
+
 import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 
 /**
@@ -61,14 +60,11 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 @Import(DynamicPortTestConfig.class)
 public class LockManagerTest {
 
-
     @Resource(type = GlobalLockService.class)
     private GlobalLockService globalLockService;
 
     @BeforeAll
-    public static void setUp(ApplicationContext context){
-
-    }
+    public static void setUp(ApplicationContext context) {}
 
     /**
      * Acquire lock success.
@@ -112,30 +108,31 @@ public class LockManagerTest {
         try {
             CountDownLatch countDownLatch = new CountDownLatch(2);
             new Thread(() -> {
-                try {
-                    lockManager.acquireLock(branchSession1);
-                } catch (TransactionException e) {
-                    e.printStackTrace();
-                } finally {
-                    countDownLatch.countDown();
-                }
-            }).start();
+                        try {
+                            lockManager.acquireLock(branchSession1);
+                        } catch (TransactionException e) {
+                            e.printStackTrace();
+                        } finally {
+                            countDownLatch.countDown();
+                        }
+                    })
+                    .start();
             new Thread(() -> {
-                try {
-                    lockManager.acquireLock(branchSession2);
-                } catch (TransactionException e) {
-                    e.printStackTrace();
-                } finally {
-                    countDownLatch.countDown();
-                }
-            }).start();
+                        try {
+                            lockManager.acquireLock(branchSession2);
+                        } catch (TransactionException e) {
+                            e.printStackTrace();
+                        } finally {
+                            countDownLatch.countDown();
+                        }
+                    })
+                    .start();
             // Assume execute more than 5 seconds means deadlock happened.
             Assertions.assertTrue(countDownLatch.await(5, TimeUnit.SECONDS));
         } finally {
             lockManager.releaseLock(branchSession1);
             lockManager.releaseLock(branchSession2);
         }
-
     }
 
     /**
@@ -148,30 +145,32 @@ public class LockManagerTest {
      */
     @ParameterizedTest
     @MethodSource("deadlockBranchSessionsProvider")
-    public void concurrentUseAbilityTest(BranchSession branchSession1, BranchSession branchSession2)  throws Exception {
+    public void concurrentUseAbilityTest(BranchSession branchSession1, BranchSession branchSession2) throws Exception {
         LockManager lockManager = new FileLockManagerForTest();
         try {
             final AtomicBoolean first = new AtomicBoolean();
             final AtomicBoolean second = new AtomicBoolean();
             CountDownLatch countDownLatch = new CountDownLatch(2);
             new Thread(() -> {
-                try {
-                    first.set(lockManager.acquireLock(branchSession1));
-                } catch (TransactionException e) {
-                    e.printStackTrace();
-                } finally {
-                    countDownLatch.countDown();
-                }
-            }).start();
+                        try {
+                            first.set(lockManager.acquireLock(branchSession1));
+                        } catch (TransactionException e) {
+                            e.printStackTrace();
+                        } finally {
+                            countDownLatch.countDown();
+                        }
+                    })
+                    .start();
             new Thread(() -> {
-                try {
-                    second.set(lockManager.acquireLock(branchSession2));
-                } catch (TransactionException e) {
-                    e.printStackTrace();
-                } finally {
-                    countDownLatch.countDown();
-                }
-            }).start();
+                        try {
+                            second.set(lockManager.acquireLock(branchSession2));
+                        } catch (TransactionException e) {
+                            e.printStackTrace();
+                        } finally {
+                            countDownLatch.countDown();
+                        }
+                    })
+                    .start();
             // Assume execute more than 5 seconds means deadlock happened.
             if (countDownLatch.await(5, TimeUnit.SECONDS)) {
                 Assertions.assertTrue(!first.get() || !second.get());
@@ -193,38 +192,44 @@ public class LockManagerTest {
     public void isLockableTest(BranchSession branchSession) throws Exception {
         branchSession.setLockKey("t:4");
         LockManager lockManager = new FileLockManagerForTest();
-        Assertions.assertTrue(lockManager
-                .isLockable(branchSession.getXid(), branchSession.getResourceId(), branchSession.getLockKey()));
+        Assertions.assertTrue(lockManager.isLockable(
+                branchSession.getXid(), branchSession.getResourceId(), branchSession.getLockKey()));
         lockManager.acquireLock(branchSession);
         branchSession.setTransactionId(UUIDGenerator.generateUUID());
-        Assertions.assertFalse(lockManager
-                .isLockable(branchSession.getXid(), branchSession.getResourceId(), branchSession.getLockKey()));
+        Assertions.assertFalse(lockManager.isLockable(
+                branchSession.getXid(), branchSession.getResourceId(), branchSession.getLockKey()));
     }
 
     @ParameterizedTest
     @MethodSource("duplicatePkBranchSessionsProvider")
-    public void duplicatePkBranchSessionHolderTest(BranchSession branchSession1, BranchSession branchSession2) throws Exception {
+    public void duplicatePkBranchSessionHolderTest(BranchSession branchSession1, BranchSession branchSession2)
+            throws Exception {
         LockManager lockManager = new FileLockManagerForTest();
         Assertions.assertTrue(lockManager.acquireLock(branchSession1));
-        Assertions.assertEquals(4, (long) branchSession1.getLockHolder().values().size());
+        Assertions.assertEquals(
+                4, (long) branchSession1.getLockHolder().values().size());
         Assertions.assertTrue(lockManager.releaseLock(branchSession1));
-        Assertions.assertEquals(0, (long) branchSession1.getLockHolder().values().size());
+        Assertions.assertEquals(
+                0, (long) branchSession1.getLockHolder().values().size());
         Assertions.assertTrue(lockManager.acquireLock(branchSession2));
-        Assertions.assertEquals(4, (long) branchSession2.getLockHolder().values().size());
+        Assertions.assertEquals(
+                4, (long) branchSession2.getLockHolder().values().size());
         Assertions.assertTrue(lockManager.releaseLock(branchSession2));
-        Assertions.assertEquals(0, (long) branchSession2.getLockHolder().values().size());
+        Assertions.assertEquals(
+                0, (long) branchSession2.getLockHolder().values().size());
     }
 
     @ParameterizedTest
     @MethodSource("globalSessionForLockTestProvider")
-    public void lockQueryTest(GlobalSession globalSessions1, GlobalSession globalSessions2) throws TransactionException, ParseException {
+    public void lockQueryTest(GlobalSession globalSessions1, GlobalSession globalSessions2)
+            throws TransactionException, ParseException {
         SessionHolder.getRootSessionManager().destroy();
         SessionHolder.init(SessionMode.FILE);
         final SessionManager sessionManager = SessionHolder.getRootSessionManager();
-        //make sure sessionMaanager is empty
+        // make sure sessionMaanager is empty
         Collection<GlobalSession> sessions = sessionManager.allSessions();
         if (CollectionUtils.isNotEmpty(sessions)) {
-            //FileSessionManager use ConcurrentHashMap is thread safe
+            // FileSessionManager use ConcurrentHashMap is thread safe
             for (GlobalSession session : sessions) {
                 sessionManager.removeGlobalSession(session);
             }
@@ -235,12 +240,8 @@ public class LockManagerTest {
 
             final GlobalLockParam param = new GlobalLockParam();
 
-
             // wrong pageSize or pageNum
-            Assertions.assertThrows(
-                IllegalArgumentException.class,
-                () -> globalLockService.query(param)
-            );
+            Assertions.assertThrows(IllegalArgumentException.class, () -> globalLockService.query(param));
 
             LockManager lockManager = new FileLockManagerForTest();
             for (BranchSession branchSession : globalSessions1.getBranchSessions()) {
@@ -256,9 +257,9 @@ public class LockManagerTest {
 
             // query all data
             final PageResult<GlobalLockVO> fullQueryTestResult = globalLockService.query(param);
-            Assertions.assertEquals(1,fullQueryTestResult.getPages());
-            Assertions.assertEquals(8,fullQueryTestResult.getTotal());
-            Assertions.assertEquals(8,fullQueryTestResult.getData().size());
+            Assertions.assertEquals(1, fullQueryTestResult.getPages());
+            Assertions.assertEquals(8, fullQueryTestResult.getTotal());
+            Assertions.assertEquals(8, fullQueryTestResult.getData().size());
 
             // test paging
             param.setPageSize(1);
@@ -329,7 +330,7 @@ public class LockManagerTest {
             final PageResult<GlobalLockVO> timeTestResult4 = globalLockService.query(param);
             Assertions.assertEquals(8, timeTestResult4.getTotal());
 
-            //test release lock
+            // test release lock
             for (BranchSession branchSession : globalSessions1.getBranchSessions()) {
                 lockManager.releaseLock(branchSession);
             }
@@ -339,9 +340,9 @@ public class LockManagerTest {
             param2.setPageSize(10);
 
             final PageResult<GlobalLockVO> fullQueryTestResult2 = globalLockService.query(param2);
-            Assertions.assertEquals(1,fullQueryTestResult2.getPages());
-            Assertions.assertEquals(4,fullQueryTestResult2.getTotal());
-            Assertions.assertEquals(4,fullQueryTestResult2.getData().size());
+            Assertions.assertEquals(1, fullQueryTestResult2.getPages());
+            Assertions.assertEquals(4, fullQueryTestResult2.getTotal());
+            Assertions.assertEquals(4, fullQueryTestResult2.getData().size());
 
         } finally {
             sessionManager.removeGlobalSession(globalSessions1);
@@ -366,8 +367,7 @@ public class LockManagerTest {
         branchSession.setBranchType(BranchType.AT);
         branchSession.setApplicationData("{\"data\":\"test\"}");
         branchSession.setBranchType(BranchType.AT);
-        return Stream.of(
-                Arguments.of(branchSession));
+        return Stream.of(Arguments.of(branchSession));
     }
 
     /**
@@ -398,7 +398,7 @@ public class LockManagerTest {
         branchSession2.setApplicationData("{\"data\":\"test\"}");
         branchSession2.setBranchType(BranchType.AT);
 
-        return new BranchSession[]{branchSession1, branchSession2};
+        return new BranchSession[] {branchSession1, branchSession2};
     }
 
     /**
@@ -419,7 +419,6 @@ public class LockManagerTest {
 
         final BranchSession branchSession4 = branchSessions2[1];
         branchSession4.setTransactionId(493747292L);
-
 
         final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -446,7 +445,6 @@ public class LockManagerTest {
         final BranchSession branchSession4 = branchSessions2[1];
         branchSession4.setTransactionId(123456L);
 
-
         final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
         GlobalSession globalSession = new GlobalSession("demo-app", DEFAULT_TX_GROUP, "test2", 6000);
@@ -457,7 +455,6 @@ public class LockManagerTest {
 
         return Stream.of(Arguments.of(globalSession));
     }
-
 
     /**
      * Base branch sessions provider object [ ] [ ]. Could assign resource and lock keys.

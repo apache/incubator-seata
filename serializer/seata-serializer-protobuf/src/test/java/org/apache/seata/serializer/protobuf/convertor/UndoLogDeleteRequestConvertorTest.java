@@ -16,19 +16,17 @@
  */
 package org.apache.seata.serializer.protobuf.convertor;
 
-import org.apache.seata.serializer.protobuf.generated.UndoLogDeleteRequestProto;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.protocol.transaction.UndoLogDeleteRequest;
+import org.apache.seata.serializer.protobuf.generated.UndoLogDeleteRequestProto;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
 
 public class UndoLogDeleteRequestConvertorTest {
 
     private static final String RESOURCE_ID = "resourceId";
     private static final short SAVE_DAYS = 3;
-
 
     @Test
     public void convert2Proto() {
@@ -39,14 +37,12 @@ public class UndoLogDeleteRequestConvertorTest {
         undoLogDeleteRequest.setSaveDays(SAVE_DAYS);
 
         UndoLogDeleteRequestConvertor undoLogDeleteRequestConvertor = new UndoLogDeleteRequestConvertor();
-        UndoLogDeleteRequestProto proto = undoLogDeleteRequestConvertor.convert2Proto(
-                undoLogDeleteRequest);
+        UndoLogDeleteRequestProto proto = undoLogDeleteRequestConvertor.convert2Proto(undoLogDeleteRequest);
         UndoLogDeleteRequest realRequest = undoLogDeleteRequestConvertor.convert2Model(proto);
 
         assertThat(realRequest.getTypeCode()).isEqualTo(undoLogDeleteRequest.getTypeCode());
         assertThat(realRequest.getBranchType()).isEqualTo(undoLogDeleteRequest.getBranchType());
         assertThat(realRequest.getResourceId()).isEqualTo(undoLogDeleteRequest.getResourceId());
         assertThat(realRequest.getSaveDays()).isEqualTo(undoLogDeleteRequest.getSaveDays());
-
     }
 }

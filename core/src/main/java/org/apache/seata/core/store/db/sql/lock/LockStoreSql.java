@@ -96,6 +96,5 @@ public interface LockStoreSql {
      * @param lockTable      the lock table
      * @return the string
      */
-    String getBatchUpdateStatusLockByGlobalSql(String lockTable) ;
-
+    String getBatchUpdateStatusLockByGlobalSql(String lockTable);
 }

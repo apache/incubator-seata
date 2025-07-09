@@ -25,7 +25,6 @@ import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.model.TransactionManager;
 import org.apache.seata.core.rpc.netty.RmNettyRemotingClient;
 import org.apache.seata.core.rpc.netty.TmNettyRemotingClient;
-import org.apache.seata.core.serializer.SerializerType;
 import org.apache.seata.mockserver.MockCoordinator;
 import org.apache.seata.mockserver.MockServer;
 import org.apache.seata.rm.DefaultResourceManager;
@@ -48,9 +47,11 @@ public class MockFastJson2Test {
     @BeforeAll
     public static void before() {
         ConfigurationFactory.reload();
-        ConfigurationTestHelper.putConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, String.valueOf(ProtocolTestConstants.MOCK_SERVER_PORT));
-        //Enable it when testing is needed. The settings here will affect the global configuration.
-        //ConfigurationTestHelper.putConfig(ConfigurationKeys.SERIALIZE_FOR_RPC, String.valueOf(SerializerType.FASTJSON2));
+        ConfigurationTestHelper.putConfig(
+                ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, String.valueOf(ProtocolTestConstants.MOCK_SERVER_PORT));
+        // Enable it when testing is needed. The settings here will affect the global configuration.
+        // ConfigurationTestHelper.putConfig(ConfigurationKeys.SERIALIZE_FOR_RPC,
+        // String.valueOf(SerializerType.FASTJSON2));
         MockServer.start(ProtocolTestConstants.MOCK_SERVER_PORT);
         TmNettyRemotingClient.getInstance().destroy();
         RmNettyRemotingClient.getInstance().destroy();
@@ -58,7 +59,7 @@ public class MockFastJson2Test {
 
     @AfterAll
     public static void after() {
-        //MockServer.close();
+        // MockServer.close();
         ConfigurationTestHelper.removeConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
         ConfigurationTestHelper.removeConfig(ConfigurationKeys.SERIALIZE_FOR_RPC);
         TmNettyRemotingClient.getInstance().destroy();
@@ -107,26 +108,26 @@ public class MockFastJson2Test {
         TransactionManager tm = TmClientTest.getTm();
         DefaultResourceManager rm = RmClientTest.getRm(RESOURCE_ID);
 
-        String xid = tm.begin(ProtocolTestConstants.APPLICATION_ID, ProtocolTestConstants.SERVICE_GROUP, "test-commit", 60000);
+        String xid = tm.begin(
+                ProtocolTestConstants.APPLICATION_ID, ProtocolTestConstants.SERVICE_GROUP, "test-commit", 60000);
         MockCoordinator.getInstance().setExpectedRetry(xid, times);
         Long branchId = rm.branchRegister(BranchType.TCC, RESOURCE_ID, "1", xid, "{\"mock\":\"mock\"}", "1");
         GlobalStatus commit = tm.commit(xid);
         Assertions.assertEquals(GlobalStatus.Committed, commit);
         return xid;
-
     }
 
     private String doTestRollback(int times) throws TransactionException {
         TransactionManager tm = TmClientTest.getTm();
         DefaultResourceManager rm = RmClientTest.getRm(RESOURCE_ID);
 
-        String xid = tm.begin(ProtocolTestConstants.APPLICATION_ID, ProtocolTestConstants.SERVICE_GROUP, "test-rollback", 60000);
+        String xid = tm.begin(
+                ProtocolTestConstants.APPLICATION_ID, ProtocolTestConstants.SERVICE_GROUP, "test-rollback", 60000);
         logger.info("doTestRollback xid:{}", xid);
         MockCoordinator.getInstance().setExpectedRetry(xid, times);
         Long branchId = rm.branchRegister(BranchType.TCC, RESOURCE_ID, "1", xid, "{\"mock\":\"mock\"}", "1");
         GlobalStatus rollback = tm.rollback(xid);
         Assertions.assertEquals(GlobalStatus.Rollbacked, rollback);
         return xid;
-
     }
 }

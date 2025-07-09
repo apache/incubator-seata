@@ -25,5 +25,4 @@ import org.apache.seata.sqlparser.util.JdbcConstants;
  *
  */
 @LoadLevel(name = JdbcConstants.POLARDBX)
-public class PolarDBXEscapeHandler extends MySQLEscapeHandler {
-}
+public class PolarDBXEscapeHandler extends MySQLEscapeHandler {}

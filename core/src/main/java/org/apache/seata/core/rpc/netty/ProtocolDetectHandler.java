@@ -52,7 +52,10 @@ public class ProtocolDetectHandler extends ByteToMessageDecoder {
 
         byte[] preface = new byte[in.readableBytes()];
         in.readBytes(preface);
-        LOGGER.error("Can not recognize protocol from remote {}, preface = {}", ctx.channel().remoteAddress(), preface);
+        LOGGER.error(
+                "Can not recognize protocol from remote {}, preface = {}",
+                ctx.channel().remoteAddress(),
+                preface);
         in.clear();
         ctx.close();
     }

@@ -27,7 +27,7 @@ class ExporterTypeTest {
 
     @Test
     void values() {
-        Assertions.assertArrayEquals(new ExporterType[]{ExporterType.PROMETHEUS}, ExporterType.values());
+        Assertions.assertArrayEquals(new ExporterType[] {ExporterType.PROMETHEUS}, ExporterType.values());
     }
 
     @Test

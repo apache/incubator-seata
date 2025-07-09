@@ -24,7 +24,6 @@ import org.apache.seata.core.protocol.transaction.BranchCommitResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-
 public class SerializerSecurityRegistryTest {
     @Test
     public void getAllowClassType() {
@@ -40,19 +39,19 @@ public class SerializerSecurityRegistryTest {
     @Test
     public void getAllowClassPattern() {
         Assertions.assertTrue(
-            SerializerSecurityRegistry.getAllowClassPattern().contains(Long.class.getCanonicalName()));
+                SerializerSecurityRegistry.getAllowClassPattern().contains(Long.class.getCanonicalName()));
         Assertions.assertTrue(
-            SerializerSecurityRegistry.getAllowClassPattern().contains(Integer.class.getCanonicalName()));
+                SerializerSecurityRegistry.getAllowClassPattern().contains(Integer.class.getCanonicalName()));
         Assertions.assertTrue(
-            SerializerSecurityRegistry.getAllowClassPattern().contains(HeartbeatMessage.class.getCanonicalName()));
-        Assertions.assertTrue(
-            SerializerSecurityRegistry.getAllowClassPattern().contains(BranchCommitRequest.class.getCanonicalName()));
-        Assertions.assertTrue(
-            SerializerSecurityRegistry.getAllowClassPattern().contains(BranchCommitResponse.class.getCanonicalName()));
+                SerializerSecurityRegistry.getAllowClassPattern().contains(HeartbeatMessage.class.getCanonicalName()));
+        Assertions.assertTrue(SerializerSecurityRegistry.getAllowClassPattern()
+                .contains(BranchCommitRequest.class.getCanonicalName()));
+        Assertions.assertTrue(SerializerSecurityRegistry.getAllowClassPattern()
+                .contains(BranchCommitResponse.class.getCanonicalName()));
         Assertions.assertFalse(SerializerSecurityRegistry.getAllowClassPattern()
-            .contains(AbstractBranchEndRequest.class.getCanonicalName()));
+                .contains(AbstractBranchEndRequest.class.getCanonicalName()));
         Assertions.assertFalse(
-            SerializerSecurityRegistry.getAllowClassPattern().contains(Version.class.getCanonicalName()));
+                SerializerSecurityRegistry.getAllowClassPattern().contains(Version.class.getCanonicalName()));
         Assertions.assertTrue(SerializerSecurityRegistry.getAllowClassPattern().contains("org.apache.seata.*"));
     }
 }

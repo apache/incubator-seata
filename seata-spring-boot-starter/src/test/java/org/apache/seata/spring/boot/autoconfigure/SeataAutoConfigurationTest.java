@@ -42,12 +42,7 @@ import static org.mockito.ArgumentMatchers.any;
  */
 @SpringBootTest(
         classes = SeataAutoConfigurationTest.TestConfig.class,
-        properties = {
-                "seata.enabled=true",
-                "seata.application-id=testApp",
-                "seata.tx-service-group=test_tx_group"
-        }
-)
+        properties = {"seata.enabled=true", "seata.application-id=testApp", "seata.tx-service-group=test_tx_group"})
 public class SeataAutoConfigurationTest {
 
     private static MockedStatic<TMClient> mockedTMClient;
@@ -66,8 +61,7 @@ public class SeataAutoConfigurationTest {
     @Configuration
     @EnableConfigurationProperties(SeataProperties.class)
     @ImportAutoConfiguration({SeataCoreAutoConfiguration.class, SeataAutoConfiguration.class})
-    static class TestConfig {
-    }
+    static class TestConfig {}
 
     @Autowired
     private ApplicationContext applicationContext;

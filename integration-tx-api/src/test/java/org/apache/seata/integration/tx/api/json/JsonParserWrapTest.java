@@ -30,9 +30,9 @@ import static org.mockito.Mockito.when;
 public class JsonParserWrapTest {
 
     private JsonParserWrap parserWrap;
-    private final String jsonString = "{\"actionName\":\"business_action\",\"useCommonFence\":null,\"businessActionContext\":null," +
-            "\"branchType\":\"TCC\",\"delayReport\":null}";
-
+    private final String jsonString =
+            "{\"actionName\":\"business_action\",\"useCommonFence\":null,\"businessActionContext\":null,"
+                    + "\"branchType\":\"TCC\",\"delayReport\":null}";
 
     @BeforeEach
     public void setUp() {

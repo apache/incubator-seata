@@ -16,21 +16,16 @@
  */
 package org.apache.seata.server.session.redis;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.apache.seata.common.XID;
 import org.apache.seata.common.exception.RedisException;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.util.BeanUtils;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.core.exception.TransactionException;
+import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.server.DynamicPortTestConfig;
 import org.apache.seata.server.console.entity.param.GlobalSessionParam;
 import org.apache.seata.server.console.entity.vo.GlobalLockVO;
-import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.server.console.entity.vo.GlobalSessionVO;
 import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.session.SessionCondition;
@@ -50,7 +45,14 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
 import redis.clients.jedis.Jedis;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import static org.apache.seata.server.storage.SessionConverter.convertToGlobalSessionVo;
+
 /**
  */
 @SpringBootTest
@@ -74,8 +76,8 @@ public class RedisTransactionStoreManagerTest {
     }
 
     @AfterAll
-    public static void close(){
-        redisTransactionStoreManager=null;
+    public static void close() {
+        redisTransactionStoreManager = null;
     }
 
     @Test
@@ -100,14 +102,20 @@ public class RedisTransactionStoreManagerTest {
         sessionManager.addGlobalSession(session2);
         List<GlobalSession> list = sessionManager.findGlobalSessions(sessionCondition);
         for (GlobalSession globalSession : list) {
-            LOGGER.info("sorted xid: {},timeout: {}",globalSession.getXid(),globalSession.getTimeout()+globalSession.getBeginTime());
+            LOGGER.info(
+                    "sorted xid: {},timeout: {}",
+                    globalSession.getXid(),
+                    globalSession.getTimeout() + globalSession.getBeginTime());
         }
-        List<GlobalSession> list2 = (List<GlobalSession>)sessionManager.allSessions();
+        List<GlobalSession> list2 = (List<GlobalSession>) sessionManager.allSessions();
         for (GlobalSession globalSession : list2) {
-            LOGGER.info("xid: {},timeout: {}",globalSession.getXid(),globalSession.getTimeout()+globalSession.getBeginTime());
+            LOGGER.info(
+                    "xid: {},timeout: {}",
+                    globalSession.getXid(),
+                    globalSession.getTimeout() + globalSession.getBeginTime());
         }
         Assertions.assertEquals(2, list2.size());
-        if(CollectionUtils.isNotEmpty(list)) {
+        if (CollectionUtils.isNotEmpty(list)) {
             Assertions.assertEquals(xid1, list.size() > 1 ? list.get(1).getXid() : list.get(0));
             if (list.size() > 1 && list2.size() > 1) {
                 Assertions.assertNotEquals(list2.get(0).getXid(), list.get(0).getXid());
@@ -122,7 +130,9 @@ public class RedisTransactionStoreManagerTest {
         String GLOBAL_LOCK_KEY = "SEATA_GLOBAL_LOCK_192.168.158.80:8091:37621364385185792";
         String ROW_LOCK_KEY = "SEATA_ROW_LOCK_jdbc:mysql://116.62.62.26/seata-order^^^order^^^2188";
         Map<String, String> globallockMap = new HashMap<>();
-        globallockMap.put("137621367686103001", "SEATA_ROW_LOCK_jdbc:mysql://116.62.62.26/seata-order^^^order^^^2188;SEATA_ROW_LOCK_jdbc:mysql://116.62.62.26/seata-storage^^^storage^^^1");
+        globallockMap.put(
+                "137621367686103001",
+                "SEATA_ROW_LOCK_jdbc:mysql://116.62.62.26/seata-order^^^order^^^2188;SEATA_ROW_LOCK_jdbc:mysql://116.62.62.26/seata-storage^^^storage^^^1");
         globallockMap.put("237621367686103002", "SEATA_ROW_LOCK_jdbc:mysql://116.62.62.26/seata-storage^^^storage^^^1");
         GlobalLockVO globalLockVO = new GlobalLockVO();
         globalLockVO.setXid("192.168.158.80:8091:37621364385185792");
@@ -154,7 +164,8 @@ public class RedisTransactionStoreManagerTest {
         param.setPageNum(0);
         param.setPageSize(5);
         param.setWithBranch(false);
-        List<GlobalSession> globalSessionKeys = redisTransactionStoreManager.findGlobalSessionByPage(param.getPageNum(), param.getPageSize(), param.isWithBranch());
+        List<GlobalSession> globalSessionKeys = redisTransactionStoreManager.findGlobalSessionByPage(
+                param.getPageNum(), param.getPageSize(), param.isWithBranch());
         LOGGER.info("the result size is:[{}]", globalSessionKeys.size());
         LOGGER.info("the globalSessionKeys is:[{}]", globalSessionKeys);
     }
@@ -222,29 +233,29 @@ public class RedisTransactionStoreManagerTest {
         session5.setStatus(GlobalStatus.Finished);
         sessionManager.addGlobalSession(session5);
 
-        //first:  setLogQueryLimit > totalCount
-        //second: setLogQueryLimit = totalCount
-        //third:  setLogQueryLimit < totalCount
+        // first:  setLogQueryLimit > totalCount
+        // second: setLogQueryLimit = totalCount
+        // third:  setLogQueryLimit < totalCount
         redisTransactionStoreManager.setLogQueryLimit(3);
         List<GlobalSession> globalSessions = redisTransactionStoreManager.readSession(GlobalStatus.values(), false);
         LOGGER.info("the limit  Sessions result is:[{}]", globalSessions);
         LOGGER.info("the limit  Sessions result size is:[{}]", globalSessions.size());
 
-        //first page
+        // first page
         final List<GlobalSession> globalSessions1 = redisTransactionStoreManager.findGlobalSessionByPage(1, 2, true);
         List<GlobalSessionVO> result = new ArrayList<>();
         convertToGlobalSessionVo(result, globalSessions1);
         LOGGER.info("the first page result is:[{}]", result);
         LOGGER.info("the first page result size is:[{}]", result.size());
 
-        //second page
+        // second page
         final List<GlobalSession> globalSessions2 = redisTransactionStoreManager.findGlobalSessionByPage(2, 2, true);
         List<GlobalSessionVO> result1 = new ArrayList<>();
         convertToGlobalSessionVo(result1, globalSessions2);
         LOGGER.info("the second page result is:[{}]", result1);
         LOGGER.info("the second page result size is:[{}]", result1.size());
 
-        //third page
+        // third page
         final List<GlobalSession> globalSessions3 = redisTransactionStoreManager.findGlobalSessionByPage(3, 2, true);
         List<GlobalSessionVO> result2 = new ArrayList<>();
         convertToGlobalSessionVo(result2, globalSessions3);
@@ -278,5 +289,4 @@ public class RedisTransactionStoreManagerTest {
         sessionManager.removeGlobalSession(session5);
         sessionManager.removeGlobalSession(session);
     }
-
 }

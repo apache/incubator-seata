@@ -16,11 +16,6 @@
  */
 package org.apache.seata.saga.engine.pcext.handlers;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
-
 import org.apache.seata.common.exception.FrameworkErrorCode;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.saga.engine.StateMachineConfig;
@@ -39,6 +34,11 @@ import org.apache.seata.saga.statelang.domain.TaskState.Loop;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
+
 /**
  * Loop State Handler
  * Start Loop Execution
@@ -53,10 +53,10 @@ public class LoopStartStateHandler implements StateHandler {
     public void process(ProcessContext context) throws EngineExecutionException {
 
         StateInstruction instruction = context.getInstruction(StateInstruction.class);
-        StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(
-            DomainConstants.VAR_NAME_STATEMACHINE_INST);
-        StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
-            DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
+        StateMachineInstance stateMachineInstance =
+                (StateMachineInstance) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_INST);
+        StateMachineConfig stateMachineConfig =
+                (StateMachineConfig) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
 
         instruction.setTemporaryState(null);
 
@@ -70,14 +70,18 @@ public class LoopStartStateHandler implements StateHandler {
 
             if (!stateMachineConfig.isEnableAsync() || null == stateMachineConfig.getAsyncProcessCtrlEventPublisher()) {
                 throw new EngineExecutionException(
-                    "Asynchronous start is disabled. Loop execution will run asynchronous, please set "
-                        + "StateMachineConfig.enableAsync=true first.", FrameworkErrorCode.AsynchronousStartDisabled);
+                        "Asynchronous start is disabled. Loop execution will run asynchronous, please set "
+                                + "StateMachineConfig.enableAsync=true first.",
+                        FrameworkErrorCode.AsynchronousStartDisabled);
             }
 
             int totalInstances;
-            if (DomainConstants.OPERATION_NAME_FORWARD.equals(context.getVariable(DomainConstants.VAR_NAME_OPERATION_NAME))) {
-                LoopTaskUtils.reloadLoopContext(context, instruction.getState(context).getName());
-                totalInstances = loopContextHolder.getNrOfInstances().get() - loopContextHolder.getNrOfCompletedInstances().get();
+            if (DomainConstants.OPERATION_NAME_FORWARD.equals(
+                    context.getVariable(DomainConstants.VAR_NAME_OPERATION_NAME))) {
+                LoopTaskUtils.reloadLoopContext(
+                        context, instruction.getState(context).getName());
+                totalInstances = loopContextHolder.getNrOfInstances().get()
+                        - loopContextHolder.getNrOfCompletedInstances().get();
             } else {
                 LoopTaskUtils.createLoopCounterContext(context);
                 totalInstances = loopContextHolder.getNrOfInstances().get();
@@ -95,25 +99,32 @@ public class LoopStartStateHandler implements StateHandler {
                     ProcessContextImpl tempContext;
                     // fail end inst should be forward without completion condition check
                     if (!loopContextHolder.getForwardCounterStack().isEmpty()) {
-                        int failEndLoopCounter = loopContextHolder.getForwardCounterStack().pop();
-                        tempContext = (ProcessContextImpl)LoopTaskUtils.createLoopEventContext(context, failEndLoopCounter);
+                        int failEndLoopCounter =
+                                loopContextHolder.getForwardCounterStack().pop();
+                        tempContext =
+                                (ProcessContextImpl) LoopTaskUtils.createLoopEventContext(context, failEndLoopCounter);
                     } else if (loopContextHolder.isFailEnd() || LoopTaskUtils.isCompletionConditionSatisfied(context)) {
                         semaphore.release();
                         break;
                     } else {
-                        tempContext = (ProcessContextImpl)LoopTaskUtils.createLoopEventContext(context, -1);
+                        tempContext = (ProcessContextImpl) LoopTaskUtils.createLoopEventContext(context, -1);
                     }
 
-                    if (DomainConstants.OPERATION_NAME_FORWARD.equals(context.getVariable(DomainConstants.VAR_NAME_OPERATION_NAME))) {
-                        ((HierarchicalProcessContext)context).setVariableLocally(
-                            DomainConstants.VAR_NAME_IS_FOR_SUB_STATMACHINE_FORWARD, LoopTaskUtils.isForSubStateMachineForward(tempContext));
+                    if (DomainConstants.OPERATION_NAME_FORWARD.equals(
+                            context.getVariable(DomainConstants.VAR_NAME_OPERATION_NAME))) {
+                        ((HierarchicalProcessContext) context)
+                                .setVariableLocally(
+                                        DomainConstants.VAR_NAME_IS_FOR_SUB_STATMACHINE_FORWARD,
+                                        LoopTaskUtils.isForSubStateMachineForward(tempContext));
                     }
                     stateMachineConfig.getAsyncProcessCtrlEventPublisher().publish(tempContext);
                     loopContextHolder.getNrOfActiveInstances().incrementAndGet();
                     loopContextList.add(tempContext);
                 } catch (InterruptedException e) {
-                    LOGGER.error("try execute loop task for State: [{}] is interrupted, message: [{}]",
-                        instruction.getStateName(), e.getMessage());
+                    LOGGER.error(
+                            "try execute loop task for State: [{}] is interrupted, message: [{}]",
+                            instruction.getStateName(),
+                            e.getMessage());
                     throw new EngineExecutionException(e);
                 }
             }
@@ -137,8 +148,10 @@ public class LoopStartStateHandler implements StateHandler {
                 }
             }
         } catch (InterruptedException e) {
-            LOGGER.error("State: [{}] wait loop execution complete is interrupted, message: [{}]",
-                instruction.getStateName(), e.getMessage());
+            LOGGER.error(
+                    "State: [{}] wait loop execution complete is interrupted, message: [{}]",
+                    instruction.getStateName(),
+                    e.getMessage());
             throw new EngineExecutionException(e);
         } finally {
             context.removeVariable(DomainConstants.LOOP_SEMAPHORE);
@@ -147,19 +160,21 @@ public class LoopStartStateHandler implements StateHandler {
         }
 
         if (loopContextHolder.isFailEnd()) {
-            String currentExceptionRoute = LoopTaskUtils.decideCurrentExceptionRoute(loopContextList, stateMachineInstance.getStateMachine());
+            String currentExceptionRoute =
+                    LoopTaskUtils.decideCurrentExceptionRoute(loopContextList, stateMachineInstance.getStateMachine());
             if (StringUtils.isNotBlank(currentExceptionRoute)) {
-                ((HierarchicalProcessContext)context).setVariableLocally(DomainConstants.VAR_NAME_CURRENT_EXCEPTION_ROUTE, currentExceptionRoute);
+                ((HierarchicalProcessContext) context)
+                        .setVariableLocally(DomainConstants.VAR_NAME_CURRENT_EXCEPTION_ROUTE, currentExceptionRoute);
             } else {
                 for (ProcessContext processContext : loopContextList) {
                     if (processContext.hasVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION)) {
-                        Exception exception = (Exception)processContext.getVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION);
+                        Exception exception =
+                                (Exception) processContext.getVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION);
                         EngineUtils.failStateMachine(context, exception);
                         break;
                     }
                 }
             }
         }
-
     }
 }

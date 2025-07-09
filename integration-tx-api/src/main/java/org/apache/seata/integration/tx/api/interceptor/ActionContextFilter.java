@@ -31,5 +31,4 @@ public interface ActionContextFilter {
      * @return the boolean
      */
     boolean needFilter(BusinessActionContextParameter parameter);
-
 }

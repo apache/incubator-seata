@@ -27,14 +27,11 @@ import io.grpc.MethodDescriptor;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.integration.grpc.interceptor.GrpcHeaderKey;
 
-
 public class ClientTransactionInterceptor implements ClientInterceptor {
 
     @Override
     public <ReqT, RespT> ClientCall<ReqT, RespT> interceptCall(
-        MethodDescriptor<ReqT, RespT> method,
-        CallOptions callOptions,
-        Channel next) {
+            MethodDescriptor<ReqT, RespT> method, CallOptions callOptions, Channel next) {
 
         String xid = RootContext.getXID();
         return new ForwardingClientCall.SimpleForwardingClientCall<ReqT, RespT>(next.newCall(method, callOptions)) {
@@ -43,14 +40,18 @@ public class ClientTransactionInterceptor implements ClientInterceptor {
             public void start(Listener<RespT> responseListener, Metadata headers) {
                 if (xid != null) {
                     headers.put(GrpcHeaderKey.XID_HEADER_KEY, xid);
-                    headers.put(GrpcHeaderKey.BRANCH_HEADER_KEY, RootContext.getBranchType().name());
+                    headers.put(
+                            GrpcHeaderKey.BRANCH_HEADER_KEY,
+                            RootContext.getBranchType().name());
                 }
-                super.start(new ForwardingClientCallListener.SimpleForwardingClientCallListener<RespT>(responseListener) {
-                    @Override
-                    public void onHeaders(Metadata headers) {
-                        super.onHeaders(headers);
-                    }
-                }, headers);
+                super.start(
+                        new ForwardingClientCallListener.SimpleForwardingClientCallListener<RespT>(responseListener) {
+                            @Override
+                            public void onHeaders(Metadata headers) {
+                                super.onHeaders(headers);
+                            }
+                        },
+                        headers);
             }
         };
     }

@@ -16,6 +16,19 @@
  */
 package org.apache.seata.server.storage.redis.lock;
 
+import org.apache.seata.common.exception.StoreException;
+import org.apache.seata.common.util.CollectionUtils;
+import org.apache.seata.common.util.LambdaUtils;
+import org.apache.seata.core.exception.BranchTransactionException;
+import org.apache.seata.core.lock.RowLock;
+import org.apache.seata.core.model.LockStatus;
+import org.apache.seata.core.store.LockDO;
+import org.apache.seata.server.storage.redis.JedisPooledFactory;
+import org.apache.seata.server.storage.redis.LuaParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import redis.clients.jedis.Jedis;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,19 +39,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import redis.clients.jedis.Jedis;
-
-import org.apache.seata.common.exception.StoreException;
-import org.apache.seata.common.util.CollectionUtils;
-import org.apache.seata.common.util.LambdaUtils;
-import org.apache.seata.core.exception.BranchTransactionException;
-import org.apache.seata.core.lock.RowLock;
-import org.apache.seata.core.model.LockStatus;
-import org.apache.seata.core.store.LockDO;
-import org.apache.seata.server.storage.redis.JedisPooledFactory;
-import org.apache.seata.server.storage.redis.LuaParser;
 
 import static org.apache.seata.common.Constants.ROW_LOCK_KEY_SPLIT_CHAR;
 import static org.apache.seata.core.exception.TransactionExceptionCode.LockKeyConflictFailFast;
@@ -102,9 +102,9 @@ public class RedisLuaLocker extends RedisLocker {
             String needLockXid = rowLocks.get(0).getXid();
             Long branchId = rowLocks.get(0).getBranchId();
             List<LockDO> needLockDOs = rowLocks.stream()
-                .map(this::convertToLockDO)
-                .filter(LambdaUtils.distinctByKey(LockDO::getRowKey))
-                .collect(Collectors.toList());
+                    .map(this::convertToLockDO)
+                    .filter(LambdaUtils.distinctByKey(LockDO::getRowKey))
+                    .collect(Collectors.toList());
             List<String> keys = new ArrayList<>();
             List<String> args = new ArrayList<>();
             int size = needLockDOs.size();
@@ -131,7 +131,7 @@ public class RedisLuaLocker extends RedisLocker {
             // reset args index 2
             args.set(1, String.valueOf(args.size()));
 
-            String result = (String)LuaParser.jedisEvalSha(jedis, luaSHA, ACQUIRE_LOCK_LUA_FILE_NAME, keys, args);
+            String result = (String) LuaParser.jedisEvalSha(jedis, luaSHA, ACQUIRE_LOCK_LUA_FILE_NAME, keys, args);
 
             LuaParser.LuaResult luaResult = LuaParser.getObjectFromJson(result, LuaParser.LuaResult.class);
 
@@ -208,7 +208,7 @@ public class RedisLuaLocker extends RedisLocker {
             keys.addAll(lockKeys);
             List<String> args = new ArrayList<>();
             args.add(xid);
-            String res = (String)LuaParser.jedisEvalSha(jedis, luaSHA, LOCKABLE_LUA_FILE_NAME, keys, args);
+            String res = (String) LuaParser.jedisEvalSha(jedis, luaSHA, LOCKABLE_LUA_FILE_NAME, keys, args);
             return "true".equals(res);
         }
     }

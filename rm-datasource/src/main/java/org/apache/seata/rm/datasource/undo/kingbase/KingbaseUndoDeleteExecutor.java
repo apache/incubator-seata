@@ -59,15 +59,14 @@ public class KingbaseUndoDeleteExecutor extends AbstractUndoExecutor {
         }
         Row row = beforeImageRows.get(0);
         List<Field> fields = new ArrayList<>(row.nonPrimaryKeys());
-        fields.addAll(getOrderedPkList(beforeImage,row,JdbcConstants.KINGBASE));
+        fields.addAll(getOrderedPkList(beforeImage, row, JdbcConstants.KINGBASE));
 
         // delete sql undo log before image all field come from table meta, need add escape.
         // see BaseTransactionalExecutor#buildTableRecords
         String insertColumns = fields.stream()
                 .map(field -> ColumnUtils.addEscape(field.getName(), JdbcConstants.KINGBASE))
                 .collect(Collectors.joining(", "));
-        String insertValues = fields.stream().map(field -> "?")
-                .collect(Collectors.joining(", "));
+        String insertValues = fields.stream().map(field -> "?").collect(Collectors.joining(", "));
 
         return String.format(INSERT_SQL_TEMPLATE, sqlUndoLog.getTableName(), insertColumns, insertValues);
     }

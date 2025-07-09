@@ -16,19 +16,19 @@
  */
 package org.apache.seata.server;
 
-import java.io.IOException;
-import java.net.ServerSocket;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+
+import java.io.IOException;
+import java.net.ServerSocket;
 
 @TestConfiguration
 public class DynamicPortTestConfig {
     @DynamicPropertySource
     static void dynamicProperties(DynamicPropertyRegistry registry) throws IOException {
         try (ServerSocket serverSocket = new ServerSocket(0);
-             ServerSocket exporterSocket = new ServerSocket(0);
-        ) {
+                ServerSocket exporterSocket = new ServerSocket(0); ) {
             int servicePort = serverSocket.getLocalPort();
             int exporterPort = exporterSocket.getLocalPort();
 

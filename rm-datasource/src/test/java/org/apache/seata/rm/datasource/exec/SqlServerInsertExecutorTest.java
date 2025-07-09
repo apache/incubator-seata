@@ -16,6 +16,22 @@
  */
 package org.apache.seata.rm.datasource.exec;
 
+import org.apache.seata.common.exception.NotSupportYetException;
+import org.apache.seata.rm.datasource.ConnectionProxy;
+import org.apache.seata.rm.datasource.PreparedStatementProxy;
+import org.apache.seata.rm.datasource.StatementProxy;
+import org.apache.seata.rm.datasource.exec.sqlserver.SqlServerInsertExecutor;
+import org.apache.seata.sqlparser.SQLInsertRecognizer;
+import org.apache.seata.sqlparser.struct.ColumnMeta;
+import org.apache.seata.sqlparser.struct.Null;
+import org.apache.seata.sqlparser.struct.SqlSequenceExpr;
+import org.apache.seata.sqlparser.struct.TableMeta;
+import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,28 +39,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.seata.rm.datasource.exec.StatementCallback;
-import org.apache.seata.common.exception.NotSupportYetException;
-import org.apache.seata.rm.datasource.ConnectionProxy;
-import org.apache.seata.rm.datasource.PreparedStatementProxy;
-import org.apache.seata.rm.datasource.StatementProxy;
-import org.apache.seata.rm.datasource.exec.sqlserver.SqlServerInsertExecutor;
-import org.apache.seata.sqlparser.struct.ColumnMeta;
-import org.apache.seata.sqlparser.struct.TableMeta;
-import org.apache.seata.sqlparser.SQLInsertRecognizer;
-import org.apache.seata.sqlparser.struct.Null;
-import org.apache.seata.sqlparser.struct.SqlSequenceExpr;
-import org.apache.seata.sqlparser.util.JdbcConstants;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
 
 public class SqlServerInsertExecutorTest {
     private static final String ID_COLUMN = "id";
@@ -79,11 +77,14 @@ public class SqlServerInsertExecutorTest {
         statementCallback = mock(StatementCallback.class);
         sqlInsertRecognizer = mock(SQLInsertRecognizer.class);
         tableMeta = mock(TableMeta.class);
-        insertExecutor = Mockito.spy(new SqlServerInsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
+        insertExecutor =
+                Mockito.spy(new SqlServerInsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
 
-        pkIndexMap = new HashMap<String, Integer>() {{
-            put(ID_COLUMN, pkIndex);
-        }};
+        pkIndexMap = new HashMap<String, Integer>() {
+            {
+                put(ID_COLUMN, pkIndex);
+            }
+        };
     }
 
     @Test
@@ -91,7 +92,7 @@ public class SqlServerInsertExecutorTest {
         mockInsertColumns();
         SqlSequenceExpr expr = mockParametersPkWithSeq();
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
-        when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{ID_COLUMN}));
+        when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[] {ID_COLUMN}));
         List<Object> pkValuesSeq = new ArrayList<>();
         pkValuesSeq.add(PK_VALUE);
 
@@ -108,13 +109,13 @@ public class SqlServerInsertExecutorTest {
         mockInsertColumns();
         mockParametersPkWithAuto();
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
-        when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{ID_COLUMN}));
+        when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[] {ID_COLUMN}));
 
-        doReturn(Arrays.asList(new Object[]{PK_VALUE})).when(insertExecutor).getGeneratedKeys();
+        doReturn(Arrays.asList(new Object[] {PK_VALUE})).when(insertExecutor).getGeneratedKeys();
         Map<String, List<Object>> pkValuesByAuto = insertExecutor.getPkValues();
 
         verify(insertExecutor).getGeneratedKeys();
-        Assertions.assertEquals(pkValuesByAuto.get(ID_COLUMN), Arrays.asList(new Object[]{PK_VALUE}));
+        Assertions.assertEquals(pkValuesByAuto.get(ID_COLUMN), Arrays.asList(new Object[] {PK_VALUE}));
     }
 
     @Test
@@ -126,7 +127,8 @@ public class SqlServerInsertExecutorTest {
         when(statementProxy.getConnectionProxy()).thenReturn(connectionProxy);
         when(connectionProxy.getDbType()).thenReturn(JdbcConstants.ORACLE);
 
-        insertExecutor = Mockito.spy(new SqlServerInsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
+        insertExecutor =
+                Mockito.spy(new SqlServerInsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
 
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
 
@@ -143,9 +145,7 @@ public class SqlServerInsertExecutorTest {
         doReturn(pkIndexMap).when(insertExecutor).getPkIndex();
 
         Assertions.assertThrows(NotSupportYetException.class, () -> insertExecutor.getPkValuesByColumn());
-
     }
-
 
     private List<String> mockInsertColumns() {
         List<String> columns = new ArrayList<>();

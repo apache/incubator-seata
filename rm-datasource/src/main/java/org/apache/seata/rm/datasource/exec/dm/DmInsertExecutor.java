@@ -52,39 +52,37 @@ public class DmInsertExecutor extends BaseInsertExecutor implements Sequenceable
      * @param statementCallback the statement callback
      * @param sqlRecognizer     the sql recognizer
      */
-    public DmInsertExecutor(StatementProxy statementProxy, StatementCallback statementCallback,
-                            SQLRecognizer sqlRecognizer) {
+    public DmInsertExecutor(
+            StatementProxy statementProxy, StatementCallback statementCallback, SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }
 
     @Override
-    public Map<String,List<Object>> getPkValues() throws SQLException {
-        Map<String,List<Object>> pkValuesMap = null;
+    public Map<String, List<Object>> getPkValues() throws SQLException {
+        Map<String, List<Object>> pkValuesMap = null;
         Boolean isContainsPk = containsPK();
-        //when there is only one pk in the table
+        // when there is only one pk in the table
         if (isContainsPk) {
             pkValuesMap = getPkValuesByColumn();
-        }
-        else if (containsColumns()) {
+        } else if (containsColumns()) {
             String columnName = getTableMeta().getPrimaryKeyOnlyName().get(0);
             pkValuesMap = Collections.singletonMap(columnName, getGeneratedKeys());
-        }
-        else {
+        } else {
             pkValuesMap = getPkValuesByColumn();
         }
         return pkValuesMap;
     }
 
     @Override
-    public Map<String,List<Object>> getPkValuesByColumn() throws SQLException {
-        Map<String,List<Object>> pkValuesMap  = parsePkValuesFromStatement();
+    public Map<String, List<Object>> getPkValuesByColumn() throws SQLException {
+        Map<String, List<Object>> pkValuesMap = parsePkValuesFromStatement();
         String pkKey = pkValuesMap.keySet().iterator().next();
         List<Object> pkValues = pkValuesMap.get(pkKey);
 
         if (!pkValues.isEmpty() && pkValues.get(0) instanceof SqlSequenceExpr) {
-            pkValuesMap.put(pkKey,getPkValuesBySequence((SqlSequenceExpr) pkValues.get(0)));
+            pkValuesMap.put(pkKey, getPkValuesBySequence((SqlSequenceExpr) pkValues.get(0)));
         } else if (pkValues.size() == 1 && pkValues.get(0) instanceof SqlMethodExpr) {
-            pkValuesMap.put(pkKey,getGeneratedKeys());
+            pkValuesMap.put(pkKey, getGeneratedKeys());
         } else if (pkValues.size() == 1 && pkValues.get(0) instanceof Null) {
             throw new NotSupportYetException("dm not support null");
         }

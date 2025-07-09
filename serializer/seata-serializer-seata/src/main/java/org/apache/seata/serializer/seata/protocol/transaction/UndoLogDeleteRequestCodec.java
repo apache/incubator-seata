@@ -16,11 +16,11 @@
  */
 package org.apache.seata.serializer.seata.protocol.transaction;
 
-import java.nio.ByteBuffer;
-
 import io.netty.buffer.ByteBuf;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.protocol.transaction.UndoLogDeleteRequest;
+
+import java.nio.ByteBuffer;
 
 /**
  * The type UndoLog Delete end request codec.
@@ -35,32 +35,32 @@ public class UndoLogDeleteRequestCodec extends AbstractTransactionRequestToRMCod
 
     @Override
     public <T> void encode(T t, ByteBuf out) {
-        UndoLogDeleteRequest undoLogDeleteRequest = (UndoLogDeleteRequest)t;
+        UndoLogDeleteRequest undoLogDeleteRequest = (UndoLogDeleteRequest) t;
         short saveDays = undoLogDeleteRequest.getSaveDays();
         BranchType branchType = undoLogDeleteRequest.getBranchType();
         String resourceId = undoLogDeleteRequest.getResourceId();
 
         // 1. Branch Type
-        out.writeByte((byte)branchType.ordinal());
+        out.writeByte((byte) branchType.ordinal());
 
         // 2. Resource Id
         if (resourceId != null) {
             byte[] bs = resourceId.getBytes(UTF8);
-            out.writeShort((short)bs.length);
+            out.writeShort((short) bs.length);
             if (bs.length > 0) {
                 out.writeBytes(bs);
             }
         } else {
-            out.writeShort((short)0);
+            out.writeShort((short) 0);
         }
 
-        //3.save days
+        // 3.save days
         out.writeShort(saveDays);
     }
 
     @Override
     public <T> void decode(T t, ByteBuffer in) {
-        UndoLogDeleteRequest undoLogDeleteRequest = (UndoLogDeleteRequest)t;
+        UndoLogDeleteRequest undoLogDeleteRequest = (UndoLogDeleteRequest) t;
 
         if (in.remaining() < 1) {
             return;
@@ -83,5 +83,4 @@ public class UndoLogDeleteRequestCodec extends AbstractTransactionRequestToRMCod
         }
         undoLogDeleteRequest.setSaveDays(in.getShort());
     }
-
 }

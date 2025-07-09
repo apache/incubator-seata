@@ -16,8 +16,6 @@
  */
 package org.apache.seata.integration.brpc;
 
-import java.util.Map;
-
 import com.baidu.brpc.interceptor.AbstractInterceptor;
 import com.baidu.brpc.interceptor.InterceptorChain;
 import com.baidu.brpc.protocol.Request;
@@ -26,6 +24,8 @@ import org.apache.seata.core.context.RootContext;
 import org.apache.seata.integration.rpc.core.ProviderRpcFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Map;
 
 /**
  * <p>1. load SEATA xid from brpc request in handleRequest</p>
@@ -69,7 +69,10 @@ public class TransactionPropagationServerInterceptor extends AbstractInterceptor
             }
             if (null != rpcXid && !rpcXid.equalsIgnoreCase(xid)) {
                 if (LOGGER.isWarnEnabled()) {
-                    LOGGER.warn("SEATA-BRPC context changed during RPC from {} to {},will be reset.", getJsonContext(rpcContexts), getJsonContext(rootContexts));
+                    LOGGER.warn(
+                            "SEATA-BRPC context changed during RPC from {} to {},will be reset.",
+                            getJsonContext(rpcContexts),
+                            getJsonContext(rootContexts));
                 }
                 resetRootContexts(rootContexts);
             }

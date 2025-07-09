@@ -31,15 +31,17 @@ public class UpdateBranchSessionExecute extends AbstractRaftMsgExecute {
 
     @Override
     public Boolean execute(RaftBaseMsg syncMsg) throws Throwable {
-        RaftBranchSessionSyncMsg sessionSyncMsg = (RaftBranchSessionSyncMsg)syncMsg;
-        RaftSessionManager raftSessionManager = (RaftSessionManager) SessionHolder.getRootSessionManager(sessionSyncMsg.getGroup());
+        RaftBranchSessionSyncMsg sessionSyncMsg = (RaftBranchSessionSyncMsg) syncMsg;
+        RaftSessionManager raftSessionManager =
+                (RaftSessionManager) SessionHolder.getRootSessionManager(sessionSyncMsg.getGroup());
         String xid = sessionSyncMsg.getBranchSession().getXid();
         GlobalSession globalSession = raftSessionManager.findGlobalSession(xid);
         if (globalSession == null) {
             if (logger.isWarnEnabled()) {
                 logger.warn(
-                    "The transaction corresponding to the XID: {} does not exist, which may cause a two-phase concurrency issue, msg type: {}",
-                    xid, syncMsg.getMsgType());
+                        "The transaction corresponding to the XID: {} does not exist, which may cause a two-phase concurrency issue, msg type: {}",
+                        xid,
+                        syncMsg.getMsgType());
             }
             return false;
         }
@@ -48,8 +50,9 @@ public class UpdateBranchSessionExecute extends AbstractRaftMsgExecute {
         if (branchSession == null) {
             if (logger.isWarnEnabled()) {
                 logger.warn(
-                    "The branch session corresponding to the branchId: {} does not exist, which may cause a two-phase concurrency issue, msg type: {}",
-                    sessionSyncMsg.getBranchSession().getBranchId(), syncMsg.getMsgType());
+                        "The branch session corresponding to the branchId: {} does not exist, which may cause a two-phase concurrency issue, msg type: {}",
+                        sessionSyncMsg.getBranchSession().getBranchId(),
+                        syncMsg.getMsgType());
             }
             return false;
         }
@@ -60,5 +63,4 @@ public class UpdateBranchSessionExecute extends AbstractRaftMsgExecute {
         }
         return true;
     }
-
 }

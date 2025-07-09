@@ -18,7 +18,6 @@ package org.apache.seata.spring.tcc;
 
 import org.apache.seata.rm.tcc.api.BusinessActionContext;
 
-
 public interface TccAnnoAtInterImplAction {
 
     /**
@@ -44,5 +43,4 @@ public interface TccAnnoAtInterImplAction {
      * @return the boolean
      */
     boolean rollback(BusinessActionContext actionContext);
-
 }

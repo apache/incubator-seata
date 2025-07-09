@@ -16,8 +16,6 @@
  */
 package org.apache.seata.discovery.registry.etcd3;
 
-import static io.netty.util.CharsetUtil.UTF_8;
-
 import io.etcd.jetcd.ByteSequence;
 import io.etcd.jetcd.Client;
 import io.etcd.jetcd.Lease;
@@ -29,6 +27,18 @@ import io.etcd.jetcd.options.LeaseOption;
 import io.etcd.jetcd.options.PutOption;
 import io.etcd.jetcd.options.WatchOption;
 import io.etcd.jetcd.watch.WatchResponse;
+import org.apache.seata.common.exception.ShouldNeverHappenException;
+import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.util.NetUtil;
+import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.config.Configuration;
+import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.config.exception.ConfigNotFoundException;
+import org.apache.seata.discovery.registry.RegistryHeartBeats;
+import org.apache.seata.discovery.registry.RegistryService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.HashSet;
@@ -44,17 +54,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import org.apache.seata.common.exception.ShouldNeverHappenException;
-import org.apache.seata.common.thread.NamedThreadFactory;
-import org.apache.seata.common.util.NetUtil;
-import org.apache.seata.common.util.StringUtils;
-import org.apache.seata.config.Configuration;
-import org.apache.seata.config.ConfigurationFactory;
-import org.apache.seata.config.exception.ConfigNotFoundException;
-import org.apache.seata.discovery.registry.RegistryHeartBeats;
-import org.apache.seata.discovery.registry.RegistryService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import static io.netty.util.CharsetUtil.UTF_8;
 
 public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> {
 

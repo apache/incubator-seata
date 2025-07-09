@@ -16,10 +16,6 @@
  */
 package io.seata.saga.engine.store.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import io.seata.saga.engine.store.StateLogStore;
 import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.proctrl.impl.ProcessContextImpl;
@@ -28,6 +24,10 @@ import io.seata.saga.statelang.domain.StateMachineInstance;
 import io.seata.saga.statelang.domain.impl.StateInstanceImpl;
 import io.seata.saga.statelang.domain.impl.StateMachineInstanceImpl;
 import org.apache.seata.common.util.CollectionUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class StateLogStoreImpl implements StateLogStore {
 
@@ -39,53 +39,64 @@ public class StateLogStoreImpl implements StateLogStore {
 
     @Override
     public void recordStateMachineStarted(StateMachineInstance machineInstance, ProcessContext context) {
-        actual.recordStateMachineStarted(((StateMachineInstanceImpl) machineInstance).unwrap(), ((ProcessContextImpl) context).unwrap());
+        actual.recordStateMachineStarted(
+                ((StateMachineInstanceImpl) machineInstance).unwrap(), ((ProcessContextImpl) context).unwrap());
     }
 
     @Override
     public void recordStateMachineFinished(StateMachineInstance machineInstance, ProcessContext context) {
-        actual.recordStateMachineFinished(((StateMachineInstanceImpl) machineInstance).unwrap(), ((ProcessContextImpl) context).unwrap());
+        actual.recordStateMachineFinished(
+                ((StateMachineInstanceImpl) machineInstance).unwrap(), ((ProcessContextImpl) context).unwrap());
     }
 
     @Override
     public void recordStateMachineRestarted(StateMachineInstance machineInstance, ProcessContext context) {
-        actual.recordStateMachineRestarted(((StateMachineInstanceImpl) machineInstance).unwrap(), ((ProcessContextImpl) context).unwrap());
+        actual.recordStateMachineRestarted(
+                ((StateMachineInstanceImpl) machineInstance).unwrap(), ((ProcessContextImpl) context).unwrap());
     }
 
     @Override
     public void recordStateStarted(StateInstance stateInstance, ProcessContext context) {
-        actual.recordStateStarted(((StateInstanceImpl) stateInstance).unwrap(), ((ProcessContextImpl) context).unwrap());
+        actual.recordStateStarted(
+                ((StateInstanceImpl) stateInstance).unwrap(), ((ProcessContextImpl) context).unwrap());
     }
 
     @Override
     public void recordStateFinished(StateInstance stateInstance, ProcessContext context) {
-        actual.recordStateFinished(((StateInstanceImpl) stateInstance).unwrap(), ((ProcessContextImpl) context).unwrap());
+        actual.recordStateFinished(
+                ((StateInstanceImpl) stateInstance).unwrap(), ((ProcessContextImpl) context).unwrap());
     }
 
     @Override
     public StateMachineInstance getStateMachineInstance(String stateMachineInstanceId) {
-        org.apache.seata.saga.statelang.domain.StateMachineInstance stateMachineInstance = actual.getStateMachineInstance(stateMachineInstanceId);
+        org.apache.seata.saga.statelang.domain.StateMachineInstance stateMachineInstance =
+                actual.getStateMachineInstance(stateMachineInstanceId);
         return StateMachineInstanceImpl.wrap(stateMachineInstance);
     }
 
     @Override
     public StateMachineInstance getStateMachineInstanceByBusinessKey(String businessKey, String tenantId) {
-        org.apache.seata.saga.statelang.domain.StateMachineInstance stateMachineInstance = actual.getStateMachineInstanceByBusinessKey(businessKey, tenantId);
+        org.apache.seata.saga.statelang.domain.StateMachineInstance stateMachineInstance =
+                actual.getStateMachineInstanceByBusinessKey(businessKey, tenantId);
         return StateMachineInstanceImpl.wrap(stateMachineInstance);
     }
 
     @Override
     public List<StateMachineInstance> queryStateMachineInstanceByParentId(String parentId) {
-        List<org.apache.seata.saga.statelang.domain.StateMachineInstance> stateMachineInstances = actual.queryStateMachineInstanceByParentId(parentId);
+        List<org.apache.seata.saga.statelang.domain.StateMachineInstance> stateMachineInstances =
+                actual.queryStateMachineInstanceByParentId(parentId);
         if (CollectionUtils.isEmpty(stateMachineInstances)) {
             return new ArrayList<>();
         }
-        return stateMachineInstances.stream().map(StateMachineInstanceImpl::wrap).collect(Collectors.toList());
+        return stateMachineInstances.stream()
+                .map(StateMachineInstanceImpl::wrap)
+                .collect(Collectors.toList());
     }
 
     @Override
     public StateInstance getStateInstance(String stateInstanceId, String machineInstId) {
-        org.apache.seata.saga.statelang.domain.StateInstance stateInstance = actual.getStateInstance(stateInstanceId, machineInstId);
+        org.apache.seata.saga.statelang.domain.StateInstance stateInstance =
+                actual.getStateInstance(stateInstanceId, machineInstId);
         if (stateInstance == null) {
             return null;
         }
@@ -94,7 +105,8 @@ public class StateLogStoreImpl implements StateLogStore {
 
     @Override
     public List<StateInstance> queryStateInstanceListByMachineInstanceId(String stateMachineInstanceId) {
-        List<org.apache.seata.saga.statelang.domain.StateInstance> stateInstances = actual.queryStateInstanceListByMachineInstanceId(stateMachineInstanceId);
+        List<org.apache.seata.saga.statelang.domain.StateInstance> stateInstances =
+                actual.queryStateInstanceListByMachineInstanceId(stateMachineInstanceId);
         if (CollectionUtils.isEmpty(stateInstances)) {
             return new ArrayList<>();
         }

@@ -37,7 +37,7 @@ public class ParameterParserTest {
      */
     @BeforeEach
     private void init() {
-        String[] args = new String[] {"-h", "127.0.0.1", "-p", "8088", "-m", "file","-e","test"};
+        String[] args = new String[] {"-h", "127.0.0.1", "-p", "8088", "-m", "file", "-e", "test"};
         parameterParser = new ParameterParser(args);
     }
 
@@ -49,7 +49,7 @@ public class ParameterParserTest {
         String[] args = new String[] {"-h", "127.0.0.1", "-p", "8088"};
         parameterParser.cleanUp();
         parameterParser = new ParameterParser(args);
-        //always set store.mode=file in test/resource/file.conf, if not will cause SessionStoreTest's case fail.
+        // always set store.mode=file in test/resource/file.conf, if not will cause SessionStoreTest's case fail.
         Assertions.assertNull(parameterParser.getStoreMode());
     }
 
@@ -95,5 +95,4 @@ public class ParameterParserTest {
             parameterParser = null;
         }
     }
-
 }

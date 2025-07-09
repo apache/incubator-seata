@@ -16,10 +16,6 @@
  */
 package org.apache.seata.compressor.lz4;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-
 import net.jpountz.lz4.LZ4BlockInputStream;
 import net.jpountz.lz4.LZ4BlockOutputStream;
 import net.jpountz.lz4.LZ4Compressor;
@@ -27,6 +23,10 @@ import net.jpountz.lz4.LZ4Factory;
 import net.jpountz.lz4.LZ4FastDecompressor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 /**
  * the Lz4 Util
@@ -42,8 +42,8 @@ public class Lz4Util {
         }
         LZ4Compressor compressor = LZ4Factory.fastestInstance().fastCompressor();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        try (LZ4BlockOutputStream lz4BlockOutputStream
-                     = new LZ4BlockOutputStream(outputStream, ARRAY_SIZE, compressor)) {
+        try (LZ4BlockOutputStream lz4BlockOutputStream =
+                new LZ4BlockOutputStream(outputStream, ARRAY_SIZE, compressor)) {
             lz4BlockOutputStream.write(bytes);
         } catch (IOException e) {
             LOGGER.error("compress bytes error", e);
@@ -60,8 +60,7 @@ public class Lz4Util {
 
         LZ4FastDecompressor decompressor = LZ4Factory.fastestInstance().fastDecompressor();
         ByteArrayInputStream inputStream = new ByteArrayInputStream(bytes);
-        try (LZ4BlockInputStream decompressedInputStream
-                     = new LZ4BlockInputStream(inputStream, decompressor)) {
+        try (LZ4BlockInputStream decompressedInputStream = new LZ4BlockInputStream(inputStream, decompressor)) {
             int count;
             byte[] buffer = new byte[ARRAY_SIZE];
             while ((count = decompressedInputStream.read(buffer)) != -1) {

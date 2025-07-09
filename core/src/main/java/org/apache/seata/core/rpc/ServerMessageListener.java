@@ -59,5 +59,4 @@ public interface ServerMessageListener {
      * @param ctx     the ctx
      */
     void onCheckMessage(RpcMessage request, ChannelHandlerContext ctx);
-
 }

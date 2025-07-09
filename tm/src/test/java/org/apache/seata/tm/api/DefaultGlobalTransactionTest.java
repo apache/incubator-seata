@@ -16,7 +16,6 @@
  */
 package org.apache.seata.tm.api;
 
-
 import org.apache.seata.common.XID;
 import org.apache.seata.common.util.UUIDGenerator;
 import org.apache.seata.core.context.RootContext;
@@ -27,10 +26,8 @@ import org.apache.seata.tm.TransactionManagerHolder;
 import org.apache.seata.tm.api.transaction.MyRuntimeException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 
 class DefaultGlobalTransactionTest {
 
@@ -70,7 +67,6 @@ class DefaultGlobalTransactionTest {
         RootContext.unbind();
     }
 
-
     @Test
     public void commitRetryExceptionTest() throws TransactionException {
         GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
@@ -83,7 +79,6 @@ class DefaultGlobalTransactionTest {
         GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
         Assertions.assertThrows(IllegalStateException.class, tx::commit);
     }
-
 
     @Test
     public void rollBackRetryExceptionTest() throws TransactionException {
@@ -103,5 +98,4 @@ class DefaultGlobalTransactionTest {
     public void afterEach() {
         TransactionManagerHolder.set(backTransactionManager);
     }
-
 }

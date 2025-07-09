@@ -34,14 +34,16 @@ public class StoreExceptionTest {
 
     @Test
     public void testConstructorWithMessageAndFrameworkErrorCode() {
-        exceptionAsserts(
-            new StoreException(FrameworkErrorCode.UnknownAppError.getErrMessage(), FrameworkErrorCode.UnknownAppError));
+        exceptionAsserts(new StoreException(
+                FrameworkErrorCode.UnknownAppError.getErrMessage(), FrameworkErrorCode.UnknownAppError));
     }
 
     @Test
     public void testConstructorWithCauseExceptionMessageAndFrameworkErrorCode() {
-        exceptionAsserts(new StoreException(new Throwable(), FrameworkErrorCode.UnknownAppError.getErrMessage(),
-            FrameworkErrorCode.UnknownAppError));
+        exceptionAsserts(new StoreException(
+                new Throwable(),
+                FrameworkErrorCode.UnknownAppError.getErrMessage(),
+                FrameworkErrorCode.UnknownAppError));
     }
 
     @Test
@@ -55,8 +57,9 @@ public class StoreExceptionTest {
     }
 
     private static void exceptionAsserts(StoreException exception) {
-        assertThat(exception).isInstanceOf(StoreException.class).hasMessage(
-            FrameworkErrorCode.UnknownAppError.getErrMessage());
+        assertThat(exception)
+                .isInstanceOf(StoreException.class)
+                .hasMessage(FrameworkErrorCode.UnknownAppError.getErrMessage());
         assertThat(exception.getErrcode()).isEqualTo(FrameworkErrorCode.UnknownAppError);
     }
 }

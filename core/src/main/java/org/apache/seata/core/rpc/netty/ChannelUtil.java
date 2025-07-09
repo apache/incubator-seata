@@ -20,8 +20,8 @@ import io.netty.channel.Channel;
 import org.apache.seata.common.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.net.SocketAddress;
 
+import java.net.SocketAddress;
 
 public class ChannelUtil {
 

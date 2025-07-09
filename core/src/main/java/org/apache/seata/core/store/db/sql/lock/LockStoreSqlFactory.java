@@ -29,7 +29,7 @@ import java.util.Map;
  */
 public class LockStoreSqlFactory {
 
-    private static Map<String/*dbType*/, LockStoreSql> LOCK_STORE_SQL_MAP = Maps.newConcurrentMap();
+    private static Map<String /*dbType*/, LockStoreSql> LOCK_STORE_SQL_MAP = Maps.newConcurrentMap();
 
     /**
      * get the lock store sql
@@ -38,7 +38,9 @@ public class LockStoreSqlFactory {
      * @return lock store sql
      */
     public static LockStoreSql getLogStoreSql(String dbType) {
-        return CollectionUtils.computeIfAbsent(LOCK_STORE_SQL_MAP, dbType,
-            key -> EnhancedServiceLoader.load(LockStoreSql.class, dbType.toLowerCase()));
+        return CollectionUtils.computeIfAbsent(
+                LOCK_STORE_SQL_MAP,
+                dbType,
+                key -> EnhancedServiceLoader.load(LockStoreSql.class, dbType.toLowerCase()));
     }
 }

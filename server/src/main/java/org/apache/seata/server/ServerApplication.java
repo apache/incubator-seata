@@ -16,13 +16,13 @@
  */
 package org.apache.seata.server;
 
-import java.io.IOException;
-
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import static org.apache.seata.common.Constants.APPLICATION_TYPE_KEY;
 import static org.apache.seata.common.Constants.APPLICATION_TYPE_SERVER;
+
+import java.io.IOException;
 
 /**
  */

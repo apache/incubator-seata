@@ -16,32 +16,37 @@
  */
 package org.apache.seata.serializer.protobuf.convertor;
 
+import org.apache.seata.core.protocol.transaction.GlobalStatusRequest;
 import org.apache.seata.serializer.protobuf.generated.AbstractGlobalEndRequestProto;
 import org.apache.seata.serializer.protobuf.generated.AbstractMessageProto;
 import org.apache.seata.serializer.protobuf.generated.AbstractTransactionRequestProto;
 import org.apache.seata.serializer.protobuf.generated.GlobalStatusRequestProto;
 import org.apache.seata.serializer.protobuf.generated.MessageTypeProto;
-import org.apache.seata.core.protocol.transaction.GlobalStatusRequest;
-
 
 public class GlobalStatusRequestConvertor implements PbConvertor<GlobalStatusRequest, GlobalStatusRequestProto> {
     @Override
     public GlobalStatusRequestProto convert2Proto(GlobalStatusRequest globalStatusRequest) {
         final short typeCode = globalStatusRequest.getTypeCode();
 
-        final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder().setMessageType(
-            MessageTypeProto.forNumber(typeCode)).build();
+        final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder()
+                .setMessageType(MessageTypeProto.forNumber(typeCode))
+                .build();
 
-        final AbstractTransactionRequestProto abstractTransactionRequestProto = AbstractTransactionRequestProto
-            .newBuilder().setAbstractMessage(abstractMessage).build();
+        final AbstractTransactionRequestProto abstractTransactionRequestProto =
+                AbstractTransactionRequestProto.newBuilder()
+                        .setAbstractMessage(abstractMessage)
+                        .build();
 
         final String extraData = globalStatusRequest.getExtraData();
         AbstractGlobalEndRequestProto abstractGlobalEndRequestProto = AbstractGlobalEndRequestProto.newBuilder()
-            .setAbstractTransactionRequest(abstractTransactionRequestProto).setXid(globalStatusRequest.getXid())
-            .setExtraData(extraData == null ? "" : extraData).build();
+                .setAbstractTransactionRequest(abstractTransactionRequestProto)
+                .setXid(globalStatusRequest.getXid())
+                .setExtraData(extraData == null ? "" : extraData)
+                .build();
 
-        GlobalStatusRequestProto result = GlobalStatusRequestProto.newBuilder().setAbstractGlobalEndRequest(
-            abstractGlobalEndRequestProto).build();
+        GlobalStatusRequestProto result = GlobalStatusRequestProto.newBuilder()
+                .setAbstractGlobalEndRequest(abstractGlobalEndRequestProto)
+                .build();
 
         return result;
     }
@@ -49,8 +54,10 @@ public class GlobalStatusRequestConvertor implements PbConvertor<GlobalStatusReq
     @Override
     public GlobalStatusRequest convert2Model(GlobalStatusRequestProto globalStatusRequestProto) {
         GlobalStatusRequest branchCommitRequest = new GlobalStatusRequest();
-        branchCommitRequest.setExtraData(globalStatusRequestProto.getAbstractGlobalEndRequest().getExtraData());
-        branchCommitRequest.setXid(globalStatusRequestProto.getAbstractGlobalEndRequest().getXid());
+        branchCommitRequest.setExtraData(
+                globalStatusRequestProto.getAbstractGlobalEndRequest().getExtraData());
+        branchCommitRequest.setXid(
+                globalStatusRequestProto.getAbstractGlobalEndRequest().getXid());
         return branchCommitRequest;
     }
 }

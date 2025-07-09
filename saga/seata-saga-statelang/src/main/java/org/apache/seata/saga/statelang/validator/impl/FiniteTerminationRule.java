@@ -72,7 +72,8 @@ public class FiniteTerminationRule extends AbstractRule {
                 }
             }
             if (noOutgoingFlow) {
-                hint = String.format("There is a infinite loop [%s] without outgoing flow to end",
+                hint = String.format(
+                        "There is a infinite loop [%s] without outgoing flow to end",
                         String.join(", ", cycleStateNames));
                 return false;
             }
@@ -86,8 +87,7 @@ public class FiniteTerminationRule extends AbstractRule {
             DisjointSet disjointSet,
             Set<String> visited,
             Map<String, Set<String>> nextStateNameMap,
-            Stack<String> currentPathWithoutCycles
-    ) {
+            Stack<String> currentPathWithoutCycles) {
         State state = stateMachine.getState(stateName);
 
         if (visited.contains(stateName)) {
@@ -105,13 +105,12 @@ public class FiniteTerminationRule extends AbstractRule {
 
             visited.add(stateName);
             currentPathWithoutCycles.push(stateName);
-            for (String nextStateName: nextStateNames) {
+            for (String nextStateName : nextStateNames) {
                 iterate(stateMachine, nextStateName, disjointSet, visited, nextStateNameMap, currentPathWithoutCycles);
             }
             currentPathWithoutCycles.pop();
             visited.remove(stateName);
         }
-
     }
 
     private static class DisjointSet {

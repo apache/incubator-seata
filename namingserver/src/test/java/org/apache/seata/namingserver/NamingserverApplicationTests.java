@@ -23,7 +23,5 @@ import org.springframework.boot.test.context.SpringBootTest;
 class NamingserverApplicationTests {
 
     @Test
-    void contextLoads() {
-    }
-
+    void contextLoads() {}
 }

@@ -51,24 +51,24 @@ public class MessageFuture {
      * @throws TimeoutException the timeout exception
      * @throws InterruptedException the interrupted exception
      */
-    public Object get(long timeout, TimeUnit unit) throws TimeoutException,
-        InterruptedException {
+    public Object get(long timeout, TimeUnit unit) throws TimeoutException, InterruptedException {
         Object result = null;
         try {
             result = origin.get(timeout, unit);
             if (result instanceof TimeoutException) {
-                throw (TimeoutException)result;
+                throw (TimeoutException) result;
             }
         } catch (ExecutionException e) {
             throw new ShouldNeverHappenException("Should not get results in a multi-threaded environment", e);
         } catch (TimeoutException e) {
-            throw new TimeoutException(String.format("%s ,cost: %d ms", e.getMessage(), System.currentTimeMillis() - start));
+            throw new TimeoutException(
+                    String.format("%s ,cost: %d ms", e.getMessage(), System.currentTimeMillis() - start));
         }
 
         if (result instanceof RuntimeException) {
-            throw (RuntimeException)result;
+            throw (RuntimeException) result;
         } else if (result instanceof Throwable) {
-            throw new RuntimeException((Throwable)result);
+            throw new RuntimeException((Throwable) result);
         }
 
         return result;

@@ -16,22 +16,22 @@
  */
 package org.apache.seata.rm.datasource.exec.sqlserver;
 
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringJoiner;
-
 import org.apache.seata.common.exception.NotSupportYetException;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.rm.datasource.StatementProxy;
 import org.apache.seata.rm.datasource.exec.MultiDeleteExecutor;
 import org.apache.seata.rm.datasource.exec.StatementCallback;
-import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
 import org.apache.seata.sqlparser.SQLDeleteRecognizer;
 import org.apache.seata.sqlparser.SQLRecognizer;
+import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.sqlparser.util.ColumnUtils;
+
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringJoiner;
 
 /**
  * The type SqlServer MultiSql executor.
@@ -40,7 +40,10 @@ import org.apache.seata.sqlparser.util.ColumnUtils;
  * @param <S> the type parameter
  */
 public class SqlServerMultiDeleteExecutor<T, S extends Statement> extends MultiDeleteExecutor<T, S> {
-    public SqlServerMultiDeleteExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback, List<SQLRecognizer> sqlRecognizers) {
+    public SqlServerMultiDeleteExecutor(
+            StatementProxy<S> statementProxy,
+            StatementCallback<T, S> statementCallback,
+            List<SQLRecognizer> sqlRecognizers) {
         super(statementProxy, statementCallback, sqlRecognizers);
     }
 
@@ -71,9 +74,8 @@ public class SqlServerMultiDeleteExecutor<T, S extends Statement> extends MultiD
             }
             whereCondition.append(whereConditionStr);
         }
-        StringBuilder suffix = new StringBuilder(" FROM ")
-                .append(getFromTableInSQL())
-                .append(" WITH(UPDLOCK) ");
+        StringBuilder suffix =
+                new StringBuilder(" FROM ").append(getFromTableInSQL()).append(" WITH(UPDLOCK) ");
         if (whereCondition.length() > 0) {
             suffix.append(" WHERE ").append(whereCondition);
         }

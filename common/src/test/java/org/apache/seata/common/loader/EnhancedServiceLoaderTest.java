@@ -16,12 +16,13 @@
  */
 package org.apache.seata.common.loader;
 
-import java.lang.reflect.Field;
-import java.util.List;
-import java.util.Map;
 import org.apache.seata.common.util.CollectionUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.lang.reflect.Field;
+import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -72,15 +73,15 @@ public class EnhancedServiceLoaderTest {
      */
     @Test
     public void testLoadByClassAndClassLoaderAndActivateName() {
-        Hello englishHello = EnhancedServiceLoader
-            .load(Hello.class, "EnglishHello", EnhancedServiceLoaderTest.class.getClassLoader());
+        Hello englishHello = EnhancedServiceLoader.load(
+                Hello.class, "EnglishHello", EnhancedServiceLoaderTest.class.getClassLoader());
         assertThat(englishHello.say()).isEqualTo("hello!");
     }
 
     /**
      * Gets all extension class.
      */
-    @SuppressWarnings("checkstyle:UnnecessaryParentheses") @Test
+    @Test
     public void getAllExtensionClass() {
         List<Class<Hello>> allExtensionClass = EnhancedServiceLoader.getAllExtensionClass(Hello.class);
         assertThat(allExtensionClass.get(3).getSimpleName()).isEqualTo((LatinHello.class.getSimpleName()));
@@ -94,8 +95,8 @@ public class EnhancedServiceLoaderTest {
      */
     @Test
     public void getAllExtensionClass1() {
-        List<Class<Hello>> allExtensionClass = EnhancedServiceLoader
-            .getAllExtensionClass(Hello.class, ClassLoader.getSystemClassLoader());
+        List<Class<Hello>> allExtensionClass =
+                EnhancedServiceLoader.getAllExtensionClass(Hello.class, ClassLoader.getSystemClassLoader());
         assertThat(allExtensionClass).isNotEmpty();
     }
 
@@ -141,8 +142,8 @@ public class EnhancedServiceLoaderTest {
 
     @Test
     public void testLoadByClassAndActivateNameAndArgsTypeAndArgs() {
-        Hello2 load = EnhancedServiceLoader
-            .load(Hello2.class, "JapaneseHello", new Class[] {String.class}, new Object[] {"msg"});
+        Hello2 load = EnhancedServiceLoader.load(
+                Hello2.class, "JapaneseHello", new Class[] {String.class}, new Object[] {"msg"});
         assertThat(load).isInstanceOf(Hello2.class);
     }
 
@@ -189,11 +190,13 @@ public class EnhancedServiceLoaderTest {
         Field serviceLoadersField = clazz.getDeclaredField("SERVICE_LOADERS");
         serviceLoadersField.setAccessible(true);
         Map<Class<?>, Object> serviceLoaders = (Map<Class<?>, Object>) serviceLoadersField.get(null);
-        //get innerEnhancedServiceLoader.classToDefinitionMap
+        // get innerEnhancedServiceLoader.classToDefinitionMap
         Object innerEnhancedServiceLoader = serviceLoaders.get(Hello.class);
-        Field classToDefinitionMapField = innerEnhancedServiceLoader.getClass().getDeclaredField("classToDefinitionMap");
+        Field classToDefinitionMapField =
+                innerEnhancedServiceLoader.getClass().getDeclaredField("classToDefinitionMap");
         classToDefinitionMapField.setAccessible(true);
-        Map<Class<?>, Object> classToDefinitionMap = (Map<Class<?>, Object>) classToDefinitionMapField.get(innerEnhancedServiceLoader);
+        Map<Class<?>, Object> classToDefinitionMap =
+                (Map<Class<?>, Object>) classToDefinitionMapField.get(innerEnhancedServiceLoader);
 
         assertThat(classToDefinitionMap.get(EnglishHello.class)).isNull();
     }
@@ -204,5 +207,4 @@ public class EnhancedServiceLoaderTest {
         Hello load = EnhancedServiceLoader.load(Hello.class, "FrenchHello");
         Assertions.assertDoesNotThrow(() -> EnhancedServiceLoader.unload(Hello.class, "FrenchHello"));
     }
-
 }

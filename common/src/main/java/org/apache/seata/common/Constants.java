@@ -198,7 +198,7 @@ public interface Constants {
      * The constant REGISTRY_TYPE_SPLIT_CHAR.
      */
     String REGISTRY_TYPE_SPLIT_CHAR = ",";
-    
+
     /**
      * phase two compensation method name
      */

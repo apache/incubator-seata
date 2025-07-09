@@ -21,16 +21,16 @@ import org.apache.seata.discovery.loadbalance.LoadBalanceFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-
 class ConfigurationFactoryTest {
 
     @Test
     void getInstance() {
         Configuration configuration = ConfigurationFactory.getInstance();
         // check singleton
-        Assertions.assertEquals(configuration.getClass().getName(), ConfigurationFactory.getInstance().getClass().getName());
+        Assertions.assertEquals(
+                configuration.getClass().getName(),
+                ConfigurationFactory.getInstance().getClass().getName());
     }
-
 
     @Test
     void getLoadBalance() {
@@ -38,7 +38,6 @@ class ConfigurationFactoryTest {
         String loadBalanceType = configuration.getConfig(LoadBalanceFactory.LOAD_BALANCE_TYPE);
         int virtualNode = configuration.getInt(ConsistentHashLoadBalance.LOAD_BALANCE_CONSISTENT_HASH_VIRTUAL_NODES);
         Assertions.assertEquals("XID", loadBalanceType);
-        Assertions.assertEquals(10,virtualNode);
+        Assertions.assertEquals(10, virtualNode);
     }
-
 }

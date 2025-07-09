@@ -16,10 +16,6 @@
  */
 package org.apache.seata.sqlparser.druid.sqlserver;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLInSubQueryExpr;
@@ -35,6 +31,9 @@ import org.apache.seata.sqlparser.druid.BaseRecognizer;
 import org.apache.seata.sqlparser.struct.Null;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 public abstract class BaseSqlServerRecognizer extends BaseRecognizer {
     /**
@@ -46,22 +45,24 @@ public abstract class BaseSqlServerRecognizer extends BaseRecognizer {
         super(originalSql);
     }
 
-    public SQLServerOutputVisitor createOutputVisitor(final ParametersHolder parametersHolder,
-                                                      final ArrayList<List<Object>> paramAppenderList,
-                                                      final StringBuilder sb) {
+    public SQLServerOutputVisitor createOutputVisitor(
+            final ParametersHolder parametersHolder,
+            final ArrayList<List<Object>> paramAppenderList,
+            final StringBuilder sb) {
         return new SQLServerOutputVisitor(sb) {
             @Override
             public boolean visit(SQLVariantRefExpr x) {
-                //add a process of parameter extraction
-                //parametersHolder——params of the same index; paramAppenderList——params of a sql statement
+                // add a process of parameter extraction
+                // parametersHolder——params of the same index; paramAppenderList——params of a sql statement
                 if ("?".equals(x.getName())) {
-                    ArrayList<Object> oneParamValues = parametersHolder.getParameters().get(x.getIndex() + 1);
+                    ArrayList<Object> oneParamValues =
+                            parametersHolder.getParameters().get(x.getIndex() + 1);
                     if (paramAppenderList.isEmpty()) {
                         oneParamValues.forEach(param -> paramAppenderList.add(new ArrayList<>()));
                     }
                     for (int i = 0; i < oneParamValues.size(); i++) {
                         Object o = oneParamValues.get(i);
-                        //this is a one-time visit for building image
+                        // this is a one-time visit for building image
                         paramAppenderList.get(i).add(o instanceof Null ? null : o);
                     }
                 }
@@ -70,8 +71,8 @@ public abstract class BaseSqlServerRecognizer extends BaseRecognizer {
         };
     }
 
-    public String getWhereCondition(SQLExpr where, final ParametersHolder parametersHolder,
-                                    final ArrayList<List<Object>> paramAppenderList) {
+    public String getWhereCondition(
+            SQLExpr where, final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppenderList) {
         if (Objects.isNull(where)) {
             return StringUtils.EMPTY;
         }
@@ -109,24 +110,27 @@ public abstract class BaseSqlServerRecognizer extends BaseRecognizer {
         SQLServerASTVisitorAdapter visitor = new SQLServerASTVisitorAdapter() {
             @Override
             public boolean visit(SQLInSubQueryExpr x) {
-                //just like: ...where id in (select id from t)
-                throw new NotSupportYetException("not support the sql syntax with InSubQuery:" + x
-                        + "\nplease see the doc about SQL restrictions https://seata.apache.org/zh-cn/docs/user/sqlreference/dml");
+                // just like: ...where id in (select id from t)
+                throw new NotSupportYetException(
+                        "not support the sql syntax with InSubQuery:" + x
+                                + "\nplease see the doc about SQL restrictions https://seata.apache.org/zh-cn/docs/user/sqlreference/dml");
             }
 
             @Override
             public boolean visit(SQLSubqueryTableSource x) {
-                //just like: select * from (select * from t)
-                throw new NotSupportYetException("not support the sql syntax with SubQuery:" + x
-                        + "\nplease see the doc about SQL restrictions https://seata.apache.org/zh-cn/docs/user/sqlreference/dml");
+                // just like: select * from (select * from t)
+                throw new NotSupportYetException(
+                        "not support the sql syntax with SubQuery:" + x
+                                + "\nplease see the doc about SQL restrictions https://seata.apache.org/zh-cn/docs/user/sqlreference/dml");
             }
 
             @Override
             public boolean visit(SQLInsertStatement x) {
                 if (null != x.getQuery()) {
-                    //just like: insert into t select * from t1
-                    throw new NotSupportYetException("not support the sql syntax insert with query:" + x
-                            + "\nplease see the doc about SQL restrictions https://seata.apache.org/zh-cn/docs/user/sqlreference/dml");
+                    // just like: insert into t select * from t1
+                    throw new NotSupportYetException(
+                            "not support the sql syntax insert with query:" + x
+                                    + "\nplease see the doc about SQL restrictions https://seata.apache.org/zh-cn/docs/user/sqlreference/dml");
                 }
                 return true;
             }
@@ -134,5 +138,4 @@ public abstract class BaseSqlServerRecognizer extends BaseRecognizer {
         getAst().accept(visitor);
         return true;
     }
-
 }

@@ -45,21 +45,22 @@ public class GlobalTransactionTest {
     @Test
     public void testDeprecatedAnnotation() {
         // Test that GlobalTransaction is marked as @Deprecated
-        assertTrue(GlobalTransaction.class.isAnnotationPresent(Deprecated.class),
+        assertTrue(
+                GlobalTransaction.class.isAnnotationPresent(Deprecated.class),
                 "GlobalTransaction should be marked as @Deprecated");
     }
 
     @Test
     public void testIsInterface() {
         // Test that GlobalTransaction is an interface
-        assertTrue(GlobalTransaction.class.isInterface(),
-                "GlobalTransaction should be an interface");
+        assertTrue(GlobalTransaction.class.isInterface(), "GlobalTransaction should be an interface");
     }
 
     @Test
     public void testExtendsBaseTransaction() {
         // Test that GlobalTransaction extends BaseTransaction
-        assertTrue(org.apache.seata.tm.api.BaseTransaction.class.isAssignableFrom(GlobalTransaction.class),
+        assertTrue(
+                org.apache.seata.tm.api.BaseTransaction.class.isAssignableFrom(GlobalTransaction.class),
                 "GlobalTransaction should extend BaseTransaction");
     }
 
@@ -67,22 +68,21 @@ public class GlobalTransactionTest {
     public void testBeginMethods() throws TransactionException {
         // Create a mock implementation
         GlobalTransaction mockTransaction = Mockito.mock(GlobalTransaction.class);
-        
+
         // Test begin() method
         doNothing().when(mockTransaction).begin();
-        assertDoesNotThrow(() -> mockTransaction.begin(),
-                "begin() should not throw exception");
+        assertDoesNotThrow(() -> mockTransaction.begin(), "begin() should not throw exception");
         verify(mockTransaction).begin();
-        
+
         // Test begin(int timeout) method
         doNothing().when(mockTransaction).begin(anyInt());
-        assertDoesNotThrow(() -> mockTransaction.begin(30000),
-                "begin(timeout) should not throw exception");
+        assertDoesNotThrow(() -> mockTransaction.begin(30000), "begin(timeout) should not throw exception");
         verify(mockTransaction).begin(30000);
-        
+
         // Test begin(int timeout, String name) method
         doNothing().when(mockTransaction).begin(anyInt(), anyString());
-        assertDoesNotThrow(() -> mockTransaction.begin(30000, "test-transaction"),
+        assertDoesNotThrow(
+                () -> mockTransaction.begin(30000, "test-transaction"),
                 "begin(timeout, name) should not throw exception");
         verify(mockTransaction).begin(30000, "test-transaction");
     }
@@ -91,11 +91,10 @@ public class GlobalTransactionTest {
     public void testCommitMethod() throws TransactionException {
         // Create a mock implementation
         GlobalTransaction mockTransaction = Mockito.mock(GlobalTransaction.class);
-        
+
         // Test commit() method
         doNothing().when(mockTransaction).commit();
-        assertDoesNotThrow(() -> mockTransaction.commit(),
-                "commit() should not throw exception");
+        assertDoesNotThrow(() -> mockTransaction.commit(), "commit() should not throw exception");
         verify(mockTransaction).commit();
     }
 
@@ -103,11 +102,10 @@ public class GlobalTransactionTest {
     public void testRollbackMethod() throws TransactionException {
         // Create a mock implementation
         GlobalTransaction mockTransaction = Mockito.mock(GlobalTransaction.class);
-        
+
         // Test rollback() method
         doNothing().when(mockTransaction).rollback();
-        assertDoesNotThrow(() -> mockTransaction.rollback(),
-                "rollback() should not throw exception");
+        assertDoesNotThrow(() -> mockTransaction.rollback(), "rollback() should not throw exception");
         verify(mockTransaction).rollback();
     }
 
@@ -116,13 +114,13 @@ public class GlobalTransactionTest {
         // Create a mock implementation
         GlobalTransaction mockTransaction = Mockito.mock(GlobalTransaction.class);
         SuspendedResourcesHolder mockHolder = Mockito.mock(SuspendedResourcesHolder.class);
-        
+
         // Test suspend() method
         when(mockTransaction.suspend()).thenReturn(mockHolder);
         SuspendedResourcesHolder result = mockTransaction.suspend();
         assertSame(mockHolder, result, "suspend() should return the mock holder");
         verify(mockTransaction).suspend();
-        
+
         // Test suspend(boolean clean) method
         when(mockTransaction.suspend(anyBoolean())).thenReturn(mockHolder);
         SuspendedResourcesHolder result2 = mockTransaction.suspend(true);
@@ -135,11 +133,10 @@ public class GlobalTransactionTest {
         // Create a mock implementation
         GlobalTransaction mockTransaction = Mockito.mock(GlobalTransaction.class);
         SuspendedResourcesHolder mockHolder = Mockito.mock(SuspendedResourcesHolder.class);
-        
+
         // Test resume() method
         doNothing().when(mockTransaction).resume(any(SuspendedResourcesHolder.class));
-        assertDoesNotThrow(() -> mockTransaction.resume(mockHolder),
-                "resume() should not throw exception");
+        assertDoesNotThrow(() -> mockTransaction.resume(mockHolder), "resume() should not throw exception");
         verify(mockTransaction).resume(mockHolder);
     }
 
@@ -147,7 +144,7 @@ public class GlobalTransactionTest {
     public void testGetStatusMethod() throws TransactionException {
         // Create a mock implementation
         GlobalTransaction mockTransaction = Mockito.mock(GlobalTransaction.class);
-        
+
         // Test getStatus() method
         when(mockTransaction.getStatus()).thenReturn(GlobalStatus.Begin);
         GlobalStatus status = mockTransaction.getStatus();
@@ -159,7 +156,7 @@ public class GlobalTransactionTest {
     public void testGetXidMethod() {
         // Create a mock implementation
         GlobalTransaction mockTransaction = Mockito.mock(GlobalTransaction.class);
-        
+
         // Test getXid() method
         String testXid = "test-xid-123";
         when(mockTransaction.getXid()).thenReturn(testXid);
@@ -172,10 +169,11 @@ public class GlobalTransactionTest {
     public void testGlobalReportMethod() throws TransactionException {
         // Create a mock implementation
         GlobalTransaction mockTransaction = Mockito.mock(GlobalTransaction.class);
-        
+
         // Test globalReport() method
         doNothing().when(mockTransaction).globalReport(any(GlobalStatus.class));
-        assertDoesNotThrow(() -> mockTransaction.globalReport(GlobalStatus.Committed),
+        assertDoesNotThrow(
+                () -> mockTransaction.globalReport(GlobalStatus.Committed),
                 "globalReport() should not throw exception");
         verify(mockTransaction).globalReport(GlobalStatus.Committed);
     }
@@ -184,7 +182,7 @@ public class GlobalTransactionTest {
     public void testGetLocalStatusMethod() {
         // Create a mock implementation
         GlobalTransaction mockTransaction = Mockito.mock(GlobalTransaction.class);
-        
+
         // Test getLocalStatus() method
         when(mockTransaction.getLocalStatus()).thenReturn(GlobalStatus.Begin);
         GlobalStatus localStatus = mockTransaction.getLocalStatus();
@@ -196,7 +194,7 @@ public class GlobalTransactionTest {
     public void testGetGlobalTransactionRoleMethod() {
         // Create a mock implementation
         GlobalTransaction mockTransaction = Mockito.mock(GlobalTransaction.class);
-        
+
         // Test getGlobalTransactionRole() method
         when(mockTransaction.getGlobalTransactionRole()).thenReturn(GlobalTransactionRole.Launcher);
         GlobalTransactionRole role = mockTransaction.getGlobalTransactionRole();
@@ -208,7 +206,7 @@ public class GlobalTransactionTest {
     public void testGetCreateTimeMethod() {
         // Create a mock implementation
         GlobalTransaction mockTransaction = Mockito.mock(GlobalTransaction.class);
-        
+
         // Test getCreateTime() method
         long createTime = System.currentTimeMillis();
         when(mockTransaction.getCreateTime()).thenReturn(createTime);
@@ -221,36 +219,50 @@ public class GlobalTransactionTest {
     public void testTransactionExceptionHandling() throws TransactionException {
         // Create a mock implementation
         GlobalTransaction mockTransaction = Mockito.mock(GlobalTransaction.class);
-        
+
         // Test that methods can throw TransactionException
         TransactionException testException = new TransactionException("Test exception");
-        
+
         doThrow(testException).when(mockTransaction).begin();
-        assertThrows(TransactionException.class, () -> mockTransaction.begin(),
+        assertThrows(
+                TransactionException.class,
+                () -> mockTransaction.begin(),
                 "begin() should be able to throw TransactionException");
-        
+
         doThrow(testException).when(mockTransaction).commit();
-        assertThrows(TransactionException.class, () -> mockTransaction.commit(),
+        assertThrows(
+                TransactionException.class,
+                () -> mockTransaction.commit(),
                 "commit() should be able to throw TransactionException");
-        
+
         doThrow(testException).when(mockTransaction).rollback();
-        assertThrows(TransactionException.class, () -> mockTransaction.rollback(),
+        assertThrows(
+                TransactionException.class,
+                () -> mockTransaction.rollback(),
                 "rollback() should be able to throw TransactionException");
-        
+
         doThrow(testException).when(mockTransaction).suspend();
-        assertThrows(TransactionException.class, () -> mockTransaction.suspend(),
+        assertThrows(
+                TransactionException.class,
+                () -> mockTransaction.suspend(),
                 "suspend() should be able to throw TransactionException");
-        
+
         doThrow(testException).when(mockTransaction).resume(any());
-        assertThrows(TransactionException.class, () -> mockTransaction.resume(null),
+        assertThrows(
+                TransactionException.class,
+                () -> mockTransaction.resume(null),
                 "resume() should be able to throw TransactionException");
-        
+
         when(mockTransaction.getStatus()).thenThrow(testException);
-        assertThrows(TransactionException.class, () -> mockTransaction.getStatus(),
+        assertThrows(
+                TransactionException.class,
+                () -> mockTransaction.getStatus(),
                 "getStatus() should be able to throw TransactionException");
-        
+
         doThrow(testException).when(mockTransaction).globalReport(any());
-        assertThrows(TransactionException.class, () -> mockTransaction.globalReport(GlobalStatus.Committed),
+        assertThrows(
+                TransactionException.class,
+                () -> mockTransaction.globalReport(GlobalStatus.Committed),
                 "globalReport() should be able to throw TransactionException");
     }
 
@@ -273,7 +285,7 @@ public class GlobalTransactionTest {
             GlobalTransaction.class.getMethod("getLocalStatus");
             GlobalTransaction.class.getMethod("getGlobalTransactionRole");
             GlobalTransaction.class.getMethod("getCreateTime");
-            
+
         } catch (NoSuchMethodException e) {
             fail("Required method not found in GlobalTransaction interface: " + e.getMessage());
         }
@@ -284,22 +296,52 @@ public class GlobalTransactionTest {
         // Test that methods have correct return types
         try {
             assertEquals(void.class, GlobalTransaction.class.getMethod("begin").getReturnType());
-            assertEquals(void.class, GlobalTransaction.class.getMethod("begin", int.class).getReturnType());
-            assertEquals(void.class, GlobalTransaction.class.getMethod("begin", int.class, String.class).getReturnType());
+            assertEquals(
+                    void.class,
+                    GlobalTransaction.class.getMethod("begin", int.class).getReturnType());
+            assertEquals(
+                    void.class,
+                    GlobalTransaction.class
+                            .getMethod("begin", int.class, String.class)
+                            .getReturnType());
             assertEquals(void.class, GlobalTransaction.class.getMethod("commit").getReturnType());
-            assertEquals(void.class, GlobalTransaction.class.getMethod("rollback").getReturnType());
-            assertEquals(SuspendedResourcesHolder.class, GlobalTransaction.class.getMethod("suspend").getReturnType());
-            assertEquals(SuspendedResourcesHolder.class, GlobalTransaction.class.getMethod("suspend", boolean.class).getReturnType());
-            assertEquals(void.class, GlobalTransaction.class.getMethod("resume", SuspendedResourcesHolder.class).getReturnType());
-            assertEquals(GlobalStatus.class, GlobalTransaction.class.getMethod("getStatus").getReturnType());
-            assertEquals(String.class, GlobalTransaction.class.getMethod("getXid").getReturnType());
-            assertEquals(void.class, GlobalTransaction.class.getMethod("globalReport", GlobalStatus.class).getReturnType());
-            assertEquals(GlobalStatus.class, GlobalTransaction.class.getMethod("getLocalStatus").getReturnType());
-            assertEquals(GlobalTransactionRole.class, GlobalTransaction.class.getMethod("getGlobalTransactionRole").getReturnType());
-            assertEquals(long.class, GlobalTransaction.class.getMethod("getCreateTime").getReturnType());
-            
+            assertEquals(
+                    void.class, GlobalTransaction.class.getMethod("rollback").getReturnType());
+            assertEquals(
+                    SuspendedResourcesHolder.class,
+                    GlobalTransaction.class.getMethod("suspend").getReturnType());
+            assertEquals(
+                    SuspendedResourcesHolder.class,
+                    GlobalTransaction.class.getMethod("suspend", boolean.class).getReturnType());
+            assertEquals(
+                    void.class,
+                    GlobalTransaction.class
+                            .getMethod("resume", SuspendedResourcesHolder.class)
+                            .getReturnType());
+            assertEquals(
+                    GlobalStatus.class,
+                    GlobalTransaction.class.getMethod("getStatus").getReturnType());
+            assertEquals(
+                    String.class, GlobalTransaction.class.getMethod("getXid").getReturnType());
+            assertEquals(
+                    void.class,
+                    GlobalTransaction.class
+                            .getMethod("globalReport", GlobalStatus.class)
+                            .getReturnType());
+            assertEquals(
+                    GlobalStatus.class,
+                    GlobalTransaction.class.getMethod("getLocalStatus").getReturnType());
+            assertEquals(
+                    GlobalTransactionRole.class,
+                    GlobalTransaction.class
+                            .getMethod("getGlobalTransactionRole")
+                            .getReturnType());
+            assertEquals(
+                    long.class,
+                    GlobalTransaction.class.getMethod("getCreateTime").getReturnType());
+
         } catch (NoSuchMethodException e) {
             fail("Method not found when testing return types: " + e.getMessage());
         }
     }
-} 
+}

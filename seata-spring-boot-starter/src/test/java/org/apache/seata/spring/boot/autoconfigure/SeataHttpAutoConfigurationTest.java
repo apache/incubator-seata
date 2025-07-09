@@ -34,16 +34,15 @@ public class SeataHttpAutoConfigurationTest {
     // No thread safety issues, no need to create in @BeforeEach
     private final WebApplicationContextRunner webContextRunner = new WebApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(SeataHttpAutoConfiguration.class));
-    private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
-            .withConfiguration(AutoConfigurations.of(SeataHttpAutoConfiguration.class));
+    private final ApplicationContextRunner contextRunner =
+            new ApplicationContextRunner().withConfiguration(AutoConfigurations.of(SeataHttpAutoConfiguration.class));
 
     @Test
     void whenNotWebApplication_thenNoBeansCreated() {
-        contextRunner
-                .run(context -> {
-                    assertThat(context).doesNotHaveBean(SeataWebMvcConfigurer.class);
-                    assertThat(context).doesNotHaveBean(JakartaSeataWebMvcConfigurer.class);
-                });
+        contextRunner.run(context -> {
+            assertThat(context).doesNotHaveBean(SeataWebMvcConfigurer.class);
+            assertThat(context).doesNotHaveBean(JakartaSeataWebMvcConfigurer.class);
+        });
     }
 
     @Test
@@ -68,12 +67,11 @@ public class SeataHttpAutoConfigurationTest {
 
     @Test
     void whenJakartaClassPresent_thenCreatesJakartaSeataWebMvcConfigurer() {
-        webContextRunner
-                .run(context -> {
-                    // Do not use assertThat(context).doesNotHaveBean(SeataWebMvcConfigurer.class),
-                    // because JakartaSeataWebMvcConfigurer extends SeataWebMvcConfigurer.
-                    assertThat(context.getBeansOfType(SeataWebMvcConfigurer.class).values())
-                            .hasOnlyElementsOfType(JakartaSeataWebMvcConfigurer.class);
-                });
+        webContextRunner.run(context -> {
+            // Do not use assertThat(context).doesNotHaveBean(SeataWebMvcConfigurer.class),
+            // because JakartaSeataWebMvcConfigurer extends SeataWebMvcConfigurer.
+            assertThat(context.getBeansOfType(SeataWebMvcConfigurer.class).values())
+                    .hasOnlyElementsOfType(JakartaSeataWebMvcConfigurer.class);
+        });
     }
 }

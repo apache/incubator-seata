@@ -46,7 +46,6 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-
 @EnabledIfSystemProperty(named = "redisCaseEnabled", matches = "true")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class RedisRegisterServiceImplTest {
@@ -91,16 +90,17 @@ public class RedisRegisterServiceImplTest {
         Field field = RedisRegistryServiceImpl.class.getDeclaredField("CLUSTER_ADDRESS_MAP");
         field.setAccessible(true);
 
-        ConcurrentMap<String, Set<InetSocketAddress>> CLUSTER_ADDRESS_MAP = (ConcurrentMap<String, Set<InetSocketAddress>>) field.get(null);
+        ConcurrentMap<String, Set<InetSocketAddress>> CLUSTER_ADDRESS_MAP =
+                (ConcurrentMap<String, Set<InetSocketAddress>>) field.get(null);
         CLUSTER_ADDRESS_MAP.put("cluster", Sets.newSet(NetUtil.toInetSocketAddress("127.0.0.1:8091")));
 
-        Method method = RedisRegistryServiceImpl.class.getDeclaredMethod("removeServerAddressByPushEmptyProtection", String.class, String.class);
+        Method method = RedisRegistryServiceImpl.class.getDeclaredMethod(
+                "removeServerAddressByPushEmptyProtection", String.class, String.class);
         method.setAccessible(true);
         method.invoke(redisRegistryService, "cluster", "127.0.0.1:8091");
 
         // test the push empty protection situation
         Assertions.assertEquals(1, CLUSTER_ADDRESS_MAP.get("cluster").size());
-
 
         when(configuration.getConfig(anyString())).thenReturn("mycluster");
 
@@ -118,14 +118,16 @@ public class RedisRegisterServiceImplTest {
         executorServiceField1.setAccessible(true);
         ScheduledExecutorService executorService1 = mock(ScheduledExecutorService.class);
         when(executorService1.isShutdown()).thenReturn(false);
-        when(executorService1.awaitTermination(5, TimeUnit.SECONDS)).thenThrow(new InterruptedException("Test interruption"));
+        when(executorService1.awaitTermination(5, TimeUnit.SECONDS))
+                .thenThrow(new InterruptedException("Test interruption"));
         executorServiceField1.set(redisRegistryService, executorService1);
 
         Field executorServiceField2 = RedisRegistryServiceImpl.class.getDeclaredField("threadPoolExecutorForUpdateMap");
         executorServiceField2.setAccessible(true);
         ScheduledExecutorService executorService2 = mock(ScheduledExecutorService.class);
         when(executorService2.isShutdown()).thenReturn(false);
-        when(executorService2.awaitTermination(5, TimeUnit.SECONDS)).thenThrow(new InterruptedException("Test interruption"));
+        when(executorService2.awaitTermination(5, TimeUnit.SECONDS))
+                .thenThrow(new InterruptedException("Test interruption"));
         executorServiceField2.set(redisRegistryService, executorService2);
 
         redisRegistryService.close();
@@ -135,5 +137,4 @@ public class RedisRegisterServiceImplTest {
         assertNull(executorServiceField1.get(redisRegistryService));
         assertNull(executorServiceField2.get(redisRegistryService));
     }
-
 }

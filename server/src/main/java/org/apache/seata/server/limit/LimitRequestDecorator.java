@@ -39,7 +39,6 @@ public class LimitRequestDecorator extends AbstractTransactionRequestToTC {
         requestLimitHandler = rateLimiterHandler;
     }
 
-
     @Override
     public AbstractTransactionResponse handle(RpcContext rpcContext) {
         return requestLimitHandler.handle(originalRequest, rpcContext);

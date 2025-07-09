@@ -26,24 +26,16 @@ import java.util.List;
 public class MockNacosRegistryService implements RegistryService<Object> {
 
     @Override
-    public void register(InetSocketAddress address) throws Exception {
-
-    }
+    public void register(InetSocketAddress address) throws Exception {}
 
     @Override
-    public void unregister(InetSocketAddress address) throws Exception {
-
-    }
+    public void unregister(InetSocketAddress address) throws Exception {}
 
     @Override
-    public void subscribe(String cluster, Object listener) throws Exception {
-
-    }
+    public void subscribe(String cluster, Object listener) throws Exception {}
 
     @Override
-    public void unsubscribe(String cluster, Object listener) throws Exception {
-
-    }
+    public void unsubscribe(String cluster, Object listener) throws Exception {}
 
     @Override
     public List<InetSocketAddress> lookup(String key) throws Exception {
@@ -51,7 +43,5 @@ public class MockNacosRegistryService implements RegistryService<Object> {
     }
 
     @Override
-    public void close() throws Exception {
-
-    }
-} 
+    public void close() throws Exception {}
+}

@@ -16,9 +16,6 @@
  */
 package org.apache.seata.server.cluster.raft.snapshot.metadata;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.Serializable;
 import com.alipay.sofa.jraft.Status;
 import com.alipay.sofa.jraft.error.RaftError;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
@@ -29,6 +26,10 @@ import org.apache.seata.server.cluster.raft.snapshot.StoreSnapshotFile;
 import org.apache.seata.server.cluster.raft.sync.msg.dto.RaftClusterMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.Serializable;
 
 /**
  */
@@ -49,10 +50,13 @@ public class LeaderMetadataSnapshotFile implements Serializable, StoreSnapshotFi
     public Status save(SnapshotWriter writer) {
         RaftSnapshot raftSnapshot = new RaftSnapshot();
         RaftClusterMetadata raftClusterMetadata =
-            RaftServerManager.getRaftServer(group).getRaftStateMachine().getRaftLeaderMetadata();
+                RaftServerManager.getRaftServer(group).getRaftStateMachine().getRaftLeaderMetadata();
         raftSnapshot.setBody(raftClusterMetadata);
         raftSnapshot.setType(RaftSnapshot.SnapshotType.leader_metadata);
-        String path = new StringBuilder(writer.getPath()).append(File.separator).append(fileName).toString();
+        String path = new StringBuilder(writer.getPath())
+                .append(File.separator)
+                .append(fileName)
+                .toString();
         try {
             if (save(raftSnapshot, path)) {
                 if (writer.addFile(fileName)) {
@@ -73,11 +77,13 @@ public class LeaderMetadataSnapshotFile implements Serializable, StoreSnapshotFi
             LOGGER.error("Fail to find data file in {}", reader.getPath());
             return false;
         }
-        String path = new StringBuilder(reader.getPath()).append(File.separator).append(fileName).toString();
+        String path = new StringBuilder(reader.getPath())
+                .append(File.separator)
+                .append(fileName)
+                .toString();
         try {
-            RaftClusterMetadata raftClusterMetadata = (RaftClusterMetadata)load(path);
-            RaftServerManager.getRaftServer(group).getRaftStateMachine()
-                .setRaftLeaderMetadata(raftClusterMetadata);
+            RaftClusterMetadata raftClusterMetadata = (RaftClusterMetadata) load(path);
+            RaftServerManager.getRaftServer(group).getRaftStateMachine().setRaftLeaderMetadata(raftClusterMetadata);
             return true;
         } catch (final Exception e) {
             LOGGER.error("fail to load snapshot from {}", path, e);

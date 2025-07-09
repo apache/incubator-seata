@@ -16,10 +16,10 @@
  */
 package org.apache.seata.rm.tcc;
 
-import java.lang.reflect.Method;
-
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.Resource;
+
+import java.lang.reflect.Method;
 
 /**
  * The type Tcc resource.
@@ -295,7 +295,6 @@ public class TCCResource implements Resource {
         if (!(obj instanceof TCCResource)) {
             return false;
         }
-        return this.actionName.equals(((TCCResource)obj).actionName);
+        return this.actionName.equals(((TCCResource) obj).actionName);
     }
-
 }

@@ -31,7 +31,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
 public class TransactionInterceptorTest {
 
     /**
@@ -71,7 +70,6 @@ public class TransactionInterceptorTest {
         return rpcClient;
     }
 
-
     @BeforeAll
     public static void rpcInit() {
 
@@ -84,6 +82,4 @@ public class TransactionInterceptorTest {
         rpcServerB.getInterceptors().add(new TransactionPropagationServerInterceptor());
         rpcServerB.start();
     }
-
-
 }

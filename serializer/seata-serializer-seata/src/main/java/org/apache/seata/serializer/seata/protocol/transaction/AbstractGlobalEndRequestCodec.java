@@ -16,10 +16,10 @@
  */
 package org.apache.seata.serializer.seata.protocol.transaction;
 
-import java.nio.ByteBuffer;
-
 import io.netty.buffer.ByteBuf;
 import org.apache.seata.core.protocol.transaction.AbstractGlobalEndRequest;
+
+import java.nio.ByteBuffer;
 
 /**
  * The type Abstract global end request codec.
@@ -34,34 +34,34 @@ public abstract class AbstractGlobalEndRequestCodec extends AbstractTransactionR
 
     @Override
     public <T> void encode(T t, ByteBuf out) {
-        AbstractGlobalEndRequest abstractGlobalEndRequest = (AbstractGlobalEndRequest)t;
+        AbstractGlobalEndRequest abstractGlobalEndRequest = (AbstractGlobalEndRequest) t;
         String xid = abstractGlobalEndRequest.getXid();
         String extraData = abstractGlobalEndRequest.getExtraData();
 
         // 1. xid
         if (xid != null) {
             byte[] bs = xid.getBytes(UTF8);
-            out.writeShort((short)bs.length);
+            out.writeShort((short) bs.length);
             if (bs.length > 0) {
                 out.writeBytes(bs);
             }
         } else {
-            out.writeShort((short)0);
+            out.writeShort((short) 0);
         }
         if (extraData != null) {
             byte[] bs = extraData.getBytes(UTF8);
-            out.writeShort((short)bs.length);
+            out.writeShort((short) bs.length);
             if (bs.length > 0) {
                 out.writeBytes(bs);
             }
         } else {
-            out.writeShort((short)0);
+            out.writeShort((short) 0);
         }
     }
 
     @Override
     public <T> void decode(T t, ByteBuffer in) {
-        AbstractGlobalEndRequest abstractGlobalEndRequest = (AbstractGlobalEndRequest)t;
+        AbstractGlobalEndRequest abstractGlobalEndRequest = (AbstractGlobalEndRequest) t;
 
         short xidLen = in.getShort();
         if (xidLen > 0) {
@@ -76,5 +76,4 @@ public abstract class AbstractGlobalEndRequestCodec extends AbstractTransactionR
             abstractGlobalEndRequest.setExtraData(new String(bs, UTF8));
         }
     }
-
 }

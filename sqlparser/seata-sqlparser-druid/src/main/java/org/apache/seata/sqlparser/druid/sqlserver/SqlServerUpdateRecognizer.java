@@ -16,9 +16,6 @@
  */
 package org.apache.seata.sqlparser.druid.sqlserver;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLDefaultExpr;
@@ -44,6 +41,9 @@ import org.apache.seata.sqlparser.struct.SqlDefaultExpr;
 import org.apache.seata.sqlparser.struct.SqlMethodExpr;
 import org.apache.seata.sqlparser.struct.SqlSequenceExpr;
 import org.apache.seata.sqlparser.util.ColumnUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The type SqlServer update recognizer.
@@ -112,7 +112,8 @@ public class SqlServerUpdateRecognizer extends BaseSqlServerRecognizer implement
                 SQLExpr owner = ((SQLPropertyExpr) expr).getOwner();
                 if (owner instanceof SQLIdentifierExpr) {
                     list.add(((SQLIdentifierExpr) owner).getName() + "." + ((SQLPropertyExpr) expr).getName());
-                    //This is table Field Full path, like update xxx_database.xxx_tbl set xxx_database.xxx_tbl.xxx_field...
+                    // This is table Field Full path, like update xxx_database.xxx_tbl set
+                    // xxx_database.xxx_tbl.xxx_field...
                 } else if (((SQLPropertyExpr) expr).getOwnerName().split("\\.").length > 1) {
                     list.add(((SQLPropertyExpr) expr).getOwnerName() + "." + ((SQLPropertyExpr) expr).getName());
                 }
@@ -126,7 +127,7 @@ public class SqlServerUpdateRecognizer extends BaseSqlServerRecognizer implement
     @Override
     public List<Object> getUpdateValues() {
         if (ast.getTop() != null) {
-            //deal with top sql
+            // deal with top sql
             dealTop(ast);
         }
         List<SQLUpdateSetItem> updateSetItems = ast.getItems();
@@ -138,14 +139,14 @@ public class SqlServerUpdateRecognizer extends BaseSqlServerRecognizer implement
             } else if (expr instanceof SQLValuableExpr) {
                 list.add(((SQLValuableExpr) expr).getValue());
             } else if (expr instanceof SQLVariantRefExpr) {
-                //add '?'
+                // add '?'
                 list.add(((SQLVariantRefExpr) expr).getName());
             } else if (expr instanceof SQLMethodInvokeExpr) {
                 list.add(SqlMethodExpr.get());
             } else if (expr instanceof SQLDefaultExpr) {
                 list.add(SqlDefaultExpr.get());
             } else if (expr instanceof SQLSequenceExpr) {
-                //Supported only since 2012 version of SQL Server,use next value for
+                // Supported only since 2012 version of SQL Server,use next value for
                 SQLSequenceExpr sequenceExpr = (SQLSequenceExpr) expr;
                 String sequence = sequenceExpr.getSequence().getSimpleName();
                 String function = sequenceExpr.getFunction().name;
@@ -169,8 +170,8 @@ public class SqlServerUpdateRecognizer extends BaseSqlServerRecognizer implement
     }
 
     @Override
-    public String getWhereCondition(final ParametersHolder parametersHolder,
-                                    final ArrayList<List<Object>> paramAppenderList) {
+    public String getWhereCondition(
+            final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppenderList) {
         SQLExpr where = ast.getWhere();
         return super.getWhereCondition(where, parametersHolder, paramAppenderList);
     }

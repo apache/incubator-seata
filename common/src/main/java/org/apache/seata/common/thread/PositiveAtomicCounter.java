@@ -41,5 +41,4 @@ public class PositiveAtomicCounter {
     public int get() {
         return atom.get() & MASK;
     }
-
 }

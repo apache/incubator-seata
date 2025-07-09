@@ -16,10 +16,10 @@
  */
 package org.apache.seata.sqlparser.struct;
 
+import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-
-import org.junit.jupiter.api.Test;
 
 public class IndexTypeTest {
 
@@ -41,8 +41,9 @@ public class IndexTypeTest {
 
     @Test
     public void testInvalidValueOf() {
-        assertThrows(IllegalArgumentException.class, () -> IndexType.valueOf(4),
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> IndexType.valueOf(4),
                 "Should throw IllegalArgumentException for invalid value 4");
     }
-
 }

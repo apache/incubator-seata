@@ -38,5 +38,4 @@ public interface RemotingProcessor {
      * @throws Exception throws exception process message error.
      */
     void process(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception;
-
 }

@@ -40,7 +40,7 @@ public class DataSourceProxyXANative extends AbstractDataSourceProxyXA {
 
     public DataSourceProxyXANative(XADataSource dataSource, String resourceGroupId) {
         if (dataSource instanceof DataSource) {
-            this.dataSource = (DataSource)dataSource;
+            this.dataSource = (DataSource) dataSource;
         }
         this.xaDataSource = dataSource;
         this.branchType = BranchType.XA;
@@ -61,10 +61,10 @@ public class DataSourceProxyXANative extends AbstractDataSourceProxyXA {
 
     protected Connection getConnectionProxy(XAConnection xaConnection) throws SQLException {
         Connection connection = xaConnection.getConnection();
-        ConnectionProxyXA connectionProxyXA = new ConnectionProxyXA(connection, xaConnection, this, RootContext.getXID());
+        ConnectionProxyXA connectionProxyXA =
+                new ConnectionProxyXA(connection, xaConnection, this, RootContext.getXID());
         connectionProxyXA.init();
         return connectionProxyXA;
-
     }
 
     @Override

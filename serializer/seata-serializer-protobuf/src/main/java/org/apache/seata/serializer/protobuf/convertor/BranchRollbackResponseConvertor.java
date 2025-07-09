@@ -19,6 +19,7 @@ package org.apache.seata.serializer.protobuf.convertor;
 import org.apache.seata.core.exception.TransactionExceptionCode;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.protocol.ResultCode;
+import org.apache.seata.core.protocol.transaction.BranchRollbackResponse;
 import org.apache.seata.serializer.protobuf.generated.AbstractBranchEndResponseProto;
 import org.apache.seata.serializer.protobuf.generated.AbstractMessageProto;
 import org.apache.seata.serializer.protobuf.generated.AbstractResultMessageProto;
@@ -28,36 +29,44 @@ import org.apache.seata.serializer.protobuf.generated.BranchStatusProto;
 import org.apache.seata.serializer.protobuf.generated.MessageTypeProto;
 import org.apache.seata.serializer.protobuf.generated.ResultCodeProto;
 import org.apache.seata.serializer.protobuf.generated.TransactionExceptionCodeProto;
-import org.apache.seata.core.protocol.transaction.BranchRollbackResponse;
-
 
 public class BranchRollbackResponseConvertor
-    implements PbConvertor<BranchRollbackResponse, BranchRollbackResponseProto> {
+        implements PbConvertor<BranchRollbackResponse, BranchRollbackResponseProto> {
     @Override
     public BranchRollbackResponseProto convert2Proto(BranchRollbackResponse branchRollbackResponse) {
         final short typeCode = branchRollbackResponse.getTypeCode();
 
-        final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder().setMessageType(
-            MessageTypeProto.forNumber(typeCode)).build();
+        final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder()
+                .setMessageType(MessageTypeProto.forNumber(typeCode))
+                .build();
 
         final String msg = branchRollbackResponse.getMsg();
-        final AbstractResultMessageProto abstractResultMessageProto = AbstractResultMessageProto.newBuilder().setMsg(
-            msg == null ? "" : msg).setResultCode(
-            ResultCodeProto.valueOf(branchRollbackResponse.getResultCode().name())).setAbstractMessage(abstractMessage)
-            .build();
+        final AbstractResultMessageProto abstractResultMessageProto = AbstractResultMessageProto.newBuilder()
+                .setMsg(msg == null ? "" : msg)
+                .setResultCode(ResultCodeProto.valueOf(
+                        branchRollbackResponse.getResultCode().name()))
+                .setAbstractMessage(abstractMessage)
+                .build();
 
-        final AbstractTransactionResponseProto abstractTransactionRequestProto = AbstractTransactionResponseProto
-            .newBuilder().setAbstractResultMessage(abstractResultMessageProto).setTransactionExceptionCode(
-                TransactionExceptionCodeProto.valueOf(branchRollbackResponse.getTransactionExceptionCode().name()))
-            .build();
+        final AbstractTransactionResponseProto abstractTransactionRequestProto =
+                AbstractTransactionResponseProto.newBuilder()
+                        .setAbstractResultMessage(abstractResultMessageProto)
+                        .setTransactionExceptionCode(TransactionExceptionCodeProto.valueOf(branchRollbackResponse
+                                .getTransactionExceptionCode()
+                                .name()))
+                        .build();
 
-        final AbstractBranchEndResponseProto abstractBranchEndResponse = AbstractBranchEndResponseProto.newBuilder().
-            setAbstractTransactionResponse(abstractTransactionRequestProto).setXid(branchRollbackResponse.getXid())
-            .setBranchId(branchRollbackResponse.getBranchId()).setBranchStatus(
-                BranchStatusProto.forNumber(branchRollbackResponse.getBranchStatus().getCode())).build();
+        final AbstractBranchEndResponseProto abstractBranchEndResponse = AbstractBranchEndResponseProto.newBuilder()
+                .setAbstractTransactionResponse(abstractTransactionRequestProto)
+                .setXid(branchRollbackResponse.getXid())
+                .setBranchId(branchRollbackResponse.getBranchId())
+                .setBranchStatus(BranchStatusProto.forNumber(
+                        branchRollbackResponse.getBranchStatus().getCode()))
+                .build();
 
-        BranchRollbackResponseProto result = BranchRollbackResponseProto.newBuilder().setAbstractBranchEndResponse(
-            abstractBranchEndResponse).build();
+        BranchRollbackResponseProto result = BranchRollbackResponseProto.newBuilder()
+                .setAbstractBranchEndResponse(abstractBranchEndResponse)
+                .build();
 
         return result;
     }
@@ -65,20 +74,29 @@ public class BranchRollbackResponseConvertor
     @Override
     public BranchRollbackResponse convert2Model(BranchRollbackResponseProto branchRollbackResponseProto) {
         BranchRollbackResponse branchCommitResponse = new BranchRollbackResponse();
-        branchCommitResponse.setBranchId(branchRollbackResponseProto.getAbstractBranchEndResponse().getBranchId());
-        branchCommitResponse.setBranchStatus(
-            BranchStatus.get(branchRollbackResponseProto.getAbstractBranchEndResponse().getBranchStatusValue()));
-        branchCommitResponse.setXid(branchRollbackResponseProto.getAbstractBranchEndResponse().getXid());
-        branchCommitResponse.setMsg(
-            branchRollbackResponseProto.getAbstractBranchEndResponse().getAbstractTransactionResponse()
-                .getAbstractResultMessage().getMsg());
-        branchCommitResponse.setResultCode(ResultCode.valueOf(
-            branchRollbackResponseProto.getAbstractBranchEndResponse().getAbstractTransactionResponse()
-                .getAbstractResultMessage().getResultCode().name()));
+        branchCommitResponse.setBranchId(
+                branchRollbackResponseProto.getAbstractBranchEndResponse().getBranchId());
+        branchCommitResponse.setBranchStatus(BranchStatus.get(
+                branchRollbackResponseProto.getAbstractBranchEndResponse().getBranchStatusValue()));
+        branchCommitResponse.setXid(
+                branchRollbackResponseProto.getAbstractBranchEndResponse().getXid());
+        branchCommitResponse.setMsg(branchRollbackResponseProto
+                .getAbstractBranchEndResponse()
+                .getAbstractTransactionResponse()
+                .getAbstractResultMessage()
+                .getMsg());
+        branchCommitResponse.setResultCode(ResultCode.valueOf(branchRollbackResponseProto
+                .getAbstractBranchEndResponse()
+                .getAbstractTransactionResponse()
+                .getAbstractResultMessage()
+                .getResultCode()
+                .name()));
 
-        branchCommitResponse.setTransactionExceptionCode(TransactionExceptionCode.valueOf(
-            branchRollbackResponseProto.getAbstractBranchEndResponse().getAbstractTransactionResponse()
-                .getTransactionExceptionCode().name()));
+        branchCommitResponse.setTransactionExceptionCode(TransactionExceptionCode.valueOf(branchRollbackResponseProto
+                .getAbstractBranchEndResponse()
+                .getAbstractTransactionResponse()
+                .getTransactionExceptionCode()
+                .name()));
         return branchCommitResponse;
     }
 }

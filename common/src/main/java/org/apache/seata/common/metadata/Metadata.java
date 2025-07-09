@@ -16,6 +16,9 @@
  */
 package org.apache.seata.common.metadata;
 
+import org.apache.seata.common.store.StoreMode;
+import org.apache.seata.common.util.StringUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -24,45 +27,47 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
-import org.apache.seata.common.store.StoreMode;
-import org.apache.seata.common.util.StringUtils;
-
-
 public class Metadata {
 
-    private final Map<String/*vgroup*/, Map<String/*raft-group*/, Node>> leaders = new ConcurrentHashMap<>();
+    private final Map<String /*vgroup*/, Map<String /*raft-group*/, Node>> leaders = new ConcurrentHashMap<>();
 
-    private final Map<String/*vgroup*/, Map<String/*raft-group*/, Long/*term*/>> clusterTerm = new ConcurrentHashMap<>();
+    private final Map<String /*vgroup*/, Map<String /*raft-group*/, Long /*term*/>> clusterTerm =
+            new ConcurrentHashMap<>();
 
-    private final Map<String/*vgroup*/, Map<String/*raft-group*/, List<Node>>> clusterNodes =
-        new ConcurrentHashMap<>();
+    private final Map<String /*vgroup*/, Map<String /*raft-group*/, List<Node>>> clusterNodes =
+            new ConcurrentHashMap<>();
 
     private StoreMode storeMode = StoreMode.FILE;
 
     public Node getLeader(String clusterName) {
-        Map<String/*raft-group*/, Node> map = leaders.computeIfAbsent(clusterName, k -> new ConcurrentHashMap<>());
+        Map<String /*raft-group*/, Node> map = leaders.computeIfAbsent(clusterName, k -> new ConcurrentHashMap<>());
         List<Node> nodes = new ArrayList<>(map.values());
         return nodes.size() > 0 ? nodes.get(ThreadLocalRandom.current().nextInt(nodes.size())) : null;
     }
 
     public void setLeaderNode(String clusterName, Node node) {
         String group = node.getGroup();
-        Map<String/*raft-group*/, Node> map = leaders.computeIfAbsent(clusterName, k -> new ConcurrentHashMap<>());
+        Map<String /*raft-group*/, Node> map = leaders.computeIfAbsent(clusterName, k -> new ConcurrentHashMap<>());
         map.put(group, node);
         this.leaders.put(clusterName, map);
     }
 
     public List<Node> getNodes(String clusterName, String group) {
-        return clusterNodes.computeIfAbsent(clusterName, k -> new ConcurrentHashMap<>()).get(group);
+        return clusterNodes
+                .computeIfAbsent(clusterName, k -> new ConcurrentHashMap<>())
+                .get(group);
     }
 
     public List<Node> getNodes(String clusterName) {
         return clusterNodes.computeIfAbsent(clusterName, k -> new ConcurrentHashMap<>()).values().stream()
-            .flatMap(List::stream).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+                .flatMap(List::stream)
+                .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
     }
 
     public void setNodes(String clusterName, String group, List<Node> nodes) {
-        this.clusterNodes.computeIfAbsent(clusterName, k -> new ConcurrentHashMap<>()).put(group, nodes);
+        this.clusterNodes
+                .computeIfAbsent(clusterName, k -> new ConcurrentHashMap<>())
+                .put(group, nodes);
     }
 
     public boolean containsGroup(String group) {
@@ -70,7 +75,9 @@ public class Metadata {
     }
 
     public Set<String> groups(String clusterName) {
-        return clusterNodes.computeIfAbsent(clusterName, k -> new ConcurrentHashMap<>()).keySet();
+        return clusterNodes
+                .computeIfAbsent(clusterName, k -> new ConcurrentHashMap<>())
+                .keySet();
     }
 
     public StoreMode getStoreMode() {
@@ -101,8 +108,9 @@ public class Metadata {
         if (!list.isEmpty()) {
             String group = list.get(0).getGroup();
             this.setNodes(clusterName, group, list);
-            this.clusterTerm.computeIfAbsent(clusterName, k -> new ConcurrentHashMap<>()).put(group,
-                metadataResponse.getTerm());
+            this.clusterTerm
+                    .computeIfAbsent(clusterName, k -> new ConcurrentHashMap<>())
+                    .put(group, metadataResponse.getTerm());
         }
     }
 
@@ -110,5 +118,4 @@ public class Metadata {
     public String toString() {
         return StringUtils.toString(this);
     }
-
 }

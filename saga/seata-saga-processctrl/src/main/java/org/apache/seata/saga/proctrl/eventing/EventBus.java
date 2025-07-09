@@ -16,9 +16,9 @@
  */
 package org.apache.seata.saga.proctrl.eventing;
 
-import java.util.List;
-
 import org.apache.seata.common.exception.FrameworkException;
+
+import java.util.List;
 
 /**
  * Event bus

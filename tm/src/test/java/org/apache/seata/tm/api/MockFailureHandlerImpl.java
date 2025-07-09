@@ -16,24 +16,16 @@
  */
 package org.apache.seata.tm.api;
 
-public class MockFailureHandlerImpl implements FailureHandler{
+public class MockFailureHandlerImpl implements FailureHandler {
     @Override
-    public void onBeginFailure(BaseTransaction tx, Throwable cause) {
-
-    }
+    public void onBeginFailure(BaseTransaction tx, Throwable cause) {}
 
     @Override
-    public void onCommitFailure(BaseTransaction tx, Throwable cause) {
-
-    }
+    public void onCommitFailure(BaseTransaction tx, Throwable cause) {}
 
     @Override
-    public void onRollbackFailure(BaseTransaction tx, Throwable originalException) {
-
-    }
+    public void onRollbackFailure(BaseTransaction tx, Throwable originalException) {}
 
     @Override
-    public void onRollbacking(BaseTransaction tx, Throwable originalException) {
-
-    }
+    public void onRollbacking(BaseTransaction tx, Throwable originalException) {}
 }

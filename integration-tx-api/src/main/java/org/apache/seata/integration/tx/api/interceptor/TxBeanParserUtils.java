@@ -26,8 +26,7 @@ import org.apache.seata.integration.tx.api.remoting.parser.DefaultRemotingParser
  */
 public class TxBeanParserUtils {
 
-    private TxBeanParserUtils() {
-    }
+    private TxBeanParserUtils() {}
 
     /**
      * is auto proxy transaction bean
@@ -39,7 +38,6 @@ public class TxBeanParserUtils {
     public static boolean isTxRemotingBean(Object bean, String beanName) {
         return parserRemotingServiceInfo(bean, beanName);
     }
-
 
     /**
      * get remoting bean info: sofa:service, sofa:reference, dubbo:reference, dubbo:service
@@ -65,5 +63,4 @@ public class TxBeanParserUtils {
     public static RemotingDesc getRemotingDesc(String beanName) {
         return DefaultRemotingParser.get().getRemotingBeanDesc(beanName);
     }
-
 }

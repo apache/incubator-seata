@@ -45,5 +45,4 @@ public class NamingRegistryException extends RuntimeException {
     public NamingRegistryException(Throwable cause) {
         super(cause);
     }
-
 }

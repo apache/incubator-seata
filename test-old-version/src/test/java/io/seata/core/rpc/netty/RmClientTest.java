@@ -42,26 +42,27 @@ public class RmClientTest {
 
         DefaultResourceManager rm = getRm(resourceId);
 
-        //branchRegister:TYPE_BRANCH_REGISTER = 11 , TYPE_BRANCH_REGISTER_RESULT = 12
+        // branchRegister:TYPE_BRANCH_REGISTER = 11 , TYPE_BRANCH_REGISTER_RESULT = 12
         Long branchId = rm.branchRegister(BranchType.AT, resourceId, "1", xid, "1", "1");
         Assertions.assertTrue(branchId > 0);
-
 
         // (not support)branchReport:TYPE_BRANCH_STATUS_REPORT = 13 , TYPE_BRANCH_STATUS_REPORT_RESULT = 14
         // (not support)lockQuery:TYPE_GLOBAL_LOCK_QUERY = 21 , TYPE_GLOBAL_LOCK_QUERY_RESULT = 22
 
     }
 
-
     public static DefaultResourceManager getRm(String resourceId) throws NoSuchMethodException {
         if (rm == null) {
             synchronized (RmClientTest.class) {
                 if (rm == null) {
-                    //register:TYPE_REG_RM = 103 , TYPE_REG_RM_RESULT = 104
+                    // register:TYPE_REG_RM = 103 , TYPE_REG_RM_RESULT = 104
                     RMClient.init(ProtocolTestConstants.APPLICATION_ID, ProtocolTestConstants.SERVICE_GROUP);
 
                     DefaultResourceManager resourceManager = DefaultResourceManager.get();
-                    resourceManager.getResourceManager(BranchType.TCC).getManagedResources().clear();
+                    resourceManager
+                            .getResourceManager(BranchType.TCC)
+                            .getManagedResources()
+                            .clear();
 
                     rm = resourceManager;
                 }
@@ -74,12 +75,12 @@ public class RmClientTest {
         tccResource.setPrepareMethod(target.getClass().getMethod("insert", Long.class, Map.class));
         tccResource.setCommitMethodName("commitTcc");
         tccResource.setRollbackMethodName("cancel");
-        tccResource.setCommitMethod(ReflectionUtil.getMethod(Action1.class, "commitTcc", new Class[]{BusinessActionContext.class}));
-        tccResource.setRollbackMethod(ReflectionUtil.getMethod(Action1.class, "cancel", new Class[]{BusinessActionContext.class}));
+        tccResource.setCommitMethod(
+                ReflectionUtil.getMethod(Action1.class, "commitTcc", new Class[] {BusinessActionContext.class}));
+        tccResource.setRollbackMethod(
+                ReflectionUtil.getMethod(Action1.class, "cancel", new Class[] {BusinessActionContext.class}));
         rm.registerResource(tccResource);
         LOGGER.info("registerResource ok");
         return rm;
     }
-
-
 }

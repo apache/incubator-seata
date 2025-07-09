@@ -22,5 +22,4 @@ import org.apache.seata.common.loader.LoadLevel;
  * Database log store oceanbase sql
  */
 @LoadLevel(name = "oceanbase")
-public class OceanbaseLogStoreSqls extends MysqlLogStoreSqls {
-}
+public class OceanbaseLogStoreSqls extends MysqlLogStoreSqls {}

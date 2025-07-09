@@ -55,6 +55,5 @@ public abstract class AbstractTransactionStoreManager implements TransactionStor
     }
 
     @Override
-    public void shutdown() {
-    }
+    public void shutdown() {}
 }

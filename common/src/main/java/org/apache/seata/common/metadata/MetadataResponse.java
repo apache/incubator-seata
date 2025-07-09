@@ -18,7 +18,6 @@ package org.apache.seata.common.metadata;
 
 import java.util.List;
 
-
 public class MetadataResponse {
 
     List<Node> nodes;

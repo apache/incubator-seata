@@ -16,13 +16,13 @@
  */
 package org.apache.seata.common.exception;
 
-import java.util.HashSet;
-import java.util.MissingResourceException;
-import java.util.Set;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
+
+import java.util.HashSet;
+import java.util.MissingResourceException;
+import java.util.Set;
 
 class ResourceBundleUtilTest {
 
@@ -52,18 +52,24 @@ class ResourceBundleUtilTest {
     @Test
     void testGetMessage() {
         ResourceBundleUtil resourceBundleUtil = ResourceBundleUtil.getInstance();
-        String emptyKeyMsg = resourceBundleUtil.getMessage("", ErrorCode.ERR_CONFIG.getCode(),
-            ErrorCode.ERR_CONFIG.getType());
+        String emptyKeyMsg =
+                resourceBundleUtil.getMessage("", ErrorCode.ERR_CONFIG.getCode(), ErrorCode.ERR_CONFIG.getType());
         Assertions.assertNull(emptyKeyMsg);
-        String errorConfigMsg = resourceBundleUtil.getMessage(ErrorCode.ERR_CONFIG.name(),
-            ErrorCode.ERR_CONFIG.getCode(), ErrorCode.ERR_CONFIG.getType());
-        Assertions.assertEquals("ERR-CODE: [Seata-1][ERR_CONFIG] config error, {0} More: [https://seata.apache"
-            + ".org/docs/next/overview/faq#1]", errorConfigMsg);
-        String errorConfigMsgWithParams = resourceBundleUtil.getMessage(ErrorCode.ERR_CONFIG.name(),
-            ErrorCode.ERR_CONFIG.getCode(), ErrorCode.ERR_CONFIG.getType(), "vgroup_mapping_test");
+        String errorConfigMsg = resourceBundleUtil.getMessage(
+                ErrorCode.ERR_CONFIG.name(), ErrorCode.ERR_CONFIG.getCode(), ErrorCode.ERR_CONFIG.getType());
         Assertions.assertEquals(
-            "ERR-CODE: [Seata-1][ERR_CONFIG] config error, vgroup_mapping_test More: [https://seata.apache"
-                + ".org/docs/next/overview/faq#1]", errorConfigMsgWithParams);
+                "ERR-CODE: [Seata-1][ERR_CONFIG] config error, {0} More: [https://seata.apache"
+                        + ".org/docs/next/overview/faq#1]",
+                errorConfigMsg);
+        String errorConfigMsgWithParams = resourceBundleUtil.getMessage(
+                ErrorCode.ERR_CONFIG.name(),
+                ErrorCode.ERR_CONFIG.getCode(),
+                ErrorCode.ERR_CONFIG.getType(),
+                "vgroup_mapping_test");
+        Assertions.assertEquals(
+                "ERR-CODE: [Seata-1][ERR_CONFIG] config error, vgroup_mapping_test More: [https://seata.apache"
+                        + ".org/docs/next/overview/faq#1]",
+                errorConfigMsgWithParams);
     }
 
     @Test
@@ -93,12 +99,15 @@ class ResourceBundleUtilTest {
         Assertions.assertEquals(strVal, parseValue);
 
         final String strValWithEmptyPlaceHolder = "str val with placeholder ${}";
-        Assertions.assertThrows(SeataRuntimeException.class, new Executable() {
-            @Override
-            public void execute() throws Throwable {
-                resourceBundleUtil.parseStringValue(strValWithEmptyPlaceHolder, new HashSet<>());
-            }
-        }, "Could not resolve placeholder 'str val with placeholder ${}'");
+        Assertions.assertThrows(
+                SeataRuntimeException.class,
+                new Executable() {
+                    @Override
+                    public void execute() throws Throwable {
+                        resourceBundleUtil.parseStringValue(strValWithEmptyPlaceHolder, new HashSet<>());
+                    }
+                },
+                "Could not resolve placeholder 'str val with placeholder ${}'");
         String strValWithPlaceHolder = "str val with placeholder ${ERR_CONFIG}";
         Set<String> holderSet = new HashSet<>();
         parseValue = resourceBundleUtil.parseStringValue(strValWithPlaceHolder, holderSet);

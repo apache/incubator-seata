@@ -16,6 +16,10 @@
  */
 package org.apache.seata.serializer.protobuf.convertor;
 
+import org.apache.seata.core.exception.TransactionExceptionCode;
+import org.apache.seata.core.model.GlobalStatus;
+import org.apache.seata.core.protocol.ResultCode;
+import org.apache.seata.core.protocol.transaction.GlobalReportResponse;
 import org.apache.seata.serializer.protobuf.generated.AbstractGlobalEndResponseProto;
 import org.apache.seata.serializer.protobuf.generated.AbstractMessageProto;
 import org.apache.seata.serializer.protobuf.generated.AbstractResultMessageProto;
@@ -25,55 +29,60 @@ import org.apache.seata.serializer.protobuf.generated.GlobalStatusProto;
 import org.apache.seata.serializer.protobuf.generated.MessageTypeProto;
 import org.apache.seata.serializer.protobuf.generated.ResultCodeProto;
 import org.apache.seata.serializer.protobuf.generated.TransactionExceptionCodeProto;
-import org.apache.seata.core.exception.TransactionExceptionCode;
-import org.apache.seata.core.model.GlobalStatus;
-import org.apache.seata.core.protocol.ResultCode;
-import org.apache.seata.core.protocol.transaction.GlobalReportResponse;
-
 
 public class GlobalReportResponseConvertor implements PbConvertor<GlobalReportResponse, GlobalReportResponseProto> {
     @Override
     public GlobalReportResponseProto convert2Proto(GlobalReportResponse globalStatusResponse) {
         final short typeCode = globalStatusResponse.getTypeCode();
 
-        final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder().setMessageType(
-            MessageTypeProto.forNumber(typeCode)).build();
+        final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder()
+                .setMessageType(MessageTypeProto.forNumber(typeCode))
+                .build();
 
         final String msg = globalStatusResponse.getMsg();
-        final AbstractResultMessageProto abstractResultMessageProto = AbstractResultMessageProto.newBuilder().setMsg(
-            msg == null ? "" : msg).setResultCode(ResultCodeProto.valueOf(globalStatusResponse.getResultCode().name()))
-            .setAbstractMessage(abstractMessage).build();
+        final AbstractResultMessageProto abstractResultMessageProto = AbstractResultMessageProto.newBuilder()
+                .setMsg(msg == null ? "" : msg)
+                .setResultCode(ResultCodeProto.valueOf(
+                        globalStatusResponse.getResultCode().name()))
+                .setAbstractMessage(abstractMessage)
+                .build();
 
-        AbstractTransactionResponseProto abstractTransactionResponseProto = AbstractTransactionResponseProto
-            .newBuilder().setAbstractResultMessage(abstractResultMessageProto).setTransactionExceptionCode(
-                TransactionExceptionCodeProto.valueOf(globalStatusResponse.getTransactionExceptionCode().name()))
-            .build();
+        AbstractTransactionResponseProto abstractTransactionResponseProto =
+                AbstractTransactionResponseProto.newBuilder()
+                        .setAbstractResultMessage(abstractResultMessageProto)
+                        .setTransactionExceptionCode(TransactionExceptionCodeProto.valueOf(globalStatusResponse
+                                .getTransactionExceptionCode()
+                                .name()))
+                        .build();
 
         AbstractGlobalEndResponseProto abstractGlobalEndResponseProto = AbstractGlobalEndResponseProto.newBuilder()
-            .setAbstractTransactionResponse(abstractTransactionResponseProto).setGlobalStatus(
-                GlobalStatusProto.valueOf(globalStatusResponse.getGlobalStatus().name())).build();
+                .setAbstractTransactionResponse(abstractTransactionResponseProto)
+                .setGlobalStatus(GlobalStatusProto.valueOf(
+                        globalStatusResponse.getGlobalStatus().name()))
+                .build();
 
-        GlobalReportResponseProto result = GlobalReportResponseProto.newBuilder().setAbstractGlobalEndResponse(
-            abstractGlobalEndResponseProto).build();
+        GlobalReportResponseProto result = GlobalReportResponseProto.newBuilder()
+                .setAbstractGlobalEndResponse(abstractGlobalEndResponseProto)
+                .build();
         return result;
     }
 
     @Override
     public GlobalReportResponse convert2Model(GlobalReportResponseProto globalStatusResponseProto) {
         GlobalReportResponse branchRegisterResponse = new GlobalReportResponse();
-        final AbstractGlobalEndResponseProto abstractGlobalEndResponse = globalStatusResponseProto
-            .getAbstractGlobalEndResponse();
-        AbstractTransactionResponseProto abstractResultMessage = abstractGlobalEndResponse
-            .getAbstractTransactionResponse();
-        branchRegisterResponse.setMsg(abstractResultMessage.getAbstractResultMessage().getMsg());
-        branchRegisterResponse.setResultCode(
-            ResultCode.valueOf(abstractResultMessage.getAbstractResultMessage().getResultCode().name()));
-        branchRegisterResponse.setTransactionExceptionCode(
-            TransactionExceptionCode.valueOf(abstractResultMessage.getTransactionExceptionCode().name()));
+        final AbstractGlobalEndResponseProto abstractGlobalEndResponse =
+                globalStatusResponseProto.getAbstractGlobalEndResponse();
+        AbstractTransactionResponseProto abstractResultMessage =
+                abstractGlobalEndResponse.getAbstractTransactionResponse();
+        branchRegisterResponse.setMsg(
+                abstractResultMessage.getAbstractResultMessage().getMsg());
+        branchRegisterResponse.setResultCode(ResultCode.valueOf(
+                abstractResultMessage.getAbstractResultMessage().getResultCode().name()));
+        branchRegisterResponse.setTransactionExceptionCode(TransactionExceptionCode.valueOf(
+                abstractResultMessage.getTransactionExceptionCode().name()));
         branchRegisterResponse.setGlobalStatus(
-            GlobalStatus.valueOf(abstractGlobalEndResponse.getGlobalStatus().name()));
+                GlobalStatus.valueOf(abstractGlobalEndResponse.getGlobalStatus().name()));
 
         return branchRegisterResponse;
-
     }
 }

@@ -20,6 +20,4 @@ package org.apache.seata.saga.statelang.domain;
  * Compensation trigger State
  *
  */
-public interface CompensationTriggerState extends State {
-
-}
+public interface CompensationTriggerState extends State {}

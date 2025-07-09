@@ -19,8 +19,6 @@ package org.apache.seata.compressor.lz4;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-
-
 public class Lz4CompressorTest {
     @Test
     public void testCompressAndDecompress() {

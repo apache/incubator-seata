@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-
 public class KingbaseUndoInsertExecutorTest extends BaseExecutorTest {
 
     @Test
@@ -51,7 +50,7 @@ public class KingbaseUndoInsertExecutorTest extends BaseExecutorTest {
 
     public KingbaseUndoInsertExecutor upperCase() {
         TableMeta tableMeta = Mockito.mock(TableMeta.class);
-        Mockito.when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[]{"ID"}));
+        Mockito.when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[] {"ID"}));
         Mockito.when(tableMeta.getTableName()).thenReturn("TABLE_NAME");
 
         TableRecords beforeImage = new TableRecords();
@@ -91,5 +90,4 @@ public class KingbaseUndoInsertExecutorTest extends BaseExecutorTest {
 
         return new KingbaseUndoInsertExecutor(sqlUndoLog);
     }
-
 }

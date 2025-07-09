@@ -16,7 +16,6 @@
  */
 package org.apache.seata.core.model;
 
-
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 
 /**
@@ -50,7 +49,7 @@ public enum LockStatus {
      * @return the lock status
      */
     public static LockStatus get(byte code) {
-        return get((int)code);
+        return get((int) code);
     }
 
     /**
@@ -77,5 +76,4 @@ public enum LockStatus {
     public int getCode() {
         return code;
     }
-
 }

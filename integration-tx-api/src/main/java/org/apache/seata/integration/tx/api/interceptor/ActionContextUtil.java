@@ -42,8 +42,7 @@ import java.util.Map;
  */
 public final class ActionContextUtil {
 
-    private ActionContextUtil() {
-    }
+    private ActionContextUtil() {}
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ActionContextUtil.class);
 
@@ -59,8 +58,10 @@ public final class ActionContextUtil {
             Field[] fields = ReflectionUtil.getAllFields(targetParam.getClass());
             if (CollectionUtils.isEmpty(fields)) {
                 if (LOGGER.isWarnEnabled()) {
-                    LOGGER.warn("The param of type `{}` has no field, please don't use `@{}(isParamInProperty = true)` on it",
-                            targetParam.getClass().getName(), BusinessActionContextParameter.class.getSimpleName());
+                    LOGGER.warn(
+                            "The param of type `{}` has no field, please don't use `@{}(isParamInProperty = true)` on it",
+                            targetParam.getClass().getName(),
+                            BusinessActionContextParameter.class.getSimpleName());
                 }
                 return Collections.emptyMap();
             }
@@ -97,8 +98,12 @@ public final class ActionContextUtil {
      * @param annotation    the annotation on the param or field
      * @param actionContext the action context
      */
-    public static void loadParamByAnnotationAndPutToContext(@Nonnull final ParamType paramType, @Nonnull String paramName, Object paramValue,
-                                                            @Nonnull final BusinessActionContextParameter annotation, @Nonnull final Map<String, Object> actionContext) {
+    public static void loadParamByAnnotationAndPutToContext(
+            @Nonnull final ParamType paramType,
+            @Nonnull String paramName,
+            Object paramValue,
+            @Nonnull final BusinessActionContextParameter annotation,
+            @Nonnull final Map<String, Object> actionContext) {
         if (paramValue == null) {
             return;
         }
@@ -129,7 +134,8 @@ public final class ActionContextUtil {
     }
 
     @Nullable
-    public static Object getByIndex(@Nonnull ParamType paramType, @Nonnull String paramName, @Nonnull Object paramValue, int index) {
+    public static Object getByIndex(
+            @Nonnull ParamType paramType, @Nonnull String paramName, @Nonnull Object paramValue, int index) {
         if (paramValue instanceof List) {
             @SuppressWarnings("unchecked")
             List<Object> list = (List<Object>) paramValue;
@@ -138,15 +144,24 @@ public final class ActionContextUtil {
             }
             if (list.size() <= index) {
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("The index '{}' is out of bounds for the list {} named '{}'," +
-                            " whose size is '{}', so pass this {}", index, paramType.getCode(), paramName, list.size(), paramType.getCode());
+                    LOGGER.debug(
+                            "The index '{}' is out of bounds for the list {} named '{}',"
+                                    + " whose size is '{}', so pass this {}",
+                            index,
+                            paramType.getCode(),
+                            paramName,
+                            list.size(),
+                            paramType.getCode());
                 }
                 return null;
             }
             paramValue = list.get(index);
         } else {
-            LOGGER.warn("the {} named '{}' is not a `List`, so the 'index' field of '@{}' cannot be used on it",
-                    paramType.getCode(), paramName, BusinessActionContextParameter.class.getSimpleName());
+            LOGGER.warn(
+                    "the {} named '{}' is not a `List`, so the 'index' field of '@{}' cannot be used on it",
+                    paramType.getCode(),
+                    paramName,
+                    BusinessActionContextParameter.class.getSimpleName());
         }
 
         return paramValue;
@@ -188,7 +203,8 @@ public final class ActionContextUtil {
      * @param actionContextMap the actionContextMap
      * @return the action context is changed
      */
-    public static boolean putActionContext(Map<String, Object> actionContext, @Nonnull Map<String, Object> actionContextMap) {
+    public static boolean putActionContext(
+            Map<String, Object> actionContext, @Nonnull Map<String, Object> actionContextMap) {
         boolean isChanged = false;
         for (Map.Entry<String, Object> entry : actionContextMap.entrySet()) {
             if (putActionContext(actionContext, entry.getKey(), entry.getValue())) {
@@ -206,7 +222,8 @@ public final class ActionContextUtil {
      * @param value         the actionContext's value
      * @return the action context is changed
      */
-    public static boolean putActionContextWithoutHandle(@Nonnull final Map<String, Object> actionContext, String key, Object value) {
+    public static boolean putActionContextWithoutHandle(
+            @Nonnull final Map<String, Object> actionContext, String key, Object value) {
         if (value == null) {
             return false;
         }
@@ -223,7 +240,8 @@ public final class ActionContextUtil {
      * @param actionContextMap the actionContextMap
      * @return the action context is changed
      */
-    public static boolean putActionContextWithoutHandle(Map<String, Object> actionContext, @Nonnull Map<String, Object> actionContextMap) {
+    public static boolean putActionContextWithoutHandle(
+            Map<String, Object> actionContext, @Nonnull Map<String, Object> actionContextMap) {
         boolean isChanged = false;
         for (Map.Entry<String, Object> entry : actionContextMap.entrySet()) {
             if (putActionContextWithoutHandle(actionContext, entry.getKey(), entry.getValue())) {
@@ -243,7 +261,9 @@ public final class ActionContextUtil {
      * @see BusinessActionContext#getActionContext(String, Class)
      */
     public static Object handleActionContext(@Nonnull Object actionContext) {
-        if (actionContext instanceof CharSequence || actionContext instanceof Number || actionContext instanceof Boolean
+        if (actionContext instanceof CharSequence
+                || actionContext instanceof Number
+                || actionContext instanceof Boolean
                 || actionContext instanceof Character) {
             return actionContext;
         } else {
@@ -263,7 +283,8 @@ public final class ActionContextUtil {
     @SuppressWarnings("unchecked")
     public static <T> T convertActionContext(String key, @Nullable Object value, @Nonnull Class<T> targetClazz) {
         if (targetClazz.isPrimitive()) {
-            throw new IllegalArgumentException("The targetClazz cannot be a primitive type, because the value may be null. Please use the wrapped type.");
+            throw new IllegalArgumentException(
+                    "The targetClazz cannot be a primitive type, because the value may be null. Please use the wrapped type.");
         }
 
         if (value == null) {
@@ -288,7 +309,8 @@ public final class ActionContextUtil {
                 return JsonUtil.parseObject(JsonUtil.toJSONString(value), targetClazz);
             }
         } catch (RuntimeException e) {
-            String errorMsg = String.format("Failed to convert the action context with key '%s' from '%s' to '%s'.",
+            String errorMsg = String.format(
+                    "Failed to convert the action context with key '%s' from '%s' to '%s'.",
                     key, value.getClass().getName(), targetClazz.getName());
             throw new FrameworkException(e, errorMsg);
         }
@@ -313,8 +335,8 @@ public final class ActionContextUtil {
                 }
             }
             if (keys[i] == null && !(argsClasses[i].equals(BusinessActionContext.class))) {
-                throw new IllegalArgumentException("non-BusinessActionContext parameter should use annotation " +
-                        "BusinessActionContextParameter");
+                throw new IllegalArgumentException("non-BusinessActionContext parameter should use annotation "
+                        + "BusinessActionContextParameter");
             }
         }
         return keys;

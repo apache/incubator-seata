@@ -32,9 +32,7 @@ public class HeadMapSerializer {
 
     private static final HeadMapSerializer INSTANCE = new HeadMapSerializer();
 
-    private HeadMapSerializer() {
-
-    }
+    private HeadMapSerializer() {}
 
     public static HeadMapSerializer getInstance() {
         return INSTANCE;

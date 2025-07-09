@@ -16,15 +16,6 @@
  */
 package org.apache.seata.server.cluster.raft;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 import com.alipay.remoting.serialization.SerializerManager;
 import com.alipay.sofa.jraft.CliService;
 import com.alipay.sofa.jraft.RaftServiceFactory;
@@ -54,18 +45,28 @@ import org.apache.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_PORT_CAMEL;
-import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_SYNC;
-import static org.apache.seata.common.DefaultValues.DEFAULT_SERVER_RAFT_ELECTION_TIMEOUT_MS;
-import static org.apache.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
-import static org.apache.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static java.io.File.separator;
 import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_APPLY_BATCH;
 import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_DISRUPTOR_BUFFER_SIZE;
 import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_ELECTION_TIMEOUT_MS;
 import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_MAX_APPEND_BUFFER_SIZE;
 import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_MAX_REPLICATOR_INFLIGHT_MSGS;
+import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_PORT_CAMEL;
 import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_SNAPSHOT_INTERVAL;
-import static java.io.File.separator;
+import static org.apache.seata.common.ConfigurationKeys.SERVER_RAFT_SYNC;
+import static org.apache.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
+import static org.apache.seata.common.DefaultValues.DEFAULT_SERVER_RAFT_ELECTION_TIMEOUT_MS;
+import static org.apache.seata.common.DefaultValues.DEFAULT_SESSION_STORE_FILE_DIR;
 
 /**
  */
@@ -73,13 +74,13 @@ public class RaftServerManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RaftServerManager.class);
 
-    private static final Map<String/*group*/, RaftServer/*raft-group-cluster*/> RAFT_SERVER_MAP = new HashMap<>();
+    private static final Map<String /*group*/, RaftServer /*raft-group-cluster*/> RAFT_SERVER_MAP = new HashMap<>();
     private static final AtomicBoolean INIT = new AtomicBoolean(false);
 
     private static final org.apache.seata.config.Configuration CONFIG = ConfigurationFactory.getInstance();
     private static volatile boolean RAFT_MODE;
     private static RpcServer rpcServer;
-    
+
     public static CliService getCliServiceInstance() {
         return SingletonHandler.CLI_SERVICE;
     }
@@ -95,14 +96,14 @@ public class RaftServerManager {
             if (StringUtils.isBlank(initConfStr)) {
                 if (RAFT_MODE) {
                     throw new IllegalArgumentException(
-                        "Raft store mode must config: " + ConfigurationKeys.SERVER_RAFT_SERVER_ADDR);
+                            "Raft store mode must config: " + ConfigurationKeys.SERVER_RAFT_SERVER_ADDR);
                 }
                 return;
             } else {
                 if (RAFT_MODE) {
                     for (RegistryService<?> instance : MultiRegistryFactory.getInstances()) {
                         if (!(instance instanceof FileRegistryServiceImpl)
-                            && !(instance instanceof NamingserverRegistryServiceImpl)) {
+                                && !(instance instanceof NamingserverRegistryServiceImpl)) {
                             throw new IllegalArgumentException("Raft store mode not support other Registration Center");
                         }
                     }
@@ -136,7 +137,7 @@ public class RaftServerManager {
                 serverId = new PeerId(host, port);
             }
             final String dataPath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR)
-                + separator + "raft" + separator + serverId.getPort();
+                    + separator + "raft" + separator + serverId.getPort();
             String group = CONFIG.getConfig(ConfigurationKeys.SERVER_RAFT_GROUP, DEFAULT_SEATA_GROUP);
             try {
                 // Here you have raft RPC and business RPC using the same RPC server, and you can usually do this
@@ -207,11 +208,11 @@ public class RaftServerManager {
         RaftOptions raftOptions = new RaftOptions();
         raftOptions.setApplyBatch(CONFIG.getInt(SERVER_RAFT_APPLY_BATCH, raftOptions.getApplyBatch()));
         raftOptions.setMaxAppendBufferSize(
-            CONFIG.getInt(SERVER_RAFT_MAX_APPEND_BUFFER_SIZE, raftOptions.getMaxAppendBufferSize()));
+                CONFIG.getInt(SERVER_RAFT_MAX_APPEND_BUFFER_SIZE, raftOptions.getMaxAppendBufferSize()));
         raftOptions.setDisruptorBufferSize(
-            CONFIG.getInt(SERVER_RAFT_DISRUPTOR_BUFFER_SIZE, raftOptions.getDisruptorBufferSize()));
+                CONFIG.getInt(SERVER_RAFT_DISRUPTOR_BUFFER_SIZE, raftOptions.getDisruptorBufferSize()));
         raftOptions.setMaxReplicatorInflightMsgs(
-            CONFIG.getInt(SERVER_RAFT_MAX_REPLICATOR_INFLIGHT_MSGS, raftOptions.getMaxReplicatorInflightMsgs()));
+                CONFIG.getInt(SERVER_RAFT_MAX_REPLICATOR_INFLIGHT_MSGS, raftOptions.getMaxReplicatorInflightMsgs()));
         raftOptions.setSync(CONFIG.getBoolean(SERVER_RAFT_SYNC, raftOptions.isSync()));
         return raftOptions;
     }
@@ -225,8 +226,8 @@ public class RaftServerManager {
         nodeOptions.setSnapshotIntervalSecs(snapshotInterval);
         nodeOptions.setRaftOptions(initRaftOptions());
         // set the election timeout to 1 second
-        nodeOptions
-            .setElectionTimeoutMs(CONFIG.getInt(SERVER_RAFT_ELECTION_TIMEOUT_MS, DEFAULT_SERVER_RAFT_ELECTION_TIMEOUT_MS));
+        nodeOptions.setElectionTimeoutMs(
+                CONFIG.getInt(SERVER_RAFT_ELECTION_TIMEOUT_MS, DEFAULT_SERVER_RAFT_ELECTION_TIMEOUT_MS));
         // set up the initial cluster configuration
         nodeOptions.setInitialConf(initConf);
         return nodeOptions;
@@ -243,7 +244,5 @@ public class RaftServerManager {
         static {
             CLI_CLIENT_SERVICE.init(new CliOptions());
         }
-
     }
-
 }

@@ -33,15 +33,20 @@ public class EurekaRegistryExceptionTest {
 
     @Test
     public void testConstructorWithMessageAndThrowable() {
-        exceptionAsserts(new EurekaRegistryException(FrameworkErrorCode.UnknownAppError.getErrMessage(), new Throwable()));
+        exceptionAsserts(
+                new EurekaRegistryException(FrameworkErrorCode.UnknownAppError.getErrMessage(), new Throwable()));
     }
 
     @Test
     public void testConstructorWithThrowable() {
-        assertThat(new EurekaRegistryException(new Throwable(FrameworkErrorCode.UnknownAppError.getErrMessage()))).isInstanceOf(EurekaRegistryException.class).hasMessage("java.lang.Throwable: " + FrameworkErrorCode.UnknownAppError.getErrMessage());
+        assertThat(new EurekaRegistryException(new Throwable(FrameworkErrorCode.UnknownAppError.getErrMessage())))
+                .isInstanceOf(EurekaRegistryException.class)
+                .hasMessage("java.lang.Throwable: " + FrameworkErrorCode.UnknownAppError.getErrMessage());
     }
 
     private static void exceptionAsserts(EurekaRegistryException exception) {
-        assertThat(exception).isInstanceOf(EurekaRegistryException.class).hasMessage(FrameworkErrorCode.UnknownAppError.getErrMessage());
+        assertThat(exception)
+                .isInstanceOf(EurekaRegistryException.class)
+                .hasMessage(FrameworkErrorCode.UnknownAppError.getErrMessage());
     }
 }

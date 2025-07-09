@@ -21,8 +21,8 @@ import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.model.Resource;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,27 +39,41 @@ public class ResourceManagerTest {
         private final Map<String, Resource> managedResources = new HashMap<>();
 
         @Override
-        public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws TransactionException {
+        public Long branchRegister(
+                BranchType branchType,
+                String resourceId,
+                String clientId,
+                String xid,
+                String applicationData,
+                String lockKeys)
+                throws TransactionException {
             return System.currentTimeMillis(); // Simple mock implementation
         }
 
         @Override
-        public void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status, String applicationData) throws TransactionException {
+        public void branchReport(
+                BranchType branchType, String xid, long branchId, BranchStatus status, String applicationData)
+                throws TransactionException {
             // Mock implementation - do nothing
         }
 
         @Override
-        public boolean lockQuery(BranchType branchType, String resourceId, String xid, String lockKeys) throws TransactionException {
+        public boolean lockQuery(BranchType branchType, String resourceId, String xid, String lockKeys)
+                throws TransactionException {
             return true; // Simple mock implementation
         }
 
         @Override
-        public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId, String applicationData) throws TransactionException {
+        public BranchStatus branchCommit(
+                BranchType branchType, String xid, long branchId, String resourceId, String applicationData)
+                throws TransactionException {
             return BranchStatus.PhaseTwo_Committed; // Simple mock implementation
         }
 
         @Override
-        public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId, String applicationData) throws TransactionException {
+        public BranchStatus branchRollback(
+                BranchType branchType, String xid, long branchId, String resourceId, String applicationData)
+                throws TransactionException {
             return BranchStatus.PhaseTwo_Rollbacked; // Simple mock implementation
         }
 
@@ -92,14 +106,15 @@ public class ResourceManagerTest {
     @Test
     public void testResourceManagerInterfaceInheritance() {
         // Test that ResourceManager extends from Apache Seata's ResourceManager
-        Assertions.assertTrue(org.apache.seata.core.model.ResourceManager.class
-                .isAssignableFrom(ResourceManager.class));
+        Assertions.assertTrue(
+                org.apache.seata.core.model.ResourceManager.class.isAssignableFrom(ResourceManager.class));
     }
 
     @Test
     public void testDeprecationAnnotation() {
         // Test that the ResourceManager interface is marked as deprecated
-        Assertions.assertTrue(ResourceManager.class.isAnnotationPresent(Deprecated.class),
+        Assertions.assertTrue(
+                ResourceManager.class.isAnnotationPresent(Deprecated.class),
                 "ResourceManager should be marked as @Deprecated");
     }
 
@@ -107,16 +122,16 @@ public class ResourceManagerTest {
     public void testInterfaceStructure() {
         // Test interface modifiers
         int modifiers = ResourceManager.class.getModifiers();
-        Assertions.assertTrue(java.lang.reflect.Modifier.isInterface(modifiers),
-                "ResourceManager should be an interface");
-        Assertions.assertTrue(java.lang.reflect.Modifier.isPublic(modifiers),
-                "ResourceManager should be public");
+        Assertions.assertTrue(
+                java.lang.reflect.Modifier.isInterface(modifiers), "ResourceManager should be an interface");
+        Assertions.assertTrue(java.lang.reflect.Modifier.isPublic(modifiers), "ResourceManager should be public");
     }
 
     @Test
     public void testPackageName() {
         // Test that the package is the expected compatible package
-        Assertions.assertEquals("io.seata.core.model", 
+        Assertions.assertEquals(
+                "io.seata.core.model",
                 ResourceManager.class.getPackage().getName(),
                 "ResourceManager should be in io.seata.core.model package");
     }
@@ -125,7 +140,7 @@ public class ResourceManagerTest {
     public void testMethodInheritance() throws Exception {
         // Test that the interface has the expected methods from the parent interface
         MockResourceManager mockResourceManager = new MockResourceManager();
-        
+
         // Test that the mock resource manager implements both interfaces
         Assertions.assertTrue(mockResourceManager instanceof ResourceManager);
         Assertions.assertTrue(mockResourceManager instanceof org.apache.seata.core.model.ResourceManager);
@@ -136,7 +151,7 @@ public class ResourceManagerTest {
         // Test that compatible ResourceManager can be used wherever Apache Seata ResourceManager is expected
         MockResourceManager compatibleResourceManager = new MockResourceManager();
         org.apache.seata.core.model.ResourceManager apacheResourceManager = compatibleResourceManager;
-        
+
         Assertions.assertNotNull(apacheResourceManager);
         Assertions.assertSame(compatibleResourceManager, apacheResourceManager);
     }
@@ -145,28 +160,29 @@ public class ResourceManagerTest {
     public void testImplementationFunctionality() throws TransactionException {
         // Test basic functionality of a mock implementation
         MockResourceManager resourceManager = new MockResourceManager();
-        
+
         // Test branchRegister method
         Long branchId = resourceManager.branchRegister(BranchType.AT, "resource1", "client1", "xid1", "data", "keys");
         Assertions.assertNotNull(branchId);
         Assertions.assertTrue(branchId > 0);
-        
+
         // Test lockQuery method
         boolean lockResult = resourceManager.lockQuery(BranchType.AT, "resource1", "xid1", "keys");
         Assertions.assertTrue(lockResult);
-        
+
         // Test branchCommit method
         BranchStatus commitStatus = resourceManager.branchCommit(BranchType.AT, "xid1", branchId, "resource1", "data");
         Assertions.assertEquals(BranchStatus.PhaseTwo_Committed, commitStatus);
-        
+
         // Test branchRollback method
-        BranchStatus rollbackStatus = resourceManager.branchRollback(BranchType.AT, "xid1", branchId, "resource1", "data");
+        BranchStatus rollbackStatus =
+                resourceManager.branchRollback(BranchType.AT, "xid1", branchId, "resource1", "data");
         Assertions.assertEquals(BranchStatus.PhaseTwo_Rollbacked, rollbackStatus);
-        
+
         // Test getBranchType method
         BranchType branchType = resourceManager.getBranchType();
         Assertions.assertEquals(BranchType.AT, branchType);
-        
+
         // Test getGlobalStatus method
         GlobalStatus globalStatus = resourceManager.getGlobalStatus(BranchType.AT, "xid1");
         Assertions.assertEquals(GlobalStatus.Begin, globalStatus);
@@ -176,7 +192,7 @@ public class ResourceManagerTest {
     public void testResourceManagement() {
         // Test resource registration and management
         MockResourceManager resourceManager = new MockResourceManager();
-        
+
         // Create a mock resource
         Resource mockResource = new Resource() {
             @Override
@@ -194,13 +210,13 @@ public class ResourceManagerTest {
                 return BranchType.AT;
             }
         };
-        
+
         // Test registerResource method
         resourceManager.registerResource(mockResource);
         Map<String, Resource> managedResources = resourceManager.getManagedResources();
         Assertions.assertTrue(managedResources.containsKey("testResource"));
         Assertions.assertEquals(mockResource, managedResources.get("testResource"));
-        
+
         // Test unregisterResource method
         resourceManager.unregisterResource(mockResource);
         managedResources = resourceManager.getManagedResources();
@@ -213,7 +229,7 @@ public class ResourceManagerTest {
         MockResourceManager mockResourceManager = new MockResourceManager();
         ResourceManager resourceManager = mockResourceManager;
         Object obj = resourceManager;
-        
+
         Assertions.assertTrue(obj instanceof org.apache.seata.core.model.ResourceManager);
         Assertions.assertTrue(obj instanceof ResourceManager);
     }
@@ -222,7 +238,7 @@ public class ResourceManagerTest {
     public void testRequiredMethods() throws Exception {
         // Test that all required methods are present
         java.lang.reflect.Method[] methods = ResourceManager.class.getMethods();
-        
+
         boolean hasBranchRegister = false;
         boolean hasBranchReport = false;
         boolean hasLockQuery = false;
@@ -233,7 +249,7 @@ public class ResourceManagerTest {
         boolean hasGetManagedResources = false;
         boolean hasGetBranchType = false;
         boolean hasGetGlobalStatus = false;
-        
+
         for (java.lang.reflect.Method method : methods) {
             switch (method.getName()) {
                 case "branchRegister":
@@ -268,7 +284,7 @@ public class ResourceManagerTest {
                     break;
             }
         }
-        
+
         Assertions.assertTrue(hasBranchRegister, "ResourceManager should have branchRegister method");
         Assertions.assertTrue(hasBranchReport, "ResourceManager should have branchReport method");
         Assertions.assertTrue(hasLockQuery, "ResourceManager should have lockQuery method");
@@ -280,4 +296,4 @@ public class ResourceManagerTest {
         Assertions.assertTrue(hasGetBranchType, "ResourceManager should have getBranchType method");
         Assertions.assertTrue(hasGetGlobalStatus, "ResourceManager should have getGlobalStatus method");
     }
-} 
+}

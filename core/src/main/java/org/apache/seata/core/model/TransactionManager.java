@@ -38,7 +38,7 @@ public interface TransactionManager {
      * out.
      */
     String begin(String applicationId, String transactionServiceGroup, String name, int timeout)
-        throws TransactionException;
+            throws TransactionException;
 
     /**
      * Global commit.

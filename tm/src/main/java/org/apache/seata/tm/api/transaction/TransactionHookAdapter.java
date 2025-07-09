@@ -16,41 +16,26 @@
  */
 package org.apache.seata.tm.api.transaction;
 
-
 public class TransactionHookAdapter implements TransactionHook {
 
     @Override
-    public void beforeBegin() {
-
-    }
+    public void beforeBegin() {}
 
     @Override
-    public void afterBegin() {
-
-    }
+    public void afterBegin() {}
 
     @Override
-    public void beforeCommit() {
-
-    }
+    public void beforeCommit() {}
 
     @Override
-    public void afterCommit() {
-
-    }
+    public void afterCommit() {}
 
     @Override
-    public void beforeRollback() {
-
-    }
+    public void beforeRollback() {}
 
     @Override
-    public void afterRollback() {
-
-    }
+    public void afterRollback() {}
 
     @Override
-    public void afterCompletion() {
-
-    }
+    public void afterCompletion() {}
 }

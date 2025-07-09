@@ -16,10 +16,10 @@
  */
 package org.apache.seata.core.rpc.netty;
 
-import java.util.concurrent.ConcurrentMap;
-
 import io.netty.channel.Channel;
 import org.apache.seata.core.rpc.netty.mockserver.ProtocolTestConstants;
+
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Channel Manager Test Helper
@@ -31,9 +31,9 @@ public class ChannelManagerTestHelper {
     }
 
     public static Channel getChannel(TmNettyRemotingClient client) {
-        return getChannelManager(client)
-                .acquireChannel(ProtocolTestConstants.MOCK_SERVER_ADDRESS);
+        return getChannelManager(client).acquireChannel(ProtocolTestConstants.MOCK_SERVER_ADDRESS);
     }
+
     private static NettyClientChannelManager getChannelManager(AbstractNettyRemotingClient remotingClient) {
         return remotingClient.getClientChannelManager();
     }

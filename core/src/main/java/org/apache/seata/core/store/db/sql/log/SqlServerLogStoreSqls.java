@@ -29,8 +29,8 @@ public class SqlServerLogStoreSqls extends AbstractLogStoreSqls {
     /**
      * The constant QUERY_ALL_GLOBAL_SESSION_SQLSERVER.
      */
-    private static final String QUERY_ALL_GLOBAL_SESSION_SQLSERVER = "select " + ALL_GLOBAL_COLUMNS + " from "
-            + GLOBAL_TABLE_PLACEHOLD + WHERE_PLACEHOLD;
+    private static final String QUERY_ALL_GLOBAL_SESSION_SQLSERVER =
+            "select " + ALL_GLOBAL_COLUMNS + " from " + GLOBAL_TABLE_PLACEHOLD + WHERE_PLACEHOLD;
 
     /**
      * The constant INSERT_GLOBAL_TRANSACTION_SQLSERVER.
@@ -93,7 +93,9 @@ public class SqlServerLogStoreSqls extends AbstractLogStoreSqls {
 
     @Override
     public String getAllGlobalSessionSql(String globalTable, String whereCondition) {
-        return QUERY_ALL_GLOBAL_SESSION_SQLSERVER.replace(GLOBAL_TABLE_PLACEHOLD, globalTable).replace(WHERE_PLACEHOLD, whereCondition);
+        return QUERY_ALL_GLOBAL_SESSION_SQLSERVER
+                .replace(GLOBAL_TABLE_PLACEHOLD, globalTable)
+                .replace(WHERE_PLACEHOLD, whereCondition);
     }
 
     @Override
@@ -113,7 +115,8 @@ public class SqlServerLogStoreSqls extends AbstractLogStoreSqls {
 
     @Override
     public String getQueryGlobalTransactionSQLByStatus(String globalTable, String paramsPlaceHolder) {
-        return QUERY_GLOBAL_TRANSACTION_BY_STATUS_SQLSERVER.replace(GLOBAL_TABLE_PLACEHOLD, globalTable)
+        return QUERY_GLOBAL_TRANSACTION_BY_STATUS_SQLSERVER
+                .replace(GLOBAL_TABLE_PLACEHOLD, globalTable)
                 .replace(PRAMETER_PLACEHOLD, paramsPlaceHolder);
     }
 

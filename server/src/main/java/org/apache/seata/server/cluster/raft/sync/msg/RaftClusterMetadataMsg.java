@@ -32,8 +32,7 @@ public class RaftClusterMetadataMsg extends RaftBaseMsg {
         this.raftClusterMetadata = raftClusterMetadata;
     }
 
-    public RaftClusterMetadataMsg() {
-    }
+    public RaftClusterMetadataMsg() {}
 
     public RaftClusterMetadata getRaftClusterMetadata() {
         return raftClusterMetadata;

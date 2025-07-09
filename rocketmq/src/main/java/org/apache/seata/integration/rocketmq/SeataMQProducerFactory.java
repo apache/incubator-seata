@@ -40,8 +40,8 @@ public class SeataMQProducerFactory {
         return createSingle(nameServer, null, producerGroup, null);
     }
 
-    public static SeataMQProducer createSingle(String nameServer, String namespace,
-                                               String groupName, RPCHook rpcHook) throws MQClientException {
+    public static SeataMQProducer createSingle(String nameServer, String namespace, String groupName, RPCHook rpcHook)
+            throws MQClientException {
         if (defaultProducer == null) {
             try (ResourceLock ignored = RESOURCE_LOCK.obtain()) {
                 if (defaultProducer == null) {

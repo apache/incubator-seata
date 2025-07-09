@@ -16,11 +16,6 @@
  */
 package org.apache.seata.rm;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.text.ParseException;
-import java.util.Date;
-
 import org.apache.seata.common.util.DateUtil;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.ResourceManager;
@@ -31,6 +26,11 @@ import org.apache.seata.rm.datasource.undo.UndoLogManager;
 import org.apache.seata.rm.datasource.undo.UndoLogManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.text.ParseException;
+import java.util.Date;
 
 /**
  * The type Rm handler at.
@@ -45,7 +45,7 @@ public class RMHandlerAT extends AbstractRMHandler {
     @Override
     public void handle(UndoLogDeleteRequest request) {
         String resourceId = request.getResourceId();
-        DataSourceManager dataSourceManager = (DataSourceManager)getResourceManager();
+        DataSourceManager dataSourceManager = (DataSourceManager) getResourceManager();
         DataSourceProxy dataSourceProxy = dataSourceManager.get(resourceId);
         if (dataSourceProxy == null) {
             LOGGER.warn("Failed to get dataSourceProxy for delete undolog on {}", resourceId);

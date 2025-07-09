@@ -16,7 +16,6 @@
  */
 package org.apache.seata.metrics.exporter.prometheus;
 
-
 import org.apache.seata.metrics.registry.compact.TimerValue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

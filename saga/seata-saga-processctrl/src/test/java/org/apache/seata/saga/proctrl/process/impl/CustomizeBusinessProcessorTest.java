@@ -16,9 +16,6 @@
  */
 package org.apache.seata.saga.proctrl.process.impl;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.saga.proctrl.ProcessContext;
 import org.apache.seata.saga.proctrl.ProcessType;
@@ -27,6 +24,9 @@ import org.apache.seata.saga.proctrl.handler.RouterHandler;
 import org.apache.seata.saga.proctrl.impl.ProcessContextImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * CustomizeBusinessProcessorTest

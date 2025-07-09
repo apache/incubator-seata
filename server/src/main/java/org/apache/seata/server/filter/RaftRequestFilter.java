@@ -57,8 +57,8 @@ public class RaftRequestFilter implements Filter, ApplicationListener<ClusterCha
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
-        throws IOException, ServletException {
-        HttpServletRequest httpRequest = (HttpServletRequest)servletRequest;
+            throws IOException, ServletException {
+        HttpServletRequest httpRequest = (HttpServletRequest) servletRequest;
         String group = httpRequest.getParameter("unit");
         if (StringUtils.isBlank(group)) {
             group = httpRequest.getHeader(RAFT_GROUP_HEADER);
@@ -71,9 +71,10 @@ public class RaftRequestFilter implements Filter, ApplicationListener<ClusterCha
             if (!HttpMethod.GET.name().equalsIgnoreCase(method)) {
                 if (!isPass(group)) {
                     throw new ConsoleException(
-                        new TransactionException(TransactionExceptionCode.NotRaftLeader,
-                            " The current TC is not a leader node, interrupt processing of transactions!"),
-                        " The current TC is not a leader node, interrupt processing of transactions!");
+                            new TransactionException(
+                                    TransactionExceptionCode.NotRaftLeader,
+                                    " The current TC is not a leader node, interrupt processing of transactions!"),
+                            " The current TC is not a leader node, interrupt processing of transactions!");
                 }
             }
             filterChain.doFilter(servletRequest, servletResponse);

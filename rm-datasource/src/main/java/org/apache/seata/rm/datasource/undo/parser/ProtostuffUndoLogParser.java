@@ -16,15 +16,6 @@
  */
 package org.apache.seata.rm.datasource.undo.parser;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.sql.Timestamp;
-import java.util.List;
-
-import org.apache.seata.rm.datasource.undo.BranchUndoLog;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.protostuff.Input;
 import io.protostuff.LinkedBuffer;
 import io.protostuff.Output;
@@ -40,10 +31,18 @@ import org.apache.seata.common.executor.Initialize;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.loader.EnhancedServiceNotFoundException;
 import org.apache.seata.common.loader.LoadLevel;
-import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.BufferUtils;
+import org.apache.seata.common.util.CollectionUtils;
+import org.apache.seata.rm.datasource.undo.BranchUndoLog;
 import org.apache.seata.rm.datasource.undo.UndoLogParser;
 import org.apache.seata.rm.datasource.undo.parser.spi.ProtostuffDelegate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * The type protostuff based undo log parser.
@@ -67,7 +66,9 @@ public class ProtostuffUndoLogParser implements UndoLogParser, Initialize {
             if (CollectionUtils.isNotEmpty(delegates)) {
                 for (ProtostuffDelegate delegate : delegates) {
                     idStrategy.registerDelegate(delegate.create());
-                    LOGGER.info("protostuff undo log parser load [{}].", delegate.getClass().getName());
+                    LOGGER.info(
+                            "protostuff undo log parser load [{}].",
+                            delegate.getClass().getName());
                 }
             }
         } catch (EnhancedServiceNotFoundException e) {

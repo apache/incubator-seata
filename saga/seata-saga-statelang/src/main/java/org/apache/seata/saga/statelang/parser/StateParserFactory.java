@@ -16,9 +16,6 @@
  */
 package org.apache.seata.saga.statelang.parser;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.apache.seata.saga.statelang.domain.StateType;
 import org.apache.seata.saga.statelang.parser.impl.ChoiceStateParser;
 import org.apache.seata.saga.statelang.parser.impl.CompensateSubStateMachineStateParser;
@@ -28,6 +25,9 @@ import org.apache.seata.saga.statelang.parser.impl.ScriptTaskStateParser;
 import org.apache.seata.saga.statelang.parser.impl.ServiceTaskStateParser;
 import org.apache.seata.saga.statelang.parser.impl.SubStateMachineParser;
 import org.apache.seata.saga.statelang.parser.impl.SucceedEndStateParser;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A simple factory of state parser
@@ -44,8 +44,7 @@ public class StateParserFactory {
         stateParserMap.put(StateType.FAIL, new FailEndStateParser());
         stateParserMap.put(StateType.SUCCEED, new SucceedEndStateParser());
         stateParserMap.put(StateType.SUB_STATE_MACHINE, new SubStateMachineParser());
-        stateParserMap.put(StateType.SUB_MACHINE_COMPENSATION,
-            new CompensateSubStateMachineStateParser());
+        stateParserMap.put(StateType.SUB_MACHINE_COMPENSATION, new CompensateSubStateMachineStateParser());
         stateParserMap.put(StateType.SCRIPT_TASK, new ScriptTaskStateParser());
     }
 

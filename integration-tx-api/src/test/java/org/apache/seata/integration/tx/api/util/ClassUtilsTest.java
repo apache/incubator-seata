@@ -16,6 +16,8 @@
  */
 package org.apache.seata.integration.tx.api.util;
 
+import org.junit.jupiter.api.Test;
+
 import java.lang.reflect.Method;
 import java.util.AbstractList;
 import java.util.AbstractMap;
@@ -23,8 +25,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;

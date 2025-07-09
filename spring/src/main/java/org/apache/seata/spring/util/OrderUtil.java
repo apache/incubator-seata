@@ -26,8 +26,7 @@ import org.springframework.core.annotation.OrderUtils;
  */
 public class OrderUtil {
 
-    private OrderUtil() {
-    }
+    private OrderUtil() {}
 
     /**
      * Return the order on the object.
@@ -170,7 +169,9 @@ public class OrderUtil {
         if (lowerThan(sourceOrder, targetOrder)) {
             return true;
         } else {
-            return sourceOrder == targetOrder && lowerThan(source.getAdvice().getClass(), target.getAdvice().getClass());
+            return sourceOrder == targetOrder
+                    && lowerThan(
+                            source.getAdvice().getClass(), target.getAdvice().getClass());
         }
     }
 
@@ -188,7 +189,9 @@ public class OrderUtil {
         if (higherThan(sourceOrder, targetOrder)) {
             return true;
         } else {
-            return sourceOrder == targetOrder && higherThan(source.getAdvice().getClass(), target.getAdvice().getClass());
+            return sourceOrder == targetOrder
+                    && higherThan(
+                            source.getAdvice().getClass(), target.getAdvice().getClass());
         }
     }
 
@@ -206,7 +209,9 @@ public class OrderUtil {
         if (lowerThan(sourceOrder, targetOrder)) {
             return true;
         } else {
-            return sourceOrder == targetOrder && lowerOrEquals(source.getAdvice().getClass(), target.getAdvice().getClass());
+            return sourceOrder == targetOrder
+                    && lowerOrEquals(
+                            source.getAdvice().getClass(), target.getAdvice().getClass());
         }
     }
 
@@ -224,7 +229,9 @@ public class OrderUtil {
         if (higherThan(sourceOrder, targetOrder)) {
             return true;
         } else {
-            return sourceOrder == targetOrder && higherOrEquals(source.getAdvice().getClass(), target.getAdvice().getClass());
+            return sourceOrder == targetOrder
+                    && higherOrEquals(
+                            source.getAdvice().getClass(), target.getAdvice().getClass());
         }
     }
 

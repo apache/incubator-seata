@@ -30,5 +30,5 @@ public interface ParametersHolder {
      *
      * @return the array list [ ]
      */
-    Map<Integer,ArrayList<Object>> getParameters();
+    Map<Integer, ArrayList<Object>> getParameters();
 }

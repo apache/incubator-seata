@@ -16,11 +16,6 @@
  */
 package org.apache.seata.rm.datasource.undo.postgresql;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.Date;
-
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.core.compressor.CompressorType;
 import org.apache.seata.core.constants.ClientTableColumnsName;
@@ -30,14 +25,18 @@ import org.apache.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.Date;
 
 @LoadLevel(name = JdbcConstants.POSTGRESQL)
 public class PostgresqlUndoLogManager extends AbstractUndoLogManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgresqlUndoLogManager.class);
 
-    private static final String INSERT_UNDO_LOG_SQL = "INSERT INTO " + UNDO_LOG_TABLE_NAME +
-            " (" + ClientTableColumnsName.UNDO_LOG_ID + "," + ClientTableColumnsName.UNDO_LOG_BRANCH_XID + ", "
+    private static final String INSERT_UNDO_LOG_SQL = "INSERT INTO " + UNDO_LOG_TABLE_NAME + " ("
+            + ClientTableColumnsName.UNDO_LOG_ID + "," + ClientTableColumnsName.UNDO_LOG_BRANCH_XID + ", "
             + ClientTableColumnsName.UNDO_LOG_XID + ", " + ClientTableColumnsName.UNDO_LOG_CONTEXT + ", "
             + ClientTableColumnsName.UNDO_LOG_ROLLBACK_INFO + ", " + ClientTableColumnsName.UNDO_LOG_LOG_STATUS + ", "
             + ClientTableColumnsName.UNDO_LOG_LOG_CREATED + ", " + ClientTableColumnsName.UNDO_LOG_LOG_MODIFIED + ")"
@@ -73,20 +72,26 @@ public class PostgresqlUndoLogManager extends AbstractUndoLogManager {
     }
 
     @Override
-    protected void insertUndoLogWithNormal(String xid, long branchID, String rollbackCtx, byte[] undoLogContent,
-                                           Connection conn) throws SQLException {
+    protected void insertUndoLogWithNormal(
+            String xid, long branchID, String rollbackCtx, byte[] undoLogContent, Connection conn) throws SQLException {
         insertUndoLog(xid, branchID, rollbackCtx, undoLogContent, State.Normal, conn);
     }
 
     @Override
-    protected void insertUndoLogWithGlobalFinished(String xid, long branchId, UndoLogParser parser,
-        Connection conn) throws SQLException {
-        insertUndoLog(xid, branchId, buildContext(parser.getName(), CompressorType.NONE), parser.getDefaultContent(),
-                State.GlobalFinished, conn);
+    protected void insertUndoLogWithGlobalFinished(String xid, long branchId, UndoLogParser parser, Connection conn)
+            throws SQLException {
+        insertUndoLog(
+                xid,
+                branchId,
+                buildContext(parser.getName(), CompressorType.NONE),
+                parser.getDefaultContent(),
+                State.GlobalFinished,
+                conn);
     }
 
-    private void insertUndoLog(String xid, long branchID, String rollbackCtx, byte[] undoLogContent,
-                               State state, Connection conn) throws SQLException {
+    private void insertUndoLog(
+            String xid, long branchID, String rollbackCtx, byte[] undoLogContent, State state, Connection conn)
+            throws SQLException {
         PreparedStatement pst = null;
         try {
             pst = conn.prepareStatement(INSERT_UNDO_LOG_SQL);

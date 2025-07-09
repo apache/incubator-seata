@@ -34,7 +34,7 @@ public class CodeTest {
                 Arguments.of(Code.SUCCESS, "ok"), // Test case for SUCCESS
                 Arguments.of(Code.ERROR, "Server error"), // Test case for ERROR
                 Arguments.of(Code.LOGIN_FAILED, "Login failed") // Test case for LOGIN_FAILED
-        );
+                );
     }
 
     @ParameterizedTest
@@ -50,9 +50,7 @@ public class CodeTest {
     }
 
     static Stream<Arguments> codeSetterProvider() {
-        return Stream.of(
-                Arguments.of(Code.SUCCESS, "201", "Created")
-        );
+        return Stream.of(Arguments.of(Code.SUCCESS, "201", "Created"));
     }
 
     @ParameterizedTest
