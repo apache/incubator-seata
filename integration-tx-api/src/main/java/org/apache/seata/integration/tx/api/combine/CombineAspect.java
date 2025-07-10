@@ -74,7 +74,8 @@ public class CombineAspect {
                         conn.setAutoCommit(true);
                     }
                 } catch (Throwable t) {
-                    // Record the exception of resetting the auto-commit, but do not interrupt and continue to try to close
+                    // Record the exception of resetting the auto-commit, but do not interrupt and continue to try to
+                    // close
                     LOGGER.error("Failed to reset autoCommit to true for connection: {}", conn, t);
                 }
                 try {
@@ -83,7 +84,8 @@ public class CombineAspect {
                     }
                     conn.close();
                 } catch (Throwable t) {
-                    // Record the exception of closing the connection, but do not interrupt the loop and continue to process the next connection
+                    // Record the exception of closing the connection, but do not interrupt the loop and continue to
+                    // process the next connection
                     LOGGER.error("Failed to close connection: {}", conn, t);
                 }
             }
