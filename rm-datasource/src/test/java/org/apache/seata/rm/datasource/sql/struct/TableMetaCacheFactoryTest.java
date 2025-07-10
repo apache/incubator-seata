@@ -19,6 +19,7 @@ package org.apache.seata.rm.datasource.sql.struct;
 import org.apache.seata.common.loader.EnhancedServiceNotFoundException;
 import org.apache.seata.rm.datasource.sql.struct.cache.MariadbTableMetaCache;
 import org.apache.seata.rm.datasource.sql.struct.cache.MysqlTableMetaCache;
+import org.apache.seata.rm.datasource.sql.struct.cache.OceanBaseTableMetaCache;
 import org.apache.seata.rm.datasource.sql.struct.cache.OracleTableMetaCache;
 import org.apache.seata.rm.datasource.sql.struct.cache.PolarDBXTableMetaCache;
 import org.apache.seata.sqlparser.util.JdbcConstants;
@@ -39,6 +40,8 @@ public class TableMetaCacheFactoryTest {
                 TableMetaCacheFactory.getTableMetaCache(JdbcConstants.POLARDBX) instanceof PolarDBXTableMetaCache);
         Assertions.assertTrue(
                 TableMetaCacheFactory.getTableMetaCache(JdbcConstants.ORACLE) instanceof OracleTableMetaCache);
+        Assertions.assertTrue(
+                TableMetaCacheFactory.getTableMetaCache(JdbcConstants.OCEANBASE) instanceof OceanBaseTableMetaCache);
         Assertions.assertEquals(
                 TableMetaCacheFactory.getTableMetaCache(JdbcConstants.ORACLE),
                 TableMetaCacheFactory.getTableMetaCache(JdbcConstants.ORACLE));
