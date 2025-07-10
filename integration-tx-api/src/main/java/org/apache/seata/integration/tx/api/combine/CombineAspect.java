@@ -40,15 +40,15 @@ public class CombineAspect {
         }
 
         if (!CombineContext.set()) {
-            // 同一个全局事务，切面无须进入
+            // The same global transaction, the aspect does not need to enter
             return joinPoint.proceed();
         }
 
         try {
-            // 第一次切面进入
+            // First cut entry
             Object result = joinPoint.proceed();
 
-            // doCleanupAfterCompletion标识事务结束，重置并关闭连接
+            // doCleanupAfterCompletion marks the end of the transaction, resets and closes the connection
             CombineContext.clear();
             // doCommit
             for (ConnectionProxyXA conn : CombineConnectionHolder.getDsConn()) {
@@ -69,12 +69,12 @@ public class CombineAspect {
             CombineContext.clear();
             for (ConnectionProxyXA conn : CombineConnectionHolder.getDsConn()) {
                 try {
-                    // 重置自动提交（如果非自动提交）
+                    // Reset autocommit (if not autocommitting)
                     if (!conn.getAutoCommit()) {
                         conn.setAutoCommit(true);
                     }
                 } catch (Throwable t) {
-                    // 记录重置自动提交的异常，但不中断，继续尝试关闭
+                    // Record the exception of resetting the auto-commit, but do not interrupt and continue to try to close
                     LOGGER.error("Failed to reset autoCommit to true for connection: {}", conn, t);
                 }
                 try {
@@ -83,11 +83,11 @@ public class CombineAspect {
                     }
                     conn.close();
                 } catch (Throwable t) {
-                    // 记录关闭连接的异常，但不中断循环，继续处理下一个连接
+                    // Record the exception of closing the connection, but do not interrupt the loop and continue to process the next connection
                     LOGGER.error("Failed to close connection: {}", conn, t);
                 }
             }
-            // 清理本地缓存连接
+            // Clean up local cache connections
             CombineConnectionHolder.clear();
         }
     }

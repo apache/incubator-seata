@@ -28,8 +28,8 @@ public class CombineContext {
 
     /**
      * @return
-     *    false: 指定的key已经存在（重复进入切面）
-     *    true: 指定的key不存在（第一次进入切面）
+     *    false: The specified key already exists (repeatedly enter the aspect)
+     *    true: The specified key does not exist (first time entering the aspect)
      */
     public static boolean set() {
         String xid = RootContext.getXID();
