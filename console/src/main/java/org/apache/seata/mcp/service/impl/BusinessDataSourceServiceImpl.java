@@ -22,6 +22,8 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
     private static final String GET_SCHEMA_SQL = "SELECT COLUMN_NAME, DATA_TYPE, COLUMN_COMMENT FROM INFORMATION_SCHEMA.COLUMNS " +
             "WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?";
 
+    private static final String GET_UNDO_LOG_SQL = "SELECT rollback_info FROM undo_log WHERE branch_id = ? AND xid = ?";
+
     @Override
     public List<String> getTableNamesBySchema(String resourceId) {
         String schema = getSchemaNameByResourceId(resourceId);
@@ -50,6 +52,18 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
     @Override
     public List<Map<String, Object>> runSql(String sql, String resourceId) {
         return sqlExecutionTemplate.query(resourceId,sql);
+    }
+
+    @Override
+    public byte[] getUndoLogInfo(String resourceId, String branchId, String xid) {
+        List<Map<String, Object>> query = sqlExecutionTemplate.query(resourceId, GET_UNDO_LOG_SQL, branchId, xid);
+        for(Map<String, Object> map : query){
+            Object rollbackInfo = map.get("rollback_info");
+            if(rollbackInfo != null){
+                return (byte[])rollbackInfo;
+            }
+        }
+        return new byte[0];
     }
 
 
