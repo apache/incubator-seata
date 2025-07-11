@@ -59,10 +59,10 @@ public class GlobalLockParam implements Serializable {
     @ToolParam(description = "resourceId")
     private String resourceId;
 
-    @ToolParam(description = "page number")
+    @ToolParam(description = "page number",required = true)
     private int pageNum;
 
-    @ToolParam(description = "Page size")
+    @ToolParam(description = "Page size",required = true)
     private int pageSize;
 
     @ToolParam(description = "Start time")
