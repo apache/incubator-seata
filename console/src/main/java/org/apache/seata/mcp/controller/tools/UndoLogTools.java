@@ -12,10 +12,10 @@ public class UndoLogTools {
     @Autowired
     private UndoLogService undoLogService;
 
-    @Tool(description = "根据branchId,xid分析对应rm的undolog数据")
-    public String analyzeUndoLog(@ToolParam(description = "数据源唯一标识",required = true) String resourceId,
-                                        @ToolParam(description = "分支事务id",required = true) String branchId,
-                                        @ToolParam(description = "全局事务id",required = true) String xid){
+    @Tool(description = "Based on the branchId, xid analyzes the undo_log data of rm")
+    public String analyzeUndoLog(@ToolParam(description = "Unique identifier of the data source",required = true) String resourceId,
+                                        @ToolParam(description = "Branch transaction ID",required = true) String branchId,
+                                        @ToolParam(description = "Global transaction ID",required = true) String xid){
         return undoLogService.queryAndAnalyzeUndoLog(resourceId, branchId, xid);
     }
 
