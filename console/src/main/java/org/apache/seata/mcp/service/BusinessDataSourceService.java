@@ -9,4 +9,6 @@ public interface BusinessDataSourceService {
     List<Map<String, Object>> getTableSchemaByTableName(String resourceId,String tableName);
 
     List<Map<String, Object>> runSql(String sql,String resourceId);
+
+    byte[] getUndoLogInfo(String resourceId,String branchId,String xid);
 }
