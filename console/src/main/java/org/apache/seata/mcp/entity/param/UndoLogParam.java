@@ -1,0 +1,152 @@
+package org.apache.seata.mcp.entity.param;
+
+import org.apache.seata.mcp.annotation.ToolParam;
+
+import java.time.LocalDateTime;
+
+/**
+ * undo_log Query parameters
+ */
+public class UndoLogParam {
+
+    @ToolParam(description = "Unique identifier of the data source",required = true)
+    private String resourceId;
+
+    @ToolParam(description = "Branch transaction ID")
+    private String branchId;
+
+    @ToolParam(description = "Global transaction ID")
+    private String xid;
+
+    @ToolParam(description = "status,0:normal status,1:defense status")
+    private Integer logStatus;
+
+    @ToolParam(description = "The time period created, start time and end time can be the same")
+    private CreateTime logCreateTime;
+
+    @ToolParam(description = "The time period modified, start time and end time can be the same")
+    private ModifyTime logModifiedTime;
+
+
+    public static class CreateTime{
+        @ToolParam(description = "Start time",required = true,example = "2025-07-09 11:38:45")
+        private String startTime;
+        @ToolParam(description = "End time",required = true,example = "2025-07-09 11:38:45")
+        private String endTime;
+
+        @Override
+        public String toString() {
+            return "CreateTime{" +
+                    "startTime=" + startTime +
+                    ", endTime=" + endTime +
+                    '}';
+        }
+
+        public String getStartTime() {
+            return startTime;
+        }
+
+        public void setStartTime(String startTime) {
+            this.startTime = startTime;
+        }
+
+        public String getEndTime() {
+            return endTime;
+        }
+
+        public void setEndTime(String endTime) {
+            this.endTime = endTime;
+        }
+    }
+
+    public static class ModifyTime{
+        @ToolParam(description = "Start time",required = true,example = "2025-07-09 11:38:45")
+        private String startTime;
+        @ToolParam(description = "End time",required = true,example = "2025-07-09 11:38:45")
+        private String endTime;
+
+        @Override
+        public String toString() {
+            return "ModifyTime{" +
+                    "startTime=" + startTime +
+                    ", endTime=" + endTime +
+                    '}';
+        }
+
+        public String getEndTime() {
+            return endTime;
+        }
+
+        public void setEndTime(String endTime) {
+            this.endTime = endTime;
+        }
+
+        public String getStartTime() {
+            return startTime;
+        }
+
+        public void setStartTime(String startTime) {
+            this.startTime = startTime;
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "UndoLogParam{" +
+                "resourceId='" + resourceId + '\'' +
+                ", branchId='" + branchId + '\'' +
+                ", xid='" + xid + '\'' +
+                ", logStatus=" + logStatus +
+                ", logCreateTime=" + logCreateTime +
+                ", logModifiedTime=" + logModifiedTime +
+                '}';
+    }
+
+    public String getResourceId() {
+        return resourceId;
+    }
+
+    public void setResourceId(String resourceId) {
+        this.resourceId = resourceId;
+    }
+
+    public String getBranchId() {
+        return branchId;
+    }
+
+    public void setBranchId(String branchId) {
+        this.branchId = branchId;
+    }
+
+    public String getXid() {
+        return xid;
+    }
+
+    public void setXid(String xid) {
+        this.xid = xid;
+    }
+
+    public Integer getLogStatus() {
+        return logStatus;
+    }
+
+    public void setLogStatus(Integer logStatus) {
+        this.logStatus = logStatus;
+    }
+
+    public CreateTime getLogCreateTime() {
+        return logCreateTime;
+    }
+
+    public void setLogCreateTime(CreateTime logCreateTime) {
+        this.logCreateTime = logCreateTime;
+    }
+
+    public ModifyTime getLogModifiedTime() {
+        return logModifiedTime;
+    }
+
+    public void setLogModifiedTime(ModifyTime logModifiedTime) {
+        this.logModifiedTime = logModifiedTime;
+    }
+}
