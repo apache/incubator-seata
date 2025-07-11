@@ -54,6 +54,9 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
 
 
     public String getSchemaNameByResourceId(String resourceId) {
+        if (StringUtils.isBlank(resourceId)) {
+            return "";
+        }
         int idx = resourceId.lastIndexOf("/");
         if (idx != -1 && idx != resourceId.length() - 1) {
             return resourceId.substring(idx + 1);
