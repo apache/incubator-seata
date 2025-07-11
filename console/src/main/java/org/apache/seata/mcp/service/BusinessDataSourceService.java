@@ -1,5 +1,7 @@
 package org.apache.seata.mcp.service;
 
+import org.apache.seata.mcp.entity.param.UndoLogParam;
+
 import java.util.List;
 import java.util.Map;
 
@@ -10,5 +12,5 @@ public interface BusinessDataSourceService {
 
     List<Map<String, Object>> runSql(String sql,String resourceId);
 
-    byte[] getUndoLogInfo(String resourceId,String branchId,String xid);
+    List<byte[]> getUndoLogInfo(UndoLogParam undoLogParam);
 }
