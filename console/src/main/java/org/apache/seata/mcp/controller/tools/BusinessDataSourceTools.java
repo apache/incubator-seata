@@ -46,7 +46,7 @@ public class BusinessDataSourceTools {
         return dataSourceService.getTableSchemaByTableName(resourceId, tableName);
     }
 
-    @Tool(description = "Execute the SQL query result")
+    @Tool(description = "Execute the SQL query result, It can only be used to query business data!!!")
     public List<Map<String, Object>> runSql(@ToolParam(description = "SQL statement, String type",required = true) String sql,
                                             @ToolParam(description = "The identity of the data source",required = true) String resourceId) {
         if(LOGGER.isInfoEnabled()){
