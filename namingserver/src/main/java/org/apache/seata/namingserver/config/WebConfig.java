@@ -20,6 +20,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.seata.namingserver.filter.ConsoleRemotingFilter;
+import org.apache.seata.namingserver.filter.MCPRemotingFilter;
 import org.apache.seata.namingserver.manager.NamingManager;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -73,6 +74,16 @@ public class WebConfig {
         ConsoleRemotingFilter consoleRemotingFilter = new ConsoleRemotingFilter(namingManager, asyncRestTemplate);
         FilterRegistrationBean<Filter> registration = new FilterRegistrationBean<>();
         registration.setFilter(consoleRemotingFilter);
+        registration.addUrlPatterns("/*");
+        registration.setOrder(Ordered.HIGHEST_PRECEDENCE);
+        return registration;
+    }
+
+    @Bean
+    public FilterRegistrationBean<Filter> mcpRemotingFilter(NamingManager namingManager, AsyncRestTemplate asyncRestTemplate){
+        MCPRemotingFilter mcpRemotingFilter = new MCPRemotingFilter(namingManager, asyncRestTemplate);
+        FilterRegistrationBean<Filter> registration = new FilterRegistrationBean<>();
+        registration.setFilter(mcpRemotingFilter);
         registration.addUrlPatterns("/*");
         registration.setOrder(Ordered.HIGHEST_PRECEDENCE);
         return registration;
