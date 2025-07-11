@@ -20,6 +20,8 @@ public interface NamingConstant {
 
     String CONSOLE_PATTERN = "^/api/.*/console/.*";
 
+    String MCP_PATTERN = "^/mcp/.*";
+
     int DEFAULT_REQUEST_TIMEOUT = 5000;
 
     int DEFAULT_CONNECTION_MAX_TOTAL = 100;
