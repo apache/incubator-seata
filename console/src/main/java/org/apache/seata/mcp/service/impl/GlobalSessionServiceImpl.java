@@ -32,7 +32,7 @@ public class GlobalSessionServiceImpl implements GlobalSessionService {
     public String queryGlobalSession(GlobalSessionParam param) {
         // Check whether the query interval is too large
         if(param.getTimeEnd()!=null && param.getTimeStart()!=null){
-            if(param.getTimeEnd()-param.getTimeStart()> Long.parseLong(env.getProperty("seata.mcp.query.max_query_duration","86,400,000L"))){
+            if(param.getTimeEnd()-param.getTimeStart()> Long.parseLong(env.getProperty("seata.mcp.query.max_query_duration","86400000"))){
                 return "The query time span is not allowed to exceed the max query duration";
             }
         }

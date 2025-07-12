@@ -29,9 +29,9 @@ public class UndoLogParam {
 
 
     public static class CreateTime{
-        @ToolParam(description = "Start time",required = true,example = "2025-07-09 11:38:45")
+        @ToolParam(description = "Start time",required = true,example = "2025-07-09 11:38:45, yyyy-MM-dd HH:mm:ss")
         private String startTime;
-        @ToolParam(description = "End time",required = true,example = "2025-07-09 11:38:45")
+        @ToolParam(description = "End time",required = true,example = "2025-07-09 11:38:45, yyyy-MM-dd HH:mm:ss")
         private String endTime;
 
         @Override
