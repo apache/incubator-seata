@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -58,7 +59,8 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
 
     @Override
     public List<byte[]> getUndoLogInfo(UndoLogParam param) {
-        long max_time_duration = Long.parseLong(env.getProperty("seata.mcp.query.max_query_duration","86,400,000L"));
+        long max_time_duration = Long.parseLong(env.getProperty("seata.mcp.query.max_query_duration","86400000"));
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String sql = SqlConstant.GET_UNDO_LOG_SQL;
         List<Object> params = new ArrayList<>();
         String branchId = param.getBranchId();
@@ -88,8 +90,8 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
             String endTime = logCreateTime.getEndTime();
             if(startTime != null && endTime != null){
                 sql += SqlConstant.UNDO_LOG_CREATE_TIME_SQL;
-                Long startTimestamp = LocalDateTime.parse(startTime).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-                Long endTimestamp = LocalDateTime.parse(endTime).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+                Long startTimestamp = LocalDateTime.parse(startTime,formatter).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+                Long endTimestamp = LocalDateTime.parse(endTime,formatter).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
                 if(endTimestamp - startTimestamp > max_time_duration){
                     throw new StoreException("The query time span is not allowed to exceed the max query duration");
                 }
@@ -106,8 +108,8 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
             String endTime = logModifiedTime.getEndTime();
             if(startTime != null && endTime != null){
                 sql += SqlConstant.UNDO_LOG_MODIFY_TIME_SQL;
-                Long startTimestamp = LocalDateTime.parse(startTime).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-                Long endTimestamp = LocalDateTime.parse(endTime).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+                Long startTimestamp = LocalDateTime.parse(startTime,formatter).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+                Long endTimestamp = LocalDateTime.parse(endTime,formatter).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
                 if(endTimestamp - startTimestamp > max_time_duration){
                     throw new StoreException("The query time span is not allowed to exceed the max query duration");
                 }
