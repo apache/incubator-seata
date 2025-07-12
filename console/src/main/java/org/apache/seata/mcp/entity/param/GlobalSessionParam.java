@@ -31,7 +31,7 @@ public class GlobalSessionParam implements Serializable {
     /**
      * the xid
      */
-    @ToolParam(description = "全局事务id")
+    @ToolParam(description = "GLOBAL TRANSACTIONS id")
     private String xid;
     /**
      * the application id
@@ -41,20 +41,20 @@ public class GlobalSessionParam implements Serializable {
     /**
      * the global session status
      */
-    @ToolParam(description = "事务状态,没有指定就为null,example中为状态枚举类",
+    @ToolParam(description = "the state enumeration class is in example",
             exampleValueClassName = {GlobalStatus.class,BranchStatus.class}
     )
     private Integer status;
     /**
      * the transaction name
      */
-    @ToolParam(description = "事务名称")
+    @ToolParam(description = "The name of the transaction")
     private String transactionName;
 
     /**
      * the vgroup
      */
-    @ToolParam(description = "所属组别")
+    @ToolParam(description = "Belong to the group")
     private String vgroup;
 
     /**
@@ -62,19 +62,19 @@ public class GlobalSessionParam implements Serializable {
      * true: with branch session
      * false: no branch session
      */
-    @ToolParam(description = "是否带有分支事务信息")
+    @ToolParam(description = "Whether or not it contains branch transaction information")
     private boolean withBranch;
 
-    @ToolParam(description = "页码",required = true,example = "1")
+    @ToolParam(description = "PAGE NUMBER",required = true,example = "1")
     private int pageNum;
 
-    @ToolParam(description = "页面大小",required = true,example = "10")
+    @ToolParam(description = "PageSize",required = true,example = "10")
     private int pageSize;
 
-    @ToolParam(description = "起始时间(时间戳)")
+    @ToolParam(description = "Start Time (Timestamp)")
     private Long timeStart;
 
-    @ToolParam(description = "结束时间(时间戳)")
+    @ToolParam(description = "End Time (Timestamp)")
     private Long timeEnd;
 
     public int getPageNum() {
