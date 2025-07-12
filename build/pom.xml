@@ -438,6 +438,8 @@
 
                     -Dnet.bytebuddy.experimental=true
                 </maven.surefire.argLine>
+<!--                for springboot 3.x -->
+                <jakarta.servlet-api.version>6.0.0</jakarta.servlet-api.version>
             </properties>
         </profile>
 
