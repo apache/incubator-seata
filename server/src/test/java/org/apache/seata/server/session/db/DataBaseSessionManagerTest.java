@@ -58,8 +58,7 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 @Import(DynamicPortTestConfig.class)
 @EnabledIf(
         value = "org.apache.seata.server.session.db.DataBaseSessionManagerTest#isEnableDruidTest",
-        disabledReason = "druid test is skipped"
-)
+        disabledReason = "druid test is skipped")
 public class DataBaseSessionManagerTest {
 
     static SessionManager sessionManager = null;
