@@ -18,7 +18,6 @@ package org.apache.seata.server.instance;
 
 import org.apache.seata.common.metadata.Instance;
 import org.apache.seata.common.thread.NamedThreadFactory;
-import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.server.session.SessionHolder;
 import org.apache.seata.server.store.VGroupMappingStoreManager;
 import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryNamingServerProperties;
@@ -31,6 +30,7 @@ import org.springframework.context.ApplicationContext;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -64,7 +64,8 @@ public abstract class AbstractSeataInstanceStrategy implements SeataInstanceStra
 
     @Override
     public void init() {
-        if (!StringUtils.equals(registryProperties.getType(), NAMING_SERVER)) {
+        String types = registryProperties.getType();
+        if (types == null || !Arrays.asList(types.split(",")).contains(NAMING_SERVER)) {
             return;
         }
         Instance instance = serverInstanceInit();
