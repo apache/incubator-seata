@@ -50,6 +50,8 @@ seata:
     messageEndpoint: /message
     #是否开启心跳(不设置默认为false)
     heartbeat: false
+    query:
+      max_query_duration: 3,600,000L
   #业务数据源配置
   datasources:
     user:

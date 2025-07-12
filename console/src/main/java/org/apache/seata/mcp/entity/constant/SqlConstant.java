@@ -1,4 +1,4 @@
-package org.apache.seata.mcp.constant;
+package org.apache.seata.mcp.entity.constant;
 
 public class SqlConstant {
 
