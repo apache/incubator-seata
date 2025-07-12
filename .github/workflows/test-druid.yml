@@ -50,7 +50,7 @@ jobs:
           1.2.15,
           1.2.14,
           1.2.13,
-          1.2.12,
+          #1.2.12, # Unit test triggered a bug in Druid, see the issue https://github.com/alibaba/druid/issues/4936
           1.2.11,
           1.2.10,
           1.2.9,
