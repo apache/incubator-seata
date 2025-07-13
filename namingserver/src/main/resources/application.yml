@@ -58,7 +58,7 @@ seata:
       enabled: true
       db-type: mysql
       driverClassName: com.mysql.cj.jdbc.Driver
-      url: jdbc:mysql://localhost:3306/boge?useSSL=false
+      url: jdbc:mysql://8.138.127.84:3306/xb?useSSL=false
       username: root
       password: Il02mayi
       datasource: druid # 可选连接池类型（druid/hikari/dbcp）
@@ -69,7 +69,7 @@ seata:
       enabled: true
       db-type: mysql
       driverClassName: com.mysql.cj.jdbc.Driver
-      url: jdbc:mysql://localhost:3306/seata?useSSL=false
+      url: jdbc:mysql://8.138.127.84:3306/seata?useSSL=false
       username: root
       password: Il02mayi
       datasource: dbcp # 可选连接池类型（druid/hikari/dbcp）
@@ -80,7 +80,7 @@ seata:
       enabled: true
       db-type: mysql
       driverClassName: com.mysql.cj.jdbc.Driver
-      url: jdbc:mysql://localhost:3306/zhaoxin25_dev?useSSL=false
+      url: jdbc:mysql://8.138.127.84:3306/boge?useSSL=false
       username: root
       password: Il02mayi
       datasource: hikari # 可选连接池类型（druid/hikari/dbcp）

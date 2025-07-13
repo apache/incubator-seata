@@ -5,12 +5,9 @@ import org.apache.seata.mcp.service.ModifyConfirmService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 @Service
 public class ModifyConfirmTools {
@@ -18,13 +15,15 @@ public class ModifyConfirmTools {
     @Autowired
     private ModifyConfirmService modifyConfirmService;
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(ModifyConfirmTools.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ModifyConfirmTools.class);
 
-    @Tool(description = "Before modifying a transaction or lock, the user calls this function to obtain the operation key")
-    public Map<String,String> confirmAndGetKey(){
+    @Tool(
+            description =
+                    "Before modifying a transaction or lock, the user calls this function to obtain the operation key")
+    public Map<String, String> confirmAndGetKey() {
         Map<String, String> keyMap = modifyConfirmService.confirmAndGetKey();
-        if(LOGGER.isInfoEnabled()){
-            LOGGER.info("the user obtains a modify key:{}",keyMap.get("modify_key"));
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("the user obtains a modify key:{}", keyMap.get("modify_key"));
         }
         return keyMap;
     }

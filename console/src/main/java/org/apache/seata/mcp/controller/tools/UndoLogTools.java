@@ -14,8 +14,8 @@ public class UndoLogTools {
     private UndoLogService undoLogService;
 
     @Tool(description = "analyze the undo_log data of rm")
-    public String analyzeUndoLog(@ToolParam(description = "UndoLog Query parameters",required = true) UndoLogParam undoLogParam) {
+    public String analyzeUndoLog(
+            @ToolParam(description = "UndoLog Query parameters", required = true) UndoLogParam undoLogParam) {
         return undoLogService.queryAndAnalyzeUndoLog(undoLogParam);
     }
-
 }

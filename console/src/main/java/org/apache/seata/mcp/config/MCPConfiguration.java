@@ -15,7 +15,6 @@ import java.util.Objects;
 @Component
 public class MCPConfiguration {
 
-
     /**
      * 服务器名称
      */
@@ -36,6 +35,7 @@ public class MCPConfiguration {
      * 是否开启resource
      */
     private boolean resourceSupport = true;
+
     private boolean resourceTemplates = false;
     /**
      * 开启日志
@@ -54,39 +54,52 @@ public class MCPConfiguration {
     private Environment env;
 
     @PostConstruct
-    public void init(){
-        serverName = env.getProperty("seata.mcp.serverName","seata-mcp-server");
-        serverVersion = env.getProperty("seata.mcp.serverVersion","1.0.0");
-        sseEndpoint = env.getProperty("seata.mcp.sseEndpoint","/sse");
-        messageEndpoint = env.getProperty("seata.mcp.messageEndpoint","/message");
-        heartbeat = Boolean.parseBoolean(env.getProperty("seata.mcp.heartbeat","false"));
+    public void init() {
+        serverName = env.getProperty("seata.mcp.serverName", "seata-mcp-server");
+        serverVersion = env.getProperty("seata.mcp.serverVersion", "1.0.0");
+        sseEndpoint = env.getProperty("seata.mcp.sseEndpoint", "/sse");
+        messageEndpoint = env.getProperty("seata.mcp.messageEndpoint", "/message");
+        heartbeat = Boolean.parseBoolean(env.getProperty("seata.mcp.heartbeat", "false"));
     }
-
 
     @Override
     public String toString() {
-        return "MCPConfiguration{" +
-                "serverName='" + serverName + '\'' +
-                ", serverVersion='" + serverVersion + '\'' +
-                ", sseEndpoint='" + sseEndpoint + '\'' +
-                ", messageEndpoint='" + messageEndpoint + '\'' +
-                ", resourceSupport=" + resourceSupport +
-                ", resourceTemplates=" + resourceTemplates +
-                ", loggingLevel=" + loggingLevel +
-                ", heartbeat=" + heartbeat +
-                '}';
+        return "MCPConfiguration{" + "serverName='"
+                + serverName + '\'' + ", serverVersion='"
+                + serverVersion + '\'' + ", sseEndpoint='"
+                + sseEndpoint + '\'' + ", messageEndpoint='"
+                + messageEndpoint + '\'' + ", resourceSupport="
+                + resourceSupport + ", resourceTemplates="
+                + resourceTemplates + ", loggingLevel="
+                + loggingLevel + ", heartbeat="
+                + heartbeat + '}';
     }
 
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         MCPConfiguration that = (MCPConfiguration) o;
-        return resourceSupport == that.resourceSupport && resourceTemplates == that.resourceTemplates && heartbeat == that.heartbeat && Objects.equals(serverName, that.serverName) && Objects.equals(serverVersion, that.serverVersion) && Objects.equals(sseEndpoint, that.sseEndpoint) && Objects.equals(messageEndpoint, that.messageEndpoint) && loggingLevel == that.loggingLevel;
+        return resourceSupport == that.resourceSupport
+                && resourceTemplates == that.resourceTemplates
+                && heartbeat == that.heartbeat
+                && Objects.equals(serverName, that.serverName)
+                && Objects.equals(serverVersion, that.serverVersion)
+                && Objects.equals(sseEndpoint, that.sseEndpoint)
+                && Objects.equals(messageEndpoint, that.messageEndpoint)
+                && loggingLevel == that.loggingLevel;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(serverName, serverVersion, sseEndpoint, messageEndpoint, resourceSupport, resourceTemplates, loggingLevel, heartbeat);
+        return Objects.hash(
+                serverName,
+                serverVersion,
+                sseEndpoint,
+                messageEndpoint,
+                resourceSupport,
+                resourceTemplates,
+                loggingLevel,
+                heartbeat);
     }
 
     public String getServerName() {

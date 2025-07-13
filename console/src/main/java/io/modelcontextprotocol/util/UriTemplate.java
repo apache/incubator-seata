@@ -235,9 +235,7 @@ public class UriTemplate {
     /**
      * A marker interface for parts of the URI template.
      */
-    private interface Part {
-
-    }
+    private interface Part {}
 
     /**
      * Represents a literal segment of the template.

@@ -16,8 +16,6 @@
  */
 package org.apache.seata.mcp.parser;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.serializer.SimplePropertyPreFilter;
 import org.apache.seata.common.Constants;
 import org.apache.seata.common.executor.Initialize;
