@@ -14,16 +14,14 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.ListenableFutureCallback;
-import org.springframework.web.client.AsyncRestTemplate;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.net.URI;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
@@ -36,15 +34,12 @@ public class MCPRemotingFilter implements Filter {
 
     private final NamingManager namingManager;
 
-    private final AsyncRestTemplate asyncRestTemplate;
-
     private final Pattern urlPattern = Pattern.compile(MCP_PATTERN);
 
     private final Logger logger = LoggerFactory.getLogger(MCPRemotingFilter.class);
 
-    public MCPRemotingFilter(NamingManager namingManager, AsyncRestTemplate asyncRestTemplate) {
+    public MCPRemotingFilter(NamingManager namingManager) {
         this.namingManager = namingManager;
-        this.asyncRestTemplate = asyncRestTemplate;
     }
 
     @Override
@@ -123,76 +118,58 @@ public class MCPRemotingFilter implements Filter {
 
                             // Create the HttpEntity with headers and body
                             HttpEntity<byte[]> httpEntity = new HttpEntity<>(request.getCachedBody(), headers);
+                            try {
+                                SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+                                factory.setConnectTimeout(5000); // Connection timeout for 5 seconds
+                                factory.setReadTimeout(5000);   // Read timeout for 5 seconds
+                                RestTemplate restTemplate = new RestTemplate(factory);
+                                ResponseEntity<byte[]> exchange = restTemplate.exchange(
+                                        targetUrl,
+                                        Objects.requireNonNull(HttpMethod.resolve(request.getMethod())),
+                                        httpEntity,
+                                        byte[].class);
 
-                            // Forward the request
-                            AsyncContext asyncContext = servletRequest.startAsync();
-                            asyncContext.setTimeout(5000L);
-                            ListenableFuture<ResponseEntity<byte[]>> responseEntityFuture = asyncRestTemplate.exchange(
-                                    URI.create(targetUrl),
-                                    Objects.requireNonNull(HttpMethod.resolve(request.getMethod())),
-                                    httpEntity,
-                                    byte[].class);
-                            responseEntityFuture.addCallback(new ListenableFutureCallback<ResponseEntity<byte[]>>() {
-                                @Override
-                                public void onFailure(Throwable ex) {
-                                    try {
-                                        logger.error("Request to TC failed: {}", ex.getMessage());
+                                // Set the response header and status code
+                                exchange.getHeaders().forEach((key, valueList) -> {
+                                    valueList.forEach(value -> response.addHeader(key, value));
+                                });
+                                response.setStatus(exchange.getStatusCodeValue());
 
-                                        // Check whether it is an HTTP error response
-                                        if (ex instanceof HttpStatusCodeException) {
-                                            HttpStatusCodeException httpEx = (HttpStatusCodeException) ex;
-
-                                            response.setStatus(httpEx.getRawStatusCode());
-
-                                            if (httpEx.getResponseHeaders() != null) {
-                                                httpEx.getResponseHeaders().forEach((key, values) -> {
-                                                    values.forEach(value -> response.addHeader(key, value));
-                                                });
-                                            }
-
-                                            byte[] responseBody = httpEx.getResponseBodyAsByteArray();
-                                            if (responseBody.length > 0) {
-                                                try (ServletOutputStream outputStream = response.getOutputStream()) {
-                                                    outputStream.write(responseBody);
-                                                    outputStream.flush();
-                                                } catch (IOException e) {
-                                                    logger.error("Error writing response body: {}", e.getMessage());
-                                                }
-                                            }
-                                        } else {
-                                            // Non-HTTP error, 500 is returned
-                                            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                                            try (ServletOutputStream os = response.getOutputStream()) {
-                                                os.write(("Error: " + ex.getMessage()).getBytes());
-                                            } catch (IOException e) {
-                                                logger.error("Error writing error response: {}", e.getMessage());
-                                            }
-                                        }
-                                    } finally {
-                                        asyncContext.complete();
+                                // 写回响应体
+                                Optional.ofNullable(exchange.getBody()).ifPresent(body -> {
+                                    try (ServletOutputStream outputStream = response.getOutputStream()) {
+                                        outputStream.write(body);
+                                        outputStream.flush();
+                                    } catch (IOException e) {
+                                        logger.error(e.getMessage(), e);
+                                    }
+                                });
+                            } catch (HttpStatusCodeException ex) {
+                                // Handle HTTP error responses
+                                response.setStatus(ex.getRawStatusCode());
+                                if (ex.getResponseHeaders() != null) {
+                                    ex.getResponseHeaders().forEach((key, values) -> {
+                                        values.forEach(value -> response.addHeader(key, value));
+                                    });
+                                }
+                                byte[] responseBody = ex.getResponseBodyAsByteArray();
+                                if (responseBody.length > 0) {
+                                    try (ServletOutputStream outputStream = response.getOutputStream()) {
+                                        outputStream.write(responseBody);
+                                        outputStream.flush();
+                                    } catch (IOException e) {
+                                        logger.error("Error writing response body: {}", e.getMessage());
                                     }
                                 }
-
-                                @Override
-                                public void onSuccess(ResponseEntity<byte[]> responseEntity) {
-                                    // Copy response headers and status code
-                                    responseEntity.getHeaders().forEach((key, value) -> {
-                                        value.forEach(v -> response.addHeader(key, v));
-                                    });
-                                    response.setStatus(responseEntity.getStatusCodeValue());
-                                    // Write response body
-                                    Optional.ofNullable(responseEntity.getBody())
-                                            .ifPresent(body -> {
-                                                try (ServletOutputStream outputStream = response.getOutputStream()) {
-                                                    outputStream.write(body);
-                                                    outputStream.flush();
-                                                } catch (IOException e) {
-                                                    logger.error(e.getMessage(), e);
-                                                }
-                                            });
-                                    asyncContext.complete();
+                            } catch (Exception ex) {
+                                // Handle other exceptions
+                                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                                try (ServletOutputStream os = response.getOutputStream()) {
+                                    os.write(("Error: " + ex.getMessage()).getBytes());
+                                } catch (IOException e) {
+                                    logger.error("Error writing error response: {}", e.getMessage());
                                 }
-                            });
+                            }
                             return;
                         }
                     }
