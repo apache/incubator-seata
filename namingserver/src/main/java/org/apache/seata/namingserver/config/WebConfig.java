@@ -81,8 +81,8 @@ public class WebConfig {
 
     @Bean
     public FilterRegistrationBean<Filter> mcpRemotingFilter(
-            NamingManager namingManager, AsyncRestTemplate asyncRestTemplate) {
-        MCPRemotingFilter mcpRemotingFilter = new MCPRemotingFilter(namingManager, asyncRestTemplate);
+            NamingManager namingManager) {
+        MCPRemotingFilter mcpRemotingFilter = new MCPRemotingFilter(namingManager);
         FilterRegistrationBean<Filter> registration = new FilterRegistrationBean<>();
         registration.setFilter(mcpRemotingFilter);
         registration.addUrlPatterns("/*");
