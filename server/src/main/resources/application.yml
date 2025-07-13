@@ -62,7 +62,7 @@ seata:
     mode: db
     db:
       driver-class-name: com.mysql.cj.jdbc.Driver
-      url: jdbc:mysql://127.0.0.1:3306/seata?rewriteBatchedStatements=true
+      url: jdbc:mysql://8.138.127.84:3306/seata?rewriteBatchedStatements=true
       user: root
       password: Il02mayi
       datasource: druid

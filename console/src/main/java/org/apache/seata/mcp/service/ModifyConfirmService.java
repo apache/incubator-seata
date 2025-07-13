@@ -4,7 +4,7 @@ import java.util.Map;
 
 public interface ModifyConfirmService {
 
-    Map<String,String> confirmAndGetKey();
+    Map<String, String> confirmAndGetKey();
 
     Boolean isValidKey(String key);
 }

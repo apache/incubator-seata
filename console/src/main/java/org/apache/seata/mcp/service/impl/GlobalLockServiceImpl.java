@@ -18,39 +18,35 @@ public class GlobalLockServiceImpl implements GlobalLockService {
     @Lazy
     private MCPRPCService mcpRPCService;
 
-
     @Override
     public String queryGlobalLock(GlobalLockParam param) {
-        String result = mcpRPCService.getCallTC(RPCConstant.GLOBAL_LOCK_BASE_URL+"/query"
-                ,param,null,null);
-        if(StringUtils.isBlank(result)){
+        String result = mcpRPCService.getCallTC(RPCConstant.GLOBAL_LOCK_BASE_URL + "/query", param, null, null);
+        if (StringUtils.isBlank(result)) {
             return "query global lock failed";
-        }else{
+        } else {
             return result;
         }
     }
 
     @Override
     public String deleteGlobalLock(GlobalLockParam param) {
-        String result = mcpRPCService.deleteCallTC(RPCConstant.GLOBAL_LOCK_BASE_URL+"/delete"
-                ,param,null,null);
-        if(StringUtils.isBlank(result)){
+        String result = mcpRPCService.deleteCallTC(RPCConstant.GLOBAL_LOCK_BASE_URL + "/delete", param, null, null);
+        if (StringUtils.isBlank(result)) {
             return "delete global lock failed";
-        }else{
+        } else {
             return result;
         }
     }
 
     @Override
     public String checkGlobalLock(String xid, String branchId) {
-        Map<String,String> pathParams = new HashMap<>();
-        pathParams.put("xid",xid);
-        pathParams.put("branchId",branchId);
-        String result = mcpRPCService.getCallTC(RPCConstant.GLOBAL_LOCK_BASE_URL+"/check"
-                ,null,pathParams,null);
-        if(StringUtils.isBlank(result)){
+        Map<String, String> pathParams = new HashMap<>();
+        pathParams.put("xid", xid);
+        pathParams.put("branchId", branchId);
+        String result = mcpRPCService.getCallTC(RPCConstant.GLOBAL_LOCK_BASE_URL + "/check", null, pathParams, null);
+        if (StringUtils.isBlank(result)) {
             return String.format("check global lock failed, xid: %s, branchId: %s", xid, branchId);
-        }else{
+        } else {
             return result;
         }
     }

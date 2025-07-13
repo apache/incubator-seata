@@ -32,13 +32,16 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
         String schema = getSchemaNameByResourceId(resourceId);
         if (StringUtils.isBlank(schema)) {
             throw new StoreException("failed to get schema by resourceId: " + resourceId);
-        }else{
-            List<Map<String, Object>> maps = sqlExecutionTemplate.query(resourceId, SqlConstant.GET_TABLE_NAME_SQL,schema);
-            return maps.stream().map(map -> {
-                String tableName = String.valueOf(map.get("TABLE_NAME"));
-                String tableComment = String.valueOf(map.get("TABLE_COMMENT"));
-                return tableName + " (" + tableComment + ")";
-            }).collect(Collectors.toList());
+        } else {
+            List<Map<String, Object>> maps =
+                    sqlExecutionTemplate.query(resourceId, SqlConstant.GET_TABLE_NAME_SQL, schema);
+            return maps.stream()
+                    .map(map -> {
+                        String tableName = String.valueOf(map.get("TABLE_NAME"));
+                        String tableComment = String.valueOf(map.get("TABLE_COMMENT"));
+                        return tableName + " (" + tableComment + ")";
+                    })
+                    .collect(Collectors.toList());
         }
     }
 
@@ -47,19 +50,19 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
         String schema = getSchemaNameByResourceId(resourceId);
         if (StringUtils.isBlank(schema)) {
             throw new StoreException("failed to get schema by resourceId: " + resourceId);
-        }else{
-            return sqlExecutionTemplate.query(resourceId,SqlConstant.GET_SCHEMA_SQL,schema,tableName);
+        } else {
+            return sqlExecutionTemplate.query(resourceId, SqlConstant.GET_SCHEMA_SQL, schema, tableName);
         }
     }
 
     @Override
     public List<Map<String, Object>> runSql(String sql, String resourceId) {
-        return sqlExecutionTemplate.query(resourceId,sql);
+        return sqlExecutionTemplate.query(resourceId, sql);
     }
 
     @Override
     public List<byte[]> getUndoLogInfo(UndoLogParam param) {
-        long max_time_duration = Long.parseLong(env.getProperty("seata.mcp.query.max_query_duration","86400000"));
+        long max_time_duration = Long.parseLong(env.getProperty("seata.mcp.query.max_query_duration", "86400000"));
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String sql = SqlConstant.GET_UNDO_LOG_SQL;
         List<Object> params = new ArrayList<>();
@@ -70,68 +73,79 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
         UndoLogParam.CreateTime logCreateTime = param.getLogCreateTime();
         UndoLogParam.ModifyTime logModifiedTime = param.getLogModifiedTime();
         int idx = 0;
-        if(StringUtils.isBlank(resourceId)){
+        if (StringUtils.isBlank(resourceId)) {
             throw new StoreException("you cannot query without resourceId");
         }
-        if(StringUtils.isNotBlank(branchId)){
+        if (StringUtils.isNotBlank(branchId)) {
             sql += SqlConstant.PARAM_BRANCH_ID_SQL;
             params.add(branchId);
         }
-        if(StringUtils.isNotBlank(xid)){
+        if (StringUtils.isNotBlank(xid)) {
             sql += SqlConstant.PARAM_XID_SQL;
             params.add(xid);
         }
-        if(logStatus != null){
+        if (logStatus != null) {
             sql += SqlConstant.UNDO_LOG_STATUS_SQL;
             params.add(logStatus);
         }
-        if(logCreateTime != null){
+        if (logCreateTime != null) {
             String startTime = logCreateTime.getStartTime();
             String endTime = logCreateTime.getEndTime();
-            if(startTime != null && endTime != null){
+            if (startTime != null && endTime != null) {
                 sql += SqlConstant.UNDO_LOG_CREATE_TIME_SQL;
-                Long startTimestamp = LocalDateTime.parse(startTime,formatter).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-                Long endTimestamp = LocalDateTime.parse(endTime,formatter).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-                if(endTimestamp - startTimestamp > max_time_duration){
+                Long startTimestamp = LocalDateTime.parse(startTime, formatter)
+                        .atZone(ZoneId.systemDefault())
+                        .toInstant()
+                        .toEpochMilli();
+                Long endTimestamp = LocalDateTime.parse(endTime, formatter)
+                        .atZone(ZoneId.systemDefault())
+                        .toInstant()
+                        .toEpochMilli();
+                if (endTimestamp - startTimestamp > max_time_duration) {
                     throw new StoreException("The query time span is not allowed to exceed the max query duration");
                 }
             }
-            if(startTime != null){
+            if (startTime != null) {
                 params.add(startTime);
             }
-            if(endTime != null){
+            if (endTime != null) {
                 params.add(endTime);
             }
         }
-        if(logModifiedTime != null){
+        if (logModifiedTime != null) {
             String startTime = logModifiedTime.getStartTime();
             String endTime = logModifiedTime.getEndTime();
-            if(startTime != null && endTime != null){
+            if (startTime != null && endTime != null) {
                 sql += SqlConstant.UNDO_LOG_MODIFY_TIME_SQL;
-                Long startTimestamp = LocalDateTime.parse(startTime,formatter).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-                Long endTimestamp = LocalDateTime.parse(endTime,formatter).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-                if(endTimestamp - startTimestamp > max_time_duration){
+                Long startTimestamp = LocalDateTime.parse(startTime, formatter)
+                        .atZone(ZoneId.systemDefault())
+                        .toInstant()
+                        .toEpochMilli();
+                Long endTimestamp = LocalDateTime.parse(endTime, formatter)
+                        .atZone(ZoneId.systemDefault())
+                        .toInstant()
+                        .toEpochMilli();
+                if (endTimestamp - startTimestamp > max_time_duration) {
                     throw new StoreException("The query time span is not allowed to exceed the max query duration");
                 }
             }
-            if(startTime != null){
+            if (startTime != null) {
                 params.add(startTime);
             }
-            if(endTime != null){
+            if (endTime != null) {
                 params.add(endTime);
             }
         }
         List<byte[]> result = new ArrayList<>();
         List<Map<String, Object>> query = sqlExecutionTemplate.query(resourceId, sql, params.toArray());
-        for(Map<String, Object> map : query){
+        for (Map<String, Object> map : query) {
             Object rollbackInfo = map.get("rollback_info");
-            if(rollbackInfo != null){
-                result.add((byte[])rollbackInfo);
+            if (rollbackInfo != null) {
+                result.add((byte[]) rollbackInfo);
             }
         }
         return result;
     }
-
 
     public String getSchemaNameByResourceId(String resourceId) {
         if (StringUtils.isBlank(resourceId)) {

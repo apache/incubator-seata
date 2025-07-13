@@ -1,11 +1,11 @@
 package org.apache.seata.mcp.controller.tools;
+
 import org.apache.seata.mcp.annotation.Tool;
 import org.apache.seata.mcp.annotation.ToolParam;
 import org.apache.seata.mcp.config.DataSourcesConfiguration;
 import org.apache.seata.mcp.service.BusinessDataSourceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,36 +21,41 @@ public class BusinessDataSourceTools {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BusinessDataSourceTools.class);
 
-    @Tool(description = "Get the identity of the data source, and when you perform operations on a piece of data, you first get its identity")
-    public Set<String> getResourceIds(){
-        if(LOGGER.isInfoEnabled()){
+    @Tool(
+            description =
+                    "Get the identity of the data source, and when you perform operations on a piece of data, you first get its identity")
+    public Set<String> getResourceIds() {
+        if (LOGGER.isInfoEnabled()) {
             LOGGER.info("user try to get resource ids");
         }
         return DataSourcesConfiguration.getResourceIds();
     }
 
     @Tool(description = "Get all available table names")
-    public List<String> getTableNames(@ToolParam(description = "The identity of the data source",required = true) String resourceId) {
-        if(LOGGER.isInfoEnabled()){
+    public List<String> getTableNames(
+            @ToolParam(description = "The identity of the data source", required = true) String resourceId) {
+        if (LOGGER.isInfoEnabled()) {
             LOGGER.info("user try to get all table names, resource id {}", resourceId);
         }
         return dataSourceService.getTableNamesBySchema(resourceId);
     }
 
     @Tool(description = "Obtained by table nameSchema")
-    public List<Map<String, Object>> getTableSchema(@ToolParam(description = "Table Name",required = true) String tableName,
-                                                    @ToolParam(description = "The identity of the data source",required = true) String resourceId) {
-        if(LOGGER.isInfoEnabled()){
+    public List<Map<String, Object>> getTableSchema(
+            @ToolParam(description = "Table Name", required = true) String tableName,
+            @ToolParam(description = "The identity of the data source", required = true) String resourceId) {
+        if (LOGGER.isInfoEnabled()) {
             LOGGER.info("user try to get table schema, tableName: {}, resourceId: {}", tableName, resourceId);
         }
         return dataSourceService.getTableSchemaByTableName(resourceId, tableName);
     }
 
     @Tool(description = "Execute the SQL query result, It can only be used to query business data!!!")
-    public List<Map<String, Object>> runSql(@ToolParam(description = "SQL statement, String type",required = true) String sql,
-                                            @ToolParam(description = "The identity of the data source",required = true) String resourceId) {
-        if(LOGGER.isInfoEnabled()){
-            LOGGER.info("user try to run sql: {}, resourceId: {}",sql,resourceId);
+    public List<Map<String, Object>> runSql(
+            @ToolParam(description = "SQL statement, String type", required = true) String sql,
+            @ToolParam(description = "The identity of the data source", required = true) String resourceId) {
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("user try to run sql: {}, resourceId: {}", sql, resourceId);
         }
         return dataSourceService.runSql(sql, resourceId);
     }

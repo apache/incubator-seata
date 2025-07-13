@@ -17,10 +17,8 @@
 package org.apache.seata.mcp.store;
 
 import com.alibaba.druid.pool.DruidDataSource;
-import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.mcp.store.db.AbstractMCPDataSourceProvider;
-
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -43,28 +41,28 @@ public class DruidDataSourceProvider extends AbstractMCPDataSourceProvider {
         ds.setPassword(getPassword());
 
         // Basic pool configuration
-        ds.setInitialSize(getMinConn());              // Initial connection pool size
-        ds.setMaxActive(getMaxConn());                // Maximum active connections
-        ds.setMinIdle(getMinConn());                  // Minimum idle connections
-        ds.setMaxWait(getMaxWait());                  // Maximum wait time for connection acquisition
+        ds.setInitialSize(getMinConn()); // Initial connection pool size
+        ds.setMaxActive(getMaxConn()); // Maximum active connections
+        ds.setMinIdle(getMinConn()); // Minimum idle connections
+        ds.setMaxWait(getMaxWait()); // Maximum wait time for connection acquisition
 
         // Connection retry and validation settings
         // Connection retry and validation settings
-        ds.setTestOnBorrow(true);                     // Test connections when borrowing
-        ds.setTestOnReturn(false);                    // Don't test on return for performance
-        ds.setTestWhileIdle(true);                    // Test idle connections
-        ds.setTimeBetweenEvictionRunsMillis(60000);   // Run evictor every 60 seconds
-        ds.setMinEvictableIdleTimeMillis(180000);     // Min idle time before eviction (3 minutes)
-        ds.setMaxEvictableIdleTimeMillis(300000);     // Max idle time before eviction (5 minutes)
+        ds.setTestOnBorrow(true); // Test connections when borrowing
+        ds.setTestOnReturn(false); // Don't test on return for performance
+        ds.setTestWhileIdle(true); // Test idle connections
+        ds.setTimeBetweenEvictionRunsMillis(60000); // Run evictor every 60 seconds
+        ds.setMinEvictableIdleTimeMillis(180000); // Min idle time before eviction (3 minutes)
+        ds.setMaxEvictableIdleTimeMillis(300000); // Max idle time before eviction (5 minutes)
         ds.setValidationQuery(getValidationQuery(getDBType()));
-        ds.setValidationQueryTimeout(5);              // Validation timeout (seconds)
+        ds.setValidationQueryTimeout(5); // Validation timeout (seconds)
 
         // Connection failure retry settings
-        ds.setConnectionErrorRetryAttempts(3);        // Retry 3 times on connection error
-        ds.setBreakAfterAcquireFailure(true);         // Break after all retries fail
+        ds.setConnectionErrorRetryAttempts(3); // Retry 3 times on connection error
+        ds.setBreakAfterAcquireFailure(true); // Break after all retries fail
 
         // Performance settings
-        ds.setPoolPreparedStatements(true);           // Pool prepared statements for better performance
+        ds.setPoolPreparedStatements(true); // Pool prepared statements for better performance
         ds.setMaxPoolPreparedStatementPerConnectionSize(20);
         ds.setDefaultAutoCommit(true);
 

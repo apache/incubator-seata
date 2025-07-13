@@ -41,9 +41,9 @@ public class GlobalSessionParam implements Serializable {
     /**
      * the global session status
      */
-    @ToolParam(description = "the state enumeration class is in example",
-            exampleValueClassName = {GlobalStatus.class,BranchStatus.class}
-    )
+    @ToolParam(
+            description = "the state enumeration class is in example",
+            exampleValueClassName = {GlobalStatus.class, BranchStatus.class})
     private Integer status;
     /**
      * the transaction name
@@ -65,10 +65,10 @@ public class GlobalSessionParam implements Serializable {
     @ToolParam(description = "Whether or not it contains branch transaction information")
     private boolean withBranch;
 
-    @ToolParam(description = "PAGE NUMBER",required = true,example = "1")
+    @ToolParam(description = "PAGE NUMBER", required = true, example = "1")
     private int pageNum;
 
-    @ToolParam(description = "PageSize",required = true,example = "10")
+    @ToolParam(description = "PageSize", required = true, example = "10")
     private int pageSize;
 
     @ToolParam(description = "Start Time (Timestamp)")
@@ -159,17 +159,16 @@ public class GlobalSessionParam implements Serializable {
 
     @Override
     public String toString() {
-        return "GlobalSessionParam{" +
-                "xid='" + xid + '\'' +
-                ", applicationId='" + applicationId + '\'' +
-                ", status=" + status +
-                ", transactionName='" + transactionName + '\'' +
-                ", vgroup='" + vgroup + '\'' +
-                ", withBranch=" + withBranch +
-                ", pageNum=" + pageNum +
-                ", pageSize=" + pageSize +
-                ", timeStart=" + timeStart +
-                ", timeEnd=" + timeEnd +
-                '}';
+        return "GlobalSessionParam{" + "xid='"
+                + xid + '\'' + ", applicationId='"
+                + applicationId + '\'' + ", status="
+                + status + ", transactionName='"
+                + transactionName + '\'' + ", vgroup='"
+                + vgroup + '\'' + ", withBranch="
+                + withBranch + ", pageNum="
+                + pageNum + ", pageSize="
+                + pageSize + ", timeStart="
+                + timeStart + ", timeEnd="
+                + timeEnd + '}';
     }
 }

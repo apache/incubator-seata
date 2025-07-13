@@ -2,14 +2,12 @@ package org.apache.seata.mcp.entity.param;
 
 import org.apache.seata.mcp.annotation.ToolParam;
 
-import java.time.LocalDateTime;
-
 /**
  * undo_log Query parameters
  */
 public class UndoLogParam {
 
-    @ToolParam(description = "Unique identifier of the data source",required = true)
+    @ToolParam(description = "Unique identifier of the data source", required = true)
     private String resourceId;
 
     @ToolParam(description = "Branch transaction ID")
@@ -27,19 +25,16 @@ public class UndoLogParam {
     @ToolParam(description = "The time period modified, start time and end time can be the same")
     private ModifyTime logModifiedTime;
 
-
-    public static class CreateTime{
-        @ToolParam(description = "Start time",required = true,example = "2025-07-09 11:38:45, yyyy-MM-dd HH:mm:ss")
+    public static class CreateTime {
+        @ToolParam(description = "Start time", required = true, example = "2025-07-09 11:38:45, yyyy-MM-dd HH:mm:ss")
         private String startTime;
-        @ToolParam(description = "End time",required = true,example = "2025-07-09 11:38:45, yyyy-MM-dd HH:mm:ss")
+
+        @ToolParam(description = "End time", required = true, example = "2025-07-09 11:38:45, yyyy-MM-dd HH:mm:ss")
         private String endTime;
 
         @Override
         public String toString() {
-            return "CreateTime{" +
-                    "startTime=" + startTime +
-                    ", endTime=" + endTime +
-                    '}';
+            return "CreateTime{" + "startTime=" + startTime + ", endTime=" + endTime + '}';
         }
 
         public String getStartTime() {
@@ -59,18 +54,16 @@ public class UndoLogParam {
         }
     }
 
-    public static class ModifyTime{
-        @ToolParam(description = "Start time",required = true,example = "2025-07-09 11:38:45")
+    public static class ModifyTime {
+        @ToolParam(description = "Start time", required = true, example = "2025-07-09 11:38:45")
         private String startTime;
-        @ToolParam(description = "End time",required = true,example = "2025-07-09 11:38:45")
+
+        @ToolParam(description = "End time", required = true, example = "2025-07-09 11:38:45")
         private String endTime;
 
         @Override
         public String toString() {
-            return "ModifyTime{" +
-                    "startTime=" + startTime +
-                    ", endTime=" + endTime +
-                    '}';
+            return "ModifyTime{" + "startTime=" + startTime + ", endTime=" + endTime + '}';
         }
 
         public String getEndTime() {
@@ -92,14 +85,13 @@ public class UndoLogParam {
 
     @Override
     public String toString() {
-        return "UndoLogParam{" +
-                "resourceId='" + resourceId + '\'' +
-                ", branchId='" + branchId + '\'' +
-                ", xid='" + xid + '\'' +
-                ", logStatus=" + logStatus +
-                ", logCreateTime=" + logCreateTime +
-                ", logModifiedTime=" + logModifiedTime +
-                '}';
+        return "UndoLogParam{" + "resourceId='"
+                + resourceId + '\'' + ", branchId='"
+                + branchId + '\'' + ", xid='"
+                + xid + '\'' + ", logStatus="
+                + logStatus + ", logCreateTime="
+                + logCreateTime + ", logModifiedTime="
+                + logModifiedTime + '}';
     }
 
     public String getResourceId() {

@@ -9,7 +9,6 @@ import org.springframework.core.env.PropertySource;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.apache.seata.common.DefaultValues.*;
 
@@ -24,7 +23,6 @@ public class DataSourcesConfiguration implements InitializingBean {
      */
     private static final Map<String, DataSourceProperties> datasources = new HashMap<>();
 
-
     private static final String BASE_PREFIX = "seata.datasources.";
 
     @Override
@@ -38,7 +36,8 @@ public class DataSourcesConfiguration implements InitializingBean {
             props.setEnabled(env.getProperty(prefix + "enabled", Boolean.class, true));
             props.setDbType(env.getProperty(prefix + "dbType", "mysql"));
             props.setDriverClassName(env.getProperty(prefix + "driverClassName", "com.mysql.cj.jdbc.Driver"));
-            props.setUrl(env.getProperty(prefix + "url", "jdbc:mysql://127.0.0.1:3306/seata?rewriteBatchedStatements=true"));
+            props.setUrl(
+                    env.getProperty(prefix + "url", "jdbc:mysql://127.0.0.1:3306/seata?rewriteBatchedStatements=true"));
             props.setUsername(env.getProperty(prefix + "username", "mysql"));
             props.setPassword(env.getProperty(prefix + "password", "mysql"));
             props.setDatasource(env.getProperty(prefix + "datasource", "druid"));
@@ -52,7 +51,6 @@ public class DataSourcesConfiguration implements InitializingBean {
             datasources.put(resourceId, props);
         }
     }
-
 
     /**
      * Extract the base URL without query parameters from the JDBC URL
@@ -82,7 +80,7 @@ public class DataSourcesConfiguration implements InitializingBean {
                     for (String propertyName : enumSource.getPropertyNames()) {
                         if (propertyName.startsWith(BASE_PREFIX)) {
                             String[] parts = propertyName.split("\\.");
-                            if (parts.length > 3) {  // seata.datasources.{name}.{property}
+                            if (parts.length > 3) { // seata.datasources.{name}.{property}
                                 String dsName = parts[2];
                                 if (!processedNames.contains(dsName)) {
                                     // Confirm that this is a valid data source configuration
@@ -104,7 +102,7 @@ public class DataSourcesConfiguration implements InitializingBean {
         return datasources;
     }
 
-    public static Set<String> getResourceIds(){
+    public static Set<String> getResourceIds() {
         return datasources.keySet();
     }
 
@@ -128,11 +126,11 @@ public class DataSourcesConfiguration implements InitializingBean {
             this.enabled = enabled;
         }
 
-        public Long getMaxWait(){
+        public Long getMaxWait() {
             return maxWait;
         }
 
-        public void setMaxWait(Long maxWait){
+        public void setMaxWait(Long maxWait) {
             this.maxWait = maxWait;
         }
 

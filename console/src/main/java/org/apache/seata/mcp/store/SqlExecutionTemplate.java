@@ -18,7 +18,6 @@ public class SqlExecutionTemplate {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SqlExecutionTemplate.class);
 
-
     /**
      * Obtain the data source with the specified resourceId
      * @return DataSource instance
@@ -27,20 +26,20 @@ public class SqlExecutionTemplate {
         try {
             return DataSourceFactory.getDataSource(resourceId);
         } catch (Exception e) {
-            LOGGER.error("Failed to get the data source, resourceId: {}",resourceId , e);
+            LOGGER.error("Failed to get the data source, resourceId: {}", resourceId, e);
             throw new StoreException("Unable to get the data source: " + resourceId);
         }
     }
 
     private boolean validateQuerySql(String sql) {
-        if(sql == null || StringUtils.isEmpty(sql)){
+        if (sql == null || StringUtils.isEmpty(sql)) {
             return false;
         }
         return !sql.contains("DELETE") && !sql.contains("UPDATE") && !sql.contains("INSERT");
     }
 
     private boolean validateUpdateSql(String sql) {
-        if(sql == null || StringUtils.isBlank(sql)){
+        if (sql == null || StringUtils.isBlank(sql)) {
             return false;
         }
         return !sql.contains("SELECT");
@@ -60,8 +59,8 @@ public class SqlExecutionTemplate {
         ResultSet rs = null;
 
         try {
-            if(!validateQuerySql(sql)){
-                throw new StoreException("The query valid failed: "+ sql);
+            if (!validateQuerySql(sql)) {
+                throw new StoreException("The query valid failed: " + sql);
             }
             conn = getDataSource(resourceId).getConnection();
             ps = conn.prepareStatement(sql);
@@ -108,8 +107,8 @@ public class SqlExecutionTemplate {
         PreparedStatement ps = null;
 
         try {
-            if(!validateUpdateSql(sql)){
-                throw new StoreException("The query valid failed: "+ sql);
+            if (!validateUpdateSql(sql)) {
+                throw new StoreException("The query valid failed: " + sql);
             }
             conn = getDataSource(resourceId).getConnection();
             ps = conn.prepareStatement(sql);
@@ -142,8 +141,8 @@ public class SqlExecutionTemplate {
         PreparedStatement ps = null;
 
         try {
-            if(!validateUpdateSql(sql)){
-                throw new StoreException("The query valid failed: "+ sql);
+            if (!validateUpdateSql(sql)) {
+                throw new StoreException("The query valid failed: " + sql);
             }
             conn = getDataSource(resourceId).getConnection();
             conn.setAutoCommit(false);
@@ -235,11 +234,9 @@ public class SqlExecutionTemplate {
         }
     }
 
-
     public interface TransactionOperation<T> {
         T execute(Connection connection) throws SQLException;
     }
-
 
     private void closeResources(ResultSet rs, Statement stmt, Connection conn) {
         if (rs != null) {
@@ -260,7 +257,6 @@ public class SqlExecutionTemplate {
 
         closeConnection(conn);
     }
-
 
     private void closeConnection(Connection conn) {
         if (conn != null) {
