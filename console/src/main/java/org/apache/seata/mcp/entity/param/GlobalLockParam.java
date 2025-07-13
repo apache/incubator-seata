@@ -16,7 +16,6 @@
  */
 package org.apache.seata.mcp.entity.param;
 
-import org.apache.seata.common.result.BaseParam;
 import org.apache.seata.mcp.annotation.ToolParam;
 
 import java.io.Serializable;
@@ -59,10 +58,10 @@ public class GlobalLockParam implements Serializable {
     @ToolParam(description = "resourceId")
     private String resourceId;
 
-    @ToolParam(description = "page number",required = true)
+    @ToolParam(description = "page number", required = true)
     private int pageNum;
 
-    @ToolParam(description = "Page size",required = true)
+    @ToolParam(description = "Page size", required = true)
     private int pageSize;
 
     @ToolParam(description = "Start time")
@@ -153,17 +152,16 @@ public class GlobalLockParam implements Serializable {
 
     @Override
     public String toString() {
-        return "GlobalLockParam{" +
-                "xid='" + xid + '\'' +
-                ", tableName='" + tableName + '\'' +
-                ", transactionId='" + transactionId + '\'' +
-                ", branchId='" + branchId + '\'' +
-                ", pk='" + pk + '\'' +
-                ", resourceId='" + resourceId + '\'' +
-                ", pageNum=" + pageNum +
-                ", pageSize=" + pageSize +
-                ", timeStart=" + timeStart +
-                ", timeEnd=" + timeEnd +
-                '}';
+        return "GlobalLockParam{" + "xid='"
+                + xid + '\'' + ", tableName='"
+                + tableName + '\'' + ", transactionId='"
+                + transactionId + '\'' + ", branchId='"
+                + branchId + '\'' + ", pk='"
+                + pk + '\'' + ", resourceId='"
+                + resourceId + '\'' + ", pageNum="
+                + pageNum + ", pageSize="
+                + pageSize + ", timeStart="
+                + timeStart + ", timeEnd="
+                + timeEnd + '}';
     }
 }

@@ -1,8 +1,8 @@
 package org.apache.seata.mcp.manager;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.modelcontextprotocol.server.McpAsyncServer;
 import io.modelcontextprotocol.server.McpServer;
-import io.modelcontextprotocol.server.McpSyncServer;
 import io.modelcontextprotocol.server.transport.WebMvcSseServerTransportProvider;
 import io.modelcontextprotocol.spec.McpSchema;
 import org.apache.seata.mcp.config.MCPConfiguration;
@@ -29,37 +29,53 @@ import java.util.concurrent.locks.ReentrantLock;
 public class McpServerManager implements SmartLifecycle {
     private final ReentrantLock stateLock = new ReentrantLock();
     private ScheduledExecutorService heartbeatScheduler;
-    private static final Logger logger = LoggerFactory.getLogger(McpServerManager.class);//日志记录
+    private static final Logger logger = LoggerFactory.getLogger(McpServerManager.class); // 日志记录
     private final boolean heartbeat;
-    private final ReentrantLock poolLock = new ReentrantLock();//线程池锁
+    private final ReentrantLock poolLock = new ReentrantLock(); // 线程池锁
     private Future<?> heartbeatTask;
     private final AtomicBoolean running = new AtomicBoolean(false);
 
     @Override
     public String toString() {
-        return "McpServerManager{" +
-                "stateLock=" + stateLock +
-                ", heartbeatScheduler=" + heartbeatScheduler +
-                ", heartbeat=" + heartbeat +
-                ", poolLock=" + poolLock +
-                ", heartbeatTask=" + heartbeatTask +
-                ", running=" + running +
-                ", serverInstance=" + serverInstance +
-                ", transportProvider=" + transportProvider +
-                ", config=" + config +
-                '}';
+        return "McpServerManager{" + "stateLock="
+                + stateLock + ", heartbeatScheduler="
+                + heartbeatScheduler + ", heartbeat="
+                + heartbeat + ", poolLock="
+                + poolLock + ", heartbeatTask="
+                + heartbeatTask + ", running="
+                + running + ", serverInstance="
+                + serverInstance + ", transportProvider="
+                + transportProvider + ", config="
+                + config + '}';
     }
 
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         McpServerManager that = (McpServerManager) o;
-        return heartbeat == that.heartbeat && Objects.equals(stateLock, that.stateLock) && Objects.equals(heartbeatScheduler, that.heartbeatScheduler) && Objects.equals(poolLock, that.poolLock) && Objects.equals(heartbeatTask, that.heartbeatTask) && Objects.equals(running, that.running) && Objects.equals(serverInstance, that.serverInstance) && Objects.equals(transportProvider, that.transportProvider) && Objects.equals(config, that.config);
+        return heartbeat == that.heartbeat
+                && Objects.equals(stateLock, that.stateLock)
+                && Objects.equals(heartbeatScheduler, that.heartbeatScheduler)
+                && Objects.equals(poolLock, that.poolLock)
+                && Objects.equals(heartbeatTask, that.heartbeatTask)
+                && Objects.equals(running, that.running)
+                && Objects.equals(serverInstance, that.serverInstance)
+                && Objects.equals(transportProvider, that.transportProvider)
+                && Objects.equals(config, that.config);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(stateLock, heartbeatScheduler, heartbeat, poolLock, heartbeatTask, running, serverInstance, transportProvider, config);
+        return Objects.hash(
+                stateLock,
+                heartbeatScheduler,
+                heartbeat,
+                poolLock,
+                heartbeatTask,
+                running,
+                serverInstance,
+                transportProvider,
+                config);
     }
 
     public ReentrantLock getStateLock() {
@@ -117,11 +133,8 @@ public class McpServerManager implements SmartLifecycle {
 
     public McpServerManager(MCPConfiguration config, ObjectMapper objectMapper) {
         this.config = config;
-        this.transportProvider = new ControlledTransportProvider(
-                objectMapper,
-                config.getMessageEndpoint(),
-                config.getSseEndpoint()
-        );
+        this.transportProvider =
+                new ControlledTransportProvider(objectMapper, config.getMessageEndpoint(), config.getSseEndpoint());
         this.heartbeatScheduler = Executors.newSingleThreadScheduledExecutor();
         this.heartbeat = config.isHeartbeat();
     }
@@ -162,10 +175,9 @@ public class McpServerManager implements SmartLifecycle {
             if (heartbeat) {
                 heartbeatScheduler.scheduleAtFixedRate(
                         this::sendHeartbeat,
-                        0,      // 立即开始
-                        15000,  // 15秒间隔
-                        TimeUnit.MILLISECONDS
-                );
+                        0, // 立即开始
+                        15000, // 15秒间隔
+                        TimeUnit.MILLISECONDS);
             }
         } finally {
             poolLock.unlock();
@@ -188,7 +200,7 @@ public class McpServerManager implements SmartLifecycle {
         try {
             transportProvider.sendHeartbeat();
         } catch (Exception e) {
-            logger.debug("HeartBeatError:{}",e.getCause().getMessage(), e);
+            logger.debug("HeartBeatError:{}", e.getCause().getMessage(), e);
         }
     }
 
@@ -300,7 +312,7 @@ public class McpServerManager implements SmartLifecycle {
     }
 
     private void logServerState(String message) {
-//        System.out.printf("[MCP Manager] %s | Running: %b%n", message, running.get());
+        //        System.out.printf("[MCP Manager] %s | Running: %b%n", message, running.get());
         logger.info("[MCP Manager] {} | Running: {}", message, running.get());
     }
 
@@ -310,9 +322,7 @@ public class McpServerManager implements SmartLifecycle {
     private static class ControlledTransportProvider extends WebMvcSseServerTransportProvider {
         private final AtomicBoolean active = new AtomicBoolean(false);
 
-        public ControlledTransportProvider(ObjectMapper mapper,
-                                           String messageEndpoint,
-                                           String sseEndpoint) {
+        public ControlledTransportProvider(ObjectMapper mapper, String messageEndpoint, String sseEndpoint) {
             super(mapper, messageEndpoint, sseEndpoint);
         }
 
@@ -320,8 +330,8 @@ public class McpServerManager implements SmartLifecycle {
         public RouterFunction<ServerResponse> getRouterFunction() {
             return request -> {
                 if (!active.get()) {
-                    HandlerFunction<ServerResponse> handler = req ->
-                            ServerResponse.status(HttpStatus.SERVICE_UNAVAILABLE)
+                    HandlerFunction<ServerResponse> handler =
+                            req -> ServerResponse.status(HttpStatus.SERVICE_UNAVAILABLE)
                                     .body("Service is currently unavailable");
                     return Optional.of(handler);
                 }

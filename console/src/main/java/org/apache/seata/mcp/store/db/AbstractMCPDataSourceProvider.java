@@ -25,7 +25,7 @@ import org.apache.seata.core.constants.DBType;
 import org.apache.seata.mcp.config.DataSourcesConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Bean;
+
 import javax.sql.DataSource;
 import java.io.File;
 import java.net.MalformedURLException;
@@ -48,13 +48,14 @@ public abstract class AbstractMCPDataSourceProvider implements DataSourceProvide
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractMCPDataSourceProvider.class);
 
     private final Map<String, DataSource> dataSources = new HashMap<>();
-    
+
     private String resourceId;
 
     /**
      * The constant properties.
      */
-    protected static final Map<String, DataSourcesConfiguration.DataSourceProperties> DATASOURCE_PROPERTIES = DataSourcesConfiguration.getDatasources();
+    protected static final Map<String, DataSourcesConfiguration.DataSourceProperties> DATASOURCE_PROPERTIES =
+            DataSourcesConfiguration.getDatasources();
 
     private static final String MYSQL_DRIVER_CLASS_NAME = "com.mysql.jdbc.Driver";
 
@@ -95,7 +96,7 @@ public abstract class AbstractMCPDataSourceProvider implements DataSourceProvide
 
     /**
      * Set the resource ID to specify which datasource to provide
-     * 
+     *
      * @param resourceId the resource ID (database URL)
      * @return this provider instance
      */
@@ -105,13 +106,13 @@ public abstract class AbstractMCPDataSourceProvider implements DataSourceProvide
     }
 
     public DataSource generate() {
-//        validate();
+        //        validate();
         return doGenerate();
     }
-    
+
     /**
      * Generate datasource by resource ID
-     * 
+     *
      * @param resourceId the resource ID
      * @return the generated datasource
      */
@@ -174,10 +175,10 @@ public abstract class AbstractMCPDataSourceProvider implements DataSourceProvide
         }
         return null;
     }
-    
+
     /**
      * Get current datasource properties
-     * 
+     *
      * @return the datasource properties for current resourceId
      */
     protected DataSourcesConfiguration.DataSourceProperties getDataSourceProperties() {

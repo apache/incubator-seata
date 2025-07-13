@@ -77,10 +77,8 @@ public class McpAutoToolRegister implements BeanPostProcessor {
             // —— 2. build ToolSpecification and register as a tool ——
             McpSchema.Tool toolMeta = new McpSchema.Tool(m.getName(), ann.description(), true, schemaStr, null);
 
-            McpServerFeatures.AsyncToolSpecification spec =
-                    new McpServerFeatures.AsyncToolSpecification(
-                            toolMeta,
-                            (exchange, arguments) -> Mono.fromCallable(() -> {
+            McpServerFeatures.AsyncToolSpecification spec = new McpServerFeatures.AsyncToolSpecification(
+                    toolMeta, (exchange, arguments) -> Mono.fromCallable(() -> {
                                 try {
                                     Object[] args = Arrays.stream(methodParams)
                                             .map(p -> convertArgument(arguments.get(p.getName()), p.getType()))
@@ -94,9 +92,7 @@ public class McpAutoToolRegister implements BeanPostProcessor {
                                     } else if (ret instanceof String) {
                                         contents.add(new McpSchema.TextContent((String) ret));
                                     } else {
-                                        contents.add(new McpSchema.TextContent(
-                                                mapper.writeValueAsString(ret)
-                                        ));
+                                        contents.add(new McpSchema.TextContent(mapper.writeValueAsString(ret)));
                                     }
 
                                     // `false` This call will no longer trigger the LLM to continue calling the tool
@@ -105,20 +101,22 @@ public class McpAutoToolRegister implements BeanPostProcessor {
                                 } catch (InvocationTargetException ite) {
                                     String err = ite.getTargetException().getMessage();
                                     return new McpSchema.CallToolResult(
-                                            Collections.singletonList(new McpSchema.TextContent("The tool execution error: " + err)),
-                                            true
-                                    );
+                                            Collections.singletonList(
+                                                    new McpSchema.TextContent("The tool execution error: " + err)),
+                                            true);
                                 } catch (Exception e) {
-                                    logger.error("Tool transform failed:{}",e.getMessage());
+                                    logger.error("Tool transform failed:{}", e.getMessage());
                                     throw new RuntimeException(e);
                                 }
-                            }).subscribeOn(Schedulers.boundedElastic())
-                    );
+                            })
+                            .subscribeOn(Schedulers.boundedElastic()));
 
             // Add a tool and process the returned Mono
-            aysncManager.getServerInstance().addTool(spec)
+            aysncManager
+                    .getServerInstance()
+                    .addTool(spec)
                     .doOnError(error -> {
-                        logger.error("Tool registration failed:{}",error.getMessage());
+                        logger.error("Tool registration failed:{}", error.getMessage());
                         throw new RuntimeException("Failed to register the tool: " + m.getName(), error);
                     })
                     .subscribe();
@@ -163,8 +161,7 @@ public class McpAutoToolRegister implements BeanPostProcessor {
             prop.put("type", "integer");
         } else if (type == Long.class || type == long.class) {
             prop.put("type", "integer");
-        } else if (type == Double.class || type == double.class ||
-                type == Float.class || type == float.class) {
+        } else if (type == Double.class || type == double.class || type == Float.class || type == float.class) {
             prop.put("type", "number");
         } else if (type == Boolean.class || type == boolean.class) {
             prop.put("type", "boolean");
@@ -195,8 +192,8 @@ public class McpAutoToolRegister implements BeanPostProcessor {
 
                 for (Field field : fields) {
                     // Skip static fields and final fields
-                    if (java.lang.reflect.Modifier.isStatic(field.getModifiers()) ||
-                            java.lang.reflect.Modifier.isFinal(field.getModifiers())) {
+                    if (java.lang.reflect.Modifier.isStatic(field.getModifiers())
+                            || java.lang.reflect.Modifier.isFinal(field.getModifiers())) {
                         continue;
                     }
 
@@ -209,13 +206,13 @@ public class McpAutoToolRegister implements BeanPostProcessor {
                         if (!fieldAnn.description().isEmpty()) {
                             fieldProp.put("description", fieldAnn.description());
                         }
-                        if(!fieldAnn.example().isEmpty()){
+                        if (!fieldAnn.example().isEmpty()) {
                             fieldProp.put("example", fieldAnn.example());
                         }
-                        if(fieldAnn.exampleValueClassName()!=null && fieldAnn.exampleValueClassName().length!=0){
+                        if (fieldAnn.exampleValueClassName() != null && fieldAnn.exampleValueClassName().length != 0) {
                             // The conversion type is JSON format
                             StringBuilder example = new StringBuilder();
-                            for(Class<?> clazz: fieldAnn.exampleValueClassName()){
+                            for (Class<?> clazz : fieldAnn.exampleValueClassName()) {
                                 example.append(",").append(getClassInfoAsJson(clazz));
                             }
                             fieldProp.put("example", example.toString());
@@ -238,7 +235,6 @@ public class McpAutoToolRegister implements BeanPostProcessor {
         }
     }
 
-
     /**
      * Converts all field information of a class to JSON strings(Include Enum)
      */
@@ -254,7 +250,7 @@ public class McpAutoToolRegister implements BeanPostProcessor {
                 for (Object enumConstant : clazz.getEnumConstants()) {
                     ObjectNode enumInfo = enumValues.addObject();
                     enumInfo.put("name", enumConstant.toString());
-                    enumInfo.put("ordinal", ((Enum<?>)enumConstant).ordinal());
+                    enumInfo.put("ordinal", ((Enum<?>) enumConstant).ordinal());
 
                     // Trying to get code value (for GlobalStatus, etc.)
                     try {
@@ -269,8 +265,8 @@ public class McpAutoToolRegister implements BeanPostProcessor {
 
             ArrayNode fieldsArray = result.putArray("fields");
             for (Field field : getAllFields(clazz)) {
-                if (java.lang.reflect.Modifier.isStatic(field.getModifiers()) ||
-                        java.lang.reflect.Modifier.isFinal(field.getModifiers())) {
+                if (java.lang.reflect.Modifier.isStatic(field.getModifiers())
+                        || java.lang.reflect.Modifier.isFinal(field.getModifiers())) {
                     continue;
                 }
 
@@ -291,7 +287,7 @@ public class McpAutoToolRegister implements BeanPostProcessor {
 
             return mapper.writeValueAsString(result);
         } catch (Exception e) {
-            logger.error("Converts all field information of a class to JSON strings Failed:{}",e.getMessage());
+            logger.error("Converts all field information of a class to JSON strings Failed:{}", e.getMessage());
             return "{\"error\": \"" + e.getMessage() + "\"}";
         }
     }
@@ -316,12 +312,12 @@ public class McpAutoToolRegister implements BeanPostProcessor {
      */
     private boolean isCustomObject(Class<?> type) {
         // Exclude Java built-in types
-        return !type.isPrimitive() &&
-                !type.getName().startsWith("java.") &&
-                !type.getName().startsWith("javax.") &&
-                !type.isEnum() &&
-                !type.isInterface() &&
-                !type.isArray();
+        return !type.isPrimitive()
+                && !type.getName().startsWith("java.")
+                && !type.getName().startsWith("javax.")
+                && !type.isEnum()
+                && !type.isInterface()
+                && !type.isArray();
     }
 
     /**

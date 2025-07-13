@@ -27,98 +27,97 @@ public class GlobalSessionServiceImpl implements GlobalSessionService {
     @Autowired
     Environment env;
 
-
     @Override
     public String queryGlobalSession(GlobalSessionParam param) {
         // Check whether the query interval is too large
-        if(param.getTimeEnd()!=null && param.getTimeStart()!=null){
-            if(param.getTimeEnd()-param.getTimeStart()> Long.parseLong(env.getProperty("seata.mcp.query.max_query_duration","86400000"))){
+        if (param.getTimeEnd() != null && param.getTimeStart() != null) {
+            if (param.getTimeEnd() - param.getTimeStart()
+                    > Long.parseLong(env.getProperty("seata.mcp.query.max_query_duration", "86400000"))) {
                 return "The query time span is not allowed to exceed the max query duration";
             }
         }
-        String result = mcpRPCService.getCallTC(RPCConstant.GLOBAL_SESSION_BASE_URL+"/query"
-                ,param,null,null);
-        if(StringUtils.isBlank(result)){
+        String result = mcpRPCService.getCallTC(RPCConstant.GLOBAL_SESSION_BASE_URL + "/query", param, null, null);
+        if (StringUtils.isBlank(result)) {
             return "query global session failed";
-        }else{
+        } else {
             return result;
         }
     }
 
     @Override
     public String deleteGlobalSession(String xid) {
-        Map<String,String> pathParams = new HashMap<>();
-        pathParams.put("xid",xid);
-        String result = mcpRPCService.deleteCallTC(RPCConstant.GLOBAL_SESSION_BASE_URL+"/deleteGlobalSession"
-                ,null,pathParams,null);
-        if(StringUtils.isBlank(result)){
+        Map<String, String> pathParams = new HashMap<>();
+        pathParams.put("xid", xid);
+        String result = mcpRPCService.deleteCallTC(
+                RPCConstant.GLOBAL_SESSION_BASE_URL + "/deleteGlobalSession", null, pathParams, null);
+        if (StringUtils.isBlank(result)) {
             return String.format("delete global session failed, xid: %s", xid);
-        }else{
+        } else {
             return result;
         }
     }
 
     @Override
     public String forceDeleteGlobalSession(String xid) {
-        Map<String,String> pathParams = new HashMap<>();
-        pathParams.put("xid",xid);
-        String result = mcpRPCService.deleteCallTC(RPCConstant.GLOBAL_SESSION_BASE_URL+"/forceDeleteGlobalSession"
-                ,null,pathParams,null);
-        if(StringUtils.isBlank(result)){
-            return String.format("force delete global session failed, xid: %s",xid);
-        }else{
+        Map<String, String> pathParams = new HashMap<>();
+        pathParams.put("xid", xid);
+        String result = mcpRPCService.deleteCallTC(
+                RPCConstant.GLOBAL_SESSION_BASE_URL + "/forceDeleteGlobalSession", null, pathParams, null);
+        if (StringUtils.isBlank(result)) {
+            return String.format("force delete global session failed, xid: %s", xid);
+        } else {
             return result;
         }
     }
 
     @Override
     public String stopGlobalSession(String xid) {
-        Map<String,String> pathParams = new HashMap<>();
-        pathParams.put("xid",xid);
-        String result = mcpRPCService.putCallTC(RPCConstant.GLOBAL_SESSION_BASE_URL+"/stopGlobalSession"
-                , null,pathParams,null);
-        if(StringUtils.isBlank(result)){
-            return String.format("stop global session retry failed, xid: %s",xid);
-        }else{
+        Map<String, String> pathParams = new HashMap<>();
+        pathParams.put("xid", xid);
+        String result = mcpRPCService.putCallTC(
+                RPCConstant.GLOBAL_SESSION_BASE_URL + "/stopGlobalSession", null, pathParams, null);
+        if (StringUtils.isBlank(result)) {
+            return String.format("stop global session retry failed, xid: %s", xid);
+        } else {
             return result;
         }
     }
 
     @Override
     public String startGlobalSession(String xid) {
-        Map<String,String> pathParams = new HashMap<>();
-        pathParams.put("xid",xid);
-        String result = mcpRPCService.putCallTC(RPCConstant.GLOBAL_SESSION_BASE_URL+"/startGlobalSession",
-                null,pathParams,null);
-        if(StringUtils.isBlank(result)){
-            return String.format("start the global session retry failed, xid: %s",xid);
-        }else {
+        Map<String, String> pathParams = new HashMap<>();
+        pathParams.put("xid", xid);
+        String result = mcpRPCService.putCallTC(
+                RPCConstant.GLOBAL_SESSION_BASE_URL + "/startGlobalSession", null, pathParams, null);
+        if (StringUtils.isBlank(result)) {
+            return String.format("start the global session retry failed, xid: %s", xid);
+        } else {
             return result;
         }
     }
 
     @Override
     public String sendCommitOrRollback(String xid) {
-        Map<String,String> pathParams = new HashMap<>();
-        pathParams.put("xid",xid);
-        String result = mcpRPCService.putCallTC(RPCConstant.GLOBAL_SESSION_BASE_URL+"/sendCommitOrRollback"
-                , null,pathParams,null);
-        if(StringUtils.isBlank(result)){
-            return String.format("send global session to commit or rollback to rm failed, xid: %s",xid);
-        }else {
+        Map<String, String> pathParams = new HashMap<>();
+        pathParams.put("xid", xid);
+        String result = mcpRPCService.putCallTC(
+                RPCConstant.GLOBAL_SESSION_BASE_URL + "/sendCommitOrRollback", null, pathParams, null);
+        if (StringUtils.isBlank(result)) {
+            return String.format("send global session to commit or rollback to rm failed, xid: %s", xid);
+        } else {
             return result;
         }
     }
 
     @Override
     public String changeGlobalStatus(String xid) {
-        Map<String,String> pathParams = new HashMap<>();
-        pathParams.put("xid",xid);
-        String result = mcpRPCService.putCallTC(RPCConstant.GLOBAL_SESSION_BASE_URL+"/changeGlobalStatus"
-                , null,pathParams,null);
-        if(StringUtils.isBlank(result)){
-            return String.format("change the global session status failed, xid: %s",xid);
-        }else {
+        Map<String, String> pathParams = new HashMap<>();
+        pathParams.put("xid", xid);
+        String result = mcpRPCService.putCallTC(
+                RPCConstant.GLOBAL_SESSION_BASE_URL + "/changeGlobalStatus", null, pathParams, null);
+        if (StringUtils.isBlank(result)) {
+            return String.format("change the global session status failed, xid: %s", xid);
+        } else {
             return result;
         }
     }

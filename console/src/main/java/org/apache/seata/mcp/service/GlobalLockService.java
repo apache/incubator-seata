@@ -7,5 +7,5 @@ public interface GlobalLockService {
 
     String deleteGlobalLock(GlobalLockParam param);
 
-    String checkGlobalLock(String xid,String branchId);
+    String checkGlobalLock(String xid, String branchId);
 }

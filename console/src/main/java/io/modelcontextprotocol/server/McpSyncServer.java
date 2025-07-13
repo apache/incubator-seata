@@ -49,154 +49,156 @@ import io.modelcontextprotocol.util.Assert;
  */
 public class McpSyncServer {
 
-	/**
-	 * The async server to wrap.
-	 */
-	private final McpAsyncServer asyncServer;
+    /**
+     * The async server to wrap.
+     */
+    private final McpAsyncServer asyncServer;
 
-	/**
-	 * Creates a new synchronous server that wraps the provided async server.
-	 * @param asyncServer The async server to wrap
-	 */
-	public McpSyncServer(McpAsyncServer asyncServer) {
-		Assert.notNull(asyncServer, "Async server must not be null");
-		this.asyncServer = asyncServer;
-	}
+    /**
+     * Creates a new synchronous server that wraps the provided async server.
+     * @param asyncServer The async server to wrap
+     */
+    public McpSyncServer(McpAsyncServer asyncServer) {
+        Assert.notNull(asyncServer, "Async server must not be null");
+        this.asyncServer = asyncServer;
+    }
 
-	/**
-	 * Add a new tool handler.
-	 * @param toolHandler The tool handler to add
-	 */
-	public void addTool(McpServerFeatures.SyncToolSpecification toolHandler) {
-		this.asyncServer.addTool(McpServerFeatures.AsyncToolSpecification.fromSync(toolHandler)).block();
-	}
+    /**
+     * Add a new tool handler.
+     * @param toolHandler The tool handler to add
+     */
+    public void addTool(McpServerFeatures.SyncToolSpecification toolHandler) {
+        this.asyncServer
+                .addTool(McpServerFeatures.AsyncToolSpecification.fromSync(toolHandler))
+                .block();
+    }
 
-	/**
-	 * Remove a tool handler.
-	 * @param toolName The name of the tool handler to remove
-	 */
-	public void removeTool(String toolName) {
-		this.asyncServer.removeTool(toolName).block();
-	}
+    /**
+     * Remove a tool handler.
+     * @param toolName The name of the tool handler to remove
+     */
+    public void removeTool(String toolName) {
+        this.asyncServer.removeTool(toolName).block();
+    }
 
-	/**
-	 * Add a new resource handler.
-	 * @param resourceHandler The resource handler to add
-	 */
-	public void addResource(McpServerFeatures.SyncResourceSpecification resourceHandler) {
-		this.asyncServer.addResource(McpServerFeatures.AsyncResourceSpecification.fromSync(resourceHandler)).block();
-	}
+    /**
+     * Add a new resource handler.
+     * @param resourceHandler The resource handler to add
+     */
+    public void addResource(McpServerFeatures.SyncResourceSpecification resourceHandler) {
+        this.asyncServer
+                .addResource(McpServerFeatures.AsyncResourceSpecification.fromSync(resourceHandler))
+                .block();
+    }
 
-	/**
-	 * Remove a resource handler.
-	 * @param resourceUri The URI of the resource handler to remove
-	 */
-	public void removeResource(String resourceUri) {
-		this.asyncServer.removeResource(resourceUri).block();
-	}
+    /**
+     * Remove a resource handler.
+     * @param resourceUri The URI of the resource handler to remove
+     */
+    public void removeResource(String resourceUri) {
+        this.asyncServer.removeResource(resourceUri).block();
+    }
 
-	/**
-	 * Add a new resource template handler.
-	 * @param resourceHandler The resource handler to add
-	 */
-	public void addResourceTemplate(McpServerFeatures.SyncResourceTemplateSpecification resourceHandler) {
-		this.asyncServer
-				.addResourceTemplate(McpServerFeatures.AsyncResourceTemplateSpecification.fromSync(resourceHandler))
-				.block();
-	}
+    /**
+     * Add a new resource template handler.
+     * @param resourceHandler The resource handler to add
+     */
+    public void addResourceTemplate(McpServerFeatures.SyncResourceTemplateSpecification resourceHandler) {
+        this.asyncServer
+                .addResourceTemplate(McpServerFeatures.AsyncResourceTemplateSpecification.fromSync(resourceHandler))
+                .block();
+    }
 
-	/**
-	 * Remove a resource template handler.
-	 * @param resourceUri The URI of the resource template handler to remove
-	 */
-	public void removeResourceTemplate(String resourceUri) {
-		this.asyncServer.removeResourceTemplate(resourceUri).block();
-	}
+    /**
+     * Remove a resource template handler.
+     * @param resourceUri The URI of the resource template handler to remove
+     */
+    public void removeResourceTemplate(String resourceUri) {
+        this.asyncServer.removeResourceTemplate(resourceUri).block();
+    }
 
-	/**
-	 * Add a new prompt handler.
-	 * @param promptSpecification The prompt specification to add
-	 */
-	public void addPrompt(McpServerFeatures.SyncPromptSpecification promptSpecification) {
-		this.asyncServer.addPrompt(McpServerFeatures.AsyncPromptSpecification.fromSync(promptSpecification)).block();
-	}
+    /**
+     * Add a new prompt handler.
+     * @param promptSpecification The prompt specification to add
+     */
+    public void addPrompt(McpServerFeatures.SyncPromptSpecification promptSpecification) {
+        this.asyncServer
+                .addPrompt(McpServerFeatures.AsyncPromptSpecification.fromSync(promptSpecification))
+                .block();
+    }
 
-	/**
-	 * Remove a prompt handler.
-	 * @param promptName The name of the prompt handler to remove
-	 */
-	public void removePrompt(String promptName) {
-		this.asyncServer.removePrompt(promptName).block();
-	}
+    /**
+     * Remove a prompt handler.
+     * @param promptName The name of the prompt handler to remove
+     */
+    public void removePrompt(String promptName) {
+        this.asyncServer.removePrompt(promptName).block();
+    }
 
-	/**
-	 * Notify clients that the list of available tools has changed.
-	 */
-	public void notifyToolsListChanged() {
-		this.asyncServer.notifyToolsListChanged().block();
-	}
+    /**
+     * Notify clients that the list of available tools has changed.
+     */
+    public void notifyToolsListChanged() {
+        this.asyncServer.notifyToolsListChanged().block();
+    }
 
-	/**
-	 * Get the server capabilities that define the supported features and functionality.
-	 * @return The server capabilities
-	 */
-	public McpSchema.ServerCapabilities getServerCapabilities() {
-		return this.asyncServer.getServerCapabilities();
-	}
+    /**
+     * Get the server capabilities that define the supported features and functionality.
+     * @return The server capabilities
+     */
+    public McpSchema.ServerCapabilities getServerCapabilities() {
+        return this.asyncServer.getServerCapabilities();
+    }
 
-	/**
-	 * Get the server implementation information.
-	 * @return The server implementation details
-	 */
-	public McpSchema.Implementation getServerInfo() {
-		return this.asyncServer.getServerInfo();
-	}
+    /**
+     * Get the server implementation information.
+     * @return The server implementation details
+     */
+    public McpSchema.Implementation getServerInfo() {
+        return this.asyncServer.getServerInfo();
+    }
 
+    /**
+     * Notify clients that the list of available resources has changed.
+     */
+    public void notifyResourcesListChanged() {
+        this.asyncServer.notifyResourcesListChanged().block();
+    }
 
+    /**
+     * Notify clients that the list of available prompts has changed.
+     */
+    public void notifyPromptsListChanged() {
+        this.asyncServer.notifyPromptsListChanged().block();
+    }
 
-	/**
-	 * Notify clients that the list of available resources has changed.
-	 */
-	public void notifyResourcesListChanged() {
-		this.asyncServer.notifyResourcesListChanged().block();
-	}
+    /**
+     * Send a logging message notification to all clients.
+     * @param loggingMessageNotification The logging message notification to send
+     */
+    public void loggingNotification(LoggingMessageNotification loggingMessageNotification) {
+        this.asyncServer.loggingNotification(loggingMessageNotification).block();
+    }
 
-	/**
-	 * Notify clients that the list of available prompts has changed.
-	 */
-	public void notifyPromptsListChanged() {
-		this.asyncServer.notifyPromptsListChanged().block();
-	}
+    /**
+     * Close the server gracefully.
+     */
+    public void closeGracefully() {
+        this.asyncServer.closeGracefully().block();
+    }
 
-	/**
-	 * Send a logging message notification to all clients.
-	 * @param loggingMessageNotification The logging message notification to send
-	 */
-	public void loggingNotification(LoggingMessageNotification loggingMessageNotification) {
-		this.asyncServer.loggingNotification(loggingMessageNotification).block();
-	}
+    /**
+     * Close the server immediately.
+     */
+    public void close() {
+        this.asyncServer.close();
+    }
 
-	/**
-	 * Close the server gracefully.
-	 */
-	public void closeGracefully() {
-		this.asyncServer.closeGracefully().block();
-	}
-
-	/**
-	 * Close the server immediately.
-	 */
-	public void close() {
-		this.asyncServer.close();
-	}
-
-	/**
-	 * Get the underlying async server instance.
-	 * @return The wrapped async server
-	 */
-	public McpAsyncServer getAsyncServer() {
-		return this.asyncServer;
-	}
-
-
+    /**
+     * Get the underlying async server instance.
+     * @return The wrapped async server
+     */
+    public McpAsyncServer getAsyncServer() {
+        return this.asyncServer;
+    }
 }

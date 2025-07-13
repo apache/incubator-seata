@@ -32,7 +32,6 @@ import java.util.stream.Collectors;
 import static org.apache.seata.common.Constants.RAFT_GROUP_HEADER;
 import static org.apache.seata.namingserver.contants.NamingConstant.MCP_PATTERN;
 
-
 public class MCPRemotingFilter implements Filter {
 
     private final NamingManager namingManager;
@@ -49,7 +48,8 @@ public class MCPRemotingFilter implements Filter {
     }
 
     @Override
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
+            throws IOException, ServletException {
         if (servletRequest instanceof HttpServletRequest) {
             if (urlPattern
                     .matcher(((HttpServletRequest) servletRequest).getRequestURI())
@@ -65,7 +65,8 @@ public class MCPRemotingFilter implements Filter {
                     List<String> availableNamespaces = new ArrayList<>();
                     Map<String, List<String>> namespaceClusters = new HashMap<>();
 
-                    for (Map.Entry<String, NamespaceVO> entry : namespaces.getData().entrySet()) {
+                    for (Map.Entry<String, NamespaceVO> entry :
+                            namespaces.getData().entrySet()) {
                         String namespaceName = entry.getKey();
                         NamespaceVO namespaceVO = entry.getValue();
 
@@ -96,8 +97,7 @@ public class MCPRemotingFilter implements Filter {
                         }
                     }
                 }
-                if (StringUtils.isNotBlank(namespace)&&
-                        StringUtils.isNotBlank(cluster)) {
+                if (StringUtils.isNotBlank(namespace) && StringUtils.isNotBlank(cluster)) {
                     List<Node> list = null;
                     if (StringUtils.isNotBlank(cluster)) {
                         list = namingManager.getInstances(namespace, cluster);
@@ -110,7 +110,7 @@ public class MCPRemotingFilter implements Filter {
                         if (controlEndpoint != null) {
                             // Construct the target URL
                             String targetUrl = "http://" + controlEndpoint.getHost() + ":" + controlEndpoint.getPort()
-                                    + request.getRequestURI().replace("/mcp","")
+                                    + request.getRequestURI().replace("/mcp", "")
                                     + (request.getQueryString() != null ? "?" + request.getQueryString() : "");
 
                             // Copy headers from the original request
