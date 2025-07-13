@@ -1,5 +1,7 @@
 package org.apache.seata.mcp.service.impl;
 
+import org.apache.seata.console.config.WebSecurityConfig;
+import org.apache.seata.console.utils.JwtTokenUtils;
 import org.apache.seata.mcp.handler.CustomResponseErrorHandler;
 import org.apache.seata.mcp.service.MCPRPCService;
 import org.slf4j.Logger;
@@ -10,6 +12,8 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -29,6 +33,9 @@ public class MCPRPCServiceImpl implements MCPRPCService {
     @Autowired
     private Environment env;
 
+    @Autowired
+    private JwtTokenUtils jwtTokenUtils;
+
     private final RestTemplate restTemplate = new RestTemplate();
 
     private final String NAMING_SPACE_URL = "http://127.0.0.1:%s/mcp";
@@ -37,12 +44,44 @@ public class MCPRPCServiceImpl implements MCPRPCService {
 
     private String namingSpacePort = "";
 
+    private final static User user = new User();
+
+    private static String token = "";
+
     private final CustomResponseErrorHandler errorHandler = new CustomResponseErrorHandler();
 
     @PostConstruct
     public void init() {
         namingSpacePort = env.getProperty("server.port", "8081");
         restTemplate.setErrorHandler(errorHandler);
+        user.username = env.getProperty("console.user.username","seata");
+        user.password = env.getProperty("console.user.password","seata");
+        getToken();
+    }
+
+    public void getToken() {
+        // AuthenticationManager(default ProviderManager) #authenticate check Authentication
+        Authentication authentication = new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword());
+        // init token
+        String originToken = jwtTokenUtils.createToken(authentication);
+        token = WebSecurityConfig.TOKEN_PREFIX + originToken;
+    }
+
+    public static class User{
+        private String username;
+        private String password;
+        public String getUsername() {
+            return username;
+        }
+        public void setUsername(String username) {
+            this.username = username;
+        }
+        public String getPassword() {
+            return password;
+        }
+        public void setPassword(String password) {
+            this.password = password;
+        }
     }
 
     /**
@@ -50,6 +89,9 @@ public class MCPRPCServiceImpl implements MCPRPCService {
      */
     @Override
     public String postCallTC(String path, HttpHeaders headers, Object... args) {
+        if(headers==null){
+            headers = new HttpHeaders();
+        }
         String url = buildUrl(String.format(NAMING_SPACE_URL, namingSpacePort), path, null, null);
         HttpEntity<Object> entity = new HttpEntity<>(args, headers);
         String responseBody = null;
@@ -72,6 +114,10 @@ public class MCPRPCServiceImpl implements MCPRPCService {
      */
     @Override
     public String getCallTC(String path, Object queryParams, Map<String, String> pathParams, HttpHeaders headers) {
+        if(headers==null){
+            headers = new HttpHeaders();
+        }
+        headers.add(WebSecurityConfig.AUTHORIZATION_HEADER, token);
         Map<String, Object> queryParamsMap = objectToQueryParamMap(queryParams);
         String url = buildUrl(String.format(NAMING_SPACE_URL, namingSpacePort), path, pathParams, queryParamsMap);
         HttpEntity<String> entity = new HttpEntity<>(headers);
@@ -101,6 +147,10 @@ public class MCPRPCServiceImpl implements MCPRPCService {
      */
     @Override
     public String deleteCallTC(String path, Object queryParams, Map<String, String> pathParams, HttpHeaders headers) {
+        if(headers==null){
+            headers = new HttpHeaders();
+        }
+        headers.add(WebSecurityConfig.AUTHORIZATION_HEADER, token);
         Map<String, Object> queryParamsMap = objectToQueryParamMap(queryParams);
         String url = buildUrl(String.format(NAMING_SPACE_URL, namingSpacePort), path, pathParams, queryParamsMap);
         HttpEntity<String> entity = new HttpEntity<>(headers);
@@ -122,6 +172,10 @@ public class MCPRPCServiceImpl implements MCPRPCService {
 
     @Override
     public String putCallTC(String path, Object queryParams, Map<String, String> pathParams, HttpHeaders headers) {
+        if(headers==null){
+            headers = new HttpHeaders();
+        }
+        headers.add(WebSecurityConfig.AUTHORIZATION_HEADER, token);
         Map<String, Object> queryParamsMap = objectToQueryParamMap(queryParams);
         String url = buildUrl(String.format(NAMING_SPACE_URL, namingSpacePort), path, pathParams, queryParamsMap);
         HttpEntity<String> entity = new HttpEntity<>(headers);
