@@ -6,6 +6,4 @@ package io.modelcontextprotocol.spec;
  * @author Christian Tzolov
  * @author Dariusz Jędrzejczyk
  */
-public interface McpServerTransport extends McpTransport {
-
-}
+public interface McpServerTransport extends McpTransport {}

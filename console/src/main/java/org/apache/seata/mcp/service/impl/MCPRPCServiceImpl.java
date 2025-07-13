@@ -40,8 +40,8 @@ public class MCPRPCServiceImpl implements MCPRPCService {
     private final CustomResponseErrorHandler errorHandler = new CustomResponseErrorHandler();
 
     @PostConstruct
-    public void init(){
-        namingSpacePort = env.getProperty("server.port","8081");
+    public void init() {
+        namingSpacePort = env.getProperty("server.port", "8081");
         restTemplate.setErrorHandler(errorHandler);
     }
 
@@ -49,17 +49,12 @@ public class MCPRPCServiceImpl implements MCPRPCService {
      * Post Call the TC API based on the path
      */
     @Override
-    public String postCallTC(String path, HttpHeaders headers,Object... args){
-        String url = buildUrl(String.format(NAMING_SPACE_URL,namingSpacePort),path,null,null);
-        HttpEntity<Object> entity = new HttpEntity<>(args,headers);
+    public String postCallTC(String path, HttpHeaders headers, Object... args) {
+        String url = buildUrl(String.format(NAMING_SPACE_URL, namingSpacePort), path, null, null);
+        HttpEntity<Object> entity = new HttpEntity<>(args, headers);
         String responseBody = null;
-        try{
-            ResponseEntity<String> response = restTemplate.exchange(
-                    url,
-                    HttpMethod.POST,
-                    entity,
-                    String.class
-            );
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
             responseBody = response.getBody();
 
             if (!response.getStatusCode().is2xxSuccessful()) {
@@ -76,18 +71,13 @@ public class MCPRPCServiceImpl implements MCPRPCService {
      * Get Call the TC API based on the path
      */
     @Override
-    public String getCallTC(String path, Object queryParams, Map<String,String> pathParams,HttpHeaders headers){
-        Map<String,Object> queryParamsMap = objectToQueryParamMap(queryParams);
-        String url = buildUrl(String.format(NAMING_SPACE_URL,namingSpacePort),path,pathParams,queryParamsMap);
+    public String getCallTC(String path, Object queryParams, Map<String, String> pathParams, HttpHeaders headers) {
+        Map<String, Object> queryParamsMap = objectToQueryParamMap(queryParams);
+        String url = buildUrl(String.format(NAMING_SPACE_URL, namingSpacePort), path, pathParams, queryParamsMap);
         HttpEntity<String> entity = new HttpEntity<>(headers);
         String responseBody = null;
         try {
-            ResponseEntity<String> response = restTemplate.exchange(
-                    url,
-                    HttpMethod.GET,
-                    entity,
-                    String.class
-            );
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
 
             responseBody = response.getBody();
 
@@ -110,18 +100,13 @@ public class MCPRPCServiceImpl implements MCPRPCService {
      * @return "Query results"
      */
     @Override
-    public String deleteCallTC(String path, Object queryParams, Map<String,String> pathParams,HttpHeaders headers){
-        Map<String,Object> queryParamsMap = objectToQueryParamMap(queryParams);
-        String url = buildUrl(String.format(NAMING_SPACE_URL,namingSpacePort),path,pathParams,queryParamsMap);
+    public String deleteCallTC(String path, Object queryParams, Map<String, String> pathParams, HttpHeaders headers) {
+        Map<String, Object> queryParamsMap = objectToQueryParamMap(queryParams);
+        String url = buildUrl(String.format(NAMING_SPACE_URL, namingSpacePort), path, pathParams, queryParamsMap);
         HttpEntity<String> entity = new HttpEntity<>(headers);
         String responseBody = null;
         try {
-            ResponseEntity<String> response = restTemplate.exchange(
-                    url,
-                    HttpMethod.DELETE,
-                    entity,
-                    String.class
-            );
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.DELETE, entity, String.class);
 
             responseBody = response.getBody();
 
@@ -137,17 +122,12 @@ public class MCPRPCServiceImpl implements MCPRPCService {
 
     @Override
     public String putCallTC(String path, Object queryParams, Map<String, String> pathParams, HttpHeaders headers) {
-        Map<String,Object> queryParamsMap = objectToQueryParamMap(queryParams);
-        String url = buildUrl(String.format(NAMING_SPACE_URL,namingSpacePort),path,pathParams,queryParamsMap);
+        Map<String, Object> queryParamsMap = objectToQueryParamMap(queryParams);
+        String url = buildUrl(String.format(NAMING_SPACE_URL, namingSpacePort), path, pathParams, queryParamsMap);
         HttpEntity<String> entity = new HttpEntity<>(headers);
         String responseBody = null;
         try {
-            ResponseEntity<String> response = restTemplate.exchange(
-                    url,
-                    HttpMethod.PUT,
-                    entity,
-                    String.class
-            );
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.PUT, entity, String.class);
 
             responseBody = response.getBody();
 
@@ -199,16 +179,13 @@ public class MCPRPCServiceImpl implements MCPRPCService {
     /**
      * Build the full URL
      */
-    private String buildUrl(String baseUrl, String path,
-                            Map<String, String> pathParams,
-                            Map<String, Object> queryParams) {
+    private String buildUrl(
+            String baseUrl, String path, Map<String, String> pathParams, Map<String, Object> queryParams) {
 
-        UriComponentsBuilder builder = UriComponentsBuilder
-                .fromHttpUrl(baseUrl)
-                .path(path);
+        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl).path(path);
 
         if (pathParams != null && !pathParams.isEmpty()) {
-            for(Map.Entry<String, String> entry : pathParams.entrySet()) {
+            for (Map.Entry<String, String> entry : pathParams.entrySet()) {
                 builder.queryParam(entry.getKey(), entry.getValue());
             }
         }
@@ -219,7 +196,8 @@ public class MCPRPCServiceImpl implements MCPRPCService {
                     for (Object value : (Iterable<?>) entry.getValue()) {
                         builder.queryParam(entry.getKey(), value);
                     }
-                } else if (entry.getValue() != null && entry.getValue().getClass().isArray()) {
+                } else if (entry.getValue() != null
+                        && entry.getValue().getClass().isArray()) {
                     Object[] array = (Object[]) entry.getValue();
                     for (Object value : array) {
                         builder.queryParam(entry.getKey(), value);

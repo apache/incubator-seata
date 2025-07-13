@@ -20,7 +20,6 @@ import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.mcp.store.db.AbstractMCPDataSourceProvider;
 
-
 import javax.sql.DataSource;
 import java.sql.Connection;
 
@@ -45,27 +44,28 @@ public class DbcpDataSourceProvider extends AbstractMCPDataSourceProvider {
         ds.setMaxWaitMillis(getMaxWait());
 
         // Connection retry control
-        ds.setMaxConnLifetimeMillis(300000);              // Maximum connection lifetime (5 minutes)
-        ds.setLogExpiredConnections(true);                // Log expired connections
-        ds.setConnectionProperties("useUnicode=yes;characterEncoding=utf8;socketTimeout=5000;connectTimeout=500;autoReconnect=true;maxReconnects=3;retriesAllDown=3");
+        ds.setMaxConnLifetimeMillis(300000); // Maximum connection lifetime (5 minutes)
+        ds.setLogExpiredConnections(true); // Log expired connections
+        ds.setConnectionProperties(
+                "useUnicode=yes;characterEncoding=utf8;socketTimeout=5000;connectTimeout=500;autoReconnect=true;maxReconnects=3;retriesAllDown=3");
 
         // Failed connection handling
-        ds.setTestOnCreate(true);                         // Validate connection on creation
-        ds.setTestOnBorrow(true);                         // Validate connection on borrow
-        ds.setTestWhileIdle(true);                        // Validate idle connections
+        ds.setTestOnCreate(true); // Validate connection on creation
+        ds.setTestOnBorrow(true); // Validate connection on borrow
+        ds.setTestWhileIdle(true); // Validate idle connections
         ds.setValidationQuery(getValidationQuery(getDBType()));
-        ds.setValidationQueryTimeout(5);                  // Validation query timeout (seconds)
+        ds.setValidationQueryTimeout(5); // Validation query timeout (seconds)
 
         // Fast failure after connection acquisition attempts
-        ds.setFastFailValidation(true);                   // Fast validation failure
+        ds.setFastFailValidation(true); // Fast validation failure
         ds.setDefaultTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
 
         // Key settings: Connection pool exhaustion strategy
-        ds.setMaxWaitMillis(5000);                        // Maximum wait time of 5 seconds
-        ds.setAbandonedUsageTracking(true);               // Track connection usage
-        ds.setRemoveAbandonedOnBorrow(true);              // Check for abandoned connections on borrow
-        ds.setRemoveAbandonedOnMaintenance(true);         // Remove abandoned connections during maintenance
-        ds.setRemoveAbandonedTimeout(60);                 // Mark as abandoned after 60 seconds
+        ds.setMaxWaitMillis(5000); // Maximum wait time of 5 seconds
+        ds.setAbandonedUsageTracking(true); // Track connection usage
+        ds.setRemoveAbandonedOnBorrow(true); // Check for abandoned connections on borrow
+        ds.setRemoveAbandonedOnMaintenance(true); // Remove abandoned connections during maintenance
+        ds.setRemoveAbandonedTimeout(60); // Mark as abandoned after 60 seconds
 
         return ds;
     }
