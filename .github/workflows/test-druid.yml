@@ -88,7 +88,7 @@ jobs:
       - name: "Test with Maven and Druid ${{ matrix.druid }}"
         run: |
           if [ "${{ matrix.druid }}" = "1.2.12" ]; then
-          export skip.druid.tests=false;
+          export skip_druid_tests=false;
           fi
           ./mvnw -T 4C clean test \
                  -Ddruid.version=${{ matrix.druid }} \

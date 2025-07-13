@@ -69,7 +69,7 @@ public class DataBaseSessionManagerTest {
 
     public static boolean isEnableDruidTest() {
         // Unit test triggered a bug in Druid, see the issue https://github.com/alibaba/druid/issues/4936
-        String skipTests = System.getProperty("skip.druid.tests", "true");
+        String skipTests = System.getProperty("skip_druid_tests", "true");
         return Boolean.parseBoolean(skipTests);
     }
 
