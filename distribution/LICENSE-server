@@ -400,6 +400,8 @@ CDDL-1.0 licenses
     com.sun.jersey:jersey-client 1.19.1 CDDL-1.0 see:licenses/CDDL-1.0
     com.sun.jersey:jersey-core 1.19.1 CDDL-1.0 see:licenses/CDDL-1.0
     javax.ws.rs:jsr311-api 1.1.1 CDDL-1.0 see:licenses/CDDL-1.0
+    javax.servlet:javax.servlet-api 4.0.1 CDDL-1.0 see:licenses/CDDL-1.0
+
 
 ========================================================================
 EPL-1.0 licenses
