@@ -19,8 +19,6 @@ name: "test"
 on:
   push:
     branches: [ test*, "*.*.*" ]
-  pull_request:
-    branches: [ 2.5.0 ]
 jobs:
   # job 1
   test:
