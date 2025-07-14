@@ -2,6 +2,7 @@ package org.apache.seata.mcp.service.impl;
 
 import org.apache.seata.common.exception.StoreException;
 import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.mcp.config.MCPConfiguration;
 import org.apache.seata.mcp.entity.constant.SqlConstant;
 import org.apache.seata.mcp.entity.param.UndoLogParam;
 import org.apache.seata.mcp.service.BusinessDataSourceService;
@@ -25,7 +26,7 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
     private SqlExecutionTemplate sqlExecutionTemplate;
 
     @Autowired
-    private Environment env;
+    private MCPConfiguration mcpConfiguration;
 
     @Override
     public List<String> getTableNamesBySchema(String resourceId) {
@@ -62,7 +63,7 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
 
     @Override
     public List<byte[]> getUndoLogInfo(UndoLogParam param) {
-        long max_time_duration = Long.parseLong(env.getProperty("seata.mcp.query.max_query_duration", "86400000"));
+        long max_time_duration = mcpConfiguration.getQueryDuration();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String sql = SqlConstant.GET_UNDO_LOG_SQL;
         List<Object> params = new ArrayList<>();
