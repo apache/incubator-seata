@@ -1,6 +1,7 @@
 package org.apache.seata.mcp.service.impl;
 
 import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.mcp.config.MCPConfiguration;
 import org.apache.seata.mcp.entity.constant.RPCConstant;
 import org.apache.seata.mcp.entity.param.GlobalSessionParam;
 import org.apache.seata.mcp.service.GlobalSessionService;
@@ -25,14 +26,14 @@ public class GlobalSessionServiceImpl implements GlobalSessionService {
     private MCPRPCService mcpRPCService;
 
     @Autowired
-    Environment env;
+    private MCPConfiguration configuration;
 
     @Override
     public String queryGlobalSession(GlobalSessionParam param) {
         // Check whether the query interval is too large
         if (param.getTimeEnd() != null && param.getTimeStart() != null) {
             if (param.getTimeEnd() - param.getTimeStart()
-                    > Long.parseLong(env.getProperty("seata.mcp.query.max_query_duration", "86400000"))) {
+                    > configuration.getQueryDuration()) {
                 return "The query time span is not allowed to exceed the max query duration";
             }
         }
