@@ -12,9 +12,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 @Service
 public class SqlExecutionTemplate {
+
+    private static final Pattern SELECT_PATTERN = Pattern.compile(
+            "^\\s*SELECT\\b.*", Pattern.CASE_INSENSITIVE | Pattern.DOTALL
+    );
+
+    private static final Pattern DML_PATTERN = Pattern.compile(
+            "^\\s*(INSERT|UPDATE|DELETE)\\b.*", Pattern.CASE_INSENSITIVE | Pattern.DOTALL
+    );
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SqlExecutionTemplate.class);
 
@@ -32,17 +41,17 @@ public class SqlExecutionTemplate {
     }
 
     private boolean validateQuerySql(String sql) {
-        if (sql == null || StringUtils.isEmpty(sql)) {
+        if (sql == null || StringUtils.isBlank(sql)) {
             return false;
         }
-        return !sql.contains("DELETE") && !sql.contains("UPDATE") && !sql.contains("INSERT");
+        return SELECT_PATTERN.matcher(sql).matches();
     }
 
     private boolean validateUpdateSql(String sql) {
         if (sql == null || StringUtils.isBlank(sql)) {
             return false;
         }
-        return !sql.contains("SELECT");
+        return DML_PATTERN.matcher(sql).matches();
     }
 
     /**
@@ -60,7 +69,7 @@ public class SqlExecutionTemplate {
 
         try {
             if (!validateQuerySql(sql)) {
-                throw new StoreException("The query valid failed: " + sql);
+                throw new StoreException("The query valid failed,Only query operations are allowed：" + sql);
             }
             conn = getDataSource(resourceId).getConnection();
             ps = conn.prepareStatement(sql);
@@ -108,7 +117,7 @@ public class SqlExecutionTemplate {
 
         try {
             if (!validateUpdateSql(sql)) {
-                throw new StoreException("The query valid failed: " + sql);
+                throw new StoreException("The query valid failed,Only update operations are allowed：" + sql);
             }
             conn = getDataSource(resourceId).getConnection();
             ps = conn.prepareStatement(sql);
