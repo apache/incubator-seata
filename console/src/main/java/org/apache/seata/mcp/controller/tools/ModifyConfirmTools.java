@@ -19,7 +19,7 @@ public class ModifyConfirmTools {
 
     @Tool(
             description =
-                    "Before modifying a transaction or lock, the user calls this function to obtain the operation key")
+                    "Before modifying(update or delete) a transaction or lock, the user calls this function to obtain the operation key")
     public Map<String, String> confirmAndGetKey() {
         Map<String, String> keyMap = modifyConfirmService.confirmAndGetKey();
         if (LOGGER.isInfoEnabled()) {

@@ -3,6 +3,7 @@ package org.apache.seata.mcp.service.impl;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.mcp.config.MCPConfiguration;
 import org.apache.seata.mcp.entity.constant.RPCConstant;
+import org.apache.seata.mcp.entity.enums.GlobalExceptionStatus;
 import org.apache.seata.mcp.entity.param.GlobalSessionParam;
 import org.apache.seata.mcp.service.GlobalSessionService;
 import org.apache.seata.mcp.service.MCPRPCService;
@@ -13,7 +14,9 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -121,5 +124,21 @@ public class GlobalSessionServiceImpl implements GlobalSessionService {
         } else {
             return result;
         }
+    }
+
+    @Override
+    public List<String> getAbnormalSessions(Long startTime, Long endTime) {
+        List<String> result = new ArrayList<>();
+        GlobalSessionParam param = new GlobalSessionParam();
+        param.setTimeStart(startTime);
+        param.setTimeEnd(endTime);
+        param.setPageNum(1);
+        param.setPageSize(100);
+        List<Integer> exceptionStatus = GlobalExceptionStatus.getAll();
+        for(Integer status : exceptionStatus) {
+            param.setStatus(status);
+            result.add(queryGlobalSession(param));
+        }
+        return result;
     }
 }
