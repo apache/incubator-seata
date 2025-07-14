@@ -57,7 +57,7 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 @SpringBootTest
 @Import(DynamicPortTestConfig.class)
 // Unit test triggered a bug in Druid, see the issue https://github.com/alibaba/druid/issues/4936
-@DisabledIfSystemProperty(named = "druid.version", matches = "1.1.12")
+@DisabledIfSystemProperty(named = "druid.version", matches = "1.2.12")
 public class DataBaseSessionManagerTest {
 
     static SessionManager sessionManager = null;
