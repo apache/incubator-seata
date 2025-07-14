@@ -68,7 +68,7 @@ public class GlobalSessionParam implements Serializable {
     @ToolParam(description = "PAGE NUMBER", required = true, example = "1")
     private int pageNum;
 
-    @ToolParam(description = "PageSize", required = true, example = "10")
+    @ToolParam(description = "PageSize", required = true, example = "100")
     private int pageSize;
 
     @ToolParam(description = "Start Time (Timestamp)")

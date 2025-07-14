@@ -21,14 +21,14 @@ public class GlobalLockTools {
     private ModifyConfirmService modifyConfirmService;
 
     @Tool(description = "Query the global lock information")
-    public String queryGlobalLock(@ToolParam(description = "Global lock parameters") GlobalLockParam param) {
+    public String queryGlobalLock(@ToolParam(description = "Global lock parameters",required = true) GlobalLockParam param) {
         return globalLockService.queryGlobalLock(param);
     }
 
     @Tool(description = "Delete the global lock, Get the modify key before you delete")
     public String deleteGlobalLock(
-            @ToolParam(description = "Global lock parameters") GlobalLockParam param,
-            @ToolParam(description = "Modify key") String modifyKey) {
+            @ToolParam(description = "Global lock parameters",required = true) GlobalLockParam param,
+            @ToolParam(description = "Modify key",required = true) String modifyKey) {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("manual operation to delete the global lock, param: {}", param);
         }
@@ -41,8 +41,8 @@ public class GlobalLockTools {
 
     @Tool(description = "Check if the lock exist the branch session")
     public String checkGlobalLock(
-            @ToolParam(description = "Global transaction id") String xid,
-            @ToolParam(description = "Branch transaction id") String branchId) {
+            @ToolParam(description = "Global transaction id",required = true) String xid,
+            @ToolParam(description = "Branch transaction id",required = true) String branchId) {
         return globalLockService.checkGlobalLock(xid, branchId);
     }
 }
