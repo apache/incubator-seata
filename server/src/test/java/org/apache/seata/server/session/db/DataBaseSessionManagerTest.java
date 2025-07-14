@@ -19,6 +19,7 @@ package org.apache.seata.server.session.db;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.seata.common.XID;
 import org.apache.seata.common.util.IOUtil;
+import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.common.util.UUIDGenerator;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchStatus;
@@ -69,8 +70,11 @@ public class DataBaseSessionManagerTest {
 
     public static boolean isEnableDruidTest() {
         // Unit test triggered a bug in Druid, see the issue https://github.com/alibaba/druid/issues/4936
-        String skipTests = System.getProperty("skip_druid_tests", "true");
-        return Boolean.parseBoolean(skipTests);
+        String enable = System.getenv("ENABLE_DRUID_TEST");
+        if (StringUtils.isBlank(enable)) {
+            return true;
+        }
+        return Boolean.parseBoolean(enable);
     }
 
     @BeforeAll
