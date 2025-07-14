@@ -1,6 +1,7 @@
 package org.apache.seata.mcp.service.impl;
 
 import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.mcp.config.MCPConfiguration;
 import org.apache.seata.mcp.entity.constant.RPCConstant;
 import org.apache.seata.mcp.entity.param.GlobalLockParam;
 import org.apache.seata.mcp.service.GlobalLockService;
@@ -15,12 +16,21 @@ import java.util.Map;
 @Service
 public class GlobalLockServiceImpl implements GlobalLockService {
     @Autowired
-    @Lazy
     private MCPRPCService mcpRPCService;
+
+    @Autowired
+    private MCPConfiguration configuration;
 
     @Override
     public String queryGlobalLock(GlobalLockParam param) {
         String result = mcpRPCService.getCallTC(RPCConstant.GLOBAL_LOCK_BASE_URL + "/query", param, null, null);
+        // Check whether the query interval is too large
+        if (param.getTimeEnd() != null && param.getTimeStart() != null) {
+            if (param.getTimeEnd() - param.getTimeStart()
+                    > configuration.getQueryDuration()) {
+                return "The query time span is not allowed to exceed the max query duration";
+            }
+        }
         if (StringUtils.isBlank(result)) {
             return "query global lock failed";
         } else {

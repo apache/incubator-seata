@@ -16,38 +16,40 @@ import java.util.Objects;
 public class MCPConfiguration {
 
     /**
-     * 服务器名称
+     * The name of the server
      */
     private String serverName;
     /**
-     * 服务器版本
+     * Server version
      */
     private String serverVersion = "1.0.0";
     /**
-     * sse端点
+     * SSE endpoints
      */
     private String sseEndpoint = "/sse";
     /**
-     * message端点
+     * MESSAGE ENDPOINT
      */
     private String messageEndpoint = "/message";
     /**
-     * 是否开启resource
+     * Specifies whether to enable resource
      */
     private boolean resourceSupport = true;
 
     private boolean resourceTemplates = false;
     /**
-     * 开启日志
+     * Turn on logging
      */
     private McpSchema.LoggingLevel loggingLevel = McpSchema.LoggingLevel.INFO;
     /**
-     * 是否开启心跳监测，默认不开启
+     * Whether to enable heartbeat monitoring, which is not enabled by default
      */
     private boolean heartbeat = false;
 
+    private Long queryDuration = 86400000L;
+
     /**
-     * 从环境中读取mcp相关配置参数
+     * Read MCP-related configuration parameters from the environment
      */
     @Lazy
     @Autowired
@@ -60,33 +62,30 @@ public class MCPConfiguration {
         sseEndpoint = env.getProperty("seata.mcp.sseEndpoint", "/sse");
         messageEndpoint = env.getProperty("seata.mcp.messageEndpoint", "/message");
         heartbeat = Boolean.parseBoolean(env.getProperty("seata.mcp.heartbeat", "false"));
+        queryDuration = Long.parseLong(env.getProperty("seata.mcp.query.max_query_duration", "86400000"));
     }
 
     @Override
     public String toString() {
-        return "MCPConfiguration{" + "serverName='"
-                + serverName + '\'' + ", serverVersion='"
-                + serverVersion + '\'' + ", sseEndpoint='"
-                + sseEndpoint + '\'' + ", messageEndpoint='"
-                + messageEndpoint + '\'' + ", resourceSupport="
-                + resourceSupport + ", resourceTemplates="
-                + resourceTemplates + ", loggingLevel="
-                + loggingLevel + ", heartbeat="
-                + heartbeat + '}';
+        return "MCPConfiguration{" +
+                "serverName='" + serverName + '\'' +
+                ", serverVersion='" + serverVersion + '\'' +
+                ", sseEndpoint='" + sseEndpoint + '\'' +
+                ", messageEndpoint='" + messageEndpoint + '\'' +
+                ", resourceSupport=" + resourceSupport +
+                ", resourceTemplates=" + resourceTemplates +
+                ", loggingLevel=" + loggingLevel +
+                ", heartbeat=" + heartbeat +
+                ", queryDuration=" + queryDuration +
+                ", env=" + env +
+                '}';
     }
 
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         MCPConfiguration that = (MCPConfiguration) o;
-        return resourceSupport == that.resourceSupport
-                && resourceTemplates == that.resourceTemplates
-                && heartbeat == that.heartbeat
-                && Objects.equals(serverName, that.serverName)
-                && Objects.equals(serverVersion, that.serverVersion)
-                && Objects.equals(sseEndpoint, that.sseEndpoint)
-                && Objects.equals(messageEndpoint, that.messageEndpoint)
-                && loggingLevel == that.loggingLevel;
+        return resourceSupport == that.resourceSupport && resourceTemplates == that.resourceTemplates && heartbeat == that.heartbeat && Objects.equals(serverName, that.serverName) && Objects.equals(serverVersion, that.serverVersion) && Objects.equals(sseEndpoint, that.sseEndpoint) && Objects.equals(messageEndpoint, that.messageEndpoint) && loggingLevel == that.loggingLevel && Objects.equals(queryDuration, that.queryDuration) && Objects.equals(env, that.env);
     }
 
     @Override
@@ -164,5 +163,13 @@ public class MCPConfiguration {
 
     public void setHeartbeat(boolean heartbeat) {
         this.heartbeat = heartbeat;
+    }
+
+    public Long getQueryDuration() {
+        return queryDuration;
+    }
+
+    public void setQueryDuration(Long queryDuration) {
+        this.queryDuration = queryDuration;
     }
 }
