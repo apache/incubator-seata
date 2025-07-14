@@ -2,6 +2,8 @@ package org.apache.seata.mcp.service;
 
 import org.apache.seata.mcp.entity.param.GlobalSessionParam;
 
+import java.util.List;
+
 public interface GlobalSessionService {
     String queryGlobalSession(GlobalSessionParam param);
 
@@ -16,4 +18,6 @@ public interface GlobalSessionService {
     String sendCommitOrRollback(String xid);
 
     String changeGlobalStatus(String xid);
+
+    List<String> getAbnormalSessions(Long startTime, Long endTime);
 }
