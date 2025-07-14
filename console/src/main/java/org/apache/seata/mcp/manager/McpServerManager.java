@@ -1,3 +1,19 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.seata.mcp.manager;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,7 +40,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * MCP 服务管理器（支持动态控制）
+ * MCP Service Manager (supports dynamic control)
  */
 public class McpServerManager implements SmartLifecycle {
     private final ReentrantLock stateLock = new ReentrantLock();
@@ -126,7 +142,6 @@ public class McpServerManager implements SmartLifecycle {
         return config;
     }
 
-    // 核心组件
     private volatile McpAsyncServer serverInstance;
     private final ControlledTransportProvider transportProvider;
     private final MCPConfiguration config;
@@ -139,16 +154,11 @@ public class McpServerManager implements SmartLifecycle {
         this.heartbeat = config.isHeartbeat();
     }
 
-    /**
-     * 获取服务路由函数
-     */
     public RouterFunction<ServerResponse> getRouterFunction() {
         return transportProvider.getRouterFunction();
     }
 
-    /**
-     * 初始化心跳任务
-     */
+
     private void initScheduler() {
         poolLock.lock();
         try {
@@ -164,9 +174,6 @@ public class McpServerManager implements SmartLifecycle {
         }
     }
 
-    /**
-     * 启动心跳检测
-     */
     private void startHeartbeat() {
         poolLock.lock();
         try {
@@ -175,8 +182,8 @@ public class McpServerManager implements SmartLifecycle {
             if (heartbeat) {
                 heartbeatScheduler.scheduleAtFixedRate(
                         this::sendHeartbeat,
-                        0, // 立即开始
-                        15000, // 15秒间隔
+                        0,
+                        15000, // 15 second intervals
                         TimeUnit.MILLISECONDS);
             }
         } finally {
@@ -189,7 +196,7 @@ public class McpServerManager implements SmartLifecycle {
         try {
             if (heartbeatScheduler != null) {
                 heartbeatScheduler.shutdownNow();
-                heartbeatScheduler = null; // 清除引用
+                heartbeatScheduler = null;
             }
         } finally {
             poolLock.unlock();
@@ -205,7 +212,7 @@ public class McpServerManager implements SmartLifecycle {
     }
 
     /**
-     * 暂停服务（保持注册状态）
+     * Suspension of Service (Remain Registered)
      */
     public void pause() {
         stateLock.lock();
@@ -219,7 +226,7 @@ public class McpServerManager implements SmartLifecycle {
     }
 
     /**
-     * 恢复服务
+     * Restore service
      */
     public void resume() {
         stateLock.lock();
@@ -251,9 +258,7 @@ public class McpServerManager implements SmartLifecycle {
         return running.get();
     }
 
-    /**
-     * 初始化服务器
-     */
+
     private void initializeServer() {
         stateLock.lock();
         try {
@@ -267,27 +272,21 @@ public class McpServerManager implements SmartLifecycle {
         }
     }
 
-    /**
-     * 暂停
-     */
+
     private void doPause() {
         transportProvider.deactivate();
         stopHeartbeat();
         logServerState("Service paused");
     }
 
-    /**
-     * 恢复
-     */
+
     private void doResume() {
         transportProvider.activate();
         startHeartbeat();
         logServerState("Service resumed");
     }
 
-    /**
-     * 永久关闭
-     */
+
     private void shutdownServer() {
         stateLock.lock();
         try {
@@ -316,9 +315,7 @@ public class McpServerManager implements SmartLifecycle {
         logger.info("[MCP Manager] {} | Running: {}", message, running.get());
     }
 
-    /**
-     * 可控传输提供者
-     */
+
     private static class ControlledTransportProvider extends WebMvcSseServerTransportProvider {
         private final AtomicBoolean active = new AtomicBoolean(false);
 
