@@ -169,21 +169,15 @@ public class JacksonUndoLogParserTest extends BaseUndoLogParserTest {
             Method valueOfDateMethod = dmdbTimestampClass.getMethod("valueOf", Date.class);
 
             Object originalTimestamp = valueOfDateMethod.invoke(null, new Date(1721985847000L));
-            Field field =
-                    new Field("dmdb_timestamp_type2", JDBCType.TIMESTAMP.getVendorTypeNumber(), originalTimestamp);
+            Object originalTimestamp2 = valueOfDateMethod.invoke(null, new Date(1721985847001L));
+            Field field = new Field("dmdb_timestamp_type", JDBCType.TIMESTAMP.getVendorTypeNumber(), originalTimestamp);
+            Field field2 =
+                    new Field("dmdb_timestamp_type", JDBCType.TIMESTAMP.getVendorTypeNumber(), originalTimestamp2);
             byte[] bytes = mapper.writeValueAsBytes(field);
             Field sameField = mapper.readValue(bytes, Field.class);
             Assertions.assertTrue(
                     DataCompareUtils.isFieldEquals(field, sameField).getResult());
-        }
-    }
-
-    private boolean checkClassExists(String className) {
-        try {
-            Class.forName(className);
-            return true;
-        } catch (ClassNotFoundException e) {
-            return false;
+            Assertions.assertFalse(DataCompareUtils.isFieldEquals(field, field2).getResult());
         }
     }
 
