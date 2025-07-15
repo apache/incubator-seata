@@ -14,12 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.console.mcp;
+package org.apache.console.mcp.store;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.seata.mcp.config.DataSourcesConfiguration;
 import org.apache.seata.mcp.store.DataSourceFactory;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -31,8 +29,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.test.context.TestPropertySource;
 
 import javax.sql.DataSource;
-
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
