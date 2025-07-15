@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.console.mcp.parser;
+package org.apache.seata.mcp.parser;
 
 import com.alibaba.fastjson.serializer.SimplePropertyPreFilter;
 import org.apache.seata.common.Constants;

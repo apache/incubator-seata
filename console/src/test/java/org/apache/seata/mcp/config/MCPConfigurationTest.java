@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.console.mcp.config;
+package org.apache.seata.mcp.config;
 
 import io.modelcontextprotocol.spec.McpSchema;
 import org.apache.seata.mcp.config.MCPConfiguration;

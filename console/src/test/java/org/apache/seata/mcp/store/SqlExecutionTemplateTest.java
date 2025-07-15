@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.console.mcp.store;
+package org.apache.seata.mcp.store;
 
 import org.apache.seata.common.exception.StoreException;
 import org.apache.seata.mcp.store.DataSourceFactory;
