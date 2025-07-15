@@ -14,13 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.console.mcp.manager;
+package org.apache.seata.mcp.manager;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.modelcontextprotocol.spec.McpSchema;
 import org.apache.seata.mcp.config.MCPConfiguration;
 import org.apache.seata.mcp.controller.ControlMcpController;
-import org.apache.seata.mcp.manager.McpServerManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
