@@ -1,3 +1,19 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.console.mcp.config;
 
 import io.modelcontextprotocol.spec.McpSchema;
@@ -25,7 +41,7 @@ public class MCPConfigurationTest {
 
     @BeforeEach
     public void setUp() {
-        // 清除先前可能注入的值
+        // Clears values that may have been injected previously
         ReflectionTestUtils.setField(mcpConfiguration, "serverName", null);
         ReflectionTestUtils.setField(mcpConfiguration, "serverVersion", "1.0.0");
         ReflectionTestUtils.setField(mcpConfiguration, "sseEndpoint", "/sse");
@@ -39,18 +55,16 @@ public class MCPConfigurationTest {
 
     @Test
     public void testDefaultValues() {
-        // 设置默认值的模拟行为
+        // Sets the simulation behavior for the default values
         when(environment.getProperty("seata.mcp.serverName", "seata-mcp-server")).thenReturn("seata-mcp-server");
         when(environment.getProperty("seata.mcp.serverVersion", "1.0.0")).thenReturn("1.0.0");
         when(environment.getProperty("seata.mcp.sseEndpoint", "/sse")).thenReturn("/sse");
         when(environment.getProperty("seata.mcp.messageEndpoint", "/message")).thenReturn("/message");
         when(environment.getProperty("seata.mcp.heartbeat", "false")).thenReturn("false");
         when(environment.getProperty("seata.mcp.query.max_query_duration", "86400000")).thenReturn("86400000");
-        
-        // 初始化配置
+
         mcpConfiguration.init();
-        
-        // 验证默认值
+
         assertEquals("seata-mcp-server", mcpConfiguration.getServerName());
         assertEquals("1.0.0", mcpConfiguration.getServerVersion());
         assertEquals("/sse", mcpConfiguration.getSseEndpoint());
@@ -64,18 +78,16 @@ public class MCPConfigurationTest {
     
     @Test
     public void testCustomValues() {
-        // 设置自定义值的模拟行为
+        // Set the simulation behavior for custom values
         when(environment.getProperty("seata.mcp.serverName", "seata-mcp-server")).thenReturn("custom-server");
         when(environment.getProperty("seata.mcp.serverVersion", "1.0.0")).thenReturn("2.0.0");
         when(environment.getProperty("seata.mcp.sseEndpoint", "/sse")).thenReturn("/custom-sse");
         when(environment.getProperty("seata.mcp.messageEndpoint", "/message")).thenReturn("/custom-message");
         when(environment.getProperty("seata.mcp.heartbeat", "false")).thenReturn("true");
         when(environment.getProperty("seata.mcp.query.max_query_duration", "86400000")).thenReturn("43200000");
-        
-        // 初始化配置
+
         mcpConfiguration.init();
-        
-        // 验证自定义值
+
         assertEquals("custom-server", mcpConfiguration.getServerName());
         assertEquals("2.0.0", mcpConfiguration.getServerVersion());
         assertEquals("/custom-sse", mcpConfiguration.getSseEndpoint());
@@ -86,7 +98,7 @@ public class MCPConfigurationTest {
     
     @Test
     public void testSetterMethods() {
-        // 测试所有的setter方法
+        // Test all setter methods
         mcpConfiguration.setServerName("test-server");
         mcpConfiguration.setServerVersion("3.0.0");
         mcpConfiguration.setSseEndpoint("/test-sse");
@@ -97,7 +109,7 @@ public class MCPConfigurationTest {
         mcpConfiguration.setHeartbeat(true);
         mcpConfiguration.setQueryDuration(60000L);
         
-        // 验证设置的值
+        // Verify the value of the setting
         assertEquals("test-server", mcpConfiguration.getServerName());
         assertEquals("3.0.0", mcpConfiguration.getServerVersion());
         assertEquals("/test-sse", mcpConfiguration.getSseEndpoint());
@@ -111,7 +123,7 @@ public class MCPConfigurationTest {
     
     @Test
     public void testEqualsAndHashCode() {
-        // 创建相同配置的两个实例
+        // Create two instances of the same configuration
         MCPConfiguration config1 = new MCPConfiguration();
         MCPConfiguration config2 = new MCPConfiguration();
         
@@ -121,22 +133,22 @@ public class MCPConfigurationTest {
         config2.setServerName("test-server");
         config2.setServerVersion("1.0.0");
         
-        // 验证equals和hashCode方法
+        // Verify the equals and hashCode methods
         assertEquals(config1, config2);
         assertEquals(config1.hashCode(), config2.hashCode());
         
-        // 修改一个属性后应该不相等
+        // After modifying a property, it should not be equal
         config2.setServerName("different-server");
         assertNotEquals(config1, config2);
     }
     
     @Test
     public void testToString() {
-        // 设置一些值
+
         mcpConfiguration.setServerName("test-server");
         mcpConfiguration.setServerVersion("1.0.0");
         
-        // 验证toString方法包含关键信息
+        // Verify that the toString method contains key information
         String toString = mcpConfiguration.toString();
         assertTrue(toString.contains("test-server"));
         assertTrue(toString.contains("1.0.0"));
