@@ -26,7 +26,7 @@ import javax.annotation.PostConstruct;
 import java.util.Objects;
 
 /**
- * 服务器配置参数
+ * MCP Server configuration parameters
  */
 @Component
 public class MCPConfiguration {
@@ -61,7 +61,9 @@ public class MCPConfiguration {
      * Whether to enable heartbeat monitoring, which is not enabled by default
      */
     private boolean heartbeat = false;
-
+    /**
+     * Maximum query interval
+     */
     private Long queryDuration = 86400000L;
 
     /**
