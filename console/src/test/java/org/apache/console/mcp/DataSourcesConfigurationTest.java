@@ -58,7 +58,7 @@ public class DataSourcesConfigurationTest {
         datasources.clear();
     }
 
-    // 自定义属性初始化器
+    // Custom property initializer
     public static class PropertyInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
         @Override
         public void initialize(ConfigurableApplicationContext context) {
