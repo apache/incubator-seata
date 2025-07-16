@@ -16,6 +16,7 @@
  */
 package org.apache.seata.server.filter;
 
+import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.config.ConfigurationKeys;
 import org.apache.seata.core.exception.HttpRequestFilterException;
@@ -30,6 +31,7 @@ import java.util.regex.Pattern;
 /**
  * Filter to detect and block potential XSS attack vectors in HTTP request parameters.
  */
+@LoadLevel(name = "XSS", order = 1)
 public class XSSHttpRequestFilter implements HttpRequestFilter {
 
     private static final String[] XSS_KEYWORDS = {

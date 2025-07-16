@@ -23,8 +23,10 @@ import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SERVER
 
 @Component
 @ConfigurationProperties(prefix = SERVER_HTTP_FILTER_PREFIX)
-public class ServerHttpFiltersProperties {
+public class ServerHttpFilterProperties {
     private boolean enabled = true;
+
+    private Xss xss = new Xss();
 
     public boolean isEnabled() {
         return enabled;
@@ -32,5 +34,26 @@ public class ServerHttpFiltersProperties {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
+    }
+
+    public Xss getXss() {
+        return xss;
+    }
+
+    public void setXss(Xss xss) {
+        this.xss = xss;
+    }
+
+    public static class Xss {
+
+        private boolean enabled = true;
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
     }
 }
