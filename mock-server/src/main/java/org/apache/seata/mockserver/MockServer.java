@@ -57,8 +57,16 @@ public class MockServer {
      */
     public static void main(String[] args) {
         SpringApplication.run(MockServer.class, args);
-
         int port = NumberUtils.toInt(System.getenv(MOCK_SEATA_PORT_KEY), MOCK_DEFAULT_PORT);
+
+        if (args != null && args.length > 0) {
+            try {
+                port = Integer.parseInt(args[0]);
+            } catch (NumberFormatException e) {
+                LOGGER.error("Invalid port number provided, using default port: {}", port, e);
+            }
+        }
+
         start(port);
     }
 
@@ -100,6 +108,7 @@ public class MockServer {
                     }));
                     LOGGER.info(
                             "pid info: " + ManagementFactory.getRuntimeMXBean().getName());
+                    LOGGER.info("MockServer started on port: {}", port);
                 }
             }
         }
