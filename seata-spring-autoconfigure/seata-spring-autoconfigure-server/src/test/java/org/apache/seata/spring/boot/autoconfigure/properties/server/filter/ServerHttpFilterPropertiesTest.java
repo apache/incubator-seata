@@ -42,7 +42,7 @@ public class ServerHttpFilterPropertiesTest {
         ServerHttpFilterProperties serverHttpFilterProperties = new ServerHttpFilterProperties();
         serverHttpFilterProperties.setEnabled(false);
         ServerHttpFilterProperties.Xss xss = new ServerHttpFilterProperties.Xss();
-        xss.setKeywords(Collections.singletonList("alert"));
+        xss.setKeywords(Collections.singletonList("<alert>"));
         serverHttpFilterProperties.setXss(xss);
 
         Assertions.assertFalse(serverHttpFilterProperties.isEnabled());
