@@ -35,9 +35,9 @@ public class HttpRequestFilterManager {
         if (initialized) {
             return;
         }
-        boolean enableFilter = ConfigurationFactory.getInstance()
-                .getBoolean(ConfigurationKeys.SERVER_HTTP_FILTER_ENABLE, true);
-        if(enableFilter){
+        boolean enableFilter =
+                ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.SERVER_HTTP_FILTER_ENABLE, true);
+        if (enableFilter) {
             List<HttpRequestFilter> httpRequestFilters = EnhancedServiceLoader.loadAll(HttpRequestFilter.class);
             for (HttpRequestFilter filter : httpRequestFilters) {
                 if (filter.shouldApply()) {
@@ -49,7 +49,6 @@ public class HttpRequestFilterManager {
             HTTP_REQUEST_FILTER_CHAIN = new HttpRequestFilterChain(HTTP_REQUEST_FILTERS);
         }
         initialized = true;
-
     }
 
     public static HttpRequestFilterChain getFilterChain() {

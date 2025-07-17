@@ -70,14 +70,12 @@ public class XSSHttpRequestFilter implements HttpRequestFilter {
                 xssKeywords = objectMapper.readValue(xssKeywordConfig, new TypeReference<List<String>>() {});
             } catch (JsonProcessingException e) {
                 throw new IllegalArgumentException(
-                        "Invalid format for configuration 'server.http.filter.xss.keywords'. " +
-                                "Expected a JSON array like [\"<script>\", \"vbscript:\"], but got: " + xssKeywordConfig,
-                        e
-                );
-
+                        "Invalid format for configuration 'server.http.filter.xss.keywords'. "
+                                + "Expected a JSON array like [\"<script>\", \"vbscript:\"], but got: "
+                                + xssKeywordConfig,
+                        e);
             }
         }
-
     }
 
     @Override

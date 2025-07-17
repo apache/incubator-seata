@@ -53,7 +53,6 @@ public class ServerHttpFilterProperties {
 
         private List<String> keywords = DEFAULT_XSS_KEYWORDS;
 
-
         public boolean isEnabled() {
             return enabled;
         }

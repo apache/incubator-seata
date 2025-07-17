@@ -19,7 +19,6 @@ package org.apache.seata.spring.boot.autoconfigure.properties.server.filter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
 import java.util.Collections;
 
 public class ServerHttpFilterPropertiesTest {
@@ -34,7 +33,8 @@ public class ServerHttpFilterPropertiesTest {
 
         Assertions.assertTrue(serverHttpFilterProperties.isEnabled());
         Assertions.assertTrue(serverHttpFilterProperties.getXss().isEnabled());
-        Assertions.assertEquals("<script>", serverHttpFilterProperties.getXss().getKeywords().get(0));
+        Assertions.assertEquals(
+                "<script>", serverHttpFilterProperties.getXss().getKeywords().get(0));
     }
 
     @Test
@@ -47,6 +47,7 @@ public class ServerHttpFilterPropertiesTest {
 
         Assertions.assertFalse(serverHttpFilterProperties.isEnabled());
         Assertions.assertTrue(serverHttpFilterProperties.getXss().isEnabled());
-        Assertions.assertEquals("<alert>", serverHttpFilterProperties.getXss().getKeywords().get(0));
+        Assertions.assertEquals(
+                "<alert>", serverHttpFilterProperties.getXss().getKeywords().get(0));
     }
 }
