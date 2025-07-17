@@ -1153,6 +1153,12 @@ public interface ConfigurationKeys {
     String SERVER_HTTP_FILTER_XSS_FILTER_ENABLE = SERVER_HTTP_FILTER_PREFIX + "xss.enabled";
 
     /**
+     * The constant SERVER_HTTP_FILTER_XSS_FILTER_KEYWORDS.
+     *
+     */
+    String SERVER_HTTP_FILTER_XSS_FILTER_KEYWORDS = SERVER_HTTP_FILTER_PREFIX + "xss.keywords";
+
+    /**
      * The constant IS_USE_CLOUD_NAMESPACE_PARSING.
      */
     String IS_USE_CLOUD_NAMESPACE_PARSING = "isUseCloudNamespaceParsing";

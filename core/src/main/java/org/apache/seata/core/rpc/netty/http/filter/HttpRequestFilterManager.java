@@ -17,6 +17,8 @@
 package org.apache.seata.core.rpc.netty.http.filter;
 
 import org.apache.seata.common.loader.EnhancedServiceLoader;
+import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.config.ConfigurationKeys;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -33,17 +35,21 @@ public class HttpRequestFilterManager {
         if (initialized) {
             return;
         }
-
-        List<HttpRequestFilter> httpRequestFilters = EnhancedServiceLoader.loadAll(HttpRequestFilter.class);
-        for (HttpRequestFilter filter : httpRequestFilters) {
-            if (filter.shouldApply()) {
-                HTTP_REQUEST_FILTERS.add(filter);
+        boolean enableFilter = ConfigurationFactory.getInstance()
+                .getBoolean(ConfigurationKeys.SERVER_HTTP_FILTER_ENABLE, true);
+        if(enableFilter){
+            List<HttpRequestFilter> httpRequestFilters = EnhancedServiceLoader.loadAll(HttpRequestFilter.class);
+            for (HttpRequestFilter filter : httpRequestFilters) {
+                if (filter.shouldApply()) {
+                    HTTP_REQUEST_FILTERS.add(filter);
+                }
             }
-        }
 
-        HTTP_REQUEST_FILTERS.sort(Comparator.comparingInt(HttpRequestFilter::getOrder));
-        HTTP_REQUEST_FILTER_CHAIN = new HttpRequestFilterChain(HTTP_REQUEST_FILTERS);
+            HTTP_REQUEST_FILTERS.sort(Comparator.comparingInt(HttpRequestFilter::getOrder));
+            HTTP_REQUEST_FILTER_CHAIN = new HttpRequestFilterChain(HTTP_REQUEST_FILTERS);
+        }
         initialized = true;
+
     }
 
     public static HttpRequestFilterChain getFilterChain() {

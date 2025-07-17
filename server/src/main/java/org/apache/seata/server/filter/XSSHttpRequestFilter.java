@@ -16,7 +16,12 @@
  */
 package org.apache.seata.server.filter;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.seata.common.loader.LoadLevel;
+import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.config.ConfigurationKeys;
 import org.apache.seata.core.exception.HttpRequestFilterException;
@@ -28,38 +33,20 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.apache.seata.common.ConfigurationKeys.SERVER_HTTP_FILTER_XSS_FILTER_KEYWORDS;
+import static org.apache.seata.common.DefaultValues.DEFAULT_XSS_KEYWORDS;
+
 /**
  * Filter to detect and block potential XSS attack vectors in HTTP request parameters.
  */
 @LoadLevel(name = "XSS", order = 1)
 public class XSSHttpRequestFilter implements HttpRequestFilter {
+    /**
+     * The constant CONFIG.
+     */
+    private static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
-    private static final String[] XSS_KEYWORDS = {
-        "<script>",
-        "</script>",
-        "javascript:",
-        "vbscript:",
-        "data:",
-        "expression(",
-        "onerror",
-        "onload",
-        "onclick",
-        "onmouseover",
-        "onfocus",
-        "onblur",
-        "onmouseenter",
-        "onmouseleave",
-        "onkeydown",
-        "onkeyup",
-        "onchange",
-        "<iframe>",
-        "<img>",
-        "<svg>",
-        "<embed>",
-        "<object>",
-        "<style>",
-        "<link>"
-    };
+    private final List<String> xssKeywords;
 
     private static final int MAX_EVENT_HANDLER_LENGTH = 50;
 
@@ -71,6 +58,27 @@ public class XSSHttpRequestFilter implements HttpRequestFilter {
     private static final Pattern EVENT_HANDLER_PATTERN = Pattern.compile(
             "\\bon([a-zA-Z0-9]{1," + MAX_EVENT_HANDLER_LENGTH + "}?)\\s*=\\s*['\"][^'\"]*['\"]",
             Pattern.CASE_INSENSITIVE);
+
+    public XSSHttpRequestFilter() {
+        String xssKeywordConfig = CONFIG.getConfig(SERVER_HTTP_FILTER_XSS_FILTER_KEYWORDS, null);
+
+        if (StringUtils.isBlank(xssKeywordConfig)) {
+            this.xssKeywords = DEFAULT_XSS_KEYWORDS;
+        } else {
+            ObjectMapper objectMapper = new ObjectMapper();
+            try {
+                xssKeywords = objectMapper.readValue(xssKeywordConfig, new TypeReference<List<String>>() {});
+            } catch (JsonProcessingException e) {
+                throw new IllegalArgumentException(
+                        "Invalid format for configuration 'server.http.filter.xss.keywords'. " +
+                                "Expected a JSON array like [\"<script>\", \"vbscript:\"], but got: " + xssKeywordConfig,
+                        e
+                );
+
+            }
+        }
+
+    }
 
     @Override
     public int getOrder() {
@@ -112,7 +120,7 @@ public class XSSHttpRequestFilter implements HttpRequestFilter {
 
         String normalized = value.toLowerCase().replaceAll("\\s+", "");
 
-        for (String keyword : XSS_KEYWORDS) {
+        for (String keyword : xssKeywords) {
             if (normalized.contains(keyword)) {
                 return true;
             }
