@@ -309,6 +309,62 @@ public class DefaultCoreTest {
     }
 
     /**
+     * Do TimeoutRollbacking test.
+     *
+     * @param xid the xid
+     * @throws Exception the exception
+     */
+    @ParameterizedTest
+    @MethodSource("xidProvider")
+    public void doGlobalRollbackTimeoutRollbackingRetryingTest(String xid) throws Exception {
+        globalSession = SessionHolder.findGlobalSession(xid);
+        BranchSession branchSession = SessionHelper.newBranchByGlobal(
+                globalSession, BranchType.AT, resourceId, applicationData, "t1:1", clientId);
+        globalSession.addBranch(branchSession);
+        globalSession.changeBranchStatus(branchSession, BranchStatus.Registered);
+        globalSession.changeGlobalStatus(GlobalStatus.TimeoutRollbacking);
+        core.mockCore(BranchType.AT, new MockCore(BranchStatus.PhaseTwo_Committed, BranchStatus.Registered));
+        core.doGlobalRollback(globalSession, true);
+        Assertions.assertEquals(GlobalStatus.TimeoutRollbackRetrying, globalSession.getStatus());
+    }
+
+    @ParameterizedTest
+    @MethodSource("xidProvider")
+    public void doGlobalRollbackExceptionTest(String xid) throws Exception {
+        globalSession = SessionHolder.findGlobalSession(xid);
+        BranchSession branchSession = SessionHelper.newBranchByGlobal(
+                globalSession, BranchType.AT, resourceId, applicationData, "t1:1", clientId);
+        globalSession.addBranch(branchSession);
+        globalSession.changeBranchStatus(branchSession, BranchStatus.Registered);
+        globalSession.changeGlobalStatus(GlobalStatus.TimeoutRollbacking);
+        // 2. mockCore让branchRollback抛出异常
+        core.mockCore(BranchType.AT, new AbstractCore(remotingServer) {
+            @Override
+            public BranchStatus branchCommit(GlobalSession globalSession, BranchSession branchSession) {
+                return BranchStatus.PhaseTwo_Committed;
+            }
+
+            @Override
+            public BranchStatus branchRollback(GlobalSession globalSession, BranchSession branchSession) {
+                throw new RuntimeException("mock exception for test");
+            }
+
+            @Override
+            public BranchType getHandleBranchType() {
+                return BranchType.AT;
+            }
+        });
+
+        // 3. 断言doGlobalRollback会抛出TransactionException
+        TransactionException ex = Assertions.assertThrows(TransactionException.class, () -> {
+            core.doGlobalRollback(globalSession, false);
+        });
+        Assertions.assertTrue(ex.getCause() instanceof RuntimeException);
+        Assertions.assertEquals("mock exception for test", ex.getCause().getMessage());
+        Assertions.assertEquals(GlobalStatus.TimeoutRollbackRetrying, globalSession.getStatus());
+    }
+
+    /**
      * Xid provider object [ ] [ ].
      *
      * @return the object [ ] [ ]

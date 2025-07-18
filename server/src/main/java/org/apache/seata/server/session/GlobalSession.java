@@ -881,7 +881,9 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     public void queueToRetryRollback() throws TransactionException {
         GlobalStatus currentStatus = this.getStatus();
-        if (currentStatus == GlobalStatus.StopRollbackOrRollbackRetry) {
+        if (currentStatus == GlobalStatus.StopRollbackOrRollbackRetry
+                || currentStatus == GlobalStatus.RollbackRetrying
+                || currentStatus == GlobalStatus.TimeoutRollbackRetrying) {
             return;
         }
         GlobalStatus newStatus;
