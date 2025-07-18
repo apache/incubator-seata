@@ -23,7 +23,6 @@ import org.apache.seata.common.loader.LoadLevel;
 
 /**
  * The type Json based undo log parser.
- *
  */
 @LoadLevel(name = FastjsonUndoLogParser.NAME)
 public class FastjsonUndoLogParser implements UndoLogParser, Initialize {
