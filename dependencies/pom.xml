@@ -135,8 +135,7 @@
         <tomcat-embed.version>9.0.106</tomcat-embed.version>
 
         <!-- # for test -->
-        <mockito.version>4.11.0</mockito.version>
-        <mockito-inline.version>4.11.0</mockito-inline.version>
+        <mockito.version>5.18.0</mockito.version>
         <assertj-core.version>3.12.2</assertj-core.version>
         <janino-version>3.1.10</janino-version>
         <mockwebserver-version>4.12.0</mockwebserver-version>
@@ -840,17 +839,6 @@
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-junit-jupiter</artifactId>
                 <version>${mockito.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-inline</artifactId>
-                <version>${mockito-inline.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.mockito</groupId>
-                        <artifactId>mockito-core</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.assertj</groupId>
