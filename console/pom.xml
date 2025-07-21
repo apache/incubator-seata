@@ -205,6 +205,8 @@
                         <configuration>
                             <arguments>run build</arguments>
                             <environmentVariables>
+                                <!-- 增加 Node.js 内存限制 -->
+                                <NODE_OPTIONS>--max_old_space_size=4096</NODE_OPTIONS>
                                 <VERSION>${project.version}</VERSION>
                             </environmentVariables>
                         </configuration>
