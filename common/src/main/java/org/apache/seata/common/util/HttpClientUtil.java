@@ -172,4 +172,26 @@ public class HttpClientUtil {
         }
         return null;
     }
+
+    public static CloseableHttpResponse doPostJson(
+            String url, String jsonBody, Map<String, String> headers, int timeout) throws IOException {
+        RequestConfig requestConfig = RequestConfig.custom()
+                .setSocketTimeout(timeout)
+                .setConnectTimeout(timeout)
+                .build();
+
+        HttpPost post = new HttpPost(url);
+        post.setConfig(requestConfig);
+
+        if (headers != null) {
+            headers.forEach(post::addHeader);
+        }
+        post.setHeader("Content-Type", "application/json");
+
+        StringEntity entity = new StringEntity(jsonBody, StandardCharsets.UTF_8);
+        post.setEntity(entity);
+
+        CloseableHttpClient client = HttpClients.createDefault();
+        return client.execute(post);
+    }
 }
