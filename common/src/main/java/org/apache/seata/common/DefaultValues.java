@@ -17,6 +17,8 @@
 package org.apache.seata.common;
 
 import java.time.Duration;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * The interface Default values.
@@ -606,4 +608,30 @@ public interface DefaultValues {
      * The constant DEFAULT_RAFT_SSL_ENABLED.
      */
     boolean DEFAULT_RAFT_SSL_ENABLED = false;
+
+    List<String> DEFAULT_XSS_KEYWORDS = Arrays.asList(
+            "<script>",
+            "</script>",
+            "javascript:",
+            "vbscript:",
+            "data:",
+            "expression(",
+            "onerror",
+            "onload",
+            "onclick",
+            "onmouseover",
+            "onfocus",
+            "onblur",
+            "onmouseenter",
+            "onmouseleave",
+            "onkeydown",
+            "onkeyup",
+            "onchange",
+            "<iframe>",
+            "<img>",
+            "<svg>",
+            "<embed>",
+            "<object>",
+            "<style>",
+            "<link>");
 }
