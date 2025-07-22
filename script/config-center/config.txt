@@ -205,6 +205,10 @@ server.ratelimit.bucketTokenNumPerSecond = 999999
 server.ratelimit.bucketTokenMaxNum = 999999
 server.ratelimit.bucketTokenInitialNum = 999999
 
+server.http.filter.enabled=true
+server.http.filter.xss.enabled=true
+server.http.filter.xss.keywords=["<script>", "</script>", "javascript:", "vbscript:"]
+
 #Metrics configuration, only for the server
 metrics.enabled=true
 metrics.registryType=compact
