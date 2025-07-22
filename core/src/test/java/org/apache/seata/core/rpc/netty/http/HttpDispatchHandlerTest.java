@@ -23,8 +23,12 @@ import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
+import org.apache.seata.core.exception.HttpRequestFilterException;
+import org.apache.seata.core.rpc.netty.http.filter.HttpRequestFilterChain;
+import org.apache.seata.core.rpc.netty.http.filter.HttpRequestFilterManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -33,6 +37,11 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 
 class HttpDispatchHandlerTest {
 
@@ -68,7 +77,10 @@ class HttpDispatchHandlerTest {
 
         ControllerManager.addHttpInvocation(invocation);
 
-        try {
+        try (MockedStatic<HttpRequestFilterManager> mockedStatic = mockStatic(HttpRequestFilterManager.class)) {
+            HttpRequestFilterChain mockChain = mock(HttpRequestFilterChain.class);
+            doNothing().when(mockChain).doFilter(any());
+            mockedStatic.when(HttpRequestFilterManager::getFilterChain).thenReturn(mockChain);
             HttpRequest request =
                     new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/test?param=testValue");
 
@@ -85,23 +97,110 @@ class HttpDispatchHandlerTest {
 
     @Test
     void testRequestToNonexistentPath() {
-        HttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/notfound");
+        try (MockedStatic<HttpRequestFilterManager> mockedStatic = mockStatic(HttpRequestFilterManager.class)) {
+            HttpRequestFilterChain mockChain = mock(HttpRequestFilterChain.class);
+            doNothing().when(mockChain).doFilter(any());
+            mockedStatic.when(HttpRequestFilterManager::getFilterChain).thenReturn(mockChain);
+            HttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/notfound");
 
-        channel.writeInbound(request);
+            channel.writeInbound(request);
 
-        FullHttpResponse response = waitForResponse(5000);
-        assertEquals(HttpResponseStatus.NOT_FOUND, response.status());
+            FullHttpResponse response = waitForResponse(5000);
+            assertEquals(HttpResponseStatus.NOT_FOUND, response.status());
+        }
     }
 
     @Test
     void testHttpHeadMethod() {
-        HttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.HEAD, "/head");
+        try (MockedStatic<HttpRequestFilterManager> mockedStatic = mockStatic(HttpRequestFilterManager.class)) {
+            HttpRequestFilterChain mockChain = mock(HttpRequestFilterChain.class);
+            doNothing().when(mockChain).doFilter(any());
+            mockedStatic.when(HttpRequestFilterManager::getFilterChain).thenReturn(mockChain);
+            HttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.HEAD, "/head");
 
-        channel.writeInbound(request);
+            channel.writeInbound(request);
 
-        FullHttpResponse response = waitForResponse(5000);
-        assertEquals(HttpResponseStatus.NOT_FOUND, response.status());
-        assertEquals(0, response.content().readableBytes());
+            FullHttpResponse response = waitForResponse(5000);
+            assertEquals(HttpResponseStatus.NOT_FOUND, response.status());
+            assertEquals(0, response.content().readableBytes());
+        }
+    }
+
+    @Test
+    void testRequestFilteredByHttpRequestFilter() throws Exception {
+        HttpRequestFilterChain mockFilterChain = mock(HttpRequestFilterChain.class);
+
+        doThrow(new HttpRequestFilterException("Mock filter block"))
+                .when(mockFilterChain)
+                .doFilter(any());
+
+        MockedStatic<HttpRequestFilterManager> mockedStatic = mockStatic(HttpRequestFilterManager.class);
+        mockedStatic.when(HttpRequestFilterManager::getFilterChain).thenReturn(mockFilterChain);
+
+        try {
+            HttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/any");
+
+            channel.writeInbound(request);
+
+            FullHttpResponse response = waitForResponse(5000);
+            assertEquals(HttpResponseStatus.BAD_REQUEST, response.status());
+        } finally {
+            mockedStatic.close();
+        }
+    }
+
+    @Test
+    void testRequestFilteredByXssScript() throws Exception {
+        try (MockedStatic<HttpRequestFilterManager> mockedStatic = mockStatic(HttpRequestFilterManager.class)) {
+            HttpRequestFilterChain mockChain = mock(HttpRequestFilterChain.class);
+            doThrow(new HttpRequestFilterException("Detected <script>"))
+                    .when(mockChain)
+                    .doFilter(any());
+            mockedStatic.when(HttpRequestFilterManager::getFilterChain).thenReturn(mockChain);
+
+            HttpRequest request = new DefaultFullHttpRequest(
+                    HttpVersion.HTTP_1_1, HttpMethod.GET, "/test?param=<script>alert(1)</script>");
+
+            channel.writeInbound(request);
+            FullHttpResponse response = waitForResponse(5000);
+            assertEquals(HttpResponseStatus.BAD_REQUEST, response.status());
+        }
+    }
+
+    @Test
+    void testRequestFilteredByXssJavascriptUrl() throws Exception {
+        try (MockedStatic<HttpRequestFilterManager> mockedStatic = mockStatic(HttpRequestFilterManager.class)) {
+            HttpRequestFilterChain mockChain = mock(HttpRequestFilterChain.class);
+            doThrow(new HttpRequestFilterException("Detected javascript:"))
+                    .when(mockChain)
+                    .doFilter(any());
+            mockedStatic.when(HttpRequestFilterManager::getFilterChain).thenReturn(mockChain);
+
+            HttpRequest request = new DefaultFullHttpRequest(
+                    HttpVersion.HTTP_1_1, HttpMethod.GET, "/test?param=javascript:alert('XSS')");
+
+            channel.writeInbound(request);
+            FullHttpResponse response = waitForResponse(5000);
+            assertEquals(HttpResponseStatus.BAD_REQUEST, response.status());
+        }
+    }
+
+    @Test
+    void testRequestFilteredByXssOnloadEvent() throws Exception {
+        try (MockedStatic<HttpRequestFilterManager> mockedStatic = mockStatic(HttpRequestFilterManager.class)) {
+            HttpRequestFilterChain mockChain = mock(HttpRequestFilterChain.class);
+            doThrow(new HttpRequestFilterException("Detected onload="))
+                    .when(mockChain)
+                    .doFilter(any());
+            mockedStatic.when(HttpRequestFilterManager::getFilterChain).thenReturn(mockChain);
+
+            HttpRequest request =
+                    new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/test?param=onload=alert(1)");
+
+            channel.writeInbound(request);
+            FullHttpResponse response = waitForResponse(5000);
+            assertEquals(HttpResponseStatus.BAD_REQUEST, response.status());
+        }
     }
 
     private FullHttpResponse waitForResponse(long timeoutMs) {
