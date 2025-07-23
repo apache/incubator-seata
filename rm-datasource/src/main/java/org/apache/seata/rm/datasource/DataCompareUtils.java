@@ -24,13 +24,16 @@ import org.apache.seata.rm.datasource.sql.struct.Row;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
 import org.apache.seata.rm.datasource.undo.AbstractUndoLogManager;
 import org.apache.seata.rm.datasource.undo.parser.FastjsonUndoLogParser;
+import org.apache.seata.rm.datasource.undo.parser.JacksonUndoLogParser;
 import org.apache.seata.sqlparser.struct.TableMeta;
 
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -72,6 +75,23 @@ public class DataCompareUtils {
                             String currentSerializer = AbstractUndoLogManager.getCurrentSerializer();
                             if (StringUtils.equals(currentSerializer, FastjsonUndoLogParser.NAME)) {
                                 convertType(f0, f1);
+                            }
+                            if (StringUtils.equals(currentSerializer, JacksonUndoLogParser.NAME)) {
+                                Object v0 = f0.getValue();
+                                Object v1 = f1.getValue();
+                                if (isDmdbTimestamp(v0) && isDmdbTimestamp(v1)) {
+                                    Instant i0 = toInstant(v0);
+                                    Instant i1 = toInstant(v1);
+                                    boolean equals = Objects.equals(i0, i1);
+                                    return equals
+                                            ? Result.ok()
+                                            : Result.buildWithParams(
+                                                    false,
+                                                    "Field not equals (DmdbTimestamp), name {}, old value {}, new value {}",
+                                                    f0.getName(),
+                                                    v0,
+                                                    v1);
+                                }
                             }
                             boolean result = Objects.deepEquals(f0.getValue(), f1.getValue());
                             if (result) {
@@ -248,5 +268,19 @@ public class DataCompareUtils {
             rowMap.put(rowKey.toString(), colsMap);
         }
         return rowMap;
+    }
+
+    private static boolean isDmdbTimestamp(Object obj) {
+        return obj != null
+                && "dm.jdbc.driver.DmdbTimestamp".equals(obj.getClass().getName());
+    }
+
+    private static Instant toInstant(Object dmdbTimestamp) {
+        try {
+            Method toInstantMethod = dmdbTimestamp.getClass().getMethod("toInstant");
+            return (Instant) toInstantMethod.invoke(dmdbTimestamp);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to convert DmdbTimestamp to Instant", e);
+        }
     }
 }
