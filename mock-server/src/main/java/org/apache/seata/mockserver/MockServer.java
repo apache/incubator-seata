@@ -34,8 +34,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import static org.apache.seata.common.ConfigurationKeys.ENV_SEATA_PORT_KEY;
-
 /**
  * The type Mock Server.
  */
@@ -49,7 +47,8 @@ public class MockServer {
 
     private static volatile boolean inited = false;
 
-    public static final int DEFAULT_PORT = 8091;
+    public static final int MOCK_DEFAULT_PORT = 10091;
+    public static String MOCK_SEATA_PORT_KEY = "SEATA_MOCK_PORT";
 
     /**
      * The entry point of application.
@@ -58,8 +57,16 @@ public class MockServer {
      */
     public static void main(String[] args) {
         SpringApplication.run(MockServer.class, args);
+        int port = NumberUtils.toInt(System.getenv(MOCK_SEATA_PORT_KEY), MOCK_DEFAULT_PORT);
 
-        int port = NumberUtils.toInt(System.getenv(ENV_SEATA_PORT_KEY), DEFAULT_PORT);
+        if (args != null && args.length > 0) {
+            try {
+                port = Integer.parseInt(args[0]);
+            } catch (NumberFormatException e) {
+                LOGGER.error("Invalid port number provided, using default port: {}", port, e);
+            }
+        }
+
         start(port);
     }
 
@@ -101,6 +108,7 @@ public class MockServer {
                     }));
                     LOGGER.info(
                             "pid info: " + ManagementFactory.getRuntimeMXBean().getName());
+                    LOGGER.info("MockServer started on port: {}", port);
                 }
             }
         }
