@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.mcp.config;
+package org.apache.seata.mcp.entity.pojo;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +29,7 @@ import java.util.*;
 import static org.apache.seata.common.DefaultValues.*;
 
 @Component
-public class DataSourcesConfiguration implements InitializingBean {
+public class BusinessDataSourcesProperties implements InitializingBean {
 
     @Autowired
     private Environment env;

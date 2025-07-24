@@ -17,7 +17,7 @@
 package org.apache.seata.mcp.config;
 
 import io.modelcontextprotocol.spec.McpSchema;
-import org.apache.seata.mcp.config.MCPConfiguration;
+import org.apache.seata.mcp.entity.pojo.MCPProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,26 +31,26 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class MCPConfigurationTest {
+public class MCPPropertiesTest {
 
     @Mock
     private Environment environment;
 
     @InjectMocks
-    private MCPConfiguration mcpConfiguration;
+    private MCPProperties mcpProperties;
 
     @BeforeEach
     public void setUp() {
         // Clears values that may have been injected previously
-        ReflectionTestUtils.setField(mcpConfiguration, "serverName", null);
-        ReflectionTestUtils.setField(mcpConfiguration, "serverVersion", "1.0.0");
-        ReflectionTestUtils.setField(mcpConfiguration, "sseEndpoint", "/sse");
-        ReflectionTestUtils.setField(mcpConfiguration, "messageEndpoint", "/message");
-        ReflectionTestUtils.setField(mcpConfiguration, "resourceSupport", true);
-        ReflectionTestUtils.setField(mcpConfiguration, "resourceTemplates", false);
-        ReflectionTestUtils.setField(mcpConfiguration, "loggingLevel", McpSchema.LoggingLevel.INFO);
-        ReflectionTestUtils.setField(mcpConfiguration, "heartbeat", false);
-        ReflectionTestUtils.setField(mcpConfiguration, "queryDuration", 86400000L);
+        ReflectionTestUtils.setField(mcpProperties, "serverName", null);
+        ReflectionTestUtils.setField(mcpProperties, "serverVersion", "1.0.0");
+        ReflectionTestUtils.setField(mcpProperties, "sseEndpoint", "/sse");
+        ReflectionTestUtils.setField(mcpProperties, "messageEndpoint", "/message");
+        ReflectionTestUtils.setField(mcpProperties, "resourceSupport", true);
+        ReflectionTestUtils.setField(mcpProperties, "resourceTemplates", false);
+        ReflectionTestUtils.setField(mcpProperties, "loggingLevel", McpSchema.LoggingLevel.INFO);
+        ReflectionTestUtils.setField(mcpProperties, "heartbeat", false);
+        ReflectionTestUtils.setField(mcpProperties, "queryDuration", 86400000L);
     }
 
     @Test
@@ -63,17 +63,17 @@ public class MCPConfigurationTest {
         when(environment.getProperty("seata.mcp.heartbeat", "false")).thenReturn("false");
         when(environment.getProperty("seata.mcp.query.max_query_duration", "86400000")).thenReturn("86400000");
 
-        mcpConfiguration.init();
+        mcpProperties.init();
 
-        assertEquals("seata-mcp-server", mcpConfiguration.getServerName());
-        assertEquals("1.0.0", mcpConfiguration.getServerVersion());
-        assertEquals("/sse", mcpConfiguration.getSseEndpoint());
-        assertEquals("/message", mcpConfiguration.getMessageEndpoint());
-        assertTrue(mcpConfiguration.isResourceSupport());
-        assertFalse(mcpConfiguration.isResourceTemplates());
-        assertEquals(McpSchema.LoggingLevel.INFO, mcpConfiguration.getLoggingLevel());
-        assertFalse(mcpConfiguration.isHeartbeat());
-        assertEquals(86400000L, mcpConfiguration.getQueryDuration());
+        assertEquals("seata-mcp-server", mcpProperties.getServerName());
+        assertEquals("1.0.0", mcpProperties.getServerVersion());
+        assertEquals("/sse", mcpProperties.getSseEndpoint());
+        assertEquals("/message", mcpProperties.getMessageEndpoint());
+        assertTrue(mcpProperties.isResourceSupport());
+        assertFalse(mcpProperties.isResourceTemplates());
+        assertEquals(McpSchema.LoggingLevel.INFO, mcpProperties.getLoggingLevel());
+        assertFalse(mcpProperties.isHeartbeat());
+        assertEquals(86400000L, mcpProperties.getQueryDuration());
     }
     
     @Test
@@ -86,46 +86,46 @@ public class MCPConfigurationTest {
         when(environment.getProperty("seata.mcp.heartbeat", "false")).thenReturn("true");
         when(environment.getProperty("seata.mcp.query.max_query_duration", "86400000")).thenReturn("43200000");
 
-        mcpConfiguration.init();
+        mcpProperties.init();
 
-        assertEquals("custom-server", mcpConfiguration.getServerName());
-        assertEquals("2.0.0", mcpConfiguration.getServerVersion());
-        assertEquals("/custom-sse", mcpConfiguration.getSseEndpoint());
-        assertEquals("/custom-message", mcpConfiguration.getMessageEndpoint());
-        assertTrue(mcpConfiguration.isHeartbeat());
-        assertEquals(43200000L, mcpConfiguration.getQueryDuration());
+        assertEquals("custom-server", mcpProperties.getServerName());
+        assertEquals("2.0.0", mcpProperties.getServerVersion());
+        assertEquals("/custom-sse", mcpProperties.getSseEndpoint());
+        assertEquals("/custom-message", mcpProperties.getMessageEndpoint());
+        assertTrue(mcpProperties.isHeartbeat());
+        assertEquals(43200000L, mcpProperties.getQueryDuration());
     }
     
     @Test
     public void testSetterMethods() {
         // Test all setter methods
-        mcpConfiguration.setServerName("test-server");
-        mcpConfiguration.setServerVersion("3.0.0");
-        mcpConfiguration.setSseEndpoint("/test-sse");
-        mcpConfiguration.setMessageEndpoint("/test-message");
-        mcpConfiguration.setResourceSupport(false);
-        mcpConfiguration.setResourceTemplates(true);
-        mcpConfiguration.setLoggingLevel(McpSchema.LoggingLevel.DEBUG);
-        mcpConfiguration.setHeartbeat(true);
-        mcpConfiguration.setQueryDuration(60000L);
+        mcpProperties.setServerName("test-server");
+        mcpProperties.setServerVersion("3.0.0");
+        mcpProperties.setSseEndpoint("/test-sse");
+        mcpProperties.setMessageEndpoint("/test-message");
+        mcpProperties.setResourceSupport(false);
+        mcpProperties.setResourceTemplates(true);
+        mcpProperties.setLoggingLevel(McpSchema.LoggingLevel.DEBUG);
+        mcpProperties.setHeartbeat(true);
+        mcpProperties.setQueryDuration(60000L);
         
         // Verify the value of the setting
-        assertEquals("test-server", mcpConfiguration.getServerName());
-        assertEquals("3.0.0", mcpConfiguration.getServerVersion());
-        assertEquals("/test-sse", mcpConfiguration.getSseEndpoint());
-        assertEquals("/test-message", mcpConfiguration.getMessageEndpoint());
-        assertFalse(mcpConfiguration.isResourceSupport());
-        assertTrue(mcpConfiguration.isResourceTemplates());
-        assertEquals(McpSchema.LoggingLevel.DEBUG, mcpConfiguration.getLoggingLevel());
-        assertTrue(mcpConfiguration.isHeartbeat());
-        assertEquals(60000L, mcpConfiguration.getQueryDuration());
+        assertEquals("test-server", mcpProperties.getServerName());
+        assertEquals("3.0.0", mcpProperties.getServerVersion());
+        assertEquals("/test-sse", mcpProperties.getSseEndpoint());
+        assertEquals("/test-message", mcpProperties.getMessageEndpoint());
+        assertFalse(mcpProperties.isResourceSupport());
+        assertTrue(mcpProperties.isResourceTemplates());
+        assertEquals(McpSchema.LoggingLevel.DEBUG, mcpProperties.getLoggingLevel());
+        assertTrue(mcpProperties.isHeartbeat());
+        assertEquals(60000L, mcpProperties.getQueryDuration());
     }
     
     @Test
     public void testEqualsAndHashCode() {
         // Create two instances of the same configuration
-        MCPConfiguration config1 = new MCPConfiguration();
-        MCPConfiguration config2 = new MCPConfiguration();
+        MCPProperties config1 = new MCPProperties();
+        MCPProperties config2 = new MCPProperties();
         
         config1.setServerName("test-server");
         config1.setServerVersion("1.0.0");
@@ -145,11 +145,11 @@ public class MCPConfigurationTest {
     @Test
     public void testToString() {
 
-        mcpConfiguration.setServerName("test-server");
-        mcpConfiguration.setServerVersion("1.0.0");
+        mcpProperties.setServerName("test-server");
+        mcpProperties.setServerVersion("1.0.0");
         
         // Verify that the toString method contains key information
-        String toString = mcpConfiguration.toString();
+        String toString = mcpProperties.toString();
         assertTrue(toString.contains("test-server"));
         assertTrue(toString.contains("1.0.0"));
     }

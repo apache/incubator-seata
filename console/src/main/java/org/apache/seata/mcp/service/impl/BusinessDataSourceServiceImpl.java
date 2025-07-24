@@ -18,13 +18,12 @@ package org.apache.seata.mcp.service.impl;
 
 import org.apache.seata.common.exception.StoreException;
 import org.apache.seata.common.util.StringUtils;
-import org.apache.seata.mcp.config.MCPConfiguration;
+import org.apache.seata.mcp.entity.pojo.MCPProperties;
 import org.apache.seata.mcp.entity.constant.SqlConstant;
 import org.apache.seata.mcp.entity.param.UndoLogParam;
 import org.apache.seata.mcp.service.BusinessDataSourceService;
 import org.apache.seata.mcp.store.SqlExecutionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -42,7 +41,7 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
     private SqlExecutionTemplate sqlExecutionTemplate;
 
     @Autowired
-    private MCPConfiguration mcpConfiguration;
+    private MCPProperties mcpProperties;
 
     @Override
     public List<String> getTableNamesBySchema(String resourceId) {
@@ -79,7 +78,7 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
 
     @Override
     public List<byte[]> getUndoLogInfo(UndoLogParam param) {
-        long max_time_duration = mcpConfiguration.getQueryDuration();
+        long max_time_duration = mcpProperties.getQueryDuration();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String sql = SqlConstant.GET_UNDO_LOG_SQL;
         List<Object> params = new ArrayList<>();

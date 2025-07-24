@@ -22,7 +22,7 @@ import org.apache.seata.common.executor.Initialize;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.core.constants.ConfigurationKeys;
 import org.apache.seata.core.constants.DBType;
-import org.apache.seata.mcp.config.DataSourcesConfiguration;
+import org.apache.seata.mcp.entity.pojo.BusinessDataSourcesProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,8 +54,8 @@ public abstract class AbstractMCPDataSourceProvider implements DataSourceProvide
     /**
      * The constant properties.
      */
-    protected static final Map<String, DataSourcesConfiguration.DataSourceProperties> DATASOURCE_PROPERTIES =
-            DataSourcesConfiguration.getDatasources();
+    protected static final Map<String, BusinessDataSourcesProperties.DataSourceProperties> DATASOURCE_PROPERTIES =
+            BusinessDataSourcesProperties.getDatasources();
 
     private static final String MYSQL_DRIVER_CLASS_NAME = "com.mysql.jdbc.Driver";
 
@@ -169,7 +169,7 @@ public abstract class AbstractMCPDataSourceProvider implements DataSourceProvide
      * @return the db type
      */
     protected DBType getDBType() {
-        DataSourcesConfiguration.DataSourceProperties properties = getDataSourceProperties();
+        BusinessDataSourcesProperties.DataSourceProperties properties = getDataSourceProperties();
         if (properties != null) {
             return DBType.valueof(properties.getDbType());
         }
@@ -181,7 +181,7 @@ public abstract class AbstractMCPDataSourceProvider implements DataSourceProvide
      *
      * @return the datasource properties for current resourceId
      */
-    protected DataSourcesConfiguration.DataSourceProperties getDataSourceProperties() {
+    protected BusinessDataSourcesProperties.DataSourceProperties getDataSourceProperties() {
         if (StringUtils.isBlank(resourceId)) {
             if (DATASOURCE_PROPERTIES.size() == 1) {
                 return DATASOURCE_PROPERTIES.values().iterator().next();
@@ -197,7 +197,7 @@ public abstract class AbstractMCPDataSourceProvider implements DataSourceProvide
      * @return the db driver class name
      */
     protected String getDriverClassName() {
-        DataSourcesConfiguration.DataSourceProperties properties = getDataSourceProperties();
+        BusinessDataSourcesProperties.DataSourceProperties properties = getDataSourceProperties();
         String driverClassName = "";
         if (properties != null) {
             driverClassName = properties.getDriverClassName();
@@ -215,7 +215,7 @@ public abstract class AbstractMCPDataSourceProvider implements DataSourceProvide
      * @return the db max wait
      */
     protected Long getMaxWait() {
-        DataSourcesConfiguration.DataSourceProperties properties = getDataSourceProperties();
+        BusinessDataSourcesProperties.DataSourceProperties properties = getDataSourceProperties();
         if (properties != null && properties.getMaxWait() != null) {
             return properties.getMaxWait();
         }
@@ -278,7 +278,7 @@ public abstract class AbstractMCPDataSourceProvider implements DataSourceProvide
      * @return the string
      */
     protected String getUrl() {
-        DataSourcesConfiguration.DataSourceProperties properties = getDataSourceProperties();
+        BusinessDataSourcesProperties.DataSourceProperties properties = getDataSourceProperties();
         String url = "";
         if (properties != null) {
             url = properties.getUrl();
@@ -295,7 +295,7 @@ public abstract class AbstractMCPDataSourceProvider implements DataSourceProvide
      * @return the string
      */
     protected String getUser() {
-        DataSourcesConfiguration.DataSourceProperties properties = getDataSourceProperties();
+        BusinessDataSourcesProperties.DataSourceProperties properties = getDataSourceProperties();
         String username = "";
         if (properties != null) {
             username = properties.getUsername();
@@ -312,7 +312,7 @@ public abstract class AbstractMCPDataSourceProvider implements DataSourceProvide
      * @return the string
      */
     protected String getPassword() {
-        DataSourcesConfiguration.DataSourceProperties properties = getDataSourceProperties();
+        BusinessDataSourcesProperties.DataSourceProperties properties = getDataSourceProperties();
         String password = "";
         if (properties != null) {
             password = properties.getPassword();
@@ -329,7 +329,7 @@ public abstract class AbstractMCPDataSourceProvider implements DataSourceProvide
      * @return the int
      */
     protected int getMinConn() {
-        DataSourcesConfiguration.DataSourceProperties properties = getDataSourceProperties();
+        BusinessDataSourcesProperties.DataSourceProperties properties = getDataSourceProperties();
         int minConn = -1;
         if (properties != null) {
             minConn = properties.getMinConn();
@@ -343,7 +343,7 @@ public abstract class AbstractMCPDataSourceProvider implements DataSourceProvide
      * @return the int
      */
     protected int getMaxConn() {
-        DataSourcesConfiguration.DataSourceProperties properties = getDataSourceProperties();
+        BusinessDataSourcesProperties.DataSourceProperties properties = getDataSourceProperties();
         int maxConn = -1;
         if (properties != null) {
             maxConn = properties.getMaxConn();
