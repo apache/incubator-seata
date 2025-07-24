@@ -1,5 +1,6 @@
 package org.apache.seata.server.console.controller;
 
+import org.apache.seata.common.result.SingleResult;
 import org.apache.seata.server.console.entity.param.ServerLogParam;
 import org.apache.seata.server.console.service.ServerLogService;
 import org.slf4j.LoggerFactory;
@@ -19,7 +20,10 @@ public class ServerLogController {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerLogController.class);
 
     @GetMapping("/getServerLog")
-    public String getServerLog(@ModelAttribute ServerLogParam serverLogParam) {
+    public SingleResult<?> getServerLog(@ModelAttribute ServerLogParam serverLogParam) {
+        if(LOGGER.isInfoEnabled()){
+            LOGGER.info("manual operation to get the server log, param: {}", serverLogParam);
+        }
         return serverLogService.getServerLog(serverLogParam);
     }
 }
