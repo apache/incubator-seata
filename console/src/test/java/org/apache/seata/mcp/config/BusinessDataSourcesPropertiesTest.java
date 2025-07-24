@@ -16,6 +16,7 @@
  */
 package org.apache.seata.mcp.config;
 
+import org.apache.seata.mcp.entity.pojo.BusinessDataSourcesProperties;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,23 +38,23 @@ import static org.apache.seata.common.DefaultValues.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@ContextConfiguration(initializers = DataSourcesConfigurationTest.PropertyInitializer.class)
-public class DataSourcesConfigurationTest {
+@ContextConfiguration(initializers = BusinessDataSourcesPropertiesTest.PropertyInitializer.class)
+public class BusinessDataSourcesPropertiesTest {
 
     @Autowired
     private ConfigurableEnvironment environment;
 
     @Autowired
-    private DataSourcesConfiguration configuration;
+    private BusinessDataSourcesProperties configuration;
 
     // Use reflection to clear static fields to ensure that tests don't affect each other
     @BeforeEach
     @AfterEach
     public void clearStaticDatasources() throws Exception {
-        Field datasourcesField = DataSourcesConfiguration.class.getDeclaredField("datasources");
+        Field datasourcesField = BusinessDataSourcesProperties.class.getDeclaredField("datasources");
         datasourcesField.setAccessible(true);
-        Map<String, DataSourcesConfiguration.DataSourceProperties> datasources =
-                (Map<String, DataSourcesConfiguration.DataSourceProperties>) datasourcesField.get(null);
+        Map<String, BusinessDataSourcesProperties.DataSourceProperties> datasources =
+                (Map<String, BusinessDataSourcesProperties.DataSourceProperties>) datasourcesField.get(null);
         datasources.clear();
     }
 
@@ -93,8 +94,8 @@ public class DataSourcesConfigurationTest {
     @Configuration
     static class TestConfig {
         @Bean
-        public DataSourcesConfiguration dataSourcesConfiguration(Environment env) {
-            return new DataSourcesConfiguration();
+        public BusinessDataSourcesProperties dataSourcesConfiguration(Environment env) {
+            return new BusinessDataSourcesProperties();
         }
     }
 
@@ -104,15 +105,15 @@ public class DataSourcesConfigurationTest {
         configuration.afterPropertiesSet();
 
         // Verify the data source mapping
-        Map<String, DataSourcesConfiguration.DataSourceProperties> datasources =
-                DataSourcesConfiguration.getDatasources();
+        Map<String, BusinessDataSourcesProperties.DataSourceProperties> datasources =
+                BusinessDataSourcesProperties.getDatasources();
 
         assertNotNull(datasources);
 
         assertEquals(3, datasources.size());
 
         // Verify the resource ID
-        Set<String> resourceIds = DataSourcesConfiguration.getResourceIds();
+        Set<String> resourceIds = BusinessDataSourcesProperties.getResourceIds();
         assertEquals(3, resourceIds.size());
         assertTrue(resourceIds.contains("jdbc:mysql://localhost:3306/db1"));
         assertTrue(resourceIds.contains("jdbc:mysql://localhost:3306/db2"));
@@ -123,10 +124,10 @@ public class DataSourcesConfigurationTest {
     @Test
     public void testCompleteDataSourceProperties() throws Exception {
         configuration.afterPropertiesSet();
-        Map<String, DataSourcesConfiguration.DataSourceProperties> datasources =
-                DataSourcesConfiguration.getDatasources();
+        Map<String, BusinessDataSourcesProperties.DataSourceProperties> datasources =
+                BusinessDataSourcesProperties.getDatasources();
 
-        DataSourcesConfiguration.DataSourceProperties db1 =
+        BusinessDataSourcesProperties.DataSourceProperties db1 =
                 datasources.get("jdbc:mysql://localhost:3306/db1");
 
         assertNotNull(db1);
@@ -145,10 +146,10 @@ public class DataSourcesConfigurationTest {
     @Test
     public void testPartialDataSourceProperties() throws Exception {
         configuration.afterPropertiesSet();
-        Map<String, DataSourcesConfiguration.DataSourceProperties> datasources =
-                DataSourcesConfiguration.getDatasources();
+        Map<String, BusinessDataSourcesProperties.DataSourceProperties> datasources =
+                BusinessDataSourcesProperties.getDatasources();
 
-        DataSourcesConfiguration.DataSourceProperties db2 =
+        BusinessDataSourcesProperties.DataSourceProperties db2 =
                 datasources.get("jdbc:mysql://localhost:3306/db2");
 
         assertNotNull(db2);
@@ -166,10 +167,10 @@ public class DataSourcesConfigurationTest {
     @Test
     public void testDisabledDataSource() throws Exception {
         configuration.afterPropertiesSet();
-        Map<String, DataSourcesConfiguration.DataSourceProperties> datasources =
-                DataSourcesConfiguration.getDatasources();
+        Map<String, BusinessDataSourcesProperties.DataSourceProperties> datasources =
+                BusinessDataSourcesProperties.getDatasources();
 
-        DataSourcesConfiguration.DataSourceProperties db3 =
+        BusinessDataSourcesProperties.DataSourceProperties db3 =
                 datasources.get("jdbc:mysql://localhost:3306/db3");
 
         assertNotNull(db3);
@@ -179,7 +180,7 @@ public class DataSourcesConfigurationTest {
     @Test
     public void testDataSourcePropertiesMethods() throws Exception {
         // Test the methods of the DataSourceProperties class
-        DataSourcesConfiguration.DataSourceProperties props = new DataSourcesConfiguration.DataSourceProperties();
+        BusinessDataSourcesProperties.DataSourceProperties props = new BusinessDataSourcesProperties.DataSourceProperties();
 
         assertTrue(props.isEnabled());
         assertEquals("mysql", props.getDbType());
@@ -218,7 +219,7 @@ public class DataSourcesConfigurationTest {
     @Test
     public void testGetOriginUrl() throws Exception {
         // Test the method of getting the original URL
-        Method field = DataSourcesConfiguration.class.getDeclaredMethod("getOriginUrl", String.class);
+        Method field = BusinessDataSourcesProperties.class.getDeclaredMethod("getOriginUrl", String.class);
         field.setAccessible(true);
 
         String url1 = "jdbc:mysql://localhost:3306/testdb?useSSL=false";

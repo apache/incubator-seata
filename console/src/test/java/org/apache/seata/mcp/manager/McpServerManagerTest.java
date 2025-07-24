@@ -18,7 +18,7 @@ package org.apache.seata.mcp.manager;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.modelcontextprotocol.spec.McpSchema;
-import org.apache.seata.mcp.config.MCPConfiguration;
+import org.apache.seata.mcp.entity.pojo.MCPProperties;
 import org.apache.seata.mcp.controller.ControlMcpController;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,8 +47,8 @@ public class McpServerManagerTest {
     static class TestApplication {
 
         @Bean
-        public MCPConfiguration mcpConfiguration() {
-            MCPConfiguration config = new MCPConfiguration();
+        public MCPProperties mcpConfiguration() {
+            MCPProperties config = new MCPProperties();
             config.setServerName("test-server");
             config.setServerVersion("1.0.0");
             config.setSseEndpoint("/sse");
@@ -63,7 +63,7 @@ public class McpServerManagerTest {
         }
 
         @Bean
-        public McpServerManager mcpServerManager(MCPConfiguration config, ObjectMapper objectMapper) {
+        public McpServerManager mcpServerManager(MCPProperties config, ObjectMapper objectMapper) {
             McpServerManager manager = new McpServerManager(config, objectMapper);
             manager.start();
             return manager;
