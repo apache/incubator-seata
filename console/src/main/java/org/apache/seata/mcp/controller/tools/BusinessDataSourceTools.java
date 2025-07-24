@@ -18,7 +18,7 @@ package org.apache.seata.mcp.controller.tools;
 
 import org.apache.seata.mcp.annotation.Tool;
 import org.apache.seata.mcp.annotation.ToolParam;
-import org.apache.seata.mcp.config.DataSourcesConfiguration;
+import org.apache.seata.mcp.entity.pojo.BusinessDataSourcesProperties;
 import org.apache.seata.mcp.service.BusinessDataSourceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +44,7 @@ public class BusinessDataSourceTools {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("user try to get resource ids");
         }
-        return DataSourcesConfiguration.getResourceIds();
+        return BusinessDataSourcesProperties.getResourceIds();
     }
 
     @Tool(description = "Get all available table names")

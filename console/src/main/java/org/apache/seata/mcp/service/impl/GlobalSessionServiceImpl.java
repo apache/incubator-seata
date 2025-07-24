@@ -17,7 +17,7 @@
 package org.apache.seata.mcp.service.impl;
 
 import org.apache.seata.common.util.StringUtils;
-import org.apache.seata.mcp.config.MCPConfiguration;
+import org.apache.seata.mcp.entity.pojo.MCPProperties;
 import org.apache.seata.mcp.entity.constant.RPCConstant;
 import org.apache.seata.mcp.entity.enums.GlobalExceptionStatus;
 import org.apache.seata.mcp.entity.param.GlobalSessionParam;
@@ -27,7 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -45,7 +44,7 @@ public class GlobalSessionServiceImpl implements GlobalSessionService {
     private MCPRPCService mcpRPCService;
 
     @Autowired
-    private MCPConfiguration configuration;
+    private MCPProperties configuration;
 
     @Override
     public String queryGlobalSession(GlobalSessionParam param) {
