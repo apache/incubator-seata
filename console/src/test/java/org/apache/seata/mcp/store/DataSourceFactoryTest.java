@@ -16,8 +16,7 @@
  */
 package org.apache.seata.mcp.store;
 
-import org.apache.seata.mcp.config.DataSourcesConfiguration;
-import org.apache.seata.mcp.store.DataSourceFactory;
+import org.apache.seata.mcp.entity.pojo.BusinessDataSourcesProperties;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -65,14 +64,14 @@ public class DataSourceFactoryTest {
     private Environment env;
 
     @Autowired
-    private DataSourcesConfiguration dataSourcesConfiguration;
+    private BusinessDataSourcesProperties businessDataSourcesProperties;
 
     @Test
     public void testGetAllSupportedDataSources() {
-        for (String resourceId : DataSourcesConfiguration.getResourceIds()) {
+        for (String resourceId : BusinessDataSourcesProperties.getResourceIds()) {
             DataSource ds = DataSourceFactory.getDataSource(resourceId);
             assertNotNull(ds, "DataSource for " + resourceId + " should not be null");
-            String type = DataSourcesConfiguration.getDatasources().get(resourceId).getDatasource();
+            String type = BusinessDataSourcesProperties.getDatasources().get(resourceId).getDatasource();
             System.out.println("DataSource type: " + type + ", url: " + resourceId);
         }
     }
@@ -80,8 +79,8 @@ public class DataSourceFactoryTest {
     @Configuration
     static class init{
         @Bean
-        public DataSourcesConfiguration getDataSourcesConfiguration() {
-            return new DataSourcesConfiguration();
+        public BusinessDataSourcesProperties getDataSourcesConfiguration() {
+            return new BusinessDataSourcesProperties();
         }
     }
 
@@ -90,7 +89,7 @@ public class DataSourceFactoryTest {
         String druidUrl = env.getProperty("seata.datasources.db1.url");
         assertNotNull(druidUrl);
         String resourceId = druidUrl.split("\\?")[0];
-        String type = DataSourcesConfiguration.getDatasources().get(resourceId).getDatasource();
+        String type = BusinessDataSourcesProperties.getDatasources().get(resourceId).getDatasource();
         assertEquals("druid", type);
         DataSource ds = DataSourceFactory.getDataSource(resourceId);
         assertNotNull(ds);
@@ -101,7 +100,7 @@ public class DataSourceFactoryTest {
         String hikari = env.getProperty("seata.datasources.db2.url");
         assertNotNull(hikari);
         String resourceId = hikari.split("\\?")[0];
-        String type = DataSourcesConfiguration.getDatasources().get(resourceId).getDatasource();
+        String type = BusinessDataSourcesProperties.getDatasources().get(resourceId).getDatasource();
         assertEquals("hikari", type);
         DataSource ds = DataSourceFactory.getDataSource(resourceId);
         assertNotNull(ds);
@@ -112,7 +111,7 @@ public class DataSourceFactoryTest {
         String dbcp = env.getProperty("seata.datasources.db3.url");
         assertNotNull(dbcp);
         String resourceId = dbcp.split("\\?")[0];
-        String type = DataSourcesConfiguration.getDatasources().get(resourceId).getDatasource();
+        String type = BusinessDataSourcesProperties.getDatasources().get(resourceId).getDatasource();
         assertEquals("dbcp", type);
         DataSource ds = DataSourceFactory.getDataSource(resourceId);
         assertNotNull(ds);

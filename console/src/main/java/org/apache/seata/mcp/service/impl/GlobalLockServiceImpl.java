@@ -17,13 +17,12 @@
 package org.apache.seata.mcp.service.impl;
 
 import org.apache.seata.common.util.StringUtils;
-import org.apache.seata.mcp.config.MCPConfiguration;
+import org.apache.seata.mcp.entity.pojo.MCPProperties;
 import org.apache.seata.mcp.entity.constant.RPCConstant;
 import org.apache.seata.mcp.entity.param.GlobalLockParam;
 import org.apache.seata.mcp.service.GlobalLockService;
 import org.apache.seata.mcp.service.MCPRPCService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -35,7 +34,7 @@ public class GlobalLockServiceImpl implements GlobalLockService {
     private MCPRPCService mcpRPCService;
 
     @Autowired
-    private MCPConfiguration configuration;
+    private MCPProperties configuration;
 
     @Override
     public String queryGlobalLock(GlobalLockParam param) {

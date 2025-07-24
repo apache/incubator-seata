@@ -17,7 +17,7 @@
 package org.apache.seata.mcp.store;
 
 import org.apache.seata.common.exception.StoreException;
-import org.apache.seata.mcp.config.DataSourcesConfiguration;
+import org.apache.seata.mcp.entity.pojo.BusinessDataSourcesProperties;
 
 import javax.sql.DataSource;
 import java.util.HashMap;
@@ -30,9 +30,9 @@ public class DataSourceFactory {
     public static DataSource getDataSource(String resourceId) {
         if (dataSourceMap.containsKey(resourceId)) return dataSourceMap.get(resourceId);
 
-        Map<String, DataSourcesConfiguration.DataSourceProperties> datasources =
-                DataSourcesConfiguration.getDatasources();
-        DataSourcesConfiguration.DataSourceProperties dataSourceProperties = datasources.get(resourceId);
+        Map<String, BusinessDataSourcesProperties.DataSourceProperties> datasources =
+                BusinessDataSourcesProperties.getDatasources();
+        BusinessDataSourcesProperties.DataSourceProperties dataSourceProperties = datasources.get(resourceId);
 
         if (dataSourceProperties == null) {
             throw new StoreException("Cannot find datasource properties:" + resourceId);
@@ -43,7 +43,7 @@ public class DataSourceFactory {
     }
 
     public static DataSource createDataSource(
-            DataSourcesConfiguration.DataSourceProperties dataSourceProperties, String resourceId) {
+            BusinessDataSourcesProperties.DataSourceProperties dataSourceProperties, String resourceId) {
         if (dataSourceProperties == null) {
             throw new StoreException("Cannot find datasource properties:" + dataSourceProperties);
         }

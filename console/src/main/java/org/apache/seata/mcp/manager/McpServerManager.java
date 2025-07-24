@@ -21,7 +21,7 @@ import io.modelcontextprotocol.server.McpAsyncServer;
 import io.modelcontextprotocol.server.McpServer;
 import io.modelcontextprotocol.server.transport.WebMvcSseServerTransportProvider;
 import io.modelcontextprotocol.spec.McpSchema;
-import org.apache.seata.mcp.config.MCPConfiguration;
+import org.apache.seata.mcp.entity.pojo.MCPProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.SmartLifecycle;
@@ -138,15 +138,15 @@ public class McpServerManager implements SmartLifecycle {
         return transportProvider;
     }
 
-    public MCPConfiguration getConfig() {
+    public MCPProperties getConfig() {
         return config;
     }
 
     private volatile McpAsyncServer serverInstance;
     private final ControlledTransportProvider transportProvider;
-    private final MCPConfiguration config;
+    private final MCPProperties config;
 
-    public McpServerManager(MCPConfiguration config, ObjectMapper objectMapper) {
+    public McpServerManager(MCPProperties config, ObjectMapper objectMapper) {
         this.config = config;
         this.transportProvider =
                 new ControlledTransportProvider(objectMapper, config.getMessageEndpoint(), config.getSseEndpoint());
@@ -306,6 +306,7 @@ public class McpServerManager implements SmartLifecycle {
                 .capabilities(McpSchema.ServerCapabilities.builder()
                         .tools(true)
                         .resources(config.isResourceSupport(), config.isResourceTemplates())
+                        .prompts(config.isPromptSupport())
                         .build())
                 .build();
     }

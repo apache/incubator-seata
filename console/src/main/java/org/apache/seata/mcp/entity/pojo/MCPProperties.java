@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.mcp.config;
+package org.apache.seata.mcp.entity.pojo;
 
 import io.modelcontextprotocol.spec.McpSchema;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +29,7 @@ import java.util.Objects;
  * MCP Server configuration parameters
  */
 @Component
-public class MCPConfiguration {
+public class MCPProperties {
 
     /**
      * The name of the server
@@ -53,6 +53,8 @@ public class MCPConfiguration {
     private boolean resourceSupport = true;
 
     private boolean resourceTemplates = false;
+
+    private boolean promptSupport = true;
     /**
      * Turn on logging
      */
@@ -79,19 +81,22 @@ public class MCPConfiguration {
         serverVersion = env.getProperty("seata.mcp.serverVersion", "1.0.0");
         sseEndpoint = env.getProperty("seata.mcp.sseEndpoint", "/sse");
         messageEndpoint = env.getProperty("seata.mcp.messageEndpoint", "/message");
+        resourceSupport = Boolean.parseBoolean(env.getProperty("seata.mcp.resourceSupport", "true"));
+        promptSupport = Boolean.parseBoolean(env.getProperty("seata.mcp.promptSupport", "true"));
         heartbeat = Boolean.parseBoolean(env.getProperty("seata.mcp.heartbeat", "false"));
         queryDuration = Long.parseLong(env.getProperty("seata.mcp.query.max_query_duration", "86400000"));
     }
 
     @Override
     public String toString() {
-        return "MCPConfiguration{" +
+        return "McpProperties{" +
                 "serverName='" + serverName + '\'' +
                 ", serverVersion='" + serverVersion + '\'' +
                 ", sseEndpoint='" + sseEndpoint + '\'' +
                 ", messageEndpoint='" + messageEndpoint + '\'' +
                 ", resourceSupport=" + resourceSupport +
                 ", resourceTemplates=" + resourceTemplates +
+                ", promptSupport=" + promptSupport +
                 ", loggingLevel=" + loggingLevel +
                 ", heartbeat=" + heartbeat +
                 ", queryDuration=" + queryDuration +
@@ -102,7 +107,7 @@ public class MCPConfiguration {
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
-        MCPConfiguration that = (MCPConfiguration) o;
+        MCPProperties that = (MCPProperties) o;
         return resourceSupport == that.resourceSupport && resourceTemplates == that.resourceTemplates && heartbeat == that.heartbeat && Objects.equals(serverName, that.serverName) && Objects.equals(serverVersion, that.serverVersion) && Objects.equals(sseEndpoint, that.sseEndpoint) && Objects.equals(messageEndpoint, that.messageEndpoint) && loggingLevel == that.loggingLevel && Objects.equals(queryDuration, that.queryDuration) && Objects.equals(env, that.env);
     }
 
@@ -189,5 +194,13 @@ public class MCPConfiguration {
 
     public void setQueryDuration(Long queryDuration) {
         this.queryDuration = queryDuration;
+    }
+
+    public boolean isPromptSupport() {
+        return promptSupport;
+    }
+
+    public void setPromptSupport(boolean promptSupport) {
+        this.promptSupport = promptSupport;
     }
 }
