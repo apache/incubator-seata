@@ -681,8 +681,13 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("channel inactive: {}", ctx.channel());
             }
-            clientChannelManager.releaseChannel(
-                    ctx.channel(), NetUtil.toStringAddress(ctx.channel().remoteAddress()));
+            timerExecutor.execute(() -> {
+                try {
+                    clientChannelManager.releaseChannel(ctx.channel(), getAddressFromChannel(ctx.channel()));
+                } catch (Throwable throwable) {
+                    LOGGER.error("release channel error: {}", throwable.getMessage(), throwable);
+                }
+            });
             super.channelInactive(ctx);
         }
 
@@ -701,7 +706,18 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                     } catch (Exception exx) {
                         LOGGER.error(exx.getMessage());
                     } finally {
-                        clientChannelManager.releaseChannel(ctx.channel(), getAddressFromContext(ctx));
+                        try {
+                            timerExecutor.execute(() -> {
+                                try {
+                                    clientChannelManager.releaseChannel(
+                                            ctx.channel(), getAddressFromChannel(ctx.channel()));
+                                } catch (Throwable throwable) {
+                                    LOGGER.error("release channel error: {}", throwable.getMessage(), throwable);
+                                }
+                            });
+                        } catch (Exception e) {
+                            LOGGER.error("failed to schedule releaseChannel: {}", e.getMessage(), e);
+                        }
                     }
                 }
                 if (idleStateEvent == IdleStateEvent.WRITER_IDLE_STATE_EVENT) {
@@ -723,7 +739,13 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                     FrameworkErrorCode.ExceptionCaught.getErrCode(),
                     NetUtil.toStringAddress(ctx.channel().remoteAddress()) + "connect exception. " + cause.getMessage(),
                     cause);
-            clientChannelManager.releaseChannel(ctx.channel(), getAddressFromChannel(ctx.channel()));
+            timerExecutor.execute(() -> {
+                try {
+                    clientChannelManager.releaseChannel(ctx.channel(), getAddressFromChannel(ctx.channel()));
+                } catch (Throwable throwable) {
+                    LOGGER.error("release channel error: {}", throwable.getMessage(), throwable);
+                }
+            });
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("remove exception rm channel:{}", ctx.channel());
             }
