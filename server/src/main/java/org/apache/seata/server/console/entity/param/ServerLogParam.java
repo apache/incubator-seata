@@ -26,11 +26,19 @@ public class ServerLogParam implements Serializable {
 
     private Integer nextLines;
 
-    private Long costedTime;
-
     private String logType;
 
     private String logTime;
+
+    private Integer curLogNum;
+
+    public Integer getCurLogNum() {
+        return curLogNum;
+    }
+
+    public void setCurLogNum(Integer curLogNum) {
+        this.curLogNum = curLogNum;
+    }
 
     public Integer getNextLines() {
         return nextLines;
@@ -64,22 +72,14 @@ public class ServerLogParam implements Serializable {
         this.cursor = cursor;
     }
 
-    public Long getCostedTime() {
-        return costedTime;
-    }
-
-    public void setCostedTime(Long costedTime) {
-        this.costedTime = costedTime;
-    }
-
     @Override
     public String toString() {
         return "ServerLogParam{" +
                 "cursor=" + cursor +
                 ", nextLines=" + nextLines +
-                ", costedTime=" + costedTime +
                 ", logType='" + logType + '\'' +
                 ", logTime='" + logTime + '\'' +
+                ", curLogNum=" + curLogNum +
                 '}';
     }
 }

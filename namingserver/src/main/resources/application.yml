@@ -15,7 +15,23 @@
 # limitations under the License.
 #
 
+# application.yml
 server:
+  tomcat:
+    # 增加连接器缓冲区
+    connection-timeout: 60000
+    # 设置最大 HTTP 头大小
+    max-http-header-size: 65536  # 64KB
+    # 增加输出缓冲区
+    threads:
+      max: 200
+      min-spare: 10
+    # 增加接受队列大小
+    accept-count: 200
+    max-http-form-post-size: 104857600
+  # 增加 Servlet 缓冲区
+  servlet:
+    buffer-size: 65536  # 64KB，默认8KB
   port: 8081
 
 spring:
