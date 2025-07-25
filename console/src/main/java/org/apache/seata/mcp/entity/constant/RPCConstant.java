@@ -23,4 +23,6 @@ public class RPCConstant {
     public static final String BRANCH_SESSION_BASE_URL = "/api/v1/console/branchSession";
 
     public static final String GLOBAL_LOCK_BASE_URL = "/api/v1/console/globalLock";
+
+    public static final String SERVER_LOG_BASE_URL = "/api/v1/console/serverLog";
 }

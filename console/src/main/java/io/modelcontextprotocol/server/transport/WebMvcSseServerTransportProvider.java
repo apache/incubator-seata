@@ -138,8 +138,8 @@ public class WebMvcSseServerTransportProvider implements McpServerTransportProvi
     }
 
     /**
-     * 发送心跳消息
-     * 使用标准的SSE事件类型，并添加错误处理
+     * Send heartbeat messages
+     * Use standard SSE event types and add error handling
      */
     public void sendHeartbeat() {
         for (McpServerSession session : sessions.values()) {
@@ -148,7 +148,7 @@ public class WebMvcSseServerTransportProvider implements McpServerTransportProvi
                         .sendHeartbeat()
                         .subscribe();
             } catch (Exception e) {
-                logger.debug("发送心跳消息失败，会话ID: {}, 错误: {}", session.getId(), e.getMessage());
+                logger.debug("Failed to send heartbeat message, session ID: {}, Error: {}", session.getId(), e.getMessage());
             }
         }
     }
@@ -353,7 +353,7 @@ public class WebMvcSseServerTransportProvider implements McpServerTransportProvi
                     .onErrorResume(e -> {
                         logger.error("Failed to send message to session {}: {}", sessionId, e.getMessage());
                         sseBuilder.error(e);
-                        // 出现异常，关闭连接
+                        // An exception occurs, and the connection is closed
                         McpSession session = sessions.get(sessionId);
                         if (session != null) {
                             session.close();
@@ -361,12 +361,12 @@ public class WebMvcSseServerTransportProvider implements McpServerTransportProvi
                         return Mono.empty();
                     })
                     .subscribeOn(Schedulers.boundedElastic())
-                    .then(); // 避免阻塞，实现异步发送
+                    .then(); // Avoid blocking and achieve asynchronous sending
         }
 
         /**
-         * 发送心跳消息
-         * 使用标准的SSE事件类型和格式
+         * Send heartbeat messages
+         * Use standard SSE event types and formats
          */
         public Mono<Void> sendHeartbeat() {
             return Mono.fromCallable(() -> {
@@ -376,7 +376,7 @@ public class WebMvcSseServerTransportProvider implements McpServerTransportProvi
                     })
                     .onErrorResume(e -> {
                         logger.debug("Failed to send heartbeat to session {}: {}", sessionId, e.getMessage());
-                        // 出现异常，关闭连接
+                        // An exception occurs, and the connection is closed
                         McpSession session = sessions.get(sessionId);
                         if (session != null) {
                             session.close();
@@ -384,7 +384,7 @@ public class WebMvcSseServerTransportProvider implements McpServerTransportProvi
                         return Mono.empty();
                     })
                     .subscribeOn(Schedulers.boundedElastic())
-                    .then(); // 避免阻塞，实现异步发送
+                    .then(); // Avoid blocking and achieve asynchronous sending
         }
 
         /**
