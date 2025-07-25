@@ -69,5 +69,8 @@ seata:
       db-type: mysql
       vgroup-table: vgroup_table
       min-conn: 10
-  #  server:
+  server:
+    http:
+      filter:
+        enabled: false
   #    service-port: 8091 #If not configured, the default is '${server.port} + 1000'
