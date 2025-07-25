@@ -22,14 +22,28 @@ public class ServerLogVO {
 
     private Integer cursor;
 
-    private Long costedTime;
-
     private List<String> logMessages;
 
-    public ServerLogVO (Integer cursor, Long costedTime, List<String> logMessages){
+    private Integer curLogNum;
+
+    public ServerLogVO(Integer cursor, List<String> logMessages){
         this.cursor = cursor;
-        this.costedTime = costedTime;
         this.logMessages = logMessages;
+    }
+
+    public ServerLogVO(Integer cursor, List<String> logMessages, Integer curLogNum){
+        this.cursor = cursor;
+        this.logMessages = logMessages;
+        this.curLogNum = curLogNum;
+    }
+
+    @Override
+    public String toString() {
+        return "ServerLogVO{" +
+                "cursor=" + cursor +
+                ", logMessages=" + logMessages +
+                ", curLogNum=" + curLogNum +
+                '}';
     }
 
     public Integer getCursor() {
@@ -40,28 +54,19 @@ public class ServerLogVO {
         this.cursor = cursor;
     }
 
-    public Long getCostedTime() {
-        return costedTime;
-    }
-
-    public void setCostedTime(Long costedTime) {
-        this.costedTime = costedTime;
-    }
-
-    public List<String> getLogs() {
+    public List<String> getLogMessages() {
         return logMessages;
     }
 
-    public void setLogs(List<String> logMessages) {
+    public void setLogMessages(List<String> logMessages) {
         this.logMessages = logMessages;
     }
 
-    @Override
-    public String toString() {
-        return "ServerLogVO{" +
-                "cursor=" + cursor +
-                ", costedTime=" + costedTime +
-                ", logs=" + logMessages +
-                '}';
+    public Integer getCurLogNum() {
+        return curLogNum;
+    }
+
+    public void setCurLogNum(Integer curLogNum) {
+        this.curLogNum = curLogNum;
     }
 }
