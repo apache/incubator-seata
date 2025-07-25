@@ -32,6 +32,9 @@ import io.netty.handler.codec.http2.Http2Headers;
 import io.netty.handler.codec.http2.Http2HeadersFrame;
 import io.netty.handler.codec.http2.Http2StreamFrame;
 import org.apache.seata.common.rpc.http.HttpContext;
+import org.apache.seata.core.exception.HttpRequestFilterException;
+import org.apache.seata.core.rpc.netty.http.filter.HttpFilterContext;
+import org.apache.seata.core.rpc.netty.http.filter.HttpRequestParamWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,6 +90,11 @@ public class Http2HttpHandler extends BaseHttpChannelHandler<Http2StreamFrame> {
             String body = bodyBuffer != null ? bodyBuffer.toString(StandardCharsets.UTF_8) : "";
             SimpleHttp2Request request = new SimpleHttp2Request(method, path, http2Headers, body);
 
+            // After receiving the complete request, the filtering logic is executed
+            HttpFilterContext<SimpleHttp2Request> context =
+                    new HttpFilterContext<>(request, () -> new HttpRequestParamWrapper(request));
+            doFilterInternal(context);
+
             // reuse HttpDispatchHandler logic
             boolean keepAlive = true; // In HTTP/2, connections are persistent by default
             QueryStringDecoder queryStringDecoder = new QueryStringDecoder(request.getPath());
@@ -116,6 +124,9 @@ public class Http2HttpHandler extends BaseHttpChannelHandler<Http2StreamFrame> {
             Object[] args = ParameterParser.getArgValues(
                     httpInvocation.getParamMetaData(), handleMethod, requestDataNode, httpContext);
             handle(httpController, handleMethod, args, ctx, httpContext);
+        } catch (HttpRequestFilterException e) {
+            LOGGER.warn("Request blocked by filter while processing HTTP2 request: {}", e.getMessage());
+            sendErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST);
         } catch (Exception e) {
             LOGGER.error("Exception occurred while processing HTTP2 request: {}", e.getMessage(), e);
             sendErrorResponse(ctx, HttpResponseStatus.INTERNAL_SERVER_ERROR);

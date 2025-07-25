@@ -20,10 +20,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.rm.datasource.DataCompareUtils;
 import org.apache.seata.rm.datasource.sql.struct.Field;
+import org.apache.seata.rm.datasource.undo.AbstractUndoLogManager;
 import org.apache.seata.rm.datasource.undo.BaseUndoLogParserTest;
 import org.apache.seata.rm.datasource.undo.UndoLogParser;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
@@ -39,6 +41,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
+
+import static org.mockito.Mockito.mockStatic;
 
 public class JacksonUndoLogParserTest extends BaseUndoLogParserTest {
 
@@ -149,12 +153,31 @@ public class JacksonUndoLogParserTest extends BaseUndoLogParserTest {
         Assertions.assertTrue(DataCompareUtils.isFieldEquals(field, sameField).getResult());
     }
 
-    private boolean checkClassExists(String className) {
-        try {
-            Class.forName(className);
-            return true;
-        } catch (ClassNotFoundException e) {
-            return false;
+    @Test
+    public void testSerializeAndDeserializeDmdbTimestampWithNoZone()
+            throws NoSuchFieldException, IllegalAccessException, ClassNotFoundException, NoSuchMethodException,
+                    InvocationTargetException, IOException {
+
+        try (MockedStatic<AbstractUndoLogManager> mockedStatic = mockStatic(AbstractUndoLogManager.class)) {
+            mockedStatic.when(AbstractUndoLogManager::getCurrentSerializer).thenReturn(JacksonUndoLogParser.NAME);
+
+            java.lang.reflect.Field reflectField = parser.getClass().getDeclaredField("mapper");
+            reflectField.setAccessible(true);
+            ObjectMapper mapper = (ObjectMapper) reflectField.get(parser);
+
+            Class<?> dmdbTimestampClass = Class.forName("dm.jdbc.driver.DmdbTimestamp");
+            Method valueOfDateMethod = dmdbTimestampClass.getMethod("valueOf", Date.class);
+
+            Object originalTimestamp = valueOfDateMethod.invoke(null, new Date(1721985847000L));
+            Object originalTimestamp2 = valueOfDateMethod.invoke(null, new Date(1721985847001L));
+            Field field = new Field("dmdb_timestamp_type", JDBCType.TIMESTAMP.getVendorTypeNumber(), originalTimestamp);
+            Field field2 =
+                    new Field("dmdb_timestamp_type", JDBCType.TIMESTAMP.getVendorTypeNumber(), originalTimestamp2);
+            byte[] bytes = mapper.writeValueAsBytes(field);
+            Field sameField = mapper.readValue(bytes, Field.class);
+            Assertions.assertTrue(
+                    DataCompareUtils.isFieldEquals(field, sameField).getResult());
+            Assertions.assertFalse(DataCompareUtils.isFieldEquals(field, field2).getResult());
         }
     }
 

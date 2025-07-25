@@ -22,8 +22,16 @@ import com.zaxxer.hikari.util.IsolationLevel;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.core.store.db.AbstractDataSourceProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.Driver;
+import java.sql.DriverManager;
+import java.sql.DriverPropertyInfo;
+import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_DB_HIKARI_IDLE_TIMEOUT;
@@ -36,6 +44,8 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_DB_HIKARI_VALIDATION
  */
 @LoadLevel(name = "hikari")
 public class HikariDataSourceProvider extends AbstractDataSourceProvider {
+
+    private static final Logger logger = LoggerFactory.getLogger(HikariDataSourceProvider.class);
 
     @Override
     public DataSource doGenerate() {
@@ -52,10 +62,35 @@ public class HikariDataSourceProvider extends AbstractDataSourceProvider {
         properties.setProperty("dataSource.maintainTimeStats", "false");
 
         HikariConfig config = new HikariConfig(properties);
-        config.setDriverClassName(getDriverClassName());
-        config.setJdbcUrl(getUrl());
-        config.setUsername(getUser());
-        config.setPassword(getPassword());
+
+        // Get the correct class loader
+        ClassLoader driverClassLoader = getDriverClassLoader();
+        String driverClassName = getDriverClassName();
+
+        // Set driver class name in the correct class loader context
+        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
+        try {
+            Thread.currentThread().setContextClassLoader(driverClassLoader);
+
+            // 1. Explicitly load and register the driver
+            try {
+                Class<?> driverClass = Class.forName(driverClassName, true, driverClassLoader);
+                Driver driver = (Driver) driverClass.newInstance();
+                DriverManager.registerDriver(new DriverWrapper(driver));
+            } catch (Exception e) {
+                logger.warn("Failed to explicitly register driver {}", driverClassName, e);
+            }
+
+            // 2. Set configuration
+            config.setDriverClassName(driverClassName);
+            config.setJdbcUrl(getUrl());
+            config.setUsername(getUser());
+            config.setPassword(getPassword());
+
+        } finally {
+            Thread.currentThread().setContextClassLoader(originalClassLoader);
+        }
+
         config.setMaximumPoolSize(getMaxConn());
         config.setMinimumIdle(getMinConn());
         config.setAutoCommit(true);
@@ -77,5 +112,51 @@ public class HikariDataSourceProvider extends AbstractDataSourceProvider {
         config.setValidationTimeout(validationTimeout < 0 ? DEFAULT_DB_HIKARI_VALIDATION_TIMEOUT : validationTimeout);
 
         return new HikariDataSource(config);
+    }
+
+    /**
+     * Driver wrapper to ensure using the correct class loader
+     */
+    private static class DriverWrapper implements Driver {
+        private final Driver delegate;
+
+        public DriverWrapper(Driver delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public Connection connect(String url, Properties info) throws SQLException {
+            return delegate.connect(url, info);
+        }
+
+        @Override
+        public boolean acceptsURL(String url) throws SQLException {
+            return delegate.acceptsURL(url);
+        }
+
+        @Override
+        public DriverPropertyInfo[] getPropertyInfo(String url, Properties info) throws SQLException {
+            return delegate.getPropertyInfo(url, info);
+        }
+
+        @Override
+        public int getMajorVersion() {
+            return delegate.getMajorVersion();
+        }
+
+        @Override
+        public int getMinorVersion() {
+            return delegate.getMinorVersion();
+        }
+
+        @Override
+        public boolean jdbcCompliant() {
+            return delegate.jdbcCompliant();
+        }
+
+        @Override
+        public java.util.logging.Logger getParentLogger() throws SQLFeatureNotSupportedException {
+            return delegate.getParentLogger();
+        }
     }
 }

@@ -23,7 +23,7 @@
 [![build](https://github.com/apache/incubator-seata/actions/workflows/build.yml/badge.svg)](https://github.com/apache/incubator-seata/actions/workflows/build.yml)
 [![codecov](https://codecov.io/gh/apache/incubator-seata/graph/badge.svg?token=tbmHt2ZfxO)](https://codecov.io/gh/apache/incubator-seata)
 [![license](https://img.shields.io/github/license/apache/incubator-seata.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
-[![maven](https://img.shields.io/maven-central/v/org.apache.seata/seata-all?versionSuffix=2.3.0)](https://central.sonatype.com/search?q=org.apache.seata%3Aseata-all)
+[![maven](https://img.shields.io/maven-central/v/org.apache.seata/seata-all?versionSuffix=2.4.0)](https://central.sonatype.com/search?q=org.apache.seata%3Aseata-all)
 
 ## What is Seata?
 
@@ -101,7 +101,7 @@ For more details about principle and design, please go to [Seata wiki page](http
 Depending on the scenario, choose one of the two dependencies: `org.apache.seata:seata-all` or `org.apache.seata:seata-spring-boot-starter`.
 ```xml
 <properties>
-  <seata.version>2.3.0</seata.version>
+  <seata.version>2.4.0</seata.version>
 </properties>
 
 <dependencies>
@@ -157,11 +157,11 @@ Contributors are welcomed to join the Seata project. Please check [CONTRIBUTING]
 ## Seata ecosystem
 
 * [Seata Website](https://github.com/apache/incubator-seata.github.io) - Seata official website
-* [Seata GoLang](https://github.com/apache/incubator-seata-go) - Seata GoLang client and server
-* [Seata Samples](https://github.com/apache/incubator-seata-samples) - Samples for Seata
+* [Seata GoLang](https://github.com/apache/incubator-seata-go) - Seata GoLang client
+* [Seata Samples](https://github.com/apache/incubator-seata-samples) - Samples for Seata Java
 * [Seata GoLang Samples](https://github.com/apache/incubator-seata-go-samples) - Samples for Seata GoLang
-* [Seata K8s](https://github.com/apache/incubator-seata-k8s) - Seata integration with k8s
-* [Seata CLI](https://github.com/apache/incubator-seata-ctl) - CLI tool for Seata
+* [Seata K8s](https://github.com/apache/incubator-seata-k8s) - Seata integration with Kubernetes
+* [Seata CLI](https://github.com/apache/incubator-seata-ctl) - CLI tool for Seata operations
 
 ## Contributors
 
