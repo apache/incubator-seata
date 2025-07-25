@@ -34,12 +34,12 @@ public class UndoLogServiceImpl implements UndoLogService {
 
     @Override
     public String queryAndAnalyzeUndoLog(UndoLogParam param) {
-        // 1. 先根据参数查询对应rm的undo_log数据
+        // 1. First, query the undo_log data of the corresponding RM based on the parameters
         List<byte[]> undoLogInfo = dataSourceService.getUndoLogInfo(param);
         if (undoLogInfo.isEmpty()) {
             return "failed to get undo log info";
         }
-        // 2. 再通过FastJsonParser将undoLogInfo反序列化为BranchUndoLog
+        // 2. Then deserialize undoLogInfo to BranchUndoLog through FastJsonParser
         FastjsonUndoLogParser parser = new FastjsonUndoLogParser();
         List<String> result = new ArrayList<>();
         for (byte[] bytes : undoLogInfo) {
