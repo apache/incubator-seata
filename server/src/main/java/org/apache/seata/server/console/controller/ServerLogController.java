@@ -42,4 +42,12 @@ public class ServerLogController {
         }
         return serverLogService.getServerLog(serverLogParam);
     }
+
+    @GetMapping("/getHistoryServerLogNums")
+    public SingleResult<?> getHistoryServerLogNums(@ModelAttribute ServerLogParam serverLogParam){
+        if(LOGGER.isInfoEnabled()){
+            LOGGER.info("manual operation to get the history server log nums, param: {}", serverLogParam);
+        }
+        return serverLogService.getHistoryServerLogNums(serverLogParam);
+    }
 }
