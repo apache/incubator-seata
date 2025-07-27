@@ -14,39 +14,67 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.integration.tx.api.combine;
+package org.apache.seata.integration.tx.api.interceptor.handler;
 
+import org.apache.seata.config.CachedConfigurationChangeListener;
+import org.apache.seata.config.ConfigurationChangeEvent;
 import org.apache.seata.core.context.RootContext;
+import org.apache.seata.core.model.BranchType;
+import org.apache.seata.integration.tx.api.interceptor.InvocationHandlerType;
+import org.apache.seata.integration.tx.api.interceptor.InvocationWrapper;
+import org.apache.seata.integration.tx.api.interceptor.SeataInterceptorPosition;
+import org.apache.seata.integration.tx.api.util.ClassUtils;
 import org.apache.seata.rm.datasource.combine.CombineConnectionHolder;
 import org.apache.seata.rm.datasource.combine.CombineContext;
 import org.apache.seata.rm.datasource.xa.ConnectionProxyXA;
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.Around;
-import org.aspectj.lang.annotation.Aspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
-@Aspect
-@Component
-public class CombineAspect {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CombineAspect.class);
+import java.lang.reflect.Method;
+import java.util.Set;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
-    @Around("@annotation(org.apache.seata.spring.annotation.CombineTransactional)")
-    public Object handleCombine(ProceedingJoinPoint joinPoint) throws Throwable {
-        if (!RootContext.inGlobalTransaction() || !RootContext.inXABranch()) {
-            // not in transaction, or this interceptor is disabled
-            return joinPoint.proceed();
+/**
+ * The type Combine transactional interceptor handler.
+ *
+ */
+public class CombineTransactionalInterceptorHandler extends AbstractProxyInvocationHandler
+        implements CachedConfigurationChangeListener {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CombineTransactionalInterceptorHandler.class);
+
+    private Set<String> methodsToProxy;
+
+    private static volatile ScheduledThreadPoolExecutor executor;
+
+    public CombineTransactionalInterceptorHandler(Set<String> methodsToProxy) {
+        this.methodsToProxy = methodsToProxy;
+    }
+
+    @Override
+    protected Object doInvoke(InvocationWrapper invocation) throws Throwable {
+        Class<?> targetClass = invocation.getTarget().getClass();
+        Method specificMethod = ClassUtils.getMostSpecificMethod(invocation.getMethod(), targetClass);
+        if (specificMethod != null && !specificMethod.getDeclaringClass().equals(Object.class)) {
+            return handleCombineTransactional(invocation);
         }
+        return invocation.proceed();
+    }
 
+    private Object handleCombineTransactional(final InvocationWrapper methodInvocation) throws Throwable {
+        if (!RootContext.inGlobalTransaction()) {
+            // not in transaction, or this interceptor is disabled
+            return methodInvocation.proceed();
+        }
+        RootContext.bindBranchType(BranchType.XA);
         if (!CombineContext.set()) {
             // The same global transaction, the aspect does not need to enter
-            return joinPoint.proceed();
+            return methodInvocation.proceed();
         }
 
         try {
             // First cut entry
-            Object result = joinPoint.proceed();
+            Object result = methodInvocation.proceed();
 
             // doCleanupAfterCompletion marks the end of the transaction, resets and closes the connection
             CombineContext.clear();
@@ -57,7 +85,9 @@ public class CombineAspect {
             return result;
         } catch (Exception e) {
             LOGGER.error(
-                    String.format("Failed to handle,xid: %s occur exp msg: %s", RootContext.getXID(), e.getMessage()),
+                    String.format(
+                            "@CombineTransactional failed to handle,xid: %s occur exp msg: %s",
+                            RootContext.getXID(), e.getMessage()),
                     e);
             CombineContext.clear();
             // doRollback
@@ -80,7 +110,7 @@ public class CombineAspect {
                 }
                 try {
                     if (conn.isClosed()) {
-                        LOGGER.error("Connection is closed: {}", conn);
+                        LOGGER.warn("Connection is closed: {}", conn);
                     }
                     conn.close();
                 } catch (Throwable t) {
@@ -91,6 +121,30 @@ public class CombineAspect {
             }
             // Clean up local cache connections
             CombineConnectionHolder.clear();
+            RootContext.unbindBranchType();
         }
+    }
+
+    @Override
+    public void onChangeEvent(ConfigurationChangeEvent event) {}
+
+    @Override
+    public Set<String> getMethodsToProxy() {
+        return methodsToProxy;
+    }
+
+    @Override
+    public SeataInterceptorPosition getPosition() {
+        return SeataInterceptorPosition.AfterTransaction;
+    }
+
+    @Override
+    public String type() {
+        return InvocationHandlerType.CombineTransactional.name();
+    }
+
+    @Override
+    public int order() {
+        return 1;
     }
 }

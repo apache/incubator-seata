@@ -14,13 +14,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.integration.tx.api.combine;
+package org.apache.seata.integration.tx.api.interceptor.parser;
 
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.apache.seata.spring.annotation.CombineTransactional;
+import org.apache.seata.spring.annotation.GlobalTransactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@ComponentScan(basePackages = "org.apache.seata.integration.tx.api.combine")
-@Configuration
-@EnableAspectJAutoProxy(proxyTargetClass = true)
-public class CombineAutoConfiguration {}
+/**
+ * The type Business.
+ */
+@GlobalTransactional(timeoutMills = 300000, name = "busi-doBiz")
+@CombineTransactional
+public class BusinessCombineImpl implements Business {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BusinessCombineImpl.class);
+
+    @Override
+    public String doBiz(String msg) {
+        LOGGER.info("Business doBiz");
+        return "hello " + msg;
+    }
+}
