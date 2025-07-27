@@ -1136,6 +1136,29 @@ public interface ConfigurationKeys {
     String SERVER_RAFT_COMPRESSOR = SERVER_RAFT + "compressor";
 
     /**
+     * The constant SERVER_HTTP.
+     */
+    String SERVER_HTTP = SERVER_PREFIX + "http.";
+
+    String SERVER_HTTP_FILTER_PREFIX = SERVER_HTTP + "filter.";
+
+    /**
+     * The constant SERVER_HTTP_FILTERS_ENABLED.
+     */
+    String SERVER_HTTP_FILTER_ENABLE = SERVER_HTTP_FILTER_PREFIX + "enabled";
+
+    /**
+     * The constant SERVER_HTTP_FILTER_XSS_ENABLED.
+     */
+    String SERVER_HTTP_FILTER_XSS_FILTER_ENABLE = SERVER_HTTP_FILTER_PREFIX + "xss.enabled";
+
+    /**
+     * The constant SERVER_HTTP_FILTER_XSS_FILTER_KEYWORDS.
+     *
+     */
+    String SERVER_HTTP_FILTER_XSS_FILTER_KEYWORDS = SERVER_HTTP_FILTER_PREFIX + "xss.keywords";
+
+    /**
      * The constant IS_USE_CLOUD_NAMESPACE_PARSING.
      */
     String IS_USE_CLOUD_NAMESPACE_PARSING = "isUseCloudNamespaceParsing";
