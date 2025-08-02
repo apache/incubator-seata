@@ -119,6 +119,24 @@ class HttpRequestFilterManagerTest {
     }
 
     @Test
+    void testInitializeFilters_filterEnabledFalse() {
+        MockFilter filter = mock(MockFilter.class);
+        when(filter.shouldApply()).thenReturn(true);
+
+        try (MockedStatic<ConfigurationFactory> configMock = mockStatic(ConfigurationFactory.class)) {
+            Configuration mockConfig = mock(Configuration.class);
+            when(mockConfig.getBoolean(ConfigurationKeys.SERVER_HTTP_FILTER_ENABLE, true))
+                    .thenReturn(false);
+            configMock.when(ConfigurationFactory::getInstance).thenReturn(mockConfig);
+            HttpRequestFilterManager.initializeFilters();
+
+            HttpRequestFilterChain chain = HttpRequestFilterManager.getFilterChain();
+            assertNotNull(chain);
+            assertTrue(chain.getFilters().isEmpty(), "Filters list should be empty when filter config is false");
+        }
+    }
+
+    @Test
     void testGetFilterChain_beforeInitialization_shouldThrow() {
         IllegalStateException exception =
                 assertThrows(IllegalStateException.class, HttpRequestFilterManager::getFilterChain);

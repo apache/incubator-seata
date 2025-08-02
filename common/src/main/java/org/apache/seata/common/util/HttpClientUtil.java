@@ -51,6 +51,7 @@ public class HttpClientUtil {
 
     private static final PoolingHttpClientConnectionManager POOLING_HTTP_CLIENT_CONNECTION_MANAGER =
             new PoolingHttpClientConnectionManager();
+
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     static {
