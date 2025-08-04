@@ -28,7 +28,7 @@ public abstract class AbstractProxyInvocationHandler implements ProxyInvocationH
 
     protected abstract Object doInvoke(InvocationWrapper invocation) throws Throwable;
 
-    protected int order = Integer.MAX_VALUE;
+    protected int order = 0;
 
     protected ProxyInvocationHandler nextInvocationHandlerChain;
 
@@ -59,7 +59,7 @@ public abstract class AbstractProxyInvocationHandler implements ProxyInvocationH
 
     @Override
     public int getOrder() {
-        return this.order;
+        return this.order();
     }
 
     @Override
