@@ -44,10 +44,9 @@ public class HttpRequestFilterManager {
                     HTTP_REQUEST_FILTERS.add(filter);
                 }
             }
-
             HTTP_REQUEST_FILTERS.sort(Comparator.comparingInt(HttpRequestFilter::getOrder));
-            HTTP_REQUEST_FILTER_CHAIN = new HttpRequestFilterChain(HTTP_REQUEST_FILTERS);
         }
+        HTTP_REQUEST_FILTER_CHAIN = new HttpRequestFilterChain(HTTP_REQUEST_FILTERS);
         initialized = true;
     }
 
