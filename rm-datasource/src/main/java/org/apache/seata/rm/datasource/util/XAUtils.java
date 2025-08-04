@@ -117,7 +117,6 @@ public class XAUtils {
                     Class<?> kingbaseConnectionClass = Class.forName("com.kingbase8.core.BaseConnection");
                     return xaConnectionClass.getConstructor(kingbaseConnectionClass);
                 case JdbcConstants.DM:
-                    // 达梦
                     return xaConnectionClass.getConstructor(Connection.class);
                 default:
                     throw new SQLException("xa reflect not support dbType: " + dbType);

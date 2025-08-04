@@ -76,64 +76,38 @@ public class XAUtilsTest {
         }
     }
 
+    private void testCreateXAConnectionForDbType(String dbType, String connectionClass, String xaConnectionClass) {
+        try {
+            when(mockDataSourceResource.getDbType()).thenReturn(dbType);
+
+            Connection specificConn = mock(Class.forName(connectionClass).asSubclass(Connection.class));
+
+            try (MockedConstruction<?> xaConstruction = mockConstruction(
+                    Class.forName(xaConnectionClass).asSubclass(XAConnection.class),
+                    (mock, context) -> {
+                        Connection param = (Connection) context.arguments().get(0);
+                        assertSame(specificConn, param);
+                    })) {
+
+                XAConnection result = XAUtils.createXAConnection(specificConn, mockDataSourceResource);
+                assertNotNull(result);
+            }
+        } catch (Exception e) {
+            fail(dbType + " test failed: " + e.getMessage());
+        }
+    }
     @Test
     public void testCreateXAConnectionMariaDB() throws SQLException, ClassNotFoundException {
-        when(mockDataSourceResource.getDbType()).thenReturn(MARIADB);
-        // 模拟MariaDB特定的连接类
-        Class<?> mariaDbConnectionClass = Class.forName("org.mariadb.jdbc.MariaDbConnection");
-        Connection mariaMockConnection = mock(mariaDbConnectionClass.asSubclass(Connection.class));
-        try (MockedConstruction<?> ignored = mockConstruction(
-                Class.forName("org.mariadb.jdbc.MariaXaConnection").asSubclass(XAConnection.class), (mock, context) -> {
-                    // 验证构造器参数类型
-                    Connection connectionParam =
-                            (Connection) context.arguments().get(0);
-                    assertSame(mariaMockConnection, connectionParam);
-                })) {
-
-            XAConnection result = XAUtils.createXAConnection(mariaMockConnection, mockDataSourceResource);
-            assertNotNull(result);
-        } catch (ClassNotFoundException e) {
-            fail("MariaDB XAConnection class not found in test environment");
-        }
+        testCreateXAConnectionForDbType(MARIADB, "org.mariadb.jdbc.MariaDbConnection", "org.mariadb.jdbc.MariaXaConnection");
     }
 
     @Test
     public void testCreateXAConnectionKingbase() throws SQLException, ClassNotFoundException {
-        when(mockDataSourceResource.getDbType()).thenReturn(KINGBASE);
-        // 模拟Kingbase特定的连接类
-        Class<?> kingbaseConnectionClass = Class.forName("com.kingbase8.core.BaseConnection");
-        Connection kingbaseMockConnection = mock(kingbaseConnectionClass.asSubclass(Connection.class));
-        try (MockedConstruction<?> ignored = mockConstruction(
-                Class.forName("com.kingbase8.xa.KBXAConnection").asSubclass(XAConnection.class), (mock, context) -> {
-                    // 验证构造器参数类型
-                    Connection connectionParam =
-                            (Connection) context.arguments().get(0);
-                    assertSame(kingbaseMockConnection, connectionParam);
-                })) {
-            XAConnection result = XAUtils.createXAConnection(kingbaseMockConnection, mockDataSourceResource);
-            assertNotNull(result);
-        } catch (ClassNotFoundException e) {
-            fail("Kingbase XAConnection class not found in test environment");
-        }
+        testCreateXAConnectionForDbType(KINGBASE, "com.kingbase8.core.BaseConnection", "com.kingbase8.xa.KBXAConnection");
     }
 
     @Test
     public void testCreateXAConnectionDM() throws SQLException, ClassNotFoundException {
-        when(mockDataSourceResource.getDbType()).thenReturn(DM);
-        // 模拟达梦特定的连接类
-        Class<?> dmConnectionClass = Class.forName("dm.jdbc.driver.DmdbConnection");
-        Connection dmMockConnection = mock(dmConnectionClass.asSubclass(Connection.class));
-        try (MockedConstruction<?> ignored = mockConstruction(
-                Class.forName("dm.jdbc.driver.DmdbXAConnection").asSubclass(XAConnection.class), (mock, context) -> {
-                    // 验证构造器参数类型
-                    Connection connectionParam =
-                            (Connection) context.arguments().get(0);
-                    assertSame(dmMockConnection, connectionParam);
-                })) {
-            XAConnection result = XAUtils.createXAConnection(dmMockConnection, mockDataSourceResource);
-            assertNotNull(result);
-        } catch (ClassNotFoundException e) {
-            fail("DM XAConnection class not found in test environment");
-        }
+        testCreateXAConnectionForDbType(DM, "dm.jdbc.driver.DmdbConnection", "dm.jdbc.driver.DmdbXAConnection");
     }
 }
