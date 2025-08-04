@@ -19,13 +19,11 @@ package org.apache.seata.integration.tx.api.interceptor.handler;
 import org.apache.seata.config.CachedConfigurationChangeListener;
 import org.apache.seata.config.ConfigurationChangeEvent;
 import org.apache.seata.core.context.RootContext;
-import org.apache.seata.core.model.BranchType;
 import org.apache.seata.integration.tx.api.interceptor.InvocationHandlerType;
 import org.apache.seata.integration.tx.api.interceptor.InvocationWrapper;
 import org.apache.seata.integration.tx.api.interceptor.SeataInterceptorPosition;
 import org.apache.seata.integration.tx.api.util.ClassUtils;
 import org.apache.seata.rm.datasource.combine.CombineConnectionHolder;
-import org.apache.seata.rm.datasource.combine.CombineContext;
 import org.apache.seata.rm.datasource.xa.ConnectionProxyXA;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,20 +64,14 @@ public class CombineTransactionalInterceptorHandler extends AbstractProxyInvocat
             // not in transaction, or this interceptor is disabled
             return methodInvocation.proceed();
         }
-        RootContext.bindBranchType(BranchType.XA);
-        if (!CombineContext.set()) {
-            // The same global transaction, the aspect does not need to enter
-            return methodInvocation.proceed();
-        }
+
+        RootContext.bindCombineTransaction();
 
         try {
-            // First cut entry
             Object result = methodInvocation.proceed();
 
-            // doCleanupAfterCompletion marks the end of the transaction, resets and closes the connection
-            CombineContext.clear();
-            // doCommit
             for (ConnectionProxyXA conn : CombineConnectionHolder.getDsConn()) {
+                conn.setCombine(false);
                 conn.commit();
             }
             return result;
@@ -89,14 +81,13 @@ public class CombineTransactionalInterceptorHandler extends AbstractProxyInvocat
                             "@CombineTransactional failed to handle,xid: %s occur exp msg: %s",
                             RootContext.getXID(), e.getMessage()),
                     e);
-            CombineContext.clear();
             // doRollback
             for (ConnectionProxyXA conn : CombineConnectionHolder.getDsConn()) {
+                conn.setCombine(false);
                 conn.rollback();
             }
             throw e;
         } finally {
-            CombineContext.clear();
             for (ConnectionProxyXA conn : CombineConnectionHolder.getDsConn()) {
                 try {
                     // Reset autocommit (if not autocommitting)
@@ -121,7 +112,7 @@ public class CombineTransactionalInterceptorHandler extends AbstractProxyInvocat
             }
             // Clean up local cache connections
             CombineConnectionHolder.clear();
-            RootContext.unbindBranchType();
+            RootContext.unbindCombineTransaction();
         }
     }
 

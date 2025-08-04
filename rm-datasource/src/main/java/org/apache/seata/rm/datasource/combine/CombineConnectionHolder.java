@@ -51,10 +51,16 @@ public class CombineConnectionHolder {
 
         if (connectionProxyMap.putIfAbsent(dataSource, connection) == null) {
             connection.setAutoCommit(false);
+            connection.setCombine(true);
         }
     }
 
     public static void clear() {
         CONNECTION_HOLDER.get().remove(RootContext.getXID());
+    }
+
+    public static boolean inCombineTransaction() {
+        Map<String, Map<Object, ConnectionProxyXA>> connMap = CONNECTION_HOLDER.get();
+        return connMap.get(RootContext.getXID()) != null;
     }
 }

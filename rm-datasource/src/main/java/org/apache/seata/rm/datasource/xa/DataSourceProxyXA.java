@@ -23,7 +23,6 @@ import org.apache.seata.core.protocol.Version;
 import org.apache.seata.rm.DefaultResourceManager;
 import org.apache.seata.rm.datasource.SeataDataSourceProxy;
 import org.apache.seata.rm.datasource.combine.CombineConnectionHolder;
-import org.apache.seata.rm.datasource.combine.CombineContext;
 import org.apache.seata.rm.datasource.util.JdbcUtils;
 import org.apache.seata.rm.datasource.util.XAUtils;
 import org.slf4j.Logger;
@@ -89,7 +88,7 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
 
     @Override
     public Connection getConnection() throws SQLException {
-        if (RootContext.inGlobalTransaction() && CombineContext.get()) {
+        if (RootContext.inGlobalTransaction() && RootContext.inCombineTransaction()) {
             ConnectionProxyXA connectionProxyXA = CombineConnectionHolder.get(this.dataSource);
             if (connectionProxyXA != null && !connectionProxyXA.isClosed()) {
                 return connectionProxyXA;
@@ -101,7 +100,7 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
 
     @Override
     public Connection getConnection(String username, String password) throws SQLException {
-        if (RootContext.inGlobalTransaction() && CombineContext.get()) {
+        if (RootContext.inGlobalTransaction() && RootContext.inCombineTransaction()) {
             ConnectionProxyXA connectionProxyXA = CombineConnectionHolder.get(this.dataSource);
             if (connectionProxyXA != null && !connectionProxyXA.isClosed()) {
                 return connectionProxyXA;
@@ -116,7 +115,7 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
             return connection;
         }
         ConnectionProxyXA connectionProxyXA = (ConnectionProxyXA) getConnectionProxyXA(connection);
-        if (CombineContext.get()) {
+        if (RootContext.inCombineTransaction()) {
             CombineConnectionHolder.putConnection(this.dataSource, connectionProxyXA);
         }
         return connectionProxyXA;

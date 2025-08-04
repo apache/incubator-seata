@@ -91,6 +91,8 @@ public class RootContext {
 
     private static BranchType DEFAULT_BRANCH_TYPE;
 
+    public static final String KEY_COMBINE_TRANSACTION_FLAG = "TX_COMBINE";
+
     public static void setDefaultBranchType(BranchType defaultBranchType) {
         if (defaultBranchType != AT && defaultBranchType != XA) {
             throw new IllegalArgumentException("The default branch type must be " + AT + " or " + XA + "."
@@ -285,5 +287,17 @@ public class RootContext {
      */
     public static Map<String, Object> entries() {
         return CONTEXT_HOLDER.entries();
+    }
+
+    public static boolean inCombineTransaction() {
+        return CONTEXT_HOLDER.get(KEY_COMBINE_TRANSACTION_FLAG) != null;
+    }
+
+    public static void bindCombineTransaction() {
+        CONTEXT_HOLDER.put(KEY_COMBINE_TRANSACTION_FLAG, true);
+    }
+
+    public static void unbindCombineTransaction() {
+        CONTEXT_HOLDER.remove(KEY_COMBINE_TRANSACTION_FLAG);
     }
 }

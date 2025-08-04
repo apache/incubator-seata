@@ -25,7 +25,6 @@ import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.rm.BaseDataSourceResource;
 import org.apache.seata.rm.DefaultResourceManager;
-import org.apache.seata.rm.datasource.combine.CombineContext;
 import org.apache.seata.rm.datasource.util.SeataXAResource;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
@@ -73,6 +72,8 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
     private boolean shouldBeHeld = false;
 
     private final ResourceLock resourceLock = new ResourceLock();
+
+    private volatile boolean combine = false;
 
     /**
      * Constructor of Connection Proxy for XA mode.
@@ -228,7 +229,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
     @Override
     public void commit() throws SQLException {
         try (ResourceLock ignored = resourceLock.obtain()) {
-            if (CombineContext.get()) {
+            if (combine) {
                 return;
             }
             if (currentAutoCommitStatus || isReadOnly()) {
@@ -243,7 +244,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
 
     @Override
     public void rollback() throws SQLException {
-        if (CombineContext.get()) {
+        if (combine) {
             return;
         }
         if (currentAutoCommitStatus || isReadOnly()) {
@@ -307,6 +308,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
         if (!isHeld()) {
             xaBranchXid = null;
         }
+        combine = false;
     }
 
     private void checkTimeout(Long now) throws XAException {
@@ -319,7 +321,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
     @Override
     public void close() throws SQLException {
         try (ResourceLock ignored = resourceLock.obtain()) {
-            if (CombineContext.get()) {
+            if (combine) {
                 return;
             }
             try {
@@ -444,5 +446,9 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
      */
     public ResourceLock getResourceLock() {
         return resourceLock;
+    }
+
+    public void setCombine(boolean combine) {
+        this.combine = combine;
     }
 }
