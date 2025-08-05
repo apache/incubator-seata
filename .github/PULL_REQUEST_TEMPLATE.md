@@ -16,6 +16,7 @@
 -->
 <!-- Please make sure you have read and understood the contributing guidelines -->
 
+- [ ] I have read the [CONTRIBUTING.md](../../CONTRIBUTING.md) guidelines.
 - [ ] I have registered the PR [changes](../changes).
 
 ### Ⅰ. Describe what this PR did
