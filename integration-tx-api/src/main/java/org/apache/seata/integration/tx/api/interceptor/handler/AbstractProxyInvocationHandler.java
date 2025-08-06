@@ -59,7 +59,12 @@ public abstract class AbstractProxyInvocationHandler implements ProxyInvocationH
 
     @Override
     public int getOrder() {
-        return this.order();
+        return this.order;
+    }
+
+    @Override
+    public int order() {
+        return this.order;
     }
 
     @Override
