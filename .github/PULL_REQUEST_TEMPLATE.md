@@ -16,7 +16,8 @@
 -->
 <!-- Please make sure you have read and understood the contributing guidelines -->
 
-- [ ] I have registered the PR [changes](../changes).
+- [ ] I have read the [CONTRIBUTING.md](https://github.com/apache/incubator-seata/blob/2.x/CONTRIBUTING.md) guidelines.
+- [ ] I have registered the PR [changes](https://github.com/apache/incubator-seata/tree/2.x/changes).
 
 ### Ⅰ. Describe what this PR did
 
