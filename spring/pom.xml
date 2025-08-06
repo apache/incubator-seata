@@ -131,6 +131,14 @@
                             <goal>compile</goal>
                         </goals>
                     </execution>
+                    <!-- Add this execution to compile the test code -->
+                    <execution>
+                        <id>test-compile</id>
+                        <phase>test-compile</phase>
+                        <goals>
+                            <goal>test-compile</goal>
+                        </goals>
+                    </execution>
                 </executions>
             </plugin>
         </plugins>
