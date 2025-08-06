@@ -128,7 +128,6 @@ public class MetricsPublisher {
                 rateLimitInfo.getTraceId(),
                 rateLimitInfo.getLimitType(),
                 rateLimitInfo.getApplicationId(),
-                rateLimitInfo.getClientId(),
                 rateLimitInfo.getServerIpAddressAndPort()));
     }
 }
