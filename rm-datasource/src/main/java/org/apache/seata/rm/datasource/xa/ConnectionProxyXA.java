@@ -163,6 +163,7 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
      * @throws XAException XAException
      */
     public void xaRollback(XAXid xaXid) throws XAException {
+        xaEnd(xaXid, XAResource.TMFAIL);
         xaResource.rollback(xaXid);
         releaseIfNecessary();
     }

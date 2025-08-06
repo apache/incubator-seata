@@ -16,8 +16,6 @@
  */
 package org.apache.seata.integration.tx.api.interceptor.handler;
 
-import org.apache.seata.config.CachedConfigurationChangeListener;
-import org.apache.seata.config.ConfigurationChangeEvent;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.integration.tx.api.interceptor.InvocationHandlerType;
 import org.apache.seata.integration.tx.api.interceptor.InvocationWrapper;
@@ -36,8 +34,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
  * The type Combine transactional interceptor handler.
  *
  */
-public class CombineTransactionalInterceptorHandler extends AbstractProxyInvocationHandler
-        implements CachedConfigurationChangeListener {
+public class CombineTransactionalInterceptorHandler extends AbstractProxyInvocationHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CombineTransactionalInterceptorHandler.class);
 
@@ -115,9 +112,6 @@ public class CombineTransactionalInterceptorHandler extends AbstractProxyInvocat
             RootContext.unbindCombineTransaction();
         }
     }
-
-    @Override
-    public void onChangeEvent(ConfigurationChangeEvent event) {}
 
     @Override
     public Set<String> getMethodsToProxy() {
