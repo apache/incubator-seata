@@ -31,6 +31,10 @@
     <name>seata-spring-boot-starter ${project.version}</name>
     <description>spring-boot-starter for Seata built with Maven</description>
 
+    <properties>
+        <jakarta.servlet-api.version>5.0.0</jakarta.servlet-api.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -79,6 +83,7 @@
         <dependency>
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>
+            <version>${jakarta.servlet-api.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -87,5 +92,17 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+    <profiles>
+        <!--        notice: dependencies defined in args-for-test-by-jdk17-and-above profile will be not taken effect in jdk17-->
+        <profile>
+            <id>dependencies-for-test-by-jdk17-and-above</id>
+            <activation>
+                <jdk>[17,)</jdk>
+            </activation>
+            <properties>
+                <jakarta.servlet-api.version>6.0.0</jakarta.servlet-api.version>
+            </properties>
+        </profile>
+    </profiles>
 
 </project>

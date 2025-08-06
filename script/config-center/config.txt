@@ -133,7 +133,7 @@ store.db.maxConn=30
 store.db.globalTable=global_table
 store.db.branchTable=branch_table
 store.db.distributedLockTable=distributed_lock
-store.db.vgroupTable=vgroup-table
+store.db.vgroupTable=vgroup_table
 store.db.queryLimit=100
 store.db.lockTable=lock_table
 store.db.maxWait=5000
@@ -204,6 +204,10 @@ server.ratelimit.enable=false
 server.ratelimit.bucketTokenNumPerSecond = 999999
 server.ratelimit.bucketTokenMaxNum = 999999
 server.ratelimit.bucketTokenInitialNum = 999999
+
+server.http.filter.enabled=true
+server.http.filter.xss.enabled=true
+server.http.filter.xss.keywords=["<script>", "</script>", "javascript:", "vbscript:"]
 
 #Metrics configuration, only for the server
 metrics.enabled=true

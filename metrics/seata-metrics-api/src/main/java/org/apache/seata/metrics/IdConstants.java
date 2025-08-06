@@ -85,8 +85,6 @@ public interface IdConstants {
 
     String LIMIT_TYPE_KEY = "limitType";
 
-    String CLIENT_ID_KEY = "clientId";
-
     String HOST_AND_PORT = "hostAndPort";
 
     String STATUS_VALUE_COMMIT_RETRYING_KEY = "CommitRetrying";

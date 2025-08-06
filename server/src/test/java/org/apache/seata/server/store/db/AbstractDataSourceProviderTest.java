@@ -33,6 +33,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
  */
@@ -127,5 +129,84 @@ public class AbstractDataSourceProviderTest {
         ClassLoader classLoader = ClassLoader.getSystemClassLoader();
         Class<?> driverClass = Class.forName(mysqlJdbcDriver, true, classLoader);
         Assertions.assertNotNull(driverClass);
+    }
+
+    @Test
+    @Order(8)
+    public void testHikariDataSourceProviderWithMySQLDriver() {
+        // Set MySQL 8 driver
+        System.setProperty("store.db.driverClassName", mysql8JdbcDriver);
+
+        try {
+            // Use Hikari data source provider
+            DataSource dataSource = EnhancedServiceLoader.load(DataSourceProvider.class, hikariDatasourceType)
+                    .provide();
+            Assertions.assertNotNull(dataSource);
+
+            // Verify it's a HikariDataSource type
+            Assertions.assertTrue(dataSource instanceof com.zaxxer.hikari.HikariDataSource);
+
+            // The most critical verification: try to get a connection (this will trigger the actual driver loading)
+            // Note: This might throw an exception due to database connection failure, but importantly, it should not
+            // show "Failed to load driver class" error
+            try {
+                Connection connection = dataSource.getConnection();
+                // If we reach here, it means the driver loaded successfully and connection succeeded
+                Assertions.assertNotNull(connection);
+                connection.close();
+            } catch (SQLException e) {
+                // Database connection failure is normal (test environment might not have real MySQL), but error message
+                // should not contain driver class loading failure
+                String errorMessage = e.getMessage();
+                Assertions.assertFalse(
+                        errorMessage.contains("Failed to load driver class"),
+                        "Driver class should be loaded successfully, but got: " + errorMessage);
+                Assertions.assertFalse(
+                        errorMessage.contains("HikariConfig class loader"),
+                        "Driver classloader issue should be resolved, but got: " + errorMessage);
+                // Here we expect connection-related errors, such as connection timeout, connection refused, etc.
+                System.out.println("Expected database connection error (driver loaded successfully): " + errorMessage);
+            }
+
+        } catch (Exception e) {
+            // If it's a driver loading related exception, the test should fail
+            if (e.getMessage().contains("Failed to load driver class")
+                    || e.getMessage().contains("HikariConfig class loader")) {
+                Assertions.fail("HikariCP should load MySQL driver successfully with custom classloader, but got: "
+                        + e.getMessage());
+            }
+            // Other exceptions might be normal (such as configuration issues, etc.)
+            System.out.println("Non-driver related exception (might be expected): " + e.getMessage());
+        }
+    }
+
+    @Test
+    @Order(9)
+    public void testHikariDataSourceProviderWithMySQLLegacyDriver() {
+        // Test with legacy MySQL driver as well
+        System.setProperty("store.db.driverClassName", mysqlJdbcDriver);
+
+        try {
+            DataSource dataSource = EnhancedServiceLoader.load(DataSourceProvider.class, hikariDatasourceType)
+                    .provide();
+            Assertions.assertNotNull(dataSource);
+
+            // Try to get connection to verify driver loading
+            try {
+                Connection connection = dataSource.getConnection();
+                Assertions.assertNotNull(connection);
+                connection.close();
+            } catch (SQLException e) {
+                String errorMessage = e.getMessage();
+                Assertions.assertFalse(
+                        errorMessage.contains("Failed to load driver class"),
+                        "Legacy MySQL driver should also be loaded successfully, but got: " + errorMessage);
+            }
+
+        } catch (Exception e) {
+            if (e.getMessage().contains("Failed to load driver class")) {
+                Assertions.fail("HikariCP should load legacy MySQL driver successfully, but got: " + e.getMessage());
+            }
+        }
     }
 }

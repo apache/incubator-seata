@@ -36,6 +36,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
@@ -55,6 +56,8 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
  */
 @SpringBootTest
 @Import(DynamicPortTestConfig.class)
+// Unit test triggered a bug in Druid, see the issue https://github.com/alibaba/druid/issues/4936
+@DisabledIfSystemProperty(named = "druid.version", matches = "1.2.12")
 public class DataBaseSessionManagerTest {
 
     static SessionManager sessionManager = null;
@@ -65,6 +68,7 @@ public class DataBaseSessionManagerTest {
 
     @BeforeAll
     public static void start(ApplicationContext context) throws Exception {
+        // Unit test triggered a bug in Druid, see the issue https://github.com/alibaba/druid/issues/4936
         DataBaseSessionManager tempSessionManager = new DataBaseSessionManager();
         DataBaseTransactionStoreManager transactionStoreManager = DataBaseTransactionStoreManager.getInstance();
 
