@@ -1,0 +1,96 @@
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+name: Detect flaky Test
+
+on:
+  workflow_run:
+    workflows: ["build"]
+    types:
+      - completed
+
+permissions:
+  issues: write
+
+jobs:
+  detect-flaky:
+    if: github.event.workflow_run.conclusion == 'success' && fromJSON(github.event.workflow_run.run_attempt) == 2
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java: [ 8, 17, 21 ]
+    steps:
+      # step 1
+      - name: Checkout source code
+        uses: actions/checkout@v4
+      # step 2
+      - name: Download artifacts for both runs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          JAVA_VERSION: ${{ matrix.java }}
+        run: |
+          download_artifact() { 
+            ARTIFACT_NAME=$1
+            OUTPUT_DIR=$2
+
+            echo "Fetching artifacts for workflow run ID: $RUN_ID"
+            artifacts_url="https://api.github.com/repos/${{ github.repository }}/actions/runs/$RUN_ID/artifacts"
+
+            artifact_url=$(curl -s -H "Authorization: token $GITHUB_TOKEN" $artifacts_url \
+              | jq -r --arg name "$ARTIFACT_NAME" '.artifacts[] | select(.name == $name) | .archive_download_url')
+
+            if [ -z "$artifact_url" ]; then
+              echo "❌ Artifact not found: $ARTIFACT_NAME"
+              exit 1
+            fi
+
+            echo "✅ Found artifact: $ARTIFACT_NAME"
+            curl -L -H "Authorization: token $GITHUB_TOKEN" "$artifact_url" -o artifact.zip
+            mkdir -p "$OUTPUT_DIR"
+            unzip artifact.zip -d "$OUTPUT_DIR"
+          }
+
+          download_artifact "run-1-surefire-reports-$JAVA_VERSION" "reports-1-$JAVA_VERSION"
+          download_artifact "run-2-surefire-reports-$JAVA_VERSION" "reports-2-$JAVA_VERSION"
+      # step 3
+      - name: "Use Python 3.x"
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.12'
+      # step 4
+      - name: Parse failed tests
+        id: parse_failed_tests
+        run: |
+          output=$(python3 .github/scripts/parse_failed_tests.py reports-1-${{ matrix.java }} reports-2-${{ matrix.java }})
+          echo "flaky_tests=$output" >> "$GITHUB_OUTPUT"
+      - name: Create GitHub issue for flaky tests
+        if: steps.parse_failed_tests.outputs.flaky_tests != '[]'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const flakyTests = JSON.parse(process.env.FLAKY_TESTS);
+            const body = `Detected flaky tests in Java ${{ matrix.java }} run:\n\n` +
+              flakyTests.map(t => `- ${t}`).join('\n');
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Flaky tests detected for Java ${{ matrix.java }}`,
+              body: body,
+              labels: ['flaky-test'],
+            });
+        env:
+          FLAKY_TESTS: ${{ steps.parse_failed_tests.outputs.flaky_tests }}

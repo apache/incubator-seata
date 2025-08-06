@@ -66,6 +66,8 @@ jobs:
       # step 4
       - name: "Print maven version"
         run: ./mvnw -version
+      - name: "Set RUN_ATTEMPT env variable"
+        run: echo "I_RUN_ATTEMPT=${{ github.run_attempt }}" >> $GITHUB_ENV
       # step 5
       - name: "Restore local maven repository cache"
         uses: actions/cache/restore@v4
@@ -99,6 +101,15 @@ jobs:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}-${{ env.TODAY }}
       # step 8
+      - name: "Upload Surefire reports"
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: run-${{ github.run_attempt }}-surefire-reports-${{ matrix.java }}
+          path: |
+            **/target/surefire-reports/*.xml
+            **/target/failsafe-reports/*.xml
+      # step 9
       - name: "Codecov"
         if: matrix.java == '8'
         uses: codecov/codecov-action@v4.0.1
