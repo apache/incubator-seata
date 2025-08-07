@@ -36,7 +36,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledIf;
+import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
@@ -56,9 +56,8 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
  */
 @SpringBootTest
 @Import(DynamicPortTestConfig.class)
-@EnabledIf(
-        value = "org.apache.seata.server.session.db.DataBaseSessionManagerTest#isEnableDruidTest",
-        disabledReason = "druid test is skipped")
+// Unit test triggered a bug in Druid, see the issue https://github.com/alibaba/druid/issues/4936
+@DisabledIfSystemProperty(named = "druid.version", matches = "1.2.12")
 public class DataBaseSessionManagerTest {
 
     static SessionManager sessionManager = null;
@@ -66,12 +65,6 @@ public class DataBaseSessionManagerTest {
     static LogStoreDataBaseDAO logStoreDataBaseDAO = null;
 
     static BasicDataSource dataSource = null;
-
-    public static boolean isEnableDruidTest() {
-        // Unit test triggered a bug in Druid, see the issue https://github.com/alibaba/druid/issues/4936
-        String skipTests = System.getProperty("skip.druid.tests", "true");
-        return Boolean.parseBoolean(skipTests);
-    }
 
     @BeforeAll
     public static void start(ApplicationContext context) throws Exception {
