@@ -400,7 +400,7 @@ public class EtcdConfiguration extends AbstractConfiguration {
                                 .getValue()
                                 .getBytes();
                         if (bytes == null || bytes.length == 0) {
-                            LOGGER.warn("config [{}] value is empty from watchResponse", dataId);
+                            LOGGER.warn("config '{}' value is empty from watchResponse", dataId);
                             return;
                         }
 

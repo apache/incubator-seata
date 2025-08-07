@@ -351,6 +351,10 @@ public class ConsulConfiguration extends AbstractConfiguration {
                     String value = response.getValue().getDecodedValue();
                     consulIndex = currentIndex;
                     if (dataId.equals(getConsulConfigKey())) {
+                        if (StringUtils.isBlank(value)) {
+                            LOGGER.warn("Received empty config from Consul for dataId '{}', Skip updating current configuration.", dataId);
+                            return;
+                        }
                         // The new config change listener
                         Properties seataConfigNew;
                         try {
