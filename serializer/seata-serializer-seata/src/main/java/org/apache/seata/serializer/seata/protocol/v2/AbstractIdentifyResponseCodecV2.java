@@ -18,6 +18,7 @@ package org.apache.seata.serializer.seata.protocol.v2;
 
 import io.netty.buffer.ByteBuf;
 import org.apache.seata.core.protocol.AbstractIdentifyResponse;
+import org.apache.seata.core.protocol.Version;
 import org.apache.seata.serializer.seata.protocol.AbstractResultMessageCodec;
 
 import java.nio.ByteBuffer;
@@ -52,9 +53,10 @@ public class AbstractIdentifyResponseCodecV2  extends AbstractResultMessageCodec
 
     @Override
     public <T> void decode(T t, ByteBuffer in) {
-        super.decode(t, in);
         AbstractIdentifyResponse abstractIdentifyResponse = (AbstractIdentifyResponse) t;
-
+        if (Version.isAboveOrEqualV2(abstractIdentifyResponse.getVersion())) {
+            super.decode(t, in);
+        }
         abstractIdentifyResponse.setIdentified(in.get() == 1);
         short len = in.getShort();
         if (len <= 0) {

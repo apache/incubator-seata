@@ -99,6 +99,10 @@ public class Version {
     public static boolean isV0(String version) {
         return !isAboveOrEqualVersion(version, VERSION_0_7_1);
     }
+    public static boolean isAboveOrEqualV2(String version) {
+        //todo
+        return true;
+    }
 
     public static boolean isAboveOrEqualVersion071(String version) {
         return isAboveOrEqualVersion(version, VERSION_0_7_1);
