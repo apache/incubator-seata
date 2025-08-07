@@ -19,14 +19,22 @@ package org.apache.seata.config.nacos;
 import com.alibaba.nacos.api.exception.NacosException;
 import org.apache.seata.common.util.ReflectionUtil;
 import org.apache.seata.config.Configuration;
+import org.apache.seata.config.ConfigurationChangeEvent;
+import org.apache.seata.config.ConfigurationChangeListener;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.config.Dispose;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * The type Nacos configuration test
@@ -57,5 +65,70 @@ public class NacosConfigurationTest {
         properties = (Properties) method.invoke(configuration);
         Assertions.assertEquals("/foo", properties.getProperty("contextPath"));
         System.clearProperty("contextPath");
+    }
+
+    @Test
+    public void testInnerReceiveEmptyPushShouldNotUpdateConfig() throws Exception {
+
+        String dataId = "seata.properties";
+        String group = "SEATA_GROUP";
+        String configKey = "session.mode";
+
+        Properties oldConfig = new Properties();
+        oldConfig.setProperty(configKey, "db");
+
+        Field seataConfigField = NacosConfiguration.class.getDeclaredField("seataConfig");
+        seataConfigField.setAccessible(true);
+        seataConfigField.set(null, oldConfig);
+
+        TestListener listener = new TestListener();
+        NacosConfiguration.NacosListener nacosListener = getNacosListener(dataId, listener);
+
+        ConcurrentMap<ConfigurationChangeListener, NacosConfiguration.NacosListener> innerMap =
+                new ConcurrentHashMap<>();
+        innerMap.put(listener, nacosListener);
+
+        ConcurrentMap<String, ConcurrentMap<ConfigurationChangeListener, NacosConfiguration.NacosListener>> outerMap =
+                new ConcurrentHashMap<>();
+        outerMap.put(dataId, innerMap);
+
+        Field listenerMapField = NacosConfiguration.class.getDeclaredField("CONFIG_LISTENERS_MAP");
+        listenerMapField.setAccessible(true);
+        listenerMapField.set(null, outerMap);
+
+        // execute
+        nacosListener.innerReceive(dataId, group, "");
+
+        Properties actualConfig = (Properties) seataConfigField.get(null);
+        Assertions.assertEquals("db", actualConfig.getProperty(configKey));
+
+        Assertions.assertFalse(listener.invoked);
+    }
+
+    @NotNull
+    private static NacosConfiguration.NacosListener getNacosListener(String dataId, TestListener listener)
+            throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException,
+                    InvocationTargetException {
+        Class<?> outerClass = Class.forName("org.apache.seata.config.nacos.NacosConfiguration");
+        Constructor<?> constructor = outerClass.getDeclaredConstructor();
+        constructor.setAccessible(true);
+        Object nacosConfigurationInstance = constructor.newInstance();
+        Class<?> innerClass = Class.forName("org.apache.seata.config.nacos.NacosConfiguration$NacosListener");
+
+        Constructor<?> innerConstructor =
+                innerClass.getDeclaredConstructor(outerClass, String.class, ConfigurationChangeListener.class);
+        innerConstructor.setAccessible(true);
+        NacosConfiguration.NacosListener nacosListener = (NacosConfiguration.NacosListener)
+                innerConstructor.newInstance(nacosConfigurationInstance, dataId, listener);
+        return nacosListener;
+    }
+
+    private static class TestListener implements ConfigurationChangeListener {
+        boolean invoked = false;
+
+        @Override
+        public void onChangeEvent(ConfigurationChangeEvent event) {
+            invoked = true;
+        }
     }
 }

@@ -443,7 +443,9 @@ public class NacosConfiguration extends AbstractConfiguration implements Dispose
             // The new configuration method to puts all configurations into a dateId
             if (getNacosDataId().equals(dataId)) {
                 if (StringUtils.isBlank(configInfo)) {
-                    LOGGER.warn("Received empty config from Nacos for dataId '{}'. Skip updating current configuration.", dataId);
+                    LOGGER.warn(
+                            "Received empty config from Nacos for dataId '{}'. Skip updating current configuration.",
+                            dataId);
                     return;
                 }
                 Properties seataConfigNew = new Properties();
