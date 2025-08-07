@@ -16,11 +16,8 @@
  */
 package org.apache.seata.integration.tx.api.interceptor.parser;
 
-import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.ReflectionUtil;
-import org.apache.seata.config.CachedConfigurationChangeListener;
-import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.integration.tx.api.interceptor.handler.CombineTransactionalInterceptorHandler;
 import org.apache.seata.integration.tx.api.interceptor.handler.ProxyInvocationHandler;
 import org.apache.seata.spring.annotation.CombineTransactional;
@@ -45,11 +42,7 @@ public class CombineTransactionalInterceptorParser implements InterfaceParser {
         Class<?>[] interfacesIfJdk = DefaultTargetClassParser.get().findInterfaces(target);
 
         if (existsAnnotation(serviceInterface) || existsAnnotation(interfacesIfJdk)) {
-            ProxyInvocationHandler proxyInvocationHandler = createProxyInvocationHandler();
-            ConfigurationFactory.getInstance()
-                    .addConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, (CachedConfigurationChangeListener)
-                            proxyInvocationHandler);
-            return proxyInvocationHandler;
+            return createProxyInvocationHandler();
         }
 
         return null;
