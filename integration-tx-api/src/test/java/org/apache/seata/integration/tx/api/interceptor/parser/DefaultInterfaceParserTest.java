@@ -19,7 +19,6 @@ package org.apache.seata.integration.tx.api.interceptor.parser;
 import org.apache.seata.integration.tx.api.interceptor.InvocationWrapper;
 import org.apache.seata.integration.tx.api.interceptor.SeataInterceptorPosition;
 import org.apache.seata.integration.tx.api.interceptor.handler.AbstractProxyInvocationHandler;
-import org.apache.seata.integration.tx.api.interceptor.handler.GlobalTransactionalInterceptorHandler;
 import org.apache.seata.integration.tx.api.interceptor.handler.ProxyInvocationHandler;
 import org.junit.jupiter.api.Test;
 
@@ -31,8 +30,6 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 class DefaultInterfaceParserTest {
 
@@ -56,16 +53,6 @@ class DefaultInterfaceParserTest {
         assertEquals("handler2", handlers.get(0).type());
         assertEquals("handler3", handlers.get(1).type());
         assertEquals("handler1", handlers.get(2).type());
-    }
-
-    @Test
-    public void testGlobalTransactionalInterceptorHandlerOrder() {
-        // Create a GlobalTransactionalInterceptorHandler with a specific order
-        GlobalTransactionalInterceptorHandler handler = mock(GlobalTransactionalInterceptorHandler.class);
-        when(handler.order()).thenReturn(5);
-
-        // Verify the order method returns the expected value
-        assertEquals(5, handler.order());
     }
 
     /**
