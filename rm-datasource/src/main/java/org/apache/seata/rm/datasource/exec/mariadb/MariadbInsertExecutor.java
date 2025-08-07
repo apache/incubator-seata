@@ -16,11 +16,11 @@
  */
 package org.apache.seata.rm.datasource.exec.mariadb;
 
-import org.apache.seata.rm.datasource.exec.mysql.MySQLInsertExecutor;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.common.loader.Scope;
 import org.apache.seata.rm.datasource.StatementProxy;
 import org.apache.seata.rm.datasource.exec.StatementCallback;
+import org.apache.seata.rm.datasource.exec.mysql.MySQLInsertExecutor;
 import org.apache.seata.sqlparser.SQLRecognizer;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 
@@ -38,9 +38,8 @@ public class MariadbInsertExecutor extends MySQLInsertExecutor {
      * @param statementCallback the statement callback
      * @param sqlRecognizer     the sql recognizer
      */
-    public MariadbInsertExecutor(StatementProxy statementProxy, StatementCallback statementCallback,
-        SQLRecognizer sqlRecognizer) {
+    public MariadbInsertExecutor(
+            StatementProxy statementProxy, StatementCallback statementCallback, SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }
-
 }

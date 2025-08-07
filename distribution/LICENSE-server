@@ -1,0 +1,437 @@
+                                 Apache License
+                           Version 2.0, January 2004
+                        https://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that is granting the License.
+
+      "Legal Entity" shall mean the union of the acting entity and all
+      other entities that control, are controlled by, or are under common
+      control with that entity. For the purposes of this definition,
+      "control" means (properties) the power, direct or indirect, to cause the
+      direction or management of such entity, whether by contract or
+      otherwise, or (ii) ownership of fifty percent (50%) or more of the
+      outstanding shares, or (iii) beneficial ownership of such entity.
+
+      "You" (or "Your") shall mean an individual or Legal Entity
+      exercising permissions granted by this License.
+
+      "Source" form shall mean the preferred form for making modifications,
+      including but not limited to software source code, documentation
+      source, and configuration files.
+
+      "Object" form shall mean any form resulting from mechanical
+      transformation or translation of a Source form, including but
+      not limited to compiled object code, generated documentation,
+      and conversions to other media types.
+
+      "Work" shall mean the work of authorship, whether in Source or
+      Object form, made available under the License, as indicated by a
+      copyright notice that is included in or attached to the work
+      (an example is provided in the Appendix below).
+
+      "Derivative Works" shall mean any work, whether in Source or Object
+      form, that is based on (or derived from) the Work and for which the
+      editorial revisions, annotations, elaborations, or other modifications
+      represent, as a whole, an original work of authorship. For the purposes
+      of this License, Derivative Works shall not include works that remain
+      separable from, or merely link (or bind by name) to the interfaces of,
+      the Work and Derivative Works thereof.
+
+      "Contribution" shall mean any work of authorship, including
+      the original version of the Work and any modifications or additions
+      to that Work or Derivative Works thereof, that is intentionally
+      submitted to Licensor for inclusion in the Work by the copyright owner
+      or by an individual or Legal Entity authorized to submit on behalf of
+      the copyright owner. For the purposes of this definition, "submitted"
+      means any form of electronic, verbal, or written communication sent
+      to the Licensor or its representatives, including but not limited to
+      communication on electronic mailing lists, source code control systems,
+      and issue tracking systems that are managed by, or on behalf of, the
+      Licensor for the purpose of discussing and improving the Work, but
+      excluding communication that is conspicuously marked or otherwise
+      designated in writing by the copyright owner as "Not a Contribution."
+
+      "Contributor" shall mean Licensor and any individual or Legal Entity
+      on behalf of whom a Contribution has been received by Licensor and
+      subsequently incorporated within the Work.
+
+   2. Grant of Copyright License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      copyright license to reproduce, prepare Derivative Works of,
+      publicly display, publicly perform, sublicense, and distribute the
+      Work and such Derivative Works in Source or Object form.
+
+   3. Grant of Patent License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      (except as stated in this section) patent license to make, have made,
+      use, offer to sell, sell, import, and otherwise transfer the Work,
+      where such license applies only to those patent claims licensable
+      by such Contributor that are necessarily infringed by their
+      Contribution(s) alone or by combination of their Contribution(s)
+      with the Work to which such Contribution(s) was submitted. If You
+      institute patent litigation against any entity (including a
+      cross-claim or counterclaim in a lawsuit) alleging that the Work
+      or a Contribution incorporated within the Work constitutes direct
+      or contributory patent infringement, then any patent licenses
+      granted to You under this License for that Work shall terminate
+      as of the date such litigation is filed.
+
+   4. Redistribution. You may reproduce and distribute copies of the
+      Work or Derivative Works thereof in any medium, with or without
+      modifications, and in Source or Object form, provided that You
+      meet the following conditions:
+
+      (a) You must give any other recipients of the Work or
+          Derivative Works a copy of this License; and
+
+      (b) You must cause any modified files to carry prominent notices
+          stating that You changed the files; and
+
+      (c) You must retain, in the Source form of any Derivative Works
+          that You distribute, all copyright, patent, trademark, and
+          attribution notices from the Source form of the Work,
+          excluding those notices that do not pertain to any part of
+          the Derivative Works; and
+
+      (d) If the Work includes a "NOTICE" text file as part of its
+          distribution, then any Derivative Works that You distribute must
+          include a readable copy of the attribution notices contained
+          within such NOTICE file, excluding those notices that do not
+          pertain to any part of the Derivative Works, in at least one
+          of the following places: within a NOTICE text file distributed
+          as part of the Derivative Works; within the Source form or
+          documentation, if provided along with the Derivative Works; or,
+          within a display generated by the Derivative Works, if and
+          wherever such third-party notices normally appear. The contents
+          of the NOTICE file are for informational purposes only and
+          do not modify the License. You may add Your own attribution
+          notices within Derivative Works that You distribute, alongside
+          or as an addendum to the NOTICE text from the Work, provided
+          that such additional attribution notices cannot be construed
+          as modifying the License.
+
+      You may add Your own copyright statement to Your modifications and
+      may provide additional or different license terms and conditions
+      for use, reproduction, or distribution of Your modifications, or
+      for any such Derivative Works as a whole, provided Your use,
+      reproduction, and distribution of the Work otherwise complies with
+      the conditions stated in this License.
+
+   5. Submission of Contributions. Unless You explicitly state otherwise,
+      any Contribution intentionally submitted for inclusion in the Work
+      by You to the Licensor shall be under the terms and conditions of
+      this License, without any additional terms or conditions.
+      Notwithstanding the above, nothing herein shall supersede or modify
+      the terms of any separate license agreement you may have executed
+      with Licensor regarding such Contributions.
+
+   6. Trademarks. This License does not grant permission to use the trade
+      names, trademarks, service marks, or product names of the Licensor,
+      except as required for reasonable and customary use in describing the
+      origin of the Work and reproducing the content of the NOTICE file.
+
+   7. Disclaimer of Warranty. Unless required by applicable law or
+      agreed to in writing, Licensor provides the Work (and each
+      Contributor provides its Contributions) on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+      implied, including, without limitation, any warranties or conditions
+      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+      PARTICULAR PURPOSE. You are solely responsible for determining the
+      appropriateness of using or redistributing the Work and assume any
+      risks associated with Your exercise of permissions under this License.
+
+   8. Limitation of Liability. In no event and under no legal theory,
+      whether in tort (including negligence), contract, or otherwise,
+      unless required by applicable law (such as deliberate and grossly
+      negligent acts) or agreed to in writing, shall any Contributor be
+      liable to You for damages, including any direct, indirect, special,
+      incidental, or consequential damages of any character arising as a
+      result of this License or out of the use or inability to use the
+      Work (including but not limited to damages for loss of goodwill,
+      work stoppage, computer failure or malfunction, or any and all
+      other commercial damages or losses), even if such Contributor
+      has been advised of the possibility of such damages.
+
+   9. Accepting Warranty or Additional Liability. While redistributing
+      the Work or Derivative Works thereof, You may choose to offer,
+      and charge a fee for, acceptance of support, warranty, indemnity,
+      or other liability obligations and/or rights consistent with this
+      License. However, in accepting such obligations, You may act only
+      on Your own behalf and on Your sole responsibility, not on behalf
+      of any other Contributor, and only if You agree to indemnify,
+      defend, and hold each Contributor harmless for any liability
+      incurred by, or claims asserted against, such Contributor by reason
+      of your accepting any such warranty or additional liability.
+   END OF TERMS AND CONDITIONS
+
+   APPENDIX: How to apply the Apache License to your work.
+
+      To apply the Apache License to your work, attach the following
+      boilerplate notice, with the fields enclosed by brackets "[]"
+      replaced with your own identifying information. (Don't include
+      the brackets!)  The text should be enclosed in the appropriate
+      comment syntax for the file format. We also recommend that a
+      file or class name and description of purpose be included on the
+      same "printed page" as the copyright notice for easier
+      identification within third-party archives.
+
+   Copyright [yyyy] [name of copyright owner]
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       https://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+=======================================================================
+Seata Subcomponents:
+
+The Seata project contains subcomponents with separate copyright
+notices and license terms. Your use of the source code for the these
+subcomponents is subject to the terms and conditions of the following
+licenses.
+
+========================================================================
+Apache-1.1 licenses
+========================================================================
+
+    com.caucho:hessian 4.0.63 Apache-1.1 see:licenses/Apache-1.1
+
+========================================================================
+Apache-2.0 licenses
+========================================================================
+
+    org.apache.ant:ant 1.10.12 Apache-2.0
+    org.apache.ant:ant-launcher 1.10.12 Apache-2.0
+    com.ctrip.framework.apollo:apollo-client 2.0.1 Apache-2.0
+    com.ctrip.framework.apollo:apollo-core 2.0.1 Apache-2.0
+    com.netflix.archaius:archaius-core 0.7.6 Apache-2.0
+    org.apache.yetus:audience-annotations 0.12.0 Apache-2.0
+    com.alipay.sofa:bolt 1.6.7 Apache-2.0
+    com.bucket4j:bucket4j_jdk8-core 8.1.0 Apache-2.0
+    commons-codec:commons-codec 1.15 Apache-2.0
+    commons-configuration:commons-configuration 1.10 Apache-2.0
+    org.apache.commons:commons-dbcp2 2.9.0 Apache-2.0
+    commons-io:commons-io 2.8.0 Apache-2.0
+    commons-jxpath:commons-jxpath 1.3 Apache-2.0
+    commons-lang:commons-lang 2.6 Apache-2.0
+    commons-logging:commons-logging 1.2 Apache-2.0
+    org.apache.commons:commons-math 2.2 Apache-2.0
+    commons-pool:commons-pool 1.6 Apache-2.0
+    org.apache.commons:commons-pool2 2.11.1 Apache-2.0
+    com.github.vlsi.compactmap:compactmap 2.0 Apache-2.0
+    com.typesafe:config 1.2.1 Apache-2.0
+    com.ecwid.consul:consul-api 1.4.2 Apache-2.0
+    org.apache.curator:curator-framework 5.1.0 Apache-2.0
+    org.apache.curator:curator-recipes 5.1.0 Apache-2.0
+    org.apache.curator:curator-test 5.1.0 Apache-2.0
+    com.lmax:disruptor 3.3.7 Apache-2.0
+    com.dameng:DmJdbcDriver18 8.1.2.192 Apache-2.0
+    com.alibaba:druid 1.2.20 Apache-2.0
+    com.google.errorprone:error_prone_annotations 2.21.1 Apache-2.0
+    com.netflix.eureka:eureka-client 1.10.18 Apache-2.0
+    net.jodah:failsafe 2.3.3 Apache-2.0
+    net.logstash.logback:logstash-logback-encoder 6.5 Apache-2.0
+    com.google.guava:failureaccess 1.0.1 Apache-2.0
+    com.alibaba:fastjson 1.2.83 Apache-2.0
+    com.alibaba.fastjson2:fastjson2 2.0.52 Apache-2.0
+    io.dropwizard.metrics:metrics-core 4.2.22 Apache-2.0
+    io.grpc:grpc-api 1.55.1 Apache-2.0
+    io.grpc:grpc-context 1.55.1 Apache-2.0
+    io.grpc:grpc-grpclb 1.27.1 Apache-2.0
+    io.grpc:grpc-netty 1.55.1 Apache-2.0
+    io.grpc:grpc-protobuf 1.55.1 Apache-2.0
+    io.grpc:grpc-protobuf-lite 1.55.1 Apache-2.0
+    io.grpc:grpc-stub 1.55.1 Apache-2.0
+    com.google.code.gson:gson 2.9.1 Apache-2.0
+    com.google.guava:guava 32.1.3-jre Apache-2.0
+    com.google.inject:guice 5.0.1 Apache-2.0
+    com.alipay.sofa:hessian 4.0.3 Apache-2.0
+    com.zaxxer:HikariCP 4.0.3 Apache-2.0
+    org.apache.httpcomponents:httpasyncclient 4.1.5 Apache-2.0
+    org.apache.httpcomponents:httpclient 4.5.14 Apache-2.0
+    org.apache.httpcomponents:httpcore 4.4.16 Apache-2.0
+    org.apache.httpcomponents:httpcore-nio 4.4.16 Apache-2.0
+    com.google.j2objc:j2objc-annotations 2.8 Apache-2.0
+    com.fasterxml.jackson.core:jackson-annotations 2.13.5 Apache-2.0
+    com.fasterxml.jackson.core:jackson-core 2.13.5 Apache-2.0
+    com.fasterxml.jackson.core:jackson-databind 2.13.5 Apache-2.0
+    com.fasterxml.jackson.datatype:jackson-datatype-jdk8 2.13.5 Apache-2.0
+    com.fasterxml.jackson.datatype:jackson-datatype-jsr310 2.13.5 Apache-2.0
+    com.fasterxml.jackson.module:jackson-module-parameter-names 2.13.5 Apache-2.0
+    javax.inject:javax.inject 1 Apache-2.0
+    com.beust:jcommander 1.82 Apache-2.0
+    org.jctools:jctools-core 2.1.1 Apache-2.0
+    io.etcd:jetcd-common 0.5.0 Apache-2.0
+    io.etcd:jetcd-core 0.5.0 Apache-2.0
+    io.etcd:jetcd-resolver 0.5.0 Apache-2.0
+    org.codehaus.jettison:jettison 1.5.4 Apache-2.0
+    net.java.dev.jna:jna 5.5.0 Apache-2.0
+    joda-time:joda-time 2.3 Apache-2.0
+    com.alipay.sofa:jraft-core 1.3.14 Apache-2.0
+    com.google.code.findbugs:jsr305 3.0.2 Apache-2.0
+    org.apache.kafka:kafka-clients 3.6.1 Apache-2.0
+    de.javakaffee:kryo-serializers 0.45 Apache-2.0
+    com.github.danielwegener:logback-kafka-appender 0.2.0-RC2 Apache-2.0
+    org.lz4:lz4-java 1.7.1 Apache-2.0
+    com.alibaba.nacos:nacos-api 1.4.6 Apache-2.0
+    com.alibaba.nacos:nacos-client 1.4.6 Apache-2.0
+    com.alibaba.nacos:nacos-common 1.4.6 Apache-2.0
+    com.netflix.netflix-commons:netflix-eventbus 0.3.0 Apache-2.0
+    com.netflix.netflix-commons:netflix-infix 0.3.0 Apache-2.0
+    io.netty:netty-all 4.1.101.Final Apache-2.0
+    io.netty:netty-buffer 4.1.101.Final Apache-2.0
+    io.netty:netty-codec 4.1.101.Final Apache-2.0
+    io.netty:netty-codec-dns 4.1.101.Final Apache-2.0
+    io.netty:netty-codec-haproxy 4.1.101.Final Apache-2.0
+    io.netty:netty-codec-http 4.1.101.Final Apache-2.0
+    io.netty:netty-codec-http2 4.1.101.Final Apache-2.0
+    io.netty:netty-codec-memcache 4.1.101.Final Apache-2.0
+    io.netty:netty-codec-mqtt 4.1.101.Final Apache-2.0
+    io.netty:netty-codec-redis 4.1.101.Final Apache-2.0
+    io.netty:netty-codec-smtp 4.1.101.Final Apache-2.0
+    io.netty:netty-codec-socks 4.1.101.Final Apache-2.0
+    io.netty:netty-codec-stomp 4.1.101.Final Apache-2.0
+    io.netty:netty-codec-xml 4.1.101.Final Apache-2.0
+    io.netty:netty-common 4.1.101.Final Apache-2.0
+    io.netty:netty-handler 4.1.101.Final Apache-2.0
+    io.netty:netty-handler-proxy 4.1.101.Final Apache-2.0
+    io.netty:netty-handler-ssl-ocsp 4.1.101.Final Apache-2.0
+    io.netty:netty-resolver 4.1.101.Final Apache-2.0
+    io.netty:netty-resolver-dns 4.1.101.Final Apache-2.0
+    io.netty:netty-resolver-dns-classes-macos 4.1.101.Final Apache-2.0
+    io.netty:netty-resolver-dns-native-macos 4.1.101.Final Apache-2.0
+    io.netty:netty-resolver-dns-native-macos 4.1.101.Final Apache-2.0
+    io.netty:netty-transport 4.1.101.Final Apache-2.0
+    io.netty:netty-transport-classes-epoll 4.1.101.Final Apache-2.0
+    io.netty:netty-transport-classes-kqueue 4.1.101.Final Apache-2.0
+    io.netty:netty-transport-native-epoll 4.1.101.Final Apache-2.0
+    io.netty:netty-transport-native-epoll 4.1.101.Final Apache-2.0
+    io.netty:netty-transport-native-kqueue 4.1.101.Final Apache-2.0
+    io.netty:netty-transport-native-kqueue 4.1.101.Final Apache-2.0
+    io.netty:netty-transport-native-unix-common 4.1.101.Final Apache-2.0
+    io.netty:netty-transport-rxtx 4.1.101.Final Apache-2.0
+    io.netty:netty-transport-sctp 4.1.101.Final Apache-2.0
+    io.netty:netty-transport-udt 4.1.101.Final Apache-2.0
+    org.objenesis:objenesis 3.2 Apache-2.0
+    io.perfmark:perfmark-api 0.25.0 Apache-2.0
+    com.google.api.grpc:proto-google-common-protos 2.9.0 Apache-2.0
+    com.alipay.sofa:registry-client-all 6.3.0 Apache-2.0
+    org.rocksdb:rocksdbjni 8.8.1 Apache-2.0
+    com.netflix.servo:servo-core 0.12.21 Apache-2.0
+    io.prometheus:simpleclient 0.15.0 Apache-2.0
+    io.prometheus:simpleclient_common 0.15.0 Apache-2.0
+    io.prometheus:simpleclient_httpserver 0.15.0 Apache-2.0
+    io.prometheus:simpleclient_tracer_common 0.15.0 Apache-2.0
+    io.prometheus:simpleclient_tracer_otel 0.15.0 Apache-2.0
+    io.prometheus:simpleclient_tracer_otel_agent 0.15.0 Apache-2.0
+    org.yaml:snakeyaml 2.0 Apache-2.0
+    org.xerial.snappy:snappy-java 1.1.10.5 Apache-2.0
+    com.alipay.sofa.common:sofa-common-tools 1.0.12 Apache-2.0
+    org.springframework:spring-aop 5.3.39 Apache-2.0
+    org.springframework:spring-beans 5.3.39 Apache-2.0
+    org.springframework.boot:spring-boot 2.7.18 Apache-2.0
+    org.springframework.boot:spring-boot-autoconfigure 2.7.18 Apache-2.0
+    org.springframework.boot:spring-boot-starter 2.7.18 Apache-2.0
+    org.springframework.boot:spring-boot-starter-json 2.7.18 Apache-2.0
+    org.springframework.boot:spring-boot-starter-logging 2.7.18 Apache-2.0
+    org.springframework.boot:spring-boot-starter-tomcat 2.7.18 Apache-2.0
+    org.springframework.boot:spring-boot-starter-web 2.7.18 Apache-2.0
+    org.springframework:spring-context 5.3.39 Apache-2.0
+    org.springframework:spring-core 5.3.39 Apache-2.0
+    org.springframework:spring-expression 5.3.39 Apache-2.0
+    org.springframework:spring-jcl 5.3.39 Apache-2.0
+    org.springframework:spring-web 5.3.39 Apache-2.0
+    org.springframework:spring-webmvc 5.3.39 Apache-2.0
+    org.springframework:spring-test 5.3.39 Apache-2.0
+    org.apache.curator:curator-client 5.1.0 Apache-2.0
+    org.apache.fury:fury-core 0.8.0 Apache-2.0
+    org.apache.tomcat:tomcat-annotations-api 9.0.83 Apache-2.0
+    org.apache.zookeeper:zookeeper 3.7.2 Apache-2.0
+    org.apache.zookeeper:zookeeper-jute 3.7.2 Apache-2.0
+
+========================================================================
+BSD-2-Clause licenses
+========================================================================
+
+    org.postgresql:postgresql 42.3.8 BSD-2-Clause see:licenses/postgresql-BSD-2-Clause
+    com.github.luben:zstd-jni 1.5.0-4 BSD-2-Clause see:licenses/zstd-jni-BSD-2-Clause
+
+========================================================================
+BSD-3-Clause licenses
+========================================================================
+
+    org.codehaus.janino:commons-compiler 3.1.10 BSD-3-Clause see:licenses/janino-BSD-3-Clause
+    org.codehaus.janino:janino 3.1.10 BSD-3-Clause see:licenses/janino-BSD-3-Clause
+    com.thoughtworks.xstream:xstream 1.4.21 BSD-3-Clause see:licenses/xstream-BSD-3-Clause
+    org.ow2.asm:asm 6.0 BSD-3-Clause see:licenses/asm-BSD-3-Clause
+    org.hamcrest:hamcrest 2.2 BSD-3-Clause see:licenses/hamcrest-BSD-3-Clause
+    org.hamcrest:hamcrest-core 2.2 BSD-3-Clause see:licenses/hamcrest-BSD-3-Clause
+    com.esotericsoftware:kryo 5.4.0 BSD-3-Clause see:licenses/kryo-BSD-3-Clause
+    com.esotericsoftware:minlog 1.3.1 BSD-3-Clause see:licenses/minlog-BSD-3-Clause
+    com.esotericsoftware:reflectasm 1.11.9 BSD-3-Clause see:licenses/reflectasm-BSD-3-Clause
+    com.google.protobuf:protobuf-java 3.25.5 BSD-3-Clause see:licenses/protobuf-java-BSD-3-Clause
+    com.google.protobuf:protobuf-java-util 3.11.0 BSD-3-Clause see:licenses/protobuf-java-BSD-3-Clause
+
+========================================================================
+CDDL-1.0 licenses
+========================================================================
+
+    com.sun.jersey.contribs:jersey-apache-client4 1.19.1 CDDL-1.0 see:licenses/CDDL-1.0
+    com.sun.jersey:jersey-client 1.19.1 CDDL-1.0 see:licenses/CDDL-1.0
+    com.sun.jersey:jersey-core 1.19.1 CDDL-1.0 see:licenses/CDDL-1.0
+    javax.ws.rs:jsr311-api 1.1.1 CDDL-1.0 see:licenses/CDDL-1.0
+    javax.servlet:javax.servlet-api 4.0.1 CDDL-1.0 see:licenses/CDDL-1.0
+
+
+========================================================================
+EPL-1.0 licenses
+========================================================================
+
+    ch.qos.logback:logback-classic 1.2.12 EPL-1.0 see:licenses/EPL-1.0
+    ch.qos.logback:logback-core 1.2.12 EPL-1.0 see:licenses/EPL-1.0
+    junit:junit 4.13.2 EPL-1.0 see:licenses/junit4-EPL-1.0
+
+========================================================================
+EPL-2.0 licenses
+========================================================================
+
+    jakarta.annotation:jakarta.annotation-api 1.3.5 EPL-2.0 see:licenses/EPL-2.0
+
+========================================================================
+MIT licenses
+========================================================================
+
+    org.checkerframework:checker-qual 3.37.0 MIT see:licenses/checker-qual-MIT
+    redis.clients:jedis 3.8.0 MIT see:licenses/jedis-MIT
+    org.slf4j:jul-to-slf4j 1.7.36 MIT see:licenses/jul-to-slf4j-MIT
+    org.slf4j:slf4j-api 1.7.36 MIT see:licenses/slf4j-api-MIT
+    com.github.andrewoma.dexx:dexx-collections 0.2 MIT see:licenses/dexx-collections-MIT
+
+========================================================================
+Public Domain licenses
+========================================================================
+
+    aopalliance:aopalliance 1.0 Public Domain
+
+========================================================================
+Indiana University Extreme! Lab Software License
+========================================================================
+
+    io.github.x-stream:mxparser 1.2.2 Indiana University Extreme! Lab Software License see:licenses/mxparser-IUELSL

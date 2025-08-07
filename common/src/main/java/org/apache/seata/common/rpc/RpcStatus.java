@@ -31,8 +31,7 @@ public class RpcStatus {
     private final AtomicLong active = new AtomicLong();
     private final LongAdder total = new LongAdder();
 
-    private RpcStatus() {
-    }
+    private RpcStatus() {}
 
     /**
      * get the RpcStatus of this service

@@ -22,6 +22,4 @@ import org.apache.seata.common.loader.LoadLevel;
  * the database lock store kingbase sql
  */
 @LoadLevel(name = "kingbase")
-public class KingbaseLockStoreSql extends OracleLockStoreSql {
-
-}
+public class KingbaseLockStoreSql extends OracleLockStoreSql {}

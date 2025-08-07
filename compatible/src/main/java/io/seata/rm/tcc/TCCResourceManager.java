@@ -25,15 +25,15 @@ import org.apache.seata.rm.tcc.api.BusinessActionContext;
 public class TCCResourceManager extends org.apache.seata.rm.tcc.TCCResourceManager {
 
     @Override
-    protected Object[] getTwoPhaseMethodParams(String[] keys, Class<?>[] argsClasses,
-        BusinessActionContext businessActionContext) {
+    protected Object[] getTwoPhaseMethodParams(
+            String[] keys, Class<?>[] argsClasses, BusinessActionContext businessActionContext) {
         Object[] args = new Object[argsClasses.length];
         for (int i = 0; i < argsClasses.length; i++) {
             if (argsClasses[i].equals(BusinessActionContext.class)) {
                 args[i] = businessActionContext;
             } else if (argsClasses[i].equals(io.seata.rm.tcc.api.BusinessActionContext.class)) {
                 io.seata.rm.tcc.api.BusinessActionContext oldBusinessActionContext =
-                    new io.seata.rm.tcc.api.BusinessActionContext();
+                        new io.seata.rm.tcc.api.BusinessActionContext();
                 oldBusinessActionContext.setUpdated(businessActionContext.getUpdated());
                 oldBusinessActionContext.setXid(businessActionContext.getXid());
                 oldBusinessActionContext.setActionContext(businessActionContext.getActionContext());
@@ -48,5 +48,4 @@ public class TCCResourceManager extends org.apache.seata.rm.tcc.TCCResourceManag
         }
         return args;
     }
-
 }

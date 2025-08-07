@@ -48,6 +48,4 @@ public class MockHelpController {
         MockCoordinator.getInstance().setExpectedRetry(xid, times);
         return OK;
     }
-
-
 }

@@ -16,10 +16,6 @@
  */
 package org.apache.seata.sqlparser.druid.polardbx;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLInSubQueryExpr;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
@@ -31,6 +27,10 @@ import org.apache.seata.sqlparser.struct.Null;
 import org.apache.seata.sqlparser.struct.SqlMethodExpr;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Test cases for delete recognizer of PolarDB-X
@@ -130,16 +130,15 @@ public class PolarDBXInsertRecognizerTest extends AbstractPolarDBXRecognizerTest
     public void testGetInsertRows() {
         // case1: test expressions of value
         // VALUES(variant ref(placeholder etc.), value, null, method, default)
-        String sql = "INSERT INTO t(no, name, age, time, school) " +
-                "VALUES (?, 'test', null, now(), default)";
+        String sql = "INSERT INTO t(no, name, age, time, school) " + "VALUES (?, 'test', null, now(), default)";
         SQLStatement ast = getSQLStatement(sql);
 
         PolarDBXInsertRecognizer recognizer = new PolarDBXInsertRecognizer(sql, ast);
         List<List<Object>> insertRows = recognizer.getInsertRows(Collections.singletonList(pkIndex));
         Assertions.assertEquals(1, insertRows.size());
         List<Object> insertRow = insertRows.get(0);
-        Assertions.assertEquals(Arrays.asList("?", "test", Null.get(), SqlMethodExpr.get(), NotPlaceholderExpr.get()),
-                insertRow);
+        Assertions.assertEquals(
+                Arrays.asList("?", "test", Null.get(), SqlMethodExpr.get(), NotPlaceholderExpr.get()), insertRow);
 
         // case2: unrecognized expression of value
         Assertions.assertThrows(SQLParsingException.class, () -> {

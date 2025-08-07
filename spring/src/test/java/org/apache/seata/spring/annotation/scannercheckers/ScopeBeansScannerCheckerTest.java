@@ -78,8 +78,8 @@ public class ScopeBeansScannerCheckerTest {
     public void testCheckWhenBeanDefinitionNotFound() throws Exception {
         ConfigurableListableBeanFactory beanFactory = Mockito.mock(ConfigurableListableBeanFactory.class);
         Mockito.when(beanFactory.getBeanDefinition(Mockito.anyString()))
-               .thenThrow(new NoSuchBeanDefinitionException("testBean"));
-        
+                .thenThrow(new NoSuchBeanDefinitionException("testBean"));
+
         boolean result = checker.check(testBean, "testBean", beanFactory);
         Assertions.assertTrue(result, "Should return true when bean definition is not found");
     }
@@ -91,10 +91,10 @@ public class ScopeBeansScannerCheckerTest {
     public void testCheckWhenBeanDefinitionIsNotAnnotated() throws Exception {
         ConfigurableListableBeanFactory beanFactory = Mockito.mock(ConfigurableListableBeanFactory.class);
         BeanDefinition beanDefinition = Mockito.mock(BeanDefinition.class);
-        
+
         Mockito.when(beanFactory.getBeanDefinition(Mockito.anyString())).thenReturn(beanDefinition);
         Mockito.when(beanDefinition.getOriginatingBeanDefinition()).thenReturn(null);
-        
+
         boolean result = checker.check(testBean, "testBean", beanFactory);
         Assertions.assertTrue(result, "Should return true when bean definition is not an AnnotatedBeanDefinition");
     }
@@ -108,17 +108,18 @@ public class ScopeBeansScannerCheckerTest {
         ConfigurableListableBeanFactory beanFactory = Mockito.mock(ConfigurableListableBeanFactory.class);
         AnnotatedBeanDefinition beanDefinition = Mockito.mock(AnnotatedBeanDefinition.class);
         AnnotationMetadata metadata = Mockito.mock(AnnotationMetadata.class);
-        
+
         // Setup scope attributes with a non-excluded scope
         MultiValueMap<String, Object> scopeAttributes = new LinkedMultiValueMap<>();
         scopeAttributes.add("scopeName", "singleton");
-        
+
         // Setup mock behavior
         Mockito.when(beanFactory.getBeanDefinition(Mockito.anyString())).thenReturn(beanDefinition);
         Mockito.when(beanDefinition.getMetadata()).thenReturn(metadata);
         Mockito.when(beanDefinition.getFactoryMethodMetadata()).thenReturn(null);
-        Mockito.when(metadata.getAllAnnotationAttributes(Mockito.eq(Scope.class.getName()))).thenReturn(scopeAttributes);
-        
+        Mockito.when(metadata.getAllAnnotationAttributes(Mockito.eq(Scope.class.getName())))
+                .thenReturn(scopeAttributes);
+
         boolean result = checker.check(testBean, "testBean", beanFactory);
         Assertions.assertTrue(result, "Should return true when scope is not excluded");
     }
@@ -132,17 +133,18 @@ public class ScopeBeansScannerCheckerTest {
         ConfigurableListableBeanFactory beanFactory = Mockito.mock(ConfigurableListableBeanFactory.class);
         AnnotatedBeanDefinition beanDefinition = Mockito.mock(AnnotatedBeanDefinition.class);
         AnnotationMetadata metadata = Mockito.mock(AnnotationMetadata.class);
-        
+
         // Setup scope attributes with an excluded scope (request)
         MultiValueMap<String, Object> scopeAttributes = new LinkedMultiValueMap<>();
         scopeAttributes.add("scopeName", ScopeBeansScannerChecker.REQUEST_SCOPE_NAME);
-        
+
         // Setup mock behavior
         Mockito.when(beanFactory.getBeanDefinition(Mockito.anyString())).thenReturn(beanDefinition);
         Mockito.when(beanDefinition.getMetadata()).thenReturn(metadata);
         Mockito.when(beanDefinition.getFactoryMethodMetadata()).thenReturn(null);
-        Mockito.when(metadata.getAllAnnotationAttributes(Mockito.eq(Scope.class.getName()))).thenReturn(scopeAttributes);
-        
+        Mockito.when(metadata.getAllAnnotationAttributes(Mockito.eq(Scope.class.getName())))
+                .thenReturn(scopeAttributes);
+
         boolean result = checker.check(testBean, "testBean", beanFactory);
         Assertions.assertFalse(result, "Should return false when scope is excluded");
     }
@@ -157,19 +159,20 @@ public class ScopeBeansScannerCheckerTest {
         AnnotatedBeanDefinition beanDefinition = Mockito.mock(AnnotatedBeanDefinition.class);
         AnnotationMetadata metadata = Mockito.mock(AnnotationMetadata.class);
         MethodMetadata factoryMethodMetadata = Mockito.mock(MethodMetadata.class);
-        
+
         // Setup factory method metadata with an excluded scope (session)
         MultiValueMap<String, Object> factoryScopeAttributes = new LinkedMultiValueMap<>();
         factoryScopeAttributes.add("scopeName", ScopeBeansScannerChecker.SESSION_SCOPE_NAME);
-        
+
         // Setup mock behavior
         Mockito.when(beanFactory.getBeanDefinition(Mockito.anyString())).thenReturn(beanDefinition);
         Mockito.when(beanDefinition.getMetadata()).thenReturn(metadata);
         Mockito.when(beanDefinition.getFactoryMethodMetadata()).thenReturn(factoryMethodMetadata);
         Mockito.when(factoryMethodMetadata.getAllAnnotationAttributes(Mockito.eq(Scope.class.getName())))
-               .thenReturn(factoryScopeAttributes);
-        Mockito.when(metadata.getAllAnnotationAttributes(Mockito.eq(Scope.class.getName()))).thenReturn(null);
-        
+                .thenReturn(factoryScopeAttributes);
+        Mockito.when(metadata.getAllAnnotationAttributes(Mockito.eq(Scope.class.getName())))
+                .thenReturn(null);
+
         boolean result = checker.check(testBean, "testBean", beanFactory);
         Assertions.assertFalse(result, "Should return false when factory method has excluded scope");
     }
@@ -183,13 +186,14 @@ public class ScopeBeansScannerCheckerTest {
         ConfigurableListableBeanFactory beanFactory = Mockito.mock(ConfigurableListableBeanFactory.class);
         AnnotatedBeanDefinition beanDefinition = Mockito.mock(AnnotatedBeanDefinition.class);
         AnnotationMetadata metadata = Mockito.mock(AnnotationMetadata.class);
-        
+
         // Setup mock behavior
         Mockito.when(beanFactory.getBeanDefinition(Mockito.anyString())).thenReturn(beanDefinition);
         Mockito.when(beanDefinition.getMetadata()).thenReturn(metadata);
         Mockito.when(beanDefinition.getFactoryMethodMetadata()).thenReturn(null);
-        Mockito.when(metadata.getAllAnnotationAttributes(Mockito.eq(Scope.class.getName()))).thenReturn(null);
-        
+        Mockito.when(metadata.getAllAnnotationAttributes(Mockito.eq(Scope.class.getName())))
+                .thenReturn(null);
+
         boolean result = checker.check(testBean, "testBean", beanFactory);
         Assertions.assertTrue(result, "Should return true when no scope annotation is present");
     }
@@ -202,16 +206,16 @@ public class ScopeBeansScannerCheckerTest {
         // Clear exclude scopes first
         Set<String> originalSet = getExcludeScopeSet();
         setExcludeScopeSet(new HashSet<>());
-        
+
         // Add exclude scopes
         ScopeBeansScannerChecker.addExcludeScopes("custom1", "custom2");
-        
+
         // Verify scopes were added
         Set<String> excludeScopes = getExcludeScopeSet();
         Assertions.assertEquals(2, excludeScopes.size(), "Should have 2 exclude scopes");
         Assertions.assertTrue(excludeScopes.contains("custom1"), "Should contain 'custom1'");
         Assertions.assertTrue(excludeScopes.contains("custom2"), "Should contain 'custom2'");
-        
+
         // Restore original set
         setExcludeScopeSet(originalSet);
     }
@@ -224,15 +228,15 @@ public class ScopeBeansScannerCheckerTest {
         // Clear exclude scopes first
         Set<String> originalSet = getExcludeScopeSet();
         setExcludeScopeSet(new HashSet<>());
-        
+
         // Add exclude scopes including blank ones
         ScopeBeansScannerChecker.addExcludeScopes("custom", "", "  ", null);
-        
+
         // Verify only non-blank scopes were added
         Set<String> excludeScopes = getExcludeScopeSet();
         Assertions.assertEquals(1, excludeScopes.size(), "Should have 1 exclude scope");
         Assertions.assertTrue(excludeScopes.contains("custom"), "Should contain 'custom'");
-        
+
         // Restore original set
         setExcludeScopeSet(originalSet);
     }
@@ -243,14 +247,18 @@ public class ScopeBeansScannerCheckerTest {
     @Test
     public void testDefaultExcludeScopes() throws Exception {
         Set<String> excludeScopes = getExcludeScopeSet();
-        Assertions.assertTrue(excludeScopes.contains(ScopeBeansScannerChecker.REQUEST_SCOPE_NAME), 
-                             "Should contain 'request' scope by default");
-        Assertions.assertTrue(excludeScopes.contains(ScopeBeansScannerChecker.SESSION_SCOPE_NAME), 
-                             "Should contain 'session' scope by default");
-        Assertions.assertTrue(excludeScopes.contains(ScopeBeansScannerChecker.JOB_SCOPE_NAME), 
-                             "Should contain 'job' scope by default");
-        Assertions.assertTrue(excludeScopes.contains(ScopeBeansScannerChecker.STEP_SCOPE_NAME), 
-                             "Should contain 'step' scope by default");
+        Assertions.assertTrue(
+                excludeScopes.contains(ScopeBeansScannerChecker.REQUEST_SCOPE_NAME),
+                "Should contain 'request' scope by default");
+        Assertions.assertTrue(
+                excludeScopes.contains(ScopeBeansScannerChecker.SESSION_SCOPE_NAME),
+                "Should contain 'session' scope by default");
+        Assertions.assertTrue(
+                excludeScopes.contains(ScopeBeansScannerChecker.JOB_SCOPE_NAME),
+                "Should contain 'job' scope by default");
+        Assertions.assertTrue(
+                excludeScopes.contains(ScopeBeansScannerChecker.STEP_SCOPE_NAME),
+                "Should contain 'step' scope by default");
     }
 
     /**
@@ -260,7 +268,7 @@ public class ScopeBeansScannerCheckerTest {
     private Set<String> getExcludeScopeSet() throws Exception {
         Field field = ScopeBeansScannerChecker.class.getDeclaredField("EXCLUDE_SCOPE_SET");
         field.setAccessible(true);
-        Set<String> scopes = (Set<String>)field.get(null);
+        Set<String> scopes = (Set<String>) field.get(null);
         return new HashSet<>(scopes); // Return a copy to avoid modifying the original
     }
 
@@ -271,8 +279,8 @@ public class ScopeBeansScannerCheckerTest {
     private void setExcludeScopeSet(Set<String> scopes) throws Exception {
         Field field = ScopeBeansScannerChecker.class.getDeclaredField("EXCLUDE_SCOPE_SET");
         field.setAccessible(true);
-        Set<String> originalSet = (Set<String>)field.get(null);
+        Set<String> originalSet = (Set<String>) field.get(null);
         originalSet.clear();
         originalSet.addAll(scopes);
     }
-} 
+}

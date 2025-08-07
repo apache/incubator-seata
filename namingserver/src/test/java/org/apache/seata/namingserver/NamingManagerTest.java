@@ -38,22 +38,22 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.ArrayList;
 import java.util.UUID;
-import java.util.Arrays;
 
 import static org.apache.seata.common.NamingServerConstants.CONSTANT_GROUP;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
 
 @SpringBootTest
 class NamingManagerTest {
@@ -80,7 +80,9 @@ class NamingManagerTest {
 
         Mockito.when(httpResponse.getStatusLine()).thenReturn(statusLine);
         mockedHttpClientUtil = Mockito.mockStatic(HttpClientUtil.class);
-        mockedHttpClientUtil.when(() -> HttpClientUtil.doGet(anyString(), anyMap(), anyMap(), anyInt())).thenReturn(httpResponse);
+        mockedHttpClientUtil
+                .when(() -> HttpClientUtil.doGet(anyString(), anyMap(), anyMap(), anyInt()))
+                .thenReturn(httpResponse);
 
         namingManager.init();
     }
@@ -232,7 +234,8 @@ class NamingManagerTest {
         assertEquals("200", result.getCode());
         assertEquals("add vGroup successfully!", result.getMessage());
 
-        mockedHttpClientUtil.verify(() -> HttpClientUtil.doGet(anyString(), anyMap(), anyMap(), anyInt()), Mockito.times(1));
+        mockedHttpClientUtil.verify(
+                () -> HttpClientUtil.doGet(anyString(), anyMap(), anyMap(), anyInt()), Mockito.times(1));
     }
 
     @Test
@@ -289,8 +292,8 @@ class NamingManagerTest {
         Mockito.when(httpResponse.getStatusLine()).thenReturn(statusLine);
         Mockito.when(statusLine.getStatusCode()).thenReturn(200);
 
-
-        mockedHttpClientUtil.when(() -> HttpClientUtil.doGet(anyString(), anyMap(), anyMap(), anyInt()))
+        mockedHttpClientUtil
+                .when(() -> HttpClientUtil.doGet(anyString(), anyMap(), anyMap(), anyInt()))
                 .thenReturn(httpResponse);
 
         Result<String> result = namingManager.removeGroup(unit, vGroup, clusterName, namespace, unitName);
@@ -299,9 +302,8 @@ class NamingManagerTest {
         assertEquals("200", result.getCode());
         assertEquals("remove group in old cluster successfully!", result.getMessage());
 
-        mockedHttpClientUtil.verify(() -> HttpClientUtil.doGet(
-                anyString(), anyMap(), anyMap(), anyInt()), Mockito.times(1));
-
+        mockedHttpClientUtil.verify(
+                () -> HttpClientUtil.doGet(anyString(), anyMap(), anyMap(), anyInt()), Mockito.times(1));
     }
 
     @Test

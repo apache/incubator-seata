@@ -54,8 +54,7 @@ public class MergedWarpMessageTest {
 
         assertEquals(
                 "SeataMergeMessage RegisterRMResponse{version='1', extraData='null', identified=true, resultCode=Failed, msg='null'}\nRegisterTMResponse{version='2', extraData='null', identified=true, resultCode=Success, msg='null'}\n",
-                mergedWarpMessage.toString()
-        );
+                mergedWarpMessage.toString());
     }
 
     private GlobalBeginRequest buildGlobalBeginRequest() {

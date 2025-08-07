@@ -16,8 +16,6 @@
  */
 package org.apache.seata.server.controller;
 
-import java.util.HashMap;
-import java.util.Map;
 import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -37,8 +35,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.TestPropertySource;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.apache.seata.common.ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL;
 import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
@@ -49,8 +50,7 @@ import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CO
 class ClusterControllerTest {
 
     @BeforeAll
-    public static void setUp(ApplicationContext context) {
-    }
+    public static void setUp(ApplicationContext context) {}
 
     @Test
     @Order(1)
@@ -60,9 +60,9 @@ class ClusterControllerTest {
         header.put(HTTP.CONN_KEEP_ALIVE, "close");
         Map<String, String> param = new HashMap<>();
         param.put("default-test", "1");
-        int port = Integer.parseInt(System.getProperty(SERVER_SERVICE_PORT_CAMEL,"8091"));
-        try (CloseableHttpResponse response =
-            HttpClientUtil.doPost("http://127.0.0.1:"+port+"/metadata/v1/watch?timeout=3000", param, header, 5000)) {
+        int port = Integer.parseInt(System.getProperty(SERVER_SERVICE_PORT_CAMEL, "8091"));
+        try (CloseableHttpResponse response = HttpClientUtil.doPost(
+                "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", param, header, 5000)) {
             if (response != null) {
                 StatusLine statusLine = response.getStatusLine();
                 Assertions.assertEquals(HttpStatus.SC_NOT_MODIFIED, statusLine.getStatusCode());
@@ -79,21 +79,22 @@ class ClusterControllerTest {
         header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
         Map<String, String> param = new HashMap<>();
         param.put("default-test", "1");
-        Thread thread = new Thread(new Runnable(){
-            @Override public void run() {
-	            try {
-		            Thread.sleep(2000);
-	            } catch (InterruptedException e) {
-		            throw new RuntimeException(e);
-	            }
-	            ((ApplicationEventPublisher)ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
-                    .publishEvent(new ClusterChangeEvent(this, "default-test",2, true));
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                ((ApplicationEventPublisher) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
+                        .publishEvent(new ClusterChangeEvent(this, "default-test", 2, true));
             }
         });
         thread.start();
-        int port = Integer.parseInt(System.getProperty(SERVER_SERVICE_PORT_CAMEL,"8091"));
+        int port = Integer.parseInt(System.getProperty(SERVER_SERVICE_PORT_CAMEL, "8091"));
         try (CloseableHttpResponse response =
-            HttpClientUtil.doPost("http://127.0.0.1:"+port+"/metadata/v1/watch", param, header, 30000)) {
+                HttpClientUtil.doPost("http://127.0.0.1:" + port + "/metadata/v1/watch", param, header, 30000)) {
             if (response != null) {
                 StatusLine statusLine = response.getStatusLine();
                 Assertions.assertEquals(HttpStatus.SC_OK, statusLine.getStatusCode());
@@ -103,4 +104,93 @@ class ClusterControllerTest {
         Assertions.fail();
     }
 
+    @Test
+    @Order(3)
+    void testXssFilterBlocked_queryParam() throws Exception {
+        int port = Integer.parseInt(System.getProperty(SERVER_SERVICE_PORT_CAMEL, "8091"));
+        String malicious = "<script>alert('xss')</script>";
+        Map<String, String> header = new HashMap<>();
+        header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
+        try (CloseableHttpResponse response = HttpClientUtil.doGet(
+                "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000&testParam="
+                        + URLEncoder.encode(malicious, String.valueOf(StandardCharsets.UTF_8)),
+                new HashMap<>(),
+                header,
+                5000)) {
+            Assertions.assertEquals(
+                    HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
+        }
+    }
+
+    @Test
+    @Order(4)
+    void testXssFilterBlocked_formParam() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
+
+        Map<String, String> params = new HashMap<>();
+        params.put("testParam", "<script>alert('xss')</script>");
+
+        int port = Integer.parseInt(System.getProperty(SERVER_SERVICE_PORT_CAMEL, "8091"));
+        try (CloseableHttpResponse response = HttpClientUtil.doPost(
+                "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", params, headers, 5000)) {
+            Assertions.assertEquals(
+                    HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
+        }
+    }
+
+    @Test
+    @Order(5)
+    void testXssFilterBlocked_jsonBody() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
+
+        String jsonBody = "{\"testParam\":\"<script>alert('xss')</script>\"}";
+
+        int port = Integer.parseInt(System.getProperty(SERVER_SERVICE_PORT_CAMEL, "8091"));
+        try (CloseableHttpResponse response = HttpClientUtil.doPostJson(
+                "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", jsonBody, headers, 5000)) {
+            Assertions.assertEquals(
+                    HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
+        }
+    }
+
+    @Test
+    @Order(6)
+    void testXssFilterBlocked_headerParam() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
+        headers.put("X-Test-Header", "<script>alert('xss')</script>");
+
+        Map<String, String> params = new HashMap<>();
+        params.put("safeParam", "123");
+
+        int port = Integer.parseInt(System.getProperty(SERVER_SERVICE_PORT_CAMEL, "8091"));
+        try (CloseableHttpResponse response = HttpClientUtil.doPost(
+                "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", params, headers, 5000)) {
+            Assertions.assertEquals(
+                    HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
+        }
+    }
+
+    @Test
+    @Order(7)
+    void testXssFilterBlocked_multiSource() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
+        headers.put("X-Test-Header", "<script>alert('xss')</script>");
+
+        String jsonBody = "{\"testParam\":\"<script>alert('xss')</script>\"}";
+
+        int port = Integer.parseInt(System.getProperty(SERVER_SERVICE_PORT_CAMEL, "8091"));
+        try (CloseableHttpResponse response = HttpClientUtil.doPostJson(
+                "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000&urlParam="
+                        + URLEncoder.encode("<script>alert('xss')</script>", String.valueOf(StandardCharsets.UTF_8)),
+                jsonBody,
+                headers,
+                5000)) {
+            Assertions.assertEquals(
+                    HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
+        }
+    }
 }

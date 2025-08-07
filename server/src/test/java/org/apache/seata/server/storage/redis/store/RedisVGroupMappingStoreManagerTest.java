@@ -24,9 +24,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 
 import java.util.Map;
-import org.springframework.context.annotation.Import;
 
 @EnabledIfSystemProperty(named = "redisCaseEnabled", matches = "true")
 @SpringBootTest
@@ -50,7 +50,7 @@ public class RedisVGroupMappingStoreManagerTest {
         mappingDO.setCluster("testCluster");
         mappingDO.setNamespace("public");
         redisVGroupMappingStoreManager.addVGroup(mappingDO);
-        Map<String,Object> map = redisVGroupMappingStoreManager.loadVGroups();
+        Map<String, Object> map = redisVGroupMappingStoreManager.loadVGroups();
         Assertions.assertTrue(map.containsKey("testVGroup"));
         redisVGroupMappingStoreManager.removeVGroup("testVGroup");
         map = redisVGroupMappingStoreManager.loadVGroups();

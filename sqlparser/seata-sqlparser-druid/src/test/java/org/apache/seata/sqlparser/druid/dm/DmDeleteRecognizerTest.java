@@ -22,13 +22,13 @@ import com.alibaba.druid.sql.ast.statement.SQLDeleteStatement;
 import com.alibaba.druid.sql.dialect.oracle.ast.expr.OracleArgumentExpr;
 import org.apache.seata.sqlparser.ParametersHolder;
 import org.apache.seata.sqlparser.SQLType;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
 
 public class DmDeleteRecognizerTest {
 
@@ -67,82 +67,93 @@ public class DmDeleteRecognizerTest {
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
 
         DmDeleteRecognizer recognizer = new DmDeleteRecognizer(sql, asts.get(0));
-        String whereCondition = recognizer.getWhereCondition(new ParametersHolder() {
-            @Override
-            public Map<Integer, ArrayList<Object>> getParameters() {
-                return null;
-            }
-        }, new ArrayList<>());
+        String whereCondition = recognizer.getWhereCondition(
+                new ParametersHolder() {
+                    @Override
+                    public Map<Integer, ArrayList<Object>> getParameters() {
+                        return null;
+                    }
+                },
+                new ArrayList<>());
 
-        //test for no condition
+        // test for no condition
         Assertions.assertEquals("", whereCondition);
 
         sql = "delete from t where id = ?";
         asts = SQLUtils.parseStatements(sql, DB_TYPE);
 
         recognizer = new DmDeleteRecognizer(sql, asts.get(0));
-        whereCondition = recognizer.getWhereCondition(new ParametersHolder() {
-            @Override
-            public Map<Integer, ArrayList<Object>> getParameters() {
-                ArrayList<Object> idParam = new ArrayList<>();
-                idParam.add(1);
-                Map result = new HashMap();
-                result.put(1, idParam);
-                return result;
-            }
-        }, new ArrayList<>());
+        whereCondition = recognizer.getWhereCondition(
+                new ParametersHolder() {
+                    @Override
+                    public Map<Integer, ArrayList<Object>> getParameters() {
+                        ArrayList<Object> idParam = new ArrayList<>();
+                        idParam.add(1);
+                        Map result = new HashMap();
+                        result.put(1, idParam);
+                        return result;
+                    }
+                },
+                new ArrayList<>());
 
-        //test for normal sql
+        // test for normal sql
         Assertions.assertEquals("id = ?", whereCondition);
 
         sql = "delete from t where id in (?)";
         asts = SQLUtils.parseStatements(sql, DB_TYPE);
         recognizer = new DmDeleteRecognizer(sql, asts.get(0));
-        whereCondition = recognizer.getWhereCondition(new ParametersHolder() {
-            @Override
-            public Map<Integer, ArrayList<Object>> getParameters() {
-                ArrayList<Object> idParam = new ArrayList<>();
-                idParam.add(1);
-                Map result = new HashMap();
-                result.put(1, idParam);
-                return result;
-            }
-        }, new ArrayList<>());
+        whereCondition = recognizer.getWhereCondition(
+                new ParametersHolder() {
+                    @Override
+                    public Map<Integer, ArrayList<Object>> getParameters() {
+                        ArrayList<Object> idParam = new ArrayList<>();
+                        idParam.add(1);
+                        Map result = new HashMap();
+                        result.put(1, idParam);
+                        return result;
+                    }
+                },
+                new ArrayList<>());
 
-        //test for sql with in
+        // test for sql with in
         Assertions.assertEquals("id IN (?)", whereCondition);
 
         sql = "delete from t where id between ? and ?";
         asts = SQLUtils.parseStatements(sql, DB_TYPE);
         recognizer = new DmDeleteRecognizer(sql, asts.get(0));
-        whereCondition = recognizer.getWhereCondition(new ParametersHolder() {
-            @Override
-            public Map<Integer, ArrayList<Object>> getParameters() {
-                ArrayList<Object> idParam = new ArrayList<>();
-                idParam.add(1);
-                ArrayList<Object> idParam2 = new ArrayList<>();
-                idParam.add(2);
-                Map result = new HashMap();
-                result.put(1, idParam);
-                result.put(2, idParam2);
-                return result;
-            }
-        }, new ArrayList<>());
-        //test for sql with in
+        whereCondition = recognizer.getWhereCondition(
+                new ParametersHolder() {
+                    @Override
+                    public Map<Integer, ArrayList<Object>> getParameters() {
+                        ArrayList<Object> idParam = new ArrayList<>();
+                        idParam.add(1);
+                        ArrayList<Object> idParam2 = new ArrayList<>();
+                        idParam.add(2);
+                        Map result = new HashMap();
+                        result.put(1, idParam);
+                        result.put(2, idParam2);
+                        return result;
+                    }
+                },
+                new ArrayList<>());
+        // test for sql with in
         Assertions.assertEquals("id BETWEEN ? AND ?", whereCondition);
 
-        //test for exception
+        // test for exception
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             String s = "delete from t where id in (?)";
             List<SQLStatement> sqlStatements = SQLUtils.parseStatements(s, DB_TYPE);
             SQLDeleteStatement deleteAst = (SQLDeleteStatement) sqlStatements.get(0);
             deleteAst.setWhere(new OracleArgumentExpr());
-            new DmDeleteRecognizer(s, deleteAst).getWhereCondition(new ParametersHolder() {
-                @Override
-                public Map<Integer, ArrayList<Object>> getParameters() {
-                    return new HashMap<>();
-                }
-            }, new ArrayList<>());
+            new DmDeleteRecognizer(s, deleteAst)
+                    .getWhereCondition(
+                            new ParametersHolder() {
+                                @Override
+                                public Map<Integer, ArrayList<Object>> getParameters() {
+                                    return new HashMap<>();
+                                }
+                            },
+                            new ArrayList<>());
         });
     }
 
@@ -155,7 +166,7 @@ public class DmDeleteRecognizerTest {
         DmDeleteRecognizer recognizer = new DmDeleteRecognizer(sql, asts.get(0));
         String whereCondition = recognizer.getWhereCondition();
 
-        //test for no condition
+        // test for no condition
         Assertions.assertEquals("", whereCondition);
 
         sql = "delete from t where id = 1";
@@ -164,7 +175,7 @@ public class DmDeleteRecognizerTest {
         recognizer = new DmDeleteRecognizer(sql, asts.get(0));
         whereCondition = recognizer.getWhereCondition();
 
-        //test for normal sql
+        // test for normal sql
         Assertions.assertEquals("id = 1", whereCondition);
 
         sql = "delete from t where id in (1)";
@@ -172,17 +183,17 @@ public class DmDeleteRecognizerTest {
         recognizer = new DmDeleteRecognizer(sql, asts.get(0));
         whereCondition = recognizer.getWhereCondition();
 
-        //test for sql with in
+        // test for sql with in
         Assertions.assertEquals("id IN (1)", whereCondition);
 
         sql = "delete from t where id between 1 and 2";
         asts = SQLUtils.parseStatements(sql, DB_TYPE);
         recognizer = new DmDeleteRecognizer(sql, asts.get(0));
         whereCondition = recognizer.getWhereCondition();
-        //test for sql with in
+        // test for sql with in
         Assertions.assertEquals("id BETWEEN 1 AND 2", whereCondition);
 
-        //test for exception
+        // test for exception
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             String s = "delete from t where id in (1)";
             List<SQLStatement> sqlStatements = SQLUtils.parseStatements(s, DB_TYPE);

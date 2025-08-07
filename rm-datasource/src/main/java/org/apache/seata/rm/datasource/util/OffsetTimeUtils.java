@@ -38,7 +38,7 @@ public class OffsetTimeUtils {
 
     public static final String PATTERN_FORMAT_TIME = "yyyy-MM-dd HH:mm:ss.SSS";
 
-    private static final byte REGIONIDBIT = (byte)0b1000_0000;
+    private static final byte REGIONIDBIT = (byte) 0b1000_0000;
 
     private static final Map<Integer, String> ZONE_ID_MAP = new HashMap<>(36);
 
@@ -106,8 +106,10 @@ public class OffsetTimeUtils {
         int second = bytes[6] - 1;
         int nanoOfSecond = 0;
         if (bytes.length >= 8) {
-            nanoOfSecond = (toUnsignedInt(bytes[7]) << 24) | (toUnsignedInt(bytes[8]) << 16)
-                | (toUnsignedInt(bytes[9]) << 8) | toUnsignedInt(bytes[10]);
+            nanoOfSecond = (toUnsignedInt(bytes[7]) << 24)
+                    | (toUnsignedInt(bytes[8]) << 16)
+                    | (toUnsignedInt(bytes[9]) << 8)
+                    | toUnsignedInt(bytes[10]);
         }
         return LocalDateTime.of(year, month, dayOfMonth, hour, minute, second, nanoOfSecond);
     }

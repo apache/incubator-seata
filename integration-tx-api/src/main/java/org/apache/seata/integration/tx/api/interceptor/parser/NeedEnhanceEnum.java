@@ -16,7 +16,6 @@
  */
 package org.apache.seata.integration.tx.api.interceptor.parser;
 
-
 public enum NeedEnhanceEnum {
 
     /**

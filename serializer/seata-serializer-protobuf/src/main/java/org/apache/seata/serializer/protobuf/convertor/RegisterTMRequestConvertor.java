@@ -22,23 +22,27 @@ import org.apache.seata.serializer.protobuf.generated.AbstractMessageProto;
 import org.apache.seata.serializer.protobuf.generated.MessageTypeProto;
 import org.apache.seata.serializer.protobuf.generated.RegisterTMRequestProto;
 
-
 public class RegisterTMRequestConvertor implements PbConvertor<RegisterTMRequest, RegisterTMRequestProto> {
     @Override
     public RegisterTMRequestProto convert2Proto(RegisterTMRequest registerTMRequest) {
         final short typeCode = registerTMRequest.getTypeCode();
 
-        final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder().setMessageType(
-            MessageTypeProto.forNumber(typeCode)).build();
+        final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder()
+                .setMessageType(MessageTypeProto.forNumber(typeCode))
+                .build();
 
         final String extraData = registerTMRequest.getExtraData();
         AbstractIdentifyRequestProto abstractIdentifyRequestProto = AbstractIdentifyRequestProto.newBuilder()
-            .setAbstractMessage(abstractMessage).setApplicationId(registerTMRequest.getApplicationId()).setExtraData(
-                extraData == null ? "" : extraData).setTransactionServiceGroup(
-                registerTMRequest.getTransactionServiceGroup()).setVersion(registerTMRequest.getVersion()).build();
+                .setAbstractMessage(abstractMessage)
+                .setApplicationId(registerTMRequest.getApplicationId())
+                .setExtraData(extraData == null ? "" : extraData)
+                .setTransactionServiceGroup(registerTMRequest.getTransactionServiceGroup())
+                .setVersion(registerTMRequest.getVersion())
+                .build();
 
-        RegisterTMRequestProto result = RegisterTMRequestProto.newBuilder().setAbstractIdentifyRequest(
-            abstractIdentifyRequestProto).build();
+        RegisterTMRequestProto result = RegisterTMRequestProto.newBuilder()
+                .setAbstractIdentifyRequest(abstractIdentifyRequestProto)
+                .build();
 
         return result;
     }

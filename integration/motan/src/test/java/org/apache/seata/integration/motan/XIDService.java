@@ -16,7 +16,6 @@
  */
 package org.apache.seata.integration.motan;
 
-
 public interface XIDService {
     String getXid();
 }

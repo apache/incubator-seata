@@ -23,8 +23,8 @@ import org.apache.seata.core.serializer.SerializerType;
 
 public class JacksonBoltSerializer implements Serializer {
 
-    private final org.apache.seata.core.serializer.Serializer seataSerializer =
-        EnhancedServiceLoader.load(org.apache.seata.core.serializer.Serializer.class,
+    private final org.apache.seata.core.serializer.Serializer seataSerializer = EnhancedServiceLoader.load(
+            org.apache.seata.core.serializer.Serializer.class,
             SerializerType.getByCode(SerializerType.JACKSON.getCode()).name());
 
     @Override
@@ -44,5 +44,4 @@ public class JacksonBoltSerializer implements Serializer {
             throw new CodecException("Failed to deserialize data", e);
         }
     }
-
 }

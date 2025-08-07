@@ -29,7 +29,6 @@ public class XidResource {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(XidResource.class);
 
-
     public static void cleanXid(String rpcXid) {
         String xid = RootContext.getXID();
         if (StringUtils.isNotBlank(xid)) {

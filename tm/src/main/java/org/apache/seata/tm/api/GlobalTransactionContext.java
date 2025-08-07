@@ -26,8 +26,7 @@ import org.apache.seata.core.model.GlobalStatus;
  */
 public class GlobalTransactionContext {
 
-    private GlobalTransactionContext() {
-    }
+    private GlobalTransactionContext() {}
 
     /**
      * Try to create a new GlobalTransaction.

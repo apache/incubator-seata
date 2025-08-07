@@ -36,7 +36,8 @@ public class ProcessorProperties implements Processor {
     public Properties processor(String config) throws IOException {
         Properties properties = new Properties();
 
-        try (Reader reader = new InputStreamReader(new ByteArrayInputStream(config.getBytes()), StandardCharsets.UTF_8)) {
+        try (Reader reader =
+                new InputStreamReader(new ByteArrayInputStream(config.getBytes()), StandardCharsets.UTF_8)) {
             properties.load(reader);
         }
         return properties;

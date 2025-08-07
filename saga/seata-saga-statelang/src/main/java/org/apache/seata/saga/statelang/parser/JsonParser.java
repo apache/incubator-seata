@@ -39,7 +39,6 @@ public interface JsonParser {
      */
     String toJsonString(Object o, boolean prettyPrint);
 
-
     /**
      * Check json use auto type boolean.
      *

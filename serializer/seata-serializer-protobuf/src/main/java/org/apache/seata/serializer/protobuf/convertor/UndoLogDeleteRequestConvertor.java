@@ -16,31 +16,35 @@
  */
 package org.apache.seata.serializer.protobuf.convertor;
 
+import org.apache.seata.core.model.BranchType;
+import org.apache.seata.core.protocol.transaction.UndoLogDeleteRequest;
 import org.apache.seata.serializer.protobuf.generated.AbstractMessageProto;
 import org.apache.seata.serializer.protobuf.generated.AbstractTransactionRequestProto;
 import org.apache.seata.serializer.protobuf.generated.BranchTypeProto;
 import org.apache.seata.serializer.protobuf.generated.MessageTypeProto;
 import org.apache.seata.serializer.protobuf.generated.UndoLogDeleteRequestProto;
-import org.apache.seata.core.model.BranchType;
-import org.apache.seata.core.protocol.transaction.UndoLogDeleteRequest;
-
 
 public class UndoLogDeleteRequestConvertor implements PbConvertor<UndoLogDeleteRequest, UndoLogDeleteRequestProto> {
     @Override
     public UndoLogDeleteRequestProto convert2Proto(UndoLogDeleteRequest undoLogDeleteRequest) {
         final short typeCode = undoLogDeleteRequest.getTypeCode();
 
-        final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder().setMessageType(
-            MessageTypeProto.forNumber(typeCode)).build();
+        final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder()
+                .setMessageType(MessageTypeProto.forNumber(typeCode))
+                .build();
 
-        final AbstractTransactionRequestProto abstractTransactionRequestProto = AbstractTransactionRequestProto
-            .newBuilder().setAbstractMessage(abstractMessage).build();
+        final AbstractTransactionRequestProto abstractTransactionRequestProto =
+                AbstractTransactionRequestProto.newBuilder()
+                        .setAbstractMessage(abstractMessage)
+                        .build();
 
         final UndoLogDeleteRequestProto undoLogDeleteRequestProto = UndoLogDeleteRequestProto.newBuilder()
-            .setAbstractTransactionRequest(abstractTransactionRequestProto).setSaveDays(
-                undoLogDeleteRequest.getSaveDays()).setBranchType(
-                BranchTypeProto.valueOf(undoLogDeleteRequest.getBranchType().name())).setResourceId(
-                undoLogDeleteRequest.getResourceId()).build();
+                .setAbstractTransactionRequest(abstractTransactionRequestProto)
+                .setSaveDays(undoLogDeleteRequest.getSaveDays())
+                .setBranchType(BranchTypeProto.valueOf(
+                        undoLogDeleteRequest.getBranchType().name()))
+                .setResourceId(undoLogDeleteRequest.getResourceId())
+                .build();
 
         return undoLogDeleteRequestProto;
     }
@@ -48,9 +52,10 @@ public class UndoLogDeleteRequestConvertor implements PbConvertor<UndoLogDeleteR
     @Override
     public UndoLogDeleteRequest convert2Model(UndoLogDeleteRequestProto undoLogDeleteRequestProto) {
         UndoLogDeleteRequest undoLogDeleteRequest = new UndoLogDeleteRequest();
-        undoLogDeleteRequest.setSaveDays((short)undoLogDeleteRequestProto.getSaveDays());
+        undoLogDeleteRequest.setSaveDays((short) undoLogDeleteRequestProto.getSaveDays());
         undoLogDeleteRequest.setResourceId(undoLogDeleteRequestProto.getResourceId());
-        undoLogDeleteRequest.setBranchType(BranchType.valueOf(undoLogDeleteRequestProto.getBranchType().name()));
+        undoLogDeleteRequest.setBranchType(
+                BranchType.valueOf(undoLogDeleteRequestProto.getBranchType().name()));
 
         return undoLogDeleteRequest;
     }

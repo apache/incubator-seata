@@ -16,17 +16,17 @@
  */
 package org.apache.seata.integration.tx.api.remoting.parser;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.integration.tx.api.remoting.RemotingDesc;
 import org.apache.seata.integration.tx.api.remoting.RemotingParser;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * parsing remoting bean
@@ -70,7 +70,7 @@ public class DefaultRemotingParser {
      * init parsers
      */
     protected void initRemotingParser() {
-        //init all resource managers
+        // init all resource managers
         List<RemotingParser> remotingParsers = EnhancedServiceLoader.loadAll(RemotingParser.class);
         if (CollectionUtils.isNotEmpty(remotingParsers)) {
             allRemotingParsers.addAll(remotingParsers);
@@ -192,7 +192,7 @@ public class DefaultRemotingParser {
         }
         remotingServiceMap.put(bean, remotingBeanDesc);
         if (remotingParser.isReference(bean, beanName)) {
-            //reference bean, TCC proxy
+            // reference bean, TCC proxy
             remotingBeanDesc.setReference(true);
         }
         return remotingBeanDesc;
@@ -207,5 +207,4 @@ public class DefaultRemotingParser {
     public RemotingDesc getRemotingBeanDesc(Object bean) {
         return remotingServiceMap.get(bean);
     }
-
 }

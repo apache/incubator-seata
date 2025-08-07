@@ -67,7 +67,12 @@ public interface StateMachine {
      *
      * @return the state machine key: the state machine name,value: the state machine
      */
-    Map<String/** state machine name **/, State> getStates();
+    Map<
+                    String
+                    /** state machine name **/
+                    ,
+                    State>
+            getStates();
 
     /**
      * get state

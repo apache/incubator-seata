@@ -24,7 +24,7 @@ import org.apache.seata.core.rpc.RpcContext;
  * The type Branch register request.
  *
  */
-public class BranchRegisterRequest extends AbstractTransactionRequestToTC  {
+public class BranchRegisterRequest extends AbstractTransactionRequestToTC {
 
     private String xid;
 

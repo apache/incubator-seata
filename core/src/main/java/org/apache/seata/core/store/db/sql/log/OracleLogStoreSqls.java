@@ -44,7 +44,7 @@ public class OracleLogStoreSqls extends AbstractLogStoreSqls {
      * The constant UPDATE_GLOBAL_TRANSACTION_STATUS_BY_STATUS_ORACLE.
      */
     public static final String UPDATE_GLOBAL_TRANSACTION_STATUS_BY_STATUS_ORACLE =
-        UPDATE_GLOBAL_TRANSACTION_STATUS_ORACLE + " and " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " = ?";
+            UPDATE_GLOBAL_TRANSACTION_STATUS_ORACLE + " and " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " = ?";
 
     /**
      * The constant QUERY_GLOBAL_TRANSACTION_BY_STATUS_ORACLE.
@@ -86,7 +86,7 @@ public class OracleLogStoreSqls extends AbstractLogStoreSqls {
     /**
      * The constant UPDATE_BRANCH_STATUS_APPLICATION_DATA_ORACLE.
      */
-    public static final String UPDATE_BRANCH_STATUS_APPLICATION_DATA_ORACLE =  "update " + BRANCH_TABLE_PLACEHOLD
+    public static final String UPDATE_BRANCH_STATUS_APPLICATION_DATA_ORACLE = "update " + BRANCH_TABLE_PLACEHOLD
             + "   set " + ServerTableColumnsName.BRANCH_TABLE_STATUS + " = ?,"
             + "       " + ServerTableColumnsName.BRANCH_TABLE_APPLICATION_DATA + " = ?,"
             + "       " + ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED + " = systimestamp"
@@ -110,8 +110,9 @@ public class OracleLogStoreSqls extends AbstractLogStoreSqls {
 
     @Override
     public String getQueryGlobalTransactionSQLByStatus(String globalTable, String paramsPlaceHolder) {
-        return QUERY_GLOBAL_TRANSACTION_BY_STATUS_ORACLE.replace(GLOBAL_TABLE_PLACEHOLD, globalTable)
-            .replace(PRAMETER_PLACEHOLD, paramsPlaceHolder);
+        return QUERY_GLOBAL_TRANSACTION_BY_STATUS_ORACLE
+                .replace(GLOBAL_TABLE_PLACEHOLD, globalTable)
+                .replace(PRAMETER_PLACEHOLD, paramsPlaceHolder);
     }
 
     @Override

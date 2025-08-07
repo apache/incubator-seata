@@ -30,21 +30,19 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 public class MockController {
 
-
     @RequestMapping("/testGet")
     @ResponseBody
     public String testGet(HttpTest.Person person) {
         /* verify xid propagate by test case */
-        Assertions.assertEquals(HttpTest.XID,RootContext.getXID());
+        Assertions.assertEquals(HttpTest.XID, RootContext.getXID());
         return person.toString();
     }
-
 
     @ResponseBody
     @PostMapping("/testPost")
     public String testPost(@RequestBody HttpTest.Person person) {
         /* verify xid propagate by test case */
-        Assertions.assertEquals(HttpTest.XID,RootContext.getXID());
+        Assertions.assertEquals(HttpTest.XID, RootContext.getXID());
         return person.toString();
     }
 
@@ -53,5 +51,4 @@ public class MockController {
     public String testException(HttpTest.Person person) {
         throw new RuntimeException();
     }
-
 }

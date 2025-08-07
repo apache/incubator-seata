@@ -16,15 +16,15 @@
  */
 package io.seata.rm.tcc.interceptor;
 
-import java.lang.annotation.Annotation;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
 import io.seata.integration.tx.api.interceptor.ActionInterceptorHandler;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import org.apache.seata.common.Constants;
 import org.apache.seata.integration.tx.api.interceptor.TwoPhaseBusinessActionParam;
+
+import java.lang.annotation.Annotation;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * The type Tcc action interceptor handler.
@@ -66,7 +66,7 @@ public class TccActionInterceptorHandler extends org.apache.seata.rm.tcc.interce
         businessActionParam.setUseCommonFence(businessAction.useTCCFence());
         businessActionParam.setBranchType(getBranchType());
         Map<String, Object> businessActionContextMap = new HashMap<>(4);
-        //the phase two method name
+        // the phase two method name
         businessActionContextMap.put(Constants.COMMIT_METHOD, businessAction.commitMethod());
         businessActionContextMap.put(Constants.ROLLBACK_METHOD, businessAction.rollbackMethod());
         businessActionContextMap.put(Constants.ACTION_NAME, businessAction.name());

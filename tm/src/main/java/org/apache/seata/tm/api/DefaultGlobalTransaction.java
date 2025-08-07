@@ -57,11 +57,11 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
      */
     private long createTime;
 
-    private static final int COMMIT_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
-        ConfigurationKeys.CLIENT_TM_COMMIT_RETRY_COUNT, DEFAULT_TM_COMMIT_RETRY_COUNT);
+    private static final int COMMIT_RETRY_COUNT = ConfigurationFactory.getInstance()
+            .getInt(ConfigurationKeys.CLIENT_TM_COMMIT_RETRY_COUNT, DEFAULT_TM_COMMIT_RETRY_COUNT);
 
-    private static final int ROLLBACK_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
-        ConfigurationKeys.CLIENT_TM_ROLLBACK_RETRY_COUNT, DEFAULT_TM_ROLLBACK_RETRY_COUNT);
+    private static final int ROLLBACK_RETRY_COUNT = ConfigurationFactory.getInstance()
+            .getInt(ConfigurationKeys.CLIENT_TM_ROLLBACK_RETRY_COUNT, DEFAULT_TM_ROLLBACK_RETRY_COUNT);
 
     /**
      * Instantiates a new Default global transaction.
@@ -107,8 +107,8 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         assertXIDNull();
         String currentXid = RootContext.getXID();
         if (currentXid != null) {
-            throw new IllegalStateException("Global transaction already exists," +
-                " can't begin a new global transaction, currentXid = " + currentXid);
+            throw new IllegalStateException("Global transaction already exists,"
+                    + " can't begin a new global transaction, currentXid = " + currentXid);
         }
         xid = transactionManager.begin(null, null, name, timeout);
         status = GlobalStatus.Begin;
@@ -140,7 +140,11 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
                     status = transactionManager.commit(xid);
                     break;
                 } catch (Throwable ex) {
-                    LOGGER.error("Failed to report global commit [{}],Retry Countdown: {}, reason: {}", this.getXid(), retry, ex.getMessage());
+                    LOGGER.error(
+                            "Failed to report global commit [{}],Retry Countdown: {}, reason: {}",
+                            this.getXid(),
+                            retry,
+                            ex.getMessage());
                     if (retry == 0) {
                         throw new TransactionException("Failed to report global commit", ex);
                     }
@@ -179,7 +183,11 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
                     status = transactionManager.rollback(xid);
                     break;
                 } catch (Throwable ex) {
-                    LOGGER.error("Failed to report global rollback [{}],Retry Countdown: {}, reason: {}", this.getXid(), retry, ex.getMessage());
+                    LOGGER.error(
+                            "Failed to report global rollback [{}],Retry Countdown: {}, reason: {}",
+                            this.getXid(),
+                            retry,
+                            ex.getMessage());
                     if (retry == 0) {
                         throw new TransactionException("Failed to report global rollback", ex);
                     }

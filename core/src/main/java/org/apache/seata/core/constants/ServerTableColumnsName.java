@@ -77,11 +77,6 @@ public interface ServerTableColumnsName {
      */
     String GLOBAL_TABLE_GMT_MODIFIED = "gmt_modified";
 
-
-
-
-
-
     /**
      * The constant branch_table column name branch_id
      */
@@ -142,11 +137,6 @@ public interface ServerTableColumnsName {
      */
     String BRANCH_TABLE_GMT_MODIFIED = "gmt_modified";
 
-
-
-
-
-
     /**
      * The constant lock_table column name row_key
      */
@@ -166,7 +156,6 @@ public interface ServerTableColumnsName {
      * The constant lock_table column name branch_id
      */
     String LOCK_TABLE_BRANCH_ID = "branch_id";
-
 
     /**
      * The constant lock_table column name resource_id
@@ -197,8 +186,6 @@ public interface ServerTableColumnsName {
      * The constant lock_table column name gmt_modified
      */
     String LOCK_TABLE_GMT_MODIFIED = "gmt_modified";
-
-
 
     /**
      * The constant distributed_lock column name lock key

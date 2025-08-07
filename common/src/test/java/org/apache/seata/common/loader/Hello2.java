@@ -16,6 +16,4 @@
  */
 package org.apache.seata.common.loader;
 
-
-public interface Hello2 {
-}
+public interface Hello2 {}

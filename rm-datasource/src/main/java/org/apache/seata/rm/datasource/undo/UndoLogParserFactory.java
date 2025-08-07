@@ -16,12 +16,12 @@
  */
 package org.apache.seata.rm.datasource.undo;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
+
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * The type Undo log parser factory.
@@ -29,9 +29,7 @@ import org.apache.seata.common.util.StringUtils;
  */
 public class UndoLogParserFactory {
 
-    private UndoLogParserFactory() {
-
-    }
+    private UndoLogParserFactory() {}
 
     /**
      * {serializerName:UndoLogParser}
@@ -60,9 +58,9 @@ public class UndoLogParserFactory {
     public static UndoLogParser getInstance(String name) {
         if (StringUtils.equalsIgnoreCase("fst", name)) {
             throw new IllegalArgumentException(
-                "Since fst is no longer maintained, this serialization extension has been removed from version 2.0 for security and stability reasons.");
+                    "Since fst is no longer maintained, this serialization extension has been removed from version 2.0 for security and stability reasons.");
         }
-        return CollectionUtils.computeIfAbsent(INSTANCES, name,
-            key -> EnhancedServiceLoader.load(UndoLogParser.class, name));
+        return CollectionUtils.computeIfAbsent(
+                INSTANCES, name, key -> EnhancedServiceLoader.load(UndoLogParser.class, name));
     }
 }

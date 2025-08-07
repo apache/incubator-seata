@@ -16,12 +16,12 @@
  */
 package org.apache.seata.sqlparser.struct;
 
+import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import org.junit.jupiter.api.Test;
 
 public class ColumnMetaTest {
 
@@ -53,7 +53,6 @@ public class ColumnMetaTest {
         // Test equality with the copy
         assertTrue(column1.equals(column3));
         assertEquals(column1.hashCode(), column3.hashCode());
-
     }
 
     @Test
@@ -184,5 +183,4 @@ public class ColumnMetaTest {
         columnMeta.setCaseSensitive(true);
         assertTrue(columnMeta.isCaseSensitive());
     }
-
 }

@@ -16,13 +16,6 @@
  */
 package org.apache.seata.config.apollo;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-
 import com.ctrip.framework.apollo.core.dto.ApolloConfig;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,6 +23,13 @@ import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * The type Apollo mock server.
@@ -70,7 +70,6 @@ public class ApolloMockServer {
         });
         server.start(port);
         System.setProperty("apollo.configService", "http://localhost:" + port);
-
     }
 
     private String loadMockData(String appId, String Cluster, String namespace) throws JsonProcessingException {
@@ -90,7 +89,6 @@ public class ApolloMockServer {
         apolloConfig.setConfigurations(configurations);
         String json = mapper.writeValueAsString(apolloConfig);
         return json;
-
     }
 
     /**
@@ -103,5 +101,4 @@ public class ApolloMockServer {
             server.shutdown();
         }
     }
-
 }

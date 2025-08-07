@@ -19,9 +19,9 @@ package org.apache.seata.server.storage.raft.lock;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.config.ConfigurationFactory;
-import org.apache.seata.server.cluster.raft.RaftServerManager;
 import org.apache.seata.core.store.DistributedLockDO;
 import org.apache.seata.core.store.DistributedLocker;
+import org.apache.seata.server.cluster.raft.RaftServerManager;
 import org.apache.seata.server.storage.redis.lock.RedisDistributedLocker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,10 +34,10 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 @LoadLevel(name = "raft")
 public class RaftDistributedLocker implements DistributedLocker {
 
-    protected static final Logger LOGGER = LoggerFactory.getLogger(
-            RedisDistributedLocker.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(RedisDistributedLocker.class);
 
-    private final String group = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SERVER_RAFT_GROUP, DEFAULT_SEATA_GROUP);
+    private final String group =
+            ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SERVER_RAFT_GROUP, DEFAULT_SEATA_GROUP);
 
     /**
      * Acquire the distributed lock
@@ -60,5 +60,4 @@ public class RaftDistributedLocker implements DistributedLocker {
     public boolean releaseLock(DistributedLockDO distributedLockDO) {
         return true;
     }
-    
 }

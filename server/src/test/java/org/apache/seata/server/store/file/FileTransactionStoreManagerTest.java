@@ -16,16 +16,19 @@
  */
 package org.apache.seata.server.store.file;
 
-import java.io.File;
-import java.lang.reflect.Method;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import org.apache.seata.common.store.SessionMode;
+import org.apache.seata.common.util.BufferUtils;
+import org.apache.seata.common.util.UUIDGenerator;
 import org.apache.seata.server.DynamicPortTestConfig;
+import org.apache.seata.server.session.BranchSession;
+import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.session.SessionHolder;
+import org.apache.seata.server.session.SessionManager;
+import org.apache.seata.server.storage.file.TransactionWriteStore;
+import org.apache.seata.server.storage.file.session.FileSessionManager;
+import org.apache.seata.server.storage.file.store.FileTransactionStoreManager;
+import org.apache.seata.server.store.StoreConfig;
+import org.apache.seata.server.store.TransactionStoreManager;
 import org.assertj.core.util.Files;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -33,19 +36,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import org.apache.seata.common.util.BufferUtils;
-import org.apache.seata.common.util.UUIDGenerator;
-import org.apache.seata.server.session.BranchSession;
-import org.apache.seata.server.session.GlobalSession;
-import org.apache.seata.server.session.SessionManager;
-import org.apache.seata.server.storage.file.TransactionWriteStore;
-import org.apache.seata.server.storage.file.session.FileSessionManager;
-import org.apache.seata.server.storage.file.store.FileTransactionStoreManager;
-import org.apache.seata.server.store.StoreConfig;
-import org.apache.seata.server.store.TransactionStoreManager;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
+
+import java.io.File;
+import java.lang.reflect.Method;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  */
@@ -54,11 +52,12 @@ import org.springframework.context.annotation.Import;
 public class FileTransactionStoreManagerTest {
 
     @BeforeEach
-    public void setUp(){
+    public void setUp() {
         SessionHolder.init(SessionMode.FILE);
     }
+
     @AfterEach
-    public void tearDown(){
+    public void tearDown() {
         SessionHolder.destroy();
     }
 
@@ -70,17 +69,17 @@ public class FileTransactionStoreManagerTest {
             fileTransactionStoreManager = new FileTransactionStoreManager(seataFile.getAbsolutePath(), null);
             BranchSession branchSessionA = Mockito.mock(BranchSession.class);
             GlobalSession global = new GlobalSession();
-            Mockito.when(branchSessionA.encode())
-                    .thenReturn(createBigBranchSessionData(global, (byte) 'A'));
+            Mockito.when(branchSessionA.encode()).thenReturn(createBigBranchSessionData(global, (byte) 'A'));
             Mockito.when(branchSessionA.getApplicationData())
                     .thenReturn(new String(createBigApplicationData((byte) 'A')));
             BranchSession branchSessionB = Mockito.mock(BranchSession.class);
-            Mockito.when(branchSessionB.encode())
-                    .thenReturn(createBigBranchSessionData(global, (byte) 'B'));
+            Mockito.when(branchSessionB.encode()).thenReturn(createBigBranchSessionData(global, (byte) 'B'));
             Mockito.when(branchSessionB.getApplicationData())
                     .thenReturn(new String(createBigApplicationData((byte) 'B')));
-            Assertions.assertTrue(fileTransactionStoreManager.writeSession(TransactionStoreManager.LogOperation.BRANCH_ADD, branchSessionA));
-            Assertions.assertTrue(fileTransactionStoreManager.writeSession(TransactionStoreManager.LogOperation.BRANCH_ADD, branchSessionB));
+            Assertions.assertTrue(fileTransactionStoreManager.writeSession(
+                    TransactionStoreManager.LogOperation.BRANCH_ADD, branchSessionA));
+            Assertions.assertTrue(fileTransactionStoreManager.writeSession(
+                    TransactionStoreManager.LogOperation.BRANCH_ADD, branchSessionB));
             List<TransactionWriteStore> list = fileTransactionStoreManager.readWriteStore(2000, false);
             Assertions.assertNotNull(list);
             Assertions.assertEquals(2, list.size());
@@ -108,24 +107,21 @@ public class FileTransactionStoreManagerTest {
             for (int i = 0; i < 100; i++) {
                 GlobalSession globalSession = new GlobalSession("", "", "", 60000);
                 BranchSession branchSessionA = Mockito.mock(BranchSession.class);
-                Mockito.when(branchSessionA.encode())
-                        .thenReturn(createBigBranchSessionData(globalSession, (byte) 'A'));
+                Mockito.when(branchSessionA.encode()).thenReturn(createBigBranchSessionData(globalSession, (byte) 'A'));
                 Mockito.when(branchSessionA.getApplicationData())
                         .thenReturn(new String(createBigApplicationData((byte) 'A')));
                 globalSession.addBranch(branchSessionA);
                 BranchSession branchSessionB = Mockito.mock(BranchSession.class);
-                Mockito.when(branchSessionB.encode())
-                        .thenReturn(createBigBranchSessionData(globalSession, (byte) 'B'));
+                Mockito.when(branchSessionB.encode()).thenReturn(createBigBranchSessionData(globalSession, (byte) 'B'));
                 Mockito.when(branchSessionB.getApplicationData())
                         .thenReturn(new String(createBigApplicationData((byte) 'B')));
                 globalSession.addBranch(branchSessionB);
                 timeoutSessions.add(globalSession);
             }
             SessionManager sessionManagerMock = Mockito.mock(SessionManager.class);
-            Mockito.when(sessionManagerMock.findGlobalSessions(Mockito.any()))
-                    .thenReturn(timeoutSessions);
-            fileTransactionStoreManager = new FileTransactionStoreManager(
-                seataFile.getAbsolutePath(), sessionManagerMock);
+            Mockito.when(sessionManagerMock.findGlobalSessions(Mockito.any())).thenReturn(timeoutSessions);
+            fileTransactionStoreManager =
+                    new FileTransactionStoreManager(seataFile.getAbsolutePath(), sessionManagerMock);
             Assertions.assertTrue((boolean) findTimeoutAndSaveMethod.invoke(fileTransactionStoreManager));
 
             sessionManager = new FileSessionManager(seataFile.getName(), seataFile.getParent());
@@ -136,8 +132,12 @@ public class FileTransactionStoreManagerTest {
                 Assertions.assertNotNull(g);
                 List<BranchSession> branches = g.getBranchSessions();
                 Assertions.assertEquals(2, branches.size());
-                Assertions.assertEquals(new String(createBigApplicationData((byte) 'A')), branches.get(0).getApplicationData());
-                Assertions.assertEquals(new String(createBigApplicationData((byte) 'B')), branches.get(1).getApplicationData());
+                Assertions.assertEquals(
+                        new String(createBigApplicationData((byte) 'A')),
+                        branches.get(0).getApplicationData());
+                Assertions.assertEquals(
+                        new String(createBigApplicationData((byte) 'B')),
+                        branches.get(1).getApplicationData());
             });
         } finally {
             findTimeoutAndSaveMethod.setAccessible(false);
@@ -162,7 +162,7 @@ public class FileTransactionStoreManagerTest {
                 + 4 // xidBytes.size
                 + 1 // statusCode
                 + 1 // lockstatus
-                + 1; //branchType
+                + 1; // branchType
         String xid = global.getXid();
         byte[] xidBytes = null;
         if (xid != null) {

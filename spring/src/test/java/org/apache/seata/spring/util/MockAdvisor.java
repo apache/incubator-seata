@@ -20,7 +20,6 @@ import org.aopalliance.aop.Advice;
 import org.springframework.aop.Advisor;
 import org.springframework.core.Ordered;
 
-
 public class MockAdvisor implements Advisor, Ordered {
 
     private Integer order;

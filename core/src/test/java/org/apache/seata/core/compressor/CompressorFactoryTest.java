@@ -17,8 +17,6 @@
 package org.apache.seata.core.compressor;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -35,10 +33,10 @@ class CompressorFactoryTest {
     void testNoneCompressor() {
         CompressorFactory.NoneCompressor noneCompressor = new CompressorFactory.NoneCompressor();
         byte[] testData = "Test data".getBytes();
-        
+
         byte[] compressed = noneCompressor.compress(testData);
         assertArrayEquals(testData, compressed);
-        
+
         byte[] decompressed = noneCompressor.decompress(compressed);
         assertArrayEquals(testData, decompressed);
     }
@@ -58,6 +56,7 @@ class CompressorFactoryTest {
     @Test
     void testCompressorMapInitialization() {
         assertTrue(CompressorFactory.COMPRESSOR_MAP.containsKey(CompressorType.NONE));
-        assertTrue(CompressorFactory.COMPRESSOR_MAP.get(CompressorType.NONE) instanceof CompressorFactory.NoneCompressor);
+        assertTrue(
+                CompressorFactory.COMPRESSOR_MAP.get(CompressorType.NONE) instanceof CompressorFactory.NoneCompressor);
     }
 }

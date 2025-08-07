@@ -16,9 +16,9 @@
  */
 package org.apache.seata.sqlparser.struct;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SqlMethodExprTest {
     @Test
@@ -32,5 +32,4 @@ public class SqlMethodExprTest {
         String expected = "SQL_METHOD";
         assertEquals(expected.trim(), SqlMethodExpr.get().toString().trim());
     }
-
 }

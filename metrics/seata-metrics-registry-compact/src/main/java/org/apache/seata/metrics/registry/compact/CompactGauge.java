@@ -16,14 +16,14 @@
  */
 package org.apache.seata.metrics.registry.compact;
 
-import java.util.Collections;
-import java.util.function.Supplier;
-
 import org.apache.seata.metrics.Clock;
 import org.apache.seata.metrics.Gauge;
 import org.apache.seata.metrics.Id;
 import org.apache.seata.metrics.Measurement;
 import org.apache.seata.metrics.SystemClock;
+
+import java.util.Collections;
+import java.util.function.Supplier;
 
 /**
  * Compact Gauge implement with Supplier

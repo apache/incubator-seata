@@ -16,16 +16,6 @@
  */
 package org.apache.seata.spring.annotation;
 
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.annotation.Nullable;
-
 import com.google.common.collect.ImmutableSet;
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
@@ -77,6 +67,15 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.Ordered;
 
+import javax.annotation.Nullable;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import static org.apache.seata.common.DefaultValues.DEFAULT_DISABLE_GLOBAL_TRANSACTION;
 import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP_OLD;
@@ -98,7 +97,8 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     private static final int ORDER_NUM = 1024;
     private static final int DEFAULT_MODE = AT_MODE + MT_MODE;
 
-    private static final String SPRING_TRANSACTION_INTERCEPTOR_CLASS_NAME = "org.springframework.transaction.interceptor.TransactionInterceptor";
+    private static final String SPRING_TRANSACTION_INTERCEPTOR_CLASS_NAME =
+            "org.springframework.transaction.interceptor.TransactionInterceptor";
 
     private static final Set<String> PROXYED_SET = new HashSet<>();
     private static final Set<String> EXCLUDE_BEAN_NAME_SET = new HashSet<>();
@@ -112,8 +112,8 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     private final String txServiceGroup;
     private static String accessKey;
     private static String secretKey;
-    private volatile boolean disableGlobalTransaction = ConfigurationFactory.getInstance().getBoolean(
-            ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, DEFAULT_DISABLE_GLOBAL_TRANSACTION);
+    private volatile boolean disableGlobalTransaction = ConfigurationFactory.getInstance()
+            .getBoolean(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, DEFAULT_DISABLE_GLOBAL_TRANSACTION);
     private final AtomicBoolean initialized = new AtomicBoolean(false);
 
     private final FailureHandler failureHandlerHook;
@@ -121,7 +121,6 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     private ApplicationContext applicationContext;
 
     private static final Set<String> NEED_ENHANCE_BEAN_NAME_SET = new HashSet<>();
-
 
     /**
      * Instantiates a new Global transaction scanner.
@@ -182,8 +181,8 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
      * @param exposeProxy        the exposeProxy
      * @param failureHandlerHook the failure handler hook
      */
-    public GlobalTransactionScanner(String applicationId, String txServiceGroup, boolean exposeProxy,
-                                    FailureHandler failureHandlerHook) {
+    public GlobalTransactionScanner(
+            String applicationId, String txServiceGroup, boolean exposeProxy, FailureHandler failureHandlerHook) {
         this(applicationId, txServiceGroup, DEFAULT_MODE, exposeProxy, failureHandlerHook);
     }
 
@@ -196,8 +195,12 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
      * @param exposeProxy        the exposeProxy
      * @param failureHandlerHook the failure handler hook
      */
-    public GlobalTransactionScanner(String applicationId, String txServiceGroup, int mode, boolean exposeProxy,
-                                    FailureHandler failureHandlerHook) {
+    public GlobalTransactionScanner(
+            String applicationId,
+            String txServiceGroup,
+            int mode,
+            boolean exposeProxy,
+            FailureHandler failureHandlerHook) {
         setOrder(ORDER_NUM);
         setProxyTargetClass(true);
         setExposeProxy(exposeProxy);
@@ -235,30 +238,38 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
             LOGGER.info("Initializing Global Transaction Clients ... ");
         }
         if (DEFAULT_TX_GROUP_OLD.equals(txServiceGroup)) {
-            LOGGER.warn("the default value of seata.tx-service-group: {} has already changed to {} since Seata 1.5, " +
-                            "please change your default configuration as soon as possible " +
-                            "and we don't recommend you to use default tx-service-group's value provided by seata",
-                    DEFAULT_TX_GROUP_OLD, DEFAULT_TX_GROUP);
+            LOGGER.warn(
+                    "the default value of seata.tx-service-group: {} has already changed to {} since Seata 1.5, "
+                            + "please change your default configuration as soon as possible "
+                            + "and we don't recommend you to use default tx-service-group's value provided by seata",
+                    DEFAULT_TX_GROUP_OLD,
+                    DEFAULT_TX_GROUP);
         }
         if (StringUtils.isNullOrEmpty(applicationId) || StringUtils.isNullOrEmpty(txServiceGroup)) {
-            throw new IllegalArgumentException(String.format("applicationId: %s, txServiceGroup: %s", applicationId, txServiceGroup));
+            throw new IllegalArgumentException(
+                    String.format("applicationId: %s, txServiceGroup: %s", applicationId, txServiceGroup));
         }
-        //init TM
+        // init TM
         TMClient.init(applicationId, txServiceGroup, accessKey, secretKey);
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Transaction Manager Client is initialized. applicationId[{}] txServiceGroup[{}]", applicationId, txServiceGroup);
+            LOGGER.info(
+                    "Transaction Manager Client is initialized. applicationId[{}] txServiceGroup[{}]",
+                    applicationId,
+                    txServiceGroup);
         }
-        //init RM
+        // init RM
         RMClient.init(applicationId, txServiceGroup);
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Resource Manager is initialized. applicationId[{}] txServiceGroup[{}]", applicationId, txServiceGroup);
+            LOGGER.info(
+                    "Resource Manager is initialized. applicationId[{}] txServiceGroup[{}]",
+                    applicationId,
+                    txServiceGroup);
         }
 
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Global Transaction Clients are initialized. ");
         }
         registerSpringShutdownHook();
-
     }
 
     protected void registerSpringShutdownHook() {
@@ -266,7 +277,8 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
             ((ConfigurableApplicationContext) applicationContext).registerShutdownHook();
             ShutdownHook.removeRuntimeShutdownHook();
         }
-        ShutdownHook.getInstance().addDisposable(TmNettyRemotingClient.getInstance(applicationId, txServiceGroup, accessKey, secretKey));
+        ShutdownHook.getInstance()
+                .addDisposable(TmNettyRemotingClient.getInstance(applicationId, txServiceGroup, accessKey, secretKey));
         ShutdownHook.getInstance().addDisposable(RmNettyRemotingClient.getInstance(applicationId, txServiceGroup));
     }
 
@@ -307,14 +319,19 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                     return bean;
                 }
                 interceptor = null;
-                ProxyInvocationHandler proxyInvocationHandler = DefaultInterfaceParser.get().parserInterfaceToProxy(bean, beanName);
+                ProxyInvocationHandler proxyInvocationHandler =
+                        DefaultInterfaceParser.get().parserInterfaceToProxy(bean, beanName);
                 if (proxyInvocationHandler == null) {
                     return bean;
                 }
 
                 interceptor = new AdapterSpringSeataInterceptor(proxyInvocationHandler);
 
-                LOGGER.info("Bean [{}] with name [{}] would use interceptor [{}]", bean.getClass().getName(), beanName, interceptor.toString());
+                LOGGER.info(
+                        "Bean [{}] with name [{}] would use interceptor [{}]",
+                        bean.getClass().getName(),
+                        beanName,
+                        interceptor.toString());
                 if (!AopUtils.isAopProxy(bean)) {
                     bean = super.wrapIfNecessary(bean, beanName, cacheKey);
                 } else {
@@ -336,7 +353,8 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     }
 
     private boolean doCheckers(Object bean, String beanName) {
-        if (PROXYED_SET.contains(beanName) || EXCLUDE_BEAN_NAME_SET.contains(beanName)
+        if (PROXYED_SET.contains(beanName)
+                || EXCLUDE_BEAN_NAME_SET.contains(beanName)
                 || FactoryBean.class.isAssignableFrom(bean.getClass())) {
             return false;
         }
@@ -353,16 +371,18 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                         return false;
                     }
                 } catch (Exception e) {
-                    LOGGER.error("Do check failed: beanName={}, checker={}",
-                            beanName, checker.getClass().getSimpleName(), e);
+                    LOGGER.error(
+                            "Do check failed: beanName={}, checker={}",
+                            beanName,
+                            checker.getClass().getSimpleName(),
+                            e);
                 }
             }
         }
         return true;
     }
 
-
-    //region the methods about findAddSeataAdvisorPosition  START
+    // region the methods about findAddSeataAdvisorPosition  START
 
     /**
      * Find pos for `advised.addAdvisor(pos, avr);`
@@ -387,7 +407,8 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
             }
         } else {
             // If the interceptorPosition is not any, compute position if has TransactionInterceptor.
-            Integer position = computePositionIfHasTransactionInterceptor(advised, seataAdvisor, seataInterceptorPosition, seataOrder);
+            Integer position = computePositionIfHasTransactionInterceptor(
+                    advised, seataAdvisor, seataInterceptorPosition, seataOrder);
             if (position != null) {
                 // the position before or after TransactionInterceptor
                 return position;
@@ -399,7 +420,11 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     }
 
     @Nullable
-    private Integer computePositionIfHasTransactionInterceptor(AdvisedSupport advised, Advisor seataAdvisor, SeataInterceptorPosition seataInterceptorPosition, int seataOrder) {
+    private Integer computePositionIfHasTransactionInterceptor(
+            AdvisedSupport advised,
+            Advisor seataAdvisor,
+            SeataInterceptorPosition seataInterceptorPosition,
+            int seataOrder) {
         // Find the TransactionInterceptor's advisor, order and position
         Advisor otherAdvisor = null;
         Integer transactionInterceptorPosition = null;
@@ -419,25 +444,35 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
         // Reset seataOrder if the seataOrder is not match the position
         Advice seataAdvice = seataAdvisor.getAdvice();
-        if (SeataInterceptorPosition.AfterTransaction == seataInterceptorPosition && OrderUtil.higherOrEquals(seataOrder, transactionInterceptorOrder)) {
+        if (SeataInterceptorPosition.AfterTransaction == seataInterceptorPosition
+                && OrderUtil.higherOrEquals(seataOrder, transactionInterceptorOrder)) {
             int newSeataOrder = OrderUtil.lower(transactionInterceptorOrder, 1);
             ((SeataInterceptor) seataAdvice).setOrder(newSeataOrder);
             if (LOGGER.isWarnEnabled()) {
-                LOGGER.warn("The {}'s order '{}' is higher or equals than {}'s order '{}' , reset {}'s order to lower order '{}'.",
-                        seataAdvice.getClass().getSimpleName(), seataOrder,
-                        otherAdvisor.getAdvice().getClass().getSimpleName(), transactionInterceptorOrder,
-                        seataAdvice.getClass().getSimpleName(), newSeataOrder);
+                LOGGER.warn(
+                        "The {}'s order '{}' is higher or equals than {}'s order '{}' , reset {}'s order to lower order '{}'.",
+                        seataAdvice.getClass().getSimpleName(),
+                        seataOrder,
+                        otherAdvisor.getAdvice().getClass().getSimpleName(),
+                        transactionInterceptorOrder,
+                        seataAdvice.getClass().getSimpleName(),
+                        newSeataOrder);
             }
             // the position after the TransactionInterceptor's advisor
             return transactionInterceptorPosition + 1;
-        } else if (SeataInterceptorPosition.BeforeTransaction == seataInterceptorPosition && OrderUtil.lowerOrEquals(seataOrder, transactionInterceptorOrder)) {
+        } else if (SeataInterceptorPosition.BeforeTransaction == seataInterceptorPosition
+                && OrderUtil.lowerOrEquals(seataOrder, transactionInterceptorOrder)) {
             int newSeataOrder = OrderUtil.higher(transactionInterceptorOrder, 1);
             ((SeataInterceptor) seataAdvice).setOrder(newSeataOrder);
             if (LOGGER.isWarnEnabled()) {
-                LOGGER.warn("The {}'s order '{}' is lower or equals than {}'s order '{}' , reset {}'s order to higher order '{}'.",
-                        seataAdvice.getClass().getSimpleName(), seataOrder,
-                        otherAdvisor.getAdvice().getClass().getSimpleName(), transactionInterceptorOrder,
-                        seataAdvice.getClass().getSimpleName(), newSeataOrder);
+                LOGGER.warn(
+                        "The {}'s order '{}' is lower or equals than {}'s order '{}' , reset {}'s order to higher order '{}'.",
+                        seataAdvice.getClass().getSimpleName(),
+                        seataOrder,
+                        otherAdvisor.getAdvice().getClass().getSimpleName(),
+                        transactionInterceptorOrder,
+                        seataAdvice.getClass().getSimpleName(),
+                        newSeataOrder);
             }
             // the position before the TransactionInterceptor's advisor
             return transactionInterceptorPosition;
@@ -470,10 +505,11 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     }
 
     private boolean isTransactionInterceptor(Advisor advisor) {
-        return SPRING_TRANSACTION_INTERCEPTOR_CLASS_NAME.equals(advisor.getAdvice().getClass().getName());
+        return SPRING_TRANSACTION_INTERCEPTOR_CLASS_NAME.equals(
+                advisor.getAdvice().getClass().getName());
     }
 
-    //endregion the methods about findAddSeataAdvisorPosition  END
+    // endregion the methods about findAddSeataAdvisorPosition  END
 
     private MethodDesc makeMethodDesc(GlobalTransactional anno, Method method) {
         return new MethodDesc(anno, method);
@@ -482,7 +518,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     @Override
     protected Object[] getAdvicesAndAdvisorsForBean(Class beanClass, String beanName, TargetSource customTargetSource)
             throws BeansException {
-        return new Object[]{interceptor};
+        return new Object[] {interceptor};
     }
 
     @Override
@@ -491,7 +527,9 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("Global transaction is disabled.");
             }
-            ConfigurationFactory.getInstance().addConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, (CachedConfigurationChangeListener) this);
+            ConfigurationFactory.getInstance()
+                    .addConfigListener(
+                            ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, (CachedConfigurationChangeListener) this);
             return;
         }
         if (initialized.compareAndSet(false, true)) {
@@ -503,8 +541,10 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
     private void findBusinessBeanNamesNeededEnhancement() {
         if (applicationContext instanceof ConfigurableApplicationContext) {
-            ConfigurableApplicationContext configurableApplicationContext = (ConfigurableApplicationContext) applicationContext;
-            ConfigurableListableBeanFactory configurableListableBeanFactory = configurableApplicationContext.getBeanFactory();
+            ConfigurableApplicationContext configurableApplicationContext =
+                    (ConfigurableApplicationContext) applicationContext;
+            ConfigurableListableBeanFactory configurableListableBeanFactory =
+                    configurableApplicationContext.getBeanFactory();
 
             String[] beanNames = applicationContext.getBeanDefinitionNames();
             for (String contextBeanName : beanNames) {
@@ -522,13 +562,15 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                     // get the class by bean definition class name
                     Class<?> beanClass = Class.forName(beanDefinition.getBeanClassName());
                     // check if it needs enhancement by the class
-                    IfNeedEnhanceBean ifNeedEnhanceBean = DefaultInterfaceParser.get().parseIfNeedEnhancement(beanClass);
+                    IfNeedEnhanceBean ifNeedEnhanceBean =
+                            DefaultInterfaceParser.get().parseIfNeedEnhancement(beanClass);
                     if (!ifNeedEnhanceBean.isIfNeed()) {
                         continue;
                     }
                     if (ifNeedEnhanceBean.getNeedEnhanceEnum().equals(NeedEnhanceEnum.SERVICE_BEAN)) {
                         // the native bean which dubbo, sofa bean service bean referenced
-                        PropertyValue propertyValue = beanDefinition.getPropertyValues().getPropertyValue("ref");
+                        PropertyValue propertyValue =
+                                beanDefinition.getPropertyValues().getPropertyValue("ref");
                         if (propertyValue == null) {
                             // the native bean which HSF service bean referenced
                             propertyValue = beanDefinition.getPropertyValues().getPropertyValue("target");
@@ -542,7 +584,9 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                         }
                         // the native bean which local tcc service bean referenced
                         NEED_ENHANCE_BEAN_NAME_SET.add(contextBeanName);
-                    } else if (ifNeedEnhanceBean.getNeedEnhanceEnum().equals(NeedEnhanceEnum.GLOBAL_TRANSACTIONAL_BEAN)) {
+                    } else if (ifNeedEnhanceBean
+                            .getNeedEnhanceEnum()
+                            .equals(NeedEnhanceEnum.GLOBAL_TRANSACTIONAL_BEAN)) {
                         // global transactional bean
                         NEED_ENHANCE_BEAN_NAME_SET.add(contextBeanName);
                     }
@@ -555,15 +599,13 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     }
 
     private static final Set<String> IGNORE_ENHANCE_CHECK_SET = ImmutableSet.of(
-            "org.apache.seata.spring.annotation.GlobalTransactionScanner"
-            , "org.apache.seata.rm.fence.SpringFenceConfig"
-            , "org.springframework.context.annotation.internalConfigurationAnnotationProcessor"
-            , "org.springframework.context.annotation.internalAutowiredAnnotationProcessor"
-            , "org.springframework.context.annotation.internalCommonAnnotationProcessor"
-            , "org.springframework.context.event.internalEventListenerProcessor"
-            , "org.springframework.context.event.internalEventListenerFactory"
-    );
-
+            "org.apache.seata.spring.annotation.GlobalTransactionScanner",
+            "org.apache.seata.rm.fence.SpringFenceConfig",
+            "org.springframework.context.annotation.internalConfigurationAnnotationProcessor",
+            "org.springframework.context.annotation.internalAutowiredAnnotationProcessor",
+            "org.springframework.context.annotation.internalCommonAnnotationProcessor",
+            "org.springframework.context.event.internalEventListenerProcessor",
+            "org.springframework.context.event.internalEventListenerFactory");
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
@@ -578,10 +620,13 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         if (ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION.equals(event.getDataId())) {
             disableGlobalTransaction = Boolean.parseBoolean(event.getNewValue().trim());
             if (!disableGlobalTransaction && initialized.compareAndSet(false, true)) {
-                LOGGER.info("{} config changed, old value:true, new value:{}", ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
+                LOGGER.info(
+                        "{} config changed, old value:true, new value:{}",
+                        ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
                         event.getNewValue());
                 initClient();
-                ConfigurationFactory.getInstance().removeConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, this);
+                ConfigurationFactory.getInstance()
+                        .removeConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, this);
             }
         }
     }

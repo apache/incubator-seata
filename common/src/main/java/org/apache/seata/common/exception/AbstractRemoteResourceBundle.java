@@ -18,6 +18,4 @@ package org.apache.seata.common.exception;
 
 import java.util.ResourceBundle;
 
-public abstract class AbstractRemoteResourceBundle extends ResourceBundle {
-
-}
+public abstract class AbstractRemoteResourceBundle extends ResourceBundle {}

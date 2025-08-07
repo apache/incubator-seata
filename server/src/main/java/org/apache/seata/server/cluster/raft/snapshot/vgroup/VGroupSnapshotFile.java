@@ -16,10 +16,6 @@
  */
 package org.apache.seata.server.cluster.raft.snapshot.vgroup;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.Map;
 import com.alipay.sofa.jraft.Status;
 import com.alipay.sofa.jraft.error.RaftError;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
@@ -32,9 +28,14 @@ import org.apache.seata.server.storage.raft.store.RaftVGroupMappingStoreManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.Map;
+
 public class VGroupSnapshotFile implements Serializable, StoreSnapshotFile {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(VGroupSnapshotFile.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(VGroupSnapshotFile.class);
 
     public static final String ROOT_MAPPING_MANAGER_NAME = "vgroup_mapping";
 
@@ -48,11 +49,14 @@ public class VGroupSnapshotFile implements Serializable, StoreSnapshotFile {
     public Status save(SnapshotWriter writer) {
         RaftSnapshot raftSnapshot = new RaftSnapshot();
         RaftVGroupMappingStoreManager raftVGroupMappingStoreManager =
-            (RaftVGroupMappingStoreManager)SessionHolder.getRootVGroupMappingManager();
-        Map<String/*vgroup*/, MappingDO> map = raftVGroupMappingStoreManager.loadVGroupsByUnit(group);
+                (RaftVGroupMappingStoreManager) SessionHolder.getRootVGroupMappingManager();
+        Map<String /*vgroup*/, MappingDO> map = raftVGroupMappingStoreManager.loadVGroupsByUnit(group);
         raftSnapshot.setBody(map);
         raftSnapshot.setType(RaftSnapshot.SnapshotType.vgroup_mapping);
-        String path = new StringBuilder(writer.getPath()).append(File.separator).append(ROOT_MAPPING_MANAGER_NAME).toString();
+        String path = new StringBuilder(writer.getPath())
+                .append(File.separator)
+                .append(ROOT_MAPPING_MANAGER_NAME)
+                .toString();
         try {
             if (save(raftSnapshot, path)) {
                 if (writer.addFile(ROOT_MAPPING_MANAGER_NAME)) {
@@ -73,11 +77,14 @@ public class VGroupSnapshotFile implements Serializable, StoreSnapshotFile {
             LOGGER.error("Fail to find data file in {}", reader.getPath());
             return false;
         }
-        String path = new StringBuilder(reader.getPath()).append(File.separator).append(ROOT_MAPPING_MANAGER_NAME).toString();
+        String path = new StringBuilder(reader.getPath())
+                .append(File.separator)
+                .append(ROOT_MAPPING_MANAGER_NAME)
+                .toString();
         try {
-            Map<String/*vgroup*/, MappingDO> map = (Map<String/*vgroup*/, MappingDO>)load(path);
+            Map<String /*vgroup*/, MappingDO> map = (Map<String /*vgroup*/, MappingDO>) load(path);
             RaftVGroupMappingStoreManager raftVGroupMappingStoreManager =
-                (RaftVGroupMappingStoreManager)SessionHolder.getRootVGroupMappingManager();
+                    (RaftVGroupMappingStoreManager) SessionHolder.getRootVGroupMappingManager();
             raftVGroupMappingStoreManager.clear(group);
             raftVGroupMappingStoreManager.localAddVGroups(map, group);
             return true;
@@ -86,5 +93,4 @@ public class VGroupSnapshotFile implements Serializable, StoreSnapshotFile {
             return false;
         }
     }
-
 }

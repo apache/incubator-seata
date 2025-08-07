@@ -16,12 +16,6 @@
  */
 package org.apache.seata.spring.boot.autoconfigure;
 
-import javax.sql.DataSource;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.RejectedExecutionHandler;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
 import org.apache.seata.saga.engine.StateMachineConfig;
 import org.apache.seata.saga.engine.StateMachineEngine;
 import org.apache.seata.saga.engine.config.DbStateMachineConfig;
@@ -40,6 +34,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean;
+
+import javax.sql.DataSource;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Saga auto configuration.
@@ -64,7 +64,8 @@ public class SeataSagaAutoConfiguration {
     public StateMachineConfig dbStateMachineConfig(
             DataSource dataSource,
             @Qualifier(SAGA_DATA_SOURCE_BEAN_NAME) @Autowired(required = false) DataSource sagaDataSource,
-            @Qualifier(SAGA_ASYNC_THREAD_POOL_EXECUTOR_BEAN_NAME) @Autowired(required = false) ThreadPoolExecutor threadPoolExecutor,
+            @Qualifier(SAGA_ASYNC_THREAD_POOL_EXECUTOR_BEAN_NAME) @Autowired(required = false)
+                    ThreadPoolExecutor threadPoolExecutor,
             @Value("${spring.application.name:}") String applicationId,
             @Value("${seata.tx-service-group:}") String txServiceGroup) {
         DbStateMachineConfig config = new DbStateMachineConfig();
@@ -115,7 +116,8 @@ public class SeataSagaAutoConfiguration {
         @ConditionalOnMissingBean
         public ThreadPoolExecutor sagaAsyncThreadPoolExecutor(
                 SagaAsyncThreadPoolProperties properties,
-                @Qualifier(SAGA_REJECTED_EXECUTION_HANDLER_BEAN_NAME) RejectedExecutionHandler rejectedExecutionHandler) {
+                @Qualifier(SAGA_REJECTED_EXECUTION_HANDLER_BEAN_NAME)
+                        RejectedExecutionHandler rejectedExecutionHandler) {
             ThreadPoolExecutorFactoryBean threadFactory = new ThreadPoolExecutorFactoryBean();
             threadFactory.setBeanName("sagaStateMachineThreadPoolExecutorFactory");
             threadFactory.setThreadNamePrefix("sagaAsyncExecute-");
@@ -130,8 +132,7 @@ public class SeataSagaAutoConfiguration {
                     TimeUnit.SECONDS,
                     new LinkedBlockingQueue<>(),
                     threadFactory,
-                    rejectedExecutionHandler
-            );
+                    rejectedExecutionHandler);
         }
     }
 }

@@ -16,12 +16,12 @@
  */
 package org.apache.seata.server.console.entity.vo;
 
+import org.apache.seata.core.constants.ServerTableColumnsName;
+
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Objects;
-
-import org.apache.seata.core.constants.ServerTableColumnsName;
 
 /**
  * BranchSessionVO
@@ -50,20 +50,18 @@ public class BranchSessionVO {
 
     private Long gmtModified;
 
+    public BranchSessionVO() {}
 
-    public BranchSessionVO(){
-
-    }
-
-    public BranchSessionVO(String xid,
-                           Long transactionId,
-                           Long branchId,
-                           String resourceGroupId,
-                           String resourceId,
-                           String branchType,
-                           Integer status,
-                           String clientId,
-                           String applicationData) {
+    public BranchSessionVO(
+            String xid,
+            Long transactionId,
+            Long branchId,
+            String resourceGroupId,
+            String resourceId,
+            String branchType,
+            Integer status,
+            String clientId,
+            String applicationData) {
         this.xid = xid;
         this.transactionId = String.valueOf(transactionId);
         this.branchId = String.valueOf(branchId);
@@ -209,7 +207,8 @@ public class BranchSessionVO {
 
     @Override
     public int hashCode() {
-        return Objects.hash(xid,
+        return Objects.hash(
+                xid,
                 transactionId,
                 branchId,
                 resourceGroupId,
@@ -224,18 +223,17 @@ public class BranchSessionVO {
 
     @Override
     public String toString() {
-        return "BranchSessionVO{" +
-                "xid='" + xid + '\'' +
-                ", transactionId=" + transactionId +
-                ", branchId=" + branchId +
-                ", resourceGroupId='" + resourceGroupId + '\'' +
-                ", resourceId='" + resourceId + '\'' +
-                ", branchType='" + branchType + '\'' +
-                ", status=" + status +
-                ", clientId='" + clientId + '\'' +
-                ", applicationData='" + applicationData + '\'' +
-                ", gmtCreate=" + gmtCreate +
-                ", gmtModified=" + gmtModified +
-                '}';
+        return "BranchSessionVO{" + "xid='"
+                + xid + '\'' + ", transactionId="
+                + transactionId + ", branchId="
+                + branchId + ", resourceGroupId='"
+                + resourceGroupId + '\'' + ", resourceId='"
+                + resourceId + '\'' + ", branchType='"
+                + branchType + '\'' + ", status="
+                + status + ", clientId='"
+                + clientId + '\'' + ", applicationData='"
+                + applicationData + '\'' + ", gmtCreate="
+                + gmtCreate + ", gmtModified="
+                + gmtModified + '}';
     }
 }

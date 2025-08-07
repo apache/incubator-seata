@@ -24,7 +24,6 @@ import java.lang.reflect.Method;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-
 public class ProtobufHelper {
 
     /**
@@ -57,8 +56,8 @@ public class ProtobufHelper {
                 throw new ShouldNeverHappenException("get class occurs exception", e);
             }
             if (clazz == void.class || !isProtoBufMessageClass(clazz)) {
-                throw new ShouldNeverHappenException("class based protobuf: " + clazz.getName()
-                        + ", only support return protobuf message!");
+                throw new ShouldNeverHappenException(
+                        "class based protobuf: " + clazz.getName() + ", only support return protobuf message!");
             }
             return clazz;
         });

@@ -16,10 +16,6 @@
  */
 package org.apache.seata.saga.engine.pcext.handlers;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.seata.common.exception.FrameworkErrorCode;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.saga.engine.StateMachineConfig;
@@ -36,6 +32,10 @@ import org.apache.seata.saga.statelang.domain.DomainConstants;
 import org.apache.seata.saga.statelang.domain.StateMachineInstance;
 import org.apache.seata.saga.statelang.domain.impl.ChoiceStateImpl;
 
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * ChoiceState Handler
  *
@@ -46,7 +46,7 @@ public class ChoiceStateHandler implements StateHandler {
     public void process(ProcessContext context) throws EngineExecutionException {
 
         StateInstruction instruction = context.getInstruction(StateInstruction.class);
-        ChoiceStateImpl choiceState = (ChoiceStateImpl)instruction.getState(context);
+        ChoiceStateImpl choiceState = (ChoiceStateImpl) instruction.getState(context);
 
         Map<Object, String> choiceEvaluators = choiceState.getChoiceEvaluators();
         if (choiceEvaluators == null) {
@@ -59,8 +59,9 @@ public class ChoiceStateHandler implements StateHandler {
                         choiceEvaluators = new LinkedHashMap<>(0);
                     } else {
                         choiceEvaluators = new LinkedHashMap<>(choices.size());
-                        ExpressionResolver resolver = ((StateMachineConfig) context.getVariable(
-                                DomainConstants.VAR_NAME_STATEMACHINE_CONFIG)).getExpressionResolver();
+                        ExpressionResolver resolver = ((StateMachineConfig)
+                                        context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONFIG))
+                                .getExpressionResolver();
                         for (ChoiceState.Choice choice : choices) {
                             Expression evaluator = resolver.getExpression(choice.getExpression());
                             choiceEvaluators.put(evaluator, choice.getNext());
@@ -74,8 +75,8 @@ public class ChoiceStateHandler implements StateHandler {
         Expression expression;
         for (Map.Entry<Object, String> entry : choiceEvaluators.entrySet()) {
             expression = (Expression) entry.getKey();
-            if (Boolean.TRUE.equals(expression.getValue(context.getVariable(
-                    DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT)))) {
+            if (Boolean.TRUE.equals(
+                    expression.getValue(context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT)))) {
                 context.setVariable(DomainConstants.VAR_NAME_CURRENT_CHOICE, entry.getValue());
                 return;
             }
@@ -83,10 +84,14 @@ public class ChoiceStateHandler implements StateHandler {
 
         if (StringUtils.isEmpty(choiceState.getDefault())) {
 
-            StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(
-                    DomainConstants.VAR_NAME_STATEMACHINE_INST);
+            StateMachineInstance stateMachineInstance =
+                    (StateMachineInstance) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_INST);
 
-            EngineExecutionException exception = ExceptionUtils.createEngineExecutionException(FrameworkErrorCode.StateMachineNoChoiceMatched, "No choice matched, maybe it is a bug. Choice state name: " + choiceState.getName(), stateMachineInstance, null);
+            EngineExecutionException exception = ExceptionUtils.createEngineExecutionException(
+                    FrameworkErrorCode.StateMachineNoChoiceMatched,
+                    "No choice matched, maybe it is a bug. Choice state name: " + choiceState.getName(),
+                    stateMachineInstance,
+                    null);
 
             EngineUtils.failStateMachine(context, exception);
 

@@ -36,5 +36,4 @@ public class InsertStatementSqlVisitor extends MySqlParserBaseVisitor<MySqlConte
     public MySqlContext visitInsertStatement(MySqlParser.InsertStatementContext ctx) {
         return new InsertSpecificationSqlVisitor(this.mySqlContext).visitInsertStatement(ctx);
     }
-
 }

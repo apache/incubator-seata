@@ -21,8 +21,8 @@ import org.apache.seata.core.rpc.RpcContext;
 import org.apache.seata.server.DynamicPortTestConfig;
 import org.apache.seata.server.limit.ratelimit.RateLimiter;
 import org.apache.seata.server.limit.ratelimit.RateLimiterHandler;
+import org.apache.seata.server.limit.ratelimit.RateLimiterHandlerConfig;
 import org.apache.seata.server.limit.ratelimit.TokenBucketLimiter;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -46,22 +46,42 @@ public class RateLimiterHandlerTest {
 
     @Test
     public void testHandlePass() {
-        RateLimiter rateLimiter = new TokenBucketLimiter(true, 1,
-                10, 10);
+        RateLimiter rateLimiter = new TokenBucketLimiter(true, 1, 10, 10);
         rateLimiterHandler = new RateLimiterHandler(rateLimiter);
         GlobalBeginRequest request = new GlobalBeginRequest();
         RpcContext rpcContext = new RpcContext();
-        Assertions.assertThrowsExactly(NullPointerException.class, () -> rateLimiterHandler.handle(request, rpcContext));
+        Assertions.assertThrowsExactly(
+                NullPointerException.class, () -> rateLimiterHandler.handle(request, rpcContext));
     }
 
     @Test
     public void testHandleNotPass() {
-        RateLimiter rateLimiter = new TokenBucketLimiter(true, 1,
-                1, 0);
+        RateLimiter rateLimiter = new RateLimiter() {
+            @Override
+            public boolean canPass() {
+                return false;
+            }
+
+            @Override
+            public void reInit(RateLimiterHandlerConfig config) {
+                LOGGER.info("Static anonymous RateLimiter reInit called, but it always fails.");
+            }
+
+            @Override
+            public RateLimiterHandlerConfig obtainConfig() {
+                RateLimiterHandlerConfig config = new RateLimiterHandlerConfig();
+                config.setEnable(false);
+                return config;
+            }
+
+            @Override
+            public boolean isEnable() {
+                return true;
+            }
+        };
         rateLimiterHandler = new RateLimiterHandler(rateLimiter);
         GlobalBeginRequest request = new GlobalBeginRequest();
         RpcContext rpcContext = new RpcContext();
-        Assertions.assertThrowsExactly(NullPointerException.class, () -> rateLimiterHandler.handle(request, rpcContext));
+        Assertions.assertDoesNotThrow(() -> rateLimiterHandler.handle(request, rpcContext));
     }
-
 }

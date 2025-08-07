@@ -20,7 +20,6 @@ import org.apache.seata.rm.datasource.sql.struct.Field;
 import org.apache.seata.rm.datasource.sql.struct.KeyType;
 import org.apache.seata.rm.datasource.sql.struct.Row;
 
-
 public abstract class BaseExecutorTest {
 
     protected static Field addField(Row row, String name, int type, Object value) {

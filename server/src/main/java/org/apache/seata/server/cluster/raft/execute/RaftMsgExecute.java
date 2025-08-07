@@ -30,5 +30,4 @@ public interface RaftMsgExecute<T> {
      * @throws Throwable the throwable
      */
     T execute(RaftBaseMsg syncMsg) throws Throwable;
-
 }

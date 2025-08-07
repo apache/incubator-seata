@@ -32,5 +32,4 @@ public interface NormalTccAction {
     boolean commit(BusinessActionContext actionContext);
 
     boolean rollback(BusinessActionContext actionContext);
-
 }

@@ -27,4 +27,4 @@ public class MockNacosRegistryProvider implements RegistryProvider {
     public RegistryService provide() {
         return new MockNacosRegistryService();
     }
-} 
+}

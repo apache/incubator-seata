@@ -60,12 +60,14 @@ public class DefaultCoreDoGlobalCommitInterceptorTest {
         request.setXid("test-xid");
         rpcMessage.setBody(request);
 
-        Object[] allArguments = new Object[] { rpcMessage };
-        Class<?>[] argumentTypes = new Class[] { RpcMessage.class };
+        Object[] allArguments = new Object[] {rpcMessage};
+        Class<?>[] argumentTypes = new Class[] {RpcMessage.class};
 
         try (MockedStatic<ContextManager> contextManagerMockedStatic = Mockito.mockStatic(ContextManager.class)) {
             AbstractSpan span = mock(AbstractSpan.class);
-            contextManagerMockedStatic.when(() -> ContextManager.createLocalSpan(anyString())).thenReturn(span);
+            contextManagerMockedStatic
+                    .when(() -> ContextManager.createLocalSpan(anyString()))
+                    .thenReturn(span);
 
             // When
             interceptor.beforeMethod(enhancedInstance, method, allArguments, argumentTypes, result);

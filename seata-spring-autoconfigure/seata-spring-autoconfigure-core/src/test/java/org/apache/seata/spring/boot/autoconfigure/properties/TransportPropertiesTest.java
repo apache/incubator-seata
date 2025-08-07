@@ -41,6 +41,16 @@ public class TransportPropertiesTest {
         transportProperties.setMaxHttpPoolSize(200);
         transportProperties.setMaxHttpTaskQueueSize(2000);
         transportProperties.setHttpPoolKeepAliveTime(600);
+        transportProperties.setServerSocketSendBufSize(1024);
+        transportProperties.setServerSocketResvBufSize(2048);
+        transportProperties.setWriteBufferHighWaterMark(65536);
+        transportProperties.setWriteBufferLowWaterMark(32768);
+        transportProperties.setSoBackLogSize(512);
+        transportProperties.setServerChannelMaxIdleTimeSeconds(60);
+        transportProperties.setMinServerPoolSize(100);
+        transportProperties.setMaxServerPoolSize(1000);
+        transportProperties.setMaxTaskQueueSize(50000);
+        transportProperties.setKeepAliveTime(1000);
 
         Assertions.assertEquals("server", transportProperties.getServer());
         Assertions.assertEquals("type", transportProperties.getType());
@@ -59,5 +69,15 @@ public class TransportPropertiesTest {
         Assertions.assertEquals(200, transportProperties.getMaxHttpPoolSize());
         Assertions.assertEquals(2000, transportProperties.getMaxHttpTaskQueueSize());
         Assertions.assertEquals(600, transportProperties.getHttpPoolKeepAliveTime());
+        Assertions.assertEquals(1024, transportProperties.getServerSocketSendBufSize());
+        Assertions.assertEquals(2048, transportProperties.getServerSocketResvBufSize());
+        Assertions.assertEquals(65536, transportProperties.getWriteBufferHighWaterMark());
+        Assertions.assertEquals(32768, transportProperties.getWriteBufferLowWaterMark());
+        Assertions.assertEquals(512, transportProperties.getSoBackLogSize());
+        Assertions.assertEquals(60, transportProperties.getServerChannelMaxIdleTimeSeconds());
+        Assertions.assertEquals(100, transportProperties.getMinServerPoolSize());
+        Assertions.assertEquals(1000, transportProperties.getMaxServerPoolSize());
+        Assertions.assertEquals(50000, transportProperties.getMaxTaskQueueSize());
+        Assertions.assertEquals(1000, transportProperties.getKeepAliveTime());
     }
 }

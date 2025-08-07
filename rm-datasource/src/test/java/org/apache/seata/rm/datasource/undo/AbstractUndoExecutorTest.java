@@ -17,12 +17,11 @@
 package org.apache.seata.rm.datasource.undo;
 
 import org.apache.seata.rm.datasource.SqlGenerateUtils;
-import org.apache.seata.rm.datasource.undo.SQLUndoLog;
-import org.apache.seata.sqlparser.SQLType;
 import org.apache.seata.rm.datasource.sql.struct.Field;
 import org.apache.seata.rm.datasource.sql.struct.Row;
-import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
+import org.apache.seata.sqlparser.SQLType;
+import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -30,7 +29,6 @@ import org.mockito.Mockito;
 
 import java.sql.SQLException;
 import java.util.*;
-
 
 public class AbstractUndoExecutorTest extends BaseH2Test {
 
@@ -94,10 +92,10 @@ public class AbstractUndoExecutorTest extends BaseH2Test {
 
         TestUndoExecutor spy = new TestUndoExecutor(sqlUndoLog, false);
 
-        // case1: normal case  before:0 -> after:2 -> current:2 
+        // case1: normal case  before:0 -> after:2 -> current:2
         Assertions.assertTrue(spy.dataValidationAndGoOn(connection));
 
-        // case2: dirty data   before:0 -> after:2 -> current:2' 
+        // case2: dirty data   before:0 -> after:2 -> current:2'
         execSQL("update table_name set name = 'yyy' where id in (12345, 12346);");
         try {
             Assertions.assertTrue(spy.dataValidationAndGoOn(connection));
@@ -187,13 +185,13 @@ public class AbstractUndoExecutorTest extends BaseH2Test {
         sqlUndoLog.setAfterImage(null);
 
         TestUndoExecutor executor = new TestUndoExecutor(sqlUndoLog, true);
-        Map<String,List<Field>> pkValues = executor.parsePkValues(beforeImage);
+        Map<String, List<Field>> pkValues = executor.parsePkValues(beforeImage);
         Assertions.assertEquals(2, pkValues.get("id").size());
     }
 
     @Test
     public void testBuildWhereConditionByPKs() throws SQLException {
-        List<String> pkNameList =new ArrayList<>();
+        List<String> pkNameList = new ArrayList<>();
         pkNameList.add("id1");
         pkNameList.add("id2");
 
@@ -209,11 +207,14 @@ public class AbstractUndoExecutorTest extends BaseH2Test {
         pkRowValues.put("id1", pkId1Values);
         pkRowValues.put("id2", pkId2Values);
 
-        List<SqlGenerateUtils.WhereSql> sql = SqlGenerateUtils.buildWhereConditionListByPKs(pkNameList, pkRowValues.get("id1").size(), JdbcConstants.MYSQL, 1000);
+        List<SqlGenerateUtils.WhereSql> sql = SqlGenerateUtils.buildWhereConditionListByPKs(
+                pkNameList, pkRowValues.get("id1").size(), JdbcConstants.MYSQL, 1000);
         Assertions.assertEquals("(id1,id2) in ( (?,?),(?,?),(?,?) )", sql.get(0).getSql());
-        sql = SqlGenerateUtils.buildWhereConditionListByPKs(pkNameList, pkRowValues.get("id1").size(), JdbcConstants.MARIADB, 1000);
+        sql = SqlGenerateUtils.buildWhereConditionListByPKs(
+                pkNameList, pkRowValues.get("id1").size(), JdbcConstants.MARIADB, 1000);
         Assertions.assertEquals("(id1,id2) in ( (?,?),(?,?),(?,?) )", sql.get(0).getSql());
-        sql = SqlGenerateUtils.buildWhereConditionListByPKs(pkNameList, pkRowValues.get("id1").size(), JdbcConstants.POLARDBX, 1000);
+        sql = SqlGenerateUtils.buildWhereConditionListByPKs(
+                pkNameList, pkRowValues.get("id1").size(), JdbcConstants.POLARDBX, 1000);
         Assertions.assertEquals("(id1,id2) in ( (?,?),(?,?),(?,?) )", sql.get(0).getSql());
     }
 
@@ -227,17 +228,21 @@ public class AbstractUndoExecutorTest extends BaseH2Test {
         pkId1Values.add(new Field());
         pkRowValues.put("id1", pkId1Values);
 
-        List<SqlGenerateUtils.WhereSql> sql = SqlGenerateUtils.buildWhereConditionListByPKs(pkNameList, pkRowValues.get("id1").size(), JdbcConstants.MYSQL);
+        List<SqlGenerateUtils.WhereSql> sql = SqlGenerateUtils.buildWhereConditionListByPKs(
+                pkNameList, pkRowValues.get("id1").size(), JdbcConstants.MYSQL);
         Assertions.assertEquals("(id1) in ( (?) )", sql.get(0).getSql());
-        sql = SqlGenerateUtils.buildWhereConditionListByPKs(pkNameList, pkRowValues.get("id1").size(), JdbcConstants.MARIADB);
+        sql = SqlGenerateUtils.buildWhereConditionListByPKs(
+                pkNameList, pkRowValues.get("id1").size(), JdbcConstants.MARIADB);
         Assertions.assertEquals("(id1) in ( (?) )", sql.get(0).getSql());
-        sql = SqlGenerateUtils.buildWhereConditionListByPKs(pkNameList, pkRowValues.get("id1").size(), JdbcConstants.POLARDBX);
+        sql = SqlGenerateUtils.buildWhereConditionListByPKs(
+                pkNameList, pkRowValues.get("id1").size(), JdbcConstants.POLARDBX);
         Assertions.assertEquals("(id1) in ( (?) )", sql.get(0).getSql());
     }
 }
 
 class TestUndoExecutor extends AbstractUndoExecutor {
     private final boolean isDelete;
+
     public TestUndoExecutor(SQLUndoLog sqlUndoLog, boolean isDelete) {
         super(sqlUndoLog);
         this.isDelete = isDelete;

@@ -44,5 +44,4 @@ public interface Resource {
      * @return branch type
      */
     BranchType getBranchType();
-
 }

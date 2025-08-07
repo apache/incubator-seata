@@ -21,7 +21,6 @@ import org.apache.seata.core.protocol.ResultCode;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-
 public class BranchRollbackResponseTest {
     @Test
     public void toStringTest() {
@@ -32,9 +31,7 @@ public class BranchRollbackResponseTest {
         branchRollbackResponse.setResultCode(ResultCode.Success);
         branchRollbackResponse.setMsg("");
         Assertions.assertEquals(
-            "BranchRollbackResponse{xid='127.0.0.1:8091:123456', branchId=2345678, branchStatus=PhaseOne_Done, resultCode=Success, msg=''}",
-            branchRollbackResponse.toString());
-
+                "BranchRollbackResponse{xid='127.0.0.1:8091:123456', branchId=2345678, branchStatus=PhaseOne_Done, resultCode=Success, msg=''}",
+                branchRollbackResponse.toString());
     }
-
 }

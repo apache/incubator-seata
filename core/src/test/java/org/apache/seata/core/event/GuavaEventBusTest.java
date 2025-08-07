@@ -16,11 +16,11 @@
  */
 package org.apache.seata.core.event;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 import com.google.common.eventbus.Subscribe;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Test default GuavaEventBus.

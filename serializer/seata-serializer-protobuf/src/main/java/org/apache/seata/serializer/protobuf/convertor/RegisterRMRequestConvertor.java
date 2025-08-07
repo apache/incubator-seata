@@ -16,29 +16,33 @@
  */
 package org.apache.seata.serializer.protobuf.convertor;
 
+import org.apache.seata.core.protocol.RegisterRMRequest;
 import org.apache.seata.serializer.protobuf.generated.AbstractIdentifyRequestProto;
 import org.apache.seata.serializer.protobuf.generated.AbstractMessageProto;
 import org.apache.seata.serializer.protobuf.generated.MessageTypeProto;
 import org.apache.seata.serializer.protobuf.generated.RegisterRMRequestProto;
-import org.apache.seata.core.protocol.RegisterRMRequest;
-
 
 public class RegisterRMRequestConvertor implements PbConvertor<RegisterRMRequest, RegisterRMRequestProto> {
     @Override
     public RegisterRMRequestProto convert2Proto(RegisterRMRequest registerRMRequest) {
         final short typeCode = registerRMRequest.getTypeCode();
 
-        final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder().setMessageType(
-            MessageTypeProto.forNumber(typeCode)).build();
+        final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder()
+                .setMessageType(MessageTypeProto.forNumber(typeCode))
+                .build();
 
         final String extraData = registerRMRequest.getExtraData();
         AbstractIdentifyRequestProto abstractIdentifyRequestProto = AbstractIdentifyRequestProto.newBuilder()
-            .setAbstractMessage(abstractMessage).setApplicationId(registerRMRequest.getApplicationId()).setExtraData(
-                extraData == null ? "" : extraData).setTransactionServiceGroup(
-                registerRMRequest.getTransactionServiceGroup()).setVersion(registerRMRequest.getVersion()).build();
-        RegisterRMRequestProto result = RegisterRMRequestProto.newBuilder().setAbstractIdentifyRequest(
-            abstractIdentifyRequestProto).setResourceIds(
-            registerRMRequest.getResourceIds() == null ? "" : registerRMRequest.getResourceIds()).build();
+                .setAbstractMessage(abstractMessage)
+                .setApplicationId(registerRMRequest.getApplicationId())
+                .setExtraData(extraData == null ? "" : extraData)
+                .setTransactionServiceGroup(registerRMRequest.getTransactionServiceGroup())
+                .setVersion(registerRMRequest.getVersion())
+                .build();
+        RegisterRMRequestProto result = RegisterRMRequestProto.newBuilder()
+                .setAbstractIdentifyRequest(abstractIdentifyRequestProto)
+                .setResourceIds(registerRMRequest.getResourceIds() == null ? "" : registerRMRequest.getResourceIds())
+                .build();
 
         return result;
     }

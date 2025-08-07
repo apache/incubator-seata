@@ -16,10 +16,10 @@
  */
 package org.apache.seata.serializer.seata.protocol.transaction;
 
-import org.apache.seata.core.protocol.ProtocolConstants;
-import org.apache.seata.serializer.seata.SeataSerializer;
 import org.apache.seata.core.model.BranchType;
+import org.apache.seata.core.protocol.ProtocolConstants;
 import org.apache.seata.core.protocol.transaction.BranchRollbackRequest;
+import org.apache.seata.serializer.seata.SeataSerializer;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,7 +39,7 @@ public class BranchRollbackRequestSerializerTest {
      * Test codec.
      */
     @Test
-    public void test_codec(){
+    public void test_codec() {
         BranchRollbackRequest branchRollbackRequest = new BranchRollbackRequest();
         branchRollbackRequest.setApplicationData("abcd");
         branchRollbackRequest.setBranchId(112232);
@@ -56,7 +56,5 @@ public class BranchRollbackRequestSerializerTest {
         assertThat(branchRollbackRequest2.getBranchType()).isEqualTo(branchRollbackRequest.getBranchType());
         assertThat(branchRollbackRequest2.getResourceId()).isEqualTo(branchRollbackRequest.getResourceId());
         assertThat(branchRollbackRequest2.getXid()).isEqualTo(branchRollbackRequest.getXid());
-
     }
-
 }

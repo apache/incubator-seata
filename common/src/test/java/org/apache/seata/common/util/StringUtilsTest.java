@@ -16,6 +16,16 @@
  */
 package org.apache.seata.common.util;
 
+import org.apache.seata.common.Constants;
+import org.apache.seata.common.holder.ObjectHolder;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.opentest4j.AssertionFailedError;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.lang.annotation.ElementType;
@@ -34,16 +44,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
-
-import org.apache.seata.common.Constants;
-import org.apache.seata.common.holder.ObjectHolder;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.opentest4j.AssertionFailedError;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -75,11 +75,7 @@ public class StringUtilsTest {
 
     static Stream<Arguments> provideForIsNullOrEmpty() {
         return Stream.of(
-                Arguments.of(null, true),
-                Arguments.of("abc", false),
-                Arguments.of("", true),
-                Arguments.of(" ", false)
-        );
+                Arguments.of(null, true), Arguments.of("abc", false), Arguments.of("", true), Arguments.of(" ", false));
     }
 
     @ParameterizedTest
@@ -90,11 +86,7 @@ public class StringUtilsTest {
 
     static Stream<Arguments> provideForIsBlank() {
         return Stream.of(
-                Arguments.of(null, true),
-                Arguments.of("abc", false),
-                Arguments.of("", true),
-                Arguments.of(" ", true)
-        );
+                Arguments.of(null, true), Arguments.of("abc", false), Arguments.of("", true), Arguments.of(" ", true));
     }
 
     @ParameterizedTest
@@ -108,8 +100,7 @@ public class StringUtilsTest {
                 Arguments.of(null, false),
                 Arguments.of("abc", true),
                 Arguments.of("", false),
-                Arguments.of(" ", false)
-        );
+                Arguments.of(" ", false));
     }
 
     @Test
@@ -154,9 +145,7 @@ public class StringUtilsTest {
     @Test
     public void testInputStream2String() throws IOException {
         assertNull(StringUtils.inputStream2String(null));
-        String data = "abc\n"
-            + ":\"klsdf\n"
-            + "2ks,x:\".,-3sd˚ø≤ø¬≥";
+        String data = "abc\n" + ":\"klsdf\n" + "2ks,x:\".,-3sd˚ø≤ø¬≥";
         ByteArrayInputStream inputStream = new ByteArrayInputStream(data.getBytes(Constants.DEFAULT_CHARSET));
         assertThat(StringUtils.inputStream2String(inputStream)).isEqualTo(data);
     }
@@ -164,9 +153,7 @@ public class StringUtilsTest {
     @Test
     void inputStream2Bytes() {
         assertNull(StringUtils.inputStream2Bytes(null));
-        String data = "abc\n"
-            + ":\"klsdf\n"
-            + "2ks,x:\".,-3sd˚ø≤ø¬≥";
+        String data = "abc\n" + ":\"klsdf\n" + "2ks,x:\".,-3sd˚ø≤ø¬≥";
         byte[] bs = data.getBytes(Constants.DEFAULT_CHARSET);
         ByteArrayInputStream inputStream = new ByteArrayInputStream(data.getBytes(Constants.DEFAULT_CHARSET));
         assertThat(StringUtils.inputStream2Bytes(inputStream)).isEqualTo(bs);
@@ -196,28 +183,30 @@ public class StringUtilsTest {
 
     @Test
     void testToStringAndCycleDependency() throws Exception {
-        //case: String
+        // case: String
         Assertions.assertEquals("\"aaa\"", StringUtils.toString("aaa"));
 
-        //case: CharSequence
+        // case: CharSequence
         Assertions.assertEquals("\"bbb\"", StringUtils.toString(new StringBuilder("bbb")));
-        //case: Number
+        // case: Number
         Assertions.assertEquals("1", StringUtils.toString(1));
-        //case: Boolean
+        // case: Boolean
         Assertions.assertEquals("true", StringUtils.toString(true));
-        //case: Character
+        // case: Character
         Assertions.assertEquals("'2'", StringUtils.toString('2'));
-        //case: Charset
+        // case: Charset
         Assertions.assertEquals("UTF-8", StringUtils.toString(StandardCharsets.UTF_8));
-        //case: Thread
+        // case: Thread
         try {
             Assertions.assertEquals("Thread[main,5,main]", StringUtils.toString(Thread.currentThread()));
         } catch (AssertionFailedError e) {
             // for java21 and above
-            Assertions.assertEquals("Thread[#" + Thread.currentThread().getId() + ",main,5,main]", StringUtils.toString(Thread.currentThread()));
+            Assertions.assertEquals(
+                    "Thread[#" + Thread.currentThread().getId() + ",main,5,main]",
+                    StringUtils.toString(Thread.currentThread()));
         }
 
-        //case: Date
+        // case: Date
         Date date = new Date(2021 - 1900, 6 - 1, 15);
         Assertions.assertEquals("2021-06-15", StringUtils.toString(date));
         date.setTime(date.getTime() + 3600000);
@@ -229,107 +218,113 @@ public class StringUtilsTest {
         date.setTime(date.getTime() + 12);
         Assertions.assertEquals("2021-06-15 01:01:50.012", StringUtils.toString(date));
 
-        //case: Enum
+        // case: Enum
         Assertions.assertEquals("ObjectHolder.INSTANCE", StringUtils.toString(ObjectHolder.INSTANCE));
 
-        //case: Annotation
+        // case: Annotation
         TestAnnotation annotation = TestClass.class.getAnnotation(TestAnnotation.class);
-        Assertions.assertEquals("@" + TestAnnotation.class.getSimpleName() + "(test=true)", StringUtils.toString(annotation));
+        Assertions.assertEquals(
+                "@" + TestAnnotation.class.getSimpleName() + "(test=true)", StringUtils.toString(annotation));
 
-        //case: Class
+        // case: Class
         Class<?> clazz = TestClass.class;
         Assertions.assertEquals("Class<" + clazz.getSimpleName() + ">", StringUtils.toString(clazz));
 
-        //case: Method
+        // case: Method
         Method method = clazz.getMethod("setObj", TestClass.class);
-        Assertions.assertEquals("Method<" + clazz.getSimpleName() + ".setObj(" + clazz.getSimpleName() + ")>", StringUtils.toString(method));
+        Assertions.assertEquals(
+                "Method<" + clazz.getSimpleName() + ".setObj(" + clazz.getSimpleName() + ")>",
+                StringUtils.toString(method));
 
-        //case: Field
+        // case: Field
         Field field = clazz.getDeclaredField("s");
         Assertions.assertEquals("Field<" + clazz.getSimpleName() + ".(String s)>", StringUtils.toString(field));
 
-        //case: List, and cycle dependency
+        // case: List, and cycle dependency
         List<Object> list = new ArrayList<>();
         list.add("xxx");
         list.add(111);
         list.add(list);
         Assertions.assertEquals("[\"xxx\", 111, (this ArrayList)]", StringUtils.toString(list));
 
-        //case: String Array
+        // case: String Array
         String[] strArr = new String[2];
         strArr[0] = "11";
         strArr[1] = "22";
         Assertions.assertEquals("[\"11\", \"22\"]", StringUtils.toString(strArr));
-        //case: int Array
+        // case: int Array
         int[] intArr = new int[2];
         intArr[0] = 11;
         intArr[1] = 22;
         Assertions.assertEquals("[11, 22]", StringUtils.toString(intArr));
-        //case: Array, and cycle dependency
+        // case: Array, and cycle dependency
         Object[] array = new Object[3];
         array[0] = 1;
         array[1] = '2';
         array[2] = array;
         Assertions.assertEquals("[1, '2', (this Object[])]", StringUtils.toString(array));
 
-        //case: Map, and cycle dependency
+        // case: Map, and cycle dependency
         Map<Object, Object> map = new HashMap<>();
         map.put("aaa", 111);
         map.put("bbb", true);
         map.put("self", map);
         Assertions.assertEquals("{\"aaa\"->111, \"bbb\"->true, \"self\"->(this HashMap)}", StringUtils.toString(map));
         Assertions.assertFalse(CycleDependencyHandler.isStarting());
-        //case: Map, and cycle dependency（deep case）
+        // case: Map, and cycle dependency（deep case）
         List<Object> list2 = new ArrayList<>();
         list2.add(map);
         list2.add('c');
         map.put("list", list2);
-        Assertions.assertEquals("{\"aaa\"->111, \"bbb\"->true, \"self\"->(this HashMap), \"list\"->[(ref HashMap), 'c']}", StringUtils.toString(map));
+        Assertions.assertEquals(
+                "{\"aaa\"->111, \"bbb\"->true, \"self\"->(this HashMap), \"list\"->[(ref HashMap), 'c']}",
+                StringUtils.toString(map));
         Assertions.assertFalse(CycleDependencyHandler.isStarting());
 
-        //case: Object
+        // case: Object
         Assertions.assertEquals("CycleDependency(s=\"a\", obj=null)", StringUtils.toString(CycleDependency.A));
-        //case: Object, and cycle dependency
+        // case: Object, and cycle dependency
         CycleDependency obj = new CycleDependency("c");
         obj.setObj(obj);
         Assertions.assertEquals("CycleDependency(s=\"c\", obj=(this CycleDependency))", StringUtils.toString(obj));
-        //case: Object
+        // case: Object
         CycleDependency obj2 = new CycleDependency("d");
         obj.setObj(obj2);
-        Assertions.assertEquals("CycleDependency(s=\"c\", obj=CycleDependency(s=\"d\", obj=null))", StringUtils.toString(obj));
-        //case: Object, and cycle dependency
+        Assertions.assertEquals(
+                "CycleDependency(s=\"c\", obj=CycleDependency(s=\"d\", obj=null))", StringUtils.toString(obj));
+        // case: Object, and cycle dependency
         TestClass a = new TestClass();
         a.setObj(a);
         Assertions.assertEquals("TestClass(obj=(this TestClass), s=null)", StringUtils.toString(a));
-        //case: Object, and cycle dependency（deep case）
+        // case: Object, and cycle dependency（deep case）
         TestClass b = new TestClass();
         TestClass c = new TestClass();
         b.setObj(c);
         c.setObj(a);
         a.setObj(b);
-        Assertions.assertEquals("TestClass(obj=TestClass(obj=TestClass(obj=(ref TestClass), s=null), s=null), s=null)", StringUtils.toString(a));
+        Assertions.assertEquals(
+                "TestClass(obj=TestClass(obj=TestClass(obj=(ref TestClass), s=null), s=null), s=null)",
+                StringUtils.toString(a));
 
-        //case: anonymous class from an interface
+        // case: anonymous class from an interface
         Object anonymousObj = new TestInterface() {
             private String a = "aaa";
 
             @Override
-            public void test() {
-            }
+            public void test() {}
         };
         Assertions.assertEquals("TestInterface$(a=\"aaa\")", StringUtils.toString(anonymousObj));
 
-        //case: anonymous class from an abstract class
+        // case: anonymous class from an abstract class
         anonymousObj = new TestAbstractClass() {
             private String a = "aaa";
 
             @Override
-            public void test() {
-            }
+            public void test() {}
         };
         Assertions.assertEquals("TestAbstractClass$(a=\"aaa\")", StringUtils.toString(anonymousObj));
 
-        //final confirm: do not triggered the `toString` and `hashCode` methods
+        // final confirm: do not triggered the `toString` and `hashCode` methods
         Assertions.assertFalse(TestClass.hashCodeTriggered);
         Assertions.assertFalse(TestClass.toStringTriggered);
         Assertions.assertFalse(CycleDependency.hashCodeTriggered);
@@ -337,7 +332,8 @@ public class StringUtilsTest {
     }
 
     @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.TYPE) @interface TestAnnotation {
+    @Target(ElementType.TYPE)
+    @interface TestAnnotation {
         boolean test() default false;
     }
 
@@ -409,10 +405,7 @@ public class StringUtilsTest {
         @Override
         public String toString() {
             toStringTriggered = true;
-            return "(" +
-                "s=" + s + "," +
-                "obj=" + (obj != this ? String.valueOf(obj) : "(this CycleDependency)") +
-                ')';
+            return "(" + "s=" + s + "," + "obj=" + (obj != this ? String.valueOf(obj) : "(this CycleDependency)") + ')';
         }
     }
 
@@ -421,9 +414,8 @@ public class StringUtilsTest {
         assertThat(StringUtils.checkDataSize("", "testdata", 10, false)).isEqualTo(Boolean.TRUE);
         assertThat(StringUtils.checkDataSize("1234567", "testdata", 17, false)).isEqualTo(Boolean.TRUE);
         assertThat(StringUtils.checkDataSize("1234567", "testdata", 4, false)).isEqualTo(Boolean.FALSE);
-        Assertions.assertThrows(IllegalArgumentException.class, () ->
-            StringUtils.checkDataSize("1234567", "testdata", 6, true)
-        );
+        Assertions.assertThrows(
+                IllegalArgumentException.class, () -> StringUtils.checkDataSize("1234567", "testdata", 6, true));
         assertThat(StringUtils.checkDataSize("1234567", "testdata", 6, false)).isEqualTo(Boolean.FALSE);
     }
 
@@ -468,7 +460,8 @@ public class StringUtilsTest {
 
     @Test
     void joinMultipleAndNullReturnsJoinedString() {
-        Iterator<String> mixedIterator = Arrays.asList("Hello", "", "World", null, "Java").iterator();
+        Iterator<String> mixedIterator =
+                Arrays.asList("Hello", "", "World", null, "Java").iterator();
         Assertions.assertEquals("Hello,,World,,Java", StringUtils.join(mixedIterator, ","));
     }
 

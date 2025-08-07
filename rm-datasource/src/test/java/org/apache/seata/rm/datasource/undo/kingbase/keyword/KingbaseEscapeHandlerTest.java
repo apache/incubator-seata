@@ -22,7 +22,6 @@ import org.apache.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-
 public class KingbaseEscapeHandlerTest {
 
     @Test
@@ -30,5 +29,4 @@ public class KingbaseEscapeHandlerTest {
         EscapeHandler escapeHandler = EscapeHandlerFactory.getEscapeHandler(JdbcConstants.KINGBASE);
         Assertions.assertNotNull(escapeHandler);
     }
-
 }

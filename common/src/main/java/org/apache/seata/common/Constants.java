@@ -198,7 +198,7 @@ public interface Constants {
      * The constant REGISTRY_TYPE_SPLIT_CHAR.
      */
     String REGISTRY_TYPE_SPLIT_CHAR = ",";
-    
+
     /**
      * phase two compensation method name
      */
@@ -243,5 +243,4 @@ public interface Constants {
      * The constant RAFT_GROUP_HEADER
      */
     String RAFT_GROUP_HEADER = "X-SEATA-RAFT-GROUP";
-
 }

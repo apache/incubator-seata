@@ -19,15 +19,17 @@ package org.apache.seata.integration.http;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class ServletMapping {
 
     public static List<ServletMapping> servletMappingList = new ArrayList<>();
 
     static {
-        servletMappingList.add(new ServletMapping("/testGet", "testGet", "org.apache.seata.integration.http.MockController"));
-        servletMappingList.add(new ServletMapping("/testPost", "testPost", "org.apache.seata.integration.http.MockController"));
-        servletMappingList.add(new ServletMapping("/testException", "testException", "org.apache.seata.integration.http.MockController"));
+        servletMappingList.add(
+                new ServletMapping("/testGet", "testGet", "org.apache.seata.integration.http.MockController"));
+        servletMappingList.add(
+                new ServletMapping("/testPost", "testPost", "org.apache.seata.integration.http.MockController"));
+        servletMappingList.add(new ServletMapping(
+                "/testException", "testException", "org.apache.seata.integration.http.MockController"));
     }
 
     private String method;

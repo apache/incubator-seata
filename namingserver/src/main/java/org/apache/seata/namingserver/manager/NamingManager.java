@@ -16,25 +16,6 @@
  */
 package org.apache.seata.namingserver.manager;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
-import javax.annotation.PostConstruct;
-
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.github.benmanes.caffeine.cache.RemovalCause;
@@ -42,6 +23,7 @@ import com.github.benmanes.caffeine.cache.RemovalListener;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.ContentType;
 import org.apache.http.protocol.HTTP;
+import org.apache.seata.common.NamingServerConstants;
 import org.apache.seata.common.metadata.Cluster;
 import org.apache.seata.common.metadata.ClusterRole;
 import org.apache.seata.common.metadata.Node;
@@ -50,14 +32,13 @@ import org.apache.seata.common.metadata.namingserver.Unit;
 import org.apache.seata.common.result.Result;
 import org.apache.seata.common.result.SingleResult;
 import org.apache.seata.common.util.HttpClientUtil;
-import org.apache.seata.common.NamingServerConstants;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.namingserver.entity.bo.ClusterBO;
 import org.apache.seata.namingserver.entity.bo.NamespaceBO;
-import org.apache.seata.namingserver.entity.vo.NamespaceVO;
-import org.apache.seata.namingserver.listener.ClusterChangeEvent;
 import org.apache.seata.namingserver.entity.pojo.ClusterData;
+import org.apache.seata.namingserver.entity.vo.NamespaceVO;
 import org.apache.seata.namingserver.entity.vo.monitor.ClusterVO;
+import org.apache.seata.namingserver.listener.ClusterChangeEvent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
@@ -69,6 +50,24 @@ import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import static org.apache.seata.common.NamingServerConstants.CONSTANT_GROUP;
 
@@ -76,9 +75,9 @@ import static org.apache.seata.common.NamingServerConstants.CONSTANT_GROUP;
 public class NamingManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(NamingManager.class);
     private final ConcurrentMap<InetSocketAddress, Long> instanceLiveTable;
-    private volatile LoadingCache<String/* VGroup */, ConcurrentMap<String/* namespace */, NamespaceBO>> vGroupMap;
-    private final ConcurrentMap<String/* namespace */,
-        ConcurrentMap<String/* clusterName */, ClusterData>> namespaceClusterDataMap;
+    private volatile LoadingCache<String /* VGroup */, ConcurrentMap<String /* namespace */, NamespaceBO>> vGroupMap;
+    private final ConcurrentMap<String /* namespace */, ConcurrentMap<String /* clusterName */, ClusterData>>
+            namespaceClusterDataMap;
 
     @Value("${heartbeat.threshold:90000}")
     private int heartbeatTimeThreshold;
@@ -87,7 +86,7 @@ public class NamingManager {
     private int heartbeatCheckTimePeriod;
 
     protected final ScheduledExecutorService heartBeatCheckService =
-        new ScheduledThreadPoolExecutor(1, new CustomizableThreadFactory("heartBeatCheckExcuter"));
+            new ScheduledThreadPoolExecutor(1, new CustomizableThreadFactory("heartBeatCheckExcuter"));
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -112,13 +111,17 @@ public class NamingManager {
                     }
                 })
                 .build(k -> new ConcurrentHashMap<>());
-        this.heartBeatCheckService.scheduleAtFixedRate(() -> {
-            try {
-                instanceHeartBeatCheck();
-            } catch (Exception e) {
-                LOGGER.error("Heart Beat Check Exception:{}", e.getMessage(), e);
-            }
-        }, heartbeatCheckTimePeriod, heartbeatCheckTimePeriod, TimeUnit.MILLISECONDS);
+        this.heartBeatCheckService.scheduleAtFixedRate(
+                () -> {
+                    try {
+                        instanceHeartBeatCheck();
+                    } catch (Exception e) {
+                        LOGGER.error("Heart Beat Check Exception:{}", e.getMessage(), e);
+                    }
+                },
+                heartbeatCheckTimePeriod,
+                heartbeatCheckTimePeriod,
+                TimeUnit.MILLISECONDS);
     }
 
     public List<ClusterVO> monitorCluster(String namespace) {
@@ -156,13 +159,17 @@ public class NamingManager {
             LOGGER.error("no instance in cluster {}", clusterName);
             return new Result<>("301", "no instance in cluster:" + clusterName);
         } else {
-            Node node =
-                nodeList.stream().filter(n -> n.getRole() == ClusterRole.LEADER || n.getRole() == ClusterRole.MEMBER)
-                    .collect(Collectors.toList()).get(0);
+            Node node = nodeList.stream()
+                    .filter(n -> n.getRole() == ClusterRole.LEADER || n.getRole() == ClusterRole.MEMBER)
+                    .collect(Collectors.toList())
+                    .get(0);
             String controlHost = node.getControl().getHost();
             int controlPort = node.getControl().getPort();
-            String httpUrl = NamingServerConstants.HTTP_PREFIX + controlHost + NamingServerConstants.IP_PORT_SPLIT_CHAR
-                + controlPort + NamingServerConstants.HTTP_ADD_GROUP_SUFFIX;
+            String httpUrl = NamingServerConstants.HTTP_PREFIX
+                    + controlHost
+                    + NamingServerConstants.IP_PORT_SPLIT_CHAR
+                    + controlPort
+                    + NamingServerConstants.HTTP_ADD_GROUP_SUFFIX;
             HashMap<String, String> params = new HashMap<>();
             params.put(CONSTANT_GROUP, vGroup);
             params.put(NamingServerConstants.CONSTANT_UNIT, unitName);
@@ -170,11 +177,17 @@ public class NamingManager {
             header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
 
             try (CloseableHttpResponse closeableHttpResponse = HttpClientUtil.doGet(httpUrl, params, header, 3000)) {
-                if (closeableHttpResponse == null || closeableHttpResponse.getStatusLine().getStatusCode() != 200) {
-                    return new Result<>(String.valueOf(closeableHttpResponse.getStatusLine().getStatusCode()),
-                        "add vGroup in new cluster failed");
+                if (closeableHttpResponse == null
+                        || closeableHttpResponse.getStatusLine().getStatusCode() != 200) {
+                    return new Result<>(
+                            String.valueOf(closeableHttpResponse.getStatusLine().getStatusCode()),
+                            "add vGroup in new cluster failed");
                 }
-                LOGGER.info("namespace: {} add vGroup: {} in new cluster: {} successfully!", namespace, vGroup, clusterName);
+                LOGGER.info(
+                        "namespace: {} add vGroup: {} in new cluster: {} successfully!",
+                        namespace,
+                        vGroup,
+                        clusterName);
             } catch (IOException e) {
                 LOGGER.error("add vGroup in new cluster failed:{}", e.getMessage(), e);
                 return new Result<>("500", "add vGroup in new cluster failed");
@@ -186,26 +199,33 @@ public class NamingManager {
     public Result<String> removeGroup(Unit unit, String vGroup, String clusterName, String namespace, String unitName) {
         if (unit != null && !CollectionUtils.isEmpty(unit.getNamingInstanceList())) {
             Node node = unit.getNamingInstanceList().get(0);
-            String httpUrl = NamingServerConstants.HTTP_PREFIX + node.getControl().getHost()
-                + NamingServerConstants.IP_PORT_SPLIT_CHAR + node.getControl().getPort()
-                + NamingServerConstants.HTTP_REMOVE_GROUP_SUFFIX;
+            String httpUrl = NamingServerConstants.HTTP_PREFIX
+                    + node.getControl().getHost()
+                    + NamingServerConstants.IP_PORT_SPLIT_CHAR
+                    + node.getControl().getPort()
+                    + NamingServerConstants.HTTP_REMOVE_GROUP_SUFFIX;
             HashMap<String, String> params = new HashMap<>();
             params.put(CONSTANT_GROUP, vGroup);
             params.put(NamingServerConstants.CONSTANT_UNIT, unitName);
             Map<String, String> header = new HashMap<>();
             header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
             try (CloseableHttpResponse closeableHttpResponse = HttpClientUtil.doGet(httpUrl, params, header, 3000)) {
-                if (closeableHttpResponse == null || closeableHttpResponse.getStatusLine().getStatusCode() != 200) {
+                if (closeableHttpResponse == null
+                        || closeableHttpResponse.getStatusLine().getStatusCode() != 200) {
                     LOGGER.warn("remove vGroup in old cluster failed");
-                    return new Result<>(String.valueOf(closeableHttpResponse.getStatusLine().getStatusCode()),
-                        "removing vGroup " + vGroup + " in old cluster " + clusterName + " failed");
+                    return new Result<>(
+                            String.valueOf(closeableHttpResponse.getStatusLine().getStatusCode()),
+                            "removing vGroup " + vGroup + " in old cluster " + clusterName + " failed");
                 }
-                LOGGER.info("namespace: {} remove vGroup: {} in new cluster: {} successfully!", namespace, vGroup,
-                    clusterName);
+                LOGGER.info(
+                        "namespace: {} remove vGroup: {} in new cluster: {} successfully!",
+                        namespace,
+                        vGroup,
+                        clusterName);
             } catch (IOException e) {
                 LOGGER.error("handle removing vGroup in old cluster failed:{}", e.getMessage(), e);
-                return new Result<>("500",
-                    "handle removing vGroup " + vGroup + " in old cluster " + clusterName + " failed");
+                return new Result<>(
+                        "500", "handle removing vGroup " + vGroup + " in old cluster " + clusterName + " failed");
             }
         }
         return new Result<>("200", "remove group in old cluster successfully!");
@@ -213,8 +233,10 @@ public class NamingManager {
 
     public boolean addGroup(String namespace, String clusterName, String unitName, String vGroup) {
         try {
-            ClusterBO clusterBO = vGroupMap.get(vGroup, k -> new ConcurrentHashMap<>())
-                .computeIfAbsent(namespace, k -> new NamespaceBO()).getCluster(clusterName);
+            ClusterBO clusterBO = vGroupMap
+                    .get(vGroup, k -> new ConcurrentHashMap<>())
+                    .computeIfAbsent(namespace, k -> new NamespaceBO())
+                    .getCluster(clusterName);
             if (clusterBO != null) {
                 boolean needNotify = !clusterBO.getUnitNames().contains(unitName);
                 NamespaceBO namespaceBO = vGroupMap.getIfPresent(vGroup).get(namespace);
@@ -232,9 +254,12 @@ public class NamingManager {
 
     public void notifyClusterChange(String vGroup, String namespace, String clusterName, String unitName, long term) {
 
-        Optional.ofNullable(vGroupMap.asMap().get(vGroup)).flatMap(map -> Optional.ofNullable(map.get(namespace)).flatMap(namespaceBO -> Optional.ofNullable(namespaceBO.getCluster(clusterName)))).ifPresent(clusterBO -> {
-            applicationContext.publishEvent(new ClusterChangeEvent(this, vGroup, term));
-        });
+        Optional.ofNullable(vGroupMap.asMap().get(vGroup))
+                .flatMap(map -> Optional.ofNullable(map.get(namespace))
+                        .flatMap(namespaceBO -> Optional.ofNullable(namespaceBO.getCluster(clusterName))))
+                .ifPresent(clusterBO -> {
+                    applicationContext.publishEvent(new ClusterChangeEvent(this, vGroup, term));
+                });
     }
 
     public boolean registerInstances(List<NamingServerNode> node, String namespace, String clusterName) {
@@ -251,17 +276,19 @@ public class NamingManager {
         }
         try {
             Map<String, ClusterData> clusterDataHashMap =
-                namespaceClusterDataMap.computeIfAbsent(namespace, k -> new ConcurrentHashMap<>());
+                    namespaceClusterDataMap.computeIfAbsent(namespace, k -> new ConcurrentHashMap<>());
 
             // add instance in cluster
             // create cluster when there is no cluster in clusterDataHashMap
-            ClusterData clusterData = clusterDataHashMap.computeIfAbsent(clusterName,
-                key -> new ClusterData(clusterName, (String)node.getMetadata().get("cluster-type")));
+            ClusterData clusterData = clusterDataHashMap.computeIfAbsent(
+                    clusterName,
+                    key -> new ClusterData(
+                            clusterName, (String) node.getMetadata().get("cluster-type")));
             boolean hasChanged = clusterData.registerInstance(node, unitName);
             Object mappingObj = node.getMetadata().get(CONSTANT_GROUP);
             // if extended metadata includes vgroup mapping relationship, add it in clusterData
             if (mappingObj instanceof Map) {
-                Map<String, String> vGroups = (Map<String, String>)mappingObj;
+                Map<String, String> vGroups = (Map<String, String>) mappingObj;
                 vGroups.forEach((k, v) -> {
                     // In non-raft mode, a unit is one-to-one with a node, and the unitName is stored on the node.
                     // In raft mode, the unitName is equal to the raft-group, so the node's unitName cannot be used.
@@ -272,8 +299,10 @@ public class NamingManager {
                 });
             }
             instanceLiveTable.put(
-                new InetSocketAddress(node.getTransaction().getHost(), node.getTransaction().getPort()),
-                System.currentTimeMillis());
+                    new InetSocketAddress(
+                            node.getTransaction().getHost(),
+                            node.getTransaction().getPort()),
+                    System.currentTimeMillis());
         } catch (Exception e) {
             LOGGER.error("Instance registered failed:{}", e.getMessage(), e);
             return false;
@@ -286,19 +315,24 @@ public class NamingManager {
             Map<String, ClusterData> clusterMap = namespaceClusterDataMap.get(namespace);
             if (clusterMap != null) {
                 ClusterData clusterData = clusterMap.get(clusterName);
-                if (clusterData.getUnitData() != null && clusterData.getUnitData().containsKey(unitName)) {
+                if (clusterData.getUnitData() != null
+                        && clusterData.getUnitData().containsKey(unitName)) {
                     clusterData.removeInstance(node, unitName);
                     Object vgroupMap = node.getMetadata().get(CONSTANT_GROUP);
                     if (vgroupMap instanceof Map) {
                         ((Map<String, Object>) vgroupMap).forEach((group, realUnitName) -> {
-                            vGroupMap.get(group, k -> new ConcurrentHashMap<>())
-                                    .get(namespace).getCluster(clusterName).remove(realUnitName == null ? unitName : (String) realUnitName);
+                            vGroupMap
+                                    .get(group, k -> new ConcurrentHashMap<>())
+                                    .get(namespace)
+                                    .getCluster(clusterName)
+                                    .remove(realUnitName == null ? unitName : (String) realUnitName);
                             notifyClusterChange(group, namespace, clusterName, unitName, node.getTerm());
                         });
                     }
 
-                    instanceLiveTable.remove(
-                        new InetSocketAddress(node.getTransaction().getHost(), node.getTransaction().getPort()));
+                    instanceLiveTable.remove(new InetSocketAddress(
+                            node.getTransaction().getHost(),
+                            node.getTransaction().getPort()));
                 }
             }
         } catch (Exception e) {
@@ -310,12 +344,14 @@ public class NamingManager {
 
     public List<Cluster> getClusterListByVgroup(String vGroup, String namespace) {
         // find the cluster where the transaction group is located
-        Map<String/* VGroup */, ConcurrentMap<String/* namespace */,NamespaceBO>> concurrentVgroupMap = new HashMap<>(vGroupMap.asMap());
-        Map<String/* namespace */, NamespaceBO> vgroupNamespaceMap = concurrentVgroupMap.get(vGroup);
+        Map<String /* VGroup */, ConcurrentMap<String /* namespace */, NamespaceBO>> concurrentVgroupMap =
+                new HashMap<>(vGroupMap.asMap());
+        Map<String /* namespace */, NamespaceBO> vgroupNamespaceMap = concurrentVgroupMap.get(vGroup);
         List<Cluster> clusterList = new ArrayList<>();
         if (!CollectionUtils.isEmpty(vgroupNamespaceMap)) {
             NamespaceBO namespaceBO = vgroupNamespaceMap.get(namespace);
-            ConcurrentMap<String/* clusterName */, ClusterData> clusterDataMap = namespaceClusterDataMap.get(namespace);
+            ConcurrentMap<String /* clusterName */, ClusterData> clusterDataMap =
+                    namespaceClusterDataMap.get(namespace);
             if (namespaceBO != null && !CollectionUtils.isEmpty(clusterDataMap)) {
                 clusterList.addAll(namespaceBO.getCluster(clusterDataMap));
             }
@@ -338,10 +374,11 @@ public class NamingManager {
             LOGGER.warn("no instances in {} : {}", namespace, clusterName);
             return Collections.emptyList();
         }
-        return readOnly ? clusterData.getInstanceList()
-            : clusterData.getInstanceList().stream()
-                .filter(node -> node.getRole() == ClusterRole.LEADER || node.getRole() == ClusterRole.MEMBER)
-                .collect(Collectors.toList());
+        return readOnly
+                ? clusterData.getInstanceList()
+                : clusterData.getInstanceList().stream()
+                        .filter(node -> node.getRole() == ClusterRole.LEADER || node.getRole() == ClusterRole.MEMBER)
+                        .collect(Collectors.toList());
     }
 
     public List<Node> getInstancesByVgroupAndNamespace(String namespace, String vgroup, boolean readOnly) {
@@ -349,19 +386,21 @@ public class NamingManager {
         if (CollectionUtils.isEmpty(clusters)) {
             return Collections.emptyList();
         } else {
-            return getInstances(namespace, clusters.get(0).getClusterName(),readOnly);
+            return getInstances(namespace, clusters.get(0).getClusterName(), readOnly);
         }
     }
 
     public void instanceHeartBeatCheck() {
         for (String namespace : namespaceClusterDataMap.keySet()) {
-            for (ClusterData clusterData : namespaceClusterDataMap.get(namespace).values()) {
+            for (ClusterData clusterData :
+                    namespaceClusterDataMap.get(namespace).values()) {
                 for (Unit unit : clusterData.getUnitData().values()) {
                     List<NamingServerNode> removeList = new ArrayList<>();
                     for (NamingServerNode instance : unit.getNamingInstanceList()) {
-                        InetSocketAddress inetSocketAddress = new InetSocketAddress(instance.getTransaction().getHost(),
-                            instance.getTransaction().getPort());
-                        long lastHeatBeatTimeStamp = instanceLiveTable.getOrDefault(inetSocketAddress, (long)0);
+                        InetSocketAddress inetSocketAddress = new InetSocketAddress(
+                                instance.getTransaction().getHost(),
+                                instance.getTransaction().getPort());
+                        long lastHeatBeatTimeStamp = instanceLiveTable.getOrDefault(inetSocketAddress, (long) 0);
                         if (Math.abs(lastHeatBeatTimeStamp - System.currentTimeMillis()) > heartbeatTimeThreshold) {
                             instanceLiveTable.remove(inetSocketAddress);
                             removeList.add(instance);
@@ -373,21 +412,24 @@ public class NamingManager {
                             clusterData.removeInstance(instance, unit.getUnitName());
                             Object vgoupMap = instance.getMetadata().get(CONSTANT_GROUP);
                             if (vgoupMap instanceof Map) {
-                                ((Map<String, Object>)vgoupMap).forEach((group, unitName) -> {
-                                    ClusterBO clusterBO =
-                                        vGroupMap.get(group)
-                                                .computeIfAbsent(namespace, k -> new NamespaceBO())
-                                                .getCluster(clusterData.getClusterName());
+                                ((Map<String, Object>) vgoupMap).forEach((group, unitName) -> {
+                                    ClusterBO clusterBO = vGroupMap
+                                            .get(group)
+                                            .computeIfAbsent(namespace, k -> new NamespaceBO())
+                                            .getCluster(clusterData.getClusterName());
                                     Set<String> units = clusterBO.getUnitNames();
                                     if (units != null) {
                                         units.remove(unitName == null ? instance.getUnit() : unitName);
-                                        notifyClusterChange(group,namespace, clusterData.getClusterName(), unit.getUnitName(),-1);
+                                        notifyClusterChange(
+                                                group, namespace, clusterData.getClusterName(), unit.getUnitName(), -1);
                                     }
                                 });
                             }
 
-                            LOGGER.warn("{} instance has gone offline",
-                                instance.getTransaction().getHost() + ":" + instance.getTransaction().getPort());
+                            LOGGER.warn(
+                                    "{} instance has gone offline",
+                                    instance.getTransaction().getHost() + ":"
+                                            + instance.getTransaction().getPort());
                         }
                     }
                 }
@@ -401,8 +443,10 @@ public class NamingManager {
         Set<String> currentNamespaces = namespaceMap.keySet();
         Map<String, Set<String>> namespaceClusters = new HashMap<>();
         for (String currentNamespace : currentNamespaces) {
-            namespaceClusters.put(currentNamespace,
-                new HashSet<>(namespaceMap.get(currentNamespace).getClusterMap().keySet()));
+            namespaceClusters.put(
+                    currentNamespace,
+                    new HashSet<>(
+                            namespaceMap.get(currentNamespace).getClusterMap().keySet()));
         }
         Result<String> res = createGroup(namespace, vGroup, clusterName, unitName);
         if (!res.isSuccess()) {
@@ -413,10 +457,12 @@ public class NamingManager {
         namespaceClusters.forEach((oldNamespace, clusters) -> {
             for (String cluster : clusters) {
                 Optional.ofNullable(namespaceClusterDataMap.get(oldNamespace))
-                        .flatMap(map -> Optional.ofNullable(map.get(cluster))).ifPresent(clusterData -> {
+                        .flatMap(map -> Optional.ofNullable(map.get(cluster)))
+                        .ifPresent(clusterData -> {
                             if (!CollectionUtils.isEmpty(clusterData.getUnitData())) {
                                 Optional<Map.Entry<String, Unit>> optionalEntry =
-                                        clusterData.getUnitData().entrySet().stream().findFirst();
+                                        clusterData.getUnitData().entrySet().stream()
+                                                .findFirst();
                                 if (optionalEntry.isPresent()) {
                                     String unit = optionalEntry.get().getKey();
                                     Unit unitData = optionalEntry.get().getValue();
@@ -433,8 +479,8 @@ public class NamingManager {
     public SingleResult<Map<String, NamespaceVO>> namespace() {
         // namespace->cluster->vgroups
         Map<String, NamespaceVO> namespaceVOs = new HashMap<>();
-        Map<String/* VGroup */, ConcurrentMap<String/* namespace */, NamespaceBO>> currentVGourpMap =
-            new HashMap<>(vGroupMap.asMap());
+        Map<String /* VGroup */, ConcurrentMap<String /* namespace */, NamespaceBO>> currentVGourpMap =
+                new HashMap<>(vGroupMap.asMap());
         if (currentVGourpMap.isEmpty()) {
             namespaceClusterDataMap.forEach((namespace, clusterDataMap) -> {
                 NamespaceVO namespaceVO = new NamespaceVO();
@@ -443,13 +489,12 @@ public class NamingManager {
             });
             return SingleResult.success(namespaceVOs);
         }
-        currentVGourpMap.forEach((vGroup, namespaceMap) -> namespaceMap
-            .forEach((namespace, namespaceBO) -> namespaceBO.getClusterMap().forEach((clusterName, clusterBO) -> {
-                NamespaceVO namespaceVO = namespaceVOs.computeIfAbsent(namespace, value -> new NamespaceVO());
-                namespaceVO.getClusters().add(clusterName);
-                namespaceVO.getVgroups().add(vGroup);
-            })));
+        currentVGourpMap.forEach((vGroup, namespaceMap) -> namespaceMap.forEach(
+                (namespace, namespaceBO) -> namespaceBO.getClusterMap().forEach((clusterName, clusterBO) -> {
+                    NamespaceVO namespaceVO = namespaceVOs.computeIfAbsent(namespace, value -> new NamespaceVO());
+                    namespaceVO.getClusters().add(clusterName);
+                    namespaceVO.getVgroups().add(vGroup);
+                })));
         return SingleResult.success(namespaceVOs);
     }
-
 }

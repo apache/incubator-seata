@@ -16,8 +16,9 @@
  */
 package org.apache.seata.core.lock;
 
-import java.util.List;
 import org.apache.seata.core.model.LockStatus;
+
+import java.util.List;
 
 /**
  * The interface Locker.
@@ -30,7 +31,7 @@ public interface Locker {
      * @param rowLock the row lock
      * @return the boolean
      */
-    boolean acquireLock(List<RowLock> rowLock) ;
+    boolean acquireLock(List<RowLock> rowLock);
 
     /**
      * Acquire lock boolean.
@@ -88,6 +89,4 @@ public interface Locker {
      *
      */
     void updateLockStatus(String xid, LockStatus lockStatus);
-
 }
-

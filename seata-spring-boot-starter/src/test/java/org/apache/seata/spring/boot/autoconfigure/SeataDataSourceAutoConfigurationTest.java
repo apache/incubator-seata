@@ -48,8 +48,7 @@ public class SeataDataSourceAutoConfigurationTest {
                     .withPropertyValues(
                             "seata.enabled=true",
                             "seata.enableAutoDataSourceProxy=true",
-                            "seata.enable-auto-data-source-proxy=true"
-                    )
+                            "seata.enable-auto-data-source-proxy=true")
                     .run(context -> {
                         // assert DataSourceProxy construction to be mock
                         assertThat(mocked.constructed()).isNotEmpty();
@@ -60,13 +59,9 @@ public class SeataDataSourceAutoConfigurationTest {
 
     @Test
     void whenDisabledByProperty_thenBeanNotCreated() {
-        contextRunner
-                .withPropertyValues(
-                        "seata.enabled=false"
-                )
-                .run(context -> {
-                    assertThat(context).doesNotHaveBean(SeataAutoDataSourceProxyCreator.class);
-                });
+        contextRunner.withPropertyValues("seata.enabled=false").run(context -> {
+            assertThat(context).doesNotHaveBean(SeataAutoDataSourceProxyCreator.class);
+        });
     }
 
     @Test

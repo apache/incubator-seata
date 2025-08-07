@@ -72,8 +72,8 @@ public interface RegistryService<T> {
      * @throws Exception the exception
      */
     default void register(Instance instance) throws Exception {
-        InetSocketAddress inetSocketAddress =
-            new InetSocketAddress(instance.getTransaction().getHost(), instance.getTransaction().getPort());
+        InetSocketAddress inetSocketAddress = new InetSocketAddress(
+                instance.getTransaction().getHost(), instance.getTransaction().getPort());
         register(inetSocketAddress);
     }
 
@@ -93,8 +93,8 @@ public interface RegistryService<T> {
      * @throws Exception the exception
      */
     default void unregister(Instance instance) throws Exception {
-        InetSocketAddress inetSocketAddress =
-            new InetSocketAddress(instance.getTransaction().getHost(), instance.getTransaction().getPort());
+        InetSocketAddress inetSocketAddress = new InetSocketAddress(
+                instance.getTransaction().getHost(), instance.getTransaction().getPort());
         unregister(inetSocketAddress);
     }
 
@@ -146,8 +146,8 @@ public interface RegistryService<T> {
     }
 
     default List<InetSocketAddress> aliveLookup(String transactionServiceGroup) {
-        Map<String, List<InetSocketAddress>> clusterAddressMap = CURRENT_ADDRESS_MAP.computeIfAbsent(transactionServiceGroup,
-            k -> new ConcurrentHashMap<>());
+        Map<String, List<InetSocketAddress>> clusterAddressMap =
+                CURRENT_ADDRESS_MAP.computeIfAbsent(transactionServiceGroup, k -> new ConcurrentHashMap<>());
 
         String clusterName = getServiceGroup(transactionServiceGroup);
         List<InetSocketAddress> inetSocketAddresses = clusterAddressMap.get(clusterName);
@@ -156,21 +156,22 @@ public interface RegistryService<T> {
         }
 
         // fall back to addresses of any cluster
-        return clusterAddressMap.values().stream().filter(CollectionUtils::isNotEmpty)
-                .findAny().orElse(Collections.emptyList());
+        return clusterAddressMap.values().stream()
+                .filter(CollectionUtils::isNotEmpty)
+                .findAny()
+                .orElse(Collections.emptyList());
     }
 
-    default List<InetSocketAddress> refreshAliveLookup(String transactionServiceGroup,
-        List<InetSocketAddress> aliveAddress) {
+    default List<InetSocketAddress> refreshAliveLookup(
+            String transactionServiceGroup, List<InetSocketAddress> aliveAddress) {
 
-        Map<String, List<InetSocketAddress>> clusterAddressMap = CURRENT_ADDRESS_MAP.computeIfAbsent(transactionServiceGroup,
-            key -> new ConcurrentHashMap<>());
+        Map<String, List<InetSocketAddress>> clusterAddressMap =
+                CURRENT_ADDRESS_MAP.computeIfAbsent(transactionServiceGroup, key -> new ConcurrentHashMap<>());
 
         String clusterName = getServiceGroup(transactionServiceGroup);
 
         return clusterAddressMap.put(clusterName, aliveAddress);
     }
-
 
     /**
      *
@@ -181,21 +182,20 @@ public interface RegistryService<T> {
      * @param clusterName
      * @param newAddressed
      */
-    default void removeOfflineAddressesIfNecessary(String transactionGroupService, String clusterName, Collection<InetSocketAddress> newAddressed) {
+    default void removeOfflineAddressesIfNecessary(
+            String transactionGroupService, String clusterName, Collection<InetSocketAddress> newAddressed) {
 
-        Map<String, List<InetSocketAddress>> clusterAddressMap = CURRENT_ADDRESS_MAP.computeIfAbsent(transactionGroupService,
-            key -> new ConcurrentHashMap<>());
+        Map<String, List<InetSocketAddress>> clusterAddressMap =
+                CURRENT_ADDRESS_MAP.computeIfAbsent(transactionGroupService, key -> new ConcurrentHashMap<>());
 
         List<InetSocketAddress> currentAddresses = clusterAddressMap.getOrDefault(clusterName, Collections.emptyList());
 
-        List<InetSocketAddress> inetSocketAddresses = currentAddresses
-                .stream().filter(newAddressed::contains).collect(
-                        Collectors.toList());
+        List<InetSocketAddress> inetSocketAddresses =
+                currentAddresses.stream().filter(newAddressed::contains).collect(Collectors.toList());
 
         // prevent empty update
         if (CollectionUtils.isNotEmpty(inetSocketAddresses)) {
             clusterAddressMap.put(clusterName, inetSocketAddresses);
         }
     }
-
 }

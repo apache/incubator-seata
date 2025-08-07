@@ -16,8 +16,9 @@
  */
 package org.apache.seata.core.store;
 
-import java.util.Date;
 import org.apache.seata.common.util.StringUtils;
+
+import java.util.Date;
 
 /**
  * Global Transaction data object
@@ -289,5 +290,4 @@ public class GlobalTransactionDO implements java.io.Serializable {
     public String toString() {
         return StringUtils.toString(this);
     }
-
 }

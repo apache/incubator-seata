@@ -32,8 +32,7 @@ public class Null {
         return instance;
     }
 
-    private Null() {
-    }
+    private Null() {}
 
     @Override
     public String toString() {

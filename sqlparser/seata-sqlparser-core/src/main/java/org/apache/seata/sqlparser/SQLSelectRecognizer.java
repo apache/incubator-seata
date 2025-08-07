@@ -20,5 +20,4 @@ package org.apache.seata.sqlparser;
  * The interface Sql select recognizer.
  *
  */
-public interface SQLSelectRecognizer extends WhereRecognizer {
-}
+public interface SQLSelectRecognizer extends WhereRecognizer {}

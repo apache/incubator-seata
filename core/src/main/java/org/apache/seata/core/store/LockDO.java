@@ -18,7 +18,6 @@ package org.apache.seata.core.store;
 
 import org.apache.seata.common.util.StringUtils;
 
-
 import static org.apache.seata.core.model.LockStatus.Locked;
 
 /**
@@ -46,8 +45,7 @@ public class LockDO {
     /**
      * Instantiates a new Lock do.
      */
-    public LockDO() {
-    }
+    public LockDO() {}
 
     /**
      * Gets xid.

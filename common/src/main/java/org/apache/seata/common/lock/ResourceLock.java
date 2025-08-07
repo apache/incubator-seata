@@ -45,7 +45,6 @@ public class ResourceLock extends ReentrantLock implements AutoCloseable {
         return this;
     }
 
-
     /**
      * Unlock the resource lock.
      *

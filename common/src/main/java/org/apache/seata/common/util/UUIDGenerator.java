@@ -24,7 +24,7 @@ import org.apache.seata.common.lock.ResourceLock;
 public class UUIDGenerator {
 
     private static volatile IdWorker idWorker;
-    private final static ResourceLock RESOURCE_LOCK = new ResourceLock();
+    private static final ResourceLock RESOURCE_LOCK = new ResourceLock();
 
     /**
      * generate UUID using snowflake algorithm

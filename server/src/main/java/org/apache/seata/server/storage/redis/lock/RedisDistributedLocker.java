@@ -45,15 +45,21 @@ public class RedisDistributedLocker implements DistributedLocker {
     @Override
     public boolean acquireLock(DistributedLockDO distributedLockDO) {
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
-            //Don't need to retry, if you can't acquire the lock,let the other get the lock
-            String result = jedis.set(distributedLockDO.getLockKey(), distributedLockDO.getLockValue(), SetParams.setParams().nx().px(distributedLockDO.getExpireTime()));
+            // Don't need to retry, if you can't acquire the lock,let the other get the lock
+            String result = jedis.set(
+                    distributedLockDO.getLockKey(),
+                    distributedLockDO.getLockValue(),
+                    SetParams.setParams().nx().px(distributedLockDO.getExpireTime()));
             return SUCCESS.equalsIgnoreCase(result);
         } catch (Exception ex) {
-            LOGGER.error("The {} acquired the {} distributed lock failed.", distributedLockDO.getLockValue(), distributedLockDO.getLockKey(), ex);
+            LOGGER.error(
+                    "The {} acquired the {} distributed lock failed.",
+                    distributedLockDO.getLockValue(),
+                    distributedLockDO.getLockKey(),
+                    ex);
             return false;
         }
     }
-
 
     /**
      * Release the distributed lock
@@ -67,14 +73,14 @@ public class RedisDistributedLocker implements DistributedLocker {
         String lockValue = distributedLockDO.getLockValue();
         try (Jedis jedis = JedisPooledFactory.getJedisInstance()) {
             jedis.watch(lockKey);
-            //Check the value to prevent release the other's lock
+            // Check the value to prevent release the other's lock
             if (lockValue.equals(jedis.get(lockKey))) {
                 Transaction multi = jedis.multi();
                 multi.del(lockKey);
                 multi.exec();
                 return true;
             }
-            //The lock hold by others,If other one get the lock,we release lock success too as for current lockKey
+            // The lock hold by others,If other one get the lock,we release lock success too as for current lockKey
             jedis.unwatch();
             return true;
         } catch (Exception ex) {

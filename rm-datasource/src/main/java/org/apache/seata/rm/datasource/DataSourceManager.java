@@ -16,10 +16,6 @@
  */
 package org.apache.seata.rm.datasource;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeoutException;
-
 import org.apache.seata.common.exception.NotSupportYetException;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.core.context.RootContext;
@@ -39,6 +35,10 @@ import org.apache.seata.rm.datasource.undo.UndoLogManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeoutException;
+
 /**
  * The type Data source manager.
  *
@@ -52,7 +52,8 @@ public class DataSourceManager extends AbstractResourceManager {
     private final Map<String, Resource> dataSourceCache = new ConcurrentHashMap<>();
 
     @Override
-    public boolean lockQuery(BranchType branchType, String resourceId, String xid, String lockKeys) throws TransactionException {
+    public boolean lockQuery(BranchType branchType, String resourceId, String xid, String lockKeys)
+            throws TransactionException {
         GlobalLockQueryRequest request = new GlobalLockQueryRequest();
         request.setXid(xid);
         request.setLockKey(lockKeys);
@@ -60,14 +61,15 @@ public class DataSourceManager extends AbstractResourceManager {
         try {
             GlobalLockQueryResponse response;
             if (RootContext.inGlobalTransaction() || RootContext.requireGlobalLock()) {
-                response = (GlobalLockQueryResponse) RmNettyRemotingClient.getInstance().sendSyncRequest(request);
+                response = (GlobalLockQueryResponse)
+                        RmNettyRemotingClient.getInstance().sendSyncRequest(request);
             } else {
                 throw new RuntimeException("unknow situation!");
             }
 
             if (response.getResultCode() == ResultCode.Failed) {
-                throw new TransactionException(response.getTransactionExceptionCode(),
-                    "Response[" + response.getMsg() + "]");
+                throw new TransactionException(
+                        response.getTransactionExceptionCode(), "Response[" + response.getMsg() + "]");
             }
             return response.isLockable();
         } catch (TimeoutException toe) {
@@ -80,8 +82,7 @@ public class DataSourceManager extends AbstractResourceManager {
     /**
      * Instantiates a new Data source manager.
      */
-    public DataSourceManager() {
-    }
+    public DataSourceManager() {}
 
     @Override
     public void registerResource(Resource resource) {
@@ -106,17 +107,19 @@ public class DataSourceManager extends AbstractResourceManager {
     }
 
     @Override
-    public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId,
-                                     String applicationData) throws TransactionException {
+    public BranchStatus branchCommit(
+            BranchType branchType, String xid, long branchId, String resourceId, String applicationData)
+            throws TransactionException {
         return asyncWorker.branchCommit(xid, branchId, resourceId);
     }
 
     @Override
-    public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId,
-                                       String applicationData) throws TransactionException {
+    public BranchStatus branchRollback(
+            BranchType branchType, String xid, long branchId, String resourceId, String applicationData)
+            throws TransactionException {
         DataSourceProxy dataSourceProxy = get(resourceId);
         if (dataSourceProxy == null) {
-            throw new ShouldNeverHappenException(String.format("resource: %s not found",resourceId));
+            throw new ShouldNeverHappenException(String.format("resource: %s not found", resourceId));
         }
         try {
             UndoLogManagerFactory.getUndoLogManager(dataSourceProxy.getDbType()).undo(dataSourceProxy, xid, branchId);
@@ -124,9 +127,11 @@ public class DataSourceManager extends AbstractResourceManager {
                 LOGGER.info("branch rollback success, xid:{}, branchId:{}", xid, branchId);
             }
         } catch (TransactionException te) {
-            StackTraceLogger.error(LOGGER, te,
-                "branchRollback failed. branchType:[{}], xid:[{}], branchId:[{}], resourceId:[{}], applicationData:[{}]. reason:[{}]",
-                new Object[]{branchType, xid, branchId, resourceId, applicationData, te.getMessage()});
+            StackTraceLogger.error(
+                    LOGGER,
+                    te,
+                    "branchRollback failed. branchType:[{}], xid:[{}], branchId:[{}], resourceId:[{}], applicationData:[{}]. reason:[{}]",
+                    new Object[] {branchType, xid, branchId, resourceId, applicationData, te.getMessage()});
             if (te.getCode() == TransactionExceptionCode.BranchRollbackFailed_Unretriable) {
                 return BranchStatus.PhaseTwo_RollbackFailed_Unretryable;
             } else {
@@ -134,7 +139,6 @@ public class DataSourceManager extends AbstractResourceManager {
             }
         }
         return BranchStatus.PhaseTwo_Rollbacked;
-
     }
 
     @Override
@@ -146,5 +150,4 @@ public class DataSourceManager extends AbstractResourceManager {
     public BranchType getBranchType() {
         return BranchType.AT;
     }
-
 }

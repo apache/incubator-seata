@@ -16,11 +16,6 @@
  */
 package org.apache.seata.mockserver;
 
-import java.lang.management.ManagementFactory;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
 import org.apache.seata.common.XID;
 import org.apache.seata.common.metadata.Instance;
 import org.apache.seata.common.metadata.Node;
@@ -34,7 +29,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import static org.apache.seata.common.ConfigurationKeys.ENV_SEATA_PORT_KEY;
+import java.lang.management.ManagementFactory;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The type Mock Server.
@@ -49,7 +47,8 @@ public class MockServer {
 
     private static volatile boolean inited = false;
 
-    public static final int DEFAULT_PORT = 8091;
+    public static final int MOCK_DEFAULT_PORT = 10091;
+    public static String MOCK_SEATA_PORT_KEY = "SEATA_MOCK_PORT";
 
     /**
      * The entry point of application.
@@ -58,8 +57,16 @@ public class MockServer {
      */
     public static void main(String[] args) {
         SpringApplication.run(MockServer.class, args);
+        int port = NumberUtils.toInt(System.getenv(MOCK_SEATA_PORT_KEY), MOCK_DEFAULT_PORT);
 
-        int port = NumberUtils.toInt(System.getenv(ENV_SEATA_PORT_KEY), DEFAULT_PORT);
+        if (args != null && args.length > 0) {
+            try {
+                port = Integer.parseInt(args[0]);
+            } catch (NumberFormatException e) {
+                LOGGER.error("Invalid port number provided, using default port: {}", port, e);
+            }
+        }
+
         start(port);
     }
 
@@ -68,10 +75,14 @@ public class MockServer {
             synchronized (MockServer.class) {
                 if (!inited) {
                     inited = true;
-                    workingThreads = new ThreadPoolExecutor(50,
-                            50, 500, TimeUnit.SECONDS,
+                    workingThreads = new ThreadPoolExecutor(
+                            50,
+                            50,
+                            500,
+                            TimeUnit.SECONDS,
                             new LinkedBlockingQueue<>(20000),
-                            new NamedThreadFactory("ServerHandlerThread", 500), new ThreadPoolExecutor.CallerRunsPolicy());
+                            new NamedThreadFactory("ServerHandlerThread", 500),
+                            new ThreadPoolExecutor.CallerRunsPolicy());
                     NettyServerConfig config = new NettyServerConfig();
                     config.setServerListenPort(port);
                     nettyRemotingServer = new MockNettyRemotingServer(workingThreads, config);
@@ -80,7 +91,8 @@ public class MockServer {
                     XID.setIpAddress(NetUtil.getLocalIp());
                     XID.setPort(port);
                     // init snowflake for transactionId, branchId
-                    Instance.getInstance().setTransaction(new Node.Endpoint(XID.getIpAddress(),XID.getPort(),"netty"));
+                    Instance.getInstance()
+                            .setTransaction(new Node.Endpoint(XID.getIpAddress(), XID.getPort(), "netty"));
                     UUIDGenerator.init(1L);
 
                     MockCoordinator coordinator = MockCoordinator.getInstance();
@@ -90,15 +102,16 @@ public class MockServer {
                     Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            LOGGER.info("system is closing , pid info: " + ManagementFactory.getRuntimeMXBean().getName());
+                            LOGGER.info("system is closing , pid info: "
+                                    + ManagementFactory.getRuntimeMXBean().getName());
                         }
                     }));
-                    LOGGER.info("pid info: " + ManagementFactory.getRuntimeMXBean().getName());
+                    LOGGER.info(
+                            "pid info: " + ManagementFactory.getRuntimeMXBean().getName());
+                    LOGGER.info("MockServer started on port: {}", port);
                 }
             }
         }
-
-
     }
 
     public static void close() {

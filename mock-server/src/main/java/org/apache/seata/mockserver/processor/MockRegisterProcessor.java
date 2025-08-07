@@ -38,16 +38,13 @@ public class MockRegisterProcessor implements RemotingProcessor {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(MockRegisterProcessor.class);
 
-
     private final RemotingServer remotingServer;
     private final Role role;
-
 
     public MockRegisterProcessor(RemotingServer remotingServer, Role role) {
         this.remotingServer = remotingServer;
         this.role = role;
     }
-
 
     @Override
     public void process(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception {
@@ -77,7 +74,6 @@ public class MockRegisterProcessor implements RemotingProcessor {
         remotingServer.sendAsyncResponse(rpcMessage, ctx.channel(), response);
         LOGGER.info("sendAsyncResponse: {}", response);
     }
-
 
     public enum Role {
         /**

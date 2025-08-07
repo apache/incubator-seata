@@ -16,12 +16,11 @@
  */
 package org.apache.seata.serializer.protobuf.convertor;
 
-import org.apache.seata.serializer.protobuf.generated.HeartbeatMessageProto;
 import org.apache.seata.core.protocol.HeartbeatMessage;
+import org.apache.seata.serializer.protobuf.generated.HeartbeatMessageProto;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
 
 public class HeartbeatMessageConvertorTest {
 
@@ -33,5 +32,4 @@ public class HeartbeatMessageConvertorTest {
         HeartbeatMessage real = convertor.convert2Model(proto);
         assertThat(real).isEqualTo(heartbeatMessage);
     }
-
 }

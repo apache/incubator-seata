@@ -39,16 +39,18 @@ public class OscarUndoLogManager extends AbstractUndoLogManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OscarUndoLogManager.class);
 
-    private static final String CHECK_UNDO_LOG_TABLE_EXIST_SQL = "SELECT 1 FROM " + UNDO_LOG_TABLE_NAME + " WHERE ROWNUM = 1";
+    private static final String CHECK_UNDO_LOG_TABLE_EXIST_SQL =
+            "SELECT 1 FROM " + UNDO_LOG_TABLE_NAME + " WHERE ROWNUM = 1";
 
-    private static final String INSERT_UNDO_LOG_SQL = "INSERT INTO " + UNDO_LOG_TABLE_NAME +
-            " (" + ClientTableColumnsName.UNDO_LOG_ID + "," + ClientTableColumnsName.UNDO_LOG_BRANCH_XID + ", "
+    private static final String INSERT_UNDO_LOG_SQL = "INSERT INTO " + UNDO_LOG_TABLE_NAME + " ("
+            + ClientTableColumnsName.UNDO_LOG_ID + "," + ClientTableColumnsName.UNDO_LOG_BRANCH_XID + ", "
             + ClientTableColumnsName.UNDO_LOG_XID + ", " + ClientTableColumnsName.UNDO_LOG_CONTEXT + ", "
             + ClientTableColumnsName.UNDO_LOG_ROLLBACK_INFO + ", " + ClientTableColumnsName.UNDO_LOG_LOG_STATUS + ", "
             + ClientTableColumnsName.UNDO_LOG_LOG_CREATED + ", " + ClientTableColumnsName.UNDO_LOG_LOG_MODIFIED + ")"
             + "VALUES (UNDO_LOG_SEQ.nextval, ?, ?, ?, ?, ?, sysdate, sysdate)";
 
-    private static final String DELETE_UNDO_LOG_BY_CREATE_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME + " WHERE " + ClientTableColumnsName.UNDO_LOG_LOG_CREATED + " <= to_date(?,'yyyy-mm-dd hh24:mi:ss') and ROWNUM <= ?";
+    private static final String DELETE_UNDO_LOG_BY_CREATE_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME + " WHERE "
+            + ClientTableColumnsName.UNDO_LOG_LOG_CREATED + " <= to_date(?,'yyyy-mm-dd hh24:mi:ss') and ROWNUM <= ?";
 
     @Override
     public int deleteUndoLogByLogCreated(Date logCreated, int limitRows, Connection conn) throws SQLException {
@@ -70,20 +72,26 @@ public class OscarUndoLogManager extends AbstractUndoLogManager {
     }
 
     @Override
-    protected void insertUndoLogWithNormal(String xid, long branchId, String rollbackCtx, byte[] undoLogContent,
-                                           Connection conn) throws SQLException {
-        insertUndoLog(xid, branchId,rollbackCtx, undoLogContent, State.Normal, conn);
+    protected void insertUndoLogWithNormal(
+            String xid, long branchId, String rollbackCtx, byte[] undoLogContent, Connection conn) throws SQLException {
+        insertUndoLog(xid, branchId, rollbackCtx, undoLogContent, State.Normal, conn);
     }
 
     @Override
-    protected void insertUndoLogWithGlobalFinished(String xid, long branchId, UndoLogParser parser, Connection conn) throws SQLException {
-        insertUndoLog(xid, branchId, buildContext(parser.getName(), CompressorType.NONE), parser.getDefaultContent(),
-                State.GlobalFinished, conn);
+    protected void insertUndoLogWithGlobalFinished(String xid, long branchId, UndoLogParser parser, Connection conn)
+            throws SQLException {
+        insertUndoLog(
+                xid,
+                branchId,
+                buildContext(parser.getName(), CompressorType.NONE),
+                parser.getDefaultContent(),
+                State.GlobalFinished,
+                conn);
     }
 
-
-    private void insertUndoLog(String xid, long branchID, String rollbackCtx, byte[] undoLogContent,
-                               State state, Connection conn) throws SQLException {
+    private void insertUndoLog(
+            String xid, long branchID, String rollbackCtx, byte[] undoLogContent, State state, Connection conn)
+            throws SQLException {
         try (PreparedStatement pst = conn.prepareStatement(INSERT_UNDO_LOG_SQL)) {
             pst.setLong(1, branchID);
             pst.setString(2, xid);

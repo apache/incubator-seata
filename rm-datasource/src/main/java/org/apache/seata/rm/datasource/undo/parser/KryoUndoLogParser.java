@@ -51,7 +51,9 @@ public class KryoUndoLogParser implements UndoLogParser, Initialize {
                         Serializer ser = typeSerializer.serializer();
                         if (type != null) {
                             KryoSerializerFactory.getInstance().registerSerializer(type, ser);
-                            LOGGER.info("kryo undo log parser load [{}].", typeSerializer.getClass().getName());
+                            LOGGER.info(
+                                    "kryo undo log parser load [{}].",
+                                    typeSerializer.getClass().getName());
                         }
                     }
                 }
@@ -95,5 +97,4 @@ public class KryoUndoLogParser implements UndoLogParser, Initialize {
             KryoSerializerFactory.getInstance().returnKryo(kryoSerializer);
         }
     }
-
 }

@@ -66,7 +66,7 @@ public class RemotingFactoryBeanParserTest {
             mockedDefaultRemotingParser.close();
         }
     }
-    
+
     /**
      * Create a proxy test service
      *
@@ -84,132 +84,135 @@ public class RemotingFactoryBeanParserTest {
             new RemotingFactoryBeanParser(null);
         });
     }
-    
+
     @Test
     public void testGetRemotingFactoryBeanWithNonProxyBean() {
         TestService testService = new TestServiceImpl();
         Object result = remotingFactoryBeanParser.getRemotingFactoryBean(testService, "testService");
         Assertions.assertNull(result);
     }
-    
+
     @Test
     public void testGetRemotingFactoryBeanWithProxyBeanButNoFactoryBean() {
         // Create proxy object
         TestService proxyTestService = createProxyTestService();
-        
+
         // Mock applicationContext behavior
         Mockito.when(applicationContext.containsBean("&testService")).thenReturn(false);
-        
+
         // Test
         Object result = remotingFactoryBeanParser.getRemotingFactoryBean(proxyTestService, "testService");
         Assertions.assertNull(result);
     }
-    
+
     @Test
     public void testGetRemotingFactoryBeanWithProxyBeanAndFactoryBean() {
         // Create proxy object
         TestService proxyTestService = createProxyTestService();
-        
+
         // Mock applicationContext behavior
         Object expectedFactoryBean = new Object();
         Mockito.when(applicationContext.containsBean("&testService")).thenReturn(true);
         Mockito.when(applicationContext.getBean("&testService")).thenReturn(expectedFactoryBean);
-        
+
         // Test
         Object result = remotingFactoryBeanParser.getRemotingFactoryBean(proxyTestService, "testService");
-        
+
         // Alternative to assertNotNull - check that result is the same as our expected object
         Assertions.assertSame(expectedFactoryBean, result);
     }
-    
+
     @Test
     public void testIsReferenceWithNullFactoryBean() {
         TestService testService = new TestServiceImpl();
         boolean result = remotingFactoryBeanParser.isReference(testService, "testService");
         Assertions.assertFalse(result);
     }
-    
+
     @Test
     public void testIsReferenceWithFactoryBean() {
         // Create proxy object
         TestService proxyTestService = createProxyTestService();
-        
+
         Object factoryBean = new Object();
-        
+
         // Mock applicationContext behavior
         Mockito.when(applicationContext.containsBean("&testService")).thenReturn(true);
         Mockito.when(applicationContext.getBean("&testService")).thenReturn(factoryBean);
-        
+
         // Mock DefaultRemotingParser behavior
-        Mockito.when(defaultRemotingParser.isReference(factoryBean, "&testService")).thenReturn(true);
-        
+        Mockito.when(defaultRemotingParser.isReference(factoryBean, "&testService"))
+                .thenReturn(true);
+
         // Test
         boolean result = remotingFactoryBeanParser.isReference(proxyTestService, "testService");
         Assertions.assertTrue(result);
     }
-    
+
     @Test
     public void testIsServiceWithNullFactoryBean() {
         TestService testService = new TestServiceImpl();
         boolean result = remotingFactoryBeanParser.isService(testService, "testService");
         Assertions.assertFalse(result);
     }
-    
+
     @Test
     public void testIsServiceWithFactoryBean() {
         // Create proxy object
         TestService proxyTestService = createProxyTestService();
-        
+
         Object factoryBean = new Object();
-        
+
         // Mock applicationContext behavior
         Mockito.when(applicationContext.containsBean("&testService")).thenReturn(true);
         Mockito.when(applicationContext.getBean("&testService")).thenReturn(factoryBean);
-        
+
         // Mock DefaultRemotingParser behavior
-        Mockito.when(defaultRemotingParser.isService(factoryBean, "&testService")).thenReturn(true);
-        
+        Mockito.when(defaultRemotingParser.isService(factoryBean, "&testService"))
+                .thenReturn(true);
+
         // Test
         boolean result = remotingFactoryBeanParser.isService(proxyTestService, "testService");
         Assertions.assertTrue(result);
     }
-    
+
     @Test
     public void testIsServiceWithClass() {
         boolean result = remotingFactoryBeanParser.isService(TestServiceImpl.class);
         Assertions.assertFalse(result);
     }
-    
+
     @Test
     public void testGetServiceDescWithNullFactoryBean() {
         TestService testService = new TestServiceImpl();
         RemotingDesc result = remotingFactoryBeanParser.getServiceDesc(testService, "testService");
         Assertions.assertNull(result);
     }
-    
+
     @Test
     public void testGetServiceDescWithFactoryBean() throws FrameworkException {
         // Create proxy object
         TestService proxyTestService = createProxyTestService();
-        
+
         Object factoryBean = new Object();
         RemotingDesc expectedDesc = new RemotingDesc();
-        
+
         // Mock applicationContext behavior
         Mockito.when(applicationContext.containsBean("&testService")).thenReturn(true);
         Mockito.when(applicationContext.getBean("&testService")).thenReturn(factoryBean);
-        
+
         // Mock DefaultRemotingParser behavior
-        Mockito.when(defaultRemotingParser.getServiceDesc(factoryBean, "&testService")).thenReturn(expectedDesc);
-        
+        Mockito.when(defaultRemotingParser.getServiceDesc(factoryBean, "&testService"))
+                .thenReturn(expectedDesc);
+
         // Test
         RemotingDesc result = remotingFactoryBeanParser.getServiceDesc(proxyTestService, "testService");
         Assertions.assertEquals(expectedDesc, result);
     }
-    
+
     @Test
     public void testGetProtocol() {
         short result = remotingFactoryBeanParser.getProtocol();
         Assertions.assertEquals(0, result);
     }
-} 
+}

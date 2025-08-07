@@ -20,7 +20,7 @@ package org.apache.seata.core.protocol;
  * The enum Result code.
  *
  */
-public enum  ResultCode {
+public enum ResultCode {
 
     /**
      * Failed result code.
@@ -41,7 +41,7 @@ public enum  ResultCode {
      * @return the result code
      */
     public static ResultCode get(byte ordinal) {
-        return get((int)ordinal);
+        return get((int) ordinal);
     }
 
     /**

@@ -35,5 +35,4 @@ public class ZstdCompressor implements Compressor {
     public byte[] decompress(byte[] bytes) {
         return ZstdUtil.decompress(bytes);
     }
-
 }

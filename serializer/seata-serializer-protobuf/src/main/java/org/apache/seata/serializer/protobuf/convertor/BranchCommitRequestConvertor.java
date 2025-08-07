@@ -17,36 +17,42 @@
 package org.apache.seata.serializer.protobuf.convertor;
 
 import org.apache.seata.core.model.BranchType;
+import org.apache.seata.core.protocol.transaction.BranchCommitRequest;
 import org.apache.seata.serializer.protobuf.generated.AbstractBranchEndRequestProto;
 import org.apache.seata.serializer.protobuf.generated.AbstractMessageProto;
 import org.apache.seata.serializer.protobuf.generated.AbstractTransactionRequestProto;
 import org.apache.seata.serializer.protobuf.generated.BranchCommitRequestProto;
 import org.apache.seata.serializer.protobuf.generated.BranchTypeProto;
 import org.apache.seata.serializer.protobuf.generated.MessageTypeProto;
-import org.apache.seata.core.protocol.transaction.BranchCommitRequest;
-
 
 public class BranchCommitRequestConvertor implements PbConvertor<BranchCommitRequest, BranchCommitRequestProto> {
     @Override
     public BranchCommitRequestProto convert2Proto(BranchCommitRequest branchCommitRequest) {
         final short typeCode = branchCommitRequest.getTypeCode();
 
-        final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder().setMessageType(
-            MessageTypeProto.forNumber(typeCode)).build();
+        final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder()
+                .setMessageType(MessageTypeProto.forNumber(typeCode))
+                .build();
 
-        final AbstractTransactionRequestProto abstractTransactionRequestProto = AbstractTransactionRequestProto
-            .newBuilder().setAbstractMessage(abstractMessage).build();
+        final AbstractTransactionRequestProto abstractTransactionRequestProto =
+                AbstractTransactionRequestProto.newBuilder()
+                        .setAbstractMessage(abstractMessage)
+                        .build();
 
         final String applicationData = branchCommitRequest.getApplicationData();
-        final AbstractBranchEndRequestProto abstractBranchEndRequestProto = AbstractBranchEndRequestProto.newBuilder().
-            setAbstractTransactionRequest(abstractTransactionRequestProto).setXid(branchCommitRequest.getXid())
-            .setBranchId(branchCommitRequest.getBranchId()).setBranchType(
-                BranchTypeProto.valueOf(branchCommitRequest.getBranchType().name())).setApplicationData(
-                applicationData == null ? "" : applicationData).setResourceId(branchCommitRequest.getResourceId())
-            .build();
+        final AbstractBranchEndRequestProto abstractBranchEndRequestProto = AbstractBranchEndRequestProto.newBuilder()
+                .setAbstractTransactionRequest(abstractTransactionRequestProto)
+                .setXid(branchCommitRequest.getXid())
+                .setBranchId(branchCommitRequest.getBranchId())
+                .setBranchType(BranchTypeProto.valueOf(
+                        branchCommitRequest.getBranchType().name()))
+                .setApplicationData(applicationData == null ? "" : applicationData)
+                .setResourceId(branchCommitRequest.getResourceId())
+                .build();
 
-        BranchCommitRequestProto result = BranchCommitRequestProto.newBuilder().setAbstractBranchEndRequest(
-            abstractBranchEndRequestProto).build();
+        BranchCommitRequestProto result = BranchCommitRequestProto.newBuilder()
+                .setAbstractBranchEndRequest(abstractBranchEndRequestProto)
+                .build();
         return result;
     }
 
@@ -54,12 +60,17 @@ public class BranchCommitRequestConvertor implements PbConvertor<BranchCommitReq
     public BranchCommitRequest convert2Model(BranchCommitRequestProto branchCommitRequestProto) {
         BranchCommitRequest branchCommitRequest = new BranchCommitRequest();
         branchCommitRequest.setApplicationData(
-            branchCommitRequestProto.getAbstractBranchEndRequest().getApplicationData());
-        branchCommitRequest.setBranchId(branchCommitRequestProto.getAbstractBranchEndRequest().getBranchId());
-        branchCommitRequest.setResourceId(branchCommitRequestProto.getAbstractBranchEndRequest().getResourceId());
-        branchCommitRequest.setXid(branchCommitRequestProto.getAbstractBranchEndRequest().getXid());
-        branchCommitRequest.setBranchType(
-            BranchType.valueOf(branchCommitRequestProto.getAbstractBranchEndRequest().getBranchType().name()));
+                branchCommitRequestProto.getAbstractBranchEndRequest().getApplicationData());
+        branchCommitRequest.setBranchId(
+                branchCommitRequestProto.getAbstractBranchEndRequest().getBranchId());
+        branchCommitRequest.setResourceId(
+                branchCommitRequestProto.getAbstractBranchEndRequest().getResourceId());
+        branchCommitRequest.setXid(
+                branchCommitRequestProto.getAbstractBranchEndRequest().getXid());
+        branchCommitRequest.setBranchType(BranchType.valueOf(branchCommitRequestProto
+                .getAbstractBranchEndRequest()
+                .getBranchType()
+                .name()));
 
         return branchCommitRequest;
     }

@@ -76,6 +76,4 @@ public class VGroupMappingController {
         }
         return result;
     }
-
-
 }

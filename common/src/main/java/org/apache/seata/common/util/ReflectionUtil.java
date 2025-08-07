@@ -39,11 +39,9 @@ import java.util.function.Predicate;
  */
 public final class ReflectionUtil {
 
-    private ReflectionUtil() {
-    }
+    private ReflectionUtil() {}
 
-
-    //region Constants
+    // region Constants
 
     /**
      * The constant EMPTY_FIELD_ARRAY
@@ -75,10 +73,9 @@ public final class ReflectionUtil {
      */
     private static final Map<Class<?>, Map<String, Method>> METHOD_CACHE = new ConcurrentHashMap<>();
 
-    //endregion
+    // endregion
 
-
-    //region Class
+    // region Class
 
     /**
      * Gets class by name.
@@ -146,10 +143,9 @@ public final class ReflectionUtil {
         return clazz;
     }
 
-    //endregion
+    // endregion
 
-
-    //region Interface
+    // region Interface
 
     /**
      * get all interface of the clazz
@@ -172,10 +168,9 @@ public final class ReflectionUtil {
         return interfaces;
     }
 
-    //endregion
+    // endregion
 
-
-    //region Field
+    // region Field
 
     /**
      * Gets all fields, excluding static or synthetic fields
@@ -230,8 +225,10 @@ public final class ReflectionUtil {
      * @throws NoSuchFieldException if the field named {@code fieldName} does not exist
      * @throws SecurityException    the security exception
      */
-    public static Field getField(final Class<?> clazz, final String fieldName) throws NoSuchFieldException, SecurityException {
-        Map<String, Field> fieldMap = CollectionUtils.computeIfAbsent(FIELD_CACHE, clazz, k -> new ConcurrentHashMap<>());
+    public static Field getField(final Class<?> clazz, final String fieldName)
+            throws NoSuchFieldException, SecurityException {
+        Map<String, Field> fieldMap =
+                CollectionUtils.computeIfAbsent(FIELD_CACHE, clazz, k -> new ConcurrentHashMap<>());
         Field field = CollectionUtils.computeIfAbsent(fieldMap, fieldName, k -> {
             Class<?> cl = clazz;
             while (cl != null && cl != Object.class && !cl.isInterface()) {
@@ -266,8 +263,7 @@ public final class ReflectionUtil {
      * @throws SecurityException        the security exception
      * @throws ClassCastException       if the type of the variable receiving the field value is not equals to the field type
      */
-    public static <T> T getFieldValue(Object target, Field field)
-            throws IllegalArgumentException, SecurityException {
+    public static <T> T getFieldValue(Object target, Field field) throws IllegalArgumentException, SecurityException {
         if (target == null) {
             throw new IllegalArgumentException("target must be not null");
         }
@@ -277,7 +273,7 @@ public final class ReflectionUtil {
                 field.setAccessible(true);
             }
             try {
-                return (T)field.get(target);
+                return (T) field.get(target);
             } catch (IllegalAccessException ignore) {
                 // avoid other threads executing `field.setAccessible(false)`
             }
@@ -379,7 +375,8 @@ public final class ReflectionUtil {
 
         // check is static field
         if (!Modifier.isStatic(staticField.getModifiers())) {
-            throw new IllegalArgumentException("the `" + fieldToString(staticField) + "` is not a static field, cannot modify value.");
+            throw new IllegalArgumentException(
+                    "the `" + fieldToString(staticField) + "` is not a static field, cannot modify value.");
         }
 
         // remove the `final` keyword from the field
@@ -419,10 +416,9 @@ public final class ReflectionUtil {
         modifyStaticFinalField(field, newValue);
     }
 
-    //endregion
+    // endregion
 
-
-    //region Method
+    // region Method
 
     /**
      * get method.
@@ -443,7 +439,8 @@ public final class ReflectionUtil {
             throw new IllegalArgumentException("clazz must be not null");
         }
 
-        Map<String, Method> methodMap = CollectionUtils.computeIfAbsent(METHOD_CACHE, clazz, k -> new ConcurrentHashMap<>());
+        Map<String, Method> methodMap =
+                CollectionUtils.computeIfAbsent(METHOD_CACHE, clazz, k -> new ConcurrentHashMap<>());
 
         String cacheKey = generateMethodCacheKey(methodName, parameterTypes);
         Method method = CollectionUtils.computeIfAbsent(methodMap, cacheKey, k -> {
@@ -659,8 +656,8 @@ public final class ReflectionUtil {
      * @throws InvocationTargetException if the underlying method throws an exception.
      * @throws SecurityException         the security exception
      */
-    public static Object invokeStaticMethod(Class<?> targetClass, String staticMethodName,
-                                            Class<?>[] parameterTypes, Object... args)
+    public static Object invokeStaticMethod(
+            Class<?> targetClass, String staticMethodName, Class<?>[] parameterTypes, Object... args)
             throws IllegalArgumentException, NoSuchMethodException, InvocationTargetException, SecurityException {
         if (targetClass == null) {
             throw new IllegalArgumentException("targetClass must be not null");
@@ -669,8 +666,8 @@ public final class ReflectionUtil {
         // get method
         Method staticMethod = getMethod(targetClass, staticMethodName, parameterTypes);
         if (!Modifier.isStatic(staticMethod.getModifiers())) {
-            throw new NoSuchMethodException("static method not found: "
-                    + methodToString(targetClass, staticMethodName, parameterTypes));
+            throw new NoSuchMethodException(
+                    "static method not found: " + methodToString(targetClass, staticMethodName, parameterTypes));
         }
 
         return invokeStaticMethod(staticMethod, args);
@@ -693,10 +690,9 @@ public final class ReflectionUtil {
         return invokeStaticMethod(targetClass, staticMethodName, EMPTY_CLASS_ARRAY, EMPTY_ARGS);
     }
 
-    //endregion
+    // endregion
 
-
-    //region Annotation
+    // region Annotation
 
     /**
      * get annotation values
@@ -709,10 +705,9 @@ public final class ReflectionUtil {
         return getFieldValue(h, "memberValues");
     }
 
-    //endregion
+    // endregion
 
-
-    //region toString
+    // region toString
 
     /**
      * class to string
@@ -811,5 +806,5 @@ public final class ReflectionUtil {
         return sb.toString();
     }
 
-    //endregion
+    // endregion
 }

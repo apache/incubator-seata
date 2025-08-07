@@ -16,6 +16,24 @@
  */
 package org.apache.seata.rm.datasource.exec.mysql;
 
+import org.apache.seata.common.exception.NotSupportYetException;
+import org.apache.seata.common.exception.ShouldNeverHappenException;
+import org.apache.seata.common.loader.LoadLevel;
+import org.apache.seata.common.loader.Scope;
+import org.apache.seata.common.util.IOUtil;
+import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.rm.datasource.StatementProxy;
+import org.apache.seata.rm.datasource.exec.BaseInsertExecutor;
+import org.apache.seata.rm.datasource.exec.StatementCallback;
+import org.apache.seata.sqlparser.SQLRecognizer;
+import org.apache.seata.sqlparser.struct.ColumnMeta;
+import org.apache.seata.sqlparser.struct.Defaultable;
+import org.apache.seata.sqlparser.struct.Null;
+import org.apache.seata.sqlparser.struct.SqlMethodExpr;
+import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -27,24 +45,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-
-import org.apache.seata.common.exception.NotSupportYetException;
-import org.apache.seata.common.exception.ShouldNeverHappenException;
-import org.apache.seata.common.loader.LoadLevel;
-import org.apache.seata.common.loader.Scope;
-import org.apache.seata.common.util.IOUtil;
-import org.apache.seata.common.util.StringUtils;
-import org.apache.seata.rm.datasource.StatementProxy;
-import org.apache.seata.rm.datasource.exec.BaseInsertExecutor;
-import org.apache.seata.rm.datasource.exec.StatementCallback;
-import org.apache.seata.sqlparser.struct.ColumnMeta;
-import org.apache.seata.sqlparser.SQLRecognizer;
-import org.apache.seata.sqlparser.struct.Defaultable;
-import org.apache.seata.sqlparser.struct.Null;
-import org.apache.seata.sqlparser.struct.SqlMethodExpr;
-import org.apache.seata.sqlparser.util.JdbcConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The type My sql insert executor.
@@ -74,37 +74,36 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
      * @param statementCallback the statement callback
      * @param sqlRecognizer     the sql recognizer
      */
-    public MySQLInsertExecutor(StatementProxy statementProxy, StatementCallback statementCallback,
-                               SQLRecognizer sqlRecognizer) {
+    public MySQLInsertExecutor(
+            StatementProxy statementProxy, StatementCallback statementCallback, SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }
 
     @Override
-    public Map<String,List<Object>> getPkValues() throws SQLException {
-        Map<String,List<Object>> pkValuesMap = null;
+    public Map<String, List<Object>> getPkValues() throws SQLException {
+        Map<String, List<Object>> pkValuesMap = null;
         List<String> pkColumnNameList = getTableMeta().getPrimaryKeyOnlyName();
         boolean isContainsPk = containsPK();
-        //when there is only one pk in the table
+        // when there is only one pk in the table
         if (pkColumnNameList.size() == 1) {
             if (isContainsPk) {
                 pkValuesMap = getPkValuesByColumn();
-            }
-            else if (containsColumns()) {
+            } else if (containsColumns()) {
                 pkValuesMap = getPkValuesByAuto();
-            }
-            else {
+            } else {
                 pkValuesMap = getPkValuesByColumn();
             }
         } else {
-            //when there is multiple pk in the table
-            //1,all pk columns are filled value.
-            //2,the auto increment pk column value is null, and other pk value are not null.
+            // when there is multiple pk in the table
+            // 1,all pk columns are filled value.
+            // 2,the auto increment pk column value is null, and other pk value are not null.
             pkValuesMap = getPkValuesByColumn();
-            for (String columnName:pkColumnNameList) {
+            for (String columnName : pkColumnNameList) {
                 if (!pkValuesMap.containsKey(columnName)) {
                     ColumnMeta pkColumnMeta = getTableMeta().getColumnMeta(columnName);
                     if (Objects.nonNull(pkColumnMeta) && pkColumnMeta.isAutoincrement()) {
-                        //3,the auto increment pk column is not exits in sql, and other pk are exits also the value is not null.
+                        // 3,the auto increment pk column is not exits in sql, and other pk are exits also the value is
+                        // not null.
                         pkValuesMap.putAll(getPkValuesByAuto());
                     }
                 }
@@ -140,7 +139,8 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
             // specify Statement.RETURN_GENERATED_KEYS to
             // Statement.executeUpdate() or Connection.prepareStatement().
             if (ERR_SQL_STATE.equalsIgnoreCase(e.getSQLState())) {
-                logger.error("Fail to get auto-generated keys, use 'SELECT LAST_INSERT_ID()' instead. Be cautious, statement could be polluted. Recommend you set the statement to return generated keys.");
+                logger.error(
+                        "Fail to get auto-generated keys, use 'SELECT LAST_INSERT_ID()' instead. Be cautious, statement could be polluted. Recommend you set the statement to return generated keys.");
                 int updateCount = statementProxy.getUpdateCount();
                 try {
                     genKeys = statementProxy.getTargetStatement().executeQuery("SELECT LAST_INSERT_ID()");
@@ -181,11 +181,11 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
     }
 
     @Override
-    public Map<String,List<Object>> getPkValuesByColumn() throws SQLException {
-        Map<String,List<Object>> pkValuesMap  = parsePkValuesFromStatement();
+    public Map<String, List<Object>> getPkValuesByColumn() throws SQLException {
+        Map<String, List<Object>> pkValuesMap = parsePkValuesFromStatement();
         Set<String> keySet = new HashSet<>(pkValuesMap.keySet());
-        //auto increment
-        for (String pkKey:keySet) {
+        // auto increment
+        for (String pkKey : keySet) {
             List<Object> pkValues = pkValuesMap.get(pkKey);
             // pk auto generated while single insert primary key is expression
             if (pkValues.size() == 1 && (pkValues.get(0) instanceof SqlMethodExpr)) {
@@ -214,15 +214,19 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
         throw new NotSupportYetException();
     }
 
-    protected Map<String, List<Object>> autoGeneratePks(BigDecimal cursor, String autoColumnName, Integer updateCount) throws SQLException {
+    protected Map<String, List<Object>> autoGeneratePks(BigDecimal cursor, String autoColumnName, Integer updateCount)
+            throws SQLException {
         BigDecimal step = BigDecimal.ONE;
-        String resourceId = statementProxy.getConnectionProxy().getDataSourceProxy().getResourceId();
+        String resourceId =
+                statementProxy.getConnectionProxy().getDataSourceProxy().getResourceId();
         if (RESOURCE_ID_STEP_CACHE.containsKey(resourceId)) {
             step = RESOURCE_ID_STEP_CACHE.get(resourceId);
         } else {
             ResultSet increment = null;
             try {
-                increment = statementProxy.getTargetStatement().executeQuery("SHOW VARIABLES LIKE 'auto_increment_increment'");
+                increment = statementProxy
+                        .getTargetStatement()
+                        .executeQuery("SHOW VARIABLES LIKE 'auto_increment_increment'");
 
                 increment.next();
                 step = new BigDecimal(increment.getString(2));
@@ -239,7 +243,7 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
         }
 
         Map<String, List<Object>> pkValuesMap = new HashMap<>(1, 1.001f);
-        pkValuesMap.put(autoColumnName,pkValues);
+        pkValuesMap.put(autoColumnName, pkValues);
         return pkValuesMap;
     }
 
@@ -253,5 +257,4 @@ public class MySQLInsertExecutor extends BaseInsertExecutor implements Defaultab
         }
         return false;
     }
-
 }

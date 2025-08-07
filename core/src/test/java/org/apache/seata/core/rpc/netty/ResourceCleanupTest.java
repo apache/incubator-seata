@@ -16,17 +16,10 @@
  */
 package org.apache.seata.core.rpc.netty;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
-import java.lang.reflect.Field;
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import io.netty.handler.timeout.IdleStateEvent;
 import org.apache.seata.core.protocol.MergeMessage;
 import org.apache.seata.core.protocol.MergedWarpMessage;
 import org.apache.seata.core.protocol.MessageFuture;
@@ -37,6 +30,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.lang.reflect.Field;
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ResourceCleanupTest {
@@ -58,6 +61,7 @@ class ResourceCleanupTest {
     @BeforeEach
     void setUp() throws Exception {
         client = TmNettyRemotingClient.getInstance();
+        client.init();
 
         Field futuresField = AbstractNettyRemoting.class.getDeclaredField("futures");
         futuresField.setAccessible(true);
@@ -140,6 +144,69 @@ class ResourceCleanupTest {
 
         assertDoesNotThrow(() -> client.cleanupResourcesForChannel(null));
         assertTrue(futures.containsKey(1), "Future ID 1 should still exist");
+    }
+
+    @Test
+    void testExceptionCaughtTriggersChannelRelease() throws Exception {
+        AbstractNettyRemotingClient.ClientHandler handler = client.new ClientHandler();
+        ChannelHandlerContext mockCtx = mock(ChannelHandlerContext.class);
+        when(mockCtx.channel()).thenReturn(channel);
+        when(channel.remoteAddress()).thenReturn(new InetSocketAddress("127.0.0.1", 8091));
+        Field channelManagerField = AbstractNettyRemotingClient.class.getDeclaredField("clientChannelManager");
+        channelManagerField.setAccessible(true);
+        NettyClientChannelManager originalManager = (NettyClientChannelManager) channelManagerField.get(client);
+
+        NettyClientChannelManager spyManager = spy(originalManager);
+        channelManagerField.set(client, spyManager);
+
+        handler.exceptionCaught(mockCtx, new IllegalArgumentException("test"));
+
+        Thread.sleep(500);
+        verify(spyManager).releaseChannel(eq(channel), eq("127.0.0.1:8091"));
+        channelManagerField.set(client, originalManager);
+    }
+
+    @Test
+    void testUserEventTriggeredReaderIdleReleasesChannel() throws Exception {
+        AbstractNettyRemotingClient.ClientHandler handler = client.new ClientHandler();
+        ChannelHandlerContext mockCtx = mock(ChannelHandlerContext.class);
+        when(mockCtx.channel()).thenReturn(channel);
+        when(channel.remoteAddress()).thenReturn(new InetSocketAddress("127.0.0.1", 8091));
+
+        Field channelManagerField = AbstractNettyRemotingClient.class.getDeclaredField("clientChannelManager");
+        channelManagerField.setAccessible(true);
+        NettyClientChannelManager originalManager = (NettyClientChannelManager) channelManagerField.get(client);
+
+        NettyClientChannelManager spyManager = spy(originalManager);
+        channelManagerField.set(client, spyManager);
+
+        IdleStateEvent readerIdleEvent = IdleStateEvent.READER_IDLE_STATE_EVENT;
+        handler.userEventTriggered(mockCtx, readerIdleEvent);
+
+        Thread.sleep(500);
+        verify(spyManager).releaseChannel(eq(channel), eq("127.0.0.1:8091"));
+        channelManagerField.set(client, originalManager);
+    }
+
+    @Test
+    void testChannelInactiveTriggersChannelRelease() throws Exception {
+        AbstractNettyRemotingClient.ClientHandler handler = client.new ClientHandler();
+        ChannelHandlerContext mockCtx = mock(ChannelHandlerContext.class);
+        when(mockCtx.channel()).thenReturn(channel);
+        when(channel.remoteAddress()).thenReturn(new InetSocketAddress("127.0.0.1", 8091));
+        Field channelManagerField = AbstractNettyRemotingClient.class.getDeclaredField("clientChannelManager");
+        channelManagerField.setAccessible(true);
+        NettyClientChannelManager originalManager = (NettyClientChannelManager) channelManagerField.get(client);
+
+        NettyClientChannelManager spyManager = spy(originalManager);
+        channelManagerField.set(client, spyManager);
+
+        handler.channelInactive(mockCtx);
+
+        Thread.sleep(500);
+
+        verify(spyManager).releaseChannel(eq(channel), eq("127.0.0.1:8091"));
+        channelManagerField.set(client, originalManager);
     }
 
     private RpcMessage createRpcMessage(int id) {

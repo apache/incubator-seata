@@ -16,9 +16,6 @@
  */
 package org.apache.seata.saga.engine.db.mockserver;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.seata.common.SagaCostPrint;
 import org.apache.seata.saga.engine.StateMachineEngine;
 import org.apache.seata.saga.engine.mock.DemoService.Engineer;
@@ -36,6 +33,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * State machine tests with db log store
  *
@@ -46,8 +46,8 @@ public class StateMachineDBMockServerTests {
 
     @BeforeAll
     public static void initApplicationContext() {
-        ApplicationContext applicationContext = new ClassPathXmlApplicationContext(
-                "classpath:saga/spring/statemachine_engine_db_mockserver_test.xml");
+        ApplicationContext applicationContext =
+                new ClassPathXmlApplicationContext("classpath:saga/spring/statemachine_engine_db_mockserver_test.xml");
         stateMachineEngine = applicationContext.getBean("stateMachineEngine", StateMachineEngine.class);
         StateMachineEngineHolder.setStateMachineEngine(stateMachineEngine);
     }
@@ -68,12 +68,16 @@ public class StateMachineDBMockServerTests {
             paramMap.put("a", 1);
 
             String businessKey = String.valueOf(System.currentTimeMillis());
-            StateMachineInstance inst = stateMachineEngine.startWithBusinessKey(stateMachineName, null, businessKey, paramMap);
+            StateMachineInstance inst =
+                    stateMachineEngine.startWithBusinessKey(stateMachineName, null, businessKey, paramMap);
 
             Assertions.assertNotNull(inst);
             Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
 
-            inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstanceByBusinessKey(businessKey, null);
+            inst = stateMachineEngine
+                    .getStateMachineConfig()
+                    .getStateLogStore()
+                    .getStateMachineInstanceByBusinessKey(businessKey, null);
             Assertions.assertNotNull(inst);
             Assertions.assertEquals(ExecutionStatus.SU, inst.getStatus());
         });
@@ -122,8 +126,8 @@ public class StateMachineDBMockServerTests {
             Assertions.assertNotNull(businessKey);
             System.out.println("====== businessKey :" + businessKey);
 
-            String contextBusinessKey = (String)inst.getEndParams().get(
-                    inst.getStateList().get(0).getName() + DomainConstants.VAR_NAME_BUSINESSKEY);
+            String contextBusinessKey = (String) inst.getEndParams()
+                    .get(inst.getStateList().get(0).getName() + DomainConstants.VAR_NAME_BUSINESSKEY);
             Assertions.assertNotNull(contextBusinessKey);
             System.out.println("====== context businessKey :" + businessKey);
         });
@@ -567,7 +571,7 @@ public class StateMachineDBMockServerTests {
 
             StateMachineInstance instance = stateMachineEngine.start(stateMachineName, null, paramMap);
 
-            People peopleResult = (People)instance.getEndParams().get("complexParameterMethodResult");
+            People peopleResult = (People) instance.getEndParams().get("complexParameterMethodResult");
             Assertions.assertNotNull(peopleResult);
             Assertions.assertEquals(people.getName(), peopleResult.getName());
 
@@ -598,8 +602,10 @@ public class StateMachineDBMockServerTests {
     @Test
     public void testReloadStateMachineInstance() throws Exception {
         SagaCostPrint.executeAndPrint("5-39", () -> {
-            StateMachineInstance instance = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(
-                    "10.15.232.93:8091:2019567124");
+            StateMachineInstance instance = stateMachineEngine
+                    .getStateMachineConfig()
+                    .getStateLogStore()
+                    .getStateMachineInstance("10.15.232.93:8091:2019567124");
             System.out.println(instance);
         });
     }

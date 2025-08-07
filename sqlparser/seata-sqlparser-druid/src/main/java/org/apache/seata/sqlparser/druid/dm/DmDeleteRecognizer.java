@@ -47,7 +47,7 @@ public class DmDeleteRecognizer extends BaseDmRecognizer implements SQLDeleteRec
      */
     public DmDeleteRecognizer(String originalSQL, SQLStatement ast) {
         super(originalSQL);
-        this.ast = (SQLDeleteStatement)ast;
+        this.ast = (SQLDeleteStatement) ast;
     }
 
     @Override
@@ -94,8 +94,8 @@ public class DmDeleteRecognizer extends BaseDmRecognizer implements SQLDeleteRec
     }
 
     @Override
-    public String getWhereCondition(final ParametersHolder parametersHolder,
-        final ArrayList<List<Object>> paramAppenderList) {
+    public String getWhereCondition(
+            final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppenderList) {
         SQLExpr where = ast.getWhere();
         return super.getWhereCondition(where, parametersHolder, paramAppenderList);
     }

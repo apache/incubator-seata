@@ -21,6 +21,4 @@ package io.seata.rm;
  *
  */
 @Deprecated
-public class RMClient extends org.apache.seata.rm.RMClient {
-
-}
+public class RMClient extends org.apache.seata.rm.RMClient {}

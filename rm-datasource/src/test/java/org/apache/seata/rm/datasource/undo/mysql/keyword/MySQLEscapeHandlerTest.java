@@ -16,24 +16,23 @@
  */
 package org.apache.seata.rm.datasource.undo.mysql.keyword;
 
-import java.sql.Types;
-
-import org.apache.seata.sqlparser.EscapeHandler;
-import org.apache.seata.sqlparser.EscapeHandlerFactory;
-import org.apache.seata.rm.datasource.undo.SQLUndoLog;
-import org.apache.seata.rm.datasource.undo.mysql.MySQLUndoDeleteExecutor;
-import org.apache.seata.rm.datasource.undo.mysql.MySQLUndoInsertExecutor;
-import org.apache.seata.rm.datasource.undo.mysql.MySQLUndoUpdateExecutor;
-
-import org.apache.seata.rm.datasource.undo.UndoExecutorTest;
-import org.apache.seata.sqlparser.SQLType;
 import org.apache.seata.rm.datasource.sql.struct.Field;
 import org.apache.seata.rm.datasource.sql.struct.KeyType;
 import org.apache.seata.rm.datasource.sql.struct.Row;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
+import org.apache.seata.rm.datasource.undo.SQLUndoLog;
+import org.apache.seata.rm.datasource.undo.UndoExecutorTest;
+import org.apache.seata.rm.datasource.undo.mysql.MySQLUndoDeleteExecutor;
+import org.apache.seata.rm.datasource.undo.mysql.MySQLUndoInsertExecutor;
+import org.apache.seata.rm.datasource.undo.mysql.MySQLUndoUpdateExecutor;
+import org.apache.seata.sqlparser.EscapeHandler;
+import org.apache.seata.sqlparser.EscapeHandlerFactory;
+import org.apache.seata.sqlparser.SQLType;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.sql.Types;
 
 /**
  * The type My sql keyword checker test.
@@ -114,9 +113,9 @@ public class MySQLEscapeHandlerTest {
 
         MySQLUndoUpdateExecutorExtension mySQLUndoUpdateExecutor = new MySQLUndoUpdateExecutorExtension(sqlUndoLog);
 
-        Assertions.assertEquals("UPDATE `lock` SET `desc` = ?, since = ? WHERE `key` = ?",
-            mySQLUndoUpdateExecutor.getSql().trim());
-
+        Assertions.assertEquals(
+                "UPDATE `lock` SET `desc` = ?, since = ? WHERE `key` = ?",
+                mySQLUndoUpdateExecutor.getSql().trim());
     }
 
     private static class MySQLUndoUpdateExecutorExtension extends MySQLUndoUpdateExecutor {
@@ -202,8 +201,9 @@ public class MySQLEscapeHandlerTest {
 
         MySQLUndoInsertExecutorExtension mySQLUndoInsertExecutor = new MySQLUndoInsertExecutorExtension(sqlUndoLog);
 
-        Assertions.assertEquals("DELETE FROM `lock` WHERE `key` = ?", mySQLUndoInsertExecutor.getSql().trim());
-
+        Assertions.assertEquals(
+                "DELETE FROM `lock` WHERE `key` = ?",
+                mySQLUndoInsertExecutor.getSql().trim());
     }
 
     private static class MySQLUndoInsertExecutorExtension extends MySQLUndoInsertExecutor {
@@ -289,9 +289,8 @@ public class MySQLEscapeHandlerTest {
 
         MySQLUndoDeleteExecutorExtension mySQLUndoDeleteExecutor = new MySQLUndoDeleteExecutorExtension(sqlUndoLog);
 
-        Assertions.assertEquals("INSERT INTO `lock` (`desc`, since, `key`) VALUES (?, ?, ?)",
-            mySQLUndoDeleteExecutor.getSql());
-
+        Assertions.assertEquals(
+                "INSERT INTO `lock` (`desc`, since, `key`) VALUES (?, ?, ?)", mySQLUndoDeleteExecutor.getSql());
     }
 
     private static class MySQLUndoDeleteExecutorExtension extends MySQLUndoDeleteExecutor {
@@ -313,5 +312,4 @@ public class MySQLEscapeHandlerTest {
             return super.buildUndoSQL();
         }
     }
-
 }

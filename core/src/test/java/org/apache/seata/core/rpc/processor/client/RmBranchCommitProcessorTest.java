@@ -16,25 +16,12 @@
  */
 package org.apache.seata.core.rpc.processor.client;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.core.protocol.RpcMessage;
 import org.apache.seata.core.protocol.transaction.BranchCommitRequest;
@@ -47,6 +34,20 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.slf4j.LoggerFactory;
+
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * The type Rm branch commit processor test.
@@ -163,9 +164,8 @@ public class RmBranchCommitProcessorTest {
         when(mockHandler.onRequest(mockRequest, null)).thenReturn(mockResponse);
         processor.process(mockCtx, mockRpcMessage);
 
-        assertTrue(
-                getLogs(Level.INFO).stream().anyMatch(log -> log.startsWith("rm client handle branch commit process:"))
-        );
+        assertTrue(getLogs(Level.INFO).stream()
+                .anyMatch(log -> log.startsWith("rm client handle branch commit process:")));
     }
 
     private List<String> getLogs(Level level) {

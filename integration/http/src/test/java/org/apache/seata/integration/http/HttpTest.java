@@ -16,6 +16,14 @@
  */
 package org.apache.seata.integration.http;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.http.HttpResponse;
+import org.apache.seata.common.util.BufferUtils;
+import org.apache.seata.core.context.RootContext;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,18 +33,9 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.util.HashMap;
 import java.util.Map;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import org.apache.seata.common.util.BufferUtils;
-import org.apache.seata.core.context.RootContext;
-import org.apache.http.HttpResponse;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
 
 import static org.apache.seata.integration.http.AbstractHttpExecutor.convertParamOfBean;
 import static org.apache.seata.integration.http.AbstractHttpExecutor.convertParamOfJsonString;
-
 
 class HttpTest {
 
@@ -101,19 +100,13 @@ class HttpTest {
 
         @Override
         public String toString() {
-            return "Person{" +
-                    "name='" + name + '\'' +
-                    ", age=" + age +
-                    '}';
+            return "Person{" + "name='" + name + '\'' + ", age=" + age + '}';
         }
     }
 
     private String consumerPostStart(int param_type) {
         DefaultHttpExecutor httpExecuter = DefaultHttpExecutor.getInstance();
-        String str = "{\n" +
-                "    \"name\":\"zhangsan\",\n" +
-                "    \"age\":15\n" +
-                "}";
+        String str = "{\n" + "    \"name\":\"zhangsan\",\n" + "    \"age\":15\n" + "}";
         Person person = JSON.parseObject(str, Person.class);
 
         Map<String, Object> map = new HashMap<>();
@@ -124,7 +117,7 @@ class HttpTest {
         json.put("name", "zhangsan");
         json.put("age", 15);
 
-        //The body parameter of post supports the above types (str,person,map,json)
+        // The body parameter of post supports the above types (str,person,map,json)
         try {
             HttpResponse response;
 
@@ -148,20 +141,18 @@ class HttpTest {
         params.put("name", "zhangsan");
         params.put("age", "15");
 
-        String str = "{\n" +
-                "    \"name\":\"zhangsan\",\n" +
-                "    \"age\":15\n" +
-                "}";
+        String str = "{\n" + "    \"name\":\"zhangsan\",\n" + "    \"age\":15\n" + "}";
         Person person = JSON.parseObject(str, Person.class);
         try {
-            //support all type of parameter types
+            // support all type of parameter types
             HttpResponse response;
             if (param_type == PARAM_TYPE_MAP) {
                 response = httpExecuter.executeGet(host, getPath, params, HttpResponse.class);
             } else if (param_type == PARAM_TYPE_BEAN) {
                 response = httpExecuter.executeGet(host, getPath, convertParamOfBean(person), HttpResponse.class);
             } else {
-                response = httpExecuter.executeGet(host, getPath, convertParamOfJsonString(str, Person.class), HttpResponse.class);
+                response = httpExecuter.executeGet(
+                        host, getPath, convertParamOfJsonString(str, Person.class), HttpResponse.class);
             }
             return readStreamAsStr(response.getEntity().getContent());
 
@@ -193,9 +184,7 @@ class HttpTest {
             } catch (IOException ex) {
                 throw new RuntimeException(e);
             }
-
         }
-
     }
 
     public static String readStreamAsStr(InputStream is) throws IOException {
@@ -219,16 +208,11 @@ class HttpTest {
     void convertParamOfJsonStringTest() {
 
         String targetParam = "{name=zhangsan, age=15}";
-        String str = "{\n" +
-                "    \"name\":\"zhangsan\",\n" +
-                "    \"age\":15\n" +
-                "}";
+        String str = "{\n" + "    \"name\":\"zhangsan\",\n" + "    \"age\":15\n" + "}";
         Map<String, String> map = convertParamOfJsonString(str, Person.class);
         Assertions.assertEquals(map.toString(), targetParam);
         Person person = JSON.parseObject(str, Person.class);
         map = convertParamOfBean(person);
         Assertions.assertEquals(map.toString(), targetParam);
-
-
     }
 }

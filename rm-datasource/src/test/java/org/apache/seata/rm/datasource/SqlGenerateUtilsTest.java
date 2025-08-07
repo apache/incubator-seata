@@ -23,23 +23,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
-
 class SqlGenerateUtilsTest {
-
 
     @Test
     void testBuildWhereConditionListByPKs() {
         List<String> pkNameList = new ArrayList<>();
         pkNameList.add("id");
         pkNameList.add("name");
-        List<SqlGenerateUtils.WhereSql> results1 = SqlGenerateUtils.buildWhereConditionListByPKs(pkNameList, 4, "mysql", 2);
+        List<SqlGenerateUtils.WhereSql> results1 =
+                SqlGenerateUtils.buildWhereConditionListByPKs(pkNameList, 4, "mysql", 2);
         Assertions.assertEquals(2, results1.size());
         results1.forEach(result -> {
             Assertions.assertEquals("(id,name) in ( (?,?),(?,?) )", result.getSql());
             Assertions.assertEquals(2, result.getRowSize());
             Assertions.assertEquals(2, result.getPkSize());
         });
-        List<SqlGenerateUtils.WhereSql> results2 = SqlGenerateUtils.buildWhereConditionListByPKs(pkNameList, 5, "mysql", 2);
+        List<SqlGenerateUtils.WhereSql> results2 =
+                SqlGenerateUtils.buildWhereConditionListByPKs(pkNameList, 5, "mysql", 2);
         Assertions.assertEquals(3, results2.size());
         Assertions.assertEquals("(id,name) in ( (?,?),(?,?) )", results2.get(0).getSql());
         Assertions.assertEquals(2, results2.get(0).getRowSize());
@@ -56,9 +56,12 @@ class SqlGenerateUtilsTest {
         List<String> pkNameList = new ArrayList<>();
         pkNameList.add("id");
         pkNameList.add("name");
-        List<SqlGenerateUtils.WhereSql> whereList = SqlGenerateUtils.buildWhereConditionListByPKs(pkNameList, 4, "mysql", 2);
+        List<SqlGenerateUtils.WhereSql> whereList =
+                SqlGenerateUtils.buildWhereConditionListByPKs(pkNameList, 4, "mysql", 2);
         StringJoiner sqlJoiner = new StringJoiner(" union ");
         whereList.forEach(whereSql -> sqlJoiner.add(sqlPrefix + " " + whereSql.getSql()));
-        Assertions.assertEquals("select id,name from t_order where  (id,name) in ( (?,?),(?,?) ) union select id,name from t_order where  (id,name) in ( (?,?),(?,?) )", sqlJoiner.toString());
+        Assertions.assertEquals(
+                "select id,name from t_order where  (id,name) in ( (?,?),(?,?) ) union select id,name from t_order where  (id,name) in ( (?,?),(?,?) )",
+                sqlJoiner.toString());
     }
 }

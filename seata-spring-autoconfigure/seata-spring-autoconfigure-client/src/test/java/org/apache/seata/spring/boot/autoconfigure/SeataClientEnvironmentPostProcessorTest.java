@@ -25,9 +25,11 @@ public class SeataClientEnvironmentPostProcessorTest {
 
     @Test
     public void testSeataClientEnvironmentPostProcessor() {
-        AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext("io.seata.spring.boot.autoconfigure.properties");
+        AnnotationConfigApplicationContext applicationContext =
+                new AnnotationConfigApplicationContext("io.seata.spring.boot.autoconfigure.properties");
 
-        SeataClientEnvironmentPostProcessor seataClientEnvironmentPostProcessor = new SeataClientEnvironmentPostProcessor();
+        SeataClientEnvironmentPostProcessor seataClientEnvironmentPostProcessor =
+                new SeataClientEnvironmentPostProcessor();
         seataClientEnvironmentPostProcessor.postProcessEnvironment(applicationContext.getEnvironment(), null);
         Assertions.assertEquals(Ordered.HIGHEST_PRECEDENCE, seataClientEnvironmentPostProcessor.getOrder());
     }

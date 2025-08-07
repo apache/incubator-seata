@@ -20,7 +20,6 @@ import org.apache.seata.common.result.BaseParam;
 
 import java.io.Serializable;
 
-
 /**
  * Global session param
  */
@@ -48,7 +47,7 @@ public class GlobalSessionParam extends BaseParam implements Serializable {
      * the vgroup
      */
     private String vgroup;
-    
+
     /**
      * if with branch
      * true: with branch session
@@ -107,8 +106,8 @@ public class GlobalSessionParam extends BaseParam implements Serializable {
     @Override
     public String toString() {
         return "GlobalSessionParam{" + "xid='" + xid + '\'' + ", applicationId='" + applicationId + '\'' + ", status="
-            + status + ", transactionName='" + transactionName + '\'' + ", vgroup='" + vgroup + '\'' + ", withBranch="
-            + withBranch + '}';
+                + status + ", transactionName='" + transactionName + '\'' + ", vgroup='" + vgroup + '\''
+                + ", withBranch="
+                + withBranch + '}';
     }
-    
 }

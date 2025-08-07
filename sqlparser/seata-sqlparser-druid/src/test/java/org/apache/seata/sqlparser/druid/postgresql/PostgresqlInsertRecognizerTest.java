@@ -16,19 +16,17 @@
  */
 package org.apache.seata.sqlparser.druid.postgresql;
 
-import org.apache.seata.sqlparser.SQLParsingException;
-import org.apache.seata.sqlparser.SQLType;
-
-import java.util.Collections;
-import java.util.List;
-
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLBetweenExpr;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
+import org.apache.seata.sqlparser.SQLParsingException;
+import org.apache.seata.sqlparser.SQLType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collections;
+import java.util.List;
 
 public class PostgresqlInsertRecognizerTest {
 
@@ -63,7 +61,7 @@ public class PostgresqlInsertRecognizerTest {
     @Test
     public void testGetInsertColumns() {
 
-        //test for no column
+        // test for no column
         String sql = "insert into t values (?)";
 
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
@@ -71,7 +69,7 @@ public class PostgresqlInsertRecognizerTest {
         List<String> insertColumns = postgresqlInsertRecognizer.getInsertColumns();
         Assertions.assertNull(insertColumns);
 
-        //test for normal
+        // test for normal
         sql = "insert into t(a) values (?)";
 
         asts = SQLUtils.parseStatements(sql, DB_TYPE);
@@ -79,14 +77,15 @@ public class PostgresqlInsertRecognizerTest {
         insertColumns = postgresqlInsertRecognizer.getInsertColumns();
         Assertions.assertEquals(1, insertColumns.size());
 
-        //test for exception
+        // test for exception
         Assertions.assertThrows(SQLParsingException.class, () -> {
             String s = "insert into t(a) values (?)";
             List<SQLStatement> sqlStatements = SQLUtils.parseStatements(s, DB_TYPE);
             SQLInsertStatement sqlInsertStatement = (SQLInsertStatement) sqlStatements.get(0);
             sqlInsertStatement.getColumns().add(new SQLBetweenExpr());
 
-            PostgresqlInsertRecognizer postgresqlInsertRecognizer1 = new PostgresqlInsertRecognizer(s, sqlInsertStatement);
+            PostgresqlInsertRecognizer postgresqlInsertRecognizer1 =
+                    new PostgresqlInsertRecognizer(s, sqlInsertStatement);
             postgresqlInsertRecognizer1.getInsertColumns();
         });
     }
@@ -94,7 +93,7 @@ public class PostgresqlInsertRecognizerTest {
     @Test
     public void testGetInsertRows() {
         final int pkIndex = 0;
-        //test for null value
+        // test for null value
         String sql = "insert into t(id, no, name, age, time) values (nextval('id_seq'), null, 'a', ?, now())";
 
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
@@ -102,14 +101,15 @@ public class PostgresqlInsertRecognizerTest {
         List<List<Object>> insertRows = postgresqlInsertRecognizer1.getInsertRows(Collections.singletonList(pkIndex));
         Assertions.assertEquals(1, insertRows.size());
 
-        //test for exception
+        // test for exception
         Assertions.assertThrows(SQLParsingException.class, () -> {
             String s = "insert into t(a) values (?)";
             List<SQLStatement> sqlStatements = SQLUtils.parseStatements(s, DB_TYPE);
             SQLInsertStatement sqlInsertStatement = (SQLInsertStatement) sqlStatements.get(0);
             sqlInsertStatement.getValuesList().get(0).getValues().set(pkIndex, new SQLBetweenExpr());
 
-            PostgresqlInsertRecognizer postgresqlInsertRecognizer = new PostgresqlInsertRecognizer(s, sqlInsertStatement);
+            PostgresqlInsertRecognizer postgresqlInsertRecognizer =
+                    new PostgresqlInsertRecognizer(s, sqlInsertStatement);
             postgresqlInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex));
         });
     }

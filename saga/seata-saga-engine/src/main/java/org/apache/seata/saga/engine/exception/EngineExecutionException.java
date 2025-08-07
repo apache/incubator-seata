@@ -30,8 +30,7 @@ public class EngineExecutionException extends FrameworkException {
     private String stateMachineInstanceId;
     private String stateInstanceId;
 
-    public EngineExecutionException() {
-    }
+    public EngineExecutionException() {}
 
     public EngineExecutionException(FrameworkErrorCode err) {
         super(err);

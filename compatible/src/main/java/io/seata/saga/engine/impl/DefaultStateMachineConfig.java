@@ -16,14 +16,6 @@
  */
 package io.seata.saga.engine.impl;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.stream.Collectors;
-
-import javax.script.ScriptEngineManager;
-
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.expression.ExpressionFactoryManager;
 import io.seata.saga.engine.repo.StateLogRepository;
@@ -45,6 +37,13 @@ import org.apache.seata.saga.proctrl.eventing.impl.ProcessCtrlEventPublisher;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+
+import javax.script.ScriptEngineManager;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.stream.Collectors;
 
 /**
  * Default state machine configuration
@@ -164,19 +163,22 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
         return new StateMachineRepository() {
             @Override
             public StateMachine getStateMachineById(String stateMachineId) {
-                org.apache.seata.saga.statelang.domain.StateMachine stateMachine = repository.getStateMachineById(stateMachineId);
+                org.apache.seata.saga.statelang.domain.StateMachine stateMachine =
+                        repository.getStateMachineById(stateMachineId);
                 return StateMachineImpl.wrap(stateMachine);
             }
 
             @Override
             public StateMachine getStateMachine(String stateMachineName, String tenantId) {
-                org.apache.seata.saga.statelang.domain.StateMachine stateMachine = repository.getStateMachine(stateMachineName, tenantId);
+                org.apache.seata.saga.statelang.domain.StateMachine stateMachine =
+                        repository.getStateMachine(stateMachineName, tenantId);
                 return StateMachineImpl.wrap(stateMachine);
             }
 
             @Override
             public StateMachine getStateMachine(String stateMachineName, String tenantId, String version) {
-                org.apache.seata.saga.statelang.domain.StateMachine stateMachine = repository.getStateMachine(stateMachineName, tenantId, version);
+                org.apache.seata.saga.statelang.domain.StateMachine stateMachine =
+                        repository.getStateMachine(stateMachineName, tenantId, version);
                 return StateMachineImpl.wrap(stateMachine);
             }
 
@@ -194,7 +196,8 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
         };
     }
 
-    public void setStateMachineRepository(org.apache.seata.saga.engine.repo.StateMachineRepository stateMachineRepository) {
+    public void setStateMachineRepository(
+            org.apache.seata.saga.engine.repo.StateMachineRepository stateMachineRepository) {
         actual.setStateMachineRepository(stateMachineRepository);
     }
 
@@ -264,7 +267,6 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
         actual.setThreadPoolExecutor(threadPoolExecutor);
     }
 
-
     @Override
     public boolean isEnableAsync() {
         return actual.isEnableAsync();
@@ -293,13 +295,15 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
 
             @Override
             public StateMachineInstance getStateMachineInstanceByBusinessKey(String businessKey, String tenantId) {
-                return StateMachineInstanceImpl.wrap(repository.getStateMachineInstanceByBusinessKey(businessKey, tenantId));
+                return StateMachineInstanceImpl.wrap(
+                        repository.getStateMachineInstanceByBusinessKey(businessKey, tenantId));
             }
 
             @Override
             public List<StateMachineInstance> queryStateMachineInstanceByParentId(String parentId) {
                 return repository.queryStateMachineInstanceByParentId(parentId).stream()
-                        .map(StateMachineInstanceImpl::wrap).collect(Collectors.toList());
+                        .map(StateMachineInstanceImpl::wrap)
+                        .collect(Collectors.toList());
             }
 
             @Override
@@ -310,7 +314,8 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
             @Override
             public List<StateInstance> queryStateInstanceListByMachineInstanceId(String stateMachineInstanceId) {
                 return repository.queryStateInstanceListByMachineInstanceId(stateMachineInstanceId).stream()
-                        .map(StateInstanceImpl::wrap).collect(Collectors.toList());
+                        .map(StateInstanceImpl::wrap)
+                        .collect(Collectors.toList());
             }
         };
     }

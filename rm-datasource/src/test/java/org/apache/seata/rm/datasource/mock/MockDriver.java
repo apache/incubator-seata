@@ -16,16 +16,16 @@
  */
 package org.apache.seata.rm.datasource.mock;
 
+import com.alibaba.druid.mock.MockStatementBase;
+import com.alibaba.druid.mock.handler.MockExecuteHandler;
+import com.google.common.collect.Lists;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Properties;
-import com.alibaba.druid.mock.MockStatementBase;
-import com.alibaba.druid.mock.handler.MockExecuteHandler;
-
-import com.google.common.collect.Lists;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Mock driver
@@ -75,43 +75,111 @@ public class MockDriver extends com.alibaba.druid.mock.MockDriver {
     private MockExecuteHandler mockExecuteHandler;
 
     public MockDriver() {
-        this(Lists.newArrayList(), new Object[][]{}, new Object[][]{}, new Object[][]{},  new Object[][]{});
+        this(Lists.newArrayList(), new Object[][] {}, new Object[][] {}, new Object[][] {}, new Object[][] {});
     }
 
     public MockDriver(Object[][] mockColumnsMetasReturnValue, Object[][] mockIndexMetasReturnValue) {
-        this(Lists.newArrayList(), new Object[][]{}, mockColumnsMetasReturnValue, mockIndexMetasReturnValue,  new Object[][]{}, new Object[][]{});
+        this(
+                Lists.newArrayList(),
+                new Object[][] {},
+                mockColumnsMetasReturnValue,
+                mockIndexMetasReturnValue,
+                new Object[][] {},
+                new Object[][] {});
     }
 
-    public MockDriver(Object[][] mockColumnsMetasReturnValue, Object[][] mockIndexMetasReturnValue, Object[][] mockPkMetasReturnValue) {
-        this(Lists.newArrayList(), new Object[][]{}, mockColumnsMetasReturnValue, mockIndexMetasReturnValue, mockPkMetasReturnValue, new Object[][]{});
+    public MockDriver(
+            Object[][] mockColumnsMetasReturnValue,
+            Object[][] mockIndexMetasReturnValue,
+            Object[][] mockPkMetasReturnValue) {
+        this(
+                Lists.newArrayList(),
+                new Object[][] {},
+                mockColumnsMetasReturnValue,
+                mockIndexMetasReturnValue,
+                mockPkMetasReturnValue,
+                new Object[][] {});
     }
 
-    public MockDriver(Object[][] mockColumnsMetasReturnValue, Object[][] mockIndexMetasReturnValue, Object[][] mockPkMetasReturnValue, Object[][] mockTableMetasReturnValue) {
-        this(Lists.newArrayList(), new Object[][]{}, mockColumnsMetasReturnValue, mockIndexMetasReturnValue, mockPkMetasReturnValue, mockTableMetasReturnValue);
+    public MockDriver(
+            Object[][] mockColumnsMetasReturnValue,
+            Object[][] mockIndexMetasReturnValue,
+            Object[][] mockPkMetasReturnValue,
+            Object[][] mockTableMetasReturnValue) {
+        this(
+                Lists.newArrayList(),
+                new Object[][] {},
+                mockColumnsMetasReturnValue,
+                mockIndexMetasReturnValue,
+                mockPkMetasReturnValue,
+                mockTableMetasReturnValue);
     }
 
-    public MockDriver(List<String> mockReturnValueColumnLabels, Object[][] mockReturnValue, Object[][] mockColumnsMetasReturnValue, Object[][] mockIndexMetasReturnValue) {
-        this(mockReturnValueColumnLabels, mockReturnValue, mockColumnsMetasReturnValue, mockIndexMetasReturnValue, new Object[][]{}, new Object[][]{});
+    public MockDriver(
+            List<String> mockReturnValueColumnLabels,
+            Object[][] mockReturnValue,
+            Object[][] mockColumnsMetasReturnValue,
+            Object[][] mockIndexMetasReturnValue) {
+        this(
+                mockReturnValueColumnLabels,
+                mockReturnValue,
+                mockColumnsMetasReturnValue,
+                mockIndexMetasReturnValue,
+                new Object[][] {},
+                new Object[][] {});
     }
 
-    public MockDriver(List<String> mockReturnValueColumnLabels, Object[][] mockReturnValue, Object[][] mockColumnsMetasReturnValue, Object[][] mockIndexMetasReturnValue, Object[][] mockPkMetasReturnValue) {
-        this(mockReturnValueColumnLabels, mockReturnValue, mockColumnsMetasReturnValue, mockIndexMetasReturnValue, mockPkMetasReturnValue, new Object[][]{}, new Object[][]{});
+    public MockDriver(
+            List<String> mockReturnValueColumnLabels,
+            Object[][] mockReturnValue,
+            Object[][] mockColumnsMetasReturnValue,
+            Object[][] mockIndexMetasReturnValue,
+            Object[][] mockPkMetasReturnValue) {
+        this(
+                mockReturnValueColumnLabels,
+                mockReturnValue,
+                mockColumnsMetasReturnValue,
+                mockIndexMetasReturnValue,
+                mockPkMetasReturnValue,
+                new Object[][] {},
+                new Object[][] {});
     }
 
-    public MockDriver(List<String> mockReturnValueColumnLabels, Object[][] mockReturnValue, Object[][] mockColumnsMetasReturnValue, Object[][] mockIndexMetasReturnValue, Object[][] mockPkMetasReturnValue, Object[][] mockTableMetasReturnValue) {
-        this(mockReturnValueColumnLabels, mockReturnValue, mockColumnsMetasReturnValue, mockIndexMetasReturnValue, mockPkMetasReturnValue, new Object[][]{}, mockTableMetasReturnValue);
+    public MockDriver(
+            List<String> mockReturnValueColumnLabels,
+            Object[][] mockReturnValue,
+            Object[][] mockColumnsMetasReturnValue,
+            Object[][] mockIndexMetasReturnValue,
+            Object[][] mockPkMetasReturnValue,
+            Object[][] mockTableMetasReturnValue) {
+        this(
+                mockReturnValueColumnLabels,
+                mockReturnValue,
+                mockColumnsMetasReturnValue,
+                mockIndexMetasReturnValue,
+                mockPkMetasReturnValue,
+                new Object[][] {},
+                mockTableMetasReturnValue);
     }
 
     /**
      * Instantiate a new MockDriver
      */
-    public MockDriver(List<String> mockReturnValueColumnLabels, Object[][] mockReturnValue, Object[][] mockColumnsMetasReturnValue, Object[][] mockIndexMetasReturnValue, Object[][] mockPkMetasReturnValue, Object[][] mockOnUpdateColumnsReturnValue, Object[][] mockTableMetasReturnValue) {
+    public MockDriver(
+            List<String> mockReturnValueColumnLabels,
+            Object[][] mockReturnValue,
+            Object[][] mockColumnsMetasReturnValue,
+            Object[][] mockIndexMetasReturnValue,
+            Object[][] mockPkMetasReturnValue,
+            Object[][] mockOnUpdateColumnsReturnValue,
+            Object[][] mockTableMetasReturnValue) {
         this.mockReturnValueColumnLabels = mockReturnValueColumnLabels;
         this.mockReturnValue = mockReturnValue;
         this.mockColumnsMetasReturnValue = mockColumnsMetasReturnValue;
         this.mockIndexMetasReturnValue = mockIndexMetasReturnValue;
         this.mockPkMetasReturnValue = mockPkMetasReturnValue;
-        this.setMockExecuteHandler(new MockExecuteHandlerImpl(mockReturnValueColumnLabels, mockReturnValue, mockColumnsMetasReturnValue));
+        this.setMockExecuteHandler(
+                new MockExecuteHandlerImpl(mockReturnValueColumnLabels, mockReturnValue, mockColumnsMetasReturnValue));
         this.mockOnUpdateColumnsReturnValue = mockOnUpdateColumnsReturnValue;
         this.mockTableMetasReturnValue = mockTableMetasReturnValue;
     }
@@ -124,8 +192,8 @@ public class MockDriver extends com.alibaba.druid.mock.MockDriver {
      * @return
      */
     @Override
-    public MockConnection createMockConnection(com.alibaba.druid.mock.MockDriver driver, String url,
-                                               Properties connectProperties) {
+    public MockConnection createMockConnection(
+            com.alibaba.druid.mock.MockDriver driver, String url, Properties connectProperties) {
         return new MockConnection(this, url, connectProperties);
     }
 
@@ -154,7 +222,7 @@ public class MockDriver extends com.alibaba.druid.mock.MockDriver {
      * @param mockReturnValue
      */
     public void setMockReturnValue(Object[][] mockReturnValue) {
-        this.mockReturnValue = mockReturnValue == null ? new Object[][]{} : mockReturnValue;
+        this.mockReturnValue = mockReturnValue == null ? new Object[][] {} : mockReturnValue;
     }
 
     /**
@@ -162,7 +230,8 @@ public class MockDriver extends com.alibaba.druid.mock.MockDriver {
      * @param mockColumnsMetasReturnValue
      */
     public void setMockColumnsMetasReturnValue(Object[][] mockColumnsMetasReturnValue) {
-        this.mockColumnsMetasReturnValue = mockColumnsMetasReturnValue == null ? new Object[][]{} : mockColumnsMetasReturnValue;
+        this.mockColumnsMetasReturnValue =
+                mockColumnsMetasReturnValue == null ? new Object[][] {} : mockColumnsMetasReturnValue;
     }
 
     /**
@@ -178,7 +247,8 @@ public class MockDriver extends com.alibaba.druid.mock.MockDriver {
      * @param mockIndexMetasReturnValue
      */
     public void setMockIndexMetasReturnValue(Object[][] mockIndexMetasReturnValue) {
-        this.mockIndexMetasReturnValue = mockIndexMetasReturnValue == null ? new Object[][]{} : mockIndexMetasReturnValue;
+        this.mockIndexMetasReturnValue =
+                mockIndexMetasReturnValue == null ? new Object[][] {} : mockIndexMetasReturnValue;
     }
 
     /**
@@ -201,7 +271,7 @@ public class MockDriver extends com.alibaba.druid.mock.MockDriver {
      * set the mock execute handler
      * @param mockExecuteHandler
      */
-    public void setMockExecuteHandler(MockExecuteHandler mockExecuteHandler){
+    public void setMockExecuteHandler(MockExecuteHandler mockExecuteHandler) {
         this.mockExecuteHandler = mockExecuteHandler;
     }
 

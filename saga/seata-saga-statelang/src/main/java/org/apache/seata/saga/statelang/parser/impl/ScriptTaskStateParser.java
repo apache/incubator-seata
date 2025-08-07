@@ -36,12 +36,12 @@ public class ScriptTaskStateParser extends AbstractTaskStateParser implements St
 
         parseTaskAttributes(scriptTaskState, node);
 
-        Map<String, Object> nodeMap = (Map<String, Object>)node;
+        Map<String, Object> nodeMap = (Map<String, Object>) node;
         String scriptType = (String) nodeMap.get("ScriptType");
         if (StringUtils.isNotBlank(scriptType)) {
             scriptTaskState.setScriptType(scriptType);
         }
-        scriptTaskState.setScriptContent((String)nodeMap.get("ScriptContent"));
+        scriptTaskState.setScriptContent((String) nodeMap.get("ScriptContent"));
 
         scriptTaskState.setForCompensation(false);
         scriptTaskState.setForUpdate(false);

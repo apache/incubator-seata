@@ -16,11 +16,11 @@
  */
 package io.seata.integration.http;
 
-import java.util.Map;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
+
+import java.util.Map;
 
 /**
  * The type Default http executor.
@@ -28,8 +28,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 @Deprecated
 public class DefaultHttpExecutor {
 
-    private static final org.apache.seata.integration.http.DefaultHttpExecutor INSTANCE
-        = org.apache.seata.integration.http.DefaultHttpExecutor.getInstance();
+    private static final org.apache.seata.integration.http.DefaultHttpExecutor INSTANCE =
+            org.apache.seata.integration.http.DefaultHttpExecutor.getInstance();
 
     private final org.apache.seata.integration.http.DefaultHttpExecutor targetDefaultHttpExecutor;
 
@@ -114,5 +114,4 @@ public class DefaultHttpExecutor {
     public <K> K convertResult(HttpResponse response, Class<K> clazz) {
         return this.targetDefaultHttpExecutor.convertResult(response, clazz);
     }
-
 }

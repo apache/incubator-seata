@@ -16,14 +16,13 @@
  */
 package org.apache.seata.serializer.protobuf.convertor;
 
-import org.apache.seata.serializer.protobuf.generated.BranchReportResponseProto;
 import org.apache.seata.core.exception.TransactionExceptionCode;
 import org.apache.seata.core.protocol.ResultCode;
 import org.apache.seata.core.protocol.transaction.BranchReportResponse;
+import org.apache.seata.serializer.protobuf.generated.BranchReportResponseProto;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
 
 public class BranchReportResponseConvertorTest {
 
@@ -41,6 +40,5 @@ public class BranchReportResponseConvertorTest {
         assertThat((real.getMsg())).isEqualTo(branchReportResponse.getMsg());
         assertThat((real.getResultCode())).isEqualTo(branchReportResponse.getResultCode());
         assertThat((real.getTransactionExceptionCode())).isEqualTo(branchReportResponse.getTransactionExceptionCode());
-
     }
 }

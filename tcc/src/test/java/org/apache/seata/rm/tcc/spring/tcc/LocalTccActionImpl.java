@@ -20,6 +20,4 @@ package org.apache.seata.rm.tcc.spring.tcc;
  * The type Local tcc action.
  *
  */
-public class LocalTccActionImpl extends TccActionImpl implements LocalTccAction {
-
-}
+public class LocalTccActionImpl extends TccActionImpl implements LocalTccAction {}

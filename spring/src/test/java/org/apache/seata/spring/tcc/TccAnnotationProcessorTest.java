@@ -16,7 +16,6 @@
  */
 package org.apache.seata.spring.tcc;
 
-import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
@@ -35,7 +34,6 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -74,13 +72,11 @@ public class TccAnnotationProcessorTest {
         annotations.clear();
     }
 
-    @interface MockReference {
-    }
+    @interface MockReference {}
 
     static class MockTccService {
         @TwoPhaseBusinessAction(name = "testAction")
-        public void tryMethod() {
-        }
+        public void tryMethod() {}
     }
 
     static class TestBean {
@@ -112,7 +108,8 @@ public class TccAnnotationProcessorTest {
 
         Object newValue = field.get(bean);
         assertNotEquals(originalValue, newValue, "Proxy should replace original field");
-        String expectedLog = String.format("Bean[%s] with name [%s] would use proxy", bean.getClass().getName(), "tccService");
+        String expectedLog = String.format(
+                "Bean[%s] with name [%s] would use proxy", bean.getClass().getName(), "tccService");
         boolean containsLog = listAppender.list.stream()
                 .anyMatch(event -> event.getFormattedMessage().equals(expectedLog));
         assertTrue(containsLog, "Logs should contain exact proxy injection info: " + expectedLog);
@@ -147,7 +144,9 @@ public class TccAnnotationProcessorTest {
         TestBean bean = new TestBean();
 
         try (MockedStatic<ProxyUtil> mockedStatic = Mockito.mockStatic(ProxyUtil.class)) {
-            mockedStatic.when(() -> ProxyUtil.createProxy(bean, "testBean")).thenReturn(Mockito.spy(new MockTccService()));
+            mockedStatic
+                    .when(() -> ProxyUtil.createProxy(bean, "testBean"))
+                    .thenReturn(Mockito.spy(new MockTccService()));
 
             processor.postProcessBeforeInitialization(bean, "testBean");
         }
@@ -166,7 +165,6 @@ public class TccAnnotationProcessorTest {
         Object nullClass = loadAnnotationMethod.invoke(null, "non.existing.AnnotationClass");
         assertNull(nullClass);
     }
-
 
     @Test
     public void testPostProcessAfterInitializationReturnsBean() {

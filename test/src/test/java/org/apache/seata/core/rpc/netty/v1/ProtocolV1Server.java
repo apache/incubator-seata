@@ -16,9 +16,6 @@
  */
 package org.apache.seata.core.rpc.netty.v1;
 
-import java.net.InetSocketAddress;
-import java.util.concurrent.TimeUnit;
-
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.AdaptiveRecvByteBufAllocator;
@@ -37,6 +34,9 @@ import io.netty.handler.logging.LoggingHandler;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.core.rpc.netty.MultiProtocolDecoder;
 
+import java.net.InetSocketAddress;
+import java.util.concurrent.TimeUnit;
+
 /**
  */
 public class ProtocolV1Server {
@@ -52,30 +52,30 @@ public class ProtocolV1Server {
         bossGroup = createBossGroup();
         workerGroup = createWorkerGroup();
 
-        serverBootstrap = new ServerBootstrap().group(bossGroup, workerGroup)
-            .channel(NioServerSocketChannel.class)
-            .option(ChannelOption.RCVBUF_ALLOCATOR, AdaptiveRecvByteBufAllocator.DEFAULT)
-            .option(ChannelOption.ALLOCATOR, ByteBufAllocator.DEFAULT)
-            .childOption(ChannelOption.SO_KEEPALIVE, true)
-            .childOption(ChannelOption.TCP_NODELAY, true)
-            .childOption(ChannelOption.SO_RCVBUF, 8192 * 128)
-            .childOption(ChannelOption.SO_SNDBUF, 8192 * 128)
-            .handler(new LoggingHandler(LogLevel.DEBUG))
-            .childOption(ChannelOption.ALLOCATOR, ByteBufAllocator.DEFAULT)
-            .childOption(ChannelOption.WRITE_BUFFER_WATER_MARK, new WriteBufferWaterMark(
-                8192, 31768))
-            .childHandler(new ChannelInitializer() {
-                @Override
-                protected void initChannel(Channel channel) throws Exception {
-                    ChannelPipeline pipeline = channel.pipeline();
-                    pipeline.addLast(new MultiProtocolDecoder(new ServerChannelHandler()));
-                }
-            });
+        serverBootstrap = new ServerBootstrap()
+                .group(bossGroup, workerGroup)
+                .channel(NioServerSocketChannel.class)
+                .option(ChannelOption.RCVBUF_ALLOCATOR, AdaptiveRecvByteBufAllocator.DEFAULT)
+                .option(ChannelOption.ALLOCATOR, ByteBufAllocator.DEFAULT)
+                .childOption(ChannelOption.SO_KEEPALIVE, true)
+                .childOption(ChannelOption.TCP_NODELAY, true)
+                .childOption(ChannelOption.SO_RCVBUF, 8192 * 128)
+                .childOption(ChannelOption.SO_SNDBUF, 8192 * 128)
+                .handler(new LoggingHandler(LogLevel.DEBUG))
+                .childOption(ChannelOption.ALLOCATOR, ByteBufAllocator.DEFAULT)
+                .childOption(ChannelOption.WRITE_BUFFER_WATER_MARK, new WriteBufferWaterMark(8192, 31768))
+                .childHandler(new ChannelInitializer() {
+                    @Override
+                    protected void initChannel(Channel channel) throws Exception {
+                        ChannelPipeline pipeline = channel.pipeline();
+                        pipeline.addLast(new MultiProtocolDecoder(new ServerChannelHandler()));
+                    }
+                });
 
         String host = "0.0.0.0";
 
         ChannelFuture future = serverBootstrap.bind(new InetSocketAddress(host, port));
-        ChannelFuture channelFuture = future.addListener((ChannelFutureListener)future1 -> {
+        ChannelFuture channelFuture = future.addListener((ChannelFutureListener) future1 -> {
             if (!future1.isSuccess()) {
                 throw new RuntimeException("Server start fail !", future1.cause());
             }
@@ -99,14 +99,12 @@ public class ProtocolV1Server {
     }
 
     private EventLoopGroup createBossGroup() {
-        NamedThreadFactory threadName =
-            new NamedThreadFactory("SEV-BOSS-" + port, false);
+        NamedThreadFactory threadName = new NamedThreadFactory("SEV-BOSS-" + port, false);
         return new NioEventLoopGroup(2, threadName);
     }
 
     private EventLoopGroup createWorkerGroup() {
-        NamedThreadFactory threadName =
-            new NamedThreadFactory("SEV-WORKER-" + port, false);
+        NamedThreadFactory threadName = new NamedThreadFactory("SEV-WORKER-" + port, false);
         return new NioEventLoopGroup(10, threadName);
     }
 

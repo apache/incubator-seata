@@ -16,10 +16,11 @@
  */
 package org.apache.seata.rm.datasource.xa;
 
+import org.apache.seata.rm.BaseDataSourceResource;
+
+import javax.sql.PooledConnection;
 import java.sql.Connection;
 import java.sql.SQLException;
-import javax.sql.PooledConnection;
-import org.apache.seata.rm.BaseDataSourceResource;
 
 /**
  * Abstract DataSource proxy for XA mode.
@@ -44,7 +45,7 @@ public abstract class AbstractDataSourceProxyXA extends BaseDataSourceResource<C
                 return connectionProxyXA;
             }
         }
-        return (ConnectionProxyXA)getConnectionProxyXA();
+        return (ConnectionProxyXA) getConnectionProxyXA();
     }
 
     protected abstract Connection getConnectionProxyXA() throws SQLException;
@@ -60,12 +61,10 @@ public abstract class AbstractDataSourceProxyXA extends BaseDataSourceResource<C
             connectionProxyXA.close();
             Connection physicalConn = connectionProxyXA.getWrappedConnection();
             if (physicalConn instanceof PooledConnection) {
-                physicalConn = ((PooledConnection)physicalConn).getConnection();
+                physicalConn = ((PooledConnection) physicalConn).getConnection();
             }
             // Force close the physical connection
             physicalConn.close();
         }
-
-
     }
 }

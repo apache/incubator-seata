@@ -16,8 +16,6 @@
  */
 package org.apache.seata.rm.datasource.xa;
 
-import org.apache.seata.rm.datasource.xa.XAXid;
-import org.apache.seata.rm.datasource.xa.XAXidBuilder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -39,6 +37,5 @@ public class XAXidBuilderTest {
 
         Assertions.assertEquals(mockXid, retrievedXid);
         Assertions.assertEquals(mockBranchId, retrievedBranchId);
-
     }
 }
