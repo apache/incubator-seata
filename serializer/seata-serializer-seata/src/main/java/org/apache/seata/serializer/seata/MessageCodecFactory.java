@@ -16,15 +16,7 @@
  */
 package org.apache.seata.serializer.seata;
 
-import org.apache.seata.core.protocol.AbstractMessage;
-import org.apache.seata.core.protocol.BatchResultMessage;
-import org.apache.seata.core.protocol.MergeResultMessage;
-import org.apache.seata.core.protocol.MergedWarpMessage;
-import org.apache.seata.core.protocol.MessageType;
-import org.apache.seata.core.protocol.RegisterRMRequest;
-import org.apache.seata.core.protocol.RegisterRMResponse;
-import org.apache.seata.core.protocol.RegisterTMRequest;
-import org.apache.seata.core.protocol.RegisterTMResponse;
+import org.apache.seata.core.protocol.*;
 import org.apache.seata.core.protocol.transaction.BranchCommitRequest;
 import org.apache.seata.core.protocol.transaction.BranchCommitResponse;
 import org.apache.seata.core.protocol.transaction.BranchRegisterRequest;
