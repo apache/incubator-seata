@@ -352,9 +352,7 @@ public class ConsulConfiguration extends AbstractConfiguration {
                     consulIndex = currentIndex;
                     if (dataId.equals(getConsulConfigKey())) {
                         if (StringUtils.isBlank(value)) {
-                            LOGGER.warn(
-                                    "Received empty config from Consul for dataId '{}', Skip updating current configuration.",
-                                    dataId);
+                            LOGGER.warn("Empty config from Consul, dataId='{}'. Skipped.", dataId);
                             return;
                         }
                         // The new config change listener
