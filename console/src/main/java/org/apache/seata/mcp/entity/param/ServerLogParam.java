@@ -36,7 +36,7 @@ public class ServerLogParam implements Serializable {
     @ToolParam(description = "Log creation time, format: yyyy-mm-dd, It is only required to pass in when querying the history log")
     private String logTime;
 
-    @ToolParam(description = "The log serial number to be analyzed, It is only required to pass in when querying the history log")
+    @ToolParam(description = "The log serial number to be analyzed, It is only required to pass in when querying the history log",example = "0")
     private Integer curLogNum;
 
     public Integer getCurLogNum() {
