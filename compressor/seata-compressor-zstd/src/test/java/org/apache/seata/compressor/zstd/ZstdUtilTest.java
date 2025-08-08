@@ -17,18 +17,19 @@
 package org.apache.seata.compressor.zstd;
 
 import com.github.luben.zstd.Zstd;
+import com.github.luben.zstd.ZstdException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.apache.seata.compressor.zstd.ZstdUtil.MAX_COMPRESSED_SIZE;
-
 /**
  * the Zstd Util test
  */
 public class ZstdUtilTest {
+
+    private final int MAX_COMPRESSED_SIZE = 4 * 1024 * 1024; // 4MB
 
     @Test
     public void test_compress() {
@@ -46,7 +47,7 @@ public class ZstdUtilTest {
 
     @Test
     public void test_decompress_with_len_illegal() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+        Assertions.assertThrows(ZstdException.class, () -> {
             // https://github.com/facebook/zstd/blob/dev/doc/zstd_compression_format.md#zstandard-frames
             List<Byte> bytes = new ArrayList<>();
             byte[] magic = new byte[] {(byte) 0x28, (byte) 0xB5, (byte) 0x2F, (byte) 0xFD};
@@ -64,7 +65,7 @@ public class ZstdUtilTest {
 
     @Test
     public void test_decompress_with_len() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+        Assertions.assertDoesNotThrow(() -> {
             byte[] data = new byte[MAX_COMPRESSED_SIZE + 1];
             for (int i = 0; i < data.length; i++) {
                 data[i] = (byte) ('A' + i % 26);
