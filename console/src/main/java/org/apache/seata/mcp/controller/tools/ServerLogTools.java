@@ -15,7 +15,7 @@ public class ServerLogTools {
     private ServerLogService logService;
 
     @Tool(description = "Get the latest or history running logs on the server side")
-    public String getServerLog(@ToolParam(description = "server log file query parameters. when getting history logs, curLogNum and logTime are both required",required = true)ServerLogParam param){
+    public String getServerLog(@ToolParam(description = "server log file query parameters. when getting history logs, logTime is required",required = true)ServerLogParam param){
         return logService.analyseServerLog(param);
     }
 
