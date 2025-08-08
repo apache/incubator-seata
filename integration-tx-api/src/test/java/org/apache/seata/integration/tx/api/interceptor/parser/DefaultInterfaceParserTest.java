@@ -55,6 +55,49 @@ class DefaultInterfaceParserTest {
         assertEquals("handler1", handlers.get(2).type());
     }
 
+    @Test
+    public void testSetOrderAndSorting() {
+        // Create handlers with different order values
+        TestHandler handler1 = new TestHandler("handler1", 1);
+        TestHandler handler2 = new TestHandler("handler2", 2);
+        TestHandler handler3 = new TestHandler("handler3", 3);
+        TestHandler handler4 = new TestHandler("handler4", 4);
+
+        // Set order values using setOrder method
+        handler1.setOrder(4);
+        handler2.setOrder(3);
+        handler3.setOrder(2);
+        handler4.setOrder(1);
+
+        // Add handlers to list
+        List<ProxyInvocationHandler> handlers = new ArrayList<>();
+        handlers.add(handler1);
+        handlers.add(handler2);
+        handlers.add(handler3);
+        handlers.add(handler4);
+
+        // Verify order values before sorting
+        assertEquals(4, handlers.get(0).order());
+        assertEquals(3, handlers.get(1).order());
+        assertEquals(2, handlers.get(2).order());
+        assertEquals(1, handlers.get(3).order());
+
+        // Sort handlers by order() method
+        Collections.sort(handlers, Comparator.comparingInt(ProxyInvocationHandler::order));
+
+        // Verify sorted order
+        assertEquals("handler4", handlers.get(0).type()); // order: 1
+        assertEquals("handler3", handlers.get(1).type()); // order: 2
+        assertEquals("handler2", handlers.get(2).type()); // order: 3
+        assertEquals("handler1", handlers.get(3).type()); // order: 4
+
+        // Verify order values after sorting
+        assertEquals(1, handlers.get(0).order());
+        assertEquals(2, handlers.get(1).order());
+        assertEquals(3, handlers.get(2).order());
+        assertEquals(4, handlers.get(3).order());
+    }
+
     /**
      * Test implementation of ProxyInvocationHandler
      */
