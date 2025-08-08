@@ -347,7 +347,7 @@ public class EtcdConfiguration extends AbstractConfiguration {
     /**
      * the type config change notifier
      */
-    public static class EtcdListener implements ConfigurationChangeListener {
+    private static class EtcdListener implements ConfigurationChangeListener {
         private final String dataId;
         private final ConfigurationChangeListener listener;
         private Watch.Watcher watcher;
