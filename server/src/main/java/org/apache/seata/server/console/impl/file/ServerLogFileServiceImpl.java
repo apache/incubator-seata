@@ -106,7 +106,7 @@ public class ServerLogFileServiceImpl implements ServerLogService {
             throw new IllegalArgumentException("A valid folder path must be provided");
         }
         File[] files = dir.listFiles((d, name) -> name.endsWith(".log.gz"));
-        String logName = env.getProperty("spring.application.name","seata-server") + "."
+        String logName = env.getProperty("spring.application.name",DEFAULT_APP_NAME) + "."
                 + System.getProperty(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL) + "." + logType + "." + logTime;
         List<Integer> logNums = new ArrayList<>();
         if(files!=null){
