@@ -28,7 +28,7 @@ public abstract class AbstractProxyInvocationHandler implements ProxyInvocationH
 
     protected abstract Object doInvoke(InvocationWrapper invocation) throws Throwable;
 
-    protected int order = 0;
+    protected int order = Integer.MAX_VALUE;
 
     protected ProxyInvocationHandler nextInvocationHandlerChain;
 
