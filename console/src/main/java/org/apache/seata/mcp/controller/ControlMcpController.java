@@ -16,36 +16,59 @@
  */
 package org.apache.seata.mcp.controller;
 
+import org.apache.seata.common.result.SingleResult;
 import org.apache.seata.mcp.manager.McpServerManager;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Locale;
 
 @RestController
+@RequestMapping("/api/v1/mcp/service")
 public class ControlMcpController {
 
     @Autowired
     McpServerManager mcpServerEndpointProvider;
 
-    @PostMapping("/open")
-    public String openMcp() {
-        boolean isRunning = mcpServerEndpointProvider.isRunning();
-        if (!isRunning) {
-            mcpServerEndpointProvider.resume();
-            return "服务器启动成功";
-        } else {
-            return "服务器正在运行，无须启动";
+    @PutMapping("/changeStatus")
+    public SingleResult<?> changeStatus(@RequestParam(defaultValue = "") String status){
+        switch (status.toLowerCase(Locale.ROOT)){
+            case "start":
+                return startMcpService();
+            case "stop":
+                return stopMcpService();
+            default:
+                return SingleResult.failure("Only the start and stop status are supported");
         }
     }
 
-    @PostMapping("/close")
-    public String closeMcp() {
+    @GetMapping("/getStatus")
+    public SingleResult<?> getStatus(){
+        boolean isRunning = mcpServerEndpointProvider.isRunning();
+        if(isRunning){
+            return SingleResult.success("MCP Service is Running");
+        }else{
+            return SingleResult.success("MCP Service is Stopped");
+        }
+    }
+
+    public SingleResult<?> startMcpService() {
         boolean isRunning = mcpServerEndpointProvider.isRunning();
         if (!isRunning) {
-            return "服务器已经关闭，无须关闭";
+            mcpServerEndpointProvider.resume();
+            return SingleResult.success("The server started successfully");
+        } else {
+            return SingleResult.failure("The server is running and does not need to be started");
+        }
+    }
+
+    public SingleResult<?> stopMcpService() {
+        boolean isRunning = mcpServerEndpointProvider.isRunning();
+        if (!isRunning) {
+            return SingleResult.failure("The server is down and does not need to be shut down");
         } else {
             mcpServerEndpointProvider.pause();
-            return "服务器关闭成功";
+            return SingleResult.success("The server stopped successfully");
         }
     }
 }
