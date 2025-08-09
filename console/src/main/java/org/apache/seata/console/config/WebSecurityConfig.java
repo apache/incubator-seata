@@ -21,6 +21,7 @@ import org.apache.seata.console.filter.JwtAuthenticationTokenFilter;
 import org.apache.seata.console.security.CustomUserDetailsServiceImpl;
 import org.apache.seata.console.security.JwtAuthenticationEntryPoint;
 import org.apache.seata.console.utils.JwtTokenUtils;
+import org.apache.seata.mcp.entity.pojo.MCPProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -79,6 +80,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private Environment env;
 
+    @Autowired
+    private MCPProperties mcpProperties;
+
     @Bean(name = BeanIds.AUTHENTICATION_MANAGER)
     @Override
     public AuthenticationManager authenticationManagerBean() throws Exception {
@@ -93,8 +97,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(WebSecurity web) {
         String ignoreURLs = env.getProperty("seata.security.ignore.urls", "/**");
-        ignoreURLs +=
-                "," + env.getProperty("seata.mcp.sseEndpoint") + "," + env.getProperty("seata.mcp.messageEndpoint");
+        if(!mcpProperties.isEnableAuth()){
+            ignoreURLs +=
+                    "," + mcpProperties.getSseEndpoint() + "," + mcpProperties.getMessageEndpoint();
+        }
         for (String ignoreURL : ignoreURLs.trim().split(SECURITY_IGNORE_URLS_SPILT_CHAR)) {
             web.ignoring().antMatchers(ignoreURL.trim());
         }
@@ -104,7 +110,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         String csrfIgnoreUrls = env.getProperty("seata.security.csrf-ignore-urls");
         csrfIgnoreUrls +=
-                "," + env.getProperty("seata.mcp.messageEndpoint") + "," + env.getProperty("seata.mcp.sseEndpoint");
+                "," + mcpProperties.getSseEndpoint() + "," + mcpProperties.getMessageEndpoint();
         CsrfConfigurer<HttpSecurity> csrf = http.authorizeRequests()
                 .anyRequest()
                 .authenticated()
