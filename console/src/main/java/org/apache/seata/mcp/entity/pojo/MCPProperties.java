@@ -48,6 +48,10 @@ public class MCPProperties {
      */
     private String messageEndpoint = "/message";
     /**
+     * Whether to enable OAuth connection authentication
+     */
+    private boolean enableAuth = true;
+    /**
      * Specifies whether to enable resource
      */
     private boolean resourceSupport = true;
@@ -85,15 +89,17 @@ public class MCPProperties {
         promptSupport = Boolean.parseBoolean(env.getProperty("seata.mcp.promptSupport", "true"));
         heartbeat = Boolean.parseBoolean(env.getProperty("seata.mcp.heartbeat", "false"));
         queryDuration = Long.parseLong(env.getProperty("seata.mcp.query.max_query_duration", "86400000"));
+        enableAuth = Boolean.parseBoolean(env.getProperty("seata.mcp.auth.enabled","true"));
     }
 
     @Override
     public String toString() {
-        return "McpProperties{" +
+        return "MCPProperties{" +
                 "serverName='" + serverName + '\'' +
                 ", serverVersion='" + serverVersion + '\'' +
                 ", sseEndpoint='" + sseEndpoint + '\'' +
                 ", messageEndpoint='" + messageEndpoint + '\'' +
+                ", enableAuth=" + enableAuth +
                 ", resourceSupport=" + resourceSupport +
                 ", resourceTemplates=" + resourceTemplates +
                 ", promptSupport=" + promptSupport +
@@ -108,20 +114,12 @@ public class MCPProperties {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         MCPProperties that = (MCPProperties) o;
-        return resourceSupport == that.resourceSupport && resourceTemplates == that.resourceTemplates && heartbeat == that.heartbeat && Objects.equals(serverName, that.serverName) && Objects.equals(serverVersion, that.serverVersion) && Objects.equals(sseEndpoint, that.sseEndpoint) && Objects.equals(messageEndpoint, that.messageEndpoint) && loggingLevel == that.loggingLevel && Objects.equals(queryDuration, that.queryDuration) && Objects.equals(env, that.env);
+        return enableAuth == that.enableAuth && resourceSupport == that.resourceSupport && resourceTemplates == that.resourceTemplates && promptSupport == that.promptSupport && heartbeat == that.heartbeat && Objects.equals(serverName, that.serverName) && Objects.equals(serverVersion, that.serverVersion) && Objects.equals(sseEndpoint, that.sseEndpoint) && Objects.equals(messageEndpoint, that.messageEndpoint) && loggingLevel == that.loggingLevel && Objects.equals(queryDuration, that.queryDuration) && Objects.equals(env, that.env);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(
-                serverName,
-                serverVersion,
-                sseEndpoint,
-                messageEndpoint,
-                resourceSupport,
-                resourceTemplates,
-                loggingLevel,
-                heartbeat);
+        return Objects.hash(serverName, serverVersion, sseEndpoint, messageEndpoint, enableAuth, resourceSupport, resourceTemplates, promptSupport, loggingLevel, heartbeat, queryDuration, env);
     }
 
     public String getServerName() {
@@ -202,5 +200,13 @@ public class MCPProperties {
 
     public void setPromptSupport(boolean promptSupport) {
         this.promptSupport = promptSupport;
+    }
+
+    public boolean isEnableAuth() {
+        return enableAuth;
+    }
+
+    public void setEnableAuth(boolean enableAuth) {
+        this.enableAuth = enableAuth;
     }
 }
