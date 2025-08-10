@@ -17,6 +17,11 @@
 package org.apache.seata.compressor.zstd;
 
 import com.github.luben.zstd.Zstd;
+import com.github.luben.zstd.ZstdInputStream;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 /**
  * the Zstd Util
@@ -28,6 +33,7 @@ public class ZstdUtil {
         if (bytes == null) {
             throw new NullPointerException("bytes is null");
         }
+
         return Zstd.compress(bytes);
     }
 
@@ -35,9 +41,17 @@ public class ZstdUtil {
         if (bytes == null) {
             throw new NullPointerException("bytes is null");
         }
-        long size = Zstd.decompressedSize(bytes);
-        byte[] decompressBytes = new byte[(int) size];
-        Zstd.decompress(decompressBytes, bytes);
-        return decompressBytes;
+        try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+                ZstdInputStream zis = new ZstdInputStream(bais);
+                ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            byte[] buffer = new byte[8192];
+            int len;
+            while ((len = zis.read(buffer)) > 0) {
+                baos.write(buffer, 0, len);
+            }
+            return baos.toByteArray();
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Failed to decompress zstd data", e);
+        }
     }
 }
