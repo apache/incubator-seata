@@ -445,6 +445,6 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
 
     @Override
     public int order() {
-        return this.order;
+        return 0;
     }
 }
