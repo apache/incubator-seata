@@ -28,6 +28,7 @@ import org.apache.seata.server.store.StoreConfig;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
@@ -48,6 +49,12 @@ public class RaftServerTest {
         LockerManagerFactory.destroy();
         SessionHolder.destroy();
         RaftServerManager.destroy();
+    }
+
+    @BeforeEach
+    public void init() {
+        System.setProperty("server.raftPort", "0");
+        System.setProperty(ConfigurationKeys.SERVER_RAFT_SERVER_ADDR, "");
     }
 
     @AfterEach

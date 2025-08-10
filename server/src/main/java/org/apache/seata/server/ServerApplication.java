@@ -21,11 +21,15 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.io.IOException;
 
+import static org.apache.seata.common.Constants.APPLICATION_TYPE_KEY;
+import static org.apache.seata.common.Constants.APPLICATION_TYPE_SERVER;
+
 /**
  */
 @SpringBootApplication(scanBasePackages = {"org.apache.seata"})
 public class ServerApplication {
     public static void main(String[] args) throws IOException {
+        System.setProperty(APPLICATION_TYPE_KEY, APPLICATION_TYPE_SERVER);
         // run the spring-boot application
         SpringApplication.run(ServerApplication.class, args);
     }

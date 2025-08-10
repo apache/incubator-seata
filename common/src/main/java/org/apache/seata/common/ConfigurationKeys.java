@@ -1218,6 +1218,32 @@ public interface ConfigurationKeys {
      */
     String ROCKET_MQ_MSG_TIMEOUT = SERVER_PREFIX + "rocketmqMsgTimeout";
 
+    String CONFIG_STORE_PREFIX =
+            FILE_ROOT_PREFIX_CONFIG + "raft" + FILE_CONFIG_SPLIT_CHAR + "db" + FILE_CONFIG_SPLIT_CHAR;
+
+    /**
+     * The constant CONFIG_STORE_TYPE
+     */
+    String CONFIG_STORE_TYPE = CONFIG_STORE_PREFIX + "type";
+
+    /**
+     * The constant CONFIG_STORE_DIR
+     */
+    String CONFIG_STORE_DIR = CONFIG_STORE_PREFIX + "dir";
+
+    /**
+     * The constant CONFIG_STORE_DESTROY_ON_SHUTDOWN
+     */
+    String CONFIG_STORE_DESTROY_ON_SHUTDOWN = CONFIG_STORE_PREFIX + "destroyOnShutdown";
+
+    /**
+     * The constant CONFIG_STORE_NAMESPACE
+     */
+    String CONFIG_STORE_NAMESPACE = CONFIG_STORE_PREFIX + "namespace";
+    /**
+     * The constant CONFIG_STORE_DATA_ID
+     */
+    String CONFIG_STORE_DATA_ID = CONFIG_STORE_PREFIX + "dataId";
     /**
      *
      */
@@ -1290,4 +1316,9 @@ public interface ConfigurationKeys {
      * The constant RATE_LIMIT_BUCKET_TOKEN_INITIAL_NUM.
      */
     String RATE_LIMIT_BUCKET_TOKEN_INITIAL_NUM = RATE_LIMIT_PREFIX + ".bucketTokenInitialNum";
+
+    /**
+     * The constant CLIENT_METADATA_MAX_AGE_MS.
+     */
+    String CLIENT_METADATA_MAX_AGE_MS = CLIENT_PREFIX + "metadataMaxAgeMs";
 }

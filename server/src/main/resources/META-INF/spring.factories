@@ -17,3 +17,6 @@
 org.springframework.context.ApplicationListener=\
 org.apache.seata.server.spring.listener.ServerApplicationListener,\
 org.apache.seata.server.spring.listener.HttpFilterInitListener
+
+org.springframework.context.ApplicationContextInitializer=\
+org.apache.seata.server.cluster.raft.RaftConfigInitializer

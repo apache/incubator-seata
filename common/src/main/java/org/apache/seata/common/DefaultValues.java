@@ -583,20 +583,79 @@ public interface DefaultValues {
      */
     int DEFAULT_ROCKET_MQ_MSG_TIMEOUT = 60 * 1000;
 
+    /**
+     * The constant DEFAULT_DB_STORE_FILE_DIR.
+     */
+    String DEFAULT_DB_STORE_FILE_DIR = "configStore";
+
+    /**
+     * The constant DEFAULT_DB_TYPE.
+     */
+    String DEFAULT_DB_TYPE = "rocksdb";
+
+    /**
+     * The constant DEFAULT_DB_DRUID_TIME_BETWEEN_EVICTION_RUNS_MILLIS.
+     */
     long DEFAULT_DB_DRUID_TIME_BETWEEN_EVICTION_RUNS_MILLIS = 120000;
+
+    /**
+     * The constant DEFAULT_DB_DRUID_MIN_EVICTABLE_TIME_MILLIS.
+     */
     long DEFAULT_DB_DRUID_MIN_EVICTABLE_TIME_MILLIS = 300000;
+
+    /**
+     * The constant DEFAULT_DB_DRUID_TEST_WHILE_IDLE.
+     */
     boolean DEFAULT_DB_DRUID_TEST_WHILE_IDLE = true;
+
+    /**
+     * The constant DEFAULT_DB_DRUID_TEST_ON_BORROW.
+     */
     boolean DEFAULT_DB_DRUID_TEST_ON_BORROW = false;
+
+    /**
+     * The constant DEFAULT_DB_DRUID_KEEP_ALIVE.
+     */
     boolean DEFAULT_DB_DRUID_KEEP_ALIVE = false;
 
+    /**
+     * The constant DEFAULT_DB_HIKARI_IDLE_TIMEOUT.
+     */
     long DEFAULT_DB_HIKARI_IDLE_TIMEOUT = 600000L;
+
+    /**
+     * The constant DEFAULT_DB_HIKARI_KEEPALIVE_TIME.
+     */
     long DEFAULT_DB_HIKARI_KEEPALIVE_TIME = 120000L;
+
+    /**
+     * The constant DEFAULT_DB_HIKARI_MAX_LIFE_TIME.
+     */
     long DEFAULT_DB_HIKARI_MAX_LIFE_TIME = 1800000L;
+
+    /**
+     * The constant DEFAULT_DB_HIKARI_VALIDATION_TIMEOUT.
+     */
     long DEFAULT_DB_HIKARI_VALIDATION_TIMEOUT = 5000L;
 
+    /**
+     * The constant DEFAULT_DB_DBCP_TIME_BETWEEN_EVICTION_RUNS_MILLIS.
+     */
     long DEFAULT_DB_DBCP_TIME_BETWEEN_EVICTION_RUNS_MILLIS = 120000;
+
+    /**
+     * The constant DEFAULT_DB_DBCP_MIN_EVICTABLE_TIME_MILLIS.
+     */
     long DEFAULT_DB_DBCP_MIN_EVICTABLE_TIME_MILLIS = 300000;
+
+    /**
+     * The constant DEFAULT_DB_DBCP_TEST_WHILE_IDLE.
+     */
     boolean DEFAULT_DB_DBCP_TEST_WHILE_IDLE = true;
+
+    /**
+     * The constant DEFAULT_DB_DBCP_TEST_ON_BORROW.
+     */
     boolean DEFAULT_DB_DBCP_TEST_ON_BORROW = false;
 
     /**

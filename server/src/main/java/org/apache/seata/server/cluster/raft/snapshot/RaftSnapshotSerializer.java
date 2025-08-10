@@ -50,6 +50,7 @@ public class RaftSnapshotSerializer {
         PERMITS.add(io.seata.server.cluster.raft.snapshot.RaftSnapshot.class.getName());
         PERMITS.add(io.seata.server.cluster.raft.snapshot.RaftSnapshot.SnapshotType.class.getName());
         PERMITS.add(java.lang.Enum.class.getName());
+        PERMITS.add(java.util.HashMap.class.getName());
         PERMITS.add("[B");
     }
 

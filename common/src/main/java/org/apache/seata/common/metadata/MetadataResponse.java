@@ -24,6 +24,8 @@ public class MetadataResponse {
 
     String storeMode;
 
+    String configMode;
+
     long term;
 
     public List<Node> getNodes() {
@@ -48,5 +50,13 @@ public class MetadataResponse {
 
     public void setTerm(long term) {
         this.term = term;
+    }
+
+    public String getConfigMode() {
+        return configMode;
+    }
+
+    public void setConfigMode(String configMode) {
+        this.configMode = configMode;
     }
 }

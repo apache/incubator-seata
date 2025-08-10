@@ -37,7 +37,9 @@ public class CustomDeserializer extends JsonDeserializer<Class<?>> {
     static {
         PERMIT_PACKAGES.add("org.apache.seata");
         // The storage structure of vgroup is a map.
+        PERMIT_PACKAGES.add("java.util.Map");
         PERMIT_PACKAGES.add("java.util.HashMap");
+        PERMIT_PACKAGES.add("java.util.LinkedHashMap");
     }
 
     @Override
