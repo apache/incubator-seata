@@ -421,6 +421,10 @@ Apache-2.0 licenses
     org.springframework:spring-web 5.3.39 Apache-2.0
     org.springframework:spring-webmvc 5.3.39 Apache-2.0
     org.apache.commons:commons-math 2.2 Apache-2.0
+    org.apache.tomcat.embed:tomcat-embed-websocket 9.0.106 Apache-2.0
+    org.apache.tomcat.embed:tomcat-embed-core 9.0.106 Apache-2.0
+    org.apache.tomcat.embed:tomcat-embed-core 9.0.106 Apache-2.0
+    org.apache.tomcat.embed:tomcat-embed-el 9.0.106 Apache-2.0
 
 ========================================================================
 BSD-2-Clause licenses
@@ -494,6 +498,7 @@ CDDL-1.0 licenses
 ========================================================================
 
     javax.ws.rs:jsr311-api 1.1.1 CDDL-1.0 see:licenses/CDDL-1.0
+    javax.servlet:javax.servlet-api 4.0.1 CDDL-1.0 see:licenses/CDDL-1.0
 
 ========================================================================
 CDDL+GPL-1.1 licenses

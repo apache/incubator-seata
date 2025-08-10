@@ -81,10 +81,7 @@ public class RateLimiterHandler extends AbstractTransactionRequestHandler implem
                 response.setTransactionExceptionCode(TransactionExceptionCode.BeginFailed);
                 response.setResultCode(ResultCode.Failed);
                 RateLimitInfo rateLimitInfo = RateLimitInfo.generateRateLimitInfo(
-                        context.getApplicationId(),
-                        RateLimitInfo.GLOBAL_BEGIN_FAILED,
-                        context.getClientId(),
-                        XID.getIpAddressAndPort());
+                        context.getApplicationId(), RateLimitInfo.GLOBAL_BEGIN_FAILED, XID.getIpAddressAndPort());
                 MetricsPublisher.postRateLimitEvent(rateLimitInfo);
                 response.setMsg(String.format(
                         "TransactionException[rate limit exception, rate limit info: %s]", rateLimitInfo));
