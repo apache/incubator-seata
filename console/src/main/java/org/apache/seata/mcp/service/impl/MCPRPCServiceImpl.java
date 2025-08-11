@@ -16,8 +16,15 @@
  */
 package org.apache.seata.mcp.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONException;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.seata.common.result.SingleResult;
 import org.apache.seata.console.config.WebSecurityConfig;
 import org.apache.seata.console.utils.JwtTokenUtils;
+import org.apache.seata.mcp.annotation.Tool;
+import org.apache.seata.mcp.annotation.ToolParam;
+import org.apache.seata.mcp.entity.pojo.NameSpaceDetail;
 import org.apache.seata.mcp.handler.CustomResponseErrorHandler;
 import org.apache.seata.mcp.service.MCPRPCService;
 import org.slf4j.Logger;
@@ -54,7 +61,9 @@ public class MCPRPCServiceImpl implements MCPRPCService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    private final String NAMING_SPACE_URL = "http://127.0.0.1:%s/mcp";
+    private final String NAMING_SPACE_URL = "http://127.0.0.1:%s";
+
+    private final String GET_NAMESPACE_PATH = "/api/v1/naming/namespace";
 
     private final Logger logger = LoggerFactory.getLogger(MCPRPCServiceImpl.class);
 
@@ -62,7 +71,9 @@ public class MCPRPCServiceImpl implements MCPRPCService {
 
     private final static User user = new User();
 
-    private static String token = "";
+    private String token = "";
+
+    private String originJwt = "";
 
     private final CustomResponseErrorHandler errorHandler = new CustomResponseErrorHandler();
 
@@ -72,7 +83,6 @@ public class MCPRPCServiceImpl implements MCPRPCService {
         restTemplate.setErrorHandler(errorHandler);
         user.username = env.getProperty("console.user.username","seata");
         user.password = env.getProperty("console.user.password","seata");
-        getToken();
     }
 
     public void getToken() {
@@ -80,7 +90,28 @@ public class MCPRPCServiceImpl implements MCPRPCService {
         Authentication authentication = new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword());
         // init token
         String originToken = jwtTokenUtils.createToken(authentication);
+        originJwt = originToken;
         token = WebSecurityConfig.TOKEN_PREFIX + originToken;
+    }
+
+
+    @Tool(description = "Get the namespace and cluster or vgroup where all TC/Servers are located")
+    public SingleResult<?> getTCNameSpaces(){
+        String originData = getCallNameSpace(GET_NAMESPACE_PATH,null,null,null);
+        Map<String,Object> nameSpacesVo = new HashMap<>();
+        JSONObject jsonObject = null;
+        try {
+            jsonObject = JSON.parseObject(originData);
+        } catch (JSONException e) {
+            logger.error("get NameSpace Failed:{}",e.getMessage());
+            nameSpacesVo.put("failed",e.getMessage());
+            return SingleResult.failure("get namespace failed:"+e.getMessage());
+        }
+        if(jsonObject.containsKey("data")){
+            String data = jsonObject.getString("data");
+            nameSpacesVo.put("namespaces",data);
+        }
+        return SingleResult.success(nameSpacesVo);
     }
 
     public static class User{
@@ -100,14 +131,32 @@ public class MCPRPCServiceImpl implements MCPRPCService {
         }
     }
 
+    public void setNamespaceHeaderAndPathParam(NameSpaceDetail nameSpaceDetail, HttpHeaders headers, Map<String, String> pathParams){
+        headers.add("x-seata-namespace",nameSpaceDetail.getNamespace());
+        if(nameSpaceDetail.getvGroup()!=null){
+            pathParams.put("vGroup",nameSpaceDetail.getvGroup());
+            return;
+        }
+        if(nameSpaceDetail.getCluster()!=null){
+            headers.add("x-seata-cluster",nameSpaceDetail.getCluster());
+        }
+    }
+
     /**
      * Post Call the TC API based on the path
      */
     @Override
-    public String postCallTC(String path, HttpHeaders headers, Object... args) {
+    public String postCallTC(NameSpaceDetail nameSpaceDetail, String path, HttpHeaders headers, Object... args) {
         if(headers==null){
             headers = new HttpHeaders();
         }
+        if(nameSpaceDetail==null || !nameSpaceDetail.isValid()){
+            return "If you have not specified the namespace of the TC/Server, specify the namespace first";
+        }
+        if(!jwtTokenUtils.validateToken(originJwt)){
+            getToken();
+        }
+        headers.add(WebSecurityConfig.AUTHORIZATION_HEADER, token);
         String url = buildUrl(String.format(NAMING_SPACE_URL, namingSpacePort), path, null, null);
         HttpEntity<Object> entity = new HttpEntity<>(args, headers);
         String responseBody = null;
@@ -125,13 +174,48 @@ public class MCPRPCServiceImpl implements MCPRPCService {
         }
     }
 
+    public String getCallNameSpace(String path, Object queryParams, Map<String, String> pathParams, HttpHeaders headers) {
+        if(headers==null){
+            headers = new HttpHeaders();
+        }
+        if(!jwtTokenUtils.validateToken(originJwt)){
+            getToken();
+        }
+        headers.add(WebSecurityConfig.AUTHORIZATION_HEADER, token);
+        Map<String, Object> queryParamsMap = objectToQueryParamMap(queryParams);
+        String url = buildUrl(String.format(NAMING_SPACE_URL, namingSpacePort), path, pathParams, queryParamsMap);
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        String responseBody = null;
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+
+            responseBody = response.getBody();
+
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                logger.warn("MCP GET request returned non-success status: {}", response.getStatusCode());
+            }
+            return responseBody;
+        } catch (RestClientException e) {
+            logger.error("MCP GET Call NameSpace Failed: {}", e.getMessage());
+            return responseBody;
+        }
+    }
+
     /**
      * Get Call the TC API based on the path
      */
     @Override
-    public String getCallTC(String path, Object queryParams, Map<String, String> pathParams, HttpHeaders headers) {
+    public String getCallTC(NameSpaceDetail nameSpaceDetail, String path, Object queryParams, Map<String, String> pathParams, HttpHeaders headers) {
         if(headers==null){
             headers = new HttpHeaders();
+        }
+        if(nameSpaceDetail==null || !nameSpaceDetail.isValid()){
+            return "If you have not specified the namespace of the TC/Server, specify the namespace first";
+        }else{
+            setNamespaceHeaderAndPathParam(nameSpaceDetail,headers,pathParams);
+        }
+        if(!jwtTokenUtils.validateToken(originJwt)){
+            getToken();
         }
         headers.add(WebSecurityConfig.AUTHORIZATION_HEADER, token);
         Map<String, Object> queryParamsMap = objectToQueryParamMap(queryParams);
@@ -162,9 +246,17 @@ public class MCPRPCServiceImpl implements MCPRPCService {
      * @return "Query results"
      */
     @Override
-    public String deleteCallTC(String path, Object queryParams, Map<String, String> pathParams, HttpHeaders headers) {
+    public String deleteCallTC(NameSpaceDetail nameSpaceDetail, String path, Object queryParams, Map<String, String> pathParams, HttpHeaders headers) {
         if(headers==null){
             headers = new HttpHeaders();
+        }
+        if(nameSpaceDetail==null || !nameSpaceDetail.isValid()){
+            return "If you have not specified the namespace of the TC/Server, specify the namespace first";
+        }else{
+            setNamespaceHeaderAndPathParam(nameSpaceDetail,headers,pathParams);
+        }
+        if(!jwtTokenUtils.validateToken(originJwt)){
+            getToken();
         }
         headers.add(WebSecurityConfig.AUTHORIZATION_HEADER, token);
         Map<String, Object> queryParamsMap = objectToQueryParamMap(queryParams);
@@ -187,9 +279,17 @@ public class MCPRPCServiceImpl implements MCPRPCService {
     }
 
     @Override
-    public String putCallTC(String path, Object queryParams, Map<String, String> pathParams, HttpHeaders headers) {
+    public String putCallTC(NameSpaceDetail nameSpaceDetail, String path, Object queryParams, Map<String, String> pathParams, HttpHeaders headers) {
         if(headers==null){
             headers = new HttpHeaders();
+        }
+        if(nameSpaceDetail==null || !nameSpaceDetail.isValid()){
+            return "If you have not specified the namespace of the TC/Server, specify the namespace first";
+        }else{
+            setNamespaceHeaderAndPathParam(nameSpaceDetail,headers,pathParams);
+        }
+        if(!jwtTokenUtils.validateToken(originJwt)){
+            getToken();
         }
         headers.add(WebSecurityConfig.AUTHORIZATION_HEADER, token);
         Map<String, Object> queryParamsMap = objectToQueryParamMap(queryParams);
