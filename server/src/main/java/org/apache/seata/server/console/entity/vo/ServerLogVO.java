@@ -26,15 +26,19 @@ public class ServerLogVO {
 
     private Integer curLogNum;
 
-    public ServerLogVO(Integer cursor, List<String> logMessages){
+    private Long totalLines;
+
+    public ServerLogVO(Integer cursor, List<String> logMessages, Long totalLines){
         this.cursor = cursor;
         this.logMessages = logMessages;
+        this.totalLines = totalLines;
     }
 
-    public ServerLogVO(Integer cursor, List<String> logMessages, Integer curLogNum){
+    public ServerLogVO(Integer cursor, List<String> logMessages, Integer curLogNum, Long totalLines){
         this.cursor = cursor;
         this.logMessages = logMessages;
         this.curLogNum = curLogNum;
+        this.totalLines = totalLines;
     }
 
     @Override
@@ -43,6 +47,7 @@ public class ServerLogVO {
                 "cursor=" + cursor +
                 ", logMessages=" + logMessages +
                 ", curLogNum=" + curLogNum +
+                ", totalLines=" + totalLines +
                 '}';
     }
 
@@ -68,5 +73,13 @@ public class ServerLogVO {
 
     public void setCurLogNum(Integer curLogNum) {
         this.curLogNum = curLogNum;
+    }
+
+    public Long getTotalLines() {
+        return totalLines;
+    }
+
+    public void setTotalLines(Long totalLines) {
+        this.totalLines = totalLines;
     }
 }
