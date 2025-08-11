@@ -153,7 +153,8 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
             }
         }
         List<byte[]> result = new ArrayList<>();
-        List<Map<String, Object>> query = sqlExecutionTemplate.query(resourceId, sql, params.toArray());
+        Object[] objects = params.isEmpty() ? null : params.toArray();
+        List<Map<String, Object>> query = sqlExecutionTemplate.query(resourceId, sql, objects);
         for (Map<String, Object> map : query) {
             Object rollbackInfo = map.get("rollback_info");
             if (rollbackInfo != null) {
