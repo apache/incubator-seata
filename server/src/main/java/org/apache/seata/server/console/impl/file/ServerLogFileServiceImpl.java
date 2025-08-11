@@ -16,6 +16,7 @@
  */
 package org.apache.seata.server.console.impl.file;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.input.ReversedLinesFileReader;
 import org.apache.seata.common.result.SingleResult;
 import org.apache.seata.common.util.StringUtils;
@@ -35,10 +36,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
@@ -109,6 +107,7 @@ public class ServerLogFileServiceImpl implements ServerLogService {
         String logName = env.getProperty("spring.application.name",DEFAULT_APP_NAME) + "."
                 + System.getProperty(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL) + "." + logType + "." + logTime;
         List<Integer> logNums = new ArrayList<>();
+        Map<String,List<Integer>> results = new HashMap<>();
         if(files!=null){
             for(File file : files){
                 String fileName = file.getName();
@@ -120,7 +119,8 @@ public class ServerLogFileServiceImpl implements ServerLogService {
                     }
                 }
             }
-            return SingleResult.success(logNums);
+            results.put("log indexes",logNums);
+            return SingleResult.success(results);
         }else{
             return SingleResult.failure("There is no relevant log index");
         }
@@ -194,12 +194,13 @@ public class ServerLogFileServiceImpl implements ServerLogService {
         File file = new File(filePath);
         if (!file.exists() || !file.isFile()) {
             LOGGER.warn("Log file missing: {}", filePath);
-            return new ServerLogVO(cursor != null ? cursor : 0, Collections.emptyList());
+            return new ServerLogVO(cursor != null ? cursor : 0, Collections.emptyList(),0L);
         }
 
         List<String> logs = new ArrayList<>();
         int newCursor = cursor != null ? cursor : 0;
         int processedLines = 0;
+        long totalLines = FileUtils.readLines(file,StandardCharsets.UTF_8).size();
 
         try (ReversedLinesFileReader reader = new ReversedLinesFileReader(file, StandardCharsets.UTF_8)) {
             // Skip the read line
@@ -217,18 +218,19 @@ public class ServerLogFileServiceImpl implements ServerLogService {
 
             newCursor += processedLines;
         }
-        return new ServerLogVO(newCursor, logs);
+        return new ServerLogVO(newCursor, logs, totalLines);
     }
 
     private ServerLogVO readGzLogFile(String filePath, Integer cursor, int nextLines) throws IOException {
         List<String> logs = new ArrayList<>();
         int newCursor = cursor != null ? cursor : 0;
         int linesRead = 0;
+        long totalLines;
 
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(
                         new GZIPInputStream(Files.newInputStream(Paths.get(filePath))), StandardCharsets.UTF_8))) {
-
+            totalLines = reader.lines().count();
             // Skip the read line
             for (int i = 0; i < newCursor; i++) {
                 if (reader.readLine() == null) break;
@@ -243,7 +245,7 @@ public class ServerLogFileServiceImpl implements ServerLogService {
             newCursor += linesRead;
         }
 
-        return new ServerLogVO(newCursor, logs);
+        return new ServerLogVO(newCursor, logs, totalLines);
     }
 
     /**
