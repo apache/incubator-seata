@@ -17,23 +17,24 @@
 package org.apache.seata.mcp.service;
 
 import org.apache.seata.mcp.entity.param.GlobalSessionParam;
+import org.apache.seata.mcp.entity.pojo.NameSpaceDetail;
 
 import java.util.List;
 
 public interface GlobalSessionService {
-    String queryGlobalSession(GlobalSessionParam param);
+    String queryGlobalSession(NameSpaceDetail nameSpaceDetail, GlobalSessionParam param);
 
-    String deleteGlobalSession(String xid);
+    String deleteGlobalSession(NameSpaceDetail nameSpaceDetail, String xid);
 
-    String forceDeleteGlobalSession(String xid);
+    String forceDeleteGlobalSession(NameSpaceDetail nameSpaceDetail, String xid);
 
-    String stopGlobalSession(String xid);
+    String stopGlobalSession(NameSpaceDetail nameSpaceDetail, String xid);
 
-    String startGlobalSession(String xid);
+    String startGlobalSession(NameSpaceDetail nameSpaceDetail, String xid);
 
-    String sendCommitOrRollback(String xid);
+    String sendCommitOrRollback(NameSpaceDetail nameSpaceDetail, String xid);
 
-    String changeGlobalStatus(String xid);
+    String changeGlobalStatus(NameSpaceDetail nameSpaceDetail, String xid);
 
-    List<String> getAbnormalSessions(Long startTime, Long endTime);
+    List<String> getAbnormalSessions(NameSpaceDetail nameSpaceDetail, Long startTime, Long endTime);
 }

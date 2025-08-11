@@ -18,6 +18,7 @@ package org.apache.seata.mcp.controller.tools;
 
 import org.apache.seata.mcp.annotation.Tool;
 import org.apache.seata.mcp.annotation.ToolParam;
+import org.apache.seata.mcp.entity.pojo.NameSpaceDetail;
 import org.apache.seata.mcp.service.BranchSessionService;
 import org.apache.seata.mcp.service.ModifyConfirmService;
 import org.slf4j.Logger;
@@ -38,6 +39,7 @@ public class BranchSessionTools {
 
     @Tool(description = "Delete branch transactions, Get the modify key before you delete")
     public String deleteBranchSession(
+            @ToolParam(description = "Specify the namespace of the TC node",required = true) NameSpaceDetail nameSpaceDetail,
             @ToolParam(description = "Global transaction id",required = true) String xid,
             @ToolParam(description = "Branch transaction id",required = true) String branchId,
             @ToolParam(description = "Modify key",required = true) String modifyKey) {
@@ -45,7 +47,7 @@ public class BranchSessionTools {
             LOGGER.info("manual operation to delete the branch session, xid: {} branchId: {}", xid, branchId);
         }
         if (modifyConfirmService.isValidKey(modifyKey)) {
-            return branchSessionService.deleteBranchSession(xid, branchId);
+            return branchSessionService.deleteBranchSession(nameSpaceDetail, xid, branchId);
         } else {
             return "the modify key is not available";
         }
@@ -53,6 +55,7 @@ public class BranchSessionTools {
 
     @Tool(description = "Force the deletion of branch transactions, Get the modify key before you delete")
     public String forceDeleteBranchSession(
+            @ToolParam(description = "Specify the namespace of the TC node",required = true) NameSpaceDetail nameSpaceDetail,
             @ToolParam(description = "Global transaction id",required = true) String xid,
             @ToolParam(description = "Branch transaction id",required = true) String branchId,
             @ToolParam(description = "Modify key",required = true) String modifyKey) {
@@ -60,7 +63,7 @@ public class BranchSessionTools {
             LOGGER.info("manual operation to force delete the branch session, xid: {} branchId: {}", xid, branchId);
         }
         if (modifyConfirmService.isValidKey(modifyKey)) {
-            return branchSessionService.forceDeleteBranchSession(xid, branchId);
+            return branchSessionService.forceDeleteBranchSession(nameSpaceDetail, xid, branchId);
         } else {
             return "the modify key is not available";
         }
@@ -68,6 +71,7 @@ public class BranchSessionTools {
 
     @Tool(description = "Stop the branch transaction retry, Get the modify key before you stop")
     public String stopBranchSession(
+            @ToolParam(description = "Specify the namespace of the TC node",required = true) NameSpaceDetail nameSpaceDetail,
             @ToolParam(description = "Global transaction id",required = true) String xid,
             @ToolParam(description = "Branch transaction id",required = true) String branchId,
             @ToolParam(description = "Modify key",required = true) String modifyKey) {
@@ -75,7 +79,7 @@ public class BranchSessionTools {
             LOGGER.info("manual operation to stop the branch session, xid: {} branchId: {}", xid, branchId);
         }
         if (modifyConfirmService.isValidKey(modifyKey)) {
-            return branchSessionService.stopBranchSession(xid, branchId);
+            return branchSessionService.stopBranchSession(nameSpaceDetail, xid, branchId);
         } else {
             return "the modify key is not available";
         }
@@ -83,6 +87,7 @@ public class BranchSessionTools {
 
     @Tool(description = "Initiate a branch transaction retries, Get the modify key before you start")
     public String startBranchRetry(
+            @ToolParam(description = "Specify the namespace of the TC node",required = true) NameSpaceDetail nameSpaceDetail,
             @ToolParam(description = "Global transaction id",required = true) String xid,
             @ToolParam(description = "Branch transaction id",required = true) String branchId,
             @ToolParam(description = "Modify key",required = true) String modifyKey) {
@@ -90,7 +95,7 @@ public class BranchSessionTools {
             LOGGER.info("manual operation to start the branch session, xid: {} branchId: {}", xid, branchId);
         }
         if (modifyConfirmService.isValidKey(modifyKey)) {
-            return branchSessionService.startBranchRetry(xid, branchId);
+            return branchSessionService.startBranchRetry(nameSpaceDetail, xid, branchId);
         } else {
             return "the modify key is not available";
         }
