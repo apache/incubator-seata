@@ -17,6 +17,7 @@
 package org.apache.seata.mcp.service.impl;
 
 import org.apache.seata.mcp.entity.param.UndoLogParam;
+import org.apache.seata.mcp.entity.pojo.NameSpaceDetail;
 import org.apache.seata.mcp.parser.FastjsonUndoLogParser;
 import org.apache.seata.mcp.service.BusinessDataSourceService;
 import org.apache.seata.mcp.service.UndoLogService;

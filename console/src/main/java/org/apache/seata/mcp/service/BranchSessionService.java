@@ -16,13 +16,15 @@
  */
 package org.apache.seata.mcp.service;
 
+import org.apache.seata.mcp.entity.pojo.NameSpaceDetail;
+
 public interface BranchSessionService {
 
-    String deleteBranchSession(String xid, String branchId);
+    String deleteBranchSession(NameSpaceDetail nameSpaceDetail, String xid, String branchId);
 
-    String forceDeleteBranchSession(String xid, String branchId);
+    String forceDeleteBranchSession(NameSpaceDetail nameSpaceDetail, String xid, String branchId);
 
-    String stopBranchSession(String xid, String branchId);
+    String stopBranchSession(NameSpaceDetail nameSpaceDetail, String xid, String branchId);
 
-    String startBranchRetry(String xid, String branchId);
+    String startBranchRetry(NameSpaceDetail nameSpaceDetail, String xid, String branchId);
 }

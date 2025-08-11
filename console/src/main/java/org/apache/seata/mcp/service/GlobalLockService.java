@@ -17,11 +17,12 @@
 package org.apache.seata.mcp.service;
 
 import org.apache.seata.mcp.entity.param.GlobalLockParam;
+import org.apache.seata.mcp.entity.pojo.NameSpaceDetail;
 
 public interface GlobalLockService {
-    String queryGlobalLock(GlobalLockParam param);
+    String queryGlobalLock(NameSpaceDetail nameSpaceDetail, GlobalLockParam param);
 
-    String deleteGlobalLock(GlobalLockParam param);
+    String deleteGlobalLock(NameSpaceDetail nameSpaceDetail, GlobalLockParam param);
 
-    String checkGlobalLock(String xid, String branchId);
+    String checkGlobalLock(NameSpaceDetail nameSpaceDetail, String xid, String branchId);
 }
