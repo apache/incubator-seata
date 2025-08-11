@@ -17,6 +17,7 @@
 package org.apache.seata.mcp.service;
 
 import org.apache.seata.mcp.entity.param.UndoLogParam;
+import org.apache.seata.mcp.entity.pojo.NameSpaceDetail;
 
 public interface UndoLogService {
     String queryAndAnalyzeUndoLog(UndoLogParam undoLogParam);
