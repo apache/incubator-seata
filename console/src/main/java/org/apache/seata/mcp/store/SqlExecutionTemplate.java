@@ -88,6 +88,11 @@ public class SqlExecutionTemplate {
                 throw new StoreException("The query valid failed,Only query operations are allowed：" + sql);
             }
             conn = getDataSource(resourceId).getConnection();
+            if(params==null){
+                if(sql.contains("where") || sql.contains("WHERE")){
+                    sql = sql.replaceAll("(?i)\\bWHERE\\b.*", "").trim();
+                }
+            }
             ps = conn.prepareStatement(sql);
             if (params != null) {
                 for (int i = 0; i < params.length; i++) {
