@@ -16,6 +16,8 @@
  */
 package org.apache.seata.config.zk;
 
+import org.apache.curator.framework.recipes.cache.ChildData;
+import org.apache.curator.framework.recipes.cache.CuratorCacheListener;
 import org.apache.curator.test.TestingServer;
 import org.apache.seata.config.ConfigurationChangeEvent;
 import org.apache.seata.config.ConfigurationChangeListener;
@@ -27,8 +29,12 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Method;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * The type zk configuration test
@@ -123,5 +129,23 @@ public class ZkConfigurationTest {
             throw new RuntimeException(e);
         }
         Assertions.assertTrue(listened[0]);
+    }
+
+    @Test
+    public void testEvent_pathEqualsConfigPath_blankValue() throws Exception {
+        Method getConfigPath = ZookeeperConfiguration.class.getDeclaredMethod("getConfigPath");
+        getConfigPath.setAccessible(true);
+
+        String configPath = getConfigPath.invoke(null).toString();
+
+        ZookeeperConfiguration.NodeCacheListenerImpl listener =
+                new ZookeeperConfiguration.NodeCacheListenerImpl(configPath, null);
+
+        ChildData mockData = mock(ChildData.class);
+        when(mockData.getData()).thenReturn(new byte[0]);
+
+        listener.event(CuratorCacheListener.Type.NODE_CHANGED, null, mockData);
+
+        // If it can run to this point, it indicates that the null value branch has been overwritten
     }
 }

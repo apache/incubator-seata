@@ -28,14 +28,12 @@ public class ProcessorYamlTest {
 
     @Test
     void testProcessor_NormalYaml() {
-        String yamlConfig =
-                "server:\n" +
-                        "  port: 8080\n" +
-                        "  host: localhost\n" +
-                        "spring:\n" +
-                        "  datasource:\n" +
-                        "    url: jdbc:mysql://localhost:3306/test\n" +
-                        "    username: root";
+        String yamlConfig = "server:\n" + "  port: 8080\n"
+                + "  host: localhost\n"
+                + "spring:\n"
+                + "  datasource:\n"
+                + "    url: jdbc:mysql://localhost:3306/test\n"
+                + "    username: root";
 
         ProcessorYaml processorYaml = new ProcessorYaml();
         Properties props = processorYaml.processor(yamlConfig);
@@ -50,9 +48,7 @@ public class ProcessorYamlTest {
     @Test
     void testProcessor_InvalidYaml_ShouldThrowException() {
 
-        String invalidYaml =
-                "server:\n" +
-                        "  port: 8080\n" + "::host localhost";
+        String invalidYaml = "server:\n" + "  port: 8080\n" + "::host localhost";
 
         ProcessorYaml processorYaml = new ProcessorYaml();
 
