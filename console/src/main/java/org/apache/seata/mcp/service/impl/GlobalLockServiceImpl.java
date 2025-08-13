@@ -44,7 +44,7 @@ public class GlobalLockServiceImpl implements GlobalLockService {
         if (param.getTimeEnd() != null && param.getTimeStart() != null) {
             if (param.getTimeEnd() - param.getTimeStart()
                     > configuration.getQueryDuration()) {
-                return "The query time span is not allowed to exceed the max query duration";
+                return "The query time span is not allowed to exceed the max query duration(milliseconds): "+ configuration.getQueryDuration();
             }
         }
         if (StringUtils.isBlank(result)) {

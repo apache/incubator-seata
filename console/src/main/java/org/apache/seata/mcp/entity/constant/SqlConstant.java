@@ -27,11 +27,11 @@ public class SqlConstant {
 
     public static final String GET_UNDO_LOG_SQL = "SELECT rollback_info FROM undo_log WHERE";
 
-    public static final String PARAM_BRANCH_ID_SQL = " branch_id = ?";
+    public static final String PARAM_BRANCH_ID_SQL = " branch_id = ? #";
 
-    public static final String PARAM_XID_SQL = " xid = ?";
+    public static final String PARAM_XID_SQL = " xid = ? #";
 
-    public static final String UNDO_LOG_STATUS_SQL = " log_status = ?";
+    public static final String UNDO_LOG_STATUS_SQL = " log_status = ? #";
 
     public static final String UNDO_LOG_CREATE_TIME_SQL = " log_created BETWEEN ? AND ?";
 
