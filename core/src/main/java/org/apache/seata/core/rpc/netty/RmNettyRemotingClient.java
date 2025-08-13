@@ -320,6 +320,7 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
         super.destroy();
         initialized.getAndSet(false);
         instance = null;
+        transactionServiceGroup = null;
     }
 
     @Override

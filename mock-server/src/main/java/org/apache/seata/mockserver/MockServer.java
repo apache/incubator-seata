@@ -23,6 +23,8 @@ import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.NumberUtils;
 import org.apache.seata.common.util.UUIDGenerator;
+import org.apache.seata.config.ConfigurationCache;
+import org.apache.seata.core.constants.ConfigurationKeys;
 import org.apache.seata.core.rpc.netty.NettyServerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,6 +76,10 @@ public class MockServer {
         if (!inited) {
             synchronized (MockServer.class) {
                 if (!inited) {
+                    ConfigurationCache.clear();
+                    // Clear the property for any of the supported events
+                    System.clearProperty(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
+                    System.clearProperty("server.port");
                     inited = true;
                     workingThreads = new ThreadPoolExecutor(
                             50,

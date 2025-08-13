@@ -81,4 +81,15 @@ public class ProxyUtilsGlobalTransactionalTest {
 
         Assertions.assertNotNull(result);
     }
+
+    @Test
+    public void testXAWithCombineTransaction() {
+        BusinessCombineImpl businessCombine = new BusinessCombineImpl();
+
+        Business businessProxy = ProxyUtil.createProxy(businessCombine);
+
+        String result = businessProxy.doBiz("test");
+
+        Assertions.assertNotNull(result);
+    }
 }
