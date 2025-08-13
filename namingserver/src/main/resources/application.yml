@@ -78,8 +78,8 @@ seata:
       enabled: false
 
   # Business data source configuration
-  datasources:
-    user:
+  businessDataSources:
+    sepsisDatabase:
       enabled: true
       db-type: mysql
       driverClassName: com.mysql.cj.jdbc.Driver
@@ -90,7 +90,7 @@ seata:
       min-conn: 5
       max-conn: 50
       max-wait: 5000L
-    account:
+    seataDatabase:
       enabled: true
       db-type: mysql
       driverClassName: com.mysql.cj.jdbc.Driver
@@ -101,11 +101,11 @@ seata:
       min-conn: 5
       max-conn: 50
       max-wait: 5000L
-    zhaoxin:
+    recruitNewcomersDatabase:
       enabled: true
       db-type: mysql
       driverClassName: com.mysql.cj.jdbc.Driver
-      url: jdbc:mysql://8.138.127.84:3306/boge?useSSL=false
+      url: jdbc:mysql://localhost:3306/zhaoxin25_dev?useSSL=false
       username: root
       password: Il02mayi
       datasource: hikari
