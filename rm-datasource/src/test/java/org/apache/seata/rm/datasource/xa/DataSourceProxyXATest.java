@@ -204,7 +204,6 @@ public class DataSourceProxyXATest {
 
             holderMock.verify(() -> CombineConnectionHolder.get(realDataSource));
         }
-
     }
 
     @AfterAll
