@@ -92,17 +92,24 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
         if (StringUtils.isBlank(resourceId)) {
             throw new StoreException("you cannot query without resourceId");
         }
+        int andCounts = 0;
         if (StringUtils.isNotBlank(branchId)) {
             sql += SqlConstant.PARAM_BRANCH_ID_SQL;
             params.add(branchId);
+            andCounts++;
         }
         if (StringUtils.isNotBlank(xid)) {
             sql += SqlConstant.PARAM_XID_SQL;
             params.add(xid);
+            andCounts++;
         }
         if (logStatus != null) {
             sql += SqlConstant.UNDO_LOG_STATUS_SQL;
             params.add(logStatus);
+            andCounts++;
+        }
+        for(int i = 1;i<andCounts;i++){
+            sql = sql.replace("#","AND");
         }
         if (logCreateTime != null) {
             String startTime = logCreateTime.getStartTime();
@@ -118,7 +125,7 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
                         .toInstant()
                         .toEpochMilli();
                 if (endTimestamp - startTimestamp > max_time_duration) {
-                    throw new StoreException("The query time span is not allowed to exceed the max query duration");
+                    throw new StoreException("The query time span is not allowed to exceed the max query duration(milliseconds): "+max_time_duration);
                 }
             }
             if (startTime != null) {
@@ -142,7 +149,7 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
                         .toInstant()
                         .toEpochMilli();
                 if (endTimestamp - startTimestamp > max_time_duration) {
-                    throw new StoreException("The query time span is not allowed to exceed the max query duration");
+                    throw new StoreException("The query time span is not allowed to exceed the max query duration(milliseconds): "+max_time_duration);
                 }
             }
             if (startTime != null) {

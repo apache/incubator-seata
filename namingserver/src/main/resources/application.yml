@@ -68,7 +68,7 @@ seata:
     heartbeat: false
     promptSupport: true
     resourceSupport: true
-    # Query limits the maximum time interval
+    # Query limits the maximum time interval, The unit is milliseconds
     query:
       max_query_duration: 86400000
     prompts:

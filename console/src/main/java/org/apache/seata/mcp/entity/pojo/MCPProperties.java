@@ -68,7 +68,7 @@ public class MCPProperties {
      */
     private boolean heartbeat = false;
     /**
-     * Maximum query interval
+     * Maximum query interval, Millisecond, default: One day: 86400000L
      */
     private Long queryDuration = 86400000L;
 
