@@ -170,12 +170,13 @@ public class ZkConfigurationTest {
         when(mockData.getData()).thenReturn(invalidYaml.getBytes(StandardCharsets.UTF_8));
 
         try (MockedStatic<ConfigProcessor> processorMockedStatic = Mockito.mockStatic(ConfigProcessor.class)) {
-            processorMockedStatic.when(() -> ConfigProcessor.resolverConfigDataType(anyString()))
+            processorMockedStatic
+                    .when(() -> ConfigProcessor.resolverConfigDataType(anyString()))
                     .thenReturn("yaml");
-            processorMockedStatic.when(() -> ConfigProcessor.processConfig(anyString(), anyString()))
+            processorMockedStatic
+                    .when(() -> ConfigProcessor.processConfig(anyString(), anyString()))
                     .thenThrow(new IOException("mock io exception"));
             listener.event(CuratorCacheListener.Type.NODE_CHANGED, null, mockData);
         }
-
     }
 }

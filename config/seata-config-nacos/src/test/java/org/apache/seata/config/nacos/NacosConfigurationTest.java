@@ -23,11 +23,15 @@ import org.apache.seata.config.ConfigurationChangeEvent;
 import org.apache.seata.config.ConfigurationChangeListener;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.config.Dispose;
+import org.apache.seata.config.processor.ConfigProcessor;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -35,6 +39,8 @@ import java.lang.reflect.Method;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
+import static org.mockito.ArgumentMatchers.anyString;
 
 /**
  * The type Nacos configuration test
@@ -139,6 +145,52 @@ public class NacosConfigurationTest {
 
         Properties actualConfig = (Properties) seataConfigField.get(null);
         Assertions.assertEquals("redis", actualConfig.getProperty(configKey));
+
+        Assertions.assertFalse(listener.invoked);
+    }
+
+    @Test
+    public void testInnerReceiveThrowException() throws Exception {
+
+        String dataId = "seata.properties";
+        String group = "SEATA_GROUP";
+        String configKey = "session.mode";
+
+        Properties oldConfig = new Properties();
+        oldConfig.setProperty(configKey, "db");
+
+        Field seataConfigField = NacosConfiguration.class.getDeclaredField("seataConfig");
+        seataConfigField.setAccessible(true);
+        seataConfigField.set(null, oldConfig);
+
+        TestListener listener = new TestListener();
+        NacosConfiguration.NacosListener nacosListener = getNacosListener(dataId, listener);
+
+        ConcurrentMap<ConfigurationChangeListener, NacosConfiguration.NacosListener> innerMap =
+                new ConcurrentHashMap<>();
+        innerMap.put(listener, nacosListener);
+
+        ConcurrentMap<String, ConcurrentMap<ConfigurationChangeListener, NacosConfiguration.NacosListener>> outerMap =
+                new ConcurrentHashMap<>();
+        outerMap.put(dataId, innerMap);
+
+        Field listenerMapField = NacosConfiguration.class.getDeclaredField("CONFIG_LISTENERS_MAP");
+        listenerMapField.setAccessible(true);
+        listenerMapField.set(null, outerMap);
+
+        try (MockedStatic<ConfigProcessor> processorMockedStatic = Mockito.mockStatic(ConfigProcessor.class)) {
+            processorMockedStatic
+                    .when(() -> ConfigProcessor.resolverConfigDataType(anyString()))
+                    .thenReturn("yaml");
+            processorMockedStatic
+                    .when(() -> ConfigProcessor.processConfig(anyString(), anyString()))
+                    .thenThrow(new IOException("mock io exception"));
+            // execute
+            nacosListener.innerReceive(dataId, group, "session.mode=redis");
+        }
+
+        Properties actualConfig = (Properties) seataConfigField.get(null);
+        Assertions.assertEquals("db", actualConfig.getProperty(configKey));
 
         Assertions.assertFalse(listener.invoked);
     }
