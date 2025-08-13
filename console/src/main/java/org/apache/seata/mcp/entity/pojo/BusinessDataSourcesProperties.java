@@ -39,7 +39,9 @@ public class BusinessDataSourcesProperties implements InitializingBean {
      */
     private static final Map<String, DataSourceProperties> datasources = new HashMap<>();
 
-    private static final String BASE_PREFIX = "seata.datasources.";
+    private static final Map<String,String> dataSourcesNamesAndResourceIds = new HashMap<>();
+
+    private static final String BASE_PREFIX = "seata.businessDataSources.";
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -65,6 +67,7 @@ public class BusinessDataSourcesProperties implements InitializingBean {
 
             // Use the database URL as a unique identifier
             datasources.put(resourceId, props);
+            dataSourcesNamesAndResourceIds.put(name,resourceId);
         }
     }
 
@@ -96,7 +99,7 @@ public class BusinessDataSourcesProperties implements InitializingBean {
                     for (String propertyName : enumSource.getPropertyNames()) {
                         if (propertyName.startsWith(BASE_PREFIX)) {
                             String[] parts = propertyName.split("\\.");
-                            if (parts.length > 3) { // seata.datasources.{name}.{property}
+                            if (parts.length > 3) { // seata.businessDataSources.{name}.{property}
                                 String dsName = parts[2];
                                 if (!processedNames.contains(dsName)) {
                                     // Confirm that this is a valid data source configuration
@@ -117,6 +120,8 @@ public class BusinessDataSourcesProperties implements InitializingBean {
     public static Map<String, DataSourceProperties> getDatasources() {
         return datasources;
     }
+
+    public static Map<String,String> getDataSourcesNamesAndResourceIds(){ return dataSourcesNamesAndResourceIds; }
 
     public static Set<String> getResourceIds() {
         return datasources.keySet();
