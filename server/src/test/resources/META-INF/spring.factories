@@ -14,7 +14,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-
-server.port=18091
-seata.server.service-port=18091
+org.springframework.context.ApplicationListener=\
+org.apache.seata.server.spring.listener.ClearServerServicePortInitializer

@@ -114,6 +114,7 @@ public class ServerApplicationListener implements GenericApplicationListener {
             // add property source to the first position
             Properties pro = new Properties();
             pro.setProperty(SERVER_SERVICE_PORT_CONFIG, port);
+            pro.setProperty(SERVER_SERVICE_PORT_CAMEL, port);
             environment.getPropertySources().addFirst(new PropertiesPropertySource("serverProperties", pro));
         }
     }

@@ -20,7 +20,7 @@ import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.seata.common.util.IOUtil;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.lock.Locker;
-import org.apache.seata.server.DynamicPortTestConfig;
+import org.apache.seata.server.BaseSpringBootTest;
 import org.apache.seata.server.lock.LockManager;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.storage.db.lock.DataBaseLocker;
@@ -29,9 +29,7 @@ import org.apache.seata.server.storage.file.lock.FileLockManager;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Import;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -40,9 +38,7 @@ import java.sql.Statement;
 
 /**
  */
-@SpringBootTest
-@Import(DynamicPortTestConfig.class)
-public class DataBaseLockManagerImplTest {
+public class DataBaseLockManagerImplTest extends BaseSpringBootTest {
 
     static LockManager lockManager = null;
 
