@@ -25,6 +25,7 @@ import org.apache.seata.rm.datasource.combine.CombineConnectionHolder;
 import org.apache.seata.rm.datasource.mock.MockDataSource;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 import org.mockito.MockedStatic;
@@ -46,6 +47,13 @@ import static org.mockito.Mockito.when;
  * Tests for DataSourceProxyXA
  */
 public class DataSourceProxyXATest {
+    @BeforeEach
+    public void setUp() {
+        // Clean up context before each test
+        RootContext.unbind();
+        RootContext.unbindBranchType();
+        RootContext.unbindCombineTransaction();
+    }
 
     @Test
     public void test_constructor() {
@@ -196,6 +204,7 @@ public class DataSourceProxyXATest {
 
             holderMock.verify(() -> CombineConnectionHolder.get(realDataSource));
         }
+
     }
 
     @AfterAll
