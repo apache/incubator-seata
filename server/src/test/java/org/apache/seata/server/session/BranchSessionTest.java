@@ -19,15 +19,13 @@ package org.apache.seata.server.session;
 import org.apache.seata.common.util.UUIDGenerator;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchType;
-import org.apache.seata.server.DynamicPortTestConfig;
+import org.apache.seata.server.BaseSpringBootTest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Import;
 
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
@@ -39,9 +37,7 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
  *
  * @since 2019 /1/23
  */
-@SpringBootTest
-@Import(DynamicPortTestConfig.class)
-public class BranchSessionTest {
+public class BranchSessionTest extends BaseSpringBootTest {
 
     @BeforeAll
     public static void setUp(ApplicationContext context) {}
