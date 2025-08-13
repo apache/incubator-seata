@@ -21,11 +21,14 @@ import com.kingbase8.xa.KBXAConnection;
 import com.mysql.jdbc.JDBC4MySQLConnection;
 import com.mysql.jdbc.jdbc2.optional.JDBC4ConnectionWrapper;
 import org.apache.seata.core.context.RootContext;
+import org.apache.seata.rm.datasource.combine.CombineConnectionHolder;
 import org.apache.seata.rm.datasource.mock.MockDataSource;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
 import javax.sql.DataSource;
@@ -37,11 +40,20 @@ import java.sql.Driver;
 import java.sql.SQLException;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Tests for DataSourceProxyXA
  */
 public class DataSourceProxyXATest {
+    @BeforeEach
+    public void setUp() {
+        // Clean up context before each test
+        RootContext.unbind();
+        RootContext.unbindBranchType();
+        RootContext.unbindCombineTransaction();
+    }
 
     @Test
     public void test_constructor() {
@@ -57,10 +69,10 @@ public class DataSourceProxyXATest {
     @Test
     public void testGetConnection() throws SQLException {
         // Mock
-        Driver driver = Mockito.mock(Driver.class);
-        JDBC4MySQLConnection connection = Mockito.mock(JDBC4MySQLConnection.class);
+        Driver driver = mock(Driver.class);
+        JDBC4MySQLConnection connection = mock(JDBC4MySQLConnection.class);
         Mockito.when(connection.getAutoCommit()).thenReturn(true);
-        DatabaseMetaData metaData = Mockito.mock(DatabaseMetaData.class);
+        DatabaseMetaData metaData = mock(DatabaseMetaData.class);
         Mockito.when(metaData.getURL()).thenReturn("jdbc:mysql:xxx");
         Mockito.when(connection.getMetaData()).thenReturn(metaData);
         Mockito.when(driver.connect(any(), any())).thenReturn(connection);
@@ -91,11 +103,11 @@ public class DataSourceProxyXATest {
     @Test
     public void testGetMariaXaConnection() throws SQLException, ClassNotFoundException {
         // Mock
-        Driver driver = Mockito.mock(Driver.class);
+        Driver driver = mock(Driver.class);
         Class clazz = Class.forName("org.mariadb.jdbc.MariaDbConnection");
-        Connection connection = (Connection) (Mockito.mock(clazz));
+        Connection connection = (Connection) (mock(clazz));
         Mockito.when(connection.getAutoCommit()).thenReturn(true);
-        DatabaseMetaData metaData = Mockito.mock(DatabaseMetaData.class);
+        DatabaseMetaData metaData = mock(DatabaseMetaData.class);
         Mockito.when(metaData.getURL()).thenReturn("jdbc:mariadb:xxx");
         Mockito.when(connection.getMetaData()).thenReturn(metaData);
         Mockito.when(driver.connect(any(), any())).thenReturn(connection);
@@ -131,11 +143,11 @@ public class DataSourceProxyXATest {
             disabledReason = "druid 1.2.8 correct support kingbase")
     public void testGetKingbaseXaConnection() throws SQLException, ClassNotFoundException {
         // Mock
-        Driver driver = Mockito.mock(Driver.class);
+        Driver driver = mock(Driver.class);
         Class clazz = Class.forName("com.kingbase8.jdbc.KbConnection");
-        Connection connection = (Connection) (Mockito.mock(clazz));
+        Connection connection = (Connection) (mock(clazz));
         Mockito.when(connection.getAutoCommit()).thenReturn(true);
-        DatabaseMetaData metaData = Mockito.mock(DatabaseMetaData.class);
+        DatabaseMetaData metaData = mock(DatabaseMetaData.class);
         Mockito.when(metaData.getURL()).thenReturn("jdbc:kingbase8:xxx");
         Mockito.when(connection.getMetaData()).thenReturn(metaData);
         Mockito.when(driver.connect(any(), any())).thenReturn(connection);
@@ -160,6 +172,38 @@ public class DataSourceProxyXATest {
         XAConnection xaConnection = connectionProxyXA.getWrappedXAConnection();
         Assertions.assertEquals(xaConnection.getClass(), KBXAConnection.class);
         tearDown();
+    }
+
+    @Test
+    public void testGetConnectionInCombineMode() throws SQLException {
+        RootContext.bind("testXID");
+        RootContext.bindCombineTransaction();
+
+        ConnectionProxyXA combineConn = mock(ConnectionProxyXA.class);
+        when(combineConn.isClosed()).thenReturn(false);
+
+        try (MockedStatic<CombineConnectionHolder> holderMock = Mockito.mockStatic(CombineConnectionHolder.class)) {
+            holderMock
+                    .when(() -> CombineConnectionHolder.get(any(DataSource.class)))
+                    .thenReturn(combineConn);
+            Driver driver = mock(Driver.class);
+            JDBC4MySQLConnection connection = mock(JDBC4MySQLConnection.class);
+            Mockito.when(connection.getAutoCommit()).thenReturn(true);
+            DatabaseMetaData metaData = mock(DatabaseMetaData.class);
+            Mockito.when(metaData.getURL()).thenReturn("jdbc:mysql:xxx");
+            Mockito.when(connection.getMetaData()).thenReturn(metaData);
+            Mockito.when(driver.connect(any(), any())).thenReturn(connection);
+
+            DruidDataSource realDataSource = new DruidDataSource();
+            realDataSource.setDriver(driver);
+            DataSourceProxyXA proxyDataSource = new DataSourceProxyXA(realDataSource);
+
+            Connection result = proxyDataSource.getConnection();
+
+            Assertions.assertEquals(combineConn, result);
+
+            holderMock.verify(() -> CombineConnectionHolder.get(realDataSource));
+        }
     }
 
     @AfterAll

@@ -14,30 +14,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.integration.tx.api.interceptor;
+package org.apache.seata.integration.tx.api.interceptor.parser;
+
+import org.apache.seata.spring.annotation.CombineTransactional;
+import org.apache.seata.spring.annotation.GlobalTransactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * The  InvocationHandlerType enum
+ * The type Business.
  */
-public enum InvocationHandlerType {
+@GlobalTransactional(timeoutMills = 300000, name = "busi-doBiz")
+@CombineTransactional
+public class BusinessCombineImpl implements Business {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BusinessCombineImpl.class);
 
-    /**
-     * GlobalTransactional InvocationHandler
-     */
-    GlobalTransactional,
-
-    /**
-     * TwoPhase InvocationHandler
-     */
-    TwoPhaseAnnotation,
-
-    /**
-     * SagaAnnotation InvocationHandler
-     */
-    SagaAnnotation,
-
-    /**
-     * CombineTransactional InvocationHandler
-     */
-    CombineTransactional
+    @Override
+    public String doBiz(String msg) {
+        LOGGER.info("Business doBiz");
+        return "hello " + msg;
+    }
 }
