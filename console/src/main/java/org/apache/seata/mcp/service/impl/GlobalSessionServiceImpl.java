@@ -30,10 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class GlobalSessionServiceImpl implements GlobalSessionService {
@@ -53,7 +50,7 @@ public class GlobalSessionServiceImpl implements GlobalSessionService {
         if (param.getTimeEnd() != null && param.getTimeStart() != null) {
             if (param.getTimeEnd() - param.getTimeStart()
                     > configuration.getQueryDuration()) {
-                return "The query time span is not allowed to exceed the max query duration";
+                return "The query time span is not allowed to exceed the max query duration(milliseconds): "+configuration.getQueryDuration();
             }
         }
         String result = mcpRPCService.getCallTC(nameSpaceDetail, RPCConstant.GLOBAL_SESSION_BASE_URL + "/query", param, null, null);
@@ -146,6 +143,13 @@ public class GlobalSessionServiceImpl implements GlobalSessionService {
     public List<String> getAbnormalSessions(NameSpaceDetail nameSpaceDetail, Long startTime, Long endTime) {
         List<String> result = new ArrayList<>();
         GlobalSessionParam param = new GlobalSessionParam();
+        // Check whether the query interval is too large
+        if (endTime != null && startTime != null) {
+            if (endTime - startTime
+                    > configuration.getQueryDuration()) {
+                return Collections.singletonList("The query time span is not allowed to exceed the max query duration(milliseconds): "+configuration.getQueryDuration());
+            }
+        }
         param.setTimeStart(startTime);
         param.setTimeEnd(endTime);
         param.setPageNum(1);
