@@ -14,30 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.integration.tx.api.interceptor;
+package org.apache.seata.spring.annotation;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * The  InvocationHandlerType enum
+ * The interface Combine transactional.
+ * This annotation is only valid in XA mode.
  */
-public enum InvocationHandlerType {
-
-    /**
-     * GlobalTransactional InvocationHandler
-     */
-    GlobalTransactional,
-
-    /**
-     * TwoPhase InvocationHandler
-     */
-    TwoPhaseAnnotation,
-
-    /**
-     * SagaAnnotation InvocationHandler
-     */
-    SagaAnnotation,
-
-    /**
-     * CombineTransactional InvocationHandler
-     */
-    CombineTransactional
-}
+@Target({ElementType.TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface CombineTransactional {}
