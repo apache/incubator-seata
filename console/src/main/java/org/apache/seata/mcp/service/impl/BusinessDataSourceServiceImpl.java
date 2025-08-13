@@ -108,14 +108,13 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
             params.add(logStatus);
             andCounts++;
         }
-        for(int i = 1;i<andCounts;i++){
-            sql = sql.replace("#","AND");
-        }
+        boolean containsTimeDuration = false;
         if (logCreateTime != null) {
             String startTime = logCreateTime.getStartTime();
             String endTime = logCreateTime.getEndTime();
             if (startTime != null && endTime != null) {
                 sql += SqlConstant.UNDO_LOG_CREATE_TIME_SQL;
+                containsTimeDuration = true;
                 Long startTimestamp = LocalDateTime.parse(startTime, formatter)
                         .atZone(ZoneId.systemDefault())
                         .toInstant()
@@ -140,6 +139,7 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
             String endTime = logModifiedTime.getEndTime();
             if (startTime != null && endTime != null) {
                 sql += SqlConstant.UNDO_LOG_MODIFY_TIME_SQL;
+                containsTimeDuration = true;
                 Long startTimestamp = LocalDateTime.parse(startTime, formatter)
                         .atZone(ZoneId.systemDefault())
                         .toInstant()
@@ -159,6 +159,16 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
                 params.add(endTime);
             }
         }
+        if(containsTimeDuration){
+            for(int i = 0;i<andCounts;i++){
+                sql = sql.replace("#","AND");
+            }
+        }else{
+            for(int i = 1;i<andCounts;i++){
+                sql = sql.replace("#","AND");
+            }
+        }
+        sql = sql.replaceAll("#","");
         List<byte[]> result = new ArrayList<>();
         Object[] objects = params.isEmpty() ? null : params.toArray();
         List<Map<String, Object>> query = sqlExecutionTemplate.query(resourceId, sql, objects);
