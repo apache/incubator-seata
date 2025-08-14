@@ -17,11 +17,9 @@
 package org.apache.seata.server.storage.raft.store;
 
 import org.apache.seata.core.store.MappingDO;
-import org.apache.seata.server.DynamicPortTestConfig;
+import org.apache.seata.server.BaseSpringBootTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,9 +27,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SpringBootTest
-@Import(DynamicPortTestConfig.class)
-public class RaftVGroupMappingStoreManagerTest {
+public class RaftVGroupMappingStoreManagerTest extends BaseSpringBootTest {
 
     private RaftVGroupMappingStoreManager raftVGroupMappingStoreManager;
 

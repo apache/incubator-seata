@@ -21,14 +21,12 @@ import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.store.BranchTransactionDO;
 import org.apache.seata.core.store.GlobalTransactionDO;
-import org.apache.seata.server.DynamicPortTestConfig;
+import org.apache.seata.server.BaseSpringBootTest;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.storage.SessionConverter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 
 import java.util.Date;
 
@@ -36,9 +34,7 @@ import java.util.Date;
  * The session converter utils
  *
  */
-@SpringBootTest
-@Import(DynamicPortTestConfig.class)
-public class SessionConverterTest {
+public class SessionConverterTest extends BaseSpringBootTest {
 
     @Test
     public void testConvertGlobalSessionNotNull() {

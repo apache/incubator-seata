@@ -33,7 +33,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import static org.apache.seata.metrics.IdConstants.APP_ID_KEY;
-import static org.apache.seata.metrics.IdConstants.CLIENT_ID_KEY;
 import static org.apache.seata.metrics.IdConstants.GROUP_KEY;
 import static org.apache.seata.metrics.IdConstants.HOST_AND_PORT;
 import static org.apache.seata.metrics.IdConstants.LIMIT_TYPE_KEY;
@@ -232,7 +231,6 @@ public class MetricsSubscriber {
         registry.getSummary(MeterIdConstants.SUMMARY_RATE_LIMIT
                         .withTag(LIMIT_TYPE_KEY, event.getLimitType())
                         .withTag(APP_ID_KEY, event.getApplicationId())
-                        .withTag(CLIENT_ID_KEY, event.getClientId())
                         .withTag(HOST_AND_PORT, event.getServerIpAddressAndPort()))
                 .increase(1);
     }

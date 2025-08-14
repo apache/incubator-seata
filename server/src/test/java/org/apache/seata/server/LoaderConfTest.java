@@ -19,17 +19,13 @@ package org.apache.seata.server;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 
 /**
  *
  */
-@SpringBootTest
-@Import(DynamicPortTestConfig.class)
-public class LoaderConfTest {
+public class LoaderConfTest extends BaseSpringBootTest {
 
     static Environment environment;
 
