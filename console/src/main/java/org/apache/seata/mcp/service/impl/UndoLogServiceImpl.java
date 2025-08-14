@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class UndoLogServiceImpl implements UndoLogService {
@@ -36,15 +37,21 @@ public class UndoLogServiceImpl implements UndoLogService {
     @Override
     public String queryAndAnalyzeUndoLog(UndoLogParam param) {
         // 1. First, query the undo_log data of the corresponding RM based on the parameters
-        List<byte[]> undoLogInfo = dataSourceService.getUndoLogInfo(param);
+        Map<String,List<byte[]>> undoLogInfo = dataSourceService.getUndoLogInfo(param);
         if (undoLogInfo.isEmpty()) {
-            return "failed to get undo log info";
+            return "The corresponding undoLog data cannot be queried";
         }
         // 2. Then deserialize undoLogInfo to BranchUndoLog through FastJsonParser
         FastjsonUndoLogParser parser = new FastjsonUndoLogParser();
         List<String> result = new ArrayList<>();
-        for (byte[] bytes : undoLogInfo) {
-            result.add(parser.decode(bytes));
+//        for (byte[] bytes : undoLogInfo) {
+//            result.add(parser.decode(bytes));
+//        }
+        for (String context : undoLogInfo.keySet()){
+            List<byte[]> bytes = undoLogInfo.get(context);
+            for(byte[] infos : bytes){
+                result.add(parser.decode(infos));
+            }
         }
         return result.toString();
     }
