@@ -83,8 +83,7 @@ public class XAUtilsTest {
             Connection specificConn = mock(Class.forName(connectionClass).asSubclass(Connection.class));
 
             try (MockedConstruction<?> xaConstruction = mockConstruction(
-                    Class.forName(xaConnectionClass).asSubclass(XAConnection.class),
-                    (mock, context) -> {
+                    Class.forName(xaConnectionClass).asSubclass(XAConnection.class), (mock, context) -> {
                         Connection param = (Connection) context.arguments().get(0);
                         assertSame(specificConn, param);
                     })) {
@@ -96,14 +95,17 @@ public class XAUtilsTest {
             fail(dbType + " test failed: " + e.getMessage());
         }
     }
+
     @Test
     public void testCreateXAConnectionMariaDB() throws SQLException, ClassNotFoundException {
-        testCreateXAConnectionForDbType(MARIADB, "org.mariadb.jdbc.MariaDbConnection", "org.mariadb.jdbc.MariaXaConnection");
+        testCreateXAConnectionForDbType(
+                MARIADB, "org.mariadb.jdbc.MariaDbConnection", "org.mariadb.jdbc.MariaXaConnection");
     }
 
     @Test
     public void testCreateXAConnectionKingbase() throws SQLException, ClassNotFoundException {
-        testCreateXAConnectionForDbType(KINGBASE, "com.kingbase8.core.BaseConnection", "com.kingbase8.xa.KBXAConnection");
+        testCreateXAConnectionForDbType(
+                KINGBASE, "com.kingbase8.core.BaseConnection", "com.kingbase8.xa.KBXAConnection");
     }
 
     @Test
