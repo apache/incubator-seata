@@ -61,7 +61,6 @@
             <groupId>net.bytebuddy</groupId>
             <artifactId>byte-buddy</artifactId>
         </dependency>
-        
     </dependencies>
     
 </project>
