@@ -41,6 +41,12 @@ public class UndoLogParam {
     @ToolParam(description = "The time period modified, start time and end time can be the same")
     private ModifyTime logModifiedTime;
 
+    @ToolParam(description = "PAGE NUMBER", required = true, example = "1")
+    private int pageNum;
+
+    @ToolParam(description = "PageSize", required = true, example = "100")
+    private int pageSize;
+
     public static class CreateTime {
         @ToolParam(description = "Start time", example = "2025-07-09 11:38:45, yyyy-MM-dd HH:mm:ss")
         private String startTime;
@@ -101,13 +107,16 @@ public class UndoLogParam {
 
     @Override
     public String toString() {
-        return "UndoLogParam{" + "resourceId='"
-                + resourceId + '\'' + ", branchId='"
-                + branchId + '\'' + ", xid='"
-                + xid + '\'' + ", logStatus="
-                + logStatus + ", logCreateTime="
-                + logCreateTime + ", logModifiedTime="
-                + logModifiedTime + '}';
+        return "UndoLogParam{" +
+                "resourceId='" + resourceId + '\'' +
+                ", branchId='" + branchId + '\'' +
+                ", xid='" + xid + '\'' +
+                ", logStatus=" + logStatus +
+                ", logCreateTime=" + logCreateTime +
+                ", logModifiedTime=" + logModifiedTime +
+                ", pageNum=" + pageNum +
+                ", pageSize=" + pageSize +
+                '}';
     }
 
     public String getResourceId() {
@@ -156,5 +165,21 @@ public class UndoLogParam {
 
     public void setLogModifiedTime(ModifyTime logModifiedTime) {
         this.logModifiedTime = logModifiedTime;
+    }
+
+    public int getPageNum() {
+        return pageNum;
+    }
+
+    public void setPageNum(int pageNum) {
+        this.pageNum = pageNum;
+    }
+
+    public int getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(int pageSize) {
+        this.pageSize = pageSize;
     }
 }

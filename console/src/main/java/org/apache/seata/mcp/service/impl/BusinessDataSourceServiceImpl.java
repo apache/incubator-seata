@@ -30,6 +30,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -77,7 +78,7 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
     }
 
     @Override
-    public List<byte[]> getUndoLogInfo(UndoLogParam param) {
+    public Map<String,List<byte[]>> getUndoLogInfo(UndoLogParam param) {
         long max_time_duration = mcpProperties.getQueryDuration();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String sql = SqlConstant.GET_UNDO_LOG_SQL;
@@ -88,25 +89,27 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
         Integer logStatus = param.getLogStatus();
         UndoLogParam.CreateTime logCreateTime = param.getLogCreateTime();
         UndoLogParam.ModifyTime logModifiedTime = param.getLogModifiedTime();
-        int idx = 0;
+        int pageNum = param.getPageNum();
+        int pageSize = param.getPageSize();
+        int offset = getOffsetAndValidationPageQuerySql(pageNum,pageSize);
         if (StringUtils.isBlank(resourceId)) {
             throw new StoreException("you cannot query without resourceId");
         }
-        int andCounts = 0;
+        int paramCounts = 0;
         if (StringUtils.isNotBlank(branchId)) {
             sql += SqlConstant.PARAM_BRANCH_ID_SQL;
             params.add(branchId);
-            andCounts++;
+            paramCounts++;
         }
         if (StringUtils.isNotBlank(xid)) {
             sql += SqlConstant.PARAM_XID_SQL;
             params.add(xid);
-            andCounts++;
+            paramCounts++;
         }
         if (logStatus != null) {
             sql += SqlConstant.UNDO_LOG_STATUS_SQL;
             params.add(logStatus);
-            andCounts++;
+            paramCounts++;
         }
         boolean containsTimeDuration = false;
         if (logCreateTime != null) {
@@ -160,22 +163,31 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
             }
         }
         if(containsTimeDuration){
-            for(int i = 0;i<andCounts;i++){
-                sql = sql.replace("#","AND");
+            for(int i = 0; i< paramCounts; i++){
+                sql = sql.replaceFirst("#","AND");
             }
         }else{
-            for(int i = 1;i<andCounts;i++){
-                sql = sql.replace("#","AND");
+            for(int i = 1; i< paramCounts; i++){
+                sql = sql.replaceFirst("#","AND");
             }
         }
         sql = sql.replaceAll("#","");
-        List<byte[]> result = new ArrayList<>();
-        Object[] objects = params.isEmpty() ? null : params.toArray();
+        sql += SqlConstant.UNDO_LOG_ORDER + SqlConstant.PAGE_QUERY;
+        sql = sql.replaceFirst("%",String.valueOf(pageSize));
+        sql = sql.replaceFirst("%",String.valueOf(offset));
+        Map<String,List<byte[]>> result = new HashMap<>();
+        Object[] objects = params.toArray();
         List<Map<String, Object>> query = sqlExecutionTemplate.query(resourceId, sql, objects);
         for (Map<String, Object> map : query) {
-            Object rollbackInfo = map.get("rollback_info");
-            if (rollbackInfo != null) {
-                result.add((byte[]) rollbackInfo);
+            byte[] rollbackInfo = (byte[]) map.get("rollback_info");
+            String context = (String) map.get("context");
+            if (rollbackInfo != null && context!=null) {
+                List<byte[]> bytes = result.get(context);
+                if(bytes == null){
+                    bytes = new ArrayList<>();
+                }
+                bytes.add(rollbackInfo);
+                result.put(context,bytes);
             }
         }
         return result;
@@ -191,4 +203,22 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
         }
         return "";
     }
+
+    public int getOffsetAndValidationPageQuerySql(int pageNum, int pageSize){
+        int offset = (pageNum-1)*pageSize;
+        if (pageNum < 1) {
+            throw new IllegalArgumentException("The page number must be greater than 0");
+        }
+        if(pageSize<0){
+            throw new IllegalArgumentException("The page number must be greater than 0");
+        }
+        if(pageSize>SqlConstant.MAX_PAGE_SIZE){
+            throw new IllegalArgumentException("Exceeding the maximum pageSize: "+SqlConstant.MAX_PAGE_SIZE);
+        }
+        if(offset>SqlConstant.MAX_OFFSET_THRESHOLD){
+            throw new StoreException("Exceeding the maximum offset: "+ SqlConstant.MAX_OFFSET_THRESHOLD);
+        }
+        return offset;
+    }
+
 }

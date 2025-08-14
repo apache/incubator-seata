@@ -18,6 +18,7 @@ package org.apache.seata.mcp.store;
 
 import org.apache.seata.common.exception.StoreException;
 import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.mcp.entity.constant.SqlConstant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -88,8 +89,8 @@ public class SqlExecutionTemplate {
                 throw new StoreException("The query valid failed,Only query operations are allowed：" + sql);
             }
             conn = getDataSource(resourceId).getConnection();
-            if(params==null){
-                if(sql.contains("where") || sql.contains("WHERE")){
+            if(params==null || params.length==0){
+                if((sql.contains("where") || sql.contains("WHERE"))){
                     sql = sql.replaceAll("(?i)\\bWHERE\\b.*", "").trim();
                 }
             }
