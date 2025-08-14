@@ -353,7 +353,7 @@ public class ConsulConfiguration extends AbstractConfiguration {
                     if (dataId.equals(getConsulConfigKey())) {
                         if (StringUtils.isBlank(value)) {
                             LOGGER.warn("Empty config from Consul, dataId='{}'. Skipped.", dataId);
-                            return;
+                            continue;
                         }
                         // The new config change listener
                         Properties seataConfigNew;
