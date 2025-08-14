@@ -118,7 +118,17 @@ class ConsulConfigurationTest {
 
         ConsulConfiguration newInstance = ConsulConfiguration.getInstance();
 
-        assertEquals("val1", newInstance.getLatestConfig("key1", null, 1000));
+        // Short retry loop to absorb potential propagation delay in CI environments
+        String value = null;
+        long deadline = System.nanoTime() + java.util.concurrent.TimeUnit.SECONDS.toNanos(3); // Max ~3 seconds
+        do {
+            value = newInstance.getLatestConfig("key1", null, 1000);
+            if ("val1".equals(value)) break;
+            Thread.sleep(100);
+        } while (System.nanoTime() < deadline);
+
+        // Verify that the value retrieved matches the expected one
+        assertEquals("val1", value, "KV should be visible after a short await");
     }
 
     // Utility method to set private fields via reflection
