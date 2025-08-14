@@ -28,5 +28,5 @@ public interface BusinessDataSourceService {
 
     List<Map<String, Object>> runSql(String sql, String resourceId);
 
-    List<byte[]> getUndoLogInfo(UndoLogParam undoLogParam);
+    Map<String,List<byte[]>> getUndoLogInfo(UndoLogParam undoLogParam);
 }
