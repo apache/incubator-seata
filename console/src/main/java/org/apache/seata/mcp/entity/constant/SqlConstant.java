@@ -25,7 +25,7 @@ public class SqlConstant {
             "SELECT COLUMN_NAME, DATA_TYPE, COLUMN_COMMENT FROM INFORMATION_SCHEMA.COLUMNS "
                     + "WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?";
 
-    public static final String GET_UNDO_LOG_SQL = "SELECT rollback_info FROM undo_log WHERE";
+    public static final String GET_UNDO_LOG_SQL = "SELECT rollback_info,context FROM undo_log WHERE";
 
     public static final String PARAM_BRANCH_ID_SQL = " branch_id = ? #";
 
@@ -36,4 +36,14 @@ public class SqlConstant {
     public static final String UNDO_LOG_CREATE_TIME_SQL = " log_created BETWEEN ? AND ?";
 
     public static final String UNDO_LOG_MODIFY_TIME_SQL = " log_modified BETWEEN ? AND ?";
+
+    public static final String UNDO_LOG_ORDER = " ORDER BY context";
+
+    public static final int MAX_OFFSET_THRESHOLD = 10000;
+
+    public static final int MAX_PAGE_SIZE = 100;
+
+    public static final String PAGE_QUERY = " LIMIT % OFFSET %";
+
+    public static final String WHERE_SQL = " WHERE";
 }
