@@ -34,5 +34,10 @@ public enum InvocationHandlerType {
     /**
      * SagaAnnotation InvocationHandler
      */
-    SagaAnnotation
+    SagaAnnotation,
+
+    /**
+     * CombineTransactional InvocationHandler
+     */
+    CombineTransactional
 }
