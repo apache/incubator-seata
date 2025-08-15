@@ -400,6 +400,10 @@ public class EtcdConfiguration extends AbstractConfiguration {
                                 .getValue()
                                 .getBytes();
                         Properties seataConfigNew;
+                        if (bytes == null || bytes.length == 0) {
+                            LOGGER.warn("config '{}' value is empty from watchResponse", dataId);
+                            return;
+                        }
                         try {
                             seataConfigNew = ConfigProcessor.processConfig(
                                     new String(bytes, StandardCharsets.UTF_8), getEtcdDataType());

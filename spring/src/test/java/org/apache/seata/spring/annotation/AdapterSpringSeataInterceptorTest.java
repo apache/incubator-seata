@@ -17,6 +17,7 @@
 package org.apache.seata.spring.annotation;
 
 import org.aopalliance.intercept.MethodInvocation;
+import org.apache.seata.core.rpc.netty.RmNettyRemotingClient;
 import org.apache.seata.integration.tx.api.interceptor.handler.ProxyInvocationHandler;
 import org.apache.seata.integration.tx.api.interceptor.parser.DefaultInterfaceParser;
 import org.apache.seata.rm.tcc.api.BusinessActionContext;
@@ -43,6 +44,7 @@ class AdapterSpringSeataInterceptorTest {
 
     @BeforeAll
     static void init() throws Throwable {
+        RmNettyRemotingClient.getInstance().destroy();
         // given
         normalTccAction = new NormalTccActionImpl();
         ProxyInvocationHandler proxyInvocationHandler =
