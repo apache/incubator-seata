@@ -30,10 +30,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.ContextConfiguration;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Set;
+
 import static org.apache.seata.common.DefaultValues.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -85,8 +87,7 @@ public class BusinessDataSourcesPropertiesTest {
                     "seata.datasources.db3.url=jdbc:mysql://localhost:3306/db3",
 
                     // Incomplete data sources
-                    "seata.datasources.db4.dbType=postgresql"
-            );
+                    "seata.datasources.db4.dbType=postgresql");
             values.applyTo(context);
         }
     }
@@ -127,8 +128,7 @@ public class BusinessDataSourcesPropertiesTest {
         Map<String, BusinessDataSourcesProperties.DataSourceProperties> datasources =
                 BusinessDataSourcesProperties.getDatasources();
 
-        BusinessDataSourcesProperties.DataSourceProperties db1 =
-                datasources.get("jdbc:mysql://localhost:3306/db1");
+        BusinessDataSourcesProperties.DataSourceProperties db1 = datasources.get("jdbc:mysql://localhost:3306/db1");
 
         assertNotNull(db1);
         assertTrue(db1.isEnabled());
@@ -149,8 +149,7 @@ public class BusinessDataSourcesPropertiesTest {
         Map<String, BusinessDataSourcesProperties.DataSourceProperties> datasources =
                 BusinessDataSourcesProperties.getDatasources();
 
-        BusinessDataSourcesProperties.DataSourceProperties db2 =
-                datasources.get("jdbc:mysql://localhost:3306/db2");
+        BusinessDataSourcesProperties.DataSourceProperties db2 = datasources.get("jdbc:mysql://localhost:3306/db2");
 
         assertNotNull(db2);
         assertTrue(db2.isEnabled());
@@ -170,8 +169,7 @@ public class BusinessDataSourcesPropertiesTest {
         Map<String, BusinessDataSourcesProperties.DataSourceProperties> datasources =
                 BusinessDataSourcesProperties.getDatasources();
 
-        BusinessDataSourcesProperties.DataSourceProperties db3 =
-                datasources.get("jdbc:mysql://localhost:3306/db3");
+        BusinessDataSourcesProperties.DataSourceProperties db3 = datasources.get("jdbc:mysql://localhost:3306/db3");
 
         assertNotNull(db3);
         assertFalse(db3.isEnabled());
@@ -180,7 +178,8 @@ public class BusinessDataSourcesPropertiesTest {
     @Test
     public void testDataSourcePropertiesMethods() throws Exception {
         // Test the methods of the DataSourceProperties class
-        BusinessDataSourcesProperties.DataSourceProperties props = new BusinessDataSourcesProperties.DataSourceProperties();
+        BusinessDataSourcesProperties.DataSourceProperties props =
+                new BusinessDataSourcesProperties.DataSourceProperties();
 
         assertTrue(props.isEnabled());
         assertEquals("mysql", props.getDbType());
@@ -226,11 +225,8 @@ public class BusinessDataSourcesPropertiesTest {
         String url2 = "jdbc:mysql://localhost:3306/testdb";
         String url3 = "jdbc:postgresql://localhost:5432/testdb?currentSchema=public&ssl=true";
 
-        assertEquals("jdbc:mysql://localhost:3306/testdb",
-                field.invoke(configuration, url1));
-        assertEquals("jdbc:mysql://localhost:3306/testdb",
-                field.invoke(configuration, url2));
-        assertEquals("jdbc:postgresql://localhost:5432/testdb",
-                field.invoke(configuration, url3));
+        assertEquals("jdbc:mysql://localhost:3306/testdb", field.invoke(configuration, url1));
+        assertEquals("jdbc:mysql://localhost:3306/testdb", field.invoke(configuration, url2));
+        assertEquals("jdbc:postgresql://localhost:5432/testdb", field.invoke(configuration, url3));
     }
 }

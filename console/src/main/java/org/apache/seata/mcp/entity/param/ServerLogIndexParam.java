@@ -27,15 +27,15 @@ public class ServerLogIndexParam implements Serializable {
     @ToolParam(description = "log type, contains: all, error, warn")
     private String logType;
 
-    @ToolParam(description = "Log creation time, format: yyyy-mm-dd, It is only required to pass in when querying the history log",required = true)
+    @ToolParam(
+            description =
+                    "Log creation time, format: yyyy-mm-dd, It is only required to pass in when querying the history log",
+            required = true)
     private String logTime;
 
     @Override
     public String toString() {
-        return "ServerLogIndexParam{" +
-                "logType='" + logType + '\'' +
-                ", logTime='" + logTime + '\'' +
-                '}';
+        return "ServerLogIndexParam{" + "logType='" + logType + '\'' + ", logTime='" + logTime + '\'' + '}';
     }
 
     public String getLogType() {

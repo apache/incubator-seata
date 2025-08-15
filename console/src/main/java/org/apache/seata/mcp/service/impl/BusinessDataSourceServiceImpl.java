@@ -18,9 +18,9 @@ package org.apache.seata.mcp.service.impl;
 
 import org.apache.seata.common.exception.StoreException;
 import org.apache.seata.common.util.StringUtils;
-import org.apache.seata.mcp.entity.pojo.MCPProperties;
 import org.apache.seata.mcp.entity.constant.SqlConstant;
 import org.apache.seata.mcp.entity.param.UndoLogParam;
+import org.apache.seata.mcp.entity.pojo.MCPProperties;
 import org.apache.seata.mcp.service.BusinessDataSourceService;
 import org.apache.seata.mcp.store.SqlExecutionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,7 +78,7 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
     }
 
     @Override
-    public Map<String,List<byte[]>> getUndoLogInfo(UndoLogParam param) {
+    public Map<String, List<byte[]>> getUndoLogInfo(UndoLogParam param) {
         long max_time_duration = mcpProperties.getQueryDuration();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String sql = SqlConstant.GET_UNDO_LOG_SQL;
@@ -91,7 +91,7 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
         UndoLogParam.ModifyTime logModifiedTime = param.getLogModifiedTime();
         int pageNum = param.getPageNum();
         int pageSize = param.getPageSize();
-        int offset = getOffsetAndValidationPageQuerySql(pageNum,pageSize);
+        int offset = getOffsetAndValidationPageQuerySql(pageNum, pageSize);
         if (StringUtils.isBlank(resourceId)) {
             throw new StoreException("you cannot query without resourceId");
         }
@@ -127,7 +127,9 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
                         .toInstant()
                         .toEpochMilli();
                 if (endTimestamp - startTimestamp > max_time_duration) {
-                    throw new StoreException("The query time span is not allowed to exceed the max query duration(milliseconds): "+max_time_duration);
+                    throw new StoreException(
+                            "The query time span is not allowed to exceed the max query duration(milliseconds): "
+                                    + max_time_duration);
                 }
             }
             if (startTime != null) {
@@ -152,7 +154,9 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
                         .toInstant()
                         .toEpochMilli();
                 if (endTimestamp - startTimestamp > max_time_duration) {
-                    throw new StoreException("The query time span is not allowed to exceed the max query duration(milliseconds): "+max_time_duration);
+                    throw new StoreException(
+                            "The query time span is not allowed to exceed the max query duration(milliseconds): "
+                                    + max_time_duration);
                 }
             }
             if (startTime != null) {
@@ -162,32 +166,32 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
                 params.add(endTime);
             }
         }
-        if(containsTimeDuration){
-            for(int i = 0; i< paramCounts; i++){
-                sql = sql.replaceFirst("#","AND");
+        if (containsTimeDuration) {
+            for (int i = 0; i < paramCounts; i++) {
+                sql = sql.replaceFirst("#", "AND");
             }
-        }else{
-            for(int i = 1; i< paramCounts; i++){
-                sql = sql.replaceFirst("#","AND");
+        } else {
+            for (int i = 1; i < paramCounts; i++) {
+                sql = sql.replaceFirst("#", "AND");
             }
         }
-        sql = sql.replaceAll("#","");
+        sql = sql.replaceAll("#", "");
         sql += SqlConstant.UNDO_LOG_ORDER + SqlConstant.PAGE_QUERY;
-        sql = sql.replaceFirst("%",String.valueOf(pageSize));
-        sql = sql.replaceFirst("%",String.valueOf(offset));
-        Map<String,List<byte[]>> result = new HashMap<>();
+        sql = sql.replaceFirst("%", String.valueOf(pageSize));
+        sql = sql.replaceFirst("%", String.valueOf(offset));
+        Map<String, List<byte[]>> result = new HashMap<>();
         Object[] objects = params.toArray();
         List<Map<String, Object>> query = sqlExecutionTemplate.query(resourceId, sql, objects);
         for (Map<String, Object> map : query) {
             byte[] rollbackInfo = (byte[]) map.get("rollback_info");
             String context = (String) map.get("context");
-            if (rollbackInfo != null && context!=null) {
+            if (rollbackInfo != null && context != null) {
                 List<byte[]> bytes = result.get(context);
-                if(bytes == null){
+                if (bytes == null) {
                     bytes = new ArrayList<>();
                 }
                 bytes.add(rollbackInfo);
-                result.put(context,bytes);
+                result.put(context, bytes);
             }
         }
         return result;
@@ -204,21 +208,20 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
         return "";
     }
 
-    public int getOffsetAndValidationPageQuerySql(int pageNum, int pageSize){
-        int offset = (pageNum-1)*pageSize;
+    public int getOffsetAndValidationPageQuerySql(int pageNum, int pageSize) {
+        int offset = (pageNum - 1) * pageSize;
         if (pageNum < 1) {
             throw new IllegalArgumentException("The page number must be greater than 0");
         }
-        if(pageSize<0){
+        if (pageSize < 0) {
             throw new IllegalArgumentException("The page number must be greater than 0");
         }
-        if(pageSize>SqlConstant.MAX_PAGE_SIZE){
-            throw new IllegalArgumentException("Exceeding the maximum pageSize: "+SqlConstant.MAX_PAGE_SIZE);
+        if (pageSize > SqlConstant.MAX_PAGE_SIZE) {
+            throw new IllegalArgumentException("Exceeding the maximum pageSize: " + SqlConstant.MAX_PAGE_SIZE);
         }
-        if(offset>SqlConstant.MAX_OFFSET_THRESHOLD){
-            throw new StoreException("Exceeding the maximum offset: "+ SqlConstant.MAX_OFFSET_THRESHOLD);
+        if (offset > SqlConstant.MAX_OFFSET_THRESHOLD) {
+            throw new StoreException("Exceeding the maximum offset: " + SqlConstant.MAX_OFFSET_THRESHOLD);
         }
         return offset;
     }
-
 }

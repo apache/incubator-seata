@@ -18,8 +18,8 @@ package org.apache.seata.mcp.manager;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.modelcontextprotocol.spec.McpSchema;
-import org.apache.seata.mcp.entity.pojo.MCPProperties;
 import org.apache.seata.mcp.controller.ControlMcpController;
+import org.apache.seata.mcp.entity.pojo.MCPProperties;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
@@ -30,6 +30,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.servlet.function.RouterFunction;
 import org.springframework.web.servlet.function.ServerResponse;
+
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -38,8 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(
         classes = McpServerManagerTest.TestApplication.class,
         webEnvironment = SpringBootTest.WebEnvironment.MOCK,
-        properties = "spring.main.allow-bean-definition-overriding=true"
-)
+        properties = "spring.main.allow-bean-definition-overriding=true")
 @AutoConfigureMockMvc(addFilters = false)
 public class McpServerManagerTest {
 
@@ -115,19 +115,17 @@ public class McpServerManagerTest {
 
         // Test whether the route is normal when startup
         assertTrue(serverManager.isRunning());
-        mockMvc.perform(get("/sse")
-                        .accept(MediaType.TEXT_EVENT_STREAM))
-                .andDo(result -> System.out.println("SSE response status: " +
-                        result.getResponse().getStatus()))
+        mockMvc.perform(get("/sse").accept(MediaType.TEXT_EVENT_STREAM))
+                .andDo(result -> System.out.println(
+                        "SSE response status: " + result.getResponse().getStatus()))
                 .andExpect(status().isOk());
 
         // Test whether the route is unreachable when paused
         serverManager.pause();
         assertFalse(serverManager.isRunning());
-        mockMvc.perform(get("/sse")
-                        .accept(MediaType.TEXT_EVENT_STREAM))
-                .andDo(result -> System.out.println("SSE response status: " +
-                        result.getResponse().getStatus()))
+        mockMvc.perform(get("/sse").accept(MediaType.TEXT_EVENT_STREAM))
+                .andDo(result -> System.out.println(
+                        "SSE response status: " + result.getResponse().getStatus()))
                 .andExpect(status().isServiceUnavailable());
     }
 }

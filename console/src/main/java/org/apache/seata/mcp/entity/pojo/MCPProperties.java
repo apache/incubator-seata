@@ -89,37 +89,59 @@ public class MCPProperties {
         promptSupport = Boolean.parseBoolean(env.getProperty("seata.mcp.promptSupport", "true"));
         heartbeat = Boolean.parseBoolean(env.getProperty("seata.mcp.heartbeat", "false"));
         queryDuration = Long.parseLong(env.getProperty("seata.mcp.query.max_query_duration", "86400000"));
-        enableAuth = Boolean.parseBoolean(env.getProperty("seata.mcp.auth.enabled","true"));
+        enableAuth = Boolean.parseBoolean(env.getProperty("seata.mcp.auth.enabled", "true"));
     }
 
     @Override
     public String toString() {
-        return "MCPProperties{" +
-                "serverName='" + serverName + '\'' +
-                ", serverVersion='" + serverVersion + '\'' +
-                ", sseEndpoint='" + sseEndpoint + '\'' +
-                ", messageEndpoint='" + messageEndpoint + '\'' +
-                ", enableAuth=" + enableAuth +
-                ", resourceSupport=" + resourceSupport +
-                ", resourceTemplates=" + resourceTemplates +
-                ", promptSupport=" + promptSupport +
-                ", loggingLevel=" + loggingLevel +
-                ", heartbeat=" + heartbeat +
-                ", queryDuration=" + queryDuration +
-                ", env=" + env +
-                '}';
+        return "MCPProperties{" + "serverName='"
+                + serverName + '\'' + ", serverVersion='"
+                + serverVersion + '\'' + ", sseEndpoint='"
+                + sseEndpoint + '\'' + ", messageEndpoint='"
+                + messageEndpoint + '\'' + ", enableAuth="
+                + enableAuth + ", resourceSupport="
+                + resourceSupport + ", resourceTemplates="
+                + resourceTemplates + ", promptSupport="
+                + promptSupport + ", loggingLevel="
+                + loggingLevel + ", heartbeat="
+                + heartbeat + ", queryDuration="
+                + queryDuration + ", env="
+                + env + '}';
     }
 
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         MCPProperties that = (MCPProperties) o;
-        return enableAuth == that.enableAuth && resourceSupport == that.resourceSupport && resourceTemplates == that.resourceTemplates && promptSupport == that.promptSupport && heartbeat == that.heartbeat && Objects.equals(serverName, that.serverName) && Objects.equals(serverVersion, that.serverVersion) && Objects.equals(sseEndpoint, that.sseEndpoint) && Objects.equals(messageEndpoint, that.messageEndpoint) && loggingLevel == that.loggingLevel && Objects.equals(queryDuration, that.queryDuration) && Objects.equals(env, that.env);
+        return enableAuth == that.enableAuth
+                && resourceSupport == that.resourceSupport
+                && resourceTemplates == that.resourceTemplates
+                && promptSupport == that.promptSupport
+                && heartbeat == that.heartbeat
+                && Objects.equals(serverName, that.serverName)
+                && Objects.equals(serverVersion, that.serverVersion)
+                && Objects.equals(sseEndpoint, that.sseEndpoint)
+                && Objects.equals(messageEndpoint, that.messageEndpoint)
+                && loggingLevel == that.loggingLevel
+                && Objects.equals(queryDuration, that.queryDuration)
+                && Objects.equals(env, that.env);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(serverName, serverVersion, sseEndpoint, messageEndpoint, enableAuth, resourceSupport, resourceTemplates, promptSupport, loggingLevel, heartbeat, queryDuration, env);
+        return Objects.hash(
+                serverName,
+                serverVersion,
+                sseEndpoint,
+                messageEndpoint,
+                enableAuth,
+                resourceSupport,
+                resourceTemplates,
+                promptSupport,
+                loggingLevel,
+                heartbeat,
+                queryDuration,
+                env);
     }
 
     public String getServerName() {

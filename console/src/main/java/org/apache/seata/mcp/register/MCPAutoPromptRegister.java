@@ -21,25 +21,26 @@ public class MCPAutoPromptRegister {
 
     private final McpServerManager asyncServer;
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(MCPAutoPromptRegister.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MCPAutoPromptRegister.class);
 
     public MCPAutoPromptRegister(McpServerManager asyncServer) {
         this.asyncServer = asyncServer;
     }
 
     @PostConstruct
-    public void init(){
+    public void init() {
         String systemDescription = env.getProperty("seata.mcp.prompts.systemPrompt.description");
         List<McpSchema.PromptMessage> messages = new ArrayList<>();
-        messages.add(
-                new McpSchema.PromptMessage(McpSchema.Role.ASSISTANT,new McpSchema.TextContent(null,0.0, systemDescription))
-        );
+        messages.add(new McpSchema.PromptMessage(
+                McpSchema.Role.ASSISTANT, new McpSchema.TextContent(null, 0.0, systemDescription)));
         McpServerFeatures.AsyncPromptSpecification systemPrompt = new McpServerFeatures.AsyncPromptSpecification(
-                new McpSchema.Prompt(null, "The basic prompt, all questions about seata need to refer to this prompt", "system-prompt"),
+                new McpSchema.Prompt(
+                        null,
+                        "The basic prompt, all questions about seata need to refer to this prompt",
+                        "system-prompt"),
                 (exchange, request) -> {
                     return Mono.just(new McpSchema.GetPromptResult("System prompt", messages));
-                }
-        );
+                });
         asyncServer
                 .getServerInstance()
                 .addPrompt(systemPrompt)

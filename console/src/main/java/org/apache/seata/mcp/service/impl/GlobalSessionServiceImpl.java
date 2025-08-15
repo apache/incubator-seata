@@ -17,10 +17,10 @@
 package org.apache.seata.mcp.service.impl;
 
 import org.apache.seata.common.util.StringUtils;
-import org.apache.seata.mcp.entity.pojo.MCPProperties;
 import org.apache.seata.mcp.entity.constant.RPCConstant;
 import org.apache.seata.mcp.entity.enums.GlobalExceptionStatus;
 import org.apache.seata.mcp.entity.param.GlobalSessionParam;
+import org.apache.seata.mcp.entity.pojo.MCPProperties;
 import org.apache.seata.mcp.entity.pojo.NameSpaceDetail;
 import org.apache.seata.mcp.service.GlobalSessionService;
 import org.apache.seata.mcp.service.MCPRPCService;
@@ -48,12 +48,13 @@ public class GlobalSessionServiceImpl implements GlobalSessionService {
     public String queryGlobalSession(NameSpaceDetail nameSpaceDetail, GlobalSessionParam param) {
         // Check whether the query interval is too large
         if (param.getTimeEnd() != null && param.getTimeStart() != null) {
-            if (param.getTimeEnd() - param.getTimeStart()
-                    > configuration.getQueryDuration()) {
-                return "The query time span is not allowed to exceed the max query duration(milliseconds): "+configuration.getQueryDuration();
+            if (param.getTimeEnd() - param.getTimeStart() > configuration.getQueryDuration()) {
+                return "The query time span is not allowed to exceed the max query duration(milliseconds): "
+                        + configuration.getQueryDuration();
             }
         }
-        String result = mcpRPCService.getCallTC(nameSpaceDetail, RPCConstant.GLOBAL_SESSION_BASE_URL + "/query", param, null, null);
+        String result = mcpRPCService.getCallTC(
+                nameSpaceDetail, RPCConstant.GLOBAL_SESSION_BASE_URL + "/query", param, null, null);
         if (StringUtils.isBlank(result)) {
             return "query global session failed";
         } else {
@@ -65,8 +66,8 @@ public class GlobalSessionServiceImpl implements GlobalSessionService {
     public String deleteGlobalSession(NameSpaceDetail nameSpaceDetail, String xid) {
         Map<String, String> pathParams = new HashMap<>();
         pathParams.put("xid", xid);
-        String result = mcpRPCService.deleteCallTC(nameSpaceDetail,
-                RPCConstant.GLOBAL_SESSION_BASE_URL + "/deleteGlobalSession", null, pathParams, null);
+        String result = mcpRPCService.deleteCallTC(
+                nameSpaceDetail, RPCConstant.GLOBAL_SESSION_BASE_URL + "/deleteGlobalSession", null, pathParams, null);
         if (StringUtils.isBlank(result)) {
             return String.format("delete global session failed, xid: %s", xid);
         } else {
@@ -78,8 +79,12 @@ public class GlobalSessionServiceImpl implements GlobalSessionService {
     public String forceDeleteGlobalSession(NameSpaceDetail nameSpaceDetail, String xid) {
         Map<String, String> pathParams = new HashMap<>();
         pathParams.put("xid", xid);
-        String result = mcpRPCService.deleteCallTC(nameSpaceDetail,
-                RPCConstant.GLOBAL_SESSION_BASE_URL + "/forceDeleteGlobalSession", null, pathParams, null);
+        String result = mcpRPCService.deleteCallTC(
+                nameSpaceDetail,
+                RPCConstant.GLOBAL_SESSION_BASE_URL + "/forceDeleteGlobalSession",
+                null,
+                pathParams,
+                null);
         if (StringUtils.isBlank(result)) {
             return String.format("force delete global session failed, xid: %s", xid);
         } else {
@@ -91,8 +96,8 @@ public class GlobalSessionServiceImpl implements GlobalSessionService {
     public String stopGlobalSession(NameSpaceDetail nameSpaceDetail, String xid) {
         Map<String, String> pathParams = new HashMap<>();
         pathParams.put("xid", xid);
-        String result = mcpRPCService.putCallTC(nameSpaceDetail,
-                RPCConstant.GLOBAL_SESSION_BASE_URL + "/stopGlobalSession", null, pathParams, null);
+        String result = mcpRPCService.putCallTC(
+                nameSpaceDetail, RPCConstant.GLOBAL_SESSION_BASE_URL + "/stopGlobalSession", null, pathParams, null);
         if (StringUtils.isBlank(result)) {
             return String.format("stop global session retry failed, xid: %s", xid);
         } else {
@@ -104,8 +109,8 @@ public class GlobalSessionServiceImpl implements GlobalSessionService {
     public String startGlobalSession(NameSpaceDetail nameSpaceDetail, String xid) {
         Map<String, String> pathParams = new HashMap<>();
         pathParams.put("xid", xid);
-        String result = mcpRPCService.putCallTC(nameSpaceDetail,
-                RPCConstant.GLOBAL_SESSION_BASE_URL + "/startGlobalSession", null, pathParams, null);
+        String result = mcpRPCService.putCallTC(
+                nameSpaceDetail, RPCConstant.GLOBAL_SESSION_BASE_URL + "/startGlobalSession", null, pathParams, null);
         if (StringUtils.isBlank(result)) {
             return String.format("start the global session retry failed, xid: %s", xid);
         } else {
@@ -117,8 +122,8 @@ public class GlobalSessionServiceImpl implements GlobalSessionService {
     public String sendCommitOrRollback(NameSpaceDetail nameSpaceDetail, String xid) {
         Map<String, String> pathParams = new HashMap<>();
         pathParams.put("xid", xid);
-        String result = mcpRPCService.putCallTC(nameSpaceDetail,
-                RPCConstant.GLOBAL_SESSION_BASE_URL + "/sendCommitOrRollback", null, pathParams, null);
+        String result = mcpRPCService.putCallTC(
+                nameSpaceDetail, RPCConstant.GLOBAL_SESSION_BASE_URL + "/sendCommitOrRollback", null, pathParams, null);
         if (StringUtils.isBlank(result)) {
             return String.format("send global session to commit or rollback to rm failed, xid: %s", xid);
         } else {
@@ -130,8 +135,8 @@ public class GlobalSessionServiceImpl implements GlobalSessionService {
     public String changeGlobalStatus(NameSpaceDetail nameSpaceDetail, String xid) {
         Map<String, String> pathParams = new HashMap<>();
         pathParams.put("xid", xid);
-        String result = mcpRPCService.putCallTC(nameSpaceDetail,
-                RPCConstant.GLOBAL_SESSION_BASE_URL + "/changeGlobalStatus", null, pathParams, null);
+        String result = mcpRPCService.putCallTC(
+                nameSpaceDetail, RPCConstant.GLOBAL_SESSION_BASE_URL + "/changeGlobalStatus", null, pathParams, null);
         if (StringUtils.isBlank(result)) {
             return String.format("change the global session status failed, xid: %s", xid);
         } else {
@@ -145,9 +150,10 @@ public class GlobalSessionServiceImpl implements GlobalSessionService {
         GlobalSessionParam param = new GlobalSessionParam();
         // Check whether the query interval is too large
         if (endTime != null && startTime != null) {
-            if (endTime - startTime
-                    > configuration.getQueryDuration()) {
-                return Collections.singletonList("The query time span is not allowed to exceed the max query duration(milliseconds): "+configuration.getQueryDuration());
+            if (endTime - startTime > configuration.getQueryDuration()) {
+                return Collections.singletonList(
+                        "The query time span is not allowed to exceed the max query duration(milliseconds): "
+                                + configuration.getQueryDuration());
             }
         }
         param.setTimeStart(startTime);
@@ -155,7 +161,7 @@ public class GlobalSessionServiceImpl implements GlobalSessionService {
         param.setPageNum(1);
         param.setPageSize(100);
         List<Integer> exceptionStatus = GlobalExceptionStatus.getAll();
-        for(Integer status : exceptionStatus) {
+        for (Integer status : exceptionStatus) {
             param.setStatus(status);
             result.add(queryGlobalSession(nameSpaceDetail, param));
         }
