@@ -40,8 +40,8 @@ public class BranchSessionServiceImpl implements BranchSessionService {
         Map<String, String> pathParams = new HashMap<>();
         pathParams.put("xid", xid);
         pathParams.put("branchId", branchId);
-        String result = mcpRPCService.deleteCallTC(nameSpaceDetail,
-                RPCConstant.BRANCH_SESSION_BASE_URL + "/deleteBranchSession", null, pathParams, null);
+        String result = mcpRPCService.deleteCallTC(
+                nameSpaceDetail, RPCConstant.BRANCH_SESSION_BASE_URL + "/deleteBranchSession", null, pathParams, null);
         if (StringUtils.isBlank(result)) {
             return String.format("delete branch session failed, xid: %s, branchId: %s", xid, branchId);
         } else {
@@ -54,8 +54,12 @@ public class BranchSessionServiceImpl implements BranchSessionService {
         Map<String, String> pathParams = new HashMap<>();
         pathParams.put("xid", xid);
         pathParams.put("branchId", branchId);
-        String result = mcpRPCService.deleteCallTC(nameSpaceDetail,
-                RPCConstant.BRANCH_SESSION_BASE_URL + "/forceDeleteBranchSession", null, pathParams, null);
+        String result = mcpRPCService.deleteCallTC(
+                nameSpaceDetail,
+                RPCConstant.BRANCH_SESSION_BASE_URL + "/forceDeleteBranchSession",
+                null,
+                pathParams,
+                null);
         if (StringUtils.isBlank(result)) {
             return String.format("force delete branch session failed, xid: %s, branchId: %s", xid, branchId);
         } else {
@@ -68,8 +72,8 @@ public class BranchSessionServiceImpl implements BranchSessionService {
         Map<String, String> pathParams = new HashMap<>();
         pathParams.put("xid", xid);
         pathParams.put("branchId", branchId);
-        String result = mcpRPCService.putCallTC(nameSpaceDetail,
-                RPCConstant.BRANCH_SESSION_BASE_URL + "/stopBranchSession", null, pathParams, null);
+        String result = mcpRPCService.putCallTC(
+                nameSpaceDetail, RPCConstant.BRANCH_SESSION_BASE_URL + "/stopBranchSession", null, pathParams, null);
         if (StringUtils.isBlank(result)) {
             return String.format("stop branch session failed, xid: %s, branchId: %s", xid, branchId);
         } else {
@@ -82,8 +86,8 @@ public class BranchSessionServiceImpl implements BranchSessionService {
         Map<String, String> pathParams = new HashMap<>();
         pathParams.put("xid", xid);
         pathParams.put("branchId", branchId);
-        String result = mcpRPCService.putCallTC(nameSpaceDetail,
-                RPCConstant.BRANCH_SESSION_BASE_URL + "/startBranchSession", null, pathParams, null);
+        String result = mcpRPCService.putCallTC(
+                nameSpaceDetail, RPCConstant.BRANCH_SESSION_BASE_URL + "/startBranchSession", null, pathParams, null);
         if (StringUtils.isBlank(result)) {
             return String.format("start branch session failed, xid: %s, branchId: %s", xid, branchId);
         } else {

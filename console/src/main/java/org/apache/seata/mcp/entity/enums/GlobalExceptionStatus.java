@@ -43,7 +43,6 @@ public enum GlobalExceptionStatus {
     // Finally: failed to rollback since timeout
     TimeoutRollbackFailed(14, "global transaction was rollbacking due to timeout, but failed");
 
-
     private final int code;
     private final String desc;
 
@@ -94,7 +93,7 @@ public enum GlobalExceptionStatus {
     public static List<Integer> getAll() {
         GlobalExceptionStatus[] values = GlobalExceptionStatus.values();
         List<Integer> result = new ArrayList<>();
-        for(GlobalExceptionStatus value : values) {
+        for (GlobalExceptionStatus value : values) {
             result.add(value.getCode());
         }
         return result;

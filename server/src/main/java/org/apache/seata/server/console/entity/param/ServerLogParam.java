@@ -74,12 +74,11 @@ public class ServerLogParam implements Serializable {
 
     @Override
     public String toString() {
-        return "ServerLogParam{" +
-                "cursor=" + cursor +
-                ", nextLines=" + nextLines +
-                ", logType='" + logType + '\'' +
-                ", logTime='" + logTime + '\'' +
-                ", curLogNum=" + curLogNum +
-                '}';
+        return "ServerLogParam{" + "cursor="
+                + cursor + ", nextLines="
+                + nextLines + ", logType='"
+                + logType + '\'' + ", logTime='"
+                + logTime + '\'' + ", curLogNum="
+                + curLogNum + '}';
     }
 }

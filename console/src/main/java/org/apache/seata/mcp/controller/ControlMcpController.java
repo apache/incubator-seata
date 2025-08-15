@@ -31,8 +31,8 @@ public class ControlMcpController {
     McpServerManager mcpServerEndpointProvider;
 
     @PutMapping("/changeStatus")
-    public SingleResult<?> changeStatus(@RequestParam(defaultValue = "") String status){
-        switch (status.toLowerCase(Locale.ROOT)){
+    public SingleResult<?> changeStatus(@RequestParam(defaultValue = "") String status) {
+        switch (status.toLowerCase(Locale.ROOT)) {
             case "start":
                 return startMcpService();
             case "stop":
@@ -43,11 +43,11 @@ public class ControlMcpController {
     }
 
     @GetMapping("/getStatus")
-    public SingleResult<?> getStatus(){
+    public SingleResult<?> getStatus() {
         boolean isRunning = mcpServerEndpointProvider.isRunning();
-        if(isRunning){
+        if (isRunning) {
             return SingleResult.success("MCP Service is Running");
-        }else{
+        } else {
             return SingleResult.success("MCP Service is Stopped");
         }
     }

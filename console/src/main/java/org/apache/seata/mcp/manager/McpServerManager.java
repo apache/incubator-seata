@@ -158,7 +158,6 @@ public class McpServerManager implements SmartLifecycle {
         return transportProvider.getRouterFunction();
     }
 
-
     private void initScheduler() {
         poolLock.lock();
         try {
@@ -258,7 +257,6 @@ public class McpServerManager implements SmartLifecycle {
         return running.get();
     }
 
-
     private void initializeServer() {
         stateLock.lock();
         try {
@@ -272,20 +270,17 @@ public class McpServerManager implements SmartLifecycle {
         }
     }
 
-
     private void doPause() {
         transportProvider.deactivate();
         stopHeartbeat();
         logServerState("Service paused");
     }
 
-
     private void doResume() {
         transportProvider.activate();
         startHeartbeat();
         logServerState("Service resumed");
     }
-
 
     private void shutdownServer() {
         stateLock.lock();
@@ -315,7 +310,6 @@ public class McpServerManager implements SmartLifecycle {
         //        System.out.printf("[MCP Manager] %s | Running: %b%n", message, running.get());
         logger.info("[MCP Manager] {} | Running: {}", message, running.get());
     }
-
 
     private static class ControlledTransportProvider extends WebMvcSseServerTransportProvider {
         private final AtomicBoolean active = new AtomicBoolean(false);

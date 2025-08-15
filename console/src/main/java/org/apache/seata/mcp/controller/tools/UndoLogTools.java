@@ -19,7 +19,6 @@ package org.apache.seata.mcp.controller.tools;
 import org.apache.seata.mcp.annotation.Tool;
 import org.apache.seata.mcp.annotation.ToolParam;
 import org.apache.seata.mcp.entity.param.UndoLogParam;
-import org.apache.seata.mcp.entity.pojo.NameSpaceDetail;
 import org.apache.seata.mcp.service.UndoLogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

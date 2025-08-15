@@ -27,7 +27,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 @Service
 public class BusinessDataSourceTools {
@@ -40,7 +39,7 @@ public class BusinessDataSourceTools {
     @Tool(
             description =
                     "Get the identity and name of the business data source. Important!!!: key is name, value is resourceId")
-    public Map<String,String> getResourceIds() {
+    public Map<String, String> getResourceIds() {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("user try to get resource ids");
         }
@@ -49,7 +48,8 @@ public class BusinessDataSourceTools {
 
     @Tool(description = "Get all available table names")
     public List<String> getTableNames(
-            @ToolParam(description = "The identity of the data source, start with jdbc://", required = true) String resourceId) {
+            @ToolParam(description = "The identity of the data source, start with jdbc://", required = true)
+                    String resourceId) {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("user try to get all table names, resource id {}", resourceId);
         }
@@ -59,7 +59,8 @@ public class BusinessDataSourceTools {
     @Tool(description = "Obtained by table nameSchema")
     public List<Map<String, Object>> getTableSchema(
             @ToolParam(description = "Table Name", required = true) String tableName,
-            @ToolParam(description = "The identity of the data source, start with jdbc://", required = true) String resourceId) {
+            @ToolParam(description = "The identity of the data source, start with jdbc://", required = true)
+                    String resourceId) {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("user try to get table schema, tableName: {}, resourceId: {}", tableName, resourceId);
         }
@@ -69,7 +70,8 @@ public class BusinessDataSourceTools {
     @Tool(description = "Execute the SQL query result, It can only be used to query business data!!!")
     public List<Map<String, Object>> runSql(
             @ToolParam(description = "SQL statement, String type", required = true) String sql,
-            @ToolParam(description = "The identity of the data source, start with jdbc://", required = true) String resourceId) {
+            @ToolParam(description = "The identity of the data source, start with jdbc://", required = true)
+                    String resourceId) {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("user try to run sql: {}, resourceId: {}", sql, resourceId);
         }

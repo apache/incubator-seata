@@ -148,7 +148,8 @@ public class WebMvcSseServerTransportProvider implements McpServerTransportProvi
                         .sendHeartbeat()
                         .subscribe();
             } catch (Exception e) {
-                logger.debug("Failed to send heartbeat message, session ID: {}, Error: {}", session.getId(), e.getMessage());
+                logger.debug(
+                        "Failed to send heartbeat message, session ID: {}, Error: {}", session.getId(), e.getMessage());
             }
         }
     }
