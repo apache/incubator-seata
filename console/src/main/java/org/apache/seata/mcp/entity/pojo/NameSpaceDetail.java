@@ -31,8 +31,8 @@ public class NameSpaceDetail {
         this.vGroup = vGroup;
     }
 
-    public boolean isValid(){
-        if(StringUtils.isBlank(namespace)){
+    public boolean isValid() {
+        if (StringUtils.isBlank(namespace)) {
             return false;
         }
         return !StringUtils.isBlank(vGroup) || !StringUtils.isBlank(cluster);
@@ -40,10 +40,9 @@ public class NameSpaceDetail {
 
     @Override
     public String toString() {
-        return "NameSpaceDetail{" +
-                "namespace='" + namespace + '\'' +
-                ", cluster='" + cluster + '\'' +
-                ", vGroup='" + vGroup + '\'' +
-                '}';
+        return "NameSpaceDetail{" + "namespace='"
+                + namespace + '\'' + ", cluster='"
+                + cluster + '\'' + ", vGroup='"
+                + vGroup + '\'' + '}';
     }
 }

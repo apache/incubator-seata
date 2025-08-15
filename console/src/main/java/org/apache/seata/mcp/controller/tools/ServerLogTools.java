@@ -33,15 +33,23 @@ public class ServerLogTools {
 
     @Tool(description = "Get the latest or history running logs on the server side")
     public String getServerLog(
-            @ToolParam(description = "Specify the namespace of the TC node",required = true) NameSpaceDetail nameSpaceDetail,
-            @ToolParam(description = "server log file query parameters. when getting history logs, logTime is required",required = true)ServerLogParam param){
-        return logService.analyseServerLog(nameSpaceDetail,param);
+            @ToolParam(description = "Specify the namespace of the TC node", required = true)
+                    NameSpaceDetail nameSpaceDetail,
+            @ToolParam(
+                            description =
+                                    "server log file query parameters. when getting history logs, logTime is required",
+                            required = true)
+                    ServerLogParam param) {
+        return logService.analyseServerLog(nameSpaceDetail, param);
     }
 
-    @Tool(description = "Obtain the server run log index nums of the specified type or creation time, If you do not specify a type, it is an all-type log，logTime is required")
+    @Tool(
+            description =
+                    "Obtain the server run log index nums of the specified type or creation time, If you do not specify a type, it is an all-type log，logTime is required")
     public String getHistoryServerLogNums(
-            @ToolParam(description = "Specify the namespace of the TC node",required = true) NameSpaceDetail nameSpaceDetail,
-            @ToolParam(description = "Log file index query parameters",required = true) ServerLogIndexParam param){
-        return logService.getHistoryServerLogNums(nameSpaceDetail,param);
+            @ToolParam(description = "Specify the namespace of the TC node", required = true)
+                    NameSpaceDetail nameSpaceDetail,
+            @ToolParam(description = "Log file index query parameters", required = true) ServerLogIndexParam param) {
+        return logService.getHistoryServerLogNums(nameSpaceDetail, param);
     }
 }
