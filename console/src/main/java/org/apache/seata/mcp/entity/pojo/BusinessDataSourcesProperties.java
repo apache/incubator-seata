@@ -39,7 +39,7 @@ public class BusinessDataSourcesProperties implements InitializingBean {
      */
     private static final Map<String, DataSourceProperties> datasources = new HashMap<>();
 
-    private static final Map<String,String> dataSourcesNamesAndResourceIds = new HashMap<>();
+    private static final Map<String, String> dataSourcesNamesAndResourceIds = new HashMap<>();
 
     private static final String BASE_PREFIX = "seata.businessDataSources.";
 
@@ -67,7 +67,7 @@ public class BusinessDataSourcesProperties implements InitializingBean {
 
             // Use the database URL as a unique identifier
             datasources.put(resourceId, props);
-            dataSourcesNamesAndResourceIds.put(name,resourceId);
+            dataSourcesNamesAndResourceIds.put(name, resourceId);
         }
     }
 
@@ -121,7 +121,9 @@ public class BusinessDataSourcesProperties implements InitializingBean {
         return datasources;
     }
 
-    public static Map<String,String> getDataSourcesNamesAndResourceIds(){ return dataSourcesNamesAndResourceIds; }
+    public static Map<String, String> getDataSourcesNamesAndResourceIds() {
+        return dataSourcesNamesAndResourceIds;
+    }
 
     public static Set<String> getResourceIds() {
         return datasources.keySet();

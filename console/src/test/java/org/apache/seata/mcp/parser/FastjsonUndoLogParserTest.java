@@ -19,10 +19,9 @@ package org.apache.seata.mcp.parser;
 import com.alibaba.fastjson.serializer.SimplePropertyPreFilter;
 import org.apache.seata.common.Constants;
 import org.apache.seata.common.executor.Initialize;
-import org.apache.seata.mcp.parser.FastjsonUndoLogParser;
-import org.apache.seata.mcp.parser.UndoLogParser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.util.Set;
@@ -42,12 +41,12 @@ public class FastjsonUndoLogParserTest {
     public void testInit() throws Exception {
         // Initialize the parser
         parser.init();
-        
+
         // Get the private field filter
         Field filterField = FastjsonUndoLogParser.class.getDeclaredField("filter");
         filterField.setAccessible(true);
         SimplePropertyPreFilter filter = (SimplePropertyPreFilter) filterField.get(parser);
-        
+
         // Verify that the filter contains "tableMeta" in the exclusion list
         Set<String> excludes = filter.getExcludes();
         assertTrue(excludes.contains("tableMeta"), "排除列表应该包含'tableMeta'");
@@ -64,10 +63,11 @@ public class FastjsonUndoLogParserTest {
     public void testGetDefaultContent() {
         // Get the default content
         byte[] defaultContent = parser.getDefaultContent();
-        
+
         // The validation content is an array of bytes encoded using UTF-8 using "{}".
         byte[] expected = "{}".getBytes(Constants.DEFAULT_CHARSET);
-        assertArrayEquals(expected, defaultContent, "The default content should be an array of UTF-8 encoded bytes for '{}'");
+        assertArrayEquals(
+                expected, defaultContent, "The default content should be an array of UTF-8 encoded bytes for '{}'");
     }
 
     @Test
@@ -75,10 +75,10 @@ public class FastjsonUndoLogParserTest {
         // Create test data
         String testJson = "{\"name\":\"test\",\"value\":123}";
         byte[] testBytes = testJson.getBytes(Constants.DEFAULT_CHARSET);
-        
+
         // Decode the test data
         String result = parser.decode(testBytes);
-        
+
         // Verify the decoding result
         assertEquals(testJson, result, "解码结果应该与原始JSON字符串相同");
     }
@@ -88,7 +88,7 @@ public class FastjsonUndoLogParserTest {
         // Test decoding empty byte arrays
         byte[] emptyBytes = new byte[0];
         String result = parser.decode(emptyBytes);
-        
+
         // The result of the validation is an empty string
         assertEquals("", result, "Decoding an array of empty bytes should return an empty string");
     }
@@ -96,9 +96,12 @@ public class FastjsonUndoLogParserTest {
     @Test
     public void testDecodeWithNullBytes() {
         // Test decoding null
-        assertThrows(NullPointerException.class, () -> {
-            parser.decode(null);
-        }, "decode null should throw NullPointerException");
+        assertThrows(
+                NullPointerException.class,
+                () -> {
+                    parser.decode(null);
+                },
+                "decode null should throw NullPointerException");
     }
 
     @Test
@@ -107,10 +110,10 @@ public class FastjsonUndoLogParserTest {
         assertTrue(parser instanceof UndoLogParser, "The UndoLogParser interface should be implemented");
         assertTrue(parser instanceof Initialize, "The Initialize interface should be implemented");
     }
-    
+
     @Test
     public void testDefaultCharset() {
         // The validation DEFAULT_CHARSET is UTF-8
         assertEquals(StandardCharsets.UTF_8, Constants.DEFAULT_CHARSET, "默认字符集应该是UTF-8");
     }
-} 
+}

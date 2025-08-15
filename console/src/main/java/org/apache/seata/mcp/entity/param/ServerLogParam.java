@@ -24,19 +24,26 @@ public class ServerLogParam implements Serializable {
 
     private static final long serialVersionUID = 225478653801012285L;
 
-    @ToolParam(description = "file pointer, i.e. read the log file from the cursor line",required = true)
+    @ToolParam(description = "file pointer, i.e. read the log file from the cursor line", required = true)
     private Integer cursor;
 
-    @ToolParam(description = "The number of rows read down from the cursor line should not exceed 100 lines",required = true)
+    @ToolParam(
+            description = "The number of rows read down from the cursor line should not exceed 100 lines",
+            required = true)
     private Integer nextLines;
 
     @ToolParam(description = "log type, contains: all, error, warn")
     private String logType;
 
-    @ToolParam(description = "Log creation time, format: yyyy-mm-dd, It is only required to pass in when querying the history log")
+    @ToolParam(
+            description =
+                    "Log creation time, format: yyyy-mm-dd, It is only required to pass in when querying the history log")
     private String logTime;
 
-    @ToolParam(description = "The log serial number to be analyzed, It is only required to pass in when querying the history log",example = "0")
+    @ToolParam(
+            description =
+                    "The log serial number to be analyzed, It is only required to pass in when querying the history log",
+            example = "0")
     private Integer curLogNum;
 
     public Integer getCurLogNum() {
@@ -81,12 +88,11 @@ public class ServerLogParam implements Serializable {
 
     @Override
     public String toString() {
-        return "ServerLogParam{" +
-                "cursor=" + cursor +
-                ", nextLines=" + nextLines +
-                ", logType='" + logType + '\'' +
-                ", logTime='" + logTime + '\'' +
-                ", curLogNum=" + curLogNum +
-                '}';
+        return "ServerLogParam{" + "cursor="
+                + cursor + ", nextLines="
+                + nextLines + ", logType='"
+                + logType + '\'' + ", logTime='"
+                + logTime + '\'' + ", curLogNum="
+                + curLogNum + '}';
     }
 }

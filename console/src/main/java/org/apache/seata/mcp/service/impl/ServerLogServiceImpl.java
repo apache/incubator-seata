@@ -18,7 +18,8 @@ public class ServerLogServiceImpl implements ServerLogService {
 
     @Override
     public String analyseServerLog(NameSpaceDetail nameSpaceDetail, ServerLogParam param) {
-        String result = mcpRPCService.getCallTC(nameSpaceDetail,RPCConstant.SERVER_LOG_BASE_URL + "/getServerLog", param, null, null);
+        String result = mcpRPCService.getCallTC(
+                nameSpaceDetail, RPCConstant.SERVER_LOG_BASE_URL + "/getServerLog", param, null, null);
         if (StringUtils.isBlank(result)) {
             return "analyse server log failed";
         } else {
@@ -28,13 +29,12 @@ public class ServerLogServiceImpl implements ServerLogService {
 
     @Override
     public String getHistoryServerLogNums(NameSpaceDetail nameSpaceDetail, ServerLogIndexParam param) {
-        String result = mcpRPCService.getCallTC(nameSpaceDetail,RPCConstant.SERVER_LOG_BASE_URL + "/getHistoryServerLogNums", param, null, null);
+        String result = mcpRPCService.getCallTC(
+                nameSpaceDetail, RPCConstant.SERVER_LOG_BASE_URL + "/getHistoryServerLogNums", param, null, null);
         if (StringUtils.isBlank(result)) {
             return "get history server log nums failed";
         } else {
             return result;
         }
     }
-
-
 }

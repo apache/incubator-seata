@@ -39,16 +39,18 @@ public class GlobalLockTools {
 
     @Tool(description = "Query the global lock information")
     public String queryGlobalLock(
-            @ToolParam(description = "Specify the namespace of the TC node",required = true) NameSpaceDetail nameSpaceDetail,
-            @ToolParam(description = "Global lock parameters",required = true) GlobalLockParam param) {
+            @ToolParam(description = "Specify the namespace of the TC node", required = true)
+                    NameSpaceDetail nameSpaceDetail,
+            @ToolParam(description = "Global lock parameters", required = true) GlobalLockParam param) {
         return globalLockService.queryGlobalLock(nameSpaceDetail, param);
     }
 
     @Tool(description = "Delete the global lock, Get the modify key before you delete")
     public String deleteGlobalLock(
-            @ToolParam(description = "Specify the namespace of the TC node",required = true) NameSpaceDetail nameSpaceDetail,
-            @ToolParam(description = "Global lock parameters",required = true) GlobalLockParam param,
-            @ToolParam(description = "Modify key",required = true) String modifyKey) {
+            @ToolParam(description = "Specify the namespace of the TC node", required = true)
+                    NameSpaceDetail nameSpaceDetail,
+            @ToolParam(description = "Global lock parameters", required = true) GlobalLockParam param,
+            @ToolParam(description = "Modify key", required = true) String modifyKey) {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("manual operation to delete the global lock, param: {}", param);
         }
@@ -61,9 +63,10 @@ public class GlobalLockTools {
 
     @Tool(description = "Check if the lock exist the branch session")
     public String checkGlobalLock(
-            @ToolParam(description = "Specify the namespace of the TC node",required = true) NameSpaceDetail nameSpaceDetail,
-            @ToolParam(description = "Global transaction id",required = true) String xid,
-            @ToolParam(description = "Branch transaction id",required = true) String branchId) {
+            @ToolParam(description = "Specify the namespace of the TC node", required = true)
+                    NameSpaceDetail nameSpaceDetail,
+            @ToolParam(description = "Global transaction id", required = true) String xid,
+            @ToolParam(description = "Branch transaction id", required = true) String branchId) {
         return globalLockService.checkGlobalLock(nameSpaceDetail, xid, branchId);
     }
 }

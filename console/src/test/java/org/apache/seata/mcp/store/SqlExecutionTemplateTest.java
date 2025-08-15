@@ -17,8 +17,6 @@
 package org.apache.seata.mcp.store;
 
 import org.apache.seata.common.exception.StoreException;
-import org.apache.seata.mcp.store.DataSourceFactory;
-import org.apache.seata.mcp.store.SqlExecutionTemplate;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -69,7 +67,7 @@ public class SqlExecutionTemplateTest {
     private final String updateSql = "UPDATE test_table SET name = ? WHERE id = ?";
     private final String deleteSql = "DELETE FROM test_table WHERE id = ?";
     private final String invalidSql = "INVALID SQL";
-    
+
     // MockedStatic object at the class level
     private MockedStatic<DataSourceFactory> dataSourceFactoryMock;
 
@@ -77,14 +75,16 @@ public class SqlExecutionTemplateTest {
     public void setUp() throws SQLException {
         // Initialize MockedStatic and remain valid for the entire duration of the test
         dataSourceFactoryMock = Mockito.mockStatic(DataSourceFactory.class);
-        dataSourceFactoryMock.when(() -> DataSourceFactory.getDataSource(resourceId)).thenReturn(dataSource);
-        
+        dataSourceFactoryMock
+                .when(() -> DataSourceFactory.getDataSource(resourceId))
+                .thenReturn(dataSource);
+
         when(dataSource.getConnection()).thenReturn(connection);
         when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
         when(preparedStatement.executeQuery()).thenReturn(resultSet);
         when(resultSet.getMetaData()).thenReturn(resultSetMetaData);
     }
-    
+
     @AfterEach
     public void tearDown() {
         // Turn off MockedStatic when the test is over
@@ -99,7 +99,7 @@ public class SqlExecutionTemplateTest {
         when(resultSetMetaData.getColumnCount()).thenReturn(2);
         when(resultSetMetaData.getColumnLabel(1)).thenReturn("id");
         when(resultSetMetaData.getColumnLabel(2)).thenReturn("name");
-        
+
         when(resultSet.next()).thenReturn(true, true, false);
         when(resultSet.getObject(1)).thenReturn(1, 2);
         when(resultSet.getObject(2)).thenReturn("test1", "test2");
@@ -119,8 +119,7 @@ public class SqlExecutionTemplateTest {
     @Test
     public void testQuery_InvalidSql() {
         // test NON-SELECT SENTENCE
-        assertThrows(StoreException.class, () -> 
-            sqlExecutionTemplate.query(resourceId, invalidSql));
+        assertThrows(StoreException.class, () -> sqlExecutionTemplate.query(resourceId, invalidSql));
     }
 
     @Test
@@ -128,8 +127,7 @@ public class SqlExecutionTemplateTest {
         // simulation SQLException
         when(preparedStatement.executeQuery()).thenThrow(new SQLException("Test SQLException"));
 
-        assertThrows(StoreException.class, () -> 
-            sqlExecutionTemplate.query(resourceId, selectSql));
+        assertThrows(StoreException.class, () -> sqlExecutionTemplate.query(resourceId, selectSql));
     }
 
     @Test
@@ -149,8 +147,7 @@ public class SqlExecutionTemplateTest {
     @Test
     public void testUpdate_InvalidSql() {
         // Test non-DML statements
-        assertThrows(StoreException.class, () -> 
-            sqlExecutionTemplate.update(resourceId, selectSql, 1));
+        assertThrows(StoreException.class, () -> sqlExecutionTemplate.update(resourceId, selectSql, 1));
     }
 
     @Test
@@ -159,18 +156,17 @@ public class SqlExecutionTemplateTest {
         when(preparedStatement.executeUpdate()).thenThrow(new SQLException("Test SQLException"));
 
         // Verify that exceptions are properly packaged
-        assertThrows(StoreException.class, () -> 
-            sqlExecutionTemplate.update(resourceId, updateSql, "newName", 1));
+        assertThrows(StoreException.class, () -> sqlExecutionTemplate.update(resourceId, updateSql, "newName", 1));
     }
 
     @Test
     public void testBatchUpdate_Success() throws SQLException {
         // The simulated batch update is successful
-        when(preparedStatement.executeBatch()).thenReturn(new int[]{1, 1});
+        when(preparedStatement.executeBatch()).thenReturn(new int[] {1, 1});
 
         List<Object[]> batchParams = new ArrayList<>();
-        batchParams.add(new Object[]{"name1", 10});
-        batchParams.add(new Object[]{"name2", 20});
+        batchParams.add(new Object[] {"name1", 10});
+        batchParams.add(new Object[] {"name2", 20});
 
         int[] results = sqlExecutionTemplate.batchUpdate(resourceId, insertSql, batchParams);
 
@@ -191,10 +187,9 @@ public class SqlExecutionTemplateTest {
         when(preparedStatement.executeBatch()).thenThrow(new SQLException("Test SQLException"));
 
         List<Object[]> batchParams = new ArrayList<>();
-        batchParams.add(new Object[]{"name1", 10});
+        batchParams.add(new Object[] {"name1", 10});
 
-        assertThrows(StoreException.class, () -> 
-            sqlExecutionTemplate.batchUpdate(resourceId, insertSql, batchParams));
+        assertThrows(StoreException.class, () -> sqlExecutionTemplate.batchUpdate(resourceId, insertSql, batchParams));
 
         verify(connection).rollback();
     }
@@ -204,7 +199,7 @@ public class SqlExecutionTemplateTest {
         when(resultSetMetaData.getColumnCount()).thenReturn(2);
         when(resultSetMetaData.getColumnLabel(1)).thenReturn("id");
         when(resultSetMetaData.getColumnLabel(2)).thenReturn("name");
-        
+
         when(resultSet.next()).thenReturn(true, false);
         when(resultSet.getObject(1)).thenReturn(1);
         when(resultSet.getObject(2)).thenReturn("test1");
@@ -255,8 +250,7 @@ public class SqlExecutionTemplateTest {
         };
 
         // Verify that the exception is properly packaged and rolled back
-        assertThrows(StoreException.class, () -> 
-            sqlExecutionTemplate.executeTransaction(resourceId, operation));
+        assertThrows(StoreException.class, () -> sqlExecutionTemplate.executeTransaction(resourceId, operation));
 
         verify(connection).rollback();
         verify(connection).setAutoCommit(true);
@@ -265,51 +259,41 @@ public class SqlExecutionTemplateTest {
     @Test
     public void testGetDataSource_Exception() {
         // Simulated an exception to obtain a data source
-        dataSourceFactoryMock.when(() -> DataSourceFactory.getDataSource("invalidId"))
-            .thenThrow(new RuntimeException("DataSource not found"));
+        dataSourceFactoryMock
+                .when(() -> DataSourceFactory.getDataSource("invalidId"))
+                .thenThrow(new RuntimeException("DataSource not found"));
 
         // Verify that exceptions are properly packaged
-        assertThrows(StoreException.class, () -> 
-            sqlExecutionTemplate.query("invalidId", selectSql));
+        assertThrows(StoreException.class, () -> sqlExecutionTemplate.query("invalidId", selectSql));
     }
 
     @Test
     public void testValidateQuerySql() {
         // Test valid query statements
-        assertDoesNotThrow(() -> 
-            sqlExecutionTemplate.query(resourceId, "SELECT * FROM table"));
+        assertDoesNotThrow(() -> sqlExecutionTemplate.query(resourceId, "SELECT * FROM table"));
 
         // Test invalid query statements
-        assertThrows(StoreException.class, () -> 
-            sqlExecutionTemplate.query(resourceId, null));
+        assertThrows(StoreException.class, () -> sqlExecutionTemplate.query(resourceId, null));
 
-        assertThrows(StoreException.class, () -> 
-            sqlExecutionTemplate.query(resourceId, ""));
+        assertThrows(StoreException.class, () -> sqlExecutionTemplate.query(resourceId, ""));
 
-        assertThrows(StoreException.class, () -> 
-            sqlExecutionTemplate.query(resourceId, "INSERT INTO table VALUES(1)"));
+        assertThrows(StoreException.class, () -> sqlExecutionTemplate.query(resourceId, "INSERT INTO table VALUES(1)"));
     }
 
     @Test
     public void testValidateUpdateSql() {
         // Test valid update statements
-        assertDoesNotThrow(() -> 
-            sqlExecutionTemplate.update(resourceId, "INSERT INTO table VALUES(1)"));
+        assertDoesNotThrow(() -> sqlExecutionTemplate.update(resourceId, "INSERT INTO table VALUES(1)"));
 
-        assertDoesNotThrow(() -> 
-            sqlExecutionTemplate.update(resourceId, "UPDATE table SET col = 1"));
+        assertDoesNotThrow(() -> sqlExecutionTemplate.update(resourceId, "UPDATE table SET col = 1"));
 
-        assertDoesNotThrow(() -> 
-            sqlExecutionTemplate.update(resourceId, "DELETE FROM table"));
+        assertDoesNotThrow(() -> sqlExecutionTemplate.update(resourceId, "DELETE FROM table"));
 
         // Test for invalid update statements
-        assertThrows(StoreException.class, () -> 
-            sqlExecutionTemplate.update(resourceId, null));
+        assertThrows(StoreException.class, () -> sqlExecutionTemplate.update(resourceId, null));
 
-        assertThrows(StoreException.class, () -> 
-            sqlExecutionTemplate.update(resourceId, ""));
+        assertThrows(StoreException.class, () -> sqlExecutionTemplate.update(resourceId, ""));
 
-        assertThrows(StoreException.class, () -> 
-            sqlExecutionTemplate.update(resourceId, "SELECT * FROM table"));
+        assertThrows(StoreException.class, () -> sqlExecutionTemplate.update(resourceId, "SELECT * FROM table"));
     }
 }

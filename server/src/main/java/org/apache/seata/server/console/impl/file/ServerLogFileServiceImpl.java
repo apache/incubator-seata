@@ -18,9 +18,9 @@ package org.apache.seata.server.console.impl.file;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.input.ReversedLinesFileReader;
+import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.result.SingleResult;
 import org.apache.seata.common.util.StringUtils;
-import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.server.console.entity.param.ServerLogParam;
 import org.apache.seata.server.console.entity.vo.ServerLogVO;
 import org.apache.seata.server.console.service.ServerLogService;
@@ -57,8 +57,7 @@ public class ServerLogFileServiceImpl implements ServerLogService {
 
     private static final Integer MAX_LINES = 1000;
 
-    private static final Pattern LOG_PATTERN =
-            Pattern.compile("^.*\\.(\\d{4}-\\d{2}-\\d{2})\\.(\\d+)\\.log\\.gz$");
+    private static final Pattern LOG_PATTERN = Pattern.compile("^.*\\.(\\d{4}-\\d{2}-\\d{2})\\.(\\d+)\\.log\\.gz$");
 
     private final Logger LOGGER = LoggerFactory.getLogger(ServerLogFileServiceImpl.class);
 
@@ -76,14 +75,13 @@ public class ServerLogFileServiceImpl implements ServerLogService {
             return SingleResult.failure("Invalid log type");
         }
 
-        if(param.getLogTime()!=null && !isValidDate(param.getLogTime())){
+        if (param.getLogTime() != null && !isValidDate(param.getLogTime())) {
             return SingleResult.failure("Invalid log time");
         }
 
         boolean isHistoryLog = isHistoryLog(param);
         try {
-            ServerLogVO logVO = isHistoryLog ?
-                    readHistoryLogs(param) : readCurrentLogs(param);
+            ServerLogVO logVO = isHistoryLog ? readHistoryLogs(param) : readCurrentLogs(param);
             return SingleResult.success(logVO);
         } catch (IOException e) {
             LOGGER.error("Error reading logs: {}", e.getMessage());
@@ -92,43 +90,45 @@ public class ServerLogFileServiceImpl implements ServerLogService {
     }
 
     @Override
-    public SingleResult<?> getHistoryServerLogNums(ServerLogParam serverLogParam){
-        String logType = StringUtils.isBlank(serverLogParam.getLogType()) ? SERVER_LOG_ALL : serverLogParam.getLogType();
+    public SingleResult<?> getHistoryServerLogNums(ServerLogParam serverLogParam) {
+        String logType =
+                StringUtils.isBlank(serverLogParam.getLogType()) ? SERVER_LOG_ALL : serverLogParam.getLogType();
         String logTime = serverLogParam.getLogTime();
-        if(StringUtils.isBlank(logTime)){
+        if (StringUtils.isBlank(logTime)) {
             return SingleResult.failure("logTime is required");
         }
-        String logFilePath = env.getProperty("logging.file.path") + "/" +"history";
+        String logFilePath = env.getProperty("logging.file.path") + "/" + "history";
         File dir = new File(logFilePath);
-        if(!dir.isDirectory()){
+        if (!dir.isDirectory()) {
             throw new IllegalArgumentException("A valid folder path must be provided");
         }
         File[] files = dir.listFiles((d, name) -> name.endsWith(".log.gz"));
-        String logName = env.getProperty("spring.application.name",DEFAULT_APP_NAME) + "."
+        String logName = env.getProperty("spring.application.name", DEFAULT_APP_NAME) + "."
                 + System.getProperty(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL) + "." + logType + "." + logTime;
         List<Integer> logNums = new ArrayList<>();
-        Map<String,List<Integer>> results = new HashMap<>();
-        if(files!=null){
-            for(File file : files){
+        Map<String, List<Integer>> results = new HashMap<>();
+        if (files != null) {
+            for (File file : files) {
                 String fileName = file.getName();
-                if(fileName.contains(logName)){
+                if (fileName.contains(logName)) {
                     // target file
                     int idx = extractIndexFromFileName(fileName);
-                    if(idx>=0){
+                    if (idx >= 0) {
                         logNums.add(idx);
                     }
                 }
             }
-            results.put("log indexes",logNums);
+            results.put("log indexes", logNums);
             return SingleResult.success(results);
-        }else{
+        } else {
             return SingleResult.failure("There is no relevant log index");
         }
     }
 
     private boolean isHistoryLog(ServerLogParam param) {
-        return param.getLogTime() != null &&
-                !param.getLogTime().equals(LocalDate.now().toString()) && param.getCurLogNum()!=null;
+        return param.getLogTime() != null
+                && !param.getLogTime().equals(LocalDate.now().toString())
+                && param.getCurLogNum() != null;
     }
 
     private ServerLogVO readCurrentLogs(ServerLogParam param) throws IOException {
@@ -154,7 +154,7 @@ public class ServerLogFileServiceImpl implements ServerLogService {
     private String buildLogFilePath(boolean isHistory, ServerLogParam param) {
         String logType = param.getLogType();
         Integer logNum = param.getCurLogNum();
-        logNum = logNum==null ? 0 : logNum;
+        logNum = logNum == null ? 0 : logNum;
         String logTime = param.getLogTime();
         String path = buildLogBasePath() + (isHistory ? "/history/" : "/");
         String prefix = buildFilePrefix(logType);
@@ -185,22 +185,20 @@ public class ServerLogFileServiceImpl implements ServerLogService {
     }
 
     private boolean validLogType(String logType) {
-        return SERVER_LOG_ALL.equals(logType) ||
-                SERVER_LOG_WARN.equals(logType) ||
-                SERVER_LOG_ERROR.equals(logType);
+        return SERVER_LOG_ALL.equals(logType) || SERVER_LOG_WARN.equals(logType) || SERVER_LOG_ERROR.equals(logType);
     }
 
     private ServerLogVO readLogFile(String filePath, Integer cursor, int nextLines) throws IOException {
         File file = new File(filePath);
         if (!file.exists() || !file.isFile()) {
             LOGGER.warn("Log file missing: {}", filePath);
-            return new ServerLogVO(cursor != null ? cursor : 0, Collections.emptyList(),0L);
+            return new ServerLogVO(cursor != null ? cursor : 0, Collections.emptyList(), 0L);
         }
 
         List<String> logs = new ArrayList<>();
         int newCursor = cursor != null ? cursor : 0;
         int processedLines = 0;
-        long totalLines = FileUtils.readLines(file,StandardCharsets.UTF_8).size();
+        long totalLines = FileUtils.readLines(file, StandardCharsets.UTF_8).size();
 
         try (ReversedLinesFileReader reader = new ReversedLinesFileReader(file, StandardCharsets.UTF_8)) {
             // Skip the read line
@@ -227,9 +225,8 @@ public class ServerLogFileServiceImpl implements ServerLogService {
         int linesRead = 0;
         long totalLines;
 
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(
-                        new GZIPInputStream(Files.newInputStream(Paths.get(filePath))), StandardCharsets.UTF_8))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+                new GZIPInputStream(Files.newInputStream(Paths.get(filePath))), StandardCharsets.UTF_8))) {
             totalLines = reader.lines().count();
             // Skip the read line
             for (int i = 0; i < newCursor; i++) {

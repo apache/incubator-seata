@@ -24,9 +24,24 @@ import java.util.Map;
 public interface MCPRPCService {
     String postCallTC(NameSpaceDetail nameSpaceDetail, String path, HttpHeaders headers, Object... args);
 
-    String getCallTC(NameSpaceDetail nameSpaceDetail, String path, Object queryParams, Map<String, String> pathParams, HttpHeaders headers);
+    String getCallTC(
+            NameSpaceDetail nameSpaceDetail,
+            String path,
+            Object queryParams,
+            Map<String, String> pathParams,
+            HttpHeaders headers);
 
-    String deleteCallTC(NameSpaceDetail nameSpaceDetail, String path, Object queryParams, Map<String, String> pathParams, HttpHeaders headers);
+    String deleteCallTC(
+            NameSpaceDetail nameSpaceDetail,
+            String path,
+            Object queryParams,
+            Map<String, String> pathParams,
+            HttpHeaders headers);
 
-    String putCallTC(NameSpaceDetail nameSpaceDetail, String path, Object queryParams, Map<String, String> pathParams, HttpHeaders headers);
+    String putCallTC(
+            NameSpaceDetail nameSpaceDetail,
+            String path,
+            Object queryParams,
+            Map<String, String> pathParams,
+            HttpHeaders headers);
 }
