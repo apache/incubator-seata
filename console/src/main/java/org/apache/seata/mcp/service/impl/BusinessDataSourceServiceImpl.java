@@ -143,8 +143,12 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
             String startTime = logModifiedTime.getStartTime();
             String endTime = logModifiedTime.getEndTime();
             if (startTime != null && endTime != null) {
-                sql += SqlConstant.UNDO_LOG_MODIFY_TIME_SQL;
-                containsTimeDuration = true;
+                if(containsTimeDuration){
+                    sql += " AND" + SqlConstant.UNDO_LOG_MODIFY_TIME_SQL;
+                }else{
+                    sql += SqlConstant.UNDO_LOG_MODIFY_TIME_SQL;
+                    containsTimeDuration=true;
+                }
                 Long startTimestamp = LocalDateTime.parse(startTime, formatter)
                         .atZone(ZoneId.systemDefault())
                         .toInstant()
