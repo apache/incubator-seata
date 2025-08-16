@@ -18,6 +18,7 @@ package org.apache.seata.mcp.service.impl;
 
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.mcp.entity.constant.RPCConstant;
+import org.apache.seata.mcp.entity.param.GlobalLockDeleteParam;
 import org.apache.seata.mcp.entity.param.GlobalLockParam;
 import org.apache.seata.mcp.entity.pojo.MCPProperties;
 import org.apache.seata.mcp.entity.pojo.NameSpaceDetail;
@@ -56,7 +57,7 @@ public class GlobalLockServiceImpl implements GlobalLockService {
     }
 
     @Override
-    public String deleteGlobalLock(NameSpaceDetail nameSpaceDetail, GlobalLockParam param) {
+    public String deleteGlobalLock(NameSpaceDetail nameSpaceDetail, GlobalLockDeleteParam param) {
         String result = mcpRPCService.deleteCallTC(
                 nameSpaceDetail, RPCConstant.GLOBAL_LOCK_BASE_URL + "/delete", param, null, null);
         if (StringUtils.isBlank(result)) {
