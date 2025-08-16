@@ -14,33 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.mcp.parser;
+package org.apache.seata.mcp.undo.parser;
+
+import org.apache.seata.common.Constants;
 
 /**
- * The interface Undo log parser.
- *
+ * The type Json based undo log parser.
  */
-public interface UndoLogParser {
-
-    /**
-     * Get the name of parser;
-     *
-     * @return the name of parser
-     */
-    String getName();
-
-    /**
-     * Get default context of this parser
-     *
-     * @return the default content if undo log is empty
-     */
-    byte[] getDefaultContent();
-
-    /**
-     * Decode byte array to branch undo log.
-     *
-     * @param bytes the byte array
-     * @return the branch undo log text
-     */
-    String decode(byte[] bytes);
+public class UndoLogParser {
+    public String decode(byte[] bytes) {
+        return new String(bytes, Constants.DEFAULT_CHARSET);
+    }
 }
