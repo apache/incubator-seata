@@ -16,6 +16,11 @@
  */
 package org.apache.seata.mcp.entity.constant;
 
+/**
+ *  ‘#’ is a placeholder for AND
+ *  ‘%’ is a placeholder for Number Params
+ */
+
 public class SqlConstant {
 
     public static final String GET_TABLE_NAME_SQL =
@@ -25,7 +30,7 @@ public class SqlConstant {
             "SELECT COLUMN_NAME, DATA_TYPE, COLUMN_COMMENT FROM INFORMATION_SCHEMA.COLUMNS "
                     + "WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?";
 
-    public static final String GET_UNDO_LOG_SQL = "SELECT rollback_info,context FROM undo_log WHERE";
+    public static final String GET_UNDO_LOG_SQL = "SELECT rollback_info,context,log_status FROM undo_log WHERE";
 
     public static final String PARAM_BRANCH_ID_SQL = " branch_id = ? #";
 
@@ -37,7 +42,7 @@ public class SqlConstant {
 
     public static final String UNDO_LOG_MODIFY_TIME_SQL = " log_modified BETWEEN ? AND ?";
 
-    public static final String UNDO_LOG_ORDER = " ORDER BY context";
+    public static final String UNDO_LOG_ORDER = " ORDER BY log_status";
 
     public static final int MAX_OFFSET_THRESHOLD = 10000;
 
