@@ -18,6 +18,7 @@ package org.apache.seata.mcp.controller.tools;
 
 import org.apache.seata.mcp.annotation.Tool;
 import org.apache.seata.mcp.annotation.ToolParam;
+import org.apache.seata.mcp.entity.param.GlobalLockDeleteParam;
 import org.apache.seata.mcp.entity.param.GlobalLockParam;
 import org.apache.seata.mcp.entity.pojo.NameSpaceDetail;
 import org.apache.seata.mcp.service.GlobalLockService;
@@ -49,7 +50,7 @@ public class GlobalLockTools {
     public String deleteGlobalLock(
             @ToolParam(description = "Specify the namespace of the TC node", required = true)
                     NameSpaceDetail nameSpaceDetail,
-            @ToolParam(description = "Global lock parameters", required = true) GlobalLockParam param,
+            @ToolParam(description = "Global lock delete parameters", required = true) GlobalLockDeleteParam param,
             @ToolParam(description = "Modify key", required = true) String modifyKey) {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("manual operation to delete the global lock, param: {}", param);
