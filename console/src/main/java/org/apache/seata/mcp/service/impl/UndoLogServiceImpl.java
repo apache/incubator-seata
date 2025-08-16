@@ -17,7 +17,7 @@
 package org.apache.seata.mcp.service.impl;
 
 import org.apache.seata.mcp.entity.param.UndoLogParam;
-import org.apache.seata.mcp.parser.FastjsonUndoLogParser;
+import org.apache.seata.mcp.undo.parser.UndoLogParser;
 import org.apache.seata.mcp.service.BusinessDataSourceService;
 import org.apache.seata.mcp.service.UndoLogService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,11 +41,8 @@ public class UndoLogServiceImpl implements UndoLogService {
             return "The corresponding undoLog data cannot be queried";
         }
         // 2. Then deserialize undoLogInfo to BranchUndoLog through FastJsonParser
-        FastjsonUndoLogParser parser = new FastjsonUndoLogParser();
+        UndoLogParser parser = new UndoLogParser();
         List<String> result = new ArrayList<>();
-        //        for (byte[] bytes : undoLogInfo) {
-        //            result.add(parser.decode(bytes));
-        //        }
         for (String context : undoLogInfo.keySet()) {
             List<byte[]> bytes = undoLogInfo.get(context);
             for (byte[] infos : bytes) {
