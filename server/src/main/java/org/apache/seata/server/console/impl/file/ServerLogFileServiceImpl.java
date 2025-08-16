@@ -224,10 +224,13 @@ public class ServerLogFileServiceImpl implements ServerLogService {
         int newCursor = cursor != null ? cursor : 0;
         int linesRead = 0;
         long totalLines;
+        try (BufferedReader counter = new BufferedReader(new InputStreamReader(
+                new GZIPInputStream(Files.newInputStream(Paths.get(filePath))), StandardCharsets.UTF_8))) {
+            totalLines = counter.lines().count();
+        }
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(
                 new GZIPInputStream(Files.newInputStream(Paths.get(filePath))), StandardCharsets.UTF_8))) {
-            totalLines = reader.lines().count();
             // Skip the read line
             for (int i = 0; i < newCursor; i++) {
                 if (reader.readLine() == null) break;
