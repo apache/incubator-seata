@@ -29,7 +29,10 @@ import javax.annotation.Nullable;
 
 public class AdapterSpringSeataInterceptor implements MethodInterceptor, SeataInterceptor, Ordered {
 
-    private ProxyInvocationHandler proxyInvocationHandler;
+    @Nullable
+    private Integer explicitOrder;
+
+    private final ProxyInvocationHandler proxyInvocationHandler;
 
     public AdapterSpringSeataInterceptor(ProxyInvocationHandler proxyInvocationHandler) {
         Assert.notNull(proxyInvocationHandler, "proxyInvocationHandler must not be null");
@@ -46,12 +49,14 @@ public class AdapterSpringSeataInterceptor implements MethodInterceptor, SeataIn
 
     @Override
     public int getOrder() {
-        return proxyInvocationHandler.getOrder();
+        final int candidate = (explicitOrder != null) ? explicitOrder : proxyInvocationHandler.getOrder();
+        return (candidate >= Ordered.LOWEST_PRECEDENCE) ? (Ordered.LOWEST_PRECEDENCE - 1) : candidate;
     }
 
     @Override
     public void setOrder(int order) {
         proxyInvocationHandler.setOrder(order);
+        this.explicitOrder = order;
     }
 
     @Override

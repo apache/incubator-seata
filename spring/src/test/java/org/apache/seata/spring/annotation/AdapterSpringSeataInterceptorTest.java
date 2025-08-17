@@ -26,6 +26,7 @@ import org.apache.seata.spring.tcc.NormalTccActionImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.Ordered;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -73,6 +74,21 @@ class AdapterSpringSeataInterceptorTest {
         Assertions.assertTrue((Boolean) adapterSpringSeataInterceptor.invoke(myMockMethodInvocation));
     }
 
+    @Test
+    void order_should_be_less_than_lowest_precedence() {
+        // given
+        adapterSpringSeataInterceptor.setOrder(Ordered.LOWEST_PRECEDENCE);
+
+        // then
+        Assertions.assertEquals(Ordered.LOWEST_PRECEDENCE - 1, adapterSpringSeataInterceptor.getOrder());
+    }
+
+    @Test
+    void order_should_passthrough_when_not_lowest() {
+        adapterSpringSeataInterceptor.setOrder(100);
+        Assertions.assertEquals(100, adapterSpringSeataInterceptor.getOrder());
+    }
+
     static class MyMockMethodInvocation implements MethodInvocation {
 
         private Callable callable;
@@ -110,7 +126,7 @@ class AdapterSpringSeataInterceptorTest {
         @Nonnull
         @Override
         public AccessibleObject getStaticPart() {
-            return null;
+            return method;
         }
     }
 }
