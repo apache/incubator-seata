@@ -38,7 +38,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class McpAutoToolRegisterTest {
+public class MCPAutoRegisterTest {
 
     @Mock
     private McpServerManager mcpServerManager;
@@ -46,7 +46,7 @@ public class McpAutoToolRegisterTest {
     @Mock
     private io.modelcontextprotocol.server.McpAsyncServer mcpServer;
 
-    private McpAutoToolRegister toolRegister;
+    private MCPAutoRegister toolRegister;
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
@@ -54,7 +54,7 @@ public class McpAutoToolRegisterTest {
         MockitoAnnotations.openMocks(this);
         when(mcpServerManager.getServerInstance()).thenReturn(mcpServer);
         when(mcpServer.addTool(any())).thenReturn(Mono.empty());
-        toolRegister = new McpAutoToolRegister(mcpServerManager);
+        toolRegister = new MCPAutoRegister(mcpServerManager);
     }
 
     @Test
@@ -96,7 +96,7 @@ public class McpAutoToolRegisterTest {
             required.forEach(node -> requiredFields.add(node.asText()));
             assertFalse(requiredFields.contains("stringParam"));
             assertFalse(requiredFields.contains("intParam"));
-            assertFalse(requiredFields.contains("boolParam")); // boolParam不是必填项
+            assertFalse(requiredFields.contains("boolParam"));
 
         } catch (Exception e) {
             fail("Failed to parse schema: " + e.getMessage());
@@ -202,7 +202,6 @@ public class McpAutoToolRegisterTest {
     }
 
     // Bean classes for testing
-
     public static class TestToolWithSimpleTypes {
         @Tool(description = "A simple test tool")
         public String simpleMethod(
