@@ -21,6 +21,9 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.modelcontextprotocol.server.McpServerFeatures;
 import io.modelcontextprotocol.spec.McpSchema;
+import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.mcp.annotation.Prompt;
+import org.apache.seata.mcp.annotation.PromptParam;
 import org.apache.seata.mcp.annotation.Tool;
 import org.apache.seata.mcp.annotation.ToolParam;
 import org.apache.seata.mcp.manager.McpServerManager;
@@ -43,102 +46,169 @@ import java.util.*;
  * @author xb2555
  */
 @Component
-public class McpAutoToolRegister implements BeanPostProcessor {
+public class MCPAutoRegister implements BeanPostProcessor {
 
     private final McpServerManager aysncManager;
     private final ObjectMapper mapper = new ObjectMapper();
-    private final Logger logger = LoggerFactory.getLogger(McpAutoToolRegister.class);
+    private final Logger logger = LoggerFactory.getLogger(MCPAutoRegister.class);
 
     // Type tracking to prevent circular references
     private final Set<Class<?>> processingTypes = new HashSet<>();
 
-    public McpAutoToolRegister(McpServerManager aysncManager) {
+    public MCPAutoRegister(McpServerManager aysncManager) {
         this.aysncManager = aysncManager;
     }
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String name) {
         for (Method m : bean.getClass().getMethods()) {
-            Tool ann = m.getAnnotation(Tool.class);
-            if (ann == null) continue;
-
-            // —— 1. Dynamically generate JSON Schema -
-            ObjectNode parameters = mapper.createObjectNode();
-            parameters.put("type", "object");
-
-            ObjectNode props = parameters.putObject("properties");
-            ArrayNode required = parameters.putArray("required");
-
-            Parameter[] methodParams = m.getParameters();
-            for (Parameter p : methodParams) {
-                String pName = p.getName();
-                Class<?> pt = p.getType();
-
-                // Cleanup the collection of processing type tracks
-                processingTypes.clear();
-
-                // Generate a schema for the parameters
-                ObjectNode prop = generatePropertySchema(pt, p);
-                props.set(pName, prop);
-
-                // Check whether this parameter is mandatory
-                ToolParam paramAnn = p.getAnnotation(ToolParam.class);
-                if (paramAnn == null || paramAnn.required()) {
-                    required.add(pName);
-                }
+            Tool toolAnn = m.getAnnotation(Tool.class);
+            Prompt promptAnn = m.getAnnotation(Prompt.class);
+            if(toolAnn!=null){
+                autoRegisterTool(bean,m,toolAnn);
             }
 
-            String schemaStr = parameters.toString();
-
-            // —— 2. build ToolSpecification and register as a tool ——
-            McpSchema.Tool toolMeta = new McpSchema.Tool(m.getName(), ann.description(), true, schemaStr, null);
-
-            McpServerFeatures.AsyncToolSpecification spec = new McpServerFeatures.AsyncToolSpecification(
-                    toolMeta, (exchange, arguments) -> Mono.fromCallable(() -> {
-                                try {
-                                    Object[] args = Arrays.stream(methodParams)
-                                            .map(p -> convertArgument(arguments.get(p.getName()), p.getType()))
-                                            .toArray();
-
-                                    Object ret = m.invoke(bean, args);
-
-                                    List<McpSchema.Content> contents = new ArrayList<>();
-                                    if (ret instanceof McpSchema.CallToolResult) {
-                                        return (McpSchema.CallToolResult) ret;
-                                    } else if (ret instanceof String) {
-                                        contents.add(new McpSchema.TextContent((String) ret));
-                                    } else {
-                                        contents.add(new McpSchema.TextContent(mapper.writeValueAsString(ret)));
-                                    }
-
-                                    // `false` This call will no longer trigger the LLM to continue calling the tool
-                                    return new McpSchema.CallToolResult(contents, false);
-
-                                } catch (InvocationTargetException ite) {
-                                    String err = ite.getTargetException().getMessage();
-                                    return new McpSchema.CallToolResult(
-                                            Collections.singletonList(
-                                                    new McpSchema.TextContent("The tool execution error: " + err)),
-                                            true);
-                                } catch (Exception e) {
-                                    logger.error("Tool transform failed:{}", e.getMessage());
-                                    throw new RuntimeException(e);
-                                }
-                            })
-                            .subscribeOn(Schedulers.boundedElastic()));
-
-            // Add a tool and process the returned Mono
-            aysncManager
-                    .getServerInstance()
-                    .addTool(spec)
-                    .doOnError(error -> {
-                        logger.error("Tool registration failed:{}", error.getMessage());
-                        throw new RuntimeException("Failed to register the tool: " + m.getName(), error);
-                    })
-                    .subscribe();
+            if(promptAnn!=null){
+                autoRegisterPrompt(bean,m,promptAnn);
+            }
         }
 
         return bean;
+    }
+
+    public void autoRegisterPrompt(Object bean, Method m, Prompt ann){
+        Parameter[] methodParams = m.getParameters();
+        List<McpSchema.PromptArgument> arguments = new ArrayList<>();
+        for (Parameter p : methodParams) {
+            PromptParam paramAnn = p.getAnnotation(PromptParam.class);
+            McpSchema.PromptArgument promptArgument = new McpSchema.PromptArgument();
+            promptArgument.setName(p.getName());
+            if(paramAnn!=null){
+                if(StringUtils.isNotBlank(paramAnn.description())){
+                    promptArgument.setDescription(paramAnn.description());
+                }
+                promptArgument.setRequired(paramAnn.required());
+            }
+            arguments.add(promptArgument);
+        }
+
+        // —— 2. build ToolSpecification and register as a tool ——
+        McpSchema.Prompt promptMeta = new McpSchema.Prompt(arguments, ann.description(), m.getName());
+
+        McpServerFeatures.AsyncPromptSpecification spec = new McpServerFeatures.AsyncPromptSpecification(
+                promptMeta, (exchange, request) -> Mono.fromCallable(() -> {
+                    try {
+                        Object[] args = Arrays.stream(methodParams)
+                                .map(p -> convertArgument(request.getArguments().get(p.getName()), p.getType()))
+                                .toArray();
+
+                        Object ret = m.invoke(bean, args);
+                        List<McpSchema.PromptMessage> messages = new ArrayList<>();
+                        if (ret instanceof McpSchema.GetPromptResult) {
+                            return (McpSchema.GetPromptResult) ret;
+                        } else if (ret instanceof String) {
+                            messages.add(new McpSchema.PromptMessage(McpSchema.Role.USER,new McpSchema.TextContent((String) ret)));
+                        }
+
+                        // `false` This call will no longer trigger the LLM to continue calling the tool
+                        return new McpSchema.GetPromptResult("",messages);
+
+                    } catch (InvocationTargetException ite) {
+                        String err = ite.getTargetException().getMessage();
+                        return new McpSchema.GetPromptResult("error",Collections.singletonList(new McpSchema.PromptMessage(McpSchema.Role.USER,new McpSchema.TextContent(err))));
+                    } catch (Exception e) {
+                        logger.error("Prompt transform failed:{}", e.getMessage());
+                        throw new RuntimeException(e);
+                    }
+                })
+                .subscribeOn(Schedulers.boundedElastic()));
+
+        // Add a tool and process the returned Mono
+        aysncManager
+                .getServerInstance()
+                .addPrompt(spec)
+                .doOnError(error -> {
+                    logger.error("Prompt registration failed:{}", error.getMessage());
+                    throw new RuntimeException("Failed to register the prompt: " + m.getName(), error);
+                })
+                .subscribe();
+    }
+
+    public void autoRegisterTool(Object bean, Method m, Tool ann){
+        // —— 1. Dynamically generate JSON Schema -
+        ObjectNode parameters = mapper.createObjectNode();
+        parameters.put("type", "object");
+
+        ObjectNode props = parameters.putObject("properties");
+        ArrayNode required = parameters.putArray("required");
+
+        Parameter[] methodParams = m.getParameters();
+        for (Parameter p : methodParams) {
+            String pName = p.getName();
+            Class<?> pt = p.getType();
+
+            // Cleanup the collection of processing type tracks
+            processingTypes.clear();
+
+            // Generate a schema for the parameters
+            ObjectNode prop = generatePropertySchema(pt, p);
+            props.set(pName, prop);
+
+            // Check whether this parameter is mandatory
+            ToolParam paramAnn = p.getAnnotation(ToolParam.class);
+            if (paramAnn == null || paramAnn.required()) {
+                required.add(pName);
+            }
+        }
+
+        String schemaStr = parameters.toString();
+
+        // —— 2. build ToolSpecification and register as a tool ——
+        McpSchema.Tool toolMeta = new McpSchema.Tool(m.getName(), ann.description(), true, schemaStr, null);
+
+        McpServerFeatures.AsyncToolSpecification spec = new McpServerFeatures.AsyncToolSpecification(
+                toolMeta, (exchange, arguments) -> Mono.fromCallable(() -> {
+                    try {
+                        Object[] args = Arrays.stream(methodParams)
+                                .map(p -> convertArgument(arguments.get(p.getName()), p.getType()))
+                                .toArray();
+
+                        Object ret = m.invoke(bean, args);
+
+                        List<McpSchema.Content> contents = new ArrayList<>();
+                        if (ret instanceof McpSchema.CallToolResult) {
+                            return (McpSchema.CallToolResult) ret;
+                        } else if (ret instanceof String) {
+                            contents.add(new McpSchema.TextContent((String) ret));
+                        } else {
+                            contents.add(new McpSchema.TextContent(mapper.writeValueAsString(ret)));
+                        }
+
+                        // `false` This call will no longer trigger the LLM to continue calling the tool
+                        return new McpSchema.CallToolResult(contents, false);
+
+                    } catch (InvocationTargetException ite) {
+                        String err = ite.getTargetException().getMessage();
+                        return new McpSchema.CallToolResult(
+                                Collections.singletonList(
+                                        new McpSchema.TextContent("The tool execution error: " + err)),
+                                true);
+                    } catch (Exception e) {
+                        logger.error("Tool transform failed:{}", e.getMessage());
+                        throw new RuntimeException(e);
+                    }
+                })
+                .subscribeOn(Schedulers.boundedElastic()));
+
+        // Add a tool and process the returned Mono
+        aysncManager
+                .getServerInstance()
+                .addTool(spec)
+                .doOnError(error -> {
+                    logger.error("Tool registration failed:{}", error.getMessage());
+                    throw new RuntimeException("Failed to register the tool: " + m.getName(), error);
+                })
+                .subscribe();
     }
 
     /**
