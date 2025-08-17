@@ -45,9 +45,9 @@ import java.util.concurrent.locks.ReentrantLock;
 public class McpServerManager implements SmartLifecycle {
     private final ReentrantLock stateLock = new ReentrantLock();
     private ScheduledExecutorService heartbeatScheduler;
-    private static final Logger logger = LoggerFactory.getLogger(McpServerManager.class); // 日志记录
+    private static final Logger logger = LoggerFactory.getLogger(McpServerManager.class);
     private final boolean heartbeat;
-    private final ReentrantLock poolLock = new ReentrantLock(); // 线程池锁
+    private final ReentrantLock poolLock = new ReentrantLock();
     private Future<?> heartbeatTask;
     private final AtomicBoolean running = new AtomicBoolean(false);
 
