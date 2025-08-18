@@ -31,6 +31,9 @@ import java.util.Objects;
 @Component
 public class MCPProperties {
 
+    public static final String SSE_TYPE = "sse";
+    public static final String STREAMABLE_TYPE = "streamable";
+
     /**
      * The name of the server
      */
@@ -40,19 +43,11 @@ public class MCPProperties {
      */
     private String serverVersion = "1.0.0";
     /**
-     * SSE endpoints
-     */
-    private String sseEndpoint = "/sse";
-    /**
-     * MESSAGE ENDPOINT
-     */
-    private String messageEndpoint = "/message";
-    /**
      * Whether to enable OAuth connection authentication
      */
     private boolean enableAuth = true;
     /**
-     * Specifies whether to enable resource
+     * Specifies whether to enable resource/prompt
      */
     private boolean resourceSupport = true;
 
@@ -64,13 +59,85 @@ public class MCPProperties {
      */
     private McpSchema.LoggingLevel loggingLevel = McpSchema.LoggingLevel.INFO;
     /**
-     * Whether to enable heartbeat monitoring, which is not enabled by default
-     */
-    private boolean heartbeat = false;
-    /**
      * Maximum query interval, Millisecond, default: One day: 86400000L
      */
     private Long queryDuration = 86400000L;
+
+    /**
+     * Transmission types, Streamable and SSE are available
+     */
+    private String mcpType = SSE_TYPE;
+
+    private StreamableProperties streamableProperties;
+
+    private SseServerProperties sseServerProperties;
+
+    public boolean isSseType() {
+        return mcpType.equals(SSE_TYPE);
+    }
+
+    public static class StreamableProperties {
+        private String mcpEndPoint = "/mcp";
+
+        public String getMcpEndPoint() {
+            return mcpEndPoint;
+        }
+
+        public void setMcpEndPoint(String mcpEndPoint) {
+            this.mcpEndPoint = mcpEndPoint;
+        }
+
+        public StreamableProperties(String mcpEndPoint) {
+            this.mcpEndPoint = mcpEndPoint;
+        }
+
+        @Override
+        public String toString() {
+            return "StreamableProperties{" +
+                    "mcpEndPoint='" + mcpEndPoint + '\'' +
+                    '}';
+        }
+    }
+
+    public static class SseServerProperties {
+        /**
+         * SSE endpoints
+         */
+        private String sseEndpoint = "/sse";
+        /**
+         * MESSAGE ENDPOINT
+         */
+        private String messageEndpoint = "/message";
+
+        public String getSseEndpoint() {
+            return sseEndpoint;
+        }
+
+        public void setSseEndpoint(String sseEndpoint) {
+            this.sseEndpoint = sseEndpoint;
+        }
+
+        public String getMessageEndpoint() {
+            return messageEndpoint;
+        }
+
+        public void setMessageEndpoint(String messageEndpoint) {
+            this.messageEndpoint = messageEndpoint;
+        }
+
+        public SseServerProperties(String sseEndpoint, String messageEndpoint) {
+            this.sseEndpoint = sseEndpoint;
+            this.messageEndpoint = messageEndpoint;
+        }
+
+        @Override
+        public String toString() {
+            return "SseServerProperties{" +
+                    "sseEndpoint='" + sseEndpoint + '\'' +
+                    ", messageEndpoint='" + messageEndpoint + '\'' +
+                    '}';
+        }
+    }
 
     /**
      * Read MCP-related configuration parameters from the environment
@@ -81,67 +148,44 @@ public class MCPProperties {
 
     @PostConstruct
     public void init() {
+        mcpType = env.getProperty("seata.mcp.mcpType","sse");
+        if(mcpType.equals(SSE_TYPE)){
+            String sseEndpoint = env.getProperty("seata.mcp.sse.sseEndpoint", "/sse");
+            String messageEndpoint = env.getProperty("seata.mcp.sse.messageEndpoint", "/message");
+            sseServerProperties = new SseServerProperties(sseEndpoint,messageEndpoint);
+        }else if (mcpType.equals(STREAMABLE_TYPE)){
+            String mcpEndPoint = env.getProperty("seata.mcp.streamable.mcpEndpoint","/mcp");
+            streamableProperties = new StreamableProperties(mcpEndPoint);
+        }else {
+            mcpType = SSE_TYPE;
+            String sseEndpoint = env.getProperty("seata.mcp.sse.sseEndpoint", "/sse");
+            String messageEndpoint = env.getProperty("seata.mcp.sse.messageEndpoint", "/message");
+            sseServerProperties = new SseServerProperties(sseEndpoint,messageEndpoint);
+        }
         serverName = env.getProperty("seata.mcp.serverName", "seata-mcp-server");
         serverVersion = env.getProperty("seata.mcp.serverVersion", "1.0.0");
-        sseEndpoint = env.getProperty("seata.mcp.sseEndpoint", "/sse");
-        messageEndpoint = env.getProperty("seata.mcp.messageEndpoint", "/message");
         resourceSupport = Boolean.parseBoolean(env.getProperty("seata.mcp.resourceSupport", "true"));
         promptSupport = Boolean.parseBoolean(env.getProperty("seata.mcp.promptSupport", "true"));
-        heartbeat = Boolean.parseBoolean(env.getProperty("seata.mcp.heartbeat", "false"));
         queryDuration = Long.parseLong(env.getProperty("seata.mcp.query.max_query_duration", "86400000"));
         enableAuth = Boolean.parseBoolean(env.getProperty("seata.mcp.auth.enabled", "true"));
     }
 
     @Override
     public String toString() {
-        return "MCPProperties{" + "serverName='"
-                + serverName + '\'' + ", serverVersion='"
-                + serverVersion + '\'' + ", sseEndpoint='"
-                + sseEndpoint + '\'' + ", messageEndpoint='"
-                + messageEndpoint + '\'' + ", enableAuth="
-                + enableAuth + ", resourceSupport="
-                + resourceSupport + ", resourceTemplates="
-                + resourceTemplates + ", promptSupport="
-                + promptSupport + ", loggingLevel="
-                + loggingLevel + ", heartbeat="
-                + heartbeat + ", queryDuration="
-                + queryDuration + ", env="
-                + env + '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        MCPProperties that = (MCPProperties) o;
-        return enableAuth == that.enableAuth
-                && resourceSupport == that.resourceSupport
-                && resourceTemplates == that.resourceTemplates
-                && promptSupport == that.promptSupport
-                && heartbeat == that.heartbeat
-                && Objects.equals(serverName, that.serverName)
-                && Objects.equals(serverVersion, that.serverVersion)
-                && Objects.equals(sseEndpoint, that.sseEndpoint)
-                && Objects.equals(messageEndpoint, that.messageEndpoint)
-                && loggingLevel == that.loggingLevel
-                && Objects.equals(queryDuration, that.queryDuration)
-                && Objects.equals(env, that.env);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(
-                serverName,
-                serverVersion,
-                sseEndpoint,
-                messageEndpoint,
-                enableAuth,
-                resourceSupport,
-                resourceTemplates,
-                promptSupport,
-                loggingLevel,
-                heartbeat,
-                queryDuration,
-                env);
+        return "MCPProperties{" +
+                "serverName='" + serverName + '\'' +
+                ", serverVersion='" + serverVersion + '\'' +
+                ", enableAuth=" + enableAuth +
+                ", resourceSupport=" + resourceSupport +
+                ", resourceTemplates=" + resourceTemplates +
+                ", promptSupport=" + promptSupport +
+                ", loggingLevel=" + loggingLevel +
+                ", queryDuration=" + queryDuration +
+                ", mcpType='" + mcpType + '\'' +
+                ", streamableProperties=" + streamableProperties +
+                ", sseServerProperties=" + sseServerProperties +
+                ", env=" + env +
+                '}';
     }
 
     public String getServerName() {
@@ -158,22 +202,6 @@ public class MCPProperties {
 
     public void setServerVersion(String serverVersion) {
         this.serverVersion = serverVersion;
-    }
-
-    public String getSseEndpoint() {
-        return sseEndpoint;
-    }
-
-    public void setSseEndpoint(String sseEndpoint) {
-        this.sseEndpoint = sseEndpoint;
-    }
-
-    public String getMessageEndpoint() {
-        return messageEndpoint;
-    }
-
-    public void setMessageEndpoint(String messageEndpoint) {
-        this.messageEndpoint = messageEndpoint;
     }
 
     public boolean isResourceSupport() {
@@ -200,14 +228,6 @@ public class MCPProperties {
         this.loggingLevel = loggingLevel;
     }
 
-    public boolean isHeartbeat() {
-        return heartbeat;
-    }
-
-    public void setHeartbeat(boolean heartbeat) {
-        this.heartbeat = heartbeat;
-    }
-
     public Long getQueryDuration() {
         return queryDuration;
     }
@@ -230,5 +250,21 @@ public class MCPProperties {
 
     public void setEnableAuth(boolean enableAuth) {
         this.enableAuth = enableAuth;
+    }
+
+    public String getMcpType() {
+        return mcpType;
+    }
+
+    public Environment getEnv() {
+        return env;
+    }
+
+    public StreamableProperties getStreamableProperties() {
+        return streamableProperties;
+    }
+
+    public SseServerProperties getSseServerProperties() {
+        return sseServerProperties;
     }
 }

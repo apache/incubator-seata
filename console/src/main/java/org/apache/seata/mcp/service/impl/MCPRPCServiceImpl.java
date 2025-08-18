@@ -20,6 +20,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.seata.common.result.SingleResult;
+import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.console.config.WebSecurityConfig;
 import org.apache.seata.console.utils.JwtTokenUtils;
 import org.apache.seata.mcp.annotation.Tool;
@@ -136,7 +137,10 @@ public class MCPRPCServiceImpl implements MCPRPCService {
     public void setNamespaceHeaderAndPathParam(
             NameSpaceDetail nameSpaceDetail, HttpHeaders headers, Map<String, String> pathParams) {
         headers.add("x-seata-namespace", nameSpaceDetail.getNamespace());
-        if (nameSpaceDetail.getvGroup() != null) {
+        if (StringUtils.isNotBlank(nameSpaceDetail.getvGroup())) {
+            if(pathParams==null){
+                pathParams = new HashMap<>();
+            }
             pathParams.put("vGroup", nameSpaceDetail.getvGroup());
             return;
         }
