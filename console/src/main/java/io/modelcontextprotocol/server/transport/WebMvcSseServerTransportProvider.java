@@ -22,8 +22,7 @@ import reactor.core.scheduler.Schedulers;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -137,23 +136,6 @@ public class WebMvcSseServerTransportProvider implements McpServerTransportProvi
                 .build();
     }
 
-    /**
-     * Send heartbeat messages
-     * Use standard SSE event types and add error handling
-     */
-    public void sendHeartbeat() {
-        for (McpServerSession session : sessions.values()) {
-            try {
-                ((WebMvcMcpSessionTransport) session.getTransport())
-                        .sendHeartbeat()
-                        .subscribe();
-            } catch (Exception e) {
-                logger.debug(
-                        "Failed to send heartbeat message, session ID: {}, Error: {}", session.getId(), e.getMessage());
-            }
-        }
-    }
-
     @Override
     public void setSessionFactory(McpServerSession.Factory sessionFactory) {
         this.sessionFactory = sessionFactory;
@@ -169,7 +151,7 @@ public class WebMvcSseServerTransportProvider implements McpServerTransportProvi
      * @return A Mono that completes when the broadcast attempt is finished
      */
     @Override
-    public Mono<Void> notifyClients(String method, Map<String, Object> params) {
+    public Mono<Void> notifyClients(String method, Object params) {
         if (sessions.isEmpty()) {
             logger.debug("No active sessions to broadcast message to");
             return Mono.empty();
@@ -213,6 +195,11 @@ public class WebMvcSseServerTransportProvider implements McpServerTransportProvi
      */
     public RouterFunction<ServerResponse> getRouterFunction() {
         return this.routerFunction;
+    }
+
+    @Override
+    public List<String> protocolVersions() {
+        return Arrays.asList(ProtocolVersions.MCP_2024_11_05,ProtocolVersions.MCP_2025_03_26);
     }
 
     /**

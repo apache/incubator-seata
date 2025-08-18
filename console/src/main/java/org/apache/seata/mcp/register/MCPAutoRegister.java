@@ -29,6 +29,7 @@ import org.apache.seata.mcp.annotation.ToolParam;
 import org.apache.seata.mcp.manager.McpServerManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
@@ -49,7 +50,10 @@ import java.util.*;
 public class MCPAutoRegister implements BeanPostProcessor {
 
     private final McpServerManager aysncManager;
-    private final ObjectMapper mapper = new ObjectMapper();
+
+    @Autowired
+    private ObjectMapper mapper;
+
     private final Logger logger = LoggerFactory.getLogger(MCPAutoRegister.class);
 
     // Type tracking to prevent circular references
@@ -93,7 +97,7 @@ public class MCPAutoRegister implements BeanPostProcessor {
         }
 
         // —— 2. build ToolSpecification and register as a tool ——
-        McpSchema.Prompt promptMeta = new McpSchema.Prompt(arguments, ann.description(), m.getName());
+        McpSchema.Prompt promptMeta = new McpSchema.Prompt(m.getName(), ann.description(), arguments);
 
         McpServerFeatures.AsyncPromptSpecification spec = new McpServerFeatures.AsyncPromptSpecification(
                 promptMeta, (exchange, request) -> Mono.fromCallable(() -> {
@@ -123,7 +127,7 @@ public class MCPAutoRegister implements BeanPostProcessor {
                 })
                 .subscribeOn(Schedulers.boundedElastic()));
 
-        // Add a tool and process the returned Mono
+        // Add a prompt and process the returned Mono
         aysncManager
                 .getServerInstance()
                 .addPrompt(spec)
@@ -164,41 +168,44 @@ public class MCPAutoRegister implements BeanPostProcessor {
         String schemaStr = parameters.toString();
 
         // —— 2. build ToolSpecification and register as a tool ——
-        McpSchema.Tool toolMeta = new McpSchema.Tool(m.getName(), ann.description(), true, schemaStr, null);
+        McpSchema.Tool toolMeta = new McpSchema.Tool(m.getName(), ann.description(), schemaStr);
 
-        McpServerFeatures.AsyncToolSpecification spec = new McpServerFeatures.AsyncToolSpecification(
-                toolMeta, (exchange, arguments) -> Mono.fromCallable(() -> {
-                    try {
-                        Object[] args = Arrays.stream(methodParams)
-                                .map(p -> convertArgument(arguments.get(p.getName()), p.getType()))
-                                .toArray();
+        McpServerFeatures.AsyncToolSpecification spec = McpServerFeatures.AsyncToolSpecification.builder()
+                        .tool(toolMeta)
+                        .callHandler((exchange,request) -> Mono.fromCallable(() -> {
+                                    try {
+                                        Object[] args = Arrays.stream(methodParams)
+                                                .map(p -> convertArgument(request.getArguments().get(p.getName()), p.getType()))
+                                                .toArray();
 
-                        Object ret = m.invoke(bean, args);
+                                        Object ret = m.invoke(bean, args);
 
-                        List<McpSchema.Content> contents = new ArrayList<>();
-                        if (ret instanceof McpSchema.CallToolResult) {
-                            return (McpSchema.CallToolResult) ret;
-                        } else if (ret instanceof String) {
-                            contents.add(new McpSchema.TextContent((String) ret));
-                        } else {
-                            contents.add(new McpSchema.TextContent(mapper.writeValueAsString(ret)));
-                        }
+                                        List<McpSchema.Content> contents = new ArrayList<>();
+                                        if (ret instanceof McpSchema.CallToolResult) {
+                                            return (McpSchema.CallToolResult) ret;
+                                        } else if (ret instanceof String) {
+                                            contents.add(new McpSchema.TextContent((String) ret));
+                                        } else {
+                                            contents.add(new McpSchema.TextContent(mapper.writeValueAsString(ret)));
+                                        }
 
-                        // `false` This call will no longer trigger the LLM to continue calling the tool
-                        return new McpSchema.CallToolResult(contents, false);
+                                        // `false` This call will no longer trigger the LLM to continue calling the tool
+                                        return new McpSchema.CallToolResult(contents, false);
 
-                    } catch (InvocationTargetException ite) {
-                        String err = ite.getTargetException().getMessage();
-                        return new McpSchema.CallToolResult(
-                                Collections.singletonList(
-                                        new McpSchema.TextContent("The tool execution error: " + err)),
-                                true);
-                    } catch (Exception e) {
-                        logger.error("Tool transform failed:{}", e.getMessage());
-                        throw new RuntimeException(e);
-                    }
-                })
-                .subscribeOn(Schedulers.boundedElastic()));
+                                    } catch (InvocationTargetException ite) {
+                                        String err = ite.getTargetException().getMessage();
+                                        return new McpSchema.CallToolResult(
+                                                Collections.singletonList(
+                                                        new McpSchema.TextContent("The tool execution error: " + err)),
+                                                true);
+                                    } catch (Exception e) {
+                                        logger.error("Tool transform failed:{}", e.getMessage());
+                                        throw new RuntimeException(e);
+                                    }
+                                })
+                                .subscribeOn(Schedulers.boundedElastic())
+                        )
+                .build();
 
         // Add a tool and process the returned Mono
         aysncManager

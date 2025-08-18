@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.modelcontextprotocol.util.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,9 +29,12 @@ public final class McpSchema {
 
     private McpSchema() {}
 
-    public static final String LATEST_PROTOCOL_VERSION = "2025-03-26";
+    @Deprecated
+    public static final String LATEST_PROTOCOL_VERSION = ProtocolVersions.MCP_2025_03_26;
 
     public static final String JSONRPC_VERSION = "2.0";
+
+    public static final String FIRST_PAGE = null;
 
     // ---------------------------
     // Method Names
@@ -42,6 +46,8 @@ public final class McpSchema {
     public static final String METHOD_NOTIFICATION_INITIALIZED = "notifications/initialized";
 
     public static final String METHOD_PING = "ping";
+
+    public static final String METHOD_NOTIFICATION_PROGRESS = "notifications/progress";
 
     // Tool Methods
     public static final String METHOD_TOOLS_LIST = "tools/list";
@@ -57,6 +63,8 @@ public final class McpSchema {
 
     public static final String METHOD_NOTIFICATION_RESOURCES_LIST_CHANGED = "notifications/resources/list_changed";
 
+    public static final String METHOD_NOTIFICATION_RESOURCES_UPDATED = "notifications/resources/updated";
+
     public static final String METHOD_RESOURCES_TEMPLATES_LIST = "resources/templates/list";
 
     public static final String METHOD_RESOURCES_SUBSCRIBE = "resources/subscribe";
@@ -70,6 +78,8 @@ public final class McpSchema {
 
     public static final String METHOD_NOTIFICATION_PROMPTS_LIST_CHANGED = "notifications/prompts/list_changed";
 
+    public static final String METHOD_COMPLETION_COMPLETE = "completion/complete";
+
     // Logging Methods
     public static final String METHOD_LOGGING_SET_LEVEL = "logging/setLevel";
 
@@ -82,6 +92,9 @@ public final class McpSchema {
 
     // Sampling Methods
     public static final String METHOD_SAMPLING_CREATE_MESSAGE = "sampling/createMessage";
+
+    // Elicitation Methods
+    public static final String METHOD_ELICITATION_CREATE = "elicitation/create";
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
@@ -119,7 +132,29 @@ public final class McpSchema {
         public static final int INTERNAL_ERROR = -32603;
     }
 
-    public interface Request {}
+    public interface Request {
+        Map<String, Object> meta();
+
+        default String progressToken() {
+            if (meta() != null && meta().containsKey("progressToken")) {
+                return meta().get("progressToken").toString();
+            }
+            return null;
+        }
+    }
+
+    public interface Result {
+
+        Map<String, Object> meta();
+
+    }
+
+    public interface Notification {
+
+        Map<String, Object> meta();
+
+    }
+
 
     private static final TypeReference<HashMap<String, Object>> MAP_TYPE_REF =
             new TypeReference<HashMap<String, Object>>() {};
@@ -252,11 +287,11 @@ public final class McpSchema {
         String method;
 
         @JsonProperty("params")
-        Map<String, Object> params;
+        Object params;
 
         public JSONRPCNotification() {}
 
-        public JSONRPCNotification(String jsonrpc, String method, Map<String, Object> params) {
+        public JSONRPCNotification(String jsonrpc, String method, Object params) {
             this.jsonrpc = jsonrpc;
             this.method = method;
             this.params = params;
@@ -279,7 +314,7 @@ public final class McpSchema {
             this.method = method;
         }
 
-        public Map<String, Object> getParams() {
+        public Object getParams() {
             return params;
         }
 
@@ -469,10 +504,14 @@ public final class McpSchema {
         @JsonProperty("clientInfo")
         Implementation clientInfo;
 
+        @JsonProperty("_meta")
+        Map<String, Object> meta;
+
         public InitializeRequest(String protocolVersion, ClientCapabilities capabilities, Implementation clientInfo) {
             this.protocolVersion = protocolVersion;
             this.capabilities = capabilities;
             this.clientInfo = clientInfo;
+            this.meta = null;
         }
 
         public InitializeRequest() {}
@@ -501,32 +540,45 @@ public final class McpSchema {
             this.clientInfo = clientInfo;
         }
 
+        public Map<String, Object> getMeta() {
+            return meta;
+        }
+
+        public void setMeta(Map<String, Object> meta) {
+            this.meta = meta;
+        }
+
         @Override
         public String toString() {
-            return "InitializeRequest{" + "protocolVersion='"
-                    + protocolVersion + '\'' + ", capabilities="
-                    + capabilities + ", clientInfo="
-                    + clientInfo + '}';
+            return "InitializeRequest{" +
+                    "protocolVersion='" + protocolVersion + '\'' +
+                    ", capabilities=" + capabilities +
+                    ", clientInfo=" + clientInfo +
+                    ", meta=" + meta +
+                    '}';
         }
 
         @Override
         public boolean equals(Object o) {
             if (o == null || getClass() != o.getClass()) return false;
             InitializeRequest that = (InitializeRequest) o;
-            return Objects.equals(protocolVersion, that.protocolVersion)
-                    && Objects.equals(capabilities, that.capabilities)
-                    && Objects.equals(clientInfo, that.clientInfo);
+            return Objects.equals(protocolVersion, that.protocolVersion) && Objects.equals(capabilities, that.capabilities) && Objects.equals(clientInfo, that.clientInfo) && Objects.equals(meta, that.meta);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(protocolVersion, capabilities, clientInfo);
+            return Objects.hash(protocolVersion, capabilities, clientInfo, meta);
+        }
+
+        @Override
+        public Map<String, Object> meta() {
+            return this.meta;
         }
     } // @formatter:on
 
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class InitializeResult {
+    public static class InitializeResult implements Result{
         @JsonProperty("protocolVersion")
         String protocolVersion;
 
@@ -539,30 +591,32 @@ public final class McpSchema {
         @JsonProperty("instructions")
         String instructions;
 
+        @JsonProperty("_meta")
+        Map<String, Object> meta;
+
         public InitializeResult() {}
 
         @Override
         public String toString() {
-            return "InitializeResult{" + "protocolVersion='"
-                    + protocolVersion + '\'' + ", capabilities="
-                    + capabilities + ", serverInfo="
-                    + serverInfo + ", instructions='"
-                    + instructions + '\'' + '}';
+            return "InitializeResult{" +
+                    "protocolVersion='" + protocolVersion + '\'' +
+                    ", capabilities=" + capabilities +
+                    ", serverInfo=" + serverInfo +
+                    ", instructions='" + instructions + '\'' +
+                    ", meta=" + meta +
+                    '}';
         }
 
         @Override
         public boolean equals(Object o) {
             if (o == null || getClass() != o.getClass()) return false;
             InitializeResult that = (InitializeResult) o;
-            return Objects.equals(protocolVersion, that.protocolVersion)
-                    && Objects.equals(capabilities, that.capabilities)
-                    && Objects.equals(serverInfo, that.serverInfo)
-                    && Objects.equals(instructions, that.instructions);
+            return Objects.equals(protocolVersion, that.protocolVersion) && Objects.equals(capabilities, that.capabilities) && Objects.equals(serverInfo, that.serverInfo) && Objects.equals(instructions, that.instructions) && Objects.equals(meta, that.meta);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(protocolVersion, capabilities, serverInfo, instructions);
+            return Objects.hash(protocolVersion, capabilities, serverInfo, instructions, meta);
         }
 
         public String getProtocolVersion() {
@@ -597,6 +651,14 @@ public final class McpSchema {
             this.instructions = instructions;
         }
 
+        public Map<String, Object> getMeta() {
+            return meta;
+        }
+
+        public void setMeta(Map<String, Object> meta) {
+            this.meta = meta;
+        }
+
         public InitializeResult(
                 String protocolVersion,
                 ServerCapabilities capabilities,
@@ -606,6 +668,12 @@ public final class McpSchema {
             this.capabilities = capabilities;
             this.serverInfo = serverInfo;
             this.instructions = instructions;
+            this.meta = null;
+        }
+
+        @Override
+        public Map<String, Object> meta() {
+            return this.meta;
         }
     } // @formatter:on
 
@@ -635,10 +703,14 @@ public final class McpSchema {
         @JsonProperty("sampling")
         Sampling sampling;
 
-        public ClientCapabilities(Map<String, Object> experimental, RootCapabilities roots, Sampling sampling) {
+        @JsonProperty("elicitation")
+        Elicitation elicitation;
+
+        public ClientCapabilities(Map<String, Object> experimental, RootCapabilities roots, Sampling sampling, Elicitation elicitation) {
             this.experimental = experimental;
             this.roots = roots;
             this.sampling = sampling;
+            this.elicitation = elicitation;
         }
 
         public ClientCapabilities() {}
@@ -667,6 +739,14 @@ public final class McpSchema {
             this.sampling = sampling;
         }
 
+        public Elicitation getElicitation() {
+            return elicitation;
+        }
+
+        public void setElicitation(Elicitation elicitation) {
+            this.elicitation = elicitation;
+        }
+
         @Override
         public boolean equals(Object o) {
             if (o == null || getClass() != o.getClass()) return false;
@@ -689,12 +769,15 @@ public final class McpSchema {
                     + sampling + '}';
         }
 
+        @JsonInclude(JsonInclude.Include.NON_ABSENT)
+        public static class Elicitation {
+        }
+
         /**
          * Roots define the boundaries of where servers can operate within the filesystem,
          * allowing them to understand which directories and files they have access to.
          * Servers can request the list of roots from supporting clients and
          * receive notifications when that list changes.
-         *
          * listChanged Whether the client would send notification about roots
          * 		  has changed since the last time the server checked.
          */
@@ -755,54 +838,12 @@ public final class McpSchema {
 
         public static class Builder {
             private Map<String, Object> experimental;
+
             private RootCapabilities roots;
+
             private Sampling sampling;
 
-            @Override
-            public boolean equals(Object o) {
-                if (o == null || getClass() != o.getClass()) return false;
-                Builder builder = (Builder) o;
-                return Objects.equals(experimental, builder.experimental)
-                        && Objects.equals(roots, builder.roots)
-                        && Objects.equals(sampling, builder.sampling);
-            }
-
-            @Override
-            public int hashCode() {
-                return Objects.hash(experimental, roots, sampling);
-            }
-
-            public Builder() {}
-
-            public Builder(Map<String, Object> experimental, RootCapabilities roots, Sampling sampling) {
-                this.experimental = experimental;
-                this.roots = roots;
-                this.sampling = sampling;
-            }
-
-            public Map<String, Object> getExperimental() {
-                return experimental;
-            }
-
-            public void setExperimental(Map<String, Object> experimental) {
-                this.experimental = experimental;
-            }
-
-            public RootCapabilities getRoots() {
-                return roots;
-            }
-
-            public void setRoots(RootCapabilities roots) {
-                this.roots = roots;
-            }
-
-            public Sampling getSampling() {
-                return sampling;
-            }
-
-            public void setSampling(Sampling sampling) {
-                this.sampling = sampling;
-            }
+            private Elicitation elicitation;
 
             public Builder experimental(Map<String, Object> experimental) {
                 this.experimental = experimental;
@@ -819,256 +860,201 @@ public final class McpSchema {
                 return this;
             }
 
-            @Override
-            public String toString() {
-                return "Builder{" + "experimental="
-                        + experimental + ", roots="
-                        + roots + ", sampling="
-                        + sampling + '}';
+            public Builder elicitation() {
+                this.elicitation = new Elicitation();
+                return this;
             }
 
             public ClientCapabilities build() {
-                return new ClientCapabilities(experimental, roots, sampling);
+                return new ClientCapabilities(experimental, roots, sampling, elicitation);
             }
         }
     } // @formatter:on
 
+
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class ServerCapabilities {
+    public static final class ServerCapabilities {
+        @JsonProperty("completions")
+        private final CompletionCapabilities completions;
         @JsonProperty("experimental")
-        Map<String, Object> experimental;
-
+        private final Map<String, Object> experimental;
         @JsonProperty("logging")
-        LoggingCapabilities logging;
-
+        private final LoggingCapabilities logging;
         @JsonProperty("prompts")
-        PromptCapabilities prompts;
-
+        private final PromptCapabilities prompts;
         @JsonProperty("resources")
-        ResourceCapabilities resources;
-
+        private final ResourceCapabilities resources;
         @JsonProperty("tools")
-        ToolCapabilities tools;
-
-        public ServerCapabilities(
-                Map<String, Object> experimental,
-                LoggingCapabilities logging,
-                PromptCapabilities prompts,
-                ResourceCapabilities resources,
-                ToolCapabilities tools) {
-            this.experimental = experimental;
-            this.logging = logging;
-            this.prompts = prompts;
-            this.resources = resources;
-            this.tools = tools;
-        }
-
-        public ServerCapabilities() {}
-
-        public Map<String, Object> getExperimental() {
-            return experimental;
-        }
-
-        public void setExperimental(Map<String, Object> experimental) {
-            this.experimental = experimental;
-        }
-
-        public LoggingCapabilities getLogging() {
-            return logging;
-        }
-
-        public void setLogging(LoggingCapabilities logging) {
-            this.logging = logging;
-        }
-
-        public PromptCapabilities getPrompts() {
-            return prompts;
-        }
-
-        public void setPrompts(PromptCapabilities prompts) {
-            this.prompts = prompts;
-        }
-
-        public ResourceCapabilities getResources() {
-            return resources;
-        }
-
-        public void setResources(ResourceCapabilities resources) {
-            this.resources = resources;
-        }
-
-        public ToolCapabilities getTools() {
-            return tools;
-        }
-
-        public void setTools(ToolCapabilities tools) {
-            this.tools = tools;
-        }
+        private final ToolCapabilities tools;
 
         @Override
         public String toString() {
-            return "ServerCapabilities{" + "experimental="
-                    + experimental + ", logging="
-                    + logging + ", prompts="
-                    + prompts + ", resources="
-                    + resources + ", tools="
-                    + tools + '}';
+            return "ServerCapabilities{" +
+                    "completions=" + completions +
+                    ", experimental=" + experimental +
+                    ", logging=" + logging +
+                    ", prompts=" + prompts +
+                    ", resources=" + resources +
+                    ", tools=" + tools +
+                    '}';
         }
 
-        @Override
-        public boolean equals(Object o) {
-            if (o == null || getClass() != o.getClass()) return false;
-            ServerCapabilities that = (ServerCapabilities) o;
-            return Objects.equals(experimental, that.experimental)
-                    && Objects.equals(logging, that.logging)
-                    && Objects.equals(prompts, that.prompts)
-                    && Objects.equals(resources, that.resources)
-                    && Objects.equals(tools, that.tools);
+        @JsonCreator
+        public ServerCapabilities(
+                @JsonProperty("completions") CompletionCapabilities completions,
+                @JsonProperty("experimental") Map<String, Object> experimental,
+                @JsonProperty("logging") LoggingCapabilities logging,
+                @JsonProperty("prompts") PromptCapabilities prompts,
+                @JsonProperty("resources") ResourceCapabilities resources,
+                @JsonProperty("tools") ToolCapabilities tools
+        ) {
+            this.completions = completions;
+            this.experimental = experimental;
+            this.logging = logging;
+            this.prompts = prompts;
+            this.resources = resources;
+            this.tools = tools;
         }
 
-        @Override
-        public int hashCode() {
-            return Objects.hash(experimental, logging, prompts, resources, tools);
+        public CompletionCapabilities completions() {
+            return completions;
         }
 
-        @JsonInclude(JsonInclude.Include.NON_ABSENT)
-        public static class LoggingCapabilities {}
-
-        @JsonInclude(JsonInclude.Include.NON_ABSENT)
-        public static class PromptCapabilities {
-            @JsonProperty("listChanged")
-            Boolean listChanged;
-
-            public PromptCapabilities(Boolean listChanged) {
-                this.listChanged = listChanged;
-            }
-
-            public PromptCapabilities() {}
-
-            public Boolean getListChanged() {
-                return listChanged;
-            }
-
-            public void setListChanged(Boolean listChanged) {
-                this.listChanged = listChanged;
-            }
-
-            @Override
-            public boolean equals(Object o) {
-                if (o == null || getClass() != o.getClass()) return false;
-                PromptCapabilities that = (PromptCapabilities) o;
-                return Objects.equals(listChanged, that.listChanged);
-            }
-
-            @Override
-            public int hashCode() {
-                return Objects.hashCode(listChanged);
-            }
-
-            @Override
-            public String toString() {
-                return "PromptCapabilities{" + "listChanged=" + listChanged + '}';
-            }
+        public Map<String, Object> experimental() {
+            return experimental;
         }
 
-        @JsonInclude(JsonInclude.Include.NON_ABSENT)
-        public static class ResourceCapabilities {
-            @JsonProperty("subscribe")
-            Boolean subscribe;
-
-            @JsonProperty("listChanged")
-            Boolean listChanged;
-
-            public ResourceCapabilities() {}
-
-            public ResourceCapabilities(Boolean subscribe, Boolean listChanged) {
-                this.subscribe = subscribe;
-                this.listChanged = listChanged;
-            }
-
-            public Boolean getSubscribe() {
-                return subscribe;
-            }
-
-            public void setSubscribe(Boolean subscribe) {
-                this.subscribe = subscribe;
-            }
-
-            public Boolean getListChanged() {
-                return listChanged;
-            }
-
-            public void setListChanged(Boolean listChanged) {
-                this.listChanged = listChanged;
-            }
-
-            @Override
-            public boolean equals(Object o) {
-                if (o == null || getClass() != o.getClass()) return false;
-                ResourceCapabilities that = (ResourceCapabilities) o;
-                return Objects.equals(subscribe, that.subscribe) && Objects.equals(listChanged, that.listChanged);
-            }
-
-            @Override
-            public int hashCode() {
-                return Objects.hash(subscribe, listChanged);
-            }
-
-            @Override
-            public String toString() {
-                return "ResourceCapabilities{" + "subscribe=" + subscribe + ", listChanged=" + listChanged + '}';
-            }
+        public LoggingCapabilities logging() {
+            return logging;
         }
 
-        @JsonInclude(JsonInclude.Include.NON_ABSENT)
-        public static class ToolCapabilities {
-            @JsonProperty("listChanged")
-            Boolean listChanged;
+        public PromptCapabilities prompts() {
+            return prompts;
+        }
 
-            public ToolCapabilities() {}
+        public ResourceCapabilities resources() {
+            return resources;
+        }
 
-            public ToolCapabilities(Boolean listChanged) {
-                this.listChanged = listChanged;
-            }
+        public ToolCapabilities tools() {
+            return tools;
+        }
 
-            public Boolean getListChanged() {
-                return listChanged;
-            }
-
-            public void setListChanged(Boolean listChanged) {
-                this.listChanged = listChanged;
-            }
-
-            @Override
-            public boolean equals(Object o) {
-                if (o == null || getClass() != o.getClass()) return false;
-                ToolCapabilities that = (ToolCapabilities) o;
-                return Objects.equals(listChanged, that.listChanged);
-            }
-
-            @Override
-            public int hashCode() {
-                return Objects.hashCode(listChanged);
-            }
-
-            @Override
-            public String toString() {
-                return "ToolCapabilities{" + "listChanged=" + listChanged + '}';
-            }
+        public Builder mutate() {
+            Builder builder = new Builder();
+            builder.completions = this.completions;
+            builder.experimental = this.experimental;
+            builder.logging = this.logging;
+            builder.prompts = this.prompts;
+            builder.resources = this.resources;
+            builder.tools = this.tools;
+            return builder;
         }
 
         public static Builder builder() {
             return new Builder();
         }
 
-        public static class Builder {
+        @JsonInclude(JsonInclude.Include.NON_ABSENT)
+        public static final class CompletionCapabilities {
+            public CompletionCapabilities() {}
+        }
 
+        @JsonInclude(JsonInclude.Include.NON_ABSENT)
+        public static final class LoggingCapabilities {
+            public LoggingCapabilities() {}
+        }
+
+        @JsonInclude(JsonInclude.Include.NON_ABSENT)
+        public static final class PromptCapabilities {
+            @JsonProperty("listChanged")
+            private final Boolean listChanged;
+
+            @JsonCreator
+            public PromptCapabilities(@JsonProperty("listChanged") Boolean listChanged) {
+                this.listChanged = listChanged;
+            }
+
+            @Override
+            public String toString() {
+                return "PromptCapabilities{" +
+                        "listChanged=" + listChanged +
+                        '}';
+            }
+
+            public Boolean listChanged() {
+                return listChanged;
+            }
+        }
+
+        @JsonInclude(JsonInclude.Include.NON_ABSENT)
+        public static final class ResourceCapabilities {
+            @JsonProperty("subscribe")
+            private final Boolean subscribe;
+            @JsonProperty("listChanged")
+            private final Boolean listChanged;
+
+            @JsonCreator
+            public ResourceCapabilities(
+                    @JsonProperty("subscribe") Boolean subscribe,
+                    @JsonProperty("listChanged") Boolean listChanged
+            ) {
+                this.subscribe = subscribe;
+                this.listChanged = listChanged;
+            }
+
+            @Override
+            public String toString() {
+                return "ResourceCapabilities{" +
+                        "subscribe=" + subscribe +
+                        ", listChanged=" + listChanged +
+                        '}';
+            }
+
+            public Boolean subscribe() {
+                return subscribe;
+            }
+
+            public Boolean listChanged() {
+                return listChanged;
+            }
+        }
+
+        @JsonInclude(JsonInclude.Include.NON_ABSENT)
+        public static final class ToolCapabilities {
+            @JsonProperty("listChanged")
+            private final Boolean listChanged;
+
+            @Override
+            public String toString() {
+                return "ToolCapabilities{" +
+                        "listChanged=" + listChanged +
+                        '}';
+            }
+
+            @JsonCreator
+            public ToolCapabilities(@JsonProperty("listChanged") Boolean listChanged) {
+                this.listChanged = listChanged;
+            }
+
+            public Boolean listChanged() {
+                return listChanged;
+            }
+        }
+
+        public static class Builder {
+            private CompletionCapabilities completions;
             private Map<String, Object> experimental;
             private LoggingCapabilities logging = new LoggingCapabilities();
             private PromptCapabilities prompts;
             private ResourceCapabilities resources;
             private ToolCapabilities tools;
+
+            public Builder completions() {
+                this.completions = new CompletionCapabilities();
+                return this;
+            }
 
             public Builder experimental(Map<String, Object> experimental) {
                 this.experimental = experimental;
@@ -1096,16 +1082,26 @@ public final class McpSchema {
             }
 
             public ServerCapabilities build() {
-                return new ServerCapabilities(experimental, logging, prompts, resources, tools);
+                return new ServerCapabilities(
+                        completions,
+                        experimental,
+                        logging,
+                        prompts,
+                        resources,
+                        tools
+                );
             }
         }
-    } // @formatter:on
+    }
 
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Implementation {
         @JsonProperty("name")
         String name;
+
+        @JsonProperty("title")
+        String title;
 
         @JsonProperty("version")
         String version;
@@ -1115,23 +1111,36 @@ public final class McpSchema {
         public Implementation(String name, String version) {
             this.name = name;
             this.version = version;
+            this.title = null;
+        }
+
+        @Override
+        public String toString() {
+            return "Implementation{" +
+                    "name='" + name + '\'' +
+                    ", title='" + title + '\'' +
+                    ", version='" + version + '\'' +
+                    '}';
         }
 
         @Override
         public boolean equals(Object o) {
             if (o == null || getClass() != o.getClass()) return false;
             Implementation that = (Implementation) o;
-            return Objects.equals(name, that.name) && Objects.equals(version, that.version);
+            return Objects.equals(name, that.name) && Objects.equals(title, that.title) && Objects.equals(version, that.version);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(name, version);
+            return Objects.hash(name, title, version);
         }
 
-        @Override
-        public String toString() {
-            return "Implementation{" + "name='" + name + '\'' + ", version='" + version + '\'' + '}';
+        public String getTitle() {
+            return title;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
         }
 
         public String getName() {
@@ -1234,8 +1243,47 @@ public final class McpSchema {
     } // @formatter:on
 
     /**
+     * A common interface for resource content, which includes metadata about the resource
+     * such as its URI, name, description, MIME type, size, and annotations.
+     */
+    public interface ResourceContent extends BaseMetadata {
+
+        String getUri();
+
+        String getDescription();
+
+        String getMimeType();
+
+        Long getSize();
+
+        Annotations getAnnotations();
+
+    }
+
+    /**
+     * Base interface for metadata with name (identifier) and title (display name)
+     * properties.
+     */
+    public interface BaseMetadata {
+
+        /**
+         * Intended for programmatic or logical use, but used as a display name in past
+         * specs or fallback (if title isn't present).
+         */
+        String getName();
+
+        /**
+         * Intended for UI and end-user contexts — optimized to be human-readable and
+         * easily understood, even by those unfamiliar with domain-specific terminology.
+         *
+         * If not provided, the name should be used for display.
+         */
+        String getTitle();
+
+    }
+
+    /**
      * A known resource that the server is capable of reading.
-     *
      * uri the URI of the resource.
      * name A human-readable name for this resource. This can be used by clients to
      * populate UI elements.
@@ -1248,12 +1296,15 @@ public final class McpSchema {
      */
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class Resource implements Annotated {
+    public static class Resource implements Annotated,ResourceContent {
         @JsonProperty("uri")
         String uri;
 
         @JsonProperty("name")
         String name;
+
+        @JsonProperty("title")
+        String title;
 
         @JsonProperty("description")
         String description;
@@ -1261,43 +1312,52 @@ public final class McpSchema {
         @JsonProperty("mimeType")
         String mimeType;
 
+        @JsonProperty("size")
+        Long size;
+
         @JsonProperty("annotations")
         Annotations annotations;
 
+        @JsonProperty("_meta")
+        Map<String, Object> meta;
+
         public Resource() {}
 
-        public Resource(String uri, String name, String description, String mimeType, Annotations annotations) {
+        public Resource(String uri, String name, String title, String description, String mimeType, Long size, Annotations annotations, Map<String, Object> meta) {
             this.uri = uri;
             this.name = name;
+            this.title = title;
             this.description = description;
             this.mimeType = mimeType;
+            this.size = size;
             this.annotations = annotations;
+            this.meta = meta;
         }
 
         @Override
         public String toString() {
-            return "Resource{" + "uri='"
-                    + uri + '\'' + ", name='"
-                    + name + '\'' + ", description='"
-                    + description + '\'' + ", mimeType='"
-                    + mimeType + '\'' + ", annotations="
-                    + annotations + '}';
+            return "Resource{" +
+                    "uri='" + uri + '\'' +
+                    ", name='" + name + '\'' +
+                    ", title='" + title + '\'' +
+                    ", description='" + description + '\'' +
+                    ", mimeType='" + mimeType + '\'' +
+                    ", size=" + size +
+                    ", annotations=" + annotations +
+                    ", meta=" + meta +
+                    '}';
         }
 
         @Override
         public boolean equals(Object o) {
             if (o == null || getClass() != o.getClass()) return false;
             Resource resource = (Resource) o;
-            return Objects.equals(uri, resource.uri)
-                    && Objects.equals(name, resource.name)
-                    && Objects.equals(description, resource.description)
-                    && Objects.equals(mimeType, resource.mimeType)
-                    && Objects.equals(annotations, resource.annotations);
+            return Objects.equals(uri, resource.uri) && Objects.equals(name, resource.name) && Objects.equals(title, resource.title) && Objects.equals(description, resource.description) && Objects.equals(mimeType, resource.mimeType) && Objects.equals(size, resource.size) && Objects.equals(annotations, resource.annotations) && Objects.equals(meta, resource.meta);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(uri, name, description, mimeType, annotations);
+            return Objects.hash(uri, name, title, description, mimeType, size, annotations, meta);
         }
 
         public String getUri() {
@@ -1310,6 +1370,27 @@ public final class McpSchema {
 
         public String getName() {
             return name;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public void setSize(Long size) {
+            this.size = size;
+        }
+
+        public Map<String, Object> getMeta() {
+            return meta;
+        }
+
+        public void setMeta(Map<String, Object> meta) {
+            this.meta = meta;
+        }
+
+        @Override
+        public String getTitle() {
+            return this.title;
         }
 
         public void setName(String name) {
@@ -1328,6 +1409,11 @@ public final class McpSchema {
             return mimeType;
         }
 
+        @Override
+        public Long getSize() {
+            return this.size;
+        }
+
         public void setMimeType(String mimeType) {
             this.mimeType = mimeType;
         }
@@ -1340,12 +1426,82 @@ public final class McpSchema {
         public void setAnnotations(Annotations annotations) {
             this.annotations = annotations;
         }
+
+        public static Builder builder() {
+            return new Builder();
+        }
+
+        public static class Builder {
+
+            private String uri;
+
+            private String name;
+
+            private String title;
+
+            private String description;
+
+            private String mimeType;
+
+            private Long size;
+
+            private Annotations annotations;
+
+            private Map<String, Object> meta;
+
+            public Builder uri(String uri) {
+                this.uri = uri;
+                return this;
+            }
+
+            public Builder name(String name) {
+                this.name = name;
+                return this;
+            }
+
+            public Builder title(String title) {
+                this.title = title;
+                return this;
+            }
+
+            public Builder description(String description) {
+                this.description = description;
+                return this;
+            }
+
+            public Builder mimeType(String mimeType) {
+                this.mimeType = mimeType;
+                return this;
+            }
+
+            public Builder size(Long size) {
+                this.size = size;
+                return this;
+            }
+
+            public Builder annotations(Annotations annotations) {
+                this.annotations = annotations;
+                return this;
+            }
+
+            public Builder meta(Map<String, Object> meta) {
+                this.meta = meta;
+                return this;
+            }
+
+            public Resource build() {
+                Assert.hasText(uri, "uri must not be empty");
+                Assert.hasText(name, "name must not be empty");
+
+                return new Resource(uri, name, title, description, mimeType, size, annotations, meta);
+            }
+
+        }
     } // @formatter:on
 
     /**
      * Resource templates allow servers to expose parameterized resources using URI
      * templates.
-     *
      * uriTemplate A URI template that can be used to generate URIs for this
      * resource.
      * name A human-readable name for this resource. This can be used by clients to
@@ -1360,12 +1516,15 @@ public final class McpSchema {
      */
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class ResourceTemplate implements Annotated {
+    public static class ResourceTemplate implements Annotated,BaseMetadata {
         @JsonProperty("uriTemplate")
         String uriTemplate;
 
         @JsonProperty("name")
         String name;
+
+        @JsonProperty("title")
+        String title;
 
         @JsonProperty("description")
         String description;
@@ -1376,30 +1535,32 @@ public final class McpSchema {
         @JsonProperty("annotations")
         Annotations annotations;
 
+        @JsonProperty("_meta")
+        Map<String, Object> meta;
+
         @Override
         public String toString() {
-            return "ResourceTemplate{" + "uriTemplate='"
-                    + uriTemplate + '\'' + ", name='"
-                    + name + '\'' + ", description='"
-                    + description + '\'' + ", mimeType='"
-                    + mimeType + '\'' + ", annotations="
-                    + annotations + '}';
+            return "ResourceTemplate{" +
+                    "uriTemplate='" + uriTemplate + '\'' +
+                    ", name='" + name + '\'' +
+                    ", title='" + title + '\'' +
+                    ", description='" + description + '\'' +
+                    ", mimeType='" + mimeType + '\'' +
+                    ", annotations=" + annotations +
+                    ", meta=" + meta +
+                    '}';
         }
 
         @Override
         public boolean equals(Object o) {
             if (o == null || getClass() != o.getClass()) return false;
             ResourceTemplate that = (ResourceTemplate) o;
-            return Objects.equals(uriTemplate, that.uriTemplate)
-                    && Objects.equals(name, that.name)
-                    && Objects.equals(description, that.description)
-                    && Objects.equals(mimeType, that.mimeType)
-                    && Objects.equals(annotations, that.annotations);
+            return Objects.equals(uriTemplate, that.uriTemplate) && Objects.equals(name, that.name) && Objects.equals(title, that.title) && Objects.equals(description, that.description) && Objects.equals(mimeType, that.mimeType) && Objects.equals(annotations, that.annotations) && Objects.equals(meta, that.meta);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(uriTemplate, name, description, mimeType, annotations);
+            return Objects.hash(uriTemplate, name, title, description, mimeType, annotations, meta);
         }
 
         public String getUriTemplate() {
@@ -1435,6 +1596,23 @@ public final class McpSchema {
         }
 
         @Override
+        public String getTitle() {
+            return title;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public Map<String, Object> getMeta() {
+            return meta;
+        }
+
+        public void setMeta(Map<String, Object> meta) {
+            this.meta = meta;
+        }
+
+        @Override
         public Annotations getAnnotations() {
             return annotations;
         }
@@ -1445,40 +1623,58 @@ public final class McpSchema {
 
         public ResourceTemplate() {}
 
-        public ResourceTemplate(
-                String uriTemplate, String name, String description, String mimeType, Annotations annotations) {
+        public ResourceTemplate(String uriTemplate, String name, String title, String description, String mimeType, Annotations annotations, Map<String, Object> meta) {
             this.uriTemplate = uriTemplate;
             this.name = name;
+            this.title = title;
             this.description = description;
             this.mimeType = mimeType;
             this.annotations = annotations;
+            this.meta = meta;
+        }
+
+        public ResourceTemplate(String uriTemplate, String name, String title, String description, String mimeType,
+                                Annotations annotations) {
+            this(uriTemplate, name, title, description, mimeType, annotations, null);
+        }
+
+        public ResourceTemplate(String uriTemplate, String name, String description, String mimeType,
+                                Annotations annotations) {
+            this(uriTemplate, name, null, description, mimeType, annotations);
         }
     } // @formatter:on
 
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class ListResourcesResult {
+    public static class ListResourcesResult implements Result{
         @JsonProperty("resources")
         List<Resource> resources;
 
         @JsonProperty("nextCursor")
         String nextCursor;
 
+        @JsonProperty("_meta")
+        Map<String, Object> meta;
+
         @Override
         public String toString() {
-            return "ListResourcesResult{" + "resources=" + resources + ", nextCursor='" + nextCursor + '\'' + '}';
+            return "ListResourcesResult{" +
+                    "resources=" + resources +
+                    ", nextCursor='" + nextCursor + '\'' +
+                    ", meta=" + meta +
+                    '}';
         }
 
         @Override
         public boolean equals(Object o) {
             if (o == null || getClass() != o.getClass()) return false;
             ListResourcesResult that = (ListResourcesResult) o;
-            return Objects.equals(resources, that.resources) && Objects.equals(nextCursor, that.nextCursor);
+            return Objects.equals(resources, that.resources) && Objects.equals(nextCursor, that.nextCursor) && Objects.equals(meta, that.meta);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(resources, nextCursor);
+            return Objects.hash(resources, nextCursor, meta);
         }
 
         public List<Resource> getResources() {
@@ -1497,41 +1693,58 @@ public final class McpSchema {
             this.nextCursor = nextCursor;
         }
 
+        public Map<String, Object> getMeta() {
+            return meta;
+        }
+
+        public void setMeta(Map<String, Object> meta) {
+            this.meta = meta;
+        }
+
         public ListResourcesResult() {}
 
         public ListResourcesResult(List<Resource> resources, String nextCursor) {
             this.resources = resources;
             this.nextCursor = nextCursor;
         }
+
+        @Override
+        public Map<String, Object> meta() {
+            return this.meta;
+        }
     } // @formatter:on
 
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class ListResourceTemplatesResult {
+    public static class ListResourceTemplatesResult implements Result{
         @JsonProperty("resourceTemplates")
         List<ResourceTemplate> resourceTemplates;
 
         @JsonProperty("nextCursor")
         String nextCursor;
 
+        @JsonProperty("_meta")
+        Map<String, Object> meta;
+
         @Override
         public String toString() {
-            return "ListResourceTemplatesResult{" + "resourceTemplates="
-                    + resourceTemplates + ", nextCursor='"
-                    + nextCursor + '\'' + '}';
+            return "ListResourceTemplatesResult{" +
+                    "resourceTemplates=" + resourceTemplates +
+                    ", nextCursor='" + nextCursor + '\'' +
+                    ", meta=" + meta +
+                    '}';
         }
 
         @Override
         public boolean equals(Object o) {
             if (o == null || getClass() != o.getClass()) return false;
             ListResourceTemplatesResult that = (ListResourceTemplatesResult) o;
-            return Objects.equals(resourceTemplates, that.resourceTemplates)
-                    && Objects.equals(nextCursor, that.nextCursor);
+            return Objects.equals(resourceTemplates, that.resourceTemplates) && Objects.equals(nextCursor, that.nextCursor) && Objects.equals(meta, that.meta);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(resourceTemplates, nextCursor);
+            return Objects.hash(resourceTemplates, nextCursor, meta);
         }
 
         public List<ResourceTemplate> getResourceTemplates() {
@@ -1550,35 +1763,55 @@ public final class McpSchema {
             this.nextCursor = nextCursor;
         }
 
+        public Map<String, Object> getMeta() {
+            return meta;
+        }
+
+        public void setMeta(Map<String, Object> meta) {
+            this.meta = meta;
+        }
+
         public ListResourceTemplatesResult() {}
 
         public ListResourceTemplatesResult(String nextCursor, List<ResourceTemplate> resourceTemplates) {
             this.nextCursor = nextCursor;
             this.resourceTemplates = resourceTemplates;
+            this.meta = null;
+        }
+
+        @Override
+        public Map<String, Object> meta() {
+            return this.meta;
         }
     } // @formatter:on
 
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class ReadResourceRequest {
+    public static class ReadResourceRequest implements Request{
         @JsonProperty("uri")
         String uri;
 
+        @JsonProperty("_meta")
+        Map<String, Object> meta;
+
         @Override
         public String toString() {
-            return "ReadResourceRequest{" + "uri='" + uri + '\'' + '}';
+            return "ReadResourceRequest{" +
+                    "uri='" + uri + '\'' +
+                    ", meta=" + meta +
+                    '}';
         }
 
         @Override
         public boolean equals(Object o) {
             if (o == null || getClass() != o.getClass()) return false;
             ReadResourceRequest that = (ReadResourceRequest) o;
-            return Objects.equals(uri, that.uri);
+            return Objects.equals(uri, that.uri) && Objects.equals(meta, that.meta);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hashCode(uri);
+            return Objects.hash(uri, meta);
         }
 
         public String getUri() {
@@ -1589,32 +1822,50 @@ public final class McpSchema {
             this.uri = uri;
         }
 
+        public Map<String, Object> getMeta() {
+            return meta;
+        }
+
+        public void setMeta(Map<String, Object> meta) {
+            this.meta = meta;
+        }
+
         public ReadResourceRequest() {}
 
         public ReadResourceRequest(String uri) {
             this.uri = uri;
+            this.meta = null;
+        }
+
+        @Override
+        public Map<String, Object> meta() {
+            return this.meta;
         }
     } // @formatter:on
 
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class ReadResourceResult {
+    public static class ReadResourceResult implements Result{
         @JsonProperty("contents")
         List<ResourceContents> contents;
 
+        @JsonProperty("_meta") Map<String, Object> meta;
+
         @Override
         public String toString() {
-            return "ReadResourceResult{" + "contents=" + contents + '}';
+            return "ReadResourceResult{" +
+                    "contents=" + contents +
+                    ", meta=" + meta +
+                    '}';
         }
 
         @Override
         public boolean equals(Object o) {
             if (o == null || getClass() != o.getClass()) return false;
             ReadResourceResult that = (ReadResourceResult) o;
-            return Objects.equals(contents, that.contents);
+            return Objects.equals(contents, that.contents) && Objects.equals(meta, that.meta);
         }
 
-        @Override
         public int hashCode() {
             return Objects.hashCode(contents);
         }
@@ -1627,10 +1878,24 @@ public final class McpSchema {
             this.contents = contents;
         }
 
+        public Map<String, Object> getMeta() {
+            return meta;
+        }
+
+        public void setMeta(Map<String, Object> meta) {
+            this.meta = meta;
+        }
+
         public ReadResourceResult() {}
 
         public ReadResourceResult(List<ResourceContents> contents) {
             this.contents = contents;
+            this.meta = null;
+        }
+
+        @Override
+        public Map<String, Object> meta() {
+            return this.meta;
         }
     } // @formatter:on
 
@@ -1643,25 +1908,31 @@ public final class McpSchema {
      */
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class SubscribeRequest {
+    public static class SubscribeRequest implements Request{
         @JsonProperty("uri")
         String uri;
 
+        @JsonProperty("_meta")
+        Map<String, Object> meta;
+
         @Override
         public String toString() {
-            return "SubscribeRequest{" + "uri='" + uri + '\'' + '}';
+            return "SubscribeRequest{" +
+                    "uri='" + uri + '\'' +
+                    ", meta=" + meta +
+                    '}';
         }
 
         @Override
         public boolean equals(Object o) {
             if (o == null || getClass() != o.getClass()) return false;
             SubscribeRequest that = (SubscribeRequest) o;
-            return Objects.equals(uri, that.uri);
+            return Objects.equals(uri, that.uri) && Objects.equals(meta, that.meta);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hashCode(uri);
+            return Objects.hash(uri, meta);
         }
 
         public String getUri() {
@@ -1672,34 +1943,53 @@ public final class McpSchema {
             this.uri = uri;
         }
 
+        public Map<String, Object> getMeta() {
+            return meta;
+        }
+
+        public void setMeta(Map<String, Object> meta) {
+            this.meta = meta;
+        }
+
         public SubscribeRequest() {}
 
         public SubscribeRequest(String uri) {
             this.uri = uri;
+            this.meta = null;
+        }
+
+        @Override
+        public Map<String, Object> meta() {
+            return this.meta;
         }
     } // @formatter:on
 
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class UnsubscribeRequest {
+    public static class UnsubscribeRequest implements Request{
         @JsonProperty("uri")
         String uri;
 
+        @JsonProperty("_meta") Map<String, Object> meta;
+
         @Override
         public String toString() {
-            return "UnsubscribeRequest{" + "uri='" + uri + '\'' + '}';
+            return "UnsubscribeRequest{" +
+                    "uri='" + uri + '\'' +
+                    ", meta=" + meta +
+                    '}';
         }
 
         @Override
         public boolean equals(Object o) {
             if (o == null || getClass() != o.getClass()) return false;
             UnsubscribeRequest that = (UnsubscribeRequest) o;
-            return Objects.equals(uri, that.uri);
+            return Objects.equals(uri, that.uri) && Objects.equals(meta, that.meta);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hashCode(uri);
+            return Objects.hash(uri, meta);
         }
 
         public String getUri() {
@@ -1714,6 +2004,11 @@ public final class McpSchema {
 
         public UnsubscribeRequest(String uri) {
             this.uri = uri;
+        }
+
+        @Override
+        public Map<String, Object> meta() {
+            return this.meta;
         }
     } // @formatter:on
 
@@ -1738,11 +2033,18 @@ public final class McpSchema {
          * @return the MIME type of this resource.
          */
         String getMimeType();
+
+        /**
+         * @see <a href=
+         * "https://modelcontextprotocol.io/specification/2025-06-18/basic/index#meta">Specification</a>
+         * for notes on _meta usage
+         * @return additional metadata related to this resource.
+         */
+        Map<String, Object> meta();
     }
 
     /**
      * Text contents of a resource.
-     *
      * uri the URI of this resource.
      * mimeType the MIME type of this resource.
      * text the text of the resource. This must only be set if the resource can
@@ -1760,26 +2062,28 @@ public final class McpSchema {
         @JsonProperty("text")
         String text;
 
+        @JsonProperty("_meta") Map<String, Object> meta;
+
         @Override
         public String toString() {
-            return "TextResourceContents{" + "uri='"
-                    + uri + '\'' + ", mimeType='"
-                    + mimeType + '\'' + ", text='"
-                    + text + '\'' + '}';
+            return "TextResourceContents{" +
+                    "uri='" + uri + '\'' +
+                    ", mimeType='" + mimeType + '\'' +
+                    ", text='" + text + '\'' +
+                    ", meta=" + meta +
+                    '}';
         }
 
         @Override
         public boolean equals(Object o) {
             if (o == null || getClass() != o.getClass()) return false;
             TextResourceContents that = (TextResourceContents) o;
-            return Objects.equals(uri, that.uri)
-                    && Objects.equals(mimeType, that.mimeType)
-                    && Objects.equals(text, that.text);
+            return Objects.equals(uri, that.uri) && Objects.equals(mimeType, that.mimeType) && Objects.equals(text, that.text) && Objects.equals(meta, that.meta);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(uri, mimeType, text);
+            return Objects.hash(uri, mimeType, text, meta);
         }
 
         @Override
@@ -1796,6 +2100,11 @@ public final class McpSchema {
             return mimeType;
         }
 
+        @Override
+        public Map<String, Object> meta() {
+            return this.meta;
+        }
+
         public void setMimeType(String mimeType) {
             this.mimeType = mimeType;
         }
@@ -1808,18 +2117,27 @@ public final class McpSchema {
             this.text = text;
         }
 
+        public Map<String, Object> getMeta() {
+            return meta;
+        }
+
+        public void setMeta(Map<String, Object> meta) {
+            this.meta = meta;
+        }
+
         public TextResourceContents() {}
 
         public TextResourceContents(String text, String mimeType, String uri) {
             this.text = text;
             this.mimeType = mimeType;
             this.uri = uri;
+            this.meta = null;
         }
+
     } // @formatter:on
 
     /**
      * Binary contents of a resource.
-     *
      * uri the URI of this resource.
      * mimeType the MIME type of this resource.
      * blob a base64-encoded string representing the binary data of the resource.
@@ -1838,26 +2156,29 @@ public final class McpSchema {
         @JsonProperty("blob")
         String blob;
 
+        @JsonProperty("_meta")
+        Map<String, Object> meta;
+
         @Override
         public String toString() {
-            return "BlobResourceContents{" + "uri='"
-                    + uri + '\'' + ", mimeType='"
-                    + mimeType + '\'' + ", blob='"
-                    + blob + '\'' + '}';
+            return "BlobResourceContents{" +
+                    "uri='" + uri + '\'' +
+                    ", mimeType='" + mimeType + '\'' +
+                    ", blob='" + blob + '\'' +
+                    ", meta=" + meta +
+                    '}';
         }
 
         @Override
         public boolean equals(Object o) {
             if (o == null || getClass() != o.getClass()) return false;
             BlobResourceContents that = (BlobResourceContents) o;
-            return Objects.equals(uri, that.uri)
-                    && Objects.equals(mimeType, that.mimeType)
-                    && Objects.equals(blob, that.blob);
+            return Objects.equals(uri, that.uri) && Objects.equals(mimeType, that.mimeType) && Objects.equals(blob, that.blob) && Objects.equals(meta, that.meta);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(uri, mimeType, blob);
+            return Objects.hash(uri, mimeType, blob, meta);
         }
 
         @Override
@@ -1874,6 +2195,11 @@ public final class McpSchema {
             return mimeType;
         }
 
+        @Override
+        public Map<String, Object> meta() {
+            return this.meta;
+        }
+
         public void setMimeType(String mimeType) {
             this.mimeType = mimeType;
         }
@@ -1886,12 +2212,21 @@ public final class McpSchema {
             this.blob = blob;
         }
 
+        public Map<String, Object> getMeta() {
+            return meta;
+        }
+
+        public void setMeta(Map<String, Object> meta) {
+            this.meta = meta;
+        }
+
         public BlobResourceContents() {}
 
         public BlobResourceContents(String uri, String mimeType, String blob) {
             this.uri = uri;
             this.mimeType = mimeType;
             this.blob = blob;
+            this.meta = null;
         }
     } // @formatter:on
 
@@ -1900,16 +2235,18 @@ public final class McpSchema {
     // ---------------------------
     /**
      * A prompt or prompt template that the server offers.
-     *
      * name The name of the prompt or prompt template.
      * description An optional description of what this prompt provides.
      * arguments A list of arguments to use for templating the prompt.
      */
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class Prompt {
+    public static class Prompt implements BaseMetadata{
         @JsonProperty("name")
         String name;
+
+        @JsonProperty("title")
+        String title;
 
         @JsonProperty("description")
         String description;
@@ -1917,26 +2254,30 @@ public final class McpSchema {
         @JsonProperty("arguments")
         List<PromptArgument> arguments;
 
+        @JsonProperty("_meta")
+        Map<String, Object> meta;
+
         @Override
         public String toString() {
-            return "Prompt{" + "name='"
-                    + name + '\'' + ", description='"
-                    + description + '\'' + ", arguments="
-                    + arguments + '}';
+            return "Prompt{" +
+                    "name='" + name + '\'' +
+                    ", title='" + title + '\'' +
+                    ", description='" + description + '\'' +
+                    ", arguments=" + arguments +
+                    ", meta=" + meta +
+                    '}';
         }
 
         @Override
         public boolean equals(Object o) {
             if (o == null || getClass() != o.getClass()) return false;
             Prompt prompt = (Prompt) o;
-            return Objects.equals(name, prompt.name)
-                    && Objects.equals(description, prompt.description)
-                    && Objects.equals(arguments, prompt.arguments);
+            return Objects.equals(name, prompt.name) && Objects.equals(title, prompt.title) && Objects.equals(description, prompt.description) && Objects.equals(arguments, prompt.arguments) && Objects.equals(meta, prompt.meta);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(name, description, arguments);
+            return Objects.hash(name, title, description, arguments, meta);
         }
 
         public String getName() {
@@ -1963,12 +2304,39 @@ public final class McpSchema {
             this.arguments = arguments;
         }
 
+        @Override
+        public String getTitle() {
+            return title;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public Map<String, Object> getMeta() {
+            return meta;
+        }
+
+        public void setMeta(Map<String, Object> meta) {
+            this.meta = meta;
+        }
+
         public Prompt() {}
 
-        public Prompt(List<PromptArgument> arguments, String description, String name) {
-            this.arguments = arguments;
-            this.description = description;
+        public Prompt(String name, String title, String description, List<PromptArgument> arguments, Map<String, Object> meta) {
             this.name = name;
+            this.title = title;
+            this.description = description;
+            this.arguments = arguments;
+            this.meta = meta;
+        }
+
+        public Prompt(String name, String description, List<PromptArgument> arguments) {
+            this(name, null, description, arguments != null ? arguments : new ArrayList<>());
+        }
+
+        public Prompt(String name, String title, String description, List<PromptArgument> arguments) {
+            this(name, title, description, arguments != null ? arguments : new ArrayList<>(), null);
         }
     } // @formatter:on
 
@@ -1981,9 +2349,12 @@ public final class McpSchema {
      */
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class PromptArgument {
+    public static class PromptArgument implements BaseMetadata{
         @JsonProperty("name")
         String name;
+
+        @JsonProperty("title")
+        String title;
 
         @JsonProperty("description")
         String description;
@@ -1993,24 +2364,24 @@ public final class McpSchema {
 
         @Override
         public String toString() {
-            return "PromptArgument{" + "name='"
-                    + name + '\'' + ", description='"
-                    + description + '\'' + ", required="
-                    + required + '}';
+            return "PromptArgument{" +
+                    "name='" + name + '\'' +
+                    ", title='" + title + '\'' +
+                    ", description='" + description + '\'' +
+                    ", required=" + required +
+                    '}';
         }
 
         @Override
         public boolean equals(Object o) {
             if (o == null || getClass() != o.getClass()) return false;
             PromptArgument that = (PromptArgument) o;
-            return Objects.equals(name, that.name)
-                    && Objects.equals(description, that.description)
-                    && Objects.equals(required, that.required);
+            return Objects.equals(name, that.name) && Objects.equals(title, that.title) && Objects.equals(description, that.description) && Objects.equals(required, that.required);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(name, description, required);
+            return Objects.hash(name, title, description, required);
         }
 
         public String getName() {
@@ -2037,10 +2408,20 @@ public final class McpSchema {
             this.required = required;
         }
 
+        @Override
+        public String getTitle() {
+            return title;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
         public PromptArgument() {}
 
         public PromptArgument(String name, String description, Boolean required) {
             this.name = name;
+            this.title = null;
             this.description = description;
             this.required = required;
         }
@@ -2114,28 +2495,35 @@ public final class McpSchema {
      */
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class ListPromptsResult {
+    public static class ListPromptsResult implements Result{
         @JsonProperty("prompts")
         List<Prompt> prompts;
 
         @JsonProperty("nextCursor")
         String nextCursor;
 
+        @JsonProperty("_meta")
+        Map<String, Object> meta;
+
         @Override
         public String toString() {
-            return "ListPromptsResult{" + "prompts=" + prompts + ", nextCursor='" + nextCursor + '\'' + '}';
+            return "ListPromptsResult{" +
+                    "prompts=" + prompts +
+                    ", nextCursor='" + nextCursor + '\'' +
+                    ", meta=" + meta +
+                    '}';
         }
 
         @Override
         public boolean equals(Object o) {
             if (o == null || getClass() != o.getClass()) return false;
             ListPromptsResult that = (ListPromptsResult) o;
-            return Objects.equals(prompts, that.prompts) && Objects.equals(nextCursor, that.nextCursor);
+            return Objects.equals(prompts, that.prompts) && Objects.equals(nextCursor, that.nextCursor) && Objects.equals(meta, that.meta);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(prompts, nextCursor);
+            return Objects.hash(prompts, nextCursor, meta);
         }
 
         public List<Prompt> getPrompts() {
@@ -2154,11 +2542,25 @@ public final class McpSchema {
             this.nextCursor = nextCursor;
         }
 
+        public Map<String, Object> getMeta() {
+            return meta;
+        }
+
+        public void setMeta(Map<String, Object> meta) {
+            this.meta = meta;
+        }
+
         public ListPromptsResult() {}
 
         public ListPromptsResult(List<Prompt> prompts, String nextCursor) {
             this.prompts = prompts;
             this.nextCursor = nextCursor;
+            this.meta = null;
+        }
+
+        @Override
+        public Map<String, Object> meta() {
+            return this.meta;
         }
     } // @formatter:on
 
@@ -2166,7 +2568,7 @@ public final class McpSchema {
      * Used by the client to get a prompt provided by the server.
      *
      * name The name of the prompt or prompt template.
-     * arguments Arguments to use for templating the prompt.
+     * Arguments to use for templating the prompt.
      */
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
@@ -2176,6 +2578,9 @@ public final class McpSchema {
 
         @JsonProperty("arguments")
         Map<String, Object> arguments;
+
+        @JsonProperty("_meta")
+        Map<String, Object> meta;
 
         @Override
         public String toString() {
@@ -2215,8 +2620,13 @@ public final class McpSchema {
         public GetPromptRequest(String name, Map<String, Object> arguments) {
             this.name = name;
             this.arguments = arguments;
+            this.meta = null;
         }
-    } // @formatter:off
+
+        @Override
+        public Map<String, Object> meta() {
+            return this.meta;
+        }} // @formatter:off
 
     /**
      * The server's response to a prompts/get request from the client.
@@ -2226,18 +2636,22 @@ public final class McpSchema {
      */
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class GetPromptResult {
+    public static class GetPromptResult implements Result{
         @JsonProperty("description")
         String description;
 
         @JsonProperty("messages")
         List<PromptMessage> messages;
 
+        @JsonProperty("_meta")
+        Map<String, Object> meta;
+
         public GetPromptResult() {}
 
         public GetPromptResult(String description, List<PromptMessage> messages) {
             this.description = description;
             this.messages = messages;
+            this.meta = null;
         }
 
         public String getDescription() {
@@ -2272,6 +2686,11 @@ public final class McpSchema {
         public int hashCode() {
             return Objects.hash(description, messages);
         }
+
+        @Override
+        public Map<String,Object> meta() {
+            return this.meta;
+        }
     } // @formatter:on
 
     // ---------------------------
@@ -2286,28 +2705,35 @@ public final class McpSchema {
      */
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class ListToolsResult {
+    public static class ListToolsResult implements Result{
         @JsonProperty("tools")
         List<Tool> tools;
 
         @JsonProperty("nextCursor")
         String nextCursor;
 
-        @Override
-        public String toString() {
-            return "ListToolsResult{" + "tools=" + tools + ", nextCursor='" + nextCursor + '\'' + '}';
-        }
+        @JsonProperty("_meta")
+        Map<String, Object> meta;
 
         @Override
         public boolean equals(Object o) {
             if (o == null || getClass() != o.getClass()) return false;
             ListToolsResult that = (ListToolsResult) o;
-            return Objects.equals(tools, that.tools) && Objects.equals(nextCursor, that.nextCursor);
+            return Objects.equals(tools, that.tools) && Objects.equals(nextCursor, that.nextCursor) && Objects.equals(meta, that.meta);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(tools, nextCursor);
+            return Objects.hash(tools, nextCursor, meta);
+        }
+
+        @Override
+        public String toString() {
+            return "ListToolsResult{" +
+                    "tools=" + tools +
+                    ", nextCursor='" + nextCursor + '\'' +
+                    ", meta=" + meta +
+                    '}';
         }
 
         public List<Tool> getTools() {
@@ -2326,12 +2752,25 @@ public final class McpSchema {
             this.nextCursor = nextCursor;
         }
 
+        public Map<String, Object> getMeta() {
+            return meta;
+        }
+
+        public void setMeta(Map<String, Object> meta) {
+            this.meta = meta;
+        }
+
         public ListToolsResult(List<Tool> tools, String nextCursor) {
             this.tools = tools;
             this.nextCursor = nextCursor;
         }
 
         public ListToolsResult() {}
+
+        @Override
+        public Map<String, Object> meta() {
+            return this.meta;
+        }
     } // @formatter:on
 
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
@@ -2349,13 +2788,22 @@ public final class McpSchema {
         @JsonProperty("additionalProperties")
         Boolean additionalProperties;
 
+        @JsonProperty("$defs")
+        Map<String, Object> defs;
+
+        @JsonProperty("definitions")
+        Map<String, Object> definitions;
+
         @Override
         public String toString() {
-            return "JsonSchema{" + "type='"
-                    + type + '\'' + ", properties="
-                    + properties + ", required="
-                    + required + ", additionalProperties="
-                    + additionalProperties + '}';
+            return "JsonSchema{" +
+                    "type='" + type + '\'' +
+                    ", properties=" + properties +
+                    ", required=" + required +
+                    ", additionalProperties=" + additionalProperties +
+                    ", defs=" + defs +
+                    ", definitions=" + definitions +
+                    '}';
         }
 
         public String getType() {
@@ -2390,31 +2838,139 @@ public final class McpSchema {
             this.additionalProperties = additionalProperties;
         }
 
+        public Map<String, Object> getDefs() {
+            return defs;
+        }
+
+        public void setDefs(Map<String, Object> defs) {
+            this.defs = defs;
+        }
+
+        public Map<String, Object> getDefinitions() {
+            return definitions;
+        }
+
+        public void setDefinitions(Map<String, Object> definitions) {
+            this.definitions = definitions;
+        }
+
         @Override
         public boolean equals(Object o) {
             if (o == null || getClass() != o.getClass()) return false;
-            JsonSchema that = (JsonSchema) o;
-            return Objects.equals(type, that.type)
-                    && Objects.equals(properties, that.properties)
-                    && Objects.equals(required, that.required)
-                    && Objects.equals(additionalProperties, that.additionalProperties);
+            JsonSchema schema = (JsonSchema) o;
+            return Objects.equals(type, schema.type) && Objects.equals(properties, schema.properties) && Objects.equals(required, schema.required) && Objects.equals(additionalProperties, schema.additionalProperties) && Objects.equals(defs, schema.defs) && Objects.equals(definitions, schema.definitions);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(type, properties, required, additionalProperties);
+            return Objects.hash(type, properties, required, additionalProperties, defs, definitions);
         }
 
         public JsonSchema() {}
 
-        public JsonSchema(
-                String type, Map<String, Object> properties, List<String> required, Boolean additionalProperties) {
+        public JsonSchema(String type, Map<String, Object> properties, List<String> required, Boolean additionalProperties, Map<String, Object> defs, Map<String, Object> definitions) {
             this.type = type;
             this.properties = properties;
             this.required = required;
             this.additionalProperties = additionalProperties;
+            this.defs = defs;
+            this.definitions = definitions;
         }
     } // @formatter:on
+
+
+    /**
+     * Additional properties describing a Tool to clients.
+     *
+     * NOTE: all properties in ToolAnnotations are **hints**. They are not guaranteed to
+     * provide a faithful description of tool behavior (including descriptive properties
+     * like `title`).
+     *
+     * Clients should never make tool use decisions based on ToolAnnotations received from
+     * untrusted servers.
+     */
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class ToolAnnotations {
+        @JsonProperty("title")  String title;
+        @JsonProperty("readOnlyHint")   Boolean readOnlyHint;
+        @JsonProperty("destructiveHint") Boolean destructiveHint;
+        @JsonProperty("idempotentHint") Boolean idempotentHint;
+        @JsonProperty("openWorldHint") Boolean openWorldHint;
+        @JsonProperty("returnDirect") Boolean returnDirect;
+
+        @Override
+        public String toString() {
+            return "ToolAnnotations{" +
+                    "title='" + title + '\'' +
+                    ", readOnlyHint=" + readOnlyHint +
+                    ", destructiveHint=" + destructiveHint +
+                    ", idempotentHint=" + idempotentHint +
+                    ", openWorldHint=" + openWorldHint +
+                    ", returnDirect=" + returnDirect +
+                    '}';
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o == null || getClass() != o.getClass()) return false;
+            ToolAnnotations that = (ToolAnnotations) o;
+            return Objects.equals(title, that.title) && Objects.equals(readOnlyHint, that.readOnlyHint) && Objects.equals(destructiveHint, that.destructiveHint) && Objects.equals(idempotentHint, that.idempotentHint) && Objects.equals(openWorldHint, that.openWorldHint) && Objects.equals(returnDirect, that.returnDirect);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(title, readOnlyHint, destructiveHint, idempotentHint, openWorldHint, returnDirect);
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public Boolean getReadOnlyHint() {
+            return readOnlyHint;
+        }
+
+        public void setReadOnlyHint(Boolean readOnlyHint) {
+            this.readOnlyHint = readOnlyHint;
+        }
+
+        public Boolean getDestructiveHint() {
+            return destructiveHint;
+        }
+
+        public void setDestructiveHint(Boolean destructiveHint) {
+            this.destructiveHint = destructiveHint;
+        }
+
+        public Boolean getIdempotentHint() {
+            return idempotentHint;
+        }
+
+        public void setIdempotentHint(Boolean idempotentHint) {
+            this.idempotentHint = idempotentHint;
+        }
+
+        public Boolean getOpenWorldHint() {
+            return openWorldHint;
+        }
+
+        public void setOpenWorldHint(Boolean openWorldHint) {
+            this.openWorldHint = openWorldHint;
+        }
+
+        public Boolean getReturnDirect() {
+            return returnDirect;
+        }
+
+        public void setReturnDirect(Boolean returnDirect) {
+            this.returnDirect = returnDirect;
+        }
+    }
 
     /**
      * Represents a tool that the server provides. Tools enable servers to expose
@@ -2435,51 +2991,45 @@ public final class McpSchema {
         @JsonProperty("name")
         String name;
 
+        @JsonProperty("title")
+        String title;
+
         @JsonProperty("description")
         String description;
-
-        @JsonProperty("returnDirect")
-        Boolean returnDirect;
 
         @JsonProperty("inputSchema")
         JsonSchema inputSchema;
 
         @JsonProperty("outputSchema")
-        JsonSchema outputSchema;
+        Map<String, Object> outputSchema;
 
-        public Tool(String name, String description, Boolean returnDirect, String inSchemaJson, String outSchemaJson) {
-            this(
-                    name,
-                    description,
-                    returnDirect,
-                    parseSchema(inSchemaJson),
-                    (outSchemaJson == null || outSchemaJson.isEmpty()) ? null : parseSchema(outSchemaJson));
-        }
+        @JsonProperty("annotations")
+        ToolAnnotations annotations;
+
+        @JsonProperty("_meta")
+        Map<String, Object> meta;
 
         @Override
         public String toString() {
-            return "Tool{" + "name='"
-                    + name + '\'' + ", description='"
-                    + description + '\'' + ", returnDirect="
-                    + returnDirect + ", inputSchema="
-                    + inputSchema + ", outputSchema="
-                    + outputSchema + '}';
+            return "Tool{" +
+                    "name='" + name + '\'' +
+                    ", title='" + title + '\'' +
+                    ", description='" + description + '\'' +
+                    ", inputSchema=" + inputSchema +
+                    ", outputSchema=" + outputSchema +
+                    ", annotations=" + annotations +
+                    ", meta=" + meta +
+                    '}';
         }
 
-        @Override
-        public boolean equals(Object o) {
-            if (o == null || getClass() != o.getClass()) return false;
-            Tool tool = (Tool) o;
-            return Objects.equals(name, tool.name)
-                    && Objects.equals(description, tool.description)
-                    && Objects.equals(returnDirect, tool.returnDirect)
-                    && Objects.equals(inputSchema, tool.inputSchema)
-                    && Objects.equals(outputSchema, tool.outputSchema);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(name, description, returnDirect, inputSchema, outputSchema);
+        public Tool(String name, String title, String description, JsonSchema inputSchema, Map<String, Object> outputSchema, ToolAnnotations annotations, Map<String, Object> meta) {
+            this.name = name;
+            this.title = title;
+            this.description = description;
+            this.inputSchema = inputSchema;
+            this.outputSchema = outputSchema;
+            this.annotations = annotations;
+            this.meta = meta;
         }
 
         public String getName() {
@@ -2490,20 +3040,20 @@ public final class McpSchema {
             this.name = name;
         }
 
+        public String getTitle() {
+            return title;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
         public String getDescription() {
             return description;
         }
 
         public void setDescription(String description) {
             this.description = description;
-        }
-
-        public Boolean getReturnDirect() {
-            return returnDirect;
-        }
-
-        public void setReturnDirect(Boolean returnDirect) {
-            this.returnDirect = returnDirect;
         }
 
         public JsonSchema getInputSchema() {
@@ -2514,34 +3064,164 @@ public final class McpSchema {
             this.inputSchema = inputSchema;
         }
 
-        public JsonSchema getOutputSchema() {
+        public Map<String, Object> getOutputSchema() {
             return outputSchema;
         }
 
-        public void setOutputSchema(JsonSchema outputSchema) {
+        public void setOutputSchema(Map<String, Object> outputSchema) {
             this.outputSchema = outputSchema;
         }
 
-        public Tool() {}
+        public ToolAnnotations getAnnotations() {
+            return annotations;
+        }
 
-        public Tool(
-                String name,
-                String description,
-                Boolean returnDirect,
-                JsonSchema inputSchema,
-                JsonSchema outputSchema) {
-            this.name = name;
-            this.description = description;
-            this.returnDirect = returnDirect;
-            this.inputSchema = inputSchema;
-            this.outputSchema = outputSchema;
+        public void setAnnotations(ToolAnnotations annotations) {
+            this.annotations = annotations;
+        }
+
+        public Map<String, Object> getMeta() {
+            return meta;
+        }
+
+        public void setMeta(Map<String, Object> meta) {
+            this.meta = meta;
+        }
+
+        /**
+         * @deprecated Only exists for backwards-compatibility purposes. Use
+         * {@link Tool#builder()} instead.
+         */
+        @Deprecated
+        public Tool(String name, String description, JsonSchema inputSchema, ToolAnnotations annotations) {
+            this(name, null, description, inputSchema, null, annotations, null);
+        }
+
+        /**
+         * @deprecated Only exists for backwards-compatibility purposes. Use
+         * {@link Tool#builder()} instead.
+         */
+        @Deprecated
+        public Tool(String name, String description, String inputSchema) {
+            this(name, null, description, parseSchema(inputSchema), null, null, null);
+        }
+
+        /**
+         * @deprecated Only exists for backwards-compatibility purposes. Use
+         * {@link Tool#builder()} instead.
+         */
+        @Deprecated
+        public Tool(String name, String description, String schema, ToolAnnotations annotations) {
+            this(name, null, description, parseSchema(schema), null, annotations, null);
+        }
+
+        /**
+         * @deprecated Only exists for backwards-compatibility purposes. Use
+         * {@link Tool#builder()} instead.
+         */
+        @Deprecated
+        public Tool(String name, String description, String inputSchema, String outputSchema,
+                    ToolAnnotations annotations) {
+            this(name, null, description, parseSchema(inputSchema), schemaToMap(outputSchema), annotations, null);
+        }
+
+        /**
+         * @deprecated Only exists for backwards-compatibility purposes. Use
+         * {@link Tool#builder()} instead.
+         */
+        @Deprecated
+        public Tool(String name, String title, String description, String inputSchema, String outputSchema,
+                    ToolAnnotations annotations) {
+            this(name, title, description, parseSchema(inputSchema), schemaToMap(outputSchema), annotations, null);
+        }
+
+        public static Builder builder() {
+            return new Builder();
+        }
+
+        public static class Builder {
+
+            private String name;
+
+            private String title;
+
+            private String description;
+
+            private JsonSchema inputSchema;
+
+            private Map<String, Object> outputSchema;
+
+            private ToolAnnotations annotations;
+
+            private Map<String, Object> meta;
+
+            public Builder name(String name) {
+                this.name = name;
+                return this;
+            }
+
+            public Builder title(String title) {
+                this.title = title;
+                return this;
+            }
+
+            public Builder description(String description) {
+                this.description = description;
+                return this;
+            }
+
+            public Builder inputSchema(JsonSchema inputSchema) {
+                this.inputSchema = inputSchema;
+                return this;
+            }
+
+            public Builder inputSchema(String inputSchema) {
+                this.inputSchema = parseSchema(inputSchema);
+                return this;
+            }
+
+            public Builder outputSchema(Map<String, Object> outputSchema) {
+                this.outputSchema = outputSchema;
+                return this;
+            }
+
+            public Builder outputSchema(String outputSchema) {
+                this.outputSchema = schemaToMap(outputSchema);
+                return this;
+            }
+
+            public Builder annotations(ToolAnnotations annotations) {
+                this.annotations = annotations;
+                return this;
+            }
+
+            public Builder meta(Map<String, Object> meta) {
+                this.meta = meta;
+                return this;
+            }
+
+            public Tool build() {
+                Assert.hasText(name, "name must not be empty");
+                return new Tool(name, title, description, inputSchema, outputSchema, annotations, meta);
+            }
+
         }
     } // @formatter:on
+
+    private static Map<String, Object> schemaToMap(String schema) {
+        try {
+            return OBJECT_MAPPER.readValue(schema, MAP_TYPE_REF);
+        }
+        catch (IOException e) {
+            throw new IllegalArgumentException("Invalid schema: " + schema, e);
+        }
+    }
 
     private static JsonSchema parseSchema(String schema) {
         try {
             return OBJECT_MAPPER.readValue(schema, JsonSchema.class);
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new IllegalArgumentException("Invalid schema: " + schema, e);
         }
     }
@@ -2563,21 +3243,42 @@ public final class McpSchema {
         @JsonProperty("arguments")
         Map<String, Object> arguments;
 
-        @Override
-        public String toString() {
-            return "CallToolRequest{" + "name='" + name + '\'' + ", arguments=" + arguments + '}';
+        @JsonProperty("_meta")
+        Map<String, Object> meta;
+
+        public CallToolRequest(String name, Map<String, Object> arguments, Map<String, Object> meta) {
+            this.name = name;
+            this.arguments = arguments;
+            this.meta = meta;
+        }
+
+        public CallToolRequest() {
+        }
+
+        public CallToolRequest(String name, String jsonArguments) {
+            this(name, parseJsonArguments(jsonArguments), null);
+        }
+
+        public CallToolRequest(String name, Map<String, Object> arguments) {
+            this(name, arguments, null);
+        }
+
+        private static Map<String, Object> parseJsonArguments(String jsonArguments) {
+            try {
+                return OBJECT_MAPPER.readValue(jsonArguments, MAP_TYPE_REF);
+            }
+            catch (IOException e) {
+                throw new IllegalArgumentException("Invalid arguments: " + jsonArguments, e);
+            }
+        }
+
+        public static Builder builder() {
+            return new Builder();
         }
 
         @Override
-        public boolean equals(Object o) {
-            if (o == null || getClass() != o.getClass()) return false;
-            CallToolRequest that = (CallToolRequest) o;
-            return Objects.equals(name, that.name) && Objects.equals(arguments, that.arguments);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(name, arguments);
+        public Map<String, Object> meta() {
+            return this.meta;
         }
 
         public String getName() {
@@ -2596,12 +3297,66 @@ public final class McpSchema {
             this.arguments = arguments;
         }
 
-        public CallToolRequest() {}
-
-        public CallToolRequest(String name, Map<String, Object> arguments) {
-            this.name = name;
-            this.arguments = arguments;
+        public Map<String, Object> getMeta() {
+            return meta;
         }
+
+        public void setMeta(Map<String, Object> meta) {
+            this.meta = meta;
+        }
+
+        @Override
+        public String toString() {
+            return "CallToolRequest{" +
+                    "name='" + name + '\'' +
+                    ", arguments=" + arguments +
+                    ", meta=" + meta +
+                    '}';
+        }
+
+        public static class Builder {
+
+            private String name;
+
+            private Map<String, Object> arguments;
+
+            private Map<String, Object> meta;
+
+            public Builder name(String name) {
+                this.name = name;
+                return this;
+            }
+
+            public Builder arguments(Map<String, Object> arguments) {
+                this.arguments = arguments;
+                return this;
+            }
+
+            public Builder arguments(String jsonArguments) {
+                this.arguments = parseJsonArguments(jsonArguments);
+                return this;
+            }
+
+            public Builder meta(Map<String, Object> meta) {
+                this.meta = meta;
+                return this;
+            }
+
+            public Builder progressToken(String progressToken) {
+                if (this.meta == null) {
+                    this.meta = new HashMap<>();
+                }
+                this.meta.put("progressToken", progressToken);
+                return this;
+            }
+
+            public CallToolRequest build() {
+                Assert.hasText(name, "name must not be empty");
+                return new CallToolRequest(name, arguments, meta);
+            }
+
+        }
+
     } // @formatter:off
 
     /**
@@ -2614,52 +3369,201 @@ public final class McpSchema {
      */
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class CallToolResult {
+    public static class CallToolResult implements Result{
         @JsonProperty("content")
         List<Content> content;
 
         @JsonProperty("isError")
         Boolean isError;
 
-        public CallToolResult(List<Content> content, Boolean isError) {
-            this.content = content;
-            this.isError = isError;
+        @JsonProperty("structuredContent")
+        Map<String, Object> structuredContent;
+
+        @JsonProperty("_meta")
+        Map<String, Object> meta;
+
+        @Override public String toString() {
+            return "CallToolResult{" +
+                    "content=" + content +
+                    ", isError=" + isError +
+                    ", structuredContent=" + structuredContent +
+                    ", meta=" + meta +
+                    '}';
         }
-
-        public CallToolResult() {}
-
         public List<Content> getContent() {
             return content;
         }
-
         public void setContent(List<Content> content) {
             this.content = content;
         }
-
         public Boolean getError() {
             return isError;
         }
-
         public void setError(Boolean error) {
             isError = error;
         }
+        public Map<String, Object> getStructuredContent() {
+            return structuredContent;
+        }
+        public void setStructuredContent(Map<String, Object> structuredContent) {
+            this.structuredContent = structuredContent;
+        }
+        public Map<String, Object> getMeta() {
+            return meta;
+        }
+        public void setMeta(Map<String, Object> meta) {
+            this.meta = meta;
+        }
+        public CallToolResult(List<Content> content, Boolean isError, Map<String, Object> structuredContent, Map<String, Object> meta) {
+            this.content = content;
+            this.isError = isError;
+            this.structuredContent = structuredContent;
+            this.meta = meta;
+        }
 
-        @Override
-        public boolean equals(Object o) {
-            if (o == null || getClass() != o.getClass()) return false;
-            CallToolResult that = (CallToolResult) o;
-            return Objects.equals(content, that.content) && Objects.equals(isError, that.isError);
+        // backwards compatibility constructor
+        public CallToolResult(List<Content> content, Boolean isError) {
+            this(content, isError, null, null);
+        }
+
+        // backwards compatibility constructor
+        public CallToolResult(List<Content> content, Boolean isError, Map<String, Object> structuredContent) {
+            this(content, isError, structuredContent, null);
+        }
+
+        /**
+         * Creates a new instance of {@link CallToolResult} with a string containing the
+         * tool result.
+         * @param content The content of the tool result. This will be mapped to a
+         * one-sized list with a {@link TextContent} element.
+         * @param isError If true, indicates that the tool execution failed and the
+         * content contains error information. If false or absent, indicates successful
+         * execution.
+         */
+        public CallToolResult(String content, Boolean isError) {
+            this(Collections.singletonList(new TextContent(content)), isError, null);
+        }
+
+        /**
+         * Creates a builder for {@link CallToolResult}.
+         * @return a new builder instance
+         */
+        public static Builder builder() {
+            return new Builder();
         }
 
         @Override
-        public int hashCode() {
-            return Objects.hash(content, isError);
+        public Map<String,Object> meta() {
+            return this.meta;
         }
 
-        @Override
-        public String toString() {
-            return "CallToolResult{" + "content=" + content + ", isError=" + isError + '}';
+        /**
+         * Builder for {@link CallToolResult}.
+         */
+        public static class Builder {
+
+            private List<Content> content = new ArrayList<>();
+
+            private Boolean isError = false;
+
+            private Map<String, Object> structuredContent;
+
+            private Map<String, Object> meta;
+
+            /**
+             * Sets the content list for the tool result.
+             * @param content the content list
+             * @return this builder
+             */
+            public Builder content(List<Content> content) {
+                Assert.notNull(content, "content must not be null");
+                this.content = content;
+                return this;
+            }
+
+            public Builder structuredContent(Map<String, Object> structuredContent) {
+                Assert.notNull(structuredContent, "structuredContent must not be null");
+                this.structuredContent = structuredContent;
+                return this;
+            }
+
+            public Builder structuredContent(String structuredContent) {
+                Assert.hasText(structuredContent, "structuredContent must not be empty");
+                try {
+                    this.structuredContent = OBJECT_MAPPER.readValue(structuredContent, MAP_TYPE_REF);
+                }
+                catch (IOException e) {
+                    throw new IllegalArgumentException("Invalid structured content: " + structuredContent, e);
+                }
+                return this;
+            }
+
+            /**
+             * Sets the text content for the tool result.
+             * @param textContent the text content
+             * @return this builder
+             */
+            public Builder textContent(List<String> textContent) {
+                Assert.notNull(textContent, "textContent must not be null");
+                textContent.stream().map(TextContent::new).forEach(this.content::add);
+                return this;
+            }
+
+            /**
+             * Adds a content item to the tool result.
+             * @param contentItem the content item to add
+             * @return this builder
+             */
+            public Builder addContent(Content contentItem) {
+                Assert.notNull(contentItem, "contentItem must not be null");
+                if (this.content == null) {
+                    this.content = new ArrayList<>();
+                }
+                this.content.add(contentItem);
+                return this;
+            }
+
+            /**
+             * Adds a text content item to the tool result.
+             * @param text the text content
+             * @return this builder
+             */
+            public Builder addTextContent(String text) {
+                Assert.notNull(text, "text must not be null");
+                return addContent(new TextContent(text));
+            }
+
+            /**
+             * Sets whether the tool execution resulted in an error.
+             * @param isError true if the tool execution failed, false otherwise
+             * @return this builder
+             */
+            public Builder isError(Boolean isError) {
+                Assert.notNull(isError, "isError must not be null");
+                this.isError = isError;
+                return this;
+            }
+
+            /**
+             * Sets the metadata for the tool result.
+             * @param meta metadata
+             * @return this builder
+             */
+            public Builder meta(Map<String, Object> meta) {
+                this.meta = meta;
+                return this;
+            }
+
+            /**
+             * Builds a new {@link CallToolResult} instance.
+             * @return a new CallToolResult instance
+             */
+            public CallToolResult build() {
+                return new CallToolResult(content, isError, structuredContent, meta);
+            }
+
         }
+
     } // @formatter:on
 
     // ---------------------------
@@ -2910,44 +3814,47 @@ public final class McpSchema {
         @JsonProperty("metadata")
         Map<String, Object> metadata;
 
-        @Override
-        public boolean equals(Object o) {
-            if (o == null || getClass() != o.getClass()) return false;
-            CreateMessageRequest that = (CreateMessageRequest) o;
-            return maxTokens == that.maxTokens
-                    && Objects.equals(messages, that.messages)
-                    && Objects.equals(modelPreferences, that.modelPreferences)
-                    && Objects.equals(systemPrompt, that.systemPrompt)
-                    && includeContext == that.includeContext
-                    && Objects.equals(temperature, that.temperature)
-                    && Objects.equals(stopSequences, that.stopSequences)
-                    && Objects.equals(metadata, that.metadata);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(
-                    messages,
-                    modelPreferences,
-                    systemPrompt,
-                    includeContext,
-                    temperature,
-                    maxTokens,
-                    stopSequences,
-                    metadata);
-        }
+        @JsonProperty("_meta")
+        Map<String, Object> meta;
 
         @Override
         public String toString() {
-            return "CreateMessageRequest{" + "messages="
-                    + messages + ", modelPreferences="
-                    + modelPreferences + ", systemPrompt='"
-                    + systemPrompt + '\'' + ", includeContext="
-                    + includeContext + ", temperature="
-                    + temperature + ", maxTokens="
-                    + maxTokens + ", stopSequences="
-                    + stopSequences + ", metadata="
-                    + metadata + '}';
+            return "CreateMessageRequest{" +
+                    "messages=" + messages +
+                    ", modelPreferences=" + modelPreferences +
+                    ", systemPrompt='" + systemPrompt + '\'' +
+                    ", includeContext=" + includeContext +
+                    ", temperature=" + temperature +
+                    ", maxTokens=" + maxTokens +
+                    ", stopSequences=" + stopSequences +
+                    ", metadata=" + metadata +
+                    ", meta=" + meta +
+                    '}';
+        }
+
+        public CreateMessageRequest(List<SamplingMessage> messages, ModelPreferences modelPreferences, String systemPrompt, ContextInclusionStrategy includeContext, Double temperature, int maxTokens, List<String> stopSequences, Map<String, Object> metadata, Map<String, Object> meta) {
+            this.messages = messages;
+            this.modelPreferences = modelPreferences;
+            this.systemPrompt = systemPrompt;
+            this.includeContext = includeContext;
+            this.temperature = temperature;
+            this.maxTokens = maxTokens;
+            this.stopSequences = stopSequences;
+            this.metadata = metadata;
+            this.meta = meta;
+        }
+
+        // backwards compatibility constructor
+        public CreateMessageRequest(List<SamplingMessage> messages, ModelPreferences modelPreferences,
+                                    String systemPrompt, ContextInclusionStrategy includeContext, Double temperature, int maxTokens,
+                                    List<String> stopSequences, Map<String, Object> metadata) {
+            this(messages, modelPreferences, systemPrompt, includeContext, temperature, maxTokens, stopSequences,
+                    metadata, null);
+        }
+
+        @Override
+        public Map<String, Object> meta() {
+            return this.meta;
         }
 
         public List<SamplingMessage> getMessages() {
@@ -3014,49 +3921,45 @@ public final class McpSchema {
             this.metadata = metadata;
         }
 
-        public CreateMessageRequest() {}
+        public Map<String, Object> getMeta() {
+            return meta;
+        }
 
-        public CreateMessageRequest(
-                List<SamplingMessage> messages,
-                ModelPreferences modelPreferences,
-                String systemPrompt,
-                ContextInclusionStrategy includeContext,
-                Double temperature,
-                int maxTokens,
-                List<String> stopSequences,
-                Map<String, Object> metadata) {
-            this.messages = messages;
-            this.modelPreferences = modelPreferences;
-            this.systemPrompt = systemPrompt;
-            this.includeContext = includeContext;
-            this.temperature = temperature;
-            this.maxTokens = maxTokens;
-            this.stopSequences = stopSequences;
-            this.metadata = metadata;
+        public void setMeta(Map<String, Object> meta) {
+            this.meta = meta;
         }
 
         public enum ContextInclusionStrategy {
-            @JsonProperty("none")
-            NONE,
-            @JsonProperty("thisServer")
-            THIS_SERVER,
-            @JsonProperty("allServers")
-            ALL_SERVERS
-        }
+
+            // @formatter:off
+            @JsonProperty("none") NONE,
+            @JsonProperty("thisServer") THIS_SERVER,
+            @JsonProperty("allServers")ALL_SERVERS
+        } // @formatter:on
 
         public static Builder builder() {
             return new Builder();
         }
 
         public static class Builder {
+
             private List<SamplingMessage> messages;
+
             private ModelPreferences modelPreferences;
+
             private String systemPrompt;
+
             private ContextInclusionStrategy includeContext;
+
             private Double temperature;
+
             private int maxTokens;
+
             private List<String> stopSequences;
+
             private Map<String, Object> metadata;
+
+            private Map<String, Object> meta;
 
             public Builder messages(List<SamplingMessage> messages) {
                 this.messages = messages;
@@ -3098,23 +4001,30 @@ public final class McpSchema {
                 return this;
             }
 
-            public CreateMessageRequest build() {
-                return new CreateMessageRequest(
-                        messages,
-                        modelPreferences,
-                        systemPrompt,
-                        includeContext,
-                        temperature,
-                        maxTokens,
-                        stopSequences,
-                        metadata);
+            public Builder meta(Map<String, Object> meta) {
+                this.meta = meta;
+                return this;
             }
+
+            public Builder progressToken(String progressToken) {
+                if (this.meta == null) {
+                    this.meta = new HashMap<>();
+                }
+                this.meta.put("progressToken", progressToken);
+                return this;
+            }
+
+            public CreateMessageRequest build() {
+                return new CreateMessageRequest(messages, modelPreferences, systemPrompt, includeContext, temperature,
+                        maxTokens, stopSequences, metadata, meta);
+            }
+
         }
     } // @formatter:on
 
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class CreateMessageResult {
+    public static class CreateMessageResult implements Result{
         @JsonProperty("role")
         Role role;
 
@@ -3127,28 +4037,30 @@ public final class McpSchema {
         @JsonProperty("stopReason")
         StopReason stopReason;
 
+        @JsonProperty("_meta")
+        Map<String, Object> meta;
+
         @Override
         public String toString() {
-            return "CreateMessageResult{" + "role="
-                    + role + ", content="
-                    + content + ", model='"
-                    + model + '\'' + ", stopReason="
-                    + stopReason + '}';
+            return "CreateMessageResult{" +
+                    "role=" + role +
+                    ", content=" + content +
+                    ", model='" + model + '\'' +
+                    ", stopReason=" + stopReason +
+                    ", meta=" + meta +
+                    '}';
         }
 
         @Override
         public boolean equals(Object o) {
             if (o == null || getClass() != o.getClass()) return false;
             CreateMessageResult that = (CreateMessageResult) o;
-            return role == that.role
-                    && Objects.equals(content, that.content)
-                    && Objects.equals(model, that.model)
-                    && stopReason == that.stopReason;
+            return role == that.role && Objects.equals(content, that.content) && Objects.equals(model, that.model) && stopReason == that.stopReason && Objects.equals(meta, that.meta);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(role, content, model, stopReason);
+            return Objects.hash(role, content, model, stopReason, meta);
         }
 
         public Role getRole() {
@@ -3183,22 +4095,65 @@ public final class McpSchema {
             this.stopReason = stopReason;
         }
 
+        public Map<String, Object> getMeta() {
+            return meta;
+        }
+
+        public void setMeta(Map<String, Object> meta) {
+            this.meta = meta;
+        }
+
         public CreateMessageResult() {}
 
-        public CreateMessageResult(Role role, Content content, String model, StopReason stopReason) {
+        public CreateMessageResult(Role role, Content content, String model, StopReason stopReason, Map<String, Object> meta) {
             this.role = role;
             this.content = content;
             this.model = model;
             this.stopReason = stopReason;
+            this.meta = meta;
+        }
+
+        @Override
+        public Map<String, Object> meta() {
+            return this.meta;
         }
 
         public enum StopReason {
             @JsonProperty("endTurn")
-            END_TURN,
+            END_TURN("endTurn"),
+
             @JsonProperty("stopSequence")
-            STOP_SEQUENCE,
+            STOP_SEQUENCE("stopSequence"),
+
             @JsonProperty("maxTokens")
-            MAX_TOKENS
+            MAX_TOKENS("maxTokens"),
+
+            @JsonProperty("unknown")
+            UNKNOWN("unknown");
+
+            private final String value;
+
+            private StopReason(String value) {
+                this.value = value;
+            }
+
+            public String getValue() {
+                return value;
+            }
+
+            @JsonCreator
+            public static StopReason fromValue(String value) {
+                for (StopReason reason : values()) {
+                    if (reason.value.equals(value)) {
+                        return reason;
+                    }
+                }
+                return UNKNOWN;
+            }
+        }
+
+        public CreateMessageResult(Role role, Content content, String model, StopReason stopReason) {
+            this(role, content, model, stopReason, null);
         }
 
         public static Builder builder() {
@@ -3206,10 +4161,16 @@ public final class McpSchema {
         }
 
         public static class Builder {
+
             private Role role = Role.ASSISTANT;
+
             private Content content;
+
             private String model;
+
             private StopReason stopReason = StopReason.END_TURN;
+
+            private Map<String, Object> meta;
 
             public Builder role(Role role) {
                 this.role = role;
@@ -3236,36 +4197,182 @@ public final class McpSchema {
                 return this;
             }
 
-            public CreateMessageResult build() {
-                return new CreateMessageResult(role, content, model, stopReason);
+            public Builder meta(Map<String, Object> meta) {
+                this.meta = meta;
+                return this;
             }
+
+            public CreateMessageResult build() {
+                return new CreateMessageResult(role, content, model, stopReason, meta);
+            }
+
         }
     } // @formatter:on
+
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class ElicitRequest implements Request{ // @formatter:on
+
+        @JsonProperty("message") String message;
+        @JsonProperty("requestedSchema") Map<String, Object> requestedSchema;
+        @JsonProperty("_meta") Map<String, Object> meta;
+
+        @Override
+        public String toString() {
+            return "ElicitRequest{" +
+                    "message='" + message + '\'' +
+                    ", requestedSchema=" + requestedSchema +
+                    ", meta=" + meta +
+                    '}';
+        }
+
+        // backwards compatibility constructor
+		public ElicitRequest(String message, Map<String, Object> requestedSchema, Map<String,Object> meta) {
+            this.message = message;
+            this.requestedSchema = requestedSchema;
+            this.meta = meta;
+        }
+
+        public ElicitRequest(String message, Map<String, Object> requestedSchema) {
+            this(message, requestedSchema, null);
+        }
+
+        @Override
+        public Map<String, Object> meta() {
+            return this.meta;
+        }
+
+        public static Builder builder() {
+            return new Builder();
+        }
+
+        public static class Builder {
+
+            private String message;
+
+            private Map<String, Object> requestedSchema;
+
+            private Map<String, Object> meta;
+
+            public Builder message(String message) {
+                this.message = message;
+                return this;
+            }
+
+            public Builder requestedSchema(Map<String, Object> requestedSchema) {
+                this.requestedSchema = requestedSchema;
+                return this;
+            }
+
+            public Builder meta(Map<String, Object> meta) {
+                this.meta = meta;
+                return this;
+            }
+
+            public Builder progressToken(String progressToken) {
+                if (this.meta == null) {
+                    this.meta = new HashMap<>();
+                }
+                this.meta.put("progressToken", progressToken);
+                return this;
+            }
+
+            public ElicitRequest build() {
+                return new ElicitRequest(message, requestedSchema, meta);
+            }
+
+        }
+    }
+
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class ElicitResult implements Result{ // @formatter:on
+
+        @JsonProperty("action") Action action;
+        @JsonProperty("content") Map<String, Object> content;
+        @JsonProperty("_meta") Map<String, Object> meta;
+
+        @Override
+        public String toString() {
+            return "ElicitResult{" +
+                    "action=" + action +
+                    ", content=" + content +
+                    ", meta=" + meta +
+                    '}';
+        }
+
+        @Override
+        public Map<String, Object> meta() {
+            return this.meta;
+        }
+
+        public enum Action {
+
+            // @formatter:off
+            @JsonProperty("accept") ACCEPT,
+            @JsonProperty("decline") DECLINE,
+            @JsonProperty("cancel") CANCEL
+        } // @formatter:on
+
+        // backwards compatibility constructor
+		public ElicitResult(Action action, Map<String, Object> content, Map<String,Object> meta) {
+            this.action = action;
+            this.content = content;
+            this.meta = meta;
+        }
+
+        public ElicitResult(Action action, Map<String, Object> content) {
+            this(action, content, null);
+        }
+
+        public static Builder builder() {
+            return new Builder();
+        }
+
+        public static class Builder {
+
+            private Action action;
+
+            private Map<String, Object> content;
+
+            private Map<String, Object> meta;
+
+            public Builder message(Action action) {
+                this.action = action;
+                return this;
+            }
+
+            public Builder content(Map<String, Object> content) {
+                this.content = content;
+                return this;
+            }
+
+            public Builder meta(Map<String, Object> meta) {
+                this.meta = meta;
+                return this;
+            }
+
+            public ElicitResult build() {
+                return new ElicitResult(action, content, meta);
+            }
+
+        }
+    }
 
     // ---------------------------
     // Pagination Interfaces
     // ---------------------------
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class PaginatedRequest {
+    public static class PaginatedRequest implements Request{
         @JsonProperty("cursor")
         String cursor;
 
-        @Override
-        public String toString() {
-            return "PaginatedRequest{" + "cursor='" + cursor + '\'' + '}';
-        }
+        @JsonProperty("_meta") Map<String, Object> meta;
 
-        @Override
-        public boolean equals(Object o) {
-            if (o == null || getClass() != o.getClass()) return false;
-            PaginatedRequest that = (PaginatedRequest) o;
-            return Objects.equals(cursor, that.cursor);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hashCode(cursor);
+        public PaginatedRequest(String cursor, Map<String, Object> meta) {
+            this.cursor = cursor;
+            this.meta = meta;
         }
 
         public String getCursor() {
@@ -3276,10 +4383,47 @@ public final class McpSchema {
             this.cursor = cursor;
         }
 
-        public PaginatedRequest() {}
+        public Map<String, Object> getMeta() {
+            return meta;
+        }
 
+        public void setMeta(Map<String, Object> meta) {
+            this.meta = meta;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o == null || getClass() != o.getClass()) return false;
+            PaginatedRequest that = (PaginatedRequest) o;
+            return Objects.equals(cursor, that.cursor) && Objects.equals(meta, that.meta);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(cursor, meta);
+        }
+
+        @Override
+        public String toString() {
+            return "PaginatedRequest{" +
+                    "cursor='" + cursor + '\'' +
+                    ", meta=" + meta +
+                    '}';
+        }
         public PaginatedRequest(String cursor) {
-            this.cursor = cursor;
+            this(cursor, null);
+        }
+
+        /**
+         * Creates a new paginated request with an empty cursor.
+         */
+        public PaginatedRequest() {
+            this(null);
+        }
+
+        @Override
+        public Map<String, Object> meta() {
+            return this.meta;
         }
     }
 
@@ -3325,7 +4469,7 @@ public final class McpSchema {
     // Progress and Logging
     // ---------------------------
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class ProgressNotification {
+    public static class ProgressNotification implements Notification{
         @JsonProperty("progressToken")
         String progressToken;
 
@@ -3335,26 +4479,41 @@ public final class McpSchema {
         @JsonProperty("total")
         Double total;
 
+        @JsonProperty("message")
+        String message;
+
+        @JsonProperty("_meta")
+        Map<String, Object> meta;
+
+        public ProgressNotification(String progressToken, double progress, Double total, String message, Map<String, Object> meta) {
+            this.progressToken = progressToken;
+            this.progress = progress;
+            this.total = total;
+            this.message = message;
+            this.meta = meta;
+        }
+
         @Override
         public String toString() {
-            return "ProgressNotification{" + "progressToken='"
-                    + progressToken + '\'' + ", progress="
-                    + progress + ", total="
-                    + total + '}';
+            return "ProgressNotification{" +
+                    "progressToken='" + progressToken + '\'' +
+                    ", progress=" + progress +
+                    ", total=" + total +
+                    ", message='" + message + '\'' +
+                    ", meta=" + meta +
+                    '}';
         }
 
         @Override
         public boolean equals(Object o) {
             if (o == null || getClass() != o.getClass()) return false;
             ProgressNotification that = (ProgressNotification) o;
-            return Double.compare(progress, that.progress) == 0
-                    && Objects.equals(progressToken, that.progressToken)
-                    && Objects.equals(total, that.total);
+            return Double.compare(progress, that.progress) == 0 && Objects.equals(progressToken, that.progressToken) && Objects.equals(total, that.total) && Objects.equals(message, that.message) && Objects.equals(meta, that.meta);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(progressToken, progress, total);
+            return Objects.hash(progressToken, progress, total, message, meta);
         }
 
         public String getProgressToken() {
@@ -3381,14 +4540,65 @@ public final class McpSchema {
             this.total = total;
         }
 
-        public ProgressNotification() {}
+        public String getMessage() {
+            return message;
+        }
 
-        public ProgressNotification(String progressToken, double progress, Double total) {
-            this.progressToken = progressToken;
-            this.progress = progress;
-            this.total = total;
+        public void setMessage(String message) {
+            this.message = message;
+        }
+
+        public Map<String, Object> getMeta() {
+            return meta;
+        }
+
+        public void setMeta(Map<String, Object> meta) {
+            this.meta = meta;
+        }
+
+        public ProgressNotification(String progressToken, double progress, Double total, String message) {
+            this(progressToken, progress, total, message, null);
+        }
+
+        @Override
+        public Map<String, Object> meta() {
+            return this.meta;
         }
     } // @formatter:on
+
+    /**
+     * The Model Context Protocol (MCP) provides a standardized way for servers to send
+     * resources update message to clients.
+     *
+     */
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class ResourcesUpdatedNotification implements Notification{
+
+        @JsonProperty("uri") String uri;
+        @JsonProperty("_meta") Map<String, Object> meta;
+
+        @Override
+        public String toString() {
+            return "ResourcesUpdatedNotification{" +
+                    "uri='" + uri + '\'' +
+                    ", meta=" + meta +
+                    '}';
+        }
+
+        public ResourcesUpdatedNotification(String uri, Map<String, Object> meta) {
+            this.uri = uri;
+            this.meta = meta;
+        }
+
+        public ResourcesUpdatedNotification(String uri) {
+            this(uri, null);
+        }
+
+        @Override
+        public Map<String, Object> meta() {
+            return this.meta;
+        }
+    }
 
     /**
      * The Model Context Protocol (MCP) provides a standardized way for servers to send
@@ -3401,7 +4611,7 @@ public final class McpSchema {
      * data JSON-serializable logging data.
      */
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class LoggingMessageNotification {
+    public static class LoggingMessageNotification implements Notification{
         @JsonProperty("level")
         LoggingLevel level;
 
@@ -3411,24 +4621,37 @@ public final class McpSchema {
         @JsonProperty("data")
         String data;
 
-        @Override
-        public String toString() {
-            return "LoggingMessageNotification{" + "level="
-                    + level + ", logger='"
-                    + logger + '\'' + ", data='"
-                    + data + '\'' + '}';
+        @JsonProperty("_meta")
+        Map<String, Object> meta;
+
+        public Map<String, Object> getMeta() {
+            return meta;
+        }
+
+        public void setMeta(Map<String, Object> meta) {
+            this.meta = meta;
         }
 
         @Override
         public boolean equals(Object o) {
             if (o == null || getClass() != o.getClass()) return false;
             LoggingMessageNotification that = (LoggingMessageNotification) o;
-            return level == that.level && Objects.equals(logger, that.logger) && Objects.equals(data, that.data);
+            return level == that.level && Objects.equals(logger, that.logger) && Objects.equals(data, that.data) && Objects.equals(meta, that.meta);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(level, logger, data);
+            return Objects.hash(level, logger, data, meta);
+        }
+
+        @Override
+        public String toString() {
+            return "LoggingMessageNotification{" +
+                    "level=" + level +
+                    ", logger='" + logger + '\'' +
+                    ", data='" + data + '\'' +
+                    ", meta=" + meta +
+                    '}';
         }
 
         public LoggingLevel getLevel() {
@@ -3457,10 +4680,21 @@ public final class McpSchema {
 
         public LoggingMessageNotification() {}
 
-        public LoggingMessageNotification(LoggingLevel level, String logger, String data) {
+        public LoggingMessageNotification(LoggingLevel level, String logger, String data, Map<String,Object> meta) {
             this.level = level;
             this.logger = logger;
             this.data = data;
+            this.meta = meta;
+        }
+
+
+        @Override
+        public Map<String, Object> meta() {
+            return this.meta;
+        }
+
+        public LoggingMessageNotification(LoggingLevel level, String logger, String data) {
+            this(level, logger, data, null);
         }
 
         public static Builder builder() {
@@ -3468,9 +4702,14 @@ public final class McpSchema {
         }
 
         public static class Builder {
+
             private LoggingLevel level = LoggingLevel.INFO;
+
             private String logger = "server";
+
             private String data;
+
+            private Map<String, Object> meta;
 
             public Builder level(LoggingLevel level) {
                 this.level = level;
@@ -3487,9 +4726,15 @@ public final class McpSchema {
                 return this;
             }
 
-            public LoggingMessageNotification build() {
-                return new LoggingMessageNotification(level, logger, data);
+            public Builder meta(Map<String, Object> meta) {
+                this.meta = meta;
+                return this;
             }
+
+            public LoggingMessageNotification build() {
+                return new LoggingMessageNotification(level, logger, data, meta);
+            }
+
         }
     } // @formatter:on
 
@@ -3522,300 +4767,364 @@ public final class McpSchema {
         }
     } // @formatter:on
 
+    /**
+     * A request from the client to the server, to enable or adjust logging.
+     * level The level of logging that the client wants to receive from the server.
+     * The server should send all logs at this level and higher (i.e., more severe) to the
+     * client as notifications/message
+     */
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static final class SetLevelRequest {
+        @JsonProperty("level")
+        LoggingLevel level;
+
+        @Override
+        public String toString() {
+            return "SetLevelRequest{" +
+                    "level=" + level +
+                    '}';
+        }
+
+        public LoggingLevel getLevel() {
+            return level;
+        }
+
+        public void setLevel(LoggingLevel level) {
+            this.level = level;
+        }
+
+        public SetLevelRequest(LoggingLevel level) {
+            this.level = level;
+        }
+    }
+
     // ---------------------------
     // Autocomplete
     // ---------------------------
-    public static class CompleteRequest implements Request {
-        PromptOrResourceReference ref;
-        CompleteArgument argument;
+
+    public interface CompleteReference {
+
+        String type();
+
+        String identifier();
+
+    }
+
+    /**
+     * Identifies a prompt for completion requests.
+     */
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static final class PromptReference implements CompleteReference, BaseMetadata { // @formatter:on
+
+        @JsonProperty("type") String type;
+        @JsonProperty("name") String name;
+        @JsonProperty("title") String title;
+
 
         @Override
         public String toString() {
-            return "CompleteRequest{" + "ref=" + ref + ", argument=" + argument + '}';
+            return "PromptReference{" +
+                    "type='" + type + '\'' +
+                    ", name='" + name + '\'' +
+                    ", title='" + title + '\'' +
+                    '}';
+        }
+
+        public PromptReference(String type, String name) {
+            this.type = type;
+            this.name = name;
+            this.title = null;
+        }
+
+		public PromptReference(String name) {
+            this.name = name;
+            this.type = "ref/prompt";
+            this.title = null;
+        }
+
+        public PromptReference(String type, String name, String title) {
+            this.type = type;
+            this.name = name;
+            this.title = title;
         }
 
         @Override
-        public boolean equals(Object o) {
-            if (o == null || getClass() != o.getClass()) return false;
-            CompleteRequest that = (CompleteRequest) o;
-            return Objects.equals(ref, that.ref) && Objects.equals(argument, that.argument);
+        public String type() {
+            return getType();
         }
 
         @Override
-        public int hashCode() {
-            return Objects.hash(ref, argument);
+        public String identifier() {
+            return getName();
         }
 
-        public PromptOrResourceReference getRef() {
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String getTitle() {
+            return title;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+    }
+
+    /**
+     * A reference to a resource or resource template definition for completion requests.
+     *
+     */
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static final class ResourceReference implements CompleteReference {
+
+        @JsonProperty("type") String type;
+        @JsonProperty("uri") String uri;
+
+        @Override
+        public String toString() {
+            return "ResourceReference{" +
+                    "type='" + type + '\'' +
+                    ", uri='" + uri + '\'' +
+                    '}';
+        }
+
+        public ResourceReference(String uri) {
+            this.uri = uri;
+            this.type = "ref/resource";
+        }
+
+        public ResourceReference(String type, String uri) {
+            this.type = type;
+            this.uri = uri;
+        }
+
+        @Override
+        public String type() {
+            return this.type;
+        }
+
+        @Override
+        public String identifier() {
+            return this.uri;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+
+        public String getUri() {
+            return uri;
+        }
+
+        public void setUri(String uri) {
+            this.uri = uri;
+        }
+    }
+
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static final class CompleteRequest implements Request {
+        @JsonProperty("ref")
+        private final CompleteReference ref;
+        @JsonProperty("argument")
+        private final CompleteArgument argument;
+        @JsonProperty("_meta")
+        private final Map<String, Object> meta;
+        @JsonProperty("context")
+        private final CompleteContext context;
+
+        @Override
+        public String toString() {
+            return "CompleteRequest{" +
+                    "ref=" + ref +
+                    ", argument=" + argument +
+                    ", meta=" + meta +
+                    ", context=" + context +
+                    '}';
+        }
+
+        @JsonCreator
+        public CompleteRequest(
+                @JsonProperty("ref") CompleteReference ref,
+                @JsonProperty("argument") CompleteArgument argument,
+                @JsonProperty("_meta") Map<String, Object> meta,
+                @JsonProperty("context") CompleteContext context
+        ) {
+            this.ref = ref;
+            this.argument = argument;
+            this.meta = meta;
+            this.context = context;
+        }
+
+        public CompleteRequest(CompleteReference ref, CompleteArgument argument, Map<String, Object> meta) {
+            this(ref, argument, meta, null);
+        }
+
+        public CompleteRequest(CompleteReference ref, CompleteArgument argument, CompleteContext context) {
+            this(ref, argument, null, context);
+        }
+
+        public CompleteRequest(CompleteReference ref, CompleteArgument argument) {
+            this(ref, argument, null, null);
+        }
+
+        public CompleteReference ref() {
             return ref;
         }
 
-        public void setRef(PromptOrResourceReference ref) {
-            this.ref = ref;
-        }
-
-        public CompleteArgument getArgument() {
+        public CompleteArgument argument() {
             return argument;
         }
 
-        public void setArgument(CompleteArgument argument) {
-            this.argument = argument;
+        public Map<String, Object> meta() {
+            return meta;
         }
 
-        public CompleteRequest() {}
-
-        public CompleteRequest(PromptOrResourceReference ref, CompleteArgument argument) {
-            this.ref = ref;
-            this.argument = argument;
+        public CompleteContext context() {
+            return context;
         }
 
-        public interface PromptOrResourceReference {
-            String getType();
-        }
+        public static final class CompleteArgument {
+            private final String name;
+            private final String value;
 
-        public static class PromptReference implements PromptOrResourceReference {
-            @JsonProperty("type")
-            String type;
-
-            @JsonProperty("name")
-            String name;
-
-            @Override
-            public String toString() {
-                return "PromptReference{" + "type='" + type + '\'' + ", name='" + name + '\'' + '}';
+            @JsonCreator
+            public CompleteArgument(
+                    @JsonProperty("name") String name,
+                    @JsonProperty("value") String value
+            ) {
+                this.name = name;
+                this.value = value;
             }
 
-            @Override
-            public boolean equals(Object o) {
-                if (o == null || getClass() != o.getClass()) return false;
-                PromptReference that = (PromptReference) o;
-                return Objects.equals(type, that.type) && Objects.equals(name, that.name);
-            }
-
-            @Override
-            public int hashCode() {
-                return Objects.hash(type, name);
-            }
-
-            @Override
-            public String getType() {
-                return type;
-            }
-
-            public void setType(String type) {
-                this.type = type;
-            }
-
-            public String getName() {
+            public String name() {
                 return name;
             }
 
-            public void setName(String name) {
-                this.name = name;
-            }
-
-            public PromptReference() {}
-
-            public PromptReference(String type, String name) {
-                this.type = type;
-                this.name = name;
-            }
-        } // @formatter:on
-
-        public static class ResourceReference implements PromptOrResourceReference {
-            @JsonProperty("type")
-            String type;
-
-            @JsonProperty("uri")
-            String uri;
-
-            @Override
-            public String toString() {
-                return "ResourceReference{" + "type='" + type + '\'' + ", uri='" + uri + '\'' + '}';
-            }
-
-            @Override
-            public boolean equals(Object o) {
-                if (o == null || getClass() != o.getClass()) return false;
-                ResourceReference that = (ResourceReference) o;
-                return Objects.equals(type, that.type) && Objects.equals(uri, that.uri);
-            }
-
-            @Override
-            public int hashCode() {
-                return Objects.hash(type, uri);
-            }
-
-            @Override
-            public String getType() {
-                return type;
-            }
-
-            public void setType(String type) {
-                this.type = type;
-            }
-
-            public String getUri() {
-                return uri;
-            }
-
-            public void setUri(String uri) {
-                this.uri = uri;
-            }
-
-            public ResourceReference() {}
-
-            public ResourceReference(String type, String uri) {
-                this.type = type;
-                this.uri = uri;
-            }
-        } // @formatter:on
-
-        public static class CompleteArgument {
-            @JsonProperty("name")
-            String name;
-
-            @JsonProperty("value")
-            String value;
-
-            @Override
-            public String toString() {
-                return "CompleteArgument{" + "name='" + name + '\'' + ", value='" + value + '\'' + '}';
-            }
-
-            @Override
-            public boolean equals(Object o) {
-                if (o == null || getClass() != o.getClass()) return false;
-                CompleteArgument that = (CompleteArgument) o;
-                return Objects.equals(name, that.name) && Objects.equals(value, that.value);
-            }
-
-            @Override
-            public int hashCode() {
-                return Objects.hash(name, value);
-            }
-
-            public String getName() {
-                return name;
-            }
-
-            public void setName(String name) {
-                this.name = name;
-            }
-
-            public String getValue() {
+            public String value() {
                 return value;
             }
+        }
 
-            public void setValue(String value) {
-                this.value = value;
+        public static final class CompleteContext {
+            private final Map<String, String> arguments;
+
+            @JsonCreator
+            public CompleteContext(
+                    @JsonProperty("arguments") Map<String, String> arguments
+            ) {
+                this.arguments = arguments;
             }
 
-            public CompleteArgument() {}
-
-            public CompleteArgument(String name, String value) {
-                this.name = name;
-                this.value = value;
+            public Map<String, String> arguments() {
+                return arguments;
             }
-        } // @formatter:on
+        }
     }
 
-    public static class CompleteResult {
-        CompleteCompletion completion;
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static final class CompleteResult{
+        @JsonProperty("completion")
+        private final CompleteCompletion completion;
+        @JsonProperty("_meta")
+        private final Map<String, Object> meta;
 
         @Override
         public String toString() {
-            return "CompleteResult{" + "completion=" + completion + '}';
+            return "CompleteResult{" +
+                    "completion=" + completion +
+                    ", meta=" + meta +
+                    '}';
         }
 
-        @Override
-        public boolean equals(Object o) {
-            if (o == null || getClass() != o.getClass()) return false;
-            CompleteResult that = (CompleteResult) o;
-            return Objects.equals(completion, that.completion);
+        @JsonCreator
+        public CompleteResult(
+                @JsonProperty("completion") CompleteCompletion completion,
+                @JsonProperty("_meta") Map<String, Object> meta
+        ) {
+            this.completion = completion;
+            this.meta = meta;
         }
 
-        @Override
-        public int hashCode() {
-            return Objects.hashCode(completion);
+        public CompleteResult(CompleteCompletion completion) {
+            this(completion, null);
         }
 
-        public CompleteCompletion getCompletion() {
+        public CompleteCompletion completion() {
             return completion;
         }
 
-        public void setCompletion(CompleteCompletion completion) {
-            this.completion = completion;
+        public Map<String, Object> meta() {
+            return meta;
         }
 
-        public CompleteResult() {}
-
-        public CompleteResult(CompleteCompletion completion) {
-            this.completion = completion;
-        }
-
-        public static class CompleteCompletion {
+        public static final class CompleteCompletion {
             @JsonProperty("values")
-            List<String> values;
-
+            private final List<String> values;
             @JsonProperty("total")
-            Integer total;
-
+            private final Integer total;
             @JsonProperty("hasMore")
-            Boolean hasMore;
+            private final Boolean hasMore;
 
             @Override
             public String toString() {
-                return "CompleteCompletion{" + "values=" + values + ", total=" + total + ", hasMore=" + hasMore + '}';
+                return "CompleteCompletion{" +
+                        "values=" + values +
+                        ", total=" + total +
+                        ", hasMore=" + hasMore +
+                        '}';
             }
 
-            @Override
-            public boolean equals(Object o) {
-                if (o == null || getClass() != o.getClass()) return false;
-                CompleteCompletion that = (CompleteCompletion) o;
-                return Objects.equals(values, that.values)
-                        && Objects.equals(total, that.total)
-                        && Objects.equals(hasMore, that.hasMore);
+            @JsonCreator
+            public CompleteCompletion(
+                    @JsonProperty("values") List<String> values,
+                    @JsonProperty("total") Integer total,
+                    @JsonProperty("hasMore") Boolean hasMore
+            ) {
+                this.values = values;
+                this.total = total;
+                this.hasMore = hasMore;
             }
 
-            @Override
-            public int hashCode() {
-                return Objects.hash(values, total, hasMore);
-            }
-
-            public List<String> getValues() {
+            public List<String> values() {
                 return values;
             }
 
-            public void setValues(List<String> values) {
-                this.values = values;
-            }
-
-            public Integer getTotal() {
+            public Integer total() {
                 return total;
             }
 
-            public void setTotal(Integer total) {
-                this.total = total;
-            }
-
-            public Boolean getHasMore() {
+            public Boolean hasMore() {
                 return hasMore;
             }
-
-            public void setHasMore(Boolean hasMore) {
-                this.hasMore = hasMore;
-            }
-
-            public CompleteCompletion() {}
-
-            public CompleteCompletion(List<String> values, Integer total, Boolean hasMore) {
-                this.values = values;
-                this.total = total;
-                this.hasMore = hasMore;
-            }
-        } // @formatter:on
+        }
     }
+
+
+
 
     // ---------------------------
     // Content Types
@@ -4133,21 +5442,26 @@ public final class McpSchema {
         @JsonProperty("roots")
         List<Root> roots;
 
+        @JsonProperty("nextCursor") String nextCursor;
+
         @Override
         public String toString() {
-            return "ListRootsResult{" + "roots=" + roots + '}';
+            return "ListRootsResult{" +
+                    "roots=" + roots +
+                    ", nextCursor='" + nextCursor + '\'' +
+                    '}';
         }
 
         @Override
         public boolean equals(Object o) {
             if (o == null || getClass() != o.getClass()) return false;
             ListRootsResult that = (ListRootsResult) o;
-            return Objects.equals(roots, that.roots);
+            return Objects.equals(roots, that.roots) && Objects.equals(nextCursor, that.nextCursor);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hashCode(roots);
+            return Objects.hash(roots, nextCursor);
         }
 
         public List<Root> getRoots() {
@@ -4158,10 +5472,25 @@ public final class McpSchema {
             this.roots = roots;
         }
 
+        public String getNextCursor() {
+            return nextCursor;
+        }
+
+        public void setNextCursor(String nextCursor) {
+            this.nextCursor = nextCursor;
+        }
+
         public ListRootsResult() {}
 
         public ListRootsResult(List<Root> roots) {
             this.roots = roots;
+            this.nextCursor = null;
+        }
+
+
+        public ListRootsResult(List<Root> roots, String nextCursor) {
+            this.roots = roots;
+            this.nextCursor = nextCursor;
         }
     } // @formatter:on
 }
