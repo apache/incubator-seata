@@ -210,6 +210,11 @@
             <artifactId>spring-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.networknt</groupId>
+            <artifactId>json-schema-validator</artifactId>
+            <version>1.5.7</version>
+        </dependency>
     </dependencies>
 
     <build>

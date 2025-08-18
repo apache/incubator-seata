@@ -98,7 +98,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     public void configure(WebSecurity web) {
         String ignoreURLs = env.getProperty("seata.security.ignore.urls", "/**");
         if (!mcpProperties.isEnableAuth()) {
-            ignoreURLs += "," + mcpProperties.getSseEndpoint() + "," + mcpProperties.getMessageEndpoint();
+            if(mcpProperties.isSseType()){
+                MCPProperties.SseServerProperties sseServerProperties = mcpProperties.getSseServerProperties();
+                ignoreURLs += "," + sseServerProperties.getSseEndpoint() + "," + sseServerProperties.getMessageEndpoint();
+            }else{
+                MCPProperties.StreamableProperties streamableProperties = mcpProperties.getStreamableProperties();
+                ignoreURLs += "," + streamableProperties.getMcpEndPoint();
+            }
         }
         for (String ignoreURL : ignoreURLs.trim().split(SECURITY_IGNORE_URLS_SPILT_CHAR)) {
             web.ignoring().antMatchers(ignoreURL.trim());
@@ -108,7 +114,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         String csrfIgnoreUrls = env.getProperty("seata.security.csrf-ignore-urls");
-        csrfIgnoreUrls += "," + mcpProperties.getSseEndpoint() + "," + mcpProperties.getMessageEndpoint();
+        if(mcpProperties.isSseType()){
+            MCPProperties.SseServerProperties sseServerProperties = mcpProperties.getSseServerProperties();
+            csrfIgnoreUrls += "," + sseServerProperties.getSseEndpoint() + "," + sseServerProperties.getMessageEndpoint();
+        }else{
+            MCPProperties.StreamableProperties streamableProperties = mcpProperties.getStreamableProperties();
+            csrfIgnoreUrls += "," + streamableProperties.getMcpEndPoint();
+        }
         CsrfConfigurer<HttpSecurity> csrf = http.authorizeRequests()
                 .anyRequest()
                 .authenticated()
