@@ -12,8 +12,6 @@ import java.util.Map;
  * <p>
  * The lifecycle of the provider dictates that it be created first, upon application
  * startup, and then passed into either
- * {@link io.modelcontextprotocol.server.McpServer#sync(McpServerTransportProvider)} or
- * {@link io.modelcontextprotocol.server.McpServer#async(McpServerTransportProvider)}. As
  * a result of the MCP server creation, the provider will be notified of a
  * {@link McpServerSession.Factory} which will be used to handle a 1:1 communication
  * between a newly connected client and the server. The provider's responsibility is to
@@ -29,7 +27,7 @@ import java.util.Map;
  *
  * @author Dariusz Jędrzejczyk
  */
-public interface McpServerTransportProvider {
+public interface McpServerTransportProvider extends McpServerTransportProviderBase{
 
     /**
      * Sets the session factory that will be used to create sessions for new clients. An
@@ -44,9 +42,8 @@ public interface McpServerTransportProvider {
      * @param method the name of the notification method to be called on the clients
      * @param params a map of parameters to be sent with the notification
      * @return a Mono that completes when the notification has been broadcast
-     * @see McpSession#sendNotification(String, Map)
      */
-    Mono<Void> notifyClients(String method, Map<String, Object> params);
+    Mono<Void> notifyClients(String method, Object params);
 
     /**
      * Immediately closes all the transports with connected clients and releases any

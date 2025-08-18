@@ -7,8 +7,6 @@ package io.modelcontextprotocol.spec;
 import com.fasterxml.jackson.core.type.TypeReference;
 import reactor.core.publisher.Mono;
 
-import java.util.Map;
-
 /**
  * Represents a Model Control Protocol (MCP) session that handles communication between
  * clients and the server. This interface provides methods for sending requests and
@@ -66,7 +64,7 @@ public interface McpSession {
      * @param params a map of parameters to be sent with the notification
      * @return a Mono that completes when the notification has been sent
      */
-    Mono<Void> sendNotification(String method, Map<String, Object> params);
+    Mono<Void> sendNotification(String method, Object params);
 
     /**
      * Closes the session and releases any associated resources asynchronously.

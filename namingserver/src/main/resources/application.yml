@@ -55,25 +55,25 @@ seata:
     csrf-ignore-urls: /naming/v1/**,/api/v1/naming/**
     ignore:
       urls: /,/**/*.css,/**/*.js,/**/*.html,/**/*.map,/**/*.svg,/**/*.png,/**/*.jpeg,/**/*.ico,/api/v1/auth/login,/version.json,/naming/v1/health,/error
+
   # MCP Server Configuration
   mcp:
     # Server name (do not set the default to seata-mcp-server)
     serverName: test-mcp
     serverVersion: 2.0.0
-    # SSE endpoint (no default/SSE set)
-    sseEndpoint: /sse
-    # message endpoint (no default /message set)
-    messageEndpoint: /message
-    # Whether to turn on the heartbeat (do not set the default to false)
-    heartbeat: false
+    mcpType: streamable
+#    sse:
+#      # SSE endpoint (no default/SSE set)
+#      sseEndpoint: /sse
+#      # message endpoint (no default /message set)
+#      messageEndpoint: /message
+    streamable:
+      mcpEndpoint: /mcp
     promptSupport: true
     resourceSupport: true
     # Query limits the maximum time interval, The unit is milliseconds
     query:
       max_query_duration: 86400000
-    prompts:
-      systemPrompt:
-        description: ""
     auth:
       enabled: false
 
