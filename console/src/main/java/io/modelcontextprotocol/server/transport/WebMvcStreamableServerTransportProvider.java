@@ -23,6 +23,7 @@ import org.springframework.web.servlet.function.ServerResponse;
 import org.springframework.web.servlet.function.ServerResponse.SseBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -123,10 +124,25 @@ public class WebMvcStreamableServerTransportProvider implements McpStreamableSer
 
 		if (keepAliveInterval != null) {
 			this.keepAliveScheduler = KeepAliveScheduler
-				.builder(() -> (isClosing) ? Flux.empty() : Flux.fromIterable(this.sessions.values()))
-				.initialDelay(keepAliveInterval)
-				.interval(keepAliveInterval)
-				.build();
+					.builder(() -> {
+						if (isClosing) {
+							return Flux.empty();
+						}
+						return Flux.fromIterable(this.sessions.values())
+								.filter(session -> {
+									// Check if the session is healthy
+									if (!session.isHealthy()) {
+										logger.warn("Removing unhealthy session: {}", session.getId());
+										this.sessions.remove(session.getId());
+										return false;
+									}
+									return true;
+								})
+								.cast(McpSession.class);
+					})
+					.initialDelay(keepAliveInterval)
+					.interval(keepAliveInterval)
+					.build();
 
 			this.keepAliveScheduler.start();
 		}
@@ -522,11 +538,6 @@ public class WebMvcStreamableServerTransportProvider implements McpStreamableSer
 					logger.error("Failed to send message to session {}: {}", this.sessionId, e.getMessage());
 					try {
 						this.sseBuilder.error(e);
-						// An exception occurs, and the connection is closed
-						McpSession session = sessions.get(sessionId);
-						if (session != null) {
-							session.close();
-						}
 					}
 					catch (Exception errorException) {
 						logger.error("Failed to send error to SSE builder for session {}: {}", this.sessionId,
@@ -557,9 +568,7 @@ public class WebMvcStreamableServerTransportProvider implements McpStreamableSer
 		 */
 		@Override
 		public Mono<Void> closeGracefully() {
-			return Mono.fromRunnable(() -> {
-				WebMvcStreamableMcpSessionTransport.this.close();
-			});
+			return Mono.fromRunnable(WebMvcStreamableMcpSessionTransport.this::close);
 		}
 
 		/**
@@ -575,7 +584,6 @@ public class WebMvcStreamableServerTransportProvider implements McpStreamableSer
 				}
 
 				this.closed = true;
-
 				this.sseBuilder.complete();
 				logger.debug("Successfully completed SSE builder for session {}", sessionId);
 			}
