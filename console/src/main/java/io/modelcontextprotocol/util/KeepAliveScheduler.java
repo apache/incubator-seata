@@ -2,7 +2,6 @@ package io.modelcontextprotocol.util;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.modelcontextprotocol.spec.McpSchema;
-import io.modelcontextprotocol.spec.McpServerSession;
 import io.modelcontextprotocol.spec.McpSession;
 import io.modelcontextprotocol.spec.McpStreamableServerSession;
 import org.slf4j.Logger;
