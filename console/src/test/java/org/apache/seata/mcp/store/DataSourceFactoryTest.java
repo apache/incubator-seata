@@ -36,27 +36,27 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @ExtendWith(MockitoExtension.class)
 @TestPropertySource(
         properties = {
-            "seata.datasources.db1.enabled=true",
-            "seata.datasources.db1.db-type=mysql",
-            "seata.datasources.db1.driverClassName=com.mysql.cj.jdbc.Driver",
-            "seata.datasources.db1.url=jdbc:mysql://localhost:3306/seata1?useSSL=false",
-            "seata.datasources.db1.username=root",
-            "seata.datasources.db1.password=seata",
-            "seata.datasources.db1.datasource=druid",
-            "seata.datasources.db2.enabled=true",
-            "seata.datasources.db2.db-type=mysql",
-            "seata.datasources.db2.driverClassName=com.mysql.cj.jdbc.Driver",
-            "seata.datasources.db2.url=jdbc:mysql://localhost:3306/seata2?useSSL=false",
-            "seata.datasources.db2.username=root",
-            "seata.datasources.db2.password=seata",
-            "seata.datasources.db2.datasource=hikari",
-            "seata.datasources.db3.enabled=true",
-            "seata.datasources.db3.db-type=mysql",
-            "seata.datasources.db3.driverClassName=com.mysql.cj.jdbc.Driver",
-            "seata.datasources.db3.url=jdbc:mysql://localhost:3306/seata3?useSSL=false",
-            "seata.datasources.db3.username=root",
-            "seata.datasources.db3.password=seata",
-            "seata.datasources.db3.datasource=dbcp",
+            "seata.businessDataSources.db1.enabled=true",
+            "seata.businessDataSources.db1.db-type=mysql",
+            "seata.businessDataSources.db1.driverClassName=com.mysql.cj.jdbc.Driver",
+            "seata.businessDataSources.db1.url=jdbc:mysql://localhost:3306/seata1?useSSL=false",
+            "seata.businessDataSources.db1.username=root",
+            "seata.businessDataSources.db1.password=seata",
+            "seata.businessDataSources.db1.datasource=druid",
+            "seata.businessDataSources.db2.enabled=true",
+            "seata.businessDataSources.db2.db-type=mysql",
+            "seata.businessDataSources.db2.driverClassName=com.mysql.cj.jdbc.Driver",
+            "seata.businessDataSources.db2.url=jdbc:mysql://localhost:3306/seata2?useSSL=false",
+            "seata.businessDataSources.db2.username=root",
+            "seata.businessDataSources.db2.password=seata",
+            "seata.businessDataSources.db2.datasource=hikari",
+            "seata.businessDataSources.db3.enabled=true",
+            "seata.businessDataSources.db3.db-type=mysql",
+            "seata.businessDataSources.db3.driverClassName=com.mysql.cj.jdbc.Driver",
+            "seata.businessDataSources.db3.url=jdbc:mysql://localhost:3306/seata3?useSSL=false",
+            "seata.businessDataSources.db3.username=root",
+            "seata.businessDataSources.db3.password=seata",
+            "seata.businessDataSources.db3.datasource=dbcp",
         })
 public class DataSourceFactoryTest {
 
@@ -88,7 +88,7 @@ public class DataSourceFactoryTest {
 
     @Test
     public void testGetDruidDataSource() {
-        String druidUrl = env.getProperty("seata.datasources.db1.url");
+        String druidUrl = env.getProperty("seata.businessDataSources.db1.url");
         assertNotNull(druidUrl);
         String resourceId = druidUrl.split("\\?")[0];
         String type =
@@ -100,7 +100,7 @@ public class DataSourceFactoryTest {
 
     @Test
     public void testGetHikariDataSource() {
-        String hikari = env.getProperty("seata.datasources.db2.url");
+        String hikari = env.getProperty("seata.businessDataSources.db2.url");
         assertNotNull(hikari);
         String resourceId = hikari.split("\\?")[0];
         String type =
@@ -112,7 +112,7 @@ public class DataSourceFactoryTest {
 
     @Test
     public void testGetDbcpDataSource() {
-        String dbcp = env.getProperty("seata.datasources.db3.url");
+        String dbcp = env.getProperty("seata.businessDataSources.db3.url");
         assertNotNull(dbcp);
         String resourceId = dbcp.split("\\?")[0];
         String type =
