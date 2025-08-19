@@ -98,7 +98,7 @@ public class McpServerManager implements SmartLifecycle {
             transportProvider = new ControlledSseTransportProvider(objectMapper,properties.getMessageEndpoint(),properties.getSseEndpoint());
         }else {
             MCPProperties.StreamableProperties properties = config.getStreamableProperties();
-            transportProvider = new ControlledStreamableTransportProvider(objectMapper,properties.getMcpEndPoint(),new WebMvcContextExtractor(),Duration.ofSeconds(5));
+            transportProvider = new ControlledStreamableTransportProvider(objectMapper,properties.getMcpEndPoint(),new WebMvcContextExtractor(),Duration.ofSeconds(properties.getHeartBeatSecondDuration()));
         }
     }
 
