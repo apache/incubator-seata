@@ -25,8 +25,6 @@ import org.apache.seata.mcp.store.db.AbstractMCPDataSourceProvider;
 import javax.sql.DataSource;
 import java.util.Properties;
 
-import static org.apache.seata.common.DefaultValues.*;
-
 /**
  * The hikari datasource provider
  */

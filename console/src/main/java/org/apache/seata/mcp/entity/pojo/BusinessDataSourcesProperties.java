@@ -24,9 +24,13 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertySource;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
-import static org.apache.seata.common.DefaultValues.*;
+import static org.apache.seata.common.DefaultValues.DEFAULT_DB_MAX_CONN;
+import static org.apache.seata.common.DefaultValues.DEFAULT_DB_MIN_CONN;
 
 @Component
 public class BusinessDataSourcesProperties implements InitializingBean {
