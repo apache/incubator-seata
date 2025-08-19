@@ -34,6 +34,8 @@ import java.util.function.Supplier;
  */
 public class McpStreamableServerSession implements McpLoggableSession {
 
+	private boolean healthy = true;
+
 	private static final Logger logger = LoggerFactory.getLogger(McpStreamableServerSession.class);
 
 	private final ConcurrentHashMap<Object, McpStreamableServerSessionStream> requestIdToStream = new ConcurrentHashMap<>();
@@ -57,6 +59,15 @@ public class McpStreamableServerSession implements McpLoggableSession {
 	private final MissingMcpTransportSession missingMcpTransportSession;
 
 	private volatile McpSchema.LoggingLevel minLoggingLevel = McpSchema.LoggingLevel.INFO;
+
+	@Override
+	public boolean isHealthy() {
+		return healthy;
+	}
+
+	public void setHealthy(boolean healthy) {
+		this.healthy = healthy;
+	}
 
 	/**
 	 * Create an instance of the streamable session.
@@ -327,6 +338,8 @@ public class McpStreamableServerSession implements McpLoggableSession {
 	 */
 	public final class McpStreamableServerSessionStream implements McpLoggableSession {
 
+		private boolean healthy = true;
+
 		private final ConcurrentHashMap<Object, MonoSink<McpSchema.JSONRPCResponse>> pendingResponses = new ConcurrentHashMap<>();
 
 		private final McpStreamableServerTransport transport;
@@ -334,6 +347,15 @@ public class McpStreamableServerSession implements McpLoggableSession {
 		private final String transportId;
 
 		private final Supplier<String> uuidGenerator;
+
+		@Override
+		public boolean isHealthy() {
+			return healthy;
+		}
+
+		public void setHealthy(boolean healthy) {
+			this.healthy = healthy;
+		}
 
 		/**
 		 * Constructor accepting the dedicated transport representing the SSE stream.

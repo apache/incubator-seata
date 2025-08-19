@@ -18,9 +18,20 @@ import reactor.core.publisher.Mono;
  */
 public class MissingMcpTransportSession implements McpLoggableSession {
 
+	private boolean healthy = true;
+
 	private final String sessionId;
 
 	private volatile McpSchema.LoggingLevel minLoggingLevel = McpSchema.LoggingLevel.INFO;
+
+	@Override
+	public boolean isHealthy() {
+		return healthy;
+	}
+
+	public void setHealthy(boolean healthy) {
+		this.healthy = healthy;
+	}
 
 	/**
 	 * Create an instance with the Session ID specified.

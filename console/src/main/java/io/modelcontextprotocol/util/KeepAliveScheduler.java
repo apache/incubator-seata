@@ -34,12 +34,10 @@ public class KeepAliveScheduler {
 	private Disposable currentSubscription;
 	private final Supplier<Flux<McpSession>> mcpSessions;
 
-	// 新增：会话失败处理器
+	// Session failure processor
 	private final Consumer<McpSession> sessionFailureHandler;
-
-	// 新增：跟踪失败次数
 	private final ConcurrentMap<String, Integer> sessionFailureCounts = new ConcurrentHashMap<>();
-	private final int maxFailureCount = 3; // 最大允许失败次数
+	private final int maxFailureCount = 3;
 
 	KeepAliveScheduler(Scheduler scheduler, Duration initialDelay, Duration interval,
 					   Supplier<Flux<McpSession>> mcpSessions,
@@ -74,7 +72,6 @@ public class KeepAliveScheduler {
 		}
 	}
 
-	// 新增：处理心跳的核心逻辑
 	private Mono<Void> processKeepAlive() {
 		return this.mcpSessions.get()
 				.flatMap(session -> {
@@ -82,12 +79,12 @@ public class KeepAliveScheduler {
 
 					return session.sendRequest(McpSchema.METHOD_PING, null, OBJECT_TYPE_REF)
 							.doOnSuccess(response -> {
-								// 心跳成功：重置失败计数
+								// Heartbeat Success: Resets the failure count
 								sessionFailureCounts.remove(sessionId);
 								logger.debug("Keep-alive ping successful for session: {}", sessionId);
 							})
 							.doOnError(error -> {
-								// 心跳失败：增加失败计数
+								// Heartbeat Failures: Increases the failure count
 								int failures = sessionFailureCounts.compute(sessionId, (id, count) ->
 										count == null ? 1 : count + 1
 								);
@@ -95,24 +92,23 @@ public class KeepAliveScheduler {
 								logger.warn("Keep-alive failed for session {} (attempt {}/{}): {}",
 										sessionId, failures, maxFailureCount, error.getMessage());
 
-								// 超过最大失败次数：处理会话
+								// Maximum failures exceeded: Processing sessions
 								if (failures >= maxFailureCount) {
 									handleSessionFailure(session, sessionId);
 								}
 							})
-							.onErrorResume(error -> Mono.empty()); // 忽略错误继续处理其他会话
+							.onErrorResume(error -> Mono.empty());
 				})
 				.then();
 	}
 
-	// 新增：处理会话失败
 	private void handleSessionFailure(McpSession session, String sessionId) {
 		try {
 			logger.info("Removing session due to repeated keep-alive failures: {}", sessionId);
 			sessionFailureCounts.remove(sessionId);
 
 			McpStreamableServerSession streamableServerSession = (McpStreamableServerSession) session;
-			streamableServerSession.close();
+			streamableServerSession.setHealthy(false);
 		} catch (Exception e) {
 			logger.error("Error handling session failure for {}", sessionId, e);
 		}
@@ -162,7 +158,6 @@ public class KeepAliveScheduler {
 			return this;
 		}
 
-		// 新增：设置会话失败处理器
 		public Builder sessionFailureHandler(Consumer<McpSession> handler) {
 			this.sessionFailureHandler = handler;
 			return this;
