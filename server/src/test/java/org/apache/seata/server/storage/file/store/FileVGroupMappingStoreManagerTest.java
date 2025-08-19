@@ -18,13 +18,11 @@ package org.apache.seata.server.storage.file.store;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.seata.core.store.MappingDO;
-import org.apache.seata.server.DynamicPortTestConfig;
+import org.apache.seata.server.BaseSpringBootTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,9 +34,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@SpringBootTest
-@Import(DynamicPortTestConfig.class)
-public class FileVGroupMappingStoreManagerTest {
+public class FileVGroupMappingStoreManagerTest extends BaseSpringBootTest {
 
     private FileVGroupMappingStoreManager fileVGroupMappingStoreManager;
     private static final String STORE_PATH = "sessionStore/vgroup_mapping.json";

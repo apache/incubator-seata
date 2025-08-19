@@ -24,7 +24,7 @@ import org.apache.seata.core.constants.ConfigurationKeys;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.GlobalStatus;
-import org.apache.seata.server.DynamicPortTestConfig;
+import org.apache.seata.server.BaseSpringBootTest;
 import org.apache.seata.server.lock.LockManager;
 import org.apache.seata.server.lock.file.FileLockManagerForTest;
 import org.apache.seata.server.session.BranchSession;
@@ -35,10 +35,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Import;
 
 import java.io.File;
 
@@ -49,19 +50,20 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 /**
  * The type Session store test.
  */
-@SpringBootTest
-@Import(DynamicPortTestConfig.class)
-public class SessionStoreTest {
-
-    @BeforeAll
-    public static void setUp(ApplicationContext context) {}
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+public class SessionStoreTest extends BaseSpringBootTest {
 
     /**
      * The constant RESOURCE_ID.
      */
     public static final String RESOURCE_ID = "mysql:xxx";
 
-    private static Configuration CONFIG = ConfigurationFactory.getInstance();
+    private static Configuration CONFIG;
+
+    @BeforeAll
+    public static void setUp(ApplicationContext context) {
+        CONFIG = ConfigurationFactory.getInstance();
+    }
 
     /**
      * Clean.
@@ -97,6 +99,7 @@ public class SessionStoreTest {
      * @throws Exception the exception
      */
     @Test
+    @Order(1)
     public void testRestoredFromFile() throws Exception {
         try {
             SessionHolder.init(SessionMode.FILE);
@@ -176,6 +179,7 @@ public class SessionStoreTest {
      * @throws Exception the exception
      */
     @Test
+    @Order(2)
     public void testRestoredFromFileAsyncCommitting() throws Exception {
         try {
             SessionHolder.init(SessionMode.FILE);
@@ -229,6 +233,7 @@ public class SessionStoreTest {
      * @throws Exception the exception
      */
     @Test
+    @Order(3)
     public void testRestoredFromFileCommitRetry() throws Exception {
         try {
             SessionHolder.init(SessionMode.FILE);
@@ -287,6 +292,7 @@ public class SessionStoreTest {
      * @throws Exception the exception
      */
     @Test
+    @Order(4)
     public void testRestoredFromFileRollbackRetry() throws Exception {
         try {
             SessionHolder.init(SessionMode.FILE);
@@ -346,6 +352,7 @@ public class SessionStoreTest {
      * @throws Exception the exception
      */
     @Test
+    @Order(5)
     public void testRestoredFromFileRollbackFailed() throws Exception {
         try {
             SessionHolder.init(SessionMode.FILE);

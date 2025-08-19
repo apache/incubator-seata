@@ -14,7 +14,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-
-server.port=18091
-seata.server.service-port=18091
+org.apache.seata.server.filter.XSSHttpRequestFilter

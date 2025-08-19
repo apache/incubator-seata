@@ -15,4 +15,5 @@
 # limitations under the License.
 #
 org.springframework.context.ApplicationListener=\
-org.apache.seata.server.spring.listener.ServerApplicationListener
+org.apache.seata.server.spring.listener.ServerApplicationListener,\
+org.apache.seata.server.spring.listener.HttpFilterInitListener

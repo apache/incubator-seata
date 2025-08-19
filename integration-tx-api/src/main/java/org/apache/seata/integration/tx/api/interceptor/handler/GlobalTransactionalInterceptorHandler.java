@@ -442,4 +442,9 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
     public String type() {
         return InvocationHandlerType.GlobalTransactional.name();
     }
+
+    @Override
+    public int order() {
+        return 0;
+    }
 }
