@@ -23,6 +23,8 @@ import reactor.core.publisher.Mono;
  */
 public interface McpSession {
 
+    boolean isHealthy();
+
     /**
      * Sends a request to the model counterparty and expects a response of type T.
      *

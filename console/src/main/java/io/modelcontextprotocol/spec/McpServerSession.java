@@ -28,6 +28,8 @@ public class McpServerSession implements McpLoggableSession {
 
 	private static final Logger logger = LoggerFactory.getLogger(McpServerSession.class);
 
+	private boolean healthy = true;
+
 	private final ConcurrentHashMap<Object, MonoSink<McpSchema.JSONRPCResponse>> pendingResponses = new ConcurrentHashMap<>();
 
 	private final String id;
@@ -116,6 +118,15 @@ public class McpServerSession implements McpLoggableSession {
 	 */
 	public String getId() {
 		return this.id;
+	}
+
+	@Override
+	public boolean isHealthy() {
+		return healthy;
+	}
+
+	public void setHealthy(boolean healthy) {
+		this.healthy = healthy;
 	}
 
 	/**
