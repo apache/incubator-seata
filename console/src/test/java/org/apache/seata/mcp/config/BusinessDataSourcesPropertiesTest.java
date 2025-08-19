@@ -67,28 +67,28 @@ public class BusinessDataSourcesPropertiesTest {
         public void initialize(ConfigurableApplicationContext context) {
             TestPropertyValues values = TestPropertyValues.of(
                     // The first data source configuration
-                    "seata.datasources.db1.enabled=true",
-                    "seata.datasources.db1.dbType=mysql",
-                    "seata.datasources.db1.driverClassName=com.mysql.cj.jdbc.Driver",
-                    "seata.datasources.db1.url=jdbc:mysql://localhost:3306/db1",
-                    "seata.datasources.db1.username=user1",
-                    "seata.datasources.db1.password=pass1",
-                    "seata.datasources.db1.datasource=druid",
-                    "seata.datasources.db1.minConn=5",
-                    "seata.datasources.db1.maxConn=20",
-                    "seata.datasources.db1.maxWait=3000",
+                    "seata.businessDataSources.db1.enabled=true",
+                    "seata.businessDataSources.db1.dbType=mysql",
+                    "seata.businessDataSources.db1.driverClassName=com.mysql.cj.jdbc.Driver",
+                    "seata.businessDataSources.db1.url=jdbc:mysql://localhost:3306/db1",
+                    "seata.businessDataSources.db1.username=user1",
+                    "seata.businessDataSources.db1.password=pass1",
+                    "seata.businessDataSources.db1.datasource=druid",
+                    "seata.businessDataSources.db1.minConn=5",
+                    "seata.businessDataSources.db1.maxConn=20",
+                    "seata.businessDataSources.db1.maxWait=3000",
 
                     // The second data source configuration
-                    "seata.datasources.db2.url=jdbc:mysql://localhost:3306/db2",
-                    "seata.datasources.db2.username=user2",
-                    "seata.datasources.db2.password=pass2",
+                    "seata.businessDataSources.db2.url=jdbc:mysql://localhost:3306/db2",
+                    "seata.businessDataSources.db2.username=user2",
+                    "seata.businessDataSources.db2.password=pass2",
 
                     // The Third data source configuration
-                    "seata.datasources.db3.enabled=false",
-                    "seata.datasources.db3.url=jdbc:mysql://localhost:3306/db3",
+                    "seata.businessDataSources.db3.enabled=false",
+                    "seata.businessDataSources.db3.url=jdbc:mysql://localhost:3306/db3",
 
                     // Incomplete data sources
-                    "seata.datasources.db4.dbType=postgresql");
+                    "seata.businessDataSources.db4.dbType=postgresql");
             values.applyTo(context);
         }
     }

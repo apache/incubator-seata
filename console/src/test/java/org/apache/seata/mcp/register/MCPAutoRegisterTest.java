@@ -29,8 +29,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.context.SpringBootTest;
 import reactor.core.publisher.Mono;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +51,7 @@ public class MCPAutoRegisterTest {
     @Mock
     private io.modelcontextprotocol.server.McpAsyncServer mcpServer;
 
+    @Mock
     private MCPAutoRegister toolRegister;
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -58,6 +61,14 @@ public class MCPAutoRegisterTest {
         when(mcpServerManager.getServerInstance()).thenReturn(mcpServer);
         when(mcpServer.addTool(any())).thenReturn(Mono.empty());
         toolRegister = new MCPAutoRegister(mcpServerManager);
+
+        try {
+            Field mapperField = MCPAutoRegister.class.getDeclaredField("mapper");
+            mapperField.setAccessible(true);
+            mapperField.set(toolRegister, objectMapper);
+        } catch (Exception e) {
+            fail("Failed to inject ObjectMapper: " + e.getMessage());
+        }
     }
 
     @Test
@@ -75,13 +86,13 @@ public class MCPAutoRegisterTest {
 
         // Verify the captured tool specifications
         McpServerFeatures.AsyncToolSpecification capturedSpec = toolCaptor.getValue();
-        assertEquals("simpleMethod", capturedSpec.getTool().getName());
-        assertEquals("A simple test tool", capturedSpec.getTool().getDescription());
+        assertEquals("simpleMethod", capturedSpec.tool().getName());
+        assertEquals("A simple test tool", capturedSpec.tool().getDescription());
 
         // verify JSON Schema
         try {
             JsonNode schema = objectMapper.readTree(
-                    objectMapper.writeValueAsString(capturedSpec.getTool().getInputSchema()));
+                    objectMapper.writeValueAsString(capturedSpec.tool().getInputSchema()));
             assertEquals("object", schema.get("type").asText());
 
             JsonNode props = schema.get("properties");
@@ -117,12 +128,12 @@ public class MCPAutoRegisterTest {
         verify(mcpServer).addTool(toolCaptor.capture());
 
         McpServerFeatures.AsyncToolSpecification capturedSpec = toolCaptor.getValue();
-        assertEquals("complexMethod", capturedSpec.getTool().getName());
+        assertEquals("complexMethod", capturedSpec.tool().getName());
 
         // verify JSON Schema
         try {
             JsonNode schema = objectMapper.readTree(
-                    objectMapper.writeValueAsString(capturedSpec.getTool().getInputSchema()));
+                    objectMapper.writeValueAsString(capturedSpec.tool().getInputSchema()));
 
             JsonNode props = schema.get("properties");
             assertTrue(props.has("complexParam"));
@@ -155,7 +166,7 @@ public class MCPAutoRegisterTest {
 
         try {
             JsonNode schema = objectMapper.readTree(
-                    objectMapper.writeValueAsString(capturedSpec.getTool().getInputSchema()));
+                    objectMapper.writeValueAsString(capturedSpec.tool().getInputSchema()));
             JsonNode props = schema.get("properties");
             assertTrue(props.has("node"));
 
@@ -184,7 +195,7 @@ public class MCPAutoRegisterTest {
 
         try {
             JsonNode schema = objectMapper.readTree(
-                    objectMapper.writeValueAsString(capturedSpec.getTool().getInputSchema()));
+                    objectMapper.writeValueAsString(capturedSpec.tool().getInputSchema()));
             JsonNode props = schema.get("properties");
 
             assertTrue(props.has("list"));
