@@ -55,6 +55,14 @@
         <discardingThreshold>0</discardingThreshold>
         <queueSize>2048</queueSize>
         <neverBlock>true</neverBlock>
+        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+            <evaluator>
+                <expression>
+                    message.contains("not eligible for getting processed by all BeanPostProcessors")
+                </expression>
+            </evaluator>
+            <onMatch>DENY</onMatch>
+        </filter>
     </appender>
     <appender name="ASYNC_FILE_ALL" class="ch.qos.logback.classic.AsyncAppender">
         <!-- file-appender -->
