@@ -23,8 +23,6 @@ import org.apache.seata.mcp.store.db.AbstractMCPDataSourceProvider;
 import javax.sql.DataSource;
 import java.sql.Connection;
 
-import static org.apache.seata.common.DefaultValues.*;
-
 /**
  * The druid datasource provider
  */

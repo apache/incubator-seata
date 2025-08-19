@@ -36,7 +36,8 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Set;
 
-import static org.apache.seata.common.DefaultValues.*;
+import static org.apache.seata.common.DefaultValues.DEFAULT_DB_MAX_CONN;
+import static org.apache.seata.common.DefaultValues.DEFAULT_DB_MIN_CONN;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest

@@ -59,16 +59,23 @@ seata:
   # MCP Server Configuration
   mcp:
     # Server name (do not set the default to seata-mcp-server)
-    serverName: test-mcp
+    serverName: seata-mcp-server
     serverVersion: 2.0.0
+    # MCP service transmission types, available in SSE and Streamable
     mcpType: streamable
+
+    # sse type properties
 #    sse:
 #      # SSE endpoint (no default/SSE set)
 #      sseEndpoint: /sse
 #      # message endpoint (no default /message set)
 #      messageEndpoint: /message
+
+    # streamable type properties
     streamable:
       mcpEndpoint: /mcp
+      heartBeatSecondDuration: 5
+
     promptSupport: true
     resourceSupport: true
     # Query limits the maximum time interval, The unit is milliseconds
