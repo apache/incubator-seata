@@ -79,6 +79,8 @@ public class MCPProperties {
     public static class StreamableProperties {
         private String mcpEndPoint = "/mcp";
 
+        private Long heartBeatSecondDuration = 5L;
+
         public String getMcpEndPoint() {
             return mcpEndPoint;
         }
@@ -87,14 +89,24 @@ public class MCPProperties {
             this.mcpEndPoint = mcpEndPoint;
         }
 
-        public StreamableProperties(String mcpEndPoint) {
+        public StreamableProperties(String mcpEndPoint,Long heartBeatSecondDuration) {
             this.mcpEndPoint = mcpEndPoint;
+            this.heartBeatSecondDuration = heartBeatSecondDuration;
+        }
+
+        public Long getHeartBeatSecondDuration() {
+            return heartBeatSecondDuration;
+        }
+
+        public void setHeartBeatSecondDuration(Long heartBeatDuration) {
+            this.heartBeatSecondDuration = heartBeatDuration;
         }
 
         @Override
         public String toString() {
             return "StreamableProperties{" +
                     "mcpEndPoint='" + mcpEndPoint + '\'' +
+                    ", heartBeatSecondDuration=" + heartBeatSecondDuration +
                     '}';
         }
     }
@@ -155,7 +167,8 @@ public class MCPProperties {
             sseServerProperties = new SseServerProperties(sseEndpoint,messageEndpoint);
         }else if (mcpType.equals(STREAMABLE_TYPE)){
             String mcpEndPoint = env.getProperty("seata.mcp.streamable.mcpEndpoint","/mcp");
-            streamableProperties = new StreamableProperties(mcpEndPoint);
+            Long heartBeatSecondDuration = Long.parseLong(env.getProperty("seata.mcp.streamable.heartBeatSecondDuration","5"));
+            streamableProperties = new StreamableProperties(mcpEndPoint,heartBeatSecondDuration);
         }else {
             mcpType = SSE_TYPE;
             String sseEndpoint = env.getProperty("seata.mcp.sse.sseEndpoint", "/sse");
