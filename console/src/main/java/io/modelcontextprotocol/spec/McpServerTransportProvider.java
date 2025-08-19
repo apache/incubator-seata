@@ -2,8 +2,6 @@ package io.modelcontextprotocol.spec;
 
 import reactor.core.publisher.Mono;
 
-import java.util.Map;
-
 /**
  * The core building block providing the server-side MCP transport. Implement this
  * interface to bridge between a particular server-side technology and the MCP server
