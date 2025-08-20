@@ -63,6 +63,18 @@
             </evaluator>
             <onMatch>DENY</onMatch>
         </filter>
+        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+            <evaluator>
+                <expression>
+                    message.contains("Servlet.service() for servlet [dispatcherServlet] threw exception") ||
+                    message.contains("你的主机中的软件中止了一个已建立的连接") ||
+                    message.contains("Broken pipe") ||
+                    message.contains("reset by peer") ||
+                    message.contains("已建立的连接")
+                </expression>
+            </evaluator>
+            <onMatch>DENY</onMatch>
+        </filter>
     </appender>
     <appender name="ASYNC_FILE_ALL" class="ch.qos.logback.classic.AsyncAppender">
         <!-- file-appender -->

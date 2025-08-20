@@ -383,17 +383,26 @@ public class McpStreamableServerSession implements McpLoggableSession {
 		@Override
 		public <T> Mono<T> sendRequest(String method, Object requestParams, TypeReference<T> typeRef) {
 			String requestId = McpStreamableServerSession.this.generateRequestId();
-
 			McpStreamableServerSession.this.requestIdToStream.put(requestId, this);
 
-			return Mono.<McpSchema.JSONRPCResponse>create(sink -> {
-				this.pendingResponses.put(requestId, sink);
+			return Mono.defer(() -> {
 				McpSchema.JSONRPCRequest jsonrpcRequest = new McpSchema.JSONRPCRequest(McpSchema.JSONRPC_VERSION,
 						method, requestId, requestParams);
 				String messageId = this.uuidGenerator.get();
-				// TODO: store message in history
-				this.transport.sendMessage(jsonrpcRequest, messageId).subscribe(v -> {
-				}, sink::error);
+
+				return this.transport.sendMessage(jsonrpcRequest, messageId)
+						.onErrorResume(throwable -> {
+							if (isClientDisconnection(throwable)) {
+								logger.debug("Client disconnected, ignoring error for request {}", requestId);
+								return Mono.empty();
+							} else {
+								logger.error("Failed to send message for request {}", requestId, throwable);
+								return Mono.error(throwable);
+							}
+						})
+						.then(Mono.<McpSchema.JSONRPCResponse>create(sink -> {
+							this.pendingResponses.put(requestId, sink);
+						}));
 			}).timeout(requestTimeout).doOnError(e -> {
 				this.pendingResponses.remove(requestId);
 				McpStreamableServerSession.this.requestIdToStream.remove(requestId);
@@ -410,6 +419,15 @@ public class McpStreamableServerSession implements McpLoggableSession {
 					}
 				}
 			});
+		}
+
+		private boolean isClientDisconnection(Throwable e) {
+			String message = e.getMessage();
+			return message != null && (
+					message.contains("你的主机中的软件中止了一个已建立的连接") ||
+							message.contains("Connection reset by peer") ||
+							message.contains("Broken pipe")
+			);
 		}
 
 		@Override
