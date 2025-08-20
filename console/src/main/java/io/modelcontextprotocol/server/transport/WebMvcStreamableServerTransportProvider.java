@@ -23,7 +23,6 @@ import org.springframework.web.servlet.function.ServerResponse;
 import org.springframework.web.servlet.function.ServerResponse.SseBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -429,6 +428,32 @@ public class WebMvcStreamableServerTransportProvider implements McpStreamableSer
 		}
 	}
 
+	private boolean isAnyConnectionError(Throwable throwable) {
+		Throwable current = throwable;
+		while (current != null) {
+			String message = current.getMessage();
+			if (message != null) {
+				if (message.contains("你的主机中的软件中止了一个已建立的连接") ||
+						message.contains("Connection reset by peer") ||
+						message.contains("Broken pipe") ||
+						message.contains("远程主机强迫关闭了一个现有的连接") ||
+						message.contains("An existing connection was forcibly closed") ||
+						message.contains("Socket") ||
+						message.contains("Channel")) {
+					return true;
+				}
+			}
+
+			if (current instanceof IOException) {
+				return true;
+			}
+
+			current = current.getCause();
+		}
+
+		return false;
+	}
+
 	/**
 	 * Handles DELETE requests for session deletion.
 	 * @param request The incoming server request
@@ -531,12 +556,12 @@ public class WebMvcStreamableServerTransportProvider implements McpStreamableSer
 
 					String jsonText = objectMapper.writeValueAsString(message);
 					this.sseBuilder.id(messageId != null ? messageId : this.sessionId)
-						.event(MESSAGE_EVENT_TYPE)
-						.data(jsonText);
-					logger.debug("Message sent to session {} with ID {}", this.sessionId, messageId);
+						.event(MESSAGE_EVENT_TYPE);
+					this.sseBuilder.data(jsonText);
+					logger.debug("Data sent successfully to session {}", this.sessionId);
 				}
 				catch (Exception e) {
-					if(e.getMessage().contains("你的主机中的软件中止了一个已建立的连接")){
+					if(isClientDisconnection(e)){
 						logger.debug("Client disconnected, session {}: {}",this.sessionId,e.getMessage());
 					}else{
 						logger.error("Failed to send message to session {}: {}", this.sessionId, e.getMessage());
@@ -553,6 +578,26 @@ public class WebMvcStreamableServerTransportProvider implements McpStreamableSer
 					this.lock.unlock();
 				}
 			});
+		}
+
+
+		private boolean isClientDisconnection(Throwable e) {
+			if (e == null) {
+				return false;
+			}
+
+			String message = e.getMessage();
+			if (message == null) {
+				return false;
+			}
+			return message.contains("你的主机中的软件中止了一个已建立的连接") ||
+					message.contains("ServletOutputStream failed to flush") ||
+					message.contains("Connection reset by peer") ||
+					message.contains("Broken pipe") ||
+					message.contains("远程主机强迫关闭了一个现有的连接") ||
+					message.contains("An existing connection was forcibly closed by the remote host") ||
+					message.contains("Connection aborted") ||
+					message.contains("Socket closed");
 		}
 
 		/**
