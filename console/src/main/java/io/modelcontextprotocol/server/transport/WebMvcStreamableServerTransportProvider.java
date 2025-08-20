@@ -133,6 +133,7 @@ public class WebMvcStreamableServerTransportProvider implements McpStreamableSer
 									// Check if the session is healthy
 									if (!session.isHealthy()) {
 										logger.warn("Removing unhealthy session: {}", session.getId());
+										session.closeGracefully().subscribe();
 										this.sessions.remove(session.getId());
 										return false;
 									}
@@ -535,9 +536,13 @@ public class WebMvcStreamableServerTransportProvider implements McpStreamableSer
 					logger.debug("Message sent to session {} with ID {}", this.sessionId, messageId);
 				}
 				catch (Exception e) {
-					logger.error("Failed to send message to session {}: {}", this.sessionId, e.getMessage());
+					if(e.getMessage().contains("你的主机中的软件中止了一个已建立的连接")){
+						logger.debug("Client disconnected, session {}: {}",this.sessionId,e.getMessage());
+					}else{
+						logger.error("Failed to send message to session {}: {}", this.sessionId, e.getMessage());
+					}
 					try {
-						this.sseBuilder.error(e);
+						this.sseBuilder.complete();
 					}
 					catch (Exception errorException) {
 						logger.error("Failed to send error to SSE builder for session {}: {}", this.sessionId,
