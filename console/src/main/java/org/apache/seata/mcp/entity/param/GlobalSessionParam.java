@@ -171,4 +171,12 @@ public class GlobalSessionParam implements Serializable {
                 + timeStart + ", timeEnd="
                 + timeEnd + '}';
     }
+
+    public static GlobalSessionParam covertFromAbnormalParam(GlobalAbnormalSessionParam abParam){
+        GlobalSessionParam param = new GlobalSessionParam();
+        param.setTimeStart(abParam.getTimeStart());
+        param.setTimeEnd(abParam.getTimeEnd());
+        param.setWithBranch(abParam.isWithBranch());
+        return param;
+    }
 }
