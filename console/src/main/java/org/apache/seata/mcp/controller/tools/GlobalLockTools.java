@@ -16,11 +16,13 @@
  */
 package org.apache.seata.mcp.controller.tools;
 
+import org.apache.seata.common.result.PageResult;
 import org.apache.seata.mcp.annotation.Tool;
 import org.apache.seata.mcp.annotation.ToolParam;
 import org.apache.seata.mcp.entity.param.GlobalLockDeleteParam;
 import org.apache.seata.mcp.entity.param.GlobalLockParam;
 import org.apache.seata.mcp.entity.pojo.NameSpaceDetail;
+import org.apache.seata.mcp.entity.vo.GlobalLockVO;
 import org.apache.seata.mcp.service.GlobalLockService;
 import org.apache.seata.mcp.service.ModifyConfirmService;
 import org.slf4j.Logger;
@@ -39,7 +41,7 @@ public class GlobalLockTools {
     private ModifyConfirmService modifyConfirmService;
 
     @Tool(description = "Query the global lock information")
-    public String queryGlobalLock(
+    public PageResult<GlobalLockVO> queryGlobalLock(
             @ToolParam(description = "Specify the namespace of the TC node", required = true)
                     NameSpaceDetail nameSpaceDetail,
             @ToolParam(description = "Global lock parameters", required = true) GlobalLockParam param) {
