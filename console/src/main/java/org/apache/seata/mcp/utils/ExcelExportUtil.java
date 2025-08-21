@@ -3,6 +3,7 @@ package org.apache.seata.mcp.utils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.seata.mcp.entity.param.ExportSheetParam;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
@@ -22,6 +23,10 @@ import java.util.Date;
 public class ExcelExportUtil {
 
     private static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
+
+    public static void exportExcelWithCustomHeaders(ExportSheetParam param, List<Map<String, String>> headers) throws IOException{
+        exportExcelWithCustomHeaders(param.getSheetName(),param.getFilePath(),param.getData(),headers);
+    }
 
     /**
      * Export List<Map<String, Object>> to Excel file (.xls) with custom headers
@@ -88,12 +93,11 @@ public class ExcelExportUtil {
     /**
      * Convert List<Map<String, Object>> to Excel file and save to specified path
      *
-     * @param dataList List of data maps to be exported
-     * @param filePath Output file path (should end with .xls)
+     * @param param is the param of export sheet
      * @throws IOException If file writing fails
      */
-    public static void exportToExcelFile(List<Map<String, Object>> dataList, String filePath) throws IOException {
-        exportToExcelFile(dataList, filePath, "Sheet1");
+    public static void exportToExcelFile(ExportSheetParam param) throws IOException {
+        exportToExcelFile(param.getData(),param.getFilePath(),param.getSheetName());
     }
 
     /**
