@@ -16,6 +16,7 @@
  */
 package org.apache.seata.rm.datasource;
 
+import org.apache.seata.common.monitor.SqlMonitor;
 import org.apache.seata.rm.datasource.exec.ExecuteTemplate;
 import org.apache.seata.sqlparser.ParametersHolder;
 
@@ -53,16 +54,46 @@ public class PreparedStatementProxy extends AbstractPreparedStatementProxy
 
     @Override
     public boolean execute() throws SQLException {
-        return ExecuteTemplate.execute(this, (statement, args) -> statement.execute());
+        long start = System.nanoTime();
+        try {
+            return ExecuteTemplate.execute(this, (statement, args) -> statement.execute());
+        } finally {
+            long execMs = (System.nanoTime() - start) / 1_000_000;
+            long holdMs = getConnectionProxy().calcHoldTimeMillis();
+            try {
+                SqlMonitor.getInstance().record(targetSQL, execMs, holdMs);
+            } catch (Throwable ignore) {
+            }
+        }
     }
 
     @Override
     public ResultSet executeQuery() throws SQLException {
-        return ExecuteTemplate.execute(this, (statement, args) -> statement.executeQuery());
+        long start = System.nanoTime();
+        try {
+            return ExecuteTemplate.execute(this, (statement, args) -> statement.executeQuery());
+        } finally {
+            long execMs = (System.nanoTime() - start) / 1_000_000;
+            long holdMs = getConnectionProxy().calcHoldTimeMillis();
+            try {
+                SqlMonitor.getInstance().record(targetSQL, execMs, holdMs);
+            } catch (Throwable ignore) {
+            }
+        }
     }
 
     @Override
     public int executeUpdate() throws SQLException {
-        return ExecuteTemplate.execute(this, (statement, args) -> statement.executeUpdate());
+        long start = System.nanoTime();
+        try {
+            return ExecuteTemplate.execute(this, (statement, args) -> statement.executeUpdate());
+        } finally {
+            long execMs = (System.nanoTime() - start) / 1_000_000;
+            long holdMs = getConnectionProxy().calcHoldTimeMillis();
+            try {
+                SqlMonitor.getInstance().record(targetSQL, execMs, holdMs);
+            } catch (Throwable ignore) {
+            }
+        }
     }
 }

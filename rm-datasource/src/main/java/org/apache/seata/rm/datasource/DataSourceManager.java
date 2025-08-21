@@ -18,6 +18,10 @@ package org.apache.seata.rm.datasource;
 
 import org.apache.seata.common.exception.NotSupportYetException;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
+import org.apache.seata.common.pool.PoolManager;
+import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.config.Configuration;
+import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.exception.RmTransactionException;
 import org.apache.seata.core.exception.TransactionException;
@@ -26,18 +30,23 @@ import org.apache.seata.core.logger.StackTraceLogger;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.Resource;
+import org.apache.seata.core.protocol.MessageType;
 import org.apache.seata.core.protocol.ResultCode;
 import org.apache.seata.core.protocol.transaction.GlobalLockQueryRequest;
 import org.apache.seata.core.protocol.transaction.GlobalLockQueryResponse;
 import org.apache.seata.core.rpc.netty.RmNettyRemotingClient;
+import org.apache.seata.core.rpc.processor.RemotingProcessor;
 import org.apache.seata.rm.AbstractResourceManager;
+import org.apache.seata.rm.datasource.pool.ConnectionPoolReporter;
+import org.apache.seata.rm.datasource.pool.PoolConfigUpdateProcessor;
+import org.apache.seata.rm.datasource.pool.PoolManagerFactory;
 import org.apache.seata.rm.datasource.undo.UndoLogManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * The type Data source manager.
@@ -50,6 +59,11 @@ public class DataSourceManager extends AbstractResourceManager {
     private final AsyncWorker asyncWorker = new AsyncWorker(this);
 
     private final Map<String, Resource> dataSourceCache = new ConcurrentHashMap<>();
+    private final Configuration configuration = ConfigurationFactory.getInstance();
+    private final boolean poolMonitorEnabled = configuration.getBoolean("client.rm.pool.monitor.enabled", false);
+    private final long reportIntervalMs = configuration.getLong("client.rm.pool.monitor.report-interval", 15000L);
+    private final ConcurrentHashMap<String, ConnectionPoolReporter> reporters = new ConcurrentHashMap<>();
+    private static final AtomicBoolean CONFIG_PROCESSOR_REGISTERED = new AtomicBoolean(false);
 
     @Override
     public boolean lockQuery(BranchType branchType, String resourceId, String xid, String lockKeys)
@@ -79,16 +93,49 @@ public class DataSourceManager extends AbstractResourceManager {
         }
     }
 
+    private static final ExecutorService POOL_CFG_EXECUTOR = new ThreadPoolExecutor(
+            1,
+            1,
+            0L,
+            TimeUnit.MILLISECONDS,
+            new LinkedBlockingQueue<>(),
+            new NamedThreadFactory("rm-pool-config-update", 1));
+
     /**
      * Instantiates a new Data source manager.
      */
-    public DataSourceManager() {}
+    public DataSourceManager() {
+        registerPoolConfigProcessorOnce();
+    }
+
+    private void registerPoolConfigProcessorOnce() {
+        if (!CONFIG_PROCESSOR_REGISTERED.compareAndSet(false, true)) {
+            return;
+        }
+        RmNettyRemotingClient rmClient = RmNettyRemotingClient.getInstance();
+        RemotingProcessor processor = new PoolConfigUpdateProcessor(rmClient);
+        rmClient.registerProcessor(MessageType.TYPE_POOL_CONFIG_UPDATE, processor, POOL_CFG_EXECUTOR);
+        LOGGER.info("Registered PoolConfigUpdateProcessor for messageType={}", MessageType.TYPE_POOL_CONFIG_UPDATE);
+    }
 
     @Override
     public void registerResource(Resource resource) {
         DataSourceProxy dataSourceProxy = (DataSourceProxy) resource;
         dataSourceCache.put(dataSourceProxy.getResourceId(), dataSourceProxy);
         super.registerResource(dataSourceProxy);
+
+        if (poolMonitorEnabled) {
+            try {
+                String serviceName = dataSourceProxy.getResourceId();
+                PoolManager poolManager = PoolManagerFactory.create(dataSourceProxy, serviceName);
+                ConnectionPoolReporter reporter = new ConnectionPoolReporter(serviceName, poolManager);
+                reporter.start();
+                reporters.put(serviceName, reporter);
+                LOGGER.info("Started ConnectionPoolReporter for {}", serviceName);
+            } catch (Throwable t) {
+                LOGGER.warn("Start ConnectionPoolReporter failed for {}", dataSourceProxy.getResourceId(), t);
+            }
+        }
     }
 
     @Override
@@ -149,5 +196,16 @@ public class DataSourceManager extends AbstractResourceManager {
     @Override
     public BranchType getBranchType() {
         return BranchType.AT;
+    }
+
+    public void stopAllPoolReporters() {
+        reporters.forEach((k, r) -> {
+            try {
+                r.stop();
+            } catch (Throwable ignore) {
+
+            }
+        });
+        reporters.clear();
     }
 }

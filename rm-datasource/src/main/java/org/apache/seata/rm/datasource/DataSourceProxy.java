@@ -20,11 +20,14 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.Constants;
 import org.apache.seata.common.loader.EnhancedServiceNotFoundException;
+import org.apache.seata.common.pool.PoolManager;
+import org.apache.seata.common.pool.PoolManagerRegistry;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.Resource;
 import org.apache.seata.rm.DefaultResourceManager;
+import org.apache.seata.rm.datasource.pool.PoolManagerFactory;
 import org.apache.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import org.apache.seata.rm.datasource.undo.UndoLogManager;
 import org.apache.seata.rm.datasource.undo.UndoLogManagerFactory;
@@ -125,6 +128,8 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         initResourceId();
         DefaultResourceManager.get().registerResource(this);
         TableMetaCacheFactory.registerTableMeta(this);
+        // register PoolManager
+        registerPoolManager();
         // Set the default branch type to 'AT' in the RootContext.
         RootContext.setDefaultBranchType(this.getBranchType());
     }
@@ -407,6 +412,59 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         } else {
             resourceId = jdbcUrl;
         }
+    }
+
+    /**
+     * Register PoolManager for this DataSource
+     */
+    private void registerPoolManager() {
+        try {
+            String serviceName = determineServiceName();
+            PoolManager poolManager = PoolManagerFactory.create(this, serviceName);
+            PoolManagerRegistry.register(serviceName, poolManager);
+        } catch (Exception e) {
+            LOGGER.warn("Failed to register PoolManager for monitoring", e);
+        }
+    }
+
+    /**
+     * Determine the service name for this DataSource
+     * @return the service name
+     */
+    private String determineServiceName() {
+        // try to get from system
+        String serviceName = System.getProperty("seata.service.name");
+        if (serviceName != null && !serviceName.trim().isEmpty()) {
+            return serviceName.trim();
+        }
+
+        // try to get from environment variable
+        serviceName = System.getenv("SEATA_SERVICE_NAME");
+        if (serviceName != null && !serviceName.trim().isEmpty()) {
+            return serviceName.trim();
+        }
+        return resourceGroupId + "-" + extractSimpleResourceId();
+    }
+
+    /**
+     * Extract a simple identifier from resourceId
+     * @return simple resource id
+     */
+    private String extractSimpleResourceId() {
+        if (resourceId == null) {
+            return String.valueOf(this.hashCode());
+        }
+
+        String id = resourceId;
+        int lastSlash = id.lastIndexOf('/');
+        if (lastSlash >= 0 && lastSlash < id.length() - 1) {
+            id = id.substring((lastSlash + 1));
+            int paramIndex = id.indexOf('?');
+            if (paramIndex > 0) {
+                id = id.substring(0, paramIndex);
+            }
+        }
+        return id;
     }
 
     @Override
