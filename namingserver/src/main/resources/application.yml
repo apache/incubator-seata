@@ -52,6 +52,7 @@ seata:
 
   # MCP Server Configuration
   mcp:
+
     # Server name (do not set the default to seata-mcp-server)
     serverName: seata-mcp-server
     serverVersion: 2.0.0
@@ -74,9 +75,12 @@ seata:
     # MCP supports
     promptSupport: true
     resourceSupport: true
+
     # Query limits the maximum time interval, The unit is milliseconds
     query:
       max_query_duration: 86400000
+
+    # Whether to enable permission authentication
     auth:
       enabled: false
 
@@ -93,11 +97,11 @@ seata:
       min-conn: 5
       max-conn: 50
       max-wait: 5000L
-    seataDatabase:
+    orderDatabase:
       enabled: true
       db-type: mysql
       driverClassName: com.mysql.cj.jdbc.Driver
-      url: jdbc:mysql://8.138.127.84:3306/seata?useSSL=false
+      url: jdbc:mysql://8.138.127.84:3306/order?useSSL=false
       username: root
       password: Il02mayi
       datasource: dbcp
