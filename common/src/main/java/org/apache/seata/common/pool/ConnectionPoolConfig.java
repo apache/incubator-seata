@@ -32,6 +32,8 @@ public class ConnectionPoolConfig {
     private long maxLifeTime;
     private long keepaliveTime;
 
+    public ConnectionPoolConfig() {}
+
     private ConnectionPoolConfig(Builder builder) {
         this.serviceName = builder.serviceName;
         this.maxPoolSize = builder.maxPoolSize;
