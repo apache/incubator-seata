@@ -18,13 +18,16 @@ package org.apache.seata.mcp.controller.tools;
 
 import org.apache.seata.mcp.annotation.Tool;
 import org.apache.seata.mcp.annotation.ToolParam;
+import org.apache.seata.mcp.entity.param.ExportSheetParam;
 import org.apache.seata.mcp.entity.pojo.BusinessDataSourcesProperties;
 import org.apache.seata.mcp.service.BusinessDataSourceService;
+import org.apache.seata.mcp.utils.ExcelExportUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -70,10 +73,18 @@ public class BusinessDataSourceTools {
     @Tool(description = "Execute the SQL query result, It can only be used to query business data!!!")
     public List<Map<String, Object>> runSql(
             @ToolParam(description = "SQL statement, String type", required = true) String sql,
-            @ToolParam(description = "The identity of the data source, start with jdbc://", required = true)
-                    String resourceId) {
+            @ToolParam(description = "The identity of the data source, start with jdbc://", required = true) String resourceId,
+            @ToolParam(description = "Whether to automatically convert query data to tables", required = true) boolean isExport,
+            @ToolParam(description = "Parameters converted to sheet") ExportSheetParam param) {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("user try to run sql: {}, resourceId: {}", sql, resourceId);
+        }
+        if(param!=null){
+            try {
+                ExcelExportUtil.exportToExcelFile(param);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
         return dataSourceService.runSql(sql, resourceId);
     }
