@@ -16,12 +16,18 @@
  */
 package org.apache.seata.mcp.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.seata.common.result.PageResult;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.mcp.entity.constant.RPCConstant;
 import org.apache.seata.mcp.entity.param.GlobalLockDeleteParam;
 import org.apache.seata.mcp.entity.param.GlobalLockParam;
 import org.apache.seata.mcp.entity.pojo.MCPProperties;
 import org.apache.seata.mcp.entity.pojo.NameSpaceDetail;
+import org.apache.seata.mcp.entity.vo.GlobalLockVO;
+import org.apache.seata.mcp.entity.vo.GlobalSessionVO;
 import org.apache.seata.mcp.service.GlobalLockService;
 import org.apache.seata.mcp.service.MCPRPCService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,19 +44,28 @@ public class GlobalLockServiceImpl implements GlobalLockService {
     @Autowired
     private MCPProperties configuration;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @Override
-    public String queryGlobalLock(NameSpaceDetail nameSpaceDetail, GlobalLockParam param) {
-        String result = mcpRPCService.getCallTC(
+    public PageResult<GlobalLockVO> queryGlobalLock(NameSpaceDetail nameSpaceDetail, GlobalLockParam param) {
+        PageResult<GlobalLockVO> result;
+        String response = mcpRPCService.getCallTC(
                 nameSpaceDetail, RPCConstant.GLOBAL_LOCK_BASE_URL + "/query", param, null, null);
+        try {
+            result = objectMapper.readValue(response, new TypeReference<PageResult<GlobalLockVO>>() {});
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
         // Check whether the query interval is too large
         if (param.getTimeEnd() != null && param.getTimeStart() != null) {
             if (param.getTimeEnd() - param.getTimeStart() > configuration.getQueryDuration()) {
-                return "The query time span is not allowed to exceed the max query duration(milliseconds): "
-                        + configuration.getQueryDuration();
+                return PageResult.failure("","The query time span is not allowed to exceed the max query duration(milliseconds): "
+                        + configuration.getQueryDuration());
             }
         }
-        if (StringUtils.isBlank(result)) {
-            return "query global lock failed";
+        if (result==null) {
+            return PageResult.failure("","query global lock failed");
         } else {
             return result;
         }

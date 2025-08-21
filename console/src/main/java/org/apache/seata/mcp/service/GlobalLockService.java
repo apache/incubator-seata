@@ -16,12 +16,14 @@
  */
 package org.apache.seata.mcp.service;
 
+import org.apache.seata.common.result.PageResult;
 import org.apache.seata.mcp.entity.param.GlobalLockDeleteParam;
 import org.apache.seata.mcp.entity.param.GlobalLockParam;
 import org.apache.seata.mcp.entity.pojo.NameSpaceDetail;
+import org.apache.seata.mcp.entity.vo.GlobalLockVO;
 
 public interface GlobalLockService {
-    String queryGlobalLock(NameSpaceDetail nameSpaceDetail, GlobalLockParam param);
+    PageResult<GlobalLockVO> queryGlobalLock(NameSpaceDetail nameSpaceDetail, GlobalLockParam param);
 
     String deleteGlobalLock(NameSpaceDetail nameSpaceDetail, GlobalLockDeleteParam param);
 
