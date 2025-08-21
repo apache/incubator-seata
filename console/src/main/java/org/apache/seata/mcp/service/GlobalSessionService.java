@@ -16,13 +16,16 @@
  */
 package org.apache.seata.mcp.service;
 
+import org.apache.seata.common.result.PageResult;
+import org.apache.seata.mcp.entity.param.GlobalAbnormalSessionParam;
 import org.apache.seata.mcp.entity.param.GlobalSessionParam;
 import org.apache.seata.mcp.entity.pojo.NameSpaceDetail;
+import org.apache.seata.mcp.entity.vo.GlobalSessionVO;
 
 import java.util.List;
 
 public interface GlobalSessionService {
-    String queryGlobalSession(NameSpaceDetail nameSpaceDetail, GlobalSessionParam param);
+    PageResult<GlobalSessionVO> queryGlobalSession(NameSpaceDetail nameSpaceDetail, GlobalSessionParam param);
 
     String deleteGlobalSession(NameSpaceDetail nameSpaceDetail, String xid);
 
@@ -36,5 +39,5 @@ public interface GlobalSessionService {
 
     String changeGlobalStatus(NameSpaceDetail nameSpaceDetail, String xid);
 
-    List<String> getAbnormalSessions(NameSpaceDetail nameSpaceDetail, Long startTime, Long endTime);
+    List<String> getAbnormalSessions(NameSpaceDetail nameSpaceDetail, GlobalAbnormalSessionParam param);
 }

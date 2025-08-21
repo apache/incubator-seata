@@ -16,8 +16,10 @@
  */
 package org.apache.seata.mcp.controller.tools;
 
+import org.apache.seata.common.result.PageResult;
 import org.apache.seata.mcp.annotation.Tool;
 import org.apache.seata.mcp.annotation.ToolParam;
+import org.apache.seata.mcp.entity.param.GlobalAbnormalSessionParam;
 import org.apache.seata.mcp.entity.param.GlobalSessionParam;
 import org.apache.seata.mcp.entity.pojo.NameSpaceDetail;
 import org.apache.seata.mcp.service.GlobalSessionService;
@@ -47,19 +49,12 @@ public class GlobalSessionTools {
     public List<String> getAbnormalTransactionInfo(
             @ToolParam(description = "Specify the namespace of the TC node", required = true)
                     NameSpaceDetail nameSpaceDetail,
-            @ToolParam(description = "Millisecond timestamps,Long string") String startTime,
-            @ToolParam(description = "Millisecond timestamps,Long string") String endTime) {
-        Long start = null;
-        Long end = null;
-        if (startTime != null && endTime != null) {
-            start = Long.parseLong(startTime);
-            end = Long.parseLong(endTime);
-        }
-        return globalSessionService.getAbnormalSessions(nameSpaceDetail, start, end);
+            @ToolParam(description = "Query Param",required = true)GlobalAbnormalSessionParam param) {
+        return globalSessionService.getAbnormalSessions(nameSpaceDetail, param);
     }
 
     @Tool(description = "Query global transactions")
-    public String queryGlobalSession(
+    public PageResult<?> queryGlobalSession(
             @ToolParam(description = "Specify the namespace of the TC node", required = true)
                     NameSpaceDetail nameSpaceDetail,
             @ToolParam(description = "Query parameter objects", required = true) GlobalSessionParam param) {
