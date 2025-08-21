@@ -85,6 +85,9 @@ public class SqlExecutionTemplate {
             if (!validateQuerySql(sql)) {
                 throw new StoreException("The query valid failed,Only query operations are allowed：" + sql);
             }
+            if(sql.contains("undo_log")){
+                throw new StoreException("If you do not use SQL to query undo_log data, use analyzeUndoLog to query and analyze undo_log");
+            }
             conn = getDataSource(resourceId).getConnection();
             if (params == null || params.length == 0) {
                 if ((sql.contains("where") || sql.contains("WHERE"))) {

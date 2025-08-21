@@ -27,9 +27,9 @@ import org.apache.seata.mcp.entity.param.GlobalLockParam;
 import org.apache.seata.mcp.entity.pojo.MCPProperties;
 import org.apache.seata.mcp.entity.pojo.NameSpaceDetail;
 import org.apache.seata.mcp.entity.vo.GlobalLockVO;
-import org.apache.seata.mcp.entity.vo.GlobalSessionVO;
 import org.apache.seata.mcp.service.GlobalLockService;
 import org.apache.seata.mcp.service.MCPRPCService;
+import org.apache.seata.mcp.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -59,7 +59,7 @@ public class GlobalLockServiceImpl implements GlobalLockService {
         }
         // Check whether the query interval is too large
         if (param.getTimeEnd() != null && param.getTimeStart() != null) {
-            if (param.getTimeEnd() - param.getTimeStart() > configuration.getQueryDuration()) {
+            if (DateUtils.judgeExceedTimeDuration(param.getTimeStart(),param.getTimeEnd(),configuration.getQueryDuration())) {
                 return PageResult.failure("","The query time span is not allowed to exceed the max query duration(milliseconds): "
                         + configuration.getQueryDuration());
             }
