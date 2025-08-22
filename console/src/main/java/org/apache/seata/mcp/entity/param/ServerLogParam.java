@@ -28,7 +28,7 @@ public class ServerLogParam implements Serializable {
     private Integer cursor;
 
     @ToolParam(
-            description = "The number of rows read down from the cursor line should not exceed 100 lines",
+            description = "The number of rows read down from the cursor line should not exceed 1000 lines",
             required = true)
     private Integer nextLines;
 
