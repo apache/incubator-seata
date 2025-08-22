@@ -51,6 +51,17 @@ public class DateUtils {
         }
     }
 
+    public static String convertToDateTimeFromTimestamp(Long timestamp){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime dateTime;
+        try{
+            dateTime = Instant.ofEpochMilli(timestamp).atZone(ZoneId.systemDefault()).toLocalDateTime();
+        } catch (DateTimeParseException e){
+            return "Parse Failed, please check that the timestamp is correct";
+        }
+        return dateTime.format(formatter);
+    }
+
     public static boolean judgeExceedTimeDuration(Long startTime, Long endTime, Long maxDuration){
         return endTime - startTime > maxDuration;
     }
