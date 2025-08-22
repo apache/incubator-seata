@@ -61,7 +61,7 @@ public class GlobalSessionServiceImpl implements GlobalSessionService {
                         + configuration.getQueryDuration());
             }
         }
-        PageResult<GlobalSessionVO> pageResult = new PageResult<>();
+        PageResult<GlobalSessionVO> pageResult;
         String result = mcpRPCService.getCallTC(
                 nameSpaceDetail, RPCConstant.GLOBAL_SESSION_BASE_URL + "/query", param, null, null);
         try {

@@ -52,7 +52,11 @@ public class GlobalLockServiceImpl implements GlobalLockService {
         PageResult<GlobalLockVO> result;
         String response = mcpRPCService.getCallTC(
                 nameSpaceDetail, RPCConstant.GLOBAL_LOCK_BASE_URL + "/query", param, null, null);
-        result = GlobalLockVO.convertFromJson(objectMapper,response);
+        try {
+            result = objectMapper.readValue(response, new TypeReference<PageResult<GlobalLockVO>>() {});
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
         // Check whether the query interval is too large
         if (param.getTimeEnd() != null && param.getTimeStart() != null) {
             if (DateUtils.judgeExceedTimeDuration(param.getTimeStart(),param.getTimeEnd(),configuration.getQueryDuration())) {
