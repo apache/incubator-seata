@@ -425,14 +425,13 @@ public class MCPAutoRegister implements BeanPostProcessor {
             return arg;
         }
 
-        if (isCustomObject(targetType)) {
-            try {
-                return mapper.convertValue(arg, targetType);
-            } catch (Exception e) {
-                throw new RuntimeException("Parameter conversion failed: " + arg + " -> " + targetType, e);
-            }
+        try {
+            return mapper.convertValue(arg, targetType);
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException(
+                    "Parameter conversion failed: value=" + arg + " (" + arg.getClass().getSimpleName() + ") -> " + targetType,
+                    e
+            );
         }
-
-        return arg;
     }
 }
