@@ -74,6 +74,9 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
 
     @Override
     public List<Map<String, Object>> runSql(String sql, String resourceId) {
+        if(sql.contains("undo_log")){
+            throw new StoreException("If you do not use SQL to query undo_log data, use analyzeUndoLog to query and analyze undo_log");
+        }
         return sqlExecutionTemplate.query(resourceId, sql);
     }
 
