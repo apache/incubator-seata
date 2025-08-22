@@ -1,13 +1,33 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.seata.mcp.utils;
 
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.mcp.entity.param.ExportSheetParam;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +44,23 @@ public class ExcelExportUtil {
 
     private static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
+    public static boolean isInValidFolderPath(String path) {
+        if (path == null || path.trim().isEmpty()) {
+            return true;
+        }
+        try {
+            Paths.get(path);
+        } catch (InvalidPathException | SecurityException e) {
+            return true;
+        }
+        return false;
+    }
+
     public static void exportExcelWithCustomHeaders(ExportSheetParam param, List<Map<String, String>> headers) throws IOException{
+        if(StringUtils.isBlank(param.getFilePath()) || isInValidFolderPath(param.getFilePath())){
+            // Get the default system folder for users
+            param.setFilePath(System.getProperty("user.home"));
+        }
         exportExcelWithCustomHeaders(param.getSheetName(),param.getFilePath(),param.getData(),headers);
     }
 
@@ -59,7 +95,6 @@ public class ExcelExportUtil {
             cell.setCellValue(name);
             cell.setCellStyle(headerStyle);
 
-            // 写入数据
             for (int rowIndex = 0; rowIndex < data.size(); rowIndex++) {
                 Row row = sheet.getRow(rowIndex + 1);
                 if (row == null) row = sheet.createRow(rowIndex + 1);
@@ -97,6 +132,10 @@ public class ExcelExportUtil {
      * @throws IOException If file writing fails
      */
     public static void exportToExcelFile(ExportSheetParam param) throws IOException {
+        if(StringUtils.isBlank(param.getFilePath()) || isInValidFolderPath(param.getFilePath())){
+            // Get the default system folder for users
+            param.setFilePath(System.getProperty("user.home"));
+        }
         exportToExcelFile(param.getData(),param.getFilePath(),param.getSheetName());
     }
 

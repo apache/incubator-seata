@@ -11,7 +11,7 @@ public class ExportSheetParam {
     private List<Map<String,Object>> data;
     @ToolParam(description = "Sheet Name",required = true)
     private String sheetName;
-    @ToolParam(description = "Where the file is stored", required = true)
+    @ToolParam(description = "Where the file is stored, Be sure to ask the user where they want to store it, The default is the system user folder")
     private String filePath;
 
     @Override
