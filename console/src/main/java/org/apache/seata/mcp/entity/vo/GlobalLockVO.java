@@ -16,12 +16,9 @@
  */
 package org.apache.seata.mcp.entity.vo;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.seata.common.result.PageResult;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.apache.seata.core.lock.RowLock;
-import org.apache.seata.mcp.utils.DateUtils;
+import org.apache.seata.mcp.config.TimestampToStringDeserializer;
 
 /**
  * GlobalLockVO
@@ -47,8 +44,10 @@ public class GlobalLockVO {
      */
     private String vgroup;
 
+    @JsonDeserialize(using = TimestampToStringDeserializer.class)
     private String gmtCreate;
 
+    @JsonDeserialize(using = TimestampToStringDeserializer.class)
     private String gmtModified;
 
     /**
@@ -67,20 +66,6 @@ public class GlobalLockVO {
         globalLockVO.setRowKey(rowLock.getRowKey());
         globalLockVO.setVgroup(vgroup);
         return globalLockVO;
-    }
-
-
-    public static PageResult<GlobalLockVO> convertFromJson(ObjectMapper objectMapper, String jsonStr){
-        try {
-            PageResult<GlobalLockVO> result = objectMapper.readValue(jsonStr, new TypeReference<PageResult<GlobalLockVO>>() {});
-            for(GlobalLockVO vo : result.getData()){
-                vo.setGmtCreate(DateUtils.convertToDateTimeFromTimestamp(Long.parseLong(vo.getGmtCreate())));
-                vo.setGmtModified(DateUtils.convertToDateTimeFromTimestamp(Long.parseLong(vo.getGmtModified())));
-            }
-            return result;
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public String getXid() {
