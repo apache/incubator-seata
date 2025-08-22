@@ -19,6 +19,7 @@ package org.apache.seata.mcp.entity.param;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.mcp.annotation.ToolParam;
+import org.apache.seata.mcp.utils.DateUtils;
 
 import java.io.Serializable;
 
@@ -174,8 +175,8 @@ public class GlobalSessionParam implements Serializable {
 
     public static GlobalSessionParam covertFromAbnormalParam(GlobalAbnormalSessionParam abParam){
         GlobalSessionParam param = new GlobalSessionParam();
-        param.setTimeStart(abParam.getTimeStart());
-        param.setTimeEnd(abParam.getTimeEnd());
+        param.setTimeStart(DateUtils.convertToTimeStampFromDateTime(abParam.getTimeStart()));
+        param.setTimeEnd(DateUtils.convertToTimeStampFromDateTime(abParam.getTimeEnd()));
         param.setWithBranch(abParam.isWithBranch());
         return param;
     }
