@@ -27,6 +27,22 @@ public class DataSourceFactory {
 
     private static final Map<String, DataSource> dataSourceMap = new HashMap<String, DataSource>();
 
+    public static void initAllDataSources() {
+        Map<String, BusinessDataSourcesProperties.DataSourceProperties> datasources =
+                BusinessDataSourcesProperties.getDatasources();
+        if (datasources == null || datasources.isEmpty()) {
+            return;
+        }
+
+        for (Map.Entry<String, BusinessDataSourcesProperties.DataSourceProperties> entry : datasources.entrySet()) {
+            String resourceId = entry.getKey();
+            if (!dataSourceMap.containsKey(resourceId)) {
+                DataSource ds = createDataSource(entry.getValue(), resourceId);
+                dataSourceMap.put(resourceId, ds);
+            }
+        }
+    }
+
     public static DataSource getDataSource(String resourceId) {
         if (dataSourceMap.containsKey(resourceId)) return dataSourceMap.get(resourceId);
 
