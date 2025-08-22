@@ -16,16 +16,7 @@
  */
 package org.apache.seata.mcp.entity.vo;
 
-import org.apache.seata.common.util.CollectionUtils;
-import org.apache.seata.core.constants.ServerTableColumnsName;
 import org.apache.seata.core.lock.RowLock;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * GlobalLockVO
