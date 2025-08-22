@@ -16,6 +16,9 @@
  */
 package org.apache.seata.mcp.entity.vo;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import org.apache.seata.mcp.config.TimestampToStringDeserializer;
+
 import java.util.Set;
 
 /**
@@ -37,13 +40,16 @@ public class GlobalSessionVO {
 
     private Long timeout;
 
-    private Long beginTime;
+    @JsonDeserialize(using = TimestampToStringDeserializer.class)
+    private String beginTime;
 
     private String applicationData;
 
-    private Long gmtCreate;
+    @JsonDeserialize(using = TimestampToStringDeserializer.class)
+    private String gmtCreate;
 
-    private Long gmtModified;
+    @JsonDeserialize(using = TimestampToStringDeserializer.class)
+    private String gmtModified;
 
     private Set<BranchSessionVO> branchSessionVOs;
 
@@ -57,7 +63,7 @@ public class GlobalSessionVO {
             String transactionServiceGroup,
             String transactionName,
             Long timeout,
-            Long beginTime,
+            String beginTime,
             String applicationData,
             Set<BranchSessionVO> branchSessionVOs) {
         this.xid = xid;
@@ -128,12 +134,32 @@ public class GlobalSessionVO {
         this.timeout = timeout;
     }
 
-    public Long getBeginTime() {
+    public void setTransactionId(String transactionId) {
+        this.transactionId = transactionId;
+    }
+
+    public String getBeginTime() {
         return beginTime;
     }
 
-    public void setBeginTime(Long beginTime) {
+    public void setBeginTime(String beginTime) {
         this.beginTime = beginTime;
+    }
+
+    public String getGmtCreate() {
+        return gmtCreate;
+    }
+
+    public void setGmtCreate(String gmtCreate) {
+        this.gmtCreate = gmtCreate;
+    }
+
+    public String getGmtModified() {
+        return gmtModified;
+    }
+
+    public void setGmtModified(String gmtModified) {
+        this.gmtModified = gmtModified;
     }
 
     public String getApplicationData() {
@@ -142,22 +168,6 @@ public class GlobalSessionVO {
 
     public void setApplicationData(String applicationData) {
         this.applicationData = applicationData;
-    }
-
-    public Long getGmtCreate() {
-        return gmtCreate;
-    }
-
-    public void setGmtCreate(Long gmtCreate) {
-        this.gmtCreate = gmtCreate;
-    }
-
-    public Long getGmtModified() {
-        return gmtModified;
-    }
-
-    public void setGmtModified(Long gmtModified) {
-        this.gmtModified = gmtModified;
     }
 
     public Set<BranchSessionVO> getBranchSessionVOs() {
