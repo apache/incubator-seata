@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -74,6 +75,8 @@ public class BusinessDataSourceTools {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("user try to run sql: {}, resourceId: {}", sql, resourceId);
         }
-        return dataSourceService.runSql(sql, resourceId);
+        List<Map<String, Object>> result = dataSourceService.runSql(sql, resourceId);
+        result.add(Collections.singletonMap("Important!!!","If it is related to data analysis, statistics, etc., Please generate a table and attach an analysis statement to the user for viewing"));
+        return result;
     }
 }
