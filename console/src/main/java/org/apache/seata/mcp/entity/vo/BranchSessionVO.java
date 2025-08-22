@@ -16,6 +16,9 @@
  */
 package org.apache.seata.mcp.entity.vo;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import org.apache.seata.mcp.config.TimestampToStringDeserializer;
+
 import java.util.Objects;
 
 /**
@@ -41,9 +44,11 @@ public class BranchSessionVO {
 
     private String applicationData;
 
-    private Long gmtCreate;
+    @JsonDeserialize(using = TimestampToStringDeserializer.class)
+    private String gmtCreate;
 
-    private Long gmtModified;
+    @JsonDeserialize(using = TimestampToStringDeserializer.class)
+    private String gmtModified;
 
     public BranchSessionVO() {}
 
@@ -140,19 +145,19 @@ public class BranchSessionVO {
         this.applicationData = applicationData;
     }
 
-    public Long getGmtCreate() {
+    public String getGmtCreate() {
         return gmtCreate;
     }
 
-    public void setGmtCreate(Long gmtCreate) {
+    public void setGmtCreate(String gmtCreate) {
         this.gmtCreate = gmtCreate;
     }
 
-    public Long getGmtModified() {
+    public String getGmtModified() {
         return gmtModified;
     }
 
-    public void setGmtModified(Long gmtModified) {
+    public void setGmtModified(String gmtModified) {
         this.gmtModified = gmtModified;
     }
 
