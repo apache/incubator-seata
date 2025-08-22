@@ -6,11 +6,11 @@ public class GlobalAbnormalSessionParam {
     @ToolParam(description = "Whether or not it contains branch transaction information, default is true")
     private boolean withBranch = true;
 
-    @ToolParam(description = "Start Time (Timestamp)")
-    private Long timeStart;
+    @ToolParam(description = "Start Time, DateTime format (yyyy-MM-dd HH:mm:ss)")
+    private String timeStart;
 
-    @ToolParam(description = "End Time (Timestamp)")
-    private Long timeEnd;
+    @ToolParam(description = "End Time, DateTime format (yyyy-MM-dd HH:mm:ss)")
+    private String timeEnd;
 
     @Override
     public String toString() {
@@ -29,19 +29,19 @@ public class GlobalAbnormalSessionParam {
         this.withBranch = withBranch;
     }
 
-    public Long getTimeStart() {
-        return timeStart;
-    }
-
-    public void setTimeStart(Long timeStart) {
-        this.timeStart = timeStart;
-    }
-
-    public Long getTimeEnd() {
+    public String getTimeEnd() {
         return timeEnd;
     }
 
-    public void setTimeEnd(Long timeEnd) {
+    public void setTimeEnd(String timeEnd) {
         this.timeEnd = timeEnd;
+    }
+
+    public String getTimeStart() {
+        return timeStart;
+    }
+
+    public void setTimeStart(String timeStart) {
+        this.timeStart = timeStart;
     }
 }
