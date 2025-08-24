@@ -16,6 +16,7 @@
  */
 package org.apache.seata.mcp.controller.tools;
 
+import org.apache.seata.common.result.PageResult;
 import org.apache.seata.mcp.annotation.Tool;
 import org.apache.seata.mcp.annotation.ToolParam;
 import org.apache.seata.mcp.entity.param.UndoLogParam;
@@ -30,7 +31,7 @@ public class UndoLogTools {
     private UndoLogService undoLogService;
 
     @Tool(description = "get the undo_log data of rm")
-    public String analyzeUndoLog(
+    public PageResult<?> analyzeUndoLog(
             @ToolParam(description = "UndoLog Query parameters", required = true) UndoLogParam undoLogParam) {
         return undoLogService.queryAndAnalyzeUndoLog(undoLogParam);
     }
