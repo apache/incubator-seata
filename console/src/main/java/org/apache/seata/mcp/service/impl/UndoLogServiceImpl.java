@@ -16,6 +16,7 @@
  */
 package org.apache.seata.mcp.service.impl;
 
+import org.apache.seata.common.result.PageResult;
 import org.apache.seata.mcp.entity.param.UndoLogParam;
 import org.apache.seata.mcp.service.BusinessDataSourceService;
 import org.apache.seata.mcp.service.UndoLogService;
@@ -34,11 +35,12 @@ public class UndoLogServiceImpl implements UndoLogService {
     private BusinessDataSourceService dataSourceService;
 
     @Override
-    public String queryAndAnalyzeUndoLog(UndoLogParam param) {
+    public PageResult<?> queryAndAnalyzeUndoLog(UndoLogParam param) {
         // 1. First, query the undo_log data of the corresponding RM based on the parameters
         Map<String, List<byte[]>> undoLogInfo = dataSourceService.getUndoLogInfo(param);
+        Integer counts = dataSourceService.getUndoLogCounts(param);
         if (undoLogInfo.isEmpty()) {
-            return "The corresponding undoLog data cannot be queried";
+            return PageResult.failure("","The corresponding undoLog data cannot be queried");
         }
         // 2. Then deserialize undoLogInfo to BranchUndoLog through FastJsonParser
         UndoLogParser parser = new UndoLogParser();
@@ -49,6 +51,6 @@ public class UndoLogServiceImpl implements UndoLogService {
                 result.add(parser.decode(infos));
             }
         }
-        return result.toString();
+        return PageResult.success(result,counts, param.getPageNum(), param.getPageSize());
     }
 }
