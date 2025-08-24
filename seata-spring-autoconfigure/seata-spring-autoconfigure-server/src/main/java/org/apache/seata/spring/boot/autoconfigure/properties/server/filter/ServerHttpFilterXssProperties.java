@@ -19,8 +19,6 @@ package org.apache.seata.spring.boot.autoconfigure.properties.server.filter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
 import static org.apache.seata.common.DefaultValues.DEFAULT_XSS_KEYWORDS;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SERVER_HTTP_FILTER_XSS_PREFIX;
 
@@ -29,7 +27,7 @@ import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SERVER
 public class ServerHttpFilterXssProperties {
     private boolean enabled = true;
 
-    private List<String> keywords = DEFAULT_XSS_KEYWORDS;
+    private String keywords = DEFAULT_XSS_KEYWORDS;
 
     public boolean isEnabled() {
         return enabled;
@@ -39,11 +37,11 @@ public class ServerHttpFilterXssProperties {
         this.enabled = enabled;
     }
 
-    public List<String> getKeywords() {
+    public String getKeywords() {
         return keywords;
     }
 
-    public void setKeywords(List<String> keywords) {
+    public void setKeywords(String keywords) {
         this.keywords = keywords;
     }
 }

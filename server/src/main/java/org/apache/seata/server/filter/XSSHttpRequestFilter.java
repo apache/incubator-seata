@@ -20,7 +20,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.seata.common.loader.LoadLevel;
-import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.config.ConfigurationKeys;
@@ -60,21 +59,17 @@ public class XSSHttpRequestFilter implements HttpRequestFilter {
             Pattern.CASE_INSENSITIVE);
 
     public XSSHttpRequestFilter() {
-        String xssKeywordConfig = CONFIG.getConfig(SERVER_HTTP_FILTER_XSS_FILTER_KEYWORDS, null);
+        String xssKeywordConfig = CONFIG.getConfig(SERVER_HTTP_FILTER_XSS_FILTER_KEYWORDS, DEFAULT_XSS_KEYWORDS);
 
-        if (StringUtils.isBlank(xssKeywordConfig)) {
-            this.xssKeywords = DEFAULT_XSS_KEYWORDS;
-        } else {
-            ObjectMapper objectMapper = new ObjectMapper();
-            try {
-                xssKeywords = objectMapper.readValue(xssKeywordConfig, new TypeReference<List<String>>() {});
-            } catch (JsonProcessingException e) {
-                throw new IllegalArgumentException(
-                        "Invalid format for configuration 'server.http.filter.xss.keywords'. "
-                                + "Expected a JSON array like [\"<script>\", \"vbscript:\"], but got: "
-                                + xssKeywordConfig,
-                        e);
-            }
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            xssKeywords = objectMapper.readValue(xssKeywordConfig, new TypeReference<List<String>>() {});
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException(
+                    "Invalid format for configuration 'server.http.filter.xss.keywords'. "
+                            + "Expected a JSON array like [\"<script>\", \"vbscript:\"], but got: "
+                            + xssKeywordConfig,
+                    e);
         }
     }
 
