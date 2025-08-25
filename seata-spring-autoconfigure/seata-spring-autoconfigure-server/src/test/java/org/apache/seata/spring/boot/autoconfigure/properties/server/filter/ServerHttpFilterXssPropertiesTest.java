@@ -16,6 +16,7 @@
  */
 package org.apache.seata.spring.boot.autoconfigure.properties.server.filter;
 
+import org.apache.seata.common.util.StringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -25,7 +26,7 @@ public class ServerHttpFilterXssPropertiesTest {
         ServerHttpFilterXssProperties serverHttpFilterXssProperties = new ServerHttpFilterXssProperties();
 
         Assertions.assertTrue(serverHttpFilterXssProperties.isEnabled());
-        Assertions.assertTrue(serverHttpFilterXssProperties.getKeywords().contains("<script>"));
+        Assertions.assertTrue(StringUtils.isBlank(serverHttpFilterXssProperties.getKeywords()));
     }
 
     @Test
