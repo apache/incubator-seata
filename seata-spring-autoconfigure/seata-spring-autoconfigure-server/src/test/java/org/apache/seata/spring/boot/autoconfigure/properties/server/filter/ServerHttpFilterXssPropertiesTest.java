@@ -25,7 +25,6 @@ public class ServerHttpFilterXssPropertiesTest {
     public void testServerHttpFilterXssProperties() {
         ServerHttpFilterXssProperties serverHttpFilterXssProperties = new ServerHttpFilterXssProperties();
 
-        Assertions.assertTrue(serverHttpFilterXssProperties.isEnabled());
         Assertions.assertTrue(StringUtils.isBlank(serverHttpFilterXssProperties.getKeywords()));
     }
 
@@ -33,11 +32,7 @@ public class ServerHttpFilterXssPropertiesTest {
     public void testServerHttpFilterPropertiesUnDefaultValue() {
         ServerHttpFilterXssProperties serverHttpFilterXssProperties = new ServerHttpFilterXssProperties();
 
-        serverHttpFilterXssProperties.setEnabled(false);
-
         serverHttpFilterXssProperties.setKeywords("<alert>");
-
-        Assertions.assertFalse(serverHttpFilterXssProperties.isEnabled());
         Assertions.assertTrue(serverHttpFilterXssProperties.getKeywords().contains("<alert>"));
     }
 }

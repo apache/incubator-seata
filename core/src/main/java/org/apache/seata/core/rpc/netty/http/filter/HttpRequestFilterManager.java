@@ -17,8 +17,6 @@
 package org.apache.seata.core.rpc.netty.http.filter;
 
 import org.apache.seata.common.loader.EnhancedServiceLoader;
-import org.apache.seata.config.ConfigurationFactory;
-import org.apache.seata.config.ConfigurationKeys;
 
 import java.util.ArrayList;
 import java.util.Comparator;
