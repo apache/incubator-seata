@@ -46,7 +46,7 @@ public class DateUtils {
         try {
             LocalDateTime dateTime = LocalDateTime.parse(dateTimeStr, formatter);
             return dateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-        } catch (DateTimeParseException e) {
+        } catch (Exception e) {
             return -1;
         }
     }
