@@ -1,310 +1,426 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.apache.seata.mcp.register;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.modelcontextprotocol.server.McpAsyncServer;
 import io.modelcontextprotocol.server.McpServerFeatures;
+import io.modelcontextprotocol.spec.McpSchema;
+import org.apache.seata.mcp.annotation.Prompt;
+import org.apache.seata.mcp.annotation.PromptParam;
 import org.apache.seata.mcp.annotation.Tool;
 import org.apache.seata.mcp.annotation.ToolParam;
-import org.apache.seata.mcp.manager.McpServerManager;
+import org.apache.seata.mcp.manager.MCPServerManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 
+
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.lang.reflect.Method;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
+/**
+ * Unit tests for MCPAutoRegister
+ */
 @ExtendWith(MockitoExtension.class)
-public class MCPAutoRegisterTest {
+class MCPAutoRegisterTest {
 
     @Mock
-    private McpServerManager mcpServerManager;
+    private MCPServerManager mcpServerManager;
 
     @Mock
-    private io.modelcontextprotocol.server.McpAsyncServer mcpServer;
+    private McpAsyncServer mcpAsyncServer;
 
-    @Mock
-    private MCPAutoRegister toolRegister;
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectMapper objectMapper;
+    private MCPAutoRegister mcpAutoRegister;
+
+    // Test beans for annotation scanning
+    private TestToolBean testToolBean;
+    private TestPromptBean testPromptBean;
+    private TestComplexBean testComplexBean;
 
     @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.openMocks(this);
-        when(mcpServerManager.getServerInstance()).thenReturn(mcpServer);
-        when(mcpServer.addTool(any())).thenReturn(Mono.empty());
-        toolRegister = new MCPAutoRegister(mcpServerManager);
+    void setUp() {
+        objectMapper = new ObjectMapper();
+        mcpAutoRegister = new MCPAutoRegister(mcpServerManager);
 
+        // Use reflection to inject the ObjectMapper
         try {
             Field mapperField = MCPAutoRegister.class.getDeclaredField("mapper");
             mapperField.setAccessible(true);
-            mapperField.set(toolRegister, objectMapper);
+            mapperField.set(mcpAutoRegister, objectMapper);
         } catch (Exception e) {
             fail("Failed to inject ObjectMapper: " + e.getMessage());
         }
+
+        // Mock the server manager to return the async server (lenient to avoid unnecessary stubbing warnings)
+        lenient().when(mcpServerManager.getServerInstance()).thenReturn(mcpAsyncServer);
+
+        // Initialize test beans
+        testToolBean = new TestToolBean();
+        testPromptBean = new TestPromptBean();
+        testComplexBean = new TestComplexBean();
     }
 
     @Test
-    public void testRegisterToolWithSimpleTypes() {
-        // Create a test bean
-        TestToolWithSimpleTypes testBean = new TestToolWithSimpleTypes();
+    void testPostProcessAfterInitializationWithPromptAnnotation() {
+        // Setup mocks for this specific test
+        when(mcpAsyncServer.addPrompt(any())).thenReturn(Mono.empty());
 
-        // Register the tool
-        toolRegister.postProcessAfterInitialization(testBean, "testBean");
+        Object result = mcpAutoRegister.postProcessAfterInitialization(testPromptBean, "testPromptBean");
 
-        // Verify tool registration
-        ArgumentCaptor<McpServerFeatures.AsyncToolSpecification> toolCaptor =
-                ArgumentCaptor.forClass(McpServerFeatures.AsyncToolSpecification.class);
-        verify(mcpServer).addTool(toolCaptor.capture());
-
-        // Verify the captured tool specifications
-        McpServerFeatures.AsyncToolSpecification capturedSpec = toolCaptor.getValue();
-        assertEquals("simpleMethod", capturedSpec.tool().getName());
-        assertEquals("A simple test tool", capturedSpec.tool().getDescription());
-
-        // verify JSON Schema
-        try {
-            JsonNode schema = objectMapper.readTree(
-                    objectMapper.writeValueAsString(capturedSpec.tool().getInputSchema()));
-            assertEquals("object", schema.get("type").asText());
-
-            JsonNode props = schema.get("properties");
-            assertTrue(props.has("stringParam"));
-            assertTrue(props.has("intParam"));
-            assertTrue(props.has("boolParam"));
-
-            assertEquals("string", props.get("stringParam").get("type").asText());
-            assertEquals("integer", props.get("intParam").get("type").asText());
-            assertEquals("boolean", props.get("boolParam").get("type").asText());
-
-            JsonNode required = schema.get("required");
-            assertTrue(required.isArray());
-            List<String> requiredFields = new ArrayList<>();
-            required.forEach(node -> requiredFields.add(node.asText()));
-            assertFalse(requiredFields.contains("stringParam"));
-            assertFalse(requiredFields.contains("intParam"));
-            assertFalse(requiredFields.contains("boolParam"));
-
-        } catch (Exception e) {
-            fail("Failed to parse schema: " + e.getMessage());
-        }
+        assertEquals(testPromptBean, result);
+        verify(mcpAsyncServer, times(1)).addPrompt(any(McpServerFeatures.AsyncPromptSpecification.class));
     }
 
     @Test
-    public void testRegisterToolWithComplexTypes() {
-        TestToolWithComplexTypes testBean = new TestToolWithComplexTypes();
+    void testPostProcessAfterInitializationWithNoAnnotations() {
+        Object plainBean = new Object();
+        Object result = mcpAutoRegister.postProcessAfterInitialization(plainBean, "plainBean");
 
-        toolRegister.postProcessAfterInitialization(testBean, "testBean");
-
-        ArgumentCaptor<McpServerFeatures.AsyncToolSpecification> toolCaptor =
-                ArgumentCaptor.forClass(McpServerFeatures.AsyncToolSpecification.class);
-        verify(mcpServer).addTool(toolCaptor.capture());
-
-        McpServerFeatures.AsyncToolSpecification capturedSpec = toolCaptor.getValue();
-        assertEquals("complexMethod", capturedSpec.tool().getName());
-
-        // verify JSON Schema
-        try {
-            JsonNode schema = objectMapper.readTree(
-                    objectMapper.writeValueAsString(capturedSpec.tool().getInputSchema()));
-
-            JsonNode props = schema.get("properties");
-            assertTrue(props.has("complexParam"));
-            assertEquals("object", props.get("complexParam").get("type").asText());
-
-            JsonNode complexProps = props.get("complexParam").get("properties");
-            assertTrue(complexProps.has("name"));
-            assertTrue(complexProps.has("age"));
-            assertTrue(complexProps.has("tags"));
-
-            assertEquals("array", complexProps.get("tags").get("type").asText());
-
-        } catch (Exception e) {
-            fail("Failed to parse schema: " + e.getMessage());
-        }
+        assertEquals(plainBean, result);
+        verify(mcpAsyncServer, never()).addTool(any());
+        verify(mcpAsyncServer, never()).addPrompt(any());
     }
 
     @Test
-    public void testHandleCircularReference() {
+    void testAutoRegisterToolWithSimpleParameters() throws Exception {
+        // Setup mocks for this specific test
+        when(mcpAsyncServer.addTool(any())).thenReturn(Mono.empty());
 
-        TestToolWithCircularReference testBean = new TestToolWithCircularReference();
+        Method method = TestToolBean.class.getMethod("simpleTool", String.class, Integer.class);
+        Tool toolAnnotation = method.getAnnotation(Tool.class);
 
-        toolRegister.postProcessAfterInitialization(testBean, "testBean");
+        mcpAutoRegister.autoRegisterTool(testToolBean, method, toolAnnotation);
 
-        ArgumentCaptor<McpServerFeatures.AsyncToolSpecification> toolCaptor =
+        ArgumentCaptor<McpServerFeatures.AsyncToolSpecification> captor =
                 ArgumentCaptor.forClass(McpServerFeatures.AsyncToolSpecification.class);
-        verify(mcpServer).addTool(toolCaptor.capture());
+        verify(mcpAsyncServer).addTool(captor.capture());
 
-        McpServerFeatures.AsyncToolSpecification capturedSpec = toolCaptor.getValue();
+        McpServerFeatures.AsyncToolSpecification spec = captor.getValue();
+        assertNotNull(spec);
+        assertEquals("simpleTool", spec.tool().getName());
+        assertEquals("A simple tool for testing", spec.tool().getDescription());
 
-        try {
-            JsonNode schema = objectMapper.readTree(
-                    objectMapper.writeValueAsString(capturedSpec.tool().getInputSchema()));
-            JsonNode props = schema.get("properties");
-            assertTrue(props.has("node"));
+        // Verify JSON schema
+        McpSchema.JsonSchema inputSchema = spec.tool().getInputSchema();
+        assertNotNull(inputSchema);
 
-            // Verify that the description contains a circular reference warning
-            JsonNode nodeChildProps = props.get("node").get("properties").get("child");
-            assertTrue(nodeChildProps.has("description"));
-            assertTrue(nodeChildProps.get("description").asText().contains("Circular references"));
+        // Convert to JSON to verify structure (since JsonSchema might not have direct getters)
+        String schemaJson = objectMapper.writeValueAsString(inputSchema);
+        JsonNode schemaNode = objectMapper.readTree(schemaJson);
 
-        } catch (Exception e) {
-            fail("Failed to parse schema: " + e.getMessage());
-        }
+        assertEquals("object", schemaNode.get("type").asText());
+        assertTrue(schemaNode.has("properties"));
+        assertTrue(schemaNode.get("properties").has("name"));
+        assertTrue(schemaNode.get("properties").has("count"));
+        assertTrue(schemaNode.has("required"));
     }
 
     @Test
-    public void testHandleCollectionsAndMaps() {
+    void testAutoRegisterToolWithComplexParameter() throws Exception {
+        // Setup mocks for this specific test
+        when(mcpAsyncServer.addTool(any())).thenReturn(Mono.empty());
 
-        TestToolWithCollections testBean = new TestToolWithCollections();
+        Method method = TestToolBean.class.getMethod("complexTool", TestComplexParam.class);
+        Tool toolAnnotation = method.getAnnotation(Tool.class);
 
-        toolRegister.postProcessAfterInitialization(testBean, "testBean");
+        mcpAutoRegister.autoRegisterTool(testToolBean, method, toolAnnotation);
 
-        ArgumentCaptor<McpServerFeatures.AsyncToolSpecification> toolCaptor =
+        ArgumentCaptor<McpServerFeatures.AsyncToolSpecification> captor =
                 ArgumentCaptor.forClass(McpServerFeatures.AsyncToolSpecification.class);
-        verify(mcpServer).addTool(toolCaptor.capture());
+        verify(mcpAsyncServer).addTool(captor.capture());
 
-        McpServerFeatures.AsyncToolSpecification capturedSpec = toolCaptor.getValue();
+        McpServerFeatures.AsyncToolSpecification spec = captor.getValue();
+        McpSchema.JsonSchema inputSchema = spec.tool().getInputSchema();
+        String schema = objectMapper.writeValueAsString(inputSchema);
+        JsonNode schemaNode = objectMapper.readTree(schema);
 
-        try {
-            JsonNode schema = objectMapper.readTree(
-                    objectMapper.writeValueAsString(capturedSpec.tool().getInputSchema()));
-            JsonNode props = schema.get("properties");
+        // Verify complex object schema
+        JsonNode paramProperties = schemaNode.get("properties").get("param");
+        assertEquals("object", paramProperties.get("type").asText());
+        assertTrue(paramProperties.has("properties"));
+        assertTrue(paramProperties.get("properties").has("name"));
+        assertTrue(paramProperties.get("properties").has("value"));
+    }
 
-            assertTrue(props.has("list"));
-            assertEquals("array", props.get("list").get("type").asText());
+    @Test
+    void testAutoRegisterPromptWithParameters() throws Exception {
+        // Setup mocks for this specific test
+        when(mcpAsyncServer.addPrompt(any())).thenReturn(Mono.empty());
 
-            assertTrue(props.has("map"));
-            assertEquals("object", props.get("map").get("type").asText());
-            assertTrue(props.get("map").has("description"));
-            assertTrue(props.get("map").get("description").asText().contains("Key-value"));
+        Method method = TestPromptBean.class.getMethod("simplePrompt", String.class, Boolean.class);
+        Prompt promptAnnotation = method.getAnnotation(Prompt.class);
 
-            assertTrue(props.has("array"));
-            assertEquals("array", props.get("array").get("type").asText());
-            assertEquals("string", props.get("array").get("items").get("type").asText());
+        mcpAutoRegister.autoRegisterPrompt(testPromptBean, method, promptAnnotation);
 
-        } catch (Exception e) {
-            fail("Failed to parse schema: " + e.getMessage());
+        ArgumentCaptor<McpServerFeatures.AsyncPromptSpecification> captor =
+                ArgumentCaptor.forClass(McpServerFeatures.AsyncPromptSpecification.class);
+        verify(mcpAsyncServer).addPrompt(captor.capture());
+
+        McpServerFeatures.AsyncPromptSpecification spec = captor.getValue();
+        assertNotNull(spec);
+        assertEquals("simplePrompt", spec.prompt().getName());
+        assertEquals("A simple prompt for testing", spec.prompt().getDescription());
+        assertEquals(2, spec.prompt().getArguments().size());
+    }
+
+    @Test
+    void testToolCallHandlerExecution() throws Exception {
+        // Setup mocks for this specific test
+        when(mcpAsyncServer.addTool(any())).thenReturn(Mono.empty());
+
+        Method method = TestToolBean.class.getMethod("simpleTool", String.class, Integer.class);
+        Tool toolAnnotation = method.getAnnotation(Tool.class);
+
+        mcpAutoRegister.autoRegisterTool(testToolBean, method, toolAnnotation);
+
+        ArgumentCaptor<McpServerFeatures.AsyncToolSpecification> captor =
+                ArgumentCaptor.forClass(McpServerFeatures.AsyncToolSpecification.class);
+        verify(mcpAsyncServer).addTool(captor.capture());
+
+        McpServerFeatures.AsyncToolSpecification spec = captor.getValue();
+
+        // Create a mock call tool request
+        Map<String, Object> arguments = new HashMap<>();
+        arguments.put("name", "test");
+        arguments.put("count", 42);
+        McpSchema.CallToolRequest request = new McpSchema.CallToolRequest("simpleTool", arguments);
+
+        // Execute the handler and block for result
+        Mono<McpSchema.CallToolResult> result = spec.callHandler().apply(null, request);
+        McpSchema.CallToolResult toolResult = result.block();
+
+        assertNotNull(toolResult);
+        assertFalse(toolResult.getError());
+        assertEquals(1, toolResult.getContent().size());
+        assertTrue(toolResult.getContent().get(0) instanceof McpSchema.TextContent);
+        assertEquals("Hello test, count: 42",
+                ((McpSchema.TextContent)toolResult.getContent().get(0)).getText());
+    }
+
+    @Test
+    void testPromptCallHandlerExecution() throws Exception {
+        // Setup mocks for this specific test
+        when(mcpAsyncServer.addPrompt(any())).thenReturn(Mono.empty());
+
+        Method method = TestPromptBean.class.getMethod("simplePrompt", String.class, Boolean.class);
+        Prompt promptAnnotation = method.getAnnotation(Prompt.class);
+
+        mcpAutoRegister.autoRegisterPrompt(testPromptBean, method, promptAnnotation);
+
+        ArgumentCaptor<McpServerFeatures.AsyncPromptSpecification> captor =
+                ArgumentCaptor.forClass(McpServerFeatures.AsyncPromptSpecification.class);
+        verify(mcpAsyncServer).addPrompt(captor.capture());
+
+        McpServerFeatures.AsyncPromptSpecification spec = captor.getValue();
+
+        // Create a mock get prompt request
+        Map<String, Object> arguments = new HashMap<>();
+        arguments.put("topic", "AI");
+        arguments.put("detailed", true);
+        McpSchema.GetPromptRequest request = new McpSchema.GetPromptRequest("simplePrompt", arguments);
+
+        // Execute the handler and block for result
+        Mono<McpSchema.GetPromptResult> result = spec.promptHandler().apply(null, request);
+        McpSchema.GetPromptResult promptResult = result.block();
+
+        assertNotNull(promptResult);
+        assertEquals(1, promptResult.getMessages().size());
+        McpSchema.PromptMessage message = promptResult.getMessages().get(0);
+        assertEquals(McpSchema.Role.USER, message.getRole());
+        assertTrue(message.getContent() instanceof McpSchema.TextContent);
+        assertEquals("Prompt about AI (detailed: true)",
+                ((McpSchema.TextContent)message.getContent()).getText());
+    }
+
+    @Test
+    void testToolCallHandlerWithException() throws Exception {
+        // Setup mocks for this specific test
+        when(mcpAsyncServer.addTool(any())).thenReturn(Mono.empty());
+
+        Method method = TestToolBean.class.getMethod("errorTool");
+        Tool toolAnnotation = method.getAnnotation(Tool.class);
+
+        mcpAutoRegister.autoRegisterTool(testToolBean, method, toolAnnotation);
+
+        ArgumentCaptor<McpServerFeatures.AsyncToolSpecification> captor =
+                ArgumentCaptor.forClass(McpServerFeatures.AsyncToolSpecification.class);
+        verify(mcpAsyncServer).addTool(captor.capture());
+
+        McpServerFeatures.AsyncToolSpecification spec = captor.getValue();
+
+        // Create a mock call tool request
+        McpSchema.CallToolRequest request = new McpSchema.CallToolRequest("errorTool", Collections.emptyMap());
+
+        // Execute the handler and block for result
+        Mono<McpSchema.CallToolResult> result = spec.callHandler().apply(null, request);
+        McpSchema.CallToolResult toolResult = result.block();
+
+        assertNotNull(toolResult);
+        assertTrue(toolResult.getError());
+        assertEquals(1, toolResult.getContent().size());
+        assertTrue(toolResult.getContent().get(0) instanceof McpSchema.TextContent);
+        String errorMessage = ((McpSchema.TextContent)toolResult.getContent().get(0)).getText();
+        assertTrue(errorMessage.contains("Test error"));
+    }
+
+    @Test
+    void testGeneratePropertySchemaForPrimitiveTypes() throws Exception {
+        Method method = MCPAutoRegister.class.getDeclaredMethod("generatePropertySchema", Class.class, java.lang.reflect.Parameter.class);
+        method.setAccessible(true);
+
+        Method testMethod = TestToolBean.class.getMethod("simpleTool", String.class, Integer.class);
+        java.lang.reflect.Parameter stringParam = testMethod.getParameters()[0];
+        java.lang.reflect.Parameter intParam = testMethod.getParameters()[1];
+
+        JsonNode stringSchema = (JsonNode) method.invoke(mcpAutoRegister, String.class, stringParam);
+        JsonNode intSchema = (JsonNode) method.invoke(mcpAutoRegister, Integer.class, intParam);
+
+        assertEquals("string", stringSchema.get("type").asText());
+        assertEquals("integer", intSchema.get("type").asText());
+    }
+
+    @Test
+    void testGenerateTypeSchemaForCollections() throws Exception {
+        Method method = MCPAutoRegister.class.getDeclaredMethod("generateTypeSchema",
+                com.fasterxml.jackson.databind.node.ObjectNode.class,
+                Class.class);
+        method.setAccessible(true);
+
+        com.fasterxml.jackson.databind.node.ObjectNode prop = objectMapper.createObjectNode();
+        method.invoke(mcpAutoRegister, prop, List.class);
+
+        assertEquals("array", prop.get("type").asText());
+        assertTrue(prop.has("items"));
+    }
+
+    @Test
+    void testConvertArgument() throws Exception {
+        Method method = MCPAutoRegister.class.getDeclaredMethod("convertArgument", Object.class, Class.class);
+        method.setAccessible(true);
+
+        // Test string conversion
+        Object result = method.invoke(mcpAutoRegister, "42", Integer.class);
+        assertEquals(42, result);
+
+        // Test null handling
+        Object nullResult = method.invoke(mcpAutoRegister, null, String.class);
+        assertNull(nullResult);
+
+        // Test same type
+        String stringResult = (String) method.invoke(mcpAutoRegister, "test", String.class);
+        assertEquals("test", stringResult);
+    }
+
+    @Test
+    void testGetClassInfoAsJson() throws Exception {
+        Method method = MCPAutoRegister.class.getDeclaredMethod("getClassInfoAsJson", Class.class);
+        method.setAccessible(true);
+
+        String result = (String) method.invoke(mcpAutoRegister, TestEnum.class);
+        assertNotNull(result);
+
+        JsonNode resultNode = objectMapper.readTree(result);
+        assertEquals("TestEnum", resultNode.get("className").asText());
+        assertTrue(resultNode.has("enumValues"));
+        assertEquals(2, resultNode.get("enumValues").size());
+    }
+
+    @Test
+    void testGetAllFields() throws Exception {
+        Method method = MCPAutoRegister.class.getDeclaredMethod("getAllFields", Class.class);
+        method.setAccessible(true);
+
+        Field[] fields = (Field[]) method.invoke(mcpAutoRegister, TestComplexParam.class);
+        assertTrue(fields.length >= 2); // At least name and value fields
+    }
+
+    @Test
+    void testIsCustomObject() throws Exception {
+        Method method = MCPAutoRegister.class.getDeclaredMethod("isCustomObject", Class.class);
+        method.setAccessible(true);
+
+        assertTrue((Boolean) method.invoke(mcpAutoRegister, TestComplexParam.class));
+        assertFalse((Boolean) method.invoke(mcpAutoRegister, String.class));
+        assertFalse((Boolean) method.invoke(mcpAutoRegister, Integer.class));
+        assertFalse((Boolean) method.invoke(mcpAutoRegister, TestEnum.class));
+    }
+
+    // Test bean classes and supporting types
+    public static class TestToolBean {
+        @Tool(description = "A simple tool for testing")
+        public String simpleTool(@ToolParam(description = "The name",required = true) String name,
+                                 @ToolParam(description = "The count",required = true) Integer count) {
+            return "Hello " + name + ", count: " + count;
+        }
+
+        @Tool(description = "A complex tool for testing")
+        public String complexTool(@ToolParam(description = "Complex parameter") TestComplexParam param) {
+            return "Complex: " + param.getName() + " = " + param.getValue();
+        }
+
+        @Tool(description = "A tool that throws an error")
+        public String errorTool() {
+            throw new RuntimeException("Test error");
         }
     }
 
-    // Bean classes for testing
-    public static class TestToolWithSimpleTypes {
-        @Tool(description = "A simple test tool")
-        public String simpleMethod(
-                @ToolParam(description = "A string parameter") String stringParam,
-                @ToolParam(description = "An integer parameter") int intParam,
-                @ToolParam(required = false, description = "A boolean parameter") boolean boolParam) {
-            return "Processed: " + stringParam + ", " + intParam + ", " + boolParam;
+    public static class TestPromptBean {
+        @Prompt(description = "A simple prompt for testing")
+        public String simplePrompt(@PromptParam(description = "The topic") String topic,
+                                   @PromptParam(description = "Detailed flag") Boolean detailed) {
+            return "Prompt about " + topic + " (detailed: " + detailed + ")";
         }
     }
 
-    public static class TestToolWithComplexTypes {
-        @Tool(description = "A test tool with complex types")
-        public String complexMethod(@ToolParam ComplexParam complexParam) {
-            return "Processed complex param";
-        }
-
-        public static class ComplexParam {
-            @ToolParam(description = "The name")
-            private String name;
-
-            @ToolParam(description = "The age")
-            private int age;
-
-            @ToolParam(description = "Tags list")
-            private List<String> tags;
-
-            // Getters and setters
-            public String getName() {
-                return name;
-            }
-
-            public void setName(String name) {
-                this.name = name;
-            }
-
-            public int getAge() {
-                return age;
-            }
-
-            public void setAge(int age) {
-                this.age = age;
-            }
-
-            public List<String> getTags() {
-                return tags;
-            }
-
-            public void setTags(List<String> tags) {
-                this.tags = tags;
-            }
+    public static class TestComplexBean {
+        // Bean without any annotations
+        public String normalMethod() {
+            return "normal";
         }
     }
 
-    public static class TestToolWithCircularReference {
-        @Tool(description = "A test tool with circular reference")
-        public String circularMethod(@ToolParam Node node) {
-            return "Processed node";
+    public static class TestComplexParam {
+        @ToolParam(description = "Parameter name", required = true)
+        private String name;
+
+        @ToolParam(description = "Parameter value", required = false, example = "42")
+        private Integer value;
+
+        public TestComplexParam() {}
+
+        public TestComplexParam(String name, Integer value) {
+            this.name = name;
+            this.value = value;
         }
 
-        public static class Node {
-            @ToolParam
-            private String value;
-
-            @ToolParam
-            private Node child;
-
-            // Getters and setters
-            public String getValue() {
-                return value;
-            }
-
-            public void setValue(String value) {
-                this.value = value;
-            }
-
-            public Node getChild() {
-                return child;
-            }
-
-            public void setChild(Node child) {
-                this.child = child;
-            }
-        }
+        public String getName() { return name; }
+        public void setName(String name) { this.name = name; }
+        public Integer getValue() { return value; }
+        public void setValue(Integer value) { this.value = value; }
     }
 
-    public static class TestToolWithCollections {
-        @Tool(description = "A test tool with collections")
-        public String collectionMethod(
-                @ToolParam List<String> list, @ToolParam Map<String, Object> map, @ToolParam String[] array) {
-            return "Processed collections";
+    public enum TestEnum {
+        VALUE1(1), VALUE2(2);
+
+        private final int code;
+
+        TestEnum(int code) {
+            this.code = code;
+        }
+
+        public int getCode() {
+            return code;
         }
     }
 }
