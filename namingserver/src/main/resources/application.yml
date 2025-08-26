@@ -18,9 +18,7 @@
 # application.yml
 server:
   tomcat:
-    # 增加连接器缓冲区
     connection-timeout: 60000
-    # 增加输出缓冲区
     threads:
       max: 200
       min-spare: 10
@@ -52,7 +50,6 @@ seata:
 
   # MCP Server Configuration
   mcp:
-
     # Server name (do not set the default to seata-mcp-server)
     serverName: seata-mcp-server
     serverVersion: 2.0.0
@@ -70,7 +67,7 @@ seata:
     # streamable type properties
     streamable:
       mcpEndpoint: /mcp
-      heartBeatSecondDuration: 5
+      heartBeatSecondDuration: 30
 
     # MCP supports
     promptSupport: true
