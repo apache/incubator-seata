@@ -71,6 +71,9 @@ public class MCPProperties {
 
     private SseServerProperties sseServerProperties;
 
+    public MCPProperties() {
+    }
+
     public boolean isSseType() {
         return mcpType.equals(SSE_TYPE);
     }
@@ -88,7 +91,10 @@ public class MCPProperties {
             this.mcpEndPoint = mcpEndPoint;
         }
 
-        public StreamableProperties(String mcpEndPoint,Long heartBeatSecondDuration) {
+        public StreamableProperties() {
+        }
+
+        public StreamableProperties(String mcpEndPoint, Long heartBeatSecondDuration) {
             this.mcpEndPoint = mcpEndPoint;
             this.heartBeatSecondDuration = heartBeatSecondDuration;
         }
@@ -136,6 +142,9 @@ public class MCPProperties {
             this.messageEndpoint = messageEndpoint;
         }
 
+        public SseServerProperties() {
+        }
+
         public SseServerProperties(String sseEndpoint, String messageEndpoint) {
             this.sseEndpoint = sseEndpoint;
             this.messageEndpoint = messageEndpoint;
@@ -160,13 +169,9 @@ public class MCPProperties {
     @PostConstruct
     public void init() {
         mcpType = env.getProperty("seata.mcp.mcpType","sse");
-        if(mcpType.equals(SSE_TYPE)){
-            String sseEndpoint = env.getProperty("seata.mcp.sse.sseEndpoint", "/sse");
-            String messageEndpoint = env.getProperty("seata.mcp.sse.messageEndpoint", "/message");
-            sseServerProperties = new SseServerProperties(sseEndpoint,messageEndpoint);
-        }else if (mcpType.equals(STREAMABLE_TYPE)){
+        if (mcpType.equals(STREAMABLE_TYPE)){
             String mcpEndPoint = env.getProperty("seata.mcp.streamable.mcpEndpoint","/mcp");
-            Long heartBeatSecondDuration = Long.parseLong(env.getProperty("seata.mcp.streamable.heartBeatSecondDuration","5"));
+            Long heartBeatSecondDuration = Long.parseLong(env.getProperty("seata.mcp.streamable.heartBeatSecondDuration","30"));
             streamableProperties = new StreamableProperties(mcpEndPoint,heartBeatSecondDuration);
         }else {
             mcpType = SSE_TYPE;
@@ -278,5 +283,17 @@ public class MCPProperties {
 
     public SseServerProperties getSseServerProperties() {
         return sseServerProperties;
+    }
+
+    public void setMcpType(String mcpType) {
+        this.mcpType = mcpType;
+    }
+
+    public void setStreamableProperties(StreamableProperties streamableProperties) {
+        this.streamableProperties = streamableProperties;
+    }
+
+    public void setSseServerProperties(SseServerProperties sseServerProperties) {
+        this.sseServerProperties = sseServerProperties;
     }
 }
