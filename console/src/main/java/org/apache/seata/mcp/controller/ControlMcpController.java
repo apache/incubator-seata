@@ -17,7 +17,7 @@
 package org.apache.seata.mcp.controller;
 
 import org.apache.seata.common.result.SingleResult;
-import org.apache.seata.mcp.manager.McpServerManager;
+import org.apache.seata.mcp.manager.MCPServerManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,7 +28,7 @@ import java.util.Locale;
 public class ControlMcpController {
 
     @Autowired
-    McpServerManager mcpServerEndpointProvider;
+    MCPServerManager mcpServerEndpointProvider;
 
     @PutMapping("/changeStatus")
     public SingleResult<?> changeStatus(@RequestParam(defaultValue = "") String status) {

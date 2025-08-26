@@ -18,7 +18,7 @@ package org.apache.seata.mcp.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.seata.mcp.entity.pojo.MCPProperties;
-import org.apache.seata.mcp.manager.McpServerManager;
+import org.apache.seata.mcp.manager.MCPServerManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,15 +31,15 @@ public class MCPServerConfig {
     private MCPProperties serverConfig;
 
     @Bean
-    public McpServerManager mcpServerManager(ObjectMapper objectMapper) {
+    public MCPServerManager mcpServerManager(ObjectMapper objectMapper) {
         MCPProperties config = serverConfig;
-        McpServerManager mcpServerManager = new McpServerManager(config, objectMapper);
+        MCPServerManager mcpServerManager = new MCPServerManager(config, objectMapper);
         mcpServerManager.start();
         return mcpServerManager;
     }
 
     @Bean
-    public RouterFunction<ServerResponse> mcpRouter(McpServerManager manager) {
+    public RouterFunction<ServerResponse> mcpRouter(MCPServerManager manager) {
         return manager.getRouterFunction();
     }
 }

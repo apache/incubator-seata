@@ -42,9 +42,9 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * MCP Service Manager (supports dynamic control)
  */
-public class McpServerManager implements SmartLifecycle {
+public class MCPServerManager implements SmartLifecycle {
     private final ReentrantLock stateLock = new ReentrantLock();
-    private static final Logger logger = LoggerFactory.getLogger(McpServerManager.class);
+    private static final Logger logger = LoggerFactory.getLogger(MCPServerManager.class);
     private final ReentrantLock poolLock = new ReentrantLock();
     private final AtomicBoolean running = new AtomicBoolean(false);
 
@@ -87,7 +87,7 @@ public class McpServerManager implements SmartLifecycle {
     private final ControlledTransportProvider transportProvider;
     private final MCPProperties config;
 
-    public McpServerManager(MCPProperties config, ObjectMapper objectMapper) {
+    public MCPServerManager(MCPProperties config, ObjectMapper objectMapper) {
         this.config = config;
         if(config.getMcpType().equals(MCPProperties.SSE_TYPE)){
             MCPProperties.SseServerProperties properties = config.getSseServerProperties();
@@ -216,7 +216,7 @@ public class McpServerManager implements SmartLifecycle {
 
     private void logServerState(String message) {
         //        System.out.printf("[MCP Manager] %s | Running: %b%n", message, running.get());
-        logger.info("[MCP Manager] {} | Running: {}", message, running.get());
+        logger.info("[MCP Manager] {} | Transport Type: {} | Running: {}", message, config.getMcpType(), running.get());
     }
 
     private interface ControlledTransportProvider {

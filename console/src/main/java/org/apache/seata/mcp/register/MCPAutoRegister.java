@@ -26,7 +26,7 @@ import org.apache.seata.mcp.annotation.Prompt;
 import org.apache.seata.mcp.annotation.PromptParam;
 import org.apache.seata.mcp.annotation.Tool;
 import org.apache.seata.mcp.annotation.ToolParam;
-import org.apache.seata.mcp.manager.McpServerManager;
+import org.apache.seata.mcp.manager.MCPServerManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +49,7 @@ import java.util.*;
 @Component
 public class MCPAutoRegister implements BeanPostProcessor {
 
-    private final McpServerManager aysncManager;
+    private final MCPServerManager aysncManager;
 
     @Autowired
     private ObjectMapper mapper;
@@ -59,7 +59,7 @@ public class MCPAutoRegister implements BeanPostProcessor {
     // Type tracking to prevent circular references
     private final Set<Class<?>> processingTypes = new HashSet<>();
 
-    public MCPAutoRegister(McpServerManager aysncManager) {
+    public MCPAutoRegister(MCPServerManager aysncManager) {
         this.aysncManager = aysncManager;
     }
 
