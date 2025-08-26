@@ -183,9 +183,9 @@ public class NettyClientBootstrap implements RemotingBootstrap {
         try {
             f.await(this.nettyClientConfig.getConnectTimeoutMillis(), TimeUnit.MILLISECONDS);
             if (f.isCancelled()) {
-                throw new FrameworkException(f.cause(), "connect cancelled, can not connect to services-server.");
+                throw new FrameworkException(f.cause(), "connect cancelled, can not connect to services-server:" + address.toString() + ".");
             } else if (!f.isSuccess()) {
-                throw new FrameworkException(f.cause(), "connect failed, can not connect to services-server.");
+                throw new FrameworkException(f.cause(), "connect failed, can not connect to services-server:" + address.toString() + ".");
             } else {
                 channel = f.channel();
             }
@@ -211,8 +211,10 @@ public class NettyClientBootstrap implements RemotingBootstrap {
                 channel = bootstrap.open().get();
             }
 
+        } catch (FrameworkException frameworkException) {
+            throw frameworkException;
         } catch (Exception e) {
-            throw new FrameworkException(e, "can not connect to services-server.");
+            throw new FrameworkException(e, "can not connect to services-server:" + address.toString() + ".");
         }
 
         return channel;
