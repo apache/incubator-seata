@@ -116,12 +116,11 @@ public class XSSHttpRequestFilter implements HttpRequestFilter {
     }
 
     /**
-     * Returns whether this XSS filter is enabled via configuration.
+     * The system is forcibly enabled by default
      */
     @Override
     public boolean shouldApply() {
-        return ConfigurationFactory.getInstance()
-                .getBoolean(ConfigurationKeys.SERVER_HTTP_FILTER_XSS_FILTER_ENABLE, true);
+        return true;
     }
 
     /**

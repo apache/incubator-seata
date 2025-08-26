@@ -24,18 +24,9 @@ import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SERVER
 @Component
 @ConfigurationProperties(prefix = SERVER_HTTP_FILTER_XSS_PREFIX)
 public class ServerHttpFilterXssProperties {
-    private boolean enabled = true;
 
     // It is specified by the user
     private String keywords;
-
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
 
     public String getKeywords() {
         return keywords;
