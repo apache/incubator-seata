@@ -16,7 +16,6 @@
  */
 package io.seata.config.extend;
 
-import com.alibaba.nacos.api.NacosFactory;
 import com.alibaba.nacos.api.config.ConfigService;
 import com.alibaba.nacos.api.exception.NacosException;
 import com.typesafe.config.Config;
@@ -31,8 +30,6 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledOnOs;
-import org.junit.jupiter.api.condition.OS;
 import org.mockito.Mockito;
 import org.mockito.internal.util.collections.Sets;
 
@@ -83,12 +80,14 @@ public class TestConfigFromExtendSPI {
             listenerCountDown.countDown();
         };
         doAnswer(invocation -> {
-            String argDataId = invocation.getArgument(0);
-            CachedConfigurationChangeListener argListener = invocation.getArgument(1);
-            ConfigurationChangeEvent event = new ConfigurationChangeEvent(argDataId, content);
-            argListener.onChangeEvent(event);
-            return null;
-        }).when(configuration).addConfigListener(Mockito.eq(dataId), Mockito.any(CachedConfigurationChangeListener.class));
+                    String argDataId = invocation.getArgument(0);
+                    CachedConfigurationChangeListener argListener = invocation.getArgument(1);
+                    ConfigurationChangeEvent event = new ConfigurationChangeEvent(argDataId, content);
+                    argListener.onChangeEvent(event);
+                    return null;
+                })
+                .when(configuration)
+                .addConfigListener(Mockito.eq(dataId), Mockito.any(CachedConfigurationChangeListener.class));
 
         // mock getConfig返回内容
         Mockito.when(configuration.getConfig(dataId)).thenReturn(content);
@@ -107,6 +106,7 @@ public class TestConfigFromExtendSPI {
         Set<ConfigurationChangeListener> listeners = configuration.getConfigListeners(dataId);
         Assertions.assertEquals(1, listeners.size());
     }
+
     public static String generateRandomString() {
         StringBuilder sb = new StringBuilder(STRING_LENGTH);
         for (int i = 0; i < STRING_LENGTH; i++) {

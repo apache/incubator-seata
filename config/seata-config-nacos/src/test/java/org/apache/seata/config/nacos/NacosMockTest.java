@@ -26,27 +26,27 @@ import org.apache.seata.config.ConfigurationChangeEvent;
 import org.apache.seata.config.ConfigurationChangeListener;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.config.Dispose;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.junit.jupiter.api.MethodOrderer;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
 import java.lang.reflect.UndeclaredThrowableException;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.Map;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.ArrayList;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -66,7 +66,6 @@ public class NacosMockTest {
      * 存储监听器的集合
      */
     private static final Map<String, List<Listener>> listenerMap = new ConcurrentHashMap<>();
-
 
     private static final String NACOS_ENDPOINT = "127.0.0.1:8848";
 
@@ -89,7 +88,8 @@ public class NacosMockTest {
         mockedNacosFactory = Mockito.mockStatic(NacosFactory.class);
 
         // 配置NacosFactory.createConfigService返回我们的Mock对象
-        mockedNacosFactory.when(() -> NacosFactory.createConfigService(any(Properties.class)))
+        mockedNacosFactory
+                .when(() -> NacosFactory.createConfigService(any(Properties.class)))
                 .thenReturn(configService);
 
         // 设置getConfig从HashMap获取数据
@@ -130,31 +130,35 @@ public class NacosMockTest {
 
         // 设置addListener添加监听器
         doAnswer(invocation -> {
-            String dataId = invocation.getArgument(0);
-            String group = invocation.getArgument(1);
-            Listener listener = invocation.getArgument(2);
-            String key = dataId + "_" + group;
-            if (listener instanceof NacosConfiguration.NacosListener) {
-                NacosConfiguration.NacosListener nacosListener = (NacosConfiguration.NacosListener) listener;
-                nacosListener.fillContext(dataId, group);
-            }
+                    String dataId = invocation.getArgument(0);
+                    String group = invocation.getArgument(1);
+                    Listener listener = invocation.getArgument(2);
+                    String key = dataId + "_" + group;
+                    if (listener instanceof NacosConfiguration.NacosListener) {
+                        NacosConfiguration.NacosListener nacosListener = (NacosConfiguration.NacosListener) listener;
+                        nacosListener.fillContext(dataId, group);
+                    }
 
-            listenerMap.computeIfAbsent(key, k -> new ArrayList<>()).add(listener);
-            return null;
-        }).when(configService).addListener(anyString(), anyString(), any(Listener.class));
+                    listenerMap.computeIfAbsent(key, k -> new ArrayList<>()).add(listener);
+                    return null;
+                })
+                .when(configService)
+                .addListener(anyString(), anyString(), any(Listener.class));
 
         // 设置removeListener移除监听器
         doAnswer(invocation -> {
-            String dataId = invocation.getArgument(0);
-            String group = invocation.getArgument(1);
-            Listener listener = invocation.getArgument(2);
-            String key = dataId + "_" + group;
+                    String dataId = invocation.getArgument(0);
+                    String group = invocation.getArgument(1);
+                    Listener listener = invocation.getArgument(2);
+                    String key = dataId + "_" + group;
 
-            if (listenerMap.containsKey(key)) {
-                listenerMap.get(key).remove(listener);
-            }
-            return null;
-        }).when(configService).removeListener(anyString(), anyString(), any(Listener.class));
+                    if (listenerMap.containsKey(key)) {
+                        listenerMap.get(key).remove(listener);
+                    }
+                    return null;
+                })
+                .when(configService)
+                .removeListener(anyString(), anyString(), any(Listener.class));
 
         // 重新初始化配置
         NacosConfiguration configuration = NacosConfiguration.getInstance();
@@ -309,5 +313,4 @@ public class NacosMockTest {
         listenerMap.clear();
         System.clearProperty("seataEnv");
     }
-
 }
