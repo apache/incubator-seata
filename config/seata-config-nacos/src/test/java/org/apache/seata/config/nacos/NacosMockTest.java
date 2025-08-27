@@ -18,6 +18,7 @@ package org.apache.seata.config.nacos;
 
 import com.alibaba.nacos.api.NacosFactory;
 import com.alibaba.nacos.api.config.ConfigService;
+import com.alibaba.nacos.api.config.listener.Listener;
 import com.alibaba.nacos.api.exception.NacosException;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationCache;
@@ -25,26 +26,48 @@ import org.apache.seata.config.ConfigurationChangeEvent;
 import org.apache.seata.config.ConfigurationChangeListener;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.config.Dispose;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.junit.jupiter.api.condition.EnabledOnOs;
-import org.junit.jupiter.api.condition.OS;
+import org.junit.jupiter.api.MethodOrderer;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
 import java.lang.reflect.UndeclaredThrowableException;
 import java.time.Duration;
 import java.util.Properties;
 import java.util.Set;
+import java.util.Map;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.when;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class NacosMockTest {
     private static ConfigService configService;
+
+    /**
+     * 存储配置数据的HashMap
+     */
+    private static final Map<String, String> configMap = new ConcurrentHashMap<>();
+    /**
+     * 存储监听器的集合
+     */
+    private static final Map<String, List<Listener>> listenerMap = new ConcurrentHashMap<>();
+
+
     private static final String NACOS_ENDPOINT = "127.0.0.1:8848";
 
     private static final String NACOS_GROUP = "SEATA_GROUP";
@@ -54,22 +77,94 @@ public class NacosMockTest {
 
     private ConfigurationChangeListener listener;
 
+    private static MockedStatic<NacosFactory> mockedNacosFactory;
+
     @BeforeAll
     public static void setup() throws NacosException {
         System.setProperty("seataEnv", "mock");
+        // 创建Mock对象
+        configService = Mockito.mock(ConfigService.class);
+
+        // 创建NacosFactory的静态Mock
+        mockedNacosFactory = Mockito.mockStatic(NacosFactory.class);
+
+        // 配置NacosFactory.createConfigService返回我们的Mock对象
+        mockedNacosFactory.when(() -> NacosFactory.createConfigService(any(Properties.class)))
+                .thenReturn(configService);
+
+        // 设置getConfig从HashMap获取数据
+        when(configService.getConfig(anyString(), anyString(), anyLong())).thenAnswer(invocation -> {
+            String dataId = invocation.getArgument(0);
+            String group = invocation.getArgument(1);
+            String key = dataId + "_" + group;
+            return configMap.get(key);
+        });
+
+        // 设置publishConfig将数据存入HashMap
+        when(configService.publishConfig(anyString(), anyString(), anyString())).thenAnswer(invocation -> {
+            String dataId = invocation.getArgument(0);
+            String group = invocation.getArgument(1);
+            String content = invocation.getArgument(2);
+            String key = dataId + "_" + group;
+            configMap.put(key, content);
+
+            // 通知监听器
+            String listenerKey = key;
+            if (listenerMap.containsKey(listenerKey)) {
+                for (Listener listener : listenerMap.get(listenerKey)) {
+                    listener.receiveConfigInfo(content);
+                }
+            }
+
+            return true;
+        });
+
+        // 设置removeConfig从HashMap移除数据
+        when(configService.removeConfig(anyString(), anyString())).thenAnswer(invocation -> {
+            String dataId = invocation.getArgument(0);
+            String group = invocation.getArgument(1);
+            String key = dataId + "_" + group;
+            configMap.remove(key);
+            return true;
+        });
+
+        // 设置addListener添加监听器
+        doAnswer(invocation -> {
+            String dataId = invocation.getArgument(0);
+            String group = invocation.getArgument(1);
+            Listener listener = invocation.getArgument(2);
+            String key = dataId + "_" + group;
+            if (listener instanceof NacosConfiguration.NacosListener) {
+                NacosConfiguration.NacosListener nacosListener = (NacosConfiguration.NacosListener) listener;
+                nacosListener.fillContext(dataId, group);
+            }
+
+            listenerMap.computeIfAbsent(key, k -> new ArrayList<>()).add(listener);
+            return null;
+        }).when(configService).addListener(anyString(), anyString(), any(Listener.class));
+
+        // 设置removeListener移除监听器
+        doAnswer(invocation -> {
+            String dataId = invocation.getArgument(0);
+            String group = invocation.getArgument(1);
+            Listener listener = invocation.getArgument(2);
+            String key = dataId + "_" + group;
+
+            if (listenerMap.containsKey(key)) {
+                listenerMap.get(key).remove(listener);
+            }
+            return null;
+        }).when(configService).removeListener(anyString(), anyString(), any(Listener.class));
+
+        // 重新初始化配置
         NacosConfiguration configuration = NacosConfiguration.getInstance();
         if (configuration instanceof Dispose) {
             ((Dispose) configuration).dispose();
         }
         ConfigurationFactory.reload();
-        Properties properties = new Properties();
-        properties.setProperty("serverAddr", NACOS_ENDPOINT);
-        configService = NacosFactory.createConfigService(properties);
-        configService.removeConfig(NACOS_DATAID, NACOS_GROUP);
     }
 
     @Test
-    @EnabledOnOs(OS.LINUX)
     @Order(1)
     public void getInstance() {
         Assertions.assertNotNull(configService);
@@ -78,7 +173,6 @@ public class NacosMockTest {
     }
 
     @Test
-    @EnabledOnOs(OS.LINUX)
     @Order(2)
     public void getConfig() {
         Configuration configuration = ConfigurationFactory.getInstance();
@@ -143,7 +237,6 @@ public class NacosMockTest {
     }
 
     @Test
-    @EnabledOnOs(OS.LINUX)
     @Order(3)
     public void putConfigIfAbsent() {
         Configuration configuration = ConfigurationFactory.getInstance();
@@ -153,7 +246,6 @@ public class NacosMockTest {
     }
 
     @Test
-    @EnabledOnOs(OS.LINUX)
     @Order(4)
     public void removeConfig() {
         Configuration configuration = ConfigurationFactory.getInstance();
@@ -162,7 +254,6 @@ public class NacosMockTest {
     }
 
     @Test
-    @EnabledOnOs(OS.LINUX)
     @Order(5)
     public void putConfig() {
         Configuration configuration = ConfigurationFactory.getInstance();
@@ -173,7 +264,6 @@ public class NacosMockTest {
     }
 
     @Test
-    @EnabledOnOs(OS.LINUX)
     @Order(6)
     public void testConfigListener() throws NacosException, InterruptedException {
         Configuration configuration = ConfigurationFactory.getInstance();
@@ -206,4 +296,18 @@ public class NacosMockTest {
         configService.removeConfig(NACOS_DATAID, NACOS_GROUP);
         ConfigurationFactory.reload();
     }
+
+    @AfterAll
+    public static void tearDown() {
+        // 关闭MockedStatic
+        if (mockedNacosFactory != null) {
+            mockedNacosFactory.close();
+        }
+
+        // 清理数据
+        configMap.clear();
+        listenerMap.clear();
+        System.clearProperty("seataEnv");
+    }
+
 }

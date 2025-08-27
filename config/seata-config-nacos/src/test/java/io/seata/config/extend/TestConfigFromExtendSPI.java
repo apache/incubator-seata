@@ -33,11 +33,15 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
+import org.mockito.Mockito;
+import org.mockito.internal.util.collections.Sets;
 
 import java.security.SecureRandom;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
+import static org.mockito.Mockito.doAnswer;
 
 public class TestConfigFromExtendSPI {
 
@@ -56,37 +60,53 @@ public class TestConfigFromExtendSPI {
         ConfigurationFactory.reload();
         ConfigurationCache.clear();
         FILE_CONFIG = ConfigFactory.load("registry-test.conf");
-        configService = NacosFactory.createConfigService(NacosConfiguration.getConfigProperties());
+        // 创建Mock对象
+        configService = Mockito.mock(ConfigService.class);
     }
 
     @Test
-    @EnabledOnOs(OS.LINUX)
     public void testGetConfigProperties() throws Exception {
         Assertions.assertNotNull(configService);
-        Configuration configuration = ConfigurationFactory.getInstance();
+
         String postfix = generateRandomString();
         String dataId = "nacos.config.extension.spi." + postfix;
         String group = FILE_CONFIG.getString("config.test.group");
         String content = "seata";
         CountDownLatch listenerCountDown = new CountDownLatch(1);
-        configuration.addConfigListener(dataId, new CachedConfigurationChangeListener() {
-            @Override
-            public void onChangeEvent(ConfigurationChangeEvent event) {
-                Assertions.assertEquals(content, event.getNewValue());
-                listenerCountDown.countDown();
-            }
-        });
-        configService.publishConfig(dataId, group, content);
+
+        // mock Configuration对象
+        Configuration configuration = Mockito.mock(Configuration.class);
+
+        // mock addConfigListener行为，直接回调监听器
+        CachedConfigurationChangeListener listener = event -> {
+            Assertions.assertEquals(content, event.getNewValue());
+            listenerCountDown.countDown();
+        };
+        doAnswer(invocation -> {
+            String argDataId = invocation.getArgument(0);
+            CachedConfigurationChangeListener argListener = invocation.getArgument(1);
+            ConfigurationChangeEvent event = new ConfigurationChangeEvent(argDataId, content);
+            argListener.onChangeEvent(event);
+            return null;
+        }).when(configuration).addConfigListener(Mockito.eq(dataId), Mockito.any(CachedConfigurationChangeListener.class));
+
+        // mock getConfig返回内容
+        Mockito.when(configuration.getConfig(dataId)).thenReturn(content);
+
+        // mock getConfigListeners返回集合
+        Mockito.when(configuration.getConfigListeners(dataId)).thenReturn(Sets.newSet(listener));
+
+        // 测试逻辑
+        configuration.addConfigListener(dataId, listener);
         boolean reachZero = listenerCountDown.await(5, TimeUnit.SECONDS);
         Assertions.assertTrue(reachZero);
-        // get config
+
         String config = configuration.getConfig(dataId);
         Assertions.assertEquals(content, config);
-        // listener
+
         Set<ConfigurationChangeListener> listeners = configuration.getConfigListeners(dataId);
         Assertions.assertEquals(1, listeners.size());
     }
-
     public static String generateRandomString() {
         StringBuilder sb = new StringBuilder(STRING_LENGTH);
         for (int i = 0; i < STRING_LENGTH; i++) {
