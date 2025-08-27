@@ -152,9 +152,7 @@ seata:
       bucketTokenInitialNum: 999999
     http:
       filter:
-        enabled: true
         xss:
-          enabled: true
           keywords: ["<script>", "</script>", "javascript:", "vbscript:"]
   store:
     # support: file
