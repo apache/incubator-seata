@@ -103,11 +103,11 @@ class NamingserverRegistryServiceImplTest {
         namingserverRegistryService.register(inetSocketAddress);
         namingserverRegistryService.unregister(inetSocketAddress);
     }
+
     @Test
     public void testWatchCoversRefreshToken() throws Exception {
 
-        NamingserverRegistryServiceImpl spyService =
-                Mockito.spy(NamingserverRegistryServiceImpl.getInstance());
+        NamingserverRegistryServiceImpl spyService = Mockito.spy(NamingserverRegistryServiceImpl.getInstance());
         doReturn("127.0.0.1:8081").when(spyService).getNamingAddr();
 
         CloseableHttpResponse mockResponse = mock(CloseableHttpResponse.class);
@@ -115,7 +115,8 @@ class NamingserverRegistryServiceImplTest {
         when(mockStatusLine.getStatusCode()).thenReturn(200);
         when(mockResponse.getStatusLine()).thenReturn(mockStatusLine);
         mockStatic(HttpClientUtil.class);
-        when(HttpClientUtil.doPost(anyString(), anyString(), anyMap(), anyInt())).thenReturn(mockResponse);
+        when(HttpClientUtil.doPost(anyString(), anyString(), anyMap(), anyInt()))
+                .thenReturn(mockResponse);
         spyService.watch("testGroup");
     }
 
