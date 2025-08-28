@@ -21,11 +21,9 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.modelcontextprotocol.server.McpServerFeatures;
 import io.modelcontextprotocol.spec.McpSchema;
+import io.modelcontextprotocol.spec.McpSession;
 import org.apache.seata.common.util.StringUtils;
-import org.apache.seata.mcp.annotation.Prompt;
-import org.apache.seata.mcp.annotation.PromptParam;
-import org.apache.seata.mcp.annotation.Tool;
-import org.apache.seata.mcp.annotation.ToolParam;
+import org.apache.seata.mcp.annotation.*;
 import org.apache.seata.mcp.manager.MCPServerManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,16 +66,57 @@ public class MCPAutoRegister implements BeanPostProcessor {
         for (Method m : bean.getClass().getMethods()) {
             Tool toolAnn = m.getAnnotation(Tool.class);
             Prompt promptAnn = m.getAnnotation(Prompt.class);
+            Resource resourceAnn = m.getAnnotation(Resource.class);
             if(toolAnn!=null){
                 autoRegisterTool(bean,m,toolAnn);
-            }
-
-            if(promptAnn!=null){
+            }else if(promptAnn!=null){
                 autoRegisterPrompt(bean,m,promptAnn);
+            }else if(resourceAnn!=null){
+                autoRegisterResource(bean,m,resourceAnn);
             }
         }
-
         return bean;
+    }
+
+    public void autoRegisterResource(Object bean, Method m, Resource ann){
+        McpSchema.Resource resourceMeta = McpSchema.Resource.builder()
+                .name(m.getName())
+                .mimeType(ann.mimeType())
+                .description(ann.description())
+                .uri(ann.uri())
+                .build();
+        McpServerFeatures.AsyncResourceSpecification spec = new McpServerFeatures.AsyncResourceSpecification(
+                resourceMeta,(exchange, request) -> Mono.fromCallable(() -> {
+                    try {
+                        String uri = request.getUri();
+                        Object ret = m.invoke(bean, uri);
+                        List<McpSchema.ResourceContents> contents = new ArrayList<>();
+                        if(ret instanceof McpSchema.TextResourceContents){
+                            contents.add((McpSchema.TextResourceContents) ret);
+                        }else if(ret instanceof McpSchema.BlobResourceContents){
+                            contents.add((McpSchema.BlobResourceContents) ret);
+                        }
+                        return new McpSchema.ReadResourceResult(contents);
+                    } catch (InvocationTargetException e) {
+                        String err = e.getTargetException().getMessage();
+                        logger.error("Invoke Resource Error: {}",err);
+                        return new McpSchema.ReadResourceResult();
+                    } catch (Exception e) {
+                        logger.error("Resource transform failed:{}", e.getMessage());
+                        throw new RuntimeException(e);
+                    }
+                })
+                .subscribeOn(Schedulers.boundedElastic()));
+
+        // Add a resource and process the returned Mono
+        aysncManager
+                .getServerInstance()
+                .addResource(spec)
+                .doOnError(error -> {
+                    logger.error("Resource registration failed:{}", error.getMessage());
+                    throw new RuntimeException("Failed to register the resource: " + m.getName(), error);
+                })
+                .subscribe();
     }
 
     public void autoRegisterPrompt(Object bean, Method m, Prompt ann){
@@ -96,7 +135,6 @@ public class MCPAutoRegister implements BeanPostProcessor {
             arguments.add(promptArgument);
         }
 
-        // —— 2. build ToolSpecification and register as a tool ——
         McpSchema.Prompt promptMeta = new McpSchema.Prompt(m.getName(), ann.description(), arguments);
 
         McpServerFeatures.AsyncPromptSpecification spec = new McpServerFeatures.AsyncPromptSpecification(
@@ -105,7 +143,6 @@ public class MCPAutoRegister implements BeanPostProcessor {
                         Object[] args = Arrays.stream(methodParams)
                                 .map(p -> convertArgument(request.getArguments().get(p.getName()), p.getType()))
                                 .toArray();
-
                         Object ret = m.invoke(bean, args);
                         List<McpSchema.PromptMessage> messages = new ArrayList<>();
                         if (ret instanceof McpSchema.GetPromptResult) {
@@ -113,10 +150,7 @@ public class MCPAutoRegister implements BeanPostProcessor {
                         } else if (ret instanceof String) {
                             messages.add(new McpSchema.PromptMessage(McpSchema.Role.USER,new McpSchema.TextContent((String) ret)));
                         }
-
-                        // `false` This call will no longer trigger the LLM to continue calling the tool
                         return new McpSchema.GetPromptResult("",messages);
-
                     } catch (InvocationTargetException ite) {
                         String err = ite.getTargetException().getMessage();
                         return new McpSchema.GetPromptResult("error",Collections.singletonList(new McpSchema.PromptMessage(McpSchema.Role.USER,new McpSchema.TextContent(err))));
