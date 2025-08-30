@@ -52,10 +52,10 @@ public class GlobalSessionParamDto implements Serializable {
     @ToolParam(description = "PageSize", required = true, example = "100")
     private int pageSize;
 
-    @ToolParam(description = "The transaction start time is after this time (yyyy-MM-dd HH:mm:ss), Do not specify a time to query transactions for the last hour by default")
+    @ToolParam(description = "The transaction start time is after this time (yyyy-MM-dd HH:mm:ss)")
     private String timeStart;
 
-    @ToolParam(description = "The transaction start time is before this time (yyyy-MM-dd HH:mm:ss), Do not specify a time to query transactions for the last hour by default")
+    @ToolParam(description = "The transaction start time is before this time (yyyy-MM-dd HH:mm:ss)")
     private String timeEnd;
 
     public int getPageNum() {
