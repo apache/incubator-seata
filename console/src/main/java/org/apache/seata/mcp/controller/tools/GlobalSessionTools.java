@@ -19,6 +19,7 @@ package org.apache.seata.mcp.controller.tools;
 import org.apache.seata.common.result.PageResult;
 import org.apache.seata.mcp.annotation.Tool;
 import org.apache.seata.mcp.annotation.ToolParam;
+import org.apache.seata.mcp.entity.dto.GlobalSessionParamDto;
 import org.apache.seata.mcp.entity.param.GlobalAbnormalSessionParam;
 import org.apache.seata.mcp.entity.param.GlobalSessionParam;
 import org.apache.seata.mcp.entity.pojo.NameSpaceDetail;
@@ -57,7 +58,8 @@ public class GlobalSessionTools {
     public PageResult<?> queryGlobalSession(
             @ToolParam(description = "Specify the namespace of the TC node", required = true)
                     NameSpaceDetail nameSpaceDetail,
-            @ToolParam(description = "Query parameter objects", required = true) GlobalSessionParam param) {
+            @ToolParam(description = "Query parameter objects", required = true) GlobalSessionParamDto paramDto) {
+        GlobalSessionParam param = GlobalSessionParam.covertFromDtoParam(paramDto);
         return globalSessionService.queryGlobalSession(nameSpaceDetail, param);
     }
 
