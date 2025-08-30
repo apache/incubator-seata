@@ -23,6 +23,8 @@ import java.util.regex.Pattern;
 
 public class DateUtils {
 
+    public static final Long ONE_DAY_TIMESTAMP = 86400000L;
+
     private static final Pattern DATE_PATTERN =
             Pattern.compile("^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$");
 
@@ -64,6 +66,14 @@ public class DateUtils {
 
     public static boolean judgeExceedTimeDuration(Long startTime, Long endTime, Long maxDuration){
         return endTime - startTime > maxDuration;
+    }
+
+    public static Long getNowTimeStamp(){
+        return LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+    }
+
+    public static Long convertToHourFromTimeStamp(Long timestamp){
+        return timestamp / (60 * 60 * 1000);
     }
 }
 
