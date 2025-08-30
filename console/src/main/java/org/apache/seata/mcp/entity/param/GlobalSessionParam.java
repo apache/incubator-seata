@@ -16,9 +16,8 @@
  */
 package org.apache.seata.mcp.entity.param;
 
-import org.apache.seata.core.model.BranchStatus;
-import org.apache.seata.core.model.GlobalStatus;
-import org.apache.seata.mcp.annotation.ToolParam;
+import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.mcp.entity.dto.GlobalSessionParamDto;
 import org.apache.seata.mcp.utils.DateUtils;
 
 import java.io.Serializable;
@@ -32,30 +31,23 @@ public class GlobalSessionParam implements Serializable {
     /**
      * the xid
      */
-    @ToolParam(description = "GLOBAL TRANSACTIONS id")
     private String xid;
     /**
      * the application id
      */
-    @ToolParam(description = "applicationId")
     private String applicationId;
     /**
      * the global session status
      */
-    @ToolParam(
-            description = "the state enumeration class is in example",
-            exampleValueClassName = {GlobalStatus.class, BranchStatus.class})
     private Integer status;
     /**
      * the transaction name
      */
-    @ToolParam(description = "The name of the transaction")
     private String transactionName;
 
     /**
      * the vgroup
      */
-    @ToolParam(description = "Belong to the group")
     private String vgroup;
 
     /**
@@ -63,19 +55,14 @@ public class GlobalSessionParam implements Serializable {
      * true: with branch session
      * false: no branch session
      */
-    @ToolParam(description = "Whether or not it contains branch transaction information")
     private boolean withBranch;
 
-    @ToolParam(description = "PAGE NUMBER", required = true, example = "1")
     private int pageNum;
 
-    @ToolParam(description = "PageSize", required = true, example = "100")
     private int pageSize;
 
-    @ToolParam(description = "Start Time (Timestamp)")
     private Long timeStart;
 
-    @ToolParam(description = "End Time (Timestamp)")
     private Long timeEnd;
 
     public int getPageNum() {
@@ -175,9 +162,32 @@ public class GlobalSessionParam implements Serializable {
 
     public static GlobalSessionParam covertFromAbnormalParam(GlobalAbnormalSessionParam abParam){
         GlobalSessionParam param = new GlobalSessionParam();
-        param.setTimeStart(DateUtils.convertToTimeStampFromDateTime(abParam.getTimeStart()));
-        param.setTimeEnd(DateUtils.convertToTimeStampFromDateTime(abParam.getTimeEnd()));
+        if(StringUtils.isNotBlank(abParam.getTimeStart())){
+            param.setTimeStart(DateUtils.convertToTimeStampFromDateTime(abParam.getTimeStart()));
+        }
+        if(StringUtils.isNotBlank(abParam.getTimeEnd())){
+            param.setTimeEnd(DateUtils.convertToTimeStampFromDateTime(abParam.getTimeEnd()));
+        }
         param.setWithBranch(abParam.isWithBranch());
+        return param;
+    }
+
+    public static GlobalSessionParam covertFromDtoParam(GlobalSessionParamDto paramDto){
+        GlobalSessionParam param = new GlobalSessionParam();
+        param.setPageSize(paramDto.getPageSize());
+        param.setPageNum(paramDto.getPageNum());
+        param.setStatus(paramDto.getStatus());
+        param.setXid(paramDto.getXid());
+        param.setApplicationId(paramDto.getApplicationId());
+        param.setVgroup(paramDto.getVgroup());
+        param.setTransactionName(paramDto.getTransactionName());
+        param.setWithBranch(paramDto.isWithBranch());
+        if(StringUtils.isNotBlank(paramDto.getTimeStart())){
+            param.setTimeStart(DateUtils.convertToTimeStampFromDateTime(paramDto.getTimeStart()));
+        }
+        if(StringUtils.isNotBlank(paramDto.getTimeEnd())){
+            param.setTimeEnd(DateUtils.convertToTimeStampFromDateTime(paramDto.getTimeEnd()));
+        }
         return param;
     }
 }
