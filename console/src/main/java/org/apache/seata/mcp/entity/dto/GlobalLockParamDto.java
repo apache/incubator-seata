@@ -1,68 +1,55 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package org.apache.seata.mcp.entity.param;
+package org.apache.seata.mcp.entity.dto;
 
-import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.mcp.annotation.ToolParam;
-import org.apache.seata.mcp.entity.dto.GlobalLockParamDto;
-import org.apache.seata.mcp.utils.DateUtils;
-import org.springframework.beans.BeanUtils;
 
 import java.io.Serializable;
 
-/**
- * Global lock param
- */
-public class GlobalLockParam implements Serializable {
+public class GlobalLockParamDto implements Serializable {
 
     private static final long serialVersionUID = 615412528070131284L;
 
     /**
      * the xid
      */
+    @ToolParam(description = "Global transaction id")
     private String xid;
     /**
      * the table name
      */
+    @ToolParam(description = "the table name")
     private String tableName;
     /**
      * the transaction id
      */
+    @ToolParam(description = "the transaction id")
     private String transactionId;
     /**
      * the branch id
      */
+    @ToolParam(description = "the branch id")
     private String branchId;
     /**
      * the primary Key
      */
+    @ToolParam(description = "the primary Key")
     private String pk;
     /**
      * the resourceId
      */
+    @ToolParam(description = "resourceId")
     private String resourceId;
 
+    @ToolParam(description = "page number", required = true)
     private int pageNum;
 
+    @ToolParam(description = "Page size", required = true)
     private int pageSize;
 
-    private Long timeStart;
+    @ToolParam(description = "Start time, The global lock create time is after this time (yyyy-MM-dd HH:mm:ss)")
+    private String timeStart;
 
-    private Long timeEnd;
+    @ToolParam(description = "End time, The global lock create time is before this time (yyyy-MM-dd HH:mm:ss)")
+    private String timeEnd;
 
     public int getPageNum() {
         return pageNum;
@@ -80,19 +67,19 @@ public class GlobalLockParam implements Serializable {
         this.pageSize = pageSize;
     }
 
-    public Long getTimeStart() {
+    public String getTimeStart() {
         return timeStart;
     }
 
-    public void setTimeStart(Long timeStart) {
+    public void setTimeStart(String timeStart) {
         this.timeStart = timeStart;
     }
 
-    public Long getTimeEnd() {
+    public String getTimeEnd() {
         return timeEnd;
     }
 
-    public void setTimeEnd(Long timeEnd) {
+    public void setTimeEnd(String timeEnd) {
         this.timeEnd = timeEnd;
     }
 
@@ -157,17 +144,5 @@ public class GlobalLockParam implements Serializable {
                 + pageSize + ", timeStart="
                 + timeStart + ", timeEnd="
                 + timeEnd + '}';
-    }
-
-    public static GlobalLockParam convertFromParamDto(GlobalLockParamDto paramDto){
-        GlobalLockParam param = new GlobalLockParam();
-        BeanUtils.copyProperties(paramDto,param);
-        if(StringUtils.isNotBlank(paramDto.getTimeStart())){
-            param.setTimeStart(DateUtils.convertToTimeStampFromDateTime(paramDto.getTimeStart()));
-        }
-        if(StringUtils.isNotBlank(paramDto.getTimeEnd())){
-            param.setTimeEnd(DateUtils.convertToTimeStampFromDateTime(paramDto.getTimeEnd()));
-        }
-        return param;
     }
 }
