@@ -73,9 +73,9 @@ seata:
     promptSupport: true
     resourceSupport: true
 
-    # Query limits the maximum time interval, The unit is milliseconds
+    # Query limits the maximum time interval, The unit is milliseconds, Default seven days
     query:
-      max_query_duration: 86400000
+      max_query_duration: 604800000
 
     # Whether to enable permission authentication
     auth:

@@ -183,7 +183,7 @@ public class MCPProperties {
         serverVersion = env.getProperty("seata.mcp.serverVersion", "1.0.0");
         resourceSupport = Boolean.parseBoolean(env.getProperty("seata.mcp.resourceSupport", "true"));
         promptSupport = Boolean.parseBoolean(env.getProperty("seata.mcp.promptSupport", "true"));
-        queryDuration = Long.parseLong(env.getProperty("seata.mcp.query.max_query_duration", "86400000"));
+        queryDuration = Long.parseLong(env.getProperty("seata.mcp.query.max_query_duration", "604800000"));
         enableAuth = Boolean.parseBoolean(env.getProperty("seata.mcp.auth.enabled", "true"));
     }
 
