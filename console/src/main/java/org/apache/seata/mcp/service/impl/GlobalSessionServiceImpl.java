@@ -173,11 +173,13 @@ public class GlobalSessionServiceImpl implements GlobalSessionService {
         for (Integer status : exceptionStatus) {
             param.setStatus(status);
             List<GlobalSessionVO> datas = queryGlobalSession(nameSpaceDetail, param).getData();
-            for(Object vo : datas){
-                if(result.size()>=200){
-                    return result;
+            if(datas!=null && !datas.isEmpty()){
+                for(Object vo : datas){
+                    if(result.size()>=200){
+                        return result;
+                    }
+                    result.add(vo.toString());
                 }
-                result.add(vo.toString());
             }
         }
         return result;
