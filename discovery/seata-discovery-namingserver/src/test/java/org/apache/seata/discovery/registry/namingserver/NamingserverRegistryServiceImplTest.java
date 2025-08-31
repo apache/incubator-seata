@@ -16,6 +16,7 @@
  */
 package org.apache.seata.discovery.registry.namingserver;
 
+import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.ContentType;
 import org.apache.http.protocol.HTTP;
@@ -34,6 +35,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MutablePropertySources;
@@ -54,6 +56,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 
 class NamingserverRegistryServiceImplTest {
 
@@ -64,9 +73,10 @@ class NamingserverRegistryServiceImplTest {
         System.setProperty("registry.seata.namespace", "dev");
         System.setProperty("registry.seata.cluster", "cluster1");
         System.setProperty("registry.seata.server-addr", "127.0.0.1:8080");
+        System.setProperty("registry.seata.username", "seata");
+        System.setProperty("registry.seata.password", "seata");
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 
-        // 获取应用程序环境
         ConfigurableEnvironment environment = context.getEnvironment();
         MutablePropertySources propertySources = environment.getPropertySources();
         Properties customProperties = new Properties();
@@ -82,6 +92,8 @@ class NamingserverRegistryServiceImplTest {
         System.clearProperty("registry.seata.namespace");
         System.clearProperty("registry.seata.cluster");
         System.clearProperty("registry.seata.server-addr");
+        System.clearProperty("registry.seata.username");
+        System.clearProperty("registry.seata.password");
     }
 
     @Test
@@ -90,6 +102,22 @@ class NamingserverRegistryServiceImplTest {
         InetSocketAddress inetSocketAddress = new InetSocketAddress("127.0.0.1", 8080);
         namingserverRegistryService.register(inetSocketAddress);
         namingserverRegistryService.unregister(inetSocketAddress);
+    }
+
+    @Test
+    public void testWatchCoversRefreshToken() throws Exception {
+
+        NamingserverRegistryServiceImpl spyService = Mockito.spy(NamingserverRegistryServiceImpl.getInstance());
+        doReturn("127.0.0.1:8081").when(spyService).getNamingAddr();
+
+        CloseableHttpResponse mockResponse = mock(CloseableHttpResponse.class);
+        StatusLine mockStatusLine = mock(StatusLine.class);
+        when(mockStatusLine.getStatusCode()).thenReturn(200);
+        when(mockResponse.getStatusLine()).thenReturn(mockStatusLine);
+        mockStatic(HttpClientUtil.class);
+        when(HttpClientUtil.doPost(anyString(), anyString(), anyMap(), anyInt()))
+                .thenReturn(mockResponse);
+        spyService.watch("testGroup");
     }
 
     @Test
