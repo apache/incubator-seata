@@ -29,7 +29,7 @@ public class SqlConstant {
             "SELECT COLUMN_NAME, DATA_TYPE, COLUMN_COMMENT FROM INFORMATION_SCHEMA.COLUMNS "
                     + "WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?";
 
-    public static final String GET_UNDO_LOG_SQL = "SELECT rollback_info,context,log_status FROM undo_log WHERE";
+    public static final String GET_UNDO_LOG_SQL = "SELECT rollback_info,context,log_status,log_created,log_modified FROM undo_log WHERE";
 
     public static final String PARAM_BRANCH_ID_SQL = " branch_id = ? #";
 
