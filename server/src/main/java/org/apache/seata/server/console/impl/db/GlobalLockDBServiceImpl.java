@@ -171,11 +171,11 @@ public class GlobalLockDBServiceImpl extends AbstractLockService implements Glob
             sqlParamList.add(param.getBranchId());
         }
         if (param.getTimeStart() != null) {
-            whereConditionBuilder.append(PageUtil.getTimeStartSql(this.dbType, "gmt_create"));
+            whereConditionBuilder.append(PageUtil.getDateTimeStartSql(this.dbType, "gmt_create"));
             sqlParamList.add(param.getTimeStart() / 1000);
         }
         if (param.getTimeEnd() != null) {
-            whereConditionBuilder.append(PageUtil.getTimeEndSql(this.dbType, "gmt_create"));
+            whereConditionBuilder.append(PageUtil.getDateTimeEndSql(this.dbType, "gmt_create"));
             sqlParamList.add(param.getTimeEnd() / 1000);
         }
         String whereCondition = whereConditionBuilder.toString();
