@@ -36,21 +36,6 @@ public class UndoLogServiceImpl implements UndoLogService {
 
     @Override
     public PageResult<?> queryAndAnalyzeUndoLog(UndoLogParam param) {
-        // 1. First, query the undo_log data of the corresponding RM based on the parameters
-        Map<String, List<byte[]>> undoLogInfo = dataSourceService.getUndoLogInfo(param);
-        Integer counts = dataSourceService.getUndoLogCounts(param);
-        if (undoLogInfo.isEmpty()) {
-            return PageResult.failure("", "The corresponding undoLog data cannot be queried");
-        }
-        // 2. Then deserialize undoLogInfo to BranchUndoLog through FastJsonParser
-        UndoLogParser parser = new UndoLogParser();
-        List<String> result = new ArrayList<>();
-        for (String context : undoLogInfo.keySet()) {
-            List<byte[]> bytes = undoLogInfo.get(context);
-            for (byte[] infos : bytes) {
-                result.add(parser.decode(infos));
-            }
-        }
-        return PageResult.success(result, counts, param.getPageNum(), param.getPageSize());
+        return dataSourceService.getUndoLogInfo(param);
     }
 }
