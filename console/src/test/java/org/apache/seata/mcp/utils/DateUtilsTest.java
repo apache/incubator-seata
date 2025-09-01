@@ -1,10 +1,10 @@
 package org.apache.seata.mcp.utils;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.*;
 
@@ -23,19 +23,20 @@ public class DateUtilsTest {
 
     @ParameterizedTest
     @DisplayName("Test invalid date formats")
-    @ValueSource(strings = {
-            "2023-1-1",      // month and day not two digits
-            "23-01-01",      // year not four digits
-            "2023/01/01",    // wrong separator
-            "2023-13-01",    // month out of range
-            "2023-01-32",    // day out of range
-            "2023-00-01",    // month is 0
-            "2023-01-00",    // day is 0
-            "",              // empty string
-            "abc-def-ghi",   // non-numeric
-            "2023-01",       // incomplete format
-            "2023-01-01 10:30:00" // includes time part
-    })
+    @ValueSource(
+            strings = {
+                "2023-1-1", // month and day not two digits
+                "23-01-01", // year not four digits
+                "2023/01/01", // wrong separator
+                "2023-13-01", // month out of range
+                "2023-01-32", // day out of range
+                "2023-00-01", // month is 0
+                "2023-01-00", // day is 0
+                "", // empty string
+                "abc-def-ghi", // non-numeric
+                "2023-01", // incomplete format
+                "2023-01-01 10:30:00" // includes time part
+            })
     public void testIsValidDate_InvalidFormats(String invalidDate) {
         assertFalse(DateUtils.isValidDate(invalidDate));
     }
@@ -80,26 +81,28 @@ public class DateUtilsTest {
         assertTrue(timestamp > 0);
 
         // Verify conversion accuracy
-        LocalDateTime expectedDateTime = LocalDateTime.parse(dateTimeStr,
-                java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        long expectedTimestamp = expectedDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        LocalDateTime expectedDateTime =
+                LocalDateTime.parse(dateTimeStr, java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        long expectedTimestamp =
+                expectedDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
 
         assertEquals(expectedTimestamp, timestamp);
     }
 
     @ParameterizedTest
     @DisplayName("Test invalid datetime conversion returns -1")
-    @ValueSource(strings = {
-            "2023-06-15 25:30:45",    // invalid hour
-            "2023-06-15 14:60:45",    // invalid minute
-            "2023-06-15 14:30:61",    // invalid second
-            "2023-13-15 14:30:45",    // invalid month
-            "2023-06-32 14:30:45",    // invalid day
-            "invalid-datetime",        // completely invalid format
-            "2023-06-15",             // missing time part
-            "",                       // empty string
-            "2023/06/15 14:30:45"     // wrong date separator
-    })
+    @ValueSource(
+            strings = {
+                "2023-06-15 25:30:45", // invalid hour
+                "2023-06-15 14:60:45", // invalid minute
+                "2023-06-15 14:30:61", // invalid second
+                "2023-13-15 14:30:45", // invalid month
+                "2023-06-32 14:30:45", // invalid day
+                "invalid-datetime", // completely invalid format
+                "2023-06-15", // missing time part
+                "", // empty string
+                "2023/06/15 14:30:45" // wrong date separator
+            })
     public void testConvertToTimeStampFromDateTime_InvalidDateTime(String invalidDateTime) {
         assertEquals(-1, DateUtils.convertToTimeStampFromDateTime(invalidDateTime));
     }
@@ -119,10 +122,10 @@ public class DateUtilsTest {
         assertTrue(dateTimeStr.matches("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}"));
 
         // Verify conversion accuracy
-        LocalDateTime expectedDateTime = Instant.ofEpochMilli(timestamp)
-                .atZone(ZoneId.systemDefault()).toLocalDateTime();
-        String expectedStr = expectedDateTime.format(
-                java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        LocalDateTime expectedDateTime =
+                Instant.ofEpochMilli(timestamp).atZone(ZoneId.systemDefault()).toLocalDateTime();
+        String expectedStr =
+                expectedDateTime.format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
         assertEquals(expectedStr, dateTimeStr);
     }
@@ -163,12 +166,12 @@ public class DateUtilsTest {
     @ParameterizedTest
     @DisplayName("Test different duration scenarios")
     @CsvSource({
-            "1000, 2000, 500, true",      // exceeds
-            "1000, 2000, 1000, false",   // equals
-            "1000, 2000, 1500, false",   // does not exceed
-            "0, 1000, 999, true",        // exceeds
-            "0, 1000, 1000, false",      // equals
-            "5000, 3000, 1000, false"    // end time less than start time
+        "1000, 2000, 500, true", // exceeds
+        "1000, 2000, 1000, false", // equals
+        "1000, 2000, 1500, false", // does not exceed
+        "0, 1000, 999, true", // exceeds
+        "0, 1000, 1000, false", // equals
+        "5000, 3000, 1000, false" // end time less than start time
     })
     public void testJudgeExceedTimeDuration_ParameterizedTest(
             long startTime, long endTime, long maxDuration, boolean expected) {

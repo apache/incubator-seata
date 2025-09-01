@@ -14,15 +14,14 @@ package io.modelcontextprotocol.server;
  */
 public interface McpTransportContextExtractor<T> {
 
-	/**
-	 * Given an empty context, provides the means to fill it with transport-specific
-	 * metadata extracted from the request.
-	 * @param request the generic representation for the request in the context of a
-	 * specific transport implementation
-	 * @param transportContext the mutable context which can be filled in with metadata
-	 * @return the context filled in with metadata. It can be the same instance as
-	 * provided or a new one.
-	 */
-	McpTransportContext extract(T request, McpTransportContext transportContext);
-
+    /**
+     * Given an empty context, provides the means to fill it with transport-specific
+     * metadata extracted from the request.
+     * @param request the generic representation for the request in the context of a
+     * specific transport implementation
+     * @param transportContext the mutable context which can be filled in with metadata
+     * @return the context filled in with metadata. It can be the same instance as
+     * provided or a new one.
+     */
+    McpTransportContext extract(T request, McpTransportContext transportContext);
 }

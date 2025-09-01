@@ -10,13 +10,12 @@ import reactor.core.publisher.Mono;
  */
 public interface McpRequestHandler<T> {
 
-	/**
-	 * Handles a request from the client.
-	 * @param exchange the exchange associated with the client that allows calling back to
-	 * the connected client or inspecting its capabilities.
-	 * @param params the parameters of the request.
-	 * @return a Mono that will emit the response to the request.
-	 */
-	Mono<T> handle(McpAsyncServerExchange exchange, Object params);
-
+    /**
+     * Handles a request from the client.
+     * @param exchange the exchange associated with the client that allows calling back to
+     * the connected client or inspecting its capabilities.
+     * @param params the parameters of the request.
+     * @return a Mono that will emit the response to the request.
+     */
+    Mono<T> handle(McpAsyncServerExchange exchange, Object params);
 }

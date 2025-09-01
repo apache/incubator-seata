@@ -140,17 +140,16 @@ public class GlobalSessionParamDto implements Serializable {
 
     @Override
     public String toString() {
-        return "GlobalSessionParamDto{" +
-                "xid='" + xid + '\'' +
-                ", applicationId='" + applicationId + '\'' +
-                ", status=" + status +
-                ", transactionName='" + transactionName + '\'' +
-                ", vgroup='" + vgroup + '\'' +
-                ", withBranch=" + withBranch +
-                ", pageNum=" + pageNum +
-                ", pageSize=" + pageSize +
-                ", timeStart='" + timeStart + '\'' +
-                ", timeEnd='" + timeEnd + '\'' +
-                '}';
+        return "GlobalSessionParamDto{" + "xid='"
+                + xid + '\'' + ", applicationId='"
+                + applicationId + '\'' + ", status="
+                + status + ", transactionName='"
+                + transactionName + '\'' + ", vgroup='"
+                + vgroup + '\'' + ", withBranch="
+                + withBranch + ", pageNum="
+                + pageNum + ", pageSize="
+                + pageSize + ", timeStart='"
+                + timeStart + '\'' + ", timeEnd='"
+                + timeEnd + '\'' + '}';
     }
 }

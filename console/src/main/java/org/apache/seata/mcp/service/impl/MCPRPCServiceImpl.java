@@ -138,7 +138,7 @@ public class MCPRPCServiceImpl implements MCPRPCService {
             NameSpaceDetail nameSpaceDetail, HttpHeaders headers, Map<String, String> pathParams) {
         headers.add("x-seata-namespace", nameSpaceDetail.getNamespace());
         if (StringUtils.isNotBlank(nameSpaceDetail.getvGroup())) {
-            if(pathParams==null){
+            if (pathParams == null) {
                 pathParams = new HashMap<>();
             }
             pathParams.put("vGroup", nameSpaceDetail.getvGroup());

@@ -1,6 +1,5 @@
 package org.apache.seata.mcp.register;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.modelcontextprotocol.server.McpAsyncServer;
@@ -18,7 +17,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
-
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -204,8 +202,9 @@ class MCPAutoRegisterTest {
         assertFalse(toolResult.getError());
         assertEquals(1, toolResult.getContent().size());
         assertTrue(toolResult.getContent().get(0) instanceof McpSchema.TextContent);
-        assertEquals("Hello test, count: 42",
-                ((McpSchema.TextContent)toolResult.getContent().get(0)).getText());
+        assertEquals(
+                "Hello test, count: 42",
+                ((McpSchema.TextContent) toolResult.getContent().get(0)).getText());
     }
 
     @Test
@@ -239,8 +238,7 @@ class MCPAutoRegisterTest {
         McpSchema.PromptMessage message = promptResult.getMessages().get(0);
         assertEquals(McpSchema.Role.USER, message.getRole());
         assertTrue(message.getContent() instanceof McpSchema.TextContent);
-        assertEquals("Prompt about AI (detailed: true)",
-                ((McpSchema.TextContent)message.getContent()).getText());
+        assertEquals("Prompt about AI (detailed: true)", ((McpSchema.TextContent) message.getContent()).getText());
     }
 
     @Test
@@ -270,13 +268,14 @@ class MCPAutoRegisterTest {
         assertTrue(toolResult.getError());
         assertEquals(1, toolResult.getContent().size());
         assertTrue(toolResult.getContent().get(0) instanceof McpSchema.TextContent);
-        String errorMessage = ((McpSchema.TextContent)toolResult.getContent().get(0)).getText();
+        String errorMessage = ((McpSchema.TextContent) toolResult.getContent().get(0)).getText();
         assertTrue(errorMessage.contains("Test error"));
     }
 
     @Test
     void testGeneratePropertySchemaForPrimitiveTypes() throws Exception {
-        Method method = MCPAutoRegister.class.getDeclaredMethod("generatePropertySchema", Class.class, java.lang.reflect.Parameter.class);
+        Method method = MCPAutoRegister.class.getDeclaredMethod(
+                "generatePropertySchema", Class.class, java.lang.reflect.Parameter.class);
         method.setAccessible(true);
 
         Method testMethod = TestToolBean.class.getMethod("simpleTool", String.class, Integer.class);
@@ -292,9 +291,8 @@ class MCPAutoRegisterTest {
 
     @Test
     void testGenerateTypeSchemaForCollections() throws Exception {
-        Method method = MCPAutoRegister.class.getDeclaredMethod("generateTypeSchema",
-                com.fasterxml.jackson.databind.node.ObjectNode.class,
-                Class.class);
+        Method method = MCPAutoRegister.class.getDeclaredMethod(
+                "generateTypeSchema", com.fasterxml.jackson.databind.node.ObjectNode.class, Class.class);
         method.setAccessible(true);
 
         com.fasterxml.jackson.databind.node.ObjectNode prop = objectMapper.createObjectNode();
@@ -359,8 +357,9 @@ class MCPAutoRegisterTest {
     // Test bean classes and supporting types
     public static class TestToolBean {
         @Tool(description = "A simple tool for testing")
-        public String simpleTool(@ToolParam(description = "The name",required = true) String name,
-                                 @ToolParam(description = "The count",required = true) Integer count) {
+        public String simpleTool(
+                @ToolParam(description = "The name", required = true) String name,
+                @ToolParam(description = "The count", required = true) Integer count) {
             return "Hello " + name + ", count: " + count;
         }
 
@@ -377,8 +376,9 @@ class MCPAutoRegisterTest {
 
     public static class TestPromptBean {
         @Prompt(description = "A simple prompt for testing")
-        public String simplePrompt(@PromptParam(description = "The topic") String topic,
-                                   @PromptParam(description = "Detailed flag") Boolean detailed) {
+        public String simplePrompt(
+                @PromptParam(description = "The topic") String topic,
+                @PromptParam(description = "Detailed flag") Boolean detailed) {
             return "Prompt about " + topic + " (detailed: " + detailed + ")";
         }
     }
@@ -404,14 +404,26 @@ class MCPAutoRegisterTest {
             this.value = value;
         }
 
-        public String getName() { return name; }
-        public void setName(String name) { this.name = name; }
-        public Integer getValue() { return value; }
-        public void setValue(Integer value) { this.value = value; }
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public Integer getValue() {
+            return value;
+        }
+
+        public void setValue(Integer value) {
+            this.value = value;
+        }
     }
 
     public enum TestEnum {
-        VALUE1(1), VALUE2(2);
+        VALUE1(1),
+        VALUE2(2);
 
         private final int code;
 

@@ -30,27 +30,27 @@ public class GlobalLockDeleteParam implements Serializable {
     /**
      * the xid
      */
-    @ToolParam(description = "Global transaction id",required = true)
+    @ToolParam(description = "Global transaction id", required = true)
     private String xid;
     /**
      * the table name
      */
-    @ToolParam(description = "the table name",required = true)
+    @ToolParam(description = "the table name", required = true)
     private String tableName;
     /**
      * the branch id
      */
-    @ToolParam(description = "the branch id",required = true)
+    @ToolParam(description = "the branch id", required = true)
     private String branchId;
     /**
      * the primary Key
      */
-    @ToolParam(description = "the primary Key",required = true)
+    @ToolParam(description = "the primary Key", required = true)
     private String pk;
     /**
      * the resourceId
      */
-    @ToolParam(description = "resourceId",required = true)
+    @ToolParam(description = "resourceId", required = true)
     private String resourceId;
 
     public String getBranchId() {
@@ -95,12 +95,11 @@ public class GlobalLockDeleteParam implements Serializable {
 
     @Override
     public String toString() {
-        return "GlobalLockDeleteParam{" +
-                "xid='" + xid + '\'' +
-                ", tableName='" + tableName + '\'' +
-                ", branchId='" + branchId + '\'' +
-                ", pk='" + pk + '\'' +
-                ", resourceId='" + resourceId + '\'' +
-                '}';
+        return "GlobalLockDeleteParam{" + "xid='"
+                + xid + '\'' + ", tableName='"
+                + tableName + '\'' + ", branchId='"
+                + branchId + '\'' + ", pk='"
+                + pk + '\'' + ", resourceId='"
+                + resourceId + '\'' + '}';
     }
 }

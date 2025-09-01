@@ -152,16 +152,17 @@ class MCPServerManagerTest {
         for (int i = 0; i < threadCount; i++) {
             final int threadId = i;
             new Thread(() -> {
-                try {
-                    if (threadId % 2 == 0) {
-                        mcpServerManager.start();
-                    } else {
-                        mcpServerManager.stop();
-                    }
-                } finally {
-                    latch.countDown();
-                }
-            }).start();
+                        try {
+                            if (threadId % 2 == 0) {
+                                mcpServerManager.start();
+                            } else {
+                                mcpServerManager.stop();
+                            }
+                        } finally {
+                            latch.countDown();
+                        }
+                    })
+                    .start();
         }
 
         assertTrue(latch.await(5, TimeUnit.SECONDS));
@@ -180,16 +181,17 @@ class MCPServerManagerTest {
         for (int i = 0; i < threadCount; i++) {
             final int threadId = i;
             new Thread(() -> {
-                try {
-                    if (threadId % 2 == 0) {
-                        mcpServerManager.pause();
-                    } else {
-                        mcpServerManager.resume();
-                    }
-                } finally {
-                    latch.countDown();
-                }
-            }).start();
+                        try {
+                            if (threadId % 2 == 0) {
+                                mcpServerManager.pause();
+                            } else {
+                                mcpServerManager.resume();
+                            }
+                        } finally {
+                            latch.countDown();
+                        }
+                    })
+                    .start();
         }
 
         assertTrue(latch.await(5, TimeUnit.SECONDS));

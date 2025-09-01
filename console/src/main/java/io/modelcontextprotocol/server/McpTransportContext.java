@@ -15,36 +15,35 @@ import java.util.Collections;
  */
 public interface McpTransportContext {
 
-	/**
-	 * Key for use in Reactor Context to transport the context to user land.
-	 */
-	String KEY = "MCP_TRANSPORT_CONTEXT";
+    /**
+     * Key for use in Reactor Context to transport the context to user land.
+     */
+    String KEY = "MCP_TRANSPORT_CONTEXT";
 
-	/**
-	 * An empty, unmodifiable context.
-	 */
-	@SuppressWarnings("unchecked")
-	McpTransportContext EMPTY = new DefaultMcpTransportContext(Collections.EMPTY_MAP);
+    /**
+     * An empty, unmodifiable context.
+     */
+    @SuppressWarnings("unchecked")
+    McpTransportContext EMPTY = new DefaultMcpTransportContext(Collections.EMPTY_MAP);
 
-	/**
-	 * Extract a value from the context.
-	 * @param key the key under the data is expected
-	 * @return the associated value or {@code null} if missing.
-	 */
-	Object get(String key);
+    /**
+     * Extract a value from the context.
+     * @param key the key under the data is expected
+     * @return the associated value or {@code null} if missing.
+     */
+    Object get(String key);
 
-	/**
-	 * Inserts a value for a given key.
-	 * @param key a String representing the key
-	 * @param value the value to store
-	 */
-	void put(String key, Object value);
+    /**
+     * Inserts a value for a given key.
+     * @param key a String representing the key
+     * @param value the value to store
+     */
+    void put(String key, Object value);
 
-	/**
-	 * Copies the contents of the context to allow further modifications without affecting
-	 * the initial object.
-	 * @return a new instance with the underlying storage copied.
-	 */
-	McpTransportContext copy();
-
+    /**
+     * Copies the contents of the context to allow further modifications without affecting
+     * the initial object.
+     * @return a new instance with the underlying storage copied.
+     */
+    McpTransportContext copy();
 }

@@ -14,11 +14,10 @@ public class GlobalAbnormalSessionParam {
 
     @Override
     public String toString() {
-        return "GlobalAbnormalSessionParam{" +
-                "withBranch=" + withBranch +
-                ", timeStart='" + timeStart + '\'' +
-                ", timeEnd='" + timeEnd + '\'' +
-                '}';
+        return "GlobalAbnormalSessionParam{" + "withBranch="
+                + withBranch + ", timeStart='"
+                + timeStart + '\'' + ", timeEnd='"
+                + timeEnd + '\'' + '}';
     }
 
     public boolean isWithBranch() {

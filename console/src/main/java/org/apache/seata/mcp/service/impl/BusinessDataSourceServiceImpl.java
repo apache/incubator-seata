@@ -17,7 +17,6 @@
 package org.apache.seata.mcp.service.impl;
 
 import org.apache.seata.common.exception.StoreException;
-import org.apache.seata.common.result.PageResult;
 import org.apache.seata.common.util.PageUtil;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.mcp.entity.constant.SqlConstant;
@@ -76,8 +75,9 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
 
     @Override
     public List<Map<String, Object>> runSql(String sql, String resourceId) {
-        if(sql.contains("undo_log")){
-            throw new StoreException("If you do not use SQL to query undo_log data, use analyzeUndoLog to query and analyze undo_log");
+        if (sql.contains("undo_log")) {
+            throw new StoreException(
+                    "If you do not use SQL to query undo_log data, use analyzeUndoLog to query and analyze undo_log");
         }
         return sqlExecutionTemplate.query(resourceId, sql);
     }
@@ -148,11 +148,11 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
             String startTime = logModifiedTime.getStartTime();
             String endTime = logModifiedTime.getEndTime();
             if (startTime != null && endTime != null) {
-                if(containsTimeDuration){
+                if (containsTimeDuration) {
                     sql += " AND" + SqlConstant.UNDO_LOG_MODIFY_TIME_SQL;
-                }else{
+                } else {
                     sql += SqlConstant.UNDO_LOG_MODIFY_TIME_SQL;
-                    containsTimeDuration=true;
+                    containsTimeDuration = true;
                 }
                 Long startTimestamp = LocalDateTime.parse(startTime, formatter)
                         .atZone(ZoneId.systemDefault())
@@ -191,7 +191,8 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
         Map<String, List<byte[]>> result = new HashMap<>();
         Object[] objects = params.toArray();
         List<Map<String, Object>> query = sqlExecutionTemplate.query(resourceId, sql, objects);
-        Map<String, Object> countMap = sqlExecutionTemplate.queryForObject(resourceId, PageUtil.countSql(sql, "mysql"), objects);
+        Map<String, Object> countMap =
+                sqlExecutionTemplate.queryForObject(resourceId, PageUtil.countSql(sql, "mysql"), objects);
         for (Map<String, Object> map : query) {
             byte[] rollbackInfo = (byte[]) map.get("rollback_info");
             String context = (String) map.get("context");
@@ -273,11 +274,11 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
             String startTime = logModifiedTime.getStartTime();
             String endTime = logModifiedTime.getEndTime();
             if (startTime != null && endTime != null) {
-                if(containsTimeDuration){
+                if (containsTimeDuration) {
                     sql += " AND" + SqlConstant.UNDO_LOG_MODIFY_TIME_SQL;
-                }else{
+                } else {
                     sql += SqlConstant.UNDO_LOG_MODIFY_TIME_SQL;
-                    containsTimeDuration=true;
+                    containsTimeDuration = true;
                 }
                 Long startTimestamp = LocalDateTime.parse(startTime, formatter)
                         .atZone(ZoneId.systemDefault())
@@ -314,7 +315,8 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
         sql = sql.replaceFirst("%", String.valueOf(pageSize));
         sql = sql.replaceFirst("%", String.valueOf(offset));
         Object[] objects = params.toArray();
-        Map<String, Object> mysql = sqlExecutionTemplate.queryForObject(resourceId, PageUtil.countSql(sql, "mysql"), objects);
+        Map<String, Object> mysql =
+                sqlExecutionTemplate.queryForObject(resourceId, PageUtil.countSql(sql, "mysql"), objects);
         Long o = (Long) mysql.get("count(1)");
         return o.intValue();
     }

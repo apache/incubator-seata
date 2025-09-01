@@ -25,7 +25,7 @@ import reactor.core.publisher.Mono;
  *
  * @author Dariusz Jędrzejczyk
  */
-public interface McpServerTransportProvider extends McpServerTransportProviderBase{
+public interface McpServerTransportProvider extends McpServerTransportProviderBase {
 
     /**
      * Sets the session factory that will be used to create sessions for new clients. An
