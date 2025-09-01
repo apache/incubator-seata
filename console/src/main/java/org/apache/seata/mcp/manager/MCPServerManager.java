@@ -89,12 +89,17 @@ public class MCPServerManager implements SmartLifecycle {
 
     public MCPServerManager(MCPProperties config, ObjectMapper objectMapper) {
         this.config = config;
-        if(config.getMcpType().equals(MCPProperties.SSE_TYPE)){
+        if (config.getMcpType().equals(MCPProperties.SSE_TYPE)) {
             MCPProperties.SseServerProperties properties = config.getSseServerProperties();
-            transportProvider = new ControlledSseTransportProvider(objectMapper,properties.getMessageEndpoint(),properties.getSseEndpoint());
-        }else {
+            transportProvider = new ControlledSseTransportProvider(
+                    objectMapper, properties.getMessageEndpoint(), properties.getSseEndpoint());
+        } else {
             MCPProperties.StreamableProperties properties = config.getStreamableProperties();
-            transportProvider = new ControlledStreamableTransportProvider(objectMapper,properties.getMcpEndPoint(),new WebMvcContextExtractor(),Duration.ofSeconds(properties.getHeartBeatSecondDuration()));
+            transportProvider = new ControlledStreamableTransportProvider(
+                    objectMapper,
+                    properties.getMcpEndPoint(),
+                    new WebMvcContextExtractor(),
+                    Duration.ofSeconds(properties.getHeartBeatSecondDuration()));
         }
     }
 
@@ -153,7 +158,7 @@ public class MCPServerManager implements SmartLifecycle {
         stateLock.lock();
         try {
             this.serverInstance = buildServer();
-            if(serverInstance==null){
+            if (serverInstance == null) {
                 throw new InstantiationException("TransportProvider transform failed");
             }
             transportProvider.activate();
@@ -189,7 +194,7 @@ public class MCPServerManager implements SmartLifecycle {
     }
 
     private McpAsyncServer buildServer() {
-        if(transportProvider instanceof ControlledSseTransportProvider){
+        if (transportProvider instanceof ControlledSseTransportProvider) {
             ControlledSseTransportProvider sseTransportProvider = (ControlledSseTransportProvider) transportProvider;
             return McpServer.async(sseTransportProvider)
                     .serverInfo(config.getServerName(), config.getServerVersion())
@@ -200,8 +205,9 @@ public class MCPServerManager implements SmartLifecycle {
                             .build())
                     .build();
         }
-        if(transportProvider instanceof ControlledStreamableTransportProvider){
-            ControlledStreamableTransportProvider streamableTransportProvider = (ControlledStreamableTransportProvider) transportProvider;
+        if (transportProvider instanceof ControlledStreamableTransportProvider) {
+            ControlledStreamableTransportProvider streamableTransportProvider =
+                    (ControlledStreamableTransportProvider) transportProvider;
             return McpServer.async(streamableTransportProvider)
                     .serverInfo(config.getServerName(), config.getServerVersion())
                     .capabilities(McpSchema.ServerCapabilities.builder()
@@ -229,7 +235,8 @@ public class MCPServerManager implements SmartLifecycle {
         RouterFunction<ServerResponse> getRouterFunction();
     }
 
-    private static class ControlledSseTransportProvider extends WebMvcSseServerTransportProvider implements ControlledTransportProvider{
+    private static class ControlledSseTransportProvider extends WebMvcSseServerTransportProvider
+            implements ControlledTransportProvider {
         private final AtomicBoolean active = new AtomicBoolean(false);
 
         public ControlledSseTransportProvider(ObjectMapper mapper, String messageEndpoint, String sseEndpoint) {
@@ -263,11 +270,16 @@ public class MCPServerManager implements SmartLifecycle {
         }
     }
 
-    private static class ControlledStreamableTransportProvider extends WebMvcStreamableServerTransportProvider implements ControlledTransportProvider{
+    private static class ControlledStreamableTransportProvider extends WebMvcStreamableServerTransportProvider
+            implements ControlledTransportProvider {
         private final AtomicBoolean active = new AtomicBoolean(false);
 
-        public ControlledStreamableTransportProvider(ObjectMapper mapper, String mcpEndPoint, McpTransportContextExtractor<ServerRequest> contextExtractor, Duration keepAliveInterval) {
-            super(mapper, mcpEndPoint,true, contextExtractor,keepAliveInterval);
+        public ControlledStreamableTransportProvider(
+                ObjectMapper mapper,
+                String mcpEndPoint,
+                McpTransportContextExtractor<ServerRequest> contextExtractor,
+                Duration keepAliveInterval) {
+            super(mapper, mcpEndPoint, true, contextExtractor, keepAliveInterval);
         }
 
         @Override

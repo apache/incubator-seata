@@ -201,7 +201,7 @@ public class WebMvcSseServerTransportProvider implements McpServerTransportProvi
 
     @Override
     public List<String> protocolVersions() {
-        return Arrays.asList(ProtocolVersions.MCP_2024_11_05,ProtocolVersions.MCP_2025_03_26);
+        return Arrays.asList(ProtocolVersions.MCP_2024_11_05, ProtocolVersions.MCP_2025_03_26);
     }
 
     /**

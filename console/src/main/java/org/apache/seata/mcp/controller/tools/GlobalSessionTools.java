@@ -50,7 +50,7 @@ public class GlobalSessionTools {
     public List<String> getAbnormalTransactionInfo(
             @ToolParam(description = "Specify the namespace of the TC node", required = true)
                     NameSpaceDetail nameSpaceDetail,
-            @ToolParam(description = "Query Param",required = true)GlobalAbnormalSessionParam param) {
+            @ToolParam(description = "Query Param", required = true) GlobalAbnormalSessionParam param) {
         return globalSessionService.getAbnormalSessions(nameSpaceDetail, param);
     }
 

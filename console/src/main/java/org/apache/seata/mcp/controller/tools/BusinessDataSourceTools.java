@@ -71,12 +71,16 @@ public class BusinessDataSourceTools {
     @Tool(description = "Execute the SQL query result, It can only be used to query business data!!!")
     public List<Map<String, Object>> runSql(
             @ToolParam(description = "SQL statement, String type", required = true) String sql,
-            @ToolParam(description = "The identity of the data source, start with jdbc://", required = true) String resourceId) {
+            @ToolParam(description = "The identity of the data source, start with jdbc://", required = true)
+                    String resourceId) {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("User try to run sql: {}, resourceId: {}", sql, resourceId);
         }
         List<Map<String, Object>> result = dataSourceService.runSql(sql, resourceId);
-        result.add(Collections.singletonMap("Important!!!","If it is related to data analysis, statistics, etc., Please generate a table and attach an analysis statement to the user for viewing"));
+        result.add(
+                Collections.singletonMap(
+                        "Important!!!",
+                        "If it is related to data analysis, statistics, etc., Please generate a table and attach an analysis statement to the user for viewing"));
         return result;
     }
 }

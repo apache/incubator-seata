@@ -51,13 +51,16 @@ public class GlobalLockServiceImpl implements GlobalLockService {
     public PageResult<GlobalLockVO> queryGlobalLock(NameSpaceDetail nameSpaceDetail, GlobalLockParam param) {
         // Check whether the query interval is too large
         if (param.getTimeEnd() != null && param.getTimeStart() != null) {
-            if (DateUtils.judgeExceedTimeDuration(param.getTimeStart(),param.getTimeEnd(),configuration.getQueryDuration())) {
-                return PageResult.failure("","The query time span is not allowed to exceed the max query duration : "
-                        + DateUtils.convertToHourFromTimeStamp(configuration.getQueryDuration()) + " hour");
+            if (DateUtils.judgeExceedTimeDuration(
+                    param.getTimeStart(), param.getTimeEnd(), configuration.getQueryDuration())) {
+                return PageResult.failure(
+                        "",
+                        "The query time span is not allowed to exceed the max query duration : "
+                                + DateUtils.convertToHourFromTimeStamp(configuration.getQueryDuration()) + " hour");
             }
-        }else if(param.getTimeStart()!=null && param.getTimeEnd()==null){
+        } else if (param.getTimeStart() != null && param.getTimeEnd() == null) {
             param.setTimeEnd(param.getTimeStart() + DateUtils.ONE_DAY_TIMESTAMP);
-        }else{
+        } else {
             param.setTimeEnd(null);
             param.setTimeStart(null);
         }
@@ -69,8 +72,8 @@ public class GlobalLockServiceImpl implements GlobalLockService {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-        if (result==null) {
-            return PageResult.failure("","query global lock failed");
+        if (result == null) {
+            return PageResult.failure("", "query global lock failed");
         } else {
             return result;
         }
