@@ -230,7 +230,7 @@ public class PageUtil {
     public static String getDateTimeStartSql(String dbType, String timeColumnName) {
         switch (dbType.toLowerCase()) {
             case "mysql":
-                return " and " + timeColumnName + " >= FROM_UNIXTIME(?) ";
+                return " and UNIX_TIMESTAMP(" + timeColumnName + ") >= ? ";
             case "postgresql":
                 return " and " + timeColumnName + " >= TO_TIMESTAMP(?) ";
             case "oracle":
@@ -255,7 +255,7 @@ public class PageUtil {
     public static String getDateTimeEndSql(String dbType, String timeColumnName) {
         switch (dbType.toLowerCase()) {
             case "mysql":
-                return " and " + timeColumnName + " <= FROM_UNIXTIME(?) ";
+                return " and UNIX_TIMESTAMP(" + timeColumnName + ") <= ? ";
             case "postgresql":
                 return " and " + timeColumnName + " <= TO_TIMESTAMP(?) ";
             case "oracle":
