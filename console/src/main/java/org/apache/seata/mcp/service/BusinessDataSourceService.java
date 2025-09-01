@@ -16,7 +16,9 @@
  */
 package org.apache.seata.mcp.service;
 
+import org.apache.seata.common.result.PageResult;
 import org.apache.seata.mcp.entity.param.UndoLogParam;
+import org.apache.seata.mcp.entity.vo.UndoLogVO;
 
 import java.util.List;
 import java.util.Map;
@@ -28,7 +30,7 @@ public interface BusinessDataSourceService {
 
     List<Map<String, Object>> runSql(String sql, String resourceId);
 
-    Map<String, List<byte[]>> getUndoLogInfo(UndoLogParam undoLogParam);
+    PageResult<UndoLogVO> getUndoLogInfo(UndoLogParam undoLogParam);
 
     Integer getUndoLogCounts(UndoLogParam undoLogParam);
 }

@@ -17,7 +17,11 @@
 package org.apache.seata.mcp.store;
 
 import org.apache.seata.common.exception.StoreException;
+import org.apache.seata.common.result.PageResult;
+import org.apache.seata.common.util.IOUtil;
+import org.apache.seata.common.util.PageUtil;
 import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.mcp.entity.vo.UndoLogVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -120,6 +124,67 @@ public class SqlExecutionTemplate {
         } finally {
             LOGGER.info("User query business datasource with sql: {}", sql);
             closeResources(rs, ps, conn);
+        }
+    }
+
+    /**
+     * Execute the query and return ResultSet
+     *
+     * @param resourceId of the data source
+     * @param sql SQL query statement
+     * @param params parameters
+     * @return List of query results
+     */
+    public PageResult<UndoLogVO> queryForUndoLogs(String resourceId, String sql, Integer pageNum, Integer pageSize, Object... params) {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        PreparedStatement countPs = null;
+        ResultSet rs = null;
+        ResultSet countRs = null;
+        List<UndoLogVO> data = new ArrayList<>();
+        int count = 0;
+
+        try {
+            if (!validateQuerySql(sql)) {
+                throw new StoreException("The query valid failed,Only query operations are allowed：" + sql);
+            }
+            conn = getDataSource(resourceId).getConnection();
+            if (params == null || params.length == 0) {
+                if ((sql.contains("where") || sql.contains("WHERE"))) {
+                    sql = sql.replaceAll("(?i)\\bWHERE\\b.*", "").trim();
+                }
+            }
+            ps = conn.prepareStatement(sql);
+            if (params != null) {
+                for (int i = 0; i < params.length; i++) {
+                    ps.setObject(i + 1, params[i]);
+                }
+            }
+
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                data.add(UndoLogVO.convert(rs));
+            }
+
+            // count query
+            sql = PageUtil.countSql(sql,"mysql");
+            countPs = conn.prepareStatement(sql);
+            if (params != null) {
+                for (int i = 0; i < params.length; i++) {
+                    countPs.setObject(i + 1, params[i]);
+                }
+            }
+            countRs = countPs.executeQuery();
+            while(countRs.next()){
+                count++;
+            }
+            return PageResult.success(data,count,pageNum,pageSize);
+        } catch (SQLException e) {
+            LOGGER.error("The query failed, resourceId: {}, sql: {}", resourceId, sql, e);
+            throw new StoreException("The query execution failed: " + e.getMessage());
+        } finally {
+            LOGGER.info("User query business datasource with sql: {}", sql);
+            IOUtil.close(rs,countPs,ps,conn);
         }
     }
 

@@ -17,16 +17,19 @@
 package org.apache.seata.mcp.service.impl;
 
 import org.apache.seata.common.exception.StoreException;
+import org.apache.seata.common.result.PageResult;
 import org.apache.seata.common.util.PageUtil;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.mcp.entity.constant.SqlConstant;
 import org.apache.seata.mcp.entity.param.UndoLogParam;
 import org.apache.seata.mcp.entity.pojo.MCPProperties;
+import org.apache.seata.mcp.entity.vo.UndoLogVO;
 import org.apache.seata.mcp.service.BusinessDataSourceService;
 import org.apache.seata.mcp.store.SqlExecutionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.ResultSet;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -83,7 +86,7 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
     }
 
     @Override
-    public Map<String, List<byte[]>> getUndoLogInfo(UndoLogParam param) {
+    public PageResult<UndoLogVO> getUndoLogInfo(UndoLogParam param) {
         long max_time_duration = mcpProperties.getQueryDuration();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String sql = SqlConstant.GET_UNDO_LOG_SQL;
@@ -188,24 +191,8 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
         sql += SqlConstant.UNDO_LOG_ORDER + SqlConstant.PAGE_QUERY;
         sql = sql.replaceFirst("%", String.valueOf(pageSize));
         sql = sql.replaceFirst("%", String.valueOf(offset));
-        Map<String, List<byte[]>> result = new HashMap<>();
         Object[] objects = params.toArray();
-        List<Map<String, Object>> query = sqlExecutionTemplate.query(resourceId, sql, objects);
-        Map<String, Object> countMap =
-                sqlExecutionTemplate.queryForObject(resourceId, PageUtil.countSql(sql, "mysql"), objects);
-        for (Map<String, Object> map : query) {
-            byte[] rollbackInfo = (byte[]) map.get("rollback_info");
-            String context = (String) map.get("context");
-            if (rollbackInfo != null && context != null) {
-                List<byte[]> bytes = result.get(context);
-                if (bytes == null) {
-                    bytes = new ArrayList<>();
-                }
-                bytes.add(rollbackInfo);
-                result.put(context, bytes);
-            }
-        }
-        return result;
+        return sqlExecutionTemplate.queryForUndoLogs(resourceId,sql,pageNum,pageSize,objects);
     }
 
     @Override
