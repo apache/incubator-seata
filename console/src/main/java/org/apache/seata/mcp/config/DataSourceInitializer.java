@@ -9,8 +9,7 @@ import javax.annotation.PostConstruct;
 public class DataSourceInitializer {
 
     @PostConstruct
-    public void init(){
+    public void init() {
         DataSourceFactory.initAllDataSources();
     }
-
 }

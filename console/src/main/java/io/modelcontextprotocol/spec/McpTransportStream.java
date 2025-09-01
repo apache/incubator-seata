@@ -21,29 +21,28 @@ import java.util.Optional;
  */
 public interface McpTransportStream<CONNECTION> {
 
-	/**
-	 * The last observed event identifier.
-	 * @return if not empty, contains the most recent event that was consumed
-	 */
-	Optional<String> lastId();
+    /**
+     * The last observed event identifier.
+     * @return if not empty, contains the most recent event that was consumed
+     */
+    Optional<String> lastId();
 
-	/**
-	 * An internal stream identifier used to distinguish streams while debugging.
-	 * @return a {@code long} stream identifier value
-	 */
-	long streamId();
+    /**
+     * An internal stream identifier used to distinguish streams while debugging.
+     * @return a {@code long} stream identifier value
+     */
+    long streamId();
 
-	/**
-	 * Allows keeping track of the transport stream of events (currently an SSE stream
-	 * from Streamable HTTP specification) and enable resumability and reconnects in case
-	 * of stream errors.
-	 * @param eventStream a {@link Publisher} of tuples (pairs) of an optional identifier
-	 * associated with a collection of messages
-	 * @return a flattened {@link Publisher} of
-	 * {@link McpSchema.JSONRPCMessage JSON-RPC messages}
-	 * with the identifier stripped away
-	 */
-	Publisher<McpSchema.JSONRPCMessage> consumeSseStream(
-			Publisher<Tuple2<Optional<String>, Iterable<McpSchema.JSONRPCMessage>>> eventStream);
-
+    /**
+     * Allows keeping track of the transport stream of events (currently an SSE stream
+     * from Streamable HTTP specification) and enable resumability and reconnects in case
+     * of stream errors.
+     * @param eventStream a {@link Publisher} of tuples (pairs) of an optional identifier
+     * associated with a collection of messages
+     * @return a flattened {@link Publisher} of
+     * {@link McpSchema.JSONRPCMessage JSON-RPC messages}
+     * with the identifier stripped away
+     */
+    Publisher<McpSchema.JSONRPCMessage> consumeSseStream(
+            Publisher<Tuple2<Optional<String>, Iterable<McpSchema.JSONRPCMessage>>> eventStream);
 }

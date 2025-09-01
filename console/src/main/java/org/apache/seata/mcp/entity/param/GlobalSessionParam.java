@@ -160,19 +160,19 @@ public class GlobalSessionParam implements Serializable {
                 + timeEnd + '}';
     }
 
-    public static GlobalSessionParam covertFromAbnormalParam(GlobalAbnormalSessionParam abParam){
+    public static GlobalSessionParam covertFromAbnormalParam(GlobalAbnormalSessionParam abParam) {
         GlobalSessionParam param = new GlobalSessionParam();
-        if(StringUtils.isNotBlank(abParam.getTimeStart())){
+        if (StringUtils.isNotBlank(abParam.getTimeStart())) {
             param.setTimeStart(DateUtils.convertToTimeStampFromDateTime(abParam.getTimeStart()));
         }
-        if(StringUtils.isNotBlank(abParam.getTimeEnd())){
+        if (StringUtils.isNotBlank(abParam.getTimeEnd())) {
             param.setTimeEnd(DateUtils.convertToTimeStampFromDateTime(abParam.getTimeEnd()));
         }
         param.setWithBranch(abParam.isWithBranch());
         return param;
     }
 
-    public static GlobalSessionParam covertFromDtoParam(GlobalSessionParamDto paramDto){
+    public static GlobalSessionParam covertFromDtoParam(GlobalSessionParamDto paramDto) {
         GlobalSessionParam param = new GlobalSessionParam();
         param.setPageSize(paramDto.getPageSize());
         param.setPageNum(paramDto.getPageNum());
@@ -182,10 +182,10 @@ public class GlobalSessionParam implements Serializable {
         param.setVgroup(paramDto.getVgroup());
         param.setTransactionName(paramDto.getTransactionName());
         param.setWithBranch(paramDto.isWithBranch());
-        if(StringUtils.isNotBlank(paramDto.getTimeStart())){
+        if (StringUtils.isNotBlank(paramDto.getTimeStart())) {
             param.setTimeStart(DateUtils.convertToTimeStampFromDateTime(paramDto.getTimeStart()));
         }
-        if(StringUtils.isNotBlank(paramDto.getTimeEnd())){
+        if (StringUtils.isNotBlank(paramDto.getTimeEnd())) {
             param.setTimeEnd(DateUtils.convertToTimeStampFromDateTime(paramDto.getTimeEnd()));
         }
         return param;

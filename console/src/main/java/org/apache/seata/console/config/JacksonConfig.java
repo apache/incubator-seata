@@ -54,12 +54,9 @@ public class JacksonConfig {
 
     @Bean
     public ObjectMapper objectMapper(Jackson2ObjectMapperBuilder builder) {
-        return builder
-                .modulesToInstall(new JavaTimeModule())
+        return builder.modulesToInstall(new JavaTimeModule())
                 .featuresToDisable(
-                        SerializationFeature.FAIL_ON_EMPTY_BEANS,
-                        SerializationFeature.WRITE_DATES_AS_TIMESTAMPS
-                )
+                        SerializationFeature.FAIL_ON_EMPTY_BEANS, SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
                 .build();
     }
 }

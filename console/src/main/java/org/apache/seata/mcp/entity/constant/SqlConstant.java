@@ -20,7 +20,6 @@ package org.apache.seata.mcp.entity.constant;
  *  ‘#’ is a placeholder for AND
  *  ‘%’ is a placeholder for Number Params
  */
-
 public class SqlConstant {
 
     public static final String GET_TABLE_NAME_SQL =

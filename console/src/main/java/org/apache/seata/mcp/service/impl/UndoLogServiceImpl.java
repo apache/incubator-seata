@@ -40,7 +40,7 @@ public class UndoLogServiceImpl implements UndoLogService {
         Map<String, List<byte[]>> undoLogInfo = dataSourceService.getUndoLogInfo(param);
         Integer counts = dataSourceService.getUndoLogCounts(param);
         if (undoLogInfo.isEmpty()) {
-            return PageResult.failure("","The corresponding undoLog data cannot be queried");
+            return PageResult.failure("", "The corresponding undoLog data cannot be queried");
         }
         // 2. Then deserialize undoLogInfo to BranchUndoLog through FastJsonParser
         UndoLogParser parser = new UndoLogParser();
@@ -51,6 +51,6 @@ public class UndoLogServiceImpl implements UndoLogService {
                 result.add(parser.decode(infos));
             }
         }
-        return PageResult.success(result,counts, param.getPageNum(), param.getPageSize());
+        return PageResult.success(result, counts, param.getPageNum(), param.getPageSize());
     }
 }

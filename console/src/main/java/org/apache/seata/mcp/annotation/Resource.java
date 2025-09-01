@@ -12,6 +12,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Resource {
     String description();
+
     String mimeType();
+
     String uri();
 }

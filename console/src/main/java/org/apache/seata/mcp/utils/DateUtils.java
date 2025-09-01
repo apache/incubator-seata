@@ -25,15 +25,14 @@ public class DateUtils {
 
     public static final Long ONE_DAY_TIMESTAMP = 86400000L;
 
-    private static final Pattern DATE_PATTERN =
-            Pattern.compile("^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$");
+    private static final Pattern DATE_PATTERN = Pattern.compile("^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$");
 
     public static boolean isValidDate(String dateStr) {
         return DATE_PATTERN.matcher(dateStr).matches();
     }
 
     public static long convertToTimestampFromDate(String dateStr) {
-        if(!isValidDate(dateStr)){
+        if (!isValidDate(dateStr)) {
             throw new DateTimeException("The time format does not match yyyy-mm-dd");
         }
         LocalDate date = LocalDate.parse(dateStr);
@@ -41,8 +40,7 @@ public class DateUtils {
         return zonedDateTime.toInstant().toEpochMilli();
     }
 
-
-    public static long convertToTimeStampFromDateTime(String dateTimeStr){
+    public static long convertToTimeStampFromDateTime(String dateTimeStr) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
         try {
@@ -53,27 +51,28 @@ public class DateUtils {
         }
     }
 
-    public static String convertToDateTimeFromTimestamp(Long timestamp){
+    public static String convertToDateTimeFromTimestamp(Long timestamp) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDateTime dateTime;
-        try{
-            dateTime = Instant.ofEpochMilli(timestamp).atZone(ZoneId.systemDefault()).toLocalDateTime();
-        } catch (DateTimeParseException e){
+        try {
+            dateTime = Instant.ofEpochMilli(timestamp)
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDateTime();
+        } catch (DateTimeParseException e) {
             return "Parse Failed, please check that the timestamp is correct";
         }
         return dateTime.format(formatter);
     }
 
-    public static boolean judgeExceedTimeDuration(Long startTime, Long endTime, Long maxDuration){
+    public static boolean judgeExceedTimeDuration(Long startTime, Long endTime, Long maxDuration) {
         return endTime - startTime > maxDuration;
     }
 
-    public static Long getNowTimeStamp(){
+    public static Long getNowTimeStamp() {
         return LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
     }
 
-    public static Long convertToHourFromTimeStamp(Long timestamp){
+    public static Long convertToHourFromTimeStamp(Long timestamp) {
         return timestamp / (60 * 60 * 1000);
     }
 }
-

@@ -56,13 +56,16 @@ public class GlobalSessionServiceImpl implements GlobalSessionService {
     public PageResult<GlobalSessionVO> queryGlobalSession(NameSpaceDetail nameSpaceDetail, GlobalSessionParam param) {
         // Check whether the query interval is too large
         if (param.getTimeEnd() != null && param.getTimeStart() != null) {
-            if (DateUtils.judgeExceedTimeDuration(param.getTimeStart(),param.getTimeEnd(),configuration.getQueryDuration())) {
-                return PageResult.failure("","The query time span is not allowed to exceed the max query duration : "
-                        + DateUtils.convertToHourFromTimeStamp(configuration.getQueryDuration()) + " hour");
+            if (DateUtils.judgeExceedTimeDuration(
+                    param.getTimeStart(), param.getTimeEnd(), configuration.getQueryDuration())) {
+                return PageResult.failure(
+                        "",
+                        "The query time span is not allowed to exceed the max query duration : "
+                                + DateUtils.convertToHourFromTimeStamp(configuration.getQueryDuration()) + " hour");
             }
-        }else if(param.getTimeStart()!=null && param.getTimeEnd()==null){
+        } else if (param.getTimeStart() != null && param.getTimeEnd() == null) {
             param.setTimeEnd(param.getTimeStart() + DateUtils.ONE_DAY_TIMESTAMP);
-        }else{
+        } else {
             param.setTimeEnd(null);
             param.setTimeStart(null);
         }
@@ -74,8 +77,8 @@ public class GlobalSessionServiceImpl implements GlobalSessionService {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-        if (pageResult==null) {
-            return PageResult.failure("","query global session failed");
+        if (pageResult == null) {
+            return PageResult.failure("", "query global session failed");
         } else {
             return pageResult;
         }
@@ -164,7 +167,8 @@ public class GlobalSessionServiceImpl implements GlobalSessionService {
     }
 
     @Override
-    public List<String> getAbnormalSessions(NameSpaceDetail nameSpaceDetail, GlobalAbnormalSessionParam abnormalSessionParam) {
+    public List<String> getAbnormalSessions(
+            NameSpaceDetail nameSpaceDetail, GlobalAbnormalSessionParam abnormalSessionParam) {
         List<String> result = new ArrayList<>();
         GlobalSessionParam param = GlobalSessionParam.covertFromAbnormalParam(abnormalSessionParam);
         param.setPageNum(1);
@@ -172,10 +176,11 @@ public class GlobalSessionServiceImpl implements GlobalSessionService {
         List<Integer> exceptionStatus = GlobalExceptionStatus.getAll();
         for (Integer status : exceptionStatus) {
             param.setStatus(status);
-            List<GlobalSessionVO> datas = queryGlobalSession(nameSpaceDetail, param).getData();
-            if(datas!=null && !datas.isEmpty()){
-                for(Object vo : datas){
-                    if(result.size()>=200){
+            List<GlobalSessionVO> datas =
+                    queryGlobalSession(nameSpaceDetail, param).getData();
+            if (datas != null && !datas.isEmpty()) {
+                for (Object vo : datas) {
+                    if (result.size() >= 200) {
                         return result;
                     }
                     result.add(vo.toString());
