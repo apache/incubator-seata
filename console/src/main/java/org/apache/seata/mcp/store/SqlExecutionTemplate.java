@@ -118,7 +118,7 @@ public class SqlExecutionTemplate {
             LOGGER.error("The query failed, resourceId: {}, sql: {}", resourceId, sql, e);
             throw new StoreException("The query execution failed: " + e.getMessage());
         } finally {
-            LOGGER.info("User query business datasource with sql: {}",sql);
+            LOGGER.info("User query business datasource with sql: {}", sql);
             closeResources(rs, ps, conn);
         }
     }

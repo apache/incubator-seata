@@ -17,7 +17,6 @@
 package org.apache.seata.mcp.entity.param;
 
 import org.apache.seata.common.util.StringUtils;
-import org.apache.seata.mcp.annotation.ToolParam;
 import org.apache.seata.mcp.entity.dto.GlobalLockParamDto;
 import org.apache.seata.mcp.utils.DateUtils;
 import org.springframework.beans.BeanUtils;
@@ -159,13 +158,13 @@ public class GlobalLockParam implements Serializable {
                 + timeEnd + '}';
     }
 
-    public static GlobalLockParam convertFromParamDto(GlobalLockParamDto paramDto){
+    public static GlobalLockParam convertFromParamDto(GlobalLockParamDto paramDto) {
         GlobalLockParam param = new GlobalLockParam();
-        BeanUtils.copyProperties(paramDto,param);
-        if(StringUtils.isNotBlank(paramDto.getTimeStart())){
+        BeanUtils.copyProperties(paramDto, param);
+        if (StringUtils.isNotBlank(paramDto.getTimeStart())) {
             param.setTimeStart(DateUtils.convertToTimeStampFromDateTime(paramDto.getTimeStart()));
         }
-        if(StringUtils.isNotBlank(paramDto.getTimeEnd())){
+        if (StringUtils.isNotBlank(paramDto.getTimeEnd())) {
             param.setTimeEnd(DateUtils.convertToTimeStampFromDateTime(paramDto.getTimeEnd()));
         }
         return param;

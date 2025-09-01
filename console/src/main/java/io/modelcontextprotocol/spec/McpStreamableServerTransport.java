@@ -13,12 +13,11 @@ import reactor.core.publisher.Mono;
  */
 public interface McpStreamableServerTransport extends McpServerTransport {
 
-	/**
-	 * Send a message to the client with a message ID for use in the SSE event payload
-	 * @param message the JSON-RPC payload
-	 * @param messageId message id for SSE events
-	 * @return Mono which completes when done
-	 */
-	Mono<Void> sendMessage(McpSchema.JSONRPCMessage message, String messageId);
-
+    /**
+     * Send a message to the client with a message ID for use in the SSE event payload
+     * @param message the JSON-RPC payload
+     * @param messageId message id for SSE events
+     * @return Mono which completes when done
+     */
+    Mono<Void> sendMessage(McpSchema.JSONRPCMessage message, String messageId);
 }

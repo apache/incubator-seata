@@ -27,16 +27,13 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 public class TimestampToStringDeserializer extends JsonDeserializer<String> {
-    private static final DateTimeFormatter FORMATTER =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Override
     public String deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
         long timestamp = p.getLongValue();
-        LocalDateTime dateTime = Instant.ofEpochMilli(timestamp)
-                .atZone(ZoneId.systemDefault())
-                .toLocalDateTime();
+        LocalDateTime dateTime =
+                Instant.ofEpochMilli(timestamp).atZone(ZoneId.systemDefault()).toLocalDateTime();
         return dateTime.format(FORMATTER);
     }
 }
-
