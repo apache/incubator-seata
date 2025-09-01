@@ -234,13 +234,15 @@ public class PageUtil {
             case "postgresql":
                 return " and " + timeColumnName + " >= TO_TIMESTAMP(?) ";
             case "oracle":
-                return " and " + timeColumnName + " >= TO_TIMESTAMP('1970-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS') + NUMTODSINTERVAL(?, 'SECOND') ";
+                return " and " + timeColumnName
+                        + " >= TO_TIMESTAMP('1970-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS') + NUMTODSINTERVAL(?, 'SECOND') ";
             case "sqlserver":
                 return " and " + timeColumnName + " >= DATEADD(SECOND, ?, '1970-01-01 00:00:00') ";
             case "dm":
             case "oscar":
                 // Compatible with Oracle syntax
-                return " and " + timeColumnName + " >= TO_TIMESTAMP('1970-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS') + NUMTODSINTERVAL(?, 'SECOND') ";
+                return " and " + timeColumnName
+                        + " >= TO_TIMESTAMP('1970-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS') + NUMTODSINTERVAL(?, 'SECOND') ";
             default:
                 throw new IllegalArgumentException("Unsupported DB type: " + dbType);
         }
@@ -259,13 +261,15 @@ public class PageUtil {
             case "postgresql":
                 return " and " + timeColumnName + " <= TO_TIMESTAMP(?) ";
             case "oracle":
-                return " and " + timeColumnName + " <= TO_TIMESTAMP('1970-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS') + NUMTODSINTERVAL(?, 'SECOND') ";
+                return " and " + timeColumnName
+                        + " <= TO_TIMESTAMP('1970-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS') + NUMTODSINTERVAL(?, 'SECOND') ";
             case "sqlserver":
                 return " and " + timeColumnName + " <= DATEADD(SECOND, ?, '1970-01-01 00:00:00') ";
             case "dm":
             case "oscar":
                 // Compatible with Oracle syntax
-                return " and " + timeColumnName + " <= TO_TIMESTAMP('1970-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS') + NUMTODSINTERVAL(?, 'SECOND') ";
+                return " and " + timeColumnName
+                        + " <= TO_TIMESTAMP('1970-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS') + NUMTODSINTERVAL(?, 'SECOND') ";
             default:
                 throw new IllegalArgumentException("Unsupported DB type: " + dbType);
         }
