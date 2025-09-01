@@ -1143,16 +1143,6 @@ public interface ConfigurationKeys {
     String SERVER_HTTP_FILTER_PREFIX = SERVER_HTTP + "filter.";
 
     /**
-     * The constant SERVER_HTTP_FILTERS_ENABLED.
-     */
-    String SERVER_HTTP_FILTER_ENABLE = SERVER_HTTP_FILTER_PREFIX + "enabled";
-
-    /**
-     * The constant SERVER_HTTP_FILTER_XSS_ENABLED.
-     */
-    String SERVER_HTTP_FILTER_XSS_FILTER_ENABLE = SERVER_HTTP_FILTER_PREFIX + "xss.enabled";
-
-    /**
      * The constant SERVER_HTTP_FILTER_XSS_FILTER_KEYWORDS.
      *
      */
