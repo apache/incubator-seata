@@ -16,15 +16,6 @@
  */
 package org.apache.seata.rm.datasource;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.sql.DataSource;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.loader.EnhancedServiceNotFoundException;
@@ -42,6 +33,14 @@ import org.apache.seata.rm.datasource.util.JdbcUtils;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_TRANSACTION_UNDO_LOG_TABLE;
 
@@ -94,9 +93,10 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
      */
     public DataSourceProxy(DataSource targetDataSource, String resourceGroupId) {
         if (targetDataSource instanceof SeataDataSourceProxy) {
-            LOGGER.info("Unwrap the target data source, because the type is: {}",
-                targetDataSource.getClass().getName());
-            targetDataSource = ((SeataDataSourceProxy)targetDataSource).getTargetDataSource();
+            LOGGER.info(
+                    "Unwrap the target data source, because the type is: {}",
+                    targetDataSource.getClass().getName());
+            targetDataSource = ((SeataDataSourceProxy) targetDataSource).getTargetDataSource();
         }
         this.targetDataSource = targetDataSource;
         init(targetDataSource, resourceGroupId);
@@ -120,7 +120,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         }
         if (JdbcConstants.SQLSERVER.equals(dbType)) {
             LOGGER.info("SQLServer support in AT mode is currently an experimental function, "
-                + "if you have any problems in use, please feedback to us");
+                    + "if you have any problems in use, please feedback to us");
         }
         initResourceId();
         DefaultResourceManager.get().registerResource(this);
@@ -174,8 +174,8 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
         boolean undoLogTableExist = undoLogManager.hasUndoLogTable(conn);
         if (!undoLogTableExist) {
-            String undoLogTableName = ConfigurationFactory.getInstance().getConfig(
-                ConfigurationKeys.TRANSACTION_UNDO_LOG_TABLE, DEFAULT_TRANSACTION_UNDO_LOG_TABLE);
+            String undoLogTableName = ConfigurationFactory.getInstance()
+                    .getConfig(ConfigurationKeys.TRANSACTION_UNDO_LOG_TABLE, DEFAULT_TRANSACTION_UNDO_LOG_TABLE);
             String errMsg = String.format("in AT mode, %s table not exist", undoLogTableName);
             throw new IllegalStateException(errMsg);
         }
@@ -255,7 +255,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             return;
         }
         try (PreparedStatement preparedStatement = connection.prepareStatement("SHOW VARIABLES");
-             ResultSet rs = preparedStatement.executeQuery()) {
+                ResultSet rs = preparedStatement.executeQuery()) {
             while (rs.next()) {
                 String name = rs.getString(1);
                 String value = rs.getString(2);

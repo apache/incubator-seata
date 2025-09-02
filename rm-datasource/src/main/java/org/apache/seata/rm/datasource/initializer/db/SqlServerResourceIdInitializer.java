@@ -22,7 +22,6 @@ import org.apache.seata.rm.datasource.initializer.AbstractResourceIdInitializer;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 import org.jetbrains.annotations.NotNull;
 
-
 public class SqlServerResourceIdInitializer extends AbstractResourceIdInitializer {
     @Override
     public boolean supports(String dbType, DataSourceProxy proxy) {
@@ -61,8 +60,9 @@ public class SqlServerResourceIdInitializer extends AbstractResourceIdInitialize
         for (String urlParam : urlParams) {
             String[] paramSplit = urlParam.split("=");
             String propertyName = paramSplit[0];
-            if ("INSTANCENAME".equalsIgnoreCase(propertyName) || "databaseName".equalsIgnoreCase(propertyName)
-                || "database".equalsIgnoreCase(propertyName)) {
+            if ("INSTANCENAME".equalsIgnoreCase(propertyName)
+                    || "databaseName".equalsIgnoreCase(propertyName)
+                    || "database".equalsIgnoreCase(propertyName)) {
                 paramsBuilder.append(urlParam);
             }
         }

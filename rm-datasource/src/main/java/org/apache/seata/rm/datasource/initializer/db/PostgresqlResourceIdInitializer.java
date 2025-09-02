@@ -22,7 +22,6 @@ import org.apache.seata.rm.datasource.DataSourceProxy;
 import org.apache.seata.rm.datasource.initializer.AbstractResourceIdInitializer;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 
-
 public class PostgresqlResourceIdInitializer extends AbstractResourceIdInitializer {
     @Override
     public boolean supports(String dbType, DataSourceProxy proxy) {

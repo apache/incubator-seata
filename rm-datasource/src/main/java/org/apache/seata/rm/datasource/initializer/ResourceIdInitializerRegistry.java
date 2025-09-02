@@ -17,9 +17,6 @@
 
 package org.apache.seata.rm.datasource.initializer;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.seata.rm.datasource.DataSourceProxy;
 import org.apache.seata.rm.datasource.initializer.db.DMResourceIdInitializer;
 import org.apache.seata.rm.datasource.initializer.db.DefaultResourceIdInitializer;
@@ -28,6 +25,9 @@ import org.apache.seata.rm.datasource.initializer.db.OracleResourceIdInitializer
 import org.apache.seata.rm.datasource.initializer.db.OscarResourceIdInitializer;
 import org.apache.seata.rm.datasource.initializer.db.PostgresqlResourceIdInitializer;
 import org.apache.seata.rm.datasource.initializer.db.SqlServerResourceIdInitializer;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ResourceIdInitializerRegistry {
     private static final List<ResourceIdInitializer> INITIALIZERS = new ArrayList<>();

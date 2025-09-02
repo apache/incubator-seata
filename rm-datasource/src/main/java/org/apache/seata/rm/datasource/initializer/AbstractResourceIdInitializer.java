@@ -19,7 +19,6 @@ package org.apache.seata.rm.datasource.initializer;
 
 import org.apache.seata.rm.datasource.DataSourceProxy;
 
-
 public abstract class AbstractResourceIdInitializer implements ResourceIdInitializer {
     @Override
     public void initResourceId(DataSourceProxy proxy) {
