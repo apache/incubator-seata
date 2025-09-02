@@ -21,7 +21,6 @@ import org.apache.seata.spring.boot.autoconfigure.properties.server.ServerProper
 import org.apache.seata.spring.boot.autoconfigure.properties.server.ServerRateLimitProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.server.ServerRecoveryProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.server.ServerUndoProperties;
-import org.apache.seata.spring.boot.autoconfigure.properties.server.filter.ServerHttpFilterProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.server.filter.ServerHttpFilterXssProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.server.raft.ServerRaftProperties;
 import org.apache.seata.spring.boot.autoconfigure.properties.server.raft.ServerRaftSSLClientProperties;
@@ -46,7 +45,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.METRICS_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_BEAN_MAP;
-import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SERVER_HTTP_FILTER_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SERVER_HTTP_FILTER_XSS_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SERVER_PREFIX;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.SERVER_RAFT_PREFIX;
@@ -106,7 +104,6 @@ public class SeataServerEnvironmentPostProcessor implements EnvironmentPostProce
             PROPERTY_BEAN_MAP.put(SESSION_PREFIX, SessionProperties.class);
             PROPERTY_BEAN_MAP.put(STORE_PREFIX, StoreProperties.class);
             PROPERTY_BEAN_MAP.put(SERVER_RATELIMIT_PREFIX, ServerRateLimitProperties.class);
-            PROPERTY_BEAN_MAP.put(SERVER_HTTP_FILTER_PREFIX, ServerHttpFilterProperties.class);
             PROPERTY_BEAN_MAP.put(SERVER_HTTP_FILTER_XSS_PREFIX, ServerHttpFilterXssProperties.class);
         }
     }

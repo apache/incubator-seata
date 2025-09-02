@@ -16,10 +16,7 @@
  */
 package org.apache.seata.core.rpc.netty.http.filter;
 
-import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
-import org.apache.seata.config.Configuration;
-import org.apache.seata.config.ConfigurationFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
@@ -67,13 +64,7 @@ class HttpRequestFilterManagerTest {
         when(filter2.shouldApply()).thenReturn(true);
         when(filter2.getOrder()).thenReturn(5);
 
-        try (MockedStatic<ConfigurationFactory> configMock = mockStatic(ConfigurationFactory.class);
-                MockedStatic<EnhancedServiceLoader> mockedLoader = mockStatic(EnhancedServiceLoader.class)) {
-
-            Configuration mockConfig = mock(Configuration.class);
-            when(mockConfig.getBoolean(ConfigurationKeys.SERVER_HTTP_FILTER_ENABLE, true))
-                    .thenReturn(true);
-            configMock.when(ConfigurationFactory::getInstance).thenReturn(mockConfig);
+        try (MockedStatic<EnhancedServiceLoader> mockedLoader = mockStatic(EnhancedServiceLoader.class)) {
 
             mockedLoader
                     .when(() -> EnhancedServiceLoader.loadAll(HttpRequestFilter.class))
@@ -100,12 +91,7 @@ class HttpRequestFilterManagerTest {
         MockFilter filter = mock(MockFilter.class);
         when(filter.shouldApply()).thenReturn(false);
 
-        try (MockedStatic<ConfigurationFactory> configMock = mockStatic(ConfigurationFactory.class);
-                MockedStatic<EnhancedServiceLoader> mockedLoader = mockStatic(EnhancedServiceLoader.class)) {
-            Configuration mockConfig = mock(Configuration.class);
-            when(mockConfig.getBoolean(ConfigurationKeys.SERVER_HTTP_FILTER_ENABLE, true))
-                    .thenReturn(true);
-            configMock.when(ConfigurationFactory::getInstance).thenReturn(mockConfig);
+        try (MockedStatic<EnhancedServiceLoader> mockedLoader = mockStatic(EnhancedServiceLoader.class)) {
             mockedLoader
                     .when(() -> EnhancedServiceLoader.loadAll(HttpRequestFilter.class))
                     .thenReturn(Arrays.asList(filter));
@@ -123,17 +109,11 @@ class HttpRequestFilterManagerTest {
         MockFilter filter = mock(MockFilter.class);
         when(filter.shouldApply()).thenReturn(true);
 
-        try (MockedStatic<ConfigurationFactory> configMock = mockStatic(ConfigurationFactory.class)) {
-            Configuration mockConfig = mock(Configuration.class);
-            when(mockConfig.getBoolean(ConfigurationKeys.SERVER_HTTP_FILTER_ENABLE, true))
-                    .thenReturn(false);
-            configMock.when(ConfigurationFactory::getInstance).thenReturn(mockConfig);
-            HttpRequestFilterManager.initializeFilters();
+        HttpRequestFilterManager.initializeFilters();
 
-            HttpRequestFilterChain chain = HttpRequestFilterManager.getFilterChain();
-            assertNotNull(chain);
-            assertTrue(chain.getFilters().isEmpty(), "Filters list should be empty when filter config is false");
-        }
+        HttpRequestFilterChain chain = HttpRequestFilterManager.getFilterChain();
+        assertNotNull(chain);
+        assertTrue(chain.getFilters().isEmpty(), "Filters list should be empty when filter config is false");
     }
 
     @Test
