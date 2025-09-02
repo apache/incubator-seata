@@ -41,12 +41,12 @@ public class HsfTransactionProviderFilter implements ServerFilter {
     }
 
     private ListenableFuture<RPCResult> doInvoke(InvocationHandler nextHandler, Invocation invocation)
-        throws Throwable {
+            throws Throwable {
         RpcTransactionContext rpcContext = extractRpcTransactionContext();
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("xid in RpcContext[{}], branchType in RpcContext[{}]", rpcContext.rpcXid,
-                rpcContext.rpcBranchType);
+            LOGGER.debug(
+                    "xid in RpcContext[{}], branchType in RpcContext[{}]", rpcContext.rpcXid, rpcContext.rpcBranchType);
         }
 
         TransactionContextBinding binding = bindTransactionContext(rpcContext);
@@ -75,15 +75,15 @@ public class HsfTransactionProviderFilter implements ServerFilter {
             binding.wasBound = true;
             binding.bindXid = xidStr;
 
-            if (rpcContext.rpcBranchType != null && StringUtils.equals(BranchType.TCC.name(),
-                rpcContext.rpcBranchType.toString())) {
+            if (rpcContext.rpcBranchType != null
+                    && StringUtils.equals(BranchType.TCC.name(), rpcContext.rpcBranchType.toString())) {
                 RootContext.bindBranchType(BranchType.TCC);
                 binding.wasBranchTypeBound = true;
             }
 
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("bind xid [{}] branchType [{}] to RootContext", rpcContext.rpcXid,
-                    rpcContext.rpcBranchType);
+                LOGGER.debug(
+                        "bind xid [{}] branchType [{}] to RootContext", rpcContext.rpcXid, rpcContext.rpcBranchType);
             }
         }
 
@@ -113,9 +113,12 @@ public class HsfTransactionProviderFilter implements ServerFilter {
 
     private void handleXidChange(TransactionContextBinding binding) {
         if (!binding.bindXid.equalsIgnoreCase(binding.unbindXid)) {
-            LOGGER.warn("xid in change during RPC from {} to {},branchType from {} to {}", binding.bindXid,
-                binding.unbindXid, binding.bindBranchType != null ? binding.bindBranchType : "AT",
-                binding.unbindBranchType);
+            LOGGER.warn(
+                    "xid in change during RPC from {} to {},branchType from {} to {}",
+                    binding.bindXid,
+                    binding.unbindXid,
+                    binding.bindBranchType != null ? binding.bindBranchType : "AT",
+                    binding.unbindBranchType);
 
             if (binding.unbindXid != null) {
                 restoreTransactionContext(binding);

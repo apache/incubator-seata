@@ -40,7 +40,7 @@ public class HsfTransactionConsumerFilter implements ClientFilter {
     }
 
     private ListenableFuture<RPCResult> doInvoke(InvocationHandler nextHandler, Invocation invocation)
-        throws Throwable {
+            throws Throwable {
         TransactionContext context = extractTransactionContext();
 
         if (LOGGER.isDebugEnabled()) {
