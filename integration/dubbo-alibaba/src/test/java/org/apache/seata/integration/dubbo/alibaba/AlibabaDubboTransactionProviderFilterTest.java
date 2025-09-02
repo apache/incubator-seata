@@ -22,7 +22,6 @@ import com.alibaba.dubbo.rpc.Invoker;
 import com.alibaba.dubbo.rpc.Result;
 import com.alibaba.dubbo.rpc.RpcContext;
 import com.alibaba.dubbo.rpc.RpcException;
-
 import org.apache.seata.core.constants.DubboConstants;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.model.BranchType;
