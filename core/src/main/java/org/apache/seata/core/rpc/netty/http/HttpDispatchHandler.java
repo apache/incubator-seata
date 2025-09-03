@@ -19,28 +19,27 @@ package org.apache.seata.core.rpc.netty.http;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.DefaultFullHttpResponse;
-import io.netty.handler.codec.http.FullHttpResponse;
-import io.netty.handler.codec.http.HttpHeaderNames;
-import io.netty.handler.codec.http.HttpMethod;
-import io.netty.handler.codec.http.HttpRequest;
-import io.netty.handler.codec.http.HttpResponseStatus;
-import io.netty.handler.codec.http.HttpUtil;
-import io.netty.handler.codec.http.HttpVersion;
-import io.netty.handler.codec.http.QueryStringDecoder;
+import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.multipart.Attribute;
 import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
 import io.netty.handler.codec.http.multipart.InterfaceHttpData;
+import io.netty.handler.stream.ChunkedStream;
 import org.apache.seata.common.rpc.http.HttpContext;
 import org.apache.seata.core.exception.HttpRequestFilterException;
 import org.apache.seata.core.rpc.netty.http.filter.HttpFilterContext;
 import org.apache.seata.core.rpc.netty.http.filter.HttpRequestParamWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
+import java.io.*;
 import java.lang.reflect.Method;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
 
 /**
@@ -137,6 +136,42 @@ public class HttpDispatchHandler extends BaseHttpChannelHandler<HttpRequest> {
     private void sendResponse(ChannelHandlerContext ctx, boolean keepAlive, Object result)
             throws JsonProcessingException {
         FullHttpResponse response;
+        // Increase the stream transport way
+        if (result instanceof ResponseEntity) {
+            ResponseEntity<?> responseEntity = (ResponseEntity<?>) result;
+            if (responseEntity.getBody() instanceof StreamingResponseBody) {
+                StreamingResponseBody streamingBody = (StreamingResponseBody) responseEntity.getBody();
+
+                DefaultHttpResponse defaultHttpResponse = new DefaultHttpResponse(
+                        HttpVersion.HTTP_1_1,
+                        HttpResponseStatus.valueOf(responseEntity.getStatusCodeValue()));
+
+                responseEntity.getHeaders().forEach((key, values) ->
+                        defaultHttpResponse.headers().add(key, values));
+
+                defaultHttpResponse.headers().set(HttpHeaderNames.TRANSFER_ENCODING, HttpHeaderValues.CHUNKED);
+
+                ctx.write(defaultHttpResponse);
+
+                ctx.executor().execute(() -> {
+                    try (OutputStream out = new ChannelOutputStreamAdapter(ctx.channel())) {
+                        streamingBody.writeTo(out);
+                    } catch (Exception e) {
+                        LOGGER.error("Streaming failed", e);
+                    } finally {
+                        ChannelFuture lastContentFuture =
+                                ctx.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT);
+
+                        if (!keepAlive) {
+                            lastContentFuture.addListener(ChannelFutureListener.CLOSE);
+                        }
+                    }
+                });
+            }
+        }
+
+
+
         if (result != null) {
             byte[] body = OBJECT_MAPPER.writeValueAsBytes(result);
             response = new DefaultFullHttpResponse(
