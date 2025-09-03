@@ -16,16 +16,17 @@
  */
 package org.apache.seata.server.console.controller;
 
-import org.apache.seata.common.result.SingleResult;
 import org.apache.seata.server.console.entity.param.ServerLogParam;
 import org.apache.seata.server.console.service.ServerLogService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 @RestController
 @RequestMapping("/api/v1/console/serverLog")
@@ -35,19 +36,11 @@ public class ServerLogController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerLogController.class);
 
-    @GetMapping("/getServerLog")
-    public SingleResult<?> getServerLog(@ModelAttribute ServerLogParam serverLogParam) {
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("manual operation to get the server log, param: {}", serverLogParam);
+    @GetMapping("/getCurrentLogFile")
+    public ResponseEntity<StreamingResponseBody> getCurrentServerLogFile(@ModelAttribute ServerLogParam param){
+        if(LOGGER.isInfoEnabled()){
+            LOGGER.info("User try to get current server log file, log type:{}",param.getLogType());
         }
-        return serverLogService.getServerLog(serverLogParam);
-    }
-
-    @GetMapping("/getHistoryServerLogNums")
-    public SingleResult<?> getHistoryServerLogNums(@ModelAttribute ServerLogParam serverLogParam) {
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("manual operation to get the history server log nums, param: {}", serverLogParam);
-        }
-        return serverLogService.getHistoryServerLogNums(serverLogParam);
+        return serverLogService.getServerLogFile(param);
     }
 }
