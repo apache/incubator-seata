@@ -22,31 +22,7 @@ public class ServerLogParam implements Serializable {
 
     private static final long serialVersionUID = 225478653801012285L;
 
-    private Integer cursor;
-
-    private Integer nextLines;
-
     private String logType;
-
-    private String logTime;
-
-    private Integer curLogNum;
-
-    public Integer getCurLogNum() {
-        return curLogNum;
-    }
-
-    public void setCurLogNum(Integer curLogNum) {
-        this.curLogNum = curLogNum;
-    }
-
-    public Integer getNextLines() {
-        return nextLines;
-    }
-
-    public void setNextLines(Integer nextLines) {
-        this.nextLines = nextLines;
-    }
 
     public String getLogType() {
         return logType;
@@ -56,29 +32,10 @@ public class ServerLogParam implements Serializable {
         this.logType = logType;
     }
 
-    public String getLogTime() {
-        return logTime;
-    }
-
-    public void setLogTime(String logTime) {
-        this.logTime = logTime;
-    }
-
-    public Integer getCursor() {
-        return cursor;
-    }
-
-    public void setCursor(Integer cursor) {
-        this.cursor = cursor;
-    }
-
     @Override
     public String toString() {
-        return "ServerLogParam{" + "cursor="
-                + cursor + ", nextLines="
-                + nextLines + ", logType='"
-                + logType + '\'' + ", logTime='"
-                + logTime + '\'' + ", curLogNum="
-                + curLogNum + '}';
+        return "ServerLogParam{" +
+                "logType='" + logType + '\'' +
+                '}';
     }
 }
