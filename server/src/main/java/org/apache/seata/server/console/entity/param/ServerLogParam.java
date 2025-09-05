@@ -34,8 +34,6 @@ public class ServerLogParam implements Serializable {
 
     @Override
     public String toString() {
-        return "ServerLogParam{" +
-                "logType='" + logType + '\'' +
-                '}';
+        return "ServerLogParam{" + "logType='" + logType + '\'' + '}';
     }
 }

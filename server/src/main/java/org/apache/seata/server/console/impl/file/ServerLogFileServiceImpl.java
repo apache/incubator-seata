@@ -53,12 +53,12 @@ public class ServerLogFileServiceImpl implements ServerLogService {
     public ResponseEntity<StreamingResponseBody> getServerLogFile(ServerLogParam serverLogParam) {
         String logPathString = buildLogFilePath(serverLogParam);
         Path logPath = Paths.get(logPathString);
-        if(Files.exists(logPath)){
+        if (Files.exists(logPath)) {
             long totalLines = 0;
             try (Stream<String> lines = Files.lines(logPath)) {
                 totalLines = lines.count();
-            } catch (IOException e){
-                LOGGER.warn("Error get log total lines: {}",e.getMessage());
+            } catch (IOException e) {
+                LOGGER.warn("Error get log total lines: {}", e.getMessage());
             }
             StreamingResponseBody responseBody = outputStream -> {
                 try (FileChannel channel = FileChannel.open(logPath, StandardOpenOption.READ)) {
@@ -75,16 +75,15 @@ public class ServerLogFileServiceImpl implements ServerLogService {
                 }
             };
             return ResponseEntity.ok()
-                    .header("X-Log-Total-Lines",String.valueOf(totalLines))
-                    .header(HttpHeaders.CONTENT_DISPOSITION,
-                            "attachment; filename=\"" + logPath.getFileName() + "\"")
+                    .header("X-Log-Total-Lines", String.valueOf(totalLines))
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + logPath.getFileName() + "\"")
                     .header(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate")
                     .header(HttpHeaders.PRAGMA, "no-cache")
                     .header(HttpHeaders.EXPIRES, "0")
                     .contentType(MediaType.APPLICATION_JSON)
-                    .header("charset","utf-8")
+                    .header("charset", "utf-8")
                     .body(responseBody);
-        }else{
+        } else {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(out -> out.write("Server error".getBytes()));
         }
