@@ -29,16 +29,18 @@ public class ServerLogServiceImpl implements ServerLogService {
 
         checkLogParam(param);
 
-        ServerLogDetails logsDetails = mcpRPCService.getCallTCLogs(nameSpaceDetail,
-                RPCConstant.SERVER_LOG_BASE_URL + "/getCurrentServerLogFile", param, null, null);
+        ServerLogDetails logsDetails = mcpRPCService.getCallTCLogs(
+                nameSpaceDetail, RPCConstant.SERVER_LOG_BASE_URL + "/getCurrentServerLogFile", param, null, null);
 
         int pageNum = param.getPage();
 
         Pattern timestampPattern = Pattern.compile("^\\d{4}-\\d{2}-\\d{2}\\s+\\d{2}:\\d{2}:\\d{2}\\.\\d{3}");
 
         // One-time completion: Build entries → filter → count → pagination
-        PaginationResult result = logsDetails.getLogs()
-                .collect(() -> new FilteringLogAccumulator(param, timestampPattern),
+        PaginationResult result = logsDetails
+                .getLogs()
+                .collect(
+                        () -> new FilteringLogAccumulator(param, timestampPattern),
                         (accumulator, line) -> accumulator.processLine(line))
                 .map(accumulator -> {
                     accumulator.finish();
@@ -49,7 +51,8 @@ public class ServerLogServiceImpl implements ServerLogService {
                     int index = 0;
                     for (String entry : accumulator.drainFilteredEntries()) {
                         paginationResult.incrementTotal();
-                        if (index >= skipCounts && paginationResult.getPageEntries().size() < SERVER_LOG_PAGE_SIZE) {
+                        if (index >= skipCounts
+                                && paginationResult.getPageEntries().size() < SERVER_LOG_PAGE_SIZE) {
                             paginationResult.addToPage(entry);
                         }
                         index++;
@@ -62,30 +65,34 @@ public class ServerLogServiceImpl implements ServerLogService {
         return PageResult.success(result.getPageEntries(), result.getTotalCount(), pageNum, SERVER_LOG_PAGE_SIZE);
     }
 
-    private void checkLogParam(ServerLogParam logParam){
+    private void checkLogParam(ServerLogParam logParam) {
         Integer page = logParam.getPage();
         List<String> logMessageKeyWord = logParam.getLogMessageKeyWord();
         String logType = logParam.getLogType();
         List<String> logMessageTime = logParam.getLogMessageTime();
         String logMessageLevel = logParam.getLogMessageLevel();
 
-        if((logMessageKeyWord==null || logMessageKeyWord.isEmpty()) && (logMessageTime==null || logMessageTime.isEmpty())){
-            throw new IllegalArgumentException("It is not allowed to query logs without any parameters(except page and logType)");
+        if ((logMessageKeyWord == null || logMessageKeyWord.isEmpty())
+                && (logMessageTime == null || logMessageTime.isEmpty())) {
+            throw new IllegalArgumentException(
+                    "It is not allowed to query logs without any parameters(except page and logType)");
         }
 
-        if(page==null || page<1){
+        if (page == null || page < 1) {
             throw new IllegalArgumentException("The page number must be greater than or equal to 1");
         }
 
-        if(StringUtils.isNotBlank(logType)){
+        if (StringUtils.isNotBlank(logType)) {
             if (!Arrays.asList("all", "error", "warn").contains(logType.toLowerCase())) {
-                throw new IllegalArgumentException("The logType parameter value is invalid and must be: all, error, warn");
+                throw new IllegalArgumentException(
+                        "The logType parameter value is invalid and must be: all, error, warn");
             }
         }
 
         if (StringUtils.isNotBlank(logMessageLevel)) {
             if (!Arrays.asList("error", "warn", "info").contains(logMessageLevel.toLowerCase())) {
-                throw new IllegalArgumentException("The logMessageLevel parameter value is invalid and must be: error, warn, info");
+                throw new IllegalArgumentException(
+                        "The logMessageLevel parameter value is invalid and must be: error, warn, info");
             }
         }
     }
@@ -127,12 +134,13 @@ public class ServerLogServiceImpl implements ServerLogService {
 
         private boolean matchesFilter(String entry) {
             // Filter by level
-            if (param.getLogMessageLevel() != null &&
-                    !entry.toUpperCase().contains(param.getLogMessageLevel().toUpperCase())) {
+            if (param.getLogMessageLevel() != null
+                    && !entry.toUpperCase().contains(param.getLogMessageLevel().toUpperCase())) {
                 return false;
             }
             // Filter by keyword
-            if (param.getLogMessageKeyWord() != null && !param.getLogMessageKeyWord().isEmpty()) {
+            if (param.getLogMessageKeyWord() != null
+                    && !param.getLogMessageKeyWord().isEmpty()) {
                 boolean matched = false;
                 for (String key : param.getLogMessageKeyWord()) {
                     if (entry.contains(key)) {

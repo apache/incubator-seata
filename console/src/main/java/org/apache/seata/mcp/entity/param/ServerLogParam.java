@@ -25,20 +25,30 @@ public class ServerLogParam implements Serializable {
 
     private static final long serialVersionUID = 225478653801012285L;
 
-    @ToolParam(description = "Log type filter, optional values: all, error, warn, default is all",
-            example = "all")
+    @ToolParam(description = "Log type filter, optional values: all, error, warn, default is all", example = "all")
     private String logType = "all";
 
-    @ToolParam(description = "Page number index (starting from 1). The larger the page number, the newer the log, and you can directly get the latest log by specifying the maximum page number",required = true,example = "1")
+    @ToolParam(
+            description =
+                    "Page number index (starting from 1). The larger the page number, the newer the log, and you can directly get the latest log by specifying the maximum page number",
+            required = true,
+            example = "1")
     private Integer page = 1;
 
-    @ToolParam(description = "The time when the log information was generated，Enter the time given by the user directly and fuzz the match")
+    @ToolParam(
+            description =
+                    "The time when the log information was generated，Enter the time given by the user directly and fuzz the match")
     private List<String> logMessageTime;
 
-    @ToolParam(description = "Log level filtering, optional values: error, warn, info. When there is a conflict with the logType parameter, the logType shall prevail", example = "error")
+    @ToolParam(
+            description =
+                    "Log level filtering, optional values: error, warn, info. When there is a conflict with the logType parameter, the logType shall prevail",
+            example = "error")
     private String logMessageLevel;
 
-    @ToolParam(description = "Log content keyword fuzzy matching, support multiple keywords separated by commas", example = "connection timeout,SSL")
+    @ToolParam(
+            description = "Log content keyword fuzzy matching, support multiple keywords separated by commas",
+            example = "connection timeout,SSL")
     private List<String> logMessageKeyWord;
 
     public String getLogType() {
@@ -83,12 +93,11 @@ public class ServerLogParam implements Serializable {
 
     @Override
     public String toString() {
-        return "ServerLogParam{" +
-                "logType='" + logType + '\'' +
-                ", page=" + page +
-                ", logMessageTime='" + logMessageTime + '\'' +
-                ", logMessageLevel='" + logMessageLevel + '\'' +
-                ", logMessageKeyWord='" + logMessageKeyWord + '\'' +
-                '}';
+        return "ServerLogParam{" + "logType='"
+                + logType + '\'' + ", page="
+                + page + ", logMessageTime='"
+                + logMessageTime + '\'' + ", logMessageLevel='"
+                + logMessageLevel + '\'' + ", logMessageKeyWord='"
+                + logMessageKeyWord + '\'' + '}';
     }
 }

@@ -31,15 +31,16 @@ public class ServerLogTools {
     @Autowired
     private ServerLogService logService;
 
-    @Tool(description = "Get the latest(only one day) running logs on the server side, The larger the page, the newer the log")
+    @Tool(
+            description =
+                    "Get the latest(only one day) running logs on the server side, The larger the page, the newer the log")
     public PageResult<String> getServerLogFile(
             @ToolParam(description = "Specify the namespace of the TC node", required = true)
-            NameSpaceDetail nameSpaceDetail,
+                    NameSpaceDetail nameSpaceDetail,
             @ToolParam(
-                    description =
-                            "server log file query parameters(If possible, avoid using full queries)",
-                    required = true)
-            ServerLogParam param) {
+                            description = "server log file query parameters(If possible, avoid using full queries)",
+                            required = true)
+                    ServerLogParam param) {
         return logService.analyseServerLogFile(nameSpaceDetail, param);
     }
 }
