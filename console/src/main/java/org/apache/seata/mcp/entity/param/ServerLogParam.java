@@ -19,48 +19,27 @@ package org.apache.seata.mcp.entity.param;
 import org.apache.seata.mcp.annotation.ToolParam;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class ServerLogParam implements Serializable {
 
     private static final long serialVersionUID = 225478653801012285L;
 
-    @ToolParam(description = "file pointer, i.e. read the log file from the cursor line", required = true)
-    private Integer cursor;
+    @ToolParam(description = "Log type filter, optional values: all, error, warn, default is all",
+            example = "all")
+    private String logType = "all";
 
-    @ToolParam(
-            description = "The number of rows read down from the cursor line should not exceed 1000 lines",
-            required = true)
-    private Integer nextLines;
+    @ToolParam(description = "Page number index (starting from 1). The larger the page number, the newer the log, and you can directly get the latest log by specifying the maximum page number",required = true,example = "1")
+    private Integer page = 1;
 
-    @ToolParam(description = "log type, contains: all, error, warn")
-    private String logType;
+    @ToolParam(description = "The time when the log information was generated，Enter the time given by the user directly and fuzz the match")
+    private List<String> logMessageTime;
 
-    @ToolParam(
-            description =
-                    "Log creation time, format: yyyy-mm-dd, It is only required to pass in when querying the history log")
-    private String logTime;
+    @ToolParam(description = "Log level filtering, optional values: error, warn, info. When there is a conflict with the logType parameter, the logType shall prevail", example = "error")
+    private String logMessageLevel;
 
-    @ToolParam(
-            description =
-                    "The log serial number to be analyzed, It is only required to pass in when querying the history log",
-            example = "0")
-    private Integer curLogNum;
-
-    public Integer getCurLogNum() {
-        return curLogNum;
-    }
-
-    public void setCurLogNum(Integer curLogNum) {
-        this.curLogNum = curLogNum;
-    }
-
-    public Integer getNextLines() {
-        return nextLines;
-    }
-
-    public void setNextLines(Integer nextLines) {
-        this.nextLines = nextLines;
-    }
+    @ToolParam(description = "Log content keyword fuzzy matching, support multiple keywords separated by commas", example = "connection timeout,SSL")
+    private List<String> logMessageKeyWord;
 
     public String getLogType() {
         return logType;
@@ -70,29 +49,46 @@ public class ServerLogParam implements Serializable {
         this.logType = logType;
     }
 
-    public String getLogTime() {
-        return logTime;
+    public Integer getPage() {
+        return page;
     }
 
-    public void setLogTime(String logTime) {
-        this.logTime = logTime;
+    public void setPage(Integer page) {
+        this.page = page;
     }
 
-    public Integer getCursor() {
-        return cursor;
+    public List<String> getLogMessageTime() {
+        return logMessageTime;
     }
 
-    public void setCursor(Integer cursor) {
-        this.cursor = cursor;
+    public void setLogMessageTime(List<String> logMessageTime) {
+        this.logMessageTime = logMessageTime;
+    }
+
+    public String getLogMessageLevel() {
+        return logMessageLevel;
+    }
+
+    public void setLogMessageLevel(String logMessageLevel) {
+        this.logMessageLevel = logMessageLevel;
+    }
+
+    public List<String> getLogMessageKeyWord() {
+        return logMessageKeyWord;
+    }
+
+    public void setLogMessageKeyWord(List<String> logMessageKeyWord) {
+        this.logMessageKeyWord = logMessageKeyWord;
     }
 
     @Override
     public String toString() {
-        return "ServerLogParam{" + "cursor="
-                + cursor + ", nextLines="
-                + nextLines + ", logType='"
-                + logType + '\'' + ", logTime='"
-                + logTime + '\'' + ", curLogNum="
-                + curLogNum + '}';
+        return "ServerLogParam{" +
+                "logType='" + logType + '\'' +
+                ", page=" + page +
+                ", logMessageTime='" + logMessageTime + '\'' +
+                ", logMessageLevel='" + logMessageLevel + '\'' +
+                ", logMessageKeyWord='" + logMessageKeyWord + '\'' +
+                '}';
     }
 }

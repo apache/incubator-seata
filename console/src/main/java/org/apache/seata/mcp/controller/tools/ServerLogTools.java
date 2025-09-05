@@ -16,9 +16,9 @@
  */
 package org.apache.seata.mcp.controller.tools;
 
+import org.apache.seata.common.result.PageResult;
 import org.apache.seata.mcp.annotation.Tool;
 import org.apache.seata.mcp.annotation.ToolParam;
-import org.apache.seata.mcp.entity.param.ServerLogIndexParam;
 import org.apache.seata.mcp.entity.param.ServerLogParam;
 import org.apache.seata.mcp.entity.pojo.NameSpaceDetail;
 import org.apache.seata.mcp.service.ServerLogService;
@@ -31,25 +31,15 @@ public class ServerLogTools {
     @Autowired
     private ServerLogService logService;
 
-    @Tool(description = "Get the latest or history running logs on the server side")
-    public String getServerLog(
+    @Tool(description = "Get the latest(only one day) running logs on the server side, The larger the page, the newer the log")
+    public PageResult<String> getServerLogFile(
             @ToolParam(description = "Specify the namespace of the TC node", required = true)
-                    NameSpaceDetail nameSpaceDetail,
+            NameSpaceDetail nameSpaceDetail,
             @ToolParam(
-                            description =
-                                    "server log file query parameters. when getting history logs, logTime is required",
-                            required = true)
-                    ServerLogParam param) {
-        return logService.analyseServerLog(nameSpaceDetail, param);
-    }
-
-    @Tool(
-            description =
-                    "Obtain the server run log index nums of the specified type or creation time, If you do not specify a type, it is an all-type log，logTime is required")
-    public String getHistoryServerLogNums(
-            @ToolParam(description = "Specify the namespace of the TC node", required = true)
-                    NameSpaceDetail nameSpaceDetail,
-            @ToolParam(description = "Log file index query parameters", required = true) ServerLogIndexParam param) {
-        return logService.getHistoryServerLogNums(nameSpaceDetail, param);
+                    description =
+                            "server log file query parameters(If possible, avoid using full queries)",
+                    required = true)
+            ServerLogParam param) {
+        return logService.analyseServerLogFile(nameSpaceDetail, param);
     }
 }
