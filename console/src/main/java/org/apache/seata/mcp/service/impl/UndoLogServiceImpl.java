@@ -20,13 +20,8 @@ import org.apache.seata.common.result.PageResult;
 import org.apache.seata.mcp.entity.param.UndoLogParam;
 import org.apache.seata.mcp.service.BusinessDataSourceService;
 import org.apache.seata.mcp.service.UndoLogService;
-import org.apache.seata.mcp.undo.parser.UndoLogParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 @Service
 public class UndoLogServiceImpl implements UndoLogService {

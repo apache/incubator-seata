@@ -29,12 +29,10 @@ import org.apache.seata.mcp.store.SqlExecutionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.sql.ResultSet;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -192,7 +190,7 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
         sql = sql.replaceFirst("%", String.valueOf(pageSize));
         sql = sql.replaceFirst("%", String.valueOf(offset));
         Object[] objects = params.toArray();
-        return sqlExecutionTemplate.queryForUndoLogs(resourceId,sql,pageNum,pageSize,objects);
+        return sqlExecutionTemplate.queryForUndoLogs(resourceId, sql, pageNum, pageSize, objects);
     }
 
     @Override

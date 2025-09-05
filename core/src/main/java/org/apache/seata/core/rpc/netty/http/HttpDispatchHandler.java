@@ -26,7 +26,6 @@ import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.multipart.Attribute;
 import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
 import io.netty.handler.codec.http.multipart.InterfaceHttpData;
-import io.netty.handler.stream.ChunkedStream;
 import org.apache.seata.common.rpc.http.HttpContext;
 import org.apache.seata.core.exception.HttpRequestFilterException;
 import org.apache.seata.core.rpc.netty.http.filter.HttpFilterContext;
@@ -38,8 +37,6 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 
 import java.io.*;
 import java.lang.reflect.Method;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
 
 /**
@@ -143,11 +140,11 @@ public class HttpDispatchHandler extends BaseHttpChannelHandler<HttpRequest> {
                 StreamingResponseBody streamingBody = (StreamingResponseBody) responseEntity.getBody();
 
                 DefaultHttpResponse defaultHttpResponse = new DefaultHttpResponse(
-                        HttpVersion.HTTP_1_1,
-                        HttpResponseStatus.valueOf(responseEntity.getStatusCodeValue()));
+                        HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(responseEntity.getStatusCodeValue()));
 
-                responseEntity.getHeaders().forEach((key, values) ->
-                        defaultHttpResponse.headers().add(key, values));
+                responseEntity
+                        .getHeaders()
+                        .forEach((key, values) -> defaultHttpResponse.headers().add(key, values));
 
                 defaultHttpResponse.headers().set(HttpHeaderNames.TRANSFER_ENCODING, HttpHeaderValues.CHUNKED);
 
@@ -159,8 +156,7 @@ public class HttpDispatchHandler extends BaseHttpChannelHandler<HttpRequest> {
                     } catch (Exception e) {
                         LOGGER.error("Streaming failed", e);
                     } finally {
-                        ChannelFuture lastContentFuture =
-                                ctx.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT);
+                        ChannelFuture lastContentFuture = ctx.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT);
 
                         if (!keepAlive) {
                             lastContentFuture.addListener(ChannelFutureListener.CLOSE);
@@ -169,8 +165,6 @@ public class HttpDispatchHandler extends BaseHttpChannelHandler<HttpRequest> {
                 });
             }
         }
-
-
 
         if (result != null) {
             byte[] body = OBJECT_MAPPER.writeValueAsBytes(result);

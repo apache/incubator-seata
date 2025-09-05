@@ -5,7 +5,6 @@ import org.apache.seata.mcp.utils.DateUtils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
 
 public class UndoLogVO {
     private String rollBackInfo;
@@ -56,21 +55,22 @@ public class UndoLogVO {
 
     @Override
     public String toString() {
-        return "UndoLogVO{" +
-                "rollBackInfo='" + rollBackInfo + '\'' +
-                ", context='" + context + '\'' +
-                ", logStatus=" + logStatus +
-                ", logCreated='" + logCreated + '\'' +
-                ", logModified='" + logModified + '\'' +
-                '}';
+        return "UndoLogVO{" + "rollBackInfo='"
+                + rollBackInfo + '\'' + ", context='"
+                + context + '\'' + ", logStatus="
+                + logStatus + ", logCreated='"
+                + logCreated + '\'' + ", logModified='"
+                + logModified + '\'' + '}';
     }
 
     public static UndoLogVO convert(ResultSet rs) throws SQLException {
         UndoLogVO vo = new UndoLogVO();
         UndoLogParser parser = new UndoLogParser();
         vo.setContext(rs.getString("context"));
-        vo.setLogCreated(DateUtils.convertToDateTimeFromTimestamp(rs.getTimestamp("log_created").getTime()));
-        vo.setLogModified(DateUtils.convertToDateTimeFromTimestamp(rs.getTimestamp("log_modified").getTime()));
+        vo.setLogCreated(DateUtils.convertToDateTimeFromTimestamp(
+                rs.getTimestamp("log_created").getTime()));
+        vo.setLogModified(DateUtils.convertToDateTimeFromTimestamp(
+                rs.getTimestamp("log_modified").getTime()));
         vo.setLogStatus(rs.getInt("log_status"));
         vo.setRollBackInfo(parser.decode(rs.getBytes("rollback_info")));
         return vo;

@@ -135,7 +135,8 @@ public class SqlExecutionTemplate {
      * @param params parameters
      * @return List of query results
      */
-    public PageResult<UndoLogVO> queryForUndoLogs(String resourceId, String sql, Integer pageNum, Integer pageSize, Object... params) {
+    public PageResult<UndoLogVO> queryForUndoLogs(
+            String resourceId, String sql, Integer pageNum, Integer pageSize, Object... params) {
         Connection conn = null;
         PreparedStatement ps = null;
         PreparedStatement countPs = null;
@@ -167,7 +168,7 @@ public class SqlExecutionTemplate {
             }
 
             // count query
-            sql = PageUtil.countSql(sql,"mysql");
+            sql = PageUtil.countSql(sql, "mysql");
             countPs = conn.prepareStatement(sql);
             if (params != null) {
                 for (int i = 0; i < params.length; i++) {
@@ -175,16 +176,16 @@ public class SqlExecutionTemplate {
                 }
             }
             countRs = countPs.executeQuery();
-            while(countRs.next()){
+            while (countRs.next()) {
                 count++;
             }
-            return PageResult.success(data,count,pageNum,pageSize);
+            return PageResult.success(data, count, pageNum, pageSize);
         } catch (SQLException e) {
             LOGGER.error("The query failed, resourceId: {}, sql: {}", resourceId, sql, e);
             throw new StoreException("The query execution failed: " + e.getMessage());
         } finally {
             LOGGER.info("User query business datasource with sql: {}", sql);
-            IOUtil.close(rs,countPs,ps,conn);
+            IOUtil.close(rs, countPs, ps, conn);
         }
     }
 

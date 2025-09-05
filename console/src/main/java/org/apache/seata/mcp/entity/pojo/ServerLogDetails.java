@@ -40,9 +40,6 @@ public class ServerLogDetails {
 
     @Override
     public String toString() {
-        return "ServerLogDetails{" +
-                "logs=" + logs +
-                ", totalLines=" + totalLines +
-                '}';
+        return "ServerLogDetails{" + "logs=" + logs + ", totalLines=" + totalLines + '}';
     }
 }
