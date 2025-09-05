@@ -333,17 +333,19 @@ public class MCPRPCServiceImpl implements MCPRPCService {
     }
 
     @Override
-    public ServerLogDetails getCallTCLogs(NameSpaceDetail nameSpaceDetail,
-                                          String path,
-                                          Object queryParams,
-                                          Map<String, String> pathParams,
-                                          HttpHeaders headers) {
+    public ServerLogDetails getCallTCLogs(
+            NameSpaceDetail nameSpaceDetail,
+            String path,
+            Object queryParams,
+            Map<String, String> pathParams,
+            HttpHeaders headers) {
         ServerLogDetails details = new ServerLogDetails();
         if (headers == null) {
             headers = new HttpHeaders();
         }
         if (nameSpaceDetail == null || !nameSpaceDetail.isValid()) {
-            details.setLogs(Flux.error(new IllegalArgumentException("If you have not specified the namespace of the TC/Server, specify the namespace first")));
+            details.setLogs(Flux.error(new IllegalArgumentException(
+                    "If you have not specified the namespace of the TC/Server, specify the namespace first")));
             return details;
         } else {
             setNamespaceHeaderAndPathParam(nameSpaceDetail, headers, pathParams);
@@ -366,9 +368,9 @@ public class MCPRPCServiceImpl implements MCPRPCService {
                 .exchangeToFlux(response -> {
                     HttpHeaders responseHeaders = response.headers().asHttpHeaders();
                     List<String> totalLines = responseHeaders.get("X-Log-Total-Lines");
-                    if(totalLines !=null && !totalLines.isEmpty()){
+                    if (totalLines != null && !totalLines.isEmpty()) {
                         details.setTotalLines(Integer.valueOf(totalLines.get(0)));
-                    }else{
+                    } else {
                         details.setTotalLines(0);
                     }
                     return response.bodyToFlux(String.class);
@@ -377,8 +379,6 @@ public class MCPRPCServiceImpl implements MCPRPCService {
         details.setLogs(stringFlux);
         return details;
     }
-
-
 
     /**
      * Convert an object to a query parameter, Map

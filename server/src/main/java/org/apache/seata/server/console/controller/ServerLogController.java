@@ -37,9 +37,9 @@ public class ServerLogController {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerLogController.class);
 
     @GetMapping("/getCurrentServerLogFile")
-    public ResponseEntity<StreamingResponseBody> getCurrentServerLogFile(@ModelAttribute ServerLogParam param){
-        if(LOGGER.isInfoEnabled()){
-            LOGGER.info("User try to get current server log file, log type:{}",param.getLogType());
+    public ResponseEntity<StreamingResponseBody> getCurrentServerLogFile(@ModelAttribute ServerLogParam param) {
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("User try to get current server log file, log type:{}", param.getLogType());
         }
         return serverLogService.getServerLogFile(param);
     }
