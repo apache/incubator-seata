@@ -16,11 +16,10 @@
  */
 package org.apache.seata.server.console.service;
 
-import org.apache.seata.common.result.SingleResult;
 import org.apache.seata.server.console.entity.param.ServerLogParam;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 public interface ServerLogService {
-    SingleResult<?> getServerLog(ServerLogParam serverLogParam);
-
-    SingleResult<?> getHistoryServerLogNums(ServerLogParam serverLogParam);
+    ResponseEntity<StreamingResponseBody> getServerLogFile(ServerLogParam serverLogParam);
 }
