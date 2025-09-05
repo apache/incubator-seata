@@ -37,6 +37,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.stream.Stream;
 
 @Service
 public class ServerLogFileServiceImpl implements ServerLogService {
@@ -53,6 +54,12 @@ public class ServerLogFileServiceImpl implements ServerLogService {
         String logPathString = buildLogFilePath(serverLogParam);
         Path logPath = Paths.get(logPathString);
         if(Files.exists(logPath)){
+            long totalLines = 0;
+            try (Stream<String> lines = Files.lines(logPath)) {
+                totalLines = lines.count();
+            } catch (IOException e){
+                LOGGER.warn("Error get log total lines: {}",e.getMessage());
+            }
             StreamingResponseBody responseBody = outputStream -> {
                 try (FileChannel channel = FileChannel.open(logPath, StandardOpenOption.READ)) {
                     ByteBuffer buffer = ByteBuffer.allocate(512 * 1024);
@@ -68,12 +75,13 @@ public class ServerLogFileServiceImpl implements ServerLogService {
                 }
             };
             return ResponseEntity.ok()
+                    .header("X-Log-Total-Lines",String.valueOf(totalLines))
                     .header(HttpHeaders.CONTENT_DISPOSITION,
                             "attachment; filename=\"" + logPath.getFileName() + "\"")
                     .header(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate")
                     .header(HttpHeaders.PRAGMA, "no-cache")
                     .header(HttpHeaders.EXPIRES, "0")
-                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .contentType(MediaType.APPLICATION_JSON)
                     .header("charset","utf-8")
                     .body(responseBody);
         }else{
