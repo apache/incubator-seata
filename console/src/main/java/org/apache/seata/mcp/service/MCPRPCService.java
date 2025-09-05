@@ -17,6 +17,7 @@
 package org.apache.seata.mcp.service;
 
 import org.apache.seata.mcp.entity.pojo.NameSpaceDetail;
+import org.apache.seata.mcp.entity.pojo.ServerLogDetails;
 import org.springframework.http.HttpHeaders;
 
 import java.util.Map;
@@ -39,6 +40,13 @@ public interface MCPRPCService {
             HttpHeaders headers);
 
     String putCallTC(
+            NameSpaceDetail nameSpaceDetail,
+            String path,
+            Object queryParams,
+            Map<String, String> pathParams,
+            HttpHeaders headers);
+
+    ServerLogDetails getCallTCLogs(
             NameSpaceDetail nameSpaceDetail,
             String path,
             Object queryParams,
