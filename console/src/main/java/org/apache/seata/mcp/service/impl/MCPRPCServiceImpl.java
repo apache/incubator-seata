@@ -25,28 +25,26 @@ import org.apache.seata.console.config.WebSecurityConfig;
 import org.apache.seata.console.utils.JwtTokenUtils;
 import org.apache.seata.mcp.annotation.Tool;
 import org.apache.seata.mcp.entity.pojo.NameSpaceDetail;
+import org.apache.seata.mcp.entity.pojo.ServerLogDetails;
 import org.apache.seata.mcp.handler.CustomResponseErrorHandler;
 import org.apache.seata.mcp.service.MCPRPCService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
+import reactor.core.publisher.Flux;
 
 import javax.annotation.PostConstruct;
 import java.lang.reflect.Field;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Provides an interface for MCP to call servers from RPC through Namingspace
@@ -333,6 +331,54 @@ public class MCPRPCServiceImpl implements MCPRPCService {
             return responseBody;
         }
     }
+
+    @Override
+    public ServerLogDetails getCallTCLogs(NameSpaceDetail nameSpaceDetail,
+                                          String path,
+                                          Object queryParams,
+                                          Map<String, String> pathParams,
+                                          HttpHeaders headers) {
+        ServerLogDetails details = new ServerLogDetails();
+        if (headers == null) {
+            headers = new HttpHeaders();
+        }
+        if (nameSpaceDetail == null || !nameSpaceDetail.isValid()) {
+            details.setLogs(Flux.error(new IllegalArgumentException("If you have not specified the namespace of the TC/Server, specify the namespace first")));
+            return details;
+        } else {
+            setNamespaceHeaderAndPathParam(nameSpaceDetail, headers, pathParams);
+        }
+        if (!jwtTokenUtils.validateToken(originJwt)) {
+            getToken();
+        }
+        headers.add(WebSecurityConfig.AUTHORIZATION_HEADER, token);
+        Map<String, Object> queryParamsMap = objectToQueryParamMap(queryParams);
+        String url = buildUrl(String.format(NAMING_SPACE_URL, namingSpacePort), path, pathParams, queryParamsMap);
+
+        HttpHeaders finalHeaders = headers;
+        WebClient client = WebClient.builder()
+                .baseUrl(url)
+                .defaultHeaders(h -> h.addAll(finalHeaders))
+                .build();
+
+        Flux<String> stringFlux = client.get()
+                .accept(MediaType.APPLICATION_JSON)
+                .exchangeToFlux(response -> {
+                    HttpHeaders responseHeaders = response.headers().asHttpHeaders();
+                    List<String> totalLines = responseHeaders.get("X-Log-Total-Lines");
+                    if(totalLines !=null && !totalLines.isEmpty()){
+                        details.setTotalLines(Integer.valueOf(totalLines.get(0)));
+                    }else{
+                        details.setTotalLines(0);
+                    }
+                    return response.bodyToFlux(String.class);
+                })
+                .onBackpressureBuffer();
+        details.setLogs(stringFlux);
+        return details;
+    }
+
+
 
     /**
      * Convert an object to a query parameter, Map
