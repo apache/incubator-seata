@@ -35,10 +35,11 @@ public class ServerLogParam implements Serializable {
             example = "1")
     private Integer page = 1;
 
-    @ToolParam(
-            description =
-                    "The time when the log information was generated，Enter the time given by the user directly and fuzz the match")
-    private List<String> logMessageTime;
+    @ToolParam(description = "The start time when the log information was generated(yyyy-MM-dd HH:mm:ss)")
+    private String logMessageStartTime;
+
+    @ToolParam(description = "The end time when the log information was generated(yyyy-MM-dd HH:mm:ss)")
+    private String logMessageEndTime;
 
     @ToolParam(
             description =
@@ -67,12 +68,20 @@ public class ServerLogParam implements Serializable {
         this.page = page;
     }
 
-    public List<String> getLogMessageTime() {
-        return logMessageTime;
+    public String getLogMessageStartTime() {
+        return logMessageStartTime;
     }
 
-    public void setLogMessageTime(List<String> logMessageTime) {
-        this.logMessageTime = logMessageTime;
+    public void setLogMessageStartTime(String logMessageStartTime) {
+        this.logMessageStartTime = logMessageStartTime;
+    }
+
+    public String getLogMessageEndTime() {
+        return logMessageEndTime;
+    }
+
+    public void setLogMessageEndTime(String logMessageEndTime) {
+        this.logMessageEndTime = logMessageEndTime;
     }
 
     public String getLogMessageLevel() {
@@ -95,9 +104,10 @@ public class ServerLogParam implements Serializable {
     public String toString() {
         return "ServerLogParam{" + "logType='"
                 + logType + '\'' + ", page="
-                + page + ", logMessageTime='"
-                + logMessageTime + '\'' + ", logMessageLevel='"
-                + logMessageLevel + '\'' + ", logMessageKeyWord='"
-                + logMessageKeyWord + '\'' + '}';
+                + page + ", logMessageStartTime='"
+                + logMessageStartTime + '\'' + ", logMessageEndTime='"
+                + logMessageEndTime + '\'' + ", logMessageLevel='"
+                + logMessageLevel + '\'' + ", logMessageKeyWord="
+                + logMessageKeyWord + '}';
     }
 }
