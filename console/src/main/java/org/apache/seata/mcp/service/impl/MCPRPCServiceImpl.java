@@ -19,20 +19,23 @@ package org.apache.seata.mcp.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
+import io.netty.handler.timeout.ReadTimeoutHandler;
 import org.apache.seata.common.result.SingleResult;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.console.config.WebSecurityConfig;
 import org.apache.seata.console.utils.JwtTokenUtils;
 import org.apache.seata.mcp.annotation.Tool;
 import org.apache.seata.mcp.entity.pojo.NameSpaceDetail;
-import org.apache.seata.mcp.entity.pojo.ServerLogDetails;
 import org.apache.seata.mcp.handler.CustomResponseErrorHandler;
 import org.apache.seata.mcp.service.MCPRPCService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.*;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -40,11 +43,19 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
-import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.netty.http.client.HttpClient;
 
 import javax.annotation.PostConstruct;
+import java.io.IOException;
 import java.lang.reflect.Field;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.time.Duration;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Provides an interface for MCP to call servers from RPC through Namingspace
@@ -333,20 +344,19 @@ public class MCPRPCServiceImpl implements MCPRPCService {
     }
 
     @Override
-    public ServerLogDetails getCallTCLogs(
+    public Mono<Void> getCallTCLogs(
             NameSpaceDetail nameSpaceDetail,
             String path,
             Object queryParams,
             Map<String, String> pathParams,
-            HttpHeaders headers) {
-        ServerLogDetails details = new ServerLogDetails();
+            HttpHeaders headers,
+            String outputFilePath) {
+
         if (headers == null) {
             headers = new HttpHeaders();
         }
         if (nameSpaceDetail == null || !nameSpaceDetail.isValid()) {
-            details.setLogs(Flux.error(new IllegalArgumentException(
-                    "If you have not specified the namespace of the TC/Server, specify the namespace first")));
-            return details;
+            return Mono.error(new IllegalArgumentException("Invalid namespace"));
         } else {
             setNamespaceHeaderAndPathParam(nameSpaceDetail, headers, pathParams);
         }
@@ -358,26 +368,35 @@ public class MCPRPCServiceImpl implements MCPRPCService {
         String url = buildUrl(String.format(NAMING_SPACE_URL, namingSpacePort), path, pathParams, queryParamsMap);
 
         HttpHeaders finalHeaders = headers;
-        WebClient client = WebClient.builder()
+        HttpClient httpClient = HttpClient.create()
+                .responseTimeout(Duration.ofSeconds(60))
+                .doOnConnected(conn -> conn.addHandlerLast(new ReadTimeoutHandler(60, TimeUnit.SECONDS)));
+
+        WebClient webClient = WebClient.builder()
+                .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .baseUrl(url)
+                .codecs(configurer -> {
+                    configurer.defaultCodecs().maxInMemorySize(512 * 1024); // 512KB
+                    configurer.defaultCodecs().enableLoggingRequestDetails(false);
+                })
                 .defaultHeaders(h -> h.addAll(finalHeaders))
                 .build();
 
-        Flux<String> stringFlux = client.get()
-                .accept(MediaType.APPLICATION_JSON)
-                .exchangeToFlux(response -> {
-                    HttpHeaders responseHeaders = response.headers().asHttpHeaders();
-                    List<String> totalLines = responseHeaders.get("X-Log-Total-Lines");
-                    if (totalLines != null && !totalLines.isEmpty()) {
-                        details.setTotalLines(Integer.valueOf(totalLines.get(0)));
-                    } else {
-                        details.setTotalLines(0);
-                    }
-                    return response.bodyToFlux(String.class);
-                })
-                .onBackpressureBuffer();
-        details.setLogs(stringFlux);
-        return details;
+        Path filePath = Paths.get(outputFilePath);
+        try {
+            Files.createDirectories(filePath.getParent());
+        } catch (IOException e) {
+            return Mono.error(e);
+        }
+
+        // 执行请求并流式写入文件
+        return webClient
+                .get()
+                .retrieve()
+                .bodyToFlux(DataBuffer.class)
+                .as(dataBufferFlux -> DataBufferUtils.write(
+                        dataBufferFlux, filePath, StandardOpenOption.CREATE, StandardOpenOption.WRITE))
+                .then();
     }
 
     /**

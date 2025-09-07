@@ -16,11 +16,11 @@
  */
 package org.apache.seata.mcp.controller.tools;
 
-import org.apache.seata.common.result.PageResult;
 import org.apache.seata.mcp.annotation.Tool;
 import org.apache.seata.mcp.annotation.ToolParam;
 import org.apache.seata.mcp.entity.param.ServerLogParam;
 import org.apache.seata.mcp.entity.pojo.NameSpaceDetail;
+import org.apache.seata.mcp.entity.vo.ServerLogPageVO;
 import org.apache.seata.mcp.service.ServerLogService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,7 +34,7 @@ public class ServerLogTools {
     @Tool(
             description =
                     "Get the latest(only one day) running logs on the server side, The larger the page, the newer the log")
-    public PageResult<String> getServerLogFile(
+    public ServerLogPageVO<String> getServerLogFile(
             @ToolParam(description = "Specify the namespace of the TC node", required = true)
                     NameSpaceDetail nameSpaceDetail,
             @ToolParam(
