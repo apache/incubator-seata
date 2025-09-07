@@ -47,6 +47,8 @@ public class ServerLogFileServiceImpl implements ServerLogService {
 
     private static final String DEFAULT_APP_NAME = "seata-server";
 
+    private static final Integer MAX_LOG_FILE_SIZE = 500 * 1024 * 1024; // 500MB
+
     private final Logger LOGGER = LoggerFactory.getLogger(ServerLogFileServiceImpl.class);
 
     @Override
@@ -54,6 +56,17 @@ public class ServerLogFileServiceImpl implements ServerLogService {
         String logPathString = buildLogFilePath(serverLogParam);
         Path logPath = Paths.get(logPathString);
         if (Files.exists(logPath)) {
+            long size = 0;
+            try {
+                size = Files.size(logPath);
+            } catch (IOException e) {
+                LOGGER.warn("Error get log file size: {}", e.getMessage());
+            }
+            if (size > MAX_LOG_FILE_SIZE) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(out ->
+                                out.write(("Log File exceed the Max Size: " + MAX_LOG_FILE_SIZE + " B").getBytes()));
+            }
             long totalLines = 0;
             try (Stream<String> lines = Files.lines(logPath)) {
                 totalLines = lines.count();
