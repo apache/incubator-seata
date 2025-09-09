@@ -23,6 +23,7 @@ import org.springframework.web.servlet.function.ServerResponse;
 import org.springframework.web.servlet.function.ServerResponse.SseBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -130,6 +131,7 @@ public class WebMvcStreamableServerTransportProvider implements McpStreamableSer
                             return Flux.empty();
                         }
                         return Flux.fromIterable(this.sessions.values())
+                                .publishOn(Schedulers.boundedElastic())
                                 .filter(session -> {
                                     // Check if the session is healthy
                                     if (!session.isHealthy()) {
