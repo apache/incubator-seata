@@ -403,7 +403,7 @@ public class ServerLogServiceImpl implements ServerLogService {
             if (keywordSet != null) {
                 boolean matched = false;
                 for (String key : keywordSet) {
-                    if (entry.contains(key)) {
+                    if (org.apache.commons.lang.StringUtils.indexOf(entry,key)!=-1) {
                         matched = true;
                         break;
                     }
