@@ -369,7 +369,7 @@ public class MCPRPCServiceImpl implements MCPRPCService {
 
         HttpHeaders finalHeaders = headers;
         HttpClient httpClient = HttpClient.create()
-                .responseTimeout(Duration.ofSeconds(60))
+                .responseTimeout(Duration.ofSeconds(30))
                 .doOnConnected(conn -> conn.addHandlerLast(new ReadTimeoutHandler(60, TimeUnit.SECONDS)));
 
         WebClient webClient = WebClient.builder()
@@ -389,7 +389,6 @@ public class MCPRPCServiceImpl implements MCPRPCService {
             return Mono.error(e);
         }
 
-        // 执行请求并流式写入文件
         return webClient
                 .get()
                 .retrieve()
