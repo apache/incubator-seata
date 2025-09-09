@@ -32,6 +32,8 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -67,28 +69,33 @@ public class ServerLogFileServiceImpl implements ServerLogService {
                         .body(out ->
                                 out.write(("Log File exceed the Max Size: " + MAX_LOG_FILE_SIZE + " B").getBytes()));
             }
-            long totalLines = 0;
-            try (Stream<String> lines = Files.lines(logPath)) {
-                totalLines = lines.count();
-            } catch (IOException e) {
-                LOGGER.warn("Error get log total lines: {}", e.getMessage());
-            }
+            long finalSize = size;
             StreamingResponseBody responseBody = outputStream -> {
                 try (FileChannel channel = FileChannel.open(logPath, StandardOpenOption.READ)) {
-                    ByteBuffer buffer = ByteBuffer.allocate(512 * 1024);
+                    long position = 0;
+                    long remaining = finalSize;
 
-                    while (channel.read(buffer) != -1) {
-                        buffer.flip();
-                        outputStream.write(buffer.array(), 0, buffer.limit());
+                    while (remaining > 0) {
+                        // 将文件内容直接传输到输出流
+                        long transferred = channel.transferTo(position, remaining, Channels.newChannel(outputStream));
+
+                        if (transferred <= 0) {
+                            break;
+                        }
+
+                        position += transferred;
+                        remaining -= transferred;
+
                         outputStream.flush();
-                        buffer.clear();
                     }
                 } catch (IOException e) {
                     LOGGER.warn("Error streaming log file: {}", e.getMessage());
+                    if (e instanceof ClosedChannelException) {
+                        LOGGER.info("Client closed connection during file transfer");
+                    }
                 }
             };
             return ResponseEntity.ok()
-                    .header("X-Log-Total-Lines", String.valueOf(totalLines))
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + logPath.getFileName() + "\"")
                     .header(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate")
                     .header(HttpHeaders.PRAGMA, "no-cache")
