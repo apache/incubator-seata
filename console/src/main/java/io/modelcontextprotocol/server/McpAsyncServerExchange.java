@@ -241,7 +241,7 @@ public class McpAsyncServerExchange {
 
     /**
      * Sends a ping request to the client.
-     * @return A Mono that completes with clients's ping response
+     * @return A Mono that completes with client's ping response
      */
     public Mono<Object> ping() {
         return this.session.sendRequest(McpSchema.METHOD_PING, null, OBJECT_TYPE_REF);
