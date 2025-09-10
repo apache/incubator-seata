@@ -20,42 +20,32 @@ import org.apache.seata.common.exception.StoreException;
 import org.apache.seata.mcp.entity.pojo.BusinessDataSourcesProperties;
 
 import javax.sql.DataSource;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DataSourceFactory {
 
-    private static final Map<String, DataSource> dataSourceMap = new HashMap<String, DataSource>();
+    private static final Map<String, DataSource> dataSourceMap = new ConcurrentHashMap<>();
 
     public static void initAllDataSources() {
         Map<String, BusinessDataSourcesProperties.DataSourceProperties> datasources =
                 BusinessDataSourcesProperties.getDatasources();
-        if (datasources == null || datasources.isEmpty()) {
-            return;
-        }
+        if (datasources == null) return;
 
-        for (Map.Entry<String, BusinessDataSourcesProperties.DataSourceProperties> entry : datasources.entrySet()) {
-            String resourceId = entry.getKey();
-            if (!dataSourceMap.containsKey(resourceId)) {
-                DataSource ds = createDataSource(entry.getValue(), resourceId);
-                dataSourceMap.put(resourceId, ds);
-            }
-        }
+        datasources.forEach((resourceId, props) ->
+                dataSourceMap.computeIfAbsent(resourceId, key -> createDataSource(props, key))
+        );
     }
 
     public static DataSource getDataSource(String resourceId) {
-        if (dataSourceMap.containsKey(resourceId)) return dataSourceMap.get(resourceId);
-
-        Map<String, BusinessDataSourcesProperties.DataSourceProperties> datasources =
-                BusinessDataSourcesProperties.getDatasources();
-        BusinessDataSourcesProperties.DataSourceProperties dataSourceProperties = datasources.get(resourceId);
-
-        if (dataSourceProperties == null) {
-            throw new StoreException("Cannot find datasource properties:" + resourceId);
-        }
-        DataSource dataSource = createDataSource(dataSourceProperties, resourceId);
-        dataSourceMap.put(resourceId, dataSource);
-        return dataSource;
+        return dataSourceMap.computeIfAbsent(resourceId, key -> {
+            BusinessDataSourcesProperties.DataSourceProperties props =
+                    BusinessDataSourcesProperties.getDatasources().get(key);
+            if (props == null) {
+                throw new StoreException("Cannot find datasource properties: " + key);
+            }
+            return createDataSource(props, key);
+        });
     }
 
     public static DataSource createDataSource(
