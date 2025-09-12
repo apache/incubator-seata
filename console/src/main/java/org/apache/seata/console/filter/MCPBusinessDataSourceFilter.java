@@ -26,10 +26,14 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class MCPBusinessDataSourceFilter extends OncePerRequestFilter {
 
     private final BusinessDataSourcesProperties businessDataSourcesProperties;
+
+    private final Set<String> processedConfigs = ConcurrentHashMap.newKeySet();
 
     public MCPBusinessDataSourceFilter(BusinessDataSourcesProperties properties) {
         this.businessDataSourcesProperties = properties;
@@ -43,8 +47,12 @@ public class MCPBusinessDataSourceFilter extends OncePerRequestFilter {
         if (combinedHeader != null && !combinedHeader.isEmpty()) {
             String[] jsonConfigs = combinedHeader.split(";");
             for (String jsonDBConfig : jsonConfigs) {
+                if (processedConfigs.contains(jsonDBConfig.trim())) {
+                    continue;
+                }
                 try {
                     businessDataSourcesProperties.registerDataSourceFromJson(jsonDBConfig.trim());
+                    processedConfigs.add(jsonDBConfig.trim());
                 } catch (Exception e) {
                     if (!response.isCommitted()) {
                         response.sendError(
