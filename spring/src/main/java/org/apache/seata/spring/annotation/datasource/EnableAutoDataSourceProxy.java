@@ -33,7 +33,7 @@ import java.lang.annotation.Target;
 @Documented
 public @interface EnableAutoDataSourceProxy {
     /**
-     * Whether use JDK proxy instead of CGLIB proxy
+     * Whether to use JDK proxy instead of CGLIB proxy
      *
      * @return useJdkProxy
      */
