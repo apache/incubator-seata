@@ -38,8 +38,7 @@ public class ProcessorYamlTest {
         ProcessorYaml processorYaml = new ProcessorYaml();
         Properties props = processorYaml.processor(yamlConfig);
 
-        assertEquals(8080, props.get("server.port"));
-        assertEquals("", props.getProperty("server.port", ""));
+        assertEquals("8080", props.getProperty("server.port", ""));
         assertEquals("localhost", props.getProperty("server.host"));
         assertEquals("jdbc:mysql://localhost:3306/test", props.getProperty("spring.datasource.url"));
         assertEquals("root", props.getProperty("spring.datasource.username"));
