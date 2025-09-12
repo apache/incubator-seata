@@ -49,10 +49,12 @@ public class MCPFiltersConfig {
 
         registration.setFilter(mcpJwtAuthenticationTokenFilter);
 
-        registration.addUrlPatterns(
-                mcpProperties.isSseType()
-                        ? mcpProperties.getSseServerProperties().getSseEndpoint()
-                        : mcpProperties.getStreamableProperties().getMcpEndPoint());
+        if (mcpProperties.isSseType()) {
+            MCPProperties.SseServerProperties sseServerProperties = mcpProperties.getSseServerProperties();
+            registration.addUrlPatterns(sseServerProperties.getSseEndpoint(), sseServerProperties.getMessageEndpoint());
+        } else {
+            registration.addUrlPatterns(mcpProperties.getStreamableProperties().getMcpEndPoint());
+        }
 
         registration.setName("mcpJwtAuthenticationTokenFilter");
 
@@ -72,10 +74,12 @@ public class MCPFiltersConfig {
 
         registration.setFilter(mcpBusinessDataSourceFilter);
 
-        registration.addUrlPatterns(
-                mcpProperties.isSseType()
-                        ? mcpProperties.getSseServerProperties().getSseEndpoint()
-                        : mcpProperties.getStreamableProperties().getMcpEndPoint());
+        if (mcpProperties.isSseType()) {
+            MCPProperties.SseServerProperties sseServerProperties = mcpProperties.getSseServerProperties();
+            registration.addUrlPatterns(sseServerProperties.getSseEndpoint(), sseServerProperties.getMessageEndpoint());
+        } else {
+            registration.addUrlPatterns(mcpProperties.getStreamableProperties().getMcpEndPoint());
+        }
 
         registration.setName("mcpBusinessDataSourceFilter");
 
