@@ -32,9 +32,8 @@ public class DataSourceFactory {
                 BusinessDataSourcesProperties.getDatasources();
         if (datasources == null) return;
 
-        datasources.forEach((resourceId, props) ->
-                dataSourceMap.computeIfAbsent(resourceId, key -> createDataSource(props, key))
-        );
+        datasources.forEach(
+                (resourceId, props) -> dataSourceMap.computeIfAbsent(resourceId, key -> createDataSource(props, key)));
     }
 
     public static DataSource getDataSource(String resourceId) {
