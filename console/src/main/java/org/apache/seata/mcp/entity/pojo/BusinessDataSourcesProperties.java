@@ -16,6 +16,9 @@
  */
 package org.apache.seata.mcp.entity.pojo;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.seata.common.util.StringUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -24,10 +27,10 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertySource;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_DB_MAX_CONN;
 import static org.apache.seata.common.DefaultValues.DEFAULT_DB_MIN_CONN;
@@ -38,17 +41,20 @@ public class BusinessDataSourcesProperties implements InitializingBean {
     @Autowired
     private Environment env;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     /**
      * Business database properties instance
      */
-    private static final Map<String, DataSourceProperties> datasources = new HashMap<>();
+    private static final Map<String, DataSourceProperties> datasources = new ConcurrentHashMap<>();
 
-    private static final Map<String, String> dataSourcesNamesAndResourceIds = new HashMap<>();
+    private static final Map<String, String> dataSourcesNamesAndResourceIds = new ConcurrentHashMap<>();
 
     private static final String BASE_PREFIX = "seata.businessDataSources.";
 
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
 
         Set<String> dataSourceNames = getDataSourceNames();
 
@@ -72,6 +78,86 @@ public class BusinessDataSourcesProperties implements InitializingBean {
             // Use the database URL as a unique identifier
             datasources.put(resourceId, props);
             dataSourcesNamesAndResourceIds.put(name, resourceId);
+        }
+    }
+
+    private DataSourceProperties parseDBPropertyFromJson(JsonNode jsonNode) {
+        if (jsonNode == null || jsonNode.isEmpty()) {
+            throw new IllegalArgumentException("JSON configuration cannot be null");
+        }
+        DataSourceProperties props = new DataSourceProperties();
+
+        // Parse basic properties with defaults
+        props.setDbType(jsonNode.has("dbType") ? jsonNode.get("dbType").asText() : "mysql");
+
+        // Set driver class based on database type if not explicitly provided
+        String driverClassName = getDefaultDriverClassName(props.getDbType());
+        props.setDriverClassName(driverClassName);
+
+        // Required fields
+        if (!jsonNode.has("url")) {
+            throw new IllegalArgumentException("The database URL cannot be empty");
+        }
+        props.setUrl(jsonNode.get("url").asText());
+
+        if (!jsonNode.has("username")) {
+            throw new IllegalArgumentException("The database username cannot be empty");
+        }
+        props.setUsername(jsonNode.get("username").asText());
+
+        if (!jsonNode.has("password")) {
+            throw new IllegalArgumentException("The database password cannot be empty");
+        }
+        props.setPassword(jsonNode.get("password").asText());
+
+        // Optional fields with defaults
+        props.setDatasource(
+                jsonNode.has("datasource") ? jsonNode.get("datasource").asText() : "druid");
+        props.setMinConn(jsonNode.has("minConn") ? jsonNode.get("minConn").asInt() : DEFAULT_DB_MIN_CONN);
+        props.setMaxConn(jsonNode.has("maxConn") ? jsonNode.get("maxConn").asInt() : DEFAULT_DB_MAX_CONN);
+        props.setMaxWait(jsonNode.has("maxWait") ? jsonNode.get("maxWait").asLong() : 5000L);
+
+        return props;
+    }
+
+    /**
+     * Register a new DataSource from JSON configuration
+     * @param jsonConfig JSON configuration string
+     * @throws Exception if JSON parsing or registration fails
+     */
+    public void registerDataSourceFromJson(String jsonConfig) throws Exception {
+        JsonNode jsonNode = objectMapper.readTree(jsonConfig);
+        if (jsonNode == null || jsonNode.isEmpty()) {
+            throw new IllegalArgumentException("JSON configuration cannot be null");
+        }
+        String name = jsonNode.get("dbName").asText();
+        if (!StringUtils.hasText(name)) {
+            throw new IllegalArgumentException("The data source name cannot be empty");
+        }
+
+        DataSourceProperties props = parseDBPropertyFromJson(jsonNode);
+        String resourceId = getOriginUrl(props.getUrl());
+
+        datasources.put(resourceId, props);
+        dataSourcesNamesAndResourceIds.put(name, resourceId);
+    }
+
+    /**
+     * Get default driver class name based on database type
+     */
+    private static String getDefaultDriverClassName(String dbType) {
+        switch (dbType.toLowerCase()) {
+            case "postgresql":
+                return "org.postgresql.Driver";
+            case "oracle":
+                return "oracle.jdbc.driver.OracleDriver";
+            case "sqlserver":
+                return "com.microsoft.sqlserver.jdbc.SQLServerDriver";
+            case "h2":
+                return "org.h2.Driver";
+            case "mysql":
+            default:
+                return "com.mysql.cj.jdbc.Driver";
         }
     }
 
@@ -144,6 +230,21 @@ public class BusinessDataSourcesProperties implements InitializingBean {
         private int minConn = DEFAULT_DB_MIN_CONN;
         private int maxConn = DEFAULT_DB_MAX_CONN;
         private Long maxWait = 5000L;
+
+        @Override
+        public String toString() {
+            return "DataSourceProperties{" + "enabled="
+                    + enabled + ", dbType='"
+                    + dbType + '\'' + ", driverClassName='"
+                    + driverClassName + '\'' + ", url='"
+                    + url + '\'' + ", username='"
+                    + username + '\'' + ", password='"
+                    + password + '\'' + ", datasource='"
+                    + datasource + '\'' + ", minConn="
+                    + minConn + ", maxConn="
+                    + maxConn + ", maxWait="
+                    + maxWait + '}';
+        }
 
         public boolean isEnabled() {
             return enabled;
