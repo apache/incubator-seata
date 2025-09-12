@@ -105,14 +105,3 @@ seata:
       min-conn: 5
       max-conn: 50
       max-wait: 5000L
-    recruitNewcomersDatabase:
-      enabled: true
-      db-type: mysql
-      driverClassName: com.mysql.cj.jdbc.Driver
-      url: jdbc:mysql://localhost:3306/zhaoxin25_dev?useSSL=false
-      username: root
-      password: Il02mayi
-      datasource: hikari
-      min-conn: 5
-      max-conn: 50
-      max-wait: 5000L
