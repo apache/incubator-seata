@@ -97,15 +97,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(WebSecurity web) {
         String ignoreURLs = env.getProperty("seata.security.ignore.urls", "/**");
-        if (!mcpProperties.isEnableAuth()) {
-            if (mcpProperties.isSseType()) {
-                MCPProperties.SseServerProperties sseServerProperties = mcpProperties.getSseServerProperties();
-                ignoreURLs +=
-                        "," + sseServerProperties.getSseEndpoint() + "," + sseServerProperties.getMessageEndpoint();
-            } else {
-                MCPProperties.StreamableProperties streamableProperties = mcpProperties.getStreamableProperties();
-                ignoreURLs += "," + streamableProperties.getMcpEndPoint();
-            }
+        if (mcpProperties.isSseType()) {
+            MCPProperties.SseServerProperties sseServerProperties = mcpProperties.getSseServerProperties();
+            ignoreURLs += "," + sseServerProperties.getSseEndpoint() + "," + sseServerProperties.getMessageEndpoint();
+        } else {
+            MCPProperties.StreamableProperties streamableProperties = mcpProperties.getStreamableProperties();
+            ignoreURLs += "," + streamableProperties.getMcpEndPoint();
         }
         for (String ignoreURL : ignoreURLs.trim().split(SECURITY_IGNORE_URLS_SPILT_CHAR)) {
             web.ignoring().antMatchers(ignoreURL.trim());
