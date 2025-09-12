@@ -17,15 +17,13 @@
 package org.apache.seata.server.ratelimiter;
 
 import org.apache.seata.common.thread.NamedThreadFactory;
-import org.apache.seata.server.DynamicPortTestConfig;
+import org.apache.seata.server.BaseSpringBootTest;
 import org.apache.seata.server.limit.ratelimit.RateLimiter;
 import org.apache.seata.server.limit.ratelimit.TokenBucketLimiter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.util.StopWatch;
 
 import java.util.concurrent.CountDownLatch;
@@ -37,9 +35,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * TokenBucketLimiterTest
  */
-@SpringBootTest
-@Import(DynamicPortTestConfig.class)
-public class TokenBucketLimiterTest {
+public class TokenBucketLimiterTest extends BaseSpringBootTest {
 
     /**
      * Logger for TokenBucketLimiterTest

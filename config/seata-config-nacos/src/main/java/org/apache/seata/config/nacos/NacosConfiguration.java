@@ -442,14 +442,17 @@ public class NacosConfiguration extends AbstractConfiguration implements Dispose
         public void innerReceive(String dataId, String group, String configInfo) {
             // The new configuration method to puts all configurations into a dateId
             if (getNacosDataId().equals(dataId)) {
+                if (StringUtils.isBlank(configInfo)) {
+                    LOGGER.warn("Empty config from Nacos, dataId='{}'. Skipped.", dataId);
+                    return;
+                }
                 Properties seataConfigNew = new Properties();
-                if (StringUtils.isNotBlank(configInfo)) {
-                    try {
-                        seataConfigNew = ConfigProcessor.processConfig(configInfo, getNacosDataType());
-                    } catch (IOException e) {
-                        LOGGER.error("load config properties error", e);
-                        return;
-                    }
+
+                try {
+                    seataConfigNew = ConfigProcessor.processConfig(configInfo, getNacosDataType());
+                } catch (IOException e) {
+                    LOGGER.error("load config properties error", e);
+                    return;
                 }
 
                 // Get all the monitored dataids and judge whether it has been modified

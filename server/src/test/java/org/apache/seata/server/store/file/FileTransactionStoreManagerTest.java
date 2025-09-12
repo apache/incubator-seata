@@ -19,7 +19,7 @@ package org.apache.seata.server.store.file;
 import org.apache.seata.common.store.SessionMode;
 import org.apache.seata.common.util.BufferUtils;
 import org.apache.seata.common.util.UUIDGenerator;
-import org.apache.seata.server.DynamicPortTestConfig;
+import org.apache.seata.server.BaseSpringBootTest;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.session.SessionHolder;
@@ -35,8 +35,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -45,11 +43,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-/**
- */
-@SpringBootTest
-@Import(DynamicPortTestConfig.class)
-public class FileTransactionStoreManagerTest {
+public class FileTransactionStoreManagerTest extends BaseSpringBootTest {
 
     @BeforeEach
     public void setUp() {

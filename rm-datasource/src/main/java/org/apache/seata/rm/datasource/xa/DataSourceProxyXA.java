@@ -22,6 +22,7 @@ import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.protocol.Version;
 import org.apache.seata.rm.DefaultResourceManager;
 import org.apache.seata.rm.datasource.SeataDataSourceProxy;
+import org.apache.seata.rm.datasource.combine.CombineConnectionHolder;
 import org.apache.seata.rm.datasource.util.JdbcUtils;
 import org.apache.seata.rm.datasource.util.XAUtils;
 import org.slf4j.Logger;
@@ -87,12 +88,24 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
 
     @Override
     public Connection getConnection() throws SQLException {
+        if (RootContext.inGlobalTransaction() && RootContext.inCombineTransaction()) {
+            ConnectionProxyXA connectionProxyXA = CombineConnectionHolder.get(this.dataSource);
+            if (connectionProxyXA != null && !connectionProxyXA.isClosed()) {
+                return connectionProxyXA;
+            }
+        }
         Connection connection = dataSource.getConnection();
         return getConnectionProxy(connection);
     }
 
     @Override
     public Connection getConnection(String username, String password) throws SQLException {
+        if (RootContext.inGlobalTransaction() && RootContext.inCombineTransaction()) {
+            ConnectionProxyXA connectionProxyXA = CombineConnectionHolder.get(this.dataSource);
+            if (connectionProxyXA != null && !connectionProxyXA.isClosed()) {
+                return connectionProxyXA;
+            }
+        }
         Connection connection = dataSource.getConnection(username, password);
         return getConnectionProxy(connection);
     }
@@ -101,7 +114,11 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
         if (!RootContext.inGlobalTransaction()) {
             return connection;
         }
-        return getConnectionProxyXA(connection);
+        ConnectionProxyXA connectionProxyXA = (ConnectionProxyXA) getConnectionProxyXA(connection);
+        if (RootContext.inCombineTransaction()) {
+            CombineConnectionHolder.putConnection(this.dataSource, connectionProxyXA);
+        }
+        return connectionProxyXA;
     }
 
     @Override

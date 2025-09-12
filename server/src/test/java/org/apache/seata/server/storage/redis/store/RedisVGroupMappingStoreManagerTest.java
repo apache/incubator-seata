@@ -18,20 +18,16 @@ package org.apache.seata.server.storage.redis.store;
 
 import org.apache.seata.common.metadata.Instance;
 import org.apache.seata.core.store.MappingDO;
-import org.apache.seata.server.DynamicPortTestConfig;
+import org.apache.seata.server.BaseSpringBootTest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 
 import java.util.Map;
 
 @EnabledIfSystemProperty(named = "redisCaseEnabled", matches = "true")
-@SpringBootTest
-@Import(DynamicPortTestConfig.class)
-public class RedisVGroupMappingStoreManagerTest {
+public class RedisVGroupMappingStoreManagerTest extends BaseSpringBootTest {
     private RedisVGroupMappingStoreManager redisVGroupMappingStoreManager;
 
     @BeforeEach

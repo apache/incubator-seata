@@ -77,6 +77,12 @@ public interface StarterConstants {
     String SERVER_RAFT_SSL_SERVER_KEYSTORE_PREFIX = SERVER_RAFT_SSL_PREFIX + ".server.keystore";
     String SERVER_RECOVERY_PREFIX = SERVER_PREFIX + ".recovery";
 
+    String SERVER_HTTP_PREFIX = SERVER_PREFIX + ".http";
+
+    String SERVER_HTTP_FILTER_PREFIX = SERVER_HTTP_PREFIX + ".filter";
+
+    String SERVER_HTTP_FILTER_XSS_PREFIX = SERVER_HTTP_FILTER_PREFIX + ".xss";
+
     String METRICS_PREFIX = SEATA_PREFIX + ".metrics";
 
     String STORE_PREFIX = SEATA_PREFIX + ".store";

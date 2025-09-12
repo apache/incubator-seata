@@ -22,7 +22,7 @@ import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.store.SessionMode;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchType;
-import org.apache.seata.server.DynamicPortTestConfig;
+import org.apache.seata.server.BaseSpringBootTest;
 import org.apache.seata.server.cluster.raft.snapshot.RaftSnapshot;
 import org.apache.seata.server.cluster.raft.snapshot.RaftSnapshotSerializer;
 import org.apache.seata.server.cluster.raft.snapshot.session.RaftSessionSnapshot;
@@ -41,9 +41,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Import;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -56,9 +54,7 @@ import java.util.Map;
 
 /**
  */
-@SpringBootTest
-@Import(DynamicPortTestConfig.class)
-public class RaftSyncMessageTest {
+public class RaftSyncMessageTest extends BaseSpringBootTest {
 
     @BeforeAll
     public static void setUp(ApplicationContext context) {

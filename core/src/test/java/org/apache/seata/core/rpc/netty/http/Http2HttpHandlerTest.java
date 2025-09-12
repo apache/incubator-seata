@@ -25,8 +25,12 @@ import io.netty.handler.codec.http2.DefaultHttp2HeadersFrame;
 import io.netty.handler.codec.http2.Http2Headers;
 import io.netty.handler.codec.http2.Http2HeadersFrame;
 import io.netty.handler.codec.http2.Http2StreamFrame;
+import org.apache.seata.core.exception.HttpRequestFilterException;
+import org.apache.seata.core.rpc.netty.http.filter.HttpRequestFilterChain;
+import org.apache.seata.core.rpc.netty.http.filter.HttpRequestFilterManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -34,7 +38,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 
 class Http2HttpHandlerTest {
     private Http2HttpHandler handler;
@@ -84,88 +95,187 @@ class Http2HttpHandlerTest {
 
     @Test
     void testHttp2GetRequestWithParameters() throws Exception {
-        Http2Headers headers = new DefaultHttp2Headers();
-        headers.method("GET");
-        headers.path("/test?param=testValue");
-        Http2HeadersFrame headersFrame = new DefaultHttp2HeadersFrame(headers, true);
-        channel.writeInbound(headersFrame);
+        try (MockedStatic<HttpRequestFilterManager> mockedStatic = mockStatic(HttpRequestFilterManager.class)) {
+            HttpRequestFilterChain mockChain = mock(HttpRequestFilterChain.class);
+            doNothing().when(mockChain).doFilter(any());
+            mockedStatic.when(HttpRequestFilterManager::getFilterChain).thenReturn(mockChain);
+            Http2Headers headers = new DefaultHttp2Headers();
+            headers.method("GET");
+            headers.path("/test?param=testValue");
+            Http2HeadersFrame headersFrame = new DefaultHttp2HeadersFrame(headers, true);
+            channel.writeInbound(headersFrame);
 
-        Http2StreamFrame responseHeadersFrame = waitForHttp2Response(5000);
-        assertNotNull(responseHeadersFrame);
-        assertTrue(responseHeadersFrame instanceof DefaultHttp2HeadersFrame);
-        DefaultHttp2HeadersFrame respHeaders = (DefaultHttp2HeadersFrame) responseHeadersFrame;
-        assertEquals("200", respHeaders.headers().status().toString());
+            Http2StreamFrame responseHeadersFrame = waitForHttp2Response(5000);
+            assertNotNull(responseHeadersFrame);
+            assertTrue(responseHeadersFrame instanceof DefaultHttp2HeadersFrame);
+            DefaultHttp2HeadersFrame respHeaders = (DefaultHttp2HeadersFrame) responseHeadersFrame;
+            assertEquals("200", respHeaders.headers().status().toString());
 
-        Http2StreamFrame responseDataFrame = waitForHttp2Response(5000);
-        assertNotNull(responseDataFrame);
-        assertTrue(responseDataFrame instanceof DefaultHttp2DataFrame);
-        DefaultHttp2DataFrame respData = (DefaultHttp2DataFrame) responseDataFrame;
-        String content = respData.content().toString(StandardCharsets.UTF_8);
-        assertTrue(content.contains("Processed: testValue"));
+            Http2StreamFrame responseDataFrame = waitForHttp2Response(5000);
+            assertNotNull(responseDataFrame);
+            assertTrue(responseDataFrame instanceof DefaultHttp2DataFrame);
+            DefaultHttp2DataFrame respData = (DefaultHttp2DataFrame) responseDataFrame;
+            String content = respData.content().toString(StandardCharsets.UTF_8);
+            assertTrue(content.contains("Processed: testValue"));
+        }
     }
 
     @Test
     void testHttp2RequestToNonexistentPath() {
-        Http2Headers headers = new DefaultHttp2Headers();
-        headers.method("GET");
-        headers.path("/notfound");
-        Http2HeadersFrame headersFrame = new DefaultHttp2HeadersFrame(headers, true);
-        channel.writeInbound(headersFrame);
+        try (MockedStatic<HttpRequestFilterManager> mockedStatic = mockStatic(HttpRequestFilterManager.class)) {
+            HttpRequestFilterChain mockChain = mock(HttpRequestFilterChain.class);
+            doNothing().when(mockChain).doFilter(any());
+            mockedStatic.when(HttpRequestFilterManager::getFilterChain).thenReturn(mockChain);
+            Http2Headers headers = new DefaultHttp2Headers();
+            headers.method("GET");
+            headers.path("/notfound");
+            Http2HeadersFrame headersFrame = new DefaultHttp2HeadersFrame(headers, true);
+            channel.writeInbound(headersFrame);
 
-        Http2StreamFrame responseHeadersFrame = channel.readOutbound();
-        assertTrue(responseHeadersFrame instanceof DefaultHttp2HeadersFrame);
-        DefaultHttp2HeadersFrame respHeaders = (DefaultHttp2HeadersFrame) responseHeadersFrame;
-        assertEquals("404", respHeaders.headers().status().toString());
+            Http2StreamFrame responseHeadersFrame = channel.readOutbound();
+            assertTrue(responseHeadersFrame instanceof DefaultHttp2HeadersFrame);
+            DefaultHttp2HeadersFrame respHeaders = (DefaultHttp2HeadersFrame) responseHeadersFrame;
+            assertEquals("404", respHeaders.headers().status().toString());
+        }
     }
 
     @Test
     void testHttp2PostRequestWithJsonBody() throws Exception {
-        String json = OBJECT_MAPPER.writeValueAsString(new HashMap<String, Object>() {
-            {
-                put("foo", "bar");
-            }
-        });
-        Http2Headers headers = new DefaultHttp2Headers();
-        headers.method("POST");
-        headers.path("/test?param=jsonValue");
-        Http2HeadersFrame headersFrame = new DefaultHttp2HeadersFrame(headers, false);
-        channel.writeInbound(headersFrame);
-        DefaultHttp2DataFrame dataFrame =
-                new DefaultHttp2DataFrame(Unpooled.copiedBuffer(json, StandardCharsets.UTF_8), true);
-        channel.writeInbound(dataFrame);
+        try (MockedStatic<HttpRequestFilterManager> mockedStatic = mockStatic(HttpRequestFilterManager.class)) {
+            HttpRequestFilterChain mockChain = mock(HttpRequestFilterChain.class);
+            doNothing().when(mockChain).doFilter(any());
+            mockedStatic.when(HttpRequestFilterManager::getFilterChain).thenReturn(mockChain);
+            String json = OBJECT_MAPPER.writeValueAsString(new HashMap<String, Object>() {
+                {
+                    put("foo", "bar");
+                }
+            });
+            Http2Headers headers = new DefaultHttp2Headers();
+            headers.method("POST");
+            headers.path("/test?param=jsonValue");
+            Http2HeadersFrame headersFrame = new DefaultHttp2HeadersFrame(headers, false);
+            channel.writeInbound(headersFrame);
+            DefaultHttp2DataFrame dataFrame =
+                    new DefaultHttp2DataFrame(Unpooled.copiedBuffer(json, StandardCharsets.UTF_8), true);
+            channel.writeInbound(dataFrame);
 
-        Http2StreamFrame frame1 = null, frame2 = null;
-        long deadline = System.currentTimeMillis() + 5000; // 最多等5秒
-        while ((frame1 == null || frame2 == null) && System.currentTimeMillis() < deadline) {
-            if (frame1 == null) frame1 = channel.readOutbound();
-            if (frame2 == null) frame2 = channel.readOutbound();
-            if (frame1 == null || frame2 == null) Thread.sleep(500);
+            Http2StreamFrame frame1 = null, frame2 = null;
+            long deadline = System.currentTimeMillis() + 5000;
+            while ((frame1 == null || frame2 == null) && System.currentTimeMillis() < deadline) {
+                if (frame1 == null) frame1 = channel.readOutbound();
+                if (frame2 == null) frame2 = channel.readOutbound();
+                if (frame1 == null || frame2 == null) Thread.sleep(500);
+            }
+            assertNotNull(frame1);
+            assertNotNull(frame2);
+            DefaultHttp2HeadersFrame respHeaders;
+            DefaultHttp2DataFrame respData;
+            if (frame1 instanceof DefaultHttp2HeadersFrame) {
+                respHeaders = (DefaultHttp2HeadersFrame) frame1;
+                respData = (DefaultHttp2DataFrame) frame2;
+            } else {
+                respHeaders = (DefaultHttp2HeadersFrame) frame2;
+                respData = (DefaultHttp2DataFrame) frame1;
+            }
+            assertEquals("200", respHeaders.headers().status().toString());
+            String content = respData.content().toString(StandardCharsets.UTF_8);
+            assertTrue(content.contains("Processed: jsonValue"));
         }
-        assertNotNull(frame1);
-        assertNotNull(frame2);
-        DefaultHttp2HeadersFrame respHeaders;
-        DefaultHttp2DataFrame respData;
-        if (frame1 instanceof DefaultHttp2HeadersFrame) {
-            respHeaders = (DefaultHttp2HeadersFrame) frame1;
-            respData = (DefaultHttp2DataFrame) frame2;
-        } else {
-            respHeaders = (DefaultHttp2HeadersFrame) frame2;
-            respData = (DefaultHttp2DataFrame) frame1;
-        }
-        assertEquals("200", respHeaders.headers().status().toString());
-        String content = respData.content().toString(StandardCharsets.UTF_8);
-        assertTrue(content.contains("Processed: jsonValue"));
     }
 
     @Test
     void testHttp2BadRequest() {
+        try (MockedStatic<HttpRequestFilterManager> mockedStatic = mockStatic(HttpRequestFilterManager.class)) {
+            HttpRequestFilterChain mockChain = mock(HttpRequestFilterChain.class);
+            doNothing().when(mockChain).doFilter(any());
+            mockedStatic.when(HttpRequestFilterManager::getFilterChain).thenReturn(mockChain);
+            Http2Headers headers = new DefaultHttp2Headers();
+            Http2HeadersFrame headersFrame = new DefaultHttp2HeadersFrame(headers, true);
+            channel.writeInbound(headersFrame);
+            Http2StreamFrame responseHeadersFrame = channel.readOutbound();
+            assertTrue(responseHeadersFrame instanceof DefaultHttp2HeadersFrame);
+            DefaultHttp2HeadersFrame respHeaders = (DefaultHttp2HeadersFrame) responseHeadersFrame;
+            assertEquals("400", respHeaders.headers().status().toString());
+        }
+    }
+
+    @Test
+    void testHttp2GetRequestWithXSSParam_shouldBeBlocked() {
+
         Http2Headers headers = new DefaultHttp2Headers();
+        headers.method("GET");
+        headers.path("/test?param=<script>alert(1)</script>");
         Http2HeadersFrame headersFrame = new DefaultHttp2HeadersFrame(headers, true);
-        channel.writeInbound(headersFrame);
-        Http2StreamFrame responseHeadersFrame = channel.readOutbound();
-        assertTrue(responseHeadersFrame instanceof DefaultHttp2HeadersFrame);
-        DefaultHttp2HeadersFrame respHeaders = (DefaultHttp2HeadersFrame) responseHeadersFrame;
-        assertEquals("400", respHeaders.headers().status().toString());
+        try (MockedStatic<HttpRequestFilterManager> mockedStatic = mockStatic(HttpRequestFilterManager.class)) {
+            HttpRequestFilterChain mockChain = mock(HttpRequestFilterChain.class);
+            doThrow(new HttpRequestFilterException("Detected javascript:"))
+                    .when(mockChain)
+                    .doFilter(any());
+            mockedStatic.when(HttpRequestFilterManager::getFilterChain).thenReturn(mockChain);
+            channel.writeInbound(headersFrame);
+
+            Http2StreamFrame responseHeadersFrame = waitForHttp2Response(3000);
+            assertNotNull(responseHeadersFrame);
+            assertTrue(responseHeadersFrame instanceof DefaultHttp2HeadersFrame);
+            DefaultHttp2HeadersFrame respHeaders = (DefaultHttp2HeadersFrame) responseHeadersFrame;
+
+            assertEquals("400", respHeaders.headers().status().toString());
+        }
+    }
+
+    @Test
+    void testHttp2GetRequestWithOnloadParam_shouldBeBlocked() {
+        try (MockedStatic<HttpRequestFilterManager> mockedStatic = mockStatic(HttpRequestFilterManager.class)) {
+            HttpRequestFilterChain mockChain = mock(HttpRequestFilterChain.class);
+            doThrow(new HttpRequestFilterException("Detected javascript:"))
+                    .when(mockChain)
+                    .doFilter(any());
+            mockedStatic.when(HttpRequestFilterManager::getFilterChain).thenReturn(mockChain);
+            Http2Headers headers = new DefaultHttp2Headers();
+            headers.method("GET");
+            headers.path("/test?param=onload=alert(1)");
+            Http2HeadersFrame headersFrame = new DefaultHttp2HeadersFrame(headers, true);
+
+            channel.writeInbound(headersFrame);
+
+            Http2StreamFrame responseHeadersFrame = waitForHttp2Response(3000);
+            assertNotNull(responseHeadersFrame);
+            assertTrue(responseHeadersFrame instanceof DefaultHttp2HeadersFrame);
+            DefaultHttp2HeadersFrame respHeaders = (DefaultHttp2HeadersFrame) responseHeadersFrame;
+
+            assertEquals("400", respHeaders.headers().status().toString());
+        }
+    }
+
+    @Test
+    void testHttp2PostRequestWithXssJson_shouldBeBlocked() throws Exception {
+        try (MockedStatic<HttpRequestFilterManager> mockedStatic = mockStatic(HttpRequestFilterManager.class)) {
+            HttpRequestFilterChain mockChain = mock(HttpRequestFilterChain.class);
+            doThrow(new HttpRequestFilterException("Detected javascript:"))
+                    .when(mockChain)
+                    .doFilter(any());
+            mockedStatic.when(HttpRequestFilterManager::getFilterChain).thenReturn(mockChain);
+            String maliciousJson = "{\"param\": \"<script>alert('xss')</script>\"}";
+
+            Http2Headers headers = new DefaultHttp2Headers();
+            headers.method("POST");
+            headers.path("/test?param=abc");
+            headers.set("content-type", "application/json");
+
+            Http2HeadersFrame headersFrame = new DefaultHttp2HeadersFrame(headers, false);
+            DefaultHttp2DataFrame dataFrame =
+                    new DefaultHttp2DataFrame(Unpooled.copiedBuffer(maliciousJson, StandardCharsets.UTF_8), true);
+
+            channel.writeInbound(headersFrame);
+            channel.writeInbound(dataFrame);
+
+            Http2StreamFrame responseHeadersFrame = waitForHttp2Response(3000);
+            assertNotNull(responseHeadersFrame);
+            assertTrue(responseHeadersFrame instanceof DefaultHttp2HeadersFrame);
+            DefaultHttp2HeadersFrame respHeaders = (DefaultHttp2HeadersFrame) responseHeadersFrame;
+
+            assertEquals("400", respHeaders.headers().status().toString());
+        }
     }
 
     @org.junit.jupiter.api.AfterEach

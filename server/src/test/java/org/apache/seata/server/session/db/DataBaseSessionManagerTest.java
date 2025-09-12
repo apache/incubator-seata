@@ -24,7 +24,7 @@ import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.GlobalStatus;
-import org.apache.seata.server.DynamicPortTestConfig;
+import org.apache.seata.server.BaseSpringBootTest;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.session.SessionCondition;
@@ -36,9 +36,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Import;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -53,9 +52,9 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
  * The type Data base session manager test.
  *
  */
-@SpringBootTest
-@Import(DynamicPortTestConfig.class)
-public class DataBaseSessionManagerTest {
+// Unit test triggered a bug in Druid, see the issue https://github.com/alibaba/druid/issues/4936
+@DisabledIfSystemProperty(named = "druid.version", matches = "1.2.12")
+public class DataBaseSessionManagerTest extends BaseSpringBootTest {
 
     static SessionManager sessionManager = null;
 
@@ -65,6 +64,7 @@ public class DataBaseSessionManagerTest {
 
     @BeforeAll
     public static void start(ApplicationContext context) throws Exception {
+        // Unit test triggered a bug in Druid, see the issue https://github.com/alibaba/druid/issues/4936
         DataBaseSessionManager tempSessionManager = new DataBaseSessionManager();
         DataBaseTransactionStoreManager transactionStoreManager = DataBaseTransactionStoreManager.getInstance();
 
