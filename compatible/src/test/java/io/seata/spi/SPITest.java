@@ -37,7 +37,7 @@ public class SPITest {
         Assertions.assertNotNull(list);
         ResourceManager resourceManager = list.get(list.size() - 1);
         Assertions.assertEquals(
-                "io.seata.saga.rm.SagaResourceManager",
+                "org.apache.seata.saga.rm.SagaResourceManager",
                 resourceManager.getClass().getName());
     }
 }
