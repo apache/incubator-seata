@@ -23,6 +23,8 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * MCP Server configuration parameters
@@ -75,6 +77,17 @@ public class MCPProperties {
 
     public boolean isSseType() {
         return mcpType.equals(SSE_TYPE);
+    }
+
+    public List<String> getEndpoints(){
+        List<String> result = new ArrayList<>();
+        if(isSseType()){
+            result.add(sseServerProperties.sseEndpoint);
+            result.add(sseServerProperties.messageEndpoint);
+        }else{
+            result.add(streamableProperties.mcpEndPoint);
+        }
+        return result;
     }
 
     public static class StreamableProperties {

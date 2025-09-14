@@ -27,6 +27,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 
+import java.util.List;
+
 @Configuration
 public class MCPFiltersConfig {
 
@@ -49,11 +51,8 @@ public class MCPFiltersConfig {
 
         registration.setFilter(mcpJwtAuthenticationTokenFilter);
 
-        if (mcpProperties.isSseType()) {
-            MCPProperties.SseServerProperties sseServerProperties = mcpProperties.getSseServerProperties();
-            registration.addUrlPatterns(sseServerProperties.getSseEndpoint(), sseServerProperties.getMessageEndpoint());
-        } else {
-            registration.addUrlPatterns(mcpProperties.getStreamableProperties().getMcpEndPoint());
+        for(String endPoint : mcpProperties.getEndpoints()) {
+            registration.addUrlPatterns(endPoint);
         }
 
         registration.setName("mcpJwtAuthenticationTokenFilter");
@@ -74,11 +73,8 @@ public class MCPFiltersConfig {
 
         registration.setFilter(mcpBusinessDataSourceFilter);
 
-        if (mcpProperties.isSseType()) {
-            MCPProperties.SseServerProperties sseServerProperties = mcpProperties.getSseServerProperties();
-            registration.addUrlPatterns(sseServerProperties.getSseEndpoint(), sseServerProperties.getMessageEndpoint());
-        } else {
-            registration.addUrlPatterns(mcpProperties.getStreamableProperties().getMcpEndPoint());
+        for(String endPoint : mcpProperties.getEndpoints()) {
+            registration.addUrlPatterns(endPoint);
         }
 
         registration.setName("mcpBusinessDataSourceFilter");
