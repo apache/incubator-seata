@@ -68,8 +68,7 @@ public class BusinessDataSourcesProperties implements InitializingBean {
             props.setEnabled(env.getProperty(prefix + "enabled", Boolean.class, true));
             props.setDbType(env.getProperty(prefix + "dbType", "mysql"));
             props.setDriverClassName(env.getProperty(prefix + "driverClassName", "com.mysql.cj.jdbc.Driver"));
-            props.setUrl(
-                    env.getProperty(prefix + "url"));
+            props.setUrl(env.getProperty(prefix + "url"));
             props.setUsername(env.getProperty(prefix + "username"));
             props.setPassword(env.getProperty(prefix + "password"));
             props.setDatasource(env.getProperty(prefix + "datasource", "druid"));
@@ -78,14 +77,14 @@ public class BusinessDataSourcesProperties implements InitializingBean {
             props.setMaxWait(env.getProperty(prefix + "maxWait", Long.class, 5000L));
 
             // Check whether the parameters are perfect
-            if(!validateDataSourceProperties(props,name)){
+            if (!validateDataSourceProperties(props, name)) {
                 continue;
             }
 
             String resourceId = getOriginUrl(props.getUrl());
 
             // Use the database URL as a unique identifier
-            if(props.enabled){
+            if (props.enabled) {
                 datasources.put(resourceId, props);
                 dataSourcesNamesAndResourceIds.put(name, resourceId);
             }
@@ -140,7 +139,9 @@ public class BusinessDataSourcesProperties implements InitializingBean {
         }
 
         if (props.getMinConn() > props.getMaxConn()) {
-            LOGGER.error("Minimum connection count cannot be greater than maximum connection count for datasource: {}", dataSourceName);
+            LOGGER.error(
+                    "Minimum connection count cannot be greater than maximum connection count for datasource: {}",
+                    dataSourceName);
             return false;
         }
 
@@ -155,7 +156,6 @@ public class BusinessDataSourcesProperties implements InitializingBean {
         }
         return true;
     }
-
 
     private DataSourceProperties parseDBPropertyFromJson(JsonNode jsonNode) {
         if (jsonNode == null || jsonNode.isEmpty()) {
@@ -212,7 +212,7 @@ public class BusinessDataSourcesProperties implements InitializingBean {
         }
 
         DataSourceProperties props = parseDBPropertyFromJson(jsonNode);
-        if(!validateDataSourceProperties(props,name)){
+        if (!validateDataSourceProperties(props, name)) {
             throw new IllegalArgumentException("Business DataSource Properties has failure");
         }
         String resourceId = getOriginUrl(props.getUrl());

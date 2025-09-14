@@ -27,8 +27,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 
-import java.util.List;
-
 @Configuration
 public class MCPFiltersConfig {
 
@@ -51,7 +49,7 @@ public class MCPFiltersConfig {
 
         registration.setFilter(mcpJwtAuthenticationTokenFilter);
 
-        for(String endPoint : mcpProperties.getEndpoints()) {
+        for (String endPoint : mcpProperties.getEndpoints()) {
             registration.addUrlPatterns(endPoint);
         }
 
@@ -73,7 +71,7 @@ public class MCPFiltersConfig {
 
         registration.setFilter(mcpBusinessDataSourceFilter);
 
-        for(String endPoint : mcpProperties.getEndpoints()) {
+        for (String endPoint : mcpProperties.getEndpoints()) {
             registration.addUrlPatterns(endPoint);
         }
 
