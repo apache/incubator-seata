@@ -89,7 +89,7 @@ public class SqlExecutionTemplate {
             if (!validateQuerySql(sql)) {
                 throw new StoreException("The query valid failed,Only query operations are allowed：" + sql);
             }
-            conn = getDataSource(resourceId).getConnection();
+            conn = getConnection(resourceId);
             if (params == null || params.length == 0) {
                 if ((sql.contains("where") || sql.contains("WHERE"))) {
                     sql = sql.replaceAll("(?i)\\bWHERE\\b.*", "").trim();
@@ -149,7 +149,7 @@ public class SqlExecutionTemplate {
             if (!validateQuerySql(sql)) {
                 throw new StoreException("The query valid failed,Only query operations are allowed：" + sql);
             }
-            conn = getDataSource(resourceId).getConnection();
+            conn = getConnection(resourceId);
             if (params == null || params.length == 0) {
                 if ((sql.contains("where") || sql.contains("WHERE"))) {
                     sql = sql.replaceAll("(?i)\\bWHERE\\b.*", "").trim();
@@ -205,7 +205,7 @@ public class SqlExecutionTemplate {
             if (!validateUpdateSql(sql)) {
                 throw new StoreException("The query valid failed,Only update operations are allowed：" + sql);
             }
-            conn = getDataSource(resourceId).getConnection();
+            conn = getConnection(resourceId);
             ps = conn.prepareStatement(sql);
 
             if (params != null) {
@@ -239,7 +239,7 @@ public class SqlExecutionTemplate {
             if (!validateUpdateSql(sql)) {
                 throw new StoreException("The query valid failed: " + sql);
             }
-            conn = getDataSource(resourceId).getConnection();
+            conn = getConnection(resourceId);
             conn.setAutoCommit(false);
 
             ps = conn.prepareStatement(sql);
@@ -256,9 +256,7 @@ public class SqlExecutionTemplate {
             return results;
         } catch (SQLException e) {
             try {
-                if (conn != null) {
-                    conn.rollback();
-                }
+                conn.rollback();
             } catch (SQLException ex) {
                 LOGGER.error("The rollback transaction failed", ex);
             }
@@ -300,7 +298,7 @@ public class SqlExecutionTemplate {
         Connection conn = null;
 
         try {
-            conn = getDataSource(resourceId).getConnection();
+            conn = getConnection(resourceId);
             conn.setAutoCommit(false);
 
             T result = operations.execute(conn);
@@ -320,7 +318,7 @@ public class SqlExecutionTemplate {
         } finally {
             try {
                 if (conn != null) {
-                    conn.setAutoCommit(true); // 恢复自动提交
+                    conn.setAutoCommit(true);
                 }
             } catch (SQLException e) {
                 LOGGER.error("Restoring the connection auto-commit failed", e);
@@ -360,6 +358,16 @@ public class SqlExecutionTemplate {
             } catch (SQLException e) {
                 LOGGER.warn("fail to close Connection", e);
             }
+        }
+    }
+
+    private Connection getConnection(String resourceId){
+        try{
+            return getDataSource(resourceId).getConnection();
+        } catch (Exception e) {
+            LOGGER.error("Get The Business DataSource Connection: {} failed due to: {}", resourceId, e.getMessage());
+            DataSourceFactory.removeErrorDataSource(resourceId,e);
+            throw new StoreException(e);
         }
     }
 }
