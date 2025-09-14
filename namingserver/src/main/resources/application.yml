@@ -28,6 +28,10 @@ logging:
 heartbeat:
   threshold: 90000
   period: 60000
+console:
+  user:
+    password: seata
+    username: seata
 seata:
   security:
     secretKey: SeataSecretKey0c382ef121d778043159209298fd40bf3850a017
@@ -35,3 +39,49 @@ seata:
     csrf-ignore-urls: /naming/v1/**,/api/v1/naming/**
     ignore:
       urls: /,/**/*.css,/**/*.js,/**/*.html,/**/*.map,/**/*.svg,/**/*.png,/**/*.jpeg,/**/*.ico,/api/v1/auth/login,/version.json,/naming/v1/health,/error
+  #mcp服务器配置
+  mcp:
+    #服务器名称(不设置默认为seata-mcp-server)
+    serverName: test-mcp
+    serverVersion: 2.0.0
+    #sse端点（不设置默认/sse）
+    sseEndpoint: /sse
+    #message端点（不设置默认/message）
+    messageEndpoint: /message
+    #是否开启心跳(不设置默认为false)
+    heartbeat: false
+  #业务数据源配置
+  datasources:
+    user:
+      enabled: true
+      db-type: mysql
+      driverClassName: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://localhost:3306/boge?useSSL=false
+      username: root
+      password: Il02mayi
+      datasource: druid # 可选连接池类型（druid/hikari/dbcp）
+      min-conn: 5
+      max-conn: 50
+      max-wait: 5000L
+    account:
+      enabled: true
+      db-type: mysql
+      driverClassName: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://localhost:3306/seata?useSSL=false
+      username: root
+      password: Il02mayi
+      datasource: dbcp # 可选连接池类型（druid/hikari/dbcp）
+      min-conn: 5
+      max-conn: 50
+      max-wait: 5000L
+    zhaoxin:
+      enabled: true
+      db-type: mysql
+      driverClassName: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://localhost:3306/zhaoxin25_dev?useSSL=false
+      username: root
+      password: Il02mayi
+      datasource: hikari # 可选连接池类型（druid/hikari/dbcp）
+      min-conn: 5
+      max-conn: 50
+      max-wait: 5000L
