@@ -22,7 +22,8 @@ import org.apache.seata.common.Constants;
  * The type Json based undo log parser.
  */
 public class UndoLogParser {
-    public String decode(byte[] bytes) {
+    public String decode(String context, byte[] bytes) {
+        if(!context.contains("fastjson") && !context.contains("jackson")) throw new IllegalArgumentException("Currently, only undolog parsing in JSON format is supported");
         return new String(bytes, Constants.DEFAULT_CHARSET);
     }
 }

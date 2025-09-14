@@ -42,7 +42,7 @@ public class UndoLogParserTest {
         byte[] testBytes = testJson.getBytes(Constants.DEFAULT_CHARSET);
 
         // Decode the test data
-        String result = parser.decode(testBytes);
+        String result = parser.decode("fastjson",testBytes);
 
         // Verify the decoding result
         assertEquals(testJson, result, "The decoding result should be the same as the original JSON string");
@@ -52,7 +52,7 @@ public class UndoLogParserTest {
     public void testDecodeWithEmptyBytes() {
         // Test decoding empty byte arrays
         byte[] emptyBytes = new byte[0];
-        String result = parser.decode(emptyBytes);
+        String result = parser.decode("fastjson",emptyBytes);
 
         // The result of the validation is an empty string
         assertEquals("", result, "Decoding an array of empty bytes should return an empty string");
@@ -64,7 +64,7 @@ public class UndoLogParserTest {
         assertThrows(
                 NullPointerException.class,
                 () -> {
-                    parser.decode(null);
+                    parser.decode("fastjson",null);
                 },
                 "decode null should throw NullPointerException");
     }

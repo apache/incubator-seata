@@ -72,7 +72,7 @@ public class UndoLogVO {
         vo.setLogModified(DateUtils.convertToDateTimeFromTimestamp(
                 rs.getTimestamp("log_modified").getTime()));
         vo.setLogStatus(rs.getInt("log_status"));
-        vo.setRollBackInfo(parser.decode(rs.getBytes("rollback_info")));
+        vo.setRollBackInfo(parser.decode(vo.context,rs.getBytes("rollback_info")));
         return vo;
     }
 }
