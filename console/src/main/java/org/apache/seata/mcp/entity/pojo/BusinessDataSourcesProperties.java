@@ -19,6 +19,8 @@ package org.apache.seata.mcp.entity.pojo;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.seata.common.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -53,6 +55,8 @@ public class BusinessDataSourcesProperties implements InitializingBean {
 
     private static final String BASE_PREFIX = "seata.businessDataSources.";
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(BusinessDataSourcesProperties.class);
+
     @Override
     public void afterPropertiesSet() {
 
@@ -65,16 +69,18 @@ public class BusinessDataSourcesProperties implements InitializingBean {
             props.setDbType(env.getProperty(prefix + "dbType", "mysql"));
             props.setDriverClassName(env.getProperty(prefix + "driverClassName", "com.mysql.cj.jdbc.Driver"));
             props.setUrl(
-                    env.getProperty(prefix + "url", "jdbc:mysql://127.0.0.1:3306/seata?rewriteBatchedStatements=true"));
-            props.setUsername(env.getProperty(prefix + "username", "mysql"));
-            props.setPassword(env.getProperty(prefix + "password", "mysql"));
+                    env.getProperty(prefix + "url"));
+            props.setUsername(env.getProperty(prefix + "username"));
+            props.setPassword(env.getProperty(prefix + "password"));
             props.setDatasource(env.getProperty(prefix + "datasource", "druid"));
             props.setMinConn(env.getProperty(prefix + "minConn", Integer.class, DEFAULT_DB_MIN_CONN));
             props.setMaxConn(env.getProperty(prefix + "maxConn", Integer.class, DEFAULT_DB_MAX_CONN));
             props.setMaxWait(env.getProperty(prefix + "maxWait", Long.class, 5000L));
 
             // Check whether the parameters are perfect
-            validateDataSourceProperties(props,name);
+            if(!validateDataSourceProperties(props,name)){
+                continue;
+            }
 
             String resourceId = getOriginUrl(props.getUrl());
 
@@ -92,50 +98,62 @@ public class BusinessDataSourcesProperties implements InitializingBean {
      * @param dataSourceName Data source name, used for exception information
      * @throws IllegalArgumentException If required parameters are missing
      */
-    private void validateDataSourceProperties(DataSourceProperties props, String dataSourceName) {
+    private boolean validateDataSourceProperties(DataSourceProperties props, String dataSourceName) {
         if (props == null) {
-            throw new IllegalArgumentException("DataSource configuration cannot be null for: " + dataSourceName);
+            LOGGER.error("DataSource configuration cannot be null for: {}", dataSourceName);
+            return false;
         }
 
         if (!StringUtils.hasText(props.getUrl())) {
-            throw new IllegalArgumentException("Database URL cannot be empty for datasource: " + dataSourceName);
+            LOGGER.error("Database URL cannot be empty for datasource: {}", dataSourceName);
+            return false;
         }
 
         if (!StringUtils.hasText(props.getUsername())) {
-            throw new IllegalArgumentException("Database username cannot be empty for datasource: " + dataSourceName);
+            LOGGER.error("Database username cannot be empty for datasource: {}", dataSourceName);
+            return false;
         }
 
         if (!StringUtils.hasText(props.getPassword())) {
-            throw new IllegalArgumentException("Database password cannot be empty for datasource: " + dataSourceName);
+            LOGGER.error("Database password cannot be empty for datasource: {}", dataSourceName);
+            return false;
         }
 
         if (!StringUtils.hasText(props.getDriverClassName())) {
-            throw new IllegalArgumentException("Database driver class name cannot be empty for datasource: " + dataSourceName);
+            LOGGER.error("Database driver class name cannot be empty for datasource: {}", dataSourceName);
+            return false;
         }
 
         if (!StringUtils.hasText(props.getDbType())) {
-            throw new IllegalArgumentException("Database type cannot be empty for datasource: " + dataSourceName);
+            LOGGER.error("Database type cannot be empty for datasource: {}", dataSourceName);
+            return false;
         }
 
         if (props.getMinConn() < 0) {
-            throw new IllegalArgumentException("Minimum connection count cannot be negative for datasource: " + dataSourceName);
+            LOGGER.error("Minimum connection count cannot be negative for datasource: {}", dataSourceName);
+            return false;
         }
 
         if (props.getMaxConn() <= 0) {
-            throw new IllegalArgumentException("Maximum connection count must be positive for datasource: " + dataSourceName);
+            LOGGER.error("Maximum connection count must be positive for datasource: {}", dataSourceName);
+            return false;
         }
 
         if (props.getMinConn() > props.getMaxConn()) {
-            throw new IllegalArgumentException("Minimum connection count cannot be greater than maximum connection count for datasource: " + dataSourceName);
+            LOGGER.error("Minimum connection count cannot be greater than maximum connection count for datasource: {}", dataSourceName);
+            return false;
         }
 
         if (props.getMaxWait() != null && props.getMaxWait() < 0) {
-            throw new IllegalArgumentException("Maximum wait time cannot be negative for datasource: " + dataSourceName);
+            LOGGER.error("Maximum wait time cannot be negative for datasource: {}", dataSourceName);
+            return false;
         }
 
         if (!props.getUrl().toLowerCase().startsWith("jdbc:")) {
-            throw new IllegalArgumentException("Invalid JDBC URL format for datasource: " + dataSourceName + ". URL should start with 'jdbc:'");
+            LOGGER.error("Invalid JDBC URL format for datasource: {}. URL should start with 'jdbc:'", dataSourceName);
+            return false;
         }
+        return true;
     }
 
 
