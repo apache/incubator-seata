@@ -100,7 +100,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     public void configure(WebSecurity web) {
         StringBuilder ignoreURLs = new StringBuilder(env.getProperty("seata.security.ignore.urls", "/**"));
         List<String> mcpEndpoints = mcpProperties.getEndpoints();
-        for(String endpoint : mcpEndpoints){
+        for (String endpoint : mcpEndpoints) {
             ignoreURLs.append(",").append(endpoint);
         }
         for (String ignoreURL : ignoreURLs.toString().trim().split(SECURITY_IGNORE_URLS_SPILT_CHAR)) {
@@ -110,9 +110,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        StringBuilder csrfIgnoreUrls = new StringBuilder(env.getProperty("seata.security.csrf-ignore-urls","/**"));
+        StringBuilder csrfIgnoreUrls = new StringBuilder(env.getProperty("seata.security.csrf-ignore-urls", "/**"));
         List<String> mcpEndpoints = mcpProperties.getEndpoints();
-        for(String endpoint : mcpEndpoints){
+        for (String endpoint : mcpEndpoints) {
             csrfIgnoreUrls.append(",").append(endpoint);
         }
         CsrfConfigurer<HttpSecurity> csrf = http.authorizeRequests()

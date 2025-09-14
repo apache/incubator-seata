@@ -79,12 +79,12 @@ public class MCPProperties {
         return mcpType.equals(SSE_TYPE);
     }
 
-    public List<String> getEndpoints(){
+    public List<String> getEndpoints() {
         List<String> result = new ArrayList<>();
-        if(isSseType()){
+        if (isSseType()) {
             result.add(sseServerProperties.sseEndpoint);
             result.add(sseServerProperties.messageEndpoint);
-        }else{
+        } else {
             result.add(streamableProperties.mcpEndPoint);
         }
         return result;

@@ -51,10 +51,11 @@ public class DataSourceFactory {
         });
     }
 
-    public static void removeErrorDataSource(String resourceId,Exception e){
+    public static void removeErrorDataSource(String resourceId, Exception e) {
         dataSourceMap.remove(resourceId);
-        LOGGER.info("Delete Business DataSource, resourceId: {}",resourceId);
-        throw new StoreException("The Business DataSource: " + resourceId +" can't be connected due to: "+e.getMessage());
+        LOGGER.info("Delete Business DataSource, resourceId: {}", resourceId);
+        throw new StoreException(
+                "The Business DataSource: " + resourceId + " can't be connected due to: " + e.getMessage());
     }
 
     public static DataSource createDataSource(

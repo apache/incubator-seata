@@ -361,12 +361,12 @@ public class SqlExecutionTemplate {
         }
     }
 
-    private Connection getConnection(String resourceId){
-        try{
+    private Connection getConnection(String resourceId) {
+        try {
             return getDataSource(resourceId).getConnection();
         } catch (Exception e) {
             LOGGER.error("Get The Business DataSource Connection: {} failed due to: {}", resourceId, e.getMessage());
-            DataSourceFactory.removeErrorDataSource(resourceId,e);
+            DataSourceFactory.removeErrorDataSource(resourceId, e);
             throw new StoreException(e);
         }
     }
