@@ -24,6 +24,8 @@ import io.etcd.jetcd.options.DeleteOption;
 import io.etcd.jetcd.options.GetOption;
 import io.etcd.jetcd.watch.WatchResponse;
 import org.apache.seata.discovery.registry.RegistryService;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -44,22 +46,22 @@ public class EtcdRegistryServiceImplTest {
     private static final String CLUSTER_NAME = "default";
 
     @Rule
-    private static final EtcdClusterResource etcd = new EtcdClusterResource(CLUSTER_NAME, 1);
+    public final EtcdClusterResource etcd = new EtcdClusterResource(CLUSTER_NAME, 1);
 
     private final Client client =
             Client.builder().endpoints(etcd.getClientEndpoints()).build();
     private static final String HOST = "127.0.0.1";
     private static final int PORT = 8091;
 
-    @BeforeAll
-    public static void beforeClass() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         System.setProperty(
                 EtcdRegistryServiceImpl.TEST_ENDPONT,
                 etcd.getClientEndpoints().get(0).toString());
     }
 
-    @AfterAll
-    public static void afterClass() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         System.setProperty(EtcdRegistryServiceImpl.TEST_ENDPONT, "");
     }
 
