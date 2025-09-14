@@ -212,6 +212,9 @@ public class BusinessDataSourcesProperties implements InitializingBean {
         }
 
         DataSourceProperties props = parseDBPropertyFromJson(jsonNode);
+        if(!validateDataSourceProperties(props,name)){
+            throw new IllegalArgumentException("Business DataSource Properties has failure");
+        }
         String resourceId = getOriginUrl(props.getUrl());
 
         datasources.put(resourceId, props);
