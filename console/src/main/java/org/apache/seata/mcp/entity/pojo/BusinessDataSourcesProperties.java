@@ -73,13 +73,71 @@ public class BusinessDataSourcesProperties implements InitializingBean {
             props.setMaxConn(env.getProperty(prefix + "maxConn", Integer.class, DEFAULT_DB_MAX_CONN));
             props.setMaxWait(env.getProperty(prefix + "maxWait", Long.class, 5000L));
 
+            // Check whether the parameters are perfect
+            validateDataSourceProperties(props,name);
+
             String resourceId = getOriginUrl(props.getUrl());
 
             // Use the database URL as a unique identifier
-            datasources.put(resourceId, props);
-            dataSourcesNamesAndResourceIds.put(name, resourceId);
+            if(props.enabled){
+                datasources.put(resourceId, props);
+                dataSourcesNamesAndResourceIds.put(name, resourceId);
+            }
         }
     }
+
+    /**
+     * Verify the required parameters for DataSourceProperties
+     * @param props Data source attribute configuration
+     * @param dataSourceName Data source name, used for exception information
+     * @throws IllegalArgumentException If required parameters are missing
+     */
+    private void validateDataSourceProperties(DataSourceProperties props, String dataSourceName) {
+        if (props == null) {
+            throw new IllegalArgumentException("DataSource configuration cannot be null for: " + dataSourceName);
+        }
+
+        if (!StringUtils.hasText(props.getUrl())) {
+            throw new IllegalArgumentException("Database URL cannot be empty for datasource: " + dataSourceName);
+        }
+
+        if (!StringUtils.hasText(props.getUsername())) {
+            throw new IllegalArgumentException("Database username cannot be empty for datasource: " + dataSourceName);
+        }
+
+        if (!StringUtils.hasText(props.getPassword())) {
+            throw new IllegalArgumentException("Database password cannot be empty for datasource: " + dataSourceName);
+        }
+
+        if (!StringUtils.hasText(props.getDriverClassName())) {
+            throw new IllegalArgumentException("Database driver class name cannot be empty for datasource: " + dataSourceName);
+        }
+
+        if (!StringUtils.hasText(props.getDbType())) {
+            throw new IllegalArgumentException("Database type cannot be empty for datasource: " + dataSourceName);
+        }
+
+        if (props.getMinConn() < 0) {
+            throw new IllegalArgumentException("Minimum connection count cannot be negative for datasource: " + dataSourceName);
+        }
+
+        if (props.getMaxConn() <= 0) {
+            throw new IllegalArgumentException("Maximum connection count must be positive for datasource: " + dataSourceName);
+        }
+
+        if (props.getMinConn() > props.getMaxConn()) {
+            throw new IllegalArgumentException("Minimum connection count cannot be greater than maximum connection count for datasource: " + dataSourceName);
+        }
+
+        if (props.getMaxWait() != null && props.getMaxWait() < 0) {
+            throw new IllegalArgumentException("Maximum wait time cannot be negative for datasource: " + dataSourceName);
+        }
+
+        if (!props.getUrl().toLowerCase().startsWith("jdbc:")) {
+            throw new IllegalArgumentException("Invalid JDBC URL format for datasource: " + dataSourceName + ". URL should start with 'jdbc:'");
+        }
+    }
+
 
     private DataSourceProperties parseDBPropertyFromJson(JsonNode jsonNode) {
         if (jsonNode == null || jsonNode.isEmpty()) {

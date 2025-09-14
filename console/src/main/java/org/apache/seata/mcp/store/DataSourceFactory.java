@@ -18,6 +18,8 @@ package org.apache.seata.mcp.store;
 
 import org.apache.seata.common.exception.StoreException;
 import org.apache.seata.mcp.entity.pojo.BusinessDataSourcesProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.util.Map;
@@ -26,6 +28,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class DataSourceFactory {
 
     private static final Map<String, DataSource> dataSourceMap = new ConcurrentHashMap<>();
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DataSourceFactory.class);
 
     public static void initAllDataSources() {
         Map<String, BusinessDataSourcesProperties.DataSourceProperties> datasources =
@@ -45,6 +49,12 @@ public class DataSourceFactory {
             }
             return createDataSource(props, key);
         });
+    }
+
+    public static void removeErrorDataSource(String resourceId,Exception e){
+        dataSourceMap.remove(resourceId);
+        LOGGER.info("Delete Business DataSource, resourceId: {}",resourceId);
+        throw new StoreException("The Business DataSource: " + resourceId +" can't be connected due to: "+e.getMessage());
     }
 
     public static DataSource createDataSource(
