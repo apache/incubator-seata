@@ -177,7 +177,7 @@ public class SqlExecutionTemplate {
             }
             countRs = countPs.executeQuery();
             while (countRs.next()) {
-                count++;
+                count = countRs.getInt("count(1)");
             }
             return PageResult.success(data, count, pageNum, pageSize);
         } catch (SQLException e) {

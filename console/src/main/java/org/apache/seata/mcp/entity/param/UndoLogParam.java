@@ -41,7 +41,7 @@ public class UndoLogParam {
     @ToolParam(description = "The time period modified, start time and end time can be the same")
     private ModifyTime logModifiedTime;
 
-    @ToolParam(description = "PAGE NUMBER", required = true, example = "1")
+    @ToolParam(description = "PageNum", required = true, example = "1")
     private int pageNum;
 
     @ToolParam(description = "PageSize", required = true, example = "100")
