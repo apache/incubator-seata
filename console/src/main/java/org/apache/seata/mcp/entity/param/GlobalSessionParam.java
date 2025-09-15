@@ -160,7 +160,7 @@ public class GlobalSessionParam implements Serializable {
     }
 
     public static GlobalSessionParam covertFromDtoParam(GlobalSessionParamDto paramDto) {
-        PageUtil.checkParam(paramDto.getPageNum(),paramDto.getPageSize());
+        PageUtil.checkParam(paramDto.getPageNum(), paramDto.getPageSize());
         GlobalSessionParam param = new GlobalSessionParam();
         param.setPageSize(paramDto.getPageSize());
         param.setPageNum(paramDto.getPageNum());

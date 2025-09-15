@@ -28,10 +28,10 @@ public class CustomResponseErrorHandler implements ResponseErrorHandler {
     @Override
     public boolean hasError(ClientHttpResponse response) throws IOException {
         // ALL STATUS CODES ARE CONSIDERED ERROR FREE
-//        return false;
+        //        return false;
 
         // Ignore 500 errors
-         return !response.getStatusCode().is5xxServerError() && defaultHandler.hasError(response);
+        return !response.getStatusCode().is5xxServerError() && defaultHandler.hasError(response);
     }
 
     @Override

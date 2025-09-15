@@ -48,7 +48,8 @@ public class ServerLogParam implements Serializable {
     private String logMessageLevel;
 
     @ToolParam(
-            description = "Log content keyword fuzzy matching, support multiple keywords separated by commas, All keyword matches will return the log line information",
+            description =
+                    "Log content keyword fuzzy matching, support multiple keywords separated by commas, All keyword matches will return the log line information",
             example = "connection timeout,SSL")
     private List<String> logMessageKeyWord;
 
