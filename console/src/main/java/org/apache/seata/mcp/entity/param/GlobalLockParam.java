@@ -16,6 +16,7 @@
  */
 package org.apache.seata.mcp.entity.param;
 
+import org.apache.seata.common.util.PageUtil;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.mcp.entity.dto.GlobalLockParamDto;
 import org.apache.seata.mcp.utils.DateUtils;
@@ -159,6 +160,7 @@ public class GlobalLockParam implements Serializable {
     }
 
     public static GlobalLockParam convertFromParamDto(GlobalLockParamDto paramDto) {
+        PageUtil.checkParam(paramDto.getPageNum(),paramDto.getPageSize());
         GlobalLockParam param = new GlobalLockParam();
         BeanUtils.copyProperties(paramDto, param);
         if (StringUtils.isNotBlank(paramDto.getTimeStart())) {
