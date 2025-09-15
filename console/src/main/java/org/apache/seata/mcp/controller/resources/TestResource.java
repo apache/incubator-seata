@@ -9,6 +9,6 @@ public class TestResource {
 
     @Resource(description = "test resource", uri = "file://test/testText", mimeType = "text")
     public McpSchema.TextResourceContents testResource(String uri) {
-        return new McpSchema.TextResourceContents("666", "text", uri);
+        return new McpSchema.TextResourceContents("Seata", "text", uri);
     }
 }
