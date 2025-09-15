@@ -16,6 +16,7 @@
  */
 package org.apache.seata.mcp.entity.param;
 
+import org.apache.seata.common.util.PageUtil;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.mcp.entity.dto.GlobalSessionParamDto;
 import org.apache.seata.mcp.utils.DateUtils;
@@ -159,6 +160,7 @@ public class GlobalSessionParam implements Serializable {
     }
 
     public static GlobalSessionParam covertFromDtoParam(GlobalSessionParamDto paramDto) {
+        PageUtil.checkParam(paramDto.getPageNum(),paramDto.getPageSize());
         GlobalSessionParam param = new GlobalSessionParam();
         param.setPageSize(paramDto.getPageSize());
         param.setPageNum(paramDto.getPageNum());
