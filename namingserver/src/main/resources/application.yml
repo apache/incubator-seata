@@ -80,11 +80,11 @@ seata:
 
   # Business data source configuration
   businessDataSources:
-    sepsisDatabase:
+    dataSource1:
       # Whether this data source is enabled
       enabled: true
       db-type: mysql
-      driverClassName: com.mysql.cj.jdbc.Driver
+      driverClassName: com.mysql.cj.jdbc.Driver # Currently, only mysql is supported
       url: jdbc:mysql://:3306/xb?useSSL=false
       username: root
       password: root
@@ -92,7 +92,7 @@ seata:
       min-conn: 5
       max-conn: 50
       max-wait: 5000L
-    orderDatabase:
+    dataSource2:
       enabled: true
       db-type: mysql
       driverClassName: com.mysql.cj.jdbc.Driver
