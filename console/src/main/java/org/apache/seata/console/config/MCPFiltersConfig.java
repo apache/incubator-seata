@@ -21,6 +21,8 @@ import org.apache.seata.console.filter.MCPJwtAuthenticationTokenFilter;
 import org.apache.seata.console.utils.JwtTokenUtils;
 import org.apache.seata.mcp.entity.pojo.BusinessDataSourcesProperties;
 import org.apache.seata.mcp.entity.pojo.MCPProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -39,6 +41,8 @@ public class MCPFiltersConfig {
     @Autowired
     private BusinessDataSourcesProperties properties;
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(MCPFiltersConfig.class);
+
     @Bean
     public FilterRegistrationBean<MCPJwtAuthenticationTokenFilter> mcpJwtAuthenticationTokenFilterRegistration() {
 
@@ -56,6 +60,8 @@ public class MCPFiltersConfig {
         registration.setName("mcpJwtAuthenticationTokenFilter");
 
         registration.setOrder(Ordered.HIGHEST_PRECEDENCE + 10);
+
+        if(!mcpProperties.isEnableAuth()) LOGGER.warn("The AUTH VERIFICATION of the [MCP server] is not enabled, please ensure that it is enabled as much as possible to avoid security problems");
 
         registration.setEnabled(mcpProperties.isEnableAuth());
 
