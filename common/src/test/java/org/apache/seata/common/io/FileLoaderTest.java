@@ -20,23 +20,63 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class FileLoaderTest {
 
     @Test
     public void testLoadExistFile() {
         File file = FileLoader.load("io/TestFile.txt");
-        Assertions.assertTrue(file != null && file.exists());
+        assertTrue(file != null && file.exists());
     }
 
     @Test
     public void testLoadNotExistFile() {
         File file = FileLoader.load("io/NotExistFile.txt");
-        Assertions.assertTrue(file == null || !file.exists());
+        assertTrue(file == null || !file.exists());
     }
 
     @Test
     public void testLoadException() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> FileLoader.load(null));
+    }
+
+    @Test
+    public void testLoadWhenDirectPath() throws Exception {
+        Path tempFile = Paths.get("direct-test-file.txt");
+        Files.createFile(tempFile);
+
+        File result = FileLoader.load("direct-test-file.txt");
+
+        assertNotNull(result);
+        assertTrue(result.exists());
+
+        Files.deleteIfExists(tempFile);
+    }
+
+    @Test
+    public void testLoadWhenSpecial() throws Exception {
+        String encodedName = "测试%20文件.txt";
+        String decodedName = "测试 文件.txt";
+
+        Path tempFile = Paths.get(decodedName);
+        Files.createFile(tempFile);
+
+        File result = FileLoader.load(encodedName);
+
+        assertNotNull(result);
+        assertTrue(result.exists());
+
+        Files.deleteIfExists(tempFile);
+    }
+
+    @Test
+    public void testLoadWhenNull() {
+        File result = FileLoader.load("nonexistent/path.txt");
+        assertNull(result);
     }
 }
