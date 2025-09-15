@@ -97,7 +97,7 @@ public class ServerLogServiceImpl implements ServerLogService {
 
         scheduledExecutor.scheduleAtFixedRate(this::cleanExpiredFiles, 60, 60, TimeUnit.SECONDS);
 
-        LOGGER.info("File cleanup scheduler initialized, will run every 60 seconds");
+        LOGGER.info("Server Temp Log File cleanup scheduler initialized, will run every 60 seconds");
     }
 
     @PreDestroy
@@ -107,13 +107,13 @@ public class ServerLogServiceImpl implements ServerLogService {
             try {
                 if (!scheduledExecutor.awaitTermination(30, TimeUnit.SECONDS)) {
                     scheduledExecutor.shutdownNow();
-                    LOGGER.warn("File cleanup scheduler did not terminate gracefully, forced shutdown");
+                    LOGGER.warn("Temp Server Log File cleanup scheduler did not terminate gracefully, forced shutdown");
                 }
-                LOGGER.info("File cleanup scheduler shutdown successfully");
+                LOGGER.info("Temp Server Log File cleanup scheduler shutdown successfully");
             } catch (InterruptedException e) {
                 scheduledExecutor.shutdownNow();
                 Thread.currentThread().interrupt();
-                LOGGER.warn("File cleanup scheduler shutdown interrupted", e);
+                LOGGER.warn("Temp Server Log File cleanup scheduler shutdown interrupted", e);
             }
         }
     }
@@ -139,7 +139,7 @@ public class ServerLogServiceImpl implements ServerLogService {
         Path tempDir = Paths.get(System.getProperty("user.home"), "logs", "seata", "console", "tmp");
 
         if (!Files.exists(tempDir)) {
-            LOGGER.debug("Temp directory does not exist: {}", tempDir);
+            LOGGER.debug("Temp Server Log directory does not exist: {}", tempDir);
             return 0;
         }
 
