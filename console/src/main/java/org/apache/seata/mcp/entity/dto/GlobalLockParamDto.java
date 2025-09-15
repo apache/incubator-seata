@@ -31,7 +31,6 @@ public class GlobalLockParamDto implements Serializable {
     /**
      * the primary Key
      */
-    @ToolParam(description = "the primary Key")
     private String pk;
     /**
      * the resourceId

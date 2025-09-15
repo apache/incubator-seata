@@ -400,15 +400,12 @@ public class ServerLogServiceImpl implements ServerLogService {
                 return false;
             }
 
-            if (keywordSet != null) {
-                boolean matched = false;
+            if (keywordSet != null && !keywordSet.isEmpty()) {
                 for (String key : keywordSet) {
-                    if (org.apache.commons.lang.StringUtils.indexOf(entry, key) != -1) {
-                        matched = true;
-                        break;
+                    if (org.apache.commons.lang.StringUtils.indexOf(entry, key) == -1) {
+                        return false;
                     }
                 }
-                if (!matched) return false;
             }
 
             if (startTimeMillis != null && endTimeMillis != null) {
