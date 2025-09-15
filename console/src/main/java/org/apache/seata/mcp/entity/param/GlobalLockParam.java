@@ -160,7 +160,7 @@ public class GlobalLockParam implements Serializable {
     }
 
     public static GlobalLockParam convertFromParamDto(GlobalLockParamDto paramDto) {
-        PageUtil.checkParam(paramDto.getPageNum(),paramDto.getPageSize());
+        PageUtil.checkParam(paramDto.getPageNum(), paramDto.getPageSize());
         GlobalLockParam param = new GlobalLockParam();
         BeanUtils.copyProperties(paramDto, param);
         if (StringUtils.isNotBlank(paramDto.getTimeStart())) {

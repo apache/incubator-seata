@@ -61,7 +61,9 @@ public class MCPFiltersConfig {
 
         registration.setOrder(Ordered.HIGHEST_PRECEDENCE + 10);
 
-        if(!mcpProperties.isEnableAuth()) LOGGER.warn("The AUTH VERIFICATION of the [MCP server] is not enabled, please ensure that it is enabled as much as possible to avoid security problems");
+        if (!mcpProperties.isEnableAuth())
+            LOGGER.warn(
+                    "The AUTH VERIFICATION of the [MCP server] is not enabled, please ensure that it is enabled as much as possible to avoid security problems");
 
         registration.setEnabled(mcpProperties.isEnableAuth());
 
