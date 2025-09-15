@@ -46,11 +46,6 @@ public class GlobalSessionParam implements Serializable {
     private String transactionName;
 
     /**
-     * the vgroup
-     */
-    private String vgroup;
-
-    /**
      * if with branch
      * true: with branch session
      * false: no branch session
@@ -137,14 +132,6 @@ public class GlobalSessionParam implements Serializable {
         this.withBranch = withBranch;
     }
 
-    public String getVgroup() {
-        return vgroup;
-    }
-
-    public void setVgroup(String vgroup) {
-        this.vgroup = vgroup;
-    }
-
     @Override
     public String toString() {
         return "GlobalSessionParam{" + "xid='"
@@ -152,7 +139,6 @@ public class GlobalSessionParam implements Serializable {
                 + applicationId + '\'' + ", status="
                 + status + ", transactionName='"
                 + transactionName + '\'' + ", vgroup='"
-                + vgroup + '\'' + ", withBranch="
                 + withBranch + ", pageNum="
                 + pageNum + ", pageSize="
                 + pageSize + ", timeStart="
@@ -179,7 +165,6 @@ public class GlobalSessionParam implements Serializable {
         param.setStatus(paramDto.getStatus());
         param.setXid(paramDto.getXid());
         param.setApplicationId(paramDto.getApplicationId());
-        param.setVgroup(paramDto.getVgroup());
         param.setTransactionName(paramDto.getTransactionName());
         param.setWithBranch(paramDto.isWithBranch());
         if (StringUtils.isNotBlank(paramDto.getTimeStart())) {
