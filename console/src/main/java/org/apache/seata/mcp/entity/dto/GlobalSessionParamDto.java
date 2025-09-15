@@ -33,12 +33,6 @@ public class GlobalSessionParamDto implements Serializable {
     private String transactionName;
 
     /**
-     * the vgroup
-     */
-    @ToolParam(description = "Belong to the group")
-    private String vgroup;
-
-    /**
      * if with branch
      * true: with branch session
      * false: no branch session
@@ -130,14 +124,6 @@ public class GlobalSessionParamDto implements Serializable {
         this.withBranch = withBranch;
     }
 
-    public String getVgroup() {
-        return vgroup;
-    }
-
-    public void setVgroup(String vgroup) {
-        this.vgroup = vgroup;
-    }
-
     @Override
     public String toString() {
         return "GlobalSessionParamDto{" + "xid='"
@@ -145,7 +131,6 @@ public class GlobalSessionParamDto implements Serializable {
                 + applicationId + '\'' + ", status="
                 + status + ", transactionName='"
                 + transactionName + '\'' + ", vgroup='"
-                + vgroup + '\'' + ", withBranch="
                 + withBranch + ", pageNum="
                 + pageNum + ", pageSize="
                 + pageSize + ", timeStart='"
