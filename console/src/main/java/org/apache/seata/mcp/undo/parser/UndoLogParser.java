@@ -23,7 +23,7 @@ import org.apache.seata.common.Constants;
  */
 public class UndoLogParser {
     public String decode(String context, byte[] bytes) {
-        if(!context.contains("fastjson") && !context.contains("jackson")) throw new IllegalArgumentException("Currently, only undolog parsing in JSON format is supported");
+        if(!context.contains("fastjson") && !context.contains("jackson")) return "Only RollBackInfo parsing in Json format is supported, and the RollBackInfo serialization tool currently recorded is: "+context;
         return new String(bytes, Constants.DEFAULT_CHARSET);
     }
 }
