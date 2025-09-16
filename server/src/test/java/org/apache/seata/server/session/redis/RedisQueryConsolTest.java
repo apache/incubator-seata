@@ -16,7 +16,8 @@
  */
 package org.apache.seata.server.session.redis;
 
-import com.alibaba.fastjson.JSON;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.seata.common.result.PageResult;
 import org.apache.seata.server.BaseSpringBootTest;
 import org.apache.seata.server.console.entity.param.GlobalLockParam;
@@ -62,14 +63,16 @@ public class RedisQueryConsolTest extends BaseSpringBootTest {
     @Resource
     private GlobalLockService globalLockService;
 
+    private final ObjectMapper objectMapper=new ObjectMapper();
+
     @Test
-    public void test_globalRedisServiceQuery() {
+    public void test_globalRedisServiceQuery() throws JsonProcessingException {
         GlobalSessionParam param = new GlobalSessionParam();
         param.setPageNum(1);
         param.setPageSize(4);
         param.setXid("SEATA_GLOBAL_LOCK_192.168.158.80:8091:37621364385185792");
         PageResult<GlobalSessionVO> query = globalSessionService.query(param);
-        System.out.print(JSON.toJSON(query));
+        System.out.print(objectMapper.writeValueAsString(query));
     }
 
     @Test

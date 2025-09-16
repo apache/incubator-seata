@@ -76,7 +76,7 @@
       "name": "seata.client.rm.saga-json-parser",
       "type": "java.lang.String",
       "sourceType": "org.apache.seata.spring.boot.autoconfigure.properties.client.RmProperties",
-      "defaultValue": "fastjson"
+      "defaultValue": "jackson"
     },
     {
       "name": "seata.client.rm.saga-retry-persist-mode-update",
@@ -369,11 +369,11 @@
       "name": "seata.client.rm.saga-json-parser",
       "values": [
         {
-          "value": "fastjson",
+          "value": "jackson",
           "description": "the default parser."
         },
         {
-          "value": "jackson"
+          "value": "fastjson"
         }
       ]
     },
