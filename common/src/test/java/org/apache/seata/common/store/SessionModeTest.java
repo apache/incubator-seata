@@ -16,53 +16,52 @@
  */
 package org.apache.seata.common.store;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class SessionModeTest {
     @Test
     void testGetName() {
-        assertEquals("file", SessionMode.FILE.getName());
-        assertEquals("db", SessionMode.DB.getName());
-        assertEquals("redis", SessionMode.REDIS.getName());
-        assertEquals("raft", SessionMode.RAFT.getName());
+        Assertions.assertEquals("file", SessionMode.FILE.getName());
+        Assertions.assertEquals("db", SessionMode.DB.getName());
+        Assertions.assertEquals("redis", SessionMode.REDIS.getName());
+        Assertions.assertEquals("raft", SessionMode.RAFT.getName());
     }
 
     @Test
     void testGet() {
-        assertEquals(SessionMode.FILE, SessionMode.get("file"));
-        assertEquals(SessionMode.FILE, SessionMode.get("FILE"));
-        assertEquals(SessionMode.FILE, SessionMode.get("FiLe"));
-        assertEquals(SessionMode.DB, SessionMode.get("db"));
-        assertEquals(SessionMode.DB, SessionMode.get("DB"));
-        assertEquals(SessionMode.REDIS, SessionMode.get("redis"));
-        assertEquals(SessionMode.REDIS, SessionMode.get("REDIS"));
-        assertEquals(SessionMode.RAFT, SessionMode.get("raft"));
-        assertEquals(SessionMode.RAFT, SessionMode.get("Raft"));
+        Assertions.assertEquals(SessionMode.FILE, SessionMode.get("file"));
+        Assertions.assertEquals(SessionMode.FILE, SessionMode.get("FILE"));
+        Assertions.assertEquals(SessionMode.FILE, SessionMode.get("FiLe"));
+        Assertions.assertEquals(SessionMode.DB, SessionMode.get("db"));
+        Assertions.assertEquals(SessionMode.DB, SessionMode.get("DB"));
+        Assertions.assertEquals(SessionMode.REDIS, SessionMode.get("redis"));
+        Assertions.assertEquals(SessionMode.REDIS, SessionMode.get("REDIS"));
+        Assertions.assertEquals(SessionMode.RAFT, SessionMode.get("raft"));
+        Assertions.assertEquals(SessionMode.RAFT, SessionMode.get("Raft"));
     }
 
     @Test
     void testGetUnknown() {
-        assertThrows(IllegalArgumentException.class, () -> SessionMode.get("unknown"));
-        assertThrows(IllegalArgumentException.class, () -> SessionMode.get(""));
-        assertThrows(IllegalArgumentException.class, () -> SessionMode.get(null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> SessionMode.get("unknown"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> SessionMode.get(""));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> SessionMode.get(null));
     }
 
     @Test
     void testContainsValid() {
-        assertTrue(SessionMode.contains("file"));
-        assertTrue(SessionMode.contains("FILE"));
-        assertTrue(SessionMode.contains("FiLe"));
-        assertTrue(SessionMode.contains("db"));
-        assertTrue(SessionMode.contains("redis"));
-        assertTrue(SessionMode.contains("raft"));
+        Assertions.assertTrue(SessionMode.contains("file"));
+        Assertions.assertTrue(SessionMode.contains("FILE"));
+        Assertions.assertTrue(SessionMode.contains("FiLe"));
+        Assertions.assertTrue(SessionMode.contains("db"));
+        Assertions.assertTrue(SessionMode.contains("redis"));
+        Assertions.assertTrue(SessionMode.contains("raft"));
     }
 
     @Test
     void testContainsInvalid() {
-        assertFalse(SessionMode.contains("unknown"));
-        assertFalse(SessionMode.contains(""));
-        assertFalse(SessionMode.contains(null));
+        Assertions.assertFalse(SessionMode.contains("unknown"));
+        Assertions.assertFalse(SessionMode.contains(""));
+        Assertions.assertFalse(SessionMode.contains(null));
     }
 }

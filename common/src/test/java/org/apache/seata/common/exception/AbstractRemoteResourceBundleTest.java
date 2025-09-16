@@ -18,14 +18,13 @@
 package org.apache.seata.common.exception;
 
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.Enumeration;
 import java.util.MissingResourceException;
 import java.util.Collections;
 import java.util.ArrayList;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class AbstractRemoteResourceBundleTest {
 
@@ -63,28 +62,28 @@ class AbstractRemoteResourceBundleTest {
     @Test
     void testGetString1() {
         TestResourceBundle bundle = new TestResourceBundle();
-        assertThrows(MissingResourceException.class, () -> bundle.getString("key1"));
+        Assertions.assertThrows(MissingResourceException.class, () -> bundle.getString("key1"));
     }
 
     // WhenKeyDoesNotExist
     @Test
     void testGetString2() {
         TestResourceBundle bundle = new TestResourceBundle();
-        assertThrows(MissingResourceException.class, () -> bundle.getString("nonexistent"));
+        Assertions.assertThrows(MissingResourceException.class, () -> bundle.getString("nonexistent"));
     }
 
     // WhenKeyExistsInKeysButValueIsNull
     @Test
     void testGetObject1() {
         TestResourceBundle bundle = new TestResourceBundle();
-        assertThrows(MissingResourceException.class, () -> bundle.getObject("key2"));
+        Assertions.assertThrows(MissingResourceException.class, () -> bundle.getObject("key2"));
     }
 
     // WhenKeyDoesNotExist
     @Test
     void testGetObject2() {
         TestResourceBundle bundle = new TestResourceBundle();
-        assertThrows(MissingResourceException.class, () -> bundle.getObject("missing"));
+        Assertions.assertThrows(MissingResourceException.class, () -> bundle.getObject("missing"));
     }
 
     @Test
@@ -92,15 +91,15 @@ class AbstractRemoteResourceBundleTest {
         TestResourceBundle bundle = new TestResourceBundle();
         Enumeration<String> keys = bundle.getKeys();
 
-        assertNotNull(keys);
-        assertTrue(keys.hasMoreElements());
+        Assertions.assertNotNull(keys);
+        Assertions.assertTrue(keys.hasMoreElements());
 
         ArrayList<String> actual = new ArrayList<>();
         while (keys.hasMoreElements()) {
             actual.add(keys.nextElement());
         }
 
-        assertEquals(java.util.Arrays.asList("key1", "key2", "key3"), actual);
+        Assertions.assertEquals(java.util.Arrays.asList("key1", "key2", "key3"), actual);
     }
 
     @Test
@@ -119,27 +118,27 @@ class AbstractRemoteResourceBundleTest {
         };
 
         Enumeration<String> keys = emptyBundle.getKeys();
-        assertNotNull(keys);
-        assertFalse(keys.hasMoreElements());
+        Assertions.assertNotNull(keys);
+        Assertions.assertFalse(keys.hasMoreElements());
     }
 
     // WhenKeyIsInKeys
     @Test
     void testContainsKey1() {
         TestResourceBundle bundle = new TestResourceBundle();
-        assertFalse(bundle.containsKey("key1"));
+        Assertions.assertFalse(bundle.containsKey("key1"));
     }
 
     // WhenKeyIsNotInKeys
     @Test
     void testContainsKey2() {
         TestResourceBundle bundle = new TestResourceBundle();
-        assertFalse(bundle.containsKey("unknown"));
+        Assertions.assertFalse(bundle.containsKey("unknown"));
     }
 
     @Test
     void testToString() {
         TestResourceBundle bundle = new TestResourceBundle();
-        assertNotNull(bundle.toString());
+        Assertions.assertNotNull(bundle.toString());
     }
 }

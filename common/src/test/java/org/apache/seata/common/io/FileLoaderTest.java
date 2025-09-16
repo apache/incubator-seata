@@ -24,20 +24,18 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 public class FileLoaderTest {
 
     @Test
     public void testLoadExistFile() {
         File file = FileLoader.load("io/TestFile.txt");
-        assertTrue(file != null && file.exists());
+        Assertions.assertTrue(file != null && file.exists());
     }
 
     @Test
     public void testLoadNotExistFile() {
         File file = FileLoader.load("io/NotExistFile.txt");
-        assertTrue(file == null || !file.exists());
+        Assertions.assertTrue(file == null || !file.exists());
     }
 
     @Test
@@ -52,8 +50,8 @@ public class FileLoaderTest {
 
         File result = FileLoader.load("direct-test-file.txt");
 
-        assertNotNull(result);
-        assertTrue(result.exists());
+        Assertions.assertNotNull(result);
+        Assertions.assertTrue(result.exists());
 
         Files.deleteIfExists(tempFile);
     }
@@ -68,8 +66,8 @@ public class FileLoaderTest {
 
         File result = FileLoader.load(encodedName);
 
-        assertNotNull(result);
-        assertTrue(result.exists());
+        Assertions.assertNotNull(result);
+        Assertions.assertTrue(result.exists());
 
         Files.deleteIfExists(tempFile);
     }
@@ -77,6 +75,6 @@ public class FileLoaderTest {
     @Test
     public void testLoadWhenNull() {
         File result = FileLoader.load("nonexistent/path.txt");
-        assertNull(result);
+        Assertions.assertNull(result);
     }
 }

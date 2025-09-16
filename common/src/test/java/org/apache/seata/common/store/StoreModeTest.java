@@ -17,53 +17,52 @@
 
 package org.apache.seata.common.store;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class StoreModeTest {
     @Test
     void testGetName() {
-        assertEquals("file", StoreMode.FILE.getName());
-        assertEquals("db", StoreMode.DB.getName());
-        assertEquals("redis", StoreMode.REDIS.getName());
-        assertEquals("raft", StoreMode.RAFT.getName());
+        Assertions.assertEquals("file", StoreMode.FILE.getName());
+        Assertions.assertEquals("db", StoreMode.DB.getName());
+        Assertions.assertEquals("redis", StoreMode.REDIS.getName());
+        Assertions.assertEquals("raft", StoreMode.RAFT.getName());
     }
 
     @Test
     void testGet() {
-        assertEquals(StoreMode.FILE, StoreMode.get("file"));
-        assertEquals(StoreMode.FILE, StoreMode.get("FILE"));
-        assertEquals(StoreMode.FILE, StoreMode.get("FiLe"));
-        assertEquals(StoreMode.DB, StoreMode.get("db"));
-        assertEquals(StoreMode.DB, StoreMode.get("DB"));
-        assertEquals(StoreMode.REDIS, StoreMode.get("redis"));
-        assertEquals(StoreMode.REDIS, StoreMode.get("REDIS"));
-        assertEquals(StoreMode.RAFT, StoreMode.get("raft"));
-        assertEquals(StoreMode.RAFT, StoreMode.get("Raft"));
+        Assertions.assertEquals(StoreMode.FILE, StoreMode.get("file"));
+        Assertions.assertEquals(StoreMode.FILE, StoreMode.get("FILE"));
+        Assertions.assertEquals(StoreMode.FILE, StoreMode.get("FiLe"));
+        Assertions.assertEquals(StoreMode.DB, StoreMode.get("db"));
+        Assertions.assertEquals(StoreMode.DB, StoreMode.get("DB"));
+        Assertions.assertEquals(StoreMode.REDIS, StoreMode.get("redis"));
+        Assertions.assertEquals(StoreMode.REDIS, StoreMode.get("REDIS"));
+        Assertions.assertEquals(StoreMode.RAFT, StoreMode.get("raft"));
+        Assertions.assertEquals(StoreMode.RAFT, StoreMode.get("Raft"));
     }
 
     @Test
     void testGetUnknown() {
-        assertThrows(IllegalArgumentException.class, () -> StoreMode.get("unknown"));
-        assertThrows(IllegalArgumentException.class, () -> StoreMode.get(""));
-        assertThrows(IllegalArgumentException.class, () -> StoreMode.get(null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> StoreMode.get("unknown"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> StoreMode.get(""));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> StoreMode.get(null));
     }
 
     @Test
     void testContainsValidMode() {
-        assertTrue(StoreMode.contains("file"));
-        assertTrue(StoreMode.contains("FILE"));
-        assertTrue(StoreMode.contains("FiLe"));
-        assertTrue(StoreMode.contains("db"));
-        assertTrue(StoreMode.contains("redis"));
-        assertTrue(StoreMode.contains("raft"));
+        Assertions.assertTrue(StoreMode.contains("file"));
+        Assertions.assertTrue(StoreMode.contains("FILE"));
+        Assertions.assertTrue(StoreMode.contains("FiLe"));
+        Assertions.assertTrue(StoreMode.contains("db"));
+        Assertions.assertTrue(StoreMode.contains("redis"));
+        Assertions.assertTrue(StoreMode.contains("raft"));
     }
 
     @Test
     void testContainsInvalid() {
-        assertFalse(StoreMode.contains("unknown"));
-        assertFalse(StoreMode.contains(""));
-        assertFalse(StoreMode.contains(null));
+        Assertions.assertFalse(StoreMode.contains("unknown"));
+        Assertions.assertFalse(StoreMode.contains(""));
+        Assertions.assertFalse(StoreMode.contains(null));
     }
 }

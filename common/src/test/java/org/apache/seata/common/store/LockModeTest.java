@@ -17,53 +17,52 @@
 
 package org.apache.seata.common.store;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class LockModeTest {
     @Test
     void testGetName() {
-        assertEquals("file", LockMode.FILE.getName());
-        assertEquals("db", LockMode.DB.getName());
-        assertEquals("redis", LockMode.REDIS.getName());
-        assertEquals("raft", LockMode.RAFT.getName());
+        Assertions.assertEquals("file", LockMode.FILE.getName());
+        Assertions.assertEquals("db", LockMode.DB.getName());
+        Assertions.assertEquals("redis", LockMode.REDIS.getName());
+        Assertions.assertEquals("raft", LockMode.RAFT.getName());
     }
 
     @Test
     void testGet() {
-        assertEquals(LockMode.FILE, LockMode.get("file"));
-        assertEquals(LockMode.FILE, LockMode.get("FILE"));
-        assertEquals(LockMode.FILE, LockMode.get("FiLe"));
-        assertEquals(LockMode.DB, LockMode.get("db"));
-        assertEquals(LockMode.DB, LockMode.get("DB"));
-        assertEquals(LockMode.REDIS, LockMode.get("redis"));
-        assertEquals(LockMode.REDIS, LockMode.get("REDIS"));
-        assertEquals(LockMode.RAFT, LockMode.get("raft"));
-        assertEquals(LockMode.RAFT, LockMode.get("Raft"));
+        Assertions.assertEquals(LockMode.FILE, LockMode.get("file"));
+        Assertions.assertEquals(LockMode.FILE, LockMode.get("FILE"));
+        Assertions.assertEquals(LockMode.FILE, LockMode.get("FiLe"));
+        Assertions.assertEquals(LockMode.DB, LockMode.get("db"));
+        Assertions.assertEquals(LockMode.DB, LockMode.get("DB"));
+        Assertions.assertEquals(LockMode.REDIS, LockMode.get("redis"));
+        Assertions.assertEquals(LockMode.REDIS, LockMode.get("REDIS"));
+        Assertions.assertEquals(LockMode.RAFT, LockMode.get("raft"));
+        Assertions.assertEquals(LockMode.RAFT, LockMode.get("Raft"));
     }
 
     @Test
     void testGetUnknown() {
-        assertThrows(IllegalArgumentException.class, () -> LockMode.get("unknown"));
-        assertThrows(IllegalArgumentException.class, () -> LockMode.get(""));
-        assertThrows(IllegalArgumentException.class, () -> LockMode.get(null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> LockMode.get("unknown"));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> LockMode.get(""));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> LockMode.get(null));
     }
 
     @Test
     void testContainsValid() {
-        assertTrue(LockMode.contains("file"));
-        assertTrue(LockMode.contains("FILE"));
-        assertTrue(LockMode.contains("FiLe"));
-        assertTrue(LockMode.contains("db"));
-        assertTrue(LockMode.contains("redis"));
-        assertTrue(LockMode.contains("raft"));
+        Assertions.assertTrue(LockMode.contains("file"));
+        Assertions.assertTrue(LockMode.contains("FILE"));
+        Assertions.assertTrue(LockMode.contains("FiLe"));
+        Assertions.assertTrue(LockMode.contains("db"));
+        Assertions.assertTrue(LockMode.contains("redis"));
+        Assertions.assertTrue(LockMode.contains("raft"));
     }
 
     @Test
     void testContainsInvalid() {
-        assertFalse(LockMode.contains("unknown"));
-        assertFalse(LockMode.contains(""));
-        assertFalse(LockMode.contains(null));
+        Assertions.assertFalse(LockMode.contains("unknown"));
+        Assertions.assertFalse(LockMode.contains(""));
+        Assertions.assertFalse(LockMode.contains(null));
     }
 }

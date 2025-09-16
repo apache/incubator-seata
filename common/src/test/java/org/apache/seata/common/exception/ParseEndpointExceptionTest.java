@@ -16,35 +16,34 @@
  */
 package org.apache.seata.common.exception;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class ParseEndpointExceptionTest {
 
     @Test
     void testNoArgConstructor() {
         ParseEndpointException e = new ParseEndpointException();
-        assertNull(e.getMessage());
-        assertNull(e.getCause());
+        Assertions.assertNull(e.getMessage());
+        Assertions.assertNull(e.getCause());
     }
 
     @Test
     void testMessageConstructor() {
         String message = "Invalid endpoint format: tcp://localhost:8091";
         ParseEndpointException e = new ParseEndpointException(message);
-        assertEquals(message, e.getMessage());
-        assertNull(e.getCause());
+        Assertions.assertEquals(message, e.getMessage());
+        Assertions.assertNull(e.getCause());
     }
 
     @Test
     void testCauseConstructor() {
         ParseEndpointException e = new ParseEndpointException();
-        assertNull(e.getMessage());
-        assertNull(e.getCause());
+        Assertions.assertNull(e.getMessage());
+        Assertions.assertNull(e.getCause());
     }
 
     @Test
@@ -52,8 +51,8 @@ class ParseEndpointExceptionTest {
         String message = "Failed to parse endpoint";
         Throwable cause = new IllegalArgumentException("missing host");
         ParseEndpointException e = new ParseEndpointException(message, cause);
-        assertEquals(message, e.getMessage());
-        assertSame(cause, e.getCause());
+        Assertions.assertEquals(message, e.getMessage());
+        Assertions.assertSame(cause, e.getCause());
     }
 
     @Test
@@ -67,22 +66,22 @@ class ParseEndpointExceptionTest {
                 message, cause, enableSuppression, writableStackTrace
         );
 
-        assertEquals(message, e.getMessage());
-        assertSame(cause, e.getCause());
+        Assertions.assertEquals(message, e.getMessage());
+        Assertions.assertSame(cause, e.getCause());
 
-        assertEquals(0, e.getStackTrace().length);
+        Assertions.assertEquals(0, e.getStackTrace().length);
     }
 
     @Test
     void testToStringAndPrintStackTrace() {
         ParseEndpointException e = new ParseEndpointException("test", new NullPointerException());
-        assertNotNull(e.toString());
+        Assertions.assertNotNull(e.toString());
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         PrintStream ps = new PrintStream(out);
         try {
             e.printStackTrace(ps);
-            assertTrue(out.size() > 0);
+            Assertions.assertTrue(out.size() > 0);
         } catch (Exception ignored) {}
     }
 }
