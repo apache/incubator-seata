@@ -78,7 +78,7 @@ client.rm.tableMetaCheckerInterval=60000
 client.rm.sqlParserType=druid
 client.rm.reportSuccessEnable=false
 client.rm.sagaBranchRegisterEnable=false
-client.rm.sagaJsonParser=jackson
+client.rm.sagaJsonParser=fastjson
 client.rm.tccActionInterceptorOrder=-2147482648
 client.rm.sqlParserType=druid
 client.tm.commitRetryCount=5
@@ -101,7 +101,7 @@ client.undo.compress.threshold=64k
 tcc.fence.logTableName=tcc_fence_log
 tcc.fence.cleanPeriod=1h
 # You can choose from the following options: fastjson, jackson, gson
-tcc.contextJsonParserType=jackson
+tcc.contextJsonParserType=fastjson
 
 #Log rule configuration, for client and server
 log.exceptionRate=100

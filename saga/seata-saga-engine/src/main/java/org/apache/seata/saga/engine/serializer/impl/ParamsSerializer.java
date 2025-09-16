@@ -22,7 +22,7 @@ import org.apache.seata.saga.statelang.parser.JsonParser;
 import org.apache.seata.saga.statelang.parser.JsonParserFactory;
 
 /**
- * Parameter serializer based on Jackson
+ * Parameter serializer based on Fastjson
  *
  */
 public class ParamsSerializer implements Serializer<Object, String> {

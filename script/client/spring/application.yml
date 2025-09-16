@@ -35,7 +35,7 @@ seata:
       table-meta-check-enable: false
       report-success-enable: false
       saga-branch-register-enable: false
-      saga-json-parser: jackson
+      saga-json-parser: fastjson
       saga-retry-persist-mode-update: false
       saga-compensate-persist-mode-update: false
       tcc-action-interceptor-order: -2147482648 #Ordered.HIGHEST_PRECEDENCE + 1000
@@ -204,7 +204,7 @@ seata:
       log-table-name: tcc_fence_log
       clean-period: 1h
     # You can choose from the following options: fastjson, jackson, gson
-    context-json-parser-type: jackson
+    context-json-parser-type: fastjson
   saga:
     enabled: false
     state-machine:

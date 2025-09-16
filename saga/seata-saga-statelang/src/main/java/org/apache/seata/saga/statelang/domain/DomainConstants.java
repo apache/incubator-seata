@@ -82,5 +82,5 @@ public interface DomainConstants {
 
     String SEPERATOR_PARENT_ID = ":";
 
-    String DEFAULT_JSON_PARSER = "jackson";
+    String DEFAULT_JSON_PARSER = "fastjson";
 }
