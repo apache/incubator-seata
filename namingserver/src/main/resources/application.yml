@@ -76,7 +76,7 @@ seata:
       max_query_duration: 604800000
     # Whether to enable permission authentication
     auth:
-      enabled: false
+      enabled: true
 
   # Business data source configuration
   businessDataSources:
