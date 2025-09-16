@@ -178,8 +178,7 @@ public class EnhancedServiceLoaderTest {
         assertThat(serviceLoaders.get(Hello.class)).isNull();
     }
 
-    // FIXME: 2023/2/11 wait fix EnhancedServiceLoader.unload(Class<S> service, String activateName)
-    // @Test
+    @Test
     public void testUnloadByClassAndActivateName() throws NoSuchFieldException, IllegalAccessException {
         Hello englishHello = EnhancedServiceLoader.load(Hello.class, "EnglishHello");
         assertThat(englishHello.say()).isEqualTo("hello!");
