@@ -72,9 +72,17 @@ public class BusinessDataSourcesProperties implements InitializingBean {
             props.setUsername(env.getProperty(prefix + "username"));
             props.setPassword(env.getProperty(prefix + "password"));
             props.setDatasource(env.getProperty(prefix + "datasource", "druid"));
-            props.setMinConn(env.getProperty(prefix + "minConn", Integer.class, DEFAULT_DB_MIN_CONN));
-            props.setMaxConn(env.getProperty(prefix + "maxConn", Integer.class, DEFAULT_DB_MAX_CONN));
-            props.setMaxWait(env.getProperty(prefix + "maxWait", Long.class, 5000L));
+            props.setMinConn(env.getProperty(prefix + "min-conn", Integer.class, DEFAULT_DB_MIN_CONN));
+            if(props.getMinConn()<=0 || props.getMinConn()>DEFAULT_DB_MIN_CONN){
+                LOGGER.warn("The minimum number of connections for a data source: {} is not compliant",name);
+                continue;
+            }
+            props.setMaxConn(env.getProperty(prefix + "max-conn", Integer.class, DEFAULT_DB_MAX_CONN));
+            if(props.getMaxConn()<=0 || props.getMaxConn()>DEFAULT_DB_MAX_CONN){
+                LOGGER.warn("The maximum number of connections for a data source: {} is not compliant",name);
+                continue;
+            }
+            props.setMaxWait(env.getProperty(prefix + "max-wait", Long.class, 5000L));
 
             // Check whether the parameters are perfect
             if (!validateDataSourceProperties(props, name)) {

@@ -91,7 +91,7 @@ seata:
       datasource: druid # Optional connection pool type (druid/hikari/dbcp)
       min-conn: 5
       max-conn: 50
-      max-wait: 5000L
+      max-wait: 5000
     dataSource2:
       enabled: true
       db-type: mysql
@@ -102,4 +102,4 @@ seata:
       datasource: dbcp
       min-conn: 5
       max-conn: 50
-      max-wait: 5000L
+      max-wait: 5000
