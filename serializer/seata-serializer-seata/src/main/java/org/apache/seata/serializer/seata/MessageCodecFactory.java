@@ -66,11 +66,11 @@ import org.apache.seata.serializer.seata.protocol.transaction.GlobalRollbackResp
 import org.apache.seata.serializer.seata.protocol.transaction.GlobalStatusRequestCodec;
 import org.apache.seata.serializer.seata.protocol.transaction.GlobalStatusResponseCodec;
 import org.apache.seata.serializer.seata.protocol.transaction.UndoLogDeleteRequestCodec;
+import org.apache.seata.serializer.seata.protocol.v2.RegisterRMResponseCodecV2;
+import org.apache.seata.serializer.seata.protocol.v2.RegisterTMResponseCodecV2;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import org.apache.seata.serializer.seata.protocol.v2.RegisterRMResponseCodecV2;
-import org.apache.seata.serializer.seata.protocol.v2.RegisterTMResponseCodecV2;
 
 /**
  * The type Message codec factory.

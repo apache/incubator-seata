@@ -24,8 +24,7 @@ import org.apache.seata.core.protocol.ProtocolConstants;
 public class SeataSerializerV2 extends SeataSerializerV1 {
     private static volatile SeataSerializerV2 instance;
 
-    protected SeataSerializerV2() {
-    }
+    protected SeataSerializerV2() {}
 
     public static SeataSerializerV2 getInstance() {
         if (instance == null) {

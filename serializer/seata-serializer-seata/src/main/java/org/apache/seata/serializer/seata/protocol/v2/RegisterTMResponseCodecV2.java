@@ -16,7 +16,6 @@
  */
 package org.apache.seata.serializer.seata.protocol.v2;
 
-
 import org.apache.seata.core.protocol.RegisterTMResponse;
 
 /**
@@ -28,5 +27,4 @@ public class RegisterTMResponseCodecV2 extends AbstractIdentifyResponseCodecV2 {
     public Class<?> getMessageClassType() {
         return RegisterTMResponse.class;
     }
-
 }

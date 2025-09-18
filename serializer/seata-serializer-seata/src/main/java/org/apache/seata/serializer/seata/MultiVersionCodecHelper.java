@@ -36,11 +36,12 @@ public class MultiVersionCodecHelper {
             if (!(messageCodec instanceof MultiVersionCodec)) {
                 return null;
             }
-            Map<MultiVersionCodec.VersionRange, MessageSeataCodec> map = ((MultiVersionCodec) messageCodec).oldVersionCodec();
+            Map<MultiVersionCodec.VersionRange, MessageSeataCodec> map =
+                    ((MultiVersionCodec) messageCodec).oldVersionCodec();
             long version = Version.convertVersion(v);
             for (MultiVersionCodec.VersionRange range : map.keySet()) {
-                if (version > Version.convertVersion(range.getBegin()) &&
-                        version <= Version.convertVersion(range.getEnd())) {
+                if (version > Version.convertVersion(range.getBegin())
+                        && version <= Version.convertVersion(range.getEnd())) {
                     return map.get(version);
                 }
             }

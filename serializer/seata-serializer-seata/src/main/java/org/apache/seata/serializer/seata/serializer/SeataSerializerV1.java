@@ -35,8 +35,7 @@ public class SeataSerializerV1 implements Serializer {
 
     private static volatile SeataSerializerV1 instance;
 
-    protected SeataSerializerV1() {
-    }
+    protected SeataSerializerV1() {}
 
     public static SeataSerializerV1 getInstance() {
         if (instance == null) {
@@ -55,20 +54,20 @@ public class SeataSerializerV1 implements Serializer {
             throw new IllegalArgumentException("AbstractMessage isn't available.");
         }
         AbstractMessage abstractMessage = (AbstractMessage) t;
-        //type code
+        // type code
         short typecode = abstractMessage.getTypeCode();
-        //msg codec
+        // msg codec
         MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typecode, protocolVersion());
-        //get empty ByteBuffer
+        // get empty ByteBuffer
         ByteBuf out = Unpooled.buffer(1024);
-        //msg encode
+        // msg encode
         messageCodec.encode(t, out);
         byte[] body = new byte[out.readableBytes()];
         out.readBytes(body);
 
         ByteBuffer byteBuffer;
 
-        //typecode + body
+        // typecode + body
         byteBuffer = ByteBuffer.allocate(2 + body.length);
         byteBuffer.putShort(typecode);
         byteBuffer.put(body);

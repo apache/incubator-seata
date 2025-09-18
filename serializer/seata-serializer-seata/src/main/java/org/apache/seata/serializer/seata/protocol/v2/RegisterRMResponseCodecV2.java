@@ -27,6 +27,4 @@ public class RegisterRMResponseCodecV2 extends AbstractIdentifyResponseCodecV2 {
     public Class<?> getMessageClassType() {
         return RegisterRMResponse.class;
     }
-
-
 }

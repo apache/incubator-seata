@@ -26,7 +26,7 @@ import java.nio.ByteBuffer;
 /**
  *  The type Abstract identify request codec.(v2)
  **/
-public class AbstractIdentifyResponseCodecV2  extends AbstractResultMessageCodec {
+public class AbstractIdentifyResponseCodecV2 extends AbstractResultMessageCodec {
     @Override
     public Class<?> getMessageClassType() {
         return AbstractIdentifyResponse.class;
@@ -69,5 +69,4 @@ public class AbstractIdentifyResponseCodecV2  extends AbstractResultMessageCodec
         in.get(bs);
         abstractIdentifyResponse.setVersion(new String(bs, UTF8));
     }
-
 }
