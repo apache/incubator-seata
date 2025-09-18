@@ -290,7 +290,7 @@ public class TransactionalTemplate {
                 break;
             case TimeoutRollbacked:
             case Rollbacked:
-                // rollback transactions but do not exist are usually considered completed
+            // rollback transactions but do not exist are usually considered completed
             case Finished:
                 code = TransactionalExecutor.Code.RollbackDone;
                 break;
