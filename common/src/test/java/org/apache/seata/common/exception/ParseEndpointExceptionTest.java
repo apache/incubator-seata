@@ -62,9 +62,7 @@ class ParseEndpointExceptionTest {
         boolean enableSuppression = true;
         boolean writableStackTrace = false;
 
-        ParseEndpointException e = new ParseEndpointException(
-                message, cause, enableSuppression, writableStackTrace
-        );
+        ParseEndpointException e = new ParseEndpointException(message, cause, enableSuppression, writableStackTrace);
 
         Assertions.assertEquals(message, e.getMessage());
         Assertions.assertSame(cause, e.getCause());
@@ -82,6 +80,7 @@ class ParseEndpointExceptionTest {
         try {
             e.printStackTrace(ps);
             Assertions.assertTrue(out.size() > 0);
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
     }
 }

@@ -21,10 +21,10 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.MissingResourceException;
-import java.util.Collections;
-import java.util.ArrayList;
 
 class AbstractRemoteResourceBundleTest {
 
