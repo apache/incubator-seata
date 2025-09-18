@@ -244,22 +244,12 @@
         </profile>
 
         <profile>
-            <id>jdk11-jdk21-spotless</id>
+            <id>jdk11-spotless</id>
             <activation>
-                <jdk>[11, 21)</jdk>
+                <jdk>[11,)</jdk>
             </activation>
             <properties>
-                <palantirJavaFormat.version>2.28.0</palantirJavaFormat.version>
-            </properties>
-        </profile>
-
-        <profile>
-            <id>jdk21-spotless</id>
-            <activation>
-                <jdk>[21,)</jdk>
-            </activation>
-            <properties>
-                <palantirJavaFormat.version>2.39.0</palantirJavaFormat.version>
+                <palantirJavaFormat.version>2.71.0</palantirJavaFormat.version>
             </properties>
         </profile>
         <profile>
