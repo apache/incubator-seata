@@ -15,3 +15,4 @@
 # limitations under the License.
 #
 org.apache.seata.integration.tx.api.interceptor.parser.GlobalTransactionalInterceptorParser
+org.apache.seata.integration.tx.api.interceptor.parser.CombineTransactionalInterceptorParser

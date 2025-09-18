@@ -21,16 +21,14 @@ import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.util.IOUtil;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.store.LockDO;
-import org.apache.seata.server.DynamicPortTestConfig;
+import org.apache.seata.server.BaseSpringBootTest;
 import org.apache.seata.server.storage.db.lock.LockStoreDataBaseDAO;
 import org.h2.store.fs.FileUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Import;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -41,9 +39,7 @@ import java.util.List;
 
 /**
  */
-@SpringBootTest
-@Import(DynamicPortTestConfig.class)
-public class DataBaseLockStoreDAOTest {
+public class DataBaseLockStoreDAOTest extends BaseSpringBootTest {
 
     static LockStoreDataBaseDAO dataBaseLockStoreDAO = null;
 

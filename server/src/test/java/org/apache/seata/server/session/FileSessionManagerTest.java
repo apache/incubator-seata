@@ -27,7 +27,7 @@ import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.model.LockStatus;
-import org.apache.seata.server.DynamicPortTestConfig;
+import org.apache.seata.server.BaseSpringBootTest;
 import org.apache.seata.server.console.entity.param.GlobalSessionParam;
 import org.apache.seata.server.console.entity.vo.GlobalSessionVO;
 import org.apache.seata.server.console.service.BranchSessionService;
@@ -41,9 +41,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Import;
 
 import javax.annotation.Resource;
 import java.io.IOException;
@@ -62,9 +60,7 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
  *
  * @since 2019 /1/22
  */
-@SpringBootTest
-@Import(DynamicPortTestConfig.class)
-public class FileSessionManagerTest {
+public class FileSessionManagerTest extends BaseSpringBootTest {
 
     private static volatile List<SessionManager> sessionManagerList;
 

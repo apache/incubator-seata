@@ -17,6 +17,7 @@
 package org.apache.seata.saga.rm;
 
 import org.apache.seata.common.exception.FrameworkErrorCode;
+import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
@@ -38,6 +39,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * Saga resource manager
  *
  */
+@LoadLevel(name = "sagaResourceManager", order = Integer.MAX_VALUE)
 public class SagaResourceManager extends AbstractResourceManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SagaResourceManager.class);

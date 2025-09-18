@@ -32,9 +32,7 @@ public interface ProxyInvocationHandler extends SeataInterceptor {
 
     String type();
 
-    default int order() {
-        return 0;
-    }
+    int order();
 
     void setNextProxyInvocationHandler(ProxyInvocationHandler next);
 }
