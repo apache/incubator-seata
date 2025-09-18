@@ -82,7 +82,8 @@ public class EtcdRegistryServiceImplTest {
     public void tearDown() throws Exception {
         KV kvClient = client.getKVClient();
         ByteSequence keyPrefix = buildRegistryKeyPrefix();
-        DeleteOption deleteOption = DeleteOption.newBuilder().withPrefix(keyPrefix).build();
+        DeleteOption deleteOption =
+                DeleteOption.newBuilder().withPrefix(keyPrefix).build();
         kvClient.delete(keyPrefix, deleteOption).get();
     }
 
@@ -93,7 +94,8 @@ public class EtcdRegistryServiceImplTest {
         // 1. Register the service instance.
         registryService.register(inetSocketAddress);
         // 2. Verify the registration by directly querying etcd.
-        GetOption getOption = GetOption.newBuilder().withPrefix(buildRegistryKeyPrefix()).build();
+        GetOption getOption =
+                GetOption.newBuilder().withPrefix(buildRegistryKeyPrefix()).build();
         long count = client.getKVClient().get(buildRegistryKeyPrefix(), getOption).get().getKvs().stream()
                 .filter(keyValue -> {
                     String[] instanceInfo = keyValue.getValue().toString(UTF_8).split(":");
@@ -110,7 +112,8 @@ public class EtcdRegistryServiceImplTest {
         // 1.register
         registryService.register(inetSocketAddress);
         // 2. Verify it was registered successfully.
-        GetOption getOption = GetOption.newBuilder().withPrefix(buildRegistryKeyPrefix()).build();
+        GetOption getOption =
+                GetOption.newBuilder().withPrefix(buildRegistryKeyPrefix()).build();
         long count = client.getKVClient().get(buildRegistryKeyPrefix(), getOption).get().getKvs().stream()
                 .filter(keyValue -> {
                     String[] instanceInfo = keyValue.getValue().toString(UTF_8).split(":");
@@ -140,7 +143,8 @@ public class EtcdRegistryServiceImplTest {
         EtcdListener etcdListener = new EtcdListener();
         registryService.subscribe(DEFAULT_TX_GROUP, etcdListener);
         // 3. Delete the instance key and verify the listener is notified.
-        DeleteOption deleteOption = DeleteOption.newBuilder().withPrefix(buildRegistryKeyPrefix()).build();
+        DeleteOption deleteOption =
+                DeleteOption.newBuilder().withPrefix(buildRegistryKeyPrefix()).build();
         client.getKVClient().delete(buildRegistryKeyPrefix(), deleteOption).get();
         assertThat(etcdListener.isNotified()).isTrue();
     }
@@ -155,7 +159,8 @@ public class EtcdRegistryServiceImplTest {
         EtcdListener etcdListener = new EtcdListener();
         registryService.subscribe(DEFAULT_TX_GROUP, etcdListener);
         // 3.delete instance,see if the listener can be notified
-        DeleteOption deleteOption = DeleteOption.newBuilder().withPrefix(buildRegistryKeyPrefix()).build();
+        DeleteOption deleteOption =
+                DeleteOption.newBuilder().withPrefix(buildRegistryKeyPrefix()).build();
         client.getKVClient().delete(buildRegistryKeyPrefix(), deleteOption).get();
         assertThat(etcdListener.isNotified()).isTrue();
         // 4.unsubscribe
