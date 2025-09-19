@@ -18,7 +18,6 @@ package org.apache.seata.serializer.seata.protocol.v2;
 
 import io.netty.buffer.ByteBuf;
 import org.apache.seata.core.protocol.AbstractIdentifyResponse;
-import org.apache.seata.core.protocol.Version;
 import org.apache.seata.serializer.seata.protocol.AbstractResultMessageCodec;
 
 import java.nio.ByteBuffer;
