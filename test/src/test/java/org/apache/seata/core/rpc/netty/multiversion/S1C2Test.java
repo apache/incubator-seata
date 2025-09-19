@@ -17,7 +17,6 @@
 package org.apache.seata.core.rpc.netty.multiversion;
 
 import org.apache.seata.common.util.StringUtils;
-import org.apache.seata.core.protocol.RegisterTMRequest;
 import org.apache.seata.core.protocol.RegisterTMResponse;
 import org.apache.seata.core.rpc.netty.CodecTestCheckAuthHandler;
 import org.jetbrains.annotations.NotNull;
@@ -25,8 +24,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * Test V1 Server and V2 Client compatibility (client auto-downgrade)

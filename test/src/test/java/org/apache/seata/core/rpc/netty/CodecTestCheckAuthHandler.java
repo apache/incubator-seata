@@ -35,6 +35,4 @@ public class CodecTestCheckAuthHandler extends DefaultCheckAuthHandler {
         }
         return super.regTransactionManagerCheckAuth(request);
     }
-
-
 }

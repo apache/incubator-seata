@@ -17,7 +17,6 @@
 package org.apache.seata.core.rpc.netty.multiversion;
 
 import org.apache.seata.common.util.StringUtils;
-import org.apache.seata.core.protocol.RegisterTMRequest;
 import org.apache.seata.core.protocol.RegisterTMResponse;
 import org.apache.seata.core.rpc.netty.CodecTestCheckAuthHandler;
 import org.jetbrains.annotations.NotNull;
@@ -60,6 +59,5 @@ public class S2C1Test extends MultiVersionCompatibilityTest {
         connectV1Client("127.0.0.1", port, 3000);
 
         return doSendRegister(extraData);
-
     }
 }
