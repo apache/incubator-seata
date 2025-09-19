@@ -54,9 +54,7 @@ public class AbstractIdentifyResponseCodecV2 extends AbstractResultMessageCodec 
     @Override
     public <T> void decode(T t, ByteBuffer in) {
         AbstractIdentifyResponse abstractIdentifyResponse = (AbstractIdentifyResponse) t;
-        if (Version.isAboveOrEqualV2(abstractIdentifyResponse.getVersion())) {
-            super.decode(t, in);
-        }
+        super.decode(t, in);
         abstractIdentifyResponse.setIdentified(in.get() == 1);
         short len = in.getShort();
         if (len <= 0) {
