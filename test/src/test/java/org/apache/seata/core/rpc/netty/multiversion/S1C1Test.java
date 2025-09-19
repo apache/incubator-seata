@@ -17,7 +17,6 @@
 package org.apache.seata.core.rpc.netty.multiversion;
 
 import org.apache.seata.common.util.StringUtils;
-import org.apache.seata.core.protocol.RegisterTMRequest;
 import org.apache.seata.core.protocol.RegisterTMResponse;
 import org.apache.seata.core.rpc.netty.CodecTestCheckAuthHandler;
 import org.jetbrains.annotations.NotNull;

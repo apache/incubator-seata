@@ -31,7 +31,6 @@ import org.apache.seata.core.protocol.ProtocolConstants;
 import org.apache.seata.core.protocol.RegisterTMRequest;
 import org.apache.seata.core.protocol.RegisterTMResponse;
 import org.apache.seata.core.protocol.RpcMessage;
-import org.apache.seata.core.rpc.netty.MultiProtocolDecoder;
 import org.apache.seata.core.rpc.netty.MultiProtocolDecoderTest;
 import org.apache.seata.core.rpc.netty.TestClientHandler;
 import org.apache.seata.core.rpc.netty.TestServerHandler;

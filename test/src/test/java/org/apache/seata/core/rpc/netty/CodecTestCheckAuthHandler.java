@@ -30,7 +30,7 @@ public class CodecTestCheckAuthHandler extends DefaultCheckAuthHandler {
 
     @Override
     public boolean regTransactionManagerCheckAuth(RegisterTMRequest request) {
-        if(CODEC_TEST_REG_ERROR.equals(request.getExtraData())){
+        if (CODEC_TEST_REG_ERROR.equals(request.getExtraData())) {
             return false;
         }
         return super.regTransactionManagerCheckAuth(request);

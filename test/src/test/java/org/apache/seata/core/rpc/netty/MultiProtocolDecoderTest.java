@@ -141,7 +141,7 @@ public class MultiProtocolDecoderTest {
     public MultiProtocolDecoder createMultiProtocolDecoder(byte currentVersion) {
         return new MultiProtocolDecoder(currentVersion, new TestServerHandler());
     }
-    
+
     public MultiProtocolDecoder createMultiProtocolDecoder(byte currentVersion, ChannelHandler... handlers) {
         return new MultiProtocolDecoder(currentVersion, handlers);
     }

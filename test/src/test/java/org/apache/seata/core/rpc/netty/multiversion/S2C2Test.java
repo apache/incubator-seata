@@ -40,7 +40,6 @@ public class S2C2Test extends MultiVersionCompatibilityTest {
     public void testV2ClientToV2ServerSuccess() throws Exception {
         RegisterTMResponse tmResponse = doSendRegister(8201, null);
         Assertions.assertTrue(tmResponse.isIdentified(), "Should be successfully identified");
-        
     }
 
     /**
