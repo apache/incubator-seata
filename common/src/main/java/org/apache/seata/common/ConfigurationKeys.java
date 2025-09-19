@@ -1280,4 +1280,14 @@ public interface ConfigurationKeys {
      * The constant RATE_LIMIT_BUCKET_TOKEN_INITIAL_NUM.
      */
     String RATE_LIMIT_BUCKET_TOKEN_INITIAL_NUM = RATE_LIMIT_PREFIX + ".bucketTokenInitialNum";
+
+    /**
+     * The constant JSON_PREFIX.
+     */
+    String JSON_PARSER_PREFIX = "jsonParser";
+
+    /**
+     * The constant JSON_PARSER_TYPE
+     */
+    String JSON_PARSER_TYPE = JSON_PARSER_PREFIX + ".type";
 }
