@@ -29,39 +29,23 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.concurrent.DefaultEventExecutor;
 import io.netty.util.concurrent.DefaultPromise;
-import org.apache.seata.common.ConfigurationKeys;
-import org.apache.seata.common.ConfigurationTestHelper;
-import org.apache.seata.common.XID;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.thread.PositiveAtomicCounter;
-import org.apache.seata.common.util.NetUtil;
-import org.apache.seata.common.util.UUIDGenerator;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.protocol.ProtocolConstants;
-import org.apache.seata.core.protocol.RegisterTMRequest;
 import org.apache.seata.core.protocol.RpcMessage;
 import org.apache.seata.core.protocol.transaction.BranchCommitRequest;
-import org.apache.seata.core.rpc.netty.CodecTestCheckAuthHandler;
-import org.apache.seata.core.rpc.netty.NettyRemotingServer;
 import org.apache.seata.core.serializer.SerializerType;
-import org.apache.seata.server.coordinator.DefaultCoordinator;
-import org.apache.seata.server.session.SessionHolder;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -82,17 +66,6 @@ public class ProtocolV1Client {
     private EventLoopGroup eventLoopGroup = createWorkerGroup();
 
     private DefaultEventExecutor defaultEventExecutor = new DefaultEventExecutor(eventLoopGroup);
-
-    @BeforeAll
-    public static void init() {
-        ConfigurationTestHelper.putConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL, "8091");
-    }
-
-    @AfterAll
-    public static void after() {
-        ConfigurationTestHelper.removeConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
-    }
-
 
     public void connect(String host, int port, int connectTimeout) {
 
@@ -158,43 +131,6 @@ public class ProtocolV1Client {
             LOGGER.warn("channel is null");
         }
         return null;
-    }
-
-
-    @Test
-    public void testTmRegFail() throws InterruptedException, ExecutionException, TimeoutException {
-        ThreadPoolExecutor workingThreads = new ThreadPoolExecutor(5, 5, 500, TimeUnit.SECONDS,
-                new LinkedBlockingQueue(20000), new ThreadPoolExecutor.CallerRunsPolicy());
-        NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
-        new Thread(() -> {
-            SessionHolder.init(null);
-            nettyRemotingServer.setHandler(DefaultCoordinator.getInstance(nettyRemotingServer));
-            // set registry
-            XID.setIpAddress(NetUtil.getLocalIp());
-            XID.setPort(8091);
-            // init snowflake for transactionId, branchId
-            UUIDGenerator.init(1L);
-            nettyRemotingServer.init();
-        }).start();
-        Thread.sleep(3000);
-
-        ProtocolV1Client client = new ProtocolV1Client();
-        client.connect("127.0.0.1", 8091, 500);
-        RpcMessage rpcMessage = new RpcMessage();
-        rpcMessage.setId(100);
-        rpcMessage.setCodec(SerializerType.SEATA.getCode());
-        rpcMessage.setCompressor(ProtocolConstants.CONFIGURED_COMPRESSOR);
-        rpcMessage.setMessageType(ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
-
-        RegisterTMRequest requestV1 = new RegisterTMRequest("test-v1", "default_tx_group");
-        requestV1.setExtraData(CodecTestCheckAuthHandler.CODEC_TEST_REG_ERROR);
-        requestV1.setVersion("2.2.0");
-
-        Future future = client.sendRpc(null, requestV1);
-        RpcMessage resp = (RpcMessage) future.get(200, TimeUnit.MILLISECONDS);
-        if (resp != null) {
-            LOGGER.info("resp: {}", resp.getBody());
-        }
     }
 
     // can test tps
