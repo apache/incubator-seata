@@ -130,7 +130,10 @@ public class MultiProtocolDecoder extends LengthFieldBasedFrameDecoder {
                 // Ensure version is within supported range
                 if (version > maxCurrentVersion) {
                     version = maxCurrentVersion;
-                    LOGGER.error("Detected version {} is greater than max supported version {}, using max supported version.", version, maxCurrentVersion);
+                    LOGGER.error(
+                            "Detected version {} is greater than max supported version {}, using max supported version.",
+                            version,
+                            maxCurrentVersion);
                 }
                 ProtocolDecoder decoder = protocolDecoderMap.get(version);
                 ProtocolEncoder encoder = protocolEncoderMap.get(version);
