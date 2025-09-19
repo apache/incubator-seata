@@ -139,7 +139,6 @@ public class NettyClientBootstrap implements RemotingBootstrap {
             }
         }
 
-
         bootstrap.handler(new ChannelInitializer<SocketChannel>() {
             @Override
             public void initChannel(SocketChannel ch) {

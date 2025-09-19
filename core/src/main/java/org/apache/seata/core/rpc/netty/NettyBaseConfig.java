@@ -71,7 +71,6 @@ public class NettyBaseConfig {
      */
     protected static final Class<? extends Channel> CLIENT_CHANNEL_CLAZZ;
 
-
     private static final int DEFAULT_WRITE_IDLE_SECONDS = 5;
 
     private static final int READIDLE_BASE_WRITEIDLE = 3;

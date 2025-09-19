@@ -171,7 +171,6 @@ public class NettyClientConfig extends NettyBaseConfig {
         return clientChannelClazz;
     }
 
-
     /**
      * Gets per host max conn.
      *
