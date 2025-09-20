@@ -100,18 +100,9 @@ public class NettyBaseConfig {
             WORKER_THREAD_SIZE = WorkThreadMode.Default.getValue();
         }
 
-        if (PlatformDependent.isWindows() || PlatformDependent.isOsx()) {
-            SERVER_CHANNEL_CLAZZ = NioServerSocketChannel.class;
-            CLIENT_CHANNEL_CLAZZ = NioSocketChannel.class;
-        } else {
-            if (Epoll.isAvailable()) {
-                SERVER_CHANNEL_CLAZZ = EpollServerSocketChannel.class;
-                CLIENT_CHANNEL_CLAZZ = EpollSocketChannel.class;
-            } else {
-                SERVER_CHANNEL_CLAZZ = NioServerSocketChannel.class;
-                CLIENT_CHANNEL_CLAZZ = NioSocketChannel.class;
-            }
-        }
+        boolean useEpoll = !PlatformDependent.isWindows() && !PlatformDependent.isOsx() && Epoll.isAvailable();
+        SERVER_CHANNEL_CLAZZ = useEpoll ? EpollServerSocketChannel.class : NioServerSocketChannel.class;
+        CLIENT_CHANNEL_CLAZZ = useEpoll ? EpollSocketChannel.class : NioSocketChannel.class;
 
         boolean enableHeartbeat = CONFIG.getBoolean(ConfigurationKeys.TRANSPORT_HEARTBEAT, DEFAULT_TRANSPORT_HEARTBEAT);
         if (enableHeartbeat) {
