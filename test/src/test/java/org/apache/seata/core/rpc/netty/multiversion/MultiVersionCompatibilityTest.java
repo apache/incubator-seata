@@ -120,7 +120,8 @@ public abstract class MultiVersionCompatibilityTest {
                         ChannelPipeline pipeline = ch.pipeline();
                         // Simulate V1 server with forced V1 version in MultiProtocolDecoder
                         pipeline.addLast(new IdleStateHandler(0, 0, 30));
-                        pipeline.addLast(decoderTestHelper.createMultiProtocolDecoder(version1, createTestServerHandler()));
+                        pipeline.addLast(
+                                decoderTestHelper.createMultiProtocolDecoder(version1, createTestServerHandler()));
                     }
                 });
 
@@ -161,7 +162,7 @@ public abstract class MultiVersionCompatibilityTest {
             clientChannel.writeAndFlush(rpcMessage);
         }
     }
-    
+
     /**
      * Build RpcMessage as real clients do
      */
@@ -174,9 +175,9 @@ public abstract class MultiVersionCompatibilityTest {
         rpcMessage.setBody(msg);
         return rpcMessage;
     }
-    
+
     private static final AtomicInteger MESSAGE_ID_GENERATOR = new AtomicInteger(0);
-    
+
     private int getNextMessageId() {
         return MESSAGE_ID_GENERATOR.incrementAndGet();
     }
