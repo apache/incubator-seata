@@ -42,6 +42,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -92,7 +93,6 @@ public abstract class MultiVersionCompatibilityTest {
         clientGroup.shutdownGracefully().sync();
     }
 
-
     protected void startV1Server(int port) throws InterruptedException {
         startServerByVersion(ProtocolConstants.VERSION_1, port);
     }
@@ -111,7 +111,8 @@ public abstract class MultiVersionCompatibilityTest {
 
     private void startServerByVersion(byte version1, int port) throws InterruptedException {
         ServerBootstrap serverBootstrap = new ServerBootstrap();
-        serverBootstrap.group(bossGroup, workerGroup)
+        serverBootstrap
+                .group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel.class)
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override

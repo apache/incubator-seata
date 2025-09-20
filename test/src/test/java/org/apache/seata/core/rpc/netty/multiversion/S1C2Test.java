@@ -19,7 +19,6 @@ package org.apache.seata.core.rpc.netty.multiversion;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.core.protocol.RegisterTMResponse;
 import org.apache.seata.core.rpc.netty.CodecTestCheckAuthHandler;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -51,7 +50,6 @@ public class S1C2Test extends MultiVersionCompatibilityTest {
         Assertions.assertTrue(StringUtils.isBlank(tmResponse.getMsg()), "Error message should not be present");
     }
 
-    @NotNull
     private RegisterTMResponse doSendRegister(int port, String extraData) throws InterruptedException {
         startV1Server(port);
         connectV2Client("127.0.0.1", port, 3000);
