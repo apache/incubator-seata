@@ -66,23 +66,20 @@ class NettyClientBootstrapTest {
     @Test
     void testStartWithSharedEventLoopAndChannelSelection() {
         when(nettyClientConfig.getEnableClientSharedEventLoop()).thenReturn(true);
-        when(nettyClientConfig.getClientChannelClazz())
-                .thenAnswer(invocation -> {
-                    if (PlatformDependent.isWindows() || PlatformDependent.isOsx()) {
-                        return NioSocketChannel.class;
-                    } else if (Epoll.isAvailable()) {
-                        return EpollSocketChannel.class;
-                    } else {
-                        return NioSocketChannel.class;
-                    }
-                });
-
+        when(nettyClientConfig.getClientChannelClazz()).thenAnswer(invocation -> {
+            if (PlatformDependent.isWindows() || PlatformDependent.isOsx()) {
+                return NioSocketChannel.class;
+            } else if (Epoll.isAvailable()) {
+                return EpollSocketChannel.class;
+            } else {
+                return NioSocketChannel.class;
+            }
+        });
 
         NettyClientBootstrap tmNettyClientBootstrap =
                 new NettyClientBootstrap(nettyClientConfig, NettyPoolKey.TransactionRole.TMROLE);
         tmNettyClientBootstrap.start();
     }
-
 
     private EventLoopGroup getEventLoopGroupWorker(NettyClientBootstrap bootstrap) {
         try {
