@@ -1,5 +1,53 @@
 /*
- * Copyright 2024-2025 the original author or authors.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*
+ * ------------------------------------------------------------------------
+ * This file contains code originally from the [Model Context Protocol Java SDK],
+ * which is licensed under the MIT License.
+ *
+ * Modifications made by [Seata]:
+ *   - Adapted code from Java 17 features to Java 8 compatible syntax
+ *
+ * The original MIT license text is reproduced below:
+ * ------------------------------------------------------------------------
+ */
+
+/*
+ * MIT License
+ * Copyright (c) [Year] the original author or authors.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
 package io.modelcontextprotocol.spec;
@@ -101,10 +149,7 @@ public class McpServerSession implements McpLoggableSession {
      * received.
      * @param requestHandlers map of request handlers to use
      * @param notificationHandlers map of notification handlers to use
-     * @deprecated Use
-     * {@link #McpServerSession(String, Duration, McpServerTransport, McpInitRequestHandler, Map, Map)}
      */
-    @Deprecated
     public McpServerSession(
             String id,
             Duration requestTimeout,
@@ -141,7 +186,6 @@ public class McpServerSession implements McpLoggableSession {
     /**
      * Called upon successful initialization sequence between the client and the server
      * with the client capabilities and information.
-     *
      * <a href=
      * "https://github.com/modelcontextprotocol/specification/blob/main/docs/specification/basic/lifecycle.md#initialization">Initialization
      * Spec</a>
@@ -213,7 +257,6 @@ public class McpServerSession implements McpLoggableSession {
      */
     public Mono<Void> handle(McpSchema.JSONRPCMessage message) {
         return Mono.defer(() -> {
-            // TODO handle errors for communication to without initialization happening
             // first
             if (message instanceof McpSchema.JSONRPCResponse) {
                 McpSchema.JSONRPCResponse response = (McpSchema.JSONRPCResponse) message;
@@ -236,16 +279,13 @@ public class McpServerSession implements McpLoggableSession {
                                     null,
                                     new McpSchema.JSONRPCResponse.JSONRPCError(
                                             McpSchema.ErrorCodes.INTERNAL_ERROR, error.getMessage(), null));
-                            // TODO: Should the error go to SSE or back as POST return?
                             return this.transport.sendMessage(errorResponse).then(Mono.empty());
                         })
                         .flatMap(this.transport::sendMessage);
             } else if (message instanceof McpSchema.JSONRPCNotification) {
                 McpSchema.JSONRPCNotification notification = (McpSchema.JSONRPCNotification) message;
-                // TODO handle errors for communication to without initialization
                 // happening first
                 logger.debug("Received notification: {}", notification);
-                // TODO: in case of error, should the POST request be signalled?
                 return handleIncomingNotification(notification)
                         .doOnError(error -> logger.error("Error handling notification: {}", error.getMessage()));
             } else {
@@ -264,7 +304,6 @@ public class McpServerSession implements McpLoggableSession {
         return Mono.defer(() -> {
             Mono<?> resultMono;
             if (McpSchema.METHOD_INITIALIZE.equals(request.getMethod())) {
-                // TODO handle situation where already initialized!
                 McpSchema.InitializeRequest initializeRequest = transport.unmarshalFrom(
                         request.getParams(), new TypeReference<McpSchema.InitializeRequest>() {});
 
@@ -272,7 +311,6 @@ public class McpServerSession implements McpLoggableSession {
                 this.init(initializeRequest.getCapabilities(), initializeRequest.getClientInfo());
                 resultMono = this.initRequestHandler.handle(initializeRequest);
             } else {
-                // TODO handle errors for communication to this session without
                 // initialization happening first
                 McpRequestHandler<?> handler = this.requestHandlers.get(request.getMethod());
                 if (handler == null) {
@@ -312,8 +350,6 @@ public class McpServerSession implements McpLoggableSession {
         return Mono.defer(() -> {
             if (McpSchema.METHOD_NOTIFICATION_INITIALIZED.equals(notification.getMethod())) {
                 this.state.lazySet(STATE_INITIALIZED);
-                // FIXME: The session ID passed here is not the same as the one in the
-                // legacy SSE transport.
                 exchangeSink.tryEmitValue(new McpAsyncServerExchange(
                         this.id, this, clientCapabilities.get(), clientInfo.get(), McpTransportContext.EMPTY));
             }
@@ -377,22 +413,17 @@ public class McpServerSession implements McpLoggableSession {
 
     @Override
     public Mono<Void> closeGracefully() {
-        // TODO: clear pendingResponses and emit errors?
         return this.transport.closeGracefully();
     }
 
     @Override
     public void close() {
-        // TODO: clear pendingResponses and emit errors?
         this.transport.close();
     }
 
     /**
      * Request handler for the initialization request.
-     *
-     * @deprecated Use {@link McpInitRequestHandler}
      */
-    @Deprecated
     public interface InitRequestHandler {
 
         /**
@@ -417,10 +448,7 @@ public class McpServerSession implements McpLoggableSession {
 
     /**
      * A handler for client-initiated notifications.
-     *
-     * @deprecated Use {@link McpNotificationHandler}
      */
-    @Deprecated
     public interface NotificationHandler {
 
         /**
@@ -438,9 +466,7 @@ public class McpServerSession implements McpLoggableSession {
      *
      * @param <T> the type of the response that is expected as a result of handling the
      * request.
-     * @deprecated Use {@link McpRequestHandler}
      */
-    @Deprecated
     public interface RequestHandler<T> {
 
         /**
