@@ -25,8 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.TimeUnit;
-
 /**
  * Test V1 Server and V1 Client compatibility
  */
@@ -42,7 +40,6 @@ public class S1C1Test extends MultiVersionCompatibilityTest {
     public void testV1ClientToV1ServerSuccess() throws Exception {
         RegisterTMResponse tmResponse = doSendRegister(8231, null);
         Assertions.assertTrue(tmResponse.isIdentified(), "Should be successfully identified");
-        
     }
 
     /**
@@ -59,7 +56,6 @@ public class S1C1Test extends MultiVersionCompatibilityTest {
     private RegisterTMResponse doSendRegister(int port, String extraData) throws InterruptedException {
         startV1Server(port);
         connectV1Client("127.0.0.1", port, 3000);
-
         return doSendRegister(extraData);
     }
 }

@@ -36,7 +36,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.lang.management.ManagementFactory;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -232,7 +231,6 @@ public class TmNettyClientTest extends AbstractServerTest {
         LOGGER.info("resp: {}", response);
         Assertions.assertFalse(response.isIdentified());
         Assertions.assertNotNull(response.isIdentified());
-
         nettyRemotingServer.destroy();
         tmNettyRemotingClient.destroy();
     }

@@ -59,5 +59,4 @@ public class S2C2Test extends MultiVersionCompatibilityTest {
 
         return doSendRegister(extraData);
     }
-
 }

@@ -42,7 +42,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -53,7 +52,6 @@ import java.util.concurrent.atomic.AtomicReference;
  * If maven environment has dependency issues, run these commands first:
  * 1. chmod -R u+rwx ./*
  * 2. mvn -Prelease-seata -Dmaven.test.skip=true clean install -U
- * 
  * This provides common utilities for testing multi-version protocol compatibility
  * and simulates realistic server and client construction flows.
  */
@@ -70,7 +68,6 @@ public abstract class MultiVersionCompatibilityTest {
     protected final AtomicReference<Object> requestRef = new AtomicReference<>();
     protected final AtomicReference<Object> responseRef = new AtomicReference<>();
     protected final CountDownLatch responseLatch = new CountDownLatch(1);
-    
     private final MultiProtocolDecoderTest decoderTestHelper = new MultiProtocolDecoderTest();
 
     @BeforeEach

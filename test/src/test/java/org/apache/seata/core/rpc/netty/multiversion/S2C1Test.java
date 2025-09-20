@@ -57,7 +57,6 @@ public class S2C1Test extends MultiVersionCompatibilityTest {
     private RegisterTMResponse doSendRegister(int port, String extraData) throws InterruptedException {
         startV2Server(port);
         connectV1Client("127.0.0.1", port, 3000);
-
         return doSendRegister(extraData);
     }
 }
