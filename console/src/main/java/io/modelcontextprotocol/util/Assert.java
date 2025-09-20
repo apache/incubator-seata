@@ -54,10 +54,10 @@ import reactor.util.annotation.Nullable;
 import java.util.Collection;
 
 /*
-  Assertion utility class that assists in validating arguments.
+ Assertion utility class that assists in validating arguments.
 
-  @author Christian Tzolov
- */
+ @author Christian Tzolov
+*/
 
 /**
  * Utility class providing assertion methods for parameter validation.
