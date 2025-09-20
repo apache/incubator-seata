@@ -33,11 +33,11 @@ public class ServerLogTools {
 
     @Tool(
             description =
-                    "This tool is used to fetch log data. The response includes a field `hasMorePages`:\n" +
-                            "- When `hasMorePages = true`, it means there are more pages to fetch, and you must continue calling this tool.\n" +
-                            "- For the next page, increment the parameter `pageNum` by +1 from the previous call.\n" +
-                            "- Continue calling this tool until a response with `hasMorePages = false` is received.\n" +
-                            "- All logs from all pages should be combined into a single list in chronological order. You don’t need to handle pagination logic yourself—just merge the results.\n")
+                    "This tool is used to fetch log data. The response includes a field `hasMorePages`:\n"
+                            + "- When `hasMorePages = true`, it means there are more pages to fetch, and you must continue calling this tool.\n"
+                            + "- For the next page, increment the parameter `pageNum` by +1 from the previous call.\n"
+                            + "- Continue calling this tool until a response with `hasMorePages = false` is received.\n"
+                            + "- All logs from all pages should be combined into a single list in chronological order. You don’t need to handle pagination logic yourself—just merge the results.\n")
     public ServerLogPageVO<String> getServerLogFile(
             @ToolParam(description = "Specify the namespace of the TC node", required = true)
                     NameSpaceDetail nameSpaceDetail,
