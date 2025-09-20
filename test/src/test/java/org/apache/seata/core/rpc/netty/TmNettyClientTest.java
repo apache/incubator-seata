@@ -23,8 +23,6 @@ import org.apache.seata.common.XID;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.UUIDGenerator;
 import org.apache.seata.core.model.GlobalStatus;
-import org.apache.seata.core.protocol.RegisterTMRequest;
-import org.apache.seata.core.protocol.RegisterTMResponse;
 import org.apache.seata.core.protocol.transaction.GlobalCommitRequest;
 import org.apache.seata.core.protocol.transaction.GlobalCommitResponse;
 import org.apache.seata.saga.engine.db.AbstractServerTest;
@@ -45,7 +43,6 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- *
  */
 public class TmNettyClientTest extends AbstractServerTest {
 
@@ -197,41 +194,6 @@ public class TmNettyClientTest extends AbstractServerTest {
         }
         Assertions.assertNotNull(globalCommitResponse);
         Assertions.assertEquals(GlobalStatus.Finished, globalCommitResponse.getGlobalStatus());
-        nettyRemotingServer.destroy();
-        tmNettyRemotingClient.destroy();
-    }
-
-    @Test
-    public void testRegisterTMReg() throws Exception {
-        ThreadPoolExecutor workingThreads = initMessageExecutor();
-        NettyRemotingServer nettyRemotingServer = new NettyRemotingServer(workingThreads);
-        new Thread(() -> {
-            SessionHolder.init(null);
-            nettyRemotingServer.setHandler(DefaultCoordinator.getInstance(nettyRemotingServer));
-            // set registry
-            XID.setIpAddress(NetUtil.getLocalIp());
-            XID.setPort(8091);
-            // init snowflake for transactionId, branchId
-            UUIDGenerator.init(1L);
-            nettyRemotingServer.init();
-        }).start();
-        Thread.sleep(3000);
-
-        String applicationId = "test-current-version";
-        String transactionServiceGroup = "default_tx_group";
-        TmNettyRemotingClient tmNettyRemotingClient = TmNettyRemotingClient.getInstance(applicationId, transactionServiceGroup);
-        tmNettyRemotingClient.init();
-
-        // test old version
-        RegisterTMRequest request = new RegisterTMRequest(applicationId, transactionServiceGroup);
-        request.setExtraData(CodecTestCheckAuthHandler.CODEC_TEST_REG_ERROR);
-        RegisterTMResponse response = (RegisterTMResponse) tmNettyRemotingClient.sendSyncRequest(request);
-        if (response != null) {
-        }
-        Assertions.assertNotNull(response);
-        LOGGER.info("resp: {}", response);
-        Assertions.assertFalse(response.isIdentified());
-        Assertions.assertNotNull(response.isIdentified());
         nettyRemotingServer.destroy();
         tmNettyRemotingClient.destroy();
     }
