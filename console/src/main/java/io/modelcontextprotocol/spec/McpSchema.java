@@ -1,5 +1,54 @@
 /*
- * Copyright 2024-2024 the original author or authors.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*
+ * ------------------------------------------------------------------------
+ * This file contains code originally from the [Model Context Protocol Java SDK],
+ * which is licensed under the MIT License.
+ *
+ * Modifications made by [Seata]:
+ *   - Adapted code from Java 17 features to Java 8 compatible syntax
+ *   - [Optional: record class to static immutable class]
+ *
+ * The original MIT license text is reproduced below:
+ * ------------------------------------------------------------------------
+ */
+
+/*
+ * MIT License
+ * Copyright (c) [Year] the original author or authors.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
 package io.modelcontextprotocol.spec;
@@ -28,9 +77,6 @@ public final class McpSchema {
     private static final Logger logger = LoggerFactory.getLogger(McpSchema.class);
 
     private McpSchema() {}
-
-    @Deprecated
-    public static final String LATEST_PROTOCOL_VERSION = ProtocolVersions.MCP_2025_03_26;
 
     public static final String JSONRPC_VERSION = "2.0";
 
@@ -684,7 +730,6 @@ public final class McpSchema {
      * additional capabilities. These capabilities can be used to extend the functionality
      * of the server, or to provide additional information to the server about the
      * client's capabilities.
-     *
      * experimental WIP
      * roots define the boundaries of where servers can operate within the
      * filesystem, allowing them to understand which directories and files they have
@@ -1173,7 +1218,6 @@ public final class McpSchema {
     /**
      * Optional annotations for the client. The client can use annotations to inform how
      * objects are used or displayed.
-     *
      * audience Describes who the intended customer of this object or data is. It
      * can include multiple entries to indicate content useful for multiple audiences
      * (e.g., `["user", "assistant"]`).
@@ -1917,7 +1961,6 @@ public final class McpSchema {
     /**
      * Sent from the client to request resources/updated notifications from the server
      * whenever a particular resource changes.
-     *
      * uri the URI of the resource to subscribe to. The URI can use any protocol;
      * it is up to the server how to interpret it.
      */
@@ -2364,7 +2407,6 @@ public final class McpSchema {
 
     /**
      * Describes an argument that a prompt can accept.
-     *
      * name The name of the argument.
      * description A human-readable description of the argument.
      * required Whether this argument must be provided.
@@ -2453,10 +2495,8 @@ public final class McpSchema {
 
     /**
      * Describes a message returned as part of a prompt.
-     *
      * This is similar to `SamplingMessage`, but also supports the embedding of resources
      * from the MCP server.
-     *
      * role The sender or recipient of messages and data in a conversation.
      * content The content of the message of type {@link Content}.
      */
@@ -2512,7 +2552,6 @@ public final class McpSchema {
 
     /**
      * The server's response to a prompts/list request from the client.
-     *
      * prompts A list of prompts that the server provides.
      * nextCursor An optional cursor for pagination. If present, indicates there
      * are more prompts available.
@@ -2591,7 +2630,6 @@ public final class McpSchema {
 
     /**
      * Used by the client to get a prompt provided by the server.
-     *
      * name The name of the prompt or prompt template.
      * Arguments to use for templating the prompt.
      */
@@ -2656,7 +2694,6 @@ public final class McpSchema {
 
     /**
      * The server's response to a prompts/get request from the client.
-     *
      * description An optional description for the prompt.
      * messages A list of messages to display as part of the prompt.
      */
@@ -2724,7 +2761,6 @@ public final class McpSchema {
     // ---------------------------
     /**
      * The server's response to a tools/list request from the client.
-     *
      * tools A list of tools that the server provides.
      * nextCursor An optional cursor for pagination. If present, indicates there
      * are more tools available.
@@ -2917,11 +2953,9 @@ public final class McpSchema {
 
     /**
      * Additional properties describing a Tool to clients.
-     *
      * NOTE: all properties in ToolAnnotations are **hints**. They are not guaranteed to
      * provide a faithful description of tool behavior (including descriptive properties
      * like `title`).
-     *
      * Clients should never make tool use decisions based on ToolAnnotations received from
      * untrusted servers.
      */
@@ -3027,7 +3061,6 @@ public final class McpSchema {
      * Represents a tool that the server provides. Tools enable servers to expose
      * executable functionality to the system. Through these tools, you can interact with
      * external systems, perform computations, and take actions in the real world.
-     *
      * name A unique identifier for the tool. This name is used when calling the
      * tool.
      * description A human-readable description of what the tool does. This can be
@@ -3145,48 +3178,23 @@ public final class McpSchema {
             this.meta = meta;
         }
 
-        /**
-         * @deprecated Only exists for backwards-compatibility purposes. Use
-         * {@link Tool#builder()} instead.
-         */
-        @Deprecated
         public Tool(String name, String description, JsonSchema inputSchema, ToolAnnotations annotations) {
             this(name, null, description, inputSchema, null, annotations, null);
         }
 
-        /**
-         * @deprecated Only exists for backwards-compatibility purposes. Use
-         * {@link Tool#builder()} instead.
-         */
-        @Deprecated
         public Tool(String name, String description, String inputSchema) {
             this(name, null, description, parseSchema(inputSchema), null, null, null);
         }
 
-        /**
-         * @deprecated Only exists for backwards-compatibility purposes. Use
-         * {@link Tool#builder()} instead.
-         */
-        @Deprecated
         public Tool(String name, String description, String schema, ToolAnnotations annotations) {
             this(name, null, description, parseSchema(schema), null, annotations, null);
         }
 
-        /**
-         * @deprecated Only exists for backwards-compatibility purposes. Use
-         * {@link Tool#builder()} instead.
-         */
-        @Deprecated
         public Tool(
                 String name, String description, String inputSchema, String outputSchema, ToolAnnotations annotations) {
             this(name, null, description, parseSchema(inputSchema), schemaToMap(outputSchema), annotations, null);
         }
 
-        /**
-         * @deprecated Only exists for backwards-compatibility purposes. Use
-         * {@link Tool#builder()} instead.
-         */
-        @Deprecated
         public Tool(
                 String name,
                 String title,
@@ -3287,7 +3295,6 @@ public final class McpSchema {
 
     /**
      * Used by the client to call a tool provided by the server.
-     *
      * name The name of the tool to call. This must match a tool name from
      * tools/list.
      * Arguments to pass to the tool. These must conform to the tool's
@@ -3412,7 +3419,6 @@ public final class McpSchema {
 
     /**
      * The server's response to a tools/call request from the client.
-     *
      * content A list of content items representing the tool's output. Each item can be text, an image,
      *                or an embedded resource.
      * isError If true, indicates that the tool execution failed and the content contains error information.
@@ -4710,7 +4716,6 @@ public final class McpSchema {
      * structured log messages to clients. Clients can control logging verbosity by
      * setting minimum log levels, with servers sending notifications containing severity
      * levels, optional logger names, and arbitrary JSON-serializable data.
-     *
      * level The severity levels. The mimimum log level is set by the client.
      * logger The logger that generated the message.
      * data JSON-serializable logging data.
@@ -5462,7 +5467,6 @@ public final class McpSchema {
     // ---------------------------
     /**
      * Represents a root directory or file that the server can operate on.
-     *
      * uri The URI identifying the root. This *must* start with file:// for now.
      * This restriction may be relaxed in future versions of the protocol to allow other
      * URI schemes.
@@ -5524,7 +5528,6 @@ public final class McpSchema {
      * The client's response to a roots/list request from the server. This result contains
      * an array of Root objects, each representing a root directory or file that the
      * server can operate on.
-     *
      * roots An array of Root objects, each representing a root directory or file
      * that the server can operate on.
      */
