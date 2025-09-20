@@ -129,7 +129,8 @@ public abstract class MultiVersionCompatibilityTest {
         serverChannel = future.channel();
     }
 
-    private void connectClientByVersion(MessageToByteEncoder encoder, byte version, String host, int port, int connectTimeout) {
+    private void connectClientByVersion(
+            MessageToByteEncoder encoder, byte version, String host, int port, int connectTimeout) {
         Bootstrap bootstrap = new Bootstrap();
         bootstrap.group(clientGroup).channel(NioSocketChannel.class);
         bootstrap.option(ChannelOption.SO_KEEPALIVE, true);
@@ -207,7 +208,7 @@ public abstract class MultiVersionCompatibilityTest {
     @NotNull
     protected RegisterTMResponse doSendRegister(String extraData) throws InterruptedException {
         RegisterTMRequest request = new RegisterTMRequest("testApp", "testGroup");
-        if(StringUtils.isNotBlank(extraData)){
+        if (StringUtils.isNotBlank(extraData)) {
             request.setExtraData(extraData);
         }
         sendRequest(request);
