@@ -83,23 +83,23 @@ seata:
     dataSource1:
       # Whether this data source is enabled
       enabled: true
-      db-type: mysql
+      dbType: mysql
       driverClassName: com.mysql.cj.jdbc.Driver # Currently, only mysql is supported
-      url: jdbc:mysql://:3306/xb?useSSL=false
+      url: jdbc:mysql://:3306/order1?useSSL=false
       username: root
       password: root
       datasource: druid # Optional connection pool type (druid/hikari/dbcp)
-      min-conn: 5
-      max-conn: 50
-      max-wait: 5000
+      minConn: 5
+      maxConn: 50
+      maxWait: 5000
     dataSource2:
       enabled: true
-      db-type: mysql
+      dbType: mysql
       driverClassName: com.mysql.cj.jdbc.Driver
-      url: jdbc:mysql://:3306/order?useSSL=false
+      url: jdbc:mysql://:3306/order2?useSSL=false
       username: root
       password: root
       datasource: dbcp
-      min-conn: 5
-      max-conn: 50
-      max-wait: 5000
+      minConn: 5
+      maxConn: 50
+      maxWait: 5000
