@@ -127,16 +127,11 @@ public class NettyClientBootstrap implements RemotingBootstrap {
                 .option(ChannelOption.SO_RCVBUF, nettyClientConfig.getClientSocketRcvBufSize());
 
         if (PlatformDependent.isWindows() || PlatformDependent.isOsx()) {
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("client run on MacOS/Windows, fallback to NIO.");
-            }
-            // Use NIO by default, no additional configuration required
-        } else {
-            if (Epoll.isAvailable()) {
-                bootstrap
-                        .option(EpollChannelOption.EPOLL_MODE, EpollMode.EDGE_TRIGGERED)
-                        .option(EpollChannelOption.TCP_QUICKACK, true);
-            }
+            LOGGER.info("client run on MacOS/Windows, fallback to NIO.");
+        } else if (Epoll.isAvailable()) {
+            bootstrap
+                    .option(EpollChannelOption.EPOLL_MODE, EpollMode.EDGE_TRIGGERED)
+                    .option(EpollChannelOption.TCP_QUICKACK, true);
         }
 
         bootstrap.handler(new ChannelInitializer<SocketChannel>() {
