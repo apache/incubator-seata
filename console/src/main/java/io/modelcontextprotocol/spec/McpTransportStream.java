@@ -26,7 +26,7 @@
 
 /*
  * MIT License
- * Copyright (c) [Year] the original author or authors.
+ * Copyright (c) 2025 the original author or authors.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
