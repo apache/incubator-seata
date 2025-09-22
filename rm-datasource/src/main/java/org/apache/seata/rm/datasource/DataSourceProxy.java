@@ -452,4 +452,9 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             LOGGER.error("check mysql version fail error: {}", e.getMessage());
         }
     }
+
+    public void close() throws Exception {
+        // TODO: Need to unregister resource from DefaultResourceManager
+        TableMetaCacheFactory.shutdown(resourceId);
+    }
 }
