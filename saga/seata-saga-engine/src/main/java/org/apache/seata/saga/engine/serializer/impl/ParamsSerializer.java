@@ -21,7 +21,7 @@ import org.apache.seata.json.JsonParserFactory;
 import org.apache.seata.saga.engine.serializer.Serializer;
 
 /**
- * Parameter serializer based on Fastjson
+ * Parameter serializer based on configuration
  *
  */
 public class ParamsSerializer implements Serializer<Object, String> {
