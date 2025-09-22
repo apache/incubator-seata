@@ -68,10 +68,6 @@ public class DateUtils {
         return endTime - startTime > maxDuration;
     }
 
-    public static Long getNowTimeStamp() {
-        return LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-    }
-
     public static Long convertToHourFromTimeStamp(Long timestamp) {
         return timestamp / (60 * 60 * 1000);
     }
