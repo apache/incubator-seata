@@ -336,16 +336,17 @@ public interface DefaultValues {
      */
     String SERVER_DEFAULT_STORE_MODE = "file";
 
-    /**
-     * The constant DEFAULT_SAGA_JSON_PARSER.
-     */
-    String DEFAULT_SAGA_JSON_PARSER = "fastjson";
-
+    // todo swj tcc
     /**
      * The constant DEFAULT_TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER.
      */
     // default tcc business action context json parser
     String DEFAULT_TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER = "fastjson";
+
+    /**
+     * The constant DEFAULT_JSON_PARSER_TYPE
+     */
+    String DEFAULT_JSON_PARSER_TYPE = "fastjson";
 
     /**
      * The constant DEFAULT_SERVER_ENABLE_CHECK_AUTH.

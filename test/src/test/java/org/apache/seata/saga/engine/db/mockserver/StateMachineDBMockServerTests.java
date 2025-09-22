@@ -17,6 +17,8 @@
 package org.apache.seata.saga.engine.db.mockserver;
 
 import org.apache.seata.common.SagaCostPrint;
+import org.apache.seata.json.JsonParser;
+import org.apache.seata.json.JsonParserFactory;
 import org.apache.seata.saga.engine.StateMachineEngine;
 import org.apache.seata.saga.engine.mock.DemoService.Engineer;
 import org.apache.seata.saga.engine.mock.DemoService.People;
@@ -24,8 +26,6 @@ import org.apache.seata.saga.rm.StateMachineEngineHolder;
 import org.apache.seata.saga.statelang.domain.DomainConstants;
 import org.apache.seata.saga.statelang.domain.ExecutionStatus;
 import org.apache.seata.saga.statelang.domain.StateMachineInstance;
-import org.apache.seata.saga.statelang.parser.JsonParser;
-import org.apache.seata.saga.statelang.parser.JsonParserFactory;
 import org.apache.seata.saga.statelang.parser.utils.DesignerJsonTransformer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -315,7 +315,7 @@ public class StateMachineDBMockServerTests {
     public void testForwardSubStateMachineWithLayout() throws Exception {
         String stateMachineName = "simpleStateMachineWithCompensationAndSubMachine_layout";
 
-        JsonParser jsonParser = JsonParserFactory.getJsonParser("jackson");
+        JsonParser jsonParser = JsonParserFactory.getInstance();
 
         StateMachineInstance inst0 = SagaCostPrint.executeAndPrint("5-20", () -> {
             Map<String, Object> paramMap = new HashMap<>(2);
@@ -375,7 +375,7 @@ public class StateMachineDBMockServerTests {
     public void testCompensateSubStateMachineWithLayout() throws Exception {
         String stateMachineName = "simpleStateMachineWithCompensationAndSubMachine_layout";
 
-        JsonParser jsonParser = JsonParserFactory.getJsonParser("jackson");
+        JsonParser jsonParser = JsonParserFactory.getInstance();
 
         Map<String, Object> paramMap = new HashMap<>(3);
         paramMap.put("a", 2);

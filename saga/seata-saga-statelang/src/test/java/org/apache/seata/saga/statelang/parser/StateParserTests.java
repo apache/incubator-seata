@@ -17,6 +17,8 @@
 package org.apache.seata.saga.statelang.parser;
 
 import org.apache.seata.common.util.BeanUtils;
+import org.apache.seata.json.JsonParser;
+import org.apache.seata.json.JsonParserFactory;
 import org.apache.seata.saga.statelang.domain.StateMachine;
 import org.apache.seata.saga.statelang.domain.StateMachineInstance;
 import org.apache.seata.saga.statelang.domain.impl.StateMachineInstanceImpl;
@@ -42,17 +44,13 @@ public class StateParserTests {
         InputStream inputStream = getInputStreamByPath("statelang/simple_statemachine.json");
         String json = IOUtils.toString(inputStream, "UTF-8");
         StateMachine stateMachine =
-                StateMachineParserFactory.getStateMachineParser(null).parse(json);
+                StateMachineParserFactory.getStateMachineParser().parse(json);
         stateMachine.setGmtCreate(new Date());
         Assertions.assertNotNull(stateMachine);
 
-        JsonParser jsonParser = JsonParserFactory.getJsonParser("jackson");
+        JsonParser jsonParser = JsonParserFactory.getInstance();
         String outputJson = jsonParser.toJsonString(stateMachine, true);
         System.out.println(outputJson);
-
-        JsonParser fastjsonParser = JsonParserFactory.getJsonParser("fastjson");
-        String fastjsonOutputJson = fastjsonParser.toJsonString(stateMachine, true);
-        System.out.println(fastjsonOutputJson);
 
         Assertions.assertEquals("simpleTestStateMachine", stateMachine.getName());
         Assertions.assertFalse(stateMachine.getStates().isEmpty());
@@ -62,20 +60,12 @@ public class StateParserTests {
     public void testDesignerJsonTransformer() throws IOException {
         InputStream inputStream = getInputStreamByPath("statelang/simple_statemachine_with_layout.json");
         String json = IOUtils.toString(inputStream, "UTF-8");
-        JsonParser jsonParser = JsonParserFactory.getJsonParser("jackson");
+        JsonParser jsonParser = JsonParserFactory.getInstance();
         Map<String, Object> parsedObj = DesignerJsonTransformer.toStandardJson(jsonParser.parse(json, Map.class, true));
         Assertions.assertNotNull(parsedObj);
 
         String outputJson = jsonParser.toJsonString(parsedObj, true);
         System.out.println(outputJson);
-
-        JsonParser fastjsonParser = JsonParserFactory.getJsonParser("fastjson");
-        Map<String, Object> fastjsonParsedObj =
-                DesignerJsonTransformer.toStandardJson(fastjsonParser.parse(json, Map.class, true));
-        Assertions.assertNotNull(fastjsonParsedObj);
-
-        String fastjsonOutputJson = fastjsonParser.toJsonString(fastjsonParsedObj, true);
-        System.out.println(fastjsonOutputJson);
     }
 
     @Test
@@ -83,7 +73,7 @@ public class StateParserTests {
         InputStream inputStream = getInputStreamByPath("statelang/simple_statemachine_with_single_infinite_loop.json");
         String json = IOUtils.toString(inputStream, "UTF-8");
         Throwable e = Assertions.assertThrows(ValidationException.class, () -> {
-            StateMachineParserFactory.getStateMachineParser(null).parse(json);
+            StateMachineParserFactory.getStateMachineParser().parse(json);
         });
         System.out.println(e.getMessage());
         Assertions.assertTrue(e.getMessage().endsWith("without outgoing flow to end"));
@@ -95,7 +85,7 @@ public class StateParserTests {
                 getInputStreamByPath("statelang/simple_statemachine_with_multiple_infinite_loop.json");
         String json = IOUtils.toString(inputStream, "UTF-8");
         Throwable e = Assertions.assertThrows(ValidationException.class, () -> {
-            StateMachineParserFactory.getStateMachineParser(null).parse(json);
+            StateMachineParserFactory.getStateMachineParser().parse(json);
         });
         System.out.println(e.getMessage());
         Assertions.assertTrue(e.getMessage().endsWith("without outgoing flow to end"));
@@ -106,7 +96,7 @@ public class StateParserTests {
         InputStream inputStream = getInputStreamByPath("statelang/simple_statemachine_with_non_existed_name.json");
         String json = IOUtils.toString(inputStream, "UTF-8");
         Throwable e = Assertions.assertThrows(ValidationException.class, () -> {
-            StateMachineParserFactory.getStateMachineParser(null).parse(json);
+            StateMachineParserFactory.getStateMachineParser().parse(json);
         });
         System.out.println(e.getMessage());
         Assertions.assertTrue(e.getMessage().endsWith("does not exist"));
@@ -117,7 +107,7 @@ public class StateParserTests {
         InputStream inputStream = getInputStreamByPath("statelang/simple_statemachine_with_recursive_sub_machine.json");
         String json = IOUtils.toString(inputStream, "UTF-8");
         Throwable e = Assertions.assertThrows(ValidationException.class, () -> {
-            StateMachineParserFactory.getStateMachineParser(null).parse(json);
+            StateMachineParserFactory.getStateMachineParser().parse(json);
         });
         Assertions.assertTrue(e.getMessage().endsWith("call itself"));
     }
@@ -127,7 +117,7 @@ public class StateParserTests {
         InputStream inputStream = getInputStreamByPath("statelang/simple_statemachine_with_layout.json");
         String json = IOUtils.toString(inputStream, "UTF-8");
         StateMachine stateMachine =
-                StateMachineParserFactory.getStateMachineParser(null).parse(json);
+                StateMachineParserFactory.getStateMachineParser().parse(json);
         Map<String, String> machineMap = BeanUtils.objectToMap(stateMachine);
         StateMachineInstance instance =
                 (StateMachineInstance) BeanUtils.mapToObject(machineMap, StateMachineInstanceImpl.class);
@@ -135,7 +125,7 @@ public class StateParserTests {
         context.put("test", "test");
         stateMachine.setContent(json);
         instance.setStateMachine(stateMachine);
-        JsonParser jsonParser = JsonParserFactory.getJsonParser("fastjson");
+        JsonParser jsonParser = JsonParserFactory.getInstance();
         String graphJson = DesignerJsonTransformer.generateTracingGraphJson(instance, jsonParser);
         Assertions.assertNotNull(graphJson);
     }

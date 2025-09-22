@@ -18,6 +18,8 @@ package org.apache.seata.saga.engine.invoker.impl;
 
 import org.apache.seata.common.exception.FrameworkErrorCode;
 import org.apache.seata.common.util.CollectionUtils;
+import org.apache.seata.json.JsonParser;
+import org.apache.seata.json.JsonParserFactory;
 import org.apache.seata.saga.engine.exception.EngineExecutionException;
 import org.apache.seata.saga.engine.invoker.ServiceInvoker;
 import org.apache.seata.saga.engine.pcext.handlers.ServiceTaskStateHandler;
@@ -25,8 +27,6 @@ import org.apache.seata.saga.engine.utils.ExceptionUtils;
 import org.apache.seata.saga.statelang.domain.ServiceTaskState;
 import org.apache.seata.saga.statelang.domain.TaskState.Retry;
 import org.apache.seata.saga.statelang.domain.impl.ServiceTaskStateImpl;
-import org.apache.seata.saga.statelang.parser.JsonParser;
-import org.apache.seata.saga.statelang.parser.JsonParserFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -55,7 +55,6 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
 
     private ApplicationContext applicationContext;
     private ThreadPoolExecutor threadPoolExecutor;
-    private String sagaJsonParser;
 
     @Override
     public Object invoke(ServiceTaskState serviceTaskState, Object... input) throws Throwable {
@@ -311,10 +310,7 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
         } else if (isPrimitive(paramType)) {
             return value;
         } else {
-            JsonParser jsonParser = JsonParserFactory.getJsonParser(getSagaJsonParser());
-            if (jsonParser == null) {
-                throw new RuntimeException("Cannot get JsonParser by name : " + getSagaJsonParser());
-            }
+            JsonParser jsonParser = JsonParserFactory.getInstance();
             String jsonValue = jsonParser.toJsonString(value, true, false);
 
             // compatible history autoType serialize json
@@ -366,13 +362,5 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
         } else {
             return null;
         }
-    }
-
-    public String getSagaJsonParser() {
-        return sagaJsonParser;
-    }
-
-    public void setSagaJsonParser(String sagaJsonParser) {
-        this.sagaJsonParser = sagaJsonParser;
     }
 }

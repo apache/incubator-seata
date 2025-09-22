@@ -17,7 +17,8 @@
 package org.apache.seata.saga.statelang.parser.impl;
 
 import org.apache.seata.common.util.StringUtils;
-import org.apache.seata.saga.statelang.domain.DomainConstants;
+import org.apache.seata.json.JsonParser;
+import org.apache.seata.json.JsonParserFactory;
 import org.apache.seata.saga.statelang.domain.RecoverStrategy;
 import org.apache.seata.saga.statelang.domain.State;
 import org.apache.seata.saga.statelang.domain.StateMachine;
@@ -25,8 +26,6 @@ import org.apache.seata.saga.statelang.domain.StateType;
 import org.apache.seata.saga.statelang.domain.impl.AbstractTaskState;
 import org.apache.seata.saga.statelang.domain.impl.BaseState;
 import org.apache.seata.saga.statelang.domain.impl.StateMachineImpl;
-import org.apache.seata.saga.statelang.parser.JsonParser;
-import org.apache.seata.saga.statelang.parser.JsonParserFactory;
 import org.apache.seata.saga.statelang.parser.StateMachineParser;
 import org.apache.seata.saga.statelang.parser.StateParser;
 import org.apache.seata.saga.statelang.parser.StateParserFactory;
@@ -45,23 +44,12 @@ public class StateMachineParserImpl implements StateMachineParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StateMachineParserImpl.class);
 
-    private String jsonParserName = DomainConstants.DEFAULT_JSON_PARSER;
-
     private final StateMachineValidator validator = new StateMachineValidator();
-
-    public StateMachineParserImpl(String jsonParserName) {
-        if (StringUtils.isNotBlank(jsonParserName)) {
-            this.jsonParserName = jsonParserName;
-        }
-    }
 
     @Override
     public StateMachine parse(String json) {
 
-        JsonParser jsonParser = JsonParserFactory.getJsonParser(jsonParserName);
-        if (jsonParser == null) {
-            throw new RuntimeException("Cannot find JsonParer by name: " + jsonParserName);
-        }
+        JsonParser jsonParser = JsonParserFactory.getInstance();
         Map<String, Object> node = jsonParser.parse(json, Map.class, true);
         if (DesignerJsonTransformer.isDesignerJson(node)) {
             node = DesignerJsonTransformer.toStandardJson(node);
@@ -132,13 +120,5 @@ public class StateMachineParserImpl implements StateMachineParser {
 
         validator.validate(stateMachine);
         return stateMachine;
-    }
-
-    public String getJsonParserName() {
-        return jsonParserName;
-    }
-
-    public void setJsonParserName(String jsonParserName) {
-        this.jsonParserName = jsonParserName;
     }
 }

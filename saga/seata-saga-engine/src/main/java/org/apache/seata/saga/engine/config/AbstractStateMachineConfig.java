@@ -67,7 +67,6 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_CLIENT_REPORT_SUCCES
 import static org.apache.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE;
-import static org.apache.seata.common.DefaultValues.DEFAULT_SAGA_JSON_PARSER;
 
 /**
  * Abstract StateMachineConfig
@@ -110,8 +109,6 @@ public abstract class AbstractStateMachineConfig implements StateMachineConfig {
 
     private String charset = "UTF-8";
     private String defaultTenantId = "000001";
-
-    private String sagaJsonParser = DEFAULT_SAGA_JSON_PARSER;
 
     private boolean autoRegisterResources = true;
 
@@ -161,7 +158,6 @@ public abstract class AbstractStateMachineConfig implements StateMachineConfig {
             defaultStateMachineRepository.setCharset(charset);
             defaultStateMachineRepository.setSeqGenerator(seqGenerator);
             defaultStateMachineRepository.setDefaultTenantId(defaultTenantId);
-            defaultStateMachineRepository.setJsonParserName(sagaJsonParser);
             defaultStateMachineRepository.setStateLangStore(stateLangStore);
             this.stateMachineRepository = defaultStateMachineRepository;
         }
@@ -450,20 +446,12 @@ public abstract class AbstractStateMachineConfig implements StateMachineConfig {
         this.defaultTenantId = defaultTenantId;
     }
 
-    public void setSagaJsonParser(String sagaJsonParser) {
-        this.sagaJsonParser = sagaJsonParser;
-    }
-
     public void setAutoRegisterResources(boolean autoRegisterResources) {
         this.autoRegisterResources = autoRegisterResources;
     }
 
     public void setStateMachineDefInputStreamArray(InputStream[] stateMachineDefInputStreamArray) {
         this.stateMachineDefInputStreamArray = stateMachineDefInputStreamArray;
-    }
-
-    public String getSagaJsonParser() {
-        return sagaJsonParser;
     }
 
     public boolean isAutoRegisterResources() {

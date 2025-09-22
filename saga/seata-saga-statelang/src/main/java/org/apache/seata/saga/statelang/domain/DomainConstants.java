@@ -81,6 +81,4 @@ public interface DomainConstants {
     String EXPRESSION_TYPE_EXCEPTION = "Exception";
 
     String SEPERATOR_PARENT_ID = ":";
-
-    String DEFAULT_JSON_PARSER = "fastjson";
 }

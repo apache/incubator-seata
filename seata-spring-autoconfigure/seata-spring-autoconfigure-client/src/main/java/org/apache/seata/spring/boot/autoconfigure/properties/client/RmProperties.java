@@ -28,7 +28,6 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_BRANCH_R
 import static org.apache.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_CLIENT_TABLE_META_CHECK_ENABLE;
-import static org.apache.seata.common.DefaultValues.DEFAULT_SAGA_JSON_PARSER;
 import static org.apache.seata.common.DefaultValues.DEFAULT_TABLE_META_CHECKER_INTERVAL;
 import static org.apache.seata.common.DefaultValues.DEFAULT_XA_BRANCH_EXECUTION_TIMEOUT;
 import static org.apache.seata.common.DefaultValues.DEFAULT_XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT;
@@ -44,7 +43,6 @@ public class RmProperties {
     private long tableMetaCheckerInterval = DEFAULT_TABLE_META_CHECKER_INTERVAL;
     private boolean reportSuccessEnable = DEFAULT_CLIENT_REPORT_SUCCESS_ENABLE;
     private boolean sagaBranchRegisterEnable = DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE;
-    private String sagaJsonParser = DEFAULT_SAGA_JSON_PARSER;
     private boolean sagaRetryPersistModeUpdate = DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE;
     private boolean sagaCompensatePersistModeUpdate = DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE;
     private int tccActionInterceptorOrder = TCC_ACTION_INTERCEPTOR_ORDER;
@@ -97,14 +95,6 @@ public class RmProperties {
 
     public void setSagaBranchRegisterEnable(boolean sagaBranchRegisterEnable) {
         this.sagaBranchRegisterEnable = sagaBranchRegisterEnable;
-    }
-
-    public String getSagaJsonParser() {
-        return sagaJsonParser;
-    }
-
-    public void setSagaJsonParser(String sagaJsonParser) {
-        this.sagaJsonParser = sagaJsonParser;
     }
 
     public long getTableMetaCheckerInterval() {

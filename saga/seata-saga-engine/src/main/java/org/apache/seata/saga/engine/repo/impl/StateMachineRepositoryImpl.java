@@ -60,7 +60,6 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
     private SeqGenerator seqGenerator = new UUIDSeqGenerator();
     private String charset = "UTF-8";
     private String defaultTenantId;
-    private String jsonParserName = DomainConstants.DEFAULT_JSON_PARSER;
 
     @Override
     public StateMachine getStateMachineById(String stateMachineId) {
@@ -70,7 +69,7 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
                 if (item.getValue() == null) {
                     StateMachine stateMachine = stateLangStore.getStateMachineById(stateMachineId);
                     if (stateMachine != null) {
-                        StateMachine parsedStatMachine = StateMachineParserFactory.getStateMachineParser(jsonParserName)
+                        StateMachine parsedStatMachine = StateMachineParserFactory.getStateMachineParser()
                                 .parse(stateMachine.getContent());
                         if (parsedStatMachine == null) {
                             throw new RuntimeException("Parse State Language failed, stateMachineId:"
@@ -96,7 +95,7 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
                 if (item.getValue() == null) {
                     StateMachine stateMachine = stateLangStore.getLastVersionStateMachine(stateMachineName, tenantId);
                     if (stateMachine != null) {
-                        StateMachine parsedStatMachine = StateMachineParserFactory.getStateMachineParser(jsonParserName)
+                        StateMachine parsedStatMachine = StateMachineParserFactory.getStateMachineParser()
                                 .parse(stateMachine.getContent());
                         if (parsedStatMachine == null) {
                             throw new RuntimeException("Parse State Language failed, stateMachineId:"
@@ -175,8 +174,8 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
             try (InputStream is = resource) {
                 json = IOUtils.toString(is, charset);
             }
-            StateMachine stateMachine = StateMachineParserFactory.getStateMachineParser(jsonParserName)
-                    .parse(json);
+            StateMachine stateMachine =
+                    StateMachineParserFactory.getStateMachineParser().parse(json);
             if (stateMachine != null) {
                 stateMachine.setContent(json);
                 if (StringUtils.isBlank(stateMachine.getTenantId())) {
@@ -212,14 +211,6 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
 
     public void setDefaultTenantId(String defaultTenantId) {
         this.defaultTenantId = defaultTenantId;
-    }
-
-    public String getJsonParserName() {
-        return jsonParserName;
-    }
-
-    public void setJsonParserName(String jsonParserName) {
-        this.jsonParserName = jsonParserName;
     }
 
     private static class Item {

@@ -44,6 +44,6 @@ public enum JsonParserType {
                 return jsonParserType;
             }
         }
-        throw new NotSupportYetException("not support registry type: " + name);
+        throw new NotSupportYetException("not support json parser type: " + name);
     }
 }

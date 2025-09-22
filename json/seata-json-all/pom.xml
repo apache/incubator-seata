@@ -29,5 +29,16 @@
     <name>seata-json-all ${project.version}</name>
     <description>discovery-all for Seata built with Maven</description>
 
-
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-json-jackson</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>seata-json-fastjson</artifactId>
+        <version>${project.version}</version>
+    </dependency>
+    </dependencies>
 </project>

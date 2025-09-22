@@ -381,14 +381,6 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
         actual.setScriptEngineManager(scriptEngineManager);
     }
 
-    public String getSagaJsonParser() {
-        return actual.getSagaJsonParser();
-    }
-
-    public void setSagaJsonParser(String sagaJsonParser) {
-        actual.setSagaJsonParser(sagaJsonParser);
-    }
-
     public boolean isSagaRetryPersistModeUpdate() {
         return actual.isSagaRetryPersistModeUpdate();
     }

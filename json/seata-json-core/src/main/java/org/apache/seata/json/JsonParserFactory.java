@@ -16,8 +16,8 @@
  */
 package org.apache.seata.json;
 
+import org.apache.seata.common.DefaultValues;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
-import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.config.ConfigurationKeys;
 import org.slf4j.Logger;
@@ -38,16 +38,11 @@ public class JsonParserFactory {
         return JsonParserFactoryHolder.INSTANCE;
     }
 
-    private static JsonParser buildRegistryService() {
-        String jsonParserTypeName =
-                ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig(ConfigurationKeys.JSON_PARSER_TYPE);
+    private static JsonParser buildJsonParser() {
+        String jsonParserTypeName = ConfigurationFactory.getInstance()
+                .getConfig(ConfigurationKeys.JSON_PARSER_TYPE, DefaultValues.DEFAULT_JSON_PARSER_TYPE);
 
-        // If blank, use default configuration
-        if (StringUtils.isBlank(jsonParserTypeName)) {
-            jsonParserTypeName = JsonParserType.Jackson.name();
-        }
-
-        LOGGER.info("use registry center type: {}", jsonParserTypeName);
+        LOGGER.info("use json parser type: {}", jsonParserTypeName);
 
         JsonParserType jsonParserType = JsonParserType.getType(jsonParserTypeName);
         return EnhancedServiceLoader.load(
@@ -55,6 +50,6 @@ public class JsonParserFactory {
     }
 
     private static class JsonParserFactoryHolder {
-        private static final JsonParser INSTANCE = buildRegistryService();
+        private static final JsonParser INSTANCE = buildJsonParser();
     }
 }

@@ -210,11 +210,6 @@ public interface ConfigurationKeys {
     String CLIENT_SAGA_BRANCH_REGISTER_ENABLE = CLIENT_RM_PREFIX + "sagaBranchRegisterEnable";
 
     /**
-     * The constant CLIENT_SAGA_JSON_PARSER.
-     */
-    String CLIENT_SAGA_JSON_PARSER = CLIENT_RM_PREFIX + "sagaJsonParser";
-
-    /**
      * The constant CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE.
      */
     String CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE = CLIENT_RM_PREFIX + "sagaRetryPersistModeUpdate";

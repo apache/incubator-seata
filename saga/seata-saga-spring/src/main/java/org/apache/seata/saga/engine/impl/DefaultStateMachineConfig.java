@@ -77,7 +77,6 @@ public class DefaultStateMachineConfig extends AbstractStateMachineConfig
     private void registerSpringBeanServiceInvoker() {
         ServiceInvokerManager manager = getServiceInvokerManager();
         SpringBeanServiceInvoker springBeanServiceInvoker = new SpringBeanServiceInvoker();
-        springBeanServiceInvoker.setSagaJsonParser(getSagaJsonParser());
         springBeanServiceInvoker.setApplicationContext(getApplicationContext());
         springBeanServiceInvoker.setThreadPoolExecutor(getThreadPoolExecutor());
         manager.putServiceInvoker(DomainConstants.SERVICE_TYPE_SPRING_BEAN, springBeanServiceInvoker);

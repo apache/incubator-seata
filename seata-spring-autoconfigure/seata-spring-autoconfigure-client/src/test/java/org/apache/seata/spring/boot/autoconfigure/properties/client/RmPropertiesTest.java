@@ -39,9 +39,6 @@ public class RmPropertiesTest {
         rmProperties.setSagaBranchRegisterEnable(true);
         Assertions.assertTrue(rmProperties.isSagaBranchRegisterEnable());
 
-        rmProperties.setSagaJsonParser("json");
-        Assertions.assertEquals("json", rmProperties.getSagaJsonParser());
-
         rmProperties.setTableMetaCheckerInterval(1);
         Assertions.assertEquals(1, rmProperties.getTableMetaCheckerInterval());
 

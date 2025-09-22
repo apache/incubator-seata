@@ -50,7 +50,6 @@
 		<property name="applicationId" value="test_saga"/>
 		<property name="txServiceGroup" value="default_tx_group"/>
 		<property name="sagaBranchRegisterEnable" value="false"/>
-		<property name="sagaJsonParser" value="jackson"/>
 		<property name="sagaRetryPersistModeUpdate" value="false" />
 		<property name="sagaCompensatePersistModeUpdate" value="false" />
 	</bean>

@@ -78,7 +78,6 @@ client.rm.tableMetaCheckerInterval=60000
 client.rm.sqlParserType=druid
 client.rm.reportSuccessEnable=false
 client.rm.sagaBranchRegisterEnable=false
-client.rm.sagaJsonParser=fastjson
 client.rm.tccActionInterceptorOrder=-2147482648
 client.rm.sqlParserType=druid
 client.tm.commitRetryCount=5
@@ -212,3 +211,6 @@ metrics.enabled=true
 metrics.registryType=compact
 metrics.exporterList=prometheus
 metrics.exporterPrometheusPort=9898
+
+#Server, At, TCC, Saga module json serialization configuration options
+jsonParser.type=jackson

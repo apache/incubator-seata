@@ -29,7 +29,6 @@ import org.apache.seata.saga.engine.tm.SagaTransactionalTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -40,7 +39,6 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_CLIENT_REPORT_SUCCES
 import static org.apache.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_COMPENSATE_PERSIST_MODE_UPDATE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_CLIENT_SAGA_RETRY_PERSIST_MODE_UPDATE;
-import static org.apache.seata.common.DefaultValues.DEFAULT_SAGA_JSON_PARSER;
 
 /**
  * The type Db state machine config.
@@ -74,8 +72,6 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
                 this.sagaBranchRegisterEnable = configuration.getBoolean(
                         ConfigurationKeys.CLIENT_SAGA_BRANCH_REGISTER_ENABLE,
                         DEFAULT_CLIENT_SAGA_BRANCH_REGISTER_ENABLE);
-                setSagaJsonParser(
-                        configuration.getConfig(ConfigurationKeys.CLIENT_SAGA_JSON_PARSER, DEFAULT_SAGA_JSON_PARSER));
                 this.applicationId = configuration.getConfig(ConfigurationKeys.APPLICATION_ID);
                 this.txServiceGroup = configuration.getConfig(ConfigurationKeys.TX_SERVICE_GROUP);
                 this.accessKey = configuration.getConfig(ConfigurationKeys.ACCESS_KEY, null);
@@ -121,11 +117,7 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
             dbStateLogStore.setDefaultTenantId(getDefaultTenantId());
             dbStateLogStore.setSeqGenerator(getSeqGenerator());
 
-            if (StringUtils.hasLength(getSagaJsonParser())) {
-                ParamsSerializer paramsSerializer = new ParamsSerializer();
-                paramsSerializer.setJsonParserName(getSagaJsonParser());
-                dbStateLogStore.setParamsSerializer(paramsSerializer);
-            }
+            dbStateLogStore.setParamsSerializer(new ParamsSerializer());
 
             if (sagaTransactionalTemplate == null) {
                 sagaTransactionalTemplate = buildDefaultSagaTransactionalTemplate();

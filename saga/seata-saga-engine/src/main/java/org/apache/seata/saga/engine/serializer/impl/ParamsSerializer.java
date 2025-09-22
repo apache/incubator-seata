@@ -16,10 +16,9 @@
  */
 package org.apache.seata.saga.engine.serializer.impl;
 
+import org.apache.seata.json.JsonParser;
+import org.apache.seata.json.JsonParserFactory;
 import org.apache.seata.saga.engine.serializer.Serializer;
-import org.apache.seata.saga.statelang.domain.DomainConstants;
-import org.apache.seata.saga.statelang.parser.JsonParser;
-import org.apache.seata.saga.statelang.parser.JsonParserFactory;
 
 /**
  * Parameter serializer based on Fastjson
@@ -27,14 +26,12 @@ import org.apache.seata.saga.statelang.parser.JsonParserFactory;
  */
 public class ParamsSerializer implements Serializer<Object, String> {
 
-    private String jsonParserName = DomainConstants.DEFAULT_JSON_PARSER;
-
     @Override
     public String serialize(Object params) {
         if (params != null) {
-            JsonParser jsonParser = JsonParserFactory.getJsonParser(jsonParserName);
+            JsonParser jsonParser = JsonParserFactory.getInstance();
             if (jsonParser == null) {
-                throw new RuntimeException("Cannot find JsonParer by name: " + jsonParserName);
+                throw new RuntimeException("Cannot find JsonParer");
             }
             return jsonParser.toJsonString(params, false);
         }
@@ -44,20 +41,12 @@ public class ParamsSerializer implements Serializer<Object, String> {
     @Override
     public Object deserialize(String json) {
         if (json != null) {
-            JsonParser jsonParser = JsonParserFactory.getJsonParser(jsonParserName);
+            JsonParser jsonParser = JsonParserFactory.getInstance();
             if (jsonParser == null) {
-                throw new RuntimeException("Cannot find JsonParer by name: " + jsonParserName);
+                throw new RuntimeException("Cannot find JsonParer");
             }
             return jsonParser.parse(json, Object.class, false);
         }
         return null;
-    }
-
-    public String getJsonParserName() {
-        return jsonParserName;
-    }
-
-    public void setJsonParserName(String jsonParserName) {
-        this.jsonParserName = jsonParserName;
     }
 }
