@@ -59,7 +59,7 @@ public class MCPFiltersConfig {
 
         registration.setName("mcpJwtAuthenticationTokenFilter");
 
-        registration.setOrder(Ordered.HIGHEST_PRECEDENCE + 10);
+        registration.setOrder(Ordered.HIGHEST_PRECEDENCE);
 
         if (!mcpProperties.isEnableAuth())
             LOGGER.warn(
@@ -85,7 +85,7 @@ public class MCPFiltersConfig {
 
         registration.setName("mcpBusinessDataSourceFilter");
 
-        registration.setOrder(Ordered.HIGHEST_PRECEDENCE + 11);
+        registration.setOrder(Ordered.LOWEST_PRECEDENCE);
 
         registration.setEnabled(true);
 
