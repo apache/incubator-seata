@@ -48,7 +48,7 @@ seata:
     # support: nacos, consul, apollo, zk, etcd3
     type: file
   registry:
-    # support: nacos, eureka, redis, zk, consul, etcd3, sofa
+    # support: nacos, eureka, redis, zk, consul, etcd3, sofa, seata
     type: file
   store:
     # support: file 、 db 、 redis 、 raft
