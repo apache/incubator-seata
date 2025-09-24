@@ -103,16 +103,6 @@ public class WebMvcStreamableServerTransportProvider implements McpStreamableSer
     public static final String MESSAGE_EVENT_TYPE = "message";
 
     /**
-     * Event type for sending the message endpoint URI to clients.
-     */
-    public static final String ENDPOINT_EVENT_TYPE = "endpoint";
-
-    /**
-     * Default base URL for the message endpoint.
-     */
-    public static final String DEFAULT_BASE_URL = "";
-
-    /**
      * The endpoint URI where clients should send their JSON-RPC messages. Defaults to
      * "/mcp".
      */
@@ -227,15 +217,13 @@ public class WebMvcStreamableServerTransportProvider implements McpStreamableSer
 
         logger.debug("Attempting to broadcast message to {} active sessions", this.sessions.size());
 
-        return Mono.fromRunnable(() -> {
-            this.sessions.values().parallelStream().forEach(session -> {
-                try {
-                    session.sendNotification(method, params).block();
-                } catch (Exception e) {
-                    logger.error("Failed to send message to session {}: {}", session.getId(), e.getMessage());
-                }
-            });
-        });
+        return Mono.fromRunnable(() -> this.sessions.values().parallelStream().forEach(session -> {
+            try {
+                session.sendNotification(method, params).block();
+            } catch (Exception e) {
+                logger.error("Failed to send message to session {}: {}", session.getId(), e.getMessage());
+            }
+        }));
     }
 
     /**
@@ -314,9 +302,7 @@ public class WebMvcStreamableServerTransportProvider implements McpStreamableSer
         try {
             return ServerResponse.sse(
                     sseBuilder -> {
-                        sseBuilder.onTimeout(() -> {
-                            logger.debug("SSE connection timed out for session: {}", sessionId);
-                        });
+                        sseBuilder.onTimeout(() -> logger.debug("SSE connection timed out for session: {}", sessionId));
 
                         WebMvcStreamableMcpSessionTransport sessionTransport =
                                 new WebMvcStreamableMcpSessionTransport(sessionId, sseBuilder);
@@ -445,12 +431,8 @@ public class WebMvcStreamableServerTransportProvider implements McpStreamableSer
                 // For streaming responses, we need to return SSE
                 return ServerResponse.sse(
                         sseBuilder -> {
-                            sseBuilder.onComplete(() -> {
-                                logger.debug("Request response stream completed for session: {}", sessionId);
-                            });
-                            sseBuilder.onTimeout(() -> {
-                                logger.debug("Request response stream timed out for session: {}", sessionId);
-                            });
+                            sseBuilder.onComplete(() -> logger.debug("Request response stream completed for session: {}", sessionId));
+                            sseBuilder.onTimeout(() -> logger.debug("Request response stream timed out for session: {}", sessionId));
 
                             WebMvcStreamableMcpSessionTransport sessionTransport =
                                     new WebMvcStreamableMcpSessionTransport(sessionId, sseBuilder);
@@ -476,32 +458,6 @@ public class WebMvcStreamableServerTransportProvider implements McpStreamableSer
             logger.error("Error handling message: {}", e.getMessage());
             return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new McpError(e.getMessage()));
         }
-    }
-
-    private boolean isAnyConnectionError(Throwable throwable) {
-        Throwable current = throwable;
-        while (current != null) {
-            String message = current.getMessage();
-            if (message != null) {
-                if (message.contains("你的主机中的软件中止了一个已建立的连接")
-                        || message.contains("Connection reset by peer")
-                        || message.contains("Broken pipe")
-                        || message.contains("远程主机强迫关闭了一个现有的连接")
-                        || message.contains("An existing connection was forcibly closed")
-                        || message.contains("Socket")
-                        || message.contains("Channel")) {
-                    return true;
-                }
-            }
-
-            if (current instanceof IOException) {
-                return true;
-            }
-
-            current = current.getCause();
-        }
-
-        return false;
     }
 
     /**
@@ -535,7 +491,9 @@ public class WebMvcStreamableServerTransportProvider implements McpStreamableSer
             session.delete()
                     .contextWrite(ctx -> ctx.put(McpTransportContext.KEY, transportContext))
                     .block();
-            this.sessions.remove(sessionId);
+            if (sessionId != null) {
+                this.sessions.remove(sessionId);
+            }
             return ServerResponse.ok().build();
         } catch (Exception e) {
             logger.error("Failed to delete session {}: {}", sessionId, e.getMessage());
@@ -691,107 +649,6 @@ public class WebMvcStreamableServerTransportProvider implements McpStreamableSer
             } finally {
                 this.lock.unlock();
             }
-        }
-    }
-
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    /**
-     * Builder for creating instances of {@link WebMvcStreamableServerTransportProvider}.
-     */
-    public static class Builder {
-
-        private ObjectMapper objectMapper;
-
-        private String mcpEndpoint = "/mcp";
-
-        private boolean disallowDelete = false;
-
-        private McpTransportContextExtractor<ServerRequest> contextExtractor = (serverRequest, context) -> context;
-
-        private Duration keepAliveInterval;
-
-        /**
-         * Sets the ObjectMapper to use for JSON serialization/deserialization of MCP
-         * messages.
-         * @param objectMapper The ObjectMapper instance. Must not be null.
-         * @return this builder instance
-         * @throws IllegalArgumentException if objectMapper is null
-         */
-        public Builder objectMapper(ObjectMapper objectMapper) {
-            Assert.notNull(objectMapper, "ObjectMapper must not be null");
-            this.objectMapper = objectMapper;
-            return this;
-        }
-
-        /**
-         * Sets the endpoint URI where clients should send their JSON-RPC messages.
-         * @param mcpEndpoint The MCP endpoint URI. Must not be null.
-         * @return this builder instance
-         * @throws IllegalArgumentException if mcpEndpoint is null
-         */
-        public Builder mcpEndpoint(String mcpEndpoint) {
-            Assert.notNull(mcpEndpoint, "MCP endpoint must not be null");
-            this.mcpEndpoint = mcpEndpoint;
-            return this;
-        }
-
-        /**
-         * Sets whether to disallow DELETE requests on the endpoint.
-         * @param disallowDelete true to disallow DELETE requests, false otherwise
-         * @return this builder instance
-         */
-        public Builder disallowDelete(boolean disallowDelete) {
-            this.disallowDelete = disallowDelete;
-            return this;
-        }
-
-        /**
-         * Sets the context extractor that allows providing the MCP feature
-         * implementations to inspect HTTP transport level metadata that was present at
-         * HTTP request processing time. This allows to extract custom headers and other
-         * useful data for use during execution later on in the process.
-         * @param contextExtractor The contextExtractor to fill in a
-         * {@link McpTransportContext}.
-         * @return this builder instance
-         * @throws IllegalArgumentException if contextExtractor is null
-         */
-        public Builder contextExtractor(McpTransportContextExtractor<ServerRequest> contextExtractor) {
-            Assert.notNull(contextExtractor, "contextExtractor must not be null");
-            this.contextExtractor = contextExtractor;
-            return this;
-        }
-
-        /**
-         * Sets the keep-alive interval for the transport. If set, a keep-alive scheduler
-         * will be created to periodically check and send keep-alive messages to clients.
-         * @param keepAliveInterval The interval duration for keep-alive messages, or null
-         * to disable keep-alive
-         * @return this builder instance
-         */
-        public Builder keepAliveInterval(Duration keepAliveInterval) {
-            this.keepAliveInterval = keepAliveInterval;
-            return this;
-        }
-
-        /**
-         * Builds a new instance of {@link WebMvcStreamableServerTransportProvider} with
-         * the configured settings.
-         * @return A new WebMvcStreamableServerTransportProvider instance
-         * @throws IllegalStateException if required parameters are not set
-         */
-        public WebMvcStreamableServerTransportProvider build() {
-            Assert.notNull(this.objectMapper, "ObjectMapper must be set");
-            Assert.notNull(this.mcpEndpoint, "MCP endpoint must be set");
-
-            return new WebMvcStreamableServerTransportProvider(
-                    this.objectMapper,
-                    this.mcpEndpoint,
-                    this.disallowDelete,
-                    this.contextExtractor,
-                    this.keepAliveInterval);
         }
     }
 }

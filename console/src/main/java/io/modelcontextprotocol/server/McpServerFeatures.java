@@ -230,31 +230,6 @@ public class McpServerFeatures {
         }
     }
 
-    /**
-     * Specification of a resource with its asynchronous handler function. Resources
-     * provide context to AI models by exposing data such as:
-     * <ul>
-     * <li>File contents
-     * <li>Database records
-     * <li>API responses
-     * <li>System information
-     * <li>Application state
-     * </ul>
-     *
-     * <p>
-     * Example resource specification:
-     *
-     * <pre>{@code
-     * new McpServerFeatures.AsyncResourceSpecification(
-     * 		new Resource("docs", "Documentation files", "text/markdown"),
-     * 		(exchange, request) -> Mono.fromSupplier(() -> readFile(request.getPath()))
-     * 				.map(ReadResourceResult::new))
-     * }</pre>
-     *
-     * first argument is an {@link McpAsyncServerExchange} upon which the server can
-     * interact with the connected client. The second arguments is a
-     * {@link McpSchema.ReadResourceRequest}.
-     */
     public static final class AsyncResourceSpecification {
         private final McpSchema.Resource resource;
         private final BiFunction<
@@ -279,35 +254,6 @@ public class McpServerFeatures {
         }
     }
 
-    /**
-     * Specification of a prompt template with its asynchronous handler function. Prompts
-     * provide structured templates for AI model interactions, supporting:
-     * <ul>
-     * <li>Consistent message formatting
-     * <li>Parameter substitution
-     * <li>Context injection
-     * <li>Response formatting
-     * <li>Instruction templating
-     * </ul>
-     *
-     * <p>
-     * Example prompt specification:
-     *
-     * <pre>{@code
-     * new McpServerFeatures.AsyncPromptSpecification(
-     * 		new Prompt("analyze", "Code analysis template"),
-     * 		(exchange, request) -> {
-     * 			String code = request.getArguments().get("code");
-     * 			return Mono.just(new GetPromptResult(
-     * 					"Analyze this code:\n\n" + code + "\n\nProvide feedback on:"));
-     * 		})
-     * }</pre>
-     *
-     * formatted templates. The function's first argument is an
-     * {@link McpAsyncServerExchange} upon which the server can interact with the
-     * connected client. The second arguments is a
-     * {@link McpSchema.GetPromptRequest}.
-     */
     public static final class AsyncPromptSpecification {
         private final McpSchema.Prompt prompt;
         private final BiFunction<McpAsyncServerExchange, McpSchema.GetPromptRequest, Mono<McpSchema.GetPromptResult>>
@@ -331,20 +277,6 @@ public class McpServerFeatures {
         }
     }
 
-    /**
-     * Specification of a completion handler function with asynchronous execution support.
-     * Completions generate AI model outputs based on prompt or resource references and
-     * user-provided arguments. This abstraction enables:
-     * <ul>
-     * <li>Customizable response generation logic
-     * <li>Parameter-driven template expansion
-     * <li>Dynamic interaction with connected clients
-     * </ul>
-     *
-     * requests and returns results. The first argument is an
-     * {@link McpAsyncServerExchange} used to interact with the client. The second
-     * argument is a {@link McpSchema.CompleteRequest}.
-     */
     public static final class AsyncCompletionSpecification {
         private final McpSchema.CompleteReference referenceKey;
         private final BiFunction<McpAsyncServerExchange, McpSchema.CompleteRequest, Mono<McpSchema.CompleteResult>>

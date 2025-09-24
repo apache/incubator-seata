@@ -93,8 +93,6 @@ public final class McpSchema {
 
     public static final String METHOD_PING = "ping";
 
-    public static final String METHOD_NOTIFICATION_PROGRESS = "notifications/progress";
-
     // Tool Methods
     public static final String METHOD_TOOLS_LIST = "tools/list";
 
@@ -109,13 +107,7 @@ public final class McpSchema {
 
     public static final String METHOD_NOTIFICATION_RESOURCES_LIST_CHANGED = "notifications/resources/list_changed";
 
-    public static final String METHOD_NOTIFICATION_RESOURCES_UPDATED = "notifications/resources/updated";
-
     public static final String METHOD_RESOURCES_TEMPLATES_LIST = "resources/templates/list";
-
-    public static final String METHOD_RESOURCES_SUBSCRIBE = "resources/subscribe";
-
-    public static final String METHOD_RESOURCES_UNSUBSCRIBE = "resources/unsubscribe";
 
     // Prompt Methods
     public static final String METHOD_PROMPT_LIST = "prompts/list";
@@ -129,15 +121,10 @@ public final class McpSchema {
     // Logging Methods
     public static final String METHOD_LOGGING_SET_LEVEL = "logging/setLevel";
 
-    public static final String METHOD_NOTIFICATION_MESSAGE = "notifications/message";
-
     // Roots Methods
     public static final String METHOD_ROOTS_LIST = "roots/list";
 
     public static final String METHOD_NOTIFICATION_ROOTS_LIST_CHANGED = "notifications/roots/list_changed";
-
-    // Sampling Methods
-    public static final String METHOD_SAMPLING_CREATE_MESSAGE = "sampling/createMessage";
 
     // Elicitation Methods
     public static final String METHOD_ELICITATION_CREATE = "elicitation/create";
@@ -153,24 +140,9 @@ public final class McpSchema {
     public static final class ErrorCodes {
 
         /**
-         * Invalid JSON was received by the server.
-         */
-        public static final int PARSE_ERROR = -32700;
-
-        /**
-         * The JSON sent is not a valid Request object.
-         */
-        public static final int INVALID_REQUEST = -32600;
-
-        /**
          * The method does not exist / is not available.
          */
         public static final int METHOD_NOT_FOUND = -32601;
-
-        /**
-         * Invalid method parameter(s).
-         */
-        public static final int INVALID_PARAMS = -32602;
 
         /**
          * Internal JSON-RPC error.
@@ -725,19 +697,6 @@ public final class McpSchema {
         }
     } // @formatter:on
 
-    /**
-     * Clients can implement additional features to enrich connected MCP servers with
-     * additional capabilities. These capabilities can be used to extend the functionality
-     * of the server, or to provide additional information to the server about the
-     * client's capabilities.
-     * experimental WIP
-     * roots define the boundaries of where servers can operate within the
-     * filesystem, allowing them to understand which directories and files they have
-     * access to.
-     * sampling Provides a standardized way for servers to request LLM sampling
-     * (“completions” or “generations”) from language models via clients.
-     *
-     */
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ClientCapabilities {
@@ -820,14 +779,6 @@ public final class McpSchema {
         @JsonInclude(JsonInclude.Include.NON_ABSENT)
         public static class Elicitation {}
 
-        /**
-         * Roots define the boundaries of where servers can operate within the filesystem,
-         * allowing them to understand which directories and files they have access to.
-         * Servers can request the list of roots from supporting clients and
-         * receive notifications when that list changes.
-         * listChanged Whether the client would send notification about roots
-         * 		  has changed since the last time the server checked.
-         */
         @JsonInclude(JsonInclude.Include.NON_ABSENT)
         @JsonIgnoreProperties(ignoreUnknown = true)
         public static class RootCapabilities {
@@ -866,16 +817,6 @@ public final class McpSchema {
             }
         }
 
-        /**
-         * Provides a standardized way for servers to request LLM
-         * sampling ("completions" or "generations") from language
-         * models via clients. This flow allows clients to maintain
-         * control over model access, selection, and permissions
-         * while enabling servers to leverage AI capabilities—with
-         * no server API keys necessary. Servers can request text or
-         * image-based interactions and optionally include context
-         * from MCP servers in their prompts.
-         */
         @JsonInclude(JsonInclude.Include.NON_ABSENT)
         public static class Sampling {}
 
@@ -1215,17 +1156,6 @@ public final class McpSchema {
         Annotations getAnnotations();
     }
 
-    /**
-     * Optional annotations for the client. The client can use annotations to inform how
-     * objects are used or displayed.
-     * audience Describes who the intended customer of this object or data is. It
-     * can include multiple entries to indicate content useful for multiple audiences
-     * (e.g., `["user", "assistant"]`).
-     * priority Describes how important this data is for operating the server. A
-     * value of 1 means "most important," and indicates that the data is effectively
-     * required, while 0 means "least important," and indicates that the data is entirely
-     * optional. It is a number between 0 and 1.
-     */
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Annotations {
@@ -1314,18 +1244,6 @@ public final class McpSchema {
         String getTitle();
     }
 
-    /**
-     * A known resource that the server is capable of reading.
-     * uri the URI of the resource.
-     * name A human-readable name for this resource. This can be used by clients to
-     * populate UI elements.
-     * description A description of what this resource represents. This can be used
-     * by clients to improve the LLM's understanding of available resources. It can be
-     * thought of like a "hint" to the model.
-     * mimeType The MIME type of this resource, if known.
-     * annotations Optional annotations for the client. The client can use
-     * annotations to inform how objects are used or displayed.
-     */
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Resource implements Annotated, ResourceContent {
@@ -1544,21 +1462,6 @@ public final class McpSchema {
         }
     } // @formatter:on
 
-    /**
-     * Resource templates allow servers to expose parameterized resources using URI
-     * templates.
-     * uriTemplate A URI template that can be used to generate URIs for this
-     * resource.
-     * name A human-readable name for this resource. This can be used by clients to
-     * populate UI elements.
-     * description A description of what this resource represents. This can be used
-     * by clients to improve the LLM's understanding of available resources. It can be
-     * thought of like a "hint" to the model.
-     * mimeType The MIME type of this resource, if known.
-     * annotations Optional annotations for the client. The client can use
-     * annotations to inform how objects are used or displayed.
-     * @see <a href="https://datatracker.ietf.org/doc/html/rfc6570">RFC 6570</a>
-     */
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ResourceTemplate implements Annotated, BaseMetadata {
@@ -1959,113 +1862,6 @@ public final class McpSchema {
     } // @formatter:on
 
     /**
-     * Sent from the client to request resources/updated notifications from the server
-     * whenever a particular resource changes.
-     * uri the URI of the resource to subscribe to. The URI can use any protocol;
-     * it is up to the server how to interpret it.
-     */
-    @JsonInclude(JsonInclude.Include.NON_ABSENT)
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class SubscribeRequest implements Request {
-        @JsonProperty("uri")
-        String uri;
-
-        @JsonProperty("_meta")
-        Map<String, Object> meta;
-
-        @Override
-        public String toString() {
-            return "SubscribeRequest{" + "uri='" + uri + '\'' + ", meta=" + meta + '}';
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (o == null || getClass() != o.getClass()) return false;
-            SubscribeRequest that = (SubscribeRequest) o;
-            return Objects.equals(uri, that.uri) && Objects.equals(meta, that.meta);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(uri, meta);
-        }
-
-        public String getUri() {
-            return uri;
-        }
-
-        public void setUri(String uri) {
-            this.uri = uri;
-        }
-
-        public Map<String, Object> getMeta() {
-            return meta;
-        }
-
-        public void setMeta(Map<String, Object> meta) {
-            this.meta = meta;
-        }
-
-        public SubscribeRequest() {}
-
-        public SubscribeRequest(String uri) {
-            this.uri = uri;
-            this.meta = null;
-        }
-
-        @Override
-        public Map<String, Object> meta() {
-            return this.meta;
-        }
-    } // @formatter:on
-
-    @JsonInclude(JsonInclude.Include.NON_ABSENT)
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class UnsubscribeRequest implements Request {
-        @JsonProperty("uri")
-        String uri;
-
-        @JsonProperty("_meta")
-        Map<String, Object> meta;
-
-        @Override
-        public String toString() {
-            return "UnsubscribeRequest{" + "uri='" + uri + '\'' + ", meta=" + meta + '}';
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (o == null || getClass() != o.getClass()) return false;
-            UnsubscribeRequest that = (UnsubscribeRequest) o;
-            return Objects.equals(uri, that.uri) && Objects.equals(meta, that.meta);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(uri, meta);
-        }
-
-        public String getUri() {
-            return uri;
-        }
-
-        public void setUri(String uri) {
-            this.uri = uri;
-        }
-
-        public UnsubscribeRequest() {}
-
-        public UnsubscribeRequest(String uri) {
-            this.uri = uri;
-        }
-
-        @Override
-        public Map<String, Object> meta() {
-            return this.meta;
-        }
-    } // @formatter:on
-
-    /**
      * The contents of a specific resource or sub-resource.
      */
     @JsonTypeInfo(use = JsonTypeInfo.Id.DEDUCTION, include = As.PROPERTY)
@@ -2191,14 +1987,6 @@ public final class McpSchema {
         }
     } // @formatter:on
 
-    /**
-     * Binary contents of a resource.
-     * uri the URI of this resource.
-     * mimeType the MIME type of this resource.
-     * blob a base64-encoded string representing the binary data of the resource.
-     * This must only be set if the resource can actually be represented as binary data
-     * (not text).
-     */
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class BlobResourceContents implements ResourceContents {
@@ -2493,13 +2281,6 @@ public final class McpSchema {
         }
     } // @formatter:on
 
-    /**
-     * Describes a message returned as part of a prompt.
-     * This is similar to `SamplingMessage`, but also supports the embedding of resources
-     * from the MCP server.
-     * role The sender or recipient of messages and data in a conversation.
-     * content The content of the message of type {@link Content}.
-     */
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class PromptMessage {
@@ -2550,12 +2331,6 @@ public final class McpSchema {
         }
     } // @formatter:on
 
-    /**
-     * The server's response to a prompts/list request from the client.
-     * prompts A list of prompts that the server provides.
-     * nextCursor An optional cursor for pagination. If present, indicates there
-     * are more prompts available.
-     */
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ListPromptsResult implements Result {
@@ -2628,11 +2403,6 @@ public final class McpSchema {
         }
     } // @formatter:on
 
-    /**
-     * Used by the client to get a prompt provided by the server.
-     * name The name of the prompt or prompt template.
-     * Arguments to use for templating the prompt.
-     */
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class GetPromptRequest implements Request {
@@ -2692,11 +2462,6 @@ public final class McpSchema {
         }
     } // @formatter:off
 
-    /**
-     * The server's response to a prompts/get request from the client.
-     * description An optional description for the prompt.
-     * messages A list of messages to display as part of the prompt.
-     */
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class GetPromptResult implements Result {
@@ -2759,12 +2524,6 @@ public final class McpSchema {
     // ---------------------------
     // Tool Interfaces
     // ---------------------------
-    /**
-     * The server's response to a tools/list request from the client.
-     * tools A list of tools that the server provides.
-     * nextCursor An optional cursor for pagination. If present, indicates there
-     * are more tools available.
-     */
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ListToolsResult implements Result {
@@ -3057,18 +2816,6 @@ public final class McpSchema {
         }
     }
 
-    /**
-     * Represents a tool that the server provides. Tools enable servers to expose
-     * executable functionality to the system. Through these tools, you can interact with
-     * external systems, perform computations, and take actions in the real world.
-     * name A unique identifier for the tool. This name is used when calling the
-     * tool.
-     * description A human-readable description of what the tool does. This can be
-     * used by clients to improve the LLM's understanding of available tools.
-     * inputSchema A JSON Schema object that describes the expected structure of
-     * the arguments when calling this tool. This allows clients to validate tool
-     * arguments before sending them to the server.
-     */
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Tool {
@@ -3293,13 +3040,6 @@ public final class McpSchema {
         }
     }
 
-    /**
-     * Used by the client to call a tool provided by the server.
-     * name The name of the tool to call. This must match a tool name from
-     * tools/list.
-     * Arguments to pass to the tool. These must conform to the tool's
-     * input schema.
-     */
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class CallToolRequest implements Request {
@@ -3417,13 +3157,6 @@ public final class McpSchema {
         }
     } // @formatter:off
 
-    /**
-     * The server's response to a tools/call request from the client.
-     * content A list of content items representing the tool's output. Each item can be text, an image,
-     *                or an embedded resource.
-     * isError If true, indicates that the tool execution failed and the content contains error information.
-     *                If false or absent, indicates successful execution.
-     */
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class CallToolResult implements Result {
@@ -3501,23 +3234,10 @@ public final class McpSchema {
             this(content, isError, structuredContent, null);
         }
 
-        /**
-         * Creates a new instance of {@link CallToolResult} with a string containing the
-         * tool result.
-         * @param content The content of the tool result. This will be mapped to a
-         * one-sized list with a {@link TextContent} element.
-         * @param isError If true, indicates that the tool execution failed and the
-         * content contains error information. If false or absent, indicates successful
-         * execution.
-         */
         public CallToolResult(String content, Boolean isError) {
             this(Collections.singletonList(new TextContent(content)), isError, null);
         }
 
-        /**
-         * Creates a builder for {@link CallToolResult}.
-         * @return a new builder instance
-         */
         public static Builder builder() {
             return new Builder();
         }
@@ -3634,840 +3354,6 @@ public final class McpSchema {
     } // @formatter:on
 
     // ---------------------------
-    // Sampling Interfaces
-    // ---------------------------
-    @JsonInclude(JsonInclude.Include.NON_ABSENT)
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class ModelPreferences {
-        @JsonProperty("hints")
-        List<ModelHint> hints;
-
-        @JsonProperty("costPriority")
-        Double costPriority;
-
-        @JsonProperty("speedPriority")
-        Double speedPriority;
-
-        @JsonProperty("intelligencePriority")
-        Double intelligencePriority;
-
-        @Override
-        public String toString() {
-            return "ModelPreferences{" + "hints="
-                    + hints + ", costPriority="
-                    + costPriority + ", speedPriority="
-                    + speedPriority + ", intelligencePriority="
-                    + intelligencePriority + '}';
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (o == null || getClass() != o.getClass()) return false;
-            ModelPreferences that = (ModelPreferences) o;
-            return Objects.equals(hints, that.hints)
-                    && Objects.equals(costPriority, that.costPriority)
-                    && Objects.equals(speedPriority, that.speedPriority)
-                    && Objects.equals(intelligencePriority, that.intelligencePriority);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(hints, costPriority, speedPriority, intelligencePriority);
-        }
-
-        public List<ModelHint> getHints() {
-            return hints;
-        }
-
-        public void setHints(List<ModelHint> hints) {
-            this.hints = hints;
-        }
-
-        public Double getCostPriority() {
-            return costPriority;
-        }
-
-        public void setCostPriority(Double costPriority) {
-            this.costPriority = costPriority;
-        }
-
-        public Double getSpeedPriority() {
-            return speedPriority;
-        }
-
-        public void setSpeedPriority(Double speedPriority) {
-            this.speedPriority = speedPriority;
-        }
-
-        public Double getIntelligencePriority() {
-            return intelligencePriority;
-        }
-
-        public void setIntelligencePriority(Double intelligencePriority) {
-            this.intelligencePriority = intelligencePriority;
-        }
-
-        public ModelPreferences() {}
-
-        public ModelPreferences(
-                List<ModelHint> hints, Double costPriority, Double speedPriority, Double intelligencePriority) {
-            this.hints = hints;
-            this.costPriority = costPriority;
-            this.speedPriority = speedPriority;
-            this.intelligencePriority = intelligencePriority;
-        }
-
-        public static Builder builder() {
-            return new Builder();
-        }
-
-        public static class Builder {
-            private List<ModelHint> hints;
-            private Double costPriority;
-            private Double speedPriority;
-            private Double intelligencePriority;
-
-            public Builder hints(List<ModelHint> hints) {
-                this.hints = hints;
-                return this;
-            }
-
-            public Builder addHint(String name) {
-                if (this.hints == null) {
-                    this.hints = new ArrayList<>();
-                }
-                this.hints.add(new ModelHint(name));
-                return this;
-            }
-
-            public Builder costPriority(Double costPriority) {
-                this.costPriority = costPriority;
-                return this;
-            }
-
-            public Builder speedPriority(Double speedPriority) {
-                this.speedPriority = speedPriority;
-                return this;
-            }
-
-            public Builder intelligencePriority(Double intelligencePriority) {
-                this.intelligencePriority = intelligencePriority;
-                return this;
-            }
-
-            public ModelPreferences build() {
-                return new ModelPreferences(hints, costPriority, speedPriority, intelligencePriority);
-            }
-        }
-    } // @formatter:on
-
-    @JsonInclude(JsonInclude.Include.NON_ABSENT)
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class ModelHint {
-        @JsonProperty("name")
-        String name;
-
-        @Override
-        public String toString() {
-            return "ModelHint{" + "name='" + name + '\'' + '}';
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (o == null || getClass() != o.getClass()) return false;
-            ModelHint modelHint = (ModelHint) o;
-            return Objects.equals(name, modelHint.name);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hashCode(name);
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public ModelHint() {}
-
-        public ModelHint(String name) {
-            this.name = name;
-        }
-
-        public static ModelHint of(String name) {
-            return new ModelHint(name);
-        }
-    }
-
-    @JsonInclude(JsonInclude.Include.NON_ABSENT)
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class SamplingMessage {
-        @JsonProperty("role")
-        Role role;
-
-        @JsonProperty("content")
-        Content content;
-
-        @Override
-        public String toString() {
-            return "SamplingMessage{" + "role=" + role + ", content=" + content + '}';
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (o == null || getClass() != o.getClass()) return false;
-            SamplingMessage that = (SamplingMessage) o;
-            return role == that.role && Objects.equals(content, that.content);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(role, content);
-        }
-
-        public Role getRole() {
-            return role;
-        }
-
-        public void setRole(Role role) {
-            this.role = role;
-        }
-
-        public Content getContent() {
-            return content;
-        }
-
-        public void setContent(Content content) {
-            this.content = content;
-        }
-
-        public SamplingMessage() {}
-
-        public SamplingMessage(Role role, Content content) {
-            this.role = role;
-            this.content = content;
-        }
-    } // @formatter:on
-
-    // Sampling and Message Creation
-    @JsonInclude(JsonInclude.Include.NON_ABSENT)
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class CreateMessageRequest implements Request {
-        @JsonProperty("messages")
-        List<SamplingMessage> messages;
-
-        @JsonProperty("modelPreferences")
-        ModelPreferences modelPreferences;
-
-        @JsonProperty("systemPrompt")
-        String systemPrompt;
-
-        @JsonProperty("includeContext")
-        ContextInclusionStrategy includeContext;
-
-        @JsonProperty("temperature")
-        Double temperature;
-
-        @JsonProperty("maxTokens")
-        int maxTokens;
-
-        @JsonProperty("stopSequences")
-        List<String> stopSequences;
-
-        @JsonProperty("metadata")
-        Map<String, Object> metadata;
-
-        @JsonProperty("_meta")
-        Map<String, Object> meta;
-
-        @Override
-        public String toString() {
-            return "CreateMessageRequest{" + "messages="
-                    + messages + ", modelPreferences="
-                    + modelPreferences + ", systemPrompt='"
-                    + systemPrompt + '\'' + ", includeContext="
-                    + includeContext + ", temperature="
-                    + temperature + ", maxTokens="
-                    + maxTokens + ", stopSequences="
-                    + stopSequences + ", metadata="
-                    + metadata + ", meta="
-                    + meta + '}';
-        }
-
-        public CreateMessageRequest(
-                List<SamplingMessage> messages,
-                ModelPreferences modelPreferences,
-                String systemPrompt,
-                ContextInclusionStrategy includeContext,
-                Double temperature,
-                int maxTokens,
-                List<String> stopSequences,
-                Map<String, Object> metadata,
-                Map<String, Object> meta) {
-            this.messages = messages;
-            this.modelPreferences = modelPreferences;
-            this.systemPrompt = systemPrompt;
-            this.includeContext = includeContext;
-            this.temperature = temperature;
-            this.maxTokens = maxTokens;
-            this.stopSequences = stopSequences;
-            this.metadata = metadata;
-            this.meta = meta;
-        }
-
-        // backwards compatibility constructor
-        public CreateMessageRequest(
-                List<SamplingMessage> messages,
-                ModelPreferences modelPreferences,
-                String systemPrompt,
-                ContextInclusionStrategy includeContext,
-                Double temperature,
-                int maxTokens,
-                List<String> stopSequences,
-                Map<String, Object> metadata) {
-            this(
-                    messages,
-                    modelPreferences,
-                    systemPrompt,
-                    includeContext,
-                    temperature,
-                    maxTokens,
-                    stopSequences,
-                    metadata,
-                    null);
-        }
-
-        @Override
-        public Map<String, Object> meta() {
-            return this.meta;
-        }
-
-        public List<SamplingMessage> getMessages() {
-            return messages;
-        }
-
-        public void setMessages(List<SamplingMessage> messages) {
-            this.messages = messages;
-        }
-
-        public ModelPreferences getModelPreferences() {
-            return modelPreferences;
-        }
-
-        public void setModelPreferences(ModelPreferences modelPreferences) {
-            this.modelPreferences = modelPreferences;
-        }
-
-        public String getSystemPrompt() {
-            return systemPrompt;
-        }
-
-        public void setSystemPrompt(String systemPrompt) {
-            this.systemPrompt = systemPrompt;
-        }
-
-        public ContextInclusionStrategy getIncludeContext() {
-            return includeContext;
-        }
-
-        public void setIncludeContext(ContextInclusionStrategy includeContext) {
-            this.includeContext = includeContext;
-        }
-
-        public Double getTemperature() {
-            return temperature;
-        }
-
-        public void setTemperature(Double temperature) {
-            this.temperature = temperature;
-        }
-
-        public int getMaxTokens() {
-            return maxTokens;
-        }
-
-        public void setMaxTokens(int maxTokens) {
-            this.maxTokens = maxTokens;
-        }
-
-        public List<String> getStopSequences() {
-            return stopSequences;
-        }
-
-        public void setStopSequences(List<String> stopSequences) {
-            this.stopSequences = stopSequences;
-        }
-
-        public Map<String, Object> getMetadata() {
-            return metadata;
-        }
-
-        public void setMetadata(Map<String, Object> metadata) {
-            this.metadata = metadata;
-        }
-
-        public Map<String, Object> getMeta() {
-            return meta;
-        }
-
-        public void setMeta(Map<String, Object> meta) {
-            this.meta = meta;
-        }
-
-        public enum ContextInclusionStrategy {
-
-            // @formatter:off
-            @JsonProperty("none")
-            NONE,
-            @JsonProperty("thisServer")
-            THIS_SERVER,
-            @JsonProperty("allServers")
-            ALL_SERVERS
-        } // @formatter:on
-
-        public static Builder builder() {
-            return new Builder();
-        }
-
-        public static class Builder {
-
-            private List<SamplingMessage> messages;
-
-            private ModelPreferences modelPreferences;
-
-            private String systemPrompt;
-
-            private ContextInclusionStrategy includeContext;
-
-            private Double temperature;
-
-            private int maxTokens;
-
-            private List<String> stopSequences;
-
-            private Map<String, Object> metadata;
-
-            private Map<String, Object> meta;
-
-            public Builder messages(List<SamplingMessage> messages) {
-                this.messages = messages;
-                return this;
-            }
-
-            public Builder modelPreferences(ModelPreferences modelPreferences) {
-                this.modelPreferences = modelPreferences;
-                return this;
-            }
-
-            public Builder systemPrompt(String systemPrompt) {
-                this.systemPrompt = systemPrompt;
-                return this;
-            }
-
-            public Builder includeContext(ContextInclusionStrategy includeContext) {
-                this.includeContext = includeContext;
-                return this;
-            }
-
-            public Builder temperature(Double temperature) {
-                this.temperature = temperature;
-                return this;
-            }
-
-            public Builder maxTokens(int maxTokens) {
-                this.maxTokens = maxTokens;
-                return this;
-            }
-
-            public Builder stopSequences(List<String> stopSequences) {
-                this.stopSequences = stopSequences;
-                return this;
-            }
-
-            public Builder metadata(Map<String, Object> metadata) {
-                this.metadata = metadata;
-                return this;
-            }
-
-            public Builder meta(Map<String, Object> meta) {
-                this.meta = meta;
-                return this;
-            }
-
-            public Builder progressToken(String progressToken) {
-                if (this.meta == null) {
-                    this.meta = new HashMap<>();
-                }
-                this.meta.put("progressToken", progressToken);
-                return this;
-            }
-
-            public CreateMessageRequest build() {
-                return new CreateMessageRequest(
-                        messages,
-                        modelPreferences,
-                        systemPrompt,
-                        includeContext,
-                        temperature,
-                        maxTokens,
-                        stopSequences,
-                        metadata,
-                        meta);
-            }
-        }
-    } // @formatter:on
-
-    @JsonInclude(JsonInclude.Include.NON_ABSENT)
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class CreateMessageResult implements Result {
-        @JsonProperty("role")
-        Role role;
-
-        @JsonProperty("content")
-        Content content;
-
-        @JsonProperty("model")
-        String model;
-
-        @JsonProperty("stopReason")
-        StopReason stopReason;
-
-        @JsonProperty("_meta")
-        Map<String, Object> meta;
-
-        @Override
-        public String toString() {
-            return "CreateMessageResult{" + "role="
-                    + role + ", content="
-                    + content + ", model='"
-                    + model + '\'' + ", stopReason="
-                    + stopReason + ", meta="
-                    + meta + '}';
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (o == null || getClass() != o.getClass()) return false;
-            CreateMessageResult that = (CreateMessageResult) o;
-            return role == that.role
-                    && Objects.equals(content, that.content)
-                    && Objects.equals(model, that.model)
-                    && stopReason == that.stopReason
-                    && Objects.equals(meta, that.meta);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(role, content, model, stopReason, meta);
-        }
-
-        public Role getRole() {
-            return role;
-        }
-
-        public void setRole(Role role) {
-            this.role = role;
-        }
-
-        public Content getContent() {
-            return content;
-        }
-
-        public void setContent(Content content) {
-            this.content = content;
-        }
-
-        public String getModel() {
-            return model;
-        }
-
-        public void setModel(String model) {
-            this.model = model;
-        }
-
-        public StopReason getStopReason() {
-            return stopReason;
-        }
-
-        public void setStopReason(StopReason stopReason) {
-            this.stopReason = stopReason;
-        }
-
-        public Map<String, Object> getMeta() {
-            return meta;
-        }
-
-        public void setMeta(Map<String, Object> meta) {
-            this.meta = meta;
-        }
-
-        public CreateMessageResult() {}
-
-        public CreateMessageResult(
-                Role role, Content content, String model, StopReason stopReason, Map<String, Object> meta) {
-            this.role = role;
-            this.content = content;
-            this.model = model;
-            this.stopReason = stopReason;
-            this.meta = meta;
-        }
-
-        @Override
-        public Map<String, Object> meta() {
-            return this.meta;
-        }
-
-        public enum StopReason {
-            @JsonProperty("endTurn")
-            END_TURN("endTurn"),
-
-            @JsonProperty("stopSequence")
-            STOP_SEQUENCE("stopSequence"),
-
-            @JsonProperty("maxTokens")
-            MAX_TOKENS("maxTokens"),
-
-            @JsonProperty("unknown")
-            UNKNOWN("unknown");
-
-            private final String value;
-
-            private StopReason(String value) {
-                this.value = value;
-            }
-
-            public String getValue() {
-                return value;
-            }
-
-            @JsonCreator
-            public static StopReason fromValue(String value) {
-                for (StopReason reason : values()) {
-                    if (reason.value.equals(value)) {
-                        return reason;
-                    }
-                }
-                return UNKNOWN;
-            }
-        }
-
-        public CreateMessageResult(Role role, Content content, String model, StopReason stopReason) {
-            this(role, content, model, stopReason, null);
-        }
-
-        public static Builder builder() {
-            return new Builder();
-        }
-
-        public static class Builder {
-
-            private Role role = Role.ASSISTANT;
-
-            private Content content;
-
-            private String model;
-
-            private StopReason stopReason = StopReason.END_TURN;
-
-            private Map<String, Object> meta;
-
-            public Builder role(Role role) {
-                this.role = role;
-                return this;
-            }
-
-            public Builder content(Content content) {
-                this.content = content;
-                return this;
-            }
-
-            public Builder model(String model) {
-                this.model = model;
-                return this;
-            }
-
-            public Builder stopReason(StopReason stopReason) {
-                this.stopReason = stopReason;
-                return this;
-            }
-
-            public Builder message(String message) {
-                this.content = new TextContent(message);
-                return this;
-            }
-
-            public Builder meta(Map<String, Object> meta) {
-                this.meta = meta;
-                return this;
-            }
-
-            public CreateMessageResult build() {
-                return new CreateMessageResult(role, content, model, stopReason, meta);
-            }
-        }
-    } // @formatter:on
-
-    @JsonInclude(JsonInclude.Include.NON_ABSENT)
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class ElicitRequest implements Request { // @formatter:on
-
-        @JsonProperty("message")
-        String message;
-
-        @JsonProperty("requestedSchema")
-        Map<String, Object> requestedSchema;
-
-        @JsonProperty("_meta")
-        Map<String, Object> meta;
-
-        @Override
-        public String toString() {
-            return "ElicitRequest{" + "message='"
-                    + message + '\'' + ", requestedSchema="
-                    + requestedSchema + ", meta="
-                    + meta + '}';
-        }
-
-        // backwards compatibility constructor
-        public ElicitRequest(String message, Map<String, Object> requestedSchema, Map<String, Object> meta) {
-            this.message = message;
-            this.requestedSchema = requestedSchema;
-            this.meta = meta;
-        }
-
-        public ElicitRequest(String message, Map<String, Object> requestedSchema) {
-            this(message, requestedSchema, null);
-        }
-
-        @Override
-        public Map<String, Object> meta() {
-            return this.meta;
-        }
-
-        public static Builder builder() {
-            return new Builder();
-        }
-
-        public static class Builder {
-
-            private String message;
-
-            private Map<String, Object> requestedSchema;
-
-            private Map<String, Object> meta;
-
-            public Builder message(String message) {
-                this.message = message;
-                return this;
-            }
-
-            public Builder requestedSchema(Map<String, Object> requestedSchema) {
-                this.requestedSchema = requestedSchema;
-                return this;
-            }
-
-            public Builder meta(Map<String, Object> meta) {
-                this.meta = meta;
-                return this;
-            }
-
-            public Builder progressToken(String progressToken) {
-                if (this.meta == null) {
-                    this.meta = new HashMap<>();
-                }
-                this.meta.put("progressToken", progressToken);
-                return this;
-            }
-
-            public ElicitRequest build() {
-                return new ElicitRequest(message, requestedSchema, meta);
-            }
-        }
-    }
-
-    @JsonInclude(JsonInclude.Include.NON_ABSENT)
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class ElicitResult implements Result { // @formatter:on
-
-        @JsonProperty("action")
-        Action action;
-
-        @JsonProperty("content")
-        Map<String, Object> content;
-
-        @JsonProperty("_meta")
-        Map<String, Object> meta;
-
-        @Override
-        public String toString() {
-            return "ElicitResult{" + "action=" + action + ", content=" + content + ", meta=" + meta + '}';
-        }
-
-        @Override
-        public Map<String, Object> meta() {
-            return this.meta;
-        }
-
-        public enum Action {
-
-            // @formatter:off
-            @JsonProperty("accept")
-            ACCEPT,
-            @JsonProperty("decline")
-            DECLINE,
-            @JsonProperty("cancel")
-            CANCEL
-        } // @formatter:on
-
-        // backwards compatibility constructor
-        public ElicitResult(Action action, Map<String, Object> content, Map<String, Object> meta) {
-            this.action = action;
-            this.content = content;
-            this.meta = meta;
-        }
-
-        public ElicitResult(Action action, Map<String, Object> content) {
-            this(action, content, null);
-        }
-
-        public static Builder builder() {
-            return new Builder();
-        }
-
-        public static class Builder {
-
-            private Action action;
-
-            private Map<String, Object> content;
-
-            private Map<String, Object> meta;
-
-            public Builder message(Action action) {
-                this.action = action;
-                return this;
-            }
-
-            public Builder content(Map<String, Object> content) {
-                this.content = content;
-                return this;
-            }
-
-            public Builder meta(Map<String, Object> meta) {
-                this.meta = meta;
-                return this;
-            }
-
-            public ElicitResult build() {
-                return new ElicitResult(action, content, meta);
-            }
-        }
-    }
-
-    // ---------------------------
     // Pagination Interfaces
     // ---------------------------
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
@@ -4573,281 +3459,8 @@ public final class McpSchema {
     }
 
     // ---------------------------
-    // Progress and Logging
+    // Logging
     // ---------------------------
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class ProgressNotification implements Notification {
-        @JsonProperty("progressToken")
-        String progressToken;
-
-        @JsonProperty("progress")
-        double progress;
-
-        @JsonProperty("total")
-        Double total;
-
-        @JsonProperty("message")
-        String message;
-
-        @JsonProperty("_meta")
-        Map<String, Object> meta;
-
-        public ProgressNotification(
-                String progressToken, double progress, Double total, String message, Map<String, Object> meta) {
-            this.progressToken = progressToken;
-            this.progress = progress;
-            this.total = total;
-            this.message = message;
-            this.meta = meta;
-        }
-
-        @Override
-        public String toString() {
-            return "ProgressNotification{" + "progressToken='"
-                    + progressToken + '\'' + ", progress="
-                    + progress + ", total="
-                    + total + ", message='"
-                    + message + '\'' + ", meta="
-                    + meta + '}';
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (o == null || getClass() != o.getClass()) return false;
-            ProgressNotification that = (ProgressNotification) o;
-            return Double.compare(progress, that.progress) == 0
-                    && Objects.equals(progressToken, that.progressToken)
-                    && Objects.equals(total, that.total)
-                    && Objects.equals(message, that.message)
-                    && Objects.equals(meta, that.meta);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(progressToken, progress, total, message, meta);
-        }
-
-        public String getProgressToken() {
-            return progressToken;
-        }
-
-        public void setProgressToken(String progressToken) {
-            this.progressToken = progressToken;
-        }
-
-        public double getProgress() {
-            return progress;
-        }
-
-        public void setProgress(double progress) {
-            this.progress = progress;
-        }
-
-        public Double getTotal() {
-            return total;
-        }
-
-        public void setTotal(Double total) {
-            this.total = total;
-        }
-
-        public String getMessage() {
-            return message;
-        }
-
-        public void setMessage(String message) {
-            this.message = message;
-        }
-
-        public Map<String, Object> getMeta() {
-            return meta;
-        }
-
-        public void setMeta(Map<String, Object> meta) {
-            this.meta = meta;
-        }
-
-        public ProgressNotification(String progressToken, double progress, Double total, String message) {
-            this(progressToken, progress, total, message, null);
-        }
-
-        @Override
-        public Map<String, Object> meta() {
-            return this.meta;
-        }
-    } // @formatter:on
-
-    /**
-     * The Model Context Protocol (MCP) provides a standardized way for servers to send
-     * resources update message to clients.
-     *
-     */
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class ResourcesUpdatedNotification implements Notification {
-
-        @JsonProperty("uri")
-        String uri;
-
-        @JsonProperty("_meta")
-        Map<String, Object> meta;
-
-        @Override
-        public String toString() {
-            return "ResourcesUpdatedNotification{" + "uri='" + uri + '\'' + ", meta=" + meta + '}';
-        }
-
-        public ResourcesUpdatedNotification(String uri, Map<String, Object> meta) {
-            this.uri = uri;
-            this.meta = meta;
-        }
-
-        public ResourcesUpdatedNotification(String uri) {
-            this(uri, null);
-        }
-
-        @Override
-        public Map<String, Object> meta() {
-            return this.meta;
-        }
-    }
-
-    /**
-     * The Model Context Protocol (MCP) provides a standardized way for servers to send
-     * structured log messages to clients. Clients can control logging verbosity by
-     * setting minimum log levels, with servers sending notifications containing severity
-     * levels, optional logger names, and arbitrary JSON-serializable data.
-     * level The severity levels. The mimimum log level is set by the client.
-     * logger The logger that generated the message.
-     * data JSON-serializable logging data.
-     */
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class LoggingMessageNotification implements Notification {
-        @JsonProperty("level")
-        LoggingLevel level;
-
-        @JsonProperty("logger")
-        String logger;
-
-        @JsonProperty("data")
-        String data;
-
-        @JsonProperty("_meta")
-        Map<String, Object> meta;
-
-        public Map<String, Object> getMeta() {
-            return meta;
-        }
-
-        public void setMeta(Map<String, Object> meta) {
-            this.meta = meta;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (o == null || getClass() != o.getClass()) return false;
-            LoggingMessageNotification that = (LoggingMessageNotification) o;
-            return level == that.level
-                    && Objects.equals(logger, that.logger)
-                    && Objects.equals(data, that.data)
-                    && Objects.equals(meta, that.meta);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(level, logger, data, meta);
-        }
-
-        @Override
-        public String toString() {
-            return "LoggingMessageNotification{" + "level="
-                    + level + ", logger='"
-                    + logger + '\'' + ", data='"
-                    + data + '\'' + ", meta="
-                    + meta + '}';
-        }
-
-        public LoggingLevel getLevel() {
-            return level;
-        }
-
-        public void setLevel(LoggingLevel level) {
-            this.level = level;
-        }
-
-        public String getLogger() {
-            return logger;
-        }
-
-        public void setLogger(String logger) {
-            this.logger = logger;
-        }
-
-        public String getData() {
-            return data;
-        }
-
-        public void setData(String data) {
-            this.data = data;
-        }
-
-        public LoggingMessageNotification() {}
-
-        public LoggingMessageNotification(LoggingLevel level, String logger, String data, Map<String, Object> meta) {
-            this.level = level;
-            this.logger = logger;
-            this.data = data;
-            this.meta = meta;
-        }
-
-        @Override
-        public Map<String, Object> meta() {
-            return this.meta;
-        }
-
-        public LoggingMessageNotification(LoggingLevel level, String logger, String data) {
-            this(level, logger, data, null);
-        }
-
-        public static Builder builder() {
-            return new Builder();
-        }
-
-        public static class Builder {
-
-            private LoggingLevel level = LoggingLevel.INFO;
-
-            private String logger = "server";
-
-            private String data;
-
-            private Map<String, Object> meta;
-
-            public Builder level(LoggingLevel level) {
-                this.level = level;
-                return this;
-            }
-
-            public Builder logger(String logger) {
-                this.logger = logger;
-                return this;
-            }
-
-            public Builder data(String data) {
-                this.data = data;
-                return this;
-            }
-
-            public Builder meta(Map<String, Object> meta) {
-                this.meta = meta;
-                return this;
-            }
-
-            public LoggingMessageNotification build() {
-                return new LoggingMessageNotification(level, logger, data, meta);
-            }
-        }
-    } // @formatter:on
-
     public enum LoggingLevel { // @formatter:off
         @JsonProperty("debug")
         DEBUG(0),
@@ -4877,12 +3490,6 @@ public final class McpSchema {
         }
     } // @formatter:on
 
-    /**
-     * A request from the client to the server, to enable or adjust logging.
-     * level The level of logging that the client wants to receive from the server.
-     * The server should send all logs at this level and higher (i.e., more severe) to the
-     * client as notifications/message
-     */
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static final class SetLevelRequest {

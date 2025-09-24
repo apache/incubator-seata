@@ -66,47 +66,19 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 /**
- * The Model Context Protocol (MCP) server implementation that provides asynchronous
- * communication using Project Reactor's Mono and Flux types.
- *
- * <p>
- * This server implements the MCP specification, enabling AI models to expose tools,
- * resources, and prompts through a standardized interface. Key features include:
- * <ul>
- * <li>Asynchronous communication using reactive programming patterns
- * <li>Dynamic tool registration and management
- * <li>Resource handling with URI-based addressing
- * <li>Prompt template management
- * <li>Real-time client notifications for state changes
- * <li>Structured logging with configurable severity levels
- * <li>Support for client-side AI model sampling
- * </ul>
- *
- * <p>
- * The server follows a lifecycle:
- * <ol>
- * <li>Initialization - Accepts client connections and negotiates capabilities
- * <li>Normal Operation - Handles client requests and sends notifications
- * <li>Graceful Shutdown - Ensures clean connection termination
- * </ol>
- *
- * <p>
- * This implementation uses Project Reactor for non-blocking operations, making it
- * suitable for high-throughput scenarios and reactive applications. All operations return
- * Mono or Flux types that can be composed into reactive pipelines.
- *
- * <p>
- * The server supports runtime modification of its capabilities through methods like
- * {@link #addTool}, {@link #addResource}, and {@link #addPrompt}, automatically notifying
- * connected clients of changes when configured to do so.
- *
  * @author Christian Tzolov
  * @author Dariusz Jędrzejczyk
  * @author Jihoon Kim
@@ -310,22 +282,6 @@ public class McpAsyncServer {
     }
 
     /**
-     * Get the server capabilities that define the supported features and functionality.
-     * @return The server capabilities
-     */
-    public ServerCapabilities getServerCapabilities() {
-        return this.serverCapabilities;
-    }
-
-    /**
-     * Get the server implementation information.
-     * @return The server implementation details
-     */
-    public Implementation getServerInfo() {
-        return this.serverInfo;
-    }
-
-    /**
      * Gracefully closes the server, allowing any in-progress operations to complete.
      * @return A Mono that completes when the server has been closed
      */
@@ -355,12 +311,6 @@ public class McpAsyncServer {
     // ---------------------------------------
     // Tool Management
     // ---------------------------------------
-
-    /**
-     * Add a new tool call specification at runtime.
-     * @param toolSpecification The tool specification to add
-     * @return Mono that completes when clients have been notified of the change
-     */
     public Mono<Void> addTool(McpServerFeatures.AsyncToolSpecification toolSpecification) {
         if (toolSpecification == null) {
             return Mono.error(new McpError("Tool specification must not be null"));
@@ -430,8 +380,6 @@ public class McpAsyncServer {
                                 "Tool call with no outputSchema is not expected to have a result with structured content, but got: {}",
                                 result.getStructuredContent());
                     }
-                    // Pass through. No validation is required if no output schema is
-                    // provided.
                     return result;
                 }
 
@@ -446,7 +394,6 @@ public class McpAsyncServer {
                             true);
                 }
 
-                // Validate the result against the output schema
                 JsonSchemaValidator.ValidationResponse validation =
                         this.jsonSchemaValidator.validate(outputSchema, result.getStructuredContent());
 
@@ -456,12 +403,6 @@ public class McpAsyncServer {
                 }
 
                 if (Utils.isEmpty(result.getContent())) {
-                    // For backwards compatibility, a tool that returns structured
-                    // content SHOULD also return functionally equivalent unstructured
-                    // content. (For example, serialized JSON can be returned in a
-                    // TextContent block.)
-                    // https://modelcontextprotocol.io/specification/2025-06-18/server/tools#structured-content
-
                     return new CallToolResult(
                             Collections.singletonList(new TextContent(validation.getJsonStructuredOutput())),
                             result.getError(),
@@ -505,33 +446,6 @@ public class McpAsyncServer {
                         toolSpecification.tool().getOutputSchema(),
                         toolSpecification.callHandler()))
                 .build();
-    }
-
-    /**
-     * Remove a tool handler at runtime.
-     * @param toolName The name of the tool handler to remove
-     * @return Mono that completes when clients have been notified of the change
-     */
-    public Mono<Void> removeTool(String toolName) {
-        if (toolName == null) {
-            return Mono.error(new McpError("Tool name must not be null"));
-        }
-        if (this.serverCapabilities.tools() == null) {
-            return Mono.error(new McpError("Server must be configured with tool capabilities"));
-        }
-
-        return Mono.defer(() -> {
-            boolean removed = this.tools.removeIf(
-                    toolSpecification -> toolSpecification.tool().getName().equals(toolName));
-            if (removed) {
-                logger.debug("Removed tool handler: {}", toolName);
-                if (this.serverCapabilities.tools().listChanged()) {
-                    return notifyToolsListChanged();
-                }
-                return Mono.empty();
-            }
-            return Mono.error(new McpError("Tool with name '" + toolName + "' not found"));
-        });
     }
 
     /**
@@ -605,46 +519,11 @@ public class McpAsyncServer {
     }
 
     /**
-     * Remove a resource handler at runtime.
-     * @param resourceUri The URI of the resource handler to remove
-     * @return Mono that completes when clients have been notified of the change
-     */
-    public Mono<Void> removeResource(String resourceUri) {
-        if (resourceUri == null) {
-            return Mono.error(new McpError("Resource URI must not be null"));
-        }
-        if (this.serverCapabilities.resources() == null) {
-            return Mono.error(new McpError("Server must be configured with resource capabilities"));
-        }
-
-        return Mono.defer(() -> {
-            McpServerFeatures.AsyncResourceSpecification removed = this.resources.remove(resourceUri);
-            if (removed != null) {
-                logger.debug("Removed resource handler: {}", resourceUri);
-                if (this.serverCapabilities.resources().listChanged()) {
-                    return notifyResourcesListChanged();
-                }
-                return Mono.empty();
-            }
-            return Mono.error(new McpError("Resource with URI '" + resourceUri + "' not found"));
-        });
-    }
-
-    /**
      * Notifies clients that the list of available resources has changed.
      * @return A Mono that completes when all clients have been notified
      */
     public Mono<Void> notifyResourcesListChanged() {
         return this.mcpTransportProvider.notifyClients(McpSchema.METHOD_NOTIFICATION_RESOURCES_LIST_CHANGED, null);
-    }
-
-    /**
-     * Notifies clients that the resources have updated.
-     * @return A Mono that completes when all clients have been notified
-     */
-    public Mono<Void> notifyResourcesUpdated(ResourcesUpdatedNotification resourcesUpdatedNotification) {
-        return this.mcpTransportProvider.notifyClients(
-                McpSchema.METHOD_NOTIFICATION_RESOURCES_UPDATED, resourcesUpdatedNotification);
     }
 
     private McpRequestHandler<ListResourcesResult> resourcesListRequestHandler() {
@@ -666,13 +545,12 @@ public class McpAsyncServer {
                 .filter(uri -> uri.contains("{"))
                 .map(uri -> {
                     Resource resource = this.resources.get(uri).resource();
-                    ResourceTemplate template = new ResourceTemplate(
+                    return new ResourceTemplate(
                             resource.getUri(),
                             resource.getName(),
                             resource.getDescription(),
                             resource.getMimeType(),
                             resource.getAnnotations());
-                    return template;
                 })
                 .collect(Collectors.toList());
 
@@ -737,35 +615,6 @@ public class McpAsyncServer {
     }
 
     /**
-     * Remove a prompt handler at runtime.
-     * @param promptName The name of the prompt handler to remove
-     * @return Mono that completes when clients have been notified of the change
-     */
-    public Mono<Void> removePrompt(String promptName) {
-        if (promptName == null) {
-            return Mono.error(new McpError("Prompt name must not be null"));
-        }
-        if (this.serverCapabilities.prompts() == null) {
-            return Mono.error(new McpError("Server must be configured with prompt capabilities"));
-        }
-
-        return Mono.defer(() -> {
-            McpServerFeatures.AsyncPromptSpecification removed = this.prompts.remove(promptName);
-
-            if (removed != null) {
-                logger.debug("Removed prompt handler: {}", promptName);
-                // Servers that declared the listChanged capability SHOULD send a
-                // notification, when the list of available prompts changes
-                if (this.serverCapabilities.prompts().listChanged()) {
-                    return this.notifyPromptsListChanged();
-                }
-                return Mono.empty();
-            }
-            return Mono.error(new McpError("Prompt with name '" + promptName + "' not found"));
-        });
-    }
-
-    /**
      * Notifies clients that the list of available prompts has changed.
      * @return A Mono that completes when all clients have been notified
      */
@@ -800,41 +649,16 @@ public class McpAsyncServer {
     // ---------------------------------------
     // Logging Management
     // ---------------------------------------
-
-    /**
-     * This implementation would, incorrectly, broadcast the logging message to all
-     * connected clients, using a single minLoggingLevel for all of them. Similar to the
-     * sampling and roots, the logging level should be set per client session and use the
-     * ServerExchange to send the logging message to the right client.
-     * @param loggingMessageNotification The logging message to send
-     * @return A Mono that completes when the notification has been sent
-     */
-    public Mono<Void> loggingNotification(LoggingMessageNotification loggingMessageNotification) {
-
-        if (loggingMessageNotification == null) {
-            return Mono.error(new McpError("Logging message must not be null"));
-        }
-
-        if (loggingMessageNotification.getLevel().level() < minLoggingLevel.level()) {
-            return Mono.empty();
-        }
-
-        return this.mcpTransportProvider.notifyClients(
-                McpSchema.METHOD_NOTIFICATION_MESSAGE, loggingMessageNotification);
-    }
-
     private McpRequestHandler<Object> setLoggerRequestHandler() {
-        return (exchange, params) -> {
-            return Mono.defer(() -> {
-                SetLevelRequest newMinLoggingLevel =
-                        objectMapper.convertValue(params, new TypeReference<SetLevelRequest>() {});
+        return (exchange, params) -> Mono.defer(() -> {
+            SetLevelRequest newMinLoggingLevel =
+                    objectMapper.convertValue(params, new TypeReference<SetLevelRequest>() {});
 
-                exchange.setMinLoggingLevel(newMinLoggingLevel.getLevel());
-                this.minLoggingLevel = newMinLoggingLevel.getLevel();
+            exchange.setMinLoggingLevel(newMinLoggingLevel.getLevel());
+            this.minLoggingLevel = newMinLoggingLevel.getLevel();
 
-                return Mono.just(Collections.EMPTY_MAP);
-            });
-        };
+            return Mono.just(Collections.EMPTY_MAP);
+        });
     }
 
     private McpRequestHandler<CompleteResult> completionCompleteRequestHandler() {
@@ -892,19 +716,6 @@ public class McpAsyncServer {
         };
     }
 
-    /**
-     * Parses the raw JSON-RPC request parameters into a {@link CompleteRequest}
-     * object.
-     * <p>
-     * This method manually extracts the `ref` and `argument` fields from the input map,
-     * determines the correct reference type (either prompt or resource), and constructs a
-     * fully-typed {@code CompleteRequest} instance.
-     * @param object the raw request parameters, expected to be a Map containing "ref" and
-     * "argument" entries.
-     * @return a {@link CompleteRequest} representing the structured completion
-     * request.
-     * @throws IllegalArgumentException if the "ref" type is not recognized.
-     */
     @SuppressWarnings("unchecked")
     private CompleteRequest parseCompletionParams(Object object) {
         Map<String, Object> params = (Map<String, Object>) object;
@@ -943,12 +754,4 @@ public class McpAsyncServer {
         return new CompleteRequest(ref, argument, meta, context);
     }
 
-    /**
-     * This method is package-private and used for test only. Should not be called by user
-     * code.
-     * @param protocolVersions the Client supported protocol versions.
-     */
-    void setProtocolVersions(List<String> protocolVersions) {
-        this.protocolVersions = protocolVersions;
-    }
 }

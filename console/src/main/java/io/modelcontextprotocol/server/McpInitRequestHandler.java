@@ -59,11 +59,5 @@ import reactor.core.publisher.Mono;
  * Request handler for the initialization request.
  */
 public interface McpInitRequestHandler {
-
-    /**
-     * Handles the initialization request.
-     * @param initializeRequest the initialization request by the client
-     * @return a Mono that will emit the result of the initialization
-     */
     Mono<McpSchema.InitializeResult> handle(McpSchema.InitializeRequest initializeRequest);
 }

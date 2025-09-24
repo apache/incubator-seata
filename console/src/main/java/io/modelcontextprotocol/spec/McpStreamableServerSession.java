@@ -217,8 +217,6 @@ public class McpStreamableServerSession implements McpLoggableSession {
             McpStreamableServerSessionStream stream = new McpStreamableServerSessionStream(transport);
             McpRequestHandler<?> requestHandler =
                     McpStreamableServerSession.this.requestHandlers.get(jsonrpcRequest.method);
-            // remove itself from the registry and also close the underlying transport
-            // (sink)
             if (requestHandler == null) {
                 MethodNotFoundError error = getMethodNotFoundError(jsonrpcRequest.method);
                 return transport.sendMessage(new McpSchema.JSONRPCResponse(

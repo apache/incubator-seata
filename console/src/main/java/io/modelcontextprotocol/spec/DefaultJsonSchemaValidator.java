@@ -66,10 +66,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Default implementation of the {@link JsonSchemaValidator} interface. This class
- * provides methods to validate structured content against a JSON schema. It uses the
- * NetworkNT JSON Schema Validator library for validation.
- *
  * @author Christian Tzolov
  */
 public class DefaultJsonSchemaValidator implements JsonSchemaValidator {
@@ -81,10 +77,6 @@ public class DefaultJsonSchemaValidator implements JsonSchemaValidator {
     private final JsonSchemaFactory schemaFactory;
 
     private final ConcurrentHashMap<String, JsonSchema> schemaCache;
-
-    public DefaultJsonSchemaValidator() {
-        this(new ObjectMapper());
-    }
 
     public DefaultJsonSchemaValidator(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
@@ -105,7 +97,6 @@ public class DefaultJsonSchemaValidator implements JsonSchemaValidator {
             Set<ValidationMessage> validationResult =
                     this.getOrCreateJsonSchema(schema).validate(jsonStructuredOutput);
 
-            // Check if validation passed
             if (!validationResult.isEmpty()) {
                 return ValidationResponse.asInvalid(
                         "Validation failed: structuredContent does not match tool outputSchema. "
@@ -123,51 +114,30 @@ public class DefaultJsonSchemaValidator implements JsonSchemaValidator {
         }
     }
 
-    /**
-     * Gets a cached JsonSchema or creates and caches a new one.
-     * @param schema the schema map to convert
-     * @return the compiled JsonSchema
-     * @throws JsonProcessingException if schema processing fails
-     */
     private JsonSchema getOrCreateJsonSchema(Map<String, Object> schema) throws JsonProcessingException {
-        // Generate cache key based on schema content
         String cacheKey = this.generateCacheKey(schema);
 
-        // Try to get from cache first
         JsonSchema cachedSchema = this.schemaCache.get(cacheKey);
         if (cachedSchema != null) {
             return cachedSchema;
         }
 
-        // Create new schema if not in cache
         JsonSchema newSchema = this.createJsonSchema(schema);
 
-        // Cache the schema
         JsonSchema existingSchema = this.schemaCache.putIfAbsent(cacheKey, newSchema);
         return existingSchema != null ? existingSchema : newSchema;
     }
 
-    /**
-     * Creates a new JsonSchema from the given schema map.
-     * @param schema the schema map
-     * @return the compiled JsonSchema
-     * @throws JsonProcessingException if schema processing fails
-     */
     private JsonSchema createJsonSchema(Map<String, Object> schema) throws JsonProcessingException {
-        // Convert schema map directly to JsonNode (more efficient than string
-        // serialization)
         JsonNode schemaNode = this.objectMapper.valueToTree(schema);
 
-        // Handle case where ObjectMapper might return null (e.g., in mocked scenarios)
         if (schemaNode == null) {
             throw new JsonProcessingException("Failed to convert schema to JsonNode") {};
         }
 
-        // Handle additionalProperties setting
         if (schemaNode.isObject()) {
             ObjectNode objectSchemaNode = (ObjectNode) schemaNode;
             if (!objectSchemaNode.has("additionalProperties")) {
-                // Clone the node before modification to avoid mutating the original
                 objectSchemaNode = objectSchemaNode.deepCopy();
                 objectSchemaNode.put("additionalProperties", false);
                 schemaNode = objectSchemaNode;
@@ -177,33 +147,11 @@ public class DefaultJsonSchemaValidator implements JsonSchemaValidator {
         return this.schemaFactory.getSchema(schemaNode);
     }
 
-    /**
-     * Generates a cache key for the given schema map.
-     * @param schema the schema map
-     * @return a cache key string
-     */
     protected String generateCacheKey(Map<String, Object> schema) {
         if (schema.containsKey("$id")) {
             // Use the (optional) "$id" field as the cache key if present
             return "" + schema.get("$id");
         }
-        // Fall back to schema's hash code as a simple cache key
-        // For more sophisticated caching, could use content-based hashing
         return String.valueOf(schema.hashCode());
-    }
-
-    /**
-     * Clears the schema cache. Useful for testing or memory management.
-     */
-    public void clearCache() {
-        this.schemaCache.clear();
-    }
-
-    /**
-     * Returns the current size of the schema cache.
-     * @return the number of cached schemas
-     */
-    public int getCacheSize() {
-        return this.schemaCache.size();
     }
 }
