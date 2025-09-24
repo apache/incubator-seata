@@ -20,6 +20,8 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFactory;
 import io.netty.channel.ChannelOption;
+import io.netty.channel.epoll.Epoll;
+import io.netty.channel.epoll.EpollSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.apache.seata.common.ConfigurationKeys;
@@ -101,7 +103,12 @@ public class TmNettyClientTest {
         ChannelFactory<? extends Channel> channelFactory =
                 (ChannelFactory<? extends Channel>) channelFactoryField.get(bootstrap);
         Assertions.assertNotNull(channelFactory);
-        Assertions.assertTrue(channelFactory.newChannel() instanceof NioSocketChannel);
+
+        if (Epoll.isAvailable()) {
+            Assertions.assertTrue(channelFactory.newChannel() instanceof EpollSocketChannel);
+        } else {
+            Assertions.assertTrue(channelFactory.newChannel() instanceof NioSocketChannel);
+        }
     }
 
     /**
