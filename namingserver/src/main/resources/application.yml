@@ -68,9 +68,6 @@ seata:
       mcpEndpoint: /mcp
       heartBeatSecondDuration: 30
 
-    # MCP supports
-    promptSupport: true
-    resourceSupport: true
     # Query limits the maximum time interval, The unit is milliseconds, Default seven days
     query:
       max_query_duration: 604800000
