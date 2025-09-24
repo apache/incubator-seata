@@ -22,7 +22,11 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.modelcontextprotocol.server.McpServerFeatures;
 import io.modelcontextprotocol.spec.McpSchema;
 import org.apache.seata.common.util.StringUtils;
-import org.apache.seata.mcp.annotation.*;
+import org.apache.seata.mcp.annotation.Prompt;
+import org.apache.seata.mcp.annotation.PromptParam;
+import org.apache.seata.mcp.annotation.Resource;
+import org.apache.seata.mcp.annotation.Tool;
+import org.apache.seata.mcp.annotation.ToolParam;
 import org.apache.seata.mcp.manager.MCPServerManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +40,14 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Automatic tool registration class, able to scan @McpTool and @McpParam annotations, encapsulating them as mcp specified Json schema
