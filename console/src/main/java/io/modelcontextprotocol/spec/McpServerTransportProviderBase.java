@@ -55,26 +55,6 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * The core building block providing the server-side MCP transport. Implement this
- * interface to bridge between a particular server-side technology and the MCP server
- * transport layer.
- *
- * <p>
- * The lifecycle of the provider dictates that it be created first, upon application
- * startup, and then passed into either
- * a result of the MCP server creation, the provider will be notified of a
- * {@link McpServerSession.Factory} which will be used to handle a 1:1 communication
- * between a newly connected client and the server. The provider's responsibility is to
- * create instances of {@link McpServerTransport} that the session will utilise during the
- * session lifetime.
- *
- * <p>
- * Finally, the {@link McpServerTransport}s can be closed in bulk when {@link #close()} or
- * {@link #closeGracefully()} are called as part of the normal application shutdown event.
- * Individual {@link McpServerTransport}s can also be closed on a per-session basis, where
- * the {@link McpServerSession#close()} or {@link McpServerSession#closeGracefully()}
- * closes the provided transport.
- *
  * @author Dariusz Jędrzejczyk
  */
 public interface McpServerTransportProviderBase {

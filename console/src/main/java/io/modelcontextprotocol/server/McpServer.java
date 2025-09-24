@@ -60,8 +60,6 @@ import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
 import io.modelcontextprotocol.spec.McpServerTransportProvider;
 import io.modelcontextprotocol.spec.McpStreamableServerTransportProvider;
 import io.modelcontextprotocol.util.Assert;
-import io.modelcontextprotocol.util.DeafaultMcpUriTemplateManagerFactory;
-import io.modelcontextprotocol.util.McpUriTemplateManagerFactory;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
@@ -126,7 +124,6 @@ public interface McpServer {
                     mapper,
                     features,
                     this.requestTimeout,
-                    this.uriTemplateManagerFactory,
                     jsonSchemaValidator);
         }
     }
@@ -161,14 +158,11 @@ public interface McpServer {
                     mapper,
                     features,
                     this.requestTimeout,
-                    this.uriTemplateManagerFactory,
                     jsonSchemaValidator);
         }
     }
 
     abstract class AsyncSpecification<S extends AsyncSpecification<S>> {
-
-        McpUriTemplateManagerFactory uriTemplateManagerFactory = new DeafaultMcpUriTemplateManagerFactory();
 
         ObjectMapper objectMapper;
 

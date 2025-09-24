@@ -76,8 +76,6 @@ import io.modelcontextprotocol.spec.McpServerTransportProvider;
 import io.modelcontextprotocol.spec.McpServerTransportProviderBase;
 import io.modelcontextprotocol.spec.McpStreamableServerTransportProvider;
 import io.modelcontextprotocol.util.Assert;
-import io.modelcontextprotocol.util.DeafaultMcpUriTemplateManagerFactory;
-import io.modelcontextprotocol.util.McpUriTemplateManagerFactory;
 import io.modelcontextprotocol.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -128,7 +126,6 @@ public class McpAsyncServer {
 
     private List<String> protocolVersions;
 
-    private McpUriTemplateManagerFactory uriTemplateManagerFactory = new DeafaultMcpUriTemplateManagerFactory();
 
     /**
      * Create a new McpAsyncServer with the given transport provider and capabilities.
@@ -142,7 +139,6 @@ public class McpAsyncServer {
             ObjectMapper objectMapper,
             McpServerFeatures.Async features,
             Duration requestTimeout,
-            McpUriTemplateManagerFactory uriTemplateManagerFactory,
             JsonSchemaValidator jsonSchemaValidator) {
         this.mcpTransportProvider = mcpTransportProvider;
         this.objectMapper = objectMapper;
@@ -151,7 +147,6 @@ public class McpAsyncServer {
         this.instructions = features.instructions();
         this.tools.addAll(withStructuredOutputHandling(jsonSchemaValidator, features.tools()));
         this.completions.putAll(features.completions());
-        this.uriTemplateManagerFactory = uriTemplateManagerFactory;
         this.jsonSchemaValidator = jsonSchemaValidator;
 
         Map<String, McpRequestHandler<?>> requestHandlers = prepareRequestHandlers();
@@ -173,7 +168,6 @@ public class McpAsyncServer {
             ObjectMapper objectMapper,
             McpServerFeatures.Async features,
             Duration requestTimeout,
-            McpUriTemplateManagerFactory uriTemplateManagerFactory,
             JsonSchemaValidator jsonSchemaValidator) {
         this.mcpTransportProvider = mcpTransportProvider;
         this.objectMapper = objectMapper;
@@ -182,7 +176,6 @@ public class McpAsyncServer {
         this.instructions = features.instructions();
         this.tools.addAll(withStructuredOutputHandling(jsonSchemaValidator, features.tools()));
         this.completions.putAll(features.completions());
-        this.uriTemplateManagerFactory = uriTemplateManagerFactory;
         this.jsonSchemaValidator = jsonSchemaValidator;
 
         Map<String, McpRequestHandler<?>> requestHandlers = prepareRequestHandlers();

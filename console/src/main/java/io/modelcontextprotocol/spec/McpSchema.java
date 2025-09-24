@@ -110,24 +110,6 @@ public final class McpSchema {
 
     public static final String METHOD_NOTIFICATION_TOOLS_LIST_CHANGED = "notifications/tools/list_changed";
 
-    // Resources Methods
-    public static final String METHOD_RESOURCES_LIST = "resources/list";
-
-    public static final String METHOD_RESOURCES_READ = "resources/read";
-
-    public static final String METHOD_NOTIFICATION_RESOURCES_LIST_CHANGED = "notifications/resources/list_changed";
-
-    public static final String METHOD_RESOURCES_TEMPLATES_LIST = "resources/templates/list";
-
-    // Prompt Methods
-    public static final String METHOD_PROMPT_LIST = "prompts/list";
-
-    public static final String METHOD_PROMPT_GET = "prompts/get";
-
-    public static final String METHOD_NOTIFICATION_PROMPTS_LIST_CHANGED = "notifications/prompts/list_changed";
-
-    public static final String METHOD_COMPLETION_COMPLETE = "completion/complete";
-
     // Logging Methods
     public static final String METHOD_LOGGING_SET_LEVEL = "logging/setLevel";
 
@@ -135,9 +117,6 @@ public final class McpSchema {
     public static final String METHOD_ROOTS_LIST = "roots/list";
 
     public static final String METHOD_NOTIFICATION_ROOTS_LIST_CHANGED = "notifications/roots/list_changed";
-
-    // Elicitation Methods
-    public static final String METHOD_ELICITATION_CREATE = "elicitation/create";
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
@@ -184,16 +163,6 @@ public final class McpSchema {
     private static final TypeReference<HashMap<String, Object>> MAP_TYPE_REF =
             new TypeReference<HashMap<String, Object>>() {};
 
-    /**
-     * Deserializes a JSON string into a JSONRPCMessage object.
-     * @param objectMapper The ObjectMapper instance to use for deserialization
-     * @param jsonText The JSON string to deserialize
-     * @return A JSONRPCMessage instance using either the {@link JSONRPCRequest},
-     * {@link JSONRPCNotification}, or {@link JSONRPCResponse} classes.
-     * @throws IOException If there's an error during deserialization
-     * @throws IllegalArgumentException If the JSON structure doesn't match any known
-     * message type
-     */
     public static JSONRPCMessage deserializeJsonRpcMessage(ObjectMapper objectMapper, String jsonText)
             throws IOException {
 
@@ -1204,33 +1173,6 @@ public final class McpSchema {
         }
     } // @formatter:on
 
-    /**
-     * A common interface for resource content, which includes metadata about the resource
-     * such as its URI, name, description, MIME type, size, and annotations.
-     */
-    public interface ResourceContent extends BaseMetadata {
-
-        String getUri();
-
-        String getDescription();
-
-        String getMimeType();
-
-        Long getSize();
-
-        Annotations getAnnotations();
-    }
-
-    /**
-     * Base interface for metadata with name (identifier) and title (display name)
-     * properties.
-     */
-    public interface BaseMetadata {
-        String getName();
-
-        String getTitle();
-    }
-
     // ---------------------------
     // Tool Interfaces
     // ---------------------------
@@ -1420,14 +1362,6 @@ public final class McpSchema {
         }
     } // @formatter:on
 
-    /**
-     * Additional properties describing a Tool to clients.
-     * NOTE: all properties in ToolAnnotations are **hints**. They are not guaranteed to
-     * provide a faithful description of tool behavior (including descriptive properties
-     * like `title`).
-     * Clients should never make tool use decisions based on ToolAnnotations received from
-     * untrusted servers.
-     */
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ToolAnnotations {
@@ -1970,11 +1904,6 @@ public final class McpSchema {
 
             private Map<String, Object> meta;
 
-            /**
-             * Sets the content list for the tool result.
-             * @param content the content list
-             * @return this builder
-             */
             public Builder content(List<Content> content) {
                 Assert.notNull(content, "content must not be null");
                 this.content = content;
@@ -1997,22 +1926,12 @@ public final class McpSchema {
                 return this;
             }
 
-            /**
-             * Sets the text content for the tool result.
-             * @param textContent the text content
-             * @return this builder
-             */
             public Builder textContent(List<String> textContent) {
                 Assert.notNull(textContent, "textContent must not be null");
                 textContent.stream().map(TextContent::new).forEach(this.content::add);
                 return this;
             }
 
-            /**
-             * Adds a content item to the tool result.
-             * @param contentItem the content item to add
-             * @return this builder
-             */
             public Builder addContent(Content contentItem) {
                 Assert.notNull(contentItem, "contentItem must not be null");
                 if (this.content == null) {
@@ -2022,41 +1941,22 @@ public final class McpSchema {
                 return this;
             }
 
-            /**
-             * Adds a text content item to the tool result.
-             * @param text the text content
-             * @return this builder
-             */
             public Builder addTextContent(String text) {
                 Assert.notNull(text, "text must not be null");
                 return addContent(new TextContent(text));
             }
 
-            /**
-             * Sets whether the tool execution resulted in an error.
-             * @param isError true if the tool execution failed, false otherwise
-             * @return this builder
-             */
             public Builder isError(Boolean isError) {
                 Assert.notNull(isError, "isError must not be null");
                 this.isError = isError;
                 return this;
             }
 
-            /**
-             * Sets the metadata for the tool result.
-             * @param meta metadata
-             * @return this builder
-             */
             public Builder meta(Map<String, Object> meta) {
                 this.meta = meta;
                 return this;
             }
 
-            /**
-             * Builds a new {@link CallToolResult} instance.
-             * @return a new CallToolResult instance
-             */
             public CallToolResult build() {
                 return new CallToolResult(content, isError, structuredContent, meta);
             }
@@ -2410,16 +2310,13 @@ public final class McpSchema {
     // ---------------------------
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = As.PROPERTY, property = "type")
     @JsonSubTypes({
-        @JsonSubTypes.Type(value = TextContent.class, name = "text"),
-        @JsonSubTypes.Type(value = ImageContent.class, name = "image")
+        @JsonSubTypes.Type(value = TextContent.class, name = "text")
     })
     public interface Content {
 
         default String type() {
             if (this instanceof TextContent) {
                 return "text";
-            } else if (this instanceof ImageContent) {
-                return "image";
             }
             throw new IllegalArgumentException("Unknown content type: " + this);
         }
@@ -2493,100 +2390,10 @@ public final class McpSchema {
         }
     }
 
-    @JsonInclude(JsonInclude.Include.NON_ABSENT)
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class ImageContent implements Content { // @formatter:on
-        @JsonProperty("audience")
-        List<Role> audience;
-
-        @JsonProperty("priority")
-        Double priority;
-
-        @JsonProperty("data")
-        String data;
-
-        @JsonProperty("mimeType")
-        String mimeType;
-
-        @Override
-        public String toString() {
-            return "ImageContent{" + "audience="
-                    + audience + ", priority="
-                    + priority + ", data='"
-                    + data + '\'' + ", mimeType='"
-                    + mimeType + '\'' + '}';
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (o == null || getClass() != o.getClass()) return false;
-            ImageContent that = (ImageContent) o;
-            return Objects.equals(audience, that.audience)
-                    && Objects.equals(priority, that.priority)
-                    && Objects.equals(data, that.data)
-                    && Objects.equals(mimeType, that.mimeType);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(audience, priority, data, mimeType);
-        }
-
-        public ImageContent() {}
-
-        public ImageContent(List<Role> audience, Double priority, String data, String mimeType) {
-            this.audience = audience;
-            this.priority = priority;
-            this.data = data;
-            this.mimeType = mimeType;
-        }
-
-        public List<Role> getAudience() {
-            return audience;
-        }
-
-        public void setAudience(List<Role> audience) {
-            this.audience = audience;
-        }
-
-        public Double getPriority() {
-            return priority;
-        }
-
-        public void setPriority(Double priority) {
-            this.priority = priority;
-        }
-
-        public String getData() {
-            return data;
-        }
-
-        public void setData(String data) {
-            this.data = data;
-        }
-
-        public String getMimeType() {
-            return mimeType;
-        }
-
-        public void setMimeType(String mimeType) {
-            this.mimeType = mimeType;
-        }
-    }
-
 
     // ---------------------------
     // Roots
     // ---------------------------
-    /**
-     * Represents a root directory or file that the server can operate on.
-     * uri The URI identifying the root. This *must* start with file:// for now.
-     * This restriction may be relaxed in future versions of the protocol to allow other
-     * URI schemes.
-     * name An optional name for the root. This can be used to provide a
-     * human-readable identifier for the root, which may be useful for display purposes or
-     * for referencing the root in other parts of the application.
-     */
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Root {
@@ -2637,13 +2444,6 @@ public final class McpSchema {
         }
     } // @formatter:on
 
-    /**
-     * The client's response to a roots/list request from the server. This result contains
-     * an array of Root objects, each representing a root directory or file that the
-     * server can operate on.
-     * roots An array of Root objects, each representing a root directory or file
-     * that the server can operate on.
-     */
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ListRootsResult {

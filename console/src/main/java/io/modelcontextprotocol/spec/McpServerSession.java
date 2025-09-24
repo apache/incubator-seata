@@ -116,16 +116,6 @@ public class McpServerSession implements McpLoggableSession {
 
     private volatile McpSchema.LoggingLevel minLoggingLevel = McpSchema.LoggingLevel.INFO;
 
-    /**
-     * Creates a new server session with the given parameters and the transport to use.
-     * @param id session id
-     * @param transport the transport to use
-     * @param initHandler called when a
-     * {@link McpSchema.InitializeRequest} is received by the
-     * server
-     * @param requestHandlers map of request handlers to use
-     * @param notificationHandlers map of notification handlers to use
-     */
     public McpServerSession(
             String id,
             Duration requestTimeout,
@@ -141,10 +131,6 @@ public class McpServerSession implements McpLoggableSession {
         this.notificationHandlers = notificationHandlers;
     }
 
-    /**
-     * Retrieve the session id.
-     * @return session id
-     */
     public String getId() {
         return this.id;
     }
@@ -158,15 +144,6 @@ public class McpServerSession implements McpLoggableSession {
         this.healthy = healthy;
     }
 
-    /**
-     * Called upon successful initialization sequence between the client and the server
-     * with the client capabilities and information.
-     * <a href=
-     * "https://github.com/modelcontextprotocol/specification/blob/main/docs/specification/basic/lifecycle.md#initialization">Initialization
-     * Spec</a>
-     * @param clientCapabilities the capabilities the connected client provides
-     * @param clientInfo the information about the connected client
-     */
     public void init(McpSchema.ClientCapabilities clientCapabilities, McpSchema.Implementation clientInfo) {
         this.clientCapabilities.lazySet(clientCapabilities);
         this.clientInfo.lazySet(clientInfo);
@@ -221,15 +198,6 @@ public class McpServerSession implements McpLoggableSession {
         return this.transport.sendMessage(jsonrpcNotification);
     }
 
-    /**
-     * Called by the {@link McpServerTransportProvider} once the session is determined.
-     * The purpose of this method is to dispatch the message to an appropriate handler as
-     * specified by the MCP server implementation
-     * ({@link io.modelcontextprotocol.server.McpAsyncServer}
-     * {@link Factory} that the server creates.
-     * @param message the incoming JSON-RPC message
-     * @return a Mono that completes when the message is processed
-     */
     public Mono<Void> handle(McpSchema.JSONRPCMessage message) {
         return Mono.defer(() -> {
             // first
@@ -270,11 +238,6 @@ public class McpServerSession implements McpLoggableSession {
         });
     }
 
-    /**
-     * Handles an incoming JSON-RPC request by routing it to the appropriate handler.
-     * @param request The incoming JSON-RPC request
-     * @return A Mono containing the JSON-RPC response
-     */
     private Mono<McpSchema.JSONRPCResponse> handleIncomingRequest(McpSchema.JSONRPCRequest request) {
         return Mono.defer(() -> {
             Mono<?> resultMono;
@@ -316,11 +279,6 @@ public class McpServerSession implements McpLoggableSession {
         });
     }
 
-    /**
-     * Handles an incoming JSON-RPC notification by routing it to the appropriate handler.
-     * @param notification The incoming JSON-RPC notification
-     * @return A Mono that completes when the notification is processed
-     */
     private Mono<Void> handleIncomingNotification(McpSchema.JSONRPCNotification notification) {
         return Mono.defer(() -> {
             if (McpSchema.METHOD_NOTIFICATION_INITIALIZED.equals(notification.getMethod())) {
@@ -396,18 +354,9 @@ public class McpServerSession implements McpLoggableSession {
         this.transport.close();
     }
 
-    /**
-     * Factory for creating server sessions which delegate to a provided 1:1 transport
-     * with a connected client.
-     */
     @FunctionalInterface
     public interface Factory {
 
-        /**
-         * Creates a new 1:1 representation of the client-server interaction.
-         * @param sessionTransport the transport to use for communication with the client.
-         * @return a new server session.
-         */
         McpServerSession create(McpServerTransport sessionTransport);
     }
 }
