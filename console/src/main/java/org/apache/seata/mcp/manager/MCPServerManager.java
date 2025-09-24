@@ -75,10 +75,6 @@ public class MCPServerManager implements SmartLifecycle {
         return serverInstance;
     }
 
-    public void setServerInstance(McpAsyncServer serverInstance) {
-        this.serverInstance = serverInstance;
-    }
-
     public MCPProperties getConfig() {
         return config;
     }

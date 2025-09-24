@@ -21,8 +21,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.modelcontextprotocol.server.McpAsyncServer;
 import io.modelcontextprotocol.server.McpServerFeatures;
 import io.modelcontextprotocol.spec.McpSchema;
-import org.apache.seata.mcp.annotation.Prompt;
-import org.apache.seata.mcp.annotation.PromptParam;
 import org.apache.seata.mcp.annotation.Tool;
 import org.apache.seata.mcp.annotation.ToolParam;
 import org.apache.seata.mcp.manager.MCPServerManager;
@@ -50,7 +48,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -71,8 +68,6 @@ class MCPAutoRegisterTest {
 
     // Test beans for annotation scanning
     private TestToolBean testToolBean;
-    private TestPromptBean testPromptBean;
-    private TestComplexBean testComplexBean;
 
     @BeforeEach
     void setUp() {
@@ -93,19 +88,6 @@ class MCPAutoRegisterTest {
 
         // Initialize test beans
         testToolBean = new TestToolBean();
-        testPromptBean = new TestPromptBean();
-        testComplexBean = new TestComplexBean();
-    }
-
-    @Test
-    void testPostProcessAfterInitializationWithPromptAnnotation() {
-        // Setup mocks for this specific test
-        when(mcpAsyncServer.addPrompt(any())).thenReturn(Mono.empty());
-
-        Object result = mcpAutoRegister.postProcessAfterInitialization(testPromptBean, "testPromptBean");
-
-        assertEquals(testPromptBean, result);
-        verify(mcpAsyncServer, times(1)).addPrompt(any(McpServerFeatures.AsyncPromptSpecification.class));
     }
 
     @Test
@@ -115,7 +97,6 @@ class MCPAutoRegisterTest {
 
         assertEquals(plainBean, result);
         verify(mcpAsyncServer, never()).addTool(any());
-        verify(mcpAsyncServer, never()).addPrompt(any());
     }
 
     @Test
@@ -180,27 +161,6 @@ class MCPAutoRegisterTest {
     }
 
     @Test
-    void testAutoRegisterPromptWithParameters() throws Exception {
-        // Setup mocks for this specific test
-        when(mcpAsyncServer.addPrompt(any())).thenReturn(Mono.empty());
-
-        Method method = TestPromptBean.class.getMethod("simplePrompt", String.class, Boolean.class);
-        Prompt promptAnnotation = method.getAnnotation(Prompt.class);
-
-        mcpAutoRegister.autoRegisterPrompt(testPromptBean, method, promptAnnotation);
-
-        ArgumentCaptor<McpServerFeatures.AsyncPromptSpecification> captor =
-                ArgumentCaptor.forClass(McpServerFeatures.AsyncPromptSpecification.class);
-        verify(mcpAsyncServer).addPrompt(captor.capture());
-
-        McpServerFeatures.AsyncPromptSpecification spec = captor.getValue();
-        assertNotNull(spec);
-        assertEquals("simplePrompt", spec.prompt().getName());
-        assertEquals("A simple prompt for testing", spec.prompt().getDescription());
-        assertEquals(2, spec.prompt().getArguments().size());
-    }
-
-    @Test
     void testToolCallHandlerExecution() throws Exception {
         // Setup mocks for this specific test
         when(mcpAsyncServer.addTool(any())).thenReturn(Mono.empty());
@@ -233,40 +193,6 @@ class MCPAutoRegisterTest {
         assertEquals(
                 "Hello test, count: 42",
                 ((McpSchema.TextContent) toolResult.getContent().get(0)).getText());
-    }
-
-    @Test
-    void testPromptCallHandlerExecution() throws Exception {
-        // Setup mocks for this specific test
-        when(mcpAsyncServer.addPrompt(any())).thenReturn(Mono.empty());
-
-        Method method = TestPromptBean.class.getMethod("simplePrompt", String.class, Boolean.class);
-        Prompt promptAnnotation = method.getAnnotation(Prompt.class);
-
-        mcpAutoRegister.autoRegisterPrompt(testPromptBean, method, promptAnnotation);
-
-        ArgumentCaptor<McpServerFeatures.AsyncPromptSpecification> captor =
-                ArgumentCaptor.forClass(McpServerFeatures.AsyncPromptSpecification.class);
-        verify(mcpAsyncServer).addPrompt(captor.capture());
-
-        McpServerFeatures.AsyncPromptSpecification spec = captor.getValue();
-
-        // Create a mock get prompt request
-        Map<String, Object> arguments = new HashMap<>();
-        arguments.put("topic", "AI");
-        arguments.put("detailed", true);
-        McpSchema.GetPromptRequest request = new McpSchema.GetPromptRequest("simplePrompt", arguments);
-
-        // Execute the handler and block for result
-        Mono<McpSchema.GetPromptResult> result = spec.promptHandler().apply(null, request);
-        McpSchema.GetPromptResult promptResult = result.block();
-
-        assertNotNull(promptResult);
-        assertEquals(1, promptResult.getMessages().size());
-        McpSchema.PromptMessage message = promptResult.getMessages().get(0);
-        assertEquals(McpSchema.Role.USER, message.getRole());
-        assertTrue(message.getContent() instanceof McpSchema.TextContent);
-        assertEquals("Prompt about AI (detailed: true)", ((McpSchema.TextContent) message.getContent()).getText());
     }
 
     @Test
@@ -399,22 +325,6 @@ class MCPAutoRegisterTest {
         @Tool(description = "A tool that throws an error")
         public String errorTool() {
             throw new RuntimeException("Test error");
-        }
-    }
-
-    public static class TestPromptBean {
-        @Prompt(description = "A simple prompt for testing")
-        public String simplePrompt(
-                @PromptParam(description = "The topic") String topic,
-                @PromptParam(description = "Detailed flag") Boolean detailed) {
-            return "Prompt about " + topic + " (detailed: " + detailed + ")";
-        }
-    }
-
-    public static class TestComplexBean {
-        // Bean without any annotations
-        public String normalMethod() {
-            return "normal";
         }
     }
 

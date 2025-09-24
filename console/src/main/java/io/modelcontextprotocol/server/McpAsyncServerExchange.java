@@ -129,14 +129,6 @@ public class McpAsyncServerExchange {
     }
 
     /**
-     * Sends a ping request to the client.
-     * @return A Mono that completes with client's ping response
-     */
-    public Mono<Object> ping() {
-        return this.session.sendRequest(McpSchema.METHOD_PING, null, OBJECT_TYPE_REF);
-    }
-
-    /**
      * Set the minimum logging level for the client. Messages below this level will be
      * filtered out.
      * @param minLoggingLevel The minimum logging level

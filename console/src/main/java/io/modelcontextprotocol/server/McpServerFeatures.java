@@ -77,9 +77,6 @@ public class McpServerFeatures {
         private final McpSchema.Implementation serverInfo;
         private final McpSchema.ServerCapabilities serverCapabilities;
         private final List<AsyncToolSpecification> tools;
-        private final Map<String, AsyncResourceSpecification> resources;
-        private final List<McpSchema.ResourceTemplate> resourceTemplates;
-        private final Map<String, AsyncPromptSpecification> prompts;
         private final Map<McpSchema.CompleteReference, AsyncCompletionSpecification> completions;
         private final List<BiFunction<McpAsyncServerExchange, List<McpSchema.Root>, Mono<Void>>> rootsChangeConsumers;
         private final String instructions;
@@ -88,9 +85,6 @@ public class McpServerFeatures {
                 McpSchema.Implementation serverInfo,
                 McpSchema.ServerCapabilities serverCapabilities,
                 List<AsyncToolSpecification> tools,
-                Map<String, AsyncResourceSpecification> resources,
-                List<McpSchema.ResourceTemplate> resourceTemplates,
-                Map<String, AsyncPromptSpecification> prompts,
                 Map<McpSchema.CompleteReference, AsyncCompletionSpecification> completions,
                 List<BiFunction<McpAsyncServerExchange, List<McpSchema.Root>, Mono<Void>>> rootsChangeConsumers,
                 String instructions) {
@@ -103,20 +97,13 @@ public class McpServerFeatures {
                             null,
                             null,
                             new McpSchema.ServerCapabilities.LoggingCapabilities(),
-                            (prompts != null && !prompts.isEmpty())
-                                    ? new McpSchema.ServerCapabilities.PromptCapabilities(false)
-                                    : null,
-                            (resources != null && !resources.isEmpty())
-                                    ? new McpSchema.ServerCapabilities.ResourceCapabilities(false, false)
-                                    : null,
+                            null,
+                            null,
                             (tools != null && !tools.isEmpty())
                                     ? new McpSchema.ServerCapabilities.ToolCapabilities(false)
                                     : null);
 
             this.tools = tools != null ? tools : Collections.emptyList();
-            this.resources = resources != null ? resources : Collections.emptyMap();
-            this.resourceTemplates = resourceTemplates != null ? resourceTemplates : Collections.emptyList();
-            this.prompts = prompts != null ? prompts : Collections.emptyMap();
             this.completions = completions != null ? completions : Collections.emptyMap();
             this.rootsChangeConsumers = rootsChangeConsumers != null ? rootsChangeConsumers : Collections.emptyList();
             this.instructions = instructions;
@@ -132,18 +119,6 @@ public class McpServerFeatures {
 
         public List<AsyncToolSpecification> tools() {
             return tools;
-        }
-
-        public Map<String, AsyncResourceSpecification> resources() {
-            return resources;
-        }
-
-        public List<McpSchema.ResourceTemplate> resourceTemplates() {
-            return resourceTemplates;
-        }
-
-        public Map<String, AsyncPromptSpecification> prompts() {
-            return prompts;
         }
 
         public Map<McpSchema.CompleteReference, AsyncCompletionSpecification> completions() {
@@ -227,53 +202,6 @@ public class McpServerFeatures {
 
         public static Builder builder() {
             return new Builder();
-        }
-    }
-
-    public static final class AsyncResourceSpecification {
-        private final McpSchema.Resource resource;
-        private final BiFunction<
-                        McpAsyncServerExchange, McpSchema.ReadResourceRequest, Mono<McpSchema.ReadResourceResult>>
-                readHandler;
-
-        public AsyncResourceSpecification(
-                McpSchema.Resource resource,
-                BiFunction<McpAsyncServerExchange, McpSchema.ReadResourceRequest, Mono<McpSchema.ReadResourceResult>>
-                        readHandler) {
-            this.resource = resource;
-            this.readHandler = readHandler;
-        }
-
-        public McpSchema.Resource resource() {
-            return resource;
-        }
-
-        public BiFunction<McpAsyncServerExchange, McpSchema.ReadResourceRequest, Mono<McpSchema.ReadResourceResult>>
-                readHandler() {
-            return readHandler;
-        }
-    }
-
-    public static final class AsyncPromptSpecification {
-        private final McpSchema.Prompt prompt;
-        private final BiFunction<McpAsyncServerExchange, McpSchema.GetPromptRequest, Mono<McpSchema.GetPromptResult>>
-                promptHandler;
-
-        public AsyncPromptSpecification(
-                McpSchema.Prompt prompt,
-                BiFunction<McpAsyncServerExchange, McpSchema.GetPromptRequest, Mono<McpSchema.GetPromptResult>>
-                        promptHandler) {
-            this.prompt = prompt;
-            this.promptHandler = promptHandler;
-        }
-
-        public McpSchema.Prompt prompt() {
-            return prompt;
-        }
-
-        public BiFunction<McpAsyncServerExchange, McpSchema.GetPromptRequest, Mono<McpSchema.GetPromptResult>>
-                promptHandler() {
-            return promptHandler;
         }
     }
 

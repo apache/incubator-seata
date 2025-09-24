@@ -57,7 +57,6 @@ import io.modelcontextprotocol.spec.DefaultJsonSchemaValidator;
 import io.modelcontextprotocol.spec.JsonSchemaValidator;
 import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpSchema.CallToolResult;
-import io.modelcontextprotocol.spec.McpSchema.ResourceTemplate;
 import io.modelcontextprotocol.spec.McpServerTransportProvider;
 import io.modelcontextprotocol.spec.McpStreamableServerTransportProvider;
 import io.modelcontextprotocol.util.Assert;
@@ -115,9 +114,6 @@ public interface McpServer {
                     this.serverInfo,
                     this.serverCapabilities,
                     this.tools,
-                    this.resources,
-                    this.resourceTemplates,
-                    this.prompts,
                     this.completions,
                     this.rootsChangeHandlers,
                     this.instructions);
@@ -153,9 +149,6 @@ public interface McpServer {
                     this.serverInfo,
                     this.serverCapabilities,
                     this.tools,
-                    this.resources,
-                    this.resourceTemplates,
-                    this.prompts,
                     this.completions,
                     this.rootsChangeHandlers,
                     this.instructions);
@@ -188,12 +181,6 @@ public interface McpServer {
         String instructions;
 
         final List<McpServerFeatures.AsyncToolSpecification> tools = new ArrayList<>();
-
-        final Map<String, McpServerFeatures.AsyncResourceSpecification> resources = new HashMap<>();
-
-        final List<ResourceTemplate> resourceTemplates = new ArrayList<>();
-
-        final Map<String, McpServerFeatures.AsyncPromptSpecification> prompts = new HashMap<>();
 
         final Map<McpSchema.CompleteReference, McpServerFeatures.AsyncCompletionSpecification> completions =
                 new HashMap<>();
@@ -256,30 +243,6 @@ public interface McpServer {
                     .anyMatch(toolSpec -> toolSpec.tool().getName().equals(toolName))) {
                 throw new IllegalArgumentException("Tool with name '" + toolName + "' is already registered.");
             }
-        }
-
-        public AsyncSpecification<S> resources(
-                Map<String, McpServerFeatures.AsyncResourceSpecification> resourceSpecifications) {
-            Assert.notNull(resourceSpecifications, "Resource handlers map must not be null");
-            this.resources.putAll(resourceSpecifications);
-            return this;
-        }
-
-        public AsyncSpecification<S> resources(
-                List<McpServerFeatures.AsyncResourceSpecification> resourceSpecifications) {
-            Assert.notNull(resourceSpecifications, "Resource handlers list must not be null");
-            for (McpServerFeatures.AsyncResourceSpecification resource : resourceSpecifications) {
-                this.resources.put(resource.resource().getUri(), resource);
-            }
-            return this;
-        }
-
-        public AsyncSpecification<S> resources(McpServerFeatures.AsyncResourceSpecification... resourceSpecifications) {
-            Assert.notNull(resourceSpecifications, "Resource handlers list must not be null");
-            for (McpServerFeatures.AsyncResourceSpecification resource : resourceSpecifications) {
-                this.resources.put(resource.resource().getUri(), resource);
-            }
-            return this;
         }
 
         /**

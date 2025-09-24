@@ -50,11 +50,11 @@ public class MCPProperties {
     /**
      * Specifies whether to enable resource/prompt
      */
-    private boolean resourceSupport = true;
+    private boolean resourceSupport = false;
 
     private boolean resourceTemplates = false;
 
-    private boolean promptSupport = true;
+    private boolean promptSupport = false;
     /**
      * Turn on logging
      */
@@ -190,8 +190,6 @@ public class MCPProperties {
         }
         serverName = env.getProperty("seata.mcp.serverName", "seata-mcp-server");
         serverVersion = env.getProperty("seata.mcp.serverVersion", "1.0.0");
-        resourceSupport = Boolean.parseBoolean(env.getProperty("seata.mcp.resourceSupport", "true"));
-        promptSupport = Boolean.parseBoolean(env.getProperty("seata.mcp.promptSupport", "true"));
         queryDuration = Long.parseLong(env.getProperty("seata.mcp.query.max_query_duration", "604800000"));
         enableAuth = Boolean.parseBoolean(env.getProperty("seata.mcp.auth.enabled", "true"));
     }
