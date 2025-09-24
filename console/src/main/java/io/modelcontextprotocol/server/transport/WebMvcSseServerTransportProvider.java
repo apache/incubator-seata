@@ -99,11 +99,6 @@ public class WebMvcSseServerTransportProvider implements McpServerTransportProvi
      */
     public static final String ENDPOINT_EVENT_TYPE = "endpoint";
 
-    /**
-     * Default SSE endpoint path as specified by the MCP transport specification.
-     */
-    public static final String DEFAULT_SSE_ENDPOINT = "/sse";
-
     private final ObjectMapper objectMapper;
 
     private final String messageEndpoint;
@@ -125,20 +120,6 @@ public class WebMvcSseServerTransportProvider implements McpServerTransportProvi
      * Flag indicating if the transport is shutting down.
      */
     private volatile boolean isClosing = false;
-
-    /**
-     * Constructs a new WebMvcSseServerTransportProvider instance with the default SSE
-     * endpoint.
-     * @param objectMapper The ObjectMapper to use for JSON serialization/deserialization
-     * of messages.
-     * @param messageEndpoint The endpoint URI where clients should send their JSON-RPC
-     * messages via HTTP POST. This endpoint will be communicated to clients through the
-     * SSE connection's initial endpoint event.
-     * @throws IllegalArgumentException if either objectMapper or messageEndpoint is null
-     */
-    public WebMvcSseServerTransportProvider(ObjectMapper objectMapper, String messageEndpoint) {
-        this(objectMapper, messageEndpoint, DEFAULT_SSE_ENDPOINT);
-    }
 
     /**
      * Constructs a new WebMvcSseServerTransportProvider instance.
@@ -388,29 +369,6 @@ public class WebMvcSseServerTransportProvider implements McpServerTransportProvi
                     .onErrorResume(e -> {
                         logger.error("Failed to send message to session {}: {}", sessionId, e.getMessage());
                         sseBuilder.error(e);
-                        // An exception occurs, and the connection is closed
-                        McpSession session = sessions.get(sessionId);
-                        if (session != null) {
-                            session.close();
-                        }
-                        return Mono.empty();
-                    })
-                    .subscribeOn(Schedulers.boundedElastic())
-                    .then(); // Avoid blocking and achieve asynchronous sending
-        }
-
-        /**
-         * Send heartbeat messages
-         * Use standard SSE event types and formats
-         */
-        public Mono<Void> sendHeartbeat() {
-            return Mono.fromCallable(() -> {
-                        sseBuilder.id(sessionId).event(HEARTBEAT_EVENT_TYPE).data("ping");
-                        logger.debug("Message sent to session {}", sessionId);
-                        return true;
-                    })
-                    .onErrorResume(e -> {
-                        logger.debug("Failed to send heartbeat to session {}: {}", sessionId, e.getMessage());
                         // An exception occurs, and the connection is closed
                         McpSession session = sessions.get(sessionId);
                         if (session != null) {
