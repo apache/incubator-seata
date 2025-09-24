@@ -104,20 +104,10 @@ public class WebMvcStreamableServerTransportProvider implements McpStreamableSer
 
     private static final Logger logger = LoggerFactory.getLogger(WebMvcStreamableServerTransportProvider.class);
 
-    /**
-     * Event type for JSON-RPC messages sent through the SSE connection.
-     */
     public static final String MESSAGE_EVENT_TYPE = "message";
 
-    /**
-     * The endpoint URI where clients should send their JSON-RPC messages. Defaults to
-     * "/mcp".
-     */
     private final String mcpEndpoint;
 
-    /**
-     * Flag indicating whether DELETE requests are disallowed on the endpoint.
-     */
     private final boolean disallowDelete;
 
     private final ObjectMapper objectMapper;
@@ -126,30 +116,14 @@ public class WebMvcStreamableServerTransportProvider implements McpStreamableSer
 
     private McpStreamableServerSession.Factory sessionFactory;
 
-    /**
-     * Map of active client sessions, keyed by mcp-session-id.
-     */
     private final ConcurrentHashMap<String, McpStreamableServerSession> sessions = new ConcurrentHashMap<>();
 
     private McpTransportContextExtractor<ServerRequest> contextExtractor;
 
-    /**
-     * Flag indicating if the transport is shutting down.
-     */
     private volatile boolean isClosing = false;
 
     private KeepAliveScheduler keepAliveScheduler;
 
-    /**
-     * Constructs a new WebMvcStreamableServerTransportProvider instance.
-     * @param objectMapper The ObjectMapper to use for JSON serialization/deserialization
-     * of messages.
-     * endpoint URL for clients.
-     * @param mcpEndpoint The endpoint URI where clients should send their JSON-RPC
-     * messages via HTTP. This endpoint will handle GET, POST, and DELETE requests.
-     * @param disallowDelete Whether to disallow DELETE requests on the endpoint.
-     * @throws IllegalArgumentException if any parameter is null
-     */
     public WebMvcStreamableServerTransportProvider(
             ObjectMapper objectMapper,
             String mcpEndpoint,
@@ -207,14 +181,6 @@ public class WebMvcStreamableServerTransportProvider implements McpStreamableSer
         this.sessionFactory = sessionFactory;
     }
 
-    /**
-     * Broadcasts a notification to all connected clients through their SSE connections.
-     * If any errors occur during sending to a particular client, they are logged but
-     * don't prevent sending to other clients.
-     * @param method The method name for the notification
-     * @param params The parameters for the notification
-     * @return A Mono that completes when the broadcast attempt is finished
-     */
     @Override
     public Mono<Void> notifyClients(String method, Object params) {
         if (this.sessions.isEmpty()) {
@@ -233,10 +199,6 @@ public class WebMvcStreamableServerTransportProvider implements McpStreamableSer
         }));
     }
 
-    /**
-     * Initiates a graceful shutdown of the transport.
-     * @return A Mono that completes when all cleanup operations are finished
-     */
     @Override
     public Mono<Void> closeGracefully() {
         return Mono.fromRunnable(() -> {
@@ -262,25 +224,10 @@ public class WebMvcStreamableServerTransportProvider implements McpStreamableSer
                 });
     }
 
-    /**
-     * Returns the RouterFunction that defines the HTTP endpoints for this transport. The
-     * router function handles three endpoints:
-     * <ul>
-     * <li>GET [mcpEndpoint] - For establishing SSE connections and message replay</li>
-     * <li>POST [mcpEndpoint] - For receiving JSON-RPC messages from clients</li>
-     * <li>DELETE [mcpEndpoint] - For session deletion (if enabled)</li>
-     * </ul>
-     * @return The configured RouterFunction for handling HTTP requests
-     */
     public RouterFunction<ServerResponse> getRouterFunction() {
         return this.routerFunction;
     }
 
-    /**
-     * Set up the listening SSE connections and message replay.
-     * @param request The incoming server request
-     * @return A ServerResponse configured for SSE communication, or an error response
-     */
     private ServerResponse handleGet(ServerRequest request) {
         if (this.isClosing) {
             return ServerResponse.status(HttpStatus.SERVICE_UNAVAILABLE).body("Server is shutting down");
@@ -356,11 +303,6 @@ public class WebMvcStreamableServerTransportProvider implements McpStreamableSer
         }
     }
 
-    /**
-     * Handles POST requests for incoming JSON-RPC messages from clients.
-     * @param request The incoming server request containing the JSON-RPC message
-     * @return A ServerResponse indicating success or appropriate error status
-     */
     private ServerResponse handlePost(ServerRequest request) {
         if (this.isClosing) {
             return ServerResponse.status(HttpStatus.SERVICE_UNAVAILABLE).body("Server is shutting down");
@@ -379,7 +321,6 @@ public class WebMvcStreamableServerTransportProvider implements McpStreamableSer
             String body = request.body(String.class);
             McpSchema.JSONRPCMessage message = McpSchema.deserializeJsonRpcMessage(objectMapper, body);
 
-            // Handle initialization request
             if (message instanceof McpSchema.JSONRPCRequest) {
                 McpSchema.JSONRPCRequest jsonrpcRequest = (McpSchema.JSONRPCRequest) message;
                 if (jsonrpcRequest.getMethod().equals(McpSchema.METHOD_INITIALIZE)) {
@@ -467,11 +408,6 @@ public class WebMvcStreamableServerTransportProvider implements McpStreamableSer
         }
     }
 
-    /**
-     * Handles DELETE requests for session deletion.
-     * @param request The incoming server request
-     * @return A ServerResponse indicating success or appropriate error status
-     */
     private ServerResponse handleDelete(ServerRequest request) {
         if (this.isClosing) {
             return ServerResponse.status(HttpStatus.SERVICE_UNAVAILABLE).body("Server is shutting down");
@@ -508,15 +444,6 @@ public class WebMvcStreamableServerTransportProvider implements McpStreamableSer
         }
     }
 
-    /**
-     * Implementation of McpStreamableServerTransport for WebMVC SSE sessions. This class
-     * handles the transport-level communication for a specific client session.
-     *
-     * <p>
-     * This class is thread-safe and uses a ReentrantLock to synchronize access to the
-     * underlying SSE builder to prevent race conditions when multiple threads attempt to
-     * send messages concurrently.
-     */
     private class WebMvcStreamableMcpSessionTransport implements McpStreamableServerTransport {
 
         private final String sessionId;
@@ -527,34 +454,17 @@ public class WebMvcStreamableServerTransportProvider implements McpStreamableSer
 
         private volatile boolean closed = false;
 
-        /**
-         * Creates a new session transport with the specified ID and SSE builder.
-         * @param sessionId The unique identifier for this session
-         * @param sseBuilder The SSE builder for sending server events to the client
-         */
         WebMvcStreamableMcpSessionTransport(String sessionId, SseBuilder sseBuilder) {
             this.sessionId = sessionId;
             this.sseBuilder = sseBuilder;
             logger.debug("Streamable session transport {} initialized with SSE builder", sessionId);
         }
 
-        /**
-         * Sends a JSON-RPC message to the client through the SSE connection.
-         * @param message The JSON-RPC message to send
-         * @return A Mono that completes when the message has been sent
-         */
         @Override
         public Mono<Void> sendMessage(McpSchema.JSONRPCMessage message) {
             return sendMessage(message, null);
         }
 
-        /**
-         * Sends a JSON-RPC message to the client through the SSE connection with a
-         * specific message ID.
-         * @param message The JSON-RPC message to send
-         * @param messageId The message ID for SSE event identification
-         * @return A Mono that completes when the message has been sent
-         */
         @Override
         public Mono<Void> sendMessage(McpSchema.JSONRPCMessage message, String messageId) {
             return Mono.fromRunnable(() -> {
@@ -615,30 +525,16 @@ public class WebMvcStreamableServerTransportProvider implements McpStreamableSer
                     || message.contains("Socket closed");
         }
 
-        /**
-         * Converts data from one type to another using the configured ObjectMapper.
-         * @param data The source data object to convert
-         * @param typeRef The target type reference
-         * @return The converted object of type T
-         * @param <T> The target type
-         */
         @Override
         public <T> T unmarshalFrom(Object data, TypeReference<T> typeRef) {
             return objectMapper.convertValue(data, typeRef);
         }
 
-        /**
-         * Initiates a graceful shutdown of the transport.
-         * @return A Mono that completes when the shutdown is complete
-         */
         @Override
         public Mono<Void> closeGracefully() {
             return Mono.fromRunnable(WebMvcStreamableMcpSessionTransport.this::close);
         }
 
-        /**
-         * Closes the transport immediately.
-         */
         @Override
         public void close() {
             this.lock.lock();

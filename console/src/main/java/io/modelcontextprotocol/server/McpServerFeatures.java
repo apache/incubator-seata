@@ -70,9 +70,6 @@ import java.util.function.BiFunction;
  */
 public class McpServerFeatures {
 
-    /**
-     * Asynchronous server features specification.
-     */
     public static final class Async {
         private final McpSchema.Implementation serverInfo;
         private final McpSchema.ServerCapabilities serverCapabilities;
@@ -134,16 +131,6 @@ public class McpServerFeatures {
         }
     }
 
-    /**
-     * Specification of a tool with its asynchronous handler function. Tools are the
-     * primary way for MCP servers to expose functionality to AI models. Each tool
-     * represents a specific capability.
-     * {@link McpAsyncServerExchange} and a
-     * {@link CallToolRequest} and returning
-     * results. The function's first argument is an {@link McpAsyncServerExchange} upon
-     * which the server can interact with the connected client. The second arguments is a
-     * map of tool arguments.
-     */
     public static final class AsyncToolSpecification {
         private final McpSchema.Tool tool;
 

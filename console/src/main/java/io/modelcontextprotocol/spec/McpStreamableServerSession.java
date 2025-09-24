@@ -118,16 +118,6 @@ public class McpStreamableServerSession implements McpLoggableSession {
         this.healthy = healthy;
     }
 
-    /**
-     * Create an instance of the streamable session.
-     * @param id session ID
-     * @param clientCapabilities client capabilities
-     * @param clientInfo client info
-     * @param requestTimeout timeout to use for requests
-     * @param requestHandlers the map of MCP request handlers keyed by method name
-     * @param notificationHandlers the map of MCP notification handlers keyed by method
-     * name
-     */
     public McpStreamableServerSession(
             String id,
             McpSchema.ClientCapabilities clientCapabilities,
@@ -156,10 +146,6 @@ public class McpStreamableServerSession implements McpLoggableSession {
         return loggingLevel.level() >= this.minLoggingLevel.level();
     }
 
-    /**
-     * Return the Session ID.
-     * @return session ID
-     */
     public String getId() {
         return this.id;
     }
@@ -188,12 +174,6 @@ public class McpStreamableServerSession implements McpLoggableSession {
         return this.closeGracefully().then(Mono.fromRunnable(() -> {}));
     }
 
-    /**
-     * Create a listening stream (the generic HTTP GET request without Last-Event-ID
-     * header).
-     * @param transport The dedicated SSE transport stream
-     * @return a stream representation
-     */
     public McpStreamableServerSessionStream listeningStream(McpStreamableServerTransport transport) {
         McpStreamableServerSessionStream listeningStream = new McpStreamableServerSessionStream(transport);
         this.listeningStreamRef.set(listeningStream);
@@ -204,12 +184,6 @@ public class McpStreamableServerSession implements McpLoggableSession {
         return Flux.empty();
     }
 
-    /**
-     * Provide the SSE stream of MCP messages finalized with a Response.
-     * @param jsonrpcRequest the MCP request triggering the stream creation
-     * @param transport the SSE transport stream to send messages to
-     * @return Mono which completes once the processing is done
-     */
     public Mono<Void> responseStream(McpSchema.JSONRPCRequest jsonrpcRequest, McpStreamableServerTransport transport) {
         return Mono.deferContextual(ctx -> {
             McpTransportContext transportContext = ctx.getOrDefault(McpTransportContext.KEY, McpTransportContext.EMPTY);
@@ -247,11 +221,6 @@ public class McpStreamableServerSession implements McpLoggableSession {
         });
     }
 
-    /**
-     * Handle the MCP notification.
-     * @param notification MCP notification
-     * @return Mono which completes upon succesful handling
-     */
     public Mono<Void> accept(McpSchema.JSONRPCNotification notification) {
         return Mono.deferContextual(ctx -> {
             McpTransportContext transportContext = ctx.getOrDefault(McpTransportContext.KEY, McpTransportContext.EMPTY);
@@ -272,11 +241,6 @@ public class McpStreamableServerSession implements McpLoggableSession {
         });
     }
 
-    /**
-     * Handle the MCP response.
-     * @param response MCP response to the server-initiated request
-     * @return Mono which completes upon successful processing
-     */
     public Mono<Void> accept(McpSchema.JSONRPCResponse response) {
         return Mono.defer(() -> {
             McpStreamableServerSessionStream stream = this.requestIdToStream.get(response.id);
@@ -327,36 +291,18 @@ public class McpStreamableServerSession implements McpLoggableSession {
         }
     }
 
-    /**
-     * Request handler for the initialization request.
-     */
+
     public interface InitRequestHandler {
 
-        /**
-         * Handles the initialization request.
-         * @param initializeRequest the initialization request by the client
-         * @return a Mono that will emit the result of the initialization
-         */
         Mono<McpSchema.InitializeResult> handle(McpSchema.InitializeRequest initializeRequest);
     }
 
-    /**
-     * Factory for new Streamable HTTP MCP sessions.
-     */
+
     public interface Factory {
 
-        /**
-         * Given an initialize request, create a composite for the session initialization
-         * @param initializeRequest the initialization request from the client
-         * @return a composite allowing the session to start
-         */
         McpStreamableServerSessionInit startSession(McpSchema.InitializeRequest initializeRequest);
     }
 
-    /**
-     * Composite holding the {@link McpStreamableServerSession} and the initialization
-     * result
-     */
     public static final class McpStreamableServerSessionInit {
         private McpStreamableServerSession session;
         private Mono<McpSchema.InitializeResult> initResult;
@@ -384,10 +330,6 @@ public class McpStreamableServerSession implements McpLoggableSession {
         }
     }
 
-    /**
-     * An individual SSE stream within a Streamable HTTP context. Can be either the
-     * listening GET SSE stream or a request-specific POST SSE stream.
-     */
     public final class McpStreamableServerSessionStream implements McpLoggableSession {
 
         private boolean healthy = true;
@@ -410,15 +352,9 @@ public class McpStreamableServerSession implements McpLoggableSession {
             this.healthy = healthy;
         }
 
-        /**
-         * Constructor accepting the dedicated transport representing the SSE stream.
-         * @param transport request-specific SSE transport stream
-         */
         public McpStreamableServerSessionStream(McpStreamableServerTransport transport) {
             this.transport = transport;
             this.transportId = UUID.randomUUID().toString();
-            // This ID design allows for a constant-time extraction of the history by
-            // precisely identifying the SSE stream using the first component
             this.uuidGenerator = () -> this.transportId + "_" + UUID.randomUUID();
         }
 
@@ -497,7 +433,6 @@ public class McpStreamableServerSession implements McpLoggableSession {
             return Mono.defer(() -> {
                 this.pendingResponses.values().forEach(s -> s.error(new RuntimeException("Stream closed")));
                 this.pendingResponses.clear();
-                // If this was the generic stream, reset it
                 McpStreamableServerSession.this.listeningStreamRef.compareAndSet(
                         this, McpStreamableServerSession.this.missingMcpTransportSession);
                 McpStreamableServerSession.this.requestIdToStream.values().removeIf(this::equals);
@@ -509,7 +444,6 @@ public class McpStreamableServerSession implements McpLoggableSession {
         public void close() {
             this.pendingResponses.values().forEach(s -> s.error(new RuntimeException("Stream closed")));
             this.pendingResponses.clear();
-            // If this was the generic stream, reset it
             McpStreamableServerSession.this.listeningStreamRef.compareAndSet(
                     this, McpStreamableServerSession.this.missingMcpTransportSession);
             McpStreamableServerSession.this.requestIdToStream.values().removeIf(this::equals);

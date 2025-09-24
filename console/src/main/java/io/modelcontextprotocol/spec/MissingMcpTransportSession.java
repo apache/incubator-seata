@@ -54,11 +54,6 @@ import io.modelcontextprotocol.util.Assert;
 import reactor.core.publisher.Mono;
 
 /**
- * A {@link McpLoggableSession} which represents a missing stream that would allow the
- * server to communicate with the client. Specifically, it can be used when a Streamable
- * HTTP client has not opened a listening SSE stream to accept messages for interactions
- * unrelated with concurrently running client-initiated requests.
- *
  * @author Dariusz Jędrzejczyk
  */
 public class MissingMcpTransportSession implements McpLoggableSession {
@@ -78,10 +73,6 @@ public class MissingMcpTransportSession implements McpLoggableSession {
         this.healthy = healthy;
     }
 
-    /**
-     * Create an instance with the Session ID specified.
-     * @param sessionId session ID
-     */
     public MissingMcpTransportSession(String sessionId) {
         this.sessionId = sessionId;
     }

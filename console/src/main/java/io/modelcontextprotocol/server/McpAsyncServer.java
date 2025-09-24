@@ -126,14 +126,6 @@ public class McpAsyncServer {
 
     private List<String> protocolVersions;
 
-
-    /**
-     * Create a new McpAsyncServer with the given transport provider and capabilities.
-     * @param mcpTransportProvider The transport layer implementation for MCP
-     * communication.
-     * @param features The MCP server supported features.
-     * @param objectMapper The ObjectMapper to use for JSON serialization/deserialization
-     */
     McpAsyncServer(
             McpServerTransportProvider mcpTransportProvider,
             ObjectMapper objectMapper,
@@ -209,18 +201,13 @@ public class McpAsyncServer {
     private Map<String, McpRequestHandler<?>> prepareRequestHandlers() {
         Map<String, McpRequestHandler<?>> requestHandlers = new HashMap<>();
 
-        // Initialize request handlers for standard MCP methods
-
-        // Ping MUST respond with an empty data, but not NULL response.
         requestHandlers.put(McpSchema.METHOD_PING, (exchange, params) -> Mono.just(Collections.EMPTY_MAP));
 
-        // Add tools API handlers if the tool capability is enabled
         if (this.serverCapabilities.tools() != null) {
             requestHandlers.put(McpSchema.METHOD_TOOLS_LIST, toolsListRequestHandler());
             requestHandlers.put(McpSchema.METHOD_TOOLS_CALL, toolsCallRequestHandler());
         }
 
-        // Add logging API handlers if the logging capability is enabled
         if (this.serverCapabilities.logging() != null) {
             requestHandlers.put(McpSchema.METHOD_LOGGING_SET_LEVEL, setLoggerRequestHandler());
         }
@@ -228,9 +215,6 @@ public class McpAsyncServer {
         return requestHandlers;
     }
 
-    // ---------------------------------------
-    // Lifecycle Management
-    // ---------------------------------------
     private Mono<InitializeResult> asyncInitializeRequestHandler(InitializeRequest initializeRequest) {
         return Mono.defer(() -> {
             logger.info(
@@ -239,15 +223,9 @@ public class McpAsyncServer {
                     initializeRequest.getCapabilities(),
                     initializeRequest.getClientInfo());
 
-            // The server MUST respond with the highest protocol version it supports
-            // if
-            // it does not support the requested (e.g. Client) version.
             String serverProtocolVersion = this.protocolVersions.get(this.protocolVersions.size() - 1);
 
             if (this.protocolVersions.contains(initializeRequest.getProtocolVersion())) {
-                // If the server supports the requested protocol version, it MUST
-                // respond
-                // with the same version.
                 serverProtocolVersion = initializeRequest.getProtocolVersion();
             } else {
                 logger.warn(
@@ -261,17 +239,10 @@ public class McpAsyncServer {
         });
     }
 
-    /**
-     * Gracefully closes the server, allowing any in-progress operations to complete.
-     * @return A Mono that completes when the server has been closed
-     */
     public Mono<Void> closeGracefully() {
         return this.mcpTransportProvider.closeGracefully();
     }
 
-    /**
-     * Close the server immediately.
-     */
     public void close() {
         this.mcpTransportProvider.close();
     }
@@ -288,9 +259,6 @@ public class McpAsyncServer {
                         .then());
     }
 
-    // ---------------------------------------
-    // Tool Management
-    // ---------------------------------------
     public Mono<Void> addTool(McpServerFeatures.AsyncToolSpecification toolSpecification) {
         if (toolSpecification == null) {
             return Mono.error(new McpError("Tool specification must not be null"));
@@ -363,9 +331,6 @@ public class McpAsyncServer {
                     return result;
                 }
 
-                // If an output schema is provided, servers MUST provide structured
-                // results that conform to this schema.
-                // https://modelcontextprotocol.io/specification/2025-06-18/server/tools#output-schema
                 if (result.getStructuredContent() == null) {
                     logger.warn(
                             "Response missing structured content which is expected when calling tool with non-empty outputSchema");
@@ -428,10 +393,6 @@ public class McpAsyncServer {
                 .build();
     }
 
-    /**
-     * Notifies clients that the list of available tools has changed.
-     * @return A Mono that completes when all clients have been notified
-     */
     public Mono<Void> notifyToolsListChanged() {
         return this.mcpTransportProvider.notifyClients(McpSchema.METHOD_NOTIFICATION_TOOLS_LIST_CHANGED, null);
     }
@@ -465,9 +426,6 @@ public class McpAsyncServer {
         };
     }
 
-    // ---------------------------------------
-    // Logging Management
-    // ---------------------------------------
     private McpRequestHandler<Object> setLoggerRequestHandler() {
         return (exchange, params) -> Mono.defer(() -> {
             SetLevelRequest newMinLoggingLevel =

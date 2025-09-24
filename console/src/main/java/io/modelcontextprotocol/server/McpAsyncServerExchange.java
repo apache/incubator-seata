@@ -63,9 +63,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 /**
- * Represents an asynchronous exchange with a Model Context Protocol (MCP) client. The
- * exchange provides methods to interact with the client and query its capabilities.
- *
  * @author Dariusz Jędrzejczyk
  * @author Christian Tzolov
  */
@@ -99,10 +96,6 @@ public class McpAsyncServerExchange {
         this.transportContext = transportContext;
     }
 
-    /**
-     * Retrieves the list of all roots provided by the client.
-     * @return A Mono that emits the list of roots result.
-     */
     public Mono<McpSchema.ListRootsResult> listRoots() {
 
         // @formatter:off
@@ -118,21 +111,11 @@ public class McpAsyncServerExchange {
         // @formatter:on
     }
 
-    /**
-     * Retrieves a paginated list of roots provided by the client.
-     * @param cursor Optional pagination cursor from a previous list request
-     * @return A Mono that emits the list of roots result containing
-     */
     public Mono<McpSchema.ListRootsResult> listRoots(String cursor) {
         return this.session.sendRequest(
                 McpSchema.METHOD_ROOTS_LIST, new McpSchema.PaginatedRequest(cursor), LIST_ROOTS_RESULT_TYPE_REF);
     }
 
-    /**
-     * Set the minimum logging level for the client. Messages below this level will be
-     * filtered out.
-     * @param minLoggingLevel The minimum logging level
-     */
     void setMinLoggingLevel(LoggingLevel minLoggingLevel) {
         Assert.notNull(minLoggingLevel, "minLoggingLevel must not be null");
         this.session.setMinLoggingLevel(minLoggingLevel);

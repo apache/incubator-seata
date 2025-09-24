@@ -71,13 +71,6 @@ public class DefaultMcpStreamableServerSessionFactory implements McpStreamableSe
 
     Map<String, McpNotificationHandler> notificationHandlers;
 
-    /**
-     * Constructs an instance
-     * @param requestTimeout timeout for requests
-     * @param initRequestHandler initialization request handler
-     * @param requestHandlers map of MCP request handlers keyed by method name
-     * @param notificationHandlers map of MCP notification handlers keyed by method name
-     */
     public DefaultMcpStreamableServerSessionFactory(
             Duration requestTimeout,
             McpStreamableServerSession.InitRequestHandler initRequestHandler,

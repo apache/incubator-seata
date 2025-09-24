@@ -53,18 +53,12 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Default implementation for {@link McpTransportContext} which uses a Thread-safe map.
- * Objects of this kind are mutable.
- *
  * @author Dariusz Jędrzejczyk
  */
 public class DefaultMcpTransportContext implements McpTransportContext {
 
     private final Map<String, Object> storage;
 
-    /**
-     * Create an empty instance.
-     */
     public DefaultMcpTransportContext() {
         this.storage = new ConcurrentHashMap<>();
     }
@@ -83,10 +77,6 @@ public class DefaultMcpTransportContext implements McpTransportContext {
         this.storage.put(key, value);
     }
 
-    /**
-     * Allows copying the contents.
-     * @return new instance with the copy of the underlying map
-     */
     public McpTransportContext copy() {
         return new DefaultMcpTransportContext(new ConcurrentHashMap<>(this.storage));
     }

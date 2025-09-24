@@ -80,14 +80,6 @@ public interface McpServer {
 
     McpSchema.Implementation DEFAULT_SERVER_INFO = new McpSchema.Implementation("mcp-server", "1.0.0");
 
-    /**
-     * Starts building an asynchronous MCP server that provides non-blocking operations.
-     * Asynchronous servers can handle multiple requests concurrently on a single Thread
-     * using a functional paradigm with non-blocking server transports, making them more
-     * scalable for high-concurrency scenarios but more complex to implement.
-     * @param transportProvider The transport layer implementation for MCP communication.
-     * @return A new instance of {@link AsyncSpecification} for configuring the server.
-     */
     static AsyncSpecification<?> async(McpServerTransportProvider transportProvider) {
         return new SingleSessionAsyncSpecification(transportProvider);
     }
@@ -101,11 +93,6 @@ public interface McpServer {
             this.transportProvider = transportProvider;
         }
 
-        /**
-         * Builds an asynchronous MCP server that provides non-blocking operations.
-         * @return A new instance of {@link McpAsyncServer} configured with this builder's
-         * settings.
-         */
         @Override
         public McpAsyncServer build() {
             McpServerFeatures.Async features = new McpServerFeatures.Async(
@@ -239,12 +226,6 @@ public interface McpServer {
             }
         }
 
-        /**
-         * Sets the object mapper to use for serializing and deserializing JSON messages.
-         * @param objectMapper the instance to use. Must not be null.
-         * @return This builder instance for method chaining.
-         * @throws IllegalArgumentException if objectMapper is null
-         */
         public AsyncSpecification<S> objectMapper(ObjectMapper objectMapper) {
             Assert.notNull(objectMapper, "ObjectMapper must not be null");
             this.objectMapper = objectMapper;
