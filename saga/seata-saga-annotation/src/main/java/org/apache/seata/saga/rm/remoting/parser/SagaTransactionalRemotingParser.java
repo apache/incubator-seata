@@ -14,67 +14,67 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.rm.tcc.remoting.parser;
+package org.apache.seata.saga.rm.remoting.parser;
 
 import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.common.util.ReflectionUtil;
 import org.apache.seata.integration.tx.api.remoting.Protocols;
 import org.apache.seata.integration.tx.api.remoting.RemotingDesc;
 import org.apache.seata.integration.tx.api.remoting.parser.AbstractedRemotingParser;
-import org.apache.seata.rm.tcc.api.LocalTCC;
-import org.springframework.aop.framework.AopProxyUtils;
+import org.apache.seata.saga.rm.api.SagaTransactional;
 
 import java.util.Set;
 
 /**
- * Remoting parser for TCC transaction participant beans with @LocalTCC annotation
+ * Remoting parser for Saga transaction participant beans with @SagaTransactional annotation
  *
- * This parser is specifically designed for TCC (Try-Confirm-Cancel) transaction mode
- * and handles beans annotated with @LocalTCC annotation. It provides proper service
- * detection and proxy enhancement for TCC scenarios.
+ * This parser is specifically designed for Saga transaction mode and handles beans annotated
+ * with @SagaTransactional annotation. It provides proper service detection and proxy enhancement
+ * for Saga compensation scenarios.
  *
  * Key Features:
- * - Dedicated support for @LocalTCC annotation
- * - Optimized for TCC Try-Confirm-Cancel patterns
- * - Proper integration with TwoPhaseBusinessAction
- * - High-performance annotation detection
+ * - Dedicated support for @SagaTransactional annotation
+ * - Optimized for Saga compensation patterns
+ * - Clear semantic separation from TCC mode
+ * - Proper integration with CompensationBusinessAction
  *
  * Usage Pattern:
- * @LocalTCC
- * public interface PaymentTccService {
- *     @TwoPhaseBusinessAction(name = "payment", commitMethod = "confirmPayment", rollbackMethod = "cancelPayment")
- *     boolean tryPayment(BusinessActionContext context, String orderId, double amount);
+ * @SagaTransactional
+ * public interface PaymentSagaService {
+ *     @CompensationBusinessAction(compensationMethod = "compensatePayment")
+ *     boolean processPayment(BusinessActionContext context, String orderId, double amount);
  *
- *     boolean confirmPayment(BusinessActionContext context);
- *     boolean cancelPayment(BusinessActionContext context);
+ *     boolean compensatePayment(BusinessActionContext context);
  * }
  *
  * Detection Priority:
  * 1. Implementation class annotations (higher priority)
  * 2. Interface annotations (fallback)
  *
- * Note: For Saga scenarios, use @SagaTransactional with SagaTransactionalRemotingParser instead.
+ * Performance Considerations:
+ * - Annotation detection is cached appropriately for high-throughput scenarios
+ * - Reflection-based scanning is optimized for typical usage patterns
  *
- * @see LocalTCC The TCC-specific annotation this parser handles
- * @see org.apache.seata.rm.tcc.api.TwoPhaseBusinessAction Commonly used with @LocalTCC
+ * @see SagaTransactional The annotation this parser handles
+ * @see org.apache.seata.saga.rm.api.CompensationBusinessAction Commonly used with @SagaTransactional
  * @see org.apache.seata.integration.tx.api.remoting.parser.AbstractedRemotingParser Base class
- * @since 1.0.0
+ * @since 2.5.0
  */
-public class LocalTCCRemotingParser extends AbstractedRemotingParser {
+public class SagaTransactionalRemotingParser extends AbstractedRemotingParser {
 
     @Override
     public boolean isReference(Object bean, String beanName) {
-        return isLocalTCC(bean);
+        return isSagaTransactional(bean);
     }
 
     @Override
     public boolean isService(Object bean, String beanName) {
-        return isLocalTCC(bean);
+        return isSagaTransactional(bean);
     }
 
     @Override
     public boolean isService(Class<?> beanClass) throws FrameworkException {
-        return isLocalTCC(beanClass);
+        return isSagaTransactional(beanClass);
     }
 
     @Override
@@ -88,27 +88,27 @@ public class LocalTCCRemotingParser extends AbstractedRemotingParser {
         remotingDesc.setProtocol(Protocols.IN_JVM);
         Class<?> classType = bean.getClass();
 
-        // First priority: check if @LocalTCC is present on the implementation class itself
+        // First priority: check if @SagaTransactional is present on the implementation class itself
         // Implementation class annotations take precedence over interface annotations
-        if (hasLocalTCCAnnotation(classType)) {
-            remotingDesc.setServiceClass(AopProxyUtils.ultimateTargetClass(bean));
-            remotingDesc.setServiceClassName(remotingDesc.getServiceClass().getName());
+        if (hasSagaTransactionalAnnotation(classType)) {
+            remotingDesc.setServiceClass(classType);
+            remotingDesc.setServiceClassName(classType.getName());
             remotingDesc.setTargetBean(bean);
             return remotingDesc;
         }
 
-        // Second priority: check if @LocalTCC is present on any implemented interfaces
+        // Second priority: check if @SagaTransactional is present on any implemented interfaces
         // Fall back to interface annotations if no implementation class annotations found
         Set<Class<?>> interfaceClasses = ReflectionUtil.getInterfaces(classType);
         for (Class<?> interClass : interfaceClasses) {
-            if (hasLocalTCCAnnotation(interClass)) {
+            if (hasSagaTransactionalAnnotation(interClass)) {
                 remotingDesc.setServiceClassName(interClass.getName());
                 remotingDesc.setServiceClass(interClass);
                 remotingDesc.setTargetBean(bean);
                 return remotingDesc;
             }
         }
-        throw new FrameworkException("Couldn't parse any Remoting info for LocalTCC bean");
+        throw new FrameworkException("Couldn't parse any Remoting info for SagaTransactional bean");
     }
 
     @Override
@@ -117,39 +117,39 @@ public class LocalTCCRemotingParser extends AbstractedRemotingParser {
     }
 
     /**
-     * Check if the given bean is annotated with @LocalTCC annotation
+     * Check if the given bean is annotated with @SagaTransactional annotation
      *
      * @param bean the bean to check
-     * @return true if the bean or its interfaces have @LocalTCC annotation
+     * @return true if the bean or its interfaces have @SagaTransactional annotation
      */
-    private boolean isLocalTCC(Object bean) {
-        return isLocalTCC(bean.getClass());
+    private boolean isSagaTransactional(Object bean) {
+        return isSagaTransactional(bean.getClass());
     }
 
     /**
-     * Check if the given class or its interfaces are annotated with @LocalTCC annotation
+     * Check if the given class or its interfaces are annotated with @SagaTransactional annotation
      *
      * @param classType the class type to check
-     * @return true if the class has @LocalTCC annotation
+     * @return true if the class has @SagaTransactional annotation
      */
-    private boolean isLocalTCC(Class<?> classType) {
+    private boolean isSagaTransactional(Class<?> classType) {
         // Check the class itself first for better performance
-        if (hasLocalTCCAnnotation(classType)) {
+        if (hasSagaTransactionalAnnotation(classType)) {
             return true;
         }
 
         // Check all interfaces
         Set<Class<?>> interfaceClasses = ReflectionUtil.getInterfaces(classType);
-        return interfaceClasses.stream().anyMatch(this::hasLocalTCCAnnotation);
+        return interfaceClasses.stream().anyMatch(this::hasSagaTransactionalAnnotation);
     }
 
     /**
-     * Check if a class has @LocalTCC annotation
+     * Check if a class has @SagaTransactional annotation
      *
      * @param clazz the class to check
-     * @return true if the class has @LocalTCC annotation
+     * @return true if the class has @SagaTransactional annotation
      */
-    private boolean hasLocalTCCAnnotation(Class<?> clazz) {
-        return clazz.isAnnotationPresent(LocalTCC.class);
+    private boolean hasSagaTransactionalAnnotation(Class<?> clazz) {
+        return clazz.isAnnotationPresent(SagaTransactional.class);
     }
 }

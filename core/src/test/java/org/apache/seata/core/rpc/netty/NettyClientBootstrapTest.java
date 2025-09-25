@@ -17,6 +17,10 @@
 package org.apache.seata.core.rpc.netty;
 
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.epoll.Epoll;
+import io.netty.channel.epoll.EpollSocketChannel;
+import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.util.internal.PlatformDependent;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -57,6 +61,24 @@ class NettyClientBootstrapTest {
         EventLoopGroup rmEventLoopGroupWorker = getEventLoopGroupWorker(rmNettyClientBootstrap);
 
         Assertions.assertNotEquals(tmEventLoopGroupWorker, rmEventLoopGroupWorker);
+    }
+
+    @Test
+    void testStartWithSharedEventLoopAndChannelSelection() {
+        when(nettyClientConfig.getEnableClientSharedEventLoop()).thenReturn(true);
+        when(nettyClientConfig.getClientChannelClazz()).thenAnswer(invocation -> {
+            if (PlatformDependent.isWindows() || PlatformDependent.isOsx()) {
+                return NioSocketChannel.class;
+            } else if (Epoll.isAvailable()) {
+                return EpollSocketChannel.class;
+            } else {
+                return NioSocketChannel.class;
+            }
+        });
+
+        NettyClientBootstrap tmNettyClientBootstrap =
+                new NettyClientBootstrap(nettyClientConfig, NettyPoolKey.TransactionRole.TMROLE);
+        tmNettyClientBootstrap.start();
     }
 
     private EventLoopGroup getEventLoopGroupWorker(NettyClientBootstrap bootstrap) {

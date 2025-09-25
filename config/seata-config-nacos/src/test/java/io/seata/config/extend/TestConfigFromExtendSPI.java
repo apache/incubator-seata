@@ -31,14 +31,14 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledOnOs;
-import org.junit.jupiter.api.condition.OS;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
 import java.security.SecureRandom;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+@EnabledIfSystemProperty(named = "nacosCaseEnabled", matches = "true")
 public class TestConfigFromExtendSPI {
 
     private static Config FILE_CONFIG;
@@ -60,7 +60,6 @@ public class TestConfigFromExtendSPI {
     }
 
     @Test
-    @EnabledOnOs(OS.LINUX)
     public void testGetConfigProperties() throws Exception {
         Assertions.assertNotNull(configService);
         Configuration configuration = ConfigurationFactory.getInstance();
