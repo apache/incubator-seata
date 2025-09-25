@@ -107,11 +107,7 @@ public interface McpServer {
                     ? this.jsonSchemaValidator
                     : new DefaultJsonSchemaValidator(mapper);
             return new McpAsyncServer(
-                    this.transportProvider,
-                    mapper,
-                    features,
-                    this.requestTimeout,
-                    jsonSchemaValidator);
+                    this.transportProvider, mapper, features, this.requestTimeout, jsonSchemaValidator);
         }
     }
 
@@ -141,11 +137,7 @@ public interface McpServer {
                     ? this.jsonSchemaValidator
                     : new DefaultJsonSchemaValidator(mapper);
             return new McpAsyncServer(
-                    this.transportProvider,
-                    mapper,
-                    features,
-                    this.requestTimeout,
-                    jsonSchemaValidator);
+                    this.transportProvider, mapper, features, this.requestTimeout, jsonSchemaValidator);
         }
     }
 
@@ -231,6 +223,5 @@ public interface McpServer {
             this.objectMapper = objectMapper;
             return this;
         }
-
     }
 }

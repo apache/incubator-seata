@@ -291,12 +291,10 @@ public class McpStreamableServerSession implements McpLoggableSession {
         }
     }
 
-
     public interface InitRequestHandler {
 
         Mono<McpSchema.InitializeResult> handle(McpSchema.InitializeRequest initializeRequest);
     }
-
 
     public interface Factory {
 

@@ -2309,9 +2309,7 @@ public final class McpSchema {
     // Content Types
     // ---------------------------
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = As.PROPERTY, property = "type")
-    @JsonSubTypes({
-        @JsonSubTypes.Type(value = TextContent.class, name = "text")
-    })
+    @JsonSubTypes({@JsonSubTypes.Type(value = TextContent.class, name = "text")})
     public interface Content {
 
         default String type() {
@@ -2389,7 +2387,6 @@ public final class McpSchema {
             this(null, null, content);
         }
     }
-
 
     // ---------------------------
     // Roots

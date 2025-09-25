@@ -379,8 +379,10 @@ public class WebMvcStreamableServerTransportProvider implements McpStreamableSer
                 // For streaming responses, we need to return SSE
                 return ServerResponse.sse(
                         sseBuilder -> {
-                            sseBuilder.onComplete(() -> logger.debug("Request response stream completed for session: {}", sessionId));
-                            sseBuilder.onTimeout(() -> logger.debug("Request response stream timed out for session: {}", sessionId));
+                            sseBuilder.onComplete(
+                                    () -> logger.debug("Request response stream completed for session: {}", sessionId));
+                            sseBuilder.onTimeout(
+                                    () -> logger.debug("Request response stream timed out for session: {}", sessionId));
 
                             WebMvcStreamableMcpSessionTransport sessionTransport =
                                     new WebMvcStreamableMcpSessionTransport(sessionId, sseBuilder);

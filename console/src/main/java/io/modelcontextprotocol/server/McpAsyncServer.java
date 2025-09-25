@@ -437,5 +437,4 @@ public class McpAsyncServer {
             return Mono.just(Collections.EMPTY_MAP);
         });
     }
-
 }

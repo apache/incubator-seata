@@ -76,5 +76,4 @@ public final class Utils {
     public static boolean isEmpty(@Nullable Map<?, ?> map) {
         return (map == null || map.isEmpty());
     }
-
 }
