@@ -274,8 +274,7 @@ public class McpServerSession implements McpLoggableSession {
                             new McpSchema.JSONRPCResponse.JSONRPCError(
                                     McpSchema.ErrorCodes.INTERNAL_ERROR,
                                     error.getMessage(),
-                                    null)))); // TODO: add error message
-            // through the data field
+                                    null))));
         });
     }
 

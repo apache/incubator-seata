@@ -35,7 +35,7 @@ public class CustomResponseErrorHandler implements ResponseErrorHandler {
     }
 
     @Override
-    public void handleError(ClientHttpResponse response) throws IOException {
+    public void handleError(ClientHttpResponse response) {
         // Empty implementation, making sure no exceptions are thrown
     }
 }
