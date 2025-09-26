@@ -17,9 +17,12 @@
 package org.apache.seata.rm.datasource.xa;
 
 import com.alibaba.druid.pool.DruidDataSource;
+import com.alibaba.druid.pool.DruidStatementConnection;
 import com.kingbase8.xa.KBXAConnection;
 import com.mysql.jdbc.JDBC4MySQLConnection;
 import com.mysql.jdbc.jdbc2.optional.JDBC4ConnectionWrapper;
+import com.mysql.jdbc.jdbc2.optional.MysqlXAConnection;
+import com.oscar.xa.Jdbc3XAConnection;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.rm.datasource.combine.CombineConnectionHolder;
 import org.apache.seata.rm.datasource.mock.MockDataSource;
@@ -28,6 +31,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
+import org.mariadb.jdbc.MariaXaConnection;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 
@@ -67,34 +71,9 @@ public class DataSourceProxyXATest {
     }
 
     @Test
-    public void testGetConnection() throws SQLException {
-        // Mock
-        Driver driver = mock(Driver.class);
-        JDBC4MySQLConnection connection = mock(JDBC4MySQLConnection.class);
-        Mockito.when(connection.getAutoCommit()).thenReturn(true);
-        DatabaseMetaData metaData = mock(DatabaseMetaData.class);
-        Mockito.when(metaData.getURL()).thenReturn("jdbc:mysql:xxx");
-        Mockito.when(connection.getMetaData()).thenReturn(metaData);
-        Mockito.when(driver.connect(any(), any())).thenReturn(connection);
-
-        DruidDataSource druidDataSource = new DruidDataSource();
-        druidDataSource.setDriver(driver);
-        DataSourceProxyXA dataSourceProxyXA = new DataSourceProxyXA(druidDataSource);
-        Connection connFromDataSourceProxyXA = dataSourceProxyXA.getConnection();
-        Assertions.assertFalse(connFromDataSourceProxyXA instanceof ConnectionProxyXA);
-        RootContext.bind("test");
-        connFromDataSourceProxyXA = dataSourceProxyXA.getConnection();
-
-        Assertions.assertTrue(connFromDataSourceProxyXA instanceof ConnectionProxyXA);
-        ConnectionProxyXA connectionProxyXA = (ConnectionProxyXA) dataSourceProxyXA.getConnection();
-
-        Connection wrappedConnection = connectionProxyXA.getWrappedConnection();
-        Assertions.assertTrue(wrappedConnection instanceof PooledConnection);
-
-        Connection wrappedPhysicalConn = ((PooledConnection) wrappedConnection).getConnection();
-        Assertions.assertSame(wrappedPhysicalConn, connection);
-
-        XAConnection xaConnection = connectionProxyXA.getWrappedXAConnection();
+    public void testGetConnection() throws SQLException, ClassNotFoundException {
+        XAConnection xaConnection =
+                testGetXaConnection(MysqlXAConnection.class, "jdbc:mysql:xxx", JDBC4MySQLConnection.class.getName());
         Connection connectionInXA = xaConnection.getConnection();
         Assertions.assertTrue(connectionInXA instanceof JDBC4ConnectionWrapper);
         tearDown();
@@ -102,34 +81,8 @@ public class DataSourceProxyXATest {
 
     @Test
     public void testGetMariaXaConnection() throws SQLException, ClassNotFoundException {
-        // Mock
-        Driver driver = mock(Driver.class);
-        Class clazz = Class.forName("org.mariadb.jdbc.MariaDbConnection");
-        Connection connection = (Connection) (mock(clazz));
-        Mockito.when(connection.getAutoCommit()).thenReturn(true);
-        DatabaseMetaData metaData = mock(DatabaseMetaData.class);
-        Mockito.when(metaData.getURL()).thenReturn("jdbc:mariadb:xxx");
-        Mockito.when(connection.getMetaData()).thenReturn(metaData);
-        Mockito.when(driver.connect(any(), any())).thenReturn(connection);
-
-        DruidDataSource druidDataSource = new DruidDataSource();
-        druidDataSource.setDriver(driver);
-        DataSourceProxyXA dataSourceProxyXA = new DataSourceProxyXA(druidDataSource);
-        Connection connFromDataSourceProxyXA = dataSourceProxyXA.getConnection();
-        Assertions.assertFalse(connFromDataSourceProxyXA instanceof ConnectionProxyXA);
-        RootContext.bind("test");
-        connFromDataSourceProxyXA = dataSourceProxyXA.getConnection();
-
-        Assertions.assertTrue(connFromDataSourceProxyXA instanceof ConnectionProxyXA);
-        ConnectionProxyXA connectionProxyXA = (ConnectionProxyXA) dataSourceProxyXA.getConnection();
-
-        Connection wrappedConnection = connectionProxyXA.getWrappedConnection();
-        Assertions.assertTrue(wrappedConnection instanceof PooledConnection);
-
-        Connection wrappedPhysicalConn = ((PooledConnection) wrappedConnection).getConnection();
-        Assertions.assertSame(wrappedPhysicalConn, connection);
-
-        XAConnection xaConnection = connectionProxyXA.getWrappedXAConnection();
+        XAConnection xaConnection =
+                testGetXaConnection(MariaXaConnection.class, "jdbc:mariadb:xxx", "org.mariadb.jdbc.MariaDbConnection");
         Connection connectionInXA = xaConnection.getConnection();
         Assertions.assertEquals(
                 "org.mariadb.jdbc.MariaDbConnection", connectionInXA.getClass().getName());
@@ -142,18 +95,36 @@ public class DataSourceProxyXATest {
             matches = "[0-1].[1-2].[0-7]",
             disabledReason = "druid 1.2.8 correct support kingbase")
     public void testGetKingbaseXaConnection() throws SQLException, ClassNotFoundException {
+        testGetXaConnection(KBXAConnection.class, "jdbc:kingbase8:xxx", "com.kingbase8.jdbc.KbConnection");
+        tearDown();
+    }
+
+    @Test
+    @DisabledIfSystemProperty(
+            named = "druid.version",
+            matches = "[0-1].[1-2].[0-24]",
+            disabledReason = "druid 1.2.24 correct support oscar")
+    public void testGetOscarXaConnection() throws SQLException, ClassNotFoundException {
+        testGetXaConnection(Jdbc3XAConnection.class, "jdbc:oscar:xxx", "com.oscar.jdbc.OscarJdbc2Connection");
+        tearDown();
+    }
+
+    private XAConnection testGetXaConnection(
+            Class<? extends XAConnection> xaConnectionClass, String mockJdbcUrl, String connectionClassName)
+            throws SQLException, ClassNotFoundException {
         // Mock
         Driver driver = mock(Driver.class);
-        Class clazz = Class.forName("com.kingbase8.jdbc.KbConnection");
+        Class clazz = Class.forName(connectionClassName);
         Connection connection = (Connection) (mock(clazz));
         Mockito.when(connection.getAutoCommit()).thenReturn(true);
         DatabaseMetaData metaData = mock(DatabaseMetaData.class);
-        Mockito.when(metaData.getURL()).thenReturn("jdbc:kingbase8:xxx");
+        Mockito.when(metaData.getURL()).thenReturn(mockJdbcUrl);
         Mockito.when(connection.getMetaData()).thenReturn(metaData);
         Mockito.when(driver.connect(any(), any())).thenReturn(connection);
 
         DruidDataSource druidDataSource = new DruidDataSource();
         druidDataSource.setDriver(driver);
+        druidDataSource.setUrl(mockJdbcUrl);
         DataSourceProxyXA dataSourceProxyXA = new DataSourceProxyXA(druidDataSource);
         Connection connFromDataSourceProxyXA = dataSourceProxyXA.getConnection();
         Assertions.assertFalse(connFromDataSourceProxyXA instanceof ConnectionProxyXA);
@@ -167,11 +138,14 @@ public class DataSourceProxyXATest {
         Assertions.assertTrue(wrappedConnection instanceof PooledConnection);
 
         Connection wrappedPhysicalConn = ((PooledConnection) wrappedConnection).getConnection();
+        if (wrappedPhysicalConn instanceof DruidStatementConnection) {
+            wrappedPhysicalConn = ((DruidStatementConnection) wrappedPhysicalConn).getConnection();
+        }
         Assertions.assertSame(wrappedPhysicalConn, connection);
 
         XAConnection xaConnection = connectionProxyXA.getWrappedXAConnection();
-        Assertions.assertEquals(xaConnection.getClass(), KBXAConnection.class);
-        tearDown();
+        Assertions.assertEquals(xaConnection.getClass(), xaConnectionClass);
+        return xaConnection;
     }
 
     @Test
@@ -196,6 +170,7 @@ public class DataSourceProxyXATest {
 
             DruidDataSource realDataSource = new DruidDataSource();
             realDataSource.setDriver(driver);
+            realDataSource.setUrl("jdbc:mysql:xxx");
             DataSourceProxyXA proxyDataSource = new DataSourceProxyXA(realDataSource);
 
             Connection result = proxyDataSource.getConnection();
