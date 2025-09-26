@@ -48,25 +48,20 @@ public class OscarOperateRecognizerHolder implements SQLOperateRecognizerHolder 
 
     @Override
     public SQLRecognizer getSelectForUpdateRecognizer(String sql, SQLStatement ast) {
-        if (!(ast instanceof SQLSelectStatement)) {
-            return null;
-        }
-        SQLSelectStatement selectStatement = (SQLSelectStatement) ast;
-        if (selectStatement.getSelect() == null) {
-            return null;
-        }
-        if (selectStatement.getSelect().getFirstQueryBlock() == null) {
-            return null;
-        }
-        OscarSelectQueryBlock queryBlock = (OscarSelectQueryBlock) selectStatement.getSelect().getFirstQueryBlock();
-        if (queryBlock.getForClause() == null) {
-            return null;
-        }
-        if (queryBlock.getForClause().getOption() == null) {
-            return null;
-        }
-        if (queryBlock.getForClause().getOption() == OscarSelectQueryBlock.ForClause.Option.UPDATE) {
-            return new OscarSelectForUpdateRecognizer(sql, ast);
+        if ((ast instanceof SQLSelectStatement)) {
+            SQLSelectStatement selectStatement = (SQLSelectStatement) ast;
+            if (selectStatement.getSelect() != null) {
+                if (selectStatement.getSelect().getFirstQueryBlock() != null) {
+                    OscarSelectQueryBlock queryBlock =
+                            (OscarSelectQueryBlock) selectStatement.getSelect().getFirstQueryBlock();
+                    if (queryBlock.getForClause() != null
+                            && queryBlock.getForClause().getOption() != null) {
+                        if (queryBlock.getForClause().getOption() == OscarSelectQueryBlock.ForClause.Option.UPDATE) {
+                            return new OscarSelectForUpdateRecognizer(sql, ast);
+                        }
+                    }
+                }
+            }
         }
         return null;
     }
