@@ -16,7 +16,7 @@
  */
 package org.apache.seata.common.loader;
 
-import org.apache.commons.lang.exception.NestableRuntimeException;
+import org.apache.seata.common.exception.NestableRuntimeException;
 
 /**
  * The type Enhanced service not found exception.

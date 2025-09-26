@@ -163,7 +163,7 @@ public class LogStoreDataBaseDAO implements LogStore {
             conn = logStoreDataSource.getConnection();
             conn.setAutoCommit(true);
 
-            String paramsPlaceHolder = org.apache.commons.lang.StringUtils.repeat("?", ",", statuses.length);
+            String paramsPlaceHolder = org.apache.commons.lang3.StringUtils.repeat("?", ",", statuses.length);
 
             String sql = LogStoreSqlsFactory.getLogStoreSqls(dbType)
                     .getQueryGlobalTransactionSQLByStatus(globalTable, paramsPlaceHolder);
@@ -312,7 +312,7 @@ public class LogStoreDataBaseDAO implements LogStore {
     public List<BranchTransactionDO> queryBranchTransactionDO(List<String> xids) {
         int length = xids.size();
         List<BranchTransactionDO> rets = new ArrayList<>(length * 3);
-        String paramsPlaceHolder = org.apache.commons.lang.StringUtils.repeat("?", ",", length);
+        String paramsPlaceHolder = org.apache.commons.lang3.StringUtils.repeat("?", ",", length);
         String sql =
                 LogStoreSqlsFactory.getLogStoreSqls(dbType).getQueryBranchTransaction(branchTable, paramsPlaceHolder);
         Connection conn = null;
