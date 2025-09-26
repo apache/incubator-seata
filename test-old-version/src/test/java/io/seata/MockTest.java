@@ -29,13 +29,13 @@ import io.seata.core.rpc.netty.TmRpcClient;
 import io.seata.rm.DefaultResourceManager;
 import org.apache.seata.mockserver.MockCoordinator;
 import org.apache.seata.mockserver.MockServer;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Order;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
