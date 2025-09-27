@@ -323,7 +323,7 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
             throw new IllegalArgumentException("The page number must be greater than 0");
         }
         if (pageSize < 0) {
-            throw new IllegalArgumentException("The page number must be greater than 0");
+            throw new IllegalArgumentException("The page size must be greater than 0");
         }
         if (pageSize > SqlConstant.MAX_PAGE_SIZE) {
             throw new IllegalArgumentException("Exceeding the maximum pageSize: " + SqlConstant.MAX_PAGE_SIZE);
