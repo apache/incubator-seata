@@ -70,6 +70,7 @@ public class DateUtils {
     }
 
     public static boolean judgeExceedTimeDuration(Long startTime, Long endTime, Long maxDuration) {
+        if(endTime < startTime) return false;
         return endTime - startTime > maxDuration;
     }
 
