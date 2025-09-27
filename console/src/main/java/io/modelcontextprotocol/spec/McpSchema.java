@@ -254,21 +254,6 @@ public final class McpSchema {
                     + id + ", params="
                     + params + '}';
         }
-
-        @Override
-        public boolean equals(Object o) {
-            if (o == null || getClass() != o.getClass()) return false;
-            JSONRPCRequest that = (JSONRPCRequest) o;
-            return Objects.equals(jsonrpc, that.jsonrpc)
-                    && Objects.equals(method, that.method)
-                    && Objects.equals(id, that.id)
-                    && Objects.equals(params, that.params);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(jsonrpc, method, id, params);
-        }
     } // @formatter:on
 
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
@@ -314,20 +299,6 @@ public final class McpSchema {
 
         public void setParams(Map<String, Object> params) {
             this.params = params;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (o == null || getClass() != o.getClass()) return false;
-            JSONRPCNotification that = (JSONRPCNotification) o;
-            return Objects.equals(jsonrpc, that.jsonrpc)
-                    && Objects.equals(method, that.method)
-                    && Objects.equals(params, that.params);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(jsonrpc, method, params);
         }
 
         @Override
@@ -405,21 +376,6 @@ public final class McpSchema {
                     + error + '}';
         }
 
-        @Override
-        public boolean equals(Object o) {
-            if (o == null || getClass() != o.getClass()) return false;
-            JSONRPCResponse that = (JSONRPCResponse) o;
-            return Objects.equals(jsonrpc, that.jsonrpc)
-                    && Objects.equals(id, that.id)
-                    && Objects.equals(result, that.result)
-                    && Objects.equals(error, that.error);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(jsonrpc, id, result, error);
-        }
-
         @JsonInclude(JsonInclude.Include.NON_ABSENT)
         @JsonIgnoreProperties(ignoreUnknown = true)
         public static class JSONRPCError {
@@ -462,18 +418,6 @@ public final class McpSchema {
 
             public void setData(Object data) {
                 this.data = data;
-            }
-
-            @Override
-            public boolean equals(Object o) {
-                if (o == null || getClass() != o.getClass()) return false;
-                JSONRPCError that = (JSONRPCError) o;
-                return code == that.code && Objects.equals(message, that.message) && Objects.equals(data, that.data);
-            }
-
-            @Override
-            public int hashCode() {
-                return Objects.hash(code, message, data);
             }
 
             @Override
@@ -602,22 +546,6 @@ public final class McpSchema {
                     + meta + '}';
         }
 
-        @Override
-        public boolean equals(Object o) {
-            if (o == null || getClass() != o.getClass()) return false;
-            InitializeResult that = (InitializeResult) o;
-            return Objects.equals(protocolVersion, that.protocolVersion)
-                    && Objects.equals(capabilities, that.capabilities)
-                    && Objects.equals(serverInfo, that.serverInfo)
-                    && Objects.equals(instructions, that.instructions)
-                    && Objects.equals(meta, that.meta);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(protocolVersion, capabilities, serverInfo, instructions, meta);
-        }
-
         public String getProtocolVersion() {
             return protocolVersion;
         }
@@ -734,20 +662,6 @@ public final class McpSchema {
         }
 
         @Override
-        public boolean equals(Object o) {
-            if (o == null || getClass() != o.getClass()) return false;
-            ClientCapabilities that = (ClientCapabilities) o;
-            return Objects.equals(experimental, that.experimental)
-                    && Objects.equals(roots, that.roots)
-                    && Objects.equals(sampling, that.sampling);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(experimental, roots, sampling);
-        }
-
-        @Override
         public String toString() {
             return "ClientCapabilities{" + "experimental="
                     + experimental + ", roots="
@@ -771,20 +685,8 @@ public final class McpSchema {
             }
 
             @Override
-            public boolean equals(Object o) {
-                if (o == null || getClass() != o.getClass()) return false;
-                RootCapabilities that = (RootCapabilities) o;
-                return Objects.equals(listChanged, that.listChanged);
-            }
-
-            @Override
             public String toString() {
                 return "RootCapabilities{" + "listChanged=" + listChanged + '}';
-            }
-
-            @Override
-            public int hashCode() {
-                return Objects.hashCode(listChanged);
             }
 
             public Boolean getListChanged() {
@@ -1144,18 +1046,6 @@ public final class McpSchema {
             return "Annotations{" + "audience=" + audience + ", priority=" + priority + '}';
         }
 
-        @Override
-        public boolean equals(Object o) {
-            if (o == null || getClass() != o.getClass()) return false;
-            Annotations that = (Annotations) o;
-            return Objects.equals(audience, that.audience) && Objects.equals(priority, that.priority);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(audience, priority);
-        }
-
         public List<Role> getAudience() {
             return audience;
         }
@@ -1187,20 +1077,6 @@ public final class McpSchema {
 
         @JsonProperty("_meta")
         Map<String, Object> meta;
-
-        @Override
-        public boolean equals(Object o) {
-            if (o == null || getClass() != o.getClass()) return false;
-            ListToolsResult that = (ListToolsResult) o;
-            return Objects.equals(tools, that.tools)
-                    && Objects.equals(nextCursor, that.nextCursor)
-                    && Objects.equals(meta, that.meta);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(tools, nextCursor, meta);
-        }
 
         @Override
         public String toString() {
@@ -1327,23 +1203,6 @@ public final class McpSchema {
             this.definitions = definitions;
         }
 
-        @Override
-        public boolean equals(Object o) {
-            if (o == null || getClass() != o.getClass()) return false;
-            JsonSchema schema = (JsonSchema) o;
-            return Objects.equals(type, schema.type)
-                    && Objects.equals(properties, schema.properties)
-                    && Objects.equals(required, schema.required)
-                    && Objects.equals(additionalProperties, schema.additionalProperties)
-                    && Objects.equals(defs, schema.defs)
-                    && Objects.equals(definitions, schema.definitions);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(type, properties, required, additionalProperties, defs, definitions);
-        }
-
         public JsonSchema() {}
 
         public JsonSchema(
@@ -1392,23 +1251,6 @@ public final class McpSchema {
                     + idempotentHint + ", openWorldHint="
                     + openWorldHint + ", returnDirect="
                     + returnDirect + '}';
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (o == null || getClass() != o.getClass()) return false;
-            ToolAnnotations that = (ToolAnnotations) o;
-            return Objects.equals(title, that.title)
-                    && Objects.equals(readOnlyHint, that.readOnlyHint)
-                    && Objects.equals(destructiveHint, that.destructiveHint)
-                    && Objects.equals(idempotentHint, that.idempotentHint)
-                    && Objects.equals(openWorldHint, that.openWorldHint)
-                    && Objects.equals(returnDirect, that.returnDirect);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(title, readOnlyHint, destructiveHint, idempotentHint, openWorldHint, returnDirect);
         }
 
         public String getTitle() {
@@ -1997,18 +1839,6 @@ public final class McpSchema {
         }
 
         @Override
-        public boolean equals(Object o) {
-            if (o == null || getClass() != o.getClass()) return false;
-            PaginatedRequest that = (PaginatedRequest) o;
-            return Objects.equals(cursor, that.cursor) && Objects.equals(meta, that.meta);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(cursor, meta);
-        }
-
-        @Override
         public String toString() {
             return "PaginatedRequest{" + "cursor='" + cursor + '\'' + ", meta=" + meta + '}';
         }
@@ -2039,18 +1869,6 @@ public final class McpSchema {
         @Override
         public String toString() {
             return "PaginatedResult{" + "nextCursor='" + nextCursor + '\'' + '}';
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (o == null || getClass() != o.getClass()) return false;
-            PaginatedResult that = (PaginatedResult) o;
-            return Objects.equals(nextCursor, that.nextCursor);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hashCode(nextCursor);
         }
 
         public String getNextCursor() {
@@ -2254,10 +2072,6 @@ public final class McpSchema {
             this.meta = meta;
         }
 
-        public CompleteResult(CompleteCompletion completion) {
-            this(completion, null);
-        }
-
         public CompleteCompletion completion() {
             return completion;
         }
@@ -2337,20 +2151,6 @@ public final class McpSchema {
             return "TextContent{" + "audience=" + audience + ", priority=" + priority + ", text='" + text + '\'' + '}';
         }
 
-        @Override
-        public boolean equals(Object o) {
-            if (o == null || getClass() != o.getClass()) return false;
-            TextContent that = (TextContent) o;
-            return Objects.equals(audience, that.audience)
-                    && Objects.equals(priority, that.priority)
-                    && Objects.equals(text, that.text);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(audience, priority, text);
-        }
-
         public List<Role> getAudience() {
             return audience;
         }
@@ -2405,18 +2205,6 @@ public final class McpSchema {
             return "Root{" + "uri='" + uri + '\'' + ", name='" + name + '\'' + '}';
         }
 
-        @Override
-        public boolean equals(Object o) {
-            if (o == null || getClass() != o.getClass()) return false;
-            Root root = (Root) o;
-            return Objects.equals(uri, root.uri) && Objects.equals(name, root.name);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(uri, name);
-        }
-
         public String getUri() {
             return uri;
         }
@@ -2453,18 +2241,6 @@ public final class McpSchema {
         @Override
         public String toString() {
             return "ListRootsResult{" + "roots=" + roots + ", nextCursor='" + nextCursor + '\'' + '}';
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (o == null || getClass() != o.getClass()) return false;
-            ListRootsResult that = (ListRootsResult) o;
-            return Objects.equals(roots, that.roots) && Objects.equals(nextCursor, that.nextCursor);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(roots, nextCursor);
         }
 
         public List<Root> getRoots() {
