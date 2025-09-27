@@ -272,9 +272,7 @@ public class McpServerSession implements McpLoggableSession {
                             request.getId(),
                             null,
                             new McpSchema.JSONRPCResponse.JSONRPCError(
-                                    McpSchema.ErrorCodes.INTERNAL_ERROR,
-                                    error.getMessage(),
-                                    null))));
+                                    McpSchema.ErrorCodes.INTERNAL_ERROR, error.getMessage(), null))));
         });
     }
 

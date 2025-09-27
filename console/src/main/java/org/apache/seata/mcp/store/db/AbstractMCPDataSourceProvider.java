@@ -72,7 +72,6 @@ public abstract class AbstractMCPDataSourceProvider implements Initialize {
         return doGenerate();
     }
 
-
     public DataSource generateByResourceId(String resourceId) {
         this.resourceId = resourceId;
         return generate();
@@ -112,7 +111,6 @@ public abstract class AbstractMCPDataSourceProvider implements Initialize {
                     driverClassName, driverClassPath));
         }
     }
-
 
     public abstract DataSource doGenerate();
 

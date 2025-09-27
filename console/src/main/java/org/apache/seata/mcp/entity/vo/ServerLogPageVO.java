@@ -119,12 +119,11 @@ public class ServerLogPageVO<T> extends Result<T> implements Serializable {
 
     @Override
     public String toString() {
-        return "ServerLogPageVO{" +
-                "pageSize=" + pageSize +
-                ", pageNum=" + pageNum +
-                ", total=" + total +
-                ", hasMorePages=" + hasMorePages +
-                ", data=" + data +
-                '}';
+        return "ServerLogPageVO{" + "pageSize="
+                + pageSize + ", pageNum="
+                + pageNum + ", total="
+                + total + ", hasMorePages="
+                + hasMorePages + ", data="
+                + data + '}';
     }
 }

@@ -54,6 +54,6 @@ public abstract class BaseHttpChannelHandler<T> extends SimpleChannelInboundHand
      */
     protected final void doFilterInternal(HttpFilterContext<?> context) throws HttpRequestFilterException {
         HttpRequestFilterChain filterChain = HttpRequestFilterManager.getFilterChain();
-                filterChain.doFilter(context);
+        filterChain.doFilter(context);
     }
 }
