@@ -551,10 +551,13 @@ public class JacksonUndoLogParser implements UndoLogParser, Initialize {
      * the class of serialize SerialArray type
      */
     private static class SerialArraySerializer extends JsonSerializer<SerialArray> {
-        
+
         @Override
         public void serializeWithType(
-                SerialArray serialArray, JsonGenerator gen, SerializerProvider serializers, TypeSerializer typeSerializer)
+                SerialArray serialArray,
+                JsonGenerator gen,
+                SerializerProvider serializers,
+                TypeSerializer typeSerializer)
                 throws IOException {
             WritableTypeId typeIdDef =
                     typeSerializer.writeTypePrefix(gen, typeSerializer.typeId(serialArray, JsonToken.START_OBJECT));
@@ -563,13 +566,15 @@ public class JacksonUndoLogParser implements UndoLogParser, Initialize {
         }
 
         @Override
-        public void serialize(SerialArray serialArray, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+        public void serialize(SerialArray serialArray, JsonGenerator gen, SerializerProvider serializers)
+                throws IOException {
             gen.writeStartObject();
             serializeValue(serialArray, gen, serializers);
             gen.writeEndObject();
         }
-        
-        private void serializeValue(SerialArray serialArray, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+
+        private void serializeValue(SerialArray serialArray, JsonGenerator gen, SerializerProvider serializers)
+                throws IOException {
             gen.writeFieldName("baseType");
             try {
                 gen.writeNumber(serialArray.getBaseType());

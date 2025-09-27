@@ -46,7 +46,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.Map;
-import java.util.Arrays;
 
 import static org.mockito.Mockito.mockStatic;
 
@@ -188,7 +187,8 @@ public class JacksonUndoLogParserTest extends BaseUndoLogParserTest {
     }
 
     @Test
-    public void testSerializeAndDeserializeSerialArray() throws NoSuchFieldException, IllegalAccessException, IOException, SQLException {
+    public void testSerializeAndDeserializeSerialArray()
+            throws NoSuchFieldException, IllegalAccessException, IOException, SQLException {
         // get the jackson mapper
         java.lang.reflect.Field reflectField = parser.getClass().getDeclaredField("mapper");
         reflectField.setAccessible(true);
@@ -212,7 +212,8 @@ public class JacksonUndoLogParserTest extends BaseUndoLogParserTest {
     }
 
     @Test
-    public void testSerializeAndDeserializeSerialArrayWithNulls() throws NoSuchFieldException, IllegalAccessException, IOException, SQLException {
+    public void testSerializeAndDeserializeSerialArrayWithNulls()
+            throws NoSuchFieldException, IllegalAccessException, IOException, SQLException {
         // get the jackson mapper
         java.lang.reflect.Field reflectField = parser.getClass().getDeclaredField("mapper");
         reflectField.setAccessible(true);
@@ -225,7 +226,7 @@ public class JacksonUndoLogParserTest extends BaseUndoLogParserTest {
         Field field = new Field("nullable_array", JDBCType.ARRAY.getVendorTypeNumber(), serialArray);
         byte[] bytes = mapper.writeValueAsBytes(field);
         Field sameField = mapper.readValue(bytes, Field.class);
-        
+
         Assertions.assertTrue(DataCompareUtils.isFieldEquals(field, sameField).getResult());
 
         // verify null elements are handled correctly
