@@ -97,7 +97,7 @@ public class SqlExecutionTemplate {
             conn = getConnection(resourceId);
             if (params == null || params.length == 0) {
                 if ((sql.contains("where") || sql.contains("WHERE"))) {
-                    sql = sql.replaceAll("(?i)\\bWHERE\\b.*", "").trim();
+                    throw new StoreException("Query contains WHERE clause but no parameters were provided. This may lead to unintended full table scans and is not allowed.");
                 }
             }
             ps = conn.prepareStatement(sql);
