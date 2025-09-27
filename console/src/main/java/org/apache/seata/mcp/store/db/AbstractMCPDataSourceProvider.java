@@ -16,15 +16,13 @@
  */
 package org.apache.seata.mcp.store.db;
 
+import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.common.exception.StoreException;
 import org.apache.seata.common.executor.Initialize;
 import org.apache.seata.common.util.StringUtils;
-import org.apache.seata.core.constants.ConfigurationKeys;
 import org.apache.seata.core.constants.DBType;
 import org.apache.seata.mcp.entity.pojo.BusinessDataSourcesProperties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.io.File;
@@ -39,21 +37,12 @@ import java.util.stream.Stream;
 import static org.apache.seata.common.DefaultValues.DEFAULT_DB_MAX_CONN;
 import static org.apache.seata.common.DefaultValues.DEFAULT_DB_MIN_CONN;
 
-/**
- * The abstract datasource provider
- *
- */
-public abstract class AbstractMCPDataSourceProvider implements DataSourceProvider, Initialize {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractMCPDataSourceProvider.class);
+public abstract class AbstractMCPDataSourceProvider implements Initialize {
 
     private final Map<String, DataSource> dataSources = new HashMap<>();
 
     private String resourceId;
 
-    /**
-     * The constant properties.
-     */
     protected static final Map<String, BusinessDataSourcesProperties.DataSourceProperties> DATASOURCE_PROPERTIES =
             BusinessDataSourcesProperties.getDatasources();
 
@@ -79,50 +68,17 @@ public abstract class AbstractMCPDataSourceProvider implements DataSourceProvide
         }
     }
 
-    @Override
-    public DataSource provide() {
-        if (StringUtils.isBlank(resourceId)) {
-            if (dataSources.size() == 1) {
-                return dataSources.values().iterator().next();
-            }
-            throw new StoreException("resourceId is not specified and there are multiple datasources");
-        }
-        DataSource dataSource = dataSources.get(resourceId);
-        if (dataSource == null) {
-            throw new StoreException(String.format("Cannot find datasource for resourceId: %s", resourceId));
-        }
-        return dataSource;
-    }
-
-    /**
-     * Set the resource ID to specify which datasource to provide
-     *
-     * @param resourceId the resource ID (database URL)
-     * @return this provider instance
-     */
-    public AbstractMCPDataSourceProvider withResourceId(String resourceId) {
-        this.resourceId = resourceId;
-        return this;
-    }
-
     public DataSource generate() {
-        //        validate();
         return doGenerate();
     }
 
-    /**
-     * Generate datasource by resource ID
-     *
-     * @param resourceId the resource ID
-     * @return the generated datasource
-     */
+
     public DataSource generateByResourceId(String resourceId) {
         this.resourceId = resourceId;
         return generate();
     }
 
     public void validate() {
-        // valid driver class name
         String driverClassName = getDriverClassName();
         ClassLoader loader = getDriverClassLoader();
         if (null == loader) {
@@ -141,7 +97,6 @@ public abstract class AbstractMCPDataSourceProvider implements DataSourceProvide
                     .map(file -> file.isFile() ? file.getParentFile() : file)
                     .filter(Objects::nonNull)
                     .filter(File::isDirectory)
-                    // Only the MySQL driver needs to be placed in the jdbc folder.
                     .map(file -> (MYSQL8_DRIVER_CLASS_NAME.equals(driverClassName)
                                     || MYSQL_DRIVER_CLASS_NAME.equals(driverClassName))
                             ? new File(file, "jdbc")
@@ -157,17 +112,10 @@ public abstract class AbstractMCPDataSourceProvider implements DataSourceProvide
                     driverClassName, driverClassPath));
         }
     }
-    /**
-     * generate the datasource
-     * @return datasource
-     */
+
+
     public abstract DataSource doGenerate();
 
-    /**
-     * Get db type db type.
-     *
-     * @return the db type
-     */
     protected DBType getDBType() {
         BusinessDataSourcesProperties.DataSourceProperties properties = getDataSourceProperties();
         if (properties != null) {
@@ -176,11 +124,6 @@ public abstract class AbstractMCPDataSourceProvider implements DataSourceProvide
         return null;
     }
 
-    /**
-     * Get current datasource properties
-     *
-     * @return the datasource properties for current resourceId
-     */
     protected BusinessDataSourcesProperties.DataSourceProperties getDataSourceProperties() {
         if (StringUtils.isBlank(resourceId)) {
             if (DATASOURCE_PROPERTIES.size() == 1) {
@@ -191,11 +134,6 @@ public abstract class AbstractMCPDataSourceProvider implements DataSourceProvide
         return DATASOURCE_PROPERTIES.get(resourceId);
     }
 
-    /**
-     * get db driver class name
-     *
-     * @return the db driver class name
-     */
     protected String getDriverClassName() {
         BusinessDataSourcesProperties.DataSourceProperties properties = getDataSourceProperties();
         String driverClassName = "";
@@ -209,11 +147,6 @@ public abstract class AbstractMCPDataSourceProvider implements DataSourceProvide
         return driverClassName;
     }
 
-    /**
-     * get db max wait
-     *
-     * @return the db max wait
-     */
     protected Long getMaxWait() {
         BusinessDataSourcesProperties.DataSourceProperties properties = getDataSourceProperties();
         if (properties != null && properties.getMaxWait() != null) {
@@ -272,11 +205,6 @@ public abstract class AbstractMCPDataSourceProvider implements DataSourceProvide
         return loaders;
     }
 
-    /**
-     * Get url string.
-     *
-     * @return the string
-     */
     protected String getUrl() {
         BusinessDataSourcesProperties.DataSourceProperties properties = getDataSourceProperties();
         String url = "";
@@ -289,11 +217,6 @@ public abstract class AbstractMCPDataSourceProvider implements DataSourceProvide
         return url;
     }
 
-    /**
-     * Get user string.
-     *
-     * @return the string
-     */
     protected String getUser() {
         BusinessDataSourcesProperties.DataSourceProperties properties = getDataSourceProperties();
         String username = "";
@@ -306,11 +229,6 @@ public abstract class AbstractMCPDataSourceProvider implements DataSourceProvide
         return username;
     }
 
-    /**
-     * Get password string.
-     *
-     * @return the string
-     */
     protected String getPassword() {
         BusinessDataSourcesProperties.DataSourceProperties properties = getDataSourceProperties();
         String password = "";
@@ -323,11 +241,6 @@ public abstract class AbstractMCPDataSourceProvider implements DataSourceProvide
         return password;
     }
 
-    /**
-     * Get min conn int.
-     *
-     * @return the int
-     */
     protected int getMinConn() {
         BusinessDataSourcesProperties.DataSourceProperties properties = getDataSourceProperties();
         int minConn = -1;
@@ -337,11 +250,6 @@ public abstract class AbstractMCPDataSourceProvider implements DataSourceProvide
         return minConn < 0 ? DEFAULT_DB_MIN_CONN : minConn;
     }
 
-    /**
-     * Get max conn int.
-     *
-     * @return the int
-     */
     protected int getMaxConn() {
         BusinessDataSourcesProperties.DataSourceProperties properties = getDataSourceProperties();
         int maxConn = -1;
@@ -351,12 +259,6 @@ public abstract class AbstractMCPDataSourceProvider implements DataSourceProvide
         return maxConn < 0 ? DEFAULT_DB_MAX_CONN : maxConn;
     }
 
-    /**
-     * Get validation query string.
-     *
-     * @param dbType the db type
-     * @return the string
-     */
     protected String getValidationQuery(DBType dbType) {
         if (DBType.ORACLE.equals(dbType)) {
             return "select sysdate from dual";

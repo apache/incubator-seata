@@ -57,7 +57,6 @@ public class GlobalSessionServiceImpl implements GlobalSessionService {
 
     @Override
     public PageResult<GlobalSessionVO> queryGlobalSession(NameSpaceDetail nameSpaceDetail, GlobalSessionParam param) {
-        // Check whether the query interval is too large
         if (param.getTimeEnd() != null && param.getTimeStart() != null) {
             if (DateUtils.judgeExceedTimeDuration(
                     param.getTimeStart(), param.getTimeEnd(), configuration.getQueryDuration())) {

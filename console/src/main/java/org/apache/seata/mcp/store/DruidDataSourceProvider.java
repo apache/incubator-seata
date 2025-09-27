@@ -38,14 +38,11 @@ public class DruidDataSourceProvider extends AbstractMCPDataSourceProvider {
         ds.setUsername(getUser());
         ds.setPassword(getPassword());
 
-        // Basic pool configuration
         ds.setInitialSize(getMinConn()); // Initial connection pool size
         ds.setMaxActive(getMaxConn()); // Maximum active connections
         ds.setMinIdle(getMinConn()); // Minimum idle connections
         ds.setMaxWait(getMaxWait()); // Maximum wait time for connection acquisition
 
-        // Connection retry and validation settings
-        // Connection retry and validation settings
         ds.setTestOnBorrow(true); // Test connections when borrowing
         ds.setTestOnReturn(false); // Don't test on return for performance
         ds.setTestWhileIdle(true); // Test idle connections
@@ -55,16 +52,13 @@ public class DruidDataSourceProvider extends AbstractMCPDataSourceProvider {
         ds.setValidationQuery(getValidationQuery(getDBType()));
         ds.setValidationQueryTimeout(5); // Validation timeout (seconds)
 
-        // Connection failure retry settings
         ds.setConnectionErrorRetryAttempts(3); // Retry 3 times on connection error
         ds.setBreakAfterAcquireFailure(true); // Break after all retries fail
 
-        // Performance settings
         ds.setPoolPreparedStatements(true); // Pool prepared statements for better performance
         ds.setMaxPoolPreparedStatementPerConnectionSize(20);
         ds.setDefaultAutoCommit(true);
 
-        // Fix for Oracle-specific issue (#5030)
         ds.setUseOracleImplicitCache(false);
         ds.setDefaultTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
 

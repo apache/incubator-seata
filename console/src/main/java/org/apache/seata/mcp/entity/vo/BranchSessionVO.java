@@ -19,8 +19,6 @@ package org.apache.seata.mcp.entity.vo;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.apache.seata.mcp.config.TimestampToStringDeserializer;
 
-import java.util.Objects;
-
 /**
  * BranchSessionVO
  */
@@ -159,44 +157,6 @@ public class BranchSessionVO {
 
     public void setGmtModified(String gmtModified) {
         this.gmtModified = gmtModified;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        BranchSessionVO that = (BranchSessionVO) o;
-        return Objects.equals(xid, that.xid)
-                && Objects.equals(transactionId, that.transactionId)
-                && Objects.equals(branchId, that.branchId)
-                && Objects.equals(resourceGroupId, that.resourceGroupId)
-                && Objects.equals(resourceId, that.resourceId)
-                && Objects.equals(branchType, that.branchType)
-                && Objects.equals(status, that.status)
-                && Objects.equals(clientId, that.clientId)
-                && Objects.equals(applicationData, that.applicationData)
-                && Objects.equals(gmtCreate, that.gmtCreate)
-                && Objects.equals(gmtModified, that.gmtModified);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(
-                xid,
-                transactionId,
-                branchId,
-                resourceGroupId,
-                resourceId,
-                branchType,
-                status,
-                clientId,
-                applicationData,
-                gmtCreate,
-                gmtModified);
     }
 
     @Override

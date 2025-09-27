@@ -24,33 +24,20 @@ public class GlobalLockParamDto implements Serializable {
 
     private static final long serialVersionUID = 615412528070131284L;
 
-    /**
-     * the xid
-     */
     @ToolParam(description = "Global transaction id")
     private String xid;
-    /**
-     * the table name
-     */
+
     @ToolParam(description = "the table name")
     private String tableName;
-    /**
-     * the transaction id
-     */
+
     @ToolParam(description = "the transaction id")
     private String transactionId;
-    /**
-     * the branch id
-     */
+
     @ToolParam(description = "the branch id")
     private String branchId;
-    /**
-     * the primary Key
-     */
+
     private String pk;
-    /**
-     * the resourceId
-     */
+
     @ToolParam(description = "resourceId")
     private String resourceId;
 

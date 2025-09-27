@@ -116,4 +116,15 @@ public class ServerLogPageVO<T> extends Result<T> implements Serializable {
     public void setData(List<T> data) {
         this.data = data;
     }
+
+    @Override
+    public String toString() {
+        return "ServerLogPageVO{" +
+                "pageSize=" + pageSize +
+                ", pageNum=" + pageNum +
+                ", total=" + total +
+                ", hasMorePages=" + hasMorePages +
+                ", data=" + data +
+                '}';
+    }
 }

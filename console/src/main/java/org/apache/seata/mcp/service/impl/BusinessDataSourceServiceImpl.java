@@ -18,7 +18,6 @@ package org.apache.seata.mcp.service.impl;
 
 import org.apache.seata.common.exception.StoreException;
 import org.apache.seata.common.result.PageResult;
-import org.apache.seata.common.util.PageUtil;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.mcp.entity.constant.SqlConstant;
 import org.apache.seata.mcp.entity.param.UndoLogParam;
@@ -191,119 +190,6 @@ public class BusinessDataSourceServiceImpl implements BusinessDataSourceService 
         sql = sql.replaceFirst("%", String.valueOf(offset));
         Object[] objects = params.toArray();
         return sqlExecutionTemplate.queryForUndoLogs(resourceId, sql, pageNum, pageSize, objects);
-    }
-
-    @Override
-    public Integer getUndoLogCounts(UndoLogParam param) {
-        long max_time_duration = mcpProperties.getQueryDuration();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        String sql = SqlConstant.GET_UNDO_LOG_SQL;
-        List<Object> params = new ArrayList<>();
-        String branchId = param.getBranchId();
-        String xid = param.getXid();
-        String resourceId = param.getResourceId();
-        Integer logStatus = param.getLogStatus();
-        UndoLogParam.CreateTime logCreateTime = param.getLogCreateTime();
-        UndoLogParam.ModifyTime logModifiedTime = param.getLogModifiedTime();
-        int pageNum = param.getPageNum();
-        int pageSize = param.getPageSize();
-        int offset = getOffsetAndValidationPageQuerySql(pageNum, pageSize);
-        if (StringUtils.isBlank(resourceId)) {
-            throw new StoreException("you cannot query without resourceId");
-        }
-        int paramCounts = 0;
-        if (StringUtils.isNotBlank(branchId)) {
-            sql += SqlConstant.PARAM_BRANCH_ID_SQL;
-            params.add(branchId);
-            paramCounts++;
-        }
-        if (StringUtils.isNotBlank(xid)) {
-            sql += SqlConstant.PARAM_XID_SQL;
-            params.add(xid);
-            paramCounts++;
-        }
-        if (logStatus != null) {
-            sql += SqlConstant.UNDO_LOG_STATUS_SQL;
-            params.add(logStatus);
-            paramCounts++;
-        }
-        boolean containsTimeDuration = false;
-        if (logCreateTime != null) {
-            String startTime = logCreateTime.getStartTime();
-            String endTime = logCreateTime.getEndTime();
-            if (startTime != null && endTime != null) {
-                sql += SqlConstant.UNDO_LOG_CREATE_TIME_SQL;
-                containsTimeDuration = true;
-                Long startTimestamp = LocalDateTime.parse(startTime, formatter)
-                        .atZone(ZoneId.systemDefault())
-                        .toInstant()
-                        .toEpochMilli();
-                Long endTimestamp = LocalDateTime.parse(endTime, formatter)
-                        .atZone(ZoneId.systemDefault())
-                        .toInstant()
-                        .toEpochMilli();
-                if (endTimestamp - startTimestamp > max_time_duration) {
-                    throw new StoreException(
-                            "The query time span is not allowed to exceed the max query duration(milliseconds): "
-                                    + max_time_duration);
-                }
-            }
-            if (startTime != null) {
-                params.add(startTime);
-            }
-            if (endTime != null) {
-                params.add(endTime);
-            }
-        }
-        if (logModifiedTime != null) {
-            String startTime = logModifiedTime.getStartTime();
-            String endTime = logModifiedTime.getEndTime();
-            if (startTime != null && endTime != null) {
-                if (containsTimeDuration) {
-                    sql += " AND" + SqlConstant.UNDO_LOG_MODIFY_TIME_SQL;
-                } else {
-                    sql += SqlConstant.UNDO_LOG_MODIFY_TIME_SQL;
-                    containsTimeDuration = true;
-                }
-                Long startTimestamp = LocalDateTime.parse(startTime, formatter)
-                        .atZone(ZoneId.systemDefault())
-                        .toInstant()
-                        .toEpochMilli();
-                Long endTimestamp = LocalDateTime.parse(endTime, formatter)
-                        .atZone(ZoneId.systemDefault())
-                        .toInstant()
-                        .toEpochMilli();
-                if (endTimestamp - startTimestamp > max_time_duration) {
-                    throw new StoreException(
-                            "The query time span is not allowed to exceed the max query duration(milliseconds): "
-                                    + max_time_duration);
-                }
-            }
-            if (startTime != null) {
-                params.add(startTime);
-            }
-            if (endTime != null) {
-                params.add(endTime);
-            }
-        }
-        if (containsTimeDuration) {
-            for (int i = 0; i < paramCounts; i++) {
-                sql = sql.replaceFirst("#", "AND");
-            }
-        } else {
-            for (int i = 1; i < paramCounts; i++) {
-                sql = sql.replaceFirst("#", "AND");
-            }
-        }
-        sql = sql.replaceAll("#", "");
-        sql += SqlConstant.UNDO_LOG_ORDER + SqlConstant.PAGE_QUERY;
-        sql = sql.replaceFirst("%", String.valueOf(pageSize));
-        sql = sql.replaceFirst("%", String.valueOf(offset));
-        Object[] objects = params.toArray();
-        Map<String, Object> mysql =
-                sqlExecutionTemplate.queryForObject(resourceId, PageUtil.countSql(sql, "mysql"), objects);
-        Long o = (Long) mysql.get("count(1)");
-        return o.intValue();
     }
 
     public String getSchemaNameByResourceId(String resourceId) {

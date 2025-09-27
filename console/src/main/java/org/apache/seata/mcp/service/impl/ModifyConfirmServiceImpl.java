@@ -27,9 +27,6 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class ModifyConfirmServiceImpl implements ModifyConfirmService {
 
-    /**
-     * To modify the operation key, only the input key can call the transaction modification API
-     */
     private static final Map<String, Long> MODIFY_KEY = new ConcurrentHashMap<>();
 
     private static final long EXPIRE_MS = 60_000; // Key timeout period

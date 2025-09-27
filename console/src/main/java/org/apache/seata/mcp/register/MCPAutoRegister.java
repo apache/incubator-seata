@@ -61,7 +61,6 @@ public class MCPAutoRegister implements BeanPostProcessor {
 
     private final Logger logger = LoggerFactory.getLogger(MCPAutoRegister.class);
 
-    // Type tracking to prevent circular references
     private final Set<Class<?>> processingTypes = new HashSet<>();
 
     public MCPAutoRegister(MCPServerManager aysncManager) {
@@ -91,15 +90,9 @@ public class MCPAutoRegister implements BeanPostProcessor {
         for (Parameter p : methodParams) {
             String pName = p.getName();
             Class<?> pt = p.getType();
-
-            // Cleanup the collection of processing type tracks
             processingTypes.clear();
-
-            // Generate a schema for the parameters
             ObjectNode prop = generatePropertySchema(pt, p);
             props.set(pName, prop);
-
-            // Check whether this parameter is mandatory
             ToolParam paramAnn = p.getAnnotation(ToolParam.class);
             if (paramAnn == null || paramAnn.required()) {
                 required.add(pName);
@@ -107,10 +100,7 @@ public class MCPAutoRegister implements BeanPostProcessor {
         }
 
         String schemaStr = parameters.toString();
-
-        // —— 2. build ToolSpecification and register as a tool ——
         McpSchema.Tool toolMeta = new McpSchema.Tool(m.getName(), ann.description(), schemaStr);
-
         McpServerFeatures.AsyncToolSpecification spec = McpServerFeatures.AsyncToolSpecification.builder()
                 .tool(toolMeta)
                 .callHandler((exchange, request) -> Mono.fromCallable(() -> {
@@ -130,8 +120,6 @@ public class MCPAutoRegister implements BeanPostProcessor {
                                 } else {
                                     contents.add(new McpSchema.TextContent(mapper.writeValueAsString(ret)));
                                 }
-
-                                // `false` This call will no longer trigger the LLM to continue calling the tool
                                 return new McpSchema.CallToolResult(contents, false);
 
                             } catch (InvocationTargetException ite) {
@@ -147,8 +135,6 @@ public class MCPAutoRegister implements BeanPostProcessor {
                         })
                         .subscribeOn(Schedulers.boundedElastic()))
                 .build();
-
-        // Add a tool and process the returned Mono
         aysncManager
                 .getServerInstance()
                 .addTool(spec)
@@ -159,36 +145,26 @@ public class MCPAutoRegister implements BeanPostProcessor {
                 .subscribe();
     }
 
-    /**
-     * Generate JSON Schema attributes for the parameters
-     */
     private ObjectNode generatePropertySchema(Class<?> type, Parameter parameter) {
         ObjectNode prop = mapper.createObjectNode();
 
-        // Get @ToolParam annotations
         ToolParam paramAnn = parameter.getAnnotation(ToolParam.class);
         if (paramAnn != null && !paramAnn.description().isEmpty()) {
             prop.put("description", paramAnn.description());
         }
 
-        // Recursively generate schemas
         generateTypeSchema(prop, type);
 
         return prop;
     }
 
-    /**
-     * A JSON schema of the recursive generation type
-     */
     private void generateTypeSchema(ObjectNode prop, Class<?> type) {
-        // Prevent circular references
         if (processingTypes.contains(type)) {
             prop.put("type", "object");
             prop.put("description", "Circular references: " + type.getSimpleName());
             return;
         }
 
-        // Basic type mapping
         if (type == String.class) {
             prop.put("type", "string");
         } else if (type == Integer.class || type == int.class) {
@@ -211,21 +187,16 @@ public class MCPAutoRegister implements BeanPostProcessor {
             prop.put("type", "object");
             prop.put("description", "Key-value pair mappings");
         } else if (isCustomObject(type)) {
-            // Custom object types
             prop.put("type", "object");
-
-            // Prevent circular references
             processingTypes.add(type);
 
             try {
                 ObjectNode properties = prop.putObject("properties");
                 ArrayNode required = prop.putArray("required");
 
-                // GET ALL THE FIELDS
                 Field[] fields = getAllFields(type);
 
                 for (Field field : fields) {
-                    // Skip static fields and final fields
                     if (java.lang.reflect.Modifier.isStatic(field.getModifiers())
                             || java.lang.reflect.Modifier.isFinal(field.getModifiers())) {
                         continue;
@@ -233,8 +204,6 @@ public class MCPAutoRegister implements BeanPostProcessor {
 
                     String fieldName = field.getName();
                     ObjectNode fieldProp = properties.putObject(fieldName);
-
-                    // Check the @ToolParam annotation of the field
                     ToolParam fieldAnn = field.getAnnotation(ToolParam.class);
                     if (fieldAnn != null) {
                         if (!fieldAnn.description().isEmpty()) {
@@ -244,7 +213,6 @@ public class MCPAutoRegister implements BeanPostProcessor {
                             fieldProp.put("example", fieldAnn.example());
                         }
                         if (fieldAnn.exampleValueClassName() != null && fieldAnn.exampleValueClassName().length != 0) {
-                            // The conversion type is JSON format
                             StringBuilder example = new StringBuilder();
                             for (Class<?> clazz : fieldAnn.exampleValueClassName()) {
                                 example.append(",").append(getClassInfoAsJson(clazz));
@@ -255,8 +223,6 @@ public class MCPAutoRegister implements BeanPostProcessor {
                             required.add(fieldName);
                         }
                     }
-
-                    // Recursively generate a schema of field types
                     generateTypeSchema(fieldProp, field.getType());
                 }
 
@@ -269,9 +235,6 @@ public class MCPAutoRegister implements BeanPostProcessor {
         }
     }
 
-    /**
-     * Converts all field information of a class to JSON strings(Include Enum)
-     */
     private String getClassInfoAsJson(Class<?> clazz) {
         try {
             ObjectNode result = mapper.createObjectNode();
@@ -285,14 +248,11 @@ public class MCPAutoRegister implements BeanPostProcessor {
                     ObjectNode enumInfo = enumValues.addObject();
                     enumInfo.put("name", enumConstant.toString());
                     enumInfo.put("ordinal", ((Enum<?>) enumConstant).ordinal());
-
-                    // Trying to get code value (for GlobalStatus, etc.)
                     try {
                         Method getCodeMethod = clazz.getMethod("getCode");
                         Object code = getCodeMethod.invoke(enumConstant);
                         enumInfo.put("code", code.toString());
                     } catch (Exception ignored) {
-                        // Ignore enumerations that don't have a getCode method
                     }
                 }
             }
@@ -303,7 +263,6 @@ public class MCPAutoRegister implements BeanPostProcessor {
                         || java.lang.reflect.Modifier.isFinal(field.getModifiers())) {
                     continue;
                 }
-
                 ObjectNode fieldInfo = fieldsArray.addObject();
                 fieldInfo.put("name", field.getName());
                 fieldInfo.put("type", field.getType().getName());
@@ -326,9 +285,6 @@ public class MCPAutoRegister implements BeanPostProcessor {
         }
     }
 
-    /**
-     * Get all fields of a class (including parent class fields)
-     */
     private Field[] getAllFields(Class<?> clazz) {
         List<Field> fields = new ArrayList<>();
         Class<?> current = clazz;
@@ -341,11 +297,7 @@ public class MCPAutoRegister implements BeanPostProcessor {
         return fields.toArray(new Field[0]);
     }
 
-    /**
-     * Determine whether the object type is a custom object
-     */
     private boolean isCustomObject(Class<?> type) {
-        // Exclude Java built-in types
         return !type.isPrimitive()
                 && !type.getName().startsWith("java.")
                 && !type.getName().startsWith("javax.")
@@ -354,9 +306,6 @@ public class MCPAutoRegister implements BeanPostProcessor {
                 && !type.isArray();
     }
 
-    /**
-     * Conversion parameter type (used for parameter conversion on method call)
-     */
     private Object convertArgument(Object arg, Class<?> targetType) {
         if (arg == null) {
             return null;

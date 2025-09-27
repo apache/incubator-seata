@@ -62,9 +62,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-/**
- * Provides an interface for MCP to call servers from RPC through Namingspace
- */
 @Service
 public class MCPRPCServiceImpl implements MCPRPCService {
     @Autowired
@@ -100,9 +97,7 @@ public class MCPRPCServiceImpl implements MCPRPCService {
     }
 
     public void getToken() {
-        // AuthenticationManager(default ProviderManager) #authenticate check Authentication
         Authentication authentication = new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword());
-        // init token
         String originToken = jwtTokenUtils.createToken(authentication);
         originJwt = originToken;
         token = WebSecurityConfig.TOKEN_PREFIX + originToken;
@@ -163,9 +158,6 @@ public class MCPRPCServiceImpl implements MCPRPCService {
         }
     }
 
-    /**
-     * Post Call the TC API based on the path
-     */
     @Override
     public String postCallTC(NameSpaceDetail nameSpaceDetail, String path, HttpHeaders headers, Object... args) {
         if (headers == null) {
@@ -223,9 +215,6 @@ public class MCPRPCServiceImpl implements MCPRPCService {
         }
     }
 
-    /**
-     * Get Call the TC API based on the path
-     */
     @Override
     public String getCallTC(
             NameSpaceDetail nameSpaceDetail,
@@ -264,14 +253,6 @@ public class MCPRPCServiceImpl implements MCPRPCService {
         }
     }
 
-    /**
-     * Delete Call the TC API based on the path
-     * @param path "Interface path"
-     * @param queryParams "Query Parameters (Objects)"
-     * @param pathParams "Path parameters（map）"
-     * @param headers "Request header"
-     * @return "Query results"
-     */
     @Override
     public String deleteCallTC(
             NameSpaceDetail nameSpaceDetail,
@@ -438,9 +419,6 @@ public class MCPRPCServiceImpl implements MCPRPCService {
         return paramMap;
     }
 
-    /**
-     * Build the full URL
-     */
     private String buildUrl(
             String baseUrl, String path, Map<String, String> pathParams, Map<String, Object> queryParams) {
 

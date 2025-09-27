@@ -25,34 +25,21 @@ import java.io.Serializable;
 public class GlobalSessionParamDto implements Serializable {
 
     private static final long serialVersionUID = 115488252809011284L;
-    /**
-     * the xid
-     */
+
     @ToolParam(description = "GLOBAL TRANSACTIONS id")
     private String xid;
-    /**
-     * the application id
-     */
+
     @ToolParam(description = "applicationId")
     private String applicationId;
-    /**
-     * the global session status
-     */
+
     @ToolParam(
             description = "the state enumeration class is in example",
             exampleValueClassName = {GlobalStatus.class, BranchStatus.class})
     private Integer status;
-    /**
-     * the transaction name
-     */
+
     @ToolParam(description = "The name of the transaction")
     private String transactionName;
 
-    /**
-     * if with branch
-     * true: with branch session
-     * false: no branch session
-     */
     @ToolParam(description = "Whether or not it contains branch transaction information")
     private boolean withBranch;
 

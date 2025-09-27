@@ -50,10 +50,6 @@ public class SqlExecutionTemplate {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SqlExecutionTemplate.class);
 
-    /**
-     * Obtain the data source with the specified resourceId
-     * @return DataSource instance
-     */
     private DataSource getDataSource(String resourceId) {
         try {
             return DataSourceFactory.getDataSource(resourceId);
@@ -77,14 +73,6 @@ public class SqlExecutionTemplate {
         return DML_PATTERN.matcher(sql).matches();
     }
 
-    /**
-     * Execute the query and return <Map>the list result
-     *
-     * @param resourceId of the data source
-     * @param sql SQL query statement
-     * @param params parameters
-     * @return List of query results
-     */
     public List<Map<String, Object>> query(String resourceId, String sql, Object... params) {
         Connection conn = null;
         PreparedStatement ps = null;
@@ -132,14 +120,6 @@ public class SqlExecutionTemplate {
         }
     }
 
-    /**
-     * Execute the query and return ResultSet
-     *
-     * @param resourceId of the data source
-     * @param sql SQL query statement
-     * @param params parameters
-     * @return List of query results
-     */
     public PageResult<UndoLogVO> queryForUndoLogs(
             String resourceId, String sql, Integer pageNum, Integer pageSize, Object... params) {
         Connection conn = null;
@@ -194,14 +174,6 @@ public class SqlExecutionTemplate {
         }
     }
 
-    /**
-     * PERFORM AN UPDATE OPERATION (INSERT, UPDATE, DELETE)
-     *
-     * @param resourceId of the data source
-     * @param sql SQL update statement
-     * @param params parameters
-     * @return The number of rows affected
-     */
     public int update(String resourceId, String sql, Object... params) {
         Connection conn = null;
         PreparedStatement ps = null;
@@ -228,14 +200,6 @@ public class SqlExecutionTemplate {
         }
     }
 
-    /**
-     * Perform update operations in bulk
-     *
-     * @param resourceId of the data source
-     * @param sql SQL statements
-     * @param batchParams batch parameter list
-     * @return Array of the number of rows affected
-     */
     public int[] batchUpdate(String resourceId, String sql, List<Object[]> batchParams) {
         Connection conn = null;
         PreparedStatement ps = null;
@@ -279,26 +243,11 @@ public class SqlExecutionTemplate {
         }
     }
 
-    /**
-     * Execute a query that returns a single object
-     *
-     * @param resourceId of the data source
-     * @param sql SQL query statement
-     * @param params parameters
-     * @return A single Map result, if there is no result, null will be returned
-     */
     public Map<String, Object> queryForObject(String resourceId, String sql, Object... params) {
         List<Map<String, Object>> results = query(resourceId, sql, params);
         return results.isEmpty() ? null : results.get(0);
     }
 
-    /**
-     * Perform transactional operations
-     *
-     * @param resourceId of the data source
-     * @param operations transaction operation interface
-     * @return Result of the operation
-     */
     public <T> T executeTransaction(String resourceId, TransactionOperation<T> operations) {
         Connection conn = null;
 

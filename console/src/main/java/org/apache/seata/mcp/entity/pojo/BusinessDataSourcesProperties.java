@@ -46,9 +46,6 @@ public class BusinessDataSourcesProperties implements InitializingBean {
     @Autowired
     private ObjectMapper objectMapper;
 
-    /**
-     * Business database properties instance
-     */
     private static final Map<String, DataSourceProperties> datasources = new ConcurrentHashMap<>();
 
     private static final Map<String, String> dataSourcesNamesAndResourceIds = new ConcurrentHashMap<>();
@@ -84,14 +81,12 @@ public class BusinessDataSourcesProperties implements InitializingBean {
             }
             props.setMaxWait(env.getProperty(prefix + "maxWait", Long.class, 5000L));
 
-            // Check whether the parameters are perfect
             if (!validateDataSourceProperties(props, name)) {
                 continue;
             }
 
             String resourceId = getOriginUrl(props.getUrl());
 
-            // Use the database URL as a unique identifier
             if (props.enabled) {
                 datasources.put(resourceId, props);
                 dataSourcesNamesAndResourceIds.put(name, resourceId);
@@ -99,12 +94,6 @@ public class BusinessDataSourcesProperties implements InitializingBean {
         }
     }
 
-    /**
-     * Verify the required parameters for DataSourceProperties
-     * @param props Data source attribute configuration
-     * @param dataSourceName Data source name, used for exception information
-     * @throws IllegalArgumentException If required parameters are missing
-     */
     private boolean validateDataSourceProperties(DataSourceProperties props, String dataSourceName) {
         if (props == null) {
             LOGGER.error("DataSource configuration cannot be null for: {}", dataSourceName);
@@ -171,14 +160,11 @@ public class BusinessDataSourcesProperties implements InitializingBean {
         }
         DataSourceProperties props = new DataSourceProperties();
 
-        // Parse basic properties with defaults
         props.setDbType(jsonNode.has("dbType") ? jsonNode.get("dbType").asText() : "mysql");
 
-        // Set driver class based on database type if not explicitly provided
         String driverClassName = getDefaultDriverClassName(props.getDbType());
         props.setDriverClassName(driverClassName);
 
-        // Required fields
         if (!jsonNode.has("url")) {
             throw new IllegalArgumentException("The database URL cannot be empty");
         }
@@ -194,7 +180,6 @@ public class BusinessDataSourcesProperties implements InitializingBean {
         }
         props.setPassword(jsonNode.get("password").asText());
 
-        // Optional fields with defaults
         props.setDatasource(
                 jsonNode.has("datasource") ? jsonNode.get("datasource").asText() : "druid");
         props.setMinConn(jsonNode.has("minConn") ? jsonNode.get("minConn").asInt() : DEFAULT_DB_MIN_CONN);
@@ -204,11 +189,6 @@ public class BusinessDataSourcesProperties implements InitializingBean {
         return props;
     }
 
-    /**
-     * Register a new DataSource from JSON configuration
-     * @param jsonConfig JSON configuration string
-     * @throws Exception if JSON parsing or registration fails
-     */
     public void registerDataSourceFromJson(String jsonConfig) throws Exception {
         JsonNode jsonNode = objectMapper.readTree(jsonConfig);
         if (jsonNode == null || jsonNode.isEmpty()) {
@@ -229,9 +209,6 @@ public class BusinessDataSourcesProperties implements InitializingBean {
         dataSourcesNamesAndResourceIds.put(name, resourceId);
     }
 
-    /**
-     * Get default driver class name based on database type
-     */
     private static String getDefaultDriverClassName(String dbType) {
         switch (dbType.toLowerCase()) {
             case "postgresql":
@@ -248,9 +225,6 @@ public class BusinessDataSourcesProperties implements InitializingBean {
         }
     }
 
-    /**
-     * Extract the base URL without query parameters from the JDBC URL
-     */
     private String getOriginUrl(String url) {
         int index = url.indexOf("?");
         if (index != -1) {
@@ -262,11 +236,9 @@ public class BusinessDataSourcesProperties implements InitializingBean {
     private Set<String> getDataSourceNames() {
         Set<String> names = new HashSet<>();
 
-        // Use the standard PropertySource API to get the data source name
         if (env instanceof ConfigurableEnvironment) {
             ConfigurableEnvironment configEnv = (ConfigurableEnvironment) env;
 
-            // Store processed data source names to avoid duplication
             Set<String> processedNames = new HashSet<>();
 
             for (PropertySource<?> propertySource : configEnv.getPropertySources()) {
@@ -276,10 +248,9 @@ public class BusinessDataSourcesProperties implements InitializingBean {
                     for (String propertyName : enumSource.getPropertyNames()) {
                         if (propertyName.startsWith(BASE_PREFIX)) {
                             String[] parts = propertyName.split("\\.");
-                            if (parts.length > 3) { // seata.businessDataSources.{name}.{property}
+                            if (parts.length > 3) {
                                 String dsName = parts[2];
                                 if (!processedNames.contains(dsName)) {
-                                    // Confirm that this is a valid data source configuration
                                     if (env.containsProperty(BASE_PREFIX + dsName + ".url")) {
                                         names.add(dsName);
                                         processedNames.add(dsName);

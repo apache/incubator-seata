@@ -18,7 +18,6 @@ package org.apache.seata.mcp.entity.pojo;
 
 import io.modelcontextprotocol.spec.McpSchema;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
@@ -26,47 +25,28 @@ import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * MCP Server configuration parameters
- */
 @Component
 public class MCPProperties {
 
     public static final String SSE_TYPE = "sse";
     public static final String STREAMABLE_TYPE = "streamable";
 
-    /**
-     * The name of the server
-     */
     private String serverName;
-    /**
-     * Server version
-     */
+
     private String serverVersion = "1.0.0";
-    /**
-     * Whether to enable OAuth connection authentication
-     */
+
     private boolean enableAuth = true;
-    /**
-     * Specifies whether to enable resource/prompt
-     */
+
     private boolean resourceSupport = false;
 
     private boolean resourceTemplates = false;
 
     private boolean promptSupport = false;
-    /**
-     * Turn on logging
-     */
+
     private McpSchema.LoggingLevel loggingLevel = McpSchema.LoggingLevel.INFO;
-    /**
-     * Maximum query interval, Millisecond, default: One day: 86400000L
-     */
+
     private Long queryDuration = 86400000L;
 
-    /**
-     * Transmission types, Streamable and SSE are available
-     */
     private String mcpType = SSE_TYPE;
 
     private StreamableProperties streamableProperties;
@@ -127,13 +107,9 @@ public class MCPProperties {
     }
 
     public static class SseServerProperties {
-        /**
-         * SSE endpoints
-         */
+
         private String sseEndpoint = "/sse";
-        /**
-         * MESSAGE ENDPOINT
-         */
+
         private String messageEndpoint = "/message";
 
         public String getSseEndpoint() {
@@ -167,10 +143,6 @@ public class MCPProperties {
         }
     }
 
-    /**
-     * Read MCP-related configuration parameters from the environment
-     */
-    @Lazy
     @Autowired
     private Environment env;
 

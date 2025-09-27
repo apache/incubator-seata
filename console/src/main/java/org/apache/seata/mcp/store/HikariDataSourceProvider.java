@@ -33,7 +33,6 @@ public class HikariDataSourceProvider extends AbstractMCPDataSourceProvider {
 
     @Override
     public DataSource doGenerate() {
-        // Performance optimization properties for MySQL
         Properties properties = new Properties();
         properties.setProperty("dataSource.cachePrepStmts", "true"); // Enable prepared statement caching
         properties.setProperty("dataSource.prepStmtCacheSize", "250"); // Number of prepared statements to cache
@@ -49,32 +48,26 @@ public class HikariDataSourceProvider extends AbstractMCPDataSourceProvider {
 
         HikariConfig config = new HikariConfig(properties);
 
-        // Basic connection settings
         config.setDriverClassName(getDriverClassName());
         config.setJdbcUrl(getUrl());
         config.setUsername(getUser());
         config.setPassword(getPassword());
 
-        // Connection pool configuration
         config.setMaximumPoolSize(getMaxConn()); // Maximum size of connection pool
         config.setMinimumIdle(getMinConn()); // Minimum number of idle connections
         config.setIdleTimeout(300000); // Maximum idle time (5 minutes)
 
-        // Connection acquisition settings
         config.setConnectionTimeout(getMaxWait()); // Maximum wait time for connection
         config.setInitializationFailTimeout(-1); // No timeout for pool initialization
 
-        // Connection retry and validation
         config.setConnectionTestQuery(getValidationQuery(getDBType())); // Query to validate connections
         config.setValidationTimeout(5000); // Validation timeout (5 seconds)
         config.setMaxLifetime(1800000); // Maximum connection lifetime (30 minutes)
         config.setKeepaliveTime(60000); // Keepalive interval (60 seconds)
 
-        // Retry behavior
         config.setAutoCommit(true); // Auto-commit connections by default
         config.setTransactionIsolation(IsolationLevel.TRANSACTION_READ_COMMITTED.name());
 
-        // Additional retry settings
         properties.setProperty("connectionRetryAttempts", "3"); // Attempt connection 3 times
         properties.setProperty("connectionRetryDelay", "1000"); // Wait 1 second between retries
         properties.setProperty("connectionTimeoutMs", "5000"); // Connection timeout 5 seconds

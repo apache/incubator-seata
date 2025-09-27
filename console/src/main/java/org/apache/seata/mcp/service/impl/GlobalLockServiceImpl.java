@@ -49,7 +49,6 @@ public class GlobalLockServiceImpl implements GlobalLockService {
 
     @Override
     public PageResult<GlobalLockVO> queryGlobalLock(NameSpaceDetail nameSpaceDetail, GlobalLockParam param) {
-        // Check whether the query interval is too large
         if (param.getTimeEnd() != null && param.getTimeStart() != null) {
             if (DateUtils.judgeExceedTimeDuration(
                     param.getTimeStart(), param.getTimeEnd(), configuration.getQueryDuration())) {

@@ -31,6 +31,4 @@ public interface BusinessDataSourceService {
     List<Map<String, Object>> runSql(String sql, String resourceId);
 
     PageResult<UndoLogVO> getUndoLogInfo(UndoLogParam undoLogParam);
-
-    Integer getUndoLogCounts(UndoLogParam undoLogParam);
 }
