@@ -147,18 +147,6 @@ public class GlobalSessionParam implements Serializable {
                 + timeEnd + '}';
     }
 
-    public static GlobalSessionParam covertFromAbnormalParam(GlobalAbnormalSessionParam abParam) {
-        GlobalSessionParam param = new GlobalSessionParam();
-        if (StringUtils.isNotBlank(abParam.getTimeStart())) {
-            param.setTimeStart(DateUtils.convertToTimeStampFromDateTime(abParam.getTimeStart()));
-        }
-        if (StringUtils.isNotBlank(abParam.getTimeEnd())) {
-            param.setTimeEnd(DateUtils.convertToTimeStampFromDateTime(abParam.getTimeEnd()));
-        }
-        param.setWithBranch(abParam.isWithBranch());
-        return param;
-    }
-
     public static GlobalSessionParam covertFromDtoParam(GlobalSessionParamDto paramDto) {
         PageUtil.checkParam(paramDto.getPageNum(), paramDto.getPageSize());
         GlobalSessionParam param = new GlobalSessionParam();

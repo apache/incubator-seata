@@ -16,51 +16,80 @@
  */
 package org.apache.seata.mcp.controller.tools;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.seata.common.result.PageResult;
+import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.mcp.annotation.Tool;
 import org.apache.seata.mcp.annotation.ToolParam;
+import org.apache.seata.mcp.entity.constant.RPCConstant;
 import org.apache.seata.mcp.entity.dto.GlobalSessionParamDto;
+import org.apache.seata.mcp.entity.enums.GlobalExceptionStatus;
 import org.apache.seata.mcp.entity.param.GlobalAbnormalSessionParam;
 import org.apache.seata.mcp.entity.param.GlobalSessionParam;
+import org.apache.seata.mcp.entity.pojo.MCPProperties;
 import org.apache.seata.mcp.entity.pojo.NameSpaceDetail;
-import org.apache.seata.mcp.service.GlobalSessionService;
+import org.apache.seata.mcp.entity.vo.GlobalSessionVO;
+import org.apache.seata.mcp.service.MCPRPCService;
 import org.apache.seata.mcp.service.ModifyConfirmService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.seata.mcp.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-/**
- * Use RPC to call the server-side corresponding method
- */
 @Service
 public class GlobalSessionTools {
 
     @Autowired
-    private GlobalSessionService globalSessionService;
+    private MCPRPCService mcpRPCService;
+
+    @Autowired
+    private MCPProperties configuration;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Autowired
     private ModifyConfirmService modifyConfirmService;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GlobalSessionTools.class);
-
-    @Tool(description = "Check out the abnormal transaction information,You can specify the time")
-    public List<String> getAbnormalTransactionInfo(
-            @ToolParam(description = "Specify the namespace of the TC node", required = true)
-                    NameSpaceDetail nameSpaceDetail,
-            @ToolParam(description = "Query Param", required = true) GlobalAbnormalSessionParam param) {
-        return globalSessionService.getAbnormalSessions(nameSpaceDetail, param);
-    }
-
     @Tool(description = "Query global transactions")
-    public PageResult<?> queryGlobalSession(
+    public PageResult<GlobalSessionVO> queryGlobalSession(
             @ToolParam(description = "Specify the namespace of the TC node", required = true)
                     NameSpaceDetail nameSpaceDetail,
             @ToolParam(description = "Query parameter objects", required = true) GlobalSessionParamDto paramDto) {
         GlobalSessionParam param = GlobalSessionParam.covertFromDtoParam(paramDto);
-        return globalSessionService.queryGlobalSession(nameSpaceDetail, param);
+        if (param.getTimeEnd() != null && param.getTimeStart() != null) {
+            if (DateUtils.judgeExceedTimeDuration(
+                    param.getTimeStart(), param.getTimeEnd(), configuration.getQueryDuration())) {
+                return PageResult.failure(
+                        "",
+                        "The query time span is not allowed to exceed the max query duration : "
+                                + DateUtils.convertToHourFromTimeStamp(configuration.getQueryDuration()) + " hour");
+            }
+        } else if (param.getTimeStart() != null && param.getTimeEnd() == null) {
+            param.setTimeEnd(param.getTimeStart() + DateUtils.ONE_DAY_TIMESTAMP);
+        } else {
+            param.setTimeEnd(null);
+            param.setTimeStart(null);
+        }
+        PageResult<GlobalSessionVO> pageResult;
+        String result = mcpRPCService.getCallTC(
+                nameSpaceDetail, RPCConstant.GLOBAL_SESSION_BASE_URL + "/query", param, null, null);
+        try {
+            pageResult = objectMapper.readValue(result, new TypeReference<PageResult<GlobalSessionVO>>() {});
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        if (pageResult == null) {
+            return PageResult.failure("", "query global session failed");
+        } else {
+            return pageResult;
+        }
     }
 
     @Tool(description = "Delete the global session, Get the modify key before you delete")
@@ -69,29 +98,17 @@ public class GlobalSessionTools {
                     NameSpaceDetail nameSpaceDetail,
             @ToolParam(description = "Global transaction id", required = true) String xid,
             @ToolParam(description = "Modify key", required = true) String modifyKey) {
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("manual operation to delete the global session, xid: {}", xid);
+        if (!modifyConfirmService.isValidKey(modifyKey)) {
+            return "The modify key is not available";
         }
-        if (modifyConfirmService.isValidKey(modifyKey)) {
-            return globalSessionService.deleteGlobalSession(nameSpaceDetail, xid);
+        Map<String, String> pathParams = new HashMap<>();
+        pathParams.put("xid", xid);
+        String result = mcpRPCService.deleteCallTC(
+                nameSpaceDetail, RPCConstant.GLOBAL_SESSION_BASE_URL + "/deleteGlobalSession", null, pathParams, null);
+        if (StringUtils.isBlank(result)) {
+            return String.format("delete global session failed, xid: %s", xid);
         } else {
-            return "the modify key is not available";
-        }
-    }
-
-    @Tool(description = "Force Delete the global session, Get the modify key before you delete")
-    public String forceDeleteGlobalSession(
-            @ToolParam(description = "Specify the namespace of the TC node", required = true)
-                    NameSpaceDetail nameSpaceDetail,
-            @ToolParam(description = "Global transaction id", required = true) String xid,
-            @ToolParam(description = "Modify key", required = true) String modifyKey) {
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("manual operation to force delete the global session, xid: {}", xid);
-        }
-        if (modifyConfirmService.isValidKey(modifyKey)) {
-            return globalSessionService.forceDeleteGlobalSession(nameSpaceDetail, xid);
-        } else {
-            return "the modify key is not available";
+            return result;
         }
     }
 
@@ -101,13 +118,17 @@ public class GlobalSessionTools {
                     NameSpaceDetail nameSpaceDetail,
             @ToolParam(description = "Global transaction id", required = true) String xid,
             @ToolParam(description = "Modify key", required = true) String modifyKey) {
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("manual operation to stop the global session, xid: {}", xid);
+        if (!modifyConfirmService.isValidKey(modifyKey)) {
+            return "The modify key is not available";
         }
-        if (modifyConfirmService.isValidKey(modifyKey)) {
-            return globalSessionService.stopGlobalSession(nameSpaceDetail, xid);
+        Map<String, String> pathParams = new HashMap<>();
+        pathParams.put("xid", xid);
+        String result = mcpRPCService.putCallTC(
+                nameSpaceDetail, RPCConstant.GLOBAL_SESSION_BASE_URL + "/stopGlobalSession", null, pathParams, null);
+        if (StringUtils.isBlank(result)) {
+            return String.format("stop global session retry failed, xid: %s", xid);
         } else {
-            return "the modify key is not available";
+            return result;
         }
     }
 
@@ -117,13 +138,17 @@ public class GlobalSessionTools {
                     NameSpaceDetail nameSpaceDetail,
             @ToolParam(description = "Global transaction id", required = true) String xid,
             @ToolParam(description = "Modify key", required = true) String modifyKey) {
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("manual operation to start the global session, xid: {}", xid);
+        if (!modifyConfirmService.isValidKey(modifyKey)) {
+            return "The modify key is not available";
         }
-        if (modifyConfirmService.isValidKey(modifyKey)) {
-            return globalSessionService.startGlobalSession(nameSpaceDetail, xid);
+        Map<String, String> pathParams = new HashMap<>();
+        pathParams.put("xid", xid);
+        String result = mcpRPCService.putCallTC(
+                nameSpaceDetail, RPCConstant.GLOBAL_SESSION_BASE_URL + "/startGlobalSession", null, pathParams, null);
+        if (StringUtils.isBlank(result)) {
+            return String.format("start the global session retry failed, xid: %s", xid);
         } else {
-            return "the modify key is not available";
+            return result;
         }
     }
 
@@ -133,13 +158,17 @@ public class GlobalSessionTools {
                     NameSpaceDetail nameSpaceDetail,
             @ToolParam(description = "Global transaction id", required = true) String xid,
             @ToolParam(description = "Modify key", required = true) String modifyKey) {
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("manual operation to commit or rollback the global session, xid: {}", xid);
+        if (!modifyConfirmService.isValidKey(modifyKey)) {
+            return "The modify key is not available";
         }
-        if (modifyConfirmService.isValidKey(modifyKey)) {
-            return globalSessionService.sendCommitOrRollback(nameSpaceDetail, xid);
+        Map<String, String> pathParams = new HashMap<>();
+        pathParams.put("xid", xid);
+        String result = mcpRPCService.putCallTC(
+                nameSpaceDetail, RPCConstant.GLOBAL_SESSION_BASE_URL + "/sendCommitOrRollback", null, pathParams, null);
+        if (StringUtils.isBlank(result)) {
+            return String.format("send global session to commit or rollback to rm failed, xid: %s", xid);
         } else {
-            return "the modify key is not available";
+            return result;
         }
     }
 
@@ -149,13 +178,43 @@ public class GlobalSessionTools {
                     NameSpaceDetail nameSpaceDetail,
             @ToolParam(description = "Global transaction id", required = true) String xid,
             @ToolParam(description = "Modify key", required = true) String modifyKey) {
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("manual operation to change the global session, xid: {}", xid);
+        if (!modifyConfirmService.isValidKey(modifyKey)) {
+            return "The modify key is not available";
         }
-        if (modifyConfirmService.isValidKey(modifyKey)) {
-            return globalSessionService.changeGlobalStatus(nameSpaceDetail, xid);
+        Map<String, String> pathParams = new HashMap<>();
+        pathParams.put("xid", xid);
+        String result = mcpRPCService.putCallTC(
+                nameSpaceDetail, RPCConstant.GLOBAL_SESSION_BASE_URL + "/changeGlobalStatus", null, pathParams, null);
+        if (StringUtils.isBlank(result)) {
+            return String.format("change the global session status failed, xid: %s", xid);
         } else {
-            return "the modify key is not available";
+            return result;
         }
+    }
+
+    @Tool(description = "Check out the abnormal transaction information,You can specify the time")
+    public List<String> getAbnormalSessions(
+            @ToolParam(description = "Specify the namespace of the TC node", required = true)
+                    NameSpaceDetail nameSpaceDetail,
+            @ToolParam(description = "Query Param", required = true) GlobalAbnormalSessionParam abnormalSessionParam) {
+        List<String> result = new ArrayList<>();
+        GlobalSessionParamDto param = GlobalSessionParamDto.covertFromAbnormalParam(abnormalSessionParam);
+        param.setPageNum(1);
+        param.setPageSize(100);
+        List<Integer> exceptionStatus = GlobalExceptionStatus.getAll();
+        for (Integer status : exceptionStatus) {
+            param.setStatus(status);
+            List<GlobalSessionVO> datas =
+                    queryGlobalSession(nameSpaceDetail, param).getData();
+            if (datas != null && !datas.isEmpty()) {
+                for (Object vo : datas) {
+                    if (result.size() >= 200) {
+                        return result;
+                    }
+                    result.add(vo.toString());
+                }
+            }
+        }
+        return result;
     }
 }

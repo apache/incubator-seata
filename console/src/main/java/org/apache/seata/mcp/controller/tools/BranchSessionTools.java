@@ -16,26 +16,27 @@
  */
 package org.apache.seata.mcp.controller.tools;
 
+import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.mcp.annotation.Tool;
 import org.apache.seata.mcp.annotation.ToolParam;
+import org.apache.seata.mcp.entity.constant.RPCConstant;
 import org.apache.seata.mcp.entity.pojo.NameSpaceDetail;
-import org.apache.seata.mcp.service.BranchSessionService;
+import org.apache.seata.mcp.service.MCPRPCService;
 import org.apache.seata.mcp.service.ModifyConfirmService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class BranchSessionTools {
 
     @Autowired
-    private BranchSessionService branchSessionService;
+    private MCPRPCService mcpRPCService;
 
     @Autowired
     private ModifyConfirmService modifyConfirmService;
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(BranchSessionTools.class);
 
     @Tool(description = "Delete branch transactions, Get the modify key before you delete")
     public String deleteBranchSession(
@@ -44,30 +45,18 @@ public class BranchSessionTools {
             @ToolParam(description = "Global transaction id", required = true) String xid,
             @ToolParam(description = "Branch transaction id", required = true) String branchId,
             @ToolParam(description = "Modify key", required = true) String modifyKey) {
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("manual operation to delete the branch session, xid: {} branchId: {}", xid, branchId);
+        if (!modifyConfirmService.isValidKey(modifyKey)) {
+            return "The modify key is not available";
         }
-        if (modifyConfirmService.isValidKey(modifyKey)) {
-            return branchSessionService.deleteBranchSession(nameSpaceDetail, xid, branchId);
+        Map<String, String> pathParams = new HashMap<>();
+        pathParams.put("xid", xid);
+        pathParams.put("branchId", branchId);
+        String result = mcpRPCService.deleteCallTC(
+                nameSpaceDetail, RPCConstant.BRANCH_SESSION_BASE_URL + "/deleteBranchSession", null, pathParams, null);
+        if (StringUtils.isBlank(result)) {
+            return String.format("delete branch session failed, xid: %s, branchId: %s", xid, branchId);
         } else {
-            return "the modify key is not available";
-        }
-    }
-
-    @Tool(description = "Force the deletion of branch transactions, Get the modify key before you delete")
-    public String forceDeleteBranchSession(
-            @ToolParam(description = "Specify the namespace of the TC node", required = true)
-                    NameSpaceDetail nameSpaceDetail,
-            @ToolParam(description = "Global transaction id", required = true) String xid,
-            @ToolParam(description = "Branch transaction id", required = true) String branchId,
-            @ToolParam(description = "Modify key", required = true) String modifyKey) {
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("manual operation to force delete the branch session, xid: {} branchId: {}", xid, branchId);
-        }
-        if (modifyConfirmService.isValidKey(modifyKey)) {
-            return branchSessionService.forceDeleteBranchSession(nameSpaceDetail, xid, branchId);
-        } else {
-            return "the modify key is not available";
+            return result;
         }
     }
 
@@ -78,13 +67,18 @@ public class BranchSessionTools {
             @ToolParam(description = "Global transaction id", required = true) String xid,
             @ToolParam(description = "Branch transaction id", required = true) String branchId,
             @ToolParam(description = "Modify key", required = true) String modifyKey) {
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("manual operation to stop the branch session, xid: {} branchId: {}", xid, branchId);
+        if (!modifyConfirmService.isValidKey(modifyKey)) {
+            return "The modify key is not available";
         }
-        if (modifyConfirmService.isValidKey(modifyKey)) {
-            return branchSessionService.stopBranchSession(nameSpaceDetail, xid, branchId);
+        Map<String, String> pathParams = new HashMap<>();
+        pathParams.put("xid", xid);
+        pathParams.put("branchId", branchId);
+        String result = mcpRPCService.putCallTC(
+                nameSpaceDetail, RPCConstant.BRANCH_SESSION_BASE_URL + "/stopBranchSession", null, pathParams, null);
+        if (StringUtils.isBlank(result)) {
+            return String.format("stop branch session failed, xid: %s, branchId: %s", xid, branchId);
         } else {
-            return "the modify key is not available";
+            return result;
         }
     }
 
@@ -95,13 +89,18 @@ public class BranchSessionTools {
             @ToolParam(description = "Global transaction id", required = true) String xid,
             @ToolParam(description = "Branch transaction id", required = true) String branchId,
             @ToolParam(description = "Modify key", required = true) String modifyKey) {
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("manual operation to start the branch session, xid: {} branchId: {}", xid, branchId);
+        if (!modifyConfirmService.isValidKey(modifyKey)) {
+            return "The modify key is not available";
         }
-        if (modifyConfirmService.isValidKey(modifyKey)) {
-            return branchSessionService.startBranchRetry(nameSpaceDetail, xid, branchId);
+        Map<String, String> pathParams = new HashMap<>();
+        pathParams.put("xid", xid);
+        pathParams.put("branchId", branchId);
+        String result = mcpRPCService.putCallTC(
+                nameSpaceDetail, RPCConstant.BRANCH_SESSION_BASE_URL + "/startBranchSession", null, pathParams, null);
+        if (StringUtils.isBlank(result)) {
+            return String.format("start branch session failed, xid: %s, branchId: %s", xid, branchId);
         } else {
-            return "the modify key is not available";
+            return result;
         }
     }
 }

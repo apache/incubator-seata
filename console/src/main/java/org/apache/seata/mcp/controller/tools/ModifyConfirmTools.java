@@ -37,7 +37,6 @@ public class ModifyConfirmTools {
 
     @Tool(
             description = "Before modifying (update or delete) a transaction or lock, the user MUST manually confirm."
-                    + "The confirmation string MUST come directly from the USER."
                     + "You are NOT allowed to fabricate or auto-confirm on behalf of the user.")
     public Map<String, String> confirmAndGetKey(
             @ToolParam(

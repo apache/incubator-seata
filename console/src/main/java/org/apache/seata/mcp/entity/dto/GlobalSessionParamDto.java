@@ -16,9 +16,11 @@
  */
 package org.apache.seata.mcp.entity.dto;
 
+import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.mcp.annotation.ToolParam;
+import org.apache.seata.mcp.entity.param.GlobalAbnormalSessionParam;
 
 import java.io.Serializable;
 
@@ -125,6 +127,18 @@ public class GlobalSessionParamDto implements Serializable {
 
     public void setWithBranch(boolean withBranch) {
         this.withBranch = withBranch;
+    }
+
+    public static GlobalSessionParamDto covertFromAbnormalParam(GlobalAbnormalSessionParam abParam) {
+        GlobalSessionParamDto param = new GlobalSessionParamDto();
+        if (StringUtils.isNotBlank(abParam.getTimeStart())) {
+            param.setTimeStart(abParam.getTimeStart());
+        }
+        if (StringUtils.isNotBlank(abParam.getTimeEnd())) {
+            param.setTimeEnd(abParam.getTimeEnd());
+        }
+        param.setWithBranch(abParam.isWithBranch());
+        return param;
     }
 
     @Override
