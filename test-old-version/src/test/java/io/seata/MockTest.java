@@ -32,13 +32,17 @@ import org.apache.seata.mockserver.MockServer;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * the type MockServerTest
  */
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class MockTest {
 
     static String RESOURCE_ID = "mock-action-061";
@@ -57,6 +61,7 @@ public class MockTest {
     }
 
     @Test
+    @Order(1)
     public void testCommit() throws Exception {
         String xid = doTestCommit(0);
         Assertions.assertEquals(1, Action1Impl.getCommitTimes(xid));
@@ -64,6 +69,7 @@ public class MockTest {
     }
 
     @Test
+    @Order(2)
     public void testCommitRetry() throws Exception {
         String xid = doTestCommit(2);
         Assertions.assertEquals(3, Action1Impl.getCommitTimes(xid));
@@ -71,6 +77,7 @@ public class MockTest {
     }
 
     @Test
+    @Order(3)
     public void testRollback() throws Exception {
         String xid = doTestRollback(0);
         Assertions.assertEquals(0, Action1Impl.getCommitTimes(xid));
@@ -78,6 +85,7 @@ public class MockTest {
     }
 
     @Test
+    @Order(4)
     public void testRollbackRetry() throws Exception {
         String xid = doTestRollback(2);
         Assertions.assertEquals(0, Action1Impl.getCommitTimes(xid));
@@ -85,11 +93,13 @@ public class MockTest {
     }
 
     @Test
+    @Order(5)
     public void testTm() throws Exception {
         TmClientTest.testTm();
     }
 
     @Test
+    @Order(6)
     public void testRm() throws Exception {
         RmClientTest.testRm("testRM01");
     }
