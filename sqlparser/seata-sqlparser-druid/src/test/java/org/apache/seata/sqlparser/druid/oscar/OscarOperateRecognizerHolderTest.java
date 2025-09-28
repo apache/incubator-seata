@@ -68,7 +68,7 @@ public class OscarOperateRecognizerHolderTest extends AbstractOscarRecognizerTes
         selectStatement.setSelect(null);
         Assertions.assertNull(new OscarOperateRecognizerHolder().getSelectForUpdateRecognizer(sql, sqlStatement));
 
-        // set select field query is null
+        // set select query is null
         selectStatement = (SQLSelectStatement) getSQLStatement(sql);
         selectStatement.getSelect().setQuery(null);
         Assertions.assertNull(new OscarOperateRecognizerHolder().getSelectForUpdateRecognizer(sql, sqlStatement));
