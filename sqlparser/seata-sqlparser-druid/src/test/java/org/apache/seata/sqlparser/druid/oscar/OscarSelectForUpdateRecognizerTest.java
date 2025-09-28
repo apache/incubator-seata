@@ -18,20 +18,18 @@ package org.apache.seata.sqlparser.druid.oscar;
 
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
-import org.apache.seata.sqlparser.ParametersHolder;
 import org.apache.seata.sqlparser.SQLParsingException;
 import org.apache.seata.sqlparser.SQLType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
-import java.util.Map;
 
 /**
  * The type Oscar select for update recognizer test.
  */
 public class OscarSelectForUpdateRecognizerTest extends AbstractOscarRecognizerTest {
-    
+
     @Test
     public void testGetSqlType() {
         String sql = "select * from t where id = ? for update";
@@ -47,9 +45,7 @@ public class OscarSelectForUpdateRecognizerTest extends AbstractOscarRecognizerT
         SQLStatement sqlStatement = getSQLStatement(sql);
 
         OscarSelectForUpdateRecognizer recognizer = new OscarSelectForUpdateRecognizer(sql, sqlStatement);
-        String whereCondition = recognizer.getWhereCondition(
-                () -> null,
-                new ArrayList<>());
+        String whereCondition = recognizer.getWhereCondition(() -> null, new ArrayList<>());
         Assertions.assertEquals("", whereCondition);
     }
 

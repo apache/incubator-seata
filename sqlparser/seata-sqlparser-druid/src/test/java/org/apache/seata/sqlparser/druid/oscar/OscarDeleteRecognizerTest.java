@@ -66,9 +66,7 @@ public class OscarDeleteRecognizerTest extends AbstractOscarRecognizerTest {
         SQLStatement sqlStatement = getSQLStatement(sql);
 
         OscarDeleteRecognizer recognizer = new OscarDeleteRecognizer(sql, sqlStatement);
-        String whereCondition = recognizer.getWhereCondition(
-                () -> null,
-                new ArrayList<>());
+        String whereCondition = recognizer.getWhereCondition(() -> null, new ArrayList<>());
 
         // test for no condition
         Assertions.assertEquals("", whereCondition);
@@ -138,10 +136,7 @@ public class OscarDeleteRecognizerTest extends AbstractOscarRecognizerTest {
             String s = "delete from t where id in (?)";
             SQLDeleteStatement deleteAst = (SQLDeleteStatement) getSQLStatement(s);
             deleteAst.setWhere(new OracleArgumentExpr());
-            new OscarDeleteRecognizer(s, deleteAst)
-                    .getWhereCondition(
-                            () -> new HashMap<>(),
-                            new ArrayList<>());
+            new OscarDeleteRecognizer(s, deleteAst).getWhereCondition(() -> new HashMap<>(), new ArrayList<>());
         });
     }
 
