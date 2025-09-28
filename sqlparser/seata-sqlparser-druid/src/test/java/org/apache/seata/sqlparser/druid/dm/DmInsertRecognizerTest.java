@@ -19,6 +19,7 @@ package org.apache.seata.sqlparser.druid.dm;
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
+import com.alibaba.druid.sql.dialect.oracle.ast.expr.OracleBinaryDoubleExpr;
 import com.alibaba.druid.sql.dialect.oracle.ast.expr.OracleIntervalExpr;
 import org.apache.seata.sqlparser.SQLParsingException;
 import org.apache.seata.sqlparser.SQLType;
@@ -84,7 +85,7 @@ public class DmInsertRecognizerTest {
             String s = "insert into t(a) values (?)";
             List<SQLStatement> sqlStatements = SQLUtils.parseStatements(s, DB_TYPE);
             SQLInsertStatement sqlInsertStatement = (SQLInsertStatement) sqlStatements.get(0);
-            sqlInsertStatement.getColumns().add(new OracleIntervalExpr());
+            sqlInsertStatement.getColumns().add(new OracleBinaryDoubleExpr());
 
             DmInsertRecognizer dmInsertRecognizer = new DmInsertRecognizer(s, sqlInsertStatement);
             dmInsertRecognizer.getInsertColumns();
