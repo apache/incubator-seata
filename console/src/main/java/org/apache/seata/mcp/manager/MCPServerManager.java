@@ -20,7 +20,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.modelcontextprotocol.server.McpAsyncServer;
 import io.modelcontextprotocol.server.McpServer;
 import io.modelcontextprotocol.server.McpTransportContextExtractor;
-import io.modelcontextprotocol.server.WebMvcContextExtractor;
 import io.modelcontextprotocol.server.transport.WebMvcSseServerTransportProvider;
 import io.modelcontextprotocol.server.transport.WebMvcStreamableServerTransportProvider;
 import io.modelcontextprotocol.spec.McpSchema;
@@ -31,7 +30,6 @@ import org.springframework.context.SmartLifecycle;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.function.HandlerFunction;
 import org.springframework.web.servlet.function.RouterFunction;
-import org.springframework.web.servlet.function.ServerRequest;
 import org.springframework.web.servlet.function.ServerResponse;
 
 import java.time.Duration;
@@ -94,7 +92,7 @@ public class MCPServerManager implements SmartLifecycle {
             transportProvider = new ControlledStreamableTransportProvider(
                     objectMapper,
                     properties.getMcpEndPoint(),
-                    new WebMvcContextExtractor(),
+                    new McpTransportContextExtractor(),
                     Duration.ofSeconds(properties.getHeartBeatSecondDuration()));
         }
     }
@@ -273,7 +271,7 @@ public class MCPServerManager implements SmartLifecycle {
         public ControlledStreamableTransportProvider(
                 ObjectMapper mapper,
                 String mcpEndPoint,
-                McpTransportContextExtractor<ServerRequest> contextExtractor,
+                McpTransportContextExtractor contextExtractor,
                 Duration keepAliveInterval) {
             super(mapper, mcpEndPoint, true, contextExtractor, keepAliveInterval);
         }

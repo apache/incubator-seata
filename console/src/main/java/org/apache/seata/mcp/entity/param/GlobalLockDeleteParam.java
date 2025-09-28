@@ -27,29 +27,18 @@ public class GlobalLockDeleteParam implements Serializable {
 
     private static final long serialVersionUID = 615412528070131284L;
 
-    /**
-     * the xid
-     */
     @ToolParam(description = "Global transaction id", required = true)
     private String xid;
-    /**
-     * the table name
-     */
+
     @ToolParam(description = "the table name", required = true)
     private String tableName;
-    /**
-     * the branch id
-     */
+
     @ToolParam(description = "the branch id", required = true)
     private String branchId;
-    /**
-     * the primary Key
-     */
+
     @ToolParam(description = "the primary Key", required = true)
     private String pk;
-    /**
-     * the resourceId
-     */
+
     @ToolParam(description = "resourceId", required = true)
     private String resourceId;
 
@@ -91,15 +80,5 @@ public class GlobalLockDeleteParam implements Serializable {
 
     public void setResourceId(String resourceId) {
         this.resourceId = resourceId;
-    }
-
-    @Override
-    public String toString() {
-        return "GlobalLockDeleteParam{" + "xid='"
-                + xid + '\'' + ", tableName='"
-                + tableName + '\'' + ", branchId='"
-                + branchId + '\'' + ", pk='"
-                + pk + '\'' + ", resourceId='"
-                + resourceId + '\'' + '}';
     }
 }

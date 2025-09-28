@@ -49,9 +49,13 @@
 
 package io.modelcontextprotocol.server;
 
+import org.springframework.web.servlet.function.ServerRequest;
+
 /**
  * @author Dariusz Jędrzejczyk
  */
-public interface McpTransportContextExtractor<T> {
-    McpTransportContext extract(T request, McpTransportContext transportContext);
+public class McpTransportContextExtractor {
+    public McpTransportContext extract(ServerRequest request, McpTransportContext context) {
+        return context;
+    }
 }

@@ -120,20 +120,6 @@ public class GlobalSessionParam implements Serializable {
         this.withBranch = withBranch;
     }
 
-    @Override
-    public String toString() {
-        return "GlobalSessionParam{" + "xid='"
-                + xid + '\'' + ", applicationId='"
-                + applicationId + '\'' + ", status="
-                + status + ", transactionName='"
-                + transactionName + '\'' + ", vgroup='"
-                + withBranch + ", pageNum="
-                + pageNum + ", pageSize="
-                + pageSize + ", timeStart="
-                + timeStart + ", timeEnd="
-                + timeEnd + '}';
-    }
-
     public static GlobalSessionParam covertFromDtoParam(GlobalSessionParamDto paramDto) {
         PageUtil.checkParam(paramDto.getPageNum(), paramDto.getPageSize());
         GlobalSessionParam param = new GlobalSessionParam();

@@ -72,10 +72,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-/**
- * Represents a Model Context Protocol (MCP) session on the server side. It manages
- * bidirectional JSON-RPC communication with the client.
- */
 public class McpServerSession implements McpLoggableSession {
 
     private static final Logger logger = LoggerFactory.getLogger(McpServerSession.class);

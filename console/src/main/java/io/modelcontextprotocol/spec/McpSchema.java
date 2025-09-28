@@ -62,24 +62,16 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.modelcontextprotocol.util.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
- * Based on the <a href="http://www.jsonrpc.org/specification">JSON-RPC 2.0
- * specification</a> and the <a href=
- * "https://github.com/modelcontextprotocol/specification/blob/main/schema/schema.ts">Model
- * Context Protocol Schema</a>.
- *
  * @author Christian Tzolov
  */
 public final class McpSchema {
@@ -92,71 +84,61 @@ public final class McpSchema {
 
     public static final String FIRST_PAGE = null;
 
-    // ---------------------------
-    // Method Names
-    // ---------------------------
-
-    // Lifecycle Methods
     public static final String METHOD_INITIALIZE = "initialize";
 
     public static final String METHOD_NOTIFICATION_INITIALIZED = "notifications/initialized";
 
     public static final String METHOD_PING = "ping";
 
-    // Tool Methods
     public static final String METHOD_TOOLS_LIST = "tools/list";
 
     public static final String METHOD_TOOLS_CALL = "tools/call";
 
     public static final String METHOD_NOTIFICATION_TOOLS_LIST_CHANGED = "notifications/tools/list_changed";
 
-    // Logging Methods
     public static final String METHOD_LOGGING_SET_LEVEL = "logging/setLevel";
 
-    // Roots Methods
     public static final String METHOD_ROOTS_LIST = "roots/list";
 
     public static final String METHOD_NOTIFICATION_ROOTS_LIST_CHANGED = "notifications/roots/list_changed";
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-    // ---------------------------
-    // JSON-RPC Error Codes
-    // ---------------------------
-    /**
-     * Standard error codes used in MCP JSON-RPC responses.
-     */
     public static final class ErrorCodes {
 
-        /**
-         * The method does not exist / is not available.
-         */
         public static final int METHOD_NOT_FOUND = -32601;
 
-        /**
-         * Internal JSON-RPC error.
-         */
         public static final int INTERNAL_ERROR = -32603;
+    }
+
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static abstract class BaseJsonRpcMessage implements JSONRPCMessage {
+
+        @JsonProperty("jsonrpc")
+        protected String jsonrpc = JSONRPC_VERSION;
+
+        protected BaseJsonRpcMessage() {}
+
+        protected BaseJsonRpcMessage(String jsonrpc) {
+            this.jsonrpc = jsonrpc;
+        }
+
+        @Override
+        public String getJsonrpc() {
+            return jsonrpc;
+        }
+
+        public void setJsonrpc(String jsonrpc) {
+            this.jsonrpc = jsonrpc;
+        }
     }
 
     public interface Request {
         Map<String, Object> meta();
-
-        default String progressToken() {
-            if (meta() != null && meta().containsKey("progressToken")) {
-                return meta().get("progressToken").toString();
-            }
-            return null;
-        }
     }
 
     public interface Result {
-
-        Map<String, Object> meta();
-    }
-
-    public interface Notification {
-
         Map<String, Object> meta();
     }
 
@@ -182,19 +164,13 @@ public final class McpSchema {
         throw new IllegalArgumentException("Cannot deserialize JSONRPCMessage: " + jsonText);
     }
 
-    // ---------------------------
-    // JSON-RPC Message Types
-    // ---------------------------
     public interface JSONRPCMessage {
         String getJsonrpc();
     }
 
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class JSONRPCRequest implements JSONRPCMessage {
-        @JsonProperty("jsonrpc")
-        String jsonrpc;
-
+    public static class JSONRPCRequest extends BaseJsonRpcMessage {
         @JsonProperty("method")
         String method;
 
@@ -212,15 +188,6 @@ public final class McpSchema {
         }
 
         public JSONRPCRequest() {}
-
-        @Override
-        public String getJsonrpc() {
-            return jsonrpc;
-        }
-
-        public void setJsonrpc(String jsonrpc) {
-            this.jsonrpc = jsonrpc;
-        }
 
         public String getMethod() {
             return method;
@@ -245,23 +212,11 @@ public final class McpSchema {
         public void setParams(Object params) {
             this.params = params;
         }
-
-        @Override
-        public String toString() {
-            return "JSONRPCRequest{" + "jsonrpc='"
-                    + jsonrpc + '\'' + ", method='"
-                    + method + '\'' + ", id="
-                    + id + ", params="
-                    + params + '}';
-        }
     } // @formatter:on
 
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class JSONRPCNotification implements JSONRPCMessage {
-        @JsonProperty("jsonrpc")
-        String jsonrpc;
-
+    public static class JSONRPCNotification extends BaseJsonRpcMessage {
         @JsonProperty("method")
         String method;
 
@@ -274,15 +229,6 @@ public final class McpSchema {
             this.jsonrpc = jsonrpc;
             this.method = method;
             this.params = params;
-        }
-
-        @Override
-        public String getJsonrpc() {
-            return jsonrpc;
-        }
-
-        public void setJsonrpc(String jsonrpc) {
-            this.jsonrpc = jsonrpc;
         }
 
         public String getMethod() {
@@ -300,22 +246,11 @@ public final class McpSchema {
         public void setParams(Map<String, Object> params) {
             this.params = params;
         }
-
-        @Override
-        public String toString() {
-            return "JSONRPCNotification{" + "jsonrpc='"
-                    + jsonrpc + '\'' + ", method='"
-                    + method + '\'' + ", params="
-                    + params + '}';
-        }
     } // @formatter:on
 
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class JSONRPCResponse implements JSONRPCMessage {
-        @JsonProperty("jsonrpc")
-        String jsonrpc;
-
+    public static class JSONRPCResponse extends BaseJsonRpcMessage {
         @JsonProperty("id")
         Object id;
 
@@ -333,15 +268,6 @@ public final class McpSchema {
         }
 
         public JSONRPCResponse() {}
-
-        @Override
-        public String getJsonrpc() {
-            return jsonrpc;
-        }
-
-        public void setJsonrpc(String jsonrpc) {
-            this.jsonrpc = jsonrpc;
-        }
 
         public Object getId() {
             return id;
@@ -365,15 +291,6 @@ public final class McpSchema {
 
         public void setError(JSONRPCError error) {
             this.error = error;
-        }
-
-        @Override
-        public String toString() {
-            return "JSONRPCResponse{" + "jsonrpc='"
-                    + jsonrpc + '\'' + ", id="
-                    + id + ", result="
-                    + result + ", error="
-                    + error + '}';
         }
 
         @JsonInclude(JsonInclude.Include.NON_ABSENT)
@@ -419,20 +336,25 @@ public final class McpSchema {
             public void setData(Object data) {
                 this.data = data;
             }
-
-            @Override
-            public String toString() {
-                return "JSONRPCError{" + "code=" + code + ", message='" + message + '\'' + ", data=" + data + '}';
-            }
         }
     } // @formatter:on
 
-    // ---------------------------
-    // Initialization
-    // ---------------------------
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class InitializeRequest implements Request {
+    public static abstract class BaseMeta {
+        @JsonProperty("_meta")
+        protected Map<String, Object> meta;
+
+        public Map<String, Object> meta() { return meta; }
+
+        public Map<String, Object> getMeta() { return meta; }
+
+        public void setMeta(Map<String, Object> meta) { this.meta = meta; }
+    }
+
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class InitializeRequest extends BaseMeta {
         @JsonProperty("protocolVersion")
         String protocolVersion;
 
@@ -441,9 +363,6 @@ public final class McpSchema {
 
         @JsonProperty("clientInfo")
         Implementation clientInfo;
-
-        @JsonProperty("_meta")
-        Map<String, Object> meta;
 
         public InitializeRequest(String protocolVersion, ClientCapabilities capabilities, Implementation clientInfo) {
             this.protocolVersion = protocolVersion;
@@ -477,48 +396,11 @@ public final class McpSchema {
         public void setClientInfo(Implementation clientInfo) {
             this.clientInfo = clientInfo;
         }
-
-        public Map<String, Object> getMeta() {
-            return meta;
-        }
-
-        public void setMeta(Map<String, Object> meta) {
-            this.meta = meta;
-        }
-
-        @Override
-        public String toString() {
-            return "InitializeRequest{" + "protocolVersion='"
-                    + protocolVersion + '\'' + ", capabilities="
-                    + capabilities + ", clientInfo="
-                    + clientInfo + ", meta="
-                    + meta + '}';
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (o == null || getClass() != o.getClass()) return false;
-            InitializeRequest that = (InitializeRequest) o;
-            return Objects.equals(protocolVersion, that.protocolVersion)
-                    && Objects.equals(capabilities, that.capabilities)
-                    && Objects.equals(clientInfo, that.clientInfo)
-                    && Objects.equals(meta, that.meta);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(protocolVersion, capabilities, clientInfo, meta);
-        }
-
-        @Override
-        public Map<String, Object> meta() {
-            return this.meta;
-        }
     } // @formatter:on
 
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class InitializeResult implements Result {
+    public static class InitializeResult extends BaseMeta {
         @JsonProperty("protocolVersion")
         String protocolVersion;
 
@@ -531,20 +413,7 @@ public final class McpSchema {
         @JsonProperty("instructions")
         String instructions;
 
-        @JsonProperty("_meta")
-        Map<String, Object> meta;
-
         public InitializeResult() {}
-
-        @Override
-        public String toString() {
-            return "InitializeResult{" + "protocolVersion='"
-                    + protocolVersion + '\'' + ", capabilities="
-                    + capabilities + ", serverInfo="
-                    + serverInfo + ", instructions='"
-                    + instructions + '\'' + ", meta="
-                    + meta + '}';
-        }
 
         public String getProtocolVersion() {
             return protocolVersion;
@@ -578,14 +447,6 @@ public final class McpSchema {
             this.instructions = instructions;
         }
 
-        public Map<String, Object> getMeta() {
-            return meta;
-        }
-
-        public void setMeta(Map<String, Object> meta) {
-            this.meta = meta;
-        }
-
         public InitializeResult(
                 String protocolVersion,
                 ServerCapabilities capabilities,
@@ -596,11 +457,6 @@ public final class McpSchema {
             this.serverInfo = serverInfo;
             this.instructions = instructions;
             this.meta = null;
-        }
-
-        @Override
-        public Map<String, Object> meta() {
-            return this.meta;
         }
     } // @formatter:on
 
@@ -613,17 +469,13 @@ public final class McpSchema {
         @JsonProperty("roots")
         RootCapabilities roots;
 
-        @JsonProperty("sampling")
-        Sampling sampling;
-
         @JsonProperty("elicitation")
         Elicitation elicitation;
 
         public ClientCapabilities(
-                Map<String, Object> experimental, RootCapabilities roots, Sampling sampling, Elicitation elicitation) {
+                Map<String, Object> experimental, RootCapabilities roots, Elicitation elicitation) {
             this.experimental = experimental;
             this.roots = roots;
-            this.sampling = sampling;
             this.elicitation = elicitation;
         }
 
@@ -645,28 +497,12 @@ public final class McpSchema {
             this.roots = roots;
         }
 
-        public Sampling getSampling() {
-            return sampling;
-        }
-
-        public void setSampling(Sampling sampling) {
-            this.sampling = sampling;
-        }
-
         public Elicitation getElicitation() {
             return elicitation;
         }
 
         public void setElicitation(Elicitation elicitation) {
             this.elicitation = elicitation;
-        }
-
-        @Override
-        public String toString() {
-            return "ClientCapabilities{" + "experimental="
-                    + experimental + ", roots="
-                    + roots + ", sampling="
-                    + sampling + '}';
         }
 
         @JsonInclude(JsonInclude.Include.NON_ABSENT)
@@ -678,15 +514,11 @@ public final class McpSchema {
             @JsonProperty("listChanged")
             Boolean listChanged;
 
-            public RootCapabilities() {}
+            public RootCapabilities() {
+            }
 
             public RootCapabilities(Boolean listChanged) {
                 this.listChanged = listChanged;
-            }
-
-            @Override
-            public String toString() {
-                return "RootCapabilities{" + "listChanged=" + listChanged + '}';
             }
 
             public Boolean getListChanged() {
@@ -695,47 +527,6 @@ public final class McpSchema {
 
             public void setListChanged(Boolean listChanged) {
                 this.listChanged = listChanged;
-            }
-        }
-
-        @JsonInclude(JsonInclude.Include.NON_ABSENT)
-        public static class Sampling {}
-
-        public static Builder builder() {
-            return new Builder();
-        }
-
-        public static class Builder {
-            private Map<String, Object> experimental;
-
-            private RootCapabilities roots;
-
-            private Sampling sampling;
-
-            private Elicitation elicitation;
-
-            public Builder experimental(Map<String, Object> experimental) {
-                this.experimental = experimental;
-                return this;
-            }
-
-            public Builder roots(Boolean listChanged) {
-                this.roots = new RootCapabilities(listChanged);
-                return this;
-            }
-
-            public Builder sampling() {
-                this.sampling = new Sampling();
-                return this;
-            }
-
-            public Builder elicitation() {
-                this.elicitation = new Elicitation();
-                return this;
-            }
-
-            public ClientCapabilities build() {
-                return new ClientCapabilities(experimental, roots, sampling, elicitation);
             }
         }
     } // @formatter:on
@@ -760,17 +551,6 @@ public final class McpSchema {
 
         @JsonProperty("tools")
         private final ToolCapabilities tools;
-
-        @Override
-        public String toString() {
-            return "ServerCapabilities{" + "completions="
-                    + completions + ", experimental="
-                    + experimental + ", logging="
-                    + logging + ", prompts="
-                    + prompts + ", resources="
-                    + resources + ", tools="
-                    + tools + '}';
-        }
 
         @JsonCreator
         public ServerCapabilities(
@@ -812,17 +592,6 @@ public final class McpSchema {
             return tools;
         }
 
-        public Builder mutate() {
-            Builder builder = new Builder();
-            builder.completions = this.completions;
-            builder.experimental = this.experimental;
-            builder.logging = this.logging;
-            builder.prompts = this.prompts;
-            builder.resources = this.resources;
-            builder.tools = this.tools;
-            return builder;
-        }
-
         public static Builder builder() {
             return new Builder();
         }
@@ -847,11 +616,6 @@ public final class McpSchema {
                 this.listChanged = listChanged;
             }
 
-            @Override
-            public String toString() {
-                return "PromptCapabilities{" + "listChanged=" + listChanged + '}';
-            }
-
             public Boolean listChanged() {
                 return listChanged;
             }
@@ -872,11 +636,6 @@ public final class McpSchema {
                 this.listChanged = listChanged;
             }
 
-            @Override
-            public String toString() {
-                return "ResourceCapabilities{" + "subscribe=" + subscribe + ", listChanged=" + listChanged + '}';
-            }
-
             public Boolean subscribe() {
                 return subscribe;
             }
@@ -890,11 +649,6 @@ public final class McpSchema {
         public static final class ToolCapabilities {
             @JsonProperty("listChanged")
             private final Boolean listChanged;
-
-            @Override
-            public String toString() {
-                return "ToolCapabilities{" + "listChanged=" + listChanged + '}';
-            }
 
             @JsonCreator
             public ToolCapabilities(@JsonProperty("listChanged") Boolean listChanged) {
@@ -970,28 +724,6 @@ public final class McpSchema {
             this.title = null;
         }
 
-        @Override
-        public String toString() {
-            return "Implementation{" + "name='"
-                    + name + '\'' + ", title='"
-                    + title + '\'' + ", version='"
-                    + version + '\'' + '}';
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (o == null || getClass() != o.getClass()) return false;
-            Implementation that = (Implementation) o;
-            return Objects.equals(name, that.name)
-                    && Objects.equals(title, that.title)
-                    && Objects.equals(version, that.version);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(name, title, version);
-        }
-
         public String getTitle() {
             return title;
         }
@@ -1017,7 +749,6 @@ public final class McpSchema {
         }
     } // @formatter:on
 
-    // Existing Enums and Base Types (from previous implementation)
     public enum Role { // @formatter:off
         @JsonProperty("user")
         USER,
@@ -1027,64 +758,12 @@ public final class McpSchema {
 
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class Annotations {
-        @JsonProperty("audience")
-        List<Role> audience;
-
-        @JsonProperty("priority")
-        Double priority;
-
-        public Annotations() {}
-
-        public Annotations(Double priority, List<Role> audience) {
-            this.priority = priority;
-            this.audience = audience;
-        }
-
-        @Override
-        public String toString() {
-            return "Annotations{" + "audience=" + audience + ", priority=" + priority + '}';
-        }
-
-        public List<Role> getAudience() {
-            return audience;
-        }
-
-        public void setAudience(List<Role> audience) {
-            this.audience = audience;
-        }
-
-        public Double getPriority() {
-            return priority;
-        }
-
-        public void setPriority(Double priority) {
-            this.priority = priority;
-        }
-    } // @formatter:on
-
-    // ---------------------------
-    // Tool Interfaces
-    // ---------------------------
-    @JsonInclude(JsonInclude.Include.NON_ABSENT)
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class ListToolsResult implements Result {
+    public static class ListToolsResult extends BaseMeta {
         @JsonProperty("tools")
         List<Tool> tools;
 
         @JsonProperty("nextCursor")
         String nextCursor;
-
-        @JsonProperty("_meta")
-        Map<String, Object> meta;
-
-        @Override
-        public String toString() {
-            return "ListToolsResult{" + "tools="
-                    + tools + ", nextCursor='"
-                    + nextCursor + '\'' + ", meta="
-                    + meta + '}';
-        }
 
         public List<Tool> getTools() {
             return tools;
@@ -1102,24 +781,9 @@ public final class McpSchema {
             this.nextCursor = nextCursor;
         }
 
-        public Map<String, Object> getMeta() {
-            return meta;
-        }
-
-        public void setMeta(Map<String, Object> meta) {
-            this.meta = meta;
-        }
-
         public ListToolsResult(List<Tool> tools, String nextCursor) {
             this.tools = tools;
             this.nextCursor = nextCursor;
-        }
-
-        public ListToolsResult() {}
-
-        @Override
-        public Map<String, Object> meta() {
-            return this.meta;
         }
     } // @formatter:on
 
@@ -1143,17 +807,6 @@ public final class McpSchema {
 
         @JsonProperty("definitions")
         Map<String, Object> definitions;
-
-        @Override
-        public String toString() {
-            return "JsonSchema{" + "type='"
-                    + type + '\'' + ", properties="
-                    + properties + ", required="
-                    + required + ", additionalProperties="
-                    + additionalProperties + ", defs="
-                    + defs + ", definitions="
-                    + definitions + '}';
-        }
 
         public String getType() {
             return type;
@@ -1242,17 +895,6 @@ public final class McpSchema {
         @JsonProperty("returnDirect")
         Boolean returnDirect;
 
-        @Override
-        public String toString() {
-            return "ToolAnnotations{" + "title='"
-                    + title + '\'' + ", readOnlyHint="
-                    + readOnlyHint + ", destructiveHint="
-                    + destructiveHint + ", idempotentHint="
-                    + idempotentHint + ", openWorldHint="
-                    + openWorldHint + ", returnDirect="
-                    + returnDirect + '}';
-        }
-
         public String getTitle() {
             return title;
         }
@@ -1325,18 +967,6 @@ public final class McpSchema {
 
         @JsonProperty("_meta")
         Map<String, Object> meta;
-
-        @Override
-        public String toString() {
-            return "Tool{" + "name='"
-                    + name + '\'' + ", title='"
-                    + title + '\'' + ", description='"
-                    + description + '\'' + ", inputSchema="
-                    + inputSchema + ", outputSchema="
-                    + outputSchema + ", annotations="
-                    + annotations + ", meta="
-                    + meta + '}';
-        }
 
         public Tool(
                 String name,
@@ -1411,112 +1041,10 @@ public final class McpSchema {
             this.meta = meta;
         }
 
-        public Tool(String name, String description, JsonSchema inputSchema, ToolAnnotations annotations) {
-            this(name, null, description, inputSchema, null, annotations, null);
-        }
-
         public Tool(String name, String description, String inputSchema) {
             this(name, null, description, parseSchema(inputSchema), null, null, null);
         }
-
-        public Tool(String name, String description, String schema, ToolAnnotations annotations) {
-            this(name, null, description, parseSchema(schema), null, annotations, null);
-        }
-
-        public Tool(
-                String name, String description, String inputSchema, String outputSchema, ToolAnnotations annotations) {
-            this(name, null, description, parseSchema(inputSchema), schemaToMap(outputSchema), annotations, null);
-        }
-
-        public Tool(
-                String name,
-                String title,
-                String description,
-                String inputSchema,
-                String outputSchema,
-                ToolAnnotations annotations) {
-            this(name, title, description, parseSchema(inputSchema), schemaToMap(outputSchema), annotations, null);
-        }
-
-        public static Builder builder() {
-            return new Builder();
-        }
-
-        public static class Builder {
-
-            private String name;
-
-            private String title;
-
-            private String description;
-
-            private JsonSchema inputSchema;
-
-            private Map<String, Object> outputSchema;
-
-            private ToolAnnotations annotations;
-
-            private Map<String, Object> meta;
-
-            public Builder name(String name) {
-                this.name = name;
-                return this;
-            }
-
-            public Builder title(String title) {
-                this.title = title;
-                return this;
-            }
-
-            public Builder description(String description) {
-                this.description = description;
-                return this;
-            }
-
-            public Builder inputSchema(JsonSchema inputSchema) {
-                this.inputSchema = inputSchema;
-                return this;
-            }
-
-            public Builder inputSchema(String inputSchema) {
-                this.inputSchema = parseSchema(inputSchema);
-                return this;
-            }
-
-            public Builder outputSchema(Map<String, Object> outputSchema) {
-                this.outputSchema = outputSchema;
-                return this;
-            }
-
-            public Builder outputSchema(String outputSchema) {
-                this.outputSchema = schemaToMap(outputSchema);
-                return this;
-            }
-
-            public Builder annotations(ToolAnnotations annotations) {
-                this.annotations = annotations;
-                return this;
-            }
-
-            public Builder meta(Map<String, Object> meta) {
-                this.meta = meta;
-                return this;
-            }
-
-            public Tool build() {
-                Assert.hasText(name, "name must not be empty");
-                return new Tool(name, title, description, inputSchema, outputSchema, annotations, meta);
-            }
-        }
     } // @formatter:on
-
-    private static Map<String, Object> schemaToMap(String schema) {
-        try {
-            return OBJECT_MAPPER.readValue(schema, MAP_TYPE_REF);
-        } catch (IOException e) {
-            throw new IllegalArgumentException("Invalid schema: " + schema, e);
-        }
-    }
 
     private static JsonSchema parseSchema(String schema) {
         try {
@@ -1528,15 +1056,12 @@ public final class McpSchema {
 
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class CallToolRequest implements Request {
+    public static class CallToolRequest extends BaseMeta {
         @JsonProperty("name")
         String name;
 
         @JsonProperty("arguments")
         Map<String, Object> arguments;
-
-        @JsonProperty("_meta")
-        Map<String, Object> meta;
 
         public CallToolRequest(String name, Map<String, Object> arguments, Map<String, Object> meta) {
             this.name = name;
@@ -1545,10 +1070,6 @@ public final class McpSchema {
         }
 
         public CallToolRequest() {}
-
-        public CallToolRequest(String name, String jsonArguments) {
-            this(name, parseJsonArguments(jsonArguments), null);
-        }
 
         public CallToolRequest(String name, Map<String, Object> arguments) {
             this(name, arguments, null);
@@ -1560,15 +1081,6 @@ public final class McpSchema {
             } catch (IOException e) {
                 throw new IllegalArgumentException("Invalid arguments: " + jsonArguments, e);
             }
-        }
-
-        public static Builder builder() {
-            return new Builder();
-        }
-
-        @Override
-        public Map<String, Object> meta() {
-            return this.meta;
         }
 
         public String getName() {
@@ -1586,66 +1098,11 @@ public final class McpSchema {
         public void setArguments(Map<String, Object> arguments) {
             this.arguments = arguments;
         }
-
-        public Map<String, Object> getMeta() {
-            return meta;
-        }
-
-        public void setMeta(Map<String, Object> meta) {
-            this.meta = meta;
-        }
-
-        @Override
-        public String toString() {
-            return "CallToolRequest{" + "name='" + name + '\'' + ", arguments=" + arguments + ", meta=" + meta + '}';
-        }
-
-        public static class Builder {
-
-            private String name;
-
-            private Map<String, Object> arguments;
-
-            private Map<String, Object> meta;
-
-            public Builder name(String name) {
-                this.name = name;
-                return this;
-            }
-
-            public Builder arguments(Map<String, Object> arguments) {
-                this.arguments = arguments;
-                return this;
-            }
-
-            public Builder arguments(String jsonArguments) {
-                this.arguments = parseJsonArguments(jsonArguments);
-                return this;
-            }
-
-            public Builder meta(Map<String, Object> meta) {
-                this.meta = meta;
-                return this;
-            }
-
-            public Builder progressToken(String progressToken) {
-                if (this.meta == null) {
-                    this.meta = new HashMap<>();
-                }
-                this.meta.put("progressToken", progressToken);
-                return this;
-            }
-
-            public CallToolRequest build() {
-                Assert.hasText(name, "name must not be empty");
-                return new CallToolRequest(name, arguments, meta);
-            }
-        }
     } // @formatter:off
 
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class CallToolResult implements Result {
+    public static class CallToolResult extends BaseMeta {
         @JsonProperty("content")
         List<Content> content;
 
@@ -1654,18 +1111,6 @@ public final class McpSchema {
 
         @JsonProperty("structuredContent")
         Map<String, Object> structuredContent;
-
-        @JsonProperty("_meta")
-        Map<String, Object> meta;
-
-        @Override
-        public String toString() {
-            return "CallToolResult{" + "content="
-                    + content + ", isError="
-                    + isError + ", structuredContent="
-                    + structuredContent + ", meta="
-                    + meta + '}';
-        }
 
         public List<Content> getContent() {
             return content;
@@ -1691,14 +1136,6 @@ public final class McpSchema {
             this.structuredContent = structuredContent;
         }
 
-        public Map<String, Object> getMeta() {
-            return meta;
-        }
-
-        public void setMeta(Map<String, Object> meta) {
-            this.meta = meta;
-        }
-
         public CallToolResult(
                 List<Content> content,
                 Boolean isError,
@@ -1710,12 +1147,10 @@ public final class McpSchema {
             this.meta = meta;
         }
 
-        // backwards compatibility constructor
         public CallToolResult(List<Content> content, Boolean isError) {
             this(content, isError, null, null);
         }
 
-        // backwards compatibility constructor
         public CallToolResult(List<Content> content, Boolean isError, Map<String, Object> structuredContent) {
             this(content, isError, structuredContent, null);
         }
@@ -1723,99 +1158,13 @@ public final class McpSchema {
         public CallToolResult(String content, Boolean isError) {
             this(Collections.singletonList(new TextContent(content)), isError, null);
         }
-
-        public static Builder builder() {
-            return new Builder();
-        }
-
-        @Override
-        public Map<String, Object> meta() {
-            return this.meta;
-        }
-
-        /**
-         * Builder for {@link CallToolResult}.
-         */
-        public static class Builder {
-
-            private List<Content> content = new ArrayList<>();
-
-            private Boolean isError = false;
-
-            private Map<String, Object> structuredContent;
-
-            private Map<String, Object> meta;
-
-            public Builder content(List<Content> content) {
-                Assert.notNull(content, "content must not be null");
-                this.content = content;
-                return this;
-            }
-
-            public Builder structuredContent(Map<String, Object> structuredContent) {
-                Assert.notNull(structuredContent, "structuredContent must not be null");
-                this.structuredContent = structuredContent;
-                return this;
-            }
-
-            public Builder structuredContent(String structuredContent) {
-                Assert.hasText(structuredContent, "structuredContent must not be empty");
-                try {
-                    this.structuredContent = OBJECT_MAPPER.readValue(structuredContent, MAP_TYPE_REF);
-                } catch (IOException e) {
-                    throw new IllegalArgumentException("Invalid structured content: " + structuredContent, e);
-                }
-                return this;
-            }
-
-            public Builder textContent(List<String> textContent) {
-                Assert.notNull(textContent, "textContent must not be null");
-                textContent.stream().map(TextContent::new).forEach(this.content::add);
-                return this;
-            }
-
-            public Builder addContent(Content contentItem) {
-                Assert.notNull(contentItem, "contentItem must not be null");
-                if (this.content == null) {
-                    this.content = new ArrayList<>();
-                }
-                this.content.add(contentItem);
-                return this;
-            }
-
-            public Builder addTextContent(String text) {
-                Assert.notNull(text, "text must not be null");
-                return addContent(new TextContent(text));
-            }
-
-            public Builder isError(Boolean isError) {
-                Assert.notNull(isError, "isError must not be null");
-                this.isError = isError;
-                return this;
-            }
-
-            public Builder meta(Map<String, Object> meta) {
-                this.meta = meta;
-                return this;
-            }
-
-            public CallToolResult build() {
-                return new CallToolResult(content, isError, structuredContent, meta);
-            }
-        }
     } // @formatter:on
 
-    // ---------------------------
-    // Pagination Interfaces
-    // ---------------------------
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class PaginatedRequest implements Request {
+    public static class PaginatedRequest extends BaseMeta {
         @JsonProperty("cursor")
         String cursor;
-
-        @JsonProperty("_meta")
-        Map<String, Object> meta;
 
         public PaginatedRequest(String cursor, Map<String, Object> meta) {
             this.cursor = cursor;
@@ -1830,33 +1179,12 @@ public final class McpSchema {
             this.cursor = cursor;
         }
 
-        public Map<String, Object> getMeta() {
-            return meta;
-        }
-
-        public void setMeta(Map<String, Object> meta) {
-            this.meta = meta;
-        }
-
-        @Override
-        public String toString() {
-            return "PaginatedRequest{" + "cursor='" + cursor + '\'' + ", meta=" + meta + '}';
-        }
-
         public PaginatedRequest(String cursor) {
             this(cursor, null);
         }
 
-        /**
-         * Creates a new paginated request with an empty cursor.
-         */
         public PaginatedRequest() {
             this(null);
-        }
-
-        @Override
-        public Map<String, Object> meta() {
-            return this.meta;
         }
     }
 
@@ -1865,11 +1193,6 @@ public final class McpSchema {
     public static class PaginatedResult {
         @JsonProperty("nextCursor")
         String nextCursor;
-
-        @Override
-        public String toString() {
-            return "PaginatedResult{" + "nextCursor='" + nextCursor + '\'' + '}';
-        }
 
         public String getNextCursor() {
             return nextCursor;
@@ -1886,9 +1209,6 @@ public final class McpSchema {
         }
     }
 
-    // ---------------------------
-    // Logging
-    // ---------------------------
     public enum LoggingLevel { // @formatter:off
         @JsonProperty("debug")
         DEBUG(0),
@@ -1924,11 +1244,6 @@ public final class McpSchema {
         @JsonProperty("level")
         LoggingLevel level;
 
-        @Override
-        public String toString() {
-            return "SetLevelRequest{" + "level=" + level + '}';
-        }
-
         public LoggingLevel getLevel() {
             return level;
         }
@@ -1942,10 +1257,6 @@ public final class McpSchema {
         }
     }
 
-    // ---------------------------
-    // Autocomplete
-    // ---------------------------
-
     public interface CompleteReference {
 
         String type();
@@ -1955,27 +1266,15 @@ public final class McpSchema {
 
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static final class CompleteRequest implements Request {
+    public static final class CompleteRequest extends BaseMeta {
         @JsonProperty("ref")
         private final CompleteReference ref;
 
         @JsonProperty("argument")
         private final CompleteArgument argument;
 
-        @JsonProperty("_meta")
-        private final Map<String, Object> meta;
-
         @JsonProperty("context")
         private final CompleteContext context;
-
-        @Override
-        public String toString() {
-            return "CompleteRequest{" + "ref="
-                    + ref + ", argument="
-                    + argument + ", meta="
-                    + meta + ", context="
-                    + context + '}';
-        }
 
         @JsonCreator
         public CompleteRequest(
@@ -2007,10 +1306,6 @@ public final class McpSchema {
 
         public CompleteArgument argument() {
             return argument;
-        }
-
-        public Map<String, Object> meta() {
-            return meta;
         }
 
         public CompleteContext context() {
@@ -2052,12 +1347,9 @@ public final class McpSchema {
 
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static final class CompleteResult {
+    public static final class CompleteResult extends BaseMeta{
         @JsonProperty("completion")
         private final CompleteCompletion completion;
-
-        @JsonProperty("_meta")
-        private final Map<String, Object> meta;
 
         @Override
         public String toString() {
@@ -2076,10 +1368,6 @@ public final class McpSchema {
             return completion;
         }
 
-        public Map<String, Object> meta() {
-            return meta;
-        }
-
         public static final class CompleteCompletion {
             @JsonProperty("values")
             private final List<String> values;
@@ -2089,11 +1377,6 @@ public final class McpSchema {
 
             @JsonProperty("hasMore")
             private final Boolean hasMore;
-
-            @Override
-            public String toString() {
-                return "CompleteCompletion{" + "values=" + values + ", total=" + total + ", hasMore=" + hasMore + '}';
-            }
 
             @JsonCreator
             public CompleteCompletion(
@@ -2119,9 +1402,6 @@ public final class McpSchema {
         }
     }
 
-    // ---------------------------
-    // Content Types
-    // ---------------------------
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = As.PROPERTY, property = "type")
     @JsonSubTypes({@JsonSubTypes.Type(value = TextContent.class, name = "text")})
     public interface Content {
@@ -2145,11 +1425,6 @@ public final class McpSchema {
 
         @JsonProperty("text")
         String text;
-
-        @Override
-        public String toString() {
-            return "TextContent{" + "audience=" + audience + ", priority=" + priority + ", text='" + text + '\'' + '}';
-        }
 
         public List<Role> getAudience() {
             return audience;
@@ -2188,9 +1463,6 @@ public final class McpSchema {
         }
     }
 
-    // ---------------------------
-    // Roots
-    // ---------------------------
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Root {
@@ -2199,11 +1471,6 @@ public final class McpSchema {
 
         @JsonProperty("name")
         String name;
-
-        @Override
-        public String toString() {
-            return "Root{" + "uri='" + uri + '\'' + ", name='" + name + '\'' + '}';
-        }
 
         public String getUri() {
             return uri;

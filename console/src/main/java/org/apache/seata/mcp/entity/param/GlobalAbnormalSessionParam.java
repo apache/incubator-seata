@@ -28,14 +28,6 @@ public class GlobalAbnormalSessionParam {
     @ToolParam(description = "The transaction start time is before this time (yyyy-MM-dd HH:mm:ss)")
     private String timeEnd;
 
-    @Override
-    public String toString() {
-        return "GlobalAbnormalSessionParam{" + "withBranch="
-                + withBranch + ", timeStart='"
-                + timeStart + '\'' + ", timeEnd='"
-                + timeEnd + '\'' + '}';
-    }
-
     public boolean isWithBranch() {
         return withBranch;
     }

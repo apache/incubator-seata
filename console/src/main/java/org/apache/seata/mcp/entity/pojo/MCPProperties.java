@@ -97,13 +97,6 @@ public class MCPProperties {
         public void setHeartBeatSecondDuration(Long heartBeatDuration) {
             this.heartBeatSecondDuration = heartBeatDuration;
         }
-
-        @Override
-        public String toString() {
-            return "StreamableProperties{" + "mcpEndPoint='"
-                    + mcpEndPoint + '\'' + ", heartBeatSecondDuration="
-                    + heartBeatSecondDuration + '}';
-        }
     }
 
     public static class SseServerProperties {
@@ -134,13 +127,6 @@ public class MCPProperties {
             this.sseEndpoint = sseEndpoint;
             this.messageEndpoint = messageEndpoint;
         }
-
-        @Override
-        public String toString() {
-            return "SseServerProperties{" + "sseEndpoint='"
-                    + sseEndpoint + '\'' + ", messageEndpoint='"
-                    + messageEndpoint + '\'' + '}';
-        }
     }
 
     @Autowired
@@ -164,23 +150,6 @@ public class MCPProperties {
         serverVersion = env.getProperty("seata.mcp.serverVersion", "1.0.0");
         queryDuration = Long.parseLong(env.getProperty("seata.mcp.query.max_query_duration", "604800000"));
         enableAuth = Boolean.parseBoolean(env.getProperty("seata.mcp.auth.enabled", "true"));
-    }
-
-    @Override
-    public String toString() {
-        return "MCPProperties{" + "serverName='"
-                + serverName + '\'' + ", serverVersion='"
-                + serverVersion + '\'' + ", enableAuth="
-                + enableAuth + ", resourceSupport="
-                + resourceSupport + ", resourceTemplates="
-                + resourceTemplates + ", promptSupport="
-                + promptSupport + ", loggingLevel="
-                + loggingLevel + ", queryDuration="
-                + queryDuration + ", mcpType='"
-                + mcpType + '\'' + ", streamableProperties="
-                + streamableProperties + ", sseServerProperties="
-                + sseServerProperties + ", env="
-                + env + '}';
     }
 
     public String getServerName() {

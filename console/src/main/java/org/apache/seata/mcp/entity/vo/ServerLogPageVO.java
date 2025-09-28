@@ -24,25 +24,14 @@ import java.util.List;
 public class ServerLogPageVO<T> extends Result<T> implements Serializable {
     private static final long serialVersionUID = 7761262662429121287L;
 
-    /**
-     * the page size
-     */
     private Integer pageSize;
-    /**
-     * current page number
-     */
+
     private Integer pageNum;
-    /**
-     * total result number
-     */
+
     private Integer total = 0;
-    /**
-     * total page number
-     */
+
     private Boolean hasMorePages = false;
-    /**
-     * the data
-     */
+
     private List<T> data;
 
     public ServerLogPageVO() {}
@@ -115,15 +104,5 @@ public class ServerLogPageVO<T> extends Result<T> implements Serializable {
 
     public void setData(List<T> data) {
         this.data = data;
-    }
-
-    @Override
-    public String toString() {
-        return "ServerLogPageVO{" + "pageSize="
-                + pageSize + ", pageNum="
-                + pageNum + ", total="
-                + total + ", hasMorePages="
-                + hasMorePages + ", data="
-                + data + '}';
     }
 }

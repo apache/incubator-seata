@@ -79,7 +79,6 @@ public class MCPAutoRegister implements BeanPostProcessor {
     }
 
     public void autoRegisterTool(Object bean, Method m, Tool ann) {
-        // —— 1. Dynamically generate JSON Schema -
         ObjectNode parameters = mapper.createObjectNode();
         parameters.put("type", "object");
 

@@ -52,8 +52,6 @@ package io.modelcontextprotocol.spec;
 import reactor.core.publisher.Mono;
 
 /**
- * Streamable HTTP server transport representing an individual SSE stream.
- *
  * @author Dariusz Jędrzejczyk
  */
 public interface McpStreamableServerTransport extends McpServerTransport {

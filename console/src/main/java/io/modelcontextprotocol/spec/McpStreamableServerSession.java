@@ -73,11 +73,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 /**
- * Representation of a Streamable HTTP server session that keeps track of mapping
- * server-initiated requests to the client and mapping arriving responses. It also allows
- * handling incoming notifications. For requests, it provides the default SSE streaming
- * capability without the insight into the transport-specific details of HTTP handling.
- *
  * @author Dariusz Jędrzejczyk
  */
 public class McpStreamableServerSession implements McpLoggableSession {

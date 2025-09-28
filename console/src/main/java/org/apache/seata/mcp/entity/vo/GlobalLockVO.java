@@ -140,14 +140,6 @@ public class GlobalLockVO {
         this.gmtModified = gmtModified;
     }
 
-    @Override
-    public String toString() {
-        return "GlobalLockVO{" + "xid='" + xid + '\'' + ", transactionId='" + transactionId + '\'' + ", branchId='"
-                + branchId + '\'' + ", resourceId='" + resourceId + '\'' + ", tableName='" + tableName + '\'' + ", pk='"
-                + pk + '\'' + ", rowKey='" + rowKey + '\'' + ", vgroup='" + vgroup + '\'' + ", gmtCreate=" + gmtCreate
-                + ", gmtModified=" + gmtModified + '}';
-    }
-
     public void setTransactionId(String transactionId) {
         this.transactionId = transactionId;
     }

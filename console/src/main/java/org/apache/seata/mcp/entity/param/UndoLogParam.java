@@ -105,19 +105,6 @@ public class UndoLogParam {
         }
     }
 
-    @Override
-    public String toString() {
-        return "UndoLogParam{" + "resourceId='"
-                + resourceId + '\'' + ", branchId='"
-                + branchId + '\'' + ", xid='"
-                + xid + '\'' + ", logStatus="
-                + logStatus + ", logCreateTime="
-                + logCreateTime + ", logModifiedTime="
-                + logModifiedTime + ", pageNum="
-                + pageNum + ", pageSize="
-                + pageSize + '}';
-    }
-
     public String getResourceId() {
         return resourceId;
     }

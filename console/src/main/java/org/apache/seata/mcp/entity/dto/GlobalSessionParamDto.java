@@ -140,18 +140,4 @@ public class GlobalSessionParamDto implements Serializable {
         param.setWithBranch(abParam.isWithBranch());
         return param;
     }
-
-    @Override
-    public String toString() {
-        return "GlobalSessionParamDto{" + "xid='"
-                + xid + '\'' + ", applicationId='"
-                + applicationId + '\'' + ", status="
-                + status + ", transactionName='"
-                + transactionName + '\'' + ", vgroup='"
-                + withBranch + ", pageNum="
-                + pageNum + ", pageSize="
-                + pageSize + ", timeStart='"
-                + timeStart + '\'' + ", timeEnd='"
-                + timeEnd + '\'' + '}';
-    }
 }

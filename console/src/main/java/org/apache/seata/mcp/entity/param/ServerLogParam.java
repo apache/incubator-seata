@@ -100,15 +100,4 @@ public class ServerLogParam implements Serializable {
     public void setLogMessageKeyWord(List<String> logMessageKeyWord) {
         this.logMessageKeyWord = logMessageKeyWord;
     }
-
-    @Override
-    public String toString() {
-        return "ServerLogParam{" + "logType='"
-                + logType + '\'' + ", page="
-                + page + ", logMessageStartTime='"
-                + logMessageStartTime + '\'' + ", logMessageEndTime='"
-                + logMessageEndTime + '\'' + ", logMessageLevel='"
-                + logMessageLevel + '\'' + ", logMessageKeyWord="
-                + logMessageKeyWord + '}';
-    }
 }

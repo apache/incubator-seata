@@ -50,9 +50,6 @@
 package io.modelcontextprotocol.spec;
 
 /**
- * An {@link McpSession} which is capable of processing logging notifications and keeping
- * track of a min logging level.
- *
  * @author Dariusz Jędrzejczyk
  */
 public interface McpLoggableSession extends McpSession {

@@ -158,35 +158,6 @@ public class MCPRPCServiceImpl implements MCPRPCService {
         }
     }
 
-    @Override
-    public String postCallTC(NameSpaceDetail nameSpaceDetail, String path, HttpHeaders headers, Object... args) {
-        if (headers == null) {
-            headers = new HttpHeaders();
-        }
-        if (nameSpaceDetail == null || !nameSpaceDetail.isValid()) {
-            return "If you have not specified the namespace of the TC/Server, specify the namespace first";
-        }
-        if (!jwtTokenUtils.validateToken(originJwt)) {
-            getToken();
-        }
-        headers.add(WebSecurityConfig.AUTHORIZATION_HEADER, token);
-        String url = buildUrl(String.format(NAMING_SPACE_URL, namingSpacePort), path, null, null);
-        HttpEntity<Object> entity = new HttpEntity<>(args, headers);
-        String responseBody = null;
-        try {
-            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
-            responseBody = response.getBody();
-
-            if (!response.getStatusCode().is2xxSuccessful()) {
-                logger.warn("MCP POST request returned non-success status: {}", response.getStatusCode());
-            }
-            return responseBody;
-        } catch (RestClientException e) {
-            logger.error("MCP POST Call TC Failed:{}", e.getMessage());
-            return responseBody;
-        }
-    }
-
     public String getCallNameSpace(
             String path, Object queryParams, Map<String, String> pathParams, HttpHeaders headers) {
         if (headers == null) {

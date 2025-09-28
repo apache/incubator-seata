@@ -21,26 +21,13 @@ import java.util.List;
 
 /**
  * Status of global transaction.
- *
  */
 public enum GlobalExceptionStatus {
 
-    /**
-     * The Commit failed.
-     */
-    // Finally: failed to commit
     CommitFailed(10, "2Phase commit failed"),
 
-    /**
-     * The Rollback failed.
-     */
-    // Finally: failed to rollback
     RollbackFailed(12, "global transaction completed but rollback failed"),
 
-    /**
-     * The Timeout rollback failed.
-     */
-    // Finally: failed to rollback since timeout
     TimeoutRollbackFailed(14, "global transaction was rollbacking due to timeout, but failed");
 
     private final int code;
@@ -51,31 +38,14 @@ public enum GlobalExceptionStatus {
         this.desc = desc;
     }
 
-    /**
-     * Gets code.
-     *
-     * @return the code
-     */
     public int getCode() {
         return code;
     }
 
-    /**
-     * Get global status.
-     *
-     * @param code the code
-     * @return the global status
-     */
     public static GlobalExceptionStatus get(byte code) {
         return get((int) code);
     }
 
-    /**
-     * Get global status.
-     *
-     * @param code the code
-     * @return the global status
-     */
     public static GlobalExceptionStatus get(int code) {
         GlobalExceptionStatus value = null;
         try {
@@ -86,10 +56,6 @@ public enum GlobalExceptionStatus {
         return value;
     }
 
-    /**
-     * Get global exception status code
-     * @return the exception status code
-     */
     public static List<Integer> getAll() {
         GlobalExceptionStatus[] values = GlobalExceptionStatus.values();
         List<Integer> result = new ArrayList<>();

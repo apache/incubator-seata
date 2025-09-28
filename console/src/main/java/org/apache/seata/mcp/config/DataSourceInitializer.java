@@ -23,7 +23,6 @@ import javax.annotation.PostConstruct;
 
 @Component
 public class DataSourceInitializer {
-
     @PostConstruct
     public void init() {
         DataSourceFactory.initAllDataSources();

@@ -177,21 +177,4 @@ public class GlobalSessionVO {
     public void setBranchSessionVOs(Set<BranchSessionVO> branchSessionVOs) {
         this.branchSessionVOs = branchSessionVOs;
     }
-
-    @Override
-    public String toString() {
-        return "GlobalSessionVO{" + "xid='"
-                + xid + '\'' + ", transactionId="
-                + transactionId + ", status="
-                + status + ", applicationId='"
-                + applicationId + '\'' + ", transactionServiceGroup='"
-                + transactionServiceGroup + '\'' + ", transactionName='"
-                + transactionName + '\'' + ", timeout="
-                + timeout + ", beginTime="
-                + beginTime + ", applicationData='"
-                + applicationData + '\'' + ", gmtCreate="
-                + gmtCreate + ", gmtModified="
-                + gmtModified + ", branchSessionVOs="
-                + branchSessionVOs + '}';
-    }
 }

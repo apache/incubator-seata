@@ -132,19 +132,4 @@ public class GlobalLockParamDto implements Serializable {
     public void setResourceId(String resourceId) {
         this.resourceId = resourceId;
     }
-
-    @Override
-    public String toString() {
-        return "GlobalLockParam{" + "xid='"
-                + xid + '\'' + ", tableName='"
-                + tableName + '\'' + ", transactionId='"
-                + transactionId + '\'' + ", branchId='"
-                + branchId + '\'' + ", pk='"
-                + pk + '\'' + ", resourceId='"
-                + resourceId + '\'' + ", pageNum="
-                + pageNum + ", pageSize="
-                + pageSize + ", timeStart="
-                + timeStart + ", timeEnd="
-                + timeEnd + '}';
-    }
 }

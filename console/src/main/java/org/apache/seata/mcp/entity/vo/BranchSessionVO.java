@@ -158,20 +158,4 @@ public class BranchSessionVO {
     public void setGmtModified(String gmtModified) {
         this.gmtModified = gmtModified;
     }
-
-    @Override
-    public String toString() {
-        return "BranchSessionVO{" + "xid='"
-                + xid + '\'' + ", transactionId="
-                + transactionId + ", branchId="
-                + branchId + ", resourceGroupId='"
-                + resourceGroupId + '\'' + ", resourceId='"
-                + resourceId + '\'' + ", branchType='"
-                + branchType + '\'' + ", status="
-                + status + ", clientId='"
-                + clientId + '\'' + ", applicationData='"
-                + applicationData + '\'' + ", gmtCreate="
-                + gmtCreate + ", gmtModified="
-                + gmtModified + '}';
-    }
 }

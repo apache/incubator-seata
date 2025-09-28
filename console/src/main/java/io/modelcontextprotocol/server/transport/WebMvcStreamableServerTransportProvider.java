@@ -118,7 +118,7 @@ public class WebMvcStreamableServerTransportProvider implements McpStreamableSer
 
     private final ConcurrentHashMap<String, McpStreamableServerSession> sessions = new ConcurrentHashMap<>();
 
-    private McpTransportContextExtractor<ServerRequest> contextExtractor;
+    private McpTransportContextExtractor contextExtractor;
 
     private volatile boolean isClosing = false;
 
@@ -128,7 +128,7 @@ public class WebMvcStreamableServerTransportProvider implements McpStreamableSer
             ObjectMapper objectMapper,
             String mcpEndpoint,
             boolean disallowDelete,
-            McpTransportContextExtractor<ServerRequest> contextExtractor,
+            McpTransportContextExtractor contextExtractor,
             Duration keepAliveInterval) {
         Assert.notNull(objectMapper, "ObjectMapper must not be null");
         Assert.notNull(mcpEndpoint, "MCP endpoint must not be null");

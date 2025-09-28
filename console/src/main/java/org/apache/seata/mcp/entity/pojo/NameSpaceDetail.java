@@ -53,12 +53,4 @@ public class NameSpaceDetail {
         }
         return !StringUtils.isBlank(vGroup) || !StringUtils.isBlank(cluster);
     }
-
-    @Override
-    public String toString() {
-        return "NameSpaceDetail{" + "namespace='"
-                + namespace + '\'' + ", cluster='"
-                + cluster + '\'' + ", vGroup='"
-                + vGroup + '\'' + '}';
-    }
 }

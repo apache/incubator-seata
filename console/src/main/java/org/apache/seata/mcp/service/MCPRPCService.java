@@ -23,7 +23,6 @@ import reactor.core.publisher.Mono;
 import java.util.Map;
 
 public interface MCPRPCService {
-    String postCallTC(NameSpaceDetail nameSpaceDetail, String path, HttpHeaders headers, Object... args);
 
     String getCallTC(
             NameSpaceDetail nameSpaceDetail,

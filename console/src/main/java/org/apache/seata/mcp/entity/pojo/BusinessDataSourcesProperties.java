@@ -289,20 +289,6 @@ public class BusinessDataSourcesProperties implements InitializingBean {
         private int maxConn = DEFAULT_DB_MAX_CONN;
         private Long maxWait = 5000L;
 
-        @Override
-        public String toString() {
-            return "DataSourceProperties{" + "enabled="
-                    + enabled + ", dbType='"
-                    + dbType + '\'' + ", driverClassName='"
-                    + driverClassName + '\'' + ", url='"
-                    + url + '\'' + ", username='"
-                    + username + '\'' + ", password='"
-                    + password + '\'' + ", datasource='"
-                    + datasource + '\'' + ", minConn="
-                    + minConn + ", maxConn="
-                    + maxConn + ", maxWait="
-                    + maxWait + '}';
-        }
 
         public boolean isEnabled() {
             return enabled;

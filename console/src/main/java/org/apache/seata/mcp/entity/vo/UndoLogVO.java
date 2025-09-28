@@ -69,16 +69,6 @@ public class UndoLogVO {
         this.logModified = logModified;
     }
 
-    @Override
-    public String toString() {
-        return "UndoLogVO{" + "rollBackInfo='"
-                + rollBackInfo + '\'' + ", context='"
-                + context + '\'' + ", logStatus="
-                + logStatus + ", logCreated='"
-                + logCreated + '\'' + ", logModified='"
-                + logModified + '\'' + '}';
-    }
-
     public static UndoLogVO convert(ResultSet rs) throws SQLException {
         UndoLogVO vo = new UndoLogVO();
         UndoLogParser parser = new UndoLogParser();

@@ -66,10 +66,8 @@ public class GlobalSessionTools {
         if (param.getTimeEnd() != null && param.getTimeStart() != null) {
             if (DateUtils.judgeExceedTimeDuration(
                     param.getTimeStart(), param.getTimeEnd(), configuration.getQueryDuration())) {
-                return PageResult.failure(
-                        "",
-                        "The query time span is not allowed to exceed the max query duration : "
-                                + DateUtils.convertToHourFromTimeStamp(configuration.getQueryDuration()) + " hour");
+                throw new IllegalArgumentException("The query time span is not allowed to exceed the max query duration : "
+                        + DateUtils.convertToHourFromTimeStamp(configuration.getQueryDuration()) + " hour");
             }
         } else if (param.getTimeStart() != null && param.getTimeEnd() == null) {
             param.setTimeEnd(param.getTimeStart() + DateUtils.ONE_DAY_TIMESTAMP);
@@ -195,11 +193,11 @@ public class GlobalSessionTools {
     }
 
     @Tool(description = "Check out the abnormal transaction information,You can specify the time")
-    public List<String> getAbnormalSessions(
+    public List<GlobalSessionVO> getAbnormalSessions(
             @ToolParam(description = "Specify the namespace of the TC node", required = true)
                     NameSpaceDetail nameSpaceDetail,
             @ToolParam(description = "Query Param", required = true) GlobalAbnormalSessionParam abnormalSessionParam) {
-        List<String> result = new ArrayList<>();
+        List<GlobalSessionVO> result = new ArrayList<>();
         GlobalSessionParamDto param = GlobalSessionParamDto.covertFromAbnormalParam(abnormalSessionParam);
         param.setPageNum(1);
         param.setPageSize(100);
@@ -209,11 +207,11 @@ public class GlobalSessionTools {
             List<GlobalSessionVO> datas =
                     queryGlobalSession(nameSpaceDetail, param).getData();
             if (datas != null && !datas.isEmpty()) {
-                for (Object vo : datas) {
+                for (GlobalSessionVO vo : datas) {
                     if (result.size() >= 200) {
                         return result;
                     }
-                    result.add(vo.toString());
+                    result.add(vo);
                 }
             }
         }
