@@ -29,28 +29,15 @@ import java.io.Serializable;
 public class GlobalSessionParam implements Serializable {
 
     private static final long serialVersionUID = 115488252809011284L;
-    /**
-     * the xid
-     */
+
     private String xid;
-    /**
-     * the application id
-     */
+
     private String applicationId;
-    /**
-     * the global session status
-     */
+
     private Integer status;
-    /**
-     * the transaction name
-     */
+
     private String transactionName;
 
-    /**
-     * if with branch
-     * true: with branch session
-     * false: no branch session
-     */
     private boolean withBranch;
 
     private int pageNum;

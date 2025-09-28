@@ -31,29 +31,16 @@ public class GlobalLockParam implements Serializable {
 
     private static final long serialVersionUID = 615412528070131284L;
 
-    /**
-     * the xid
-     */
     private String xid;
-    /**
-     * the table name
-     */
+
     private String tableName;
-    /**
-     * the transaction id
-     */
+
     private String transactionId;
-    /**
-     * the branch id
-     */
+
     private String branchId;
-    /**
-     * the primary Key
-     */
+
     private String pk;
-    /**
-     * the resourceId
-     */
+
     private String resourceId;
 
     private int pageNum;
