@@ -113,7 +113,7 @@ public final class McpSchema {
 
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static abstract class BaseJsonRpcMessage implements JSONRPCMessage {
+    public abstract static class BaseJsonRpcMessage implements JSONRPCMessage {
 
         @JsonProperty("jsonrpc")
         protected String jsonrpc = JSONRPC_VERSION;
@@ -341,15 +341,21 @@ public final class McpSchema {
 
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static abstract class BaseMeta {
+    public abstract static class BaseMeta {
         @JsonProperty("_meta")
         protected Map<String, Object> meta;
 
-        public Map<String, Object> meta() { return meta; }
+        public Map<String, Object> meta() {
+            return meta;
+        }
 
-        public Map<String, Object> getMeta() { return meta; }
+        public Map<String, Object> getMeta() {
+            return meta;
+        }
 
-        public void setMeta(Map<String, Object> meta) { this.meta = meta; }
+        public void setMeta(Map<String, Object> meta) {
+            this.meta = meta;
+        }
     }
 
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
@@ -472,8 +478,7 @@ public final class McpSchema {
         @JsonProperty("elicitation")
         Elicitation elicitation;
 
-        public ClientCapabilities(
-                Map<String, Object> experimental, RootCapabilities roots, Elicitation elicitation) {
+        public ClientCapabilities(Map<String, Object> experimental, RootCapabilities roots, Elicitation elicitation) {
             this.experimental = experimental;
             this.roots = roots;
             this.elicitation = elicitation;
@@ -514,8 +519,7 @@ public final class McpSchema {
             @JsonProperty("listChanged")
             Boolean listChanged;
 
-            public RootCapabilities() {
-            }
+            public RootCapabilities() {}
 
             public RootCapabilities(Boolean listChanged) {
                 this.listChanged = listChanged;
@@ -1347,7 +1351,7 @@ public final class McpSchema {
 
     @JsonInclude(JsonInclude.Include.NON_ABSENT)
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static final class CompleteResult extends BaseMeta{
+    public static final class CompleteResult extends BaseMeta {
         @JsonProperty("completion")
         private final CompleteCompletion completion;
 

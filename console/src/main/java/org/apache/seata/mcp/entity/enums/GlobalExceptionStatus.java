@@ -23,7 +23,6 @@ import java.util.List;
  * Status of global transaction.
  */
 public enum GlobalExceptionStatus {
-
     CommitFailed(10, "2Phase commit failed"),
 
     RollbackFailed(12, "global transaction completed but rollback failed"),

@@ -66,8 +66,9 @@ public class GlobalSessionTools {
         if (param.getTimeEnd() != null && param.getTimeStart() != null) {
             if (DateUtils.judgeExceedTimeDuration(
                     param.getTimeStart(), param.getTimeEnd(), configuration.getQueryDuration())) {
-                throw new IllegalArgumentException("The query time span is not allowed to exceed the max query duration : "
-                        + DateUtils.convertToHourFromTimeStamp(configuration.getQueryDuration()) + " hour");
+                throw new IllegalArgumentException(
+                        "The query time span is not allowed to exceed the max query duration : "
+                                + DateUtils.convertToHourFromTimeStamp(configuration.getQueryDuration()) + " hour");
             }
         } else if (param.getTimeStart() != null && param.getTimeEnd() == null) {
             param.setTimeEnd(param.getTimeStart() + DateUtils.ONE_DAY_TIMESTAMP);

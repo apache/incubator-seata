@@ -31,6 +31,5 @@ public class CustomResponseErrorHandler implements ResponseErrorHandler {
     }
 
     @Override
-    public void handleError(ClientHttpResponse response) {
-    }
+    public void handleError(ClientHttpResponse response) {}
 }

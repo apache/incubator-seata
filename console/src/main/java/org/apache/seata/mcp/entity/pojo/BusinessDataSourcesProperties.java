@@ -289,7 +289,6 @@ public class BusinessDataSourcesProperties implements InitializingBean {
         private int maxConn = DEFAULT_DB_MAX_CONN;
         private Long maxWait = 5000L;
 
-
         public boolean isEnabled() {
             return enabled;
         }
