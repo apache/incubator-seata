@@ -54,8 +54,7 @@ public class OscarOperateRecognizerHolder implements SQLOperateRecognizerHolder 
                 if (selectStatement.getSelect().getFirstQueryBlock() != null) {
                     OscarSelectQueryBlock queryBlock =
                             (OscarSelectQueryBlock) selectStatement.getSelect().getFirstQueryBlock();
-                    if (queryBlock.getForClause() != null
-                            && queryBlock.getForClause().getOption() != null) {
+                    if (queryBlock.getForClause() != null) {
                         if (queryBlock.getForClause().getOption() == OscarSelectQueryBlock.ForClause.Option.UPDATE) {
                             return new OscarSelectForUpdateRecognizer(sql, ast);
                         }

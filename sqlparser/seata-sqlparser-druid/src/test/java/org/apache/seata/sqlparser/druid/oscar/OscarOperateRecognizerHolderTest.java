@@ -19,6 +19,7 @@ package org.apache.seata.sqlparser.druid.oscar;
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
+import com.alibaba.druid.sql.dialect.oscar.ast.stmt.OscarSelectQueryBlock;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -75,7 +76,13 @@ public class OscarOperateRecognizerHolderTest extends AbstractOscarRecognizerTes
 
         // select for update
         sql += " FOR UPDATE";
-        sqlStatement = getSQLStatement(sql);
-        Assertions.assertNotNull(new OscarOperateRecognizerHolder().getSelectForUpdateRecognizer(sql, sqlStatement));
+        selectStatement = (SQLSelectStatement) getSQLStatement(sql);
+        Assertions.assertNotNull(new OscarOperateRecognizerHolder().getSelectForUpdateRecognizer(sql, selectStatement));
+
+        // set getForClause is null
+        OscarSelectQueryBlock queryBlock =
+                (OscarSelectQueryBlock) selectStatement.getSelect().getFirstQueryBlock();
+        queryBlock.setForClause(null);
+        Assertions.assertNull(new OscarOperateRecognizerHolder().getSelectForUpdateRecognizer(sql, selectStatement));
     }
 }
