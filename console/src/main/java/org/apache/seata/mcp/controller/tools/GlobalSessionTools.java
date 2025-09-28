@@ -172,7 +172,9 @@ public class GlobalSessionTools {
         }
     }
 
-    @Tool(description = "Change the global session status, Get the modify key before you change")
+    @Tool(
+            description =
+                    "Change the global session status, Used to change transactions that are in a failed commit or rollback failed state to a retry state, Get the modify key before you change")
     public String changeGlobalStatus(
             @ToolParam(description = "Specify the namespace of the TC node", required = true)
                     NameSpaceDetail nameSpaceDetail,
