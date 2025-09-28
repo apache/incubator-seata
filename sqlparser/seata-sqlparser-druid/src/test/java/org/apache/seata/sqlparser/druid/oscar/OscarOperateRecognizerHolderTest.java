@@ -18,6 +18,7 @@ package org.apache.seata.sqlparser.druid.oscar;
 
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
+import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -52,9 +53,24 @@ public class OscarOperateRecognizerHolderTest extends AbstractOscarRecognizerTes
 
     @Test
     public void getSelectForUpdateTest() {
-        // common select without lock
-        String sql = "SELECT name FROM t1 WHERE id = 1";
+        // not select clause
+        String sql = "DELETE FROM t WHERE id = 1";
         SQLStatement sqlStatement = getSQLStatement(sql);
+        Assertions.assertNull(new OscarOperateRecognizerHolder().getSelectForUpdateRecognizer(sql, sqlStatement));
+
+        // common select without lock
+        sql = "SELECT name FROM t1 WHERE id = 1";
+        sqlStatement = getSQLStatement(sql);
+        Assertions.assertNull(new OscarOperateRecognizerHolder().getSelectForUpdateRecognizer(sql, sqlStatement));
+
+        // set select is null
+        SQLSelectStatement selectStatement = (SQLSelectStatement) getSQLStatement(sql);
+        selectStatement.setSelect(null);
+        Assertions.assertNull(new OscarOperateRecognizerHolder().getSelectForUpdateRecognizer(sql, sqlStatement));
+
+        // set select field query is null
+        selectStatement = (SQLSelectStatement) getSQLStatement(sql);
+        selectStatement.getSelect().setQuery(null);
         Assertions.assertNull(new OscarOperateRecognizerHolder().getSelectForUpdateRecognizer(sql, sqlStatement));
 
         // select for update
