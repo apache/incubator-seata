@@ -31,7 +31,7 @@
     "@babel/plugin-proposal-decorators": "^7.23.7",
     "@babel/preset-env": "^7.23.8",
     "@babel/preset-typescript": "^7.23.3",
-    "@babel/runtime": "^7.26.10",
+    "@babel/runtime": "^7.27.0",
     "@types/lodash": "^4.14.202",
     "@types/node": "^13.1.4",
     "@types/react": "^16.14.56",
@@ -106,6 +106,7 @@
     "nanoid": "3.1.31",
     "ip": "2.0.1",
     "sha.js": "2.4.12",
-    "cipher-base": "1.0.6"
+    "cipher-base": "1.0.6",
+    "@babel/runtime": "^7.27.0"
   }
 }

@@ -17,6 +17,7 @@
 package org.apache.seata.rm.datasource;
 
 import com.alibaba.druid.pool.DruidDataSource;
+import org.apache.seata.rm.DefaultResourceManager;
 import org.apache.seata.rm.datasource.mock.MockDataSource;
 import org.apache.seata.rm.datasource.mock.MockDriver;
 import org.apache.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
@@ -213,6 +214,30 @@ public class DataSourceProxyTest {
 
             // create data source proxy
             return new DataSourceProxy(dataSource);
+        }
+    }
+
+    @Test
+    public void testCloseRemovesResource() throws Exception {
+        final MockDriver mockDriver = new MockDriver();
+        final String username = "username";
+        final String jdbcUrl = "jdbc:mock:xxx";
+
+        final DruidDataSource dataSource = new DruidDataSource();
+        dataSource.setUrl(jdbcUrl);
+        dataSource.setDriver(mockDriver);
+        dataSource.setUsername(username);
+        dataSource.setPassword("password");
+
+        DataSourceProxy proxy = getDataSourceProxy(dataSource);
+        try (MockedStatic<DefaultResourceManager> drmStatic = Mockito.mockStatic(DefaultResourceManager.class);
+                MockedStatic<TableMetaCacheFactory> tmcfStatic = Mockito.mockStatic(TableMetaCacheFactory.class)) {
+            DefaultResourceManager drm = Mockito.mock(DefaultResourceManager.class);
+            drmStatic.when(DefaultResourceManager::get).thenReturn(drm);
+
+            proxy.close();
+
+            tmcfStatic.verify(() -> TableMetaCacheFactory.shutdown(proxy.getResourceId()));
         }
     }
 }
