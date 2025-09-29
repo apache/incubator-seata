@@ -19,6 +19,7 @@ package org.apache.seata.rm.datasource.undo.parser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.rm.datasource.DataCompareUtils;
+import org.apache.seata.rm.datasource.sql.serial.SerialArray;
 import org.apache.seata.rm.datasource.sql.struct.Field;
 import org.apache.seata.rm.datasource.undo.AbstractUndoLogManager;
 import org.apache.seata.rm.datasource.undo.BaseUndoLogParserTest;
@@ -33,14 +34,18 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.sql.Array;
 import java.sql.JDBCType;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
+import java.util.Map;
 
 import static org.mockito.Mockito.mockStatic;
 
@@ -178,6 +183,182 @@ public class JacksonUndoLogParserTest extends BaseUndoLogParserTest {
             Assertions.assertTrue(
                     DataCompareUtils.isFieldEquals(field, sameField).getResult());
             Assertions.assertFalse(DataCompareUtils.isFieldEquals(field, field2).getResult());
+        }
+    }
+
+    @Test
+    public void testSerializeAndDeserializeSerialArray()
+            throws NoSuchFieldException, IllegalAccessException, IOException, SQLException {
+        // get the jackson mapper
+        java.lang.reflect.Field reflectField = parser.getClass().getDeclaredField("mapper");
+        reflectField.setAccessible(true);
+        ObjectMapper mapper = (ObjectMapper) reflectField.get(parser);
+
+        // create a mock Array object for testing SerialArray
+        Array mockArray = new MockArray();
+        SerialArray serialArray = new SerialArray(mockArray);
+
+        // test SerialArray with BIGINT array (PostgreSQL _int8 type)
+        Field field = new Field("dept_ids", JDBCType.ARRAY.getVendorTypeNumber(), serialArray);
+        byte[] bytes = mapper.writeValueAsBytes(field);
+        Field sameField = mapper.readValue(bytes, Field.class);
+        Assertions.assertTrue(DataCompareUtils.isFieldEquals(field, sameField).getResult());
+
+        // verify the SerialArray properties are correctly serialized/deserialized
+        SerialArray deserializedArray = (SerialArray) sameField.getValue();
+        Assertions.assertEquals(serialArray.getBaseType(), deserializedArray.getBaseType());
+        Assertions.assertEquals(serialArray.getBaseTypeName(), deserializedArray.getBaseTypeName());
+        Assertions.assertArrayEquals(serialArray.getElements(), deserializedArray.getElements());
+    }
+
+    @Test
+    public void testSerializeAndDeserializeSerialArrayWithNulls()
+            throws NoSuchFieldException, IllegalAccessException, IOException, SQLException {
+        // get the jackson mapper
+        java.lang.reflect.Field reflectField = parser.getClass().getDeclaredField("mapper");
+        reflectField.setAccessible(true);
+        ObjectMapper mapper = (ObjectMapper) reflectField.get(parser);
+
+        // create SerialArray with null elements
+        Array mockArrayWithNulls = new MockArrayWithNulls();
+        SerialArray serialArray = new SerialArray(mockArrayWithNulls);
+
+        Field field = new Field("nullable_array", JDBCType.ARRAY.getVendorTypeNumber(), serialArray);
+        byte[] bytes = mapper.writeValueAsBytes(field);
+        Field sameField = mapper.readValue(bytes, Field.class);
+
+        Assertions.assertTrue(DataCompareUtils.isFieldEquals(field, sameField).getResult());
+
+        // verify null elements are handled correctly
+        SerialArray deserializedArray = (SerialArray) sameField.getValue();
+        Object[] elements = deserializedArray.getElements();
+        Assertions.assertEquals(3, elements.length);
+        Assertions.assertEquals(1L, elements[0]);
+        Assertions.assertNull(elements[1]);
+        Assertions.assertEquals(3L, elements[2]);
+    }
+
+    /**
+     * Mock Array class for testing SerialArray serialization
+     */
+    private static class MockArray implements Array {
+        private final Object[] elements = {1L, 2L, 3L, 4L, 5L};
+
+        @Override
+        public String getBaseTypeName() throws SQLException {
+            return "int8";
+        }
+
+        @Override
+        public int getBaseType() throws SQLException {
+            return Types.BIGINT;
+        }
+
+        @Override
+        public Object getArray() throws SQLException {
+            return elements;
+        }
+
+        @Override
+        public Object getArray(Map<String, Class<?>> map) throws SQLException {
+            return elements;
+        }
+
+        @Override
+        public Object getArray(long index, int count) throws SQLException {
+            return elements;
+        }
+
+        @Override
+        public Object getArray(long index, int count, Map<String, Class<?>> map) throws SQLException {
+            return elements;
+        }
+
+        @Override
+        public ResultSet getResultSet() throws SQLException {
+            return null;
+        }
+
+        @Override
+        public ResultSet getResultSet(Map<String, Class<?>> map) throws SQLException {
+            return null;
+        }
+
+        @Override
+        public ResultSet getResultSet(long index, int count) throws SQLException {
+            return null;
+        }
+
+        @Override
+        public ResultSet getResultSet(long index, int count, Map<String, Class<?>> map) throws SQLException {
+            return null;
+        }
+
+        @Override
+        public void free() throws SQLException {
+            // do nothing
+        }
+    }
+
+    /**
+     * Mock Array class with null elements for testing edge cases
+     */
+    private static class MockArrayWithNulls implements Array {
+        private final Object[] elements = {1L, null, 3L};
+
+        @Override
+        public String getBaseTypeName() throws SQLException {
+            return "int8";
+        }
+
+        @Override
+        public int getBaseType() throws SQLException {
+            return Types.BIGINT;
+        }
+
+        @Override
+        public Object getArray() throws SQLException {
+            return elements;
+        }
+
+        @Override
+        public Object getArray(Map<String, Class<?>> map) throws SQLException {
+            return elements;
+        }
+
+        @Override
+        public Object getArray(long index, int count) throws SQLException {
+            return elements;
+        }
+
+        @Override
+        public Object getArray(long index, int count, Map<String, Class<?>> map) throws SQLException {
+            return elements;
+        }
+
+        @Override
+        public ResultSet getResultSet() throws SQLException {
+            return null;
+        }
+
+        @Override
+        public ResultSet getResultSet(Map<String, Class<?>> map) throws SQLException {
+            return null;
+        }
+
+        @Override
+        public ResultSet getResultSet(long index, int count) throws SQLException {
+            return null;
+        }
+
+        @Override
+        public ResultSet getResultSet(long index, int count, Map<String, Class<?>> map) throws SQLException {
+            return null;
+        }
+
+        @Override
+        public void free() throws SQLException {
+            // do nothing
         }
     }
 
