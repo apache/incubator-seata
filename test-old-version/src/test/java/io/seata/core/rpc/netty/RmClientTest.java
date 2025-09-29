@@ -80,7 +80,7 @@ public class RmClientTest {
         tccResource.setRollbackMethod(
                 ReflectionUtil.getMethod(Action1.class, "cancel", new Class[] {BusinessActionContext.class}));
         rm.registerResource(tccResource);
-        LOGGER.info("registerResource ok");
+        LOGGER.info("(0.6.1)registerResource ok");
         return rm;
     }
 }
