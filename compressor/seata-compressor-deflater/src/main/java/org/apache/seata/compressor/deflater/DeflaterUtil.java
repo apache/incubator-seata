@@ -31,15 +31,15 @@ public class DeflaterUtil {
         if (bytes == null) {
             throw new NullPointerException("bytes is null");
         }
-        int lenght = 0;
+        int length = 0;
         Deflater deflater = new Deflater();
         deflater.setInput(bytes);
         deflater.finish();
         byte[] outputBytes = new byte[BUFFER_SIZE];
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             while (!deflater.finished()) {
-                lenght = deflater.deflate(outputBytes);
-                bos.write(outputBytes, 0, lenght);
+                length = deflater.deflate(outputBytes);
+                bos.write(outputBytes, 0, length);
             }
             deflater.end();
             return bos.toByteArray();
