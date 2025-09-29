@@ -27,9 +27,14 @@ import java.lang.annotation.Target;
 /**
  * TCC annotation.
  * Define a TCC interface, which added on the try method.
- * Must be used with `@LocalTCC`.
+ * Must be used with `@LocalTCC` annotation on the interface or implementation class.
+ * This annotation is specifically designed for TCC (Try-Confirm-Cancel) transaction mode.
  *
- * @see org.apache.seata.rm.tcc.api.LocalTCC // TCC annotation, which added on the TCC interface. It can't be left out.
+ * For Saga scenarios with compensation patterns, use `@CompensationBusinessAction` on methods within classes or interfaces marked with `@SagaTransactional`.
+ *
+ * @see org.apache.seata.rm.tcc.api.LocalTCC TCC annotation, which added on the TCC interface. It can't be left out.
+ * @see org.apache.seata.saga.rm.api.SagaTransactional Generic transaction participant annotation for Saga scenarios
+ * @see org.apache.seata.saga.rm.api.CompensationBusinessAction Saga-specific business action annotation
  * @see org.apache.seata.spring.annotation.GlobalTransactionScanner#wrapIfNecessary(Object, String, Object) // the scanner for TM, GlobalLock, and TCC mode
  * @see TccActionInterceptorHandler // the interceptor of TCC mode
  * @see BusinessActionContext
