@@ -57,13 +57,18 @@ public class SqlServerResourceIdInitializer extends AbstractResourceIdInitialize
         StringBuilder paramsBuilder = new StringBuilder();
         String paramUrl = resourceId.substring(resourceId.indexOf(';') + 1);
         String[] urlParams = paramUrl.split(";");
+        boolean first = true;
         for (String urlParam : urlParams) {
             String[] paramSplit = urlParam.split("=");
             String propertyName = paramSplit[0];
             if ("INSTANCENAME".equalsIgnoreCase(propertyName)
                     || "databaseName".equalsIgnoreCase(propertyName)
                     || "database".equalsIgnoreCase(propertyName)) {
+                if (!first) {
+                    paramsBuilder.append(";");
+                }
                 paramsBuilder.append(urlParam);
+                first = false;
             }
         }
         return paramsBuilder;
