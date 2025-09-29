@@ -173,13 +173,13 @@ public class SerialArray implements java.sql.Array, java.io.Serializable {
             SerialArray sa = (SerialArray) obj;
             return baseType == sa.baseType
                     && baseTypeName.equals(sa.baseTypeName)
-                    && Arrays.equals(elements, sa.elements);
+                    && Arrays.deepEquals(elements, sa.elements);
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return (((31 + Arrays.hashCode(elements)) * 31 + len) * 31 + baseType) * 31 + baseTypeName.hashCode();
+        return (((31 + Arrays.deepHashCode(elements)) * 31 + len) * 31 + baseType) * 31 + baseTypeName.hashCode();
     }
 }
