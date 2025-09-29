@@ -60,7 +60,7 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
     private static final String SERVER_ADDR_KEY = "serverAddr";
     private static final String REGISTRY_CLUSTER = "cluster";
     private static final String DEFAULT_CLUSTER_NAME = "default";
-    private static final String SERVICE_TAG = "services";
+    private static final String SERVICE_TAG = "META-INF/services";
     private static final String ACL_TOKEN = "aclToken";
     private static final String FILE_CONFIG_KEY_PREFIX =
             FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR;

@@ -27,7 +27,7 @@ import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.metadata.namingserver.MetaResponse;
 import org.apache.seata.common.metadata.namingserver.NamingServerNode;
 import org.apache.seata.common.metadata.namingserver.Unit;
-import org.apache.seata.common.util.HttpClientUtil;
+import org.apache.seata.common.http.Http1Client;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.discovery.registry.RegistryService;
@@ -114,8 +114,8 @@ class NamingserverRegistryServiceImplTest {
         StatusLine mockStatusLine = mock(StatusLine.class);
         when(mockStatusLine.getStatusCode()).thenReturn(200);
         when(mockResponse.getStatusLine()).thenReturn(mockStatusLine);
-        mockStatic(HttpClientUtil.class);
-        when(HttpClientUtil.doPost(anyString(), anyString(), anyMap(), anyInt()))
+        mockStatic(Http1Client.class);
+        when(Http1Client.doPost(anyString(), anyString(), anyMap(), anyInt()))
                 .thenReturn(mockResponse);
         spyService.watch("testGroup");
     }
@@ -389,7 +389,7 @@ class NamingserverRegistryServiceImplTest {
         Map<String, String> header = new HashMap<>();
         header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
         try {
-            CloseableHttpResponse response = HttpClientUtil.doGet(url, paraMap, header, 30000);
+            CloseableHttpResponse response = Http1Client.doGet(url, paraMap, header, 30000);
         } catch (Exception e) {
             throw new RemoteException();
         }

@@ -24,7 +24,7 @@ import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.metadata.namingserver.NamingServerNode;
 import org.apache.seata.common.metadata.namingserver.Unit;
 import org.apache.seata.common.result.Result;
-import org.apache.seata.common.util.HttpClientUtil;
+import org.apache.seata.common.http.Http1Client;
 import org.apache.seata.namingserver.entity.vo.monitor.ClusterVO;
 import org.apache.seata.namingserver.listener.ClusterChangeEvent;
 import org.apache.seata.namingserver.manager.NamingManager;
@@ -69,7 +69,7 @@ class NamingManagerTest {
     @Mock
     private StatusLine statusLine;
 
-    private MockedStatic<HttpClientUtil> mockedHttpClientUtil;
+    private MockedStatic<Http1Client> mockedHttpClientUtil;
 
     @BeforeEach
     void setUp() {
@@ -79,9 +79,9 @@ class NamingManagerTest {
         ReflectionTestUtils.setField(namingManager, "heartbeatCheckTimePeriod", 10000000);
 
         Mockito.when(httpResponse.getStatusLine()).thenReturn(statusLine);
-        mockedHttpClientUtil = Mockito.mockStatic(HttpClientUtil.class);
+        mockedHttpClientUtil = Mockito.mockStatic(Http1Client.class);
         mockedHttpClientUtil
-                .when(() -> HttpClientUtil.doGet(anyString(), anyMap(), anyMap(), anyInt()))
+                .when(() -> Http1Client.doGet(anyString(), anyMap(), anyMap(), anyInt()))
                 .thenReturn(httpResponse);
 
         namingManager.init();
@@ -235,7 +235,7 @@ class NamingManagerTest {
         assertEquals("add vGroup successfully!", result.getMessage());
 
         mockedHttpClientUtil.verify(
-                () -> HttpClientUtil.doGet(anyString(), anyMap(), anyMap(), anyInt()), Mockito.times(1));
+                () -> Http1Client.doGet(anyString(), anyMap(), anyMap(), anyInt()), Mockito.times(1));
     }
 
     @Test
@@ -293,7 +293,7 @@ class NamingManagerTest {
         Mockito.when(statusLine.getStatusCode()).thenReturn(200);
 
         mockedHttpClientUtil
-                .when(() -> HttpClientUtil.doGet(anyString(), anyMap(), anyMap(), anyInt()))
+                .when(() -> Http1Client.doGet(anyString(), anyMap(), anyMap(), anyInt()))
                 .thenReturn(httpResponse);
 
         Result<String> result = namingManager.removeGroup(unit, vGroup, clusterName, namespace, unitName);
@@ -303,7 +303,7 @@ class NamingManagerTest {
         assertEquals("remove group in old cluster successfully!", result.getMessage());
 
         mockedHttpClientUtil.verify(
-                () -> HttpClientUtil.doGet(anyString(), anyMap(), anyMap(), anyInt()), Mockito.times(1));
+                () -> Http1Client.doGet(anyString(), anyMap(), anyMap(), anyInt()), Mockito.times(1));
     }
 
     @Test

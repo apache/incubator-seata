@@ -31,7 +31,7 @@ import org.apache.seata.common.metadata.namingserver.NamingServerNode;
 import org.apache.seata.common.metadata.namingserver.Unit;
 import org.apache.seata.common.result.Result;
 import org.apache.seata.common.result.SingleResult;
-import org.apache.seata.common.util.HttpClientUtil;
+import org.apache.seata.common.http.Http1Client;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.namingserver.entity.bo.ClusterBO;
 import org.apache.seata.namingserver.entity.bo.NamespaceBO;
@@ -176,7 +176,7 @@ public class NamingManager {
             Map<String, String> header = new HashMap<>();
             header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
 
-            try (CloseableHttpResponse closeableHttpResponse = HttpClientUtil.doGet(httpUrl, params, header, 3000)) {
+            try (CloseableHttpResponse closeableHttpResponse = Http1Client.doGet(httpUrl, params, header, 3000)) {
                 if (closeableHttpResponse == null
                         || closeableHttpResponse.getStatusLine().getStatusCode() != 200) {
                     return new Result<>(
@@ -209,7 +209,7 @@ public class NamingManager {
             params.put(NamingServerConstants.CONSTANT_UNIT, unitName);
             Map<String, String> header = new HashMap<>();
             header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
-            try (CloseableHttpResponse closeableHttpResponse = HttpClientUtil.doGet(httpUrl, params, header, 3000)) {
+            try (CloseableHttpResponse closeableHttpResponse = Http1Client.doGet(httpUrl, params, header, 3000)) {
                 if (closeableHttpResponse == null
                         || closeableHttpResponse.getStatusLine().getStatusCode() != 200) {
                     LOGGER.warn("remove vGroup in old cluster failed");

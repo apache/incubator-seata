@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.common.util;
+package org.apache.seata.common.http;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.NameValuePair;
@@ -31,6 +31,9 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
+import org.apache.seata.common.loader.LoadLevel;
+import org.apache.seata.common.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,11 +44,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class HttpClientUtil {
+@LoadLevel(name = "Http1", order = 1)
+public class Http1Client implements HttpClient {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HttpClientUtil.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Http1Client.class);
 
     private static final Map<Integer /*timeout*/, CloseableHttpClient> HTTP_CLIENT_MAP = new ConcurrentHashMap<>();
 
@@ -70,7 +75,9 @@ public class HttpClientUtil {
     }
 
     // post request
-    public static CloseableHttpResponse doPost(
+
+    @Override
+    public CompletableFuture<HttpResponseWrapper> doPost(
             String url, Map<String, String> params, Map<String, String> header, int timeout) throws IOException {
         try {
             URIBuilder builder = new URIBuilder(url);
@@ -104,7 +111,18 @@ public class HttpClientUtil {
                             .setConnectTimeout(timeout)
                             .build())
                     .build());
-            return client.execute(httpPost);
+
+            CloseableHttpResponse closeableHttpResponse = client.execute(httpPost);
+
+            HttpResponseWrapper httpResponseWrapper = new HttpResponseWrapper();
+
+            if (closeableHttpResponse != null) {
+                httpResponseWrapper.setStatusCode(closeableHttpResponse.getStatusLine().getStatusCode() );
+                httpResponseWrapper.setResponse(EntityUtils.toString(closeableHttpResponse.getEntity(), StandardCharsets.UTF_8));
+                httpResponseWrapper.setObj(closeableHttpResponse);
+            }
+
+            return CompletableFuture.completedFuture(httpResponseWrapper);
         } catch (URISyntaxException | ClientProtocolException e) {
             LOGGER.error(e.getMessage(), e);
         }
@@ -112,7 +130,8 @@ public class HttpClientUtil {
     }
 
     // post request
-    public static CloseableHttpResponse doPost(String url, String body, Map<String, String> header, int timeout)
+    @Override
+    public CompletableFuture<HttpResponseWrapper> doPost(String url, String body, Map<String, String> header, int timeout)
             throws IOException {
         try {
             URIBuilder builder = new URIBuilder(url);
@@ -137,7 +156,19 @@ public class HttpClientUtil {
                             .setConnectTimeout(timeout)
                             .build())
                     .build());
-            return client.execute(httpPost);
+
+            CloseableHttpResponse closeableHttpResponse = client.execute(httpPost);
+
+            HttpResponseWrapper httpResponseWrapper = new HttpResponseWrapper();
+
+            if (closeableHttpResponse != null) {
+                httpResponseWrapper.setStatusCode(closeableHttpResponse.getStatusLine().getStatusCode() );
+                httpResponseWrapper.setResponse(EntityUtils.toString(closeableHttpResponse.getEntity(), StandardCharsets.UTF_8));
+                httpResponseWrapper.setObj(closeableHttpResponse);
+            }
+
+            return CompletableFuture.completedFuture(httpResponseWrapper);
+
         } catch (URISyntaxException | ClientProtocolException e) {
             LOGGER.error(e.getMessage(), e);
         }
@@ -145,7 +176,8 @@ public class HttpClientUtil {
     }
 
     // get request
-    public static CloseableHttpResponse doGet(
+    @Override
+    public CompletableFuture<HttpResponseWrapper> doGet(
             String url, Map<String, String> param, Map<String, String> header, int timeout) throws IOException {
         try {
             URIBuilder builder = new URIBuilder(url);
@@ -167,14 +199,26 @@ public class HttpClientUtil {
                             .setConnectTimeout(timeout)
                             .build())
                     .build());
-            return client.execute(httpGet);
+
+            CloseableHttpResponse closeableHttpResponse = client.execute(httpGet);
+
+            HttpResponseWrapper httpResponseWrapper = new HttpResponseWrapper();
+
+            if (closeableHttpResponse != null) {
+                httpResponseWrapper.setStatusCode(closeableHttpResponse.getStatusLine().getStatusCode() );
+                httpResponseWrapper.setResponse(EntityUtils.toString(closeableHttpResponse.getEntity(), StandardCharsets.UTF_8));
+                httpResponseWrapper.setObj(closeableHttpResponse);
+            }
+
+            return CompletableFuture.completedFuture(httpResponseWrapper);
         } catch (URISyntaxException | ClientProtocolException e) {
             LOGGER.error(e.getMessage(), e);
         }
         return null;
     }
 
-    public static CloseableHttpResponse doPostJson(
+    @Override
+    public CompletableFuture<HttpResponseWrapper> doPostJson(
             String url, String jsonBody, Map<String, String> headers, int timeout) throws IOException {
         RequestConfig requestConfig = RequestConfig.custom()
                 .setSocketTimeout(timeout)
@@ -193,6 +237,16 @@ public class HttpClientUtil {
         post.setEntity(entity);
 
         CloseableHttpClient client = HttpClients.createDefault();
-        return client.execute(post);
+
+        CloseableHttpResponse closeableHttpResponse = client.execute(post);
+
+        HttpResponseWrapper httpResponseWrapper = new HttpResponseWrapper();
+
+        if (closeableHttpResponse != null) {
+            httpResponseWrapper.setStatusCode(closeableHttpResponse.getStatusLine().getStatusCode() );
+            httpResponseWrapper.setResponse(EntityUtils.toString(closeableHttpResponse.getEntity(), StandardCharsets.UTF_8));
+            httpResponseWrapper.setObj(closeableHttpResponse);
+        }
+        return CompletableFuture.completedFuture(httpResponseWrapper);
     }
 }

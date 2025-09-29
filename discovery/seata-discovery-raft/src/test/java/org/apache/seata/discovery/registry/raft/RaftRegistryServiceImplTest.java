@@ -22,9 +22,9 @@ import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.StringEntity;
+import org.apache.seata.common.http.Http1Client;
 import org.apache.seata.common.metadata.MetadataResponse;
 import org.apache.seata.common.metadata.Node;
-import org.apache.seata.common.util.*;
 import org.apache.seata.config.ConfigurationFactory;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
@@ -72,7 +72,7 @@ class RaftRegistryServiceImplTest {
         String responseBody =
                 "{\"code\":\"401\",\"message\":\"Login failed\",\"data\":\"" + jwtToken + "\",\"success\":false}";
 
-        try (MockedStatic<HttpClientUtil> mockedStatic = Mockito.mockStatic(HttpClientUtil.class)) {
+        try (MockedStatic<Http1Client> mockedStatic = Mockito.mockStatic(Http1Client.class)) {
 
             CloseableHttpResponse mockResponse = mock(CloseableHttpResponse.class);
             StatusLine mockStatusLine = mock(StatusLine.class);
@@ -81,7 +81,7 @@ class RaftRegistryServiceImplTest {
             when(mockResponse.getStatusLine()).thenReturn(mockStatusLine);
             when(mockStatusLine.getStatusCode()).thenReturn(HttpStatus.SC_OK);
 
-            when(HttpClientUtil.doPost(any(String.class), any(Map.class), any(Map.class), any(int.class)))
+            when(Http1Client.doPost(any(String.class), any(Map.class), any(Map.class), any(int.class)))
                     .thenReturn(mockResponse);
 
             // Use reflection to access and invoke the private method
@@ -104,7 +104,7 @@ class RaftRegistryServiceImplTest {
         String responseBody =
                 "{\"code\":\"200\",\"message\":\"success\",\"data\":\"" + jwtToken + "\",\"success\":true}";
 
-        try (MockedStatic<HttpClientUtil> mockedStatic = Mockito.mockStatic(HttpClientUtil.class)) {
+        try (MockedStatic<Http1Client> mockedStatic = Mockito.mockStatic(Http1Client.class)) {
 
             CloseableHttpResponse mockResponse = mock(CloseableHttpResponse.class);
             StatusLine mockStatusLine = mock(StatusLine.class);
@@ -113,7 +113,7 @@ class RaftRegistryServiceImplTest {
             when(mockResponse.getStatusLine()).thenReturn(mockStatusLine);
             when(mockStatusLine.getStatusCode()).thenReturn(HttpStatus.SC_OK);
 
-            when(HttpClientUtil.doPost(any(String.class), any(Map.class), any(Map.class), any(int.class)))
+            when(Http1Client.doPost(any(String.class), any(Map.class), any(Map.class), any(int.class)))
                     .thenReturn(mockResponse);
 
             Method refreshTokenMethod = RaftRegistryServiceImpl.class.getDeclaredMethod("refreshToken", String.class);
