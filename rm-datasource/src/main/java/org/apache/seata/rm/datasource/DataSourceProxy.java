@@ -292,4 +292,9 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     public String getUserName() {
         return userName;
     }
+
+    public void close() throws Exception {
+        // TODO: Need to unregister resource from DefaultResourceManager
+        TableMetaCacheFactory.shutdown(resourceId);
+    }
 }

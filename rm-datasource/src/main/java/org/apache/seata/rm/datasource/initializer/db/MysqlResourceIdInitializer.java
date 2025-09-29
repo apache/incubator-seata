@@ -32,7 +32,7 @@ public class MysqlResourceIdInitializer extends AbstractResourceIdInitializer {
      * @param proxy
      */
     @Override
-    public void doInitResourceId(DataSourceProxy proxy) {
+    protected void doInitResourceId(DataSourceProxy proxy) {
         String startsWith = "jdbc:mysql:loadbalance://";
         if (proxy.getJdbcUrl().startsWith(startsWith)) {
             String url = proxy.getJdbcUrl();

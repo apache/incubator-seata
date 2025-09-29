@@ -27,6 +27,8 @@ import java.util.Set;
 
 /**
  * The type Local tcc remoting parser.
+ * Compatible module maintains backward compatibility with Seata versions prior to 2.1.
+ * Only supports @LocalTCC annotation.
  */
 @Deprecated
 public class LocalTCCRemotingParser extends org.apache.seata.rm.tcc.remoting.parser.LocalTCCRemotingParser {

@@ -35,7 +35,7 @@ import java.util.Map;
 public class RmClientTest {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(RmClientTest.class);
-    private static DefaultResourceManager rm = null;
+    private static volatile DefaultResourceManager rm = null;
 
     public static void testRm(String resourceId) throws TransactionException, NoSuchMethodException {
         String xid = "1111";
