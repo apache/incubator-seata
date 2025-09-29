@@ -44,12 +44,12 @@ public class OracleMultiInsertRecognizer extends BaseOracleRecognizer implements
 
     @Override
     public String getTableAlias() {
-        // Oracle Multi Insert 通常只涉及一个表，取第一个插入项的表别名
+        // Oracle Multi Insert usually only one table is involved, take the table alias of the first inserted item
         if (!CollectionUtils.isEmpty(ast.getEntries())) {
             OracleMultiInsertStatement.Entry firstEntry = ast.getEntries().get(0);
             if (firstEntry instanceof OracleMultiInsertStatement.InsertIntoClause) {
-                OracleMultiInsertStatement.InsertIntoClause insertClause = 
-                    (OracleMultiInsertStatement.InsertIntoClause) firstEntry;
+                OracleMultiInsertStatement.InsertIntoClause insertClause =
+                        (OracleMultiInsertStatement.InsertIntoClause) firstEntry;
                 if (insertClause.getTableSource() != null) {
                     return insertClause.getTableSource().getAlias();
                 }
@@ -60,12 +60,12 @@ public class OracleMultiInsertRecognizer extends BaseOracleRecognizer implements
 
     @Override
     public String getTableName() {
-        // Oracle Multi Insert 通常只涉及一个表，取第一个插入项的表名
+        // Oracle Multi Insert usually only one table is involved, take the table alias of the first inserted item
         if (!CollectionUtils.isEmpty(ast.getEntries())) {
             OracleMultiInsertStatement.Entry firstEntry = ast.getEntries().get(0);
             if (firstEntry instanceof OracleMultiInsertStatement.InsertIntoClause) {
-                OracleMultiInsertStatement.InsertIntoClause insertClause = 
-                    (OracleMultiInsertStatement.InsertIntoClause) firstEntry;
+                OracleMultiInsertStatement.InsertIntoClause insertClause =
+                        (OracleMultiInsertStatement.InsertIntoClause) firstEntry;
                 if (insertClause.getTableSource() != null) {
                     StringBuilder sb = new StringBuilder();
                     OracleOutputVisitor visitor = new OracleOutputVisitor(sb) {
@@ -88,8 +88,8 @@ public class OracleMultiInsertRecognizer extends BaseOracleRecognizer implements
         if (!CollectionUtils.isEmpty(ast.getEntries())) {
             OracleMultiInsertStatement.Entry firstEntry = ast.getEntries().get(0);
             if (firstEntry instanceof OracleMultiInsertStatement.InsertIntoClause) {
-                OracleMultiInsertStatement.InsertIntoClause insertClause = 
-                    (OracleMultiInsertStatement.InsertIntoClause) firstEntry;
+                OracleMultiInsertStatement.InsertIntoClause insertClause =
+                        (OracleMultiInsertStatement.InsertIntoClause) firstEntry;
                 return CollectionUtils.isEmpty(insertClause.getColumns());
             }
         }
@@ -101,8 +101,8 @@ public class OracleMultiInsertRecognizer extends BaseOracleRecognizer implements
         if (!CollectionUtils.isEmpty(ast.getEntries())) {
             OracleMultiInsertStatement.Entry firstEntry = ast.getEntries().get(0);
             if (firstEntry instanceof OracleMultiInsertStatement.InsertIntoClause) {
-                OracleMultiInsertStatement.InsertIntoClause insertClause = 
-                    (OracleMultiInsertStatement.InsertIntoClause) firstEntry;
+                OracleMultiInsertStatement.InsertIntoClause insertClause =
+                        (OracleMultiInsertStatement.InsertIntoClause) firstEntry;
                 if (!CollectionUtils.isEmpty(insertClause.getColumns())) {
                     List<SQLExpr> columnSQLExprs = insertClause.getColumns();
                     List<String> list = new ArrayList<>(columnSQLExprs.size());
@@ -127,9 +127,9 @@ public class OracleMultiInsertRecognizer extends BaseOracleRecognizer implements
         if (!CollectionUtils.isEmpty(ast.getEntries())) {
             for (OracleMultiInsertStatement.Entry entry : ast.getEntries()) {
                 if (entry instanceof OracleMultiInsertStatement.InsertIntoClause) {
-                    OracleMultiInsertStatement.InsertIntoClause insertClause = 
-                        (OracleMultiInsertStatement.InsertIntoClause) entry;
-                    
+                    OracleMultiInsertStatement.InsertIntoClause insertClause =
+                            (OracleMultiInsertStatement.InsertIntoClause) entry;
+
                     if (!CollectionUtils.isEmpty(insertClause.getValuesList())) {
                         for (SQLInsertStatement.ValuesClause valuesClause : insertClause.getValuesList()) {
                             List<SQLExpr> exprs = valuesClause.getValues();

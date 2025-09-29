@@ -29,7 +29,6 @@ import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.sqlparser.SQLRecognizer;
 import org.apache.seata.sqlparser.SQLRecognizerFactory;
 import org.apache.seata.sqlparser.druid.oracle.OracleOperateRecognizerHolder;
-import org.apache.seata.sqlparser.util.JdbcConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,15 +74,10 @@ class DruidSQLRecognizerFactoryImpl implements SQLRecognizerFactory {
                 recognizer = recognizerHolder.getDeleteRecognizer(sql, sqlStatement);
             } else if (sqlStatement instanceof SQLSelectStatement) {
                 recognizer = recognizerHolder.getSelectForUpdateRecognizer(sql, sqlStatement);
-            }else if (sqlStatement instanceof OracleMultiInsertStatement) {
-                // 使用专门的方法处理 Oracle 批量插入
-                if (JdbcConstants.ORACLE.equals(dbType.toLowerCase())) {
-                    recognizer = ((OracleOperateRecognizerHolder) recognizerHolder)
-                            .getMultiInsertRecognizer(sql, sqlStatement);
-                } else {
-                    throw new NotSupportYetException(
-                            "OracleMultiInsertStatement is only supported for Oracle database: " + sql);
-                }
+            } else if (sqlStatement instanceof OracleMultiInsertStatement) {
+                // Use specialized methods to handle Oracle bulk inserts
+                recognizer =
+                        ((OracleOperateRecognizerHolder) recognizerHolder).getMultiInsertRecognizer(sql, sqlStatement);
             }
 
             // When recognizer is null, it indicates that recognizerHolder cannot allocate unsupported syntax, like

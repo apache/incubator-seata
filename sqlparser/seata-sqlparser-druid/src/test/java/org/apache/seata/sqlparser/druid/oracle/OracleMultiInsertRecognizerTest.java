@@ -55,7 +55,7 @@ public class OracleMultiInsertRecognizerTest {
 
     @Test
     public void testGetTableAlias() {
-        // 测试无别名的情况
+        // Test the case without alias
         String sql = "INSERT ALL INTO users (id) VALUES (1) INTO users (id) VALUES (2) SELECT 1 FROM DUAL";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
 
@@ -65,12 +65,13 @@ public class OracleMultiInsertRecognizerTest {
 
     @Test
     public void testGetInsertColumns() {
-        String sql = "INSERT ALL INTO users (id, name, age) VALUES (1, 'Tom', 20) INTO users (id, name, age) VALUES (2, 'Jerry', 25) SELECT 1 FROM DUAL";
+        String sql =
+                "INSERT ALL INTO users (id, name, age) VALUES (1, 'Tom', 20) INTO users (id, name, age) VALUES (2, 'Jerry', 25) SELECT 1 FROM DUAL";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
 
         OracleMultiInsertRecognizer recognizer = new OracleMultiInsertRecognizer(sql, asts.get(0));
         List<String> columns = recognizer.getInsertColumns();
-        
+
         Assertions.assertNotNull(columns);
         Assertions.assertEquals(3, columns.size());
         Assertions.assertEquals("id", columns.get(0));
@@ -80,35 +81,34 @@ public class OracleMultiInsertRecognizerTest {
 
     @Test
     public void testInsertColumnsIsEmpty() {
-        // 测试有列的情况
-        String sqlWithColumns = "INSERT ALL INTO users (id, name) VALUES (1, 'Tom') INTO users (id, name) VALUES (2, 'Jerry') SELECT 1 FROM DUAL";
+        // Test the case with columns
+        String sqlWithColumns =
+                "INSERT ALL INTO users (id, name) VALUES (1, 'Tom') INTO users (id, name) VALUES (2, 'Jerry') SELECT 1 FROM DUAL";
         List<SQLStatement> asts = SQLUtils.parseStatements(sqlWithColumns, DB_TYPE);
         OracleMultiInsertRecognizer recognizer = new OracleMultiInsertRecognizer(sqlWithColumns, asts.get(0));
         Assertions.assertFalse(recognizer.insertColumnsIsEmpty());
-
-        // 测试没有列的情况（虽然在实际的 INSERT ALL 中很少见）
-        // 这里主要测试边界情况
     }
 
     @Test
     public void testGetInsertRows() {
-        String sql = "INSERT ALL INTO users (id, name, age) VALUES (1, 'Tom', 20) INTO users (id, name, age) VALUES (2, 'Jerry', 25) SELECT 1 FROM DUAL";
+        String sql =
+                "INSERT ALL INTO users (id, name, age) VALUES (1, 'Tom', 20) INTO users (id, name, age) VALUES (2, 'Jerry', 25) SELECT 1 FROM DUAL";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
 
         OracleMultiInsertRecognizer recognizer = new OracleMultiInsertRecognizer(sql, asts.get(0));
         List<List<Object>> rows = recognizer.getInsertRows(Collections.emptySet());
-        
+
         Assertions.assertNotNull(rows);
         Assertions.assertEquals(2, rows.size());
-        
-        // 验证第一行数据
+
+        // Verify the first row of data
         List<Object> firstRow = rows.get(0);
         Assertions.assertEquals(3, firstRow.size());
         Assertions.assertEquals(1, firstRow.get(0));
         Assertions.assertEquals("Tom", firstRow.get(1));
         Assertions.assertEquals(20, firstRow.get(2));
-        
-        // 验证第二行数据
+
+        // Verify the second row of data
         List<Object> secondRow = rows.get(1);
         Assertions.assertEquals(3, secondRow.size());
         Assertions.assertEquals(2, secondRow.get(0));
@@ -118,23 +118,24 @@ public class OracleMultiInsertRecognizerTest {
 
     @Test
     public void testGetInsertRowsWithNullValues() {
-        String sql = "INSERT ALL INTO users (id, name, age) VALUES (1, 'Tom', NULL) INTO users (id, name, age) VALUES (2, NULL, 25) SELECT 1 FROM DUAL";
+        String sql =
+                "INSERT ALL INTO users (id, name, age) VALUES (1, 'Tom', NULL) INTO users (id, name, age) VALUES (2, NULL, 25) SELECT 1 FROM DUAL";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
 
         OracleMultiInsertRecognizer recognizer = new OracleMultiInsertRecognizer(sql, asts.get(0));
         List<List<Object>> rows = recognizer.getInsertRows(Collections.emptySet());
-        
+
         Assertions.assertNotNull(rows);
         Assertions.assertEquals(2, rows.size());
-        
-        // 验证第一行数据（age 为 NULL）
+
+        // Verify the first row of data (age is NULL)
         List<Object> firstRow = rows.get(0);
         Assertions.assertEquals(3, firstRow.size());
         Assertions.assertEquals(1, firstRow.get(0));
         Assertions.assertEquals("Tom", firstRow.get(1));
         Assertions.assertEquals(Null.get(), firstRow.get(2));
-        
-        // 验证第二行数据（name 为 NULL）
+
+        // Verify the second row of data (name is NULL)
         List<Object> secondRow = rows.get(1);
         Assertions.assertEquals(3, secondRow.size());
         Assertions.assertEquals(2, secondRow.get(0));
@@ -144,16 +145,17 @@ public class OracleMultiInsertRecognizerTest {
 
     @Test
     public void testGetInsertRowsWithParameters() {
-        String sql = "INSERT ALL INTO users (id, name) VALUES (?, ?) INTO users (id, name) VALUES (?, ?) SELECT 1 FROM DUAL";
+        String sql =
+                "INSERT ALL INTO users (id, name) VALUES (?, ?) INTO users (id, name) VALUES (?, ?) SELECT 1 FROM DUAL";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
 
         OracleMultiInsertRecognizer recognizer = new OracleMultiInsertRecognizer(sql, asts.get(0));
         List<List<Object>> rows = recognizer.getInsertRows(Collections.emptySet());
-        
+
         Assertions.assertNotNull(rows);
         Assertions.assertEquals(2, rows.size());
-        
-        // 验证参数占位符
+
+        // Validation parameter placeholders
         for (List<Object> row : rows) {
             Assertions.assertEquals(2, row.size());
             for (Object value : row) {
@@ -165,29 +167,32 @@ public class OracleMultiInsertRecognizerTest {
 
     @Test
     public void testGetInsertParamsValue() {
-        String sql = "INSERT ALL INTO users (id, name) VALUES (1, 'Tom') INTO users (id, name) VALUES (2, 'Jerry') SELECT 1 FROM DUAL";
+        String sql =
+                "INSERT ALL INTO users (id, name) VALUES (1, 'Tom') INTO users (id, name) VALUES (2, 'Jerry') SELECT 1 FROM DUAL";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
 
         OracleMultiInsertRecognizer recognizer = new OracleMultiInsertRecognizer(sql, asts.get(0));
         List<String> paramsValue = recognizer.getInsertParamsValue();
-        
+
         Assertions.assertNull(paramsValue);
     }
 
     @Test
     public void testGetDuplicateKeyUpdate() {
-        String sql = "INSERT ALL INTO users (id, name) VALUES (1, 'Tom') INTO users (id, name) VALUES (2, 'Jerry') SELECT 1 FROM DUAL";
+        String sql =
+                "INSERT ALL INTO users (id, name) VALUES (1, 'Tom') INTO users (id, name) VALUES (2, 'Jerry') SELECT 1 FROM DUAL";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
 
         OracleMultiInsertRecognizer recognizer = new OracleMultiInsertRecognizer(sql, asts.get(0));
         List<String> duplicateKeyUpdate = recognizer.getDuplicateKeyUpdate();
-        
+
         Assertions.assertNull(duplicateKeyUpdate);
     }
 
     @Test
     public void testIsSqlSyntaxSupports() {
-        String sql = "INSERT ALL INTO users (id, name) VALUES (1, 'Tom') INTO users (id, name) VALUES (2, 'Jerry') SELECT 1 FROM DUAL";
+        String sql =
+                "INSERT ALL INTO users (id, name) VALUES (1, 'Tom') INTO users (id, name) VALUES (2, 'Jerry') SELECT 1 FROM DUAL";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
 
         OracleMultiInsertRecognizer recognizer = new OracleMultiInsertRecognizer(sql, asts.get(0));
@@ -196,32 +201,33 @@ public class OracleMultiInsertRecognizerTest {
 
     @Test
     public void testMultipleTablesInsert() {
-        // 测试插入到多个不同表的情况
-        String sql = "INSERT ALL INTO users (id, name) VALUES (1, 'Tom') INTO orders (id, user_id) VALUES (101, 1) SELECT 1 FROM DUAL";
+        // Testing inserts into multiple different tables
+        String sql =
+                "INSERT ALL INTO users (id, name) VALUES (1, 'Tom') INTO orders (id, user_id) VALUES (101, 1) SELECT 1 FROM DUAL";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
 
         OracleMultiInsertRecognizer recognizer = new OracleMultiInsertRecognizer(sql, asts.get(0));
-        
-        // 应该返回第一个表的信息
+
+        // The information of the first table should be returned
         Assertions.assertEquals("users", recognizer.getTableName());
-        
+
         List<String> columns = recognizer.getInsertColumns();
         Assertions.assertNotNull(columns);
         Assertions.assertEquals(2, columns.size());
         Assertions.assertEquals("id", columns.get(0));
         Assertions.assertEquals("name", columns.get(1));
-        
-        // 验证所有插入行数据
+
+        // Verify all inserted row data
         List<List<Object>> rows = recognizer.getInsertRows(Collections.emptySet());
         Assertions.assertEquals(2, rows.size());
-        
-        // 第一行：users 表数据
+
+        // First row: users table data
         List<Object> firstRow = rows.get(0);
         Assertions.assertEquals(2, firstRow.size());
         Assertions.assertEquals(1, firstRow.get(0));
         Assertions.assertEquals("Tom", firstRow.get(1));
-        
-        // 第二行：orders 表数据
+
+        // Second row: orders table data
         List<Object> secondRow = rows.get(1);
         Assertions.assertEquals(2, secondRow.size());
         Assertions.assertEquals(101, secondRow.get(0));
@@ -230,19 +236,19 @@ public class OracleMultiInsertRecognizerTest {
 
     @Test
     public void testComplexInsertAllStatement() {
-        // 测试更复杂的 INSERT ALL 语句
-        String sql = "INSERT ALL " +
-                     "INTO sales (prod_id, cust_id, time_id, amount) VALUES (product_id, customer_id, weekly_start_date, sales_sun) " +
-                     "INTO sales (prod_id, cust_id, time_id, amount) VALUES (product_id, customer_id, weekly_start_date+1, sales_mon) " +
-                     "INTO sales (prod_id, cust_id, time_id, amount) VALUES (product_id, customer_id, weekly_start_date+2, sales_tue) " +
-                     "SELECT product_id, customer_id, weekly_start_date, sales_sun, sales_mon, sales_tue FROM sales_input_table";
-        
+        // Testing a more complex INSERT ALL statement
+        String sql = "INSERT ALL "
+                + "INTO sales (prod_id, cust_id, time_id, amount) VALUES (product_id, customer_id, weekly_start_date, sales_sun) "
+                + "INTO sales (prod_id, cust_id, time_id, amount) VALUES (product_id, customer_id, weekly_start_date+1, sales_mon) "
+                + "INTO sales (prod_id, cust_id, time_id, amount) VALUES (product_id, customer_id, weekly_start_date+2, sales_tue) "
+                + "SELECT product_id, customer_id, weekly_start_date, sales_sun, sales_mon, sales_tue FROM sales_input_table";
+
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
         OracleMultiInsertRecognizer recognizer = new OracleMultiInsertRecognizer(sql, asts.get(0));
-        
+
         Assertions.assertEquals("sales", recognizer.getTableName());
         Assertions.assertEquals(SQLType.INSERT, recognizer.getSQLType());
-        
+
         List<String> columns = recognizer.getInsertColumns();
         Assertions.assertNotNull(columns);
         Assertions.assertEquals(4, columns.size());
@@ -254,15 +260,13 @@ public class OracleMultiInsertRecognizerTest {
 
     @Test
     public void testEmptyEntriesHandling() {
-        // 这个测试主要是为了保证在边界情况下不会出现异常
-        // 虽然实际上不太可能出现空的 entries，但我们需要确保代码的健壮性
-        
+        // This test is mainly to ensure that no exceptions occur in boundary conditions
+
         String sql = "INSERT ALL INTO users (id, name) VALUES (1, 'Tom') SELECT 1 FROM DUAL";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
-        
+
         OracleMultiInsertRecognizer recognizer = new OracleMultiInsertRecognizer(sql, asts.get(0));
-        
-        // 基本功能应该正常工作
+
         Assertions.assertEquals(SQLType.INSERT, recognizer.getSQLType());
         Assertions.assertEquals("users", recognizer.getTableName());
         Assertions.assertTrue(recognizer.isSqlSyntaxSupports());
@@ -270,21 +274,22 @@ public class OracleMultiInsertRecognizerTest {
 
     @Test
     public void testGetInsertRowsWithPrimaryKeyIndex() {
-        String sql = "INSERT ALL INTO users (id, name, age) VALUES (1, 'Tom', 20) INTO users (id, name, age) VALUES (2, 'Jerry', 25) SELECT 1 FROM DUAL";
+        String sql =
+                "INSERT ALL INTO users (id, name, age) VALUES (1, 'Tom', 20) INTO users (id, name, age) VALUES (2, 'Jerry', 25) SELECT 1 FROM DUAL";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
 
         OracleMultiInsertRecognizer recognizer = new OracleMultiInsertRecognizer(sql, asts.get(0));
-        
-        // 测试当指定主键索引时的行为
-        List<List<Object>> rows = recognizer.getInsertRows(Arrays.asList(0)); // id 字段是主键
-        
+
+        // Test behavior when primary key index is specified
+        List<List<Object>> rows = recognizer.getInsertRows(Arrays.asList(0));
+
         Assertions.assertNotNull(rows);
         Assertions.assertEquals(2, rows.size());
-        
-        // 验证主键字段的值
+
+        // Validate the value of the primary key field
         for (List<Object> row : rows) {
             Assertions.assertEquals(3, row.size());
-            Assertions.assertTrue(row.get(0) instanceof Integer); // 主键应该是整数
+            Assertions.assertTrue(row.get(0) instanceof Integer);
         }
     }
 }
