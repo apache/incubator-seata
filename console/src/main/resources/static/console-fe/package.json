@@ -106,6 +106,7 @@
     "nanoid": "3.1.31",
     "ip": "2.0.1",
     "sha.js": "2.4.12",
-    "cipher-base": "1.0.6"
+    "cipher-base": "1.0.6",
+    "@babel/runtime": "^7.27.0"
   }
 }
