@@ -91,7 +91,7 @@ public class RmClientTest {
             try {
                 return doGetRm(resourceId);
             } catch (Exception e) {
-                if(retry >= 2) {
+                if (retry >= 2) {
                     throw e;
                 }
                 LOGGER.warn(" failed, retry times " + retry, e);

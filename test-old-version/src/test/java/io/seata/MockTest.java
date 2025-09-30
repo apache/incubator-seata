@@ -39,8 +39,6 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.TimeoutException;
-
 /**
  * the type MockServerTest
  */
