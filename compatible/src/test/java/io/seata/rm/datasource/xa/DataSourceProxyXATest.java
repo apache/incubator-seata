@@ -17,6 +17,7 @@
 package io.seata.rm.datasource.xa;
 
 import com.alibaba.druid.pool.DruidDataSource;
+import com.alibaba.druid.pool.DruidStatementConnection;
 import com.mysql.jdbc.JDBC4MySQLConnection;
 import com.mysql.jdbc.jdbc2.optional.JDBC4ConnectionWrapper;
 import io.seata.core.context.RootContext;
@@ -66,6 +67,7 @@ public class DataSourceProxyXATest {
 
         DruidDataSource druidDataSource = new DruidDataSource();
         druidDataSource.setDriver(driver);
+        druidDataSource.setUrl("jdbc:mysql:xxx");
         DataSourceProxyXA dataSourceProxyXA = new DataSourceProxyXA(druidDataSource);
         RootContext.unbind();
         Connection connFromDataSourceProxyXA = dataSourceProxyXA.getConnection();
@@ -79,6 +81,9 @@ public class DataSourceProxyXATest {
         Assertions.assertTrue(wrappedConnection instanceof PooledConnection);
 
         Connection wrappedPhysicalConn = ((PooledConnection) wrappedConnection).getConnection();
+        if (wrappedPhysicalConn instanceof DruidStatementConnection) {
+            wrappedPhysicalConn = ((DruidStatementConnection) wrappedPhysicalConn).getConnection();
+        }
         Assertions.assertSame(wrappedPhysicalConn, connection);
 
         XAConnection xaConnection = connectionProxyXA.getWrappedXAConnection();
@@ -101,6 +106,7 @@ public class DataSourceProxyXATest {
 
         DruidDataSource druidDataSource = new DruidDataSource();
         druidDataSource.setDriver(driver);
+        druidDataSource.setUrl("jdbc:mariadb:xxx");
         DataSourceProxyXA dataSourceProxyXA = new DataSourceProxyXA(druidDataSource);
         RootContext.unbind();
         Connection connFromDataSourceProxyXA = dataSourceProxyXA.getConnection();
@@ -115,6 +121,9 @@ public class DataSourceProxyXATest {
         Assertions.assertTrue(wrappedConnection instanceof PooledConnection);
 
         Connection wrappedPhysicalConn = ((PooledConnection) wrappedConnection).getConnection();
+        if (wrappedPhysicalConn instanceof DruidStatementConnection) {
+            wrappedPhysicalConn = ((DruidStatementConnection) wrappedPhysicalConn).getConnection();
+        }
         Assertions.assertSame(wrappedPhysicalConn, connection);
 
         XAConnection xaConnection = connectionProxyXA.getWrappedXAConnection();
