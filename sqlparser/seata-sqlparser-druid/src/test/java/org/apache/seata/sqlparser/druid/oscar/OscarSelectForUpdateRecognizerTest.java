@@ -16,58 +16,45 @@
  */
 package org.apache.seata.sqlparser.druid.oscar;
 
-import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
-import org.apache.seata.sqlparser.ParametersHolder;
 import org.apache.seata.sqlparser.SQLParsingException;
 import org.apache.seata.sqlparser.SQLType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 /**
  * The type Oscar select for update recognizer test.
  */
-public class OscarSelectForUpdateRecognizerTest {
-
-    private static final String DB_TYPE = "oscar";
+public class OscarSelectForUpdateRecognizerTest extends AbstractOscarRecognizerTest {
 
     @Test
     public void testGetSqlType() {
         String sql = "select * from t where id = ? for update";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
+        SQLStatement sqlStatement = getSQLStatement(sql);
 
-        OscarSelectForUpdateRecognizer recognizer = new OscarSelectForUpdateRecognizer(sql, asts.get(0));
+        OscarSelectForUpdateRecognizer recognizer = new OscarSelectForUpdateRecognizer(sql, sqlStatement);
         Assertions.assertEquals(recognizer.getSQLType(), SQLType.SELECT_FOR_UPDATE);
     }
 
     @Test
     public void testGetWhereCondition_0() {
         String sql = "select * from t for update";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
+        SQLStatement sqlStatement = getSQLStatement(sql);
 
-        OscarSelectForUpdateRecognizer recognizer = new OscarSelectForUpdateRecognizer(sql, asts.get(0));
-        String whereCondition = recognizer.getWhereCondition(
-                new ParametersHolder() {
-                    @Override
-                    public Map<Integer, ArrayList<Object>> getParameters() {
-                        return null;
-                    }
-                },
-                new ArrayList<>());
+        OscarSelectForUpdateRecognizer recognizer = new OscarSelectForUpdateRecognizer(sql, sqlStatement);
+        String whereCondition = recognizer.getWhereCondition(() -> null, new ArrayList<>());
         Assertions.assertEquals("", whereCondition);
     }
 
     @Test
     public void testGetWhereCondition_1() {
         String sql = "select * from t for update";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
+        SQLStatement sqlStatement = getSQLStatement(sql);
 
-        OscarSelectForUpdateRecognizer recognizer = new OscarSelectForUpdateRecognizer(sql, asts.get(0));
+        OscarSelectForUpdateRecognizer recognizer = new OscarSelectForUpdateRecognizer(sql, sqlStatement);
         String whereCondition = recognizer.getWhereCondition();
 
         Assertions.assertEquals("", whereCondition);
@@ -75,8 +62,7 @@ public class OscarSelectForUpdateRecognizerTest {
         // test for select was null
         Assertions.assertThrows(SQLParsingException.class, () -> {
             String s = "select * from t for update";
-            List<SQLStatement> sqlStatements = SQLUtils.parseStatements(s, DB_TYPE);
-            SQLSelectStatement selectAst = (SQLSelectStatement) sqlStatements.get(0);
+            SQLSelectStatement selectAst = (SQLSelectStatement) getSQLStatement(s);
             selectAst.setSelect(null);
             new OscarSelectForUpdateRecognizer(s, selectAst).getWhereCondition();
         });
@@ -84,8 +70,7 @@ public class OscarSelectForUpdateRecognizerTest {
         // test for query was null
         Assertions.assertThrows(SQLParsingException.class, () -> {
             String s = "select * from t";
-            List<SQLStatement> sqlStatements = SQLUtils.parseStatements(s, DB_TYPE);
-            SQLSelectStatement selectAst = (SQLSelectStatement) sqlStatements.get(0);
+            SQLSelectStatement selectAst = (SQLSelectStatement) getSQLStatement(s);
             selectAst.getSelect().setQuery(null);
             new OscarSelectForUpdateRecognizer(s, selectAst).getWhereCondition();
         });
@@ -94,18 +79,18 @@ public class OscarSelectForUpdateRecognizerTest {
     @Test
     public void testGetTableAlias() {
         String sql = "select * from t where id = ? for update";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
+        SQLStatement sqlStatement = getSQLStatement(sql);
 
-        OscarSelectForUpdateRecognizer recognizer = new OscarSelectForUpdateRecognizer(sql, asts.get(0));
+        OscarSelectForUpdateRecognizer recognizer = new OscarSelectForUpdateRecognizer(sql, sqlStatement);
         Assertions.assertNull(recognizer.getTableAlias());
     }
 
     @Test
     public void testGetTableName() {
         String sql = "select * from t where id = ? for update";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
+        SQLStatement sqlStatement = getSQLStatement(sql);
 
-        OscarSelectForUpdateRecognizer recognizer = new OscarSelectForUpdateRecognizer(sql, asts.get(0));
+        OscarSelectForUpdateRecognizer recognizer = new OscarSelectForUpdateRecognizer(sql, sqlStatement);
         Assertions.assertEquals(recognizer.getTableName(), "t");
     }
 }

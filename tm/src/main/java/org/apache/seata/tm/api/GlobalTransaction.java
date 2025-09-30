@@ -21,130 +21,161 @@ import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.tm.api.transaction.SuspendedResourcesHolder;
 
 /**
- * Global transaction.
+ * Global transaction interface for managing distributed transactions in Seata.
  *
+ * <p>Provides complete lifecycle management for global transactions including
+ * begin, commit, rollback, suspend, and resume operations.</p>
+ *
+ * <p><b>Transaction Roles:</b></p>
+ * <ul>
+ *   <li><b>Launcher</b>: Can control transaction lifecycle (begin, commit, rollback)</li>
+ *   <li><b>Participant</b>: Can only participate (register branches, query status)</li>
+ * </ul>
+ *
+ * <p><b>Basic Usage:</b></p>
+ * <pre>{@code
+ * GlobalTransaction tx = GlobalTransactionContext.createNew();
+ * try {
+ *     tx.begin(30000, "order-service");
+ *     // Execute business logic
+ *     tx.commit();
+ * } catch (Exception e) {
+ *     tx.rollback();
+ *     throw e;
+ * }
+ * }</pre>
+ *
+ * @author Seata Team
+ * @see GlobalTransactionContext
+ * @see DefaultGlobalTransaction
+ * @since 1.0.0
  */
 public interface GlobalTransaction extends BaseTransaction {
 
     /**
-     * Begin a new global transaction with default timeout and name.
+     * Begins a new global transaction with default timeout (60s) and name ("default").
      *
-     * @throws TransactionException Any exception that fails this will be wrapped with TransactionException and thrown
-     * out.
+     * <p>Launcher role: Creates new transaction with TC server<br>
+     * Participant role: Ignores the operation (already in transaction)</p>
+     *
+     * @throws TransactionException if transaction cannot be started
+     * @throws IllegalStateException if transaction already exists in current thread
      */
     void begin() throws TransactionException;
 
     /**
-     * Begin a new global transaction with given timeout and default name.
+     * Begins a new global transaction with specified timeout and default name.
      *
-     * @param timeout Global transaction timeout in MILLISECONDS
-     * @throws TransactionException Any exception that fails this will be wrapped with TransactionException and thrown
-     * out.
+     * @param timeout transaction timeout in milliseconds (recommended: 1000-300000ms)
+     * @throws TransactionException if transaction cannot be started
+     * @throws IllegalArgumentException if timeout is not positive
      */
     void begin(int timeout) throws TransactionException;
 
     /**
-     * Begin a new global transaction with given timeout and given name.
+     * Begins a new global transaction with specified timeout and name.
      *
-     * @param timeout Given timeout in MILLISECONDS.
-     * @param name    Given name.
-     * @throws TransactionException Any exception that fails this will be wrapped with TransactionException and thrown
-     * out.
+     * @param timeout transaction timeout in milliseconds
+     * @param name transaction name for identification (recommended format: "service-operation")
+     * @throws TransactionException if transaction cannot be started
+     * @throws IllegalArgumentException if timeout is not positive or name is null/empty
      */
     void begin(int timeout, String name) throws TransactionException;
 
     /**
-     * Commit the global transaction.
+     * Commits the global transaction using two-phase commit protocol.
      *
-     * @throws TransactionException Any exception that fails this will be wrapped with TransactionException and thrown
-     * out.
+     * <p>Only Launcher role can execute commit. Participant role ignores this operation.</p>
+     * <p>Includes automatic retry mechanism for network failures.</p>
+     *
+     * @throws TransactionException if commit fails after all retry attempts
+     * @throws IllegalStateException if XID is null or invalid state
      */
     void commit() throws TransactionException;
 
     /**
-     * Rollback the global transaction.
+     * Rolls back the global transaction.
      *
-     * @throws TransactionException Any exception that fails this will be wrapped with TransactionException and thrown
-     * out.
+     * <p>Only Launcher role can execute rollback. Uses different strategies based on transaction mode:
+     * AT (undo logs), TCC (cancel), SAGA (compensation), XA (rollback).</p>
+     *
+     * @throws TransactionException if rollback fails
+     * @throws IllegalStateException if XID is null or invalid state
      */
     void rollback() throws TransactionException;
 
     /**
-     * Suspend the global transaction.
+     * Suspends the transaction without cleaning context (can be resumed).
      *
-     * @return the SuspendedResourcesHolder which holds the suspend resources
-     * @throws TransactionException Any exception that fails this will be wrapped with TransactionException and thrown
-     * @see SuspendedResourcesHolder
+     * @return SuspendedResourcesHolder for resume, or null if no transaction
+     * @throws TransactionException if suspension fails
      */
     SuspendedResourcesHolder suspend() throws TransactionException;
 
     /**
-     * Suspend the global transaction.
+     * Suspends the transaction with optional context cleanup.
      *
-     * @param clean the clean if true, clean the transaction context. otherwise,suspend only
-     * @return the SuspendedResourcesHolder which holds the suspend resources
-     * @throws TransactionException Any exception that fails this will be wrapped with TransactionException and thrown
-     * @see SuspendedResourcesHolder
+     * @param clean if true, performs cleanup (cannot resume); if false, allows resume
+     * @return SuspendedResourcesHolder for resume (if clean=false), null otherwise
+     * @throws TransactionException if suspension fails
      */
     SuspendedResourcesHolder suspend(boolean clean) throws TransactionException;
 
     /**
-     * Resume the global transaction.
+     * Resumes a previously suspended transaction.
      *
-     * @param suspendedResourcesHolder the suspended resources to resume
-     * @throws TransactionException Any exception that fails this will be wrapped with TransactionException and thrown
-     * out.
-     * @see SuspendedResourcesHolder
+     * @param suspendedResourcesHolder holder containing suspended transaction context
+     * @throws TransactionException if resume fails
+     * @throws IllegalArgumentException if holder is null
+     * @throws IllegalStateException if current thread already has transaction
      */
     void resume(SuspendedResourcesHolder suspendedResourcesHolder) throws TransactionException;
 
     /**
-     * Ask TC for current status of the corresponding global transaction.
+     * Queries current transaction status from TC server (remote call).
      *
-     * @return Status of the corresponding global transaction.
-     * @throws TransactionException Any exception that fails this will be wrapped with TransactionException and thrown
-     * out.
-     * @see GlobalStatus
+     * @return current GlobalStatus from TC server
+     * @throws TransactionException if status query fails
+     * @throws IllegalStateException if XID is null
      */
     GlobalStatus getStatus() throws TransactionException;
 
     /**
-     * Get XID.
+     * Gets the global transaction identifier (XID).
      *
-     * @return XID. xid
+     * <p>Format: "IP:PORT:TRANSACTION_ID" (e.g., "192.168.1.100:8091:2012052108:40001")</p>
+     *
+     * @return XID string, or null if transaction hasn't begun
      */
     String getXid();
 
     /**
-     * report the global transaction status.
+     * Reports transaction status to TC server (for manual status management).
      *
-     * @param globalStatus global status.
-     *
-     * @throws TransactionException Any exception that fails this will be wrapped with TransactionException and thrown
-     * out.
+     * @param globalStatus status to report
+     * @throws TransactionException if reporting fails
+     * @throws IllegalArgumentException if globalStatus is null
      */
     void globalReport(GlobalStatus globalStatus) throws TransactionException;
 
     /**
-     * local status of the global transaction.
+     * Gets locally cached transaction status (fast, no network call).
      *
-     * @return Status of the corresponding global transaction.
-     * @see GlobalStatus
+     * @return locally cached GlobalStatus
      */
     GlobalStatus getLocalStatus();
 
     /**
-     * get global transaction role.
+     * Gets the transaction role (Launcher or Participant).
      *
-     * @return global transaction Role.
-     * @see GlobalTransactionRole
+     * @return GlobalTransactionRole of this instance
      */
     GlobalTransactionRole getGlobalTransactionRole();
 
     /**
-     * get create time
+     * Gets the creation timestamp of this transaction instance.
      *
-     * @return create time
+     * @return creation time in milliseconds since epoch
      */
     long getCreateTime();
 }

@@ -19,6 +19,7 @@ package org.apache.seata.rm.datasource.exec;
 import com.alibaba.druid.mock.MockStatement;
 import com.alibaba.druid.mock.MockStatementBase;
 import com.alibaba.druid.pool.DruidDataSource;
+import com.alibaba.druid.pool.DruidStatementConnection;
 import com.google.common.collect.Lists;
 import org.apache.seata.common.exception.NotSupportYetException;
 import org.apache.seata.rm.datasource.ConnectionProxy;
@@ -37,6 +38,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
@@ -117,14 +119,20 @@ public class MultiExecutorTest {
             Field field = dataSourceProxy.getClass().getDeclaredField("dbType");
             field.setAccessible(true);
             field.set(dataSourceProxy, "mysql");
-            connectionProxy = new ConnectionProxy(
-                    dataSourceProxy, dataSource.getConnection().getConnection());
-            MockStatementBase mockStatement =
-                    new MockStatement(dataSource.getConnection().getConnection());
+            connectionProxy = new ConnectionProxy(dataSourceProxy, getPhysicsConnection(dataSource));
+            MockStatementBase mockStatement = new MockStatement(getPhysicsConnection(dataSource));
             statementProxy = new StatementProxy(connectionProxy, mockStatement);
         } catch (Exception e) {
             throw new RuntimeException("init failed");
         }
+    }
+
+    private static Connection getPhysicsConnection(DruidDataSource dataSource) throws SQLException {
+        Connection connection = dataSource.getConnection().getConnection();
+        if (connection instanceof DruidStatementConnection) {
+            return ((DruidStatementConnection) connection).getConnection();
+        }
+        return connection;
     }
 
     @Test

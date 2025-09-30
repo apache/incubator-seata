@@ -22,7 +22,7 @@ import org.apache.seata.tm.api.TransactionalExecutor;
  * Propagation level of global transactions.
  *
  * @see org.apache.seata.spring.annotation.GlobalTransactional#propagation() // TM annotation
- * @see org.apache.seata.spring.annotation.GlobalTransactionalInterceptor#invoke(MethodInvocation) // the interceptor of TM
+ * @see org.apache.seata.integration.tx.api.interceptor.handler.GlobalTransactionalInterceptorHandler // the interceptor of TM
  * @see org.apache.seata.tm.api.TransactionalTemplate#execute(TransactionalExecutor) // the transaction template of TM
  */
 public enum Propagation {

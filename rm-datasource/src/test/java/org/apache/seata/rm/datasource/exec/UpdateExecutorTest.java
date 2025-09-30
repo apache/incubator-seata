@@ -19,6 +19,7 @@ package org.apache.seata.rm.datasource.exec;
 import com.alibaba.druid.mock.MockStatement;
 import com.alibaba.druid.mock.MockStatementBase;
 import com.alibaba.druid.pool.DruidDataSource;
+import com.alibaba.druid.pool.DruidStatementConnection;
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.util.JdbcConstants;
@@ -35,6 +36,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
@@ -158,10 +160,8 @@ public class UpdateExecutorTest {
             Field field = dataSourceProxy.getClass().getDeclaredField("dbType");
             field.setAccessible(true);
             field.set(dataSourceProxy, "mysql");
-            ConnectionProxy connectionProxy = new ConnectionProxy(
-                    dataSourceProxy, dataSource.getConnection().getConnection());
-            MockStatementBase mockStatement =
-                    new MockStatement(dataSource.getConnection().getConnection());
+            ConnectionProxy connectionProxy = new ConnectionProxy(dataSourceProxy, getPhysicsConnection(dataSource));
+            MockStatementBase mockStatement = new MockStatement(getPhysicsConnection(dataSource));
             statementProxy = new StatementProxy(connectionProxy, mockStatement);
         } catch (Exception e) {
             throw new RuntimeException("init failed");
@@ -175,6 +175,14 @@ public class UpdateExecutorTest {
                     return null;
                 },
                 recognizer);
+    }
+
+    private static Connection getPhysicsConnection(DruidDataSource dataSource) throws SQLException {
+        Connection connection = dataSource.getConnection().getConnection();
+        if (connection instanceof DruidStatementConnection) {
+            return ((DruidStatementConnection) connection).getConnection();
+        }
+        return connection;
     }
 
     @Test
