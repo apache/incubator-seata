@@ -30,7 +30,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * The type Enhanced service loader test.
  */
 public class EnhancedServiceLoaderTest {
-
     /**
      * Test load by class and class loader.
      */
@@ -73,6 +72,8 @@ public class EnhancedServiceLoaderTest {
      */
     @Test
     public void testLoadByClassAndClassLoaderAndActivateName() {
+        EnhancedServiceLoader.unloadAll();
+
         Hello englishHello = EnhancedServiceLoader.load(
                 Hello.class, "EnglishHello", EnhancedServiceLoaderTest.class.getClassLoader());
         assertThat(englishHello.say()).isEqualTo("hello!");
