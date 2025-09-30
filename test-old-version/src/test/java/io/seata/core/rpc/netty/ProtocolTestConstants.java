@@ -23,5 +23,4 @@ public class ProtocolTestConstants {
     public static final String APPLICATION_ID = "mock_tx_app_id_061";
     public static final String SERVICE_GROUP = "mock_tx_group";
     public static final int MOCK_SERVER_PORT = 8077;
-    public static final String MOCK_SERVER_ADDRESS = "0.0.0.0:" + MOCK_SERVER_PORT;
 }
