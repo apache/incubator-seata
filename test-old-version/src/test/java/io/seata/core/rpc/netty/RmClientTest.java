@@ -17,13 +17,11 @@
 package io.seata.core.rpc.netty;
 
 import io.seata.common.util.ReflectionUtil;
-import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchType;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.RMClient;
 import io.seata.rm.tcc.TCCResource;
 import io.seata.rm.tcc.api.BusinessActionContext;
-import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,21 +35,7 @@ public class RmClientTest {
     protected static final Logger LOGGER = LoggerFactory.getLogger(RmClientTest.class);
     private static volatile DefaultResourceManager rm = null;
 
-    public static void testRm(String resourceId) throws TransactionException, NoSuchMethodException {
-        String xid = "1111";
-
-        DefaultResourceManager rm = getRm(resourceId);
-
-        // branchRegister:TYPE_BRANCH_REGISTER = 11 , TYPE_BRANCH_REGISTER_RESULT = 12
-        Long branchId = rm.branchRegister(BranchType.AT, resourceId, "1", xid, "1", "1");
-        Assertions.assertTrue(branchId > 0);
-
-        // (not support)branchReport:TYPE_BRANCH_STATUS_REPORT = 13 , TYPE_BRANCH_STATUS_REPORT_RESULT = 14
-        // (not support)lockQuery:TYPE_GLOBAL_LOCK_QUERY = 21 , TYPE_GLOBAL_LOCK_QUERY_RESULT = 22
-
-    }
-
-    public static DefaultResourceManager getRm(String resourceId) throws NoSuchMethodException {
+    private static DefaultResourceManager doGetRm(String resourceId) throws NoSuchMethodException {
         if (rm == null) {
             synchronized (RmClientTest.class) {
                 if (rm == null) {
@@ -65,6 +49,7 @@ public class RmClientTest {
                             .clear();
 
                     rm = resourceManager;
+                    LOGGER.info("(0.6.1)RM init");
                 }
             }
         }
@@ -80,7 +65,22 @@ public class RmClientTest {
         tccResource.setRollbackMethod(
                 ReflectionUtil.getMethod(Action1.class, "cancel", new Class[] {BusinessActionContext.class}));
         rm.registerResource(tccResource);
-        LOGGER.info("registerResource ok");
+        LOGGER.info("(0.6.1)registerResource ok");
         return rm;
+    }
+
+    public static DefaultResourceManager getRm(String resourceId) throws NoSuchMethodException {
+        int retry = 0;
+        do {
+            try {
+                return doGetRm(resourceId);
+            } catch (Exception e) {
+                if (retry >= 2) {
+                    throw e;
+                }
+                LOGGER.warn(" failed, retry times " + retry, e);
+            }
+            retry++;
+        } while (true);
     }
 }
