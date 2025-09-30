@@ -103,7 +103,8 @@ public class MockTest {
     @Test
     @Order(6)
     public void testRm() throws Exception {
-        RmClientTest.testRm("testRM01");
+        DefaultResourceManager rm = RmClientTest.getRm(RESOURCE_ID);
+        Assertions.assertNotNull(rm);
     }
 
     private String doTestCommit(int times) throws TransactionException, NoSuchMethodException {
