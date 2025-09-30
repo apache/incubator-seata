@@ -51,7 +51,7 @@ public class RmClientTest {
 
     }
 
-    public static DefaultResourceManager getRm(String resourceId) throws NoSuchMethodException {
+    private static DefaultResourceManager doGetRm(String resourceId) throws NoSuchMethodException {
         if (rm == null) {
             synchronized (RmClientTest.class) {
                 if (rm == null) {
@@ -65,6 +65,7 @@ public class RmClientTest {
                             .clear();
 
                     rm = resourceManager;
+                    LOGGER.info("(0.6.1)RM init");
                 }
             }
         }
@@ -82,5 +83,20 @@ public class RmClientTest {
         rm.registerResource(tccResource);
         LOGGER.info("(0.6.1)registerResource ok");
         return rm;
+    }
+
+    public static DefaultResourceManager getRm(String resourceId) throws NoSuchMethodException {
+        int retry = 0;
+        do {
+            try {
+                return doGetRm(resourceId);
+            } catch (Exception e) {
+                if(retry >= 2) {
+                    throw e;
+                }
+                LOGGER.warn(" failed, retry times " + retry, e);
+            }
+            retry++;
+        } while (true);
     }
 }
