@@ -221,7 +221,7 @@ Apache-2.0 licenses
     com.alibaba.nacos:nacos-api 1.4.6 Apache-2.0
     com.alibaba.nacos:nacos-client 1.4.6 Apache-2.0
     com.alibaba.nacos:nacos-common 1.4.6 Apache-2.0
-    com.alibaba:druid 1.2.20 Apache-2.0
+    com.alibaba:druid 1.2.25 Apache-2.0
     com.alibaba:fastjson 1.2.83 Apache-2.0
     com.alibaba.fastjson2:fastjson2 2.0.52 Apache-2.0
     com.alipay.sofa.common:sofa-common-tools 1.0.12 Apache-2.0

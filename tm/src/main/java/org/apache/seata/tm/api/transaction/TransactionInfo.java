@@ -22,20 +22,85 @@ import org.apache.seata.common.util.CollectionUtils;
 import java.io.Serializable;
 import java.util.Set;
 
+/**
+ * Transaction configuration and metadata container for global transactions.
+ *
+ * <p>Encapsulates all configuration parameters that control how a global transaction
+ * should be executed within Seata framework.</p>
+ *
+ * <p><b>Configuration Categories:</b></p>
+ * <ul>
+ *   <li><b>Timing</b>: Timeout settings and duration limits</li>
+ *   <li><b>Identification</b>: Transaction naming for monitoring</li>
+ *   <li><b>Propagation</b>: How to handle existing transaction contexts</li>
+ *   <li><b>Rollback Rules</b>: Exception-based rollback decision logic</li>
+ *   <li><b>Lock Management</b>: Global lock retry and strategy configuration</li>
+ * </ul>
+ *
+ * <p><b>Usage Example:</b></p>
+ * <pre>{@code
+ * TransactionInfo info = TransactionInfo.newBuilder()
+ *     .setTimeOut(30000)
+ *     .setName("order-processing")
+ *     .setPropagation(Propagation.REQUIRED)
+ *     .addRollbackRule(BusinessException.class)
+ *     .setLockRetryTimes(5)
+ *     .build();
+ * }</pre>
+ *
+ * @author Seata Team
+ * @see org.apache.seata.tm.api.TransactionalExecutor#getTransactionInfo()
+ * @see Propagation
+ * @since 1.0.0
+ */
 public final class TransactionInfo implements Serializable {
 
+    /**
+     * Transaction timeout in milliseconds.
+     * Specifies maximum duration for transaction execution.
+     * Default: 60000ms, Recommended range: 1000-300000ms
+     */
     private int timeOut;
 
+    /**
+     * Transaction name for identification and monitoring.
+     * Used for log correlation, debugging, and performance analysis.
+     * Best practices: descriptive names like "order-create", keep under 64 chars
+     */
     private String name;
 
+    /**
+     * Set of rollback rules determining exception-based rollback behavior.
+     * Contains RollbackRule and NoRollbackRule instances that define
+     * which exceptions should or should not trigger transaction rollback.
+     */
     private Set<RollbackRule> rollbackRules;
 
+    /**
+     * Transaction propagation behavior.
+     * Determines how this transaction interacts with existing transaction contexts.
+     * Default: REQUIRED (use existing or create new)
+     */
     private Propagation propagation;
 
+    /**
+     * Interval between global lock acquisition retry attempts in milliseconds.
+     * Default: 100ms, Range: 10-5000ms
+     */
     private int lockRetryInterval;
 
+    /**
+     * Maximum number of global lock acquisition retry attempts.
+     * Default: 30, Range: 1-100
+     * Total wait time = lockRetryTimes × lockRetryInterval
+     */
     private int lockRetryTimes;
 
+    /**
+     * Global lock strategy mode.
+     * OPTIMISTIC: acquire locks during commit (better performance, late conflicts)
+     * PESSIMISTIC: acquire locks during execution (early detection, potential deadlocks)
+     */
     private LockStrategyMode lockStrategyMode;
 
     public int getTimeOut() {

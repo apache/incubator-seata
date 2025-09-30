@@ -14,13 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.core.rpc.netty;
+package org.apache.seata.sqlparser.druid.oscar;
+
+import org.apache.seata.sqlparser.druid.AbstractRecognizerTest;
+import org.apache.seata.sqlparser.util.JdbcConstants;
 
 /**
- * Mock Constants
+ * Base Test for recognizer of Oscar
+ *
  **/
-public class ProtocolTestConstants {
-    public static final String APPLICATION_ID = "mock_tx_app_id_061";
-    public static final String SERVICE_GROUP = "mock_tx_group";
-    public static final int MOCK_SERVER_PORT = 8077;
+public class AbstractOscarRecognizerTest extends AbstractRecognizerTest {
+    @Override
+    public String getDbType() {
+        return JdbcConstants.OSCAR;
+    }
 }
