@@ -114,8 +114,9 @@
         <h2.version>1.4.181</h2.version>
         <mariadb.version>2.7.2</mariadb.version>
         <kingbase.version>9.0.0</kingbase.version>
+        <oscar.version>4.1.152</oscar.version>
         <!-- db connection pool -->
-        <druid.version>1.2.20</druid.version>
+        <druid.version>1.2.25</druid.version>
         <commons-dbcp2.version>2.9.0</commons-dbcp2.version>
         <hikari.version>3.4.3</hikari.version>
         <caffeine.version>2.9.3</caffeine.version>
@@ -923,6 +924,11 @@
                 <groupId>cn.com.kingbase</groupId>
                 <artifactId>kingbase8</artifactId>
                 <version>${kingbase.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.shentongdata</groupId>
+                <artifactId>oscarJDBC8</artifactId>
+                <version>${oscar.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
