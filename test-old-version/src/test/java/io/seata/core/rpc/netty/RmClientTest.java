@@ -37,20 +37,6 @@ public class RmClientTest {
     protected static final Logger LOGGER = LoggerFactory.getLogger(RmClientTest.class);
     private static volatile DefaultResourceManager rm = null;
 
-    public static void testRm(String resourceId) throws TransactionException, NoSuchMethodException {
-        String xid = "1111";
-
-        DefaultResourceManager rm = getRm(resourceId);
-
-        // branchRegister:TYPE_BRANCH_REGISTER = 11 , TYPE_BRANCH_REGISTER_RESULT = 12
-        Long branchId = rm.branchRegister(BranchType.AT, resourceId, "1", xid, "1", "1");
-        Assertions.assertTrue(branchId > 0);
-
-        // (not support)branchReport:TYPE_BRANCH_STATUS_REPORT = 13 , TYPE_BRANCH_STATUS_REPORT_RESULT = 14
-        // (not support)lockQuery:TYPE_GLOBAL_LOCK_QUERY = 21 , TYPE_GLOBAL_LOCK_QUERY_RESULT = 22
-
-    }
-
     private static DefaultResourceManager doGetRm(String resourceId) throws NoSuchMethodException {
         if (rm == null) {
             synchronized (RmClientTest.class) {
