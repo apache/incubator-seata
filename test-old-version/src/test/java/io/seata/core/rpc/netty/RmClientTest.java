@@ -17,13 +17,11 @@
 package io.seata.core.rpc.netty;
 
 import io.seata.common.util.ReflectionUtil;
-import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchType;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.RMClient;
 import io.seata.rm.tcc.TCCResource;
 import io.seata.rm.tcc.api.BusinessActionContext;
-import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
