@@ -116,7 +116,10 @@ public class MockTest {
                 DefaultResourceManager rm = RmClientTest.getRm(RESOURCE_ID);
 
                 String xid = tm.begin(
-                        ProtocolTestConstants.APPLICATION_ID, ProtocolTestConstants.SERVICE_GROUP, "test-commit", 60000);
+                        ProtocolTestConstants.APPLICATION_ID,
+                        ProtocolTestConstants.SERVICE_GROUP,
+                        "test-commit",
+                        60000);
                 logger.info("doTestCommit(0.6.1) xid:{}", xid);
                 MockCoordinator.getInstance().setExpectedRetry(xid, times);
                 Long branchId = rm.branchRegister(BranchType.TCC, RESOURCE_ID, "1", xid, "{\"mock\":\"mock\"}", "1");
@@ -126,7 +129,7 @@ public class MockTest {
                 logger.info("branch commit(0.6.1) ok, branchId=" + branchId + "xid=" + xid);
                 return xid;
             } catch (TransactionException e) {
-                if(retry >= 2) {
+                if (retry >= 2) {
                     throw e;
                 }
                 LOGGER.warn("doTestCommit failed, retry times " + retry, e);
@@ -143,7 +146,10 @@ public class MockTest {
                 DefaultResourceManager rm = RmClientTest.getRm(RESOURCE_ID);
 
                 String xid = tm.begin(
-                        ProtocolTestConstants.APPLICATION_ID, ProtocolTestConstants.SERVICE_GROUP, "test-rollback", 60000);
+                        ProtocolTestConstants.APPLICATION_ID,
+                        ProtocolTestConstants.SERVICE_GROUP,
+                        "test-rollback",
+                        60000);
                 logger.info("doTestRollback(0.6.1) xid:{}", xid);
                 MockCoordinator.getInstance().setExpectedRetry(xid, times);
                 Long branchId = rm.branchRegister(BranchType.TCC, RESOURCE_ID, "1", xid, "{\"mock\":\"mock\"}", "1");
@@ -153,7 +159,7 @@ public class MockTest {
                 logger.info("branch rollback(0.6.1) ok, branchId=" + branchId + "xid=" + xid);
                 return xid;
             } catch (TransactionException e) {
-                if(retry >= 2) {
+                if (retry >= 2) {
                     throw e;
                 }
                 LOGGER.warn("doTestRollback failed, retry times " + retry, e);
