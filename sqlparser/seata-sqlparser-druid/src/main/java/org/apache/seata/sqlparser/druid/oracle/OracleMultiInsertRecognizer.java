@@ -71,6 +71,12 @@ public class OracleMultiInsertRecognizer extends BaseOracleRecognizer implements
         List<String> firstColumns = null;
 
         for (OracleMultiInsertStatement.Entry entry : ast.getEntries()) {
+            // 检查是否包含条件插入，暂时不支持
+            if (entry instanceof OracleMultiInsertStatement.ConditionalInsertClause) {
+                throw new NotSupportYetException(
+                        "Oracle Multi Insert with conditional clauses (WHEN...THEN) is not supported yet. " +
+                                "SQL: " + getOriginalSQL());
+            }
             if (entry instanceof OracleMultiInsertStatement.InsertIntoClause) {
                 OracleMultiInsertStatement.InsertIntoClause insertClause =
                         (OracleMultiInsertStatement.InsertIntoClause) entry;
@@ -135,6 +141,9 @@ public class OracleMultiInsertRecognizer extends BaseOracleRecognizer implements
         for (SQLExpr expr : insertClause.getColumns()) {
             if (expr instanceof SQLIdentifierExpr) {
                 columns.add(((SQLIdentifierExpr) expr).getName());
+            } else {
+                // 处理非标准列名的情况
+                wrapSQLParsingException(expr);
             }
         }
         return columns;

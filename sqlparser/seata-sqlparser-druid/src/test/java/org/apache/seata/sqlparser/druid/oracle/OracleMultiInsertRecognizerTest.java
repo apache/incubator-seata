@@ -384,4 +384,22 @@ public class OracleMultiInsertRecognizerTest {
             Assertions.assertTrue(row.get(0) instanceof Integer);
         }
     }
+
+    @Test
+    public void testConditionalInsertNotSupported() {
+        // 测试带条件的插入语句
+        String sql = "INSERT ALL " +
+                "INTO users (id, name) VALUES (1, 'Tom') " +
+                "WHEN salary > 1000 THEN INTO employees (id, name) VALUES (2, 'Jerry') " +
+                "SELECT 1 FROM DUAL";
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
+
+        // 应该抛出 NotSupportYetException
+        NotSupportYetException exception = Assertions.assertThrows(
+                NotSupportYetException.class,
+                () -> new OracleMultiInsertRecognizer(sql, asts.get(0)));
+
+        Assertions.assertTrue(exception.getMessage().contains("conditional clauses"));
+        Assertions.assertTrue(exception.getMessage().contains("WHEN...THEN"));
+    }
 }
