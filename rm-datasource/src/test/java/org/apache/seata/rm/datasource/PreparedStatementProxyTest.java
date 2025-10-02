@@ -21,6 +21,7 @@ import com.alibaba.druid.mock.MockNClob;
 import com.alibaba.druid.mock.MockRef;
 import com.alibaba.druid.mock.MockSQLXML;
 import com.alibaba.druid.pool.DruidDataSource;
+import com.alibaba.druid.pool.DruidStatementConnection;
 import com.google.common.collect.Lists;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.rm.datasource.mock.MockBlob;
@@ -43,6 +44,7 @@ import java.io.CharArrayReader;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.sql.Connection;
 import java.sql.Date;
 import java.sql.JDBCType;
 import java.sql.PreparedStatement;
@@ -123,13 +125,17 @@ public class PreparedStatementProxyTest {
         dataSource.setDriver(mockDriver);
         DataSourceProxy dataSourceProxy = DataSourceProxyTest.getDataSourceProxy(dataSource);
 
-        ConnectionProxy connectionProxy =
-                new ConnectionProxy(dataSourceProxy, dataSource.getConnection().getConnection());
+        ConnectionProxy connectionProxy = new ConnectionProxy(dataSourceProxy, getPhysicsConnection(dataSource));
 
         String sql = "update prepared_statement_proxy set name = ?";
 
-        PreparedStatement preparedStatement = mockDriver.createSeataMockPreparedStatement(
-                (MockConnection) connectionProxy.getTargetConnection(), sql);
+        Connection targetConnection = connectionProxy.getTargetConnection();
+        if (targetConnection instanceof DruidStatementConnection) {
+            targetConnection = ((DruidStatementConnection) targetConnection).getConnection();
+        }
+
+        PreparedStatement preparedStatement =
+                mockDriver.createSeataMockPreparedStatement((MockConnection) targetConnection, sql);
 
         preparedStatementProxy = new PreparedStatementProxy(connectionProxy, preparedStatement, sql);
         unusedConstructorPreparedStatementProxy =
@@ -140,6 +146,14 @@ public class PreparedStatementProxyTest {
                 SQLOperateRecognizerHolderFactory.class.getClassLoader());
         DruidDelegatingSQLRecognizerFactory recognizerFactory = (DruidDelegatingSQLRecognizerFactory)
                 EnhancedServiceLoader.load(SQLRecognizerFactory.class, SqlParserType.SQL_PARSER_TYPE_DRUID);
+    }
+
+    private static Connection getPhysicsConnection(DruidDataSource dataSource) throws SQLException {
+        Connection connection = dataSource.getConnection().getConnection();
+        if (connection instanceof DruidStatementConnection) {
+            return ((DruidStatementConnection) connection).getConnection();
+        }
+        return connection;
     }
 
     @Test

@@ -70,7 +70,7 @@ public class SeataMQProducerSendTest {
 
     @AfterAll
     public static void after() {
-        MockServer.close();
+        //  MockServer.close();
         ConfigurationTestHelper.removeConfig(ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL);
         producer.shutdown();
     }
