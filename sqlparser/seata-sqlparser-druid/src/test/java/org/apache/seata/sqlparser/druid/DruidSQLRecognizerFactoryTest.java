@@ -208,4 +208,21 @@ public class DruidSQLRecognizerFactoryTest {
         Assertions.assertThrows(
                 NotSupportYetException.class, () -> recognizerFactory.create(sql9, JdbcConstants.KINGBASE));
     }
+
+    @Test
+    public void testInsertFirstNotSupported() {
+        SQLRecognizerFactory recognizerFactory =
+                EnhancedServiceLoader.load(SQLRecognizerFactory.class, SqlParserType.SQL_PARSER_TYPE_DRUID);
+        // Test that INSERT FIRST syntax should be rejected at the Factory level
+        String sql = "INSERT FIRST " +
+                "WHEN salary > 1000 THEN INTO high_earners (id, name, salary) VALUES (1, 'John', 2000) " +
+                "WHEN salary <= 1000 THEN INTO low_earners (id, name, salary) VALUES (1, 'John', 800) " +
+                "SELECT 1 FROM DUAL";
+
+        NotSupportYetException exception = Assertions.assertThrows(
+                NotSupportYetException.class,
+                () -> recognizerFactory.create(sql, JdbcConstants.ORACLE));
+
+        Assertions.assertTrue(exception.getMessage().contains("INSERT FIRST not supported yet"));
+    }
 }
