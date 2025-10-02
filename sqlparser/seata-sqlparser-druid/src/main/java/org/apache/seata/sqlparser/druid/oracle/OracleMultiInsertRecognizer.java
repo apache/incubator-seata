@@ -60,7 +60,7 @@ public class OracleMultiInsertRecognizer extends BaseOracleRecognizer implements
     }
 
     /**
-     * 验证所有entries都是同一张表，并且列定义一致
+     * Verify that all entries are in the same table and have consistent column definitions.
      */
     private void validateSingleTableConsistency() {
         if (CollectionUtils.isEmpty(ast.getEntries())) {
@@ -71,42 +71,42 @@ public class OracleMultiInsertRecognizer extends BaseOracleRecognizer implements
         List<String> firstColumns = null;
 
         for (OracleMultiInsertStatement.Entry entry : ast.getEntries()) {
-            // 检查是否包含条件插入，暂时不支持
+            // Check whether conditional insertion is included. It is not supported yet.
             if (entry instanceof OracleMultiInsertStatement.ConditionalInsertClause) {
                 throw new NotSupportYetException(
-                        "Oracle Multi Insert with conditional clauses (WHEN...THEN) is not supported yet. " +
-                                "SQL: " + getOriginalSQL());
+                        "Oracle Multi Insert with conditional clauses (WHEN...THEN) is not supported yet. " + "SQL: "
+                                + getOriginalSQL());
             }
             if (entry instanceof OracleMultiInsertStatement.InsertIntoClause) {
                 OracleMultiInsertStatement.InsertIntoClause insertClause =
                         (OracleMultiInsertStatement.InsertIntoClause) entry;
 
-                // 获取当前表名
+                // Get the current table name
                 String currentTableName = getTableNameFromClause(insertClause);
                 if (currentTableName == null) {
                     continue;
                 }
 
-                // 获取当前列信息
+                // Get current column information
                 List<String> currentColumns = getColumnsFromClause(insertClause);
 
                 if (firstTableName == null) {
                     firstTableName = currentTableName;
                     firstColumns = currentColumns;
                 } else {
-                    // 检查表名是否一致
+                    // Check whether the table names are consistent
                     if (!firstTableName.equalsIgnoreCase(currentTableName)) {
                         throw new NotSupportYetException(
-                                "Oracle Multi Insert with different tables is not supported yet. " +
-                                        "Found tables: " + firstTableName + " and " + currentTableName +
-                                        ". SQL: " + getOriginalSQL());
+                                "Oracle Multi Insert with different tables is not supported yet. " + "Found tables: "
+                                        + firstTableName + " and " + currentTableName + ". SQL: "
+                                        + getOriginalSQL());
                     }
 
-                    // 检查列定义是否一致
+                    // Check that column definitions are consistent
                     if (!Objects.equals(firstColumns, currentColumns)) {
                         throw new NotSupportYetException(
-                                "Oracle Multi Insert with different column definitions is not supported yet. " +
-                                        "Table: " + firstTableName + ". SQL: " + getOriginalSQL());
+                                "Oracle Multi Insert with different column definitions is not supported yet. "
+                                        + "Table: " + firstTableName + ". SQL: " + getOriginalSQL());
                     }
                 }
             }
@@ -142,7 +142,7 @@ public class OracleMultiInsertRecognizer extends BaseOracleRecognizer implements
             if (expr instanceof SQLIdentifierExpr) {
                 columns.add(((SQLIdentifierExpr) expr).getName());
             } else {
-                // 处理非标准列名的情况
+                // Handling non-standard column names
                 wrapSQLParsingException(expr);
             }
         }

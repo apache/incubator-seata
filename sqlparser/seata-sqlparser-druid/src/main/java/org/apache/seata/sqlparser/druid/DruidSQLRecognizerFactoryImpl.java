@@ -76,7 +76,7 @@ class DruidSQLRecognizerFactoryImpl implements SQLRecognizerFactory {
                 recognizer = recognizerHolder.getSelectForUpdateRecognizer(sql, sqlStatement);
             } else if (sqlStatement instanceof OracleMultiInsertStatement) {
                 OracleMultiInsertStatement stmt = (OracleMultiInsertStatement) sqlStatement;
-                if (stmt.getOption() == OracleMultiInsertStatement.Option.FIRST){
+                if (stmt.getOption() == OracleMultiInsertStatement.Option.FIRST) {
                     throw new NotSupportYetException("INSERT FIRST not supported yet");
                 }
                 // Use specialized methods to handle Oracle bulk inserts

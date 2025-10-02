@@ -202,126 +202,127 @@ public class OracleMultiInsertRecognizerTest {
 
     @Test
     public void testMultipleTablesInsert() {
-        // 现在这个应该抛出异常，因为涉及不同的表
+        // Now this should throw an exception since different tables are involved
         String sql =
                 "INSERT ALL INTO users (id, name) VALUES (1, 'Tom') INTO orders (id, user_id) VALUES (101, 1) SELECT 1 FROM DUAL";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
 
-        // 应该抛出 NotSupportYetException
+        // should throw NotSupportYetException
         NotSupportYetException exception = Assertions.assertThrows(
-                NotSupportYetException.class,
-                () -> new OracleMultiInsertRecognizer(sql, asts.get(0)));
-        
-        Assertions.assertTrue(exception.getMessage().contains("Oracle Multi Insert with different tables is not supported yet"));
+                NotSupportYetException.class, () -> new OracleMultiInsertRecognizer(sql, asts.get(0)));
+
+        Assertions.assertTrue(
+                exception.getMessage().contains("Oracle Multi Insert with different tables is not supported yet"));
         Assertions.assertTrue(exception.getMessage().contains("users"));
         Assertions.assertTrue(exception.getMessage().contains("orders"));
     }
 
     @Test
     public void testMultipleTablesWithDifferentColumns() {
-        // 测试同表但不同列定义的情况
+        // Testing the same table but different column definitions
         String sql =
                 "INSERT ALL INTO users (id, name) VALUES (1, 'Tom') INTO users (id, name, age) VALUES (2, 'Jerry', 25) SELECT 1 FROM DUAL";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
 
-        // 应该抛出 NotSupportYetException
+        // should throw NotSupportYetException
         NotSupportYetException exception = Assertions.assertThrows(
-                NotSupportYetException.class,
-                () -> new OracleMultiInsertRecognizer(sql, asts.get(0)));
-        
-        Assertions.assertTrue(exception.getMessage().contains("Oracle Multi Insert with different column definitions is not supported yet"));
+                NotSupportYetException.class, () -> new OracleMultiInsertRecognizer(sql, asts.get(0)));
+
+        Assertions.assertTrue(exception
+                .getMessage()
+                .contains("Oracle Multi Insert with different column definitions is not supported yet"));
         Assertions.assertTrue(exception.getMessage().contains("users"));
     }
 
     @Test
     public void testSameTableMultipleInserts() {
-        // 测试同表同列的正常情况（应该成功）
+        // Test the normal situation of the same table and column
         String sql =
                 "INSERT ALL INTO users (id, name) VALUES (1, 'Tom') INTO users (id, name) VALUES (2, 'Jerry') SELECT 1 FROM DUAL";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
 
-        // 这个应该成功，不抛异常
+        // success
         OracleMultiInsertRecognizer recognizer = new OracleMultiInsertRecognizer(sql, asts.get(0));
-        
+
         Assertions.assertEquals("users", recognizer.getTableName());
         Assertions.assertEquals(2, recognizer.getInsertColumns().size());
         Assertions.assertEquals("id", recognizer.getInsertColumns().get(0));
         Assertions.assertEquals("name", recognizer.getInsertColumns().get(1));
-        
+
         List<List<Object>> rows = recognizer.getInsertRows(Collections.emptySet());
         Assertions.assertEquals(2, rows.size());
     }
 
     @Test
     public void testEmptyColumnsConsistency() {
-        // 测试空列定义的一致性
-        String sql =
-                "INSERT ALL INTO users VALUES (1, 'Tom') INTO users VALUES (2, 'Jerry') SELECT 1 FROM DUAL";
+        // Tests the consistency of empty column definitions
+        String sql = "INSERT ALL INTO users VALUES (1, 'Tom') INTO users VALUES (2, 'Jerry') SELECT 1 FROM DUAL";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
 
-        // 这个应该成功，因为两个entry都没有指定列
+        // This should succeed since neither entry specifies a column.
         OracleMultiInsertRecognizer recognizer = new OracleMultiInsertRecognizer(sql, asts.get(0));
-        
+
         Assertions.assertEquals("users", recognizer.getTableName());
         Assertions.assertTrue(recognizer.insertColumnsIsEmpty());
     }
 
     @Test
     public void testMixedColumnDefinitions() {
-        // 测试一个有列定义，一个没有列定义的情况
+        // Test one case with column definition and one case without column definition
         String sql =
                 "INSERT ALL INTO users (id, name) VALUES (1, 'Tom') INTO users VALUES (2, 'Jerry') SELECT 1 FROM DUAL";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
 
-        // 应该抛出异常，因为列定义不一致
+        // An exception should be thrown because the column definitions are inconsistent
         NotSupportYetException exception = Assertions.assertThrows(
-                NotSupportYetException.class,
-                () -> new OracleMultiInsertRecognizer(sql, asts.get(0)));
-        
-        Assertions.assertTrue(exception.getMessage().contains("Oracle Multi Insert with different column definitions is not supported yet"));
+                NotSupportYetException.class, () -> new OracleMultiInsertRecognizer(sql, asts.get(0)));
+
+        Assertions.assertTrue(exception
+                .getMessage()
+                .contains("Oracle Multi Insert with different column definitions is not supported yet"));
     }
 
     @Test
     public void testCaseInsensitiveTableNames() {
-        // 测试表名大小写敏感性
+        // Test table name case sensitivity
         String sql =
                 "INSERT ALL INTO users (id, name) VALUES (1, 'Tom') INTO USERS (id, name) VALUES (2, 'Jerry') SELECT 1 FROM DUAL";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
 
-        // 这个应该成功，因为使用了 equalsIgnoreCase
+        // This should succeed because equalsIgnoreCase is used
         OracleMultiInsertRecognizer recognizer = new OracleMultiInsertRecognizer(sql, asts.get(0));
-        
+
         Assertions.assertEquals("users", recognizer.getTableName());
         Assertions.assertEquals(2, recognizer.getInsertColumns().size());
     }
 
     @Test
     public void testTableWithSchema() {
-        // 测试带Schema的表名
+        // Test table name with Schema
         String sql =
                 "INSERT ALL INTO schema1.users (id, name) VALUES (1, 'Tom') INTO schema1.users (id, name) VALUES (2, 'Jerry') SELECT 1 FROM DUAL";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
 
-        // 这个应该成功
+        // success
         OracleMultiInsertRecognizer recognizer = new OracleMultiInsertRecognizer(sql, asts.get(0));
-        
+
         Assertions.assertEquals("schema1.users", recognizer.getTableName());
         Assertions.assertEquals(2, recognizer.getInsertColumns().size());
     }
 
     @Test
     public void testDifferentSchemas() {
-        // 测试不同Schema的同名表
+        // Testing tables with the same name in different schemas
         String sql =
                 "INSERT ALL INTO schema1.users (id, name) VALUES (1, 'Tom') INTO schema2.users (id, name) VALUES (2, 'Jerry') SELECT 1 FROM DUAL";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
 
-        // 应该抛出异常，因为是不同的表
+        // An exception should be thrown because they are different tables
         NotSupportYetException exception = Assertions.assertThrows(
-                NotSupportYetException.class,
-                () -> new OracleMultiInsertRecognizer(sql, asts.get(0)));
-        
-        Assertions.assertTrue(exception.getMessage().contains("Oracle Multi Insert with different tables is not supported yet"));
+                NotSupportYetException.class, () -> new OracleMultiInsertRecognizer(sql, asts.get(0)));
+
+        Assertions.assertTrue(
+                exception.getMessage().contains("Oracle Multi Insert with different tables is not supported yet"));
         Assertions.assertTrue(exception.getMessage().contains("schema1.users"));
         Assertions.assertTrue(exception.getMessage().contains("schema2.users"));
     }
@@ -387,17 +388,15 @@ public class OracleMultiInsertRecognizerTest {
 
     @Test
     public void testConditionalInsertNotSupported() {
-        // 测试带条件的插入语句
-        String sql = "INSERT ALL " +
-                "INTO users (id, name) VALUES (1, 'Tom') " +
-                "WHEN salary > 1000 THEN INTO employees (id, name) VALUES (2, 'Jerry') " +
-                "SELECT 1 FROM DUAL";
+        // Testing conditional insert statements
+        String sql = "INSERT ALL " + "INTO users (id, name) VALUES (1, 'Tom') "
+                + "WHEN salary > 1000 THEN INTO employees (id, name) VALUES (2, 'Jerry') "
+                + "SELECT 1 FROM DUAL";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
 
-        // 应该抛出 NotSupportYetException
+        // Should throw NotSupportYetException
         NotSupportYetException exception = Assertions.assertThrows(
-                NotSupportYetException.class,
-                () -> new OracleMultiInsertRecognizer(sql, asts.get(0)));
+                NotSupportYetException.class, () -> new OracleMultiInsertRecognizer(sql, asts.get(0)));
 
         Assertions.assertTrue(exception.getMessage().contains("conditional clauses"));
         Assertions.assertTrue(exception.getMessage().contains("WHEN...THEN"));

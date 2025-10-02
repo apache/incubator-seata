@@ -226,21 +226,20 @@ public class DruidSQLRecognizerFactoryTest {
         SQLRecognizerFactory recognizerFactory =
                 EnhancedServiceLoader.load(SQLRecognizerFactory.class, SqlParserType.SQL_PARSER_TYPE_DRUID);
         // Test that INSERT FIRST syntax should be rejected at the Factory level
-        String sql = "INSERT FIRST " +
-                "WHEN salary > 1000 THEN INTO high_earners (id, name, salary) VALUES (1, 'John', 2000) " +
-                "WHEN salary <= 1000 THEN INTO low_earners (id, name, salary) VALUES (1, 'John', 800) " +
-                "SELECT 1 FROM DUAL";
+        String sql = "INSERT FIRST "
+                + "WHEN salary > 1000 THEN INTO high_earners (id, name, salary) VALUES (1, 'John', 2000) "
+                + "WHEN salary <= 1000 THEN INTO low_earners (id, name, salary) VALUES (1, 'John', 800) "
+                + "SELECT 1 FROM DUAL";
 
         NotSupportYetException exception = Assertions.assertThrows(
-                NotSupportYetException.class,
-                () -> recognizerFactory.create(sql, JdbcConstants.ORACLE));
+                NotSupportYetException.class, () -> recognizerFactory.create(sql, JdbcConstants.ORACLE));
 
         assertTrue(exception.getMessage().contains("INSERT FIRST not supported yet"));
     }
 
     @Test
     void testGetMultiInsertRecognizerDelegation() {
-        // 1. 构造 INSERT ALL SQL
+        // 1.sql
         String sql = "INSERT ALL INTO a(id) VALUES(1) INTO a(id) VALUES(2) SELECT 1 FROM dual";
 
         SQLStatement stmt = SQLUtils.parseSingleStatement(sql, "oracle");
