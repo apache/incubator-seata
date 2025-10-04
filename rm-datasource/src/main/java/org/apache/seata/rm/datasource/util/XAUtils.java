@@ -70,6 +70,8 @@ public class XAUtils {
                         return PGUtils.createXAConnection(physicalConn);
                     case JdbcConstants.KINGBASE:
                         return createXAConnection(physicalConn, "com.kingbase8.xa.KBXAConnection", dbType);
+                    case JdbcConstants.OSCAR:
+                        return createXAConnection(physicalConn, "com.oscar.xa.Jdbc3XAConnection", dbType);
                     case JdbcConstants.DM:
                         return createXAConnection(physicalConn, "dm.jdbc.driver.DmdbXAConnection", dbType);
                     default:
@@ -118,6 +120,8 @@ public class XAUtils {
                     return xaConnectionClass.getConstructor(kingbaseConnectionClass);
                 case JdbcConstants.DM:
                     return xaConnectionClass.getConstructor(Connection.class);
+                case JdbcConstants.OSCAR:
+                    return xaConnectionClass.getConstructor(Connection.class);
                 default:
                     throw new SQLException("xa reflect not support dbType: " + dbType);
             }
@@ -141,6 +145,9 @@ public class XAUtils {
                     result.add(params[0]);
                     return result;
                 case JdbcConstants.KINGBASE:
+                    result.add(params[0]);
+                    return result;
+                case JdbcConstants.OSCAR:
                     result.add(params[0]);
                     return result;
                 case JdbcConstants.MARIADB:

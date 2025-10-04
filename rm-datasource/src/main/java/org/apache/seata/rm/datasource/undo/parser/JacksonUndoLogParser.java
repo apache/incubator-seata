@@ -25,6 +25,7 @@ import com.fasterxml.jackson.core.type.WritableTypeId;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -40,6 +41,7 @@ import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.loader.EnhancedServiceNotFoundException;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.common.util.CollectionUtils;
+import org.apache.seata.rm.datasource.sql.serial.SerialArray;
 import org.apache.seata.rm.datasource.undo.BranchUndoLog;
 import org.apache.seata.rm.datasource.undo.UndoLogParser;
 import org.apache.seata.rm.datasource.undo.parser.spi.JacksonSerializer;
@@ -136,6 +138,16 @@ public class JacksonUndoLogParser implements UndoLogParser, Initialize {
      */
     private final JsonDeserializer dmdbTimestampDeserializer = new DmdbTimestampDeserializer();
 
+    /**
+     * customize serializer for org.apache.seata.rm.datasource.sql.serial.SerialArray
+     */
+    private final JsonSerializer serialArraySerializer = new SerialArraySerializer();
+
+    /**
+     * customize deserializer for org.apache.seata.rm.datasource.sql.serial.SerialArray
+     */
+    private final JsonDeserializer serialArrayDeserializer = new SerialArrayDeserializer();
+
     @Override
     public void init() {
         try {
@@ -170,6 +182,8 @@ public class JacksonUndoLogParser implements UndoLogParser, Initialize {
         module.addDeserializer(SerialClob.class, clobDeserializer);
         module.addSerializer(LocalDateTime.class, localDateTimeSerializer);
         module.addDeserializer(LocalDateTime.class, localDateTimeDeserializer);
+        module.addSerializer(SerialArray.class, serialArraySerializer);
+        module.addDeserializer(SerialArray.class, serialArrayDeserializer);
         registerDmdbTimestampModuleIfPresent();
         mapper.registerModule(module);
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -483,7 +497,7 @@ public class JacksonUndoLogParser implements UndoLogParser, Initialize {
         }
     }
 
-    public class DmdbTimestampDeserializer extends JsonDeserializer<Object> {
+    private class DmdbTimestampDeserializer extends JsonDeserializer<Object> {
 
         @Override
         public Object deserialize(JsonParser p, DeserializationContext ctxt) {
@@ -531,5 +545,105 @@ public class JacksonUndoLogParser implements UndoLogParser, Initialize {
     public static void setZoneOffset(ZoneId zoneId) {
         Objects.requireNonNull(zoneId, "zoneId must be not null");
         JacksonUndoLogParser.zoneId = zoneId;
+    }
+
+    /**
+     * the class of serialize SerialArray type
+     */
+    private static class SerialArraySerializer extends JsonSerializer<SerialArray> {
+
+        @Override
+        public void serializeWithType(
+                SerialArray serialArray,
+                JsonGenerator gen,
+                SerializerProvider serializers,
+                TypeSerializer typeSerializer)
+                throws IOException {
+            WritableTypeId typeIdDef =
+                    typeSerializer.writeTypePrefix(gen, typeSerializer.typeId(serialArray, JsonToken.START_OBJECT));
+            serializeValue(serialArray, gen, serializers);
+            typeSerializer.writeTypeSuffix(gen, typeIdDef);
+        }
+
+        @Override
+        public void serialize(SerialArray serialArray, JsonGenerator gen, SerializerProvider serializers)
+                throws IOException {
+            gen.writeStartObject();
+            serializeValue(serialArray, gen, serializers);
+            gen.writeEndObject();
+        }
+
+        private void serializeValue(SerialArray serialArray, JsonGenerator gen, SerializerProvider serializers)
+                throws IOException {
+            gen.writeFieldName("baseType");
+            try {
+                gen.writeNumber(serialArray.getBaseType());
+            } catch (SQLException e) {
+                gen.writeNull();
+            }
+            gen.writeFieldName("baseTypeName");
+            try {
+                gen.writeString(serialArray.getBaseTypeName());
+            } catch (SQLException e) {
+                gen.writeNull();
+            }
+            gen.writeFieldName("elements");
+            try {
+                Object[] elements = serialArray.getElements();
+                gen.writeStartArray();
+                if (elements != null) {
+                    for (Object element : elements) {
+                        gen.writeObject(element);
+                    }
+                }
+                gen.writeEndArray();
+            } catch (Exception e) {
+                gen.writeNull();
+            }
+        }
+    }
+
+    /**
+     * the class of deserialize SerialArray type
+     */
+    private static class SerialArrayDeserializer extends JsonDeserializer<SerialArray> {
+        @Override
+        public SerialArray deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+            try {
+                JsonNode node = p.getCodec().readTree(p);
+                SerialArray serialArray = new SerialArray();
+
+                if (node.has("baseType") && !node.get("baseType").isNull()) {
+                    serialArray.setBaseType(node.get("baseType").asInt());
+                }
+
+                if (node.has("baseTypeName") && !node.get("baseTypeName").isNull()) {
+                    serialArray.setBaseTypeName(node.get("baseTypeName").asText());
+                }
+
+                if (node.has("elements") && node.get("elements").isArray()) {
+                    JsonNode elementsNode = node.get("elements");
+                    Object[] elements = new Object[elementsNode.size()];
+                    for (int i = 0; i < elementsNode.size(); i++) {
+                        JsonNode elementNode = elementsNode.get(i);
+                        if (elementNode.isNull()) {
+                            elements[i] = null;
+                        } else if (elementNode.isNumber()) {
+                            elements[i] = elementNode.asLong();
+                        } else if (elementNode.isTextual()) {
+                            elements[i] = elementNode.asText();
+                        } else {
+                            elements[i] = elementNode;
+                        }
+                    }
+                    serialArray.setElements(elements);
+                }
+
+                return serialArray;
+            } catch (Exception e) {
+                LOGGER.error("deserialize SerialArray error: {}", e.getMessage(), e);
+                return null;
+            }
+        }
     }
 }

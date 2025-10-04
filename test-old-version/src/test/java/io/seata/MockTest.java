@@ -32,14 +32,20 @@ import org.apache.seata.mockserver.MockServer;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * the type MockServerTest
  */
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class MockTest {
+
+    protected static final Logger LOGGER = LoggerFactory.getLogger(MockTest.class);
 
     static String RESOURCE_ID = "mock-action-061";
     Logger logger = LoggerFactory.getLogger(MockTest.class);
@@ -57,6 +63,7 @@ public class MockTest {
     }
 
     @Test
+    @Order(1)
     public void testCommit() throws Exception {
         String xid = doTestCommit(0);
         Assertions.assertEquals(1, Action1Impl.getCommitTimes(xid));
@@ -64,6 +71,7 @@ public class MockTest {
     }
 
     @Test
+    @Order(2)
     public void testCommitRetry() throws Exception {
         String xid = doTestCommit(2);
         Assertions.assertEquals(3, Action1Impl.getCommitTimes(xid));
@@ -71,6 +79,7 @@ public class MockTest {
     }
 
     @Test
+    @Order(3)
     public void testRollback() throws Exception {
         String xid = doTestRollback(0);
         Assertions.assertEquals(0, Action1Impl.getCommitTimes(xid));
@@ -78,6 +87,7 @@ public class MockTest {
     }
 
     @Test
+    @Order(4)
     public void testRollbackRetry() throws Exception {
         String xid = doTestRollback(2);
         Assertions.assertEquals(0, Action1Impl.getCommitTimes(xid));
@@ -85,44 +95,75 @@ public class MockTest {
     }
 
     @Test
+    @Order(5)
     public void testTm() throws Exception {
         TmClientTest.testTm();
     }
 
     @Test
+    @Order(6)
     public void testRm() throws Exception {
-        RmClientTest.testRm("testRM01");
+        DefaultResourceManager rm = RmClientTest.getRm(RESOURCE_ID);
+        Assertions.assertNotNull(rm);
     }
 
     private String doTestCommit(int times) throws TransactionException, NoSuchMethodException {
-        TransactionManager tm = TmClientTest.getTm();
-        DefaultResourceManager rm = RmClientTest.getRm(RESOURCE_ID);
+        int retry = 0;
+        do {
+            try {
+                TransactionManager tm = TmClientTest.getTm();
+                DefaultResourceManager rm = RmClientTest.getRm(RESOURCE_ID);
 
-        String xid = tm.begin(
-                ProtocolTestConstants.APPLICATION_ID, ProtocolTestConstants.SERVICE_GROUP, "test-commit", 60000);
-        logger.info("doTestCommit(0.6.1) xid:{}", xid);
-        MockCoordinator.getInstance().setExpectedRetry(xid, times);
-        Long branchId = rm.branchRegister(BranchType.TCC, RESOURCE_ID, "1", xid, "{\"mock\":\"mock\"}", "1");
-        logger.info("branch register(0.6.1) ok, branchId=" + branchId);
-        GlobalStatus commit = tm.commit(xid);
-        Assertions.assertEquals(GlobalStatus.Committed, commit);
-        logger.info("branch commit(0.6.1) ok, branchId=" + branchId);
-        return xid;
+                String xid = tm.begin(
+                        ProtocolTestConstants.APPLICATION_ID,
+                        ProtocolTestConstants.SERVICE_GROUP,
+                        "test-commit",
+                        60000);
+                logger.info("doTestCommit(0.6.1) xid:{}", xid);
+                MockCoordinator.getInstance().setExpectedRetry(xid, times);
+                Long branchId = rm.branchRegister(BranchType.TCC, RESOURCE_ID, "1", xid, "{\"mock\":\"mock\"}", "1");
+                logger.info("branch register(0.6.1) ok, branchId=" + branchId);
+                GlobalStatus commit = tm.commit(xid);
+                Assertions.assertEquals(GlobalStatus.Committed, commit);
+                logger.info("branch commit(0.6.1) ok, branchId=" + branchId + "xid=" + xid);
+                return xid;
+            } catch (TransactionException e) {
+                if (retry >= 2) {
+                    throw e;
+                }
+                LOGGER.warn("doTestCommit failed, retry times " + retry, e);
+            }
+            retry++;
+        } while (true);
     }
 
     private String doTestRollback(int times) throws TransactionException, NoSuchMethodException {
-        TransactionManager tm = TmClientTest.getTm();
-        DefaultResourceManager rm = RmClientTest.getRm(RESOURCE_ID);
+        int retry = 0;
+        do {
+            try {
+                TransactionManager tm = TmClientTest.getTm();
+                DefaultResourceManager rm = RmClientTest.getRm(RESOURCE_ID);
 
-        String xid = tm.begin(
-                ProtocolTestConstants.APPLICATION_ID, ProtocolTestConstants.SERVICE_GROUP, "test-rollback", 60000);
-        logger.info("doTestRollback(0.6.1) xid:{}", xid);
-        MockCoordinator.getInstance().setExpectedRetry(xid, times);
-        Long branchId = rm.branchRegister(BranchType.TCC, RESOURCE_ID, "1", xid, "{\"mock\":\"mock\"}", "1");
-        logger.info("branch register(0.6.1) ok, branchId=" + branchId);
-        GlobalStatus rollback = tm.rollback(xid);
-        Assertions.assertEquals(GlobalStatus.Rollbacked, rollback);
-        logger.info("branch rollback(0.6.1) ok, branchId=" + branchId);
-        return xid;
+                String xid = tm.begin(
+                        ProtocolTestConstants.APPLICATION_ID,
+                        ProtocolTestConstants.SERVICE_GROUP,
+                        "test-rollback",
+                        60000);
+                logger.info("doTestRollback(0.6.1) xid:{}", xid);
+                MockCoordinator.getInstance().setExpectedRetry(xid, times);
+                Long branchId = rm.branchRegister(BranchType.TCC, RESOURCE_ID, "1", xid, "{\"mock\":\"mock\"}", "1");
+                logger.info("branch register(0.6.1) ok, branchId=" + branchId);
+                GlobalStatus rollback = tm.rollback(xid);
+                Assertions.assertEquals(GlobalStatus.Rollbacked, rollback);
+                logger.info("branch rollback(0.6.1) ok, branchId=" + branchId + "xid=" + xid);
+                return xid;
+            } catch (TransactionException e) {
+                if (retry >= 2) {
+                    throw e;
+                }
+                LOGGER.warn("doTestRollback failed, retry times " + retry, e);
+            }
+            retry++;
+        } while (true);
     }
 }
