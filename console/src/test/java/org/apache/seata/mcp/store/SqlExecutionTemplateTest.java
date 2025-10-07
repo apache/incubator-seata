@@ -35,7 +35,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -45,7 +44,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -73,9 +71,6 @@ public class SqlExecutionTemplateTest {
 
     private final String resourceId = "testResourceId";
     private final String selectSql = "SELECT * FROM test_table WHERE id = ?";
-    private final String insertSql = "INSERT INTO test_table (name, value) VALUES (?, ?)";
-    private final String updateSql = "UPDATE test_table SET name = ? WHERE id = ?";
-    private final String deleteSql = "DELETE FROM test_table WHERE id = ?";
     private final String invalidSql = "INVALID SQL";
 
     // MockedStatic object at the class level
@@ -141,70 +136,6 @@ public class SqlExecutionTemplateTest {
     }
 
     @Test
-    public void testUpdate_Success() throws SQLException {
-        // The simulation update was successful
-        when(preparedStatement.executeUpdate()).thenReturn(1);
-
-        int rowsAffected = sqlExecutionTemplate.update(resourceId, updateSql, "newName", 1);
-
-        assertEquals(1, rowsAffected);
-
-        verify(preparedStatement).setObject(1, "newName");
-        verify(preparedStatement).setObject(2, 1);
-        verify(preparedStatement).executeUpdate();
-    }
-
-    @Test
-    public void testUpdate_InvalidSql() {
-        // Test non-DML statements
-        assertThrows(StoreException.class, () -> sqlExecutionTemplate.update(resourceId, selectSql, 1));
-    }
-
-    @Test
-    public void testUpdate_SQLException() throws SQLException {
-        // simulation SQLException
-        when(preparedStatement.executeUpdate()).thenThrow(new SQLException("Test SQLException"));
-
-        // Verify that exceptions are properly packaged
-        assertThrows(StoreException.class, () -> sqlExecutionTemplate.update(resourceId, updateSql, "newName", 1));
-    }
-
-    @Test
-    public void testBatchUpdate_Success() throws SQLException {
-        // The simulated batch update is successful
-        when(preparedStatement.executeBatch()).thenReturn(new int[] {1, 1});
-
-        List<Object[]> batchParams = new ArrayList<>();
-        batchParams.add(new Object[] {"name1", 10});
-        batchParams.add(new Object[] {"name2", 20});
-
-        int[] results = sqlExecutionTemplate.batchUpdate(resourceId, insertSql, batchParams);
-
-        assertEquals(2, results.length);
-        assertEquals(1, results[0]);
-        assertEquals(1, results[1]);
-
-        verify(connection).setAutoCommit(false);
-        verify(preparedStatement, times(2)).addBatch();
-        verify(preparedStatement).executeBatch();
-        verify(connection).commit();
-        verify(connection).setAutoCommit(true);
-    }
-
-    @Test
-    public void testBatchUpdate_SQLException() throws SQLException {
-        // simulation SQLException
-        when(preparedStatement.executeBatch()).thenThrow(new SQLException("Test SQLException"));
-
-        List<Object[]> batchParams = new ArrayList<>();
-        batchParams.add(new Object[] {"name1", 10});
-
-        assertThrows(StoreException.class, () -> sqlExecutionTemplate.batchUpdate(resourceId, insertSql, batchParams));
-
-        verify(connection).rollback();
-    }
-
-    @Test
     public void testQueryForObject_Success() throws SQLException {
         when(resultSetMetaData.getColumnCount()).thenReturn(2);
         when(resultSetMetaData.getColumnLabel(1)).thenReturn("id");
@@ -233,40 +164,6 @@ public class SqlExecutionTemplateTest {
     }
 
     @Test
-    public void testExecuteTransaction_Success() throws SQLException {
-        // The simulated transaction succeeded
-        when(preparedStatement.executeUpdate()).thenReturn(1);
-        when(connection.prepareStatement(insertSql)).thenReturn(preparedStatement);
-
-        Integer result = sqlExecutionTemplate.executeTransaction(resourceId, conn -> {
-            PreparedStatement ps = conn.prepareStatement(insertSql);
-            ps.setObject(1, "transactionName");
-            ps.setObject(2, 100);
-            return ps.executeUpdate();
-        });
-
-        assertEquals(1, result);
-
-        verify(connection).setAutoCommit(false);
-        verify(connection).commit();
-        verify(connection).setAutoCommit(true);
-    }
-
-    @Test
-    public void testExecuteTransaction_Exception() throws SQLException {
-        // Simulate a transaction exception
-        SqlExecutionTemplate.TransactionOperation<Integer> operation = conn -> {
-            throw new SQLException("Transaction failed");
-        };
-
-        // Verify that the exception is properly packaged and rolled back
-        assertThrows(StoreException.class, () -> sqlExecutionTemplate.executeTransaction(resourceId, operation));
-
-        verify(connection).rollback();
-        verify(connection).setAutoCommit(true);
-    }
-
-    @Test
     public void testGetDataSource_Exception() {
         // Simulated an exception to obtain a data source
         dataSourceFactoryMock
@@ -288,22 +185,5 @@ public class SqlExecutionTemplateTest {
         assertThrows(StoreException.class, () -> sqlExecutionTemplate.query(resourceId, ""));
 
         assertThrows(StoreException.class, () -> sqlExecutionTemplate.query(resourceId, "INSERT INTO table VALUES(1)"));
-    }
-
-    @Test
-    public void testValidateUpdateSql() {
-        // Test valid update statements
-        assertDoesNotThrow(() -> sqlExecutionTemplate.update(resourceId, "INSERT INTO table VALUES(1)"));
-
-        assertDoesNotThrow(() -> sqlExecutionTemplate.update(resourceId, "UPDATE table SET col = 1"));
-
-        assertDoesNotThrow(() -> sqlExecutionTemplate.update(resourceId, "DELETE FROM table"));
-
-        // Test for invalid update statements
-        assertThrows(StoreException.class, () -> sqlExecutionTemplate.update(resourceId, null));
-
-        assertThrows(StoreException.class, () -> sqlExecutionTemplate.update(resourceId, ""));
-
-        assertThrows(StoreException.class, () -> sqlExecutionTemplate.update(resourceId, "SELECT * FROM table"));
     }
 }

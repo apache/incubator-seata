@@ -66,13 +66,6 @@ public class SqlExecutionTemplate {
         return SELECT_PATTERN.matcher(sql).matches();
     }
 
-    private boolean validateUpdateSql(String sql) {
-        if (sql == null || StringUtils.isBlank(sql)) {
-            return false;
-        }
-        return DML_PATTERN.matcher(sql).matches();
-    }
-
     public List<Map<String, Object>> query(String resourceId, String sql, Object... params) {
         Connection conn = null;
         PreparedStatement ps = null;
@@ -175,115 +168,9 @@ public class SqlExecutionTemplate {
         }
     }
 
-    public int update(String resourceId, String sql, Object... params) {
-        Connection conn = null;
-        PreparedStatement ps = null;
-
-        try {
-            if (!validateUpdateSql(sql)) {
-                throw new StoreException("The query valid failed,Only update operations are allowed：" + sql);
-            }
-            conn = getConnection(resourceId);
-            ps = conn.prepareStatement(sql);
-
-            if (params != null) {
-                for (int i = 0; i < params.length; i++) {
-                    ps.setObject(i + 1, params[i]);
-                }
-            }
-
-            return ps.executeUpdate();
-        } catch (SQLException e) {
-            LOGGER.error("Failed to perform the update, resourceId: {}, sql: {}", resourceId, sql, e);
-            throw new StoreException("The update failed to be executed: " + e.getMessage());
-        } finally {
-            closeResources(null, ps, conn);
-        }
-    }
-
-    public int[] batchUpdate(String resourceId, String sql, List<Object[]> batchParams) {
-        Connection conn = null;
-        PreparedStatement ps = null;
-
-        try {
-            if (!validateUpdateSql(sql)) {
-                throw new StoreException("The query valid failed: " + sql);
-            }
-            conn = getConnection(resourceId);
-            conn.setAutoCommit(false);
-
-            ps = conn.prepareStatement(sql);
-
-            for (Object[] params : batchParams) {
-                for (int i = 0; i < params.length; i++) {
-                    ps.setObject(i + 1, params[i]);
-                }
-                ps.addBatch();
-            }
-
-            int[] results = ps.executeBatch();
-            conn.commit();
-            return results;
-        } catch (SQLException e) {
-            try {
-                conn.rollback();
-            } catch (SQLException ex) {
-                LOGGER.error("The rollback transaction failed", ex);
-            }
-            LOGGER.error("Failed to perform a bulk update, resourceId: {}, sql: {}", resourceId, sql, e);
-            throw new StoreException("The batch update failed to be executed: " + e.getMessage());
-        } finally {
-            try {
-                if (conn != null) {
-                    conn.setAutoCommit(true);
-                }
-            } catch (SQLException e) {
-                LOGGER.error("Restoring the connection auto-commit failed", e);
-            }
-            closeResources(null, ps, conn);
-        }
-    }
-
     public Map<String, Object> queryForObject(String resourceId, String sql, Object... params) {
         List<Map<String, Object>> results = query(resourceId, sql, params);
         return results.isEmpty() ? null : results.get(0);
-    }
-
-    public <T> T executeTransaction(String resourceId, TransactionOperation<T> operations) {
-        Connection conn = null;
-
-        try {
-            conn = getConnection(resourceId);
-            conn.setAutoCommit(false);
-
-            T result = operations.execute(conn);
-
-            conn.commit();
-            return result;
-        } catch (Exception e) {
-            try {
-                if (conn != null) {
-                    conn.rollback();
-                }
-            } catch (SQLException ex) {
-                LOGGER.error("The rollback transaction failed", ex);
-            }
-            LOGGER.error("Failed to perform the transaction, resourceId: {}", resourceId, e);
-            throw new StoreException("The transaction operation failed: " + e.getMessage());
-        } finally {
-            try {
-                if (conn != null) {
-                    conn.setAutoCommit(true);
-                }
-            } catch (SQLException e) {
-                LOGGER.error("Restoring the connection auto-commit failed", e);
-            }
-            closeConnection(conn);
-        }
-    }
-
-    public interface TransactionOperation<T> {
-        T execute(Connection connection) throws SQLException;
     }
 
     private void closeResources(ResultSet rs, Statement stmt, Connection conn) {
