@@ -37,12 +37,6 @@ public class MCPProperties {
 
     private boolean enableAuth = true;
 
-    private boolean resourceSupport = false;
-
-    private boolean resourceTemplates = false;
-
-    private boolean promptSupport = false;
-
     private McpSchema.LoggingLevel loggingLevel = McpSchema.LoggingLevel.INFO;
 
     private Long queryDuration = 86400000L;
@@ -168,22 +162,6 @@ public class MCPProperties {
         this.serverVersion = serverVersion;
     }
 
-    public boolean isResourceSupport() {
-        return resourceSupport;
-    }
-
-    public void setResourceSupport(boolean resourceSupport) {
-        this.resourceSupport = resourceSupport;
-    }
-
-    public boolean isResourceTemplates() {
-        return resourceTemplates;
-    }
-
-    public void setResourceTemplates(boolean resourceTemplates) {
-        this.resourceTemplates = resourceTemplates;
-    }
-
     public McpSchema.LoggingLevel getLoggingLevel() {
         return loggingLevel;
     }
@@ -198,14 +176,6 @@ public class MCPProperties {
 
     public void setQueryDuration(Long queryDuration) {
         this.queryDuration = queryDuration;
-    }
-
-    public boolean isPromptSupport() {
-        return promptSupport;
-    }
-
-    public void setPromptSupport(boolean promptSupport) {
-        this.promptSupport = promptSupport;
     }
 
     public boolean isEnableAuth() {

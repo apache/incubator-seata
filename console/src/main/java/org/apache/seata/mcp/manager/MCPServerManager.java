@@ -194,8 +194,8 @@ public class MCPServerManager implements SmartLifecycle {
                     .serverInfo(config.getServerName(), config.getServerVersion())
                     .capabilities(McpSchema.ServerCapabilities.builder()
                             .tools(true)
-                            .resources(config.isResourceSupport(), config.isResourceTemplates())
-                            .prompts(config.isPromptSupport())
+                            .resources(false, false)
+                            .prompts(false)
                             .build())
                     .build();
         }
@@ -206,8 +206,8 @@ public class MCPServerManager implements SmartLifecycle {
                     .serverInfo(config.getServerName(), config.getServerVersion())
                     .capabilities(McpSchema.ServerCapabilities.builder()
                             .tools(true)
-                            .resources(config.isResourceSupport(), config.isResourceTemplates())
-                            .prompts(config.isPromptSupport())
+                            .resources(false,false)
+                            .prompts(false)
                             .build())
                     .build();
         }
