@@ -45,9 +45,6 @@ public class SqlExecutionTemplate {
     private static final Pattern SELECT_PATTERN =
             Pattern.compile("^\\s*SELECT\\b.*", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
-    private static final Pattern DML_PATTERN =
-            Pattern.compile("^\\s*(INSERT|UPDATE|DELETE)\\b.*", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-
     private static final Logger LOGGER = LoggerFactory.getLogger(SqlExecutionTemplate.class);
 
     private DataSource getDataSource(String resourceId) {
