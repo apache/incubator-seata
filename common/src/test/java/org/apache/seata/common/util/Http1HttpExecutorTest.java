@@ -30,17 +30,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class Http1HttpExecutorTest {
 
-    private final Http1HttpExecutor http1HttpExecutor = new Http1HttpExecutor();
 
     @Test
     public void testDoPost() throws IOException {
-        Assertions.assertNull(http1HttpExecutor.doPost("test", new HashMap<>(), new HashMap<>(), 0));
-        Assertions.assertNull(http1HttpExecutor.doGet("test", new HashMap<>(), new HashMap<>(), 0));
+        Assertions.assertNull(Http1HttpExecutor.getInstance().doPost("test", new HashMap<>(), new HashMap<>(), 0));
+        Assertions.assertNull(Http1HttpExecutor.getInstance().doGet("test", new HashMap<>(), new HashMap<>(), 0));
     }
 
     @Test
     void testDoGetBaidu() throws Exception {
-        HttpResult<Void> httpResult = http1HttpExecutor.doGet(
+        HttpResult<Void> httpResult = Http1HttpExecutor.getInstance().doGet(
                 "https://www.baidu.com",
                 null,
                 null,
@@ -57,7 +56,7 @@ public class Http1HttpExecutorTest {
         HashMap<String, String> header = new HashMap<>();
         header.put("Content-Type", "application/json");
 
-        HttpResult<Void> httpResult = http1HttpExecutor.doPost(
+        HttpResult<Void> httpResult = Http1HttpExecutor.getInstance().doPost(
                 "https://postman-echo.com/post",
                 "{\"name\":\"seata\"}",
                 header,

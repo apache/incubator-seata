@@ -58,6 +58,26 @@ public class Http1HttpExecutor implements HttpExecutor{
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
+    public static volatile Http1HttpExecutor instance;
+
+    /**
+     * Gets instance.
+     *
+     * @return the instance
+     */
+    public static Http1HttpExecutor getInstance() {
+
+        if (instance == null) {
+            synchronized (Http1HttpExecutor.class) {
+                if (instance == null) {
+                    instance = new Http1HttpExecutor();
+                }
+            }
+        }
+        return instance;
+    }
+
+
     static {
         POOLING_HTTP_CLIENT_CONNECTION_MANAGER.setMaxTotal(10);
         POOLING_HTTP_CLIENT_CONNECTION_MANAGER.setDefaultMaxPerRoute(10);

@@ -20,16 +20,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpStatus;
-import org.apache.http.StatusLine;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.ContentType;
 import org.apache.http.protocol.HTTP;
-import org.apache.http.util.EntityUtils;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.exception.AuthenticationFailedException;
 import org.apache.seata.common.exception.NotSupportYetException;
 import org.apache.seata.common.exception.ParseEndpointException;
 import org.apache.seata.common.exception.RetryableException;
+import org.apache.seata.common.http.HttpResult;
 import org.apache.seata.common.metadata.Metadata;
 import org.apache.seata.common.metadata.MetadataResponse;
 import org.apache.seata.common.metadata.Node;
@@ -47,7 +45,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -67,7 +64,6 @@ import java.util.stream.Stream;
 
 /**
  * The type File registry service.
- *
  */
 public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeListener> {
 
@@ -131,7 +127,8 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
         PREFERRED_NETWORKS = CONFIG.getConfig(getPreferredNetworks());
     }
 
-    private RaftRegistryServiceImpl() {}
+    private RaftRegistryServiceImpl() {
+    }
 
     /**
      * Gets instance.
@@ -150,16 +147,20 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
     }
 
     @Override
-    public void register(InetSocketAddress address) throws Exception {}
+    public void register(InetSocketAddress address) throws Exception {
+    }
 
     @Override
-    public void unregister(InetSocketAddress address) throws Exception {}
+    public void unregister(InetSocketAddress address) throws Exception {
+    }
 
     @Override
-    public void subscribe(String cluster, ConfigChangeListener listener) throws Exception {}
+    public void subscribe(String cluster, ConfigChangeListener listener) throws Exception {
+    }
 
     @Override
-    public void unsubscribe(String cluster, ConfigChangeListener listener) throws Exception {}
+    public void unsubscribe(String cluster, ConfigChangeListener listener) throws Exception {
+    }
 
     protected static void startQueryMetadata() {
         if (REFRESH_METADATA_EXECUTOR == null) {
@@ -425,11 +426,10 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
             if (StringUtils.isNotBlank(jwtToken)) {
                 header.put(AUTHORIZATION_HEADER, jwtToken);
             }
-            try (CloseableHttpResponse response =
-                    Http1HttpExecutor.doPost("http://" + tcAddress + "/metadata/v1/watch", param, header, 30000)) {
-                if (response != null) {
-                    StatusLine statusLine = response.getStatusLine();
-                    if (statusLine != null && statusLine.getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
+            try {
+                HttpResult<Void> httpResult = Http1HttpExecutor.getInstance().doPost("http://" + tcAddress + "/metadata/v1/watch", param, header, 30000);
+                if (httpResult != null) {
+                    if (httpResult.getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
                         if (StringUtils.isNotBlank(USERNAME) && StringUtils.isNotBlank(PASSWORD)) {
                             throw new RetryableException("Authentication failed!");
                         } else {
@@ -437,7 +437,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                                     "Authentication failed! you should configure the correct username and password.");
                         }
                     }
-                    return statusLine != null && statusLine.getStatusCode() == HttpStatus.SC_OK;
+                    return httpResult.getStatusCode() == HttpStatus.SC_OK;
                 }
             } catch (IOException e) {
                 LOGGER.error("watch cluster node: {}, fail: {}", tcAddress, e.getMessage());
@@ -459,18 +459,18 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                     aliveAddress.isEmpty()
                             ? aliveAddress
                             : aliveAddress.parallelStream()
-                                    .filter(inetSocketAddress -> {
-                                        // Since only follower will turn into leader, only the follower node needs to be
-                                        // listened to
-                                        return inetSocketAddress.getPort() != leaderAddress.getPort()
-                                                || !inetSocketAddress
-                                                        .getAddress()
-                                                        .getHostAddress()
-                                                        .equals(leaderAddress
-                                                                .getAddress()
-                                                                .getHostAddress());
-                                    })
-                                    .collect(Collectors.toList()));
+                            .filter(inetSocketAddress -> {
+                                // Since only follower will turn into leader, only the follower node needs to be
+                                // listened to
+                                return inetSocketAddress.getPort() != leaderAddress.getPort()
+                                        || !inetSocketAddress
+                                        .getAddress()
+                                        .getHostAddress()
+                                        .equals(leaderAddress
+                                                .getAddress()
+                                                .getHostAddress());
+                            })
+                            .collect(Collectors.toList()));
         } else {
             return RegistryService.super.refreshAliveLookup(transactionServiceGroup, aliveAddress);
         }
@@ -498,12 +498,12 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
             Map<String, String> param = new HashMap<>();
             param.put("group", group);
             String response = null;
-            try (CloseableHttpResponse httpResponse =
-                    Http1HttpExecutor.doGet("http://" + tcAddress + "/metadata/v1/cluster", param, header, 1000)) {
-                if (httpResponse != null) {
-                    int statusCode = httpResponse.getStatusLine().getStatusCode();
+            try {
+                HttpResult<Void> httpResult = Http1HttpExecutor.getInstance().doGet("http://" + tcAddress + "/metadata/v1/cluster", param, header, 1000);
+                if (httpResult != null) {
+                    int statusCode = httpResult.getStatusCode();
                     if (statusCode == HttpStatus.SC_OK) {
-                        response = EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
+                        response = httpResult.getResponseBody();
                     } else if (statusCode == HttpStatus.SC_UNAUTHORIZED) {
                         if (StringUtils.isNotBlank(USERNAME) && StringUtils.isNotBlank(PASSWORD)) {
                             refreshToken(tcAddress);
@@ -544,11 +544,11 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
         Map<String, String> header = new HashMap<>();
         header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
         String response = null;
-        try (CloseableHttpResponse httpResponse =
-                Http1HttpExecutor.doPost("http://" + tcAddress + "/api/v1/auth/login", param, header, 1000)) {
-            if (httpResponse != null) {
-                if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                    response = EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
+        try {
+            HttpResult<Void> httpResult = Http1HttpExecutor.getInstance().doPost("http://" + tcAddress + "/api/v1/auth/login", param, header, 1000);
+            if (httpResult != null) {
+                if (httpResult.getStatusCode() == HttpStatus.SC_OK) {
+                    response = httpResult.getResponseBody();
                     JsonNode jsonNode = OBJECT_MAPPER.readTree(response);
                     String codeStatus = jsonNode.get("code").asText();
                     if (!StringUtils.equals(codeStatus, "200")) {

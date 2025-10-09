@@ -21,14 +21,12 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpStatus;
-import org.apache.http.StatusLine;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.ContentType;
 import org.apache.http.protocol.HTTP;
-import org.apache.http.util.EntityUtils;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.exception.AuthenticationFailedException;
 import org.apache.seata.common.exception.RetryableException;
+import org.apache.seata.common.http.HttpResult;
 import org.apache.seata.common.metadata.Cluster;
 import org.apache.seata.common.metadata.ClusterRole;
 import org.apache.seata.common.metadata.Instance;
@@ -49,7 +47,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -230,8 +227,9 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
             }
             header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
 
-            try (CloseableHttpResponse response = Http1HttpExecutor.doPost(url, jsonBody, header, 3000)) {
-                int statusCode = response.getStatusLine().getStatusCode();
+            try {
+                HttpResult<Void> httpResult = Http1HttpExecutor.getInstance().doPost(url, jsonBody, header, 3000);
+                int statusCode = httpResult.getStatusCode();
                 if (statusCode == 200) {
                     if (LOGGER.isDebugEnabled()) {
                         LOGGER.debug("instance has been registered successfully:{}", statusCode);
@@ -249,8 +247,9 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
         url = HTTP_PREFIX + url + "/naming/v1/health";
         Map<String, String> header = new HashMap<>();
         header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
-        try (CloseableHttpResponse response = Http1HttpExecutor.doGet(url, null, header, 3000)) {
-            int statusCode = response.getStatusLine().getStatusCode();
+        try {
+            HttpResult<Void> httpResult = Http1HttpExecutor.getInstance().doGet(url, null, header, 3000);
+            int statusCode = httpResult.getStatusCode();
             return statusCode == 200;
         } catch (Exception e) {
             return false;
@@ -274,8 +273,9 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
             url += params;
             Map<String, String> header = new HashMap<>();
             header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
-            try (CloseableHttpResponse response = Http1HttpExecutor.doPost(url, jsonBody, header, 3000)) {
-                int statusCode = response.getStatusLine().getStatusCode();
+            try {
+                HttpResult<Void> httpResult = Http1HttpExecutor.getInstance().doPost(url, jsonBody, header, 3000);
+                int statusCode = httpResult.getStatusCode();
                 if (statusCode == 200) {
                     LOGGER.info("instance has been unregistered successfully:{}", statusCode);
                 } else {
@@ -357,10 +357,11 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
         if (StringUtils.isNotBlank(jwtToken)) {
             header.put(AUTHORIZATION_HEADER, jwtToken);
         }
-        try (CloseableHttpResponse response = Http1HttpExecutor.doPost(watchAddr, (String) null, header, 30000)) {
-            if (response != null) {
-                StatusLine statusLine = response.getStatusLine();
-                return statusLine != null && statusLine.getStatusCode() == HttpStatus.SC_OK;
+        try {
+            HttpResult<Void> httpResult = Http1HttpExecutor.getInstance().doPost(watchAddr, (String) null, header, 30000);
+
+            if (httpResult != null) {
+                return httpResult.getStatusCode() == HttpStatus.SC_OK;
             }
         } catch (Exception e) {
             LOGGER.error("watch failed: {}", e.getMessage());
@@ -438,12 +439,14 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
         if (StringUtils.isNotBlank(jwtToken)) {
             header.put(AUTHORIZATION_HEADER, jwtToken);
         }
-        try (CloseableHttpResponse response = Http1HttpExecutor.doGet(url, paraMap, header, 3000)) {
-            if (response == null || response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+        try  {
+            HttpResult<Void> httpResult = Http1HttpExecutor.getInstance().doGet(url, paraMap, header, 3000);
+            if (httpResult == null || httpResult.getStatusCode() != HttpStatus.SC_OK) {
+                assert httpResult != null;
                 throw new NamingRegistryException("cannot lookup server list in vgroup: " + vGroup + ", http code: "
-                        + response.getStatusLine().getStatusCode());
+                        + httpResult.getStatusCode());
             }
-            String jsonResponse = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+            String jsonResponse = httpResult.getResponseBody();
             // jsonResponse -> MetaResponse
             MetaResponse metaResponse = OBJECT_MAPPER.readValue(jsonResponse, new TypeReference<MetaResponse>() {});
             return handleMetadata(metaResponse, vGroup);
@@ -576,11 +579,11 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
         Map<String, String> header = new HashMap<>();
         header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
         String response = null;
-        try (CloseableHttpResponse httpResponse =
-                Http1HttpExecutor.doPost("http://" + namingServerAddress + "/api/v1/auth/login", param, header, 1000)) {
-            if (httpResponse != null) {
-                if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                    response = EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
+        try {
+            HttpResult<Void> httpResult = Http1HttpExecutor.getInstance().doPost("http://" + namingServerAddress + "/api/v1/auth/login", param, header, 1000);
+            if (httpResult != null) {
+                if (httpResult.getStatusCode() == HttpStatus.SC_OK) {
+                    response = httpResult.getResponseBody();
                     JsonNode jsonNode = OBJECT_MAPPER.readTree(response);
                     String codeStatus = jsonNode.get("code").asText();
                     if (!StringUtils.equals(codeStatus, "200")) {
