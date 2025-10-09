@@ -59,31 +59,31 @@ class AbstractRemoteResourceBundleTest {
     }
 
     @Test
-    void getString_fails_whenValueIsNull() {
+    void testGetString_valueIsNull() {
         TestResourceBundle bundle = new TestResourceBundle();
         Assertions.assertThrows(MissingResourceException.class, () -> bundle.getString("key1"));
     }
 
     @Test
-    void getString_keyNotFound() {
+    void testGetString_keyNotFound() {
         TestResourceBundle bundle = new TestResourceBundle();
         Assertions.assertThrows(MissingResourceException.class, () -> bundle.getString("nonexistent"));
     }
 
     @Test
-    void getString_valueIsNull() {
+    void testGetObject_valueIsNull() {
         TestResourceBundle bundle = new TestResourceBundle();
         Assertions.assertThrows(MissingResourceException.class, () -> bundle.getObject("key2"));
     }
 
     @Test
-    void getObject_valueIsNull() {
+    void testGetObject_keyNotFound() {
         TestResourceBundle bundle = new TestResourceBundle();
         Assertions.assertThrows(MissingResourceException.class, () -> bundle.getObject("missing"));
     }
 
     @Test
-    void testGetKeys() {
+    void testGetKeys_normal() {
         TestResourceBundle bundle = new TestResourceBundle();
         Enumeration<String> keys = bundle.getKeys();
 
@@ -99,7 +99,7 @@ class AbstractRemoteResourceBundleTest {
     }
 
     @Test
-    void testGetKeysIfNoneDefined() {
+    void testGetKeys_empty() {
         AbstractRemoteResourceBundle emptyBundle = new AbstractRemoteResourceBundle() {
             @Override
             protected Object handleGetObject(@NotNull String key) {
@@ -119,19 +119,13 @@ class AbstractRemoteResourceBundleTest {
     }
 
     @Test
-    void getObject_keyNotFound() {
+    void testContainsKey_keyAbsent() {
         TestResourceBundle bundle = new TestResourceBundle();
         Assertions.assertFalse(bundle.containsKey("key1"));
     }
 
     @Test
-    void containsKey_keyPresent() {
-        TestResourceBundle bundle = new TestResourceBundle();
-        Assertions.assertFalse(bundle.containsKey("unknown"));
-    }
-
-    @Test
-    void testToString() {
+    void testToString_default() {
         TestResourceBundle bundle = new TestResourceBundle();
         Assertions.assertNotNull(bundle.toString());
     }
