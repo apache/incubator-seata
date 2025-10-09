@@ -21,11 +21,11 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.seata.common.result.PageResult;
 import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.mcp.annotation.Tool;
 import org.apache.seata.mcp.annotation.ToolParam;
 import org.apache.seata.mcp.entity.constant.RPCConstant;
 import org.apache.seata.mcp.entity.dto.GlobalSessionParamDto;
-import org.apache.seata.mcp.entity.enums.GlobalExceptionStatus;
 import org.apache.seata.mcp.entity.param.GlobalAbnormalSessionParam;
 import org.apache.seata.mcp.entity.param.GlobalSessionParam;
 import org.apache.seata.mcp.entity.pojo.MCPProperties;
@@ -56,6 +56,8 @@ public class GlobalSessionTools {
 
     @Autowired
     private ModifyConfirmService modifyConfirmService;
+
+    private final List<Integer> exceptionStatus = new ArrayList<>();
 
     @Tool(description = "Query global transactions")
     public PageResult<GlobalSessionVO> queryGlobalSession(
@@ -202,7 +204,11 @@ public class GlobalSessionTools {
         GlobalSessionParamDto param = GlobalSessionParamDto.covertFromAbnormalParam(abnormalSessionParam);
         param.setPageNum(1);
         param.setPageSize(100);
-        List<Integer> exceptionStatus = GlobalExceptionStatus.getAll();
+        if(exceptionStatus.isEmpty()){
+            exceptionStatus.add(GlobalStatus.CommitFailed.getCode());
+            exceptionStatus.add(GlobalStatus.TimeoutRollbackFailed.getCode());
+            exceptionStatus.add(GlobalStatus.RollbackFailed.getCode());
+        }
         for (Integer status : exceptionStatus) {
             param.setStatus(status);
             List<GlobalSessionVO> datas =
