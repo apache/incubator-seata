@@ -27,5 +27,7 @@ public interface HttpExecutor {
 
     HttpResult doGet(String url, Map<String, String> param, Map<String, String> header, int timeout) throws IOException;
 
+    HttpResult doGet(String url, Map<String, String> headers, int timeout) throws IOException;
+
     HttpResult doPostJson(String url, String jsonBody, Map<String, String> headers, int timeout) throws IOException;
 }

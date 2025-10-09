@@ -205,6 +205,12 @@ public class Http1HttpExecutor implements HttpExecutor{
     }
 
     @Override
+    public HttpResult doGet(String url, Map<String, String> headers, int timeout) throws IOException {
+        //todo
+        return null;
+    }
+
+    @Override
     public HttpResult<Void> doPostJson(
             String url, String jsonBody, Map<String, String> headers, int timeout) throws IOException {
         RequestConfig requestConfig = RequestConfig.custom()

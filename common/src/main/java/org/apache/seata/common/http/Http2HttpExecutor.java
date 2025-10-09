@@ -34,10 +34,11 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 @LoadLevel(name = "Http2", order = 2)
-public class Http2HttpExecutor{
+public class Http2HttpExecutor implements HttpExecutor{
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Http2HttpExecutor.class);
 
@@ -52,8 +53,9 @@ public class Http2HttpExecutor{
     public static final MediaType MEDIA_TYPE_JSON = MediaType.parse("application/json");
     public static final MediaType MEDIA_TYPE_FORM_URLENCODED = MediaType.parse("application/x-www-form-urlencoded");
 
-    public static void doPostHttp(
-            String url, Map<String, String> params, Map<String, String> headers, HttpCallback<Response> callback) {
+    @Override
+    public HttpResult<Response> doPost(
+            String url, Map<String, String> params, Map<String, String> headers, int timeout) throws IOException {
         try {
             Headers.Builder headerBuilder = new Headers.Builder();
             if (headers != null) {
@@ -69,55 +71,144 @@ public class Http2HttpExecutor{
                     .post(requestBody)
                     .build();
 
-            executeAsync(HTTP_CLIENT, request, callback);
+            CompletableFuture<HttpResult<Response>> future = new CompletableFuture<>();
+            HTTP_CLIENT.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    future.completeExceptionally(e);
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) {
+                    try {
+                        String responseBody = response.body() != null ? response.body().string() : null;
+                        future.complete(new HttpResult<>(response.code(), responseBody, response));
+                    } catch (IOException e) {
+                        future.completeExceptionally(e);
+                    }finally {
+                        response.close(); // 确保关闭
+                    }
+                }
+            });
+
+            // 阻塞等待回调完成，统一同步 API
+            try {
+                return future.get(timeout, TimeUnit.MILLISECONDS);
+            } catch (Exception e) {
+                throw new IOException("HTTP2 request failed", e);
+            }
 
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);
-            callback.onFailure(e);
+            throw new IOException("Failed to serialize request params to JSON", e);
         }
     }
 
-    public static void doPostHttp(
-            String url, String body, Map<String, String> headers, HttpCallback<Response> callback) {
-        Headers.Builder headerBuilder = new Headers.Builder();
-        if (headers != null) {
-            headers.forEach(headerBuilder::add);
+    @Override
+    public HttpResult<Response> doPost(String url, String body, Map<String, String> headers, int timeout) throws IOException {
+        try {
+            Headers.Builder headerBuilder = new Headers.Builder();
+            if (headers != null) {
+                headers.forEach(headerBuilder::add);
+            }
+
+            RequestBody requestBody = RequestBody.create(body, MEDIA_TYPE_JSON);
+
+            Request request = new Request.Builder()
+                    .url(url)
+                    .headers(headerBuilder.build())
+                    .post(requestBody)
+                    .build();
+
+            CompletableFuture<HttpResult<Response>> future = new CompletableFuture<>();
+            HTTP_CLIENT.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    future.completeExceptionally(e);
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) {
+                    try {
+                        String responseBody = response.body() != null ? response.body().string() : null;
+                        future.complete(new HttpResult<>(response.code(), responseBody, response));
+                    } catch (IOException e) {
+                        future.completeExceptionally(e);
+                    }finally {
+                        response.close(); // 确保关闭
+                    }
+                }
+            });
+
+            // 阻塞等待结果
+            try {
+                return future.get(timeout, TimeUnit.MILLISECONDS);
+            } catch (Exception e) {
+                throw new IOException("HTTP2 POST request failed or timed out", e);
+            }
+        } catch (Exception e) {
+            throw new IOException("Failed to execute HTTP2 POST request", e);
         }
-
-        RequestBody requestBody = RequestBody.create(body, MEDIA_TYPE_JSON);
-
-        Request request = new Request.Builder()
-                .url(url)
-                .headers(headerBuilder.build())
-                .post(requestBody)
-                .build();
-
-        executeAsync(HTTP_CLIENT, request, callback);
     }
 
-    public static void doGetHttp(
-            String url, Map<String, String> headers, final HttpCallback<Response> callback, int timeout) {
-        OkHttpClient client = new OkHttpClient.Builder()
-                .connectTimeout(timeout, TimeUnit.SECONDS)
-                .readTimeout(timeout, TimeUnit.SECONDS)
-                .writeTimeout(timeout, TimeUnit.SECONDS)
-                .build();
-
-        Headers.Builder headerBuilder = new Headers.Builder();
-        if (headers != null) {
-            headers.forEach(headerBuilder::add);
-        }
-
-        Request request = new Request.Builder()
-                .url(url)
-                .headers(headerBuilder.build())
-                .get()
-                .build();
-
-        executeAsync(client, request, callback);
+    @Override
+    public HttpResult doGet(String url, Map<String, String> param, Map<String, String> header, int timeout) throws IOException {
+        //todo
+        return null;
     }
 
-    private static RequestBody createRequestBody(Map<String, String> params, String contentType)
+    @Override
+    public HttpResult<Response> doGet(String url, Map<String, String> headers, int timeout) throws IOException {
+        try {
+            Headers.Builder headerBuilder = new Headers.Builder();
+            if (headers != null) {
+                headers.forEach(headerBuilder::add);
+            }
+
+            Request request = new Request.Builder()
+                    .url(url)
+                    .headers(headerBuilder.build())
+                    .get()
+                    .build();
+
+            CompletableFuture<HttpResult<Response>> future = new CompletableFuture<>();
+            HTTP_CLIENT.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    future.completeExceptionally(e);
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) {
+                    try {
+                        String responseBody = response.body() != null ? response.body().string() : null;
+                        future.complete(new HttpResult<>(response.code(), responseBody, response));
+                    } catch (IOException e) {
+                        future.completeExceptionally(e);
+                    }finally {
+                        response.close(); // 确保关闭
+                    }
+                }
+            });
+
+            // 阻塞等待结果
+            try {
+                return future.get(timeout, TimeUnit.MILLISECONDS);
+            } catch (Exception e) {
+                throw new IOException("HTTP2 GET request failed or timed out", e);
+            }
+        } catch (Exception e) {
+            throw new IOException("Failed to execute HTTP2 GET request", e);
+        }
+    }
+
+    @Override
+    public HttpResult doPostJson(String url, String jsonBody, Map<String, String> headers, int timeout) throws IOException {
+        return null;
+    }
+
+
+    private RequestBody createRequestBody(Map<String, String> params, String contentType)
             throws JsonProcessingException {
         if (params == null || params.isEmpty()) {
             return RequestBody.create(new byte[0]);
