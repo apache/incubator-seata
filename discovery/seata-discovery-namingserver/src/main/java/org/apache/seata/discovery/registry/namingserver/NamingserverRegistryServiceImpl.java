@@ -38,7 +38,7 @@ import org.apache.seata.common.metadata.namingserver.NamingServerNode;
 import org.apache.seata.common.metadata.namingserver.Unit;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.CollectionUtils;
-import org.apache.seata.common.util.HttpClientUtil;
+import org.apache.seata.common.http.Http1HttpExecutor;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.Configuration;
@@ -230,7 +230,7 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
             }
             header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
 
-            try (CloseableHttpResponse response = HttpClientUtil.doPost(url, jsonBody, header, 3000)) {
+            try (CloseableHttpResponse response = Http1HttpExecutor.doPost(url, jsonBody, header, 3000)) {
                 int statusCode = response.getStatusLine().getStatusCode();
                 if (statusCode == 200) {
                     if (LOGGER.isDebugEnabled()) {
@@ -249,7 +249,7 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
         url = HTTP_PREFIX + url + "/naming/v1/health";
         Map<String, String> header = new HashMap<>();
         header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
-        try (CloseableHttpResponse response = HttpClientUtil.doGet(url, null, header, 3000)) {
+        try (CloseableHttpResponse response = Http1HttpExecutor.doGet(url, null, header, 3000)) {
             int statusCode = response.getStatusLine().getStatusCode();
             return statusCode == 200;
         } catch (Exception e) {
@@ -274,7 +274,7 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
             url += params;
             Map<String, String> header = new HashMap<>();
             header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
-            try (CloseableHttpResponse response = HttpClientUtil.doPost(url, jsonBody, header, 3000)) {
+            try (CloseableHttpResponse response = Http1HttpExecutor.doPost(url, jsonBody, header, 3000)) {
                 int statusCode = response.getStatusLine().getStatusCode();
                 if (statusCode == 200) {
                     LOGGER.info("instance has been unregistered successfully:{}", statusCode);
@@ -357,7 +357,7 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
         if (StringUtils.isNotBlank(jwtToken)) {
             header.put(AUTHORIZATION_HEADER, jwtToken);
         }
-        try (CloseableHttpResponse response = HttpClientUtil.doPost(watchAddr, (String) null, header, 30000)) {
+        try (CloseableHttpResponse response = Http1HttpExecutor.doPost(watchAddr, (String) null, header, 30000)) {
             if (response != null) {
                 StatusLine statusLine = response.getStatusLine();
                 return statusLine != null && statusLine.getStatusCode() == HttpStatus.SC_OK;
@@ -438,7 +438,7 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
         if (StringUtils.isNotBlank(jwtToken)) {
             header.put(AUTHORIZATION_HEADER, jwtToken);
         }
-        try (CloseableHttpResponse response = HttpClientUtil.doGet(url, paraMap, header, 3000)) {
+        try (CloseableHttpResponse response = Http1HttpExecutor.doGet(url, paraMap, header, 3000)) {
             if (response == null || response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
                 throw new NamingRegistryException("cannot lookup server list in vgroup: " + vGroup + ", http code: "
                         + response.getStatusLine().getStatusCode());
@@ -577,7 +577,7 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
         header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
         String response = null;
         try (CloseableHttpResponse httpResponse =
-                HttpClientUtil.doPost("http://" + namingServerAddress + "/api/v1/auth/login", param, header, 1000)) {
+                Http1HttpExecutor.doPost("http://" + namingServerAddress + "/api/v1/auth/login", param, header, 1000)) {
             if (httpResponse != null) {
                 if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                     response = EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);

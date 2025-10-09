@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.common.util;
+package org.apache.seata.common.http;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.NameValuePair;
@@ -31,6 +31,9 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
+import org.apache.seata.common.loader.LoadLevel;
+import org.apache.seata.common.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,9 +46,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class HttpClientUtil {
+@LoadLevel(name = "Http1", order = 1)
+public class Http1HttpExecutor implements HttpExecutor{
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HttpClientUtil.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Http1HttpExecutor.class);
 
     private static final Map<Integer /*timeout*/, CloseableHttpClient> HTTP_CLIENT_MAP = new ConcurrentHashMap<>();
 
@@ -69,8 +73,8 @@ public class HttpClientUtil {
                 })));
     }
 
-    // post request
-    public static CloseableHttpResponse doPost(
+    @Override
+    public HttpResult<Void>  doPost(
             String url, Map<String, String> params, Map<String, String> header, int timeout) throws IOException {
         try {
             URIBuilder builder = new URIBuilder(url);
@@ -104,15 +108,17 @@ public class HttpClientUtil {
                             .setConnectTimeout(timeout)
                             .build())
                     .build());
-            return client.execute(httpPost);
+            CloseableHttpResponse httpResponse  = client.execute(httpPost);
+            String responseBody = httpResponse != null ? EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8) : null;
+            return new HttpResult<>(httpResponse != null ? httpResponse.getStatusLine().getStatusCode() : 0, responseBody, null);
         } catch (URISyntaxException | ClientProtocolException e) {
             LOGGER.error(e.getMessage(), e);
         }
         return null;
     }
 
-    // post request
-    public static CloseableHttpResponse doPost(String url, String body, Map<String, String> header, int timeout)
+    @Override
+    public  HttpResult<Void> doPost(String url, String body, Map<String, String> header, int timeout)
             throws IOException {
         try {
             URIBuilder builder = new URIBuilder(url);
@@ -137,15 +143,17 @@ public class HttpClientUtil {
                             .setConnectTimeout(timeout)
                             .build())
                     .build());
-            return client.execute(httpPost);
+            CloseableHttpResponse httpResponse  = client.execute(httpPost);
+            String responseBody = httpResponse != null ? EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8) : null;
+            return new HttpResult<>(httpResponse != null ? httpResponse.getStatusLine().getStatusCode() : 0, responseBody, null);
         } catch (URISyntaxException | ClientProtocolException e) {
             LOGGER.error(e.getMessage(), e);
         }
         return null;
     }
 
-    // get request
-    public static CloseableHttpResponse doGet(
+    @Override
+    public  HttpResult<Void> doGet(
             String url, Map<String, String> param, Map<String, String> header, int timeout) throws IOException {
         try {
             URIBuilder builder = new URIBuilder(url);
@@ -167,14 +175,17 @@ public class HttpClientUtil {
                             .setConnectTimeout(timeout)
                             .build())
                     .build());
-            return client.execute(httpGet);
+            CloseableHttpResponse httpResponse = client.execute(httpGet);
+            String responseBody = httpResponse != null ? EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8) : null;
+            return new HttpResult<>(httpResponse != null ? httpResponse.getStatusLine().getStatusCode() : 0, responseBody, null);
         } catch (URISyntaxException | ClientProtocolException e) {
             LOGGER.error(e.getMessage(), e);
         }
         return null;
     }
 
-    public static CloseableHttpResponse doPostJson(
+    @Override
+    public HttpResult<Void> doPostJson(
             String url, String jsonBody, Map<String, String> headers, int timeout) throws IOException {
         RequestConfig requestConfig = RequestConfig.custom()
                 .setSocketTimeout(timeout)
@@ -193,6 +204,8 @@ public class HttpClientUtil {
         post.setEntity(entity);
 
         CloseableHttpClient client = HttpClients.createDefault();
-        return client.execute(post);
+        CloseableHttpResponse httpResponse  = client.execute(post);
+        String responseBody = httpResponse != null ? EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8) : null;
+        return new HttpResult<>(httpResponse != null ? httpResponse.getStatusLine().getStatusCode() : 0, responseBody, null);
     }
 }

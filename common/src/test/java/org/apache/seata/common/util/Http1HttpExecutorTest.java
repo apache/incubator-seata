@@ -16,17 +16,18 @@
  */
 package org.apache.seata.common.util;
 
+import org.apache.seata.common.http.Http1HttpExecutor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.HashMap;
 
-public class HttpClientUtilTest {
+public class Http1HttpExecutorTest {
 
     @Test
     public void testDoPost() throws IOException {
-        Assertions.assertNull(HttpClientUtil.doPost("test", new HashMap<>(), new HashMap<>(), 0));
-        Assertions.assertNull(HttpClientUtil.doGet("test", new HashMap<>(), new HashMap<>(), 0));
+        Assertions.assertNull(Http1HttpExecutor.doPost("test", new HashMap<>(), new HashMap<>(), 0));
+        Assertions.assertNull(Http1HttpExecutor.doGet("test", new HashMap<>(), new HashMap<>(), 0));
     }
 }

@@ -19,6 +19,7 @@ package org.apache.seata.common.util;
 import okhttp3.Protocol;
 import okhttp3.Response;
 import org.apache.seata.common.executor.HttpCallback;
+import org.apache.seata.common.http.Http2HttpExecutor;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -31,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-class Http5ClientUtilTest {
+class Http2HttpExecutorTest {
 
     @Test
     void testDoPostHttp_param_onSuccess() throws Exception {
@@ -62,7 +63,7 @@ class Http5ClientUtilTest {
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
 
-        Http5ClientUtil.doPostHttp("https://www.apache.org/", params, headers, callback);
+        Http2HttpExecutor.doPostHttp("https://www.apache.org/", params, headers, callback);
         assertTrue(latch.await(10, TimeUnit.SECONDS));
     }
 
@@ -94,7 +95,7 @@ class Http5ClientUtilTest {
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
 
-        Http5ClientUtil.doPostHttp("http://localhost:9999/invalid", params, headers, callback);
+        Http2HttpExecutor.doPostHttp("http://localhost:9999/invalid", params, headers, callback);
         assertTrue(latch.await(10, TimeUnit.SECONDS));
     }
 
@@ -124,7 +125,7 @@ class Http5ClientUtilTest {
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
 
-        Http5ClientUtil.doPostHttp("https://www.apache.org/", "{\"key\":\"value\"}", headers, callback);
+        Http2HttpExecutor.doPostHttp("https://www.apache.org/", "{\"key\":\"value\"}", headers, callback);
         assertTrue(latch.await(10, TimeUnit.SECONDS));
     }
 
@@ -153,7 +154,7 @@ class Http5ClientUtilTest {
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
 
-        Http5ClientUtil.doPostHttp("http://localhost:9999/invalid", "{\"key\":\"value\"}", headers, callback);
+        Http2HttpExecutor.doPostHttp("http://localhost:9999/invalid", "{\"key\":\"value\"}", headers, callback);
         assertTrue(latch.await(10, TimeUnit.SECONDS));
     }
 
@@ -186,7 +187,7 @@ class Http5ClientUtilTest {
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
 
-        Http5ClientUtil.doPostHttp("http://httpbin.org/post", params, headers, callback);
+        Http2HttpExecutor.doPostHttp("http://httpbin.org/post", params, headers, callback);
         assertTrue(latch.await(10, TimeUnit.SECONDS));
     }
 
@@ -216,7 +217,7 @@ class Http5ClientUtilTest {
         Map<String, String> headers = new HashMap<>();
         headers.put("Accept", "application/json");
 
-        Http5ClientUtil.doGetHttp("https://www.apache.org/", headers, callback, 1);
+        Http2HttpExecutor.doGetHttp("https://www.apache.org/", headers, callback, 1);
         assertTrue(latch.await(10, TimeUnit.SECONDS));
     }
 
@@ -246,7 +247,7 @@ class Http5ClientUtilTest {
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
 
-        Http5ClientUtil.doPostHttp("http://httpbin.org/post", "{\"key\":\"value\"}", headers, callback);
+        Http2HttpExecutor.doPostHttp("http://httpbin.org/post", "{\"key\":\"value\"}", headers, callback);
         assertTrue(latch.await(10, TimeUnit.SECONDS));
     }
 }
