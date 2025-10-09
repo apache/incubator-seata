@@ -281,7 +281,7 @@ public class BusinessDataSourcesProperties implements InitializingBean {
         private boolean enabled = true;
         private String dbType = "mysql";
         private String driverClassName = "com.mysql.cj.jdbc.Driver";
-        private String url = "jdbc:mysql://127.0.0.1:3306/seata?rewriteBatchedStatements=true";
+        private String url = "";
         private String username = "mysql";
         private String password = "mysql";
         private String datasource = "druid";
