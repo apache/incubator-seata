@@ -17,17 +17,55 @@
 package org.apache.seata.common.util;
 
 import org.apache.seata.common.http.Http1HttpExecutor;
+import org.apache.seata.common.http.HttpResult;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.HashMap;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class Http1HttpExecutorTest {
+
+    private final Http1HttpExecutor http1HttpExecutor = new Http1HttpExecutor();
 
     @Test
     public void testDoPost() throws IOException {
-        Assertions.assertNull(Http1HttpExecutor.doPost("test", new HashMap<>(), new HashMap<>(), 0));
-        Assertions.assertNull(Http1HttpExecutor.doGet("test", new HashMap<>(), new HashMap<>(), 0));
+        Assertions.assertNull(http1HttpExecutor.doPost("test", new HashMap<>(), new HashMap<>(), 0));
+        Assertions.assertNull(http1HttpExecutor.doGet("test", new HashMap<>(), new HashMap<>(), 0));
+    }
+
+    @Test
+    void testDoGetBaidu() throws Exception {
+        HttpResult<Void> httpResult = http1HttpExecutor.doGet(
+                "https://www.baidu.com",
+                null,
+                null,
+                5000
+        );
+
+
+        assertNotNull(httpResult);
+        assertEquals(200, httpResult.getStatusCode());
+    }
+
+    @Test
+    void testDoPostNormal() throws Exception {
+        HashMap<String, String> header = new HashMap<>();
+        header.put("Content-Type", "application/json");
+
+        HttpResult<Void> httpResult = http1HttpExecutor.doPost(
+                "https://postman-echo.com/post",
+                "{\"name\":\"seata\"}",
+                header,
+                5000
+        );
+
+        assertNotNull(httpResult);
+        assertEquals(200, httpResult.getStatusCode());
+        assertTrue(httpResult.getResponseBody().contains("seata"));
     }
 }

@@ -17,12 +17,11 @@
 package org.apache.seata.server.controller;
 
 import org.apache.http.HttpStatus;
-import org.apache.http.StatusLine;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.ContentType;
 import org.apache.http.protocol.HTTP;
 import org.apache.seata.common.holder.ObjectHolder;
 import org.apache.seata.common.http.Http1HttpExecutor;
+import org.apache.seata.common.http.HttpResult;
 import org.apache.seata.server.BaseSpringBootTest;
 import org.apache.seata.server.cluster.listener.ClusterChangeEvent;
 import org.junit.jupiter.api.Assertions;
@@ -48,6 +47,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
 
     private static Environment environment;
     private static int port;
+    private final Http1HttpExecutor http1HttpExecutor = new Http1HttpExecutor();
 
     @BeforeAll
     public static void setUp(ApplicationContext context) {
@@ -63,14 +63,15 @@ class ClusterControllerTest extends BaseSpringBootTest {
         header.put(HTTP.CONN_KEEP_ALIVE, "close");
         Map<String, String> param = new HashMap<>();
         param.put("default-test", "1");
-        try (CloseableHttpResponse response = Http1HttpExecutor.doPost(
-                "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", param, header, 5000)) {
-            if (response != null) {
-                StatusLine statusLine = response.getStatusLine();
-                Assertions.assertEquals(HttpStatus.SC_NOT_MODIFIED, statusLine.getStatusCode());
-                return;
-            }
+
+        HttpResult<Void> httpResult = http1HttpExecutor.doPost(
+                "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", param, header, 5000);
+
+        if (httpResult != null) {
+            Assertions.assertEquals(HttpStatus.SC_NOT_MODIFIED, httpResult.getStatusCode());
+            return;
         }
+
         Assertions.fail();
     }
 
@@ -94,14 +95,16 @@ class ClusterControllerTest extends BaseSpringBootTest {
             }
         });
         thread.start();
-        try (CloseableHttpResponse response =
-                Http1HttpExecutor.doPost("http://127.0.0.1:" + port + "/metadata/v1/watch", param, header, 30000)) {
-            if (response != null) {
-                StatusLine statusLine = response.getStatusLine();
-                Assertions.assertEquals(HttpStatus.SC_OK, statusLine.getStatusCode());
-                return;
-            }
+
+
+        HttpResult<Void> httpResult =
+                http1HttpExecutor.doPost("http://127.0.0.1:" + port + "/metadata/v1/watch", param, header, 30000);
+        if (httpResult != null) {
+
+            Assertions.assertEquals(HttpStatus.SC_OK, httpResult.getStatusCode());
+            return;
         }
+
         Assertions.fail();
     }
 
@@ -111,15 +114,17 @@ class ClusterControllerTest extends BaseSpringBootTest {
         String malicious = "<script>alert('xss')</script>";
         Map<String, String> header = new HashMap<>();
         header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
-        try (CloseableHttpResponse response = Http1HttpExecutor.doGet(
+
+
+        HttpResult<Void> httpResult = http1HttpExecutor.doGet(
                 "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000&testParam="
                         + URLEncoder.encode(malicious, String.valueOf(StandardCharsets.UTF_8)),
                 new HashMap<>(),
                 header,
-                5000)) {
-            Assertions.assertEquals(
-                    HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
-        }
+                5000);
+        Assertions.assertEquals(
+                HttpStatus.SC_BAD_REQUEST, httpResult.getStatusCode());
+
     }
 
     @Test
@@ -131,11 +136,12 @@ class ClusterControllerTest extends BaseSpringBootTest {
         Map<String, String> params = new HashMap<>();
         params.put("testParam", "<script>alert('xss')</script>");
 
-        try (CloseableHttpResponse response = Http1HttpExecutor.doPost(
-                "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", params, headers, 5000)) {
-            Assertions.assertEquals(
-                    HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
-        }
+
+        HttpResult<Void> httpResult = http1HttpExecutor.doPost(
+                "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", params, headers, 5000);
+        Assertions.assertEquals(
+                HttpStatus.SC_BAD_REQUEST, httpResult.getStatusCode());
+
     }
 
     @Test
@@ -146,11 +152,12 @@ class ClusterControllerTest extends BaseSpringBootTest {
 
         String jsonBody = "{\"testParam\":\"<script>alert('xss')</script>\"}";
 
-        try (CloseableHttpResponse response = Http1HttpExecutor.doPostJson(
-                "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", jsonBody, headers, 5000)) {
-            Assertions.assertEquals(
-                    HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
-        }
+
+        HttpResult<Void> httpResult = http1HttpExecutor.doPostJson(
+                "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", jsonBody, headers, 5000);
+        Assertions.assertEquals(
+                HttpStatus.SC_BAD_REQUEST, httpResult.getStatusCode());
+
     }
 
     @Test
@@ -163,11 +170,12 @@ class ClusterControllerTest extends BaseSpringBootTest {
         Map<String, String> params = new HashMap<>();
         params.put("safeParam", "123");
 
-        try (CloseableHttpResponse response = Http1HttpExecutor.doPost(
-                "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", params, headers, 5000)) {
-            Assertions.assertEquals(
-                    HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
-        }
+
+        HttpResult<Void> httpResult = http1HttpExecutor.doPost(
+                "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", params, headers, 5000);
+        Assertions.assertEquals(
+                HttpStatus.SC_BAD_REQUEST, httpResult.getStatusCode());
+
     }
 
     @Test
@@ -179,15 +187,15 @@ class ClusterControllerTest extends BaseSpringBootTest {
 
         String jsonBody = "{\"testParam\":\"<script>alert('xss')</script>\"}";
 
-        try (CloseableHttpResponse response = Http1HttpExecutor.doPostJson(
+        HttpResult<Void> httpResult = http1HttpExecutor.doPostJson(
                 "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000&urlParam="
                         + URLEncoder.encode("<script>alert('xss')</script>", String.valueOf(StandardCharsets.UTF_8)),
                 jsonBody,
                 headers,
-                5000)) {
-            Assertions.assertEquals(
-                    HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
-        }
+                5000);
+        Assertions.assertEquals(
+                HttpStatus.SC_BAD_REQUEST, httpResult.getStatusCode());
+
     }
 
     @Test
@@ -199,10 +207,11 @@ class ClusterControllerTest extends BaseSpringBootTest {
         Map<String, String> params = new HashMap<>();
         params.put("testParam", "custom1");
 
-        try (CloseableHttpResponse response = Http1HttpExecutor.doPost(
-                "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", params, headers, 5000)) {
-            Assertions.assertEquals(
-                    HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
-        }
+
+        HttpResult<Void> httpResult = http1HttpExecutor.doPost(
+                "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", params, headers, 5000);
+        Assertions.assertEquals(
+                HttpStatus.SC_BAD_REQUEST, httpResult.getStatusCode());
+
     }
 }

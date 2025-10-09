@@ -37,7 +37,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @LoadLevel(name = "Http2", order = 2)
-public class Http2HttpExecutor implements HttpExecutor{
+public class Http2HttpExecutor{
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Http2HttpExecutor.class);
 
