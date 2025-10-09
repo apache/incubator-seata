@@ -66,6 +66,7 @@ public class ServerLogServiceImpl implements ServerLogService {
     @Autowired
     private MCPRPCService mcprpcService;
 
+    // TODO: Support breakpoint download
     private static final int SERVER_LOG_PAGE_SIZE = 2500;
     private static final long FILE_EXPIRATION_SECONDS = 60;
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerLogServiceImpl.class);
@@ -74,7 +75,6 @@ public class ServerLogServiceImpl implements ServerLogService {
 
     private static final ReentrantReadWriteLock fileLock = new ReentrantReadWriteLock();
 
-    // File metadata caching
     private static final ConcurrentHashMap<String, FileMetadata> fileMetadataCache = new ConcurrentHashMap<>();
 
     private ScheduledExecutorService scheduledExecutor;
