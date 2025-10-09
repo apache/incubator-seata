@@ -27,6 +27,7 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.epoll.Epoll;
 import io.netty.channel.epoll.EpollChannelOption;
 import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollMode;
@@ -125,16 +126,12 @@ public class NettyClientBootstrap implements RemotingBootstrap {
                 .option(ChannelOption.SO_SNDBUF, nettyClientConfig.getClientSocketSndBufSize())
                 .option(ChannelOption.SO_RCVBUF, nettyClientConfig.getClientSocketRcvBufSize());
 
-        if (nettyClientConfig.enableNative()) {
-            if (PlatformDependent.isOsx()) {
-                if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("client run on macOS");
-                }
-            } else {
-                bootstrap
-                        .option(EpollChannelOption.EPOLL_MODE, EpollMode.EDGE_TRIGGERED)
-                        .option(EpollChannelOption.TCP_QUICKACK, true);
-            }
+        if (PlatformDependent.isWindows() || PlatformDependent.isOsx()) {
+            LOGGER.info("client run on MacOS/Windows, fallback to NIO.");
+        } else if (Epoll.isAvailable()) {
+            bootstrap
+                    .option(EpollChannelOption.EPOLL_MODE, EpollMode.EDGE_TRIGGERED)
+                    .option(EpollChannelOption.TCP_QUICKACK, true);
         }
 
         bootstrap.handler(new ChannelInitializer<SocketChannel>() {
