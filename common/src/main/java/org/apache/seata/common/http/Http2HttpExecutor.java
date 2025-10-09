@@ -50,6 +50,25 @@ public class Http2HttpExecutor implements HttpExecutor {
             .writeTimeout(10, TimeUnit.SECONDS)
             .build();
 
+    public static volatile Http2HttpExecutor instance;
+
+    /**
+     * Gets instance.
+     *
+     * @return the instance
+     */
+    public static Http2HttpExecutor getInstance() {
+
+        if (instance == null) {
+            synchronized (Http2HttpExecutor.class) {
+                if (instance == null) {
+                    instance = new Http2HttpExecutor();
+                }
+            }
+        }
+        return instance;
+    }
+
     public static final MediaType MEDIA_TYPE_JSON = MediaType.parse("application/json");
     public static final MediaType MEDIA_TYPE_FORM_URLENCODED = MediaType.parse("application/x-www-form-urlencoded");
 

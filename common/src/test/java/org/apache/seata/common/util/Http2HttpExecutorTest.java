@@ -20,6 +20,7 @@ import okhttp3.Protocol;
 import okhttp3.Response;
 import org.apache.seata.common.executor.HttpCallback;
 import org.apache.seata.common.http.Http2HttpExecutor;
+import org.apache.seata.common.http.HttpResult;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -36,26 +37,6 @@ class Http2HttpExecutorTest {
 
     @Test
     void testDoPostHttp_param_onSuccess() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-
-        HttpCallback<Response> callback = new HttpCallback<Response>() {
-            @Override
-            public void onSuccess(Response result) {
-                assertNotNull(result);
-                assertEquals(Protocol.HTTP_2, result.protocol());
-                latch.countDown();
-            }
-
-            @Override
-            public void onFailure(Throwable e) {
-                fail("Should not fail");
-            }
-
-            @Override
-            public void onCancelled() {
-                fail("Should not be cancelled");
-            }
-        };
 
         Map<String, String> params = new HashMap<>();
         params.put("key", "value");
@@ -63,8 +44,10 @@ class Http2HttpExecutorTest {
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
 
-        Http2HttpExecutor.doPostHttp("https://www.apache.org/", params, headers, callback);
-        assertTrue(latch.await(10, TimeUnit.SECONDS));
+        HttpResult<Response> responseHttpResult = Http2HttpExecutor.getInstance().doPost("https://www.apache.org/", params, headers, 10000);
+        assertNotNull(responseHttpResult);
+        assertEquals(Protocol.HTTP_2, responseHttpResult.getRawResponse().protocol());
+
     }
 
     @Test
