@@ -27,13 +27,13 @@ import org.apache.seata.common.exception.AuthenticationFailedException;
 import org.apache.seata.common.exception.NotSupportYetException;
 import org.apache.seata.common.exception.ParseEndpointException;
 import org.apache.seata.common.exception.RetryableException;
+import org.apache.seata.common.http.Http1HttpExecutor;
 import org.apache.seata.common.http.HttpResult;
 import org.apache.seata.common.metadata.Metadata;
 import org.apache.seata.common.metadata.MetadataResponse;
 import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.CollectionUtils;
-import org.apache.seata.common.http.Http1HttpExecutor;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.ConfigChangeListener;
@@ -127,8 +127,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
         PREFERRED_NETWORKS = CONFIG.getConfig(getPreferredNetworks());
     }
 
-    private RaftRegistryServiceImpl() {
-    }
+    private RaftRegistryServiceImpl() {}
 
     /**
      * Gets instance.
@@ -147,20 +146,16 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
     }
 
     @Override
-    public void register(InetSocketAddress address) throws Exception {
-    }
+    public void register(InetSocketAddress address) throws Exception {}
 
     @Override
-    public void unregister(InetSocketAddress address) throws Exception {
-    }
+    public void unregister(InetSocketAddress address) throws Exception {}
 
     @Override
-    public void subscribe(String cluster, ConfigChangeListener listener) throws Exception {
-    }
+    public void subscribe(String cluster, ConfigChangeListener listener) throws Exception {}
 
     @Override
-    public void unsubscribe(String cluster, ConfigChangeListener listener) throws Exception {
-    }
+    public void unsubscribe(String cluster, ConfigChangeListener listener) throws Exception {}
 
     protected static void startQueryMetadata() {
         if (REFRESH_METADATA_EXECUTOR == null) {
@@ -427,7 +422,8 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                 header.put(AUTHORIZATION_HEADER, jwtToken);
             }
             try {
-                HttpResult<Void> httpResult = Http1HttpExecutor.getInstance().doPost("http://" + tcAddress + "/metadata/v1/watch", param, header, 30000);
+                HttpResult<Void> httpResult = Http1HttpExecutor.getInstance()
+                        .doPost("http://" + tcAddress + "/metadata/v1/watch", param, header, 30000);
                 if (httpResult != null) {
                     if (httpResult.getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
                         if (StringUtils.isNotBlank(USERNAME) && StringUtils.isNotBlank(PASSWORD)) {
@@ -459,18 +455,18 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                     aliveAddress.isEmpty()
                             ? aliveAddress
                             : aliveAddress.parallelStream()
-                            .filter(inetSocketAddress -> {
-                                // Since only follower will turn into leader, only the follower node needs to be
-                                // listened to
-                                return inetSocketAddress.getPort() != leaderAddress.getPort()
-                                        || !inetSocketAddress
-                                        .getAddress()
-                                        .getHostAddress()
-                                        .equals(leaderAddress
-                                                .getAddress()
-                                                .getHostAddress());
-                            })
-                            .collect(Collectors.toList()));
+                                    .filter(inetSocketAddress -> {
+                                        // Since only follower will turn into leader, only the follower node needs to be
+                                        // listened to
+                                        return inetSocketAddress.getPort() != leaderAddress.getPort()
+                                                || !inetSocketAddress
+                                                        .getAddress()
+                                                        .getHostAddress()
+                                                        .equals(leaderAddress
+                                                                .getAddress()
+                                                                .getHostAddress());
+                                    })
+                                    .collect(Collectors.toList()));
         } else {
             return RegistryService.super.refreshAliveLookup(transactionServiceGroup, aliveAddress);
         }
@@ -499,7 +495,8 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
             param.put("group", group);
             String response = null;
             try {
-                HttpResult<Void> httpResult = Http1HttpExecutor.getInstance().doGet("http://" + tcAddress + "/metadata/v1/cluster", param, header, 1000);
+                HttpResult<Void> httpResult = Http1HttpExecutor.getInstance()
+                        .doGet("http://" + tcAddress + "/metadata/v1/cluster", param, header, 1000);
                 if (httpResult != null) {
                     int statusCode = httpResult.getStatusCode();
                     if (statusCode == HttpStatus.SC_OK) {
@@ -545,7 +542,8 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
         header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
         String response = null;
         try {
-            HttpResult<Void> httpResult = Http1HttpExecutor.getInstance().doPost("http://" + tcAddress + "/api/v1/auth/login", param, header, 1000);
+            HttpResult<Void> httpResult = Http1HttpExecutor.getInstance()
+                    .doPost("http://" + tcAddress + "/api/v1/auth/login", param, header, 1000);
             if (httpResult != null) {
                 if (httpResult.getStatusCode() == HttpStatus.SC_OK) {
                     response = httpResult.getResponseBody();

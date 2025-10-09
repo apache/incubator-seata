@@ -30,12 +30,27 @@ public class HttpResult<T> {
         this.rawResponse = rawResponse;
     }
 
-    public int getStatusCode() { return statusCode; }
-    public void setStatusCode(int statusCode) { this.statusCode = statusCode; }
+    public int getStatusCode() {
+        return statusCode;
+    }
 
-    public String getResponseBody() { return responseBody; }
-    public void setResponseBody(String responseBody) { this.responseBody = responseBody; }
+    public void setStatusCode(int statusCode) {
+        this.statusCode = statusCode;
+    }
 
-    public T getRawResponse() { return rawResponse; }
-    public void setRawResponse(T rawResponse) { this.rawResponse = rawResponse; }
+    public String getResponseBody() {
+        return responseBody;
+    }
+
+    public void setResponseBody(String responseBody) {
+        this.responseBody = responseBody;
+    }
+
+    public T getRawResponse() {
+        return rawResponse;
+    }
+
+    public void setRawResponse(T rawResponse) {
+        this.rawResponse = rawResponse;
+    }
 }

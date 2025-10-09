@@ -47,7 +47,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @LoadLevel(name = "Http1", order = 1)
-public class Http1HttpExecutor implements HttpExecutor{
+public class Http1HttpExecutor implements HttpExecutor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Http1HttpExecutor.class);
 
@@ -77,7 +77,6 @@ public class Http1HttpExecutor implements HttpExecutor{
         return instance;
     }
 
-
     static {
         POOLING_HTTP_CLIENT_CONNECTION_MANAGER.setMaxTotal(10);
         POOLING_HTTP_CLIENT_CONNECTION_MANAGER.setDefaultMaxPerRoute(10);
@@ -94,8 +93,8 @@ public class Http1HttpExecutor implements HttpExecutor{
     }
 
     @Override
-    public HttpResult<Void>  doPost(
-            String url, Map<String, String> params, Map<String, String> header, int timeout) throws IOException {
+    public HttpResult<Void> doPost(String url, Map<String, String> params, Map<String, String> header, int timeout)
+            throws IOException {
         try {
             URIBuilder builder = new URIBuilder(url);
             URI uri = builder.build();
@@ -128,9 +127,12 @@ public class Http1HttpExecutor implements HttpExecutor{
                             .setConnectTimeout(timeout)
                             .build())
                     .build());
-            CloseableHttpResponse httpResponse  = client.execute(httpPost);
-            String responseBody = httpResponse != null ? EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8) : null;
-            return new HttpResult<>(httpResponse != null ? httpResponse.getStatusLine().getStatusCode() : 0, responseBody, null);
+            CloseableHttpResponse httpResponse = client.execute(httpPost);
+            String responseBody = httpResponse != null
+                    ? EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8)
+                    : null;
+            return new HttpResult<>(
+                    httpResponse != null ? httpResponse.getStatusLine().getStatusCode() : 0, responseBody, null);
         } catch (URISyntaxException | ClientProtocolException e) {
             LOGGER.error(e.getMessage(), e);
         }
@@ -138,7 +140,7 @@ public class Http1HttpExecutor implements HttpExecutor{
     }
 
     @Override
-    public  HttpResult<Void> doPost(String url, String body, Map<String, String> header, int timeout)
+    public HttpResult<Void> doPost(String url, String body, Map<String, String> header, int timeout)
             throws IOException {
         try {
             URIBuilder builder = new URIBuilder(url);
@@ -163,9 +165,12 @@ public class Http1HttpExecutor implements HttpExecutor{
                             .setConnectTimeout(timeout)
                             .build())
                     .build());
-            CloseableHttpResponse httpResponse  = client.execute(httpPost);
-            String responseBody = httpResponse != null ? EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8) : null;
-            return new HttpResult<>(httpResponse != null ? httpResponse.getStatusLine().getStatusCode() : 0, responseBody, null);
+            CloseableHttpResponse httpResponse = client.execute(httpPost);
+            String responseBody = httpResponse != null
+                    ? EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8)
+                    : null;
+            return new HttpResult<>(
+                    httpResponse != null ? httpResponse.getStatusLine().getStatusCode() : 0, responseBody, null);
         } catch (URISyntaxException | ClientProtocolException e) {
             LOGGER.error(e.getMessage(), e);
         }
@@ -173,8 +178,8 @@ public class Http1HttpExecutor implements HttpExecutor{
     }
 
     @Override
-    public  HttpResult<Void> doGet(
-            String url, Map<String, String> param, Map<String, String> header, int timeout) throws IOException {
+    public HttpResult<Void> doGet(String url, Map<String, String> param, Map<String, String> header, int timeout)
+            throws IOException {
         try {
             URIBuilder builder = new URIBuilder(url);
             if (param != null) {
@@ -196,8 +201,11 @@ public class Http1HttpExecutor implements HttpExecutor{
                             .build())
                     .build());
             CloseableHttpResponse httpResponse = client.execute(httpGet);
-            String responseBody = httpResponse != null ? EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8) : null;
-            return new HttpResult<>(httpResponse != null ? httpResponse.getStatusLine().getStatusCode() : 0, responseBody, null);
+            String responseBody = httpResponse != null
+                    ? EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8)
+                    : null;
+            return new HttpResult<>(
+                    httpResponse != null ? httpResponse.getStatusLine().getStatusCode() : 0, responseBody, null);
         } catch (URISyntaxException | ClientProtocolException e) {
             LOGGER.error(e.getMessage(), e);
         }
@@ -206,13 +214,13 @@ public class Http1HttpExecutor implements HttpExecutor{
 
     @Override
     public HttpResult doGet(String url, Map<String, String> headers, int timeout) throws IOException {
-        //todo
+        // todo
         return null;
     }
 
     @Override
-    public HttpResult<Void> doPostJson(
-            String url, String jsonBody, Map<String, String> headers, int timeout) throws IOException {
+    public HttpResult<Void> doPostJson(String url, String jsonBody, Map<String, String> headers, int timeout)
+            throws IOException {
         RequestConfig requestConfig = RequestConfig.custom()
                 .setSocketTimeout(timeout)
                 .setConnectTimeout(timeout)
@@ -230,8 +238,10 @@ public class Http1HttpExecutor implements HttpExecutor{
         post.setEntity(entity);
 
         CloseableHttpClient client = HttpClients.createDefault();
-        CloseableHttpResponse httpResponse  = client.execute(post);
-        String responseBody = httpResponse != null ? EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8) : null;
-        return new HttpResult<>(httpResponse != null ? httpResponse.getStatusLine().getStatusCode() : 0, responseBody, null);
+        CloseableHttpResponse httpResponse = client.execute(post);
+        String responseBody =
+                httpResponse != null ? EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8) : null;
+        return new HttpResult<>(
+                httpResponse != null ? httpResponse.getStatusLine().getStatusCode() : 0, responseBody, null);
     }
 }

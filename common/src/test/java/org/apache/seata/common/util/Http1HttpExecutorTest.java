@@ -30,7 +30,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class Http1HttpExecutorTest {
 
-
     @Test
     public void testDoPost() throws IOException {
         Assertions.assertNull(Http1HttpExecutor.getInstance().doPost("test", new HashMap<>(), new HashMap<>(), 0));
@@ -39,13 +38,7 @@ public class Http1HttpExecutorTest {
 
     @Test
     void testDoGetBaidu() throws Exception {
-        HttpResult<Void> httpResult = Http1HttpExecutor.getInstance().doGet(
-                "https://www.baidu.com",
-                null,
-                null,
-                5000
-        );
-
+        HttpResult<Void> httpResult = Http1HttpExecutor.getInstance().doGet("https://www.baidu.com", null, null, 5000);
 
         assertNotNull(httpResult);
         assertEquals(200, httpResult.getStatusCode());
@@ -56,12 +49,8 @@ public class Http1HttpExecutorTest {
         HashMap<String, String> header = new HashMap<>();
         header.put("Content-Type", "application/json");
 
-        HttpResult<Void> httpResult = Http1HttpExecutor.getInstance().doPost(
-                "https://postman-echo.com/post",
-                "{\"name\":\"seata\"}",
-                header,
-                5000
-        );
+        HttpResult<Void> httpResult = Http1HttpExecutor.getInstance()
+                .doPost("https://postman-echo.com/post", "{\"name\":\"seata\"}", header, 5000);
 
         assertNotNull(httpResult);
         assertEquals(200, httpResult.getStatusCode());

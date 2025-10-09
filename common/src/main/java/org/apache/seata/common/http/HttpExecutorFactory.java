@@ -24,8 +24,7 @@ public class HttpExecutorFactory {
     private static final String HTTP2_IMPL = "Http2";
     private static final HttpExecutor INSTANCE = createInstance();
 
-    private HttpExecutorFactory() {
-    }
+    private HttpExecutorFactory() {}
 
     private static HttpExecutor createInstance() {
         String implName = isOkHttpAvailable() ? HTTP1_IMPL : HTTP2_IMPL;

@@ -21,7 +21,8 @@ import java.util.Map;
 
 public interface HttpExecutor {
 
-    HttpResult doPost(String url, Map<String, String> params, Map<String, String> header, int timeout) throws IOException;
+    HttpResult doPost(String url, Map<String, String> params, Map<String, String> header, int timeout)
+            throws IOException;
 
     HttpResult doPost(String url, String body, Map<String, String> header, int timeout) throws IOException;
 

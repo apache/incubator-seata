@@ -26,6 +26,7 @@ import org.apache.http.protocol.HTTP;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.exception.AuthenticationFailedException;
 import org.apache.seata.common.exception.RetryableException;
+import org.apache.seata.common.http.Http1HttpExecutor;
 import org.apache.seata.common.http.HttpResult;
 import org.apache.seata.common.metadata.Cluster;
 import org.apache.seata.common.metadata.ClusterRole;
@@ -36,7 +37,6 @@ import org.apache.seata.common.metadata.namingserver.NamingServerNode;
 import org.apache.seata.common.metadata.namingserver.Unit;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.CollectionUtils;
-import org.apache.seata.common.http.Http1HttpExecutor;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.Configuration;
@@ -358,7 +358,8 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
             header.put(AUTHORIZATION_HEADER, jwtToken);
         }
         try {
-            HttpResult<Void> httpResult = Http1HttpExecutor.getInstance().doPost(watchAddr, (String) null, header, 30000);
+            HttpResult<Void> httpResult =
+                    Http1HttpExecutor.getInstance().doPost(watchAddr, (String) null, header, 30000);
 
             if (httpResult != null) {
                 return httpResult.getStatusCode() == HttpStatus.SC_OK;
@@ -439,7 +440,7 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
         if (StringUtils.isNotBlank(jwtToken)) {
             header.put(AUTHORIZATION_HEADER, jwtToken);
         }
-        try  {
+        try {
             HttpResult<Void> httpResult = Http1HttpExecutor.getInstance().doGet(url, paraMap, header, 3000);
             if (httpResult == null || httpResult.getStatusCode() != HttpStatus.SC_OK) {
                 assert httpResult != null;
@@ -580,7 +581,8 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
         header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
         String response = null;
         try {
-            HttpResult<Void> httpResult = Http1HttpExecutor.getInstance().doPost("http://" + namingServerAddress + "/api/v1/auth/login", param, header, 1000);
+            HttpResult<Void> httpResult = Http1HttpExecutor.getInstance()
+                    .doPost("http://" + namingServerAddress + "/api/v1/auth/login", param, header, 1000);
             if (httpResult != null) {
                 if (httpResult.getStatusCode() == HttpStatus.SC_OK) {
                     response = httpResult.getResponseBody();
