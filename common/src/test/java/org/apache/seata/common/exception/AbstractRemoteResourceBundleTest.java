@@ -58,30 +58,26 @@ class AbstractRemoteResourceBundleTest {
         }
     }
 
-    // WhenKeyExistsInKeysButValueIsNull
     @Test
-    void testGetString1() {
+    void getString_fails_whenValueIsNull() {
         TestResourceBundle bundle = new TestResourceBundle();
         Assertions.assertThrows(MissingResourceException.class, () -> bundle.getString("key1"));
     }
 
-    // WhenKeyDoesNotExist
     @Test
-    void testGetString2() {
+    void getString_keyNotFound() {
         TestResourceBundle bundle = new TestResourceBundle();
         Assertions.assertThrows(MissingResourceException.class, () -> bundle.getString("nonexistent"));
     }
 
-    // WhenKeyExistsInKeysButValueIsNull
     @Test
-    void testGetObject1() {
+    void getString_valueIsNull() {
         TestResourceBundle bundle = new TestResourceBundle();
         Assertions.assertThrows(MissingResourceException.class, () -> bundle.getObject("key2"));
     }
 
-    // WhenKeyDoesNotExist
     @Test
-    void testGetObject2() {
+    void getObject_valueIsNull() {
         TestResourceBundle bundle = new TestResourceBundle();
         Assertions.assertThrows(MissingResourceException.class, () -> bundle.getObject("missing"));
     }
@@ -122,16 +118,14 @@ class AbstractRemoteResourceBundleTest {
         Assertions.assertFalse(keys.hasMoreElements());
     }
 
-    // WhenKeyIsInKeys
     @Test
-    void testContainsKey1() {
+    void getObject_keyNotFound() {
         TestResourceBundle bundle = new TestResourceBundle();
         Assertions.assertFalse(bundle.containsKey("key1"));
     }
 
-    // WhenKeyIsNotInKeys
     @Test
-    void testContainsKey2() {
+    void containsKey_keyPresent() {
         TestResourceBundle bundle = new TestResourceBundle();
         Assertions.assertFalse(bundle.containsKey("unknown"));
     }
