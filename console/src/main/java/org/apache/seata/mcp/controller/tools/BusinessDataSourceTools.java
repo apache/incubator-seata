@@ -41,9 +41,7 @@ public class BusinessDataSourceTools {
             description =
                     "Get the identity and name of the business data source. Important!!!: key is name, value is resourceId")
     public Map<String, String> getResourceIds() {
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("User try to get resource ids");
-        }
+        LOGGER.info("User try to get resource ids");
         return BusinessDataSourcesProperties.getDataSourcesNamesAndResourceIds();
     }
 
@@ -51,9 +49,7 @@ public class BusinessDataSourceTools {
     public List<String> getTableNames(
             @ToolParam(description = "The identity of the data source, start with jdbc://", required = true)
                     String resourceId) {
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("User try to get all table names, resource id {}", resourceId);
-        }
+        LOGGER.info("User try to get all table names, resource id {}", resourceId);
         return dataSourceService.getTableNamesBySchema(resourceId);
     }
 
@@ -62,9 +58,7 @@ public class BusinessDataSourceTools {
             @ToolParam(description = "Table Name", required = true) String tableName,
             @ToolParam(description = "The identity of the data source, start with jdbc://", required = true)
                     String resourceId) {
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("User try to get table schema, tableName: {}, resourceId: {}", tableName, resourceId);
-        }
+        LOGGER.info("User try to get table schema, tableName: {}, resourceId: {}", tableName, resourceId);
         return dataSourceService.getTableSchemaByTableName(resourceId, tableName);
     }
 
@@ -73,9 +67,7 @@ public class BusinessDataSourceTools {
             @ToolParam(description = "SQL statement, String type", required = true) String sql,
             @ToolParam(description = "The identity of the data source, start with jdbc://", required = true)
                     String resourceId) {
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("User try to run sql: {}, resourceId: {}", sql, resourceId);
-        }
+        LOGGER.info("User try to run sql: {}, resourceId: {}", sql, resourceId);
         List<Map<String, Object>> result = dataSourceService.runSql(sql, resourceId);
         result.add(
                 Collections.singletonMap(
