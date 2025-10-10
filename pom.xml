@@ -44,19 +44,13 @@
         <module>compatible</module>
         <module>dependencies</module>
         <module>discovery</module>
-        <module>integration/rpc-core</module>
-        <module>integration/dubbo</module>
-        <module>integration/dubbo-alibaba</module>
-        <module>integration/sofa-rpc</module>
-        <module>integration/motan</module>
-        <module>integration/grpc</module>
-        <module>integration/http</module>
-        <module>integration/http-jakarta</module>
-        <module>integration/hsf</module>
-        <module>integration/brpc</module>
+        <!-- Removed integration module -->
+        <!-- Removed ext module -->
+        <!-- Removed rocketmq module -->
+        <!-- Added extensions module -->
+        <module>extensions</module>
         <module>rm</module>
         <module>rm-datasource</module>
-        <module>rocketmq</module>
         <module>spring</module>
         <module>tcc</module>
         <module>mock-server</module>
@@ -69,8 +63,6 @@
         <module>saga</module>
         <module>sqlparser</module>
         <module>server</module>
-        <module>ext/apm-seata-skywalking-plugin</module>
-        <module>integration-tx-api</module>
         <module>namingserver</module>
         <!--<module>seata-plugin</module>-->
     </modules>
@@ -300,16 +292,6 @@
                 <module>compatible</module>
                 <module>dependencies</module>
                 <module>discovery</module>
-                <module>integration/rpc-core</module>
-                <module>integration/dubbo</module>
-                <module>integration/dubbo-alibaba</module>
-                <module>integration/sofa-rpc</module>
-                <module>integration/motan</module>
-                <module>integration/grpc</module>
-                <module>integration/http</module>
-                <module>integration/http-jakarta</module>
-                <module>integration/hsf</module>
-                <module>integration/brpc</module>
                 <module>rm</module>
                 <module>rm-datasource</module>
                 <module>rocketmq</module>
@@ -325,8 +307,6 @@
                 <module>saga</module>
                 <module>sqlparser</module>
                 <module>server</module>
-                <module>ext/apm-seata-skywalking-plugin</module>
-                <module>integration-tx-api</module>
                 <module>namingserver</module>
             </modules>
             <build>
