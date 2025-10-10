@@ -37,57 +37,150 @@ public class HsfTransactionProviderFilter implements ServerFilter {
 
     @Override
     public ListenableFuture<RPCResult> invoke(InvocationHandler nextHandler, Invocation invocation) throws Throwable {
+        return doInvoke(nextHandler, invocation);
+    }
 
-        Object rpcXid = RPCContext.getServerContext().getAttachment(RootContext.KEY_XID);
-        Object rpcBranchType = RPCContext.getServerContext().getAttachment(RootContext.KEY_BRANCH_TYPE);
+    private ListenableFuture<RPCResult> doInvoke(InvocationHandler nextHandler, Invocation invocation)
+            throws Throwable {
+        RpcTransactionContext rpcContext = extractRpcTransactionContext();
+
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("xid in RpcContext[{}], branchType in RpcContext[{}]", rpcXid, rpcBranchType);
+            LOGGER.debug(
+                    "xid in RpcContext[{}], branchType in RpcContext[{}]", rpcContext.rpcXid, rpcContext.rpcBranchType);
         }
-        boolean bind = false;
-        if (rpcXid != null) {
-            RootContext.bind(rpcXid.toString());
-            if (StringUtils.equals(BranchType.TCC.name(), rpcBranchType.toString())) {
-                RootContext.bindBranchType(BranchType.TCC);
-            }
-            bind = true;
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("bind xid [{}] branchType [{}] to RootContext", rpcXid, rpcBranchType);
-            }
-        }
+
+        TransactionContextBinding binding = bindTransactionContext(rpcContext);
+
         try {
             return nextHandler.invoke(invocation);
         } finally {
-            if (bind) {
-                BranchType previousBranchType = RootContext.getBranchType();
-                String unbindXid = RootContext.unbind();
-                if (BranchType.TCC == previousBranchType) {
-                    RootContext.unbindBranchType();
-                }
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("unbind xid [{}] branchType [{}] from RootContext", unbindXid, previousBranchType);
-                }
-                if (!rpcXid.toString().equalsIgnoreCase(unbindXid)) {
-                    LOGGER.warn(
-                            "xid in change during RPC from {} to {},branchType from {} to {}",
-                            rpcXid,
-                            unbindXid,
-                            rpcBranchType != null ? rpcBranchType : "AT",
-                            previousBranchType);
-                    if (unbindXid != null) {
-                        RootContext.bind(unbindXid);
-                        LOGGER.warn("bind xid [{}] back to RootContext", unbindXid);
-                        if (BranchType.TCC == previousBranchType) {
-                            RootContext.bindBranchType(BranchType.TCC);
-                            LOGGER.warn("bind branchType [{}] back to RootContext", previousBranchType);
-                        }
-                    }
-                }
-            }
-            RPCContext.getServerContext().removeAttachment(RootContext.KEY_XID);
-            RPCContext.getServerContext().removeAttachment(RootContext.KEY_BRANCH_TYPE);
+            unbindTransactionContext(binding);
+            clearServerContextAttachments();
         }
     }
 
+    private RpcTransactionContext extractRpcTransactionContext() {
+        RpcTransactionContext context = new RpcTransactionContext();
+        context.rpcXid = RPCContext.getServerContext().getAttachment(RootContext.KEY_XID);
+        context.rpcBranchType = RPCContext.getServerContext().getAttachment(RootContext.KEY_BRANCH_TYPE);
+        return context;
+    }
+
+    private TransactionContextBinding bindTransactionContext(RpcTransactionContext rpcContext) {
+        TransactionContextBinding binding = new TransactionContextBinding();
+
+        if (rpcContext.rpcXid != null) {
+            String xidStr = rpcContext.rpcXid.toString();
+            RootContext.bind(xidStr);
+            binding.wasBound = true;
+            binding.bindXid = xidStr;
+
+            if (rpcContext.rpcBranchType != null
+                    && StringUtils.equals(BranchType.TCC.name(), rpcContext.rpcBranchType.toString())) {
+                RootContext.bindBranchType(BranchType.TCC);
+                binding.wasBranchTypeBound = true;
+            }
+
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug(
+                        "bind xid [{}] branchType [{}] to RootContext", rpcContext.rpcXid, rpcContext.rpcBranchType);
+            }
+        }
+
+        return binding;
+    }
+
+    private void unbindTransactionContext(TransactionContextBinding binding) {
+        if (!binding.wasBound) {
+            return;
+        }
+
+        BranchType previousBranchType = RootContext.getBranchType();
+        String unbindXid = RootContext.unbind();
+        binding.unbindXid = unbindXid;
+        binding.unbindBranchType = previousBranchType;
+
+        if (binding.wasBranchTypeBound && BranchType.TCC == previousBranchType) {
+            RootContext.unbindBranchType();
+        }
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("unbind xid [{}] branchType [{}] from RootContext", unbindXid, previousBranchType);
+        }
+
+        handleXidChange(binding);
+    }
+
+    private void handleXidChange(TransactionContextBinding binding) {
+        if (!binding.bindXid.equalsIgnoreCase(binding.unbindXid)) {
+            LOGGER.warn(
+                    "xid in change during RPC from {} to {},branchType from {} to {}",
+                    binding.bindXid,
+                    binding.unbindXid,
+                    binding.bindBranchType != null ? binding.bindBranchType : "AT",
+                    binding.unbindBranchType);
+
+            if (binding.unbindXid != null) {
+                restoreTransactionContext(binding);
+            }
+        }
+    }
+
+    private void restoreTransactionContext(TransactionContextBinding binding) {
+        RootContext.bind(binding.unbindXid);
+        LOGGER.warn("bind xid [{}] back to RootContext", binding.unbindXid);
+
+        if (BranchType.TCC == binding.unbindBranchType) {
+            RootContext.bindBranchType(BranchType.TCC);
+            LOGGER.warn("bind branchType [{}] back to RootContext", binding.unbindBranchType);
+        }
+    }
+
+    private void clearServerContextAttachments() {
+        RPCContext.getServerContext().removeAttachment(RootContext.KEY_XID);
+        RPCContext.getServerContext().removeAttachment(RootContext.KEY_BRANCH_TYPE);
+    }
+
     @Override
-    public void onResponse(Invocation invocation, RPCResult rpcResult) {}
+    public void onResponse(Invocation invocation, RPCResult rpcResult) {
+        // No operation needed
+    }
+
+    private static class RpcTransactionContext {
+        /**
+         * The Rpc xid.
+         */
+        Object rpcXid;
+        /**
+         * The Rpc branch type.
+         */
+        Object rpcBranchType;
+    }
+
+    private static class TransactionContextBinding {
+        /**
+         * The Was bound.
+         */
+        boolean wasBound = false;
+        /**
+         * The Was branch type bound.
+         */
+        boolean wasBranchTypeBound = false;
+        /**
+         * The Bind xid.
+         */
+        String bindXid;
+        /**
+         * The Bind branch type.
+         */
+        String bindBranchType;
+        /**
+         * The Unbind xid.
+         */
+        String unbindXid;
+        /**
+         * The Unbind branch type.
+         */
+        BranchType unbindBranchType;
+    }
 }

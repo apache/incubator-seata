@@ -45,52 +45,98 @@ public class AlibabaDubboTransactionProviderFilter implements Filter {
         if (!DubboConstants.ALIBABADUBBO) {
             return invoker.invoke(invocation);
         }
+
+        return doInvoke(invoker, invocation);
+    }
+
+    private Result doInvoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
         String rpcXid = getRpcXid();
         String rpcBranchType = RpcContext.getContext().getAttachment(RootContext.KEY_BRANCH_TYPE);
+
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("xid in RpcContext[{}], branchType in RpcContext[{}]", rpcXid, rpcBranchType);
         }
-        boolean bind = false;
-        if (rpcXid != null) {
-            RootContext.bind(rpcXid);
-            if (StringUtils.equals(BranchType.TCC.name(), rpcBranchType)) {
-                RootContext.bindBranchType(BranchType.TCC);
-            }
-            bind = true;
-        }
+
+        TransactionContextBinding binding = bindTransactionContext(rpcXid, rpcBranchType);
 
         try {
             return invoker.invoke(invocation);
         } finally {
-            if (bind) {
-                BranchType previousBranchType = RootContext.getBranchType();
-                String unbindXid = RootContext.unbind();
-                if (BranchType.TCC == previousBranchType) {
-                    RootContext.unbindBranchType();
-                }
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("unbind xid [{}] branchType [{}] from RootContext", unbindXid, previousBranchType);
-                }
-                if (!rpcXid.equalsIgnoreCase(unbindXid)) {
-                    LOGGER.warn(
-                            "xid in change during RPC from {} to {},branchType from {} to {}",
-                            rpcXid,
-                            unbindXid,
-                            rpcBranchType != null ? rpcBranchType : BranchType.AT,
-                            previousBranchType);
-                    if (unbindXid != null) {
-                        RootContext.bind(unbindXid);
-                        LOGGER.warn("bind xid [{}] back to RootContext", unbindXid);
-                        if (BranchType.TCC == previousBranchType) {
-                            RootContext.bindBranchType(BranchType.TCC);
-                            LOGGER.warn("bind branchType [{}] back to RootContext", previousBranchType);
-                        }
-                    }
-                }
-            }
-            RpcContext.getServerContext().removeAttachment(RootContext.KEY_XID);
-            RpcContext.getServerContext().removeAttachment(RootContext.KEY_BRANCH_TYPE);
+            unbindTransactionContext(binding);
+            clearServerContextAttachments();
         }
+    }
+
+    private TransactionContextBinding bindTransactionContext(String rpcXid, String rpcBranchType) {
+        TransactionContextBinding binding = new TransactionContextBinding();
+
+        if (rpcXid != null) {
+            RootContext.bind(rpcXid);
+            binding.wasBound = true;
+            binding.bindXid = rpcXid;
+
+            if (StringUtils.equals(BranchType.TCC.name(), rpcBranchType)) {
+                RootContext.bindBranchType(BranchType.TCC);
+                binding.wasBranchTypeBound = true;
+            }
+
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("bind xid [{}] branchType [{}] to RootContext", rpcXid, rpcBranchType);
+            }
+        }
+
+        return binding;
+    }
+
+    private void unbindTransactionContext(TransactionContextBinding binding) {
+        if (!binding.wasBound) {
+            return;
+        }
+
+        BranchType previousBranchType = RootContext.getBranchType();
+        String unbindXid = RootContext.unbind();
+        binding.unbindXid = unbindXid;
+        binding.unbindBranchType = previousBranchType;
+
+        if (binding.wasBranchTypeBound && BranchType.TCC == previousBranchType) {
+            RootContext.unbindBranchType();
+        }
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("unbind xid [{}] branchType [{}] from RootContext", unbindXid, previousBranchType);
+        }
+
+        handleXidChange(binding);
+    }
+
+    private void handleXidChange(TransactionContextBinding binding) {
+        if (!binding.bindXid.equalsIgnoreCase(binding.unbindXid)) {
+            LOGGER.warn(
+                    "xid in change during RPC from {} to {},branchType from {} to {}",
+                    binding.bindXid,
+                    binding.unbindXid,
+                    binding.bindBranchType != null ? binding.bindBranchType : BranchType.AT,
+                    binding.unbindBranchType);
+
+            if (binding.unbindXid != null) {
+                restoreTransactionContext(binding);
+            }
+        }
+    }
+
+    private void restoreTransactionContext(TransactionContextBinding binding) {
+        RootContext.bind(binding.unbindXid);
+        LOGGER.warn("bind xid [{}] back to RootContext", binding.unbindXid);
+
+        if (BranchType.TCC == binding.unbindBranchType) {
+            RootContext.bindBranchType(BranchType.TCC);
+            LOGGER.warn("bind branchType [{}] back to RootContext", binding.unbindBranchType);
+        }
+    }
+
+    private void clearServerContextAttachments() {
+        RpcContext.getServerContext().removeAttachment(RootContext.KEY_XID);
+        RpcContext.getServerContext().removeAttachment(RootContext.KEY_BRANCH_TYPE);
     }
 
     /**
@@ -104,5 +150,32 @@ public class AlibabaDubboTransactionProviderFilter implements Filter {
             rpcXid = RpcContext.getContext().getAttachment(RootContext.KEY_XID.toLowerCase());
         }
         return rpcXid;
+    }
+
+    private static class TransactionContextBinding {
+        /**
+         * The Was bound.
+         */
+        boolean wasBound = false;
+        /**
+         * The Was branch type bound.
+         */
+        boolean wasBranchTypeBound = false;
+        /**
+         * The Bind xid.
+         */
+        String bindXid;
+        /**
+         * The Bind branch type.
+         */
+        String bindBranchType;
+        /**
+         * The Unbind xid.
+         */
+        String unbindXid;
+        /**
+         * The Unbind branch type.
+         */
+        BranchType unbindBranchType;
     }
 }
