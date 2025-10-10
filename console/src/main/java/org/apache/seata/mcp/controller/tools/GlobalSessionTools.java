@@ -65,15 +65,17 @@ public class GlobalSessionTools {
                     NameSpaceDetail nameSpaceDetail,
             @ToolParam(description = "Query parameter objects", required = true) GlobalSessionParamDto paramDto) {
         GlobalSessionParam param = GlobalSessionParam.covertFromDtoParam(paramDto);
-        if (param.getTimeEnd() != null && param.getTimeStart() != null) {
-            if (DateUtils.judgeExceedTimeDuration(
-                    param.getTimeStart(), param.getTimeEnd(), configuration.getQueryDuration())) {
-                throw new IllegalArgumentException(
-                        "The query time span is not allowed to exceed the max query duration : "
-                                + DateUtils.convertToHourFromTimeStamp(configuration.getQueryDuration()) + " hour");
+        if (param.getTimeStart() != null) {
+            if (param.getTimeEnd() != null) {
+                if (DateUtils.judgeExceedTimeDuration(
+                        param.getTimeStart(), param.getTimeEnd(), configuration.getQueryDuration())) {
+                    throw new IllegalArgumentException(
+                            "The query time span is not allowed to exceed the max query duration : "
+                                    + DateUtils.convertToHourFromTimeStamp(configuration.getQueryDuration()) + " hour");
+                }
+            } else {
+                param.setTimeEnd(param.getTimeStart() + DateUtils.ONE_DAY_TIMESTAMP);
             }
-        } else if (param.getTimeStart() != null && param.getTimeEnd() == null) {
-            param.setTimeEnd(param.getTimeStart() + DateUtils.ONE_DAY_TIMESTAMP);
         } else {
             param.setTimeEnd(null);
             param.setTimeStart(null);
