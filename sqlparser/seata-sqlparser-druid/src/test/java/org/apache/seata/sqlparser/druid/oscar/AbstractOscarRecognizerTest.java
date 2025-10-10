@@ -14,43 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.core.rpc;
+package org.apache.seata.sqlparser.druid.oscar;
+
+import org.apache.seata.sqlparser.druid.AbstractRecognizerTest;
+import org.apache.seata.sqlparser.util.JdbcConstants;
 
 /**
- * The enum Transport server type.
+ * Base Test for recognizer of Oscar
  *
- */
-public enum TransportServerType {
-    /**
-     * Native transport server type.
-     */
-    NATIVE("native"),
-    /**
-     * Nio transport server type.
-     */
-    NIO("nio");
-
-    /**
-     * The Name.
-     */
-    public final String name;
-
-    TransportServerType(String name) {
-        this.name = name;
-    }
-
-    /**
-     * Gets type.
-     *
-     * @param name the name
-     * @return the type
-     */
-    public static TransportServerType getType(String name) {
-        for (TransportServerType b : TransportServerType.values()) {
-            if (b.name().equalsIgnoreCase(name)) {
-                return b;
-            }
-        }
-        throw new IllegalArgumentException("unknown type:" + name);
+ **/
+public class AbstractOscarRecognizerTest extends AbstractRecognizerTest {
+    @Override
+    public String getDbType() {
+        return JdbcConstants.OSCAR;
     }
 }

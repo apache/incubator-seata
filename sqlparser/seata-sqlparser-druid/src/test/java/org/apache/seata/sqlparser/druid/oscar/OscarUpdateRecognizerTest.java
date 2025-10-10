@@ -34,16 +34,16 @@ import java.util.Map;
 /**
  * The Oscar Update Recognizer Test.
  */
-public class OscarUpdateRecognizerTest {
+public class OscarUpdateRecognizerTest extends AbstractOscarRecognizerTest {
 
     private static final String DB_TYPE = "oscar";
 
     @Test
     public void testGetSqlType() {
         String sql = "update t set n = ?";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
+        SQLStatement sqlStatement = getSQLStatement(sql);
 
-        OscarUpdateRecognizer recognizer = new OscarUpdateRecognizer(sql, asts.get(0));
+        OscarUpdateRecognizer recognizer = new OscarUpdateRecognizer(sql, sqlStatement);
         Assertions.assertEquals(recognizer.getSQLType(), SQLType.UPDATE);
     }
 
@@ -51,15 +51,15 @@ public class OscarUpdateRecognizerTest {
     public void testGetUpdateColumns() {
         // test with normal
         String sql = "update t set a = ?, b = ?, c = ?";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
-        OscarUpdateRecognizer recognizer = new OscarUpdateRecognizer(sql, asts.get(0));
+        SQLStatement sqlStatement = getSQLStatement(sql);
+        OscarUpdateRecognizer recognizer = new OscarUpdateRecognizer(sql, sqlStatement);
         List<String> updateColumns = recognizer.getUpdateColumns();
         Assertions.assertEquals(updateColumns.size(), 3);
 
         // test with alias
         sql = "update t set a.a = ?, a.b = ?, a.c = ?";
-        asts = SQLUtils.parseStatements(sql, DB_TYPE);
-        recognizer = new OscarUpdateRecognizer(sql, asts.get(0));
+        sqlStatement = getSQLStatement(sql);
+        recognizer = new OscarUpdateRecognizer(sql, sqlStatement);
         updateColumns = recognizer.getUpdateColumns();
         Assertions.assertEquals(updateColumns.size(), 3);
 
@@ -81,15 +81,15 @@ public class OscarUpdateRecognizerTest {
     public void testGetUpdateValues() {
         // test with normal
         String sql = "update t set a = ?, b = ?, c = ?";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
-        OscarUpdateRecognizer recognizer = new OscarUpdateRecognizer(sql, asts.get(0));
+        SQLStatement sqlStatement = getSQLStatement(sql);
+        OscarUpdateRecognizer recognizer = new OscarUpdateRecognizer(sql, sqlStatement);
         List<Object> updateValues = recognizer.getUpdateValues();
         Assertions.assertEquals(updateValues.size(), 3);
 
         // test with values
         sql = "update t set a = 1, b = 2, c = 3";
-        asts = SQLUtils.parseStatements(sql, DB_TYPE);
-        recognizer = new OscarUpdateRecognizer(sql, asts.get(0));
+        sqlStatement = getSQLStatement(sql);
+        recognizer = new OscarUpdateRecognizer(sql, sqlStatement);
         updateValues = recognizer.getUpdateValues();
         Assertions.assertEquals(updateValues.size(), 3);
 
@@ -111,9 +111,9 @@ public class OscarUpdateRecognizerTest {
     public void testGetWhereCondition_0() {
 
         String sql = "update t set a = 1";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
+        SQLStatement sqlStatement = getSQLStatement(sql);
 
-        OscarUpdateRecognizer recognizer = new OscarUpdateRecognizer(sql, asts.get(0));
+        OscarUpdateRecognizer recognizer = new OscarUpdateRecognizer(sql, sqlStatement);
         String whereCondition = recognizer.getWhereCondition(
                 new ParametersHolder() {
                     @Override
@@ -130,9 +130,9 @@ public class OscarUpdateRecognizerTest {
     public void testGetWhereCondition_1() {
 
         String sql = "update t set a = 1";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
+        SQLStatement sqlStatement = getSQLStatement(sql);
 
-        OscarUpdateRecognizer recognizer = new OscarUpdateRecognizer(sql, asts.get(0));
+        OscarUpdateRecognizer recognizer = new OscarUpdateRecognizer(sql, sqlStatement);
         String whereCondition = recognizer.getWhereCondition();
 
         Assertions.assertEquals("", whereCondition);
@@ -141,18 +141,18 @@ public class OscarUpdateRecognizerTest {
     @Test
     public void testGetTableAlias() {
         String sql = "update t set a = ?, b = ?, c = ?";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
+        SQLStatement sqlStatement = getSQLStatement(sql);
 
-        OscarUpdateRecognizer recognizer = new OscarUpdateRecognizer(sql, asts.get(0));
+        OscarUpdateRecognizer recognizer = new OscarUpdateRecognizer(sql, sqlStatement);
         Assertions.assertNull(recognizer.getTableAlias());
     }
 
     @Test
     public void testGetTableName() {
         String sql = "update t set a = ?, b = ?, c = ?";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
+        SQLStatement sqlStatement = getSQLStatement(sql);
 
-        OscarUpdateRecognizer recognizer = new OscarUpdateRecognizer(sql, asts.get(0));
+        OscarUpdateRecognizer recognizer = new OscarUpdateRecognizer(sql, sqlStatement);
         Assertions.assertEquals(recognizer.getTableName(), "t");
     }
 }
