@@ -51,9 +51,7 @@ public class ModifyConfirmTools {
                     "Confirmation string must explicitly contain '确认' or 'confirm' and repeat the modification content. This must come from the user.");
         }
         Map<String, String> keyMap = modifyConfirmService.confirmAndGetKey();
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("the user obtains a modify key:{}", keyMap.get("modify_key"));
-        }
+        LOGGER.info("the user obtains a modify key:{}", keyMap.get("modify_key"));
         return keyMap;
     }
 }
