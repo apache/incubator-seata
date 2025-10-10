@@ -63,8 +63,8 @@ class ClusterControllerTest extends BaseSpringBootTest {
         Map<String, String> param = new HashMap<>();
         param.put("default-test", "1");
 
-        HttpResult<Void> httpResult = Http1HttpExecutor.getInstance().doPost(
-                "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", param, header, 5000);
+        HttpResult<Void> httpResult = Http1HttpExecutor.getInstance()
+                .doPost("http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", param, header, 5000);
 
         if (httpResult != null) {
             Assertions.assertEquals(HttpStatus.SC_NOT_MODIFIED, httpResult.getStatusCode());
@@ -95,8 +95,8 @@ class ClusterControllerTest extends BaseSpringBootTest {
         });
         thread.start();
 
-        HttpResult<Void> httpResult =
-                Http1HttpExecutor.getInstance().doPost("http://127.0.0.1:" + port + "/metadata/v1/watch", param, header, 30000);
+        HttpResult<Void> httpResult = Http1HttpExecutor.getInstance()
+                .doPost("http://127.0.0.1:" + port + "/metadata/v1/watch", param, header, 30000);
         if (httpResult != null) {
 
             Assertions.assertEquals(HttpStatus.SC_OK, httpResult.getStatusCode());
@@ -113,12 +113,13 @@ class ClusterControllerTest extends BaseSpringBootTest {
         Map<String, String> header = new HashMap<>();
         header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
 
-        HttpResult<Void> httpResult = Http1HttpExecutor.getInstance().doGet(
-                "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000&testParam="
-                        + URLEncoder.encode(malicious, String.valueOf(StandardCharsets.UTF_8)),
-                new HashMap<>(),
-                header,
-                5000);
+        HttpResult<Void> httpResult = Http1HttpExecutor.getInstance()
+                .doGet(
+                        "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000&testParam="
+                                + URLEncoder.encode(malicious, String.valueOf(StandardCharsets.UTF_8)),
+                        new HashMap<>(),
+                        header,
+                        5000);
         Assertions.assertEquals(HttpStatus.SC_BAD_REQUEST, httpResult.getStatusCode());
     }
 
@@ -131,8 +132,8 @@ class ClusterControllerTest extends BaseSpringBootTest {
         Map<String, String> params = new HashMap<>();
         params.put("testParam", "<script>alert('xss')</script>");
 
-        HttpResult<Void> httpResult = Http1HttpExecutor.getInstance().doPost(
-                "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", params, headers, 5000);
+        HttpResult<Void> httpResult = Http1HttpExecutor.getInstance()
+                .doPost("http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", params, headers, 5000);
         Assertions.assertEquals(HttpStatus.SC_BAD_REQUEST, httpResult.getStatusCode());
     }
 
@@ -144,8 +145,8 @@ class ClusterControllerTest extends BaseSpringBootTest {
 
         String jsonBody = "{\"testParam\":\"<script>alert('xss')</script>\"}";
 
-        HttpResult<Void> httpResult = Http1HttpExecutor.getInstance().doPostJson(
-                "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", jsonBody, headers, 5000);
+        HttpResult<Void> httpResult = Http1HttpExecutor.getInstance()
+                .doPostJson("http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", jsonBody, headers, 5000);
         Assertions.assertEquals(HttpStatus.SC_BAD_REQUEST, httpResult.getStatusCode());
     }
 
@@ -159,8 +160,8 @@ class ClusterControllerTest extends BaseSpringBootTest {
         Map<String, String> params = new HashMap<>();
         params.put("safeParam", "123");
 
-        HttpResult<Void> httpResult = Http1HttpExecutor.getInstance().doPost(
-                "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", params, headers, 5000);
+        HttpResult<Void> httpResult = Http1HttpExecutor.getInstance()
+                .doPost("http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", params, headers, 5000);
         Assertions.assertEquals(HttpStatus.SC_BAD_REQUEST, httpResult.getStatusCode());
     }
 
@@ -173,12 +174,14 @@ class ClusterControllerTest extends BaseSpringBootTest {
 
         String jsonBody = "{\"testParam\":\"<script>alert('xss')</script>\"}";
 
-        HttpResult<Void> httpResult = Http1HttpExecutor.getInstance().doPostJson(
-                "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000&urlParam="
-                        + URLEncoder.encode("<script>alert('xss')</script>", String.valueOf(StandardCharsets.UTF_8)),
-                jsonBody,
-                headers,
-                5000);
+        HttpResult<Void> httpResult = Http1HttpExecutor.getInstance()
+                .doPostJson(
+                        "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000&urlParam="
+                                + URLEncoder.encode(
+                                        "<script>alert('xss')</script>", String.valueOf(StandardCharsets.UTF_8)),
+                        jsonBody,
+                        headers,
+                        5000);
         Assertions.assertEquals(HttpStatus.SC_BAD_REQUEST, httpResult.getStatusCode());
     }
 
@@ -191,8 +194,8 @@ class ClusterControllerTest extends BaseSpringBootTest {
         Map<String, String> params = new HashMap<>();
         params.put("testParam", "custom1");
 
-        HttpResult<Void> httpResult = Http1HttpExecutor.getInstance().doPost(
-                "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", params, headers, 5000);
+        HttpResult<Void> httpResult = Http1HttpExecutor.getInstance()
+                .doPost("http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", params, headers, 5000);
         Assertions.assertEquals(HttpStatus.SC_BAD_REQUEST, httpResult.getStatusCode());
     }
 }

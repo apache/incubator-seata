@@ -78,8 +78,7 @@ class RaftRegistryServiceImplTest {
         mockResult.setResponseBody(responseBody);
 
         Http1HttpExecutor mockExecutor = mock(Http1HttpExecutor.class);
-        when(mockExecutor.doPost(anyString(), anyMap(), anyMap(), anyInt()))
-                .thenReturn(mockResult);
+        when(mockExecutor.doPost(anyString(), anyMap(), anyMap(), anyInt())).thenReturn(mockResult);
 
         try (MockedStatic<Http1HttpExecutor> mockedStatic = mockStatic(Http1HttpExecutor.class)) {
             mockedStatic.when(Http1HttpExecutor::getInstance).thenReturn(mockExecutor);
@@ -114,9 +113,7 @@ class RaftRegistryServiceImplTest {
         mockResult.setResponseBody(responseBody);
 
         Http1HttpExecutor mockExecutor = mock(Http1HttpExecutor.class);
-        when(mockExecutor.doPost(anyString(), anyMap(), anyMap(), anyInt()))
-                .thenReturn(mockResult);
-
+        when(mockExecutor.doPost(anyString(), anyMap(), anyMap(), anyInt())).thenReturn(mockResult);
 
         try (MockedStatic<Http1HttpExecutor> mockedStatic = mockStatic(Http1HttpExecutor.class)) {
             mockedStatic.when(Http1HttpExecutor::getInstance).thenReturn(mockExecutor);
