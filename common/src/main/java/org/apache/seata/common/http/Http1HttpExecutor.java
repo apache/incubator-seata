@@ -119,20 +119,19 @@ public class Http1HttpExecutor implements HttpExecutor {
                     httpPost.setEntity(stringEntity);
                 }
             }
-            CloseableHttpClient client = HTTP_CLIENT_MAP.computeIfAbsent(timeout, k -> HttpClients.custom()
-                    .setConnectionManager(POOLING_HTTP_CLIENT_CONNECTION_MANAGER)
-                    .setDefaultRequestConfig(RequestConfig.custom()
-                            .setConnectionRequestTimeout(timeout)
-                            .setSocketTimeout(timeout)
-                            .setConnectTimeout(timeout)
-                            .build())
-                    .build());
-            CloseableHttpResponse httpResponse = client.execute(httpPost);
-            String responseBody = httpResponse != null
-                    ? EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8)
-                    : null;
-            return new HttpResult<>(
-                    httpResponse != null ? httpResponse.getStatusLine().getStatusCode() : 0, responseBody, null);
+            CloseableHttpClient client = getHttpClient(timeout);
+            try (CloseableHttpResponse response = client.execute(httpPost)) {
+                int statusCode = response.getStatusLine() != null
+                        ? response.getStatusLine().getStatusCode()
+                        : 0;
+
+                String responseBody = null;
+                if (response.getEntity() != null) {
+                    responseBody = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+                }
+
+                return new HttpResult<>(statusCode, responseBody, null);
+            }
         } catch (URISyntaxException | ClientProtocolException e) {
             LOGGER.error(e.getMessage(), e);
         }
@@ -157,20 +156,19 @@ public class Http1HttpExecutor implements HttpExecutor {
                     httpPost.setEntity(stringEntity);
                 }
             }
-            CloseableHttpClient client = HTTP_CLIENT_MAP.computeIfAbsent(timeout, k -> HttpClients.custom()
-                    .setConnectionManager(POOLING_HTTP_CLIENT_CONNECTION_MANAGER)
-                    .setDefaultRequestConfig(RequestConfig.custom()
-                            .setConnectionRequestTimeout(timeout)
-                            .setSocketTimeout(timeout)
-                            .setConnectTimeout(timeout)
-                            .build())
-                    .build());
-            CloseableHttpResponse httpResponse = client.execute(httpPost);
-            String responseBody = httpResponse != null
-                    ? EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8)
-                    : null;
-            return new HttpResult<>(
-                    httpResponse != null ? httpResponse.getStatusLine().getStatusCode() : 0, responseBody, null);
+            CloseableHttpClient client = getHttpClient(timeout);
+            try (CloseableHttpResponse response = client.execute(httpPost)) {
+                int statusCode = response.getStatusLine() != null
+                        ? response.getStatusLine().getStatusCode()
+                        : 0;
+
+                String responseBody = null;
+                if (response.getEntity() != null) {
+                    responseBody = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+                }
+
+                return new HttpResult<>(statusCode, responseBody, null);
+            }
         } catch (URISyntaxException | ClientProtocolException e) {
             LOGGER.error(e.getMessage(), e);
         }
@@ -192,20 +190,19 @@ public class Http1HttpExecutor implements HttpExecutor {
             if (header != null) {
                 header.forEach(httpGet::addHeader);
             }
-            CloseableHttpClient client = HTTP_CLIENT_MAP.computeIfAbsent(timeout, k -> HttpClients.custom()
-                    .setConnectionManager(POOLING_HTTP_CLIENT_CONNECTION_MANAGER)
-                    .setDefaultRequestConfig(RequestConfig.custom()
-                            .setConnectionRequestTimeout(timeout)
-                            .setSocketTimeout(timeout)
-                            .setConnectTimeout(timeout)
-                            .build())
-                    .build());
-            CloseableHttpResponse httpResponse = client.execute(httpGet);
-            String responseBody = httpResponse != null
-                    ? EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8)
-                    : null;
-            return new HttpResult<>(
-                    httpResponse != null ? httpResponse.getStatusLine().getStatusCode() : 0, responseBody, null);
+            CloseableHttpClient client = getHttpClient(timeout);
+            try (CloseableHttpResponse response = client.execute(httpGet)) {
+                int statusCode = response.getStatusLine() != null
+                        ? response.getStatusLine().getStatusCode()
+                        : 0;
+
+                String responseBody = null;
+                if (response.getEntity() != null) {
+                    responseBody = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+                }
+
+                return new HttpResult<>(statusCode, responseBody, null);
+            }
         } catch (URISyntaxException | ClientProtocolException e) {
             LOGGER.error(e.getMessage(), e);
         }
@@ -221,27 +218,44 @@ public class Http1HttpExecutor implements HttpExecutor {
     @Override
     public HttpResult<Void> doPostJson(String url, String jsonBody, Map<String, String> headers, int timeout)
             throws IOException {
-        RequestConfig requestConfig = RequestConfig.custom()
-                .setSocketTimeout(timeout)
-                .setConnectTimeout(timeout)
-                .build();
 
         HttpPost post = new HttpPost(url);
-        post.setConfig(requestConfig);
 
         if (headers != null) {
             headers.forEach(post::addHeader);
         }
         post.setHeader("Content-Type", "application/json");
 
-        StringEntity entity = new StringEntity(jsonBody, StandardCharsets.UTF_8);
-        post.setEntity(entity);
+        if (StringUtils.isNotBlank(jsonBody)) {
+            post.setEntity(new StringEntity(jsonBody, StandardCharsets.UTF_8));
+        }
 
-        CloseableHttpClient client = HttpClients.createDefault();
-        CloseableHttpResponse httpResponse = client.execute(post);
-        String responseBody =
-                httpResponse != null ? EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8) : null;
-        return new HttpResult<>(
-                httpResponse != null ? httpResponse.getStatusLine().getStatusCode() : 0, responseBody, null);
+
+        CloseableHttpClient client = getHttpClient(timeout);
+        try (CloseableHttpResponse response = client.execute(post)) {
+            int statusCode = response.getStatusLine() != null
+                    ? response.getStatusLine().getStatusCode()
+                    : 0;
+
+            String responseBody = null;
+            if (response.getEntity() != null) {
+                responseBody = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+            }
+
+            return new HttpResult<>(statusCode, responseBody, null);
+        }
+    }
+
+    private static CloseableHttpClient getHttpClient(int timeout) {
+        return HTTP_CLIENT_MAP.computeIfAbsent(timeout, k ->
+                HttpClients.custom()
+                        .setConnectionManager(POOLING_HTTP_CLIENT_CONNECTION_MANAGER)
+                        .setDefaultRequestConfig(RequestConfig.custom()
+                                .setConnectionRequestTimeout(timeout)
+                                .setSocketTimeout(timeout)
+                                .setConnectTimeout(timeout)
+                                .build())
+                        .build()
+        );
     }
 }
