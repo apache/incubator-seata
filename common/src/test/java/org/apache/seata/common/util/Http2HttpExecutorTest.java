@@ -40,8 +40,8 @@ class Http2HttpExecutorTest {
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
 
-        HttpResult<Response> responseHttpResult = Http2HttpExecutor.getInstance()
-                .doPost("https://www.cloudflare.com/", params, headers, 10000);
+        HttpResult<Response> responseHttpResult =
+                Http2HttpExecutor.getInstance().doPost("https://www.cloudflare.com/", params, headers, 10000);
 
         assertNotNull(responseHttpResult);
         assertEquals(Protocol.HTTP_2, responseHttpResult.getRawResponse().protocol());
@@ -55,9 +55,8 @@ class Http2HttpExecutorTest {
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
 
-        assertThrows(Exception.class, () ->
-                Http2HttpExecutor.getInstance()
-                        .doPost("http://localhost:9999/invalid", params, headers, 3000));
+        assertThrows(Exception.class, () -> Http2HttpExecutor.getInstance()
+                .doPost("http://localhost:9999/invalid", params, headers, 3000));
     }
 
     @Test
@@ -76,9 +75,8 @@ class Http2HttpExecutorTest {
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
 
-        assertThrows(Exception.class, () ->
-                Http2HttpExecutor.getInstance()
-                        .doPost("http://localhost:9999/invalid", "{\"key\":\"value\"}", headers, 3000));
+        assertThrows(Exception.class, () -> Http2HttpExecutor.getInstance()
+                .doPost("http://localhost:9999/invalid", "{\"key\":\"value\"}", headers, 3000));
     }
 
     @Test
@@ -89,8 +87,8 @@ class Http2HttpExecutorTest {
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
 
-        HttpResult<Response> result = Http2HttpExecutor.getInstance()
-                .doPost("http://httpbin.org/post", params, headers, 10000);
+        HttpResult<Response> result =
+                Http2HttpExecutor.getInstance().doPost("http://httpbin.org/post", params, headers, 10000);
         assertNotNull(result);
         assertEquals(Protocol.HTTP_1_1, result.getRawResponse().protocol());
     }
@@ -100,8 +98,8 @@ class Http2HttpExecutorTest {
         Map<String, String> headers = new HashMap<>();
         headers.put("Accept", "application/json");
 
-        HttpResult<Response> result = Http2HttpExecutor.getInstance()
-                .doGet("https://www.cloudflare.com/", headers, 10000);
+        HttpResult<Response> result =
+                Http2HttpExecutor.getInstance().doGet("https://www.cloudflare.com/", headers, 10000);
         assertNotNull(result);
         assertEquals(Protocol.HTTP_2, result.getRawResponse().protocol());
     }
