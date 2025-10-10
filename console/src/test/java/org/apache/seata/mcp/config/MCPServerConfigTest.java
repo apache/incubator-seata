@@ -2,11 +2,10 @@ package org.apache.seata.mcp.config;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.seata.mcp.manager.MCPServerManager;
 import org.apache.seata.mcp.entity.pojo.MCPProperties;
+import org.apache.seata.mcp.manager.MCPServerManager;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.servlet.function.RouterFunction;
 import org.springframework.web.servlet.function.ServerResponse;
