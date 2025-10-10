@@ -59,16 +59,18 @@ public class GlobalLockTools {
                     NameSpaceDetail nameSpaceDetail,
             @ToolParam(description = "Global lock parameters", required = true) GlobalLockParamDto paramDto) {
         GlobalLockParam param = GlobalLockParam.convertFromParamDto(paramDto);
-        if (param.getTimeEnd() != null && param.getTimeStart() != null) {
-            if (DateUtils.judgeExceedTimeDuration(
-                    param.getTimeStart(), param.getTimeEnd(), configuration.getQueryDuration())) {
-                return PageResult.failure(
-                        "",
-                        "The query time span is not allowed to exceed the max query duration : "
-                                + DateUtils.convertToHourFromTimeStamp(configuration.getQueryDuration()) + " hour");
+        if (param.getTimeStart() != null) {
+            if (param.getTimeEnd() != null) {
+                if (DateUtils.judgeExceedTimeDuration(
+                        param.getTimeStart(), param.getTimeEnd(), configuration.getQueryDuration())) {
+                    return PageResult.failure(
+                            "",
+                            "The query time span is not allowed to exceed the max query duration : "
+                                    + DateUtils.convertToHourFromTimeStamp(configuration.getQueryDuration()) + " hour");
+                }
+            } else {
+                param.setTimeEnd(param.getTimeStart() + DateUtils.ONE_DAY_TIMESTAMP);
             }
-        } else if (param.getTimeStart() != null && param.getTimeEnd() == null) {
-            param.setTimeEnd(param.getTimeStart() + DateUtils.ONE_DAY_TIMESTAMP);
         } else {
             param.setTimeEnd(null);
             param.setTimeStart(null);
