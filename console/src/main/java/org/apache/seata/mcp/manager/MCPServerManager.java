@@ -152,14 +152,9 @@ public class MCPServerManager implements SmartLifecycle {
         stateLock.lock();
         try {
             this.serverInstance = buildServer();
-            if (serverInstance == null) {
-                throw new InstantiationException("TransportProvider transform failed");
-            }
             transportProvider.activate();
             running.set(true);
             logServerState("Service initialized and running");
-        } catch (InstantiationException e) {
-            throw new RuntimeException(e);
         } finally {
             stateLock.unlock();
         }
@@ -198,8 +193,7 @@ public class MCPServerManager implements SmartLifecycle {
                             .prompts(false)
                             .build())
                     .build();
-        }
-        if (transportProvider instanceof ControlledStreamableTransportProvider) {
+        }else{
             ControlledStreamableTransportProvider streamableTransportProvider =
                     (ControlledStreamableTransportProvider) transportProvider;
             return McpServer.async(streamableTransportProvider)
@@ -211,7 +205,6 @@ public class MCPServerManager implements SmartLifecycle {
                             .build())
                     .build();
         }
-        return null;
     }
 
     private void logServerState(String message) {

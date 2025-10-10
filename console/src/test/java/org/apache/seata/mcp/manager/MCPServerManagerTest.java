@@ -26,9 +26,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.servlet.function.RouterFunction;
 import org.springframework.web.servlet.function.ServerResponse;
+import org.springframework.web.servlet.function.ServerRequest;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.http.converter.HttpMessageConverter;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.Collections;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -79,9 +84,85 @@ class MCPServerManagerTest {
     }
 
     @Test
+    void testStartStopWithSseType() {
+        MCPProperties sseProperties = createSseMCPProperties();
+        MCPServerManager sseManager = new MCPServerManager(sseProperties, objectMapper);
+
+        assertFalse(sseManager.isRunning());
+        sseManager.start();
+        assertTrue(sseManager.isRunning());
+        assertNotNull(sseManager.getServerInstance());
+
+        sseManager.stop();
+        assertFalse(sseManager.isRunning());
+    }
+
+    @Test
     void testGetRouterFunction() {
         RouterFunction<ServerResponse> routerFunction = mcpServerManager.getRouterFunction();
         assertNotNull(routerFunction);
+    }
+
+    @Test
+    void testSseRouterFunctionActiveFlagBranches() throws Exception {
+        // Inactive branch: expect 503 handler returned
+        MCPProperties sseProperties = createSseMCPProperties();
+        MCPServerManager sseManager = new MCPServerManager(sseProperties, objectMapper);
+        RouterFunction<ServerResponse> routerFunctionInactive = sseManager.getRouterFunction();
+        ServerRequest inactiveReq = createMvcServerRequest("GET", "/any");
+        assertTrue(routerFunctionInactive.route(inactiveReq).isPresent());
+        ServerResponse resp = routerFunctionInactive.route(inactiveReq).get().handle(inactiveReq);
+        assertEquals(503, resp.statusCode().value());
+
+        // Active branch: after start() active=true, delegate to super router
+        sseManager.start();
+        RouterFunction<ServerResponse> routerFunctionActive = sseManager.getRouterFunction();
+        // Match GET to sseEndpoint
+        ServerRequest activeReq = createMvcServerRequest("GET", sseProperties.getSseServerProperties().getSseEndpoint());
+        // Route may or may not be present depending on full handler composition; ensure no NPE
+        routerFunctionActive.route(activeReq);
+
+        // Pause -> inactive again
+        sseManager.pause();
+        RouterFunction<ServerResponse> routerFunctionPaused = sseManager.getRouterFunction();
+        ServerRequest pausedReq = createMvcServerRequest("GET", "/any");
+        assertTrue(routerFunctionPaused.route(pausedReq).isPresent());
+        ServerResponse pausedResp = routerFunctionPaused.route(pausedReq).get().handle(pausedReq);
+        assertEquals(503, pausedResp.statusCode().value());
+    }
+
+    @Test
+    void testStreamableRouterFunctionActiveFlagBranches() throws Exception {
+        MCPProperties streamableProperties = createStreamableMCPProperties();
+        MCPServerManager streamableManager = new MCPServerManager(streamableProperties, objectMapper);
+
+        // Inactive branch
+        RouterFunction<ServerResponse> routerFunctionInactive = streamableManager.getRouterFunction();
+        ServerRequest inactiveReq = createMvcServerRequest("GET", "/any");
+        assertTrue(routerFunctionInactive.route(inactiveReq).isPresent());
+        ServerResponse resp = routerFunctionInactive.route(inactiveReq).get().handle(inactiveReq);
+        assertEquals(503, resp.statusCode().value());
+
+        // Active branch
+        streamableManager.start();
+        RouterFunction<ServerResponse> routerFunctionActive = streamableManager.getRouterFunction();
+        // Match GET to mcp endpoint (listening stream)
+        ServerRequest activeReq = createMvcServerRequest("GET", streamableProperties.getStreamableProperties().getMcpEndPoint());
+        routerFunctionActive.route(activeReq);
+
+        // Deactivate via pause
+        streamableManager.pause();
+        RouterFunction<ServerResponse> routerFunctionPaused = streamableManager.getRouterFunction();
+        ServerRequest pausedReq = createMvcServerRequest("GET", "/any");
+        assertTrue(routerFunctionPaused.route(pausedReq).isPresent());
+        ServerResponse pausedResp = routerFunctionPaused.route(pausedReq).get().handle(pausedReq);
+        assertEquals(503, pausedResp.statusCode().value());
+    }
+
+    private ServerRequest createMvcServerRequest(String method, String path) {
+        MockHttpServletRequest servletRequest = new MockHttpServletRequest(method, path);
+        List<HttpMessageConverter<?>> converters = Collections.emptyList();
+        return ServerRequest.create(servletRequest, converters);
     }
 
     @Test
@@ -268,9 +349,6 @@ class MCPServerManagerTest {
         properties.setMcpType("streamable");
         properties.setServerName("TestServer");
         properties.setServerVersion("1.0.0");
-        properties.setResourceSupport(true);
-        properties.setResourceTemplates(false);
-        properties.setPromptSupport(true);
 
         MCPProperties.StreamableProperties streamableProps = new MCPProperties.StreamableProperties();
         streamableProps.setMcpEndPoint("/mcp");
@@ -285,10 +363,6 @@ class MCPServerManagerTest {
         properties.setMcpType(MCPProperties.SSE_TYPE);
         properties.setServerName("TestSseServer");
         properties.setServerVersion("1.0.0");
-        properties.setResourceSupport(true);
-        properties.setResourceTemplates(true);
-        properties.setPromptSupport(true);
-
         MCPProperties.SseServerProperties sseProps = new MCPProperties.SseServerProperties();
         sseProps.setMessageEndpoint("/message");
         sseProps.setSseEndpoint("/sse");
@@ -302,9 +376,6 @@ class MCPServerManagerTest {
         properties.setMcpType("streamable");
         properties.setServerName("TestStreamableServer");
         properties.setServerVersion("2.0.0");
-        properties.setResourceSupport(false);
-        properties.setResourceTemplates(false);
-        properties.setPromptSupport(false);
 
         MCPProperties.StreamableProperties streamableProps = new MCPProperties.StreamableProperties();
         streamableProps.setMcpEndPoint("/stream");
@@ -314,3 +385,4 @@ class MCPServerManagerTest {
         return properties;
     }
 }
+
