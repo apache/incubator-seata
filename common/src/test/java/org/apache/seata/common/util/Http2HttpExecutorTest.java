@@ -18,20 +18,16 @@ package org.apache.seata.common.util;
 
 import okhttp3.Protocol;
 import okhttp3.Response;
-import org.apache.seata.common.executor.HttpCallback;
 import org.apache.seata.common.http.Http2HttpExecutor;
 import org.apache.seata.common.http.HttpResult;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class Http2HttpExecutorTest {
 
@@ -44,193 +40,80 @@ class Http2HttpExecutorTest {
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
 
-        HttpResult<Response> responseHttpResult = Http2HttpExecutor.getInstance().doPost("https://www.apache.org/", params, headers, 10000);
+        HttpResult<Response> responseHttpResult = Http2HttpExecutor.getInstance()
+                .doPost("https://www.cloudflare.com/", params, headers, 10000);
+
         assertNotNull(responseHttpResult);
         assertEquals(Protocol.HTTP_2, responseHttpResult.getRawResponse().protocol());
-
     }
 
     @Test
-    void testDoPostHttp_param_onFailure() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-
-        HttpCallback<Response> callback = new HttpCallback<Response>() {
-            @Override
-            public void onSuccess(Response response) {
-                fail("Should not succeed");
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                assertNotNull(t);
-                latch.countDown();
-            }
-
-            @Override
-            public void onCancelled() {
-                fail("Should not be cancelled");
-            }
-        };
-
+    void testDoPostHttp_param_onFailure() {
         Map<String, String> params = new HashMap<>();
         params.put("key", "value");
 
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
 
-        Http2HttpExecutor.doPostHttp("http://localhost:9999/invalid", params, headers, callback);
-        assertTrue(latch.await(10, TimeUnit.SECONDS));
+        assertThrows(Exception.class, () ->
+                Http2HttpExecutor.getInstance()
+                        .doPost("http://localhost:9999/invalid", params, headers, 3000));
     }
 
     @Test
     void testDoPostHttp_body_onSuccess() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-
-        HttpCallback<Response> callback = new HttpCallback<Response>() {
-            @Override
-            public void onSuccess(Response result) {
-                assertNotNull(result);
-                assertEquals(Protocol.HTTP_2, result.protocol());
-                latch.countDown();
-            }
-
-            @Override
-            public void onFailure(Throwable e) {
-                fail("Should not fail");
-            }
-
-            @Override
-            public void onCancelled() {
-                fail("Should not be cancelled");
-            }
-        };
-
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
 
-        Http2HttpExecutor.doPostHttp("https://www.apache.org/", "{\"key\":\"value\"}", headers, callback);
-        assertTrue(latch.await(10, TimeUnit.SECONDS));
+        HttpResult<Response> result = Http2HttpExecutor.getInstance()
+                .doPost("https://www.cloudflare.com/", "{\"key\":\"value\"}", headers, 10000);
+        assertNotNull(result);
+        assertEquals(Protocol.HTTP_2, result.getRawResponse().protocol());
     }
 
     @Test
-    void testDoPostHttp_body_onFailure() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-
-        HttpCallback<Response> callback = new HttpCallback<Response>() {
-            @Override
-            public void onSuccess(Response response) {
-                fail("Should not succeed");
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                assertNotNull(t);
-                latch.countDown();
-            }
-
-            @Override
-            public void onCancelled() {
-                fail("Should not be cancelled");
-            }
-        };
-
+    void testDoPostHttp_body_onFailure() {
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
 
-        Http2HttpExecutor.doPostHttp("http://localhost:9999/invalid", "{\"key\":\"value\"}", headers, callback);
-        assertTrue(latch.await(10, TimeUnit.SECONDS));
+        assertThrows(Exception.class, () ->
+                Http2HttpExecutor.getInstance()
+                        .doPost("http://localhost:9999/invalid", "{\"key\":\"value\"}", headers, 3000));
     }
 
     @Test
     void testDoPostHttp_param_onSuccess_forceHttp1() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-
-        HttpCallback<Response> callback = new HttpCallback<Response>() {
-            @Override
-            public void onSuccess(Response result) {
-                assertNotNull(result);
-                assertEquals(Protocol.HTTP_1_1, result.protocol());
-                latch.countDown();
-            }
-
-            @Override
-            public void onFailure(Throwable e) {
-                fail("Should not fail");
-            }
-
-            @Override
-            public void onCancelled() {
-                fail("Should not be cancelled");
-            }
-        };
-
         Map<String, String> params = new HashMap<>();
         params.put("key", "value");
 
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
 
-        Http2HttpExecutor.doPostHttp("http://httpbin.org/post", params, headers, callback);
-        assertTrue(latch.await(10, TimeUnit.SECONDS));
+        HttpResult<Response> result = Http2HttpExecutor.getInstance()
+                .doPost("http://httpbin.org/post", params, headers, 10000);
+        assertNotNull(result);
+        assertEquals(Protocol.HTTP_1_1, result.getRawResponse().protocol());
     }
 
     @Test
     void testDoGetHttp_onSuccess() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-
-        HttpCallback<Response> callback = new HttpCallback<Response>() {
-            @Override
-            public void onSuccess(Response result) {
-                assertNotNull(result);
-                assertEquals(Protocol.HTTP_2, result.protocol());
-                latch.countDown();
-            }
-
-            @Override
-            public void onFailure(Throwable e) {
-                fail("Should not fail");
-            }
-
-            @Override
-            public void onCancelled() {
-                fail("Should not be cancelled");
-            }
-        };
-
         Map<String, String> headers = new HashMap<>();
         headers.put("Accept", "application/json");
 
-        Http2HttpExecutor.doGetHttp("https://www.apache.org/", headers, callback, 1);
-        assertTrue(latch.await(10, TimeUnit.SECONDS));
+        HttpResult<Response> result = Http2HttpExecutor.getInstance()
+                .doGet("https://www.cloudflare.com/", headers, 10000);
+        assertNotNull(result);
+        assertEquals(Protocol.HTTP_2, result.getRawResponse().protocol());
     }
 
     @Test
     void testDoPostHttp_body_onSuccess_forceHttp1() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-
-        HttpCallback<Response> callback = new HttpCallback<Response>() {
-            @Override
-            public void onSuccess(Response result) {
-                assertNotNull(result);
-                assertEquals(Protocol.HTTP_1_1, result.protocol());
-                latch.countDown();
-            }
-
-            @Override
-            public void onFailure(Throwable e) {
-                fail("Should not fail");
-            }
-
-            @Override
-            public void onCancelled() {
-                fail("Should not be cancelled");
-            }
-        };
-
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
 
-        Http2HttpExecutor.doPostHttp("http://httpbin.org/post", "{\"key\":\"value\"}", headers, callback);
-        assertTrue(latch.await(10, TimeUnit.SECONDS));
+        HttpResult<Response> result = Http2HttpExecutor.getInstance()
+                .doPost("http://httpbin.org/post", "{\"key\":\"value\"}", headers, 10000);
+        assertNotNull(result);
+        assertEquals(Protocol.HTTP_1_1, result.getRawResponse().protocol());
     }
 }
