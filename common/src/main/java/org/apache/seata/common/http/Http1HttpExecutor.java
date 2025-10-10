@@ -230,12 +230,10 @@ public class Http1HttpExecutor implements HttpExecutor {
             post.setEntity(new StringEntity(jsonBody, StandardCharsets.UTF_8));
         }
 
-
         CloseableHttpClient client = getHttpClient(timeout);
         try (CloseableHttpResponse response = client.execute(post)) {
-            int statusCode = response.getStatusLine() != null
-                    ? response.getStatusLine().getStatusCode()
-                    : 0;
+            int statusCode =
+                    response.getStatusLine() != null ? response.getStatusLine().getStatusCode() : 0;
 
             String responseBody = null;
             if (response.getEntity() != null) {
@@ -247,15 +245,13 @@ public class Http1HttpExecutor implements HttpExecutor {
     }
 
     private static CloseableHttpClient getHttpClient(int timeout) {
-        return HTTP_CLIENT_MAP.computeIfAbsent(timeout, k ->
-                HttpClients.custom()
-                        .setConnectionManager(POOLING_HTTP_CLIENT_CONNECTION_MANAGER)
-                        .setDefaultRequestConfig(RequestConfig.custom()
-                                .setConnectionRequestTimeout(timeout)
-                                .setSocketTimeout(timeout)
-                                .setConnectTimeout(timeout)
-                                .build())
-                        .build()
-        );
+        return HTTP_CLIENT_MAP.computeIfAbsent(timeout, k -> HttpClients.custom()
+                .setConnectionManager(POOLING_HTTP_CLIENT_CONNECTION_MANAGER)
+                .setDefaultRequestConfig(RequestConfig.custom()
+                        .setConnectionRequestTimeout(timeout)
+                        .setSocketTimeout(timeout)
+                        .setConnectTimeout(timeout)
+                        .build())
+                .build());
     }
 }
