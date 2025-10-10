@@ -6,6 +6,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -29,7 +31,7 @@ public class ControlMcpControllerTest {
     void testChangeStatusStart() {
         when(manager.isRunning()).thenReturn(false);
         SingleResult<?> res = controller.changeStatus("start");
-        assertEquals(true, res.isSuccess());
+        assertTrue(res.isSuccess());
         verify(manager, times(1)).resume();
     }
 
@@ -37,21 +39,21 @@ public class ControlMcpControllerTest {
     void testChangeStatusStop() {
         when(manager.isRunning()).thenReturn(true);
         SingleResult<?> res = controller.changeStatus("stop");
-        assertEquals(true, res.isSuccess());
+        assertTrue(res.isSuccess());
         verify(manager, times(1)).pause();
     }
 
     @Test
     void testChangeStatusDefault() {
         SingleResult<?> res = controller.changeStatus("unknown");
-        assertEquals(false, res.isSuccess());
+        assertFalse(res.isSuccess());
     }
 
     @Test
     void testGetStatusRunning() {
         when(manager.isRunning()).thenReturn(true);
         SingleResult<?> res = controller.getStatus();
-        assertEquals(true, res.isSuccess());
+        assertTrue(res.isSuccess());
         assertEquals("MCP Service is Running", res.getData());
     }
 
@@ -59,7 +61,7 @@ public class ControlMcpControllerTest {
     void testGetStatusStopped() {
         when(manager.isRunning()).thenReturn(false);
         SingleResult<?> res = controller.getStatus();
-        assertEquals(true, res.isSuccess());
+        assertTrue(res.isSuccess());
         assertEquals("MCP Service is Stopped", res.getData());
     }
 
@@ -67,7 +69,7 @@ public class ControlMcpControllerTest {
     void testStartMcpServiceWhenNotRunning() {
         when(manager.isRunning()).thenReturn(false);
         SingleResult<?> res = controller.startMcpService();
-        assertEquals(true, res.isSuccess());
+        assertTrue(res.isSuccess());
         verify(manager, times(1)).resume();
     }
 
@@ -75,14 +77,14 @@ public class ControlMcpControllerTest {
     void testStartMcpServiceWhenRunning() {
         when(manager.isRunning()).thenReturn(true);
         SingleResult<?> res = controller.startMcpService();
-        assertEquals(false, res.isSuccess());
+        assertFalse(res.isSuccess());
     }
 
     @Test
     void testStopMcpServiceWhenRunning() {
         when(manager.isRunning()).thenReturn(true);
         SingleResult<?> res = controller.stopMcpService();
-        assertEquals(true, res.isSuccess());
+        assertTrue(res.isSuccess());
         verify(manager, times(1)).pause();
     }
 
@@ -90,7 +92,7 @@ public class ControlMcpControllerTest {
     void testStopMcpServiceWhenNotRunning() {
         when(manager.isRunning()).thenReturn(false);
         SingleResult<?> res = controller.stopMcpService();
-        assertEquals(false, res.isSuccess());
+        assertFalse(res.isSuccess());
     }
 }
 
