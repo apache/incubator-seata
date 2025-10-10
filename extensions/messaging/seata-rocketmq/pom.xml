@@ -32,10 +32,6 @@
     <name>seata-rocketmq ${project.version}</name>
     <description>RocketMQ integration for Seata built with Maven</description>
 
-    <properties>
-        <rocketmq.version>4.9.4</rocketmq.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>

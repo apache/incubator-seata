@@ -200,12 +200,9 @@
                                 <goal>run</goal>
                             </goals>
                             <configuration>
-                                <target>
-                                    <mkdir dir="${agent-config.dir}"/>
-                                    <copy todir="${agent-config.dir}">
-                                        <fileset dir="${project.basedir}/src/main/resources"/>
-                                    </copy>
-                                </target>
+                                <tasks>
+                                    <copy overwrite="true" file="${project.basedir}/config/agent.config" tofile="${agent-config.dir}/agent.config" />
+                                </tasks>
                             </configuration>
                         </execution>
                     </executions>
@@ -213,4 +210,19 @@
             </plugins>
         </pluginManagement>
     </build>
+
+    <profiles>
+        <profile>
+            <id>release</id>
+            <properties>
+                <maven-antrun-plugin.skip>false</maven-antrun-plugin.skip>
+            </properties>
+        </profile>
+        <profile>
+            <id>release-seata</id>
+            <properties>
+                <maven-antrun-plugin.skip>false</maven-antrun-plugin.skip>
+            </properties>
+        </profile>
+    </profiles>
 </project>

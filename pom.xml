@@ -44,10 +44,6 @@
         <module>compatible</module>
         <module>dependencies</module>
         <module>discovery</module>
-        <!-- Removed integration module -->
-        <!-- Removed ext module -->
-        <!-- Removed rocketmq module -->
-        <!-- Added extensions module -->
         <module>extensions</module>
         <module>rm</module>
         <module>rm-datasource</module>
@@ -63,6 +59,7 @@
         <module>saga</module>
         <module>sqlparser</module>
         <module>server</module>
+        <module>integration-tx-api</module>
         <module>namingserver</module>
         <!--<module>seata-plugin</module>-->
     </modules>
@@ -294,7 +291,6 @@
                 <module>discovery</module>
                 <module>rm</module>
                 <module>rm-datasource</module>
-                <module>rocketmq</module>
                 <module>spring</module>
                 <module>tcc</module>
                 <module>mock-server</module>
@@ -307,6 +303,7 @@
                 <module>saga</module>
                 <module>sqlparser</module>
                 <module>server</module>
+                <module>integration-tx-api</module>
                 <module>namingserver</module>
             </modules>
             <build>
