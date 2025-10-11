@@ -16,15 +16,15 @@
  */
 package org.apache.seata.common.http;
 
-public class HttpResult<T> {
+public class HttpResult {
 
     private int statusCode;
     private String responseBody;
-    private T rawResponse;
+    private Object rawResponse;
 
     public HttpResult() {}
 
-    public HttpResult(int statusCode, String responseBody, T rawResponse) {
+    public HttpResult(int statusCode, String responseBody, Object rawResponse) {
         this.statusCode = statusCode;
         this.responseBody = responseBody;
         this.rawResponse = rawResponse;
@@ -46,11 +46,11 @@ public class HttpResult<T> {
         this.responseBody = responseBody;
     }
 
-    public T getRawResponse() {
+    public Object getRawResponse() {
         return rawResponse;
     }
 
-    public void setRawResponse(T rawResponse) {
+    public void setRawResponse(Object rawResponse) {
         this.rawResponse = rawResponse;
     }
 }

@@ -73,7 +73,7 @@ class RaftRegistryServiceImplTest {
     void testRefreshToken_loginFailed() throws Exception {
 
         String responseBody = "{\"code\":\"401\",\"message\":\"Login failed\",\"data\":null,\"success\":false}";
-        HttpResult<Void> mockResult = new HttpResult<>();
+        HttpResult mockResult = new HttpResult();
         mockResult.setStatusCode(HttpStatus.SC_OK);
         mockResult.setResponseBody(responseBody);
 
@@ -108,7 +108,7 @@ class RaftRegistryServiceImplTest {
         String responseBody =
                 "{\"code\":\"200\",\"message\":\"success\",\"data\":\"" + jwtToken + "\",\"success\":true}";
 
-        HttpResult<Void> mockResult = new HttpResult<>();
+        HttpResult mockResult = new HttpResult();
         mockResult.setStatusCode(HttpStatus.SC_OK);
         mockResult.setResponseBody(responseBody);
 

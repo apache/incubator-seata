@@ -27,7 +27,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import org.apache.seata.common.executor.HttpCallback;
 import org.apache.seata.common.loader.LoadLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,7 +72,7 @@ public class Http2HttpExecutor implements HttpExecutor {
     public static final MediaType MEDIA_TYPE_FORM_URLENCODED = MediaType.parse("application/x-www-form-urlencoded");
 
     @Override
-    public HttpResult<Response> doPost(String url, Map<String, String> params, Map<String, String> headers, int timeout)
+    public HttpResult doPost(String url, Map<String, String> params, Map<String, String> headers, int timeout)
             throws IOException {
         try {
             Headers.Builder headerBuilder = new Headers.Builder();
@@ -90,7 +89,7 @@ public class Http2HttpExecutor implements HttpExecutor {
                     .post(requestBody)
                     .build();
 
-            CompletableFuture<HttpResult<Response>> future = new CompletableFuture<>();
+            CompletableFuture<HttpResult> future = new CompletableFuture<>();
             HTTP_CLIENT.newCall(request).enqueue(new Callback() {
                 @Override
                 public void onFailure(Call call, IOException e) {
@@ -102,16 +101,16 @@ public class Http2HttpExecutor implements HttpExecutor {
                     try {
                         String responseBody =
                                 response.body() != null ? response.body().string() : null;
-                        future.complete(new HttpResult<>(response.code(), responseBody, response));
+                        future.complete(new HttpResult(response.code(), responseBody, response));
                     } catch (IOException e) {
                         future.completeExceptionally(e);
                     } finally {
-                        response.close(); // 确保关闭
+                        response.close();
                     }
                 }
             });
 
-            // 阻塞等待回调完成，统一同步 API
+            // 异步转同步
             try {
                 return future.get(timeout, TimeUnit.MILLISECONDS);
             } catch (Exception e) {
@@ -125,7 +124,7 @@ public class Http2HttpExecutor implements HttpExecutor {
     }
 
     @Override
-    public HttpResult<Response> doPost(String url, String body, Map<String, String> headers, int timeout)
+    public HttpResult doPost(String url, String body, Map<String, String> headers, int timeout)
             throws IOException {
         try {
             Headers.Builder headerBuilder = new Headers.Builder();
@@ -141,7 +140,7 @@ public class Http2HttpExecutor implements HttpExecutor {
                     .post(requestBody)
                     .build();
 
-            CompletableFuture<HttpResult<Response>> future = new CompletableFuture<>();
+            CompletableFuture<HttpResult> future = new CompletableFuture<>();
             HTTP_CLIENT.newCall(request).enqueue(new Callback() {
                 @Override
                 public void onFailure(Call call, IOException e) {
@@ -153,11 +152,11 @@ public class Http2HttpExecutor implements HttpExecutor {
                     try {
                         String responseBody =
                                 response.body() != null ? response.body().string() : null;
-                        future.complete(new HttpResult<>(response.code(), responseBody, response));
+                        future.complete(new HttpResult(response.code(), responseBody, response));
                     } catch (IOException e) {
                         future.completeExceptionally(e);
                     } finally {
-                        response.close(); // 确保关闭
+                        response.close();
                     }
                 }
             });
@@ -181,7 +180,7 @@ public class Http2HttpExecutor implements HttpExecutor {
     }
 
     @Override
-    public HttpResult<Response> doGet(String url, Map<String, String> headers, int timeout) throws IOException {
+    public HttpResult doGet(String url, Map<String, String> headers, int timeout) throws IOException {
         try {
             Headers.Builder headerBuilder = new Headers.Builder();
             if (headers != null) {
@@ -194,7 +193,7 @@ public class Http2HttpExecutor implements HttpExecutor {
                     .get()
                     .build();
 
-            CompletableFuture<HttpResult<Response>> future = new CompletableFuture<>();
+            CompletableFuture<HttpResult> future = new CompletableFuture<>();
             HTTP_CLIENT.newCall(request).enqueue(new Callback() {
                 @Override
                 public void onFailure(Call call, IOException e) {
@@ -206,16 +205,15 @@ public class Http2HttpExecutor implements HttpExecutor {
                     try {
                         String responseBody =
                                 response.body() != null ? response.body().string() : null;
-                        future.complete(new HttpResult<>(response.code(), responseBody, response));
+                        future.complete(new HttpResult(response.code(), responseBody, response));
                     } catch (IOException e) {
                         future.completeExceptionally(e);
                     } finally {
-                        response.close(); // 确保关闭
+                        response.close();
                     }
                 }
             });
 
-            // 阻塞等待结果
             try {
                 return future.get(timeout, TimeUnit.MILLISECONDS);
             } catch (Exception e) {
@@ -248,25 +246,4 @@ public class Http2HttpExecutor implements HttpExecutor {
         }
     }
 
-    private static void executeAsync(OkHttpClient client, Request request, final HttpCallback<Response> callback) {
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onResponse(Call call, Response response) {
-                try {
-                    callback.onSuccess(response);
-                } finally {
-                    response.close();
-                }
-            }
-
-            @Override
-            public void onFailure(Call call, IOException e) {
-                if (call.isCanceled()) {
-                    callback.onCancelled();
-                } else {
-                    callback.onFailure(e);
-                }
-            }
-        });
-    }
 }

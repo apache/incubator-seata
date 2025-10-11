@@ -93,7 +93,7 @@ public class Http1HttpExecutor implements HttpExecutor {
     }
 
     @Override
-    public HttpResult<Void> doPost(String url, Map<String, String> params, Map<String, String> header, int timeout)
+    public HttpResult doPost(String url, Map<String, String> params, Map<String, String> header, int timeout)
             throws IOException {
         try {
             URIBuilder builder = new URIBuilder(url);
@@ -130,7 +130,7 @@ public class Http1HttpExecutor implements HttpExecutor {
                     responseBody = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
                 }
 
-                return new HttpResult<>(statusCode, responseBody, null);
+                return new HttpResult(statusCode, responseBody, null);
             }
         } catch (URISyntaxException | ClientProtocolException e) {
             LOGGER.error(e.getMessage(), e);
@@ -139,7 +139,7 @@ public class Http1HttpExecutor implements HttpExecutor {
     }
 
     @Override
-    public HttpResult<Void> doPost(String url, String body, Map<String, String> header, int timeout)
+    public HttpResult doPost(String url, String body, Map<String, String> header, int timeout)
             throws IOException {
         try {
             URIBuilder builder = new URIBuilder(url);
@@ -167,7 +167,7 @@ public class Http1HttpExecutor implements HttpExecutor {
                     responseBody = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
                 }
 
-                return new HttpResult<>(statusCode, responseBody, null);
+                return new HttpResult(statusCode, responseBody, null);
             }
         } catch (URISyntaxException | ClientProtocolException e) {
             LOGGER.error(e.getMessage(), e);
@@ -176,7 +176,7 @@ public class Http1HttpExecutor implements HttpExecutor {
     }
 
     @Override
-    public HttpResult<Void> doGet(String url, Map<String, String> param, Map<String, String> header, int timeout)
+    public HttpResult doGet(String url, Map<String, String> param, Map<String, String> header, int timeout)
             throws IOException {
         try {
             URIBuilder builder = new URIBuilder(url);
@@ -201,7 +201,7 @@ public class Http1HttpExecutor implements HttpExecutor {
                     responseBody = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
                 }
 
-                return new HttpResult<>(statusCode, responseBody, null);
+                return new HttpResult(statusCode, responseBody, null);
             }
         } catch (URISyntaxException | ClientProtocolException e) {
             LOGGER.error(e.getMessage(), e);
@@ -216,7 +216,7 @@ public class Http1HttpExecutor implements HttpExecutor {
     }
 
     @Override
-    public HttpResult<Void> doPostJson(String url, String jsonBody, Map<String, String> headers, int timeout)
+    public HttpResult doPostJson(String url, String jsonBody, Map<String, String> headers, int timeout)
             throws IOException {
 
         HttpPost post = new HttpPost(url);
@@ -240,7 +240,7 @@ public class Http1HttpExecutor implements HttpExecutor {
                 responseBody = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
             }
 
-            return new HttpResult<>(statusCode, responseBody, null);
+            return new HttpResult(statusCode, responseBody, null);
         }
     }
 
