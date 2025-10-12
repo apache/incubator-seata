@@ -17,14 +17,17 @@
 package org.apache.seata.compressor.zstd;
 
 import com.github.luben.zstd.Zstd;
+import com.github.luben.zstd.ZstdInputStream;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 
 /**
  * the Zstd Util
  *
  */
 public class ZstdUtil {
-
-    public static final int MAX_COMPRESSED_SIZE = 4 * 1024 * 1024;
 
     public static byte[] compress(byte[] bytes) {
         if (bytes == null) {
@@ -38,14 +41,17 @@ public class ZstdUtil {
         if (bytes == null) {
             throw new NullPointerException("bytes is null");
         }
-
-        long size = Zstd.decompressedSize(bytes);
-        if (size < 0 || size > MAX_COMPRESSED_SIZE) {
-            throw new IllegalArgumentException("Invalid decompressed size: " + size
-                    + ", the value of size ranges from 0 to " + MAX_COMPRESSED_SIZE);
+        try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+                ZstdInputStream zis = new ZstdInputStream(bais);
+                ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            byte[] buffer = new byte[8192];
+            int len;
+            while ((len = zis.read(buffer)) > 0) {
+                baos.write(buffer, 0, len);
+            }
+            return baos.toByteArray();
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Failed to decompress zstd data", e);
         }
-        byte[] decompressBytes = new byte[(int) size];
-        Zstd.decompress(decompressBytes, bytes);
-        return decompressBytes;
     }
 }

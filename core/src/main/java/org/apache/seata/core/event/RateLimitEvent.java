@@ -34,11 +34,6 @@ public class RateLimitEvent implements Event {
     private String applicationId;
 
     /**
-     * The Client id.
-     */
-    private String clientId;
-
-    /**
      * The Server ip address and port.
      */
     private String serverIpAddressAndPort;
@@ -67,14 +62,6 @@ public class RateLimitEvent implements Event {
         this.applicationId = applicationId;
     }
 
-    public String getClientId() {
-        return clientId;
-    }
-
-    public void setClientId(String clientId) {
-        this.clientId = clientId;
-    }
-
     public String getServerIpAddressAndPort() {
         return serverIpAddressAndPort;
     }
@@ -83,12 +70,10 @@ public class RateLimitEvent implements Event {
         this.serverIpAddressAndPort = serverIpAddressAndPort;
     }
 
-    public RateLimitEvent(
-            String traceId, String limitType, String applicationId, String clientId, String serverIpAddressAndPort) {
+    public RateLimitEvent(String traceId, String limitType, String applicationId, String serverIpAddressAndPort) {
         this.traceId = traceId;
         this.limitType = limitType;
         this.applicationId = applicationId;
-        this.clientId = clientId;
         this.serverIpAddressAndPort = serverIpAddressAndPort;
     }
 
@@ -98,7 +83,6 @@ public class RateLimitEvent implements Event {
                 + traceId + '\'' + ", limitType='"
                 + limitType + '\'' + ", applicationId='"
                 + applicationId + '\'' + ", clientId='"
-                + clientId + '\'' + ", serverIpAddressAndPort='"
                 + serverIpAddressAndPort + '\'' + '}';
     }
 }

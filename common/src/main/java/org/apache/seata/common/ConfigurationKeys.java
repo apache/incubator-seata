@@ -667,11 +667,13 @@ public interface ConfigurationKeys {
     /**
      * The constant TRANSPORT_TYPE
      */
+    @Deprecated
     String TRANSPORT_TYPE = TRANSPORT_PREFIX + "type";
 
     /**
      * The constant TRANSPORT_SERVER
      */
+    @Deprecated
     String TRANSPORT_SERVER = TRANSPORT_PREFIX + "server";
 
     /**
@@ -1141,16 +1143,6 @@ public interface ConfigurationKeys {
     String SERVER_HTTP = SERVER_PREFIX + "http.";
 
     String SERVER_HTTP_FILTER_PREFIX = SERVER_HTTP + "filter.";
-
-    /**
-     * The constant SERVER_HTTP_FILTERS_ENABLED.
-     */
-    String SERVER_HTTP_FILTER_ENABLE = SERVER_HTTP_FILTER_PREFIX + "enabled";
-
-    /**
-     * The constant SERVER_HTTP_FILTER_XSS_ENABLED.
-     */
-    String SERVER_HTTP_FILTER_XSS_FILTER_ENABLE = SERVER_HTTP_FILTER_PREFIX + "xss.enabled";
 
     /**
      * The constant SERVER_HTTP_FILTER_XSS_FILTER_KEYWORDS.

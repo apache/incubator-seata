@@ -14,45 +14,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.core.rpc;
+package org.apache.seata.common.executor;
 
 /**
- * The enum Transport protocol type.
+ * The interface HttpCallback.
  *
+ * @param <T> the type parameter
  */
-public enum TransportProtocolType {
-    /**
-     * Tcp transport protocol type.
-     */
-    TCP("tcp"),
+public interface HttpCallback<T> {
 
     /**
-     * Unix domain socket transport protocol type.
-     */
-    UNIX_DOMAIN_SOCKET("unix-domain-socket");
-
-    /**
-     * The Name.
-     */
-    public final String name;
-
-    TransportProtocolType(String name) {
-        this.name = name;
-    }
-
-    /**
-     * Gets type.
+     * Called when the HTTP request is successful.
      *
-     * @param name the name
-     * @return the type
+     * @param result the result of the HTTP request
      */
-    public static TransportProtocolType getType(String name) {
-        name = name.trim().replace('-', '_');
-        for (TransportProtocolType b : TransportProtocolType.values()) {
-            if (b.name().equalsIgnoreCase(name)) {
-                return b;
-            }
-        }
-        throw new IllegalArgumentException("unknown type:" + name);
-    }
+    void onSuccess(T result);
+
+    /**
+     * Called when the HTTP request fails.
+     *
+     * @param e the exception that occurred during the HTTP request
+     */
+    void onFailure(Throwable e);
+
+    /**
+     * Called when the HTTP request is cancelled.
+     */
+    void onCancelled();
 }

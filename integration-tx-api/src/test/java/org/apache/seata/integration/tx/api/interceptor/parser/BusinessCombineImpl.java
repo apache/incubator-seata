@@ -14,43 +14,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.core.rpc;
+package org.apache.seata.integration.tx.api.interceptor.parser;
+
+import org.apache.seata.spring.annotation.CombineTransactional;
+import org.apache.seata.spring.annotation.GlobalTransactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * The enum Transport server type.
- *
+ * The type Business.
  */
-public enum TransportServerType {
-    /**
-     * Native transport server type.
-     */
-    NATIVE("native"),
-    /**
-     * Nio transport server type.
-     */
-    NIO("nio");
+@GlobalTransactional(timeoutMills = 300000, name = "busi-doBiz")
+@CombineTransactional
+public class BusinessCombineImpl implements Business {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BusinessCombineImpl.class);
 
-    /**
-     * The Name.
-     */
-    public final String name;
-
-    TransportServerType(String name) {
-        this.name = name;
-    }
-
-    /**
-     * Gets type.
-     *
-     * @param name the name
-     * @return the type
-     */
-    public static TransportServerType getType(String name) {
-        for (TransportServerType b : TransportServerType.values()) {
-            if (b.name().equalsIgnoreCase(name)) {
-                return b;
-            }
-        }
-        throw new IllegalArgumentException("unknown type:" + name);
+    @Override
+    public String doBiz(String msg) {
+        LOGGER.info("Business doBiz");
+        return "hello " + msg;
     }
 }

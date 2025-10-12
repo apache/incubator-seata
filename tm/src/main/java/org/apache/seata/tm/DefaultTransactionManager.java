@@ -39,8 +39,45 @@ import org.apache.seata.core.rpc.netty.TmNettyRemotingClient;
 import java.util.concurrent.TimeoutException;
 
 /**
- * The type Default transaction manager.
+ * Default implementation of Transaction Manager (TM) in Seata distributed transaction system.
  *
+ * <p>Acts as the primary client-side component for managing global transactions.
+ * Forwards transaction management operations to Transaction Coordinator (TC) server
+ * through network communication.</p>
+ *
+ * <p><b>Core Operations:</b></p>
+ * <ul>
+ *   <li><b>Begin</b>: Request new global transaction and receive XID</li>
+ *   <li><b>Commit</b>: Initiate two-phase commit protocol</li>
+ *   <li><b>Rollback</b>: Request global transaction rollback</li>
+ *   <li><b>Status Query</b>: Retrieve current transaction status</li>
+ *   <li><b>Status Report</b>: Report transaction status changes</li>
+ * </ul>
+ *
+ * <p><b>Communication:</b> Uses Netty-based TCP communication with configurable
+ * serialization, connection pooling, and automatic failover to available TC servers.</p>
+ *
+ * <p><b>Usage Example:</b></p>
+ * <pre>{@code
+ * TransactionManager tm = new DefaultTransactionManager();
+ * try {
+ *     String xid = tm.begin("app-id", "service-group", "order-create", 30000);
+ *     // Execute business logic...
+ *     GlobalStatus status = tm.commit(xid);
+ * } catch (TransactionException e) {
+ *     tm.rollback(xid);
+ *     throw e;
+ * }
+ * }</pre>
+ *
+ * <p>Thread-safe and typically used indirectly through {@link org.apache.seata.tm.api.DefaultGlobalTransaction}
+ * or {@link org.apache.seata.tm.api.TransactionalTemplate}.</p>
+ *
+ * @author Seata Team
+ * @see TransactionManager
+ * @see TmNettyRemotingClient
+ * @see org.apache.seata.tm.api.DefaultGlobalTransaction
+ * @since 1.0.0
  */
 public class DefaultTransactionManager implements TransactionManager {
 

@@ -42,6 +42,11 @@ jobs:
       fail-fast: false
       matrix:
         druid: [
+          1.2.25,
+#          1.2.24, #The source code depends on guava, resulting in a class not found, see the commit https://github.com/alibaba/druid/commit/f060c2701587948380bd0d07d5baf4f774c06e8a#diff-5200f514252efbc0c4b2dc51ebad5d840b4b3065b9556eb4368bd3476d4c220eR25
+          1.2.23,
+          1.2.22,
+          1.2.21,
           1.2.20,
           1.2.19,
           #1.2.18, # Unit test triggered a bug in Druid, see the commit https://github.com/alibaba/druid/commit/6c493f852852fb287ed5fd31ee16c27ead0ea5cf

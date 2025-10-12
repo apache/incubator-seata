@@ -19,6 +19,7 @@ package org.apache.seata.rm.datasource.exec;
 import com.alibaba.druid.mock.MockStatement;
 import com.alibaba.druid.mock.MockStatementBase;
 import com.alibaba.druid.pool.DruidDataSource;
+import com.alibaba.druid.pool.DruidStatementConnection;
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.google.common.collect.Lists;
@@ -51,6 +52,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -249,14 +251,21 @@ public class MySQLInsertExecutorTest {
             Field field = dataSourceProxy.getClass().getDeclaredField("dbType");
             field.setAccessible(true);
             field.set(newDataSourceProxy, "mysql");
-            ConnectionProxy newConnectionProxy = new ConnectionProxy(
-                    newDataSourceProxy, dataSource.getConnection().getConnection());
-            MockStatementBase mockStatement =
-                    new MockStatement(dataSource.getConnection().getConnection());
+            ConnectionProxy newConnectionProxy =
+                    new ConnectionProxy(newDataSourceProxy, getPhysicsConnection(dataSource));
+            MockStatementBase mockStatement = new MockStatement(getPhysicsConnection(dataSource));
             newStatementProxy = new StatementProxy(newConnectionProxy, mockStatement);
         } catch (Exception e) {
             throw new RuntimeException("init failed");
         }
+    }
+
+    protected Connection getPhysicsConnection(DruidDataSource dataSource) throws SQLException {
+        Connection connection = dataSource.getConnection().getConnection();
+        if (connection instanceof DruidStatementConnection) {
+            return ((DruidStatementConnection) connection).getConnection();
+        }
+        return connection;
     }
 
     @Test

@@ -19,6 +19,7 @@ package org.apache.seata.rm.datasource.sql.struct;
 import com.alibaba.druid.mock.MockStatement;
 import com.alibaba.druid.mock.MockStatementBase;
 import com.alibaba.druid.pool.DruidDataSource;
+import com.alibaba.druid.pool.DruidStatementConnection;
 import com.google.common.collect.Lists;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.rm.datasource.DataSourceProxy;
@@ -31,6 +32,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -218,8 +220,7 @@ public class TableRecordsTest {
         dataSource.setUrl("jdbc:mock:xxx");
         dataSource.setDriver(mockDriver);
 
-        MockStatementBase mockStatement =
-                new MockStatement(dataSource.getConnection().getConnection());
+        MockStatementBase mockStatement = new MockStatement(getPhysicsConnection(dataSource));
         DataSourceProxy proxy = DataSourceProxyTest.getDataSourceProxy(dataSource);
 
         TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(JdbcConstants.MYSQL)
@@ -232,14 +233,21 @@ public class TableRecordsTest {
         Assertions.assertEquals(returnValue.length, tableRecords.pkRows().size());
     }
 
+    private Connection getPhysicsConnection(DruidDataSource dataSource) throws SQLException {
+        Connection connection = dataSource.getConnection().getConnection();
+        if (connection instanceof DruidStatementConnection) {
+            return ((DruidStatementConnection) connection).getConnection();
+        }
+        return connection;
+    }
+
     @Test
     public void testBuildRecords() throws SQLException {
         MockDriver mockDriver = new MockDriver(returnValueColumnLabels, returnValue, columnMetas, indexMetas);
         DruidDataSource dataSource = new DruidDataSource();
         dataSource.setUrl("jdbc:mock:xxx");
         dataSource.setDriver(mockDriver);
-        MockStatementBase mockStatement =
-                new MockStatement(dataSource.getConnection().getConnection());
+        MockStatementBase mockStatement = new MockStatement(getPhysicsConnection(dataSource));
         DataSourceProxy proxy = DataSourceProxyTest.getDataSourceProxy(dataSource);
 
         TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(JdbcConstants.MYSQL)
@@ -258,8 +266,7 @@ public class TableRecordsTest {
         DruidDataSource dataSource = new DruidDataSource();
         dataSource.setUrl("jdbc:mock:xxx");
         dataSource.setDriver(mockDriver);
-        MockStatementBase mockStatement =
-                new MockStatement(dataSource.getConnection().getConnection());
+        MockStatementBase mockStatement = new MockStatement(getPhysicsConnection(dataSource));
         DataSourceProxy proxy = DataSourceProxyTest.getDataSourceProxy(dataSource);
 
         TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(JdbcConstants.MYSQL)

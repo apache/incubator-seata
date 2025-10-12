@@ -16,19 +16,31 @@
  */
 package org.apache.seata.config.zk;
 
+import org.apache.curator.framework.recipes.cache.ChildData;
+import org.apache.curator.framework.recipes.cache.CuratorCacheListener;
 import org.apache.curator.test.TestingServer;
 import org.apache.seata.config.ConfigurationChangeEvent;
 import org.apache.seata.config.ConfigurationChangeListener;
 import org.apache.seata.config.ConfigurationChangeType;
+import org.apache.seata.config.processor.ConfigProcessor;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * The type zk configuration test
@@ -123,5 +135,44 @@ public class ZkConfigurationTest {
             throw new RuntimeException(e);
         }
         Assertions.assertTrue(listened[0]);
+    }
+
+    @Test
+    public void testEvent_pathEqualsConfigPath_blankValue() throws Exception {
+        Method getConfigPath = ZookeeperConfiguration.class.getDeclaredMethod("getConfigPath");
+        getConfigPath.setAccessible(true);
+
+        String configPath = getConfigPath.invoke(null).toString();
+
+        ZookeeperConfiguration.NodeCacheListenerImpl listener =
+                new ZookeeperConfiguration.NodeCacheListenerImpl(configPath, null);
+
+        ChildData mockData = mock(ChildData.class);
+        when(mockData.getData()).thenReturn(new byte[0]);
+
+        listener.event(CuratorCacheListener.Type.NODE_CHANGED, null, mockData);
+
+        // If it can run to this point, it indicates that the null value branch has been overwritten
+    }
+
+    @Test
+    public void testEvent_pathEqualsConfigPath_throwException() throws Exception {
+        Method getConfigPathMethod = ZookeeperConfiguration.class.getDeclaredMethod("getConfigPath");
+        getConfigPathMethod.setAccessible(true);
+        String configPath = getConfigPathMethod.invoke(null).toString();
+        ZookeeperConfiguration.NodeCacheListenerImpl listener =
+                new ZookeeperConfiguration.NodeCacheListenerImpl(configPath, null);
+        String invalidYaml = "server:\n" + "  port: 8080\n" + "::host localhost";
+        ChildData mockData = mock(ChildData.class);
+        when(mockData.getData()).thenReturn(invalidYaml.getBytes(StandardCharsets.UTF_8));
+        try (MockedStatic<ConfigProcessor> processorMockedStatic = Mockito.mockStatic(ConfigProcessor.class)) {
+            processorMockedStatic
+                    .when(() -> ConfigProcessor.resolverConfigDataType(anyString()))
+                    .thenReturn("yaml");
+            processorMockedStatic
+                    .when(() -> ConfigProcessor.processConfig(anyString(), anyString()))
+                    .thenThrow(new IOException("mock io exception"));
+            listener.event(CuratorCacheListener.Type.NODE_CHANGED, null, mockData);
+        }
     }
 }

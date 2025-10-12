@@ -19,7 +19,9 @@ package org.apache.seata.spring.annotation;
 import org.aopalliance.aop.Advice;
 import org.apache.seata.config.ConfigurationChangeEvent;
 import org.apache.seata.core.constants.ConfigurationKeys;
+import org.apache.seata.core.rpc.netty.RmNettyRemotingClient;
 import org.apache.seata.tm.api.FailureHandler;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -82,6 +84,11 @@ class GlobalTransactionScannerTest {
         if (mocks != null) {
             mocks.close();
         }
+    }
+
+    @AfterAll
+    static void afterAll() {
+        RmNettyRemotingClient.getInstance().destroy();
     }
 
     @Test

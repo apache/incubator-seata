@@ -394,15 +394,16 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
                 o = new String(data.getData());
             }
             if (path.equals(getConfigPath())) {
+                if (StringUtils.isBlank(o.toString())) {
+                    LOGGER.warn("Empty config from Zookeeper, path='{}'. Skipped.", path);
+                    return;
+                }
                 Properties seataConfigNew = new Properties();
-                if (StringUtils.isNotBlank(o.toString())) {
-                    try {
-                        seataConfigNew = ConfigProcessor.processConfig(o.toString(), getZkDataType());
-
-                    } catch (IOException e) {
-                        LOGGER.error("load config properties error", e);
-                        return;
-                    }
+                try {
+                    seataConfigNew = ConfigProcessor.processConfig(o.toString(), getZkDataType());
+                } catch (IOException e) {
+                    LOGGER.error("load config properties error", e);
+                    return;
                 }
 
                 for (Map.Entry<String, ConcurrentMap<ConfigurationChangeListener, NodeCacheListenerImpl>> entry :

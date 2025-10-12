@@ -16,7 +16,7 @@
  */
 package org.apache.seata.server.store;
 
-import org.apache.seata.server.DynamicPortTestConfig;
+import org.apache.seata.server.BaseSpringBootTest;
 import org.apache.seata.server.cluster.raft.sync.RaftSyncMessageSerializer;
 import org.apache.seata.server.cluster.raft.sync.msg.RaftGlobalSessionSyncMsg;
 import org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMessage;
@@ -27,15 +27,9 @@ import org.apache.seata.server.storage.SessionConverter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Import;
 
-/**
- */
-@SpringBootTest
-@Import(DynamicPortTestConfig.class)
-public class RaftSyncMessageSerializerTest {
+public class RaftSyncMessageSerializerTest extends BaseSpringBootTest {
     @BeforeAll
     public static void setUp(ApplicationContext context) {}
 
