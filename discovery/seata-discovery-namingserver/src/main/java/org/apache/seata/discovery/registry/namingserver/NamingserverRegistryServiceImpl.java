@@ -358,8 +358,7 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
             header.put(AUTHORIZATION_HEADER, jwtToken);
         }
         try {
-            HttpResult httpResult =
-                    Http1HttpExecutor.getInstance().doPost(watchAddr, (String) null, header, 30000);
+            HttpResult httpResult = Http1HttpExecutor.getInstance().doPost(watchAddr, (String) null, header, 30000);
 
             if (httpResult != null) {
                 return httpResult.getStatusCode() == HttpStatus.SC_OK;
