@@ -17,8 +17,12 @@
 package org.apache.seata.common.http;
 
 import org.apache.seata.common.loader.EnhancedServiceLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HttpExecutorFactory {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpExecutorFactory.class);
 
     private static final String HTTP1_IMPL = "Http1";
     private static final String HTTP2_IMPL = "Http2";
@@ -31,21 +35,16 @@ public class HttpExecutorFactory {
         return EnhancedServiceLoader.load(HttpExecutor.class, implName);
     }
 
-    /**
-     * 检测当前 classpath 中是否存在 OkHttp
-     */
     private static boolean isOkHttpAvailable() {
         try {
             Class.forName("okhttp3.OkHttpClient", false, HttpExecutorFactory.class.getClassLoader());
             return true;
         } catch (ClassNotFoundException ignored) {
+            LOGGER.warn("HTTP2 implementation not available in classpath, falling back to default executor!");
             return false;
         }
     }
 
-    /**
-     * 获取单例 HttpClient 实例
-     */
     public static HttpExecutor getInstance() {
         return INSTANCE;
     }

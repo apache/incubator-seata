@@ -16,9 +16,9 @@
  */
 package org.apache.seata.namingserver;
 
-import org.apache.http.StatusLine;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.seata.common.http.Http1HttpExecutor;
+import org.apache.seata.common.http.HttpExecutor;
+import org.apache.seata.common.http.HttpExecutorFactory;
+import org.apache.seata.common.http.HttpResult;
 import org.apache.seata.common.metadata.Cluster;
 import org.apache.seata.common.metadata.ClusterRole;
 import org.apache.seata.common.metadata.Node;
@@ -38,6 +38,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -64,12 +65,9 @@ class NamingManagerTest {
     private ApplicationContext applicationContext;
 
     @Mock
-    private CloseableHttpResponse httpResponse;
+    private HttpExecutor httpExecutor;
 
-    @Mock
-    private StatusLine statusLine;
-
-    private MockedStatic<Http1HttpExecutor> mockedHttpClientUtil;
+    private MockedStatic<HttpExecutorFactory> mockedHttpExecutorFactory;
 
     @BeforeEach
     void setUp() {
@@ -78,11 +76,8 @@ class NamingManagerTest {
         ReflectionTestUtils.setField(namingManager, "heartbeatTimeThreshold", 500000);
         ReflectionTestUtils.setField(namingManager, "heartbeatCheckTimePeriod", 10000000);
 
-        Mockito.when(httpResponse.getStatusLine()).thenReturn(statusLine);
-        mockedHttpClientUtil = Mockito.mockStatic(Http1HttpExecutor.class);
-        mockedHttpClientUtil
-                .when(() -> Http1HttpExecutor.doGet(anyString(), anyMap(), anyMap(), anyInt()))
-                .thenReturn(httpResponse);
+        mockedHttpExecutorFactory = Mockito.mockStatic(HttpExecutorFactory.class);
+        mockedHttpExecutorFactory.when(HttpExecutorFactory::getInstance).thenReturn(httpExecutor);
 
         namingManager.init();
     }
@@ -102,8 +97,8 @@ class NamingManagerTest {
 
     @AfterEach
     void tearDown() {
-        if (mockedHttpClientUtil != null) {
-            mockedHttpClientUtil.close();
+        if (mockedHttpExecutorFactory != null) {
+            mockedHttpExecutorFactory.close();
         }
     }
 
@@ -216,7 +211,7 @@ class NamingManagerTest {
     }
 
     @Test
-    void testCreateGroup() {
+    void testCreateGroup() throws IOException {
         String namespace = "test-namespace";
         String clusterName = "test-cluster";
         String unitName = UUID.randomUUID().toString();
@@ -228,14 +223,17 @@ class NamingManagerTest {
         node.getMetadata().put(CONSTANT_GROUP, vGroups);
         namingManager.registerInstance(node, namespace, clusterName, unitName);
 
-        Mockito.when(statusLine.getStatusCode()).thenReturn(200);
+        HttpResult mockResult = new HttpResult();
+        mockResult.setStatusCode(200);
+        Mockito.when(httpExecutor.doGet(anyString(), anyMap(), anyMap(), anyInt()))
+                .thenReturn(mockResult);
+
         Result<String> result = namingManager.createGroup(namespace, vGroup, clusterName, unitName);
         assertTrue(result.isSuccess());
         assertEquals("200", result.getCode());
         assertEquals("add vGroup successfully!", result.getMessage());
 
-        mockedHttpClientUtil.verify(
-                () -> Http1HttpExecutor.doGet(anyString(), anyMap(), anyMap(), anyInt()), Mockito.times(1));
+        Mockito.verify(httpExecutor, Mockito.times(1)).doGet(anyString(), anyMap(), anyMap(), anyInt());
     }
 
     @Test
@@ -274,7 +272,7 @@ class NamingManagerTest {
     }
 
     @Test
-    void testRemoveGroup() {
+    void testRemoveGroup() throws IOException {
         String namespace = "test-namespace";
         String clusterName = "test-cluster";
         String unitName = UUID.randomUUID().toString();
@@ -289,12 +287,10 @@ class NamingManagerTest {
         nodeList.add(node);
         unit.setNamingInstanceList(nodeList);
 
-        Mockito.when(httpResponse.getStatusLine()).thenReturn(statusLine);
-        Mockito.when(statusLine.getStatusCode()).thenReturn(200);
-
-        mockedHttpClientUtil
-                .when(() -> Http1HttpExecutor.doGet(anyString(), anyMap(), anyMap(), anyInt()))
-                .thenReturn(httpResponse);
+        HttpResult mockResult = new HttpResult();
+        mockResult.setStatusCode(200);
+        Mockito.when(httpExecutor.doGet(anyString(), anyMap(), anyMap(), anyInt()))
+                .thenReturn(mockResult);
 
         Result<String> result = namingManager.removeGroup(unit, vGroup, clusterName, namespace, unitName);
 
@@ -302,8 +298,7 @@ class NamingManagerTest {
         assertEquals("200", result.getCode());
         assertEquals("remove group in old cluster successfully!", result.getMessage());
 
-        mockedHttpClientUtil.verify(
-                () -> Http1HttpExecutor.doGet(anyString(), anyMap(), anyMap(), anyInt()), Mockito.times(1));
+        Mockito.verify(httpExecutor, Mockito.times(1)).doGet(anyString(), anyMap(), anyMap(), anyInt());
     }
 
     @Test
