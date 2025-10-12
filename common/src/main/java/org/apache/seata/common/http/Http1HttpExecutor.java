@@ -210,7 +210,29 @@ public class Http1HttpExecutor implements HttpExecutor {
 
     @Override
     public HttpResult doGet(String url, Map<String, String> headers, int timeout) throws IOException {
-        // todo
+        try {
+            URIBuilder builder = new URIBuilder(url);
+            URI uri = builder.build();
+            HttpGet httpGet = new HttpGet(uri);
+            if (headers != null) {
+                headers.forEach(httpGet::addHeader);
+            }
+            CloseableHttpClient client = getHttpClient(timeout);
+            try (CloseableHttpResponse response = client.execute(httpGet)) {
+                int statusCode = response.getStatusLine() != null
+                        ? response.getStatusLine().getStatusCode()
+                        : 0;
+
+                String responseBody = null;
+                if (response.getEntity() != null) {
+                    responseBody = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+                }
+
+                return new HttpResult(statusCode, responseBody, null);
+            }
+        } catch (URISyntaxException | ClientProtocolException e) {
+            LOGGER.error(e.getMessage(), e);
+        }
         return null;
     }
 

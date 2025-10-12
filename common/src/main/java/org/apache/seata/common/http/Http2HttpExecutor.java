@@ -22,6 +22,7 @@ import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.FormBody;
 import okhttp3.Headers;
+import okhttp3.HttpUrl;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -172,10 +173,57 @@ public class Http2HttpExecutor implements HttpExecutor {
     }
 
     @Override
-    public HttpResult doGet(String url, Map<String, String> param, Map<String, String> header, int timeout)
+    public HttpResult doGet(String url, Map<String, String> param, Map<String, String> headers, int timeout)
             throws IOException {
-        // todo
-        return null;
+        try {
+
+            HttpUrl.Builder urlBuilder = HttpUrl.parse(url).newBuilder();
+            if (param != null) {
+                param.forEach(urlBuilder::addQueryParameter);
+            }
+            HttpUrl finalUrl = urlBuilder.build();
+
+            Headers.Builder headerBuilder = new Headers.Builder();
+            if (headers != null) {
+                headers.forEach(headerBuilder::add);
+            }
+
+            Request request = new Request.Builder()
+                    .url(finalUrl)
+                    .headers(headerBuilder.build())
+                    .get()
+                    .build();
+
+            CompletableFuture<HttpResult> future = new CompletableFuture<>();
+            HTTP_CLIENT.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    future.completeExceptionally(e);
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) {
+                    try {
+                        String responseBody =
+                                response.body() != null ? response.body().string() : null;
+                        future.complete(new HttpResult(response.code(), responseBody, response));
+                    } catch (IOException e) {
+                        future.completeExceptionally(e);
+                    } finally {
+                        response.close();
+                    }
+                }
+            });
+
+            try {
+                return future.get(timeout, TimeUnit.MILLISECONDS);
+            } catch (Exception e) {
+                throw new IOException("HTTP2 GET request failed or timed out", e);
+            }
+
+        } catch (Exception e) {
+            throw new IOException("Failed to execute HTTP2 GET request", e);
+        }
     }
 
     @Override
@@ -222,7 +270,6 @@ public class Http2HttpExecutor implements HttpExecutor {
             throw new IOException("Failed to execute HTTP2 GET request", e);
         }
     }
-
 
     private RequestBody createRequestBody(Map<String, String> params, String contentType)
             throws JsonProcessingException {
