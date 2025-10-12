@@ -31,7 +31,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -225,35 +224,20 @@ public class EnhancedServiceLoader {
     private static <S> void doUnload(InnerEnhancedServiceLoader<S> serviceLoader, String activateName) {
         ConcurrentMap<Class<?>, ExtensionDefinition<S>> classToDefinitionMap = serviceLoader.classToDefinitionMap;
         List<ExtensionDefinition<S>> extensionDefinitions = new ArrayList<>();
-        for (Iterator<Map.Entry<Class<?>, ExtensionDefinition<S>>> it =
-                        classToDefinitionMap.entrySet().iterator();
-                it.hasNext(); ) {
-            Map.Entry<Class<?>, ExtensionDefinition<S>> entry = it.next();
+        for (Map.Entry<Class<?>, ExtensionDefinition<S>> entry : classToDefinitionMap.entrySet()) {
             String name = entry.getValue().getName();
             if (null == name) {
                 continue;
             }
             if (name.equals(activateName)) {
                 extensionDefinitions.add(entry.getValue());
-                it.remove();
+                classToDefinitionMap.remove(entry.getKey());
             }
         }
         serviceLoader.nameToDefinitionsMap.remove(activateName.toLowerCase());
         if (CollectionUtils.isNotEmpty(extensionDefinitions)) {
             for (ExtensionDefinition<S> definition : extensionDefinitions) {
                 serviceLoader.definitionToInstanceMap.remove(definition);
-            }
-        }
-        InnerEnhancedServiceLoader.Holder<List<ExtensionDefinition<S>>> definitionsHolder =
-                serviceLoader.definitionsHolder;
-        synchronized (definitionsHolder) {
-            List<ExtensionDefinition<S>> definitions = definitionsHolder.get();
-            if (definitions != null && !definitions.isEmpty()) {
-                definitions.removeIf(def -> activateName.equals(def.getName()));
-
-                if (definitions.isEmpty()) {
-                    definitionsHolder.set(null);
-                }
             }
         }
     }
