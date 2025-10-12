@@ -93,8 +93,10 @@ public class MCPAutoRegister implements BeanPostProcessor {
             ObjectNode prop = generatePropertySchema(pt, p);
             props.set(pName, prop);
             ToolParam paramAnn = p.getAnnotation(ToolParam.class);
-            if (paramAnn == null || paramAnn.required()) {
-                required.add(pName);
+            if (paramAnn != null) {
+                if(paramAnn.required()){
+                    required.add(pName);
+                }
             }
         }
 
@@ -148,7 +150,7 @@ public class MCPAutoRegister implements BeanPostProcessor {
         ObjectNode prop = mapper.createObjectNode();
 
         ToolParam paramAnn = parameter.getAnnotation(ToolParam.class);
-        if (paramAnn != null && !paramAnn.description().isEmpty()) {
+        if (paramAnn != null) {
             prop.put("description", paramAnn.description());
         }
 
@@ -211,7 +213,7 @@ public class MCPAutoRegister implements BeanPostProcessor {
                         if (!fieldAnn.example().isEmpty()) {
                             fieldProp.put("example", fieldAnn.example());
                         }
-                        if (fieldAnn.exampleValueClassName() != null && fieldAnn.exampleValueClassName().length != 0) {
+                        if (fieldAnn.exampleValueClassName().length != 0) {
                             StringBuilder example = new StringBuilder();
                             for (Class<?> clazz : fieldAnn.exampleValueClassName()) {
                                 example.append(",").append(getClassInfoAsJson(clazz));
@@ -267,9 +269,7 @@ public class MCPAutoRegister implements BeanPostProcessor {
                 fieldInfo.put("type", field.getType().getName());
                 ToolParam annotation = field.getAnnotation(ToolParam.class);
                 if (annotation != null) {
-                    if (!annotation.description().isEmpty()) {
-                        fieldInfo.put("description", annotation.description());
-                    }
+                    fieldInfo.put("description", annotation.description());
                     fieldInfo.put("required", annotation.required());
                     if (!annotation.example().isEmpty()) {
                         fieldInfo.put("example", annotation.example());
@@ -288,7 +288,7 @@ public class MCPAutoRegister implements BeanPostProcessor {
         List<Field> fields = new ArrayList<>();
         Class<?> current = clazz;
 
-        while (current != null && current != Object.class) {
+        while (current != Object.class) {
             fields.addAll(Arrays.asList(current.getDeclaredFields()));
             current = current.getSuperclass();
         }
@@ -301,7 +301,6 @@ public class MCPAutoRegister implements BeanPostProcessor {
                 && !type.getName().startsWith("java.")
                 && !type.getName().startsWith("javax.")
                 && !type.isEnum()
-                && !type.isInterface()
                 && !type.isArray();
     }
 
