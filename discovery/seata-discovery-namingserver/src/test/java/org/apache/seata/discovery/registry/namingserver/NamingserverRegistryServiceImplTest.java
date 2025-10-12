@@ -364,7 +364,7 @@ class NamingserverRegistryServiceImplTest {
         Map<String, String> header = new HashMap<>();
         header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
         try {
-            HttpResult<Void> httpResult = Http1HttpExecutor.getInstance().doGet(url, paraMap, header, 30000);
+            HttpResult httpResult = Http1HttpExecutor.getInstance().doGet(url, paraMap, header, 30000);
         } catch (Exception e) {
             throw new RemoteException();
         }

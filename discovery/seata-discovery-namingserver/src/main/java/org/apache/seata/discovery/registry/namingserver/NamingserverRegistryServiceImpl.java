@@ -228,7 +228,7 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
             header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
 
             try {
-                HttpResult<Void> httpResult = Http1HttpExecutor.getInstance().doPost(url, jsonBody, header, 3000);
+                HttpResult httpResult = Http1HttpExecutor.getInstance().doPost(url, jsonBody, header, 3000);
                 int statusCode = httpResult.getStatusCode();
                 if (statusCode == 200) {
                     if (LOGGER.isDebugEnabled()) {
@@ -248,7 +248,7 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
         Map<String, String> header = new HashMap<>();
         header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
         try {
-            HttpResult<Void> httpResult = Http1HttpExecutor.getInstance().doGet(url, null, header, 3000);
+            HttpResult httpResult = Http1HttpExecutor.getInstance().doGet(url, null, header, 3000);
             int statusCode = httpResult.getStatusCode();
             return statusCode == 200;
         } catch (Exception e) {
@@ -274,7 +274,7 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
             Map<String, String> header = new HashMap<>();
             header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
             try {
-                HttpResult<Void> httpResult = Http1HttpExecutor.getInstance().doPost(url, jsonBody, header, 3000);
+                HttpResult httpResult = Http1HttpExecutor.getInstance().doPost(url, jsonBody, header, 3000);
                 int statusCode = httpResult.getStatusCode();
                 if (statusCode == 200) {
                     LOGGER.info("instance has been unregistered successfully:{}", statusCode);
@@ -358,7 +358,7 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
             header.put(AUTHORIZATION_HEADER, jwtToken);
         }
         try {
-            HttpResult<Void> httpResult =
+            HttpResult httpResult =
                     Http1HttpExecutor.getInstance().doPost(watchAddr, (String) null, header, 30000);
 
             if (httpResult != null) {
@@ -441,7 +441,7 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
             header.put(AUTHORIZATION_HEADER, jwtToken);
         }
         try {
-            HttpResult<Void> httpResult = Http1HttpExecutor.getInstance().doGet(url, paraMap, header, 3000);
+            HttpResult httpResult = Http1HttpExecutor.getInstance().doGet(url, paraMap, header, 3000);
             if (httpResult == null || httpResult.getStatusCode() != HttpStatus.SC_OK) {
                 assert httpResult != null;
                 throw new NamingRegistryException("cannot lookup server list in vgroup: " + vGroup + ", http code: "
@@ -581,7 +581,7 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
         header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
         String response = null;
         try {
-            HttpResult<Void> httpResult = Http1HttpExecutor.getInstance()
+            HttpResult httpResult = Http1HttpExecutor.getInstance()
                     .doPost("http://" + namingServerAddress + "/api/v1/auth/login", param, header, 1000);
             if (httpResult != null) {
                 if (httpResult.getStatusCode() == HttpStatus.SC_OK) {

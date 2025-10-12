@@ -422,7 +422,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                 header.put(AUTHORIZATION_HEADER, jwtToken);
             }
             try {
-                HttpResult<Void> httpResult = Http1HttpExecutor.getInstance()
+                HttpResult httpResult = Http1HttpExecutor.getInstance()
                         .doPost("http://" + tcAddress + "/metadata/v1/watch", param, header, 30000);
                 if (httpResult != null) {
                     if (httpResult.getStatusCode() == HttpStatus.SC_UNAUTHORIZED) {
@@ -495,7 +495,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
             param.put("group", group);
             String response = null;
             try {
-                HttpResult<Void> httpResult = Http1HttpExecutor.getInstance()
+                HttpResult httpResult = Http1HttpExecutor.getInstance()
                         .doGet("http://" + tcAddress + "/metadata/v1/cluster", param, header, 1000);
                 if (httpResult != null) {
                     int statusCode = httpResult.getStatusCode();
@@ -542,7 +542,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
         header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
         String response = null;
         try {
-            HttpResult<Void> httpResult = Http1HttpExecutor.getInstance()
+            HttpResult httpResult = Http1HttpExecutor.getInstance()
                     .doPost("http://" + tcAddress + "/api/v1/auth/login", param, header, 1000);
             if (httpResult != null) {
                 if (httpResult.getStatusCode() == HttpStatus.SC_OK) {
