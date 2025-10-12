@@ -146,7 +146,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
         String jsonBody = "{\"testParam\":\"<script>alert('xss')</script>\"}";
 
         HttpResult httpResult = Http1HttpExecutor.getInstance()
-                .doPostJson("http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", jsonBody, headers, 5000);
+                .doPost("http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", jsonBody, headers, 5000);
         Assertions.assertEquals(HttpStatus.SC_BAD_REQUEST, httpResult.getStatusCode());
     }
 
@@ -175,7 +175,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
         String jsonBody = "{\"testParam\":\"<script>alert('xss')</script>\"}";
 
         HttpResult httpResult = Http1HttpExecutor.getInstance()
-                .doPostJson(
+                .doPost(
                         "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000&urlParam="
                                 + URLEncoder.encode(
                                         "<script>alert('xss')</script>", String.valueOf(StandardCharsets.UTF_8)),

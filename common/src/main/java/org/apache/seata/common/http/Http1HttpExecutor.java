@@ -214,35 +214,6 @@ public class Http1HttpExecutor implements HttpExecutor {
         return null;
     }
 
-    @Override
-    public HttpResult doPostJson(String url, String jsonBody, Map<String, String> headers, int timeout)
-            throws IOException {
-
-        HttpPost post = new HttpPost(url);
-
-        if (headers != null) {
-            headers.forEach(post::addHeader);
-        }
-        post.setHeader("Content-Type", "application/json");
-
-        if (StringUtils.isNotBlank(jsonBody)) {
-            post.setEntity(new StringEntity(jsonBody, StandardCharsets.UTF_8));
-        }
-
-        CloseableHttpClient client = getHttpClient(timeout);
-        try (CloseableHttpResponse response = client.execute(post)) {
-            int statusCode =
-                    response.getStatusLine() != null ? response.getStatusLine().getStatusCode() : 0;
-
-            String responseBody = null;
-            if (response.getEntity() != null) {
-                responseBody = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
-            }
-
-            return new HttpResult(statusCode, responseBody, null);
-        }
-    }
-
     private static CloseableHttpClient getHttpClient(int timeout) {
         return HTTP_CLIENT_MAP.computeIfAbsent(timeout, k -> HttpClients.custom()
                 .setConnectionManager(POOLING_HTTP_CLIENT_CONNECTION_MANAGER)

@@ -223,11 +223,6 @@ public class Http2HttpExecutor implements HttpExecutor {
         }
     }
 
-    @Override
-    public HttpResult doPostJson(String url, String jsonBody, Map<String, String> headers, int timeout)
-            throws IOException {
-        return null;
-    }
 
     private RequestBody createRequestBody(Map<String, String> params, String contentType)
             throws JsonProcessingException {
