@@ -86,7 +86,7 @@ public class GlobalLockToolsTest {
     }
 
     @Test
-    void testQueryGlobalLockWithOnlyStartAddsOneDayEndAndParses() throws Exception {
+    void testQueryGlobalLockWithOnlyStartAddsOneDayEndAndParses() {
         try (MockedStatic<DateUtils> mocked = mockStatic(DateUtils.class)) {
             GlobalLockParamDto dto = new GlobalLockParamDto();
             dto.setPageNum(1);
@@ -112,7 +112,7 @@ public class GlobalLockToolsTest {
     }
 
     @Test
-    void testQueryGlobalLockWithOnlyEndTime() throws Exception {
+    void testQueryGlobalLockWithOnlyEndTime() {
         try (MockedStatic<DateUtils> mocked = mockStatic(DateUtils.class)) {
             GlobalLockParamDto dto = new GlobalLockParamDto();
             dto.setPageNum(1);
@@ -139,7 +139,7 @@ public class GlobalLockToolsTest {
     }
 
     @Test
-    void testQueryGlobalLockWithBothNullTimesSetsNullsAndParses() throws Exception {
+    void testQueryGlobalLockWithBothNullTimesSetsNullsAndParses() {
         GlobalLockParamDto dto = new GlobalLockParamDto();
         dto.setPageNum(1);
         dto.setPageSize(10);
@@ -156,7 +156,7 @@ public class GlobalLockToolsTest {
     }
 
     @Test
-    void testQueryGlobalLockWithOnlyEndSetsTimesToNull() throws Exception {
+    void testQueryGlobalLockWithOnlyEndSetsTimesToNull() {
         GlobalLockParamDto dto = new GlobalLockParamDto();
         dto.setPageNum(1);
         dto.setPageSize(10);
@@ -174,7 +174,7 @@ public class GlobalLockToolsTest {
     }
 
     @Test
-    void testQueryGlobalLockWithStartAndEndWithinLimit_ParsesAndKeepsTimes() throws Exception {
+    void testQueryGlobalLockWithStartAndEndWithinLimit_ParsesAndKeepsTimes() {
         try (MockedStatic<DateUtils> mocked = mockStatic(DateUtils.class)) {
             config.setQueryDuration(3600_000L);
             GlobalLockParamDto dto = new GlobalLockParamDto();
