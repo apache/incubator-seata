@@ -124,8 +124,7 @@ public class Http2HttpExecutor implements HttpExecutor {
     }
 
     @Override
-    public HttpResult doPost(String url, String body, Map<String, String> headers, int timeout)
-            throws IOException {
+    public HttpResult doPost(String url, String body, Map<String, String> headers, int timeout) throws IOException {
         try {
             Headers.Builder headerBuilder = new Headers.Builder();
             if (headers != null) {
@@ -245,5 +244,4 @@ public class Http2HttpExecutor implements HttpExecutor {
             return RequestBody.create(json, MEDIA_TYPE_JSON);
         }
     }
-
 }

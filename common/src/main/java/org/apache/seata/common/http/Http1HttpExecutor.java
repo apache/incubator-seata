@@ -139,8 +139,7 @@ public class Http1HttpExecutor implements HttpExecutor {
     }
 
     @Override
-    public HttpResult doPost(String url, String body, Map<String, String> header, int timeout)
-            throws IOException {
+    public HttpResult doPost(String url, String body, Map<String, String> header, int timeout) throws IOException {
         try {
             URIBuilder builder = new URIBuilder(url);
             URI uri = builder.build();

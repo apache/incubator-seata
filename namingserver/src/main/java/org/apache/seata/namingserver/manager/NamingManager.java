@@ -211,8 +211,7 @@ public class NamingManager {
             header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
             try {
                 HttpResult httpResult = HttpExecutorFactory.getInstance().doGet(httpUrl, params, header, 3000);
-                if (httpResult == null
-                        || httpResult.getStatusCode() != 200) {
+                if (httpResult == null || httpResult.getStatusCode() != 200) {
                     LOGGER.warn("remove vGroup in old cluster failed");
                     return new Result<>(
                             String.valueOf(httpResult != null ? httpResult.getStatusCode() : 0),

@@ -44,7 +44,7 @@ class Http2HttpExecutorTest {
                 Http2HttpExecutor.getInstance().doPost("https://www.cloudflare.com/", params, headers, 10000);
 
         assertNotNull(responseHttpResult);
-        assertEquals(Protocol.HTTP_2, ((Response)responseHttpResult.getRawResponse()).protocol());
+        assertEquals(Protocol.HTTP_2, ((Response) responseHttpResult.getRawResponse()).protocol());
     }
 
     @Test
@@ -67,7 +67,7 @@ class Http2HttpExecutorTest {
         HttpResult result = Http2HttpExecutor.getInstance()
                 .doPost("https://www.cloudflare.com/", "{\"key\":\"value\"}", headers, 10000);
         assertNotNull(result);
-        assertEquals(Protocol.HTTP_2, ((Response)result.getRawResponse()).protocol());
+        assertEquals(Protocol.HTTP_2, ((Response) result.getRawResponse()).protocol());
     }
 
     @Test
@@ -87,10 +87,9 @@ class Http2HttpExecutorTest {
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
 
-        HttpResult result =
-                Http2HttpExecutor.getInstance().doPost("http://httpbin.org/post", params, headers, 10000);
+        HttpResult result = Http2HttpExecutor.getInstance().doPost("http://httpbin.org/post", params, headers, 10000);
         assertNotNull(result);
-        assertEquals(Protocol.HTTP_1_1, ((Response)result.getRawResponse()).protocol());
+        assertEquals(Protocol.HTTP_1_1, ((Response) result.getRawResponse()).protocol());
     }
 
     @Test
@@ -98,10 +97,9 @@ class Http2HttpExecutorTest {
         Map<String, String> headers = new HashMap<>();
         headers.put("Accept", "application/json");
 
-        HttpResult result =
-                Http2HttpExecutor.getInstance().doGet("https://www.cloudflare.com/", headers, 10000);
+        HttpResult result = Http2HttpExecutor.getInstance().doGet("https://www.cloudflare.com/", headers, 10000);
         assertNotNull(result);
-        assertEquals(Protocol.HTTP_2, ((Response)result.getRawResponse()).protocol());
+        assertEquals(Protocol.HTTP_2, ((Response) result.getRawResponse()).protocol());
     }
 
     @Test
@@ -112,6 +110,6 @@ class Http2HttpExecutorTest {
         HttpResult result = Http2HttpExecutor.getInstance()
                 .doPost("http://httpbin.org/post", "{\"key\":\"value\"}", headers, 10000);
         assertNotNull(result);
-        assertEquals(Protocol.HTTP_1_1, ((Response)result.getRawResponse()).protocol());
+        assertEquals(Protocol.HTTP_1_1, ((Response) result.getRawResponse()).protocol());
     }
 }
