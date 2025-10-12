@@ -38,7 +38,9 @@ public class Http1HttpExecutorTest {
 
     @Test
     void testDoGetBaidu() throws Exception {
-        HttpResult httpResult = Http1HttpExecutor.getInstance().doGet("https://www.baidu.com", null, null, 5000);
+        HashMap<String, String> param = new HashMap<>();
+        param.put("wd", "seata");
+        HttpResult httpResult = Http1HttpExecutor.getInstance().doGet("https://www.baidu.com", param, null, 5000);
 
         assertNotNull(httpResult);
         assertEquals(200, httpResult.getStatusCode());

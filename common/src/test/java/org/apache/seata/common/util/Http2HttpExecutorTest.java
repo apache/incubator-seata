@@ -97,7 +97,20 @@ class Http2HttpExecutorTest {
         Map<String, String> headers = new HashMap<>();
         headers.put("Accept", "application/json");
 
-        HttpResult result = Http2HttpExecutor.getInstance().doGet("https://www.cloudflare.com/", headers, 10000);
+        HttpResult result = Http2HttpExecutor.getInstance().doGet("https://www.cloudflare.com/", null, headers, 10000);
+        assertNotNull(result);
+        assertEquals(Protocol.HTTP_2, ((Response) result.getRawResponse()).protocol());
+    }
+
+    @Test
+    void testDoGetHttp_withParams_onSuccess() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Accept", "application/json");
+
+        Map<String, String> params = new HashMap<>();
+        params.put("key", "value");
+
+        HttpResult result = Http2HttpExecutor.getInstance().doGet("https://www.cloudflare.com", params, headers, 10000);
         assertNotNull(result);
         assertEquals(Protocol.HTTP_2, ((Response) result.getRawResponse()).protocol());
     }

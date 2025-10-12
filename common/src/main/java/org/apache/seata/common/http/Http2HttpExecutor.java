@@ -176,7 +176,6 @@ public class Http2HttpExecutor implements HttpExecutor {
     public HttpResult doGet(String url, Map<String, String> param, Map<String, String> headers, int timeout)
             throws IOException {
         try {
-
             HttpUrl.Builder urlBuilder = HttpUrl.parse(url).newBuilder();
             if (param != null) {
                 param.forEach(urlBuilder::addQueryParameter);
@@ -221,51 +220,6 @@ public class Http2HttpExecutor implements HttpExecutor {
                 throw new IOException("HTTP2 GET request failed or timed out", e);
             }
 
-        } catch (Exception e) {
-            throw new IOException("Failed to execute HTTP2 GET request", e);
-        }
-    }
-
-    @Override
-    public HttpResult doGet(String url, Map<String, String> headers, int timeout) throws IOException {
-        try {
-            Headers.Builder headerBuilder = new Headers.Builder();
-            if (headers != null) {
-                headers.forEach(headerBuilder::add);
-            }
-
-            Request request = new Request.Builder()
-                    .url(url)
-                    .headers(headerBuilder.build())
-                    .get()
-                    .build();
-
-            CompletableFuture<HttpResult> future = new CompletableFuture<>();
-            HTTP_CLIENT.newCall(request).enqueue(new Callback() {
-                @Override
-                public void onFailure(Call call, IOException e) {
-                    future.completeExceptionally(e);
-                }
-
-                @Override
-                public void onResponse(Call call, Response response) {
-                    try {
-                        String responseBody =
-                                response.body() != null ? response.body().string() : null;
-                        future.complete(new HttpResult(response.code(), responseBody, response));
-                    } catch (IOException e) {
-                        future.completeExceptionally(e);
-                    } finally {
-                        response.close();
-                    }
-                }
-            });
-
-            try {
-                return future.get(timeout, TimeUnit.MILLISECONDS);
-            } catch (Exception e) {
-                throw new IOException("HTTP2 GET request failed or timed out", e);
-            }
         } catch (Exception e) {
             throw new IOException("Failed to execute HTTP2 GET request", e);
         }
