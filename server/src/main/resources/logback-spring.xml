@@ -157,4 +157,9 @@
     </root>
     <logger name="org.springframework.security.config.annotation.web.builders.WebSecurity" level="ERROR"/>
     <logger name="org.springframework.security.web.DefaultSecurityFilterChain" level="ERROR"/>
+
+    <logger name="org.apache.seata" level="DEBUG"/>
+    <logger name="org.apache.seata.config" level="INFO"/>
+    <logger name="io.seata" level="DEBUG"/>
+
 </configuration>
