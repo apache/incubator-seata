@@ -25,6 +25,7 @@ import javax.sql.DataSource;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -73,7 +74,7 @@ public class DataSourceConnectionPoolCollector {
     public static List<Object> collectAllPoolMetrics() {
         List<Object> allMetrics = new ArrayList<>();
 
-        for (ConcurrentMap.Entry<String, DataSource> entry : REGISTERED_DATASOURCES.entrySet()) {
+        for (Map.Entry<String, DataSource> entry : REGISTERED_DATASOURCES.entrySet()) {
             String name = entry.getKey();
             DataSource dataSource = entry.getValue();
 
