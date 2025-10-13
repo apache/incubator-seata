@@ -18,6 +18,7 @@ package org.apache.seata.core.rpc.netty;
 
 import io.netty.channel.Channel;
 import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.core.protocol.ConnectionPoolInfo;
 import org.apache.seata.core.protocol.MessageType;
 import org.apache.seata.core.rpc.ShutdownHook;
 import org.apache.seata.core.rpc.TransactionMessageHandler;
@@ -29,6 +30,7 @@ import org.apache.seata.core.rpc.processor.server.ServerOnResponseProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -133,5 +135,13 @@ public class NettyRemotingServer extends AbstractNettyRemotingServer {
     public void destroy() {
         super.destroy();
         branchResultMessageExecutor.shutdown();
+    }
+
+    public Map<String, ConnectionPoolInfo> getAllClientPoolInfo() {
+        return heartbeatMessageProcessor.getAllPoolInfo();
+    }
+
+    public ConnectionPoolInfo getClientPoolInfo(String clientAddress) {
+        return heartbeatMessageProcessor.getClientPoolInfo(clientAddress);
     }
 }
