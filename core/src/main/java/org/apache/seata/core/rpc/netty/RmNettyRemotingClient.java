@@ -29,10 +29,7 @@ import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.constants.ConfigurationKeys;
 import org.apache.seata.core.model.Resource;
 import org.apache.seata.core.model.ResourceManager;
-import org.apache.seata.core.protocol.AbstractMessage;
-import org.apache.seata.core.protocol.MessageType;
-import org.apache.seata.core.protocol.RegisterRMRequest;
-import org.apache.seata.core.protocol.RegisterRMResponse;
+import org.apache.seata.core.protocol.*;
 import org.apache.seata.core.rpc.netty.NettyPoolKey.TransactionRole;
 import org.apache.seata.core.rpc.processor.client.ClientHeartbeatProcessor;
 import org.apache.seata.core.rpc.processor.client.ClientOnResponseProcessor;
@@ -48,6 +45,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
 import static org.apache.seata.common.Constants.DBKEYS_SPLIT_CHAR;
@@ -66,6 +64,12 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
     private static final int MAX_QUEUE_SIZE = 20000;
     private String applicationId;
     private String transactionServiceGroup;
+
+    // connection pool monitoring
+    private static final long POOL_INFO_REPORT_INTERVAL = 30000; // 30 seconds
+    private ConnectionPoolMonitor poolMonitor;
+    private final AtomicLong heartbeatSequence = new AtomicLong(0);
+    private volatile long lastPoolInfoReportTime = 0L;
 
     @Override
     public void init() {
@@ -321,6 +325,7 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
         initialized.getAndSet(false);
         instance = null;
         transactionServiceGroup = null;
+        poolMonitor = null;
     }
 
     @Override
@@ -351,6 +356,21 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
         return NettyClientConfig.getRpcRmRequestTimeout();
     }
 
+    @Override
+    public Object createHeartbeatMessage() {
+        HeartbeatMessage heartbeat = HeartbeatMessage.PING;
+        if (shouldReportInfo()) {
+            heartbeat.setConnectionPoolInfo(poolMonitor.collectPoolInfo());
+            heartbeat.setSequenceNumber(heartbeatSequence.incrementAndGet());
+            lastPoolInfoReportTime = System.currentTimeMillis();
+        }
+        return heartbeat;
+    }
+
+    private boolean shouldReportInfo() {
+        return (System.currentTimeMillis() - lastPoolInfoReportTime) >= POOL_INFO_REPORT_INTERVAL;
+    }
+
     private void registerProcessor() {
         // 1.registry rm client handle branch commit processor
         RmBranchCommitProcessor rmBranchCommitProcessor =
@@ -373,6 +393,7 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
         super.registerProcessor(MessageType.TYPE_REG_RM_RESULT, onResponseProcessor, null);
         super.registerProcessor(MessageType.TYPE_BATCH_RESULT_MSG, onResponseProcessor, null);
         // 5.registry heartbeat message processor
+        poolMonitor = new ConnectionPoolMonitor(applicationId, transactionServiceGroup);
         ClientHeartbeatProcessor clientHeartbeatProcessor = new ClientHeartbeatProcessor();
         super.registerProcessor(MessageType.TYPE_HEARTBEAT_MSG, clientHeartbeatProcessor, null);
     }

@@ -25,6 +25,8 @@ import java.io.Serializable;
 public class HeartbeatMessage implements MessageTypeAware, Serializable {
     private static final long serialVersionUID = -985316399527884899L;
     private boolean ping = true;
+    private long sequenceNumber;
+    private ConnectionPoolInfo connectionPoolInfo;
     /**
      * The constant PING.
      */
@@ -54,5 +56,21 @@ public class HeartbeatMessage implements MessageTypeAware, Serializable {
 
     public void setPing(boolean ping) {
         this.ping = ping;
+    }
+
+    public long getSequenceNumber() {
+        return sequenceNumber;
+    }
+
+    public void setSequenceNumber(long sequenceNumber) {
+        this.sequenceNumber = sequenceNumber;
+    }
+
+    public ConnectionPoolInfo getConnectionPoolInfo() {
+        return connectionPoolInfo;
+    }
+
+    public void setConnectionPoolInfo(ConnectionPoolInfo connectionPoolInfo) {
+        this.connectionPoolInfo = connectionPoolInfo;
     }
 }

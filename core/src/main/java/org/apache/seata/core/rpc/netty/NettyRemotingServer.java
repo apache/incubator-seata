@@ -43,7 +43,7 @@ public class NettyRemotingServer extends AbstractNettyRemotingServer {
     private static final Logger LOGGER = LoggerFactory.getLogger(NettyRemotingServer.class);
 
     private TransactionMessageHandler transactionMessageHandler;
-
+    private ServerHeartbeatProcessor heartbeatMessageProcessor;
     private final AtomicBoolean initialized = new AtomicBoolean(false);
 
     private final ThreadPoolExecutor branchResultMessageExecutor = new ThreadPoolExecutor(
@@ -125,7 +125,7 @@ public class NettyRemotingServer extends AbstractNettyRemotingServer {
         RegTmProcessor regTmProcessor = new RegTmProcessor(this);
         super.registerProcessor(MessageType.TYPE_REG_CLT, regTmProcessor, null);
         // 5. registry heartbeat message processor
-        ServerHeartbeatProcessor heartbeatMessageProcessor = new ServerHeartbeatProcessor(this);
+        heartbeatMessageProcessor = new ServerHeartbeatProcessor(this);
         super.registerProcessor(MessageType.TYPE_HEARTBEAT_MSG, heartbeatMessageProcessor, null);
     }
 
