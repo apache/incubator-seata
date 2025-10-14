@@ -14,13 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.mcp.service.impl;
+package org.apache.seata.mcp.service;
 
 import org.apache.seata.common.exception.StoreException;
 import org.apache.seata.common.result.PageResult;
 import org.apache.seata.mcp.entity.param.UndoLogParam;
 import org.apache.seata.mcp.entity.pojo.MCPProperties;
 import org.apache.seata.mcp.entity.vo.UndoLogVO;
+import org.apache.seata.mcp.service.impl.BusinessDataSourceServiceImpl;
 import org.apache.seata.mcp.store.SqlExecutionTemplate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,7 +48,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class BusinessDataSourceServiceImplTest {
+class BusinessDataSourceServiceTest {
 
     @Mock
     private SqlExecutionTemplate sqlExecutionTemplate;

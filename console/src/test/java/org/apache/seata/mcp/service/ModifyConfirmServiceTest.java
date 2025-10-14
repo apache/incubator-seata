@@ -1,6 +1,6 @@
-package org.apache.seata.mcp.service.impl;
+package org.apache.seata.mcp.service;
 
-import org.apache.seata.mcp.service.ModifyConfirmService;
+import org.apache.seata.mcp.service.impl.ModifyConfirmServiceImpl;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ModifyConfirmServiceImplTest {
+public class ModifyConfirmServiceTest {
 
     @Test
     void testConfirmAndGetKeyGeneratesMap() {

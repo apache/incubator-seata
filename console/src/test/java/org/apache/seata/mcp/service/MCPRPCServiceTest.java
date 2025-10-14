@@ -14,11 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.mcp.service.impl;
+package org.apache.seata.mcp.service;
 
 import org.apache.seata.common.result.SingleResult;
 import org.apache.seata.console.utils.JwtTokenUtils;
 import org.apache.seata.mcp.entity.pojo.NameSpaceDetail;
+import org.apache.seata.mcp.service.impl.MCPRPCServiceImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,7 +55,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class MCPRPCServiceImplTest {
+class MCPRPCServiceTest {
 
     @Mock
     private Environment env;

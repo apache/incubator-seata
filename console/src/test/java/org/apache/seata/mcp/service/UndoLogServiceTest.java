@@ -14,12 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.mcp.service.impl;
+package org.apache.seata.mcp.service;
 
 import org.apache.seata.common.result.PageResult;
 import org.apache.seata.mcp.entity.param.UndoLogParam;
 import org.apache.seata.mcp.entity.vo.UndoLogVO;
-import org.apache.seata.mcp.service.BusinessDataSourceService;
+import org.apache.seata.mcp.service.impl.UndoLogServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -36,7 +36,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class UndoLogServiceImplTest {
+class UndoLogServiceTest {
 
     @Mock
     private BusinessDataSourceService dataSourceService;
