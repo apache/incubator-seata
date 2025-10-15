@@ -178,7 +178,9 @@ public class Http2HttpExecutor implements HttpExecutor {
             HttpUrl finalUrl = Objects.requireNonNull(HttpUrl.get(url), "Invalid URL");
             if (param != null) {
                 for (Map.Entry<String, String> entry : param.entrySet()) {
-                    finalUrl = finalUrl.newBuilder().addQueryParameter(entry.getKey(), entry.getValue()).build();
+                    finalUrl = finalUrl.newBuilder()
+                            .addQueryParameter(entry.getKey(), entry.getValue())
+                            .build();
                 }
             }
 
