@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -111,7 +112,6 @@ public class Http2HttpExecutor implements HttpExecutor {
                 }
             });
 
-            // 异步转同步
             try {
                 return future.get(timeout, TimeUnit.MILLISECONDS);
             } catch (Exception e) {
@@ -161,7 +161,6 @@ public class Http2HttpExecutor implements HttpExecutor {
                 }
             });
 
-            // 阻塞等待结果
             try {
                 return future.get(timeout, TimeUnit.MILLISECONDS);
             } catch (Exception e) {
@@ -176,11 +175,12 @@ public class Http2HttpExecutor implements HttpExecutor {
     public HttpResult doGet(String url, Map<String, String> param, Map<String, String> headers, int timeout)
             throws IOException {
         try {
-            HttpUrl.Builder urlBuilder = HttpUrl.parse(url).newBuilder();
+            HttpUrl finalUrl = Objects.requireNonNull(HttpUrl.get(url), "Invalid URL");
             if (param != null) {
-                param.forEach(urlBuilder::addQueryParameter);
+                for (Map.Entry<String, String> entry : param.entrySet()) {
+                    finalUrl = finalUrl.newBuilder().addQueryParameter(entry.getKey(), entry.getValue()).build();
+                }
             }
-            HttpUrl finalUrl = urlBuilder.build();
 
             Headers.Builder headerBuilder = new Headers.Builder();
             if (headers != null) {
