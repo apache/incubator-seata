@@ -24,6 +24,26 @@ public class ServerLogParam implements Serializable {
 
     private String logType;
 
+    private Long lastModifyTime = 0L;
+
+    private Long curSize = 0L;
+
+    public Long getLastModifyTime() {
+        return lastModifyTime;
+    }
+
+    public void setLastModifyTime(Long lastModifyTime) {
+        this.lastModifyTime = lastModifyTime;
+    }
+
+    public Long getCurSize() {
+        return curSize;
+    }
+
+    public void setCurSize(Long curSize) {
+        this.curSize = curSize;
+    }
+
     public String getLogType() {
         return logType;
     }
@@ -34,6 +54,10 @@ public class ServerLogParam implements Serializable {
 
     @Override
     public String toString() {
-        return "ServerLogParam{" + "logType='" + logType + '\'' + '}';
+        return "ServerLogParam{" +
+                "logType='" + logType + '\'' +
+                ", lastModifyTime=" + lastModifyTime +
+                ", curSize=" + curSize +
+                '}';
     }
 }

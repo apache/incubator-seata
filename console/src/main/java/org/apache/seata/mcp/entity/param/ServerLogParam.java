@@ -53,6 +53,26 @@ public class ServerLogParam implements Serializable {
             example = "connection timeout,SSL")
     private List<String> logMessageKeyWord;
 
+    private Long curSize;
+
+    private Long lastModifyTime;
+
+    public Long getCurSize() {
+        return curSize;
+    }
+
+    public void setCurSize(Long curSize) {
+        this.curSize = curSize;
+    }
+
+    public Long getLastModifyTime() {
+        return lastModifyTime;
+    }
+
+    public void setLastModifyTime(Long lastModifyTime) {
+        this.lastModifyTime = lastModifyTime;
+    }
+
     public String getLogType() {
         return logType;
     }

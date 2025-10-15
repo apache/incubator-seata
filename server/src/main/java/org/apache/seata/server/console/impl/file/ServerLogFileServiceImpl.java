@@ -57,7 +57,9 @@ public class ServerLogFileServiceImpl implements ServerLogService {
         Path logPath = Paths.get(logPathString);
         if (Files.exists(logPath)) {
             long size = 0;
+            long modifyTime = 0;
             try {
+                modifyTime = Files.getLastModifiedTime(logPath).toMillis();
                 size = Files.size(logPath);
             } catch (IOException e) {
                 LOGGER.warn("Error get log file size: {}", e.getMessage());
@@ -67,10 +69,22 @@ public class ServerLogFileServiceImpl implements ServerLogService {
                         .body(out ->
                                 out.write(("Log File exceed the Max Size: " + MAX_LOG_FILE_SIZE + " B").getBytes()));
             }
+            Long lastModifyTime = serverLogParam.getLastModifyTime();
+            long finalCurSize;
+            if(lastModifyTime == 0 || modifyTime-lastModifyTime > 86400000) {
+                finalCurSize = 0;
+            } else {
+                finalCurSize = serverLogParam.getCurSize();
+            }
             long finalSize = size;
+            if(finalCurSize > size){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(out ->
+                                out.write(("Remote Log File is newer than TC, please check the log file").getBytes()));
+            }
             StreamingResponseBody responseBody = outputStream -> {
                 try (FileChannel channel = FileChannel.open(logPath, StandardOpenOption.READ)) {
-                    long position = 0;
+                    long position = finalCurSize;
                     long remaining = finalSize;
 
                     while (remaining > 0) {
@@ -97,6 +111,7 @@ public class ServerLogFileServiceImpl implements ServerLogService {
                     .header(HttpHeaders.CACHE_CONTROL, "no-cache, no-store, must-revalidate")
                     .header(HttpHeaders.PRAGMA, "no-cache")
                     .header(HttpHeaders.EXPIRES, "0")
+                    .header("X-APPEND-NEEDED", finalCurSize == 0 ? "false" : "true")
                     .contentType(MediaType.APPLICATION_JSON)
                     .header("charset", "utf-8")
                     .body(responseBody);

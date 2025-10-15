@@ -68,110 +68,11 @@ public class ServerLogServiceImpl implements ServerLogService {
 
     // TODO: Support breakpoint download
     private static final int SERVER_LOG_PAGE_SIZE = 2500;
-    private static final long FILE_EXPIRATION_SECONDS = 60;
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerLogServiceImpl.class);
     private static final DateTimeFormatter LOG_TIMESTAMP_FORMATTER =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
 
     private static final ReentrantReadWriteLock fileLock = new ReentrantReadWriteLock();
-
-    private static final ConcurrentHashMap<String, FileMetadata> fileMetadataCache = new ConcurrentHashMap<>();
-
-    private ScheduledExecutorService scheduledExecutor;
-
-    private static class FileMetadata {
-        final long lastModified;
-        final long fileSize;
-        final long totalLines;
-
-        FileMetadata(long lastModified, long fileSize, long totalLines) {
-            this.lastModified = lastModified;
-            this.fileSize = fileSize;
-            this.totalLines = totalLines;
-        }
-    }
-
-    @PostConstruct
-    public void initFileCleanupScheduler() {
-        scheduledExecutor = new ScheduledThreadPoolExecutor(1, r -> {
-            Thread thread = new Thread(r, "file-cleanup-scheduler");
-            thread.setDaemon(true);
-            return thread;
-        });
-
-        scheduledExecutor.scheduleAtFixedRate(this::cleanExpiredFiles, 60, 60, TimeUnit.SECONDS);
-
-        LOGGER.info("Server Temp Log File cleanup scheduler initialized, will run every 60 seconds");
-    }
-
-    @PreDestroy
-    public void destroyFileCleanupScheduler() {
-        if (scheduledExecutor != null && !scheduledExecutor.isShutdown()) {
-            scheduledExecutor.shutdown();
-            try {
-                if (!scheduledExecutor.awaitTermination(30, TimeUnit.SECONDS)) {
-                    scheduledExecutor.shutdownNow();
-                    LOGGER.warn("Temp Server Log File cleanup scheduler did not terminate gracefully, forced shutdown");
-                }
-                LOGGER.info("Temp Server Log File cleanup scheduler shutdown successfully");
-            } catch (InterruptedException e) {
-                scheduledExecutor.shutdownNow();
-                Thread.currentThread().interrupt();
-                LOGGER.warn("Temp Server Log File cleanup scheduler shutdown interrupted", e);
-            }
-        }
-    }
-
-    public void cleanExpiredFiles() {
-        try {
-            LOGGER.debug("Starting expired temp server log file cleanup...");
-            int cleanedTempCount = cleanTempDirectory();
-            cleanMetadataCache();
-            if (cleanedTempCount > 0) LOGGER.debug("Cleaned {} temp log files", cleanedTempCount);
-        } catch (Exception e) {
-            LOGGER.error("Error occurred during server log file cleanup", e);
-        }
-    }
-
-    private void cleanMetadataCache() {
-        long currentTime = System.currentTimeMillis();
-        fileMetadataCache.entrySet().removeIf(entry -> currentTime - entry.getValue().lastModified > 600_000);
-    }
-
-    private int cleanTempDirectory() {
-        AtomicInteger count = new AtomicInteger();
-        Path tempDir = Paths.get(System.getProperty("user.home"), "logs", "seata", "console", "tmp");
-
-        if (!Files.exists(tempDir)) {
-            LOGGER.debug("Temp Server Log directory does not exist: {}", tempDir);
-            return 0;
-        }
-
-        try {
-            Files.list(tempDir).forEach(path -> {
-                try {
-                    BasicFileAttributes attrs = Files.readAttributes(path, BasicFileAttributes.class);
-                    FileTime lastModifiedTime = attrs.lastModifiedTime();
-
-                    if (lastModifiedTime
-                            .toInstant()
-                            .plus(FILE_EXPIRATION_SECONDS, ChronoUnit.SECONDS)
-                            .isBefore(Instant.now())) {
-                        Files.delete(path);
-                        count.getAndIncrement();
-                        fileMetadataCache.remove(path.toString());
-                        LOGGER.debug("Deleted expired temp file: {}", path);
-                    }
-                } catch (IOException e) {
-                    LOGGER.warn("Failed to delete temp file: {}", path, e);
-                }
-            });
-            return count.get();
-        } catch (IOException e) {
-            LOGGER.error("Failed to clean temp directory: {}", tempDir, e);
-            return 0;
-        }
-    }
 
     @Override
     public ServerLogPageVO<String> analyseServerLogFile(NameSpaceDetail nameSpaceDetail, ServerLogParam param) {
@@ -222,35 +123,13 @@ public class ServerLogServiceImpl implements ServerLogService {
         String fileName = key + "-Server.log";
         Path filePath = Paths.get(System.getProperty("user.home"), "logs", "seata", "console", "tmp", fileName);
 
-        fileLock.readLock().lock();
-        try {
-            if (Files.exists(filePath)) {
-                BasicFileAttributes attrs = Files.readAttributes(filePath, BasicFileAttributes.class);
-                Instant lastModified = attrs.lastModifiedTime().toInstant();
-
-                if (lastModified
-                        .plus(FILE_EXPIRATION_SECONDS, ChronoUnit.SECONDS)
-                        .isAfter(Instant.now())) {
-                    return filePath.toString();
-                }
-            }
-        } catch (IOException e) {
-            LOGGER.warn("Failed to check file attributes: {}", filePath, e);
-        } finally {
-            fileLock.readLock().unlock();
-        }
-
         fileLock.writeLock().lock();
         try {
             if (Files.exists(filePath)) {
                 try {
                     BasicFileAttributes attrs = Files.readAttributes(filePath, BasicFileAttributes.class);
-                    Instant lastModified = attrs.lastModifiedTime().toInstant();
-                    if (lastModified
-                            .plus(FILE_EXPIRATION_SECONDS, ChronoUnit.SECONDS)
-                            .isAfter(Instant.now())) {
-                        return filePath.toString();
-                    }
+                    param.setLastModifyTime(attrs.lastModifiedTime().toMillis());
+                    param.setCurSize(attrs.size());
                 } catch (IOException e) {
                     LOGGER.warn("Failed to recheck file attributes: {}", filePath, e);
                 }
