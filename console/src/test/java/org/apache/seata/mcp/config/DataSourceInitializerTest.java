@@ -21,5 +21,3 @@ public class DataSourceInitializerTest {
         }
     }
 }
-
-

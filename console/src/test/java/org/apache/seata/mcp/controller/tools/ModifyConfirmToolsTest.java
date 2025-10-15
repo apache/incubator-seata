@@ -31,14 +31,16 @@ public class ModifyConfirmToolsTest {
 
     @Test
     void testConfirmAndGetKey_BlankInputThrows() {
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> tools.confirmAndGetKey(" \t\n"));
+        IllegalArgumentException ex =
+                assertThrows(IllegalArgumentException.class, () -> tools.confirmAndGetKey(" \t\n"));
         assertEquals("User confirmation string is required.", ex.getMessage());
         verify(service, never()).confirmAndGetKey();
     }
 
     @Test
     void testConfirmAndGetKey_WithoutKeywordThrows() {
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> tools.confirmAndGetKey("请执行删除操作"));
+        IllegalArgumentException ex =
+                assertThrows(IllegalArgumentException.class, () -> tools.confirmAndGetKey("请执行删除操作"));
         String msg = ex.getMessage();
         org.junit.jupiter.api.Assertions.assertTrue(msg.contains("Confirmation string must explicitly contain"));
         verify(service, never()).confirmAndGetKey();
@@ -69,5 +71,3 @@ public class ModifyConfirmToolsTest {
         verify(service, times(1)).confirmAndGetKey();
     }
 }
-
-

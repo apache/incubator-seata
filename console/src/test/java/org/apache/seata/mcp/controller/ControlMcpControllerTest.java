@@ -95,5 +95,3 @@ public class ControlMcpControllerTest {
         assertFalse(res.isSuccess());
     }
 }
-
-

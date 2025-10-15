@@ -37,12 +37,10 @@ public class ServerLogToolsTest {
         param.setPage(2);
         ServerLogPageVO<String> page = new ServerLogPageVO<>();
         page.setHasMorePages(true);
-        page.setData(Arrays.asList("l1","l2"));
+        page.setData(Arrays.asList("l1", "l2"));
         when(service.analyseServerLogFile(any(), any())).thenReturn(page);
         ServerLogPageVO<String> res = tools.getServerLogFile(new NameSpaceDetail(), param);
         assertEquals(2, res.getData().size());
         verify(service, times(1)).analyseServerLogFile(any(), any());
     }
 }
-
-

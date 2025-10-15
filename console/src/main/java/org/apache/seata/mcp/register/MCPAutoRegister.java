@@ -94,7 +94,7 @@ public class MCPAutoRegister implements BeanPostProcessor {
             props.set(pName, prop);
             ToolParam paramAnn = p.getAnnotation(ToolParam.class);
             if (paramAnn != null) {
-                if(paramAnn.required()){
+                if (paramAnn.required()) {
                     required.add(pName);
                 }
             }

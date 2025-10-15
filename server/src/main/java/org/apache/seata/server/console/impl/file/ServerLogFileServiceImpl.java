@@ -30,7 +30,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
-import java.io.*;
+import java.io.IOException;
 import java.nio.channels.Channels;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.FileChannel;
@@ -71,13 +71,13 @@ public class ServerLogFileServiceImpl implements ServerLogService {
             }
             Long lastModifyTime = serverLogParam.getLastModifyTime();
             long finalCurSize;
-            if(lastModifyTime == 0 || modifyTime-lastModifyTime > 86400000) {
+            if (lastModifyTime == 0 || modifyTime - lastModifyTime > 86400000) {
                 finalCurSize = 0;
             } else {
                 finalCurSize = serverLogParam.getCurSize();
             }
             long finalSize = size;
-            if(finalCurSize > size){
+            if (finalCurSize > size) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body(out ->
                                 out.write(("Remote Log File is newer than TC, please check the log file").getBytes()));

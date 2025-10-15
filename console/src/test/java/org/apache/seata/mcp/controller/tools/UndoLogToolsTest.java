@@ -36,5 +36,3 @@ public class UndoLogToolsTest {
         verify(service, times(1)).queryAndAnalyzeUndoLog(any());
     }
 }
-
-

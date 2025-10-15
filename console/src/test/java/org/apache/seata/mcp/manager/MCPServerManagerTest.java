@@ -118,7 +118,8 @@ class MCPServerManagerTest {
         sseManager.start();
         RouterFunction<ServerResponse> routerFunctionActive = sseManager.getRouterFunction();
         // Match GET to sseEndpoint
-        ServerRequest activeReq = createMvcServerRequest("GET", sseProperties.getSseServerProperties().getSseEndpoint());
+        ServerRequest activeReq = createMvcServerRequest(
+                "GET", sseProperties.getSseServerProperties().getSseEndpoint());
         // Route may or may not be present depending on full handler composition; ensure no NPE
         routerFunctionActive.route(activeReq);
 
@@ -147,7 +148,8 @@ class MCPServerManagerTest {
         streamableManager.start();
         RouterFunction<ServerResponse> routerFunctionActive = streamableManager.getRouterFunction();
         // Match GET to mcp endpoint (listening stream)
-        ServerRequest activeReq = createMvcServerRequest("GET", streamableProperties.getStreamableProperties().getMcpEndPoint());
+        ServerRequest activeReq = createMvcServerRequest(
+                "GET", streamableProperties.getStreamableProperties().getMcpEndPoint());
         routerFunctionActive.route(activeReq);
 
         // Deactivate via pause
@@ -385,4 +387,3 @@ class MCPServerManagerTest {
         return properties;
     }
 }
-

@@ -60,11 +60,14 @@ public class BranchSessionToolsTest {
     @Test
     void testDeleteBranchSessionSuccess() {
         when(confirmService.isValidKey("k")).thenReturn(true);
-        when(rpcService.deleteCallTC(any(), eq(RPCConstant.BRANCH_SESSION_BASE_URL + "/deleteBranchSession"), any(), any(), any()))
+        when(rpcService.deleteCallTC(
+                        any(), eq(RPCConstant.BRANCH_SESSION_BASE_URL + "/deleteBranchSession"), any(), any(), any()))
                 .thenReturn("ok");
         String res = tools.deleteBranchSession(new NameSpaceDetail(), "x", "b", "k");
         assertEquals("ok", res);
-        verify(rpcService, times(1)).deleteCallTC(any(), eq(RPCConstant.BRANCH_SESSION_BASE_URL + "/deleteBranchSession"), any(), any(), any());
+        verify(rpcService, times(1))
+                .deleteCallTC(
+                        any(), eq(RPCConstant.BRANCH_SESSION_BASE_URL + "/deleteBranchSession"), any(), any(), any());
     }
 
     @Test
@@ -78,7 +81,8 @@ public class BranchSessionToolsTest {
     @Test
     void testStopBranchSessionSuccessAndFailure() {
         when(confirmService.isValidKey("k")).thenReturn(true);
-        when(rpcService.putCallTC(any(), eq(RPCConstant.BRANCH_SESSION_BASE_URL + "/stopBranchSession"), any(), any(), any()))
+        when(rpcService.putCallTC(
+                        any(), eq(RPCConstant.BRANCH_SESSION_BASE_URL + "/stopBranchSession"), any(), any(), any()))
                 .thenReturn("");
         String res1 = tools.stopBranchSession(new NameSpaceDetail(), "x", "b", "k");
         assertEquals("stop branch session failed, xid: x, branchId: b", res1);
@@ -91,7 +95,8 @@ public class BranchSessionToolsTest {
     @Test
     void testStartBranchRetrySuccessAndFailure() {
         when(confirmService.isValidKey("k")).thenReturn(true);
-        when(rpcService.putCallTC(any(), eq(RPCConstant.BRANCH_SESSION_BASE_URL + "/startBranchSession"), any(), any(), any()))
+        when(rpcService.putCallTC(
+                        any(), eq(RPCConstant.BRANCH_SESSION_BASE_URL + "/startBranchSession"), any(), any(), any()))
                 .thenReturn(null);
         String res1 = tools.startBranchRetry(new NameSpaceDetail(), "x", "b", "k");
         assertEquals("start branch session failed, xid: x, branchId: b", res1);
@@ -101,5 +106,3 @@ public class BranchSessionToolsTest {
         assertEquals("ok", res2);
     }
 }
-
-

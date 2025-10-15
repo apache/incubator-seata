@@ -28,11 +28,9 @@ public class TimestampToStringDeserializerTest {
         String result = deserializer.deserialize(parser, context);
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        String expected = LocalDateTime.ofInstant(
-                Instant.ofEpochMilli(millis), ZoneId.systemDefault()).format(formatter);
+        String expected = LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), ZoneId.systemDefault())
+                .format(formatter);
 
         assertEquals(expected, result);
     }
 }
-
-

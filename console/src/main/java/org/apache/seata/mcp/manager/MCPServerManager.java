@@ -193,14 +193,14 @@ public class MCPServerManager implements SmartLifecycle {
                             .prompts(false)
                             .build())
                     .build();
-        }else{
+        } else {
             ControlledStreamableTransportProvider streamableTransportProvider =
                     (ControlledStreamableTransportProvider) transportProvider;
             return McpServer.async(streamableTransportProvider)
                     .serverInfo(config.getServerName(), config.getServerVersion())
                     .capabilities(McpSchema.ServerCapabilities.builder()
                             .tools(true)
-                            .resources(false,false)
+                            .resources(false, false)
                             .prompts(false)
                             .build())
                     .build();

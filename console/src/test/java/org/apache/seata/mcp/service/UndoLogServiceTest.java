@@ -40,6 +40,7 @@ class UndoLogServiceTest {
 
     @Mock
     private BusinessDataSourceService dataSourceService;
+
     @InjectMocks
     private UndoLogServiceImpl service;
 
@@ -138,17 +139,17 @@ class UndoLogServiceTest {
         param.setBranchId("branch-123");
         param.setXid("xid-456");
         param.setLogStatus(0);
-        
+
         UndoLogParam.CreateTime createTime = new UndoLogParam.CreateTime();
         createTime.setStartTime("2024-01-01 10:00:00");
         createTime.setEndTime("2024-01-01 11:00:00");
         param.setLogCreateTime(createTime);
-        
+
         UndoLogParam.ModifyTime modifyTime = new UndoLogParam.ModifyTime();
         modifyTime.setStartTime("2024-01-01 10:00:00");
         modifyTime.setEndTime("2024-01-01 11:00:00");
         param.setLogModifiedTime(modifyTime);
-        
+
         PageResult<UndoLogVO> expectedResult = createMockPageResult();
 
         when(dataSourceService.getUndoLogInfo(any(UndoLogParam.class))).thenReturn(expectedResult);
@@ -178,7 +179,7 @@ class UndoLogServiceTest {
     @Test
     void testQueryAndAnalyzeUndoLogServiceException() {
         UndoLogParam param = createValidUndoLogParam();
-        
+
         when(dataSourceService.getUndoLogInfo(any(UndoLogParam.class)))
                 .thenThrow(new RuntimeException("Database connection failed"));
 
@@ -211,7 +212,7 @@ class UndoLogServiceTest {
     private PageResult<UndoLogVO> createMockPageResult() {
         PageResult<UndoLogVO> result = new PageResult<>();
         List<UndoLogVO> data = new ArrayList<>();
-        
+
         UndoLogVO vo1 = new UndoLogVO();
         vo1.setContext("test-context-1");
         vo1.setLogStatus(0);
@@ -219,7 +220,7 @@ class UndoLogServiceTest {
         vo1.setLogModified("2024-01-01 10:00:00");
         vo1.setRollBackInfo("rollback-info-1");
         data.add(vo1);
-        
+
         UndoLogVO vo2 = new UndoLogVO();
         vo2.setContext("test-context-2");
         vo2.setLogStatus(1);
@@ -227,7 +228,7 @@ class UndoLogServiceTest {
         vo2.setLogModified("2024-01-01 11:00:00");
         vo2.setRollBackInfo("rollback-info-2");
         data.add(vo2);
-        
+
         result.setData(data);
         result.setTotal(2);
         return result;

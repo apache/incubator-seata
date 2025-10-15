@@ -38,7 +38,8 @@ public class BusinessDataSourceToolsTest {
         Map<String, String> mockMap = new HashMap<>();
         mockMap.put("name1", "res1");
         try (MockedStatic<BusinessDataSourcesProperties> mocked = mockStatic(BusinessDataSourcesProperties.class)) {
-            mocked.when(BusinessDataSourcesProperties::getDataSourcesNamesAndResourceIds).thenReturn(mockMap);
+            mocked.when(BusinessDataSourcesProperties::getDataSourcesNamesAndResourceIds)
+                    .thenReturn(mockMap);
             Map<String, String> res = tools.getResourceIds();
             assertEquals(mockMap, res);
         }
@@ -69,5 +70,3 @@ public class BusinessDataSourceToolsTest {
         assertEquals(1, res.get(0).get("a"));
     }
 }
-
-

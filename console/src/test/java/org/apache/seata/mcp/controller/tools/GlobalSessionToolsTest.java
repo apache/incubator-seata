@@ -77,9 +77,12 @@ public class GlobalSessionToolsTest {
             dto.setPageSize(10);
             dto.setTimeStart("2025-10-01 00:00:00");
             dto.setTimeEnd("2025-10-02 01:00:00");
-            mocked.when(() -> DateUtils.convertToTimeStampFromDateTime("2025-10-01 00:00:00")).thenReturn(0L);
-            mocked.when(() -> DateUtils.convertToTimeStampFromDateTime("2025-10-02 01:00:00")).thenReturn(3600_000L + 1);
-            mocked.when(() -> DateUtils.judgeExceedTimeDuration(0L, 3600_000L + 1, 3600_000L)).thenReturn(true);
+            mocked.when(() -> DateUtils.convertToTimeStampFromDateTime("2025-10-01 00:00:00"))
+                    .thenReturn(0L);
+            mocked.when(() -> DateUtils.convertToTimeStampFromDateTime("2025-10-02 01:00:00"))
+                    .thenReturn(3600_000L + 1);
+            mocked.when(() -> DateUtils.judgeExceedTimeDuration(0L, 3600_000L + 1, 3600_000L))
+                    .thenReturn(true);
             mocked.when(() -> DateUtils.convertToHourFromTimeStamp(3600_000L)).thenReturn(1L);
             assertThrows(IllegalArgumentException.class, () -> tools.queryGlobalSession(new NameSpaceDetail(), dto));
         }
@@ -92,16 +95,20 @@ public class GlobalSessionToolsTest {
             dto.setPageNum(1);
             dto.setPageSize(10);
             dto.setTimeStart("2020-01-01 00:00:00");
-            mocked.when(() -> DateUtils.convertToTimeStampFromDateTime("2020-01-01 00:00:00")).thenReturn(1000L);
+            mocked.when(() -> DateUtils.convertToTimeStampFromDateTime("2020-01-01 00:00:00"))
+                    .thenReturn(1000L);
 
-            String body = "{\"code\":\"200\",\"message\":\"success\",\"pageSize\":10,\"pageNum\":1,\"total\":0,\"pages\":0,\"data\":[]}";
+            String body =
+                    "{\"code\":\"200\",\"message\":\"success\",\"pageSize\":10,\"pageNum\":1,\"total\":0,\"pages\":0,\"data\":[]}";
             ArgumentCaptor<GlobalSessionParam> captor = ArgumentCaptor.forClass(GlobalSessionParam.class);
             when(rpcService.getCallTC(any(), eq(RPCConstant.GLOBAL_SESSION_BASE_URL + "/query"), any(), any(), any()))
                     .thenReturn(body);
 
             PageResult<GlobalSessionVO> res = tools.queryGlobalSession(new NameSpaceDetail(), dto);
             assertTrue(res.isSuccess());
-            verify(rpcService).getCallTC(any(), eq(RPCConstant.GLOBAL_SESSION_BASE_URL + "/query"), captor.capture(), any(), any());
+            verify(rpcService)
+                    .getCallTC(
+                            any(), eq(RPCConstant.GLOBAL_SESSION_BASE_URL + "/query"), captor.capture(), any(), any());
             GlobalSessionParam sent = captor.getValue();
             assertEquals(1000L, sent.getTimeStart());
             assertEquals(1000L + DateUtils.ONE_DAY_TIMESTAMP, sent.getTimeEnd());
@@ -116,17 +123,22 @@ public class GlobalSessionToolsTest {
             dto.setPageSize(10);
             dto.setTimeStart("2020-01-01 00:00:00");
             dto.setTimeEnd("2020-01-02 00:00:00");
-            mocked.when(() -> DateUtils.convertToTimeStampFromDateTime("2020-01-01 00:00:00")).thenReturn(1000L);
-            mocked.when(() -> DateUtils.convertToTimeStampFromDateTime("2020-01-02 00:00:00")).thenReturn(1200L);
+            mocked.when(() -> DateUtils.convertToTimeStampFromDateTime("2020-01-01 00:00:00"))
+                    .thenReturn(1000L);
+            mocked.when(() -> DateUtils.convertToTimeStampFromDateTime("2020-01-02 00:00:00"))
+                    .thenReturn(1200L);
 
-            String body = "{\"code\":\"200\",\"message\":\"success\",\"pageSize\":10,\"pageNum\":1,\"total\":0,\"pages\":0,\"data\":[]}";
+            String body =
+                    "{\"code\":\"200\",\"message\":\"success\",\"pageSize\":10,\"pageNum\":1,\"total\":0,\"pages\":0,\"data\":[]}";
             ArgumentCaptor<GlobalSessionParam> captor = ArgumentCaptor.forClass(GlobalSessionParam.class);
             when(rpcService.getCallTC(any(), eq(RPCConstant.GLOBAL_SESSION_BASE_URL + "/query"), any(), any(), any()))
                     .thenReturn(body);
 
             PageResult<GlobalSessionVO> res = tools.queryGlobalSession(new NameSpaceDetail(), dto);
             assertTrue(res.isSuccess());
-            verify(rpcService).getCallTC(any(), eq(RPCConstant.GLOBAL_SESSION_BASE_URL + "/query"), captor.capture(), any(), any());
+            verify(rpcService)
+                    .getCallTC(
+                            any(), eq(RPCConstant.GLOBAL_SESSION_BASE_URL + "/query"), captor.capture(), any(), any());
             GlobalSessionParam sent = captor.getValue();
             assertEquals(1000L, sent.getTimeStart());
         }
@@ -138,12 +150,14 @@ public class GlobalSessionToolsTest {
         dto.setPageNum(1);
         dto.setPageSize(10);
         ArgumentCaptor<GlobalSessionParam> captor = ArgumentCaptor.forClass(GlobalSessionParam.class);
-        String body = "{\"code\":\"200\",\"message\":\"success\",\"pageSize\":10,\"pageNum\":1,\"total\":0,\"pages\":0,\"data\":[]}";
+        String body =
+                "{\"code\":\"200\",\"message\":\"success\",\"pageSize\":10,\"pageNum\":1,\"total\":0,\"pages\":0,\"data\":[]}";
         when(rpcService.getCallTC(any(), eq(RPCConstant.GLOBAL_SESSION_BASE_URL + "/query"), any(), any(), any()))
                 .thenReturn(body);
         PageResult<GlobalSessionVO> res = tools.queryGlobalSession(new NameSpaceDetail(), dto);
         assertTrue(res.isSuccess());
-        verify(rpcService).getCallTC(any(), eq(RPCConstant.GLOBAL_SESSION_BASE_URL + "/query"), captor.capture(), any(), any());
+        verify(rpcService)
+                .getCallTC(any(), eq(RPCConstant.GLOBAL_SESSION_BASE_URL + "/query"), captor.capture(), any(), any());
         GlobalSessionParam sent = captor.getValue();
         assertNull(sent.getTimeStart());
         assertNull(sent.getTimeEnd());
@@ -185,7 +199,8 @@ public class GlobalSessionToolsTest {
         assertEquals("The modify key is not available", res1);
 
         when(confirmService.isValidKey("k")).thenReturn(true);
-        when(rpcService.deleteCallTC(any(), eq(RPCConstant.GLOBAL_SESSION_BASE_URL + "/deleteGlobalSession"), any(), any(), any()))
+        when(rpcService.deleteCallTC(
+                        any(), eq(RPCConstant.GLOBAL_SESSION_BASE_URL + "/deleteGlobalSession"), any(), any(), any()))
                 .thenReturn(" ");
         String res2 = tools.deleteGlobalSession(new NameSpaceDetail(), "x", "k");
         assertEquals("delete global session failed, xid: x", res2);
@@ -202,28 +217,39 @@ public class GlobalSessionToolsTest {
     @Test
     void testDeleteGlobalSession_ErrorModifyKey() {
         String res = tools.deleteGlobalSession(new NameSpaceDetail(), "x", "k");
-        assertEquals("The modify key is not available",res);
+        assertEquals("The modify key is not available", res);
     }
 
     @Test
     void testStopStartChange_SendCommitRollback() {
         when(confirmService.isValidKey("k")).thenReturn(true);
 
-        when(rpcService.putCallTC(any(), eq(RPCConstant.GLOBAL_SESSION_BASE_URL + "/stopGlobalSession"), any(), any(), any()))
+        when(rpcService.putCallTC(
+                        any(), eq(RPCConstant.GLOBAL_SESSION_BASE_URL + "/stopGlobalSession"), any(), any(), any()))
                 .thenReturn("");
-        assertEquals("stop global session retry failed, xid: x", tools.stopGlobalSession(new NameSpaceDetail(), "x", "k"));
+        assertEquals(
+                "stop global session retry failed, xid: x", tools.stopGlobalSession(new NameSpaceDetail(), "x", "k"));
 
-        when(rpcService.putCallTC(any(), eq(RPCConstant.GLOBAL_SESSION_BASE_URL + "/startGlobalSession"), any(), any(), any()))
+        when(rpcService.putCallTC(
+                        any(), eq(RPCConstant.GLOBAL_SESSION_BASE_URL + "/startGlobalSession"), any(), any(), any()))
                 .thenReturn("");
-        assertEquals("start the global session retry failed, xid: x", tools.startGlobalSession(new NameSpaceDetail(), "x", "k"));
+        assertEquals(
+                "start the global session retry failed, xid: x",
+                tools.startGlobalSession(new NameSpaceDetail(), "x", "k"));
 
-        when(rpcService.putCallTC(any(), eq(RPCConstant.GLOBAL_SESSION_BASE_URL + "/sendCommitOrRollback"), any(), any(), any()))
+        when(rpcService.putCallTC(
+                        any(), eq(RPCConstant.GLOBAL_SESSION_BASE_URL + "/sendCommitOrRollback"), any(), any(), any()))
                 .thenReturn("");
-        assertEquals("send global session to commit or rollback to rm failed, xid: x", tools.sendCommitOrRollback(new NameSpaceDetail(), "x", "k"));
+        assertEquals(
+                "send global session to commit or rollback to rm failed, xid: x",
+                tools.sendCommitOrRollback(new NameSpaceDetail(), "x", "k"));
 
-        when(rpcService.putCallTC(any(), eq(RPCConstant.GLOBAL_SESSION_BASE_URL + "/changeGlobalStatus"), any(), any(), any()))
+        when(rpcService.putCallTC(
+                        any(), eq(RPCConstant.GLOBAL_SESSION_BASE_URL + "/changeGlobalStatus"), any(), any(), any()))
                 .thenReturn("");
-        assertEquals("change the global session status failed, xid: x", tools.changeGlobalStatus(new NameSpaceDetail(), "x", "k"));
+        assertEquals(
+                "change the global session status failed, xid: x",
+                tools.changeGlobalStatus(new NameSpaceDetail(), "x", "k"));
 
         when(rpcService.putCallTC(any(), any(), any(), any(), any())).thenReturn("ok");
         assertEquals("ok", tools.stopGlobalSession(new NameSpaceDetail(), "x", "k"));
@@ -249,8 +275,9 @@ public class GlobalSessionToolsTest {
             batch.add(vo);
         }
         String dataArray = new ObjectMapper().valueToTree(batch).toString();
-        String body = "{\"code\":\"200\",\"message\":\"success\",\"pageSize\":100,\"pageNum\":1,\"total\":210,\"pages\":3,\"data\":"
-                + dataArray + "}";
+        String body =
+                "{\"code\":\"200\",\"message\":\"success\",\"pageSize\":100,\"pageNum\":1,\"total\":210,\"pages\":3,\"data\":"
+                        + dataArray + "}";
         when(rpcService.getCallTC(any(), eq(RPCConstant.GLOBAL_SESSION_BASE_URL + "/query"), any(), any(), any()))
                 .thenReturn(body);
 
@@ -269,8 +296,9 @@ public class GlobalSessionToolsTest {
             batch.add(vo);
         }
         String dataArray = new ObjectMapper().valueToTree(batch).toString();
-        String body = "{\"code\":\"200\",\"message\":\"success\",\"pageSize\":30,\"pageNum\":1,\"total\":90,\"pages\":3,\"data\":"
-                + dataArray + "}";
+        String body =
+                "{\"code\":\"200\",\"message\":\"success\",\"pageSize\":30,\"pageNum\":1,\"total\":90,\"pages\":3,\"data\":"
+                        + dataArray + "}";
         when(rpcService.getCallTC(any(), eq(RPCConstant.GLOBAL_SESSION_BASE_URL + "/query"), any(), any(), any()))
                 .thenReturn(body);
 
@@ -283,8 +311,9 @@ public class GlobalSessionToolsTest {
     void testGetAbnormalSessionsWithEmptyData() throws NoSuchFieldException, IllegalAccessException {
         List<GlobalSessionVO> batch = new ArrayList<>();
         String dataArray = new ObjectMapper().valueToTree(batch).toString();
-        String body = "{\"code\":\"200\",\"message\":\"success\",\"pageSize\":30,\"pageNum\":1,\"total\":90,\"pages\":3,\"data\":"
-                + dataArray + "}";
+        String body =
+                "{\"code\":\"200\",\"message\":\"success\",\"pageSize\":30,\"pageNum\":1,\"total\":90,\"pages\":3,\"data\":"
+                        + dataArray + "}";
         when(rpcService.getCallTC(any(), eq(RPCConstant.GLOBAL_SESSION_BASE_URL + "/query"), any(), any(), any()))
                 .thenReturn(body);
 
@@ -299,7 +328,8 @@ public class GlobalSessionToolsTest {
 
     @Test
     void testGetAbnormalSessionsWithNullData() {
-        String body = "{\"code\":\"200\",\"message\":\"success\",\"pageSize\":30,\"pageNum\":1,\"total\":90,\"pages\":3}";
+        String body =
+                "{\"code\":\"200\",\"message\":\"success\",\"pageSize\":30,\"pageNum\":1,\"total\":90,\"pages\":3}";
         when(rpcService.getCallTC(any(), eq(RPCConstant.GLOBAL_SESSION_BASE_URL + "/query"), any(), any(), any()))
                 .thenReturn(body);
         GlobalAbnormalSessionParam abnormal = new GlobalAbnormalSessionParam();
@@ -307,5 +337,3 @@ public class GlobalSessionToolsTest {
         assertTrue(res.isEmpty());
     }
 }
-
-

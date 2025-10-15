@@ -43,6 +43,7 @@ class ServerLogServiceTest {
 
     @Mock
     private MCPRPCService mcprpcService;
+
     @InjectMocks
     private ServerLogServiceImpl service;
 
@@ -54,7 +55,8 @@ class ServerLogServiceTest {
 
     @BeforeEach
     void setUp() {
-        lenient().when(mcprpcService.getCallTCLogs(any(), anyString(), any(), any(), any(), anyString()))
+        lenient()
+                .when(mcprpcService.getCallTCLogs(any(), anyString(), any(), any(), any(), anyString()))
                 .thenReturn(Mono.empty());
     }
 
@@ -64,7 +66,7 @@ class ServerLogServiceTest {
         param.setPage(1);
         param.setLogType("error");
         param.setLogMessageLevel("error");
-        invokePrivate("checkLogParam", new Class<?>[]{ServerLogParam.class}, param);
+        invokePrivate("checkLogParam", new Class<?>[] {ServerLogParam.class}, param);
     }
 
     @Test
@@ -72,8 +74,8 @@ class ServerLogServiceTest {
         ServerLogParam param = new ServerLogParam();
         param.setPage(1);
         param.setLogType("all");
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> service.analyseServerLogFile(createNameSpaceDetail(), param));
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class, () -> service.analyseServerLogFile(createNameSpaceDetail(), param));
         assertTrue(exception.getMessage().contains("not allowed to query log data"));
     }
 
@@ -82,8 +84,8 @@ class ServerLogServiceTest {
         ServerLogParam param = new ServerLogParam();
         param.setPage(1);
         param.setLogMessageStartTime("2024-01-01 10:00:00");
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> service.analyseServerLogFile(createNameSpaceDetail(), param));
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class, () -> service.analyseServerLogFile(createNameSpaceDetail(), param));
         assertTrue(exception.getMessage().contains("start time without the end time"));
     }
 
@@ -92,8 +94,8 @@ class ServerLogServiceTest {
         ServerLogParam param = new ServerLogParam();
         param.setPage(0);
         param.setLogType("error");
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> service.analyseServerLogFile(createNameSpaceDetail(), param));
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class, () -> service.analyseServerLogFile(createNameSpaceDetail(), param));
         assertTrue(exception.getMessage().contains("page number must be greater than or equal to 1"));
     }
 
@@ -102,8 +104,8 @@ class ServerLogServiceTest {
         ServerLogParam param = new ServerLogParam();
         param.setPage(1);
         param.setLogType("invalid");
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> service.analyseServerLogFile(createNameSpaceDetail(), param));
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class, () -> service.analyseServerLogFile(createNameSpaceDetail(), param));
         assertTrue(exception.getMessage().contains("logType parameter value is invalid"));
     }
 
@@ -112,8 +114,8 @@ class ServerLogServiceTest {
         ServerLogParam param = new ServerLogParam();
         param.setPage(1);
         param.setLogMessageLevel("invalid");
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> service.analyseServerLogFile(createNameSpaceDetail(), param));
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class, () -> service.analyseServerLogFile(createNameSpaceDetail(), param));
         assertTrue(exception.getMessage().contains("logMessageLevel parameter value is invalid"));
     }
 
@@ -123,8 +125,8 @@ class ServerLogServiceTest {
         param.setPage(1);
         param.setLogType("error");
         param.setLogMessageLevel("error");
-        RuntimeException exception = assertThrows(RuntimeException.class,
-                () -> service.analyseServerLogFile(createNameSpaceDetail(), param));
+        RuntimeException exception = assertThrows(
+                RuntimeException.class, () -> service.analyseServerLogFile(createNameSpaceDetail(), param));
         assertTrue(exception.getMessage().contains("Failed to read large log file"));
     }
 
@@ -134,8 +136,8 @@ class ServerLogServiceTest {
         param.setPage(1);
         param.setLogMessageKeyWord(Arrays.asList("error", "timeout"));
 
-        RuntimeException exception = assertThrows(RuntimeException.class,
-                () -> service.analyseServerLogFile(createNameSpaceDetail(), param));
+        RuntimeException exception = assertThrows(
+                RuntimeException.class, () -> service.analyseServerLogFile(createNameSpaceDetail(), param));
         assertTrue(exception.getMessage().contains("Failed to read large log file"));
     }
 
@@ -146,8 +148,8 @@ class ServerLogServiceTest {
         param.setLogMessageStartTime("2024-01-01 10:00:00");
         param.setLogMessageEndTime("2024-01-01 11:00:00");
 
-        RuntimeException exception = assertThrows(RuntimeException.class,
-                () -> service.analyseServerLogFile(createNameSpaceDetail(), param));
+        RuntimeException exception = assertThrows(
+                RuntimeException.class, () -> service.analyseServerLogFile(createNameSpaceDetail(), param));
         assertTrue(exception.getMessage().contains("Failed to read large log file"));
     }
 
@@ -184,8 +186,8 @@ class ServerLogServiceTest {
         ServerLogParam param = new ServerLogParam();
         param.setLogType("error");
 
-        String filePath = (String) invokePrivate("getLogFilePath",
-                new Class<?>[]{NameSpaceDetail.class, ServerLogParam.class}, detail, param);
+        String filePath = (String) invokePrivate(
+                "getLogFilePath", new Class<?>[] {NameSpaceDetail.class, ServerLogParam.class}, detail, param);
 
         assertNotNull(filePath);
         assertTrue(filePath.contains("error-Server.log"));
@@ -196,9 +198,12 @@ class ServerLogServiceTest {
         NameSpaceDetail detail = createNameSpaceDetail();
         ServerLogParam param = new ServerLogParam();
 
-        Mono<Void> result = (Mono<Void>) invokePrivate("downloadLogFile",
-                new Class<?>[]{NameSpaceDetail.class, String.class, ServerLogParam.class},
-                detail, "/tmp/test.log", param);
+        Mono<Void> result = (Mono<Void>) invokePrivate(
+                "downloadLogFile",
+                new Class<?>[] {NameSpaceDetail.class, String.class, ServerLogParam.class},
+                detail,
+                "/tmp/test.log",
+                param);
 
         assertNotNull(result);
     }
@@ -210,5 +215,4 @@ class ServerLogServiceTest {
         detail.setvGroup("test-vgroup");
         return detail;
     }
-
 }

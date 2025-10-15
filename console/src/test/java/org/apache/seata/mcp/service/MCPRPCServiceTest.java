@@ -59,10 +59,13 @@ class MCPRPCServiceTest {
 
     @Mock
     private Environment env;
+
     @Mock
     private JwtTokenUtils jwtTokenUtils;
+
     @Mock
     private RestTemplate restTemplate;
+
     @InjectMocks
     private MCPRPCServiceImpl service;
 
@@ -85,7 +88,7 @@ class MCPRPCServiceTest {
         lenient().when(env.getProperty("console.user.password", "seata")).thenReturn("seata");
         lenient().when(jwtTokenUtils.validateToken(anyString())).thenReturn(true);
         lenient().when(jwtTokenUtils.createToken(any())).thenReturn("test-token");
-        
+
         service.init();
         setField("restTemplate", restTemplate);
         setField("token", "Bearer test-token");
@@ -104,7 +107,7 @@ class MCPRPCServiceTest {
         ResponseEntity<String> response = new ResponseEntity<>("{\"data\":\"ns1,ns2\"}", HttpStatus.OK);
         when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), any(HttpEntity.class), eq(String.class)))
                 .thenReturn(response);
-        
+
         SingleResult<?> result = service.getTCNameSpaces();
         assertTrue(result.isSuccess());
         assertNotNull(result.getData());
@@ -115,7 +118,7 @@ class MCPRPCServiceTest {
         ResponseEntity<String> response = new ResponseEntity<>("invalid", HttpStatus.OK);
         when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), any(HttpEntity.class), eq(String.class)))
                 .thenReturn(response);
-        
+
         SingleResult<?> result = service.getTCNameSpaces();
         Assertions.assertFalse(result.isSuccess());
     }
@@ -126,9 +129,9 @@ class MCPRPCServiceTest {
         detail.setNamespace("test-ns");
         detail.setCluster("cluster1");
         HttpHeaders headers = new HttpHeaders();
-        
+
         service.setNamespaceHeaderAndPathParam(detail, headers, new HashMap<>());
-        
+
         assertEquals("test-ns", headers.getFirst("x-seata-namespace"));
         assertEquals("cluster1", headers.getFirst("x-seata-cluster"));
     }
@@ -139,10 +142,10 @@ class MCPRPCServiceTest {
         detail.setNamespace("test-ns");
         detail.setCluster("test-clu");
         ResponseEntity<String> response = new ResponseEntity<>("{\"ok\":true}", HttpStatus.OK);
-        
+
         when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), any(HttpEntity.class), eq(String.class)))
                 .thenReturn(response);
-        
+
         String result = service.getCallTC(detail, "/api/test", null, null, null);
         assertEquals("{\"ok\":true}", result);
     }
@@ -159,10 +162,10 @@ class MCPRPCServiceTest {
         detail.setNamespace("test-ns");
         detail.setCluster("test-clu");
         ResponseEntity<String> response = new ResponseEntity<>("{\"ok\":true}", HttpStatus.OK);
-        
+
         when(restTemplate.exchange(anyString(), eq(HttpMethod.DELETE), any(HttpEntity.class), eq(String.class)))
                 .thenReturn(response);
-        
+
         String result = service.deleteCallTC(detail, "/api/test", null, null, null);
         assertEquals("{\"ok\":true}", result);
     }
@@ -179,10 +182,10 @@ class MCPRPCServiceTest {
         detail.setNamespace("test-ns");
         detail.setCluster("test-clu");
         ResponseEntity<String> response = new ResponseEntity<>("{\"ok\":true}", HttpStatus.OK);
-        
+
         when(restTemplate.exchange(anyString(), eq(HttpMethod.PUT), any(HttpEntity.class), eq(String.class)))
                 .thenReturn(response);
-        
+
         String result = service.putCallTC(detail, "/api/test", null, null, null);
         assertEquals("{\"ok\":true}", result);
     }
@@ -205,69 +208,89 @@ class MCPRPCServiceTest {
         detail.setNamespace("test-ns");
         detail.setCluster("test-cluster");
 
-        Mono<Void> result = service.getCallTCLogs(detail, "/api/logs", null, null, null, 
-            System.getProperty("java.io.tmpdir") + "/test-logs.txt");
+        Mono<Void> result = service.getCallTCLogs(
+                detail, "/api/logs", null, null, null, System.getProperty("java.io.tmpdir") + "/test-logs.txt");
 
         assertNotNull(result);
     }
 
     @Test
     void testObjectToQueryParamMap() throws Exception {
-        Map<String, Object> result = (Map<String, Object>) invokePrivate("objectToQueryParamMap", 
-            new Class<?>[]{Object.class}, new Object[]{null});
+        Map<String, Object> result = (Map<String, Object>)
+                invokePrivate("objectToQueryParamMap", new Class<?>[] {Object.class}, new Object[] {null});
         assertTrue(result.isEmpty());
-        
+
         Map<String, Object> input = new HashMap<>();
         input.put("key", "value");
-        result = (Map<String, Object>) invokePrivate("objectToQueryParamMap", new Class<?>[]{Object.class}, input);
+        result = (Map<String, Object>) invokePrivate("objectToQueryParamMap", new Class<?>[] {Object.class}, input);
         assertEquals("value", result.get("key"));
-        
+
         TestParam param = new TestParam();
         param.name = "test";
-        result = (Map<String, Object>) invokePrivate("objectToQueryParamMap", new Class<?>[]{Object.class}, param);
+        result = (Map<String, Object>) invokePrivate("objectToQueryParamMap", new Class<?>[] {Object.class}, param);
         assertEquals("test", result.get("name"));
     }
 
     @Test
     void testBuildUrl() throws Exception {
-        String result = (String) invokePrivate("buildUrl", 
-            new Class<?>[]{String.class, String.class, Map.class, Map.class},
-            "http://localhost:8081", "/api", null, null);
+        String result = (String) invokePrivate(
+                "buildUrl",
+                new Class<?>[] {String.class, String.class, Map.class, Map.class},
+                "http://localhost:8081",
+                "/api",
+                null,
+                null);
         assertEquals("http://localhost:8081/api", result);
-        
+
         Map<String, String> pathParams = new HashMap<>();
         pathParams.put("id", "123");
-        result = (String) invokePrivate("buildUrl", 
-            new Class<?>[]{String.class, String.class, Map.class, Map.class},
-            "http://localhost:8081", "/api", pathParams, null);
+        result = (String) invokePrivate(
+                "buildUrl",
+                new Class<?>[] {String.class, String.class, Map.class, Map.class},
+                "http://localhost:8081",
+                "/api",
+                pathParams,
+                null);
         assertTrue(result.contains("id=123"));
-        
+
         Map<String, Object> queryParams = new HashMap<>();
         queryParams.put("name", "test");
-        result = (String) invokePrivate("buildUrl", 
-            new Class<?>[]{String.class, String.class, Map.class, Map.class},
-            "http://localhost:8081", "/api", null, queryParams);
+        result = (String) invokePrivate(
+                "buildUrl",
+                new Class<?>[] {String.class, String.class, Map.class, Map.class},
+                "http://localhost:8081",
+                "/api",
+                null,
+                queryParams);
         assertTrue(result.contains("name=test"));
     }
 
     @Test
     void testBuildUrlWithArrayAndList() throws Exception {
         Map<String, Object> queryParams = new HashMap<>();
-        queryParams.put("ids", new Integer[]{1, 2});
-        String result = (String) invokePrivate("buildUrl", 
-            new Class<?>[]{String.class, String.class, Map.class, Map.class},
-            "http://localhost:8081", "/api", null, queryParams);
+        queryParams.put("ids", new Integer[] {1, 2});
+        String result = (String) invokePrivate(
+                "buildUrl",
+                new Class<?>[] {String.class, String.class, Map.class, Map.class},
+                "http://localhost:8081",
+                "/api",
+                null,
+                queryParams);
         assertTrue(result.contains("ids=1"));
         assertTrue(result.contains("ids=2"));
-        
+
         queryParams.clear();
         List<String> tags = new ArrayList<>();
         tags.add("a");
         tags.add("b");
         queryParams.put("tags", tags);
-        result = (String) invokePrivate("buildUrl", 
-            new Class<?>[]{String.class, String.class, Map.class, Map.class},
-            "http://localhost:8081", "/api", null, queryParams);
+        result = (String) invokePrivate(
+                "buildUrl",
+                new Class<?>[] {String.class, String.class, Map.class, Map.class},
+                "http://localhost:8081",
+                "/api",
+                null,
+                queryParams);
         assertTrue(result.contains("tags=a"));
         assertTrue(result.contains("tags=b"));
     }
@@ -276,5 +299,3 @@ class MCPRPCServiceTest {
         public String name;
     }
 }
-
-

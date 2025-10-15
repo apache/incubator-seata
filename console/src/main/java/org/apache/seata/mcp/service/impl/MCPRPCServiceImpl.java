@@ -341,57 +341,45 @@ public class MCPRPCServiceImpl implements MCPRPCService {
                 .build();
 
         Path filePath = Paths.get(outputFilePath);
-        return webClient
-                .get()
-                .exchangeToMono(clientResponse -> {
-                    HttpHeaders httpHeaders = clientResponse.headers().asHttpHeaders();
-                    boolean appendMode = Boolean.parseBoolean(httpHeaders.getFirst("X-APPEND-NEEDED"));
+        return webClient.get().exchangeToMono(clientResponse -> {
+            HttpHeaders httpHeaders = clientResponse.headers().asHttpHeaders();
+            boolean appendMode = Boolean.parseBoolean(httpHeaders.getFirst("X-APPEND-NEEDED"));
 
-                    try {
-                        Files.createDirectories(filePath.getParent());
-                    } catch (IOException e) {
-                        return Mono.error(e);
-                    }
+            try {
+                Files.createDirectories(filePath.getParent());
+            } catch (IOException e) {
+                return Mono.error(e);
+            }
 
-                    return Mono.using(
-                            () -> AsynchronousFileChannel.open(
-                                    filePath,
-                                    StandardOpenOption.CREATE,
-                                    StandardOpenOption.WRITE
-                            ),
-
-                            channel -> {
-                                long position = 0;
-                                if (appendMode) {
-                                    try {
-                                        position = channel.size();
-                                    } catch (IOException e) {
-                                        return Mono.error(e);
-                                    }
-                                } else {
-                                    try {
-                                        channel.truncate(0);
-                                    } catch (IOException e) {
-                                        return Mono.error(e);
-                                    }
-                                }
-
-                                return DataBufferUtils.write(
-                                        clientResponse.bodyToFlux(DataBuffer.class),
-                                        channel,
-                                        position
-                                ).then();
-                            },
-
-                            channel -> {
-                                try {
-                                    channel.close();
-                                } catch (IOException e) {
-                                    logger.error("Close log file error:{}", e.getMessage());
-                                }
+            return Mono.using(
+                    () -> AsynchronousFileChannel.open(filePath, StandardOpenOption.CREATE, StandardOpenOption.WRITE),
+                    channel -> {
+                        long position = 0;
+                        if (appendMode) {
+                            try {
+                                position = channel.size();
+                            } catch (IOException e) {
+                                return Mono.error(e);
                             }
-                    );
-                });
+                        } else {
+                            try {
+                                channel.truncate(0);
+                            } catch (IOException e) {
+                                return Mono.error(e);
+                            }
+                        }
+
+                        return DataBufferUtils.write(clientResponse.bodyToFlux(DataBuffer.class), channel, position)
+                                .then();
+                    },
+                    channel -> {
+                        try {
+                            channel.close();
+                        } catch (IOException e) {
+                            logger.error("Close log file error:{}", e.getMessage());
+                        }
+                    });
+        });
     }
 
     private Map<String, Object> objectToQueryParamMap(Object obj) {

@@ -32,7 +32,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-
 public class GlobalLockToolsTest {
 
     private GlobalLockTools tools;
@@ -75,9 +74,12 @@ public class GlobalLockToolsTest {
             dto.setPageSize(10);
             dto.setTimeStart("2025-10-01 10:00:00");
             dto.setTimeEnd("2025-10-02 10:00:01");
-            mocked.when(() -> DateUtils.convertToTimeStampFromDateTime("2025-10-01 10:00:00")).thenReturn(0L);
-            mocked.when(() -> DateUtils.convertToTimeStampFromDateTime("2025-10-02 10:00:01")).thenReturn(3600_000L + 1);
-            mocked.when(() -> DateUtils.judgeExceedTimeDuration(0L, 3600_000L + 1, 3600_000L)).thenReturn(true);
+            mocked.when(() -> DateUtils.convertToTimeStampFromDateTime("2025-10-01 10:00:00"))
+                    .thenReturn(0L);
+            mocked.when(() -> DateUtils.convertToTimeStampFromDateTime("2025-10-02 10:00:01"))
+                    .thenReturn(3600_000L + 1);
+            mocked.when(() -> DateUtils.judgeExceedTimeDuration(0L, 3600_000L + 1, 3600_000L))
+                    .thenReturn(true);
             mocked.when(() -> DateUtils.convertToHourFromTimeStamp(3600_000L)).thenReturn(1L);
             PageResult<GlobalLockVO> res = tools.queryGlobalLock(new NameSpaceDetail(), dto);
             assertFalse(res.isSuccess());
@@ -93,9 +95,11 @@ public class GlobalLockToolsTest {
             dto.setPageSize(10);
             dto.setTimeStart("2020-01-01 00:00:00");
 
-            mocked.when(() -> DateUtils.convertToTimeStampFromDateTime("2020-01-01 00:00:00")).thenReturn(1000L);
+            mocked.when(() -> DateUtils.convertToTimeStampFromDateTime("2020-01-01 00:00:00"))
+                    .thenReturn(1000L);
 
-            String body = "{\"code\":\"200\",\"message\":\"success\",\"pageSize\":null,\"pageNum\":null,\"total\":0,\"pages\":0,\"data\":[]}";
+            String body =
+                    "{\"code\":\"200\",\"message\":\"success\",\"pageSize\":null,\"pageNum\":null,\"total\":0,\"pages\":0,\"data\":[]}";
             ArgumentCaptor<GlobalLockParam> paramCaptor = ArgumentCaptor.forClass(GlobalLockParam.class);
             when(rpcService.getCallTC(any(), eq(RPCConstant.GLOBAL_LOCK_BASE_URL + "/query"), any(), any(), any()))
                     .thenReturn(body);
@@ -104,7 +108,13 @@ public class GlobalLockToolsTest {
             assertTrue(res.isSuccess());
             assertNotNull(res.getData());
 
-            verify(rpcService).getCallTC(any(), eq(RPCConstant.GLOBAL_LOCK_BASE_URL + "/query"), paramCaptor.capture(), any(), any());
+            verify(rpcService)
+                    .getCallTC(
+                            any(),
+                            eq(RPCConstant.GLOBAL_LOCK_BASE_URL + "/query"),
+                            paramCaptor.capture(),
+                            any(),
+                            any());
             GlobalLockParam sent = paramCaptor.getValue();
             assertEquals(1000L, sent.getTimeStart());
             assertEquals(1000L + DateUtils.ONE_DAY_TIMESTAMP, sent.getTimeEnd());
@@ -120,9 +130,11 @@ public class GlobalLockToolsTest {
             dto.setTimeStart("2020-01-01 00:00:00");
             dto.setTimeEnd("2020-01-01 00:00:00");
 
-            mocked.when(() -> DateUtils.convertToTimeStampFromDateTime("2020-01-01 00:00:00")).thenReturn(1000L);
+            mocked.when(() -> DateUtils.convertToTimeStampFromDateTime("2020-01-01 00:00:00"))
+                    .thenReturn(1000L);
 
-            String body = "{\"code\":\"200\",\"message\":\"success\",\"pageSize\":null,\"pageNum\":null,\"total\":0,\"pages\":0,\"data\":[]}";
+            String body =
+                    "{\"code\":\"200\",\"message\":\"success\",\"pageSize\":null,\"pageNum\":null,\"total\":0,\"pages\":0,\"data\":[]}";
             ArgumentCaptor<GlobalLockParam> paramCaptor = ArgumentCaptor.forClass(GlobalLockParam.class);
             when(rpcService.getCallTC(any(), eq(RPCConstant.GLOBAL_LOCK_BASE_URL + "/query"), any(), any(), any()))
                     .thenReturn(body);
@@ -131,7 +143,13 @@ public class GlobalLockToolsTest {
             assertTrue(res.isSuccess());
             assertNotNull(res.getData());
 
-            verify(rpcService).getCallTC(any(), eq(RPCConstant.GLOBAL_LOCK_BASE_URL + "/query"), paramCaptor.capture(), any(), any());
+            verify(rpcService)
+                    .getCallTC(
+                            any(),
+                            eq(RPCConstant.GLOBAL_LOCK_BASE_URL + "/query"),
+                            paramCaptor.capture(),
+                            any(),
+                            any());
             GlobalLockParam sent = paramCaptor.getValue();
             assertNotNull(sent.getTimeStart());
             assertNotNull(sent.getTimeEnd());
@@ -144,12 +162,14 @@ public class GlobalLockToolsTest {
         dto.setPageNum(1);
         dto.setPageSize(10);
         ArgumentCaptor<GlobalLockParam> paramCaptor = ArgumentCaptor.forClass(GlobalLockParam.class);
-        String body = "{\"code\":\"200\",\"message\":\"success\",\"pageSize\":null,\"pageNum\":null,\"total\":0,\"pages\":0,\"data\":[]}";
+        String body =
+                "{\"code\":\"200\",\"message\":\"success\",\"pageSize\":null,\"pageNum\":null,\"total\":0,\"pages\":0,\"data\":[]}";
         when(rpcService.getCallTC(any(), eq(RPCConstant.GLOBAL_LOCK_BASE_URL + "/query"), any(), any(), any()))
                 .thenReturn(body);
         PageResult<GlobalLockVO> res = tools.queryGlobalLock(new NameSpaceDetail(), dto);
         assertTrue(res.isSuccess());
-        verify(rpcService).getCallTC(any(), eq(RPCConstant.GLOBAL_LOCK_BASE_URL + "/query"), paramCaptor.capture(), any(), any());
+        verify(rpcService)
+                .getCallTC(any(), eq(RPCConstant.GLOBAL_LOCK_BASE_URL + "/query"), paramCaptor.capture(), any(), any());
         GlobalLockParam sent = paramCaptor.getValue();
         assertNull(sent.getTimeStart());
         assertNull(sent.getTimeEnd());
@@ -162,12 +182,14 @@ public class GlobalLockToolsTest {
         dto.setPageSize(10);
         dto.setTimeEnd("2025-10-01 10:00:00");
         ArgumentCaptor<GlobalLockParam> paramCaptor = ArgumentCaptor.forClass(GlobalLockParam.class);
-        String body = "{\"code\":\"200\",\"message\":\"success\",\"pageSize\":null,\"pageNum\":null,\"total\":0,\"pages\":0,\"data\":[]}";
+        String body =
+                "{\"code\":\"200\",\"message\":\"success\",\"pageSize\":null,\"pageNum\":null,\"total\":0,\"pages\":0,\"data\":[]}";
         when(rpcService.getCallTC(any(), eq(RPCConstant.GLOBAL_LOCK_BASE_URL + "/query"), any(), any(), any()))
                 .thenReturn(body);
         PageResult<GlobalLockVO> res = tools.queryGlobalLock(new NameSpaceDetail(), dto);
         assertTrue(res.isSuccess());
-        verify(rpcService).getCallTC(any(), eq(RPCConstant.GLOBAL_LOCK_BASE_URL + "/query"), paramCaptor.capture(), any(), any());
+        verify(rpcService)
+                .getCallTC(any(), eq(RPCConstant.GLOBAL_LOCK_BASE_URL + "/query"), paramCaptor.capture(), any(), any());
         GlobalLockParam sent = paramCaptor.getValue();
         assertNull(sent.getTimeStart());
         assertNull(sent.getTimeEnd());
@@ -183,19 +205,29 @@ public class GlobalLockToolsTest {
             dto.setTimeStart("2025-10-01 10:00:00");
             dto.setTimeEnd("2025-10-01 10:30:00");
 
-            mocked.when(() -> DateUtils.convertToTimeStampFromDateTime("2025-10-01 10:00:00")).thenReturn(1000L);
-            mocked.when(() -> DateUtils.convertToTimeStampFromDateTime("2025-10-01 10:30:00")).thenReturn(2000L);
-            mocked.when(() -> DateUtils.judgeExceedTimeDuration(1000L, 2000L, 3600_000L)).thenReturn(false);
+            mocked.when(() -> DateUtils.convertToTimeStampFromDateTime("2025-10-01 10:00:00"))
+                    .thenReturn(1000L);
+            mocked.when(() -> DateUtils.convertToTimeStampFromDateTime("2025-10-01 10:30:00"))
+                    .thenReturn(2000L);
+            mocked.when(() -> DateUtils.judgeExceedTimeDuration(1000L, 2000L, 3600_000L))
+                    .thenReturn(false);
 
             ArgumentCaptor<GlobalLockParam> paramCaptor = ArgumentCaptor.forClass(GlobalLockParam.class);
-            String body = "{\"code\":\"200\",\"message\":\"success\",\"pageSize\":null,\"pageNum\":null,\"total\":0,\"pages\":0,\"data\":[]}";
+            String body =
+                    "{\"code\":\"200\",\"message\":\"success\",\"pageSize\":null,\"pageNum\":null,\"total\":0,\"pages\":0,\"data\":[]}";
             when(rpcService.getCallTC(any(), eq(RPCConstant.GLOBAL_LOCK_BASE_URL + "/query"), any(), any(), any()))
                     .thenReturn(body);
 
             PageResult<GlobalLockVO> res = tools.queryGlobalLock(new NameSpaceDetail(), dto);
             assertTrue(res.isSuccess());
 
-            verify(rpcService).getCallTC(any(), eq(RPCConstant.GLOBAL_LOCK_BASE_URL + "/query"), paramCaptor.capture(), any(), any());
+            verify(rpcService)
+                    .getCallTC(
+                            any(),
+                            eq(RPCConstant.GLOBAL_LOCK_BASE_URL + "/query"),
+                            paramCaptor.capture(),
+                            any(),
+                            any());
             GlobalLockParam sent = paramCaptor.getValue();
             assertEquals(1000L, sent.getTimeStart());
             assertEquals(2000L, sent.getTimeEnd());
@@ -224,7 +256,8 @@ public class GlobalLockToolsTest {
     @Test
     void testDeleteGlobalLockInvalidKey() {
         when(confirmService.isValidKey("k")).thenReturn(false);
-        String res = tools.deleteGlobalLock(new NameSpaceDetail(), new org.apache.seata.mcp.entity.param.GlobalLockDeleteParam(), "k");
+        String res = tools.deleteGlobalLock(
+                new NameSpaceDetail(), new org.apache.seata.mcp.entity.param.GlobalLockDeleteParam(), "k");
         assertEquals("The modify key is not available", res);
     }
 
@@ -257,11 +290,10 @@ public class GlobalLockToolsTest {
         String res2 = tools.checkGlobalLock(new NameSpaceDetail(), "x", "b");
         assertEquals("ok", res2);
 
-        verify(rpcService, atLeastOnce()).getCallTC(any(), eq(RPCConstant.GLOBAL_LOCK_BASE_URL + "/check"), any(), pathCaptor.capture(), any());
+        verify(rpcService, atLeastOnce())
+                .getCallTC(any(), eq(RPCConstant.GLOBAL_LOCK_BASE_URL + "/check"), any(), pathCaptor.capture(), any());
         java.util.Map sentPath = pathCaptor.getValue();
         assertEquals("x", sentPath.get("xid"));
         assertEquals("b", sentPath.get("branchId"));
     }
 }
-
-

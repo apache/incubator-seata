@@ -54,5 +54,3 @@ public class ModifyConfirmServiceTest {
         assertFalse(service.isValidKey(key));
     }
 }
-
-

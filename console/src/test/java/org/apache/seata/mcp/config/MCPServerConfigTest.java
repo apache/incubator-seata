@@ -1,6 +1,5 @@
 package org.apache.seata.mcp.config;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.seata.mcp.entity.pojo.MCPProperties;
 import org.apache.seata.mcp.manager.MCPServerManager;

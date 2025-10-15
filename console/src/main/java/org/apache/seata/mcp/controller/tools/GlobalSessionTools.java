@@ -206,7 +206,7 @@ public class GlobalSessionTools {
         GlobalSessionParamDto param = GlobalSessionParamDto.covertFromAbnormalParam(abnormalSessionParam);
         param.setPageNum(1);
         param.setPageSize(100);
-        if(exceptionStatus.isEmpty()){
+        if (exceptionStatus.isEmpty()) {
             exceptionStatus.add(GlobalStatus.CommitFailed.getCode());
             exceptionStatus.add(GlobalStatus.TimeoutRollbackFailed.getCode());
             exceptionStatus.add(GlobalStatus.RollbackFailed.getCode());

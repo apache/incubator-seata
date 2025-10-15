@@ -52,8 +52,10 @@ class BusinessDataSourceServiceTest {
 
     @Mock
     private SqlExecutionTemplate sqlExecutionTemplate;
+
     @Mock
     private MCPProperties mcpProperties;
+
     @InjectMocks
     private BusinessDataSourceServiceImpl service;
 
@@ -77,7 +79,8 @@ class BusinessDataSourceServiceTest {
         table1.put("TABLE_COMMENT", "User table");
         mockData.add(table1);
 
-        when(sqlExecutionTemplate.query(eq(resourceId), anyString(), eq("testdb"))).thenReturn(mockData);
+        when(sqlExecutionTemplate.query(eq(resourceId), anyString(), eq("testdb")))
+                .thenReturn(mockData);
 
         List<String> result = service.getTableNamesBySchema(resourceId);
 
@@ -142,8 +145,7 @@ class BusinessDataSourceServiceTest {
         String sql = "SELECT * FROM undo_log";
         String resourceId = "jdbc://mysql/testdb";
 
-        StoreException exception = assertThrows(StoreException.class, 
-            () -> service.runSql(sql, resourceId));
+        StoreException exception = assertThrows(StoreException.class, () -> service.runSql(sql, resourceId));
         assertTrue(exception.getMessage().contains("analyzeUndoLog"));
     }
 
@@ -287,52 +289,54 @@ class BusinessDataSourceServiceTest {
 
     @Test
     void testGetSchemaNameByResourceId() throws Exception {
-        assertEquals("testdb", invokePrivate("getSchemaNameByResourceId", 
-            new Class<?>[]{String.class}, "jdbc://mysql/testdb"));
-        assertEquals("", invokePrivate("getSchemaNameByResourceId", 
-            new Class<?>[]{String.class}, ""));
-        assertEquals("", invokePrivate("getSchemaNameByResourceId", 
-            new Class<?>[]{String.class}, "jdbc://mysql/"));
-        assertEquals("", invokePrivate("getSchemaNameByResourceId", 
-            new Class<?>[]{String.class}, "noslash"));
+        assertEquals(
+                "testdb",
+                invokePrivate("getSchemaNameByResourceId", new Class<?>[] {String.class}, "jdbc://mysql/testdb"));
+        assertEquals("", invokePrivate("getSchemaNameByResourceId", new Class<?>[] {String.class}, ""));
+        assertEquals("", invokePrivate("getSchemaNameByResourceId", new Class<?>[] {String.class}, "jdbc://mysql/"));
+        assertEquals("", invokePrivate("getSchemaNameByResourceId", new Class<?>[] {String.class}, "noslash"));
     }
 
     @Test
     void testGetOffsetAndValidationPageQuerySql() throws Exception {
-        assertEquals(0, invokePrivate("getOffsetAndValidationPageQuerySql", 
-            new Class<?>[]{int.class, int.class}, 1, 10));
-        assertEquals(10, invokePrivate("getOffsetAndValidationPageQuerySql", 
-            new Class<?>[]{int.class, int.class}, 2, 10));
-        assertEquals(100, invokePrivate("getOffsetAndValidationPageQuerySql", 
-            new Class<?>[]{int.class, int.class}, 11, 10));
+        assertEquals(
+                0, invokePrivate("getOffsetAndValidationPageQuerySql", new Class<?>[] {int.class, int.class}, 1, 10));
+        assertEquals(
+                10, invokePrivate("getOffsetAndValidationPageQuerySql", new Class<?>[] {int.class, int.class}, 2, 10));
+        assertEquals(
+                100,
+                invokePrivate("getOffsetAndValidationPageQuerySql", new Class<?>[] {int.class, int.class}, 11, 10));
     }
 
     @Test
     void testGetOffsetAndValidationPageQuerySqlWithInvalidPageNum() {
-        assertThrows(Exception.class, () -> 
-            invokePrivate("getOffsetAndValidationPageQuerySql", 
-                new Class<?>[]{int.class, int.class}, 0, 10));
+        assertThrows(
+                Exception.class,
+                () -> invokePrivate(
+                        "getOffsetAndValidationPageQuerySql", new Class<?>[] {int.class, int.class}, 0, 10));
     }
 
     @Test
     void testGetOffsetAndValidationPageQuerySqlWithInvalidPageSize() {
-        assertThrows(Exception.class, () -> 
-            invokePrivate("getOffsetAndValidationPageQuerySql", 
-                new Class<?>[]{int.class, int.class}, 1, -1));
+        assertThrows(
+                Exception.class,
+                () -> invokePrivate(
+                        "getOffsetAndValidationPageQuerySql", new Class<?>[] {int.class, int.class}, 1, -1));
     }
 
     @Test
     void testGetOffsetAndValidationPageQuerySqlWithExceedingPageSize() {
-        assertThrows(Exception.class, () -> 
-            invokePrivate("getOffsetAndValidationPageQuerySql", 
-                new Class<?>[]{int.class, int.class}, 1, 10001));
+        assertThrows(
+                Exception.class,
+                () -> invokePrivate(
+                        "getOffsetAndValidationPageQuerySql", new Class<?>[] {int.class, int.class}, 1, 10001));
     }
 
     @Test
     void testGetOffsetAndValidationPageQuerySqlWithExceedingOffset() {
-        assertThrows(Exception.class, () -> 
-            invokePrivate("getOffsetAndValidationPageQuerySql", 
-                new Class<?>[]{int.class, int.class}, 100001, 10));
+        assertThrows(
+                Exception.class,
+                () -> invokePrivate(
+                        "getOffsetAndValidationPageQuerySql", new Class<?>[] {int.class, int.class}, 100001, 10));
     }
 }
-
