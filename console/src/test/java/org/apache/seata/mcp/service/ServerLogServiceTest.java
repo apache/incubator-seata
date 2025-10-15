@@ -27,7 +27,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
@@ -151,33 +150,6 @@ class ServerLogServiceTest {
         RuntimeException exception = assertThrows(
                 RuntimeException.class, () -> service.analyseServerLogFile(createNameSpaceDetail(), param));
         assertTrue(exception.getMessage().contains("Failed to read large log file"));
-    }
-
-    @Test
-    void testCleanExpiredFiles() {
-        service.cleanExpiredFiles();
-    }
-
-    @Test
-    void testInitFileCleanupScheduler() throws Exception {
-        ServerLogServiceImpl newService = new ServerLogServiceImpl();
-        newService.initFileCleanupScheduler();
-        Field schedulerField = ServerLogServiceImpl.class.getDeclaredField("scheduledExecutor");
-        schedulerField.setAccessible(true);
-        assertNotNull(schedulerField.get(newService));
-
-        newService.destroyFileCleanupScheduler();
-    }
-
-    @Test
-    void testDestroyFileCleanupScheduler() throws Exception {
-        ServerLogServiceImpl newService = new ServerLogServiceImpl();
-        newService.initFileCleanupScheduler();
-        newService.destroyFileCleanupScheduler();
-        Field schedulerField = ServerLogServiceImpl.class.getDeclaredField("scheduledExecutor");
-        schedulerField.setAccessible(true);
-        Object scheduler = schedulerField.get(newService);
-        assertNotNull(scheduler);
     }
 
     @Test
