@@ -65,6 +65,9 @@ public class ServerLogServiceImpl implements ServerLogService {
 
     @Override
     public ServerLogPageVO<String> analyseServerLogFile(NameSpaceDetail nameSpaceDetail, ServerLogParam param) {
+        if (nameSpaceDetail == null || !nameSpaceDetail.isValid())
+            return ServerLogPageVO.failure("", "Invalid NameSpace");
+
         checkLogParam(param);
 
         int pageNum = param.getPage();
@@ -106,7 +109,9 @@ public class ServerLogServiceImpl implements ServerLogService {
     private String getLogFilePath(NameSpaceDetail nameSpaceDetail, ServerLogParam param) {
         String namespace = nameSpaceDetail.getNamespace();
         String vGroup = nameSpaceDetail.getvGroup();
+        if (vGroup == null) vGroup = "";
         String cluster = nameSpaceDetail.getCluster();
+        if (cluster == null) cluster = "";
         String key = namespace + "." + vGroup + "." + cluster + "." + param.getLogType();
 
         String fileName = key + "-Server.log";

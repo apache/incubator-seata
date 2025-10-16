@@ -71,16 +71,16 @@ public class ServerLogFileServiceImpl implements ServerLogService {
             }
             Long lastModifyTime = serverLogParam.getLastModifyTime();
             long finalCurSize;
-            if (lastModifyTime == 0 || modifyTime - lastModifyTime > 86400000) {
+            if (lastModifyTime == 0 || !isSameCalendarDay(lastModifyTime, modifyTime)) {
                 finalCurSize = 0;
             } else {
                 finalCurSize = serverLogParam.getCurSize();
             }
             long finalSize = size;
-            if (finalCurSize > size) {
+            if (finalCurSize > size && isSameCalendarDay(lastModifyTime, modifyTime)) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body(out ->
-                                out.write(("Remote Log File is newer than TC, please check the log file").getBytes()));
+                                out.write(("Log File is newer than TC's File, please check the log file").getBytes()));
             }
             StreamingResponseBody responseBody = outputStream -> {
                 try (FileChannel channel = FileChannel.open(logPath, StandardOpenOption.READ)) {
@@ -119,6 +119,12 @@ public class ServerLogFileServiceImpl implements ServerLogService {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(out -> out.write("Server error".getBytes()));
         }
+    }
+
+    public boolean isSameCalendarDay(long timestamp1, long timestamp2) {
+        long days1 = timestamp1 / (1000 * 60 * 60 * 24);
+        long days2 = timestamp2 / (1000 * 60 * 60 * 24);
+        return days1 == days2;
     }
 
     private String buildLogBasePath() {
