@@ -82,7 +82,7 @@ seata:
       enabled: true
       dbType: mysql
       driverClassName: com.mysql.cj.jdbc.Driver # Currently, only mysql is supported
-      url: jdbc:mysql://:3306/order1?useSSL=false
+      url:
       username: root
       password: root
       datasource: druid # Optional connection pool type (druid/hikari/dbcp)
@@ -93,7 +93,7 @@ seata:
       enabled: true
       dbType: mysql
       driverClassName: com.mysql.cj.jdbc.Driver
-      url: jdbc:mysql://:3306/order2?useSSL=false
+      url:
       username: root
       password: root
       datasource: dbcp
