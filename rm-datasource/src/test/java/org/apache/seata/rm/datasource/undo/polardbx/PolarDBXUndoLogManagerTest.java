@@ -17,6 +17,7 @@
 package org.apache.seata.rm.datasource.undo.polardbx;
 
 import com.alibaba.druid.pool.DruidDataSource;
+import com.alibaba.druid.pool.DruidStatementConnection;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
@@ -46,6 +47,7 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -135,11 +137,18 @@ public class PolarDBXUndoLogManagerTest {
         dataSource.setDriver(mockDriver);
 
         dataSourceProxy = DataSourceProxyTest.getDataSourceProxy(dataSource);
-        connectionProxy =
-                new ConnectionProxy(dataSourceProxy, dataSource.getConnection().getConnection());
+        connectionProxy = new ConnectionProxy(dataSourceProxy, getPhysicsConnection(dataSource));
         undoLogManager = new PolarDBXUndoLogManager();
         tableMeta = new TableMeta();
         tableMeta.setTableName("table_plain_executor_test");
+    }
+
+    private Connection getPhysicsConnection(DruidDataSource dataSource) throws SQLException {
+        Connection connection = dataSource.getConnection().getConnection();
+        if (connection instanceof DruidStatementConnection) {
+            return ((DruidStatementConnection) connection).getConnection();
+        }
+        return connection;
     }
 
     @Test

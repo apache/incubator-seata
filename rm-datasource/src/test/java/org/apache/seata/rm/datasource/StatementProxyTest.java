@@ -19,6 +19,7 @@ package org.apache.seata.rm.datasource;
 import com.alibaba.druid.mock.MockResultSet;
 import com.alibaba.druid.mock.MockStatement;
 import com.alibaba.druid.pool.DruidDataSource;
+import com.alibaba.druid.pool.DruidStatementConnection;
 import com.alibaba.druid.util.jdbc.ResultSetMetaDataBase;
 import com.google.common.collect.Lists;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
@@ -37,6 +38,7 @@ import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Statement;
@@ -111,10 +113,14 @@ public class StatementProxyTest {
 
         DataSourceProxy dataSourceProxy = DataSourceProxyTest.getDataSourceProxy(dataSource);
 
-        ConnectionProxy connectionProxy =
-                new ConnectionProxy(dataSourceProxy, dataSource.getConnection().getConnection());
+        ConnectionProxy connectionProxy = new ConnectionProxy(dataSourceProxy, getPhysicsConnection(dataSource));
 
-        Statement statement = mockDriver.createMockStatement((MockConnection) connectionProxy.getTargetConnection());
+        Connection targetConnection = connectionProxy.getTargetConnection();
+        if (targetConnection instanceof DruidStatementConnection) {
+            targetConnection = ((DruidStatementConnection) targetConnection).getConnection();
+        }
+
+        Statement statement = mockDriver.createMockStatement((MockConnection) targetConnection);
 
         MockResultSet mockResultSet = new MockResultSet(statement);
         ((ResultSetMetaDataBase) mockResultSet.getMetaData())
@@ -129,6 +135,14 @@ public class StatementProxyTest {
                 SQLOperateRecognizerHolderFactory.class.getClassLoader());
         DruidDelegatingSQLRecognizerFactory recognizerFactory = (DruidDelegatingSQLRecognizerFactory)
                 EnhancedServiceLoader.load(SQLRecognizerFactory.class, SqlParserType.SQL_PARSER_TYPE_DRUID);
+    }
+
+    private static Connection getPhysicsConnection(DruidDataSource dataSource) throws SQLException {
+        Connection connection = dataSource.getConnection().getConnection();
+        if (connection instanceof DruidStatementConnection) {
+            return ((DruidStatementConnection) connection).getConnection();
+        }
+        return connection;
     }
 
     @AfterEach
