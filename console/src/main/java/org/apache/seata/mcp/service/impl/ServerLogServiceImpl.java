@@ -56,7 +56,6 @@ public class ServerLogServiceImpl implements ServerLogService {
     @Autowired
     private MCPRPCService mcprpcService;
 
-    // TODO: Support breakpoint download
     private static final int SERVER_LOG_PAGE_SIZE = 2500;
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerLogServiceImpl.class);
     private static final DateTimeFormatter LOG_TIMESTAMP_FORMATTER =
@@ -275,7 +274,7 @@ public class ServerLogServiceImpl implements ServerLogService {
 
             if (keywordSet != null && !keywordSet.isEmpty()) {
                 for (String key : keywordSet) {
-                    if (org.apache.commons.lang.StringUtils.indexOf(entry, key) == -1) {
+                    if (!entry.contains(key)) {
                         return false;
                     }
                 }
