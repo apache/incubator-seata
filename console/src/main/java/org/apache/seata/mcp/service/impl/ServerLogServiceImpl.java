@@ -147,13 +147,13 @@ public class ServerLogServiceImpl implements ServerLogService {
 
     private void checkLogParam(ServerLogParam logParam) {
         Integer page = logParam.getPage();
-        List<String> logMessageKeyWord = logParam.getLogMessageKeyWord();
+        List<String> logMessageKeyWord = new ArrayList<>(Arrays.asList(logParam.getLogMessageKeyWord()));
         String logType = logParam.getLogType();
         String logMessageStartTime = logParam.getLogMessageStartTime();
         String logMessageEndTime = logParam.getLogMessageEndTime();
         String logMessageLevel = logParam.getLogMessageLevel();
 
-        if ((logMessageKeyWord == null || logMessageKeyWord.isEmpty())
+        if (logMessageKeyWord.isEmpty()
                 && StringUtils.isBlank(logMessageStartTime)
                 && (StringUtils.isBlank(logType) || logType.equalsIgnoreCase("all"))
                 && StringUtils.isBlank(logMessageLevel)
@@ -216,9 +216,8 @@ public class ServerLogServiceImpl implements ServerLogService {
                 this.endTimeMillis = null;
             }
 
-            if (param.getLogMessageKeyWord() != null
-                    && !param.getLogMessageKeyWord().isEmpty()) {
-                this.keywordSet = new HashSet<>(param.getLogMessageKeyWord());
+            if (param.getLogMessageKeyWord() != null && param.getLogMessageKeyWord().length != 0) {
+                this.keywordSet = new HashSet<>(Arrays.asList(param.getLogMessageKeyWord()));
             } else {
                 this.keywordSet = null;
             }

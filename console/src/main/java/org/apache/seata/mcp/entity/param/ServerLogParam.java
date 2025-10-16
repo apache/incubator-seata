@@ -19,7 +19,6 @@ package org.apache.seata.mcp.entity.param;
 import org.apache.seata.mcp.annotation.ToolParam;
 
 import java.io.Serializable;
-import java.util.List;
 
 public class ServerLogParam implements Serializable {
 
@@ -49,9 +48,8 @@ public class ServerLogParam implements Serializable {
 
     @ToolParam(
             description =
-                    "Log content keyword fuzzy matching, support multiple keywords separated by commas, All keyword matches will return the log line information",
-            example = "connection timeout,SSL")
-    private List<String> logMessageKeyWord;
+                    "This is a Array of String type, without key-value format!! Log content keyword fuzzy matching, support multiple keywords separated by commas, All keyword matches will return the log line information")
+    private String[] logMessageKeyWord;
 
     private Long curSize;
 
@@ -113,11 +111,11 @@ public class ServerLogParam implements Serializable {
         this.logMessageLevel = logMessageLevel;
     }
 
-    public List<String> getLogMessageKeyWord() {
+    public String[] getLogMessageKeyWord() {
         return logMessageKeyWord;
     }
 
-    public void setLogMessageKeyWord(List<String> logMessageKeyWord) {
+    public void setLogMessageKeyWord(String[] logMessageKeyWord) {
         this.logMessageKeyWord = logMessageKeyWord;
     }
 }
