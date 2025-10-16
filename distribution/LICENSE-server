@@ -243,7 +243,7 @@ Apache-2.0 licenses
     org.apache.curator:curator-test 5.1.0 Apache-2.0
     com.lmax:disruptor 3.3.7 Apache-2.0
     com.dameng:DmJdbcDriver18 8.1.2.192 Apache-2.0
-    com.alibaba:druid 1.2.20 Apache-2.0
+    com.alibaba:druid 1.2.25 Apache-2.0
     com.google.errorprone:error_prone_annotations 2.21.1 Apache-2.0
     com.netflix.eureka:eureka-client 1.10.18 Apache-2.0
     net.jodah:failsafe 2.3.3 Apache-2.0
