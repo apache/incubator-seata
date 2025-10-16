@@ -208,10 +208,9 @@ public class MariadbInsertExecutorTest extends MySQLInsertExecutorTest {
             Field field = dataSourceProxy.getClass().getDeclaredField("dbType");
             field.setAccessible(true);
             field.set(newDataSourceProxy, "mysql");
-            ConnectionProxy newConnectionProxy = new ConnectionProxy(
-                    newDataSourceProxy, dataSource.getConnection().getConnection());
-            MockStatementBase mockStatement =
-                    new MockStatement(dataSource.getConnection().getConnection());
+            ConnectionProxy newConnectionProxy =
+                    new ConnectionProxy(newDataSourceProxy, getPhysicsConnection(dataSource));
+            MockStatementBase mockStatement = new MockStatement(getPhysicsConnection(dataSource));
             newStatementProxy = new StatementProxy(newConnectionProxy, mockStatement);
         } catch (Exception e) {
             throw new RuntimeException("init failed");

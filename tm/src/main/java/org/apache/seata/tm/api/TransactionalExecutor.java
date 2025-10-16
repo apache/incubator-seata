@@ -19,22 +19,71 @@ package org.apache.seata.tm.api;
 import org.apache.seata.tm.api.transaction.TransactionInfo;
 
 /**
- * Callback for executing business logic in a global transaction.
+ * Callback interface for executing business logic within a global transaction.
  *
+ * <p>Separates business logic from transaction management concerns, allowing the
+ * framework to handle transaction lifecycle automatically using template pattern.</p>
+ *
+ * <p><b>Usage Example:</b></p>
+ * <pre>{@code
+ * TransactionalTemplate template = new TransactionalTemplate();
+ * Object result = template.execute(new TransactionalExecutor() {
+ *     @Override
+ *     public Object execute() throws Throwable {
+ *         // Your business logic here
+ *         return orderService.createOrder(order);
+ *     }
+ *
+ *     @Override
+ *     public TransactionInfo getTransactionInfo() {
+ *         return TransactionInfo.newBuilder()
+ *             .setTimeOut(30000)
+ *             .setName("create-order")
+ *             .build();
+ *     }
+ * });
+ * }</pre>
+ *
+ * @author Seata Team
+ * @see TransactionalTemplate
+ * @see org.apache.seata.tm.api.transaction.TransactionInfo
+ * @since 1.0.0
  */
 public interface TransactionalExecutor {
 
     /**
-     * Execute the business logic here.
+     * Executes the business logic within the transaction context.
      *
-     * @return What the business logic returns.
-     * @throws Throwable Any throwable during executing.
+     * <p>Called by TransactionalTemplate after transaction setup. Should contain
+     * focused business operations without direct transaction management calls.</p>
+     *
+     * <p><b>Best Practices:</b></p>
+     * <ul>
+     *   <li>Keep operations within transaction timeout</li>
+     *   <li>Use appropriate exception handling</li>
+     *   <li>Ensure data consistency across operations</li>
+     * </ul>
+     *
+     * @return result of business logic execution, may be null
+     * @throws Throwable any exception during execution, handled according to rollback rules
      */
     Object execute() throws Throwable;
 
     /**
-     * transaction conf or other attr
-     * @return transaction info
+     * Provides transaction configuration for this execution.
+     *
+     * <p>Controls timeout, name, propagation, rollback rules, and lock settings.
+     * May be called multiple times, consider caching if expensive to create.</p>
+     *
+     * <p><b>Default Values (if returns null):</b></p>
+     * <ul>
+     *   <li>Timeout: 60000ms</li>
+     *   <li>Name: "default"</li>
+     *   <li>Propagation: REQUIRED</li>
+     *   <li>Rollback: All exceptions cause rollback</li>
+     * </ul>
+     *
+     * @return TransactionInfo containing configuration, or null for defaults
      */
     TransactionInfo getTransactionInfo();
 
