@@ -60,7 +60,13 @@ public class OracleMultiInsertRecognizer extends BaseOracleRecognizer implements
     }
 
     /**
-     * Verify that all entries are in the same table and have consistent column definitions.
+     * Verifies that all entries are in the same table and have consistent column definitions.
+     * <p>
+     * If validation fails (e.g., conditional clauses are present, or table/column consistency is violated),
+     * this method throws a {@link NotSupportYetException}.
+     * <p>
+     * Upon successful validation, initializes {@code validatedTableName} and {@code validatedColumns}
+     * with the consistent table name and column definitions.
      */
     private void validateSingleTableConsistency() {
         if (CollectionUtils.isEmpty(ast.getEntries())) {
