@@ -23,10 +23,12 @@ import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
 import com.alibaba.druid.sql.ast.statement.SQLReplaceStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import com.alibaba.druid.sql.ast.statement.SQLUpdateStatement;
+import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleMultiInsertStatement;
 import org.apache.seata.common.exception.NotSupportYetException;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.sqlparser.SQLRecognizer;
 import org.apache.seata.sqlparser.SQLRecognizerFactory;
+import org.apache.seata.sqlparser.druid.oracle.OracleOperateRecognizerHolder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,6 +74,14 @@ class DruidSQLRecognizerFactoryImpl implements SQLRecognizerFactory {
                 recognizer = recognizerHolder.getDeleteRecognizer(sql, sqlStatement);
             } else if (sqlStatement instanceof SQLSelectStatement) {
                 recognizer = recognizerHolder.getSelectForUpdateRecognizer(sql, sqlStatement);
+            } else if (sqlStatement instanceof OracleMultiInsertStatement) {
+                OracleMultiInsertStatement stmt = (OracleMultiInsertStatement) sqlStatement;
+                if (stmt.getOption() == OracleMultiInsertStatement.Option.FIRST) {
+                    throw new NotSupportYetException("INSERT FIRST not supported yet");
+                }
+                // Use specialized methods to handle Oracle bulk inserts
+                recognizer =
+                        ((OracleOperateRecognizerHolder) recognizerHolder).getMultiInsertRecognizer(sql, sqlStatement);
             }
 
             // When recognizer is null, it indicates that recognizerHolder cannot allocate unsupported syntax, like
