@@ -20,6 +20,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class FileLoaderTest {
 
@@ -38,5 +41,40 @@ public class FileLoaderTest {
     @Test
     public void testLoadException() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> FileLoader.load(null));
+    }
+
+    @Test
+    public void testLoadWhenDirectPath() throws Exception {
+        Path tempFile = Paths.get("direct-test-file.txt");
+        Files.createFile(tempFile);
+
+        File result = FileLoader.load("direct-test-file.txt");
+
+        Assertions.assertNotNull(result);
+        Assertions.assertTrue(result.exists());
+
+        Files.deleteIfExists(tempFile);
+    }
+
+    @Test
+    public void testLoadWhenSpecial() throws Exception {
+        String encodedName = "测试%20文件.txt";
+        String decodedName = "测试 文件.txt";
+
+        Path tempFile = Paths.get(decodedName);
+        Files.createFile(tempFile);
+
+        File result = FileLoader.load(encodedName);
+
+        Assertions.assertNotNull(result);
+        Assertions.assertTrue(result.exists());
+
+        Files.deleteIfExists(tempFile);
+    }
+
+    @Test
+    public void testLoadWhenNull() {
+        File result = FileLoader.load("nonexistent/path.txt");
+        Assertions.assertNull(result);
     }
 }
