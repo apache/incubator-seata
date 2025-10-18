@@ -23,6 +23,7 @@ import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.epoll.EpollSocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.incubator.channel.uring.IOUring;
 import io.netty.incubator.channel.uring.IOUringServerSocketChannel;
 import io.netty.incubator.channel.uring.IOUringSocketChannel;
 import io.netty.util.NettyRuntime;
@@ -110,65 +111,15 @@ public class NettyBaseConfig {
         }
 
         boolean useEpoll = !PlatformDependent.isWindows() && !PlatformDependent.isOsx() && Epoll.isAvailable();
-        SERVER_CHANNEL_CLAZZ = useEpoll ? EpollServerSocketChannel.class : NioServerSocketChannel.class;
-        CLIENT_CHANNEL_CLAZZ = useEpoll ? EpollSocketChannel.class : NioSocketChannel.class;
-
-        TRANSPORT_SERVER_TYPE = TransportServerType.getType(
-                CONFIG.getConfig(ConfigurationKeys.TRANSPORT_SERVER, TransportServerType.NIO.name()));
-        switch (TRANSPORT_SERVER_TYPE) {
-            case NIO:
-                if (TRANSPORT_PROTOCOL_TYPE == TransportProtocolType.TCP) {
-                    SERVER_CHANNEL_CLAZZ = NioServerSocketChannel.class;
-                    CLIENT_CHANNEL_CLAZZ = NioSocketChannel.class;
-                } else {
-                    raiseUnsupportedTransportError();
-                    SERVER_CHANNEL_CLAZZ = null;
-                    CLIENT_CHANNEL_CLAZZ = null;
-                }
-                break;
-            case NATIVE:
-                if (PlatformDependent.isWindows()) {
-                    throw new IllegalArgumentException("no native supporting for Windows.");
-                } else if (PlatformDependent.isOsx()) {
-                    if (TRANSPORT_PROTOCOL_TYPE == TransportProtocolType.TCP) {
-                        SERVER_CHANNEL_CLAZZ = KQueueServerSocketChannel.class;
-                        CLIENT_CHANNEL_CLAZZ = KQueueSocketChannel.class;
-                    } else if (TRANSPORT_PROTOCOL_TYPE == TransportProtocolType.UNIX_DOMAIN_SOCKET) {
-                        SERVER_CHANNEL_CLAZZ = KQueueServerDomainSocketChannel.class;
-                        CLIENT_CHANNEL_CLAZZ = KQueueDomainSocketChannel.class;
-                    } else {
-                        raiseUnsupportedTransportError();
-                        SERVER_CHANNEL_CLAZZ = null;
-                        CLIENT_CHANNEL_CLAZZ = null;
-                    }
-                } else {
-                    if (TRANSPORT_IO_IO_URING_ENABLE) {
-                        if (TRANSPORT_PROTOCOL_TYPE == TransportProtocolType.TCP) {
-                            SERVER_CHANNEL_CLAZZ = IOUringServerSocketChannel.class;
-                            CLIENT_CHANNEL_CLAZZ = IOUringSocketChannel.class;
-                        } else {
-                            raiseUnsupportedTransportError();
-                            SERVER_CHANNEL_CLAZZ = null;
-                            CLIENT_CHANNEL_CLAZZ = null;
-                        }
-                    } else {
-                        if (TRANSPORT_PROTOCOL_TYPE == TransportProtocolType.TCP) {
-                            SERVER_CHANNEL_CLAZZ = EpollServerSocketChannel.class;
-                            CLIENT_CHANNEL_CLAZZ = EpollSocketChannel.class;
-                        } else if (TRANSPORT_PROTOCOL_TYPE == TransportProtocolType.UNIX_DOMAIN_SOCKET) {
-                            SERVER_CHANNEL_CLAZZ = EpollServerDomainSocketChannel.class;
-                            CLIENT_CHANNEL_CLAZZ = EpollDomainSocketChannel.class;
-                        } else {
-                            raiseUnsupportedTransportError();
-                            SERVER_CHANNEL_CLAZZ = null;
-                            CLIENT_CHANNEL_CLAZZ = null;
-                        }
-                    }
-                }
-                break;
-            default:
-                throw new IllegalArgumentException("unsupported.");
+        boolean useIoUring = TRANSPORT_IO_IO_URING_ENABLE && IOUring.isAvailable();
+        if (useIoUring) {
+            SERVER_CHANNEL_CLAZZ = IOUringServerSocketChannel.class;
+            CLIENT_CHANNEL_CLAZZ = IOUringSocketChannel.class;
+        } else {
+            SERVER_CHANNEL_CLAZZ = useEpoll ? EpollServerSocketChannel.class : NioServerSocketChannel.class;
+            CLIENT_CHANNEL_CLAZZ = useEpoll ? EpollSocketChannel.class : NioSocketChannel.class;
         }
+
         boolean enableHeartbeat = CONFIG.getBoolean(ConfigurationKeys.TRANSPORT_HEARTBEAT, DEFAULT_TRANSPORT_HEARTBEAT);
         if (enableHeartbeat) {
             MAX_WRITE_IDLE_SECONDS = DEFAULT_WRITE_IDLE_SECONDS;
