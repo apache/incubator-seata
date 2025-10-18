@@ -88,7 +88,7 @@ public class DmUndoInsertExecutorTest extends BaseExecutorTest {
         Assertions.assertNotNull(sql);
         Assertions.assertTrue(sql.contains("DELETE FROM"));
         Assertions.assertTrue(sql.contains("WHERE"));
-        
+
         // Check that both primary key columns appear in the WHERE clause
         Assertions.assertTrue(sql.contains("id1"));
         Assertions.assertTrue(sql.contains("id2"));
@@ -159,16 +159,16 @@ public class DmUndoInsertExecutorTest extends BaseExecutorTest {
         afterImage.setTableMeta(tableMeta);
         List<Row> afterRows = new ArrayList<>();
         Row row0 = new Row();
-        
+
         // Manually create primary key fields since addField only sets "id" as primary key
         Field id1Field = new Field("id1", 1, "123");
         id1Field.setKeyType(KeyType.PRIMARY_KEY);
         row0.add(id1Field);
-        
+
         Field id2Field = new Field("id2", 1, "456");
         id2Field.setKeyType(KeyType.PRIMARY_KEY);
         row0.add(id2Field);
-        
+
         addField(row0, "age", 1, "25");
         afterRows.add(row0);
         afterImage.setRows(afterRows);
@@ -183,4 +183,3 @@ public class DmUndoInsertExecutorTest extends BaseExecutorTest {
         return new DmUndoInsertExecutor(sqlUndoLog);
     }
 }
-

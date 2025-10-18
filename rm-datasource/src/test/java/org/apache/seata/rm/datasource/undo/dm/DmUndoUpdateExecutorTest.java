@@ -171,4 +171,3 @@ public class DmUndoUpdateExecutorTest extends BaseExecutorTest {
         return new DmUndoUpdateExecutor(sqlUndoLog);
     }
 }
-

@@ -84,7 +84,7 @@ public class DmUndoExecutorHolderTest {
         AbstractUndoExecutor insertExecutor = holder.getInsertExecutor(null);
         AbstractUndoExecutor updateExecutor = holder.getUpdateExecutor(null);
         AbstractUndoExecutor deleteExecutor = holder.getDeleteExecutor(null);
-        
+
         Assertions.assertNotNull(insertExecutor);
         Assertions.assertNotNull(updateExecutor);
         Assertions.assertNotNull(deleteExecutor);
@@ -105,4 +105,3 @@ public class DmUndoExecutorHolderTest {
         Assertions.assertTrue(executor2 instanceof DmUndoInsertExecutor);
     }
 }
-

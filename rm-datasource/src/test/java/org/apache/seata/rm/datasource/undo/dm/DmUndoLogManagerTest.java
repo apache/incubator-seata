@@ -287,4 +287,3 @@ public class DmUndoLogManagerTest {
         return sqlUndoLog;
     }
 }
-
