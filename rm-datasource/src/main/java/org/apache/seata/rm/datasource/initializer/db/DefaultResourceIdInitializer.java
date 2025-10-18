@@ -14,43 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.core.rpc;
 
-/**
- * The enum Transport server type.
- *
- */
-public enum TransportServerType {
-    /**
-     * Native transport server type.
-     */
-    NATIVE("native"),
-    /**
-     * Nio transport server type.
-     */
-    NIO("nio");
+package org.apache.seata.rm.datasource.initializer.db;
 
-    /**
-     * The Name.
-     */
-    public final String name;
+import org.apache.seata.rm.datasource.DataSourceProxy;
+import org.apache.seata.rm.datasource.initializer.AbstractResourceIdInitializer;
 
-    TransportServerType(String name) {
-        this.name = name;
+public class DefaultResourceIdInitializer extends AbstractResourceIdInitializer {
+    @Override
+    protected void doInitResourceId(DataSourceProxy proxy) {
+        String jdbcUrl = proxy.getJdbcUrl();
+        String resourceId = jdbcUrl;
+        if (jdbcUrl.contains(JDBC_URL_SPLIT_CHAR)) {
+            resourceId = jdbcUrl.substring(0, jdbcUrl.indexOf(JDBC_URL_SPLIT_CHAR));
+        }
+        proxy.setResourceId(resourceId);
     }
 
-    /**
-     * Gets type.
-     *
-     * @param name the name
-     * @return the type
-     */
-    public static TransportServerType getType(String name) {
-        for (TransportServerType b : TransportServerType.values()) {
-            if (b.name().equalsIgnoreCase(name)) {
-                return b;
-            }
-        }
-        throw new IllegalArgumentException("unknown type:" + name);
+    @Override
+    public boolean supports(String dbType, DataSourceProxy proxy) {
+        return false;
     }
 }

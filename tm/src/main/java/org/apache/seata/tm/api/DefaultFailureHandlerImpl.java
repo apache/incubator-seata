@@ -37,7 +37,7 @@ public class DefaultFailureHandlerImpl implements TMFailureHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultFailureHandlerImpl.class);
 
     /**
-     * Retry 1 hours by default
+     * Retry 1 hour by default
      */
     private static final int RETRY_MAX_TIMES = 6 * 60;
 

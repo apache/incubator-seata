@@ -14,4 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 org.apache.seata.common.loader.ChineseHello
+org.apache.seata.common.loader.EnglishHello
+org.apache.seata.common.loader.FrenchHello
+org.apache.seata.common.loader.LatinHello

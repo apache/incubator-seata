@@ -18,14 +18,9 @@ package org.apache.seata.core.rpc.netty;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ServerChannel;
-import io.netty.channel.epoll.EpollDomainSocketChannel;
-import io.netty.channel.epoll.EpollServerDomainSocketChannel;
+import io.netty.channel.epoll.Epoll;
 import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.epoll.EpollSocketChannel;
-import io.netty.channel.kqueue.KQueueDomainSocketChannel;
-import io.netty.channel.kqueue.KQueueServerDomainSocketChannel;
-import io.netty.channel.kqueue.KQueueServerSocketChannel;
-import io.netty.channel.kqueue.KQueueSocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.incubator.channel.uring.IOUringServerSocketChannel;
@@ -37,10 +32,6 @@ import org.apache.seata.common.DefaultValues;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.constants.ConfigurationKeys;
-import org.apache.seata.core.rpc.TransportProtocolType;
-import org.apache.seata.core.rpc.TransportServerType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_TRANSPORT_HEARTBEAT;
 
@@ -49,7 +40,6 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_TRANSPORT_HEARTBEAT;
  *
  */
 public class NettyBaseConfig {
-    private static final Logger LOGGER = LoggerFactory.getLogger(NettyBaseConfig.class);
 
     /**
      * The constant CONFIG.
@@ -82,11 +72,6 @@ public class NettyBaseConfig {
     protected static final int WORKER_THREAD_SIZE;
 
     /**
-     * The constant TRANSPORT_SERVER_TYPE.
-     */
-    protected static final TransportServerType TRANSPORT_SERVER_TYPE;
-
-    /**
      * The constant SERVER_CHANNEL_CLAZZ.
      */
     protected static final Class<? extends ServerChannel> SERVER_CHANNEL_CLAZZ;
@@ -94,11 +79,6 @@ public class NettyBaseConfig {
      * The constant CLIENT_CHANNEL_CLAZZ.
      */
     protected static final Class<? extends Channel> CLIENT_CHANNEL_CLAZZ;
-
-    /**
-     * The constant TRANSPORT_PROTOCOL_TYPE.
-     */
-    protected static final TransportProtocolType TRANSPORT_PROTOCOL_TYPE;
 
     private static final int DEFAULT_WRITE_IDLE_SECONDS = 5;
 
@@ -120,8 +100,6 @@ public class NettyBaseConfig {
     protected static final int MAX_ALL_IDLE_SECONDS = 0;
 
     static {
-        TRANSPORT_PROTOCOL_TYPE = TransportProtocolType.getType(
-                CONFIG.getConfig(ConfigurationKeys.TRANSPORT_TYPE, TransportProtocolType.TCP.name()));
         String workerThreadSize = CONFIG.getConfig(ConfigurationKeys.WORKER_THREAD_SIZE);
         if (StringUtils.isNotBlank(workerThreadSize) && StringUtils.isNumeric(workerThreadSize)) {
             WORKER_THREAD_SIZE = Integer.parseInt(workerThreadSize);
@@ -130,6 +108,11 @@ public class NettyBaseConfig {
         } else {
             WORKER_THREAD_SIZE = WorkThreadMode.Default.getValue();
         }
+
+        boolean useEpoll = !PlatformDependent.isWindows() && !PlatformDependent.isOsx() && Epoll.isAvailable();
+        SERVER_CHANNEL_CLAZZ = useEpoll ? EpollServerSocketChannel.class : NioServerSocketChannel.class;
+        CLIENT_CHANNEL_CLAZZ = useEpoll ? EpollSocketChannel.class : NioSocketChannel.class;
+
         TRANSPORT_SERVER_TYPE = TransportServerType.getType(
                 CONFIG.getConfig(ConfigurationKeys.TRANSPORT_SERVER, TransportServerType.NIO.name()));
         switch (TRANSPORT_SERVER_TYPE) {
@@ -193,13 +176,6 @@ public class NettyBaseConfig {
             MAX_WRITE_IDLE_SECONDS = 0;
         }
         MAX_READ_IDLE_SECONDS = MAX_WRITE_IDLE_SECONDS * READIDLE_BASE_WRITEIDLE;
-    }
-
-    private static void raiseUnsupportedTransportError() throws RuntimeException {
-        String errMsg = String.format(
-                "Unsupported provider type :[%s] for transport:[%s].", TRANSPORT_SERVER_TYPE, TRANSPORT_PROTOCOL_TYPE);
-        LOGGER.error(errMsg);
-        throw new IllegalArgumentException(errMsg);
     }
 
     /**

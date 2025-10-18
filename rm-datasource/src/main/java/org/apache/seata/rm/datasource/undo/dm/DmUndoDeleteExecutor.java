@@ -23,6 +23,8 @@ import org.apache.seata.rm.datasource.sql.struct.Row;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
 import org.apache.seata.rm.datasource.undo.AbstractUndoExecutor;
 import org.apache.seata.rm.datasource.undo.SQLUndoLog;
+import org.apache.seata.sqlparser.struct.ColumnMeta;
+import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.sqlparser.util.ColumnUtils;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 
@@ -68,16 +70,39 @@ public class DmUndoDeleteExecutor extends AbstractUndoExecutor {
                 .collect(Collectors.joining(", "));
         String insertValues = fields.stream().map(field -> "?").collect(Collectors.joining(", "));
 
-        return "SET IDENTITY_INSERT " + sqlUndoLog.getTableName()
-                + " ON; INSERT INTO "
-                + sqlUndoLog.getTableName()
-                + " ("
-                + insertColumns
-                + ") VALUES ("
-                + insertValues
-                + "); SET IDENTITY_INSERT "
-                + sqlUndoLog.getTableName()
-                + " OFF;";
+        // Check if the table has an auto-increment primary key
+        boolean hasAutoIncrement = false;
+        TableMeta tableMeta = beforeImage.getTableMeta();
+        if (tableMeta != null) {
+            List<String> primaryKeys = tableMeta.getPrimaryKeyOnlyName();
+            for (String pk : primaryKeys) {
+                ColumnMeta columnMeta = tableMeta.getColumnMeta(pk);
+                if (columnMeta != null && columnMeta.isAutoincrement()) {
+                    hasAutoIncrement = true;
+                    break;
+                }
+            }
+        }
+        if (hasAutoIncrement) {
+            return "SET IDENTITY_INSERT " + sqlUndoLog.getTableName()
+                    + " ON; INSERT INTO "
+                    + sqlUndoLog.getTableName()
+                    + " ("
+                    + insertColumns
+                    + ") VALUES ("
+                    + insertValues
+                    + "); SET IDENTITY_INSERT "
+                    + sqlUndoLog.getTableName()
+                    + " OFF;";
+        } else {
+            return " INSERT INTO " +
+                    sqlUndoLog.getTableName() +
+                    " (" +
+                    insertColumns +
+                    ") VALUES (" +
+                    insertValues +
+                    ");";
+        }
     }
 
     @Override

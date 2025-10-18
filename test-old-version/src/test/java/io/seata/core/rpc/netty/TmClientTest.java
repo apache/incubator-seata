@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 public class TmClientTest {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(TmClientTest.class);
-    private static TransactionManager tm = null;
+    private static volatile TransactionManager tm = null;
 
     public static void testTm() throws Exception {
         TransactionManager tm = getTm();
@@ -68,6 +68,7 @@ public class TmClientTest {
                             ProtocolTestConstants.APPLICATION_ID, ProtocolTestConstants.SERVICE_GROUP);
                     tmRpcClient.init();
                     tm = new DefaultTransactionManager();
+                    LOGGER.info("(0.6.1)TM init");
                 }
             }
         }
