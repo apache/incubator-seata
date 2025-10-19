@@ -53,14 +53,16 @@ public class FastjsonUndoLogParser implements UndoLogParser, Initialize {
     private static final Logger LOGGER = LoggerFactory.getLogger(FastjsonUndoLogParser.class);
 
     private final SimplePropertyPreFilter filter = new SimplePropertyPreFilter();
+    final SerializeConfig serializeConfig = new SerializeConfig();
+    final ParserConfig parserConfig = new ParserConfig();
 
     @Override
     public void init() {
         filter.getExcludes().add("tableMeta");
 
         // Register SerialArray serializer and deserializer
-        SerializeConfig.getGlobalInstance().put(SerialArray.class, new SerialArraySerializer());
-        ParserConfig.getGlobalInstance().putDeserializer(SerialArray.class, new SerialArrayDeserializer());
+        serializeConfig.put(SerialArray.class, new SerialArraySerializer());
+        parserConfig.putDeserializer(SerialArray.class, new SerialArrayDeserializer());
     }
 
     @Override
@@ -76,14 +78,18 @@ public class FastjsonUndoLogParser implements UndoLogParser, Initialize {
     @Override
     public byte[] encode(BranchUndoLog branchUndoLog) {
         String json = JSON.toJSONString(
-                branchUndoLog, filter, SerializerFeature.WriteClassName, SerializerFeature.WriteDateUseDateFormat);
+                branchUndoLog,
+                serializeConfig,
+                filter,
+                SerializerFeature.WriteClassName,
+                SerializerFeature.WriteDateUseDateFormat);
         return json.getBytes(Constants.DEFAULT_CHARSET);
     }
 
     @Override
     public BranchUndoLog decode(byte[] bytes) {
         String text = new String(bytes, Constants.DEFAULT_CHARSET);
-        return JSON.parseObject(text, BranchUndoLog.class);
+        return JSON.parseObject(text, BranchUndoLog.class, parserConfig);
     }
 
     /**
@@ -99,32 +105,60 @@ public class FastjsonUndoLogParser implements UndoLogParser, Initialize {
             }
 
             SerialArray serialArray = (SerialArray) object;
-            JSONObject json = new JSONObject();
 
+            // Use SerialWriter to write JSON structure directly
+            com.alibaba.fastjson.serializer.SerializeWriter out = serializer.getWriter();
+
+            out.write('{');
+
+            // Write baseType
+            out.writeFieldName("baseType");
             try {
-                json.put("baseType", serialArray.getBaseType());
+                out.writeInt(serialArray.getBaseType());
             } catch (SQLException e) {
-                json.put("baseType", null);
+                out.writeNull();
             }
 
+            out.write(',');
+
+            // Write baseTypeName
+            out.writeFieldName("baseTypeName");
             try {
-                json.put("baseTypeName", serialArray.getBaseTypeName());
+                String baseTypeName = serialArray.getBaseTypeName();
+                if (baseTypeName != null) {
+                    out.writeString(baseTypeName);
+                } else {
+                    out.writeNull();
+                }
             } catch (SQLException e) {
-                json.put("baseTypeName", null);
+                out.writeNull();
             }
 
+            out.write(',');
+
+            // Write elements
+            out.writeFieldName("elements");
             Object[] elements = serialArray.getElements();
             if (elements != null) {
-                JSONArray jsonArray = new JSONArray();
-                for (Object element : elements) {
-                    jsonArray.add(element);
+                out.write('[');
+                for (int i = 0; i < elements.length; i++) {
+                    if (i > 0) {
+                        out.write(',');
+                    }
+                    if (elements[i] == null) {
+                        out.writeNull();
+                    } else if (elements[i] instanceof Long) {
+                        out.writeLong((Long) elements[i]);
+                    } else {
+                        out.write(elements[i].toString());
+                    }
                 }
-                json.put("elements", jsonArray);
+                out.write(']');
             } else {
-                json.put("elements", null);
+                out.writeNull();
             }
 
-            serializer.write(json);
+            out.write('}');
         }
     }
 
@@ -157,7 +191,13 @@ public class FastjsonUndoLogParser implements UndoLogParser, Initialize {
                     JSONArray elementsArray = (JSONArray) elementsObj;
                     Object[] elements = new Object[elementsArray.size()];
                     for (int i = 0; i < elementsArray.size(); i++) {
-                        elements[i] = elementsArray.get(i);
+                        Object element = elementsArray.get(i);
+                        // Convert Integer to Long to match expected type for BIGINT arrays
+                        if (element instanceof Integer) {
+                            elements[i] = ((Integer) element).longValue();
+                        } else {
+                            elements[i] = element;
+                        }
                     }
                     serialArray.setElements(elements);
                 }
