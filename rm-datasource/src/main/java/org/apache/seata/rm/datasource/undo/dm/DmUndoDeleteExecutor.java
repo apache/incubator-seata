@@ -95,13 +95,12 @@ public class DmUndoDeleteExecutor extends AbstractUndoExecutor {
                     + sqlUndoLog.getTableName()
                     + " OFF;";
         } else {
-            return " INSERT INTO " +
-                    sqlUndoLog.getTableName() +
-                    " (" +
-                    insertColumns +
-                    ") VALUES (" +
-                    insertValues +
-                    ");";
+            return " INSERT INTO " + sqlUndoLog.getTableName()
+                    + " ("
+                    + insertColumns
+                    + ") VALUES ("
+                    + insertValues
+                    + ");";
         }
     }
 
