@@ -111,6 +111,11 @@ public class FastjsonUndoLogParser implements UndoLogParser, Initialize {
 
             out.write('{');
 
+            // Add @type information for proper deserialization
+            out.writeFieldName("@type");
+            out.writeString("org.apache.seata.rm.datasource.sql.serial.SerialArray");
+            out.write(',');
+
             // Write baseType
             out.writeFieldName("baseType");
             try {
