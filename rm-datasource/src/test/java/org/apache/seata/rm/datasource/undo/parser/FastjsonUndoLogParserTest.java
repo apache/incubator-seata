@@ -146,7 +146,7 @@ public class FastjsonUndoLogParserTest extends BaseUndoLogParserTest {
         String json = JSON.toJSONString(serialArray, parser.serializeConfig);
         System.out.println("Direct SerialArray JSON: " + json);
 
-        // 不指定具体类型，让Fastjson根据@type信息自动判断
+        // Do not specify a specific type, let Fastjson automatically determine it based on the @type information
         SerialArray deserialized = (SerialArray) JSON.parse(json, parser.parserConfig);
 
         System.out.println("Original - baseType: " + serialArray.getBaseType() + ", baseTypeName: "

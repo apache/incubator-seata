@@ -26,6 +26,7 @@ import com.alibaba.fastjson.parser.deserializer.ObjectDeserializer;
 import com.alibaba.fastjson.serializer.JSONSerializer;
 import com.alibaba.fastjson.serializer.ObjectSerializer;
 import com.alibaba.fastjson.serializer.SerializeConfig;
+import com.alibaba.fastjson.serializer.SerializeWriter;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.serializer.SimplePropertyPreFilter;
 import org.apache.seata.common.Constants;
@@ -107,11 +108,11 @@ public class FastjsonUndoLogParser implements UndoLogParser, Initialize {
             SerialArray serialArray = (SerialArray) object;
 
             // Use SerialWriter to write JSON structure directly
-            com.alibaba.fastjson.serializer.SerializeWriter out = serializer.getWriter();
+            SerializeWriter out = serializer.getWriter();
 
             out.write('{');
 
-            // 始终添加@type信息以确保正确的反序列化
+            // Always add @type information to ensure correct deserialization
             out.writeFieldName("@type");
             out.writeString("org.apache.seata.rm.datasource.sql.serial.SerialArray");
             out.write(',');
@@ -181,7 +182,7 @@ public class FastjsonUndoLogParser implements UndoLogParser, Initialize {
 
                 SerialArray serialArray = new SerialArray();
 
-                // 移除@type字段（如果存在）
+                // Remove the @type field if it exists.
                 json.remove("@type");
 
                 Object baseType = json.get("baseType");
