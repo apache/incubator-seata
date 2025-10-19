@@ -111,7 +111,7 @@ public class FastjsonUndoLogParser implements UndoLogParser, Initialize {
 
             out.write('{');
 
-            // Add @type information for proper deserialization
+            // 始终添加@type信息以确保正确的反序列化
             out.writeFieldName("@type");
             out.writeString("org.apache.seata.rm.datasource.sql.serial.SerialArray");
             out.write(',');
@@ -180,6 +180,9 @@ public class FastjsonUndoLogParser implements UndoLogParser, Initialize {
                 }
 
                 SerialArray serialArray = new SerialArray();
+
+                // 移除@type字段（如果存在）
+                json.remove("@type");
 
                 Object baseType = json.get("baseType");
                 if (baseType instanceof Number) {
