@@ -146,20 +146,9 @@ public class FastjsonUndoLogParser implements UndoLogParser, Initialize {
             out.writeFieldName("elements");
             Object[] elements = serialArray.getElements();
             if (elements != null) {
-                out.write('[');
-                for (int i = 0; i < elements.length; i++) {
-                    if (i > 0) {
-                        out.write(',');
-                    }
-                    if (elements[i] == null) {
-                        out.writeNull();
-                    } else if (elements[i] instanceof Long) {
-                        out.writeLong((Long) elements[i]);
-                    } else {
-                        out.write(elements[i].toString());
-                    }
-                }
-                out.write(']');
+                // Directly let Fastjson serialize the entire array to ensure the correct JSON format
+                String elementsJson = JSON.toJSONString(elements);
+                out.write(elementsJson);
             } else {
                 out.writeNull();
             }
