@@ -31,7 +31,7 @@ public class HttpExecutorFactory {
     private HttpExecutorFactory() {}
 
     private static HttpExecutor createInstance() {
-        String implName = isOkHttpAvailable() ? HTTP1_IMPL : HTTP2_IMPL;
+        String implName = isOkHttpAvailable() ? HTTP2_IMPL : HTTP1_IMPL;
         return EnhancedServiceLoader.load(HttpExecutor.class, implName);
     }
 
