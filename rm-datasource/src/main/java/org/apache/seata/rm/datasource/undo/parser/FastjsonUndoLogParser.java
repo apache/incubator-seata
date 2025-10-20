@@ -95,6 +95,7 @@ public class FastjsonUndoLogParser implements UndoLogParser, Initialize {
 
     /**
      * Custom Fastjson serializer for SerialArray
+     * Manually construct JSON structure while letting serializer handle elements properly
      */
     private static class SerialArraySerializer implements ObjectSerializer {
         @Override
@@ -106,13 +107,11 @@ public class FastjsonUndoLogParser implements UndoLogParser, Initialize {
             }
 
             SerialArray serialArray = (SerialArray) object;
-
-            // Use SerialWriter to write JSON structure directly
             SerializeWriter out = serializer.getWriter();
 
             out.write('{');
 
-            // Always add @type information to ensure correct deserialization
+            // Write the correct @type information to ensure the deserializer is called
             out.writeFieldName("@type");
             out.writeString("org.apache.seata.rm.datasource.sql.serial.SerialArray");
             out.write(',');
@@ -124,7 +123,6 @@ public class FastjsonUndoLogParser implements UndoLogParser, Initialize {
             } catch (SQLException e) {
                 out.writeNull();
             }
-
             out.write(',');
 
             // Write baseTypeName
@@ -139,19 +137,11 @@ public class FastjsonUndoLogParser implements UndoLogParser, Initialize {
             } catch (SQLException e) {
                 out.writeNull();
             }
-
             out.write(',');
 
-            // Write elements
+            // Writing elements - using a serializer to ensure correct JSON formatting and type handling
             out.writeFieldName("elements");
-            Object[] elements = serialArray.getElements();
-            if (elements != null) {
-                // Directly let Fastjson serialize the entire array to ensure the correct JSON format
-                String elementsJson = JSON.toJSONString(elements);
-                out.write(elementsJson);
-            } else {
-                out.writeNull();
-            }
+            serializer.write(serialArray.getElements());
 
             out.write('}');
         }
@@ -159,6 +149,7 @@ public class FastjsonUndoLogParser implements UndoLogParser, Initialize {
 
     /**
      * Custom Fastjson deserializer for SerialArray
+     * Enhanced with comprehensive type mapping based on SQL baseType
      */
     private static class SerialArrayDeserializer implements ObjectDeserializer {
         @Override
@@ -171,12 +162,15 @@ public class FastjsonUndoLogParser implements UndoLogParser, Initialize {
 
                 SerialArray serialArray = new SerialArray();
 
-                // Remove the @type field if it exists.
+                // Remove the @type field if it exists (Fastjson automatically adds this)
                 json.remove("@type");
 
-                Object baseType = json.get("baseType");
-                if (baseType instanceof Number) {
-                    serialArray.setBaseType(((Number) baseType).intValue());
+                // Extract baseType for type conversion
+                int baseType = 0;
+                Object baseTypeObj = json.get("baseType");
+                if (baseTypeObj instanceof Number) {
+                    baseType = ((Number) baseTypeObj).intValue();
+                    serialArray.setBaseType(baseType);
                 }
 
                 Object baseTypeName = json.get("baseTypeName");
@@ -190,12 +184,7 @@ public class FastjsonUndoLogParser implements UndoLogParser, Initialize {
                     Object[] elements = new Object[elementsArray.size()];
                     for (int i = 0; i < elementsArray.size(); i++) {
                         Object element = elementsArray.get(i);
-                        // Convert Integer to Long to match expected type for BIGINT arrays
-                        if (element instanceof Integer) {
-                            elements[i] = ((Integer) element).longValue();
-                        } else {
-                            elements[i] = element;
-                        }
+                        elements[i] = convertElementByBaseType(element, baseType);
                     }
                     serialArray.setElements(elements);
                 }
@@ -204,6 +193,49 @@ public class FastjsonUndoLogParser implements UndoLogParser, Initialize {
             } catch (Exception e) {
                 LOGGER.error("deserialize SerialArray error: {}", e.getMessage(), e);
                 return null;
+            }
+        }
+
+        /**
+         * Convert element to appropriate Java type based on SQL baseType
+         */
+        private Object convertElementByBaseType(Object element, int baseType) {
+            if (element == null) {
+                return null;
+            }
+
+            // If not a number, return as-is (String, Boolean, etc.)
+            if (!(element instanceof Number)) {
+                return element;
+            }
+
+            Number numElement = (Number) element;
+
+            // Convert based on SQL type constants
+            switch (baseType) {
+                case java.sql.Types.TINYINT:
+                    return numElement.byteValue();
+                case java.sql.Types.SMALLINT:
+                    return numElement.shortValue();
+                case java.sql.Types.INTEGER:
+                    return numElement.intValue();
+                case java.sql.Types.BIGINT:
+                    return numElement.longValue();
+                case java.sql.Types.REAL:
+                case java.sql.Types.FLOAT:
+                    return numElement.floatValue();
+                case java.sql.Types.DOUBLE:
+                    return numElement.doubleValue();
+                case java.sql.Types.DECIMAL:
+                case java.sql.Types.NUMERIC:
+                    return new java.math.BigDecimal(numElement.toString());
+                default:
+                    // For unknown types, try to preserve as much precision as possible
+                    if (element instanceof Integer) {
+                        // Default fallback: convert Integer to Long for better compatibility
+                        return numElement.longValue();
+                    }
+                    return element;
             }
         }
 
