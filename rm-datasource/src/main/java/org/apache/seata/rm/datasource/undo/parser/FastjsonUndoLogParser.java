@@ -40,7 +40,18 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.sql.SQLException;
+
+import static java.sql.Types.BIGINT;
+import static java.sql.Types.DECIMAL;
+import static java.sql.Types.DOUBLE;
+import static java.sql.Types.FLOAT;
+import static java.sql.Types.INTEGER;
+import static java.sql.Types.NUMERIC;
+import static java.sql.Types.REAL;
+import static java.sql.Types.SMALLINT;
+import static java.sql.Types.TINYINT;
 
 /**
  * The type Json based undo log parser.
@@ -113,7 +124,7 @@ public class FastjsonUndoLogParser implements UndoLogParser, Initialize {
 
             // Write the correct @type information to ensure the deserializer is called
             out.writeFieldName("@type");
-            out.writeString("org.apache.seata.rm.datasource.sql.serial.SerialArray");
+            out.writeString(serialArray.getClass().getName());
             out.write(',');
 
             // Write baseType
@@ -213,28 +224,23 @@ public class FastjsonUndoLogParser implements UndoLogParser, Initialize {
 
             // Convert based on SQL type constants
             switch (baseType) {
-                case java.sql.Types.TINYINT:
+                case TINYINT:
                     return numElement.byteValue();
-                case java.sql.Types.SMALLINT:
+                case SMALLINT:
                     return numElement.shortValue();
-                case java.sql.Types.INTEGER:
+                case INTEGER:
                     return numElement.intValue();
-                case java.sql.Types.BIGINT:
+                case BIGINT:
                     return numElement.longValue();
-                case java.sql.Types.REAL:
-                case java.sql.Types.FLOAT:
+                case REAL:
+                case FLOAT:
                     return numElement.floatValue();
-                case java.sql.Types.DOUBLE:
+                case DOUBLE:
                     return numElement.doubleValue();
-                case java.sql.Types.DECIMAL:
-                case java.sql.Types.NUMERIC:
-                    return new java.math.BigDecimal(numElement.toString());
+                case DECIMAL:
+                case NUMERIC:
+                    return new BigDecimal(numElement.toString());
                 default:
-                    // For unknown types, try to preserve as much precision as possible
-                    if (element instanceof Integer) {
-                        // Default fallback: convert Integer to Long for better compatibility
-                        return numElement.longValue();
-                    }
                     return element;
             }
         }
