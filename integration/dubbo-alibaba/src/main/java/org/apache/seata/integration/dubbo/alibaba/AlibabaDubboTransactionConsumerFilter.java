@@ -44,21 +44,38 @@ public class AlibabaDubboTransactionConsumerFilter implements Filter {
         if (!DubboConstants.ALIBABADUBBO) {
             return invoker.invoke(invocation);
         }
+        return doInvoke(invoker, invocation);
+    }
+
+    private Result doInvoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
         String xid = RootContext.getXID();
         BranchType branchType = RootContext.getBranchType();
-
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("consumer xid in RootContext[{}], branchType in RootContext[{}]", xid, branchType);
         }
+        try {
+            propagateTransactionContext(xid, branchType);
+            return invoker.invoke(invocation);
+        } finally {
+            clearTransactionContext();
+        }
+    }
+
+    private void propagateTransactionContext(String xid, BranchType branchType) {
         if (xid != null) {
             RpcContext.getContext().setAttachment(RootContext.KEY_XID, xid);
             RpcContext.getContext().setAttachment(RootContext.KEY_BRANCH_TYPE, branchType.name());
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("transaction context propagated: xid={}, branchType={}", xid, branchType);
+            }
         }
-        try {
-            return invoker.invoke(invocation);
-        } finally {
-            RpcContext.getContext().removeAttachment(RootContext.KEY_XID);
-            RpcContext.getContext().removeAttachment(RootContext.KEY_BRANCH_TYPE);
+    }
+
+    private void clearTransactionContext() {
+        RpcContext.getContext().removeAttachment(RootContext.KEY_XID);
+        RpcContext.getContext().removeAttachment(RootContext.KEY_BRANCH_TYPE);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("transaction context cleared");
         }
     }
 }

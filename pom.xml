@@ -234,38 +234,18 @@
         </profile>
         <!-- profile: spotless -->
         <profile>
-            <id>jdk9-jdk11-spotless</id>
+            <id>jdk17-spotless</id>
             <activation>
-                <jdk>[1.8, 11)</jdk>
+                <jdk>[17,)</jdk>
             </activation>
             <properties>
-                <palantirJavaFormat.version>1.1.0</palantirJavaFormat.version>
-            </properties>
-        </profile>
-
-        <profile>
-            <id>jdk11-jdk21-spotless</id>
-            <activation>
-                <jdk>[11, 21)</jdk>
-            </activation>
-            <properties>
-                <palantirJavaFormat.version>2.28.0</palantirJavaFormat.version>
-            </properties>
-        </profile>
-
-        <profile>
-            <id>jdk21-spotless</id>
-            <activation>
-                <jdk>[21,)</jdk>
-            </activation>
-            <properties>
-                <palantirJavaFormat.version>2.39.0</palantirJavaFormat.version>
+                <palantirJavaFormat.version>2.74.0</palantirJavaFormat.version>
             </properties>
         </profile>
         <profile>
-            <id>java11+</id>
+            <id>java17+</id>
             <activation>
-                <jdk>[11,)</jdk>
+                <jdk>[17,)</jdk>
             </activation>
             <build>
                 <plugins>
@@ -309,46 +289,6 @@
         <!-- profile: source-release -->
         <profile>
             <id>source-release</id>
-            <modules>
-                <module>build</module>
-                <module>all</module>
-                <module>bom</module>
-                <module>common</module>
-                <module>config</module>
-                <module>console</module>
-                <module>core</module>
-                <module>compatible</module>
-                <module>dependencies</module>
-                <module>discovery</module>
-                <module>integration/rpc-core</module>
-                <module>integration/dubbo</module>
-                <module>integration/dubbo-alibaba</module>
-                <module>integration/sofa-rpc</module>
-                <module>integration/motan</module>
-                <module>integration/grpc</module>
-                <module>integration/http</module>
-                <module>integration/http-jakarta</module>
-                <module>integration/hsf</module>
-                <module>integration/brpc</module>
-                <module>rm</module>
-                <module>rm-datasource</module>
-                <module>rocketmq</module>
-                <module>spring</module>
-                <module>tcc</module>
-                <module>mock-server</module>
-                <module>tm</module>
-                <module>metrics</module>
-                <module>serializer</module>
-                <module>seata-spring-boot-starter</module>
-                <module>seata-spring-autoconfigure</module>
-                <module>compressor</module>
-                <module>saga</module>
-                <module>sqlparser</module>
-                <module>server</module>
-                <module>ext/apm-seata-skywalking-plugin</module>
-                <module>integration-tx-api</module>
-                <module>namingserver</module>
-            </modules>
             <build>
                 <plugins>
                     <plugin>
@@ -356,7 +296,7 @@
                         <artifactId>maven-assembly-plugin</artifactId>
                         <configuration>
                             <descriptors>
-                                <descriptor>src/assembly/source-release.xml</descriptor>
+                                <descriptor>distribution/source-release.xml</descriptor>
                             </descriptors>
                             <finalName>apache-seata-${project.version}-incubating-src</finalName>
                         </configuration>
