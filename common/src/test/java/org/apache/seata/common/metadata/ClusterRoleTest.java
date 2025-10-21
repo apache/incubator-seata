@@ -29,4 +29,42 @@ public class ClusterRoleTest {
         Assertions.assertEquals(3, ClusterRole.MEMBER.getRoleCode());
         Assertions.assertDoesNotThrow(() -> ClusterRole.MEMBER.setRoleCode(4));
     }
+
+    @Test
+    public void testSetRoleCode() {
+        ClusterRole role = ClusterRole.LEADER;
+        int originalCode = role.getRoleCode();
+
+        // Test setting new role code
+        role.setRoleCode(99);
+        Assertions.assertEquals(99, role.getRoleCode());
+
+        // Reset to original value
+        role.setRoleCode(originalCode);
+        Assertions.assertEquals(originalCode, role.getRoleCode());
+    }
+
+    @Test
+    public void testAllClusterRoles() {
+        ClusterRole[] roles = ClusterRole.values();
+        Assertions.assertEquals(4, roles.length);
+
+        Assertions.assertTrue(java.util.Arrays.asList(roles).contains(ClusterRole.LEADER));
+        Assertions.assertTrue(java.util.Arrays.asList(roles).contains(ClusterRole.FOLLOWER));
+        Assertions.assertTrue(java.util.Arrays.asList(roles).contains(ClusterRole.LEARNER));
+        Assertions.assertTrue(java.util.Arrays.asList(roles).contains(ClusterRole.MEMBER));
+    }
+
+    @Test
+    public void testValueOf() {
+        Assertions.assertEquals(ClusterRole.LEADER, ClusterRole.valueOf("LEADER"));
+        Assertions.assertEquals(ClusterRole.FOLLOWER, ClusterRole.valueOf("FOLLOWER"));
+        Assertions.assertEquals(ClusterRole.LEARNER, ClusterRole.valueOf("LEARNER"));
+        Assertions.assertEquals(ClusterRole.MEMBER, ClusterRole.valueOf("MEMBER"));
+
+        // Test invalid name throws exception
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            ClusterRole.valueOf("INVALID");
+        });
+    }
 }

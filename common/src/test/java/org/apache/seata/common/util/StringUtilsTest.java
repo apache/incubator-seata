@@ -491,4 +491,21 @@ public class StringUtilsTest {
         Assertions.assertFalse(StringUtils.hasText("   "));
         Assertions.assertTrue(StringUtils.hasText(whitespaceCharSequence));
     }
+
+    @Test
+    public void testHasLength() {
+        Assertions.assertFalse(StringUtils.hasLength(null));
+        Assertions.assertFalse(StringUtils.hasLength(""));
+        Assertions.assertTrue(StringUtils.hasLength(" "));
+        Assertions.assertTrue(StringUtils.hasLength("foo"));
+    }
+
+    @Test
+    public void testHasText() {
+        Assertions.assertFalse(StringUtils.hasText(null));
+        Assertions.assertFalse(StringUtils.hasText(""));
+        Assertions.assertFalse(StringUtils.hasText(" "));
+        Assertions.assertTrue(StringUtils.hasText("foo"));
+        Assertions.assertTrue(StringUtils.hasText(" foo "));
+    }
 }
