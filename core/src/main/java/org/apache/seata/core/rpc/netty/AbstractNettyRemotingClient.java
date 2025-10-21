@@ -92,8 +92,12 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
 
     private final CopyOnWriteArrayList<ChannelEventListener> channelEventListeners = new CopyOnWriteArrayList<>();
 
+    // synchronized(mergeLock)
+    // mergeLock.wait()/notify()/notifyAll()
+    // Mixed use will cause race conditions or IllegalMonitorStateException
     protected final ReentrantLock mergeLock = new ReentrantLock();
     protected final Condition mergeCondition = mergeLock.newCondition();
+    protected volatile boolean isSending = false;
 
     /**
      * When sending message type is {@link MergeMessage}, will be stored to mergeMsgMap.
