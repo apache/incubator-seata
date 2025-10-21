@@ -16,7 +16,7 @@
  */
 package org.apache.seata.rm.datasource;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.loader.EnhancedServiceNotFoundException;
 import org.apache.seata.config.ConfigurationFactory;
