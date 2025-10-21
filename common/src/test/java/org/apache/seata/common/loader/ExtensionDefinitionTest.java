@@ -51,4 +51,86 @@ public class ExtensionDefinitionTest {
                 new ExtensionDefinition<>("abc", 1, Scope.PROTOTYPE, ChineseHello.class);
         Assertions.assertEquals(definition.hashCode(), definition2.hashCode());
     }
+
+    @Test
+    public void testEqualsWithSameObject() {
+        ExtensionDefinition<ChineseHello> definition =
+                new ExtensionDefinition<>("abc", 1, Scope.PROTOTYPE, ChineseHello.class);
+        Assertions.assertEquals(definition, definition);
+    }
+
+    @Test
+    public void testEqualsWithNull() {
+        ExtensionDefinition<ChineseHello> definition =
+                new ExtensionDefinition<>("abc", 1, Scope.PROTOTYPE, ChineseHello.class);
+        Assertions.assertNotEquals(definition, null);
+    }
+
+    @Test
+    public void testEqualsWithDifferentClass() {
+        ExtensionDefinition<ChineseHello> definition =
+                new ExtensionDefinition<>("abc", 1, Scope.PROTOTYPE, ChineseHello.class);
+        Assertions.assertNotEquals(definition, new Object());
+    }
+
+    @Test
+    public void testEqualsWithDifferentName() {
+        ExtensionDefinition<ChineseHello> definition1 =
+                new ExtensionDefinition<>("abc", 1, Scope.PROTOTYPE, ChineseHello.class);
+        ExtensionDefinition<ChineseHello> definition2 =
+                new ExtensionDefinition<>("def", 1, Scope.PROTOTYPE, ChineseHello.class);
+        Assertions.assertNotEquals(definition1, definition2);
+    }
+
+    @Test
+    public void testEqualsWithDifferentServiceClass() {
+        ExtensionDefinition<ChineseHello> definition1 =
+                new ExtensionDefinition<>("abc", 1, Scope.PROTOTYPE, ChineseHello.class);
+        ExtensionDefinition<EnglishHello> definition2 =
+                new ExtensionDefinition<>("abc", 1, Scope.PROTOTYPE, EnglishHello.class);
+        Assertions.assertNotEquals(definition1, definition2);
+    }
+
+    @Test
+    public void testEqualsWithDifferentOrder() {
+        ExtensionDefinition<ChineseHello> definition1 =
+                new ExtensionDefinition<>("abc", 1, Scope.PROTOTYPE, ChineseHello.class);
+        ExtensionDefinition<ChineseHello> definition2 =
+                new ExtensionDefinition<>("abc", 2, Scope.PROTOTYPE, ChineseHello.class);
+        Assertions.assertNotEquals(definition1, definition2);
+    }
+
+    @Test
+    public void testEqualsWithDifferentScope() {
+        ExtensionDefinition<ChineseHello> definition1 =
+                new ExtensionDefinition<>("abc", 1, Scope.PROTOTYPE, ChineseHello.class);
+        ExtensionDefinition<ChineseHello> definition2 =
+                new ExtensionDefinition<>("abc", 1, Scope.SINGLETON, ChineseHello.class);
+        Assertions.assertNotEquals(definition1, definition2);
+    }
+
+    @Test
+    public void testEqualsWithNullName() {
+        ExtensionDefinition<ChineseHello> definition1 =
+                new ExtensionDefinition<>(null, 1, Scope.PROTOTYPE, ChineseHello.class);
+        ExtensionDefinition<ChineseHello> definition2 =
+                new ExtensionDefinition<>(null, 1, Scope.PROTOTYPE, ChineseHello.class);
+        Assertions.assertEquals(definition1, definition2);
+    }
+
+    @Test
+    public void testEqualsWithOneNullName() {
+        ExtensionDefinition<ChineseHello> definition1 =
+                new ExtensionDefinition<>(null, 1, Scope.PROTOTYPE, ChineseHello.class);
+        ExtensionDefinition<ChineseHello> definition2 =
+                new ExtensionDefinition<>("abc", 1, Scope.PROTOTYPE, ChineseHello.class);
+        Assertions.assertNotEquals(definition1, definition2);
+    }
+
+    @Test
+    public void testHashCodeWithNullValues() {
+        ExtensionDefinition<ChineseHello> definition = new ExtensionDefinition<>(null, null, null, ChineseHello.class);
+        // Should not throw exception
+        Assertions.assertDoesNotThrow(definition::hashCode);
+    }
 }

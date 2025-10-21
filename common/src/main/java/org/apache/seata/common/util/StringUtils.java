@@ -279,6 +279,7 @@ public class StringUtils {
                         sb.append(toString(f));
                     }
                 } catch (Exception ignore) {
+                    // Ignore exceptions during field access
                 }
             }
 
