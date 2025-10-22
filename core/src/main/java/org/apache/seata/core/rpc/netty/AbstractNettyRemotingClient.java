@@ -667,9 +667,6 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     @Sharable
     class ClientHandler extends ChannelDuplexHandler {
 
-        private final ReentrantLock writabilityLock = new ReentrantLock();
-        private final Condition writabilityCondition = writabilityLock.newCondition();
-
         @Override
         public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
             if (msg instanceof RpcMessage) {
@@ -681,13 +678,13 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
 
         @Override
         public void channelWritabilityChanged(ChannelHandlerContext ctx) {
-            writabilityLock.lock();
+            AbstractNettyRemotingClient.super.writabilityLock.lock();
             try {
                 if (ctx.channel().isWritable()) {
-                    writabilityCondition.signalAll();
+                    AbstractNettyRemotingClient.super.writabilityCondition.signalAll();
                 }
             } finally {
-                writabilityLock.unlock();
+                AbstractNettyRemotingClient.super.writabilityLock.unlock();
             }
             ctx.fireChannelWritabilityChanged();
         }
