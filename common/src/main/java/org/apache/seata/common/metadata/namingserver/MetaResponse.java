@@ -99,9 +99,6 @@ public class MetaResponse {
 
     @Override
     public String toString() {
-        return "MetaResponse{" +
-                "clusterList=" + clusterList +
-                ", term=" + term +
-                '}';
+        return "MetaResponse{" + "clusterList=" + clusterList + ", term=" + term + '}';
     }
 }
