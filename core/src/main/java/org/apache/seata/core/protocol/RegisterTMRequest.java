@@ -16,7 +16,7 @@
  */
 package org.apache.seata.core.protocol;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.util.NetUtil;
 
