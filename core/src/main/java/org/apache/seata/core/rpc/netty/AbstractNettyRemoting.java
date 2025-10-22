@@ -405,13 +405,12 @@ public abstract class AbstractNettyRemoting implements Disposable {
         }
     }
 
-
-            /**
-             * Destroy channel.
-             *
-             * @param serverAddress the server address
-             * @param channel       the channel
-             */
+    /**
+     * Destroy channel.
+     *
+     * @param serverAddress the server address
+     * @param channel       the channel
+     */
     public abstract void destroyChannel(String serverAddress, Channel channel);
 
     protected void doBeforeRpcHooks(String remoteAddr, RpcMessage request) {
