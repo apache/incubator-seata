@@ -16,7 +16,7 @@
  */
 package org.apache.seata.rm.datasource.undo.mysql;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.IOUtil;
