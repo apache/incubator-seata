@@ -16,7 +16,7 @@
  */
 package org.apache.seata.common.loader;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.seata.common.Constants;
 import org.apache.seata.common.executor.Initialize;
 import org.apache.seata.common.util.CollectionUtils;
@@ -436,7 +436,7 @@ public class EnhancedServiceLoader {
                 throw e;
             } catch (Throwable e) {
                 throw new EnhancedServiceNotFoundException("not found service provider for : " + type.getName()
-                        + " caused by " + ExceptionUtils.getFullStackTrace(e));
+                        + " caused by " + ExceptionUtils.getStackTrace(e));
             }
         }
 
@@ -456,7 +456,7 @@ public class EnhancedServiceLoader {
                     throw (EnhancedServiceNotFoundException) e;
                 } else {
                     throw new EnhancedServiceNotFoundException("not found service provider for : " + type.getName()
-                            + " caused by " + ExceptionUtils.getFullStackTrace(e));
+                            + " caused by " + ExceptionUtils.getStackTrace(e));
                 }
             }
         }
