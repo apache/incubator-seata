@@ -18,7 +18,9 @@ package org.apache.seata.core.serializer;
 
 /**
  * The enum serialize type.
- *
+ * <p>
+ * <b>NOTE: Adding a new serializer type must be non-repeating and within byte range<b/>
+ * </p>
  */
 public enum SerializerType {
 
