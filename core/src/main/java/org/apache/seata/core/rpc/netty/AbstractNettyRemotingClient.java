@@ -67,6 +67,8 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 
 import static org.apache.seata.common.exception.FrameworkErrorCode.NoAvailableService;
@@ -90,7 +92,9 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
 
     private final CopyOnWriteArrayList<ChannelEventListener> channelEventListeners = new CopyOnWriteArrayList<>();
 
-    protected final Object mergeLock = new Object();
+    protected final ReentrantLock mergeLock = new ReentrantLock();
+    protected final Condition mergeCondition = mergeLock.newCondition();
+    protected volatile boolean isSending = false;
 
     /**
      * When sending message type is {@link MergeMessage}, will be stored to mergeMsgMap.
@@ -183,8 +187,11 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                 LOGGER.debug("offer message: {}", rpcMessage.getBody());
             }
             if (!isSending) {
-                synchronized (mergeLock) {
-                    mergeLock.notifyAll();
+                mergeLock.lock();
+                try {
+                    mergeCondition.signalAll();
+                } finally {
+                    mergeLock.unlock();
                 }
             }
 
@@ -578,11 +585,14 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         @Override
         public void run() {
             while (true) {
-                synchronized (mergeLock) {
-                    try {
-                        mergeLock.wait(MAX_MERGE_SEND_MILLS);
-                    } catch (InterruptedException e) {
-                    }
+                mergeLock.lock();
+                try {
+                    mergeCondition.await(MAX_MERGE_SEND_MILLS, TimeUnit.MILLISECONDS);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    LOGGER.warn("MergedSendRunnable wait interrupted", e);
+                } finally {
+                    mergeLock.unlock();
                 }
                 isSending = true;
                 basketMap.forEach((address, basket) -> {
@@ -665,10 +675,13 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
 
         @Override
         public void channelWritabilityChanged(ChannelHandlerContext ctx) {
-            synchronized (lock) {
+            AbstractNettyRemotingClient.super.writabilityLock.lock();
+            try {
                 if (ctx.channel().isWritable()) {
-                    lock.notifyAll();
+                    AbstractNettyRemotingClient.super.writabilityCondition.signalAll();
                 }
+            } finally {
+                AbstractNettyRemotingClient.super.writabilityLock.unlock();
             }
             ctx.fireChannelWritabilityChanged();
         }

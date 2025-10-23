@@ -53,6 +53,8 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * The abstract netty remoting.
@@ -92,7 +94,8 @@ public abstract class AbstractNettyRemoting implements Disposable {
     protected volatile long nowMills = 0;
 
     private static final int TIMEOUT_CHECK_INTERVAL = 3000;
-    protected final Object lock = new Object();
+    protected final ReentrantLock writabilityLock = new ReentrantLock();
+    protected final Condition writabilityCondition = writabilityLock.newCondition();
     /**
      * The Is sending.
      */
@@ -379,21 +382,26 @@ public abstract class AbstractNettyRemoting implements Disposable {
 
     private void channelWritableCheck(Channel channel, Object msg) {
         int tryTimes = 0;
-        synchronized (lock) {
+        writabilityLock.lock();
+        try {
             while (!channel.isWritable()) {
+                tryTimes++;
+                if (tryTimes > NettyClientConfig.getMaxNotWriteableRetry()) {
+                    destroyChannel(channel);
+                    throw new FrameworkException(
+                            "msg:" + ((msg == null) ? "null" : msg.toString()),
+                            FrameworkErrorCode.ChannelIsNotWritable);
+                }
                 try {
-                    tryTimes++;
-                    if (tryTimes > NettyClientConfig.getMaxNotWriteableRetry()) {
-                        destroyChannel(channel);
-                        throw new FrameworkException(
-                                "msg:" + ((msg == null) ? "null" : msg.toString()),
-                                FrameworkErrorCode.ChannelIsNotWritable);
-                    }
-                    lock.wait(NOT_WRITEABLE_CHECK_MILLS);
+                    writabilityCondition.await(NOT_WRITEABLE_CHECK_MILLS, TimeUnit.MILLISECONDS);
                 } catch (InterruptedException exx) {
                     LOGGER.error(exx.getMessage());
+                    Thread.currentThread().interrupt();
+                    throw new FrameworkException(exx);
                 }
             }
+        } finally {
+            writabilityLock.unlock();
         }
     }
 
