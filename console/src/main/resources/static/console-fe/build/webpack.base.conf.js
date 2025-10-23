@@ -43,9 +43,9 @@ module.exports = {
       components: resolve('src/components'),
       pages: resolve('src/pages'),
     },
-  },
-  node: {
-    fs: 'empty'
+    fallback: {
+      fs: false
+    },
   },
   module: {
     rules: [

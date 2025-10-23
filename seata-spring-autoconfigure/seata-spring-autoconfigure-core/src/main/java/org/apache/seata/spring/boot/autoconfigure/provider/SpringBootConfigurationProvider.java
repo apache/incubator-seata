@@ -16,7 +16,7 @@
  */
 package org.apache.seata.spring.boot.autoconfigure.provider;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.common.holder.ObjectHolder;
 import org.apache.seata.common.util.CollectionUtils;
