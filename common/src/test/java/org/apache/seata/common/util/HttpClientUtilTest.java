@@ -71,7 +71,6 @@ public class HttpClientUtilTest {
         assertTrue(latch.await(10, TimeUnit.SECONDS));
     }
 
-
     @Test
     void testDoGetHttp_param_onFailure() throws Exception {
         CountDownLatch latch = new CountDownLatch(1);
@@ -103,6 +102,4 @@ public class HttpClientUtilTest {
         HttpClientUtil.doGetWithHttp2("http://localhost:9999/invalid", headers, callback, 30000);
         assertTrue(latch.await(10, TimeUnit.SECONDS));
     }
-
-
 }

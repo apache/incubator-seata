@@ -221,7 +221,6 @@ public class HttpClientUtil {
         return client.execute(post);
     }
 
-
     public static void doPostWithHttp2(
             String url, Map<String, String> params, Map<String, String> headers, HttpCallback<Response> callback) {
         try {

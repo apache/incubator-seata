@@ -103,7 +103,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
         });
         thread.start();
         try (CloseableHttpResponse response =
-                     HttpClientUtil.doPost("http://127.0.0.1:" + port + "/metadata/v1/watch", param, header, 30000)) {
+                HttpClientUtil.doPost("http://127.0.0.1:" + port + "/metadata/v1/watch", param, header, 30000)) {
             if (response != null) {
                 StatusLine statusLine = response.getStatusLine();
                 Assertions.assertEquals(HttpStatus.SC_OK, statusLine.getStatusCode());
@@ -229,10 +229,8 @@ class ClusterControllerTest extends BaseSpringBootTest {
             @Override
             public void onSuccess(Response response) {
                 assertNotNull(response);
-                Assertions.assertEquals(
-                        Protocol.H2_PRIOR_KNOWLEDGE, response.protocol());
-                Assertions.assertEquals(
-                        HttpStatus.SC_BAD_REQUEST, response.code());
+                Assertions.assertEquals(Protocol.H2_PRIOR_KNOWLEDGE, response.protocol());
+                Assertions.assertEquals(HttpStatus.SC_BAD_REQUEST, response.code());
                 latch.countDown();
             }
 
@@ -250,6 +248,5 @@ class ClusterControllerTest extends BaseSpringBootTest {
         HttpClientUtil.doPostWithHttp2(
                 "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", params, headers, callback);
         assertTrue(latch.await(10, TimeUnit.SECONDS));
-
     }
 }
