@@ -16,11 +16,20 @@
  */
 package org.apache.seata.common.util;
 
+import okhttp3.Response;
+import org.apache.seata.common.executor.HttpCallback;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class HttpClientUtilTest {
 
@@ -29,4 +38,71 @@ public class HttpClientUtilTest {
         Assertions.assertNull(HttpClientUtil.doPost("test", new HashMap<>(), new HashMap<>(), 0));
         Assertions.assertNull(HttpClientUtil.doGet("test", new HashMap<>(), new HashMap<>(), 0));
     }
+
+    @Test
+    void testDoPostHttp_param_onFailure() throws Exception {
+        CountDownLatch latch = new CountDownLatch(1);
+
+        HttpCallback<Response> callback = new HttpCallback<Response>() {
+            @Override
+            public void onSuccess(Response response) {
+                fail("Should not succeed");
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                assertNotNull(t);
+                latch.countDown();
+            }
+
+            @Override
+            public void onCancelled() {
+                fail("Should not be cancelled");
+            }
+        };
+
+        Map<String, String> params = new HashMap<>();
+        params.put("key", "value");
+
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/json");
+
+        HttpClientUtil.doPostWithHttp2("http://localhost:9999/invalid", params, headers, callback);
+        assertTrue(latch.await(10, TimeUnit.SECONDS));
+    }
+
+
+    @Test
+    void testDoGetHttp_param_onFailure() throws Exception {
+        CountDownLatch latch = new CountDownLatch(1);
+
+        HttpCallback<Response> callback = new HttpCallback<Response>() {
+            @Override
+            public void onSuccess(Response response) {
+                fail("Should not succeed");
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                assertNotNull(t);
+                latch.countDown();
+            }
+
+            @Override
+            public void onCancelled() {
+                fail("Should not be cancelled");
+            }
+        };
+
+        Map<String, String> params = new HashMap<>();
+        params.put("key", "value");
+
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/json");
+
+        HttpClientUtil.doGetWithHttp2("http://localhost:9999/invalid", headers, callback, 30000);
+        assertTrue(latch.await(10, TimeUnit.SECONDS));
+    }
+
+
 }
