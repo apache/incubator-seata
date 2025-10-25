@@ -59,7 +59,7 @@ public class FenceLogCleanRunnableTest {
         // Set static fields of SpringFenceHandler
         SpringFenceHandler.setDataSource(dataSource);
         SpringFenceHandler.setTransactionTemplate(transactionTemplate);
-        
+
         // Get inner classes
         Class<?>[] innerClasses = SpringFenceHandler.class.getDeclaredClasses();
         for (Class<?> innerClass : innerClasses) {
@@ -69,7 +69,7 @@ public class FenceLogCleanRunnableTest {
                 fenceLogCleanRunnableClass = innerClass;
             }
         }
-        
+
         assertNotNull(fenceLogIdentityClass, "FenceLogIdentity inner class should exist");
         assertNotNull(fenceLogCleanRunnableClass, "FenceLogCleanRunnable inner class should exist");
     }
@@ -89,7 +89,8 @@ public class FenceLogCleanRunnableTest {
     public void testDeleteFenceSuccess() throws Exception {
         // Given
         try (MockedStatic<SpringFenceHandler> mockedStatic = mockStatic(SpringFenceHandler.class)) {
-            mockedStatic.when(() -> SpringFenceHandler.deleteFence("test-xid", 123L))
+            mockedStatic
+                    .when(() -> SpringFenceHandler.deleteFence("test-xid", 123L))
                     .thenReturn(true);
 
             // When
@@ -105,7 +106,8 @@ public class FenceLogCleanRunnableTest {
     public void testDeleteFenceFailure() throws Exception {
         // Given
         try (MockedStatic<SpringFenceHandler> mockedStatic = mockStatic(SpringFenceHandler.class)) {
-            mockedStatic.when(() -> SpringFenceHandler.deleteFence("test-xid-fail", 456L))
+            mockedStatic
+                    .when(() -> SpringFenceHandler.deleteFence("test-xid-fail", 456L))
                     .thenReturn(false);
 
             // When
@@ -121,14 +123,15 @@ public class FenceLogCleanRunnableTest {
     public void testDeleteFenceWithException() throws Exception {
         // Given
         try (MockedStatic<SpringFenceHandler> mockedStatic = mockStatic(SpringFenceHandler.class)) {
-            mockedStatic.when(() -> SpringFenceHandler.deleteFence("test-xid-exception", 789L))
+            mockedStatic
+                    .when(() -> SpringFenceHandler.deleteFence("test-xid-exception", 789L))
                     .thenThrow(new RuntimeException("Test exception"));
 
             // When & Then - Verify exception is thrown
             assertThrows(RuntimeException.class, () -> {
                 SpringFenceHandler.deleteFence("test-xid-exception", 789L);
             });
-            
+
             mockedStatic.verify(() -> SpringFenceHandler.deleteFence("test-xid-exception", 789L), times(1));
         }
     }
@@ -144,13 +147,13 @@ public class FenceLogCleanRunnableTest {
 
         // Then
         assertNotNull(identity);
-        
+
         // Verify xid and branchId are set correctly
         Method getXidMethod = fenceLogIdentityClass.getDeclaredMethod("getXid");
         Method getBranchIdMethod = fenceLogIdentityClass.getDeclaredMethod("getBranchId");
         getXidMethod.setAccessible(true);
         getBranchIdMethod.setAccessible(true);
-        
+
         assertEquals(testXid, getXidMethod.invoke(identity));
         assertEquals(testBranchId, getBranchIdMethod.invoke(identity));
     }
@@ -159,11 +162,14 @@ public class FenceLogCleanRunnableTest {
     public void testMultipleDeleteFenceCalls() throws Exception {
         // Given
         try (MockedStatic<SpringFenceHandler> mockedStatic = mockStatic(SpringFenceHandler.class)) {
-            mockedStatic.when(() -> SpringFenceHandler.deleteFence("xid-1", 100L))
+            mockedStatic
+                    .when(() -> SpringFenceHandler.deleteFence("xid-1", 100L))
                     .thenReturn(true);
-            mockedStatic.when(() -> SpringFenceHandler.deleteFence("xid-2", 200L))
+            mockedStatic
+                    .when(() -> SpringFenceHandler.deleteFence("xid-2", 200L))
                     .thenReturn(false);
-            mockedStatic.when(() -> SpringFenceHandler.deleteFence("xid-3", 300L))
+            mockedStatic
+                    .when(() -> SpringFenceHandler.deleteFence("xid-3", 300L))
                     .thenReturn(true);
 
             // When
@@ -175,7 +181,7 @@ public class FenceLogCleanRunnableTest {
             assertTrue(result1);
             assertFalse(result2);
             assertTrue(result3);
-            
+
             mockedStatic.verify(() -> SpringFenceHandler.deleteFence("xid-1", 100L), times(1));
             mockedStatic.verify(() -> SpringFenceHandler.deleteFence("xid-2", 200L), times(1));
             mockedStatic.verify(() -> SpringFenceHandler.deleteFence("xid-3", 300L), times(1));
@@ -187,7 +193,8 @@ public class FenceLogCleanRunnableTest {
         // Given
         try (MockedStatic<SpringFenceHandler> mockedStatic = mockStatic(SpringFenceHandler.class)) {
             // Mock any parameter calls to return true
-            mockedStatic.when(() -> SpringFenceHandler.deleteFence(anyString(), anyLong()))
+            mockedStatic
+                    .when(() -> SpringFenceHandler.deleteFence(anyString(), anyLong()))
                     .thenReturn(true);
 
             // When
@@ -197,7 +204,7 @@ public class FenceLogCleanRunnableTest {
             // Then
             assertTrue(result1);
             assertTrue(result2);
-            
+
             mockedStatic.verify(() -> SpringFenceHandler.deleteFence("any-xid", 999L), times(1));
             mockedStatic.verify(() -> SpringFenceHandler.deleteFence("another-xid", 888L), times(1));
         }

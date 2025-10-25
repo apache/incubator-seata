@@ -44,9 +44,9 @@ public class FenceLogIdentityTest {
                 break;
             }
         }
-        
+
         assertNotNull(fenceLogIdentityClass, "FenceLogIdentity inner class should exist");
-        
+
         // 创建实例
         Constructor<?> constructor = fenceLogIdentityClass.getDeclaredConstructor();
         constructor.setAccessible(true);
@@ -163,12 +163,12 @@ public class FenceLogIdentityTest {
         String testXid2 = "test-xid-2";
         Long testBranchId1 = 111L;
         Long testBranchId2 = 222L;
-        
+
         java.lang.reflect.Method setXidMethod = fenceLogIdentityClass.getDeclaredMethod("setXid", String.class);
         java.lang.reflect.Method getXidMethod = fenceLogIdentityClass.getDeclaredMethod("getXid");
         java.lang.reflect.Method setBranchIdMethod = fenceLogIdentityClass.getDeclaredMethod("setBranchId", Long.class);
         java.lang.reflect.Method getBranchIdMethod = fenceLogIdentityClass.getDeclaredMethod("getBranchId");
-        
+
         setXidMethod.setAccessible(true);
         getXidMethod.setAccessible(true);
         setBranchIdMethod.setAccessible(true);
@@ -177,14 +177,14 @@ public class FenceLogIdentityTest {
         // When & Then - Set first group of values
         setXidMethod.invoke(fenceLogIdentity, testXid1);
         setBranchIdMethod.invoke(fenceLogIdentity, testBranchId1);
-        
+
         assertEquals(testXid1, getXidMethod.invoke(fenceLogIdentity));
         assertEquals(testBranchId1, getBranchIdMethod.invoke(fenceLogIdentity));
 
         // When & Then - Set second group of values
         setXidMethod.invoke(fenceLogIdentity, testXid2);
         setBranchIdMethod.invoke(fenceLogIdentity, testBranchId2);
-        
+
         assertEquals(testXid2, getXidMethod.invoke(fenceLogIdentity));
         assertEquals(testBranchId2, getBranchIdMethod.invoke(fenceLogIdentity));
     }
