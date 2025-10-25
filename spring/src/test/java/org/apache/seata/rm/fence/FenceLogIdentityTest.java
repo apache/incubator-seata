@@ -26,8 +26,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
- * FenceLogIdentity 单元测试
- * 测试 SpringFenceHandler 的内部类 FenceLogIdentity
+ * Unit tests for FenceLogIdentity
+ * Tests the inner class FenceLogIdentity of SpringFenceHandler
  */
 public class FenceLogIdentityTest {
 
@@ -36,7 +36,7 @@ public class FenceLogIdentityTest {
 
     @BeforeEach
     public void setUp() throws Exception {
-        // 获取内部类
+        // Get inner class
         Class<?>[] innerClasses = SpringFenceHandler.class.getDeclaredClasses();
         for (Class<?> innerClass : innerClasses) {
             if ("FenceLogIdentity".equals(innerClass.getSimpleName())) {
@@ -174,14 +174,14 @@ public class FenceLogIdentityTest {
         setBranchIdMethod.setAccessible(true);
         getBranchIdMethod.setAccessible(true);
 
-        // When & Then - 设置第一组值
+        // When & Then - Set first group of values
         setXidMethod.invoke(fenceLogIdentity, testXid1);
         setBranchIdMethod.invoke(fenceLogIdentity, testBranchId1);
         
         assertEquals(testXid1, getXidMethod.invoke(fenceLogIdentity));
         assertEquals(testBranchId1, getBranchIdMethod.invoke(fenceLogIdentity));
 
-        // When & Then - 设置第二组值
+        // When & Then - Set second group of values
         setXidMethod.invoke(fenceLogIdentity, testXid2);
         setBranchIdMethod.invoke(fenceLogIdentity, testBranchId2);
         

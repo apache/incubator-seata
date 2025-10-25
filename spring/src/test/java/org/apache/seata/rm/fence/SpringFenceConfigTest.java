@@ -37,7 +37,7 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 
 /**
- * SpringFenceConfig 单元测试
+ * Unit tests for SpringFenceConfig
  */
 @ExtendWith(MockitoExtension.class)
 public class SpringFenceConfigTest {

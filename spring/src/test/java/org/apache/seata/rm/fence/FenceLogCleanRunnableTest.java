@@ -39,8 +39,8 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 
 /**
- * FenceLogCleanRunnable 单元测试
- * 专注于测试核心清理逻辑，避免复杂的多线程和静态字段操作
+ * Unit tests for FenceLogCleanRunnable
+ * Focuses on testing core cleanup logic, avoiding complex multithreading and static field operations
  */
 @ExtendWith(MockitoExtension.class)
 public class FenceLogCleanRunnableTest {
@@ -56,11 +56,11 @@ public class FenceLogCleanRunnableTest {
 
     @BeforeEach
     public void setUp() throws Exception {
-        // 设置SpringFenceHandler的静态字段
+        // Set static fields of SpringFenceHandler
         SpringFenceHandler.setDataSource(dataSource);
         SpringFenceHandler.setTransactionTemplate(transactionTemplate);
         
-        // 获取内部类
+        // Get inner classes
         Class<?>[] innerClasses = SpringFenceHandler.class.getDeclaredClasses();
         for (Class<?> innerClass : innerClasses) {
             if ("FenceLogIdentity".equals(innerClass.getSimpleName())) {
@@ -124,7 +124,7 @@ public class FenceLogCleanRunnableTest {
             mockedStatic.when(() -> SpringFenceHandler.deleteFence("test-xid-exception", 789L))
                     .thenThrow(new RuntimeException("Test exception"));
 
-            // When & Then - 验证异常被抛出
+            // When & Then - Verify exception is thrown
             assertThrows(RuntimeException.class, () -> {
                 SpringFenceHandler.deleteFence("test-xid-exception", 789L);
             });
@@ -145,7 +145,7 @@ public class FenceLogCleanRunnableTest {
         // Then
         assertNotNull(identity);
         
-        // 验证xid和branchId设置正确
+        // Verify xid and branchId are set correctly
         Method getXidMethod = fenceLogIdentityClass.getDeclaredMethod("getXid");
         Method getBranchIdMethod = fenceLogIdentityClass.getDeclaredMethod("getBranchId");
         getXidMethod.setAccessible(true);
@@ -186,7 +186,7 @@ public class FenceLogCleanRunnableTest {
     public void testDeleteFenceWithDifferentParameters() throws Exception {
         // Given
         try (MockedStatic<SpringFenceHandler> mockedStatic = mockStatic(SpringFenceHandler.class)) {
-            // Mock任何参数的调用都返回true
+            // Mock any parameter calls to return true
             mockedStatic.when(() -> SpringFenceHandler.deleteFence(anyString(), anyLong()))
                     .thenReturn(true);
 
@@ -204,7 +204,7 @@ public class FenceLogCleanRunnableTest {
     }
 
     /**
-     * 创建FenceLogIdentity实例的辅助方法
+     * Helper method to create FenceLogIdentity instance
      */
     private Object createFenceLogIdentity(String xid, Long branchId) throws Exception {
         Constructor<?> constructor = fenceLogIdentityClass.getDeclaredConstructor();

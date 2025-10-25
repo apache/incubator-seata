@@ -53,8 +53,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * SpringFenceHandler 单元测试
- * 专注于测试可访问的方法和逻辑，避免复杂的静态字段操作
+ * Unit tests for SpringFenceHandler
+ * Focuses on testing accessible methods and logic, avoiding complex static field operations
  */
 @ExtendWith(MockitoExtension.class)
 public class SpringFenceHandlerTest {
@@ -121,7 +121,7 @@ public class SpringFenceHandlerTest {
         SpringFenceHandler.setTransactionTemplate(newTemplate);
 
         // Then
-        // 验证设置成功
+        // Verify successful setting
         assertNotNull(newTemplate);
     }
 
@@ -240,7 +240,7 @@ public class SpringFenceHandlerTest {
 
     @Test
     public void testCreateTransactionTemplateForTransactionalMethodWithTransactional() throws Exception {
-        // Given - 使用动态代理创建 @Transactional 注解实现
+        // Given - Create @Transactional annotation implementation using dynamic proxy
         Transactional transactional = (Transactional) java.lang.reflect.Proxy.newProxyInstance(
             Transactional.class.getClassLoader(),
             new Class[]{Transactional.class},
@@ -248,7 +248,7 @@ public class SpringFenceHandlerTest {
                 if ("isolation".equals(method.getName())) {
                     return Isolation.READ_COMMITTED;
                 }
-                // 返回默认值
+                // Return default value
                 return method.getDefaultValue();
             }
         );
@@ -326,7 +326,7 @@ public class SpringFenceHandlerTest {
     public void testDeleteFenceWithDifferentParameters() {
         // Given
         try (MockedStatic<SpringFenceHandler> mockedStatic = mockStatic(SpringFenceHandler.class)) {
-            // Mock任何参数的调用都返回true
+            // Mock any parameter calls to return true
             mockedStatic.when(() -> SpringFenceHandler.deleteFence(anyString(), anyLong()))
                     .thenReturn(true);
 
