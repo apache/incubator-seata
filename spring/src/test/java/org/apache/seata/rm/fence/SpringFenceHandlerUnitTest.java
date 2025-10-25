@@ -67,7 +67,7 @@ public class SpringFenceHandlerUnitTest {
         try (MockedStatic<SpringFenceHandler> mockedStatic = mockStatic(SpringFenceHandler.class, CALLS_REAL_METHODS)) {
             // Mock static method calls within this scope
             mockedStatic.when(SpringFenceHandler::getDataSource).thenReturn(dataSource);
-            
+
             // This test will verify the method works with null transactional annotation
             // The actual implementation will be tested in integration tests
             assertDoesNotThrow(() -> {
@@ -80,15 +80,12 @@ public class SpringFenceHandlerUnitTest {
     public void testCreateTransactionTemplateWithTransactionalAnnotation() throws Exception {
         // Test with dynamic proxy for Transactional annotation
         Transactional transactional = (Transactional) java.lang.reflect.Proxy.newProxyInstance(
-            Transactional.class.getClassLoader(),
-            new Class[]{Transactional.class},
-            (proxy, method, args) -> {
-                if ("isolation".equals(method.getName())) {
-                    return Isolation.READ_COMMITTED;
-                }
-                return method.getDefaultValue();
-            }
-        );
+                Transactional.class.getClassLoader(), new Class[] {Transactional.class}, (proxy, method, args) -> {
+                    if ("isolation".equals(method.getName())) {
+                        return Isolation.READ_COMMITTED;
+                    }
+                    return method.getDefaultValue();
+                });
 
         Method createMethod = SpringFenceHandler.class.getDeclaredMethod(
                 "createTransactionTemplateForTransactionalMethod", Transactional.class);
@@ -105,8 +102,10 @@ public class SpringFenceHandlerUnitTest {
             Throwable cause = e.getCause();
             // For this test, we accept that the method might throw exceptions due to missing dependencies
             // The important thing is that the method is accessible and the annotation is processed
-            assertTrue(cause instanceof RuntimeException || cause instanceof IllegalArgumentException,
-                    "Expected runtime exception due to missing dependencies, but got: " + cause.getClass().getName());
+            assertTrue(
+                    cause instanceof RuntimeException || cause instanceof IllegalArgumentException,
+                    "Expected runtime exception due to missing dependencies, but got: "
+                            + cause.getClass().getName());
         }
     }
 
@@ -115,7 +114,9 @@ public class SpringFenceHandlerUnitTest {
         // Test static methods safely using MockedStatic
         try (MockedStatic<SpringFenceHandler> mockedStatic = mockStatic(SpringFenceHandler.class)) {
             mockedStatic.when(SpringFenceHandler::getDataSource).thenReturn(dataSource);
-            mockedStatic.when(() -> SpringFenceHandler.deleteFence("test", 123L)).thenReturn(true);
+            mockedStatic
+                    .when(() -> SpringFenceHandler.deleteFence("test", 123L))
+                    .thenReturn(true);
 
             // Test static method calls within mocked scope
             DataSource result = SpringFenceHandler.getDataSource();
@@ -135,7 +136,9 @@ public class SpringFenceHandlerUnitTest {
     public void testMultipleStaticMethodCalls() {
         // Test multiple static method calls in isolated scope
         try (MockedStatic<SpringFenceHandler> mockedStatic = mockStatic(SpringFenceHandler.class)) {
-            mockedStatic.when(() -> SpringFenceHandler.deleteFence(anyString(), anyLong())).thenReturn(true);
+            mockedStatic
+                    .when(() -> SpringFenceHandler.deleteFence(anyString(), anyLong()))
+                    .thenReturn(true);
 
             boolean result1 = SpringFenceHandler.deleteFence("xid1", 100L);
             boolean result2 = SpringFenceHandler.deleteFence("xid2", 200L);
@@ -164,7 +167,7 @@ public class SpringFenceHandlerUnitTest {
         // Test the inner class without modifying static state
         Class<?>[] innerClasses = SpringFenceHandler.class.getDeclaredClasses();
         Class<?> fenceLogIdentityClass = null;
-        
+
         for (Class<?> innerClass : innerClasses) {
             if ("FenceLogIdentity".equals(innerClass.getSimpleName())) {
                 fenceLogIdentityClass = innerClass;
@@ -186,7 +189,7 @@ public class SpringFenceHandlerUnitTest {
         // Test the inner class without modifying static state
         Class<?>[] innerClasses = SpringFenceHandler.class.getDeclaredClasses();
         Class<?> cleanRunnableClass = null;
-        
+
         for (Class<?> innerClass : innerClasses) {
             if ("FenceLogCleanRunnable".equals(innerClass.getSimpleName())) {
                 cleanRunnableClass = innerClass;

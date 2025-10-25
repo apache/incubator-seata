@@ -38,7 +38,7 @@ public class FenceLogCleanRunnableUnitTest {
         // Test that the inner class exists
         Class<?>[] innerClasses = SpringFenceHandler.class.getDeclaredClasses();
         Class<?> cleanRunnableClass = null;
-        
+
         for (Class<?> innerClass : innerClasses) {
             if ("FenceLogCleanRunnable".equals(innerClass.getSimpleName())) {
                 cleanRunnableClass = innerClass;
@@ -55,7 +55,7 @@ public class FenceLogCleanRunnableUnitTest {
         // Test that we can create instance of the inner class
         Class<?>[] innerClasses = SpringFenceHandler.class.getDeclaredClasses();
         Class<?> cleanRunnableClass = null;
-        
+
         for (Class<?> innerClass : innerClasses) {
             if ("FenceLogCleanRunnable".equals(innerClass.getSimpleName())) {
                 cleanRunnableClass = innerClass;
@@ -64,7 +64,7 @@ public class FenceLogCleanRunnableUnitTest {
         }
 
         assertNotNull(cleanRunnableClass);
-        
+
         Constructor<?> constructor = cleanRunnableClass.getDeclaredConstructor();
         constructor.setAccessible(true);
         Object runnable = constructor.newInstance();
@@ -77,8 +77,12 @@ public class FenceLogCleanRunnableUnitTest {
     public void testDeleteFenceMethodWithMockedStatic() {
         // Test static deleteFence method safely using MockedStatic
         try (MockedStatic<SpringFenceHandler> mockedStatic = mockStatic(SpringFenceHandler.class)) {
-            mockedStatic.when(() -> SpringFenceHandler.deleteFence("test-xid", 123L)).thenReturn(true);
-            mockedStatic.when(() -> SpringFenceHandler.deleteFence("fail-xid", 456L)).thenReturn(false);
+            mockedStatic
+                    .when(() -> SpringFenceHandler.deleteFence("test-xid", 123L))
+                    .thenReturn(true);
+            mockedStatic
+                    .when(() -> SpringFenceHandler.deleteFence("fail-xid", 456L))
+                    .thenReturn(false);
 
             // Test successful deletion
             boolean result1 = SpringFenceHandler.deleteFence("test-xid", 123L);
@@ -98,7 +102,8 @@ public class FenceLogCleanRunnableUnitTest {
     public void testDeleteFenceWithException() {
         // Test exception handling in static deleteFence method
         try (MockedStatic<SpringFenceHandler> mockedStatic = mockStatic(SpringFenceHandler.class)) {
-            mockedStatic.when(() -> SpringFenceHandler.deleteFence("error-xid", 789L))
+            mockedStatic
+                    .when(() -> SpringFenceHandler.deleteFence("error-xid", 789L))
                     .thenThrow(new RuntimeException("Database error"));
 
             // Should throw exception as expected
@@ -114,7 +119,9 @@ public class FenceLogCleanRunnableUnitTest {
     public void testMultipleDeleteFenceCalls() {
         // Test multiple static method calls in isolated environment
         try (MockedStatic<SpringFenceHandler> mockedStatic = mockStatic(SpringFenceHandler.class)) {
-            mockedStatic.when(() -> SpringFenceHandler.deleteFence(anyString(), anyLong())).thenReturn(true);
+            mockedStatic
+                    .when(() -> SpringFenceHandler.deleteFence(anyString(), anyLong()))
+                    .thenReturn(true);
 
             // Make multiple calls
             boolean result1 = SpringFenceHandler.deleteFence("xid1", 100L);
@@ -138,7 +145,7 @@ public class FenceLogCleanRunnableUnitTest {
         // Test FenceLogIdentity inner class existence and instantiation
         Class<?>[] innerClasses = SpringFenceHandler.class.getDeclaredClasses();
         Class<?> identityClass = null;
-        
+
         for (Class<?> innerClass : innerClasses) {
             if ("FenceLogIdentity".equals(innerClass.getSimpleName())) {
                 identityClass = innerClass;
@@ -147,7 +154,7 @@ public class FenceLogCleanRunnableUnitTest {
         }
 
         assertNotNull(identityClass, "FenceLogIdentity inner class should exist");
-        
+
         // Test instantiation
         Constructor<?> constructor = identityClass.getDeclaredConstructor();
         constructor.setAccessible(true);
