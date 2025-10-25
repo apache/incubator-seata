@@ -17,7 +17,11 @@
 package org.apache.seata.rm.fence;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -41,9 +45,12 @@ import static org.mockito.Mockito.times;
 /**
  * Unit tests for FenceLogCleanRunnable
  * Focuses on testing core cleanup logic, avoiding complex multithreading and static field operations
+ * Uses AbstractFenceTest to prevent test pollution and ensure proper cleanup
  */
 @ExtendWith(MockitoExtension.class)
-public class FenceLogCleanRunnableTest {
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+public class FenceLogCleanRunnableTest extends AbstractFenceTest {
 
     @Mock
     private DataSource dataSource;
@@ -56,7 +63,13 @@ public class FenceLogCleanRunnableTest {
 
     @BeforeEach
     public void setUp() throws Exception {
-        // Set static fields of SpringFenceHandler
+        super.setUpBase(); // Call parent cleanup first
+        doSetUp(); // Template method for additional setup
+    }
+
+    @Override
+    protected void doSetUp() throws Exception {
+        // Set static fields of SpringFenceHandler for testing
         SpringFenceHandler.setDataSource(dataSource);
         SpringFenceHandler.setTransactionTemplate(transactionTemplate);
 
@@ -75,6 +88,7 @@ public class FenceLogCleanRunnableTest {
     }
 
     @Test
+    @Order(1)
     public void testFenceLogCleanRunnableCreation() throws Exception {
         // Given & When
         Constructor<?> constructor = fenceLogCleanRunnableClass.getDeclaredConstructor();
@@ -86,6 +100,7 @@ public class FenceLogCleanRunnableTest {
     }
 
     @Test
+    @Order(2)
     public void testDeleteFenceSuccess() throws Exception {
         // Given
         try (MockedStatic<SpringFenceHandler> mockedStatic = mockStatic(SpringFenceHandler.class)) {
@@ -103,6 +118,7 @@ public class FenceLogCleanRunnableTest {
     }
 
     @Test
+    @Order(3)
     public void testDeleteFenceFailure() throws Exception {
         // Given
         try (MockedStatic<SpringFenceHandler> mockedStatic = mockStatic(SpringFenceHandler.class)) {
@@ -120,6 +136,7 @@ public class FenceLogCleanRunnableTest {
     }
 
     @Test
+    @Order(4)
     public void testDeleteFenceWithException() throws Exception {
         // Given
         try (MockedStatic<SpringFenceHandler> mockedStatic = mockStatic(SpringFenceHandler.class)) {
@@ -137,6 +154,7 @@ public class FenceLogCleanRunnableTest {
     }
 
     @Test
+    @Order(5)
     public void testFenceLogIdentityCreation() throws Exception {
         // Given
         String testXid = "test-xid-identity";

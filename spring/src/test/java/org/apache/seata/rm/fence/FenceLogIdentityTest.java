@@ -17,7 +17,11 @@
 package org.apache.seata.rm.fence;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import java.lang.reflect.Constructor;
 
@@ -28,7 +32,10 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 /**
  * Unit tests for FenceLogIdentity
  * Tests the inner class FenceLogIdentity of SpringFenceHandler
+ * This test class is isolated and doesn't modify static state
  */
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class FenceLogIdentityTest {
 
     private Object fenceLogIdentity;
@@ -47,13 +54,14 @@ public class FenceLogIdentityTest {
 
         assertNotNull(fenceLogIdentityClass, "FenceLogIdentity inner class should exist");
 
-        // 创建实例
+        // Create an instance
         Constructor<?> constructor = fenceLogIdentityClass.getDeclaredConstructor();
         constructor.setAccessible(true);
         fenceLogIdentity = constructor.newInstance();
     }
 
     @Test
+    @Order(1)
     public void testDefaultConstructor() throws Exception {
         // Given & When
         Constructor<?> constructor = fenceLogIdentityClass.getDeclaredConstructor();
@@ -65,6 +73,7 @@ public class FenceLogIdentityTest {
     }
 
     @Test
+    @Order(2)
     public void testGetXidInitiallyNull() throws Exception {
         // Given
         java.lang.reflect.Method getXidMethod = fenceLogIdentityClass.getDeclaredMethod("getXid");
@@ -78,6 +87,7 @@ public class FenceLogIdentityTest {
     }
 
     @Test
+    @Order(3)
     public void testGetBranchIdInitiallyNull() throws Exception {
         // Given
         java.lang.reflect.Method getBranchIdMethod = fenceLogIdentityClass.getDeclaredMethod("getBranchId");
@@ -91,6 +101,7 @@ public class FenceLogIdentityTest {
     }
 
     @Test
+    @Order(4)
     public void testSetAndGetXid() throws Exception {
         // Given
         String testXid = "test-xid-123";
@@ -108,6 +119,7 @@ public class FenceLogIdentityTest {
     }
 
     @Test
+    @Order(5)
     public void testSetAndGetBranchId() throws Exception {
         // Given
         Long testBranchId = 123456L;

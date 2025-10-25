@@ -19,7 +19,11 @@ package org.apache.seata.rm.fence;
 import org.apache.seata.common.exception.FrameworkErrorCode;
 import org.apache.seata.integration.tx.api.fence.exception.CommonFenceException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -37,8 +41,11 @@ import static org.mockito.Mockito.mockStatic;
 
 /**
  * Unit tests for SpringFenceConfig
+ * Uses MockedStatic to avoid static state pollution
  */
 @ExtendWith(MockitoExtension.class)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class SpringFenceConfigTest {
 
     @Mock
@@ -55,6 +62,7 @@ public class SpringFenceConfigTest {
     }
 
     @Test
+    @Order(1)
     public void testConstructorWithValidParameters() {
         // Given
         DataSource testDataSource = dataSource;
@@ -68,6 +76,7 @@ public class SpringFenceConfigTest {
     }
 
     @Test
+    @Order(2)
     public void testAfterPropertiesSetWithValidDataSourceAndTransactionManager() {
         // Given
         try (MockedStatic<SpringFenceHandler> mockedStatic = mockStatic(SpringFenceHandler.class)) {
@@ -81,6 +90,7 @@ public class SpringFenceConfigTest {
     }
 
     @Test
+    @Order(3)
     public void testAfterPropertiesSetWithNullDataSource() {
         // Given
         SpringFenceConfig configWithNullDataSource = new SpringFenceConfig(null, transactionManager);
@@ -94,6 +104,7 @@ public class SpringFenceConfigTest {
     }
 
     @Test
+    @Order(4)
     public void testAfterPropertiesSetWithNullTransactionManager() {
         // Given
         SpringFenceConfig configWithNullTxManager = new SpringFenceConfig(dataSource, null);
@@ -109,6 +120,7 @@ public class SpringFenceConfigTest {
     }
 
     @Test
+    @Order(5)
     public void testAfterPropertiesSetWithBothNullParameters() {
         // Given
         SpringFenceConfig configWithBothNull = new SpringFenceConfig(null, null);

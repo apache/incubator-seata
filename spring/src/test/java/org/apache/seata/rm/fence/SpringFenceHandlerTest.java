@@ -22,7 +22,11 @@ import org.apache.seata.common.executor.Callback;
 import org.apache.seata.rm.tcc.api.BusinessActionContext;
 import org.apache.seata.rm.tcc.api.BusinessActionContextUtil;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -55,9 +59,12 @@ import static org.mockito.Mockito.when;
 /**
  * Unit tests for SpringFenceHandler
  * Focuses on testing accessible methods and logic, avoiding complex static field operations
+ * Uses AbstractFenceTest to prevent test pollution and ensure proper cleanup
  */
 @ExtendWith(MockitoExtension.class)
-public class SpringFenceHandlerTest {
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+public class SpringFenceHandlerTest extends AbstractFenceTest {
 
     @Mock
     private DataSource dataSource;
@@ -84,11 +91,20 @@ public class SpringFenceHandlerTest {
     private static final String TEST_ACTION_NAME = "testAction";
 
     @BeforeEach
-    public void setUp() {
+    public void setUp() throws Exception {
+        super.setUpBase(); // Call parent cleanup first
         springFenceHandler = new SpringFenceHandler();
+        doSetUp(); // Template method for additional setup
+    }
+
+    @Override
+    protected void doSetUp() throws Exception {
+        // Additional setup specific to SpringFenceHandlerTest
+        // Base class handles static field cleanup automatically
     }
 
     @Test
+    @Order(1)
     public void testGetDataSource() {
         // Given
         SpringFenceHandler.setDataSource(dataSource);
@@ -101,6 +117,7 @@ public class SpringFenceHandlerTest {
     }
 
     @Test
+    @Order(2)
     public void testSetDataSource() {
         // Given
         DataSource newDataSource = mock(DataSource.class);
@@ -113,6 +130,7 @@ public class SpringFenceHandlerTest {
     }
 
     @Test
+    @Order(3)
     public void testSetTransactionTemplate() {
         // Given
         TransactionTemplate newTemplate = mock(TransactionTemplate.class);
@@ -126,6 +144,7 @@ public class SpringFenceHandlerTest {
     }
 
     @Test
+    @Order(10)
     public void testPrepareFenceSuccess() throws Exception {
         // Given
         Object expectedResult = "success";
@@ -142,6 +161,7 @@ public class SpringFenceHandlerTest {
     }
 
     @Test
+    @Order(11)
     public void testCommitFenceSuccess() throws Exception {
         // Given
         SpringFenceHandler handler = mock(SpringFenceHandler.class);
@@ -157,6 +177,7 @@ public class SpringFenceHandlerTest {
     }
 
     @Test
+    @Order(12)
     public void testRollbackFenceSuccess() throws Exception {
         // Given
         SpringFenceHandler handler = mock(SpringFenceHandler.class);
