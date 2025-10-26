@@ -235,7 +235,7 @@ public class NettyClientBootstrap implements RemotingBootstrap {
 
     private EventLoopGroup createEventLoopGroupWorker(int selectorThreadSizeThreadSize) {
         if (NettyServerConfig.enableIoUring()) {
-            System.out.println("Using IOUringEventLoopGroup for Netty server");
+            LOGGER.info("Using IOUringEventLoopGroup for Netty Client");
             return new IOUringEventLoopGroup(
                     selectorThreadSizeThreadSize,
                     new NamedThreadFactory(
@@ -244,6 +244,7 @@ public class NettyClientBootstrap implements RemotingBootstrap {
         }
 
         if (NettyServerConfig.enableEpoll()) {
+            LOGGER.info("Using EpollEventLoopGroup for Netty Client");
             return new EpollEventLoopGroup(
                     selectorThreadSizeThreadSize,
                     new NamedThreadFactory(
@@ -251,6 +252,7 @@ public class NettyClientBootstrap implements RemotingBootstrap {
                             selectorThreadSizeThreadSize));
         }
 
+        LOGGER.info("Using NioEventLoopGroup for Netty Client");
         return new NioEventLoopGroup(
                 selectorThreadSizeThreadSize,
                 new NamedThreadFactory(
