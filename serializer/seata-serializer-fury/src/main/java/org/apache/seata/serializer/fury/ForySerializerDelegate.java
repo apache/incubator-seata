@@ -16,27 +16,20 @@
  */
 package org.apache.seata.serializer.fury;
 
-import org.apache.seata.common.loader.LoadLevel;
-import org.apache.seata.core.protocol.AbstractMessage;
 import org.apache.seata.core.serializer.Serializer;
+import org.apache.seata.serializer.fory.ForySerializer;
 
-@LoadLevel(name = "FURY")
-public class FurySerializer implements Serializer {
+public class ForySerializerDelegate implements Serializer {
+
+    private static final ForySerializer SERIALIZER = new ForySerializer();
+
     @Override
-    public <T> byte[] serialize(T t) {
-        if (!(t instanceof AbstractMessage)) {
-            throw new IllegalArgumentException("AbstractMessage isn't available.");
-        }
-        Serializer serializer = DynamicSerializerFactory.getInstance().get();
-        return serializer.serialize(t);
+    public byte[] serialize(Object obj) {
+        return SERIALIZER.serialize(obj);
     }
 
     @Override
-    public <T> T deserialize(byte[] bytes) {
-        if (bytes == null || bytes.length == 0) {
-            throw new IllegalArgumentException("bytes is null");
-        }
-        Serializer serializer = DynamicSerializerFactory.getInstance().get();
-        return (T) serializer.deserialize(bytes);
+    public Object deserialize(byte[] bytes) {
+        return SERIALIZER.deserialize(bytes);
     }
 }
