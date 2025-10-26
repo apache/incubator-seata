@@ -16,104 +16,116 @@
  */
 package org.apache.seata.sqlparser.druid;
 
+import com.alibaba.druid.sql.SQLUtils;
+import com.alibaba.druid.sql.ast.SQLStatement;
+import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleMultiInsertStatement;
 import org.apache.seata.common.exception.NotSupportYetException;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.sqlparser.SQLRecognizer;
 import org.apache.seata.sqlparser.SQLRecognizerFactory;
 import org.apache.seata.sqlparser.SQLType;
 import org.apache.seata.sqlparser.SqlParserType;
+import org.apache.seata.sqlparser.druid.oracle.OracleOperateRecognizerHolder;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 public class DruidSQLRecognizerFactoryTest {
     @Test
     public void testSqlRecognizerCreation() {
         SQLRecognizerFactory recognizerFactory =
                 EnhancedServiceLoader.load(SQLRecognizerFactory.class, SqlParserType.SQL_PARSER_TYPE_DRUID);
-        Assertions.assertNotNull(recognizerFactory);
+        assertNotNull(recognizerFactory);
         List<SQLRecognizer> recognizers = recognizerFactory.create("delete from t1", JdbcConstants.MYSQL);
-        Assertions.assertNotNull(recognizers);
+        assertNotNull(recognizers);
         Assertions.assertEquals(recognizers.size(), 1);
         Assertions.assertEquals(SQLType.DELETE, recognizers.get(0).getSQLType());
 
         recognizers = recognizerFactory.create("delete from t1", JdbcConstants.MARIADB);
-        Assertions.assertNotNull(recognizers);
+        assertNotNull(recognizers);
         Assertions.assertEquals(recognizers.size(), 1);
         Assertions.assertEquals(SQLType.DELETE, recognizers.get(0).getSQLType());
 
         recognizers = recognizerFactory.create("delete from t1", JdbcConstants.POLARDBX);
-        Assertions.assertNotNull(recognizers);
+        assertNotNull(recognizers);
         Assertions.assertEquals(recognizers.size(), 1);
         Assertions.assertEquals(SQLType.DELETE, recognizers.get(0).getSQLType());
 
         recognizers = recognizerFactory.create("delete from t1", JdbcConstants.DM);
-        Assertions.assertNotNull(recognizers);
+        assertNotNull(recognizers);
         Assertions.assertEquals(recognizers.size(), 1);
         Assertions.assertEquals(SQLType.DELETE, recognizers.get(0).getSQLType());
 
         recognizers = recognizerFactory.create("delete from t1", JdbcConstants.KINGBASE);
-        Assertions.assertNotNull(recognizers);
+        assertNotNull(recognizers);
         Assertions.assertEquals(recognizers.size(), 1);
         Assertions.assertEquals(SQLType.DELETE, recognizers.get(0).getSQLType());
 
         recognizers = recognizerFactory.create("delete from t1", JdbcConstants.OSCAR);
-        Assertions.assertNotNull(recognizers);
+        assertNotNull(recognizers);
         Assertions.assertEquals(recognizers.size(), 1);
         Assertions.assertEquals(SQLType.DELETE, recognizers.get(0).getSQLType());
 
         // test sql syntax
         String sql = "update d.t set d.t.a = ?, d.t.b = ?, d.t.c = ?";
-        Assertions.assertNotNull(recognizerFactory.create(sql, JdbcConstants.MYSQL));
-        Assertions.assertNotNull(recognizerFactory.create(sql, JdbcConstants.MARIADB));
-        Assertions.assertNotNull(recognizerFactory.create(sql, JdbcConstants.POLARDBX));
-        Assertions.assertNotNull(recognizerFactory.create(sql, JdbcConstants.ORACLE));
-        Assertions.assertNotNull(recognizerFactory.create(sql, JdbcConstants.POSTGRESQL));
-        Assertions.assertNotNull(recognizerFactory.create(sql, JdbcConstants.DM));
-        Assertions.assertNotNull(recognizerFactory.create(sql, JdbcConstants.KINGBASE));
-        Assertions.assertNotNull(recognizerFactory.create(sql, JdbcConstants.OSCAR));
+        assertNotNull(recognizerFactory.create(sql, JdbcConstants.MYSQL));
+        assertNotNull(recognizerFactory.create(sql, JdbcConstants.MARIADB));
+        assertNotNull(recognizerFactory.create(sql, JdbcConstants.POLARDBX));
+        assertNotNull(recognizerFactory.create(sql, JdbcConstants.ORACLE));
+        assertNotNull(recognizerFactory.create(sql, JdbcConstants.POSTGRESQL));
+        assertNotNull(recognizerFactory.create(sql, JdbcConstants.DM));
+        assertNotNull(recognizerFactory.create(sql, JdbcConstants.KINGBASE));
+        assertNotNull(recognizerFactory.create(sql, JdbcConstants.OSCAR));
 
         String sql5 = "insert into a values (1, 2)";
-        Assertions.assertNotNull(recognizerFactory.create(sql5, JdbcConstants.MYSQL));
-        Assertions.assertNotNull(recognizerFactory.create(sql5, JdbcConstants.MARIADB));
-        Assertions.assertNotNull(recognizerFactory.create(sql5, JdbcConstants.POLARDBX));
-        Assertions.assertNotNull(recognizerFactory.create(sql5, JdbcConstants.ORACLE));
-        Assertions.assertNotNull(recognizerFactory.create(sql5, JdbcConstants.POSTGRESQL));
-        Assertions.assertNotNull(recognizerFactory.create(sql5, JdbcConstants.DM));
-        Assertions.assertNotNull(recognizerFactory.create(sql5, JdbcConstants.KINGBASE));
-        Assertions.assertNotNull(recognizerFactory.create(sql5, JdbcConstants.OSCAR));
+        assertNotNull(recognizerFactory.create(sql5, JdbcConstants.MYSQL));
+        assertNotNull(recognizerFactory.create(sql5, JdbcConstants.MARIADB));
+        assertNotNull(recognizerFactory.create(sql5, JdbcConstants.POLARDBX));
+        assertNotNull(recognizerFactory.create(sql5, JdbcConstants.ORACLE));
+        assertNotNull(recognizerFactory.create(sql5, JdbcConstants.POSTGRESQL));
+        assertNotNull(recognizerFactory.create(sql5, JdbcConstants.DM));
+        assertNotNull(recognizerFactory.create(sql5, JdbcConstants.KINGBASE));
+        assertNotNull(recognizerFactory.create(sql5, JdbcConstants.OSCAR));
 
         String sql6 = "insert into a (id, name) values (1, 2), (3, 4)";
-        Assertions.assertNotNull(recognizerFactory.create(sql6, JdbcConstants.MYSQL));
-        Assertions.assertNotNull(recognizerFactory.create(sql6, JdbcConstants.MARIADB));
-        Assertions.assertNotNull(recognizerFactory.create(sql6, JdbcConstants.POLARDBX));
-        Assertions.assertNotNull(recognizerFactory.create(sql6, JdbcConstants.ORACLE));
-        Assertions.assertNotNull(recognizerFactory.create(sql6, JdbcConstants.POSTGRESQL));
-        Assertions.assertNotNull(recognizerFactory.create(sql6, JdbcConstants.DM));
-        Assertions.assertNotNull(recognizerFactory.create(sql6, JdbcConstants.KINGBASE));
-        Assertions.assertNotNull(recognizerFactory.create(sql6, JdbcConstants.OSCAR));
+        assertNotNull(recognizerFactory.create(sql6, JdbcConstants.MYSQL));
+        assertNotNull(recognizerFactory.create(sql6, JdbcConstants.MARIADB));
+        assertNotNull(recognizerFactory.create(sql6, JdbcConstants.POLARDBX));
+        assertNotNull(recognizerFactory.create(sql6, JdbcConstants.ORACLE));
+        assertNotNull(recognizerFactory.create(sql6, JdbcConstants.POSTGRESQL));
+        assertNotNull(recognizerFactory.create(sql6, JdbcConstants.DM));
+        assertNotNull(recognizerFactory.create(sql6, JdbcConstants.KINGBASE));
+        assertNotNull(recognizerFactory.create(sql6, JdbcConstants.OSCAR));
 
         String sql8 = "delete from t where id = ?";
-        Assertions.assertNotNull(recognizerFactory.create(sql8, JdbcConstants.MYSQL));
-        Assertions.assertNotNull(recognizerFactory.create(sql8, JdbcConstants.MARIADB));
-        Assertions.assertNotNull(recognizerFactory.create(sql8, JdbcConstants.POLARDBX));
-        Assertions.assertNotNull(recognizerFactory.create(sql8, JdbcConstants.ORACLE));
-        Assertions.assertNotNull(recognizerFactory.create(sql8, JdbcConstants.POSTGRESQL));
-        Assertions.assertNotNull(recognizerFactory.create(sql8, JdbcConstants.DM));
-        Assertions.assertNotNull(recognizerFactory.create(sql8, JdbcConstants.KINGBASE));
-        Assertions.assertNotNull(recognizerFactory.create(sql8, JdbcConstants.OSCAR));
+        assertNotNull(recognizerFactory.create(sql8, JdbcConstants.MYSQL));
+        assertNotNull(recognizerFactory.create(sql8, JdbcConstants.MARIADB));
+        assertNotNull(recognizerFactory.create(sql8, JdbcConstants.POLARDBX));
+        assertNotNull(recognizerFactory.create(sql8, JdbcConstants.ORACLE));
+        assertNotNull(recognizerFactory.create(sql8, JdbcConstants.POSTGRESQL));
+        assertNotNull(recognizerFactory.create(sql8, JdbcConstants.DM));
+        assertNotNull(recognizerFactory.create(sql8, JdbcConstants.KINGBASE));
+        assertNotNull(recognizerFactory.create(sql8, JdbcConstants.OSCAR));
 
         String sql10 = "select * from t for update";
-        Assertions.assertNotNull(recognizerFactory.create(sql10, JdbcConstants.MYSQL));
-        Assertions.assertNotNull(recognizerFactory.create(sql10, JdbcConstants.MARIADB));
-        Assertions.assertNotNull(recognizerFactory.create(sql10, JdbcConstants.POLARDBX));
-        Assertions.assertNotNull(recognizerFactory.create(sql10, JdbcConstants.ORACLE));
-        Assertions.assertNotNull(recognizerFactory.create(sql10, JdbcConstants.POSTGRESQL));
-        Assertions.assertNotNull(recognizerFactory.create(sql10, JdbcConstants.KINGBASE));
-        Assertions.assertNotNull(recognizerFactory.create(sql10, JdbcConstants.DM));
-        Assertions.assertNotNull(recognizerFactory.create(sql10, JdbcConstants.OSCAR));
+        assertNotNull(recognizerFactory.create(sql10, JdbcConstants.MYSQL));
+        assertNotNull(recognizerFactory.create(sql10, JdbcConstants.MARIADB));
+        assertNotNull(recognizerFactory.create(sql10, JdbcConstants.POLARDBX));
+        assertNotNull(recognizerFactory.create(sql10, JdbcConstants.ORACLE));
+        assertNotNull(recognizerFactory.create(sql10, JdbcConstants.POSTGRESQL));
+        assertNotNull(recognizerFactory.create(sql10, JdbcConstants.KINGBASE));
+        assertNotNull(recognizerFactory.create(sql10, JdbcConstants.DM));
+        assertNotNull(recognizerFactory.create(sql10, JdbcConstants.OSCAR));
     }
 
     @Test
@@ -207,5 +219,45 @@ public class DruidSQLRecognizerFactoryTest {
                 NotSupportYetException.class, () -> recognizerFactory.create(sql9, JdbcConstants.ORACLE));
         Assertions.assertThrows(
                 NotSupportYetException.class, () -> recognizerFactory.create(sql9, JdbcConstants.KINGBASE));
+    }
+
+    @Test
+    public void testInsertFirstNotSupported() {
+        SQLRecognizerFactory recognizerFactory =
+                EnhancedServiceLoader.load(SQLRecognizerFactory.class, SqlParserType.SQL_PARSER_TYPE_DRUID);
+        // Test that INSERT FIRST syntax should be rejected at the Factory level
+        String sql = "INSERT FIRST "
+                + "WHEN salary > 1000 THEN INTO high_earners (id, name, salary) VALUES (1, 'John', 2000) "
+                + "WHEN salary <= 1000 THEN INTO low_earners (id, name, salary) VALUES (1, 'John', 800) "
+                + "SELECT 1 FROM DUAL";
+
+        NotSupportYetException exception = Assertions.assertThrows(
+                NotSupportYetException.class, () -> recognizerFactory.create(sql, JdbcConstants.ORACLE));
+
+        assertTrue(exception.getMessage().contains("INSERT FIRST not supported yet"));
+    }
+
+    @Test
+    void testGetMultiInsertRecognizerDelegation() {
+        // 1.sql
+        String sql = "INSERT ALL INTO a(id) VALUES(1) INTO a(id) VALUES(2) SELECT 1 FROM dual";
+
+        SQLStatement stmt = SQLUtils.parseSingleStatement(sql, "oracle");
+        assertTrue(stmt instanceof OracleMultiInsertStatement);
+
+        // 2. mock recognizerHolder and recognizer
+        OracleOperateRecognizerHolder recognizerHolder = mock(OracleOperateRecognizerHolder.class);
+        SQLRecognizer mockRecognizer = mock(SQLRecognizer.class);
+
+        // 3. stub getMultiInsertRecognizer
+        when(recognizerHolder.getMultiInsertRecognizer(sql, stmt)).thenReturn(mockRecognizer);
+
+        SQLRecognizer recognizer =
+                ((OracleOperateRecognizerHolder) recognizerHolder).getMultiInsertRecognizer(sql, stmt);
+
+        assertNotNull(recognizer);
+        assertSame(mockRecognizer, recognizer);
+
+        verify(recognizerHolder, times(1)).getMultiInsertRecognizer(sql, stmt);
     }
 }

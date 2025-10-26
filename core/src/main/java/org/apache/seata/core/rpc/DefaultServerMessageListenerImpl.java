@@ -17,7 +17,7 @@
 package org.apache.seata.core.rpc;
 
 import io.netty.channel.ChannelHandlerContext;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.core.protocol.AbstractMessage;

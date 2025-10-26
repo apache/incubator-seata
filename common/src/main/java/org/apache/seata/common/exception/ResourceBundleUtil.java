@@ -16,7 +16,7 @@
  */
 package org.apache.seata.common.exception;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 
 import java.text.MessageFormat;
