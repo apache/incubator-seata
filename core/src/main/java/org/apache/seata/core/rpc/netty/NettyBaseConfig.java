@@ -28,7 +28,7 @@ import io.netty.incubator.channel.uring.IOUringServerSocketChannel;
 import io.netty.incubator.channel.uring.IOUringSocketChannel;
 import io.netty.util.NettyRuntime;
 import io.netty.util.internal.PlatformDependent;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.seata.common.DefaultValues;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
