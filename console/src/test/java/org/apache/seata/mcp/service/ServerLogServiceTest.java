@@ -133,7 +133,7 @@ class ServerLogServiceTest {
     void testAnalyseServerLogFileWithKeywords() {
         ServerLogParam param = new ServerLogParam();
         param.setPage(1);
-        param.setLogMessageKeyWord(Arrays.asList("error", "timeout"));
+        param.setLogMessageKeyWord(new String[]{"error", "timeout"});
 
         RuntimeException exception = assertThrows(
                 RuntimeException.class, () -> service.analyseServerLogFile(createNameSpaceDetail(), param));

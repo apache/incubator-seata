@@ -152,7 +152,9 @@ public class ServerLogServiceImpl implements ServerLogService {
 
     private void checkLogParam(ServerLogParam logParam) {
         Integer page = logParam.getPage();
-        List<String> logMessageKeyWord = new ArrayList<>(Arrays.asList(logParam.getLogMessageKeyWord()));
+        List<String> logMessageKeyWord = logParam.getLogMessageKeyWord() != null
+                ? new ArrayList<>(Arrays.asList(logParam.getLogMessageKeyWord()))
+                : new ArrayList<>();
         String logType = logParam.getLogType();
         String logMessageStartTime = logParam.getLogMessageStartTime();
         String logMessageEndTime = logParam.getLogMessageEndTime();
