@@ -40,6 +40,8 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * The http2 http handler.
@@ -111,12 +113,27 @@ public class Http2HttpHandler extends BaseHttpChannelHandler<Http2StreamFrame> {
             if (request.getMethod() == HttpMethod.POST
                     && request.getBody() != null
                     && !request.getBody().isEmpty()) {
-                // assume body is json
+                CharSequence contentTypeSeq = request.getHeaders().get(HttpHeaderNames.CONTENT_TYPE);
+                String contentType = contentTypeSeq != null ? contentTypeSeq.toString() : "";
+
                 try {
-                    ObjectNode bodyDataNode = (ObjectNode) OBJECT_MAPPER.readTree(request.getBody());
-                    requestDataNode.set("body", bodyDataNode);
+                    if (contentType.contains("application/json")) {
+                        ObjectNode bodyDataNode = (ObjectNode) OBJECT_MAPPER.readTree(request.getBody());
+                        requestDataNode.set("body", bodyDataNode);
+                    } else if (contentType.contains("application/x-www-form-urlencoded")) {
+                        Map<String, String> formParams = new HashMap<>();
+                        String[] pairs = request.getBody().split("&");
+                        for (String pair : pairs) {
+                            String[] kv = pair.split("=", 2);
+                            if (kv.length == 2) {
+                                formParams.put(kv[0], kv[1]);
+                            }
+                        }
+                        ObjectNode formDataNode = OBJECT_MAPPER.valueToTree(formParams);
+                        requestDataNode.set("body", formDataNode);
+                    }
                 } catch (Exception e) {
-                    LOGGER.warn("Failed to parse http2 body as json: {}", e.getMessage());
+                    LOGGER.warn("Failed to parse http2 body: {}", e.getMessage());
                 }
             }
             Object httpController = httpInvocation.getController();
