@@ -16,11 +16,14 @@
  */
 package org.apache.seata.console.filter;
 
-import org.apache.seata.console.config.WebSecurityConfig;
-import org.apache.seata.console.utils.JwtTokenUtils;
+import org.apache.seata.console.security.User;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
-import org.springframework.util.StringUtils;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -31,49 +34,50 @@ import java.io.IOException;
 
 public class MCPJwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
-    private final JwtTokenUtils tokenProvider;
+    private final AuthenticationManager authenticationManager;
 
     /**
      * Instantiates a new Jwt authentication token filter.
      *
-     * @param tokenProvider the token provider
+     * @param authenticationManager the token provider
      */
-    public MCPJwtAuthenticationTokenFilter(JwtTokenUtils tokenProvider) {
-        this.tokenProvider = tokenProvider;
+    public MCPJwtAuthenticationTokenFilter(AuthenticationManager authenticationManager) {
+        this.authenticationManager = authenticationManager;
     }
 
     @Override
     protected void doFilterInternal(
             @NotNull HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull FilterChain chain)
             throws IOException, ServletException {
-        String jwt = resolveToken(request);
 
-        if (jwt != null && !jwt.trim().isEmpty()) {
-            if (!this.tokenProvider.validateToken(jwt)) {
-                if (!response.isCommitted()) response.sendError(HttpStatus.UNAUTHORIZED.value(), "UnAuthorized");
-            }
-        } else {
-            if (!response.isCommitted())
-                response.sendError(
-                        HttpStatus.UNAUTHORIZED.value(),
-                        "Do not carry JWT tokens, Please go to console first to get token");
+        Authentication existingAuth = SecurityContextHolder.getContext().getAuthentication();
+        if (existingAuth != null && existingAuth.isAuthenticated()) {
+            chain.doFilter(request, response);
+            return;
+        }
+
+        User user = resolveHeaders(request);
+
+        UsernamePasswordAuthenticationToken authenticationToken =
+                new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword());
+
+        try {
+            Authentication authentication = authenticationManager.authenticate(authenticationToken);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        } catch (BadCredentialsException e) {
+            response.sendError(HttpStatus.UNAUTHORIZED.value(), "Invalid credentials");
+            return;
         }
 
         chain.doFilter(request, response);
     }
 
     /**
-     * Get token from header
+     * Get userDetails from header
      */
-    private String resolveToken(HttpServletRequest request) {
-        String bearerToken = request.getHeader(WebSecurityConfig.AUTHORIZATION_HEADER);
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(WebSecurityConfig.TOKEN_PREFIX)) {
-            return bearerToken.substring(WebSecurityConfig.TOKEN_PREFIX.length());
-        }
-        String jwt = request.getParameter(WebSecurityConfig.AUTHORIZATION_TOKEN);
-        if (StringUtils.hasText(jwt)) {
-            return jwt;
-        }
-        return null;
+    private User resolveHeaders(HttpServletRequest request) {
+        String username = request.getHeader("X-Mcp-Username");
+        String password = request.getHeader("X-Mcp-Password");
+        return new User(username, password);
     }
 }

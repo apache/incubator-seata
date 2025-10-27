@@ -18,7 +18,6 @@ package org.apache.seata.console.config;
 
 import org.apache.seata.console.filter.MCPBusinessDataSourceFilter;
 import org.apache.seata.console.filter.MCPJwtAuthenticationTokenFilter;
-import org.apache.seata.console.utils.JwtTokenUtils;
 import org.apache.seata.mcp.entity.pojo.BusinessDataSourcesProperties;
 import org.apache.seata.mcp.entity.pojo.MCPProperties;
 import org.slf4j.Logger;
@@ -28,12 +27,13 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
+import org.springframework.security.authentication.AuthenticationManager;
 
 @Configuration
 public class MCPFiltersConfig {
 
     @Autowired
-    private JwtTokenUtils jwtTokenUtils;
+    private AuthenticationManager authenticationManager;
 
     @Autowired
     private MCPProperties mcpProperties;
@@ -47,7 +47,7 @@ public class MCPFiltersConfig {
     public FilterRegistrationBean<MCPJwtAuthenticationTokenFilter> mcpJwtAuthenticationTokenFilterRegistration() {
 
         MCPJwtAuthenticationTokenFilter mcpJwtAuthenticationTokenFilter =
-                new MCPJwtAuthenticationTokenFilter(jwtTokenUtils);
+                new MCPJwtAuthenticationTokenFilter(authenticationManager);
 
         FilterRegistrationBean<MCPJwtAuthenticationTokenFilter> registration = new FilterRegistrationBean<>();
 

@@ -28,7 +28,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -133,7 +132,7 @@ class ServerLogServiceTest {
     void testAnalyseServerLogFileWithKeywords() {
         ServerLogParam param = new ServerLogParam();
         param.setPage(1);
-        param.setLogMessageKeyWord(new String[]{"error", "timeout"});
+        param.setLogMessageKeyWord(new String[] {"error", "timeout"});
 
         RuntimeException exception = assertThrows(
                 RuntimeException.class, () -> service.analyseServerLogFile(createNameSpaceDetail(), param));
