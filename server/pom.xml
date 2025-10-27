@@ -297,6 +297,12 @@
             <artifactId>bucket4j_jdk8-core</artifactId>
             <version>${bucket4j.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
