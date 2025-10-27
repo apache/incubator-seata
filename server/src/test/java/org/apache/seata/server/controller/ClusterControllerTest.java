@@ -84,6 +84,42 @@ class ClusterControllerTest extends BaseSpringBootTest {
 
     @Test
     @Order(2)
+    void watchTimeoutTest_withHttp2() throws Exception {
+        CountDownLatch latch = new CountDownLatch(1);
+
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
+
+        Map<String, String> params = new HashMap<>();
+        params.put("default-test", "1");
+
+        HttpCallback<Response> callback = new HttpCallback<Response>() {
+            @Override
+            public void onSuccess(Response response) {
+                assertNotNull(response);
+                Assertions.assertEquals(Protocol.H2_PRIOR_KNOWLEDGE, response.protocol());
+                Assertions.assertEquals(HttpStatus.SC_NOT_MODIFIED, response.code());
+                latch.countDown();
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                fail("Should not fail");
+            }
+
+            @Override
+            public void onCancelled() {
+                fail("Should not be cancelled");
+            }
+        };
+
+        HttpClientUtil.doPostWithHttp2(
+                "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", params, headers, callback);
+        assertTrue(latch.await(10, TimeUnit.SECONDS));
+    }
+
+    @Test
+    @Order(2)
     void watch() throws Exception {
         Map<String, String> header = new HashMap<>();
         header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
