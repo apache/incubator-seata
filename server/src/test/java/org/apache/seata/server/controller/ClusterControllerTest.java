@@ -119,7 +119,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
     }
 
     @Test
-    @Order(2)
+    @Order(3)
     void watch() throws Exception {
         Map<String, String> header = new HashMap<>();
         header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
@@ -150,7 +150,55 @@ class ClusterControllerTest extends BaseSpringBootTest {
     }
 
     @Test
-    @Order(3)
+    @Order(4)
+    void watch_withHttp2() throws Exception {
+        CountDownLatch latch = new CountDownLatch(1);
+        Map<String, String> header = new HashMap<>();
+        header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
+        Map<String, String> param = new HashMap<>();
+        param.put("default-test", "1");
+
+        // Simulate a cluster change event after 2 seconds
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                ((ApplicationEventPublisher) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
+                        .publishEvent(new ClusterChangeEvent(this, "default-test", 2, true));
+            }
+        });
+        thread.start();
+
+        HttpCallback<Response> callback = new HttpCallback<Response>() {
+            @Override
+            public void onSuccess(Response response) {
+                assertNotNull(response);
+                Assertions.assertEquals(Protocol.H2_PRIOR_KNOWLEDGE, response.protocol());
+                Assertions.assertEquals(HttpStatus.SC_OK, response.code());
+                latch.countDown();
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                fail("Should not fail");
+            }
+
+            @Override
+            public void onCancelled() {
+                fail("Should not be cancelled");
+            }
+        };
+
+        HttpClientUtil.doPostWithHttp2("http://127.0.0.1:" + port + "/metadata/v1/watch", param, header, callback);
+        assertTrue(latch.await(10, TimeUnit.SECONDS));
+    }
+
+    @Test
+    @Order(5)
     void testXssFilterBlocked_queryParam() throws Exception {
         String malicious = "<script>alert('xss')</script>";
         Map<String, String> header = new HashMap<>();
@@ -164,6 +212,45 @@ class ClusterControllerTest extends BaseSpringBootTest {
             Assertions.assertEquals(
                     HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
         }
+    }
+
+    @Test
+    @Order(6)
+    void testXssFilterBlocked_queryParam_withHttp2() throws Exception {
+        CountDownLatch latch = new CountDownLatch(1);
+
+        String malicious = "<script>alert('xss')</script>";
+        Map<String, String> header = new HashMap<>();
+        header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
+
+        HttpCallback<Response> callback = new HttpCallback<Response>() {
+            @Override
+            public void onSuccess(Response response) {
+                assertNotNull(response);
+                Assertions.assertEquals(Protocol.H2_PRIOR_KNOWLEDGE, response.protocol());
+                Assertions.assertEquals(HttpStatus.SC_BAD_REQUEST, response.code());
+                latch.countDown();
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                fail("Should not fail");
+            }
+
+            @Override
+            public void onCancelled() {
+                fail("Should not be cancelled");
+            }
+        };
+
+        HttpClientUtil.doGetWithHttp2(
+                "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000&testParam="
+                        + URLEncoder.encode(malicious, String.valueOf(StandardCharsets.UTF_8)),
+                new HashMap<>(),
+                callback,
+                5000);
+
+        assertTrue(latch.await(10, TimeUnit.SECONDS));
     }
 
     @Test

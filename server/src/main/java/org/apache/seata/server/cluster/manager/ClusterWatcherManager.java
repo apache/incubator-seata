@@ -114,8 +114,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
 
         if (!ctx.channel().isActive()) {
             logger.warn(
-                    "Netty channel is not active for watcher on group {}, cannot send response.",
-                    watcher.getGroup());
+                    "Netty channel is not active for watcher on group {}, cannot send response.", watcher.getGroup());
             return;
         }
 
@@ -141,12 +140,17 @@ public class ClusterWatcherManager implements ClusterChangeListener {
                 ctx.flush();
 
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Sent HTTP/2 response with status: {} to watcher on group {}",
-                            nettyStatus.code(), watcher.getGroup());
+                    logger.debug(
+                            "Sent HTTP/2 response with status: {} to watcher on group {}",
+                            nettyStatus.code(),
+                            watcher.getGroup());
                 }
             } catch (Exception e) {
-                logger.error("Failed to send HTTP/2 response for watcher on group {}: {}",
-                        watcher.getGroup(), e.getMessage(), e);
+                logger.error(
+                        "Failed to send HTTP/2 response for watcher on group {}: {}",
+                        watcher.getGroup(),
+                        e.getMessage(),
+                        e);
             }
         }
     }

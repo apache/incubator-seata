@@ -63,6 +63,8 @@ public class HttpClientUtil {
 
     private static final Map<Integer /*timeout*/, CloseableHttpClient> HTTP_CLIENT_MAP = new ConcurrentHashMap<>();
 
+    private static final Map<Integer /*timeout*/, OkHttpClient> HTTP2_CLIENT_MAP = new ConcurrentHashMap<>();
+
     private static final PoolingHttpClientConnectionManager POOLING_HTTP_CLIENT_CONNECTION_MANAGER =
             new PoolingHttpClientConnectionManager();
 
@@ -71,25 +73,27 @@ public class HttpClientUtil {
     static {
         POOLING_HTTP_CLIENT_CONNECTION_MANAGER.setMaxTotal(10);
         POOLING_HTTP_CLIENT_CONNECTION_MANAGER.setDefaultMaxPerRoute(10);
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> HTTP_CLIENT_MAP.values().parallelStream()
-                .forEach(client -> {
-                    try {
-                        // delay 3s, make sure unregister http request send successfully
-                        Thread.sleep(3000);
-                        client.close();
-                    } catch (IOException | InterruptedException e) {
-                        LOGGER.error(e.getMessage(), e);
-                    }
-                })));
-    }
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            HTTP_CLIENT_MAP.values().parallelStream().forEach(client -> {
+                try {
+                    // delay 3s, make sure unregister http request send successfully
+                    Thread.sleep(3000);
+                    client.close();
+                } catch (IOException | InterruptedException e) {
+                    LOGGER.error(e.getMessage(), e);
+                }
+            });
 
-    private static final OkHttpClient HTTP_CLIENT = new OkHttpClient.Builder()
-            // Use HTTP/2 prior knowledge to directly use HTTP/2 without an initial HTTP/1.1 upgrade
-            .protocols(Collections.singletonList(Protocol.H2_PRIOR_KNOWLEDGE))
-            .connectTimeout(10, TimeUnit.SECONDS)
-            .readTimeout(10, TimeUnit.SECONDS)
-            .writeTimeout(10, TimeUnit.SECONDS)
-            .build();
+            HTTP2_CLIENT_MAP.values().parallelStream().forEach(client -> {
+                try {
+                    client.dispatcher().executorService().shutdown();
+                    client.connectionPool().evictAll();
+                } catch (Exception e) {
+                    LOGGER.error(e.getMessage(), e);
+                }
+            });
+        }));
+    }
 
     public static final MediaType MEDIA_TYPE_JSON = MediaType.parse("application/json");
     public static final MediaType MEDIA_TYPE_FORM_URLENCODED = MediaType.parse("application/x-www-form-urlencoded");
@@ -223,23 +227,21 @@ public class HttpClientUtil {
 
     public static void doPostWithHttp2(
             String url, Map<String, String> params, Map<String, String> headers, HttpCallback<Response> callback) {
-        try {
-            Headers.Builder headerBuilder = new Headers.Builder();
-            if (headers != null) {
-                headers.forEach(headerBuilder::add);
-            }
+        doPostWithHttp2(url, params, headers, callback, 10);
+    }
 
+    public static void doPostWithHttp2(
+            String url,
+            Map<String, String> params,
+            Map<String, String> headers,
+            HttpCallback<Response> callback,
+            int timeoutSeconds) {
+        try {
             String contentType = headers != null ? headers.get("Content-Type") : "";
             RequestBody requestBody = createRequestBody(params, contentType);
-
-            Request request = new Request.Builder()
-                    .url(url)
-                    .headers(headerBuilder.build())
-                    .post(requestBody)
-                    .build();
-
-            executeAsync(HTTP_CLIENT, request, callback);
-
+            Request request = buildHttp2Request(url, headers, requestBody, "POST");
+            OkHttpClient client = createHttp2ClientWithTimeout(timeoutSeconds);
+            executeAsync(client, request, callback);
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);
             callback.onFailure(e);
@@ -248,41 +250,22 @@ public class HttpClientUtil {
 
     public static void doPostWithHttp2(
             String url, String body, Map<String, String> headers, HttpCallback<Response> callback) {
-        Headers.Builder headerBuilder = new Headers.Builder();
-        if (headers != null) {
-            headers.forEach(headerBuilder::add);
-        }
+        // default timeout 10 seconds
+        doPostWithHttp2(url, body, headers, callback, 10);
+    }
 
+    public static void doPostWithHttp2(
+            String url, String body, Map<String, String> headers, HttpCallback<Response> callback, int timeoutSeconds) {
         RequestBody requestBody = RequestBody.create(body, MEDIA_TYPE_JSON);
-
-        Request request = new Request.Builder()
-                .url(url)
-                .headers(headerBuilder.build())
-                .post(requestBody)
-                .build();
-
-        executeAsync(HTTP_CLIENT, request, callback);
+        Request request = buildHttp2Request(url, headers, requestBody, "POST");
+        OkHttpClient client = createHttp2ClientWithTimeout(timeoutSeconds);
+        executeAsync(client, request, callback);
     }
 
     public static void doGetWithHttp2(
-            String url, Map<String, String> headers, final HttpCallback<Response> callback, int timeout) {
-        OkHttpClient client = new OkHttpClient.Builder()
-                .connectTimeout(timeout, TimeUnit.SECONDS)
-                .readTimeout(timeout, TimeUnit.SECONDS)
-                .writeTimeout(timeout, TimeUnit.SECONDS)
-                .build();
-
-        Headers.Builder headerBuilder = new Headers.Builder();
-        if (headers != null) {
-            headers.forEach(headerBuilder::add);
-        }
-
-        Request request = new Request.Builder()
-                .url(url)
-                .headers(headerBuilder.build())
-                .get()
-                .build();
-
+            String url, Map<String, String> headers, final HttpCallback<Response> callback, int timeoutSeconds) {
+        Request request = buildHttp2Request(url, headers, null, "GET");
+        OkHttpClient client = createHttp2ClientWithTimeout(timeoutSeconds);
         executeAsync(client, request, callback);
     }
 
@@ -300,6 +283,34 @@ public class HttpClientUtil {
             String json = OBJECT_MAPPER.writeValueAsString(params);
             return RequestBody.create(json, MEDIA_TYPE_JSON);
         }
+    }
+
+    private static OkHttpClient createHttp2ClientWithTimeout(int timeoutSeconds) {
+        return HTTP2_CLIENT_MAP.computeIfAbsent(timeoutSeconds, k -> new OkHttpClient.Builder()
+                // Use HTTP/2 prior knowledge to directly use HTTP/2 without an initial HTTP/1.1 upgrade
+                .protocols(Collections.singletonList(Protocol.H2_PRIOR_KNOWLEDGE))
+                .connectTimeout(timeoutSeconds, TimeUnit.SECONDS)
+                .readTimeout(timeoutSeconds, TimeUnit.SECONDS)
+                .writeTimeout(timeoutSeconds, TimeUnit.SECONDS)
+                .build());
+    }
+
+    private static Request buildHttp2Request(
+            String url, Map<String, String> headers, RequestBody requestBody, String method) {
+        Headers.Builder headerBuilder = new Headers.Builder();
+        if (headers != null) {
+            headers.forEach(headerBuilder::add);
+        }
+
+        Request.Builder requestBuilder = new Request.Builder().url(url).headers(headerBuilder.build());
+
+        if ("POST".equals(method) && requestBody != null) {
+            requestBuilder.post(requestBody);
+        } else if ("GET".equals(method)) {
+            requestBuilder.get();
+        }
+
+        return requestBuilder.build();
     }
 
     private static void executeAsync(OkHttpClient client, Request request, final HttpCallback<Response> callback) {
