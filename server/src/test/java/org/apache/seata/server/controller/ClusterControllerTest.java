@@ -254,7 +254,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
     }
 
     @Test
-    @Order(4)
+    @Order(7)
     void testXssFilterBlocked_formParam() throws Exception {
         Map<String, String> headers = new HashMap<>();
         headers.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
@@ -270,7 +270,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
     }
 
     @Test
-    @Order(5)
+    @Order(8)
     void testXssFilterBlocked_jsonBody() throws Exception {
         Map<String, String> headers = new HashMap<>();
         headers.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
@@ -285,7 +285,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
     }
 
     @Test
-    @Order(6)
+    @Order(9)
     void testXssFilterBlocked_headerParam() throws Exception {
         Map<String, String> headers = new HashMap<>();
         headers.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
@@ -302,7 +302,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
     }
 
     @Test
-    @Order(7)
+    @Order(10)
     void testXssFilterBlocked_multiSource() throws Exception {
         Map<String, String> headers = new HashMap<>();
         headers.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
@@ -322,7 +322,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
     }
 
     @Test
-    @Order(8)
+    @Order(11)
     void testXssFilterBlocked_formParamWithUserCustomKeyWords() throws Exception {
         Map<String, String> headers = new HashMap<>();
         headers.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
@@ -338,7 +338,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
     }
 
     @Test
-    @Order(9)
+    @Order(12)
     void testXssFilterBlocked_formParamWithUserCustomKeyWords_withHttp2() throws Exception {
         CountDownLatch latch = new CountDownLatch(1);
 
