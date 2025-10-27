@@ -24,6 +24,10 @@ import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
+import io.netty.handler.codec.http2.DefaultHttp2DataFrame;
+import io.netty.handler.codec.http2.DefaultHttp2Headers;
+import io.netty.handler.codec.http2.DefaultHttp2HeadersFrame;
+import io.netty.handler.codec.http2.Http2Headers;
 import org.apache.seata.common.rpc.http.HttpContext;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.server.cluster.listener.ClusterChangeEvent;
@@ -107,21 +111,42 @@ public class ClusterWatcherManager implements ClusterChangeListener {
             return;
         }
         ChannelHandlerContext ctx = context.getContext();
-        if (!context.isHttp2()) {
-            if (ctx.channel().isActive()) {
-                HttpResponse response =
-                        new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, nettyStatus, Unpooled.EMPTY_BUFFER);
-                response.headers().set(HttpHeaderNames.CONTENT_LENGTH, 0);
 
-                if (!context.isKeepAlive()) {
-                    ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
-                } else {
-                    ctx.writeAndFlush(response);
-                }
+        if (!ctx.channel().isActive()) {
+            logger.warn(
+                    "Netty channel is not active for watcher on group {}, cannot send response.",
+                    watcher.getGroup());
+            return;
+        }
+
+        if (!context.isHttp2()) {
+            HttpResponse response =
+                    new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, nettyStatus, Unpooled.EMPTY_BUFFER);
+            response.headers().set(HttpHeaderNames.CONTENT_LENGTH, 0);
+
+            if (!context.isKeepAlive()) {
+                ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
             } else {
-                logger.warn(
-                        "Netty channel is not active for watcher on group {}, cannot send response.",
-                        watcher.getGroup());
+                ctx.writeAndFlush(response);
+            }
+
+        } else {
+            try {
+
+                Http2Headers headers = new DefaultHttp2Headers().status(nettyStatus.codeAsText());
+                headers.set(HttpHeaderNames.CONTENT_LENGTH, "0");
+
+                ctx.write(new DefaultHttp2HeadersFrame(headers));
+                ctx.write(new DefaultHttp2DataFrame(Unpooled.EMPTY_BUFFER, true));
+                ctx.flush();
+
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Sent HTTP/2 response with status: {} to watcher on group {}",
+                            nettyStatus.code(), watcher.getGroup());
+                }
+            } catch (Exception e) {
+                logger.error("Failed to send HTTP/2 response for watcher on group {}: {}",
+                        watcher.getGroup(), e.getMessage(), e);
             }
         }
     }
