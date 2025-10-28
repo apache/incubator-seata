@@ -26,7 +26,6 @@ import org.apache.seata.config.ConfigurationChangeListener;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.config.Dispose;
 import org.apache.seata.config.processor.ConfigProcessor;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -229,7 +228,6 @@ public class NacosConfigurationTest {
         Assertions.assertFalse(listener.invoked);
     }
 
-    @NotNull
     private static NacosConfiguration.NacosListener getNacosListener(String dataId, TestListener listener)
             throws ClassNotFoundException, NoSuchMethodException, InstantiationException, IllegalAccessException,
                     InvocationTargetException {
