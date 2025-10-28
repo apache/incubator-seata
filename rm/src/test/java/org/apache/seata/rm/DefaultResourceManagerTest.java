@@ -19,9 +19,9 @@ package org.apache.seata.rm;
 import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.core.exception.TransactionException;
-import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
+import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.model.Resource;
 import org.apache.seata.core.model.ResourceManager;
 import org.junit.jupiter.api.AfterEach;
@@ -120,8 +120,8 @@ public class DefaultResourceManagerTest {
 
     @Test
     void testGetResourceManagerNonExistingType() {
-        FrameworkException exception = assertThrows(FrameworkException.class,
-                () -> defaultRm.getResourceManager(BranchType.XA));
+        FrameworkException exception =
+                assertThrows(FrameworkException.class, () -> defaultRm.getResourceManager(BranchType.XA));
         assertTrue(exception.getMessage().contains("No ResourceManager for BranchType:XA"));
     }
 
@@ -150,12 +150,14 @@ public class DefaultResourceManagerTest {
     @Test
     void testBranchRegister() throws TransactionException {
         DefaultResourceManager.mockResourceManager(BranchType.AT, mockAtRm);
-        when(mockAtRm.branchRegister(eq(BranchType.AT), eq("res3"), eq("client1"), eq("xid3"), eq("data3"), eq("locks")))
+        when(mockAtRm.branchRegister(
+                        eq(BranchType.AT), eq("res3"), eq("client1"), eq("xid3"), eq("data3"), eq("locks")))
                 .thenReturn(789L);
 
         Long branchId = defaultRm.branchRegister(BranchType.AT, "res3", "client1", "xid3", "data3", "locks");
         assertEquals(789L, branchId);
-        verify(mockAtRm).branchRegister(eq(BranchType.AT), eq("res3"), eq("client1"), eq("xid3"), eq("data3"), eq("locks"));
+        verify(mockAtRm)
+                .branchRegister(eq(BranchType.AT), eq("res3"), eq("client1"), eq("xid3"), eq("data3"), eq("locks"));
     }
 
     @Test
@@ -163,7 +165,8 @@ public class DefaultResourceManagerTest {
         DefaultResourceManager.mockResourceManager(BranchType.TCC, mockTccRm);
 
         defaultRm.branchReport(BranchType.TCC, "xid4", 101L, BranchStatus.PhaseOne_Done, "data4");
-        verify(mockTccRm).branchReport(eq(BranchType.TCC), eq("xid4"), eq(101L), eq(BranchStatus.PhaseOne_Done), eq("data4"));
+        verify(mockTccRm)
+                .branchReport(eq(BranchType.TCC), eq("xid4"), eq(101L), eq(BranchStatus.PhaseOne_Done), eq("data4"));
     }
 
     @Test
@@ -222,8 +225,7 @@ public class DefaultResourceManagerTest {
     @Test
     void testGetGlobalStatus() {
         DefaultResourceManager.mockResourceManager(BranchType.AT, mockAtRm);
-        when(mockAtRm.getGlobalStatus(eq(BranchType.AT), eq("xid6")))
-                .thenReturn(GlobalStatus.Committed);
+        when(mockAtRm.getGlobalStatus(eq(BranchType.AT), eq("xid6"))).thenReturn(GlobalStatus.Committed);
 
         GlobalStatus status = defaultRm.getGlobalStatus(BranchType.AT, "xid6");
         assertEquals(GlobalStatus.Committed, status);
