@@ -206,8 +206,8 @@ public class DefaultResourceManagerTest {
     void testRegisterResourceWithNonExistingBranchType() {
         when(mockAtResource.getBranchType()).thenReturn(BranchType.XA);
 
-        FrameworkException exception = assertThrows(FrameworkException.class,
-                () -> defaultRm.registerResource(mockAtResource));
+        FrameworkException exception =
+                assertThrows(FrameworkException.class, () -> defaultRm.registerResource(mockAtResource));
         assertTrue(exception.getMessage().contains("No ResourceManager for BranchType:XA"));
     }
 
@@ -224,8 +224,8 @@ public class DefaultResourceManagerTest {
     void testUnregisterResourceWithNonExistingBranchType() {
         when(mockTccResource.getBranchType()).thenReturn(BranchType.XA);
 
-        FrameworkException exception = assertThrows(FrameworkException.class,
-                () -> defaultRm.unregisterResource(mockTccResource));
+        FrameworkException exception =
+                assertThrows(FrameworkException.class, () -> defaultRm.unregisterResource(mockTccResource));
         assertTrue(exception.getMessage().contains("No ResourceManager for BranchType:XA"));
     }
 
