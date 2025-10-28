@@ -87,7 +87,14 @@ public class HttpClientUtil {
             HTTP2_CLIENT_MAP.values().parallelStream().forEach(client -> {
                 try {
                     client.dispatcher().executorService().shutdown();
+                    // Wait for up to 3 seconds for in-flight requests to complete
+                    if (!client.dispatcher().executorService().awaitTermination(3, TimeUnit.SECONDS)) {
+                        LOGGER.warn("Timeout waiting for OkHttp executor service to terminate.");
+                    }
                     client.connectionPool().evictAll();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    LOGGER.error("Interrupted while waiting for OkHttp executor service to terminate.", e);
                 } catch (Exception e) {
                     LOGGER.error(e.getMessage(), e);
                 }
