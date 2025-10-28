@@ -282,7 +282,9 @@ public class HttpClientUtil {
             return RequestBody.create(new byte[0]);
         }
 
-        if (MEDIA_TYPE_FORM_URLENCODED.toString().equals(contentType)) {
+        // Extract media type without parameters for robust comparison
+        String mediaTypeOnly = contentType == null ? "" : contentType.split(";")[0].trim();
+        if (MEDIA_TYPE_FORM_URLENCODED.toString().equals(mediaTypeOnly)) {
             FormBody.Builder formBuilder = new FormBody.Builder();
             params.forEach(formBuilder::add);
             return formBuilder.build();
