@@ -106,6 +106,19 @@ public class DefaultResourceManagerTest {
     }
 
     @Test
+    void testInitResourceManagersWithEmptyList() {
+        try (MockedStatic<EnhancedServiceLoader> mockedLoader = Mockito.mockStatic(EnhancedServiceLoader.class)) {
+            List<ResourceManager> emptyRmList = new ArrayList<>();
+            when(EnhancedServiceLoader.loadAll(ResourceManager.class)).thenReturn(emptyRmList);
+
+            DefaultResourceManager.resourceManagers.clear();
+            defaultRm.initResourceManagers();
+
+            assertTrue(DefaultResourceManager.resourceManagers.isEmpty());
+        }
+    }
+
+    @Test
     void testMockResourceManager() {
         DefaultResourceManager.mockResourceManager(BranchType.SAGA, mockAtRm);
         assertEquals(mockAtRm, DefaultResourceManager.resourceManagers.get(BranchType.SAGA));
@@ -190,12 +203,30 @@ public class DefaultResourceManagerTest {
     }
 
     @Test
+    void testRegisterResourceWithNonExistingBranchType() {
+        when(mockAtResource.getBranchType()).thenReturn(BranchType.XA);
+
+        FrameworkException exception = assertThrows(FrameworkException.class,
+                () -> defaultRm.registerResource(mockAtResource));
+        assertTrue(exception.getMessage().contains("No ResourceManager for BranchType:XA"));
+    }
+
+    @Test
     void testUnregisterResource() {
         when(mockTccResource.getBranchType()).thenReturn(BranchType.TCC);
         DefaultResourceManager.mockResourceManager(BranchType.TCC, mockTccRm);
 
         defaultRm.unregisterResource(mockTccResource);
         verify(mockTccRm).unregisterResource(mockTccResource);
+    }
+
+    @Test
+    void testUnregisterResourceWithNonExistingBranchType() {
+        when(mockTccResource.getBranchType()).thenReturn(BranchType.XA);
+
+        FrameworkException exception = assertThrows(FrameworkException.class,
+                () -> defaultRm.unregisterResource(mockTccResource));
+        assertTrue(exception.getMessage().contains("No ResourceManager for BranchType:XA"));
     }
 
     @Test
