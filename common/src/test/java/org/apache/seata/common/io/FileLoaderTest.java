@@ -58,8 +58,8 @@ public class FileLoaderTest {
 
     @Test
     public void testLoadWhenSpecial() throws Exception {
-        String encodedName = "测试%20文件.txt";
-        String decodedName = "测试 文件.txt";
+        String encodedName = "test%20file.txt";
+        String decodedName = "test file.txt";
 
         Path tempFile = Paths.get(decodedName);
         Files.createFile(tempFile);
