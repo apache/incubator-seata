@@ -119,6 +119,18 @@ public class DefaultResourceManagerTest {
     }
 
     @Test
+    void testInitResourceManagersWithNullList() {
+        try (MockedStatic<EnhancedServiceLoader> mockedLoader = Mockito.mockStatic(EnhancedServiceLoader.class)) {
+            when(EnhancedServiceLoader.loadAll(ResourceManager.class)).thenReturn(null);
+
+            DefaultResourceManager.resourceManagers.clear();
+            defaultRm.initResourceManagers();
+
+            assertTrue(DefaultResourceManager.resourceManagers.isEmpty());
+        }
+    }
+
+    @Test
     void testMockResourceManager() {
         DefaultResourceManager.mockResourceManager(BranchType.SAGA, mockAtRm);
         assertEquals(mockAtRm, DefaultResourceManager.resourceManagers.get(BranchType.SAGA));
@@ -147,6 +159,24 @@ public class DefaultResourceManagerTest {
         BranchStatus result = defaultRm.branchCommit(BranchType.AT, "xid1", 123L, "res1", "data");
         assertEquals(BranchStatus.PhaseTwo_Committed, result);
         verify(mockAtRm).branchCommit(eq(BranchType.AT), eq("xid1"), eq(123L), eq("res1"), eq("data"));
+    }
+
+    @Test
+    void testBranchCommitWithUnderlyingTransactionException() throws TransactionException {
+        DefaultResourceManager.mockResourceManager(BranchType.AT, mockAtRm);
+        TransactionException expectedException = new TransactionException("Simulate underlying RM throws exception");
+        when(mockAtRm.branchCommit(
+                        eq(BranchType.AT), eq("xid-exception"), eq(999L), eq("res-exception"), eq("data-exception")))
+                .thenThrow(expectedException);
+
+        TransactionException actualException = assertThrows(
+                TransactionException.class,
+                () -> defaultRm.branchCommit(BranchType.AT, "xid-exception", 999L, "res-exception", "data-exception"));
+
+        assertEquals(expectedException.getMessage(), actualException.getMessage());
+        verify(mockAtRm)
+                .branchCommit(
+                        eq(BranchType.AT), eq("xid-exception"), eq(999L), eq("res-exception"), eq("data-exception"));
     }
 
     @Test
@@ -246,6 +276,16 @@ public class DefaultResourceManagerTest {
         assertEquals(2, allResources.size());
         assertTrue(allResources.containsKey("resAt1"));
         assertTrue(allResources.containsKey("resTcc1"));
+    }
+
+    @Test
+    void testGetManagedResourcesWithEmptyResourceManagers() {
+        DefaultResourceManager.resourceManagers.clear();
+
+        Map<String, Resource> allResources = defaultRm.getManagedResources();
+
+        assertTrue(allResources.isEmpty());
+        assertEquals(HashMap.class, allResources.getClass());
     }
 
     @Test
