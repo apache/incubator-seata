@@ -173,7 +173,6 @@ public class HttpClientUtilTest {
         assertTrue(latch.await(10, TimeUnit.SECONDS));
     }
 
-
     @Test
     void testShutdownHookExecution() throws Exception {
         Class.forName("org.apache.seata.common.util.HttpClientUtil");
@@ -196,7 +195,6 @@ public class HttpClientUtilTest {
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("No HttpClientUtil shutdown hook found"));
 
-
         Field httpClientMapField = HttpClientUtil.class.getDeclaredField("HTTP_CLIENT_MAP");
         httpClientMapField.setAccessible(true);
         Map<Integer, Object> httpClientMap = (Map<Integer, Object>) httpClientMapField.get(null);
@@ -217,6 +215,4 @@ public class HttpClientUtilTest {
         verify(mockHttp2Client.dispatcher().executorService(), atLeastOnce()).shutdown();
         verify(mockHttp2Client.connectionPool(), atLeastOnce()).evictAll();
     }
-
-
 }
