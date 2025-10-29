@@ -134,7 +134,7 @@ public class HttpClientUtilTest {
         params.put("key", "value");
 
         Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", "application/json;charset=UTF-8");
+        headers.put("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8");
 
         HttpClientUtil.doPostWithHttp2("http://localhost:9999/invalid", params, headers, callback, 30000);
         assertTrue(latch.await(10, TimeUnit.SECONDS));
