@@ -196,10 +196,13 @@ public class PostgresqlUndoLogManagerTest {
 
         // Verify default uses undo_log_id_seq
         Assertions.assertTrue(
-                insertSql.contains("nextval('undo_log_id_seq')"), "Should use undo_log_id_seq by default. Actual SQL: " + insertSql);
+                insertSql.contains("nextval('undo_log_id_seq')"),
+                "Should use undo_log_id_seq by default. Actual SQL: " + insertSql);
 
         // Verify SQL contains correct table name
-        Assertions.assertTrue(insertSql.contains("INSERT INTO undo_log"), "SQL should insert into undo_log. Actual SQL: " + insertSql);
+        Assertions.assertTrue(
+                insertSql.contains("INSERT INTO undo_log"),
+                "SQL should insert into undo_log. Actual SQL: " + insertSql);
     }
 
     /**
@@ -234,7 +237,8 @@ public class PostgresqlUndoLogManagerTest {
 
             // Verify the sequence name generation is correct
             Assertions.assertTrue(
-                    expectedSqlPart.contains("my_undo_log_id_seq"), "Custom table 'my_undo_log' should generate sequence 'my_undo_log_id_seq'");
+                    expectedSqlPart.contains("my_undo_log_id_seq"),
+                    "Custom table 'my_undo_log' should generate sequence 'my_undo_log_id_seq'");
         }
     }
 
@@ -277,13 +281,16 @@ public class PostgresqlUndoLogManagerTest {
 
         // Verify key SQL parts
         Assertions.assertTrue(insertSql.contains("INSERT INTO undo_log"), "Should keep default table name 'undo_log'");
-        Assertions.assertTrue(insertSql.contains("nextval('undo_log_id_seq')"), "Should keep default sequence 'undo_log_id_seq'");
+        Assertions.assertTrue(
+                insertSql.contains("nextval('undo_log_id_seq')"), "Should keep default sequence 'undo_log_id_seq'");
         Assertions.assertTrue(insertSql.contains("now(), now()"), "Should keep PostgreSQL time function now()");
 
         // Verify parameter placeholder count is correct
         long parameterCount = insertSql.chars().filter(ch -> ch == '?').count();
         Assertions.assertEquals(
-                5, parameterCount, "INSERT SQL should contain 5 placeholders (branch_id, xid, context, rollback_info, log_status)");
+                5,
+                parameterCount,
+                "INSERT SQL should contain 5 placeholders (branch_id, xid, context, rollback_info, log_status)");
     }
 
     private SQLUndoLog getUndoLogItem(int size) throws NoSuchFieldException, IllegalAccessException {

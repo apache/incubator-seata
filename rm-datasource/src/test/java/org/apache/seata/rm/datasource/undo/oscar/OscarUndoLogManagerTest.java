@@ -196,13 +196,17 @@ public class OscarUndoLogManagerTest {
 
         // Verify default uses UNDO_LOG_SEQ (uppercase, following Oscar community convention)
         Assertions.assertTrue(
-                insertSql.contains("UNDO_LOG_SEQ.nextval"), "Should use UNDO_LOG_SEQ sequence (uppercase) by default. Actual SQL: " + insertSql);
+                insertSql.contains("UNDO_LOG_SEQ.nextval"),
+                "Should use UNDO_LOG_SEQ sequence (uppercase) by default. Actual SQL: " + insertSql);
 
         // Verify SQL contains correct table name
-        Assertions.assertTrue(insertSql.contains("INSERT INTO undo_log"), "SQL should insert into undo_log table. Actual SQL: " + insertSql);
+        Assertions.assertTrue(
+                insertSql.contains("INSERT INTO undo_log"),
+                "SQL should insert into undo_log table. Actual SQL: " + insertSql);
 
         // Verify uses Oscar-specific time function
-        Assertions.assertTrue(insertSql.contains("sysdate"), "Oscar should use sysdate time function. Actual SQL: " + insertSql);
+        Assertions.assertTrue(
+                insertSql.contains("sysdate"), "Oscar should use sysdate time function. Actual SQL: " + insertSql);
     }
 
     /**
@@ -224,7 +228,8 @@ public class OscarUndoLogManagerTest {
 
             // Verify sequence name generation logic - Oscar convention uses uppercase sequence names
             String customTableName = "my_undo_log";
-            String expectedSequenceName = customTableName.toUpperCase() + "_SEQ";  // MY_UNDO_LOG_SEQ, following Oscar convention
+            String expectedSequenceName =
+                    customTableName.toUpperCase() + "_SEQ"; // MY_UNDO_LOG_SEQ, following Oscar convention
             String expectedSqlPart = customTableName.toUpperCase() + "_SEQ.nextval";
 
             // Build expected SQL fragment
@@ -235,11 +240,13 @@ public class OscarUndoLogManagerTest {
 
             // Verify sequence name generation logic is correct - Oscar convention uses uppercase
             Assertions.assertTrue(
-                    expectedSqlPart.contains("MY_UNDO_LOG_SEQ"), "Custom table 'my_undo_log' should generate sequence 'MY_UNDO_LOG_SEQ' (following Oscar uppercase convention)");
-            
+                    expectedSqlPart.contains("MY_UNDO_LOG_SEQ"),
+                    "Custom table 'my_undo_log' should generate sequence 'MY_UNDO_LOG_SEQ' (following Oscar uppercase convention)");
+
             // Verify conversion to uppercase (Oscar community convention)
             Assertions.assertFalse(
-                    expectedSqlPart.contains("my_undo_log_SEQ"), "Oscar should convert sequence name to uppercase, not keep lowercase");
+                    expectedSqlPart.contains("my_undo_log_SEQ"),
+                    "Oscar should convert sequence name to uppercase, not keep lowercase");
         }
     }
 
@@ -251,12 +258,12 @@ public class OscarUndoLogManagerTest {
     public void testSequenceNameGenerationRules() {
         // Test various table name formats - Oscar convention converts to uppercase
         String[][] testCases = {
-            {"undo_log", "UNDO_LOG_SEQ"},           // Default to uppercase
-            {"UNDO_LOG", "UNDO_LOG_SEQ"},           // Already uppercase
-            {"my_undo_log", "MY_UNDO_LOG_SEQ"},     // Custom to uppercase
-            {"MyUndoLog", "MYUNDOLOG_SEQ"},         // CamelCase to uppercase
-            {"CUSTOM_TABLE", "CUSTOM_TABLE_SEQ"},   // Already uppercase
-            {"seata_undo", "SEATA_UNDO_SEQ"}        // Project prefix to uppercase
+            {"undo_log", "UNDO_LOG_SEQ"}, // Default to uppercase
+            {"UNDO_LOG", "UNDO_LOG_SEQ"}, // Already uppercase
+            {"my_undo_log", "MY_UNDO_LOG_SEQ"}, // Custom to uppercase
+            {"MyUndoLog", "MYUNDOLOG_SEQ"}, // CamelCase to uppercase
+            {"CUSTOM_TABLE", "CUSTOM_TABLE_SEQ"}, // Already uppercase
+            {"seata_undo", "SEATA_UNDO_SEQ"} // Project prefix to uppercase
         };
 
         for (String[] testCase : testCases) {
@@ -268,7 +275,9 @@ public class OscarUndoLogManagerTest {
             Assertions.assertEquals(
                     expectedSequence,
                     actualSequence,
-                    String.format("Table '%s' should generate sequence '%s' (following Oscar uppercase convention)", tableName, expectedSequence));
+                    String.format(
+                            "Table '%s' should generate sequence '%s' (following Oscar uppercase convention)",
+                            tableName, expectedSequence));
         }
     }
 
@@ -284,13 +293,17 @@ public class OscarUndoLogManagerTest {
 
         // Verify key SQL components
         Assertions.assertTrue(insertSql.contains("INSERT INTO undo_log"), "Should keep default table name 'undo_log'");
-        Assertions.assertTrue(insertSql.contains("UNDO_LOG_SEQ.nextval"), "Should keep default sequence name 'UNDO_LOG_SEQ' (uppercase)");
+        Assertions.assertTrue(
+                insertSql.contains("UNDO_LOG_SEQ.nextval"),
+                "Should keep default sequence name 'UNDO_LOG_SEQ' (uppercase)");
         Assertions.assertTrue(insertSql.contains("sysdate"), "Should keep Oscar time function sysdate");
 
         // Verify parameter placeholder count is correct
         long parameterCount = insertSql.chars().filter(ch -> ch == '?').count();
         Assertions.assertEquals(
-                5, parameterCount, "INSERT SQL should contain 5 parameter placeholders (branch_id, xid, context, rollback_info, log_status)");
+                5,
+                parameterCount,
+                "INSERT SQL should contain 5 parameter placeholders (branch_id, xid, context, rollback_info, log_status)");
     }
 
     /**
@@ -299,27 +312,36 @@ public class OscarUndoLogManagerTest {
     @Test
     public void testFixComparison() {
         System.out.println("\n=== Oscar Sequence Name Fix Comparison ===");
-        
+
         // Before fix (hardcoded)
         String oldSequenceName = "UNDO_LOG_SEQ";
         System.out.println("Before: " + oldSequenceName + ".nextval - hardcoded uppercase");
-        
+
         // After fix (dynamically generated based on table name, following Oscar uppercase convention)
         String defaultTableName = "undo_log";
         String newSequenceName = defaultTableName.toUpperCase() + "_SEQ";
-        System.out.println("After: " + newSequenceName + ".nextval - dynamically generated, following Oscar uppercase convention");
-        
+        System.out.println(
+                "After: " + newSequenceName + ".nextval - dynamically generated, following Oscar uppercase convention");
+
         // Same result by default (backward compatible)
-        Assertions.assertEquals(oldSequenceName, newSequenceName, "Before and after fix should be same with default config, ensuring backward compatibility");
-        
+        Assertions.assertEquals(
+                oldSequenceName,
+                newSequenceName,
+                "Before and after fix should be same with default config, ensuring backward compatibility");
+
         // Custom table name scenario
         String customTableName = "my_undo_log";
         String customSequenceName = customTableName.toUpperCase() + "_SEQ";
-        System.out.println("Custom table: " + customSequenceName + ".nextval - supports customization and follows Oscar uppercase convention");
-        
+        System.out.println("Custom table: " + customSequenceName
+                + ".nextval - supports customization and follows Oscar uppercase convention");
+
         // Verify conversion to uppercase (following Oscar community convention)
-        Assertions.assertEquals("MY_UNDO_LOG_SEQ", customSequenceName, "Custom table name should be converted to uppercase sequence name");
-        Assertions.assertNotEquals("my_undo_log_SEQ", customSequenceName, "Oscar should convert sequence name to uppercase");
+        Assertions.assertEquals(
+                "MY_UNDO_LOG_SEQ",
+                customSequenceName,
+                "Custom table name should be converted to uppercase sequence name");
+        Assertions.assertNotEquals(
+                "my_undo_log_SEQ", customSequenceName, "Oscar should convert sequence name to uppercase");
     }
 
     private SQLUndoLog getUndoLogItem(int size) throws NoSuchFieldException, IllegalAccessException {
