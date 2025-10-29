@@ -150,6 +150,8 @@ public class HttpRequestParamWrapper {
                 // decoding form parameters.
                 FullHttpRequest copiedRequest = new DefaultFullHttpRequest(
                         request.protocolVersion(), request.method(), "/internal-safe-uri", copiedBuf);
+                // Copy headers to ensure proper multipart parsing
+                copiedRequest.headers().setAll(request.headers());
                 parseFormBody(copiedRequest);
             }
         } catch (Exception e) {
