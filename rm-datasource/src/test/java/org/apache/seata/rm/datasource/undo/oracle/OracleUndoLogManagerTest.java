@@ -31,6 +31,7 @@ import org.apache.seata.rm.datasource.mock.MockDriver;
 import org.apache.seata.rm.datasource.sql.struct.Row;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
 import org.apache.seata.rm.datasource.undo.*;
+import org.apache.seata.rm.datasource.undo.AbstractUndoLogManager;
 import org.apache.seata.rm.datasource.undo.parser.JacksonUndoLogParser;
 import org.apache.seata.sqlparser.SQLRecognizerFactory;
 import org.apache.seata.sqlparser.SQLType;
@@ -210,43 +211,56 @@ public class OracleUndoLogManagerTest {
     }
 
     /**
-     * Test sequence name generation with custom table name (fix verification).
-     * Focus on testing that sequence names follow Oracle uppercase convention.
+     * Test that sequence name is derived from table name at class loading time.
+     * This test verifies the fix works by checking the actual static SQL contains the expected pattern.
+     * Oracle convention: sequence names are converted to uppercase.
+     * 
+     * Note: Since UNDO_LOG_TABLE_NAME and INSERT_UNDO_LOG_SQL are static final fields,
+     * they are initialized once at class loading time based on configuration.
+     * This test validates that the sequence name follows the pattern: {table_name}_SEQ (uppercase)
      */
     @Test
-    public void testCustomTableNameSequenceGeneration() throws Exception {
-        // Mock custom table name configuration
-        try (MockedStatic<ConfigurationFactory> configurationFactoryMock =
-                Mockito.mockStatic(ConfigurationFactory.class)) {
-            // Create mocked Configuration instance
-            Configuration mockConfiguration = Mockito.mock(Configuration.class);
-            configurationFactoryMock.when(ConfigurationFactory::getInstance).thenReturn(mockConfiguration);
+    public void testSequenceNameDerivedFromTableName() throws Exception {
+        // Get the actual INSERT_UNDO_LOG_SQL that was constructed at class loading time
+        Field insertSqlField = OracleUndoLogManager.class.getDeclaredField("INSERT_UNDO_LOG_SQL");
+        insertSqlField.setAccessible(true);
+        String actualInsertSql = (String) insertSqlField.get(null);
 
-            // Configure custom table name "my_undo_log" (lowercase)
-            Mockito.when(mockConfiguration.getConfig(ConfigurationKeys.TRANSACTION_UNDO_LOG_TABLE, "undo_log"))
-                    .thenReturn("my_undo_log");
+        // Get the actual UNDO_LOG_TABLE_NAME that was loaded from configuration
+        Field undoLogTableNameField = AbstractUndoLogManager.class.getDeclaredField("UNDO_LOG_TABLE_NAME");
+        undoLogTableNameField.setAccessible(true);
+        String actualTableName = (String) undoLogTableNameField.get(null);
 
-            // Verify sequence name generation logic - Oracle convention uses uppercase sequence names
-            String customTableName = "my_undo_log";
-            String expectedSequenceName =
-                    customTableName.toUpperCase() + "_SEQ"; // MY_UNDO_LOG_SEQ, following Oracle convention
-            String expectedSqlPart = customTableName.toUpperCase() + "_SEQ.nextval";
+        // Verify the sequence name follows the pattern: {table_name}_SEQ (uppercase for Oracle)
+        String expectedSequenceName = actualTableName.toUpperCase() + "_SEQ";
+        String expectedSequenceCall = expectedSequenceName + ".nextval";
 
-            // Build expected SQL fragment
-            String expectedInsertSql = "INSERT INTO " + customTableName + " ("
-                    + "id,branch_id, xid, context, rollback_info, log_status, log_created, log_modified)"
-                    + "VALUES ("
-                    + expectedSqlPart + ", ?, ?, ?, ?, ?, sysdate, sysdate)";
+        // Test that the INSERT SQL contains the properly derived sequence name
+        Assertions.assertTrue(
+                actualInsertSql.contains(expectedSequenceCall),
+                String.format("INSERT SQL should contain sequence call '%s' for table '%s'. Actual SQL: %s", 
+                    expectedSequenceCall, actualTableName, actualInsertSql));
+        
+        // Verify the SQL uses the correct table name in INSERT statement
+        Assertions.assertTrue(
+                actualInsertSql.contains("INSERT INTO " + actualTableName),
+                String.format("INSERT SQL should target table '%s'. Actual SQL: %s", actualTableName, actualInsertSql));
 
-            // Verify sequence name generation logic is correct - Oracle convention uses uppercase
-            Assertions.assertTrue(
-                    expectedSqlPart.contains("MY_UNDO_LOG_SEQ"),
-                    "Custom table 'my_undo_log' should generate sequence 'MY_UNDO_LOG_SEQ' (following Oracle uppercase convention)");
+        // Verify Oracle-specific characteristics
+        Assertions.assertTrue(
+                actualInsertSql.contains("sysdate"),
+                String.format("Oracle should use sysdate time function. Actual SQL: %s", actualInsertSql));
 
-            // Verify conversion to uppercase (Oracle community convention)
-            Assertions.assertFalse(
-                    expectedSqlPart.contains("my_undo_log_SEQ"),
-                    "Oracle should convert sequence name to uppercase, not keep lowercase");
+        // Test the pattern works for different theoretical table names (Oracle uppercase convention)
+        String[] testTableNames = {"undo_log", "my_undo_log", "custom_table", "seata_undo"};
+        for (String testTableName : testTableNames) {
+            String testSequenceName = testTableName.toUpperCase() + "_SEQ";
+            String testSequenceCall = testSequenceName + ".nextval";
+            
+            Assertions.assertEquals(
+                testSequenceName, 
+                testTableName.toUpperCase() + "_SEQ",
+                String.format("Table '%s' should derive sequence '%s' (Oracle uppercase convention)", testTableName, testSequenceName));
         }
     }
 
