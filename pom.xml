@@ -208,6 +208,14 @@
                 <maven.git-commit-id.skip>false</maven.git-commit-id.skip>
             </properties>
         </profile>
+        <!-- profile: release-image-based-on-java25 -->
+        <profile>
+            <id>release-image-based-on-java25</id>
+            <properties>
+                <image.tags>${project.version}.jdk25</image.tags>
+                <maven.git-commit-id.skip>false</maven.git-commit-id.skip>
+            </properties>
+        </profile>
         <!-- profile: dependency-check -->
         <profile>
             <id>dependency-check</id>
