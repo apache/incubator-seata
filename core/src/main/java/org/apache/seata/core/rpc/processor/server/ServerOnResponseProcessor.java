@@ -66,22 +66,24 @@ public class ServerOnResponseProcessor implements RemotingProcessor {
     @Override
     public void process(ChannelHandlerContext ctx, RpcMessage rpcMessage) throws Exception {
         MessageFuture messageFuture = futures.remove(rpcMessage.getId());
-        String receiveMsgLog = String.format(
-                "receive msg[single]: %s, clientIp: %s, vgroup: %s",
-                rpcMessage.getBody(),
-                NetUtil.toIpAddress(ctx.channel().remoteAddress()),
-                ChannelManager.getContextFromIdentified(ctx.channel()).getTransactionServiceGroup());
-        if (LOGGER.isInfoEnabled()) {
-            BatchLogHandler.INSTANCE.writeLog(receiveMsgLog);
-        }
+
         if (messageFuture != null) {
             messageFuture.setResultMessage(rpcMessage.getBody());
+            // Log only for registered channels to avoid NPE
+            if (ChannelManager.isRegistered(ctx.channel())) {
+                logReceivedMessage(ctx, rpcMessage);
+            }
         } else {
             if (ChannelManager.isRegistered(ctx.channel())) {
+                logReceivedMessage(ctx, rpcMessage);
                 onResponseMessage(ctx, rpcMessage);
             } else {
                 try {
                     ctx.disconnect();
+                } catch (Exception exx) {
+                    LOGGER.error(exx.getMessage());
+                }
+                try {
                     ctx.close();
                 } catch (Exception exx) {
                     LOGGER.error(exx.getMessage());
@@ -91,6 +93,18 @@ public class ServerOnResponseProcessor implements RemotingProcessor {
                             "close a unhandled connection! [%s]", ctx.channel().toString()));
                 }
             }
+        }
+    }
+
+    private void logReceivedMessage(ChannelHandlerContext ctx, RpcMessage rpcMessage) {
+        if (LOGGER.isInfoEnabled()) {
+            RpcContext rpcContext = ChannelManager.getContextFromIdentified(ctx.channel());
+            String receiveMsgLog = String.format(
+                    "receive msg[single]: %s, clientIp: %s, vgroup: %s",
+                    rpcMessage.getBody(),
+                    NetUtil.toIpAddress(ctx.channel().remoteAddress()),
+                    rpcContext != null ? rpcContext.getTransactionServiceGroup() : "unknown");
+            BatchLogHandler.INSTANCE.writeLog(receiveMsgLog);
         }
     }
 
