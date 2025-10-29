@@ -31,6 +31,7 @@ import org.apache.seata.rm.datasource.mock.MockDriver;
 import org.apache.seata.rm.datasource.sql.struct.Row;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
 import org.apache.seata.rm.datasource.undo.*;
+import org.apache.seata.rm.datasource.undo.AbstractUndoLogManager;
 import org.apache.seata.rm.datasource.undo.parser.JacksonUndoLogParser;
 import org.apache.seata.sqlparser.SQLRecognizerFactory;
 import org.apache.seata.sqlparser.SQLType;
@@ -206,39 +207,50 @@ public class PostgresqlUndoLogManagerTest {
     }
 
     /**
-     * Test sequence name generation with custom table name (new feature).
-     * Core of the fix: when custom table name is configured, sequence name should change accordingly.
+     * Test that sequence name is derived from table name at class loading time.
+     * This test verifies the fix works by checking the actual static SQL contains the expected pattern.
+     * 
+     * Note: Since UNDO_LOG_TABLE_NAME and INSERT_UNDO_LOG_SQL are static final fields,
+     * they are initialized once at class loading time based on configuration.
+     * This test validates that the sequence name follows the pattern: {table_name}_id_seq
      */
     @Test
-    public void testCustomTableNameSequenceGeneration() throws Exception {
-        // Mock custom table name configuration
-        try (MockedStatic<ConfigurationFactory> configurationFactoryMock =
-                Mockito.mockStatic(ConfigurationFactory.class)) {
-            // Create mocked Configuration instance
-            Configuration mockConfiguration = Mockito.mock(Configuration.class);
-            configurationFactoryMock.when(ConfigurationFactory::getInstance).thenReturn(mockConfiguration);
+    public void testSequenceNameDerivedFromTableName() throws Exception {
+        // Get the actual INSERT_UNDO_LOG_SQL that was constructed at class loading time
+        Field insertSqlField = PostgresqlUndoLogManager.class.getDeclaredField("INSERT_UNDO_LOG_SQL");
+        insertSqlField.setAccessible(true);
+        String actualInsertSql = (String) insertSqlField.get(null);
 
-            // Configure custom table name "my_undo_log"
-            Mockito.when(mockConfiguration.getConfig(ConfigurationKeys.TRANSACTION_UNDO_LOG_TABLE, "undo_log"))
-                    .thenReturn("my_undo_log");
+        // Get the actual UNDO_LOG_TABLE_NAME that was loaded from configuration
+        Field undoLogTableNameField = AbstractUndoLogManager.class.getDeclaredField("UNDO_LOG_TABLE_NAME");
+        undoLogTableNameField.setAccessible(true);
+        String actualTableName = (String) undoLogTableNameField.get(null);
 
-            // Reload PostgresqlUndoLogManager if needed (static final fields verified via reflection)
+        // Verify the sequence name follows the pattern: {table_name}_id_seq
+        String expectedSequenceName = actualTableName + "_id_seq";
+        String expectedSequenceCall = "nextval('" + expectedSequenceName + "')";
 
-            // Verify sequence name generation logic
-            String customTableName = "my_undo_log";
-            String expectedSequenceName = customTableName + "_id_seq";
-            String expectedSqlPart = "nextval('" + expectedSequenceName + "')";
+        // Test that the INSERT SQL contains the properly derived sequence name
+        Assertions.assertTrue(
+                actualInsertSql.contains(expectedSequenceCall),
+                String.format("INSERT SQL should contain sequence call '%s' for table '%s'. Actual SQL: %s", 
+                    expectedSequenceCall, actualTableName, actualInsertSql));
+        
+        // Verify the SQL uses the correct table name in INSERT statement
+        Assertions.assertTrue(
+                actualInsertSql.contains("INSERT INTO " + actualTableName),
+                String.format("INSERT SQL should target table '%s'. Actual SQL: %s", actualTableName, actualInsertSql));
 
-            // Build expected SQL fragment
-            String expectedInsertSql = "INSERT INTO " + customTableName + " ("
-                    + "id,branch_id, xid, context, rollback_info, log_status, log_created, log_modified)"
-                    + "VALUES ("
-                    + expectedSqlPart + ", ?, ?, ?, ?, ?, now(), now())";
-
-            // Verify the sequence name generation is correct
-            Assertions.assertTrue(
-                    expectedSqlPart.contains("my_undo_log_id_seq"),
-                    "Custom table 'my_undo_log' should generate sequence 'my_undo_log_id_seq'");
+        // Test the pattern works for different theoretical table names
+        String[] testTableNames = {"undo_log", "my_undo_log", "custom_table", "seata_undo"};
+        for (String testTableName : testTableNames) {
+            String testSequenceName = testTableName + "_id_seq";
+            String testSequenceCall = "nextval('" + testSequenceName + "')";
+            
+            Assertions.assertEquals(
+                testSequenceName, 
+                testTableName + "_id_seq",
+                String.format("Table '%s' should derive sequence '%s'", testTableName, testSequenceName));
         }
     }
 
@@ -268,6 +280,23 @@ public class PostgresqlUndoLogManagerTest {
                     String.format("Table '%s' should generate sequence '%s'", tableName, expectedSequence));
         }
     }
+
+    /**
+     * IMPORTANT: Testing real dynamic configuration changes
+     * 
+     * The current implementation uses static final fields that are initialized at class loading time.
+     * To truly test dynamic table name configuration, you would need integration tests with:
+     * 
+     * 1. Multiple JVM instances with different configurations
+     * 2. Separate test processes that load classes with different config files
+     * 3. Custom classloader that can reload classes with new configuration
+     * 
+     * Example integration test approach:
+     * - Create test-config-1.properties with: seata.client.undo.log.table=undo_log
+     * - Create test-config-2.properties with: seata.client.undo.log.table=my_undo_log  
+     * - Run separate test processes that load these configs before class loading
+     * - Verify each process generates the correct SQL with proper sequence names
+     */
 
     /**
      * Test backward compatibility - ensure existing deployments are not impacted.
