@@ -134,7 +134,6 @@ public class HttpClientUtilTest {
         assertTrue(latch.await(10, TimeUnit.SECONDS));
     }
 
-
     @Test
     void testDoPostWithHttp2_withEmptyParam_onFailure() throws Exception {
         CountDownLatch latch = new CountDownLatch(1);
