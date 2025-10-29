@@ -21,9 +21,6 @@ import com.alibaba.druid.pool.DruidStatementConnection;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
-import org.apache.seata.config.Configuration;
-import org.apache.seata.config.ConfigurationFactory;
-import org.apache.seata.core.constants.ConfigurationKeys;
 import org.apache.seata.rm.datasource.ConnectionProxy;
 import org.apache.seata.rm.datasource.DataSourceProxy;
 import org.apache.seata.rm.datasource.DataSourceProxyTest;
@@ -45,8 +42,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 
 import java.lang.reflect.Field;
 import java.sql.Connection;
@@ -214,7 +209,7 @@ public class OscarUndoLogManagerTest {
      * Test that sequence name is derived from table name at class loading time.
      * This test verifies the fix works by checking the actual static SQL contains the expected pattern.
      * Oscar convention: sequence names are converted to uppercase.
-     * 
+     *
      * Note: Since UNDO_LOG_TABLE_NAME and INSERT_UNDO_LOG_SQL are static final fields,
      * they are initialized once at class loading time based on configuration.
      * This test validates that the sequence name follows the pattern: {table_name}_SEQ (uppercase)
@@ -238,9 +233,10 @@ public class OscarUndoLogManagerTest {
         // Test that the INSERT SQL contains the properly derived sequence name
         Assertions.assertTrue(
                 actualInsertSql.contains(expectedSequenceCall),
-                String.format("INSERT SQL should contain sequence call '%s' for table '%s'. Actual SQL: %s", 
-                    expectedSequenceCall, actualTableName, actualInsertSql));
-        
+                String.format(
+                        "INSERT SQL should contain sequence call '%s' for table '%s'. Actual SQL: %s",
+                        expectedSequenceCall, actualTableName, actualInsertSql));
+
         // Verify the SQL uses the correct table name in INSERT statement
         Assertions.assertTrue(
                 actualInsertSql.contains("INSERT INTO " + actualTableName),
@@ -256,11 +252,13 @@ public class OscarUndoLogManagerTest {
         for (String testTableName : testTableNames) {
             String testSequenceName = testTableName.toUpperCase() + "_SEQ";
             String testSequenceCall = testSequenceName + ".nextval";
-            
+
             Assertions.assertEquals(
-                testSequenceName, 
-                testTableName.toUpperCase() + "_SEQ",
-                String.format("Table '%s' should derive sequence '%s' (Oscar uppercase convention)", testTableName, testSequenceName));
+                    testSequenceName,
+                    testTableName.toUpperCase() + "_SEQ",
+                    String.format(
+                            "Table '%s' should derive sequence '%s' (Oscar uppercase convention)",
+                            testTableName, testSequenceName));
         }
     }
 

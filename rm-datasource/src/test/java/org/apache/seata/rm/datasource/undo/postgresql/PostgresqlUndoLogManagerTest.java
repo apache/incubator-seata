@@ -21,9 +21,6 @@ import com.alibaba.druid.pool.DruidStatementConnection;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
-import org.apache.seata.config.Configuration;
-import org.apache.seata.config.ConfigurationFactory;
-import org.apache.seata.core.constants.ConfigurationKeys;
 import org.apache.seata.rm.datasource.ConnectionProxy;
 import org.apache.seata.rm.datasource.DataSourceProxy;
 import org.apache.seata.rm.datasource.DataSourceProxyTest;
@@ -45,8 +42,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 
 import java.lang.reflect.Field;
 import java.sql.Connection;
@@ -209,7 +204,7 @@ public class PostgresqlUndoLogManagerTest {
     /**
      * Test that sequence name is derived from table name at class loading time.
      * This test verifies the fix works by checking the actual static SQL contains the expected pattern.
-     * 
+     *
      * Note: Since UNDO_LOG_TABLE_NAME and INSERT_UNDO_LOG_SQL are static final fields,
      * they are initialized once at class loading time based on configuration.
      * This test validates that the sequence name follows the pattern: {table_name}_id_seq
@@ -233,9 +228,10 @@ public class PostgresqlUndoLogManagerTest {
         // Test that the INSERT SQL contains the properly derived sequence name
         Assertions.assertTrue(
                 actualInsertSql.contains(expectedSequenceCall),
-                String.format("INSERT SQL should contain sequence call '%s' for table '%s'. Actual SQL: %s", 
-                    expectedSequenceCall, actualTableName, actualInsertSql));
-        
+                String.format(
+                        "INSERT SQL should contain sequence call '%s' for table '%s'. Actual SQL: %s",
+                        expectedSequenceCall, actualTableName, actualInsertSql));
+
         // Verify the SQL uses the correct table name in INSERT statement
         Assertions.assertTrue(
                 actualInsertSql.contains("INSERT INTO " + actualTableName),
@@ -246,11 +242,11 @@ public class PostgresqlUndoLogManagerTest {
         for (String testTableName : testTableNames) {
             String testSequenceName = testTableName + "_id_seq";
             String testSequenceCall = "nextval('" + testSequenceName + "')";
-            
+
             Assertions.assertEquals(
-                testSequenceName, 
-                testTableName + "_id_seq",
-                String.format("Table '%s' should derive sequence '%s'", testTableName, testSequenceName));
+                    testSequenceName,
+                    testTableName + "_id_seq",
+                    String.format("Table '%s' should derive sequence '%s'", testTableName, testSequenceName));
         }
     }
 
@@ -283,17 +279,17 @@ public class PostgresqlUndoLogManagerTest {
 
     /**
      * IMPORTANT: Testing real dynamic configuration changes
-     * 
+     *
      * The current implementation uses static final fields that are initialized at class loading time.
      * To truly test dynamic table name configuration, you would need integration tests with:
-     * 
+     *
      * 1. Multiple JVM instances with different configurations
      * 2. Separate test processes that load classes with different config files
      * 3. Custom classloader that can reload classes with new configuration
-     * 
+     *
      * Example integration test approach:
      * - Create test-config-1.properties with: seata.client.undo.log.table=undo_log
-     * - Create test-config-2.properties with: seata.client.undo.log.table=my_undo_log  
+     * - Create test-config-2.properties with: seata.client.undo.log.table=my_undo_log
      * - Run separate test processes that load these configs before class loading
      * - Verify each process generates the correct SQL with proper sequence names
      */
