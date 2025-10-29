@@ -16,12 +16,15 @@
  */
 package org.apache.seata.common.util;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.Response;
 import org.apache.seata.common.executor.HttpCallback;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -30,6 +33,9 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class HttpClientUtilTest {
 
@@ -127,6 +133,80 @@ public class HttpClientUtilTest {
         Map<String, String> params = new HashMap<>();
         params.put("key", "value");
 
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/json;charset=UTF-8");
+
+        HttpClientUtil.doPostWithHttp2("http://localhost:9999/invalid", params, headers, callback, 30000);
+        assertTrue(latch.await(10, TimeUnit.SECONDS));
+    }
+
+
+    @Test
+    void testDoPostWithHttp2_withEmptyParam_onFailure() throws Exception {
+        CountDownLatch latch = new CountDownLatch(1);
+
+        HttpCallback<Response> callback = new HttpCallback<Response>() {
+            @Override
+            public void onSuccess(Response response) {
+                fail("Should not succeed");
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                assertNotNull(t);
+                latch.countDown();
+            }
+
+            @Override
+            public void onCancelled() {
+                fail("Should not be cancelled");
+            }
+        };
+
+        Map<String, String> params = new HashMap<>();
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/json;charset=UTF-8");
+
+        HttpClientUtil.doPostWithHttp2("http://localhost:9999/invalid", params, headers, callback, 30000);
+        assertTrue(latch.await(10, TimeUnit.SECONDS));
+    }
+
+    @Test
+    void testDoPostWithHttp2_withParamSerializeError_onFailure() throws Exception {
+        CountDownLatch latch = new CountDownLatch(1);
+
+        HttpCallback<Response> callback = new HttpCallback<Response>() {
+            @Override
+            public void onSuccess(Response response) {
+                fail("Should not succeed");
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                assertNotNull(t);
+                latch.countDown();
+            }
+
+            @Override
+            public void onCancelled() {
+                fail("Should not be cancelled");
+            }
+        };
+        ObjectMapper mockMapper = mock(ObjectMapper.class);
+        when(mockMapper.writeValueAsString(any())).thenThrow(
+                new JsonProcessingException("forced serialization error") {});
+
+        Field objectMapperField = HttpClientUtil.class.getDeclaredField("OBJECT_MAPPER");
+        objectMapperField.setAccessible(true);
+
+        Field modifiersField = Field.class.getDeclaredField("modifiers");
+        modifiersField.setAccessible(true);
+        modifiersField.setInt(objectMapperField, objectMapperField.getModifiers() & ~java.lang.reflect.Modifier.FINAL);
+
+        objectMapperField.set(null, mockMapper);
+
+        Map<String, String> params = new HashMap<>();
+        params.put("key", "value");
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json;charset=UTF-8");
 
