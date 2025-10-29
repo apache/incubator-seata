@@ -24,6 +24,7 @@ import io.netty.channel.ChannelId;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.core.protocol.AbstractMessage;
 import org.apache.seata.core.protocol.HeartbeatMessage;
 import org.apache.seata.core.protocol.MergedWarpMessage;
@@ -38,24 +39,12 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.function.Function;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Test for AbstractNettyRemotingClient
@@ -1558,5 +1547,44 @@ public class AbstractNettyRemotingClientTest {
         public NettyClientChannelManager getClientChannelManager() {
             return mockChannelManager != null ? mockChannelManager : super.getClientChannelManager();
         }
+    }
+
+    @Test
+    public void testGetXidWithUnknownMessageWithoutXidField() {
+        class UnknownMessageWithoutXid extends AbstractMessage {
+            private String name;
+
+            public UnknownMessageWithoutXid(String name) {
+                this.name = name;
+            }
+
+            @Override
+            public short getTypeCode() {
+                return 0;
+            }
+        }
+
+        UnknownMessageWithoutXid msg1 = new UnknownMessageWithoutXid("test1");
+        UnknownMessageWithoutXid msg2 = new UnknownMessageWithoutXid("test2");
+
+        String xid1 = client.getXid(msg1);
+        String xid2 = client.getXid(msg2);
+
+        assertFalse(StringUtils.isBlank(xid1));
+        assertFalse(StringUtils.isBlank(xid2));
+        assertNotEquals(xid1, xid2);
+    }
+
+    @Test
+    public void testCleanupResourcesForNonExistentChannel() {
+        Channel mockChannel = mock(Channel.class);
+        ChannelId mockChannelId = mock(ChannelId.class);
+        when(mockChannel.id()).thenReturn(mockChannelId);
+        when(mockChannel.remoteAddress()).thenReturn(new InetSocketAddress("127.0.0.1", 9999));
+
+        NettyClientChannelManager channelManager = client.getClientChannelManager();
+        assertTrue(channelManager.getChannels().isEmpty());
+
+        assertDoesNotThrow(() -> client.cleanupResourcesForChannel(mockChannel));
     }
 }
