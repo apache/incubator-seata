@@ -151,6 +151,23 @@ public class DefaultResourceManagerTest {
     }
 
     @Test
+    void testGetManagedResourcesWithPartialNullSubResources() {
+        when(mockAtRm.getManagedResources()).thenReturn(null);
+        Map<String, Resource> tccResources = new HashMap<>();
+        tccResources.put("tcc-res-1", mockTccResource);
+        when(mockTccRm.getManagedResources()).thenReturn(tccResources);
+
+        DefaultResourceManager.mockResourceManager(BranchType.AT, mockAtRm);
+        DefaultResourceManager.mockResourceManager(BranchType.TCC, mockTccRm);
+
+        Map<String, Resource> allResources = defaultRm.getManagedResources();
+        assertEquals(1, allResources.size());
+        assertTrue(allResources.containsKey("tcc-res-1"));
+        verify(mockAtRm).getManagedResources();
+        verify(mockTccRm).getManagedResources();
+    }
+
+    @Test
     void testBranchCommit() throws TransactionException {
         DefaultResourceManager.mockResourceManager(BranchType.AT, mockAtRm);
         when(mockAtRm.branchCommit(eq(BranchType.AT), eq("xid1"), eq(123L), eq("res1"), eq("data")))
@@ -213,6 +230,25 @@ public class DefaultResourceManagerTest {
     }
 
     @Test
+    void testBranchReportWithException() throws TransactionException {
+        DefaultResourceManager.mockResourceManager(BranchType.TCC, mockTccRm);
+        TransactionException expectedException = new TransactionException("report failed");
+        Mockito.doThrow(expectedException)
+                .when(mockTccRm)
+                .branchReport(
+                        eq(BranchType.TCC), eq("xid-ex"), eq(222L), eq(BranchStatus.PhaseOne_Failed), eq("data-ex"));
+
+        TransactionException actualException = assertThrows(
+                TransactionException.class,
+                () -> defaultRm.branchReport(BranchType.TCC, "xid-ex", 222L, BranchStatus.PhaseOne_Failed, "data-ex"));
+
+        assertEquals(expectedException.getMessage(), actualException.getMessage());
+        verify(mockTccRm)
+                .branchReport(
+                        eq(BranchType.TCC), eq("xid-ex"), eq(222L), eq(BranchStatus.PhaseOne_Failed), eq("data-ex"));
+    }
+
+    @Test
     void testLockQuery() throws TransactionException {
         DefaultResourceManager.mockResourceManager(BranchType.AT, mockAtRm);
         when(mockAtRm.lockQuery(eq(BranchType.AT), eq("res5"), eq("xid5"), eq("locks5")))
@@ -221,6 +257,20 @@ public class DefaultResourceManagerTest {
         boolean result = defaultRm.lockQuery(BranchType.AT, "res5", "xid5", "locks5");
         assertTrue(result);
         verify(mockAtRm).lockQuery(eq(BranchType.AT), eq("res5"), eq("xid5"), eq("locks5"));
+    }
+
+    @Test
+    void testLockQueryWithTransactionException() throws TransactionException {
+        DefaultResourceManager.mockResourceManager(BranchType.AT, mockAtRm);
+        TransactionException expectedException = new TransactionException("lock query failed");
+        when(mockAtRm.lockQuery(eq(BranchType.AT), eq("res-ex"), eq("xid-ex"), eq("locks-ex")))
+                .thenThrow(expectedException);
+
+        TransactionException actualException = assertThrows(
+                TransactionException.class, () -> defaultRm.lockQuery(BranchType.AT, "res-ex", "xid-ex", "locks-ex"));
+
+        assertEquals(expectedException.getMessage(), actualException.getMessage());
+        verify(mockAtRm).lockQuery(eq(BranchType.AT), eq("res-ex"), eq("xid-ex"), eq("locks-ex"));
     }
 
     @Test
