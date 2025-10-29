@@ -66,7 +66,8 @@ public class HttpRequestParamWrapper {
         parseQueryParams(request.getPath());
         parseHeaders(request.getHeaders());
 
-        String contentType = (String) request.getHeaders().get(HttpHeaderNames.CONTENT_TYPE);
+        CharSequence contentTypeSeq = request.getHeaders().get(HttpHeaderNames.CONTENT_TYPE);
+        String contentType = contentTypeSeq != null ? contentTypeSeq.toString() : null;
         if (contentType == null) {
             return;
         }
