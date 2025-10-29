@@ -414,7 +414,7 @@
                     <extraDirectories>
                         <paths>
                             <path>
-                                <from>src/main/resources/jdbc</from>
+                                <from>target/lib/jdbc</from>
                                 <into>/seata-server/libs/jdbc</into>
                             </path>
                             <path>
