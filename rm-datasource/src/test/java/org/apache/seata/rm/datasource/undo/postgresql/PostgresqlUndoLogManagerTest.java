@@ -184,67 +184,66 @@ public class PostgresqlUndoLogManagerTest {
     }
 
     /**
-     * 测试默认表名的序列名生成 - 向后兼容性测试
-     * 这是我们修复的重点：当使用默认表名 "undo_log" 时，应该生成 "undo_log_id_seq"
+     * Test sequence name generation with default table name (backward compatibility).
+     * Focus of the fix: using default table name "undo_log" should generate "undo_log_id_seq".
      */
     @Test
     public void testDefaultTableNameSequenceGeneration() throws Exception {
-        // 使用反射获取私有的 INSERT_UNDO_LOG_SQL 字段
+        // Use reflection to access private INSERT_UNDO_LOG_SQL field
         Field insertSqlField = PostgresqlUndoLogManager.class.getDeclaredField("INSERT_UNDO_LOG_SQL");
         insertSqlField.setAccessible(true);
         String insertSql = (String) insertSqlField.get(null);
 
-        // 验证默认情况下使用 undo_log_id_seq
+        // Verify default uses undo_log_id_seq
         Assertions.assertTrue(
-                insertSql.contains("nextval('undo_log_id_seq')"), "默认配置下应该使用 undo_log_id_seq 序列，实际SQL: " + insertSql);
+                insertSql.contains("nextval('undo_log_id_seq')"), "Should use undo_log_id_seq by default. Actual SQL: " + insertSql);
 
-        // 验证 SQL 包含正确的表名
-        Assertions.assertTrue(insertSql.contains("INSERT INTO undo_log"), "SQL应该插入到 undo_log 表，实际SQL: " + insertSql);
+        // Verify SQL contains correct table name
+        Assertions.assertTrue(insertSql.contains("INSERT INTO undo_log"), "SQL should insert into undo_log. Actual SQL: " + insertSql);
     }
 
     /**
-     * 测试自定义表名的序列名生成 - 新功能测试
-     * 这是我们修复的核心：当配置自定义表名时，序列名应该相应变化
+     * Test sequence name generation with custom table name (new feature).
+     * Core of the fix: when custom table name is configured, sequence name should change accordingly.
      */
     @Test
     public void testCustomTableNameSequenceGeneration() throws Exception {
-        // 模拟配置自定义表名
+        // Mock custom table name configuration
         try (MockedStatic<ConfigurationFactory> configurationFactoryMock =
                 Mockito.mockStatic(ConfigurationFactory.class)) {
-            // 创建模拟的 Configuration 实例
+            // Create mocked Configuration instance
             Configuration mockConfiguration = Mockito.mock(Configuration.class);
             configurationFactoryMock.when(ConfigurationFactory::getInstance).thenReturn(mockConfiguration);
 
-            // 配置自定义表名 "my_undo_log"
+            // Configure custom table name "my_undo_log"
             Mockito.when(mockConfiguration.getConfig(ConfigurationKeys.TRANSACTION_UNDO_LOG_TABLE, "undo_log"))
                     .thenReturn("my_undo_log");
 
-            // 重新加载 PostgresqlUndoLogManager 类以应用新配置
-            // 注意：由于字段是 static final，我们需要通过反射来验证逻辑
+            // Reload PostgresqlUndoLogManager if needed (static final fields verified via reflection)
 
-            // 验证序列名生成逻辑
+            // Verify sequence name generation logic
             String customTableName = "my_undo_log";
             String expectedSequenceName = customTableName + "_id_seq";
             String expectedSqlPart = "nextval('" + expectedSequenceName + "')";
 
-            // 构造预期的SQL片段
+            // Build expected SQL fragment
             String expectedInsertSql = "INSERT INTO " + customTableName + " ("
                     + "id,branch_id, xid, context, rollback_info, log_status, log_created, log_modified)"
                     + "VALUES ("
                     + expectedSqlPart + ", ?, ?, ?, ?, ?, now(), now())";
 
-            // 验证序列名生成逻辑是否正确
+            // Verify the sequence name generation is correct
             Assertions.assertTrue(
-                    expectedSqlPart.contains("my_undo_log_id_seq"), "自定义表名 my_undo_log 应该生成序列名 my_undo_log_id_seq");
+                    expectedSqlPart.contains("my_undo_log_id_seq"), "Custom table 'my_undo_log' should generate sequence 'my_undo_log_id_seq'");
         }
     }
 
     /**
-     * 测试各种表名的序列名生成规则
+     * Test sequence name generation rules for various table names.
      */
     @Test
     public void testSequenceNameGenerationRules() {
-        // 测试各种表名格式
+        // Various table name formats
         String[][] testCases = {
             {"undo_log", "undo_log_id_seq"},
             {"my_undo_log", "my_undo_log_id_seq"},
@@ -257,34 +256,34 @@ public class PostgresqlUndoLogManagerTest {
             String tableName = testCase[0];
             String expectedSequence = testCase[1];
 
-            // 验证序列名生成规则
+            // Verify the sequence name rule
             String actualSequence = tableName + "_id_seq";
             Assertions.assertEquals(
                     expectedSequence,
                     actualSequence,
-                    String.format("表名 '%s' 应该生成序列名 '%s'", tableName, expectedSequence));
+                    String.format("Table '%s' should generate sequence '%s'", tableName, expectedSequence));
         }
     }
 
     /**
-     * 测试向后兼容性 - 确保现有部署不会受到影响
+     * Test backward compatibility - ensure existing deployments are not impacted.
      */
     @Test
     public void testBackwardCompatibility() throws Exception {
-        // 验证默认配置下的行为与之前保持一致
+        // Verify default behavior stays the same
         Field insertSqlField = PostgresqlUndoLogManager.class.getDeclaredField("INSERT_UNDO_LOG_SQL");
         insertSqlField.setAccessible(true);
         String insertSql = (String) insertSqlField.get(null);
 
-        // 验证关键的 SQL 组件
-        Assertions.assertTrue(insertSql.contains("INSERT INTO undo_log"), "应该保持默认表名 undo_log");
-        Assertions.assertTrue(insertSql.contains("nextval('undo_log_id_seq')"), "应该保持默认序列名 undo_log_id_seq");
-        Assertions.assertTrue(insertSql.contains("now(), now()"), "应该保持 PostgreSQL 时间函数 now()");
+        // Verify key SQL parts
+        Assertions.assertTrue(insertSql.contains("INSERT INTO undo_log"), "Should keep default table name 'undo_log'");
+        Assertions.assertTrue(insertSql.contains("nextval('undo_log_id_seq')"), "Should keep default sequence 'undo_log_id_seq'");
+        Assertions.assertTrue(insertSql.contains("now(), now()"), "Should keep PostgreSQL time function now()");
 
-        // 验证参数占位符数量正确
+        // Verify parameter placeholder count is correct
         long parameterCount = insertSql.chars().filter(ch -> ch == '?').count();
         Assertions.assertEquals(
-                5, parameterCount, "INSERT SQL 应该包含5个参数占位符 (branch_id, xid, context, rollback_info, log_status)");
+                5, parameterCount, "INSERT SQL should contain 5 placeholders (branch_id, xid, context, rollback_info, log_status)");
     }
 
     private SQLUndoLog getUndoLogItem(int size) throws NoSuchFieldException, IllegalAccessException {

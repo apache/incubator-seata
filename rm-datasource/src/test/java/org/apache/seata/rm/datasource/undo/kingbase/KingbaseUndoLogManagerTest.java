@@ -184,142 +184,142 @@ public class KingbaseUndoLogManagerTest {
     }
 
     /**
-     * 测试默认表名的序列名生成 - 向后兼容性测试
-     * Kingbase 默认使用 undo_log 表和 undo_log_SEQ 序列
+     * Test sequence name generation with default table name (backward compatibility).
+     * Kingbase defaults to using undo_log table and UNDO_LOG_SEQ sequence.
      */
     @Test
     public void testDefaultTableNameSequenceGeneration() throws Exception {
-        // 使用反射获取私有的 INSERT_UNDO_LOG_SQL 字段
+        // Use reflection to access private INSERT_UNDO_LOG_SQL field
         Field insertSqlField = KingbaseUndoLogManager.class.getDeclaredField("INSERT_UNDO_LOG_SQL");
         insertSqlField.setAccessible(true);
         String insertSql = (String) insertSqlField.get(null);
 
-        // 验证默认情况下使用 UNDO_LOG_SEQ（大写，遵循Kingbase社区约定）
+        // Verify default uses UNDO_LOG_SEQ (uppercase, following Kingbase community convention)
         Assertions.assertTrue(
-                insertSql.contains("UNDO_LOG_SEQ.nextval"), "默认配置下应该使用 UNDO_LOG_SEQ 序列（大写），实际SQL: " + insertSql);
+                insertSql.contains("UNDO_LOG_SEQ.nextval"), "Should use UNDO_LOG_SEQ sequence (uppercase) by default. Actual SQL: " + insertSql);
 
-        // 验证 SQL 包含正确的表名
-        Assertions.assertTrue(insertSql.contains("INSERT INTO undo_log"), "SQL应该插入到 undo_log 表，实际SQL: " + insertSql);
+        // Verify SQL contains correct table name
+        Assertions.assertTrue(insertSql.contains("INSERT INTO undo_log"), "SQL should insert into undo_log table. Actual SQL: " + insertSql);
 
-        // 验证使用 Kingbase 特有的时间函数
-        Assertions.assertTrue(insertSql.contains("sysdate"), "Kingbase 应该使用 sysdate 时间函数，实际SQL: " + insertSql);
+        // Verify uses Kingbase-specific time function
+        Assertions.assertTrue(insertSql.contains("sysdate"), "Kingbase should use sysdate time function. Actual SQL: " + insertSql);
     }
 
     /**
-     * 测试自定义表名的序列名生成 - 修复验证
-     * 重点测试序列名保持用户配置的大小写，不强制转换大写
+     * Test sequence name generation with custom table name (fix verification).
+     * Focus on testing that sequence names follow Kingbase uppercase convention.
      */
     @Test
     public void testCustomTableNameSequenceGeneration() throws Exception {
-        // 模拟配置自定义表名
+        // Mock custom table name configuration
         try (MockedStatic<ConfigurationFactory> configurationFactoryMock =
                 Mockito.mockStatic(ConfigurationFactory.class)) {
-            // 创建模拟的 Configuration 实例
+            // Create mocked Configuration instance
             Configuration mockConfiguration = Mockito.mock(Configuration.class);
             configurationFactoryMock.when(ConfigurationFactory::getInstance).thenReturn(mockConfiguration);
 
-            // 配置自定义表名 "my_undo_log"（小写）
+            // Configure custom table name "my_undo_log" (lowercase)
             Mockito.when(mockConfiguration.getConfig(ConfigurationKeys.TRANSACTION_UNDO_LOG_TABLE, "undo_log"))
                     .thenReturn("my_undo_log");
 
-            // 验证序列名生成逻辑 - Kingbase约定使用大写序列名
+            // Verify sequence name generation logic - Kingbase convention uses uppercase sequence names
             String customTableName = "my_undo_log";
-            String expectedSequenceName = customTableName.toUpperCase() + "_SEQ";  // MY_UNDO_LOG_SEQ，遵循Kingbase约定
+            String expectedSequenceName = customTableName.toUpperCase() + "_SEQ";  // MY_UNDO_LOG_SEQ, following Kingbase convention
             String expectedSqlPart = customTableName.toUpperCase() + "_SEQ.nextval";
 
-            // 构造预期的SQL片段
+            // Build expected SQL fragment
             String expectedInsertSql = "INSERT INTO " + customTableName + " ("
                     + "id,branch_id, xid, context, rollback_info, log_status, log_created, log_modified)"
                     + "VALUES ("
                     + expectedSqlPart + ", ?, ?, ?, ?, ?, sysdate, sysdate)";
 
-            // 验证序列名生成逻辑是否正确 - Kingbase约定使用大写
+            // Verify sequence name generation logic is correct - Kingbase convention uses uppercase
             Assertions.assertTrue(
-                    expectedSqlPart.contains("MY_UNDO_LOG_SEQ"), "自定义表名 my_undo_log 应该生成序列名 MY_UNDO_LOG_SEQ（遵循Kingbase大写约定）");
+                    expectedSqlPart.contains("MY_UNDO_LOG_SEQ"), "Custom table 'my_undo_log' should generate sequence 'MY_UNDO_LOG_SEQ' (following Kingbase uppercase convention)");
             
-            // 验证确实转换为了大写（Kingbase社区约定）
+            // Verify conversion to uppercase (Kingbase community convention)
             Assertions.assertFalse(
-                    expectedSqlPart.contains("my_undo_log_SEQ"), "Kingbase应该将序列名转换为大写，而不是保持小写");
+                    expectedSqlPart.contains("my_undo_log_SEQ"), "Kingbase should convert sequence name to uppercase, not keep lowercase");
         }
     }
 
     /**
-     * 测试各种表名的序列名生成规则
-     * 验证修复后保持用户配置的大小写
+     * Test sequence name generation rules for various table names.
+     * Verify uppercase conversion following Kingbase convention.
      */
     @Test
     public void testSequenceNameGenerationRules() {
-        // 测试各种表名格式 - Kingbase约定转换为大写
+        // Test various table name formats - Kingbase convention converts to uppercase
         String[][] testCases = {
-            {"undo_log", "UNDO_LOG_SEQ"},           // 默认转大写
-            {"UNDO_LOG", "UNDO_LOG_SEQ"},           // 已是大写
-            {"my_undo_log", "MY_UNDO_LOG_SEQ"},     // 自定义转大写
-            {"MyUndoLog", "MYUNDOLOG_SEQ"},         // 驼峰转大写
-            {"CUSTOM_TABLE", "CUSTOM_TABLE_SEQ"},   // 已是大写
-            {"seata_undo", "SEATA_UNDO_SEQ"}        // 项目前缀转大写
+            {"undo_log", "UNDO_LOG_SEQ"},           // Default to uppercase
+            {"UNDO_LOG", "UNDO_LOG_SEQ"},           // Already uppercase
+            {"my_undo_log", "MY_UNDO_LOG_SEQ"},     // Custom to uppercase
+            {"MyUndoLog", "MYUNDOLOG_SEQ"},         // CamelCase to uppercase
+            {"CUSTOM_TABLE", "CUSTOM_TABLE_SEQ"},   // Already uppercase
+            {"seata_undo", "SEATA_UNDO_SEQ"}        // Project prefix to uppercase
         };
 
         for (String[] testCase : testCases) {
             String tableName = testCase[0];
             String expectedSequence = testCase[1];
 
-            // 验证序列名生成规则 - Kingbase约定转大写
+            // Verify sequence name generation rule - Kingbase convention converts to uppercase
             String actualSequence = tableName.toUpperCase() + "_SEQ";
             Assertions.assertEquals(
                     expectedSequence,
                     actualSequence,
-                    String.format("表名 '%s' 应该生成序列名 '%s'（遵循Kingbase大写约定）", tableName, expectedSequence));
+                    String.format("Table '%s' should generate sequence '%s' (following Kingbase uppercase convention)", tableName, expectedSequence));
         }
     }
 
     /**
-     * 测试向后兼容性 - 确保现有部署不会受到影响
+     * Test backward compatibility - ensure existing deployments are not impacted.
      */
     @Test
     public void testBackwardCompatibility() throws Exception {
-        // 验证默认配置下的行为与之前保持一致
+        // Verify default configuration behavior stays consistent
         Field insertSqlField = KingbaseUndoLogManager.class.getDeclaredField("INSERT_UNDO_LOG_SQL");
         insertSqlField.setAccessible(true);
         String insertSql = (String) insertSqlField.get(null);
 
-        // 验证关键的 SQL 组件
-        Assertions.assertTrue(insertSql.contains("INSERT INTO undo_log"), "应该保持默认表名 undo_log");
-        Assertions.assertTrue(insertSql.contains("UNDO_LOG_SEQ.nextval"), "应该保持默认序列名 UNDO_LOG_SEQ（大写）");
-        Assertions.assertTrue(insertSql.contains("sysdate"), "应该保持 Kingbase 时间函数 sysdate");
+        // Verify key SQL components
+        Assertions.assertTrue(insertSql.contains("INSERT INTO undo_log"), "Should keep default table name 'undo_log'");
+        Assertions.assertTrue(insertSql.contains("UNDO_LOG_SEQ.nextval"), "Should keep default sequence name 'UNDO_LOG_SEQ' (uppercase)");
+        Assertions.assertTrue(insertSql.contains("sysdate"), "Should keep Kingbase time function sysdate");
 
-        // 验证参数占位符数量正确
+        // Verify parameter placeholder count is correct
         long parameterCount = insertSql.chars().filter(ch -> ch == '?').count();
         Assertions.assertEquals(
-                5, parameterCount, "INSERT SQL 应该包含5个参数占位符 (branch_id, xid, context, rollback_info, log_status)");
+                5, parameterCount, "INSERT SQL should contain 5 parameter placeholders (branch_id, xid, context, rollback_info, log_status)");
     }
 
     /**
-     * 测试修复前后的对比 - Kingbase 特有的验证
+     * Test comparison before and after fix - Kingbase-specific verification.
      */
     @Test
     public void testFixComparison() {
-        System.out.println("\n=== Kingbase 序列名修复对比 ===");
+        System.out.println("\n=== Kingbase Sequence Name Fix Comparison ===");
         
-        // 修复前（硬编码）
+        // Before fix (hardcoded)
         String oldSequenceName = "UNDO_LOG_SEQ";
-        System.out.println("修复前: " + oldSequenceName + ".nextval - 硬编码大写");
+        System.out.println("Before: " + oldSequenceName + ".nextval - hardcoded uppercase");
         
-        // 修复后（基于表名动态生成，遵循Kingbase大写约定）
+        // After fix (dynamically generated based on table name, following Kingbase uppercase convention)
         String defaultTableName = "undo_log";
         String newSequenceName = defaultTableName.toUpperCase() + "_SEQ";
-        System.out.println("修复后: " + newSequenceName + ".nextval - 基于表名动态生成，遵循Kingbase大写约定");
+        System.out.println("After: " + newSequenceName + ".nextval - dynamically generated, following Kingbase uppercase convention");
         
-        // 默认情况下结果相同（向后兼容）
-        Assertions.assertEquals(oldSequenceName, newSequenceName, "默认配置下修复前后应该相同，确保向后兼容");
+        // Same result by default (backward compatible)
+        Assertions.assertEquals(oldSequenceName, newSequenceName, "Before and after fix should be same with default config, ensuring backward compatibility");
         
-        // 自定义表名的情况
+        // Custom table name scenario
         String customTableName = "my_undo_log";
         String customSequenceName = customTableName.toUpperCase() + "_SEQ";
-        System.out.println("自定义表名: " + customSequenceName + ".nextval - 支持自定义且遵循Kingbase大写约定");
+        System.out.println("Custom table: " + customSequenceName + ".nextval - supports customization and follows Kingbase uppercase convention");
         
-        // 验证转换为大写（遵循Kingbase社区约定）
-        Assertions.assertEquals("MY_UNDO_LOG_SEQ", customSequenceName, "自定义表名应该转换为大写序列名");
-        Assertions.assertNotEquals("my_undo_log_SEQ", customSequenceName, "Kingbase应该将序列名转换为大写");
+        // Verify conversion to uppercase (following Kingbase community convention)
+        Assertions.assertEquals("MY_UNDO_LOG_SEQ", customSequenceName, "Custom table name should be converted to uppercase sequence name");
+        Assertions.assertNotEquals("my_undo_log_SEQ", customSequenceName, "Kingbase should convert sequence name to uppercase");
     }
 
     private SQLUndoLog getUndoLogItem(int size) throws NoSuchFieldException, IllegalAccessException {
