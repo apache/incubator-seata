@@ -24,7 +24,6 @@ import io.netty.channel.ChannelId;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import org.apache.seata.common.thread.NamedThreadFactory;
-import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.core.protocol.AbstractMessage;
 import org.apache.seata.core.protocol.HeartbeatMessage;
 import org.apache.seata.core.protocol.MergedWarpMessage;
