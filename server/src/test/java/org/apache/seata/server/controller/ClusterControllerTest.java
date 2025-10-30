@@ -239,12 +239,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
             }
         };
 
-        HttpClientUtil.doPostWithHttp2(
-                "http://127.0.0.1:" + port + "/random",
-                params,
-                header,
-                callback,
-                5000);
+        HttpClientUtil.doPostWithHttp2("http://127.0.0.1:" + port + "/random", params, header, callback, 5000);
 
         assertTrue(latch.await(10, TimeUnit.SECONDS));
     }
@@ -279,12 +274,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
             }
         };
 
-        HttpClientUtil.doPostWithHttp2(
-                "http://127.0.0.1:" + port + "/random",
-                jsonBody,
-                header,
-                callback,
-                5000);
+        HttpClientUtil.doPostWithHttp2("http://127.0.0.1:" + port + "/random", jsonBody, header, callback, 5000);
 
         assertTrue(latch.await(10, TimeUnit.SECONDS));
     }
