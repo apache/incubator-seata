@@ -115,8 +115,6 @@ class ClusterControllerTest extends BaseSpringBootTest {
 
         HttpClientUtil.doPostWithHttp2(
                 "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", params, headers, callback);
-        // Currently, the server side does not have the ability to send http2 responses,
-        // so if no response is received here, it will definitely time out
         Assertions.assertTrue(latch.await(10, TimeUnit.SECONDS));
     }
 
