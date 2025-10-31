@@ -1282,4 +1282,11 @@ public interface ConfigurationKeys {
      * The constant RATE_LIMIT_BUCKET_TOKEN_INITIAL_NUM.
      */
     String RATE_LIMIT_BUCKET_TOKEN_INITIAL_NUM = RATE_LIMIT_PREFIX + ".bucketTokenInitialNum";
+
+    String SONATA_PREFIX = "sonata.";
+    String SONATA_ENABLE_GLOBAL_SERIALIZABILITY = SONATA_PREFIX + "enableGlobalSerializability";
+    String SONATA_DUMMY_TABLE = SONATA_PREFIX + "dummyTable";
+    String SONATA_DUMMY_TABLE_SIZE = SONATA_PREFIX + "dummyTableSize";
+    String SONATA_S2PL_DUMMY_WRITE_RETRY_WARNING_THRESHOLD = SONATA_PREFIX + "s2plDummyWriteRetryWarningThreshold";
+    String SONATA_SSI_HELPER_BATCH_SIZE = SONATA_PREFIX + "ssiHelperBatchSize";
 }

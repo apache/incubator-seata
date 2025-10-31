@@ -16,6 +16,8 @@
  */
 package org.apache.seata.rm.datasource.xa;
 
+import org.apache.seata.common.DefaultValues;
+import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.constants.DBType;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.model.BranchType;
@@ -30,11 +32,16 @@ import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import javax.sql.XAConnection;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.AbstractMap;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.apache.seata.common.ConfigurationKeys.SONATA_ENABLE_GLOBAL_SERIALIZABILITY;
 
 /**
  * DataSource proxy for XA mode.
@@ -43,6 +50,24 @@ import java.util.Optional;
 public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSourceProxyXA.class);
+
+    private static final boolean SHOULD_ENABLE_SONATA = ConfigurationFactory.getInstance()
+            .getBoolean(
+                    SONATA_ENABLE_GLOBAL_SERIALIZABILITY, DefaultValues.DEFAULT_SONATA_ENABLE_GLOBAL_SERIALIZABILITY);
+
+    protected final boolean sonataS2plShimEnabled;
+    protected final boolean sonataSsiShimEnabled;
+    protected final boolean sonataShimEnabled;
+
+    // For both S2PL and SSI DBs
+    protected final ConcurrentSkipListSet<Integer> ACTIVE_DUMMY_KEYS = new ConcurrentSkipListSet<>();
+    protected final ConcurrentMap<XAXid, Integer> XID_TO_DUMMY_KEY = new ConcurrentHashMap<>();
+
+    // For SSI DBs only
+    protected final ConcurrentMap<Integer, AtomicInteger> HELPER_ID_REF_COUNT = new ConcurrentHashMap<>();
+    protected final ConcurrentLinkedQueue<AbstractMap.SimpleEntry<Integer, Integer>>
+            RESERVED_DUMMY_KEYS_AND_HELPER_IDS = new ConcurrentLinkedQueue<>();
+    protected final ConcurrentMap<XAXid, Integer> XID_TO_HELPER_ID = new ConcurrentHashMap<>();
 
     public DataSourceProxyXA(DataSource dataSource) {
         this(dataSource, DEFAULT_RESOURCE_GROUP_ID);
@@ -84,6 +109,10 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
                 });
         // Set the default branch type to 'XA' in the RootContext.
         RootContext.setDefaultBranchType(this.getBranchType());
+
+        sonataS2plShimEnabled = SHOULD_ENABLE_SONATA && DBType.MYSQL.name().equalsIgnoreCase(dbType);
+        sonataSsiShimEnabled = SHOULD_ENABLE_SONATA && DBType.POSTGRESQL.name().equalsIgnoreCase(dbType);
+        sonataShimEnabled = sonataS2plShimEnabled || sonataSsiShimEnabled;
     }
 
     @Override
@@ -134,5 +163,29 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
                 new ConnectionProxyXA(connection, xaConnection, this, RootContext.getXID());
         connectionProxyXA.init();
         return connectionProxyXA;
+    }
+
+    // Should be auto-executed when the datasource is closed. Now for simplicity we let the application manually
+    // release the pending helpers.
+    public void releaseAllHelpers() throws SQLException {
+        if (!sonataSsiShimEnabled) {
+            throw new RuntimeException("Sonata SSI helper transactions are not allowed for the datasource");
+        }
+
+        try (Connection conn = dataSource.getConnection()) {
+            for (int helperTxnId : HELPER_ID_REF_COUNT.keySet()) {
+                try (Statement stmt = conn.createStatement()) {
+                    stmt.executeUpdate("rollback prepared '" + helperTxnId + "'");
+                }
+            }
+        }
+    }
+
+    protected Connection getSsiHelperConnection() throws SQLException {
+        if (!sonataSsiShimEnabled) {
+            throw new RuntimeException("Sonata SSI helper transactions are not allowed for the datasource");
+        }
+
+        return dataSource.getConnection();
     }
 }
