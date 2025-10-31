@@ -33,7 +33,6 @@ import org.junit.jupiter.api.Test;
 
 import java.sql.Types;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +48,7 @@ public class OscarUndoUpdateExecutorTest {
         sqlUndoLog = new SQLUndoLog();
         sqlUndoLog.setSqlType(SQLType.UPDATE);
         sqlUndoLog.setTableName("test_table");
-        
+
         tableMeta = createTableMeta();
         sqlUndoLog.setTableMeta(tableMeta);
     }
@@ -57,47 +56,47 @@ public class OscarUndoUpdateExecutorTest {
     private TableMeta createTableMeta() {
         TableMeta meta = new TableMeta();
         meta.setTableName("test_table");
-        
-        // 创建列元数据
+
+        // Create column metadata
         Map<String, ColumnMeta> allColumns = new HashMap<>();
-        
+
         ColumnMeta idColumn = new ColumnMeta();
         idColumn.setTableName("test_table");
         idColumn.setColumnName("id");
         idColumn.setDataType(Types.INTEGER);
         idColumn.setColumnSize(11);
         allColumns.put("id", idColumn);
-        
+
         ColumnMeta nameColumn = new ColumnMeta();
         nameColumn.setTableName("test_table");
         nameColumn.setColumnName("name");
         nameColumn.setDataType(Types.VARCHAR);
         nameColumn.setColumnSize(255);
         allColumns.put("name", nameColumn);
-        
+
         ColumnMeta ageColumn = new ColumnMeta();
         ageColumn.setTableName("test_table");
         ageColumn.setColumnName("age");
         ageColumn.setDataType(Types.INTEGER);
         ageColumn.setColumnSize(11);
         allColumns.put("age", ageColumn);
-        
+
         meta.getAllColumns().putAll(allColumns);
-        
-        // 创建主键索引
+
+        // Create primary key index
         Map<String, IndexMeta> allIndexes = new HashMap<>();
         IndexMeta primaryIndex = new IndexMeta();
         primaryIndex.setIndexName("PRIMARY");
         primaryIndex.setNonUnique(false);
         primaryIndex.setIndextype(IndexType.PRIMARY);
-        
+
         List<ColumnMeta> primaryColumns = new ArrayList<>();
         primaryColumns.add(idColumn);
         primaryIndex.setValues(primaryColumns);
-        
+
         allIndexes.put("PRIMARY", primaryIndex);
         meta.getAllIndexes().putAll(allIndexes);
-        
+
         return meta;
     }
 
@@ -109,60 +108,60 @@ public class OscarUndoUpdateExecutorTest {
 
     @Test
     public void testBuildUndoSQL() {
-        // 创建 before image 数据
+        // Create before image data
         TableRecords beforeImage = new TableRecords(tableMeta);
         Row row = new Row();
         Field idField = new Field("id", Types.INTEGER, 1);
-        idField.setKeyType(KeyType.PRIMARY_KEY); // 设置为主键
+        idField.setKeyType(KeyType.PRIMARY_KEY); // mark as primary key
         row.add(idField);
         row.add(new Field("name", Types.VARCHAR, "old_name"));
         row.add(new Field("age", Types.INTEGER, 25));
-        
+
         List<Row> rows = new ArrayList<>();
         rows.add(row);
         beforeImage.setRows(rows);
-        
+
         sqlUndoLog.setBeforeImage(beforeImage);
         updateExecutor = new OscarUndoUpdateExecutor(sqlUndoLog);
-        
+
         String undoSQL = updateExecutor.buildUndoSQL();
 
-        // 验证生成的 SQL 格式
+        // Verify generated SQL format
         Assertions.assertTrue(undoSQL.contains("UPDATE test_table"));
         Assertions.assertTrue(undoSQL.contains("SET"));
         Assertions.assertTrue(undoSQL.contains("WHERE"));
-        
-        // 验证包含非主键列的更新 - 可能不使用双引号转义
+
+        // Verify updates include non-PK columns (escaping may vary)
         Assertions.assertTrue(undoSQL.contains("name") && undoSQL.contains("= ?"));
         Assertions.assertTrue(undoSQL.contains("age") && undoSQL.contains("= ?"));
-        
-        // 验证包含主键条件
+
+        // Verify WHERE contains PK condition
         Assertions.assertTrue(undoSQL.contains("id") && undoSQL.contains("= ?"));
-        
-        // 验证不包含主键列在SET子句中 - 修改为不依赖双引号的检查
+
+        // Verify SET clause does not include PK column (regex without quoting)
         Assertions.assertFalse(undoSQL.matches(".*SET.*\\bid\\s*=.*"));
     }
 
     @Test
     public void testBuildUndoSQLWithSingleNonPkColumn() {
-        // 创建只有一个非主键列的场景
+        // Create scenario with only one non-PK column
         TableRecords beforeImage = new TableRecords(tableMeta);
         Row row = new Row();
         Field idField = new Field("id", Types.INTEGER, 1);
-        idField.setKeyType(KeyType.PRIMARY_KEY); // 设置为主键
+        idField.setKeyType(KeyType.PRIMARY_KEY); // mark as primary key
         row.add(idField);
         row.add(new Field("name", Types.VARCHAR, "test_name"));
-        
+
         List<Row> rows = new ArrayList<>();
         rows.add(row);
         beforeImage.setRows(rows);
-        
+
         sqlUndoLog.setBeforeImage(beforeImage);
         updateExecutor = new OscarUndoUpdateExecutor(sqlUndoLog);
-        
+
         String undoSQL = updateExecutor.buildUndoSQL();
-        
-        // 验证 SQL 结构
+
+        // Verify SQL structure
         Assertions.assertTrue(undoSQL.contains("UPDATE test_table"));
         Assertions.assertTrue(undoSQL.contains("SET") && undoSQL.contains("name") && undoSQL.contains("= ?"));
         Assertions.assertTrue(undoSQL.contains("WHERE") && undoSQL.contains("id") && undoSQL.contains("= ?"));
@@ -170,41 +169,41 @@ public class OscarUndoUpdateExecutorTest {
 
     @Test
     public void testBuildUndoSQLWithMultipleNonPkColumns() {
-        // 创建多个非主键列的场景
+        // Create scenario with multiple non-PK columns
         TableRecords beforeImage = new TableRecords(tableMeta);
         Row row = new Row();
         Field idField = new Field("id", Types.INTEGER, 1);
-        idField.setKeyType(KeyType.PRIMARY_KEY); // 设置为主键
+        idField.setKeyType(KeyType.PRIMARY_KEY); // mark as primary key
         row.add(idField);
         row.add(new Field("name", Types.VARCHAR, "test_name"));
         row.add(new Field("age", Types.INTEGER, 30));
-        
+
         List<Row> rows = new ArrayList<>();
         rows.add(row);
         beforeImage.setRows(rows);
-        
+
         sqlUndoLog.setBeforeImage(beforeImage);
         updateExecutor = new OscarUndoUpdateExecutor(sqlUndoLog);
-        
+
         String undoSQL = updateExecutor.buildUndoSQL();
-        
-        // 验证包含所有非主键列
+
+        // Verify all non-PK columns included
         Assertions.assertTrue(undoSQL.contains("name") && undoSQL.contains("= ?"));
         Assertions.assertTrue(undoSQL.contains("age") && undoSQL.contains("= ?"));
-        
-        // 验证SET子句中的逗号分隔
+
+        // Verify comma separation in SET clause
         Assertions.assertTrue(undoSQL.contains("name") && undoSQL.contains("age") && undoSQL.contains(","));
     }
 
     @Test
     public void testBuildUndoSQLWithEmptyBeforeImage() {
-        // 测试空的 before image 应该抛出异常
+        // Empty before image should throw
         TableRecords emptyBeforeImage = new TableRecords(tableMeta);
         emptyBeforeImage.setRows(new ArrayList<>());
-        
+
         sqlUndoLog.setBeforeImage(emptyBeforeImage);
         updateExecutor = new OscarUndoUpdateExecutor(sqlUndoLog);
-        
+
         Assertions.assertThrows(ShouldNeverHappenException.class, () -> {
             updateExecutor.buildUndoSQL();
         });
@@ -212,10 +211,10 @@ public class OscarUndoUpdateExecutorTest {
 
     @Test
     public void testBuildUndoSQLWithNullBeforeImage() {
-        // 测试 null before image 应该抛出异常
+        // Null before image should throw
         sqlUndoLog.setBeforeImage(null);
         updateExecutor = new OscarUndoUpdateExecutor(sqlUndoLog);
-        
+
         Assertions.assertThrows(NullPointerException.class, () -> {
             updateExecutor.buildUndoSQL();
         });
@@ -223,30 +222,36 @@ public class OscarUndoUpdateExecutorTest {
 
     @Test
     public void testGetUndoRows() {
-        // 创建 before image 数据
+        // Create before image data
         TableRecords beforeImage = new TableRecords(tableMeta);
         Row row = new Row();
         Field idField = new Field("id", Types.INTEGER, 1);
-        idField.setKeyType(KeyType.PRIMARY_KEY); // 设置为主键
+        idField.setKeyType(KeyType.PRIMARY_KEY); // mark as primary key
         row.add(idField);
         row.add(new Field("name", Types.VARCHAR, "test_name"));
-        
+
         List<Row> rows = new ArrayList<>();
         rows.add(row);
         beforeImage.setRows(rows);
-        
+
         sqlUndoLog.setBeforeImage(beforeImage);
         updateExecutor = new OscarUndoUpdateExecutor(sqlUndoLog);
-        
+
         TableRecords undoRows = updateExecutor.getUndoRows();
-        
-        // 验证返回的是 before image
+
+        // Verify it returns before image
         Assertions.assertSame(beforeImage, undoRows);
         Assertions.assertEquals(1, undoRows.getRows().size());
-        // 通过字段列表查找字段值
+        // Find field values via field list
         Row resultRow = undoRows.getRows().get(0);
-        Field idFields = resultRow.getFields().stream().filter(f -> "id".equals(f.getName())).findFirst().orElse(null);
-        Field nameField = resultRow.getFields().stream().filter(f -> "name".equals(f.getName())).findFirst().orElse(null);
+        Field idFields = resultRow.getFields().stream()
+                .filter(f -> "id".equals(f.getName()))
+                .findFirst()
+                .orElse(null);
+        Field nameField = resultRow.getFields().stream()
+                .filter(f -> "name".equals(f.getName()))
+                .findFirst()
+                .orElse(null);
         Assertions.assertNotNull(idFields);
         Assertions.assertNotNull(nameField);
         Assertions.assertEquals(1, idFields.getValue());
@@ -255,24 +260,24 @@ public class OscarUndoUpdateExecutorTest {
 
     @Test
     public void testOscarSpecificEscaping() {
-        // 测试 Oscar 数据库特定的列名转义
+        // Test Oscar-specific column escaping
         TableRecords beforeImage = new TableRecords(tableMeta);
         Row row = new Row();
         Field idField = new Field("id", Types.INTEGER, 1);
-        idField.setKeyType(KeyType.PRIMARY_KEY); // 设置为主键
+        idField.setKeyType(KeyType.PRIMARY_KEY); // mark as primary key
         row.add(idField);
         row.add(new Field("name", Types.VARCHAR, "test"));
-        
+
         List<Row> rows = new ArrayList<>();
         rows.add(row);
         beforeImage.setRows(rows);
-        
+
         sqlUndoLog.setBeforeImage(beforeImage);
         updateExecutor = new OscarUndoUpdateExecutor(sqlUndoLog);
-        
+
         String undoSQL = updateExecutor.buildUndoSQL();
-        
-        // 验证 Oscar 列名转义（可能使用双引号或其他转义方式）
+
+        // Verify column names presence (escaping may vary)
         Assertions.assertTrue(undoSQL.contains("name"));
         Assertions.assertTrue(undoSQL.contains("id"));
     }
@@ -282,26 +287,26 @@ public class OscarUndoUpdateExecutorTest {
         TableRecords beforeImage = new TableRecords(tableMeta);
         Row row = new Row();
         Field idField = new Field("id", Types.INTEGER, 1);
-        idField.setKeyType(KeyType.PRIMARY_KEY); // 设置为主键
+        idField.setKeyType(KeyType.PRIMARY_KEY); // mark as primary key
         row.add(idField);
         row.add(new Field("name", Types.VARCHAR, "test"));
         row.add(new Field("age", Types.INTEGER, 25));
-        
+
         List<Row> rows = new ArrayList<>();
         rows.add(row);
         beforeImage.setRows(rows);
-        
+
         sqlUndoLog.setBeforeImage(beforeImage);
         updateExecutor = new OscarUndoUpdateExecutor(sqlUndoLog);
-        
+
         String undoSQL = updateExecutor.buildUndoSQL();
-        
-        // 验证 SQL 模板格式: UPDATE table SET columns WHERE conditions
+
+        // Verify SQL template: UPDATE table SET columns WHERE conditions
         String expectedPattern = "UPDATE test_table SET .+ WHERE .+";
         Assertions.assertTrue(undoSQL.matches(expectedPattern));
-        
-        // 验证参数占位符数量
+
+        // Verify number of placeholders
         long questionMarkCount = undoSQL.chars().filter(ch -> ch == '?').count();
-        Assertions.assertTrue(questionMarkCount >= 3); // 至少有 name, age, id 三个参数
+        Assertions.assertTrue(questionMarkCount >= 3); // at least placeholders for name, age, id
     }
 }

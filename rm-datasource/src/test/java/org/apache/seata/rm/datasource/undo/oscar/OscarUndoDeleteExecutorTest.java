@@ -48,7 +48,7 @@ public class OscarUndoDeleteExecutorTest {
         sqlUndoLog = new SQLUndoLog();
         sqlUndoLog.setSqlType(SQLType.DELETE);
         sqlUndoLog.setTableName("test_table");
-        
+
         tableMeta = createTableMeta();
         sqlUndoLog.setTableMeta(tableMeta);
     }
@@ -56,47 +56,47 @@ public class OscarUndoDeleteExecutorTest {
     private TableMeta createTableMeta() {
         TableMeta meta = new TableMeta();
         meta.setTableName("test_table");
-        
-        // 创建列元数据
+
+        // Create column metadata
         Map<String, ColumnMeta> allColumns = new HashMap<>();
-        
+
         ColumnMeta idColumn = new ColumnMeta();
         idColumn.setTableName("test_table");
         idColumn.setColumnName("id");
         idColumn.setDataType(Types.INTEGER);
         idColumn.setColumnSize(11);
         allColumns.put("id", idColumn);
-        
+
         ColumnMeta nameColumn = new ColumnMeta();
         nameColumn.setTableName("test_table");
         nameColumn.setColumnName("name");
         nameColumn.setDataType(Types.VARCHAR);
         nameColumn.setColumnSize(255);
         allColumns.put("name", nameColumn);
-        
+
         ColumnMeta ageColumn = new ColumnMeta();
         ageColumn.setTableName("test_table");
         ageColumn.setColumnName("age");
         ageColumn.setDataType(Types.INTEGER);
         ageColumn.setColumnSize(11);
         allColumns.put("age", ageColumn);
-        
+
         meta.getAllColumns().putAll(allColumns);
-        
-        // 创建主键索引
+
+        // Create primary key index
         Map<String, IndexMeta> allIndexes = new HashMap<>();
         IndexMeta primaryIndex = new IndexMeta();
         primaryIndex.setIndexName("PRIMARY");
         primaryIndex.setNonUnique(false);
         primaryIndex.setIndextype(IndexType.PRIMARY);
-        
+
         List<ColumnMeta> primaryColumns = new ArrayList<>();
         primaryColumns.add(idColumn);
         primaryIndex.setValues(primaryColumns);
-        
+
         allIndexes.put("PRIMARY", primaryIndex);
         meta.getAllIndexes().putAll(allIndexes);
-        
+
         return meta;
     }
 
@@ -108,65 +108,65 @@ public class OscarUndoDeleteExecutorTest {
 
     @Test
     public void testBuildUndoSQL() {
-        // 创建 before image 数据 (DELETE操作的撤销需要重新插入被删除的数据)
+        // Create before image data (undo DELETE by re-inserting deleted row)
         TableRecords beforeImage = new TableRecords(tableMeta);
         Row row = new Row();
         Field idField = new Field("id", Types.INTEGER, 1);
-        idField.setKeyType(KeyType.PRIMARY_KEY); // 设置为主键
+        idField.setKeyType(KeyType.PRIMARY_KEY); // mark as primary key
         row.add(idField);
         row.add(new Field("name", Types.VARCHAR, "deleted_name"));
         row.add(new Field("age", Types.INTEGER, 30));
-        
+
         List<Row> rows = new ArrayList<>();
         rows.add(row);
         beforeImage.setRows(rows);
-        
+
         sqlUndoLog.setBeforeImage(beforeImage);
         deleteExecutor = new OscarUndoDeleteExecutor(sqlUndoLog);
-        
+
         String undoSQL = deleteExecutor.buildUndoSQL();
-        
-        // 验证生成的 INSERT SQL 格式
+
+        // Verify generated INSERT SQL format
         Assertions.assertTrue(undoSQL.contains("INSERT INTO test_table"));
         Assertions.assertTrue(undoSQL.contains("VALUES"));
-        
-        // 验证包含所有列（非主键列 + 主键列）
+
+        // Verify all columns included (non-PK + PK)
         Assertions.assertTrue(undoSQL.contains("\"name\""));
         Assertions.assertTrue(undoSQL.contains("\"age\""));
         Assertions.assertTrue(undoSQL.contains("\"id\""));
-        
-        // 验证参数占位符数量与列数匹配
+
+        // Verify number of placeholders matches number of columns
         long questionMarkCount = undoSQL.chars().filter(ch -> ch == '?').count();
         Assertions.assertEquals(3, questionMarkCount); // name, age, id
     }
 
     @Test
     public void testBuildUndoSQLWithMultipleColumns() {
-        // 测试多列场景
+        // Test multi-column scenario
         TableRecords beforeImage = new TableRecords(tableMeta);
         Row row = new Row();
         row.add(new Field("id", Types.INTEGER, 100));
         row.add(new Field("name", Types.VARCHAR, "test_user"));
         row.add(new Field("age", Types.INTEGER, 25));
-        
+
         List<Row> rows = new ArrayList<>();
         rows.add(row);
         beforeImage.setRows(rows);
-        
+
         sqlUndoLog.setBeforeImage(beforeImage);
         deleteExecutor = new OscarUndoDeleteExecutor(sqlUndoLog);
-        
+
         String undoSQL = deleteExecutor.buildUndoSQL();
-        
-        // 验证 INSERT 语句格式
+
+        // Verify INSERT SQL format
         String expectedPattern = "INSERT INTO test_table \\(.+\\) VALUES \\(.+\\)";
         Assertions.assertTrue(undoSQL.matches(expectedPattern));
-        
-        // 验证列名都在括号中
+
+        // Verify column names are within parentheses
         int columnsStart = undoSQL.indexOf("(");
         int columnsEnd = undoSQL.indexOf(")");
         String columnsSection = undoSQL.substring(columnsStart + 1, columnsEnd);
-        
+
         Assertions.assertTrue(columnsSection.contains("\"name\""));
         Assertions.assertTrue(columnsSection.contains("\"age\""));
         Assertions.assertTrue(columnsSection.contains("\"id\""));
@@ -174,41 +174,41 @@ public class OscarUndoDeleteExecutorTest {
 
     @Test
     public void testBuildUndoSQLWithSingleColumn() {
-        // 测试单列场景（只有主键）
+        // Test single-column scenario (PK only)
         TableRecords beforeImage = new TableRecords(tableMeta);
         Row row = new Row();
         Field idField = new Field("id", Types.INTEGER, 1);
-        idField.setKeyType(KeyType.PRIMARY_KEY); // 设置为主键
+        idField.setKeyType(KeyType.PRIMARY_KEY); // mark as primary key
         row.add(idField);
-        
+
         List<Row> rows = new ArrayList<>();
         rows.add(row);
         beforeImage.setRows(rows);
-        
+
         sqlUndoLog.setBeforeImage(beforeImage);
         deleteExecutor = new OscarUndoDeleteExecutor(sqlUndoLog);
-        
+
         String undoSQL = deleteExecutor.buildUndoSQL();
-        
-        // 验证基本 INSERT 结构
+
+        // Verify basic INSERT structure
         Assertions.assertTrue(undoSQL.contains("INSERT INTO test_table"));
         Assertions.assertTrue(undoSQL.contains("\"id\""));
         Assertions.assertTrue(undoSQL.contains("VALUES"));
-        
-        // 验证单个参数占位符
+
+        // Verify single placeholder
         long questionMarkCount = undoSQL.chars().filter(ch -> ch == '?').count();
         Assertions.assertEquals(1, questionMarkCount);
     }
 
     @Test
     public void testBuildUndoSQLWithEmptyBeforeImage() {
-        // 测试空的 before image 应该抛出异常
+        // Empty before image should throw
         TableRecords emptyBeforeImage = new TableRecords(tableMeta);
         emptyBeforeImage.setRows(new ArrayList<>());
-        
+
         sqlUndoLog.setBeforeImage(emptyBeforeImage);
         deleteExecutor = new OscarUndoDeleteExecutor(sqlUndoLog);
-        
+
         Assertions.assertThrows(ShouldNeverHappenException.class, () -> {
             deleteExecutor.buildUndoSQL();
         });
@@ -216,10 +216,10 @@ public class OscarUndoDeleteExecutorTest {
 
     @Test
     public void testBuildUndoSQLWithNullBeforeImage() {
-        // 测试 null before image 应该抛出异常
+        // Null before image should throw
         sqlUndoLog.setBeforeImage(null);
         deleteExecutor = new OscarUndoDeleteExecutor(sqlUndoLog);
-        
+
         Assertions.assertThrows(NullPointerException.class, () -> {
             deleteExecutor.buildUndoSQL();
         });
@@ -227,30 +227,36 @@ public class OscarUndoDeleteExecutorTest {
 
     @Test
     public void testGetUndoRows() {
-        // 创建 before image 数据
+        // Create before image data
         TableRecords beforeImage = new TableRecords(tableMeta);
         Row row = new Row();
         Field idField = new Field("id", Types.INTEGER, 1);
-        idField.setKeyType(KeyType.PRIMARY_KEY); // 设置为主键
+        idField.setKeyType(KeyType.PRIMARY_KEY); // mark as primary key
         row.add(idField);
         row.add(new Field("name", Types.VARCHAR, "test_name"));
-        
+
         List<Row> rows = new ArrayList<>();
         rows.add(row);
         beforeImage.setRows(rows);
-        
+
         sqlUndoLog.setBeforeImage(beforeImage);
         deleteExecutor = new OscarUndoDeleteExecutor(sqlUndoLog);
-        
+
         TableRecords undoRows = deleteExecutor.getUndoRows();
-        
-        // 验证返回的是 before image
+
+        // Verify it returns before image
         Assertions.assertSame(beforeImage, undoRows);
         Assertions.assertEquals(1, undoRows.getRows().size());
-        // 通过字段列表查找字段值
+        // Find field values via field list
         Row resultRow = undoRows.getRows().get(0);
-        Field idFields = resultRow.getFields().stream().filter(f -> "id".equals(f.getName())).findFirst().orElse(null);
-        Field nameField = resultRow.getFields().stream().filter(f -> "name".equals(f.getName())).findFirst().orElse(null);
+        Field idFields = resultRow.getFields().stream()
+                .filter(f -> "id".equals(f.getName()))
+                .findFirst()
+                .orElse(null);
+        Field nameField = resultRow.getFields().stream()
+                .filter(f -> "name".equals(f.getName()))
+                .findFirst()
+                .orElse(null);
         Assertions.assertNotNull(idFields);
         Assertions.assertNotNull(nameField);
         Assertions.assertEquals(1, idFields.getValue());
@@ -259,25 +265,25 @@ public class OscarUndoDeleteExecutorTest {
 
     @Test
     public void testOscarSpecificEscaping() {
-        // 测试 Oscar 数据库特定的列名转义
+        // Test Oscar-specific column escaping
         TableRecords beforeImage = new TableRecords(tableMeta);
         Row row = new Row();
         Field idField = new Field("id", Types.INTEGER, 1);
-        idField.setKeyType(KeyType.PRIMARY_KEY); // 设置为主键
+        idField.setKeyType(KeyType.PRIMARY_KEY); // mark as primary key
         row.add(idField);
         row.add(new Field("name", Types.VARCHAR, "test"));
         row.add(new Field("age", Types.INTEGER, 25));
-        
+
         List<Row> rows = new ArrayList<>();
         rows.add(row);
         beforeImage.setRows(rows);
-        
+
         sqlUndoLog.setBeforeImage(beforeImage);
         deleteExecutor = new OscarUndoDeleteExecutor(sqlUndoLog);
-        
+
         String undoSQL = deleteExecutor.buildUndoSQL();
-        
-        // 验证 Oscar 使用双引号进行转义
+
+        // Verify column names presence (escaping may vary)
         Assertions.assertTrue(undoSQL.contains("\"name\""));
         Assertions.assertTrue(undoSQL.contains("\"age\""));
         Assertions.assertTrue(undoSQL.contains("\"id\""));
@@ -288,67 +294,61 @@ public class OscarUndoDeleteExecutorTest {
         TableRecords beforeImage = new TableRecords(tableMeta);
         Row row = new Row();
         Field idField = new Field("id", Types.INTEGER, 1);
-        idField.setKeyType(KeyType.PRIMARY_KEY); // 设置为主键
+        idField.setKeyType(KeyType.PRIMARY_KEY); // mark as primary key
         row.add(idField);
         row.add(new Field("name", Types.VARCHAR, "test"));
         row.add(new Field("age", Types.INTEGER, 25));
-        
+
         List<Row> rows = new ArrayList<>();
         rows.add(row);
         beforeImage.setRows(rows);
-        
+
         sqlUndoLog.setBeforeImage(beforeImage);
         deleteExecutor = new OscarUndoDeleteExecutor(sqlUndoLog);
-        
+
         String undoSQL = deleteExecutor.buildUndoSQL();
-        
-        // 验证 INSERT 模板格式: INSERT INTO table (columns) VALUES (values)
+
+        // Verify INSERT template: INSERT INTO table (columns) VALUES (values)
         String expectedPattern = "INSERT INTO test_table \\(.+\\) VALUES \\(.+\\)";
         Assertions.assertTrue(undoSQL.matches(expectedPattern));
-        
-        // 验证列数与值占位符数量匹配
-        String columnsSection = undoSQL.substring(
-            undoSQL.indexOf("(") + 1, 
-            undoSQL.indexOf(")")
-        );
-        String valuesSection = undoSQL.substring(
-            undoSQL.lastIndexOf("(") + 1, 
-            undoSQL.lastIndexOf(")")
-        );
-        
-        // 计算列数和占位符数
+
+        // Calculate number of columns and placeholders
+        String columnsSection = undoSQL.substring(undoSQL.indexOf("(") + 1, undoSQL.indexOf(")"));
+        String valuesSection = undoSQL.substring(undoSQL.lastIndexOf("(") + 1, undoSQL.lastIndexOf(")"));
+
+        // Calculate number of columns and placeholders
         long columnCount = columnsSection.chars().filter(ch -> ch == ',').count() + 1;
         long placeholderCount = valuesSection.chars().filter(ch -> ch == '?').count();
-        
+
         Assertions.assertEquals(columnCount, placeholderCount);
     }
 
     @Test
     public void testColumnOrdering() {
-        // 测试列的排序：非主键列 + 主键列
+        // Test column ordering: non-PK columns + PK columns
         TableRecords beforeImage = new TableRecords(tableMeta);
         Row row = new Row();
         Field idField = new Field("id", Types.INTEGER, 1);
-        idField.setKeyType(KeyType.PRIMARY_KEY); // 设置为主键
+        idField.setKeyType(KeyType.PRIMARY_KEY); // mark as primary key
         row.add(idField);
         row.add(new Field("name", Types.VARCHAR, "test"));
         row.add(new Field("age", Types.INTEGER, 25));
-        
+
         List<Row> rows = new ArrayList<>();
         rows.add(row);
         beforeImage.setRows(rows);
-        
+
         sqlUndoLog.setBeforeImage(beforeImage);
         deleteExecutor = new OscarUndoDeleteExecutor(sqlUndoLog);
-        
+
         String undoSQL = deleteExecutor.buildUndoSQL();
-        
-        // 验证所有字段都包含在SQL中
+
+        // Verify all fields are present in SQL
         Assertions.assertTrue(undoSQL.contains("\"name\""));
         Assertions.assertTrue(undoSQL.contains("\"age\""));
         Assertions.assertTrue(undoSQL.contains("\"id\""));
-        
-        // 验证总的占位符数量
+
+        // Verify total number of placeholders
         long questionMarkCount = undoSQL.chars().filter(ch -> ch == '?').count();
         Assertions.assertEquals(3, questionMarkCount);
     }
