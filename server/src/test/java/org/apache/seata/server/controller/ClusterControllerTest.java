@@ -117,7 +117,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
                 "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", params, headers, callback);
         // Currently, the server side does not have the ability to send http2 responses,
         // so if no response is received here, it will definitely time out
-        Assertions.assertFalse(latch.await(5, TimeUnit.SECONDS));
+        Assertions.assertTrue(latch.await(10, TimeUnit.SECONDS));
     }
 
     @Test
@@ -153,218 +153,6 @@ class ClusterControllerTest extends BaseSpringBootTest {
 
     @Test
     @Order(4)
-    void testXssFilterBlocked_queryParam() throws Exception {
-        String malicious = "<script>alert('xss')</script>";
-        Map<String, String> header = new HashMap<>();
-        header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
-        try (CloseableHttpResponse response = HttpClientUtil.doGet(
-                "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000&testParam="
-                        + URLEncoder.encode(malicious, String.valueOf(StandardCharsets.UTF_8)),
-                new HashMap<>(),
-                header,
-                5000)) {
-            Assertions.assertEquals(
-                    HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
-        }
-    }
-
-    @Test
-    @Order(5)
-    void testXssFilterBlocked_queryParam_withGetHttp2() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-
-        String malicious = "<script>alert('xss')</script>";
-        Map<String, String> header = new HashMap<>();
-        header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
-
-        HttpCallback<Response> callback = new HttpCallback<Response>() {
-            @Override
-            public void onSuccess(Response response) {
-                assertNotNull(response);
-                Assertions.assertEquals(Protocol.H2_PRIOR_KNOWLEDGE, response.protocol());
-                Assertions.assertEquals(HttpStatus.SC_BAD_REQUEST, response.code());
-                latch.countDown();
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                fail("Should not fail");
-            }
-
-            @Override
-            public void onCancelled() {
-                fail("Should not be cancelled");
-            }
-        };
-
-        HttpClientUtil.doGetWithHttp2(
-                "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000&testParam="
-                        + URLEncoder.encode(malicious, String.valueOf(StandardCharsets.UTF_8)),
-                header,
-                callback,
-                5000);
-
-        assertTrue(latch.await(10, TimeUnit.SECONDS));
-    }
-
-    @Test
-    @Order(6)
-    void testXssFilterBlocked_formParam_withPostHttp2() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-
-        String malicious = "<script>alert('xss')</script>";
-        Map<String, String> header = new HashMap<>();
-        header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
-
-        Map<String, String> params = new HashMap<>();
-        params.put("key", malicious);
-
-        HttpCallback<Response> callback = new HttpCallback<Response>() {
-            @Override
-            public void onSuccess(Response response) {
-                assertNotNull(response);
-                Assertions.assertEquals(Protocol.H2_PRIOR_KNOWLEDGE, response.protocol());
-                Assertions.assertEquals(HttpStatus.SC_BAD_REQUEST, response.code());
-                latch.countDown();
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                fail("Should not fail");
-            }
-
-            @Override
-            public void onCancelled() {
-                fail("Should not be cancelled");
-            }
-        };
-
-        HttpClientUtil.doPostWithHttp2("http://127.0.0.1:" + port + "/random", params, header, callback, 5000);
-
-        assertTrue(latch.await(10, TimeUnit.SECONDS));
-    }
-
-    @Test
-    @Order(7)
-    void testXssFilterBlocked_bodyParam_withPostHttp2() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-
-        String malicious = "<script>alert('xss')</script>";
-        Map<String, String> header = new HashMap<>();
-
-        String jsonBody = "{\"key\":\"" + malicious + "\"}";
-
-        HttpCallback<Response> callback = new HttpCallback<Response>() {
-            @Override
-            public void onSuccess(Response response) {
-                assertNotNull(response);
-                Assertions.assertEquals(Protocol.H2_PRIOR_KNOWLEDGE, response.protocol());
-                Assertions.assertEquals(HttpStatus.SC_BAD_REQUEST, response.code());
-                latch.countDown();
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                fail("Should not fail");
-            }
-
-            @Override
-            public void onCancelled() {
-                fail("Should not be cancelled");
-            }
-        };
-
-        HttpClientUtil.doPostWithHttp2("http://127.0.0.1:" + port + "/random", jsonBody, header, callback, 5000);
-
-        assertTrue(latch.await(10, TimeUnit.SECONDS));
-    }
-
-    @Test
-    @Order(8)
-    void testXssFilterBlocked_formParam() throws Exception {
-        Map<String, String> headers = new HashMap<>();
-        headers.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
-
-        Map<String, String> params = new HashMap<>();
-        params.put("testParam", "<script>alert('xss')</script>");
-
-        try (CloseableHttpResponse response = HttpClientUtil.doPost(
-                "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", params, headers, 5000)) {
-            Assertions.assertEquals(
-                    HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
-        }
-    }
-
-    @Test
-    @Order(9)
-    void testXssFilterBlocked_jsonBody() throws Exception {
-        Map<String, String> headers = new HashMap<>();
-        headers.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
-
-        String jsonBody = "{\"testParam\":\"<script>alert('xss')</script>\"}";
-
-        try (CloseableHttpResponse response = HttpClientUtil.doPostJson(
-                "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", jsonBody, headers, 5000)) {
-            Assertions.assertEquals(
-                    HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
-        }
-    }
-
-    @Test
-    @Order(10)
-    void testXssFilterBlocked_headerParam() throws Exception {
-        Map<String, String> headers = new HashMap<>();
-        headers.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
-        headers.put("X-Test-Header", "<script>alert('xss')</script>");
-
-        Map<String, String> params = new HashMap<>();
-        params.put("safeParam", "123");
-
-        try (CloseableHttpResponse response = HttpClientUtil.doPost(
-                "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", params, headers, 5000)) {
-            Assertions.assertEquals(
-                    HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
-        }
-    }
-
-    @Test
-    @Order(11)
-    void testXssFilterBlocked_multiSource() throws Exception {
-        Map<String, String> headers = new HashMap<>();
-        headers.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
-        headers.put("X-Test-Header", "<script>alert('xss')</script>");
-
-        String jsonBody = "{\"testParam\":\"<script>alert('xss')</script>\"}";
-
-        try (CloseableHttpResponse response = HttpClientUtil.doPostJson(
-                "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000&urlParam="
-                        + URLEncoder.encode("<script>alert('xss')</script>", String.valueOf(StandardCharsets.UTF_8)),
-                jsonBody,
-                headers,
-                5000)) {
-            Assertions.assertEquals(
-                    HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
-        }
-    }
-
-    @Test
-    @Order(12)
-    void testXssFilterBlocked_formParamWithUserCustomKeyWords() throws Exception {
-        Map<String, String> headers = new HashMap<>();
-        headers.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
-
-        Map<String, String> params = new HashMap<>();
-        params.put("testParam", "custom1");
-
-        try (CloseableHttpResponse response = HttpClientUtil.doPost(
-                "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", params, headers, 5000)) {
-            Assertions.assertEquals(
-                    HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
-        }
-    }
-
-    @Test
-    @Order(9)
     void watch_withHttp2() throws Exception {
         CountDownLatch latch = new CountDownLatch(1);
         Map<String, String> header = new HashMap<>();
@@ -410,4 +198,217 @@ class ClusterControllerTest extends BaseSpringBootTest {
         HttpClientUtil.doPostWithHttp2("http://127.0.0.1:" + port + "/metadata/v1/watch", param, header, callback);
         assertTrue(latch.await(10, TimeUnit.SECONDS));
     }
+
+    @Test
+    @Order(5)
+    void testXssFilterBlocked_queryParam() throws Exception {
+        String malicious = "<script>alert('xss')</script>";
+        Map<String, String> header = new HashMap<>();
+        header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
+        try (CloseableHttpResponse response = HttpClientUtil.doGet(
+                "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000&testParam="
+                        + URLEncoder.encode(malicious, String.valueOf(StandardCharsets.UTF_8)),
+                new HashMap<>(),
+                header,
+                5000)) {
+            Assertions.assertEquals(
+                    HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
+        }
+    }
+
+    @Test
+    @Order(6)
+    void testXssFilterBlocked_queryParam_withGetHttp2() throws Exception {
+        CountDownLatch latch = new CountDownLatch(1);
+
+        String malicious = "<script>alert('xss')</script>";
+        Map<String, String> header = new HashMap<>();
+        header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
+
+        HttpCallback<Response> callback = new HttpCallback<Response>() {
+            @Override
+            public void onSuccess(Response response) {
+                assertNotNull(response);
+                Assertions.assertEquals(Protocol.H2_PRIOR_KNOWLEDGE, response.protocol());
+                Assertions.assertEquals(HttpStatus.SC_BAD_REQUEST, response.code());
+                latch.countDown();
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                fail("Should not fail");
+            }
+
+            @Override
+            public void onCancelled() {
+                fail("Should not be cancelled");
+            }
+        };
+
+        HttpClientUtil.doGetWithHttp2(
+                "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000&testParam="
+                        + URLEncoder.encode(malicious, String.valueOf(StandardCharsets.UTF_8)),
+                header,
+                callback,
+                5000);
+
+        assertTrue(latch.await(10, TimeUnit.SECONDS));
+    }
+
+    @Test
+    @Order(7)
+    void testXssFilterBlocked_formParam_withPostHttp2() throws Exception {
+        CountDownLatch latch = new CountDownLatch(1);
+
+        String malicious = "<script>alert('xss')</script>";
+        Map<String, String> header = new HashMap<>();
+        header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
+
+        Map<String, String> params = new HashMap<>();
+        params.put("key", malicious);
+
+        HttpCallback<Response> callback = new HttpCallback<Response>() {
+            @Override
+            public void onSuccess(Response response) {
+                assertNotNull(response);
+                Assertions.assertEquals(Protocol.H2_PRIOR_KNOWLEDGE, response.protocol());
+                Assertions.assertEquals(HttpStatus.SC_BAD_REQUEST, response.code());
+                latch.countDown();
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                fail("Should not fail");
+            }
+
+            @Override
+            public void onCancelled() {
+                fail("Should not be cancelled");
+            }
+        };
+
+        HttpClientUtil.doPostWithHttp2("http://127.0.0.1:" + port + "/random", params, header, callback, 5000);
+
+        assertTrue(latch.await(10, TimeUnit.SECONDS));
+    }
+
+    @Test
+    @Order(8)
+    void testXssFilterBlocked_bodyParam_withPostHttp2() throws Exception {
+        CountDownLatch latch = new CountDownLatch(1);
+
+        String malicious = "<script>alert('xss')</script>";
+        Map<String, String> header = new HashMap<>();
+
+        String jsonBody = "{\"key\":\"" + malicious + "\"}";
+
+        HttpCallback<Response> callback = new HttpCallback<Response>() {
+            @Override
+            public void onSuccess(Response response) {
+                assertNotNull(response);
+                Assertions.assertEquals(Protocol.H2_PRIOR_KNOWLEDGE, response.protocol());
+                Assertions.assertEquals(HttpStatus.SC_BAD_REQUEST, response.code());
+                latch.countDown();
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                fail("Should not fail");
+            }
+
+            @Override
+            public void onCancelled() {
+                fail("Should not be cancelled");
+            }
+        };
+
+        HttpClientUtil.doPostWithHttp2("http://127.0.0.1:" + port + "/random", jsonBody, header, callback, 5000);
+
+        assertTrue(latch.await(10, TimeUnit.SECONDS));
+    }
+
+    @Test
+    @Order(9)
+    void testXssFilterBlocked_formParam() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
+
+        Map<String, String> params = new HashMap<>();
+        params.put("testParam", "<script>alert('xss')</script>");
+
+        try (CloseableHttpResponse response = HttpClientUtil.doPost(
+                "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", params, headers, 5000)) {
+            Assertions.assertEquals(
+                    HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
+        }
+    }
+
+    @Test
+    @Order(10)
+    void testXssFilterBlocked_jsonBody() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
+
+        String jsonBody = "{\"testParam\":\"<script>alert('xss')</script>\"}";
+
+        try (CloseableHttpResponse response = HttpClientUtil.doPostJson(
+                "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", jsonBody, headers, 5000)) {
+            Assertions.assertEquals(
+                    HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
+        }
+    }
+
+    @Test
+    @Order(11)
+    void testXssFilterBlocked_headerParam() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
+        headers.put("X-Test-Header", "<script>alert('xss')</script>");
+
+        Map<String, String> params = new HashMap<>();
+        params.put("safeParam", "123");
+
+        try (CloseableHttpResponse response = HttpClientUtil.doPost(
+                "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", params, headers, 5000)) {
+            Assertions.assertEquals(
+                    HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
+        }
+    }
+
+    @Test
+    @Order(12)
+    void testXssFilterBlocked_multiSource() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
+        headers.put("X-Test-Header", "<script>alert('xss')</script>");
+
+        String jsonBody = "{\"testParam\":\"<script>alert('xss')</script>\"}";
+
+        try (CloseableHttpResponse response = HttpClientUtil.doPostJson(
+                "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000&urlParam="
+                        + URLEncoder.encode("<script>alert('xss')</script>", String.valueOf(StandardCharsets.UTF_8)),
+                jsonBody,
+                headers,
+                5000)) {
+            Assertions.assertEquals(
+                    HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
+        }
+    }
+
+    @Test
+    @Order(13)
+    void testXssFilterBlocked_formParamWithUserCustomKeyWords() throws Exception {
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
+
+        Map<String, String> params = new HashMap<>();
+        params.put("testParam", "custom1");
+
+        try (CloseableHttpResponse response = HttpClientUtil.doPost(
+                "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", params, headers, 5000)) {
+            Assertions.assertEquals(
+                    HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
+        }
+    }
+
 }
