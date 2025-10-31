@@ -408,5 +408,4 @@ class ClusterControllerTest extends BaseSpringBootTest {
                     HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
         }
     }
-
 }

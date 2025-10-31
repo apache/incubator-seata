@@ -57,6 +57,8 @@ public class ClusterWatcherManager implements ClusterChangeListener {
 
     private static final Map<String, Long> GROUP_UPDATE_TIME = new ConcurrentHashMap<>();
 
+    private static final Map<Watcher<HttpContext>, Boolean> HTTP2_HEADERS_SENT = new ConcurrentHashMap<>();
+
     private final ScheduledThreadPoolExecutor scheduledThreadPoolExecutor =
             new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("long-polling", 1));
 
@@ -70,10 +72,11 @@ public class ClusterWatcherManager implements ClusterChangeListener {
                                 .ifPresent(watchers -> watchers.parallelStream().forEach(watcher -> {
                                     if (System.currentTimeMillis() >= watcher.getTimeout()) {
                                         watcher.setDone(true);
-                                        sendWatcherResponse(watcher, HttpResponseStatus.NOT_MODIFIED);
-                                    }
-                                    if (!watcher.isDone()) {
-                                        // Re-register
+                                        // 如果超时则一定关闭流，无论是http1还是http2。对于后者 即使之前已经发送过 200 的 必须重新发送携带304的头
+                                        sendWatcherResponse(watcher, HttpResponseStatus.NOT_MODIFIED, true, true);
+                                        HTTP2_HEADERS_SENT.remove(watcher);
+                                    } else if (!watcher.isDone()) {
+                                        // Re-register if not done and not timeout
                                         registryWatcher(watcher);
                                     }
                                 }));
@@ -97,11 +100,35 @@ public class ClusterWatcherManager implements ClusterChangeListener {
     }
 
     private void notifyWatcher(Watcher<HttpContext> watcher) {
-        watcher.setDone(true);
-        sendWatcherResponse(watcher, HttpResponseStatus.OK);
+        HttpContext context = watcher.getAsyncContext();
+        boolean isHttp2 = context instanceof HttpContext && context.isHttp2();
+
+        if (!isHttp2) {
+            watcher.setDone(true);
+        }
+
+        boolean isFirstResponse = !HTTP2_HEADERS_SENT.getOrDefault(watcher, false);
+        sendWatcherResponse(watcher, HttpResponseStatus.OK, false, isFirstResponse);
+        if (isFirstResponse && isHttp2) {
+            HTTP2_HEADERS_SENT.put(watcher, true);
+        }
+
+        // For HTTP/2, re-register the watcher to continue listening for future updates
+        if (isHttp2 && !watcher.isDone()) {
+            registryWatcher(watcher);
+        }
     }
 
-    private void sendWatcherResponse(Watcher<HttpContext> watcher, HttpResponseStatus nettyStatus) {
+    /**
+     * Send watcher response to the client.
+     *
+     * @param watcher the watcher instance
+     * @param nettyStatus the HTTP status code
+     * @param closeStream whether to close the HTTP/2 stream (endStream=true)
+     * @param sendHeaders whether to send HTTP/2 headers frame (only needed for first response)
+     */
+    private void sendWatcherResponse(
+            Watcher<HttpContext> watcher, HttpResponseStatus nettyStatus, boolean closeStream, boolean sendHeaders) {
         HttpContext context = watcher.getAsyncContext();
         if (!(context instanceof HttpContext)) {
             logger.warn(
@@ -112,6 +139,8 @@ public class ClusterWatcherManager implements ClusterChangeListener {
         }
         ChannelHandlerContext ctx = context.getContext();
         if (!ctx.channel().isActive()) {
+            // channel不可用的时候确保能清理掉watcher 防止内存泄漏
+            HTTP2_HEADERS_SENT.remove(watcher);
             logger.warn(
                     "Netty channel is not active for watcher on group {}, cannot send response.", watcher.getGroup());
             return;
@@ -128,19 +157,23 @@ public class ClusterWatcherManager implements ClusterChangeListener {
             }
         } else {
             try {
+                // 第一次发送携带头，后续只需要携带data
+                if (sendHeaders) {
+                    Http2Headers headers = new DefaultHttp2Headers().status(nettyStatus.codeAsText());
+                    headers.set(HttpHeaderNames.CONTENT_LENGTH, "0");
+                    ctx.write(new DefaultHttp2HeadersFrame(headers));
+                }
 
-                Http2Headers headers = new DefaultHttp2Headers().status(nettyStatus.codeAsText());
-                headers.set(HttpHeaderNames.CONTENT_LENGTH, "0");
-
-                ctx.write(new DefaultHttp2HeadersFrame(headers));
-                ctx.write(new DefaultHttp2DataFrame(Unpooled.EMPTY_BUFFER, true));
+                ctx.write(new DefaultHttp2DataFrame(Unpooled.EMPTY_BUFFER, closeStream));
                 ctx.flush();
 
                 if (logger.isDebugEnabled()) {
                     logger.debug(
-                            "Sent HTTP/2 response with status: {} to watcher on group {}",
+                            "Sent HTTP/2 response with status: {} to watcher on group {}, stream closed: {}, headers sent: {}",
                             nettyStatus.code(),
-                            watcher.getGroup());
+                            watcher.getGroup(),
+                            closeStream,
+                            sendHeaders);
                 }
             } catch (Exception e) {
                 logger.error(
