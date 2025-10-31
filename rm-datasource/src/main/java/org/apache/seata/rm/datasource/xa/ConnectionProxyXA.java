@@ -20,6 +20,7 @@ import org.apache.seata.common.DefaultValues;
 import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.core.constants.DBType;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
@@ -27,6 +28,7 @@ import org.apache.seata.rm.BaseDataSourceResource;
 import org.apache.seata.rm.DefaultResourceManager;
 import org.apache.seata.rm.datasource.util.SeataXAResource;
 import org.apache.seata.sqlparser.util.JdbcConstants;
+import org.postgresql.xa.PGXAException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -163,8 +165,53 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
      * @throws XAException XAException
      */
     public void xaRollback(XAXid xaXid) throws XAException {
-        xaEnd(xaXid, XAResource.TMFAIL);
+        try {
+            xaEnd(xaXid, XAResource.TMFAIL);
+        } catch (XAException e) {
+            boolean shouldIgnore = false;
+
+            // In MySQL, a branch can be in NON-EXISTING state, but still appears in `xa recover`'s output, so that
+            // `xa end` would fail but `xa rollback` would still succeed. We thus suppress this xa end error.
+            // Also, deadlock would automatically "roll back" branch txn, triggering error 1614 (already rolled back).
+            // Still, we are able to call "XA ROLLBACK xid". So we mask this case as well.
+            if (DBType.MYSQL.name().equalsIgnoreCase(resource.getDbType())) {
+                Throwable cause = e.getCause();
+                if (cause instanceof SQLException) {
+                    int error = ((SQLException) cause).getErrorCode();
+                    if (error == 1614 || (error == 1399 && cause.getMessage().contains("NON-EXISTING"))) {
+                        shouldIgnore = true;
+                    }
+                }
+            }
+
+            // In PG, when a connection is not in the ACTIVE state or its internal xid does not equal the given xid, it
+            // raises errors. This could happen when an RM restarts (all connections are fresh) and TM asks it to roll
+            // back branches.
+            if (e instanceof PGXAException
+                    && e.getMessage().contains("tried to call end without corresponding start call")) {
+                shouldIgnore = true;
+            }
+
+            if (!shouldIgnore) {
+                throw e;
+            }
+        }
         xaResource.rollback(xaXid);
+
+        if (((DataSourceProxyXA) resource).sonataShimEnabled) {
+            if (shouldReleaseHelper && !helperReleased) {
+                // If we check helper txn ID earlier than RM saving the ID, and rolling back after RM preparing the
+                // branch, then the helper txn would be dangling. Since at this point we've successfully rolled back the
+                // branch, the helper txn must have ID saved (if there is any) and prepared, otherwise we would fail to
+                // roll back. Thus, we try again.
+                // Note that, the 2nd try does not always roll back a helper txn. E.g., branch rollback caused by user
+                // exceptions, branch prepare is not called at all and there is no helper txn to roll back. Thus, we
+                // don't check the return boolean.
+                releaseHelperTxn(xaXid);
+            }
+            forgetDummyKey(xaXid);
+        }
+
         releaseIfNecessary();
     }
 
@@ -258,7 +305,17 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
         try {
             if (!rollBacked) {
                 // XA End: Fail
-                xaEnd(xaBranchXid, XAResource.TMFAIL);
+                try {
+                    xaEnd(xaBranchXid, XAResource.TMFAIL);
+                } catch (XAException e) {
+                    // In MySQL, deadlock would automatically "roll back" branch txn, triggering error 1614. Still, we
+                    // are able to call "XA ROLLBACK xid". So we just mask this exception for this particular case.
+                    if (!DBType.MYSQL.name().equalsIgnoreCase(resource.getDbType())
+                            || !(e.getCause() instanceof SQLException)
+                            || ((SQLException) e.getCause()).getErrorCode() != 1614) {
+                        throw e;
+                    }
+                }
                 xaRollback(xaBranchXid);
             }
             // Branch Report to TC
