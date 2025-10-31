@@ -409,6 +409,11 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
                     }
                 }
             } catch (XAException xe) {
+                // Some drivers (e.g., PG) do not automatically roll back and reset autocommit when failing to prepare,
+                // which would cause the later reuse of the connection to fail at init(). Thus, we do it manually.
+                originalConnection.rollback();
+                originalConnection.setAutoCommit(true);
+
                 // Branch Report to TC: Failed
                 reportStatusToTC(BranchStatus.PhaseOne_Failed);
                 throw new SQLException(
