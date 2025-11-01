@@ -39,6 +39,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Calendar;
+import java.util.Date;
+
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -78,9 +80,31 @@ public class SqlServerUndoLogManagerTest {
         
         // Mock PreparedStatement for common operations
         PreparedStatement mockPreparedStatement = mock(PreparedStatement.class);
-        when(mockConnection.prepareStatement(anyString())).thenReturn(mockPreparedStatement);
-        when(mockPooledConnection.prepareStatement(anyString())).thenReturn(mockPreparedStatement);
+        PreparedStatement mockPreparedStatement2 = mock(PreparedStatement.class);
+
+        // Mock ConnectionProxy's prepareStatement method directly
+        when(connectionProxy.prepareStatement(anyString()))
+                .thenReturn(mockPreparedStatement)
+                .thenReturn(mockPreparedStatement2)
+                .thenReturn(mockPreparedStatement)
+                .thenReturn(mockPreparedStatement2);
+        
+        // For methods that create multiple PreparedStatements, we need to return different instances
+        when(mockConnection.prepareStatement(anyString()))
+            .thenReturn(mockPreparedStatement)
+            .thenReturn(mockPreparedStatement2)
+            .thenReturn(mockPreparedStatement)
+            .thenReturn(mockPreparedStatement2);
+            
+        when(mockPooledConnection.prepareStatement(anyString()))
+            .thenReturn(mockPreparedStatement)
+            .thenReturn(mockPreparedStatement2)
+            .thenReturn(mockPreparedStatement)
+            .thenReturn(mockPreparedStatement2);
+            
+        // Mock all PreparedStatement operations
         when(mockPreparedStatement.executeUpdate()).thenReturn(1);
+        when(mockPreparedStatement2.executeUpdate()).thenReturn(1);
     }
 
     @Test
@@ -149,7 +173,7 @@ public class SqlServerUndoLogManagerTest {
         
         Calendar calendar = Calendar.getInstance();
         calendar.set(2023, Calendar.JANUARY, 1);
-        java.util.Date logCreated = calendar.getTime();
+        Date logCreated = calendar.getTime();
         
         int deletedRows = undoLogManager.deleteUndoLogByLogCreated(logCreated, 100, connection);
         
@@ -166,7 +190,7 @@ public class SqlServerUndoLogManagerTest {
         when(connection.prepareStatement(anyString())).thenThrow(new RuntimeException("Connection error"));
         
         Calendar calendar = Calendar.getInstance();
-        java.util.Date logCreated = calendar.getTime();
+        Date logCreated = calendar.getTime();
         
         Assertions.assertThrows(SQLException.class, () -> 
             undoLogManager.deleteUndoLogByLogCreated(logCreated, 100, connection));
@@ -326,7 +350,7 @@ public class SqlServerUndoLogManagerTest {
         when(preparedStatement.executeUpdate()).thenReturn(0);
         
         Calendar calendar = Calendar.getInstance();
-        java.util.Date logCreated = calendar.getTime();
+        Date logCreated = calendar.getTime();
         
         int deletedRows = undoLogManager.deleteUndoLogByLogCreated(logCreated, 100, connection);
         

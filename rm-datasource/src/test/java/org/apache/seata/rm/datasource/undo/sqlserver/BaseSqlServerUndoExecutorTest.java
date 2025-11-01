@@ -20,6 +20,7 @@ import org.apache.seata.rm.datasource.sql.struct.Field;
 import org.apache.seata.rm.datasource.sql.struct.KeyType;
 import org.apache.seata.rm.datasource.sql.struct.Row;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
+import org.apache.seata.rm.datasource.undo.AbstractUndoExecutor;
 import org.apache.seata.rm.datasource.undo.SQLUndoLog;
 import org.apache.seata.sqlparser.SQLType;
 import org.apache.seata.sqlparser.struct.ColumnMeta;
@@ -241,7 +242,7 @@ public class BaseSqlServerUndoExecutorTest {
     @Test
     public void testInheritanceFromAbstractUndoExecutor() {
         // Verify inheritance chain
-        Assertions.assertTrue(executor instanceof org.apache.seata.rm.datasource.undo.AbstractUndoExecutor);
+        Assertions.assertTrue(executor instanceof AbstractUndoExecutor);
         Assertions.assertTrue(executor instanceof BaseSqlServerUndoExecutor);
     }
 
