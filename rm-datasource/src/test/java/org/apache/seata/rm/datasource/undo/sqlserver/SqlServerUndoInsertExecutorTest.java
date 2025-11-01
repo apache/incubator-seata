@@ -105,40 +105,40 @@ public class SqlServerUndoInsertExecutorTest extends BaseExecutorTest {
     private TableMeta createTableMeta() {
         TableMeta meta = new TableMeta();
         meta.setTableName("test_table");
-        
+
         // Create column metadata
         Map<String, ColumnMeta> allColumns = new HashMap<>();
-        
+
         ColumnMeta idColumn = new ColumnMeta();
         idColumn.setTableName("test_table");
         idColumn.setColumnName("id");
         idColumn.setDataType(Types.INTEGER);
         idColumn.setColumnSize(11);
         allColumns.put("id", idColumn);
-        
+
         ColumnMeta nameColumn = new ColumnMeta();
         nameColumn.setTableName("test_table");
         nameColumn.setColumnName("name");
         nameColumn.setDataType(Types.VARCHAR);
         nameColumn.setColumnSize(255);
         allColumns.put("name", nameColumn);
-        
+
         meta.getAllColumns().putAll(allColumns);
-        
+
         // Create primary key index
         Map<String, IndexMeta> allIndexes = new HashMap<>();
         IndexMeta primaryIndex = new IndexMeta();
         primaryIndex.setIndexName("PRIMARY");
         primaryIndex.setNonUnique(false);
         primaryIndex.setIndextype(IndexType.PRIMARY);
-        
+
         List<ColumnMeta> primaryColumns = new ArrayList<>();
         primaryColumns.add(idColumn);
         primaryIndex.setValues(primaryColumns);
-        
+
         allIndexes.put("PRIMARY", primaryIndex);
         meta.getAllIndexes().putAll(allIndexes);
-        
+
         return meta;
     }
 
@@ -147,25 +147,23 @@ public class SqlServerUndoInsertExecutorTest extends BaseExecutorTest {
         undoLog.setSqlType(SQLType.INSERT);
         undoLog.setTableName("test_table");
         undoLog.setTableMeta(tableMeta);
-        
+
         // Create after image (for INSERT undo, we use after image)
         TableRecords afterImage = new TableRecords();
         afterImage.setTableName("test_table");
         afterImage.setTableMeta(tableMeta);
-        
-        List<Field> fields = Arrays.asList(
-                new Field("id", Types.INTEGER, 1),
-                new Field("name", Types.VARCHAR, "John"));
-        
+
+        List<Field> fields = Arrays.asList(new Field("id", Types.INTEGER, 1), new Field("name", Types.VARCHAR, "John"));
+
         // Set primary key for id field
         fields.get(0).setKeyType(KeyType.PRIMARY_KEY);
-        
+
         Row row = new Row();
         row.setFields(fields);
-        
+
         afterImage.setRows(Arrays.asList(row));
         undoLog.setAfterImage(afterImage);
-        
+
         return undoLog;
     }
 
@@ -199,15 +197,15 @@ public class SqlServerUndoInsertExecutorTest extends BaseExecutorTest {
     public void testBuildUndoSQL() {
         SqlServerUndoInsertExecutor insertExecutor = new SqlServerUndoInsertExecutor(sqlUndoLog);
         String undoSQL = insertExecutor.buildUndoSQL();
-        
+
         // Verify SQL structure
         Assertions.assertNotNull(undoSQL);
         Assertions.assertTrue(undoSQL.contains("DELETE FROM"));
         Assertions.assertTrue(undoSQL.contains("WHERE"));
-        
+
         // Verify table name
         Assertions.assertTrue(undoSQL.contains("test_table"));
-        
+
         // Verify WHERE clause uses primary key
         Assertions.assertTrue(undoSQL.contains("id") && undoSQL.contains("= ?"));
     }
@@ -216,15 +214,15 @@ public class SqlServerUndoInsertExecutorTest extends BaseExecutorTest {
     public void testGetUndoRows() {
         SqlServerUndoInsertExecutor insertExecutor = new SqlServerUndoInsertExecutor(sqlUndoLog);
         TableRecords undoRows = insertExecutor.getUndoRows();
-        
+
         Assertions.assertNotNull(undoRows);
         Assertions.assertEquals(sqlUndoLog.getAfterImage(), undoRows);
         Assertions.assertEquals("test_table", undoRows.getTableName());
         Assertions.assertEquals(1, undoRows.getRows().size());
-        
+
         Row row = undoRows.getRows().get(0);
         Assertions.assertEquals(2, row.getFields().size());
-        
+
         Field idField = row.getFields().stream()
                 .filter(f -> "id".equals(f.getName()))
                 .findFirst()
@@ -239,72 +237,72 @@ public class SqlServerUndoInsertExecutorTest extends BaseExecutorTest {
         // Create table with compound primary key
         TableMeta compoundMeta = new TableMeta();
         compoundMeta.setTableName("compound_table");
-        
+
         Map<String, ColumnMeta> allColumns = new HashMap<>();
-        
+
         ColumnMeta id1Column = new ColumnMeta();
         id1Column.setTableName("compound_table");
         id1Column.setColumnName("id1");
         id1Column.setDataType(Types.INTEGER);
         allColumns.put("id1", id1Column);
-        
+
         ColumnMeta id2Column = new ColumnMeta();
         id2Column.setTableName("compound_table");
         id2Column.setColumnName("id2");
         id2Column.setDataType(Types.INTEGER);
         allColumns.put("id2", id2Column);
-        
+
         ColumnMeta nameColumn = new ColumnMeta();
         nameColumn.setTableName("compound_table");
         nameColumn.setColumnName("name");
         nameColumn.setDataType(Types.VARCHAR);
         allColumns.put("name", nameColumn);
-        
+
         compoundMeta.getAllColumns().putAll(allColumns);
-        
+
         // Create compound primary key
         Map<String, IndexMeta> allIndexes = new HashMap<>();
         IndexMeta primaryIndex = new IndexMeta();
         primaryIndex.setIndexName("PRIMARY");
         primaryIndex.setNonUnique(false);
         primaryIndex.setIndextype(IndexType.PRIMARY);
-        
+
         List<ColumnMeta> primaryColumns = new ArrayList<>();
         primaryColumns.add(id1Column);
         primaryColumns.add(id2Column);
         primaryIndex.setValues(primaryColumns);
-        
+
         allIndexes.put("PRIMARY", primaryIndex);
         compoundMeta.getAllIndexes().putAll(allIndexes);
-        
+
         // Create SQL undo log with compound key
         SQLUndoLog compoundUndoLog = new SQLUndoLog();
         compoundUndoLog.setSqlType(SQLType.INSERT);
         compoundUndoLog.setTableName("compound_table");
         compoundUndoLog.setTableMeta(compoundMeta);
-        
+
         TableRecords afterImage = new TableRecords();
         afterImage.setTableName("compound_table");
         afterImage.setTableMeta(compoundMeta);
-        
+
         List<Field> fields = Arrays.asList(
                 new Field("id1", Types.INTEGER, 1),
                 new Field("id2", Types.INTEGER, 2),
                 new Field("name", Types.VARCHAR, "test"));
-        
+
         // Set primary key types
         fields.get(0).setKeyType(KeyType.PRIMARY_KEY);
         fields.get(1).setKeyType(KeyType.PRIMARY_KEY);
-        
+
         Row resultRow = new Row();
         resultRow.setFields(fields);
-        
+
         afterImage.setRows(Arrays.asList(resultRow));
         compoundUndoLog.setAfterImage(afterImage);
-        
+
         SqlServerUndoInsertExecutor compoundExecutor = new SqlServerUndoInsertExecutor(compoundUndoLog);
         String undoSQL = compoundExecutor.buildUndoSQL();
-        
+
         // Verify compound primary key in WHERE clause
         Assertions.assertTrue(undoSQL.contains("DELETE FROM"));
         Assertions.assertTrue(undoSQL.contains("id1") && undoSQL.contains("= ?"));
@@ -317,14 +315,14 @@ public class SqlServerUndoInsertExecutorTest extends BaseExecutorTest {
         SQLUndoLog emptyUndoLog = new SQLUndoLog();
         emptyUndoLog.setSqlType(SQLType.INSERT);
         emptyUndoLog.setTableName("test_table");
-        
+
         TableRecords emptyAfterImage = new TableRecords();
         emptyAfterImage.setTableName("test_table");
         emptyAfterImage.setRows(new ArrayList<>());
         emptyUndoLog.setAfterImage(emptyAfterImage);
-        
+
         SqlServerUndoInsertExecutor emptyExecutor = new SqlServerUndoInsertExecutor(emptyUndoLog);
-        
+
         Assertions.assertThrows(ShouldNeverHappenException.class, () -> {
             emptyExecutor.buildUndoSQL();
         });
@@ -336,9 +334,9 @@ public class SqlServerUndoInsertExecutorTest extends BaseExecutorTest {
         nullUndoLog.setSqlType(SQLType.INSERT);
         nullUndoLog.setTableName("test_table");
         nullUndoLog.setAfterImage(null);
-        
+
         SqlServerUndoInsertExecutor nullExecutor = new SqlServerUndoInsertExecutor(nullUndoLog);
-        
+
         Assertions.assertThrows(NullPointerException.class, () -> {
             nullExecutor.buildUndoSQL();
         });
@@ -359,7 +357,7 @@ public class SqlServerUndoInsertExecutorTest extends BaseExecutorTest {
     @Test
     public void testInheritance() {
         SqlServerUndoInsertExecutor insertExecutor = new SqlServerUndoInsertExecutor(sqlUndoLog);
-        
+
         // Verify inheritance hierarchy
         Assertions.assertTrue(insertExecutor instanceof BaseSqlServerUndoExecutor);
         Assertions.assertTrue(insertExecutor instanceof AbstractUndoExecutor);
@@ -369,11 +367,11 @@ public class SqlServerUndoInsertExecutorTest extends BaseExecutorTest {
     public void testSqlServerSpecificSql() {
         SqlServerUndoInsertExecutor insertExecutor = new SqlServerUndoInsertExecutor(sqlUndoLog);
         String undoSQL = insertExecutor.buildUndoSQL();
-        
+
         // Verify SQL Server compatible syntax
         Assertions.assertNotNull(undoSQL);
         Assertions.assertTrue(undoSQL.toUpperCase().startsWith("DELETE"));
-        
+
         // Should not contain database-specific syntax that would fail on SQL Server
         Assertions.assertFalse(undoSQL.contains("LIMIT"));
         Assertions.assertFalse(undoSQL.contains("ROWNUM"));
@@ -384,73 +382,69 @@ public class SqlServerUndoInsertExecutorTest extends BaseExecutorTest {
         // Create table with compound primary key
         TableMeta compoundMeta = new TableMeta();
         compoundMeta.setTableName("compound_table");
-        
+
         Map<String, ColumnMeta> allColumns = new HashMap<>();
-        
+
         ColumnMeta id1Column = new ColumnMeta();
         id1Column.setColumnName("id1");
         id1Column.setDataType(Types.INTEGER);
         allColumns.put("id1", id1Column);
-        
+
         ColumnMeta id2Column = new ColumnMeta();
         id2Column.setColumnName("id2");
         id2Column.setDataType(Types.INTEGER);
         allColumns.put("id2", id2Column);
-        
+
         compoundMeta.getAllColumns().putAll(allColumns);
-        
+
         // Create compound primary key index
         Map<String, IndexMeta> allIndexes = new HashMap<>();
         IndexMeta primaryIndex = new IndexMeta();
         primaryIndex.setIndexName("PRIMARY");
         primaryIndex.setNonUnique(false);
         primaryIndex.setIndextype(IndexType.PRIMARY);
-        
+
         List<ColumnMeta> primaryColumns = new ArrayList<>();
         primaryColumns.add(id1Column);
         primaryColumns.add(id2Column);
         primaryIndex.setValues(primaryColumns);
-        
+
         allIndexes.put("PRIMARY", primaryIndex);
         compoundMeta.getAllIndexes().putAll(allIndexes);
-        
+
         SQLUndoLog compoundUndoLog = new SQLUndoLog();
         compoundUndoLog.setSqlType(SQLType.INSERT);
         compoundUndoLog.setTableName("compound_table");
         compoundUndoLog.setTableMeta(compoundMeta);
-        
+
         TableRecords afterImage = new TableRecords();
         afterImage.setTableName("compound_table");
         afterImage.setTableMeta(compoundMeta);
-        
-        List<Field> fields = Arrays.asList(
-                new Field("id1", Types.INTEGER, 1),
-                new Field("id2", Types.INTEGER, 2));
-        
+
+        List<Field> fields = Arrays.asList(new Field("id1", Types.INTEGER, 1), new Field("id2", Types.INTEGER, 2));
+
         // Set primary key types
         fields.get(0).setKeyType(KeyType.PRIMARY_KEY);
         fields.get(1).setKeyType(KeyType.PRIMARY_KEY);
-        
+
         Row resultRow = new Row();
         resultRow.setFields(fields);
-        
+
         afterImage.setRows(Arrays.asList(resultRow));
         compoundUndoLog.setAfterImage(afterImage);
-        
+
         SqlServerUndoInsertExecutor compoundExecutor = new SqlServerUndoInsertExecutor(compoundUndoLog);
         String sql = compoundExecutor.buildUndoSQL();
-        
+
         MockConnection connection = new MockConnection(new MockDriver(), "", null);
         MockPreparedStatement undoPST = (MockPreparedStatement) connection.prepareStatement(sql);
-        
-        List<Field> pkFields = Arrays.asList(
-                new Field("id1", Types.INTEGER, 1),
-                new Field("id2", Types.INTEGER, 2));
+
+        List<Field> pkFields = Arrays.asList(new Field("id1", Types.INTEGER, 1), new Field("id2", Types.INTEGER, 2));
         pkFields.get(0).setKeyType(KeyType.PRIMARY_KEY);
         pkFields.get(1).setKeyType(KeyType.PRIMARY_KEY);
-        
+
         compoundExecutor.undoPrepare(undoPST, new ArrayList<>(), pkFields);
-        
+
         // Should have 2 parameters for compound primary key
         Assertions.assertEquals(2, undoPST.getParameters().size());
     }

@@ -41,7 +41,6 @@ import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Date;
 
-
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -73,11 +72,11 @@ public class SqlServerUndoLogManagerTest {
         when(connectionProxy.getDataSourceProxy()).thenReturn(dataSourceProxy);
         when(connectionProxy.getContext()).thenReturn(new ConnectionContext());
         when(connectionProxy.getTargetConnection()).thenReturn(mockConnection);
-        
+
         // Mock dataSource.getConnection() to return a mock DruidPooledConnection
         DruidPooledConnection mockPooledConnection = mock(DruidPooledConnection.class);
         when(dataSource.getConnection()).thenReturn(mockPooledConnection);
-        
+
         // Mock PreparedStatement for common operations
         PreparedStatement mockPreparedStatement = mock(PreparedStatement.class);
         PreparedStatement mockPreparedStatement2 = mock(PreparedStatement.class);
@@ -88,20 +87,20 @@ public class SqlServerUndoLogManagerTest {
                 .thenReturn(mockPreparedStatement2)
                 .thenReturn(mockPreparedStatement)
                 .thenReturn(mockPreparedStatement2);
-        
+
         // For methods that create multiple PreparedStatements, we need to return different instances
         when(mockConnection.prepareStatement(anyString()))
-            .thenReturn(mockPreparedStatement)
-            .thenReturn(mockPreparedStatement2)
-            .thenReturn(mockPreparedStatement)
-            .thenReturn(mockPreparedStatement2);
-            
+                .thenReturn(mockPreparedStatement)
+                .thenReturn(mockPreparedStatement2)
+                .thenReturn(mockPreparedStatement)
+                .thenReturn(mockPreparedStatement2);
+
         when(mockPooledConnection.prepareStatement(anyString()))
-            .thenReturn(mockPreparedStatement)
-            .thenReturn(mockPreparedStatement2)
-            .thenReturn(mockPreparedStatement)
-            .thenReturn(mockPreparedStatement2);
-            
+                .thenReturn(mockPreparedStatement)
+                .thenReturn(mockPreparedStatement2)
+                .thenReturn(mockPreparedStatement)
+                .thenReturn(mockPreparedStatement2);
+
         // Mock all PreparedStatement operations
         when(mockPreparedStatement.executeUpdate()).thenReturn(1);
         when(mockPreparedStatement2.executeUpdate()).thenReturn(1);
@@ -117,13 +116,13 @@ public class SqlServerUndoLogManagerTest {
     public void testInsertUndoLogWithGlobalFinished() throws SQLException {
         Connection connection = mock(Connection.class);
         PreparedStatement preparedStatement = mock(PreparedStatement.class);
-        
+
         when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
         when(preparedStatement.executeUpdate()).thenReturn(1);
-        
+
         Assertions.assertDoesNotThrow(() -> undoLogManager.insertUndoLogWithGlobalFinished(
                 "test-xid", 123L, new JacksonUndoLogParser(), connection));
-        
+
         verify(preparedStatement).setLong(1, 123L);
         verify(preparedStatement).setString(2, "test-xid");
         verify(preparedStatement).executeUpdate();
@@ -134,13 +133,13 @@ public class SqlServerUndoLogManagerTest {
         Connection connection = mock(Connection.class);
         PreparedStatement preparedStatement = mock(PreparedStatement.class);
         byte[] undoLogContent = "test-undo-log".getBytes();
-        
+
         when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
         when(preparedStatement.executeUpdate()).thenReturn(1);
-        
-        Assertions.assertDoesNotThrow(() -> undoLogManager.insertUndoLogWithNormal(
-                "test-xid", 456L, "test-context", undoLogContent, connection));
-        
+
+        Assertions.assertDoesNotThrow(() ->
+                undoLogManager.insertUndoLogWithNormal("test-xid", 456L, "test-context", undoLogContent, connection));
+
         verify(preparedStatement).setLong(1, 456L);
         verify(preparedStatement).setString(2, "test-xid");
         verify(preparedStatement).setString(3, "test-context");
@@ -159,24 +158,24 @@ public class SqlServerUndoLogManagerTest {
         Assertions.assertDoesNotThrow(() -> undoLogManager.batchDeleteUndoLog(
                 Sets.newHashSet("test-xid"), Sets.newHashSet(1L), dataSource.getConnection()));
 
-        Assertions.assertDoesNotThrow(() -> undoLogManager.batchDeleteUndoLog(
-                Sets.newHashSet("test-xid"), Sets.newHashSet(1L), connectionProxy));
+        Assertions.assertDoesNotThrow(() ->
+                undoLogManager.batchDeleteUndoLog(Sets.newHashSet("test-xid"), Sets.newHashSet(1L), connectionProxy));
     }
 
     @Test
     public void testDeleteUndoLogByLogCreated() throws SQLException {
         Connection connection = mock(Connection.class);
         PreparedStatement preparedStatement = mock(PreparedStatement.class);
-        
+
         when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
         when(preparedStatement.executeUpdate()).thenReturn(5);
-        
+
         Calendar calendar = Calendar.getInstance();
         calendar.set(2023, Calendar.JANUARY, 1);
         Date logCreated = calendar.getTime();
-        
+
         int deletedRows = undoLogManager.deleteUndoLogByLogCreated(logCreated, 100, connection);
-        
+
         Assertions.assertEquals(5, deletedRows);
         verify(preparedStatement).setInt(1, 100);
         verify(preparedStatement).setDate(2, new java.sql.Date(logCreated.getTime()));
@@ -186,14 +185,14 @@ public class SqlServerUndoLogManagerTest {
     @Test
     public void testDeleteUndoLogByLogCreatedWithException() throws SQLException {
         Connection connection = mock(Connection.class);
-        
+
         when(connection.prepareStatement(anyString())).thenThrow(new RuntimeException("Connection error"));
-        
+
         Calendar calendar = Calendar.getInstance();
         Date logCreated = calendar.getTime();
-        
-        Assertions.assertThrows(SQLException.class, () -> 
-            undoLogManager.deleteUndoLogByLogCreated(logCreated, 100, connection));
+
+        Assertions.assertThrows(
+                SQLException.class, () -> undoLogManager.deleteUndoLogByLogCreated(logCreated, 100, connection));
     }
 
     @Test
@@ -201,11 +200,11 @@ public class SqlServerUndoLogManagerTest {
         // Mock additional dependencies for undo operation
         Connection mockConnection = mock(Connection.class);
         PreparedStatement mockPreparedStatement = mock(PreparedStatement.class);
-        
+
         when(dataSourceProxy.getPlainConnection()).thenReturn(mockConnection);
         when(mockConnection.prepareStatement(anyString())).thenReturn(mockPreparedStatement);
         when(mockPreparedStatement.executeQuery()).thenReturn(mock(java.sql.ResultSet.class));
-        
+
         // The undo method may throw exceptions due to complex internal logic
         // We just verify it doesn't throw unexpected runtime exceptions
         try {
@@ -213,16 +212,16 @@ public class SqlServerUndoLogManagerTest {
         } catch (Exception e) {
             // Expected exceptions from business logic are acceptable
             // We're mainly testing that the method can be called without null pointer exceptions
-            Assertions.assertTrue(e instanceof SQLException || 
-                                e instanceof org.apache.seata.core.exception.BranchTransactionException ||
-                                e instanceof RuntimeException);
+            Assertions.assertTrue(e instanceof SQLException
+                    || e instanceof org.apache.seata.core.exception.BranchTransactionException
+                    || e instanceof RuntimeException);
         }
     }
 
     @Test
     public void testBuildSelectUndoSql() {
         String selectSql = undoLogManager.buildSelectUndoSql();
-        
+
         Assertions.assertNotNull(selectSql);
         Assertions.assertTrue(selectSql.contains("SELECT * FROM"));
         Assertions.assertTrue(selectSql.contains("undo_log"));
@@ -235,7 +234,7 @@ public class SqlServerUndoLogManagerTest {
     @Test
     public void testGetCheckUndoLogTableExistSql() {
         String checkSql = undoLogManager.getCheckUndoLogTableExistSql();
-        
+
         Assertions.assertNotNull(checkSql);
         Assertions.assertTrue(checkSql.contains("SELECT TOP 1 1 FROM"));
         Assertions.assertTrue(checkSql.contains("undo_log"));
@@ -245,12 +244,12 @@ public class SqlServerUndoLogManagerTest {
     public void testSqlServerSpecificSqlSyntax() {
         // Test that SQL Server-specific syntax is used
         String selectSql = undoLogManager.buildSelectUndoSql();
-        
+
         // Verify SQL Server specific WITH(UPDLOCK) is present
         Assertions.assertTrue(selectSql.contains("WITH(UPDLOCK)"));
-        
+
         String checkSql = undoLogManager.getCheckUndoLogTableExistSql();
-        
+
         // Verify SQL Server specific TOP syntax is used
         Assertions.assertTrue(checkSql.contains("SELECT TOP 1"));
     }
@@ -261,7 +260,7 @@ public class SqlServerUndoLogManagerTest {
         Field field = SqlServerUndoLogManager.class.getDeclaredField("INSERT_UNDO_LOG_SQL");
         field.setAccessible(true);
         String insertSql = (String) field.get(undoLogManager);
-        
+
         Assertions.assertNotNull(insertSql);
         Assertions.assertTrue(insertSql.contains("INSERT INTO"));
         Assertions.assertTrue(insertSql.contains("undo_log"));
@@ -276,7 +275,7 @@ public class SqlServerUndoLogManagerTest {
         Field field = SqlServerUndoLogManager.class.getDeclaredField("DELETE_UNDO_LOG_BY_CREATE_SQL");
         field.setAccessible(true);
         String deleteSql = (String) field.get(undoLogManager);
-        
+
         Assertions.assertNotNull(deleteSql);
         Assertions.assertTrue(deleteSql.contains("DELETE FROM"));
         Assertions.assertTrue(deleteSql.contains("undo_log"));
@@ -290,12 +289,12 @@ public class SqlServerUndoLogManagerTest {
     public void testInsertUndoLogWithGlobalFinishedState() throws SQLException {
         Connection connection = mock(Connection.class);
         PreparedStatement preparedStatement = mock(PreparedStatement.class);
-        
+
         when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
         when(preparedStatement.executeUpdate()).thenReturn(1);
-        
+
         undoLogManager.insertUndoLogWithGlobalFinished("test-xid", 789L, new JacksonUndoLogParser(), connection);
-        
+
         // Verify correct state value (GlobalFinished = 1) is set
         verify(preparedStatement).setInt(5, 1);
         verify(preparedStatement).executeUpdate();
@@ -306,12 +305,12 @@ public class SqlServerUndoLogManagerTest {
         Connection connection = mock(Connection.class);
         PreparedStatement preparedStatement = mock(PreparedStatement.class);
         byte[] content = "test-content".getBytes();
-        
+
         when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
         when(preparedStatement.executeUpdate()).thenReturn(1);
-        
+
         undoLogManager.insertUndoLogWithNormal("test-xid", 789L, "test-ctx", content, connection);
-        
+
         // Verify correct state value (Normal = 0) is set
         verify(preparedStatement).setInt(5, 0);
         verify(preparedStatement).executeUpdate();
@@ -321,39 +320,43 @@ public class SqlServerUndoLogManagerTest {
     public void testInsertUndoLogWithSqlException() throws SQLException {
         Connection connection = mock(Connection.class);
         PreparedStatement preparedStatement = mock(PreparedStatement.class);
-        
+
         when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
         when(preparedStatement.executeUpdate()).thenThrow(new SQLException("Database error"));
-        
-        Assertions.assertThrows(SQLException.class, () -> 
-            undoLogManager.insertUndoLogWithGlobalFinished("test-xid", 789L, new JacksonUndoLogParser(), connection));
+
+        Assertions.assertThrows(
+                SQLException.class,
+                () -> undoLogManager.insertUndoLogWithGlobalFinished(
+                        "test-xid", 789L, new JacksonUndoLogParser(), connection));
     }
 
     @Test
     public void testInsertUndoLogWithNonSqlException() throws SQLException {
         Connection connection = mock(Connection.class);
         PreparedStatement preparedStatement = mock(PreparedStatement.class);
-        
+
         when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
         when(preparedStatement.executeUpdate()).thenThrow(new RuntimeException("Runtime error"));
-        
-        Assertions.assertThrows(SQLException.class, () -> 
-            undoLogManager.insertUndoLogWithGlobalFinished("test-xid", 789L, new JacksonUndoLogParser(), connection));
+
+        Assertions.assertThrows(
+                SQLException.class,
+                () -> undoLogManager.insertUndoLogWithGlobalFinished(
+                        "test-xid", 789L, new JacksonUndoLogParser(), connection));
     }
 
     @Test
     public void testDeleteUndoLogByLogCreatedWithZeroRows() throws SQLException {
         Connection connection = mock(Connection.class);
         PreparedStatement preparedStatement = mock(PreparedStatement.class);
-        
+
         when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
         when(preparedStatement.executeUpdate()).thenReturn(0);
-        
+
         Calendar calendar = Calendar.getInstance();
         Date logCreated = calendar.getTime();
-        
+
         int deletedRows = undoLogManager.deleteUndoLogByLogCreated(logCreated, 100, connection);
-        
+
         Assertions.assertEquals(0, deletedRows);
         verify(preparedStatement).executeUpdate();
     }
@@ -361,9 +364,9 @@ public class SqlServerUndoLogManagerTest {
     @Test
     public void testLoadLevelAnnotation() {
         // Verify that the class has LoadLevel annotation for SQL Server
-        org.apache.seata.common.loader.LoadLevel loadLevel = 
-            SqlServerUndoLogManager.class.getAnnotation(org.apache.seata.common.loader.LoadLevel.class);
-        
+        org.apache.seata.common.loader.LoadLevel loadLevel =
+                SqlServerUndoLogManager.class.getAnnotation(org.apache.seata.common.loader.LoadLevel.class);
+
         Assertions.assertNotNull(loadLevel);
         Assertions.assertEquals(JdbcConstants.SQLSERVER, loadLevel.name());
     }
@@ -379,15 +382,15 @@ public class SqlServerUndoLogManagerTest {
     public void testMultipleInsertOperations() throws SQLException {
         Connection connection = mock(Connection.class);
         PreparedStatement preparedStatement = mock(PreparedStatement.class);
-        
+
         when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
         when(preparedStatement.executeUpdate()).thenReturn(1);
-        
+
         // Test multiple insert operations
         undoLogManager.insertUndoLogWithGlobalFinished("xid-1", 1L, new JacksonUndoLogParser(), connection);
         undoLogManager.insertUndoLogWithNormal("xid-2", 2L, "ctx-2", "content-2".getBytes(), connection);
         undoLogManager.insertUndoLogWithGlobalFinished("xid-3", 3L, new JacksonUndoLogParser(), connection);
-        
+
         // Verify that prepareStatement is called for each operation
         verify(connection, Mockito.times(3)).prepareStatement(anyString());
         verify(preparedStatement, Mockito.times(3)).executeUpdate();
@@ -397,14 +400,14 @@ public class SqlServerUndoLogManagerTest {
     public void testBuildContextForGlobalFinished() throws SQLException {
         Connection connection = mock(Connection.class);
         PreparedStatement preparedStatement = mock(PreparedStatement.class);
-        
+
         when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
         when(preparedStatement.executeUpdate()).thenReturn(1);
-        
+
         JacksonUndoLogParser parser = new JacksonUndoLogParser();
-        
+
         undoLogManager.insertUndoLogWithGlobalFinished("test-xid", 100L, parser, connection);
-        
+
         // Verify context is built with parser name and NONE compressor
         verify(preparedStatement).setString(3, "serializer=jackson&compressorType=" + CompressorType.NONE.name());
     }
@@ -415,16 +418,14 @@ public class SqlServerUndoLogManagerTest {
         Field field = SqlServerUndoLogManager.class.getDeclaredField("INSERT_UNDO_LOG_SQL");
         field.setAccessible(true);
         String insertSql = (String) field.get(undoLogManager);
-        
+
         // Should contain SYSDATETIME() function which is SQL Server specific
-        Assertions.assertTrue(insertSql.contains("SYSDATETIME()"), 
-            "INSERT SQL should contain SYSDATETIME() function");
-        
+        Assertions.assertTrue(insertSql.contains("SYSDATETIME()"), "INSERT SQL should contain SYSDATETIME() function");
+
         // Should not contain other database's date functions
-        Assertions.assertFalse(insertSql.contains("NOW()"), 
-            "INSERT SQL should not contain MySQL's NOW() function");
-        Assertions.assertFalse(insertSql.contains("CURRENT_TIMESTAMP"), 
-            "INSERT SQL should not contain standard CURRENT_TIMESTAMP");
+        Assertions.assertFalse(insertSql.contains("NOW()"), "INSERT SQL should not contain MySQL's NOW() function");
+        Assertions.assertFalse(
+                insertSql.contains("CURRENT_TIMESTAMP"), "INSERT SQL should not contain standard CURRENT_TIMESTAMP");
     }
 
     @Test
@@ -435,13 +436,13 @@ public class SqlServerUndoLogManagerTest {
         String insertSql = (String) insertField.get(undoLogManager);
         Assertions.assertNotNull(insertSql);
         Assertions.assertFalse(insertSql.isEmpty());
-        
+
         Field deleteField = SqlServerUndoLogManager.class.getDeclaredField("DELETE_UNDO_LOG_BY_CREATE_SQL");
         deleteField.setAccessible(true);
         String deleteSql = (String) deleteField.get(undoLogManager);
         Assertions.assertNotNull(deleteSql);
         Assertions.assertFalse(deleteSql.isEmpty());
-        
+
         Field checkField = SqlServerUndoLogManager.class.getDeclaredField("CHECK_UNDO_LOG_TABLE_EXIST_SQL");
         checkField.setAccessible(true);
         String checkSql = (String) checkField.get(undoLogManager);
