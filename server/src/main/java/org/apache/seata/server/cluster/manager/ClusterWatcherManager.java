@@ -122,7 +122,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
     /**
      * Send watcher response to the client.
      *
-     * @param watcher the watcher instance
+     * @param watcher     the watcher instance
      * @param nettyStatus the HTTP status code
      * @param closeStream whether to close the HTTP/2 stream (endStream=true)
      * @param sendHeaders whether to send HTTP/2 headers frame (only needed for first response)
@@ -139,7 +139,6 @@ public class ClusterWatcherManager implements ClusterChangeListener {
         }
         ChannelHandlerContext ctx = context.getContext();
         if (!ctx.channel().isActive()) {
-            // channel不可用的时候确保能清理掉watcher 防止内存泄漏
             HTTP2_HEADERS_SENT.remove(watcher);
             logger.warn(
                     "Netty channel is not active for watcher on group {}, cannot send response.", watcher.getGroup());
@@ -156,32 +155,13 @@ public class ClusterWatcherManager implements ClusterChangeListener {
                 ctx.writeAndFlush(response);
             }
         } else {
-            try {
-                // 第一次发送携带头，后续只需要携带data
-                if (sendHeaders) {
-                    Http2Headers headers = new DefaultHttp2Headers().status(nettyStatus.codeAsText());
-                    headers.set(HttpHeaderNames.CONTENT_LENGTH, "0");
-                    ctx.write(new DefaultHttp2HeadersFrame(headers));
-                }
-
-                ctx.write(new DefaultHttp2DataFrame(Unpooled.EMPTY_BUFFER, closeStream));
-                ctx.flush();
-
-                if (logger.isDebugEnabled()) {
-                    logger.debug(
-                            "Sent HTTP/2 response with status: {} to watcher on group {}, stream closed: {}, headers sent: {}",
-                            nettyStatus.code(),
-                            watcher.getGroup(),
-                            closeStream,
-                            sendHeaders);
-                }
-            } catch (Exception e) {
-                logger.error(
-                        "Failed to send HTTP/2 response for watcher on group {}: {}",
-                        watcher.getGroup(),
-                        e.getMessage(),
-                        e);
+            if (sendHeaders) {
+                Http2Headers headers = new DefaultHttp2Headers().status(nettyStatus.codeAsText());
+                headers.set(HttpHeaderNames.CONTENT_LENGTH, "0");
+                ctx.write(new DefaultHttp2HeadersFrame(headers));
             }
+            ctx.write(new DefaultHttp2DataFrame(Unpooled.EMPTY_BUFFER, closeStream));
+            ctx.flush();
         }
     }
 
