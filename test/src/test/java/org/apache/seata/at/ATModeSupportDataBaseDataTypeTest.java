@@ -91,7 +91,6 @@ public class ATModeSupportDataBaseDataTypeTest {
         testTypeSql(sqlType, globalCommit, sqlClass.getInsertSql(), sqlClass.getTableName(), sqlClass.getUpdateSql());
     }
 
-    @Test
     public void testTypeSql(int sqlType, boolean globalCommit, String insertSql, String tableName, String updateSql)
             throws Throwable {
         doExecute(sqlType, insertSql);
@@ -249,12 +248,13 @@ public class ATModeSupportDataBaseDataTypeTest {
                     case 3:
                         sqlClass.setInsertSql(TEST_DATE_TYPE_INSERT_SQL);
                         sqlClass.setTableName(DATE_TABLE_NAME);
-                        sqlClass.setTableName(TEST_DATE_TYPE_UPDATE_SQL);
+                        sqlClass.setUpdateSql(TEST_DATE_TYPE_UPDATE_SQL);
                         break;
                     case 4:
                         sqlClass.setInsertSql(TEST_BINARY_TYPE_INSERT_SQL);
                         sqlClass.setTableName(BINARY_TABLE_NAME);
-                        sqlClass.setTableName(TEST_BINARY_TYPE_UPDATE_SQL);
+                        sqlClass.setUpdateSql(TEST_BINARY_TYPE_UPDATE_SQL);
+                        break;
                     default:
                 }
                 break;
