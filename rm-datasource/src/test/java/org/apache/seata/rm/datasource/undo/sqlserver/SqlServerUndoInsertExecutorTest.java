@@ -308,7 +308,7 @@ public class SqlServerUndoInsertExecutorTest extends BaseExecutorTest {
         Assertions.assertTrue(undoSQL.contains("DELETE FROM"));
         Assertions.assertTrue(undoSQL.contains("id1") && undoSQL.contains("= ?"));
         Assertions.assertTrue(undoSQL.contains("id2") && undoSQL.contains("= ?"));
-        Assertions.assertTrue(undoSQL.contains(" AND "));
+        Assertions.assertTrue(undoSQL.contains(" and "));
     }
 
     @Test
