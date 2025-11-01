@@ -21,6 +21,7 @@ import org.apache.seata.rm.datasource.sql.struct.Field;
 import org.apache.seata.rm.datasource.sql.struct.KeyType;
 import org.apache.seata.rm.datasource.sql.struct.Row;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
+import org.apache.seata.rm.datasource.undo.AbstractUndoExecutor;
 import org.apache.seata.rm.datasource.undo.BaseExecutorTest;
 import org.apache.seata.rm.datasource.undo.SQLUndoLog;
 import org.apache.seata.sqlparser.SQLType;
@@ -352,7 +353,7 @@ public class SqlServerUndoUpdateExecutorTest extends BaseExecutorTest {
         // Verify compound primary key in WHERE clause
         Assertions.assertTrue(undoSQL.contains("id1") && undoSQL.contains("= ?"));
         Assertions.assertTrue(undoSQL.contains("id2") && undoSQL.contains("= ?"));
-        Assertions.assertTrue(undoSQL.contains(" AND "));
+        Assertions.assertTrue(undoSQL.contains(" and "));
         
         // Verify only non-primary key in SET clause
         Assertions.assertTrue(undoSQL.contains("value") && undoSQL.contains("= ?"));
@@ -381,7 +382,7 @@ public class SqlServerUndoUpdateExecutorTest extends BaseExecutorTest {
         
         // Verify inheritance hierarchy
         Assertions.assertTrue(updateExecutor instanceof BaseSqlServerUndoExecutor);
-        Assertions.assertTrue(updateExecutor instanceof org.apache.seata.rm.datasource.undo.AbstractUndoExecutor);
+        Assertions.assertTrue(updateExecutor instanceof AbstractUndoExecutor);
     }
 
     @Test

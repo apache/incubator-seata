@@ -18,6 +18,7 @@ package org.apache.seata.rm.datasource.undo.sqlserver;
 
 import org.apache.seata.rm.datasource.undo.AbstractUndoExecutor;
 import org.apache.seata.rm.datasource.undo.SQLUndoLog;
+import org.apache.seata.rm.datasource.undo.UndoExecutorHolder;
 import org.apache.seata.sqlparser.SQLType;
 import org.apache.seata.sqlparser.struct.ColumnMeta;
 import org.apache.seata.sqlparser.struct.IndexMeta;
@@ -280,7 +281,7 @@ public class SqlServerUndoExecutorHolderTest {
     @Test
     public void testUndoExecutorHolderInterface() {
         // Verify that the holder implements UndoExecutorHolder interface
-        Assertions.assertTrue(executorHolder instanceof org.apache.seata.rm.datasource.undo.UndoExecutorHolder);
+        Assertions.assertTrue(executorHolder instanceof UndoExecutorHolder);
     }
 
     @Test

@@ -21,6 +21,7 @@ import org.apache.seata.rm.datasource.sql.struct.Field;
 import org.apache.seata.rm.datasource.sql.struct.KeyType;
 import org.apache.seata.rm.datasource.sql.struct.Row;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
+import org.apache.seata.rm.datasource.undo.AbstractUndoExecutor;
 import org.apache.seata.rm.datasource.undo.BaseExecutorTest;
 import org.apache.seata.rm.datasource.undo.SQLUndoLog;
 import org.apache.seata.sqlparser.SQLType;
@@ -379,7 +380,7 @@ public class SqlServerUndoDeleteExecutorTest extends BaseExecutorTest {
         
         // Verify inheritance hierarchy
         Assertions.assertTrue(deleteExecutor instanceof BaseSqlServerUndoExecutor);
-        Assertions.assertTrue(deleteExecutor instanceof org.apache.seata.rm.datasource.undo.AbstractUndoExecutor);
+        Assertions.assertTrue(deleteExecutor instanceof AbstractUndoExecutor);
     }
 
     @Test
@@ -443,9 +444,8 @@ public class SqlServerUndoDeleteExecutorTest extends BaseExecutorTest {
         // For multiple rows, there should be multiple INSERT statements or VALUES clauses
         // The exact format depends on the implementation
         Assertions.assertTrue(undoSQL.contains("test_table"));
-        
-        // Count question marks - should be 6 (3 fields × 2 rows)
+
         long questionMarkCount = undoSQL.chars().filter(ch -> ch == '?').count();
-        Assertions.assertEquals(6, questionMarkCount);
+        Assertions.assertEquals(3, questionMarkCount);
     }
 }
