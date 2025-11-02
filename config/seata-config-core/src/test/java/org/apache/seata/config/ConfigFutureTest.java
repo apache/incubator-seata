@@ -88,4 +88,132 @@ class ConfigFutureTest {
         configFuture.setContent("testValue");
         Assertions.assertEquals("testValue", configFuture.getContent());
     }
+
+    @Test
+    void testConstructorWithDefaultTimeout() {
+        ConfigFuture configFuture = new ConfigFuture("test.conf", "default", ConfigFuture.ConfigOperation.GET);
+        Assertions.assertNotNull(configFuture);
+        Assertions.assertEquals("test.conf", configFuture.getDataId());
+        Assertions.assertEquals("default", configFuture.getContent());
+        Assertions.assertEquals(ConfigFuture.ConfigOperation.GET, configFuture.getOperation());
+    }
+
+    @Test
+    void testConstructorWithCustomTimeout() {
+        ConfigFuture configFuture = new ConfigFuture("test.conf", "default", ConfigFuture.ConfigOperation.PUT, 10000);
+        Assertions.assertNotNull(configFuture);
+    }
+
+    @Test
+    void testSetOperation() {
+        ConfigFuture configFuture = new ConfigFuture("test.conf", "default", ConfigFuture.ConfigOperation.GET);
+        Assertions.assertEquals(ConfigFuture.ConfigOperation.GET, configFuture.getOperation());
+
+        configFuture.setOperation(ConfigFuture.ConfigOperation.PUT);
+        Assertions.assertEquals(ConfigFuture.ConfigOperation.PUT, configFuture.getOperation());
+
+        configFuture.setOperation(ConfigFuture.ConfigOperation.PUTIFABSENT);
+        Assertions.assertEquals(ConfigFuture.ConfigOperation.PUTIFABSENT, configFuture.getOperation());
+
+        configFuture.setOperation(ConfigFuture.ConfigOperation.REMOVE);
+        Assertions.assertEquals(ConfigFuture.ConfigOperation.REMOVE, configFuture.getOperation());
+    }
+
+    @Test
+    void testRemoveOperation() throws Exception {
+        ConfigFuture configFuture = new ConfigFuture("test.conf", "default", ConfigFuture.ConfigOperation.REMOVE);
+
+        Field originField = ReflectionUtil.getField(ConfigFuture.class, "origin");
+        CompletableFuture<Object> origin = (CompletableFuture<Object>) originField.get(configFuture);
+        origin = Mockito.spy(origin);
+        originField.setAccessible(true);
+        originField.set(configFuture, origin);
+
+        Mockito.doThrow(TimeoutException.class).when(origin).get(Mockito.anyLong(), Mockito.any());
+        Assertions.assertEquals(Boolean.FALSE, configFuture.get());
+    }
+
+    @Test
+    void testPutIfAbsentOperation() throws Exception {
+        ConfigFuture configFuture = new ConfigFuture("test.conf", "default", ConfigFuture.ConfigOperation.PUTIFABSENT);
+
+        Field originField = ReflectionUtil.getField(ConfigFuture.class, "origin");
+        CompletableFuture<Object> origin = (CompletableFuture<Object>) originField.get(configFuture);
+        origin = Mockito.spy(origin);
+        originField.setAccessible(true);
+        originField.set(configFuture, origin);
+
+        Mockito.doThrow(TimeoutException.class).when(origin).get(Mockito.anyLong(), Mockito.any());
+        Assertions.assertEquals(Boolean.FALSE, configFuture.get());
+    }
+
+    @Test
+    void testSetOrigin() throws Exception {
+        ConfigFuture configFuture = new ConfigFuture("test.conf", "default", ConfigFuture.ConfigOperation.GET);
+
+        Field originField = ReflectionUtil.getField(ConfigFuture.class, "origin");
+        CompletableFuture<Object> origin = (CompletableFuture<Object>) originField.get(configFuture);
+
+        origin.complete("completed-value");
+        Object result = configFuture.get();
+        Assertions.assertEquals("completed-value", result);
+    }
+
+    @Test
+    void testSetTimeoutMills() {
+        ConfigFuture configFuture = new ConfigFuture("test.conf", "default", ConfigFuture.ConfigOperation.GET, 20000);
+        Assertions.assertNotNull(configFuture);
+    }
+
+    @Test
+    void testGetWithSuccessfulCompletion() throws Exception {
+        ConfigFuture configFuture = new ConfigFuture("test.conf", "default", ConfigFuture.ConfigOperation.GET);
+
+        Field originField = ReflectionUtil.getField(ConfigFuture.class, "origin");
+        CompletableFuture<Object> origin = (CompletableFuture<Object>) originField.get(configFuture);
+
+        origin.complete("success-value");
+        Object result = configFuture.get();
+        Assertions.assertEquals("success-value", result);
+    }
+
+    @Test
+    void testGetWithBooleanResult() throws Exception {
+        ConfigFuture configFuture = new ConfigFuture("test.conf", "default", ConfigFuture.ConfigOperation.PUT);
+
+        Field originField = ReflectionUtil.getField(ConfigFuture.class, "origin");
+        CompletableFuture<Object> origin = (CompletableFuture<Object>) originField.get(configFuture);
+
+        origin.complete(Boolean.TRUE);
+        Object result = configFuture.get();
+        Assertions.assertEquals(Boolean.TRUE, result);
+    }
+
+    @Test
+    void testMultipleGetCalls() throws Exception {
+        ConfigFuture configFuture = new ConfigFuture("test.conf", "default", ConfigFuture.ConfigOperation.GET);
+
+        Field originField = ReflectionUtil.getField(ConfigFuture.class, "origin");
+        CompletableFuture<Object> origin = (CompletableFuture<Object>) originField.get(configFuture);
+
+        origin.complete("value");
+        Object result1 = configFuture.get();
+        Object result2 = configFuture.get();
+
+        Assertions.assertEquals("value", result1);
+        Assertions.assertEquals("value", result2);
+    }
+
+    @Test
+    void testConfigOperationEnum() {
+        Assertions.assertNotNull(ConfigFuture.ConfigOperation.GET);
+        Assertions.assertNotNull(ConfigFuture.ConfigOperation.PUT);
+        Assertions.assertNotNull(ConfigFuture.ConfigOperation.PUTIFABSENT);
+        Assertions.assertNotNull(ConfigFuture.ConfigOperation.REMOVE);
+
+        Assertions.assertEquals("GET", ConfigFuture.ConfigOperation.GET.name());
+        Assertions.assertEquals("PUT", ConfigFuture.ConfigOperation.PUT.name());
+        Assertions.assertEquals("PUTIFABSENT", ConfigFuture.ConfigOperation.PUTIFABSENT.name());
+        Assertions.assertEquals("REMOVE", ConfigFuture.ConfigOperation.REMOVE.name());
+    }
 }

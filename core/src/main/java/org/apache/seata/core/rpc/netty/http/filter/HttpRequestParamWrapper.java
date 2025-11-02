@@ -66,7 +66,8 @@ public class HttpRequestParamWrapper {
         parseQueryParams(request.getPath());
         parseHeaders(request.getHeaders());
 
-        String contentType = (String) request.getHeaders().get(HttpHeaderNames.CONTENT_TYPE);
+        CharSequence contentTypeSeq = request.getHeaders().get(HttpHeaderNames.CONTENT_TYPE);
+        String contentType = contentTypeSeq != null ? contentTypeSeq.toString() : null;
         if (contentType == null) {
             return;
         }
@@ -150,6 +151,8 @@ public class HttpRequestParamWrapper {
                 // decoding form parameters.
                 FullHttpRequest copiedRequest = new DefaultFullHttpRequest(
                         request.protocolVersion(), request.method(), "/internal-safe-uri", copiedBuf);
+                // Copy headers to ensure proper multipart parsing
+                copiedRequest.headers().setAll(request.headers());
                 parseFormBody(copiedRequest);
             }
         } catch (Exception e) {
