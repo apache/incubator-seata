@@ -84,7 +84,7 @@ public @interface CompensationBusinessAction {
     boolean isDelayReport() default false;
 
     /**
-     * whether use fence (idempotent,non_rollback,suspend)
+     * whether to use fence (idempotent,non_rollback,suspend)
      *
      * @return the boolean
      */

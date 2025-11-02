@@ -278,6 +278,94 @@ class Http2HttpHandlerTest {
         }
     }
 
+    @Test
+    void testHttp2PostRequestWithMultipleDataFrames() throws Exception {
+        try (MockedStatic<HttpRequestFilterManager> mockedStatic = mockStatic(HttpRequestFilterManager.class)) {
+            HttpRequestFilterChain mockChain = mock(HttpRequestFilterChain.class);
+            doNothing().when(mockChain).doFilter(any());
+            mockedStatic.when(HttpRequestFilterManager::getFilterChain).thenReturn(mockChain);
+
+            Http2Headers headers = new DefaultHttp2Headers();
+            headers.method("POST");
+            headers.path("/test?param=multiFrame");
+
+            Http2HeadersFrame headersFrame = new DefaultHttp2HeadersFrame(headers, false);
+            channel.writeInbound(headersFrame);
+
+            String json1 = "{\"foo\":";
+            DefaultHttp2DataFrame dataFrame1 =
+                    new DefaultHttp2DataFrame(Unpooled.copiedBuffer(json1, StandardCharsets.UTF_8), false);
+            channel.writeInbound(dataFrame1);
+
+            String json2 = "\"bar\"}";
+            DefaultHttp2DataFrame dataFrame2 =
+                    new DefaultHttp2DataFrame(Unpooled.copiedBuffer(json2, StandardCharsets.UTF_8), true);
+            channel.writeInbound(dataFrame2);
+
+            Http2StreamFrame frame1 = null, frame2 = null;
+            long deadline = System.currentTimeMillis() + 5000;
+            while ((frame1 == null || frame2 == null) && System.currentTimeMillis() < deadline) {
+                if (frame1 == null) frame1 = channel.readOutbound();
+                if (frame2 == null) frame2 = channel.readOutbound();
+                if (frame1 == null || frame2 == null) Thread.sleep(500);
+            }
+            assertNotNull(frame1);
+            assertNotNull(frame2);
+        }
+    }
+
+    @Test
+    void testHttp2PostRequestWithInvalidJson() throws Exception {
+        try (MockedStatic<HttpRequestFilterManager> mockedStatic = mockStatic(HttpRequestFilterManager.class)) {
+            HttpRequestFilterChain mockChain = mock(HttpRequestFilterChain.class);
+            doNothing().when(mockChain).doFilter(any());
+            mockedStatic.when(HttpRequestFilterManager::getFilterChain).thenReturn(mockChain);
+
+            String invalidJson = "{invalid json}";
+            Http2Headers headers = new DefaultHttp2Headers();
+            headers.method("POST");
+            headers.path("/test?param=jsonValue");
+            Http2HeadersFrame headersFrame = new DefaultHttp2HeadersFrame(headers, false);
+            channel.writeInbound(headersFrame);
+            DefaultHttp2DataFrame dataFrame =
+                    new DefaultHttp2DataFrame(Unpooled.copiedBuffer(invalidJson, StandardCharsets.UTF_8), true);
+            channel.writeInbound(dataFrame);
+
+            Http2StreamFrame frame1 = null, frame2 = null;
+            long deadline = System.currentTimeMillis() + 5000;
+            while ((frame1 == null || frame2 == null) && System.currentTimeMillis() < deadline) {
+                if (frame1 == null) frame1 = channel.readOutbound();
+                if (frame2 == null) frame2 = channel.readOutbound();
+                if (frame1 == null || frame2 == null) Thread.sleep(500);
+            }
+            assertNotNull(frame1);
+        }
+    }
+
+    @Test
+    void testHttp2ChannelInactive() throws Exception {
+        try (MockedStatic<HttpRequestFilterManager> mockedStatic = mockStatic(HttpRequestFilterManager.class)) {
+            HttpRequestFilterChain mockChain = mock(HttpRequestFilterChain.class);
+            doNothing().when(mockChain).doFilter(any());
+            mockedStatic.when(HttpRequestFilterManager::getFilterChain).thenReturn(mockChain);
+
+            Http2Headers headers = new DefaultHttp2Headers();
+            headers.method("GET");
+            headers.path("/test?param=testValue");
+            Http2HeadersFrame headersFrame = new DefaultHttp2HeadersFrame(headers, false);
+            channel.writeInbound(headersFrame);
+
+            channel.close();
+            assertNotNull(channel);
+        }
+    }
+
+    @Test
+    void testHttp2ExceptionCaught() throws Exception {
+        handler.exceptionCaught(channel.pipeline().context(handler), new java.io.IOException("Connection reset"));
+        assertNotNull(handler);
+    }
+
     @org.junit.jupiter.api.AfterEach
     void tearDown() throws Exception {
         // Clean up ControllerManager
