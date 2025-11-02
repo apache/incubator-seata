@@ -33,6 +33,7 @@ import org.apache.seata.core.rpc.netty.grpc.GrpcEncoder;
 import org.apache.seata.core.rpc.netty.http.Http2HttpHandler;
 
 public class Http2Detector implements ProtocolDetector {
+    // HTTP/2 connection preface for detecting h2c (plaintext HTTP/2, not encrypted HTTPS)
     private static final byte[] HTTP2_PREFIX_BYTES = "PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n".getBytes(CharsetUtil.UTF_8);
     private final ChannelHandler[] serverHandlers;
 
