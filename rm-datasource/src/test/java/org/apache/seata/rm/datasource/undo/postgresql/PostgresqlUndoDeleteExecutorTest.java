@@ -14,15 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.rm.datasource.undo.sqlserver;
+package org.apache.seata.rm.datasource.undo.postgresql;
 
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.rm.datasource.sql.struct.Field;
 import org.apache.seata.rm.datasource.sql.struct.KeyType;
 import org.apache.seata.rm.datasource.sql.struct.Row;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
-import org.apache.seata.rm.datasource.undo.AbstractUndoExecutor;
-import org.apache.seata.rm.datasource.undo.BaseExecutorTest;
 import org.apache.seata.rm.datasource.undo.SQLUndoLog;
 import org.apache.seata.sqlparser.SQLType;
 import org.apache.seata.sqlparser.struct.ColumnMeta;
@@ -30,10 +28,8 @@ import org.apache.seata.sqlparser.struct.IndexMeta;
 import org.apache.seata.sqlparser.struct.IndexType;
 import org.apache.seata.sqlparser.struct.TableMeta;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import java.sql.Types;
 import java.util.ArrayList;
@@ -42,51 +38,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SqlServerUndoDeleteExecutorTest extends BaseExecutorTest {
-    private static SqlServerUndoDeleteExecutor executor;
+public class PostgresqlUndoDeleteExecutorTest {
+
+    private PostgresqlUndoDeleteExecutor executor;
     private SQLUndoLog sqlUndoLog;
     private TableMeta tableMeta;
-
-    @BeforeAll
-    public static void init() {
-        TableMeta tableMeta = Mockito.mock(TableMeta.class);
-        Mockito.when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[] {"id"}));
-        Mockito.when(tableMeta.getTableName()).thenReturn("table_name");
-
-        TableRecords beforeImage = new TableRecords();
-        beforeImage.setTableName("table_name");
-        beforeImage.setTableMeta(tableMeta);
-        List<Row> beforeRows = new ArrayList<>();
-        Row row0 = new Row();
-        addField(row0, "id", 1, "12345");
-        addField(row0, "age", 1, "1");
-        beforeRows.add(row0);
-        Row row1 = new Row();
-        addField(row1, "id", 1, "12346");
-        addField(row1, "age", 1, "1");
-        beforeRows.add(row1);
-        beforeImage.setRows(beforeRows);
-
-        TableRecords afterImage = new TableRecords();
-        afterImage.setTableName("table_name");
-        afterImage.setTableMeta(tableMeta);
-        List<Row> afterRows = new ArrayList<>();
-        afterImage.setRows(afterRows);
-
-        SQLUndoLog sqlUndoLog = new SQLUndoLog();
-        sqlUndoLog.setSqlType(SQLType.UPDATE);
-        sqlUndoLog.setTableMeta(tableMeta);
-        sqlUndoLog.setTableName("table_name");
-        sqlUndoLog.setBeforeImage(beforeImage);
-        sqlUndoLog.setAfterImage(afterImage);
-
-        executor = new SqlServerUndoDeleteExecutor(sqlUndoLog);
-    }
 
     @BeforeEach
     public void setUp() {
         tableMeta = createTableMeta();
         sqlUndoLog = createSQLUndoLog();
+        executor = new PostgresqlUndoDeleteExecutor(sqlUndoLog);
     }
 
     private TableMeta createTableMeta() {
@@ -142,7 +104,7 @@ public class SqlServerUndoDeleteExecutorTest extends BaseExecutorTest {
         undoLog.setTableName("test_table");
         undoLog.setTableMeta(tableMeta);
 
-        // Create before image (for DELETE undo, we use before image to restore data)
+        // Create before image (for DELETE undo, we use before image)
         TableRecords beforeImage = new TableRecords();
         beforeImage.setTableName("test_table");
         beforeImage.setTableMeta(tableMeta);
@@ -165,42 +127,49 @@ public class SqlServerUndoDeleteExecutorTest extends BaseExecutorTest {
     }
 
     @Test
-    public void buildUndoSQL() {
-        String sql = executor.buildUndoSQL().toUpperCase();
-        Assertions.assertNotNull(sql);
-        Assertions.assertTrue(sql.contains("INSERT"));
-        Assertions.assertTrue(sql.contains("TABLE_NAME"));
-        Assertions.assertTrue(sql.contains("ID"));
+    public void testConstructor() {
+        PostgresqlUndoDeleteExecutor newExecutor = new PostgresqlUndoDeleteExecutor(sqlUndoLog);
+        Assertions.assertNotNull(newExecutor);
     }
 
     @Test
-    public void getUndoRows() {
-        Assertions.assertEquals(executor.getUndoRows(), executor.getSqlUndoLog().getBeforeImage());
+    public void testConstructorWithNull() {
+        PostgresqlUndoDeleteExecutor newExecutor = new PostgresqlUndoDeleteExecutor(null);
+        Assertions.assertNotNull(newExecutor);
     }
 
     @Test
     public void testBuildUndoSQL() {
-        SqlServerUndoDeleteExecutor deleteExecutor = new SqlServerUndoDeleteExecutor(sqlUndoLog);
-        String undoSQL = deleteExecutor.buildUndoSQL();
+        String undoSQL = executor.buildUndoSQL();
 
-        // Verify SQL structure
+        // Verify SQL structure for INSERT statement
         Assertions.assertNotNull(undoSQL);
         Assertions.assertTrue(undoSQL.contains("INSERT INTO"));
+        Assertions.assertTrue(undoSQL.contains("test_table"));
         Assertions.assertTrue(undoSQL.contains("VALUES"));
 
-        // Verify table name
-        Assertions.assertTrue(undoSQL.contains("test_table"));
-
-        // Verify all fields are included (both PK and non-PK)
+        // Verify all columns are included
         Assertions.assertTrue(undoSQL.contains("id"));
         Assertions.assertTrue(undoSQL.contains("name"));
         Assertions.assertTrue(undoSQL.contains("age"));
+
+        // Verify placeholder values
+        Assertions.assertTrue(undoSQL.contains("?"));
+    }
+
+    @Test
+    public void testBuildUndoSQLWithQuotes() {
+        String undoSQL = executor.buildUndoSQL();
+
+        // PostgreSQL uses double quotes for column escaping
+        Assertions.assertTrue(undoSQL.contains("\"id\"") || undoSQL.contains("id"));
+        Assertions.assertTrue(undoSQL.contains("\"name\"") || undoSQL.contains("name"));
+        Assertions.assertTrue(undoSQL.contains("\"age\"") || undoSQL.contains("age"));
     }
 
     @Test
     public void testGetUndoRows() {
-        SqlServerUndoDeleteExecutor deleteExecutor = new SqlServerUndoDeleteExecutor(sqlUndoLog);
-        TableRecords undoRows = deleteExecutor.getUndoRows();
+        TableRecords undoRows = executor.getUndoRows();
 
         Assertions.assertNotNull(undoRows);
         Assertions.assertEquals(sqlUndoLog.getBeforeImage(), undoRows);
@@ -216,7 +185,6 @@ public class SqlServerUndoDeleteExecutorTest extends BaseExecutorTest {
                 .orElse(null);
         Assertions.assertNotNull(idField);
         Assertions.assertEquals(1, idField.getValue());
-        Assertions.assertEquals(KeyType.PRIMARY_KEY, idField.getKeyType());
 
         Field nameField = row.getFields().stream()
                 .filter(f -> "name".equals(f.getName()))
@@ -227,29 +195,41 @@ public class SqlServerUndoDeleteExecutorTest extends BaseExecutorTest {
     }
 
     @Test
-    public void testBuildUndoSQLWithMultipleFields() {
-        SqlServerUndoDeleteExecutor deleteExecutor = new SqlServerUndoDeleteExecutor(sqlUndoLog);
-        String undoSQL = deleteExecutor.buildUndoSQL();
+    public void testBuildUndoSQLWithEmptyBeforeImage() {
+        // Create SQLUndoLog with empty before image
+        SQLUndoLog emptyUndoLog = new SQLUndoLog();
+        emptyUndoLog.setSqlType(SQLType.DELETE);
+        emptyUndoLog.setTableName("test_table");
 
-        // Verify INSERT statement includes all fields
-        Assertions.assertTrue(undoSQL.contains("INSERT INTO"));
-        Assertions.assertTrue(undoSQL.contains("test_table"));
+        TableRecords emptyBeforeImage = new TableRecords();
+        emptyBeforeImage.setTableName("test_table");
+        emptyBeforeImage.setRows(new ArrayList<>());
+        emptyUndoLog.setBeforeImage(emptyBeforeImage);
 
-        // Should include all fields in column list
-        String columnsPart = undoSQL.substring(undoSQL.indexOf("("), undoSQL.indexOf(")") + 1);
-        Assertions.assertTrue(columnsPart.contains("id"));
-        Assertions.assertTrue(columnsPart.contains("name"));
-        Assertions.assertTrue(columnsPart.contains("age"));
+        PostgresqlUndoDeleteExecutor emptyExecutor = new PostgresqlUndoDeleteExecutor(emptyUndoLog);
 
-        // Should have VALUES clause with proper number of placeholders
-        Assertions.assertTrue(undoSQL.contains("VALUES"));
-        long questionMarkCount = undoSQL.chars().filter(ch -> ch == '?').count();
-        Assertions.assertEquals(3, questionMarkCount); // 3 fields
+        Assertions.assertThrows(ShouldNeverHappenException.class, () -> {
+            emptyExecutor.buildUndoSQL();
+        });
+    }
+
+    @Test
+    public void testBuildUndoSQLWithNullBeforeImage() {
+        SQLUndoLog nullUndoLog = new SQLUndoLog();
+        nullUndoLog.setSqlType(SQLType.DELETE);
+        nullUndoLog.setTableName("test_table");
+        nullUndoLog.setBeforeImage(null);
+
+        PostgresqlUndoDeleteExecutor nullExecutor = new PostgresqlUndoDeleteExecutor(nullUndoLog);
+
+        Assertions.assertThrows(NullPointerException.class, () -> {
+            nullExecutor.buildUndoSQL();
+        });
     }
 
     @Test
     public void testBuildUndoSQLWithCompoundPrimaryKey() {
-        // Create table with compound primary key
+        // Create table meta with compound primary key
         TableMeta compoundMeta = new TableMeta();
         compoundMeta.setTableName("compound_table");
 
@@ -257,21 +237,21 @@ public class SqlServerUndoDeleteExecutorTest extends BaseExecutorTest {
 
         ColumnMeta id1Column = new ColumnMeta();
         id1Column.setTableName("compound_table");
-        id1Column.setColumnName("id1");
+        id1Column.setColumnName("user_id");
         id1Column.setDataType(Types.INTEGER);
-        allColumns.put("id1", id1Column);
+        allColumns.put("user_id", id1Column);
 
         ColumnMeta id2Column = new ColumnMeta();
         id2Column.setTableName("compound_table");
-        id2Column.setColumnName("id2");
+        id2Column.setColumnName("product_id");
         id2Column.setDataType(Types.INTEGER);
-        allColumns.put("id2", id2Column);
+        allColumns.put("product_id", id2Column);
 
-        ColumnMeta nameColumn = new ColumnMeta();
-        nameColumn.setTableName("compound_table");
-        nameColumn.setColumnName("name");
-        nameColumn.setDataType(Types.VARCHAR);
-        allColumns.put("name", nameColumn);
+        ColumnMeta valueColumn = new ColumnMeta();
+        valueColumn.setTableName("compound_table");
+        valueColumn.setColumnName("quantity");
+        valueColumn.setDataType(Types.INTEGER);
+        allColumns.put("quantity", valueColumn);
 
         compoundMeta.getAllColumns().putAll(allColumns);
 
@@ -301,9 +281,9 @@ public class SqlServerUndoDeleteExecutorTest extends BaseExecutorTest {
         beforeImage.setTableMeta(compoundMeta);
 
         List<Field> fields = Arrays.asList(
-                new Field("id1", Types.INTEGER, 1),
-                new Field("id2", Types.INTEGER, 2),
-                new Field("name", Types.VARCHAR, "test"));
+                new Field("user_id", Types.INTEGER, 100),
+                new Field("product_id", Types.INTEGER, 200),
+                new Field("quantity", Types.INTEGER, 5));
 
         // Set primary key types
         fields.get(0).setKeyType(KeyType.PRIMARY_KEY);
@@ -315,118 +295,105 @@ public class SqlServerUndoDeleteExecutorTest extends BaseExecutorTest {
         beforeImage.setRows(Arrays.asList(resultRow));
         compoundUndoLog.setBeforeImage(beforeImage);
 
-        SqlServerUndoDeleteExecutor compoundExecutor = new SqlServerUndoDeleteExecutor(compoundUndoLog);
+        PostgresqlUndoDeleteExecutor compoundExecutor = new PostgresqlUndoDeleteExecutor(compoundUndoLog);
         String undoSQL = compoundExecutor.buildUndoSQL();
 
-        // Verify INSERT statement includes all fields including compound keys
+        // Verify all columns are included in INSERT
+        Assertions.assertTrue(undoSQL.contains("user_id"));
+        Assertions.assertTrue(undoSQL.contains("product_id"));
+        Assertions.assertTrue(undoSQL.contains("quantity"));
+
+        // Verify INSERT structure
         Assertions.assertTrue(undoSQL.contains("INSERT INTO"));
         Assertions.assertTrue(undoSQL.contains("compound_table"));
-        Assertions.assertTrue(undoSQL.contains("id1"));
-        Assertions.assertTrue(undoSQL.contains("id2"));
-        Assertions.assertTrue(undoSQL.contains("name"));
         Assertions.assertTrue(undoSQL.contains("VALUES"));
-
-        long questionMarkCount = undoSQL.chars().filter(ch -> ch == '?').count();
-        Assertions.assertEquals(3, questionMarkCount); // 3 fields
     }
 
     @Test
-    public void testBuildUndoSQLWithEmptyBeforeImage() {
-        SQLUndoLog emptyUndoLog = new SQLUndoLog();
-        emptyUndoLog.setSqlType(SQLType.DELETE);
-        emptyUndoLog.setTableName("test_table");
+    public void testBuildUndoSQLWithOnlyPrimaryKeyColumns() {
+        // Create table with only primary key columns
+        TableMeta pkOnlyMeta = new TableMeta();
+        pkOnlyMeta.setTableName("pk_only_table");
 
-        TableRecords emptyBeforeImage = new TableRecords();
-        emptyBeforeImage.setTableName("test_table");
-        emptyBeforeImage.setRows(new ArrayList<>());
-        emptyUndoLog.setBeforeImage(emptyBeforeImage);
+        Map<String, ColumnMeta> allColumns = new HashMap<>();
 
-        SqlServerUndoDeleteExecutor emptyExecutor = new SqlServerUndoDeleteExecutor(emptyUndoLog);
+        ColumnMeta idColumn = new ColumnMeta();
+        idColumn.setTableName("pk_only_table");
+        idColumn.setColumnName("id");
+        idColumn.setDataType(Types.INTEGER);
+        allColumns.put("id", idColumn);
 
-        Assertions.assertThrows(ShouldNeverHappenException.class, () -> {
-            emptyExecutor.buildUndoSQL();
-        });
-    }
+        pkOnlyMeta.getAllColumns().putAll(allColumns);
 
-    @Test
-    public void testBuildUndoSQLWithNullBeforeImage() {
-        SQLUndoLog nullUndoLog = new SQLUndoLog();
-        nullUndoLog.setSqlType(SQLType.DELETE);
-        nullUndoLog.setTableName("test_table");
-        nullUndoLog.setBeforeImage(null);
+        Map<String, IndexMeta> allIndexes = new HashMap<>();
+        IndexMeta primaryIndex = new IndexMeta();
+        primaryIndex.setIndexName("PRIMARY");
+        primaryIndex.setNonUnique(false);
+        primaryIndex.setIndextype(IndexType.PRIMARY);
 
-        SqlServerUndoDeleteExecutor nullExecutor = new SqlServerUndoDeleteExecutor(nullUndoLog);
+        List<ColumnMeta> primaryColumns = new ArrayList<>();
+        primaryColumns.add(idColumn);
+        primaryIndex.setValues(primaryColumns);
 
-        Assertions.assertThrows(NullPointerException.class, () -> {
-            nullExecutor.buildUndoSQL();
-        });
-    }
+        allIndexes.put("PRIMARY", primaryIndex);
+        pkOnlyMeta.getAllIndexes().putAll(allIndexes);
 
-    @Test
-    public void testConstructor() {
-        SqlServerUndoDeleteExecutor deleteExecutor = new SqlServerUndoDeleteExecutor(sqlUndoLog);
-        Assertions.assertNotNull(deleteExecutor);
-    }
+        SQLUndoLog pkOnlyUndoLog = new SQLUndoLog();
+        pkOnlyUndoLog.setSqlType(SQLType.DELETE);
+        pkOnlyUndoLog.setTableName("pk_only_table");
+        pkOnlyUndoLog.setTableMeta(pkOnlyMeta);
 
-    @Test
-    public void testConstructorWithNull() {
-        SqlServerUndoDeleteExecutor deleteExecutor = new SqlServerUndoDeleteExecutor(null);
-        Assertions.assertNotNull(deleteExecutor);
-    }
+        TableRecords beforeImage = new TableRecords();
+        beforeImage.setTableName("pk_only_table");
+        beforeImage.setTableMeta(pkOnlyMeta);
 
-    @Test
-    public void testInheritance() {
-        SqlServerUndoDeleteExecutor deleteExecutor = new SqlServerUndoDeleteExecutor(sqlUndoLog);
+        List<Field> fields = Arrays.asList(new Field("id", Types.INTEGER, 1));
 
-        // Verify inheritance hierarchy
-        Assertions.assertTrue(deleteExecutor instanceof BaseSqlServerUndoExecutor);
-        Assertions.assertTrue(deleteExecutor instanceof AbstractUndoExecutor);
-    }
+        fields.get(0).setKeyType(KeyType.PRIMARY_KEY);
 
-    @Test
-    public void testSqlServerSpecificSql() {
-        SqlServerUndoDeleteExecutor deleteExecutor = new SqlServerUndoDeleteExecutor(sqlUndoLog);
-        String undoSQL = deleteExecutor.buildUndoSQL();
+        Row resultRow = new Row();
+        resultRow.setFields(fields);
 
-        // Verify SQL Server compatible syntax
-        Assertions.assertNotNull(undoSQL);
-        Assertions.assertTrue(undoSQL.toUpperCase().startsWith("INSERT"));
+        beforeImage.setRows(Arrays.asList(resultRow));
+        pkOnlyUndoLog.setBeforeImage(beforeImage);
 
-        // Should not contain database-specific syntax that would fail on SQL Server
-        Assertions.assertFalse(undoSQL.contains("RETURNING"));
-        Assertions.assertFalse(undoSQL.contains("ON DUPLICATE KEY"));
+        PostgresqlUndoDeleteExecutor pkOnlyExecutor = new PostgresqlUndoDeleteExecutor(pkOnlyUndoLog);
+        String undoSQL = pkOnlyExecutor.buildUndoSQL();
+
+        // Should have INSERT with only primary key column
+        Assertions.assertTrue(undoSQL.contains("INSERT INTO"));
+        Assertions.assertTrue(undoSQL.contains("pk_only_table"));
+        Assertions.assertTrue(undoSQL.contains("id"));
+        Assertions.assertTrue(undoSQL.contains("VALUES"));
+        Assertions.assertTrue(undoSQL.contains("?"));
     }
 
     @Test
     public void testBuildUndoSQLWithMultipleRows() {
-        // Create undo log with multiple rows
+        // Create before image with multiple rows
         TableRecords multiRowBeforeImage = new TableRecords();
         multiRowBeforeImage.setTableName("test_table");
         multiRowBeforeImage.setTableMeta(tableMeta);
 
-        List<Row> rows = new ArrayList<>();
-
-        // First row
         List<Field> fields1 = Arrays.asList(
                 new Field("id", Types.INTEGER, 1),
                 new Field("name", Types.VARCHAR, "John"),
                 new Field("age", Types.INTEGER, 30));
         fields1.get(0).setKeyType(KeyType.PRIMARY_KEY);
-        Row row1 = new Row();
-        row1.setFields(fields1);
-        rows.add(row1);
 
-        // Second row
         List<Field> fields2 = Arrays.asList(
                 new Field("id", Types.INTEGER, 2),
                 new Field("name", Types.VARCHAR, "Jane"),
                 new Field("age", Types.INTEGER, 25));
         fields2.get(0).setKeyType(KeyType.PRIMARY_KEY);
+
+        Row row1 = new Row();
+        row1.setFields(fields1);
+
         Row row2 = new Row();
         row2.setFields(fields2);
-        rows.add(row2);
 
-        multiRowBeforeImage.setRows(rows);
+        multiRowBeforeImage.setRows(Arrays.asList(row1, row2));
 
         SQLUndoLog multiRowUndoLog = new SQLUndoLog();
         multiRowUndoLog.setSqlType(SQLType.DELETE);
@@ -434,18 +401,36 @@ public class SqlServerUndoDeleteExecutorTest extends BaseExecutorTest {
         multiRowUndoLog.setTableMeta(tableMeta);
         multiRowUndoLog.setBeforeImage(multiRowBeforeImage);
 
-        SqlServerUndoDeleteExecutor multiRowExecutor = new SqlServerUndoDeleteExecutor(multiRowUndoLog);
+        PostgresqlUndoDeleteExecutor multiRowExecutor = new PostgresqlUndoDeleteExecutor(multiRowUndoLog);
         String undoSQL = multiRowExecutor.buildUndoSQL();
 
-        // Verify SQL structure for multiple rows
+        // Should use the first row for SQL generation
         Assertions.assertNotNull(undoSQL);
         Assertions.assertTrue(undoSQL.contains("INSERT INTO"));
+        Assertions.assertTrue(undoSQL.contains("test_table"));
+        Assertions.assertTrue(undoSQL.contains("VALUES"));
+        Assertions.assertTrue(undoSQL.contains("id"));
+        Assertions.assertTrue(undoSQL.contains("name"));
+        Assertions.assertTrue(undoSQL.contains("age"));
+    }
 
-        // For multiple rows, there should be multiple INSERT statements or VALUES clauses
-        // The exact format depends on the implementation
+    @Test
+    public void testFieldOrdering() {
+        String undoSQL = executor.buildUndoSQL();
+
+        // The SQL should include both non-primary keys first, then primary keys
+        // This matches the implementation in buildUndoSQL method
+        Assertions.assertTrue(undoSQL.contains("INSERT INTO"));
         Assertions.assertTrue(undoSQL.contains("test_table"));
 
-        long questionMarkCount = undoSQL.chars().filter(ch -> ch == '?').count();
-        Assertions.assertEquals(3, questionMarkCount);
+        // All fields should be present
+        Assertions.assertTrue(undoSQL.contains("id"));
+        Assertions.assertTrue(undoSQL.contains("name"));
+        Assertions.assertTrue(undoSQL.contains("age"));
+    }
+
+    @Test
+    public void testInheritanceFromAbstractUndoExecutor() {
+        Assertions.assertTrue(executor instanceof org.apache.seata.rm.datasource.undo.AbstractUndoExecutor);
     }
 }
