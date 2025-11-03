@@ -2,7 +2,6 @@ package org.apache.seata.spring.boot.autoconfigure.properties.registry;
 
 import org.junit.jupiter.api.Test;
 
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
