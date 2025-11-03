@@ -17,9 +17,9 @@
 
 const path = require('path');
 const base = require('./webpack.base.conf');
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 // error:0308010C:digital envelope routines::unsupported
 const crypto = require("crypto");
@@ -29,12 +29,10 @@ crypto.createHash = algorithm => ori_createHash(algorithm == "md4" ? "sha256" : 
 module.exports = Object.assign({}, base, {
   optimization: {
     minimizer: [
-      new UglifyJsPlugin({
-        cache: true,
+      new TerserPlugin({
         parallel: true,
-        sourceMap: true,
       }),
-      new OptimizeCSSAssetsPlugin({}),
+      new CssMinimizerPlugin(),
     ],
   },
   plugins: [

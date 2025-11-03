@@ -52,4 +52,8 @@ public class OracleOperateRecognizerHolder implements SQLOperateRecognizerHolder
         }
         return null;
     }
+
+    public SQLRecognizer getMultiInsertRecognizer(String sql, SQLStatement ast) {
+        return new OracleMultiInsertRecognizer(sql, ast);
+    }
 }

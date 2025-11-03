@@ -214,7 +214,7 @@ public class NettyServerBootstrap implements RemotingBootstrap {
     public void shutdown() {
         try {
             if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("Shutting server down, the listen port: {}", XID.getPort());
+                LOGGER.info("Shutting server down, the listen port: {}", getListenPort());
             }
             if (initialized.get()) {
                 for (RegistryService registryService : MultiRegistryFactory.getInstances()) {

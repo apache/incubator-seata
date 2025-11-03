@@ -19,6 +19,9 @@ package org.apache.seata.compressor.gzip;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Random;
+
 public class GzipCompressorTest {
 
     @Test
@@ -28,5 +31,114 @@ public class GzipCompressorTest {
         bytes = compressor.compress(bytes);
         bytes = compressor.decompress(bytes);
         Assertions.assertEquals(new String(bytes), "aa");
+    }
+
+    @Test
+    public void testCompressNull() {
+        GzipCompressor compressor = new GzipCompressor();
+        Assertions.assertThrows(NullPointerException.class, () -> {
+            compressor.compress(null);
+        });
+    }
+
+    @Test
+    public void testDecompressNull() {
+        GzipCompressor compressor = new GzipCompressor();
+        Assertions.assertThrows(NullPointerException.class, () -> {
+            compressor.decompress(null);
+        });
+    }
+
+    @Test
+    public void testCompressEmptyArray() {
+        GzipCompressor compressor = new GzipCompressor();
+        byte[] empty = new byte[0];
+        byte[] compressed = compressor.compress(empty);
+        byte[] decompressed = compressor.decompress(compressed);
+        Assertions.assertArrayEquals(empty, decompressed);
+    }
+
+    @Test
+    public void testCompressSingleByte() {
+        GzipCompressor compressor = new GzipCompressor();
+        byte[] singleByte = {42};
+        byte[] compressed = compressor.compress(singleByte);
+        byte[] decompressed = compressor.decompress(compressed);
+        Assertions.assertArrayEquals(singleByte, decompressed);
+    }
+
+    @Test
+    public void testCompressLargeData() {
+        GzipCompressor compressor = new GzipCompressor();
+        byte[] largeData = new byte[1024 * 1024];
+        new Random().nextBytes(largeData);
+        byte[] compressed = compressor.compress(largeData);
+        byte[] decompressed = compressor.decompress(compressed);
+        Assertions.assertArrayEquals(largeData, decompressed);
+    }
+
+    @Test
+    public void testCompressTextData() {
+        GzipCompressor compressor = new GzipCompressor();
+        String text = "The quick brown fox jumps over the lazy dog";
+        byte[] original = text.getBytes(StandardCharsets.UTF_8);
+        byte[] compressed = compressor.compress(original);
+        byte[] decompressed = compressor.decompress(compressed);
+        Assertions.assertEquals(text, new String(decompressed, StandardCharsets.UTF_8));
+    }
+
+    @Test
+    public void testCompressSpecialCharacters() {
+        GzipCompressor compressor = new GzipCompressor();
+        String text = "Hello World! @#$%^&*()_+-=[]{}|;':\",./<>?";
+        byte[] original = text.getBytes(StandardCharsets.UTF_8);
+        byte[] compressed = compressor.compress(original);
+        byte[] decompressed = compressor.decompress(compressed);
+        Assertions.assertEquals(text, new String(decompressed, StandardCharsets.UTF_8));
+    }
+
+    @Test
+    public void testCompressUnicodeData() {
+        GzipCompressor compressor = new GzipCompressor();
+        String text = "Hello World in Chinese: 你好世界, Japanese: こんにちは世界, Korean: 안녕하세요 세계";
+        byte[] original = text.getBytes(StandardCharsets.UTF_8);
+        byte[] compressed = compressor.compress(original);
+        byte[] decompressed = compressor.decompress(compressed);
+        Assertions.assertEquals(text, new String(decompressed, StandardCharsets.UTF_8));
+    }
+
+    @Test
+    public void testCompressionRatio() {
+        GzipCompressor compressor = new GzipCompressor();
+        String repeatedText = new String(new char[1000]).replace("\0", "a");
+        byte[] original = repeatedText.getBytes(StandardCharsets.UTF_8);
+        byte[] compressed = compressor.compress(original);
+        Assertions.assertTrue(
+                compressed.length < original.length,
+                "Compressed size should be smaller than original for repetitive data");
+    }
+
+    @Test
+    public void testDecompressInvalidData() {
+        GzipCompressor compressor = new GzipCompressor();
+        byte[] invalidData = {0x1, 0x2, 0x3, 0x4};
+        Assertions.assertThrows(RuntimeException.class, () -> {
+            compressor.decompress(invalidData);
+        });
+    }
+
+    @Test
+    public void testMultipleCompressionCycles() {
+        GzipCompressor compressor = new GzipCompressor();
+        String text = "Test multiple compression cycles";
+        byte[] original = text.getBytes(StandardCharsets.UTF_8);
+
+        byte[] firstCompressed = compressor.compress(original);
+        byte[] firstDecompressed = compressor.decompress(firstCompressed);
+
+        byte[] secondCompressed = compressor.compress(firstDecompressed);
+        byte[] secondDecompressed = compressor.decompress(secondCompressed);
+
+        Assertions.assertEquals(text, new String(secondDecompressed, StandardCharsets.UTF_8));
     }
 }

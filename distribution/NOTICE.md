@@ -562,7 +562,7 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
     │   ├── curator-test-5.1.0.jar
     │   ├── dexx-collections-0.2.jar
     │   ├── disruptor-3.3.7.jar
-    │   ├── druid-1.2.20.jar
+    │   ├── druid-1.2.25.jar
     │   ├── error_prone_annotations-2.21.1.jar
     │   ├── eureka-client-1.10.18.jar
     │   ├── failsafe-2.3.3.jar
@@ -1719,7 +1719,7 @@ Please copy database driver dependencies, such as `mysql-connector-java.jar`, to
     │   ├── curator-test-5.1.0.jar
     │   ├── dexx-collections-0.2.jar
     │   ├── disruptor-3.3.7.jar
-    │   ├── druid-1.2.20.jar
+    │   ├── druid-1.2.25.jar
     │   ├── error_prone_annotations-2.21.1.jar
     │   ├── eureka-client-1.10.18.jar
     │   ├── failsafe-2.3.3.jar

@@ -88,7 +88,7 @@ jobs:
       max-parallel: 3
       fail-fast: false
       matrix:
-        java: [ 17, 21 ]
+        java: [ 17, 21, 25 ]
         os: [
           macos-14,
           windows-2022, # Skip tests, because too many errors in unit-test.
