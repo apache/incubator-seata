@@ -25,15 +25,12 @@ import io.netty.channel.ChannelId;
 import io.netty.channel.ChannelPromise;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
-import org.apache.seata.common.DefaultValues;
 import org.apache.seata.common.exception.FrameworkErrorCode;
 import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.StringUtils;
-import org.apache.seata.config.Configuration;
-import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.protocol.AbstractMessage;
 import org.apache.seata.core.protocol.HeartbeatMessage;
 import org.apache.seata.core.protocol.MergeMessage;
@@ -61,15 +58,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
@@ -99,8 +89,13 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     protected final Condition mergeCondition = mergeLock.newCondition();
     protected volatile boolean isSending = false;
 
-    private boolean enableReconnect;
+    private boolean enableReconnect = true;
     private final Runnable reconnectTask;
+    private static final ScheduledExecutorService GLOBAL_RECONNECT_TIMER =
+            Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("Global-Reconnect-Timer", 1));
+    private static final AtomicBoolean GLOBAL_TIMER_STARTED = new AtomicBoolean(false);
+    private static final CopyOnWriteArrayList<AbstractNettyRemotingClient> CLIENT_INSTANCES =
+            new CopyOnWriteArrayList<>();
 
     /**
      * When sending message type is {@link MergeMessage}, will be stored to mergeMsgMap.
@@ -126,12 +121,26 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
 
     @Override
     public void init() {
-        if (isEnableReconnect()) {
-            timerExecutor.scheduleAtFixedRate(
-                    reconnectTask, SCHEDULE_DELAY_MILLS, SCHEDULE_INTERVAL_MILLS, TimeUnit.MILLISECONDS);
-            LOGGER.info("Client reconnect timer started (transactionRole: {})", transactionRole.name());
-        } else {
-            LOGGER.info("Client reconnect timer disabled (transactionRole: {})", transactionRole.name());
+        if (GLOBAL_TIMER_STARTED.compareAndSet(false, true)) {
+            GLOBAL_RECONNECT_TIMER.scheduleAtFixedRate(
+                    () -> {
+                        for (AbstractNettyRemotingClient client : CLIENT_INSTANCES) {
+                            if (client.isEnableReconnect()) {
+                                try {
+                                    client.reconnectTask.run();
+                                } catch (Exception ex) {
+                                    LOGGER.warn(
+                                            "Reconnect task failed for transactionRole: {}, error: {}",
+                                            client.transactionRole.name(),
+                                            ex.getMessage());
+                                }
+                            }
+                        }
+                    },
+                    SCHEDULE_DELAY_MILLS,
+                    SCHEDULE_INTERVAL_MILLS,
+                    TimeUnit.MILLISECONDS);
+            LOGGER.info("Global client reconnect timer started (only one instance globally)");
         }
         if (this.isEnableClientBatchSendRequest()) {
             mergeSendExecutorService = new ThreadPoolExecutor(
@@ -158,10 +167,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         clientChannelManager = new NettyClientChannelManager(
                 new NettyPoolableFactory(this, clientBootstrap), getPoolKeyFunction(), nettyClientConfig);
 
-        Configuration configuration = ConfigurationFactory.getInstance();
-        this.enableReconnect =
-                configuration.getBoolean("client.reconnect.enable", DefaultValues.DEFAULT_ENABLE_CLIENT_RECONNECT);
-
+        CLIENT_INSTANCES.add(this);
         this.reconnectTask = () -> {
             try {
                 String serviceGroup = getTransactionServiceGroup();
@@ -295,6 +301,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
 
     @Override
     public void destroy() {
+        CLIENT_INSTANCES.remove(this);
         clientBootstrap.shutdown();
         if (mergeSendExecutorService != null) {
             mergeSendExecutorService.shutdown();
