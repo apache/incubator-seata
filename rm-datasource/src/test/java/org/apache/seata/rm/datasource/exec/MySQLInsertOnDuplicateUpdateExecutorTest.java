@@ -204,7 +204,7 @@ public class MySQLInsertOnDuplicateUpdateExecutorTest {
      * {1=[100], 2=[userId1], 3=[userName1], 4=[userStatus1], 5=[101], 6=[userId2], 7=[userName2], 8=[userStatus2]}
      */
     protected void mockParameters() {
-        Map<Integer, ArrayList<Object>> paramters = new HashMap<>(4);
+        Map<Integer, ArrayList<Object>> parameters = new HashMap<>(4);
         ArrayList arrayList10 = new ArrayList<>();
         arrayList10.add(PK_VALUE);
         ArrayList arrayList11 = new ArrayList<>();
@@ -213,10 +213,10 @@ public class MySQLInsertOnDuplicateUpdateExecutorTest {
         arrayList12.add("userName1");
         ArrayList arrayList13 = new ArrayList<>();
         arrayList13.add("userStatus1");
-        paramters.put(1, arrayList10);
-        paramters.put(2, arrayList11);
-        paramters.put(3, arrayList12);
-        paramters.put(4, arrayList13);
+        parameters.put(1, arrayList10);
+        parameters.put(2, arrayList11);
+        parameters.put(3, arrayList12);
+        parameters.put(4, arrayList13);
         ArrayList arrayList20 = new ArrayList<>();
         arrayList20.add(PK_VALUE + 1);
         ArrayList arrayList21 = new ArrayList<>();
@@ -225,12 +225,12 @@ public class MySQLInsertOnDuplicateUpdateExecutorTest {
         arrayList22.add("userName2");
         ArrayList arrayList23 = new ArrayList<>();
         arrayList23.add("userStatus2");
-        paramters.put(5, arrayList20);
-        paramters.put(6, arrayList21);
-        paramters.put(7, arrayList22);
-        paramters.put(8, arrayList23);
+        parameters.put(5, arrayList20);
+        parameters.put(6, arrayList21);
+        parameters.put(7, arrayList22);
+        parameters.put(8, arrayList23);
         PreparedStatementProxy psp = (PreparedStatementProxy) this.statementProxy;
-        when(psp.getParameters()).thenReturn(paramters);
+        when(psp.getParameters()).thenReturn(parameters);
     }
 
     /**
@@ -238,27 +238,27 @@ public class MySQLInsertOnDuplicateUpdateExecutorTest {
      * {1=[100], 2=[userId1], 3=[userName1], 4=[101], 5=[userId2], 6=[userName2]}
      */
     protected void mockImageParameterMap_contain_constant() {
-        Map<Integer, ArrayList<Object>> paramters = new HashMap<>(4);
+        Map<Integer, ArrayList<Object>> parameters = new HashMap<>(4);
         ArrayList arrayList10 = new ArrayList<>();
         arrayList10.add(PK_VALUE);
         ArrayList arrayList11 = new ArrayList<>();
         arrayList11.add("userId1");
         ArrayList arrayList12 = new ArrayList<>();
         arrayList12.add("userName1");
-        paramters.put(1, arrayList10);
-        paramters.put(2, arrayList11);
-        paramters.put(3, arrayList12);
+        parameters.put(1, arrayList10);
+        parameters.put(2, arrayList11);
+        parameters.put(3, arrayList12);
         ArrayList arrayList20 = new ArrayList<>();
         arrayList20.add(PK_VALUE + 1);
         ArrayList arrayList21 = new ArrayList<>();
         arrayList21.add("userId2");
         ArrayList arrayList22 = new ArrayList<>();
         arrayList22.add("userName2");
-        paramters.put(4, arrayList20);
-        paramters.put(5, arrayList21);
-        paramters.put(6, arrayList22);
+        parameters.put(4, arrayList20);
+        parameters.put(5, arrayList21);
+        parameters.put(6, arrayList22);
         PreparedStatementProxy psp = (PreparedStatementProxy) this.statementProxy;
-        when(psp.getParameters()).thenReturn(paramters);
+        when(psp.getParameters()).thenReturn(parameters);
     }
 
     protected Map<String, ArrayList<Object>> mockImageParameterMap() {
@@ -283,12 +283,12 @@ public class MySQLInsertOnDuplicateUpdateExecutorTest {
     }
 
     protected void mockParametersOfOnePk() {
-        Map<Integer, ArrayList<Object>> paramters = new HashMap<>(4);
+        Map<Integer, ArrayList<Object>> parameters = new HashMap<>(4);
         ArrayList arrayList1 = new ArrayList<>();
         arrayList1.add(PK_VALUE);
-        paramters.put(1, arrayList1);
+        parameters.put(1, arrayList1);
         PreparedStatementProxy psp = (PreparedStatementProxy) this.statementProxy;
-        when(psp.getParameters()).thenReturn(paramters);
+        when(psp.getParameters()).thenReturn(parameters);
     }
 
     protected void mockInsertRows() {
