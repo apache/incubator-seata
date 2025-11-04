@@ -17,9 +17,6 @@
 package org.apache.seata.common.json;
 
 import org.apache.seata.common.exception.JsonParseException;
-import org.apache.seata.common.json.impl.FastjsonJsonSerializer;
-import org.apache.seata.common.json.impl.GsonJsonSerializer;
-import org.apache.seata.common.json.impl.JacksonJsonSerializer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -41,13 +38,6 @@ public class JsonUtilTest {
         fastjsonUtil = new JsonUtil(JsonSerializerFactory.getSerializer("fastjson"));
         jacksonUtil = new JsonUtil(JsonSerializerFactory.getSerializer("jackson"));
         gsonUtil = new JsonUtil(JsonSerializerFactory.getSerializer("gson"));
-    }
-
-    @Test
-    public void testGetSerializer_returnsCorrectInstance() {
-        assertThat(fastjsonUtil.getSerializer()).isInstanceOf(FastjsonJsonSerializer.class);
-        assertThat(jacksonUtil.getSerializer()).isInstanceOf(JacksonJsonSerializer.class);
-        assertThat(gsonUtil.getSerializer()).isInstanceOf(GsonJsonSerializer.class);
     }
 
     @Test

@@ -83,13 +83,4 @@ public final class JsonUtil {
         }
         return serializer.parseObject(text, type);
     }
-
-    /**
-     * Get the underlying JsonSerializer instance
-     *
-     * @return the JsonSerializer instance
-     */
-    public JsonSerializer getSerializer() {
-        return serializer;
-    }
 }
