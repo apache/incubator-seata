@@ -25,12 +25,15 @@ import io.netty.channel.ChannelId;
 import io.netty.channel.ChannelPromise;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
+import org.apache.seata.common.DefaultValues;
 import org.apache.seata.common.exception.FrameworkErrorCode;
 import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.config.Configuration;
+import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.protocol.AbstractMessage;
 import org.apache.seata.core.protocol.HeartbeatMessage;
 import org.apache.seata.core.protocol.MergeMessage;
@@ -96,6 +99,9 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     protected final Condition mergeCondition = mergeLock.newCondition();
     protected volatile boolean isSending = false;
 
+    private boolean enableReconnect;
+    private final Runnable reconnectTask;
+
     /**
      * When sending message type is {@link MergeMessage}, will be stored to mergeMsgMap.
      */
@@ -120,17 +126,13 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
 
     @Override
     public void init() {
-        timerExecutor.scheduleAtFixedRate(
-                () -> {
-                    try {
-                        clientChannelManager.reconnect(getTransactionServiceGroup());
-                    } catch (Exception ex) {
-                        LOGGER.warn("reconnect server failed. {}", ex.getMessage());
-                    }
-                },
-                SCHEDULE_DELAY_MILLS,
-                SCHEDULE_INTERVAL_MILLS,
-                TimeUnit.MILLISECONDS);
+        if (isEnableReconnect()) {
+            timerExecutor.scheduleAtFixedRate(
+                    reconnectTask, SCHEDULE_DELAY_MILLS, SCHEDULE_INTERVAL_MILLS, TimeUnit.MILLISECONDS);
+            LOGGER.info("Client reconnect timer started (transactionRole: {})", transactionRole.name());
+        } else {
+            LOGGER.info("Client reconnect timer disabled (transactionRole: {})", transactionRole.name());
+        }
         if (this.isEnableClientBatchSendRequest()) {
             mergeSendExecutorService = new ThreadPoolExecutor(
                     MAX_MERGE_SEND_THREAD,
@@ -155,6 +157,28 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         clientBootstrap.setChannelHandlers(new ClientHandler(), new ChannelEventHandler(this));
         clientChannelManager = new NettyClientChannelManager(
                 new NettyPoolableFactory(this, clientBootstrap), getPoolKeyFunction(), nettyClientConfig);
+
+        Configuration configuration = ConfigurationFactory.getInstance();
+        this.enableReconnect =
+                configuration.getBoolean("client.reconnect.enable", DefaultValues.DEFAULT_ENABLE_CLIENT_RECONNECT);
+
+        this.reconnectTask = () -> {
+            try {
+                String serviceGroup = getTransactionServiceGroup();
+                if (StringUtils.isNotBlank(serviceGroup)) {
+                    clientChannelManager.reconnect(serviceGroup);
+                }
+            } catch (Exception ex) {
+                LOGGER.warn(
+                        "reconnect server failed for service group: {}, error: {}",
+                        getTransactionServiceGroup(),
+                        ex.getMessage());
+            }
+        };
+    }
+
+    protected boolean isEnableReconnect() {
+        return enableReconnect;
     }
 
     @Override

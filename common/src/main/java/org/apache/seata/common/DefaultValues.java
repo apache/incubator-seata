@@ -609,6 +609,11 @@ public interface DefaultValues {
      */
     boolean DEFAULT_RAFT_SSL_ENABLED = false;
 
+    /**
+     * The constant DEFAULT_ENABLE_CLIENT_RECONNECT.
+     */
+    boolean DEFAULT_ENABLE_CLIENT_RECONNECT = true;
+
     List<String> DEFAULT_XSS_KEYWORDS = Arrays.asList(
             "<script>",
             "</script>",
