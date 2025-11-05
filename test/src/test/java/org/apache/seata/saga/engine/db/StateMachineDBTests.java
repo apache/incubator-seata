@@ -81,7 +81,7 @@ public class StateMachineDBTests extends AbstractServerTest {
     }
 
     @AfterAll
-    public static void destory() throws InterruptedException {
+    public static void destroy() throws InterruptedException {
         stopSeataServer();
         TmNettyRemotingClient.getInstance().destroy();
         RmNettyRemotingClient.getInstance().destroy();
