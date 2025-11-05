@@ -62,9 +62,9 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -102,10 +102,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     private boolean enableReconnect = true;
     private final Runnable reconnectTask;
     private static final ScheduledExecutorService GLOBAL_RECONNECT_TIMER =
-            new ScheduledThreadPoolExecutor(
-                    1,
-                    new NamedThreadFactory("Global-Reconnect-Timer", 1)
-            );
+            new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("Global-Reconnect-Timer", 1));
     private static final AtomicBoolean GLOBAL_TIMER_STARTED = new AtomicBoolean(false);
     private static final CopyOnWriteArrayList<AbstractNettyRemotingClient> CLIENT_INSTANCES =
             new CopyOnWriteArrayList<>();
