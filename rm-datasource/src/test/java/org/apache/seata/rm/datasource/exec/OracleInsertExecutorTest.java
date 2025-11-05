@@ -358,7 +358,7 @@ public class OracleInsertExecutorTest {
 
     private SqlSequenceExpr mockParametersPkWithSeq() {
         SqlSequenceExpr expr = new SqlSequenceExpr("seq", "nextval");
-        Map<Integer, ArrayList<Object>> paramters = new HashMap(4);
+        Map<Integer, ArrayList<Object>> parameters = new HashMap(4);
         ArrayList arrayList0 = new ArrayList<>();
         arrayList0.add(expr);
         ArrayList arrayList1 = new ArrayList<>();
@@ -367,12 +367,12 @@ public class OracleInsertExecutorTest {
         arrayList2.add("userName1");
         ArrayList arrayList3 = new ArrayList<>();
         arrayList3.add("userStatus1");
-        paramters.put(1, arrayList0);
-        paramters.put(2, arrayList1);
-        paramters.put(3, arrayList2);
-        paramters.put(4, arrayList3);
+        parameters.put(1, arrayList0);
+        parameters.put(2, arrayList1);
+        parameters.put(3, arrayList2);
+        parameters.put(4, arrayList3);
         PreparedStatementProxy psp = (PreparedStatementProxy) this.statementProxy;
-        when(psp.getParameters()).thenReturn(paramters);
+        when(psp.getParameters()).thenReturn(parameters);
 
         List<List<Object>> rows = new ArrayList<>();
         rows.add(Arrays.asList("?", "?", "?"));
@@ -383,7 +383,7 @@ public class OracleInsertExecutorTest {
 
     private SqlSequenceExpr mockParametersMultiPkWithSeq() {
         SqlSequenceExpr expr = new SqlSequenceExpr("seq", "nextval");
-        Map<Integer, ArrayList<Object>> paramters = new HashMap(4);
+        Map<Integer, ArrayList<Object>> parameters = new HashMap(4);
         ArrayList arrayList0 = new ArrayList<>();
         arrayList0.add(expr);
         ArrayList arrayList1 = new ArrayList<>();
@@ -392,12 +392,12 @@ public class OracleInsertExecutorTest {
         arrayList2.add("userName1");
         ArrayList arrayList3 = new ArrayList<>();
         arrayList3.add("userStatus1");
-        paramters.put(1, arrayList0);
-        paramters.put(2, arrayList1);
-        paramters.put(3, arrayList2);
-        paramters.put(4, arrayList3);
+        parameters.put(1, arrayList0);
+        parameters.put(2, arrayList1);
+        parameters.put(3, arrayList2);
+        parameters.put(4, arrayList3);
         PreparedStatementProxy psp = (PreparedStatementProxy) this.statementProxy;
-        when(psp.getParameters()).thenReturn(paramters);
+        when(psp.getParameters()).thenReturn(parameters);
 
         List<List<Object>> rows = new ArrayList<>();
         rows.add(Arrays.asList("?", "?"));
@@ -407,7 +407,7 @@ public class OracleInsertExecutorTest {
     }
 
     private void mockParametersPkWithAuto() {
-        Map<Integer, ArrayList<Object>> paramters = new HashMap<>(4);
+        Map<Integer, ArrayList<Object>> parameters = new HashMap<>(4);
         ArrayList arrayList0 = new ArrayList<>();
         arrayList0.add(Null.get());
         ArrayList arrayList1 = new ArrayList<>();
@@ -416,12 +416,12 @@ public class OracleInsertExecutorTest {
         arrayList2.add("userName1");
         ArrayList arrayList3 = new ArrayList<>();
         arrayList3.add("userStatus1");
-        paramters.put(1, arrayList0);
-        paramters.put(2, arrayList1);
-        paramters.put(3, arrayList2);
-        paramters.put(4, arrayList3);
+        parameters.put(1, arrayList0);
+        parameters.put(2, arrayList1);
+        parameters.put(3, arrayList2);
+        parameters.put(4, arrayList3);
         PreparedStatementProxy psp = (PreparedStatementProxy) this.statementProxy;
-        when(psp.getParameters()).thenReturn(paramters);
+        when(psp.getParameters()).thenReturn(parameters);
 
         List<List<Object>> rows = new ArrayList<>();
         rows.add(Arrays.asList("?", "?", "?", "?"));
@@ -429,7 +429,7 @@ public class OracleInsertExecutorTest {
     }
 
     private void mockParametersMultiPkWithAuto() {
-        Map<Integer, ArrayList<Object>> paramters = new HashMap<>(4);
+        Map<Integer, ArrayList<Object>> parameters = new HashMap<>(4);
         ArrayList arrayList0 = new ArrayList<>();
         arrayList0.add(Null.get());
         ArrayList arrayList1 = new ArrayList<>();
@@ -438,12 +438,12 @@ public class OracleInsertExecutorTest {
         arrayList2.add("userName1");
         ArrayList arrayList3 = new ArrayList<>();
         arrayList3.add("userStatus1");
-        paramters.put(1, arrayList0);
-        paramters.put(2, arrayList1);
-        paramters.put(3, arrayList2);
-        paramters.put(4, arrayList3);
+        parameters.put(1, arrayList0);
+        parameters.put(2, arrayList1);
+        parameters.put(3, arrayList2);
+        parameters.put(4, arrayList3);
         PreparedStatementProxy psp = (PreparedStatementProxy) this.statementProxy;
-        when(psp.getParameters()).thenReturn(paramters);
+        when(psp.getParameters()).thenReturn(parameters);
 
         List<List<Object>> rows = new ArrayList<>();
         rows.add(Arrays.asList("?", "?", "?", "?"));

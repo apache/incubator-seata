@@ -117,7 +117,7 @@ public class NetAddressValidatorUtil {
 
     /**
      * Check if <code>input</code> is an IPv4 address mapped into a IPv6 address. These are
-     * starting with "::ffff:" followed by the IPv4 address in a dot-seperated notation.
+     * starting with "::ffff:" followed by the IPv4 address in a dot-separated notation.
      * The format is '::ffff:d.d.d.d'
      *
      * @param input ip-address to check
