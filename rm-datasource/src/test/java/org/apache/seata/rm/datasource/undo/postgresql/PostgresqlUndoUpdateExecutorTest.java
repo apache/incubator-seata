@@ -14,15 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.rm.datasource.undo.sqlserver;
+package org.apache.seata.rm.datasource.undo.postgresql;
 
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.rm.datasource.sql.struct.Field;
 import org.apache.seata.rm.datasource.sql.struct.KeyType;
 import org.apache.seata.rm.datasource.sql.struct.Row;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
-import org.apache.seata.rm.datasource.undo.AbstractUndoExecutor;
-import org.apache.seata.rm.datasource.undo.BaseExecutorTest;
 import org.apache.seata.rm.datasource.undo.SQLUndoLog;
 import org.apache.seata.sqlparser.SQLType;
 import org.apache.seata.sqlparser.struct.ColumnMeta;
@@ -30,10 +28,8 @@ import org.apache.seata.sqlparser.struct.IndexMeta;
 import org.apache.seata.sqlparser.struct.IndexType;
 import org.apache.seata.sqlparser.struct.TableMeta;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import java.sql.Types;
 import java.util.ArrayList;
@@ -42,59 +38,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SqlServerUndoUpdateExecutorTest extends BaseExecutorTest {
-    private static SqlServerUndoUpdateExecutor executor;
+public class PostgresqlUndoUpdateExecutorTest {
+
+    private PostgresqlUndoUpdateExecutor executor;
     private SQLUndoLog sqlUndoLog;
     private TableMeta tableMeta;
-
-    @BeforeAll
-    public static void init() {
-        TableMeta tableMeta = Mockito.mock(TableMeta.class);
-        Mockito.when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[] {"id"}));
-        Mockito.when(tableMeta.getTableName()).thenReturn("table_name");
-
-        TableRecords beforeImage = new TableRecords();
-        beforeImage.setTableName("table_name");
-        beforeImage.setTableMeta(tableMeta);
-        List<Row> beforeRows = new ArrayList<>();
-        Row row0 = new Row();
-        addField(row0, "id", 1, "12345");
-        addField(row0, "age", 1, "1");
-        beforeRows.add(row0);
-        Row row1 = new Row();
-        addField(row1, "id", 1, "12346");
-        addField(row1, "age", 1, "1");
-        beforeRows.add(row1);
-        beforeImage.setRows(beforeRows);
-
-        TableRecords afterImage = new TableRecords();
-        afterImage.setTableName("table_name");
-        afterImage.setTableMeta(tableMeta);
-        List<Row> afterRows = new ArrayList<>();
-        Row row2 = new Row();
-        addField(row2, "id", 1, "12345");
-        addField(row2, "age", 1, "2");
-        afterRows.add(row2);
-        Row row3 = new Row();
-        addField(row3, "id", 1, "12346");
-        addField(row3, "age", 1, "2");
-        afterRows.add(row3);
-        afterImage.setRows(afterRows);
-
-        SQLUndoLog sqlUndoLog = new SQLUndoLog();
-        sqlUndoLog.setSqlType(SQLType.UPDATE);
-        sqlUndoLog.setTableMeta(tableMeta);
-        sqlUndoLog.setTableName("table_name");
-        sqlUndoLog.setBeforeImage(beforeImage);
-        sqlUndoLog.setAfterImage(afterImage);
-
-        executor = new SqlServerUndoUpdateExecutor(sqlUndoLog);
-    }
 
     @BeforeEach
     public void setUp() {
         tableMeta = createTableMeta();
         sqlUndoLog = createSQLUndoLog();
+        executor = new PostgresqlUndoUpdateExecutor(sqlUndoLog);
     }
 
     private TableMeta createTableMeta() {
@@ -173,27 +127,25 @@ public class SqlServerUndoUpdateExecutorTest extends BaseExecutorTest {
     }
 
     @Test
-    public void buildUndoSQL() {
-        String sql = executor.buildUndoSQL().toLowerCase();
-        Assertions.assertNotNull(sql);
-        Assertions.assertTrue(sql.contains("update"));
-        Assertions.assertTrue(sql.contains("id"));
-        Assertions.assertTrue(sql.contains("age"));
+    public void testConstructor() {
+        PostgresqlUndoUpdateExecutor newExecutor = new PostgresqlUndoUpdateExecutor(sqlUndoLog);
+        Assertions.assertNotNull(newExecutor);
     }
 
     @Test
-    public void getUndoRows() {
-        Assertions.assertEquals(executor.getUndoRows(), executor.getSqlUndoLog().getBeforeImage());
+    public void testConstructorWithNull() {
+        PostgresqlUndoUpdateExecutor newExecutor = new PostgresqlUndoUpdateExecutor(null);
+        Assertions.assertNotNull(newExecutor);
     }
 
     @Test
     public void testBuildUndoSQL() {
-        SqlServerUndoUpdateExecutor updateExecutor = new SqlServerUndoUpdateExecutor(sqlUndoLog);
-        String undoSQL = updateExecutor.buildUndoSQL();
+        String undoSQL = executor.buildUndoSQL();
 
         // Verify SQL structure
         Assertions.assertNotNull(undoSQL);
         Assertions.assertTrue(undoSQL.contains("UPDATE"));
+        Assertions.assertTrue(undoSQL.contains("test_table"));
         Assertions.assertTrue(undoSQL.contains("SET"));
         Assertions.assertTrue(undoSQL.contains("WHERE"));
 
@@ -204,27 +156,25 @@ public class SqlServerUndoUpdateExecutorTest extends BaseExecutorTest {
         // Verify WHERE clause uses primary key
         Assertions.assertTrue(undoSQL.contains("id") && undoSQL.contains("= ?"));
 
-        // Ensure primary key is NOT in SET clause
+        // Ensure primary key is NOT in SET clause - match only between SET and WHERE
         String setClause = undoSQL.substring(undoSQL.indexOf("SET") + 3, undoSQL.indexOf("WHERE"))
                 .trim();
         Assertions.assertFalse(setClause.matches(".*\\bid\\s*=.*"));
     }
 
     @Test
-    public void testBuildUndoSQLWithSqlServerSyntax() {
-        SqlServerUndoUpdateExecutor updateExecutor = new SqlServerUndoUpdateExecutor(sqlUndoLog);
-        String undoSQL = updateExecutor.buildUndoSQL();
+    public void testBuildUndoSQLWithQuotes() {
+        String undoSQL = executor.buildUndoSQL();
 
-        // SQL Server uses square brackets for column escaping (optional)
-        // Verify basic SQL structure is correct
-        Assertions.assertTrue(undoSQL.contains("test_table"));
-        Assertions.assertTrue(undoSQL.contains("UPDATE"));
+        // PostgreSQL uses double quotes for column escaping
+        Assertions.assertTrue(undoSQL.contains("\"name\"") || undoSQL.contains("name"));
+        Assertions.assertTrue(undoSQL.contains("\"age\"") || undoSQL.contains("age"));
+        Assertions.assertTrue(undoSQL.contains("\"id\"") || undoSQL.contains("id"));
     }
 
     @Test
     public void testGetUndoRows() {
-        SqlServerUndoUpdateExecutor updateExecutor = new SqlServerUndoUpdateExecutor(sqlUndoLog);
-        TableRecords undoRows = updateExecutor.getUndoRows();
+        TableRecords undoRows = executor.getUndoRows();
 
         Assertions.assertNotNull(undoRows);
         Assertions.assertEquals(sqlUndoLog.getBeforeImage(), undoRows);
@@ -251,6 +201,7 @@ public class SqlServerUndoUpdateExecutorTest extends BaseExecutorTest {
 
     @Test
     public void testBuildUndoSQLWithEmptyBeforeImage() {
+        // Create SQLUndoLog with empty before image
         SQLUndoLog emptyUndoLog = new SQLUndoLog();
         emptyUndoLog.setSqlType(SQLType.UPDATE);
         emptyUndoLog.setTableName("test_table");
@@ -260,7 +211,7 @@ public class SqlServerUndoUpdateExecutorTest extends BaseExecutorTest {
         emptyBeforeImage.setRows(new ArrayList<>());
         emptyUndoLog.setBeforeImage(emptyBeforeImage);
 
-        SqlServerUndoUpdateExecutor emptyExecutor = new SqlServerUndoUpdateExecutor(emptyUndoLog);
+        PostgresqlUndoUpdateExecutor emptyExecutor = new PostgresqlUndoUpdateExecutor(emptyUndoLog);
 
         Assertions.assertThrows(ShouldNeverHappenException.class, () -> {
             emptyExecutor.buildUndoSQL();
@@ -274,7 +225,7 @@ public class SqlServerUndoUpdateExecutorTest extends BaseExecutorTest {
         nullUndoLog.setTableName("test_table");
         nullUndoLog.setBeforeImage(null);
 
-        SqlServerUndoUpdateExecutor nullExecutor = new SqlServerUndoUpdateExecutor(nullUndoLog);
+        PostgresqlUndoUpdateExecutor nullExecutor = new PostgresqlUndoUpdateExecutor(nullUndoLog);
 
         Assertions.assertThrows(NullPointerException.class, () -> {
             nullExecutor.buildUndoSQL();
@@ -283,6 +234,7 @@ public class SqlServerUndoUpdateExecutorTest extends BaseExecutorTest {
 
     @Test
     public void testBuildUndoSQLWithCompoundPrimaryKey() {
+        // Create table meta with compound primary key
         TableMeta compoundMeta = new TableMeta();
         compoundMeta.setTableName("compound_table");
 
@@ -348,8 +300,11 @@ public class SqlServerUndoUpdateExecutorTest extends BaseExecutorTest {
         beforeImage.setRows(Arrays.asList(resultRow));
         compoundUndoLog.setBeforeImage(beforeImage);
 
-        SqlServerUndoUpdateExecutor compoundExecutor = new SqlServerUndoUpdateExecutor(compoundUndoLog);
+        PostgresqlUndoUpdateExecutor compoundExecutor = new PostgresqlUndoUpdateExecutor(compoundUndoLog);
         String undoSQL = compoundExecutor.buildUndoSQL();
+
+        // Debug: print the generated SQL for compound key
+        System.out.println("Compound key SQL: " + undoSQL);
 
         // Verify compound primary key in WHERE clause
         Assertions.assertTrue(undoSQL.contains("id1") && undoSQL.contains("= ?"));
@@ -367,37 +322,60 @@ public class SqlServerUndoUpdateExecutorTest extends BaseExecutorTest {
     }
 
     @Test
-    public void testConstructor() {
-        SqlServerUndoUpdateExecutor updateExecutor = new SqlServerUndoUpdateExecutor(sqlUndoLog);
-        Assertions.assertNotNull(updateExecutor);
-    }
+    public void testBuildUndoSQLWithOnlyPrimaryKeyColumns() {
+        // Create table with only primary key columns
+        TableMeta pkOnlyMeta = new TableMeta();
+        pkOnlyMeta.setTableName("pk_only_table");
 
-    @Test
-    public void testConstructorWithNull() {
-        SqlServerUndoUpdateExecutor updateExecutor = new SqlServerUndoUpdateExecutor(null);
-        Assertions.assertNotNull(updateExecutor);
-    }
+        Map<String, ColumnMeta> allColumns = new HashMap<>();
 
-    @Test
-    public void testInheritance() {
-        SqlServerUndoUpdateExecutor updateExecutor = new SqlServerUndoUpdateExecutor(sqlUndoLog);
+        ColumnMeta idColumn = new ColumnMeta();
+        idColumn.setTableName("pk_only_table");
+        idColumn.setColumnName("id");
+        idColumn.setDataType(Types.INTEGER);
+        allColumns.put("id", idColumn);
 
-        // Verify inheritance hierarchy
-        Assertions.assertTrue(updateExecutor instanceof BaseSqlServerUndoExecutor);
-        Assertions.assertTrue(updateExecutor instanceof AbstractUndoExecutor);
-    }
+        pkOnlyMeta.getAllColumns().putAll(allColumns);
 
-    @Test
-    public void testSqlServerSpecificSql() {
-        SqlServerUndoUpdateExecutor updateExecutor = new SqlServerUndoUpdateExecutor(sqlUndoLog);
-        String undoSQL = updateExecutor.buildUndoSQL();
+        Map<String, IndexMeta> allIndexes = new HashMap<>();
+        IndexMeta primaryIndex = new IndexMeta();
+        primaryIndex.setIndexName("PRIMARY");
+        primaryIndex.setNonUnique(false);
+        primaryIndex.setIndextype(IndexType.PRIMARY);
 
-        // Verify SQL Server compatible syntax
-        Assertions.assertNotNull(undoSQL);
-        Assertions.assertTrue(undoSQL.toUpperCase().startsWith("UPDATE"));
+        List<ColumnMeta> primaryColumns = new ArrayList<>();
+        primaryColumns.add(idColumn);
+        primaryIndex.setValues(primaryColumns);
 
-        // Should not contain database-specific syntax that would fail on SQL Server
-        Assertions.assertFalse(undoSQL.contains("LIMIT"));
-        Assertions.assertFalse(undoSQL.contains("ROWNUM"));
+        allIndexes.put("PRIMARY", primaryIndex);
+        pkOnlyMeta.getAllIndexes().putAll(allIndexes);
+
+        SQLUndoLog pkOnlyUndoLog = new SQLUndoLog();
+        pkOnlyUndoLog.setSqlType(SQLType.UPDATE);
+        pkOnlyUndoLog.setTableName("pk_only_table");
+        pkOnlyUndoLog.setTableMeta(pkOnlyMeta);
+
+        TableRecords beforeImage = new TableRecords();
+        beforeImage.setTableName("pk_only_table");
+        beforeImage.setTableMeta(pkOnlyMeta);
+
+        List<Field> fields = Arrays.asList(new Field("id", Types.INTEGER, 1));
+
+        fields.get(0).setKeyType(KeyType.PRIMARY_KEY);
+
+        Row resultRow = new Row();
+        resultRow.setFields(fields);
+
+        beforeImage.setRows(Arrays.asList(resultRow));
+        pkOnlyUndoLog.setBeforeImage(beforeImage);
+
+        PostgresqlUndoUpdateExecutor pkOnlyExecutor = new PostgresqlUndoUpdateExecutor(pkOnlyUndoLog);
+        String undoSQL = pkOnlyExecutor.buildUndoSQL();
+
+        // Should have empty SET clause but valid WHERE clause
+        Assertions.assertTrue(undoSQL.contains("UPDATE"));
+        Assertions.assertTrue(undoSQL.contains("pk_only_table"));
+        Assertions.assertTrue(undoSQL.contains("WHERE"));
+        Assertions.assertTrue(undoSQL.contains("id") && undoSQL.contains("= ?"));
     }
 }

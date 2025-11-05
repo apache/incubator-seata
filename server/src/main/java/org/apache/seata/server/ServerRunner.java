@@ -80,14 +80,14 @@ public class ServerRunner implements CommandLineRunner, DisposableBean, Applicat
     public void destroy() throws Exception {
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("destoryAll starting");
+            LOGGER.debug("destroyAll starting");
         }
         for (Disposable disposable : DISPOSABLE_LIST) {
             disposable.destroy();
         }
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("destoryAll finish");
+            LOGGER.debug("destroyAll finish");
         }
         DISPOSABLE_LIST.clear();
     }
