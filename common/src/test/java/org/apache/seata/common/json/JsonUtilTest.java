@@ -35,9 +35,9 @@ public class JsonUtilTest {
     @BeforeEach
     void setUp() {
         // Create JsonUtil instances with different serializers
-        fastjsonUtil = new JsonUtil(JsonSerializerFactory.getSerializer("fastjson"));
-        jacksonUtil = new JsonUtil(JsonSerializerFactory.getSerializer("jackson"));
-        gsonUtil = new JsonUtil(JsonSerializerFactory.getSerializer("gson"));
+        fastjsonUtil = JsonUtil.fastjson();
+        jacksonUtil = JsonUtil.jackson();
+        gsonUtil = JsonUtil.custom("gson");
     }
 
     @Test

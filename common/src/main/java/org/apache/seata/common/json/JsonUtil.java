@@ -25,19 +25,52 @@ import java.lang.reflect.Type;
  */
 public final class JsonUtil {
 
+    private static volatile JsonUtil fastjsonInstance;
+    private static volatile JsonUtil jacksonInstance;
+
     private final JsonSerializer serializer;
 
-    /**
-     * Create a JsonUtil instance with the specified JsonSerializer implementation
-     *
-     * @param serializer the JsonSerializer implementation to use
-     * @throws IllegalArgumentException if serializer is null
-     */
-    public JsonUtil(JsonSerializer serializer) {
-        if (serializer == null) {
-            throw new IllegalArgumentException("JsonSerializer cannot be null");
-        }
+    private JsonUtil(JsonSerializer serializer) {
         this.serializer = serializer;
+    }
+
+    /**
+     * Get JsonUtil instance with FastJSON implementation
+     */
+    public static JsonUtil fastjson() {
+        if (fastjsonInstance == null) {
+            synchronized (JsonUtil.class) {
+                if (fastjsonInstance == null) {
+                    fastjsonInstance = new JsonUtil(
+                            JsonSerializerFactory.getSerializer("fastjson")
+                    );
+                }
+            }
+        }
+        return fastjsonInstance;
+    }
+
+    /**
+     * Get JsonUtil instance with Jackson implementation
+     */
+    public static JsonUtil jackson() {
+        if (jacksonInstance == null) {
+            synchronized (JsonUtil.class) {
+                if (jacksonInstance == null) {
+                    jacksonInstance = new JsonUtil(
+                            JsonSerializerFactory.getSerializer("jackson")
+                    );
+                }
+            }
+        }
+        return jacksonInstance;
+    }
+
+    /**
+     * Get JsonUtil instance with custom implementation
+     */
+    public static JsonUtil custom(String serializerName) {
+        return new JsonUtil(JsonSerializerFactory.getSerializer(serializerName));
     }
 
     /**
