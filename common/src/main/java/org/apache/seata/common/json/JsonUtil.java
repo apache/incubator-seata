@@ -41,9 +41,7 @@ public final class JsonUtil {
         if (fastjsonInstance == null) {
             synchronized (JsonUtil.class) {
                 if (fastjsonInstance == null) {
-                    fastjsonInstance = new JsonUtil(
-                            JsonSerializerFactory.getSerializer("fastjson")
-                    );
+                    fastjsonInstance = new JsonUtil(JsonSerializerFactory.getSerializer("fastjson"));
                 }
             }
         }
@@ -57,9 +55,7 @@ public final class JsonUtil {
         if (jacksonInstance == null) {
             synchronized (JsonUtil.class) {
                 if (jacksonInstance == null) {
-                    jacksonInstance = new JsonUtil(
-                            JsonSerializerFactory.getSerializer("jackson")
-                    );
+                    jacksonInstance = new JsonUtil(JsonSerializerFactory.getSerializer("jackson"));
                 }
             }
         }
