@@ -129,9 +129,9 @@ public class DataSourceProxyXATest {
         DataSourceProxyXA dataSourceProxyXA = new DataSourceProxyXA(druidDataSource);
         // Test isShouldBeHeld
         String dbType = dataSourceProxyXA.getDbType();
-        if (DBType.MYSQL.name().equalsIgnoreCase(dbType) ||
-                DBType.MARIADB.name().equalsIgnoreCase(dbType) ||
-                DBType.OSCAR.name().equalsIgnoreCase(dbType)) {
+        if (DBType.MYSQL.name().equalsIgnoreCase(dbType)
+                || DBType.MARIADB.name().equalsIgnoreCase(dbType)
+                || DBType.OSCAR.name().equalsIgnoreCase(dbType)) {
             Assertions.assertTrue(dataSourceProxyXA.isShouldBeHeld());
         }
         Connection connFromDataSourceProxyXA = dataSourceProxyXA.getConnection();
