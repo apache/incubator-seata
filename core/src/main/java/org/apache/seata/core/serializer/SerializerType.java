@@ -71,10 +71,8 @@ public enum SerializerType {
 
     /**
      * The fory.
-     * <p>
-     * To maintain compatibility with FURY, the FURY code was reused.
      */
-    FORY((byte) 86);
+    FORY((byte) 87);
 
     private final byte code;
 
