@@ -159,6 +159,48 @@ public class FastjsonJsonSerializerTest {
         assertThat(serializer).isInstanceOf(FastjsonJsonSerializer.class);
     }
 
+    @Test
+    public void testToJSONString_emptyList() {
+        List<String> emptyList = new ArrayList<>();
+        String json = ((FastjsonJsonSerializer) jsonSerializer).toJSONString(emptyList, false, false);
+        assertThat(json).isEqualTo("[]");
+    }
+
+    @Test
+    public void testToJSONString_withAutoType() {
+        TestObject obj = new TestObject("withType", 789);
+        String jsonWithAutoType = ((FastjsonJsonSerializer) jsonSerializer).toJSONString(obj, false, false);
+
+        assertThat(jsonWithAutoType).contains("@type");
+    }
+
+    @Test
+    public void testParseObject_nullJson() {
+        assertThat(((FastjsonJsonSerializer) jsonSerializer).parseObject(null, TestObject.class, false)).isNull();
+    }
+
+
+    @Test
+    public void testParseObject_emptyList() {
+        String json = "[]";
+        List<?> list = ((FastjsonJsonSerializer) jsonSerializer).parseObject(json, List.class, false);
+        assertThat(list).isEmpty();
+    }
+
+    @Test
+    public void testParseObject_withAutoType() {
+        TestObject original = new TestObject("autoTypeTest", 999);
+        String jsonWithAutoType = ((FastjsonJsonSerializer) jsonSerializer)
+                .toJSONString(original, false, false);
+
+        TestObject restored = ((FastjsonJsonSerializer) jsonSerializer)
+                .parseObject(jsonWithAutoType, TestObject.class, false);
+
+        assertThat(restored).isNotNull();
+        assertThat(restored.getName()).isEqualTo("autoTypeTest");
+        assertThat(restored.getValue()).isEqualTo(999);
+    }
+
     public static class TestObject {
         private String name;
         private int value;

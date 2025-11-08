@@ -153,6 +153,61 @@ public class GsonJsonSerializerTest {
         assertThat(serializer).isInstanceOf(GsonJsonSerializer.class);
     }
 
+    @Test
+    public void testParseObject_nullText() {
+        assertThat(((GsonJsonSerializer) jsonSerializer).parseObject(null, String.class)).isNull();
+    }
+
+    @Test
+    public void testToJSONString_emptyList() {
+        List<String> emptyList = new ArrayList<>();
+        String json = ((GsonJsonSerializer) jsonSerializer).toJSONString(emptyList, false, false);
+        assertThat(json).isEqualTo("[]");
+    }
+
+    @Test
+    public void testToJSONString_withAutoType() {
+        TestObject obj = new TestObject("withType", 789);
+        String jsonWithAutoType = ((GsonJsonSerializer) jsonSerializer).toJSONString(obj, false, false);
+
+        assertThat(jsonWithAutoType).doesNotContain("@type");
+    }
+
+    @Test
+    public void testToJsonString_prettyPrint() {
+        TestObject obj = new TestObject("pretty", 789);
+        String prettyJson = ((GsonJsonSerializer) jsonSerializer).toJSONString(obj, false, true);
+
+        // Pretty JSON should contain newlines and indentation
+        assertThat(prettyJson).contains("\n");
+    }
+
+    @Test
+    public void testParseObject_nullJson() {
+        assertThat(((GsonJsonSerializer) jsonSerializer).parseObject(null, TestObject.class, false)).isNull();
+    }
+
+    @Test
+    public void testParseObject_emptyList() {
+        String json = "[]";
+        List<?> list = ((GsonJsonSerializer) jsonSerializer).parseObject(json, List.class, false);
+        assertThat(list).isEmpty();
+    }
+
+    @Test
+    public void testParseObject_withAutoType() {
+        TestObject original = new TestObject("autoTypeTest", 999);
+        String jsonWithAutoType = ((GsonJsonSerializer) jsonSerializer)
+                .toJSONString(original, false, false);
+
+        TestObject restored = ((GsonJsonSerializer) jsonSerializer)
+                .parseObject(jsonWithAutoType, TestObject.class, false);
+
+        assertThat(restored).isNotNull();
+        assertThat(restored.getName()).isEqualTo("autoTypeTest");
+        assertThat(restored.getValue()).isEqualTo(999);
+    }
+
     public static class TestObject {
         private String name;
         private int value;

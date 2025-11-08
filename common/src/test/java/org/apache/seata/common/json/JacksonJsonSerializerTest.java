@@ -157,6 +157,55 @@ public class JacksonJsonSerializerTest {
         assertThat(serializer).isNotNull();
     }
 
+    @Test
+    public void testToJSONString_throwsException() {
+        Object unserializable = new Object() {
+            private final java.io.InputStream stream = System.in;
+        };
+
+        assertThatThrownBy(() -> jsonSerializer.toJSONString(unserializable))
+                .isInstanceOf(JsonParseException.class)
+                .hasMessageContaining("Jackson serialize error");
+    }
+
+    @Test
+    public void testParseObject_nullText() {
+        assertThat(((JacksonJsonSerializer) jsonSerializer).parseObject(null, String.class)).isNull();
+    }
+
+    @Test
+    public void testToJSONString_prettyPrint() {
+        TestObject obj = new TestObject("pretty", 789);
+        String prettyJson = ((JacksonJsonSerializer) jsonSerializer).toJSONString(obj, true);
+
+        // Pretty JSON should contain newlines and indentation
+        assertThat(prettyJson).contains("\n");
+    }
+
+    @Test
+    public void testParseObject_nullJson() {
+        assertThat(((JacksonJsonSerializer) jsonSerializer).parseObject(null, TestObject.class, false)).isNull();
+    }
+
+    @Test
+    public void testParseObject_emptyList() {
+        String json = "[]";
+        List<?> list = ((JacksonJsonSerializer) jsonSerializer).parseObject(json, List.class, false);
+        assertThat(list).isEmpty();
+    }
+
+    @Test
+    public void testParseObject_ignoreAutoType() {
+        TestObject obj = new TestObject("ignored", 222);
+        String json = jsonSerializer.toJSONString(obj);
+
+        TestObject restored = ((JacksonJsonSerializer) jsonSerializer).parseObject(json, TestObject.class, true);
+
+        assertThat(restored).isNotNull();
+        assertThat(restored.getName()).isEqualTo("ignored");
+        assertThat(restored.getValue()).isEqualTo(222);
+    }
+
     public static class TestObject {
         private String name;
         private int value;
