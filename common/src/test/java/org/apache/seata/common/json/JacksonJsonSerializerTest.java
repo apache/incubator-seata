@@ -170,7 +170,8 @@ public class JacksonJsonSerializerTest {
 
     @Test
     public void testParseObject_nullText() {
-        assertThat(((JacksonJsonSerializer) jsonSerializer).parseObject(null, String.class)).isNull();
+        assertThat(((JacksonJsonSerializer) jsonSerializer).parseObject(null, String.class))
+                .isNull();
     }
 
     @Test
@@ -184,7 +185,8 @@ public class JacksonJsonSerializerTest {
 
     @Test
     public void testParseObject_nullJson() {
-        assertThat(((JacksonJsonSerializer) jsonSerializer).parseObject(null, TestObject.class, false)).isNull();
+        assertThat(((JacksonJsonSerializer) jsonSerializer).parseObject(null, TestObject.class, false))
+                .isNull();
     }
 
     @Test

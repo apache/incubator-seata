@@ -155,7 +155,8 @@ public class GsonJsonSerializerTest {
 
     @Test
     public void testParseObject_nullText() {
-        assertThat(((GsonJsonSerializer) jsonSerializer).parseObject(null, String.class)).isNull();
+        assertThat(((GsonJsonSerializer) jsonSerializer).parseObject(null, String.class))
+                .isNull();
     }
 
     @Test
@@ -184,7 +185,8 @@ public class GsonJsonSerializerTest {
 
     @Test
     public void testParseObject_nullJson() {
-        assertThat(((GsonJsonSerializer) jsonSerializer).parseObject(null, TestObject.class, false)).isNull();
+        assertThat(((GsonJsonSerializer) jsonSerializer).parseObject(null, TestObject.class, false))
+                .isNull();
     }
 
     @Test
@@ -197,11 +199,10 @@ public class GsonJsonSerializerTest {
     @Test
     public void testParseObject_withAutoType() {
         TestObject original = new TestObject("autoTypeTest", 999);
-        String jsonWithAutoType = ((GsonJsonSerializer) jsonSerializer)
-                .toJSONString(original, false, false);
+        String jsonWithAutoType = ((GsonJsonSerializer) jsonSerializer).toJSONString(original, false, false);
 
-        TestObject restored = ((GsonJsonSerializer) jsonSerializer)
-                .parseObject(jsonWithAutoType, TestObject.class, false);
+        TestObject restored =
+                ((GsonJsonSerializer) jsonSerializer).parseObject(jsonWithAutoType, TestObject.class, false);
 
         assertThat(restored).isNotNull();
         assertThat(restored.getName()).isEqualTo("autoTypeTest");

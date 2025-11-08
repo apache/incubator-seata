@@ -176,9 +176,9 @@ public class FastjsonJsonSerializerTest {
 
     @Test
     public void testParseObject_nullJson() {
-        assertThat(((FastjsonJsonSerializer) jsonSerializer).parseObject(null, TestObject.class, false)).isNull();
+        assertThat(((FastjsonJsonSerializer) jsonSerializer).parseObject(null, TestObject.class, false))
+                .isNull();
     }
-
 
     @Test
     public void testParseObject_emptyList() {
@@ -190,11 +190,10 @@ public class FastjsonJsonSerializerTest {
     @Test
     public void testParseObject_withAutoType() {
         TestObject original = new TestObject("autoTypeTest", 999);
-        String jsonWithAutoType = ((FastjsonJsonSerializer) jsonSerializer)
-                .toJSONString(original, false, false);
+        String jsonWithAutoType = ((FastjsonJsonSerializer) jsonSerializer).toJSONString(original, false, false);
 
-        TestObject restored = ((FastjsonJsonSerializer) jsonSerializer)
-                .parseObject(jsonWithAutoType, TestObject.class, false);
+        TestObject restored =
+                ((FastjsonJsonSerializer) jsonSerializer).parseObject(jsonWithAutoType, TestObject.class, false);
 
         assertThat(restored).isNotNull();
         assertThat(restored.getName()).isEqualTo("autoTypeTest");
