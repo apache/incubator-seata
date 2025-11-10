@@ -16,7 +16,18 @@
  */
 package org.apache.seata.common.util;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.FormBody;
+import okhttp3.Headers;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Protocol;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.config.RequestConfig;
@@ -31,6 +42,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.seata.common.executor.HttpCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,9 +51,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 public class HttpClientUtil {
 
@@ -52,21 +66,44 @@ public class HttpClientUtil {
     private static final PoolingHttpClientConnectionManager POOLING_HTTP_CLIENT_CONNECTION_MANAGER =
             new PoolingHttpClientConnectionManager();
 
+    private static final Map<Integer /*timeout*/, OkHttpClient> HTTP2_CLIENT_MAP = new ConcurrentHashMap<>();
+
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+    public static final MediaType MEDIA_TYPE_JSON = MediaType.parse("application/json");
+
+    public static final MediaType MEDIA_TYPE_FORM_URLENCODED = MediaType.parse("application/x-www-form-urlencoded");
 
     static {
         POOLING_HTTP_CLIENT_CONNECTION_MANAGER.setMaxTotal(10);
         POOLING_HTTP_CLIENT_CONNECTION_MANAGER.setDefaultMaxPerRoute(10);
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> HTTP_CLIENT_MAP.values().parallelStream()
-                .forEach(client -> {
-                    try {
-                        // delay 3s, make sure unregister http request send successfully
-                        Thread.sleep(3000);
-                        client.close();
-                    } catch (IOException | InterruptedException e) {
-                        LOGGER.error(e.getMessage(), e);
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            HTTP_CLIENT_MAP.values().parallelStream().forEach(client -> {
+                try {
+                    // delay 3s, make sure unregister http request send successfully
+                    Thread.sleep(3000);
+                    client.close();
+                } catch (IOException | InterruptedException e) {
+                    LOGGER.error(e.getMessage(), e);
+                }
+            });
+
+            HTTP2_CLIENT_MAP.values().parallelStream().forEach(client -> {
+                try {
+                    client.dispatcher().executorService().shutdown();
+                    // Wait for up to 3 seconds for in-flight requests to complete
+                    if (!client.dispatcher().executorService().awaitTermination(3, TimeUnit.SECONDS)) {
+                        LOGGER.warn("Timeout waiting for OkHttp executor service to terminate.");
                     }
-                })));
+                    client.connectionPool().evictAll();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    LOGGER.error("Interrupted while waiting for OkHttp executor service to terminate.", e);
+                } catch (Exception e) {
+                    LOGGER.error(e.getMessage(), e);
+                }
+            });
+        }));
     }
 
     // post request
@@ -194,5 +231,117 @@ public class HttpClientUtil {
 
         CloseableHttpClient client = HttpClients.createDefault();
         return client.execute(post);
+    }
+
+    public static void doPostWithHttp2(
+            String url, Map<String, String> params, Map<String, String> headers, HttpCallback<Response> callback) {
+        doPostWithHttp2(url, params, headers, callback, 10);
+    }
+
+    public static void doPostWithHttp2(
+            String url,
+            Map<String, String> params,
+            Map<String, String> headers,
+            HttpCallback<Response> callback,
+            int timeoutSeconds) {
+        try {
+            String contentType = headers != null ? headers.get("Content-Type") : "";
+            RequestBody requestBody = createRequestBody(params, contentType);
+            Request request = buildHttp2Request(url, headers, requestBody, "POST");
+            OkHttpClient client = createHttp2ClientWithTimeout(timeoutSeconds);
+            executeAsync(client, request, callback);
+        } catch (JsonProcessingException e) {
+            LOGGER.error(e.getMessage(), e);
+            callback.onFailure(e);
+        }
+    }
+
+    public static void doPostWithHttp2(
+            String url, String body, Map<String, String> headers, HttpCallback<Response> callback) {
+        // default timeout 10 seconds
+        doPostWithHttp2(url, body, headers, callback, 10);
+    }
+
+    public static void doPostWithHttp2(
+            String url, String body, Map<String, String> headers, HttpCallback<Response> callback, int timeoutSeconds) {
+        RequestBody requestBody = RequestBody.create(body, MEDIA_TYPE_JSON);
+        Request request = buildHttp2Request(url, headers, requestBody, "POST");
+        OkHttpClient client = createHttp2ClientWithTimeout(timeoutSeconds);
+        executeAsync(client, request, callback);
+    }
+
+    public static void doGetWithHttp2(
+            String url, Map<String, String> headers, final HttpCallback<Response> callback, int timeoutSeconds) {
+        Request request = buildHttp2Request(url, headers, null, "GET");
+        OkHttpClient client = createHttp2ClientWithTimeout(timeoutSeconds);
+        executeAsync(client, request, callback);
+    }
+
+    private static RequestBody createRequestBody(Map<String, String> params, String contentType)
+            throws JsonProcessingException {
+        if (params == null || params.isEmpty()) {
+            return RequestBody.create(new byte[0]);
+        }
+
+        // Extract media type without parameters for robust comparison
+        String mediaTypeOnly = contentType == null ? "" : contentType.split(";")[0].trim();
+        if (MEDIA_TYPE_FORM_URLENCODED.toString().equals(mediaTypeOnly)) {
+            FormBody.Builder formBuilder = new FormBody.Builder();
+            params.forEach(formBuilder::add);
+            return formBuilder.build();
+        } else {
+            String json = OBJECT_MAPPER.writeValueAsString(params);
+            return RequestBody.create(json, MEDIA_TYPE_JSON);
+        }
+    }
+
+    private static OkHttpClient createHttp2ClientWithTimeout(int timeoutSeconds) {
+        return HTTP2_CLIENT_MAP.computeIfAbsent(timeoutSeconds, k -> new OkHttpClient.Builder()
+                // Use HTTP/2 prior knowledge to directly use HTTP/2 without an initial HTTP/1.1 upgrade
+                .protocols(Collections.singletonList(Protocol.H2_PRIOR_KNOWLEDGE))
+                .connectTimeout(timeoutSeconds, TimeUnit.SECONDS)
+                .readTimeout(timeoutSeconds, TimeUnit.SECONDS)
+                .writeTimeout(timeoutSeconds, TimeUnit.SECONDS)
+                .build());
+    }
+
+    private static Request buildHttp2Request(
+            String url, Map<String, String> headers, RequestBody requestBody, String method) {
+        Headers.Builder headerBuilder = new Headers.Builder();
+        if (headers != null) {
+            headers.forEach(headerBuilder::add);
+        }
+
+        Request.Builder requestBuilder = new Request.Builder().url(url).headers(headerBuilder.build());
+
+        if ("POST".equals(method) && requestBody != null) {
+            requestBuilder.post(requestBody);
+        } else if ("GET".equals(method)) {
+            requestBuilder.get();
+        }
+
+        return requestBuilder.build();
+    }
+
+    private static void executeAsync(OkHttpClient client, Request request, final HttpCallback<Response> callback) {
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onResponse(Call call, Response response) {
+                try {
+                    callback.onSuccess(response);
+                } finally {
+                    response.close();
+                }
+            }
+
+            @Override
+            public void onFailure(Call call, IOException e) {
+                if (call.isCanceled()) {
+                    callback.onCancelled();
+                } else {
+                    callback.onFailure(e);
+                }
+            }
+        });
     }
 }

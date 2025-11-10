@@ -16,15 +16,16 @@
  */
 package org.apache.seata.rm.datasource;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.seata.common.ConfigurationKeys;
-import org.apache.seata.common.Constants;
 import org.apache.seata.common.loader.EnhancedServiceNotFoundException;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.Resource;
 import org.apache.seata.rm.DefaultResourceManager;
+import org.apache.seata.rm.datasource.initializer.ResourceIdInitializer;
+import org.apache.seata.rm.datasource.initializer.ResourceIdInitializerRegistry;
 import org.apache.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import org.apache.seata.rm.datasource.undo.UndoLogManager;
 import org.apache.seata.rm.datasource.undo.UndoLogManagerFactory;
@@ -45,7 +46,6 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_TRANSACTION_UNDO_LOG
 
 /**
  * The type Data source proxy.
- *
  */
 public class DataSourceProxy extends AbstractDataSourceProxy implements Resource {
 
@@ -131,7 +131,6 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
     /**
      * Define derivative product version for MySQL Kernel
-     *
      */
     private void checkDerivativeProduct() {
         if (!JdbcConstants.MYSQL.equals(dbType)) {
@@ -234,179 +233,8 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     }
 
     private void initResourceId() {
-        if (JdbcConstants.POSTGRESQL.equals(dbType)) {
-            initPGResourceId();
-        } else if (JdbcConstants.ORACLE.equals(dbType) && userName != null) {
-            initOracleResourceId();
-        } else if (JdbcConstants.MYSQL.equals(dbType) || JdbcConstants.POLARDBX.equals(dbType)) {
-            initMysqlResourceId();
-        } else if (JdbcConstants.SQLSERVER.equals(dbType)) {
-            initSqlServerResourceId();
-        } else if (JdbcConstants.DM.equals(dbType)) {
-            initDMResourceId();
-        } else if (JdbcConstants.OSCAR.equals(dbType)) {
-            initOscarResourceId();
-        } else {
-            initDefaultResourceId();
-        }
-    }
-
-    /**
-     * init the default resource id
-     */
-    private void initDefaultResourceId() {
-        if (jdbcUrl.contains("?")) {
-            resourceId = jdbcUrl.substring(0, jdbcUrl.indexOf('?'));
-        } else {
-            resourceId = jdbcUrl;
-        }
-    }
-
-    /**
-     * init the oracle resource id
-     */
-    private void initOracleResourceId() {
-        if (jdbcUrl.contains("?")) {
-            resourceId = jdbcUrl.substring(0, jdbcUrl.indexOf('?')) + "/" + userName;
-        } else {
-            resourceId = jdbcUrl + "/" + userName;
-        }
-    }
-
-    /**
-     * prevent mysql url like
-     * jdbc:mysql:loadbalance://192.168.100.2:3306,192.168.100.1:3306/seata
-     * it will cause the problem like
-     * 1.rm client is not connected
-     */
-    private void initMysqlResourceId() {
-        String startsWith = "jdbc:mysql:loadbalance://";
-        if (jdbcUrl.startsWith(startsWith)) {
-            String url;
-            if (jdbcUrl.contains("?")) {
-                url = jdbcUrl.substring(0, jdbcUrl.indexOf('?'));
-            } else {
-                url = jdbcUrl;
-            }
-            resourceId = url.replace(",", "|");
-        } else {
-            initDefaultResourceId();
-        }
-    }
-
-    private void initDMResourceId() {
-        LOGGER.warn("support for the dameng database is currently an experimental feature ");
-        if (jdbcUrl.contains("?")) {
-            StringBuilder jdbcUrlBuilder = new StringBuilder();
-            jdbcUrlBuilder.append(jdbcUrl, 0, jdbcUrl.indexOf('?'));
-
-            StringBuilder paramsBuilder = new StringBuilder();
-            String paramUrl = jdbcUrl.substring(jdbcUrl.indexOf('?') + 1);
-            String[] urlParams = paramUrl.split("&");
-            for (String urlParam : urlParams) {
-                if (urlParam.contains("schema")) {
-                    // remove the '"'
-                    if (urlParam.contains("\"")) {
-                        urlParam = urlParam.replaceAll("\"", "");
-                    }
-                    paramsBuilder.append(urlParam);
-                    break;
-                }
-            }
-
-            if (paramsBuilder.length() > 0) {
-                jdbcUrlBuilder.append("?");
-                jdbcUrlBuilder.append(paramsBuilder);
-            }
-            resourceId = jdbcUrlBuilder.toString();
-        } else {
-            resourceId = jdbcUrl;
-        }
-    }
-
-    /**
-     * init the oscar resource id
-     * jdbc:oscar://192.168.x.xx:2003/OSRDB
-     */
-    private void initOscarResourceId() {
-        if (jdbcUrl.contains("?")) {
-            resourceId = jdbcUrl.substring(0, jdbcUrl.indexOf('?')) + "/" + userName;
-        } else {
-            resourceId = jdbcUrl + "/" + userName;
-        }
-    }
-
-    /**
-     * prevent pg sql url like
-     * jdbc:postgresql://127.0.0.1:5432/seata?currentSchema=public
-     * jdbc:postgresql://127.0.0.1:5432/seata?currentSchema=seata
-     * cause the duplicated resourceId
-     * it will cause the problem like
-     * 1.get file lock fail
-     * 2.error table meta cache
-     */
-    private void initPGResourceId() {
-        if (jdbcUrl.contains("?")) {
-            StringBuilder jdbcUrlBuilder = new StringBuilder();
-            jdbcUrlBuilder.append(jdbcUrl, 0, jdbcUrl.indexOf('?'));
-
-            StringBuilder paramsBuilder = new StringBuilder();
-            String paramUrl = jdbcUrl.substring(jdbcUrl.indexOf('?') + 1);
-            String[] urlParams = paramUrl.split("&");
-            for (String urlParam : urlParams) {
-                if (urlParam.contains("currentSchema")) {
-                    if (urlParam.contains(Constants.DBKEYS_SPLIT_CHAR)) {
-                        urlParam = urlParam.replace(Constants.DBKEYS_SPLIT_CHAR, "!");
-                    }
-                    paramsBuilder.append(urlParam);
-                    break;
-                }
-            }
-
-            if (paramsBuilder.length() > 0) {
-                jdbcUrlBuilder.append("?");
-                jdbcUrlBuilder.append(paramsBuilder);
-            }
-            resourceId = jdbcUrlBuilder.toString();
-        } else {
-            resourceId = jdbcUrl;
-        }
-        if (resourceId.contains(",")) {
-            resourceId = resourceId.replace(",", "|");
-        }
-    }
-
-    /**
-     * The general form of the connection URL for SqlServer is
-     * jdbc:sqlserver://[serverName[\instanceName][:portNumber]][;property=value[;property=value]]
-     * required connection properties: [INSTANCENAME], [databaseName,database]
-     *
-     */
-    private void initSqlServerResourceId() {
-        if (jdbcUrl.contains(";")) {
-            StringBuilder jdbcUrlBuilder = new StringBuilder();
-            jdbcUrlBuilder.append(jdbcUrl, 0, jdbcUrl.indexOf(';'));
-            StringBuilder paramsBuilder = new StringBuilder();
-            String paramUrl = jdbcUrl.substring(jdbcUrl.indexOf(';') + 1);
-            String[] urlParams = paramUrl.split(";");
-            for (String urlParam : urlParams) {
-                String[] paramSplit = urlParam.split("=");
-                String propertyName = paramSplit[0];
-                if ("INSTANCENAME".equalsIgnoreCase(propertyName)
-                        || "databaseName".equalsIgnoreCase(propertyName)
-                        || "database".equalsIgnoreCase(propertyName)) {
-                    paramsBuilder.append(urlParam);
-                }
-            }
-
-            if (paramsBuilder.length() > 0) {
-                jdbcUrlBuilder.append(";");
-                jdbcUrlBuilder.append(paramsBuilder);
-            }
-            resourceId = jdbcUrlBuilder.toString();
-        } else {
-            resourceId = jdbcUrl;
-        }
+        ResourceIdInitializer initializer = ResourceIdInitializerRegistry.getInitializer(dbType, this);
+        initializer.initResourceId(this);
     }
 
     @Override
@@ -451,6 +279,18 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         } catch (Exception e) {
             LOGGER.error("check mysql version fail error: {}", e.getMessage());
         }
+    }
+
+    public String getJdbcUrl() {
+        return jdbcUrl;
+    }
+
+    public void setResourceId(String resourceId) {
+        this.resourceId = resourceId;
+    }
+
+    public String getUserName() {
+        return userName;
     }
 
     public void close() throws Exception {

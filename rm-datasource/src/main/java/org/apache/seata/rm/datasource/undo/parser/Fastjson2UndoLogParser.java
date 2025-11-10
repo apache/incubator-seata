@@ -53,6 +53,9 @@ public class Fastjson2UndoLogParser implements UndoLogParser, Initialize {
             JSONWriter.Feature.NotWriteHashMapArrayListClassName,
             JSONWriter.Feature.WriteNameAsSymbol
         };
+
+        // SerialArray support: Fastjson2 with FieldBased and SupportAutoType features
+        // can handle SerialArray serialization automatically through field access
     }
 
     @Override

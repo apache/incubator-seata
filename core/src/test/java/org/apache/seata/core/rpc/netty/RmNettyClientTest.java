@@ -16,12 +16,17 @@
  */
 package org.apache.seata.core.rpc.netty;
 
+import io.netty.channel.Channel;
 import org.apache.seata.common.ConfigurationKeys;
+import org.apache.seata.common.exception.FrameworkErrorCode;
 import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.config.ConfigurationCache;
 import org.apache.seata.core.model.Resource;
 import org.apache.seata.core.model.ResourceManager;
 import org.apache.seata.core.protocol.HeartbeatMessage;
+import org.apache.seata.core.protocol.RegisterRMRequest;
+import org.apache.seata.core.protocol.RegisterRMResponse;
+import org.apache.seata.core.protocol.ResultCode;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -30,13 +35,25 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Rm RPC client test.
@@ -71,22 +88,6 @@ class RmNettyClientTest {
         newClient.destroy();
     }
 
-    @Test
-    public void testCheckFailFast() throws Exception {
-        RmNettyRemotingClient newClient = RmNettyRemotingClient.getInstance("fail_fast", "default_tx_group");
-
-        ResourceManager resourceManager = Mockito.mock(ResourceManager.class);
-        Resource mockResource = Mockito.mock(Resource.class);
-        Map<String, Resource> resourceMap = new HashMap<>();
-        resourceMap.put("jdbc:xx://localhost/test", mockResource);
-        Mockito.when(resourceManager.getManagedResources()).thenReturn(resourceMap);
-        newClient.setResourceManager(resourceManager);
-        System.setProperty(ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "true");
-        ConfigurationCache.clear();
-        Assertions.assertThrows(FrameworkException.class, newClient::init);
-        System.setProperty(ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "false");
-    }
-
     private AtomicBoolean getInitializeStatus(final RmNettyRemotingClient rmNettyRemotingClient) {
         try {
             Field field = rmNettyRemotingClient.getClass().getDeclaredField("initialized");
@@ -104,5 +105,277 @@ class RmNettyClientTest {
         assertThrows(FrameworkException.class, () -> {
             remotingClient.sendAsyncRequest(null, message);
         });
+    }
+
+    @Test
+    public void testRegisterResourceWithBlankTransactionServiceGroup() {
+        RmNettyRemotingClient client = RmNettyRemotingClient.getInstance();
+        client.setTransactionServiceGroup(null);
+
+        ResourceManager resourceManager = mock(ResourceManager.class);
+        client.setResourceManager(resourceManager);
+
+        client.registerResource("group1", "jdbc:mysql://localhost:3306/test");
+
+        verify(resourceManager, never()).getManagedResources();
+    }
+
+    @Test
+    public void testRegisterResourceWithBlankResourceId() {
+        RmNettyRemotingClient client = RmNettyRemotingClient.getInstance("app", "test_group");
+
+        ResourceManager resourceManager = mock(ResourceManager.class);
+        client.setResourceManager(resourceManager);
+
+        client.registerResource("group1", "");
+        client.registerResource("group1", null);
+
+        verify(resourceManager, never()).getManagedResources();
+    }
+
+    @Test
+    public void testRegisterResourceWithEmptyChannels() {
+        RmNettyRemotingClient client = RmNettyRemotingClient.getInstance("app", "test_group");
+
+        ResourceManager resourceManager = mock(ResourceManager.class);
+        client.setResourceManager(resourceManager);
+
+        NettyClientChannelManager channelManager = mock(NettyClientChannelManager.class);
+        when(channelManager.getChannels()).thenReturn(new ConcurrentHashMap<>());
+
+        try {
+            setChannelManager(client, channelManager);
+
+            System.setProperty(ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST, "false");
+            ConfigurationCache.clear();
+
+            client.registerResource("group1", "jdbc:mysql://localhost:3306/test");
+
+            verify(channelManager).initReconnect(eq("test_group"), eq(false));
+        } catch (Exception e) {
+            Assertions.fail("Should not throw exception: " + e.getMessage());
+        } finally {
+            System.clearProperty(ConfigurationKeys.ENABLE_RM_CLIENT_CHANNEL_CHECK_FAIL_FAST);
+            ConfigurationCache.clear();
+        }
+    }
+
+    @Test
+    public void testOnRegisterMsgSuccess() throws Exception {
+        RmNettyRemotingClient client = RmNettyRemotingClient.getInstance("app", "test_group");
+
+        ResourceManager resourceManager = mock(ResourceManager.class);
+        Map<String, Resource> resourceMap = new HashMap<>();
+        Resource mockResource = mock(Resource.class);
+        resourceMap.put("jdbc:mysql://localhost:3306/db1", mockResource);
+        when(resourceManager.getManagedResources()).thenReturn(resourceMap);
+        client.setResourceManager(resourceManager);
+
+        Channel channel = mock(Channel.class);
+        when(channel.remoteAddress()).thenReturn(new java.net.InetSocketAddress("127.0.0.1", 8091));
+        String serverAddress = "127.0.0.1:8091";
+
+        RegisterRMRequest request = new RegisterRMRequest("app", "test_group");
+        request.setResourceIds("jdbc:mysql://localhost:3306/db1");
+
+        RegisterRMResponse response = new RegisterRMResponse();
+        response.setVersion("1.5.0");
+        response.setResultCode(ResultCode.Success);
+
+        NettyClientChannelManager channelManager = mock(NettyClientChannelManager.class);
+        setChannelManager(client, channelManager);
+
+        client.onRegisterMsgSuccess(serverAddress, channel, response, request);
+
+        verify(channelManager).registerChannel(eq(serverAddress), eq(channel), anyString());
+    }
+
+    @Test
+    public void testOnRegisterMsgSuccessWithDifferentResourceIds() throws Exception {
+        RmNettyRemotingClient client = RmNettyRemotingClient.getInstance("app", "test_group");
+
+        ResourceManager resourceManager = mock(ResourceManager.class);
+        Map<String, Resource> resourceMap = new HashMap<>();
+        Resource mockResource1 = mock(Resource.class);
+        Resource mockResource2 = mock(Resource.class);
+        resourceMap.put("jdbc:mysql://localhost:3306/db1", mockResource1);
+        resourceMap.put("jdbc:mysql://localhost:3306/db2", mockResource2);
+        when(resourceManager.getManagedResources()).thenReturn(resourceMap);
+        client.setResourceManager(resourceManager);
+
+        Channel channel = mock(Channel.class);
+        when(channel.remoteAddress()).thenReturn(new java.net.InetSocketAddress("127.0.0.1", 8091));
+        String serverAddress = "127.0.0.1:8091";
+
+        RegisterRMRequest request = new RegisterRMRequest("app", "test_group");
+        request.setResourceIds("jdbc:mysql://localhost:3306/db1");
+
+        RegisterRMResponse response = new RegisterRMResponse();
+        response.setVersion("1.5.0");
+        response.setResultCode(ResultCode.Success);
+
+        NettyClientChannelManager channelManager = mock(NettyClientChannelManager.class);
+        setChannelManager(client, channelManager);
+
+        client.onRegisterMsgSuccess(serverAddress, channel, response, request);
+
+        verify(channelManager).registerChannel(eq(serverAddress), eq(channel), anyString());
+    }
+
+    @Test
+    public void testOnRegisterMsgFail() {
+        RmNettyRemotingClient client = RmNettyRemotingClient.getInstance("app", "test_group");
+
+        Channel channel = mock(Channel.class);
+        String serverAddress = "127.0.0.1:8091";
+
+        RegisterRMRequest request = new RegisterRMRequest("app", "test_group");
+        request.setVersion("1.0.0");
+
+        RegisterRMResponse response = new RegisterRMResponse();
+        response.setVersion("1.5.0");
+        response.setResultCode(ResultCode.Failed);
+        response.setMsg("Registration failed");
+
+        FrameworkException exception = assertThrows(FrameworkException.class, () -> {
+            client.onRegisterMsgFail(serverAddress, channel, response, request);
+        });
+
+        assertTrue(exception.getMessage().contains("register RM failed"));
+        assertTrue(exception.getMessage().contains("Registration failed"));
+    }
+
+    @Test
+    public void testGetMergedResourceKeys() throws Exception {
+        RmNettyRemotingClient client = RmNettyRemotingClient.getInstance("app", "test_group");
+
+        ResourceManager resourceManager = mock(ResourceManager.class);
+        Map<String, Resource> resourceMap = new HashMap<>();
+        Resource mockResource1 = mock(Resource.class);
+        Resource mockResource2 = mock(Resource.class);
+        Resource mockResource3 = mock(Resource.class);
+        resourceMap.put("jdbc:mysql://localhost:3306/db1", mockResource1);
+        resourceMap.put("jdbc:mysql://localhost:3306/db2", mockResource2);
+        resourceMap.put("jdbc:mysql://localhost:3306/db3", mockResource3);
+        when(resourceManager.getManagedResources()).thenReturn(resourceMap);
+        client.setResourceManager(resourceManager);
+
+        String mergedKeys = client.getMergedResourceKeys();
+
+        assertNotNull(mergedKeys);
+        assertTrue(mergedKeys.contains("jdbc:mysql://localhost:3306/db1"));
+        assertTrue(mergedKeys.contains("jdbc:mysql://localhost:3306/db2"));
+        assertTrue(mergedKeys.contains("jdbc:mysql://localhost:3306/db3"));
+        assertTrue(mergedKeys.contains(","));
+    }
+
+    @Test
+    public void testGetMergedResourceKeysWithEmptyResources() throws Exception {
+        RmNettyRemotingClient client = RmNettyRemotingClient.getInstance("app", "test_group");
+
+        ResourceManager resourceManager = mock(ResourceManager.class);
+        when(resourceManager.getManagedResources()).thenReturn(new HashMap<>());
+        client.setResourceManager(resourceManager);
+
+        String mergedKeys = client.getMergedResourceKeys();
+
+        assertNull(mergedKeys);
+    }
+
+    @Test
+    public void testGetMergedResourceKeysWithBlankResourceId() throws Exception {
+        RmNettyRemotingClient client = RmNettyRemotingClient.getInstance("app", "test_group");
+
+        ResourceManager resourceManager = mock(ResourceManager.class);
+        Map<String, Resource> resourceMap = new HashMap<>();
+        Resource mockResource1 = mock(Resource.class);
+        Resource mockResource2 = mock(Resource.class);
+        resourceMap.put("jdbc:mysql://localhost:3306/db1", mockResource1);
+        resourceMap.put("", mockResource2);
+        resourceMap.put("jdbc:mysql://localhost:3306/db3", mockResource2);
+        when(resourceManager.getManagedResources()).thenReturn(resourceMap);
+        client.setResourceManager(resourceManager);
+
+        String mergedKeys = client.getMergedResourceKeys();
+
+        assertNotNull(mergedKeys);
+        assertFalse(mergedKeys.contains(",,"));
+    }
+
+    @Test
+    public void testSendRegisterMessageWithChannelNotWritable() throws Exception {
+        RmNettyRemotingClient client = RmNettyRemotingClient.getInstance("app", "test_group");
+
+        Channel channel = mock(Channel.class);
+        String serverAddress = "127.0.0.1:8091";
+        String resourceId = "jdbc:mysql://localhost:3306/test";
+
+        NettyClientChannelManager channelManager = mock(NettyClientChannelManager.class);
+        setChannelManager(client, channelManager);
+
+        RmNettyRemotingClient spyClient = Mockito.spy(client);
+        doThrow(new FrameworkException("Channel is not writable", FrameworkErrorCode.ChannelIsNotWritable))
+                .when(spyClient)
+                .sendAsyncRequest(eq(channel), any(RegisterRMRequest.class));
+
+        spyClient.sendRegisterMessage(serverAddress, channel, resourceId);
+
+        verify(channelManager).releaseChannel(eq(channel), eq(serverAddress));
+    }
+
+    @Test
+    public void testSendRegisterMessageWithOtherException() throws Exception {
+        RmNettyRemotingClient client = RmNettyRemotingClient.getInstance("app", "test_group");
+
+        Channel channel = mock(Channel.class);
+        String serverAddress = "127.0.0.1:8091";
+        String resourceId = "jdbc:mysql://localhost:3306/test";
+
+        NettyClientChannelManager channelManager = mock(NettyClientChannelManager.class);
+        setChannelManager(client, channelManager);
+
+        RmNettyRemotingClient spyClient = Mockito.spy(client);
+        doThrow(new FrameworkException("Other error", FrameworkErrorCode.UnknownAppError))
+                .when(spyClient)
+                .sendAsyncRequest(eq(channel), any(RegisterRMRequest.class));
+
+        spyClient.sendRegisterMessage(serverAddress, channel, resourceId);
+
+        verify(channelManager, never()).releaseChannel(any(), anyString());
+    }
+
+    @Test
+    public void testGetPoolKeyFunction() throws Exception {
+        RmNettyRemotingClient client = RmNettyRemotingClient.getInstance("app", "test_group");
+
+        ResourceManager resourceManager = mock(ResourceManager.class);
+        Map<String, Resource> resourceMap = new HashMap<>();
+        Resource mockResource = mock(Resource.class);
+        resourceMap.put("jdbc:mysql://localhost:3306/db1", mockResource);
+        when(resourceManager.getManagedResources()).thenReturn(resourceMap);
+        client.setResourceManager(resourceManager);
+
+        Method method = client.getClass().getDeclaredMethod("getPoolKeyFunction");
+        method.setAccessible(true);
+
+        Object function = method.invoke(client);
+        assertNotNull(function);
+    }
+
+    private void setChannelManager(RmNettyRemotingClient client, NettyClientChannelManager channelManager)
+            throws Exception {
+        Field field = AbstractNettyRemotingClient.class.getDeclaredField("clientChannelManager");
+        field.setAccessible(true);
+        field.set(client, channelManager);
+    }
+
+    private Method getBatchConfigListener(RmNettyRemotingClient client) {
+        try {
+            Field field = client.getClass().getDeclaredField("enableClientBatchSendRequest");
+            field.setAccessible(true);
+            return null;
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

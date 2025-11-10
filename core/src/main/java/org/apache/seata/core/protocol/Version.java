@@ -17,7 +17,7 @@
 package org.apache.seata.core.protocol;
 
 import io.netty.channel.Channel;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.seata.common.util.NetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
