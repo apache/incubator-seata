@@ -18,72 +18,56 @@ package org.apache.seata.core.serializer;
 
 /**
  * The enum serialize type.
- *
+ * <p>
+ * <b>NOTE: Adding a new serializer type must be non-repeating and within byte range<b/>
+ * </p>
  */
 public enum SerializerType {
 
     /**
      * The seata.
-     * <p>
-     * Math.pow(2, 0)
      */
-    SEATA((byte) 0x1),
+    SEATA((byte) 1),
 
     /**
      * The protobuf, 'org.apache.seata:seata-serializer-protobuf' dependency must be referenced manually.
-     * <p>
-     * Math.pow(2, 1)
      */
-    PROTOBUF((byte) 0x2),
+    PROTOBUF((byte) 2),
 
     /**
      * The kryo.
-     * <p>
-     * Math.pow(2, 2)
      */
-    KRYO((byte) 0x4),
+    KRYO((byte) 4),
 
     /**
      * The fst but it's been removed.
-     * <p>
-     * Math.pow(2, 3)
      */
-    FST((byte) 0x8),
+    FST((byte) 8),
 
     /**
      * The hessian.
-     * <p>
-     * Math.pow(2, 4)
      */
-    HESSIAN((byte) 0x16),
+    HESSIAN((byte) 22),
 
     /**
      * The jackson.
-     * <p>
-     * Math.pow(2, 5)
      */
-    JACKSON((byte) 0x32),
+    JACKSON((byte) 50),
 
     /**
      * The fastjson2.
-     * <p>
-     * Math.pow(2, 6)
      */
-    FASTJSON2((byte) 0x64),
+    FASTJSON2((byte) 100),
 
     /**
      * The grpc
-     * <p>
-     * Math.pow(2, 7)
      */
-    GRPC((byte) 0x128),
+    GRPC((byte) 40),
 
     /**
      * The fury.
-     * <p>
-     * Math.pow(2, 8)
      */
-    FURY((byte) 0x256);
+    FURY((byte) 86);
 
     private final byte code;
 

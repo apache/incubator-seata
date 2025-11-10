@@ -25,7 +25,7 @@ import com.alipay.sofa.registry.client.api.registration.SubscriberRegistration;
 import com.alipay.sofa.registry.client.provider.DefaultRegistryClient;
 import com.alipay.sofa.registry.client.provider.DefaultRegistryClientConfigBuilder;
 import com.alipay.sofa.registry.core.model.ScopeEnum;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
