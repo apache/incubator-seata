@@ -20,13 +20,13 @@ import org.apache.seata.common.Constants;
 import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.common.exception.SkipCallbackWrapperException;
 import org.apache.seata.common.executor.Callback;
-import org.apache.seata.common.json.JsonUtil;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.integration.tx.api.fence.DefaultCommonFenceHandler;
 import org.apache.seata.integration.tx.api.fence.hook.TccHook;
 import org.apache.seata.integration.tx.api.fence.hook.TccHookManager;
+import org.apache.seata.integration.tx.api.util.JsonUtil;
 import org.apache.seata.rm.DefaultResourceManager;
 import org.apache.seata.rm.tcc.api.BusinessActionContext;
 import org.apache.seata.rm.tcc.api.BusinessActionContextParameter;
@@ -244,7 +244,7 @@ public class ActionInterceptorHandler {
 
         // Init applicationData
         Map<String, Object> applicationContext = Collections.singletonMap(Constants.TX_ACTION_CONTEXT, context);
-        String applicationContextStr = JsonUtil.fastjson().toJSONString(applicationContext);
+        String applicationContextStr = JsonUtil.toJSONString(applicationContext);
         try {
             // registry branch record
             Long branchId = DefaultResourceManager.get()

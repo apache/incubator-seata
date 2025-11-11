@@ -18,12 +18,12 @@ package org.apache.seata.rm.tcc.api;
 
 import org.apache.seata.common.Constants;
 import org.apache.seata.common.exception.FrameworkException;
-import org.apache.seata.common.json.JsonUtil;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.integration.tx.api.interceptor.ActionContextUtil;
+import org.apache.seata.integration.tx.api.util.JsonUtil;
 import org.apache.seata.rm.DefaultResourceManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -110,9 +110,8 @@ public final class BusinessActionContextUtil {
                             actionContext.getXid(),
                             actionContext.getBranchId(),
                             BranchStatus.Registered,
-                            JsonUtil.fastjson()
-                                    .toJSONString(Collections.singletonMap(
-                                            Constants.TX_ACTION_CONTEXT, actionContext.getActionContext())));
+                            JsonUtil.toJSONString(Collections.singletonMap(
+                                    Constants.TX_ACTION_CONTEXT, actionContext.getActionContext())));
 
             // reset to un_updated
             actionContext.setUpdated(null);
@@ -149,7 +148,7 @@ public final class BusinessActionContextUtil {
             String xid, long branchId, String resourceId, String applicationData) {
         Map actionContextMap = null;
         if (StringUtils.isNotBlank(applicationData)) {
-            Map tccContext = JsonUtil.fastjson().parseObject(applicationData, Map.class);
+            Map tccContext = JsonUtil.parseObject(applicationData, Map.class);
             actionContextMap = (Map) tccContext.get(Constants.TX_ACTION_CONTEXT);
         }
         if (actionContextMap == null) {

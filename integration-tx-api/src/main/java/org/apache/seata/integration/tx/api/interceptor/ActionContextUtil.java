@@ -17,10 +17,10 @@
 package org.apache.seata.integration.tx.api.interceptor;
 
 import org.apache.seata.common.exception.FrameworkException;
-import org.apache.seata.common.json.JsonUtil;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.ReflectionUtil;
 import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.integration.tx.api.util.JsonUtil;
 import org.apache.seata.rm.tcc.api.BusinessActionContext;
 import org.apache.seata.rm.tcc.api.BusinessActionContextParameter;
 import org.apache.seata.rm.tcc.api.ParamType;
@@ -267,7 +267,7 @@ public final class ActionContextUtil {
                 || actionContext instanceof Character) {
             return actionContext;
         } else {
-            return JsonUtil.fastjson().toJSONString(actionContext);
+            return JsonUtil.toJSONString(actionContext);
         }
     }
 
@@ -304,9 +304,9 @@ public final class ActionContextUtil {
         // JSON to Object
         try {
             if (value instanceof CharSequence || value instanceof Character) {
-                return JsonUtil.fastjson().parseObject(value.toString(), targetClazz);
+                return JsonUtil.parseObject(value.toString(), targetClazz);
             } else {
-                return JsonUtil.fastjson().parseObject(JsonUtil.fastjson().toJSONString(value), targetClazz);
+                return JsonUtil.parseObject(JsonUtil.toJSONString(value), targetClazz);
             }
         } catch (RuntimeException e) {
             String errorMsg = String.format(
