@@ -78,7 +78,8 @@ public class StatementProxyXATest {
             }
         };
 
-        Mockito.when(mockStatement.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS)).thenReturn(1);
+        Mockito.when(mockStatement.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS))
+                .thenReturn(1);
 
         int result = testProxy.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS);
 
@@ -164,7 +165,8 @@ public class StatementProxyXATest {
             }
         };
 
-        Mockito.when(mockStatement.execute(sql, Statement.RETURN_GENERATED_KEYS)).thenReturn(true);
+        Mockito.when(mockStatement.execute(sql, Statement.RETURN_GENERATED_KEYS))
+                .thenReturn(true);
 
         boolean result = testProxy.execute(sql, Statement.RETURN_GENERATED_KEYS);
 
@@ -469,7 +471,8 @@ public class StatementProxyXATest {
 
     @Test
     public void testGetMoreResultsWithCurrent() throws SQLException {
-        Mockito.when(mockStatement.getMoreResults(Statement.CLOSE_CURRENT_RESULT)).thenReturn(true);
+        Mockito.when(mockStatement.getMoreResults(Statement.CLOSE_CURRENT_RESULT))
+                .thenReturn(true);
 
         boolean result = statementProxyXA.getMoreResults(Statement.CLOSE_CURRENT_RESULT);
 
@@ -562,4 +565,3 @@ public class StatementProxyXATest {
         Mockito.verify(mockStatement).isWrapperFor(String.class);
     }
 }
-

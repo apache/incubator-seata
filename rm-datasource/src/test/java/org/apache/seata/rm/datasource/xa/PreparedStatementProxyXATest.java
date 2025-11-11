@@ -64,13 +64,14 @@ public class PreparedStatementProxyXATest {
         ResultSet mockResultSet = Mockito.mock(ResultSet.class);
 
         // Create a test implementation that we can control
-        PreparedStatementProxyXA testProxy = new PreparedStatementProxyXA(mockConnectionProxyXA, mockPreparedStatement) {
-            @Override
-            public ResultSet executeQuery() throws SQLException {
-                // Directly call the target statement for testing
-                return mockPreparedStatement.executeQuery();
-            }
-        };
+        PreparedStatementProxyXA testProxy =
+                new PreparedStatementProxyXA(mockConnectionProxyXA, mockPreparedStatement) {
+                    @Override
+                    public ResultSet executeQuery() throws SQLException {
+                        // Directly call the target statement for testing
+                        return mockPreparedStatement.executeQuery();
+                    }
+                };
 
         Mockito.when(mockPreparedStatement.executeQuery()).thenReturn(mockResultSet);
 
@@ -85,13 +86,14 @@ public class PreparedStatementProxyXATest {
     @Test
     public void testExecuteUpdate() throws SQLException {
         // Create a test implementation that we can control
-        PreparedStatementProxyXA testProxy = new PreparedStatementProxyXA(mockConnectionProxyXA, mockPreparedStatement) {
-            @Override
-            public int executeUpdate() throws SQLException {
-                // Directly call the target statement for testing
-                return mockPreparedStatement.executeUpdate();
-            }
-        };
+        PreparedStatementProxyXA testProxy =
+                new PreparedStatementProxyXA(mockConnectionProxyXA, mockPreparedStatement) {
+                    @Override
+                    public int executeUpdate() throws SQLException {
+                        // Directly call the target statement for testing
+                        return mockPreparedStatement.executeUpdate();
+                    }
+                };
 
         Mockito.when(mockPreparedStatement.executeUpdate()).thenReturn(5);
 
@@ -106,13 +108,14 @@ public class PreparedStatementProxyXATest {
     @Test
     public void testExecute() throws SQLException {
         // Create a test implementation that we can control
-        PreparedStatementProxyXA testProxy = new PreparedStatementProxyXA(mockConnectionProxyXA, mockPreparedStatement) {
-            @Override
-            public boolean execute() throws SQLException {
-                // Directly call the target statement for testing
-                return mockPreparedStatement.execute();
-            }
-        };
+        PreparedStatementProxyXA testProxy =
+                new PreparedStatementProxyXA(mockConnectionProxyXA, mockPreparedStatement) {
+                    @Override
+                    public boolean execute() throws SQLException {
+                        // Directly call the target statement for testing
+                        return mockPreparedStatement.execute();
+                    }
+                };
 
         Mockito.when(mockPreparedStatement.execute()).thenReturn(true);
 
@@ -536,4 +539,3 @@ public class PreparedStatementProxyXATest {
         Mockito.verify(mockPreparedStatement).setNClob(1, reader);
     }
 }
-

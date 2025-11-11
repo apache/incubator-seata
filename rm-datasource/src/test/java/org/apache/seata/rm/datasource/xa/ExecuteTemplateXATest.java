@@ -129,7 +129,9 @@ public class ExecuteTemplateXATest {
         // Mock connection proxy
         AbstractConnectionProxyXA mockConnectionProxyXA = Mockito.mock(AbstractConnectionProxyXA.class);
         Mockito.when(mockConnectionProxyXA.getAutoCommit()).thenReturn(true);
-        Mockito.doThrow(new SQLException("commit failed")).when(mockConnectionProxyXA).commit();
+        Mockito.doThrow(new SQLException("commit failed"))
+                .when(mockConnectionProxyXA)
+                .commit();
 
         // Mock statement and callback
         Statement mockStatement = Mockito.mock(Statement.class);
@@ -183,7 +185,9 @@ public class ExecuteTemplateXATest {
         // Mock connection proxy
         AbstractConnectionProxyXA mockConnectionProxyXA = Mockito.mock(AbstractConnectionProxyXA.class);
         Mockito.when(mockConnectionProxyXA.getAutoCommit()).thenReturn(true);
-        Mockito.doThrow(new SQLException("rollback failed")).when(mockConnectionProxyXA).rollback();
+        Mockito.doThrow(new SQLException("rollback failed"))
+                .when(mockConnectionProxyXA)
+                .rollback();
 
         // Mock statement and callback that throws exception
         Statement mockStatement = Mockito.mock(Statement.class);
@@ -228,4 +232,3 @@ public class ExecuteTemplateXATest {
         Mockito.verify(mockConnectionProxyXA, Mockito.never()).setAutoCommit(Mockito.anyBoolean());
     }
 }
-
