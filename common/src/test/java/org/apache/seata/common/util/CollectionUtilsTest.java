@@ -495,7 +495,7 @@ public class CollectionUtilsTest {
         assertThat(CollectionUtils.encodeMap(singleEntry)).isEqualTo("key=value");
 
         // Test with multiple entries
-        Map<String, String> multipleEntries = new HashMap<>();
+        Map<String, String> multipleEntries = new LinkedHashMap<>();
         multipleEntries.put("key1", "value1");
         multipleEntries.put("key2", "value2");
         assertThat(CollectionUtils.encodeMap(multipleEntries)).isEqualTo("key1=value1&key2=value2");
