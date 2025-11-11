@@ -61,6 +61,8 @@
         <module>server</module>
         <module>integration-tx-api</module>
         <module>namingserver</module>
+        <module>test-suite/test-new-version</module>
+        <module>test-suite/test-old-version</module>
         <!--<module>seata-plugin</module>-->
     </modules>
 
@@ -342,7 +344,7 @@
             <id>include-test-modules</id>
             <activation>
                 <file>
-                    <exists>test/pom.xml</exists>
+                    <exists>test-suite/test-new-version/pom.xml</exists>
                 </file>
                 <property>
                     <name>!excludeTestModules</name>
@@ -350,8 +352,8 @@
             </activation>
             <modules>
                 <module>distribution</module>
-                <module>test</module>
-                <module>test-old-version</module>
+                <module>test-suite/test-new-version</module>
+                <module>test-suite/test-old-version</module>
             </modules>
         </profile>
     </profiles>
