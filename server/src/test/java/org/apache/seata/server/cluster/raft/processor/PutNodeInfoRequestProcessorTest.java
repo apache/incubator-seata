@@ -14,19 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.server.raft;
+package org.apache.seata.server.cluster.raft.processor;
 
-public class TestSecurity implements java.io.Serializable {
+import org.apache.seata.server.cluster.raft.processor.request.PutNodeMetadataRequest;
+import org.junit.jupiter.api.Test;
 
-    private static final long serialVersionUID = 543214259201495900L;
+import static org.junit.jupiter.api.Assertions.*;
 
-    String a = "test";
+public class PutNodeInfoRequestProcessorTest {
 
-    public String getA() {
-        return a;
+    @Test
+    public void testConstructor() {
+        PutNodeInfoRequestProcessor processor = new PutNodeInfoRequestProcessor();
+        assertNotNull(processor);
     }
 
-    public void setA(String a) {
-        this.a = a;
+    @Test
+    public void testInterest() {
+        PutNodeInfoRequestProcessor processor = new PutNodeInfoRequestProcessor();
+        String interest = processor.interest();
+
+        assertNotNull(interest);
+        assertEquals(PutNodeMetadataRequest.class.getName(), interest);
     }
 }

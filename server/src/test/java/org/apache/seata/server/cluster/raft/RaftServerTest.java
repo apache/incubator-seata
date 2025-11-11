@@ -14,14 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.server.raft;
+package org.apache.seata.server.cluster.raft;
 
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.XID;
 import org.apache.seata.config.ConfigurationCache;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.server.BaseSpringBootTest;
-import org.apache.seata.server.cluster.raft.RaftServerManager;
 import org.apache.seata.server.lock.LockerManagerFactory;
 import org.apache.seata.server.session.SessionHolder;
 import org.apache.seata.server.store.StoreConfig;
@@ -95,5 +94,43 @@ public class RaftServerTest extends BaseSpringBootTest {
                 XID.getIpAddress() + ":9091" + "," + XID.getIpAddress() + ":9092" + "," + XID.getIpAddress() + ":9093");
         StoreConfig.setStartupParameter("raft", "raft", "raft");
         Assertions.assertThrows(IllegalArgumentException.class, RaftServerManager::init);
+    }
+
+    @Test
+    public void testIsRaftModeWhenNotInitialized() {
+        Assertions.assertFalse(RaftServerManager.isRaftMode());
+    }
+
+    @Test
+    public void testGetRaftServerWhenNotInitialized() {
+        Assertions.assertNull(RaftServerManager.getRaftServer("default"));
+    }
+
+    @Test
+    public void testGetRaftServersWhenNotInitialized() {
+        Assertions.assertNotNull(RaftServerManager.getRaftServers());
+        Assertions.assertTrue(RaftServerManager.getRaftServers().isEmpty());
+    }
+
+    @Test
+    public void testGroupsWhenNotInitialized() {
+        Assertions.assertNotNull(RaftServerManager.groups());
+        Assertions.assertTrue(RaftServerManager.groups().isEmpty());
+    }
+
+    @Test
+    public void testIsLeaderWhenNotInRaftMode() {
+        StoreConfig.setStartupParameter("file", "file", "file");
+        Assertions.assertTrue(RaftServerManager.isLeader("default"));
+    }
+
+    @Test
+    public void testCliServiceInstance() {
+        Assertions.assertNotNull(RaftServerManager.getCliServiceInstance());
+    }
+
+    @Test
+    public void testCliClientServiceInstance() {
+        Assertions.assertNotNull(RaftServerManager.getCliClientServiceInstance());
     }
 }

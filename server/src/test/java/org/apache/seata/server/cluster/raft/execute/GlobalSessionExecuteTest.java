@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.server.raft.execute;
+package org.apache.seata.server.cluster.raft.execute;
 
 import org.apache.seata.common.store.LockMode;
 import org.apache.seata.common.store.SessionMode;
