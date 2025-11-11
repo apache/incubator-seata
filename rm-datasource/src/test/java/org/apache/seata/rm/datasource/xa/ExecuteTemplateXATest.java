@@ -156,8 +156,7 @@ public class ExecuteTemplateXATest {
         Mockito.when(mockConnectionProxyXA.getAutoCommit()).thenReturn(true);
 
         // Create SQLException with XA_NOT_END SQLState
-        SQLException xaNotEndException = new SQLException("XA not end");
-        xaNotEndException.setSQLState(AbstractConnectionProxyXA.SQLSTATE_XA_NOT_END);
+        SQLException xaNotEndException = new SQLException("XA not end", AbstractConnectionProxyXA.SQLSTATE_XA_NOT_END);
         Mockito.doThrow(xaNotEndException).when(mockConnectionProxyXA).commit();
 
         // Mock statement and callback
