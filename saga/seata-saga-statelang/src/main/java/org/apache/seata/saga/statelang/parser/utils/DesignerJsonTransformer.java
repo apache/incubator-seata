@@ -18,12 +18,12 @@ package org.apache.seata.saga.statelang.parser.utils;
 
 import org.apache.seata.common.exception.FrameworkErrorCode;
 import org.apache.seata.common.exception.FrameworkException;
+import org.apache.seata.common.json.JsonSerializer;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.saga.statelang.domain.ExecutionStatus;
 import org.apache.seata.saga.statelang.domain.StateInstance;
 import org.apache.seata.saga.statelang.domain.StateMachineInstance;
-import org.apache.seata.common.json.JsonSerializer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -223,7 +223,8 @@ public class DesignerJsonTransformer {
      * @return the tracing graph json
      */
     @SuppressWarnings("lgtm[java/dereferenced-value-may-be-null]")
-    public static String generateTracingGraphJson(StateMachineInstance stateMachineInstance, JsonSerializer jsonParser) {
+    public static String generateTracingGraphJson(
+            StateMachineInstance stateMachineInstance, JsonSerializer jsonParser) {
 
         if (stateMachineInstance == null) {
             throw new FrameworkException(

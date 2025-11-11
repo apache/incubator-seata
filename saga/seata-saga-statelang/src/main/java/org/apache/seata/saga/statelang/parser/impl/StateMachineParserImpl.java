@@ -16,6 +16,8 @@
  */
 package org.apache.seata.saga.statelang.parser.impl;
 
+import org.apache.seata.common.json.JsonSerializer;
+import org.apache.seata.common.json.JsonSerializerFactory;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.saga.statelang.domain.DomainConstants;
 import org.apache.seata.saga.statelang.domain.RecoverStrategy;
@@ -25,8 +27,6 @@ import org.apache.seata.saga.statelang.domain.StateType;
 import org.apache.seata.saga.statelang.domain.impl.AbstractTaskState;
 import org.apache.seata.saga.statelang.domain.impl.BaseState;
 import org.apache.seata.saga.statelang.domain.impl.StateMachineImpl;
-import org.apache.seata.common.json.JsonSerializer;
-import org.apache.seata.common.json.JsonSerializerFactory;
 import org.apache.seata.saga.statelang.parser.StateMachineParser;
 import org.apache.seata.saga.statelang.parser.StateParser;
 import org.apache.seata.saga.statelang.parser.StateParserFactory;

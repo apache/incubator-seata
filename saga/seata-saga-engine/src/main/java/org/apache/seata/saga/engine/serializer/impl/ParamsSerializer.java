@@ -16,11 +16,10 @@
  */
 package org.apache.seata.saga.engine.serializer.impl;
 
-import org.apache.seata.common.json.impl.FastjsonJsonSerializer;
-import org.apache.seata.saga.engine.serializer.Serializer;
-import org.apache.seata.saga.statelang.domain.DomainConstants;
 import org.apache.seata.common.json.JsonSerializer;
 import org.apache.seata.common.json.JsonSerializerFactory;
+import org.apache.seata.saga.engine.serializer.Serializer;
+import org.apache.seata.saga.statelang.domain.DomainConstants;
 
 /**
  * Parameter serializer based on Fastjson

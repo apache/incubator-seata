@@ -65,7 +65,8 @@ public class StateParserTests {
         InputStream inputStream = getInputStreamByPath("statelang/simple_statemachine_with_layout.json");
         String json = IOUtils.toString(inputStream, "UTF-8");
         JsonSerializer jsonSerializer = JsonSerializerFactory.getSerializer("jackson");
-        Map<String, Object> parsedObj = DesignerJsonTransformer.toStandardJson(jsonSerializer.parseObject(json, Map.class, true));
+        Map<String, Object> parsedObj =
+                DesignerJsonTransformer.toStandardJson(jsonSerializer.parseObject(json, Map.class, true));
         Assertions.assertNotNull(parsedObj);
 
         String outputJson = jsonSerializer.toJSONString(parsedObj, true);
