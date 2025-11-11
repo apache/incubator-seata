@@ -21,12 +21,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-
 import javax.sql.XAConnection;
-
 import java.sql.Array;
 import java.sql.Blob;
-
 import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -47,9 +44,7 @@ import java.util.concurrent.Executor;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-
 import static org.mockito.Mockito.mock;
-
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -71,7 +66,7 @@ public class AbstractConnectionProxyXATest {
         mockXAConnection = mock(XAConnection.class);
         mockResource = mock(BaseDataSourceResource.class);
         xid = "testXid";
-        
+
         connectionProxy = new TestConnectionProxyXA(mockConnection, mockXAConnection, mockResource, xid);
     }
 
@@ -165,7 +160,8 @@ public class AbstractConnectionProxyXATest {
         PreparedStatement mockPreparedStatement = mock(PreparedStatement.class);
         when(mockConnection.prepareStatement(anyString(), anyInt())).thenReturn(mockPreparedStatement);
 
-        PreparedStatement result = connectionProxy.prepareStatement("INSERT INTO test", Statement.RETURN_GENERATED_KEYS);
+        PreparedStatement result =
+                connectionProxy.prepareStatement("INSERT INTO test", Statement.RETURN_GENERATED_KEYS);
 
         Assertions.assertNotNull(result);
         Assertions.assertTrue(result instanceof PreparedStatementProxyXA);
@@ -588,4 +584,3 @@ public class AbstractConnectionProxyXATest {
         }
     }
 }
-

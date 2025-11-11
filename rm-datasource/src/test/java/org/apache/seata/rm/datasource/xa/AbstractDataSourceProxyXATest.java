@@ -99,7 +99,7 @@ public class AbstractDataSourceProxyXATest {
         // Mock connection
         ConnectionProxyXA mockConnection = mock(ConnectionProxyXA.class);
         Connection mockWrappedConnection = mock(Connection.class);
-        
+
         // Setup the mock behavior
         Mockito.doNothing().when(mockConnection).close();
         when(mockConnection.getWrappedConnection()).thenReturn(mockWrappedConnection);
@@ -119,11 +119,12 @@ public class AbstractDataSourceProxyXATest {
     @Test
     public void testForceClosePhysicalConnection_WithPooledConnection() throws SQLException {
         // Create a mock that implements both Connection and PooledConnection
-        Connection mockWrappedConnection = mock(Connection.class, Mockito.withSettings().extraInterfaces(PooledConnection.class));
+        Connection mockWrappedConnection =
+                mock(Connection.class, Mockito.withSettings().extraInterfaces(PooledConnection.class));
         Connection mockPhysicalConnection = mock(Connection.class);
-        
+
         ConnectionProxyXA mockConnection = mock(ConnectionProxyXA.class);
-        
+
         // Setup the mock behavior
         Mockito.doNothing().when(mockConnection).close();
         when(mockConnection.getWrappedConnection()).thenReturn(mockWrappedConnection);
@@ -157,7 +158,7 @@ public class AbstractDataSourceProxyXATest {
      * Test implementation of AbstractDataSourceProxyXA for testing purposes
      */
     private static class TestDataSourceProxyXA extends AbstractDataSourceProxyXA {
-        
+
         private ConnectionProxyXA mockConnectionProxy;
 
         public TestDataSourceProxyXA() {
@@ -188,4 +189,3 @@ public class AbstractDataSourceProxyXATest {
         }
     }
 }
-
