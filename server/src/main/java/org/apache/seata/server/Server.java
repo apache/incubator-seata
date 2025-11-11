@@ -43,7 +43,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGEX_SPLIT_CHAR;
-import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_PREFERED_NETWORKS;
+import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_PREFERRED_NETWORKS;
 
 /**
  * The type Server.
@@ -81,7 +81,7 @@ public class Server {
         if (NetUtil.isValidIp(parameterParser.getHost(), false)) {
             XID.setIpAddress(parameterParser.getHost());
         } else {
-            String preferredNetworks = ConfigurationFactory.getInstance().getConfig(REGISTRY_PREFERED_NETWORKS);
+            String preferredNetworks = ConfigurationFactory.getInstance().getConfig(REGISTRY_PREFERRED_NETWORKS);
             if (StringUtils.isNotBlank(preferredNetworks)) {
                 XID.setIpAddress(NetUtil.getLocalIp(preferredNetworks.split(REGEX_SPLIT_CHAR)));
             } else {
