@@ -19,12 +19,15 @@ package org.apache.seata.rm.datasource.xa;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
+import org.apache.seata.core.model.Resource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import javax.transaction.xa.XAException;
+import java.lang.reflect.Field;
+import java.util.Map;
 
 /**
  * Tests for ResourceManagerXA
@@ -74,12 +77,12 @@ public class ResourceManagerXATest {
         Mockito.doNothing().when(mockConnectionProxyXA).close();
 
         // Use reflection to set the dataSourceCache field
-        java.lang.reflect.Field dataSourceCacheField =
+        Field dataSourceCacheField =
                 ResourceManagerXA.class.getSuperclass().getDeclaredField("dataSourceCache");
         dataSourceCacheField.setAccessible(true);
         @SuppressWarnings("unchecked")
-        java.util.Map<String, org.apache.seata.core.model.Resource> dataSourceCache =
-                (java.util.Map<String, org.apache.seata.core.model.Resource>)
+        Map<String, Resource> dataSourceCache =
+                (Map<String, Resource>)
                         dataSourceCacheField.get(resourceManagerXA);
         dataSourceCache.put("testResource", mockDataSourceProxyXA);
 
@@ -108,12 +111,12 @@ public class ResourceManagerXATest {
         Mockito.doNothing().when(mockConnectionProxyXA).close();
 
         // Use reflection to set the dataSourceCache field
-        java.lang.reflect.Field dataSourceCacheField =
+        Field dataSourceCacheField =
                 ResourceManagerXA.class.getSuperclass().getDeclaredField("dataSourceCache");
         dataSourceCacheField.setAccessible(true);
         @SuppressWarnings("unchecked")
-        java.util.Map<String, org.apache.seata.core.model.Resource> dataSourceCache =
-                (java.util.Map<String, org.apache.seata.core.model.Resource>)
+        Map<String, Resource> dataSourceCache =
+                (Map<String, Resource>)
                         dataSourceCacheField.get(resourceManagerXA);
         dataSourceCache.put("testResource", mockDataSourceProxyXA);
 
@@ -145,12 +148,12 @@ public class ResourceManagerXATest {
                 .thenReturn(mockConnectionProxyXA);
 
         // Use reflection to set the dataSourceCache field
-        java.lang.reflect.Field dataSourceCacheField =
+        Field dataSourceCacheField =
                 ResourceManagerXA.class.getSuperclass().getDeclaredField("dataSourceCache");
         dataSourceCacheField.setAccessible(true);
         @SuppressWarnings("unchecked")
-        java.util.Map<String, org.apache.seata.core.model.Resource> dataSourceCache =
-                (java.util.Map<String, org.apache.seata.core.model.Resource>)
+        Map<String, Resource> dataSourceCache =
+                (Map<String, Resource>)
                         dataSourceCacheField.get(resourceManagerXA);
         dataSourceCache.put("testResource", mockDataSourceProxyXA);
 
@@ -180,12 +183,12 @@ public class ResourceManagerXATest {
                 .thenReturn(mockConnectionProxyXA);
 
         // Use reflection to set the dataSourceCache field
-        java.lang.reflect.Field dataSourceCacheField =
+        Field dataSourceCacheField =
                 ResourceManagerXA.class.getSuperclass().getDeclaredField("dataSourceCache");
         dataSourceCacheField.setAccessible(true);
         @SuppressWarnings("unchecked")
-        java.util.Map<String, org.apache.seata.core.model.Resource> dataSourceCache =
-                (java.util.Map<String, org.apache.seata.core.model.Resource>)
+        Map<String, Resource> dataSourceCache =
+                (Map<String, Resource>)
                         dataSourceCacheField.get(resourceManagerXA);
         dataSourceCache.put("testResource", mockDataSourceProxyXA);
 
@@ -215,12 +218,12 @@ public class ResourceManagerXATest {
                 .thenReturn(mockConnectionProxyXA);
 
         // Use reflection to set the dataSourceCache field
-        java.lang.reflect.Field dataSourceCacheField =
+        Field dataSourceCacheField =
                 ResourceManagerXA.class.getSuperclass().getDeclaredField("dataSourceCache");
         dataSourceCacheField.setAccessible(true);
         @SuppressWarnings("unchecked")
-        java.util.Map<String, org.apache.seata.core.model.Resource> dataSourceCache =
-                (java.util.Map<String, org.apache.seata.core.model.Resource>)
+        Map<String, Resource> dataSourceCache =
+                (Map<String, Resource>)
                         dataSourceCacheField.get(resourceManagerXA);
         dataSourceCache.put("testResource", mockDataSourceProxyXA);
 
@@ -250,12 +253,12 @@ public class ResourceManagerXATest {
                 .thenReturn(mockConnectionProxyXA);
 
         // Use reflection to set the dataSourceCache field
-        java.lang.reflect.Field dataSourceCacheField =
+        Field dataSourceCacheField =
                 ResourceManagerXA.class.getSuperclass().getDeclaredField("dataSourceCache");
         dataSourceCacheField.setAccessible(true);
         @SuppressWarnings("unchecked")
-        java.util.Map<String, org.apache.seata.core.model.Resource> dataSourceCache =
-                (java.util.Map<String, org.apache.seata.core.model.Resource>)
+        Map<String, Resource> dataSourceCache =
+                (Map<String, Resource>)
                         dataSourceCacheField.get(resourceManagerXA);
         dataSourceCache.put("testResource", mockDataSourceProxyXA);
 
@@ -285,12 +288,12 @@ public class ResourceManagerXATest {
                 .thenReturn(mockConnectionProxyXA);
 
         // Use reflection to set the dataSourceCache field
-        java.lang.reflect.Field dataSourceCacheField =
+        Field dataSourceCacheField =
                 ResourceManagerXA.class.getSuperclass().getDeclaredField("dataSourceCache");
         dataSourceCacheField.setAccessible(true);
         @SuppressWarnings("unchecked")
-        java.util.Map<String, org.apache.seata.core.model.Resource> dataSourceCache =
-                (java.util.Map<String, org.apache.seata.core.model.Resource>)
+        Map<String, Resource> dataSourceCache =
+                (Map<String, Resource>)
                         dataSourceCacheField.get(resourceManagerXA);
         dataSourceCache.put("testResource", mockDataSourceProxyXA);
 
@@ -320,12 +323,12 @@ public class ResourceManagerXATest {
                 .thenReturn(mockConnectionProxyXA);
 
         // Use reflection to set the dataSourceCache field
-        java.lang.reflect.Field dataSourceCacheField =
+        Field dataSourceCacheField =
                 ResourceManagerXA.class.getSuperclass().getDeclaredField("dataSourceCache");
         dataSourceCacheField.setAccessible(true);
         @SuppressWarnings("unchecked")
-        java.util.Map<String, org.apache.seata.core.model.Resource> dataSourceCache =
-                (java.util.Map<String, org.apache.seata.core.model.Resource>)
+        Map<String, Resource> dataSourceCache =
+                (Map<String, Resource>)
                         dataSourceCacheField.get(resourceManagerXA);
         dataSourceCache.put("testResource", mockDataSourceProxyXA);
 
