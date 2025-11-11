@@ -77,13 +77,10 @@ public class ResourceManagerXATest {
         Mockito.doNothing().when(mockConnectionProxyXA).close();
 
         // Use reflection to set the dataSourceCache field
-        Field dataSourceCacheField =
-                ResourceManagerXA.class.getSuperclass().getDeclaredField("dataSourceCache");
+        Field dataSourceCacheField = ResourceManagerXA.class.getSuperclass().getDeclaredField("dataSourceCache");
         dataSourceCacheField.setAccessible(true);
         @SuppressWarnings("unchecked")
-        Map<String, Resource> dataSourceCache =
-                (Map<String, Resource>)
-                        dataSourceCacheField.get(resourceManagerXA);
+        Map<String, Resource> dataSourceCache = (Map<String, Resource>) dataSourceCacheField.get(resourceManagerXA);
         dataSourceCache.put("testResource", mockDataSourceProxyXA);
 
         // Test branch commit
@@ -111,13 +108,10 @@ public class ResourceManagerXATest {
         Mockito.doNothing().when(mockConnectionProxyXA).close();
 
         // Use reflection to set the dataSourceCache field
-        Field dataSourceCacheField =
-                ResourceManagerXA.class.getSuperclass().getDeclaredField("dataSourceCache");
+        Field dataSourceCacheField = ResourceManagerXA.class.getSuperclass().getDeclaredField("dataSourceCache");
         dataSourceCacheField.setAccessible(true);
         @SuppressWarnings("unchecked")
-        Map<String, Resource> dataSourceCache =
-                (Map<String, Resource>)
-                        dataSourceCacheField.get(resourceManagerXA);
+        Map<String, Resource> dataSourceCache = (Map<String, Resource>) dataSourceCacheField.get(resourceManagerXA);
         dataSourceCache.put("testResource", mockDataSourceProxyXA);
 
         // Test branch rollback
@@ -148,13 +142,10 @@ public class ResourceManagerXATest {
                 .thenReturn(mockConnectionProxyXA);
 
         // Use reflection to set the dataSourceCache field
-        Field dataSourceCacheField =
-                ResourceManagerXA.class.getSuperclass().getDeclaredField("dataSourceCache");
+        Field dataSourceCacheField = ResourceManagerXA.class.getSuperclass().getDeclaredField("dataSourceCache");
         dataSourceCacheField.setAccessible(true);
         @SuppressWarnings("unchecked")
-        Map<String, Resource> dataSourceCache =
-                (Map<String, Resource>)
-                        dataSourceCacheField.get(resourceManagerXA);
+        Map<String, Resource> dataSourceCache = (Map<String, Resource>) dataSourceCacheField.get(resourceManagerXA);
         dataSourceCache.put("testResource", mockDataSourceProxyXA);
 
         // Test branch commit with XAER_NOTA exception
@@ -183,13 +174,10 @@ public class ResourceManagerXATest {
                 .thenReturn(mockConnectionProxyXA);
 
         // Use reflection to set the dataSourceCache field
-        Field dataSourceCacheField =
-                ResourceManagerXA.class.getSuperclass().getDeclaredField("dataSourceCache");
+        Field dataSourceCacheField = ResourceManagerXA.class.getSuperclass().getDeclaredField("dataSourceCache");
         dataSourceCacheField.setAccessible(true);
         @SuppressWarnings("unchecked")
-        Map<String, Resource> dataSourceCache =
-                (Map<String, Resource>)
-                        dataSourceCacheField.get(resourceManagerXA);
+        Map<String, Resource> dataSourceCache = (Map<String, Resource>) dataSourceCacheField.get(resourceManagerXA);
         dataSourceCache.put("testResource", mockDataSourceProxyXA);
 
         // Test branch commit with XAException
@@ -218,13 +206,10 @@ public class ResourceManagerXATest {
                 .thenReturn(mockConnectionProxyXA);
 
         // Use reflection to set the dataSourceCache field
-        Field dataSourceCacheField =
-                ResourceManagerXA.class.getSuperclass().getDeclaredField("dataSourceCache");
+        Field dataSourceCacheField = ResourceManagerXA.class.getSuperclass().getDeclaredField("dataSourceCache");
         dataSourceCacheField.setAccessible(true);
         @SuppressWarnings("unchecked")
-        Map<String, Resource> dataSourceCache =
-                (Map<String, Resource>)
-                        dataSourceCacheField.get(resourceManagerXA);
+        Map<String, Resource> dataSourceCache = (Map<String, Resource>) dataSourceCacheField.get(resourceManagerXA);
         dataSourceCache.put("testResource", mockDataSourceProxyXA);
 
         // Test branch commit with XAException (treated as SQLException)
@@ -253,13 +238,10 @@ public class ResourceManagerXATest {
                 .thenReturn(mockConnectionProxyXA);
 
         // Use reflection to set the dataSourceCache field
-        Field dataSourceCacheField =
-                ResourceManagerXA.class.getSuperclass().getDeclaredField("dataSourceCache");
+        Field dataSourceCacheField = ResourceManagerXA.class.getSuperclass().getDeclaredField("dataSourceCache");
         dataSourceCacheField.setAccessible(true);
         @SuppressWarnings("unchecked")
-        Map<String, Resource> dataSourceCache =
-                (Map<String, Resource>)
-                        dataSourceCacheField.get(resourceManagerXA);
+        Map<String, Resource> dataSourceCache = (Map<String, Resource>) dataSourceCacheField.get(resourceManagerXA);
         dataSourceCache.put("testResource", mockDataSourceProxyXA);
 
         // Test branch rollback with XAER_NOTA exception
@@ -288,13 +270,10 @@ public class ResourceManagerXATest {
                 .thenReturn(mockConnectionProxyXA);
 
         // Use reflection to set the dataSourceCache field
-        Field dataSourceCacheField =
-                ResourceManagerXA.class.getSuperclass().getDeclaredField("dataSourceCache");
+        Field dataSourceCacheField = ResourceManagerXA.class.getSuperclass().getDeclaredField("dataSourceCache");
         dataSourceCacheField.setAccessible(true);
         @SuppressWarnings("unchecked")
-        Map<String, Resource> dataSourceCache =
-                (Map<String, Resource>)
-                        dataSourceCacheField.get(resourceManagerXA);
+        Map<String, Resource> dataSourceCache = (Map<String, Resource>) dataSourceCacheField.get(resourceManagerXA);
         dataSourceCache.put("testResource", mockDataSourceProxyXA);
 
         // Test branch rollback with XAException
@@ -323,13 +302,10 @@ public class ResourceManagerXATest {
                 .thenReturn(mockConnectionProxyXA);
 
         // Use reflection to set the dataSourceCache field
-        Field dataSourceCacheField =
-                ResourceManagerXA.class.getSuperclass().getDeclaredField("dataSourceCache");
+        Field dataSourceCacheField = ResourceManagerXA.class.getSuperclass().getDeclaredField("dataSourceCache");
         dataSourceCacheField.setAccessible(true);
         @SuppressWarnings("unchecked")
-        Map<String, Resource> dataSourceCache =
-                (Map<String, Resource>)
-                        dataSourceCacheField.get(resourceManagerXA);
+        Map<String, Resource> dataSourceCache = (Map<String, Resource>) dataSourceCacheField.get(resourceManagerXA);
         dataSourceCache.put("testResource", mockDataSourceProxyXA);
 
         // Test branch rollback with XAException (treated as SQLException)
