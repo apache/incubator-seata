@@ -76,15 +76,17 @@ public class GsonJsonSerializer implements JsonSerializer {
     }
 
     // advanced methods for Saga
-
+    @Override
     public boolean useAutoType(String json) {
         return false;
     }
 
+    @Override
     public String toJSONString(Object object, boolean prettyPrint) {
         return toJSONString(object, false, prettyPrint);
     }
 
+    @Override
     public String toJSONString(Object object, boolean ignoreAutoType, boolean prettyPrint) {
         try {
             if (prettyPrint) {
@@ -97,6 +99,7 @@ public class GsonJsonSerializer implements JsonSerializer {
         }
     }
 
+    @Override
     public <T> T parseObject(String text, Class<T> type, boolean ignoreAutoType) {
         if (text == null || type == null) {
             return null;

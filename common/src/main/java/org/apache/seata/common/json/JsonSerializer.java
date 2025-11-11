@@ -28,4 +28,12 @@ public interface JsonSerializer {
     <T> T parseObject(String text, Class<T> clazz);
 
     <T> T parseObject(String text, Type type);
+
+    boolean useAutoType(String json);
+
+    String toJSONString(Object o, boolean prettyPrint);
+
+    String toJSONString(Object o, boolean ignoreAutoType, boolean prettyPrint);
+
+    <T> T parseObject(String json, Class<T> type, boolean ignoreAutoType);
 }

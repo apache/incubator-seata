@@ -96,15 +96,17 @@ public class JacksonJsonSerializer implements JsonSerializer {
     }
 
     // advanced methods for Saga
-
+    @Override
     public boolean useAutoType(String json) {
         return json != null && json.contains("\"@type\"");
     }
 
+    @Override
     public String toJSONString(Object o, boolean prettyPrint) {
         return toJSONString(o, false, prettyPrint);
     }
 
+    @Override
     public String toJSONString(Object o, boolean ignoreAutoType, boolean prettyPrint) {
         try {
             if (o instanceof List && ((List<?>) o).isEmpty()) {
@@ -130,6 +132,7 @@ public class JacksonJsonSerializer implements JsonSerializer {
         }
     }
 
+    @Override
     public <T> T parseObject(String json, Class<T> type, boolean ignoreAutoType) {
         if (json == null || type == null) {
             return null;
