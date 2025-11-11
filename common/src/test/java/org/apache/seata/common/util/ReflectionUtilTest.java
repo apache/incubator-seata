@@ -16,12 +16,6 @@
  */
 package org.apache.seata.common.util;
 
-import org.apache.seata.common.BranchDO;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledOnJre;
-import org.junit.jupiter.api.condition.JRE;
-
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -33,6 +27,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.apache.seata.common.BranchDO;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledOnJre;
+import org.junit.jupiter.api.condition.JRE;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -336,19 +336,6 @@ public class ReflectionUtilTest {
         // Test non-existent field
         assertThatThrownBy(() -> ReflectionUtil.setFieldValue(testObj, "nonExistent", "value"))
                 .isInstanceOf(NoSuchFieldException.class);
-    }
-
-    @Test
-    @EnabledOnJre({JRE.JAVA_8, JRE.JAVA_11})
-    public void testModifyStaticFinalFieldEnhanced() throws NoSuchFieldException, IllegalAccessException {
-        // Test modifying static final field
-        ReflectionUtil.modifyStaticFinalField(TestConstants.class, "STATIC_FINAL_FIELD", "modified");
-        assertThat(TestConstants.STATIC_FINAL_FIELD).isEqualTo("modified");
-
-        // Test non-static field
-        Field instanceField = TestClassEnhanced.class.getDeclaredField("f1");
-        assertThatThrownBy(() -> ReflectionUtil.modifyStaticFinalField(instanceField, "value"))
-                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test

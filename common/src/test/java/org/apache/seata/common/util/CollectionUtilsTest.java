@@ -259,8 +259,6 @@ public class CollectionUtilsTest {
         Assertions.assertEquals("Bar", CollectionUtils.getLast(list));
     }
 
-    // 以下是增强的测试用例
-
     @Test
     public void testComputeIfAbsent() {
         // Test with a regular HashMap
