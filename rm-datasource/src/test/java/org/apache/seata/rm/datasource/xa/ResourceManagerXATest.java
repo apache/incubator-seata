@@ -64,9 +64,8 @@ public class ResourceManagerXATest {
     }
 
     @Test
-    public void testBranchCommitSuccess() throws TransactionException, SQLException, XAException {
-        // Mock data source cache
-        Map<String, BaseDataSourceResource> dataSourceCache = new ConcurrentHashMap<>();
+    public void testBranchCommitSuccess() throws Exception {
+        // Mock data source and connection
         AbstractDataSourceProxyXA mockDataSourceProxyXA = Mockito.mock(AbstractDataSourceProxyXA.class);
         ConnectionProxyXA mockConnectionProxyXA = Mockito.mock(ConnectionProxyXA.class);
 
@@ -76,29 +75,26 @@ public class ResourceManagerXATest {
         Mockito.doNothing().when(mockConnectionProxyXA).xaCommit(Mockito.anyString(), Mockito.anyLong(), Mockito.anyString());
         Mockito.doNothing().when(mockConnectionProxyXA).close();
 
+        // Use reflection to set the dataSourceCache field
+        java.lang.reflect.Field dataSourceCacheField = ResourceManagerXA.class.getSuperclass().getDeclaredField("dataSourceCache");
+        dataSourceCacheField.setAccessible(true);
+        @SuppressWarnings("unchecked")
+        java.util.Map<String, org.apache.seata.core.model.Resource> dataSourceCache =
+            (java.util.Map<String, org.apache.seata.core.model.Resource>) dataSourceCacheField.get(resourceManagerXA);
         dataSourceCache.put("testResource", mockDataSourceProxyXA);
 
-        // Replace the dataSourceCache in ResourceManagerXA (this would normally be done via reflection or package-private access)
-        // For this test, we'll use the method directly
+        // Test branch commit
+        BranchStatus result = resourceManagerXA.branchCommit(BranchType.XA, "testXid", 123L, "testResource", "testData");
 
-        try {
-            // Test branch commit
-            BranchStatus result = resourceManagerXA.branchCommit(BranchType.XA, "testXid", 123L, "testResource", "testData");
-
-            Assertions.assertEquals(BranchStatus.PhaseTwo_Committed, result);
-            Mockito.verify(mockDataSourceProxyXA).getConnectionForXAFinish(Mockito.any(XAXid.class));
-            Mockito.verify(mockConnectionProxyXA).xaCommit("testXid", 123L, "testData");
-            Mockito.verify(mockConnectionProxyXA).close();
-        } catch (Exception e) {
-            // If the test fails due to dataSourceCache access, we'll create a more focused unit test
-            Assertions.assertTrue(e.getMessage().contains("dataSourceCache") || e instanceof NullPointerException);
-        }
+        Assertions.assertEquals(BranchStatus.PhaseTwo_Committed, result);
+        Mockito.verify(mockDataSourceProxyXA).getConnectionForXAFinish(Mockito.any(XAXid.class));
+        Mockito.verify(mockConnectionProxyXA).xaCommit("testXid", 123L, "testData");
+        Mockito.verify(mockConnectionProxyXA).close();
     }
 
     @Test
-    public void testBranchRollbackSuccess() throws TransactionException, SQLException, XAException {
-        // Mock data source cache
-        Map<String, BaseDataSourceResource> dataSourceCache = new ConcurrentHashMap<>();
+    public void testBranchRollbackSuccess() throws Exception {
+        // Mock data source and connection
         AbstractDataSourceProxyXA mockDataSourceProxyXA = Mockito.mock(AbstractDataSourceProxyXA.class);
         ConnectionProxyXA mockConnectionProxyXA = Mockito.mock(ConnectionProxyXA.class);
 
@@ -108,134 +104,219 @@ public class ResourceManagerXATest {
         Mockito.doNothing().when(mockConnectionProxyXA).xaRollback(Mockito.anyString(), Mockito.anyLong(), Mockito.anyString());
         Mockito.doNothing().when(mockConnectionProxyXA).close();
 
+        // Use reflection to set the dataSourceCache field
+        java.lang.reflect.Field dataSourceCacheField = ResourceManagerXA.class.getSuperclass().getDeclaredField("dataSourceCache");
+        dataSourceCacheField.setAccessible(true);
+        @SuppressWarnings("unchecked")
+        java.util.Map<String, org.apache.seata.core.model.Resource> dataSourceCache =
+            (java.util.Map<String, org.apache.seata.core.model.Resource>) dataSourceCacheField.get(resourceManagerXA);
         dataSourceCache.put("testResource", mockDataSourceProxyXA);
 
-        try {
-            // Test branch rollback
-            BranchStatus result = resourceManagerXA.branchRollback(BranchType.XA, "testXid", 123L, "testResource", "testData");
+        // Test branch rollback
+        BranchStatus result = resourceManagerXA.branchRollback(BranchType.XA, "testXid", 123L, "testResource", "testData");
 
-            Assertions.assertEquals(BranchStatus.PhaseTwo_Rollbacked, result);
-            Mockito.verify(mockDataSourceProxyXA).getConnectionForXAFinish(Mockito.any(XAXid.class));
-            Mockito.verify(mockConnectionProxyXA).xaRollback("testXid", 123L, "testData");
-            Mockito.verify(mockConnectionProxyXA).close();
-        } catch (Exception e) {
-            // If the test fails due to dataSourceCache access, we'll create a more focused unit test
-            Assertions.assertTrue(e.getMessage().contains("dataSourceCache") || e instanceof NullPointerException);
-        }
+        Assertions.assertEquals(BranchStatus.PhaseTwo_Rollbacked, result);
+        Mockito.verify(mockDataSourceProxyXA).getConnectionForXAFinish(Mockito.any(XAXid.class));
+        Mockito.verify(mockConnectionProxyXA).xaRollback("testXid", 123L, "testData");
+        Mockito.verify(mockConnectionProxyXA).close();
     }
 
     @Test
-    public void testBranchCommitWithXAExceptionXAER_NOTA() throws TransactionException, SQLException, XAException {
-        try {
-            // Mock data source cache access would be needed here
-            // For this test, we'll test the exception handling logic directly
+    public void testBranchCommitWithXAExceptionXAER_NOTA() throws Exception {
+        // Mock data source and connection that throws XAException
+        AbstractDataSourceProxyXA mockDataSourceProxyXA = Mockito.mock(AbstractDataSourceProxyXA.class);
+        ConnectionProxyXA mockConnectionProxyXA = Mockito.mock(ConnectionProxyXA.class);
 
-            // Create XAException with XAER_NOTA
-            XAException xaException = new XAException("XAER_NOTA");
-            xaException.errorCode = XAException.XAER_NOTA;
+        // Create XAException with XAER_NOTA and setup mock to throw it
+        XAException xaException = new XAException("XAER_NOTA");
+        xaException.errorCode = XAException.XAER_NOTA;
+        Mockito.doThrow(xaException).when(mockConnectionProxyXA).xaCommit(Mockito.anyString(), Mockito.anyLong(), Mockito.anyString());
+        Mockito.doNothing().when(mockConnectionProxyXA).close();
 
-            // This test would require more complex mocking of the dataSourceCache
-            // For now, we'll test that the method signatures are correct
-            Assertions.assertEquals(BranchType.XA, resourceManagerXA.getBranchType());
+        Mockito.when(mockDataSourceProxyXA.getConnectionForXAFinish(Mockito.any(XAXid.class)))
+                .thenReturn(mockConnectionProxyXA);
 
-        } catch (Exception e) {
-            // Expected due to mocking limitations
-            Assertions.assertTrue(e instanceof NullPointerException || e.getMessage().contains("dataSourceCache"));
-        }
+        // Use reflection to set the dataSourceCache field
+        java.lang.reflect.Field dataSourceCacheField = ResourceManagerXA.class.getSuperclass().getDeclaredField("dataSourceCache");
+        dataSourceCacheField.setAccessible(true);
+        @SuppressWarnings("unchecked")
+        java.util.Map<String, org.apache.seata.core.model.Resource> dataSourceCache =
+            (java.util.Map<String, org.apache.seata.core.model.Resource>) dataSourceCacheField.get(resourceManagerXA);
+        dataSourceCache.put("testResource", mockDataSourceProxyXA);
+
+        // Test branch commit with XAER_NOTA exception
+        BranchStatus result = resourceManagerXA.branchCommit(BranchType.XA, "testXid", 123L, "testResource", "testData");
+
+        Assertions.assertEquals(BranchStatus.PhaseTwo_CommitFailed_XAER_NOTA_Retryable, result);
+        Mockito.verify(mockConnectionProxyXA).xaCommit("testXid", 123L, "testData");
     }
 
     @Test
-    public void testBranchCommitWithXAException() throws TransactionException, SQLException, XAException {
-        try {
-            // Test XA exception handling
-            // This would require mocking the dataSourceCache access
-            Assertions.assertEquals(BranchType.XA, resourceManagerXA.getBranchType());
+    public void testBranchCommitWithXAException() throws Exception {
+        // Mock data source and connection that throws XAException
+        AbstractDataSourceProxyXA mockDataSourceProxyXA = Mockito.mock(AbstractDataSourceProxyXA.class);
+        ConnectionProxyXA mockConnectionProxyXA = Mockito.mock(ConnectionProxyXA.class);
 
-        } catch (Exception e) {
-            // Expected due to mocking limitations
-            Assertions.assertTrue(e instanceof NullPointerException || e.getMessage().contains("dataSourceCache"));
-        }
+        // Create XAException and setup mock to throw it
+        XAException xaException = new XAException("XA error");
+        xaException.errorCode = XAException.XA_RBROLLBACK;
+        Mockito.doThrow(xaException).when(mockConnectionProxyXA).xaCommit(Mockito.anyString(), Mockito.anyLong(), Mockito.anyString());
+        Mockito.doNothing().when(mockConnectionProxyXA).close();
+
+        Mockito.when(mockDataSourceProxyXA.getConnectionForXAFinish(Mockito.any(XAXid.class)))
+                .thenReturn(mockConnectionProxyXA);
+
+        // Use reflection to set the dataSourceCache field
+        java.lang.reflect.Field dataSourceCacheField = ResourceManagerXA.class.getSuperclass().getDeclaredField("dataSourceCache");
+        dataSourceCacheField.setAccessible(true);
+        @SuppressWarnings("unchecked")
+        java.util.Map<String, org.apache.seata.core.model.Resource> dataSourceCache =
+            (java.util.Map<String, org.apache.seata.core.model.Resource>) dataSourceCacheField.get(resourceManagerXA);
+        dataSourceCache.put("testResource", mockDataSourceProxyXA);
+
+        // Test branch commit with XAException
+        BranchStatus result = resourceManagerXA.branchCommit(BranchType.XA, "testXid", 123L, "testResource", "testData");
+
+        Assertions.assertEquals(BranchStatus.PhaseTwo_CommitFailed_Retryable, result);
+        Mockito.verify(mockConnectionProxyXA).xaCommit("testXid", 123L, "testData");
     }
 
     @Test
-    public void testBranchCommitWithSQLException() throws TransactionException, SQLException, XAException {
-        try {
-            // Test SQL exception handling
-            // This would require mocking the dataSourceCache access
-            Assertions.assertEquals(BranchType.XA, resourceManagerXA.getBranchType());
+    public void testBranchCommitWithXAExceptionAsSQLException() throws Exception {
+        // Mock data source and connection that throws XAException (which is a subclass of SQLException)
+        AbstractDataSourceProxyXA mockDataSourceProxyXA = Mockito.mock(AbstractDataSourceProxyXA.class);
+        ConnectionProxyXA mockConnectionProxyXA = Mockito.mock(ConnectionProxyXA.class);
 
-        } catch (Exception e) {
-            // Expected due to mocking limitations
-            Assertions.assertTrue(e instanceof NullPointerException || e.getMessage().contains("dataSourceCache"));
-        }
+        // Create XAException (which extends SQLException) and setup mock to throw it
+        XAException xaException = new XAException("XA error");
+        xaException.errorCode = XAException.XA_RBROLLBACK; // Not XAER_NOTA, so it should be treated as SQLException
+        Mockito.doThrow(xaException).when(mockConnectionProxyXA).xaCommit(Mockito.anyString(), Mockito.anyLong(), Mockito.anyString());
+        Mockito.doNothing().when(mockConnectionProxyXA).close();
+
+        Mockito.when(mockDataSourceProxyXA.getConnectionForXAFinish(Mockito.any(XAXid.class)))
+                .thenReturn(mockConnectionProxyXA);
+
+        // Use reflection to set the dataSourceCache field
+        java.lang.reflect.Field dataSourceCacheField = ResourceManagerXA.class.getSuperclass().getDeclaredField("dataSourceCache");
+        dataSourceCacheField.setAccessible(true);
+        @SuppressWarnings("unchecked")
+        java.util.Map<String, org.apache.seata.core.model.Resource> dataSourceCache =
+            (java.util.Map<String, org.apache.seata.core.model.Resource>) dataSourceCacheField.get(resourceManagerXA);
+        dataSourceCache.put("testResource", mockDataSourceProxyXA);
+
+        // Test branch commit with XAException (treated as SQLException)
+        BranchStatus result = resourceManagerXA.branchCommit(BranchType.XA, "testXid", 123L, "testResource", "testData");
+
+        Assertions.assertEquals(BranchStatus.PhaseTwo_CommitFailed_Retryable, result);
+        Mockito.verify(mockConnectionProxyXA).xaCommit("testXid", 123L, "testData");
     }
 
     @Test
-    public void testBranchRollbackWithXAExceptionXAER_NOTA() throws TransactionException, SQLException, XAException {
-        try {
-            // Test rollback with XAER_NOTA
-            Assertions.assertEquals(BranchType.XA, resourceManagerXA.getBranchType());
+    public void testBranchRollbackWithXAExceptionXAER_NOTA() throws Exception {
+        // Mock data source and connection that throws XAException
+        AbstractDataSourceProxyXA mockDataSourceProxyXA = Mockito.mock(AbstractDataSourceProxyXA.class);
+        ConnectionProxyXA mockConnectionProxyXA = Mockito.mock(ConnectionProxyXA.class);
 
-        } catch (Exception e) {
-            // Expected due to mocking limitations
-            Assertions.assertTrue(e instanceof NullPointerException || e.getMessage().contains("dataSourceCache"));
-        }
+        // Create XAException with XAER_NOTA and setup mock to throw it
+        XAException xaException = new XAException("XAER_NOTA");
+        xaException.errorCode = XAException.XAER_NOTA;
+        Mockito.doThrow(xaException).when(mockConnectionProxyXA).xaRollback(Mockito.anyString(), Mockito.anyLong(), Mockito.anyString());
+        Mockito.doNothing().when(mockConnectionProxyXA).close();
+
+        Mockito.when(mockDataSourceProxyXA.getConnectionForXAFinish(Mockito.any(XAXid.class)))
+                .thenReturn(mockConnectionProxyXA);
+
+        // Use reflection to set the dataSourceCache field
+        java.lang.reflect.Field dataSourceCacheField = ResourceManagerXA.class.getSuperclass().getDeclaredField("dataSourceCache");
+        dataSourceCacheField.setAccessible(true);
+        @SuppressWarnings("unchecked")
+        java.util.Map<String, org.apache.seata.core.model.Resource> dataSourceCache =
+            (java.util.Map<String, org.apache.seata.core.model.Resource>) dataSourceCacheField.get(resourceManagerXA);
+        dataSourceCache.put("testResource", mockDataSourceProxyXA);
+
+        // Test branch rollback with XAER_NOTA exception
+        BranchStatus result = resourceManagerXA.branchRollback(BranchType.XA, "testXid", 123L, "testResource", "testData");
+
+        Assertions.assertEquals(BranchStatus.PhaseTwo_RollbackFailed_XAER_NOTA_Retryable, result);
+        Mockito.verify(mockConnectionProxyXA).xaRollback("testXid", 123L, "testData");
     }
 
     @Test
-    public void testBranchRollbackWithXAException() throws TransactionException, SQLException, XAException {
-        try {
-            // Test rollback with XA exception
-            Assertions.assertEquals(BranchType.XA, resourceManagerXA.getBranchType());
+    public void testBranchRollbackWithXAException() throws Exception {
+        // Mock data source and connection that throws XAException
+        AbstractDataSourceProxyXA mockDataSourceProxyXA = Mockito.mock(AbstractDataSourceProxyXA.class);
+        ConnectionProxyXA mockConnectionProxyXA = Mockito.mock(ConnectionProxyXA.class);
 
-        } catch (Exception e) {
-            // Expected due to mocking limitations
-            Assertions.assertTrue(e instanceof NullPointerException || e.getMessage().contains("dataSourceCache"));
-        }
+        // Create XAException and setup mock to throw it
+        XAException xaException = new XAException("XA error");
+        xaException.errorCode = XAException.XA_RBROLLBACK;
+        Mockito.doThrow(xaException).when(mockConnectionProxyXA).xaRollback(Mockito.anyString(), Mockito.anyLong(), Mockito.anyString());
+        Mockito.doNothing().when(mockConnectionProxyXA).close();
+
+        Mockito.when(mockDataSourceProxyXA.getConnectionForXAFinish(Mockito.any(XAXid.class)))
+                .thenReturn(mockConnectionProxyXA);
+
+        // Use reflection to set the dataSourceCache field
+        java.lang.reflect.Field dataSourceCacheField = ResourceManagerXA.class.getSuperclass().getDeclaredField("dataSourceCache");
+        dataSourceCacheField.setAccessible(true);
+        @SuppressWarnings("unchecked")
+        java.util.Map<String, org.apache.seata.core.model.Resource> dataSourceCache =
+            (java.util.Map<String, org.apache.seata.core.model.Resource>) dataSourceCacheField.get(resourceManagerXA);
+        dataSourceCache.put("testResource", mockDataSourceProxyXA);
+
+        // Test branch rollback with XAException
+        BranchStatus result = resourceManagerXA.branchRollback(BranchType.XA, "testXid", 123L, "testResource", "testData");
+
+        Assertions.assertEquals(BranchStatus.PhaseTwo_RollbackFailed_Retryable, result);
+        Mockito.verify(mockConnectionProxyXA).xaRollback("testXid", 123L, "testData");
     }
 
     @Test
-    public void testBranchRollbackWithSQLException() throws TransactionException, SQLException, XAException {
-        try {
-            // Test rollback with SQL exception
-            Assertions.assertEquals(BranchType.XA, resourceManagerXA.getBranchType());
+    public void testBranchRollbackWithXAExceptionAsSQLException() throws Exception {
+        // Mock data source and connection that throws XAException (which is a subclass of SQLException)
+        AbstractDataSourceProxyXA mockDataSourceProxyXA = Mockito.mock(AbstractDataSourceProxyXA.class);
+        ConnectionProxyXA mockConnectionProxyXA = Mockito.mock(ConnectionProxyXA.class);
 
-        } catch (Exception e) {
-            // Expected due to mocking limitations
-            Assertions.assertTrue(e instanceof NullPointerException || e.getMessage().contains("dataSourceCache"));
-        }
+        // Create XAException (which extends SQLException) and setup mock to throw it
+        XAException xaException = new XAException("XA error");
+        xaException.errorCode = XAException.XA_RBROLLBACK; // Not XAER_NOTA, so it should be treated as SQLException
+        Mockito.doThrow(xaException).when(mockConnectionProxyXA).xaRollback(Mockito.anyString(), Mockito.anyLong(), Mockito.anyString());
+        Mockito.doNothing().when(mockConnectionProxyXA).close();
+
+        Mockito.when(mockDataSourceProxyXA.getConnectionForXAFinish(Mockito.any(XAXid.class)))
+                .thenReturn(mockConnectionProxyXA);
+
+        // Use reflection to set the dataSourceCache field
+        java.lang.reflect.Field dataSourceCacheField = ResourceManagerXA.class.getSuperclass().getDeclaredField("dataSourceCache");
+        dataSourceCacheField.setAccessible(true);
+        @SuppressWarnings("unchecked")
+        java.util.Map<String, org.apache.seata.core.model.Resource> dataSourceCache =
+            (java.util.Map<String, org.apache.seata.core.model.Resource>) dataSourceCacheField.get(resourceManagerXA);
+        dataSourceCache.put("testResource", mockDataSourceProxyXA);
+
+        // Test branch rollback with XAException (treated as SQLException)
+        BranchStatus result = resourceManagerXA.branchRollback(BranchType.XA, "testXid", 123L, "testResource", "testData");
+
+        Assertions.assertEquals(BranchStatus.PhaseTwo_RollbackFailed_Retryable, result);
+        Mockito.verify(mockConnectionProxyXA).xaRollback("testXid", 123L, "testData");
     }
 
     @Test
     public void testBranchCommitWithUnknownResource() throws TransactionException {
-        try {
-            // Test with unknown resource ID
-            BranchStatus result = resourceManagerXA.branchCommit(BranchType.XA, "testXid", 123L, "unknownResource", "testData");
+        // Test with unknown resource ID
+        BranchStatus result = resourceManagerXA.branchCommit(BranchType.XA, "testXid", 123L, "unknownResource", "testData");
 
-            // Should return failure status for unknown resource
-            Assertions.assertTrue(result == BranchStatus.PhaseTwo_CommitFailed_Unretryable ||
-                                result == BranchStatus.PhaseTwo_CommitFailed_Retryable);
-
-        } catch (Exception e) {
-            // Expected due to dataSourceCache being null
-            Assertions.assertTrue(e instanceof NullPointerException);
-        }
+        // Should return failure status for unknown resource
+        Assertions.assertEquals(BranchStatus.PhaseTwo_CommitFailed_Unretryable, result);
     }
 
     @Test
     public void testBranchRollbackWithUnknownResource() throws TransactionException {
-        try {
-            // Test with unknown resource ID
-            BranchStatus result = resourceManagerXA.branchRollback(BranchType.XA, "testXid", 123L, "unknownResource", "testData");
+        // Test with unknown resource ID
+        BranchStatus result = resourceManagerXA.branchRollback(BranchType.XA, "testXid", 123L, "unknownResource", "testData");
 
-            // Should return failure status for unknown resource
-            Assertions.assertTrue(result == BranchStatus.PhaseTwo_RollbackFailed_Unretryable ||
-                                result == BranchStatus.PhaseTwo_RollbackFailed_Retryable);
-
-        } catch (Exception e) {
-            // Expected due to dataSourceCache being null
-            Assertions.assertTrue(e instanceof NullPointerException);
-        }
+        // Should return failure status for unknown resource
+        Assertions.assertEquals(BranchStatus.PhaseTwo_RollbackFailed_Unretryable, result);
     }
 
     @Test
