@@ -14,11 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.seata.integration.http;
+package org.apache.seata.integration.http.jakarta;
+
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
- * The type Jakarta seata web mvc configurer.
+ * The Jakarta Seata Web Mvc Configurer
+ *
  */
-@Deprecated
-public class JakartaSeataWebMvcConfigurer
-        extends org.apache.seata.integration.http.jakarta.JakartaSeataWebMvcConfigurer {}
+public class JakartaSeataWebMvcConfigurer implements WebMvcConfigurer {
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(new JakartaTransactionPropagationInterceptor());
+    }
+}
