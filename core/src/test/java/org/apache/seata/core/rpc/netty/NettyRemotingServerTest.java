@@ -81,7 +81,7 @@ public class NettyRemotingServerTest {
     }
 
     @Test
-    public void destory() {
+    public void destroy() {
         nettyRemotingServer.destroy();
         Assertions.assertTrue(nettyRemotingServer != null);
     }

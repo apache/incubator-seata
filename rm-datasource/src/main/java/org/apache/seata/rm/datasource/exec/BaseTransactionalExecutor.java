@@ -18,6 +18,7 @@ package org.apache.seata.rm.datasource.exec;
 
 import org.apache.seata.common.DefaultValues;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
+import org.apache.seata.common.util.ArrayUtils;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.IOUtil;
 import org.apache.seata.common.util.StringUtils;
@@ -457,7 +458,12 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
                 }
                 Object pkVal = rowMap.get(pkName).getValue();
                 validPk(String.valueOf(pkVal));
-                sb.append(pkVal);
+                // Handle byte[] primary keys properly to avoid using memory address as lock key
+                if (pkVal instanceof byte[]) {
+                    sb.append(ArrayUtils.toString(pkVal));
+                } else {
+                    sb.append(pkVal);
+                }
                 pkSplitIndex++;
             }
             rowSequence++;
