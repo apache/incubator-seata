@@ -415,6 +415,7 @@
                         </entrypoint>
                         <environment>
                             <TZ>Asia/Shanghai</TZ>
+                            <LOADER_PATH>/seata-server/libs/</LOADER_PATH>
                         </environment>
                     </container>
                     <extraDirectories>
