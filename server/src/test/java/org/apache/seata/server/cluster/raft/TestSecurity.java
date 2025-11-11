@@ -14,31 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.server.console.exception;
+package org.apache.seata.server.cluster.raft;
 
-public class ConsoleException extends RuntimeException {
-    /**
-     * use for globalExceptionHandlerAdvice
-     *
-     * @see  org.apache.seata.server.console.aop.GlobalExceptionHandlerAdvice
-     */
-    private String logMessage;
+public class TestSecurity implements java.io.Serializable {
 
-    public ConsoleException(Throwable cause, String logMessage) {
-        super(logMessage, cause);
-        this.logMessage = logMessage;
+    private static final long serialVersionUID = 543214259201495900L;
+
+    String a = "test";
+
+    public String getA() {
+        return a;
     }
 
-    @Override
-    public String getMessage() {
-        return logMessage;
-    }
-
-    public String getLogMessage() {
-        return logMessage;
-    }
-
-    public void setLogMessage(String logMessage) {
-        this.logMessage = logMessage;
+    public void setA(String a) {
+        this.a = a;
     }
 }

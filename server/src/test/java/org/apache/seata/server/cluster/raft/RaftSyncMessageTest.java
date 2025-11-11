@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.server.raft;
+package org.apache.seata.server.cluster.raft;
 
 import org.apache.seata.common.exception.SeataRuntimeException;
 import org.apache.seata.common.metadata.ClusterRole;

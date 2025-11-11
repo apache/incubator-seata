@@ -18,6 +18,7 @@ package org.apache.seata.server.console.impl.redis;
 
 import org.apache.seata.common.result.PageResult;
 import org.apache.seata.common.util.CollectionUtils;
+import org.apache.seata.common.util.PageUtil;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.server.console.entity.param.GlobalSessionParam;
 import org.apache.seata.server.console.entity.vo.GlobalSessionVO;
@@ -37,7 +38,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.apache.seata.common.exception.FrameworkErrorCode.ParameterRequired;
-import static org.apache.seata.common.result.PageResult.checkPage;
 import static org.apache.seata.common.util.StringUtils.isBlank;
 import static org.apache.seata.common.util.StringUtils.isNotBlank;
 import static org.apache.seata.server.storage.SessionConverter.convertToGlobalSessionVo;
@@ -54,6 +54,8 @@ public class GlobalSessionRedisServiceImpl extends AbstractGlobalService impleme
 
     @Override
     public PageResult<GlobalSessionVO> query(GlobalSessionParam param) {
+        PageUtil.checkParam(param.getPageNum(), param.getPageSize());
+
         List<GlobalSessionVO> result = new ArrayList<>();
         Long total = 0L;
         if (param.getTimeStart() != null || param.getTimeEnd() != null) {
@@ -64,8 +66,6 @@ public class GlobalSessionRedisServiceImpl extends AbstractGlobalService impleme
         List<GlobalSession> globalSessions = new ArrayList<>();
 
         RedisTransactionStoreManager instance = RedisTransactionStoreManagerFactory.getInstance();
-
-        checkPage(param);
 
         if (isBlank(param.getXid()) && param.getStatus() == null) {
             total = instance.countByGlobalSessions(GlobalStatus.values());
