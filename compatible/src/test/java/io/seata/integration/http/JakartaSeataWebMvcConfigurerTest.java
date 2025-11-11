@@ -36,7 +36,8 @@ public class JakartaSeataWebMvcConfigurerTest {
     @Test
     public void testExtendsApacheSeataClass() {
         assertTrue(
-                org.apache.seata.integration.http.jakarta.JakartaSeataWebMvcConfigurer.class.isAssignableFrom(JakartaSeataWebMvcConfigurer.class),
+                org.apache.seata.integration.http.jakarta.JakartaSeataWebMvcConfigurer.class.isAssignableFrom(
+                        JakartaSeataWebMvcConfigurer.class),
                 "JakartaSeataWebMvcConfigurer should extend Apache Seata JakartaSeataWebMvcConfigurer");
     }
 
