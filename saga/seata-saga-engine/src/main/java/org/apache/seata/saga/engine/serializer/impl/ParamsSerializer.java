@@ -16,10 +16,11 @@
  */
 package org.apache.seata.saga.engine.serializer.impl;
 
+import org.apache.seata.common.json.impl.FastjsonJsonSerializer;
 import org.apache.seata.saga.engine.serializer.Serializer;
 import org.apache.seata.saga.statelang.domain.DomainConstants;
-import org.apache.seata.saga.statelang.parser.JsonParser;
-import org.apache.seata.saga.statelang.parser.JsonParserFactory;
+import org.apache.seata.common.json.JsonSerializer;
+import org.apache.seata.common.json.JsonSerializerFactory;
 
 /**
  * Parameter serializer based on Fastjson
@@ -32,11 +33,11 @@ public class ParamsSerializer implements Serializer<Object, String> {
     @Override
     public String serialize(Object params) {
         if (params != null) {
-            JsonParser jsonParser = JsonParserFactory.getJsonParser(jsonParserName);
-            if (jsonParser == null) {
-                throw new RuntimeException("Cannot find JsonParer by name: " + jsonParserName);
+            JsonSerializer jsonSerializer = JsonSerializerFactory.getSerializer(jsonParserName);
+            if (jsonSerializer == null) {
+                throw new RuntimeException("Cannot find JsonSerializer by name: " + jsonParserName);
             }
-            return jsonParser.toJsonString(params, false);
+            return jsonSerializer.toJSONString(params, false);
         }
         return null;
     }
@@ -44,11 +45,11 @@ public class ParamsSerializer implements Serializer<Object, String> {
     @Override
     public Object deserialize(String json) {
         if (json != null) {
-            JsonParser jsonParser = JsonParserFactory.getJsonParser(jsonParserName);
-            if (jsonParser == null) {
-                throw new RuntimeException("Cannot find JsonParer by name: " + jsonParserName);
+            JsonSerializer jsonSerializer = JsonSerializerFactory.getSerializer(jsonParserName);
+            if (jsonSerializer == null) {
+                throw new RuntimeException("Cannot find JsonSerializer by name: " + jsonParserName);
             }
-            return jsonParser.parse(json, Object.class, false);
+            return jsonSerializer.parseObject(json, Object.class, false);
         }
         return null;
     }

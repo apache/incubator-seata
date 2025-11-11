@@ -22,7 +22,7 @@ import org.apache.seata.saga.engine.mock.DemoService.People;
 import org.apache.seata.saga.statelang.domain.DomainConstants;
 import org.apache.seata.saga.statelang.domain.ExecutionStatus;
 import org.apache.seata.saga.statelang.domain.StateMachineInstance;
-import org.apache.seata.saga.statelang.parser.JsonParserFactory;
+import org.apache.seata.common.json.JsonSerializerFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -263,7 +263,7 @@ public class StateMachineTests {
         map1.put("lilei4", people4);
         people1.setChildrenMap(map1);
 
-        String json = JsonParserFactory.getJsonParser("jackson").toJsonString(people1, false, true);
+        String json = JsonSerializerFactory.getSerializer("jackson").toJSONString(people1, false, true);
         System.out.println(json);
     }
 
