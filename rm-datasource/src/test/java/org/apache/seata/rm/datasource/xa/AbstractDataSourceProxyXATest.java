@@ -99,7 +99,11 @@ public class AbstractDataSourceProxyXATest {
         // Mock connection
         ConnectionProxyXA mockConnection = mock(ConnectionProxyXA.class);
         Connection mockWrappedConnection = mock(Connection.class);
+        
+        // Setup the mock behavior
+        Mockito.doNothing().when(mockConnection).close();
         when(mockConnection.getWrappedConnection()).thenReturn(mockWrappedConnection);
+        Mockito.doNothing().when(mockWrappedConnection).close();
 
         // Put connection in the lookup
         dataSourceProxy.hold(xaXid.toString(), mockConnection);
@@ -108,19 +112,23 @@ public class AbstractDataSourceProxyXATest {
         dataSourceProxy.forceClosePhysicalConnection(xaXid);
 
         verify(mockConnection).close();
-        verify(mockConnection, times(2)).getWrappedConnection();
+        verify(mockConnection, times(1)).getWrappedConnection();
         verify(mockWrappedConnection).close();
     }
 
     @Test
     public void testForceClosePhysicalConnection_WithPooledConnection() throws SQLException {
-        // Mock connection with PooledConnection
-        ConnectionProxyXA mockConnection = mock(ConnectionProxyXA.class);
-        PooledConnection mockPooledConnection = mock(PooledConnection.class);
+        // Create a mock that implements both Connection and PooledConnection
+        Connection mockWrappedConnection = mock(Connection.class, Mockito.withSettings().extraInterfaces(PooledConnection.class));
         Connection mockPhysicalConnection = mock(Connection.class);
         
-        when(mockConnection.getWrappedConnection()).thenReturn(mockPooledConnection);
-        when(mockPooledConnection.getConnection()).thenReturn(mockPhysicalConnection);
+        ConnectionProxyXA mockConnection = mock(ConnectionProxyXA.class);
+        
+        // Setup the mock behavior
+        Mockito.doNothing().when(mockConnection).close();
+        when(mockConnection.getWrappedConnection()).thenReturn(mockWrappedConnection);
+        when(((PooledConnection) mockWrappedConnection).getConnection()).thenReturn(mockPhysicalConnection);
+        Mockito.doNothing().when(mockPhysicalConnection).close();
 
         // Put connection in the lookup
         dataSourceProxy.hold(xaXid.toString(), mockConnection);
@@ -129,7 +137,7 @@ public class AbstractDataSourceProxyXATest {
         dataSourceProxy.forceClosePhysicalConnection(xaXid);
 
         verify(mockConnection).close();
-        verify(mockPooledConnection).getConnection();
+        verify(((PooledConnection) mockWrappedConnection)).getConnection();
         verify(mockPhysicalConnection).close();
     }
 
@@ -167,6 +175,16 @@ public class AbstractDataSourceProxyXATest {
                 when(mockWrappedConnection.isClosed()).thenReturn(false);
             }
             return mockConnectionProxy;
+        }
+
+        @Override
+        public Connection getConnection() throws SQLException {
+            return getConnectionProxyXA();
+        }
+
+        @Override
+        public Connection getConnection(String username, String password) throws SQLException {
+            return getConnectionProxyXA();
         }
     }
 }

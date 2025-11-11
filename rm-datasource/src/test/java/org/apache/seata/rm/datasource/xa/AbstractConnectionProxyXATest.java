@@ -20,13 +20,13 @@ import org.apache.seata.rm.BaseDataSourceResource;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
 
 import javax.sql.XAConnection;
-import javax.transaction.xa.XAResource;
+
 import java.sql.Array;
 import java.sql.Blob;
-import java.sql.CallableStatement;
+
 import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -47,9 +47,9 @@ import java.util.concurrent.Executor;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
+
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
+
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
