@@ -23,6 +23,7 @@ import com.mysql.jdbc.JDBC4MySQLConnection;
 import com.mysql.jdbc.jdbc2.optional.JDBC4ConnectionWrapper;
 import com.mysql.jdbc.jdbc2.optional.MysqlXAConnection;
 import com.oscar.xa.Jdbc3XAConnection;
+import org.apache.seata.core.constants.DBType;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.rm.datasource.combine.CombineConnectionHolder;
 import org.apache.seata.rm.datasource.mock.MockDataSource;
@@ -126,6 +127,13 @@ public class DataSourceProxyXATest {
         druidDataSource.setDriver(driver);
         druidDataSource.setUrl(mockJdbcUrl);
         DataSourceProxyXA dataSourceProxyXA = new DataSourceProxyXA(druidDataSource);
+        // Test isShouldBeHeld
+        String dbType = dataSourceProxyXA.getDbType();
+        if (DBType.MYSQL.name().equalsIgnoreCase(dbType)
+                || DBType.MARIADB.name().equalsIgnoreCase(dbType)
+                || DBType.OSCAR.name().equalsIgnoreCase(dbType)) {
+            Assertions.assertTrue(dataSourceProxyXA.isShouldBeHeld());
+        }
         Connection connFromDataSourceProxyXA = dataSourceProxyXA.getConnection();
         Assertions.assertFalse(connFromDataSourceProxyXA instanceof ConnectionProxyXA);
         RootContext.bind("test");
