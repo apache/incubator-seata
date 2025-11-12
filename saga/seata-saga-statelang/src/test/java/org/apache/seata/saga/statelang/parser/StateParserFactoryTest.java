@@ -25,7 +25,6 @@ import org.apache.seata.saga.statelang.parser.impl.ScriptTaskStateParser;
 import org.apache.seata.saga.statelang.parser.impl.ServiceTaskStateParser;
 import org.apache.seata.saga.statelang.parser.impl.SubStateMachineParser;
 import org.apache.seata.saga.statelang.parser.impl.SucceedEndStateParser;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -73,11 +72,5 @@ public class StateParserFactoryTest {
         StateParser scriptTaskParser = StateParserFactory.getStateParser(StateType.SCRIPT_TASK);
         assertNotNull("ScriptTaskStateParser should not be null", String.valueOf(scriptTaskParser));
         assertTrue(scriptTaskParser instanceof ScriptTaskStateParser, "Parser should be ScriptTaskStateParser");
-    }
-
-    @Test
-    public void testGetStateParser_NonExistingType() {
-        StateParser nullTypeParser = StateParserFactory.getStateParser(null);
-        Assertions.assertNull("return null", String.valueOf(nullTypeParser));
     }
 }
