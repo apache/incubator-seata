@@ -27,13 +27,13 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
  * Tests for AbstractDataSourceProxyXA
- *
+ * Focus on verifying actual results and business logic
  */
 public class AbstractDataSourceProxyXATest {
 
@@ -47,111 +47,155 @@ public class AbstractDataSourceProxyXATest {
     }
 
     @Test
-    public void testGetConnectionForXAFinish_WithExistingConnection() throws SQLException {
-        // Mock existing connection
-        ConnectionProxyXA mockConnection = mock(ConnectionProxyXA.class);
+    public void testGetConnectionForXAFinish_ReturnsExistingOpenConnection() throws SQLException {
+        // Verify that an existing open connection is returned (not a new one)
+        ConnectionProxyXA existingConnection = mock(ConnectionProxyXA.class);
         Connection mockWrappedConnection = mock(Connection.class);
-        when(mockConnection.getWrappedConnection()).thenReturn(mockWrappedConnection);
+        when(existingConnection.getWrappedConnection()).thenReturn(mockWrappedConnection);
         when(mockWrappedConnection.isClosed()).thenReturn(false);
 
-        // Put connection in the lookup
-        dataSourceProxy.hold(xaXid.toString(), mockConnection);
+        // Store the existing connection
+        dataSourceProxy.hold(xaXid.toString(), existingConnection);
 
         // Get connection for XA finish
         ConnectionProxyXA result = dataSourceProxy.getConnectionForXAFinish(xaXid);
 
-        Assertions.assertEquals(mockConnection, result);
-        verify(mockConnection).getWrappedConnection();
-        verify(mockWrappedConnection).isClosed();
+        // Verify it returns the EXACT same connection instance (not a new one)
+        Assertions.assertSame(
+                existingConnection, result, "Should return the exact same connection instance that was held");
+
+        // Verify that getConnectionProxyXA was NOT called (didn't create a new connection)
+        Assertions.assertEquals(
+                0,
+                dataSourceProxy.getConnectionProxyXACallCount,
+                "Should not create a new connection when an open one exists");
     }
 
     @Test
-    public void testGetConnectionForXAFinish_WithClosedConnection() throws SQLException {
-        // Mock closed connection
-        ConnectionProxyXA mockConnection = mock(ConnectionProxyXA.class);
+    public void testGetConnectionForXAFinish_CreatesNewConnectionWhenExistingIsClosed() throws SQLException {
+        // Verify that a new connection is created when the existing one is closed
+        ConnectionProxyXA closedConnection = mock(ConnectionProxyXA.class);
         Connection mockWrappedConnection = mock(Connection.class);
-        when(mockConnection.getWrappedConnection()).thenReturn(mockWrappedConnection);
+        when(closedConnection.getWrappedConnection()).thenReturn(mockWrappedConnection);
         when(mockWrappedConnection.isClosed()).thenReturn(true);
 
-        // Put connection in the lookup
-        dataSourceProxy.hold(xaXid.toString(), mockConnection);
+        // Store the closed connection
+        dataSourceProxy.hold(xaXid.toString(), closedConnection);
 
         // Get connection for XA finish
         ConnectionProxyXA result = dataSourceProxy.getConnectionForXAFinish(xaXid);
 
-        // Should return a new connection from getConnectionProxyXA
-        Assertions.assertNotNull(result);
-        verify(mockConnection).getWrappedConnection();
-        verify(mockWrappedConnection).isClosed();
+        // Verify it returns the NEW connection (from getConnectionProxyXA)
+        Assertions.assertSame(
+                dataSourceProxy.getNewConnection(),
+                result,
+                "Should return a new connection when existing one is closed");
+
+        // Verify that a new connection was actually created
+        Assertions.assertEquals(
+                1, dataSourceProxy.getConnectionProxyXACallCount, "Should create exactly one new connection");
     }
 
     @Test
-    public void testGetConnectionForXAFinish_NoExistingConnection() throws SQLException {
-        // Get connection for XA finish without existing connection
+    public void testGetConnectionForXAFinish_CreatesNewConnectionWhenNoneExists() throws SQLException {
+        // Verify that a new connection is created when no existing connection is found
+
+        // Don't hold any connection, so lookup returns null
         ConnectionProxyXA result = dataSourceProxy.getConnectionForXAFinish(xaXid);
 
-        // Should return a new connection from getConnectionProxyXA
-        Assertions.assertNotNull(result);
+        // Verify it returns the new connection from getConnectionProxyXA
+        Assertions.assertSame(
+                dataSourceProxy.getNewConnection(),
+                result,
+                "Should return a new connection when no existing connection is found");
+
+        // Verify that a new connection was actually created
+        Assertions.assertEquals(
+                1, dataSourceProxy.getConnectionProxyXACallCount, "Should create exactly one new connection");
     }
 
     @Test
-    public void testForceClosePhysicalConnection_WithExistingConnection() throws SQLException {
-        // Mock connection
+    public void testForceClosePhysicalConnection_ClosesConnectionAndWrappedConnection() throws SQLException {
+        // Verify that both the connection proxy and its wrapped connection are closed
         ConnectionProxyXA mockConnection = mock(ConnectionProxyXA.class);
         Connection mockWrappedConnection = mock(Connection.class);
 
-        // Setup the mock behavior
         Mockito.doNothing().when(mockConnection).close();
         when(mockConnection.getWrappedConnection()).thenReturn(mockWrappedConnection);
         Mockito.doNothing().when(mockWrappedConnection).close();
 
-        // Put connection in the lookup
+        // Store the connection
         dataSourceProxy.hold(xaXid.toString(), mockConnection);
 
-        // Force close physical connection
+        // Force close
         dataSourceProxy.forceClosePhysicalConnection(xaXid);
 
+        // Verify both connections were closed
         verify(mockConnection).close();
-        verify(mockConnection, times(1)).getWrappedConnection();
         verify(mockWrappedConnection).close();
     }
 
     @Test
-    public void testForceClosePhysicalConnection_WithPooledConnection() throws SQLException {
-        // Create a mock that implements both Connection and PooledConnection
+    public void testForceClosePhysicalConnection_ClosesPooledConnectionCorrectly() throws SQLException {
+        // Verify that for PooledConnection, the physical connection is closed
         Connection mockWrappedConnection =
                 mock(Connection.class, Mockito.withSettings().extraInterfaces(PooledConnection.class));
         Connection mockPhysicalConnection = mock(Connection.class);
 
         ConnectionProxyXA mockConnection = mock(ConnectionProxyXA.class);
 
-        // Setup the mock behavior
         Mockito.doNothing().when(mockConnection).close();
         when(mockConnection.getWrappedConnection()).thenReturn(mockWrappedConnection);
         when(((PooledConnection) mockWrappedConnection).getConnection()).thenReturn(mockPhysicalConnection);
         Mockito.doNothing().when(mockPhysicalConnection).close();
 
-        // Put connection in the lookup
+        // Store the connection
         dataSourceProxy.hold(xaXid.toString(), mockConnection);
 
-        // Force close physical connection
+        // Force close
         dataSourceProxy.forceClosePhysicalConnection(xaXid);
 
+        // Verify the proxy connection was closed
         verify(mockConnection).close();
-        verify(((PooledConnection) mockWrappedConnection)).getConnection();
+
+        // Verify the physical connection (from PooledConnection) was closed, not the wrapper
         verify(mockPhysicalConnection).close();
+        verify(mockWrappedConnection, never()).close();
     }
 
     @Test
-    public void testForceClosePhysicalConnection_NoExistingConnection() throws SQLException {
-        // Force close physical connection without existing connection
-        // Should not throw exception
-        Assertions.assertDoesNotThrow(() -> dataSourceProxy.forceClosePhysicalConnection(xaXid));
+    public void testForceClosePhysicalConnection_DoesNothingWhenNoConnection() throws SQLException {
+        // Verify that no exception is thrown when there's no connection to close
+
+        // Don't hold any connection
+        Assertions.assertDoesNotThrow(
+                () -> dataSourceProxy.forceClosePhysicalConnection(xaXid),
+                "Should not throw exception when no connection exists");
+
+        // Verify no connections were created or closed
+        Assertions.assertEquals(0, dataSourceProxy.getConnectionProxyXACallCount, "Should not create any connections");
     }
 
     @Test
     public void testDefaultResourceGroupId() {
-        Assertions.assertEquals("DEFAULT_XA", TestDataSourceProxyXA.DEFAULT_RESOURCE_GROUP_ID);
+        // Verify the default resource group ID constant value
+        Assertions.assertEquals(
+                "DEFAULT_XA",
+                TestDataSourceProxyXA.DEFAULT_RESOURCE_GROUP_ID,
+                "DEFAULT_RESOURCE_GROUP_ID should be 'DEFAULT_XA'");
+    }
+
+    @Test
+    public void testGetBranchType() {
+        // Verify getBranchType returns the correct branch type
+        Assertions.assertEquals(BranchType.XA, dataSourceProxy.getBranchType(), "Branch type should be XA");
+    }
+
+    @Test
+    public void testGetResourceId() {
+        // Verify getResourceId returns the configured resource ID
+        Assertions.assertEquals(
+                "test-resource-id", dataSourceProxy.getResourceId(), "Resource ID should match the configured value");
     }
 
     /**
@@ -160,6 +204,7 @@ public class AbstractDataSourceProxyXATest {
     private static class TestDataSourceProxyXA extends AbstractDataSourceProxyXA {
 
         private ConnectionProxyXA mockConnectionProxy;
+        int getConnectionProxyXACallCount = 0;
 
         public TestDataSourceProxyXA() {
             this.branchType = BranchType.XA;
@@ -168,13 +213,16 @@ public class AbstractDataSourceProxyXATest {
 
         @Override
         protected Connection getConnectionProxyXA() throws SQLException {
-            // Return a mock connection for testing
-            if (mockConnectionProxy == null) {
-                mockConnectionProxy = mock(ConnectionProxyXA.class);
-                Connection mockWrappedConnection = mock(Connection.class);
-                when(mockConnectionProxy.getWrappedConnection()).thenReturn(mockWrappedConnection);
-                when(mockWrappedConnection.isClosed()).thenReturn(false);
-            }
+            getConnectionProxyXACallCount++;
+            // Create a new mock connection each time
+            mockConnectionProxy = mock(ConnectionProxyXA.class);
+            Connection mockWrappedConnection = mock(Connection.class);
+            when(mockConnectionProxy.getWrappedConnection()).thenReturn(mockWrappedConnection);
+            when(mockWrappedConnection.isClosed()).thenReturn(false);
+            return mockConnectionProxy;
+        }
+
+        public ConnectionProxyXA getNewConnection() {
             return mockConnectionProxy;
         }
 
