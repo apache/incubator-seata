@@ -14,28 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.common.util;
+package org.apache.seata.common;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
-import java.util.function.Predicate;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * The type Lambda util.
- *
+ * The type Naming server constants test.
  */
-public class LambdaUtils {
+public class NamingServerConstantsTest {
 
-    /**
-     * Create a predicate that can be used to filter distinct objects by key
-     *
-     * @param keyExtractor the function to extract key from object
-     * @param <T> the type of object
-     * @return the predicate
-     */
-    public static <T> Predicate<T> distinctByKey(Function<? super T, Object> keyExtractor) {
-        Map<Object, Boolean> seen = new ConcurrentHashMap<>();
-        return object -> seen.putIfAbsent(keyExtractor.apply(object), Boolean.TRUE) == null;
+    @Test
+    public void testConstants() {
+        assertEquals("http://", NamingServerConstants.HTTP_PREFIX);
+        assertEquals("/vgroup/v1/addVGroup?", NamingServerConstants.HTTP_ADD_GROUP_SUFFIX);
+        assertEquals("unit", NamingServerConstants.CONSTANT_UNIT);
+        assertEquals("vGroup", NamingServerConstants.CONSTANT_GROUP);
+        assertEquals("/vgroup/v1/removeVGroup?", NamingServerConstants.HTTP_REMOVE_GROUP_SUFFIX);
+        assertEquals(":", NamingServerConstants.IP_PORT_SPLIT_CHAR);
+        assertEquals("vgroup_table", NamingServerConstants.DEFAULT_VGROUP_MAPPING);
     }
 }
