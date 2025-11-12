@@ -62,14 +62,15 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
@@ -99,13 +100,29 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     protected final Condition mergeCondition = mergeLock.newCondition();
     protected volatile boolean isSending = false;
 
-    private boolean enableReconnect = true;
-    private final Runnable reconnectTask;
-    private static final ScheduledExecutorService GLOBAL_RECONNECT_TIMER =
-            new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("Global-Reconnect-Timer", 1));
+    /**
+     * Whether this client can reconnect.
+     */
+    private final AtomicBoolean enableReconnect = new AtomicBoolean(true);
+
+    /**
+     * Global reconnect timer reference and started flag.
+     * Use AtomicReference so we can shutdown and recreate the executor if needed.
+     */
+    private static final AtomicReference<ScheduledExecutorService> GLOBAL_RECONNECT_TIMER_REF = new AtomicReference<>();
+
     private static final AtomicBoolean GLOBAL_TIMER_STARTED = new AtomicBoolean(false);
+
+    /**
+     * All client instances to be traversed by the global timer.
+     */
     private static final CopyOnWriteArrayList<AbstractNettyRemotingClient> CLIENT_INSTANCES =
             new CopyOnWriteArrayList<>();
+
+    /**
+     * Worker pool reference (atomic) so it can be recreated or shutdown.
+     */
+    private static final AtomicReference<ExecutorService> GLOBAL_RECONNECT_WORKER_REF = new AtomicReference<>();
 
     /**
      * When sending message type is {@link MergeMessage}, will be stored to mergeMsgMap.
@@ -128,30 +145,11 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     private ExecutorService mergeSendExecutorService;
     private TransactionMessageHandler transactionMessageHandler;
     protected volatile boolean enableClientBatchSendRequest;
+    private final Runnable reconnectTask;
 
     @Override
     public void init() {
-        if (GLOBAL_TIMER_STARTED.compareAndSet(false, true)) {
-            GLOBAL_RECONNECT_TIMER.scheduleAtFixedRate(
-                    () -> {
-                        for (AbstractNettyRemotingClient client : CLIENT_INSTANCES) {
-                            if (client.isEnableReconnect()) {
-                                try {
-                                    client.reconnectTask.run();
-                                } catch (Exception ex) {
-                                    LOGGER.warn(
-                                            "Reconnect task failed for transactionRole: {}, error: {}",
-                                            client.transactionRole.name(),
-                                            ex.getMessage());
-                                }
-                            }
-                        }
-                    },
-                    SCHEDULE_DELAY_MILLS,
-                    SCHEDULE_INTERVAL_MILLS,
-                    TimeUnit.MILLISECONDS);
-            LOGGER.info("Global client reconnect timer started (only one instance globally)");
-        }
+        startGlobalTimerIfNeeded();
         if (this.isEnableClientBatchSendRequest()) {
             mergeSendExecutorService = new ThreadPoolExecutor(
                     MAX_MERGE_SEND_THREAD,
@@ -184,17 +182,16 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                 if (StringUtils.isNotBlank(serviceGroup)) {
                     clientChannelManager.reconnect(serviceGroup);
                 }
-            } catch (Exception ex) {
+            } catch (Exception exception) {
+                String role = (transactionRole == null) ? "null" : transactionRole.name();
                 LOGGER.warn(
-                        "reconnect server failed for service group: {}, error: {}",
+                        "reconnect server failed for role: {}, serviceGroup: {}, error: {}",
+                        role,
                         getTransactionServiceGroup(),
-                        ex.getMessage());
+                        exception.getMessage(),
+                        exception);
             }
         };
-    }
-
-    protected boolean isEnableReconnect() {
-        return enableReconnect;
     }
 
     @Override
@@ -312,6 +309,10 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     @Override
     public void destroy() {
         CLIENT_INSTANCES.remove(this);
+
+        // If no instances remain, attempt to teardown global timer and worker.
+        shutdownGlobalTimerIfNoClients();
+
         clientBootstrap.shutdown();
         if (mergeSendExecutorService != null) {
             mergeSendExecutorService.shutdown();
@@ -812,6 +813,106 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                 LOGGER.info(ctx + " will closed");
             }
             super.close(ctx, future);
+        }
+    }
+
+    protected boolean isEnableReconnect() {
+        return enableReconnect.get();
+    }
+
+    /**
+     * Create or get global worker
+     */
+    private static ExecutorService getOrCreateGlobalWorker() {
+        ExecutorService w = GLOBAL_RECONNECT_WORKER_REF.get();
+        if (w == null || w.isShutdown() || w.isTerminated()) {
+            ExecutorService created = Executors.newFixedThreadPool(
+                    Math.max(2, Runtime.getRuntime().availableProcessors()), r -> {
+                        Thread t = new Thread(r);
+                        t.setDaemon(true);
+                        t.setName("Global-Reconnect-Worker-" + t.getId());
+                        return t;
+                    });
+            if (!GLOBAL_RECONNECT_WORKER_REF.compareAndSet(w, created)) {
+                // another thread created it first; shutdown our created one
+                try {
+                    created.shutdown();
+                } catch (Exception ex) {
+                    LOGGER.warn("Failed to shutdown redundant created worker: {}", ex.getMessage(), ex);
+                }
+            }
+        }
+        return GLOBAL_RECONNECT_WORKER_REF.get();
+    }
+
+    /**
+     * Start the global reconnect timer if it's not started.
+     */
+    static void startGlobalTimerIfNeeded() {
+        if (GLOBAL_TIMER_STARTED.compareAndSet(false, true)) {
+            ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor(r -> {
+                Thread t = new Thread(r);
+                t.setDaemon(true);
+                t.setName("Global-Reconnect-Timer-" + t.getId());
+                return t;
+            });
+            GLOBAL_RECONNECT_TIMER_REF.set(timer);
+
+            // ensure worker exists before scheduling
+            getOrCreateGlobalWorker();
+
+            timer.scheduleAtFixedRate(
+                    () -> {
+                        ExecutorService worker = GLOBAL_RECONNECT_WORKER_REF.get();
+                        for (AbstractNettyRemotingClient client : CLIENT_INSTANCES) {
+                            if (client.isEnableReconnect()) {
+                                try {
+                                    if (worker != null && !worker.isShutdown()) {
+                                        worker.submit(client.reconnectTask);
+                                    } else {
+                                        client.reconnectTask.run();
+                                    }
+                                } catch (Exception ex) {
+                                    LOGGER.warn(
+                                            "Submit reconnect task failed for client [{}], error: {}",
+                                            client.getClass().getSimpleName(),
+                                            ex.getMessage(),
+                                            ex);
+                                }
+                            }
+                        }
+                    },
+                    SCHEDULE_DELAY_MILLS,
+                    SCHEDULE_INTERVAL_MILLS,
+                    TimeUnit.MILLISECONDS);
+            LOGGER.info("Global client reconnect timer started only one instance globally");
+        }
+    }
+
+    /**
+     * Shutdown the global reconnect timer and worker when there are no client instances.
+     */
+    static void shutdownGlobalTimerIfNoClients() {
+        if (CLIENT_INSTANCES.isEmpty() && GLOBAL_TIMER_STARTED.compareAndSet(true, false)) {
+            ScheduledExecutorService timer = GLOBAL_RECONNECT_TIMER_REF.getAndSet(null);
+            if (timer != null) {
+                try {
+                    timer.shutdown();
+                    timer.awaitTermination(1, TimeUnit.SECONDS);
+                } catch (Exception ex) {
+                    LOGGER.warn("Shutdown global reconnect timer failed: {}", ex.getMessage(), ex);
+                }
+            }
+            ExecutorService worker = GLOBAL_RECONNECT_WORKER_REF.getAndSet(null);
+            if (worker != null) {
+                try {
+                    worker.shutdown();
+                    worker.awaitTermination(1, TimeUnit.SECONDS);
+                } catch (Exception ex) {
+                    LOGGER.warn("Shutdown global reconnect worker failed: {}", ex.getMessage(), ex);
+                }
+            }
+            LOGGER.info("Global reconnect timer and worker shutdown as no client instances remain");
         }
     }
 }

@@ -68,6 +68,9 @@ public class AbstractNettyRemotingClientTest {
 
     @BeforeEach
     public void setUp() {
+        // Ensure global timer/worker cleaned before each test to avoid cross-test interference
+        AbstractNettyRemotingClient.shutdownGlobalTimerIfNoClients();
+
         clientConfig = new NettyClientConfig();
         messageExecutor = new ThreadPoolExecutor(
                 1, 1, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), new NamedThreadFactory("test", 1));
@@ -86,6 +89,8 @@ public class AbstractNettyRemotingClientTest {
         if (messageExecutor != null) {
             messageExecutor.shutdown();
         }
+        // Ensure global timer/worker cleaned after each test
+        AbstractNettyRemotingClient.shutdownGlobalTimerIfNoClients();
     }
 
     @Test
@@ -872,8 +877,50 @@ public class AbstractNettyRemotingClientTest {
     }
 
     /**
-     * Test ClientHandler methods for coverage
+     * Test implementation for MergedSendRunnable testing
      */
+    static class TestNettyRemotingClientWithMergeRunnable extends AbstractNettyRemotingClient {
+
+        public TestNettyRemotingClientWithMergeRunnable(
+                NettyClientConfig nettyClientConfig, ThreadPoolExecutor messageExecutor) {
+            super(nettyClientConfig, messageExecutor, NettyPoolKey.TransactionRole.TMROLE);
+            this.enableClientBatchSendRequest = true;
+        }
+
+        @Override
+        protected Function<String, NettyPoolKey> getPoolKeyFunction() {
+            return serverAddress -> new NettyPoolKey(NettyPoolKey.TransactionRole.TMROLE, serverAddress);
+        }
+
+        @Override
+        protected String getTransactionServiceGroup() {
+            return "test-service-group";
+        }
+
+        @Override
+        protected boolean isEnableClientBatchSendRequest() {
+            return true;
+        }
+
+        @Override
+        protected long getRpcRequestTimeout() {
+            return 100L;
+        }
+
+        @Override
+        protected String loadBalance(String transactionServiceGroup, Object msg) {
+            return "127.0.0.1:8080";
+        }
+
+        @Override
+        public void onRegisterMsgSuccess(
+                String serverAddress, Channel channel, Object response, AbstractMessage requestMessage) {}
+
+        @Override
+        public void onRegisterMsgFail(
+                String serverAddress, Channel channel, Object response, AbstractMessage requestMessage) {}
+    }
+
     @Test
     public void testClientHandlerChannelInactive() throws Exception {
         AbstractNettyRemotingClient.ClientHandler handler = client.new ClientHandler();
@@ -1149,10 +1196,14 @@ public class AbstractNettyRemotingClientTest {
             clientWithException.init();
             assertNotNull(clientWithException);
 
-            // Wait for the scheduled reconnect task to execute
-            // The task is scheduled with SCHEDULE_DELAY_MILLS (60s delay)
-            // We can trigger it manually by accessing the timerExecutor
-            Thread.sleep(200);
+            // Instead of waiting for scheduled task, directly trigger reconnect to simulate scheduled run
+            try {
+                clientWithException
+                        .getClientChannelManager()
+                        .reconnect(clientWithException.getTransactionServiceGroup());
+            } catch (Exception ex) {
+                // Expected simulated reconnect failure
+            }
 
             // Verify client is still initialized despite reconnect failures
             assertNotNull(clientWithException.getClientChannelManager());
@@ -1294,14 +1345,72 @@ public class AbstractNettyRemotingClientTest {
     }
 
     /**
-     * Test implementation for MergedSendRunnable testing
+     * ensure global timer/worker lifecycle behaves (start -> create clients -> destroy -> shutdown)
      */
-    static class TestNettyRemotingClientWithMergeRunnable extends AbstractNettyRemotingClient {
+    @Test
+    public void testGlobalTimerLifecycle() throws Exception {
+        // Start global timer
+        AbstractNettyRemotingClient.startGlobalTimerIfNeeded();
 
-        public TestNettyRemotingClientWithMergeRunnable(
+        // Create and init two clients (they will be registered)
+        TestNettyRemotingClient c1 = new TestNettyRemotingClient(clientConfig, messageExecutor);
+        TestNettyRemotingClient c2 = new TestNettyRemotingClient(clientConfig, messageExecutor);
+        try {
+            c1.init();
+            c2.init();
+            // Destroy both clients
+            c1.destroy();
+            c2.destroy();
+
+            // Ensure shutdown is safe to call (should teardown timer and worker when no clients)
+            AbstractNettyRemotingClient.shutdownGlobalTimerIfNoClients();
+
+            // Re-start to ensure timer+worker can be recreated
+            AbstractNettyRemotingClient.startGlobalTimerIfNeeded();
+            AbstractNettyRemotingClient.shutdownGlobalTimerIfNoClients();
+        } finally {
+            try {
+                c1.destroy();
+            } catch (Exception ignored) {
+            }
+            try {
+                c2.destroy();
+            } catch (Exception ignored) {
+            }
+        }
+    }
+
+    /**
+     * Test implementation that simulates reconnect exception
+     */
+    static class TestNettyRemotingClientWithReconnectException extends AbstractNettyRemotingClient {
+        private static final org.slf4j.Logger TEST_LOGGER =
+                LoggerFactory.getLogger(TestNettyRemotingClientWithReconnectException.class);
+        private NettyClientChannelManager mockChannelManager;
+
+        public TestNettyRemotingClientWithReconnectException(
                 NettyClientConfig nettyClientConfig, ThreadPoolExecutor messageExecutor) {
             super(nettyClientConfig, messageExecutor, NettyPoolKey.TransactionRole.TMROLE);
-            this.enableClientBatchSendRequest = true;
+        }
+
+        @Override
+        public void init() {
+            // Use reflection to replace clientChannelManager with a mock
+            try {
+                java.lang.reflect.Field field =
+                        AbstractNettyRemotingClient.class.getDeclaredField("clientChannelManager");
+                field.setAccessible(true);
+                mockChannelManager = mock(NettyClientChannelManager.class);
+
+                // Make reconnect throw exception
+                doThrow(new RuntimeException("Simulated reconnect failure"))
+                        .when(mockChannelManager)
+                        .reconnect(any());
+
+                field.set(this, mockChannelManager);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
 
         @Override
@@ -1316,17 +1425,12 @@ public class AbstractNettyRemotingClientTest {
 
         @Override
         protected boolean isEnableClientBatchSendRequest() {
-            return true;
+            return false;
         }
 
         @Override
         protected long getRpcRequestTimeout() {
-            return 100L;
-        }
-
-        @Override
-        protected String loadBalance(String transactionServiceGroup, Object msg) {
-            return "127.0.0.1:8080";
+            return 30000L;
         }
 
         @Override
@@ -1336,6 +1440,11 @@ public class AbstractNettyRemotingClientTest {
         @Override
         public void onRegisterMsgFail(
                 String serverAddress, Channel channel, Object response, AbstractMessage requestMessage) {}
+
+        @Override
+        public NettyClientChannelManager getClientChannelManager() {
+            return mockChannelManager != null ? mockChannelManager : super.getClientChannelManager();
+        }
     }
 
     @Test
@@ -1476,87 +1585,6 @@ public class AbstractNettyRemotingClientTest {
 
         } finally {
             mergeClient.destroy();
-        }
-    }
-
-    /**
-     * Test implementation that simulates reconnect exception
-     */
-    static class TestNettyRemotingClientWithReconnectException extends AbstractNettyRemotingClient {
-        private static final org.slf4j.Logger TEST_LOGGER =
-                LoggerFactory.getLogger(TestNettyRemotingClientWithReconnectException.class);
-        private NettyClientChannelManager mockChannelManager;
-
-        public TestNettyRemotingClientWithReconnectException(
-                NettyClientConfig nettyClientConfig, ThreadPoolExecutor messageExecutor) {
-            super(nettyClientConfig, messageExecutor, NettyPoolKey.TransactionRole.TMROLE);
-        }
-
-        @Override
-        public void init() {
-            // Use reflection to replace clientChannelManager with a mock
-            try {
-                java.lang.reflect.Field field =
-                        AbstractNettyRemotingClient.class.getDeclaredField("clientChannelManager");
-                field.setAccessible(true);
-                mockChannelManager = mock(NettyClientChannelManager.class);
-
-                // Make reconnect throw exception
-                doThrow(new RuntimeException("Simulated reconnect failure"))
-                        .when(mockChannelManager)
-                        .reconnect(any());
-
-                field.set(this, mockChannelManager);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-
-            // Schedule a task that will trigger the exception handler
-            timerExecutor.scheduleAtFixedRate(
-                    () -> {
-                        try {
-                            getClientChannelManager().reconnect(getTransactionServiceGroup());
-                        } catch (Exception ex) {
-                            // This is the branch we want to cover (lines 126-129)
-                            TEST_LOGGER.warn("reconnect server failed. {}", ex.getMessage());
-                        }
-                    },
-                    10, // Short delay for testing
-                    10000,
-                    TimeUnit.MILLISECONDS);
-        }
-
-        @Override
-        protected Function<String, NettyPoolKey> getPoolKeyFunction() {
-            return serverAddress -> new NettyPoolKey(NettyPoolKey.TransactionRole.TMROLE, serverAddress);
-        }
-
-        @Override
-        protected String getTransactionServiceGroup() {
-            return "test-service-group";
-        }
-
-        @Override
-        protected boolean isEnableClientBatchSendRequest() {
-            return false;
-        }
-
-        @Override
-        protected long getRpcRequestTimeout() {
-            return 30000L;
-        }
-
-        @Override
-        public void onRegisterMsgSuccess(
-                String serverAddress, Channel channel, Object response, AbstractMessage requestMessage) {}
-
-        @Override
-        public void onRegisterMsgFail(
-                String serverAddress, Channel channel, Object response, AbstractMessage requestMessage) {}
-
-        @Override
-        public NettyClientChannelManager getClientChannelManager() {
-            return mockChannelManager != null ? mockChannelManager : super.getClientChannelManager();
         }
     }
 }
