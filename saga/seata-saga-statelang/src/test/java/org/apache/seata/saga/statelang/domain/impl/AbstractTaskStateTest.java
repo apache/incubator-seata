@@ -87,12 +87,12 @@ public class AbstractTaskStateTest {
     @Test
     public void testSetCompensateState_WithBlankValue() {
         AbstractTaskState taskState = new TestAbstractTaskState();
-        taskState.setForUpdate(true); // 初始设为 true
+        taskState.setForUpdate(true);
 
         taskState.setCompensateState("");
 
         assertEquals("", taskState.getCompensateState());
-        assertTrue(taskState.isForUpdate()); // 仍为 true
+        assertTrue(taskState.isForUpdate());
     }
 
     @Test
