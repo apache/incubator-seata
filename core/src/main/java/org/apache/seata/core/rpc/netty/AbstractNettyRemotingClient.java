@@ -58,17 +58,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Condition;
@@ -826,8 +816,13 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     private static ExecutorService getOrCreateGlobalWorker() {
         ExecutorService w = GLOBAL_RECONNECT_WORKER_REF.get();
         if (w == null || w.isShutdown() || w.isTerminated()) {
-            ExecutorService created = Executors.newFixedThreadPool(
-                    Math.max(2, Runtime.getRuntime().availableProcessors()), r -> {
+            ExecutorService created = new ThreadPoolExecutor(
+                    Math.max(2, Runtime.getRuntime().availableProcessors()),
+                    Math.max(2, Runtime.getRuntime().availableProcessors()),
+                    0L,
+                    TimeUnit.MILLISECONDS,
+                    new LinkedBlockingQueue<>(),
+                    r -> {
                         Thread t = new Thread(r);
                         t.setDaemon(true);
                         t.setName("Global-Reconnect-Worker-" + t.getId());
@@ -850,7 +845,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
      */
     static void startGlobalTimerIfNeeded() {
         if (GLOBAL_TIMER_STARTED.compareAndSet(false, true)) {
-            ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor(r -> {
+            ScheduledExecutorService timer = new ScheduledThreadPoolExecutor(1, r -> {
                 Thread t = new Thread(r);
                 t.setDaemon(true);
                 t.setName("Global-Reconnect-Timer-" + t.getId());
