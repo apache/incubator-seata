@@ -51,6 +51,11 @@ public class EnhancedServiceLoader {
             new ConcurrentHashMap<>();
 
     /**
+     * Cached class loader
+     */
+    private static final ClassLoader CLASS_LOADER = EnhancedServiceLoader.class.getClassLoader();
+
+    /**
      * Specify classLoader to load the service provider
      *
      * @param <S>     the type parameter
@@ -271,7 +276,7 @@ public class EnhancedServiceLoader {
      * @return ClassLoader
      */
     private static ClassLoader findClassLoader() {
-        return EnhancedServiceLoader.class.getClassLoader();
+        return CLASS_LOADER;
     }
 
     private static class InnerEnhancedServiceLoader<S> {
@@ -373,7 +378,7 @@ public class EnhancedServiceLoader {
          * @param activateName the activate name
          * @param argsType     the args type
          * @param args         the args
-         * @param loader  the class loader
+         * @param loader       the class loader
          * @return the s
          * @throws EnhancedServiceNotFoundException the enhanced service not found exception
          */
@@ -385,8 +390,8 @@ public class EnhancedServiceLoader {
 
         /**
          * get all implements
-         * @param loader  the class loader
          *
+         * @param loader the class loader
          * @return list list
          */
         private List<S> loadAll(ClassLoader loader) {
@@ -703,9 +708,9 @@ public class EnhancedServiceLoader {
          * @param argTypes  the arg types
          * @param args      the args
          * @return s s
-         * @throws IllegalAccessException    the illegal access exception
-         * @throws InstantiationException    the instantiation exception
-         * @throws NoSuchMethodException     the no such method exception
+         * @throws IllegalAccessException the illegal access exception
+         * @throws InstantiationException the instantiation exception
+         * @throws NoSuchMethodException the no such method exception
          * @throws InvocationTargetException the invocation target exception
          */
         private S initInstance(Class<S> implClazz, Class<?>[] argTypes, Object[] args)
@@ -718,7 +723,8 @@ public class EnhancedServiceLoader {
                 s = type.cast(constructor.newInstance(args));
             } else {
                 // default Constructor
-                s = type.cast(implClazz.newInstance());
+                Constructor<S> constructor = implClazz.getDeclaredConstructor();
+                s = type.cast(constructor.newInstance());
             }
             if (s instanceof Initialize) {
                 ((Initialize) s).init();
@@ -728,6 +734,7 @@ public class EnhancedServiceLoader {
 
         /**
          * Helper Class for hold a value.
+         *
          * @param <T>
          */
         private static class Holder<T> {

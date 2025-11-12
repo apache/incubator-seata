@@ -14,28 +14,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.common.util;
+package org.apache.seata.common;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
-import java.util.function.Predicate;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
- * The type Lambda util.
- *
+ * The type Lock strategy mode test.
  */
-public class LambdaUtils {
+public class LockStrategyModeTest {
 
-    /**
-     * Create a predicate that can be used to filter distinct objects by key
-     *
-     * @param keyExtractor the function to extract key from object
-     * @param <T> the type of object
-     * @return the predicate
-     */
-    public static <T> Predicate<T> distinctByKey(Function<? super T, Object> keyExtractor) {
-        Map<Object, Boolean> seen = new ConcurrentHashMap<>();
-        return object -> seen.putIfAbsent(keyExtractor.apply(object), Boolean.TRUE) == null;
+    @Test
+    public void testEnumValues() {
+        LockStrategyMode[] values = LockStrategyMode.values();
+        assertEquals(2, values.length);
+        assertNotNull(LockStrategyMode.OPTIMISTIC);
+        assertNotNull(LockStrategyMode.PESSIMISTIC);
+    }
+
+    @Test
+    public void testEnumValueOf() {
+        assertEquals(LockStrategyMode.OPTIMISTIC, LockStrategyMode.valueOf("OPTIMISTIC"));
+        assertEquals(LockStrategyMode.PESSIMISTIC, LockStrategyMode.valueOf("PESSIMISTIC"));
     }
 }
