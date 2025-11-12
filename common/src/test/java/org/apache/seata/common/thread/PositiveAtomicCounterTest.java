@@ -45,4 +45,29 @@ public class PositiveAtomicCounterTest {
         PositiveAtomicCounter counter = new PositiveAtomicCounter();
         assertThat(counter.get()).isEqualTo(0);
     }
+
+    @Test
+    public void testMultipleOperations() {
+        PositiveAtomicCounter counter = new PositiveAtomicCounter();
+
+        // Test sequence of operations
+        assertThat(counter.getAndIncrement()).isEqualTo(0); // Returns 0, then increments
+        assertThat(counter.get()).isEqualTo(1); // Current value is 1
+        assertThat(counter.incrementAndGet()).isEqualTo(2); // Increments then returns 2
+        assertThat(counter.get()).isEqualTo(2); // Current value is 2
+        assertThat(counter.getAndIncrement()).isEqualTo(2); // Returns 2, then increments
+        assertThat(counter.get()).isEqualTo(3); // Current value is 3
+    }
+
+    @Test
+    public void testPositiveValueGuarantee() {
+        PositiveAtomicCounter counter = new PositiveAtomicCounter();
+
+        // Simulate reaching maximum value and wrapping around
+        // This is a simplified test - in practice, the counter uses masking to ensure positivity
+        for (int i = 0; i < 100; i++) {
+            int value = counter.incrementAndGet();
+            assertThat(value).isPositive();
+        }
+    }
 }

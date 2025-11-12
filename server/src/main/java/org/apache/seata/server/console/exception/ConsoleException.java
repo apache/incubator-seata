@@ -25,8 +25,13 @@ public class ConsoleException extends RuntimeException {
     private String logMessage;
 
     public ConsoleException(Throwable cause, String logMessage) {
-        super(cause);
+        super(logMessage, cause);
         this.logMessage = logMessage;
+    }
+
+    @Override
+    public String getMessage() {
+        return logMessage;
     }
 
     public String getLogMessage() {
