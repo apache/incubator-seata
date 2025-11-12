@@ -38,39 +38,39 @@ public class StateParserFactoryTest {
     @Test
     public void testGetStateParser_ExistingTypes() {
         StateParser serviceTaskParser = StateParserFactory.getStateParser(StateType.SERVICE_TASK);
-        assertNotNull("ServiceTaskStateParser should not be null");
+        assertNotNull(serviceTaskParser, "ServiceTaskStateParser should not be null");
         assertTrue(serviceTaskParser instanceof ServiceTaskStateParser, "Parser should be ServiceTaskStateParser");
 
         StateParser choiceParser = StateParserFactory.getStateParser(StateType.CHOICE);
-        assertNotNull("ChoiceStateParser should not be null", String.valueOf(choiceParser));
+        assertNotNull(choiceParser, "ChoiceStateParser should not be null");
         assertTrue(choiceParser instanceof ChoiceStateParser, "Parser should be ChoiceStateParser");
 
         StateParser compensationTriggerParser = StateParserFactory.getStateParser(StateType.COMPENSATION_TRIGGER);
-        assertNotNull("CompensationTriggerStateParser should not be null", String.valueOf(compensationTriggerParser));
+        assertNotNull(compensationTriggerParser, "CompensationTriggerStateParser should not be null");
         assertTrue(
                 compensationTriggerParser instanceof CompensationTriggerStateParser,
                 "Parser should be CompensationTriggerStateParser");
 
         StateParser failEndParser = StateParserFactory.getStateParser(StateType.FAIL);
-        assertNotNull("FailEndStateParser should not be null", String.valueOf(failEndParser));
+        assertNotNull(failEndParser, "FailEndStateParser should not be null");
         assertTrue(failEndParser instanceof FailEndStateParser, "Parser should be FailEndStateParser");
 
         StateParser succeedEndParser = StateParserFactory.getStateParser(StateType.SUCCEED);
-        assertNotNull("SucceedEndStateParser should not be null", String.valueOf(succeedEndParser));
+        assertNotNull(succeedEndParser, "SucceedEndStateParser should not be null");
         assertTrue(succeedEndParser instanceof SucceedEndStateParser, "Parser should be SucceedEndStateParser");
 
         StateParser subStateMachineParser = StateParserFactory.getStateParser(StateType.SUB_STATE_MACHINE);
-        assertNotNull("SubStateMachineParser should not be null", String.valueOf(subStateMachineParser));
+        assertNotNull(subStateMachineParser, "SubStateMachineParser should not be null");
         assertTrue(subStateMachineParser instanceof SubStateMachineParser, "Parser should be SubStateMachineParser");
 
         StateParser subCompensationParser = StateParserFactory.getStateParser(StateType.SUB_MACHINE_COMPENSATION);
-        assertNotNull("CompensateSubStateMachineStateParser should not be null", String.valueOf(subCompensationParser));
+        assertNotNull(subCompensationParser, "CompensateSubStateMachineStateParser should not be null");
         assertTrue(
                 subCompensationParser instanceof CompensateSubStateMachineStateParser,
                 "Parser should be CompensateSubStateMachineStateParser");
 
         StateParser scriptTaskParser = StateParserFactory.getStateParser(StateType.SCRIPT_TASK);
-        assertNotNull("ScriptTaskStateParser should not be null", String.valueOf(scriptTaskParser));
+        assertNotNull(scriptTaskParser, "ScriptTaskStateParser should not be null");
         assertTrue(scriptTaskParser instanceof ScriptTaskStateParser, "Parser should be ScriptTaskStateParser");
     }
 }
