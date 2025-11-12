@@ -26,7 +26,6 @@ import org.apache.seata.saga.statelang.domain.ExecutionStatus;
 import org.apache.seata.saga.statelang.domain.StateMachineInstance;
 import org.apache.seata.saga.statelang.parser.JsonParser;
 import org.apache.seata.saga.statelang.parser.JsonParserFactory;
-import org.apache.seata.saga.statelang.parser.utils.DesignerJsonTransformer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
