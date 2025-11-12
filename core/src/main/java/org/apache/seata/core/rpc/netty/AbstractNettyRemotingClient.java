@@ -107,7 +107,6 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
 
     /**
      * Global reconnect timer reference and started flag.
-     * Use AtomicReference so we can shutdown and recreate the executor if needed.
      */
     private static final AtomicReference<ScheduledExecutorService> GLOBAL_RECONNECT_TIMER_REF = new AtomicReference<>();
 
