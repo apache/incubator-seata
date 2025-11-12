@@ -77,4 +77,20 @@ public class FileLoaderTest {
         File result = FileLoader.load("nonexistent/path.txt");
         Assertions.assertNull(result);
     }
+
+    @Test
+    public void testLoadWithEmptyString() {
+        File result = FileLoader.load("");
+        // Empty string loads the current directory which should exist
+        Assertions.assertNotNull(result);
+        Assertions.assertTrue(result.exists());
+        Assertions.assertTrue(result.isDirectory());
+    }
+
+    @Test
+    public void testLoadWithRelativePath() {
+        File result = FileLoader.load("./io/TestFile.txt");
+        Assertions.assertNotNull(result);
+        Assertions.assertTrue(result.exists());
+    }
 }

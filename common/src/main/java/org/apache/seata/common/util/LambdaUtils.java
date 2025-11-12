@@ -27,6 +27,13 @@ import java.util.function.Predicate;
  */
 public class LambdaUtils {
 
+    /**
+     * Create a predicate that can be used to filter distinct objects by key
+     *
+     * @param keyExtractor the function to extract key from object
+     * @param <T> the type of object
+     * @return the predicate
+     */
     public static <T> Predicate<T> distinctByKey(Function<? super T, Object> keyExtractor) {
         Map<Object, Boolean> seen = new ConcurrentHashMap<>();
         return object -> seen.putIfAbsent(keyExtractor.apply(object), Boolean.TRUE) == null;
