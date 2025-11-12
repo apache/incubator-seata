@@ -19,31 +19,86 @@ package org.apache.seata.common.metadata.namingserver;
 import org.apache.seata.common.metadata.Cluster;
 
 import java.util.List;
+import java.util.Objects;
 
+/**
+ * Meta response for naming server
+ */
 public class MetaResponse {
     private List<Cluster> clusterList;
     private long term;
 
+    /**
+     * Default constructor
+     */
     public MetaResponse() {}
 
+    /**
+     * Constructor with cluster list and term
+     *
+     * @param clusterList the cluster list
+     * @param term the term
+     */
     public MetaResponse(List<Cluster> clusterList, long term) {
         this.clusterList = clusterList;
         this.term = term;
     }
 
+    /**
+     * Get cluster list
+     *
+     * @return the cluster list
+     */
     public List<Cluster> getClusterList() {
         return clusterList;
     }
 
+    /**
+     * Set cluster list
+     *
+     * @param clusterList the cluster list
+     */
     public void setClusterList(List<Cluster> clusterList) {
         this.clusterList = clusterList;
     }
 
+    /**
+     * Get term
+     *
+     * @return the term
+     */
     public long getTerm() {
         return term;
     }
 
+    /**
+     * Set term
+     *
+     * @param term the term
+     */
     public void setTerm(long term) {
         this.term = term;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        MetaResponse that = (MetaResponse) o;
+        return term == that.term && Objects.equals(clusterList, that.clusterList);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(clusterList, term);
+    }
+
+    @Override
+    public String toString() {
+        return "MetaResponse{" + "clusterList=" + clusterList + ", term=" + term + '}';
     }
 }
