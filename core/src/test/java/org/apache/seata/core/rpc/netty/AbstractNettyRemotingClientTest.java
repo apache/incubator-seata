@@ -23,6 +23,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
+import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.core.protocol.AbstractMessage;
 import org.apache.seata.core.protocol.HeartbeatMessage;
@@ -37,13 +38,22 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
+import static org.apache.seata.common.exception.FrameworkErrorCode.NoAvailableService;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -1586,5 +1596,222 @@ public class AbstractNettyRemotingClientTest {
         } finally {
             mergeClient.destroy();
         }
+    }
+
+    @Test
+    public void testStartGlobalTimerIfNeeded_ConcurrentCall() throws Exception {
+        Field timerStartedField = AbstractNettyRemotingClient.class.getDeclaredField("GLOBAL_TIMER_STARTED");
+        Field timerRefField = AbstractNettyRemotingClient.class.getDeclaredField("GLOBAL_RECONNECT_TIMER_REF");
+        timerStartedField.setAccessible(true);
+        timerRefField.setAccessible(true);
+
+        ((AtomicBoolean) timerStartedField.get(null)).set(false);
+        ScheduledExecutorService oldTimer =
+                ((AtomicReference<ScheduledExecutorService>) timerRefField.get(null)).getAndSet(null);
+        if (oldTimer != null) {
+            oldTimer.shutdown();
+        }
+
+        int threadCount = 3;
+        CountDownLatch startLatch = new CountDownLatch(1);
+        CountDownLatch finishLatch = new CountDownLatch(threadCount);
+
+        for (int i = 0; i < threadCount; i++) {
+            new Thread(() -> {
+                        try {
+                            startLatch.await();
+                            AbstractNettyRemotingClient.startGlobalTimerIfNeeded();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        } finally {
+                            finishLatch.countDown();
+                        }
+                    })
+                    .start();
+        }
+
+        startLatch.countDown();
+        finishLatch.await(1, TimeUnit.SECONDS);
+
+        AtomicBoolean timerStarted = (AtomicBoolean) timerStartedField.get(null);
+        ScheduledExecutorService timer = ((AtomicReference<ScheduledExecutorService>) timerRefField.get(null)).get();
+
+        assertTrue(timerStarted.get(), "Global timer should be started");
+        assertNotNull(timer, "Global timer instance should not be null");
+        assertFalse(timer.isShutdown(), "Global timer should be alive");
+
+        timer.shutdown();
+        timerStarted.set(false);
+    }
+
+    @Test
+    public void testShutdownGlobalTimerIfNoClients_ConditionCheck() throws Exception {
+        AbstractNettyRemotingClient.startGlobalTimerIfNeeded();
+        TestNettyRemotingClient client = new TestNettyRemotingClient(clientConfig, messageExecutor);
+        client.init();
+
+        Field clientInstancesField = AbstractNettyRemotingClient.class.getDeclaredField("CLIENT_INSTANCES");
+        Field timerRefField = AbstractNettyRemotingClient.class.getDeclaredField("GLOBAL_RECONNECT_TIMER_REF");
+        Field workerRefField = AbstractNettyRemotingClient.class.getDeclaredField("GLOBAL_RECONNECT_WORKER_REF");
+        clientInstancesField.setAccessible(true);
+        timerRefField.setAccessible(true);
+        workerRefField.setAccessible(true);
+
+        AbstractNettyRemotingClient.shutdownGlobalTimerIfNoClients();
+        ScheduledExecutorService timer = ((AtomicReference<ScheduledExecutorService>) timerRefField.get(null)).get();
+        ExecutorService worker = ((AtomicReference<ExecutorService>) workerRefField.get(null)).get();
+
+        assertNotNull(timer, "Timer should not be shutdown when clients exist");
+        assertNotNull(worker, "Worker should not be shutdown when clients exist");
+        assertFalse(timer.isShutdown(), "Timer should be alive");
+        assertFalse(worker.isShutdown(), "Worker should be alive");
+
+        ((CopyOnWriteArrayList<?>) clientInstancesField.get(null)).clear();
+        AbstractNettyRemotingClient.shutdownGlobalTimerIfNoClients();
+
+        timer = ((AtomicReference<ScheduledExecutorService>) timerRefField.get(null)).get();
+        worker = ((AtomicReference<ExecutorService>) workerRefField.get(null)).get();
+
+        assertNull(timer, "Timer should be null after shutdown");
+        assertNull(worker, "Worker should be null after shutdown");
+
+        client.destroy();
+    }
+
+    @Test
+    public void testGetOrCreateGlobalWorker_ConcurrentConflict() throws Exception {
+        Field workerRefField = AbstractNettyRemotingClient.class.getDeclaredField("GLOBAL_RECONNECT_WORKER_REF");
+        workerRefField.setAccessible(true);
+        AtomicReference<ExecutorService> globalWorkerRef = (AtomicReference<ExecutorService>) workerRefField.get(null);
+        globalWorkerRef.set(null);
+
+        int threadCount = 5;
+        CountDownLatch startLatch = new CountDownLatch(1);
+        CountDownLatch finishLatch = new CountDownLatch(threadCount);
+        CopyOnWriteArrayList<ExecutorService> allCreatedWorkers = new CopyOnWriteArrayList<>();
+
+        for (int i = 0; i < threadCount; i++) {
+            new Thread(() -> {
+                        ExecutorService localCreated = null;
+                        try {
+                            startLatch.await();
+
+                            Method getWorkerMethod =
+                                    AbstractNettyRemotingClient.class.getDeclaredMethod("getOrCreateGlobalWorker");
+                            getWorkerMethod.setAccessible(true);
+
+                            ExecutorService resultWorker = (ExecutorService) getWorkerMethod.invoke(null);
+
+                            if (resultWorker != null && !resultWorker.isShutdown()) {
+                                allCreatedWorkers.addIfAbsent(resultWorker);
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        } finally {
+                            finishLatch.countDown();
+                        }
+                    })
+                    .start();
+        }
+
+        startLatch.countDown();
+        finishLatch.await(3, TimeUnit.SECONDS);
+
+        ExecutorService finalGlobalWorker = globalWorkerRef.get();
+        assertNotNull(finalGlobalWorker, "The global worker should not be null");
+        assertFalse(finalGlobalWorker.isShutdown(), "The global worker should be alive");
+
+        long aliveWorkerCount = allCreatedWorkers.stream()
+                .filter(worker -> !worker.isShutdown() && !worker.isTerminated())
+                .count();
+        assertEquals(1, aliveWorkerCount, "there should be one worker in all created workers");
+
+        finalGlobalWorker.shutdown();
+    }
+
+    @Test
+    public void testShutdownGlobalTimerIfNoClients_Exception() throws Exception {
+        AbstractNettyRemotingClient.startGlobalTimerIfNeeded();
+
+        Field clientInstancesField = AbstractNettyRemotingClient.class.getDeclaredField("CLIENT_INSTANCES");
+        clientInstancesField.setAccessible(true);
+        ((CopyOnWriteArrayList<?>) clientInstancesField.get(null)).clear();
+
+        ScheduledExecutorService mockTimer = mock(ScheduledExecutorService.class);
+        doThrow(new RuntimeException("Shutdown failed")).when(mockTimer).shutdown();
+
+        Field timerRefField = AbstractNettyRemotingClient.class.getDeclaredField("GLOBAL_RECONNECT_TIMER_REF");
+        timerRefField.setAccessible(true);
+        ((AtomicReference<ScheduledExecutorService>) timerRefField.get(null)).set(mockTimer);
+
+        try {
+            AbstractNettyRemotingClient.shutdownGlobalTimerIfNoClients();
+        } catch (RuntimeException e) {
+            assertEquals("Shutdown failed", e.getMessage());
+        }
+
+        verify(mockTimer, times(1)).shutdown();
+    }
+
+    @Test
+    public void testReconnectTask_EmptyServiceGroup() throws Exception {
+        class TestClientWithEmptyGroup extends TestNettyRemotingClient {
+            public TestClientWithEmptyGroup(NettyClientConfig config, ThreadPoolExecutor executor) {
+                super(config, executor);
+            }
+
+            @Override
+            protected String getTransactionServiceGroup() {
+                return "";
+            }
+        }
+
+        TestClientWithEmptyGroup client = new TestClientWithEmptyGroup(clientConfig, messageExecutor);
+        client.init();
+
+        Field reconnectTaskField = AbstractNettyRemotingClient.class.getDeclaredField("reconnectTask");
+        reconnectTaskField.setAccessible(true);
+        Runnable reconnectTask = (Runnable) reconnectTaskField.get(client);
+
+        reconnectTask.run();
+
+        client.destroy();
+    }
+
+    @Test
+    public void testClientChannelManager_AcquireChannelFailed() throws Exception {
+        NettyClientChannelManager mockManager = mock(NettyClientChannelManager.class);
+        String serverAddress = "127.0.0.1:8080";
+        when(mockManager.acquireChannel(serverAddress)).thenThrow(new FrameworkException(NoAvailableService));
+
+        Field managerField = AbstractNettyRemotingClient.class.getDeclaredField("clientChannelManager");
+        managerField.setAccessible(true);
+        managerField.set(client, mockManager);
+
+        GlobalBeginRequest request = new GlobalBeginRequest();
+        request.setTransactionName("test-fail");
+        try {
+            client.sendSyncRequest(request);
+        } catch (Exception e) {
+            assertTrue(e instanceof FrameworkException);
+            assertEquals(NoAvailableService, ((FrameworkException) e).getErrcode());
+        }
+    }
+
+    @Test
+    public void testHttpChannel_Processing() throws Exception {
+        Channel channel = mock(Channel.class);
+        ChannelId channelId = mock(ChannelId.class);
+        when(channel.id()).thenReturn(channelId);
+        when(channel.remoteAddress()).thenReturn(new InetSocketAddress("127.0.0.1", 80));
+
+        client.onChannelActive(channel);
+        client.onChannelIdle(channel);
+        client.onChannelInactive(channel);
+
+        Method cleanupMethod =
+                AbstractNettyRemotingClient.class.getDeclaredMethod("cleanupResourcesForChannel", Channel.class);
+        cleanupMethod.setAccessible(true);
+        cleanupMethod.invoke(client, channel);
     }
 }
