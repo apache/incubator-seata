@@ -85,10 +85,12 @@ jobs:
                  -e -B \
                  -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn \
                  -Dorg.slf4j.simpleLogger.log.net.sourceforge.pmd=info \
-                 2>&1 | tee build.log;
-          if grep -q "PMD Failure" build.log; then
-            echo "::error::PMD Violations Detected! Check Details Above！"
-          fi
+                 2>&1 | tee build.log | while read line; do
+                   echo "$line"
+                   if [[ "$line" == *"PMD Failure"* ]]; then
+                     echo "::error::PMD Violations Detected! Check Details Above!"
+                   fi
+                 done
       # step 6.2
       - name: "Test with Maven and Java${{ matrix.java }}"
         if: matrix.java != '8'
