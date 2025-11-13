@@ -58,7 +58,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
@@ -766,8 +774,4 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         }
     }
 
-    public void startTask() {
-        ExecutorService executor = Executors.newFixedThreadPool(5); // 这行会触发PMD错误
-        executor.submit(() -> System.out.println("执行任务"));
-    }
 }
