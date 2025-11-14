@@ -21,6 +21,7 @@ import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.model.BranchType;
+import org.apache.seata.core.rpc.netty.SqlCollector;
 import org.apache.seata.rm.datasource.StatementProxy;
 import org.apache.seata.rm.datasource.exec.mariadb.MariadbInsertOnDuplicateUpdateExecutor;
 import org.apache.seata.rm.datasource.exec.mariadb.MariadbUpdateJoinExecutor;
@@ -38,6 +39,7 @@ import org.apache.seata.sqlparser.util.JdbcConstants;
 
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -81,106 +83,117 @@ public class ExecuteTemplate {
             StatementCallback<T, S> statementCallback,
             Object... args)
             throws SQLException {
-        if (!RootContext.requireGlobalLock() && BranchType.AT != RootContext.getBranchType()) {
-            // Just work as original statement
-            return statementCallback.execute(statementProxy.getTargetStatement(), args);
-        }
-
-        String dbType = statementProxy.getConnectionProxy().getDbType();
-        if (CollectionUtils.isEmpty(sqlRecognizers)) {
-            sqlRecognizers = SQLVisitorFactory.get(statementProxy.getTargetSQL(), dbType);
-        }
-        Executor<T> executor;
-        if (CollectionUtils.isEmpty(sqlRecognizers)) {
-            executor = new PlainExecutor<>(statementProxy, statementCallback);
-        } else {
-            if (sqlRecognizers.size() == 1) {
-                SQLRecognizer sqlRecognizer = sqlRecognizers.get(0);
-                switch (sqlRecognizer.getSQLType()) {
-                    case INSERT:
-                        executor = EnhancedServiceLoader.load(
-                                InsertExecutor.class,
-                                dbType,
-                                new Class[] {StatementProxy.class, StatementCallback.class, SQLRecognizer.class},
-                                new Object[] {statementProxy, statementCallback, sqlRecognizer});
-                        break;
-                    case UPDATE:
-                        if (JdbcConstants.SQLSERVER.equalsIgnoreCase(dbType)) {
-                            executor = new SqlServerUpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
-                        } else {
-                            executor = new UpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
-                        }
-                        break;
-                    case DELETE:
-                        if (JdbcConstants.SQLSERVER.equalsIgnoreCase(dbType)) {
-                            executor = new SqlServerDeleteExecutor<>(statementProxy, statementCallback, sqlRecognizer);
-                        } else {
-                            executor = new DeleteExecutor<>(statementProxy, statementCallback, sqlRecognizer);
-                        }
-                        break;
-                    case SELECT_FOR_UPDATE:
-                        if (JdbcConstants.SQLSERVER.equalsIgnoreCase(dbType)) {
-                            executor = new SqlServerSelectForUpdateExecutor<>(
-                                    statementProxy, statementCallback, sqlRecognizer);
-                        } else {
-                            executor = new SelectForUpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
-                        }
-                        break;
-                    case INSERT_ON_DUPLICATE_UPDATE:
-                        switch (dbType) {
-                            case JdbcConstants.MYSQL:
-                                executor = new MySQLInsertOnDuplicateUpdateExecutor(
-                                        statementProxy, statementCallback, sqlRecognizer);
-                                break;
-                            case JdbcConstants.MARIADB:
-                                executor = new MariadbInsertOnDuplicateUpdateExecutor(
-                                        statementProxy, statementCallback, sqlRecognizer);
-                                break;
-                            case JdbcConstants.POLARDBX:
-                                executor = new PolarDBXInsertOnDuplicateUpdateExecutor(
-                                        statementProxy, statementCallback, sqlRecognizer);
-                                break;
-                            default:
-                                throw new NotSupportYetException(dbType + " not support to INSERT_ON_DUPLICATE_UPDATE");
-                        }
-                        break;
-                    case UPDATE_JOIN:
-                        switch (dbType) {
-                            case JdbcConstants.MYSQL:
-                                executor =
-                                        new MySQLUpdateJoinExecutor<>(statementProxy, statementCallback, sqlRecognizer);
-                                break;
-                            case JdbcConstants.MARIADB:
-                                executor = new MariadbUpdateJoinExecutor<>(
-                                        statementProxy, statementCallback, sqlRecognizer);
-                                break;
-                            case JdbcConstants.POLARDBX:
-                                executor = new PolarDBXUpdateJoinExecutor<>(
-                                        statementProxy, statementCallback, sqlRecognizer);
-                                break;
-                            default:
-                                throw new NotSupportYetException(
-                                        dbType + " not support to " + SQLType.UPDATE_JOIN.name());
-                        }
-                        break;
-                    default:
-                        executor = new PlainExecutor<>(statementProxy, statementCallback);
-                        break;
-                }
-            } else {
-                executor = new MultiExecutor<>(statementProxy, statementCallback, sqlRecognizers);
-            }
-        }
-        T rs;
+        long start = System.currentTimeMillis();
+        T result;
         try {
-            rs = executor.execute(args);
-        } catch (Throwable ex) {
-            if (!(ex instanceof SQLException)) {
-                // Turn other exception into SQLException
-                ex = new SQLException(ex);
+            if (!RootContext.requireGlobalLock() && BranchType.AT != RootContext.getBranchType()) {
+                // Just work as original statement
+                result = statementCallback.execute(statementProxy.getTargetStatement(), args);
+                return result;
             }
-            throw (SQLException) ex;
+
+            String dbType = statementProxy.getConnectionProxy().getDbType();
+            if (CollectionUtils.isEmpty(sqlRecognizers)) {
+                sqlRecognizers = SQLVisitorFactory.get(statementProxy.getTargetSQL(), dbType);
+            }
+            Executor<T> executor;
+            if (CollectionUtils.isEmpty(sqlRecognizers)) {
+                executor = new PlainExecutor<>(statementProxy, statementCallback);
+            } else {
+                if (sqlRecognizers.size() == 1) {
+                    SQLRecognizer sqlRecognizer = sqlRecognizers.get(0);
+                    switch (sqlRecognizer.getSQLType()) {
+                        case INSERT:
+                            executor = EnhancedServiceLoader.load(
+                                    InsertExecutor.class,
+                                    dbType,
+                                    new Class[]{StatementProxy.class, StatementCallback.class, SQLRecognizer.class},
+                                    new Object[]{statementProxy, statementCallback, sqlRecognizer});
+                            break;
+                        case UPDATE:
+                            if (JdbcConstants.SQLSERVER.equalsIgnoreCase(dbType)) {
+                                executor = new SqlServerUpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                            } else {
+                                executor = new UpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                            }
+                            break;
+                        case DELETE:
+                            if (JdbcConstants.SQLSERVER.equalsIgnoreCase(dbType)) {
+                                executor = new SqlServerDeleteExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                            } else {
+                                executor = new DeleteExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                            }
+                            break;
+                        case SELECT_FOR_UPDATE:
+                            if (JdbcConstants.SQLSERVER.equalsIgnoreCase(dbType)) {
+                                executor = new SqlServerSelectForUpdateExecutor<>(
+                                        statementProxy, statementCallback, sqlRecognizer);
+                            } else {
+                                executor = new SelectForUpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                            }
+                            break;
+                        case INSERT_ON_DUPLICATE_UPDATE:
+                            switch (dbType) {
+                                case JdbcConstants.MYSQL:
+                                    executor = new MySQLInsertOnDuplicateUpdateExecutor(
+                                            statementProxy, statementCallback, sqlRecognizer);
+                                    break;
+                                case JdbcConstants.MARIADB:
+                                    executor = new MariadbInsertOnDuplicateUpdateExecutor(
+                                            statementProxy, statementCallback, sqlRecognizer);
+                                    break;
+                                case JdbcConstants.POLARDBX:
+                                    executor = new PolarDBXInsertOnDuplicateUpdateExecutor(
+                                            statementProxy, statementCallback, sqlRecognizer);
+                                    break;
+                                default:
+                                    throw new NotSupportYetException(dbType + " not support to INSERT_ON_DUPLICATE_UPDATE");
+                            }
+                            break;
+                        case UPDATE_JOIN:
+                            switch (dbType) {
+                                case JdbcConstants.MYSQL:
+                                    executor = new MySQLUpdateJoinExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                                    break;
+                                case JdbcConstants.MARIADB:
+                                    executor = new MariadbUpdateJoinExecutor<>(
+                                            statementProxy, statementCallback, sqlRecognizer);
+                                    break;
+                                case JdbcConstants.POLARDBX:
+                                    executor = new PolarDBXUpdateJoinExecutor<>(
+                                            statementProxy, statementCallback, sqlRecognizer);
+                                    break;
+                                default:
+                                    throw new NotSupportYetException(
+                                            dbType + " not support to " + SQLType.UPDATE_JOIN.name());
+                            }
+                            break;
+                        default:
+                            executor = new PlainExecutor<>(statementProxy, statementCallback);
+                            break;
+                    }
+                } else {
+                    executor = new MultiExecutor<>(statementProxy, statementCallback, sqlRecognizers);
+                }
+            }
+            try {
+                result = executor.execute(args);
+            } catch (Throwable ex) {
+                if (!(ex instanceof SQLException)) {
+                    // Turn other exception into SQLException
+                    ex = new SQLException(ex);
+                }
+                throw (SQLException) ex;
+            }
+            return result;
+        } finally {
+            String sql = statementProxy.getTargetSQL();
+            if (sql != null) {
+                long executionTimeMillis = System.currentTimeMillis() - start;
+                LocalDateTime ts = LocalDateTime.now();
+                SqlCollector.addSqlExecutionEntry(sql, executionTimeMillis, executionTimeMillis, ts);
+                SqlCollector.addSlowSqlEntry(sql, executionTimeMillis, ts);
+            }
         }
-        return rs;
     }
 }
