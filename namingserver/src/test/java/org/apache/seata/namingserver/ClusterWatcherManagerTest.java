@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -218,6 +219,25 @@ public class ClusterWatcherManagerTest {
         Mockito.verify(response).setStatus(HttpStatus.NOT_MODIFIED.value());
         Mockito.verify(asyncContext).complete();
         assertTrue(watcher.isDone());
+    }
+
+    @Test
+    void testScheduledTaskReRegisterNonTimeoutWatcher() throws InterruptedException {
+        int timeoutDuration = 3000;
+        Watcher<AsyncContext> watcher =
+                new Watcher<>(TEST_GROUP, asyncContext, timeoutDuration, TEST_TERM, TEST_CLIENT_ENDPOINT);
+        clusterWatcherManager.registryWatcher(watcher);
+
+        clusterWatcherManager.init();
+        TimeUnit.SECONDS.sleep(2);
+
+        Mockito.verify(response, Mockito.never()).setStatus(Mockito.anyInt());
+        Mockito.verify(asyncContext, Mockito.never()).complete();
+        assertFalse(watcher.isDone());
+        Map<String, Queue<Watcher<?>>> watchers =
+                (Map<String, Queue<Watcher<?>>>) ReflectionTestUtils.getField(clusterWatcherManager, "WATCHERS");
+        assertTrue(watchers.containsKey(TEST_GROUP));
+        assertEquals(1, watchers.get(TEST_GROUP).size());
     }
 
     @Test
