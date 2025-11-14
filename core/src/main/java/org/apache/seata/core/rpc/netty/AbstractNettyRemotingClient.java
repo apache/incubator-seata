@@ -129,15 +129,9 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     public void init() {
         if (timerStarted.compareAndSet(false, true)) {
             this.reconnectTimer = new ScheduledThreadPoolExecutor(
-                    1,
-                    new NamedThreadFactory("Reconnect-Timer-" + transactionRole.name(), 1)
-            );
+                    1, new NamedThreadFactory("Reconnect-Timer-" + transactionRole.name(), 1));
             this.reconnectTimer.scheduleAtFixedRate(
-                    this.reconnectTask,
-                    SCHEDULE_DELAY_MILLS,
-                    SCHEDULE_INTERVAL_MILLS,
-                    TimeUnit.MILLISECONDS
-            );
+                    this.reconnectTask, SCHEDULE_DELAY_MILLS, SCHEDULE_INTERVAL_MILLS, TimeUnit.MILLISECONDS);
             LOGGER.info("Instance reconnect timer started (role: {})", transactionRole.name());
         }
         if (this.isEnableClientBatchSendRequest()) {
@@ -171,7 +165,10 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                     clientChannelManager.reconnect(serviceGroup);
                 }
             } catch (Exception ex) {
-                LOGGER.warn("Reconnect failed for service group: {}, error: {}", getTransactionServiceGroup(), ex.getMessage());
+                LOGGER.warn(
+                        "Reconnect failed for service group: {}, error: {}",
+                        getTransactionServiceGroup(),
+                        ex.getMessage());
             }
         };
     }
