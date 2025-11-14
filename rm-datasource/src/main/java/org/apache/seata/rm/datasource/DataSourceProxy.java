@@ -127,6 +127,9 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         TableMetaCacheFactory.registerTableMeta(this);
         // Set the default branch type to 'AT' in the RootContext.
         RootContext.setDefaultBranchType(this.getBranchType());
+
+        // Register DataSource for connection pool monitoring
+        DataSourceProxyEnhancer.onDataSourceProxyInitialized(this);
     }
 
     /**
@@ -456,5 +459,6 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     public void close() throws Exception {
         // TODO: Need to unregister resource from DefaultResourceManager
         TableMetaCacheFactory.shutdown(resourceId);
+        DataSourceProxyEnhancer.onDataSourceProxyDestroyed(this);
     }
 }
