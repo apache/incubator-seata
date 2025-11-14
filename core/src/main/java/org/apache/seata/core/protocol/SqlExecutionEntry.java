@@ -95,4 +95,3 @@ public class SqlExecutionEntry implements Serializable {
                 + timestamp + '}';
     }
 }
-

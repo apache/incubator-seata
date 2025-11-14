@@ -48,11 +48,11 @@ public class PreparedStatementProxyXA extends StatementProxyXA implements Prepar
         super(connectionProxyXA, targetStatement);
     }
 
-    public PreparedStatementProxyXA(AbstractConnectionProxyXA connectionProxyXA, PreparedStatement targetStatement, String targetSQL) {
+    public PreparedStatementProxyXA(
+            AbstractConnectionProxyXA connectionProxyXA, PreparedStatement targetStatement, String targetSQL) {
         super(connectionProxyXA, targetStatement);
         this.targetSQL = targetSQL;
     }
-
 
     private PreparedStatement getTargetStatement() {
         return (PreparedStatement) targetStatement;
