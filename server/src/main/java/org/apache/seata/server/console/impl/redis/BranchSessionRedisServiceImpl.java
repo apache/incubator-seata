@@ -44,7 +44,7 @@ public class BranchSessionRedisServiceImpl extends AbstractBranchService impleme
     @Override
     public PageResult<BranchSessionVO> queryByXid(String xid) {
         if (StringUtils.isBlank(xid)) {
-            return PageResult.success();
+            return PageResult.success(new ArrayList<>(), 0, 1, 10);
         }
 
         List<BranchSessionVO> branchSessionVos = new ArrayList<>();
@@ -61,6 +61,6 @@ public class BranchSessionRedisServiceImpl extends AbstractBranchService impleme
             }
         }
 
-        return PageResult.success(branchSessionVos, branchSessionVos.size(), 0, branchSessionVos.size());
+        return PageResult.success(branchSessionVos, branchSessionVos.size(), 1, Math.max(branchSessionVos.size(), 10));
     }
 }
