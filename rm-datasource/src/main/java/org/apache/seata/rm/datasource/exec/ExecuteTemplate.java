@@ -107,19 +107,21 @@ public class ExecuteTemplate {
                             executor = EnhancedServiceLoader.load(
                                     InsertExecutor.class,
                                     dbType,
-                                    new Class[]{StatementProxy.class, StatementCallback.class, SQLRecognizer.class},
-                                    new Object[]{statementProxy, statementCallback, sqlRecognizer});
+                                    new Class[] {StatementProxy.class, StatementCallback.class, SQLRecognizer.class},
+                                    new Object[] {statementProxy, statementCallback, sqlRecognizer});
                             break;
                         case UPDATE:
                             if (JdbcConstants.SQLSERVER.equalsIgnoreCase(dbType)) {
-                                executor = new SqlServerUpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                                executor =
+                                        new SqlServerUpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
                             } else {
                                 executor = new UpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
                             }
                             break;
                         case DELETE:
                             if (JdbcConstants.SQLSERVER.equalsIgnoreCase(dbType)) {
-                                executor = new SqlServerDeleteExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                                executor =
+                                        new SqlServerDeleteExecutor<>(statementProxy, statementCallback, sqlRecognizer);
                             } else {
                                 executor = new DeleteExecutor<>(statementProxy, statementCallback, sqlRecognizer);
                             }
@@ -129,7 +131,8 @@ public class ExecuteTemplate {
                                 executor = new SqlServerSelectForUpdateExecutor<>(
                                         statementProxy, statementCallback, sqlRecognizer);
                             } else {
-                                executor = new SelectForUpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                                executor =
+                                        new SelectForUpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
                             }
                             break;
                         case INSERT_ON_DUPLICATE_UPDATE:
@@ -147,13 +150,15 @@ public class ExecuteTemplate {
                                             statementProxy, statementCallback, sqlRecognizer);
                                     break;
                                 default:
-                                    throw new NotSupportYetException(dbType + " not support to INSERT_ON_DUPLICATE_UPDATE");
+                                    throw new NotSupportYetException(
+                                            dbType + " not support to INSERT_ON_DUPLICATE_UPDATE");
                             }
                             break;
                         case UPDATE_JOIN:
                             switch (dbType) {
                                 case JdbcConstants.MYSQL:
-                                    executor = new MySQLUpdateJoinExecutor<>(statementProxy, statementCallback, sqlRecognizer);
+                                    executor = new MySQLUpdateJoinExecutor<>(
+                                            statementProxy, statementCallback, sqlRecognizer);
                                     break;
                                 case JdbcConstants.MARIADB:
                                     executor = new MariadbUpdateJoinExecutor<>(

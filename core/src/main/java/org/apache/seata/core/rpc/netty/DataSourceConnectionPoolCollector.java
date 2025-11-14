@@ -245,7 +245,8 @@ public class DataSourceConnectionPoolCollector {
 
             // Inject SQL execution records from SqlCollector
             try {
-                List<SqlExecutionEntry> allSql = new ArrayList<>(SqlCollector.ALL_SQL_CACHE.asMap().values());
+                List<SqlExecutionEntry> allSql =
+                        new ArrayList<>(SqlCollector.ALL_SQL_CACHE.asMap().values());
                 metrics.setSqlExecutionRecord(limitEntries(allSql, 100));
 
                 List<SqlExecutionEntry> slowSqlAsExec = new ArrayList<>();
@@ -284,7 +285,7 @@ public class DataSourceConnectionPoolCollector {
      * Ranges represent upper bounds (ms) for each bucket.
      */
     private static void computeAndInjectHistogram(DruidConnectionPoolMetrics metrics, List<SqlExecutionEntry> allSql) {
-        long[] ranges = new long[]{10, 50, 100, 200, 500, 1000, 2000, 5000, 10000};
+        long[] ranges = new long[] {10, 50, 100, 200, 500, 1000, 2000, 5000, 10000};
         long[] values = new long[ranges.length];
         if (allSql != null) {
             for (SqlExecutionEntry e : allSql) {

@@ -80,4 +80,3 @@ public class SlowSqlEntry implements Serializable {
                 + timestamp + '}';
     }
 }
-
