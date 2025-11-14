@@ -146,6 +146,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     private TransactionMessageHandler transactionMessageHandler;
     protected volatile boolean enableClientBatchSendRequest;
     private final Runnable reconnectTask;
+    private static final ReentrantLock GLOBAL_SHUTDOWN_LOCK = new ReentrantLock();
 
     @Override
     public void init() {
@@ -898,26 +899,31 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
      * Shutdown the global reconnect timer and worker when there are no client instances.
      */
     static void shutdownGlobalTimerIfNoClients() {
-        if (CLIENT_INSTANCES.isEmpty() && GLOBAL_TIMER_STARTED.compareAndSet(true, false)) {
-            ScheduledExecutorService timer = GLOBAL_RECONNECT_TIMER_REF.getAndSet(null);
-            if (timer != null) {
-                try {
-                    timer.shutdown();
-                    timer.awaitTermination(1, TimeUnit.SECONDS);
-                } catch (Exception ex) {
-                    LOGGER.warn("Shutdown global reconnect timer failed: {}", ex.getMessage(), ex);
+        GLOBAL_SHUTDOWN_LOCK.lock();
+        try {
+            if (CLIENT_INSTANCES.isEmpty() && GLOBAL_TIMER_STARTED.compareAndSet(true, false)) {
+                ScheduledExecutorService timer = GLOBAL_RECONNECT_TIMER_REF.getAndSet(null);
+                if (timer != null) {
+                    try {
+                        timer.shutdown();
+                        timer.awaitTermination(1, TimeUnit.SECONDS);
+                    } catch (Exception ex) {
+                        LOGGER.warn("Shutdown global reconnect timer failed: {}", ex.getMessage(), ex);
+                    }
                 }
-            }
-            ExecutorService worker = GLOBAL_RECONNECT_WORKER_REF.getAndSet(null);
-            if (worker != null) {
-                try {
-                    worker.shutdown();
-                    worker.awaitTermination(1, TimeUnit.SECONDS);
-                } catch (Exception ex) {
-                    LOGGER.warn("Shutdown global reconnect worker failed: {}", ex.getMessage(), ex);
+                ExecutorService worker = GLOBAL_RECONNECT_WORKER_REF.getAndSet(null);
+                if (worker != null) {
+                    try {
+                        worker.shutdown();
+                        worker.awaitTermination(1, TimeUnit.SECONDS);
+                    } catch (Exception ex) {
+                        LOGGER.warn("Shutdown global reconnect worker failed: {}", ex.getMessage(), ex);
+                    }
                 }
+                LOGGER.info("Global reconnect timer and worker shutdown as no client instances remain");
             }
-            LOGGER.info("Global reconnect timer and worker shutdown as no client instances remain");
+        } finally {
+            GLOBAL_SHUTDOWN_LOCK.unlock();
         }
     }
 }
