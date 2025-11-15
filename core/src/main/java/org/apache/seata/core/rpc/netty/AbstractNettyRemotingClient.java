@@ -128,11 +128,16 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     @Override
     public void init() {
         if (timerStarted.compareAndSet(false, true)) {
-            this.reconnectTimer = new ScheduledThreadPoolExecutor(
-                    1, new NamedThreadFactory("Reconnect-Timer-" + transactionRole.name(), 1));
-            this.reconnectTimer.scheduleAtFixedRate(
-                    this.reconnectTask, SCHEDULE_DELAY_MILLS, SCHEDULE_INTERVAL_MILLS, TimeUnit.MILLISECONDS);
-            LOGGER.info("Instance reconnect timer started (role: {})", transactionRole.name());
+            mergeLock.lock();
+            try {
+                this.reconnectTimer = new ScheduledThreadPoolExecutor(
+                        1, new NamedThreadFactory("Reconnect-Timer-" + transactionRole.name(), 1));
+                this.reconnectTimer.scheduleAtFixedRate(
+                        this.reconnectTask, SCHEDULE_DELAY_MILLS, SCHEDULE_INTERVAL_MILLS, TimeUnit.MILLISECONDS);
+                LOGGER.info("Instance reconnect timer started (role: {})", transactionRole.name());
+            }finally {
+                mergeLock.unlock();
+            }
         }
         if (this.isEnableClientBatchSendRequest()) {
             mergeSendExecutorService = new ThreadPoolExecutor(
@@ -287,16 +292,21 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
 
     @Override
     public void destroy() {
-        if (reconnectTimer != null && timerStarted.get()) {
-            reconnectTimer.shutdown();
-            timerStarted.set(false);
-            LOGGER.info("Instance reconnect timer stopped (role: {})", transactionRole.name());
+        mergeLock.lock();
+        try {
+            if (reconnectTimer != null && timerStarted.get()) {
+                reconnectTimer.shutdown();
+                timerStarted.set(false);
+                LOGGER.info("Instance reconnect timer stopped (role: {})", transactionRole.name());
+            }
+            clientBootstrap.shutdown();
+            if (mergeSendExecutorService != null) {
+                mergeSendExecutorService.shutdown();
+            }
+            super.destroy();
+        }finally {
+            mergeLock.unlock();
         }
-        clientBootstrap.shutdown();
-        if (mergeSendExecutorService != null) {
-            mergeSendExecutorService.shutdown();
-        }
-        super.destroy();
     }
 
     public void setTransactionMessageHandler(TransactionMessageHandler transactionMessageHandler) {
