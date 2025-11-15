@@ -51,13 +51,9 @@ public class JacksonJsonSerializer implements JsonSerializer {
                 .enable(MapperFeature.PROPAGATE_TRANSIENT_MARKER)
                 .setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
-        PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
-                .allowIfBaseType(Object.class)
-                .build();
-
         this.objectMapperWithAutoType = new ObjectMapper()
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                .activateDefaultTyping(ptv, DefaultTyping.NON_FINAL)
+                .enableDefaultTypingAsProperty(DefaultTyping.NON_FINAL, "@type")
                 .enable(MapperFeature.PROPAGATE_TRANSIENT_MARKER)
                 .setSerializationInclusion(JsonInclude.Include.NON_NULL);
     }
@@ -65,7 +61,7 @@ public class JacksonJsonSerializer implements JsonSerializer {
     @Override
     public String toJSONString(Object object) {
         try {
-            return defaultObjectMapper.writeValueAsString(object);
+            return objectMapperWithAutoType.writeValueAsString(object);
         } catch (JsonProcessingException e) {
             throw new JsonParseException("Jackson serialize error", e);
         }
@@ -77,7 +73,7 @@ public class JacksonJsonSerializer implements JsonSerializer {
             return null;
         }
         try {
-            return defaultObjectMapper.readValue(text, clazz);
+            return objectMapperWithAutoType.readValue(text, clazz);
         } catch (IOException e) {
             throw new JsonParseException("Jackson deserialize error", e);
         }
@@ -89,7 +85,7 @@ public class JacksonJsonSerializer implements JsonSerializer {
             return null;
         }
         try {
-            return defaultObjectMapper.readValue(text, defaultObjectMapper.constructType(type));
+            return objectMapperWithAutoType.readValue(text, objectMapperWithAutoType.constructType(type));
         } catch (IOException e) {
             throw new JsonParseException("Jackson deserialize error", e);
         }
