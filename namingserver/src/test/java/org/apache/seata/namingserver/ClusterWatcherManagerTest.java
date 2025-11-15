@@ -223,9 +223,9 @@ public class ClusterWatcherManagerTest {
 
     @Test
     void testScheduledTaskReRegisterNonTimeoutWatcher() throws InterruptedException {
-        long timeout = System.currentTimeMillis() + 3000;
+        int timeoutDuration = 3000;
         Watcher<AsyncContext> watcher =
-                new Watcher<>(TEST_GROUP, asyncContext, (int) timeout, TEST_TERM, TEST_CLIENT_ENDPOINT);
+                new Watcher<>(TEST_GROUP, asyncContext, timeoutDuration, TEST_TERM, TEST_CLIENT_ENDPOINT);
         clusterWatcherManager.registryWatcher(watcher);
 
         clusterWatcherManager.init();
