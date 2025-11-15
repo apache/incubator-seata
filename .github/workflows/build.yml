@@ -91,6 +91,8 @@ jobs:
                      echo "::error::PMD Violations Detected! Check Details Above!"
                    fi
                  done
+          exit_code=${PIPESTATUS[0]}
+          exit $exit_code
       # step 6.2
       - name: "Test with Maven and Java${{ matrix.java }}"
         if: matrix.java != '8'
