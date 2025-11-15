@@ -135,7 +135,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                 this.reconnectTimer.scheduleAtFixedRate(
                         this.reconnectTask, SCHEDULE_DELAY_MILLS, SCHEDULE_INTERVAL_MILLS, TimeUnit.MILLISECONDS);
                 LOGGER.info("Instance reconnect timer started (role: {})", transactionRole.name());
-            }finally {
+            } finally {
                 mergeLock.unlock();
             }
         }
@@ -304,7 +304,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                 mergeSendExecutorService.shutdown();
             }
             super.destroy();
-        }finally {
+        } finally {
             mergeLock.unlock();
         }
     }
