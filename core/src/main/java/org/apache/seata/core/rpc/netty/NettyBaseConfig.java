@@ -33,6 +33,8 @@ import org.apache.seata.common.DefaultValues;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.constants.ConfigurationKeys;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_TRANSPORT_HEARTBEAT;
 
@@ -42,6 +44,7 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_TRANSPORT_HEARTBEAT;
  */
 public class NettyBaseConfig {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(NettyBaseConfig.class);
     /**
      * The constant CONFIG.
      */
@@ -111,8 +114,12 @@ public class NettyBaseConfig {
         }
 
         boolean useEpoll = !PlatformDependent.isWindows() && !PlatformDependent.isOsx() && Epoll.isAvailable();
-        boolean useIoUring = TRANSPORT_IO_IO_URING_ENABLE && IOUring.isAvailable();
-        if (useIoUring) {
+        boolean useIOUring = TRANSPORT_IO_IO_URING_ENABLE && IOUring.isAvailable();
+        if (TRANSPORT_IO_IO_URING_ENABLE && !IOUring.isAvailable()) {
+            LOGGER.warn("The io_uring is not available in current system, use the default transport instead.",
+                    IOUring.unavailabilityCause());
+        }
+        if (useIOUring) {
             SERVER_CHANNEL_CLAZZ = IOUringServerSocketChannel.class;
             CLIENT_CHANNEL_CLAZZ = IOUringSocketChannel.class;
         } else {
