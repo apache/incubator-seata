@@ -321,12 +321,12 @@ public class PreparedStatementProxyXATest {
         // Verify constructor properly initializes and getTargetStatement returns correct object
         AbstractConnectionProxyXA testConnectionProxy = Mockito.mock(AbstractConnectionProxyXA.class);
         PreparedStatement testPreparedStatement = Mockito.mock(PreparedStatement.class);
-        
+
         PreparedStatementProxyXA proxy = new PreparedStatementProxyXA(testConnectionProxy, testPreparedStatement);
-        
+
         // The getTargetStatement method is private, but we can verify it works through other methods
         Assertions.assertNotNull(proxy, "Constructor should create a valid proxy instance");
-        
+
         // Verify that the proxy uses the correct target statement by checking method delegation
         try {
             proxy.clearParameters();
@@ -344,15 +344,15 @@ public class PreparedStatementProxyXATest {
         preparedStatementProxyXA.setShort(3, (short) 32767);
         preparedStatementProxyXA.setFloat(4, 3.14f);
         preparedStatementProxyXA.setDouble(5, 2.718281828);
-        preparedStatementProxyXA.setBytes(6, new byte[]{1, 2, 3, 4, 5});
-        
+        preparedStatementProxyXA.setBytes(6, new byte[] {1, 2, 3, 4, 5});
+
         // Verify all calls were delegated to the underlying statement
         Mockito.verify(mockPreparedStatement).setBoolean(1, true);
         Mockito.verify(mockPreparedStatement).setByte(2, (byte) 127);
         Mockito.verify(mockPreparedStatement).setShort(3, (short) 32767);
         Mockito.verify(mockPreparedStatement).setFloat(4, 3.14f);
         Mockito.verify(mockPreparedStatement).setDouble(5, 2.718281828);
-        Mockito.verify(mockPreparedStatement).setBytes(6, new byte[]{1, 2, 3, 4, 5});
+        Mockito.verify(mockPreparedStatement).setBytes(6, new byte[] {1, 2, 3, 4, 5});
     }
 
     @Test
@@ -360,10 +360,10 @@ public class PreparedStatementProxyXATest {
         // Test time-related parameter setters
         Time testTime = new Time(System.currentTimeMillis());
         Timestamp testTimestamp = new Timestamp(System.currentTimeMillis());
-        
+
         preparedStatementProxyXA.setTime(1, testTime);
         preparedStatementProxyXA.setTimestamp(2, testTimestamp);
-        
+
         // Verify calls were delegated
         Mockito.verify(mockPreparedStatement).setTime(1, testTime);
         Mockito.verify(mockPreparedStatement).setTimestamp(2, testTimestamp);
@@ -377,14 +377,14 @@ public class PreparedStatementProxyXATest {
         Array mockArray = Mockito.mock(Array.class);
         URL testURL = Mockito.mock(URL.class);
         RowId mockRowId = Mockito.mock(RowId.class);
-        
+
         preparedStatementProxyXA.setRef(1, mockRef);
         preparedStatementProxyXA.setClob(2, mockClob);
         preparedStatementProxyXA.setArray(3, mockArray);
         preparedStatementProxyXA.setURL(4, testURL);
         preparedStatementProxyXA.setRowId(5, mockRowId);
         preparedStatementProxyXA.setNull(6, Types.VARCHAR, "VARCHAR");
-        
+
         // Verify all calls were delegated
         Mockito.verify(mockPreparedStatement).setRef(1, mockRef);
         Mockito.verify(mockPreparedStatement).setClob(2, mockClob);
@@ -399,14 +399,14 @@ public class PreparedStatementProxyXATest {
         // Test national character set related setters
         Reader mockReader = Mockito.mock(Reader.class);
         NClob mockNClob = Mockito.mock(NClob.class);
-        
+
         preparedStatementProxyXA.setNString(1, "国际化字符串");
         preparedStatementProxyXA.setNCharacterStream(2, mockReader, 100L);
         preparedStatementProxyXA.setNClob(3, mockNClob);
         preparedStatementProxyXA.setNCharacterStream(4, mockReader);
         preparedStatementProxyXA.setNClob(5, mockReader, 200L);
         preparedStatementProxyXA.setNClob(6, mockReader);
-        
+
         // Verify all calls were delegated
         Mockito.verify(mockPreparedStatement).setNString(1, "国际化字符串");
         Mockito.verify(mockPreparedStatement).setNCharacterStream(2, mockReader, 100L);
@@ -421,20 +421,20 @@ public class PreparedStatementProxyXATest {
         // Test stream setters with different length parameter variants
         InputStream mockInputStream = Mockito.mock(InputStream.class);
         Reader mockReader = Mockito.mock(Reader.class);
-        
+
         // Test long length variants
         preparedStatementProxyXA.setAsciiStream(1, mockInputStream, 1000L);
         preparedStatementProxyXA.setBinaryStream(2, mockInputStream, 2000L);
         preparedStatementProxyXA.setCharacterStream(3, mockReader, 3000L);
-        
-        // Test no-length variants  
+
+        // Test no-length variants
         preparedStatementProxyXA.setAsciiStream(4, mockInputStream);
         preparedStatementProxyXA.setBinaryStream(5, mockInputStream);
         preparedStatementProxyXA.setCharacterStream(6, mockReader);
-        
+
         // Test Unicode stream (deprecated but still needs coverage)
         preparedStatementProxyXA.setUnicodeStream(7, mockInputStream, 500);
-        
+
         // Verify all calls were delegated
         Mockito.verify(mockPreparedStatement).setAsciiStream(1, mockInputStream, 1000L);
         Mockito.verify(mockPreparedStatement).setBinaryStream(2, mockInputStream, 2000L);
@@ -450,15 +450,15 @@ public class PreparedStatementProxyXATest {
         // Test various Blob and Clob setter variants
         InputStream mockInputStream = Mockito.mock(InputStream.class);
         Reader mockReader = Mockito.mock(Reader.class);
-        
+
         // Test Blob variants
         preparedStatementProxyXA.setBlob(1, mockInputStream, 1000L);
         preparedStatementProxyXA.setBlob(2, mockInputStream);
-        
+
         // Test Clob variants
         preparedStatementProxyXA.setClob(3, mockReader, 2000L);
         preparedStatementProxyXA.setClob(4, mockReader);
-        
+
         // Verify all calls were delegated
         Mockito.verify(mockPreparedStatement).setBlob(1, mockInputStream, 1000L);
         Mockito.verify(mockPreparedStatement).setBlob(2, mockInputStream);
@@ -470,9 +470,9 @@ public class PreparedStatementProxyXATest {
     public void testSQLXMLSetter() throws SQLException {
         // Test SQLXML parameter setter
         SQLXML mockSQLXML = Mockito.mock(SQLXML.class);
-        
+
         preparedStatementProxyXA.setSQLXML(1, mockSQLXML);
-        
+
         // Verify call was delegated
         Mockito.verify(mockPreparedStatement).setSQLXML(1, mockSQLXML);
     }
@@ -482,7 +482,7 @@ public class PreparedStatementProxyXATest {
         // Test batch and parameter management methods
         preparedStatementProxyXA.addBatch();
         preparedStatementProxyXA.clearParameters();
-        
+
         // Verify calls were delegated
         Mockito.verify(mockPreparedStatement).addBatch();
         Mockito.verify(mockPreparedStatement).clearParameters();
@@ -502,7 +502,7 @@ public class PreparedStatementProxyXATest {
         preparedStatementProxyXA.setClob(9, (Clob) null);
         preparedStatementProxyXA.setArray(10, null);
         preparedStatementProxyXA.setObject(11, null);
-        
+
         // Verify all null values were handled correctly
         Mockito.verify(mockPreparedStatement).setString(1, null);
         Mockito.verify(mockPreparedStatement).setBigDecimal(2, null);
@@ -521,30 +521,34 @@ public class PreparedStatementProxyXATest {
     public void testParameterSettersThrowSQLException() throws SQLException {
         // Test that SQL exceptions from parameter setters are properly propagated
         SQLException expectedException = new SQLException("Parameter setting failed");
-        
+
         Mockito.doThrow(expectedException).when(mockPreparedStatement).setString(1, "test");
-        
+
         SQLException actualException = Assertions.assertThrows(SQLException.class, () -> {
             preparedStatementProxyXA.setString(1, "test");
         });
-        
-        Assertions.assertSame(expectedException, actualException, 
-            "SQLException from parameter setter should be propagated without modification");
+
+        Assertions.assertSame(
+                expectedException,
+                actualException,
+                "SQLException from parameter setter should be propagated without modification");
     }
 
     @Test
     public void testMetaDataMethodsThrowSQLException() throws SQLException {
         // Test that SQL exceptions from metadata methods are properly propagated
         SQLException expectedException = new SQLException("Metadata access failed");
-        
+
         Mockito.when(mockPreparedStatement.getMetaData()).thenThrow(expectedException);
-        
+
         SQLException actualException = Assertions.assertThrows(SQLException.class, () -> {
             preparedStatementProxyXA.getMetaData();
         });
-        
-        Assertions.assertSame(expectedException, actualException, 
-            "SQLException from getMetaData should be propagated without modification");
+
+        Assertions.assertSame(
+                expectedException,
+                actualException,
+                "SQLException from getMetaData should be propagated without modification");
     }
 
     @Test
@@ -562,8 +566,10 @@ public class PreparedStatementProxyXATest {
                 preparedStatementProxyXA.executeUpdate();
             });
 
-            Assertions.assertSame(expectedException, actualException, 
-                "Exception from executeUpdate should be propagated without modification");
+            Assertions.assertSame(
+                    expectedException,
+                    actualException,
+                    "Exception from executeUpdate should be propagated without modification");
         }
     }
 
@@ -582,8 +588,10 @@ public class PreparedStatementProxyXATest {
                 preparedStatementProxyXA.execute();
             });
 
-            Assertions.assertSame(expectedException, actualException, 
-                "Exception from execute should be propagated without modification");
+            Assertions.assertSame(
+                    expectedException,
+                    actualException,
+                    "Exception from execute should be propagated without modification");
         }
     }
 
@@ -608,7 +616,7 @@ public class PreparedStatementProxyXATest {
         preparedStatementProxyXA.setDouble(7, Double.MIN_VALUE);
         preparedStatementProxyXA.setBigDecimal(8, new BigDecimal("-999999.999999"));
         preparedStatementProxyXA.setString(9, "测试中文字符串");
-        preparedStatementProxyXA.setBytes(10, new byte[]{-1, 0, 1});
+        preparedStatementProxyXA.setBytes(10, new byte[] {-1, 0, 1});
         preparedStatementProxyXA.setDate(11, new Date(0));
         preparedStatementProxyXA.setTime(12, new Time(0));
         preparedStatementProxyXA.setTimestamp(13, new Timestamp(0));
@@ -631,8 +639,10 @@ public class PreparedStatementProxyXATest {
 
             ResultSet actualResultSet = preparedStatementProxyXA.executeQuery();
 
-            Assertions.assertSame(expectedResultSet, actualResultSet, 
-                "Query should execute successfully after setting comprehensive parameters");
+            Assertions.assertSame(
+                    expectedResultSet,
+                    actualResultSet,
+                    "Query should execute successfully after setting comprehensive parameters");
         }
     }
 }
