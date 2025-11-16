@@ -24,6 +24,7 @@ import java.net.Inet6Address;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -76,6 +77,15 @@ public class NetUtilTest {
     public void testToStringAddress2() {
         assertThat(NetUtil.toStringAddress(ipv4)).isEqualTo(ipv4.getAddress().getHostAddress() + ":" + ipv4.getPort());
         assertThat(NetUtil.toStringAddress(ipv6)).isEqualTo(ipv6.getAddress().getHostAddress() + ":" + ipv6.getPort());
+    }
+
+    /**
+     * Test to string host.
+     */
+    @Test
+    public void testToStringHost() {
+        assertThat(NetUtil.toStringHost(ipv4)).isEqualTo(ipv4.getAddress().getHostAddress());
+        assertThat(NetUtil.toStringHost(ipv6)).isEqualTo(ipv6.getAddress().getHostAddress());
     }
 
     /**
@@ -233,5 +243,37 @@ public class NetUtilTest {
         assertThat(NetUtil.splitIPPortStr("::FFFF:192.168.1.2:8080")).isEqualTo(ipPort);
         ipPort = new String[] {"::FFFF:192.168.1.2", "8080"};
         assertThat(NetUtil.splitIPPortStr("[::FFFF:192.168.1.2]:8080")).isEqualTo(ipPort);
+    }
+
+    @Test
+    public void testValidAddress() {
+        // Test valid address
+        InetSocketAddress validAddress = new InetSocketAddress("127.0.0.1", 8080);
+        Assertions.assertDoesNotThrow(() -> NetUtil.validAddress(validAddress));
+
+        // Test invalid address with port 0
+        InetSocketAddress invalidAddress2 = new InetSocketAddress("127.0.0.1", 0);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> NetUtil.validAddress(invalidAddress2));
+    }
+
+    @Test
+    public void testGetHostByName() {
+        // Test with valid IP
+        List<String> result1 = NetUtil.getHostByName("127.0.0.1");
+        assertThat(result1).isNotNull().contains("127.0.0.1");
+
+        // Test with null
+        List<String> result2 = NetUtil.getHostByName(null);
+        assertThat(result2).isNull();
+
+        // Test with valid domain
+        List<String> result3 = NetUtil.getHostByName("localhost");
+        assertThat(result3).isNotNull().isNotEmpty();
+    }
+
+    @Test
+    public void testLocalIP() {
+        String localIP = NetUtil.localIP();
+        assertThat(localIP).isIn("127.0.0.1", "0:0:0:0:0:0:0:1");
     }
 }

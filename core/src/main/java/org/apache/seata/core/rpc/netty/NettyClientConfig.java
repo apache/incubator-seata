@@ -18,7 +18,6 @@ package org.apache.seata.core.rpc.netty;
 
 import io.netty.channel.Channel;
 import org.apache.seata.common.ConfigurationKeys;
-import org.apache.seata.core.rpc.TransportServerType;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_ENABLE_CLIENT_BATCH_SEND_REQUEST;
 import static org.apache.seata.common.DefaultValues.DEFAULT_ENABLE_CLIENT_USE_SHARED_EVENT_LOOP;
@@ -170,15 +169,6 @@ public class NettyClientConfig extends NettyBaseConfig {
      */
     public Class<? extends Channel> getClientChannelClazz() {
         return clientChannelClazz;
-    }
-
-    /**
-     * Enable native boolean.
-     *
-     * @return the boolean
-     */
-    public boolean enableNative() {
-        return TRANSPORT_SERVER_TYPE == TransportServerType.NATIVE;
     }
 
     /**

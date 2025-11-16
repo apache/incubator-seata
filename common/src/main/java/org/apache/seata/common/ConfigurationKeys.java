@@ -667,11 +667,13 @@ public interface ConfigurationKeys {
     /**
      * The constant TRANSPORT_TYPE
      */
+    @Deprecated
     String TRANSPORT_TYPE = TRANSPORT_PREFIX + "type";
 
     /**
      * The constant TRANSPORT_SERVER
      */
+    @Deprecated
     String TRANSPORT_SERVER = TRANSPORT_PREFIX + "server";
 
     /**

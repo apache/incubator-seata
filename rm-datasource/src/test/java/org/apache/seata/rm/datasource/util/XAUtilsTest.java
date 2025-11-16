@@ -112,4 +112,9 @@ public class XAUtilsTest {
     public void testCreateXAConnectionDM() throws SQLException, ClassNotFoundException {
         testCreateXAConnectionForDbType(DM, "dm.jdbc.driver.DmdbConnection", "dm.jdbc.driver.DmdbXAConnection");
     }
+
+    @Test
+    public void testCreateXAConnectionOscar() throws SQLException, ClassNotFoundException {
+        testCreateXAConnectionForDbType(OSCAR, "com.oscar.jdbc.OscarJdbc2Connection", "com.oscar.xa.Jdbc3XAConnection");
+    }
 }
