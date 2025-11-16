@@ -44,19 +44,16 @@ public class JsonUtilTest {
     public void testToJSONString_basicObject_allSerializers() {
         TestObject obj = new TestObject("test", 123);
 
-        // FastJSON should include @type
         String fastjson = fastjsonUtil.toJSONString(obj);
         assertThat(fastjson).contains("\"name\":\"test\"");
         assertThat(fastjson).contains("\"value\":123");
         assertThat(fastjson).contains("@type");
 
-        // Jackson should not include @type by default
         String jackson = jacksonUtil.toJSONString(obj);
         assertThat(jackson).contains("\"name\":\"test\"");
         assertThat(jackson).contains("\"value\":123");
-        assertThat(jackson).doesNotContain("@type");
+        assertThat(jackson).contains("@type");
 
-        // Gson should not include @type
         String gson = gsonUtil.toJSONString(obj);
         assertThat(gson).contains("\"name\":\"test\"");
         assertThat(gson).contains("\"value\":123");
@@ -65,12 +62,14 @@ public class JsonUtilTest {
 
     @Test
     public void testParseObject_basicObject_allSerializers() {
-        // Use simple JSON without @type (compatible with all serializers)
-        String json = "{\"name\":\"test\",\"value\":123}";
+        String basicJson = "{\"name\":\"test\",\"value\":123}";
 
-        TestObject fastjsonObj = fastjsonUtil.parseObject(json, TestObject.class);
-        TestObject jacksonObj = jacksonUtil.parseObject(json, TestObject.class);
-        TestObject gsonObj = gsonUtil.parseObject(json, TestObject.class);
+        String jacksonJson =
+                "{\"@type\":\"org.apache.seata.common.json.JsonUtilTest$TestObject\",\"name\":\"test\",\"value\":123}";
+
+        TestObject fastjsonObj = fastjsonUtil.parseObject(basicJson, TestObject.class);
+        TestObject jacksonObj = jacksonUtil.parseObject(jacksonJson, TestObject.class);
+        TestObject gsonObj = gsonUtil.parseObject(basicJson, TestObject.class);
 
         assertThat(fastjsonObj).isNotNull();
         assertThat(jacksonObj).isNotNull();
@@ -127,8 +126,13 @@ public class JsonUtilTest {
     public void testParseObject_genericType_list() {
         String json = "[{\"name\":\"item1\",\"value\":1},{\"name\":\"item2\",\"value\":2}]";
 
+        String jacksonJson = "[\"java.util.ArrayList\",["
+                + "{\"@type\":\"org.apache.seata.common.json.JsonUtilTest$TestObject\",\"name\":\"item1\",\"value\":1},"
+                + "{\"@type\":\"org.apache.seata.common.json.JsonUtilTest$TestObject\",\"name\":\"item2\",\"value\":2}"
+                + "]]";
+
         List<TestObject> fastjsonList = fastjsonUtil.parseObject(json, List.class);
-        List<TestObject> jacksonList = jacksonUtil.parseObject(json, List.class);
+        List<TestObject> jacksonList = jacksonUtil.parseObject(jacksonJson, List.class);
         List<TestObject> gsonList = gsonUtil.parseObject(json, List.class);
 
         assertThat(fastjsonList).hasSize(2);
@@ -158,16 +162,17 @@ public class JsonUtilTest {
         List<String> emptyList = new ArrayList<>();
 
         assertThat(fastjsonUtil.toJSONString(emptyList)).isEqualTo("[]");
-        assertThat(jacksonUtil.toJSONString(emptyList)).isEqualTo("[]");
+        assertThat(jacksonUtil.toJSONString(emptyList)).isEqualTo("[\"java.util.ArrayList\",[]]");
         assertThat(gsonUtil.toJSONString(emptyList)).isEqualTo("[]");
     }
 
     @Test
     public void testEmptyList_deserialization_allSerializers() {
         String json = "[]";
+        String jacksonJson = "[\"java.util.ArrayList\",[]]";
 
         List<?> fastjsonList = fastjsonUtil.parseObject(json, List.class);
-        List<?> jacksonList = jacksonUtil.parseObject(json, List.class);
+        List<?> jacksonList = jacksonUtil.parseObject(jacksonJson, List.class);
         List<?> gsonList = gsonUtil.parseObject(json, List.class);
 
         assertThat(fastjsonList).isEmpty();

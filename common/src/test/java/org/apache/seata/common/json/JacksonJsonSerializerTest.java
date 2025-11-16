@@ -44,14 +44,15 @@ public class JacksonJsonSerializerTest {
 
         assertThat(json).contains("\"name\":\"test\"");
         assertThat(json).contains("\"value\":123");
-        // Should NOT contain @type by default
-        assertThat(json).doesNotContain("@type");
+
+        assertThat(json).contains("@type");
     }
 
     @Test
     public void testParseObject_basicObject() {
-        // Simple JSON without @type
-        String json = "{\"name\":\"test\",\"value\":123}";
+        // Now we need to provide JSON with @type for Jackson to work correctly
+        String json =
+                "{\"@type\":\"org.apache.seata.common.json.JacksonJsonSerializerTest$TestObject\",\"name\":\"test\",\"value\":123}";
         TestObject obj = jsonSerializer.parseObject(json, TestObject.class);
 
         assertThat(obj).isNotNull();
@@ -72,36 +73,36 @@ public class JacksonJsonSerializerTest {
     @Test
     public void testUseAutoType_withType() {
         String json = "{\"@type\":\"some.type\",\"name\":\"test\"}";
-        boolean hasAutoType = ((JacksonJsonSerializer) jsonSerializer).useAutoType(json);
+        boolean hasAutoType = jsonSerializer.useAutoType(json);
         assertThat(hasAutoType).isTrue();
     }
 
     @Test
     public void testUseAutoType_withoutType() {
         String json = "{\"name\":\"test\"}";
-        boolean hasAutoType = ((JacksonJsonSerializer) jsonSerializer).useAutoType(json);
+        boolean hasAutoType = jsonSerializer.useAutoType(json);
         assertThat(hasAutoType).isFalse();
     }
 
     @Test
     public void testToJSONString_withAutoType() {
         TestObject obj = new TestObject("withType", 789);
-        // Use the advanced method that supports autoType
-        String jsonWithAutoType = ((JacksonJsonSerializer) jsonSerializer).toJSONString(obj, false, false);
+        String jsonWithAutoType = jsonSerializer.toJSONString(obj, false, false);
 
         assertThat(jsonWithAutoType).isNotNull();
-        assertThat(jsonWithAutoType).startsWith("[");
+        assertThat(jsonWithAutoType).contains("@type");
+        assertThat(jsonWithAutoType).contains("\"name\":\"withType\"");
+        assertThat(jsonWithAutoType).contains("\"value\":789");
     }
 
     @Test
     public void testParseObject_withAutoType() {
         TestObject original = new TestObject("autoTypeTest", 999);
         // Serialize with autoType enabled
-        String jsonWithAutoType = ((JacksonJsonSerializer) jsonSerializer).toJSONString(original, false, false);
+        String jsonWithAutoType = jsonSerializer.toJSONString(original, false, false);
 
         // Deserialize with autoType enabled
-        TestObject restored =
-                ((JacksonJsonSerializer) jsonSerializer).parseObject(jsonWithAutoType, TestObject.class, false);
+        TestObject restored = jsonSerializer.parseObject(jsonWithAutoType, TestObject.class, false);
 
         assertThat(restored).isNotNull();
         assertThat(restored.getName()).isEqualTo("autoTypeTest");
@@ -111,14 +112,14 @@ public class JacksonJsonSerializerTest {
     @Test
     public void testEmptyList_serialization() {
         List<String> emptyList = new ArrayList<>();
-        String json = ((JacksonJsonSerializer) jsonSerializer).toJSONString(emptyList, false, false);
+        String json = jsonSerializer.toJSONString(emptyList, false, false);
         assertThat(json).isEqualTo("[]");
     }
 
     @Test
     public void testEmptyList_deserialization() {
         String json = "[]";
-        List<?> list = ((JacksonJsonSerializer) jsonSerializer).parseObject(json, List.class, false);
+        List<?> list = jsonSerializer.parseObject(json, List.class, false);
         assertThat(list).isEmpty();
     }
 
@@ -170,14 +171,13 @@ public class JacksonJsonSerializerTest {
 
     @Test
     public void testParseObject_nullText() {
-        assertThat(((JacksonJsonSerializer) jsonSerializer).parseObject(null, String.class))
-                .isNull();
+        assertThat(jsonSerializer.parseObject(null, String.class)).isNull();
     }
 
     @Test
     public void testToJSONString_prettyPrint() {
         TestObject obj = new TestObject("pretty", 789);
-        String prettyJson = ((JacksonJsonSerializer) jsonSerializer).toJSONString(obj, true);
+        String prettyJson = jsonSerializer.toJSONString(obj, true);
 
         // Pretty JSON should contain newlines and indentation
         assertThat(prettyJson).contains("\n");
@@ -185,14 +185,13 @@ public class JacksonJsonSerializerTest {
 
     @Test
     public void testParseObject_nullJson() {
-        assertThat(((JacksonJsonSerializer) jsonSerializer).parseObject(null, TestObject.class, false))
-                .isNull();
+        assertThat(jsonSerializer.parseObject(null, TestObject.class, false)).isNull();
     }
 
     @Test
     public void testParseObject_emptyList() {
         String json = "[]";
-        List<?> list = ((JacksonJsonSerializer) jsonSerializer).parseObject(json, List.class, false);
+        List<?> list = jsonSerializer.parseObject(json, List.class, false);
         assertThat(list).isEmpty();
     }
 
@@ -201,7 +200,7 @@ public class JacksonJsonSerializerTest {
         TestObject obj = new TestObject("ignored", 222);
         String json = jsonSerializer.toJSONString(obj);
 
-        TestObject restored = ((JacksonJsonSerializer) jsonSerializer).parseObject(json, TestObject.class, true);
+        TestObject restored = jsonSerializer.parseObject(json, TestObject.class, true);
 
         assertThat(restored).isNotNull();
         assertThat(restored.getName()).isEqualTo("ignored");
