@@ -18,6 +18,8 @@ package org.apache.seata.common.loader;
 
 import org.apache.seata.common.util.StringUtils;
 
+import java.util.Objects;
+
 /**
  * The type ExtensionDefinition
  *
@@ -49,15 +51,13 @@ final class ExtensionDefinition<S> {
         this.serviceClass = clazz;
     }
 
+    public String getName() {
+        return name;
+    }
+
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
-        result = prime * result + ((serviceClass == null) ? 0 : serviceClass.hashCode());
-        result = prime * result + ((order == null) ? 0 : order.hashCode());
-        result = prime * result + ((scope == null) ? 0 : scope.hashCode());
-        return result;
+        return Objects.hash(name, serviceClass, order, scope);
     }
 
     @Override
@@ -65,27 +65,14 @@ final class ExtensionDefinition<S> {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
 
-        ExtensionDefinition<?> other = (ExtensionDefinition<?>) obj;
-        if (!StringUtils.equals(name, other.name)) {
-            return false;
-        }
-        if (!serviceClass.equals(other.serviceClass)) {
-            return false;
-        }
-        if (!order.equals(other.order)) {
-            return false;
-        }
-        return scope.equals(other.scope);
-    }
-
-    public String getName() {
-        return name;
+        ExtensionDefinition<?> that = (ExtensionDefinition<?>) obj;
+        return StringUtils.equals(name, that.name)
+                && Objects.equals(serviceClass, that.serviceClass)
+                && Objects.equals(order, that.order)
+                && Objects.equals(scope, that.scope);
     }
 }
