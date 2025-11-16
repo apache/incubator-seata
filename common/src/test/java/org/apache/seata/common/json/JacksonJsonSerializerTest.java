@@ -16,11 +16,13 @@
  */
 package org.apache.seata.common.json;
 
+import com.alibaba.fastjson.TypeReference;
 import org.apache.seata.common.exception.JsonParseException;
 import org.apache.seata.common.json.impl.JacksonJsonSerializer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -205,6 +207,112 @@ public class JacksonJsonSerializerTest {
         assertThat(restored).isNotNull();
         assertThat(restored.getName()).isEqualTo("ignored");
         assertThat(restored.getValue()).isEqualTo(222);
+    }
+
+    @Test
+    public void testParseObject_withType() {
+        String json =
+                "{\"@type\":\"org.apache.seata.common.json.JacksonJsonSerializerTest$TestObject\",\"name\":\"test\",\"value\":123}";
+        Type type = new TypeReference<TestObject>() {}.getType();
+
+        TestObject obj = jsonSerializer.parseObject(json, type);
+        assertThat(obj).isNotNull();
+        assertThat(obj.getName()).isEqualTo("test");
+        assertThat(obj.getValue()).isEqualTo(123);
+
+        assertThatThrownBy(() -> jsonSerializer.parseObject("{invalid json}", type))
+                .isInstanceOf(JsonParseException.class)
+                .hasMessageContaining("Jackson deserialize error");
+    }
+
+    @Test
+    public void testUseAutoType() {
+        String jsonWithAutoType = "{\"@type\":\"some.type\",\"name\":\"test\"}";
+        boolean hasAutoType = jsonSerializer.useAutoType(jsonWithAutoType);
+        assertThat(hasAutoType).isTrue();
+
+        String jsonWithoutAutoType = "{\"name\":\"test\"}";
+        boolean noAutoType = jsonSerializer.useAutoType(jsonWithoutAutoType);
+        assertThat(noAutoType).isFalse();
+
+        boolean nullAutoType = jsonSerializer.useAutoType(null);
+        assertThat(nullAutoType).isFalse();
+
+        boolean emptyAutoType = jsonSerializer.useAutoType("");
+        assertThat(emptyAutoType).isFalse();
+    }
+
+    @Test
+    public void testToJSONString_withPrettyPrint() {
+        TestObject obj = new TestObject("pretty", 789);
+
+        String prettyJson = jsonSerializer.toJSONString(obj, true);
+        assertThat(prettyJson).contains("\n");
+        assertThat(prettyJson).contains("@type");
+
+        String normalJson = jsonSerializer.toJSONString(obj, false);
+        assertThat(normalJson).doesNotContain("\n");
+        assertThat(normalJson).contains("@type");
+    }
+
+    @Test
+    public void testToJSONString_withIgnoreAutoTypeAndPrettyPrint() {
+        TestObject obj = new TestObject("noType", 111);
+
+        String jsonIgnorePretty = jsonSerializer.toJSONString(obj, true, true);
+        assertThat(jsonIgnorePretty).contains("\n");
+        assertThat(jsonIgnorePretty).doesNotContain("@type");
+
+        String jsonIgnoreNormal = jsonSerializer.toJSONString(obj, true, false);
+        assertThat(jsonIgnoreNormal).doesNotContain("\n");
+        assertThat(jsonIgnoreNormal).doesNotContain("@type");
+
+        String jsonNoIgnorePretty = jsonSerializer.toJSONString(obj, false, true);
+        assertThat(jsonNoIgnorePretty).contains("\n");
+        assertThat(jsonNoIgnorePretty).contains("@type");
+
+        String jsonNoIgnoreNormal = jsonSerializer.toJSONString(obj, false, false);
+        assertThat(jsonNoIgnoreNormal).doesNotContain("\n");
+        assertThat(jsonNoIgnoreNormal).contains("@type");
+
+        List<String> emptyList = new ArrayList<>();
+        String emptyListJson = jsonSerializer.toJSONString(emptyList, false, false);
+        assertThat(emptyListJson).isEqualTo("[]");
+
+        Object invalidObject = new Object() {
+            private final java.io.InputStream stream = System.in;
+        };
+
+        assertThatThrownBy(() -> jsonSerializer.toJSONString(invalidObject, false, false))
+                .isInstanceOf(JsonParseException.class)
+                .hasMessageContaining("Jackson serialize error");
+    }
+
+    @Test
+    public void testParseObject_withIgnoreAutoType() {
+        String jsonWithAutoType = jsonSerializer.toJSONString(new TestObject("ignored", 222));
+
+        TestObject objIgnore = jsonSerializer.parseObject(jsonWithAutoType, TestObject.class, true);
+        assertThat(objIgnore).isNotNull();
+        assertThat(objIgnore.getName()).isEqualTo("ignored");
+        assertThat(objIgnore.getValue()).isEqualTo(222);
+
+        TestObject objNoIgnore = jsonSerializer.parseObject(jsonWithAutoType, TestObject.class, false);
+        assertThat(objNoIgnore).isNotNull();
+        assertThat(objNoIgnore.getName()).isEqualTo("ignored");
+        assertThat(objNoIgnore.getValue()).isEqualTo(222);
+
+        List<?> emptyList = jsonSerializer.parseObject("[]", List.class, false);
+        assertThat(emptyList).isEmpty();
+
+        List<?> emptyListIgnore = jsonSerializer.parseObject("[]", List.class, true);
+        assertThat(emptyListIgnore).isEmpty();
+
+        assertThat(jsonSerializer.parseObject(null, TestObject.class, false)).isNull();
+
+        assertThatThrownBy(() -> jsonSerializer.parseObject("{invalid json}", TestObject.class, false))
+                .isInstanceOf(JsonParseException.class)
+                .hasMessageContaining("Jackson deserialize error");
     }
 
     public static class TestObject {

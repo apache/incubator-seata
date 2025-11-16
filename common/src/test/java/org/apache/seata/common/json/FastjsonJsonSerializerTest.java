@@ -16,11 +16,13 @@
  */
 package org.apache.seata.common.json;
 
+import com.alibaba.fastjson.TypeReference;
 import org.apache.seata.common.exception.JsonParseException;
 import org.apache.seata.common.json.impl.FastjsonJsonSerializer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -70,21 +72,21 @@ public class FastjsonJsonSerializerTest {
     @Test
     public void testUseAutoType_withType() {
         String json = "{\"@type\":\"some.type\",\"name\":\"test\"}";
-        boolean hasAutoType = ((FastjsonJsonSerializer) jsonSerializer).useAutoType(json);
+        boolean hasAutoType = jsonSerializer.useAutoType(json);
         assertThat(hasAutoType).isTrue();
     }
 
     @Test
     public void testUseAutoType_withoutType() {
         String json = "{\"name\":\"test\"}";
-        boolean hasAutoType = ((FastjsonJsonSerializer) jsonSerializer).useAutoType(json);
+        boolean hasAutoType = jsonSerializer.useAutoType(json);
         assertThat(hasAutoType).isFalse();
     }
 
     @Test
     public void testToJSONString_prettyPrint() {
         TestObject obj = new TestObject("pretty", 789);
-        String prettyJson = ((FastjsonJsonSerializer) jsonSerializer).toJSONString(obj, true);
+        String prettyJson = jsonSerializer.toJSONString(obj, true);
 
         assertThat(prettyJson).contains("\n");
         assertThat(prettyJson).contains("\t");
@@ -93,7 +95,7 @@ public class FastjsonJsonSerializerTest {
     @Test
     public void testToJSONString_ignoreAutoType() {
         TestObject obj = new TestObject("noType", 111);
-        String jsonWithoutType = ((FastjsonJsonSerializer) jsonSerializer).toJSONString(obj, true, true);
+        String jsonWithoutType = jsonSerializer.toJSONString(obj, true, true);
 
         assertThat(jsonWithoutType).doesNotContain("@type");
     }
@@ -102,7 +104,7 @@ public class FastjsonJsonSerializerTest {
     public void testParseObject_ignoreAutoType() {
         String json = jsonSerializer.toJSONString(new TestObject("ignored", 222));
 
-        TestObject obj = ((FastjsonJsonSerializer) jsonSerializer).parseObject(json, TestObject.class, true);
+        TestObject obj = jsonSerializer.parseObject(json, TestObject.class, true);
 
         assertThat(obj).isNotNull();
         assertThat(obj.getName()).isEqualTo("ignored");
@@ -112,14 +114,14 @@ public class FastjsonJsonSerializerTest {
     @Test
     public void testEmptyList_serialization() {
         List<String> emptyList = new ArrayList<>();
-        String json = ((FastjsonJsonSerializer) jsonSerializer).toJSONString(emptyList, false, false);
+        String json = jsonSerializer.toJSONString(emptyList, false, false);
         assertThat(json).isEqualTo("[]");
     }
 
     @Test
     public void testEmptyList_deserialization() {
         String json = "[]";
-        List<?> list = ((FastjsonJsonSerializer) jsonSerializer).parseObject(json, List.class, false);
+        List<?> list = jsonSerializer.parseObject(json, List.class, false);
         assertThat(list).isEmpty();
     }
 
@@ -162,42 +164,88 @@ public class FastjsonJsonSerializerTest {
     @Test
     public void testToJSONString_emptyList() {
         List<String> emptyList = new ArrayList<>();
-        String json = ((FastjsonJsonSerializer) jsonSerializer).toJSONString(emptyList, false, false);
+        String json = jsonSerializer.toJSONString(emptyList, false, false);
         assertThat(json).isEqualTo("[]");
     }
 
     @Test
     public void testToJSONString_withAutoType() {
         TestObject obj = new TestObject("withType", 789);
-        String jsonWithAutoType = ((FastjsonJsonSerializer) jsonSerializer).toJSONString(obj, false, false);
+        String jsonWithAutoType = jsonSerializer.toJSONString(obj, false, false);
 
         assertThat(jsonWithAutoType).contains("@type");
     }
 
     @Test
     public void testParseObject_nullJson() {
-        assertThat(((FastjsonJsonSerializer) jsonSerializer).parseObject(null, TestObject.class, false))
-                .isNull();
+        assertThat(jsonSerializer.parseObject(null, TestObject.class, false)).isNull();
     }
 
     @Test
     public void testParseObject_emptyList() {
         String json = "[]";
-        List<?> list = ((FastjsonJsonSerializer) jsonSerializer).parseObject(json, List.class, false);
+        List<?> list = jsonSerializer.parseObject(json, List.class, false);
         assertThat(list).isEmpty();
     }
 
     @Test
     public void testParseObject_withAutoType() {
         TestObject original = new TestObject("autoTypeTest", 999);
-        String jsonWithAutoType = ((FastjsonJsonSerializer) jsonSerializer).toJSONString(original, false, false);
+        String jsonWithAutoType = jsonSerializer.toJSONString(original, false, false);
 
-        TestObject restored =
-                ((FastjsonJsonSerializer) jsonSerializer).parseObject(jsonWithAutoType, TestObject.class, false);
+        TestObject restored = jsonSerializer.parseObject(jsonWithAutoType, TestObject.class, false);
 
         assertThat(restored).isNotNull();
         assertThat(restored.getName()).isEqualTo("autoTypeTest");
         assertThat(restored.getValue()).isEqualTo(999);
+    }
+
+    @Test
+    public void testParseObject_withType() {
+
+        String json = "{\"name\":\"test\",\"value\":123}";
+        Type type = new TypeReference<TestObject>() {}.getType();
+
+        TestObject obj = jsonSerializer.parseObject(json, type);
+        assertThat(obj).isNotNull();
+        assertThat(obj.getName()).isEqualTo("test");
+        assertThat(obj.getValue()).isEqualTo(123);
+
+        String listJson = "[{\"name\":\"item1\",\"value\":1},{\"name\":\"item2\",\"value\":2}]";
+        Type listType = new TypeReference<List<TestObject>>() {}.getType();
+
+        List<TestObject> list = jsonSerializer.parseObject(listJson, listType);
+        assertThat(list).hasSize(2);
+        assertThat(list.get(0).getName()).isEqualTo("item1");
+        assertThat(list.get(1).getValue()).isEqualTo(2);
+    }
+
+    @Test
+    public void testParseObject_withIgnoreAutoType() {
+
+        String jsonWithAutoType = jsonSerializer.toJSONString(new TestObject("ignored", 222));
+
+        TestObject objIgnore = jsonSerializer.parseObject(jsonWithAutoType, TestObject.class, true);
+        assertThat(objIgnore).isNotNull();
+        assertThat(objIgnore.getName()).isEqualTo("ignored");
+        assertThat(objIgnore.getValue()).isEqualTo(222);
+
+        TestObject objNoIgnore = jsonSerializer.parseObject(jsonWithAutoType, TestObject.class, false);
+        assertThat(objNoIgnore).isNotNull();
+        assertThat(objNoIgnore.getName()).isEqualTo("ignored");
+        assertThat(objNoIgnore.getValue()).isEqualTo(222);
+
+        List<?> emptyListResult = jsonSerializer.parseObject("", List.class, false);
+        assertThat(emptyListResult).isNull();
+
+        List<?> emptyList = jsonSerializer.parseObject("[]", List.class, false);
+        assertThat(emptyList).isEmpty();
+
+        assertThat(jsonSerializer.parseObject(null, TestObject.class, false)).isNull();
+
+        assertThatThrownBy(() -> jsonSerializer.parseObject("{invalid json}", TestObject.class, false))
+                .isInstanceOf(JsonParseException.class)
+                .hasMessageContaining("FastJSON deserialize error");
     }
 
     public static class TestObject {
