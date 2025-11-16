@@ -32,7 +32,7 @@ public class ParameterParserTest extends BaseSpringBootTest {
      * init
      */
     @BeforeEach
-    private void init() {
+    public void init() {
         String[] args = new String[] {"-h", "127.0.0.1", "-p", "8088", "-m", "file", "-e", "test"};
         parameterParser = new ParameterParser(args);
     }

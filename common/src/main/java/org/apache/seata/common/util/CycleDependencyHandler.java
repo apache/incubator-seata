@@ -22,24 +22,42 @@ import java.util.function.Function;
 
 /**
  * The type CycleDependency handler.
- *
+ * <p>
+ * Used to handle cycle dependencies when converting objects to strings.
+ * </p>
  */
 public class CycleDependencyHandler {
 
     private static final ThreadLocal<Set<Object>> OBJECT_SET_LOCAL = new ThreadLocal<>();
 
+    /**
+     * Check if cycle dependency handling is starting
+     *
+     * @return true if starting, false otherwise
+     */
     public static boolean isStarting() {
         return OBJECT_SET_LOCAL.get() != null;
     }
 
+    /**
+     * Start cycle dependency handling
+     */
     public static void start() {
         OBJECT_SET_LOCAL.set(new HashSet<>(8));
     }
 
+    /**
+     * End cycle dependency handling
+     */
     public static void end() {
         OBJECT_SET_LOCAL.remove();
     }
 
+    /**
+     * Add object to the set
+     *
+     * @param obj the object to add
+     */
     public static void addObject(Object obj) {
         if (obj == null) {
             return;
@@ -47,11 +65,20 @@ public class CycleDependencyHandler {
 
         // get object set
         Set<Object> objectSet = OBJECT_SET_LOCAL.get();
+        if (objectSet == null) {
+            return;
+        }
 
         // add to object set
         objectSet.add(getUniqueSubstituteObject(obj));
     }
 
+    /**
+     * Check if object is contained in the set
+     *
+     * @param obj the object to check
+     * @return true if contained, false otherwise
+     */
     public static boolean containsObject(Object obj) {
         if (obj == null) {
             return false;
@@ -59,13 +86,21 @@ public class CycleDependencyHandler {
 
         // get object set
         Set<Object> objectSet = OBJECT_SET_LOCAL.get();
-        if (objectSet.isEmpty()) {
+        if (objectSet == null || objectSet.isEmpty()) {
             return false;
         }
 
         return objectSet.contains(getUniqueSubstituteObject(obj));
     }
 
+    /**
+     * Wrap function with cycle dependency handling
+     *
+     * @param obj the object
+     * @param function the function to apply
+     * @param <O> the type of object
+     * @return the result of function
+     */
     public static <O> String wrap(O obj, Function<O, String> function) {
         boolean isStarting = isStarting();
         try {
@@ -89,6 +124,12 @@ public class CycleDependencyHandler {
         }
     }
 
+    /**
+     * Convert object to reference string
+     *
+     * @param obj the object
+     * @return the reference string
+     */
     public static String toRefString(Object obj) {
         return "(ref " + obj.getClass().getSimpleName() + ")";
     }
@@ -101,7 +142,7 @@ public class CycleDependencyHandler {
      * @return the substitute object
      */
     private static Object getUniqueSubstituteObject(Object obj) {
-        // TODO: HELP-WANTED: Optimize this method to ensure uniqueness
+        // Use System.identityHashCode to avoid StackOverflowError
         return System.identityHashCode(obj);
     }
 }
