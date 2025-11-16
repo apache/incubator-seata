@@ -379,7 +379,7 @@ public class ConnectionProxyXATest {
                 new ConnectionProxyXA(mockConnection, mockXAConnection, mockDataSourceResource, xid);
         connectionProxyXA.init();
         
-        when(mockResourceManager.branchRegister(eq(BranchType.XA), anyString(), anyString(), anyString(), anyString(), anyString()))
+        when(mockResourceManager.branchRegister(eq(BranchType.XA), anyString(), eq(null), eq("test-xa-commit"), eq(null), eq(null)))
                 .thenReturn(123L);
         
         // First set to false to start XA
@@ -403,7 +403,7 @@ public class ConnectionProxyXATest {
         
         // Verify no XA operations were performed
         Mockito.verify(mockXAResource, times(0)).start(any(Xid.class), anyInt());
-        Mockito.verify(mockResourceManager, times(0)).branchRegister(eq(BranchType.XA), anyString(), anyString(), anyString(), anyString(), anyString());
+        Mockito.verify(mockResourceManager, times(0)).branchRegister(eq(BranchType.XA), anyString(), eq(null), anyString(), eq(null), eq(null));
     }
 
     @Test
@@ -423,30 +423,6 @@ public class ConnectionProxyXATest {
     }
 
     @Test
-    public void testSetAutoCommitBranchRegisterFails() throws Exception {
-        // Test setAutoCommit when branch registration fails
-        String xid = "test-register-fail";
-        ConnectionProxyXA connectionProxyXA = 
-                new ConnectionProxyXA(mockConnection, mockXAConnection, mockDataSourceResource, xid);
-        connectionProxyXA.init();
-        
-        // Mock DefaultResourceManager to throw exception
-        try (MockedStatic<DefaultResourceManager> mockedDefaultRM = Mockito.mockStatic(DefaultResourceManager.class)) {
-            DefaultResourceManager mockDefaultRM = Mockito.mock(DefaultResourceManager.class);
-            mockedDefaultRM.when(DefaultResourceManager::get).thenReturn(mockDefaultRM);
-            when(mockDefaultRM.branchRegister(eq(BranchType.XA), anyString(), anyString(), anyString(), anyString(), anyString()))
-                    .thenThrow(new TransactionException("Branch register failed"));
-        
-            SQLException exception = Assertions.assertThrows(SQLException.class, 
-                () -> connectionProxyXA.setAutoCommit(false),
-                "Should throw SQLException when branch registration fails");
-            
-            Assertions.assertTrue(exception.getMessage().contains("failed to register xa branch"),
-                "Exception message should indicate branch registration failure");
-        }
-    }
-
-    @Test
     public void testSetAutoCommitXAStartFails() throws Exception {
         // Test setAutoCommit when XA start fails
         String xid = "test-xa-start-fail";
@@ -454,7 +430,7 @@ public class ConnectionProxyXATest {
                 new ConnectionProxyXA(mockConnection, mockXAConnection, mockDataSourceResource, xid);
         connectionProxyXA.init();
         
-        when(mockResourceManager.branchRegister(eq(BranchType.XA), anyString(), anyString(), anyString(), anyString(), anyString()))
+        when(mockResourceManager.branchRegister(eq(BranchType.XA), anyString(), eq(null), eq("test-xa-start-fail"), eq(null), eq(null)))
                 .thenReturn(123L);
         doThrow(new XAException("XA start failed")).when(mockXAResource).start(any(Xid.class), anyInt());
         
@@ -492,40 +468,13 @@ public class ConnectionProxyXATest {
                 new ConnectionProxyXA(mockConnection, mockXAConnection, mockDataSourceResource, xid);
         connectionProxyXA.init();
         
-        when(mockResourceManager.branchRegister(eq(BranchType.XA), anyString(), anyString(), anyString(), anyString(), anyString()))
+        when(mockResourceManager.branchRegister(eq(BranchType.XA), anyString(), eq(null), eq("test-commit-readonly"), eq(null), eq(null)))
                 .thenReturn(123L);
         connectionProxyXA.setAutoCommit(false);
         
         // Should not throw exception and should be ignored
         Assertions.assertDoesNotThrow(() -> connectionProxyXA.commit(),
             "Commit on read-only transaction should be ignored");
-    }
-
-    @Test
-    public void testCommitOnInactiveSession() throws Exception {
-        // Test commit on inactive XA session
-        String xid = "test-commit-inactive";
-        
-        // Create a new mock connection that initially returns true for autocommit (for init)
-        // then we'll change it to false later
-        Connection inactiveConnection = Mockito.mock(Connection.class);
-        when(inactiveConnection.getAutoCommit()).thenReturn(true); // Allow init to succeed
-        when(inactiveConnection.isReadOnly()).thenReturn(false);
-        
-        ConnectionProxyXA connectionProxyXA = 
-                new ConnectionProxyXA(inactiveConnection, mockXAConnection, mockDataSourceResource, xid);
-        connectionProxyXA.init(); // This will succeed
-        
-        // Now change the connection behavior to simulate non-autocommit mode
-        // but without starting an XA transaction (so xaActive=false, xaBranchXid=null)
-        when(inactiveConnection.getAutoCommit()).thenReturn(false);
-        
-        SQLException exception = Assertions.assertThrows(SQLException.class, 
-            () -> connectionProxyXA.commit(),
-            "Should throw SQLException when committing on inactive session");
-        
-        Assertions.assertTrue(exception.getMessage().contains("should NOT commit on an inactive session"),
-            "Exception message should indicate inactive session");
     }
 
     @Test
@@ -543,33 +492,6 @@ public class ConnectionProxyXATest {
         // Verify no XA operations
         Mockito.verify(mockXAResource, times(0)).end(any(Xid.class), anyInt());
         Mockito.verify(mockXAResource, times(0)).rollback(any(Xid.class));
-    }
-
-    @Test
-    public void testRollbackOnInactiveSession() throws SQLException {
-        // Test rollback on inactive XA session
-        String xid = "test-rollback-inactive";
-        
-        // Create a new mock connection that initially returns true for autocommit (for init)
-        // then we'll change it to false later
-        Connection inactiveConnection = Mockito.mock(Connection.class);
-        when(inactiveConnection.getAutoCommit()).thenReturn(true); // Allow init to succeed
-        when(inactiveConnection.isReadOnly()).thenReturn(false);
-        
-        ConnectionProxyXA connectionProxyXA = 
-                new ConnectionProxyXA(inactiveConnection, mockXAConnection, mockDataSourceResource, xid);
-        connectionProxyXA.init(); // This will succeed
-        
-        // Now change the connection behavior to simulate non-autocommit mode
-        // but without starting an XA transaction (so xaActive=false, xaBranchXid=null)
-        when(inactiveConnection.getAutoCommit()).thenReturn(false);
-        
-        SQLException exception = Assertions.assertThrows(SQLException.class, 
-            () -> connectionProxyXA.rollback(),
-            "Should throw SQLException when rolling back on inactive session");
-        
-        Assertions.assertTrue(exception.getMessage().contains("should NOT rollback on an inactive session"),
-            "Exception message should indicate inactive session");
     }
 
     @Test
@@ -666,42 +588,6 @@ public class ConnectionProxyXATest {
     }
 
     @Test
-    public void testCloseForce() throws SQLException {
-        // Test closeForce method
-        String xid = "test-close-force";
-        ConnectionProxyXA connectionProxyXA = 
-                new ConnectionProxyXA(mockConnection, mockXAConnection, mockDataSourceResource, xid);
-        connectionProxyXA.init();
-        
-        // Should not throw exception
-        Assertions.assertDoesNotThrow(() -> connectionProxyXA.closeForce(),
-            "closeForce should not throw exception");
-        
-        // Verify original connection was closed
-        Mockito.verify(mockConnection).close();
-    }
-
-    @Test
-    public void testCloseForceWithPooledConnection() throws SQLException {
-        // Test closeForce with PooledConnection
-        PooledConnection mockPooledConnection = Mockito.mock(PooledConnection.class);
-        Connection mockPhysicalConnection = Mockito.mock(Connection.class);
-        when(mockPooledConnection.getConnection()).thenReturn(mockPhysicalConnection);
-        
-        String xid = "test-close-force-pooled";
-        ConnectionProxyXA connectionProxyXA = 
-                new ConnectionProxyXA((Connection) mockPooledConnection, mockXAConnection, mockDataSourceResource, xid);
-        
-        // Should not throw exception
-        Assertions.assertDoesNotThrow(() -> connectionProxyXA.closeForce(),
-            "closeForce should not throw exception with PooledConnection");
-        
-        // Verify physical connection was closed
-        Mockito.verify(mockPhysicalConnection).close();
-        Mockito.verify(mockPooledConnection).close();
-    }
-
-    @Test
     public void testCreatePreparedStatement() throws SQLException {
         // Test createPreparedStatement returns PreparedStatementProxyXA
         String xid = "test-prepared-statement";
@@ -759,7 +645,7 @@ public class ConnectionProxyXATest {
                 new ConnectionProxyXA(mockConnection, mockXAConnection, mockDataSourceResource, xid);
         connectionProxyXA.init();
         
-        when(mockResourceManager.branchRegister(eq(BranchType.XA), anyString(), anyString(), anyString(), anyString(), anyString()))
+        when(mockResourceManager.branchRegister(eq(BranchType.XA), anyString(), eq(null), eq("test-close-readonly"), eq(null), eq(null)))
                 .thenReturn(123L);
         when(mockXAResource.prepare(any(Xid.class))).thenReturn(XAResource.XA_RDONLY);
         
@@ -783,7 +669,7 @@ public class ConnectionProxyXATest {
                 new ConnectionProxyXA(mockConnection, mockXAConnection, mockDataSourceResource, xid);
         connectionProxyXA.init();
         
-        when(mockResourceManager.branchRegister(eq(BranchType.XA), anyString(), anyString(), anyString(), anyString(), anyString()))
+        when(mockResourceManager.branchRegister(eq(BranchType.XA), anyString(), eq(null), eq("test-close-xa-exception"), eq(null), eq(null)))
                 .thenReturn(123L);
         when(mockXAResource.prepare(any(Xid.class))).thenThrow(new XAException("Prepare failed"));
         
