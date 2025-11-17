@@ -63,8 +63,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -100,7 +98,6 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     protected volatile boolean isSending = false;
 
     private final Runnable reconnectTask;
-    private ScheduledExecutorService reconnectTimer;
     private AtomicBoolean timerStarted = new AtomicBoolean(false);
 
     /**
@@ -127,30 +124,30 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
 
     @Override
     public void init() {
-        if (timerStarted.compareAndSet(false, true)) {
-            mergeLock.lock();
-            try {
-                this.reconnectTimer = new ScheduledThreadPoolExecutor(
-                        1, new NamedThreadFactory("Reconnect-Timer-" + transactionRole.name(), 1));
-                this.reconnectTimer.scheduleAtFixedRate(
-                        this.reconnectTask, SCHEDULE_DELAY_MILLS, SCHEDULE_INTERVAL_MILLS, TimeUnit.MILLISECONDS);
-                LOGGER.info("Instance reconnect timer started (role: {})", transactionRole.name());
-            } finally {
-                mergeLock.unlock();
+        mergeLock.lock();
+        try {
+            if (timerStarted.compareAndSet(false, true)) {
+                timerExecutor.scheduleAtFixedRate(
+                        reconnectTask, SCHEDULE_DELAY_MILLS, SCHEDULE_INTERVAL_MILLS, TimeUnit.MILLISECONDS);
+                LOGGER.info("Reconnect timer started (role: {})", transactionRole.name());
             }
+
+            if (this.isEnableClientBatchSendRequest()) {
+                mergeSendExecutorService = new ThreadPoolExecutor(
+                        MAX_MERGE_SEND_THREAD,
+                        MAX_MERGE_SEND_THREAD,
+                        KEEP_ALIVE_TIME,
+                        TimeUnit.MILLISECONDS,
+                        new LinkedBlockingQueue<>(),
+                        new NamedThreadFactory(getThreadPrefix(), MAX_MERGE_SEND_THREAD));
+                mergeSendExecutorService.submit(new MergedSendRunnable());
+            }
+
+            super.init();
+            clientBootstrap.start();
+        } finally {
+            mergeLock.unlock();
         }
-        if (this.isEnableClientBatchSendRequest()) {
-            mergeSendExecutorService = new ThreadPoolExecutor(
-                    MAX_MERGE_SEND_THREAD,
-                    MAX_MERGE_SEND_THREAD,
-                    KEEP_ALIVE_TIME,
-                    TimeUnit.MILLISECONDS,
-                    new LinkedBlockingQueue<>(),
-                    new NamedThreadFactory(getThreadPrefix(), MAX_MERGE_SEND_THREAD));
-            mergeSendExecutorService.submit(new MergedSendRunnable());
-        }
-        super.init();
-        clientBootstrap.start();
     }
 
     public AbstractNettyRemotingClient(
@@ -164,16 +161,16 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         clientChannelManager = new NettyClientChannelManager(
                 new NettyPoolableFactory(this, clientBootstrap), getPoolKeyFunction(), nettyClientConfig);
         this.reconnectTask = () -> {
+            if (!timerStarted.get()) {
+                return;
+            }
             try {
                 String serviceGroup = getTransactionServiceGroup();
                 if (StringUtils.isNotBlank(serviceGroup)) {
                     clientChannelManager.reconnect(serviceGroup);
                 }
-            } catch (Exception ex) {
-                LOGGER.warn(
-                        "Reconnect failed for service group: {}, error: {}",
-                        getTransactionServiceGroup(),
-                        ex.getMessage());
+            } catch (Throwable t) {
+                LOGGER.error("Reconnect task failed for role: {}", transactionRole.name(), t);
             }
         };
     }
@@ -294,10 +291,8 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     public void destroy() {
         mergeLock.lock();
         try {
-            if (reconnectTimer != null && timerStarted.get()) {
-                reconnectTimer.shutdown();
-                timerStarted.set(false);
-                LOGGER.info("Instance reconnect timer stopped (role: {})", transactionRole.name());
+            if (timerStarted.compareAndSet(true, false)) {
+                LOGGER.info("Reconnect timer stopped (role: {})", transactionRole.name());
             }
             clientBootstrap.shutdown();
             if (mergeSendExecutorService != null) {
