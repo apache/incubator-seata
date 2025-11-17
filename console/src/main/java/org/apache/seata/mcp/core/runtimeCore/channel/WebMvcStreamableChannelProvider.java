@@ -257,7 +257,8 @@ public class WebMvcStreamableChannelProvider implements StreamableRuntimeTranspo
             return ServerResponse.badRequest().body(new ProtocolErrorException("Invalid format"));
         } catch (Exception e) {
             logger.error("Process failed: {}", e.getMessage());
-            return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ProtocolErrorException(e.getMessage()));
+            return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ProtocolErrorException(e.getMessage()));
         }
     }
 
@@ -278,7 +279,8 @@ public class WebMvcStreamableChannelProvider implements StreamableRuntimeTranspo
                             ProtocolDefinition.JSONRPC_VERSION, request.getId(), result, null));
         } catch (Exception e) {
             logger.error("Init failed: {}", e.getMessage());
-            return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ProtocolErrorException(e.getMessage()));
+            return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ProtocolErrorException(e.getMessage()));
         }
     }
 
@@ -315,7 +317,8 @@ public class WebMvcStreamableChannelProvider implements StreamableRuntimeTranspo
                     },
                     Duration.ZERO);
         }
-        return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ProtocolErrorException("Unknown message type"));
+        return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ProtocolErrorException("Unknown message type"));
     }
 
     private ServerResponse handleDelete(ServerRequest req) {
@@ -343,7 +346,8 @@ public class WebMvcStreamableChannelProvider implements StreamableRuntimeTranspo
             return ServerResponse.ok().build();
         } catch (Exception e) {
             logger.error("Delete failed for {}: {}", sessionId, e.getMessage());
-            return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ProtocolErrorException(e.getMessage()));
+            return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ProtocolErrorException(e.getMessage()));
         }
     }
 
@@ -366,11 +370,15 @@ public class WebMvcStreamableChannelProvider implements StreamableRuntimeTranspo
         @Override
         public Mono<Void> sendMessage(ProtocolDefinition.JSONRPCMessage msg, String msgId) {
             return Mono.fromRunnable(() -> {
-                if (closed) return;
+                if (closed) {
+                    return;
+                }
 
                 lock.lock();
                 try {
-                    if (closed) return;
+                    if (closed) {
+                        return;
+                    }
 
                     String json = mapper.writeValueAsString(msg);
                     sse.id(msgId != null ? msgId : id).event(EVENT_MESSAGE).data(json);
@@ -391,9 +399,13 @@ public class WebMvcStreamableChannelProvider implements StreamableRuntimeTranspo
         }
 
         private boolean isDisconnect(Throwable e) {
-            if (e == null) return false;
+            if (e == null) {
+                return false;
+            }
             String msg = e.getMessage();
-            if (msg == null) return false;
+            if (msg == null) {
+                return false;
+            }
             return msg.contains("Connection reset")
                     || msg.contains("Broken pipe")
                     || msg.contains("Connection aborted")
@@ -415,7 +427,9 @@ public class WebMvcStreamableChannelProvider implements StreamableRuntimeTranspo
         public void close() {
             lock.lock();
             try {
-                if (closed) return;
+                if (closed) {
+                    return;
+                }
                 closed = true;
                 sse.complete();
             } catch (Exception e) {

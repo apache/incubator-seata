@@ -50,7 +50,7 @@ public class MCPProperties {
     public MCPProperties() {}
 
     public boolean isSseType() {
-        return mcpType.equals(SSE_TYPE);
+        return SSE_TYPE.equals(mcpType);
     }
 
     public List<String> getEndpoints() {
@@ -129,7 +129,7 @@ public class MCPProperties {
     @PostConstruct
     public void init() {
         mcpType = env.getProperty("seata.mcp.mcpType", "sse");
-        if (mcpType.equals(STREAMABLE_TYPE)) {
+        if (STREAMABLE_TYPE.equals(mcpType)) {
             String mcpEndPoint = env.getProperty("seata.mcp.streamable.mcpEndpoint", "/mcp");
             Long heartBeatSecondDuration =
                     Long.parseLong(env.getProperty("seata.mcp.streamable.heartBeatSecondDuration", "30"));

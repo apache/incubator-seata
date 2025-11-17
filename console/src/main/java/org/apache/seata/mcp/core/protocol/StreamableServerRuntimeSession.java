@@ -305,7 +305,7 @@ public class StreamableServerRuntimeSession implements RuntimeSession {
         }
 
         private boolean isDisconnect(Throwable e) {
-            if (e == null){
+            if (e == null) {
                 return false;
             }
             String msg = e.getMessage();

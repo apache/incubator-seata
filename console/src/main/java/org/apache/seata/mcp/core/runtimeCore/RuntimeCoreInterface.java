@@ -41,18 +41,18 @@ public interface RuntimeCoreInterface {
     ProtocolDefinition.Implementation DEFAULT_SERVER_INFO =
             new ProtocolDefinition.Implementation("runtime-server", "1.0.0");
 
-    static AsyncSpecification<?> async(RuntimeTransportProvider provider) {
-        return new StandardSpecification(provider);
+    static BaseAsyncSpecification<?> async(RuntimeTransportProvider provider) {
+        return new StandardSpecificationBase(provider);
     }
 
-    static AsyncSpecification<?> async(StreamableRuntimeTransportProvider provider) {
-        return new StreamableSpecification(provider);
+    static BaseAsyncSpecification<?> async(StreamableRuntimeTransportProvider provider) {
+        return new StreamableSpecificationBase(provider);
     }
 
-    class StandardSpecification extends AsyncSpecification<StandardSpecification> {
+    class StandardSpecificationBase extends BaseAsyncSpecification<StandardSpecificationBase> {
         private final RuntimeTransportProvider provider;
 
-        StandardSpecification(RuntimeTransportProvider provider) {
+        StandardSpecificationBase(RuntimeTransportProvider provider) {
             RuntimeUtils.notNull(provider, "Provider required");
             this.provider = provider;
         }
@@ -63,10 +63,10 @@ public interface RuntimeCoreInterface {
         }
     }
 
-    class StreamableSpecification extends AsyncSpecification<StreamableSpecification> {
+    class StreamableSpecificationBase extends BaseAsyncSpecification<StreamableSpecificationBase> {
         private final StreamableRuntimeTransportProvider provider;
 
-        StreamableSpecification(StreamableRuntimeTransportProvider provider) {
+        StreamableSpecificationBase(StreamableRuntimeTransportProvider provider) {
             this.provider = provider;
         }
 
@@ -76,7 +76,7 @@ public interface RuntimeCoreInterface {
         }
     }
 
-    abstract class AsyncSpecification<S extends AsyncSpecification<S>> {
+    abstract class BaseAsyncSpecification<S extends BaseAsyncSpecification<S>> {
         private ObjectMapper mapper;
         private ProtocolDefinition.Implementation serverInfo = DEFAULT_SERVER_INFO;
         private ProtocolDefinition.ServerCapabilities capabilities;

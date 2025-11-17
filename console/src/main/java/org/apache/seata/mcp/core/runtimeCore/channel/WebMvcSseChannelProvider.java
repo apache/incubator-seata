@@ -173,7 +173,8 @@ public class WebMvcSseChannelProvider implements RuntimeTransportProvider {
             return ServerResponse.badRequest().body(new ProtocolErrorException("Invalid format"));
         } catch (Exception e) {
             logger.error("Process failed: {}", e.getMessage());
-            return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ProtocolErrorException(e.getMessage()));
+            return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ProtocolErrorException(e.getMessage()));
         }
     }
 
@@ -202,7 +203,9 @@ public class WebMvcSseChannelProvider implements RuntimeTransportProvider {
                         logger.error("Send failed for {}: {}", id, e.getMessage());
                         sse.error(e);
                         RuntimeSession s = activeSessions.get(id);
-                        if (s != null) s.close();
+                        if (s != null) {
+                            s.close();
+                        }
                         return Mono.empty();
                     })
                     .subscribeOn(Schedulers.boundedElastic())
