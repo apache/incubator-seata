@@ -22,7 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.seata.mcp.core.common.RuntimeUtils;
 import org.apache.seata.mcp.core.protocol.BaseTransportProvider;
 import org.apache.seata.mcp.core.protocol.ProtocolDefinition;
-import org.apache.seata.mcp.core.protocol.ProtocolError;
+import org.apache.seata.mcp.core.protocol.ProtocolErrorException;
 import org.apache.seata.mcp.core.protocol.RuntimeTransport;
 import org.apache.seata.mcp.core.protocol.RuntimeTransportProvider;
 import org.apache.seata.mcp.core.protocol.SchemaValidator;
@@ -170,10 +170,10 @@ public class AsyncRuntimeEngine {
 
     public Mono<Void> addTool(RuntimeCapabilities.AsyncToolSpecification spec) {
         if (spec == null || spec.tool() == null || (spec.call() == null && spec.callHandler() == null)) {
-            return Mono.error(new ProtocolError("Invalid tool specification"));
+            return Mono.error(new ProtocolErrorException("Invalid tool specification"));
         }
         if (capabilities.tools() == null) {
-            return Mono.error(new ProtocolError("Tools not enabled"));
+            return Mono.error(new ProtocolErrorException("Tools not enabled"));
         }
 
         RuntimeCapabilities.AsyncToolSpecification wrapped = wrapTool(validator, spec);
@@ -181,7 +181,7 @@ public class AsyncRuntimeEngine {
         return Mono.defer(() -> {
             if (toolRegistry.stream()
                     .anyMatch(t -> t.tool().getName().equals(wrapped.tool().getName()))) {
-                return Mono.error(new ProtocolError(
+                return Mono.error(new ProtocolErrorException(
                         "Tool already exists: " + wrapped.tool().getName()));
             }
 
@@ -300,7 +300,7 @@ public class AsyncRuntimeEngine {
                     .filter(t -> t.tool().getName().equals(req.getName()))
                     .findFirst()
                     .map(t -> Mono.defer(() -> t.callHandler().apply(exchange, req)))
-                    .orElse(Mono.error(new ProtocolError("Tool not found: " + req.getName())));
+                    .orElse(Mono.error(new ProtocolErrorException("Tool not found: " + req.getName())));
         };
     }
 

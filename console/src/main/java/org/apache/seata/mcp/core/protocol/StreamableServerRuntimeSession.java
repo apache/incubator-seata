@@ -173,11 +173,11 @@ public class StreamableServerRuntimeSession implements RuntimeSession {
         return Mono.defer(() -> {
             SessionStream stream = streamMap.get(resp.id);
             if (stream == null) {
-                return Mono.error(new ProtocolError("Unknown response id: " + resp.id));
+                return Mono.error(new ProtocolErrorException("Unknown response id: " + resp.id));
             }
             MonoSink<ProtocolDefinition.JSONRPCResponse> sink = stream.pending.remove(resp.id);
             if (sink == null) {
-                return Mono.error(new ProtocolError("No pending request for: " + resp.id));
+                return Mono.error(new ProtocolErrorException("No pending request for: " + resp.id));
             }
             sink.success(resp);
             return Mono.empty();
@@ -295,7 +295,7 @@ public class StreamableServerRuntimeSession implements RuntimeSession {
                     })
                     .handle((resp, sink) -> {
                         if (resp.error != null) {
-                            sink.error(new ProtocolError(resp.error));
+                            sink.error(new ProtocolErrorException(resp.error));
                         } else if (typeRef.getType().equals(Void.class)) {
                             sink.complete();
                         } else {
@@ -305,7 +305,9 @@ public class StreamableServerRuntimeSession implements RuntimeSession {
         }
 
         private boolean isDisconnect(Throwable e) {
-            if (e == null) return false;
+            if (e == null){
+                return false;
+            }
             String msg = e.getMessage();
             return msg != null
                     && (msg.contains("Connection reset") || msg.contains("Broken pipe") || msg.contains("中止了一个已建立的连接"));

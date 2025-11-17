@@ -20,7 +20,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.seata.mcp.core.common.RuntimeUtils;
 import org.apache.seata.mcp.core.protocol.ProtocolDefinition;
-import org.apache.seata.mcp.core.protocol.ProtocolError;
+import org.apache.seata.mcp.core.protocol.ProtocolErrorException;
 import org.apache.seata.mcp.core.protocol.RuntimeSession;
 import org.apache.seata.mcp.core.protocol.StreamableRuntimeTransportProvider;
 import org.apache.seata.mcp.core.protocol.StreamableServerRuntimeSession;
@@ -224,7 +224,7 @@ public class WebMvcStreamableChannelProvider implements StreamableRuntimeTranspo
 
         List<MediaType> accept = req.headers().asHttpHeaders().getAccept();
         if (!accept.contains(MediaType.TEXT_EVENT_STREAM) || !accept.contains(MediaType.APPLICATION_JSON)) {
-            return ServerResponse.badRequest().body(new ProtocolError("Invalid Accept headers"));
+            return ServerResponse.badRequest().body(new ProtocolErrorException("Invalid Accept headers"));
         }
 
         RuntimeContext ctx = contextResolver.extract(req, new DefaultRuntimeContext());
@@ -242,22 +242,22 @@ public class WebMvcStreamableChannelProvider implements StreamableRuntimeTranspo
 
             String sessionId = req.headers().asHttpHeaders().getFirst(ProtocolDefinition.HEADER_SESSION_ID);
             if (sessionId == null) {
-                return ServerResponse.badRequest().body(new ProtocolError("Session ID missing"));
+                return ServerResponse.badRequest().body(new ProtocolErrorException("Session ID missing"));
             }
 
             StreamableServerRuntimeSession session = activeSessions.get(sessionId);
             if (session == null) {
                 return ServerResponse.status(HttpStatus.NOT_FOUND)
-                        .body(new ProtocolError("Session not found: " + sessionId));
+                        .body(new ProtocolErrorException("Session not found: " + sessionId));
             }
 
             return handleMessage(msg, session, ctx, sessionId);
         } catch (IllegalArgumentException | IOException e) {
             logger.error("Deserialize failed: {}", e.getMessage());
-            return ServerResponse.badRequest().body(new ProtocolError("Invalid format"));
+            return ServerResponse.badRequest().body(new ProtocolErrorException("Invalid format"));
         } catch (Exception e) {
             logger.error("Process failed: {}", e.getMessage());
-            return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ProtocolError(e.getMessage()));
+            return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ProtocolErrorException(e.getMessage()));
         }
     }
 
@@ -278,7 +278,7 @@ public class WebMvcStreamableChannelProvider implements StreamableRuntimeTranspo
                             ProtocolDefinition.JSONRPC_VERSION, request.getId(), result, null));
         } catch (Exception e) {
             logger.error("Init failed: {}", e.getMessage());
-            return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ProtocolError(e.getMessage()));
+            return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ProtocolErrorException(e.getMessage()));
         }
     }
 
@@ -315,7 +315,7 @@ public class WebMvcStreamableChannelProvider implements StreamableRuntimeTranspo
                     },
                     Duration.ZERO);
         }
-        return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ProtocolError("Unknown message type"));
+        return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ProtocolErrorException("Unknown message type"));
     }
 
     private ServerResponse handleDelete(ServerRequest req) {
@@ -343,7 +343,7 @@ public class WebMvcStreamableChannelProvider implements StreamableRuntimeTranspo
             return ServerResponse.ok().build();
         } catch (Exception e) {
             logger.error("Delete failed for {}: {}", sessionId, e.getMessage());
-            return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ProtocolError(e.getMessage()));
+            return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ProtocolErrorException(e.getMessage()));
         }
     }
 

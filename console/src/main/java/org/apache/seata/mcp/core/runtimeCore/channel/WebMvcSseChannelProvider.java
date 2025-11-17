@@ -20,7 +20,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.seata.mcp.core.common.RuntimeUtils;
 import org.apache.seata.mcp.core.protocol.ProtocolDefinition;
-import org.apache.seata.mcp.core.protocol.ProtocolError;
+import org.apache.seata.mcp.core.protocol.ProtocolErrorException;
 import org.apache.seata.mcp.core.protocol.RuntimeSession;
 import org.apache.seata.mcp.core.protocol.RuntimeTransport;
 import org.apache.seata.mcp.core.protocol.RuntimeTransportProvider;
@@ -154,13 +154,13 @@ public class WebMvcSseChannelProvider implements RuntimeTransportProvider {
 
         String sessionId = req.param("sessionId").orElse(null);
         if (sessionId == null) {
-            return ServerResponse.badRequest().body(new ProtocolError("Missing session ID"));
+            return ServerResponse.badRequest().body(new ProtocolErrorException("Missing session ID"));
         }
 
         ServerRuntimeSession session = activeSessions.get(sessionId);
         if (session == null) {
             return ServerResponse.status(HttpStatus.NOT_FOUND)
-                    .body(new ProtocolError("Session not found: " + sessionId));
+                    .body(new ProtocolErrorException("Session not found: " + sessionId));
         }
 
         try {
@@ -170,10 +170,10 @@ public class WebMvcSseChannelProvider implements RuntimeTransportProvider {
             return ServerResponse.ok().build();
         } catch (IllegalArgumentException | IOException e) {
             logger.error("Deserialize failed: {}", e.getMessage());
-            return ServerResponse.badRequest().body(new ProtocolError("Invalid format"));
+            return ServerResponse.badRequest().body(new ProtocolErrorException("Invalid format"));
         } catch (Exception e) {
             logger.error("Process failed: {}", e.getMessage());
-            return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ProtocolError(e.getMessage()));
+            return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ProtocolErrorException(e.getMessage()));
         }
     }
 

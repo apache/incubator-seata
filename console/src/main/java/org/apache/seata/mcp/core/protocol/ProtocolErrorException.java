@@ -17,16 +17,16 @@
 
 package org.apache.seata.mcp.core.protocol;
 
-public class ProtocolError extends RuntimeException {
+public class ProtocolErrorException extends RuntimeException {
 
     private ProtocolDefinition.JSONRPCResponse.JSONRPCError error;
 
-    public ProtocolError(ProtocolDefinition.JSONRPCResponse.JSONRPCError error) {
+    public ProtocolErrorException(ProtocolDefinition.JSONRPCResponse.JSONRPCError error) {
         super(error.getMessage());
         this.error = error;
     }
 
-    public ProtocolError(Object error) {
+    public ProtocolErrorException(Object error) {
         super(error.toString());
     }
 

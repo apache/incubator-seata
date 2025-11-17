@@ -118,7 +118,7 @@ public class ServerRuntimeSession implements RuntimeSession {
                 .timeout(timeout)
                 .handle((resp, sink) -> {
                     if (resp.getError() != null) {
-                        sink.error(new ProtocolError(resp.getError()));
+                        sink.error(new ProtocolErrorException(resp.getError()));
                     } else if (typeRef.getType().equals(Void.class)) {
                         sink.complete();
                     } else {
