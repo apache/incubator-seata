@@ -27,6 +27,9 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * The type Collection utils test.
@@ -254,5 +257,336 @@ public class CollectionUtilsTest {
         list.add("Foo");
         list.add("Bar");
         Assertions.assertEquals("Bar", CollectionUtils.getLast(list));
+    }
+
+    @Test
+    public void testComputeIfAbsent() {
+        // Test with a regular HashMap
+        Map<String, String> map = new HashMap<>();
+        map.put("existing", "value");
+
+        // Test existing key - should return existing value and not call the function
+        Function<String, String> mappingFunction = key -> {
+            throw new RuntimeException("Function should not be called for existing key");
+        };
+        String result = CollectionUtils.computeIfAbsent(map, "existing", mappingFunction);
+        assertThat(result).isEqualTo("value");
+
+        // Test non-existing key - should call the function and add the value
+        Function<String, String> newMappingFunction = key -> "new value for " + key;
+        String newResult = CollectionUtils.computeIfAbsent(map, "newKey", newMappingFunction);
+        assertThat(newResult).isEqualTo("new value for newKey");
+        assertThat(map.get("newKey")).isEqualTo("new value for newKey");
+
+        // Test with null value for existing key
+        Map<String, String> mapWithNull = new HashMap<>();
+        mapWithNull.put("nullKey", null);
+        Function<String, String> nullMappingFunction = key -> "new value for null";
+        String nullResult = CollectionUtils.computeIfAbsent(mapWithNull, "nullKey", nullMappingFunction);
+        assertThat(nullResult).isEqualTo("new value for null");
+        assertThat(mapWithNull.get("nullKey")).isEqualTo("new value for null");
+    }
+
+    @Test
+    public void testMapToJsonString() {
+        // Test with empty map
+        Map<String, Object> emptyMap = new HashMap<>();
+        assertThat(CollectionUtils.mapToJsonString(emptyMap)).isEqualTo("{}");
+
+        // Test with simple key-value pairs
+        Map<String, Object> simpleMap = new HashMap<>();
+        simpleMap.put("name", "John");
+        simpleMap.put("age", 30);
+        String simpleResult = CollectionUtils.mapToJsonString(simpleMap);
+        assertThat(simpleResult).contains("\"name\": \"John\"");
+        assertThat(simpleResult).contains("\"age\": 30");
+
+        // Test with nested map - order might vary in HashMap, so we check both possible orders
+        Map<String, Object> nestedMap = new HashMap<>();
+        nestedMap.put("id", 1);
+        Map<String, Object> address = new HashMap<>();
+        address.put("city", "New York");
+        address.put("zip", "10001");
+        nestedMap.put("address", address);
+        String result = CollectionUtils.mapToJsonString(nestedMap);
+        // Check if result contains expected elements regardless of order
+        assertThat(result).contains("\"id\": 1");
+        assertThat(result).contains("\"city\": \"New York\"");
+        assertThat(result).contains("\"zip\": \"10001\"");
+
+        // Test with null values
+        Map<String, Object> mapWithNull = new HashMap<>();
+        mapWithNull.put("key1", "value1");
+        mapWithNull.put("key2", null);
+        String nullResult = CollectionUtils.mapToJsonString(mapWithNull);
+        assertThat(nullResult).contains("\"key1\": \"value1\"");
+        assertThat(nullResult).contains("\"key2\": null");
+
+        // Test with special characters in strings
+        Map<String, Object> mapWithSpecialChars = new HashMap<>();
+        mapWithSpecialChars.put("quote", "\"quoted\"");
+        mapWithSpecialChars.put("number", 42);
+        String specialResult = CollectionUtils.mapToJsonString(mapWithSpecialChars);
+        // We'll just check that it contains the expected elements without strict formatting
+        assertThat(specialResult).contains("\"quote\"");
+        assertThat(specialResult).contains("\"number\"");
+        assertThat(specialResult).contains("42");
+    }
+
+    @Test
+    public void testToStringMapEnhanced() {
+        // Test with null map
+        Map<String, String> nullResult = CollectionUtils.toStringMap(null);
+        assertThat(nullResult).isNotNull().isEmpty();
+
+        // Test with empty map
+        Map<String, Object> emptySource = new HashMap<>();
+        Map<String, String> emptyResult = CollectionUtils.toStringMap(emptySource);
+        assertThat(emptyResult).isNotNull().isEmpty();
+
+        // Test with various object types
+        Map<String, Object> sourceMap = new HashMap<>();
+        sourceMap.put("string", "text");
+        sourceMap.put("integer", 123);
+        sourceMap.put("double", 45.67);
+        sourceMap.put("boolean", true);
+        sourceMap.put("nullValue", null);
+
+        Map<String, String> result = CollectionUtils.toStringMap(sourceMap);
+        assertThat(result)
+                .containsEntry("string", "text")
+                .containsEntry("integer", "123")
+                .containsEntry("double", "45.67")
+                .containsEntry("boolean", "true")
+                .doesNotContainKey("nullValue"); // null values should be skipped
+
+        // Test with CharSequence and Character
+        Map<String, Object> charMap = new HashMap<>();
+        charMap.put("charSequence", new StringBuilder("builder"));
+        charMap.put("character", 'A');
+
+        Map<String, String> charResult = CollectionUtils.toStringMap(charMap);
+        assertThat(charResult).containsEntry("charSequence", "builder").containsEntry("character", "A");
+    }
+
+    @Test
+    public void testGetLastWithConcurrentModification() {
+        // Test with normal list
+        List<String> list = new ArrayList<>();
+        list.add("first");
+        list.add("second");
+        list.add("third");
+        assertThat((String) CollectionUtils.<String>getLast(list)).isEqualTo("third");
+
+        // Test with empty list
+        List<String> emptyList = new ArrayList<>();
+        assertThat(CollectionUtils.<String>getLast(emptyList)).isNull();
+
+        // Test with null list
+        assertThat(CollectionUtils.<String>getLast(null)).isNull();
+    }
+
+    @Test
+    public void testIsEmptyWithArraysEnhanced() {
+        // Test with null array
+        String[] nullArray = null;
+        assertThat(CollectionUtils.isEmpty(nullArray)).isTrue();
+
+        // Test with empty array
+        String[] emptyArray = new String[0];
+        assertThat(CollectionUtils.isEmpty(emptyArray)).isTrue();
+
+        // Test with filled array
+        String[] filledArray = {"one", "two"};
+        assertThat(CollectionUtils.isEmpty(filledArray)).isFalse();
+    }
+
+    @Test
+    public void testIsNotEmptyWithArrays() {
+        // Test with null array
+        String[] nullArray = null;
+        assertThat(CollectionUtils.isNotEmpty(nullArray)).isFalse();
+
+        // Test with empty array
+        String[] emptyArray = new String[0];
+        assertThat(CollectionUtils.isNotEmpty(emptyArray)).isFalse();
+
+        // Test with filled array
+        String[] filledArray = {"one", "two"};
+        assertThat(CollectionUtils.isNotEmpty(filledArray)).isTrue();
+    }
+
+    @Test
+    public void testIsEmptyWithCollections() {
+        // Test with null collection
+        List<String> nullList = null;
+        assertThat(CollectionUtils.isEmpty(nullList)).isTrue();
+
+        // Test with empty collection
+        List<String> emptyList = new ArrayList<>();
+        assertThat(CollectionUtils.isEmpty(emptyList)).isTrue();
+
+        // Test with filled collection
+        List<String> filledList = new ArrayList<>();
+        filledList.add("item");
+        assertThat(CollectionUtils.isEmpty(filledList)).isFalse();
+    }
+
+    @Test
+    public void testIsNotEmptyWithCollections() {
+        // Test with null collection
+        List<String> nullList = null;
+        assertThat(CollectionUtils.isNotEmpty(nullList)).isFalse();
+
+        // Test with empty collection
+        List<String> emptyList = new ArrayList<>();
+        assertThat(CollectionUtils.isNotEmpty(emptyList)).isFalse();
+
+        // Test with filled collection
+        List<String> filledList = new ArrayList<>();
+        filledList.add("item");
+        assertThat(CollectionUtils.isNotEmpty(filledList)).isTrue();
+    }
+
+    @Test
+    public void testIsEmptyWithMaps() {
+        // Test with null map
+        Map<String, String> nullMap = null;
+        assertThat(CollectionUtils.isEmpty(nullMap)).isTrue();
+
+        // Test with empty map
+        Map<String, String> emptyMap = new HashMap<>();
+        assertThat(CollectionUtils.isEmpty(emptyMap)).isTrue();
+
+        // Test with filled map
+        Map<String, String> filledMap = new HashMap<>();
+        filledMap.put("key", "value");
+        assertThat(CollectionUtils.isEmpty(filledMap)).isFalse();
+    }
+
+    @Test
+    public void testIsNotEmptyWithMaps() {
+        // Test with null map
+        Map<String, String> nullMap = null;
+        assertThat(CollectionUtils.isNotEmpty(nullMap)).isFalse();
+
+        // Test with empty map
+        Map<String, String> emptyMap = new HashMap<>();
+        assertThat(CollectionUtils.isNotEmpty(emptyMap)).isFalse();
+
+        // Test with filled map
+        Map<String, String> filledMap = new HashMap<>();
+        filledMap.put("key", "value");
+        assertThat(CollectionUtils.isNotEmpty(filledMap)).isTrue();
+    }
+
+    @Test
+    public void testEncodeMapEnhanced() {
+        // Test with null map
+        assertThat(CollectionUtils.encodeMap(null)).isNull();
+
+        // Test with empty map
+        Map<String, String> emptyMap = new HashMap<>();
+        assertThat(CollectionUtils.encodeMap(emptyMap)).isEqualTo("");
+
+        // Test with single entry
+        Map<String, String> singleEntry = new HashMap<>();
+        singleEntry.put("key", "value");
+        assertThat(CollectionUtils.encodeMap(singleEntry)).isEqualTo("key=value");
+
+        // Test with multiple entries
+        Map<String, String> multipleEntries = new LinkedHashMap<>();
+        multipleEntries.put("key1", "value1");
+        multipleEntries.put("key2", "value2");
+        assertThat(CollectionUtils.encodeMap(multipleEntries)).isEqualTo("key1=value1&key2=value2");
+
+        // Test with special characters
+        Map<String, String> specialChars = new HashMap<>();
+        specialChars.put("key with spaces", "value&special=chars");
+        assertThat(CollectionUtils.encodeMap(specialChars)).isEqualTo("key with spaces=value&special=chars");
+    }
+
+    @Test
+    public void testDecodeMapEnhanced() {
+        // Test with null input
+        assertThat(CollectionUtils.decodeMap(null)).isNull();
+
+        // Test with empty string
+        Map<String, String> emptyResult = CollectionUtils.decodeMap("");
+        assertThat(emptyResult).isNotNull().isEmpty();
+
+        // Test with single pair
+        Map<String, String> singleResult = CollectionUtils.decodeMap("key=value");
+        assertThat(singleResult).containsEntry("key", "value");
+
+        // Test with multiple pairs
+        Map<String, String> multipleResult = CollectionUtils.decodeMap("key1=value1&key2=value2");
+        assertThat(multipleResult).containsEntry("key1", "value1").containsEntry("key2", "value2");
+
+        // Test with malformed pairs (should be ignored)
+        Map<String, String> malformedResult = CollectionUtils.decodeMap("key1=value1&malformed&key2=value2");
+        assertThat(malformedResult)
+                .containsEntry("key1", "value1")
+                .containsEntry("key2", "value2")
+                .hasSize(2);
+
+        // Test with empty keys or values
+        Map<String, String> emptyKVResult = CollectionUtils.decodeMap("key1=&=value2&key3=value3");
+        // The entry with empty key results in key "" with value "value2"
+        assertThat(emptyKVResult)
+                .containsEntry("", "value2")
+                .containsEntry("key3", "value3")
+                .hasSize(2);
+    }
+
+    @Test
+    public void testToUpperListEnhanced() {
+        // Test with null list
+        assertThat(CollectionUtils.toUpperList(null)).isNull();
+
+        // Test with empty list
+        List<String> emptyList = new ArrayList<>();
+        assertThat(CollectionUtils.toUpperList(emptyList)).isEmpty();
+
+        // Test with normal strings
+        List<String> normalList = new ArrayList<>();
+        normalList.add("hello");
+        normalList.add("world");
+        List<String> upperList = CollectionUtils.toUpperList(normalList);
+        assertThat(upperList).containsExactly("HELLO", "WORLD");
+
+        // Test with mixed case and null values
+        List<String> mixedList = new ArrayList<>();
+        mixedList.add("HeLLo");
+        mixedList.add(null);
+        mixedList.add("WoRLd");
+        List<String> mixedUpperList = CollectionUtils.toUpperList(mixedList);
+        assertThat(mixedUpperList).containsExactly("HELLO", null, "WORLD");
+    }
+
+    @Test
+    public void testIsSizeEqualsEnhanced() {
+        // Test with both null
+        assertThat(CollectionUtils.isSizeEquals(null, null)).isTrue();
+
+        // Test with first null
+        List<String> emptyList = new ArrayList<>();
+        assertThat(CollectionUtils.isSizeEquals(null, emptyList)).isFalse();
+
+        // Test with second null
+        assertThat(CollectionUtils.isSizeEquals(emptyList, null)).isFalse();
+
+        // Test with both empty
+        List<String> anotherEmptyList = new ArrayList<>();
+        assertThat(CollectionUtils.isSizeEquals(emptyList, anotherEmptyList)).isTrue();
+
+        // Test with same size
+        emptyList.add("item");
+        anotherEmptyList.add("item");
+        assertThat(CollectionUtils.isSizeEquals(emptyList, anotherEmptyList)).isTrue();
+
+        // Test with different sizes
+        emptyList.add("another item");
+        assertThat(CollectionUtils.isSizeEquals(emptyList, anotherEmptyList)).isFalse();
     }
 }

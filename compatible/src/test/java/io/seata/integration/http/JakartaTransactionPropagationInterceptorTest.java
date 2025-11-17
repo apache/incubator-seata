@@ -36,8 +36,8 @@ public class JakartaTransactionPropagationInterceptorTest {
     @Test
     public void testExtendsApacheSeataClass() {
         assertTrue(
-                org.apache.seata.integration.http.JakartaTransactionPropagationInterceptor.class.isAssignableFrom(
-                        JakartaTransactionPropagationInterceptor.class),
+                org.apache.seata.integration.http.jakarta.JakartaTransactionPropagationInterceptor.class
+                        .isAssignableFrom(JakartaTransactionPropagationInterceptor.class),
                 "JakartaTransactionPropagationInterceptor should extend Apache Seata JakartaTransactionPropagationInterceptor");
     }
 
@@ -51,7 +51,8 @@ public class JakartaTransactionPropagationInterceptorTest {
     public void testInstanceOfApacheSeataClass() {
         JakartaTransactionPropagationInterceptor interceptor = new JakartaTransactionPropagationInterceptor();
         assertTrue(
-                interceptor instanceof org.apache.seata.integration.http.JakartaTransactionPropagationInterceptor,
+                interceptor
+                        instanceof org.apache.seata.integration.http.jakarta.JakartaTransactionPropagationInterceptor,
                 "Instance should be of Apache Seata JakartaTransactionPropagationInterceptor type");
     }
 }
