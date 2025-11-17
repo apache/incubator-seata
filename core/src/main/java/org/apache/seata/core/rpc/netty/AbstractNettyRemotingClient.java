@@ -99,6 +99,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
 
     private final Runnable reconnectTask;
     private AtomicBoolean timerStarted = new AtomicBoolean(false);
+    private final ReentrantLock reconnectLock = new ReentrantLock();
 
     /**
      * When sending message type is {@link MergeMessage}, will be stored to mergeMsgMap.
@@ -124,7 +125,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
 
     @Override
     public void init() {
-        mergeLock.lock();
+        reconnectLock.lock();
         try {
             if (timerStarted.compareAndSet(false, true)) {
                 timerExecutor.scheduleAtFixedRate(
@@ -146,7 +147,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             super.init();
             clientBootstrap.start();
         } finally {
-            mergeLock.unlock();
+            reconnectLock.unlock();
         }
     }
 
@@ -289,7 +290,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
 
     @Override
     public void destroy() {
-        mergeLock.lock();
+        reconnectLock.lock();
         try {
             if (timerStarted.compareAndSet(true, false)) {
                 LOGGER.info("Reconnect timer stopped (role: {})", transactionRole.name());
@@ -300,7 +301,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             }
             super.destroy();
         } finally {
-            mergeLock.unlock();
+            reconnectLock.unlock();
         }
     }
 
