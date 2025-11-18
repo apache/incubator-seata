@@ -16,60 +16,23 @@
  */
 package org.apache.seata.common.json;
 
+import org.apache.seata.common.ConfigurationKeys;
+import org.apache.seata.common.Constants;
+import org.apache.seata.common.DefaultValues;
 import org.apache.seata.common.exception.JsonParseException;
+import org.apache.seata.config.ConfigurationFactory;
 
-import java.lang.reflect.Type;
+import java.util.Objects;
 
 /**
  * Unified JSON utility class
  */
 public final class JsonUtil {
 
-    private static volatile JsonUtil fastjsonInstance;
-    private static volatile JsonUtil jacksonInstance;
-
-    private final org.apache.seata.common.json.JsonSerializer serializer;
-
-    private JsonUtil(JsonSerializer serializer) {
-        this.serializer = serializer;
-    }
-
-    /**
-     * Get JsonUtil instance with FastJSON implementation
-     */
-    public static JsonUtil fastjson() {
-        if (fastjsonInstance == null) {
-            synchronized (JsonUtil.class) {
-                if (fastjsonInstance == null) {
-                    fastjsonInstance =
-                            new JsonUtil(org.apache.seata.common.json.JsonSerializerFactory.getSerializer("fastjson"));
-                }
-            }
-        }
-        return fastjsonInstance;
-    }
-
-    /**
-     * Get JsonUtil instance with Jackson implementation
-     */
-    public static JsonUtil jackson() {
-        if (jacksonInstance == null) {
-            synchronized (JsonUtil.class) {
-                if (jacksonInstance == null) {
-                    jacksonInstance =
-                            new JsonUtil(org.apache.seata.common.json.JsonSerializerFactory.getSerializer("jackson"));
-                }
-            }
-        }
-        return jacksonInstance;
-    }
-
-    /**
-     * Get JsonUtil instance with custom implementation
-     */
-    public static JsonUtil custom(String serializerName) {
-        return new JsonUtil(JsonSerializerFactory.getSerializer(serializerName));
-    }
+    private static final String CONFIG_JSON_PARSER_NAME = ConfigurationFactory.getInstance()
+            .getConfig(
+                    ConfigurationKeys.TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER_NAME,
+                    DefaultValues.DEFAULT_TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER);
 
     /**
      * Serialize the given object to JSON string
@@ -78,8 +41,8 @@ public final class JsonUtil {
      * @return the JSON string representation
      * @throws JsonParseException if serialization fails
      */
-    public String toJSONString(Object object) {
-        return serializer.toJSONString(object);
+    public static String toJSONString(Object object) {
+        return JsonSerializerFactory.getSerializer(CONFIG_JSON_PARSER_NAME).toJSONString(object);
     }
 
     /**
@@ -91,27 +54,13 @@ public final class JsonUtil {
      * @return the deserialized object
      * @throws JsonParseException if deserialization fails
      */
-    public <T> T parseObject(String text, Class<T> clazz) {
-        if (text == null || clazz == null) {
+    public static <T> T parseObject(String text, Class<T> clazz) {
+        if (Objects.isNull(text) || Objects.isNull(clazz)) {
             return null;
         }
-        return serializer.parseObject(text, clazz);
-    }
-
-    /**
-     * Deserialize the given JSON string to an object of the specified type
-     * This method supports generic types (e.g., List<String>, Map<String, Object>)
-     *
-     * @param <T>   the type of the object
-     * @param text  the JSON string
-     * @param type  the type to deserialize to
-     * @return the deserialized object
-     * @throws JsonParseException if deserialization fails
-     */
-    public <T> T parseObject(String text, Type type) {
-        if (text == null || type == null) {
-            return null;
-        }
-        return serializer.parseObject(text, type);
+        String jsonParseName = text.startsWith(Constants.JACKSON_JSON_TEXT_PREFIX)
+                ? Constants.JACKSON_JSON_PARSER_NAME
+                : CONFIG_JSON_PARSER_NAME;
+        return JsonSerializerFactory.getSerializer(jsonParseName).parseObject(text, clazz);
     }
 }

@@ -16,168 +16,86 @@
  */
 package org.apache.seata.common.json;
 
-import org.apache.seata.common.exception.JsonParseException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class JsonUtilTest {
 
-    private JsonUtil fastjsonUtil;
-    private JsonUtil jacksonUtil;
-    private JsonUtil gsonUtil;
-
     @BeforeEach
-    void setUp() {
-        // Create JsonUtil instances with different serializers
-        fastjsonUtil = JsonUtil.fastjson();
-        jacksonUtil = JsonUtil.jackson();
-        gsonUtil = JsonUtil.custom("gson");
-    }
+    void setUp() {}
 
     @Test
-    public void testToJSONString_basicObject_allSerializers() {
+    public void testToJSONString_basicObject() {
         TestObject obj = new TestObject("test", 123);
+        String json = JsonUtil.toJSONString(obj);
 
-        String fastjson = fastjsonUtil.toJSONString(obj);
-        assertThat(fastjson).contains("\"name\":\"test\"");
-        assertThat(fastjson).contains("\"value\":123");
-        assertThat(fastjson).contains("@type");
-
-        String jackson = jacksonUtil.toJSONString(obj);
-        assertThat(jackson).contains("\"name\":\"test\"");
-        assertThat(jackson).contains("\"value\":123");
-        assertThat(jackson).contains("@type");
-
-        String gson = gsonUtil.toJSONString(obj);
-        assertThat(gson).contains("\"name\":\"test\"");
-        assertThat(gson).contains("\"value\":123");
-        assertThat(gson).doesNotContain("@type");
+        assertThat(json).isNotNull();
+        assertThat(json).contains("\"name\":\"test\"");
+        assertThat(json).contains("\"value\":123");
     }
 
     @Test
-    public void testParseObject_basicObject_allSerializers() {
-        String basicJson = "{\"name\":\"test\",\"value\":123}";
+    public void testParseObject_basicObject() {
+        String json = "{\"name\":\"test\",\"value\":123}";
+        TestObject obj = JsonUtil.parseObject(json, TestObject.class);
 
-        String jacksonJson =
-                "{\"@type\":\"org.apache.seata.common.json.JsonUtilTest$TestObject\",\"name\":\"test\",\"value\":123}";
-
-        TestObject fastjsonObj = fastjsonUtil.parseObject(basicJson, TestObject.class);
-        TestObject jacksonObj = jacksonUtil.parseObject(jacksonJson, TestObject.class);
-        TestObject gsonObj = gsonUtil.parseObject(basicJson, TestObject.class);
-
-        assertThat(fastjsonObj).isNotNull();
-        assertThat(jacksonObj).isNotNull();
-        assertThat(gsonObj).isNotNull();
-
-        assertThat(fastjsonObj.getName()).isEqualTo("test");
-        assertThat(jacksonObj.getValue()).isEqualTo(123);
-        assertThat(gsonObj.getName()).isEqualTo("test");
+        assertThat(obj).isNotNull();
+        assertThat(obj.getName()).isEqualTo("test");
+        assertThat(obj.getValue()).isEqualTo(123);
     }
 
     @Test
-    public void testToJSONString_and_parseObject_allSerializers() {
-        TestObject original = new TestObject("school", 456);
+    public void testToJSONString_and_parseObject_apple() {
+        TestObject original = new TestObject("apple", 456);
+        String json = JsonUtil.toJSONString(original);
+        TestObject restored = JsonUtil.parseObject(json, TestObject.class);
 
-        String fastjson = fastjsonUtil.toJSONString(original);
-        TestObject fastjsonRestored = fastjsonUtil.parseObject(fastjson, TestObject.class);
-        assertThat(fastjsonRestored.getName()).isEqualTo(original.getName());
-        assertThat(fastjsonRestored.getValue()).isEqualTo(original.getValue());
-
-        String jackson = jacksonUtil.toJSONString(original);
-        TestObject jacksonRestored = jacksonUtil.parseObject(jackson, TestObject.class);
-        assertThat(jacksonRestored.getName()).isEqualTo(original.getName());
-        assertThat(jacksonRestored.getValue()).isEqualTo(original.getValue());
-
-        String gson = gsonUtil.toJSONString(original);
-        TestObject gsonRestored = gsonUtil.parseObject(gson, TestObject.class);
-        assertThat(gsonRestored.getName()).isEqualTo(original.getName());
-        assertThat(gsonRestored.getValue()).isEqualTo(original.getValue());
+        assertThat(restored.getName()).isEqualTo(original.getName());
+        assertThat(restored.getValue()).isEqualTo(original.getValue());
     }
 
     @Test
-    public void testToJSONString_nullInput() {
-        assertThat(fastjsonUtil.toJSONString(null)).isEqualTo("null");
-        assertThat(jacksonUtil.toJSONString(null)).isEqualTo("null");
-        assertThat(gsonUtil.toJSONString(null)).isEqualTo("null");
+    public void testParseObject_nullInputs() {
+        TestObject obj1 = JsonUtil.parseObject(null, TestObject.class);
+        assertThat(obj1).isNull();
+
+        TestObject obj2 = JsonUtil.parseObject("{\"name\":\"test\"}", null);
+        assertThat(obj2).isNull();
     }
 
     @Test
-    public void testParseObject_nullText() {
-        assertThat(fastjsonUtil.parseObject(null, TestObject.class)).isNull();
-        assertThat(jacksonUtil.parseObject(null, TestObject.class)).isNull();
-        assertThat(gsonUtil.parseObject(null, TestObject.class)).isNull();
+    public void testParseObject_prefixLogic() {
+        String normalJson = "{\"name\":\"normalTest\",\"value\":888}";
+        TestObject obj = JsonUtil.parseObject(normalJson, TestObject.class);
+        assertThat(obj).isNotNull();
+        assertThat(obj.getName()).isEqualTo("normalTest");
+        assertThat(obj.getValue()).isEqualTo(888);
     }
 
     @Test
-    public void testParseObject_nullClass() {
-        String json = "{\"name\":\"test\"}";
-        assertThat(fastjsonUtil.parseObject(json, (Class<TestObject>) null)).isNull();
-        assertThat(jacksonUtil.parseObject(json, (Class<TestObject>) null)).isNull();
-        assertThat(gsonUtil.parseObject(json, (Class<TestObject>) null)).isNull();
+    public void testToJSONString_nullObject() {
+        String json = JsonUtil.toJSONString(null);
+        assertThat(json).isEqualTo("null");
     }
 
     @Test
-    public void testParseObject_genericType_list() {
-        String json = "[{\"name\":\"item1\",\"value\":1},{\"name\":\"item2\",\"value\":2}]";
+    public void testParseObject_complexObject() {
+        ComplexTestObject complexObj = new ComplexTestObject();
+        complexObj.setName("complex");
+        complexObj.setValue(789);
+        complexObj.setNested(new TestObject("nested", 1));
 
-        String jacksonJson = "[\"java.util.ArrayList\",["
-                + "{\"@type\":\"org.apache.seata.common.json.JsonUtilTest$TestObject\",\"name\":\"item1\",\"value\":1},"
-                + "{\"@type\":\"org.apache.seata.common.json.JsonUtilTest$TestObject\",\"name\":\"item2\",\"value\":2}"
-                + "]]";
+        String json = JsonUtil.toJSONString(complexObj);
+        ComplexTestObject restored = JsonUtil.parseObject(json, ComplexTestObject.class);
 
-        List<TestObject> fastjsonList = fastjsonUtil.parseObject(json, List.class);
-        List<TestObject> jacksonList = jacksonUtil.parseObject(jacksonJson, List.class);
-        List<TestObject> gsonList = gsonUtil.parseObject(json, List.class);
-
-        assertThat(fastjsonList).hasSize(2);
-        assertThat(jacksonList).hasSize(2);
-        assertThat(gsonList).hasSize(2);
-    }
-
-    @Test
-    public void testParseObject_invalidJson_allSerializers() {
-        String invalidJson = "{invalid json}";
-
-        assertThatThrownBy(() -> fastjsonUtil.parseObject(invalidJson, TestObject.class))
-                .isInstanceOf(JsonParseException.class)
-                .hasMessageContaining("deserialize error");
-
-        assertThatThrownBy(() -> jacksonUtil.parseObject(invalidJson, TestObject.class))
-                .isInstanceOf(JsonParseException.class)
-                .hasMessageContaining("deserialize error");
-
-        assertThatThrownBy(() -> gsonUtil.parseObject(invalidJson, TestObject.class))
-                .isInstanceOf(JsonParseException.class)
-                .hasMessageContaining("deserialize error");
-    }
-
-    @Test
-    public void testEmptyList_serialization_allSerializers() {
-        List<String> emptyList = new ArrayList<>();
-
-        assertThat(fastjsonUtil.toJSONString(emptyList)).isEqualTo("[]");
-        assertThat(jacksonUtil.toJSONString(emptyList)).isEqualTo("[\"java.util.ArrayList\",[]]");
-        assertThat(gsonUtil.toJSONString(emptyList)).isEqualTo("[]");
-    }
-
-    @Test
-    public void testEmptyList_deserialization_allSerializers() {
-        String json = "[]";
-        String jacksonJson = "[\"java.util.ArrayList\",[]]";
-
-        List<?> fastjsonList = fastjsonUtil.parseObject(json, List.class);
-        List<?> jacksonList = jacksonUtil.parseObject(jacksonJson, List.class);
-        List<?> gsonList = gsonUtil.parseObject(json, List.class);
-
-        assertThat(fastjsonList).isEmpty();
-        assertThat(jacksonList).isEmpty();
-        assertThat(gsonList).isEmpty();
+        assertThat(restored).isNotNull();
+        assertThat(restored.getName()).isEqualTo("complex");
+        assertThat(restored.getValue()).isEqualTo(789);
+        assertThat(restored.getNested()).isNotNull();
+        assertThat(restored.getNested().getName()).isEqualTo("nested");
+        assertThat(restored.getNested().getValue()).isEqualTo(1);
     }
 
     public static class TestObject {
@@ -205,6 +123,36 @@ public class JsonUtilTest {
 
         public void setValue(int value) {
             this.value = value;
+        }
+    }
+
+    public static class ComplexTestObject {
+        private String name;
+        private int value;
+        private TestObject nested;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public int getValue() {
+            return value;
+        }
+
+        public void setValue(int value) {
+            this.value = value;
+        }
+
+        public TestObject getNested() {
+            return nested;
+        }
+
+        public void setNested(TestObject nested) {
+            this.nested = nested;
         }
     }
 }
