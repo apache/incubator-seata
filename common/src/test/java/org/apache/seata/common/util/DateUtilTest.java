@@ -51,4 +51,25 @@ public class DateUtilTest {
     public void testGetDateNowPlusDays() throws ParseException {
         Assertions.assertNotNull(DateUtil.getDateNowPlusDays(2));
     }
+
+    @Test
+    public void testParseDateWithoutTime() throws ParseException {
+        String dateStr = "2021-01-01";
+        Date date = DateUtil.parseDateWithoutTime(dateStr);
+        Assertions.assertNotNull(date);
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Assertions.assertEquals(dateStr, sdf.format(date));
+    }
+
+    @Test
+    public void testParseDateWithBlankInput() throws ParseException {
+        // Test parseDate with blank input
+        Assertions.assertNull(DateUtil.parseDate("", "yyyy-MM-dd"));
+        Assertions.assertNull(DateUtil.parseDate(null, "yyyy-MM-dd"));
+
+        // Test parseDateWithoutTime with blank input
+        Assertions.assertNull(DateUtil.parseDateWithoutTime(""));
+        // Assertions.assertNull(DateUtil.parseDateWithoutTime(null)); // This would throw ParseException
+    }
 }
