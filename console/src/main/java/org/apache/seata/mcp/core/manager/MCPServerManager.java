@@ -90,9 +90,6 @@ public class MCPServerManager implements SmartLifecycle {
         return transportProvider.getRouterFunction();
     }
 
-    /**
-     * Suspension of Service (Remain Registered)
-     */
     public void pause() {
         stateLock.lock();
         try {
@@ -104,9 +101,6 @@ public class MCPServerManager implements SmartLifecycle {
         }
     }
 
-    /**
-     * Restore service
-     */
     public void resume() {
         stateLock.lock();
         try {
