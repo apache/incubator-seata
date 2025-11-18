@@ -27,7 +27,7 @@ public class JsonSerializerFactory {
 
     private static final String DEFAULT_SERIALIZER = "fastjson";
 
-    private static final Map<String, JsonSerializer> INSTANCES = new ConcurrentHashMap<>();
+    private static final Map<String, org.apache.seata.common.json.JsonSerializer> INSTANCES = new ConcurrentHashMap<>();
 
     private JsonSerializerFactory() {}
 
@@ -37,7 +37,7 @@ public class JsonSerializerFactory {
      * @param name the serializer name (e.g., "fastjson", "jackson", "gson")
      * @return the JsonSerializer instance
      */
-    public static JsonSerializer getSerializer(String name) {
+    public static org.apache.seata.common.json.JsonSerializer getSerializer(String name) {
         final String serializerName = Optional.ofNullable(name).orElse(DEFAULT_SERIALIZER);
         return CollectionUtils.computeIfAbsent(
                 INSTANCES, serializerName, key -> EnhancedServiceLoader.load(JsonSerializer.class, key));

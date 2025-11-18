@@ -26,36 +26,39 @@
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>seata-common</artifactId>
+    <artifactId>json-common</artifactId>
     <packaging>jar</packaging>
-    <name>seata-common ${project.version}</name>
-    <description>common library for Seata built with Maven</description>
+    <name>json-common ${project.version}</name>
+    <description>jsonUtil for Seata modules</description>
+
     <dependencies>
         <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-all</artifactId>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-common</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-core</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>okhttp</artifactId>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>
+
+
+
 </project>

@@ -28,7 +28,7 @@ public final class JsonUtil {
     private static volatile JsonUtil fastjsonInstance;
     private static volatile JsonUtil jacksonInstance;
 
-    private final JsonSerializer serializer;
+    private final org.apache.seata.common.json.JsonSerializer serializer;
 
     private JsonUtil(JsonSerializer serializer) {
         this.serializer = serializer;
@@ -41,7 +41,8 @@ public final class JsonUtil {
         if (fastjsonInstance == null) {
             synchronized (JsonUtil.class) {
                 if (fastjsonInstance == null) {
-                    fastjsonInstance = new JsonUtil(JsonSerializerFactory.getSerializer("fastjson"));
+                    fastjsonInstance =
+                            new JsonUtil(org.apache.seata.common.json.JsonSerializerFactory.getSerializer("fastjson"));
                 }
             }
         }
@@ -55,7 +56,8 @@ public final class JsonUtil {
         if (jacksonInstance == null) {
             synchronized (JsonUtil.class) {
                 if (jacksonInstance == null) {
-                    jacksonInstance = new JsonUtil(JsonSerializerFactory.getSerializer("jackson"));
+                    jacksonInstance =
+                            new JsonUtil(org.apache.seata.common.json.JsonSerializerFactory.getSerializer("jackson"));
                 }
             }
         }
