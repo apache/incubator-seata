@@ -78,7 +78,8 @@ public class ClusterWatcherManager implements ClusterChangeListener {
                                         // 对于HTTP/2：注册之前已经发送过headers frame，只能发送endStream=true的数据帧关闭流
                                         // 如果没有发送过headers frame，可以发送304的headers frame并关闭流
                                         boolean headersAlreadySent = HTTP2_HEADERS_SENT.getOrDefault(watcher, false);
-                                        sendWatcherResponse(watcher, HttpResponseStatus.NOT_MODIFIED, true, !headersAlreadySent);
+                                        sendWatcherResponse(
+                                                watcher, HttpResponseStatus.NOT_MODIFIED, true, !headersAlreadySent);
                                         HTTP2_HEADERS_SENT.remove(watcher);
                                     } else if (!watcher.isDone()) {
                                         // Re-register if not done and not timeout
@@ -137,15 +138,17 @@ public class ClusterWatcherManager implements ClusterChangeListener {
 
         HttpContext context = watcher.getAsyncContext();
         if (!(context instanceof HttpContext)) {
-            logger.warn("Unsupported context type for watcher on group {}: {}", watcher.getGroup(),
+            logger.warn(
+                    "Unsupported context type for watcher on group {}: {}",
+                    watcher.getGroup(),
                     context != null ? context.getClass().getName() : "null");
             return;
         }
         ChannelHandlerContext ctx = context.getContext();
         if (!ctx.channel().isActive()) {
             HTTP2_HEADERS_SENT.remove(watcher);
-            logger.warn("Netty channel is not active for watcher on group {}, cannot send response.",
-                    watcher.getGroup());
+            logger.warn(
+                    "Netty channel is not active for watcher on group {}, cannot send response.", watcher.getGroup());
             return;
         }
 
@@ -191,9 +194,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
 
         // 构造 JSON 格式事件
         String json = String.format(
-                "{\"type\":\"%s\",\"group\":\"%s\",\"term\":%d,\"timestamp\":%d}",
-                type, group, term, now
-        );
+                "{\"type\":\"%s\",\"group\":\"%s\",\"term\":%d,\"timestamp\":%d}", type, group, term, now);
 
         // SSE 推送格式
         String sse = "data: " + json + "\n\n";
@@ -204,7 +205,6 @@ public class ClusterWatcherManager implements ClusterChangeListener {
         ctx.write(new DefaultHttp2DataFrame(content, closeStream));
         ctx.flush();
     }
-
 
     public void registryWatcher(Watcher<HttpContext> watcher) {
         String group = watcher.getGroup();
