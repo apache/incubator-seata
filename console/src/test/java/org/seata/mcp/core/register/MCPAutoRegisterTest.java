@@ -133,8 +133,9 @@ class MCPAutoRegisterTest {
                 .apply(null, new ProtocolDefinition.CallToolRequest("simpleTool", args))
                 .block();
         assertFalse(result.getError());
-        assertTrue(
-                ((ProtocolDefinition.TextContent) result.getContent().get(0)).getText().contains("test"));
+        assertTrue(((ProtocolDefinition.TextContent) result.getContent().get(0))
+                .getText()
+                .contains("test"));
     }
 
     @Test
@@ -152,8 +153,9 @@ class MCPAutoRegisterTest {
         ProtocolDefinition.CallToolResult result = spec.callHandler()
                 .apply(null, new ProtocolDefinition.CallToolRequest("objectTool", Collections.emptyMap()))
                 .block();
-        assertTrue(
-                ((ProtocolDefinition.TextContent) result.getContent().get(0)).getText().contains("data"));
+        assertTrue(((ProtocolDefinition.TextContent) result.getContent().get(0))
+                .getText()
+                .contains("data"));
     }
 
     @Test
@@ -334,7 +336,8 @@ class MCPAutoRegisterTest {
 
         @Tool(description = "Result tool")
         public ProtocolDefinition.CallToolResult resultTool() {
-            return new ProtocolDefinition.CallToolResult(Collections.singletonList(new ProtocolDefinition.TextContent("err")), true);
+            return new ProtocolDefinition.CallToolResult(
+                    Collections.singletonList(new ProtocolDefinition.TextContent("err")), true);
         }
     }
 
