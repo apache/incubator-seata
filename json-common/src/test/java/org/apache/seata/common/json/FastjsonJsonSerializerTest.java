@@ -46,7 +46,6 @@ public class FastjsonJsonSerializerTest {
 
         assertThat(json).contains("\"name\":\"test\"");
         assertThat(json).contains("\"value\":123");
-        assertThat(json).contains("@type");
     }
 
     @Test

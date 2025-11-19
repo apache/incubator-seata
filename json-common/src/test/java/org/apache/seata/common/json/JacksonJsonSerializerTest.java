@@ -46,15 +46,12 @@ public class JacksonJsonSerializerTest {
 
         assertThat(json).contains("\"name\":\"test\"");
         assertThat(json).contains("\"value\":123");
-
-        assertThat(json).contains("@type");
     }
 
     @Test
     public void testParseObject_basicObject() {
-        // Now we need to provide JSON with @type for Jackson to work correctly
         String json =
-                "{\"@type\":\"org.apache.seata.common.json.JacksonJsonSerializerTest$TestObject\",\"name\":\"test\",\"value\":123}";
+                "{\"@class\":\"org.apache.seata.common.json.JacksonJsonSerializerTest$TestObject\",\"name\":\"test\",\"value\":123}";
         TestObject obj = jsonSerializer.parseObject(json, TestObject.class);
 
         assertThat(obj).isNotNull();
@@ -290,7 +287,7 @@ public class JacksonJsonSerializerTest {
 
     @Test
     public void testParseObject_withIgnoreAutoType() {
-        String jsonWithAutoType = jsonSerializer.toJSONString(new TestObject("ignored", 222));
+        String jsonWithAutoType = jsonSerializer.toJSONString(new TestObject("ignored", 222), false, false);
 
         TestObject objIgnore = jsonSerializer.parseObject(jsonWithAutoType, TestObject.class, true);
         assertThat(objIgnore).isNotNull();

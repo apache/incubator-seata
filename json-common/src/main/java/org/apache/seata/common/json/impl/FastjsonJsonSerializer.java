@@ -61,7 +61,7 @@ public class FastjsonJsonSerializer implements JsonSerializer {
     @Override
     public String toJSONString(Object object) {
         try {
-            return JSON.toJSONString(object, SERIALIZER_FEATURES);
+            return JSON.toJSONString(object);
         } catch (Exception e) {
             throw new JsonParseException("FastJSON serialize error", e);
         }
@@ -73,7 +73,7 @@ public class FastjsonJsonSerializer implements JsonSerializer {
             return null;
         }
         try {
-            return JSON.parseObject(text, clazz, READER_FEATURES_SUPPORT_AUTO_TYPE);
+            return JSON.parseObject(text, clazz);
         } catch (Exception e) {
             throw new JsonParseException("FastJSON deserialize error", e);
         }

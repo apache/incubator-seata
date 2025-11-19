@@ -17,6 +17,7 @@
 package org.apache.seata.common.json.impl;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
@@ -42,6 +43,8 @@ public class JacksonJsonSerializer implements JsonSerializer {
 
     private final ObjectMapper objectMapperWithAutoType;
 
+    private final ObjectMapper mapper = new ObjectMapper();
+
     public JacksonJsonSerializer() {
         this.defaultObjectMapper = new ObjectMapper()
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
@@ -54,12 +57,21 @@ public class JacksonJsonSerializer implements JsonSerializer {
                 .enableDefaultTypingAsProperty(DefaultTyping.NON_FINAL, "@type")
                 .enable(MapperFeature.PROPAGATE_TRANSIENT_MARKER)
                 .setSerializationInclusion(JsonInclude.Include.NON_NULL);
+
+        this.mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        this.mapper.activateDefaultTyping(
+                this.mapper.getPolymorphicTypeValidator(),
+                ObjectMapper.DefaultTyping.NON_FINAL,
+                JsonTypeInfo.As.PROPERTY);
+        this.mapper.setConfig(this.mapper.getSerializationConfig().with(MapperFeature.PROPAGATE_TRANSIENT_MARKER));
+        this.mapper.setConfig(this.mapper.getDeserializationConfig().with(MapperFeature.PROPAGATE_TRANSIENT_MARKER));
+        this.mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
     }
 
     @Override
     public String toJSONString(Object object) {
         try {
-            return objectMapperWithAutoType.writeValueAsString(object);
+            return mapper.writeValueAsString(object);
         } catch (JsonProcessingException e) {
             throw new JsonParseException("Jackson serialize error", e);
         }
@@ -71,7 +83,7 @@ public class JacksonJsonSerializer implements JsonSerializer {
             return null;
         }
         try {
-            return objectMapperWithAutoType.readValue(text, clazz);
+            return mapper.readValue(text, clazz);
         } catch (IOException e) {
             throw new JsonParseException("Jackson deserialize error", e);
         }
