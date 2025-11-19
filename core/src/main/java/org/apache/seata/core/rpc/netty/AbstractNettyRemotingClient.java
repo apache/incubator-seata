@@ -365,6 +365,23 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     protected abstract long getRpcRequestTimeout();
 
     /**
+     * Create metrics message for sending to server.
+     *
+     * @return metrics message (HeartbeatMessage or ConnectionPoolMetricsMessage)
+     */
+    protected Object createMetricsMessage() {
+        return HeartbeatMessage.PING;
+    }
+
+    /**
+     * Should report pool info
+     * @return true report or not
+     */
+    protected boolean shouldReportPoolInfo() {
+        return false;
+    }
+
+    /**
      * Registers a channel event listener to receive channel events.
      * If the listener is already registered, it will not be added again.
      *
@@ -726,6 +743,10 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
                             LOGGER.debug("will send ping msg,channel {}", ctx.channel());
                         }
                         AbstractNettyRemotingClient.this.sendAsyncRequest(ctx.channel(), HeartbeatMessage.PING);
+                        // send connection pool info
+                        if (shouldReportPoolInfo()) {
+                            AbstractNettyRemotingClient.this.sendAsyncRequest(ctx.channel(), createMetricsMessage());
+                        }
                     } catch (Throwable throwable) {
                         LOGGER.error("send request error: {}", throwable.getMessage(), throwable);
                     }

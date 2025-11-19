@@ -16,15 +16,7 @@
  */
 package org.apache.seata.serializer.seata;
 
-import org.apache.seata.core.protocol.AbstractMessage;
-import org.apache.seata.core.protocol.BatchResultMessage;
-import org.apache.seata.core.protocol.MergeResultMessage;
-import org.apache.seata.core.protocol.MergedWarpMessage;
-import org.apache.seata.core.protocol.MessageType;
-import org.apache.seata.core.protocol.RegisterRMRequest;
-import org.apache.seata.core.protocol.RegisterRMResponse;
-import org.apache.seata.core.protocol.RegisterTMRequest;
-import org.apache.seata.core.protocol.RegisterTMResponse;
+import org.apache.seata.core.protocol.*;
 import org.apache.seata.core.protocol.transaction.BranchCommitRequest;
 import org.apache.seata.core.protocol.transaction.BranchCommitResponse;
 import org.apache.seata.core.protocol.transaction.BranchRegisterRequest;
@@ -46,13 +38,7 @@ import org.apache.seata.core.protocol.transaction.GlobalRollbackResponse;
 import org.apache.seata.core.protocol.transaction.GlobalStatusRequest;
 import org.apache.seata.core.protocol.transaction.GlobalStatusResponse;
 import org.apache.seata.core.protocol.transaction.UndoLogDeleteRequest;
-import org.apache.seata.serializer.seata.protocol.BatchResultMessageCodec;
-import org.apache.seata.serializer.seata.protocol.MergeResultMessageCodec;
-import org.apache.seata.serializer.seata.protocol.MergedWarpMessageCodec;
-import org.apache.seata.serializer.seata.protocol.RegisterRMRequestCodec;
-import org.apache.seata.serializer.seata.protocol.RegisterRMResponseCodec;
-import org.apache.seata.serializer.seata.protocol.RegisterTMRequestCodec;
-import org.apache.seata.serializer.seata.protocol.RegisterTMResponseCodec;
+import org.apache.seata.serializer.seata.protocol.*;
 import org.apache.seata.serializer.seata.protocol.transaction.BranchCommitRequestCodec;
 import org.apache.seata.serializer.seata.protocol.transaction.BranchCommitResponseCodec;
 import org.apache.seata.serializer.seata.protocol.transaction.BranchRegisterRequestCodec;
@@ -191,6 +177,9 @@ public class MessageCodecFactory {
             case MessageType.TYPE_GLOBAL_REPORT_RESULT:
                 msgCodec = new GlobalReportResponseCodec();
                 break;
+            case MessageType.TYPE_CONNECTION_POOL_METRICS:
+                msgCodec = new ConnectionPoolMetricsMessageCodec(version);
+                break;
             default:
                 break;
         }
@@ -294,6 +283,9 @@ public class MessageCodecFactory {
                 break;
             case MessageType.TYPE_BRANCH_ROLLBACK_RESULT:
                 abstractMessage = new BranchRollbackResponse();
+                break;
+            case MessageType.TYPE_CONNECTION_POOL_METRICS:
+                abstractMessage = new ConnectionPoolMetricsMessage();
                 break;
             default:
                 break;

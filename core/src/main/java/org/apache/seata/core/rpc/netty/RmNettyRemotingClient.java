@@ -34,11 +34,7 @@ import org.apache.seata.core.protocol.MessageType;
 import org.apache.seata.core.protocol.RegisterRMRequest;
 import org.apache.seata.core.protocol.RegisterRMResponse;
 import org.apache.seata.core.rpc.netty.NettyPoolKey.TransactionRole;
-import org.apache.seata.core.rpc.processor.client.ClientHeartbeatProcessor;
-import org.apache.seata.core.rpc.processor.client.ClientOnResponseProcessor;
-import org.apache.seata.core.rpc.processor.client.RmBranchCommitProcessor;
-import org.apache.seata.core.rpc.processor.client.RmBranchRollbackProcessor;
-import org.apache.seata.core.rpc.processor.client.RmUndoLogProcessor;
+import org.apache.seata.core.rpc.processor.client.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,6 +62,9 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
     private static final int MAX_QUEUE_SIZE = 20000;
     private String applicationId;
     private String transactionServiceGroup;
+    private int httpPort;
+    private boolean enableConnectionPoolMetrics;
+    private ClientConnectionPoolMetricsProcessor clientConnectionPoolMetricsProcessor;
 
     @Override
     public void init() {
@@ -201,6 +200,26 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
      */
     public void setResourceManager(ResourceManager resourceManager) {
         this.resourceManager = resourceManager;
+    }
+
+    /**
+     * set enableConnectionPoolMetrics
+     */
+    public void setEnableConnectionPoolMetrics(boolean enableConnectionPoolMetrics) {
+        this.enableConnectionPoolMetrics = enableConnectionPoolMetrics;
+        if (clientConnectionPoolMetricsProcessor != null) {
+            clientConnectionPoolMetricsProcessor.setEnableConnectionPoolMetrics(enableConnectionPoolMetrics);
+        }
+    }
+
+    /**
+     * set http port
+     */
+    public void setHttpPort(int port) {
+        this.httpPort = port;
+        if (clientConnectionPoolMetricsProcessor != null) {
+            clientConnectionPoolMetricsProcessor.setHttpPort(port);
+        }
     }
 
     @Override
@@ -351,6 +370,16 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
         return NettyClientConfig.getRpcRmRequestTimeout();
     }
 
+    @Override
+    public Object createMetricsMessage() {
+        return clientConnectionPoolMetricsProcessor.createMetricsMessage();
+    }
+
+    @Override
+    public boolean shouldReportPoolInfo() {
+        return clientConnectionPoolMetricsProcessor.shouldReportPoolInfo();
+    }
+
     private void registerProcessor() {
         // 1.registry rm client handle branch commit processor
         RmBranchCommitProcessor rmBranchCommitProcessor =
@@ -375,5 +404,8 @@ public final class RmNettyRemotingClient extends AbstractNettyRemotingClient {
         // 5.registry heartbeat message processor
         ClientHeartbeatProcessor clientHeartbeatProcessor = new ClientHeartbeatProcessor();
         super.registerProcessor(MessageType.TYPE_HEARTBEAT_MSG, clientHeartbeatProcessor, null);
+        // 6. registry connection pool metrics processor
+        clientConnectionPoolMetricsProcessor = new ClientConnectionPoolMetricsProcessor(applicationId);
+        super.registerProcessor(MessageType.TYPE_CONNECTION_POOL_METRICS, clientConnectionPoolMetricsProcessor, null);
     }
 }

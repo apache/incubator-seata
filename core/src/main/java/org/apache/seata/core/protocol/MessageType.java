@@ -152,4 +152,9 @@ public interface MessageType {
      * the constant TYPE_BATCH_RESULT_MSG
      */
     short TYPE_BATCH_RESULT_MSG = 121;
+
+    /**
+     * the constant TYPE_CONNECTION_POOL_METRICS
+     */
+    short TYPE_CONNECTION_POOL_METRICS = 122;
 }
