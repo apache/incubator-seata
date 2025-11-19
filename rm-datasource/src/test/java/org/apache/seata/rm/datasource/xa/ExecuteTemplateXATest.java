@@ -18,6 +18,7 @@ package org.apache.seata.rm.datasource.xa;
 
 import org.apache.seata.rm.datasource.exec.StatementCallback;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -31,18 +32,29 @@ import java.sql.Statement;
  */
 public class ExecuteTemplateXATest {
 
-    @Test
-    public void testExecuteSuccessWithAutoCommitTrue() throws SQLException {
-        // Mock connection proxy
-        AbstractConnectionProxyXA mockConnectionProxyXA = Mockito.mock(AbstractConnectionProxyXA.class);
+    private AbstractConnectionProxyXA mockConnectionProxyXA;
+    private Statement mockStatement;
+    private StatementCallback<String, Statement> stringCallback;
+
+    @BeforeEach
+    public void setUp() throws SQLException {
+        // Mock connection proxy with default autoCommit=true
+        mockConnectionProxyXA = Mockito.mock(AbstractConnectionProxyXA.class);
         Mockito.when(mockConnectionProxyXA.getAutoCommit()).thenReturn(true);
 
-        // Mock statement and callback
-        Statement mockStatement = Mockito.mock(Statement.class);
-        StatementCallback<String, Statement> callback = (statement, args) -> "success";
+        // Mock statements
+        mockStatement = Mockito.mock(Statement.class);
+
+        // Default callback that returns "success"
+        stringCallback = (statement, args) -> "success";
+    }
+
+    @Test
+    public void testExecuteSuccessWithAutoCommitTrue() throws SQLException {
+        // Using default setup: autoCommit=true, stringCallback returns "success"
 
         // Execute
-        String result = ExecuteTemplateXA.execute(mockConnectionProxyXA, callback, mockStatement);
+        String result = ExecuteTemplateXA.execute(mockConnectionProxyXA, stringCallback, mockStatement);
 
         // Verify
         Assertions.assertEquals("success", result);
@@ -55,16 +67,11 @@ public class ExecuteTemplateXATest {
 
     @Test
     public void testExecuteSuccessWithAutoCommitFalse() throws SQLException {
-        // Mock connection proxy
-        AbstractConnectionProxyXA mockConnectionProxyXA = Mockito.mock(AbstractConnectionProxyXA.class);
+        // Override default autoCommit to false
         Mockito.when(mockConnectionProxyXA.getAutoCommit()).thenReturn(false);
 
-        // Mock statement and callback
-        Statement mockStatement = Mockito.mock(Statement.class);
-        StatementCallback<String, Statement> callback = (statement, args) -> "success";
-
         // Execute
-        String result = ExecuteTemplateXA.execute(mockConnectionProxyXA, callback, mockStatement);
+        String result = ExecuteTemplateXA.execute(mockConnectionProxyXA, stringCallback, mockStatement);
 
         // Verify
         Assertions.assertEquals("success", result);
@@ -76,19 +83,16 @@ public class ExecuteTemplateXATest {
 
     @Test
     public void testExecuteWithSQLExceptionDuringExecution() throws SQLException {
-        // Mock connection proxy
-        AbstractConnectionProxyXA mockConnectionProxyXA = Mockito.mock(AbstractConnectionProxyXA.class);
-        Mockito.when(mockConnectionProxyXA.getAutoCommit()).thenReturn(true);
+        // Using default setup: autoCommit=true
 
-        // Mock statement and callback that throws SQLException
-        Statement mockStatement = Mockito.mock(Statement.class);
-        StatementCallback<String, Statement> callback = (statement, args) -> {
+        // Callback that throws SQLException
+        StatementCallback<String, Statement> failingCallback = (statement, args) -> {
             throw new SQLException("execution failed");
         };
 
         // Execute and expect exception
         SQLException exception = Assertions.assertThrows(SQLException.class, () -> {
-            ExecuteTemplateXA.execute(mockConnectionProxyXA, callback, mockStatement);
+            ExecuteTemplateXA.execute(mockConnectionProxyXA, failingCallback, mockStatement);
         });
 
         // Verify
@@ -101,12 +105,6 @@ public class ExecuteTemplateXATest {
 
     @Test
     public void testExecuteWithRuntimeExceptionDuringExecution() throws SQLException {
-        // Mock connection proxy
-        AbstractConnectionProxyXA mockConnectionProxyXA = Mockito.mock(AbstractConnectionProxyXA.class);
-        Mockito.when(mockConnectionProxyXA.getAutoCommit()).thenReturn(true);
-
-        // Mock statement and callback that throws RuntimeException
-        Statement mockStatement = Mockito.mock(Statement.class);
         StatementCallback<String, Statement> callback = (statement, args) -> {
             throw new RuntimeException("runtime exception");
         };
@@ -126,20 +124,13 @@ public class ExecuteTemplateXATest {
 
     @Test
     public void testExecuteWithCommitFailure() throws SQLException {
-        // Mock connection proxy
-        AbstractConnectionProxyXA mockConnectionProxyXA = Mockito.mock(AbstractConnectionProxyXA.class);
-        Mockito.when(mockConnectionProxyXA.getAutoCommit()).thenReturn(true);
         Mockito.doThrow(new SQLException("commit failed"))
                 .when(mockConnectionProxyXA)
                 .commit();
 
-        // Mock statement and callback
-        Statement mockStatement = Mockito.mock(Statement.class);
-        StatementCallback<String, Statement> callback = (statement, args) -> "success";
-
         // Execute and expect exception
         SQLException exception = Assertions.assertThrows(SQLException.class, () -> {
-            ExecuteTemplateXA.execute(mockConnectionProxyXA, callback, mockStatement);
+            ExecuteTemplateXA.execute(mockConnectionProxyXA, stringCallback, mockStatement);
         });
 
         // Verify
@@ -153,21 +144,14 @@ public class ExecuteTemplateXATest {
 
     @Test
     public void testExecuteWithCommitFailureAndXA_NOT_END() throws SQLException {
-        // Mock connection proxy
-        AbstractConnectionProxyXA mockConnectionProxyXA = Mockito.mock(AbstractConnectionProxyXA.class);
-        Mockito.when(mockConnectionProxyXA.getAutoCommit()).thenReturn(true);
 
         // Create SQLException with XA_NOT_END SQLState
         SQLException xaNotEndException = new SQLException("XA not end", AbstractConnectionProxyXA.SQLSTATE_XA_NOT_END);
         Mockito.doThrow(xaNotEndException).when(mockConnectionProxyXA).commit();
 
-        // Mock statement and callback
-        Statement mockStatement = Mockito.mock(Statement.class);
-        StatementCallback<String, Statement> callback = (statement, args) -> "success";
-
         // Execute and expect exception
         SQLException exception = Assertions.assertThrows(SQLException.class, () -> {
-            ExecuteTemplateXA.execute(mockConnectionProxyXA, callback, mockStatement);
+            ExecuteTemplateXA.execute(mockConnectionProxyXA, stringCallback, mockStatement);
         });
 
         // Verify
@@ -182,15 +166,11 @@ public class ExecuteTemplateXATest {
 
     @Test
     public void testExecuteWithRollbackFailure() throws SQLException {
-        // Mock connection proxy
-        AbstractConnectionProxyXA mockConnectionProxyXA = Mockito.mock(AbstractConnectionProxyXA.class);
-        Mockito.when(mockConnectionProxyXA.getAutoCommit()).thenReturn(true);
+
         Mockito.doThrow(new SQLException("rollback failed"))
                 .when(mockConnectionProxyXA)
                 .rollback();
 
-        // Mock statement and callback that throws exception
-        Statement mockStatement = Mockito.mock(Statement.class);
         StatementCallback<String, Statement> callback = (statement, args) -> {
             throw new SQLException("execution failed");
         };
@@ -210,8 +190,6 @@ public class ExecuteTemplateXATest {
 
     @Test
     public void testExecuteWithArguments() throws SQLException {
-        // Mock connection proxy
-        AbstractConnectionProxyXA mockConnectionProxyXA = Mockito.mock(AbstractConnectionProxyXA.class);
         Mockito.when(mockConnectionProxyXA.getAutoCommit()).thenReturn(false);
 
         // Mock statement and callback with arguments
