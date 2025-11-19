@@ -365,7 +365,8 @@ public class MySQLInsertOnDuplicateUpdateExecutor extends MySQLInsertExecutor im
             }
         }
         StringJoiner selectSQLJoin = new StringJoiner(", ", prefix, suffix.toString());
-        return selectSQLJoin.toString();
+        selectSQL = selectSQLJoin.toString();
+        return selectSQL;
     }
 
     /**

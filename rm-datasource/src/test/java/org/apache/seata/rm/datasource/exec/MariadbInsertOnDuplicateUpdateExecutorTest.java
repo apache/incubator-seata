@@ -43,8 +43,6 @@ import static org.mockito.Mockito.when;
 
 public class MariadbInsertOnDuplicateUpdateExecutorTest extends MySQLInsertOnDuplicateUpdateExecutorTest {
 
-    protected MariadbInsertOnDuplicateUpdateExecutor insertOrUpdateExecutor;
-
     @BeforeEach
     @Override
     public void init() {
