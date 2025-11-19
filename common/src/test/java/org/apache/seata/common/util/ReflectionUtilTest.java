@@ -23,7 +23,6 @@ import org.junit.jupiter.api.condition.EnabledOnJre;
 import org.junit.jupiter.api.condition.JRE;
 
 import java.io.Serializable;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -211,9 +210,11 @@ public class ReflectionUtilTest {
 
     @Test
     public void testFindAnnotationInHierarchy() throws NoSuchMethodException, NoSuchFieldException {
+        Assertions.assertNotNull(ReflectionUtil.findAnnotationInHierarchy(
+                MultiInterfaceImpl.class, "interfaceMethod", new Class<?>[] {}, Deprecated.class));
+
         Assertions.assertNotNull(
-                ReflectionUtil.findAnnotationInHierarchy(
-                        MultiInterfaceImpl.class, "interfaceMethod", new Class<?>[]{}, Deprecated.class));
+                ReflectionUtil.findAnnotationInHierarchy(TestClass.class, "m", new Class<?>[] {}, Deprecated.class));
     }
 
     // Enhanced test cases
@@ -466,6 +467,9 @@ public class ReflectionUtilTest {
         public void setF2(String f2) {
             this.f2 = f2;
         }
+
+        @Deprecated
+        public void m() {}
     }
 
     interface TestInterface {}
