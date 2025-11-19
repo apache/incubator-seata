@@ -47,7 +47,8 @@ public class GlobalTransactionalInterceptorParser implements InterfaceParser {
     @Override
     public ProxyInvocationHandler parserInterfaceToProxy(Object target, String objectName) throws Exception {
         Class<?> serviceInterface = DefaultTargetClassParser.get().findTargetClass(target);
-        Class<?>[] interfacesIfJdk = DefaultTargetClassParser.get().findInterfaces(target);
+        Set<Class<?>> interfaceClasses = ReflectionUtil.getInterfaces(serviceInterface);
+        Class<?>[] interfacesIfJdk = interfaceClasses.toArray(new Class<?>[0]);
 
         if (existsAnnotation(serviceInterface) || existsAnnotation(interfacesIfJdk)) {
             ProxyInvocationHandler proxyInvocationHandler = createProxyInvocationHandler();

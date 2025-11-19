@@ -705,6 +705,49 @@ public final class ReflectionUtil {
         return getFieldValue(h, "memberValues");
     }
 
+
+    /**
+     *
+     * @param targetClass the target class
+     * @param methodName the method name
+     * @param paramTypes the param types
+     * @param annotationClass the annotation class
+     * @return the annotation
+     * @param <A>
+     */
+    public static <A extends Annotation> A findAnnotationInHierarchy(
+            Class<?> targetClass,
+            String methodName,
+            Class<?>[] paramTypes,
+            Class<A> annotationClass) {
+        Class<?> superClass = targetClass.getSuperclass();
+        while (superClass != null && superClass != Object.class) {
+            try {
+                Method superMethod = superClass.getDeclaredMethod(methodName, paramTypes);
+                A superAnnotation = superMethod.getAnnotation(annotationClass);
+                if (superAnnotation != null) {
+                    return superAnnotation;
+                }
+            } catch (NoSuchMethodException e) {
+            }
+            superClass = superClass.getSuperclass();
+        }
+
+        Set<Class<?>> interfaces = getInterfaces(targetClass);
+        for (Class<?> iface : interfaces) {
+            try {
+                Method ifaceMethod = iface.getDeclaredMethod(methodName, paramTypes);
+                A ifaceAnnotation = ifaceMethod.getAnnotation(annotationClass);
+                if (ifaceAnnotation != null) {
+                    return ifaceAnnotation;
+                }
+            } catch (NoSuchMethodException e) {
+            }
+        }
+
+        return null;
+    }
+
     // endregion
 
     // region toString
