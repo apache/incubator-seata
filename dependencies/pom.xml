@@ -46,7 +46,7 @@
         <protostuff.version>1.5.9</protostuff.version>
         <config.version>1.2.1</config.version>
         <commons-logging.version>1.2</commons-logging.version>
-        <commons-lang.version>2.6</commons-lang.version>
+        <commons-lang3.version>3.18.0</commons-lang3.version>
         <commons-io.version>2.8.0</commons-io.version>
         <aopalliance.version>1.0</aopalliance.version>
         <zkclient.version>0.11</zkclient.version>
@@ -90,7 +90,7 @@
         <xstream.version>1.4.21</xstream.version>
         <checker-qual.version>3.37.0</checker-qual.version>
         <error_prone_annotations.version>2.21.1</error_prone_annotations.version>
-        <tomcat-embed.version>9.0.108</tomcat-embed.version>
+        <tomcat-embed.version>9.0.110</tomcat-embed.version>
 
         <!-- The `httpcore` and `httpclient` have been removed in spring-boot 3.1.0 and above. -->
         <httpcore.version>4.4.16</httpcore.version>
@@ -114,8 +114,9 @@
         <h2.version>1.4.181</h2.version>
         <mariadb.version>2.7.2</mariadb.version>
         <kingbase.version>9.0.0</kingbase.version>
+        <oscar.version>4.1.152</oscar.version>
         <!-- db connection pool -->
-        <druid.version>1.2.20</druid.version>
+        <druid.version>1.2.25</druid.version>
         <commons-dbcp2.version>2.9.0</commons-dbcp2.version>
         <hikari.version>3.4.3</hikari.version>
         <caffeine.version>2.9.3</caffeine.version>
@@ -132,7 +133,7 @@
         <kotlin-coroutines.version>1.7.3</kotlin-coroutines.version>
 
         <!-- # for web -->
-        <tomcat-embed.version>9.0.108</tomcat-embed.version>
+        <tomcat-embed.version>9.0.110</tomcat-embed.version>
 
         <!-- # for test -->
         <mockito.version>4.11.0</mockito.version>
@@ -324,9 +325,9 @@
                 <version>${commons-logging.version}</version>
             </dependency>
             <dependency>
-                <groupId>commons-lang</groupId>
-                <artifactId>commons-lang</artifactId>
-                <version>${commons-lang.version}</version>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${commons-lang3.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.google.protobuf</groupId>
@@ -923,6 +924,11 @@
                 <groupId>cn.com.kingbase</groupId>
                 <artifactId>kingbase8</artifactId>
                 <version>${kingbase.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.shentongdata</groupId>
+                <artifactId>oscarJDBC8</artifactId>
+                <version>${oscar.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

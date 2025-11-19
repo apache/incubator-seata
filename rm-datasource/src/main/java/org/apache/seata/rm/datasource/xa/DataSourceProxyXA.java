@@ -75,6 +75,8 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
             }
         } else if (DBType.MARIADB.name().equalsIgnoreCase(dbType)) {
             setShouldBeHeld(true);
+        } else if (DBType.OSCAR.name().equalsIgnoreCase(dbType)) {
+            setShouldBeHeld(true);
         }
         Optional.ofNullable(DefaultResourceManager.get().getResourceManager(BranchType.XA))
                 .ifPresent(resourceManager -> {

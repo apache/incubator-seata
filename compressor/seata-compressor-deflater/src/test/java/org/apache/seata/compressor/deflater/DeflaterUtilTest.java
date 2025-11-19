@@ -19,26 +19,110 @@ package org.apache.seata.compressor.deflater;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Random;
+
 public class DeflaterUtilTest {
 
     @Test
-    public void test_compress() {
+    public void testCompress() {
         Assertions.assertThrows(NullPointerException.class, () -> {
             DeflaterUtil.compress(null);
         });
     }
 
     @Test
-    public void test_decompress() {
+    public void testDecompress() {
         Assertions.assertThrows(NullPointerException.class, () -> {
             DeflaterUtil.decompress(null);
         });
     }
 
     @Test
-    public void test_compressEqualDecompress() {
+    public void testCompressEqualDecompress() {
         byte[] compress = DeflaterUtil.compress("seata".getBytes());
         byte[] decompress = DeflaterUtil.decompress(compress);
         Assertions.assertEquals("seata", new String(decompress));
+    }
+
+    @Test
+    public void testCompressEmptyArray() {
+        byte[] empty = new byte[0];
+        byte[] compressed = DeflaterUtil.compress(empty);
+        byte[] decompressed = DeflaterUtil.decompress(compressed);
+        Assertions.assertArrayEquals(empty, decompressed);
+    }
+
+    @Test
+    public void testCompressSingleByte() {
+        byte[] singleByte = {42};
+        byte[] compressed = DeflaterUtil.compress(singleByte);
+        byte[] decompressed = DeflaterUtil.decompress(compressed);
+        Assertions.assertArrayEquals(singleByte, decompressed);
+    }
+
+    @Test
+    public void testCompressLargeData() {
+        byte[] largeData = new byte[1024 * 1024];
+        new Random().nextBytes(largeData);
+        byte[] compressed = DeflaterUtil.compress(largeData);
+        byte[] decompressed = DeflaterUtil.decompress(compressed);
+        Assertions.assertArrayEquals(largeData, decompressed);
+    }
+
+    @Test
+    public void testCompressTextData() {
+        String text = "The quick brown fox jumps over the lazy dog";
+        byte[] original = text.getBytes(StandardCharsets.UTF_8);
+        byte[] compressed = DeflaterUtil.compress(original);
+        byte[] decompressed = DeflaterUtil.decompress(compressed);
+        Assertions.assertEquals(text, new String(decompressed, StandardCharsets.UTF_8));
+    }
+
+    @Test
+    public void testCompressUnicodeData() {
+        String text = "测试中文数据压缩解压";
+        byte[] original = text.getBytes(StandardCharsets.UTF_8);
+        byte[] compressed = DeflaterUtil.compress(original);
+        byte[] decompressed = DeflaterUtil.decompress(compressed);
+        Assertions.assertEquals(text, new String(decompressed, StandardCharsets.UTF_8));
+    }
+
+    @Test
+    public void testCompressionRatio() {
+        String repeatedText = new String(new char[1000]).replace("\0", "a");
+        byte[] original = repeatedText.getBytes(StandardCharsets.UTF_8);
+        byte[] compressed = DeflaterUtil.compress(original);
+        Assertions.assertTrue(
+                compressed.length < original.length,
+                "Compressed size should be smaller than original for repetitive data");
+    }
+
+    @Test
+    public void testDecompressInvalidData() {
+        byte[] invalidData = {0x1, 0x2, 0x3, 0x4, 0x5};
+        Assertions.assertThrows(RuntimeException.class, () -> {
+            DeflaterUtil.decompress(invalidData);
+        });
+    }
+
+    @Test
+    public void testDecompressEmptyArray() {
+        byte[] result = DeflaterUtil.decompress(new byte[0]);
+        Assertions.assertArrayEquals(new byte[0], result);
+    }
+
+    @Test
+    public void testMultipleCompressionCycles() {
+        String text = "Test multiple compression cycles";
+        byte[] original = text.getBytes(StandardCharsets.UTF_8);
+
+        byte[] firstCompressed = DeflaterUtil.compress(original);
+        byte[] firstDecompressed = DeflaterUtil.decompress(firstCompressed);
+
+        byte[] secondCompressed = DeflaterUtil.compress(firstDecompressed);
+        byte[] secondDecompressed = DeflaterUtil.decompress(secondCompressed);
+
+        Assertions.assertEquals(text, new String(secondDecompressed, StandardCharsets.UTF_8));
     }
 }

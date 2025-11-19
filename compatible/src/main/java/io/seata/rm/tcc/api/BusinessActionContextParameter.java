@@ -60,7 +60,7 @@ public @interface BusinessActionContextParameter {
     int index() default -1;
 
     /**
-     * whether get the parameter from the property of the object
+     * whether to get the parameter from the property of the object
      * if {@code index >= 0}, the object get from the List and then do get the parameter from the property of the object
      *
      * @return the boolean

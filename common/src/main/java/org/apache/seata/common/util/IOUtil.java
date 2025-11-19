@@ -16,10 +16,17 @@
  */
 package org.apache.seata.common.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * IO utility class
+ */
 public class IOUtil {
+    private static final Logger LOGGER = LoggerFactory.getLogger(IOUtil.class);
 
     /**
-     * close Closeable
+     * Close Closeable resources
      * @param closeables the closeables
      */
     public static void close(AutoCloseable... closeables) {
@@ -31,14 +38,15 @@ public class IOUtil {
     }
 
     /**
-     * close Closeable
+     * Close Closeable resource
      * @param closeable the closeable
      */
     public static void close(AutoCloseable closeable) {
         if (closeable != null) {
             try {
                 closeable.close();
-            } catch (Exception ignore) {
+            } catch (Exception e) {
+                LOGGER.warn("Failed to close resource", e);
             }
         }
     }
