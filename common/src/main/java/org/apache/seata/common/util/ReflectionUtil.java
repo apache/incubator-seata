@@ -705,7 +705,6 @@ public final class ReflectionUtil {
         return getFieldValue(h, "memberValues");
     }
 
-
     /**
      *
      * @param targetClass the target class
@@ -716,10 +715,7 @@ public final class ReflectionUtil {
      * @param <A>
      */
     public static <A extends Annotation> A findAnnotationInHierarchy(
-            Class<?> targetClass,
-            String methodName,
-            Class<?>[] paramTypes,
-            Class<A> annotationClass) {
+            Class<?> targetClass, String methodName, Class<?>[] paramTypes, Class<A> annotationClass) {
         Class<?> superClass = targetClass.getSuperclass();
         while (superClass != null && superClass != Object.class) {
             try {

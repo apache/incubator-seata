@@ -297,7 +297,8 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
     }
 
     public AspectTransactional getAspectTransactional(Method method, Class<?> targetClass) {
-        final GlobalTransactional globalTransactionalAnnotation = findAnnotation(method, targetClass, GlobalTransactional.class);
+        final GlobalTransactional globalTransactionalAnnotation =
+                findAnnotation(method, targetClass, GlobalTransactional.class);
         return globalTransactionalAnnotation != null
                 ? new AspectTransactional(
                         globalTransactionalAnnotation.timeoutMills(),
@@ -316,7 +317,8 @@ public class GlobalTransactionalInterceptorHandler extends AbstractProxyInvocati
     private <A extends Annotation> A findAnnotation(Method method, Class<?> targetClass, Class<A> annotationClass) {
         A anno = getAnnotation(method, targetClass, annotationClass);
         if (anno == null) {
-            anno = ReflectionUtil.findAnnotationInHierarchy(targetClass, method.getName(), method.getParameterTypes(), annotationClass);
+            anno = ReflectionUtil.findAnnotationInHierarchy(
+                    targetClass, method.getName(), method.getParameterTypes(), annotationClass);
         }
         return anno;
     }
