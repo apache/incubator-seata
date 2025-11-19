@@ -23,6 +23,7 @@ import org.junit.jupiter.api.condition.EnabledOnJre;
 import org.junit.jupiter.api.condition.JRE;
 
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -206,6 +207,13 @@ public class ReflectionUtilTest {
                 new LinkedHashMap<>(),
                 ReflectionUtil.getAnnotationValues(
                         this.getClass().getMethod("testGetAnnotationValues").getAnnotation(Test.class)));
+    }
+
+    @Test
+    public void testFindAnnotationInHierarchy() throws NoSuchMethodException, NoSuchFieldException {
+        Assertions.assertNotNull(
+                ReflectionUtil.findAnnotationInHierarchy(
+                        MultiInterfaceImpl.class, "interfaceMethod", new Class<?>[]{}, Deprecated.class));
     }
 
     // Enhanced test cases
@@ -464,6 +472,8 @@ public class ReflectionUtilTest {
 
     // Enhanced test classes and interfaces
     interface TestInterfaceEnhanced {
+
+        @Deprecated
         void interfaceMethod();
     }
 
