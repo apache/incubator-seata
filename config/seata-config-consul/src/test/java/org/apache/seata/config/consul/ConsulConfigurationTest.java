@@ -135,26 +135,36 @@ class ConsulConfigurationTest {
 
     @Test
     void testOnChangeEvent_skipWhenValueIsBlank() throws InterruptedException {
-
         String dataId = "seata.properties";
-        ConsulConfiguration.ConsulListener listener = new ConsulConfiguration.ConsulListener(dataId, null);
 
+        // Mock the initial call in ConsulListener constructor (2-arg version)
+        GetValue initValue = mock(GetValue.class);
+        when(initValue.getDecodedValue()).thenReturn("dummy");
+        Response<GetValue> initResponse = new Response<>(initValue, 1L, false, 1L);
+        when(mockConsulClient.getKVValue(eq(dataId), (String) isNull())).thenReturn(initResponse);
+
+        // Mock the watch call in onChangeEvent loop (3-arg version)
         GetValue blankValue = mock(GetValue.class);
         when(blankValue.getDecodedValue()).thenReturn("");
-
         Response<GetValue> blankResponse = new Response<>(blankValue, 2L, false, 2L);
-        when(mockConsulClient.getKVValue(eq(dataId), isNull(), any(QueryParams.class)))
+        when(mockConsulClient.getKVValue(eq(dataId), (String) isNull(), any(QueryParams.class)))
                 .thenReturn(blankResponse);
 
+        ConsulConfiguration.ConsulListener listener = new ConsulConfiguration.ConsulListener(dataId, null);
+
         // Run onChangeEvent in a separate thread since it loops indefinitely
-        Thread thread = new Thread(() -> listener.onChangeEvent(new ConfigurationChangeEvent()));
+        Thread thread = new Thread(() -> {
+            try {
+                listener.onChangeEvent(new ConfigurationChangeEvent());
+            } catch (Exception e) {
+                // ignore
+            }
+        });
         thread.start();
         Thread.sleep(100);
-        // Interrupt to break the loop
         thread.interrupt();
         thread.join(500);
 
-        // Assert: Test passes as long as no exceptions are thrown
         assertTrue(true);
     }
 
