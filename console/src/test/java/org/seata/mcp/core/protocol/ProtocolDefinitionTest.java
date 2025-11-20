@@ -31,6 +31,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -59,7 +60,7 @@ class ProtocolDefinitionTest {
     void testDeserializeJsonRpcRequest() throws IOException {
         String json = "{\"jsonrpc\":\"2.0\",\"method\":\"test\",\"id\":1,\"params\":{}}";
         ProtocolDefinition.JSONRPCMessage message = ProtocolDefinition.deserializeJsonRpcMessage(mapper, json);
-        assertTrue(message instanceof ProtocolDefinition.JSONRPCRequest);
+        assertInstanceOf(ProtocolDefinition.JSONRPCRequest.class, message);
         ProtocolDefinition.JSONRPCRequest request = (ProtocolDefinition.JSONRPCRequest) message;
         assertEquals("2.0", request.getJsonrpc());
         assertEquals("test", request.getMethod());
@@ -70,7 +71,7 @@ class ProtocolDefinitionTest {
     void testDeserializeJsonRpcNotification() throws IOException {
         String json = "{\"jsonrpc\":\"2.0\",\"method\":\"test\",\"params\":{}}";
         ProtocolDefinition.JSONRPCMessage message = ProtocolDefinition.deserializeJsonRpcMessage(mapper, json);
-        assertTrue(message instanceof ProtocolDefinition.JSONRPCNotification);
+        assertInstanceOf(ProtocolDefinition.JSONRPCNotification.class, message);
         ProtocolDefinition.JSONRPCNotification notification = (ProtocolDefinition.JSONRPCNotification) message;
         assertEquals("2.0", notification.getJsonrpc());
         assertEquals("test", notification.getMethod());
@@ -80,7 +81,7 @@ class ProtocolDefinitionTest {
     void testDeserializeJsonRpcResponse() throws IOException {
         String json = "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{}}";
         ProtocolDefinition.JSONRPCMessage message = ProtocolDefinition.deserializeJsonRpcMessage(mapper, json);
-        assertTrue(message instanceof ProtocolDefinition.JSONRPCResponse);
+        assertInstanceOf(ProtocolDefinition.JSONRPCResponse.class, message);
         ProtocolDefinition.JSONRPCResponse response = (ProtocolDefinition.JSONRPCResponse) message;
         assertEquals("2.0", response.getJsonrpc());
         assertEquals(1, response.getId());
@@ -90,9 +91,7 @@ class ProtocolDefinitionTest {
     @Test
     void testDeserializeInvalidMessage() {
         String json = "{\"invalid\":\"message\"}";
-        assertThrows(IllegalArgumentException.class, () -> {
-            ProtocolDefinition.deserializeJsonRpcMessage(mapper, json);
-        });
+        assertThrows(IllegalArgumentException.class, () -> ProtocolDefinition.deserializeJsonRpcMessage(mapper, json));
     }
 
     @Test
@@ -423,17 +422,15 @@ class ProtocolDefinitionTest {
     void testMissingRuntimeTransportSessionSendRequest() {
         MissingRuntimeTransportSession session = new MissingRuntimeTransportSession("test-id");
         TypeReference<String> typeRef = new TypeReference<String>() {};
-        assertThrows(IllegalStateException.class, () -> {
-            session.sendRequest("method", null, typeRef).block();
-        });
+        assertThrows(IllegalStateException.class, () -> session.sendRequest("method", null, typeRef)
+                .block());
     }
 
     @Test
     void testMissingRuntimeTransportSessionSendNotification() {
         MissingRuntimeTransportSession session = new MissingRuntimeTransportSession("test-id");
-        assertThrows(IllegalStateException.class, () -> {
-            session.sendNotification("method", null).block();
-        });
+        assertThrows(IllegalStateException.class, () -> session.sendNotification("method", null)
+                .block());
     }
 
     @Test
@@ -446,8 +443,6 @@ class ProtocolDefinitionTest {
     @Test
     void testMissingRuntimeTransportSessionSetMinLoggingLevelNull() {
         MissingRuntimeTransportSession session = new MissingRuntimeTransportSession("test-id");
-        assertThrows(IllegalArgumentException.class, () -> {
-            session.setMinLoggingLevel(null);
-        });
+        assertThrows(IllegalArgumentException.class, () -> session.setMinLoggingLevel(null));
     }
 }

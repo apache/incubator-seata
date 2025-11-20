@@ -103,36 +103,35 @@ class WebMvcSseChannelProviderTest {
 
     @Test
     void testConstructorWithNullMapper() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            new WebMvcSseChannelProvider(null, TEST_MSG_ENDPOINT, TEST_SSE_ENDPOINT);
-        });
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new WebMvcSseChannelProvider(null, TEST_MSG_ENDPOINT, TEST_SSE_ENDPOINT));
     }
 
     @Test
     void testConstructorWithNullBaseUrl() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            new WebMvcSseChannelProvider(realMapper, null, TEST_MSG_ENDPOINT, TEST_SSE_ENDPOINT);
-        });
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new WebMvcSseChannelProvider(realMapper, null, TEST_MSG_ENDPOINT, TEST_SSE_ENDPOINT));
     }
 
     @Test
     void testConstructorWithNullMsgEndpoint() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            new WebMvcSseChannelProvider(realMapper, TEST_BASE_URL, null, TEST_SSE_ENDPOINT);
-        });
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new WebMvcSseChannelProvider(realMapper, TEST_BASE_URL, null, TEST_SSE_ENDPOINT));
     }
 
     @Test
     void testConstructorWithNullSseEndpoint() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            new WebMvcSseChannelProvider(realMapper, TEST_BASE_URL, TEST_MSG_ENDPOINT, null);
-        });
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new WebMvcSseChannelProvider(realMapper, TEST_BASE_URL, TEST_MSG_ENDPOINT, null));
     }
 
     @Test
     void testProtocolVersions() {
         provider = new WebMvcSseChannelProvider(realMapper, TEST_MSG_ENDPOINT, TEST_SSE_ENDPOINT);
-
         List<String> versions = provider.protocolVersions();
         assertNotNull(versions);
         assertEquals(2, versions.size());
@@ -143,7 +142,6 @@ class WebMvcSseChannelProviderTest {
     @Test
     void testSetSessionFactory() {
         provider = new WebMvcSseChannelProvider(realMapper, TEST_MSG_ENDPOINT, TEST_SSE_ENDPOINT);
-
         provider.setSessionFactory(mockFactory);
         assertNotNull(provider);
     }
@@ -151,7 +149,6 @@ class WebMvcSseChannelProviderTest {
     @Test
     void testGetRouterFunction() {
         provider = new WebMvcSseChannelProvider(realMapper, TEST_MSG_ENDPOINT, TEST_SSE_ENDPOINT);
-
         RouterFunction<ServerResponse> router = provider.getRouterFunction();
         assertNotNull(router);
     }
@@ -166,8 +163,6 @@ class WebMvcSseChannelProviderTest {
     @Test
     void testNotifyClientsWithActiveSessions() throws Exception {
         provider = new WebMvcSseChannelProvider(realMapper, TEST_MSG_ENDPOINT, TEST_SSE_ENDPOINT);
-
-        // Use reflection to add session to activeSessions
         Field activeSessionsField = WebMvcSseChannelProvider.class.getDeclaredField("activeSessions");
         activeSessionsField.setAccessible(true);
         @SuppressWarnings("unchecked")
@@ -184,8 +179,6 @@ class WebMvcSseChannelProviderTest {
     @Test
     void testNotifyClientsWithException() throws Exception {
         provider = new WebMvcSseChannelProvider(realMapper, TEST_MSG_ENDPOINT, TEST_SSE_ENDPOINT);
-
-        // Use reflection to add session to activeSessions
         Field activeSessionsField = WebMvcSseChannelProvider.class.getDeclaredField("activeSessions");
         activeSessionsField.setAccessible(true);
         @SuppressWarnings("unchecked")
@@ -212,7 +205,6 @@ class WebMvcSseChannelProviderTest {
     void testCloseGracefullyWithActiveSessions() throws Exception {
         provider = new WebMvcSseChannelProvider(realMapper, TEST_MSG_ENDPOINT, TEST_SSE_ENDPOINT);
 
-        // Use reflection to add session to activeSessions
         Field activeSessionsField = WebMvcSseChannelProvider.class.getDeclaredField("activeSessions");
         activeSessionsField.setAccessible(true);
         @SuppressWarnings("unchecked")
@@ -228,10 +220,7 @@ class WebMvcSseChannelProviderTest {
     @Test
     void testConnectSseWithShuttingDown() throws Exception {
         provider = new WebMvcSseChannelProvider(realMapper, TEST_MSG_ENDPOINT, TEST_SSE_ENDPOINT);
-
         provider.closeGracefully().block();
-
-        // Use reflection to call connectSse
         Method connectSseMethod = WebMvcSseChannelProvider.class.getDeclaredMethod("connectSse", ServerRequest.class);
         connectSseMethod.setAccessible(true);
         ServerResponse response = (ServerResponse) connectSseMethod.invoke(provider, mockRequest);
@@ -242,10 +231,7 @@ class WebMvcSseChannelProviderTest {
     @Test
     void testProcessMessageWithShuttingDown() throws Exception {
         provider = new WebMvcSseChannelProvider(realMapper, TEST_MSG_ENDPOINT, TEST_SSE_ENDPOINT);
-
         provider.closeGracefully().block();
-
-        // Use reflection to call processMessage
         Method processMessageMethod =
                 WebMvcSseChannelProvider.class.getDeclaredMethod("processMessage", ServerRequest.class);
         processMessageMethod.setAccessible(true);
@@ -257,10 +243,7 @@ class WebMvcSseChannelProviderTest {
     @Test
     void testProcessMessageWithMissingSessionId() throws Exception {
         provider = new WebMvcSseChannelProvider(realMapper, TEST_MSG_ENDPOINT, TEST_SSE_ENDPOINT);
-
         when(mockRequest.param("sessionId")).thenReturn(Optional.empty());
-
-        // Use reflection to call processMessage
         Method processMessageMethod =
                 WebMvcSseChannelProvider.class.getDeclaredMethod("processMessage", ServerRequest.class);
         processMessageMethod.setAccessible(true);
@@ -272,10 +255,7 @@ class WebMvcSseChannelProviderTest {
     @Test
     void testProcessMessageWithNonExistentSession() throws Exception {
         provider = new WebMvcSseChannelProvider(realMapper, TEST_MSG_ENDPOINT, TEST_SSE_ENDPOINT);
-
         when(mockRequest.param("sessionId")).thenReturn(Optional.of("non-existent"));
-
-        // Use reflection to call processMessage
         Method processMessageMethod =
                 WebMvcSseChannelProvider.class.getDeclaredMethod("processMessage", ServerRequest.class);
         processMessageMethod.setAccessible(true);
@@ -287,8 +267,6 @@ class WebMvcSseChannelProviderTest {
     @Test
     void testProcessMessageWithValidSession() throws Exception {
         provider = new WebMvcSseChannelProvider(realMapper, TEST_MSG_ENDPOINT, TEST_SSE_ENDPOINT);
-
-        // Use reflection to add session to activeSessions
         Field activeSessionsField = WebMvcSseChannelProvider.class.getDeclaredField("activeSessions");
         activeSessionsField.setAccessible(true);
         @SuppressWarnings("unchecked")
@@ -299,54 +277,40 @@ class WebMvcSseChannelProviderTest {
         request.setId("1");
         request.setMethod("test/method");
         request.setParams("params");
-
         when(mockSession.handle(any(ProtocolDefinition.JSONRPCMessage.class))).thenReturn(Mono.empty());
         when(mockSession.closeGracefully()).thenReturn(Mono.empty());
         activeSessions.put(TEST_SESSION_ID, mockSession);
-
         when(mockRequest.param("sessionId")).thenReturn(Optional.of(TEST_SESSION_ID));
         when(mockRequest.body(String.class)).thenReturn(realMapper.writeValueAsString(request));
-
-        // Use reflection to call processMessage
         Method processMessageMethod =
                 WebMvcSseChannelProvider.class.getDeclaredMethod("processMessage", ServerRequest.class);
         processMessageMethod.setAccessible(true);
         ServerResponse response = (ServerResponse) processMessageMethod.invoke(provider, mockRequest);
-
         assertNotNull(response);
     }
 
     @Test
     void testProcessMessageWithInvalidBody() throws Exception {
         provider = new WebMvcSseChannelProvider(realMapper, TEST_MSG_ENDPOINT, TEST_SSE_ENDPOINT);
-
-        // Use reflection to add session to activeSessions
         Field activeSessionsField = WebMvcSseChannelProvider.class.getDeclaredField("activeSessions");
         activeSessionsField.setAccessible(true);
         @SuppressWarnings("unchecked")
         Map<String, ServerRuntimeSession> activeSessions =
                 (Map<String, ServerRuntimeSession>) activeSessionsField.get(provider);
-
         when(mockSession.closeGracefully()).thenReturn(Mono.empty());
         activeSessions.put(TEST_SESSION_ID, mockSession);
-
         when(mockRequest.param("sessionId")).thenReturn(Optional.of(TEST_SESSION_ID));
         when(mockRequest.body(String.class)).thenReturn("invalid json");
-
-        // Use reflection to call processMessage
         Method processMessageMethod =
                 WebMvcSseChannelProvider.class.getDeclaredMethod("processMessage", ServerRequest.class);
         processMessageMethod.setAccessible(true);
         ServerResponse response = (ServerResponse) processMessageMethod.invoke(provider, mockRequest);
-
         assertNotNull(response);
     }
 
     @Test
     void testProcessMessageWithException() throws Exception {
         provider = new WebMvcSseChannelProvider(realMapper, TEST_MSG_ENDPOINT, TEST_SSE_ENDPOINT);
-
-        // Use reflection to add session to activeSessions
         Field activeSessionsField = WebMvcSseChannelProvider.class.getDeclaredField("activeSessions");
         activeSessionsField.setAccessible(true);
         @SuppressWarnings("unchecked")
@@ -365,8 +329,6 @@ class WebMvcSseChannelProviderTest {
 
         when(mockRequest.param("sessionId")).thenReturn(Optional.of(TEST_SESSION_ID));
         when(mockRequest.body(String.class)).thenReturn(realMapper.writeValueAsString(request));
-
-        // Use reflection to call processMessage
         Method processMessageMethod =
                 WebMvcSseChannelProvider.class.getDeclaredMethod("processMessage", ServerRequest.class);
         processMessageMethod.setAccessible(true);

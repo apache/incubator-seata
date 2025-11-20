@@ -22,6 +22,7 @@ import org.apache.seata.mcp.core.protocol.StandardJsonSchemaValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -74,7 +75,7 @@ class StandardJsonSchemaValidatorTest {
         nameProp.put("type", "string");
         properties.put("name", nameProp);
         schema.put("properties", properties);
-        schema.put("required", java.util.Arrays.asList("name"));
+        schema.put("required", Collections.singletonList("name"));
 
         Map<String, Object> content = new HashMap<>();
         content.put("name", 123);
@@ -94,7 +95,7 @@ class StandardJsonSchemaValidatorTest {
         nameProp.put("type", "string");
         properties.put("name", nameProp);
         schema.put("properties", properties);
-        schema.put("required", java.util.Arrays.asList("name"));
+        schema.put("required", Collections.singletonList("name"));
 
         Map<String, Object> content = new HashMap<>();
         content.put("name", "test");
@@ -112,7 +113,7 @@ class StandardJsonSchemaValidatorTest {
         nameProp.put("type", "string");
         properties.put("name", nameProp);
         schema.put("properties", properties);
-        schema.put("required", java.util.Arrays.asList("name"));
+        schema.put("required", Collections.singletonList("name"));
 
         Map<String, Object> content = new HashMap<>();
 
@@ -263,18 +264,14 @@ class StandardJsonSchemaValidatorTest {
     @Test
     void testValidateNullSchema() {
         Map<String, Object> content = new HashMap<>();
-        assertThrows(IllegalArgumentException.class, () -> {
-            validator.validate(null, content);
-        });
+        assertThrows(IllegalArgumentException.class, () -> validator.validate(null, content));
     }
 
     @Test
     void testValidateNullContent() {
         Map<String, Object> schema = new HashMap<>();
         schema.put("type", "object");
-        assertThrows(IllegalArgumentException.class, () -> {
-            validator.validate(schema, null);
-        });
+        assertThrows(IllegalArgumentException.class, () -> validator.validate(schema, null));
     }
 
     @Test

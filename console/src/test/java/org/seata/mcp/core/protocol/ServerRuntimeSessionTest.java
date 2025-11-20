@@ -90,7 +90,6 @@ class ServerRuntimeSessionTest {
     void testLoggingLevelAndNotificationFilter() {
         ServerRuntimeSession session = createSession(Collections.emptyMap(), Collections.emptyMap());
 
-        // 默认 INFO
         assertTrue(session.isNotificationForLevelAllowed(ProtocolDefinition.LoggingLevel.INFO));
         assertTrue(session.isNotificationForLevelAllowed(ProtocolDefinition.LoggingLevel.ERROR));
         assertFalse(session.isNotificationForLevelAllowed(ProtocolDefinition.LoggingLevel.DEBUG));
@@ -110,13 +109,11 @@ class ServerRuntimeSessionTest {
         TypeReference<String> typeRef = new TypeReference<String>() {};
         Mono<String> mono = session.sendRequest("test/method", Collections.singletonMap("k", "v"), typeRef);
 
-        // 构造与内部生成一致的响应 ID：sessionId + "-" + 0
         ProtocolDefinition.JSONRPCResponse resp = new ProtocolDefinition.JSONRPCResponse(
                 ProtocolDefinition.JSONRPC_VERSION, SESSION_ID + "-0", "raw-result", null);
 
         StepVerifier.create(mono)
                 .then(() -> {
-                    // 触发响应处理
                     when(mockTransport.unmarshalFrom(resp.getResult(), typeRef)).thenReturn("ok");
                     session.handle(resp).block();
                 })
@@ -162,11 +159,8 @@ class ServerRuntimeSessionTest {
     @Test
     void testHandleResponseNoPending() {
         ServerRuntimeSession session = createSession(Collections.emptyMap(), Collections.emptyMap());
-
-        // 直接发送一个没有 pending 的响应，应该只是完成
         ProtocolDefinition.JSONRPCResponse resp = new ProtocolDefinition.JSONRPCResponse(
                 ProtocolDefinition.JSONRPC_VERSION, "unknown-id", "result", null);
-
         StepVerifier.create(session.handle(resp)).verifyComplete();
     }
 
@@ -224,7 +218,6 @@ class ServerRuntimeSessionTest {
         when(mockRequestProcessor.handle(any(RuntimeExchangeContext.class), any()))
                 .thenReturn(Mono.just("ok"));
 
-        // 先发送 initialized 通知，填充 exchangeSink
         ProtocolDefinition.ClientCapabilities caps = new ProtocolDefinition.ClientCapabilities();
         ProtocolDefinition.Implementation clientInfo = new ProtocolDefinition.Implementation("client", "1.0");
         session.init(caps, clientInfo);
@@ -275,7 +268,6 @@ class ServerRuntimeSessionTest {
         when(mockNotificationProcessor.handle(any(RuntimeExchangeContext.class), any()))
                 .thenReturn(Mono.empty());
 
-        // 先 initialized，使 exchangeSink 有值
         ProtocolDefinition.ClientCapabilities caps = new ProtocolDefinition.ClientCapabilities();
         ProtocolDefinition.Implementation clientInfo = new ProtocolDefinition.Implementation("client", "1.0");
         session.init(caps, clientInfo);

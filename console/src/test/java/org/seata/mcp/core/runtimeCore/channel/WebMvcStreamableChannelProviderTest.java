@@ -104,24 +104,26 @@ class WebMvcStreamableChannelProviderTest {
 
     @Test
     void testConstructorWithNullMapper() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            new WebMvcStreamableChannelProvider(
-                    null, TEST_ENDPOINT, false, mockContextResolver, Duration.ofSeconds(30));
-        });
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new WebMvcStreamableChannelProvider(
+                        null, TEST_ENDPOINT, false, mockContextResolver, Duration.ofSeconds(30)));
     }
 
     @Test
     void testConstructorWithNullEndpoint() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            new WebMvcStreamableChannelProvider(realMapper, null, false, mockContextResolver, Duration.ofSeconds(30));
-        });
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new WebMvcStreamableChannelProvider(
+                        realMapper, null, false, mockContextResolver, Duration.ofSeconds(30)));
     }
 
     @Test
     void testConstructorWithNullContextResolver() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            new WebMvcStreamableChannelProvider(realMapper, TEST_ENDPOINT, false, null, Duration.ofSeconds(30));
-        });
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new WebMvcStreamableChannelProvider(
+                        realMapper, TEST_ENDPOINT, false, null, Duration.ofSeconds(30)));
     }
 
     @Test
@@ -168,8 +170,6 @@ class WebMvcStreamableChannelProviderTest {
     @Test
     void testNotifyClientsWithActiveSessions() throws Exception {
         provider = new WebMvcStreamableChannelProvider(realMapper, TEST_ENDPOINT, false, mockContextResolver, null);
-
-        // Use reflection to add session to activeSessions
         Field activeSessionsField = WebMvcStreamableChannelProvider.class.getDeclaredField("activeSessions");
         activeSessionsField.setAccessible(true);
         @SuppressWarnings("unchecked")
@@ -185,8 +185,6 @@ class WebMvcStreamableChannelProviderTest {
     @Test
     void testNotifyClientsWithException() throws Exception {
         provider = new WebMvcStreamableChannelProvider(realMapper, TEST_ENDPOINT, false, mockContextResolver, null);
-
-        // Use reflection to add session to activeSessions
         Field activeSessionsField = WebMvcStreamableChannelProvider.class.getDeclaredField("activeSessions");
         activeSessionsField.setAccessible(true);
         @SuppressWarnings("unchecked")
@@ -220,8 +218,6 @@ class WebMvcStreamableChannelProviderTest {
     @Test
     void testCloseGracefullyWithActiveSessions() throws Exception {
         provider = new WebMvcStreamableChannelProvider(realMapper, TEST_ENDPOINT, false, mockContextResolver, null);
-
-        // Use reflection to add session to activeSessions
         Field activeSessionsField = WebMvcStreamableChannelProvider.class.getDeclaredField("activeSessions");
         activeSessionsField.setAccessible(true);
         @SuppressWarnings("unchecked")
@@ -237,8 +233,6 @@ class WebMvcStreamableChannelProviderTest {
     @Test
     void testCloseGracefullyWithException() throws Exception {
         provider = new WebMvcStreamableChannelProvider(realMapper, TEST_ENDPOINT, false, mockContextResolver, null);
-
-        // Use reflection to add session to activeSessions
         Field activeSessionsField = WebMvcStreamableChannelProvider.class.getDeclaredField("activeSessions");
         activeSessionsField.setAccessible(true);
         @SuppressWarnings("unchecked")
@@ -258,18 +252,12 @@ class WebMvcStreamableChannelProviderTest {
 
         provider.closeGracefully().block();
 
-        // Verify provider was shut down
         assertNotNull(provider);
     }
 
     @Test
     void testConstructorWithNoDelete() {
-        provider = new WebMvcStreamableChannelProvider(
-                realMapper,
-                TEST_ENDPOINT,
-                true, // noDelete = true
-                mockContextResolver,
-                null);
+        provider = new WebMvcStreamableChannelProvider(realMapper, TEST_ENDPOINT, true, mockContextResolver, null);
 
         assertNotNull(provider);
         assertNotNull(provider.getRouterFunction());
@@ -280,7 +268,6 @@ class WebMvcStreamableChannelProviderTest {
         provider = new WebMvcStreamableChannelProvider(
                 realMapper, TEST_ENDPOINT, false, mockContextResolver, Duration.ofMillis(50));
 
-        // Use reflection to add session to activeSessions
         Field activeSessionsField = WebMvcStreamableChannelProvider.class.getDeclaredField("activeSessions");
         activeSessionsField.setAccessible(true);
         @SuppressWarnings("unchecked")
@@ -304,7 +291,6 @@ class WebMvcStreamableChannelProviderTest {
         provider = new WebMvcStreamableChannelProvider(
                 realMapper, TEST_ENDPOINT, false, mockContextResolver, Duration.ofMillis(50));
 
-        // Use reflection to add session to activeSessions
         Field activeSessionsField = WebMvcStreamableChannelProvider.class.getDeclaredField("activeSessions");
         activeSessionsField.setAccessible(true);
         @SuppressWarnings("unchecked")
@@ -313,13 +299,10 @@ class WebMvcStreamableChannelProviderTest {
 
         activeSessions.put(TEST_SESSION_ID, mockSession);
 
-        // Shut down
         provider.closeGracefully().block();
 
-        // Wait a bit
         Thread.sleep(100);
 
-        // Verify session was cleared
         assertTrue(activeSessions.isEmpty());
     }
 
@@ -328,7 +311,6 @@ class WebMvcStreamableChannelProviderTest {
         provider = new WebMvcStreamableChannelProvider(
                 realMapper, TEST_ENDPOINT, false, mockContextResolver, Duration.ofMillis(50));
 
-        // Use reflection to add session to activeSessions
         Field activeSessionsField = WebMvcStreamableChannelProvider.class.getDeclaredField("activeSessions");
         activeSessionsField.setAccessible(true);
         @SuppressWarnings("unchecked")
@@ -339,10 +321,8 @@ class WebMvcStreamableChannelProviderTest {
         when(mockSession.isHealthy()).thenReturn(true);
         activeSessions.put(TEST_SESSION_ID, mockSession);
 
-        // Wait for keep-alive to run
         Thread.sleep(150);
 
-        // Verify session is still there (healthy sessions are not removed)
         assertTrue(activeSessions.containsKey(TEST_SESSION_ID));
     }
 
@@ -376,7 +356,6 @@ class WebMvcStreamableChannelProviderTest {
         when(mockFactory.startSession(any(ProtocolDefinition.InitializeRequest.class)))
                 .thenReturn(init);
 
-        // Use reflection to call handleInitialize
         Method handleInitializeMethod = WebMvcStreamableChannelProvider.class.getDeclaredMethod(
                 "handleInitialize", ProtocolDefinition.JSONRPCRequest.class, RuntimeContext.class);
         handleInitializeMethod.setAccessible(true);
@@ -385,7 +364,6 @@ class WebMvcStreamableChannelProviderTest {
 
         assertNotNull(response);
 
-        // Verify session was added
         Field activeSessionsField = WebMvcStreamableChannelProvider.class.getDeclaredField("activeSessions");
         activeSessionsField.setAccessible(true);
         @SuppressWarnings("unchecked")
@@ -408,7 +386,6 @@ class WebMvcStreamableChannelProviderTest {
         when(mockFactory.startSession(any(ProtocolDefinition.InitializeRequest.class)))
                 .thenThrow(new RuntimeException("Test exception"));
 
-        // Use reflection to call handleInitialize
         Method handleInitializeMethod = WebMvcStreamableChannelProvider.class.getDeclaredMethod(
                 "handleInitialize", ProtocolDefinition.JSONRPCRequest.class, RuntimeContext.class);
         handleInitializeMethod.setAccessible(true);
@@ -424,7 +401,6 @@ class WebMvcStreamableChannelProviderTest {
 
         provider.closeGracefully().block();
 
-        // Use reflection to call handleGet
         Method handleGetMethod =
                 WebMvcStreamableChannelProvider.class.getDeclaredMethod("handleGet", ServerRequest.class);
         handleGetMethod.setAccessible(true);
@@ -442,7 +418,6 @@ class WebMvcStreamableChannelProviderTest {
         when(mockRequest.headers()).thenReturn(mockHeaders);
         when(mockHeaders.asHttpHeaders()).thenReturn(httpHeaders);
 
-        // Use reflection to call handleGet
         Method handleGetMethod =
                 WebMvcStreamableChannelProvider.class.getDeclaredMethod("handleGet", ServerRequest.class);
         handleGetMethod.setAccessible(true);
@@ -462,7 +437,6 @@ class WebMvcStreamableChannelProviderTest {
         when(mockContextResolver.extract(any(ServerRequest.class), any(RuntimeContext.class)))
                 .thenReturn(new DefaultRuntimeContext());
 
-        // Use reflection to call handleGet
         Method handleGetMethod =
                 WebMvcStreamableChannelProvider.class.getDeclaredMethod("handleGet", ServerRequest.class);
         handleGetMethod.setAccessible(true);
@@ -483,7 +457,6 @@ class WebMvcStreamableChannelProviderTest {
         when(mockContextResolver.extract(any(ServerRequest.class), any(RuntimeContext.class)))
                 .thenReturn(new DefaultRuntimeContext());
 
-        // Use reflection to call handleGet
         Method handleGetMethod =
                 WebMvcStreamableChannelProvider.class.getDeclaredMethod("handleGet", ServerRequest.class);
         handleGetMethod.setAccessible(true);
@@ -498,7 +471,6 @@ class WebMvcStreamableChannelProviderTest {
 
         provider.closeGracefully().block();
 
-        // Use reflection to call handlePost
         Method handlePostMethod =
                 WebMvcStreamableChannelProvider.class.getDeclaredMethod("handlePost", ServerRequest.class);
         handlePostMethod.setAccessible(true);
@@ -516,7 +488,6 @@ class WebMvcStreamableChannelProviderTest {
         when(mockRequest.headers()).thenReturn(mockHeaders);
         when(mockHeaders.asHttpHeaders()).thenReturn(httpHeaders);
 
-        // Use reflection to call handlePost
         Method handlePostMethod =
                 WebMvcStreamableChannelProvider.class.getDeclaredMethod("handlePost", ServerRequest.class);
         handlePostMethod.setAccessible(true);
@@ -531,7 +502,6 @@ class WebMvcStreamableChannelProviderTest {
 
         provider.closeGracefully().block();
 
-        // Use reflection to call handleDelete
         Method handleDeleteMethod =
                 WebMvcStreamableChannelProvider.class.getDeclaredMethod("handleDelete", ServerRequest.class);
         handleDeleteMethod.setAccessible(true);
@@ -542,14 +512,8 @@ class WebMvcStreamableChannelProviderTest {
 
     @Test
     void testHandleDeleteWithNoDelete() throws Exception {
-        provider = new WebMvcStreamableChannelProvider(
-                realMapper,
-                TEST_ENDPOINT,
-                true, // noDelete = true
-                mockContextResolver,
-                null);
+        provider = new WebMvcStreamableChannelProvider(realMapper, TEST_ENDPOINT, true, mockContextResolver, null);
 
-        // Use reflection to call handleDelete
         Method handleDeleteMethod =
                 WebMvcStreamableChannelProvider.class.getDeclaredMethod("handleDelete", ServerRequest.class);
         handleDeleteMethod.setAccessible(true);
@@ -566,7 +530,6 @@ class WebMvcStreamableChannelProviderTest {
         when(mockRequest.headers()).thenReturn(mockHeaders);
         when(mockHeaders.asHttpHeaders()).thenReturn(httpHeaders);
 
-        // Use reflection to call handleDelete
         Method handleDeleteMethod =
                 WebMvcStreamableChannelProvider.class.getDeclaredMethod("handleDelete", ServerRequest.class);
         handleDeleteMethod.setAccessible(true);
@@ -584,7 +547,6 @@ class WebMvcStreamableChannelProviderTest {
         when(mockRequest.headers()).thenReturn(mockHeaders);
         when(mockHeaders.asHttpHeaders()).thenReturn(httpHeaders);
 
-        // Use reflection to call handleDelete
         Method handleDeleteMethod =
                 WebMvcStreamableChannelProvider.class.getDeclaredMethod("handleDelete", ServerRequest.class);
         handleDeleteMethod.setAccessible(true);
@@ -597,7 +559,6 @@ class WebMvcStreamableChannelProviderTest {
     void testHandleDeleteWithValidSession() throws Exception {
         provider = new WebMvcStreamableChannelProvider(realMapper, TEST_ENDPOINT, false, mockContextResolver, null);
 
-        // Use reflection to add session to activeSessions
         Field activeSessionsField = WebMvcStreamableChannelProvider.class.getDeclaredField("activeSessions");
         activeSessionsField.setAccessible(true);
         @SuppressWarnings("unchecked")
@@ -614,7 +575,6 @@ class WebMvcStreamableChannelProviderTest {
         when(mockContextResolver.extract(any(ServerRequest.class), any(RuntimeContext.class)))
                 .thenReturn(new DefaultRuntimeContext());
 
-        // Use reflection to call handleDelete
         Method handleDeleteMethod =
                 WebMvcStreamableChannelProvider.class.getDeclaredMethod("handleDelete", ServerRequest.class);
         handleDeleteMethod.setAccessible(true);
