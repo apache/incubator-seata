@@ -20,6 +20,7 @@ import org.apache.seata.common.result.PageResult;
 import org.apache.seata.common.result.SingleResult;
 import org.apache.seata.common.util.BeanUtils;
 import org.apache.seata.common.util.CollectionUtils;
+import org.apache.seata.common.util.PageUtil;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.server.console.entity.param.GlobalLockParam;
 import org.apache.seata.server.console.entity.vo.GlobalLockVO;
@@ -41,7 +42,6 @@ import java.util.Map;
 
 import static org.apache.seata.common.Constants.ROW_LOCK_KEY_SPLIT_CHAR;
 import static org.apache.seata.common.exception.FrameworkErrorCode.ParameterRequired;
-import static org.apache.seata.common.result.PageResult.checkPage;
 import static org.apache.seata.common.util.StringUtils.isNotBlank;
 import static org.apache.seata.core.constants.RedisKeyConstants.DEFAULT_REDIS_SEATA_GLOBAL_LOCK_PREFIX;
 import static org.apache.seata.core.constants.RedisKeyConstants.DEFAULT_REDIS_SEATA_ROW_LOCK_PREFIX;
@@ -58,10 +58,10 @@ public class GlobalLockRedisServiceImpl extends AbstractLockService implements G
 
     @Override
     public PageResult<GlobalLockVO> query(GlobalLockParam param) {
+        PageUtil.checkParam(param.getPageNum(), param.getPageSize());
 
         int total = 0;
         List<GlobalLockVO> globalLockVos;
-        checkPage(param);
         if (isNotBlank(param.getXid())) {
             globalLockVos = queryGlobalByXid(param.getXid());
             total = globalLockVos.size();

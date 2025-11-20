@@ -16,7 +16,7 @@
  */
 package org.apache.seata.integration.tx.api.fence.config;
 
-import org.apache.commons.lang.time.DateUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.seata.common.DefaultValues;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.core.rpc.Disposable;

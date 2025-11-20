@@ -20,7 +20,6 @@ package org.apache.seata.rm.datasource.initializer.db;
 import org.apache.seata.rm.datasource.DataSourceProxy;
 import org.apache.seata.rm.datasource.initializer.AbstractResourceIdInitializer;
 import org.apache.seata.sqlparser.util.JdbcConstants;
-import org.jetbrains.annotations.NotNull;
 
 public class SqlServerResourceIdInitializer extends AbstractResourceIdInitializer {
     @Override
@@ -52,7 +51,6 @@ public class SqlServerResourceIdInitializer extends AbstractResourceIdInitialize
         proxy.setResourceId(resourceId);
     }
 
-    @NotNull
     private static StringBuilder getParamsBuilder(String resourceId) {
         StringBuilder paramsBuilder = new StringBuilder();
         String paramUrl = resourceId.substring(resourceId.indexOf(';') + 1);
