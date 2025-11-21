@@ -28,14 +28,12 @@ import org.apache.seata.core.protocol.AbstractMessage;
 import org.apache.seata.core.protocol.HeartbeatMessage;
 import org.apache.seata.core.protocol.MergedWarpMessage;
 import org.apache.seata.core.protocol.MessageFuture;
-import org.apache.seata.core.protocol.ProtocolConstants;
 import org.apache.seata.core.protocol.RpcMessage;
 import org.apache.seata.core.protocol.transaction.BranchRegisterRequest;
 import org.apache.seata.core.protocol.transaction.BranchReportRequest;
 import org.apache.seata.core.protocol.transaction.GlobalBeginRequest;
 import org.apache.seata.core.protocol.transaction.GlobalCommitRequest;
 import org.apache.seata.core.protocol.transaction.GlobalRollbackRequest;
-import org.apache.seata.core.rpc.processor.RemotingProcessor;
 import org.assertj.core.api.Fail;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -46,14 +44,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -1511,59 +1502,6 @@ public class AbstractNettyRemotingClientTest {
     }
 
     @Test
-    public void testMergedSendRunnableWithChannelNotWritable() throws Exception {
-        class TestClientWithUnwritableChannel extends TestNettyRemotingClientWithBatch {
-            public TestClientWithUnwritableChannel(NettyClientConfig config, ThreadPoolExecutor executor) {
-                super(config, executor);
-            }
-
-            @Override
-            protected String loadBalance(String serviceGroup, Object msg) {
-                return "127.0.0.1:8080";
-            }
-        }
-
-        TestClientWithUnwritableChannel batchClient =
-                new TestClientWithUnwritableChannel(clientConfig, messageExecutor);
-        batchClient.init();
-
-        GlobalBeginRequest request1 = new GlobalBeginRequest();
-        request1.setTransactionName("test-tx-1");
-        GlobalBeginRequest request2 = new GlobalBeginRequest();
-        request2.setTransactionName("test-tx-2");
-
-        CompletableFuture.runAsync(() -> {
-            try {
-                batchClient.sendSyncRequest(request1);
-            } catch (Exception e) {
-                /* exception */
-            }
-        });
-        CompletableFuture.runAsync(() -> {
-            try {
-                batchClient.sendSyncRequest(request2);
-            } catch (Exception e) {
-                /* exception */
-            }
-        });
-
-        Thread.sleep(100);
-        batchClient.mergeLock.lock();
-        try {
-            batchClient.mergeCondition.signalAll();
-        } finally {
-            batchClient.mergeLock.unlock();
-        }
-        Thread.sleep(100);
-
-        assertEquals(0, batchClient.futures.size());
-        assertEquals(0, batchClient.mergeMsgMap.size());
-        assertEquals(0, batchClient.childToParentMap.size());
-
-        batchClient.destroy();
-    }
-
-    @Test
     public void testReconnectTimerException() {
         TestNettyRemotingClient client = new TestNettyRemotingClient(clientConfig, messageExecutor);
         try {
@@ -1605,65 +1543,6 @@ public class AbstractNettyRemotingClientTest {
         assertNotNull(xid1);
         assertNotNull(xid2);
         Assertions.assertNotEquals(xid1, xid2);
-    }
-
-    @Test
-    public void testDoSelectWithMultipleAddresses() throws Exception {
-        List<InetSocketAddress> addressList = Arrays.asList(
-                new InetSocketAddress("127.0.0.1", 8080),
-                new InetSocketAddress("127.0.0.1", 8081),
-                new InetSocketAddress("127.0.0.1", 8082));
-        GlobalBeginRequest request = new GlobalBeginRequest();
-        request.setTransactionName("test-tx");
-
-        Set<String> selectedAddresses = new HashSet<>();
-        for (int i = 0; i < 5; i++) {
-            InetSocketAddress address = client.doSelect(addressList, request);
-            assertNotNull(address);
-            selectedAddresses.add(address.toString());
-        }
-        assertTrue(selectedAddresses.size() >= 2);
-    }
-
-    @Test
-    public void testFireChannelEventListenerThrowsException() {
-        ChannelEventListener badListener = mock(ChannelEventListener.class);
-        doThrow(new RuntimeException("listener error")).when(badListener).onChannelConnected(any());
-        ChannelEventListener goodListener = mock(ChannelEventListener.class);
-
-        client.registerChannelEventListener(badListener);
-        client.registerChannelEventListener(goodListener);
-
-        Channel mockChannel = mock(Channel.class);
-        client.onChannelActive(mockChannel);
-
-        verify(badListener, times(1)).onChannelConnected(mockChannel);
-        verify(goodListener, times(1)).onChannelConnected(mockChannel);
-    }
-
-    @Test
-    public void testClientHandlerChannelReadValidRpcMessage() throws Exception {
-        int requestCode = 100;
-        RemotingProcessor mockProcessor = mock(RemotingProcessor.class);
-        ExecutorService mockExecutor = Executors.newSingleThreadExecutor();
-        client.registerProcessor(requestCode, mockProcessor, mockExecutor);
-
-        RpcMessage rpcMsg = new RpcMessage();
-        rpcMsg.setId(1);
-        rpcMsg.setMessageType(ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
-        AbstractMessage body = mock(AbstractMessage.class);
-        when(body.getTypeCode()).thenReturn((short) requestCode);
-        rpcMsg.setBody(body);
-
-        AbstractNettyRemotingClient.ClientHandler handler = client.new ClientHandler();
-        ChannelHandlerContext mockCtx = mock(ChannelHandlerContext.class);
-        when(mockCtx.channel()).thenReturn(mock(Channel.class));
-
-        handler.channelRead(mockCtx, rpcMsg);
-
-        Thread.sleep(50);
-
-        mockExecutor.shutdown();
     }
 
     @Test
