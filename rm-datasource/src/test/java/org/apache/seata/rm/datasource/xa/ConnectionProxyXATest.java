@@ -635,8 +635,7 @@ public class ConnectionProxyXATest {
                 new ConnectionProxyXA(mockConnection, mockXAConnection, mockDataSourceResource, xid);
         connectionProxyXA.init();
         // Set up mock for branch registration to enable XA transaction
-        when(mockResourceManager.branchRegister(
-                eq(BranchType.XA), anyString(), eq(null), eq(xid), eq(null), eq(null)))
+        when(mockResourceManager.branchRegister(eq(BranchType.XA), anyString(), eq(null), eq(xid), eq(null), eq(null)))
                 .thenReturn(branchId);
 
         // Start XA transaction by setting autoCommit to false
