@@ -131,8 +131,12 @@ public class MCPProperties {
         mcpType = env.getProperty("seata.mcp.mcpType", "sse");
         if (STREAMABLE_TYPE.equals(mcpType)) {
             String mcpEndPoint = env.getProperty("seata.mcp.streamable.mcpEndpoint", "/mcp");
-            Long heartBeatSecondDuration =
-                    Long.parseLong(env.getProperty("seata.mcp.streamable.heartBeatSecondDuration", "30"));
+            long heartBeatSecondDuration;
+            try{
+                heartBeatSecondDuration = Long.parseLong(env.getProperty("seata.mcp.streamable.heartBeatSecondDuration", "30"));
+            } catch (NumberFormatException e) {
+                throw new RuntimeException(e);
+            }
             streamableProperties = new StreamableProperties(mcpEndPoint, heartBeatSecondDuration);
         } else {
             mcpType = SSE_TYPE;
@@ -142,7 +146,12 @@ public class MCPProperties {
         }
         serverName = env.getProperty("seata.mcp.serverName", "seata-mcp-server");
         serverVersion = env.getProperty("seata.mcp.serverVersion", "1.0.0");
-        queryDuration = Long.parseLong(env.getProperty("seata.mcp.query.max_query_duration", "604800000"));
+        queryDuration = 604800000L;
+        try{
+            queryDuration = Long.parseLong(env.getProperty("seata.mcp.query.max_query_duration", "604800000"));
+        } catch (NumberFormatException e) {
+            throw new RuntimeException(e);
+        }
         enableAuth = Boolean.parseBoolean(env.getProperty("seata.mcp.auth.enabled", "true"));
     }
 
