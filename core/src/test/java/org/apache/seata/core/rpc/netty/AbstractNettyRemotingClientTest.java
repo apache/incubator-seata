@@ -48,6 +48,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -62,6 +63,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.never;
+import static org.mockito.ArgumentMatchers.anyString;
 
 /**
  * Test for AbstractNettyRemotingClient
@@ -1573,6 +1576,95 @@ public class AbstractNettyRemotingClientTest {
     public void testDestroyWithoutInit() {
         TestNettyRemotingClient uninitClient = new TestNettyRemotingClient(clientConfig, messageExecutor);
         uninitClient.destroy();
+    }
+
+    @Test
+    public void testReconnectTimerWhenTimerNotStarted() throws Exception {
+        TestNettyRemotingClient client = new TestNettyRemotingClient(clientConfig, messageExecutor);
+        try {
+            // Mock clientChannelManager and set timerStarted to false
+            NettyClientChannelManager mockManager = mock(NettyClientChannelManager.class);
+            Field managerField = AbstractNettyRemotingClient.class.getDeclaredField("clientChannelManager");
+            managerField.setAccessible(true);
+            managerField.set(client, mockManager);
+
+            // Set timerStarted to false using reflection
+            Field timerStartedField = AbstractNettyRemotingClient.class.getDeclaredField("timerStarted");
+            timerStartedField.setAccessible(true);
+            AtomicBoolean timerStarted = (AtomicBoolean) timerStartedField.get(client);
+            timerStarted.set(false);
+
+            client.init();
+            Thread.sleep(100);
+
+            // Verify reconnect was not called
+            verify(mockManager, never()).reconnect(anyString());
+        } catch (Exception e) {
+            Fail.fail("Test failed: " + e.getMessage());
+        } finally {
+            client.destroy();
+        }
+    }
+
+    @Test
+    public void testReconnectTimerWithEmptyServiceGroup() throws Exception {
+        TestNettyRemotingClientWithEmptyServiceGroup client =
+                new TestNettyRemotingClientWithEmptyServiceGroup(clientConfig, messageExecutor);
+        try {
+            // Mock clientChannelManager
+            NettyClientChannelManager mockManager = mock(NettyClientChannelManager.class);
+            Field managerField = AbstractNettyRemotingClient.class.getDeclaredField("clientChannelManager");
+            managerField.setAccessible(true);
+            managerField.set(client, mockManager);
+
+            client.init();
+            Thread.sleep(100);
+
+            // Verify reconnect was not called due to empty service group
+            verify(mockManager, never()).reconnect(anyString());
+        } catch (Exception e) {
+            Fail.fail("Test failed: " + e.getMessage());
+        } finally {
+            client.destroy();
+        }
+    }
+
+    /**
+     * Test client with empty transaction service group
+     */
+    static class TestNettyRemotingClientWithEmptyServiceGroup extends AbstractNettyRemotingClient {
+        public TestNettyRemotingClientWithEmptyServiceGroup(
+                NettyClientConfig nettyClientConfig, ThreadPoolExecutor messageExecutor) {
+            super(nettyClientConfig, messageExecutor, NettyPoolKey.TransactionRole.TMROLE);
+        }
+
+        @Override
+        protected Function<String, NettyPoolKey> getPoolKeyFunction() {
+            return serverAddress -> new NettyPoolKey(NettyPoolKey.TransactionRole.TMROLE, serverAddress);
+        }
+
+        @Override
+        protected String getTransactionServiceGroup() {
+            return "";
+        }
+
+        @Override
+        protected boolean isEnableClientBatchSendRequest() {
+            return false;
+        }
+
+        @Override
+        protected long getRpcRequestTimeout() {
+            return 30000L;
+        }
+
+        @Override
+        public void onRegisterMsgSuccess(
+                String serverAddress, Channel channel, Object response, AbstractMessage requestMessage) {}
+
+        @Override
+        public void onRegisterMsgFail(
+                String serverAddress, Channel channel, Object response, AbstractMessage requestMessage) {}
     }
 
     /**
