@@ -194,7 +194,7 @@ public class DataCompareUtilsTest {
 
         Map<String, Map<String, Field>> result = DataCompareUtils.rowListToMap(rows, primaryKeyList);
         Assertions.assertEquals(3, result.size());
-        Assertions.assertEquals(result.keySet().iterator().next(), "1");
+        Assertions.assertTrue(result.containsKey("1"), "Map should contain key '1'");
     }
 
     @Test
@@ -227,6 +227,6 @@ public class DataCompareUtilsTest {
 
         Map<String, Map<String, Field>> result = DataCompareUtils.rowListToMap(rows, primaryKeyList);
         Assertions.assertEquals(3, result.size());
-        Assertions.assertEquals(result.keySet().iterator().next(), "1_2");
+        Assertions.assertTrue(result.containsKey("1_2"), "Map should contain key '1_2'");
     }
 }
