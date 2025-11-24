@@ -205,7 +205,6 @@ class KeepAliveSchedulerTest {
 
     @Test
     void testProcessKeepAliveWithStreamableSession() {
-        when(mockStreamableSession.toString()).thenReturn("streamable-session-1");
         when(mockStreamableSession.sendRequest(eq(ProtocolDefinition.METHOD_PING), any(), any(TypeReference.class)))
                 .thenReturn(Mono.error(new RuntimeException("Connection failed")));
         sessions.add(mockStreamableSession);
