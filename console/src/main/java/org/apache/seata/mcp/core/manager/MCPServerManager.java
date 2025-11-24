@@ -225,14 +225,17 @@ public class MCPServerManager implements SmartLifecycle {
             };
         }
 
+        @Override
         public void activate() {
             active.set(true);
         }
 
+        @Override
         public void deactivate() {
             active.set(false);
         }
 
+        @Override
         public void shutdown() {
             super.close();
             active.set(false);
