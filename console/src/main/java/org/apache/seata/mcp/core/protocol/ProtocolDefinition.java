@@ -1324,11 +1324,6 @@ public final class ProtocolDefinition {
         @JsonProperty("completion")
         private final CompleteCompletion completion;
 
-        @Override
-        public String toString() {
-            return "CompleteResult{" + "completion=" + completion + ", meta=" + meta + '}';
-        }
-
         @JsonCreator
         public CompleteResult(
                 @JsonProperty("completion") CompleteCompletion completion,
