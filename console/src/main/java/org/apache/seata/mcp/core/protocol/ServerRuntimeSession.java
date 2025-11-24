@@ -149,7 +149,6 @@ public class ServerRuntimeSession implements RuntimeSession {
     }
 
     private Mono<Void> handleResponse(ProtocolDefinition.JSONRPCResponse resp) {
-        logger.debug("Response: {}", resp);
         MonoSink<ProtocolDefinition.JSONRPCResponse> sink = pending.remove(resp.getId());
         if (sink != null) {
             sink.success(resp);
@@ -160,7 +159,6 @@ public class ServerRuntimeSession implements RuntimeSession {
     }
 
     private Mono<Void> handleRequest(ProtocolDefinition.JSONRPCRequest req) {
-        logger.debug("Request: {}", req);
         return Mono.defer(() -> {
             Mono<?> result;
             if (ProtocolDefinition.METHOD_INITIALIZE.equals(req.getMethod())) {
@@ -196,7 +194,6 @@ public class ServerRuntimeSession implements RuntimeSession {
     }
 
     private Mono<Void> handleNotification(ProtocolDefinition.JSONRPCNotification notif) {
-        logger.debug("Notification: {}", notif);
         return Mono.defer(() -> {
             if (ProtocolDefinition.METHOD_NOTIFICATION_INITIALIZED.equals(notif.getMethod())) {
                 state.set(STATE_READY);
