@@ -47,8 +47,6 @@ import static org.mockito.Mockito.when;
  */
 public class PolarDBXInsertOnDuplicateUpdateExecutorTest extends MySQLInsertOnDuplicateUpdateExecutorTest {
 
-    protected PolarDBXInsertOnDuplicateUpdateExecutor insertOrUpdateExecutor;
-
     @BeforeEach
     @Override
     public void init() {
