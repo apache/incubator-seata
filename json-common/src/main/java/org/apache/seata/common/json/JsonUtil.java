@@ -34,6 +34,9 @@ public final class JsonUtil {
                     ConfigurationKeys.TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER_NAME,
                     DefaultValues.DEFAULT_TCC_BUSINESS_ACTION_CONTEXT_JSON_PARSER);
 
+    private static final JsonSerializer DEFAULT_SERIALIZER =
+            JsonSerializerFactory.getSerializer(CONFIG_JSON_PARSER_NAME);
+
     /**
      * Serialize the given object to JSON string
      *
@@ -42,7 +45,7 @@ public final class JsonUtil {
      * @throws JsonParseException if serialization fails
      */
     public static String toJSONString(Object object) {
-        return JsonSerializerFactory.getSerializer(CONFIG_JSON_PARSER_NAME).toJSONString(object);
+        return DEFAULT_SERIALIZER.toJSONString(object);
     }
 
     /**
