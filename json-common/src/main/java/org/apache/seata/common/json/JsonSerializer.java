@@ -23,17 +23,69 @@ import java.lang.reflect.Type;
  */
 public interface JsonSerializer {
 
+    /**
+     * Serializes the specified object into its JSON string representation.
+     *
+     * @param object the object to serialize
+     * @return the JSON string representation of the object
+     */
     String toJSONString(Object object);
 
+    /**
+     * Deserializes the specified JSON string into an object of the given class type.
+     *
+     * @param text the JSON string to parse
+     * @param clazz the class of T
+     * @param <T> the type of the desired object
+     * @return the deserialized object of type T
+     */
     <T> T parseObject(String text, Class<T> clazz);
 
-    <T> T parseObject(String text, Type type);
+    /**
+     * Deserializes the specified JSON string into an object of the given type.
+     *
+     * @param text the JSON string to parse
+     * @param type the type to deserialize into
+     * @param <T> the type of the desired object
+     * @return the deserialized object of type T
+     */
+    <T> T parseObjectWithType(String text, Type type);
 
+    /**
+     * Checks whether the given JSON string uses auto type features (such as type information for polymorphic deserialization).
+     *
+     * @param json the JSON string to check
+     * @return true if auto type is used in the JSON, false otherwise
+     */
     boolean useAutoType(String json);
 
+    /**
+     * Serializes the specified object into its JSON string representation.
+     *
+     * @param o the object to serialize
+     * @param prettyPrint whether to format the JSON string for readability
+     * @return the JSON string representation of the object
+     */
     String toJSONString(Object o, boolean prettyPrint);
 
+    /**
+     * Serializes the specified object into its JSON string representation, with options to ignore auto type and pretty print.
+     *
+     * @param o the object to serialize
+     * @param ignoreAutoType whether to ignore auto type information during serialization
+     * @param prettyPrint whether to format the JSON string for readability
+     * @return the JSON string representation of the object
+     */
     String toJSONString(Object o, boolean ignoreAutoType, boolean prettyPrint);
 
+    /**
+     * Deserializes the specified JSON string into an object of the given class type, with an option to ignore auto type information.
+     *
+     * @param json the JSON string to parse
+     * @param type the class of T
+     * @param ignoreAutoType whether to ignore auto type information during deserialization
+     * @param <T> the type of the desired object
+     * @return the deserialized object of type T
+     */
     <T> T parseObject(String json, Class<T> type, boolean ignoreAutoType);
 }

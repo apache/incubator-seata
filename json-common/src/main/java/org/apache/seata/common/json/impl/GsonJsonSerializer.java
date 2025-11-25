@@ -64,7 +64,7 @@ public class GsonJsonSerializer implements JsonSerializer {
     }
 
     @Override
-    public <T> T parseObject(String text, Type type) {
+    public <T> T parseObjectWithType(String text, Type type) {
         if (text == null || type == null) {
             return null;
         }
@@ -106,7 +106,7 @@ public class GsonJsonSerializer implements JsonSerializer {
         }
         try {
             if ("[]".equals(text)) {
-                return (T) java.util.Collections.emptyList();
+                return (T) new java.util.ArrayList<>();
             }
             return gson.fromJson(text, type);
         } catch (Exception e) {

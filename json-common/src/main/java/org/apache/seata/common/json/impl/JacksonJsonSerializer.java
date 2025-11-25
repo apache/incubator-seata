@@ -90,7 +90,7 @@ public class JacksonJsonSerializer implements JsonSerializer {
     }
 
     @Override
-    public <T> T parseObject(String text, Type type) {
+    public <T> T parseObjectWithType(String text, Type type) {
         if (text == null || type == null) {
             return null;
         }

@@ -205,7 +205,7 @@ public class FastjsonJsonSerializerTest {
         String json = "{\"name\":\"test\",\"value\":123}";
         Type type = new TypeReference<TestObject>() {}.getType();
 
-        TestObject obj = jsonSerializer.parseObject(json, type);
+        TestObject obj = jsonSerializer.parseObjectWithType(json, type);
         assertThat(obj).isNotNull();
         assertThat(obj.getName()).isEqualTo("test");
         assertThat(obj.getValue()).isEqualTo(123);
@@ -213,7 +213,7 @@ public class FastjsonJsonSerializerTest {
         String listJson = "[{\"name\":\"item1\",\"value\":1},{\"name\":\"item2\",\"value\":2}]";
         Type listType = new TypeReference<List<TestObject>>() {}.getType();
 
-        List<TestObject> list = jsonSerializer.parseObject(listJson, listType);
+        List<TestObject> list = jsonSerializer.parseObjectWithType(listJson, listType);
         assertThat(list).hasSize(2);
         assertThat(list.get(0).getName()).isEqualTo("item1");
         assertThat(list.get(1).getValue()).isEqualTo(2);

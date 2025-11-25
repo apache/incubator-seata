@@ -70,21 +70,21 @@ public class GsonJsonSerializerTest {
     @Test
     public void testUseAutoType_withType() {
         String json = "{\"@type\":\"some.type\",\"name\":\"test\"}";
-        boolean hasAutoType = ((GsonJsonSerializer) jsonSerializer).useAutoType(json);
+        boolean hasAutoType = jsonSerializer.useAutoType(json);
         assertThat(hasAutoType).isFalse();
     }
 
     @Test
     public void testUseAutoType_withoutType() {
         String json = "{\"name\":\"test\"}";
-        boolean hasAutoType = ((GsonJsonSerializer) jsonSerializer).useAutoType(json);
+        boolean hasAutoType = jsonSerializer.useAutoType(json);
         assertThat(hasAutoType).isFalse();
     }
 
     @Test
-    public void testToJsonString_prettyPrint() {
+    public void testToJSONString_prettyPrint() {
         TestObject obj = new TestObject("pretty", 789);
-        String prettyJson = ((GsonJsonSerializer) jsonSerializer).toJSONString(obj, true);
+        String prettyJson = jsonSerializer.toJSONString(obj, true);
 
         assertThat(prettyJson).contains("\n");
         assertThat(prettyJson).contains("  \"");
@@ -93,7 +93,7 @@ public class GsonJsonSerializerTest {
     @Test
     public void testToJSONString_ignoreAutoType() {
         TestObject obj = new TestObject("noType", 111);
-        String jsonWithoutType = ((GsonJsonSerializer) jsonSerializer).toJSONString(obj, true, true);
+        String jsonWithoutType = jsonSerializer.toJSONString(obj, true, true);
 
         assertThat(jsonWithoutType).doesNotContain("@type");
     }
@@ -103,7 +103,7 @@ public class GsonJsonSerializerTest {
         TestObject obj = new TestObject("ignored", 222);
         String json = jsonSerializer.toJSONString(obj);
 
-        TestObject restored = ((GsonJsonSerializer) jsonSerializer).parseObject(json, TestObject.class, true);
+        TestObject restored = jsonSerializer.parseObject(json, TestObject.class, true);
 
         assertThat(restored).isNotNull();
         assertThat(restored.getName()).isEqualTo("ignored");
@@ -113,14 +113,14 @@ public class GsonJsonSerializerTest {
     @Test
     public void testEmptyList_serialization() {
         List<String> emptyList = new ArrayList<>();
-        String json = ((GsonJsonSerializer) jsonSerializer).toJSONString(emptyList, false, false);
+        String json = jsonSerializer.toJSONString(emptyList, false, false);
         assertThat(json).isEqualTo("[]");
     }
 
     @Test
     public void testEmptyList_deserialization() {
         String json = "[]";
-        List<?> list = ((GsonJsonSerializer) jsonSerializer).parseObject(json, List.class, false);
+        List<?> list = jsonSerializer.parseObject(json, List.class, false);
         assertThat(list).isEmpty();
     }
 
@@ -155,21 +155,20 @@ public class GsonJsonSerializerTest {
 
     @Test
     public void testParseObject_nullText() {
-        assertThat(((GsonJsonSerializer) jsonSerializer).parseObject(null, String.class))
-                .isNull();
+        assertThat(jsonSerializer.parseObject(null, String.class)).isNull();
     }
 
     @Test
     public void testToJSONString_emptyList() {
         List<String> emptyList = new ArrayList<>();
-        String json = ((GsonJsonSerializer) jsonSerializer).toJSONString(emptyList, false, false);
+        String json = jsonSerializer.toJSONString(emptyList, false, false);
         assertThat(json).isEqualTo("[]");
     }
 
     @Test
     public void testToJSONString_withAutoType() {
         TestObject obj = new TestObject("withType", 789);
-        String jsonWithAutoType = ((GsonJsonSerializer) jsonSerializer).toJSONString(obj, false, false);
+        String jsonWithAutoType = jsonSerializer.toJSONString(obj, false, false);
 
         assertThat(jsonWithAutoType).doesNotContain("@type");
     }
@@ -177,7 +176,7 @@ public class GsonJsonSerializerTest {
     @Test
     public void testToJsonString_prettyPrint() {
         TestObject obj = new TestObject("pretty", 789);
-        String prettyJson = ((GsonJsonSerializer) jsonSerializer).toJSONString(obj, false, true);
+        String prettyJson = jsonSerializer.toJSONString(obj, false, true);
 
         // Pretty JSON should contain newlines and indentation
         assertThat(prettyJson).contains("\n");
@@ -185,24 +184,22 @@ public class GsonJsonSerializerTest {
 
     @Test
     public void testParseObject_nullJson() {
-        assertThat(((GsonJsonSerializer) jsonSerializer).parseObject(null, TestObject.class, false))
-                .isNull();
+        assertThat(jsonSerializer.parseObject(null, TestObject.class, false)).isNull();
     }
 
     @Test
     public void testParseObject_emptyList() {
         String json = "[]";
-        List<?> list = ((GsonJsonSerializer) jsonSerializer).parseObject(json, List.class, false);
+        List<?> list = jsonSerializer.parseObject(json, List.class, false);
         assertThat(list).isEmpty();
     }
 
     @Test
     public void testParseObject_withAutoType() {
         TestObject original = new TestObject("autoTypeTest", 999);
-        String jsonWithAutoType = ((GsonJsonSerializer) jsonSerializer).toJSONString(original, false, false);
+        String jsonWithAutoType = jsonSerializer.toJSONString(original, false, false);
 
-        TestObject restored =
-                ((GsonJsonSerializer) jsonSerializer).parseObject(jsonWithAutoType, TestObject.class, false);
+        TestObject restored = jsonSerializer.parseObject(jsonWithAutoType, TestObject.class, false);
 
         assertThat(restored).isNotNull();
         assertThat(restored.getName()).isEqualTo("autoTypeTest");

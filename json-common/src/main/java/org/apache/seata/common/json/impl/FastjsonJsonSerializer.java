@@ -80,7 +80,7 @@ public class FastjsonJsonSerializer implements JsonSerializer {
     }
 
     @Override
-    public <T> T parseObject(String text, Type type) {
+    public <T> T parseObjectWithType(String text, Type type) {
         if (text == null || type == null) {
             return null;
         }
@@ -130,7 +130,7 @@ public class FastjsonJsonSerializer implements JsonSerializer {
         }
         try {
             if ("[]".equals(text)) {
-                return (T) java.util.Collections.emptyList();
+                return (T) new java.util.ArrayList<>();
             }
             if (ignoreAutoType) {
                 return JSON.parseObject(text, type, READER_FEATURES_IGNORE_AUTO_TYPE);

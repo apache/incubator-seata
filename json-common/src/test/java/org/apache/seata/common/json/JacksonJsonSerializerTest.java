@@ -212,12 +212,12 @@ public class JacksonJsonSerializerTest {
                 "{\"@type\":\"org.apache.seata.common.json.JacksonJsonSerializerTest$TestObject\",\"name\":\"test\",\"value\":123}";
         Type type = new TypeReference<TestObject>() {}.getType();
 
-        TestObject obj = jsonSerializer.parseObject(json, type);
+        TestObject obj = jsonSerializer.parseObjectWithType(json, type);
         assertThat(obj).isNotNull();
         assertThat(obj.getName()).isEqualTo("test");
         assertThat(obj.getValue()).isEqualTo(123);
 
-        assertThatThrownBy(() -> jsonSerializer.parseObject("{invalid json}", type))
+        assertThatThrownBy(() -> jsonSerializer.parseObjectWithType("{invalid json}", type))
                 .isInstanceOf(JsonParseException.class)
                 .hasMessageContaining("Jackson deserialize error");
     }

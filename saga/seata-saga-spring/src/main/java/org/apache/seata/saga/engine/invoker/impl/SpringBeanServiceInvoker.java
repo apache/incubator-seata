@@ -313,7 +313,7 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
         } else {
             JsonSerializer jsonSerializer = JsonSerializerFactory.getSerializer(getSagaJsonParser());
             if (jsonSerializer == null) {
-                throw new RuntimeException("Cannot get JsonParser by name : " + getSagaJsonParser());
+                throw new RuntimeException("Cannot get JsonSerializer by name : " + getSagaJsonParser());
             }
             String jsonValue = jsonSerializer.toJSONString(value, true, false);
 

@@ -60,7 +60,7 @@ public class StateMachineParserImpl implements StateMachineParser {
 
         JsonSerializer jsonSerializer = JsonSerializerFactory.getSerializer(jsonParserName);
         if (jsonSerializer == null) {
-            throw new RuntimeException("Cannot find JsonParer by name: " + jsonParserName);
+            throw new RuntimeException("Cannot find JsonSerializer by name: " + jsonParserName);
         }
         Map<String, Object> node = jsonSerializer.parseObject(json, Map.class, true);
         if (DesignerJsonTransformer.isDesignerJson(node)) {
