@@ -82,7 +82,7 @@ public class GsonJsonSerializerTest {
     }
 
     @Test
-    public void testToJSONString_prettyPrint() {
+    public void testToJsonString_prettyPrint() {
         TestObject obj = new TestObject("pretty", 789);
         String prettyJson = ((GsonJsonSerializer) jsonSerializer).toJSONString(obj, true);
 
