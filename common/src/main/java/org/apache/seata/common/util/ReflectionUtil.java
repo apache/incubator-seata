@@ -26,6 +26,7 @@ import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Map;
@@ -165,6 +166,31 @@ public final class ReflectionUtil {
             }
             clazz = clazz.getSuperclass();
         }
+        return interfaces;
+    }
+
+    /**
+     * get all interface of the clazz,include all parent class and all parent interface
+     * @param clazz
+     * @return
+     */
+    public static Set<Class<?>> getInterfacesInHierarchy(Class<?> clazz) {
+        Set<Class<?>> interfaces = new HashSet<>();
+        if (clazz == null) {
+            return interfaces;
+        }
+
+        Class<?>[] declaredInterfaces = clazz.getInterfaces();
+        for (Class<?> iface : declaredInterfaces) {
+            interfaces.add(iface);
+            interfaces.addAll(getInterfacesInHierarchy(iface));
+        }
+
+        Class<?> superClass = clazz.getSuperclass();
+        if (superClass != null && superClass != Object.class) {
+            interfaces.addAll(getInterfacesInHierarchy(superClass));
+        }
+
         return interfaces;
     }
 
@@ -716,6 +742,54 @@ public final class ReflectionUtil {
      */
     public static <A extends Annotation> A findAnnotationInHierarchy(
             Class<?> targetClass, String methodName, Class<?>[] paramTypes, Class<A> annotationClass) {
+        A classLevelAnnotation = findClassLevelAnnotation(targetClass, annotationClass);
+        if (classLevelAnnotation != null) {
+            return classLevelAnnotation;
+        }
+
+        if (methodName != null) {
+            A methodLevelAnnotation = findMethodLevelAnnotation(targetClass, methodName, paramTypes, annotationClass);
+            if (methodLevelAnnotation != null) {
+                return methodLevelAnnotation;
+            }
+        }
+
+        return null;
+    }
+
+    private static <A extends Annotation> A findClassLevelAnnotation(Class<?> targetClass, Class<A> annotationClass) {
+        if (targetClass == null || annotationClass == null) {
+            return null;
+        }
+
+        A annotation = null;
+
+        Class<?> superClass = targetClass.getSuperclass();
+        while (superClass != null && superClass != Object.class) {
+            annotation = superClass.getAnnotation(annotationClass);
+            if (annotation != null) {
+                return annotation;
+            }
+            superClass = superClass.getSuperclass();
+        }
+
+        Set<Class<?>> allInterfaces = getInterfacesInHierarchy(targetClass);
+        for (Class<?> iface : allInterfaces) {
+            annotation = iface.getAnnotation(annotationClass);
+            if (annotation != null) {
+                return annotation;
+            }
+        }
+
+        return null;
+    }
+
+    private static <A extends Annotation> A findMethodLevelAnnotation(
+            Class<?> targetClass, String methodName, Class<?>[] paramTypes, Class<A> annotationClass) {
+        if (targetClass == null || methodName == null || annotationClass == null) {
+            return null;
+        }
+
         Class<?> superClass = targetClass.getSuperclass();
         while (superClass != null && superClass != Object.class) {
             try {
@@ -729,7 +803,7 @@ public final class ReflectionUtil {
             superClass = superClass.getSuperclass();
         }
 
-        Set<Class<?>> interfaces = getInterfaces(targetClass);
+        Set<Class<?>> interfaces = getInterfacesInHierarchy(targetClass);
         for (Class<?> iface : interfaces) {
             try {
                 Method ifaceMethod = iface.getDeclaredMethod(methodName, paramTypes);

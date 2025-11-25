@@ -209,12 +209,26 @@ public class ReflectionUtilTest {
     }
 
     @Test
+    public void testFindInterfacesInHierarchy() throws NoSuchMethodException, NoSuchFieldException {
+        Set<Class<?>> allInterfaces = ReflectionUtil.getInterfacesInHierarchy(ClassChild.class);
+        Assertions.assertTrue(allInterfaces.contains(InterChild.class));
+        Assertions.assertTrue(allInterfaces.contains(InterSub.class));
+        Assertions.assertTrue(allInterfaces.contains(InterParent.class));
+        Assertions.assertTrue(allInterfaces.contains(InterOther.class));
+        Assertions.assertTrue(allInterfaces.contains(InterOther2.class));
+        Assertions.assertTrue(allInterfaces.contains(InterOther3.class));
+    }
+
+    @Test
     public void testFindAnnotationInHierarchy() throws NoSuchMethodException, NoSuchFieldException {
         Assertions.assertNotNull(ReflectionUtil.findAnnotationInHierarchy(
                 MultiInterfaceImpl.class, "interfaceMethod", new Class<?>[] {}, Deprecated.class));
 
         Assertions.assertNotNull(
                 ReflectionUtil.findAnnotationInHierarchy(TestClass.class, "m", new Class<?>[] {}, Deprecated.class));
+
+        Assertions.assertNotNull(
+                ReflectionUtil.findAnnotationInHierarchy(ClassChild.class, "m", new Class<?>[] {}, Deprecated.class));
     }
 
     // Enhanced test cases
@@ -525,6 +539,26 @@ public class ReflectionUtilTest {
     static class TestConstants {
         public static final String STATIC_FINAL_FIELD = "original";
     }
+
+    interface InterOther {}
+
+    @Deprecated
+    interface InterParent {}
+
+    interface InterSub extends InterParent {}
+
+    interface InterChild extends InterSub {}
+
+    interface InterOther3 {}
+
+    class ClassParent implements InterOther3 {}
+
+    @Deprecated
+    interface InterOther2 {}
+
+    class ClassSub extends ClassParent implements InterOther2 {}
+
+    class ClassChild extends ClassSub implements InterChild, InterOther {}
 
     // endregion
 
