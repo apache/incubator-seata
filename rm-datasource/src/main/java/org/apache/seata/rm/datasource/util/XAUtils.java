@@ -38,6 +38,9 @@ public class XAUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(XAUtils.class);
 
+    private static final String MARIADB_3X_XA_CONN_CLASS = "org.mariadb.jdbc.MariaDbPooledConnection";
+    private static final String MARIADB_PRE3X_XA_CONN_CLASS = "org.mariadb.jdbc.MariaXaConnection";
+
     public static String getDbType(String jdbcUrl, String driverClassName) {
         return JdbcUtils.getDbType(jdbcUrl, driverClassName);
     }
@@ -67,9 +70,9 @@ public class XAUtils {
                     case JdbcConstants.MARIADB: {
                         String xaConnectionClassName;
                         if (isMariaDb3x(driver)) {
-                            xaConnectionClassName = "org.mariadb.jdbc.MariaDbPooledConnection";
+                            xaConnectionClassName = MARIADB_3X_XA_CONN_CLASS;
                         } else {
-                            xaConnectionClassName = "org.mariadb.jdbc.MariaXaConnection";
+                            xaConnectionClassName = MARIADB_PRE3X_XA_CONN_CLASS;
                         }
                         return createXAConnection(physicalConn, xaConnectionClassName, dbType);
                     }
