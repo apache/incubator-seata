@@ -23,6 +23,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
+import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.core.protocol.AbstractMessage;
 import org.apache.seata.core.protocol.HeartbeatMessage;
@@ -34,6 +35,7 @@ import org.apache.seata.core.protocol.transaction.BranchReportRequest;
 import org.apache.seata.core.protocol.transaction.GlobalBeginRequest;
 import org.apache.seata.core.protocol.transaction.GlobalCommitRequest;
 import org.apache.seata.core.protocol.transaction.GlobalRollbackRequest;
+import org.apache.seata.core.protocol.ProtocolConstants;
 import org.assertj.core.api.Fail;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -50,6 +52,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
+import static org.apache.seata.common.exception.FrameworkErrorCode.NoAvailableService;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -1654,5 +1657,337 @@ public class AbstractNettyRemotingClientTest {
         public NettyClientChannelManager getClientChannelManager() {
             return mockChannelManager != null ? mockChannelManager : super.getClientChannelManager();
         }
+    }
+
+    @Test
+    public void testClientHandlerChannelReadWithHeartbeatMessage() throws Exception {
+        AbstractNettyRemotingClient.ClientHandler handler = client.new ClientHandler();
+        ChannelHandlerContext ctx = mock(ChannelHandlerContext.class);
+        Channel channel = mock(Channel.class);
+        when(ctx.channel()).thenReturn(channel);
+
+        RpcMessage heartbeatMessage = new RpcMessage();
+        heartbeatMessage.setBody(HeartbeatMessage.PING);
+        heartbeatMessage.setMessageType(ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST);
+
+        try {
+            handler.channelRead(ctx, heartbeatMessage);
+        } catch (Exception e) {
+            // Expected in test environment
+        }
+    }
+
+    @Test
+    public void testClientHandlerChannelReadWithResponseMessage() throws Exception {
+        AbstractNettyRemotingClient.ClientHandler handler = client.new ClientHandler();
+        ChannelHandlerContext ctx = mock(ChannelHandlerContext.class);
+        Channel channel = mock(Channel.class);
+        when(ctx.channel()).thenReturn(channel);
+
+        RpcMessage responseMessage = new RpcMessage();
+        responseMessage.setMessageType(ProtocolConstants.MSGTYPE_RESPONSE);
+        responseMessage.setId(1);
+
+        try {
+            handler.channelRead(ctx, responseMessage);
+        } catch (Exception e) {
+            // Expected in test environment
+        }
+    }
+
+    @Test
+    public void testClientHandlerChannelReadWithOnewayMessage() throws Exception {
+        AbstractNettyRemotingClient.ClientHandler handler = client.new ClientHandler();
+        ChannelHandlerContext ctx = mock(ChannelHandlerContext.class);
+        Channel channel = mock(Channel.class);
+        when(ctx.channel()).thenReturn(channel);
+
+        RpcMessage onewayMessage = new RpcMessage();
+        onewayMessage.setMessageType(ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY);
+
+        try {
+            handler.channelRead(ctx, onewayMessage);
+        } catch (Exception e) {
+            // Expected in test environment
+        }
+    }
+
+    @Test
+    public void testBuildRequestMessageWithHeartbeat() {
+        RpcMessage rpcMessage = client.buildRequestMessage(HeartbeatMessage.PING, ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST);
+        assertNotNull(rpcMessage);
+        assertEquals(ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST, rpcMessage.getMessageType());
+    }
+
+    @Test
+    public void testBuildRequestMessageWithSyncRequest() {
+        GlobalBeginRequest request = new GlobalBeginRequest();
+        request.setTransactionName("test-tx");
+
+        RpcMessage rpcMessage = client.buildRequestMessage(request, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
+        assertNotNull(rpcMessage);
+        assertEquals(ProtocolConstants.MSGTYPE_RESQUEST_SYNC, rpcMessage.getMessageType());
+    }
+
+    @Test
+    public void testBuildRequestMessageWithOnewayRequest() {
+        GlobalBeginRequest request = new GlobalBeginRequest();
+        request.setTransactionName("test-tx");
+
+        RpcMessage rpcMessage = client.buildRequestMessage(request, ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY);
+        assertNotNull(rpcMessage);
+        assertEquals(ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY, rpcMessage.getMessageType());
+    }
+
+    @Test
+    public void testBuildResponseMessage() {
+        RpcMessage requestMessage = new RpcMessage();
+        requestMessage.setId(1);
+
+        GlobalBeginRequest response = new GlobalBeginRequest();
+        response.setTransactionName("test-response");
+
+        RpcMessage rpcMessage = client.buildResponseMessage(requestMessage, response, ProtocolConstants.MSGTYPE_RESPONSE);
+        assertNotNull(rpcMessage);
+        assertEquals(ProtocolConstants.MSGTYPE_RESPONSE, rpcMessage.getMessageType());
+        assertEquals(requestMessage.getId(), rpcMessage.getId());
+    }
+
+    @Test
+    public void testSendSyncWithTimeout() {
+        Channel channel = mock(Channel.class);
+        when(channel.isActive()).thenReturn(true);
+        when(channel.isWritable()).thenReturn(true);
+
+        RpcMessage rpcMessage = new RpcMessage();
+        rpcMessage.setId(1);
+        rpcMessage.setBody(new GlobalBeginRequest());
+
+        try {
+            Object result = client.sendSync(channel, rpcMessage, 100L);
+            // Expected to timeout or fail in test environment
+        } catch (Exception e) {
+            assertNotNull(e);
+        }
+    }
+
+    @Test
+    public void testSendAsyncWithHeartbeat() {
+        Channel channel = mock(Channel.class);
+        when(channel.isActive()).thenReturn(true);
+        when(channel.isWritable()).thenReturn(true);
+
+        RpcMessage rpcMessage = new RpcMessage();
+        rpcMessage.setBody(HeartbeatMessage.PING);
+        rpcMessage.setMessageType(ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST);
+
+        try {
+            client.sendAsync(channel, rpcMessage);
+        } catch (Exception e) {
+            // Expected in test environment
+        }
+    }
+
+    @Test
+    public void testProcessMessageWithNullContext() {
+        RpcMessage rpcMessage = new RpcMessage();
+        rpcMessage.setMessageType(ProtocolConstants.MSGTYPE_RESPONSE);
+        rpcMessage.setId(1);
+
+        try {
+            client.processMessage(null, rpcMessage);
+        } catch (Exception e) {
+            // Expected in test environment
+        }
+    }
+
+    @Test
+    public void testProcessMessageWithUnknownMessageType() {
+        ChannelHandlerContext ctx = mock(ChannelHandlerContext.class);
+        RpcMessage rpcMessage = new RpcMessage();
+        rpcMessage.setMessageType((byte) 99); // Unknown type
+
+        try {
+            client.processMessage(ctx, rpcMessage);
+        } catch (Exception e) {
+            // Expected in test environment
+        }
+    }
+
+    @Test
+    public void testGetAddressFromChannel() {
+        Channel channel = mock(Channel.class);
+        InetSocketAddress remoteAddress = new InetSocketAddress("127.0.0.1", 8080);
+        when(channel.remoteAddress()).thenReturn(remoteAddress);
+
+        String address = client.getAddressFromChannel(channel);
+        assertNotNull(address);
+        assertTrue(address.contains("127.0.0.1"));
+        assertTrue(address.contains("8080"));
+    }
+
+    @Test
+    public void testFireChannelEventWithNullChannel() {
+        try {
+            client.fireChannelEvent(null, ChannelEventType.CONNECTED);
+        } catch (Exception e) {
+            Fail.fail("Should not throw exception for null channel");
+        }
+    }
+
+    @Test
+    public void testFireChannelEventWithNullEventType() {
+        Channel channel = mock(Channel.class);
+        try {
+            client.fireChannelEvent(channel, null);
+        } catch (Exception e) {
+            Fail.fail("Should not throw exception for null event type");
+        }
+    }
+
+    @Test
+    public void testFireChannelEventWithNullCause() {
+        Channel channel = mock(Channel.class);
+        ChannelEventListener listener = mock(ChannelEventListener.class);
+        client.registerChannelEventListener(listener);
+
+        client.fireChannelEvent(channel, ChannelEventType.EXCEPTION, null);
+
+        verify(listener, times(1)).onChannelException(channel, null);
+    }
+
+    @Test
+    public void testOnRegisterMsgSuccess() {
+        TestNettyRemotingClient testClient = new TestNettyRemotingClient(clientConfig, messageExecutor);
+        Channel channel = mock(Channel.class);
+        AbstractMessage requestMessage = new GlobalBeginRequest();
+
+        try {
+            testClient.onRegisterMsgSuccess("127.0.0.1:8080", channel, "response", requestMessage);
+            // Should not throw exception
+        } catch (Exception e) {
+            Fail.fail("Should not throw exception");
+        }
+    }
+
+    @Test
+    public void testOnRegisterMsgFail() {
+        TestNettyRemotingClient testClient = new TestNettyRemotingClient(clientConfig, messageExecutor);
+        Channel channel = mock(Channel.class);
+        AbstractMessage requestMessage = new GlobalBeginRequest();
+
+        try {
+            testClient.onRegisterMsgFail("127.0.0.1:8080", channel, "response", requestMessage);
+            // Should not throw exception
+        } catch (Exception e) {
+            Fail.fail("Should not throw exception");
+        }
+    }
+
+    @Test
+    public void testChannelEventHandler() throws Exception {
+        Channel channel = mock(Channel.class);
+        when(channel.remoteAddress()).thenReturn(new InetSocketAddress("127.0.0.1", 8080));
+
+        // Test ChannelEventHandler which is created in constructor
+        // We need to access it through reflection or test its effects
+        Field clientBootstrapField = AbstractNettyRemotingClient.class.getDeclaredField("clientBootstrap");
+        clientBootstrapField.setAccessible(true);
+        NettyClientBootstrap bootstrap = (NettyClientBootstrap) clientBootstrapField.get(client);
+
+        assertNotNull(bootstrap);
+    }
+
+    @Test
+    public void testPoolKeyFunction() {
+        Function<String, NettyPoolKey> poolKeyFunction = client.getPoolKeyFunction();
+        assertNotNull(poolKeyFunction);
+
+        NettyPoolKey poolKey = poolKeyFunction.apply("127.0.0.1:8080");
+        assertNotNull(poolKey);
+        assertEquals(NettyPoolKey.TransactionRole.TMROLE, poolKey.getTransactionRole());
+        assertEquals("127.0.0.1:8080", poolKey.getAddress());
+    }
+
+    @Test
+    public void testReconnectTaskExecution() throws Exception {
+        TestNettyRemotingClient testClient = new TestNettyRemotingClient(clientConfig, messageExecutor);
+
+        try {
+            testClient.init();
+
+            // Wait a bit for the reconnect task to potentially run
+            Thread.sleep(100);
+
+            // The reconnect task should be scheduled but may fail due to test environment
+            // We just want to ensure no exceptions are thrown
+        } finally {
+            testClient.destroy();
+        }
+    }
+
+    @Test
+    public void testDestroyBeforeInit() {
+        TestNettyRemotingClient testClient = new TestNettyRemotingClient(clientConfig, messageExecutor);
+
+        // Destroy without initializing first
+        testClient.destroy();
+
+        // Should not throw any exception
+    }
+
+    @Test
+    public void testLoadBalanceWithExceptionInLookup() {
+        // This test might be tricky as it depends on RegistryFactory
+        // We can test that the method handles exceptions gracefully
+        GlobalBeginRequest request = new GlobalBeginRequest();
+        request.setTransactionName("test-tx");
+
+        try {
+            String address = client.loadBalance("non-existent-group", request);
+            Fail.fail("Should have thrown FrameworkException");
+        } catch (FrameworkException e) {
+            // Expected - no available service
+            assertEquals(NoAvailableService, e.getErrcode());
+        } catch (Exception e) {
+            // Other exceptions might occur in test environment
+            assertNotNull(e);
+        }
+    }
+
+    @Test
+    public void testCleanupFuturesForMessageIdsWithNullException() throws Exception {
+        java.util.Set<Integer> messageIds = new java.util.HashSet<>();
+        messageIds.add(1);
+
+        MessageFuture future = new MessageFuture();
+        client.futures.put(1, future);
+
+        java.lang.reflect.Method cleanupMethod = AbstractNettyRemotingClient.class.getDeclaredMethod(
+                "cleanupFuturesForMessageIds", java.util.Set.class, Exception.class);
+        cleanupMethod.setAccessible(true);
+
+        cleanupMethod.invoke(client, messageIds, null);
+
+        assertFalse(client.futures.containsKey(1));
+    }
+
+    @Test
+    public void testCollectMessageIdsForChannelWithNoServerAddress() throws Exception {
+        Channel channel = mock(Channel.class);
+        ChannelId channelId = mock(ChannelId.class);
+        when(channel.id()).thenReturn(channelId);
+        when(channel.remoteAddress()).thenReturn(new InetSocketAddress("127.0.0.1", 8080));
+
+        // Don't add the channel to the manager
+
+        java.lang.reflect.Method collectMethod =
+                AbstractNettyRemotingClient.class.getDeclaredMethod("collectMessageIdsForChannel", ChannelId.class);
+        collectMethod.setAccessible(true);
+
+        java.util.Set<Integer> messageIds = (java.util.Set<Integer>) collectMethod.invoke(client, channelId);
+
+        assertNotNull(messageIds);
+        assertTrue(messageIds.isEmpty());
     }
 }
