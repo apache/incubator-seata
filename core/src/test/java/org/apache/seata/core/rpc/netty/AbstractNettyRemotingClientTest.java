@@ -29,13 +29,13 @@ import org.apache.seata.core.protocol.AbstractMessage;
 import org.apache.seata.core.protocol.HeartbeatMessage;
 import org.apache.seata.core.protocol.MergedWarpMessage;
 import org.apache.seata.core.protocol.MessageFuture;
+import org.apache.seata.core.protocol.ProtocolConstants;
 import org.apache.seata.core.protocol.RpcMessage;
 import org.apache.seata.core.protocol.transaction.BranchRegisterRequest;
 import org.apache.seata.core.protocol.transaction.BranchReportRequest;
 import org.apache.seata.core.protocol.transaction.GlobalBeginRequest;
 import org.apache.seata.core.protocol.transaction.GlobalCommitRequest;
 import org.apache.seata.core.protocol.transaction.GlobalRollbackRequest;
-import org.apache.seata.core.protocol.ProtocolConstants;
 import org.assertj.core.api.Fail;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -1714,7 +1714,8 @@ public class AbstractNettyRemotingClientTest {
 
     @Test
     public void testBuildRequestMessageWithHeartbeat() {
-        RpcMessage rpcMessage = client.buildRequestMessage(HeartbeatMessage.PING, ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST);
+        RpcMessage rpcMessage =
+                client.buildRequestMessage(HeartbeatMessage.PING, ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST);
         assertNotNull(rpcMessage);
         assertEquals(ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST, rpcMessage.getMessageType());
     }
@@ -1747,7 +1748,8 @@ public class AbstractNettyRemotingClientTest {
         GlobalBeginRequest response = new GlobalBeginRequest();
         response.setTransactionName("test-response");
 
-        RpcMessage rpcMessage = client.buildResponseMessage(requestMessage, response, ProtocolConstants.MSGTYPE_RESPONSE);
+        RpcMessage rpcMessage =
+                client.buildResponseMessage(requestMessage, response, ProtocolConstants.MSGTYPE_RESPONSE);
         assertNotNull(rpcMessage);
         assertEquals(ProtocolConstants.MSGTYPE_RESPONSE, rpcMessage.getMessageType());
         assertEquals(requestMessage.getId(), rpcMessage.getId());
