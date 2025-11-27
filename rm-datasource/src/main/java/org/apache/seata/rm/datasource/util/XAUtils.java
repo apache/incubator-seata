@@ -38,8 +38,8 @@ public class XAUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(XAUtils.class);
 
-    private static final String MARIADB_3X_XA_CONN_CLASS = "org.mariadb.jdbc.MariaDbPooledConnection";
-    private static final String MARIADB_PRE3X_XA_CONN_CLASS = "org.mariadb.jdbc.MariaXaConnection";
+    private static final String MARIADB_3X_XA_CONNECTION_CLASS = "org.mariadb.jdbc.MariaDbPooledConnection";
+    private static final String MARIADB_PRE3X_XA_CONNECTION_CLASS = "org.mariadb.jdbc.MariaXaConnection";
 
     public static String getDbType(String jdbcUrl, String driverClassName) {
         return JdbcUtils.getDbType(jdbcUrl, driverClassName);
@@ -67,15 +67,13 @@ public class XAUtils {
                         } else {
                             return createXAConnection(physicalConn, "oracle.jdbc.xa.client.OracleXAConnection", dbType);
                         }
-                    case JdbcConstants.MARIADB: {
-                        String xaConnectionClassName;
-                        if (isMariaDb3x(driver)) {
-                            xaConnectionClassName = MARIADB_3X_XA_CONN_CLASS;
-                        } else {
-                            xaConnectionClassName = MARIADB_PRE3X_XA_CONN_CLASS;
+                    case JdbcConstants.MARIADB:
+                        try {
+                            return createXAConnection(physicalConn, MARIADB_3X_XA_CONNECTION_CLASS, dbType);
+                        } catch (Exception e) {
+                            LOGGER.warn("Failed to create MariaDB 3.x XA Connection, try pre-3.x version", e);
+                            return createXAConnection(physicalConn, MARIADB_PRE3X_XA_CONNECTION_CLASS, dbType);
                         }
-                        return createXAConnection(physicalConn, xaConnectionClassName, dbType);
-                    }
                     case JdbcConstants.POSTGRESQL:
                         return PGUtils.createXAConnection(physicalConn);
                     case JdbcConstants.KINGBASE:
@@ -177,24 +175,6 @@ public class XAUtils {
             }
         } catch (Exception e) {
             throw new SQLException(e);
-        }
-    }
-
-    private static boolean isMariaDb3x(Driver driver) {
-        try {
-            String version = driver.getClass().getPackage().getImplementationVersion();
-            if (version == null) {
-                return false;
-            }
-            String[] parts = version.split("\\.");
-            if (parts.length > 0) {
-                int majorVersion = Integer.parseInt(parts[0]);
-                return majorVersion >= 3;
-            }
-            return false;
-        } catch (Exception e) {
-            LOGGER.warn("Failed to determine MariaDB driver version, assuming pre-3.x.", e);
-            return false;
         }
     }
 }
