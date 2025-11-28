@@ -70,8 +70,12 @@ public class Http2HttpHandler extends BaseHttpChannelHandler<Http2StreamFrame> {
                 }
             } else if (msg instanceof Http2DataFrame) {
                 Http2DataFrame dataFrame = (Http2DataFrame) msg;
-                if (dataFrame.content().readableBytes() > MAX_FRAME_LENGTH){
-                    LOGGER.error("Packet size {} exceeds maximum {}, closing connection from {}", dataFrame.content().readableBytes(), MAX_FRAME_LENGTH, ctx.channel().remoteAddress());
+                if (dataFrame.content().readableBytes() > MAX_FRAME_LENGTH) {
+                    LOGGER.error(
+                            "Packet size {} exceeds maximum {}, closing connection from {}",
+                            dataFrame.content().readableBytes(),
+                            MAX_FRAME_LENGTH,
+                            ctx.channel().remoteAddress());
                     ctx.close();
                     return;
                 }

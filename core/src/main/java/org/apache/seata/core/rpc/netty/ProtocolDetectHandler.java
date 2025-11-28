@@ -16,8 +16,6 @@
  */
 package org.apache.seata.core.rpc.netty;
 
-import java.util.List;
-
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -25,6 +23,8 @@ import io.netty.handler.codec.ByteToMessageDecoder;
 import org.apache.seata.core.protocol.detector.ProtocolDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 import static org.apache.seata.core.protocol.ProtocolConstants.MAX_FRAME_LENGTH;
 
@@ -39,7 +39,11 @@ public class ProtocolDetectHandler extends ByteToMessageDecoder {
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
         if (in.readableBytes() > MAX_FRAME_LENGTH) {
-            LOGGER.error("Packet size {} exceeds maximum {}, closing connection from {}", in.readableBytes(), MAX_FRAME_LENGTH, ctx.channel().remoteAddress());
+            LOGGER.error(
+                    "Packet size {} exceeds maximum {}, closing connection from {}",
+                    in.readableBytes(),
+                    MAX_FRAME_LENGTH,
+                    ctx.channel().remoteAddress());
             ctx.close(); // Close the channel if the frame length exceeds the maximum allowed length
             return;
         }
@@ -58,7 +62,10 @@ public class ProtocolDetectHandler extends ByteToMessageDecoder {
 
         byte[] preface = new byte[in.readableBytes()];
         in.readBytes(preface);
-        LOGGER.error("Can not recognize protocol from remote {}, preface = {}", ctx.channel().remoteAddress(), preface);
+        LOGGER.error(
+                "Can not recognize protocol from remote {}, preface = {}",
+                ctx.channel().remoteAddress(),
+                preface);
         in.clear();
         ctx.close();
     }
