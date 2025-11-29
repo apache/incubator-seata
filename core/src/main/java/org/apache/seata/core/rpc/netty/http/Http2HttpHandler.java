@@ -44,6 +44,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.apache.seata.core.protocol.ProtocolConstants.MAX_FRAME_LENGTH;
+
 /**
  * The http2 http handler.
  */
@@ -68,6 +70,15 @@ public class Http2HttpHandler extends BaseHttpChannelHandler<Http2StreamFrame> {
                 }
             } else if (msg instanceof Http2DataFrame) {
                 Http2DataFrame dataFrame = (Http2DataFrame) msg;
+                if (dataFrame.content().readableBytes() > MAX_FRAME_LENGTH) {
+                    LOGGER.error(
+                            "Packet size {} exceeds maximum {}, closing connection from {}",
+                            dataFrame.content().readableBytes(),
+                            MAX_FRAME_LENGTH,
+                            ctx.channel().remoteAddress());
+                    ctx.close();
+                    return;
+                }
                 bodyBuffer.writeBytes(dataFrame.content());
                 if (dataFrame.isEndStream()) {
                     handleRequest(ctx);
