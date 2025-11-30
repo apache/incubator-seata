@@ -27,6 +27,7 @@ import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.exception.HttpRequestFilterException;
 import org.apache.seata.core.rpc.netty.http.filter.HttpFilterContext;
 import org.apache.seata.core.rpc.netty.http.filter.HttpRequestFilter;
+import org.apache.seata.core.rpc.netty.http.filter.HttpRequestFilterChain;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,7 +44,7 @@ import static org.apache.seata.common.DefaultValues.DEFAULT_XSS_KEYWORDS;
 /**
  * Filter to detect and block potential XSS attack vectors in HTTP request parameters.
  */
-@LoadLevel(name = "XSS", order = 1)
+@LoadLevel(name = "XSS", order = Integer.MIN_VALUE)
 public class XSSHttpRequestFilter implements HttpRequestFilter {
     /**
      * The constant CONFIG.
@@ -95,14 +96,14 @@ public class XSSHttpRequestFilter implements HttpRequestFilter {
 
     @Override
     public int getOrder() {
-        return 1;
+        return Integer.MIN_VALUE;
     }
 
     /**
      * Checks all request parameters for XSS risks and throws if found.
      */
     @Override
-    public void doFilter(HttpFilterContext<?> context) throws HttpRequestFilterException {
+    public void doFilter(HttpFilterContext<?> context, HttpRequestFilterChain chain) throws HttpRequestFilterException {
         Map<String, List<String>> allParams = context.getParamWrapper().getAllParamsAsMultiMap();
         for (Map.Entry<String, List<String>> entry : allParams.entrySet()) {
             for (String value : entry.getValue()) {
@@ -112,6 +113,8 @@ public class XSSHttpRequestFilter implements HttpRequestFilter {
                 }
             }
         }
+        // Continue to next filter
+        chain.doFilter(context);
     }
 
     /**
