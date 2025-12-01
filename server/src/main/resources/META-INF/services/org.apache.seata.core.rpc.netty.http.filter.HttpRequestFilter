@@ -15,3 +15,4 @@
 # limitations under the License.
 #
 org.apache.seata.server.filter.XSSHttpRequestFilter
+org.apache.seata.server.filter.RaftRequestFilter
