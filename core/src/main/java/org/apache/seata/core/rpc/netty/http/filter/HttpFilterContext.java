@@ -21,12 +21,15 @@ import org.apache.seata.common.rpc.http.HttpContext;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 public class HttpFilterContext<T> extends HttpContext<T> {
     private final Supplier<HttpRequestParamWrapper> paramWrapperSupplier;
     private volatile HttpRequestParamWrapper paramWrapper;
     private final Map<String, Object> attributes = new ConcurrentHashMap<>();
+    private static final ThreadLocal<HttpFilterContext<?>> CURRENT_CONTEXT = new ThreadLocal<>();
+    private final AtomicReference<Object> response = new AtomicReference<>();
 
     public HttpFilterContext(
             T request,
@@ -36,6 +39,24 @@ public class HttpFilterContext<T> extends HttpContext<T> {
             Supplier<HttpRequestParamWrapper> paramWrapperSupplier) {
         super(request, channelHandlerContext, keepAlive, httpVersion);
         this.paramWrapperSupplier = paramWrapperSupplier;
+        CURRENT_CONTEXT.set(this);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> HttpFilterContext<T> getCurrentContext() {
+        return (HttpFilterContext<T>) CURRENT_CONTEXT.get();
+    }
+
+    public static void clearCurrentContext() {
+        CURRENT_CONTEXT.remove();
+    }
+
+    public void setResponse(Object response) {
+        this.response.set(response);
+    }
+
+    public Object getResponse() {
+        return this.response.get();
     }
 
     public HttpRequestParamWrapper getParamWrapper() {

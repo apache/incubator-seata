@@ -149,6 +149,10 @@ public class HttpDispatchHandler extends BaseHttpChannelHandler<HttpRequest> {
             response = new DefaultFullHttpResponse(
                     HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.wrappedBuffer(Unpooled.EMPTY_BUFFER));
         }
+        HttpFilterContext<?> currentContext = HttpFilterContext.getCurrentContext();
+        if (currentContext != null) {
+            currentContext.setResponse(response);
+        }
         if (!keepAlive) {
             ctx.writeAndFlush(response).addListeners(ChannelFutureListener.CLOSE);
         } else {
@@ -159,6 +163,10 @@ public class HttpDispatchHandler extends BaseHttpChannelHandler<HttpRequest> {
     private void sendErrorResponse(ChannelHandlerContext ctx, HttpResponseStatus status, boolean keepAlive) {
         FullHttpResponse response = new DefaultFullHttpResponse(
                 HttpVersion.HTTP_1_1, status, Unpooled.wrappedBuffer(Unpooled.EMPTY_BUFFER));
+        HttpFilterContext<?> currentContext = HttpFilterContext.getCurrentContext();
+        if (currentContext != null) {
+            currentContext.setResponse(response);
+        }
         if (!keepAlive) {
             ctx.writeAndFlush(response).addListeners(ChannelFutureListener.CLOSE);
         } else {
