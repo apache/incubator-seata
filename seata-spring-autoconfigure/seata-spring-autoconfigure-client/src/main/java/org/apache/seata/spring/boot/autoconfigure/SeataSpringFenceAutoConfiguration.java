@@ -18,13 +18,12 @@ package org.apache.seata.spring.boot.autoconfigure;
 
 import org.apache.seata.common.holder.ObjectHolder;
 import org.apache.seata.rm.fence.SpringFenceConfig;
+import org.apache.seata.spring.boot.autoconfigure.controller.ClientConnectionPoolController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.*;
 import org.springframework.boot.autoconfigure.transaction.TransactionAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -63,5 +62,12 @@ public class SeataSpringFenceAutoConfiguration {
                 springFenceTransactionManager != null ? springFenceTransactionManager : transactionManager);
         ObjectHolder.INSTANCE.setObject(BEAN_NAME_SPRING_FENCE_CONFIG, springFenceConfig);
         return springFenceConfig;
+    }
+
+    @Bean
+    @ConditionalOnProperty(name = "seata.enableConnectionPoolMetrics", havingValue = "true")
+    @ConditionalOnClass(name = "org.springframework.web.bind.annotation.RestController")
+    public ClientConnectionPoolController connectionPoolController() {
+        return new ClientConnectionPoolController();
     }
 }

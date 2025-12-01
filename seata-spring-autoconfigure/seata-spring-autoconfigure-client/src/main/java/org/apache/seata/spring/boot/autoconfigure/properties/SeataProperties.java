@@ -79,6 +79,11 @@ public class SeataProperties {
      */
     private String secretKey;
 
+    /**
+     * enable connection pool metrcs
+     */
+    private boolean enableConnectionPoolMetrics = false;
+
     @Autowired
     private SpringCloudAlibabaConfiguration springCloudAlibabaConfiguration;
 
@@ -192,5 +197,13 @@ public class SeataProperties {
     public SeataProperties setSecretKey(String secretKey) {
         this.secretKey = secretKey;
         return this;
+    }
+
+    public boolean isEnableConnectionPoolMetrics() {
+        return enableConnectionPoolMetrics;
+    }
+
+    public void setEnableConnectionPoolMetrics(boolean enableConnectionPoolMetrics) {
+        this.enableConnectionPoolMetrics = enableConnectionPoolMetrics;
     }
 }

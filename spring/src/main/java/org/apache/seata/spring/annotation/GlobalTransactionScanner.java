@@ -259,6 +259,29 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         }
         // init RM
         RMClient.init(applicationId, txServiceGroup);
+        // init enableConnectionPoolMetrics / httpPort
+        try {
+            if (applicationContext != null) {
+                String enableConnectionPoolMetricsStr =
+                        applicationContext.getEnvironment().getProperty("seata.enableConnectionPoolMetrics");
+                if (enableConnectionPoolMetricsStr != null
+                        && !enableConnectionPoolMetricsStr.trim().isEmpty()) {
+                    boolean enableConnectionPoolMetrics = Boolean.parseBoolean(enableConnectionPoolMetricsStr);
+                    RmNettyRemotingClient.getInstance().setEnableConnectionPoolMetrics(enableConnectionPoolMetrics);
+                }
+                String portStr = applicationContext.getEnvironment().getProperty("server.port");
+                if (portStr != null && !portStr.trim().isEmpty()) {
+                    try {
+                        int port = Integer.parseInt(portStr.trim());
+                        RmNettyRemotingClient.getInstance().setHttpPort(port);
+                    } catch (NumberFormatException e) {
+                        LOGGER.debug("Invalid server.port in Spring Environment: {}", portStr);
+                    }
+                }
+            }
+        } catch (Throwable t) {
+            LOGGER.debug("Failed to resolve server.port from Spring Environment", t);
+        }
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info(
                     "Resource Manager is initialized. applicationId[{}] txServiceGroup[{}]",
