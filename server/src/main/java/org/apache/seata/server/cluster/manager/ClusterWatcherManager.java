@@ -113,8 +113,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
         ChannelHandlerContext ctx = context.getContext();
         if (!ctx.channel().isActive()) {
             logger.warn(
-                    "Netty channel is not active for watcher on group {}, cannot send response.",
-                    watcher.getGroup());
+                    "Netty channel is not active for watcher on group {}, cannot send response.", watcher.getGroup());
             return;
         }
 

@@ -139,7 +139,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
         });
         thread.start();
         try (CloseableHttpResponse response =
-                     HttpClientUtil.doPost("http://127.0.0.1:" + port + "/metadata/v1/watch", param, header, 30000)) {
+                HttpClientUtil.doPost("http://127.0.0.1:" + port + "/metadata/v1/watch", param, header, 30000)) {
             if (response != null) {
                 StatusLine statusLine = response.getStatusLine();
                 Assertions.assertEquals(HttpStatus.SC_OK, statusLine.getStatusCode());
