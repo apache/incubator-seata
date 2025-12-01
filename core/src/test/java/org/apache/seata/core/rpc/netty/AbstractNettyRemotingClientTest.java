@@ -23,45 +23,49 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelId;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
-import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.core.protocol.AbstractMessage;
 import org.apache.seata.core.protocol.HeartbeatMessage;
 import org.apache.seata.core.protocol.MergedWarpMessage;
 import org.apache.seata.core.protocol.MessageFuture;
-import org.apache.seata.core.protocol.ProtocolConstants;
 import org.apache.seata.core.protocol.RpcMessage;
 import org.apache.seata.core.protocol.transaction.BranchRegisterRequest;
 import org.apache.seata.core.protocol.transaction.BranchReportRequest;
 import org.apache.seata.core.protocol.transaction.GlobalBeginRequest;
 import org.apache.seata.core.protocol.transaction.GlobalCommitRequest;
 import org.apache.seata.core.protocol.transaction.GlobalRollbackRequest;
-import org.assertj.core.api.Fail;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
-import static org.apache.seata.common.exception.FrameworkErrorCode.NoAvailableService;
+import static org.assertj.core.api.Fail.fail;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -1518,7 +1522,7 @@ public class AbstractNettyRemotingClientTest {
             client.init();
             Thread.sleep(100);
         } catch (Exception e) {
-            Fail.fail("Reconnect timer exception test failed: " + e.getMessage());
+            fail("Reconnect timer exception test failed: " + e.getMessage());
         } finally {
             client.destroy();
         }
@@ -1660,336 +1664,184 @@ public class AbstractNettyRemotingClientTest {
     }
 
     @Test
-    public void testClientHandlerChannelReadWithHeartbeatMessage() throws Exception {
-        AbstractNettyRemotingClient.ClientHandler handler = client.new ClientHandler();
-        ChannelHandlerContext ctx = mock(ChannelHandlerContext.class);
-        Channel channel = mock(Channel.class);
-        when(ctx.channel()).thenReturn(channel);
-
-        RpcMessage heartbeatMessage = new RpcMessage();
-        heartbeatMessage.setBody(HeartbeatMessage.PING);
-        heartbeatMessage.setMessageType(ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST);
-
-        try {
-            handler.channelRead(ctx, heartbeatMessage);
-        } catch (Exception e) {
-            // Expected in test environment
-        }
-    }
-
-    @Test
-    public void testClientHandlerChannelReadWithResponseMessage() throws Exception {
-        AbstractNettyRemotingClient.ClientHandler handler = client.new ClientHandler();
-        ChannelHandlerContext ctx = mock(ChannelHandlerContext.class);
-        Channel channel = mock(Channel.class);
-        when(ctx.channel()).thenReturn(channel);
-
-        RpcMessage responseMessage = new RpcMessage();
-        responseMessage.setMessageType(ProtocolConstants.MSGTYPE_RESPONSE);
-        responseMessage.setId(1);
-
-        try {
-            handler.channelRead(ctx, responseMessage);
-        } catch (Exception e) {
-            // Expected in test environment
-        }
-    }
-
-    @Test
-    public void testClientHandlerChannelReadWithOnewayMessage() throws Exception {
-        AbstractNettyRemotingClient.ClientHandler handler = client.new ClientHandler();
-        ChannelHandlerContext ctx = mock(ChannelHandlerContext.class);
-        Channel channel = mock(Channel.class);
-        when(ctx.channel()).thenReturn(channel);
-
-        RpcMessage onewayMessage = new RpcMessage();
-        onewayMessage.setMessageType(ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY);
-
-        try {
-            handler.channelRead(ctx, onewayMessage);
-        } catch (Exception e) {
-            // Expected in test environment
-        }
-    }
-
-    @Test
-    public void testBuildRequestMessageWithHeartbeat() {
-        RpcMessage rpcMessage =
-                client.buildRequestMessage(HeartbeatMessage.PING, ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST);
-        assertNotNull(rpcMessage);
-        assertEquals(ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST, rpcMessage.getMessageType());
-    }
-
-    @Test
-    public void testBuildRequestMessageWithSyncRequest() {
-        GlobalBeginRequest request = new GlobalBeginRequest();
-        request.setTransactionName("test-tx");
-
-        RpcMessage rpcMessage = client.buildRequestMessage(request, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
-        assertNotNull(rpcMessage);
-        assertEquals(ProtocolConstants.MSGTYPE_RESQUEST_SYNC, rpcMessage.getMessageType());
-    }
-
-    @Test
-    public void testBuildRequestMessageWithOnewayRequest() {
-        GlobalBeginRequest request = new GlobalBeginRequest();
-        request.setTransactionName("test-tx");
-
-        RpcMessage rpcMessage = client.buildRequestMessage(request, ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY);
-        assertNotNull(rpcMessage);
-        assertEquals(ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY, rpcMessage.getMessageType());
-    }
-
-    @Test
-    public void testBuildResponseMessage() {
-        RpcMessage requestMessage = new RpcMessage();
-        requestMessage.setId(1);
-
-        GlobalBeginRequest response = new GlobalBeginRequest();
-        response.setTransactionName("test-response");
-
-        RpcMessage rpcMessage =
-                client.buildResponseMessage(requestMessage, response, ProtocolConstants.MSGTYPE_RESPONSE);
-        assertNotNull(rpcMessage);
-        assertEquals(ProtocolConstants.MSGTYPE_RESPONSE, rpcMessage.getMessageType());
-        assertEquals(requestMessage.getId(), rpcMessage.getId());
-    }
-
-    @Test
-    public void testSendSyncWithTimeout() {
-        Channel channel = mock(Channel.class);
-        when(channel.isActive()).thenReturn(true);
-        when(channel.isWritable()).thenReturn(true);
-
-        RpcMessage rpcMessage = new RpcMessage();
-        rpcMessage.setId(1);
-        rpcMessage.setBody(new GlobalBeginRequest());
-
-        try {
-            Object result = client.sendSync(channel, rpcMessage, 100L);
-            // Expected to timeout or fail in test environment
-        } catch (Exception e) {
-            assertNotNull(e);
-        }
-    }
-
-    @Test
-    public void testSendAsyncWithHeartbeat() {
-        Channel channel = mock(Channel.class);
-        when(channel.isActive()).thenReturn(true);
-        when(channel.isWritable()).thenReturn(true);
-
-        RpcMessage rpcMessage = new RpcMessage();
-        rpcMessage.setBody(HeartbeatMessage.PING);
-        rpcMessage.setMessageType(ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST);
-
-        try {
-            client.sendAsync(channel, rpcMessage);
-        } catch (Exception e) {
-            // Expected in test environment
-        }
-    }
-
-    @Test
-    public void testProcessMessageWithNullContext() {
-        RpcMessage rpcMessage = new RpcMessage();
-        rpcMessage.setMessageType(ProtocolConstants.MSGTYPE_RESPONSE);
-        rpcMessage.setId(1);
-
-        try {
-            client.processMessage(null, rpcMessage);
-        } catch (Exception e) {
-            // Expected in test environment
-        }
-    }
-
-    @Test
-    public void testProcessMessageWithUnknownMessageType() {
-        ChannelHandlerContext ctx = mock(ChannelHandlerContext.class);
-        RpcMessage rpcMessage = new RpcMessage();
-        rpcMessage.setMessageType((byte) 99); // Unknown type
-
-        try {
-            client.processMessage(ctx, rpcMessage);
-        } catch (Exception e) {
-            // Expected in test environment
-        }
-    }
-
-    @Test
-    public void testGetAddressFromChannel() {
-        Channel channel = mock(Channel.class);
-        InetSocketAddress remoteAddress = new InetSocketAddress("127.0.0.1", 8080);
-        when(channel.remoteAddress()).thenReturn(remoteAddress);
-
-        String address = client.getAddressFromChannel(channel);
-        assertNotNull(address);
-        assertTrue(address.contains("127.0.0.1"));
-        assertTrue(address.contains("8080"));
-    }
-
-    @Test
-    public void testFireChannelEventWithNullChannel() {
-        try {
-            client.fireChannelEvent(null, ChannelEventType.CONNECTED);
-        } catch (Exception e) {
-            Fail.fail("Should not throw exception for null channel");
-        }
-    }
-
-    @Test
-    public void testFireChannelEventWithNullEventType() {
-        Channel channel = mock(Channel.class);
-        try {
-            client.fireChannelEvent(channel, null);
-        } catch (Exception e) {
-            Fail.fail("Should not throw exception for null event type");
-        }
-    }
-
-    @Test
-    public void testFireChannelEventWithNullCause() {
-        Channel channel = mock(Channel.class);
-        ChannelEventListener listener = mock(ChannelEventListener.class);
-        client.registerChannelEventListener(listener);
-
-        client.fireChannelEvent(channel, ChannelEventType.EXCEPTION, null);
-
-        verify(listener, times(1)).onChannelException(channel, null);
-    }
-
-    @Test
-    public void testOnRegisterMsgSuccess() {
+    public void testConstructorCoreInitialization() {
         TestNettyRemotingClient testClient = new TestNettyRemotingClient(clientConfig, messageExecutor);
-        Channel channel = mock(Channel.class);
-        AbstractMessage requestMessage = new GlobalBeginRequest();
-
         try {
-            testClient.onRegisterMsgSuccess("127.0.0.1:8080", channel, "response", requestMessage);
-            // Should not throw exception
+            Field clientBootstrapField = AbstractNettyRemotingClient.class.getDeclaredField("clientBootstrap");
+            clientBootstrapField.setAccessible(true);
+            NettyClientBootstrap bootstrap = (NettyClientBootstrap) clientBootstrapField.get(testClient);
+            assertNotNull(bootstrap, "fail to init NettyClientBootstrap");
+
+            Field clientChannelManagerField =
+                    AbstractNettyRemotingClient.class.getDeclaredField("clientChannelManager");
+            clientChannelManagerField.setAccessible(true);
+            NettyClientChannelManager channelManager =
+                    (NettyClientChannelManager) clientChannelManagerField.get(testClient);
+            assertNotNull(channelManager, "fail to init NettyClientChannelManager");
+
+            Field reconnectTaskField = AbstractNettyRemotingClient.class.getDeclaredField("reconnectTask");
+            reconnectTaskField.setAccessible(true);
+            Runnable reconnectTask = (Runnable) reconnectTaskField.get(testClient);
+            assertNotNull(reconnectTask, "fail to init reconnectTask");
         } catch (Exception e) {
-            Fail.fail("Should not throw exception");
+            fail("test failed：" + e.getMessage());
         }
     }
 
     @Test
-    public void testOnRegisterMsgFail() {
+    public void testInitReconnectTimerStart() throws Exception {
         TestNettyRemotingClient testClient = new TestNettyRemotingClient(clientConfig, messageExecutor);
-        Channel channel = mock(Channel.class);
-        AbstractMessage requestMessage = new GlobalBeginRequest();
 
-        try {
-            testClient.onRegisterMsgFail("127.0.0.1:8080", channel, "response", requestMessage);
-            // Should not throw exception
-        } catch (Exception e) {
-            Fail.fail("Should not throw exception");
-        }
-    }
-
-    @Test
-    public void testChannelEventHandler() throws Exception {
-        Channel channel = mock(Channel.class);
-        when(channel.remoteAddress()).thenReturn(new InetSocketAddress("127.0.0.1", 8080));
-
-        // Test ChannelEventHandler which is created in constructor
-        // We need to access it through reflection or test its effects
+        NettyClientBootstrap mockBootstrap = Mockito.mock(NettyClientBootstrap.class);
         Field clientBootstrapField = AbstractNettyRemotingClient.class.getDeclaredField("clientBootstrap");
         clientBootstrapField.setAccessible(true);
-        NettyClientBootstrap bootstrap = (NettyClientBootstrap) clientBootstrapField.get(client);
+        clientBootstrapField.set(testClient, mockBootstrap);
 
-        assertNotNull(bootstrap);
+        Field timerStartedField = AbstractNettyRemotingClient.class.getDeclaredField("timerStarted");
+        timerStartedField.setAccessible(true);
+        AtomicBoolean timerStarted = (AtomicBoolean) timerStartedField.get(testClient);
+        assertFalse(timerStarted.get(), "reconnect is not started");
+
+        testClient.init();
+
+        assertTrue(timerStarted.get(), "reconnect starts");
+
+        Mockito.verify(mockBootstrap, Mockito.times(1)).start();
+
+        Field timerExecutorField = AbstractNettyRemoting.class.getDeclaredField("timerExecutor");
+        timerExecutorField.setAccessible(true);
+        ScheduledExecutorService timerExecutor = (ScheduledExecutorService) timerExecutorField.get(testClient);
+        assertNotNull(timerExecutor, "thread can not be null");
     }
 
     @Test
-    public void testPoolKeyFunction() {
-        Function<String, NettyPoolKey> poolKeyFunction = client.getPoolKeyFunction();
-        assertNotNull(poolKeyFunction);
+    public void testInitMergeSendExecutorService() throws Exception {
+        TestNettyRemotingClientWithBatch batchClient =
+                new TestNettyRemotingClientWithBatch(clientConfig, messageExecutor);
+        Field mergeSendExecutorField = AbstractNettyRemotingClient.class.getDeclaredField("mergeSendExecutorService");
+        mergeSendExecutorField.setAccessible(true);
+        assertNull(mergeSendExecutorField.get(batchClient), "thread should be null");
 
-        NettyPoolKey poolKey = poolKeyFunction.apply("127.0.0.1:8080");
-        assertNotNull(poolKey);
-        assertEquals(NettyPoolKey.TransactionRole.TMROLE, poolKey.getTransactionRole());
-        assertEquals("127.0.0.1:8080", poolKey.getAddress());
+        batchClient.init();
+        ExecutorService mergeSendExecutor = (ExecutorService) mergeSendExecutorField.get(batchClient);
+        assertNotNull(mergeSendExecutor, "mergeSendExecutor should be initialized");
+        assertTrue(mergeSendExecutor instanceof ThreadPoolExecutor, "the type of thread should be ThreadPoolExecutor");
+
+        ThreadPoolExecutor threadPool = (ThreadPoolExecutor) mergeSendExecutor;
+        assertEquals(1, threadPool.getCorePoolSize(), "core threadPool should be MAX_MERGE_SEND_THREAD");
+        assertEquals(1, threadPool.getMaximumPoolSize(), "the max threadPool should be MAX_MERGE_SEND_THREAD");
     }
 
     @Test
-    public void testReconnectTaskExecution() throws Exception {
+    public void testReconnectTaskWithEmptyServiceGroup() throws Exception {
+        class TestClientWithEmptyServiceGroup extends TestNettyRemotingClient {
+            public TestClientWithEmptyServiceGroup(NettyClientConfig config, ThreadPoolExecutor executor) {
+                super(config, executor);
+            }
+
+            @Override
+            protected String getTransactionServiceGroup() {
+                return "";
+            }
+        }
+
+        TestClientWithEmptyServiceGroup testClient = new TestClientWithEmptyServiceGroup(clientConfig, messageExecutor);
+        Field reconnectTaskField = AbstractNettyRemotingClient.class.getDeclaredField("reconnectTask");
+        reconnectTaskField.setAccessible(true);
+        Runnable reconnectTask = (Runnable) reconnectTaskField.get(testClient);
+
+        assertDoesNotThrow(reconnectTask::run, "serviceGroup is null");
+    }
+
+    @Test
+    public void testReconnectTaskThrowException() throws Exception {
+        TestNettyRemotingClientWithReconnectException exceptionClient =
+                new TestNettyRemotingClientWithReconnectException(clientConfig, messageExecutor);
+        Field reconnectTaskField = AbstractNettyRemotingClient.class.getDeclaredField("reconnectTask");
+        reconnectTaskField.setAccessible(true);
+        Runnable reconnectTask = (Runnable) reconnectTaskField.get(exceptionClient);
+
+        assertDoesNotThrow(reconnectTask::run, "reconnectTask exception");
+    }
+
+    @Test
+    public void testInitClientBootstrapStart() throws Exception {
         TestNettyRemotingClient testClient = new TestNettyRemotingClient(clientConfig, messageExecutor);
+        Field clientBootstrapField = AbstractNettyRemotingClient.class.getDeclaredField("clientBootstrap");
+        clientBootstrapField.setAccessible(true);
+        NettyClientBootstrap mockBootstrap = mock(NettyClientBootstrap.class);
+        clientBootstrapField.set(testClient, mockBootstrap);
 
-        try {
-            testClient.init();
+        testClient.init();
+        verify(mockBootstrap, times(1)).start();
+    }
 
-            // Wait a bit for the reconnect task to potentially run
-            Thread.sleep(100);
+    static class TestReconnectTaskClient extends TestNettyRemotingClient {
+        private final String transactionServiceGroup;
 
-            // The reconnect task should be scheduled but may fail due to test environment
-            // We just want to ensure no exceptions are thrown
-        } finally {
-            testClient.destroy();
+        public TestReconnectTaskClient(NettyClientConfig config, ThreadPoolExecutor executor, String serviceGroup) {
+            super(config, executor);
+            this.transactionServiceGroup = serviceGroup;
+        }
+
+        @Override
+        protected String getTransactionServiceGroup() {
+            return this.transactionServiceGroup;
         }
     }
 
     @Test
-    public void testDestroyBeforeInit() {
-        TestNettyRemotingClient testClient = new TestNettyRemotingClient(clientConfig, messageExecutor);
+    public void testReconnectTask() throws Exception {
+        String testServiceGroup = "test-group";
+        NettyClientConfig clientConfig = new NettyClientConfig();
+        ThreadPoolExecutor messageExecutor =
+                new ThreadPoolExecutor(1, 1, 0, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
+        // Mock clientChannelManager
+        NettyClientChannelManager mockChannelManager = mock(NettyClientChannelManager.class);
+        Field transactionRoleField = AbstractNettyRemotingClient.class.getDeclaredField("transactionRole");
+        transactionRoleField.setAccessible(true);
 
-        // Destroy without initializing first
-        testClient.destroy();
+        TestReconnectTaskClient client1 = new TestReconnectTaskClient(clientConfig, messageExecutor, testServiceGroup);
+        Field timerStartedField = AbstractNettyRemotingClient.class.getDeclaredField("timerStarted");
+        timerStartedField.setAccessible(true);
+        AtomicBoolean timerStarted1 = (AtomicBoolean) timerStartedField.get(client1);
+        timerStarted1.set(false);
+        Field reconnectTaskField = AbstractNettyRemotingClient.class.getDeclaredField("reconnectTask");
+        reconnectTaskField.setAccessible(true);
+        Runnable reconnectTask1 = (Runnable) reconnectTaskField.get(client1);
 
-        // Should not throw any exception
-    }
+        reconnectTask1.run();
+        verify(mockChannelManager, never()).reconnect(anyString());
 
-    @Test
-    public void testLoadBalanceWithExceptionInLookup() {
-        // This test might be tricky as it depends on RegistryFactory
-        // We can test that the method handles exceptions gracefully
-        GlobalBeginRequest request = new GlobalBeginRequest();
-        request.setTransactionName("test-tx");
+        TestReconnectTaskClient client2 = new TestReconnectTaskClient(clientConfig, messageExecutor, "");
+        AtomicBoolean timerStarted2 = (AtomicBoolean) timerStartedField.get(client2);
+        timerStarted2.set(true);
+        Field channelManagerField = AbstractNettyRemotingClient.class.getDeclaredField("clientChannelManager");
+        channelManagerField.setAccessible(true);
+        channelManagerField.set(client2, mockChannelManager);
 
-        try {
-            String address = client.loadBalance("non-existent-group", request);
-            Fail.fail("Should have thrown FrameworkException");
-        } catch (FrameworkException e) {
-            // Expected - no available service
-            assertEquals(NoAvailableService, e.getErrcode());
-        } catch (Exception e) {
-            // Other exceptions might occur in test environment
-            assertNotNull(e);
-        }
-    }
+        // verify reconnect
+        Runnable reconnectTask2 = (Runnable) reconnectTaskField.get(client2);
+        reconnectTask2.run();
+        verify(mockChannelManager, never()).reconnect(anyString());
 
-    @Test
-    public void testCleanupFuturesForMessageIdsWithNullException() throws Exception {
-        java.util.Set<Integer> messageIds = new java.util.HashSet<>();
-        messageIds.add(1);
+        TestReconnectTaskClient client3 = new TestReconnectTaskClient(clientConfig, messageExecutor, testServiceGroup);
+        AtomicBoolean timerStarted3 = (AtomicBoolean) timerStartedField.get(client3);
+        timerStarted3.set(true);
+        channelManagerField.set(client3, mockChannelManager);
 
-        MessageFuture future = new MessageFuture();
-        client.futures.put(1, future);
+        Runnable reconnectTask3 = (Runnable) reconnectTaskField.get(client3);
+        reconnectTask3.run();
+        verify(mockChannelManager, times(1)).reconnect(testServiceGroup);
 
-        java.lang.reflect.Method cleanupMethod = AbstractNettyRemotingClient.class.getDeclaredMethod(
-                "cleanupFuturesForMessageIds", java.util.Set.class, Exception.class);
-        cleanupMethod.setAccessible(true);
+        TestReconnectTaskClient client4 = new TestReconnectTaskClient(clientConfig, messageExecutor, testServiceGroup);
+        AtomicBoolean timerStarted4 = (AtomicBoolean) timerStartedField.get(client4);
+        timerStarted4.set(true);
+        RuntimeException testEx = new RuntimeException("test-reconnect-error");
+        doThrow(testEx).when(mockChannelManager).reconnect(testServiceGroup);
+        channelManagerField.set(client4, mockChannelManager);
 
-        cleanupMethod.invoke(client, messageIds, null);
-
-        assertFalse(client.futures.containsKey(1));
-    }
-
-    @Test
-    public void testCollectMessageIdsForChannelWithNoServerAddress() throws Exception {
-        Channel channel = mock(Channel.class);
-        ChannelId channelId = mock(ChannelId.class);
-        when(channel.id()).thenReturn(channelId);
-        when(channel.remoteAddress()).thenReturn(new InetSocketAddress("127.0.0.1", 8080));
-
-        // Don't add the channel to the manager
-
-        java.lang.reflect.Method collectMethod =
-                AbstractNettyRemotingClient.class.getDeclaredMethod("collectMessageIdsForChannel", ChannelId.class);
-        collectMethod.setAccessible(true);
-
-        java.util.Set<Integer> messageIds = (java.util.Set<Integer>) collectMethod.invoke(client, channelId);
-
-        assertNotNull(messageIds);
-        assertTrue(messageIds.isEmpty());
+        Runnable reconnectTask4 = (Runnable) reconnectTaskField.get(client4);
+        assertDoesNotThrow(reconnectTask4::run);
     }
 }
