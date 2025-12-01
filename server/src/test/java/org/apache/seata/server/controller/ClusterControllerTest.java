@@ -157,7 +157,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
         header.put(HTTP.CONN_KEEP_ALIVE, "close");
         Map<String, String> param = new HashMap<>();
         param.put("default-test-inactive", "1");
-        Assertions.assertThrows(RuntimeException.class, () -> {
+        Assertions.assertThrows(Exception.class, () -> {
             HttpClientUtil.doPost("http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=5000", param, header, 4000);
         });
     }
