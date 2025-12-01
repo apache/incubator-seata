@@ -2,6 +2,7 @@
   "name": "connection-pool-monitor",
   "version": "0.1.0",
   "private": true,
+  "homepage": "/cpm",
   "dependencies": {
     "@ant-design/icons": "^5.1.4",
     "@types/react": "^18.2.15",
