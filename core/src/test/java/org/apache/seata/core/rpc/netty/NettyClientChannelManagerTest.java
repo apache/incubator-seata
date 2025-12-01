@@ -18,22 +18,36 @@ package org.apache.seata.core.rpc.netty;
 
 import io.netty.channel.Channel;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
+import org.apache.seata.common.exception.FrameworkException;
+import org.apache.seata.core.protocol.Version;
+import org.apache.seata.discovery.registry.RegistryFactory;
+import org.apache.seata.discovery.registry.RegistryService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_TX_GROUP;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -66,6 +80,9 @@ class NettyClientChannelManagerTest {
 
     @Mock
     private GenericKeyedObjectPool keyedObjectPool;
+
+    @Mock
+    private RegistryService registryService;
 
     @BeforeEach
     void setUp() {
@@ -173,6 +190,232 @@ class NettyClientChannelManagerTest {
             field.set(channelManager, keyedObjectPool);
         } catch (Exception ex) {
             throw new RuntimeException(ex);
+        }
+    }
+
+    @Test
+    void testThrowFailFastExceptionWhenFailFastIsTrue() throws Exception {
+        Method method =
+                channelManager.getClass().getDeclaredMethod("throwFailFastException", boolean.class, String.class);
+        method.setAccessible(true);
+
+        FrameworkException exception = assertThrows(FrameworkException.class, () -> {
+            try {
+                method.invoke(channelManager, true, "Test error message");
+            } catch (Exception e) {
+                if (e.getCause() instanceof FrameworkException) {
+                    throw (FrameworkException) e.getCause();
+                }
+                throw e;
+            }
+        });
+
+        assertEquals("Test error message", exception.getMessage());
+    }
+
+    @Test
+    void testThrowFailFastExceptionWhenFailFastIsFalse() throws Exception {
+        Method method =
+                channelManager.getClass().getDeclaredMethod("throwFailFastException", boolean.class, String.class);
+        method.setAccessible(true);
+
+        // Should not throw any exception
+        method.invoke(channelManager, false, "Test error message");
+    }
+
+    @Test
+    void testRegisterChannelWhenNoExistingChannel() {
+        String serverAddress = "127.0.0.1:8091";
+        String version = "1.5.0";
+        InetSocketAddress remoteAddress = new InetSocketAddress("127.0.0.1", 8091);
+
+        when(channel.remoteAddress()).thenReturn(remoteAddress);
+
+        channelManager.registerChannel(serverAddress, channel, version);
+
+        assertEquals(channel, channelManager.getChannels().get(serverAddress));
+        assertEquals(version, Version.getChannelVersion(channel));
+    }
+
+    @Test
+    void testRegisterChannelWhenExistingChannelIsActive() {
+        String serverAddress = "127.0.0.1:8091";
+        String version = "1.5.0";
+
+        when(newChannel.isActive()).thenReturn(true);
+
+        // Put an active channel first
+        channelManager.getChannels().put(serverAddress, newChannel);
+
+        channelManager.registerChannel(serverAddress, channel, version);
+
+        // Should not replace the active channel
+        assertEquals(newChannel, channelManager.getChannels().get(serverAddress));
+    }
+
+    @Test
+    void testRegisterChannelWhenExistingChannelIsInactive() {
+        String serverAddress = "127.0.0.1:8091";
+        String version = "1.5.0";
+        InetSocketAddress remoteAddress = new InetSocketAddress("127.0.0.1", 8091);
+
+        when(newChannel.isActive()).thenReturn(false);
+        when(channel.remoteAddress()).thenReturn(remoteAddress);
+
+        // Put an inactive channel first
+        channelManager.getChannels().put(serverAddress, newChannel);
+
+        channelManager.registerChannel(serverAddress, channel, version);
+
+        // Should replace the inactive channel
+        assertEquals(channel, channelManager.getChannels().get(serverAddress));
+        assertEquals(version, Version.getChannelVersion(channel));
+    }
+
+    @Test
+    void testDoReconnectWithAvailableServers() {
+        String transactionServiceGroup = "default_tx_group";
+        List<InetSocketAddress> availableServers = new ArrayList<>();
+        availableServers.add(new InetSocketAddress("127.0.0.1", 8091));
+
+        try (MockedStatic<RegistryFactory> registryFactoryMock = mockStatic(RegistryFactory.class)) {
+            registryFactoryMock.when(RegistryFactory::getInstance).thenReturn(registryService);
+            when(registryService.lookup(transactionServiceGroup)).thenReturn(availableServers);
+
+            setupPoolFactory(nettyPoolKey, channel);
+
+            // Should not throw exception
+            channelManager.doReconnect(transactionServiceGroup, false);
+
+            // Verify that acquireChannel was attempted
+            assertNotNull(channelManager.getChannels().get("127.0.0.1:8091"));
+        } catch (Exception e) {
+            Assertions.fail("Should not throw exception: " + e.getMessage());
+        }
+    }
+
+    @Test
+    void testDoReconnectWithNoAvailableServersAndFailFastTrue() {
+        String transactionServiceGroup = "default_tx_group";
+
+        try (MockedStatic<RegistryFactory> registryFactoryMock = mockStatic(RegistryFactory.class)) {
+            registryFactoryMock.when(RegistryFactory::getInstance).thenReturn(registryService);
+            when(registryService.lookup(transactionServiceGroup)).thenReturn(Collections.emptyList());
+            when(registryService.getServiceGroup(transactionServiceGroup)).thenReturn("default");
+
+            assertThrows(FrameworkException.class, () -> {
+                channelManager.doReconnect(transactionServiceGroup, true);
+            });
+        } catch (Exception e) {
+            Assertions.fail("Unexpected exception: " + e.getMessage());
+        }
+    }
+
+    @Test
+    void testDoReconnectWithNoAvailableServersAndFailFastFalse() {
+        String transactionServiceGroup = "default_tx_group";
+
+        try (MockedStatic<RegistryFactory> registryFactoryMock = mockStatic(RegistryFactory.class)) {
+            registryFactoryMock.when(RegistryFactory::getInstance).thenReturn(registryService);
+            when(registryService.lookup(transactionServiceGroup)).thenReturn(Collections.emptyList());
+            when(registryService.getServiceGroup(transactionServiceGroup)).thenReturn("default");
+
+            // Should not throw exception
+            channelManager.doReconnect(transactionServiceGroup, false);
+        } catch (Exception e) {
+            Assertions.fail("Should not throw exception: " + e.getMessage());
+        }
+    }
+
+    @Test
+    void testDoReconnectWithBlankClusterNameAndFailFastTrue() {
+        String transactionServiceGroup = "default_tx_group";
+
+        try (MockedStatic<RegistryFactory> registryFactoryMock = mockStatic(RegistryFactory.class)) {
+            registryFactoryMock.when(RegistryFactory::getInstance).thenReturn(registryService);
+            when(registryService.lookup(transactionServiceGroup)).thenReturn(Collections.emptyList());
+            when(registryService.getServiceGroup(transactionServiceGroup)).thenReturn("");
+
+            assertThrows(FrameworkException.class, () -> {
+                channelManager.doReconnect(transactionServiceGroup, true);
+            });
+        } catch (Exception e) {
+            Assertions.fail("Unexpected exception: " + e.getMessage());
+        }
+    }
+
+    @Test
+    void testDoReconnectWithBlankClusterNameAndFailFastFalse() {
+        String transactionServiceGroup = "default_tx_group";
+
+        try (MockedStatic<RegistryFactory> registryFactoryMock = mockStatic(RegistryFactory.class)) {
+            registryFactoryMock.when(RegistryFactory::getInstance).thenReturn(registryService);
+            when(registryService.lookup(transactionServiceGroup)).thenReturn(Collections.emptyList());
+            when(registryService.getServiceGroup(transactionServiceGroup)).thenReturn("");
+
+            // Should not throw exception
+            channelManager.doReconnect(transactionServiceGroup, false);
+        } catch (Exception e) {
+            Assertions.fail("Should not throw exception: " + e.getMessage());
+        }
+    }
+
+    @Test
+    void testDoReconnectWhenGetAvailServerListThrowsExceptionWithFailFastTrue() {
+        String transactionServiceGroup = "default_tx_group";
+
+        try (MockedStatic<RegistryFactory> registryFactoryMock = mockStatic(RegistryFactory.class)) {
+            registryFactoryMock.when(RegistryFactory::getInstance).thenReturn(registryService);
+            when(registryService.lookup(transactionServiceGroup)).thenThrow(new RuntimeException("Registry error"));
+
+            assertThrows(FrameworkException.class, () -> {
+                channelManager.doReconnect(transactionServiceGroup, true);
+            });
+        } catch (Exception e) {
+            Assertions.fail("Unexpected exception: " + e.getMessage());
+        }
+    }
+
+    @Test
+    void testDoReconnectWhenGetAvailServerListThrowsExceptionWithFailFastFalse() {
+        String transactionServiceGroup = "default_tx_group";
+
+        try (MockedStatic<RegistryFactory> registryFactoryMock = mockStatic(RegistryFactory.class)) {
+            registryFactoryMock.when(RegistryFactory::getInstance).thenReturn(registryService);
+            when(registryService.lookup(transactionServiceGroup)).thenThrow(new RuntimeException("Registry error"));
+
+            // Should not throw exception
+            channelManager.doReconnect(transactionServiceGroup, false);
+        } catch (Exception e) {
+            Assertions.fail("Should not throw exception: " + e.getMessage());
+        }
+    }
+
+    @Test
+    void testDoReconnectWithPartialFailures() {
+        String transactionServiceGroup = "default_tx_group";
+        List<InetSocketAddress> availableServers = new ArrayList<>();
+        availableServers.add(new InetSocketAddress("127.0.0.1", 8091));
+        availableServers.add(new InetSocketAddress("127.0.0.1", 8092));
+
+        try (MockedStatic<RegistryFactory> registryFactoryMock = mockStatic(RegistryFactory.class)) {
+            registryFactoryMock.when(RegistryFactory::getInstance).thenReturn(registryService);
+            when(registryService.lookup(transactionServiceGroup)).thenReturn(availableServers);
+
+            // Setup first server to succeed, second to fail
+            when(poolKeyFunction.apply("127.0.0.1:8091")).thenReturn(nettyPoolKey);
+            when(poolableFactory.makeObject(nettyPoolKey)).thenReturn(channel);
+            when(poolableFactory.validateObject(nettyPoolKey, channel)).thenReturn(true);
+
+            when(poolKeyFunction.apply("127.0.0.1:8092")).thenThrow(new RuntimeException("Connection failed"));
+
+            // Should not throw exception even with partial failures
+            channelManager.doReconnect(transactionServiceGroup, false);
+
+            // Verify at least one connection succeeded
+            assertFalse(channelManager.getChannels().isEmpty());
+        } catch (Exception e) {
+            Assertions.fail("Should not throw exception: " + e.getMessage());
         }
     }
 }

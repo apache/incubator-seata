@@ -171,4 +171,106 @@ public class BaseTransactionalExecutorTest {
         when(executor.getTableMeta()).thenReturn(tableMeta);
         assertThat(executor.buildLockKey(tableRecords)).isEqualTo(buildLockKeyExpect);
     }
+
+    @Test
+    public void testBuildLockKeyWithBinaryPrimaryKey() {
+        // Test binary (byte[]) primary key handling
+        String tableName = "test_binary_table";
+        byte[] binaryPkValue1 = new byte[] {1, 2, 3, 15, -1}; // -1 represents 0xFF in signed byte
+        byte[] binaryPkValue2 = new byte[] {10, 20, 30};
+        String pkColumnName = "binary_id";
+
+        // Expected: test_binary_table:[1, 2, 3, 15, -1],[10, 20, 30]
+        // Using ArrayUtils.toString() format instead of memory address like [B@1b57bff9]
+        // Note: byte is signed in Java, so 0xFF (255) is represented as -1
+        String expectedLockKey = tableName + ":[1, 2, 3, 15, -1],[10, 20, 30]";
+
+        // Mock fields with byte[] values
+        Field binaryField1 = mock(Field.class);
+        when(binaryField1.getValue()).thenReturn(binaryPkValue1);
+        Field binaryField2 = mock(Field.class);
+        when(binaryField2.getValue()).thenReturn(binaryPkValue2);
+
+        List<Map<String, Field>> pkRows = new ArrayList<>();
+        pkRows.add(Collections.singletonMap(pkColumnName, binaryField1));
+        pkRows.add(Collections.singletonMap(pkColumnName, binaryField2));
+
+        // Mock tableMeta
+        TableMeta tableMeta = mock(TableMeta.class);
+        when(tableMeta.getTableName()).thenReturn(tableName);
+        when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(Arrays.asList(new String[] {pkColumnName}));
+
+        // Mock tableRecords
+        TableRecords tableRecords = mock(TableRecords.class);
+        when(tableRecords.getTableMeta()).thenReturn(tableMeta);
+        when(tableRecords.size()).thenReturn(pkRows.size());
+        when(tableRecords.pkRows()).thenReturn(pkRows);
+
+        // Mock executor
+        BaseTransactionalExecutor executor = mock(BaseTransactionalExecutor.class);
+        when(executor.buildLockKey(tableRecords)).thenCallRealMethod();
+        when(executor.getTableMeta()).thenReturn(tableMeta);
+
+        String actualLockKey = executor.buildLockKey(tableRecords);
+
+        // Verify that byte[] is properly converted to readable format
+        assertThat(actualLockKey).isEqualTo(expectedLockKey);
+        // Ensure it's not using memory address format
+        assertThat(actualLockKey).doesNotContain("[B@]");
+        assertThat(actualLockKey).contains("[1, 2, 3, 15, -1]");
+        assertThat(actualLockKey).contains("[10, 20, 30]");
+    }
+
+    @Test
+    public void testBuildLockKeyWithMixedPrimaryKeys() {
+        // Test mixed primary keys: one regular string and one binary
+        String tableName = "test_mixed_table";
+        String stringPkValue = "user123";
+        byte[] binaryPkValue = new byte[] {16, 32, 48, 64};
+        String stringPkColumnName = "user_id";
+        String binaryPkColumnName = "session_id";
+
+        // Expected: test_mixed_table:user123_[16, 32, 48, 64]
+        String expectedLockKey = tableName + ":user123_[16, 32, 48, 64]";
+
+        // Mock fields
+        Field stringField = mock(Field.class);
+        when(stringField.getValue()).thenReturn(stringPkValue);
+        Field binaryField = mock(Field.class);
+        when(binaryField.getValue()).thenReturn(binaryPkValue);
+
+        List<Map<String, Field>> pkRows = new ArrayList<>();
+        Map<String, Field> row = new HashMap<String, Field>() {
+            {
+                put(stringPkColumnName, stringField);
+                put(binaryPkColumnName, binaryField);
+            }
+        };
+        pkRows.add(row);
+
+        // Mock tableMeta
+        TableMeta tableMeta = mock(TableMeta.class);
+        when(tableMeta.getTableName()).thenReturn(tableName);
+        when(tableMeta.getPrimaryKeyOnlyName())
+                .thenReturn(Arrays.asList(new String[] {stringPkColumnName, binaryPkColumnName}));
+
+        // Mock tableRecords
+        TableRecords tableRecords = mock(TableRecords.class);
+        when(tableRecords.getTableMeta()).thenReturn(tableMeta);
+        when(tableRecords.size()).thenReturn(pkRows.size());
+        when(tableRecords.pkRows()).thenReturn(pkRows);
+
+        // Mock executor
+        BaseTransactionalExecutor executor = mock(BaseTransactionalExecutor.class);
+        when(executor.buildLockKey(tableRecords)).thenCallRealMethod();
+        when(executor.getTableMeta()).thenReturn(tableMeta);
+
+        String actualLockKey = executor.buildLockKey(tableRecords);
+
+        // Verify mixed types are handled correctly
+        assertThat(actualLockKey).isEqualTo(expectedLockKey);
+        assertThat(actualLockKey).doesNotContain("[B@]");
+        assertThat(actualLockKey).contains("user123");
+        assertThat(actualLockKey).contains("[16, 32, 48, 64]");
+    }
 }

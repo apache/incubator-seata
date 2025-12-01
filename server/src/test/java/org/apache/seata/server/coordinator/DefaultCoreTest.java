@@ -349,6 +349,203 @@ public class DefaultCoreTest extends BaseSpringBootTest {
         }
     }
 
+    @Test
+    public void getCoreATTest() {
+        AbstractCore atCore = core.getCore(BranchType.AT);
+        Assertions.assertNotNull(atCore);
+        Assertions.assertEquals(BranchType.AT, atCore.getHandleBranchType());
+    }
+
+    @Test
+    public void lockQueryTest() throws Exception {
+        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
+        boolean result = core.lockQuery(BranchType.AT, resourceId, xid, lockKeys_1);
+        Assertions.assertTrue(result);
+
+        globalSession = SessionHolder.findGlobalSession(xid);
+        globalSession.end();
+    }
+
+    @Test
+    public void getStatusSessionNotFoundTest() throws Exception {
+        GlobalStatus status = core.getStatus("invalid_xid");
+        Assertions.assertEquals(GlobalStatus.Finished, status);
+    }
+
+    @Test
+    public void getStatusSessionFoundTest() throws Exception {
+        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
+        GlobalStatus status = core.getStatus(xid);
+        Assertions.assertEquals(GlobalStatus.Begin, status);
+
+        globalSession = SessionHolder.findGlobalSession(xid);
+        globalSession.end();
+    }
+
+    @Test
+    public void globalReportSessionNotFoundTest() throws Exception {
+        GlobalStatus status = core.globalReport("invalid_xid", GlobalStatus.Committed);
+        Assertions.assertEquals(GlobalStatus.Committed, status);
+    }
+
+    @Test
+    public void commitSessionNotFoundTest() throws Exception {
+        GlobalStatus status = core.commit("invalid_xid");
+        Assertions.assertEquals(GlobalStatus.Finished, status);
+    }
+
+    @Test
+    public void commitTimeoutTest() throws Exception {
+        String xid = core.begin(applicationId, txServiceGroup, txName, 1);
+        Thread.sleep(100);
+
+        GlobalStatus status = core.commit(xid);
+        Assertions.assertEquals(GlobalStatus.TimeoutRollbacking, status);
+
+        globalSession = SessionHolder.findGlobalSession(xid);
+        if (globalSession != null) {
+            globalSession.end();
+        }
+    }
+
+    @Test
+    public void rollbackSessionNotFoundTest() throws Exception {
+        GlobalStatus status = core.rollback("invalid_xid");
+        Assertions.assertEquals(GlobalStatus.Finished, status);
+    }
+
+    @Test
+    public void rollbackStatusNotBeginTest() throws Exception {
+        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
+        globalSession = SessionHolder.findGlobalSession(xid);
+        globalSession.changeGlobalStatus(GlobalStatus.Committed);
+
+        GlobalStatus status = core.rollback(xid);
+        Assertions.assertEquals(GlobalStatus.Committed, status);
+
+        globalSession.end();
+    }
+
+    @Test
+    public void doGlobalCommitNoBranchesTest() throws Exception {
+        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
+        globalSession = SessionHolder.findGlobalSession(xid);
+        globalSession.changeGlobalStatus(GlobalStatus.Committing);
+
+        boolean result = core.doGlobalCommit(globalSession, true);
+        Assertions.assertTrue(result);
+    }
+
+    @Test
+    public void doGlobalRollbackNoBranchesTest() throws Exception {
+        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
+        globalSession = SessionHolder.findGlobalSession(xid);
+        globalSession.changeGlobalStatus(GlobalStatus.Rollbacking);
+
+        boolean result = core.doGlobalRollback(globalSession, false);
+        Assertions.assertTrue(result);
+    }
+
+    @Test
+    public void doGlobalCommitPhaseOne_FailedTest() throws Exception {
+        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
+        globalSession = SessionHolder.findGlobalSession(xid);
+
+        BranchSession branchSession = SessionHelper.newBranchByGlobal(
+                globalSession, BranchType.AT, resourceId, applicationData, lockKeys_1, clientId);
+        globalSession.addBranch(branchSession);
+        globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Failed);
+        globalSession.changeGlobalStatus(GlobalStatus.Committing);
+
+        boolean result = core.doGlobalCommit(globalSession, true);
+        Assertions.assertTrue(result);
+    }
+
+    @Test
+    public void doGlobalRollbackPhaseOneFailedTest() throws Exception {
+        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
+        globalSession = SessionHolder.findGlobalSession(xid);
+
+        BranchSession branchSession = SessionHelper.newBranchByGlobal(
+                globalSession, BranchType.AT, resourceId, applicationData, lockKeys_1, clientId);
+        globalSession.addBranch(branchSession);
+        globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Failed);
+        globalSession.changeGlobalStatus(GlobalStatus.Rollbacking);
+
+        boolean result = core.doGlobalRollback(globalSession, false);
+        Assertions.assertTrue(result);
+    }
+
+    @Test
+    public void branchDeleteATTest() throws Exception {
+        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
+        Long branchId = core.branchRegister(BranchType.AT, resourceId, clientId, xid, applicationData, lockKeys_1);
+        globalSession = SessionHolder.findGlobalSession(xid);
+        BranchSession branchSession = globalSession.getBranch(branchId);
+
+        BranchStatus status = core.branchDelete(globalSession, branchSession);
+        Assertions.assertNotNull(status);
+
+        globalSession.end();
+    }
+
+    @Test
+    public void doBranchDeleteATPhaseTwoCommittedTest() throws Exception {
+        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
+        Long branchId = core.branchRegister(BranchType.AT, resourceId, clientId, xid, applicationData, lockKeys_1);
+        globalSession = SessionHolder.findGlobalSession(xid);
+        BranchSession branchSession = globalSession.getBranch(branchId);
+
+        core.mockCore(BranchType.AT, new MockCore(null, null) {
+            @Override
+            public BranchStatus branchDelete(GlobalSession gs, BranchSession bs) {
+                return BranchStatus.PhaseTwo_Committed;
+            }
+        });
+
+        Boolean result = core.doBranchDelete(globalSession, branchSession);
+        Assertions.assertTrue(result);
+
+        globalSession.end();
+    }
+
+    @Test
+    public void doBranchDeleteUnretryableTest() throws Exception {
+        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
+        Long branchId = core.branchRegister(BranchType.AT, resourceId, clientId, xid, applicationData, lockKeys_1);
+        globalSession = SessionHolder.findGlobalSession(xid);
+        BranchSession branchSession = globalSession.getBranch(branchId);
+
+        core.mockCore(BranchType.AT, new MockCore(null, null) {
+            @Override
+            public BranchStatus branchDelete(GlobalSession gs, BranchSession bs) {
+                return BranchStatus.PhaseTwo_RollbackFailed_Unretryable;
+            }
+        });
+
+        Boolean result = core.doBranchDelete(globalSession, branchSession);
+        Assertions.assertTrue(result);
+
+        globalSession.end();
+    }
+
+    @Test
+    public void commitAsyncCommitTest() throws Exception {
+        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
+        core.branchRegister(BranchType.AT, resourceId, clientId, xid, applicationData, lockKeys_1);
+        globalSession = SessionHolder.findGlobalSession(xid);
+
+        core.mockCore(BranchType.AT, new MockCore(BranchStatus.PhaseTwo_Committed, BranchStatus.PhaseTwo_Rollbacked) {
+            @Override
+            public boolean doGlobalCommit(GlobalSession gs, boolean retrying) {
+                return true;
+            }
+        });
+
+        GlobalStatus status = core.commit(xid);
+        Assertions.assertNotNull(status);
+    }
+
     private static class MockCore extends AbstractCore {
 
         private BranchStatus commitStatus;

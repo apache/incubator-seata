@@ -51,7 +51,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
 
     private static final Map<String, Queue<Watcher<HttpContext>>> WATCHERS = new ConcurrentHashMap<>();
 
-    private static final Map<String, Long> GROUP_UPDATE_TIME = new ConcurrentHashMap<>();
+    private static final Map<String, Long> GROUP_UPDATE_TERM = new ConcurrentHashMap<>();
 
     private final ScheduledThreadPoolExecutor scheduledThreadPoolExecutor =
             new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("long-polling", 1));
@@ -85,7 +85,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
     @Async
     public void onChangeEvent(ClusterChangeEvent event) {
         if (event.getTerm() > 0) {
-            GROUP_UPDATE_TIME.put(event.getGroup(), event.getTerm());
+            GROUP_UPDATE_TERM.put(event.getGroup(), event.getTerm());
             // Notifications are made of changes in cluster information
             Optional.ofNullable(WATCHERS.remove(event.getGroup()))
                     .ifPresent(watchers -> watchers.parallelStream().forEach(this::notifyWatcher));
@@ -128,7 +128,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
 
     public void registryWatcher(Watcher<HttpContext> watcher) {
         String group = watcher.getGroup();
-        Long term = GROUP_UPDATE_TIME.get(group);
+        Long term = GROUP_UPDATE_TERM.get(group);
         if (term == null || watcher.getTerm() >= term) {
             WATCHERS.computeIfAbsent(group, value -> new ConcurrentLinkedQueue<>())
                     .add(watcher);

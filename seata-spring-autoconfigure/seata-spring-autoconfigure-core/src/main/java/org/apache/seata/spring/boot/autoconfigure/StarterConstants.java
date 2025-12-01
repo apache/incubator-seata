@@ -45,7 +45,7 @@ public interface StarterConstants {
     String SAGA_ASYNC_THREAD_POOL_PREFIX = SAGA_STATE_MACHINE_PREFIX + ".async-thread-pool";
 
     String REGISTRY_PREFIX = SEATA_PREFIX + ".registry";
-    String REGISTRY_PREFERED_NETWORKS = ConfigurationKeys.FILE_ROOT_REGISTRY + ".preferredNetworks";
+    String REGISTRY_PREFERRED_NETWORKS = ConfigurationKeys.FILE_ROOT_REGISTRY + ".preferredNetworks";
     String REGISTRY_NACOS_PREFIX = REGISTRY_PREFIX + ".nacos";
     String REGISTRY_RAFT_PREFIX = REGISTRY_PREFIX + ".raft";
     String REGISTRY_EUREKA_PREFIX = REGISTRY_PREFIX + ".eureka";

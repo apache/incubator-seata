@@ -19,17 +19,29 @@ package org.apache.seata.core.rpc.netty.http.filter;
 import org.apache.seata.core.exception.HttpRequestFilterException;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public class HttpRequestFilterChain {
     private final List<HttpRequestFilter> filters;
+    private final Consumer<HttpFilterContext<?>> finalAction;
+    private int currentIndex = 0;
 
-    public HttpRequestFilterChain(List<HttpRequestFilter> filters) {
+    public HttpRequestFilterChain(List<HttpRequestFilter> filters, Consumer<HttpFilterContext<?>> finalAction) {
         this.filters = filters;
+        this.finalAction = finalAction;
     }
 
     public void doFilter(HttpFilterContext<?> httpFilterContext) throws HttpRequestFilterException {
-        for (HttpRequestFilter filter : filters) {
-            filter.doFilter(httpFilterContext);
+        if (currentIndex < filters.size()) {
+            HttpRequestFilter filter = filters.get(currentIndex++);
+            filter.doFilter(httpFilterContext, this);
+        } else {
+            // Execute final action
+            if (finalAction != null) {
+                finalAction.accept(httpFilterContext);
+            }
+            // Reset for next request
+            currentIndex = 0;
         }
     }
 

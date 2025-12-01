@@ -33,7 +33,7 @@ public interface HttpRequestFilter {
     /**
      * Executes the filter logic.
      */
-    void doFilter(HttpFilterContext<?> context) throws HttpRequestFilterException;
+    void doFilter(HttpFilterContext<?> context, HttpRequestFilterChain chain) throws HttpRequestFilterException;
 
     /**
      * Determines if the filter should run.
