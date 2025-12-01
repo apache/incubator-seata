@@ -16,24 +16,17 @@
  */
 package org.apache.seata.core.rpc.netty.http.filter;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.QueryStringDecoder;
-import io.netty.handler.codec.http.multipart.Attribute;
-import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
-import io.netty.handler.codec.http.multipart.InterfaceHttpData;
 import io.netty.handler.codec.http2.Http2Headers;
+import org.apache.seata.core.rpc.netty.http.RequestParseUtils;
 import org.apache.seata.core.rpc.netty.http.SimpleHttp2Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -52,146 +45,73 @@ public class HttpRequestParamWrapper {
     private final Map<String, List<String>> headerParams = new HashMap<>();
     private final Map<String, List<String>> jsonParams = new HashMap<>();
 
+    public HttpRequestParamWrapper(
+            Map<String, List<String>> queryParams,
+            Map<String, List<String>> formParams,
+            Map<String, List<String>> headerParams,
+            Map<String, List<String>> jsonParams) {
+        mergeParams(this.queryParams, queryParams);
+        mergeParams(this.formParams, formParams);
+        mergeParams(this.headerParams, headerParams);
+        mergeParams(this.jsonParams, jsonParams);
+    }
+
     public HttpRequestParamWrapper(HttpRequest httpRequest) {
         if (!(httpRequest instanceof FullHttpRequest)) {
             throw new IllegalArgumentException("HttpRequest must be FullHttpRequest to read body.");
         }
         FullHttpRequest fullRequest = (FullHttpRequest) httpRequest;
-        parseQueryParams(fullRequest);
-        parseHeaders(fullRequest);
-        parseBody(fullRequest);
+        parseQueryParams(fullRequest.uri());
+        parseHeaders(fullRequest.headers());
+        RequestParseUtils.BodyParseResult bodyParseResult = RequestParseUtils.parseBody(OBJECT_MAPPER, fullRequest);
+        mergeParams(formParams, bodyParseResult.getFormParams());
+        mergeParams(jsonParams, bodyParseResult.getJsonParams());
     }
 
     public HttpRequestParamWrapper(SimpleHttp2Request request) {
-        parseQueryParams(request.getPath());
-        parseHeaders(request.getHeaders());
-
-        CharSequence contentTypeSeq = request.getHeaders().get(HttpHeaderNames.CONTENT_TYPE);
-        String contentType = contentTypeSeq != null ? contentTypeSeq.toString() : null;
-        if (contentType == null) {
-            return;
+        if (request.getQueryParams() != null) {
+            mergeParams(queryParams, request.getQueryParams());
+        } else {
+            parseQueryParams(request.getPath());
         }
 
-        try {
-            if (contentType.contains("application/json")) {
-                parseJsonBody(request.getBody());
-            } else if (contentType.contains("application/x-www-form-urlencoded")) {
-                parseFormUrlEncodedBody(request.getBody());
-            }
-        } catch (Exception e) {
-            LOGGER.warn("Failed to parse HTTP/2 body: {}", e.getMessage(), e);
+        if (request.getHeaderParams() != null) {
+            mergeParams(headerParams, request.getHeaderParams());
+        } else if (request.getHeaders() != null) {
+            parseHeaders(request.getHeaders());
+        }
+
+        boolean hasBodyMaps = request.getFormParams() != null || request.getJsonParams() != null;
+        if (request.getFormParams() != null) {
+            mergeParams(formParams, request.getFormParams());
+        }
+        if (request.getJsonParams() != null) {
+            mergeParams(jsonParams, request.getJsonParams());
+        }
+
+        if (!hasBodyMaps && request.getBody() != null) {
+            RequestParseUtils.BodyParseResult bodyParseResult =
+                    RequestParseUtils.parseBody(OBJECT_MAPPER, request.getBody(), request.getHeaders());
+            mergeParams(formParams, bodyParseResult.getFormParams());
+            mergeParams(jsonParams, bodyParseResult.getJsonParams());
         }
     }
 
-    private void parseQueryParams(FullHttpRequest request) {
-        QueryStringDecoder decoder = new QueryStringDecoder(request.uri());
+    private void parseQueryParams(String uri) {
+        QueryStringDecoder decoder = new QueryStringDecoder(uri);
         queryParams.putAll(decoder.parameters());
     }
 
-    private void parseQueryParams(String path) {
-        QueryStringDecoder decoder = new QueryStringDecoder(path);
-        queryParams.putAll(decoder.parameters());
-    }
-
-    private void parseHeaders(FullHttpRequest request) {
-        for (Map.Entry<String, String> entry : request.headers()) {
-            headerParams.computeIfAbsent(entry.getKey(), k -> new ArrayList<>()).add(entry.getValue());
-        }
+    private void parseHeaders(HttpHeaders headers) {
+        headers.forEach(entry -> headerParams
+                .computeIfAbsent(entry.getKey(), k -> new ArrayList<>())
+                .add(entry.getValue()));
     }
 
     private void parseHeaders(Http2Headers headers) {
-        for (Map.Entry<CharSequence, CharSequence> entry : headers) {
-            headerParams
-                    .computeIfAbsent(entry.getKey().toString(), k -> new ArrayList<>())
-                    .add(entry.getValue().toString());
-        }
-    }
-
-    private void parseFormUrlEncodedBody(String body) {
-        if (body == null || body.trim().isEmpty()) {
-            return;
-        }
-        String[] pairs = body.split("&");
-        for (String pair : pairs) {
-            String[] kv = pair.split("=", 2);
-            if (kv.length == 2) {
-                String key = decode(kv[0]);
-                String value = decode(kv[1]);
-                formParams.computeIfAbsent(key, k -> new ArrayList<>()).add(value);
-            }
-        }
-    }
-
-    private String decode(String s) {
-        try {
-            return java.net.URLDecoder.decode(s, StandardCharsets.UTF_8.name());
-        } catch (Exception e) {
-            LOGGER.warn("Failed to decode form field: {}", s, e);
-            return s;
-        }
-    }
-
-    private void parseBody(FullHttpRequest request) {
-        String contentType = request.headers().get(HttpHeaderNames.CONTENT_TYPE);
-        if (contentType == null) {
-            return;
-        }
-
-        ByteBuf originalContent = request.content();
-        ByteBuf copiedBuf = Unpooled.copiedBuffer(originalContent);
-
-        String bodyStr = copiedBuf.toString(StandardCharsets.UTF_8);
-
-        try {
-            if (contentType.contains("application/json")) {
-                parseJsonBody(bodyStr);
-            } else if (contentType.contains("application/x-www-form-urlencoded")
-                    || contentType.contains("multipart/form-data")) {
-                // Replace user-controlled URI with constant string during internal FullHttpRequest construction for
-                // decoding form parameters.
-                FullHttpRequest copiedRequest = new DefaultFullHttpRequest(
-                        request.protocolVersion(), request.method(), "/internal-safe-uri", copiedBuf);
-                // Copy headers to ensure proper multipart parsing
-                copiedRequest.headers().setAll(request.headers());
-                parseFormBody(copiedRequest);
-            }
-        } catch (Exception e) {
-            LOGGER.warn("Failed to parse HTTP body: {}", e.getMessage(), e);
-        }
-    }
-
-    private void parseJsonBody(String bodyStr) {
-        try {
-            JsonNode jsonNode = OBJECT_MAPPER.readTree(bodyStr);
-            if (jsonNode != null && jsonNode.isObject()) {
-                jsonNode.fields().forEachRemaining(e -> jsonParams
-                        .computeIfAbsent(e.getKey(), k -> new ArrayList<>())
-                        .add(e.getValue().asText()));
-            }
-        } catch (Exception e) {
-            LOGGER.warn("Failed to parse JSON body: {}", e.getMessage(), e);
-        }
-    }
-
-    private void parseFormBody(FullHttpRequest request) {
-        HttpPostRequestDecoder decoder = null;
-        try {
-            decoder = new HttpPostRequestDecoder(request);
-            for (InterfaceHttpData data : decoder.getBodyHttpDatas()) {
-                if (data.getHttpDataType() == InterfaceHttpData.HttpDataType.Attribute) {
-                    Attribute attr = (Attribute) data;
-                    formParams
-                            .computeIfAbsent(attr.getName(), k -> new ArrayList<>())
-                            .add(attr.getValue());
-                }
-            }
-        } catch (Exception e) {
-            LOGGER.warn("Failed to parse form body: {}", e.getMessage(), e);
-        } finally {
-            if (decoder != null) {
-                decoder.destroy();
-            }
-        }
+        headers.forEach(entry -> headerParams
+                .computeIfAbsent(entry.getKey().toString(), k -> new ArrayList<>())
+                .add(entry.getValue().toString()));
     }
 
     /**
@@ -210,5 +130,18 @@ public class HttpRequestParamWrapper {
                 (k, v) -> all.computeIfAbsent(k, key -> new ArrayList<>()).addAll(v));
 
         return all;
+    }
+
+    private void mergeParams(Map<String, List<String>> target, Map<String, List<String>> source) {
+        if (source == null || source.isEmpty()) {
+            return;
+        }
+        source.forEach((key, values) -> {
+            if (values == null || values.isEmpty()) {
+                return;
+            }
+            List<String> targetList = target.computeIfAbsent(key, k -> new ArrayList<>());
+            targetList.addAll(values);
+        });
     }
 }
