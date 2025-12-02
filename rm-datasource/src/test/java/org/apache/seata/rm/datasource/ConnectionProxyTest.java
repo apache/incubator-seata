@@ -17,6 +17,8 @@
 package org.apache.seata.rm.datasource;
 
 import org.apache.seata.common.LockStrategyMode;
+import org.apache.seata.common.json.JsonSerializer;
+import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.core.context.GlobalLockConfigHolder;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.exception.TransactionExceptionCode;
@@ -64,6 +66,8 @@ public class ConnectionProxyTest {
     private Field branchRollbackFlagField;
     private boolean originalBranchRollbackFlag;
 
+    private JsonSerializer jsonSerializer;
+
     @BeforeEach
     public void initBeforeEach() throws Exception {
         branchRollbackFlagField =
@@ -90,6 +94,7 @@ public class ConnectionProxyTest {
         DefaultResourceManager defaultResourceManager = DefaultResourceManager.get();
         Assertions.assertNotNull(defaultResourceManager);
         DefaultResourceManager.mockResourceManager(BranchType.AT, rm);
+        EnhancedServiceLoader.load(JsonSerializer.class, "jackson");
     }
 
     @org.junit.jupiter.api.AfterEach
