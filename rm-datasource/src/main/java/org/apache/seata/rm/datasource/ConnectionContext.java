@@ -16,10 +16,11 @@
  */
 package org.apache.seata.rm.datasource;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.seata.common.LockStrategyMode;
+import org.apache.seata.common.exception.JsonParseException;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
+import org.apache.seata.common.json.JsonSerializerFactory;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.core.context.GlobalLockConfigHolder;
@@ -304,8 +305,8 @@ public class ConnectionContext {
 
         if (!this.applicationData.isEmpty()) {
             try {
-                return MAPPER.writeValueAsString(this.applicationData);
-            } catch (JsonProcessingException e) {
+                return JsonSerializerFactory.getSerializer("jackson").toJSONString(this.applicationData);
+            } catch (JsonParseException e) {
                 throw new TransactionException(e.getMessage(), e);
             }
         }
