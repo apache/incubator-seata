@@ -66,8 +66,6 @@ public class ConnectionProxyTest {
     private Field branchRollbackFlagField;
     private boolean originalBranchRollbackFlag;
 
-    private JsonSerializer jsonSerializer;
-
     @BeforeEach
     public void initBeforeEach() throws Exception {
         branchRollbackFlagField =
@@ -94,7 +92,6 @@ public class ConnectionProxyTest {
         DefaultResourceManager defaultResourceManager = DefaultResourceManager.get();
         Assertions.assertNotNull(defaultResourceManager);
         DefaultResourceManager.mockResourceManager(BranchType.AT, rm);
-        EnhancedServiceLoader.load(JsonSerializer.class, "jackson");
     }
 
     @org.junit.jupiter.api.AfterEach

@@ -62,8 +62,7 @@ public class ConnectionContext {
 
     private String xid;
     private Long branchId;
-    private JsonSerializer jsonSerializer = JsonSerializerFactory.getSerializer("jackson");
-    ;
+    private final JsonSerializer jsonSerializer = JsonSerializerFactory.getSerializer("jackson");
     private boolean isGlobalLockRequire;
     private Savepoint currentSavepoint = DEFAULT_SAVEPOINT;
     private boolean autoCommitChanged;
@@ -305,7 +304,7 @@ public class ConnectionContext {
 
         if (!this.applicationData.isEmpty()) {
             try {
-                return jsonSerializer.toJSONString(this.applicationData);
+                return jsonSerializer.toJSONString(this.applicationData, true, false);
             } catch (JsonParseException e) {
                 throw new TransactionException(e.getMessage(), e);
             }
