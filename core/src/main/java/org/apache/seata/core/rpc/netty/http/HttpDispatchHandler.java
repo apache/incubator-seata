@@ -160,7 +160,8 @@ public class HttpDispatchHandler extends BaseHttpChannelHandler<HttpRequest> {
         }
     }
 
-    private void sendErrorResponse(ChannelHandlerContext ctx, HttpResponseStatus status, boolean keepAlive, HttpFilterContext<?> context) {
+    private void sendErrorResponse(
+            ChannelHandlerContext ctx, HttpResponseStatus status, boolean keepAlive, HttpFilterContext<?> context) {
         FullHttpResponse response = new DefaultFullHttpResponse(
                 HttpVersion.HTTP_1_1, status, Unpooled.wrappedBuffer(Unpooled.EMPTY_BUFFER));
         context.setResponse(response);
