@@ -16,6 +16,10 @@
  */
 package org.apache.seata.console.filter;
 
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.seata.console.config.WebSecurityConfig;
 import org.apache.seata.console.utils.JwtTokenUtils;
 import org.springframework.security.core.Authentication;
@@ -23,10 +27,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
@@ -35,7 +35,7 @@ import java.io.IOException;
  */
 public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
-    private JwtTokenUtils tokenProvider;
+    private final JwtTokenUtils tokenProvider;
 
     /**
      * Instantiates a new Jwt authentication token filter.
@@ -52,16 +52,16 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         String jwt = resolveToken(request);
 
         if (jwt != null
-                && !"".equals(jwt.trim())
+                && !jwt.trim().isEmpty()
                 && SecurityContextHolder.getContext().getAuthentication() == null) {
             if (this.tokenProvider.validateToken(jwt)) {
-                /**
-                 * get auth info
-                 */
+                /*
+                 get auth info
+                */
                 Authentication authentication = this.tokenProvider.getAuthentication(jwt);
-                /**
-                 * save user info to securityContext
-                 */
+                /*
+                 save user info to securityContext
+                */
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         }
