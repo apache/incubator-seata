@@ -26,6 +26,7 @@ import io.netty.handler.codec.http.HttpVersion;
 import org.apache.seata.core.exception.HttpRequestFilterException;
 import org.apache.seata.core.rpc.netty.http.filter.HttpRequestFilterChain;
 import org.apache.seata.core.rpc.netty.http.filter.HttpRequestFilterManager;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
@@ -56,13 +57,9 @@ class HttpDispatchHandlerTest {
     }
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws NoSuchMethodException {
         handler = new HttpDispatchHandler();
         channel = new EmbeddedChannel(handler);
-    }
-
-    @Test
-    void testGetRequestWithParameters() throws Exception {
         Method method = TestController.class.getMethod("handleRequest", String.class);
         ParamMetaData paramMetaData = new ParamMetaData();
         paramMetaData.setParamConvertType(ParamMetaData.ParamConvertType.REQUEST_PARAM);
@@ -76,11 +73,22 @@ class HttpDispatchHandlerTest {
         invocation.setParamMetaData(paramMetaDatas);
 
         ControllerManager.addHttpInvocation(invocation);
+    }
 
-        try (MockedStatic<HttpRequestFilterManager> mockedStatic = mockStatic(HttpRequestFilterManager.class)) {
-            HttpRequestFilterChain mockChain = mock(HttpRequestFilterChain.class);
-            doNothing().when(mockChain).doFilter(any());
-            mockedStatic.when(HttpRequestFilterManager::getFilterChain).thenReturn(mockChain);
+    @AfterEach
+    void after() throws Exception {
+        clearControllerManager();
+        Field field2 = HttpRequestFilterManager.class.getDeclaredField("initialized");
+        field2.setAccessible(true);
+        field2.set(null, false);
+    }
+
+    @Test
+    void testGetRequestWithParameters() throws Exception {
+
+        HttpRequestFilterManager.initializeFilters();
+        try {
+
             HttpRequest request =
                     new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/test?param=testValue");
 
@@ -136,9 +144,9 @@ class HttpDispatchHandlerTest {
 
         MockedStatic<HttpRequestFilterManager> mockedStatic = mockStatic(HttpRequestFilterManager.class);
         mockedStatic.when(HttpRequestFilterManager::getFilterChain).thenReturn(mockFilterChain);
-
+        mockedStatic.when(() -> HttpRequestFilterManager.getFilterChain(any())).thenReturn(mockFilterChain);
         try {
-            HttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/any");
+            HttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/test");
 
             channel.writeInbound(request);
 
@@ -157,7 +165,9 @@ class HttpDispatchHandlerTest {
                     .when(mockChain)
                     .doFilter(any());
             mockedStatic.when(HttpRequestFilterManager::getFilterChain).thenReturn(mockChain);
-
+            mockedStatic
+                    .when(() -> HttpRequestFilterManager.getFilterChain(any()))
+                    .thenReturn(mockChain);
             HttpRequest request = new DefaultFullHttpRequest(
                     HttpVersion.HTTP_1_1, HttpMethod.GET, "/test?param=<script>alert(1)</script>");
 
@@ -175,7 +185,9 @@ class HttpDispatchHandlerTest {
                     .when(mockChain)
                     .doFilter(any());
             mockedStatic.when(HttpRequestFilterManager::getFilterChain).thenReturn(mockChain);
-
+            mockedStatic
+                    .when(() -> HttpRequestFilterManager.getFilterChain(any()))
+                    .thenReturn(mockChain);
             HttpRequest request = new DefaultFullHttpRequest(
                     HttpVersion.HTTP_1_1, HttpMethod.GET, "/test?param=javascript:alert('XSS')");
 
@@ -193,7 +205,9 @@ class HttpDispatchHandlerTest {
                     .when(mockChain)
                     .doFilter(any());
             mockedStatic.when(HttpRequestFilterManager::getFilterChain).thenReturn(mockChain);
-
+            mockedStatic
+                    .when(() -> HttpRequestFilterManager.getFilterChain(any()))
+                    .thenReturn(mockChain);
             HttpRequest request =
                     new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/test?param=onload=alert(1)");
 
@@ -218,11 +232,8 @@ class HttpDispatchHandlerTest {
         invocation.setParamMetaData(paramMetaDatas);
 
         ControllerManager.addHttpInvocation(invocation);
-
-        try (MockedStatic<HttpRequestFilterManager> mockedStatic = mockStatic(HttpRequestFilterManager.class)) {
-            HttpRequestFilterChain mockChain = mock(HttpRequestFilterChain.class);
-            doNothing().when(mockChain).doFilter(any());
-            mockedStatic.when(HttpRequestFilterManager::getFilterChain).thenReturn(mockChain);
+        HttpRequestFilterManager.initializeFilters();
+        try {
 
             String body = "param=postValue";
             DefaultFullHttpRequest request = new DefaultFullHttpRequest(
@@ -259,11 +270,8 @@ class HttpDispatchHandlerTest {
         invocation.setParamMetaData(paramMetaDatas);
 
         ControllerManager.addHttpInvocation(invocation);
-
-        try (MockedStatic<HttpRequestFilterManager> mockedStatic = mockStatic(HttpRequestFilterManager.class)) {
-            HttpRequestFilterChain mockChain = mock(HttpRequestFilterChain.class);
-            doNothing().when(mockChain).doFilter(any());
-            mockedStatic.when(HttpRequestFilterManager::getFilterChain).thenReturn(mockChain);
+        HttpRequestFilterManager.initializeFilters();
+        try {
 
             HttpRequest request =
                     new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/testClose?param=closeValue");
@@ -284,8 +292,10 @@ class HttpDispatchHandlerTest {
             HttpRequestFilterChain mockChain = mock(HttpRequestFilterChain.class);
             doThrow(new RuntimeException("Unexpected error")).when(mockChain).doFilter(any());
             mockedStatic.when(HttpRequestFilterManager::getFilterChain).thenReturn(mockChain);
-
-            HttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/any");
+            mockedStatic
+                    .when(() -> HttpRequestFilterManager.getFilterChain(any()))
+                    .thenReturn(mockChain);
+            HttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/test");
 
             channel.writeInbound(request);
 
