@@ -16,3 +16,4 @@
 #
 org.apache.seata.common.json.impl.FastjsonJsonSerializer
 org.apache.seata.common.json.impl.JacksonJsonSerializer
+org.apache.seata.common.json.impl.GsonJsonSerializer
