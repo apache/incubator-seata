@@ -16,6 +16,9 @@
  */
 package org.apache.seata.namingserver.manager;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.servlet.AsyncContext;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.seata.namingserver.listener.ClusterChangeEvent;
 import org.apache.seata.namingserver.listener.ClusterChangeListener;
 import org.apache.seata.namingserver.listener.Watcher;
@@ -27,9 +30,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import javax.servlet.AsyncContext;
-import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
