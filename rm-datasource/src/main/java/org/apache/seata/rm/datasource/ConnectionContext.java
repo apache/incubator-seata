@@ -16,7 +16,6 @@
  */
 package org.apache.seata.rm.datasource;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.seata.common.LockStrategyMode;
 import org.apache.seata.common.exception.JsonParseException;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
@@ -59,8 +58,6 @@ public class ConnectionContext {
             return "DEFAULT_SEATA_SAVEPOINT";
         }
     };
-
-    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private String xid;
     private Long branchId;
