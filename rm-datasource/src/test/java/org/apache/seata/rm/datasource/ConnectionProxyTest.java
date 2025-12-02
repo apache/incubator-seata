@@ -17,8 +17,6 @@
 package org.apache.seata.rm.datasource;
 
 import org.apache.seata.common.LockStrategyMode;
-import org.apache.seata.common.json.JsonSerializer;
-import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.core.context.GlobalLockConfigHolder;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.exception.TransactionExceptionCode;
