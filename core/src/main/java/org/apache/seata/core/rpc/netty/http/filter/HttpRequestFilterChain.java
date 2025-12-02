@@ -32,22 +32,16 @@ public class HttpRequestFilterChain {
     }
 
     public void doFilter(HttpFilterContext<?> httpFilterContext) throws HttpRequestFilterException {
-        try {
-            if (currentIndex < filters.size()) {
-                HttpRequestFilter filter = filters.get(currentIndex++);
-                filter.doFilter(httpFilterContext, this);
-            } else {
-                // Execute final action
-                if (finalAction != null) {
-                    finalAction.accept(httpFilterContext);
-                }
-                // Reset for next request
-                currentIndex = 0;
+        if (currentIndex < filters.size()) {
+            HttpRequestFilter filter = filters.get(currentIndex++);
+            filter.doFilter(httpFilterContext, this);
+        } else {
+            // Execute final action
+            if (finalAction != null) {
+                finalAction.accept(httpFilterContext);
             }
-        } finally {
-            if (currentIndex == 0) {
-                HttpFilterContext.clearCurrentContext();
-            }
+            // Reset for next request
+            currentIndex = 0;
         }
     }
 

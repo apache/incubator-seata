@@ -75,7 +75,7 @@ public class HttpDispatchHandler extends BaseHttpChannelHandler<HttpRequest> {
         HttpInvocation httpInvocation = ControllerManager.getHttpInvocation(path);
 
         if (httpInvocation == null) {
-            sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND, false);
+            sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND, false, context);
             return;
         }
 
@@ -95,22 +95,25 @@ public class HttpDispatchHandler extends BaseHttpChannelHandler<HttpRequest> {
                     httpInvocation.getParamMetaData(), httpInvocation.getMethod(), requestDataNode, context);
         } catch (Exception e) {
             LOGGER.error("Error parsing request arguments: {}", e.getMessage(), e);
-            sendErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST, false);
+            sendErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST, false, context);
             return;
         }
         context.setAttribute("args", args);
 
         // Execute filter chain in HTTP thread pool
         HttpRequestFilterChain filterChain = HttpRequestFilterManager.getFilterChain(this::executeFinalAction);
+        HttpFilterContext.setCurrentContext(context);
         HTTP_HANDLER_THREADS.execute(() -> {
             try {
                 filterChain.doFilter(context);
             } catch (HttpRequestFilterException e) {
                 LOGGER.warn("Request blocked by filter: {}", e.getMessage());
-                sendErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST, false);
+                sendErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST, false, context);
             } catch (Exception e) {
                 LOGGER.error("Unexpected error during request processing: {}", e.getMessage(), e);
-                sendErrorResponse(ctx, HttpResponseStatus.INTERNAL_SERVER_ERROR, false);
+                sendErrorResponse(ctx, HttpResponseStatus.INTERNAL_SERVER_ERROR, false, context);
+            } finally {
+                HttpFilterContext.clearCurrentContext();
             }
         });
     }
@@ -127,17 +130,17 @@ public class HttpDispatchHandler extends BaseHttpChannelHandler<HttpRequest> {
                 return;
             }
 
-            sendResponse(context.getContext(), context.isKeepAlive(), result);
+            sendResponse(context.getContext(), context.isKeepAlive(), result, context);
         } catch (IllegalArgumentException e) {
             LOGGER.error("Illegal argument exception: {}", e.getMessage(), e);
-            sendErrorResponse(context.getContext(), HttpResponseStatus.BAD_REQUEST, false);
+            sendErrorResponse(context.getContext(), HttpResponseStatus.BAD_REQUEST, false, context);
         } catch (Exception e) {
             LOGGER.error("Exception occurred while processing HTTP request: {}", e.getMessage(), e);
-            sendErrorResponse(context.getContext(), HttpResponseStatus.INTERNAL_SERVER_ERROR, false);
+            sendErrorResponse(context.getContext(), HttpResponseStatus.INTERNAL_SERVER_ERROR, false, context);
         }
     }
 
-    private void sendResponse(ChannelHandlerContext ctx, boolean keepAlive, Object result)
+    private void sendResponse(ChannelHandlerContext ctx, boolean keepAlive, Object result, HttpFilterContext<?> context)
             throws JsonProcessingException {
         FullHttpResponse response;
         if (result != null) {
@@ -149,10 +152,7 @@ public class HttpDispatchHandler extends BaseHttpChannelHandler<HttpRequest> {
             response = new DefaultFullHttpResponse(
                     HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.wrappedBuffer(Unpooled.EMPTY_BUFFER));
         }
-        HttpFilterContext<?> currentContext = HttpFilterContext.getCurrentContext();
-        if (currentContext != null) {
-            currentContext.setResponse(response);
-        }
+        context.setResponse(response);
         if (!keepAlive) {
             ctx.writeAndFlush(response).addListeners(ChannelFutureListener.CLOSE);
         } else {
@@ -160,13 +160,10 @@ public class HttpDispatchHandler extends BaseHttpChannelHandler<HttpRequest> {
         }
     }
 
-    private void sendErrorResponse(ChannelHandlerContext ctx, HttpResponseStatus status, boolean keepAlive) {
+    private void sendErrorResponse(ChannelHandlerContext ctx, HttpResponseStatus status, boolean keepAlive, HttpFilterContext<?> context) {
         FullHttpResponse response = new DefaultFullHttpResponse(
                 HttpVersion.HTTP_1_1, status, Unpooled.wrappedBuffer(Unpooled.EMPTY_BUFFER));
-        HttpFilterContext<?> currentContext = HttpFilterContext.getCurrentContext();
-        if (currentContext != null) {
-            currentContext.setResponse(response);
-        }
+        context.setResponse(response);
         if (!keepAlive) {
             ctx.writeAndFlush(response).addListeners(ChannelFutureListener.CLOSE);
         } else {

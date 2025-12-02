@@ -39,12 +39,15 @@ public class HttpFilterContext<T> extends HttpContext<T> {
             Supplier<HttpRequestParamWrapper> paramWrapperSupplier) {
         super(request, channelHandlerContext, keepAlive, httpVersion);
         this.paramWrapperSupplier = paramWrapperSupplier;
-        CURRENT_CONTEXT.set(this);
     }
 
     @SuppressWarnings("unchecked")
     public static <T> HttpFilterContext<T> getCurrentContext() {
         return (HttpFilterContext<T>) CURRENT_CONTEXT.get();
+    }
+
+    public static void setCurrentContext(HttpFilterContext<?> context) {
+        CURRENT_CONTEXT.set(context);
     }
 
     public static void clearCurrentContext() {
