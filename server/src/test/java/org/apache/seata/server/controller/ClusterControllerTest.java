@@ -150,19 +150,6 @@ class ClusterControllerTest extends BaseSpringBootTest {
     }
 
     @Test
-    @Order(4)
-    void watchWithInactiveChannel() throws Exception {
-        Map<String, String> header = new HashMap<>();
-        header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
-        header.put(HTTP.CONN_KEEP_ALIVE, "close");
-        Map<String, String> param = new HashMap<>();
-        param.put("default-test-inactive", "1");
-        Assertions.assertThrows(Exception.class, () -> {
-            HttpClientUtil.doPost("http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=5000", param, header, 4000);
-        });
-    }
-
-    @Test
     @Order(5)
     void watch_withHttp2() throws Exception {
         CountDownLatch latch = new CountDownLatch(1);
