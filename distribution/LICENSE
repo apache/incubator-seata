@@ -372,7 +372,7 @@ Apache-2.0 licenses
     org.jetbrains.kotlinx:kotlinx-coroutines-core 1.7.3 Apache-2.0
     org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm 1.7.3 Apache-2.0
     org.jetbrains:annotations 13.0 Apache-2.0
-    org.lz4:lz4-java 1.7.1 Apache-2.0
+    at.yawk.lz4:lz4-java 1.9.0 Apache-2.0
     org.objenesis:objenesis 3.3 Apache-2.0
     org.objenesis:objenesis 3.2 Apache-2.0
     org.springframework.boot:spring-boot 2.7.18 Apache-2.0
