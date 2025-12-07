@@ -21,11 +21,7 @@ import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.core.protocol.MessageType;
 import org.apache.seata.core.rpc.ShutdownHook;
 import org.apache.seata.core.rpc.TransactionMessageHandler;
-import org.apache.seata.core.rpc.processor.server.RegRmProcessor;
-import org.apache.seata.core.rpc.processor.server.RegTmProcessor;
-import org.apache.seata.core.rpc.processor.server.ServerHeartbeatProcessor;
-import org.apache.seata.core.rpc.processor.server.ServerOnRequestProcessor;
-import org.apache.seata.core.rpc.processor.server.ServerOnResponseProcessor;
+import org.apache.seata.core.rpc.processor.server.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -127,6 +123,10 @@ public class NettyRemotingServer extends AbstractNettyRemotingServer {
         // 5. registry heartbeat message processor
         ServerHeartbeatProcessor heartbeatMessageProcessor = new ServerHeartbeatProcessor(this);
         super.registerProcessor(MessageType.TYPE_HEARTBEAT_MSG, heartbeatMessageProcessor, null);
+        // 6. registry connection pool metrics processor
+        ServerConnectionPoolMetricsProcessor connectionPoolMetricsProcessor =
+                new ServerConnectionPoolMetricsProcessor();
+        super.registerProcessor(MessageType.TYPE_CONNECTION_POOL_METRICS, connectionPoolMetricsProcessor, null);
     }
 
     @Override
