@@ -72,7 +72,7 @@
         <bucket4j.version>8.1.0</bucket4j.version>
         <commons-compress.version>1.27.1</commons-compress.version>
         <ant.version>1.10.12</ant.version>
-        <lz4.version>1.7.1</lz4.version>
+        <lz4.version>1.9.0</lz4.version>
         <jraft.version>1.3.14</jraft.version>
         <snakeyaml.version>2.0</snakeyaml.version>
         <netty.version>4.1.101.Final</netty.version>
@@ -696,7 +696,7 @@
                 <version>${ant.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.lz4</groupId>
+                <groupId>at.yawk.lz4</groupId>
                 <artifactId>lz4-java</artifactId>
                 <version>${lz4.version}</version>
             </dependency>

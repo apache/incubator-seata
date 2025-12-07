@@ -23,7 +23,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.netty.handler.codec.http.QueryStringDecoder;
 import io.netty.handler.codec.http2.DefaultHttp2DataFrame;
 import io.netty.handler.codec.http2.DefaultHttp2Headers;
 import io.netty.handler.codec.http2.DefaultHttp2HeadersFrame;
@@ -33,16 +32,21 @@ import io.netty.handler.codec.http2.Http2HeadersFrame;
 import io.netty.handler.codec.http2.Http2StreamFrame;
 import org.apache.seata.common.rpc.http.HttpContext;
 import org.apache.seata.core.exception.HttpRequestFilterException;
+import org.apache.seata.core.rpc.netty.http.RequestParseUtils.BodyParseResult;
+import org.apache.seata.core.rpc.netty.http.RequestParseUtils.QueryParseResult;
 import org.apache.seata.core.rpc.netty.http.filter.HttpFilterContext;
+import org.apache.seata.core.rpc.netty.http.filter.HttpRequestFilterChain;
+import org.apache.seata.core.rpc.netty.http.filter.HttpRequestFilterManager;
 import org.apache.seata.core.rpc.netty.http.filter.HttpRequestParamWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
-import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import static org.apache.seata.core.protocol.ProtocolConstants.MAX_FRAME_LENGTH;
 
 /**
  * The http2 http handler.
@@ -68,6 +72,15 @@ public class Http2HttpHandler extends BaseHttpChannelHandler<Http2StreamFrame> {
                 }
             } else if (msg instanceof Http2DataFrame) {
                 Http2DataFrame dataFrame = (Http2DataFrame) msg;
+                if (dataFrame.content().readableBytes() > MAX_FRAME_LENGTH) {
+                    LOGGER.error(
+                            "Packet size {} exceeds maximum {}, closing connection from {}",
+                            dataFrame.content().readableBytes(),
+                            MAX_FRAME_LENGTH,
+                            ctx.channel().remoteAddress());
+                    ctx.close();
+                    return;
+                }
                 bodyBuffer.writeBytes(dataFrame.content());
                 if (dataFrame.isEndStream()) {
                     handleRequest(ctx);
@@ -91,61 +104,77 @@ public class Http2HttpHandler extends BaseHttpChannelHandler<Http2StreamFrame> {
             HttpMethod method = HttpMethod.valueOf(http2Headers.method().toString());
             String path = http2Headers.path().toString();
             String body = bodyBuffer != null ? bodyBuffer.toString(StandardCharsets.UTF_8) : "";
-            SimpleHttp2Request request = new SimpleHttp2Request(method, path, http2Headers, body);
 
-            // After receiving the complete request, the filtering logic is executed
-            HttpFilterContext<SimpleHttp2Request> context =
-                    new HttpFilterContext<>(request, () -> new HttpRequestParamWrapper(request));
-            doFilterInternal(context);
+            Map<String, List<String>> headerParams = RequestParseUtils.copyHeaders(http2Headers);
+            QueryParseResult queryParseResult = RequestParseUtils.parseQuery(path);
+            String requestPath = queryParseResult.getPath();
+            Map<String, List<String>> queryParams = queryParseResult.getParameters();
+            BodyParseResult bodyParseResult = RequestParseUtils.parseBody(OBJECT_MAPPER, body, http2Headers);
 
-            // reuse HttpDispatchHandler logic
-            boolean keepAlive = true; // In HTTP/2, connections are persistent by default
-            QueryStringDecoder queryStringDecoder = new QueryStringDecoder(request.getPath());
-            String requestPath = queryStringDecoder.path();
+            SimpleHttp2Request request = new SimpleHttp2Request(
+                    method,
+                    path,
+                    http2Headers,
+                    body,
+                    queryParams,
+                    bodyParseResult.getFormParams(),
+                    headerParams,
+                    bodyParseResult.getJsonParams(),
+                    bodyParseResult.getBodyNode());
+
+            HttpFilterContext<SimpleHttp2Request> context = new HttpFilterContext<>(
+                    request,
+                    ctx,
+                    true,
+                    HttpContext.HTTP_2_0,
+                    () -> new HttpRequestParamWrapper(
+                            queryParams,
+                            bodyParseResult.getFormParams(),
+                            headerParams,
+                            bodyParseResult.getJsonParams()));
+
+            // Parse request
+            // queryStringDecoder already computed path/params above
             HttpInvocation httpInvocation = ControllerManager.getHttpInvocation(requestPath);
             if (httpInvocation == null) {
                 sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND);
                 return;
             }
-            HttpContext<SimpleHttp2Request> httpContext =
-                    new HttpContext<>(request, ctx, keepAlive, HttpContext.HTTP_2_0);
+
+            context.setAttribute("httpInvocation", httpInvocation);
+            context.setAttribute("httpController", httpInvocation.getController());
+            context.setAttribute("handleMethod", httpInvocation.getMethod());
+
             ObjectNode requestDataNode = OBJECT_MAPPER.createObjectNode();
-            requestDataNode.set("param", ParameterParser.convertParamMap(queryStringDecoder.parameters()));
-            if (request.getMethod() == HttpMethod.POST
-                    && request.getBody() != null
-                    && !request.getBody().isEmpty()) {
-                CharSequence contentTypeSeq = request.getHeaders().get(HttpHeaderNames.CONTENT_TYPE);
-                String contentType = contentTypeSeq != null ? contentTypeSeq.toString() : "";
-                try {
-                    if (contentType.contains("application/json")) {
-                        ObjectNode bodyDataNode = (ObjectNode) OBJECT_MAPPER.readTree(request.getBody());
-                        requestDataNode.set("body", bodyDataNode);
-                    } else if (contentType.contains("application/x-www-form-urlencoded")) {
-                        Map<String, String> formParams = new HashMap<>();
-                        String[] pairs = request.getBody().split("&");
-                        for (String pair : pairs) {
-                            String[] kv = pair.split("=", 2);
-                            if (kv.length == 2) {
-                                String key = URLDecoder.decode(kv[0], StandardCharsets.UTF_8.name());
-                                String value = URLDecoder.decode(kv[1], StandardCharsets.UTF_8.name());
-                                formParams.put(key, value);
-                            }
-                        }
-                        ObjectNode formDataNode = OBJECT_MAPPER.valueToTree(formParams);
-                        requestDataNode.set("body", formDataNode);
-                    }
-                } catch (Exception e) {
-                    LOGGER.warn("Failed to parse http2 body: {}", e.getMessage());
-                }
+            requestDataNode.set("param", ParameterParser.convertParamMap(queryParams));
+            if (request.getMethod() == HttpMethod.POST && request.getBodyNode() != null) {
+                requestDataNode.set("body", request.getBodyNode());
             }
-            Object httpController = httpInvocation.getController();
             Method handleMethod = httpInvocation.getMethod();
-            Object[] args = ParameterParser.getArgValues(
-                    httpInvocation.getParamMetaData(), handleMethod, requestDataNode, httpContext);
-            handle(httpController, handleMethod, args, ctx, httpContext);
-        } catch (HttpRequestFilterException e) {
-            LOGGER.warn("Request blocked by filter while processing HTTP2 request: {}", e.getMessage());
-            sendErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST);
+            Object[] args;
+            try {
+                args = ParameterParser.getArgValues(
+                        httpInvocation.getParamMetaData(), handleMethod, requestDataNode, context);
+            } catch (Exception e) {
+                LOGGER.error("Error parsing request arguments for HTTP/2: {}", e.getMessage(), e);
+                sendErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST);
+                return;
+            }
+            context.setAttribute("args", args);
+
+            // Execute filter chain in HTTP thread pool
+            HttpRequestFilterChain filterChain = HttpRequestFilterManager.getFilterChain(this::executeFinalAction);
+            HTTP_HANDLER_THREADS.execute(() -> {
+                try {
+                    filterChain.doFilter(context);
+                } catch (HttpRequestFilterException e) {
+                    LOGGER.warn("Request blocked by filter while processing HTTP2 request: {}", e.getMessage());
+                    sendErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST);
+                } catch (Exception e) {
+                    LOGGER.error("Exception occurred while processing HTTP2 request: {}", e.getMessage(), e);
+                    sendErrorResponse(ctx, HttpResponseStatus.INTERNAL_SERVER_ERROR);
+                }
+            });
         } catch (Exception e) {
             LOGGER.error("Exception occurred while processing HTTP2 request: {}", e.getMessage(), e);
             sendErrorResponse(ctx, HttpResponseStatus.INTERNAL_SERVER_ERROR);
@@ -159,27 +188,24 @@ public class Http2HttpHandler extends BaseHttpChannelHandler<Http2StreamFrame> {
         }
     }
 
-    private void handle(
-            Object httpController,
-            Method handleMethod,
-            Object[] args,
-            ChannelHandlerContext ctx,
-            HttpContext<SimpleHttp2Request> httpContext) {
-        HTTP_HANDLER_THREADS.execute(() -> {
-            Object result;
-            try {
-                result = handleMethod.invoke(httpController, args);
-                if (!httpContext.isAsync()) {
-                    sendResponse(ctx, result);
-                }
-            } catch (IllegalAccessException e) {
-                LOGGER.error("Illegal argument exception: {}", e.getMessage(), e);
-                sendErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST);
-            } catch (Exception e) {
-                LOGGER.error("Exception occurred while processing HTTP2 request: {}", e.getMessage(), e);
-                sendErrorResponse(ctx, HttpResponseStatus.INTERNAL_SERVER_ERROR);
+    private void executeFinalAction(HttpFilterContext<?> context) {
+        HttpInvocation httpInvocation = context.getAttribute("httpInvocation");
+        Object httpController = context.getAttribute("httpController");
+        Method handleMethod = context.getAttribute("handleMethod");
+        Object[] args = context.getAttribute("args");
+
+        try {
+            Object result = handleMethod.invoke(httpController, args);
+            if (!context.isAsync()) {
+                sendResponse(context.getContext(), result);
             }
-        });
+        } catch (IllegalAccessException e) {
+            LOGGER.error("Illegal argument exception: {}", e.getMessage(), e);
+            sendErrorResponse(context.getContext(), HttpResponseStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            LOGGER.error("Exception occurred while processing HTTP2 request: {}", e.getMessage(), e);
+            sendErrorResponse(context.getContext(), HttpResponseStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     private void sendResponse(ChannelHandlerContext ctx, Object result) throws Exception {
