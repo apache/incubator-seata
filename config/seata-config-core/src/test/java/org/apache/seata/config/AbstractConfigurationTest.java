@@ -145,18 +145,16 @@ class AbstractConfigurationTest {
         Assertions.assertEquals(defaultDuration, value);
     }
 
-    @Test
-    void testGetConfigWithNull() {
-        String value = configuration.getConfig("test.nonexistent.key");
-        // due to configuration cache, may return default value instead of null
-        Assertions.assertNotNull(value);
-    }
 
     @Test
     void testGetConfigWithDefaultValue() {
         String defaultValue = "default-value";
         String value = configuration.getConfig("test.nonexistent.key", defaultValue);
         Assertions.assertEquals(defaultValue, value);
+        
+        String valueCached = configuration.getConfig("test.nonexistent.key");
+        // due to configuration cache, may return default value instead of null
+        Assertions.assertNotNull(valueCached);
     }
 
     @Test
