@@ -29,12 +29,11 @@ public class OracleLockStoreSql extends AbstractLockStoreSql {
     /**
      * The constant INSERT_LOCK_SQL_ORACLE.
      */
-    private static final String INSERT_LOCK_SQL_ORACLE = "insert into " + LOCK_TABLE_PLACE_HOLD + "(" + ALL_COLUMNS + ")"
-        + " values (?, ?, ?, ?, ?, ?, ?, sysdate, sysdate, ?)";
+    private static final String INSERT_LOCK_SQL_ORACLE = "insert into " + LOCK_TABLE_PLACE_HOLD + "(" + ALL_COLUMNS
+            + ")" + " values (?, ?, ?, ?, ?, ?, ?, sysdate, sysdate, ?)";
 
     @Override
     public String getInsertLockSQL(String lockTable) {
         return INSERT_LOCK_SQL_ORACLE.replace(LOCK_TABLE_PLACE_HOLD, lockTable);
     }
-
 }

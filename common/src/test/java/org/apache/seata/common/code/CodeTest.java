@@ -34,7 +34,7 @@ public class CodeTest {
                 Arguments.of(Code.SUCCESS, "ok"), // Test case for SUCCESS
                 Arguments.of(Code.ERROR, "Server error"), // Test case for ERROR
                 Arguments.of(Code.LOGIN_FAILED, "Login failed") // Test case for LOGIN_FAILED
-        );
+                );
     }
 
     @ParameterizedTest
@@ -49,12 +49,16 @@ public class CodeTest {
         assertNull(Code.getErrorMsg("404"));
     }
 
-    @Test
-    public void testSetCodeAndMsgUpdatesValuesCorrectly() {
-        // Test case to check if setCode and setMsg are working as expected
-        Code.SUCCESS.setCode("201");
-        Code.SUCCESS.setMsg("Created");
-        assertEquals("201", Code.SUCCESS.getCode());
-        assertEquals("Created", Code.SUCCESS.getMsg());
+    static Stream<Arguments> codeSetterProvider() {
+        return Stream.of(Arguments.of(Code.SUCCESS, "201", "Created"));
+    }
+
+    @ParameterizedTest
+    @MethodSource("codeSetterProvider")
+    public void testSetCodeAndMsgUpdatesValuesCorrectly(Code code, String newCode, String newMsg) {
+        code.setCode(newCode);
+        code.setMsg(newMsg);
+        assertEquals(newCode, code.getCode());
+        assertEquals(newMsg, code.getMsg());
     }
 }

@@ -16,9 +16,6 @@
  */
 package org.apache.seata.saga.engine.impl;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 import org.apache.seata.saga.engine.config.AbstractStateMachineConfig;
 import org.apache.seata.saga.engine.expression.ExpressionFactoryManager;
 import org.apache.seata.saga.engine.expression.spel.SpringELExpressionFactory;
@@ -31,12 +28,16 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.io.Resource;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 /**
  * State machine configuration base spring. In spring context,some uses will be combined with the spring framework.
  * such as expression evaluation add spring el impl, serviceInvoker add spring bean Invoker impl, etc ...
  *
  */
-public class DefaultStateMachineConfig extends AbstractStateMachineConfig implements ApplicationContextAware, InitializingBean {
+public class DefaultStateMachineConfig extends AbstractStateMachineConfig
+        implements ApplicationContextAware, InitializingBean {
 
     private ApplicationContext applicationContext;
 
@@ -69,7 +70,8 @@ public class DefaultStateMachineConfig extends AbstractStateMachineConfig implem
     private void registerSpringElExpressionFactoryManager() {
         ExpressionFactoryManager expressionFactoryManager = getExpressionFactoryManager();
         SpringELExpressionFactory springELExpressionFactory = new SpringELExpressionFactory(getApplicationContext());
-        expressionFactoryManager.putExpressionFactory(ExpressionFactoryManager.DEFAULT_EXPRESSION_TYPE, springELExpressionFactory);
+        expressionFactoryManager.putExpressionFactory(
+                ExpressionFactoryManager.DEFAULT_EXPRESSION_TYPE, springELExpressionFactory);
     }
 
     private void registerSpringBeanServiceInvoker() {

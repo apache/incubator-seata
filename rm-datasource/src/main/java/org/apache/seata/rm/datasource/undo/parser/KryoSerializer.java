@@ -24,7 +24,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Objects;
 
-
 public class KryoSerializer {
 
     private final Kryo kryo;
@@ -51,5 +50,4 @@ public class KryoSerializer {
         input.close();
         return (T) kryo.readClassAndObject(input);
     }
-
 }

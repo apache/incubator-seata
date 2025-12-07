@@ -19,7 +19,6 @@ package org.apache.seata.common.util;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-
 public class NumberUtilsTest {
 
     @Test
@@ -35,5 +34,38 @@ public class NumberUtilsTest {
     @Test
     public void testToInReturnParsedValue() {
         Assertions.assertEquals(10, NumberUtils.toInt("10", 9));
+    }
+
+    @Test
+    public void testToLongWithDefaultValue() {
+        // Test with null input
+        Assertions.assertEquals(Long.valueOf(10L), NumberUtils.toLong(null, 10L));
+
+        // Test with invalid format
+        Assertions.assertEquals(Long.valueOf(10L), NumberUtils.toLong("invalid", 10L));
+
+        // Test with valid format
+        Assertions.assertEquals(Long.valueOf(20L), NumberUtils.toLong("20", 10L));
+    }
+
+    @Test
+    public void testToLongWithoutDefaultValue() {
+        // Test with null input
+        Assertions.assertNull(NumberUtils.toLong(null));
+
+        // Test with blank input
+        Assertions.assertNull(NumberUtils.toLong(""));
+        Assertions.assertNull(NumberUtils.toLong("   "));
+
+        // Test with valid format
+        Assertions.assertEquals(Long.valueOf(20L), NumberUtils.toLong("20"));
+    }
+
+    @Test
+    public void testToLongWithInvalidFormatThrowsException() {
+        // Test that invalid format throws NumberFormatException
+        Assertions.assertThrows(NumberFormatException.class, () -> {
+            NumberUtils.toLong("invalid");
+        });
     }
 }

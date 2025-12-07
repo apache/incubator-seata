@@ -27,6 +27,7 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.epoll.Epoll;
 import io.netty.channel.epoll.EpollChannelOption;
 import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollMode;
@@ -36,8 +37,6 @@ import io.netty.handler.codec.http2.Http2FrameCodecBuilder;
 import io.netty.handler.codec.http2.Http2MultiplexHandler;
 import io.netty.handler.codec.http2.Http2StreamChannelBootstrap;
 import io.netty.handler.timeout.IdleStateHandler;
-import io.netty.util.concurrent.DefaultEventExecutorGroup;
-import io.netty.util.concurrent.EventExecutorGroup;
 import io.netty.util.internal.PlatformDependent;
 import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.common.thread.NamedThreadFactory;
@@ -69,12 +68,9 @@ public class NettyClientBootstrap implements RemotingBootstrap {
     private final AtomicBoolean initialized = new AtomicBoolean(false);
     private final NettyPoolKey.TransactionRole transactionRole;
     private final EventLoopGroup eventLoopGroupWorker;
-
-    private EventExecutorGroup defaultEventExecutorGroup;
     private ChannelHandler[] channelHandlers;
 
-    public NettyClientBootstrap(NettyClientConfig nettyClientConfig, final EventExecutorGroup eventExecutorGroup,
-                                NettyPoolKey.TransactionRole transactionRole) {
+    public NettyClientBootstrap(NettyClientConfig nettyClientConfig, NettyPoolKey.TransactionRole transactionRole) {
         if (nettyClientConfig == null) {
             nettyClientConfig = new NettyClientConfig();
             if (LOGGER.isInfoEnabled()) {
@@ -94,7 +90,6 @@ public class NettyClientBootstrap implements RemotingBootstrap {
         } else {
             eventLoopGroupWorker = createEventLoopGroupWorker(selectorThreadSizeThreadSize);
         }
-        this.defaultEventExecutorGroup = eventExecutorGroup;
     }
 
     /**
@@ -122,49 +117,42 @@ public class NettyClientBootstrap implements RemotingBootstrap {
 
     @Override
     public void start() {
-        if (this.defaultEventExecutorGroup == null) {
-            this.defaultEventExecutorGroup = new DefaultEventExecutorGroup(nettyClientConfig.getClientWorkerThreads(),
-                new NamedThreadFactory(getThreadPrefix(nettyClientConfig.getClientWorkerThreadPrefix()),
-                    nettyClientConfig.getClientWorkerThreads()));
-        }
-        this.bootstrap.group(eventLoopGroupWorker).channel(
-            nettyClientConfig.getClientChannelClazz()).option(
-            ChannelOption.TCP_NODELAY, true).option(ChannelOption.SO_KEEPALIVE, true).option(
-            ChannelOption.CONNECT_TIMEOUT_MILLIS, nettyClientConfig.getConnectTimeoutMillis()).option(
-            ChannelOption.SO_SNDBUF, nettyClientConfig.getClientSocketSndBufSize()).option(ChannelOption.SO_RCVBUF,
-            nettyClientConfig.getClientSocketRcvBufSize());
+        this.bootstrap
+                .group(eventLoopGroupWorker)
+                .channel(nettyClientConfig.getClientChannelClazz())
+                .option(ChannelOption.TCP_NODELAY, true)
+                .option(ChannelOption.SO_KEEPALIVE, true)
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, nettyClientConfig.getConnectTimeoutMillis())
+                .option(ChannelOption.SO_SNDBUF, nettyClientConfig.getClientSocketSndBufSize())
+                .option(ChannelOption.SO_RCVBUF, nettyClientConfig.getClientSocketRcvBufSize());
 
-        if (nettyClientConfig.enableNative()) {
-            if (PlatformDependent.isOsx()) {
-                if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("client run on macOS");
-                }
-            } else {
-                bootstrap.option(EpollChannelOption.EPOLL_MODE, EpollMode.EDGE_TRIGGERED)
+        if (PlatformDependent.isWindows() || PlatformDependent.isOsx()) {
+            LOGGER.info("client run on MacOS/Windows, fallback to NIO.");
+        } else if (Epoll.isAvailable()) {
+            bootstrap
+                    .option(EpollChannelOption.EPOLL_MODE, EpollMode.EDGE_TRIGGERED)
                     .option(EpollChannelOption.TCP_QUICKACK, true);
-            }
         }
 
-        bootstrap.handler(
-            new ChannelInitializer<SocketChannel>() {
-                @Override
-                public void initChannel(SocketChannel ch) {
-                    ChannelPipeline pipeline = ch.pipeline();
-                    if (nettyClientConfig.getProtocol().equals(Protocol.GRPC.value)) {
-                        pipeline.addLast(Http2FrameCodecBuilder.forClient().build())
-                                .addLast(new Http2MultiplexHandler(new ChannelDuplexHandler()));
-                    } else {
-                        pipeline.addLast(new IdleStateHandler(nettyClientConfig.getChannelMaxReadIdleSeconds(),
-                                nettyClientConfig.getChannelMaxWriteIdleSeconds(),
-                                nettyClientConfig.getChannelMaxAllIdleSeconds()));
-                        pipeline.addLast(new ProtocolDecoderV1())
-                                .addLast(new ProtocolEncoderV1());
-                        if (channelHandlers != null) {
-                            addChannelPipelineLast(ch, channelHandlers);
-                        }
+        bootstrap.handler(new ChannelInitializer<SocketChannel>() {
+            @Override
+            public void initChannel(SocketChannel ch) {
+                ChannelPipeline pipeline = ch.pipeline();
+                if (nettyClientConfig.getProtocol().equals(Protocol.GRPC.value)) {
+                    pipeline.addLast(Http2FrameCodecBuilder.forClient().build())
+                            .addLast(new Http2MultiplexHandler(new ChannelDuplexHandler()));
+                } else {
+                    pipeline.addLast(new IdleStateHandler(
+                            nettyClientConfig.getChannelMaxReadIdleSeconds(),
+                            nettyClientConfig.getChannelMaxWriteIdleSeconds(),
+                            nettyClientConfig.getChannelMaxAllIdleSeconds()));
+                    pipeline.addLast(new ProtocolDecoderV1()).addLast(new ProtocolEncoderV1());
+                    if (channelHandlers != null) {
+                        addChannelPipelineLast(ch, channelHandlers);
                     }
                 }
-            });
+            }
+        });
 
         if (initialized.compareAndSet(false, true) && LOGGER.isInfoEnabled()) {
             LOGGER.info("NettyClientBootstrap has started");
@@ -175,9 +163,6 @@ public class NettyClientBootstrap implements RemotingBootstrap {
     public void shutdown() {
         try {
             eventLoopGroupWorker.shutdownGracefully();
-            if (this.defaultEventExecutorGroup != null) {
-                this.defaultEventExecutorGroup.shutdownGracefully();
-            }
         } catch (Exception exx) {
             LOGGER.error("Failed to shutdown: {}", exx.getMessage());
         }
@@ -208,9 +193,11 @@ public class NettyClientBootstrap implements RemotingBootstrap {
                     @Override
                     public void handlerAdded(ChannelHandlerContext ctx) {
                         Channel channel = ctx.channel();
-                        channel.pipeline().addLast(new IdleStateHandler(nettyClientConfig.getChannelMaxReadIdleSeconds(),
-                                nettyClientConfig.getChannelMaxWriteIdleSeconds(),
-                                nettyClientConfig.getChannelMaxAllIdleSeconds()));
+                        channel.pipeline()
+                                .addLast(new IdleStateHandler(
+                                        nettyClientConfig.getChannelMaxReadIdleSeconds(),
+                                        nettyClientConfig.getChannelMaxWriteIdleSeconds(),
+                                        nettyClientConfig.getChannelMaxAllIdleSeconds()));
                         channel.pipeline().addLast(new GrpcDecoder());
                         channel.pipeline().addLast(new GrpcEncoder());
                         if (channelHandlers != null) {
@@ -247,13 +234,17 @@ public class NettyClientBootstrap implements RemotingBootstrap {
 
     private EventLoopGroup createEventLoopGroupWorker(int selectorThreadSizeThreadSize) {
         if (NettyServerConfig.enableEpoll()) {
-            return new EpollEventLoopGroup(selectorThreadSizeThreadSize,
-                new NamedThreadFactory(getThreadPrefix(this.nettyClientConfig.getClientSelectorThreadPrefix()),
-                    selectorThreadSizeThreadSize));
+            return new EpollEventLoopGroup(
+                    selectorThreadSizeThreadSize,
+                    new NamedThreadFactory(
+                            getThreadPrefix(this.nettyClientConfig.getClientSelectorThreadPrefix()),
+                            selectorThreadSizeThreadSize));
         }
 
-        return new NioEventLoopGroup(selectorThreadSizeThreadSize,
-            new NamedThreadFactory(getThreadPrefix(this.nettyClientConfig.getClientSelectorThreadPrefix()),
-                selectorThreadSizeThreadSize));
+        return new NioEventLoopGroup(
+                selectorThreadSizeThreadSize,
+                new NamedThreadFactory(
+                        getThreadPrefix(this.nettyClientConfig.getClientSelectorThreadPrefix()),
+                        selectorThreadSizeThreadSize));
     }
 }

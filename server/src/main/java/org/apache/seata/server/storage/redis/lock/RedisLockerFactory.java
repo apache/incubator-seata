@@ -38,8 +38,10 @@ public class RedisLockerFactory {
         if (locker == null) {
             synchronized (RedisLockerFactory.class) {
                 if (locker == null) {
-                    String storeRedisType = CONFIG.getConfig(ConfigurationKeys.STORE_REDIS_TYPE, STORE_REDIS_TYPE_PIPELINE);
-                    locker = STORE_REDIS_TYPE_PIPELINE.equals(storeRedisType) ? new RedisLocker() : new RedisLuaLocker();
+                    String storeRedisType =
+                            CONFIG.getConfig(ConfigurationKeys.STORE_REDIS_TYPE, STORE_REDIS_TYPE_PIPELINE);
+                    locker =
+                            STORE_REDIS_TYPE_PIPELINE.equals(storeRedisType) ? new RedisLocker() : new RedisLuaLocker();
                 }
             }
         }

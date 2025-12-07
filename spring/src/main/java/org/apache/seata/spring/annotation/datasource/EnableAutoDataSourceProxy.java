@@ -16,13 +16,13 @@
  */
 package org.apache.seata.spring.annotation.datasource;
 
+import org.springframework.context.annotation.Import;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
-import org.springframework.context.annotation.Import;
 
 /**
  * This annotation will enable auto proxying of datasource bean.
@@ -33,7 +33,7 @@ import org.springframework.context.annotation.Import;
 @Documented
 public @interface EnableAutoDataSourceProxy {
     /**
-     * Whether use JDK proxy instead of CGLIB proxy
+     * Whether to use JDK proxy instead of CGLIB proxy
      *
      * @return useJdkProxy
      */

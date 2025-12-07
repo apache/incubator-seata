@@ -16,10 +16,10 @@
  */
 package org.apache.seata.integration.tx.api.util;
 
+import org.apache.seata.common.util.ReflectionUtil;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-
-import org.apache.seata.common.util.ReflectionUtil;
 
 /**
  * dubbo attribute analysis
@@ -27,9 +27,7 @@ import org.apache.seata.common.util.ReflectionUtil;
  */
 public class DubboUtil {
 
-    private DubboUtil() {
-
-    }
+    private DubboUtil() {}
 
     private static final String ALIBABA_DUBBO_PROXY_NAME_PREFIX = "com.alibaba.dubbo.common.bytecode.proxy";
     private static final String APACHE_DUBBO_PROXY_NAME_PREFIX = "org.apache.dubbo.common.bytecode.proxy";
@@ -49,8 +47,8 @@ public class DubboUtil {
      * @throws InvocationTargetException the invocation target exception
      */
     public static Class<?> getAssistInterface(Object proxyBean)
-        throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException,
-        NoSuchMethodException, InvocationTargetException {
+            throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException,
+                    NoSuchMethodException, InvocationTargetException {
         if (proxyBean == null) {
             return null;
         }
@@ -66,11 +64,12 @@ public class DubboUtil {
         Field failoverClusterInvokerField = invoker.getClass().getDeclaredField("invoker");
         failoverClusterInvokerField.setAccessible(true);
         Object failoverClusterInvoker = failoverClusterInvokerField.get(invoker);
-        return (Class<?>)ReflectionUtil.invokeMethod(failoverClusterInvoker,
-            "getInterface");
+        return (Class<?>) ReflectionUtil.invokeMethod(failoverClusterInvoker, "getInterface");
     }
 
     public static boolean isDubboProxyName(String name) {
-        return name.startsWith(ALIBABA_DUBBO_PROXY_NAME_PREFIX) || name.startsWith(APACHE_DUBBO_PROXY_NAME_PREFIX) || name.contains(DUBBO_3_X_PARTIAL_PROXY_NAME);
+        return name.startsWith(ALIBABA_DUBBO_PROXY_NAME_PREFIX)
+                || name.startsWith(APACHE_DUBBO_PROXY_NAME_PREFIX)
+                || name.contains(DUBBO_3_X_PARTIAL_PROXY_NAME);
     }
 }

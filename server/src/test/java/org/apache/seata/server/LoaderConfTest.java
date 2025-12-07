@@ -19,18 +19,16 @@ package org.apache.seata.server;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 
 /**
  *
  */
-@SpringBootTest
-public class LoaderConfTest {
+public class LoaderConfTest extends BaseSpringBootTest {
 
     static Environment environment;
-    
+
     /**
      * Init session manager.
      *
@@ -40,7 +38,7 @@ public class LoaderConfTest {
     public static void initSessionManager(ApplicationContext context) throws Exception {
         environment = context.getEnvironment();
     }
-    
+
     @Test
     public void checkConf() {
         String nacosServerAddr = environment.resolveRequiredPlaceholders("${seata.config.nacos.serverAddr:localhost}");
@@ -50,6 +48,4 @@ public class LoaderConfTest {
         String undologSaveDays = environment.resolveRequiredPlaceholders("${seata.server.undo.log-save-days:7}");
         Assertions.assertEquals(undologSaveDays, "2");
     }
-    
-
 }

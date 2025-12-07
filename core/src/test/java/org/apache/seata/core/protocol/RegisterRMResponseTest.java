@@ -33,8 +33,7 @@ class RegisterRMResponseTest {
         registerRMResponse.setResultCode(ResultCode.Failed);
         Assertions.assertEquals(
                 "RegisterRMResponse{version='1', extraData='null', identified=true, resultCode=Failed, msg='null'}",
-                registerRMResponse.toString()
-        );
+                registerRMResponse.toString());
     }
 
     @Test

@@ -39,11 +39,17 @@ public interface NormalTccAction {
      * @param tccParam      the tcc param
      * @return the boolean
      */
-    @TwoPhaseBusinessAction(name = "normalTccActionForTest", commitMethod = "commit", rollbackMethod = "rollback", commitArgsClasses = {BusinessActionContext.class, TccParam.class}, rollbackArgsClasses = {BusinessActionContext.class, TccParam.class})
-    String prepare(BusinessActionContext actionContext,
-                    @BusinessActionContextParameter("a") int a,
-                    @BusinessActionContextParameter(paramName = "b", index = 0) List b,
-                    @BusinessActionContextParameter(isParamInProperty = true) TccParam tccParam);
+    @TwoPhaseBusinessAction(
+            name = "normalTccActionForTest",
+            commitMethod = "commit",
+            rollbackMethod = "rollback",
+            commitArgsClasses = {BusinessActionContext.class, TccParam.class},
+            rollbackArgsClasses = {BusinessActionContext.class, TccParam.class})
+    String prepare(
+            BusinessActionContext actionContext,
+            @BusinessActionContextParameter("a") int a,
+            @BusinessActionContextParameter(paramName = "b", index = 0) List b,
+            @BusinessActionContextParameter(isParamInProperty = true) TccParam tccParam);
 
     /**
      * Commit boolean.
@@ -51,8 +57,7 @@ public interface NormalTccAction {
      * @param actionContext the action context
      * @return the boolean
      */
-    boolean commit(BusinessActionContext actionContext,
-                   @BusinessActionContextParameter("tccParam") TccParam param);
+    boolean commit(BusinessActionContext actionContext, @BusinessActionContextParameter("tccParam") TccParam param);
 
     /**
      * Rollback boolean.
@@ -62,11 +67,15 @@ public interface NormalTccAction {
      */
     boolean rollback(BusinessActionContext actionContext, @BusinessActionContextParameter("tccParam") TccParam param);
 
-
-    @TwoPhaseBusinessAction(name = "tccActionForTestWithException", commitMethod = "commit", rollbackMethod = "rollback", commitArgsClasses = {BusinessActionContext.class, TccParam.class}, rollbackArgsClasses = {BusinessActionContext.class, TccParam.class})
-    String prepareWithException(BusinessActionContext actionContext,
-                   @BusinessActionContextParameter("a") int a,
-                   @BusinessActionContextParameter(paramName = "b", index = 0) List b,
-                   @BusinessActionContextParameter(isParamInProperty = true) TccParam tccParam);
-
+    @TwoPhaseBusinessAction(
+            name = "tccActionForTestWithException",
+            commitMethod = "commit",
+            rollbackMethod = "rollback",
+            commitArgsClasses = {BusinessActionContext.class, TccParam.class},
+            rollbackArgsClasses = {BusinessActionContext.class, TccParam.class})
+    String prepareWithException(
+            BusinessActionContext actionContext,
+            @BusinessActionContextParameter("a") int a,
+            @BusinessActionContextParameter(paramName = "b", index = 0) List b,
+            @BusinessActionContextParameter(isParamInProperty = true) TccParam tccParam);
 }

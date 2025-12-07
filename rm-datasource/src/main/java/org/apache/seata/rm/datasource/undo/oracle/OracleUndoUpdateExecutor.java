@@ -16,19 +16,19 @@
  */
 package org.apache.seata.rm.datasource.undo.oracle;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.common.util.CollectionUtils;
-import org.apache.seata.sqlparser.util.ColumnUtils;
 import org.apache.seata.rm.datasource.SqlGenerateUtils;
 import org.apache.seata.rm.datasource.sql.struct.Field;
 import org.apache.seata.rm.datasource.sql.struct.Row;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
 import org.apache.seata.rm.datasource.undo.AbstractUndoExecutor;
 import org.apache.seata.rm.datasource.undo.SQLUndoLog;
+import org.apache.seata.sqlparser.util.ColumnUtils;
 import org.apache.seata.sqlparser.util.JdbcConstants;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * The type oracle undo update executor.
@@ -53,12 +53,13 @@ public class OracleUndoUpdateExecutor extends AbstractUndoExecutor {
         List<Field> nonPkFields = row.nonPrimaryKeys();
         // update sql undo log before image all field come from table meta. need add escape.
         // see BaseTransactionalExecutor#buildTableRecords
-        String updateColumns = nonPkFields.stream().map(
-            field -> ColumnUtils.addEscape(field.getName(), JdbcConstants.ORACLE) + " = ?").collect(
-            Collectors.joining(", "));
+        String updateColumns = nonPkFields.stream()
+                .map(field -> ColumnUtils.addEscape(field.getName(), JdbcConstants.ORACLE) + " = ?")
+                .collect(Collectors.joining(", "));
 
-        List<String> pkNameList = getOrderedPkList(beforeImage, row, JdbcConstants.ORACLE).stream().map(
-            e -> e.getName()).collect(Collectors.toList());
+        List<String> pkNameList = getOrderedPkList(beforeImage, row, JdbcConstants.ORACLE).stream()
+                .map(e -> e.getName())
+                .collect(Collectors.toList());
         String whereSql = SqlGenerateUtils.buildWhereConditionByPKs(pkNameList, JdbcConstants.ORACLE);
 
         return String.format(UPDATE_SQL_TEMPLATE, sqlUndoLog.getTableName(), updateColumns, whereSql);

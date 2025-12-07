@@ -28,7 +28,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-
 public class ProxyUtilsGlobalTransactionalTest {
 
     private static TransactionManager bakTransactionManager;
@@ -38,7 +37,8 @@ public class ProxyUtilsGlobalTransactionalTest {
         bakTransactionManager = TransactionManagerHolder.get();
         TransactionManager mockTransactionManager = new TransactionManager() {
             @Override
-            public String begin(String applicationId, String transactionServiceGroup, String name, int timeout) throws TransactionException {
+            public String begin(String applicationId, String transactionServiceGroup, String name, int timeout)
+                    throws TransactionException {
                 return XID.generateXID(UUIDGenerator.generateUUID());
             }
 
@@ -71,7 +71,6 @@ public class ProxyUtilsGlobalTransactionalTest {
         TransactionManagerHolder.set(bakTransactionManager);
     }
 
-
     @Test
     public void testTcc() {
         BusinessImpl business = new BusinessImpl();
@@ -83,5 +82,14 @@ public class ProxyUtilsGlobalTransactionalTest {
         Assertions.assertNotNull(result);
     }
 
+    @Test
+    public void testXAWithCombineTransaction() {
+        BusinessCombineImpl businessCombine = new BusinessCombineImpl();
 
+        Business businessProxy = ProxyUtil.createProxy(businessCombine);
+
+        String result = businessProxy.doBiz("test");
+
+        Assertions.assertNotNull(result);
+    }
 }

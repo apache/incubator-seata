@@ -16,9 +16,9 @@
  */
 package org.apache.seata.core.context;
 
-import java.util.Optional;
-
 import org.apache.seata.common.loader.EnhancedServiceLoader;
+
+import java.util.Optional;
 
 /**
  * The type Context core loader.
@@ -26,12 +26,11 @@ import org.apache.seata.common.loader.EnhancedServiceLoader;
  */
 public class ContextCoreLoader {
 
-    private ContextCoreLoader() {
-
-    }
+    private ContextCoreLoader() {}
 
     private static class ContextCoreHolder {
-        private static final ContextCore INSTANCE = Optional.ofNullable(EnhancedServiceLoader.load(ContextCore.class)).orElse(new ThreadLocalContextCore());
+        private static final ContextCore INSTANCE = Optional.ofNullable(EnhancedServiceLoader.load(ContextCore.class))
+                .orElse(new ThreadLocalContextCore());
     }
 
     /**
@@ -42,5 +41,4 @@ public class ContextCoreLoader {
     public static ContextCore load() {
         return ContextCoreHolder.INSTANCE;
     }
-
 }

@@ -41,5 +41,4 @@ public interface TableMetaCache {
      * @param resourceId the resource id
      */
     void refresh(Connection connection, String resourceId);
-
 }

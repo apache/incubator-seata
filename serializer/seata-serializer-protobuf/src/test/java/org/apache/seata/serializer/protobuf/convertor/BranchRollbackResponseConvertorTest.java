@@ -16,15 +16,14 @@
  */
 package org.apache.seata.serializer.protobuf.convertor;
 
-import org.apache.seata.serializer.protobuf.generated.BranchRollbackResponseProto;
 import org.apache.seata.core.exception.TransactionExceptionCode;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.protocol.ResultCode;
 import org.apache.seata.core.protocol.transaction.BranchRollbackResponse;
+import org.apache.seata.serializer.protobuf.generated.BranchRollbackResponseProto;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
 
 public class BranchRollbackResponseConvertorTest {
 
@@ -40,8 +39,7 @@ public class BranchRollbackResponseConvertorTest {
         branchRollbackResponse.setBranchId(123);
 
         BranchRollbackResponseConvertor convertor = new BranchRollbackResponseConvertor();
-        BranchRollbackResponseProto proto = convertor.convert2Proto(
-            branchRollbackResponse);
+        BranchRollbackResponseProto proto = convertor.convert2Proto(branchRollbackResponse);
         BranchRollbackResponse real = convertor.convert2Model(proto);
 
         assertThat(real.getTypeCode()).isEqualTo(branchRollbackResponse.getTypeCode());

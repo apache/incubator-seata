@@ -16,8 +16,8 @@
  */
 package org.apache.seata.saga.statelang.domain.impl;
 
-import org.apache.seata.saga.statelang.domain.StateType;
 import org.apache.seata.saga.statelang.domain.LoopStartState;
+import org.apache.seata.saga.statelang.domain.StateType;
 
 /**
  * Start the "loop" execution for the state with loop attribute
@@ -28,5 +28,4 @@ public class LoopStartStateImpl extends BaseState implements LoopStartState {
     public LoopStartStateImpl() {
         setType(StateType.LOOP_START);
     }
-
 }

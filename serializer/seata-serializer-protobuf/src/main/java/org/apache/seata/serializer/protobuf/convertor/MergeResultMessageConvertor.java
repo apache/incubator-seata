@@ -16,9 +16,6 @@
  */
 package org.apache.seata.serializer.protobuf.convertor;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
@@ -31,24 +28,29 @@ import org.apache.seata.serializer.protobuf.generated.MergedResultMessageProto;
 import org.apache.seata.serializer.protobuf.generated.MessageTypeProto;
 import org.apache.seata.serializer.protobuf.manager.ProtobufConvertManager;
 
+import java.util.ArrayList;
+import java.util.List;
 
 public class MergeResultMessageConvertor implements PbConvertor<MergeResultMessage, MergedResultMessageProto> {
     @Override
     public MergedResultMessageProto convert2Proto(MergeResultMessage mergeResultMessage) {
         final short typeCode = mergeResultMessage.getTypeCode();
 
-        final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder().setMessageType(
-            MessageTypeProto.forNumber(typeCode)).build();
+        final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder()
+                .setMessageType(MessageTypeProto.forNumber(typeCode))
+                .build();
 
         List<Any> lists = new ArrayList<>();
         for (AbstractMessage msg : mergeResultMessage.msgs) {
-            final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchConvertor(
-                msg.getClass().getName());
-            lists.add(Any.pack((Message)pbConvertor.convert2Proto(msg)));
+            final PbConvertor pbConvertor = ProtobufConvertManager.getInstance()
+                    .fetchConvertor(msg.getClass().getName());
+            lists.add(Any.pack((Message) pbConvertor.convert2Proto(msg)));
         }
 
-        MergedResultMessageProto mergedWarpMessageProto = MergedResultMessageProto.newBuilder().setAbstractMessage(
-            abstractMessage).addAllMsgs(lists).build();
+        MergedResultMessageProto mergedWarpMessageProto = MergedResultMessageProto.newBuilder()
+                .setAbstractMessage(abstractMessage)
+                .addAllMsgs(lists)
+                .build();
 
         return mergedWarpMessageProto;
     }
@@ -60,15 +62,15 @@ public class MergeResultMessageConvertor implements PbConvertor<MergeResultMessa
 
         List<AbstractResultMessage> temp = new ArrayList<>();
         for (Any any : anys) {
-            final Class clazz = ProtobufConvertManager.getInstance().fetchProtoClass(
-                getTypeNameFromTypeUrl(any.getTypeUrl()));
+            final Class clazz =
+                    ProtobufConvertManager.getInstance().fetchProtoClass(getTypeNameFromTypeUrl(any.getTypeUrl()));
             if (any.is(clazz)) {
                 try {
                     Object ob = any.unpack(clazz);
-                    final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchReversedConvertor(
-                        clazz.getName());
+                    final PbConvertor pbConvertor =
+                            ProtobufConvertManager.getInstance().fetchReversedConvertor(clazz.getName());
                     Object model = pbConvertor.convert2Model(ob);
-                    temp.add((AbstractResultMessage)model);
+                    temp.add((AbstractResultMessage) model);
                 } catch (InvalidProtocolBufferException e) {
                     throw new ShouldNeverHappenException(e);
                 }

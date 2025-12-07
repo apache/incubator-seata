@@ -16,24 +16,25 @@
  */
 package org.apache.seata.rm.datasource.xa;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Optional;
-import javax.sql.DataSource;
-import javax.sql.XAConnection;
-
 import org.apache.seata.core.constants.DBType;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.protocol.Version;
 import org.apache.seata.rm.DefaultResourceManager;
 import org.apache.seata.rm.datasource.SeataDataSourceProxy;
+import org.apache.seata.rm.datasource.combine.CombineConnectionHolder;
 import org.apache.seata.rm.datasource.util.JdbcUtils;
 import org.apache.seata.rm.datasource.util.XAUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.sql.DataSource;
+import javax.sql.XAConnection;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Optional;
 
 /**
  * DataSource proxy for XA mode.
@@ -49,7 +50,9 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
 
     public DataSourceProxyXA(DataSource dataSource, String resourceGroupId) {
         if (dataSource instanceof SeataDataSourceProxy) {
-            LOGGER.info("Unwrap the data source, because the type is: {}", dataSource.getClass().getName());
+            LOGGER.info(
+                    "Unwrap the data source, because the type is: {}",
+                    dataSource.getClass().getName());
             dataSource = ((SeataDataSourceProxy) dataSource).getTargetDataSource();
         }
         this.dataSource = dataSource;
@@ -57,8 +60,8 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
         JdbcUtils.initDataSourceResource(this, dataSource, resourceGroupId);
         if (DBType.MYSQL.name().equalsIgnoreCase(dbType)) {
             try (Connection connection = dataSource.getConnection();
-                PreparedStatement preparedStatement = connection.prepareStatement("SELECT VERSION()");
-                ResultSet versionResult = preparedStatement.executeQuery()) {
+                    PreparedStatement preparedStatement = connection.prepareStatement("SELECT VERSION()");
+                    ResultSet versionResult = preparedStatement.executeQuery()) {
                 if (versionResult.next()) {
                     long currentVersion = Version.convertVersion(versionResult.getString("VERSION()"));
                     long version = Version.convertVersion("8.0.29");
@@ -72,24 +75,39 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
             }
         } else if (DBType.MARIADB.name().equalsIgnoreCase(dbType)) {
             setShouldBeHeld(true);
+        } else if (DBType.OSCAR.name().equalsIgnoreCase(dbType)) {
+            setShouldBeHeld(true);
         }
-        Optional.ofNullable(DefaultResourceManager.get().getResourceManager(BranchType.XA)).ifPresent(resourceManager -> {
-            if (resourceManager instanceof ResourceManagerXA) {
-                ((ResourceManagerXA)resourceManager).initXaTwoPhaseTimeoutChecker();
-            }
-        });
-        //Set the default branch type to 'XA' in the RootContext.
+        Optional.ofNullable(DefaultResourceManager.get().getResourceManager(BranchType.XA))
+                .ifPresent(resourceManager -> {
+                    if (resourceManager instanceof ResourceManagerXA) {
+                        ((ResourceManagerXA) resourceManager).initXaTwoPhaseTimeoutChecker();
+                    }
+                });
+        // Set the default branch type to 'XA' in the RootContext.
         RootContext.setDefaultBranchType(this.getBranchType());
     }
 
     @Override
     public Connection getConnection() throws SQLException {
+        if (RootContext.inGlobalTransaction() && RootContext.inCombineTransaction()) {
+            ConnectionProxyXA connectionProxyXA = CombineConnectionHolder.get(this.dataSource);
+            if (connectionProxyXA != null && !connectionProxyXA.isClosed()) {
+                return connectionProxyXA;
+            }
+        }
         Connection connection = dataSource.getConnection();
         return getConnectionProxy(connection);
     }
 
     @Override
     public Connection getConnection(String username, String password) throws SQLException {
+        if (RootContext.inGlobalTransaction() && RootContext.inCombineTransaction()) {
+            ConnectionProxyXA connectionProxyXA = CombineConnectionHolder.get(this.dataSource);
+            if (connectionProxyXA != null && !connectionProxyXA.isClosed()) {
+                return connectionProxyXA;
+            }
+        }
         Connection connection = dataSource.getConnection(username, password);
         return getConnectionProxy(connection);
     }
@@ -98,7 +116,11 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
         if (!RootContext.inGlobalTransaction()) {
             return connection;
         }
-        return getConnectionProxyXA(connection);
+        ConnectionProxyXA connectionProxyXA = (ConnectionProxyXA) getConnectionProxyXA(connection);
+        if (RootContext.inCombineTransaction()) {
+            CombineConnectionHolder.putConnection(this.dataSource, connectionProxyXA);
+        }
+        return connectionProxyXA;
     }
 
     @Override
@@ -110,9 +132,9 @@ public class DataSourceProxyXA extends AbstractDataSourceProxyXA {
     private Connection getConnectionProxyXA(Connection connection) throws SQLException {
         Connection physicalConn = connection.unwrap(Connection.class);
         XAConnection xaConnection = XAUtils.createXAConnection(physicalConn, this);
-        ConnectionProxyXA connectionProxyXA = new ConnectionProxyXA(connection, xaConnection, this, RootContext.getXID());
+        ConnectionProxyXA connectionProxyXA =
+                new ConnectionProxyXA(connection, xaConnection, this, RootContext.getXID());
         connectionProxyXA.init();
         return connectionProxyXA;
     }
-
 }

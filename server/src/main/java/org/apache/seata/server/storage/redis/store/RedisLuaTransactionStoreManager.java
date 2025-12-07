@@ -16,14 +16,7 @@
  */
 package org.apache.seata.server.storage.redis.store;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-
+import com.google.common.collect.ImmutableMap;
 import org.apache.seata.common.exception.RedisException;
 import org.apache.seata.common.exception.StoreException;
 import org.apache.seata.common.util.BeanUtils;
@@ -33,11 +26,17 @@ import org.apache.seata.core.store.BranchTransactionDO;
 import org.apache.seata.core.store.GlobalTransactionDO;
 import org.apache.seata.server.storage.redis.JedisPooledFactory;
 import org.apache.seata.server.storage.redis.LuaParser;
-
-import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
 import static org.apache.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_APPLICATION_DATA;
 import static org.apache.seata.core.constants.RedisKeyConstants.REDIS_KEY_BRANCH_GMT_MODIFIED;
@@ -59,11 +58,14 @@ public class RedisLuaTransactionStoreManager extends RedisTransactionStoreManage
 
     private static final String DELETE_TRANSACTION_DO_LUA_FILE_NAME = LUA_PREFIX + "deleteTransactionDO.lua";
 
-    private static final String UPDATE_BRANCH_TRANSACTION_DO_LUA_FILE_NAME = LUA_PREFIX + "updateBranchTransactionDO.lua";
+    private static final String UPDATE_BRANCH_TRANSACTION_DO_LUA_FILE_NAME =
+            LUA_PREFIX + "updateBranchTransactionDO.lua";
 
-    private static final String UPDATE_GLOBAL_TRANSACTION_DO_LUA_FILE_NAME = LUA_PREFIX + "updateGlobalTransactionDO.lua";
+    private static final String UPDATE_GLOBAL_TRANSACTION_DO_LUA_FILE_NAME =
+            LUA_PREFIX + "updateGlobalTransactionDO.lua";
 
-    private static final String ROLLBACK_GLOBAL_TRANSACTION_DO_LUA_FILE_NAME = LUA_PREFIX + "rollbackGlobalTransactionDO.lua";
+    private static final String ROLLBACK_GLOBAL_TRANSACTION_DO_LUA_FILE_NAME =
+            LUA_PREFIX + "rollbackGlobalTransactionDO.lua";
 
     /**
      * key filename
@@ -105,10 +107,10 @@ public class RedisLuaTransactionStoreManager extends RedisTransactionStoreManage
     public void initGlobalMap() {
         if (CollectionUtils.isEmpty(branchMap)) {
             globalMap = ImmutableMap.<LogOperation, Function<GlobalTransactionDO, Boolean>>builder()
-                .put(LogOperation.GLOBAL_ADD, this::insertGlobalTransactionDO)
-                .put(LogOperation.GLOBAL_UPDATE, this::updateGlobalTransactionDO)
-                .put(LogOperation.GLOBAL_REMOVE, this::deleteGlobalTransactionDO)
-                .build();
+                    .put(LogOperation.GLOBAL_ADD, this::insertGlobalTransactionDO)
+                    .put(LogOperation.GLOBAL_UPDATE, this::updateGlobalTransactionDO)
+                    .put(LogOperation.GLOBAL_REMOVE, this::deleteGlobalTransactionDO)
+                    .build();
         }
     }
 
@@ -116,10 +118,10 @@ public class RedisLuaTransactionStoreManager extends RedisTransactionStoreManage
     public void initBranchMap() {
         if (CollectionUtils.isEmpty(branchMap)) {
             branchMap = ImmutableMap.<LogOperation, Function<BranchTransactionDO, Boolean>>builder()
-                .put(LogOperation.BRANCH_ADD, this::insertBranchTransactionDO)
-                .put(LogOperation.BRANCH_UPDATE, this::updateBranchTransactionDO)
-                .put(LogOperation.BRANCH_REMOVE, this::deleteBranchTransactionDO)
-                .build();
+                    .put(LogOperation.BRANCH_ADD, this::insertBranchTransactionDO)
+                    .put(LogOperation.BRANCH_UPDATE, this::updateBranchTransactionDO)
+                    .put(LogOperation.BRANCH_REMOVE, this::deleteBranchTransactionDO)
+                    .build();
         }
     }
 
@@ -212,7 +214,8 @@ public class RedisLuaTransactionStoreManager extends RedisTransactionStoreManage
                     add(applicationData);
                 }
             };
-            String result = (String)LuaParser.jedisEvalSha(jedis, luaSHA, UPDATE_BRANCH_TRANSACTION_DO_LUA_FILE_NAME, keys, args);
+            String result = (String)
+                    LuaParser.jedisEvalSha(jedis, luaSHA, UPDATE_BRANCH_TRANSACTION_DO_LUA_FILE_NAME, keys, args);
             LuaParser.LuaResult luaResult = LuaParser.getObjectFromJson(result, LuaParser.LuaResult.class);
             if (!luaResult.getSuccess()) {
                 throw new StoreException("Branch transaction is not exist, update branch transaction failed.");
@@ -323,7 +326,8 @@ public class RedisLuaTransactionStoreManager extends RedisTransactionStoreManage
                     add(xid);
                 }
             };
-            String result = (String)LuaParser.jedisEvalSha(jedis, luaSHA, UPDATE_GLOBAL_TRANSACTION_DO_LUA_FILE_NAME, keys, args);
+            String result = (String)
+                    LuaParser.jedisEvalSha(jedis, luaSHA, UPDATE_GLOBAL_TRANSACTION_DO_LUA_FILE_NAME, keys, args);
             LuaParser.LuaResult luaResult = LuaParser.getObjectFromJson(result, LuaParser.LuaResult.class);
             // fail
             if (!luaResult.getSuccess()) {
@@ -334,8 +338,9 @@ public class RedisLuaTransactionStoreManager extends RedisTransactionStoreManage
                     String previousStatus = luaResult.getData();
                     GlobalStatus before = GlobalStatus.get(Integer.parseInt(previousStatus));
                     GlobalStatus after = GlobalStatus.get(status);
-                    throw new StoreException("Illegal changing of global status, update global transaction failed."
-                        + " beforeStatus[" + before.name() + "] cannot be changed to afterStatus[" + after.name() + "]");
+                    throw new StoreException(
+                            "Illegal changing of global status, update global transaction failed." + " beforeStatus["
+                                    + before.name() + "] cannot be changed to afterStatus[" + after.name() + "]");
                 }
             }
             return true;

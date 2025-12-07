@@ -16,18 +16,16 @@
  */
 package org.apache.seata.rm.datasource.undo;
 
-import java.sql.Types;
-import java.util.ArrayList;
-
-import org.apache.seata.rm.datasource.undo.SQLUndoLog;
-import org.apache.seata.rm.datasource.undo.UndoLogParserFactory;
-import org.apache.seata.sqlparser.SQLType;
 import org.apache.seata.rm.datasource.sql.struct.Field;
 import org.apache.seata.rm.datasource.sql.struct.Row;
-import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
+import org.apache.seata.sqlparser.SQLType;
+import org.apache.seata.sqlparser.struct.TableMeta;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.sql.Types;
+import java.util.ArrayList;
 
 /**
  * The type Branch undo log test.
@@ -74,6 +72,5 @@ public class BranchUndoLogTest {
 
         BranchUndoLog decodeObj = UndoLogParserFactory.getInstance().decode(bs);
         Assertions.assertEquals(decodeObj.getBranchId(), branchUndoLog.getBranchId());
-
     }
 }

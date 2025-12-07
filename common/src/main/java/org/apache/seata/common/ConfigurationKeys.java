@@ -191,7 +191,8 @@ public interface ConfigurationKeys {
     /**
      * The constant CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT.
      */
-    String CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT = CLIENT_RM_LOCK_PREFIX + "retryPolicyBranchRollbackOnConflict";
+    String CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT =
+            CLIENT_RM_LOCK_PREFIX + "retryPolicyBranchRollbackOnConflict";
 
     /**
      * The constant SERVICE_SESSION_RELOAD_READ_SIZE
@@ -434,7 +435,6 @@ public interface ConfigurationKeys {
      */
     String LOCK_DB_TABLE = STORE_DB_PREFIX + "lockTable";
 
-
     /**
      * The constant SERVER_RPC_PORT.
      */
@@ -645,13 +645,35 @@ public interface ConfigurationKeys {
     String KEEP_ALIVE_TIME = TRANSPORT_PREFIX + "keepAliveTime";
 
     /**
+     * The constant MIN_HTTP_POOL_SIZE.
+     */
+    String MIN_HTTP_POOL_SIZE = TRANSPORT_PREFIX + "minHttpPoolSize";
+
+    /**
+     * The constant MAX_HTTP_POOL_SIZE.
+     */
+    String MAX_HTTP_POOL_SIZE = TRANSPORT_PREFIX + "maxHttpPoolSize";
+
+    /**
+     * The constant MAX_HTTP_TASK_QUEUE_SIZE.
+     */
+    String MAX_HTTP_TASK_QUEUE_SIZE = TRANSPORT_PREFIX + "maxHttpTaskQueueSize";
+
+    /**
+     * The constant HTTP_POOL_KEEP_ALIVE_TIME.
+     */
+    String HTTP_POOL_KEEP_ALIVE_TIME = TRANSPORT_PREFIX + "httpPoolKeepAliveTime";
+
+    /**
      * The constant TRANSPORT_TYPE
      */
+    @Deprecated
     String TRANSPORT_TYPE = TRANSPORT_PREFIX + "type";
 
     /**
      * The constant TRANSPORT_SERVER
      */
+    @Deprecated
     String TRANSPORT_SERVER = TRANSPORT_PREFIX + "server";
 
     /**
@@ -1060,7 +1082,6 @@ public interface ConfigurationKeys {
      */
     String SERVER_RAFT_SSL_CLIENT_KEYSTORE_PASSWORD = SERVER_RAFT_SSL_CLIENT + "keystore.password";
 
-
     /**
      * The constant SERVER_RAFT_SSL_CLIENT_KEYSTORE_TYPE.
      */
@@ -1117,6 +1138,19 @@ public interface ConfigurationKeys {
     String SERVER_RAFT_COMPRESSOR = SERVER_RAFT + "compressor";
 
     /**
+     * The constant SERVER_HTTP.
+     */
+    String SERVER_HTTP = SERVER_PREFIX + "http.";
+
+    String SERVER_HTTP_FILTER_PREFIX = SERVER_HTTP + "filter.";
+
+    /**
+     * The constant SERVER_HTTP_FILTER_XSS_FILTER_KEYWORDS.
+     *
+     */
+    String SERVER_HTTP_FILTER_XSS_FILTER_KEYWORDS = SERVER_HTTP_FILTER_PREFIX + "xss.keywords";
+
+    /**
      * The constant IS_USE_CLOUD_NAMESPACE_PARSING.
      */
     String IS_USE_CLOUD_NAMESPACE_PARSING = "isUseCloudNamespaceParsing";
@@ -1140,7 +1174,6 @@ public interface ConfigurationKeys {
      * The constant XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT
      */
     String XA_CONNECTION_TWO_PHASE_HOLD_TIMEOUT = CLIENT_RM_PREFIX + "connectionTwoPhaseHoldTimeoutXA";
-
 
     /**
      * The constant ENABLE_PARALLEL_REQUEST_HANDLE_KEY
@@ -1180,12 +1213,14 @@ public interface ConfigurationKeys {
     /**
      *
      */
-    String NAMINGSERVER_REGISTRY_PREFIX = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + NAMING_SERVER + FILE_CONFIG_SPLIT_CHAR;
+    String NAMINGSERVER_REGISTRY_PREFIX =
+            FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + NAMING_SERVER + FILE_CONFIG_SPLIT_CHAR;
 
     /**
      *
      */
-    String SEATA_NAMINGSERVER_REGISTRY_PREFIX = SEATA_FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + NAMINGSERVER_REGISTRY_PREFIX;
+    String SEATA_NAMINGSERVER_REGISTRY_PREFIX =
+            SEATA_FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + NAMINGSERVER_REGISTRY_PREFIX;
 
     /**
      * The constant REGISTRY_NAMINGSERVER_CLUSTER
@@ -1195,7 +1230,7 @@ public interface ConfigurationKeys {
     /**
      * The constant VGROUP_TABLE_NAME
      */
-    String VGROUP_TABLE_NAME = STORE_DB_PREFIX + FILE_CONFIG_SPLIT_CHAR + "vgroup-table";
+    String VGROUP_TABLE_NAME = STORE_DB_PREFIX + "vgroupTable";
 
     /**
      * The constant NAMESPACE_KEY
@@ -1210,7 +1245,8 @@ public interface ConfigurationKeys {
     /**
      * The constant META_PREFIX
      */
-    String META_PREFIX = SEATA_FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + "metadata.";
+    String META_PREFIX =
+            SEATA_FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + "metadata.";
 
     /**
      * The constant SERVER_REGISTRY_METADATA_PREFIX
@@ -1221,7 +1257,6 @@ public interface ConfigurationKeys {
      * The constant SERVER_REGISTRY_METADATA_EXTERNAL
      */
     String SERVER_REGISTRY_METADATA_EXTERNAL = SERVER_REGISTRY_METADATA_PREFIX + ".external";
-
 
     /**
      * The constant RATE_LIMIT_PREFIX.
@@ -1247,5 +1282,4 @@ public interface ConfigurationKeys {
      * The constant RATE_LIMIT_BUCKET_TOKEN_INITIAL_NUM.
      */
     String RATE_LIMIT_BUCKET_TOKEN_INITIAL_NUM = RATE_LIMIT_PREFIX + ".bucketTokenInitialNum";
-
 }

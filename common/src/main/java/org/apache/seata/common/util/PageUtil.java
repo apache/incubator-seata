@@ -16,12 +16,12 @@
  */
 package org.apache.seata.common.util;
 
+import org.apache.seata.common.exception.NotSupportYetException;
+
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
-
-import org.apache.seata.common.exception.NotSupportYetException;
 
 /**
  * db page util
@@ -67,8 +67,8 @@ public class PageUtil {
     /**
      * The constant LIMIT_TEMPLAGE.
      */
-    private static final String LIMIT_TEMPLATE = SOURCE_SQL_PLACE_HOLD + " limit " + LIMIT_PLACE_HOLD + " offset "
-            + OFFSET_PLACE_HOLD;
+    private static final String LIMIT_TEMPLATE =
+            SOURCE_SQL_PLACE_HOLD + " limit " + LIMIT_PLACE_HOLD + " offset " + OFFSET_PLACE_HOLD;
     /**
      * The constant ORACLE_PAGE_TEMPLATE.
      */
@@ -78,8 +78,10 @@ public class PageUtil {
     /**
      * The constant SQLSERVER_PAGE_TEMPLATE. Currently, it only works for order-by condition of "ORDER BY gmt_create desc"
      */
-    private static final String SQLSERVER_PAGE_TEMPLATE = "select * from (select temp.*, ROW_NUMBER() OVER(ORDER BY gmt_create desc) AS rowId from ("
-            + SOURCE_SQL_PLACE_HOLD + ") temp ) t where t.rowId between " + START_PLACE_HOLD + " and " + END_PLACE_HOLD;
+    private static final String SQLSERVER_PAGE_TEMPLATE =
+            "select * from (select temp.*, ROW_NUMBER() OVER(ORDER BY gmt_create desc) AS rowId from ("
+                    + SOURCE_SQL_PLACE_HOLD + ") temp ) t where t.rowId between " + START_PLACE_HOLD + " and "
+                    + END_PLACE_HOLD;
     /**
      * check page parm
      *
@@ -113,15 +115,18 @@ public class PageUtil {
             case "oceanbase":
             case "dm":
             case "oscar":
-                return LIMIT_TEMPLATE.replace(SOURCE_SQL_PLACE_HOLD, sourceSql)
+                return LIMIT_TEMPLATE
+                        .replace(SOURCE_SQL_PLACE_HOLD, sourceSql)
                         .replace(LIMIT_PLACE_HOLD, String.valueOf(pageSize))
                         .replace(OFFSET_PLACE_HOLD, String.valueOf((pageNum - 1) * pageSize));
             case "oracle":
-                return ORACLE_PAGE_TEMPLATE.replace(SOURCE_SQL_PLACE_HOLD, sourceSql)
+                return ORACLE_PAGE_TEMPLATE
+                        .replace(SOURCE_SQL_PLACE_HOLD, sourceSql)
                         .replace(START_PLACE_HOLD, String.valueOf(pageSize * (pageNum - 1) + 1))
                         .replace(END_PLACE_HOLD, String.valueOf(pageSize * pageNum));
             case "sqlserver":
-                return SQLSERVER_PAGE_TEMPLATE.replace(SOURCE_SQL_PLACE_HOLD, sourceSql)
+                return SQLSERVER_PAGE_TEMPLATE
+                        .replace(SOURCE_SQL_PLACE_HOLD, sourceSql)
                         .replace(START_PLACE_HOLD, String.valueOf(pageSize * (pageNum - 1) + 1))
                         .replace(END_PLACE_HOLD, String.valueOf(pageSize * pageNum));
             default:
@@ -150,7 +155,9 @@ public class PageUtil {
             case "sqlserver":
                 int lastIndexOfOrderBy = sourceSql.toLowerCase().lastIndexOf("order by");
                 if (lastIndexOfOrderBy != -1) {
-                    return sourceSql.substring(0, lastIndexOfOrderBy).replaceAll("(?i)(?<=select)(.*)(?=from)", " count(1) ");
+                    return sourceSql
+                            .substring(0, lastIndexOfOrderBy)
+                            .replaceAll("(?i)(?<=select)(.*)(?=from)", " count(1) ");
                 }
                 return sourceSql.replaceAll("(?i)(?<=select)(.*)(?=from)", " count(1) ");
             default:
@@ -211,6 +218,60 @@ public class PageUtil {
                 return " and FLOOR(" + timeColumnName + "/1000) <= ? ";
             default:
                 throw new IllegalArgumentException("The DB type :" + dbType + " is not supported yet");
+        }
+    }
+
+    /**
+     * get sql for time start (The database fields is of type datetime)
+     * @param dbType
+     * @param timeColumnName
+     * @return java.lang.String
+     */
+    public static String getDateTimeStartSql(String dbType, String timeColumnName) {
+        switch (dbType.toLowerCase()) {
+            case "mysql":
+                return " and UNIX_TIMESTAMP(" + timeColumnName + ") >= ? ";
+            case "postgresql":
+                return " and " + timeColumnName + " >= TO_TIMESTAMP(?) ";
+            case "oracle":
+                return " and " + timeColumnName
+                        + " >= TO_TIMESTAMP('1970-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS') + NUMTODSINTERVAL(?, 'SECOND') ";
+            case "sqlserver":
+                return " and " + timeColumnName + " >= DATEADD(SECOND, ?, '1970-01-01 00:00:00') ";
+            case "dm":
+            case "oscar":
+                // Compatible with Oracle syntax
+                return " and " + timeColumnName
+                        + " >= TO_TIMESTAMP('1970-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS') + NUMTODSINTERVAL(?, 'SECOND') ";
+            default:
+                throw new IllegalArgumentException("Unsupported DB type: " + dbType);
+        }
+    }
+
+    /**
+     * get sql for time end (The database fields is of type datetime)
+     * @param dbType
+     * @param timeColumnName
+     * @return java.lang.String
+     */
+    public static String getDateTimeEndSql(String dbType, String timeColumnName) {
+        switch (dbType.toLowerCase()) {
+            case "mysql":
+                return " and UNIX_TIMESTAMP(" + timeColumnName + ") <= ? ";
+            case "postgresql":
+                return " and " + timeColumnName + " <= TO_TIMESTAMP(?) ";
+            case "oracle":
+                return " and " + timeColumnName
+                        + " <= TO_TIMESTAMP('1970-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS') + NUMTODSINTERVAL(?, 'SECOND') ";
+            case "sqlserver":
+                return " and " + timeColumnName + " <= DATEADD(SECOND, ?, '1970-01-01 00:00:00') ";
+            case "dm":
+            case "oscar":
+                // Compatible with Oracle syntax
+                return " and " + timeColumnName
+                        + " <= TO_TIMESTAMP('1970-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS') + NUMTODSINTERVAL(?, 'SECOND') ";
+            default:
+                throw new IllegalArgumentException("Unsupported DB type: " + dbType);
         }
     }
 }

@@ -51,7 +51,8 @@ public class InsertSpecificationSqlVisitor extends MySqlParserBaseVisitor<MySqlC
         }
 
         MySqlParser.InsertStatementValueContext insertStatementValueContext = ctx.insertStatementValue();
-        List<MySqlParser.ExpressionsWithDefaultsContext> expressionsWithDefaultsContexts = insertStatementValueContext.expressionsWithDefaults();
+        List<MySqlParser.ExpressionsWithDefaultsContext> expressionsWithDefaultsContexts =
+                insertStatementValueContext.expressionsWithDefaults();
 
         for (MySqlParser.ExpressionsWithDefaultsContext expressions : expressionsWithDefaultsContexts) {
 

@@ -16,25 +16,24 @@
  */
 package org.apache.seata.server.session.redis;
 
-import javax.annotation.Resource;
-
 import com.alibaba.fastjson.JSON;
 import org.apache.seata.common.result.PageResult;
+import org.apache.seata.server.BaseSpringBootTest;
 import org.apache.seata.server.console.entity.param.GlobalLockParam;
 import org.apache.seata.server.console.entity.param.GlobalSessionParam;
-import org.apache.seata.server.console.service.GlobalLockService;
-import org.apache.seata.server.console.service.GlobalSessionService;
 import org.apache.seata.server.console.entity.vo.GlobalLockVO;
 import org.apache.seata.server.console.entity.vo.GlobalSessionVO;
+import org.apache.seata.server.console.service.GlobalLockService;
+import org.apache.seata.server.console.service.GlobalSessionService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
-import org.springframework.boot.test.context.SpringBootTest;
+
+import javax.annotation.Resource;
 
 /**
  */
-@SpringBootTest
 @EnabledIfSystemProperty(named = "redisCaseEnabled", matches = "true")
-public class RedisQueryConsolTest {
+public class RedisQueryConsolTest extends BaseSpringBootTest {
 
     /**
      *
@@ -42,19 +41,19 @@ public class RedisQueryConsolTest {
      *
      *please update config information ths file: application.yml
      * store:
-          # support: file 、 db 、 redis
-          mode: redis
-          redis:
-            mode: single
-            database: 0
-            min-conn: 1
-            max-conn: 10
-            password:
-            max-total: 100
-            query-limit: 100
-            single:
-              host: real redis host
-              port: 6879
+     * # support: file 、 db 、 redis
+     * mode: redis
+     * redis:
+     * mode: single
+     * database: 0
+     * min-conn: 1
+     * max-conn: 10
+     * password:
+     * max-total: 100
+     * query-limit: 100
+     * single:
+     * host: real redis host
+     * port: 6879
      *!!!!!!!when you test finish,please restore the modified configuration!!!!!!!!
      */
     @Resource

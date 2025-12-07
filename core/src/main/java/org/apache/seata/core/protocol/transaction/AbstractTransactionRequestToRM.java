@@ -16,7 +16,6 @@
  */
 package org.apache.seata.core.protocol.transaction;
 
-
 /**
  * The type Abstract transaction request to rm.
  *

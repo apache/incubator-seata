@@ -20,7 +20,6 @@ import org.apache.seata.common.metadata.Node;
 
 import java.util.Objects;
 
-
 public class NamingServerNode extends Node {
     private long term;
     private String unit;
@@ -67,9 +66,9 @@ public class NamingServerNode extends Node {
             return false;
         }
         Node node = (Node) o;
-        return Objects.equals(getControl(), node.getControl()) && Objects.equals(getTransaction(), node.getTransaction());
+        return Objects.equals(getControl(), node.getControl())
+                && Objects.equals(getTransaction(), node.getTransaction());
     }
-
 
     public boolean isChanged(Object obj) {
         if (Objects.isNull(obj)) {

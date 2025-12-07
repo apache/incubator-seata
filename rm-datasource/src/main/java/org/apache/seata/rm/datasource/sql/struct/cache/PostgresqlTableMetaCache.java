@@ -16,11 +16,6 @@
  */
 package org.apache.seata.rm.datasource.sql.struct.cache;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import org.apache.seata.common.exception.NotSupportYetException;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.common.loader.LoadLevel;
@@ -30,6 +25,11 @@ import org.apache.seata.sqlparser.struct.IndexMeta;
 import org.apache.seata.sqlparser.struct.IndexType;
 import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.sqlparser.util.JdbcConstants;
+
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
  * The type Table meta cache.
@@ -43,13 +43,13 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
         StringBuilder cacheKey = new StringBuilder(resourceId);
         cacheKey.append(".");
 
-        //original: separate it to schemaName and tableName
-        //now: Use the original table name to avoid cache errors of tables with the same name across databases
-        //postgres does not implement supportsMixedCaseIdentifiers in DatabaseMetadata
+        // original: separate it to schemaName and tableName
+        // now: Use the original table name to avoid cache errors of tables with the same name across databases
+        // postgres does not implement supportsMixedCaseIdentifiers in DatabaseMetadata
         if (tableName.contains("\"")) {
             cacheKey.append(tableName.replace("\"", ""));
         } else {
-            //postgres default store in lower case
+            // postgres default store in lower case
             cacheKey.append(tableName.toLowerCase());
         }
 
@@ -110,9 +110,9 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
         tm.setCaseSensitive(StringUtils.hasUpperCase(tableName));
 
         try (ResultSet rsColumns = dbmd.getColumns(null, schemaName, tableName, "%");
-             ResultSet rsIndex = dbmd.getIndexInfo(null, schemaName, tableName, false, true);
-             ResultSet rsTable = dbmd.getTables(null, schemaName, tableName, new String[]{"TABLE"});
-             ResultSet rsPrimary = dbmd.getPrimaryKeys(null, schemaName, tableName)) {
+                ResultSet rsIndex = dbmd.getIndexInfo(null, schemaName, tableName, false, true);
+                ResultSet rsTable = dbmd.getTables(null, schemaName, tableName, new String[] {"TABLE"});
+                ResultSet rsPrimary = dbmd.getPrimaryKeys(null, schemaName, tableName)) {
             while (rsColumns.next()) {
                 ColumnMeta col = new ColumnMeta();
                 col.setTableCat(rsColumns.getString("TABLE_CAT"));
@@ -136,7 +136,8 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
                 col.setCaseSensitive(StringUtils.hasUpperCase(col.getColumnName()));
 
                 if (tm.getAllColumns().containsKey(col.getColumnName())) {
-                    throw new NotSupportYetException("Not support the table has the same column name with different case yet");
+                    throw new NotSupportYetException(
+                            "Not support the table has the same column name with different case yet");
                 }
                 tm.getAllColumns().put(col.getColumnName(), col);
             }
@@ -168,7 +169,6 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
                         index.setIndextype(IndexType.NORMAL);
                     }
                     tm.getAllIndexes().put(indexName, index);
-
                 }
             }
 
@@ -186,12 +186,14 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
             while (rsTable.next()) {
                 String rsTableSchema = rsTable.getString("TABLE_SCHEM");
                 String rsTableName = rsTable.getString("TABLE_NAME");
-                //set origin tableName with schema if necessary
+                // set origin tableName with schema if necessary
                 if ("public".equalsIgnoreCase(rsTableSchema)) {
-                    //for compatibility reasons, old clients generally do not have the 'public' default schema by default.
+                    // for compatibility reasons, old clients generally do not have the 'public' default schema by
+                    // default.
                     tm.setTableName(rsTableName);
                 } else {
-                    //without schema, different records with the same primary key value and the same table name in different schemas may have the same lock record.
+                    // without schema, different records with the same primary key value and the same table name in
+                    // different schemas may have the same lock record.
                     tm.setTableName(rsTableSchema + "." + rsTableName);
                 }
             }

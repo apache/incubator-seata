@@ -16,17 +16,10 @@
  */
 package org.apache.seata.saga.engine.pcext.utils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.apache.seata.common.exception.FrameworkErrorCode;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.saga.engine.exception.EngineExecutionException;
-import org.apache.seata.saga.statelang.domain.StateType;
 import org.apache.seata.saga.engine.utils.ExceptionUtils;
 import org.apache.seata.saga.proctrl.ProcessContext;
 import org.apache.seata.saga.statelang.domain.DomainConstants;
@@ -35,7 +28,14 @@ import org.apache.seata.saga.statelang.domain.State;
 import org.apache.seata.saga.statelang.domain.StateInstance;
 import org.apache.seata.saga.statelang.domain.StateMachine;
 import org.apache.seata.saga.statelang.domain.StateMachineInstance;
+import org.apache.seata.saga.statelang.domain.StateType;
 import org.apache.seata.saga.statelang.domain.impl.AbstractTaskState;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Stack;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * CompensationHolder
@@ -62,13 +62,12 @@ public class CompensationHolder {
 
     public static CompensationHolder getCurrent(ProcessContext context, boolean forceCreate) {
 
-        CompensationHolder compensationholder = (CompensationHolder)context.getVariable(
-            DomainConstants.VAR_NAME_CURRENT_COMPENSATION_HOLDER);
+        CompensationHolder compensationholder =
+                (CompensationHolder) context.getVariable(DomainConstants.VAR_NAME_CURRENT_COMPENSATION_HOLDER);
         if (compensationholder == null && forceCreate) {
             synchronized (context) {
-
-                compensationholder = (CompensationHolder)context.getVariable(
-                    DomainConstants.VAR_NAME_CURRENT_COMPENSATION_HOLDER);
+                compensationholder =
+                        (CompensationHolder) context.getVariable(DomainConstants.VAR_NAME_CURRENT_COMPENSATION_HOLDER);
                 if (compensationholder == null) {
                     compensationholder = new CompensationHolder();
                     context.setVariable(DomainConstants.VAR_NAME_CURRENT_COMPENSATION_HOLDER, compensationholder);
@@ -78,34 +77,38 @@ public class CompensationHolder {
         return compensationholder;
     }
 
-    public static List<StateInstance> findStateInstListToBeCompensated(ProcessContext context,
-                                                                       List<StateInstance> stateInstanceList) {
+    public static List<StateInstance> findStateInstListToBeCompensated(
+            ProcessContext context, List<StateInstance> stateInstanceList) {
         List<StateInstance> stateListToBeCompensated = null;
         if (CollectionUtils.isNotEmpty(stateInstanceList)) {
             stateListToBeCompensated = new ArrayList<>(stateInstanceList.size());
 
-            StateMachine stateMachine = (StateMachine)context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE);
-            StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(
-                DomainConstants.VAR_NAME_STATEMACHINE_INST);
+            StateMachine stateMachine = (StateMachine) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE);
+            StateMachineInstance stateMachineInstance =
+                    (StateMachineInstance) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_INST);
 
             for (StateInstance stateInstance : stateInstanceList) {
                 if (stateNeedToCompensate(stateInstance)) {
                     State state = stateMachine.getState(EngineUtils.getOriginStateName(stateInstance));
                     AbstractTaskState taskState = null;
                     if (state instanceof AbstractTaskState) {
-                        taskState = (AbstractTaskState)state;
+                        taskState = (AbstractTaskState) state;
                     }
 
-                    //The data update service is not configured with the compensation state,
+                    // The data update service is not configured with the compensation state,
                     // The state machine needs to exit directly without compensation.
-                    if (stateInstance.isForUpdate() && taskState != null && StringUtils.isBlank(
-                        taskState.getCompensateState())) {
+                    if (stateInstance.isForUpdate()
+                            && taskState != null
+                            && StringUtils.isBlank(taskState.getCompensateState())) {
 
-                        String message = "StateMachineInstance[" + stateMachineInstance.getId() + ":" + stateMachine
-                            .getName() + "] have a state [" + stateInstance.getName()
-                            + "] is a service for update data, but no compensateState found.";
+                        String message = "StateMachineInstance[" + stateMachineInstance.getId() + ":"
+                                + stateMachine.getName() + "] have a state [" + stateInstance.getName()
+                                + "] is a service for update data, but no compensateState found.";
                         EngineExecutionException exception = ExceptionUtils.createEngineExecutionException(
-                            FrameworkErrorCode.CompensationStateNotFound, message, stateMachineInstance, stateInstance);
+                                FrameworkErrorCode.CompensationStateNotFound,
+                                message,
+                                stateMachineInstance,
+                                stateInstance);
 
                         EngineUtils.failStateMachine(context, exception);
 
@@ -122,19 +125,20 @@ public class CompensationHolder {
     }
 
     private static boolean stateNeedToCompensate(StateInstance stateInstance) {
-        //If it has been retried, it will not be compensated
+        // If it has been retried, it will not be compensated
         if (stateInstance.isIgnoreStatus()) {
             return false;
         }
         if (StateType.SUB_STATE_MACHINE.equals(stateInstance.getType())) {
 
-            return (!ExecutionStatus.FA.equals(stateInstance.getStatus())) && (!ExecutionStatus.SU.equals(
-                stateInstance.getCompensationStatus()));
+            return (!ExecutionStatus.FA.equals(stateInstance.getStatus()))
+                    && (!ExecutionStatus.SU.equals(stateInstance.getCompensationStatus()));
         } else {
 
-            return StateType.SERVICE_TASK.equals(stateInstance.getType()) && !stateInstance
-                .isForCompensation() && (!ExecutionStatus.FA.equals(stateInstance.getStatus())) && (!ExecutionStatus.SU
-                .equals(stateInstance.getCompensationStatus()));
+            return StateType.SERVICE_TASK.equals(stateInstance.getType())
+                    && !stateInstance.isForCompensation()
+                    && (!ExecutionStatus.FA.equals(stateInstance.getStatus()))
+                    && (!ExecutionStatus.SU.equals(stateInstance.getCompensationStatus()));
         }
     }
 

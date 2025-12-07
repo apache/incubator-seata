@@ -16,12 +16,6 @@
  */
 package org.apache.seata.rm.datasource.sql.struct.cache;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.TimeUnit;
-
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
@@ -31,6 +25,12 @@ import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.sqlparser.struct.TableMetaCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The type Table meta cache.
@@ -48,14 +48,16 @@ public abstract class AbstractTableMetaCache implements TableMetaCache {
 
     static {
         try {
-            TABLE_META_CACHE = Caffeine.newBuilder().maximumSize(CACHE_SIZE)
-                    .expireAfterWrite(EXPIRE_TIME, TimeUnit.MILLISECONDS).softValues().build();
+            TABLE_META_CACHE = Caffeine.newBuilder()
+                    .maximumSize(CACHE_SIZE)
+                    .expireAfterWrite(EXPIRE_TIME, TimeUnit.MILLISECONDS)
+                    .softValues()
+                    .build();
         } catch (Throwable t) {
             LOGGER.error("Build the `TABLE_META_CACHE` failed:", t);
             throw t;
         }
     }
-
 
     @Override
     public TableMeta getTableMeta(final Connection connection, final String tableName, String resourceId) {
@@ -74,8 +76,9 @@ public abstract class AbstractTableMetaCache implements TableMetaCache {
         });
 
         if (tmeta == null) {
-            throw new ShouldNeverHappenException(String.format("[xid:%s] Get table meta failed," +
-                " please check whether the table `%s` exists.", RootContext.getXID(), tableName));
+            throw new ShouldNeverHappenException(String.format(
+                    "[xid:%s] Get table meta failed," + " please check whether the table `%s` exists.",
+                    RootContext.getXID(), tableName));
         }
         return tmeta;
     }
@@ -84,12 +87,16 @@ public abstract class AbstractTableMetaCache implements TableMetaCache {
     public void refresh(final Connection connection, String resourceId) {
         ConcurrentMap<String, TableMeta> tableMetaMap = TABLE_META_CACHE.asMap();
         for (Map.Entry<String, TableMeta> entry : tableMetaMap.entrySet()) {
-            String key = getCacheKey(connection, entry.getValue().getOriginalTableName(), resourceId);
+            TableMeta meta = entry.getValue();
+            String tableNameForKey = StringUtils.isBlank(meta.getOriginalTableName())
+                    ? meta.getTableName()
+                    : meta.getOriginalTableName();
+
+            String key = getCacheKey(connection, tableNameForKey, resourceId);
             if (entry.getKey().equals(key)) {
                 try {
-                    String freshTableName = StringUtils.isBlank(entry.getValue().getOriginalTableName()) ?
-                            entry.getValue().getTableName() : entry.getValue().getOriginalTableName();
-                    TableMeta tableMeta = fetchSchema(connection, freshTableName);
+                    // Reuse tableNameForKey directly, no need to check again
+                    TableMeta tableMeta = fetchSchema(connection, tableNameForKey);
                     if (!tableMeta.equals(entry.getValue())) {
                         TABLE_META_CACHE.put(entry.getKey(), tableMeta);
                         LOGGER.info("table meta change was found, update table meta cache automatically.");
@@ -100,7 +107,6 @@ public abstract class AbstractTableMetaCache implements TableMetaCache {
             }
         }
     }
-
 
     /**
      * generate cache key
@@ -121,5 +127,4 @@ public abstract class AbstractTableMetaCache implements TableMetaCache {
      * @throws SQLException the sql exception
      */
     protected abstract TableMeta fetchSchema(Connection connection, String tableName) throws SQLException;
-
 }

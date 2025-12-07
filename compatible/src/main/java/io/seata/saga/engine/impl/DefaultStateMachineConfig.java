@@ -16,14 +16,6 @@
  */
 package io.seata.saga.engine.impl;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.stream.Collectors;
-
-import javax.script.ScriptEngineManager;
-
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.expression.ExpressionFactoryManager;
 import io.seata.saga.engine.repo.StateLogRepository;
@@ -45,6 +37,13 @@ import org.apache.seata.saga.proctrl.eventing.impl.ProcessCtrlEventPublisher;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+
+import javax.script.ScriptEngineManager;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.stream.Collectors;
 
 /**
  * Default state machine configuration
@@ -98,6 +97,11 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
         actual.setStateLangStore(stateLangStore);
     }
 
+    /**
+     * this method will return a {@link ExpressionFactoryManager} which is wrapped from {@link org.apache.seata.saga.engine.expression.ExpressionFactoryManager}
+     * notice: This method cannot be referenced in the normal process of saga. The method here is only for
+     * compatibility interfaces {@link io.seata.saga.engine.StateMachineConfig} public methods.
+     */
     @Override
     public ExpressionFactoryManager getExpressionFactoryManager() {
         if (expressionFactoryManager == null) {
@@ -111,15 +115,30 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
         this.expressionResolver.setExpressionFactoryManager(expressionFactoryManager.unwrap());
     }
 
+    /**
+     * fix setExpressionFactoryManager NPE issue
+     * @param expressionResolver
+     */
+    public void setExpressionResolver(ExpressionResolver expressionResolver) {
+        this.expressionResolver = expressionResolver;
+        this.actual.setExpressionResolver(expressionResolver);
+    }
+
+    /**
+     * this method will return a {@link ExpressionResolver} which is wrapped from {@link org.apache.seata.saga.engine.expression.ExpressionResolver}
+     * notice: This method cannot be referenced in the normal process of saga. The method here is only for
+     * compatibility interfaces {@link io.seata.saga.engine.StateMachineConfig} public methods.
+     */
     @Override
     public ExpressionResolver getExpressionResolver() {
         return actual.getExpressionResolver();
     }
 
-    public void setExpressionResolver(ExpressionResolver expressionResolver) {
-        actual.setExpressionResolver(expressionResolver);
-    }
-
+    /**
+     * this method will return a {@link ServiceInvokerManager} which is wrapped from {@link org.apache.seata.saga.engine.invoker.ServiceInvokerManager}
+     * notice: This method cannot be referenced in the normal process of saga. The method here is only for
+     * compatibility interfaces {@link io.seata.saga.engine.StateMachineConfig} public methods.
+     */
     @Override
     public String getCharset() {
         return actual.getCharset();
@@ -129,6 +148,11 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
         actual.setCharset(charset);
     }
 
+    /**
+     * this method will return a {@link StateMachineRepository} which is wrapped from {@link org.apache.seata.saga.engine.repo.StateMachineRepository}
+     * notice: This method cannot be referenced in the normal process of saga. The method here is only for
+     * compatibility interfaces {@link io.seata.saga.engine.StateMachineConfig} public methods.
+     */
     @Override
     public StateMachineRepository getStateMachineRepository() {
         org.apache.seata.saga.engine.repo.StateMachineRepository repository = actual.getStateMachineRepository();
@@ -139,19 +163,22 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
         return new StateMachineRepository() {
             @Override
             public StateMachine getStateMachineById(String stateMachineId) {
-                org.apache.seata.saga.statelang.domain.StateMachine stateMachine = repository.getStateMachineById(stateMachineId);
+                org.apache.seata.saga.statelang.domain.StateMachine stateMachine =
+                        repository.getStateMachineById(stateMachineId);
                 return StateMachineImpl.wrap(stateMachine);
             }
 
             @Override
             public StateMachine getStateMachine(String stateMachineName, String tenantId) {
-                org.apache.seata.saga.statelang.domain.StateMachine stateMachine = repository.getStateMachine(stateMachineName, tenantId);
+                org.apache.seata.saga.statelang.domain.StateMachine stateMachine =
+                        repository.getStateMachine(stateMachineName, tenantId);
                 return StateMachineImpl.wrap(stateMachine);
             }
 
             @Override
             public StateMachine getStateMachine(String stateMachineName, String tenantId, String version) {
-                org.apache.seata.saga.statelang.domain.StateMachine stateMachine = repository.getStateMachine(stateMachineName, tenantId, version);
+                org.apache.seata.saga.statelang.domain.StateMachine stateMachine =
+                        repository.getStateMachine(stateMachineName, tenantId, version);
                 return StateMachineImpl.wrap(stateMachine);
             }
 
@@ -169,10 +196,16 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
         };
     }
 
-    public void setStateMachineRepository(org.apache.seata.saga.engine.repo.StateMachineRepository stateMachineRepository) {
+    public void setStateMachineRepository(
+            org.apache.seata.saga.engine.repo.StateMachineRepository stateMachineRepository) {
         actual.setStateMachineRepository(stateMachineRepository);
     }
 
+    /**
+     * this method will return a {@link StatusDecisionStrategy} which is wrapped from {@link org.apache.seata.saga.engine.strategy.StatusDecisionStrategy}
+     * notice: This method cannot be referenced in the normal process of saga. The method here is only for
+     * compatibility interfaces {@link io.seata.saga.engine.StateMachineConfig} public methods.
+     */
     @Override
     public StatusDecisionStrategy getStatusDecisionStrategy() {
         return actual.getStatusDecisionStrategy();
@@ -192,11 +225,21 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
         actual.setSeqGenerator(seqGenerator);
     }
 
+    /**
+     * this method will return a {@link ProcessCtrlEventPublisher} which is wrapped from {@link org.apache.seata.saga.proctrl.eventing.impl.ProcessCtrlEventPublisher}
+     * notice: This method cannot be referenced in the normal process of saga. The method here is only for
+     * compatibility interfaces {@link io.seata.saga.engine.StateMachineConfig} public methods.
+     */
     @Override
     public ProcessCtrlEventPublisher getProcessCtrlEventPublisher() {
         return actual.getProcessCtrlEventPublisher();
     }
 
+    /**
+     * this method will return a {@link ProcessCtrlEventPublisher} which is wrapped from {@link org.apache.seata.saga.proctrl.eventing.impl.ProcessCtrlEventPublisher}
+     * notice: This method cannot be referenced in the normal process of saga. The method here is only for
+     * compatibility interfaces {@link io.seata.saga.engine.StateMachineConfig} public methods.
+     */
     @Override
     public ProcessCtrlEventPublisher getAsyncProcessCtrlEventPublisher() {
         return actual.getAsyncProcessCtrlEventPublisher();
@@ -233,6 +276,11 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
         actual.setEnableAsync(enableAsync);
     }
 
+    /**
+     * this method will return a {@link StateLogRepository} which is wrapped from {@link org.apache.seata.saga.engine.repo.StateLogRepository}
+     * notice: This method cannot be referenced in the normal process of saga. The method here is only for
+     * compatibility interfaces {@link io.seata.saga.engine.StateMachineConfig} public methods.
+     */
     @Override
     public StateLogRepository getStateLogRepository() {
         org.apache.seata.saga.engine.repo.StateLogRepository repository = actual.getStateLogRepository();
@@ -247,13 +295,15 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
 
             @Override
             public StateMachineInstance getStateMachineInstanceByBusinessKey(String businessKey, String tenantId) {
-                return StateMachineInstanceImpl.wrap(repository.getStateMachineInstanceByBusinessKey(businessKey, tenantId));
+                return StateMachineInstanceImpl.wrap(
+                        repository.getStateMachineInstanceByBusinessKey(businessKey, tenantId));
             }
 
             @Override
             public List<StateMachineInstance> queryStateMachineInstanceByParentId(String parentId) {
                 return repository.queryStateMachineInstanceByParentId(parentId).stream()
-                        .map(StateMachineInstanceImpl::wrap).collect(Collectors.toList());
+                        .map(StateMachineInstanceImpl::wrap)
+                        .collect(Collectors.toList());
             }
 
             @Override
@@ -264,7 +314,8 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
             @Override
             public List<StateInstance> queryStateInstanceListByMachineInstanceId(String stateMachineInstanceId) {
                 return repository.queryStateInstanceListByMachineInstanceId(stateMachineInstanceId).stream()
-                        .map(StateInstanceImpl::wrap).collect(Collectors.toList());
+                        .map(StateInstanceImpl::wrap)
+                        .collect(Collectors.toList());
             }
         };
     }

@@ -48,8 +48,7 @@ public class ColumnMeta {
     /**
      * Instantiates a new Column meta.
      */
-    public ColumnMeta() {
-    }
+    public ColumnMeta() {}
 
     @Override
     public String toString() {

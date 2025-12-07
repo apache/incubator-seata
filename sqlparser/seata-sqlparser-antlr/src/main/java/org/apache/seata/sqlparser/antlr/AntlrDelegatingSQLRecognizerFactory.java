@@ -25,7 +25,6 @@ import org.apache.seata.sqlparser.SqlParserType;
 import java.lang.reflect.Constructor;
 import java.util.List;
 
-
 @LoadLevel(name = SqlParserType.SQL_PARSER_TYPE_ANTLR)
 public class AntlrDelegatingSQLRecognizerFactory implements SQLRecognizerFactory {
 
@@ -41,7 +40,8 @@ public class AntlrDelegatingSQLRecognizerFactory implements SQLRecognizerFactory
      */
     void setClassLoader() {
         try {
-            Class<?> recognizerFactoryImplClass = ClassLoader.getSystemClassLoader().loadClass("org.apache.seata.sqlparser.antlr.mysql.AntlrMySQLRecognizerFactory");
+            Class<?> recognizerFactoryImplClass = ClassLoader.getSystemClassLoader()
+                    .loadClass("org.apache.seata.sqlparser.antlr.mysql.AntlrMySQLRecognizerFactory");
             Constructor<?> implConstructor = recognizerFactoryImplClass.getDeclaredConstructor();
             implConstructor.setAccessible(true);
             try {

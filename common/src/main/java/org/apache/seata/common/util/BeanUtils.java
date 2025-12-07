@@ -16,15 +16,16 @@
  */
 package org.apache.seata.common.util;
 
+import org.apache.seata.common.exception.NotSupportYetException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.apache.seata.common.exception.NotSupportYetException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The bean utils
@@ -34,6 +35,12 @@ public class BeanUtils {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(BeanUtils.class);
 
+    /**
+     * Convert bean to string representation
+     *
+     * @param o the object to convert
+     * @return string representation of the object
+     */
     public static String beanToString(Object o) {
         if (o == null) {
             return null;
@@ -72,7 +79,9 @@ public class BeanUtils {
             return null;
         }
         try {
-            Object instance = clazz.newInstance();
+            // Use getDeclaredConstructor instead of newInstance which is deprecated since Java 9
+            Constructor<?> constructor = clazz.getDeclaredConstructor();
+            Object instance = constructor.newInstance();
             Field[] fields = instance.getClass().getDeclaredFields();
             for (Field field : fields) {
                 int modifiers = field.getModifiers();
@@ -107,14 +116,13 @@ public class BeanUtils {
             }
             return instance;
         } catch (IllegalAccessException e) {
-            throw new NotSupportYetException(
-                    "map to " + clazz.toString() + " failed:" + e.getMessage(), e);
+            throw new NotSupportYetException("map to " + clazz.toString() + " failed:" + e.getMessage(), e);
         } catch (InstantiationException e) {
-            throw new NotSupportYetException(
-                    "map to " + clazz.toString() + " failed:" + e.getMessage(), e);
+            throw new NotSupportYetException("map to " + clazz.toString() + " failed:" + e.getMessage(), e);
+        } catch (Exception e) {
+            throw new NotSupportYetException("map to " + clazz.toString() + " failed:" + e.getMessage(), e);
         }
     }
-
 
     /**
      * object to map
@@ -138,7 +146,8 @@ public class BeanUtils {
                         map.put(field.getName(), String.valueOf(date.getTime()));
                     }
                 } else {
-                    map.put(field.getName(),
+                    map.put(
+                            field.getName(),
                             field.get(object) == null ? "" : field.get(object).toString());
                 }
                 field.setAccessible(accessible);
@@ -149,5 +158,4 @@ public class BeanUtils {
         }
         return map;
     }
-
 }

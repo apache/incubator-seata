@@ -18,8 +18,6 @@
 #For details about configuration items, see https://seata.apache.org/zh-cn/docs/user/configurations
 #Transport configuration, for client and server
 transport.protocol=seata
-transport.type=TCP
-transport.server=NIO
 transport.heartbeat=true
 transport.enableTmClientBatchSendRequest=false
 transport.enableRmClientBatchSendRequest=true
@@ -40,6 +38,25 @@ transport.threadFactory.workerThreadSize=default
 transport.shutdown.wait=3
 transport.serialization=seata
 transport.compressor=none
+#HTTP thread pool
+transport.minHttpPoolSize=10
+transport.maxHttpPoolSize=100
+transport.maxHttpTaskQueueSize=1000
+transport.httpPoolKeepAliveTime=500
+
+transport.serverSocketSendBufSize=153600
+transport.serverSocketResvBufSize=153600
+transport.writeBufferHighWaterMark=67108864
+transport.writeBufferLowWaterMark=1048576
+
+transport.soBackLogSize=1024
+transport.serverChannelMaxIdleTimeSeconds=30
+
+transport.minServerPoolSize=50
+transport.maxServerPoolSize=500
+transport.maxTaskQueueSize=20000
+transport.keepAliveTime=500
+
 
 #Transaction routing rules configuration, only for the client
 service.vgroupMapping.default_tx_group=default
@@ -114,7 +131,7 @@ store.db.maxConn=30
 store.db.globalTable=global_table
 store.db.branchTable=branch_table
 store.db.distributedLockTable=distributed_lock
-store.db.vgroupTable=vgroup-table
+store.db.vgroupTable=vgroup_table
 store.db.queryLimit=100
 store.db.lockTable=lock_table
 store.db.maxWait=5000
@@ -163,7 +180,8 @@ server.distributedLockExpireTime=10000
 server.session.branchAsyncQueueSize=5000
 server.session.enableBranchAsyncRemove=false
 server.enableParallelRequestHandle=true
-server.enableParallelHandleBranch=false
+server.enableParallelRequestHandle=true
+server.retryDeadThreshold=70000
 server.applicationDataLimit=64000
 server.applicationDataLimitCheck=false
 
@@ -184,6 +202,8 @@ server.ratelimit.enable=false
 server.ratelimit.bucketTokenNumPerSecond = 999999
 server.ratelimit.bucketTokenMaxNum = 999999
 server.ratelimit.bucketTokenInitialNum = 999999
+
+server.http.filter.xss.keywords=["<script>", "</script>", "javascript:", "vbscript:"]
 
 #Metrics configuration, only for the server
 metrics.enabled=true

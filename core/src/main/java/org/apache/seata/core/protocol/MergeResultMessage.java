@@ -16,7 +16,6 @@
  */
 package org.apache.seata.core.protocol;
 
-
 /**
  * The type Merge result message.
  *
@@ -57,7 +56,9 @@ public class MergeResultMessage extends AbstractMessage implements MergeMessage 
         if (msgs == null) {
             return sb.toString();
         }
-        for (AbstractMessage msg : msgs) { sb.append(msg.toString()).append("\n"); }
+        for (AbstractMessage msg : msgs) {
+            sb.append(msg.toString()).append("\n");
+        }
         return sb.toString();
     }
 }

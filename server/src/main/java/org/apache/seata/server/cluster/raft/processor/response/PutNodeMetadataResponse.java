@@ -38,5 +38,4 @@ public class PutNodeMetadataResponse implements Serializable {
     public String toString() {
         return "PutNodeMetadataResponse{" + "success=" + success + '}';
     }
-
 }

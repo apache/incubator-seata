@@ -20,6 +20,4 @@ package org.apache.seata.saga.statelang.domain;
  * Compensate SubStateMachine State
  *
  */
-public interface CompensateSubStateMachineState extends ServiceTaskState {
-
-}
+public interface CompensateSubStateMachineState extends ServiceTaskState {}

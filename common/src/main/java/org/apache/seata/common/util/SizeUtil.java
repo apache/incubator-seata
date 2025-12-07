@@ -16,7 +16,6 @@
  */
 package org.apache.seata.common.util;
 
-
 public class SizeUtil {
     private static final long RADIX = 1024;
     /**

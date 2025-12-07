@@ -16,15 +16,9 @@
  */
 package io.seata.config.extend;
 
-import java.security.SecureRandom;
-import java.util.Set;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
 import com.alibaba.nacos.api.NacosFactory;
 import com.alibaba.nacos.api.config.ConfigService;
 import com.alibaba.nacos.api.exception.NacosException;
-
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import org.apache.seata.config.CachedConfigurationChangeListener;
@@ -37,12 +31,17 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledOnOs;
-import org.junit.jupiter.api.condition.OS;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
+import java.security.SecureRandom;
+import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
+@EnabledIfSystemProperty(named = "nacosCaseEnabled", matches = "true")
 public class TestConfigFromExtendSPI {
 
-    private static  Config FILE_CONFIG;
+    private static Config FILE_CONFIG;
     private static ConfigService configService;
 
     private static final String CHARACTERS = "abcdefghijklmnopqrstuvwxyz";
@@ -61,7 +60,6 @@ public class TestConfigFromExtendSPI {
     }
 
     @Test
-    @EnabledOnOs(OS.LINUX)
     public void testGetConfigProperties() throws Exception {
         Assertions.assertNotNull(configService);
         Configuration configuration = ConfigurationFactory.getInstance();
@@ -80,13 +78,12 @@ public class TestConfigFromExtendSPI {
         configService.publishConfig(dataId, group, content);
         boolean reachZero = listenerCountDown.await(5, TimeUnit.SECONDS);
         Assertions.assertTrue(reachZero);
-        //get config
+        // get config
         String config = configuration.getConfig(dataId);
         Assertions.assertEquals(content, config);
-        //listener
+        // listener
         Set<ConfigurationChangeListener> listeners = configuration.getConfigListeners(dataId);
         Assertions.assertEquals(1, listeners.size());
-
     }
 
     public static String generateRandomString() {

@@ -28,12 +28,9 @@ public class BranchSessionMock {
 
     private String resourceId;
 
-
     private BranchType branchType;
 
-
     private String applicationData;
-
 
     public String getXid() {
         return xid;

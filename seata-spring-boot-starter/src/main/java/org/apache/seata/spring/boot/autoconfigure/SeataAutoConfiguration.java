@@ -16,8 +16,6 @@
  */
 package org.apache.seata.spring.boot.autoconfigure;
 
-import java.util.List;
-
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.spring.annotation.GlobalTransactionScanner;
 import org.apache.seata.spring.annotation.ScannerChecker;
@@ -33,6 +31,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.DependsOn;
+
+import java.util.List;
 
 import static org.apache.seata.common.Constants.BEAN_NAME_FAILURE_HANDLER;
 import static org.apache.seata.common.Constants.BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER;
@@ -56,7 +56,9 @@ public class SeataAutoConfiguration {
     @Bean
     @DependsOn({BEAN_NAME_SPRING_APPLICATION_CONTEXT_PROVIDER, BEAN_NAME_FAILURE_HANDLER})
     @ConditionalOnMissingBean(GlobalTransactionScanner.class)
-    public static GlobalTransactionScanner globalTransactionScanner(SeataProperties seataProperties, FailureHandler failureHandler,
+    public static GlobalTransactionScanner globalTransactionScanner(
+            SeataProperties seataProperties,
+            FailureHandler failureHandler,
             ConfigurableListableBeanFactory beanFactory,
             @Autowired(required = false) List<ScannerChecker> scannerCheckers) {
         if (LOGGER.isInfoEnabled()) {
@@ -76,11 +78,14 @@ public class SeataAutoConfiguration {
         GlobalTransactionScanner.addScannablePackages(seataProperties.getScanPackages());
         // add excludeBeanNames
         GlobalTransactionScanner.addScannerExcludeBeanNames(seataProperties.getExcludesForScanning());
-        //set accessKey and secretKey
+        // set accessKey and secretKey
         GlobalTransactionScanner.setAccessKey(seataProperties.getAccessKey());
         GlobalTransactionScanner.setSecretKey(seataProperties.getSecretKey());
         // create global transaction scanner
-        return new GlobalTransactionScanner(seataProperties.getApplicationId(), seataProperties.getTxServiceGroup(),
-                seataProperties.isExposeProxy(), failureHandler);
+        return new GlobalTransactionScanner(
+                seataProperties.getApplicationId(),
+                seataProperties.getTxServiceGroup(),
+                seataProperties.isExposeProxy(),
+                failureHandler);
     }
 }

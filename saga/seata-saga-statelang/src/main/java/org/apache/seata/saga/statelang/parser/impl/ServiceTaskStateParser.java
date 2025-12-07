@@ -16,12 +16,12 @@
  */
 package org.apache.seata.saga.statelang.parser.impl;
 
-import java.util.List;
-import java.util.Map;
-
 import org.apache.seata.saga.statelang.domain.ServiceTaskState;
 import org.apache.seata.saga.statelang.domain.impl.ServiceTaskStateImpl;
 import org.apache.seata.saga.statelang.parser.StateParser;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * ServiceTaskTask parser
@@ -36,11 +36,11 @@ public class ServiceTaskStateParser extends AbstractTaskStateParser implements S
 
         parseTaskAttributes(serviceTaskState, node);
 
-        Map<String, Object> nodeMap = (Map<String, Object>)node;
-        serviceTaskState.setServiceName((String)nodeMap.get("ServiceName"));
-        serviceTaskState.setServiceMethod((String)nodeMap.get("ServiceMethod"));
-        serviceTaskState.setServiceType((String)nodeMap.get("ServiceType"));
-        serviceTaskState.setParameterTypes((List<String>)nodeMap.get("ParameterTypes"));
+        Map<String, Object> nodeMap = (Map<String, Object>) node;
+        serviceTaskState.setServiceName((String) nodeMap.get("ServiceName"));
+        serviceTaskState.setServiceMethod((String) nodeMap.get("ServiceMethod"));
+        serviceTaskState.setServiceType((String) nodeMap.get("ServiceType"));
+        serviceTaskState.setParameterTypes((List<String>) nodeMap.get("ParameterTypes"));
         Object isAsync = nodeMap.get("IsAsync");
         if (Boolean.TRUE.equals(isAsync)) {
             serviceTaskState.setAsync(true);

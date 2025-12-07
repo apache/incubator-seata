@@ -17,7 +17,6 @@
 package org.apache.seata.core.message;
 
 import org.apache.seata.core.protocol.transaction.GlobalBeginRequest;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -38,7 +37,7 @@ public class GlobalBeginRequestTest {
         GlobalBeginRequest globalBeginRequest = new GlobalBeginRequest();
         globalBeginRequest.setTransactionName("tran 1");
 
-        Assertions.assertEquals("GlobalBeginRequest{transactionName='tran 1', timeout=60000}", globalBeginRequest.toString());
+        Assertions.assertEquals(
+                "GlobalBeginRequest{transactionName='tran 1', timeout=60000}", globalBeginRequest.toString());
     }
-
 }

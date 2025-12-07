@@ -16,8 +16,9 @@
  */
 package org.apache.seata.core.store;
 
-import java.util.List;
 import org.apache.seata.core.model.LockStatus;
+
+import java.util.List;
 
 /**
  * The interface Lock store.
@@ -32,7 +33,6 @@ public interface LockStore {
      * @return the boolean
      */
     boolean acquireLock(LockDO lockDO);
-
 
     /**
      * Acquire lock boolean.
@@ -88,5 +88,4 @@ public interface LockStore {
      *
      */
     void updateLockStatus(String xid, LockStatus lockStatus);
-
 }

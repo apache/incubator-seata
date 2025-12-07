@@ -26,7 +26,6 @@ public class TccActionImpl implements TccAction {
 
     private boolean isCommit;
 
-
     @Override
     public boolean prepare(BusinessActionContext actionContext) {
         return true;
@@ -43,7 +42,6 @@ public class TccActionImpl implements TccAction {
         return false;
     }
 
-
     @Override
     public boolean rollback(BusinessActionContext actionContext) {
         return true;
@@ -53,7 +51,6 @@ public class TccActionImpl implements TccAction {
     public boolean rollbackWithArg(BusinessActionContext actionContext, TccParam param) {
         return false;
     }
-
 
     public boolean isCommit() {
         return isCommit;

@@ -16,17 +16,16 @@
  */
 package org.apache.seata.discovery.registry.raft;
 
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.seata.common.metadata.MetadataResponse;
-import org.apache.seata.common.metadata.Node;
-import org.apache.seata.common.util.*;
-import org.apache.seata.config.ConfigurationFactory;
 import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.StringEntity;
+import org.apache.seata.common.metadata.MetadataResponse;
+import org.apache.seata.common.metadata.Node;
+import org.apache.seata.common.util.*;
+import org.apache.seata.config.ConfigurationFactory;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -40,16 +39,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-
 class RaftRegistryServiceImplTest {
-
 
     @BeforeAll
     public static void beforeClass() {
@@ -73,7 +69,8 @@ class RaftRegistryServiceImplTest {
     @Test
     public void testLoginFailed() throws IOException, NoSuchMethodException {
         String jwtToken = "null";
-        String responseBody = "{\"code\":\"401\",\"message\":\"Login failed\",\"data\":\"" + jwtToken + "\",\"success\":false}";
+        String responseBody =
+                "{\"code\":\"401\",\"message\":\"Login failed\",\"data\":\"" + jwtToken + "\",\"success\":false}";
 
         try (MockedStatic<HttpClientUtil> mockedStatic = Mockito.mockStatic(HttpClientUtil.class)) {
 
@@ -84,26 +81,28 @@ class RaftRegistryServiceImplTest {
             when(mockResponse.getStatusLine()).thenReturn(mockStatusLine);
             when(mockStatusLine.getStatusCode()).thenReturn(HttpStatus.SC_OK);
 
-
             when(HttpClientUtil.doPost(any(String.class), any(Map.class), any(Map.class), any(int.class)))
-                .thenReturn(mockResponse);
+                    .thenReturn(mockResponse);
 
             // Use reflection to access and invoke the private method
             Method refreshTokenMethod = RaftRegistryServiceImpl.class.getDeclaredMethod("refreshToken", String.class);
             refreshTokenMethod.setAccessible(true);
-            assertThrows(Exception.class, () -> refreshTokenMethod.invoke(RaftRegistryServiceImpl.getInstance(), "127.0.0.1:8092"));
-
+            assertThrows(
+                    Exception.class,
+                    () -> refreshTokenMethod.invoke(RaftRegistryServiceImpl.getInstance(), "127.0.0.1:8092"));
         }
     }
 
     /**
      * test whether the jwtToken updated when refreshToken method invoked
      */
-
     @Test
-    public void testRefreshTokenSuccess() throws IOException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, NoSuchFieldException {
+    public void testRefreshTokenSuccess()
+            throws IOException, NoSuchMethodException, InvocationTargetException, IllegalAccessException,
+                    NoSuchFieldException {
         String jwtToken = "newToken";
-        String responseBody = "{\"code\":\"200\",\"message\":\"success\",\"data\":\"" + jwtToken + "\",\"success\":true}";
+        String responseBody =
+                "{\"code\":\"200\",\"message\":\"success\",\"data\":\"" + jwtToken + "\",\"success\":true}";
 
         try (MockedStatic<HttpClientUtil> mockedStatic = Mockito.mockStatic(HttpClientUtil.class)) {
 
@@ -114,10 +113,8 @@ class RaftRegistryServiceImplTest {
             when(mockResponse.getStatusLine()).thenReturn(mockStatusLine);
             when(mockStatusLine.getStatusCode()).thenReturn(HttpStatus.SC_OK);
 
-
             when(HttpClientUtil.doPost(any(String.class), any(Map.class), any(Map.class), any(int.class)))
-                .thenReturn(mockResponse);
-
+                    .thenReturn(mockResponse);
 
             Method refreshTokenMethod = RaftRegistryServiceImpl.class.getDeclaredMethod("refreshToken", String.class);
             refreshTokenMethod.setAccessible(true);
@@ -126,19 +123,17 @@ class RaftRegistryServiceImplTest {
             jwtTokenField.setAccessible(true);
             String jwtTokenAct = (String) jwtTokenField.get(null);
 
-
             assertEquals(jwtToken, jwtTokenAct);
-
         }
     }
-
 
     /**
      * test whether the jwtToken refreshed when it is expired
      */
-
     @Test
-    public void testSecureTTL() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, NoSuchFieldException, InterruptedException {
+    public void testSecureTTL()
+            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, NoSuchFieldException,
+                    InterruptedException {
         Field tokenTimeStamp = RaftRegistryServiceImpl.class.getDeclaredField("tokenTimeStamp");
         tokenTimeStamp.setAccessible(true);
         tokenTimeStamp.setLong(RaftRegistryServiceImpl.class, System.currentTimeMillis());
@@ -156,12 +151,16 @@ class RaftRegistryServiceImplTest {
      * RaftRegistryServiceImpl#transactionEndpointStr()
      */
     @Test
-    public void testSelectEndpoint() throws JsonProcessingException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        String jsonString = "{\"nodes\":[{\"control\":{\"host\":\"v-0.svc-l.default.svc.cluster.local\",\"port\":7091},\"transaction\":{\"host\":\"v-0.svc-l.default.svc.cluster.local\",\"port\":8091},\"internal\":{\"host\":\"v-0.svc-l.default.svc.cluster.local\",\"port\":9091},\"group\":\"default\",\"role\":\"LEADER\",\"version\":\"2.3.0-SNAPSHOT\",\"metadata\":{\"external\":[{\"host\":\"192.168.105.7\",\"controlPort\":30071,\"transactionPort\":30091},{\"host\":\"10.10.105.7\",\"controlPort\":30071,\"transactionPort\":30091}]}},{\"control\":{\"host\":\"v-2.svc-l.default.svc.cluster.local\",\"port\":7091},\"transaction\":{\"host\":\"v-2.svc-l.default.svc.cluster.local\",\"port\":8091},\"internal\":{\"host\":\"v-2.svc-l.default.svc.cluster.local\",\"port\":9091},\"group\":\"default\",\"role\":\"FOLLOWER\",\"version\":\"2.3.0-SNAPSHOT\",\"metadata\":{\"external\":[{\"host\":\"192.168.105.7\",\"controlPort\":30073,\"transactionPort\":30093},{\"host\":\"10.10.105.7\",\"controlPort\":30073,\"transactionPort\":30093}]}},{\"control\":{\"host\":\"v-1.svc-l.default.svc.cluster.local\",\"port\":7091},\"transaction\":{\"host\":\"v-1.svc-l.default.svc.cluster.local\",\"port\":8091},\"internal\":{\"host\":\"v-1.svc-l.default.svc.cluster.local\",\"port\":9091},\"group\":\"default\",\"role\":\"FOLLOWER\",\"version\":\"2.3.0-SNAPSHOT\",\"metadata\":{\"external\":[{\"host\":\"192.168.105.7\",\"controlPort\":30072,\"transactionPort\":30092},{\"host\":\"10.10.105.7\",\"controlPort\":30072,\"transactionPort\":30092}]}}],\"storeMode\":\"raft\",\"term\":1}";
+    public void testSelectEndpoint()
+            throws JsonProcessingException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        String jsonString =
+                "{\"nodes\":[{\"control\":{\"host\":\"v-0.svc-l.default.svc.cluster.local\",\"port\":7091},\"transaction\":{\"host\":\"v-0.svc-l.default.svc.cluster.local\",\"port\":8091},\"internal\":{\"host\":\"v-0.svc-l.default.svc.cluster.local\",\"port\":9091},\"group\":\"default\",\"role\":\"LEADER\",\"version\":\"2.3.0-SNAPSHOT\",\"metadata\":{\"external\":[{\"host\":\"192.168.105.7\",\"controlPort\":30071,\"transactionPort\":30091},{\"host\":\"10.10.105.7\",\"controlPort\":30071,\"transactionPort\":30091}]}},{\"control\":{\"host\":\"v-2.svc-l.default.svc.cluster.local\",\"port\":7091},\"transaction\":{\"host\":\"v-2.svc-l.default.svc.cluster.local\",\"port\":8091},\"internal\":{\"host\":\"v-2.svc-l.default.svc.cluster.local\",\"port\":9091},\"group\":\"default\",\"role\":\"FOLLOWER\",\"version\":\"2.3.0-SNAPSHOT\",\"metadata\":{\"external\":[{\"host\":\"192.168.105.7\",\"controlPort\":30073,\"transactionPort\":30093},{\"host\":\"10.10.105.7\",\"controlPort\":30073,\"transactionPort\":30093}]}},{\"control\":{\"host\":\"v-1.svc-l.default.svc.cluster.local\",\"port\":7091},\"transaction\":{\"host\":\"v-1.svc-l.default.svc.cluster.local\",\"port\":8091},\"internal\":{\"host\":\"v-1.svc-l.default.svc.cluster.local\",\"port\":9091},\"group\":\"default\",\"role\":\"FOLLOWER\",\"version\":\"2.3.0-SNAPSHOT\",\"metadata\":{\"external\":[{\"host\":\"192.168.105.7\",\"controlPort\":30072,\"transactionPort\":30092},{\"host\":\"10.10.105.7\",\"controlPort\":30072,\"transactionPort\":30092}]}}],\"storeMode\":\"raft\",\"term\":1}";
 
-        Method selectControlEndpointStrMethod = RaftRegistryServiceImpl.class.getDeclaredMethod("selectControlEndpointStr", Node.class);
+        Method selectControlEndpointStrMethod =
+                RaftRegistryServiceImpl.class.getDeclaredMethod("selectControlEndpointStr", Node.class);
         selectControlEndpointStrMethod.setAccessible(true);
-        Method selectTransactionEndpointStrMethod = RaftRegistryServiceImpl.class.getDeclaredMethod("selectTransactionEndpointStr", Node.class);
+        Method selectTransactionEndpointStrMethod =
+                RaftRegistryServiceImpl.class.getDeclaredMethod("selectTransactionEndpointStr", Node.class);
         selectTransactionEndpointStrMethod.setAccessible(true);
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -169,8 +168,10 @@ class RaftRegistryServiceImplTest {
         List<Node> nodes = metadataResponse.getNodes();
 
         for (Node node : nodes) {
-            String controlEndpointStr = (String) selectControlEndpointStrMethod.invoke(null, node);;
-            String transactionEndpointStr = (String) selectTransactionEndpointStrMethod.invoke(null, node);;
+            String controlEndpointStr = (String) selectControlEndpointStrMethod.invoke(null, node);
+            ;
+            String transactionEndpointStr = (String) selectTransactionEndpointStrMethod.invoke(null, node);
+            ;
             Assertions.assertTrue(controlEndpointStr.contains("10.10.105.7:3007"));
             Assertions.assertTrue(transactionEndpointStr.contains("10.10.105.7:3009"));
         }

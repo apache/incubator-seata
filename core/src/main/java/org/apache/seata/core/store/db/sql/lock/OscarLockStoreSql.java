@@ -16,7 +16,6 @@
  */
 package org.apache.seata.core.store.db.sql.lock;
 
-
 import org.apache.seata.common.loader.LoadLevel;
 
 /**
@@ -24,5 +23,4 @@ import org.apache.seata.common.loader.LoadLevel;
  *
  */
 @LoadLevel(name = "oscar")
-public class OscarLockStoreSql extends OracleLockStoreSql {
-}
+public class OscarLockStoreSql extends OracleLockStoreSql {}

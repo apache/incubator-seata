@@ -16,6 +16,26 @@
  */
 package org.apache.seata.server.session;
 
+import org.apache.seata.common.ConfigurationKeys;
+import org.apache.seata.common.store.SessionMode;
+import org.apache.seata.common.util.CollectionUtils;
+import org.apache.seata.common.util.UUIDGenerator;
+import org.apache.seata.config.Configuration;
+import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.core.context.RootContext;
+import org.apache.seata.core.exception.TransactionException;
+import org.apache.seata.core.model.BranchStatus;
+import org.apache.seata.core.model.BranchType;
+import org.apache.seata.core.model.GlobalStatus;
+import org.apache.seata.metrics.IdConstants;
+import org.apache.seata.server.cluster.raft.context.SeataClusterContext;
+import org.apache.seata.server.coordinator.DefaultCoordinator;
+import org.apache.seata.server.metrics.MetricsPublisher;
+import org.apache.seata.server.store.StoreConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -26,26 +46,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
-
-import org.apache.seata.common.ConfigurationKeys;
-import org.apache.seata.common.store.SessionMode;
-import org.apache.seata.common.util.CollectionUtils;
-import org.apache.seata.config.Configuration;
-import org.apache.seata.config.ConfigurationFactory;
-import org.apache.seata.core.context.RootContext;
-import org.apache.seata.core.exception.TransactionException;
-import org.apache.seata.core.model.BranchStatus;
-import org.apache.seata.core.model.BranchType;
-import org.apache.seata.core.model.GlobalStatus;
-import org.apache.seata.metrics.IdConstants;
-import org.apache.seata.common.util.UUIDGenerator;
-import org.apache.seata.server.cluster.raft.context.SeataClusterContext;
-import org.apache.seata.server.coordinator.DefaultCoordinator;
-import org.apache.seata.server.metrics.MetricsPublisher;
-import org.apache.seata.server.store.StoreConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_ENABLE_BRANCH_ASYNC_REMOVE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
@@ -63,8 +63,8 @@ public class SessionHelper {
      */
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
-    private static final Boolean ENABLE_BRANCH_ASYNC_REMOVE = CONFIG.getBoolean(
-            ConfigurationKeys.ENABLE_BRANCH_ASYNC_REMOVE, DEFAULT_ENABLE_BRANCH_ASYNC_REMOVE);
+    private static final Boolean ENABLE_BRANCH_ASYNC_REMOVE =
+            CONFIG.getBoolean(ConfigurationKeys.ENABLE_BRANCH_ASYNC_REMOVE, DEFAULT_ENABLE_BRANCH_ASYNC_REMOVE);
 
     private static final String GROUP = CONFIG.getConfig(ConfigurationKeys.SERVER_RAFT_GROUP, DEFAULT_SEATA_GROUP);
 
@@ -74,13 +74,12 @@ public class SessionHelper {
     private static final DefaultCoordinator COORDINATOR = DefaultCoordinator.getInstance();
 
     private static final boolean DELAY_HANDLE_SESSION = !(Objects.equals(StoreConfig.getSessionMode(), SessionMode.FILE)
-        || Objects.equals(StoreConfig.getSessionMode(), SessionMode.RAFT));
+            || Objects.equals(StoreConfig.getSessionMode(), SessionMode.RAFT));
 
+    private SessionHelper() {}
 
-    private SessionHelper() {
-    }
-
-    public static BranchSession newBranchByGlobal(GlobalSession globalSession, BranchType branchType, String resourceId, String lockKeys, String clientId) {
+    public static BranchSession newBranchByGlobal(
+            GlobalSession globalSession, BranchType branchType, String resourceId, String lockKeys, String clientId) {
         return newBranchByGlobal(globalSession, branchType, resourceId, null, lockKeys, clientId);
     }
 
@@ -94,8 +93,13 @@ public class SessionHelper {
      * @param clientId      the client id
      * @return the branch session
      */
-    public static BranchSession newBranchByGlobal(GlobalSession globalSession, BranchType branchType, String resourceId,
-            String applicationData, String lockKeys, String clientId) {
+    public static BranchSession newBranchByGlobal(
+            GlobalSession globalSession,
+            BranchType branchType,
+            String resourceId,
+            String applicationData,
+            String lockKeys,
+            String clientId) {
         BranchSession branchSession = new BranchSession(branchType);
 
         branchSession.setXid(globalSession.getXid());
@@ -120,7 +124,8 @@ public class SessionHelper {
      * @param applicationData Application data bind with this branch.
      * @return the branch session
      */
-    public static BranchSession newBranch(BranchType branchType, String xid, long branchId, String resourceId, String applicationData) {
+    public static BranchSession newBranch(
+            BranchType branchType, String xid, long branchId, String resourceId, String applicationData) {
         BranchSession branchSession = new BranchSession();
         branchSession.setXid(xid);
         branchSession.setBranchId(branchId);
@@ -149,8 +154,8 @@ public class SessionHelper {
             if (!DELAY_HANDLE_SESSION) {
                 MetricsPublisher.postSessionDoneEvent(globalSession, retryGlobal, false);
             }
-            MetricsPublisher.postSessionDoneEvent(globalSession, IdConstants.STATUS_VALUE_AFTER_COMMITTED_KEY, true,
-                beginTime, retryBranch);
+            MetricsPublisher.postSessionDoneEvent(
+                    globalSession, IdConstants.STATUS_VALUE_AFTER_COMMITTED_KEY, true, beginTime, retryBranch);
         } else {
             globalSession.setStatus(GlobalStatus.Committed);
             if (globalSession.isSaga()) {
@@ -180,14 +185,16 @@ public class SessionHelper {
      * @throws TransactionException the transaction exception
      */
     public static void endCommitFailed(GlobalSession globalSession, boolean retryGlobal, boolean isRetryTimeout)
-        throws TransactionException {
+            throws TransactionException {
         if (isRetryTimeout) {
             globalSession.changeGlobalStatus(GlobalStatus.CommitRetryTimeout);
         } else {
             globalSession.changeGlobalStatus(GlobalStatus.CommitFailed);
         }
-        LOGGER.error("The Global session {} has changed the status to {}, need to be handled it manually.",
-            globalSession.getXid(), globalSession.getStatus());
+        LOGGER.error(
+                "The Global session {} has changed the status to {}, need to be handled it manually.",
+                globalSession.getXid(),
+                globalSession.getStatus());
 
         globalSession.end();
         MetricsPublisher.postSessionDoneEvent(globalSession, retryGlobal, false);
@@ -209,10 +216,10 @@ public class SessionHelper {
                 MetricsPublisher.postSessionDoneEvent(globalSession, GlobalStatus.TimeoutRollbacked, false, false);
                 timeoutDone = true;
             }
-            boolean retryBranch =
-                    currentStatus == GlobalStatus.TimeoutRollbackRetrying || currentStatus == GlobalStatus.RollbackRetrying;
+            boolean retryBranch = currentStatus == GlobalStatus.TimeoutRollbackRetrying
+                    || currentStatus == GlobalStatus.RollbackRetrying;
             if (!currentStatus.equals(GlobalStatus.TimeoutRollbacked)
-                && SessionStatusValidator.isTimeoutRollbacking(currentStatus)) {
+                    && SessionStatusValidator.isTimeoutRollbacking(currentStatus)) {
                 globalSession.changeGlobalStatus(GlobalStatus.TimeoutRollbacked);
             } else if (!globalSession.getStatus().equals(GlobalStatus.Rollbacked)) {
                 globalSession.changeGlobalStatus(GlobalStatus.Rollbacked);
@@ -221,8 +228,8 @@ public class SessionHelper {
             if (!DELAY_HANDLE_SESSION && !timeoutDone) {
                 MetricsPublisher.postSessionDoneEvent(globalSession, retryGlobal, false);
             }
-            MetricsPublisher.postSessionDoneEvent(globalSession, IdConstants.STATUS_VALUE_AFTER_ROLLBACKED_KEY, true,
-                    beginTime, retryBranch);
+            MetricsPublisher.postSessionDoneEvent(
+                    globalSession, IdConstants.STATUS_VALUE_AFTER_ROLLBACKED_KEY, true, beginTime, retryBranch);
         } else {
             if (globalSession.isSaga()) {
                 globalSession.setStatus(GlobalStatus.Rollbacked);
@@ -251,7 +258,8 @@ public class SessionHelper {
      * @param isRetryTimeout   is retry timeout
      * @throws TransactionException the transaction exception
      */
-    public static void endRollbackFailed(GlobalSession globalSession, boolean retryGlobal, boolean isRetryTimeout) throws TransactionException {
+    public static void endRollbackFailed(GlobalSession globalSession, boolean retryGlobal, boolean isRetryTimeout)
+            throws TransactionException {
         GlobalStatus currentStatus = globalSession.getStatus();
         if (isRetryTimeout) {
             globalSession.changeGlobalStatus(GlobalStatus.RollbackRetryTimeout);
@@ -260,7 +268,10 @@ public class SessionHelper {
         } else {
             globalSession.changeGlobalStatus(GlobalStatus.RollbackFailed);
         }
-        LOGGER.error("The Global session {} has changed the status to {}, need to be handled it manually.", globalSession.getXid(), globalSession.getStatus());
+        LOGGER.error(
+                "The Global session {} has changed the status to {}, need to be handled it manually.",
+                globalSession.getXid(),
+                globalSession.getStatus());
         globalSession.end();
         MetricsPublisher.postSessionDoneEvent(globalSession, retryGlobal, false);
     }
@@ -328,7 +339,8 @@ public class SessionHelper {
      * @param sessions the branch session
      * @param handler  the handler
      */
-    public static Boolean forEach(Collection<BranchSession> sessions, BranchSessionHandler handler) throws TransactionException {
+    public static Boolean forEach(Collection<BranchSession> sessions, BranchSessionHandler handler)
+            throws TransactionException {
         return forEach(sessions, handler, false);
     }
 
@@ -338,13 +350,15 @@ public class SessionHelper {
      * @param sessions the branch session
      * @param handler  the handler
      */
-    public static Boolean forEach(Collection<BranchSession> sessions, BranchSessionHandler handler, boolean parallel) throws TransactionException {
+    public static Boolean forEach(Collection<BranchSession> sessions, BranchSessionHandler handler, boolean parallel)
+            throws TransactionException {
         if (CollectionUtils.isNotEmpty(sessions)) {
             Boolean result;
             if (parallel) {
                 Map<String, List<BranchSession>> map = new HashMap<>(4);
                 for (BranchSession session : sessions) {
-                    map.computeIfAbsent(session.getResourceId(), k -> new ArrayList<>()).add(session);
+                    map.computeIfAbsent(session.getResourceId(), k -> new ArrayList<>())
+                            .add(session);
                 }
                 List<CompletableFuture<Boolean>> completableFutures = new ArrayList<>(map.size());
                 map.forEach((k, v) -> completableFutures.add(CompletableFuture.supplyAsync(() -> {
@@ -369,7 +383,7 @@ public class SessionHelper {
                     if (throwable instanceof RuntimeException) {
                         Throwable cause = throwable.getCause();
                         if (cause instanceof TransactionException) {
-                            throw (TransactionException)cause;
+                            throw (TransactionException) cause;
                         }
                     }
                     throw new TransactionException(e);
@@ -399,7 +413,8 @@ public class SessionHelper {
      * @param handler  the handler
      * @since 1.5.0
      */
-    public static Boolean singleForEach(Collection<BranchSession> sessions, BranchSessionHandler handler) throws TransactionException {
+    public static Boolean singleForEach(Collection<BranchSession> sessions, BranchSessionHandler handler)
+            throws TransactionException {
         return SessionHelper.forEach(sessions, handler, false);
     }
 
@@ -409,10 +424,10 @@ public class SessionHelper {
      * @param sessions the branch session
      * @param handler  the handler
      */
-    public static Boolean parallelForEach(Collection<BranchSession> sessions, BranchSessionHandler handler) throws TransactionException {
+    public static Boolean parallelForEach(Collection<BranchSession> sessions, BranchSessionHandler handler)
+            throws TransactionException {
         return SessionHelper.forEach(sessions, handler, true);
     }
-
 
     /**
      * remove branchSession from globalSession
@@ -435,8 +450,7 @@ public class SessionHelper {
      * @param globalSession the globalSession
      * @param isAsync if asynchronous remove
      */
-    public static void removeAllBranch(GlobalSession globalSession, boolean isAsync)
-            throws TransactionException {
+    public static void removeAllBranch(GlobalSession globalSession, boolean isAsync) throws TransactionException {
         List<BranchSession> branchSessions = globalSession.getSortedBranches();
         if (branchSessions == null || branchSessions.isEmpty()) {
             return;

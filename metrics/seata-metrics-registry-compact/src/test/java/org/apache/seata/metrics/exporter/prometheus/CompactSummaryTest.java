@@ -70,13 +70,13 @@ public class CompactSummaryTest {
         compactSummary.increase(10);
         compactSummary.increase(15);
         try {
-            //Avoid test failures that take less than 1 millisecond to complete
+            // Avoid test failures that take less than 1 millisecond to complete
             Thread.sleep(1);
         } catch (InterruptedException ignore) {
             // don't care
         }
         // Assuming that the time taken is 1 second
-        assertTrue(compactSummary.tps() >0);
+        assertTrue(compactSummary.tps() > 0);
     }
 
     @Test

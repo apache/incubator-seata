@@ -47,8 +47,7 @@ public interface StateRouterInterceptor {
      * @throws EngineExecutionException
      */
     void postRoute(ProcessContext context, State state, Instruction instruction, Exception e)
-        throws EngineExecutionException;
-
+            throws EngineExecutionException;
 
     boolean match(Class<? extends InterceptableStateRouter> clazz);
 }

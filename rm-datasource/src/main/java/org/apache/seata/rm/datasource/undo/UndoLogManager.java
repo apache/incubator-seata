@@ -16,14 +16,14 @@
  */
 package org.apache.seata.rm.datasource.undo;
 
+import org.apache.seata.core.exception.TransactionException;
+import org.apache.seata.rm.datasource.ConnectionProxy;
+import org.apache.seata.rm.datasource.DataSourceProxy;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.Set;
-
-import org.apache.seata.core.exception.TransactionException;
-import org.apache.seata.rm.datasource.ConnectionProxy;
-import org.apache.seata.rm.datasource.DataSourceProxy;
 
 /**
  * The type Undo log manager.

@@ -23,10 +23,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class EurekaRegistryProviderTest {
 
     @Test
-    void testProvide(){
+    void testProvide() {
         EurekaRegistryProvider provider = new EurekaRegistryProvider();
         assertThat(provider.provide()).isInstanceOf(EurekaRegistryServiceImpl.class);
         assertThat(provider.provide()).isSameAs(provider.provide());
-
     }
 }

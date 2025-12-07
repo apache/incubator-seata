@@ -16,7 +16,6 @@
  */
 package org.apache.seata.discovery.registry.namingserver;
 
-
 public interface NamingListener {
     /**
      * on event

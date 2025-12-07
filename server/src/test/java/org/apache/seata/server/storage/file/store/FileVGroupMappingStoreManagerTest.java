@@ -18,11 +18,11 @@ package org.apache.seata.server.storage.file.store;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.seata.core.store.MappingDO;
+import org.apache.seata.server.BaseSpringBootTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,13 +30,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@SpringBootTest
-public class FileVGroupMappingStoreManagerTest {
+public class FileVGroupMappingStoreManagerTest extends BaseSpringBootTest {
 
     private FileVGroupMappingStoreManager fileVGroupMappingStoreManager;
     private static final String STORE_PATH = "sessionStore/vgroup_mapping.json";
@@ -108,7 +106,7 @@ public class FileVGroupMappingStoreManagerTest {
 
     @Test
     public void testAddVGroupFailure() {
-        FileVGroupMappingStoreManager spyManager = spy(new FileVGroupMappingStoreManager( "src/test/resources"));
+        FileVGroupMappingStoreManager spyManager = spy(new FileVGroupMappingStoreManager("src/test/resources"));
         doReturn(false).when(spyManager).save(any(HashMap.class));
         MappingDO mappingDO = new MappingDO();
         mappingDO.setVGroup(VGROUP_NAME);

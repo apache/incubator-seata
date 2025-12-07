@@ -19,6 +19,7 @@ package org.apache.seata.serializer.protobuf.convertor;
 import org.apache.seata.core.exception.TransactionExceptionCode;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.protocol.ResultCode;
+import org.apache.seata.core.protocol.transaction.GlobalRollbackResponse;
 import org.apache.seata.serializer.protobuf.generated.AbstractGlobalEndResponseProto;
 import org.apache.seata.serializer.protobuf.generated.AbstractMessageProto;
 import org.apache.seata.serializer.protobuf.generated.AbstractResultMessageProto;
@@ -28,56 +29,62 @@ import org.apache.seata.serializer.protobuf.generated.GlobalStatusProto;
 import org.apache.seata.serializer.protobuf.generated.MessageTypeProto;
 import org.apache.seata.serializer.protobuf.generated.ResultCodeProto;
 import org.apache.seata.serializer.protobuf.generated.TransactionExceptionCodeProto;
-import org.apache.seata.core.protocol.transaction.GlobalRollbackResponse;
-
 
 public class GlobalRollbackResponseConvertor
-    implements PbConvertor<GlobalRollbackResponse, GlobalRollbackResponseProto> {
+        implements PbConvertor<GlobalRollbackResponse, GlobalRollbackResponseProto> {
     @Override
     public GlobalRollbackResponseProto convert2Proto(GlobalRollbackResponse globalRollbackResponse) {
         final short typeCode = globalRollbackResponse.getTypeCode();
 
-        final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder().setMessageType(
-            MessageTypeProto.forNumber(typeCode)).build();
+        final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder()
+                .setMessageType(MessageTypeProto.forNumber(typeCode))
+                .build();
 
         final String msg = globalRollbackResponse.getMsg();
-        final AbstractResultMessageProto abstractResultMessageProto = AbstractResultMessageProto.newBuilder().setMsg(
-            msg == null ? "" : msg).setResultCode(
-            ResultCodeProto.valueOf(globalRollbackResponse.getResultCode().name())).setAbstractMessage(abstractMessage)
-            .build();
+        final AbstractResultMessageProto abstractResultMessageProto = AbstractResultMessageProto.newBuilder()
+                .setMsg(msg == null ? "" : msg)
+                .setResultCode(ResultCodeProto.valueOf(
+                        globalRollbackResponse.getResultCode().name()))
+                .setAbstractMessage(abstractMessage)
+                .build();
 
-        AbstractTransactionResponseProto abstractTransactionResponseProto = AbstractTransactionResponseProto
-            .newBuilder().setAbstractResultMessage(abstractResultMessageProto).setTransactionExceptionCode(
-                TransactionExceptionCodeProto.valueOf(globalRollbackResponse.getTransactionExceptionCode().name()))
-            .build();
+        AbstractTransactionResponseProto abstractTransactionResponseProto =
+                AbstractTransactionResponseProto.newBuilder()
+                        .setAbstractResultMessage(abstractResultMessageProto)
+                        .setTransactionExceptionCode(TransactionExceptionCodeProto.valueOf(globalRollbackResponse
+                                .getTransactionExceptionCode()
+                                .name()))
+                        .build();
 
         AbstractGlobalEndResponseProto abstractGlobalEndResponseProto = AbstractGlobalEndResponseProto.newBuilder()
-            .setAbstractTransactionResponse(abstractTransactionResponseProto).setGlobalStatus(
-                GlobalStatusProto.valueOf(globalRollbackResponse.getGlobalStatus().name())).build();
+                .setAbstractTransactionResponse(abstractTransactionResponseProto)
+                .setGlobalStatus(GlobalStatusProto.valueOf(
+                        globalRollbackResponse.getGlobalStatus().name()))
+                .build();
 
-        GlobalRollbackResponseProto result = GlobalRollbackResponseProto.newBuilder().setAbstractGlobalEndResponse(
-            abstractGlobalEndResponseProto).build();
+        GlobalRollbackResponseProto result = GlobalRollbackResponseProto.newBuilder()
+                .setAbstractGlobalEndResponse(abstractGlobalEndResponseProto)
+                .build();
 
         return result;
-
     }
 
     @Override
     public GlobalRollbackResponse convert2Model(GlobalRollbackResponseProto globalRollbackResponseProto) {
         GlobalRollbackResponse branchRegisterResponse = new GlobalRollbackResponse();
-        final AbstractGlobalEndResponseProto abstractGlobalEndResponse = globalRollbackResponseProto
-            .getAbstractGlobalEndResponse();
-        AbstractTransactionResponseProto abstractResultMessage = abstractGlobalEndResponse
-            .getAbstractTransactionResponse();
-        branchRegisterResponse.setMsg(abstractResultMessage.getAbstractResultMessage().getMsg());
-        branchRegisterResponse.setResultCode(
-            ResultCode.valueOf(abstractResultMessage.getAbstractResultMessage().getResultCode().name()));
-        branchRegisterResponse.setTransactionExceptionCode(
-            TransactionExceptionCode.valueOf(abstractResultMessage.getTransactionExceptionCode().name()));
+        final AbstractGlobalEndResponseProto abstractGlobalEndResponse =
+                globalRollbackResponseProto.getAbstractGlobalEndResponse();
+        AbstractTransactionResponseProto abstractResultMessage =
+                abstractGlobalEndResponse.getAbstractTransactionResponse();
+        branchRegisterResponse.setMsg(
+                abstractResultMessage.getAbstractResultMessage().getMsg());
+        branchRegisterResponse.setResultCode(ResultCode.valueOf(
+                abstractResultMessage.getAbstractResultMessage().getResultCode().name()));
+        branchRegisterResponse.setTransactionExceptionCode(TransactionExceptionCode.valueOf(
+                abstractResultMessage.getTransactionExceptionCode().name()));
         branchRegisterResponse.setGlobalStatus(
-            GlobalStatus.valueOf(abstractGlobalEndResponse.getGlobalStatus().name()));
+                GlobalStatus.valueOf(abstractGlobalEndResponse.getGlobalStatus().name()));
 
         return branchRegisterResponse;
-
     }
 }

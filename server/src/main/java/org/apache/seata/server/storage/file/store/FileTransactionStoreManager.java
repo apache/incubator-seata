@@ -16,6 +16,25 @@
  */
 package org.apache.seata.server.storage.file.store;
 
+import org.apache.seata.common.exception.StoreException;
+import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.util.BufferUtils;
+import org.apache.seata.common.util.CollectionUtils;
+import org.apache.seata.server.session.BranchSession;
+import org.apache.seata.server.session.GlobalSession;
+import org.apache.seata.server.session.SessionCondition;
+import org.apache.seata.server.session.SessionManager;
+import org.apache.seata.server.storage.file.FlushDiskMode;
+import org.apache.seata.server.storage.file.ReloadableStore;
+import org.apache.seata.server.storage.file.TransactionWriteStore;
+import org.apache.seata.server.store.AbstractTransactionStoreManager;
+import org.apache.seata.server.store.SessionStorable;
+import org.apache.seata.server.store.StoreConfig;
+import org.apache.seata.server.store.TransactionStoreManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -32,25 +51,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
-import org.apache.seata.common.exception.StoreException;
-import org.apache.seata.common.thread.NamedThreadFactory;
-import org.apache.seata.common.util.CollectionUtils;
-import org.apache.seata.common.util.BufferUtils;
-import org.apache.seata.server.session.BranchSession;
-import org.apache.seata.server.session.GlobalSession;
-import org.apache.seata.server.session.SessionCondition;
-import org.apache.seata.server.session.SessionManager;
-import org.apache.seata.server.storage.file.FlushDiskMode;
-import org.apache.seata.server.storage.file.ReloadableStore;
-import org.apache.seata.server.storage.file.TransactionWriteStore;
-import org.apache.seata.server.store.AbstractTransactionStoreManager;
-import org.apache.seata.server.store.SessionStorable;
-import org.apache.seata.server.store.StoreConfig;
-import org.apache.seata.server.store.TransactionStoreManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
-
 
 import static org.apache.seata.core.context.RootContext.MDC_KEY_BRANCH_ID;
 
@@ -59,7 +59,7 @@ import static org.apache.seata.core.context.RootContext.MDC_KEY_BRANCH_ID;
  *
  */
 public class FileTransactionStoreManager extends AbstractTransactionStoreManager
-    implements TransactionStoreManager, ReloadableStore {
+        implements TransactionStoreManager, ReloadableStore {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileTransactionStoreManager.class);
 
     private static final int MAX_THREAD_WRITE = 1;
@@ -137,9 +137,13 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
      */
     public FileTransactionStoreManager(String fullFileName, SessionManager sessionManager) throws IOException {
         initFile(fullFileName);
-        fileWriteExecutor = new ThreadPoolExecutor(MAX_THREAD_WRITE, MAX_THREAD_WRITE, Integer.MAX_VALUE,
-            TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(),
-            new NamedThreadFactory("fileTransactionStore", MAX_THREAD_WRITE, true));
+        fileWriteExecutor = new ThreadPoolExecutor(
+                MAX_THREAD_WRITE,
+                MAX_THREAD_WRITE,
+                Integer.MAX_VALUE,
+                TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<Runnable>(),
+                new NamedThreadFactory("fileTransactionStore", MAX_THREAD_WRITE, true));
         writeDataFileRunnable = new WriteDataFileRunnable();
         fileWriteExecutor.submit(writeDataFileRunnable);
         this.sessionManager = sessionManager;
@@ -152,7 +156,8 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
             currDataFile = new File(currFullFileName);
             if (!currDataFile.exists()) {
                 // create parent dir first
-                if (currDataFile.getParentFile() != null && !currDataFile.getParentFile().exists()) {
+                if (currDataFile.getParentFile() != null
+                        && !currDataFile.getParentFile().exists()) {
                     currDataFile.getParentFile().mkdirs();
                 }
                 currDataFile.createNewFile();
@@ -181,7 +186,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
             lastModifiedTime = System.currentTimeMillis();
             curFileTrxNum = FILE_TRX_NUM.incrementAndGet();
             if (curFileTrxNum % PER_FILE_BLOCK_SIZE == 0
-                && (System.currentTimeMillis() - trxStartTimeMills) > MAX_TRX_TIMEOUT_MILLS) {
+                    && (System.currentTimeMillis() - trxStartTimeMills) > MAX_TRX_TIMEOUT_MILLS) {
                 return saveHistory();
             }
         } catch (Exception exx) {
@@ -242,7 +247,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
         bufferRemainingSize = writeBuffer.remaining();
         if (bufferRemainingSize <= INT_BYTE_SIZE) {
             throw new IllegalStateException(
-                String.format("Write buffer remaining size %d was too small", bufferRemainingSize));
+                    String.format("Write buffer remaining size %d was too small", bufferRemainingSize));
         }
         writeBuffer.putInt(dataLength);
         bufferRemainingSize = writeBuffer.remaining();
@@ -273,8 +278,8 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
     }
 
     private boolean findTimeoutAndSave() throws IOException {
-        List<GlobalSession> globalSessionsOverMaxTimeout = sessionManager.findGlobalSessions(
-            new SessionCondition(MAX_TRX_TIMEOUT_MILLS));
+        List<GlobalSession> globalSessionsOverMaxTimeout =
+                sessionManager.findGlobalSessions(new SessionCondition(MAX_TRX_TIMEOUT_MILLS));
         if (CollectionUtils.isEmpty(globalSessionsOverMaxTimeout)) {
             return true;
         }
@@ -289,8 +294,8 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
                 for (BranchSession branchSession : branchSessIonsOverMaXTimeout) {
                     try {
                         MDC.put(MDC_KEY_BRANCH_ID, String.valueOf(branchSession.getBranchId()));
-                        TransactionWriteStore branchWriteStore = new TransactionWriteStore(branchSession,
-                            LogOperation.BRANCH_ADD);
+                        TransactionWriteStore branchWriteStore =
+                                new TransactionWriteStore(branchSession, LogOperation.BRANCH_ADD);
                         data = branchWriteStore.encode();
                         if (!writeDataFrame(data)) {
                             return false;
@@ -478,9 +483,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
         return false;
     }
 
-    interface StoreRequest {
-
-    }
+    interface StoreRequest {}
 
     abstract static class AbstractFlushRequest implements StoreRequest {
         private final long curFileTrxNum;
@@ -527,7 +530,6 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
         public AsyncFlushRequest(long curFileTrxNum, FileChannel curFileChannel) {
             super(curFileTrxNum, curFileChannel);
         }
-
     }
 
     static class CloseFileRequest implements StoreRequest {
@@ -601,11 +603,11 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
                 flushOnCondition(currFileChannel);
             }
             if (storeRequest instanceof SyncFlushRequest) {
-                syncFlush((SyncFlushRequest)storeRequest);
+                syncFlush((SyncFlushRequest) storeRequest);
             } else if (storeRequest instanceof AsyncFlushRequest) {
-                async((AsyncFlushRequest)storeRequest);
+                async((AsyncFlushRequest) storeRequest);
             } else if (storeRequest instanceof CloseFileRequest) {
-                closeAndFlush((CloseFileRequest)storeRequest);
+                closeAndFlush((CloseFileRequest) storeRequest);
             }
         }
 

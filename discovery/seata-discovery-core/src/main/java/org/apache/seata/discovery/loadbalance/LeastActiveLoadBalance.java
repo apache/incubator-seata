@@ -16,11 +16,11 @@
  */
 package org.apache.seata.discovery.loadbalance;
 
-import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
-
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.common.rpc.RpcStatus;
+
+import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static org.apache.seata.discovery.loadbalance.LoadBalanceFactory.LEAST_ACTIVE_LOAD_BALANCE;
 

@@ -33,8 +33,10 @@ import static org.mockito.Mockito.*;
 public class CompactGaugeTest {
     @Mock
     private Id id;
+
     @Mock
     private Supplier<Number> supplier;
+
     @Mock
     private Clock clock;
 

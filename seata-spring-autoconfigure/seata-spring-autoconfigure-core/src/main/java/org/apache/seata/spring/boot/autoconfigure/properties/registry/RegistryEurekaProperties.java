@@ -21,7 +21,6 @@ import org.springframework.stereotype.Component;
 
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_EUREKA_PREFIX;
 
-
 @Component
 @ConfigurationProperties(prefix = REGISTRY_EUREKA_PREFIX)
 public class RegistryEurekaProperties {

@@ -25,10 +25,9 @@ import java.security.CodeSource;
 
 import static org.apache.seata.common.DefaultValues.DRUID_LOCATION;
 
-
 class DefaultDruidLoader implements DruidLoader {
 
-    private final static DefaultDruidLoader DRUID_LOADER = new DefaultDruidLoader(DRUID_LOCATION);
+    private static final DefaultDruidLoader DRUID_LOADER = new DefaultDruidLoader(DRUID_LOCATION);
 
     private final URL druidUrl;
 
@@ -45,7 +44,8 @@ class DefaultDruidLoader implements DruidLoader {
                 // extract druid.jar to temp file
                 // TODO use URLStreamHandler to handle nested jar loading in the future
                 File tempFile = File.createTempFile("seata", "sqlparser");
-                try (InputStream input = url.openStream(); OutputStream output = new FileOutputStream(tempFile)) {
+                try (InputStream input = url.openStream();
+                        OutputStream output = new FileOutputStream(tempFile)) {
                     byte[] buf = new byte[1024];
                     while (true) {
                         int readCnt = input.read(buf);

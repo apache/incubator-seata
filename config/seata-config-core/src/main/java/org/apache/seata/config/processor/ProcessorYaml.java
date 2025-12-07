@@ -16,13 +16,13 @@
  */
 package org.apache.seata.config.processor;
 
-
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.common.util.MapUtil;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -37,8 +37,11 @@ public class ProcessorYaml implements Processor {
     public Properties processor(String config) {
         Properties properties = new Properties();
         Map<String, Object> configMap = MapUtil.asMap(new Yaml(new SafeConstructor(new LoaderOptions())).load(config));
-        properties.putAll(MapUtil.getFlattenedMap(configMap));
+        Map<String, String> stringConfigMap = new LinkedHashMap<>();
+        MapUtil.getFlattenedMap(configMap).forEach((k, v) -> {
+            stringConfigMap.put(k, v == null ? null : String.valueOf(v));
+        });
+        properties.putAll(stringConfigMap);
         return properties;
     }
-
 }

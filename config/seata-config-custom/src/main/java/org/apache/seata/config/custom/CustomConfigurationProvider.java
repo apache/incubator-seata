@@ -21,12 +21,11 @@ import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.config.ConfigType;
 import org.apache.seata.config.Configuration;
-import org.apache.seata.config.ConfigurationKeys;
 import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.config.ConfigurationKeys;
 import org.apache.seata.config.ConfigurationProvider;
 
 import java.util.stream.Stream;
-
 
 @LoadLevel(name = "Custom")
 public class CustomConfigurationProvider implements ConfigurationProvider {
@@ -39,8 +38,7 @@ public class CustomConfigurationProvider implements ConfigurationProvider {
         if (StringUtils.isBlank(name)) {
             throw new IllegalArgumentException("name value of custom config type must not be blank");
         }
-        if (Stream.of(ConfigType.values())
-                .anyMatch(ct -> ct.name().equalsIgnoreCase(name))) {
+        if (Stream.of(ConfigType.values()).anyMatch(ct -> ct.name().equalsIgnoreCase(name))) {
             throw new IllegalArgumentException(String.format("custom config type name %s is not allowed", name));
         }
         return EnhancedServiceLoader.load(ConfigurationProvider.class, name).provide();

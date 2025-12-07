@@ -24,7 +24,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
 public class TransactionHookManagerTest {
 
     @AfterEach
@@ -56,6 +55,7 @@ public class TransactionHookManagerTest {
         TransactionHookManager.clear();
         assertThat(TransactionHookManager.getHooks()).isEmpty();
     }
+
     @Test
     public void testNPE() {
         Assertions.assertThrows(NullPointerException.class, () -> TransactionHookManager.registerHook(null));

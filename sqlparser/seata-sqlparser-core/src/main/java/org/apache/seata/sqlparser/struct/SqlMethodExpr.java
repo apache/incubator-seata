@@ -33,12 +33,10 @@ public class SqlMethodExpr {
         return instance;
     }
 
-    private SqlMethodExpr() {
-    }
+    private SqlMethodExpr() {}
 
     @Override
     public String toString() {
         return "SQL_METHOD";
     }
-
 }

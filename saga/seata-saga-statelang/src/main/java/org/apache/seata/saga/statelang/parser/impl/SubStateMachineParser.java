@@ -16,13 +16,13 @@
  */
 package org.apache.seata.saga.statelang.parser.impl;
 
-import java.util.Map;
-
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.saga.statelang.domain.ServiceTaskState;
 import org.apache.seata.saga.statelang.domain.SubStateMachine;
 import org.apache.seata.saga.statelang.domain.impl.SubStateMachineImpl;
 import org.apache.seata.saga.statelang.parser.StateParser;
+
+import java.util.Map;
 
 /**
  * SubStateMachineParser
@@ -37,13 +37,13 @@ public class SubStateMachineParser extends AbstractTaskStateParser implements St
 
         parseTaskAttributes(subStateMachine, node);
 
-        Map<String, Object> nodeMap = (Map<String, Object>)node;
-        subStateMachine.setStateMachineName((String)nodeMap.get("StateMachineName"));
+        Map<String, Object> nodeMap = (Map<String, Object>) node;
+        subStateMachine.setStateMachineName((String) nodeMap.get("StateMachineName"));
 
         if (StringUtils.isEmpty(subStateMachine.getCompensateState())) {
-            //build default SubStateMachine compensate state
-            CompensateSubStateMachineStateParser compensateSubStateMachineStateParser
-                = new CompensateSubStateMachineStateParser();
+            // build default SubStateMachine compensate state
+            CompensateSubStateMachineStateParser compensateSubStateMachineStateParser =
+                    new CompensateSubStateMachineStateParser();
             ServiceTaskState subStateMachineCompenState = compensateSubStateMachineStateParser.parse(null);
             subStateMachine.setCompensateStateObject(subStateMachineCompenState);
             subStateMachine.setCompensateState(subStateMachineCompenState.getName());

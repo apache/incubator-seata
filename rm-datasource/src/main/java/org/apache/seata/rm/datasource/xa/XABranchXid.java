@@ -17,6 +17,7 @@
 package org.apache.seata.rm.datasource.xa;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Objects;
 
 /**
  * Xid in XA Protocol. Wrap info of Seata xid and branchId.
@@ -111,18 +112,33 @@ public class XABranchXid implements XAXid {
             xid = byteArray2String(globalTransactionId);
         }
 
-
         if (branchQualifier == null || branchQualifier.length == 0) {
             branchId = 0L;
         } else {
             String bs = byteArray2String(branchQualifier).substring(BRANCH_ID_PREFIX.length());
             branchId = Long.parseLong(bs);
         }
-
     }
 
     @Override
     public String toString() {
         return xid + BRANCH_ID_PREFIX + branchId;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        XABranchXid that = (XABranchXid) o;
+        return branchId == that.branchId && Objects.equals(xid, that.xid);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(xid, branchId);
     }
 }

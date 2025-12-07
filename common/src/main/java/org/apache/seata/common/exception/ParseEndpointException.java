@@ -17,8 +17,7 @@
 package org.apache.seata.common.exception;
 
 public class ParseEndpointException extends RuntimeException {
-    public ParseEndpointException() {
-    }
+    public ParseEndpointException() {}
 
     public ParseEndpointException(String message) {
         super(message);
@@ -32,7 +31,8 @@ public class ParseEndpointException extends RuntimeException {
         super(cause);
     }
 
-    public ParseEndpointException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    public ParseEndpointException(
+            String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 }

@@ -21,6 +21,4 @@ package io.seata.integration.http;
  */
 @Deprecated
 public class TransactionPropagationInterceptor
-    extends org.apache.seata.integration.http.TransactionPropagationInterceptor {
-
-}
+        extends org.apache.seata.integration.http.TransactionPropagationInterceptor {}

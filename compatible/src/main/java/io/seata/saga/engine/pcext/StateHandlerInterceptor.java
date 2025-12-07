@@ -21,5 +21,4 @@ package io.seata.saga.engine.pcext;
  *
  */
 @Deprecated
-public interface StateHandlerInterceptor extends org.apache.seata.saga.engine.pcext.StateHandlerInterceptor {
-}
+public interface StateHandlerInterceptor extends org.apache.seata.saga.engine.pcext.StateHandlerInterceptor {}

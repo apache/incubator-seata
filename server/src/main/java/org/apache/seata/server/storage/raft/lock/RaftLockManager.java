@@ -16,7 +16,6 @@
  */
 package org.apache.seata.server.storage.raft.lock;
 
-import java.util.concurrent.CompletableFuture;
 import com.alipay.sofa.jraft.Closure;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.core.exception.TransactionException;
@@ -25,13 +24,16 @@ import org.apache.seata.server.cluster.raft.sync.msg.RaftBranchSessionSyncMsg;
 import org.apache.seata.server.cluster.raft.sync.msg.RaftGlobalSessionSyncMsg;
 import org.apache.seata.server.cluster.raft.sync.msg.dto.BranchTransactionDTO;
 import org.apache.seata.server.cluster.raft.sync.msg.dto.GlobalTransactionDTO;
+import org.apache.seata.server.cluster.raft.util.RaftTaskUtil;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
 import org.apache.seata.server.storage.file.lock.FileLockManager;
-import org.apache.seata.server.cluster.raft.util.RaftTaskUtil;
+
+import java.util.concurrent.CompletableFuture;
 
 import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.RELEASE_BRANCH_SESSION_LOCK;
 import static org.apache.seata.server.cluster.raft.sync.msg.RaftSyncMsgType.RELEASE_GLOBAL_SESSION_LOCK;
+
 /**
  */
 @LoadLevel(name = "raft")
@@ -41,7 +43,8 @@ public class RaftLockManager extends FileLockManager {
     public boolean releaseGlobalSessionLock(GlobalSession globalSession) throws TransactionException {
         GlobalTransactionDTO globalTransactionDTO = new GlobalTransactionDTO();
         globalTransactionDTO.setXid(globalSession.getXid());
-        RaftGlobalSessionSyncMsg raftSyncMsg = new RaftGlobalSessionSyncMsg(RELEASE_GLOBAL_SESSION_LOCK, globalTransactionDTO);
+        RaftGlobalSessionSyncMsg raftSyncMsg =
+                new RaftGlobalSessionSyncMsg(RELEASE_GLOBAL_SESSION_LOCK, globalTransactionDTO);
         CompletableFuture<Boolean> completableFuture = new CompletableFuture<>();
         Closure closure = status -> {
             if (status.isOk()) {
@@ -51,8 +54,9 @@ public class RaftLockManager extends FileLockManager {
                     completableFuture.completeExceptionally(e);
                 }
             } else {
-                completableFuture.completeExceptionally(new TransactionException(TransactionExceptionCode.NotRaftLeader,
-                    "seata raft state machine exception: " + status.getErrorMsg()));
+                completableFuture.completeExceptionally(new TransactionException(
+                        TransactionExceptionCode.NotRaftLeader,
+                        "seata raft state machine exception: " + status.getErrorMsg()));
             }
         };
         return RaftTaskUtil.createTask(closure, raftSyncMsg, completableFuture);
@@ -64,7 +68,8 @@ public class RaftLockManager extends FileLockManager {
         BranchTransactionDTO branchTransactionDTO = new BranchTransactionDTO();
         branchTransactionDTO.setBranchId(branchSession.getBranchId());
         branchTransactionDTO.setXid(branchSession.getXid());
-        RaftBranchSessionSyncMsg raftSyncMsg = new RaftBranchSessionSyncMsg(RELEASE_BRANCH_SESSION_LOCK, branchTransactionDTO);
+        RaftBranchSessionSyncMsg raftSyncMsg =
+                new RaftBranchSessionSyncMsg(RELEASE_BRANCH_SESSION_LOCK, branchTransactionDTO);
         Closure closure = status -> {
             if (status.isOk()) {
                 try {
@@ -74,8 +79,9 @@ public class RaftLockManager extends FileLockManager {
                     completableFuture.completeExceptionally(e);
                 }
             } else {
-                completableFuture.completeExceptionally(new TransactionException(TransactionExceptionCode.NotRaftLeader,
-                    "seata raft state machine exception: " + status.getErrorMsg()));
+                completableFuture.completeExceptionally(new TransactionException(
+                        TransactionExceptionCode.NotRaftLeader,
+                        "seata raft state machine exception: " + status.getErrorMsg()));
             }
         };
         return RaftTaskUtil.createTask(closure, raftSyncMsg, completableFuture);
@@ -88,5 +94,4 @@ public class RaftLockManager extends FileLockManager {
     public boolean localReleaseLock(BranchSession branchSession) throws TransactionException {
         return super.releaseLock(branchSession);
     }
-
 }

@@ -20,5 +20,4 @@ package org.apache.seata.core.event;
  * The base interface for seata event.
  *
  */
-public interface Event {
-}
+public interface Event {}

@@ -28,5 +28,4 @@ public class BranchCommitRequestCodec extends AbstractBranchEndRequestCodec {
     public Class<?> getMessageClassType() {
         return BranchCommitRequest.class;
     }
-
 }

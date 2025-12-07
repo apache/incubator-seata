@@ -20,7 +20,7 @@ package org.apache.seata.core.protocol;
  * The type Version not support message.
  *
  */
-public class VersionNotSupportMessage extends AbstractMessage  {
+public class VersionNotSupportMessage extends AbstractMessage {
     @Override
     public short getTypeCode() {
         return MessageType.VERSION_NOT_SUPPORT;

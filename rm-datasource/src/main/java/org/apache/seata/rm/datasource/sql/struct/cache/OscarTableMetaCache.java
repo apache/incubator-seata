@@ -46,11 +46,11 @@ public class OscarTableMetaCache extends AbstractTableMetaCache {
         StringBuilder cacheKey = new StringBuilder(resourceId);
         cacheKey.append(".");
 
-        //separate it to schemaName and tableName
+        // separate it to schemaName and tableName
         String[] tableNameWithSchema = tableName.split("\\.");
         String defaultTableName = tableNameWithSchema.length > 1 ? tableNameWithSchema[1] : tableNameWithSchema[0];
 
-        //oscar does not implement supportsMixedCaseIdentifiers in DatabaseMetadata
+        // oscar does not implement supportsMixedCaseIdentifiers in DatabaseMetadata
         if (defaultTableName.contains("\"")) {
             cacheKey.append(defaultTableName.replace("\"", ""));
         } else {
@@ -77,7 +77,8 @@ public class OscarTableMetaCache extends AbstractTableMetaCache {
         tm.setTableName(tableName);
         String[] schemaTable = tableName.split("\\.");
 
-        String schemaName = schemaTable.length > 1 ? schemaTable[0] : dbmd.getConnection().getSchema();
+        String schemaName =
+                schemaTable.length > 1 ? schemaTable[0] : dbmd.getConnection().getSchema();
         tableName = schemaTable.length > 1 ? schemaTable[1] : tableName;
         if (schemaName.contains("\"")) {
             schemaName = schemaName.replace("\"", "");
@@ -94,8 +95,8 @@ public class OscarTableMetaCache extends AbstractTableMetaCache {
         tm.setCaseSensitive(StringUtils.hasLowerCase(tableName));
 
         try (ResultSet rsColumns = dbmd.getColumns("", schemaName, tableName, "%");
-             ResultSet rsIndex = dbmd.getIndexInfo(null, schemaName, tableName, false, true);
-             ResultSet rsPrimary = dbmd.getPrimaryKeys(null, schemaName, tableName)) {
+                ResultSet rsIndex = dbmd.getIndexInfo(null, schemaName, tableName, false, true);
+                ResultSet rsPrimary = dbmd.getPrimaryKeys(null, schemaName, tableName)) {
             while (rsColumns.next()) {
                 ColumnMeta col = new ColumnMeta();
                 col.setTableCat(rsColumns.getString("TABLE_CAT"));
@@ -118,7 +119,8 @@ public class OscarTableMetaCache extends AbstractTableMetaCache {
                 col.setCaseSensitive(StringUtils.hasLowerCase(col.getColumnName()));
 
                 if (tm.getAllColumns().containsKey(col.getColumnName())) {
-                    throw new NotSupportYetException("Not support the table has the same column name with different case yet");
+                    throw new NotSupportYetException(
+                            "Not support the table has the same column name with different case yet");
                 }
                 tm.getAllColumns().put(col.getColumnName(), col);
             }
@@ -150,11 +152,11 @@ public class OscarTableMetaCache extends AbstractTableMetaCache {
                         index.setIndextype(IndexType.NORMAL);
                     }
                     tm.getAllIndexes().put(indexName, index);
-
                 }
             }
             if (tm.getAllIndexes().isEmpty()) {
-                throw new ShouldNeverHappenException(String.format("Could not found any index in the table: %s", tableName));
+                throw new ShouldNeverHappenException(
+                        String.format("Could not found any index in the table: %s", tableName));
             }
             // when we create a primary key constraint oracle will uses and existing unique index.
             // if we create a unique index before create a primary constraint in the same column will cause the problem
@@ -166,11 +168,11 @@ public class OscarTableMetaCache extends AbstractTableMetaCache {
                     IndexMeta index = tm.getAllIndexes().get(pkConstraintName);
                     index.setIndextype(IndexType.PRIMARY);
                 } else {
-                    //save the columns that constraint primary key name was different from unique index name
+                    // save the columns that constraint primary key name was different from unique index name
                     pkcol.add(rsPrimary.getString("COLUMN_NAME"));
                 }
             }
-            //find the index that belong to the primary key constraint
+            // find the index that belong to the primary key constraint
             if (!pkcol.isEmpty()) {
                 int matchCols = 0;
                 for (Map.Entry<String, IndexMeta> entry : tm.getAllIndexes().entrySet()) {

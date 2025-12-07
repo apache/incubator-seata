@@ -24,5 +24,4 @@ import org.apache.seata.common.loader.LoadLevel;
  * @since 1.7.0
  */
 @LoadLevel(name = "mariadb")
-public class MariadbLockStoreSql extends MysqlLockStoreSql {
-}
+public class MariadbLockStoreSql extends MysqlLockStoreSql {}

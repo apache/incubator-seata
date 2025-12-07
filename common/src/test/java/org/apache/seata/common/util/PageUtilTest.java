@@ -16,11 +16,6 @@
  */
 package org.apache.seata.common.util;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 import org.apache.seata.common.exception.NotSupportYetException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,11 +23,18 @@ import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 
 /**
@@ -43,6 +45,7 @@ public class PageUtilTest {
     private int validPageNum;
     private int validPageSize;
     private String validTimeColumnName;
+
     @InjectMocks
     private PageUtil pageUtil;
 
@@ -52,7 +55,6 @@ public class PageUtilTest {
         validPageSize = 10;
         validTimeColumnName = "gmt_create";
         MockitoAnnotations.initMocks(this);
-
     }
 
     @Test
@@ -61,10 +63,11 @@ public class PageUtilTest {
 
         String mysqlTargetSql = "select * from test where a = 1 limit 5 offset 0";
 
-        String oracleTargetSql = "select * from " +
-            "( select ROWNUM rn, temp.* from (select * from test where a = 1) temp )" +
-            " where rn between 1 and 5";
-        String sqlserverTargetSql = "select * from (select temp.*, ROW_NUMBER() OVER(ORDER BY gmt_create desc) AS rowId from (select * from test where a = 1) temp ) t where t.rowId between 1 and 5";
+        String oracleTargetSql =
+                "select * from " + "( select ROWNUM rn, temp.* from (select * from test where a = 1) temp )"
+                        + " where rn between 1 and 5";
+        String sqlserverTargetSql =
+                "select * from (select temp.*, ROW_NUMBER() OVER(ORDER BY gmt_create desc) AS rowId from (select * from test where a = 1) temp ) t where t.rowId between 1 and 5";
 
         assertEquals(PageUtil.pageSql(sourceSql, "mysql", 1, 5), mysqlTargetSql);
         assertEquals(PageUtil.pageSql(sourceSql, "h2", 1, 5), mysqlTargetSql);
@@ -72,6 +75,7 @@ public class PageUtilTest {
         assertEquals(PageUtil.pageSql(sourceSql, "oceanbase", 1, 5), mysqlTargetSql);
         assertEquals(PageUtil.pageSql(sourceSql, "dm", 1, 5), mysqlTargetSql);
         assertEquals(PageUtil.pageSql(sourceSql, "oscar", 1, 5), mysqlTargetSql);
+        assertEquals(PageUtil.pageSql(sourceSql, "kingbase", 1, 5), mysqlTargetSql);
         assertEquals(PageUtil.pageSql(sourceSql, "oracle", 1, 5), oracleTargetSql);
         assertEquals(PageUtil.pageSql(sourceSql, "sqlserver", 1, 5), sqlserverTargetSql);
 
@@ -90,6 +94,7 @@ public class PageUtilTest {
         assertEquals(PageUtil.countSql(sourceSql, "oceanbase"), targetSql);
         assertEquals(PageUtil.countSql(sourceSql, "dm"), targetSql);
         assertEquals(PageUtil.countSql(sourceSql, "oscar"), targetSql);
+        assertEquals(PageUtil.countSql(sourceSql, "kingbase"), targetSql);
         assertEquals(PageUtil.countSql(sourceSql, "oracle"), targetSql);
         assertEquals(PageUtil.countSql(sourceSql, "sqlserver"), targetSql);
 
@@ -183,7 +188,170 @@ public class PageUtilTest {
     @Test
     public void getTimeStartSqlNotSupportedDBType() {
         String notSupportedDBType = "xxx";
-        assertThrows(IllegalArgumentException.class, () -> PageUtil.getTimeStartSql(notSupportedDBType, validTimeColumnName));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> PageUtil.getTimeStartSql(notSupportedDBType, validTimeColumnName));
     }
 
+    @Test
+    public void testGetTimeEndSqlSupportedDBTypes() {
+        String[] supportedDBTypes = {"mysql", "oracle", "postgresql", "sqlserver", "dm", "oscar"};
+        String expectedSQL = " and FLOOR(gmt_create/1000) <= ? ";
+
+        for (String dbType : supportedDBTypes) {
+            assertEquals(expectedSQL, PageUtil.getTimeEndSql(dbType, validTimeColumnName));
+        }
+    }
+
+    @Test
+    public void testGetTimeEndSqlNotSupportedDBType() {
+        String notSupportedDBType = "xxx";
+        assertThrows(
+                IllegalArgumentException.class, () -> PageUtil.getTimeEndSql(notSupportedDBType, validTimeColumnName));
+    }
+
+    @Test
+    public void testGetDateTimeStartSqlMySQL() {
+        String expectedSQL = " and UNIX_TIMESTAMP(gmt_create) >= ? ";
+        assertEquals(expectedSQL, PageUtil.getDateTimeStartSql("mysql", validTimeColumnName));
+    }
+
+    @Test
+    public void testGetDateTimeStartSqlPostgreSQL() {
+        String expectedSQL = " and gmt_create >= TO_TIMESTAMP(?) ";
+        assertEquals(expectedSQL, PageUtil.getDateTimeStartSql("postgresql", validTimeColumnName));
+    }
+
+    @Test
+    public void testGetDateTimeStartSqlOracle() {
+        String expectedSQL =
+                " and gmt_create >= TO_TIMESTAMP('1970-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS') + NUMTODSINTERVAL(?, 'SECOND') ";
+        assertEquals(expectedSQL, PageUtil.getDateTimeStartSql("oracle", validTimeColumnName));
+    }
+
+    @Test
+    public void testGetDateTimeStartSqlSQLServer() {
+        String expectedSQL = " and gmt_create >= DATEADD(SECOND, ?, '1970-01-01 00:00:00') ";
+        assertEquals(expectedSQL, PageUtil.getDateTimeStartSql("sqlserver", validTimeColumnName));
+    }
+
+    @Test
+    public void testGetDateTimeStartSqlDM() {
+        String expectedSQL =
+                " and gmt_create >= TO_TIMESTAMP('1970-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS') + NUMTODSINTERVAL(?, 'SECOND') ";
+        assertEquals(expectedSQL, PageUtil.getDateTimeStartSql("dm", validTimeColumnName));
+    }
+
+    @Test
+    public void testGetDateTimeStartSqlOscar() {
+        String expectedSQL =
+                " and gmt_create >= TO_TIMESTAMP('1970-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS') + NUMTODSINTERVAL(?, 'SECOND') ";
+        assertEquals(expectedSQL, PageUtil.getDateTimeStartSql("oscar", validTimeColumnName));
+    }
+
+    @Test
+    public void testGetDateTimeStartSqlNotSupportedDBType() {
+        String notSupportedDBType = "xxx";
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> PageUtil.getDateTimeStartSql(notSupportedDBType, validTimeColumnName));
+    }
+
+    @Test
+    public void testGetDateTimeEndSqlMySQL() {
+        String expectedSQL = " and UNIX_TIMESTAMP(gmt_create) <= ? ";
+        assertEquals(expectedSQL, PageUtil.getDateTimeEndSql("mysql", validTimeColumnName));
+    }
+
+    @Test
+    public void testGetDateTimeEndSqlPostgreSQL() {
+        String expectedSQL = " and gmt_create <= TO_TIMESTAMP(?) ";
+        assertEquals(expectedSQL, PageUtil.getDateTimeEndSql("postgresql", validTimeColumnName));
+    }
+
+    @Test
+    public void testGetDateTimeEndSqlOracle() {
+        String expectedSQL =
+                " and gmt_create <= TO_TIMESTAMP('1970-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS') + NUMTODSINTERVAL(?, 'SECOND') ";
+        assertEquals(expectedSQL, PageUtil.getDateTimeEndSql("oracle", validTimeColumnName));
+    }
+
+    @Test
+    public void testGetDateTimeEndSqlSQLServer() {
+        String expectedSQL = " and gmt_create <= DATEADD(SECOND, ?, '1970-01-01 00:00:00') ";
+        assertEquals(expectedSQL, PageUtil.getDateTimeEndSql("sqlserver", validTimeColumnName));
+    }
+
+    @Test
+    public void testGetDateTimeEndSqlDM() {
+        String expectedSQL =
+                " and gmt_create <= TO_TIMESTAMP('1970-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS') + NUMTODSINTERVAL(?, 'SECOND') ";
+        assertEquals(expectedSQL, PageUtil.getDateTimeEndSql("dm", validTimeColumnName));
+    }
+
+    @Test
+    public void testGetDateTimeEndSqlOscar() {
+        String expectedSQL =
+                " and gmt_create <= TO_TIMESTAMP('1970-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS') + NUMTODSINTERVAL(?, 'SECOND') ";
+        assertEquals(expectedSQL, PageUtil.getDateTimeEndSql("oscar", validTimeColumnName));
+    }
+
+    @Test
+    public void testGetDateTimeEndSqlNotSupportedDBType() {
+        String notSupportedDBType = "xxx";
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> PageUtil.getDateTimeEndSql(notSupportedDBType, validTimeColumnName));
+    }
+
+    @Test
+    public void testCountSqlWithOrderByPostgreSQL() {
+        String sourceSqlWithOrderBy = "select * from test where a = 1 order by id desc";
+        String expectedSql = "select count(1) from test where a = 1 ";
+
+        assertEquals(expectedSql, PageUtil.countSql(sourceSqlWithOrderBy, "postgresql"));
+        assertEquals(expectedSql, PageUtil.countSql(sourceSqlWithOrderBy, "kingbase"));
+        assertEquals(expectedSql, PageUtil.countSql(sourceSqlWithOrderBy, "sqlserver"));
+    }
+
+    @Test
+    public void testCountSqlWithoutOrderByPostgreSQL() {
+        String sourceSqlWithoutOrderBy = "select * from test where a = 1";
+        String expectedSql = "select count(1) from test where a = 1";
+
+        assertEquals(expectedSql, PageUtil.countSql(sourceSqlWithoutOrderBy, "postgresql"));
+        assertEquals(expectedSql, PageUtil.countSql(sourceSqlWithoutOrderBy, "kingbase"));
+        assertEquals(expectedSql, PageUtil.countSql(sourceSqlWithoutOrderBy, "sqlserver"));
+    }
+
+    @Test
+    public void testSetObjectWithSQLException() throws SQLException {
+        List<Object> params = new ArrayList<>();
+        params.add("test");
+
+        PreparedStatement preparedStatement = Mockito.mock(PreparedStatement.class);
+        Mockito.doThrow(new SQLException("Test exception"))
+                .when(preparedStatement)
+                .setObject(anyInt(), any());
+
+        assertThrows(SQLException.class, () -> PageUtil.setObject(preparedStatement, params));
+    }
+
+    @Test
+    public void testSetObjectWithMultipleTypes() throws SQLException {
+        List<Object> params = new ArrayList<>();
+        params.add(new Date(System.currentTimeMillis()));
+        params.add("testString");
+        params.add(123);
+        params.add(null);
+
+        PreparedStatement preparedStatement = Mockito.mock(PreparedStatement.class);
+        doNothing().when(preparedStatement).setDate(anyInt(), any(java.sql.Date.class));
+        doNothing().when(preparedStatement).setObject(anyInt(), any());
+
+        PageUtil.setObject(preparedStatement, params);
+
+        Mockito.verify(preparedStatement, Mockito.times(1)).setDate(eq(1), any(java.sql.Date.class));
+        Mockito.verify(preparedStatement, Mockito.times(3)).setObject(anyInt(), any());
+    }
 }

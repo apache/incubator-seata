@@ -18,7 +18,6 @@ package org.apache.seata.core.message;
 
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.protocol.transaction.BranchCommitRequest;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -44,7 +43,8 @@ public class BranchCommitRequestTest {
         branchCommitRequest.setResourceId("resource1");
         branchCommitRequest.setApplicationData("app1");
 
-        Assertions.assertEquals("BranchCommitRequest{xid='127.0.0.1:9999:39875642', branchId=1, branchType=AT, resourceId='resource1', applicationData='app1'}", branchCommitRequest.toString());
-
+        Assertions.assertEquals(
+                "BranchCommitRequest{xid='127.0.0.1:9999:39875642', branchId=1, branchType=AT, resourceId='resource1', applicationData='app1'}",
+                branchCommitRequest.toString());
     }
 }

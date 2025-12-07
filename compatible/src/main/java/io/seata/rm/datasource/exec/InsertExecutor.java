@@ -16,13 +16,10 @@
  */
 package io.seata.rm.datasource.exec;
 
-
 /**
  * The interface Insert executor.
  *
  * @param <T> the type parameter
  */
 @Deprecated
-public interface InsertExecutor<T> extends org.apache.seata.rm.datasource.exec.InsertExecutor<T> {
-
-}
+public interface InsertExecutor<T> extends org.apache.seata.rm.datasource.exec.InsertExecutor<T> {}

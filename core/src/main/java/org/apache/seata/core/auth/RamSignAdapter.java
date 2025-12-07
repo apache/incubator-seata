@@ -33,19 +33,19 @@ import java.time.format.DateTimeFormatter;
  *
  */
 public class RamSignAdapter {
-    
+
     private static final String SHA256_ENCRYPT = "HmacSHA256";
-    
+
     private static final String PREFIX = "aliyun_v4";
-    
+
     private static final String CONSTANT = "aliyun_v4_request";
-    
+
     private static final String DEFAULT_REGION = "cn-beijing";
-    
+
     private static final String DEFAULT_PRODCUT_CODE = "seata";
-    
+
     private static final DateTimeFormatter DTF = DateTimeFormatter.ofPattern("yyyyMMdd");
-    
+
     /**
      * get date level signing key
      *
@@ -65,7 +65,7 @@ public class RamSignAdapter {
             throw new RuntimeException("InvalidKey");
         }
     }
-    
+
     /**
      * get date&region level signing key
      *
@@ -87,7 +87,7 @@ public class RamSignAdapter {
             throw new RuntimeException("InvalidKey");
         }
     }
-    
+
     /**
      * get date&region&product level signing key
      *
@@ -98,7 +98,8 @@ public class RamSignAdapter {
      * @param signMethod  signMethod
      * @return date&region&product level signing key
      */
-    private static byte[] getProductSigningKey(String secret, String date, String region, String productCode, String signMethod) {
+    private static byte[] getProductSigningKey(
+            String secret, String date, String region, String productCode, String signMethod) {
         byte[] regionSignkey = getRegionSigningKey(secret, date, region, signMethod);
         try {
             Mac mac = Mac.getInstance(signMethod);
@@ -113,7 +114,7 @@ public class RamSignAdapter {
             throw new RuntimeException("InvalidKey");
         }
     }
-    
+
     /**
      * get ram sign Sign with hmac SHA1 encrtpt
      *
@@ -124,10 +125,15 @@ public class RamSignAdapter {
     public static String getRamSign(String encryptText, String encryptKey) {
         try {
             String[] encryptData = encryptText.split(",");
-            byte[] data = getProductSigningKey(encryptKey,
-                    LocalDateTime.ofEpochSecond(Long.parseLong(encryptData[2]) / 1000, 0, ZoneOffset.UTC).format(DTF),
-                    DEFAULT_REGION, DEFAULT_PRODCUT_CODE, SHA256_ENCRYPT);
-            // Construct a key according to the given byte array, and the second parameter specifies the name of a key algorithm
+            byte[] data = getProductSigningKey(
+                    encryptKey,
+                    LocalDateTime.ofEpochSecond(Long.parseLong(encryptData[2]) / 1000, 0, ZoneOffset.UTC)
+                            .format(DTF),
+                    DEFAULT_REGION,
+                    DEFAULT_PRODCUT_CODE,
+                    SHA256_ENCRYPT);
+            // Construct a key according to the given byte array, and the second parameter specifies the name of a key
+            // algorithm
             SecretKey secretKey = new SecretKeySpec(data, SHA256_ENCRYPT);
             // Generate a Mac object specifying Mac algorithm
             Mac mac = Mac.getInstance(SHA256_ENCRYPT);
@@ -141,5 +147,4 @@ public class RamSignAdapter {
             throw new RuntimeException("get ram sign with hmacSHA1Encrypt fail", e);
         }
     }
-    
 }

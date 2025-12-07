@@ -16,27 +16,26 @@
  */
 package org.apache.seata.spring.annotation.datasource;
 
-import javax.sql.DataSource;
-import java.lang.reflect.Method;
-
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.rm.datasource.SeataDataSourceProxy;
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.IntroductionInfo;
 
+import javax.sql.DataSource;
+import java.lang.reflect.Method;
 
 public class SeataAutoDataSourceProxyAdvice implements MethodInterceptor, IntroductionInfo {
 
     private final BranchType branchType;
 
-    private final Class<?>[] attachedInterfaces = new Class[]{SeataProxy.class};
+    private final Class<?>[] attachedInterfaces = new Class[] {SeataProxy.class};
 
     public SeataAutoDataSourceProxyAdvice(String dataSourceProxyMode) {
         this.branchType = BranchType.get(dataSourceProxyMode);
 
-        //Set the default branch type in the RootContext.
+        // Set the default branch type in the RootContext.
         RootContext.setDefaultBranchType(this.branchType);
     }
 

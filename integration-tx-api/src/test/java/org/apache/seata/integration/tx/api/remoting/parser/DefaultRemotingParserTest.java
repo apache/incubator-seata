@@ -41,7 +41,8 @@ public class DefaultRemotingParserTest {
     @Test
     public void testIsRemoting() {
         SimpleRemoteBean remoteBean = new SimpleRemoteBean();
-        RemotingParser parser = remotingParser.isRemoting(remoteBean, remoteBean.getClass().getName());
+        RemotingParser parser =
+                remotingParser.isRemoting(remoteBean, remoteBean.getClass().getName());
         assertInstanceOf(SimpleRemotingParser.class, parser);
     }
 
@@ -88,7 +89,8 @@ public class DefaultRemotingParserTest {
     @Test
     public void testGetServiceDesc() {
         SimpleRemoteBean remoteBean = new SimpleRemoteBean();
-        RemotingDesc desc = remotingParser.getServiceDesc(remoteBean, remoteBean.getClass().getName());
+        RemotingDesc desc =
+                remotingParser.getServiceDesc(remoteBean, remoteBean.getClass().getName());
         assertEquals(Protocols.IN_JVM, desc.getProtocol());
         assertEquals(SimpleRemoteBean.class, desc.getServiceClass());
     }
@@ -96,18 +98,21 @@ public class DefaultRemotingParserTest {
     @Test
     public void testGetServiceDescFail() {
         SimpleBean simpleBean = new SimpleBean();
-        assertNull(remotingParser.getServiceDesc(simpleBean, simpleBean.getClass().getName()));
+        assertNull(
+                remotingParser.getServiceDesc(simpleBean, simpleBean.getClass().getName()));
     }
 
     @Test
     public void testParserRemotingServiceInfo() {
         SimpleRemoteBean remoteBean = new SimpleRemoteBean();
         SimpleRemotingParser parser = new SimpleRemotingParser();
-        RemotingDesc desc = remotingParser.parserRemotingServiceInfo(remoteBean, remoteBean.getClass().getName(),
-                parser);
+        RemotingDesc desc = remotingParser.parserRemotingServiceInfo(
+                remoteBean, remoteBean.getClass().getName(), parser);
 
-        assertEquals(desc, remotingParser.parserRemotingServiceInfo(remoteBean, remoteBean.getClass().getName(),
-                parser));
+        assertEquals(
+                desc,
+                remotingParser.parserRemotingServiceInfo(
+                        remoteBean, remoteBean.getClass().getName(), parser));
         assertEquals(Protocols.IN_JVM, desc.getProtocol());
         assertEquals(SimpleRemoteBean.class, desc.getServiceClass());
     }
@@ -115,15 +120,15 @@ public class DefaultRemotingParserTest {
     @Test
     public void testParserRemotingServiceInfoFail() {
         SimpleBean simpleBean = new SimpleBean();
-        assertNull(remotingParser.parserRemotingServiceInfo(simpleBean, simpleBean.getClass().getName(),
-                new SimpleRemotingParser()));
+        assertNull(remotingParser.parserRemotingServiceInfo(
+                simpleBean, simpleBean.getClass().getName(), new SimpleRemotingParser()));
     }
 
     @Test
     public void testGetRemotingBeanDesc() {
         SimpleRemoteBean remoteBean = new SimpleRemoteBean();
-        remotingParser.parserRemotingServiceInfo(remoteBean, remoteBean.getClass().getName(),
-                new SimpleRemotingParser());
+        remotingParser.parserRemotingServiceInfo(
+                remoteBean, remoteBean.getClass().getName(), new SimpleRemotingParser());
 
         assertNotNull(remotingParser.getRemotingBeanDesc(remoteBean));
     }

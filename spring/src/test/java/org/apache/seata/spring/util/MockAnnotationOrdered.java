@@ -18,7 +18,5 @@ package org.apache.seata.spring.util;
 
 import org.springframework.core.annotation.Order;
 
-
 @Order(1)
-public class MockAnnotationOrdered {
-}
+public class MockAnnotationOrdered {}

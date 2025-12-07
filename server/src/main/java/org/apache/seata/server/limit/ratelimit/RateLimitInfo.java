@@ -44,25 +44,18 @@ public class RateLimitInfo {
     private String applicationId;
 
     /**
-     * The Client id.
-     */
-    private String clientId;
-
-    /**
      * The Server ip address and port.
      */
     private String serverIpAddressAndPort;
 
-    private RateLimitInfo() {
-    }
+    private RateLimitInfo() {}
 
-    public static RateLimitInfo generateRateLimitInfo(String applicationId, String type,
-                                                      String clientId, String serverIpAddressAndPort) {
+    public static RateLimitInfo generateRateLimitInfo(
+            String applicationId, String type, String serverIpAddressAndPort) {
         RateLimitInfo rateLimitInfo = new RateLimitInfo();
         rateLimitInfo.setTraceId(String.valueOf(UUIDGenerator.generateUUID()));
         rateLimitInfo.setLimitType(type);
         rateLimitInfo.setApplicationId(applicationId);
-        rateLimitInfo.setClientId(clientId);
         rateLimitInfo.setServerIpAddressAndPort(serverIpAddressAndPort);
         return rateLimitInfo;
     }
@@ -91,14 +84,6 @@ public class RateLimitInfo {
         this.applicationId = applicationId;
     }
 
-    public String getClientId() {
-        return clientId;
-    }
-
-    public void setClientId(String clientId) {
-        this.clientId = clientId;
-    }
-
     public String getServerIpAddressAndPort() {
         return serverIpAddressAndPort;
     }
@@ -109,12 +94,10 @@ public class RateLimitInfo {
 
     @Override
     public String toString() {
-        return "RateLimitInfo{" +
-                "traceId='" + traceId + '\'' +
-                ", limitType='" + limitType + '\'' +
-                ", applicationId='" + applicationId + '\'' +
-                ", clientId='" + clientId + '\'' +
-                ", serverIpAddressAndPort='" + serverIpAddressAndPort + '\'' +
-                '}';
+        return "RateLimitInfo{" + "traceId='"
+                + traceId + '\'' + ", limitType='"
+                + limitType + '\'' + ", applicationId='"
+                + applicationId + '\'' + ", serverIpAddressAndPort='"
+                + serverIpAddressAndPort + '\'' + '}';
     }
 }

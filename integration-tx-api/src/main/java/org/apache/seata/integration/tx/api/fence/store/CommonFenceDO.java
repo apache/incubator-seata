@@ -102,5 +102,4 @@ public class CommonFenceDO {
     public void setGmtModified(Date gmtModified) {
         this.gmtModified = gmtModified;
     }
-
 }

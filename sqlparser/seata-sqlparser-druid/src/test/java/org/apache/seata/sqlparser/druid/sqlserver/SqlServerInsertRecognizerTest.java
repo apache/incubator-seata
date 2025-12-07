@@ -16,10 +16,6 @@
  */
 package org.apache.seata.sqlparser.druid.sqlserver;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLDateExpr;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
@@ -31,6 +27,14 @@ import org.apache.seata.sqlparser.druid.AbstractRecognizerTest;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * The type SqlServer insert recognizer test.
@@ -85,8 +89,16 @@ public class SqlServerInsertRecognizerTest extends AbstractRecognizerTest {
         Assertions.assertEquals("t", sqlServerInsertRecognizer.getTableName());
         Assertions.assertFalse(sqlServerInsertRecognizer.insertColumnsIsEmpty());
         Assertions.assertEquals(Collections.singletonList("name"), sqlServerInsertRecognizer.getInsertColumns());
-        Assertions.assertEquals(1, sqlServerInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex)).size());
-        Assertions.assertEquals(Collections.singletonList("name1"), sqlServerInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex)).get(0));
+        Assertions.assertEquals(
+                1,
+                sqlServerInsertRecognizer
+                        .getInsertRows(Collections.singletonList(pkIndex))
+                        .size());
+        Assertions.assertEquals(
+                Collections.singletonList("name1"),
+                sqlServerInsertRecognizer
+                        .getInsertRows(Collections.singletonList(pkIndex))
+                        .get(0));
     }
 
     /**
@@ -105,8 +117,16 @@ public class SqlServerInsertRecognizerTest extends AbstractRecognizerTest {
         Assertions.assertEquals("t", sqlServerInsertRecognizer.getTableName());
         Assertions.assertFalse(sqlServerInsertRecognizer.insertColumnsIsEmpty());
         Assertions.assertEquals(Arrays.asList("name", "age"), sqlServerInsertRecognizer.getInsertColumns());
-        Assertions.assertEquals(1, sqlServerInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex)).size());
-        Assertions.assertEquals(Arrays.asList("name1", "18"), sqlServerInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex)).get(0));
+        Assertions.assertEquals(
+                1,
+                sqlServerInsertRecognizer
+                        .getInsertRows(Collections.singletonList(pkIndex))
+                        .size());
+        Assertions.assertEquals(
+                Arrays.asList("name1", "18"),
+                sqlServerInsertRecognizer
+                        .getInsertRows(Collections.singletonList(pkIndex))
+                        .get(0));
     }
 
     /**
@@ -125,8 +145,13 @@ public class SqlServerInsertRecognizerTest extends AbstractRecognizerTest {
         Assertions.assertEquals("t", sqlServerInsertRecognizer.getTableName());
         Assertions.assertFalse(sqlServerInsertRecognizer.insertColumnsIsEmpty());
         Assertions.assertEquals(Arrays.asList("name", "age"), sqlServerInsertRecognizer.getInsertColumns());
-        Assertions.assertEquals(3, sqlServerInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex)).size());
-        Assertions.assertEquals(Arrays.asList(Arrays.asList("name1", "18"), Arrays.asList("name2", "19"), Arrays.asList("name3", "20")),
+        Assertions.assertEquals(
+                3,
+                sqlServerInsertRecognizer
+                        .getInsertRows(Collections.singletonList(pkIndex))
+                        .size());
+        Assertions.assertEquals(
+                Arrays.asList(Arrays.asList("name1", "18"), Arrays.asList("name2", "19"), Arrays.asList("name3", "20")),
                 sqlServerInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex)));
     }
 
@@ -146,15 +171,22 @@ public class SqlServerInsertRecognizerTest extends AbstractRecognizerTest {
         Assertions.assertEquals("t", sqlServerInsertRecognizer.getTableName());
         Assertions.assertFalse(sqlServerInsertRecognizer.insertColumnsIsEmpty());
         Assertions.assertEquals(Collections.singletonList("name"), sqlServerInsertRecognizer.getInsertColumns());
-        Assertions.assertEquals(1, sqlServerInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex)).size());
-        Assertions.assertEquals(Collections.singletonList("?"), sqlServerInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex)).get(0));
+        Assertions.assertEquals(
+                1,
+                sqlServerInsertRecognizer
+                        .getInsertRows(Collections.singletonList(pkIndex))
+                        .size());
+        Assertions.assertEquals(
+                Collections.singletonList("?"),
+                sqlServerInsertRecognizer
+                        .getInsertRows(Collections.singletonList(pkIndex))
+                        .get(0));
     }
-
 
     @Test
     public void testGetInsertColumns() {
 
-        //test for no column
+        // test for no column
         String sql = "insert into t values (?)";
         SQLStatement ast = getSQLStatement(sql);
 
@@ -162,7 +194,7 @@ public class SqlServerInsertRecognizerTest extends AbstractRecognizerTest {
         List<String> insertColumns = recognizer.getInsertColumns();
         Assertions.assertNull(insertColumns);
 
-        //test for normal
+        // test for normal
         sql = "insert into t(a) values (?)";
         ast = getSQLStatement(sql);
 
@@ -171,7 +203,7 @@ public class SqlServerInsertRecognizerTest extends AbstractRecognizerTest {
         Assertions.assertEquals(1, insertColumns.size());
         Assertions.assertEquals(Collections.singletonList("a"), insertColumns);
 
-        //test for exception
+        // test for exception
         Assertions.assertThrows(SQLParsingException.class, () -> {
             String s = "insert into t(a) values (?)";
             SQLStatement sqlStatement = getSQLStatement(s);
@@ -185,7 +217,7 @@ public class SqlServerInsertRecognizerTest extends AbstractRecognizerTest {
 
     @Test
     public void testGetInsertRows() {
-        //test for null value
+        // test for null value
         String sql = "insert into t(id, no, name, age, time) values (default, null, 'a', ?, now())";
         SQLStatement ast = getSQLStatement(sql);
 
@@ -193,14 +225,14 @@ public class SqlServerInsertRecognizerTest extends AbstractRecognizerTest {
         List<List<Object>> insertRows = recognizer.getInsertRows(Collections.singletonList(pkIndex));
         Assertions.assertEquals(1, insertRows.size());
 
-        //test for sequence
+        // test for sequence
         sql = "insert into t(id) values(next value for t1.id)";
         ast = getSQLStatement(sql);
         recognizer = new SqlServerInsertRecognizer(sql, ast);
         insertRows = recognizer.getInsertRows(Collections.singletonList(pkIndex));
         Assertions.assertEquals(1, insertRows.size());
 
-        //test for top
+        // test for top
         Assertions.assertThrows(NotSupportYetException.class, () -> {
             String s = "insert top(1) into t(id) values(id1)";
             SQLStatement sqlStatement = getSQLStatement(s);
@@ -208,7 +240,7 @@ public class SqlServerInsertRecognizerTest extends AbstractRecognizerTest {
             sqlServerInsertRecognizer.getInsertRows(Collections.singletonList(pkIndex));
         });
 
-        //test for exception
+        // test for exception
         Assertions.assertThrows(SQLParsingException.class, () -> {
             String s = "insert into t(a) values (?)";
             SQLStatement sqlStatement = getSQLStatement(s);
@@ -229,18 +261,21 @@ public class SqlServerInsertRecognizerTest extends AbstractRecognizerTest {
         Assertions.assertEquals(SQLType.INSERT, recognizer.getSQLType());
     }
 
-    @Test
-    public void testGetInsertParamsValue() {
-        String sql = "INSERT INTO t(a) VALUES (?)";
+    @ParameterizedTest
+    @MethodSource("provideSqlWithExplicitValues")
+    void testGetInsertParamsValueForExplicitValues(String sql, Object expectedValue) {
         SQLStatement ast = getSQLStatement(sql);
         SqlServerInsertRecognizer recognizer = new SqlServerInsertRecognizer(sql, ast);
-        Assertions.assertEquals("?", recognizer.getInsertParamsValue().get(0));
+        Assertions.assertEquals(expectedValue, recognizer.getInsertParamsValue().get(0));
+    }
 
-        String sql_2 = "INSERT INTO t(a) VALUES ()";
-        SQLStatement ast_2 = getSQLStatement(sql_2);
-        SqlServerInsertRecognizer recognizer_2 = new SqlServerInsertRecognizer(sql_2, ast_2);
-        Assertions.assertEquals("", recognizer_2.getInsertParamsValue().get(0));
+    static Stream<Arguments> provideSqlWithExplicitValues() {
+        return Stream.of(
+                Arguments.of("INSERT INTO t(a) VALUES (?)", "?"), Arguments.of("INSERT INTO t(a) VALUES ()", ""));
+    }
 
+    @Test
+    public void testGetInsertParamsValueWithDefaultValues() {
         String sql_3 = "INSERT INTO T1 DEFAULT VALUES";
         SQLStatement ast_3 = getSQLStatement(sql_3);
         SqlServerInsertRecognizer recognizer_3 = new SqlServerInsertRecognizer(sql_3, ast_3);

@@ -43,5 +43,4 @@ public class RaftBaseMsg implements java.io.Serializable {
     public void setGroup(String group) {
         this.group = group;
     }
-
 }

@@ -44,7 +44,8 @@ public class SagaAnnotationActionInterceptorParser implements InterfaceParser {
 
     @Override
     public ProxyInvocationHandler parserInterfaceToProxy(Object target, String objectName) {
-        Map<Method, Class<?>> methodClassMap = ReflectionUtil.findMatchMethodClazzMap(target.getClass(), method -> method.isAnnotationPresent(getAnnotationClass()));
+        Map<Method, Class<?>> methodClassMap = ReflectionUtil.findMatchMethodClazzMap(
+                target.getClass(), method -> method.isAnnotationPresent(getAnnotationClass()));
         Set<Method> methodsToProxy = methodClassMap.keySet();
         if (methodsToProxy.isEmpty()) {
             return null;
@@ -53,7 +54,8 @@ public class SagaAnnotationActionInterceptorParser implements InterfaceParser {
         // register resource and enhance with interceptor
         registerResource(target, methodClassMap);
 
-        return new SagaAnnotationActionInterceptorHandler(target, methodsToProxy.stream().map(Method::getName).collect(Collectors.toSet()));
+        return new SagaAnnotationActionInterceptorHandler(
+                target, methodsToProxy.stream().map(Method::getName).collect(Collectors.toSet()));
     }
 
     private void registerResource(Object target, Map<Method, Class<?>> methodClassMap) {
@@ -63,7 +65,7 @@ public class SagaAnnotationActionInterceptorParser implements InterfaceParser {
                 Annotation annotation = method.getAnnotation(getAnnotationClass());
                 if (annotation != null) {
                     Resource resource = createResource(target, methodClassEntry.getValue(), annotation);
-                    //registry resource
+                    // registry resource
                     DefaultResourceManager.get().registerResource(resource);
                 }
             }
@@ -72,11 +74,10 @@ public class SagaAnnotationActionInterceptorParser implements InterfaceParser {
         }
     }
 
-
     @Override
     public IfNeedEnhanceBean parseIfNeedEnhancement(Class<?> beanClass) {
         IfNeedEnhanceBean ifNeedEnhanceBean = new IfNeedEnhanceBean();
-        //current support remote service enhance
+        // current support remote service enhance
         if (DefaultRemotingParser.get().isService(beanClass)) {
             ifNeedEnhanceBean.setIfNeed(true);
             ifNeedEnhanceBean.setNeedEnhanceEnum(NeedEnhanceEnum.SERVICE_BEAN);
@@ -88,16 +89,19 @@ public class SagaAnnotationActionInterceptorParser implements InterfaceParser {
         return CompensationBusinessAction.class;
     }
 
-    protected Resource createResource(Object targetBean, Class<?> serviceClass, Annotation annotation) throws NoSuchMethodException {
+    protected Resource createResource(Object targetBean, Class<?> serviceClass, Annotation annotation)
+            throws NoSuchMethodException {
         CompensationBusinessAction compensationBusinessAction = (CompensationBusinessAction) annotation;
         SagaAnnotationResource sagaAnnotationResource = new SagaAnnotationResource();
         sagaAnnotationResource.setActionName(compensationBusinessAction.name());
         sagaAnnotationResource.setTargetBean(targetBean);
         sagaAnnotationResource.setCompensationMethodName(compensationBusinessAction.compensationMethod());
-        Method compensationMethod = serviceClass.getMethod(compensationBusinessAction.compensationMethod(), compensationBusinessAction.compensationArgsClasses());
+        Method compensationMethod = serviceClass.getMethod(
+                compensationBusinessAction.compensationMethod(), compensationBusinessAction.compensationArgsClasses());
         sagaAnnotationResource.setCompensationMethod(compensationMethod);
         sagaAnnotationResource.setCompensationArgsClasses(compensationBusinessAction.compensationArgsClasses());
-        sagaAnnotationResource.setPhaseTwoCompensationKeys(ActionContextUtil.getTwoPhaseArgs(sagaAnnotationResource.getCompensationMethod(), compensationBusinessAction.compensationArgsClasses()));
+        sagaAnnotationResource.setPhaseTwoCompensationKeys(ActionContextUtil.getTwoPhaseArgs(
+                sagaAnnotationResource.getCompensationMethod(), compensationBusinessAction.compensationArgsClasses()));
 
         return sagaAnnotationResource;
     }

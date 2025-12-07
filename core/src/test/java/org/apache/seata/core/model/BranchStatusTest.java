@@ -54,7 +54,6 @@ public class BranchStatusTest {
         Assertions.assertThrows(ShouldNeverHappenException.class, () -> BranchStatus.get(NONE));
     }
 
-
     @Test
     public void testGetByCode() {
         BranchStatus branchStatusOne = BranchStatus.get(MIN_CODE);

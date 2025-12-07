@@ -16,8 +16,6 @@
  */
 package org.apache.seata.server.storage.db.lock;
 
-import java.util.List;
-import javax.sql.DataSource;
 import org.apache.seata.common.exception.DataAccessException;
 import org.apache.seata.common.exception.StoreException;
 import org.apache.seata.common.util.CollectionUtils;
@@ -25,6 +23,9 @@ import org.apache.seata.core.lock.AbstractLocker;
 import org.apache.seata.core.lock.RowLock;
 import org.apache.seata.core.model.LockStatus;
 import org.apache.seata.core.store.LockStore;
+
+import javax.sql.DataSource;
+import java.util.List;
 
 /**
  * The type Data base locker.
@@ -37,8 +38,7 @@ public class DataBaseLocker extends AbstractLocker {
     /**
      * Instantiates a new Data base locker.
      */
-    public DataBaseLocker() {
-    }
+    public DataBaseLocker() {}
 
     /**
      * Instantiates a new Data base locker.
@@ -139,5 +139,4 @@ public class DataBaseLocker extends AbstractLocker {
     public void setLockStore(LockStore lockStore) {
         this.lockStore = lockStore;
     }
-
 }

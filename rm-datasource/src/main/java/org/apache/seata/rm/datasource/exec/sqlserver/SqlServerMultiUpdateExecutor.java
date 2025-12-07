@@ -16,14 +16,14 @@
  */
 package org.apache.seata.rm.datasource.exec.sqlserver;
 
-import java.sql.Statement;
-import java.util.List;
-
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.rm.datasource.StatementProxy;
 import org.apache.seata.rm.datasource.exec.MultiUpdateExecutor;
 import org.apache.seata.rm.datasource.exec.StatementCallback;
 import org.apache.seata.sqlparser.SQLRecognizer;
+
+import java.sql.Statement;
+import java.util.List;
 
 /**
  * The type MultiSql executor.
@@ -39,15 +39,17 @@ public class SqlServerMultiUpdateExecutor<T, S extends Statement> extends MultiU
      * @param statementCallback the statement callback
      * @param sqlRecognizers    the sql recognizers
      */
-    public SqlServerMultiUpdateExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback, List<SQLRecognizer> sqlRecognizers) {
+    public SqlServerMultiUpdateExecutor(
+            StatementProxy<S> statementProxy,
+            StatementCallback<T, S> statementCallback,
+            List<SQLRecognizer> sqlRecognizers) {
         super(statementProxy, statementCallback, sqlRecognizers);
     }
 
     @Override
     protected String buildSuffixSql(String whereCondition) {
-        final StringBuilder suffix = new StringBuilder(" FROM ")
-                .append(getFromTableInSQL())
-                .append(" WITH(UPDLOCK) ");
+        final StringBuilder suffix =
+                new StringBuilder(" FROM ").append(getFromTableInSQL()).append(" WITH(UPDLOCK) ");
         if (StringUtils.isNotBlank(whereCondition)) {
             suffix.append(" WHERE ").append(whereCondition);
         }

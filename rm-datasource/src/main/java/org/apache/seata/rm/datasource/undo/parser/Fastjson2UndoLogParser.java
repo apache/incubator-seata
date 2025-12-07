@@ -30,9 +30,10 @@ public class Fastjson2UndoLogParser implements UndoLogParser, Initialize {
 
     private JSONReader.Feature[] jsonReaderFeature;
     private JSONWriter.Feature[] jsonWriterFeature;
+
     @Override
     public void init() {
-        jsonReaderFeature = new JSONReader.Feature[]{
+        jsonReaderFeature = new JSONReader.Feature[] {
             JSONReader.Feature.UseDefaultConstructorAsPossible,
             // If not configured, it will be serialized based on public field and getter methods by default.
             // After configuration, it will be deserialized based on non-static fields (including private).
@@ -43,7 +44,7 @@ public class Fastjson2UndoLogParser implements UndoLogParser, Initialize {
             JSONReader.Feature.SupportAutoType
         };
 
-        jsonWriterFeature = new JSONWriter.Feature[]{
+        jsonWriterFeature = new JSONWriter.Feature[] {
             JSONWriter.Feature.WriteClassName,
             JSONWriter.Feature.FieldBased,
             JSONWriter.Feature.ReferenceDetection,
@@ -52,6 +53,9 @@ public class Fastjson2UndoLogParser implements UndoLogParser, Initialize {
             JSONWriter.Feature.NotWriteHashMapArrayListClassName,
             JSONWriter.Feature.WriteNameAsSymbol
         };
+
+        // SerialArray support: Fastjson2 with FieldBased and SupportAutoType features
+        // can handle SerialArray serialization automatically through field access
     }
 
     @Override
@@ -73,5 +77,4 @@ public class Fastjson2UndoLogParser implements UndoLogParser, Initialize {
     public BranchUndoLog decode(byte[] bytes) {
         return JSONB.parseObject(bytes, BranchUndoLog.class, jsonReaderFeature);
     }
-
 }

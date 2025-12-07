@@ -44,5 +44,4 @@ public class MariadbUndoDeleteExecutor extends MySQLUndoDeleteExecutor {
     protected TableRecords getUndoRows() {
         return super.getUndoRows();
     }
-
 }

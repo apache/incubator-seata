@@ -30,6 +30,10 @@ dependency-reduced-pom.xml
 .settings/
 .project
 .classpath
+.factorypath
+
+# vscode ignore
+.vscode
 
 # idea ignore
 .idea/

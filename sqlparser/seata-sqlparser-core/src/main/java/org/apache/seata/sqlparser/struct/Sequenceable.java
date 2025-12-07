@@ -29,5 +29,4 @@ public interface Sequenceable {
      * @return sequence sql
      */
     String getSequenceSql(SqlSequenceExpr expr);
-
 }

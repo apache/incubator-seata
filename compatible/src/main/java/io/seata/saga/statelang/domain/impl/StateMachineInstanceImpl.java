@@ -16,17 +16,17 @@
  */
 package io.seata.saga.statelang.domain.impl;
 
+import io.seata.saga.statelang.domain.ExecutionStatus;
+import io.seata.saga.statelang.domain.StateInstance;
+import io.seata.saga.statelang.domain.StateMachine;
+import io.seata.saga.statelang.domain.StateMachineInstance;
+
 import java.util.AbstractMap;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import io.seata.saga.statelang.domain.ExecutionStatus;
-import io.seata.saga.statelang.domain.StateInstance;
-import io.seata.saga.statelang.domain.StateMachine;
-import io.seata.saga.statelang.domain.StateMachineInstance;
 
 /**
  * state machine execution instance
@@ -216,8 +216,8 @@ public class StateMachineInstanceImpl implements StateMachineInstance {
 
     @Override
     public List<StateInstance> getStateList() {
-        List<StateInstance> stateList = actual.getStateList().stream()
-                .map(StateInstanceImpl::wrap).collect(Collectors.toList());
+        List<StateInstance> stateList =
+                actual.getStateList().stream().map(StateInstanceImpl::wrap).collect(Collectors.toList());
         stateList.forEach(state -> state.setStateMachineInstance(this));
         return stateList;
     }
@@ -225,18 +225,18 @@ public class StateMachineInstanceImpl implements StateMachineInstance {
     @Override
     public void setStateList(List<StateInstance> stateList) {
         List<org.apache.seata.saga.statelang.domain.StateInstance> actualStateList = stateList.stream()
-                .map(state -> ((StateInstanceImpl) state).unwrap()).collect(Collectors.toList());
+                .map(state -> ((StateInstanceImpl) state).unwrap())
+                .collect(Collectors.toList());
 
         actual.setStateList(actualStateList);
     }
 
     @Override
     public Map<String, StateInstance> getStateMap() {
-        List<StateInstance> stateList = actual.getStateList().stream()
-                .map(StateInstanceImpl::wrap).collect(Collectors.toList());
+        List<StateInstance> stateList =
+                actual.getStateList().stream().map(StateInstanceImpl::wrap).collect(Collectors.toList());
         stateList.forEach(state -> state.setStateMachineInstance(this));
-        return stateList.stream()
-                .collect(Collectors.toMap(StateInstance::getId, Function.identity()));
+        return stateList.stream().collect(Collectors.toMap(StateInstance::getId, Function.identity()));
     }
 
     @Override

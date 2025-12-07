@@ -16,7 +16,6 @@
  */
 package org.apache.seata.sqlparser;
 
-
 public interface SqlParserType {
     /**
      * The constant SQL_PARSER_TYPE_DRUID.

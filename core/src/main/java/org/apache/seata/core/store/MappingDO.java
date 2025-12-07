@@ -25,7 +25,6 @@ public class MappingDO {
 
     private String vGroup;
 
-
     public String getNamespace() {
         return namespace;
     }
@@ -57,5 +56,4 @@ public class MappingDO {
     public void setVGroup(String vGroup) {
         this.vGroup = vGroup;
     }
-
 }

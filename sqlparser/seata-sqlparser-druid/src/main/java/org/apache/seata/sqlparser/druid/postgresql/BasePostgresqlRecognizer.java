@@ -38,7 +38,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-
 public abstract class BasePostgresqlRecognizer extends BaseRecognizer {
 
     /**
@@ -50,14 +49,17 @@ public abstract class BasePostgresqlRecognizer extends BaseRecognizer {
         super(originalSql);
     }
 
-    public PGOutputVisitor createOutputVisitor(final ParametersHolder parametersHolder,
-        final ArrayList<List<Object>> paramAppenderList, final StringBuilder sb) {
+    public PGOutputVisitor createOutputVisitor(
+            final ParametersHolder parametersHolder,
+            final ArrayList<List<Object>> paramAppenderList,
+            final StringBuilder sb) {
         PGOutputVisitor visitor = new PGOutputVisitor(sb) {
 
             @Override
             public boolean visit(SQLVariantRefExpr x) {
                 if ("?".equals(x.getName())) {
-                    ArrayList<Object> oneParamValues = parametersHolder.getParameters().get(x.getIndex() + 1);
+                    ArrayList<Object> oneParamValues =
+                            parametersHolder.getParameters().get(x.getIndex() + 1);
                     if (paramAppenderList.size() == 0) {
                         oneParamValues.forEach(t -> paramAppenderList.add(new ArrayList<>()));
                     }
@@ -65,7 +67,6 @@ public abstract class BasePostgresqlRecognizer extends BaseRecognizer {
                         Object o = oneParamValues.get(i);
                         paramAppenderList.get(i).add(o instanceof Null ? null : o);
                     }
-
                 }
                 return super.visit(x);
             }
@@ -79,34 +80,38 @@ public abstract class BasePostgresqlRecognizer extends BaseRecognizer {
 
             @Override
             public boolean visit(SQLSubqueryTableSource x) {
-                //just like: select * from (select * from t) for update
-                throw new NotSupportYetException("not support the sql syntax with SubQuery:" + x
-                    + "\nplease see the doc about SQL restrictions https://seata.apache.org/zh-cn/docs/user/sqlreference/dml");
+                // just like: select * from (select * from t) for update
+                throw new NotSupportYetException(
+                        "not support the sql syntax with SubQuery:" + x
+                                + "\nplease see the doc about SQL restrictions https://seata.apache.org/zh-cn/docs/user/sqlreference/dml");
             }
 
             @Override
             public boolean visit(PGUpdateStatement x) {
                 if (x.getFrom() != null) {
-                    //just like: update a set id = b.pid from b where a.id = b.id
-                    throw new NotSupportYetException("not support the sql syntax with join table:" + x
-                        + "\nplease see the doc about SQL restrictions https://seata.apache.org/zh-cn/docs/user/sqlreference/dml");
+                    // just like: update a set id = b.pid from b where a.id = b.id
+                    throw new NotSupportYetException(
+                            "not support the sql syntax with join table:" + x
+                                    + "\nplease see the doc about SQL restrictions https://seata.apache.org/zh-cn/docs/user/sqlreference/dml");
                 }
                 return true;
             }
 
             @Override
             public boolean visit(SQLInSubQueryExpr x) {
-                //just like: ...where id in (select id from t)
-                throw new NotSupportYetException("not support the sql syntax with InSubQuery:" + x
-                    + "\nplease see the doc about SQL restrictions https://seata.apache.org/zh-cn/docs/user/sqlreference/dml");
+                // just like: ...where id in (select id from t)
+                throw new NotSupportYetException(
+                        "not support the sql syntax with InSubQuery:" + x
+                                + "\nplease see the doc about SQL restrictions https://seata.apache.org/zh-cn/docs/user/sqlreference/dml");
             }
 
             @Override
             public boolean visit(PGInsertStatement x) {
                 if (null != x.getQuery()) {
-                    //just like: insert into t select * from t1
-                    throw new NotSupportYetException("not support the sql syntax insert with query:" + x
-                        + "\nplease see the doc about SQL restrictions https://seata.apache.org/zh-cn/docs/user/sqlreference/dml");
+                    // just like: insert into t select * from t1
+                    throw new NotSupportYetException(
+                            "not support the sql syntax insert with query:" + x
+                                    + "\nplease see the doc about SQL restrictions https://seata.apache.org/zh-cn/docs/user/sqlreference/dml");
                 }
                 return true;
             }
@@ -115,8 +120,8 @@ public abstract class BasePostgresqlRecognizer extends BaseRecognizer {
         return true;
     }
 
-    public String getWhereCondition(SQLExpr where, final ParametersHolder parametersHolder,
-        final ArrayList<List<Object>> paramAppenderList) {
+    public String getWhereCondition(
+            SQLExpr where, final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppenderList) {
         if (Objects.isNull(where)) {
             return StringUtils.EMPTY;
         }
@@ -146,8 +151,10 @@ public abstract class BasePostgresqlRecognizer extends BaseRecognizer {
         return sb.toString();
     }
 
-    protected String getLimitCondition(SQLLimit sqlLimit, final ParametersHolder parametersHolder,
-                                       final ArrayList<List<Object>> paramAppenderList) {
+    protected String getLimitCondition(
+            SQLLimit sqlLimit,
+            final ParametersHolder parametersHolder,
+            final ArrayList<List<Object>> paramAppenderList) {
         if (Objects.isNull(sqlLimit)) {
             return StringUtils.EMPTY;
         }
@@ -169,8 +176,10 @@ public abstract class BasePostgresqlRecognizer extends BaseRecognizer {
         return sb.toString();
     }
 
-    protected String getOrderByCondition(SQLOrderBy sqlOrderBy, final ParametersHolder parametersHolder,
-                                         final ArrayList<List<Object>> paramAppenderList) {
+    protected String getOrderByCondition(
+            SQLOrderBy sqlOrderBy,
+            final ParametersHolder parametersHolder,
+            final ArrayList<List<Object>> paramAppenderList) {
         if (Objects.isNull(sqlOrderBy)) {
             return StringUtils.EMPTY;
         }

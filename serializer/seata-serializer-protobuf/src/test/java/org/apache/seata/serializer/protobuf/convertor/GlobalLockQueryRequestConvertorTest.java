@@ -16,13 +16,12 @@
  */
 package org.apache.seata.serializer.protobuf.convertor;
 
-import org.apache.seata.serializer.protobuf.generated.GlobalLockQueryRequestProto;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.protocol.transaction.GlobalLockQueryRequest;
+import org.apache.seata.serializer.protobuf.generated.GlobalLockQueryRequestProto;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
 
 public class GlobalLockQueryRequestConvertorTest {
 
@@ -37,8 +36,7 @@ public class GlobalLockQueryRequestConvertorTest {
         globalLockQueryRequest.setXid("xid");
 
         GlobalLockQueryRequestConvertor convertor = new GlobalLockQueryRequestConvertor();
-        GlobalLockQueryRequestProto proto = convertor.convert2Proto(
-            globalLockQueryRequest);
+        GlobalLockQueryRequestProto proto = convertor.convert2Proto(globalLockQueryRequest);
         GlobalLockQueryRequest real = convertor.convert2Model(proto);
 
         assertThat(real.getTypeCode()).isEqualTo(globalLockQueryRequest.getTypeCode());

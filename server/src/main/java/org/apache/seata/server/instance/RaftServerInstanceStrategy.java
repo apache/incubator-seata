@@ -16,12 +16,11 @@
  */
 package org.apache.seata.server.instance;
 
-import javax.annotation.Resource;
 import org.apache.seata.common.XID;
 import org.apache.seata.common.holder.ObjectHolder;
 import org.apache.seata.common.metadata.ClusterRole;
-import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.metadata.Instance;
+import org.apache.seata.common.metadata.Node;
 import org.apache.seata.server.cluster.listener.ClusterChangeEvent;
 import org.apache.seata.server.cluster.listener.ClusterChangeListener;
 import org.apache.seata.server.cluster.raft.RaftServerManager;
@@ -36,12 +35,13 @@ import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.PropertySource;
 import org.springframework.scheduling.annotation.Async;
 
+import javax.annotation.Resource;
 
 import static org.apache.seata.common.ConfigurationKeys.META_PREFIX;
 import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_CONFIGURABLE_ENVIRONMENT;
 
 public class RaftServerInstanceStrategy extends AbstractSeataInstanceStrategy
-    implements ClusterChangeListener, Ordered {
+        implements ClusterChangeListener, Ordered {
 
     @Resource
     ServerRaftProperties raftProperties;
@@ -65,7 +65,10 @@ public class RaftServerInstanceStrategy extends AbstractSeataInstanceStrategy
         String clusterType = String.valueOf(StoreConfig.getSessionMode());
         instance.addMetadata("cluster-type", "raft".equalsIgnoreCase(clusterType) ? clusterType : "default");
         RaftStateMachine stateMachine = RaftServerManager.getRaftServer(unit).getRaftStateMachine();
-        long term = RaftServerManager.getRaftServer(unit).getRaftStateMachine().getCurrentTerm().get();
+        long term = RaftServerManager.getRaftServer(unit)
+                .getRaftStateMachine()
+                .getCurrentTerm()
+                .get();
         instance.setTerm(term);
         instance.setRole(stateMachine.isLeader() ? ClusterRole.LEADER : ClusterRole.FOLLOWER);
         // load node Endpoint
@@ -74,11 +77,12 @@ public class RaftServerInstanceStrategy extends AbstractSeataInstanceStrategy
         // load metadata
         for (PropertySource<?> propertySource : environment.getPropertySources()) {
             if (propertySource instanceof EnumerablePropertySource) {
-                EnumerablePropertySource<?> enumerablePropertySource = (EnumerablePropertySource<?>)propertySource;
+                EnumerablePropertySource<?> enumerablePropertySource = (EnumerablePropertySource<?>) propertySource;
                 for (String propertyName : enumerablePropertySource.getPropertyNames()) {
                     if (propertyName.startsWith(META_PREFIX)) {
-                        instance.addMetadata(propertyName.substring(META_PREFIX.length()),
-                            enumerablePropertySource.getProperty(propertyName));
+                        instance.addMetadata(
+                                propertyName.substring(META_PREFIX.length()),
+                                enumerablePropertySource.getProperty(propertyName));
                     }
                 }
             }
@@ -105,5 +109,4 @@ public class RaftServerInstanceStrategy extends AbstractSeataInstanceStrategy
         instance.setRole(event.isLeader() ? ClusterRole.LEADER : ClusterRole.FOLLOWER);
         SessionHolder.getRootVGroupMappingManager().notifyMapping();
     }
-
 }

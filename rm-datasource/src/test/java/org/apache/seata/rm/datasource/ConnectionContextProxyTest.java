@@ -17,8 +17,6 @@
 package org.apache.seata.rm.datasource;
 
 import com.alibaba.druid.mock.MockSavepoint;
-
-import org.apache.seata.rm.datasource.ConnectionContext;
 import org.apache.seata.rm.datasource.undo.SQLUndoLog;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -27,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Savepoint;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -36,13 +35,32 @@ import java.util.List;
 public class ConnectionContextProxyTest {
     ConnectionContext connectionContext = new ConnectionContext();
 
+    private static void assertLockKeysEqual(String expected, String actual) {
+        if (actual == null && expected == null) {
+            return;
+        }
+
+        Assertions.assertNotNull(actual, "Actual lock keys should not be null.");
+        Assertions.assertNotNull(expected, "Expected lock keys should not be null.");
+
+        // Split, sort, and compare the key arrays
+        String[] actualKeys = actual.split(";");
+        String[] expectedKeys = expected.split(";");
+
+        Arrays.sort(actualKeys);
+        Arrays.sort(expectedKeys);
+
+        Assertions.assertArrayEquals(expectedKeys, actualKeys, "The sorted arrays of lock keys should be equal.");
+    }
+
     @Test
     public void testBuildLockKeys() throws Exception {
         connectionContext.appendLockKey("abc");
         connectionContext.appendLockKey("bcd");
 
         Assertions.assertTrue(connectionContext.hasLockKey());
-        Assertions.assertEquals(connectionContext.buildLockKeys(), "bcd;abc");
+
+        assertLockKeysEqual("abc;bcd", connectionContext.buildLockKeys());
     }
 
     @Test
@@ -60,7 +78,8 @@ public class ConnectionContextProxyTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void testGetAfterSavepoints() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    public void testGetAfterSavepoints()
+            throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         Savepoint sp1 = new MockSavepoint();
         Savepoint sp2 = new MockSavepoint();
         Savepoint sp3 = new MockSavepoint();
@@ -71,7 +90,7 @@ public class ConnectionContextProxyTest {
         Method m = ConnectionContext.class.getDeclaredMethod("getAfterSavepoints", Savepoint.class);
         m.setAccessible(true);
 
-        List<Savepoint> invoke = (List<Savepoint>) m.invoke(connectionContext, new Object[]{null});
+        List<Savepoint> invoke = (List<Savepoint>) m.invoke(connectionContext, new Object[] {null});
         Assertions.assertEquals(invoke.size(), 3);
 
         invoke = (List<Savepoint>) m.invoke(connectionContext, sp2);
@@ -105,18 +124,19 @@ public class ConnectionContextProxyTest {
         connectionContext.appendUndoItem(new SQLUndoLog());
 
         Assertions.assertEquals(connectionContext.getUndoItems().size(), 2);
-        Assertions.assertEquals(connectionContext.buildLockKeys(), "sp3-lock-key;sp1-lock-key");
 
+        assertLockKeysEqual(connectionContext.buildLockKeys(), "sp1-lock-key;sp3-lock-key");
 
         connectionContext.removeSavepoint(sp3);
-        Assertions.assertEquals(connectionContext.getUndoItems().size(), 1);
-        Assertions.assertEquals(connectionContext.buildLockKeys(), "sp1-lock-key");
+        Assertions.assertEquals(1, connectionContext.getUndoItems().size());
+
+        assertLockKeysEqual(connectionContext.buildLockKeys(), "sp1-lock-key");
 
         connectionContext.removeSavepoint(null);
-        Assertions.assertEquals(connectionContext.getUndoItems().size(), 0);
-        Assertions.assertNull(connectionContext.buildLockKeys());
-    }
+        Assertions.assertEquals(0, connectionContext.getUndoItems().size());
 
+        assertLockKeysEqual(connectionContext.buildLockKeys(), null);
+    }
 
     @Test
     public void testReleaseSavepoint() {
@@ -133,20 +153,22 @@ public class ConnectionContextProxyTest {
         connectionContext.appendLockKey("sp3-lock-key");
         connectionContext.appendUndoItem(new SQLUndoLog());
 
-        Assertions.assertEquals(connectionContext.getUndoItems().size(), 2);
-        Assertions.assertEquals(connectionContext.buildLockKeys(), "sp3-lock-key;sp1-lock-key");
+        Assertions.assertEquals(2, connectionContext.getUndoItems().size());
 
+        String expectedLockKeys = "sp1-lock-key;sp3-lock-key";
+
+        assertLockKeysEqual(connectionContext.buildLockKeys(), expectedLockKeys);
 
         connectionContext.releaseSavepoint(sp3);
-        Assertions.assertEquals(connectionContext.getUndoItems().size(), 2);
-        Assertions.assertEquals(connectionContext.buildLockKeys(), "sp3-lock-key;sp1-lock-key");
+        Assertions.assertEquals(2, connectionContext.getUndoItems().size());
+
+        assertLockKeysEqual(connectionContext.buildLockKeys(), expectedLockKeys);
 
         connectionContext.releaseSavepoint(null);
-        Assertions.assertEquals(connectionContext.getUndoItems().size(), 2);
-        Assertions.assertEquals(connectionContext.buildLockKeys(), "sp3-lock-key;sp1-lock-key");
+        Assertions.assertEquals(2, connectionContext.getUndoItems().size());
+
+        assertLockKeysEqual(connectionContext.buildLockKeys(), expectedLockKeys);
     }
-
-
 
     @AfterEach
     public void clear() {

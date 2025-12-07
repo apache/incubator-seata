@@ -17,36 +17,34 @@
 package org.apache.seata.server.session;
 
 import org.apache.seata.core.model.GlobalStatus;
+import org.apache.seata.server.BaseSpringBootTest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
 /**
  * the type change status validator test
  *
  */
-@SpringBootTest
-public class SessionStatusValidatorTest {
+public class SessionStatusValidatorTest extends BaseSpringBootTest {
 
     @Test
-    public void testValidateUpdateStatus(){
+    public void testValidateUpdateStatus() {
         Assertions.assertTrue(SessionStatusValidator.validateUpdateStatus(GlobalStatus.Begin, GlobalStatus.Committing));
         Assertions.assertTrue(
-            SessionStatusValidator.validateUpdateStatus(GlobalStatus.Committing, GlobalStatus.Committed));
+                SessionStatusValidator.validateUpdateStatus(GlobalStatus.Committing, GlobalStatus.Committed));
 
         Assertions.assertFalse(
-            SessionStatusValidator.validateUpdateStatus(GlobalStatus.Committing, GlobalStatus.TimeoutRollbacking));
+                SessionStatusValidator.validateUpdateStatus(GlobalStatus.Committing, GlobalStatus.TimeoutRollbacking));
         Assertions.assertFalse(
-            SessionStatusValidator.validateUpdateStatus(GlobalStatus.TimeoutRollbacking, GlobalStatus.Committing));
+                SessionStatusValidator.validateUpdateStatus(GlobalStatus.TimeoutRollbacking, GlobalStatus.Committing));
         Assertions.assertFalse(
-            SessionStatusValidator.validateUpdateStatus(GlobalStatus.Committing, GlobalStatus.Rollbacking));
+                SessionStatusValidator.validateUpdateStatus(GlobalStatus.Committing, GlobalStatus.Rollbacking));
         Assertions.assertFalse(
-            SessionStatusValidator.validateUpdateStatus(GlobalStatus.Rollbacking, GlobalStatus.Committing));
+                SessionStatusValidator.validateUpdateStatus(GlobalStatus.Rollbacking, GlobalStatus.Committing));
 
         Assertions.assertFalse(
-            SessionStatusValidator.validateUpdateStatus(GlobalStatus.Committed, GlobalStatus.Rollbacked));
+                SessionStatusValidator.validateUpdateStatus(GlobalStatus.Committed, GlobalStatus.Rollbacked));
         Assertions.assertFalse(
-            SessionStatusValidator.validateUpdateStatus(GlobalStatus.Committed, GlobalStatus.TimeoutRollbacking));
-
+                SessionStatusValidator.validateUpdateStatus(GlobalStatus.Committed, GlobalStatus.TimeoutRollbacking));
     }
 }

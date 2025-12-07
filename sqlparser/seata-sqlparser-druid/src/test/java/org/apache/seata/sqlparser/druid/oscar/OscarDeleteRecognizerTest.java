@@ -16,137 +16,127 @@
  */
 package org.apache.seata.sqlparser.druid.oscar;
 
-import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLDeleteStatement;
 import com.alibaba.druid.sql.dialect.oracle.ast.expr.OracleArgumentExpr;
 import org.apache.seata.sqlparser.ParametersHolder;
 import org.apache.seata.sqlparser.SQLType;
-import org.apache.seata.sqlparser.druid.oscar.OscarDeleteRecognizer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
  * The type Oscar delete recognizer test.
  */
-public class OscarDeleteRecognizerTest {
-
-    private static final String DB_TYPE = "oscar";
+public class OscarDeleteRecognizerTest extends AbstractOscarRecognizerTest {
 
     @Test
     public void testGetSqlType() {
         String sql = "delete from t where id = ?";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
+        SQLStatement sqlStatement = getSQLStatement(sql);
 
-        OscarDeleteRecognizer recognizer = new OscarDeleteRecognizer(sql, asts.get(0));
+        OscarDeleteRecognizer recognizer = new OscarDeleteRecognizer(sql, sqlStatement);
         Assertions.assertEquals(recognizer.getSQLType(), SQLType.DELETE);
     }
 
     @Test
     public void testGetTableAlias() {
         String sql = "delete from t where id = ?";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
+        SQLStatement sqlStatement = getSQLStatement(sql);
 
-        OscarDeleteRecognizer recognizer = new OscarDeleteRecognizer(sql, asts.get(0));
+        OscarDeleteRecognizer recognizer = new OscarDeleteRecognizer(sql, sqlStatement);
         Assertions.assertNull(recognizer.getTableAlias());
     }
 
     @Test
     public void testGetTableName() {
         String sql = "delete from t where id = ?";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
+        SQLStatement sqlStatement = getSQLStatement(sql);
 
-        OscarDeleteRecognizer recognizer = new OscarDeleteRecognizer(sql, asts.get(0));
+        OscarDeleteRecognizer recognizer = new OscarDeleteRecognizer(sql, sqlStatement);
         Assertions.assertEquals(recognizer.getTableName(), "t");
     }
 
     @Test
     public void testGetWhereCondition_0() {
         String sql = "delete from t";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
+        SQLStatement sqlStatement = getSQLStatement(sql);
 
-        OscarDeleteRecognizer recognizer = new OscarDeleteRecognizer(sql, asts.get(0));
-        String whereCondition = recognizer.getWhereCondition(new ParametersHolder() {
-            @Override
-            public Map<Integer,ArrayList<Object>> getParameters() {
-                return null;
-            }
-        }, new ArrayList<>());
+        OscarDeleteRecognizer recognizer = new OscarDeleteRecognizer(sql, sqlStatement);
+        String whereCondition = recognizer.getWhereCondition(() -> null, new ArrayList<>());
 
-        //test for no condition
+        // test for no condition
         Assertions.assertEquals("", whereCondition);
 
         sql = "delete from t where id = ?";
-        asts = SQLUtils.parseStatements(sql, DB_TYPE);
+        sqlStatement = getSQLStatement(sql);
 
-        recognizer = new OscarDeleteRecognizer(sql, asts.get(0));
-        whereCondition = recognizer.getWhereCondition(new ParametersHolder() {
-            @Override
-            public Map<Integer,ArrayList<Object>> getParameters() {
-                ArrayList<Object> idParam = new ArrayList<>();
-                idParam.add(1);
-                Map result = new HashMap();
-                result.put(1, idParam);
-                return result;
-            }
-        }, new ArrayList<>());
+        recognizer = new OscarDeleteRecognizer(sql, sqlStatement);
+        whereCondition = recognizer.getWhereCondition(
+                new ParametersHolder() {
+                    @Override
+                    public Map<Integer, ArrayList<Object>> getParameters() {
+                        ArrayList<Object> idParam = new ArrayList<>();
+                        idParam.add(1);
+                        Map result = new HashMap();
+                        result.put(1, idParam);
+                        return result;
+                    }
+                },
+                new ArrayList<>());
 
-        //test for normal sql
+        // test for normal sql
         Assertions.assertEquals("id = ?", whereCondition);
 
         sql = "delete from t where id in (?)";
-        asts = SQLUtils.parseStatements(sql, DB_TYPE);
-        recognizer = new OscarDeleteRecognizer(sql, asts.get(0));
-        whereCondition = recognizer.getWhereCondition(new ParametersHolder() {
-            @Override
-            public Map<Integer,ArrayList<Object>> getParameters() {
-                ArrayList<Object> idParam = new ArrayList<>();
-                idParam.add(1);
-                Map result = new HashMap();
-                result.put(1, idParam);
-                return result;
-            }
-        }, new ArrayList<>());
+        sqlStatement = getSQLStatement(sql);
+        recognizer = new OscarDeleteRecognizer(sql, sqlStatement);
+        whereCondition = recognizer.getWhereCondition(
+                new ParametersHolder() {
+                    @Override
+                    public Map<Integer, ArrayList<Object>> getParameters() {
+                        ArrayList<Object> idParam = new ArrayList<>();
+                        idParam.add(1);
+                        Map result = new HashMap();
+                        result.put(1, idParam);
+                        return result;
+                    }
+                },
+                new ArrayList<>());
 
-        //test for sql with in
+        // test for sql with in
         Assertions.assertEquals("id IN (?)", whereCondition);
 
         sql = "delete from t where id between ? and ?";
-        asts = SQLUtils.parseStatements(sql, DB_TYPE);
-        recognizer = new OscarDeleteRecognizer(sql, asts.get(0));
-        whereCondition = recognizer.getWhereCondition(new ParametersHolder() {
-            @Override
-            public Map<Integer,ArrayList<Object>> getParameters() {
-                ArrayList<Object> idParam = new ArrayList<>();
-                idParam.add(1);
-                ArrayList<Object> idParam2 = new ArrayList<>();
-                idParam.add(2);
-                Map result = new HashMap();
-                result.put(1, idParam);
-                result.put(2, idParam2);
-                return result;
-            }
-        }, new ArrayList<>());
-        //test for sql with in
+        sqlStatement = getSQLStatement(sql);
+        recognizer = new OscarDeleteRecognizer(sql, sqlStatement);
+        whereCondition = recognizer.getWhereCondition(
+                new ParametersHolder() {
+                    @Override
+                    public Map<Integer, ArrayList<Object>> getParameters() {
+                        ArrayList<Object> idParam = new ArrayList<>();
+                        idParam.add(1);
+                        ArrayList<Object> idParam2 = new ArrayList<>();
+                        idParam.add(2);
+                        Map result = new HashMap();
+                        result.put(1, idParam);
+                        result.put(2, idParam2);
+                        return result;
+                    }
+                },
+                new ArrayList<>());
+        // test for sql with in
         Assertions.assertEquals("id BETWEEN ? AND ?", whereCondition);
 
-        //test for exception
+        // test for exception
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             String s = "delete from t where id in (?)";
-            List<SQLStatement> sqlStatements = SQLUtils.parseStatements(s, DB_TYPE);
-            SQLDeleteStatement deleteAst = (SQLDeleteStatement) sqlStatements.get(0);
+            SQLDeleteStatement deleteAst = (SQLDeleteStatement) getSQLStatement(s);
             deleteAst.setWhere(new OracleArgumentExpr());
-            new OscarDeleteRecognizer(s, deleteAst).getWhereCondition(new ParametersHolder() {
-                @Override
-                public Map<Integer,ArrayList<Object>> getParameters() {
-                    return new HashMap<>();
-                }
-            }, new ArrayList<>());
+            new OscarDeleteRecognizer(s, deleteAst).getWhereCondition(() -> new HashMap<>(), new ArrayList<>());
         });
     }
 
@@ -154,43 +144,42 @@ public class OscarDeleteRecognizerTest {
     public void testGetWhereCondition_1() {
 
         String sql = "delete from t";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
+        SQLStatement sqlStatement = getSQLStatement(sql);
 
-        OscarDeleteRecognizer recognizer = new OscarDeleteRecognizer(sql, asts.get(0));
+        OscarDeleteRecognizer recognizer = new OscarDeleteRecognizer(sql, sqlStatement);
         String whereCondition = recognizer.getWhereCondition();
 
-        //test for no condition
+        // test for no condition
         Assertions.assertEquals("", whereCondition);
 
         sql = "delete from t where id = 1";
-        asts = SQLUtils.parseStatements(sql, DB_TYPE);
+        sqlStatement = getSQLStatement(sql);
 
-        recognizer = new OscarDeleteRecognizer(sql, asts.get(0));
+        recognizer = new OscarDeleteRecognizer(sql, sqlStatement);
         whereCondition = recognizer.getWhereCondition();
 
-        //test for normal sql
+        // test for normal sql
         Assertions.assertEquals("id = 1", whereCondition);
 
         sql = "delete from t where id in (1)";
-        asts = SQLUtils.parseStatements(sql, DB_TYPE);
-        recognizer = new OscarDeleteRecognizer(sql, asts.get(0));
+        sqlStatement = getSQLStatement(sql);
+        recognizer = new OscarDeleteRecognizer(sql, sqlStatement);
         whereCondition = recognizer.getWhereCondition();
 
-        //test for sql with in
+        // test for sql with in
         Assertions.assertEquals("id IN (1)", whereCondition);
 
         sql = "delete from t where id between 1 and 2";
-        asts = SQLUtils.parseStatements(sql, DB_TYPE);
-        recognizer = new OscarDeleteRecognizer(sql, asts.get(0));
+        sqlStatement = getSQLStatement(sql);
+        recognizer = new OscarDeleteRecognizer(sql, sqlStatement);
         whereCondition = recognizer.getWhereCondition();
-        //test for sql with in
+        // test for sql with in
         Assertions.assertEquals("id BETWEEN 1 AND 2", whereCondition);
 
-        //test for exception
+        // test for exception
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             String s = "delete from t where id in (1)";
-            List<SQLStatement> sqlStatements = SQLUtils.parseStatements(s, DB_TYPE);
-            SQLDeleteStatement deleteAst = (SQLDeleteStatement) sqlStatements.get(0);
+            SQLDeleteStatement deleteAst = (SQLDeleteStatement) getSQLStatement(s);
             deleteAst.setWhere(new OracleArgumentExpr());
             new OscarDeleteRecognizer(s, deleteAst).getWhereCondition();
         });

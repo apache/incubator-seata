@@ -22,7 +22,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-
 /**
  * declare the transaction only execute in single local RM
  * but the transaction need to ensure records to update(or select for update) is not in global transaction middle
@@ -35,7 +34,7 @@ import java.lang.annotation.Target;
  * @see org.apache.seata.spring.annotation.datasource.SeataAutoDataSourceProxyAdvice#invoke(MethodInvocation) // the interceptor of GlobalLockLogic and AT/XA mode
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD,ElementType.TYPE})
+@Target({ElementType.METHOD, ElementType.TYPE})
 @Inherited
 public @interface GlobalLock {
     /**

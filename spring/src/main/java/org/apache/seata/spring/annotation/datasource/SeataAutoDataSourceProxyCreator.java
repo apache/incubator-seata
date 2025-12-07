@@ -16,22 +16,21 @@
  */
 package org.apache.seata.spring.annotation.datasource;
 
-import javax.sql.DataSource;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
+import org.aopalliance.aop.Advice;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.rm.datasource.DataSourceProxy;
 import org.apache.seata.rm.datasource.SeataDataSourceProxy;
 import org.apache.seata.rm.datasource.xa.DataSourceProxyXA;
-import org.aopalliance.aop.Advice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator;
 import org.springframework.aop.support.DefaultIntroductionAdvisor;
 
+import javax.sql.DataSource;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 public class SeataAutoDataSourceProxyCreator extends AbstractAutoProxyCreator {
 
@@ -52,11 +51,12 @@ public class SeataAutoDataSourceProxyCreator extends AbstractAutoProxyCreator {
 
     private Object[] buildAdvisors(String dataSourceProxyMode) {
         Advice advice = new SeataAutoDataSourceProxyAdvice(dataSourceProxyMode);
-        return new Object[]{new DefaultIntroductionAdvisor(advice)};
+        return new Object[] {new DefaultIntroductionAdvisor(advice)};
     }
 
     @Override
-    protected Object[] getAdvicesAndAdvisorsForBean(Class<?> beanClass, String beanName, TargetSource customTargetSource) {
+    protected Object[] getAdvicesAndAdvisorsForBean(
+            Class<?> beanClass, String beanName, TargetSource customTargetSource) {
         return advisors;
     }
 
@@ -95,7 +95,8 @@ public class SeataAutoDataSourceProxyCreator extends AbstractAutoProxyCreator {
          * if you insist on doing so, you must make sure your method return type is DataSource,
          * because this processor will never return any subclass of SeataDataSourceProxy
          */
-        LOGGER.warn("Manually register SeataDataSourceProxy(or its subclass) bean is discouraged! bean name: {}", beanName);
+        LOGGER.warn(
+                "Manually register SeataDataSourceProxy(or its subclass) bean is discouraged! bean name: {}", beanName);
         SeataDataSourceProxy proxy = (SeataDataSourceProxy) bean;
         DataSource origin = proxy.getTargetDataSource();
         Object originEnhancer = super.wrapIfNecessary(origin, beanName, cacheKey);
