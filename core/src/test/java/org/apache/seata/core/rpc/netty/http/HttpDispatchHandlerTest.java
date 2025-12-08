@@ -20,13 +20,13 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
+import io.netty.handler.codec.http.DefaultFullHttpResponse;
+import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
-import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import org.apache.seata.common.rpc.http.HttpContext;
 import org.apache.seata.core.exception.HttpRequestFilterException;
 import org.apache.seata.core.rpc.netty.http.filter.HttpFilterContext;
@@ -48,15 +48,15 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.Executors;
 
 import static org.assertj.core.api.Fail.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
@@ -72,6 +72,7 @@ class HttpDispatchHandlerTest {
 
     @Mock
     private ChannelHandlerContext mockCtx;
+
     private FullHttpRequest testHttpRequest;
     private ExecutorService testExecutor;
     private EmbeddedChannel embeddedChannel;
@@ -102,9 +103,10 @@ class HttpDispatchHandlerTest {
         ControllerManager.addHttpInvocation(invocation);
 
         testHttpRequest = new DefaultFullHttpRequest(
-                HttpVersion.HTTP_1_1, HttpMethod.GET, "/test",
-                Unpooled.copiedBuffer("{\"name\":\"test\"}", StandardCharsets.UTF_8)
-        );
+                HttpVersion.HTTP_1_1,
+                HttpMethod.GET,
+                "/test",
+                Unpooled.copiedBuffer("{\"name\":\"test\"}", StandardCharsets.UTF_8));
         embeddedChannel = new EmbeddedChannel();
         when(mockCtx.channel()).thenReturn(embeddedChannel);
         when(mockCtx.pipeline()).thenReturn(embeddedChannel.pipeline());
@@ -381,12 +383,12 @@ class HttpDispatchHandlerTest {
 
         HttpRequestFilter businessFilter = new HttpRequestFilter() {
             @Override
-            public void doFilter(HttpFilterContext<?> ctx, HttpRequestFilterChain chain) throws HttpRequestFilterException {
+            public void doFilter(HttpFilterContext<?> ctx, HttpRequestFilterChain chain)
+                    throws HttpRequestFilterException {
                 mockAspect.beforeFilter();
 
-                FullHttpResponse response = new DefaultFullHttpResponse(
-                        HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.EMPTY_BUFFER
-                );
+                FullHttpResponse response =
+                        new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.EMPTY_BUFFER);
                 ctx.setResponse(response);
 
                 chain.doFilter(ctx);
@@ -400,28 +402,29 @@ class HttpDispatchHandlerTest {
             }
         };
 
-        HttpRequestFilterChain filterChain = new HttpRequestFilterChain(
-                Arrays.asList(businessFilter),
-                ctx -> {}
-        );
+        HttpRequestFilterChain filterChain = new HttpRequestFilterChain(Arrays.asList(businessFilter), ctx -> {});
 
         HttpFilterContext<HttpRequest> context = new HttpFilterContext<>(
-                testHttpRequest, mockCtx, true, HttpContext.HTTP_1_1,
-                () -> new HttpRequestParamWrapper(null, null, null, null)
-        );
+                testHttpRequest,
+                mockCtx,
+                true,
+                HttpContext.HTTP_1_1,
+                () -> new HttpRequestParamWrapper(null, null, null, null));
         context.setAttribute("testKey", "test-invocation");
 
-        testExecutor.submit(() -> {
-            try {
-                HttpFilterContext.setCurrentContext(context);
-                filterChain.doFilter(context);
-            } catch (HttpRequestFilterException e) {
-                fail("Filter failure: " + e.getMessage());
-            } finally {
-                HttpFilterContext.clearCurrentContext();
-                mockAspect.afterFinally();
-            }
-        }).get(1, TimeUnit.SECONDS);
+        testExecutor
+                .submit(() -> {
+                    try {
+                        HttpFilterContext.setCurrentContext(context);
+                        filterChain.doFilter(context);
+                    } catch (HttpRequestFilterException e) {
+                        fail("Filter failure: " + e.getMessage());
+                    } finally {
+                        HttpFilterContext.clearCurrentContext();
+                        mockAspect.afterFinally();
+                    }
+                })
+                .get(1, TimeUnit.SECONDS);
 
         assertNull(HttpFilterContext.getCurrentContext());
     }
