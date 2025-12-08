@@ -38,6 +38,9 @@ public class XAUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(XAUtils.class);
 
+    private static final String MARIADB_3X_XA_CONNECTION_CLASS = "org.mariadb.jdbc.MariaDbPooledConnection";
+    private static final String MARIADB_PRE3X_XA_CONNECTION_CLASS = "org.mariadb.jdbc.MariaXaConnection";
+
     public static String getDbType(String jdbcUrl, String driverClassName) {
         return JdbcUtils.getDbType(jdbcUrl, driverClassName);
     }
@@ -65,7 +68,12 @@ public class XAUtils {
                             return createXAConnection(physicalConn, "oracle.jdbc.xa.client.OracleXAConnection", dbType);
                         }
                     case JdbcConstants.MARIADB:
-                        return createXAConnection(physicalConn, "org.mariadb.jdbc.MariaXaConnection", dbType);
+                        try {
+                            return createXAConnection(physicalConn, MARIADB_3X_XA_CONNECTION_CLASS, dbType);
+                        } catch (Exception e) {
+                            LOGGER.warn("Failed to create MariaDB 3.x XA Connection, try pre-3.x version", e);
+                            return createXAConnection(physicalConn, MARIADB_PRE3X_XA_CONNECTION_CLASS, dbType);
+                        }
                     case JdbcConstants.POSTGRESQL:
                         return PGUtils.createXAConnection(physicalConn);
                     case JdbcConstants.KINGBASE:
@@ -112,9 +120,12 @@ public class XAUtils {
                 case JdbcConstants.ORACLE:
                     return xaConnectionClass.getConstructor(Connection.class);
                 case JdbcConstants.MARIADB:
-                    // MariaXaConnection(MariaDbConnection connection)
-                    Class<?> mariaXaConnectionClass = Class.forName("org.mariadb.jdbc.MariaDbConnection");
-                    return xaConnectionClass.getConstructor(mariaXaConnectionClass);
+                    if ("org.mariadb.jdbc.MariaXaConnection".equals(xaConnectionClass.getName())) {
+                        Class<?> mariaDbConnectionClass = Class.forName("org.mariadb.jdbc.MariaDbConnection");
+                        return xaConnectionClass.getConstructor(mariaDbConnectionClass);
+                    } else {
+                        return xaConnectionClass.getConstructor(Connection.class);
+                    }
                 case JdbcConstants.KINGBASE:
                     Class<?> kingbaseConnectionClass = Class.forName("com.kingbase8.core.BaseConnection");
                     return xaConnectionClass.getConstructor(kingbaseConnectionClass);
@@ -151,12 +162,8 @@ public class XAUtils {
                     result.add(params[0]);
                     return result;
                 case JdbcConstants.MARIADB:
-                    Class mariaDbConnectionClass = Class.forName("org.mariadb.jdbc.MariaDbConnection");
-                    if (mariaDbConnectionClass.isInstance(params[0])) {
-                        Object mariaDbConnectionInstance = mariaDbConnectionClass.cast(params[0]);
-                        result.add(mariaDbConnectionInstance);
-                        return result;
-                    }
+                    result.add(params[0]);
+                    return (List<T>) result;
                 case JdbcConstants.DM:
                     Class<?> dmConnectionClass = Class.forName("dm.jdbc.driver.DmdbConnection");
                     if (dmConnectionClass.isInstance(params[0])) {
