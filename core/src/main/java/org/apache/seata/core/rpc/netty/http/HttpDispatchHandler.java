@@ -22,6 +22,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
+import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpMethod;
@@ -29,19 +30,20 @@ import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpUtil;
 import io.netty.handler.codec.http.HttpVersion;
-import io.netty.handler.codec.http.QueryStringDecoder;
-import io.netty.handler.codec.http.multipart.Attribute;
-import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
-import io.netty.handler.codec.http.multipart.InterfaceHttpData;
 import org.apache.seata.common.rpc.http.HttpContext;
 import org.apache.seata.core.exception.HttpRequestFilterException;
+import org.apache.seata.core.rpc.netty.http.RequestParseUtils.BodyParseResult;
+import org.apache.seata.core.rpc.netty.http.RequestParseUtils.QueryParseResult;
 import org.apache.seata.core.rpc.netty.http.filter.HttpFilterContext;
+import org.apache.seata.core.rpc.netty.http.filter.HttpRequestFilterChain;
+import org.apache.seata.core.rpc.netty.http.filter.HttpRequestFilterManager;
 import org.apache.seata.core.rpc.netty.http.filter.HttpRequestParamWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
-import java.util.concurrent.RejectedExecutionException;
+import java.util.List;
+import java.util.Map;
 
 /**
  * A Netty HTTP request handler that dispatches incoming requests to corresponding controller methods
@@ -52,85 +54,86 @@ public class HttpDispatchHandler extends BaseHttpChannelHandler<HttpRequest> {
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, HttpRequest httpRequest) {
-        try {
-            HttpFilterContext<HttpRequest> context =
-                    new HttpFilterContext<>(httpRequest, () -> new HttpRequestParamWrapper(httpRequest));
-            doFilterInternal(context);
-        } catch (HttpRequestFilterException e) {
-            LOGGER.warn("Request blocked by filter: {}", e.getMessage());
-            sendErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST, false);
-            return;
-        } catch (Exception e) {
-            LOGGER.error("Unexpected error during filter execution: {}", e.getMessage(), e);
-            sendErrorResponse(ctx, HttpResponseStatus.INTERNAL_SERVER_ERROR, false);
+        FullHttpRequest fullHttpRequest = httpRequest instanceof FullHttpRequest ? (FullHttpRequest) httpRequest : null;
+        QueryParseResult queryParseResult = RequestParseUtils.parseQuery(httpRequest.uri());
+        String path = queryParseResult.getPath();
+        Map<String, List<String>> queryParams = queryParseResult.getParameters();
+        Map<String, List<String>> headerParams = RequestParseUtils.copyHeaders(httpRequest.headers());
+        BodyParseResult bodyParseResult = fullHttpRequest != null
+                ? RequestParseUtils.parseBody(OBJECT_MAPPER, fullHttpRequest)
+                : RequestParseUtils.BodyParseResult.empty();
+
+        HttpFilterContext<HttpRequest> context = new HttpFilterContext<>(
+                httpRequest,
+                ctx,
+                HttpUtil.isKeepAlive(httpRequest)
+                        && httpRequest.protocolVersion().isKeepAliveDefault(),
+                HttpContext.HTTP_1_1,
+                () -> new HttpRequestParamWrapper(
+                        queryParams, bodyParseResult.getFormParams(), headerParams, bodyParseResult.getJsonParams()));
+
+        HttpInvocation httpInvocation = ControllerManager.getHttpInvocation(path);
+
+        if (httpInvocation == null) {
+            sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND, false);
             return;
         }
 
-        try {
-            boolean keepAlive = HttpUtil.isKeepAlive(httpRequest)
-                    && httpRequest.protocolVersion().isKeepAliveDefault();
-            QueryStringDecoder queryStringDecoder = new QueryStringDecoder(httpRequest.uri());
-            String path = queryStringDecoder.path();
-            HttpInvocation httpInvocation = ControllerManager.getHttpInvocation(path);
+        context.setAttribute("httpInvocation", httpInvocation);
+        context.setAttribute("httpController", httpInvocation.getController());
+        context.setAttribute("handleMethod", httpInvocation.getMethod());
 
-            if (httpInvocation == null) {
-                sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND, false);
+        ObjectNode requestDataNode = OBJECT_MAPPER.createObjectNode();
+        requestDataNode.set("param", ParameterParser.convertParamMap(queryParams));
+        if (httpRequest.method() == HttpMethod.POST && bodyParseResult.getBodyNode() != null) {
+            requestDataNode.set("body", bodyParseResult.getBodyNode());
+        }
+
+        Object[] args;
+        try {
+            args = ParameterParser.getArgValues(
+                    httpInvocation.getParamMetaData(), httpInvocation.getMethod(), requestDataNode, context);
+        } catch (Exception e) {
+            LOGGER.error("Error parsing request arguments: {}", e.getMessage(), e);
+            sendErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST, false);
+            return;
+        }
+        context.setAttribute("args", args);
+
+        // Execute filter chain in HTTP thread pool
+        HttpRequestFilterChain filterChain = HttpRequestFilterManager.getFilterChain(this::executeFinalAction);
+        HTTP_HANDLER_THREADS.execute(() -> {
+            try {
+                filterChain.doFilter(context);
+            } catch (HttpRequestFilterException e) {
+                LOGGER.warn("Request blocked by filter: {}", e.getMessage());
+                sendErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST, false);
+            } catch (Exception e) {
+                LOGGER.error("Unexpected error during request processing: {}", e.getMessage(), e);
+                sendErrorResponse(ctx, HttpResponseStatus.INTERNAL_SERVER_ERROR, false);
+            }
+        });
+    }
+
+    private void executeFinalAction(HttpFilterContext<?> context) {
+        HttpInvocation httpInvocation = context.getAttribute("httpInvocation");
+        Object httpController = context.getAttribute("httpController");
+        Method handleMethod = context.getAttribute("handleMethod");
+        Object[] args = context.getAttribute("args");
+
+        try {
+            Object result = handleMethod.invoke(httpController, args);
+            if (context.isAsync()) {
                 return;
             }
 
-            HttpContext<HttpRequest> httpContext = new HttpContext<>(httpRequest, ctx, keepAlive, HttpContext.HTTP_1_1);
-            ObjectNode requestDataNode = OBJECT_MAPPER.createObjectNode();
-            requestDataNode.set("param", ParameterParser.convertParamMap(queryStringDecoder.parameters()));
-
-            if (httpRequest.method() == HttpMethod.POST) {
-                HttpPostRequestDecoder httpPostRequestDecoder = null;
-                try {
-                    httpPostRequestDecoder = new HttpPostRequestDecoder(httpRequest);
-                    ObjectNode bodyDataNode = OBJECT_MAPPER.createObjectNode();
-                    for (InterfaceHttpData interfaceHttpData : httpPostRequestDecoder.getBodyHttpDatas()) {
-                        if (interfaceHttpData.getHttpDataType() != InterfaceHttpData.HttpDataType.Attribute) {
-                            continue;
-                        }
-                        Attribute attribute = (Attribute) interfaceHttpData;
-                        bodyDataNode.put(attribute.getName(), attribute.getValue());
-                    }
-                    requestDataNode.putIfAbsent("body", bodyDataNode);
-                } finally {
-                    if (httpPostRequestDecoder != null) {
-                        httpPostRequestDecoder.destroy();
-                    }
-                }
-            }
-
-            Object httpController = httpInvocation.getController();
-            Method handleMethod = httpInvocation.getMethod();
-            Object[] args = ParameterParser.getArgValues(
-                    httpInvocation.getParamMetaData(), handleMethod, requestDataNode, httpContext);
-
-            try {
-                HTTP_HANDLER_THREADS.execute(() -> {
-                    try {
-                        Object result = handleMethod.invoke(httpController, args);
-                        if (httpContext.isAsync()) {
-                            return;
-                        }
-
-                        sendResponse(ctx, keepAlive, result);
-                    } catch (IllegalArgumentException e) {
-                        LOGGER.error("Illegal argument exception: {}", e.getMessage(), e);
-                        sendErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST, false);
-                    } catch (Exception e) {
-                        LOGGER.error("Exception occurred while processing HTTP request: {}", e.getMessage(), e);
-                        sendErrorResponse(ctx, HttpResponseStatus.INTERNAL_SERVER_ERROR, false);
-                    }
-                });
-            } catch (RejectedExecutionException e) {
-                LOGGER.error("HTTP thread pool is full: {}", e.getMessage(), e);
-                sendErrorResponse(ctx, HttpResponseStatus.SERVICE_UNAVAILABLE, false);
-            }
+            sendResponse(context.getContext(), context.isKeepAlive(), result);
+        } catch (IllegalArgumentException e) {
+            LOGGER.error("Illegal argument exception: {}", e.getMessage(), e);
+            sendErrorResponse(context.getContext(), HttpResponseStatus.BAD_REQUEST, false);
         } catch (Exception e) {
             LOGGER.error("Exception occurred while processing HTTP request: {}", e.getMessage(), e);
-            sendErrorResponse(ctx, HttpResponseStatus.INTERNAL_SERVER_ERROR, false);
+            sendErrorResponse(context.getContext(), HttpResponseStatus.INTERNAL_SERVER_ERROR, false);
         }
     }
 
