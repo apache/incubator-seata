@@ -21,6 +21,7 @@ import org.apache.seata.common.loader.EnhancedServiceLoader;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class HttpRequestFilterManager {
 
@@ -42,7 +43,7 @@ public class HttpRequestFilterManager {
         }
         HTTP_REQUEST_FILTERS.sort(Comparator.comparingInt(HttpRequestFilter::getOrder));
 
-        HTTP_REQUEST_FILTER_CHAIN = new HttpRequestFilterChain(HTTP_REQUEST_FILTERS);
+        HTTP_REQUEST_FILTER_CHAIN = new HttpRequestFilterChain(HTTP_REQUEST_FILTERS, null);
         initialized = true;
     }
 
@@ -51,5 +52,12 @@ public class HttpRequestFilterManager {
             throw new IllegalStateException("HttpRequestFilterManager not initialized.");
         }
         return HTTP_REQUEST_FILTER_CHAIN;
+    }
+
+    public static HttpRequestFilterChain getFilterChain(Consumer<HttpFilterContext<?>> finalAction) {
+        if (!initialized) {
+            throw new IllegalStateException("HttpRequestFilterManager not initialized.");
+        }
+        return new HttpRequestFilterChain(HTTP_REQUEST_FILTERS, finalAction);
     }
 }
