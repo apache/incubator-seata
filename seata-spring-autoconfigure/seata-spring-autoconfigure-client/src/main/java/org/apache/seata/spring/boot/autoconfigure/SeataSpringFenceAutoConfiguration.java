@@ -42,13 +42,13 @@ import static org.apache.seata.common.Constants.BEAN_NAME_SPRING_FENCE_CONFIG;
 @ConditionalOnBean(type = {"javax.sql.DataSource", "org.springframework.transaction.PlatformTransactionManager"})
 @ConditionalOnMissingBean(SpringFenceConfig.class)
 @AutoConfigureAfter(
-    value = {SeataCoreAutoConfiguration.class},
-    name = {
-        // Spring Boot 2.x, 3.x
-        "org.springframework.boot.autoconfigure.transaction.TransactionAutoConfiguration",
-        // Spring Boot 4.x
-        "org.springframework.boot.transaction.autoconfigure.TransactionAutoConfiguration"
-    })
+        value = {SeataCoreAutoConfiguration.class},
+        name = {
+            // Spring Boot 2.x, 3.x
+            "org.springframework.boot.autoconfigure.transaction.TransactionAutoConfiguration",
+            // Spring Boot 4.x
+            "org.springframework.boot.transaction.autoconfigure.TransactionAutoConfiguration"
+        })
 @AutoConfigureOrder(Ordered.LOWEST_PRECEDENCE)
 public class SeataSpringFenceAutoConfiguration {
 
