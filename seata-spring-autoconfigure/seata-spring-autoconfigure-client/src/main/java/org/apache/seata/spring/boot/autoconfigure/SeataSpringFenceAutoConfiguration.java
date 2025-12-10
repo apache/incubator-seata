@@ -44,8 +44,10 @@ import static org.apache.seata.common.Constants.BEAN_NAME_SPRING_FENCE_CONFIG;
 @AutoConfigureAfter(
     value = {SeataCoreAutoConfiguration.class},
     name = {
-        "org.springframework.boot.autoconfigure.transaction.TransactionAutoConfiguration",  // Spring Boot 2.x, 3.x
-        "org.springframework.boot.transaction.autoconfigure.TransactionAutoConfiguration"   // Spring Boot 4.x
+        // Spring Boot 2.x, 3.x
+        "org.springframework.boot.autoconfigure.transaction.TransactionAutoConfiguration",
+        // Spring Boot 4.x
+        "org.springframework.boot.transaction.autoconfigure.TransactionAutoConfiguration"
     })
 @AutoConfigureOrder(Ordered.LOWEST_PRECEDENCE)
 public class SeataSpringFenceAutoConfiguration {
