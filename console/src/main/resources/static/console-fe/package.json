@@ -109,6 +109,7 @@
     "@babel/runtime": "^7.27.0",
     "braces": "3.0.3",
     "micromatch": "4.0.8",
-    "serialize-javascript": "6.0.2"
+    "serialize-javascript": "6.0.2",
+    "node-forge": "^1.3.3"
   }
 }
