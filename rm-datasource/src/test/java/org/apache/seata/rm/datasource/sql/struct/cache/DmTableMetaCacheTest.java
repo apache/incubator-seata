@@ -42,10 +42,10 @@ public class DmTableMetaCacheTest {
         new Object[] {"", "", "dt1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 4, "YES", "NO"}
     };
 
-    private static final Object[][] indexMetas= new Object[][] {
-            new Object[] {"IDX_ID", "id", false, "", 3, 0, "A", 34},
-            new Object[] {"IDX_NAME1", "name1", false, "", 3, 1, "A", 34},
-            new Object[] {"IDX_NAME2", "name2", true, "", 3, 2, "A", 34},
+    private static final Object[][] indexMetas = new Object[][] {
+        new Object[] {"IDX_ID", "id", false, "", 3, 0, "A", 34},
+        new Object[] {"IDX_NAME1", "name1", false, "", 3, 1, "A", 34},
+        new Object[] {"IDX_NAME2", "name2", true, "", 3, 2, "A", 34},
     };
 
     private static Object[][] pkMetas = new Object[][] {new Object[] {"id"}};
@@ -90,12 +90,12 @@ public class DmTableMetaCacheTest {
     public void testGetTableMetaWithQuotedIdentifiers() throws SQLException {
         Object[][] quotedTableMetas = new Object[][] {new Object[] {"", "t", "MixedCase"}};
         Object[][] quotedColumnMetas = new Object[][] {
-                new Object[] {
-                        "", "", "MixedCase", "Id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"
-                },
-                new Object[] {
-                        "", "", "MixedCase", "Name", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"
-                }
+            new Object[] {
+                "", "", "MixedCase", "Id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"
+            },
+            new Object[] {
+                "", "", "MixedCase", "Name", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"
+            }
         };
         Object[][] quotedIndexMetas = new Object[][] {new Object[] {"idx_id", "Id", false, "", 3, 0, "A", 34}};
         Object[][] quotedPKMetas = new Object[][] {new Object[] {"Id"}};
@@ -136,9 +136,9 @@ public class DmTableMetaCacheTest {
     @Test
     public void testGetTableMetaWithCompositeIndex() throws SQLException {
         Object[][] compositeIndexMetas = new Object[][] {
-                new Object[] {"idx_pk", "id", false, "", 3, 1, "A", 34},
-                new Object[] {"idx_composite", "name1", false, "", 3, 1, "A", 34},
-                new Object[] {"idx_composite", "name2", false, "", 3, 2, "A", 34}
+            new Object[] {"idx_pk", "id", false, "", 3, 1, "A", 34},
+            new Object[] {"idx_composite", "name1", false, "", 3, 1, "A", 34},
+            new Object[] {"idx_composite", "name2", false, "", 3, 2, "A", 34}
         };
 
         MockDriver mockDriver = new MockDriver(columnMetas, compositeIndexMetas, pkMetas, tableMetas);
@@ -213,8 +213,8 @@ public class DmTableMetaCacheTest {
     @Test
     public void testGetTableMetaWithNullIndexName() throws SQLException {
         Object[][] nullIndexMetas = new Object[][] {
-                new Object[] {"idx_id", "id", false, "", 3, 0, "A", 34},
-                new Object[] {null, "name1", false, "", 3, 1, "A", 34}
+            new Object[] {"idx_id", "id", false, "", 3, 0, "A", 34},
+            new Object[] {null, "name1", false, "", 3, 1, "A", 34}
         };
 
         MockDriver mockDriver = new MockDriver(columnMetas, nullIndexMetas, pkMetas, tableMetas);
@@ -270,9 +270,9 @@ public class DmTableMetaCacheTest {
     public void testGetTableMetaWithLowerCaseTable() throws SQLException {
         Object[][] lowerCaseTableMetas = new Object[][] {new Object[] {"", "t", "lowertable"}};
         Object[][] lowerCaseColumnMetas = new Object[][] {
-                new Object[] {
-                        "", "", "lowertable", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"
-                }
+            new Object[] {
+                "", "", "lowertable", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"
+            }
         };
         Object[][] lowerCaseIndexMetas = new Object[][] {new Object[] {"idx_id", "id", false, "", 3, 0, "A", 34}};
         Object[][] lowerCasePKMetas = new Object[][] {new Object[] {"id"}};
@@ -296,8 +296,8 @@ public class DmTableMetaCacheTest {
     public void testGetTableMetaWithMultiplePrimaryKeys() throws SQLException {
         Object[][] multiPKMetas = new Object[][] {new Object[] {"id"}, new Object[] {"name1"}};
         Object[][] multiPKIndexMetas = new Object[][] {
-                new Object[] {"idx_composite_pk", "id", false, "", 3, 1, "A", 34},
-                new Object[] {"idx_composite_pk", "name1", false, "", 3, 2, "A", 34}
+            new Object[] {"idx_composite_pk", "id", false, "", 3, 1, "A", 34},
+            new Object[] {"idx_composite_pk", "name1", false, "", 3, 2, "A", 34}
         };
 
         MockDriver mockDriver = new MockDriver(columnMetas, multiPKIndexMetas, multiPKMetas, tableMetas);
