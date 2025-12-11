@@ -110,6 +110,7 @@
     "braces": "3.0.3",
     "micromatch": "4.0.8",
     "serialize-javascript": "6.0.2",
-    "node-forge": "^1.3.3"
+    "node-forge": "^1.3.3",
+    "js-yaml": "^3.14.2"
   }
 }
