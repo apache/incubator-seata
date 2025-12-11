@@ -18,14 +18,14 @@
 <img src="https://img.alicdn.com/imgextra/i1/O1CN011z0JfQ2723QgDiWuH_!!6000000007738-2-tps-1497-401.png"  height="100" width="426"/>
 </div>
 
-# Seata: Simple Extensible Autonomous Transaction Architecture
+# Apache Seata (incubating): Simple Extensible Autonomous Transaction Architecture
 
 [![build](https://github.com/apache/incubator-seata/actions/workflows/build.yml/badge.svg)](https://github.com/apache/incubator-seata/actions/workflows/build.yml)
 [![codecov](https://codecov.io/gh/apache/incubator-seata/graph/badge.svg?token=tbmHt2ZfxO)](https://codecov.io/gh/apache/incubator-seata)
 [![license](https://img.shields.io/github/license/apache/incubator-seata.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
 [![maven](https://img.shields.io/maven-central/v/org.apache.seata/seata-all?versionSuffix=2.5.0)](https://central.sonatype.com/search?q=org.apache.seata%3Aseata-all)
 
-## What is Seata?
+## What is Apache Seata (incubating)?
 
 A **distributed transaction solution** with high performance and ease of use for **microservices** architecture.
 ### Distributed Transaction Problem in Microservices
@@ -42,19 +42,21 @@ Things have changed in a microservices architecture. The 3 modules mentioned abo
 
 ![Microservices Problem](https://img.alicdn.com/imgextra/i1/O1CN01DXkc3o1te9mnJcHOr_!!6000000005926-0-tps-1268-804.jpg) 
 
-### How Seata do?
+## Architecture
 
-Seata is just a solution to the problem mentioned above. 
+Apache Seata offers a robust solution to the distributed transaction challenges in microservices.
 
 ![Seata solution](https://img.alicdn.com/imgextra/i1/O1CN01FheliH1k5VHIRob3p_!!6000000004632-0-tps-1534-908.jpg)
 
-Firstly, how to define a **Distributed Transaction**?
+### Core Concepts
 
-We say, a **Distributed Transaction** is a **Global Transaction** which is made up with a batch of **Branch Transaction**, and normally **Branch Transaction** is just **Local Transaction**.
+A **Distributed Transaction** is a **Global Transaction** composed of a batch of **Branch Transactions**, where a **Branch Transaction** is typically a **Local Transaction**.
 
 ![Global & Branch](https://cdn.nlark.com/lark/0/2018/png/18862/1545015454979-a18e16f6-ed41-44f1-9c7a-bd82c4d5ff99.png) 
 
-There are three roles in Seata Framework: 
+### Roles
+
+There are three main roles in the Apache Seata Framework: 
 
 - **Transaction Coordinator(TC):** Maintain status of global and branch transactions, drive the global commit or rollback.
 - **Transaction Manager(TM):** Define the scope of global transaction: begin a global transaction, commit or rollback a global transaction.
@@ -62,7 +64,9 @@ There are three roles in Seata Framework:
 
 ![Model](https://cdn.nlark.com/lark/0/2018/png/18862/1545013915286-4a90f0df-5fda-41e1-91e0-2aa3d331c035.png) 
 
-A typical lifecycle of Seata managed distributed transaction:
+### Transaction Lifecycle
+
+A typical lifecycle of an Apache Seata managed distributed transaction:
 
 1. TM asks TC to begin a new global transaction. TC generates an XID representing the global transaction.
 2. XID is propagated through microservices' invoke chain.
@@ -72,7 +76,7 @@ A typical lifecycle of Seata managed distributed transaction:
 
 ![Typical Process](https://cdn.nlark.com/lark/0/2018/png/18862/1545296917881-26fabeb9-71fa-4f3e-8a7a-fc317d3389f4.png) 
 
-For more details about principle and design, please go to [Seata wiki page](https://github.com/apache/incubator-seata/wiki). 
+For more details about principle and design, please go to [Apache Seata wiki page](https://github.com/apache/incubator-seata/wiki). 
 
 ### History
 
@@ -92,7 +96,8 @@ For more details about principle and design, please go to [Seata wiki page](http
 
 ##### Seata Community
 
-- **Seata** :Simple Extensible Autonomous Transaction Architecture. Ant Financial joins Fescar, which make it to be a more neutral and open community for distributed transaction, and Fescar be renamed to Seata.
+- **Seata**: Simple Extensible Autonomous Transaction Architecture. Ant Financial joins Fescar, which make it to be a more neutral and open community for distributed transaction, and Fescar be renamed to Seata.
+- **Apache Seata**: In October 2023, Seata entered the Apache Incubator.
 
 
 
@@ -129,7 +134,7 @@ Depending on the scenario, choose one of the two dependencies: `org.apache.seata
 ## Documentation
 
 
-You can view the full documentation from Seata Official Website: [Seata Website page](https://seata.apache.org/zh-cn/docs/overview/what-is-seata).
+You can view the full documentation from Apache Seata Official Website: [Apache Seata Website page](https://seata.apache.org/zh-cn/docs/overview/what-is-seata).
 
 ## Reporting bugs
 
@@ -141,7 +146,7 @@ Please do not use our public issue tracker but refer to our [security policy](./
 
 ## Contributing
 
-Contributors are welcomed to join the Seata project. Please check [CONTRIBUTING](./CONTRIBUTING.md) and [CONTRIBUTING-CN](./CONTRIBUTING_CN.md) about how to contribute to this project.
+Contributors are welcomed to join the Apache Seata project. Please check [CONTRIBUTING](./CONTRIBUTING.md) and [CONTRIBUTING-CN](./CONTRIBUTING_CN.md) about how to contribute to this project.
 
 
 ## Contact
@@ -154,14 +159,14 @@ Contributors are welcomed to join the Seata project. Please check [CONTRIBUTING]
 |:---------------------------------------------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------------------------------------:|
 | <img src="https://seata.apache.org/zh-cn/assets/images/dingtalk-group-67f42c9466fb2268b6927bb16b549d6c.jpg"  width="150" /> | <img src="https://seata.apache.org/zh-cn/assets/images/wechat-official-467d10305f5449e6b2096e65d23a9d02.jpg"  width="150" /> | <img src="https://seata.apache.org/zh-cn/assets/images/qq-group-8d8a89699cdb9ba8818364069475ba96.jpg"  width="150" /> | <img src="https://seata.apache.org/zh-cn/assets/images/wechat-f8a87a96973942b826e32d1aed9bc8d9.jpg"  width="150" /> |
 
-## Seata ecosystem
+## Apache Seata ecosystem
 
-* [Seata Website](https://github.com/apache/incubator-seata.github.io) - Seata official website
-* [Seata GoLang](https://github.com/apache/incubator-seata-go) - Seata GoLang client
-* [Seata Samples](https://github.com/apache/incubator-seata-samples) - Samples for Seata Java
-* [Seata GoLang Samples](https://github.com/apache/incubator-seata-go-samples) - Samples for Seata GoLang
-* [Seata K8s](https://github.com/apache/incubator-seata-k8s) - Seata integration with Kubernetes
-* [Seata CLI](https://github.com/apache/incubator-seata-ctl) - CLI tool for Seata operations
+* [Apache Seata Website](https://github.com/apache/incubator-seata.github.io) - Apache Seata official website
+* [Apache Seata GoLang](https://github.com/apache/incubator-seata-go) - Apache Seata GoLang client
+* [Apache Seata Samples](https://github.com/apache/incubator-seata-samples) - Samples for Apache Seata Java
+* [Apache Seata GoLang Samples](https://github.com/apache/incubator-seata-go-samples) - Samples for Apache Seata GoLang
+* [Apache Seata K8s](https://github.com/apache/incubator-seata-k8s) - Apache Seata integration with Kubernetes
+* [Apache Seata CLI](https://github.com/apache/incubator-seata-ctl) - CLI tool for Apache Seata operations
 
 ## Contributors
 
@@ -169,12 +174,12 @@ This project exists thanks to all the people who contribute. [[Contributors](htt
 
 ## License
 
-Seata is under the Apache 2.0 license. See the [LICENSE](https://github.com/apache/incubator-seata/blob/master/LICENSE) file for details.
+Apache Seata is under the Apache 2.0 license. See the [LICENSE](https://github.com/apache/incubator-seata/blob/master/LICENSE) file for details.
 
 ## Who is using
 
-These are only part of the companies using Seata, for reference only. If you are using Seata, please [add your company 
-here](https://github.com/apache/incubator-seata/issues/1246) to tell us your scenario to make Seata better.
+These are only part of the companies using Apache Seata, for reference only. If you are using Apache Seata, please [add your company 
+here](https://github.com/apache/incubator-seata/issues/1246) to tell us your scenario to make Apache Seata better.
 
 <div style='vertical-align: middle'>
     <img alt='Alibaba Group' height='40'  src='https://img.alicdn.com/imgextra/i1/O1CN01TleQq128FAP8POtL5_!!6000000007902-2-tps-241-42.png'  /img>
@@ -274,7 +279,7 @@ here](https://github.com/apache/incubator-seata/issues/1246) to tell us your sce
     <img alt='钛师傅云' height='40'  src='https://img.alicdn.com/imgextra/i4/O1CN01jEUKEJ1WS28EnlGRb_!!6000000002786-2-tps-240-60.png'  /img>
     <img alt='广州力生信息' height='40'  src='https://img.alicdn.com/tfs/TB1m0FcFuH2gK0jSZFEXXcqMpXa-139-48.png'  /img>
     <img alt='杭州启舰科技有限公司' height='40'  src='https://img.alicdn.com/imgextra/i1/O1CN01XJFoMP1qIDxrcCFC8_!!6000000005472-2-tps-120-46.png'  /img>
-     <img alt='微链' height='40'  src='https://img.alicdn.com/tfs/TB14LhHmMgP7K4jSZFqXXamhVXa-300-135.png'  /img> 
+    <img alt='微链' height='40'  src='https://img.alicdn.com/tfs/TB14LhHmMgP7K4jSZFqXXamhVXa-300-135.png'  /img> 
     <img alt='上海美浮特' height='40'  src='https://img.alicdn.com/tfs/TB1uUtaFuT2gK0jSZFvXXXnFXXa-370-45.jpg'  /img>    
     <img alt='江西群享科技有限公司' height='40' src='https://img.alicdn.com/imgextra/i3/O1CN018AiGbE1PZdN8Vu4Fd_!!6000000001855-2-tps-630-220.png' /img>
     <img alt='杭州中威慧云医疗科技有限公司' height='40'  src='https://img.alicdn.com/tfs/TB1iqo_FaL7gK0jSZFBXXXZZpXa-361-54.jpg'  /img> 
@@ -334,11 +339,3 @@ here](https://github.com/apache/incubator-seata/issues/1246) to tell us your sce
     <img alt='平安人寿' height='40' src='https://img.alicdn.com/imgextra/i1/O1CN01Erdiwd1RrcDt2bqKl_!!6000000002165-0-tps-1080-1080.jpg' /img>
     <img alt='光大银行' height='40' src='https://img.alicdn.com/imgextra/i4/O1CN01Rc0vU61sSQ3jvR0rw_!!6000000005765-2-tps-1076-228.png' /img>
 </div>
-
-
-
-
-
-
-
-
