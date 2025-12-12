@@ -53,7 +53,7 @@ public class RpcStatusTest {
         // ensure a correct state before testing
         RpcStatus.removeStatus(SERVICE);
         RpcStatus.beginCount(SERVICE);
-        
+
         RpcStatus.endCount(SERVICE);
         Assertions.assertEquals(RpcStatus.getStatus(SERVICE).getActive(), 0);
         Assertions.assertEquals(RpcStatus.getStatus(SERVICE).getTotal(), 1);
