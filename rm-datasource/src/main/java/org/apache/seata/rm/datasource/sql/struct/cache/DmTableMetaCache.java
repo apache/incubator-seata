@@ -132,20 +132,10 @@ public class DmTableMetaCache extends OracleTableMetaCache {
             } catch (Exception e) {
                 pkColName = rs.getString("PK_NAME");
             }
-            if (StringUtils.isNotBlank(pkColName)) {
-                primaryKeyColumns.add(pkColName);
-            }
-        }
-
-        if (primaryKeyColumns.isEmpty()) {
-            return;
+            primaryKeyColumns.add(pkColName);
         }
 
         for (IndexMeta index : tableMeta.getAllIndexes().values()) {
-            if (index == null || index.getValues() == null) {
-                continue;
-            }
-
             List<String> indexColumns = index.getValues().stream()
                     .filter(col -> col != null && StringUtils.isNotBlank(col.getColumnName()))
                     .map(ColumnMeta::getColumnName)
