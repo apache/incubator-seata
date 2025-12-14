@@ -42,6 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -369,8 +370,10 @@ public class SeataMQProducerTest {
         String xid = "testXid";
         long branchId = 123L;
 
-        assertThrows(
+        MQClientException exception = assertThrows(
                 MQClientException.class, () -> seataMQProducer.doSendMessageInTransaction(msg, timeout, xid, branchId));
+        // RocketMQ client might append FAQ url to the exception message
+        assertTrue(exception.getMessage().startsWith("Message delay time level is not supported in Seata transaction"));
     }
 
     @Test
