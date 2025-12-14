@@ -362,6 +362,18 @@ public class SeataMQProducerTest {
     }
 
     @Test
+    void testDoSendMessageInTransactionWithDelayLevel() {
+        Message msg = new Message("testTopic", "testBody".getBytes());
+        msg.setDelayTimeLevel(1);
+        long timeout = 3000L;
+        String xid = "testXid";
+        long branchId = 123L;
+
+        assertThrows(MQClientException.class,
+                () -> seataMQProducer.doSendMessageInTransaction(msg, timeout, xid, branchId));
+    }
+
+    @Test
     void getTransactionListenerShouldReturnNonNullTransactionListener() {
         TransactionListener transactionListener = producer.getTransactionListener();
         assertNotNull(transactionListener, "TransactionListener should not be null");
