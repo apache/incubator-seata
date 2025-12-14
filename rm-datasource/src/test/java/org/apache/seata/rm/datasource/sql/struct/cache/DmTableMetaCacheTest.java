@@ -35,7 +35,7 @@ import java.sql.Types;
 
 public class DmTableMetaCacheTest {
 
-    private static Object[][] columnMetas = new Object[][] {
+    private static final Object[][] columnMetas = new Object[][] {
         new Object[] {"", "", "dt1", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
         new Object[] {"", "", "dt1", "name1", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
         new Object[] {"", "", "dt1", "name2", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 3, "YES", "NO"},
@@ -48,9 +48,9 @@ public class DmTableMetaCacheTest {
         new Object[] {"IDX_NAME2", "name2", true, "", 3, 2, "A", 34},
     };
 
-    private static Object[][] pkMetas = new Object[][] {new Object[] {"id"}};
+    private static final Object[][] pkMetas = new Object[][] {new Object[] {"id"}};
 
-    private static Object[][] tableMetas = new Object[][] {new Object[] {"", "t", "dt1"}};
+    private static final Object[][] tableMetas = new Object[][] {new Object[] {"", "t", "dt1"}};
 
     @Test
     public void testGetTableMetaBasic() throws SQLException {

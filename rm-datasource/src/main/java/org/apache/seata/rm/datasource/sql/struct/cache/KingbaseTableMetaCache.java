@@ -135,10 +135,6 @@ public class KingbaseTableMetaCache extends OracleTableMetaCache {
         }
 
         for (IndexMeta index : tableMeta.getAllIndexes().values()) {
-            if (index == null || index.getValues() == null) {
-                continue;
-            }
-
             List<String> indexColumns = index.getValues().stream()
                     .filter(col -> col != null && StringUtils.isNotBlank(col.getColumnName()))
                     .map(ColumnMeta::getColumnName)
