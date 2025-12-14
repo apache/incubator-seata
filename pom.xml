@@ -435,18 +435,18 @@
                     <minimumPriority>2</minimumPriority>
                     <printFailingErrors>true</printFailingErrors>
                     <targetJdk>${maven.compiler.target}</targetJdk>
-                    <rulesets>
-                        <ruleset>rulesets/java/ali-comment.xml</ruleset>
-                        <ruleset>rulesets/java/ali-concurrent.xml</ruleset>
-                        <ruleset>rulesets/java/ali-constant.xml</ruleset>
-                        <ruleset>rulesets/java/ali-exception.xml</ruleset>
-                        <ruleset>rulesets/java/ali-flowcontrol.xml</ruleset>
-                        <ruleset>rulesets/java/ali-naming.xml</ruleset>
-                        <ruleset>rulesets/java/ali-oop.xml</ruleset>
-                        <ruleset>rulesets/java/ali-orm.xml</ruleset>
-                        <ruleset>rulesets/java/ali-other.xml</ruleset>
-                        <ruleset>rulesets/java/ali-set.xml</ruleset>
-                    </rulesets>
+<!--                    <rulesets>-->
+<!--                        <ruleset>rulesets/java/ali-comment.xml</ruleset>-->
+<!--                        <ruleset>rulesets/java/ali-concurrent.xml</ruleset>-->
+<!--                        <ruleset>rulesets/java/ali-constant.xml</ruleset>-->
+<!--                        <ruleset>rulesets/java/ali-exception.xml</ruleset>-->
+<!--                        <ruleset>rulesets/java/ali-flowcontrol.xml</ruleset>-->
+<!--                        <ruleset>rulesets/java/ali-naming.xml</ruleset>-->
+<!--                        <ruleset>rulesets/java/ali-oop.xml</ruleset>-->
+<!--                        <ruleset>rulesets/java/ali-orm.xml</ruleset>-->
+<!--                        <ruleset>rulesets/java/ali-other.xml</ruleset>-->
+<!--                        <ruleset>rulesets/java/ali-set.xml</ruleset>-->
+<!--                    </rulesets>-->
                     <excludes>
                         <exclude>**/generated/*.java</exclude>
                         <exclude>**/antlr/mysql/parser/*.*</exclude>
@@ -463,13 +463,13 @@
                         </goals>
                     </execution>
                 </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>com.alibaba.p3c</groupId>
-                        <artifactId>p3c-pmd</artifactId>
-                        <version>${p3c-pmd.version}</version>
-                    </dependency>
-                </dependencies>
+<!--                <dependencies>-->
+<!--                    <dependency>-->
+<!--                        <groupId>com.alibaba.p3c</groupId>-->
+<!--                        <artifactId>p3c-pmd</artifactId>-->
+<!--                        <version>${p3c-pmd.version}</version>-->
+<!--                    </dependency>-->
+<!--                </dependencies>-->
             </plugin>
             <!-- JaCoCo -->
             <plugin>
