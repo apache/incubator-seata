@@ -369,8 +369,8 @@ public class SeataMQProducerTest {
         String xid = "testXid";
         long branchId = 123L;
 
-        assertThrows(MQClientException.class,
-                () -> seataMQProducer.doSendMessageInTransaction(msg, timeout, xid, branchId));
+        assertThrows(
+                MQClientException.class, () -> seataMQProducer.doSendMessageInTransaction(msg, timeout, xid, branchId));
     }
 
     @Test

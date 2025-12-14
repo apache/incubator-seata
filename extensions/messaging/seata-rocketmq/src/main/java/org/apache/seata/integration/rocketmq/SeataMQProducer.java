@@ -47,10 +47,10 @@ public class SeataMQProducer extends TransactionMQProducer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SeataMQProducer.class);
 
-    private static final List<GlobalStatus> COMMIT_STATUSES = Arrays.asList(GlobalStatus.Committed,
-            GlobalStatus.Committing, GlobalStatus.CommitRetrying);
-    private static final List<GlobalStatus> ROLLBACK_STATUSES = Arrays.asList(GlobalStatus.Rollbacked,
-            GlobalStatus.Rollbacking, GlobalStatus.RollbackRetrying);
+    private static final List<GlobalStatus> COMMIT_STATUSES =
+            Arrays.asList(GlobalStatus.Committed, GlobalStatus.Committing, GlobalStatus.CommitRetrying);
+    private static final List<GlobalStatus> ROLLBACK_STATUSES =
+            Arrays.asList(GlobalStatus.Rollbacked, GlobalStatus.Rollbacking, GlobalStatus.RollbackRetrying);
 
     public static String PROPERTY_SEATA_XID = RootContext.KEY_XID;
     public static String PROPERTY_SEATA_BRANCHID = RootContext.KEY_BRANCHID;
@@ -77,8 +77,8 @@ public class SeataMQProducer extends TransactionMQProducer {
                     LOGGER.error("msg has no xid, msgTransactionId: {}, msg will be rollback", msg.getTransactionId());
                     return LocalTransactionState.ROLLBACK_MESSAGE;
                 }
-                GlobalStatus globalStatus = DefaultResourceManager.get()
-                        .getGlobalStatus(SeataMQProducerFactory.ROCKET_BRANCH_TYPE, xid);
+                GlobalStatus globalStatus =
+                        DefaultResourceManager.get().getGlobalStatus(SeataMQProducerFactory.ROCKET_BRANCH_TYPE, xid);
                 if (COMMIT_STATUSES.contains(globalStatus)) {
                     return LocalTransactionState.COMMIT_MESSAGE;
                 } else if (ROLLBACK_STATUSES.contains(globalStatus) || GlobalStatus.isOnePhaseTimeout(globalStatus)) {
