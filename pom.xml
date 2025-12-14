@@ -395,6 +395,7 @@
                     <sourceEncoding>${project.build.sourceEncoding}</sourceEncoding>
                     <minimumPriority>2</minimumPriority>
                     <printFailingErrors>true</printFailingErrors>
+                    <targetJdk>${maven.compiler.target}</targetJdk>
                     <rulesets>
                         <ruleset>rulesets/java/ali-comment.xml</ruleset>
                         <ruleset>rulesets/java/ali-concurrent.xml</ruleset>
@@ -424,11 +425,11 @@
                     </execution>
                 </executions>
                 <dependencies>
-                    <dependency>
-                        <groupId>com.alibaba.p3c</groupId>
-                        <artifactId>p3c-pmd</artifactId>
-                        <version>${p3c-pmd.version}</version>
-                    </dependency>
+<!--                    <dependency>-->
+<!--                        <groupId>com.alibaba.p3c</groupId>-->
+<!--                        <artifactId>p3c-pmd</artifactId>-->
+<!--                        <version>${p3c-pmd.version}</version>-->
+<!--                    </dependency>-->
                 </dependencies>
             </plugin>
             <!-- JaCoCo -->
