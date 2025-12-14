@@ -128,6 +128,40 @@
     </dependencyManagement>
 
     <profiles>
+        <!-- profile: skip-namingserver -->
+        <profile>
+            <id>skip-namingserver</id>
+            <activation>
+                <jdk>(,25)</jdk>
+            </activation>
+            <modules>
+                <module>build</module>
+                <module>all</module>
+                <module>bom</module>
+                <module>common</module>
+                <module>config</module>
+                <module>console</module>
+                <module>core</module>
+                <module>compatible</module>
+                <module>dependencies</module>
+                <module>discovery</module>
+                <module>rm</module>
+                <module>rm-datasource</module>
+                <module>spring</module>
+                <module>tcc</module>
+                <module>mock-server</module>
+                <module>tm</module>
+                <module>metrics</module>
+                <module>serializer</module>
+                <module>seata-spring-boot-starter</module>
+                <module>seata-spring-autoconfigure</module>
+                <module>compressor</module>
+                <module>saga</module>
+                <module>sqlparser</module>
+                <module>server</module>
+                <module>integration-tx-api</module>
+            </modules>
+        </profile>
         <!-- profile: licenseCheck -->
         <profile>
             <id>licenseCheck</id>
