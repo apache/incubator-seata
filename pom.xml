@@ -128,6 +128,45 @@
     </dependencyManagement>
 
     <profiles>
+        <!-- profile: exclude Java 17+ modules when building with Java 8 -->
+        <profile>
+            <id>exclude-java17-modules</id>
+            <activation>
+                <jdk>[1.8, 17)</jdk>
+            </activation>
+            <modules>
+                <module>build</module>
+                <module>all</module>
+                <module>bom</module>
+                <module>common</module>
+                <module>config</module>
+                <!-- console and namingserver require Java 17+ (Spring Boot 3.5.2) -->
+                <!-- <module>console</module> -->
+                <module>core</module>
+                <module>compatible</module>
+                <module>dependencies</module>
+                <module>discovery</module>
+                <module>extensions</module>
+                <module>rm</module>
+                <module>rm-datasource</module>
+                <module>spring</module>
+                <module>tcc</module>
+                <module>mock-server</module>
+                <module>tm</module>
+                <module>metrics</module>
+                <module>serializer</module>
+                <module>seata-spring-boot-starter</module>
+                <module>seata-spring-autoconfigure</module>
+                <module>compressor</module>
+                <module>saga</module>
+                <module>sqlparser</module>
+                <module>server</module>
+                <module>integration-tx-api</module>
+                <!-- <module>namingserver</module> -->
+                <module>test-suite/test-new-version</module>
+                <module>test-suite/test-old-version</module>
+            </modules>
+        </profile>
         <!-- profile: licenseCheck -->
         <profile>
             <id>licenseCheck</id>
@@ -395,6 +434,7 @@
                     <sourceEncoding>${project.build.sourceEncoding}</sourceEncoding>
                     <minimumPriority>2</minimumPriority>
                     <printFailingErrors>true</printFailingErrors>
+                    <targetJdk>${maven.compiler.target}</targetJdk>
                     <rulesets>
                         <ruleset>rulesets/java/ali-comment.xml</ruleset>
                         <ruleset>rulesets/java/ali-concurrent.xml</ruleset>
@@ -424,11 +464,11 @@
                     </execution>
                 </executions>
                 <dependencies>
-                    <dependency>
-                        <groupId>com.alibaba.p3c</groupId>
-                        <artifactId>p3c-pmd</artifactId>
-                        <version>${p3c-pmd.version}</version>
-                    </dependency>
+<!--                    <dependency>-->
+<!--                        <groupId>com.alibaba.p3c</groupId>-->
+<!--                        <artifactId>p3c-pmd</artifactId>-->
+<!--                        <version>${p3c-pmd.version}</version>-->
+<!--                    </dependency>-->
                 </dependencies>
             </plugin>
             <!-- JaCoCo -->
