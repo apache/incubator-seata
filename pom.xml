@@ -464,11 +464,11 @@
                     </execution>
                 </executions>
                 <dependencies>
-<!--                    <dependency>-->
-<!--                        <groupId>com.alibaba.p3c</groupId>-->
-<!--                        <artifactId>p3c-pmd</artifactId>-->
-<!--                        <version>${p3c-pmd.version}</version>-->
-<!--                    </dependency>-->
+                    <dependency>
+                        <groupId>com.alibaba.p3c</groupId>
+                        <artifactId>p3c-pmd</artifactId>
+                        <version>${p3c-pmd.version}</version>
+                    </dependency>
                 </dependencies>
             </plugin>
             <!-- JaCoCo -->
