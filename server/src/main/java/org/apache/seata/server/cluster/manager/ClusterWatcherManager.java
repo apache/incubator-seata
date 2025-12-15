@@ -138,12 +138,8 @@ public class ClusterWatcherManager implements ClusterChangeListener {
             // Send empty data frame with endStream=true to close the stream
             ctx.writeAndFlush(new DefaultHttp2DataFrame(Unpooled.EMPTY_BUFFER, true))
                     .addListener(f -> {
-                        if (!f.isSuccess() && logger.isWarnEnabled()) {
-                            logger.warn(
-                                    "Failed to send HTTP/2 response for watcher on group {}: {}",
-                                    watcher.getGroup(),
-                                    f.cause() != null ? f.cause().getMessage() : "unknown error",
-                                    f.cause());
+                        if (!f.isSuccess()) {
+                            logger.warn("Failed to send HTTP2 response for watcher on group {}", watcher.getGroup());
                         }
                     });
         }
