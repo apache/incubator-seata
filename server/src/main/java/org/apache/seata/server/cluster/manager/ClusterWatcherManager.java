@@ -102,18 +102,18 @@ public class ClusterWatcherManager implements ClusterChangeListener {
     }
 
     private void sendWatcherResponse(Watcher<HttpContext> watcher, HttpResponseStatus nettyStatus) {
+        String group = watcher.getGroup();
         HttpContext context = watcher.getAsyncContext();
         if (!(context instanceof HttpContext)) {
             logger.warn(
                     "Unsupported context type for watcher on group {}: {}",
-                    watcher.getGroup(),
+                    group,
                     context != null ? context.getClass().getName() : "null");
             return;
         }
         ChannelHandlerContext ctx = context.getContext();
         if (!ctx.channel().isActive()) {
-            logger.warn(
-                    "Netty channel is not active for watcher on group {}, cannot send response.", watcher.getGroup());
+            logger.warn("Netty channel is not active for watcher on group {}, cannot send response.", group);
             return;
         }
 
@@ -139,10 +139,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
             ctx.writeAndFlush(new DefaultHttp2DataFrame(Unpooled.EMPTY_BUFFER, true))
                     .addListener(f -> {
                         if (!f.isSuccess()) {
-                            logger.warn(
-                                    "Failed to send HTTP2 response for watcher on group {}: {}",
-                                    watcher.getGroup(),
-                                    f.cause().toString());
+                            logger.warn("HTTP2 response send failed, group={}", group, f.cause());
                         }
                     });
         }
