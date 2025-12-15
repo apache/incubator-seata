@@ -17,6 +17,7 @@
 package org.apache.seata.server.cluster.manager;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import org.apache.seata.common.rpc.http.HttpContext;
 import org.apache.seata.server.BaseSpringBootTest;
@@ -129,6 +130,12 @@ class ClusterWatcherManagerTest extends BaseSpringBootTest {
     void testSendWatcherResponseWithActiveChannel_Http2() {
         // Test normal flow with active channel (HTTP/2)
         when(mockChannel.isActive()).thenReturn(true);
+        
+        // Mock writeAndFlush to return a non-null ChannelFuture
+        ChannelFuture mockChannelFuture = mock(ChannelFuture.class);
+        when(mockChannelHandlerContext.writeAndFlush(any())).thenReturn(mockChannelFuture);
+        when(mockChannelFuture.addListener(any())).thenReturn(mockChannelFuture);
+        
         // Create HTTP/2 context
         HttpContext<Object> http2Context =
                 new HttpContext<>(new Object(), mockChannelHandlerContext, true, HttpContext.HTTP_2_0);
@@ -142,7 +149,7 @@ class ClusterWatcherManagerTest extends BaseSpringBootTest {
         verify(mockChannel, atLeastOnce()).isActive();
 
         verify(mockChannelHandlerContext, atLeastOnce()).write(any());
-        verify(mockChannelHandlerContext, atLeastOnce()).flush();
+        verify(mockChannelHandlerContext, atLeastOnce()).writeAndFlush(any());
 
         assertTrue(watcher.isDone());
     }
