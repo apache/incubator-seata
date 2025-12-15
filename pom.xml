@@ -128,29 +128,6 @@
     </dependencyManagement>
 
     <profiles>
-        <!-- profile: JDK 1.8~24 Auto-activation: Points the path of the same name to the empty shell to exclude modules -->
-        <profile>
-            <id>jdk24-and-below</id>
-            <activation>
-                <jdk>[1.8,25)</jdk>
-            </activation>
-            <modules>
-                <module>exclude-modules/console</module>
-                <module>exclude-modules/namingserver</module>
-            </modules>
-        </profile>
-
-        <!-- profile: JDK ≥25 Auto-activation: Points the path of the same name back to the real source code -->
-        <profile>
-            <id>jdk25-and-above</id>
-            <activation>
-                <jdk>[25,)</jdk>
-            </activation>
-            <modules>
-                <module>console</module>
-                <module>namingserver</module>
-            </modules>
-        </profile>
         <!-- profile: licenseCheck -->
         <profile>
             <id>licenseCheck</id>
