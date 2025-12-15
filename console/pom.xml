@@ -243,16 +243,4 @@
             </resource>
         </resources>
     </build>
-    <profiles>
-        <profile>
-            <id>jdk24-and-below</id>
-            <activation>
-                <jdk>[1.8,25)</jdk>
-            </activation>
-            <properties>
-                <maven.main.skip>true</maven.main.skip>
-                <maven.test.skip>true</maven.test.skip>
-            </properties>
-        </profile>
-    </profiles>
 </project>
