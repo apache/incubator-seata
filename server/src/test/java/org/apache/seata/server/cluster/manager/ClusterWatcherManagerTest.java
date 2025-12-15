@@ -130,12 +130,12 @@ class ClusterWatcherManagerTest extends BaseSpringBootTest {
     void testSendWatcherResponseWithActiveChannel_Http2() {
         // Test normal flow with active channel (HTTP/2)
         when(mockChannel.isActive()).thenReturn(true);
-        
+
         // Mock writeAndFlush to return a non-null ChannelFuture
         ChannelFuture mockChannelFuture = mock(ChannelFuture.class);
         when(mockChannelHandlerContext.writeAndFlush(any())).thenReturn(mockChannelFuture);
         when(mockChannelFuture.addListener(any())).thenReturn(mockChannelFuture);
-        
+
         // Create HTTP/2 context
         HttpContext<Object> http2Context =
                 new HttpContext<>(new Object(), mockChannelHandlerContext, true, HttpContext.HTTP_2_0);
