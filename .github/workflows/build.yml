@@ -117,7 +117,7 @@ jobs:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   # job 2: Build on 'arm64v8/ubuntu' OS (Skip tests and release).
-  build_arm64-binary:
+  build_arm64:
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'push' && (github.ref_name == 'develop' || github.ref_name == 'snapshot' || github.ref_name == '2.x') }}
     strategy:
@@ -149,8 +149,7 @@ jobs:
                            -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn'
 
   # job 3: Package (build distribution) based on java 25.
-  package:
-    name: "package (jdk25)"
+  binaryPackage:
     runs-on: ubuntu-latest
     needs: build
     steps:
