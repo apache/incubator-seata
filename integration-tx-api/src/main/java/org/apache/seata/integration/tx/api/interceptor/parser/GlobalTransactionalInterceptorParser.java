@@ -92,7 +92,9 @@ public class GlobalTransactionalInterceptorParser implements InterfaceParser {
                 Method[] methods = clazz.getDeclaredMethods();
                 for (Method method : methods) {
                     // exclude private modifier methods
-                    if (Modifier.isPrivate(method.getModifiers())) continue;
+                    if (Modifier.isPrivate(method.getModifiers())) {
+                        continue;
+                    }
 
                     trxAnno = method.getAnnotation(GlobalTransactional.class);
                     if (trxAnno != null) {
