@@ -126,7 +126,7 @@ jobs:
       # step 1
       - name: "Checkout"
         uses: actions/checkout@v3
-      
+
       - name: "Set up Java JDK"
         uses: actions/setup-java@v3.12.0
         with:
@@ -146,7 +146,7 @@ jobs:
           mvn clean install \
               -Prelease-seata \
               -DskipTests \
-              -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn'
+              -e -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
 #        run: |
 #          docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
 #            --platform linux/arm64 arm64v8/ubuntu:20.04 \
