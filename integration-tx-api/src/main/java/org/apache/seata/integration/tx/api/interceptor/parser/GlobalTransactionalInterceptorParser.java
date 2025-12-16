@@ -28,6 +28,7 @@ import org.apache.seata.spring.annotation.GlobalTransactional;
 import org.apache.seata.tm.api.FailureHandlerHolder;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -88,8 +89,11 @@ public class GlobalTransactionalInterceptorParser implements InterfaceParser {
                 if (trxAnno != null) {
                     return true;
                 }
-                Method[] methods = clazz.getMethods();
+                Method[] methods = clazz.getDeclaredMethods();
                 for (Method method : methods) {
+                    // exclude private modifier methods
+                    if (Modifier.isPrivate(method.getModifiers())) continue;
+
                     trxAnno = method.getAnnotation(GlobalTransactional.class);
                     if (trxAnno != null) {
                         methodsToProxy.add(method.getName());
