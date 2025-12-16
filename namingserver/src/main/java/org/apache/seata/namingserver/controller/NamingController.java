@@ -133,7 +133,7 @@ public class NamingController {
     public Result<String> changeGroup(
             @RequestParam String namespace,
             @RequestParam String clusterName,
-            @RequestParam String unitName,
+            @RequestParam(defaultValue = "", required = false) String unitName,
             @RequestParam String vGroup) {
         Result<String> addGroupResult = namingManager.changeGroup(namespace, vGroup, clusterName, unitName);
         if (!addGroupResult.isSuccess()) {
