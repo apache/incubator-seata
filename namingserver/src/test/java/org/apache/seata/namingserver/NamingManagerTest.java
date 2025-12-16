@@ -24,8 +24,10 @@ import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.metadata.namingserver.NamingServerNode;
 import org.apache.seata.common.metadata.namingserver.Unit;
 import org.apache.seata.common.result.Result;
+import org.apache.seata.common.result.SingleResult;
 import org.apache.seata.common.util.HttpClientUtil;
 import org.apache.seata.namingserver.entity.vo.monitor.ClusterVO;
+import org.apache.seata.namingserver.entity.vo.v2.NamespaceVO;
 import org.apache.seata.namingserver.listener.ClusterChangeEvent;
 import org.apache.seata.namingserver.manager.NamingManager;
 import org.junit.jupiter.api.AfterEach;
@@ -230,6 +232,9 @@ class NamingManagerTest {
 
         Mockito.when(statusLine.getStatusCode()).thenReturn(200);
         Result<String> result = namingManager.createGroup(namespace, vGroup, clusterName, unitName);
+        assertFalse(result.isSuccess());
+        vGroup = "test-vGroup2";
+        result = namingManager.createGroup(namespace, vGroup, clusterName, unitName);
         assertTrue(result.isSuccess());
         assertEquals("200", result.getCode());
         assertEquals("add vGroup successfully!", result.getMessage());
@@ -352,5 +357,36 @@ class NamingManagerTest {
         namingManager.notifyClusterChange(vGroup, namespace, clusterName, unitName, 1000L);
 
         Mockito.verify(applicationContext, Mockito.times(2)).publishEvent(any(ClusterChangeEvent.class));
+    }
+
+    @Test
+    void testNamespaceV2() {
+        String namespace = "test-namespace";
+        String clusterName = "test-cluster";
+        String unitName = UUID.randomUUID().toString();
+        String vGroup = "test-vGroup";
+
+        // Register an instance
+        NamingServerNode node = createTestNode("127.0.0.1", 8080, unitName);
+        Map<String, String> vGroups = new HashMap<>();
+        vGroups.put(vGroup, unitName);
+        node.getMetadata().put(CONSTANT_GROUP, vGroups);
+        namingManager.registerInstance(node, namespace, clusterName, unitName);
+
+        // Call namespaceV2
+        SingleResult<Map<String, NamespaceVO>> result = namingManager.namespaceV2();
+
+        assertNotNull(result);
+        assertTrue(result.isSuccess());
+        assertEquals("200", result.getCode());
+        assertNotNull(result.getData());
+        assertTrue(result.getData().containsKey(namespace));
+
+        org.apache.seata.namingserver.entity.vo.v2.NamespaceVO namespaceVO =
+                result.getData().get(namespace);
+        assertNotNull(namespaceVO);
+        assertNotNull(namespaceVO.getClusterVgroups());
+        assertTrue(namespaceVO.getClusterVgroups().containsKey(clusterName));
+        assertTrue(namespaceVO.getClusterVgroups().get(clusterName).contains(vGroup));
     }
 }
