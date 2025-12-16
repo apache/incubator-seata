@@ -127,11 +127,6 @@ jobs:
       - name: "Checkout"
         uses: actions/checkout@v3
       # step 2
-      - name: "Use Python 3.x"
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.12'
-      # step 3
       - name: "Set up Java JDK 25"
         uses: actions/setup-java@v3.12.0
         with:
