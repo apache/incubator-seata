@@ -16,6 +16,7 @@
  */
 package org.apache.seata.server.instance;
 
+import com.alipay.sofa.jraft.entity.PeerId;
 import org.apache.seata.common.XID;
 import org.apache.seata.common.holder.ObjectHolder;
 import org.apache.seata.common.metadata.ClusterRole;
@@ -73,6 +74,10 @@ public class RaftServerInstanceStrategy extends AbstractSeataInstanceStrategy
         instance.setRole(stateMachine.isLeader() ? ClusterRole.LEADER : ClusterRole.FOLLOWER);
         // load node Endpoint
         instance.setControl(new Node.Endpoint(XID.getIpAddress(), serverProperties.getPort(), "http"));
+
+        PeerId peerId =
+                RaftServerManager.getRaftServer(raftProperties.getGroup()).getServerId();
+        instance.setInternal(new Node.Endpoint(peerId.getIp(), peerId.getPort(), "raft"));
 
         // load metadata
         for (PropertySource<?> propertySource : environment.getPropertySources()) {
