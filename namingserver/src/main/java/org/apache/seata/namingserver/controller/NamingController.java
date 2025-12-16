@@ -20,6 +20,7 @@ import org.apache.seata.common.metadata.namingserver.MetaResponse;
 import org.apache.seata.common.metadata.namingserver.NamingServerNode;
 import org.apache.seata.common.result.Result;
 import org.apache.seata.common.result.SingleResult;
+import org.apache.seata.namingserver.entity.pojo.ClusterData;
 import org.apache.seata.namingserver.entity.vo.NamespaceVO;
 import org.apache.seata.namingserver.entity.vo.monitor.ClusterVO;
 import org.apache.seata.namingserver.entity.vo.monitor.WatcherVO;
@@ -107,6 +108,16 @@ public class NamingController {
     @GetMapping("/clusters")
     public List<ClusterVO> monitorCluster(String namespace) {
         return namingManager.monitorCluster(namespace);
+    }
+
+    @GetMapping("/clusterData")
+    public SingleResult<ClusterData> getClusterData(@RequestParam String namespace, @RequestParam String clusterName) {
+        ClusterData clusterData = namingManager.getClusterData(namespace, clusterName);
+        if (clusterData != null) {
+            return SingleResult.success(clusterData);
+        } else {
+            return SingleResult.failure("Cluster not found");
+        }
     }
 
     @GetMapping("/discovery")

@@ -14,8 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { createRequest } from './request';
+import requestV2 from '@/utils/requestV2';
+import request from '@/utils/request';
 
-const requestV2 = createRequest('/api/v2');
+export async function fetchNamespaceV2(): Promise<any> {
+  const result = await requestV2.get('/naming/namespace', {
+    method: 'get',
+  });
+  return result.data;
+}
 
-export default requestV2;
+export async function fetchClusterData(namespace: string, clusterName: string): Promise<any> {
+  const result = await request.get('/naming/clusterData', {
+    method: 'get',
+    params: { namespace, clusterName },
+  });
+  return result;
+}

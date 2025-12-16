@@ -38,7 +38,7 @@ const createRequest = (baseURL: string, generalErrorMessage: string = 'Request e
   instance.interceptors.response.use(
     (response: AxiosResponse): Promise<any> => {
       const code = get(response, 'data.code');
-      if (response.status === 200 && code === '200') {
+      if (response.status === 200 && String(code) === '200') {
         return Promise.resolve(get(response, 'data'));
       } else {
         const currentLocale = getCurrentLocaleObj();
@@ -69,7 +69,7 @@ const createRequest = (baseURL: string, generalErrorMessage: string = 'Request e
   return instance;
 };
 
-const request = createRequest('api/v1');
+const request = createRequest('/api/v1');
 
 export { createRequest };
 export default request;

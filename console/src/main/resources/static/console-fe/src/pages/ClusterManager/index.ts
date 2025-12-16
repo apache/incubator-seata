@@ -14,8 +14,5 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { createRequest } from './request';
+export { default } from './ClusterManager';
 
-const requestV2 = createRequest('/api/v2');
-
-export default requestV2;

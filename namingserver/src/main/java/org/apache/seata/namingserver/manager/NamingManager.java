@@ -168,6 +168,14 @@ public class NamingManager {
         return new ArrayList<>(clusterVOHashMap.values());
     }
 
+    public ClusterData getClusterData(String namespace, String clusterName) {
+        Map<String, ClusterData> clusterDataMap = namespaceClusterDataMap.get(namespace);
+        if (clusterDataMap != null) {
+            return clusterDataMap.get(clusterName);
+        }
+        return null;
+    }
+
     public Result<String> createGroup(String namespace, String vGroup, String clusterName, String unitName) {
         return createGroup(namespace, vGroup, clusterName, unitName, true);
     }
@@ -516,7 +524,8 @@ public class NamingManager {
         } else {
             data.vgroupsMap.forEach((namespace, vgroups) -> {
                 NamespaceVO namespaceVO = namespaceVOs.computeIfAbsent(namespace, k -> new NamespaceVO());
-                namespaceVO.setClusters(new ArrayList<>(data.clustersMap.get(namespace)));
+                Set<String> clusters = data.clustersMap.get(namespace);
+                namespaceVO.setClusters(new ArrayList<>(clusters != null ? clusters : Collections.emptyList()));
                 namespaceVO.setVgroups(new ArrayList<>(vgroups));
             });
         }

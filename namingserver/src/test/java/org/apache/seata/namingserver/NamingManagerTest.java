@@ -26,6 +26,7 @@ import org.apache.seata.common.metadata.namingserver.Unit;
 import org.apache.seata.common.result.Result;
 import org.apache.seata.common.result.SingleResult;
 import org.apache.seata.common.util.HttpClientUtil;
+import org.apache.seata.namingserver.entity.pojo.ClusterData;
 import org.apache.seata.namingserver.entity.vo.monitor.ClusterVO;
 import org.apache.seata.namingserver.entity.vo.v2.NamespaceVO;
 import org.apache.seata.namingserver.listener.ClusterChangeEvent;
@@ -48,10 +49,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.apache.seata.common.NamingServerConstants.CONSTANT_GROUP;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyMap;
@@ -388,5 +386,40 @@ class NamingManagerTest {
         assertNotNull(namespaceVO.getClusterVgroups());
         assertTrue(namespaceVO.getClusterVgroups().containsKey(clusterName));
         assertTrue(namespaceVO.getClusterVgroups().get(clusterName).contains(vGroup));
+    }
+
+    @Test
+    void testGetClusterData() {
+        String namespace = "test-namespace";
+        String clusterName = "test-cluster";
+        String unitName = UUID.randomUUID().toString();
+
+        NamingServerNode node = createTestNode("127.0.0.1", 8080, unitName);
+        boolean result = namingManager.registerInstance(node, namespace, clusterName, unitName);
+
+        assertTrue(result);
+
+        ClusterData clusterData = namingManager.getClusterData(namespace, clusterName);
+        assertNotNull(clusterData);
+        assertEquals(clusterName, clusterData.getClusterName());
+        assertNotNull(clusterData.getUnitData());
+        assertEquals(1, clusterData.getUnitData().size());
+        assertTrue(clusterData.getUnitData().containsKey(unitName));
+        Unit unit = clusterData.getUnitData().get(unitName);
+        assertNotNull(unit);
+        assertEquals(unitName, unit.getUnitName());
+        assertNotNull(unit.getNamingInstanceList());
+        assertEquals(1, unit.getNamingInstanceList().size());
+        Node instance = unit.getNamingInstanceList().get(0);
+        assertEquals("127.0.0.1", instance.getTransaction().getHost());
+        assertEquals(8080, instance.getTransaction().getPort());
+
+        // Test non-existent cluster
+        ClusterData notFound = namingManager.getClusterData(namespace, "non-existent-cluster");
+        assertNull(notFound);
+
+        // Test non-existent namespace
+        ClusterData notFoundNamespace = namingManager.getClusterData("non-existent-namespace", clusterName);
+        assertNull(notFoundNamespace);
     }
 }
