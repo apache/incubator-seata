@@ -60,7 +60,10 @@ class InstanceTest {
         instance.setTimestamp(System.currentTimeMillis());
         instance.setControl(new Node.Endpoint("1.1.1.1", 888));
         instance.setTransaction(new Node.Endpoint("2.2.2.2", 999));
+        instance.setInternal(new Node.Endpoint("2.2.2.2", 1099));
         assertEquals(instance.toJsonString(objectMapper), objectMapper.writeValueAsString(instance));
+        assertEquals(
+                instance.clone().getInternal().getPort(), instance.getInternal().getPort());
     }
 
     @Test
