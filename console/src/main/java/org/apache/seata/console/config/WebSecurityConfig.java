@@ -21,6 +21,7 @@ import org.apache.seata.console.filter.JwtAuthenticationTokenFilter;
 import org.apache.seata.console.security.CustomUserDetailsServiceImpl;
 import org.apache.seata.console.security.JwtAuthenticationEntryPoint;
 import org.apache.seata.console.utils.JwtTokenUtils;
+import org.apache.seata.mcp.entity.pojo.MCPProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,6 +39,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+
+import java.util.List;
 
 /**
  * Spring security config
@@ -79,6 +82,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private Environment env;
 
+    @Autowired
+    private MCPProperties mcpProperties;
+
     @Bean(name = BeanIds.AUTHENTICATION_MANAGER)
     @Override
     public AuthenticationManager authenticationManagerBean() throws Exception {
@@ -92,15 +98,23 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(WebSecurity web) {
-        String ignoreURLs = env.getProperty("seata.security.ignore.urls", "/**");
-        for (String ignoreURL : ignoreURLs.trim().split(SECURITY_IGNORE_URLS_SPILT_CHAR)) {
+        StringBuilder ignoreURLs = new StringBuilder(env.getProperty("seata.security.ignore.urls", "/**"));
+        List<String> mcpEndpoints = mcpProperties.getEndpoints();
+        for (String endpoint : mcpEndpoints) {
+            ignoreURLs.append(",").append(endpoint);
+        }
+        for (String ignoreURL : ignoreURLs.toString().trim().split(SECURITY_IGNORE_URLS_SPILT_CHAR)) {
             web.ignoring().antMatchers(ignoreURL.trim());
         }
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        String csrfIgnoreUrls = env.getProperty("seata.security.csrf-ignore-urls");
+        StringBuilder csrfIgnoreUrls = new StringBuilder(env.getProperty("seata.security.csrf-ignore-urls", "/**"));
+        List<String> mcpEndpoints = mcpProperties.getEndpoints();
+        for (String endpoint : mcpEndpoints) {
+            csrfIgnoreUrls.append(",").append(endpoint);
+        }
         CsrfConfigurer<HttpSecurity> csrf = http.authorizeRequests()
                 .anyRequest()
                 .authenticated()
@@ -114,8 +128,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .disable()
                 .csrf();
-        if (StringUtils.isNotBlank(csrfIgnoreUrls)) {
-            csrf.ignoringAntMatchers(csrfIgnoreUrls.trim().split(SECURITY_IGNORE_URLS_SPILT_CHAR));
+        if (StringUtils.isNotBlank(csrfIgnoreUrls.toString())) {
+            csrf.ignoringAntMatchers(csrfIgnoreUrls.toString().trim().split(SECURITY_IGNORE_URLS_SPILT_CHAR));
         }
         csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
         // don't disable csrf, jwt may be implemented based on cookies
