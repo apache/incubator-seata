@@ -22,7 +22,9 @@ import org.apache.seata.common.metadata.namingserver.MetaResponse;
 import org.apache.seata.common.metadata.namingserver.NamingServerNode;
 import org.apache.seata.common.metadata.namingserver.Unit;
 import org.apache.seata.common.result.Result;
+import org.apache.seata.common.result.SingleResult;
 import org.apache.seata.namingserver.controller.NamingController;
+import org.apache.seata.namingserver.entity.pojo.ClusterData;
 import org.apache.seata.namingserver.manager.NamingManager;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -40,7 +42,11 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static org.apache.seata.common.NamingServerConstants.CONSTANT_GROUP;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -396,5 +402,46 @@ class NamingControllerTest {
         } catch (Exception e) {
             fail("Test failed due to exception: " + e.getMessage());
         }
+    }
+
+    @Test
+    void testGetClusterData() {
+        String clusterName = "test-cluster";
+        String namespace = "test-namespace";
+        String unitName = String.valueOf(UUID.randomUUID());
+        NamingServerNode node = new NamingServerNode();
+        node.setTransaction(new Node.Endpoint("127.0.0.1", 8091, "netty"));
+        node.setControl(new Node.Endpoint("127.0.0.1", 7091, "http"));
+        Map<String, Object> metadata = node.getMetadata();
+        Map<String, Object> vGroups = new HashMap<>();
+        vGroups.put("test-vGroup", unitName);
+        metadata.put(CONSTANT_GROUP, vGroups);
+        namingController.registerInstance(namespace, clusterName, unitName, node);
+
+        SingleResult<ClusterData> result = namingController.getClusterData(namespace, clusterName);
+        assertNotNull(result);
+        assertEquals("200", result.getCode());
+        assertEquals("success", result.getMessage());
+        assertNotNull(result.getData());
+        ClusterData clusterData = result.getData();
+        assertEquals(clusterName, clusterData.getClusterName());
+        assertNotNull(clusterData.getUnitData());
+        assertEquals(1, clusterData.getUnitData().size());
+        assertTrue(clusterData.getUnitData().containsKey(unitName));
+        Unit unit = clusterData.getUnitData().get(unitName);
+        assertNotNull(unit);
+        assertEquals(unitName, unit.getUnitName());
+        assertNotNull(unit.getNamingInstanceList());
+        assertEquals(1, unit.getNamingInstanceList().size());
+        Node instance = unit.getNamingInstanceList().get(0);
+        assertEquals("127.0.0.1", instance.getTransaction().getHost());
+        assertEquals(8091, instance.getTransaction().getPort());
+
+        // Test non-existent cluster
+        SingleResult<ClusterData> resultNotFound = namingController.getClusterData(namespace, "non-existent-cluster");
+        assertNotNull(resultNotFound);
+        assertEquals("500", resultNotFound.getCode());
+        assertEquals("Cluster not found", resultNotFound.getMessage());
+        assertNull(resultNotFound.getData());
     }
 }
