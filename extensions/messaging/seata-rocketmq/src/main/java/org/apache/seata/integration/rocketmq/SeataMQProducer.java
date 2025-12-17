@@ -115,7 +115,7 @@ public class SeataMQProducer extends TransactionMQProducer {
             throws MQClientException {
         msg.setTopic(withNamespace(msg.getTopic()));
         if (msg.getDelayTimeLevel() != 0) {
-            MessageAccessor.clearProperty(msg, MessageConst.PROPERTY_DELAY_TIME_LEVEL);
+            throw new MQClientException("Message delay time level is not supported in Seata transaction", null);
         }
         Validators.checkMessage(msg, this);
 

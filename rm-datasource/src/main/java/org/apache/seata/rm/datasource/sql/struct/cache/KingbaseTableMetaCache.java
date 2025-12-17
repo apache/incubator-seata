@@ -28,6 +28,9 @@ import org.apache.seata.sqlparser.util.JdbcConstants;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * The type Table meta cache.
@@ -120,6 +123,7 @@ public class KingbaseTableMetaCache extends OracleTableMetaCache {
     }
 
     protected void processPrimaries(TableMeta tableMeta, ResultSet rs) throws SQLException {
+        List<String> primaryKeyColumns = new ArrayList<>();
         while (rs.next()) {
             String pkColName;
             try {
@@ -127,12 +131,17 @@ public class KingbaseTableMetaCache extends OracleTableMetaCache {
             } catch (Exception e) {
                 pkColName = rs.getString("PK_NAME");
             }
+            primaryKeyColumns.add(pkColName);
+        }
 
-            String finalPkColName = pkColName;
-            for (IndexMeta i : tableMeta.getAllIndexes().values()) {
-                i.getValues().stream()
-                        .filter(c -> finalPkColName.equals(c.getColumnName()))
-                        .forEach(c -> i.setIndextype(IndexType.PRIMARY));
+        for (IndexMeta index : tableMeta.getAllIndexes().values()) {
+            List<String> indexColumns = index.getValues().stream()
+                    .filter(col -> col != null && StringUtils.isNotBlank(col.getColumnName()))
+                    .map(ColumnMeta::getColumnName)
+                    .collect(Collectors.toList());
+
+            if (indexColumns.equals(primaryKeyColumns)) {
+                index.setIndextype(IndexType.PRIMARY);
             }
         }
     }
