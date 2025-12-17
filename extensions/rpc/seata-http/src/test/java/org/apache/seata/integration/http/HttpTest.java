@@ -206,13 +206,17 @@ class HttpTest {
 
     @Test
     void convertParamOfJsonStringTest() {
-
-        String targetParam = "{name=zhangsan, age=15}";
         String str = "{\n" + "    \"name\":\"zhangsan\",\n" + "    \"age\":15\n" + "}";
+
+        Map<String, String> expected = new HashMap<>();
+        expected.put("name", "zhangsan");
+        expected.put("age", "15");
+
         Map<String, String> map = convertParamOfJsonString(str, Person.class);
-        Assertions.assertEquals(map.toString(), targetParam);
+        Assertions.assertEquals(expected, map);
+
         Person person = JSON.parseObject(str, Person.class);
         map = convertParamOfBean(person);
-        Assertions.assertEquals(map.toString(), targetParam);
+        Assertions.assertEquals(expected, map);
     }
 }

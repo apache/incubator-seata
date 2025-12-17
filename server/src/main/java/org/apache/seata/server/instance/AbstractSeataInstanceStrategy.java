@@ -18,6 +18,7 @@ package org.apache.seata.server.instance;
 
 import org.apache.seata.common.metadata.Instance;
 import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.core.protocol.Version;
 import org.apache.seata.server.session.SessionHolder;
 import org.apache.seata.server.store.VGroupMappingStoreManager;
 import org.apache.seata.spring.boot.autoconfigure.properties.registry.RegistryNamingServerProperties;
@@ -69,6 +70,7 @@ public abstract class AbstractSeataInstanceStrategy implements SeataInstanceStra
             return;
         }
         Instance instance = serverInstanceInit();
+        instance.setVersion(Version.getCurrent());
         if (init.compareAndSet(false, true)) {
             VGroupMappingStoreManager vGroupMappingStoreManager = SessionHolder.getRootVGroupMappingManager();
             // load vgroup mapping relationship

@@ -32,10 +32,24 @@ public enum ObjectHolder {
     private static final int MAP_SIZE = 8;
     private static final Map<String, Object> OBJECT_MAP = new ConcurrentHashMap<>(MAP_SIZE);
 
+    /**
+     * Get object by key.
+     *
+     * @param objectKey the key
+     * @return the object
+     */
     public Object getObject(String objectKey) {
         return OBJECT_MAP.get(objectKey);
     }
 
+    /**
+     * Get object by class type.
+     *
+     * @param clasz the class type
+     * @param <T>   the type parameter
+     * @return the object of the specified class type
+     * @throws ShouldNeverHappenException if no object of the specified class type is found
+     */
     public <T> T getObject(Class<T> clasz) {
         return clasz.cast(OBJECT_MAP.values().stream()
                 .filter(clasz::isInstance)

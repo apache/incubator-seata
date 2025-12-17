@@ -71,7 +71,7 @@ public class ClusterWatcherManagerTest {
         Map<String, Queue<Watcher<?>>> watchers =
                 (Map<String, Queue<Watcher<?>>>) ReflectionTestUtils.getField(clusterWatcherManager, "WATCHERS");
         Map<String, Long> groupUpdateTime =
-                (Map<String, Long>) ReflectionTestUtils.getField(clusterWatcherManager, "GROUP_UPDATE_TIME");
+                (Map<String, Long>) ReflectionTestUtils.getField(clusterWatcherManager, "GROUP_UPDATE_TERM");
 
         watchers.clear();
         groupUpdateTime.clear();
@@ -105,7 +105,7 @@ public class ClusterWatcherManagerTest {
     @Test
     void testRegistryWatcherOldTerm() {
         Map<String, Long> groupUpdateTime =
-                (Map<String, Long>) ReflectionTestUtils.getField(clusterWatcherManager, "GROUP_UPDATE_TIME");
+                (Map<String, Long>) ReflectionTestUtils.getField(clusterWatcherManager, "GROUP_UPDATE_TERM");
         groupUpdateTime.put(TEST_GROUP, TEST_TERM + 10);
 
         Watcher<AsyncContext> watcher =
@@ -131,7 +131,7 @@ public class ClusterWatcherManagerTest {
         Map<String, Queue<Watcher<?>>> watchers =
                 (Map<String, Queue<Watcher<?>>>) ReflectionTestUtils.getField(clusterWatcherManager, "WATCHERS");
         Map<String, Long> updateTime =
-                (Map<String, Long>) ReflectionTestUtils.getField(clusterWatcherManager, "GROUP_UPDATE_TIME");
+                (Map<String, Long>) ReflectionTestUtils.getField(clusterWatcherManager, "GROUP_UPDATE_TERM");
 
         assertNotNull(watchers);
         assertNotNull(updateTime);
@@ -197,7 +197,7 @@ public class ClusterWatcherManagerTest {
     @Test
     void testGetTermByvGroup() {
         Map<String, Long> groupUpdateTime =
-                (Map<String, Long>) ReflectionTestUtils.getField(clusterWatcherManager, "GROUP_UPDATE_TIME");
+                (Map<String, Long>) ReflectionTestUtils.getField(clusterWatcherManager, "GROUP_UPDATE_TERM");
 
         assertNotNull(groupUpdateTime);
 
@@ -223,9 +223,9 @@ public class ClusterWatcherManagerTest {
 
     @Test
     void testScheduledTaskReRegisterNonTimeoutWatcher() throws InterruptedException {
-        long timeout = System.currentTimeMillis() + 3000;
+        int timeoutDuration = 3000;
         Watcher<AsyncContext> watcher =
-                new Watcher<>(TEST_GROUP, asyncContext, (int) timeout, TEST_TERM, TEST_CLIENT_ENDPOINT);
+                new Watcher<>(TEST_GROUP, asyncContext, timeoutDuration, TEST_TERM, TEST_CLIENT_ENDPOINT);
         clusterWatcherManager.registryWatcher(watcher);
 
         clusterWatcherManager.init();
@@ -250,7 +250,7 @@ public class ClusterWatcherManagerTest {
         clusterWatcherManager.onChangeEvent(minus1TermEvent);
 
         Map<String, Long> updateTime =
-                (Map<String, Long>) ReflectionTestUtils.getField(clusterWatcherManager, "GROUP_UPDATE_TIME");
+                (Map<String, Long>) ReflectionTestUtils.getField(clusterWatcherManager, "GROUP_UPDATE_TERM");
         assertEquals(-1L, updateTime.get(TEST_GROUP));
         Mockito.verify(response).setStatus(HttpServletResponse.SC_OK);
         Mockito.verify(asyncContext).complete();

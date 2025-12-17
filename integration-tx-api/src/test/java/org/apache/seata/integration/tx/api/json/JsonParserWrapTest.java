@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -47,7 +48,14 @@ public class JsonParserWrapTest {
 
         String resultString = parserWrap.toJSONString(actionParam);
 
-        assertEquals(jsonString, resultString);
+        TwoPhaseBusinessActionParam deserializedParam =
+                parserWrap.parseObject(resultString, TwoPhaseBusinessActionParam.class);
+
+        assertEquals("business_action", deserializedParam.getActionName());
+        assertEquals(BranchType.TCC, deserializedParam.getBranchType());
+        assertNull(deserializedParam.getUseCommonFence());
+        assertNull(deserializedParam.getBusinessActionContext());
+        assertNull(deserializedParam.getDelayReport());
     }
 
     @Test

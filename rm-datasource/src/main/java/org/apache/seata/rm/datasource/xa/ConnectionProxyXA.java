@@ -56,8 +56,6 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
 
     private volatile boolean xaActive = false;
 
-    private volatile boolean xaEnded = false;
-
     private volatile boolean kept = false;
 
     private volatile boolean rollBacked = false;
@@ -119,9 +117,9 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
     }
 
     private void xaEnd(XAXid xaXid, int flags) throws XAException {
-        if (!xaEnded) {
+        if (xaActive) {
             xaResource.end(xaXid, flags);
-            xaEnded = true;
+            xaActive = false;
         }
     }
 
@@ -302,7 +300,6 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
     }
 
     private void cleanXABranchContext() {
-        xaEnded = false;
         branchRegisterTime = null;
         prepareTime = null;
         xaActive = false;
