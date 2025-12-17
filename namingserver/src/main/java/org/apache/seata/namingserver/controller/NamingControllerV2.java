@@ -16,6 +16,7 @@
  */
 package org.apache.seata.namingserver.controller;
 
+import jakarta.annotation.Resource;
 import org.apache.seata.common.result.SingleResult;
 import org.apache.seata.namingserver.entity.vo.v2.NamespaceVO;
 import org.apache.seata.namingserver.manager.NamingManager;
@@ -25,7 +26,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
 import java.util.Map;
 
 @RestController
