@@ -39,7 +39,7 @@
         <module>bom</module>
         <module>common</module>
         <module>config</module>
-        <module>console</module>
+<!--        <module>console</module>-->
         <module>core</module>
         <module>compatible</module>
         <module>dependencies</module>
@@ -60,7 +60,7 @@
         <module>sqlparser</module>
         <module>server</module>
         <module>integration-tx-api</module>
-        <module>namingserver</module>
+<!--        <module>namingserver</module>-->
         <module>test-suite/test-new-version</module>
         <module>test-suite/test-old-version</module>
         <!--<module>seata-plugin</module>-->
@@ -128,6 +128,17 @@
     </dependencyManagement>
 
     <profiles>
+        <!-- profile: onlyBuildOnJDK25+ -->
+        <profile>
+            <id>JDK25Plus</id>
+            <activation>
+                <jdk>[25,)</jdk>
+            </activation>
+            <modules>
+                <module>namingserver</module>
+                <module>console</module>
+            </modules>
+        </profile>
         <!-- profile: licenseCheck -->
         <profile>
             <id>licenseCheck</id>

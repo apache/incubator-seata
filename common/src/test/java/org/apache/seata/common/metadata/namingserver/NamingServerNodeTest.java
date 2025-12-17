@@ -108,5 +108,8 @@ class NamingServerNodeTest {
         Assertions.assertTrue(currentNode.isChanged(newerNode));
         Assertions.assertFalse(currentNode.isChanged(olderNode));
         Assertions.assertFalse(currentNode.isChanged(null));
+        newerNode = new NamingServerNode();
+        newerNode.setVersion("v1");
+        Assertions.assertTrue(currentNode.isChanged(newerNode));
     }
 }
