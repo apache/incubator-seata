@@ -14,17 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import requestV2 from '@/utils/requestV2';
+import request from '@/utils/request';
 
-export interface ILocaleMap {
-    [key: string]: string
+export async function fetchNamespaceV2(): Promise<any> {
+  const result = await requestV2.get('/naming/namespace', {
+    method: 'get',
+  });
+  return result.data;
 }
-export interface ILocale {
-  MenuRouter: ILocaleMap;
-  Header: ILocaleMap;
-  Login: ILocaleMap;
-  Overview: ILocaleMap;
-  TransactionInfo: ILocaleMap;
-  GlobalLockInfo: ILocaleMap;
-  ClusterManager: ILocaleMap;
-  codeMessage: ILocaleMap;
+
+export async function fetchClusterData(namespace: string, clusterName: string): Promise<any> {
+  const result = await request.get('/naming/clusterData', {
+    method: 'get',
+    params: { namespace, clusterName },
+  });
+  return result;
 }
