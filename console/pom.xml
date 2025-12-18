@@ -32,10 +32,10 @@
     <description>console for Seata built with Maven</description>
 
     <properties>
-        <spring-boot-for-server.version>2.7.18</spring-boot-for-server.version>
-        <spring-framework-for-server.version>5.3.39</spring-framework-for-server.version>
+        <spring-boot-for-server.version>3.5.2</spring-boot-for-server.version>
         <snakeyaml-for-server.version>2.0</snakeyaml-for-server.version>
-        <tomcat-embed.version>9.0.110</tomcat-embed.version>
+        <tomcat-embed.version>11.0.2</tomcat-embed.version>
+        <spring-ai.version>1.1.0</spring-ai.version>
     </properties>
 
     <dependencyManagement>
@@ -49,15 +49,6 @@
                 <scope>import</scope>
             </dependency>
 
-            <!-- spring-framework-->
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-framework-bom</artifactId>
-                <version>${spring-framework-for-server.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-
             <!-- spring-boot -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
@@ -67,10 +58,6 @@
                     <exclusion>
                         <groupId>org.apache.kafka</groupId>
                         <artifactId>kafka-clients</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.springframework</groupId>
-                        <artifactId>spring-framework-bom</artifactId>
                     </exclusion>
                 </exclusions>
                 <type>pom</type>
@@ -121,7 +108,7 @@
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.tomcat.embed</groupId>
-                    <artifactId>tomcat-embed-core</artifactId>
+                    <artifactId>*</artifactId>
                 </exclusion>
                 <exclusion>
                     <groupId>org.yaml</groupId>
@@ -138,14 +125,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-        </dependency>
-        <!--<dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt</artifactId>
-        </dependency>-->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
@@ -164,6 +143,11 @@
             <groupId>org.apache.seata</groupId>
             <artifactId>seata-common</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-starter-mcp-server-webmvc</artifactId>
+            <version>${spring-ai.version}</version>
         </dependency>
     </dependencies>
 
