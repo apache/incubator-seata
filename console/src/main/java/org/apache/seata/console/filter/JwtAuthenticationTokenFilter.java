@@ -55,13 +55,13 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
                 && !jwt.trim().isEmpty()
                 && SecurityContextHolder.getContext().getAuthentication() == null) {
             if (this.tokenProvider.validateToken(jwt)) {
-                /*
-                 get auth info
-                */
+                /**
+                 * get auth info
+                 */
                 Authentication authentication = this.tokenProvider.getAuthentication(jwt);
-                /*
-                 save user info to securityContext
-                */
+                /**
+                 * save user info to securityContext
+                 */
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         }
