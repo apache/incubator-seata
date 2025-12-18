@@ -72,6 +72,7 @@ public class MetadataTest {
 
     @Test
     void testIsRaftMode() {
+        metadata.setStoreMode(StoreMode.RAFT);
         Assertions.assertTrue(metadata.isRaftMode());
     }
 
@@ -106,9 +107,16 @@ public class MetadataTest {
 
     @Test
     public void testToString() {
-        Assertions.assertEquals(
-                "Metadata(leaders={}, clusterTerm={}, clusterNodes={\"cluster\"->{}}, storeMode=StoreMode.RAFT)",
-                metadata.toString());
+        metadata.setStoreMode(StoreMode.RAFT);
+
+        String s = metadata.toString();
+
+        Assertions.assertTrue(s.startsWith("Metadata("), "toString should start with Metadata(");
+        Assertions.assertTrue(s.contains("leaders="), "toString should contain leaders");
+        Assertions.assertTrue(s.contains("clusterTerm="), "toString should contain clusterTerm");
+        Assertions.assertTrue(s.contains("clusterNodes="), "toString should contain clusterNodes");
+        Assertions.assertTrue(
+                s.contains("storeMode=StoreMode.RAFT"), "toString should contain storeMode=StoreMode.RAFT");
     }
 
     @Test

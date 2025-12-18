@@ -31,10 +31,12 @@ public class Instance {
     private String unit;
     private Node.Endpoint control;
     private Node.Endpoint transaction;
+    private Node.Endpoint internal;
     private double weight = 1.0;
     private boolean healthy = true;
     private long term;
     private long timestamp;
+    private String version;
     private ClusterRole role = ClusterRole.MEMBER;
     private Map<String, Object> metadata = new HashMap<>();
 
@@ -165,6 +167,15 @@ public class Instance {
         }
     }
 
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    @Override
     public Instance clone() {
         Instance instance = new Instance();
         instance.setNamespace(namespace);
@@ -177,7 +188,17 @@ public class Instance {
         instance.setTerm(term);
         instance.setTimestamp(timestamp);
         instance.setMetadata(metadata);
+        instance.setVersion(this.getVersion());
+        instance.setInternal(this.getInternal());
         return instance;
+    }
+
+    public Node.Endpoint getInternal() {
+        return internal;
+    }
+
+    public void setInternal(Node.Endpoint internal) {
+        this.internal = internal;
     }
 
     private static class SingletonHolder {
