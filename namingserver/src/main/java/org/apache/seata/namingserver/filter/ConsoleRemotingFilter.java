@@ -16,7 +16,6 @@
  */
 package org.apache.seata.namingserver.filter;
 
-import jakarta.servlet.AsyncContext;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -118,35 +117,26 @@ public class ConsoleRemotingFilter implements Filter {
                                 response.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
                                 return;
                             }
-
-                            // Forward the request
-                            AsyncContext asyncContext = servletRequest.startAsync();
-                            asyncContext.setTimeout(5000L);
-                            Thread.startVirtualThread(() -> {
-                                try {
-                                    ResponseEntity<byte[]> responseEntity = restTemplate.exchange(
-                                            URI.create(targetUrl), httpMethod, httpEntity, byte[].class);
-                                    responseEntity.getHeaders().forEach((key, value) -> {
-                                        value.forEach(v -> response.addHeader(key, v));
-                                    });
-                                    response.setStatus(
-                                            responseEntity.getStatusCode().value());
-                                    Optional.ofNullable(responseEntity.getBody())
-                                            .ifPresent(body -> {
-                                                try (ServletOutputStream outputStream = response.getOutputStream()) {
-                                                    outputStream.write(body);
-                                                    outputStream.flush();
-                                                } catch (IOException e) {
-                                                    logger.error(e.getMessage(), e);
-                                                }
-                                            });
-                                } catch (Exception ex) {
-                                    logger.error(ex.getMessage(), ex);
-                                    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                                } finally {
-                                    asyncContext.complete();
-                                }
-                            });
+                            try {
+                                ResponseEntity<byte[]> responseEntity = restTemplate.exchange(
+                                        URI.create(targetUrl), httpMethod, httpEntity, byte[].class);
+                                responseEntity.getHeaders().forEach((key, value) -> {
+                                    value.forEach(v -> response.addHeader(key, v));
+                                });
+                                response.setStatus(
+                                        responseEntity.getStatusCode().value());
+                                Optional.ofNullable(responseEntity.getBody()).ifPresent(body -> {
+                                    try (ServletOutputStream outputStream = response.getOutputStream()) {
+                                        outputStream.write(body);
+                                        outputStream.flush();
+                                    } catch (IOException e) {
+                                        logger.error(e.getMessage(), e);
+                                    }
+                                });
+                            } catch (Exception ex) {
+                                logger.error(ex.getMessage(), ex);
+                                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                            }
                             return;
                         }
                     }

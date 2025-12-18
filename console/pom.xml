@@ -108,7 +108,7 @@
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.tomcat.embed</groupId>
-                    <artifactId>tomcat-embed-core</artifactId>
+                    <artifactId>*</artifactId>
                 </exclusion>
                 <exclusion>
                     <groupId>org.yaml</groupId>
