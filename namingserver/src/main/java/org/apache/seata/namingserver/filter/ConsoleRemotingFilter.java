@@ -135,7 +135,7 @@ public class ConsoleRemotingFilter implements Filter {
                                             // Set a shorter time than 5000L to prevent contention between servlet
                                             // containers and virtual threads after the request times out
                                             .orTimeout(4500, TimeUnit.MILLISECONDS);
-                                    ResponseEntity<byte[]> responseEntity = future.get();
+                                    ResponseEntity<byte[]> responseEntity = future.get(4500, TimeUnit.MILLISECONDS);
                                     responseEntity.getHeaders().forEach((key, value) -> {
                                         value.forEach(v -> response.addHeader(key, v));
                                     });
