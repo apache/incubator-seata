@@ -18,6 +18,12 @@
 server:
   port: 8081
 spring:
+  threads:
+    virtual:
+      enabled: true
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
   application:
     name: seata-namingserver
 logging:

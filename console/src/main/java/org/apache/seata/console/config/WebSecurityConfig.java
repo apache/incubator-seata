@@ -26,26 +26,31 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.BeanIds;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
+
+import java.util.Arrays;
 
 /**
  * Spring security config
  *
  */
 @Configuration(proxyBeanMethods = false)
-@EnableGlobalMethodSecurity(prePostEnabled = true)
-public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+@EnableWebSecurity
+@EnableMethodSecurity
+public class WebSecurityConfig {
 
     /**
      * The constant AUTHORIZATION_HEADER.
@@ -79,60 +84,60 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private Environment env;
 
-    @Bean(name = BeanIds.AUTHENTICATION_MANAGER)
-    @Override
-    public AuthenticationManager authenticationManagerBean() throws Exception {
-        return super.authenticationManagerBean();
-    }
-
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
-    }
-
-    @Override
-    public void configure(WebSecurity web) {
-        String ignoreURLs = env.getProperty("seata.security.ignore.urls", "/**");
-        for (String ignoreURL : ignoreURLs.trim().split(SECURITY_IGNORE_URLS_SPILT_CHAR)) {
-            web.ignoring().antMatchers(ignoreURL.trim());
-        }
-    }
-
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        String csrfIgnoreUrls = env.getProperty("seata.security.csrf-ignore-urls");
-        CsrfConfigurer<HttpSecurity> csrf = http.authorizeRequests()
-                .anyRequest()
-                .authenticated()
-                .and()
-                // custom token authorize exception handler
-                .exceptionHandling()
-                .authenticationEntryPoint(unauthorizedHandler)
-                .and()
-                // since we use jwt, session is not necessary
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .disable()
-                .csrf();
-        if (StringUtils.isNotBlank(csrfIgnoreUrls)) {
-            csrf.ignoringAntMatchers(csrfIgnoreUrls.trim().split(SECURITY_IGNORE_URLS_SPILT_CHAR));
-        }
-        csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
-        // don't disable csrf, jwt may be implemented based on cookies
-        http.addFilterBefore(
-                new JwtAuthenticationTokenFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class);
-
-        // disable cache
-        http.headers().cacheControl();
-    }
-
-    /**
-     * Password encoder password encoder.
-     *
-     * @return the password encoder
-     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager() {
+        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider(userDetailsService);
+        authenticationProvider.setPasswordEncoder(passwordEncoder());
+        return new ProviderManager(authenticationProvider);
+    }
+
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        RequestMatcher[] ignoredMatchers = buildAntMatchers(env.getProperty("seata.security.ignore.urls", "/**"));
+        return web -> {
+            if (ignoredMatchers.length > 0) {
+                web.ignoring().requestMatchers(ignoredMatchers);
+            }
+        };
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager)
+            throws Exception {
+        RequestMatcher[] csrfIgnored = buildAntMatchers(env.getProperty("seata.security.csrf-ignore-urls"));
+
+        http.authenticationManager(authenticationManager)
+                .authorizeHttpRequests(authz -> authz.anyRequest().authenticated())
+                .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .csrf(csrf -> {
+                    if (csrfIgnored.length > 0) {
+                        csrf.ignoringRequestMatchers(csrfIgnored);
+                    }
+                    csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse());
+                })
+                .addFilterBefore(
+                        new JwtAuthenticationTokenFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
+                .headers(headers -> headers.cacheControl(cache -> {}));
+
+        return http.build();
+    }
+
+    private RequestMatcher[] buildAntMatchers(String patterns) {
+        if (StringUtils.isBlank(patterns)) {
+            return new RequestMatcher[0];
+        }
+        return Arrays.stream(patterns.trim().split(SECURITY_IGNORE_URLS_SPILT_CHAR))
+                .map(String::trim)
+                .filter(StringUtils::isNotBlank)
+                // PathPatternParser using the new version of Security cannot directly achieve the same matching effect
+                // as the deprecated Ant style mode /**/*.css
+                .map(AntPathRequestMatcher::new)
+                .toArray(RequestMatcher[]::new);
     }
 }
