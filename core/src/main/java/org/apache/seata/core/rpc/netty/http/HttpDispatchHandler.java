@@ -72,54 +72,60 @@ public class HttpDispatchHandler extends BaseHttpChannelHandler<HttpRequest> {
                 () -> new HttpRequestParamWrapper(
                         queryParams, bodyParseResult.getFormParams(), headerParams, bodyParseResult.getJsonParams()));
 
-        HttpInvocation httpInvocation = ControllerManager.getHttpInvocation(path);
-
-        if (httpInvocation == null) {
-            FullHttpResponse errorResponse = addErrorResponse(context, HttpResponseStatus.NOT_FOUND);
-            sendErrorResponse(ctx, errorResponse, false);
-            return;
-        }
-
-        context.setAttribute("httpInvocation", httpInvocation);
-        context.setAttribute("httpController", httpInvocation.getController());
-        context.setAttribute("handleMethod", httpInvocation.getMethod());
-
-        ObjectNode requestDataNode = OBJECT_MAPPER.createObjectNode();
-        requestDataNode.set("param", ParameterParser.convertParamMap(queryParams));
-        if (httpRequest.method() == HttpMethod.POST && bodyParseResult.getBodyNode() != null) {
-            requestDataNode.set("body", bodyParseResult.getBodyNode());
-        }
-
-        Object[] args;
+        HttpFilterContext.setCurrentContext(context);
         try {
-            args = ParameterParser.getArgValues(
-                    httpInvocation.getParamMetaData(), httpInvocation.getMethod(), requestDataNode, context);
-        } catch (Exception e) {
-            LOGGER.error("Error parsing request arguments: {}", e.getMessage(), e);
-            FullHttpResponse errorResponse = addErrorResponse(context, HttpResponseStatus.BAD_REQUEST);
-            sendErrorResponse(ctx, errorResponse, false);
-            return;
-        }
-        context.setAttribute("args", args);
+            HttpInvocation httpInvocation = ControllerManager.getHttpInvocation(path);
 
-        // Execute filter chain in HTTP thread pool
-        HttpRequestFilterChain filterChain = HttpRequestFilterManager.getFilterChain(this::executeFinalAction);
-        HTTP_HANDLER_THREADS.execute(() -> {
-            HttpFilterContext.setCurrentContext(context);
+            if (httpInvocation == null) {
+                FullHttpResponse errorResponse = addErrorResponse(context, HttpResponseStatus.NOT_FOUND);
+                sendErrorResponse(ctx, errorResponse, false);
+                return;
+            }
+
+            context.setAttribute("httpInvocation", httpInvocation);
+            context.setAttribute("httpController", httpInvocation.getController());
+            context.setAttribute("handleMethod", httpInvocation.getMethod());
+
+            ObjectNode requestDataNode = OBJECT_MAPPER.createObjectNode();
+            requestDataNode.set("param", ParameterParser.convertParamMap(queryParams));
+            if (httpRequest.method() == HttpMethod.POST && bodyParseResult.getBodyNode() != null) {
+                requestDataNode.set("body", bodyParseResult.getBodyNode());
+            }
+
+            Object[] args;
             try {
-                filterChain.doFilter(context);
-            } catch (HttpRequestFilterException e) {
-                LOGGER.warn("Request blocked by filter: {}", e.getMessage());
+                args = ParameterParser.getArgValues(
+                        httpInvocation.getParamMetaData(), httpInvocation.getMethod(), requestDataNode, context);
+            } catch (Exception e) {
+                LOGGER.error("Error parsing request arguments: {}", e.getMessage(), e);
                 FullHttpResponse errorResponse = addErrorResponse(context, HttpResponseStatus.BAD_REQUEST);
                 sendErrorResponse(ctx, errorResponse, false);
-            } catch (Exception e) {
-                LOGGER.error("Unexpected error during request processing: {}", e.getMessage(), e);
-                FullHttpResponse errorResponse = addErrorResponse(context, HttpResponseStatus.INTERNAL_SERVER_ERROR);
-                sendErrorResponse(ctx, errorResponse, false);
-            } finally {
-                HttpFilterContext.clearCurrentContext();
+                return;
             }
-        });
+            context.setAttribute("args", args);
+
+            // Execute filter chain in HTTP thread pool
+            HttpRequestFilterChain filterChain = HttpRequestFilterManager.getFilterChain(this::executeFinalAction);
+            HTTP_HANDLER_THREADS.execute(() -> {
+                HttpFilterContext.setCurrentContext(context);
+                try {
+                    filterChain.doFilter(context);
+                } catch (HttpRequestFilterException e) {
+                    LOGGER.warn("Request blocked by filter: {}", e.getMessage());
+                    FullHttpResponse errorResponse = addErrorResponse(context, HttpResponseStatus.BAD_REQUEST);
+                    sendErrorResponse(ctx, errorResponse, false);
+                } catch (Exception e) {
+                    LOGGER.error("Unexpected error during request processing: {}", e.getMessage(), e);
+                    FullHttpResponse errorResponse =
+                            addErrorResponse(context, HttpResponseStatus.INTERNAL_SERVER_ERROR);
+                    sendErrorResponse(ctx, errorResponse, false);
+                } finally {
+                    HttpFilterContext.clearCurrentContext();
+                }
+            });
+        } finally {
+            HttpFilterContext.clearCurrentContext();
+        }
     }
 
     private void executeFinalAction(HttpFilterContext<?> context) {

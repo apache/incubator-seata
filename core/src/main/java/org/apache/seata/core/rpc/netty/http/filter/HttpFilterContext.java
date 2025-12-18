@@ -42,8 +42,8 @@ public class HttpFilterContext<T> extends HttpContext<T> {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> HttpFilterContext<T> getCurrentContext() {
-        return (HttpFilterContext<T>) CURRENT_CONTEXT.get();
+    public static HttpFilterContext<?> getCurrentContext() {
+        return CURRENT_CONTEXT.get();
     }
 
     public static void setCurrentContext(HttpFilterContext<?> context) {

@@ -352,7 +352,8 @@ class HttpDispatchHandlerTest {
     }
 
     @Test
-    void testAspectCanGetHttpFilterContext() throws InterruptedException, ExecutionException, TimeoutException {
+    void testHttpFilterContextAvailableInThreadLocalDuringFilterExecution()
+            throws InterruptedException, ExecutionException, TimeoutException {
         class MockHttpAspect {
             public void beforeFilter() {
                 HttpFilterContext<?> context = HttpFilterContext.getCurrentContext();
