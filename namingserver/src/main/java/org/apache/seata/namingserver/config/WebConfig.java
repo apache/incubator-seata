@@ -16,21 +16,18 @@
  */
 package org.apache.seata.namingserver.config;
 
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import jakarta.servlet.Filter;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.seata.namingserver.filter.ConsoleRemotingFilter;
 import org.apache.seata.namingserver.manager.NamingManager;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
-import org.springframework.http.client.HttpComponentsAsyncClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.web.client.AsyncRestTemplate;
 import org.springframework.web.client.RestTemplate;
-
-import javax.servlet.Filter;
 
 import static org.apache.seata.namingserver.contants.NamingConstant.DEFAULT_CONNECTION_MAX_PER_ROUTE;
 import static org.apache.seata.namingserver.contants.NamingConstant.DEFAULT_CONNECTION_MAX_TOTAL;
@@ -57,20 +54,9 @@ public class WebConfig {
     }
 
     @Bean
-    public AsyncRestTemplate asyncRestTemplate(RestTemplate restTemplate) {
-        HttpComponentsAsyncClientHttpRequestFactory asyncClientHttpRequestFactory =
-                new HttpComponentsAsyncClientHttpRequestFactory();
-        asyncClientHttpRequestFactory.setConnectionRequestTimeout(
-                DEFAULT_REQUEST_TIMEOUT); // Connection request timeout in milliseconds
-        asyncClientHttpRequestFactory.setConnectTimeout(DEFAULT_REQUEST_TIMEOUT); // Connection timeout in milliseconds
-        asyncClientHttpRequestFactory.setReadTimeout(DEFAULT_REQUEST_TIMEOUT); // Read timeout in milliseconds
-        return new AsyncRestTemplate(asyncClientHttpRequestFactory, restTemplate);
-    }
-
-    @Bean
     public FilterRegistrationBean<Filter> consoleRemotingFilter(
-            NamingManager namingManager, AsyncRestTemplate asyncRestTemplate) {
-        ConsoleRemotingFilter consoleRemotingFilter = new ConsoleRemotingFilter(namingManager, asyncRestTemplate);
+            NamingManager namingManager, RestTemplate restTemplate) {
+        ConsoleRemotingFilter consoleRemotingFilter = new ConsoleRemotingFilter(namingManager, restTemplate);
         FilterRegistrationBean<Filter> registration = new FilterRegistrationBean<>();
         registration.setFilter(consoleRemotingFilter);
         registration.addUrlPatterns("/*");

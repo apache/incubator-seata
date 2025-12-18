@@ -17,7 +17,7 @@
 /// <reference types="react" />
 // tslint:disable
 import { History } from 'history';
-import { ILocaleMap } from '@/locales';
+import { ILocale, ILocaleMap } from '@/locales';
 
 declare const __mock__: boolean;
 
@@ -30,6 +30,6 @@ declare module '*.svg' {
 declare module 'lodash';
 
 export interface GlobalProps {
-  locale: ILocaleMap;
+  locale: ILocale;
   history: History;
 }
