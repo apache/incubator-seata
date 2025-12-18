@@ -16,6 +16,7 @@
  */
 package org.apache.seata.namingserver.entity.pojo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.seata.common.metadata.Cluster;
 import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.metadata.namingserver.NamingServerNode;
@@ -97,6 +98,7 @@ public class ClusterData {
         }
     }
 
+    @JsonIgnore
     public List<Node> getInstanceList() {
         return unitData.values().stream()
                 .map(Unit::getNamingInstanceList)

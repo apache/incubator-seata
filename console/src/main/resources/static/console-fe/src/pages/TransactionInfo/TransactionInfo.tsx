@@ -20,9 +20,8 @@ import Actions, { LinkButton } from '@alicloud/console-components-actions';
 import { withRouter } from 'react-router-dom';
 import Page from '@/components/Page';
 import { GlobalProps } from '@/module';
-import styled, { css } from 'styled-components';
 import getData, { changeGlobalData, deleteBranchData, deleteGlobalData, GlobalSessionParam, sendGlobalCommitOrRollback,
-  startBranchData, startGlobalData, stopBranchData, stopGlobalData, forceDeleteGlobalData, forceDeleteBranchData, fetchNamespace } from '@/service/transactionInfo';
+  startBranchData, startGlobalData, stopBranchData, stopGlobalData, forceDeleteGlobalData, forceDeleteBranchData, fetchNamespaceV2, addGroup, changeGroup } from '@/service/transactionInfo';
 import PropTypes from 'prop-types';
 import moment from 'moment';
 
@@ -48,9 +47,22 @@ type TransactionInfoState = {
   xid : string;
   currentBranchSession: Array<any>;
   globalSessionParam : GlobalSessionParam;
-  namespaceOptions: Map<string, { clusters: string[], vgroups: string[] }>;
+  namespaceOptions: Map<string, { clusters: string[], clusterVgroups: {[key: string]: string[]} }>;
   clusters: Array<string>;
   vgroups: Array<string>;
+  createVGroupDialogVisible: boolean;
+  vGroupName: string;
+  changeVGroupDialogVisible: boolean;
+  selectedVGroup: string;
+  targetNamespace: string;
+  targetClusters: Array<string>;
+  targetCluster: string;
+  originalNamespace: string;
+  originalClusters: Array<string>;
+  originalCluster: string;
+  originalVGroups: Array<string>;
+  createNamespace: string;
+  createCluster: string;
 }
 
 const statusList:Array<StatusType> = [
@@ -293,6 +305,8 @@ const warnning = new Map([
     ['SAGA', 'The force delete will only delete session in server.']])],
 ])
 
+const VGROUP_REFRESH_DELAY_MS = 5000;
+
 class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState> {
   static displayName = 'TransactionInfo';
 
@@ -313,9 +327,22 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
       pageSize: 10,
       pageNum: 1,
     },
-    namespaceOptions: new Map<string, { clusters: string[], vgroups: string[] }>(),
+    namespaceOptions: new Map<string, { clusters: string[], clusterVgroups: {[key: string]: string[]} }>(),
     clusters: [],
     vgroups: [],
+    createVGroupDialogVisible: false,
+    vGroupName: '',
+    changeVGroupDialogVisible: false,
+    selectedVGroup: '',
+    targetNamespace: '',
+    targetClusters: [],
+    targetCluster: '',
+    originalNamespace: '',
+    originalClusters: [],
+    originalCluster: '',
+    originalVGroups: [],
+    createNamespace: '',
+    createCluster: '',
   };
   componentDidMount = () => {
     // search once by default
@@ -323,48 +350,55 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
   }
   loadNamespaces = async () => {
     try {
-      const namespaces = await fetchNamespace();
-      const namespaceOptions = new Map<string, { clusters: string[], vgroups: string[] }>();
+      const namespaces = await fetchNamespaceV2();
+      const namespaceOptions = new Map<string, { clusters: string[], clusterVgroups: {[key: string]: string[]} }>();
       Object.keys(namespaces).forEach(namespaceKey => {
         const namespaceData = namespaces[namespaceKey];
+        const clusterVgroups = (namespaceData.clusterVgroups || {}) as {[key: string]: string[]};
+        const clusters = Object.keys(clusterVgroups);
         namespaceOptions.set(namespaceKey, {
-          clusters: namespaceData.clusters,
-          vgroups: namespaceData.vgroups,
+          clusters,
+          clusterVgroups,
         });
       });
         if (namespaceOptions.size > 0) {
             // Set default namespace to the first option
             const firstNamespace = Array.from(namespaceOptions.keys())[0];
             const selectedNamespace = namespaceOptions.get(firstNamespace);
-            this.setState({
+            const firstCluster = selectedNamespace ? selectedNamespace.clusters[0] : undefined;
+            const clusterVgroups = selectedNamespace ? selectedNamespace.clusterVgroups : {};
+            const selectedVgroups = firstCluster ? clusterVgroups[firstCluster] || [] : [];
+            this.setState(prevState => ({
                 namespaceOptions,
                 globalSessionParam: {
-                    ...this.state.globalSessionParam,
+                    ...prevState.globalSessionParam,
                     namespace: firstNamespace,
-                    cluster: selectedNamespace ? selectedNamespace.clusters[0] : undefined,
+                    cluster: firstCluster,
                 },
                 clusters: selectedNamespace ? selectedNamespace.clusters : [],
-                vgroups: selectedNamespace ? selectedNamespace.vgroups : [],
-            });
-            this.search();
-        } else {
-            this.setState({
-                namespaceOptions,
-            });
-        }
+                vgroups: selectedVgroups,
+            }));
+             this.search();
+         } else {
+             this.setState({
+                 namespaceOptions,
+             });
+         }
     } catch (error) {
       console.error('Failed to fetch namespaces:', error);
     }
   }
   resetSearchFilter = () => {
-    this.setState({
+    this.setState(prevState => ({
       globalSessionParam: {
         withBranch: false,
         // pagination info don`t reset
-        pageSize: this.state.globalSessionParam.pageSize,
-        pageNum: this.state.globalSessionParam.pageNum,
+        pageSize: prevState.globalSessionParam.pageSize,
+        pageNum: prevState.globalSessionParam.pageNum,
       },
-    });
+      clusters: [],
+      vgroups: [],
+    }));
   }
 
   search = () => {
@@ -372,13 +406,12 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
     getData(this.state.globalSessionParam).then(data => {
       // if the result set is empty, set the page number to go back to the first page
       if (data.total === 0) {
-        this.setState({
+        this.setState(prevState => ({
           list: [],
           total: 0,
           loading: false,
-          globalSessionParam: Object.assign(this.state.globalSessionParam,
-            { pageNum: 1 }),
-        });
+          globalSessionParam: { ...prevState.globalSessionParam, pageNum: 1 },
+        }));
         return;
       }
       // format time
@@ -397,18 +430,21 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
       });
 
       if (this.state.branchSessionDialogVisible) {
-        data.data.forEach((item: any) => {
-          if (item.xid == this.state.xid) {
-            this.state.currentBranchSession = item.branchSessionVOs
-          }
-        })
+        const currentBranchSession = data.data.find((item: any) => item.xid == this.state.xid)?.branchSessionVOs || [];
+        this.setState({
+          list: data.data,
+          total: data.total,
+          loading: false,
+          currentBranchSession,
+        });
+      } else {
+        this.setState({
+          list: data.data,
+          total: data.total,
+          loading: false,
+        });
       }
-      this.setState({
-        list: data.data,
-        total: data.total,
-        loading: false,
-      });
-    }).catch(err => {
+    }).catch(() => {
       this.setState({ loading: false });
     });
   }
@@ -416,23 +452,41 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
   searchFilterOnChange = (key: string, val: string) => {
     if (key === 'namespace') {
       const selectedNamespace = this.state.namespaceOptions.get(val);
-      this.setState({
-        clusters: selectedNamespace ? selectedNamespace.clusters : [],
-        vgroups: selectedNamespace ? selectedNamespace.vgroups : [],
-        globalSessionParam: Object.assign(this.state.globalSessionParam, {[key]: val}),
-      });
+      const clusters = selectedNamespace ? selectedNamespace.clusters : [];
+      const firstCluster = clusters.length > 0 ? clusters[0] : undefined;
+      const clusterVgroups = selectedNamespace ? selectedNamespace.clusterVgroups : {};
+      const vgroups = firstCluster ? clusterVgroups[firstCluster] || [] : [];
+      this.setState(prevState => ({
+        clusters,
+        vgroups,
+        globalSessionParam: { ...prevState.globalSessionParam, [key]: val, cluster: firstCluster, vgroup: '' },
+      }));
+    } else if (key === 'cluster') {
+      const currentNamespace = this.state.globalSessionParam.namespace;
+      if (currentNamespace) {
+        const namespaceData = this.state.namespaceOptions.get(currentNamespace);
+        const clusterVgroups = namespaceData ? namespaceData.clusterVgroups : {};
+        const selectedVgroups = clusterVgroups[val] || [];
+        this.setState(prevState => ({
+          vgroups: selectedVgroups,
+          globalSessionParam: { ...prevState.globalSessionParam, [key]: val, vgroup: '' },
+        }));
+      } else {
+        this.setState(prevState => ({
+          globalSessionParam: { ...prevState.globalSessionParam, [key]: val, vgroup: '' },
+        }));
+      }
     } else {
-      this.setState({
-        globalSessionParam: Object.assign(this.state.globalSessionParam, {[key]: val}),
-      });
+      this.setState(prevState => ({
+        globalSessionParam: { ...prevState.globalSessionParam, [key]: val },
+      }));
     }
   };
 
-  branchSessionSwitchOnChange = (checked: boolean, e: any) => {
-    this.setState({
-      globalSessionParam: Object.assign(this.state.globalSessionParam,
-        { withBranch: checked }),
-    });
+  branchSessionSwitchOnChange = (checked: boolean, _e?: any) => {
+    this.setState(prevState => ({
+      globalSessionParam: { ...prevState.globalSessionParam, withBranch: checked },
+    }));
     if (checked) {
       // if checked, do search for load branch sessions
       this.search();
@@ -441,15 +495,14 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
 
   createTimeOnChange = (value: Array<any>) => {
     // timestamp(milliseconds)
-    const timeStart = value[0] == null ? null : moment(value[0]).unix() * 1000;
-    const timeEnd = value[1] == null ? null : moment(value[1]).unix() * 1000;
-    this.setState({
-      globalSessionParam: Object.assign(this.state.globalSessionParam,
-        { timeStart, timeEnd }),
-    });
+    const timeStart = value[0] == null ? undefined : moment(value[0]).unix() * 1000;
+    const timeEnd = value[1] == null ? undefined : moment(value[1]).unix() * 1000;
+    this.setState(prevState => ({
+      globalSessionParam: { ...prevState.globalSessionParam, timeStart, timeEnd },
+    }));
   }
 
-  statusCell = (val: number, index: number, record: any) => {
+  statusCell = (val: number, _index?: number, _record?: any) => {
     let icon;
     statusList.forEach((status: StatusType) => {
       if (status.value === val) {
@@ -465,7 +518,7 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
     return icon;
   }
 
-  branchSessionStatusCell = (val: number, index: number, record: any) => {
+  branchSessionStatusCell = (val: number, _index?: number, _record?: any) => {
     let icon;
     branchSessionStatusList.forEach((status: StatusType) => {
       if (status.value === val) {
@@ -525,6 +578,7 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
           {showGlobalLockTitle}
         </LinkButton>
 
+
         <Button
           onClick={() => {
             Dialog.confirm({
@@ -545,7 +599,7 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
                   title: 'Warnning',
                   content: <div dangerouslySetInnerHTML={{__html: commonWarnning + '<br>' + warnMessage}}/>,
                   onOk: () => {
-                    deleteGlobalData(record).then((rsp) => {
+                    deleteGlobalData(record).then(() => {
                       Message.success("Delete successfully")
                       this.search()
                     }).catch((rsp) => {
@@ -580,7 +634,7 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
                   title: 'Warnning',
                   content: <div dangerouslySetInnerHTML={{__html: commonWarnning + '<br>' + warnMessage}}/>,
                   onOk: () => {
-                    forceDeleteGlobalData(record).then((rsp) => {
+                    forceDeleteGlobalData(record).then(() => {
                       Message.success("Delete successfully")
                       this.search()
                     }).catch((rsp) => {
@@ -602,7 +656,7 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
                 title: 'Confirm',
                 content: 'Are you sure you want to start restart global transactions',
                 onOk: () => {
-                  startGlobalData(record).then((rsp) => {
+                  startGlobalData(record).then(() => {
                     Message.success("Start successfully")
                     this.search()
                   }).catch((rsp) => {
@@ -619,7 +673,7 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
             title: 'Confirm',
             content: 'Are you sure you want to stop stop global transactions',
             onOk: () => {
-              stopGlobalData(record).then((rsp) => {
+              stopGlobalData(record).then(() => {
                 Message.success("Stop successfully")
                 this.search()
               }).catch((rsp) => {
@@ -639,7 +693,7 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
               title: 'Confirm',
               content: 'Are you sure you want to send commit or rollback to global transactions',
               onOk: () => {
-                sendGlobalCommitOrRollback(record).then((rsp) => {
+                sendGlobalCommitOrRollback(record).then(() => {
                   Message.success("Send successfully")
                   this.search()
                 }).catch((rsp) => {
@@ -658,7 +712,7 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
               title: 'Confirm',
               content: 'Are you sure you want to change the global transactions status',
               onOk: () => {
-                changeGlobalData(record).then((rsp) => {
+                changeGlobalData(record).then(() => {
                   Message.success("Change successfully")
                   this.search()
                 }).catch((rsp) => {
@@ -718,7 +772,7 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
                   title: 'Warnning',
                   content: <div dangerouslySetInnerHTML={{__html: commonWarnning + '<br>' + warnMessage}}/>,
                   onOk: () => {
-                    deleteBranchData(record).then((rsp) => {
+                    deleteBranchData(record).then(() => {
                       Message.success("Delete successfully")
                       this.search()
                     }).catch((rsp) => {
@@ -744,7 +798,7 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
                   title: 'Warnning',
                   content: <div dangerouslySetInnerHTML={{__html: commonWarnning + '<br>' + warnMessage}}/>,
                   onOk: () => {
-                    forceDeleteBranchData(record).then((rsp) => {
+                    forceDeleteBranchData(record).then(() => {
                       Message.success("Delete successfully")
                       this.search()
                     }).catch((rsp) => {
@@ -766,7 +820,7 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
                 title: 'Confirm',
                 content: 'Are you sure you want to start branch transactions retry',
                 onOk: () => {
-                  startBranchData(record).then((rsp) => {
+                  startBranchData(record).then(() => {
                     Message.success("Start successfully")
                     this.search()
                   }).catch((rsp) => {
@@ -789,7 +843,7 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
                   title: 'Warnning',
                   content: <div dangerouslySetInnerHTML={{__html: commonWarnning + '<br>' + warnMessage}}/>,
                   onOk: () => {
-                    stopBranchData(record).then((rsp) => {
+                    stopBranchData(record).then(() => {
                       Message.success("Stop successfully")
                       this.search()
                     }).catch((rsp) => {
@@ -807,19 +861,17 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
       </Actions>);
   }
 
-  paginationOnChange = (current: number, e: {}) => {
-    this.setState({
-      globalSessionParam: Object.assign(this.state.globalSessionParam,
-        { pageNum: current }),
-    });
+  paginationOnChange = (current: number, _e?: any) => {
+    this.setState(prevState => ({
+      globalSessionParam: { ...prevState.globalSessionParam, pageNum: current },
+    }));
     this.search();
   }
 
   paginationOnPageSizeChange = (pageSize: number) => {
-    this.setState({
-      globalSessionParam: Object.assign(this.state.globalSessionParam,
-        { pageSize }),
-    });
+    this.setState(prevState => ({
+      globalSessionParam: { ...prevState.globalSessionParam, pageSize },
+    }));
     this.search();
   }
 
@@ -839,6 +891,95 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
     });
   }
 
+  showCreateVGroupDialog = () => {
+    this.setState(prevState => ({
+      createVGroupDialogVisible: true,
+      vGroupName: '',
+      createNamespace: prevState.globalSessionParam.namespace || '',
+      createCluster: prevState.globalSessionParam.cluster || '',
+    }));
+  }
+
+  closeCreateVGroupDialog = () => {
+    this.setState({
+      createVGroupDialogVisible: false,
+      vGroupName: '',
+      createNamespace: '',
+      createCluster: '',
+    });
+  }
+
+  showChangeVGroupDialog = () => {
+    this.setState({
+      changeVGroupDialogVisible: true,
+      selectedVGroup: '',
+      targetNamespace: '',
+      targetClusters: [],
+      targetCluster: '',
+      originalNamespace: '',
+      originalClusters: [],
+      originalCluster: '',
+      originalVGroups: [],
+    });
+  }
+
+  closeChangeVGroupDialog = () => {
+    this.setState({
+      changeVGroupDialogVisible: false,
+      selectedVGroup: '',
+      targetNamespace: '',
+      targetClusters: [],
+      targetCluster: '',
+      originalNamespace: '',
+      originalClusters: [],
+      originalCluster: '',
+      originalVGroups: [],
+    });
+  }
+
+  handleCreateVGroup = () => {
+    const { locale = {} } = this.props;
+    const { createVGroupErrorMessage, createVGroupSuccessMessage, createVGroupFailMessage } = locale;
+    const { createNamespace, createCluster, vGroupName } = this.state;
+    if (!createNamespace || !createCluster || !vGroupName.trim()) {
+      Message.error(createVGroupErrorMessage);
+      return;
+    }
+    addGroup(createNamespace, createCluster, vGroupName.trim()).then(() => {
+      Message.success(createVGroupSuccessMessage);
+      this.closeCreateVGroupDialog();
+      // Delay 5 seconds before reloading namespaces to get the latest vgroup list
+      setTimeout(() => {
+        this.loadNamespaces();
+      }, VGROUP_REFRESH_DELAY_MS);
+    }).catch((error) => {
+      const backendMessage = lodashGet(error, 'data.message');
+      const displayMessage = backendMessage ? `${createVGroupFailMessage}: ${backendMessage}` : createVGroupFailMessage;
+      Message.error(displayMessage);
+    });
+  }
+
+  handleChangeVGroup = () => {
+    const { locale = {} } = this.props;
+    const { changeVGroupSuccessMessage, changeVGroupFailMessage } = locale;
+    const { selectedVGroup, targetNamespace, targetCluster } = this.state;
+    if (!selectedVGroup || !targetNamespace || !targetCluster) {
+      return;
+    }
+    changeGroup(targetNamespace, targetCluster, selectedVGroup, "").then(() => {
+      Message.success(changeVGroupSuccessMessage);
+      this.closeChangeVGroupDialog();
+      // Delay 5 seconds before reloading namespaces to get the latest vgroup list
+      setTimeout(() => {
+        this.loadNamespaces();
+      }, VGROUP_REFRESH_DELAY_MS);
+    }).catch((error) => {
+      const backendMessage = lodashGet(error, 'data.message');
+      const displayMessage = backendMessage ? `${changeVGroupFailMessage}: ${backendMessage}` : changeVGroupFailMessage;
+      Message.error(displayMessage);
+    });
+  }
+
   render() {
     const { locale = {} } = this.props;
     const { title, subTitle, createTimeLabel,
@@ -852,6 +993,26 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
       searchButtonLabel,
       operateTitle,
       branchSessionDialogTitle,
+      createVGroupButtonLabel,
+      createVGroupDialogTitle,
+      createVGroupInputPlaceholder,
+      createVGroupConfirmButton,
+      changeVGroupButtonLabel,
+      changeVGroupDialogTitle,
+      namespaceLabel,
+      clusterLabel,
+      originalNamespaceLabel,
+      originalClusterLabel,
+      selectVGroupLabel,
+      targetNamespaceLabel,
+      targetClusterLabel,
+      vGroupNameLabel,
+      confirmButtonLabel,
+      selectOriginalNamespacePlaceholder,
+      selectOriginalClusterPlaceholder,
+      selectTargetNamespacePlaceholder,
+      selectTargetClusterPlaceholder,
+      selectVGroupPlaceholder,
     } = locale;
     return (
       <Page
@@ -928,6 +1089,8 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
                   this.searchFilterOnChange('vgroup', value);
                 }}
                 dataSource={this.state.vgroups.map(value => ({ label: value, value }))}
+                value={this.state.globalSessionParam.vgroup}
+                key={this.state.globalSessionParam.cluster}
             />
           </FormItem>
           {/* {branch session switch} */}
@@ -948,6 +1111,18 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
             <Form.Submit onClick={this.search}>
               <Icon type="search" />{searchButtonLabel}
             </Form.Submit>
+          </FormItem>
+          {/* {create vgroup button} */}
+          <FormItem>
+            <Button onClick={this.showCreateVGroupDialog}>
+              {createVGroupButtonLabel}
+            </Button>
+          </FormItem>
+          {/* {change vgroup button} */}
+          <FormItem>
+            <Button onClick={this.showChangeVGroupDialog}>
+              {changeVGroupButtonLabel}
+            </Button>
           </FormItem>
         </Form>
         {/* global session table */}
@@ -1003,6 +1178,143 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
               cell={this.branchSessionDialogOperateCell}
             />
           </Table>
+        </Dialog>
+
+        {/* create vgroup dialog */}
+        <Dialog visible={this.state.createVGroupDialogVisible} title={createVGroupDialogTitle} footer={false} onClose={this.closeCreateVGroupDialog}>
+          <Form inline labelAlign="left">
+            <FormItem name="createNamespace" label={namespaceLabel}>
+              <Select
+                placeholder={selectNamespaceFilerPlaceholder}
+                onChange={(value: string) => {
+                  this.setState(prevState => {
+                    const clusters = value ? prevState.namespaceOptions.get(value)?.clusters || [] : [];
+                    return {
+                      createNamespace: value,
+                      createCluster: clusters.length > 0 ? clusters[0] : '',
+                    };
+                  });
+                }}
+                dataSource={Array.from(this.state.namespaceOptions.keys()).map(key => ({ label: key, value: key }))}
+                value={this.state.createNamespace}
+              />
+            </FormItem>
+            <FormItem name="createCluster" label={clusterLabel}>
+              <Select
+                placeholder={selectClusterFilerPlaceholder}
+                onChange={(value: string) => {
+                  this.setState({ createCluster: value });
+                }}
+                dataSource={this.state.namespaceOptions.get(this.state.createNamespace)?.clusters.map(value => ({ label: value, value })) || []}
+                value={this.state.createCluster}
+              />
+            </FormItem>
+            <FormItem name="vGroupName" label={vGroupNameLabel}>
+              <Input
+                placeholder={createVGroupInputPlaceholder}
+                value={this.state.vGroupName}
+                onChange={(value: string) => { this.setState({ vGroupName: value }); }}
+              />
+            </FormItem>
+            <FormItem>
+              <Button type="primary" onClick={this.handleCreateVGroup}>
+                {createVGroupConfirmButton}
+              </Button>
+            </FormItem>
+          </Form>
+        </Dialog>
+
+        {/* change vgroup dialog */}
+        <Dialog visible={this.state.changeVGroupDialogVisible} title={changeVGroupDialogTitle} footer={false} onClose={this.closeChangeVGroupDialog}>
+          <Form inline labelAlign="left">
+            <FormItem name="originalNamespace" label={originalNamespaceLabel}>
+              <Select
+                hasClear
+                placeholder={selectOriginalNamespacePlaceholder}
+                onChange={(value: string) => {
+                  this.setState(prevState => {
+                    const clusters = value ? prevState.namespaceOptions.get(value)?.clusters || [] : [];
+                    const firstCluster = clusters.length > 0 ? clusters[0] : '';
+                    const namespaceData = prevState.namespaceOptions.get(value);
+                    const clusterVgroups = namespaceData ? namespaceData.clusterVgroups : {};
+                    const vgroups = firstCluster ? clusterVgroups[firstCluster] || [] : [];
+                    return {
+                      originalNamespace: value,
+                      originalClusters: clusters,
+                      originalCluster: firstCluster,
+                      originalVGroups: vgroups,
+                    };
+                  });
+                }}
+                dataSource={Array.from(this.state.namespaceOptions.keys()).map(key => ({ label: key, value: key }))}
+                value={this.state.originalNamespace}
+              />
+            </FormItem>
+            <FormItem name="originalCluster" label={originalClusterLabel}>
+              <Select
+                hasClear
+                placeholder={selectOriginalClusterPlaceholder}
+                onChange={(value: string) => {
+                  this.setState(prevState => {
+                    const namespaceData = prevState.namespaceOptions.get(prevState.originalNamespace);
+                    const clusterVgroups = namespaceData ? namespaceData.clusterVgroups : {};
+                    const vgroups = clusterVgroups[value] || [];
+                    return {
+                      originalCluster: value,
+                      originalVGroups: vgroups,
+                    };
+                  });
+                }}
+                dataSource={this.state.originalClusters.map(value => ({ label: value, value }))}
+                value={this.state.originalCluster}
+              />
+            </FormItem>
+            <FormItem name="selectedVGroup" label={selectVGroupLabel}>
+              <Select
+                hasClear
+                placeholder={selectVGroupPlaceholder}
+                onChange={(value: string) => {
+                  this.setState({ selectedVGroup: value });
+                }}
+                dataSource={this.state.originalVGroups.map(value => ({ label: value, value }))}
+                value={this.state.selectedVGroup}
+              />
+            </FormItem>
+            <FormItem name="targetNamespace" label={targetNamespaceLabel}>
+              <Select
+                hasClear
+                placeholder={selectTargetNamespacePlaceholder}
+                onChange={(value: string) => {
+                  this.setState(prevState => {
+                    const clusters = value ? prevState.namespaceOptions.get(value)?.clusters || [] : [];
+                    return {
+                      targetNamespace: value,
+                      targetClusters: clusters,
+                      targetCluster: clusters.length > 0 ? clusters[0] : '',
+                    };
+                  });
+                }}
+                dataSource={Array.from(this.state.namespaceOptions.keys()).map(key => ({ label: key, value: key }))}
+                value={this.state.targetNamespace}
+              />
+            </FormItem>
+            <FormItem name="targetCluster" label={targetClusterLabel}>
+              <Select
+                hasClear
+                placeholder={selectTargetClusterPlaceholder}
+                onChange={(value: string) => {
+                  this.setState({ targetCluster: value });
+                }}
+                dataSource={this.state.targetClusters.map(value => ({ label: value, value }))}
+                value={this.state.targetCluster}
+              />
+            </FormItem>
+            <FormItem>
+              <Button type="primary" onClick={this.handleChangeVGroup} disabled={!this.state.selectedVGroup || !this.state.targetNamespace || !this.state.targetCluster}>
+                {confirmButtonLabel}
+              </Button>
+            </FormItem>
+          </Form>
         </Dialog>
       </Page>
     );
