@@ -44,9 +44,7 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import static org.apache.seata.common.Constants.RAFT_GROUP_HEADER;
@@ -127,10 +125,7 @@ public class ConsoleRemotingFilter implements Filter {
                             Thread.startVirtualThread(() -> {
                                 try {
                                     ResponseEntity<byte[]> responseEntity = restTemplate.exchange(
-                                            URI.create(targetUrl),
-                                            httpMethod,
-                                            httpEntity,
-                                            byte[].class);
+                                            URI.create(targetUrl), httpMethod, httpEntity, byte[].class);
                                     responseEntity.getHeaders().forEach((key, value) -> {
                                         value.forEach(v -> response.addHeader(key, v));
                                     });
