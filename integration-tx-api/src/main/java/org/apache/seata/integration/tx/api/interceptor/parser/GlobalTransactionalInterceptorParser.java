@@ -89,25 +89,34 @@ public class GlobalTransactionalInterceptorParser implements InterfaceParser {
                 if (trxAnno != null) {
                     return true;
                 }
-                Method[] methods = clazz.getDeclaredMethods();
-                for (Method method : methods) {
-                    // exclude private modifier methods
-                    if (Modifier.isPrivate(method.getModifiers())) {
-                        continue;
-                    }
+                Method[] methods = clazz.getMethods();
+                Method[] declaredMethods = clazz.getDeclaredMethods();
+                int arrayLength = methods.length + declaredMethods.length;
+                if (arrayLength > 0) {
+                    Method[] allMethods = new Method[arrayLength];
+                    System.arraycopy(methods, 0, allMethods, 0, methods.length);
+                    System.arraycopy(declaredMethods, 0, allMethods, methods.length, declaredMethods.length);
+                    for (Method method : allMethods) {
+                        // exclude private modifier methods
+                        if (Modifier.isPrivate(method.getModifiers())) {
+                            continue;
+                        }
 
-                    trxAnno = method.getAnnotation(GlobalTransactional.class);
-                    if (trxAnno != null) {
-                        methodsToProxy.add(method.getName());
-                        result = true;
-                    }
+                        trxAnno = method.getAnnotation(GlobalTransactional.class);
+                        if (trxAnno != null) {
+                            methodsToProxy.add(method.getName());
+                            result = true;
+                        }
 
-                    GlobalLock lockAnno = method.getAnnotation(GlobalLock.class);
-                    if (lockAnno != null) {
-                        methodsToProxy.add(method.getName());
-                        result = true;
+                        GlobalLock lockAnno = method.getAnnotation(GlobalLock.class);
+                        if (lockAnno != null) {
+                            methodsToProxy.add(method.getName());
+                            result = true;
+                        }
                     }
                 }
+
+
             }
         }
         return result;
