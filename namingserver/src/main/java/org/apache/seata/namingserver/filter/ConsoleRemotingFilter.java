@@ -126,16 +126,11 @@ public class ConsoleRemotingFilter implements Filter {
                             asyncContext.setTimeout(5000L);
                             Thread.startVirtualThread(() -> {
                                 try {
-                                    CompletableFuture<ResponseEntity<byte[]>> future = CompletableFuture.supplyAsync(
-                                                    () -> restTemplate.exchange(
-                                                            URI.create(targetUrl),
-                                                            httpMethod,
-                                                            httpEntity,
-                                                            byte[].class))
-                                            // Set a shorter time than 5000L to prevent contention between servlet
-                                            // containers and virtual threads after the request times out
-                                            .orTimeout(4500, TimeUnit.MILLISECONDS);
-                                    ResponseEntity<byte[]> responseEntity = future.get(4500, TimeUnit.MILLISECONDS);
+                                    ResponseEntity<byte[]> responseEntity = restTemplate.exchange(
+                                            URI.create(targetUrl),
+                                            httpMethod,
+                                            httpEntity,
+                                            byte[].class);
                                     responseEntity.getHeaders().forEach((key, value) -> {
                                         value.forEach(v -> response.addHeader(key, v));
                                     });
