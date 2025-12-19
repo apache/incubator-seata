@@ -40,14 +40,14 @@ public class GlobalTransactionalInterceptorParserTest {
     }
 
     @Test
-    void parserInterfaceToProxyNonPrivateMethod() throws Exception {
-        MethodImpl method = new MethodImpl();
+    void shouldExcludePrivateMethodsFromProxy() throws Exception {
+        NonPrivateMethodTestClass testClass = new NonPrivateMethodTestClass();
 
         GlobalTransactionalInterceptorParser globalTransactionalInterceptorParser =
                 new GlobalTransactionalInterceptorParser();
 
         ProxyInvocationHandler proxyInvocationHandler = globalTransactionalInterceptorParser.parserInterfaceToProxy(
-                method, method.getClass().getName());
+                testClass, testClass.getClass().getName());
 
         Assertions.assertNotNull(proxyInvocationHandler);
 

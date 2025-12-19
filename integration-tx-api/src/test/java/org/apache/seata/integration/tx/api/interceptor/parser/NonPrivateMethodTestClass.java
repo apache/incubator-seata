@@ -20,8 +20,8 @@ import org.apache.seata.spring.annotation.GlobalTransactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MethodImpl {
-    private static final Logger LOGGER = LoggerFactory.getLogger(MethodImpl.class);
+public class NonPrivateMethodTestClass {
+    private static final Logger LOGGER = LoggerFactory.getLogger(NonPrivateMethodTestClass.class);
 
     @GlobalTransactional(timeoutMills = 300000)
     String dftMethod() {
