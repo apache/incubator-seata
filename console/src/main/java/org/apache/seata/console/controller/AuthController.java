@@ -16,6 +16,7 @@
  */
 package org.apache.seata.console.controller;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.seata.common.result.Code;
 import org.apache.seata.common.result.SingleResult;
 import org.apache.seata.console.config.WebSecurityConfig;
@@ -31,8 +32,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * auth user

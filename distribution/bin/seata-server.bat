@@ -73,6 +73,10 @@ if "%JAVACMD%"=="" set JAVACMD=java
 
 if "%REPO%"=="" set REPO=%BASEDIR%\lib
 
+if not defined JVM_XMX set JVM_XMX=2048m
+
+if not defined JVM_XMS set JVM_XMS=2048m
+
 set CLASSPATH="%BASEDIR%"\conf;"%REPO%"\*
 
 set ENDORSED_DIR=
@@ -109,7 +113,7 @@ if "%JMX_ENABLE%"=="true" (
   echo "JMX disabled"
 )
 
-%JAVACMD% %JAVA_OPTS% %SKYWALKING_OPTS% %JMX_OPTS% -server -Dloader.path="%BASEDIR%"/lib -Xmx2048m -Xms2048m -Xss512k -XX:SurvivorRatio=10 -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=256m -XX:MaxDirectMemorySize=1024m -XX:-OmitStackTraceInFastThrow -XX:-UseAdaptiveSizePolicy -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath="%BASEDIR%"/logs/java_heapdump.hprof -XX:+DisableExplicitGC -Xloggc:"%BASEDIR%"/logs/seata_gc.log -verbose:gc -Dio.netty.leakDetectionLevel=advanced -classpath %CLASSPATH% -Dapp.name="seata-server" -Dapp.repo="%REPO%" -Dapp.home="%BASEDIR%" -Dbasedir="%BASEDIR%" -Dspring.config.location="%BASEDIR%"/conf/application.yml -Dspring.config.additional-location="%BASEDIR%"/conf/ -Dlogging.config="%BASEDIR%"/conf/logback-spring.xml -jar "%BASEDIR%"/target/seata-server.jar %CMD_LINE_ARGS%
+%JAVACMD% %JAVA_OPTS% %SKYWALKING_OPTS% %JMX_OPTS% -server -Dloader.path="%BASEDIR%"/lib -Xmx%JVM_XMX% -Xms%JVM_XMS% -Xss512k -XX:SurvivorRatio=10 -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=256m -XX:MaxDirectMemorySize=1024m -XX:-OmitStackTraceInFastThrow -XX:-UseAdaptiveSizePolicy -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath="%BASEDIR%"/logs/java_heapdump.hprof -XX:+DisableExplicitGC -Xloggc:"%BASEDIR%"/logs/seata_gc.log -verbose:gc -Dio.netty.leakDetectionLevel=advanced -classpath %CLASSPATH% -Dapp.name="seata-server" -Dapp.repo="%REPO%" -Dapp.home="%BASEDIR%" -Dbasedir="%BASEDIR%" -Dspring.config.location="%BASEDIR%"/conf/application.yml -Dspring.config.additional-location="%BASEDIR%"/conf/ -Dlogging.config="%BASEDIR%"/conf/logback-spring.xml -jar "%BASEDIR%"/target/seata-server.jar %CMD_LINE_ARGS%
 if %ERRORLEVEL% NEQ 0 goto error
 goto end
 
