@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -112,7 +111,8 @@ public class GlobalTransactionalInterceptorParser implements InterfaceParser {
                             if (!Modifier.isPrivate(method.getModifiers())) {
                                 result = true;
                             } else {
-                                LOGGER.warn("GlobalTransactional annotation found on private method {}, which will be ignored.",
+                                LOGGER.warn(
+                                        "GlobalTransactional annotation found on private method {}, which will be ignored.",
                                         method.getName());
                             }
                         }
@@ -123,7 +123,8 @@ public class GlobalTransactionalInterceptorParser implements InterfaceParser {
                             if (!Modifier.isPrivate(method.getModifiers())) {
                                 result = true;
                             } else {
-                                LOGGER.warn("GlobalLock annotation found on private method {}, which will be ignored.",
+                                LOGGER.warn(
+                                        "GlobalLock annotation found on private method {}, which will be ignored.",
                                         method.getName());
                             }
                         }
