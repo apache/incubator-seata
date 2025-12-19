@@ -116,7 +116,7 @@ class DBTypeTest {
     void testDbTypeEnumValues() {
         DBType[] values = DBType.values();
         assertTrue(values.length > 0);
-        
+
         // Verify some common database types exist
         assertNotNull(DBType.valueOf("MYSQL"));
         assertNotNull(DBType.valueOf("ORACLE"));
