@@ -34,4 +34,10 @@ public class MethodImpl {
         LOGGER.info("protected method");
         return "protected method";
     }
+
+    @GlobalTransactional(timeoutMills = 300000)
+    private String privateMethod() {
+        LOGGER.info("private method");
+        return "private method";
+    }
 }

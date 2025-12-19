@@ -26,13 +26,18 @@ import org.apache.seata.integration.tx.api.interceptor.handler.ProxyInvocationHa
 import org.apache.seata.spring.annotation.GlobalLock;
 import org.apache.seata.spring.annotation.GlobalTransactional;
 import org.apache.seata.tm.api.FailureHandlerHolder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
 public class GlobalTransactionalInterceptorParser implements InterfaceParser {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(GlobalTransactionalInterceptorParser.class);
 
     protected final Set<String> methodsToProxy = new HashSet<>();
 
@@ -96,22 +101,31 @@ public class GlobalTransactionalInterceptorParser implements InterfaceParser {
                     Method[] allMethods = new Method[arrayLength];
                     System.arraycopy(methods, 0, allMethods, 0, methods.length);
                     System.arraycopy(declaredMethods, 0, allMethods, methods.length, declaredMethods.length);
+                    Set<Method> processedMethods = new HashSet<>();
                     for (Method method : allMethods) {
-                        // exclude private modifier methods
-                        if (Modifier.isPrivate(method.getModifiers())) {
+                        if (!processedMethods.add(method)) {
                             continue;
                         }
-
                         trxAnno = method.getAnnotation(GlobalTransactional.class);
                         if (trxAnno != null) {
                             methodsToProxy.add(method.getName());
-                            result = true;
+                            if (!Modifier.isPrivate(method.getModifiers())) {
+                                result = true;
+                            } else {
+                                LOGGER.warn("GlobalTransactional annotation found on private method {}, which will be ignored.",
+                                        method.getName());
+                            }
                         }
 
                         GlobalLock lockAnno = method.getAnnotation(GlobalLock.class);
                         if (lockAnno != null) {
                             methodsToProxy.add(method.getName());
-                            result = true;
+                            if (!Modifier.isPrivate(method.getModifiers())) {
+                                result = true;
+                            } else {
+                                LOGGER.warn("GlobalLock annotation found on private method {}, which will be ignored.",
+                                        method.getName());
+                            }
                         }
                     }
                 }
