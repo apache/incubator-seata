@@ -229,7 +229,7 @@
                         <appRoot>/seata-naming-server</appRoot>
                         <workingDirectory>/seata-naming-server</workingDirectory>
                         <ports>
-                            <port>8080</port>
+                            <port>8081</port>
                         </ports>
                         <labels>
                             <name>seata-naming-server</name>
