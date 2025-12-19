@@ -115,8 +115,6 @@ public class GlobalTransactionalInterceptorParser implements InterfaceParser {
                         }
                     }
                 }
-
-
             }
         }
         return result;
