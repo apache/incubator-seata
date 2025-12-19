@@ -105,28 +105,19 @@ public class GlobalTransactionalInterceptorParser implements InterfaceParser {
                         if (!processedMethods.add(method)) {
                             continue;
                         }
+                        if (Modifier.isPrivate(method.getModifiers())) {
+                            continue;
+                        }
                         trxAnno = method.getAnnotation(GlobalTransactional.class);
                         if (trxAnno != null) {
-                            if (Modifier.isPrivate(method.getModifiers())) {
-                                LOGGER.warn(
-                                        "GlobalTransactional annotation found on private method {}, which will be ignored.",
-                                        method.getName());
-                            } else {
-                                methodsToProxy.add(method.getName());
-                                result = true;
-                            }
+                            methodsToProxy.add(method.getName());
+                            result = true;
                         }
 
                         GlobalLock lockAnno = method.getAnnotation(GlobalLock.class);
                         if (lockAnno != null) {
-                            if (Modifier.isPrivate(method.getModifiers())) {
-                                LOGGER.warn(
-                                        "GlobalLock annotation found on private method {}, which will be ignored.",
-                                        method.getName());
-                            } else {
-                                methodsToProxy.add(method.getName());
-                                result = true;
-                            }
+                            methodsToProxy.add(method.getName());
+                            result = true;
                         }
                     }
                 }
