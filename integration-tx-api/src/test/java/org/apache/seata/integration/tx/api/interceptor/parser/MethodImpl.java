@@ -18,5 +18,4 @@ public class MethodImpl {
         LOGGER.info("protected method");
         return "protected method";
     }
-
 }

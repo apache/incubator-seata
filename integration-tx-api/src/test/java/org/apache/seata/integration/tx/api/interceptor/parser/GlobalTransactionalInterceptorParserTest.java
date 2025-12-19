@@ -40,7 +40,7 @@ public class GlobalTransactionalInterceptorParserTest {
     }
 
     @Test
-    void parserInterfaceToProxyNonPrivateMethod() throws Exception  {
+    void parserInterfaceToProxyNonPrivateMethod() throws Exception {
         MethodImpl method = new MethodImpl();
 
         GlobalTransactionalInterceptorParser globalTransactionalInterceptorParser =
