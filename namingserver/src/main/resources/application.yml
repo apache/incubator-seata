@@ -30,6 +30,8 @@ spring:
         protocol: streamable
         streamable-http:
           mcp-endpoint: /mcp
+        name: mcp-server
+        version: 1.0.0
   application:
     name: seata-namingserver
 logging:
