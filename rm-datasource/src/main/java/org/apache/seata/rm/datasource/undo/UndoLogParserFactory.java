@@ -16,18 +16,17 @@
  */
 package org.apache.seata.rm.datasource.undo;
 
+import org.apache.seata.common.loader.EnhancedServiceLoader;
+import org.apache.seata.common.util.CollectionUtils;
+import org.apache.seata.common.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-
-import org.apache.seata.common.loader.EnhancedServiceLoader;
-import org.apache.seata.common.util.CollectionUtils;
-import org.apache.seata.common.util.StringUtils;
-import org.apache.seata.core.serializer.SerializerServiceLoader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The type Undo log parser factory.
@@ -70,15 +69,18 @@ public class UndoLogParserFactory {
     public static UndoLogParser getInstance(String name) {
         if (StringUtils.equalsIgnoreCase("fst", name)) {
             throw new IllegalArgumentException(
-                "Since fst is no longer maintained, this serialization extension has been removed from version 2.0 "
-                    + "for security and stability reasons.");
+                    "Since fst is no longer maintained, this serialization extension has been removed from version 2.0 "
+                            + "for security and stability reasons.");
         }
         String resolvedSerializerName = resolveSerializerName(name);
         if (!Objects.equals(name, resolvedSerializerName)) {
-            LOGGER.info("Since {} is no longer maintained, This serialization extension has been replaced with {}.", name, resolvedSerializerName);
+            LOGGER.info(
+                    "Since {} is no longer maintained, This serialization extension has been replaced with {}.",
+                    name,
+                    resolvedSerializerName);
         }
-        return CollectionUtils.computeIfAbsent(INSTANCES, name,
-            key -> EnhancedServiceLoader.load(UndoLogParser.class, resolvedSerializerName));
+        return CollectionUtils.computeIfAbsent(
+                INSTANCES, name, key -> EnhancedServiceLoader.load(UndoLogParser.class, resolvedSerializerName));
     }
 
     /**
