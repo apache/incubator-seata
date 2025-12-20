@@ -97,7 +97,12 @@ public class MCPProperties {
             String messageEndpoint = env.getProperty("spring.ai.mcp.server.sse-message-endpoint", "/mcp/message");
             sseServerProperties = new SseServerProperties(sseEndpoint, messageEndpoint);
         }
-        queryDuration = Long.parseLong(env.getProperty("seata.mcp.query.max_query_duration", "86400000"));
+        String maxQueryDurationStr = env.getProperty("seata.mcp.query.max-query-duration", "86400000");
+        try {
+            queryDuration = Long.parseLong(maxQueryDurationStr);
+        } catch (NumberFormatException ex) {
+            queryDuration = TimeUnit.DAYS.toMillis(1);
+        }
         enableAuth = Boolean.parseBoolean(env.getProperty("seata.mcp.auth.enabled", "true"));
     }
 

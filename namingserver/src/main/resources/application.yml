@@ -52,6 +52,6 @@ seata:
   mcp:
     # Query limits the maximum time interval, The unit is milliseconds, Default one day
     query:
-      max_query_duration: 86400000
+      max-query-duration: 86400000
     auth:
       enabled: true
