@@ -34,7 +34,7 @@
     <properties>
         <spring-boot-for-server.version>3.5.2</spring-boot-for-server.version>
         <snakeyaml-for-server.version>2.0</snakeyaml-for-server.version>
-        <tomcat-embed.version>11.0.2</tomcat-embed.version>
+        <tomcat-embed.version>11.0.10</tomcat-embed.version>
         <spring-ai.version>1.1.0</spring-ai.version>
     </properties>
 
