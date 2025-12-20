@@ -53,7 +53,7 @@ public class MCPProperties {
             result.add(sseServerProperties.sseEndpoint);
             result.add(sseServerProperties.messageEndpoint);
         } else {
-            result.add(streamableProperties.mcpEndPoint);
+            result.add(streamableProperties.mcpEndpoint);
         }
         return result;
     }
@@ -63,10 +63,10 @@ public class MCPProperties {
     }
 
     public static class StreamableProperties {
-        private final String mcpEndPoint;
+        private final String mcpEndpoint;
 
         public StreamableProperties(String mcpEndPoint) {
-            this.mcpEndPoint = mcpEndPoint;
+            this.mcpEndpoint = mcpEndPoint;
         }
     }
 
