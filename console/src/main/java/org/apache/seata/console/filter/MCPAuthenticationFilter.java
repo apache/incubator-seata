@@ -26,6 +26,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -36,9 +37,10 @@ public class MCPAuthenticationFilter extends OncePerRequestFilter {
     private final AuthenticationManager authenticationManager;
 
     /**
-     * Instantiates a new Jwt authentication token filter.
+     * Instantiates a new MCP authentication filter that authenticates requests
+     * using username and password provided in HTTP headers.
      *
-     * @param authenticationManager the token provider
+     * @param authenticationManager the authentication manager used to validate credentials
      */
     public MCPAuthenticationFilter(AuthenticationManager authenticationManager) {
         this.authenticationManager = authenticationManager;
@@ -62,7 +64,7 @@ public class MCPAuthenticationFilter extends OncePerRequestFilter {
         try {
             Authentication authentication = authenticationManager.authenticate(authenticationToken);
             SecurityContextHolder.getContext().setAuthentication(authentication);
-        } catch (BadCredentialsException e) {
+        } catch (AuthenticationException e) {
             response.sendError(HttpStatus.UNAUTHORIZED.value(), "Invalid credentials");
             return;
         }
