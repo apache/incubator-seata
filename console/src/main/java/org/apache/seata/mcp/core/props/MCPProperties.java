@@ -104,6 +104,14 @@ public class MCPProperties {
             queryDuration = TimeUnit.DAYS.toMillis(1);
         }
         enableAuth = Boolean.parseBoolean(env.getProperty("seata.mcp.auth.enabled", "true"));
+        checkAfterPropertiesSet();
+    }
+
+    private void checkAfterPropertiesSet() {
+        if (isSseType() && sseServerProperties == null)
+            throw new IllegalStateException("SSE properties not initialized");
+        if (!isSseType() && streamableProperties == null)
+            throw new IllegalStateException("Streamable properties not initialized");
     }
 
     public boolean isEnableAuth() {
