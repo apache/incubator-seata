@@ -39,13 +39,13 @@ public class MCPFiltersConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(MCPFiltersConfig.class);
 
     @Bean
-    public FilterRegistrationBean<MCPAuthenticationFilter> mcpJwtAuthenticationTokenFilterRegistration() {
+    public FilterRegistrationBean<MCPAuthenticationFilter> mcpAuthenticationFilterRegistration() {
 
-        MCPAuthenticationFilter mcpJwtAuthenticationTokenFilter = new MCPAuthenticationFilter(authenticationManager);
+        MCPAuthenticationFilter mcpAuthenticationFilter = new MCPAuthenticationFilter(authenticationManager);
 
         FilterRegistrationBean<MCPAuthenticationFilter> registration = new FilterRegistrationBean<>();
 
-        registration.setFilter(mcpJwtAuthenticationTokenFilter);
+        registration.setFilter(mcpAuthenticationFilter);
 
         for (String endPoint : mcpProperties.getEndpoints()) {
             registration.addUrlPatterns(endPoint);
