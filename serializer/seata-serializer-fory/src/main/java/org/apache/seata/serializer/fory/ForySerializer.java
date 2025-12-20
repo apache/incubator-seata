@@ -14,21 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.serializer.fury;
+package org.apache.seata.serializer.fory;
 
+import org.apache.fory.ThreadSafeFory;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.core.protocol.AbstractMessage;
 import org.apache.seata.core.serializer.Serializer;
 
-@LoadLevel(name = "FURY")
-public class FurySerializer implements Serializer {
+@LoadLevel(name = "FORY")
+public class ForySerializer implements Serializer {
     @Override
     public <T> byte[] serialize(T t) {
         if (!(t instanceof AbstractMessage)) {
             throw new IllegalArgumentException("AbstractMessage isn't available.");
         }
-        Serializer serializer = DynamicSerializerFactory.getInstance().get();
-        return serializer.serialize(t);
+
+        ThreadSafeFory threadSafeFory = ForySerializerFactory.getInstance().get();
+        return threadSafeFory.serialize(t);
     }
 
     @Override
@@ -36,7 +38,7 @@ public class FurySerializer implements Serializer {
         if (bytes == null || bytes.length == 0) {
             throw new IllegalArgumentException("bytes is null");
         }
-        Serializer serializer = DynamicSerializerFactory.getInstance().get();
-        return (T) serializer.deserialize(bytes);
+        ThreadSafeFory threadSafeFory = ForySerializerFactory.getInstance().get();
+        return (T) threadSafeFory.deserialize(bytes);
     }
 }
