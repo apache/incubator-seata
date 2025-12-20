@@ -40,6 +40,7 @@ import org.apache.seata.namingserver.entity.pojo.ClusterData;
 import org.apache.seata.namingserver.entity.vo.NamespaceVO;
 import org.apache.seata.namingserver.entity.vo.monitor.ClusterVO;
 import org.apache.seata.namingserver.listener.ClusterChangeEvent;
+import org.apache.seata.namingserver.metrics.NamingServerMetricsManager;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
@@ -107,6 +108,9 @@ public class NamingManager {
     @Autowired
     private ApplicationContext applicationContext;
 
+    @Autowired(required = false)
+    private NamingServerMetricsManager metricsManager;
+
     public NamingManager() {
         this.instanceLiveTable = new ConcurrentHashMap<>();
         this.namespaceClusterDataMap = new ConcurrentHashMap<>();
@@ -138,6 +142,11 @@ public class NamingManager {
                 heartbeatCheckTimePeriod,
                 heartbeatCheckTimePeriod,
                 TimeUnit.MILLISECONDS);
+
+        // Register metrics data supplier
+        if (metricsManager != null) {
+            metricsManager.setNamespaceClusterDataSupplier(() -> namespaceClusterDataMap);
+        }
     }
 
     public List<ClusterVO> monitorCluster(String namespace) {
@@ -320,12 +329,9 @@ public class NamingManager {
                             clusterName, (String) node.getMetadata().get("cluster-type")));
             boolean hasChanged = clusterData.registerInstance(node, unitName);
             Object mappingObj = node.getMetadata().get(CONSTANT_GROUP);
-            // if extended metadata includes vgroup mapping relationship, add it in clusterData
             if (mappingObj instanceof Map) {
                 Map<String, String> vGroups = (Map<String, String>) mappingObj;
                 vGroups.forEach((k, v) -> {
-                    // In non-raft mode, a unit is one-to-one with a node, and the unitName is stored on the node.
-                    // In raft mode, the unitName is equal to the raft-group, so the node's unitName cannot be used.
                     boolean changed = addGroup(namespace, clusterName, StringUtils.isBlank(v) ? unitName : v, k);
                     if (hasChanged || changed) {
                         notifyClusterChange(k, namespace, clusterName, unitName, node.getTerm());
@@ -337,6 +343,11 @@ public class NamingManager {
                             node.getTransaction().getHost(),
                             node.getTransaction().getPort()),
                     System.currentTimeMillis());
+
+            // Immediately refresh cluster node count metrics
+            if (metricsManager != null) {
+                metricsManager.refreshClusterNodeCountMetrics();
+            }
         } catch (Exception e) {
             LOGGER.error("Instance registered failed:{}", e.getMessage(), e);
             return false;
@@ -368,6 +379,11 @@ public class NamingManager {
                             node.getTransaction().getHost(),
                             node.getTransaction().getPort()));
                 }
+            }
+
+            // Immediately refresh cluster node count metrics
+            if (metricsManager != null) {
+                metricsManager.refreshClusterNodeCountMetrics();
             }
         } catch (Exception e) {
             LOGGER.error("Instance unregistered failed:{}", e.getMessage(), e);
@@ -464,6 +480,11 @@ public class NamingManager {
                                     "{} instance has gone offline",
                                     instance.getTransaction().getHost() + ":"
                                             + instance.getTransaction().getPort());
+                        }
+
+                        // Immediately refresh cluster node count metrics after removing offline instances
+                        if (metricsManager != null) {
+                            metricsManager.refreshClusterNodeCountMetrics();
                         }
                     }
                 }

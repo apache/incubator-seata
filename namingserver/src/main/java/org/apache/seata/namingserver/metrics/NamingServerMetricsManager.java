@@ -1,0 +1,164 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.apache.seata.namingserver.metrics;
+
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.MultiGauge;
+import io.micrometer.core.instrument.Tags;
+import jakarta.annotation.PostConstruct;
+import org.apache.seata.common.metadata.namingserver.Unit;
+import org.apache.seata.namingserver.entity.pojo.ClusterData;
+import org.apache.seata.namingserver.listener.Watcher;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.function.Supplier;
+
+@Component
+public class NamingServerMetricsManager {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(NamingServerMetricsManager.class);
+
+    // Metric names
+    public static final String METRIC_CLUSTER_NODE_COUNT = "seata_namingserver_cluster_node_count";
+    public static final String METRIC_WATCHER_COUNT = "seata_namingserver_watcher_count";
+    public static final String METRIC_CLUSTER_CHANGE_PUSH_TOTAL = "seata_namingserver_cluster_change_push_total";
+
+    // Tag names
+    public static final String TAG_NAMESPACE = "namespace";
+    public static final String TAG_CLUSTER = "cluster";
+    public static final String TAG_UNIT = "unit";
+    public static final String TAG_VGROUP = "vgroup";
+
+    private final MeterRegistry meterRegistry;
+
+    private MultiGauge clusterNodeCountGauge;
+
+    private MultiGauge watcherCountGauge;
+
+    private final ConcurrentMap<String, Counter> clusterChangePushCounters = new ConcurrentHashMap<>();
+
+    private Supplier<ConcurrentMap<String, ConcurrentMap<String, ClusterData>>> namespaceClusterDataSupplier;
+    private Supplier<Map<String, Queue<Watcher<?>>>> watchersSupplier;
+
+    public NamingServerMetricsManager(MeterRegistry meterRegistry) {
+        this.meterRegistry = meterRegistry;
+    }
+
+    @PostConstruct
+    public void init() {
+        // Initialize MultiGauge for cluster node count
+        this.clusterNodeCountGauge = MultiGauge.builder(METRIC_CLUSTER_NODE_COUNT)
+                .description("Number of alive Seata Server nodes in the registry")
+                .register(meterRegistry);
+
+        // Initialize MultiGauge for watcher count
+        this.watcherCountGauge = MultiGauge.builder(METRIC_WATCHER_COUNT)
+                .description("Number of HTTP connections waiting for change notifications (long polling)")
+                .register(meterRegistry);
+
+        LOGGER.info("NamingServer metrics manager initialized with event-driven refresh");
+    }
+
+    public void setNamespaceClusterDataSupplier(
+            Supplier<ConcurrentMap<String, ConcurrentMap<String, ClusterData>>> supplier) {
+        this.namespaceClusterDataSupplier = supplier;
+    }
+
+    public void setWatchersSupplier(Supplier<Map<String, Queue<Watcher<?>>>> supplier) {
+        this.watchersSupplier = supplier;
+    }
+
+    public void refreshClusterNodeCountMetrics() {
+        if (namespaceClusterDataSupplier == null) {
+            return;
+        }
+
+        List<MultiGauge.Row<?>> rows = new ArrayList<>();
+        ConcurrentMap<String, ConcurrentMap<String, ClusterData>> namespaceClusterDataMap = namespaceClusterDataSupplier
+                .get();
+
+        if (namespaceClusterDataMap != null) {
+            namespaceClusterDataMap.forEach((namespace, clusterDataMap) -> {
+                if (clusterDataMap != null) {
+                    clusterDataMap.forEach((clusterName, clusterData) -> {
+                        if (clusterData != null && clusterData.getUnitData() != null) {
+                            Map<String, Unit> unitData = clusterData.getUnitData();
+                            unitData.forEach((unitName, unit) -> {
+                                int nodeCount = 0;
+                                if (unit != null && unit.getNamingInstanceList() != null) {
+                                    nodeCount = unit.getNamingInstanceList().size();
+                                }
+                                rows.add(MultiGauge.Row.of(
+                                        Tags.of(
+                                                TAG_NAMESPACE, namespace,
+                                                TAG_CLUSTER, clusterName,
+                                                TAG_UNIT, unitName),
+                                        nodeCount));
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        clusterNodeCountGauge.register(rows, true);
+    }
+
+    public void refreshWatcherCountMetrics() {
+        if (watchersSupplier == null) {
+            return;
+        }
+
+        List<MultiGauge.Row<?>> rows = new ArrayList<>();
+        Map<String, Queue<Watcher<?>>> watchers = watchersSupplier.get();
+
+        if (watchers != null) {
+            watchers.forEach((vgroup, watcherQueue) -> {
+                int count = 0;
+                if (watcherQueue != null) {
+                    count = watcherQueue.size();
+                }
+                rows.add(MultiGauge.Row.of(Tags.of(TAG_VGROUP, vgroup), count));
+            });
+        }
+
+        watcherCountGauge.register(rows, true);
+    }
+
+    public void incrementClusterChangePushCount(String vgroup) {
+        Counter counter = clusterChangePushCounters.computeIfAbsent(vgroup,
+                v -> Counter.builder(METRIC_CLUSTER_CHANGE_PUSH_TOTAL)
+                        .description("Total number of cluster change push notifications to watchers")
+                        .tag(TAG_VGROUP, v)
+                        .register(meterRegistry));
+        counter.increment();
+    }
+
+    public double getClusterChangePushCount(String vgroup) {
+        Counter counter = clusterChangePushCounters.get(vgroup);
+        return counter != null ? counter.count() : 0;
+    }
+}
