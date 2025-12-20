@@ -78,6 +78,9 @@ public class MCPAuthenticationFilter extends OncePerRequestFilter {
     private User resolveHeaders(HttpServletRequest request) {
         String username = request.getHeader("X-Mcp-Username");
         String password = request.getHeader("X-Mcp-Password");
+        if (username == null || password == null) {
+            throw new BadCredentialsException("Missing authentication headers");
+        }
         return new User(username, password);
     }
 }
