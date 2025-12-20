@@ -269,6 +269,11 @@
         </dependency>
         <dependency>
             <groupId>org.apache.seata</groupId>
+            <artifactId>seata-serializer-fory</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.seata</groupId>
             <artifactId>seata-serializer-kryo</artifactId>
             <version>${project.version}</version>
         </dependency>
