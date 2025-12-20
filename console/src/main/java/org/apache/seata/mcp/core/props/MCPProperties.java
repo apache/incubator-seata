@@ -17,7 +17,6 @@
 package org.apache.seata.mcp.core.props;
 
 import jakarta.annotation.PostConstruct;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
@@ -28,7 +27,10 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class MCPProperties {
 
+    private final Environment env;
+
     public static final String SSE_TYPE = "sse";
+
     public static final String STREAMABLE_TYPE = "streamable";
 
     private boolean enableAuth = true;
@@ -41,7 +43,9 @@ public class MCPProperties {
 
     private SseServerProperties sseServerProperties;
 
-    public MCPProperties() {}
+    public MCPProperties(Environment env) {
+        this.env = env;
+    }
 
     public boolean isSseType() {
         return mcpType.equals(SSE_TYPE);
@@ -81,9 +85,6 @@ public class MCPProperties {
             this.messageEndpoint = messageEndpoint;
         }
     }
-
-    @Autowired
-    private Environment env;
 
     @PostConstruct
     public void init() {
