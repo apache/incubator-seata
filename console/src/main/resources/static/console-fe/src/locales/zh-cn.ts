@@ -130,6 +130,7 @@ const zhCn: ILocale = {
     weight: '权重',
     healthy: '健康状态',
     term: '任期',
+    role: '角色',
     unit: '单元',
     operations: '操作',
     internal: '内部地址',
