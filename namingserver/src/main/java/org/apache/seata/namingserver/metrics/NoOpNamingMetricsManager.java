@@ -18,35 +18,46 @@ package org.apache.seata.namingserver.metrics;
 
 import org.apache.seata.namingserver.entity.pojo.ClusterData;
 import org.apache.seata.namingserver.listener.Watcher;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Supplier;
 
-public interface NamingServerMetricsManager {
+@Component
+@ConditionalOnProperty(name = "seata.namingserver.metrics.enabled", havingValue = "false", matchIfMissing = true)
+public class NoOpNamingMetricsManager implements NamingServerMetricsManager {
 
-    // Metric names
-    String METRIC_CLUSTER_NODE_COUNT = "seata_namingserver_cluster_node_count";
-    String METRIC_WATCHER_COUNT = "seata_namingserver_watcher_count";
-    String METRIC_CLUSTER_CHANGE_PUSH_TOTAL = "seata_namingserver_cluster_change_push_total";
+    @Override
+    public void setNamespaceClusterDataSupplier(
+            Supplier<ConcurrentMap<String, ConcurrentMap<String, ClusterData>>> supplier) {
+        // No-op
+    }
 
-    // Tag names
-    String TAG_NAMESPACE = "namespace";
-    String TAG_CLUSTER = "cluster";
-    String TAG_UNIT = "unit";
-    String TAG_VGROUP = "vgroup";
+    @Override
+    public void setWatchersSupplier(Supplier<Map<String, Queue<Watcher<?>>>> supplier) {
+        // No-op
+    }
 
-    void setNamespaceClusterDataSupplier(
-            Supplier<ConcurrentMap<String, ConcurrentMap<String, ClusterData>>> supplier);
+    @Override
+    public void refreshClusterNodeCountMetrics() {
+        // No-op
+    }
 
-    void setWatchersSupplier(Supplier<Map<String, Queue<Watcher<?>>>> supplier);
+    @Override
+    public void refreshWatcherCountMetrics() {
+        // No-op
+    }
 
-    void refreshClusterNodeCountMetrics();
+    @Override
+    public void incrementClusterChangePushCount(String vgroup) {
+        // No-op
+    }
 
-    void refreshWatcherCountMetrics();
-
-    void incrementClusterChangePushCount(String vgroup);
-
-    double getClusterChangePushCount(String vgroup);
+    @Override
+    public double getClusterChangePushCount(String vgroup) {
+        return 0;
+    }
 }

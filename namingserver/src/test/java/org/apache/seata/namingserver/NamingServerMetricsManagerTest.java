@@ -24,9 +24,9 @@ import org.apache.seata.common.metadata.namingserver.Unit;
 import org.apache.seata.namingserver.entity.pojo.ClusterData;
 import org.apache.seata.namingserver.listener.Watcher;
 import org.apache.seata.namingserver.metrics.NamingServerMetricsManager;
+import org.apache.seata.namingserver.metrics.PrometheusNamingMetricsManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Map;
 import java.util.Queue;
@@ -39,23 +39,22 @@ import static org.apache.seata.namingserver.metrics.NamingServerMetricsManager.*
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Unit tests for NamingServerMetricsManager.
+ * Unit tests for PrometheusNamingMetricsManager.
  */
 class NamingServerMetricsManagerTest {
 
     private MeterRegistry meterRegistry;
-    private NamingServerMetricsManager metricsManager;
+    private PrometheusNamingMetricsManager metricsManager;
 
     @BeforeEach
     void setUp() {
         meterRegistry = new SimpleMeterRegistry();
-        metricsManager = new NamingServerMetricsManager(meterRegistry);
-        ReflectionTestUtils.setField(metricsManager, "metricsRefreshPeriod", 100);
+        metricsManager = new PrometheusNamingMetricsManager(meterRegistry);
         metricsManager.init();
     }
 
     @Test
-    void testClusterNodeCountMetrics() throws InterruptedException {
+    void testClusterNodeCountMetrics() {
         // Prepare test data
         ConcurrentMap<String, ConcurrentMap<String, ClusterData>> namespaceClusterDataMap = new ConcurrentHashMap<>();
 
@@ -84,8 +83,8 @@ class NamingServerMetricsManagerTest {
         // Set the supplier
         metricsManager.setNamespaceClusterDataSupplier(() -> namespaceClusterDataMap);
 
-        // Wait for metrics refresh
-        Thread.sleep(200);
+        // Manually trigger metrics refresh
+        metricsManager.refreshClusterNodeCountMetrics();
 
         // Verify the metric is registered
         Meter meter = meterRegistry
@@ -99,7 +98,7 @@ class NamingServerMetricsManagerTest {
     }
 
     @Test
-    void testWatcherCountMetrics() throws InterruptedException {
+    void testWatcherCountMetrics() {
         // Prepare test data
         Map<String, Queue<Watcher<?>>> watchers = new ConcurrentHashMap<>();
         String vgroup = "test-vgroup";
@@ -112,8 +111,8 @@ class NamingServerMetricsManagerTest {
         // Set the supplier
         metricsManager.setWatchersSupplier(() -> watchers);
 
-        // Wait for metrics refresh
-        Thread.sleep(200);
+        // Manually trigger metrics refresh
+        metricsManager.refreshWatcherCountMetrics();
 
         // Verify the metric is registered
         Meter meter = meterRegistry.find(METRIC_WATCHER_COUNT).tag(TAG_VGROUP, vgroup).meter();
@@ -147,7 +146,7 @@ class NamingServerMetricsManagerTest {
     }
 
     @Test
-    void testMultiGaugeCleanupStaleTags() throws InterruptedException {
+    void testMultiGaugeCleanupStaleTags() {
         // Prepare initial test data with two namespaces
         ConcurrentMap<String, ConcurrentMap<String, ClusterData>> namespaceClusterDataMap = new ConcurrentHashMap<>();
 
@@ -172,8 +171,8 @@ class NamingServerMetricsManagerTest {
 
         metricsManager.setNamespaceClusterDataSupplier(() -> namespaceClusterDataMap);
 
-        // Wait for metrics refresh
-        Thread.sleep(200);
+        // Manually trigger metrics refresh
+        metricsManager.refreshClusterNodeCountMetrics();
 
         // Verify both metrics exist
         assertNotNull(meterRegistry
@@ -188,8 +187,8 @@ class NamingServerMetricsManagerTest {
         // Remove namespace2
         namespaceClusterDataMap.remove(namespace2);
 
-        // Wait for metrics refresh
-        Thread.sleep(200);
+        // Manually trigger metrics refresh
+        metricsManager.refreshClusterNodeCountMetrics();
 
         // Verify namespace1 still exists but namespace2 is cleaned up
         assertNotNull(meterRegistry
@@ -200,23 +199,25 @@ class NamingServerMetricsManagerTest {
     }
 
     @Test
-    void testNullSupplierHandling() throws InterruptedException {
+    void testNullSupplierHandling() {
         // Don't set any suppliers
-        // Wait for metrics refresh - should not throw exception
-        Thread.sleep(200);
+        // Manually trigger refresh - should not throw exception
+        metricsManager.refreshClusterNodeCountMetrics();
+        metricsManager.refreshWatcherCountMetrics();
 
         // No exception means test passed
         assertTrue(true);
     }
 
     @Test
-    void testEmptyDataHandling() throws InterruptedException {
+    void testEmptyDataHandling() {
         // Set empty suppliers
         metricsManager.setNamespaceClusterDataSupplier(ConcurrentHashMap::new);
         metricsManager.setWatchersSupplier(ConcurrentHashMap::new);
 
-        // Wait for metrics refresh
-        Thread.sleep(200);
+        // Manually trigger metrics refresh
+        metricsManager.refreshClusterNodeCountMetrics();
+        metricsManager.refreshWatcherCountMetrics();
 
         // Verify no exception and no metrics registered
         assertEquals(0, meterRegistry.find(METRIC_CLUSTER_NODE_COUNT).meters().size());

@@ -56,15 +56,13 @@ public class ClusterWatcherManager implements ClusterChangeListener {
     private final ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(1,
             new CustomizableThreadFactory("long-polling"));
 
-    @Autowired(required = false)
+    @Autowired
     private NamingServerMetricsManager metricsManager;
 
     @PostConstruct
     public void init() {
         // Register metrics data supplier
-        if (metricsManager != null) {
-            metricsManager.setWatchersSupplier(() -> WATCHERS);
-        }
+        metricsManager.setWatchersSupplier(() -> WATCHERS);
 
         // Responds to monitors that time out
         scheduledThreadPoolExecutor.scheduleAtFixedRate(
@@ -98,7 +96,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
             Optional.ofNullable(WATCHERS.remove(event.getGroup())).ifPresent(watchers -> {
                 watchers.parallelStream().forEach(this::notify);
                 // Increment cluster change push counter
-                if (metricsManager != null && !watchers.isEmpty()) {
+                if (!watchers.isEmpty()) {
                     metricsManager.incrementClusterChangePushCount(event.getGroup());
                     // Refresh watcher count metrics after notification
                     metricsManager.refreshWatcherCountMetrics();
@@ -132,9 +130,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
                     .add(watcher);
 
             // Immediately refresh watcher count metrics
-            if (metricsManager != null) {
-                metricsManager.refreshWatcherCountMetrics();
-            }
+            metricsManager.refreshWatcherCountMetrics();
         } else {
             notify(watcher);
         }

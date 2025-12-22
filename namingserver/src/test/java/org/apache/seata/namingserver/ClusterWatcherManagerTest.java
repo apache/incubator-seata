@@ -22,6 +22,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.apache.seata.namingserver.listener.ClusterChangeEvent;
 import org.apache.seata.namingserver.listener.Watcher;
 import org.apache.seata.namingserver.manager.ClusterWatcherManager;
+import org.apache.seata.namingserver.metrics.NoOpNamingMetricsManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -64,6 +65,9 @@ public class ClusterWatcherManagerTest {
         @BeforeEach
         void setUp() {
                 clusterWatcherManager = new ClusterWatcherManager();
+                // Inject NoOp metrics manager to avoid null pointer
+                ReflectionTestUtils.setField(clusterWatcherManager, "metricsManager", new NoOpNamingMetricsManager());
+
                 Mockito.when(asyncContext.getResponse()).thenReturn(response);
                 Mockito.when(asyncContext.getRequest()).thenReturn(request);
                 Mockito.when(request.getRemoteAddr()).thenReturn(TEST_CLIENT_ENDPOINT);

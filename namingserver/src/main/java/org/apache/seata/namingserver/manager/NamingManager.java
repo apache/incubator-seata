@@ -77,8 +77,7 @@ public class NamingManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(NamingManager.class);
     private final ConcurrentMap<InetSocketAddress, Long> instanceLiveTable;
     private volatile LoadingCache<String /* VGroup */, ConcurrentMap<String /* namespace */, NamespaceBO>> vGroupMap;
-    private final ConcurrentMap<String /* namespace */, ConcurrentMap<String /* clusterName */, ClusterData>>
-            namespaceClusterDataMap;
+    private final ConcurrentMap<String /* namespace */, ConcurrentMap<String /* clusterName */, ClusterData>> namespaceClusterDataMap;
 
     // Helper class to hold collected namespace data
     private static class NamespaceData {
@@ -102,13 +101,13 @@ public class NamingManager {
     @Value("${heartbeat.period:60000}")
     private int heartbeatCheckTimePeriod;
 
-    protected final ScheduledExecutorService heartBeatCheckService =
-            new ScheduledThreadPoolExecutor(1, new CustomizableThreadFactory("heartBeatCheckExcuter"));
+    protected final ScheduledExecutorService heartBeatCheckService = new ScheduledThreadPoolExecutor(1,
+            new CustomizableThreadFactory("heartBeatCheckExcuter"));
 
     @Autowired
     private ApplicationContext applicationContext;
 
-    @Autowired(required = false)
+    @Autowired
     private NamingServerMetricsManager metricsManager;
 
     public NamingManager() {
@@ -144,9 +143,7 @@ public class NamingManager {
                 TimeUnit.MILLISECONDS);
 
         // Register metrics data supplier
-        if (metricsManager != null) {
-            metricsManager.setNamespaceClusterDataSupplier(() -> namespaceClusterDataMap);
-        }
+        metricsManager.setNamespaceClusterDataSupplier(() -> namespaceClusterDataMap);
     }
 
     public List<ClusterVO> monitorCluster(String namespace) {
@@ -318,8 +315,8 @@ public class NamingManager {
             return false;
         }
         try {
-            Map<String, ClusterData> clusterDataHashMap =
-                    namespaceClusterDataMap.computeIfAbsent(namespace, k -> new ConcurrentHashMap<>());
+            Map<String, ClusterData> clusterDataHashMap = namespaceClusterDataMap.computeIfAbsent(namespace,
+                    k -> new ConcurrentHashMap<>());
 
             // add instance in cluster
             // create cluster when there is no cluster in clusterDataHashMap
@@ -329,9 +326,15 @@ public class NamingManager {
                             clusterName, (String) node.getMetadata().get("cluster-type")));
             boolean hasChanged = clusterData.registerInstance(node, unitName);
             Object mappingObj = node.getMetadata().get(CONSTANT_GROUP);
+            // if extended metadata includes vgroup mapping relationship, add it in
+            // clusterData
             if (mappingObj instanceof Map) {
                 Map<String, String> vGroups = (Map<String, String>) mappingObj;
                 vGroups.forEach((k, v) -> {
+                    // In non-raft mode, a unit is one-to-one with a node, and the unitName is
+                    // stored on the node.
+                    // In raft mode, the unitName is equal to the raft-group, so the node's unitName
+                    // cannot be used.
                     boolean changed = addGroup(namespace, clusterName, StringUtils.isBlank(v) ? unitName : v, k);
                     if (hasChanged || changed) {
                         notifyClusterChange(k, namespace, clusterName, unitName, node.getTerm());
@@ -345,9 +348,7 @@ public class NamingManager {
                     System.currentTimeMillis());
 
             // Immediately refresh cluster node count metrics
-            if (metricsManager != null) {
-                metricsManager.refreshClusterNodeCountMetrics();
-            }
+            metricsManager.refreshClusterNodeCountMetrics();
         } catch (Exception e) {
             LOGGER.error("Instance registered failed:{}", e.getMessage(), e);
             return false;
@@ -382,9 +383,7 @@ public class NamingManager {
             }
 
             // Immediately refresh cluster node count metrics
-            if (metricsManager != null) {
-                metricsManager.refreshClusterNodeCountMetrics();
-            }
+            metricsManager.refreshClusterNodeCountMetrics();
         } catch (Exception e) {
             LOGGER.error("Instance unregistered failed:{}", e.getMessage(), e);
             return false;
@@ -394,14 +393,14 @@ public class NamingManager {
 
     public List<Cluster> getClusterListByVgroup(String vGroup, String namespace) {
         // find the cluster where the transaction group is located
-        Map<String /* VGroup */, ConcurrentMap<String /* namespace */, NamespaceBO>> concurrentVgroupMap =
-                new HashMap<>(vGroupMap.asMap());
+        Map<String /* VGroup */, ConcurrentMap<String /* namespace */, NamespaceBO>> concurrentVgroupMap = new HashMap<>(
+                vGroupMap.asMap());
         Map<String /* namespace */, NamespaceBO> vgroupNamespaceMap = concurrentVgroupMap.get(vGroup);
         List<Cluster> clusterList = new ArrayList<>();
         if (!CollectionUtils.isEmpty(vgroupNamespaceMap)) {
             NamespaceBO namespaceBO = vgroupNamespaceMap.get(namespace);
-            ConcurrentMap<String /* clusterName */, ClusterData> clusterDataMap =
-                    namespaceClusterDataMap.get(namespace);
+            ConcurrentMap<String /* clusterName */, ClusterData> clusterDataMap = namespaceClusterDataMap
+                    .get(namespace);
             if (namespaceBO != null && !CollectionUtils.isEmpty(clusterDataMap)) {
                 clusterList.addAll(namespaceBO.getCluster(clusterDataMap));
             }
@@ -442,8 +441,7 @@ public class NamingManager {
 
     public void instanceHeartBeatCheck() {
         for (String namespace : namespaceClusterDataMap.keySet()) {
-            for (ClusterData clusterData :
-                    namespaceClusterDataMap.get(namespace).values()) {
+            for (ClusterData clusterData : namespaceClusterDataMap.get(namespace).values()) {
                 for (Unit unit : clusterData.getUnitData().values()) {
                     List<NamingServerNode> removeList = new ArrayList<>();
                     for (NamingServerNode instance : unit.getNamingInstanceList()) {
@@ -482,10 +480,9 @@ public class NamingManager {
                                             + instance.getTransaction().getPort());
                         }
 
-                        // Immediately refresh cluster node count metrics after removing offline instances
-                        if (metricsManager != null) {
-                            metricsManager.refreshClusterNodeCountMetrics();
-                        }
+                        // Immediately refresh cluster node count metrics after removing offline
+                        // instances
+                        metricsManager.refreshClusterNodeCountMetrics();
                     }
                 }
             }
@@ -515,9 +512,9 @@ public class NamingManager {
                         .flatMap(map -> Optional.ofNullable(map.get(cluster)))
                         .ifPresent(clusterData -> {
                             if (!CollectionUtils.isEmpty(clusterData.getUnitData())) {
-                                Optional<Map.Entry<String, Unit>> optionalEntry =
-                                        clusterData.getUnitData().entrySet().stream()
-                                                .findFirst();
+                                Optional<Map.Entry<String, Unit>> optionalEntry = clusterData.getUnitData().entrySet()
+                                        .stream()
+                                        .findFirst();
                                 if (optionalEntry.isPresent()) {
                                     String unit = optionalEntry.get().getKey();
                                     Unit unitData = optionalEntry.get().getValue();
@@ -561,8 +558,7 @@ public class NamingManager {
         // Build NamespaceVOv2
         Map<String, org.apache.seata.namingserver.entity.vo.v2.NamespaceVO> namespaceVOs = new HashMap<>();
         data.clustersMap.forEach((namespace, clusters) -> {
-            org.apache.seata.namingserver.entity.vo.v2.NamespaceVO namespaceVO =
-                    new org.apache.seata.namingserver.entity.vo.v2.NamespaceVO();
+            org.apache.seata.namingserver.entity.vo.v2.NamespaceVO namespaceVO = new org.apache.seata.namingserver.entity.vo.v2.NamespaceVO();
             Map<String, List<String>> clusterVgList = new HashMap<>();
             Map<String, Set<String>> clusterVgSet = data.clusterVgroupsMap.get(namespace);
             clusters.forEach(cluster -> {
@@ -602,8 +598,8 @@ public class NamingManager {
         });
 
         // Collect vgroups and build cluster to vgroups mapping
-        Map<String /* VGroup */, ConcurrentMap<String /* namespace */, NamespaceBO>> currentVGroupMap =
-                new HashMap<>(vGroupMap.asMap());
+        Map<String /* VGroup */, ConcurrentMap<String /* namespace */, NamespaceBO>> currentVGroupMap = new HashMap<>(
+                vGroupMap.asMap());
         currentVGroupMap.forEach((vGroup, namespaceMap) -> namespaceMap.forEach((namespace, namespaceBO) -> {
             Set<String> vgroups = vgroupsMap.get(namespace);
             vgroups.add(vGroup);
