@@ -130,6 +130,7 @@ const enUs: ILocale = {
     weight: 'Weight',
     healthy: 'Healthy',
     term: 'Term',
+    role: 'Role',
     unit: 'Unit',
     operations: 'Operations',
     internal: 'Internal',

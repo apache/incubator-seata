@@ -30,6 +30,7 @@ import {
 } from '@alicloud/console-components';
 import Actions from '@alicloud/console-components-actions';
 import { withRouter } from 'react-router-dom';
+import { connect } from 'react-redux';
 import Page from '@/components/Page';
 import { GlobalProps } from '@/module';
 import getData, {checkData, deleteData, GlobalLockParam } from '@/service/globalLockInfo';
@@ -105,8 +106,12 @@ class GlobalLockInfo extends React.Component<GlobalProps, GlobalLockInfoState> {
       const namespaceOptions = new Map<string, { clusters: string[], clusterVgroups: {[key: string]: string[]} }>();
       Object.keys(namespaces).forEach(namespaceKey => {
         const namespaceData = namespaces[namespaceKey];
-        const clusterVgroups = (namespaceData.clusterVgroups || {}) as {[key: string]: string[]};
-        const clusters = Object.keys(clusterVgroups);
+        const clustersData = namespaceData.clusters || {};
+        const clusterVgroups: {[key: string]: string[]} = {};
+        Object.keys(clustersData).forEach(clusterName => {
+          clusterVgroups[clusterName] = clustersData[clusterName].vgroups || [];
+        });
+        const clusters = Object.keys(clustersData);
         namespaceOptions.set(namespaceKey, {
           clusters,
           clusterVgroups,
@@ -149,15 +154,15 @@ class GlobalLockInfo extends React.Component<GlobalProps, GlobalLockInfoState> {
     }
   }
   resetSearchFilter = () => {
-    this.setState({
+    this.setState(prevState => ({
       globalLockParam: {
         // pagination info don`t reset
-        pageSize: this.state.globalLockParam.pageSize,
-        pageNum: this.state.globalLockParam.pageNum,
+        pageSize: prevState.globalLockParam.pageSize,
+        pageNum: prevState.globalLockParam.pageNum,
       },
       clusters: [],
       vgroups: [],
-    });
+    }));
   }
 
   search = () => {
@@ -276,10 +281,10 @@ class GlobalLockInfo extends React.Component<GlobalProps, GlobalLockInfoState> {
   }
 
   deleteCell = (val: string, index: number, record: any) => {
-    const {locale = {}} = this.props;
+    const { locale } = this.props;
     const {
       deleteGlobalLockTitle
-    } = locale;
+    } = locale.GlobalLockInfo || {};
     let width = getCurrentLanguage() === enUsKey ? '120px' : '80px'
     return (
       <Actions style={{width: width}}>
@@ -316,7 +321,8 @@ class GlobalLockInfo extends React.Component<GlobalProps, GlobalLockInfoState> {
 
 
   render() {
-    const { locale = {} } = this.props;
+    const { locale } = this.props;
+    const globalLockInfo = locale.GlobalLockInfo || {};
     const { title, subTitle, createTimeLabel,
       inputFilterPlaceholder,
       selectNamespaceFilerPlaceholder,
@@ -325,7 +331,7 @@ class GlobalLockInfo extends React.Component<GlobalProps, GlobalLockInfoState> {
       searchButtonLabel,
       resetButtonLabel,
       operateTitle,
-    } = locale;
+    } = globalLockInfo;
     return (
       <Page
         title={title}
@@ -453,4 +459,8 @@ class GlobalLockInfo extends React.Component<GlobalProps, GlobalLockInfoState> {
   }
 }
 
-export default withRouter(ConfigProvider.config(GlobalLockInfo, {}));
+const mapStateToProps = (state: any) => ({
+  locale: state.locale.locale,
+});
+
+export default ConfigProvider.config(withRouter(connect(mapStateToProps)(GlobalLockInfo)), {});
