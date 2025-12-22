@@ -23,9 +23,9 @@ import org.apache.seata.console.security.JwtAuthenticationEntryPoint;
 import org.apache.seata.console.utils.JwtTokenUtils;
 import org.apache.seata.mcp.core.props.MCPProperties;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -84,10 +84,13 @@ public class WebSecurityConfig {
     private JwtTokenUtils tokenProvider;
 
     @Autowired
-    private Environment env;
-
-    @Autowired
     private MCPProperties mcpProperties;
+
+    @Value("${seata.security.ignore.urls}")
+    String ignoreURLs = "/**";
+
+    @Value("${seata.security.csrf-ignore-urls}")
+    String csrfIgnoreUrls = "/**";
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -103,13 +106,13 @@ public class WebSecurityConfig {
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
-        StringBuilder ignoreURLs = new StringBuilder(env.getProperty("seata.security.ignore.urls", "/**"));
+        StringBuilder ignoreURLsBuilder = new StringBuilder(ignoreURLs);
         List<String> mcpEndpoints = mcpProperties.getEndpoints();
         for (String endpoint : mcpEndpoints) {
-            ignoreURLs.append(",").append(endpoint);
+            ignoreURLsBuilder.append(",").append(endpoint);
         }
         RequestMatcher[] ignoredMatchers =
-                buildAntMatchers(ignoreURLs.toString().trim());
+                buildAntMatchers(ignoreURLsBuilder.toString().trim());
         return web -> {
             if (ignoredMatchers.length > 0) {
                 web.ignoring().requestMatchers(ignoredMatchers);
@@ -120,13 +123,13 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager)
             throws Exception {
-        StringBuilder csrfIgnoreUrls = new StringBuilder(env.getProperty("seata.security.csrf-ignore-urls", "/**"));
+        StringBuilder csrfIgnoreUrlsBuilder = new StringBuilder(csrfIgnoreUrls);
         List<String> mcpEndpoints = mcpProperties.getEndpoints();
         for (String endpoint : mcpEndpoints) {
-            csrfIgnoreUrls.append(",").append(endpoint);
+            csrfIgnoreUrlsBuilder.append(",").append(endpoint);
         }
         RequestMatcher[] csrfIgnored =
-                buildAntMatchers(csrfIgnoreUrls.toString().trim());
+                buildAntMatchers(csrfIgnoreUrlsBuilder.toString().trim());
         http.authenticationManager(authenticationManager)
                 .authorizeHttpRequests(authz -> authz.anyRequest().authenticated())
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
