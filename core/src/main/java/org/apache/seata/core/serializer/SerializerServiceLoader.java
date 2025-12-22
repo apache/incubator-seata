@@ -95,7 +95,7 @@ public final class SerializerServiceLoader {
         if (serializer == null) {
             if (type == SerializerType.SEATA) {
                 serializer =
-                        EnhancedServiceLoader.load(Serializer.class, resolvedSerializerName, new Object[] {version});
+                        EnhancedServiceLoader.load(Serializer.class, type.name(), new Object[] {version});
             } else {
                 serializer = EnhancedServiceLoader.load(Serializer.class, resolvedSerializerName);
             }
