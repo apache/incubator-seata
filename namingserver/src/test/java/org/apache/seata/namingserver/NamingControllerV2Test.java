@@ -75,9 +75,15 @@ class NamingControllerV2Test {
 
         NamespaceVO namespaceVO = result.getData().get(namespace);
         assertNotNull(namespaceVO);
-        assertNotNull(namespaceVO.getClusterVgroups());
-        assertTrue(namespaceVO.getClusterVgroups().containsKey(clusterName));
-        assertTrue(namespaceVO.getClusterVgroups().get(clusterName).contains(vGroup));
+        assertNotNull(namespaceVO.getClusters());
+        assertTrue(namespaceVO.getClusters().containsKey(clusterName));
+        org.apache.seata.namingserver.entity.vo.v2.ClusterVO clusterVO =
+                namespaceVO.getClusters().get(clusterName);
+        assertNotNull(clusterVO);
+        assertNotNull(clusterVO.getVgroups());
+        assertTrue(clusterVO.getVgroups().contains(vGroup));
+        assertNotNull(clusterVO.getUnits());
+        assertTrue(clusterVO.getUnits().contains(unitName));
 
         // Clean up
         namingManager.unregisterInstance(namespace, clusterName, unitName, node);
