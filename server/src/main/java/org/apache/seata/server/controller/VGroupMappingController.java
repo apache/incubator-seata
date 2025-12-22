@@ -18,11 +18,11 @@ package org.apache.seata.server.controller;
 
 import org.apache.seata.common.metadata.Instance;
 import org.apache.seata.common.result.Result;
-import org.apache.seata.config.Configuration;
-import org.apache.seata.config.ConfigurationFactory;
+import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.core.store.MappingDO;
 import org.apache.seata.server.session.SessionHolder;
 import org.apache.seata.server.store.VGroupMappingStoreManager;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -34,7 +34,8 @@ public class VGroupMappingController {
 
     private VGroupMappingStoreManager vGroupMappingStoreManager;
 
-    protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
+    @Value("${sessionMode:file}")
+    String sessionMode;
 
     /**
      * add vGroup in cluster
@@ -51,7 +52,9 @@ public class VGroupMappingController {
         mappingDO.setUnit(unit);
         mappingDO.setVGroup(vGroup);
         boolean rst = SessionHolder.getRootVGroupMappingManager().addVGroup(mappingDO);
-        Instance.getInstance().setTerm(System.currentTimeMillis());
+        if (!StringUtils.equalsIgnoreCase("raft", sessionMode)) {
+            Instance.getInstance().setTerm(System.currentTimeMillis());
+        }
         if (!rst) {
             result.setCode("500");
             result.setMessage("add vGroup failed!");
@@ -69,7 +72,9 @@ public class VGroupMappingController {
     public Result<?> removeVGroup(@RequestParam String vGroup) {
         Result<?> result = new Result<>();
         boolean rst = SessionHolder.getRootVGroupMappingManager().removeVGroup(vGroup);
-        Instance.getInstance().setTerm(System.currentTimeMillis());
+        if (!StringUtils.equalsIgnoreCase("raft", sessionMode)) {
+            Instance.getInstance().setTerm(System.currentTimeMillis());
+        }
         if (!rst) {
             result.setCode("500");
             result.setMessage("remove vGroup failed!");

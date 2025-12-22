@@ -17,20 +17,19 @@
 package org.apache.seata.namingserver.entity.vo.v2;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
  * Value Object representing namespace information for the v2 API.
  * <p>
- * This class provides a mapping between cluster names and their associated vgroup lists.
+ * This class provides a mapping between cluster names and their associated cluster information.
  * It is used in the v2 version of the API and may differ from the original {@code NamespaceVO}
  * (in the v1 or root package) in its structure or the semantics of its fields.
  * <p>
  * <b>Differences from the original NamespaceVO:</b>
  * <ul>
  *   <li>Located in the {@code org.apache.seata.namingserver.entity.vo.v2} package, indicating it is for the v2 API.</li>
- *   <li>Contains a {@code clusterVgroups} map, which maps cluster names to lists of vgroup names.</li>
+ *   <li>Contains a {@code clusters} map, which maps cluster names to {@link ClusterVO} objects containing detailed cluster information.</li>
  *   <li>May have a different structure or additional fields compared to the original version.</li>
  * </ul>
  * <p>
@@ -39,13 +38,13 @@ import java.util.Map;
  */
 public class NamespaceVO {
 
-    private Map<String, List<String>> clusterVgroups = new HashMap<>();
+    private Map<String, ClusterVO> clusters = new HashMap<>();
 
-    public Map<String, List<String>> getClusterVgroups() {
-        return clusterVgroups;
+    public Map<String, ClusterVO> getClusters() {
+        return clusters;
     }
 
-    public void setClusterVgroups(Map<String, List<String>> clusterVgroups) {
-        this.clusterVgroups = clusterVgroups;
+    public void setClusters(Map<String, ClusterVO> clusters) {
+        this.clusters = clusters;
     }
 }
