@@ -35,7 +35,7 @@ heartbeat:
 seata:
   namingserver:
     metrics:
-      enabled: false
+      enabled: true
   security:
     secretKey: SeataSecretKey0c382ef121d778043159209298fd40bf3850a017
     tokenValidityInMilliseconds: 1800000
