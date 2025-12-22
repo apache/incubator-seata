@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.apache.seata.core.serializer.SerializerType.FASTJSON2;
+import static org.apache.seata.core.serializer.SerializerType.FORY;
 import static org.apache.seata.core.serializer.SerializerType.FURY;
 import static org.apache.seata.core.serializer.SerializerType.HESSIAN;
 import static org.apache.seata.core.serializer.SerializerType.KRYO;
@@ -48,7 +49,7 @@ public final class SerializerServiceLoader {
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
     private static final SerializerType[] DEFAULT_SERIALIZER_TYPE =
-            new SerializerType[] {SEATA, PROTOBUF, KRYO, HESSIAN, FASTJSON2, FURY};
+            new SerializerType[] {SEATA, PROTOBUF, KRYO, HESSIAN, FASTJSON2, FURY, FORY};
 
     private static final Map<String, Serializer> SERIALIZER_MAP = new HashMap<>();
 
