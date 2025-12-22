@@ -86,11 +86,11 @@ public class WebSecurityConfig {
     @Autowired
     private MCPProperties mcpProperties;
 
-    @Value("${seata.security.ignore.urls}")
-    String ignoreURLs = "/**";
+    @Value("${seata.security.ignore.urls:/**}")
+    String ignoreURLs;
 
-    @Value("${seata.security.csrf-ignore-urls}")
-    String csrfIgnoreUrls = "/**";
+    @Value("${seata.security.csrf-ignore-urls:/**}")
+    String csrfIgnoreUrls;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
