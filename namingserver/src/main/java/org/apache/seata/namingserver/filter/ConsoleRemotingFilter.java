@@ -79,7 +79,7 @@ public class ConsoleRemotingFilter implements Filter {
                 String vgroup = request.getParameter("vgroup");
                 if (StringUtils.isNotBlank(namespace)
                         && (StringUtils.isNotBlank(cluster) || StringUtils.isNotBlank(vgroup))) {
-                    List<Node> list = null;
+                    List<NamingServerNode> list = null;
                     if (StringUtils.isNotBlank(vgroup)) {
                         list = namingManager.getInstancesByVgroupAndNamespace(
                                 namespace,

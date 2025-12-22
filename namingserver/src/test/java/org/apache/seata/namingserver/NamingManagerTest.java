@@ -118,7 +118,7 @@ class NamingManagerTest {
 
         assertTrue(result);
 
-        List<Node> instances = namingManager.getInstances(namespace, clusterName);
+        List<NamingServerNode> instances = namingManager.getInstances(namespace, clusterName);
         assertEquals(1, instances.size());
         assertEquals("127.0.0.1", instances.get(0).getTransaction().getHost());
         assertEquals(8080, instances.get(0).getTransaction().getPort());
@@ -153,7 +153,7 @@ class NamingManagerTest {
         node.getMetadata().put(CONSTANT_GROUP, vGroups);
         namingManager.registerInstance(node, namespace, clusterName, unitName);
 
-        List<Node> instances = namingManager.getInstances(namespace, clusterName);
+        List<NamingServerNode> instances = namingManager.getInstances(namespace, clusterName);
         assertEquals(1, instances.size());
 
         boolean result = namingManager.unregisterInstance(namespace, clusterName, unitName, node);
@@ -199,7 +199,7 @@ class NamingManagerTest {
         node.getMetadata().put(CONSTANT_GROUP, vGroups);
         namingManager.registerInstance(node, namespace, clusterName, unitName);
 
-        List<Node> instances = namingManager.getInstances(namespace, clusterName);
+        List<NamingServerNode> instances = namingManager.getInstances(namespace, clusterName);
         assertEquals(1, instances.size());
 
         ReflectionTestUtils.setField(namingManager, "heartbeatTimeThreshold", 10);
@@ -210,7 +210,7 @@ class NamingManagerTest {
         }
         namingManager.instanceHeartBeatCheck();
 
-        List<Node> afterHeartBeat = namingManager.getInstances(namespace, clusterName);
+        List<NamingServerNode> afterHeartBeat = namingManager.getInstances(namespace, clusterName);
         assertEquals(0, afterHeartBeat.size());
         Mockito.verify(applicationContext, Mockito.times(2)).publishEvent(any(ClusterChangeEvent.class));
     }
