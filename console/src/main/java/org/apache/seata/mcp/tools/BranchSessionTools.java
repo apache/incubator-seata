@@ -42,11 +42,11 @@ public class BranchSessionTools {
 
     @McpTool(description = "Delete branch transactions, Get the modify key before you delete")
     public String deleteBranchSession(
-            @McpToolParam(description = "Specify the namespace of the TC node", required = true)
+            @McpToolParam(description = "Specify the namespace of the TC node")
                     NameSpaceDetail nameSpaceDetail,
-            @McpToolParam(description = "Global transaction id", required = true) String xid,
-            @McpToolParam(description = "Branch transaction id", required = true) String branchId,
-            @McpToolParam(description = "Modify key", required = true) String modifyKey) {
+            @McpToolParam(description = "Global transaction id") String xid,
+            @McpToolParam(description = "Branch transaction id") String branchId,
+            @McpToolParam(description = "Modify key") String modifyKey) {
         if (!modifyConfirmService.isValidKey(modifyKey)) {
             return "The modify key is not available";
         }
@@ -64,11 +64,11 @@ public class BranchSessionTools {
 
     @McpTool(description = "Stop the branch transaction retry, Get the modify key before you stop")
     public String stopBranchSession(
-            @McpToolParam(description = "Specify the namespace of the TC node", required = true)
+            @McpToolParam(description = "Specify the namespace of the TC node")
                     NameSpaceDetail nameSpaceDetail,
-            @McpToolParam(description = "Global transaction id", required = true) String xid,
-            @McpToolParam(description = "Branch transaction id", required = true) String branchId,
-            @McpToolParam(description = "Modify key", required = true) String modifyKey) {
+            @McpToolParam(description = "Global transaction id") String xid,
+            @McpToolParam(description = "Branch transaction id") String branchId,
+            @McpToolParam(description = "Modify key") String modifyKey) {
         if (!modifyConfirmService.isValidKey(modifyKey)) {
             return "The modify key is not available";
         }
@@ -86,11 +86,11 @@ public class BranchSessionTools {
 
     @McpTool(description = "Initiate a branch transaction retries, Get the modify key before you start")
     public String startBranchRetry(
-            @McpToolParam(description = "Specify the namespace of the TC node", required = true)
+            @McpToolParam(description = "Specify the namespace of the TC node")
                     NameSpaceDetail nameSpaceDetail,
-            @McpToolParam(description = "Global transaction id", required = true) String xid,
-            @McpToolParam(description = "Branch transaction id", required = true) String branchId,
-            @McpToolParam(description = "Modify key", required = true) String modifyKey) {
+            @McpToolParam(description = "Global transaction id") String xid,
+            @McpToolParam(description = "Branch transaction id") String branchId,
+            @McpToolParam(description = "Modify key") String modifyKey) {
         if (!modifyConfirmService.isValidKey(modifyKey)) {
             return "The modify key is not available";
         }
