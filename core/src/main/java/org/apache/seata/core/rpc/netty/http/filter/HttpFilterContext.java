@@ -21,7 +21,6 @@ import org.apache.seata.common.rpc.http.HttpContext;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 public class HttpFilterContext<T> extends HttpContext<T> {
@@ -29,7 +28,7 @@ public class HttpFilterContext<T> extends HttpContext<T> {
     private volatile HttpRequestParamWrapper paramWrapper;
     private final Map<String, Object> attributes = new ConcurrentHashMap<>();
     private static final ThreadLocal<HttpFilterContext<?>> CURRENT_CONTEXT = new ThreadLocal<>();
-    private final AtomicReference<Object> response = new AtomicReference<>();
+    private Object response;
 
     public HttpFilterContext(
             T request,
@@ -54,11 +53,11 @@ public class HttpFilterContext<T> extends HttpContext<T> {
     }
 
     public void setResponse(Object response) {
-        this.response.set(response);
+        this.response = response;
     }
 
     public Object getResponse() {
-        return this.response.get();
+        return this.response;
     }
 
     public HttpRequestParamWrapper getParamWrapper() {

@@ -388,11 +388,11 @@ class HttpDispatchHandlerTest {
                     throws HttpRequestFilterException {
                 mockAspect.beforeFilter();
 
+                chain.doFilter(ctx);
+
                 FullHttpResponse response =
                         new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.EMPTY_BUFFER);
                 ctx.setResponse(response);
-
-                chain.doFilter(ctx);
 
                 mockAspect.afterFilter();
             }
