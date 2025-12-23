@@ -16,11 +16,19 @@
  */
 package org.apache.seata.mcp.core.props;
 
+import jakarta.annotation.Nullable;
 import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.ai.mcp.server.common.autoconfigure.properties.McpServerProperties;
+import org.springframework.ai.mcp.server.common.autoconfigure.properties.McpServerSseProperties;
+import org.springframework.ai.mcp.server.common.autoconfigure.properties.McpServerStreamableHttpProperties;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -29,75 +37,42 @@ public class MCPProperties {
 
     private final Environment env;
 
-    public static final String SSE_TYPE = "sse";
-
-    public static final String STREAMABLE_TYPE = "streamable";
-
     private boolean enableAuth = true;
 
     private Long queryDuration = TimeUnit.DAYS.toMillis(1);
 
-    private String mcpType = SSE_TYPE;
+    private final McpServerProperties mcpServerProperties;
 
-    private StreamableProperties streamableProperties;
+    private final McpServerSseProperties mcpServerSseProperties;
 
-    private SseServerProperties sseServerProperties;
+    private final McpServerStreamableHttpProperties mcpServerStreamableHttpProperties;
 
-    public MCPProperties(Environment env) {
+    private final List<String> endpoints = new ArrayList<>();
+
+    private final Logger logger = LoggerFactory.getLogger(MCPProperties.class);
+
+    @Autowired
+    public MCPProperties(
+            @Nullable McpServerProperties mcpServerProperties,
+            Environment env,
+            @Nullable McpServerSseProperties serverSseProperties,
+            @Nullable McpServerStreamableHttpProperties serverStreamableHttpProperties) {
+        this.mcpServerProperties = mcpServerProperties;
         this.env = env;
-    }
-
-    public boolean isSseType() {
-        return mcpType.equals(SSE_TYPE);
+        this.mcpServerSseProperties = serverSseProperties;
+        this.mcpServerStreamableHttpProperties = serverStreamableHttpProperties;
     }
 
     public List<String> getEndpoints() {
-        List<String> result = new ArrayList<>();
-        if (isSseType()) {
-            result.add(sseServerProperties.sseEndpoint);
-            result.add(sseServerProperties.messageEndpoint);
-        } else {
-            result.add(streamableProperties.mcpEndpoint);
-        }
-        return result;
+        return Collections.unmodifiableList(new ArrayList<>(endpoints));
     }
 
     public Long getQueryDuration() {
         return queryDuration;
     }
 
-    public static class StreamableProperties {
-        private final String mcpEndpoint;
-
-        public StreamableProperties(String mcpEndPoint) {
-            this.mcpEndpoint = mcpEndPoint;
-        }
-    }
-
-    public static class SseServerProperties {
-
-        private final String sseEndpoint;
-
-        private final String messageEndpoint;
-
-        public SseServerProperties(String sseEndpoint, String messageEndpoint) {
-            this.sseEndpoint = sseEndpoint;
-            this.messageEndpoint = messageEndpoint;
-        }
-    }
-
     @PostConstruct
     public void init() {
-        mcpType = env.getProperty("spring.ai.mcp.server.protocol", "sse");
-        if (mcpType.equals(STREAMABLE_TYPE)) {
-            String mcpEndPoint = env.getProperty("spring.ai.mcp.server.streamable-http.mcp-endpoint", "/mcp");
-            streamableProperties = new StreamableProperties(mcpEndPoint);
-        } else {
-            mcpType = SSE_TYPE;
-            String sseEndpoint = env.getProperty("spring.ai.mcp.server.sse-endpoint", "/sse");
-            String messageEndpoint = env.getProperty("spring.ai.mcp.server.sse-message-endpoint", "/mcp/message");
-            sseServerProperties = new SseServerProperties(sseEndpoint, messageEndpoint);
-        }
         String maxQueryDurationStr = env.getProperty("seata.mcp.query.max-query-duration", "86400000");
         try {
             queryDuration = Long.parseLong(maxQueryDurationStr);
@@ -105,14 +80,27 @@ public class MCPProperties {
             queryDuration = TimeUnit.DAYS.toMillis(1);
         }
         enableAuth = Boolean.parseBoolean(env.getProperty("seata.mcp.auth.enabled", "true"));
-        checkAfterPropertiesSet();
-    }
 
-    private void checkAfterPropertiesSet() {
-        if (isSseType() && sseServerProperties == null)
-            throw new IllegalStateException("SSE properties not initialized");
-        if (!isSseType() && streamableProperties == null)
-            throw new IllegalStateException("Streamable properties not initialized");
+        if (!enableAuth) {
+            logger.warn(
+                    "MCP server authentication is disabled. This creates a security risk. It is strongly recommended to enable authentication by setting seata.mcp.auth.enabled=true");
+        }
+
+        if (mcpServerProperties != null) {
+            McpServerProperties.ServerProtocol protocol = mcpServerProperties.getProtocol();
+            if (protocol == McpServerProperties.ServerProtocol.SSE && mcpServerSseProperties != null) {
+                endpoints.add(mcpServerSseProperties.getSseEndpoint());
+                endpoints.add(mcpServerSseProperties.getSseMessageEndpoint());
+            } else if (protocol == McpServerProperties.ServerProtocol.STREAMABLE
+                    && mcpServerStreamableHttpProperties != null) {
+                endpoints.add(mcpServerStreamableHttpProperties.getMcpEndpoint());
+            } else {
+                throw new IllegalStateException(
+                        "MCP server properties not properly configured or unsupported protocol");
+            }
+        } else {
+            logger.warn("MCP server properties not properly configured");
+        }
     }
 
     public boolean isEnableAuth() {
