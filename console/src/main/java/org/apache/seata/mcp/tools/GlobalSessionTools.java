@@ -52,7 +52,11 @@ public class GlobalSessionTools {
 
     private final ModifyConfirmService modifyConfirmService;
 
-    public GlobalSessionTools(MCPRPCService mcpRPCService, MCPProperties mcpProperties, ObjectMapper objectMapper, ModifyConfirmService modifyConfirmService) {
+    public GlobalSessionTools(
+            MCPRPCService mcpRPCService,
+            MCPProperties mcpProperties,
+            ObjectMapper objectMapper,
+            ModifyConfirmService modifyConfirmService) {
         this.mcpRPCService = mcpRPCService;
         this.mcpProperties = mcpProperties;
         this.objectMapper = objectMapper;

@@ -49,7 +49,11 @@ public class GlobalLockTools {
 
     private final ObjectMapper objectMapper;
 
-    public GlobalLockTools(MCPRPCService mcpRPCService, MCPProperties mcpProperties, ModifyConfirmService modifyConfirmService, ObjectMapper objectMapper) {
+    public GlobalLockTools(
+            MCPRPCService mcpRPCService,
+            MCPProperties mcpProperties,
+            ModifyConfirmService modifyConfirmService,
+            ObjectMapper objectMapper) {
         this.mcpRPCService = mcpRPCService;
         this.mcpProperties = mcpProperties;
         this.modifyConfirmService = modifyConfirmService;
@@ -58,8 +62,7 @@ public class GlobalLockTools {
 
     @McpTool(description = "Query the global lock information")
     public PageResult<GlobalLockVO> queryGlobalLock(
-            @McpToolParam(description = "Specify the namespace of the TC node")
-                    NameSpaceDetail nameSpaceDetail,
+            @McpToolParam(description = "Specify the namespace of the TC node") NameSpaceDetail nameSpaceDetail,
             @McpToolParam(description = "Global lock parameters") GlobalLockParamDto paramDto) {
         GlobalLockParam param = GlobalLockParam.convertFromParamDto(paramDto);
         if (param.getTimeStart() != null) {
@@ -95,8 +98,7 @@ public class GlobalLockTools {
 
     @McpTool(description = "Delete the global lock, Get the modify key before you delete")
     public String deleteGlobalLock(
-            @McpToolParam(description = "Specify the namespace of the TC node")
-                    NameSpaceDetail nameSpaceDetail,
+            @McpToolParam(description = "Specify the namespace of the TC node") NameSpaceDetail nameSpaceDetail,
             @McpToolParam(description = "Global lock delete parameters") GlobalLockDeleteParam param,
             @McpToolParam(description = "Modify key") String modifyKey) {
         if (!modifyConfirmService.isValidKey(modifyKey)) {
@@ -113,8 +115,7 @@ public class GlobalLockTools {
 
     @McpTool(description = "Check if the lock exist the branch session")
     public String checkGlobalLock(
-            @McpToolParam(description = "Specify the namespace of the TC node")
-                    NameSpaceDetail nameSpaceDetail,
+            @McpToolParam(description = "Specify the namespace of the TC node") NameSpaceDetail nameSpaceDetail,
             @McpToolParam(description = "Global transaction id") String xid,
             @McpToolParam(description = "Branch transaction id") String branchId) {
         Map<String, String> pathParams = new HashMap<>();

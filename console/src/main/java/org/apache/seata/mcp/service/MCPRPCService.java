@@ -44,6 +44,5 @@ public interface MCPRPCService {
             Map<String, String> pathParams,
             HttpHeaders headers);
 
-    String getCallNameSpace(
-            String path, Object queryParams, Map<String, String> pathParams, HttpHeaders headers);
+    String getCallNameSpace(String path, Object queryParams, Map<String, String> pathParams, HttpHeaders headers);
 }
