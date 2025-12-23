@@ -22,10 +22,10 @@ import org.apache.fury.ThreadSafeFury;
 import org.apache.fury.config.CompatibleMode;
 import org.apache.fury.config.Language;
 import org.apache.fury.resolver.AllowListChecker;
+import org.apache.seata.core.serializer.Serializer;
 import org.apache.seata.core.serializer.SerializerSecurityRegistry;
 
-public class FurySerializerFactory {
-    private static final FurySerializerFactory FACTORY = new FurySerializerFactory();
+public class ThreadSafeFuryDelegate implements Serializer {
 
     private static final ThreadSafeFury FURY = new ThreadLocalFury(classLoader -> {
         Fury f = Fury.builder()
@@ -48,11 +48,13 @@ public class FurySerializerFactory {
         return f;
     });
 
-    public static FurySerializerFactory getInstance() {
-        return FACTORY;
+    @Override
+    public byte[] serialize(Object obj) {
+        return FURY.serialize(obj);
     }
 
-    public ThreadSafeFury get() {
-        return FURY;
+    @Override
+    public Object deserialize(byte[] bytes) {
+        return FURY.deserialize(bytes);
     }
 }

@@ -16,7 +16,6 @@
  */
 package org.apache.seata.serializer.fury;
 
-import org.apache.fury.ThreadSafeFury;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.core.protocol.AbstractMessage;
 import org.apache.seata.core.serializer.Serializer;
@@ -28,8 +27,8 @@ public class FurySerializer implements Serializer {
         if (!(t instanceof AbstractMessage)) {
             throw new IllegalArgumentException("AbstractMessage isn't available.");
         }
-        ThreadSafeFury threadSafeFury = FurySerializerFactory.getInstance().get();
-        return threadSafeFury.serialize(t);
+        Serializer serializer = DynamicSerializerFactory.getInstance().get();
+        return serializer.serialize(t);
     }
 
     @Override
@@ -37,7 +36,7 @@ public class FurySerializer implements Serializer {
         if (bytes == null || bytes.length == 0) {
             throw new IllegalArgumentException("bytes is null");
         }
-        ThreadSafeFury threadSafeFury = FurySerializerFactory.getInstance().get();
-        return (T) threadSafeFury.deserialize(bytes);
+        Serializer serializer = DynamicSerializerFactory.getInstance().get();
+        return (T) serializer.deserialize(bytes);
     }
 }

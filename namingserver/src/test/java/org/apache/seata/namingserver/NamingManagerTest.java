@@ -118,7 +118,7 @@ class NamingManagerTest {
 
         assertTrue(result);
 
-        List<Node> instances = namingManager.getInstances(namespace, clusterName);
+        List<NamingServerNode> instances = namingManager.getInstances(namespace, clusterName);
         assertEquals(1, instances.size());
         assertEquals("127.0.0.1", instances.get(0).getTransaction().getHost());
         assertEquals(8080, instances.get(0).getTransaction().getPort());
@@ -153,7 +153,7 @@ class NamingManagerTest {
         node.getMetadata().put(CONSTANT_GROUP, vGroups);
         namingManager.registerInstance(node, namespace, clusterName, unitName);
 
-        List<Node> instances = namingManager.getInstances(namespace, clusterName);
+        List<NamingServerNode> instances = namingManager.getInstances(namespace, clusterName);
         assertEquals(1, instances.size());
 
         boolean result = namingManager.unregisterInstance(namespace, clusterName, unitName, node);
@@ -199,7 +199,7 @@ class NamingManagerTest {
         node.getMetadata().put(CONSTANT_GROUP, vGroups);
         namingManager.registerInstance(node, namespace, clusterName, unitName);
 
-        List<Node> instances = namingManager.getInstances(namespace, clusterName);
+        List<NamingServerNode> instances = namingManager.getInstances(namespace, clusterName);
         assertEquals(1, instances.size());
 
         ReflectionTestUtils.setField(namingManager, "heartbeatTimeThreshold", 10);
@@ -210,7 +210,7 @@ class NamingManagerTest {
         }
         namingManager.instanceHeartBeatCheck();
 
-        List<Node> afterHeartBeat = namingManager.getInstances(namespace, clusterName);
+        List<NamingServerNode> afterHeartBeat = namingManager.getInstances(namespace, clusterName);
         assertEquals(0, afterHeartBeat.size());
         Mockito.verify(applicationContext, Mockito.times(2)).publishEvent(any(ClusterChangeEvent.class));
     }
@@ -383,9 +383,15 @@ class NamingManagerTest {
         org.apache.seata.namingserver.entity.vo.v2.NamespaceVO namespaceVO =
                 result.getData().get(namespace);
         assertNotNull(namespaceVO);
-        assertNotNull(namespaceVO.getClusterVgroups());
-        assertTrue(namespaceVO.getClusterVgroups().containsKey(clusterName));
-        assertTrue(namespaceVO.getClusterVgroups().get(clusterName).contains(vGroup));
+        assertNotNull(namespaceVO.getClusters());
+        assertTrue(namespaceVO.getClusters().containsKey(clusterName));
+        org.apache.seata.namingserver.entity.vo.v2.ClusterVO clusterVO =
+                namespaceVO.getClusters().get(clusterName);
+        assertNotNull(clusterVO);
+        assertNotNull(clusterVO.getVgroups());
+        assertTrue(clusterVO.getVgroups().contains(vGroup));
+        assertNotNull(clusterVO.getUnits());
+        assertTrue(clusterVO.getUnits().contains(unitName));
     }
 
     @Test
