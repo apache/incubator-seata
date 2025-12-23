@@ -41,7 +41,6 @@ public class HttpFilterContext<T> extends HttpContext<T> {
         this.paramWrapperSupplier = paramWrapperSupplier;
     }
 
-    @SuppressWarnings("unchecked")
     public static HttpFilterContext<?> getCurrentContext() {
         return CURRENT_CONTEXT.get();
     }
