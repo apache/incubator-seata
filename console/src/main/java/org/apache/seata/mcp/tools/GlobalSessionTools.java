@@ -34,7 +34,6 @@ import org.apache.seata.mcp.service.MCPRPCService;
 import org.apache.seata.mcp.service.ModifyConfirmService;
 import org.springaicommunity.mcp.annotation.McpTool;
 import org.springaicommunity.mcp.annotation.McpToolParam;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -45,17 +44,20 @@ import java.util.Map;
 @Service
 public class GlobalSessionTools {
 
-    @Autowired
-    private MCPRPCService mcpRPCService;
+    private final MCPRPCService mcpRPCService;
 
-    @Autowired
-    private MCPProperties configuration;
+    private final MCPProperties mcpProperties;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
-    @Autowired
-    private ModifyConfirmService modifyConfirmService;
+    private final ModifyConfirmService modifyConfirmService;
+
+    public GlobalSessionTools(MCPRPCService mcpRPCService, MCPProperties mcpProperties, ObjectMapper objectMapper, ModifyConfirmService modifyConfirmService) {
+        this.mcpRPCService = mcpRPCService;
+        this.mcpProperties = mcpProperties;
+        this.objectMapper = objectMapper;
+        this.modifyConfirmService = modifyConfirmService;
+    }
 
     private final List<Integer> exceptionStatus = new ArrayList<>();
 
@@ -67,10 +69,10 @@ public class GlobalSessionTools {
         if (param.getTimeStart() != null) {
             if (param.getTimeEnd() != null) {
                 if (DateUtils.judgeExceedTimeDuration(
-                        param.getTimeStart(), param.getTimeEnd(), configuration.getQueryDuration())) {
+                        param.getTimeStart(), param.getTimeEnd(), mcpProperties.getQueryDuration())) {
                     throw new IllegalArgumentException(
                             "The query time span is not allowed to exceed the max query duration : "
-                                    + DateUtils.convertToHourFromTimeStamp(configuration.getQueryDuration()) + " hour");
+                                    + DateUtils.convertToHourFromTimeStamp(mcpProperties.getQueryDuration()) + " hour");
                 }
             } else {
                 param.setTimeEnd(param.getTimeStart() + DateUtils.ONE_DAY_TIMESTAMP);

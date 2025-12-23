@@ -22,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springaicommunity.mcp.annotation.McpTool;
 import org.springaicommunity.mcp.annotation.McpToolParam;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -30,8 +29,11 @@ import java.util.Map;
 @Service
 public class ModifyConfirmTools {
 
-    @Autowired
-    private ModifyConfirmService modifyConfirmService;
+    private final ModifyConfirmService modifyConfirmService;
+
+    public ModifyConfirmTools(ModifyConfirmService modifyConfirmService) {
+        this.modifyConfirmService = modifyConfirmService;
+    }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ModifyConfirmTools.class);
 

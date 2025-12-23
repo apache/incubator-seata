@@ -23,7 +23,6 @@ import org.apache.seata.mcp.service.MCPRPCService;
 import org.apache.seata.mcp.service.ModifyConfirmService;
 import org.springaicommunity.mcp.annotation.McpTool;
 import org.springaicommunity.mcp.annotation.McpToolParam;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -32,11 +31,14 @@ import java.util.Map;
 @Service
 public class BranchSessionTools {
 
-    @Autowired
-    private MCPRPCService mcpRPCService;
+    private final MCPRPCService mcpRPCService;
 
-    @Autowired
-    private ModifyConfirmService modifyConfirmService;
+    private final ModifyConfirmService modifyConfirmService;
+
+    public BranchSessionTools(MCPRPCService mcpRPCService, ModifyConfirmService modifyConfirmService) {
+        this.mcpRPCService = mcpRPCService;
+        this.modifyConfirmService = modifyConfirmService;
+    }
 
     @McpTool(description = "Delete branch transactions, Get the modify key before you delete")
     public String deleteBranchSession(

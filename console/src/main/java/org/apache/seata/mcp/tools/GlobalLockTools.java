@@ -33,7 +33,6 @@ import org.apache.seata.mcp.service.MCPRPCService;
 import org.apache.seata.mcp.service.ModifyConfirmService;
 import org.springaicommunity.mcp.annotation.McpTool;
 import org.springaicommunity.mcp.annotation.McpToolParam;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -41,17 +40,21 @@ import java.util.Map;
 
 @Service
 public class GlobalLockTools {
-    @Autowired
-    private MCPRPCService mcpRPCService;
 
-    @Autowired
-    private MCPProperties configuration;
+    private final MCPRPCService mcpRPCService;
 
-    @Autowired
-    private ModifyConfirmService modifyConfirmService;
+    private final MCPProperties mcpProperties;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final ModifyConfirmService modifyConfirmService;
+
+    private final ObjectMapper objectMapper;
+
+    public GlobalLockTools(MCPRPCService mcpRPCService, MCPProperties mcpProperties, ModifyConfirmService modifyConfirmService, ObjectMapper objectMapper) {
+        this.mcpRPCService = mcpRPCService;
+        this.mcpProperties = mcpProperties;
+        this.modifyConfirmService = modifyConfirmService;
+        this.objectMapper = objectMapper;
+    }
 
     @McpTool(description = "Query the global lock information")
     public PageResult<GlobalLockVO> queryGlobalLock(
@@ -62,11 +65,11 @@ public class GlobalLockTools {
         if (param.getTimeStart() != null) {
             if (param.getTimeEnd() != null) {
                 if (DateUtils.judgeExceedTimeDuration(
-                        param.getTimeStart(), param.getTimeEnd(), configuration.getQueryDuration())) {
+                        param.getTimeStart(), param.getTimeEnd(), mcpProperties.getQueryDuration())) {
                     return PageResult.failure(
                             "",
                             "The query time span is not allowed to exceed the max query duration : "
-                                    + DateUtils.convertToHourFromTimeStamp(configuration.getQueryDuration()) + " hour");
+                                    + DateUtils.convertToHourFromTimeStamp(mcpProperties.getQueryDuration()) + " hour");
                 }
             } else {
                 param.setTimeEnd(param.getTimeStart() + DateUtils.ONE_DAY_TIMESTAMP);
