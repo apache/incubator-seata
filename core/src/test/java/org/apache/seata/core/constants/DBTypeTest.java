@@ -18,12 +18,15 @@ package org.apache.seata.core.constants;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Unit tests for {@link DBType}.
  */
-class DBTypeTest {
+public class DBTypeTest {
 
     @Test
     void testValueofWithValidDbType() {
