@@ -64,7 +64,7 @@ public class MCPProperties {
     }
 
     public List<String> getEndpoints() {
-        return Collections.unmodifiableList(new ArrayList<>(endpoints));
+        return Collections.unmodifiableList(endpoints);
     }
 
     public Long getQueryDuration() {
