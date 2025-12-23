@@ -192,15 +192,20 @@ public class NamingManager {
             return new Result<>("400", "vGroup " + vGroup + " already exists");
         }
         // add vGroup in new cluster
-        List<Node> nodeList = getInstances(namespace, clusterName);
+        List<NamingServerNode> nodeList = getInstances(namespace, clusterName);
         if (nodeList == null || nodeList.size() == 0) {
             LOGGER.error("no instance in cluster {}", clusterName);
             return new Result<>("301", "no instance in cluster:" + clusterName);
         } else {
-            Node node = nodeList.stream()
+            List<NamingServerNode> filteredNodes = nodeList.stream()
                     .filter(n -> n.getRole() == ClusterRole.LEADER || n.getRole() == ClusterRole.MEMBER)
-                    .collect(Collectors.toList())
-                    .get(0);
+                    .sorted((o1, o2) -> Long.compare(o2.getTerm(), o1.getTerm()))
+                    .collect(Collectors.toList());
+            if (filteredNodes.isEmpty()) {
+                LOGGER.error("no suitable instance (LEADER or MEMBER) in cluster {}", clusterName);
+                return new Result<>("301", "no suitable instance in cluster:" + clusterName);
+            }
+            NamingServerNode node = filteredNodes.get(0);
             String controlHost = node.getControl().getHost();
             int controlPort = node.getControl().getPort();
             String httpUrl = NamingServerConstants.HTTP_PREFIX
@@ -397,11 +402,11 @@ public class NamingManager {
         return clusterList;
     }
 
-    public List<Node> getInstances(String namespace, String clusterName) {
+    public List<NamingServerNode> getInstances(String namespace, String clusterName) {
         return getInstances(namespace, clusterName, false);
     }
 
-    public List<Node> getInstances(String namespace, String clusterName, boolean readOnly) {
+    public List<NamingServerNode> getInstances(String namespace, String clusterName, boolean readOnly) {
         Map<String, ClusterData> clusterDataHashMap = namespaceClusterDataMap.get(namespace);
         if (clusterDataHashMap == null) {
             LOGGER.warn("no clusters in namespace: {}", namespace);
@@ -419,7 +424,7 @@ public class NamingManager {
                         .collect(Collectors.toList());
     }
 
-    public List<Node> getInstancesByVgroupAndNamespace(String namespace, String vgroup, boolean readOnly) {
+    public List<NamingServerNode> getInstancesByVgroupAndNamespace(String namespace, String vgroup, boolean readOnly) {
         List<Cluster> clusters = getClusterListByVgroup(vgroup, namespace);
         if (CollectionUtils.isEmpty(clusters)) {
             return Collections.emptyList();
