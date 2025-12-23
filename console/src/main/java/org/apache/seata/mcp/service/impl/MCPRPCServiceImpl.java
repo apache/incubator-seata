@@ -20,12 +20,10 @@ import org.apache.seata.common.exception.AuthenticationFailedException;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.console.config.WebSecurityConfig;
 import org.apache.seata.console.utils.JwtTokenUtils;
-import org.apache.seata.mcp.core.constant.RPCConstant;
 import org.apache.seata.mcp.core.props.NameSpaceDetail;
 import org.apache.seata.mcp.service.MCPRPCService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springaicommunity.mcp.annotation.McpTool;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -71,11 +69,6 @@ public class MCPRPCServiceImpl implements MCPRPCService {
             throw new AuthenticationFailedException("Invalid token, please log back in to get a new token");
         }
         return WebSecurityConfig.TOKEN_PREFIX + originJwt;
-    }
-
-    @McpTool(description = "Get the namespace and cluster or vgroup where all TC/Servers are located")
-    public String getTCNameSpaces() {
-        return getCallNameSpace(RPCConstant.GET_NAMESPACE_PATH, null, null, null);
     }
 
     public void setNamespaceHeaderAndPathParam(
