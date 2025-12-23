@@ -32,6 +32,7 @@ Add changes here for all PR submitted to the develop branch.
 
 ### test:
 - [[#6151](https://github.com/seata/seata/pull/6151)] add test for `MacOS` and `Windows`
+- [[#7875](https://github.com/apache/incubator-seata/pull/7875)] add unit tests for seata-spring-boot-starter module
 
 Thanks to these contributors for their code commits. Please report an unintended omission.
 
@@ -45,5 +46,6 @@ Thanks to these contributors for their code commits. Please report an unintended
 - [wuwen5](https://github.com/wuwen5)
 - [caohdgege](https://github.com/caohdgege)
 - [xingfudeshi](https://github.com/xingfudeshi)
+- [NiMv1](https://github.com/NiMv1)
 
 Also, we receive many valuable issues, questions and advices from our community. Thanks for you all.
