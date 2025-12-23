@@ -16,6 +16,7 @@
  */
 import request from '@/utils/request';
 import requestV2 from '@/utils/requestV2';
+import qs from 'qs';
 
 export type GlobalSessionParam = {
   xid?: string,
@@ -248,28 +249,18 @@ export async function startBranchData(params: BranchSessionParam): Promise<any> 
   return result;
 }
 
-export async function addGroup(namespace: string, clusterName: string, vGroup: string, unitName?: string): Promise<any> {
-  let result = await request('/naming/addGroup', {
-    method: 'POST',
-    params: {
-      namespace,
-      clusterName,
-      vGroup,
-      unitName,
-    },
+export async function addGroup(namespace: string, clusterName: string, vGroup: string, unitName: string = ''): Promise<any> {
+  const params = { namespace, clusterName, unitName, vGroup };
+  const result = await request.post('/naming/addGroup', qs.stringify(params), {
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
   });
   return result;
 }
 
-export async function changeGroup(namespace: string, clusterName: string, vGroup: string, unitName?: string): Promise<any> {
-  let result = await request('/naming/changeGroup', {
-    method: 'POST',
-    params: {
-      namespace,
-      clusterName,
-      vGroup,
-      unitName,
-    },
+export async function changeGroup(namespace: string, clusterName: string, vGroup: string, unitName: string = ''): Promise<any> {
+  const params = { namespace, clusterName, unitName, vGroup };
+  const result = await request.post('/naming/changeGroup', qs.stringify(params), {
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
   });
   return result;
 }
