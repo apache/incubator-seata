@@ -56,7 +56,7 @@ public class GlobalLockTools {
     @McpTool(description = "Query the global lock information")
     public PageResult<GlobalLockVO> queryGlobalLock(
             @McpToolParam(description = "Specify the namespace of the TC node", required = true)
-            NameSpaceDetail nameSpaceDetail,
+                    NameSpaceDetail nameSpaceDetail,
             @McpToolParam(description = "Global lock parameters", required = true) GlobalLockParamDto paramDto) {
         GlobalLockParam param = GlobalLockParam.convertFromParamDto(paramDto);
         if (param.getTimeStart() != null) {

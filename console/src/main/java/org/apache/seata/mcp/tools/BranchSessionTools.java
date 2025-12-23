@@ -41,7 +41,7 @@ public class BranchSessionTools {
     @McpTool(description = "Delete branch transactions, Get the modify key before you delete")
     public String deleteBranchSession(
             @McpToolParam(description = "Specify the namespace of the TC node", required = true)
-            NameSpaceDetail nameSpaceDetail,
+                    NameSpaceDetail nameSpaceDetail,
             @McpToolParam(description = "Global transaction id", required = true) String xid,
             @McpToolParam(description = "Branch transaction id", required = true) String branchId,
             @McpToolParam(description = "Modify key", required = true) String modifyKey) {

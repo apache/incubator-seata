@@ -67,7 +67,7 @@ public class MCPRPCServiceImpl implements MCPRPCService {
             throw new AuthenticationFailedException("No right to be identified");
         }
         String originJwt = (String) auth.getCredentials();
-        if(!jwtTokenUtils.validateToken(originJwt)){
+        if (!jwtTokenUtils.validateToken(originJwt)) {
             throw new AuthenticationFailedException("Invalid token, please log back in to get a new token");
         }
         return WebSecurityConfig.TOKEN_PREFIX + originJwt;
@@ -258,7 +258,8 @@ public class MCPRPCServiceImpl implements MCPRPCService {
     private String buildUrl(
             String baseUrl, String path, Map<String, String> pathParams, Map<String, Object> queryParams) {
 
-        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUrl).path(path);
+        UriComponentsBuilder builder =
+                UriComponentsBuilder.fromUriString(baseUrl).path(path);
 
         if (pathParams != null && !pathParams.isEmpty()) {
             for (Map.Entry<String, String> entry : pathParams.entrySet()) {
