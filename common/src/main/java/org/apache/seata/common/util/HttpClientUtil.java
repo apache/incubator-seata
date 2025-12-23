@@ -43,7 +43,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.seata.common.executor.HttpCallback;
-import org.apache.seata.common.executor.StreamHttpCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -280,120 +279,6 @@ public class HttpClientUtil {
         executeAsync(client, request, callback);
     }
 
-    /**
-     * Execute a streaming POST request with HTTP/2 support.
-     * This method allows processing data chunks as they arrive from the server.
-     *
-     * @param url the request URL
-     * @param params the request parameters
-     * @param headers the request headers
-     * @param streamCallback the stream callback for handling data chunks
-     * @param timeoutSeconds the timeout in seconds
-     */
-    public static void doPostStreamWithHttp2(
-            String url,
-            Map<String, String> params,
-            Map<String, String> headers,
-            StreamHttpCallback streamCallback,
-            int timeoutSeconds) {
-        try {
-            String contentType = headers != null ? headers.get("Content-Type") : "";
-            RequestBody requestBody = createRequestBody(params, contentType);
-            Request request = buildHttp2Request(url, headers, requestBody, "POST");
-            OkHttpClient client = createHttp2ClientWithTimeout(timeoutSeconds);
-            executeStreamAsync(client, request, streamCallback);
-        } catch (JsonProcessingException e) {
-            LOGGER.error(e.getMessage(), e);
-            streamCallback.onError(e);
-        }
-    }
-
-    /**
-     * Execute a streaming POST request with HTTP/2 support (default timeout 10 seconds).
-     *
-     * @param url the request URL
-     * @param params the request parameters
-     * @param headers the request headers
-     * @param streamCallback the stream callback for handling data chunks
-     */
-    public static void doPostStreamWithHttp2(
-            String url,
-            Map<String, String> params,
-            Map<String, String> headers,
-            StreamHttpCallback streamCallback) {
-        doPostStreamWithHttp2(url, params, headers, streamCallback, 10);
-    }
-
-    /**
-     * Execute a streaming POST request with HTTP/2 support using a JSON body.
-     *
-     * @param url the request URL
-     * @param body the JSON body string
-     * @param headers the request headers
-     * @param streamCallback the stream callback for handling data chunks
-     * @param timeoutSeconds the timeout in seconds
-     */
-    public static void doPostStreamWithHttp2(
-            String url,
-            String body,
-            Map<String, String> headers,
-            StreamHttpCallback streamCallback,
-            int timeoutSeconds) {
-        RequestBody requestBody = RequestBody.create(body, MEDIA_TYPE_JSON);
-        Request request = buildHttp2Request(url, headers, requestBody, "POST");
-        OkHttpClient client = createHttp2ClientWithTimeout(timeoutSeconds);
-        executeStreamAsync(client, request, streamCallback);
-    }
-
-    /**
-     * Execute a streaming POST request with HTTP/2 support using a JSON body (default timeout 10 seconds).
-     *
-     * @param url the request URL
-     * @param body the JSON body string
-     * @param headers the request headers
-     * @param streamCallback the stream callback for handling data chunks
-     */
-    public static void doPostStreamWithHttp2(
-            String url,
-            String body,
-            Map<String, String> headers,
-            StreamHttpCallback streamCallback) {
-        doPostStreamWithHttp2(url, body, headers, streamCallback, 10);
-    }
-
-    /**
-     * Execute a streaming GET request with HTTP/2 support.
-     * This method allows processing data chunks as they arrive from the server.
-     *
-     * @param url the request URL
-     * @param headers the request headers
-     * @param streamCallback the stream callback for handling data chunks
-     * @param timeoutSeconds the timeout in seconds
-     */
-    public static void doGetStreamWithHttp2(
-            String url,
-            Map<String, String> headers,
-            StreamHttpCallback streamCallback,
-            int timeoutSeconds) {
-        Request request = buildHttp2Request(url, headers, null, "GET");
-        OkHttpClient client = createHttp2ClientWithTimeout(timeoutSeconds);
-        executeStreamAsync(client, request, streamCallback);
-    }
-
-    /**
-     * Execute a streaming GET request with HTTP/2 support (default timeout 10 seconds).
-     *
-     * @param url the request URL
-     * @param headers the request headers
-     * @param streamCallback the stream callback for handling data chunks
-     */
-    public static void doGetStreamWithHttp2(
-            String url,
-            Map<String, String> headers,
-            StreamHttpCallback streamCallback) {
-        doGetStreamWithHttp2(url, headers, streamCallback, 10);
-    }
-
     private static RequestBody createRequestBody(Map<String, String> params, String contentType)
             throws JsonProcessingException {
         if (params == null || params.isEmpty()) {
@@ -462,110 +347,91 @@ public class HttpClientUtil {
         });
     }
 
+    public static OkHttpClient createHttp2WatchClient(int connectTimeoutSeconds) {
+        return new OkHttpClient.Builder()
+                .protocols(Collections.singletonList(Protocol.H2_PRIOR_KNOWLEDGE))
+                .connectTimeout(connectTimeoutSeconds, TimeUnit.SECONDS) // 连接阶段快速失败
+                .readTimeout(0, TimeUnit.SECONDS)  // 等待TC推送数据(建立连接后持续监听服务器推送)
+                .writeTimeout(connectTimeoutSeconds, TimeUnit.SECONDS)
+                .build();
+    }
+
+    public static <T> SeataHttpWatch<T> watch(
+            String url,
+            Map<String, String> headers,
+            Class<T> eventType) throws IOException {
+        return watch(url, headers, null, "GET", eventType);
+    }
+
+    public static <T> SeataHttpWatch<T> watch(
+            String url,
+            Class<T> eventType) throws IOException {
+        return watch(url, null, null, "GET", eventType);
+    }
+
     /**
-     * Execute an asynchronous streaming request.
-     * This method reads data chunks from the response body and calls the stream callback
-     * as data arrives, enabling real-time processing of server-pushed data.
-     *
-     * @param client the OkHttpClient instance
-     * @param request the HTTP request
-     * @param streamCallback the stream callback for handling data chunks
+     * Execute a watch request with specified HTTP method and return a Watch iterator.
+     * This method creates a long-lived HTTP/2 connection to receive Server-Sent Events (SSE).
      */
-    private static void executeStreamAsync(
-            OkHttpClient client,
-            Request request,
-            final StreamHttpCallback streamCallback) {
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                try {
-                    // Check if request was cancelled before processing
-                    if (call.isCanceled()) {
-                        streamCallback.onCancelled();
-                        return;
-                    }
+    private static <T> SeataHttpWatch<T> watch(
+            String url,
+            Map<String, String> headers,
+            RequestBody requestBody,
+            String method,
+            Class<T> eventType) throws IOException {
 
-                    // Notify that headers have been received
-                    streamCallback.onHeaders(response);
+        OkHttpClient client = createHttp2WatchClient(30);
+        Request request = buildHttp2WatchRequest(url, headers, requestBody, method);
+        return SeataHttpWatch.createWatch(client, request, eventType);
+    }
 
-                    // Check response status
-                    if (!response.isSuccessful()) {
-                        streamCallback.onError(new IOException("Unexpected response code: " + response.code()));
-                        return;
-                    }
+    public static <T> SeataHttpWatch<T> watchPost(
+            String url,
+            Map<String, String> params,
+            Map<String, String> headers,
+            Class<T> eventType) throws IOException {
+        try {
+            String contentType = headers != null ? headers.get("Content-Type") : "";
+            RequestBody requestBody = createRequestBody(params, contentType);
+            return watch(url, headers, requestBody, "POST", eventType);
+        } catch (JsonProcessingException e) {
+            LOGGER.error("Failed to create request body: {}", e.getMessage(), e);
+            throw new IOException("Failed to create request body", e);
+        }
+    }
 
-                    // Get the response body source for streaming
-                    if (response.body() == null) {
-                        streamCallback.onComplete();
-                        return;
-                    }
+    public static <T> SeataHttpWatch<T> watchPost(
+            String url,
+            Map<String, String> params,
+            Class<T> eventType) throws IOException {
+        return watchPost(url, params, null, eventType);
+    }
 
-                    BufferedSource source = response.body().source();
 
-                    // Set buffer size for reading data chunks (8KB default)
-                    int bufferSize = 8192;
+    private static Request buildHttp2WatchRequest(
+            String url, Map<String, String> headers, RequestBody requestBody, String method) {
+        Headers.Builder headerBuilder = new Headers.Builder();
+        if (headers != null) {
+            headers.forEach(headerBuilder::add);
+        }
+        // Always add Accept header for SSE
+        headerBuilder.add("Accept", "text/event-stream");
 
-                    // Read data chunks continuously until stream is closed (endStream=true)
-                    // For HTTP/2 streaming, we need to keep reading until the server sends endStream=true
-                    // The blocking read will wait for data to arrive, allowing real-time processing
-                    while (true) {
-                        // Check if request was cancelled during processing
-                        if (call.isCanceled()) {
-                            streamCallback.onCancelled();
-                            return;
-                        }
+        Request.Builder requestBuilder = new Request.Builder()
+                .url(url)
+                .headers(headerBuilder.build());
 
-                        // Blocking read: waits for data to arrive
-                        // Returns -1 when stream is closed (endStream=true received)
-                        // Returns 0 or positive number when data is available
-                        byte[] buffer = new byte[bufferSize];
-                        long bytesRead = source.read(buffer);
+        if ("POST".equals(method) && requestBody != null) {
+            requestBuilder.post(requestBody);
+        } else if ("PUT".equals(method) && requestBody != null) {
+            requestBuilder.put(requestBody);
+        } else if ("GET".equals(method)) {
+            requestBuilder.get();
+        } else {
+            // Default to GET if method is not specified or not supported
+            requestBuilder.get();
+        }
 
-                        if (bytesRead == -1) {
-                            // Stream ended (server sent endStream=true)
-                            // This is the normal completion for HTTP/2 streaming
-                            streamCallback.onComplete();
-                            break;
-                        } else if (bytesRead > 0) {
-                            // Create exact-sized array if read less than buffer size
-                            byte[] data = bytesRead < bufferSize
-                                    ? Arrays.copyOf(buffer, (int) bytesRead)
-                                    : buffer;
-
-                            // Check if this might be the last chunk (non-blocking check)
-                            // Note: For HTTP/2 streaming, isLast might be false even if
-                            // this is the last chunk in current buffer, as more data may arrive later
-                            boolean isLast = source.exhausted();
-
-                            // Notify callback of data chunk
-                            streamCallback.onData(data, isLast);
-                        }
-                        // If bytesRead == 0, continue loop to wait for more data
-                    }
-
-                } catch (IOException e) {
-                    LOGGER.error("Error reading stream data: {}", e.getMessage(), e);
-                    streamCallback.onError(e);
-                } catch (Exception e) {
-                    LOGGER.error("Unexpected error during stream processing: {}", e.getMessage(), e);
-                    streamCallback.onError(e);
-                } finally {
-                    // Ensure response is closed to free resources
-                    if (response != null) {
-                        response.close();
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call call, IOException e) {
-                if (call.isCanceled()) {
-                    streamCallback.onCancelled();
-                } else {
-                    LOGGER.error("Request failed: {}", e.getMessage(), e);
-                    streamCallback.onError(e);
-                }
-            }
-        });
+        return requestBuilder.build();
     }
 }

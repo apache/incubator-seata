@@ -25,7 +25,9 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.protocol.HTTP;
 import org.apache.seata.common.executor.HttpCallback;
 import org.apache.seata.common.holder.ObjectHolder;
+import org.apache.seata.common.metadata.ClusterWatchEvent;
 import org.apache.seata.common.util.HttpClientUtil;
+import org.apache.seata.common.util.SeataHttpWatch;
 import org.apache.seata.server.BaseSpringBootTest;
 import org.apache.seata.server.cluster.listener.ClusterChangeEvent;
 import org.junit.jupiter.api.Assertions;
@@ -38,6 +40,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.env.Environment;
 
+import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -149,6 +152,47 @@ class ClusterControllerTest extends BaseSpringBootTest {
             }
         }
         Assertions.fail();
+    }
+
+    @Test
+    @Order(3)
+    void watch_stream() throws Exception {
+        Map<String, String> header = new HashMap<>();
+        header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
+        Map<String, String> param = new HashMap<>();
+        param.put("default-test", "1");
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                ((ApplicationEventPublisher) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
+                        .publishEvent(new ClusterChangeEvent(this, "default-test", 2, true));
+            }
+        });
+        thread.start();
+
+        try (SeataHttpWatch<ClusterWatchEvent> watch =
+                     HttpClientUtil.watchPost("http://127.0.0.1:" + port + "/metadata/v1/watch", param, header, ClusterWatchEvent.class)){
+            while (watch.hasNext()) {
+                SeataHttpWatch.Response<ClusterWatchEvent> response = watch.next();
+                // 执行业务逻辑
+                processEvent(response);
+            }
+            System.out.println("接收到server端的endStream");
+        } catch (IOException e) {
+
+        }
+    }
+
+    private static void processEvent(SeataHttpWatch.Response<ClusterWatchEvent> response) {
+        System.out.println("Event Type: " + response.type);
+        if (response.object != null) {
+            System.out.println("Event Data: " + response.object);
+        }
     }
 
     @Test
