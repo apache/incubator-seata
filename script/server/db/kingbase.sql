@@ -90,7 +90,8 @@ INSERT INTO distributed_lock (lock_key, lock_value, expire) VALUES ('TxTimeoutCh
 
 CREATE TABLE vgroup_table
 (
-    vGroup    VARCHAR2(255) PRIMARY KEY,
+    vGroup    VARCHAR2(255),
     namespace VARCHAR2(255),
-    cluster   VARCHAR2(255)
+    cluster   VARCHAR2(255),
+    CONSTRAINT uk_vgroup_namespace_cluster UNIQUE (vGroup, namespace, cluster)
 );
