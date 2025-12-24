@@ -18,6 +18,7 @@ package org.apache.seata.common.metadata.namingserver;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.seata.common.metadata.ClusterRole;
 import org.apache.seata.common.metadata.Node;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -111,5 +112,34 @@ class NamingServerNodeTest {
         newerNode = new NamingServerNode();
         newerNode.setVersion("v1");
         Assertions.assertTrue(currentNode.isChanged(newerNode));
+    }
+
+    @Test
+    void testRaftSplitBrainChanged() {
+        NamingServerNode currentNode = new NamingServerNode();
+        currentNode.setTerm(100L);
+        currentNode.setRole(ClusterRole.LEADER);
+        currentNode.setControl(new Node.Endpoint("1.1.1.1", 888));
+        currentNode.setTransaction(new Node.Endpoint("2.2.2.2", 999));
+        // When heartbeat and cluster election occur concurrently, the term is updated, but the leader status has not
+        // yet been modified.
+        NamingServerNode newerNode = new NamingServerNode();
+        newerNode.setTerm(101L);
+        newerNode.setControl(new Node.Endpoint("1.1.1.1", 888));
+        newerNode.setTransaction(new Node.Endpoint("2.2.2.2", 999));
+        newerNode.setRole(ClusterRole.LEADER);
+        Assertions.assertTrue(currentNode.isChanged(newerNode));
+        NamingServerNode newerNode2 = new NamingServerNode();
+        newerNode2.setTerm(101L);
+        newerNode2.setControl(new Node.Endpoint("1.1.1.1", 888));
+        newerNode2.setTransaction(new Node.Endpoint("2.2.2.2", 999));
+        newerNode2.setRole(ClusterRole.FOLLOWER);
+        Assertions.assertTrue(newerNode.isChanged(newerNode2));
+        NamingServerNode newerNode3 = new NamingServerNode();
+        newerNode3.setTerm(101L);
+        newerNode3.setControl(new Node.Endpoint("1.1.1.1", 888));
+        newerNode3.setTransaction(new Node.Endpoint("2.2.2.2", 999));
+        newerNode3.setRole(ClusterRole.FOLLOWER);
+        Assertions.assertFalse(newerNode2.isChanged(newerNode3));
     }
 }
