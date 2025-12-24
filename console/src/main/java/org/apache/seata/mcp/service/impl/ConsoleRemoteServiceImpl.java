@@ -16,15 +16,17 @@
  */
 package org.apache.seata.mcp.service.impl;
 
+import org.apache.seata.common.NamingServerLocalMarker;
 import org.apache.seata.common.exception.AuthenticationFailedException;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.console.config.WebSecurityConfig;
 import org.apache.seata.console.utils.JwtTokenUtils;
 import org.apache.seata.mcp.core.props.NameSpaceDetail;
-import org.apache.seata.mcp.service.MCPRPCService;
+import org.apache.seata.mcp.service.ConsoleApiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -41,12 +43,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+@ConditionalOnMissingBean(NamingServerLocalMarker.class)
 @Service
-public class MCPRPCServiceImpl implements MCPRPCService {
+public class ConsoleRemoteServiceImpl implements ConsoleApiService {
 
     private final JwtTokenUtils jwtTokenUtils;
 
-    public MCPRPCServiceImpl(JwtTokenUtils jwtTokenUtils) {
+    public ConsoleRemoteServiceImpl(JwtTokenUtils jwtTokenUtils) {
         this.jwtTokenUtils = jwtTokenUtils;
     }
 
@@ -54,7 +57,7 @@ public class MCPRPCServiceImpl implements MCPRPCService {
 
     private final String NAMING_SPACE_URL = "http://127.0.0.1:%s";
 
-    private final Logger logger = LoggerFactory.getLogger(MCPRPCServiceImpl.class);
+    private final Logger logger = LoggerFactory.getLogger(ConsoleRemoteServiceImpl.class);
 
     @Value("${server.port:8081}")
     private String namingSpacePort;

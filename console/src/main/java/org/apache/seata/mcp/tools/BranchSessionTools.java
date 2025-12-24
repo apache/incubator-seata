@@ -19,7 +19,7 @@ package org.apache.seata.mcp.tools;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.mcp.core.constant.RPCConstant;
 import org.apache.seata.mcp.core.props.NameSpaceDetail;
-import org.apache.seata.mcp.service.MCPRPCService;
+import org.apache.seata.mcp.service.ConsoleApiService;
 import org.apache.seata.mcp.service.ModifyConfirmService;
 import org.springaicommunity.mcp.annotation.McpTool;
 import org.springaicommunity.mcp.annotation.McpToolParam;
@@ -31,11 +31,11 @@ import java.util.Map;
 @Service
 public class BranchSessionTools {
 
-    private final MCPRPCService mcpRPCService;
+    private final ConsoleApiService mcpRPCService;
 
     private final ModifyConfirmService modifyConfirmService;
 
-    public BranchSessionTools(MCPRPCService mcpRPCService, ModifyConfirmService modifyConfirmService) {
+    public BranchSessionTools(ConsoleApiService mcpRPCService, ModifyConfirmService modifyConfirmService) {
         this.mcpRPCService = mcpRPCService;
         this.modifyConfirmService = modifyConfirmService;
     }

@@ -42,6 +42,7 @@ public class GlobalSessionVO extends org.apache.seata.server.console.entity.vo.G
     public String getBegin() {
         return beginTime;
     }
+
     public void setBeginTime(String beginTime) {
         this.beginTime = beginTime;
     }
@@ -51,6 +52,7 @@ public class GlobalSessionVO extends org.apache.seata.server.console.entity.vo.G
     public String getCreate() {
         return gmtCreate;
     }
+
     public void setGmtCreate(String gmtCreate) {
         this.gmtCreate = gmtCreate;
     }
@@ -60,6 +62,7 @@ public class GlobalSessionVO extends org.apache.seata.server.console.entity.vo.G
     public String getModified() {
         return gmtModified;
     }
+
     public void setGmtModified(String gmtModified) {
         this.gmtModified = gmtModified;
     }
@@ -68,6 +71,7 @@ public class GlobalSessionVO extends org.apache.seata.server.console.entity.vo.G
     public Set<BranchSessionVO> getBranchSessionVO() {
         return branchSessionVOs;
     }
+
     public void setBranchSessionVO(Set<BranchSessionVO> branchSessionVOs) {
         this.branchSessionVOs = branchSessionVOs;
     }

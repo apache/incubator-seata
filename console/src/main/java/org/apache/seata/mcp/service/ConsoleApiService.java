@@ -21,7 +21,7 @@ import org.springframework.http.HttpHeaders;
 
 import java.util.Map;
 
-public interface MCPRPCService {
+public interface ConsoleApiService {
 
     String getCallTC(
             NameSpaceDetail nameSpaceDetail,

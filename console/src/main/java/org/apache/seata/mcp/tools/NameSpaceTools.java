@@ -21,7 +21,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.seata.common.result.SingleResult;
 import org.apache.seata.mcp.core.constant.RPCConstant;
-import org.apache.seata.mcp.service.MCPRPCService;
+import org.apache.seata.mcp.service.ConsoleApiService;
 import org.springaicommunity.mcp.annotation.McpTool;
 import org.springframework.stereotype.Service;
 
@@ -31,11 +31,11 @@ import java.util.Map;
 @Service
 public class NameSpaceTools {
 
-    private final MCPRPCService mcpRPCService;
+    private final ConsoleApiService mcpRPCService;
 
     private final ObjectMapper objectMapper;
 
-    public NameSpaceTools(MCPRPCService mcpRPCService, ObjectMapper objectMapper) {
+    public NameSpaceTools(ConsoleApiService mcpRPCService, ObjectMapper objectMapper) {
         this.mcpRPCService = mcpRPCService;
         this.objectMapper = objectMapper;
     }

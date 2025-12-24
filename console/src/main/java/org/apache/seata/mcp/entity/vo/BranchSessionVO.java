@@ -38,6 +38,7 @@ public class BranchSessionVO extends org.apache.seata.server.console.entity.vo.B
     public String getCreate() {
         return gmtCreate;
     }
+
     public void setGmtCreate(String gmtCreate) {
         this.gmtCreate = gmtCreate;
     }
@@ -47,6 +48,7 @@ public class BranchSessionVO extends org.apache.seata.server.console.entity.vo.B
     public String getModified() {
         return gmtModified;
     }
+
     public void setGmtModified(String gmtModified) {
         this.gmtModified = gmtModified;
     }

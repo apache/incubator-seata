@@ -30,7 +30,7 @@ import org.apache.seata.mcp.entity.dto.GlobalSessionParamDto;
 import org.apache.seata.mcp.entity.param.GlobalAbnormalSessionParam;
 import org.apache.seata.mcp.entity.param.GlobalSessionParam;
 import org.apache.seata.mcp.entity.vo.GlobalSessionVO;
-import org.apache.seata.mcp.service.MCPRPCService;
+import org.apache.seata.mcp.service.ConsoleApiService;
 import org.apache.seata.mcp.service.ModifyConfirmService;
 import org.springaicommunity.mcp.annotation.McpTool;
 import org.springaicommunity.mcp.annotation.McpToolParam;
@@ -44,7 +44,7 @@ import java.util.Map;
 @Service
 public class GlobalSessionTools {
 
-    private final MCPRPCService mcpRPCService;
+    private final ConsoleApiService mcpRPCService;
 
     private final MCPProperties mcpProperties;
 
@@ -53,7 +53,7 @@ public class GlobalSessionTools {
     private final ModifyConfirmService modifyConfirmService;
 
     public GlobalSessionTools(
-            MCPRPCService mcpRPCService,
+            ConsoleApiService mcpRPCService,
             MCPProperties mcpProperties,
             ObjectMapper objectMapper,
             ModifyConfirmService modifyConfirmService) {

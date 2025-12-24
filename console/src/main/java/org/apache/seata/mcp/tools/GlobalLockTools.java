@@ -29,7 +29,7 @@ import org.apache.seata.mcp.entity.dto.GlobalLockParamDto;
 import org.apache.seata.mcp.entity.param.GlobalLockDeleteParam;
 import org.apache.seata.mcp.entity.param.GlobalLockParam;
 import org.apache.seata.mcp.entity.vo.GlobalLockVO;
-import org.apache.seata.mcp.service.MCPRPCService;
+import org.apache.seata.mcp.service.ConsoleApiService;
 import org.apache.seata.mcp.service.ModifyConfirmService;
 import org.springaicommunity.mcp.annotation.McpTool;
 import org.springaicommunity.mcp.annotation.McpToolParam;
@@ -41,7 +41,7 @@ import java.util.Map;
 @Service
 public class GlobalLockTools {
 
-    private final MCPRPCService mcpRPCService;
+    private final ConsoleApiService mcpRPCService;
 
     private final MCPProperties mcpProperties;
 
@@ -50,7 +50,7 @@ public class GlobalLockTools {
     private final ObjectMapper objectMapper;
 
     public GlobalLockTools(
-            MCPRPCService mcpRPCService,
+            ConsoleApiService mcpRPCService,
             MCPProperties mcpProperties,
             ModifyConfirmService modifyConfirmService,
             ObjectMapper objectMapper) {
