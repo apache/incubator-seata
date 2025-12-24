@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 server:
   port: 8081
 spring:
@@ -24,6 +23,14 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
+  ai:
+    mcp:
+      server:
+        protocol: streamable
+        streamable-http:
+          mcp-endpoint: /mcp
+        name: mcp-server
+        version: 1.0.0
   application:
     name: seata-namingserver
 logging:
@@ -40,3 +47,10 @@ seata:
     csrf-ignore-urls: /naming/v1/**,/api/v1/naming/**
     ignore:
       urls: /,/**/*.css,/**/*.js,/**/*.html,/**/*.map,/**/*.svg,/**/*.png,/**/*.jpeg,/**/*.ico,/api/v1/auth/login,/version.json,/naming/v1/health,/error
+  # MCP Server Configuration
+  mcp:
+    # Maximum query time interval, The unit is milliseconds, Default one day
+    query:
+      max-query-duration: 86400000
+    auth:
+      enabled: true

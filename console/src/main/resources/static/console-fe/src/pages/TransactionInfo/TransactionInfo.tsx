@@ -18,11 +18,11 @@ import React from 'react';
 import { ConfigProvider, Table, Button, DatePicker, Form, Icon, Switch, Pagination, Dialog, Input, Select, Message } from '@alicloud/console-components';
 import Actions, { LinkButton } from '@alicloud/console-components-actions';
 import { withRouter } from 'react-router-dom';
+import { connect } from 'react-redux';
 import Page from '@/components/Page';
 import { GlobalProps } from '@/module';
 import getData, { changeGlobalData, deleteBranchData, deleteGlobalData, GlobalSessionParam, sendGlobalCommitOrRollback,
   startBranchData, startGlobalData, stopBranchData, stopGlobalData, forceDeleteGlobalData, forceDeleteBranchData, fetchNamespaceV2, addGroup, changeGroup } from '@/service/transactionInfo';
-import PropTypes from 'prop-types';
 import moment from 'moment';
 
 import './index.scss';
@@ -47,7 +47,7 @@ type TransactionInfoState = {
   xid : string;
   currentBranchSession: Array<any>;
   globalSessionParam : GlobalSessionParam;
-  namespaceOptions: Map<string, { clusters: string[], clusterVgroups: {[key: string]: string[]} }>;
+  namespaceOptions: Map<string, NamespaceData>;
   clusters: Array<string>;
   vgroups: Array<string>;
   createVGroupDialogVisible: boolean;
@@ -57,13 +57,19 @@ type TransactionInfoState = {
   targetNamespace: string;
   targetClusters: Array<string>;
   targetCluster: string;
+  targetUnits: Array<string>;
+  targetUnit: string;
   originalNamespace: string;
   originalClusters: Array<string>;
   originalCluster: string;
   originalVGroups: Array<string>;
   createNamespace: string;
   createCluster: string;
+  createUnits: Array<string>;
+  createUnit: string;
 }
+
+type NamespaceData = { clusters: string[], clusterVgroups: {[key: string]: string[]}, clusterUnits: {[key: string]: string[]}, clusterTypes: {[key: string]: string} };
 
 const statusList:Array<StatusType> = [
   {
@@ -305,15 +311,10 @@ const warnning = new Map([
     ['SAGA', 'The force delete will only delete session in server.']])],
 ])
 
-const VGROUP_REFRESH_DELAY_MS = 5000;
+const VGROUP_REFRESH_DELAY_MS = 6000;
 
 class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState> {
   static displayName = 'TransactionInfo';
-
-  static propTypes = {
-    locale: PropTypes.object,
-    history: PropTypes.object,
-  };
 
   state: TransactionInfoState = {
     list: [],
@@ -327,7 +328,7 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
       pageSize: 10,
       pageNum: 1,
     },
-    namespaceOptions: new Map<string, { clusters: string[], clusterVgroups: {[key: string]: string[]} }>(),
+    namespaceOptions: new Map<string, NamespaceData>(),
     clusters: [],
     vgroups: [],
     createVGroupDialogVisible: false,
@@ -337,12 +338,16 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
     targetNamespace: '',
     targetClusters: [],
     targetCluster: '',
+    targetUnits: [],
+    targetUnit: '',
     originalNamespace: '',
     originalClusters: [],
     originalCluster: '',
     originalVGroups: [],
     createNamespace: '',
     createCluster: '',
+    createUnits: [],
+    createUnit: '',
   };
   componentDidMount = () => {
     // search once by default
@@ -351,14 +356,26 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
   loadNamespaces = async () => {
     try {
       const namespaces = await fetchNamespaceV2();
-      const namespaceOptions = new Map<string, { clusters: string[], clusterVgroups: {[key: string]: string[]} }>();
+      const namespaceOptions = new Map<string, NamespaceData>();
+
       Object.keys(namespaces).forEach(namespaceKey => {
         const namespaceData = namespaces[namespaceKey];
-        const clusterVgroups = (namespaceData.clusterVgroups || {}) as {[key: string]: string[]};
-        const clusters = Object.keys(clusterVgroups);
+        const clustersData = namespaceData.clusters || {};
+        const clusterVgroups: {[key: string]: string[]} = {};
+        const clusterUnits: {[key: string]: string[]} = {};
+        const clusterTypes: {[key: string]: string} = {};
+        Object.keys(clustersData).forEach(clusterName => {
+          const cluster = clustersData[clusterName];
+          clusterVgroups[clusterName] = cluster.vgroups || [];
+          clusterUnits[clusterName] = cluster.units || [];
+          clusterTypes[clusterName] = cluster.type || 'default';
+        });
+        const clusters = Object.keys(clustersData);
         namespaceOptions.set(namespaceKey, {
           clusters,
           clusterVgroups,
+          clusterUnits,
+          clusterTypes,
         });
       });
         if (namespaceOptions.size > 0) {
@@ -403,6 +420,8 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
 
   search = () => {
     this.setState({ loading: true });
+    const currentBranchSessionDialogVisible = this.state.branchSessionDialogVisible;
+    const currentXid = this.state.xid;
     getData(this.state.globalSessionParam).then(data => {
       // if the result set is empty, set the page number to go back to the first page
       if (data.total === 0) {
@@ -429,8 +448,8 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
         }
       });
 
-      if (this.state.branchSessionDialogVisible) {
-        const currentBranchSession = data.data.find((item: any) => item.xid == this.state.xid)?.branchSessionVOs || [];
+      if (currentBranchSessionDialogVisible) {
+        const currentBranchSession = data.data.find((item: any) => item.xid == currentXid)?.branchSessionVOs || [];
         this.setState({
           list: data.data,
           total: data.total,
@@ -535,7 +554,7 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
   }
 
   operateCell = (val: string, index: number, record: any) => {
-    const { locale = {}, history } = this.props;
+    const { locale, history } = this.props;
     const {
       showBranchSessionTitle,
       showGlobalLockTitle,
@@ -545,7 +564,7 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
       startGlobalSessionTitle,
       sendGlobalSessionTitle,
       changeGlobalSessionTitle,
-    } = locale;
+    } = locale?.TransactionInfo || {};
     let width = getCurrentLanguage() === enUsKey ? '450px' : '420px'
     let height = '120px';
     return (
@@ -729,14 +748,14 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
   }
 
   branchSessionDialogOperateCell = (val: string, index: number, record: any) => {
-    const { locale = {}, history } = this.props;
+    const { locale, history } = this.props;
     const {
       showGlobalLockTitle,
       deleteBranchSessionTitle,
       stopBranchSessionTitle,
       startBranchSessionTitle,
       forceDeleteBranchSessionTitle,
-    } = locale;
+    } = locale.TransactionInfo || {};
     let width = getCurrentLanguage() === enUsKey ? '500px' : '450px'
     let height = '120px';
     return (
@@ -892,12 +911,18 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
   }
 
   showCreateVGroupDialog = () => {
-    this.setState(prevState => ({
-      createVGroupDialogVisible: true,
-      vGroupName: '',
-      createNamespace: prevState.globalSessionParam.namespace || '',
-      createCluster: prevState.globalSessionParam.cluster || '',
-    }));
+    this.setState(prevState => {
+      const clusterUnits = prevState.globalSessionParam.namespace ? prevState.namespaceOptions.get(prevState.globalSessionParam.namespace)?.clusterUnits || {} : {};
+      const units = prevState.globalSessionParam.cluster ? clusterUnits[prevState.globalSessionParam.cluster] || [] : [];
+      return {
+        createVGroupDialogVisible: true,
+        vGroupName: '',
+        createNamespace: prevState.globalSessionParam.namespace || '',
+        createCluster: prevState.globalSessionParam.cluster || '',
+        createUnits: units,
+        createUnit: units.length > 0 ? units[0] : '',
+      };
+    });
   }
 
   closeCreateVGroupDialog = () => {
@@ -906,6 +931,8 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
       vGroupName: '',
       createNamespace: '',
       createCluster: '',
+      createUnits: [],
+      createUnit: '',
     });
   }
 
@@ -916,6 +943,8 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
       targetNamespace: '',
       targetClusters: [],
       targetCluster: '',
+      targetUnits: [],
+      targetUnit: '',
       originalNamespace: '',
       originalClusters: [],
       originalCluster: '',
@@ -930,6 +959,8 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
       targetNamespace: '',
       targetClusters: [],
       targetCluster: '',
+      targetUnits: [],
+      targetUnit: '',
       originalNamespace: '',
       originalClusters: [],
       originalCluster: '',
@@ -938,14 +969,18 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
   }
 
   handleCreateVGroup = () => {
-    const { locale = {} } = this.props;
-    const { createVGroupErrorMessage, createVGroupSuccessMessage, createVGroupFailMessage } = locale;
-    const { createNamespace, createCluster, vGroupName } = this.state;
+    const { locale } = this.props;
+    const { createVGroupErrorMessage, createVGroupSuccessMessage, createVGroupFailMessage } = locale.TransactionInfo || {};
+    const { createNamespace, createCluster, vGroupName, createUnit } = this.state;
     if (!createNamespace || !createCluster || !vGroupName.trim()) {
       Message.error(createVGroupErrorMessage);
       return;
     }
-    addGroup(createNamespace, createCluster, vGroupName.trim()).then(() => {
+
+    const clusterType = this.state.namespaceOptions.get(createNamespace)?.clusterTypes[createCluster];
+    const unitName = clusterType !== 'default' ? createUnit : '';
+
+    addGroup(createNamespace, createCluster, vGroupName.trim(), unitName).then(() => {
       Message.success(createVGroupSuccessMessage);
       this.closeCreateVGroupDialog();
       // Delay 5 seconds before reloading namespaces to get the latest vgroup list
@@ -959,14 +994,18 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
     });
   }
 
-  handleChangeVGroup = () => {
-    const { locale = {} } = this.props;
-    const { changeVGroupSuccessMessage, changeVGroupFailMessage } = locale;
-    const { selectedVGroup, targetNamespace, targetCluster } = this.state;
+    handleChangeVGroup = () => {
+    const { locale } = this.props;
+    const { changeVGroupSuccessMessage, changeVGroupFailMessage } = locale.TransactionInfo || {};
+    const { selectedVGroup, targetNamespace, targetCluster, targetUnit } = this.state;
     if (!selectedVGroup || !targetNamespace || !targetCluster) {
       return;
     }
-    changeGroup(targetNamespace, targetCluster, selectedVGroup, "").then(() => {
+
+    const targetClusterType = this.state.namespaceOptions.get(targetNamespace)?.clusterTypes[targetCluster];
+    const unitName = targetClusterType !== 'default' ? targetUnit : '';
+
+    changeGroup(targetNamespace, targetCluster, selectedVGroup, unitName).then(() => {
       Message.success(changeVGroupSuccessMessage);
       this.closeChangeVGroupDialog();
       // Delay 5 seconds before reloading namespaces to get the latest vgroup list
@@ -978,10 +1017,20 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
       const displayMessage = backendMessage ? `${changeVGroupFailMessage}: ${backendMessage}` : changeVGroupFailMessage;
       Message.error(displayMessage);
     });
+    }
+
+  isChangeVGroupDisabled = (): boolean => {
+    const { selectedVGroup, targetNamespace, targetCluster, targetUnit, namespaceOptions } = this.state;
+    if (!selectedVGroup || !targetNamespace || !targetCluster) {
+      return true;
+    }
+    const clusterType = namespaceOptions.get(targetNamespace)?.clusterTypes[targetCluster];
+    return clusterType !== 'default' && !targetUnit;
   }
 
   render() {
-    const { locale = {} } = this.props;
+    const { locale } = this.props;
+    const transactionInfo = locale.TransactionInfo || {};
     const { title, subTitle, createTimeLabel,
       selectFilerPlaceholder,
       selectNamespaceFilerPlaceholder,
@@ -1013,7 +1062,7 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
       selectTargetNamespacePlaceholder,
       selectTargetClusterPlaceholder,
       selectVGroupPlaceholder,
-    } = locale;
+    } = transactionInfo;
     return (
       <Page
         title={title}
@@ -1189,9 +1238,13 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
                 onChange={(value: string) => {
                   this.setState(prevState => {
                     const clusters = value ? prevState.namespaceOptions.get(value)?.clusters || [] : [];
+                    const clusterUnits = prevState.namespaceOptions.get(value)?.clusterUnits || {};
+                    const units = clusters.length > 0 ? clusterUnits[clusters[0]] || [] : [];
                     return {
                       createNamespace: value,
                       createCluster: clusters.length > 0 ? clusters[0] : '',
+                      createUnits: units,
+                      createUnit: units.length > 0 ? units[0] : '',
                     };
                   });
                 }}
@@ -1203,12 +1256,33 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
               <Select
                 placeholder={selectClusterFilerPlaceholder}
                 onChange={(value: string) => {
-                  this.setState({ createCluster: value });
+                  this.setState(prevState => {
+                    const namespaceData = prevState.namespaceOptions.get(prevState.createNamespace);
+                    const clusterUnits = namespaceData ? namespaceData.clusterUnits : {};
+                    const units = clusterUnits[value] || [];
+                    return {
+                      createCluster: value,
+                      createUnits: units,
+                      createUnit: units.length > 0 ? units[0] : '',
+                    };
+                  });
                 }}
                 dataSource={this.state.namespaceOptions.get(this.state.createNamespace)?.clusters.map(value => ({ label: value, value })) || []}
                 value={this.state.createCluster}
               />
             </FormItem>
+            {this.state.namespaceOptions.get(this.state.createNamespace)?.clusterTypes[this.state.createCluster] !== 'default' && (
+              <FormItem name="createUnit" label="Unit">
+                <Select
+                  placeholder="Select unit"
+                  onChange={(value: string) => {
+                    this.setState({ createUnit: value });
+                  }}
+                  dataSource={this.state.createUnits.map(value => ({ label: value, value }))}
+                  value={this.state.createUnit}
+                />
+              </FormItem>
+            )}
             <FormItem name="vGroupName" label={vGroupNameLabel}>
               <Input
                 placeholder={createVGroupInputPlaceholder}
@@ -1290,7 +1364,9 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
                     return {
                       targetNamespace: value,
                       targetClusters: clusters,
-                      targetCluster: clusters.length > 0 ? clusters[0] : '',
+                      targetCluster: '',
+                      targetUnits: [],
+                      targetUnit: '',
                     };
                   });
                 }}
@@ -1303,14 +1379,36 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
                 hasClear
                 placeholder={selectTargetClusterPlaceholder}
                 onChange={(value: string) => {
-                  this.setState({ targetCluster: value });
+                  this.setState(prevState => {
+                    const namespaceData = prevState.namespaceOptions.get(prevState.targetNamespace);
+                    const clusterUnits = namespaceData ? namespaceData.clusterUnits : {};
+                    const units = clusterUnits[value] || [];
+                    return {
+                      targetCluster: value,
+                      targetUnits: units,
+                      targetUnit: units.length > 0 ? units[0] : '',
+                    };
+                  });
                 }}
                 dataSource={this.state.targetClusters.map(value => ({ label: value, value }))}
                 value={this.state.targetCluster}
               />
             </FormItem>
+            {this.state.targetCluster && this.state.namespaceOptions.get(this.state.targetNamespace)?.clusterTypes[this.state.targetCluster] !== 'default' && (
+              <FormItem name="targetUnit" label="Target Unit">
+                <Select
+                  hasClear
+                  placeholder="Select Target Unit"
+                  onChange={(value: string) => {
+                    this.setState({ targetUnit: value });
+                  }}
+                  dataSource={this.state.targetUnits.map(value => ({ label: value, value }))}
+                  value={this.state.targetUnit}
+                />
+              </FormItem>
+            )}
             <FormItem>
-              <Button type="primary" onClick={this.handleChangeVGroup} disabled={!this.state.selectedVGroup || !this.state.targetNamespace || !this.state.targetCluster}>
+              <Button type="primary" onClick={this.handleChangeVGroup} disabled={this.isChangeVGroupDisabled()}>
                 {confirmButtonLabel}
               </Button>
             </FormItem>
@@ -1321,4 +1419,8 @@ class TransactionInfo extends React.Component<GlobalProps, TransactionInfoState>
   }
 }
 
-export default withRouter(ConfigProvider.config(TransactionInfo, {}));
+const mapStateToProps = (state: any) => ({
+  locale: state.locale.locale,
+});
+
+export default ConfigProvider.config(withRouter(connect(mapStateToProps)(TransactionInfo)), {});

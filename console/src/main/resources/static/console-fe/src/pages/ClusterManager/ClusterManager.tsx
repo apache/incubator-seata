@@ -52,10 +52,11 @@ type ClusterManagerLocale = {
   controlEndpoint?: string;
   transactionEndpoint?: string;
   metadataDialogTitle?: string;
+  role?: string;
 };
 
 type ClusterManagerState = {
-  namespaceOptions: Map<string, { clusters: string[], clusterVgroups: {[key: string]: string[]} }>;
+  namespaceOptions: Map<string, { clusters: string[], clusterVgroups: {[key: string]: string[]}, clusterTypes: {[key: string]: string} }>;
   clusters: Array<string>;
   namespace?: string;
   cluster?: string;
@@ -76,7 +77,7 @@ class ClusterManager extends React.Component<GlobalProps, ClusterManagerState> {
   };
 
   state: ClusterManagerState = {
-    namespaceOptions: new Map<string, { clusters: string[], clusterVgroups: {[key: string]: string[]} }>(),
+    namespaceOptions: new Map<string, { clusters: string[], clusterVgroups: {[key: string]: string[]}, clusterTypes: {[key: string]: string} }>(),
     clusters: [],
     clusterData: null,
     loading: false,
@@ -94,14 +95,22 @@ class ClusterManager extends React.Component<GlobalProps, ClusterManagerState> {
   loadNamespaces = async () => {
     try {
       const namespaces = await fetchNamespaceV2();
-      const namespaceOptions = new Map<string, { clusters: string[], clusterVgroups: {[key: string]: string[]} }>();
+      const namespaceOptions = new Map<string, { clusters: string[], clusterVgroups: {[key: string]: string[]}, clusterTypes: {[key: string]: string} }>();
       Object.keys(namespaces).forEach(namespaceKey => {
         const namespaceData = namespaces[namespaceKey];
-        const clusterVgroups: {[key: string]: string[]} = namespaceData.clusterVgroups || {};
-        const clusters = Object.keys(clusterVgroups);
+        const clustersData = namespaceData.clusters || {};
+        const clusterVgroups: {[key: string]: string[]} = {};
+        const clusterTypes: {[key: string]: string} = {};
+        Object.keys(clustersData).forEach(clusterName => {
+          const cluster = clustersData[clusterName];
+          clusterVgroups[clusterName] = cluster.vgroups || [];
+          clusterTypes[clusterName] = cluster.type || 'default';
+        });
+        const clusters = Object.keys(clustersData);
         namespaceOptions.set(namespaceKey, {
           clusters,
           clusterVgroups,
+          clusterTypes,
         });
       });
       if (namespaceOptions.size > 0) {
@@ -215,11 +224,13 @@ class ClusterManager extends React.Component<GlobalProps, ClusterManagerState> {
   };
 
   render() {
-    const { locale = {} } = this.props;
+    const { locale } = this.props;
     const rawLocale = locale.ClusterManager;
     const clusterManagerLocale: ClusterManagerLocale = typeof rawLocale === 'object' && rawLocale !== null ? rawLocale : {};
-    const { title, subTitle, selectNamespaceFilerPlaceholder, selectClusterFilerPlaceholder, searchButtonLabel, unitName, members, clusterType, view, unitDialogTitle, control, transaction, weight, healthy, term, unit, operations, internal, version, metadata, controlEndpoint, transactionEndpoint, metadataDialogTitle } = clusterManagerLocale;
+    const { title, subTitle, selectNamespaceFilerPlaceholder, selectClusterFilerPlaceholder, searchButtonLabel, members, clusterType, view, unitDialogTitle, control, transaction, weight, healthy, term, unit, operations, internal, version, metadata, controlEndpoint, transactionEndpoint, metadataDialogTitle, role } = clusterManagerLocale;
     const unitData = this.state.clusterData ? Object.entries(this.state.clusterData.unitData || {}) : [];
+    const { namespace } = this.state;
+    const namespaceData = namespace ? this.state.namespaceOptions.get(namespace) : null;
     return (
       <Page
         title={title || 'Cluster Manager'}
@@ -264,7 +275,7 @@ class ClusterManager extends React.Component<GlobalProps, ClusterManagerState> {
           </FormItem>
         </Form>
         {/* unit table */}
-        <div>
+        <div style={{ marginTop: '20px' }}>
           <Table dataSource={unitData} loading={this.state.loading}>
             <Table.Column title={members || 'Members'} dataIndex="1" cell={(val: any) => (val.namingInstanceList ? val.namingInstanceList.length : 0)} />
             <Table.Column title={clusterType || 'Cluster Type'} cell={() => (this.state.clusterData ? this.state.clusterData.clusterType : '')} />
@@ -292,6 +303,7 @@ class ClusterManager extends React.Component<GlobalProps, ClusterManagerState> {
             <Table.Column title={weight || 'Weight'} dataIndex="weight" />
             <Table.Column title={healthy || 'Healthy'} dataIndex="healthy" cell={(val: boolean) => (val ? 'Yes' : 'No')} />
             <Table.Column title={term || 'Term'} dataIndex="term" />
+            <Table.Column title={role || 'Role'} dataIndex="role" />
             <Table.Column title={unit || 'Unit'} dataIndex="unit" />
             <Table.Column title={version || 'Version'} dataIndex="version" />
             <Table.Column title={metadata || 'Metadata'} dataIndex="metadata" cell={(val: any) => (val ? <Button onClick={() => this.showMetadataDialog(val)}>View JSON</Button> : '')} />
