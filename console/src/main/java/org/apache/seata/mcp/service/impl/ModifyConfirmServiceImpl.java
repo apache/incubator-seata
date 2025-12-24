@@ -16,28 +16,50 @@
  */
 package org.apache.seata.mcp.service.impl;
 
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.io.Decoders;
+import org.apache.seata.console.utils.JwtTokenUtils;
 import org.apache.seata.mcp.service.ModifyConfirmService;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import javax.crypto.spec.SecretKeySpec;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class ModifyConfirmServiceImpl implements ModifyConfirmService {
 
-    private static final Map<String, Long> MODIFY_KEY = new ConcurrentHashMap<>();
+    private final JwtTokenUtils jwtTokenUtils;
 
-    private static final long EXPIRE_MS = 60_000; // Key timeout period
+    private static final long ModifyTokenValidityInMilliseconds = 60_000;
+
+    @Value("${seata.security.secretKey}")
+    private String secretKey;
+
+    public ModifyConfirmServiceImpl(JwtTokenUtils jwtTokenUtils) {
+        this.jwtTokenUtils = jwtTokenUtils;
+    }
 
     @Override
     public Map<String, String> confirmAndGetKey() {
-        String key = UUID.randomUUID().toString();
-        MODIFY_KEY.put(key, System.currentTimeMillis());
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        long now = (new Date()).getTime();
+        Date expirationDate = new Date(now + ModifyTokenValidityInMilliseconds);
+        SecretKeySpec secretKeySpec =
+                new SecretKeySpec(Decoders.BASE64.decode(secretKey), SignatureAlgorithm.HS256.getJcaName());
+        String key = Jwts.builder()
+                .setSubject(authentication.getName())
+                .claim("modify", "")
+                .setExpiration(expirationDate)
+                .signWith(secretKeySpec, SignatureAlgorithm.HS256)
+                .compact();
         Map<String, String> map = new HashMap<>();
         map.put("modify_key", key);
-        map.put("expire_time", EXPIRE_MS / 1000 + "s");
         map.put(
                 "Important!!!",
                 "You need to repeat the content to be modified by the user and get confirmation from the user before you can continue to call the modification tool");
@@ -46,12 +68,6 @@ public class ModifyConfirmServiceImpl implements ModifyConfirmService {
 
     @Override
     public Boolean isValidKey(String key) {
-        Long ts = MODIFY_KEY.get(key);
-        if (ts == null || (System.currentTimeMillis() - ts) > EXPIRE_MS) {
-            MODIFY_KEY.remove(key);
-            return false;
-        }
-        MODIFY_KEY.remove(key);
-        return true;
+        return jwtTokenUtils.validateToken(key);
     }
 }
