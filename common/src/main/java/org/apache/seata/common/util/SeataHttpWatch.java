@@ -86,9 +86,9 @@ public class SeataHttpWatch<T> implements Iterator<SeataHttpWatch.Response<T>>,
     /**
      * Create a Watch instance from an OkHttp call
      *
-     * @param call the prepared HTTP call
+     * @param call      the prepared HTTP call
      * @param eventType the class type for deserializing event data
-     * @param <T> the event data type
+     * @param <T>       the event data type
      * @return a Watch instance
      * @throws IOException if the request fails
      */
@@ -127,10 +127,10 @@ public class SeataHttpWatch<T> implements Iterator<SeataHttpWatch.Response<T>>,
     /**
      * Create a Watch instance with a prepared request
      *
-     * @param client the OkHttpClient instance
-     * @param request the HTTP request
+     * @param client    the OkHttpClient instance
+     * @param request   the HTTP request
      * @param eventType the class type for deserializing event data
-     * @param <T> the event data type
+     * @param <T>       the event data type
      * @return a Watch instance
      * @throws IOException if the request fails
      */
@@ -169,14 +169,14 @@ public class SeataHttpWatch<T> implements Iterator<SeataHttpWatch.Response<T>>,
             // SSE format: "data: {json}\n\n"
             // Each event is separated by double newline
             // Event type is included in the JSON data, not in a separate "event:" field
-            
+
             StringBuilder dataBuffer = new StringBuilder();
-            
+
             // Read lines until we get a complete event (ending with empty line)
             // This loop reads all lines of a single event atomically
             while (true) {
                 String line = source.readUtf8Line();
-                
+
                 if (line == null) {
                     // Stream closed
                     if (dataBuffer.length() > 0) {
@@ -190,7 +190,7 @@ public class SeataHttpWatch<T> implements Iterator<SeataHttpWatch.Response<T>>,
                 if (line.startsWith("data: ")) {
                     String jsonData = line.substring(6);
                     if (dataBuffer.length() > 0) {
-                        dataBuffer.append('\n'); 
+                        dataBuffer.append('\n');
                     }
                     dataBuffer.append(jsonData);
                 } else if (line.isEmpty()) {
@@ -222,7 +222,7 @@ public class SeataHttpWatch<T> implements Iterator<SeataHttpWatch.Response<T>>,
             // Parse JSON once to get both event type and full data
             // First, parse to extract event type
             EventMetadata metadata = objectMapper.readValue(json, EventMetadata.class);
-            
+
             // Map event type from JSON to Response.Type
             Response.Type responseType = mapEventTypeToResponseType(metadata.type);
 
