@@ -63,6 +63,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -100,6 +101,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     private final Runnable reconnectTask;
     private AtomicBoolean timerStarted = new AtomicBoolean(false);
     private final ReentrantLock reconnectLock = new ReentrantLock();
+    private ScheduledFuture<?> reconnectScheduledFuture;
 
     /**
      * When sending message type is {@link MergeMessage}, will be stored to mergeMsgMap.
@@ -128,12 +130,12 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         reconnectLock.lock();
         try {
             if (timerStarted.compareAndSet(false, true)) {
-                timerExecutor.scheduleAtFixedRate(
+                reconnectScheduledFuture = timerExecutor.scheduleAtFixedRate(
                         reconnectTask, SCHEDULE_DELAY_MILLS, SCHEDULE_INTERVAL_MILLS, TimeUnit.MILLISECONDS);
                 LOGGER.info("Reconnect timer started (role: {})", transactionRole.name());
             }
 
-            if (this.isEnableClientBatchSendRequest()) {
+            if (this.isEnableClientBatchSendRequest() && mergeSendExecutorService == null) {
                 mergeSendExecutorService = new ThreadPoolExecutor(
                         MAX_MERGE_SEND_THREAD,
                         MAX_MERGE_SEND_THREAD,
@@ -167,7 +169,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
             }
             try {
                 String serviceGroup = getTransactionServiceGroup();
-                if (StringUtils.isNotBlank(serviceGroup)) {
+                if (StringUtils.isNotBlank(serviceGroup) && timerStarted.get()) {
                     clientChannelManager.reconnect(serviceGroup);
                 }
             } catch (Throwable t) {
@@ -293,11 +295,16 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         reconnectLock.lock();
         try {
             if (timerStarted.compareAndSet(true, false)) {
+                if (reconnectScheduledFuture != null) {
+                    reconnectScheduledFuture.cancel(false);
+                    reconnectScheduledFuture = null;
+                }
                 LOGGER.info("Reconnect timer stopped (role: {})", transactionRole.name());
             }
             clientBootstrap.shutdown();
             if (mergeSendExecutorService != null) {
                 mergeSendExecutorService.shutdown();
+                mergeSendExecutorService = null;
             }
             super.destroy();
         } finally {
