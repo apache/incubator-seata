@@ -301,7 +301,6 @@
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -394,7 +393,7 @@
                         <workingDirectory>/seata-server</workingDirectory>
                         <ports>
                             <port>8091</port>
-                            <port>7091</port>
+                            <port>9091</port>
                         </ports>
                         <labels>
                             <name>seata-server</name>

@@ -93,5 +93,5 @@ CREATE TABLE IF NOT EXISTS vgroup_table
     vGroup    VARCHAR(255),
     namespace VARCHAR(255),
     cluster   VARCHAR(255),
-    PRIMARY KEY (vGroup)
+    CONSTRAINT uk_vgroup_namespace_cluster UNIQUE (vGroup, namespace, cluster)
 );
