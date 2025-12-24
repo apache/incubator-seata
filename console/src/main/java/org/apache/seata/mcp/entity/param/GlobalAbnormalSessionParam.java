@@ -32,6 +32,9 @@ public class GlobalAbnormalSessionParam {
             required = false)
     private String timeEnd;
 
+    @McpToolParam(description = "PAGE NUMBER")
+    private int pageNum;
+
     public boolean isWithBranch() {
         return withBranch;
     }
@@ -54,5 +57,13 @@ public class GlobalAbnormalSessionParam {
 
     public void setTimeEnd(String timeEnd) {
         this.timeEnd = timeEnd;
+    }
+
+    public int getPageNum() {
+        return pageNum;
+    }
+
+    public void setPageNum(int pageNum) {
+        this.pageNum = pageNum;
     }
 }

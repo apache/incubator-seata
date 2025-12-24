@@ -18,7 +18,6 @@ package org.apache.seata.namingserver.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.seata.common.NamingServerLocalMarker;
 import org.apache.seata.common.metadata.ClusterRole;
 import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.metadata.namingserver.NamingServerNode;
@@ -26,6 +25,7 @@ import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.mcp.core.props.NameSpaceDetail;
 import org.apache.seata.mcp.service.ConsoleApiService;
+import org.apache.seata.mcp.service.impl.ConsoleRemoteServiceImpl;
 import org.apache.seata.namingserver.manager.NamingManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +49,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import static org.apache.seata.common.Constants.RAFT_GROUP_HEADER;
 
-@ConditionalOnBean(NamingServerLocalMarker.class)
+@ConditionalOnBean(ConsoleRemoteServiceImpl.class)
 @Primary
 @Service
 public class ConsoleLocalServiceImpl implements ConsoleApiService {
@@ -102,7 +102,7 @@ public class ConsoleLocalServiceImpl implements ConsoleApiService {
                     String responseBody = null;
                     try {
                         ResponseEntity<String> response =
-                                restTemplate.exchange(targetUrl, HttpMethod.GET, entity, String.class);
+                                restTemplate.exchange(targetUrl, httpMethod, entity, String.class);
 
                         responseBody = response.getBody();
 

@@ -18,7 +18,7 @@ package org.apache.seata.mcp.entity.dto;
 
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.mcp.entity.param.GlobalAbnormalSessionParam;
-import org.springframework.ai.tool.annotation.ToolParam;
+import org.springaicommunity.mcp.annotation.McpToolParam;
 
 import java.io.Serializable;
 
@@ -26,31 +26,33 @@ public class GlobalSessionParamDto implements Serializable {
 
     private static final long serialVersionUID = 115488252809011284L;
 
-    @ToolParam(description = "GLOBAL TRANSACTIONS id", required = false)
+    @McpToolParam(description = "GLOBAL TRANSACTIONS id", required = false)
     private String xid;
 
-    @ToolParam(description = "applicationId", required = false)
+    @McpToolParam(description = "applicationId", required = false)
     private String applicationId;
 
-    @ToolParam(description = "the state enumeration class is in example", required = false)
+    @McpToolParam(description = "the state enumeration class is in example", required = false)
     private Integer status;
 
-    @ToolParam(description = "The name of the transaction", required = false)
+    @McpToolParam(description = "The name of the transaction", required = false)
     private String transactionName;
 
-    @ToolParam(description = "Whether or not it contains branch transaction information", required = false)
+    @McpToolParam(description = "Whether or not it contains branch transaction information", required = false)
     private boolean withBranch;
 
-    @ToolParam(description = "PAGE NUMBER")
+    @McpToolParam(description = "PAGE NUMBER")
     private int pageNum;
 
-    @ToolParam(description = "PageSize")
+    @McpToolParam(description = "PageSize")
     private int pageSize;
 
-    @ToolParam(description = "The transaction start time is after this time (yyyy-MM-dd HH:mm:ss)", required = false)
+    @McpToolParam(description = "The transaction start time is after this time (yyyy-MM-dd HH:mm:ss)", required = false)
     private String timeStart;
 
-    @ToolParam(description = "The transaction start time is before this time (yyyy-MM-dd HH:mm:ss)", required = false)
+    @McpToolParam(
+            description = "The transaction start time is before this time (yyyy-MM-dd HH:mm:ss)",
+            required = false)
     private String timeEnd;
 
     public int getPageNum() {
@@ -134,6 +136,7 @@ public class GlobalSessionParamDto implements Serializable {
             param.setTimeEnd(abParam.getTimeEnd());
         }
         param.setWithBranch(abParam.isWithBranch());
+        param.setPageNum(abParam.getPageNum());
         return param;
     }
 }

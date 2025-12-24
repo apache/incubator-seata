@@ -54,6 +54,8 @@ public class GlobalSessionTools {
 
     private final List<Integer> exceptionStatus = new ArrayList<>();
 
+    public static int AbnormalSessionPageSize = 30;
+
     public GlobalSessionTools(
             ConsoleApiService mcpRPCService,
             MCPProperties mcpProperties,
@@ -206,19 +208,13 @@ public class GlobalSessionTools {
             @McpToolParam(description = "Query Param") GlobalAbnormalSessionParam abnormalSessionParam) {
         List<GlobalSessionVO> result = new ArrayList<>();
         GlobalSessionParamDto param = GlobalSessionParamDto.covertFromAbnormalParam(abnormalSessionParam);
-        param.setPageNum(1);
-        param.setPageSize(100);
+        param.setPageSize(AbnormalSessionPageSize);
         for (Integer status : exceptionStatus) {
             param.setStatus(status);
             List<GlobalSessionVO> datas =
                     queryGlobalSession(nameSpaceDetail, param).getData();
             if (datas != null && !datas.isEmpty()) {
-                for (GlobalSessionVO vo : datas) {
-                    if (result.size() >= 200) {
-                        return result;
-                    }
-                    result.add(vo);
-                }
+                result.addAll(datas);
             }
         }
         return result;
