@@ -51,7 +51,7 @@ public class DateUtils {
         try {
             LocalDateTime dateTime = LocalDateTime.parse(dateTimeStr, formatter);
             return dateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-        } catch (Exception e) {
+        } catch (DateTimeParseException e) {
             return -1;
         }
     }
@@ -63,14 +63,15 @@ public class DateUtils {
             dateTime = Instant.ofEpochMilli(timestamp)
                     .atZone(ZoneId.systemDefault())
                     .toLocalDateTime();
-        } catch (DateTimeParseException e) {
+        } catch (DateTimeException | ArithmeticException e) {
             return "Parse Failed, please check that the timestamp is correct";
         }
         return dateTime.format(formatter);
     }
 
     public static boolean judgeExceedTimeDuration(Long startTime, Long endTime, Long maxDuration) {
-        if (endTime < startTime) return false;
+        if (endTime < startTime) throw new IllegalArgumentException("endTime must not be earlier than startTime");
+        ;
         return endTime - startTime > maxDuration;
     }
 

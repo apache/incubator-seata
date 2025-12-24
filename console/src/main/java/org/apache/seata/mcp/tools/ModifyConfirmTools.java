@@ -29,13 +29,13 @@ import java.util.Map;
 @Service
 public class ModifyConfirmTools {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ModifyConfirmTools.class);
+
     private final ModifyConfirmService modifyConfirmService;
 
     public ModifyConfirmTools(ModifyConfirmService modifyConfirmService) {
         this.modifyConfirmService = modifyConfirmService;
     }
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ModifyConfirmTools.class);
 
     @McpTool(
             description = "Before modifying (update or delete) a transaction or lock, the user MUST manually confirm."

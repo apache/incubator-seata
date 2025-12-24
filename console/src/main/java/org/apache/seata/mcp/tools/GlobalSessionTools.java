@@ -52,6 +52,8 @@ public class GlobalSessionTools {
 
     private final ModifyConfirmService modifyConfirmService;
 
+    private final List<Integer> exceptionStatus = new ArrayList<>();
+
     public GlobalSessionTools(
             ConsoleApiService mcpRPCService,
             MCPProperties mcpProperties,
@@ -61,9 +63,10 @@ public class GlobalSessionTools {
         this.mcpProperties = mcpProperties;
         this.objectMapper = objectMapper;
         this.modifyConfirmService = modifyConfirmService;
+        exceptionStatus.add(GlobalStatus.CommitFailed.getCode());
+        exceptionStatus.add(GlobalStatus.TimeoutRollbackFailed.getCode());
+        exceptionStatus.add(GlobalStatus.RollbackFailed.getCode());
     }
-
-    private final List<Integer> exceptionStatus = new ArrayList<>();
 
     @McpTool(description = "Query global transactions")
     public PageResult<GlobalSessionVO> queryGlobalSession(
@@ -205,11 +208,6 @@ public class GlobalSessionTools {
         GlobalSessionParamDto param = GlobalSessionParamDto.covertFromAbnormalParam(abnormalSessionParam);
         param.setPageNum(1);
         param.setPageSize(100);
-        if (exceptionStatus.isEmpty()) {
-            exceptionStatus.add(GlobalStatus.CommitFailed.getCode());
-            exceptionStatus.add(GlobalStatus.TimeoutRollbackFailed.getCode());
-            exceptionStatus.add(GlobalStatus.RollbackFailed.getCode());
-        }
         for (Integer status : exceptionStatus) {
             param.setStatus(status);
             List<GlobalSessionVO> datas =

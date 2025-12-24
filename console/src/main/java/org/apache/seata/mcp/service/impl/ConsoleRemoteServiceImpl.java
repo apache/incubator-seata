@@ -49,11 +49,12 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
 
     private final JwtTokenUtils jwtTokenUtils;
 
-    public ConsoleRemoteServiceImpl(JwtTokenUtils jwtTokenUtils) {
-        this.jwtTokenUtils = jwtTokenUtils;
-    }
+    private final RestTemplate restTemplate;
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    public ConsoleRemoteServiceImpl(JwtTokenUtils jwtTokenUtils, RestTemplate restTemplate) {
+        this.jwtTokenUtils = jwtTokenUtils;
+        this.restTemplate = restTemplate;
+    }
 
     private final String NAMING_SPACE_URL = "http://127.0.0.1:%s";
 
@@ -78,10 +79,9 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
             NameSpaceDetail nameSpaceDetail, HttpHeaders headers, Map<String, String> pathParams) {
         headers.add("x-seata-namespace", nameSpaceDetail.getNamespace());
         if (StringUtils.isNotBlank(nameSpaceDetail.getvGroup())) {
-            if (pathParams == null) {
-                pathParams = new HashMap<>();
+            if (pathParams != null) {
+                pathParams.put("vGroup", nameSpaceDetail.getvGroup());
             }
-            pathParams.put("vGroup", nameSpaceDetail.getvGroup());
             return;
         }
         if (nameSpaceDetail.getCluster() != null) {
@@ -89,6 +89,7 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
         }
     }
 
+    @Override
     public String getCallNameSpace(
             String path, Object queryParams, Map<String, String> pathParams, HttpHeaders headers) {
         if (headers == null) {
@@ -98,7 +99,7 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
         Map<String, Object> queryParamsMap = objectToQueryParamMap(queryParams);
         String url = buildUrl(String.format(NAMING_SPACE_URL, namingSpacePort), path, pathParams, queryParamsMap);
         HttpEntity<String> entity = new HttpEntity<>(headers);
-        String responseBody = null;
+        String responseBody;
         try {
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
 
@@ -109,8 +110,8 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
             }
             return responseBody;
         } catch (RestClientException e) {
-            logger.error("MCP GET Call NameSpace Failed: {}", e.getMessage());
-            return responseBody;
+            logger.error("MCP GET Call NameSpace Failed", e);
+            return "MCP GET Call NameSpace Failed: " + e.getMessage();
         }
     }
 
@@ -133,7 +134,7 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
         Map<String, Object> queryParamsMap = objectToQueryParamMap(queryParams);
         String url = buildUrl(String.format(NAMING_SPACE_URL, namingSpacePort), path, pathParams, queryParamsMap);
         HttpEntity<String> entity = new HttpEntity<>(headers);
-        String responseBody = null;
+        String responseBody;
         try {
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
 
@@ -144,8 +145,8 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
             }
             return responseBody;
         } catch (RestClientException e) {
-            logger.error("MCP GET Call TC Failed: {}", e.getMessage());
-            return responseBody;
+            logger.error("MCP GET Call TC Failed", e);
+            return "MCP GET Call TC Failed: " + e.getMessage();
         }
     }
 
@@ -168,7 +169,7 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
         Map<String, Object> queryParamsMap = objectToQueryParamMap(queryParams);
         String url = buildUrl(String.format(NAMING_SPACE_URL, namingSpacePort), path, pathParams, queryParamsMap);
         HttpEntity<String> entity = new HttpEntity<>(headers);
-        String responseBody = null;
+        String responseBody;
         try {
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.DELETE, entity, String.class);
 
@@ -179,8 +180,8 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
             }
             return responseBody;
         } catch (RestClientException e) {
-            logger.error("MCP DELETE Call TC Failed: {}", e.getMessage());
-            return responseBody;
+            logger.error("MCP DELETE Call TC Failed", e);
+            return "MCP DELETE Call TC Failed: " + e.getMessage();
         }
     }
 
@@ -203,7 +204,7 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
         Map<String, Object> queryParamsMap = objectToQueryParamMap(queryParams);
         String url = buildUrl(String.format(NAMING_SPACE_URL, namingSpacePort), path, pathParams, queryParamsMap);
         HttpEntity<String> entity = new HttpEntity<>(headers);
-        String responseBody = null;
+        String responseBody;
         try {
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.PUT, entity, String.class);
 
@@ -214,8 +215,8 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
             }
             return responseBody;
         } catch (RestClientException e) {
-            logger.error("MCP Put Call TC Failed: {}", e.getMessage());
-            return responseBody;
+            logger.error("MCP Put Call TC Failed", e);
+            return "MCP Put Call TC Failed: " + e.getMessage();
         }
     }
 

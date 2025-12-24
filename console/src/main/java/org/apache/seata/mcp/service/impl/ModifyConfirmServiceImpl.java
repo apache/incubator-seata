@@ -37,7 +37,7 @@ public class ModifyConfirmServiceImpl implements ModifyConfirmService {
         MODIFY_KEY.put(key, System.currentTimeMillis());
         Map<String, String> map = new HashMap<>();
         map.put("modify_key", key);
-        map.put("expire_time", "60s");
+        map.put("expire_time", EXPIRE_MS / 1000 + "s");
         map.put(
                 "Important!!!",
                 "You need to repeat the content to be modified by the user and get confirmation from the user before you can continue to call the modification tool");
