@@ -220,31 +220,33 @@ public class MCPRPCServiceImpl implements MCPRPCService {
         if (obj == null) {
             return Collections.emptyMap();
         }
-
-        Map<String, Object> paramMap = new HashMap<>();
-
         if (obj instanceof Map) {
-            ((Map<?, ?>) obj).forEach((key, value) -> {
-                if (key != null && value != null) {
-                    paramMap.put(key.toString(), value);
+            Map<?, ?> map = (Map<?, ?>) obj;
+            Map<String, Object> result = new HashMap<>(map.size());
+            map.forEach((k, v) -> {
+                if (k != null && v != null) {
+                    result.put(k.toString(), v);
                 }
             });
-            return paramMap;
+            return result;
         }
 
+        Map<String, Object> paramMap = new HashMap<>();
         Class<?> clazz = obj.getClass();
-        for (Field field : clazz.getDeclaredFields()) {
-            try {
-                field.setAccessible(true);
-                Object value = field.get(obj);
-                if (value != null) {
-                    paramMap.put(field.getName(), value);
+        while (clazz != null && clazz != Object.class) {
+            for (Field field : clazz.getDeclaredFields()) {
+                try {
+                    field.setAccessible(true);
+                    Object value = field.get(obj);
+                    if (value != null) {
+                        paramMap.putIfAbsent(field.getName(), value);
+                    }
+                } catch (IllegalAccessException e) {
+                    logger.warn("Failed to access field {}: {}", field.getName(), e.getMessage());
                 }
-            } catch (IllegalAccessException e) {
-                logger.warn("Failed to access field {}: {}", field.getName(), e.getMessage());
             }
+            clazz = clazz.getSuperclass();
         }
-
         return paramMap;
     }
 
