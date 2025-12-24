@@ -16,22 +16,44 @@
  */
 package org.apache.seata.mcp.tools;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.seata.common.result.SingleResult;
 import org.apache.seata.mcp.core.constant.RPCConstant;
 import org.apache.seata.mcp.service.MCPRPCService;
 import org.springaicommunity.mcp.annotation.McpTool;
 import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class NameSpaceTools {
 
     private final MCPRPCService mcpRPCService;
 
-    public NameSpaceTools(MCPRPCService mcpRPCService) {
+    private final ObjectMapper objectMapper;
+
+    public NameSpaceTools(MCPRPCService mcpRPCService, ObjectMapper objectMapper) {
         this.mcpRPCService = mcpRPCService;
+        this.objectMapper = objectMapper;
     }
 
     @McpTool(description = "Get the namespace and cluster or vgroup where all TC/Servers are located")
-    public String getTCNameSpaces() {
-        return mcpRPCService.getCallNameSpace(RPCConstant.GET_NAMESPACE_PATH, null, null, null);
+    public SingleResult<?> getTCNameSpaces() {
+        String result = mcpRPCService.getCallNameSpace(RPCConstant.GET_NAMESPACE_PATH, null, null, null);
+        Map<String, Object> nameSpacesVo = new HashMap<>();
+        try {
+            JsonNode root = objectMapper.readTree(result);
+            JsonNode dataNode = root.get("data");
+            if (dataNode != null && !dataNode.isNull()) {
+                nameSpacesVo.put("namespaces", dataNode.toString());
+            }
+        } catch (JsonProcessingException e) {
+            nameSpacesVo.put("failed", e.getMessage());
+            return SingleResult.failure("get namespace failed:" + e.getMessage());
+        }
+        return SingleResult.success(nameSpacesVo);
     }
 }
