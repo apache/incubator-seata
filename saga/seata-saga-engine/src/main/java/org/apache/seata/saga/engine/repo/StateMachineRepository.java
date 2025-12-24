@@ -63,7 +63,7 @@ public interface StateMachineRepository {
     StateMachine registerStateMachine(StateMachine stateMachine);
 
     /**
-     * Registry by resources.
+     * Register state machines by resources.
      *
      * @param resourceAsStreamArray the resource as stream array
      * @param tenantId the tenant id
