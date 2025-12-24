@@ -57,7 +57,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import okio.BufferedSource;
 
 public class HttpClientUtil {
 
@@ -235,68 +234,6 @@ public class HttpClientUtil {
         return client.execute(post);
     }
 
-    public static void doPostWithHttp2(
-            String url, Map<String, String> params, Map<String, String> headers, HttpCallback<Response> callback) {
-        doPostWithHttp2(url, params, headers, callback, 10);
-    }
-
-    public static void doPostWithHttp2(
-            String url,
-            Map<String, String> params,
-            Map<String, String> headers,
-            HttpCallback<Response> callback,
-            int timeoutSeconds) {
-        try {
-            String contentType = headers != null ? headers.get("Content-Type") : "";
-            RequestBody requestBody = createRequestBody(params, contentType);
-            Request request = buildHttp2Request(url, headers, requestBody, "POST");
-            OkHttpClient client = createHttp2ClientWithTimeout(timeoutSeconds);
-            executeAsync(client, request, callback);
-        } catch (JsonProcessingException e) {
-            LOGGER.error(e.getMessage(), e);
-            callback.onFailure(e);
-        }
-    }
-
-    public static void doPostWithHttp2(
-            String url, String body, Map<String, String> headers, HttpCallback<Response> callback) {
-        // default timeout 10 seconds
-        doPostWithHttp2(url, body, headers, callback, 10);
-    }
-
-    public static void doPostWithHttp2(
-            String url, String body, Map<String, String> headers, HttpCallback<Response> callback, int timeoutSeconds) {
-        RequestBody requestBody = RequestBody.create(body, MEDIA_TYPE_JSON);
-        Request request = buildHttp2Request(url, headers, requestBody, "POST");
-        OkHttpClient client = createHttp2ClientWithTimeout(timeoutSeconds);
-        executeAsync(client, request, callback);
-    }
-
-    public static void doGetWithHttp2(
-            String url, Map<String, String> headers, final HttpCallback<Response> callback, int timeoutSeconds) {
-        Request request = buildHttp2Request(url, headers, null, "GET");
-        OkHttpClient client = createHttp2ClientWithTimeout(timeoutSeconds);
-        executeAsync(client, request, callback);
-    }
-
-    private static RequestBody createRequestBody(Map<String, String> params, String contentType)
-            throws JsonProcessingException {
-        if (params == null || params.isEmpty()) {
-            return RequestBody.create(new byte[0]);
-        }
-
-        // Extract media type without parameters for robust comparison
-        String mediaTypeOnly = contentType == null ? "" : contentType.split(";")[0].trim();
-        if (MEDIA_TYPE_FORM_URLENCODED.toString().equals(mediaTypeOnly)) {
-            FormBody.Builder formBuilder = new FormBody.Builder();
-            params.forEach(formBuilder::add);
-            return formBuilder.build();
-        } else {
-            String json = OBJECT_MAPPER.writeValueAsString(params);
-            return RequestBody.create(json, MEDIA_TYPE_JSON);
-        }
-    }
-
     private static OkHttpClient createHttp2ClientWithTimeout(int timeoutSeconds) {
         return HTTP2_CLIENT_MAP.computeIfAbsent(timeoutSeconds, k -> new OkHttpClient.Builder()
                 // Use HTTP/2 prior knowledge to directly use HTTP/2 without an initial HTTP/1.1 upgrade
@@ -347,7 +284,7 @@ public class HttpClientUtil {
         });
     }
 
-    public static OkHttpClient createHttp2WatchClient(int connectTimeoutSeconds) {
+    private static OkHttpClient createHttp2WatchClient(int connectTimeoutSeconds) {
         return new OkHttpClient.Builder()
                 .protocols(Collections.singletonList(Protocol.H2_PRIOR_KNOWLEDGE))
                 .connectTimeout(connectTimeoutSeconds, TimeUnit.SECONDS) // 连接阶段快速失败
@@ -433,5 +370,23 @@ public class HttpClientUtil {
         }
 
         return requestBuilder.build();
+    }
+
+    private static RequestBody createRequestBody(Map<String, String> params, String contentType)
+            throws JsonProcessingException {
+        if (params == null || params.isEmpty()) {
+            return RequestBody.create(new byte[0]);
+        }
+
+        // Extract media type without parameters for robust comparison
+        String mediaTypeOnly = contentType == null ? "" : contentType.split(";")[0].trim();
+        if (MEDIA_TYPE_FORM_URLENCODED.toString().equals(mediaTypeOnly)) {
+            FormBody.Builder formBuilder = new FormBody.Builder();
+            params.forEach(formBuilder::add);
+            return formBuilder.build();
+        } else {
+            String json = OBJECT_MAPPER.writeValueAsString(params);
+            return RequestBody.create(json, MEDIA_TYPE_JSON);
+        }
     }
 }
