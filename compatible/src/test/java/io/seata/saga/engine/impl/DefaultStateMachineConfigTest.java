@@ -138,13 +138,13 @@ public class DefaultStateMachineConfigTest {
                     }
 
                     @Override
-                    public org.apache.seata.saga.statelang.domain.StateMachine registryStateMachine(
+                    public org.apache.seata.saga.statelang.domain.StateMachine registerStateMachine(
                             org.apache.seata.saga.statelang.domain.StateMachine stateMachine) {
                         return stateMachine;
                     }
 
                     @Override
-                    public void registryByResources(java.io.InputStream[] resources, String tenantId) {}
+                    public void registerByResources(java.io.InputStream[] resources, String tenantId) {}
                 };
 
         defaultStateMachineConfig.setStateMachineRepository(stateMachineRepository);

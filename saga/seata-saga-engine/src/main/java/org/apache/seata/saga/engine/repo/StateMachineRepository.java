@@ -60,7 +60,7 @@ public interface StateMachineRepository {
      * @param stateMachine stateMachine
      * @return the state machine
      */
-    StateMachine registryStateMachine(StateMachine stateMachine);
+    StateMachine registerStateMachine(StateMachine stateMachine);
 
     /**
      * Registry by resources.
@@ -69,5 +69,5 @@ public interface StateMachineRepository {
      * @param tenantId the tenant id
      * @throws IOException the io exception
      */
-    void registryByResources(InputStream[] resourceAsStreamArray, String tenantId) throws IOException;
+    void registerByResources(InputStream[] resourceAsStreamArray, String tenantId) throws IOException;
 }

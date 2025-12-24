@@ -21,10 +21,10 @@ import org.apache.seata.saga.statelang.domain.impl.BaseState;
 import java.util.Map;
 
 /**
- * BaseStatePaser
+ * BaseStateParser
  *
  */
-public abstract class BaseStatePaser {
+public abstract class BaseStateParser {
 
     protected void parseBaseAttributes(BaseState state, Object node) {
 

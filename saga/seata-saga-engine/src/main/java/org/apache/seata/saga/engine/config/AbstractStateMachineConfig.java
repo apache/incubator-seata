@@ -168,7 +168,7 @@ public abstract class AbstractStateMachineConfig implements StateMachineConfig {
 
         // auto register resources
         if (autoRegisterResources && stateMachineDefInputStreamArray != null) {
-            stateMachineRepository.registryByResources(stateMachineDefInputStreamArray, defaultTenantId);
+            stateMachineRepository.registerByResources(stateMachineDefInputStreamArray, defaultTenantId);
         }
 
         if (statusDecisionStrategy == null) {

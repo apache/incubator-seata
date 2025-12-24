@@ -64,7 +64,7 @@ public class DefaultStateMachineConfig extends AbstractStateMachineConfig
         for (int i = 0; i < registerResources.length; i++) {
             resourceAsStreamArray[i] = registerResources[i].getInputStream();
         }
-        getStateMachineRepository().registryByResources(resourceAsStreamArray, getDefaultTenantId());
+        getStateMachineRepository().registerByResources(resourceAsStreamArray, getDefaultTenantId());
     }
 
     private void registerSpringElExpressionFactoryManager() {

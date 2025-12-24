@@ -119,7 +119,7 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
     }
 
     @Override
-    public StateMachine registryStateMachine(StateMachine stateMachine) {
+    public StateMachine registerStateMachine(StateMachine stateMachine) {
 
         String stateMachineName = stateMachine.getName();
         String tenantId = stateMachine.getTenantId();
@@ -169,7 +169,7 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
     }
 
     @Override
-    public void registryByResources(InputStream[] resourceAsStreamArray, String tenantId) throws IOException {
+    public void registerByResources(InputStream[] resourceAsStreamArray, String tenantId) throws IOException {
         for (InputStream resource : resourceAsStreamArray) {
             String json;
             try (InputStream is = resource) {
@@ -182,7 +182,7 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
                 if (StringUtils.isBlank(stateMachine.getTenantId())) {
                     stateMachine.setTenantId(tenantId);
                 }
-                registryStateMachine(stateMachine);
+                registerStateMachine(stateMachine);
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("===== StateMachine Loaded: \n{}", json);
                 }
