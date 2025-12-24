@@ -17,7 +17,6 @@
 package org.apache.seata.mcp.entity.vo;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import org.apache.seata.core.lock.RowLock;
 import org.apache.seata.mcp.core.config.TimestampToStringDeserializer;
 
 /**
@@ -49,24 +48,6 @@ public class GlobalLockVO {
 
     @JsonDeserialize(using = TimestampToStringDeserializer.class)
     private String gmtModified;
-
-    /**
-     * convert RowLock to GlobalLockVO
-     * @param rowLock the RowLock
-     * @return the GlobalLockVO
-     */
-    public static GlobalLockVO convert(RowLock rowLock, String vgroup) {
-        final GlobalLockVO globalLockVO = new GlobalLockVO();
-        globalLockVO.setXid(rowLock.getXid());
-        globalLockVO.setTransactionId(rowLock.getTransactionId());
-        globalLockVO.setBranchId(rowLock.getBranchId());
-        globalLockVO.setResourceId(rowLock.getResourceId());
-        globalLockVO.setTableName(rowLock.getTableName());
-        globalLockVO.setPk(rowLock.getPk());
-        globalLockVO.setRowKey(rowLock.getRowKey());
-        globalLockVO.setVgroup(vgroup);
-        return globalLockVO;
-    }
 
     public String getXid() {
         return xid;
