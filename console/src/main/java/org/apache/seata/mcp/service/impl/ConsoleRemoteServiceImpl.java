@@ -33,8 +33,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -56,17 +54,10 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
 
     private final ObjectMapper objectMapper;
 
-    private final AuthenticationManager authenticationManager;
-
-    public ConsoleRemoteServiceImpl(
-            JwtTokenUtils jwtTokenUtils,
-            RestTemplate restTemplate,
-            ObjectMapper objectMapper,
-            AuthenticationManager authenticationManager) {
+    public ConsoleRemoteServiceImpl(JwtTokenUtils jwtTokenUtils, RestTemplate restTemplate, ObjectMapper objectMapper) {
         this.jwtTokenUtils = jwtTokenUtils;
         this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;
-        this.authenticationManager = authenticationManager;
     }
 
     @Value("${seata.console.naming-space-url:http://127.0.0.1:%s}")
@@ -77,29 +68,16 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
     @Value("${server.port:8081}")
     private String namingSpacePort;
 
-    @Value("${seata.mcp.auth.enabled}")
-    private String enabledAuth;
-
     public String getToken() {
-        if (Boolean.parseBoolean(enabledAuth)) {
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            if (auth == null || !auth.isAuthenticated()) {
-                throw new AuthenticationFailedException("No right to be identified");
-            }
-            String originJwt = (String) auth.getCredentials();
-            if (!jwtTokenUtils.validateToken(originJwt)) {
-                throw new AuthenticationFailedException("Invalid token, please log back in to get a new token");
-            }
-            return WebSecurityConfig.TOKEN_PREFIX + originJwt;
-        } else {
-            logger.warn(
-                    "Authentication is disabled (seata.mcp.auth.enabled=false); "
-                            + "generating token using internal fallback user. This configuration should not be used in production.");
-            UsernamePasswordAuthenticationToken authenticationToken =
-                    new UsernamePasswordAuthenticationToken("seata", "");
-            Authentication authentication = authenticationManager.authenticate(authenticationToken);
-            return WebSecurityConfig.TOKEN_PREFIX + jwtTokenUtils.createToken(authentication);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            throw new AuthenticationFailedException("No right to be identified");
         }
+        String originJwt = (String) auth.getCredentials();
+        if (!jwtTokenUtils.validateToken(originJwt)) {
+            throw new AuthenticationFailedException("Invalid token, please log in to get a new token");
+        }
+        return WebSecurityConfig.TOKEN_PREFIX + originJwt;
     }
 
     public void setNamespaceHeaderAndQueryParam(
@@ -129,7 +107,8 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
             responseBody = response.getBody();
 
             if (!response.getStatusCode().is2xxSuccessful()) {
-                String errorMsg = String.format("MCP GET request failed with status: %s, response: %s",
+                String errorMsg = String.format(
+                        "MCP GET request failed with status: %s, response: %s",
                         response.getStatusCode(), response.getBody());
                 logger.warn(errorMsg);
                 throw new ServiceCallException(errorMsg, response.getStatusCode());
@@ -168,7 +147,8 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
             responseBody = response.getBody();
 
             if (!response.getStatusCode().is2xxSuccessful()) {
-                String errorMsg = String.format("MCP GET request failed with status: %s, response: %s",
+                String errorMsg = String.format(
+                        "MCP GET request failed with status: %s, response: %s",
                         response.getStatusCode(), response.getBody());
                 logger.warn(errorMsg);
                 throw new ServiceCallException(errorMsg, response.getStatusCode());
@@ -207,7 +187,8 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
             responseBody = response.getBody();
 
             if (!response.getStatusCode().is2xxSuccessful()) {
-                String errorMsg = String.format("MCP DELETE request returned non-success status: %s, response: %s",
+                String errorMsg = String.format(
+                        "MCP DELETE request returned non-success status: %s, response: %s",
                         response.getStatusCode(), response.getBody());
                 logger.warn(errorMsg);
                 throw new ServiceCallException(errorMsg, response.getStatusCode());
@@ -246,7 +227,8 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
             responseBody = response.getBody();
 
             if (!response.getStatusCode().is2xxSuccessful()) {
-                String errorMsg = String.format("MCP PUT request returned non-success status: %s, response: %s",
+                String errorMsg = String.format(
+                        "MCP PUT request returned non-success status: %s, response: %s",
                         response.getStatusCode(), response.getBody());
                 logger.warn(errorMsg);
                 throw new ServiceCallException(errorMsg, response.getStatusCode());
