@@ -79,9 +79,10 @@ public class GlobalSessionTools {
             if (param.getTimeEnd() != null) {
                 if (DateUtils.judgeExceedTimeDuration(
                         param.getTimeStart(), param.getTimeEnd(), mcpProperties.getQueryDuration())) {
-                    throw new IllegalArgumentException(
-                            "The query time span is not allowed to exceed the max query duration : "
-                                    + DateUtils.convertToHourFromTimeStamp(mcpProperties.getQueryDuration()) + " hour");
+                    return PageResult.failure(
+                            "",
+                            String.format("The query time span is not allowed to exceed the max query duration: %s hour",
+                                    DateUtils.convertToHourFromTimeStamp(mcpProperties.getQueryDuration())));
                 }
             } else {
                 param.setTimeEnd(param.getTimeStart() + DateUtils.ONE_DAY_TIMESTAMP);

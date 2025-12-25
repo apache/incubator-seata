@@ -71,8 +71,8 @@ public class GlobalLockTools {
                         param.getTimeStart(), param.getTimeEnd(), mcpProperties.getQueryDuration())) {
                     return PageResult.failure(
                             "",
-                            "The query time span is not allowed to exceed the max query duration : "
-                                    + DateUtils.convertToHourFromTimeStamp(mcpProperties.getQueryDuration()) + " hour");
+                            String.format("The query time span is not allowed to exceed the max query duration: %s hour",
+                                    DateUtils.convertToHourFromTimeStamp(mcpProperties.getQueryDuration())));
                 }
             } else {
                 param.setTimeEnd(param.getTimeStart() + DateUtils.ONE_DAY_TIMESTAMP);
