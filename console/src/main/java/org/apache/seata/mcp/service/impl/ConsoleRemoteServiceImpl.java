@@ -23,6 +23,7 @@ import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.console.config.WebSecurityConfig;
 import org.apache.seata.console.utils.JwtTokenUtils;
 import org.apache.seata.mcp.core.props.NameSpaceDetail;
+import org.apache.seata.mcp.exception.ServiceCallException;
 import org.apache.seata.mcp.service.ConsoleApiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -128,12 +129,16 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
             responseBody = response.getBody();
 
             if (!response.getStatusCode().is2xxSuccessful()) {
-                logger.warn("MCP GET request returned non-success status: {}", response.getStatusCode());
+                String errorMsg = String.format("MCP GET request failed with status: %s, response: %s",
+                        response.getStatusCode(), response.getBody());
+                logger.warn(errorMsg);
+                throw new ServiceCallException(errorMsg, response.getStatusCode());
             }
             return responseBody;
         } catch (RestClientException e) {
-            logger.error("MCP GET Call NameSpace Failed", e);
-            return "Connect TC Failed";
+            String errorMsg = "MCP GET Call NameSpace Failed.";
+            logger.error(errorMsg, e);
+            throw new ServiceCallException(errorMsg);
         }
     }
 
@@ -163,12 +168,16 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
             responseBody = response.getBody();
 
             if (!response.getStatusCode().is2xxSuccessful()) {
-                logger.warn("MCP GET request returned non-success status: {}", response.getStatusCode());
+                String errorMsg = String.format("MCP GET request failed with status: %s, response: %s",
+                        response.getStatusCode(), response.getBody());
+                logger.warn(errorMsg);
+                throw new ServiceCallException(errorMsg, response.getStatusCode());
             }
             return responseBody;
         } catch (RestClientException e) {
-            logger.error("MCP GET Call TC Failed", e);
-            return "Connect TC Failed";
+            String errorMsg = "MCP GET Call TC Failed.";
+            logger.error(errorMsg, e);
+            throw new ServiceCallException(errorMsg);
         }
     }
 
@@ -198,12 +207,16 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
             responseBody = response.getBody();
 
             if (!response.getStatusCode().is2xxSuccessful()) {
-                logger.warn("MCP DELETE request returned non-success status: {}", response.getStatusCode());
+                String errorMsg = String.format("MCP DELETE request returned non-success status: %s, response: %s",
+                        response.getStatusCode(), response.getBody());
+                logger.warn(errorMsg);
+                throw new ServiceCallException(errorMsg, response.getStatusCode());
             }
             return responseBody;
         } catch (RestClientException e) {
-            logger.error("MCP DELETE Call TC Failed", e);
-            return "Connect TC Failed";
+            String errorMsg = "MCP DELETE Call TC Failed.";
+            logger.error(errorMsg, e);
+            throw new ServiceCallException(errorMsg);
         }
     }
 
@@ -233,12 +246,16 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
             responseBody = response.getBody();
 
             if (!response.getStatusCode().is2xxSuccessful()) {
-                logger.warn("MCP PUT request returned non-success status: {}", response.getStatusCode());
+                String errorMsg = String.format("MCP PUT request returned non-success status: %s, response: %s",
+                        response.getStatusCode(), response.getBody());
+                logger.warn(errorMsg);
+                throw new ServiceCallException(errorMsg, response.getStatusCode());
             }
             return responseBody;
         } catch (RestClientException e) {
-            logger.error("MCP Put Call TC Failed", e);
-            return "Connect TC Failed";
+            String errorMsg = "MCP PUT Call TC Failed.";
+            logger.error(errorMsg, e);
+            throw new ServiceCallException(errorMsg);
         }
     }
 }

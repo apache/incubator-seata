@@ -38,7 +38,7 @@ public class DateUtils {
 
     public static long convertToTimestampFromDate(String dateStr) {
         if (!isValidDate(dateStr)) {
-            throw new DateTimeException("The time format does not match yyyy-mm-dd");
+            throw new DateTimeException("The time format does not match yyyy-MM-dd");
         }
         LocalDate date = LocalDate.parse(dateStr);
         ZonedDateTime zonedDateTime = date.atStartOfDay(ZoneId.systemDefault());
