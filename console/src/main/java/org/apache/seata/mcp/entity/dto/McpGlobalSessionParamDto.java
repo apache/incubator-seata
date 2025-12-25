@@ -127,7 +127,7 @@ public class McpGlobalSessionParamDto implements Serializable {
         this.withBranch = withBranch;
     }
 
-    public static McpGlobalSessionParamDto covertFromAbnormalParam(McpGlobalAbnormalSessionParam abParam) {
+    public static McpGlobalSessionParamDto convertFromAbnormalParam(McpGlobalAbnormalSessionParam abParam) {
         McpGlobalSessionParamDto param = new McpGlobalSessionParamDto();
         if (StringUtils.isNotBlank(abParam.getTimeStart())) {
             param.setTimeStart(abParam.getTimeStart());

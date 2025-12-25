@@ -26,7 +26,7 @@ import org.apache.seata.mcp.entity.dto.McpGlobalSessionParamDto;
  */
 public class McpGlobalSessionParam extends org.apache.seata.server.console.entity.param.GlobalSessionParam {
 
-    public static McpGlobalSessionParam covertFromDtoParam(McpGlobalSessionParamDto paramDto) {
+    public static McpGlobalSessionParam convertFromDtoParam(McpGlobalSessionParamDto paramDto) {
         PageUtil.checkParam(paramDto.getPageNum(), paramDto.getPageSize());
         McpGlobalSessionParam param = new McpGlobalSessionParam();
         param.setPageSize(paramDto.getPageSize());

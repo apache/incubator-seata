@@ -74,7 +74,7 @@ public class GlobalSessionTools {
     public PageResult<McpGlobalSessionVO> queryGlobalSession(
             @McpToolParam(description = "Specify the namespace of the TC node") NameSpaceDetail nameSpaceDetail,
             @McpToolParam(description = "Query parameter objects") McpGlobalSessionParamDto paramDto) {
-        McpGlobalSessionParam param = McpGlobalSessionParam.covertFromDtoParam(paramDto);
+        McpGlobalSessionParam param = McpGlobalSessionParam.convertFromDtoParam(paramDto);
         if (param.getTimeStart() != null) {
             if (param.getTimeEnd() != null) {
                 if (DateUtils.judgeExceedTimeDuration(
@@ -209,7 +209,7 @@ public class GlobalSessionTools {
             @McpToolParam(description = "Specify the namespace of the TC node") NameSpaceDetail nameSpaceDetail,
             @McpToolParam(description = "Query Param") McpGlobalAbnormalSessionParam abnormalSessionParam) {
         List<McpGlobalSessionVO> result = new ArrayList<>();
-        McpGlobalSessionParamDto param = McpGlobalSessionParamDto.covertFromAbnormalParam(abnormalSessionParam);
+        McpGlobalSessionParamDto param = McpGlobalSessionParamDto.convertFromAbnormalParam(abnormalSessionParam);
         param.setPageSize(ABNORMAL_SESSION_PAGE_SIZE);
         for (Integer status : exceptionStatus) {
             param.setStatus(status);
