@@ -16,16 +16,15 @@
  */
 package org.apache.seata.server.controller;
 
-import okhttp3.Protocol;
-import okhttp3.Response;
 import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.ContentType;
 import org.apache.http.protocol.HTTP;
-import org.apache.seata.common.executor.HttpCallback;
 import org.apache.seata.common.holder.ObjectHolder;
+import org.apache.seata.common.metadata.ClusterWatchEvent;
 import org.apache.seata.common.util.HttpClientUtil;
+import org.apache.seata.common.util.SeataHttpWatch;
 import org.apache.seata.server.BaseSpringBootTest;
 import org.apache.seata.server.cluster.listener.ClusterChangeEvent;
 import org.junit.jupiter.api.Assertions;
@@ -38,18 +37,14 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.env.Environment;
 
+import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import static org.apache.seata.common.ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL;
 import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class ClusterControllerTest extends BaseSpringBootTest {
@@ -85,37 +80,66 @@ class ClusterControllerTest extends BaseSpringBootTest {
     @Test
     @Order(2)
     void watchTimeoutTest_withHttp2() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-
         Map<String, String> headers = new HashMap<>();
         headers.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
 
         Map<String, String> params = new HashMap<>();
         params.put("default-test", "1");
 
-        HttpCallback<Response> callback = new HttpCallback<Response>() {
-            @Override
-            public void onSuccess(Response response) {
-                Assertions.assertNotNull(response);
-                Assertions.assertEquals(Protocol.H2_PRIOR_KNOWLEDGE, response.protocol());
-                Assertions.assertEquals(HttpStatus.SC_NOT_MODIFIED, response.code());
-                latch.countDown();
+        // Use a short timeout (3 seconds) to test timeout behavior
+        try (SeataHttpWatch<ClusterWatchEvent> watch = HttpClientUtil.watchPost(
+                "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000",
+                params,
+                headers,
+                ClusterWatchEvent.class)) {
+
+            boolean keepaliveReceived = false;
+            boolean timeoutReceived = false;
+            long startTime = System.currentTimeMillis();
+
+            while (watch.hasNext()) {
+                SeataHttpWatch.Response<ClusterWatchEvent> response = watch.next();
+                SeataHttpWatch.Response.Type type = response.type;
+                ClusterWatchEvent event = response.object;
+
+                Assertions.assertNotNull(event, "Event data should not be null");
+
+                if (type == SeataHttpWatch.Response.Type.KEEPALIVE) {
+                    // Verify KEEPALIVE event is received when connection is established
+                    Assertions.assertFalse(keepaliveReceived, "KEEPALIVE should only be received once");
+                    keepaliveReceived = true;
+                    Assertions.assertEquals("keepalive", event.getType(), "Event type should be 'keepalive'");
+                    Assertions.assertEquals("default-test", event.getGroup(), "Group should match");
+                    Assertions.assertNotNull(event.getTimestamp(), "Timestamp should not be null");
+                    long elapsed = System.currentTimeMillis() - startTime;
+                    Assertions.assertTrue(
+                            elapsed < 1000,
+                            "KEEPALIVE should be received immediately after connection, elapsed: " + elapsed + "ms");
+                } else if (type == SeataHttpWatch.Response.Type.TIMEOUT) {
+                    // Verify TIMEOUT event is received after timeout
+                    Assertions.assertFalse(timeoutReceived, "TIMEOUT should only be received once");
+                    timeoutReceived = true;
+                    Assertions.assertEquals("timeout", event.getType(), "Event type should be 'timeout'");
+                    Assertions.assertEquals("default-test", event.getGroup(), "Group should match");
+                    long elapsed = System.currentTimeMillis() - startTime;
+                    // Timeout is 3000ms, allow some tolerance (3000-5000ms)
+                    Assertions.assertTrue(
+                            elapsed >= 2800 && elapsed <= 6000,
+                            "TIMEOUT should be received after ~3000ms, elapsed: " + elapsed + "ms");
+                    // After timeout, the stream should be closed, so break the loop
+                    break;
+                } else {
+                    Assertions.fail("Unexpected event type: " + type);
+                }
             }
 
-            @Override
-            public void onFailure(Throwable t) {
-                Assertions.fail("Should not fail");
-            }
+            // Verify both events were received
+            Assertions.assertTrue(keepaliveReceived, "KEEPALIVE event should be received");
+            Assertions.assertTrue(timeoutReceived, "TIMEOUT event should be received after timeout");
 
-            @Override
-            public void onCancelled() {
-                Assertions.fail("Should not be cancelled");
-            }
-        };
-
-        HttpClientUtil.doPostWithHttp2(
-                "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", params, headers, callback);
-        Assertions.assertTrue(latch.await(5, TimeUnit.SECONDS));
+        } catch (IOException e) {
+            throw new RuntimeException("Watch failed", e);
+        }
     }
 
     @Test
@@ -150,54 +174,47 @@ class ClusterControllerTest extends BaseSpringBootTest {
     }
 
     @Test
-    @Order(5)
-    void watch_withHttp2() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-
-        Map<String, String> headers = new HashMap<>();
-        headers.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
-
-        Map<String, String> params = new HashMap<>();
-        params.put("default-test", "1");
-
-        Thread thread = new Thread(() -> {
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+    @Order(3)
+    void watch_stream() throws Exception {
+        Map<String, String> header = new HashMap<>();
+        header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
+        Map<String, String> param = new HashMap<>();
+        param.put("default-test", "1");
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                ((ApplicationEventPublisher) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
+                        .publishEvent(new ClusterChangeEvent(this, "default-test", 2, true));
             }
-            ((ApplicationEventPublisher) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
-                    .publishEvent(new ClusterChangeEvent(this, "default-test", 2, true));
         });
         thread.start();
 
-        HttpCallback<Response> callback = new HttpCallback<Response>() {
-            @Override
-            public void onSuccess(Response response) {
-                Assertions.assertNotNull(response);
-                Assertions.assertEquals(Protocol.H2_PRIOR_KNOWLEDGE, response.protocol());
-                Assertions.assertEquals(HttpStatus.SC_OK, response.code());
-                latch.countDown();
+        try (SeataHttpWatch<ClusterWatchEvent> watch = HttpClientUtil.watchPost(
+                "http://127.0.0.1:" + port + "/metadata/v1/watch", param, header, ClusterWatchEvent.class)) {
+            while (watch.hasNext()) {
+                SeataHttpWatch.Response<ClusterWatchEvent> response = watch.next();
+                // 执行业务逻辑
+                processEvent(response);
             }
+        } catch (IOException e) {
 
-            @Override
-            public void onFailure(Throwable t) {
-                Assertions.fail("Should not fail: " + t.getMessage());
-            }
+        }
+    }
 
-            @Override
-            public void onCancelled() {
-                Assertions.fail("Should not be cancelled");
-            }
-        };
-
-        HttpClientUtil.doPostWithHttp2(
-                "http://127.0.0.1:" + port + "/metadata/v1/watch", params, headers, callback, 30);
-        Assertions.assertTrue(latch.await(35, TimeUnit.SECONDS));
+    private static void processEvent(SeataHttpWatch.Response<ClusterWatchEvent> response) {
+        System.out.println("Event Type: " + response.type);
+        if (response.object != null) {
+            System.out.println("Event Data: " + response.object);
+        }
     }
 
     @Test
-    @Order(6)
+    @Order(4)
     void testXssFilterBlocked_queryParam() throws Exception {
         String malicious = "<script>alert('xss')</script>";
         Map<String, String> header = new HashMap<>();
@@ -214,118 +231,102 @@ class ClusterControllerTest extends BaseSpringBootTest {
     }
 
     @Test
-    @Order(7)
+    @Order(5)
     void testXssFilterBlocked_queryParam_withGetHttp2() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-
         String malicious = "<script>alert('xss')</script>";
-        Map<String, String> header = new HashMap<>();
-        header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
 
-        HttpCallback<Response> callback = new HttpCallback<Response>() {
-            @Override
-            public void onSuccess(Response response) {
-                assertNotNull(response);
-                Assertions.assertEquals(Protocol.H2_PRIOR_KNOWLEDGE, response.protocol());
-                Assertions.assertEquals(HttpStatus.SC_BAD_REQUEST, response.code());
-                latch.countDown();
-            }
+        // XSS filter should block the request and return 400 Bad Request
+        // Watch method will throw FrameworkException when response is not successful
+        org.apache.seata.common.exception.FrameworkException exception =
+                Assertions.assertThrows(org.apache.seata.common.exception.FrameworkException.class, () -> {
+                    try (SeataHttpWatch<ClusterWatchEvent> watch = HttpClientUtil.watch(
+                            "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000&testParam="
+                                    + URLEncoder.encode(malicious, String.valueOf(StandardCharsets.UTF_8)),
+                            headers,
+                            ClusterWatchEvent.class)) {
+                        // Should not reach here, exception should be thrown during watch creation
+                        Assertions.fail("XSS filter should have blocked the request");
+                    }
+                });
 
-            @Override
-            public void onFailure(Throwable t) {
-                fail("Should not fail");
-            }
-
-            @Override
-            public void onCancelled() {
-                fail("Should not be cancelled");
-            }
-        };
-
-        HttpClientUtil.doGetWithHttp2(
-                "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000&testParam="
-                        + URLEncoder.encode(malicious, String.valueOf(StandardCharsets.UTF_8)),
-                header,
-                callback,
-                5000);
-
-        assertTrue(latch.await(10, TimeUnit.SECONDS));
+        // Verify the exception contains 400 status code
+        String exceptionMessage = exception.getMessage();
+        Assertions.assertNotNull(exceptionMessage, "Exception message should not be null");
+        Assertions.assertTrue(
+                exceptionMessage.contains("400") || exceptionMessage.contains("Watch request failed with code 400"),
+                "Exception should indicate 400 Bad Request, but got: " + exceptionMessage);
     }
 
     @Test
-    @Order(8)
+    @Order(6)
     void testXssFilterBlocked_formParam_withPostHttp2() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-
         String malicious = "<script>alert('xss')</script>";
-        Map<String, String> header = new HashMap<>();
-        header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
 
         Map<String, String> params = new HashMap<>();
         params.put("key", malicious);
 
-        HttpCallback<Response> callback = new HttpCallback<Response>() {
-            @Override
-            public void onSuccess(Response response) {
-                assertNotNull(response);
-                Assertions.assertEquals(Protocol.H2_PRIOR_KNOWLEDGE, response.protocol());
-                Assertions.assertEquals(HttpStatus.SC_BAD_REQUEST, response.code());
-                latch.countDown();
-            }
+        // XSS filter should block the request and return 400 Bad Request
+        // Watch method will throw FrameworkException when response is not successful
+        org.apache.seata.common.exception.FrameworkException exception =
+                Assertions.assertThrows(org.apache.seata.common.exception.FrameworkException.class, () -> {
+                    try (SeataHttpWatch<ClusterWatchEvent> watch = HttpClientUtil.watchPost(
+                            "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000",
+                            params,
+                            headers,
+                            ClusterWatchEvent.class)) {
+                        // Should not reach here, exception should be thrown during watch creation
+                        Assertions.fail("XSS filter should have blocked the request");
+                    }
+                });
 
-            @Override
-            public void onFailure(Throwable t) {
-                fail("Should not fail");
-            }
-
-            @Override
-            public void onCancelled() {
-                fail("Should not be cancelled");
-            }
-        };
-
-        HttpClientUtil.doPostWithHttp2("http://127.0.0.1:" + port + "/health", params, header, callback, 5000);
-
-        assertTrue(latch.await(10, TimeUnit.SECONDS));
+        // Verify the exception contains 400 status code
+        String exceptionMessage = exception.getMessage();
+        Assertions.assertNotNull(exceptionMessage, "Exception message should not be null");
+        Assertions.assertTrue(
+                exceptionMessage.contains("400") || exceptionMessage.contains("Watch request failed with code 400"),
+                "Exception should indicate 400 Bad Request, but got: " + exceptionMessage);
     }
 
     @Test
-    @Order(9)
+    @Order(7)
     void testXssFilterBlocked_bodyParam_withPostHttp2() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-
         String malicious = "<script>alert('xss')</script>";
-        Map<String, String> header = new HashMap<>();
+        Map<String, String> headers = new HashMap<>();
+        headers.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
 
-        String jsonBody = "{\"key\":\"" + malicious + "\"}";
+        // Create a Map with malicious content to be sent as JSON body
+        // The watchPost method will convert Map to JSON body
+        Map<String, String> params = new HashMap<>();
+        params.put("key", malicious);
 
-        HttpCallback<Response> callback = new HttpCallback<Response>() {
-            @Override
-            public void onSuccess(Response response) {
-                assertNotNull(response);
-                Assertions.assertEquals(Protocol.H2_PRIOR_KNOWLEDGE, response.protocol());
-                Assertions.assertEquals(HttpStatus.SC_BAD_REQUEST, response.code());
-                latch.countDown();
-            }
+        // XSS filter should block the request and return 400 Bad Request
+        // Watch method will throw FrameworkException when response is not successful
+        org.apache.seata.common.exception.FrameworkException exception =
+                Assertions.assertThrows(org.apache.seata.common.exception.FrameworkException.class, () -> {
+                    try (SeataHttpWatch<ClusterWatchEvent> watch = HttpClientUtil.watchPost(
+                            "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000",
+                            params,
+                            headers,
+                            ClusterWatchEvent.class)) {
+                        // Should not reach here, exception should be thrown during watch creation
+                        Assertions.fail("XSS filter should have blocked the request");
+                    }
+                });
 
-            @Override
-            public void onFailure(Throwable t) {
-                fail("Should not fail");
-            }
-
-            @Override
-            public void onCancelled() {
-                fail("Should not be cancelled");
-            }
-        };
-
-        HttpClientUtil.doPostWithHttp2("http://127.0.0.1:" + port + "/health", jsonBody, header, callback, 5000);
-
-        assertTrue(latch.await(10, TimeUnit.SECONDS));
+        // Verify the exception contains 400 status code
+        String exceptionMessage = exception.getMessage();
+        Assertions.assertNotNull(exceptionMessage, "Exception message should not be null");
+        Assertions.assertTrue(
+                exceptionMessage.contains("400") || exceptionMessage.contains("Watch request failed with code 400"),
+                "Exception should indicate 400 Bad Request, but got: " + exceptionMessage);
     }
 
     @Test
-    @Order(10)
+    @Order(8)
     void testXssFilterBlocked_formParam() throws Exception {
         Map<String, String> headers = new HashMap<>();
         headers.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
@@ -341,7 +342,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
     }
 
     @Test
-    @Order(11)
+    @Order(9)
     void testXssFilterBlocked_jsonBody() throws Exception {
         Map<String, String> headers = new HashMap<>();
         headers.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
@@ -356,7 +357,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
     }
 
     @Test
-    @Order(12)
+    @Order(10)
     void testXssFilterBlocked_headerParam() throws Exception {
         Map<String, String> headers = new HashMap<>();
         headers.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
@@ -373,7 +374,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
     }
 
     @Test
-    @Order(13)
+    @Order(11)
     void testXssFilterBlocked_multiSource() throws Exception {
         Map<String, String> headers = new HashMap<>();
         headers.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
@@ -393,7 +394,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
     }
 
     @Test
-    @Order(14)
+    @Order(12)
     void testXssFilterBlocked_formParamWithUserCustomKeyWords() throws Exception {
         Map<String, String> headers = new HashMap<>();
         headers.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());

@@ -277,24 +277,6 @@ public class HttpClientUtil {
         executeAsync(client, request, callback);
     }
 
-    private static RequestBody createRequestBody(Map<String, String> params, String contentType)
-            throws JsonProcessingException {
-        if (params == null || params.isEmpty()) {
-            return RequestBody.create(new byte[0]);
-        }
-
-        // Extract media type without parameters for robust comparison
-        String mediaTypeOnly = contentType == null ? "" : contentType.split(";")[0].trim();
-        if (MEDIA_TYPE_FORM_URLENCODED.toString().equals(mediaTypeOnly)) {
-            FormBody.Builder formBuilder = new FormBody.Builder();
-            params.forEach(formBuilder::add);
-            return formBuilder.build();
-        } else {
-            String json = OBJECT_MAPPER.writeValueAsString(params);
-            return RequestBody.create(json, MEDIA_TYPE_JSON);
-        }
-    }
-
     private static OkHttpClient createHttp2ClientWithTimeout(int timeoutSeconds) {
         return HTTP2_CLIENT_MAP.computeIfAbsent(timeoutSeconds, k -> new OkHttpClient.Builder()
                 // Use HTTP/2 prior knowledge to directly use HTTP/2 without an initial HTTP/1.1 upgrade
@@ -343,5 +325,97 @@ public class HttpClientUtil {
                 }
             }
         });
+    }
+
+    private static OkHttpClient createHttp2WatchClient(int connectTimeoutSeconds) {
+        return new OkHttpClient.Builder()
+                .protocols(Collections.singletonList(Protocol.H2_PRIOR_KNOWLEDGE))
+                .connectTimeout(connectTimeoutSeconds, TimeUnit.SECONDS) // 连接阶段快速失败
+                .readTimeout(0, TimeUnit.SECONDS) // 等待TC推送数据(建立连接后持续监听服务器推送)
+                .writeTimeout(connectTimeoutSeconds, TimeUnit.SECONDS)
+                .build();
+    }
+
+    public static <T> SeataHttpWatch<T> watch(String url, Map<String, String> headers, Class<T> eventType)
+            throws IOException {
+        return watch(url, headers, null, "GET", eventType);
+    }
+
+    public static <T> SeataHttpWatch<T> watch(String url, Class<T> eventType) throws IOException {
+        return watch(url, null, null, "GET", eventType);
+    }
+
+    /**
+     * Execute a watch request with specified HTTP method and return a Watch iterator.
+     * This method creates a long-lived HTTP/2 connection to receive Server-Sent Events (SSE).
+     */
+    private static <T> SeataHttpWatch<T> watch(
+            String url, Map<String, String> headers, RequestBody requestBody, String method, Class<T> eventType)
+            throws IOException {
+
+        OkHttpClient client = createHttp2WatchClient(30);
+        Request request = buildHttp2WatchRequest(url, headers, requestBody, method);
+        return SeataHttpWatch.createWatch(client, request, eventType);
+    }
+
+    public static <T> SeataHttpWatch<T> watchPost(
+            String url, Map<String, String> params, Map<String, String> headers, Class<T> eventType)
+            throws IOException {
+        try {
+            String contentType = headers != null ? headers.get("Content-Type") : "";
+            RequestBody requestBody = createRequestBody(params, contentType);
+            return watch(url, headers, requestBody, "POST", eventType);
+        } catch (JsonProcessingException e) {
+            LOGGER.error("Failed to create request body: {}", e.getMessage(), e);
+            throw new IOException("Failed to create request body", e);
+        }
+    }
+
+    public static <T> SeataHttpWatch<T> watchPost(String url, Map<String, String> params, Class<T> eventType)
+            throws IOException {
+        return watchPost(url, params, null, eventType);
+    }
+
+    private static Request buildHttp2WatchRequest(
+            String url, Map<String, String> headers, RequestBody requestBody, String method) {
+        Headers.Builder headerBuilder = new Headers.Builder();
+        if (headers != null) {
+            headers.forEach(headerBuilder::add);
+        }
+        // Always add Accept header for SSE
+        headerBuilder.add("Accept", "text/event-stream");
+
+        Request.Builder requestBuilder = new Request.Builder().url(url).headers(headerBuilder.build());
+
+        if ("POST".equals(method) && requestBody != null) {
+            requestBuilder.post(requestBody);
+        } else if ("PUT".equals(method) && requestBody != null) {
+            requestBuilder.put(requestBody);
+        } else if ("GET".equals(method)) {
+            requestBuilder.get();
+        } else {
+            // Default to GET if method is not specified or not supported
+            requestBuilder.get();
+        }
+
+        return requestBuilder.build();
+    }
+
+    private static RequestBody createRequestBody(Map<String, String> params, String contentType)
+            throws JsonProcessingException {
+        if (params == null || params.isEmpty()) {
+            return RequestBody.create(new byte[0]);
+        }
+
+        // Extract media type without parameters for robust comparison
+        String mediaTypeOnly = contentType == null ? "" : contentType.split(";")[0].trim();
+        if (MEDIA_TYPE_FORM_URLENCODED.toString().equals(mediaTypeOnly)) {
+            FormBody.Builder formBuilder = new FormBody.Builder();
+            params.forEach(formBuilder::add);
+            return formBuilder.build();
+        } else {
+            String json = OBJECT_MAPPER.writeValueAsString(params);
+            return RequestBody.create(json, MEDIA_TYPE_JSON);
+        }
     }
 }
