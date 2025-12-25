@@ -56,7 +56,8 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
         this.restTemplate = restTemplate;
     }
 
-    private final String NAMING_SPACE_URL = "http://127.0.0.1:%s";
+    @Value("${seata.console.naming-space-url:http://127.0.0.1:%s}")
+    private String NAMING_SPACE_URL;
 
     private final Logger logger = LoggerFactory.getLogger(ConsoleRemoteServiceImpl.class);
 
