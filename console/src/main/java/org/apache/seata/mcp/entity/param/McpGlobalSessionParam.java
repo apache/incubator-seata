@@ -19,14 +19,14 @@ package org.apache.seata.mcp.entity.param;
 import org.apache.seata.common.util.PageUtil;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.mcp.core.utils.DateUtils;
-import org.apache.seata.mcp.entity.dto.GlobalSessionParamDto;
+import org.apache.seata.mcp.entity.dto.McpGlobalSessionParamDto;
 
 /**
  * Global session param
  */
 public class McpGlobalSessionParam extends org.apache.seata.server.console.entity.param.GlobalSessionParam {
 
-    public static McpGlobalSessionParam covertFromDtoParam(GlobalSessionParamDto paramDto) {
+    public static McpGlobalSessionParam covertFromDtoParam(McpGlobalSessionParamDto paramDto) {
         PageUtil.checkParam(paramDto.getPageNum(), paramDto.getPageSize());
         McpGlobalSessionParam param = new McpGlobalSessionParam();
         param.setPageSize(paramDto.getPageSize());

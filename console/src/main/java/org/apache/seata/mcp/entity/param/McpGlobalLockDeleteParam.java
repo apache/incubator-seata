@@ -23,7 +23,7 @@ import java.io.Serializable;
 /**
  * Global lock param
  */
-public class GlobalLockDeleteParam implements Serializable {
+public class McpGlobalLockDeleteParam implements Serializable {
 
     private static final long serialVersionUID = 615412528070131284L;
 

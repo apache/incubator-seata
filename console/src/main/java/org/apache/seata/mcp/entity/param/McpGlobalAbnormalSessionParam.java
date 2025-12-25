@@ -18,7 +18,7 @@ package org.apache.seata.mcp.entity.param;
 
 import org.springaicommunity.mcp.annotation.McpToolParam;
 
-public class GlobalAbnormalSessionParam {
+public class McpGlobalAbnormalSessionParam {
     @McpToolParam(
             description = "Whether or not it contains branch transaction information, default is true",
             required = false)

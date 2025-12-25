@@ -25,8 +25,8 @@ import org.apache.seata.mcp.core.constant.RPCConstant;
 import org.apache.seata.mcp.core.props.MCPProperties;
 import org.apache.seata.mcp.core.props.NameSpaceDetail;
 import org.apache.seata.mcp.core.utils.DateUtils;
-import org.apache.seata.mcp.entity.dto.GlobalLockParamDto;
-import org.apache.seata.mcp.entity.param.GlobalLockDeleteParam;
+import org.apache.seata.mcp.entity.dto.McpGlobalLockParamDto;
+import org.apache.seata.mcp.entity.param.McpGlobalLockDeleteParam;
 import org.apache.seata.mcp.entity.param.McpGlobalLockParam;
 import org.apache.seata.mcp.entity.vo.GlobalLockVO;
 import org.apache.seata.mcp.service.ConsoleApiService;
@@ -63,7 +63,7 @@ public class GlobalLockTools {
     @McpTool(description = "Query the global lock information")
     public PageResult<GlobalLockVO> queryGlobalLock(
             @McpToolParam(description = "Specify the namespace of the TC node") NameSpaceDetail nameSpaceDetail,
-            @McpToolParam(description = "Global lock parameters") GlobalLockParamDto paramDto) {
+            @McpToolParam(description = "Global lock parameters") McpGlobalLockParamDto paramDto) {
         McpGlobalLockParam param = McpGlobalLockParam.convertFromParamDto(paramDto);
         if (param.getTimeStart() != null) {
             if (param.getTimeEnd() != null) {
@@ -100,7 +100,7 @@ public class GlobalLockTools {
     @McpTool(description = "Delete the global lock, Get the modify key before you delete")
     public String deleteGlobalLock(
             @McpToolParam(description = "Specify the namespace of the TC node") NameSpaceDetail nameSpaceDetail,
-            @McpToolParam(description = "Global lock delete parameters") GlobalLockDeleteParam param,
+            @McpToolParam(description = "Global lock delete parameters") McpGlobalLockDeleteParam param,
             @McpToolParam(description = "Modify key") String modifyKey) {
         if (!modifyConfirmService.isValidKey(modifyKey)) {
             return "The modify key is not available";

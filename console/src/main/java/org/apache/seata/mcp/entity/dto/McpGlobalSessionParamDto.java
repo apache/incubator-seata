@@ -17,12 +17,12 @@
 package org.apache.seata.mcp.entity.dto;
 
 import org.apache.seata.common.util.StringUtils;
-import org.apache.seata.mcp.entity.param.GlobalAbnormalSessionParam;
+import org.apache.seata.mcp.entity.param.McpGlobalAbnormalSessionParam;
 import org.springaicommunity.mcp.annotation.McpToolParam;
 
 import java.io.Serializable;
 
-public class GlobalSessionParamDto implements Serializable {
+public class McpGlobalSessionParamDto implements Serializable {
 
     private static final long serialVersionUID = 115488252809011284L;
 
@@ -127,8 +127,8 @@ public class GlobalSessionParamDto implements Serializable {
         this.withBranch = withBranch;
     }
 
-    public static GlobalSessionParamDto covertFromAbnormalParam(GlobalAbnormalSessionParam abParam) {
-        GlobalSessionParamDto param = new GlobalSessionParamDto();
+    public static McpGlobalSessionParamDto covertFromAbnormalParam(McpGlobalAbnormalSessionParam abParam) {
+        McpGlobalSessionParamDto param = new McpGlobalSessionParamDto();
         if (StringUtils.isNotBlank(abParam.getTimeStart())) {
             param.setTimeStart(abParam.getTimeStart());
         }

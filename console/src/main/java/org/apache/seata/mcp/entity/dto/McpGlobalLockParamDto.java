@@ -20,7 +20,7 @@ import org.springaicommunity.mcp.annotation.McpToolParam;
 
 import java.io.Serializable;
 
-public class GlobalLockParamDto implements Serializable {
+public class McpGlobalLockParamDto implements Serializable {
 
     private static final long serialVersionUID = 615412528070131284L;
 

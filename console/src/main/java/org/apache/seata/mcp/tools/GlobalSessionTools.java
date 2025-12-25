@@ -26,8 +26,8 @@ import org.apache.seata.mcp.core.constant.RPCConstant;
 import org.apache.seata.mcp.core.props.MCPProperties;
 import org.apache.seata.mcp.core.props.NameSpaceDetail;
 import org.apache.seata.mcp.core.utils.DateUtils;
-import org.apache.seata.mcp.entity.dto.GlobalSessionParamDto;
-import org.apache.seata.mcp.entity.param.GlobalAbnormalSessionParam;
+import org.apache.seata.mcp.entity.dto.McpGlobalSessionParamDto;
+import org.apache.seata.mcp.entity.param.McpGlobalAbnormalSessionParam;
 import org.apache.seata.mcp.entity.param.McpGlobalSessionParam;
 import org.apache.seata.mcp.entity.vo.GlobalSessionVO;
 import org.apache.seata.mcp.service.ConsoleApiService;
@@ -73,7 +73,7 @@ public class GlobalSessionTools {
     @McpTool(description = "Query global transactions")
     public PageResult<GlobalSessionVO> queryGlobalSession(
             @McpToolParam(description = "Specify the namespace of the TC node") NameSpaceDetail nameSpaceDetail,
-            @McpToolParam(description = "Query parameter objects") GlobalSessionParamDto paramDto) {
+            @McpToolParam(description = "Query parameter objects") McpGlobalSessionParamDto paramDto) {
         McpGlobalSessionParam param = McpGlobalSessionParam.covertFromDtoParam(paramDto);
         if (param.getTimeStart() != null) {
             if (param.getTimeEnd() != null) {
@@ -207,9 +207,9 @@ public class GlobalSessionTools {
     @McpTool(description = "Check out the abnormal transaction information,You can specify the time")
     public List<GlobalSessionVO> getAbnormalSessions(
             @McpToolParam(description = "Specify the namespace of the TC node") NameSpaceDetail nameSpaceDetail,
-            @McpToolParam(description = "Query Param") GlobalAbnormalSessionParam abnormalSessionParam) {
+            @McpToolParam(description = "Query Param") McpGlobalAbnormalSessionParam abnormalSessionParam) {
         List<GlobalSessionVO> result = new ArrayList<>();
-        GlobalSessionParamDto param = GlobalSessionParamDto.covertFromAbnormalParam(abnormalSessionParam);
+        McpGlobalSessionParamDto param = McpGlobalSessionParamDto.covertFromAbnormalParam(abnormalSessionParam);
         param.setPageSize(ABNORMAL_SESSION_PAGE_SIZE);
         for (Integer status : exceptionStatus) {
             param.setStatus(status);
