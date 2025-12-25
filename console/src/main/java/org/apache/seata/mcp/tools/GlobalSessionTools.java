@@ -32,6 +32,8 @@ import org.apache.seata.mcp.entity.param.McpGlobalSessionParam;
 import org.apache.seata.mcp.entity.vo.McpGlobalSessionVO;
 import org.apache.seata.mcp.service.ConsoleApiService;
 import org.apache.seata.mcp.service.ModifyConfirmService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springaicommunity.mcp.annotation.McpTool;
 import org.springaicommunity.mcp.annotation.McpToolParam;
 import org.springframework.stereotype.Service;
@@ -44,6 +46,8 @@ import java.util.Map;
 @Service
 public class GlobalSessionTools {
 
+    private final Logger logger = LoggerFactory.getLogger(GlobalSessionTools.class);
+
     private final ConsoleApiService mcpRPCService;
 
     private final MCPProperties mcpProperties;
@@ -54,7 +58,7 @@ public class GlobalSessionTools {
 
     private final List<Integer> exceptionStatus = new ArrayList<>();
 
-    public static int ABNORMAL_SESSION_PAGE_SIZE = 30;
+    public static final int ABNORMAL_SESSION_PAGE_SIZE = 30;
 
     public GlobalSessionTools(
             ConsoleApiService mcpRPCService,
@@ -82,7 +86,7 @@ public class GlobalSessionTools {
                     return PageResult.failure(
                             "",
                             String.format(
-                                    "The query time span is not allowed to exceed the max query duration: %s hour",
+                                    "The query time span is not allowed to exceed the max query duration: %s hours",
                                     DateUtils.convertToHourFromTimeStamp(mcpProperties.getQueryDuration())));
                 }
             } else {
@@ -92,13 +96,13 @@ public class GlobalSessionTools {
             param.setTimeEnd(null);
             param.setTimeStart(null);
         }
-        PageResult<McpGlobalSessionVO> pageResult;
+        PageResult<McpGlobalSessionVO> pageResult = null;
         String result = mcpRPCService.getCallTC(
                 nameSpaceDetail, RPCConstant.GLOBAL_SESSION_BASE_URL + "/query", param, null, null);
         try {
             pageResult = objectMapper.readValue(result, new TypeReference<PageResult<McpGlobalSessionVO>>() {});
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            logger.error(e.getMessage());
         }
         if (pageResult == null) {
             return PageResult.failure("", "query global session failed");

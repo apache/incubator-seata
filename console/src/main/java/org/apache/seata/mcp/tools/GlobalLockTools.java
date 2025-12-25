@@ -31,6 +31,8 @@ import org.apache.seata.mcp.entity.param.McpGlobalLockParam;
 import org.apache.seata.mcp.entity.vo.McpGlobalLockVO;
 import org.apache.seata.mcp.service.ConsoleApiService;
 import org.apache.seata.mcp.service.ModifyConfirmService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springaicommunity.mcp.annotation.McpTool;
 import org.springaicommunity.mcp.annotation.McpToolParam;
 import org.springframework.stereotype.Service;
@@ -40,6 +42,8 @@ import java.util.Map;
 
 @Service
 public class GlobalLockTools {
+
+    private final Logger logger = LoggerFactory.getLogger(GlobalLockTools.class);
 
     private final ConsoleApiService mcpRPCService;
 
@@ -82,13 +86,13 @@ public class GlobalLockTools {
             param.setTimeEnd(null);
             param.setTimeStart(null);
         }
-        PageResult<McpGlobalLockVO> result;
+        PageResult<McpGlobalLockVO> result = null;
         String response = mcpRPCService.getCallTC(
                 nameSpaceDetail, RPCConstant.GLOBAL_LOCK_BASE_URL + "/query", param, null, null);
         try {
             result = objectMapper.readValue(response, new TypeReference<PageResult<McpGlobalLockVO>>() {});
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            logger.error(e.getMessage());
         }
         if (result == null) {
             return PageResult.failure("", "query global lock failed");

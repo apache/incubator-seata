@@ -91,6 +91,8 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
             }
             return WebSecurityConfig.TOKEN_PREFIX + originJwt;
         } else {
+            logger.warn("Authentication is disabled (seata.mcp.auth.enabled=false); "
+                    + "generating token using internal fallback user. This configuration should not be used in production.");
             UsernamePasswordAuthenticationToken authenticationToken =
                     new UsernamePasswordAuthenticationToken("seata", "");
             Authentication authentication = authenticationManager.authenticate(authenticationToken);
@@ -130,7 +132,7 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
             return responseBody;
         } catch (RestClientException e) {
             logger.error("MCP GET Call NameSpace Failed", e);
-            return "MCP GET Call NameSpace Failed: " + e.getMessage();
+            return "Connect TC Failed";
         }
     }
 
@@ -165,7 +167,7 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
             return responseBody;
         } catch (RestClientException e) {
             logger.error("MCP GET Call TC Failed", e);
-            return "MCP GET Call TC Failed: " + e.getMessage();
+            return "Connect TC Failed";
         }
     }
 
@@ -200,7 +202,7 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
             return responseBody;
         } catch (RestClientException e) {
             logger.error("MCP DELETE Call TC Failed", e);
-            return "MCP DELETE Call TC Failed: " + e.getMessage();
+            return "Connect TC Failed";
         }
     }
 
@@ -235,7 +237,7 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
             return responseBody;
         } catch (RestClientException e) {
             logger.error("MCP Put Call TC Failed", e);
-            return "MCP Put Call TC Failed: " + e.getMessage();
+            return "Connect TC Failed";
         }
     }
 }
