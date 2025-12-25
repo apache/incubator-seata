@@ -16,7 +16,7 @@
  */
 package org.apache.seata.mcp.entity.dto;
 
-import org.springframework.ai.tool.annotation.ToolParam;
+import org.springaicommunity.mcp.annotation.McpToolParam;
 
 import java.io.Serializable;
 
@@ -24,35 +24,35 @@ public class GlobalLockParamDto implements Serializable {
 
     private static final long serialVersionUID = 615412528070131284L;
 
-    @ToolParam(description = "Global transaction id", required = false)
+    @McpToolParam(description = "Global transaction id", required = false)
     private String xid;
 
-    @ToolParam(description = "the table name", required = false)
+    @McpToolParam(description = "the table name", required = false)
     private String tableName;
 
-    @ToolParam(description = "the transaction id", required = false)
+    @McpToolParam(description = "the transaction id", required = false)
     private String transactionId;
 
-    @ToolParam(description = "the branch id", required = false)
+    @McpToolParam(description = "the branch id", required = false)
     private String branchId;
 
     private String pk;
 
-    @ToolParam(description = "resourceId", required = false)
+    @McpToolParam(description = "resourceId", required = false)
     private String resourceId;
 
-    @ToolParam(description = "page number")
+    @McpToolParam(description = "page number")
     private int pageNum;
 
-    @ToolParam(description = "Page size")
+    @McpToolParam(description = "Page size")
     private int pageSize;
 
-    @ToolParam(
+    @McpToolParam(
             description = "Start time, The global lock create time is after this time (yyyy-MM-dd HH:mm:ss)",
             required = false)
     private String timeStart;
 
-    @ToolParam(
+    @McpToolParam(
             description = "End time, The global lock create time is before this time (yyyy-MM-dd HH:mm:ss)",
             required = false)
     private String timeEnd;

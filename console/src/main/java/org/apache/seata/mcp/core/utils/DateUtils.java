@@ -52,7 +52,7 @@ public class DateUtils {
             LocalDateTime dateTime = LocalDateTime.parse(dateTimeStr, formatter);
             return dateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
         } catch (DateTimeParseException e) {
-            return -1;
+            throw new DateTimeException("The time format does not match yyyy-MM-dd HH:mm:ss", e);
         }
     }
 
@@ -71,7 +71,6 @@ public class DateUtils {
 
     public static boolean judgeExceedTimeDuration(Long startTime, Long endTime, Long maxDuration) {
         if (endTime < startTime) throw new IllegalArgumentException("endTime must not be earlier than startTime");
-        ;
         return endTime - startTime > maxDuration;
     }
 
