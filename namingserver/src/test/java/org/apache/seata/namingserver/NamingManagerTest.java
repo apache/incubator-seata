@@ -16,8 +16,8 @@
  */
 package org.apache.seata.namingserver;
 
-import org.apache.http.StatusLine;
-import org.apache.http.client.methods.CloseableHttpResponse;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 import org.apache.seata.common.metadata.Cluster;
 import org.apache.seata.common.metadata.ClusterRole;
 import org.apache.seata.common.metadata.Node;
@@ -64,10 +64,10 @@ class NamingManagerTest {
     private ApplicationContext applicationContext;
 
     @Mock
-    private CloseableHttpResponse httpResponse;
+    private Response httpResponse;
 
     @Mock
-    private StatusLine statusLine;
+    private ResponseBody responseBody;
 
     private MockedStatic<HttpClientUtil> mockedHttpClientUtil;
 
@@ -78,7 +78,8 @@ class NamingManagerTest {
         ReflectionTestUtils.setField(namingManager, "heartbeatTimeThreshold", 500000);
         ReflectionTestUtils.setField(namingManager, "heartbeatCheckTimePeriod", 10000000);
 
-        Mockito.when(httpResponse.getStatusLine()).thenReturn(statusLine);
+        Mockito.when(httpResponse.code()).thenReturn(200);
+        Mockito.when(httpResponse.body()).thenReturn(responseBody);
         mockedHttpClientUtil = Mockito.mockStatic(HttpClientUtil.class);
         mockedHttpClientUtil
                 .when(() -> HttpClientUtil.doGet(anyString(), anyMap(), anyMap(), anyInt()))
@@ -228,7 +229,7 @@ class NamingManagerTest {
         node.getMetadata().put(CONSTANT_GROUP, vGroups);
         namingManager.registerInstance(node, namespace, clusterName, unitName);
 
-        Mockito.when(statusLine.getStatusCode()).thenReturn(200);
+        Mockito.when(httpResponse.code()).thenReturn(200);
         Result<String> result = namingManager.createGroup(namespace, vGroup, clusterName, unitName);
         assertFalse(result.isSuccess());
         vGroup = "test-vGroup2";
@@ -292,8 +293,8 @@ class NamingManagerTest {
         nodeList.add(node);
         unit.setNamingInstanceList(nodeList);
 
-        Mockito.when(httpResponse.getStatusLine()).thenReturn(statusLine);
-        Mockito.when(statusLine.getStatusCode()).thenReturn(200);
+        Mockito.when(httpResponse.code()).thenReturn(200);
+        Mockito.when(httpResponse.body()).thenReturn(responseBody);
 
         mockedHttpClientUtil
                 .when(() -> HttpClientUtil.doGet(anyString(), anyMap(), anyMap(), anyInt()))
