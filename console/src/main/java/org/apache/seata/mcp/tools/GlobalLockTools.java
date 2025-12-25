@@ -69,22 +69,25 @@ public class GlobalLockTools {
             @McpToolParam(description = "Specify the namespace of the TC node") NameSpaceDetail nameSpaceDetail,
             @McpToolParam(description = "Global lock parameters") McpGlobalLockParamDto paramDto) {
         McpGlobalLockParam param = McpGlobalLockParam.convertFromParamDto(paramDto);
-        if (param.getTimeStart() != null) {
-            if (param.getTimeEnd() != null) {
-                if (DateUtils.judgeExceedTimeDuration(
-                        param.getTimeStart(), param.getTimeEnd(), mcpProperties.getQueryDuration())) {
-                    return PageResult.failure(
-                            "",
-                            String.format(
-                                    "The query time span is not allowed to exceed the max query duration: %s hour",
-                                    DateUtils.convertToHourFromTimeStamp(mcpProperties.getQueryDuration())));
-                }
-            } else {
-                param.setTimeEnd(param.getTimeStart() + DateUtils.ONE_DAY_TIMESTAMP);
+        Long timeStart = param.getTimeStart();
+        Long timeEnd = param.getTimeEnd();
+        Long maxQueryDuration = mcpProperties.getQueryDuration();
+        if (timeStart != null || timeEnd != null) {
+            if (timeStart == null) {
+                timeStart = timeEnd - maxQueryDuration;
+                param.setTimeStart(timeStart);
             }
-        } else {
-            param.setTimeEnd(null);
-            param.setTimeStart(null);
+            if (timeEnd == null) {
+                timeEnd = timeStart + maxQueryDuration;
+                param.setTimeEnd(timeEnd);
+            }
+            if (DateUtils.judgeExceedTimeDuration(timeStart, timeEnd, maxQueryDuration)) {
+                return PageResult.failure(
+                        "",
+                        String.format(
+                                "The query time span is not allowed to exceed the max query duration: %s hours",
+                                DateUtils.convertToHourFromTimeStamp(maxQueryDuration)));
+            }
         }
         PageResult<McpGlobalLockVO> result = null;
         String response = mcpRPCService.getCallTC(
@@ -112,7 +115,8 @@ public class GlobalLockTools {
         String result = mcpRPCService.deleteCallTC(
                 nameSpaceDetail, RPCConstant.GLOBAL_LOCK_BASE_URL + "/delete", param, null, null);
         if (StringUtils.isBlank(result)) {
-            return "delete global lock failed";
+            return String.format(
+                    "delete global lock failed, xid: %s, branchId: %s", param.getXid(), param.getBranchId());
         } else {
             return result;
         }

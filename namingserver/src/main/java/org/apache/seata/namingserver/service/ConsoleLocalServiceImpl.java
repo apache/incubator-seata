@@ -24,6 +24,7 @@ import org.apache.seata.common.metadata.namingserver.NamingServerNode;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.mcp.core.props.NameSpaceDetail;
+import org.apache.seata.mcp.exception.ServiceCallException;
 import org.apache.seata.mcp.service.ConsoleApiService;
 import org.apache.seata.mcp.service.impl.ConsoleRemoteServiceImpl;
 import org.apache.seata.namingserver.manager.NamingManager;
@@ -105,12 +106,17 @@ public class ConsoleLocalServiceImpl implements ConsoleApiService {
                         responseBody = response.getBody();
 
                         if (!response.getStatusCode().is2xxSuccessful()) {
-                            logger.warn("MCP request returned non-success status: {}", response.getStatusCode());
+                            String errorMsg = String.format(
+                                    "MCP request failed with status: %s, response: %s",
+                                    response.getStatusCode(), response.getBody());
+                            logger.warn(errorMsg);
+                            throw new ServiceCallException(errorMsg, response.getStatusCode());
                         }
                         return responseBody;
                     } catch (RestClientException e) {
-                        logger.error("MCP {} Call TC Failed: {}", httpMethod.name(), e.getMessage());
-                        throw new RestClientException("Connect TC Failed");
+                        String errorMsg = "MCP Call TC Failed.";
+                        logger.error(errorMsg, e);
+                        throw new ServiceCallException(errorMsg);
                     }
                 }
             }

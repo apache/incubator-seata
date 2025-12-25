@@ -79,22 +79,25 @@ public class GlobalSessionTools {
             @McpToolParam(description = "Specify the namespace of the TC node") NameSpaceDetail nameSpaceDetail,
             @McpToolParam(description = "Query parameter objects") McpGlobalSessionParamDto paramDto) {
         McpGlobalSessionParam param = McpGlobalSessionParam.convertFromDtoParam(paramDto);
-        if (param.getTimeStart() != null) {
-            if (param.getTimeEnd() != null) {
-                if (DateUtils.judgeExceedTimeDuration(
-                        param.getTimeStart(), param.getTimeEnd(), mcpProperties.getQueryDuration())) {
-                    return PageResult.failure(
-                            "",
-                            String.format(
-                                    "The query time span is not allowed to exceed the max query duration: %s hours",
-                                    DateUtils.convertToHourFromTimeStamp(mcpProperties.getQueryDuration())));
-                }
-            } else {
-                param.setTimeEnd(param.getTimeStart() + DateUtils.ONE_DAY_TIMESTAMP);
+        Long timeStart = param.getTimeStart();
+        Long timeEnd = param.getTimeEnd();
+        Long maxQueryDuration = mcpProperties.getQueryDuration();
+        if (timeStart != null || timeEnd != null) {
+            if (timeStart == null) {
+                timeStart = timeEnd - maxQueryDuration;
+                param.setTimeStart(timeStart);
             }
-        } else {
-            param.setTimeEnd(null);
-            param.setTimeStart(null);
+            if (timeEnd == null) {
+                timeEnd = timeStart + maxQueryDuration;
+                param.setTimeEnd(timeEnd);
+            }
+            if (DateUtils.judgeExceedTimeDuration(timeStart, timeEnd, maxQueryDuration)) {
+                return PageResult.failure(
+                        "",
+                        String.format(
+                                "The query time span is not allowed to exceed the max query duration: %s hours",
+                                DateUtils.convertToHourFromTimeStamp(maxQueryDuration)));
+            }
         }
         PageResult<McpGlobalSessionVO> pageResult = null;
         String result = mcpRPCService.getCallTC(
