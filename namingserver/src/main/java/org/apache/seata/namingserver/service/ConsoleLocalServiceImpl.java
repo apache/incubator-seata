@@ -97,7 +97,7 @@ public class ConsoleLocalServiceImpl implements ConsoleApiService {
                         headers.add(RAFT_GROUP_HEADER, node.getUnit());
                     }
                     HttpEntity<String> entity = new HttpEntity<>(headers);
-                    String responseBody = null;
+                    String responseBody;
                     try {
                         ResponseEntity<String> response =
                                 restTemplate.exchange(targetUrl, httpMethod, entity, String.class);

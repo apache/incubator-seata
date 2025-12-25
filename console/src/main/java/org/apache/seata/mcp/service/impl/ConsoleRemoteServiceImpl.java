@@ -69,7 +69,7 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
     }
 
     @Value("${seata.console.naming-space-url:http://127.0.0.1:%s}")
-    private String NAMING_SPACE_URL;
+    private String namingSpaceUrl;
 
     private final Logger logger = LoggerFactory.getLogger(ConsoleRemoteServiceImpl.class);
 
@@ -116,7 +116,7 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
     public String getCallNameSpace(String path) {
         HttpHeaders headers = new HttpHeaders();
         headers.add(WebSecurityConfig.AUTHORIZATION_HEADER, getToken());
-        String url = buildUrl(String.format(NAMING_SPACE_URL, namingSpacePort), path, null, null);
+        String url = buildUrl(String.format(namingSpaceUrl, namingSpacePort), path, null, null);
         HttpEntity<String> entity = new HttpEntity<>(headers);
         String responseBody;
         try {
@@ -151,7 +151,7 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
         }
         headers.add(WebSecurityConfig.AUTHORIZATION_HEADER, getToken());
         Map<String, Object> queryParamsMap = objectToQueryParamMap(objectQueryParams, objectMapper);
-        String url = buildUrl(String.format(NAMING_SPACE_URL, namingSpacePort), path, queryParams, queryParamsMap);
+        String url = buildUrl(String.format(namingSpaceUrl, namingSpacePort), path, queryParams, queryParamsMap);
         HttpEntity<String> entity = new HttpEntity<>(headers);
         String responseBody;
         try {
@@ -186,7 +186,7 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
         }
         headers.add(WebSecurityConfig.AUTHORIZATION_HEADER, getToken());
         Map<String, Object> queryParamsMap = objectToQueryParamMap(objectQueryParams, objectMapper);
-        String url = buildUrl(String.format(NAMING_SPACE_URL, namingSpacePort), path, queryParams, queryParamsMap);
+        String url = buildUrl(String.format(namingSpaceUrl, namingSpacePort), path, queryParams, queryParamsMap);
         HttpEntity<String> entity = new HttpEntity<>(headers);
         String responseBody;
         try {
@@ -221,7 +221,7 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
         }
         headers.add(WebSecurityConfig.AUTHORIZATION_HEADER, getToken());
         Map<String, Object> queryParamsMap = objectToQueryParamMap(objectQueryParams, objectMapper);
-        String url = buildUrl(String.format(NAMING_SPACE_URL, namingSpacePort), path, queryParams, queryParamsMap);
+        String url = buildUrl(String.format(namingSpaceUrl, namingSpacePort), path, queryParams, queryParamsMap);
         HttpEntity<String> entity = new HttpEntity<>(headers);
         String responseBody;
         try {
