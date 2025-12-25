@@ -91,8 +91,9 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
             }
             return WebSecurityConfig.TOKEN_PREFIX + originJwt;
         } else {
-            logger.warn("Authentication is disabled (seata.mcp.auth.enabled=false); "
-                    + "generating token using internal fallback user. This configuration should not be used in production.");
+            logger.warn(
+                    "Authentication is disabled (seata.mcp.auth.enabled=false); "
+                            + "generating token using internal fallback user. This configuration should not be used in production.");
             UsernamePasswordAuthenticationToken authenticationToken =
                     new UsernamePasswordAuthenticationToken("seata", "");
             Authentication authentication = authenticationManager.authenticate(authenticationToken);

@@ -32,7 +32,7 @@ public class McpGlobalSessionVO extends org.apache.seata.server.console.entity.v
     private String beginTime;
     private String gmtCreate;
     private String gmtModified;
-    private Set<McpBranchSessionVO> branchSessionVOs;
+    private Set<McpBranchSessionVO> mcpBranchSessionVOS;
 
     @JsonProperty("beginTime")
     @JsonDeserialize(using = TimestampToStringDeserializer.class)
@@ -66,10 +66,10 @@ public class McpGlobalSessionVO extends org.apache.seata.server.console.entity.v
 
     @JsonProperty("branchSessionVOs")
     public Set<McpBranchSessionVO> getBranchSessionVO() {
-        return branchSessionVOs;
+        return mcpBranchSessionVOS;
     }
 
     public void setBranchSessionVO(Set<McpBranchSessionVO> mcpBranchSessionVOS) {
-        this.branchSessionVOs = mcpBranchSessionVOS;
+        this.mcpBranchSessionVOS = mcpBranchSessionVOS;
     }
 }

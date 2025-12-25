@@ -36,7 +36,7 @@ public class ModifyConfirmServiceImpl implements ModifyConfirmService {
 
     private final JwtTokenUtils jwtTokenUtils;
 
-    private static final long MODIFY_TOKEN_VALIDITY_IN_MILLISECONDS = 60_000;
+    private static final long MODIFY_TOKEN_VALIDITY_IN_MILLISECONDS = 180_000;
 
     @Value("${seata.security.secretKey}")
     private String secretKey;
