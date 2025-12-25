@@ -25,11 +25,11 @@ import org.springframework.beans.BeanUtils;
 /**
  * Global lock param
  */
-public class GlobalLockParam extends org.apache.seata.server.console.entity.param.GlobalLockParam {
+public class McpGlobalLockParam extends org.apache.seata.server.console.entity.param.GlobalLockParam {
 
-    public static GlobalLockParam convertFromParamDto(GlobalLockParamDto paramDto) {
+    public static McpGlobalLockParam convertFromParamDto(GlobalLockParamDto paramDto) {
         PageUtil.checkParam(paramDto.getPageNum(), paramDto.getPageSize());
-        GlobalLockParam param = new GlobalLockParam();
+        McpGlobalLockParam param = new McpGlobalLockParam();
         BeanUtils.copyProperties(paramDto, param);
         if (StringUtils.isNotBlank(paramDto.getTimeStart())) {
             param.setTimeStart(DateUtils.convertToTimeStampFromDateTime(paramDto.getTimeStart()));

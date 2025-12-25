@@ -27,7 +27,7 @@ import org.apache.seata.mcp.core.props.NameSpaceDetail;
 import org.apache.seata.mcp.core.utils.DateUtils;
 import org.apache.seata.mcp.entity.dto.GlobalLockParamDto;
 import org.apache.seata.mcp.entity.param.GlobalLockDeleteParam;
-import org.apache.seata.mcp.entity.param.GlobalLockParam;
+import org.apache.seata.mcp.entity.param.McpGlobalLockParam;
 import org.apache.seata.mcp.entity.vo.GlobalLockVO;
 import org.apache.seata.mcp.service.ConsoleApiService;
 import org.apache.seata.mcp.service.ModifyConfirmService;
@@ -64,7 +64,7 @@ public class GlobalLockTools {
     public PageResult<GlobalLockVO> queryGlobalLock(
             @McpToolParam(description = "Specify the namespace of the TC node") NameSpaceDetail nameSpaceDetail,
             @McpToolParam(description = "Global lock parameters") GlobalLockParamDto paramDto) {
-        GlobalLockParam param = GlobalLockParam.convertFromParamDto(paramDto);
+        McpGlobalLockParam param = McpGlobalLockParam.convertFromParamDto(paramDto);
         if (param.getTimeStart() != null) {
             if (param.getTimeEnd() != null) {
                 if (DateUtils.judgeExceedTimeDuration(

@@ -110,7 +110,7 @@ public class ConsoleLocalServiceImpl implements ConsoleApiService {
                         return responseBody;
                     } catch (RestClientException e) {
                         logger.error("MCP {} Call TC Failed: {}", httpMethod.name(), e.getMessage());
-                        return responseBody;
+                        throw new RestClientException(e.getMessage());
                     }
                 }
             }
