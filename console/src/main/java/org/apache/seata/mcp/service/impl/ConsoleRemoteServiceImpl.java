@@ -16,6 +16,8 @@
  */
 package org.apache.seata.mcp.service.impl;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.seata.common.NamingServerLocalMarker;
 import org.apache.seata.common.exception.AuthenticationFailedException;
 import org.apache.seata.common.util.StringUtils;
@@ -38,7 +40,6 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -51,9 +52,12 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
 
     private final RestTemplate restTemplate;
 
-    public ConsoleRemoteServiceImpl(JwtTokenUtils jwtTokenUtils, RestTemplate restTemplate) {
+    private final ObjectMapper objectMapper;
+
+    public ConsoleRemoteServiceImpl(JwtTokenUtils jwtTokenUtils, RestTemplate restTemplate, ObjectMapper objectMapper) {
         this.jwtTokenUtils = jwtTokenUtils;
         this.restTemplate = restTemplate;
+        this.objectMapper = objectMapper;
     }
 
     @Value("${seata.console.naming-space-url:http://127.0.0.1:%s}")
@@ -236,23 +240,12 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
             return result;
         }
 
-        Map<String, Object> paramMap = new HashMap<>();
-        Class<?> clazz = obj.getClass();
-        while (clazz != null && clazz != Object.class) {
-            for (Field field : clazz.getDeclaredFields()) {
-                try {
-                    field.setAccessible(true);
-                    Object value = field.get(obj);
-                    if (value != null) {
-                        paramMap.putIfAbsent(field.getName(), value);
-                    }
-                } catch (IllegalAccessException e) {
-                    logger.warn("Failed to access field {}: {}", field.getName(), e.getMessage());
-                }
-            }
-            clazz = clazz.getSuperclass();
+        try {
+            return objectMapper.convertValue(obj, new TypeReference<Map<String, Object>>() {});
+        } catch (IllegalArgumentException e) {
+            logger.warn("Failed to convert object to map: {}", e.getMessage());
+            return Collections.emptyMap();
         }
-        return paramMap;
     }
 
     private String buildUrl(
