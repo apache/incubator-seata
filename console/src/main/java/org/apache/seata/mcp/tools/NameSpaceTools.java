@@ -42,7 +42,7 @@ public class NameSpaceTools {
 
     @McpTool(description = "Get the namespace and cluster or vgroup where all TC/Servers are located")
     public SingleResult<?> getTCNameSpaces() {
-        String result = mcpRPCService.getCallNameSpace(RPCConstant.GET_NAMESPACE_PATH, null, null, null);
+        String result = mcpRPCService.getCallNameSpace(RPCConstant.GET_NAMESPACE_PATH);
         Map<String, Object> nameSpacesVo = new HashMap<>();
         try {
             JsonNode root = objectMapper.readTree(result);

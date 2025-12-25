@@ -26,23 +26,23 @@ public interface ConsoleApiService {
     String getCallTC(
             NameSpaceDetail nameSpaceDetail,
             String path,
-            Object queryParams,
-            Map<String, String> pathParams,
+            Object objectQueryParams,
+            Map<String, String> queryParams,
             HttpHeaders headers);
 
     String deleteCallTC(
             NameSpaceDetail nameSpaceDetail,
             String path,
-            Object queryParams,
-            Map<String, String> pathParams,
+            Object objectQueryParams,
+            Map<String, String> queryParams,
             HttpHeaders headers);
 
     String putCallTC(
             NameSpaceDetail nameSpaceDetail,
             String path,
-            Object queryParams,
-            Map<String, String> pathParams,
+            Object objectQueryParams,
+            Map<String, String> queryParams,
             HttpHeaders headers);
 
-    String getCallNameSpace(String path, Object queryParams, Map<String, String> pathParams, HttpHeaders headers);
+    String getCallNameSpace(String path);
 }

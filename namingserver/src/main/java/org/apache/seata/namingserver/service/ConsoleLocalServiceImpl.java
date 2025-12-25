@@ -70,8 +70,8 @@ public class ConsoleLocalServiceImpl implements ConsoleApiService {
             NameSpaceDetail nameSpaceDetail,
             HttpMethod httpMethod,
             String path,
-            Object queryParams,
-            Map<String, String> pathParams,
+            Object objectQueryParams,
+            Map<String, String> queryParams,
             HttpHeaders headers) {
         String namespace = nameSpaceDetail.getNamespace();
         String cluster = nameSpaceDetail.getCluster();
@@ -91,8 +91,8 @@ public class ConsoleLocalServiceImpl implements ConsoleApiService {
                 if (controlEndpoint != null) {
                     // Construct the target URL
                     String baseUrl = "http://" + controlEndpoint.getHost() + ":" + controlEndpoint.getPort();
-                    Map<String, Object> queryParamsMap = objectToQueryParamMap(queryParams, objectMapper);
-                    String targetUrl = buildUrl(baseUrl, path, pathParams, queryParamsMap);
+                    Map<String, Object> queryParamsMap = objectToQueryParamMap(objectQueryParams, objectMapper);
+                    String targetUrl = buildUrl(baseUrl, path, queryParams, queryParamsMap);
                     if (node.getRole() == ClusterRole.LEADER) {
                         headers.add(RAFT_GROUP_HEADER, node.getUnit());
                     }
@@ -123,35 +123,34 @@ public class ConsoleLocalServiceImpl implements ConsoleApiService {
     public String getCallTC(
             NameSpaceDetail nameSpaceDetail,
             String path,
-            Object queryParams,
-            Map<String, String> pathParams,
+            Object objectQueryParams,
+            Map<String, String> queryParams,
             HttpHeaders headers) {
-        return getResult(nameSpaceDetail, HttpMethod.GET, path, queryParams, pathParams, headers);
+        return getResult(nameSpaceDetail, HttpMethod.GET, path, objectQueryParams, queryParams, headers);
     }
 
     @Override
     public String deleteCallTC(
             NameSpaceDetail nameSpaceDetail,
             String path,
-            Object queryParams,
-            Map<String, String> pathParams,
+            Object objectQueryParams,
+            Map<String, String> queryParams,
             HttpHeaders headers) {
-        return getResult(nameSpaceDetail, HttpMethod.DELETE, path, queryParams, pathParams, headers);
+        return getResult(nameSpaceDetail, HttpMethod.DELETE, path, objectQueryParams, queryParams, headers);
     }
 
     @Override
     public String putCallTC(
             NameSpaceDetail nameSpaceDetail,
             String path,
-            Object queryParams,
-            Map<String, String> pathParams,
+            Object objectQueryParams,
+            Map<String, String> queryParams,
             HttpHeaders headers) {
-        return getResult(nameSpaceDetail, HttpMethod.PUT, path, queryParams, pathParams, headers);
+        return getResult(nameSpaceDetail, HttpMethod.PUT, path, objectQueryParams, queryParams, headers);
     }
 
     @Override
-    public String getCallNameSpace(
-            String path, Object queryParams, Map<String, String> pathParams, HttpHeaders headers) {
+    public String getCallNameSpace(String path) {
         String namespace;
         try {
             namespace = objectMapper.writeValueAsString(namingManager.namespace());

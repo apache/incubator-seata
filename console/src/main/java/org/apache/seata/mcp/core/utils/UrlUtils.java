@@ -15,19 +15,19 @@ public class UrlUtils {
     private static final Logger logger = LoggerFactory.getLogger(UrlUtils.class);
 
     public static String buildUrl(
-            String baseUrl, String path, Map<String, String> pathParams, Map<String, Object> queryParams) {
+            String baseUrl, String path, Map<String, String> queryStringParams, Map<String, Object> queryObjectParams) {
 
         UriComponentsBuilder builder =
                 UriComponentsBuilder.fromUriString(baseUrl).path(path);
 
-        if (pathParams != null && !pathParams.isEmpty()) {
-            for (Map.Entry<String, String> entry : pathParams.entrySet()) {
+        if (queryStringParams != null && !queryStringParams.isEmpty()) {
+            for (Map.Entry<String, String> entry : queryStringParams.entrySet()) {
                 builder.queryParam(entry.getKey(), entry.getValue());
             }
         }
 
-        if (queryParams != null && !queryParams.isEmpty()) {
-            for (Map.Entry<String, Object> entry : queryParams.entrySet()) {
+        if (queryObjectParams != null && !queryObjectParams.isEmpty()) {
+            for (Map.Entry<String, Object> entry : queryObjectParams.entrySet()) {
                 if (entry.getValue() instanceof Iterable) {
                     for (Object value : (Iterable<?>) entry.getValue()) {
                         builder.queryParam(entry.getKey(), value);

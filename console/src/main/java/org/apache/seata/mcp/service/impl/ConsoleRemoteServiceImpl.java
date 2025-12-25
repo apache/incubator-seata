@@ -32,6 +32,8 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -53,10 +55,17 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
 
     private final ObjectMapper objectMapper;
 
-    public ConsoleRemoteServiceImpl(JwtTokenUtils jwtTokenUtils, RestTemplate restTemplate, ObjectMapper objectMapper) {
+    private final AuthenticationManager authenticationManager;
+
+    public ConsoleRemoteServiceImpl(
+            JwtTokenUtils jwtTokenUtils,
+            RestTemplate restTemplate,
+            ObjectMapper objectMapper,
+            AuthenticationManager authenticationManager) {
         this.jwtTokenUtils = jwtTokenUtils;
         this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;
+        this.authenticationManager = authenticationManager;
     }
 
     @Value("${seata.console.naming-space-url:http://127.0.0.1:%s}")
@@ -67,24 +76,34 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
     @Value("${server.port:8081}")
     private String namingSpacePort;
 
+    @Value("${seata.mcp.auth.enabled}")
+    private String enabledAuth;
+
     public String getToken() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated()) {
-            throw new AuthenticationFailedException("No right to be identified");
+        if (Boolean.parseBoolean(enabledAuth)) {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth == null || !auth.isAuthenticated()) {
+                throw new AuthenticationFailedException("No right to be identified");
+            }
+            String originJwt = (String) auth.getCredentials();
+            if (!jwtTokenUtils.validateToken(originJwt)) {
+                throw new AuthenticationFailedException("Invalid token, please log back in to get a new token");
+            }
+            return WebSecurityConfig.TOKEN_PREFIX + originJwt;
+        } else {
+            UsernamePasswordAuthenticationToken authenticationToken =
+                    new UsernamePasswordAuthenticationToken("seata", "");
+            Authentication authentication = authenticationManager.authenticate(authenticationToken);
+            return WebSecurityConfig.TOKEN_PREFIX + jwtTokenUtils.createToken(authentication);
         }
-        String originJwt = (String) auth.getCredentials();
-        if (!jwtTokenUtils.validateToken(originJwt)) {
-            throw new AuthenticationFailedException("Invalid token, please log back in to get a new token");
-        }
-        return WebSecurityConfig.TOKEN_PREFIX + originJwt;
     }
 
-    public void setNamespaceHeaderAndPathParam(
-            NameSpaceDetail nameSpaceDetail, HttpHeaders headers, Map<String, String> pathParams) {
+    public void setNamespaceHeaderAndQueryParam(
+            NameSpaceDetail nameSpaceDetail, HttpHeaders headers, Map<String, String> queryParams) {
         headers.add("x-seata-namespace", nameSpaceDetail.getNamespace());
         if (StringUtils.isNotBlank(nameSpaceDetail.getvGroup())) {
-            if (pathParams != null) {
-                pathParams.put("vGroup", nameSpaceDetail.getvGroup());
+            if (queryParams != null) {
+                queryParams.put("vGroup", nameSpaceDetail.getvGroup());
             }
             return;
         }
@@ -94,14 +113,10 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
     }
 
     @Override
-    public String getCallNameSpace(
-            String path, Object queryParams, Map<String, String> pathParams, HttpHeaders headers) {
-        if (headers == null) {
-            headers = new HttpHeaders();
-        }
+    public String getCallNameSpace(String path) {
+        HttpHeaders headers = new HttpHeaders();
         headers.add(WebSecurityConfig.AUTHORIZATION_HEADER, getToken());
-        Map<String, Object> queryParamsMap = objectToQueryParamMap(queryParams, objectMapper);
-        String url = buildUrl(String.format(NAMING_SPACE_URL, namingSpacePort), path, pathParams, queryParamsMap);
+        String url = buildUrl(String.format(NAMING_SPACE_URL, namingSpacePort), path, null, null);
         HttpEntity<String> entity = new HttpEntity<>(headers);
         String responseBody;
         try {
@@ -123,8 +138,8 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
     public String getCallTC(
             NameSpaceDetail nameSpaceDetail,
             String path,
-            Object queryParams,
-            Map<String, String> pathParams,
+            Object objectQueryParams,
+            Map<String, String> queryParams,
             HttpHeaders headers) {
         if (headers == null) {
             headers = new HttpHeaders();
@@ -132,11 +147,11 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
         if (nameSpaceDetail == null || !nameSpaceDetail.isValid()) {
             return "If you have not specified the namespace of the TC/Server, specify the namespace first";
         } else {
-            setNamespaceHeaderAndPathParam(nameSpaceDetail, headers, pathParams);
+            setNamespaceHeaderAndQueryParam(nameSpaceDetail, headers, queryParams);
         }
         headers.add(WebSecurityConfig.AUTHORIZATION_HEADER, getToken());
-        Map<String, Object> queryParamsMap = objectToQueryParamMap(queryParams, objectMapper);
-        String url = buildUrl(String.format(NAMING_SPACE_URL, namingSpacePort), path, pathParams, queryParamsMap);
+        Map<String, Object> queryParamsMap = objectToQueryParamMap(objectQueryParams, objectMapper);
+        String url = buildUrl(String.format(NAMING_SPACE_URL, namingSpacePort), path, queryParams, queryParamsMap);
         HttpEntity<String> entity = new HttpEntity<>(headers);
         String responseBody;
         try {
@@ -158,8 +173,8 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
     public String deleteCallTC(
             NameSpaceDetail nameSpaceDetail,
             String path,
-            Object queryParams,
-            Map<String, String> pathParams,
+            Object objectQueryParams,
+            Map<String, String> queryParams,
             HttpHeaders headers) {
         if (headers == null) {
             headers = new HttpHeaders();
@@ -167,11 +182,11 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
         if (nameSpaceDetail == null || !nameSpaceDetail.isValid()) {
             return "If you have not specified the namespace of the TC/Server, specify the namespace first";
         } else {
-            setNamespaceHeaderAndPathParam(nameSpaceDetail, headers, pathParams);
+            setNamespaceHeaderAndQueryParam(nameSpaceDetail, headers, queryParams);
         }
         headers.add(WebSecurityConfig.AUTHORIZATION_HEADER, getToken());
-        Map<String, Object> queryParamsMap = objectToQueryParamMap(queryParams, objectMapper);
-        String url = buildUrl(String.format(NAMING_SPACE_URL, namingSpacePort), path, pathParams, queryParamsMap);
+        Map<String, Object> queryParamsMap = objectToQueryParamMap(objectQueryParams, objectMapper);
+        String url = buildUrl(String.format(NAMING_SPACE_URL, namingSpacePort), path, queryParams, queryParamsMap);
         HttpEntity<String> entity = new HttpEntity<>(headers);
         String responseBody;
         try {
@@ -193,8 +208,8 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
     public String putCallTC(
             NameSpaceDetail nameSpaceDetail,
             String path,
-            Object queryParams,
-            Map<String, String> pathParams,
+            Object objectQueryParams,
+            Map<String, String> queryParams,
             HttpHeaders headers) {
         if (headers == null) {
             headers = new HttpHeaders();
@@ -202,11 +217,11 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
         if (nameSpaceDetail == null || !nameSpaceDetail.isValid()) {
             return "If you have not specified the namespace of the TC/Server, specify the namespace first";
         } else {
-            setNamespaceHeaderAndPathParam(nameSpaceDetail, headers, pathParams);
+            setNamespaceHeaderAndQueryParam(nameSpaceDetail, headers, queryParams);
         }
         headers.add(WebSecurityConfig.AUTHORIZATION_HEADER, getToken());
-        Map<String, Object> queryParamsMap = objectToQueryParamMap(queryParams, objectMapper);
-        String url = buildUrl(String.format(NAMING_SPACE_URL, namingSpacePort), path, pathParams, queryParamsMap);
+        Map<String, Object> queryParamsMap = objectToQueryParamMap(objectQueryParams, objectMapper);
+        String url = buildUrl(String.format(NAMING_SPACE_URL, namingSpacePort), path, queryParams, queryParamsMap);
         HttpEntity<String> entity = new HttpEntity<>(headers);
         String responseBody;
         try {

@@ -81,7 +81,8 @@ public class GlobalSessionTools {
                         param.getTimeStart(), param.getTimeEnd(), mcpProperties.getQueryDuration())) {
                     return PageResult.failure(
                             "",
-                            String.format("The query time span is not allowed to exceed the max query duration: %s hour",
+                            String.format(
+                                    "The query time span is not allowed to exceed the max query duration: %s hour",
                                     DateUtils.convertToHourFromTimeStamp(mcpProperties.getQueryDuration())));
                 }
             } else {
