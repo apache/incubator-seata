@@ -16,8 +16,7 @@
  */
 package org.apache.seata.discovery.registry.namingserver;
 
-import org.apache.http.StatusLine;
-import org.apache.http.client.methods.CloseableHttpResponse;
+import okhttp3.Response;
 import org.apache.http.entity.ContentType;
 import org.apache.http.protocol.HTTP;
 import org.apache.seata.common.holder.ObjectHolder;
@@ -110,10 +109,8 @@ class NamingserverRegistryServiceImplTest {
         NamingserverRegistryServiceImpl spyService = Mockito.spy(NamingserverRegistryServiceImpl.getInstance());
         doReturn("127.0.0.1:8081").when(spyService).getNamingAddr();
 
-        CloseableHttpResponse mockResponse = mock(CloseableHttpResponse.class);
-        StatusLine mockStatusLine = mock(StatusLine.class);
-        when(mockStatusLine.getStatusCode()).thenReturn(200);
-        when(mockResponse.getStatusLine()).thenReturn(mockStatusLine);
+        Response mockResponse = mock(Response.class);
+        when(mockResponse.code()).thenReturn(200);
         mockStatic(HttpClientUtil.class);
         when(HttpClientUtil.doPost(anyString(), anyString(), anyMap(), anyInt()))
                 .thenReturn(mockResponse);
@@ -389,7 +386,7 @@ class NamingserverRegistryServiceImplTest {
         Map<String, String> header = new HashMap<>();
         header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
         try {
-            CloseableHttpResponse response = HttpClientUtil.doGet(url, paraMap, header, 30000);
+            Response response = HttpClientUtil.doGet(url, paraMap, header, 30000);
         } catch (Exception e) {
             throw new RemoteException();
         }
