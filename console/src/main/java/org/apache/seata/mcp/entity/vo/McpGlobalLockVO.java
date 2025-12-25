@@ -58,16 +58,8 @@ public class McpGlobalLockVO {
         return transactionId;
     }
 
-    public void setTransactionId(Long transactionId) {
-        this.transactionId = String.valueOf(transactionId);
-    }
-
     public String getBranchId() {
         return branchId;
-    }
-
-    public void setBranchId(Long branchId) {
-        this.branchId = String.valueOf(branchId);
     }
 
     public String getResourceId() {
