@@ -80,7 +80,7 @@ public class ConsoleLocalServiceImpl implements ConsoleApiService {
             List<NamingServerNode> list = null;
             if (StringUtils.isNotBlank(vgroup)) {
                 list = namingManager.getInstancesByVgroupAndNamespace(
-                        namespace, vgroup, StringUtils.equalsIgnoreCase(httpMethod.name(), HttpMethod.GET.name()));
+                        namespace, vgroup, HttpMethod.GET.equals(httpMethod));
             } else if (StringUtils.isNotBlank(cluster)) {
                 list = namingManager.getInstances(namespace, cluster);
             }
@@ -110,7 +110,7 @@ public class ConsoleLocalServiceImpl implements ConsoleApiService {
                         return responseBody;
                     } catch (RestClientException e) {
                         logger.error("MCP {} Call TC Failed: {}", httpMethod.name(), e.getMessage());
-                        throw new RestClientException(e.getMessage());
+                        throw new RestClientException("Connect TC Failed");
                     }
                 }
             }
@@ -156,7 +156,7 @@ public class ConsoleLocalServiceImpl implements ConsoleApiService {
             namespace = objectMapper.writeValueAsString(namingManager.namespace());
         } catch (JsonProcessingException e) {
             logger.error("Get NameSpace failed: {}", e.getMessage());
-            throw new RuntimeException(e);
+            return "Failed to get namespace";
         }
         return namespace;
     }
