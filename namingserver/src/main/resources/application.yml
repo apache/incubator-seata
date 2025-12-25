@@ -52,5 +52,3 @@ seata:
     # Maximum query time interval, The unit is milliseconds, Default one day
     query:
       max-query-duration: 86400000
-    auth:
-      enabled: true
