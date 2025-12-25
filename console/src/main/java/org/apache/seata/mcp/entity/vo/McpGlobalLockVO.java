@@ -19,10 +19,7 @@ package org.apache.seata.mcp.entity.vo;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.apache.seata.mcp.core.config.TimestampToStringDeserializer;
 
-/**
- * GlobalLockVO
- */
-public class GlobalLockVO {
+public class McpGlobalLockVO {
 
     private String xid;
 

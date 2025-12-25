@@ -28,7 +28,7 @@ import org.apache.seata.mcp.core.utils.DateUtils;
 import org.apache.seata.mcp.entity.dto.McpGlobalLockParamDto;
 import org.apache.seata.mcp.entity.param.McpGlobalLockDeleteParam;
 import org.apache.seata.mcp.entity.param.McpGlobalLockParam;
-import org.apache.seata.mcp.entity.vo.GlobalLockVO;
+import org.apache.seata.mcp.entity.vo.McpGlobalLockVO;
 import org.apache.seata.mcp.service.ConsoleApiService;
 import org.apache.seata.mcp.service.ModifyConfirmService;
 import org.springaicommunity.mcp.annotation.McpTool;
@@ -61,7 +61,7 @@ public class GlobalLockTools {
     }
 
     @McpTool(description = "Query the global lock information")
-    public PageResult<GlobalLockVO> queryGlobalLock(
+    public PageResult<McpGlobalLockVO> queryGlobalLock(
             @McpToolParam(description = "Specify the namespace of the TC node") NameSpaceDetail nameSpaceDetail,
             @McpToolParam(description = "Global lock parameters") McpGlobalLockParamDto paramDto) {
         McpGlobalLockParam param = McpGlobalLockParam.convertFromParamDto(paramDto);
@@ -82,11 +82,11 @@ public class GlobalLockTools {
             param.setTimeEnd(null);
             param.setTimeStart(null);
         }
-        PageResult<GlobalLockVO> result;
+        PageResult<McpGlobalLockVO> result;
         String response = mcpRPCService.getCallTC(
                 nameSpaceDetail, RPCConstant.GLOBAL_LOCK_BASE_URL + "/query", param, null, null);
         try {
-            result = objectMapper.readValue(response, new TypeReference<PageResult<GlobalLockVO>>() {});
+            result = objectMapper.readValue(response, new TypeReference<PageResult<McpGlobalLockVO>>() {});
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

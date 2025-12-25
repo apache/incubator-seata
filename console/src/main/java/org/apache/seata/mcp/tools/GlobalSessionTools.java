@@ -29,7 +29,7 @@ import org.apache.seata.mcp.core.utils.DateUtils;
 import org.apache.seata.mcp.entity.dto.McpGlobalSessionParamDto;
 import org.apache.seata.mcp.entity.param.McpGlobalAbnormalSessionParam;
 import org.apache.seata.mcp.entity.param.McpGlobalSessionParam;
-import org.apache.seata.mcp.entity.vo.GlobalSessionVO;
+import org.apache.seata.mcp.entity.vo.McpGlobalSessionVO;
 import org.apache.seata.mcp.service.ConsoleApiService;
 import org.apache.seata.mcp.service.ModifyConfirmService;
 import org.springaicommunity.mcp.annotation.McpTool;
@@ -71,7 +71,7 @@ public class GlobalSessionTools {
     }
 
     @McpTool(description = "Query global transactions")
-    public PageResult<GlobalSessionVO> queryGlobalSession(
+    public PageResult<McpGlobalSessionVO> queryGlobalSession(
             @McpToolParam(description = "Specify the namespace of the TC node") NameSpaceDetail nameSpaceDetail,
             @McpToolParam(description = "Query parameter objects") McpGlobalSessionParamDto paramDto) {
         McpGlobalSessionParam param = McpGlobalSessionParam.covertFromDtoParam(paramDto);
@@ -92,11 +92,11 @@ public class GlobalSessionTools {
             param.setTimeEnd(null);
             param.setTimeStart(null);
         }
-        PageResult<GlobalSessionVO> pageResult;
+        PageResult<McpGlobalSessionVO> pageResult;
         String result = mcpRPCService.getCallTC(
                 nameSpaceDetail, RPCConstant.GLOBAL_SESSION_BASE_URL + "/query", param, null, null);
         try {
-            pageResult = objectMapper.readValue(result, new TypeReference<PageResult<GlobalSessionVO>>() {});
+            pageResult = objectMapper.readValue(result, new TypeReference<PageResult<McpGlobalSessionVO>>() {});
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -205,15 +205,15 @@ public class GlobalSessionTools {
     }
 
     @McpTool(description = "Check out the abnormal transaction information,You can specify the time")
-    public List<GlobalSessionVO> getAbnormalSessions(
+    public List<McpGlobalSessionVO> getAbnormalSessions(
             @McpToolParam(description = "Specify the namespace of the TC node") NameSpaceDetail nameSpaceDetail,
             @McpToolParam(description = "Query Param") McpGlobalAbnormalSessionParam abnormalSessionParam) {
-        List<GlobalSessionVO> result = new ArrayList<>();
+        List<McpGlobalSessionVO> result = new ArrayList<>();
         McpGlobalSessionParamDto param = McpGlobalSessionParamDto.covertFromAbnormalParam(abnormalSessionParam);
         param.setPageSize(ABNORMAL_SESSION_PAGE_SIZE);
         for (Integer status : exceptionStatus) {
             param.setStatus(status);
-            List<GlobalSessionVO> datas =
+            List<McpGlobalSessionVO> datas =
                     queryGlobalSession(nameSpaceDetail, param).getData();
             if (datas != null && !datas.isEmpty()) {
                 result.addAll(datas);

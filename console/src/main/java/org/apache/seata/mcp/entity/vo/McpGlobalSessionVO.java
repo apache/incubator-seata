@@ -21,17 +21,28 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.apache.seata.mcp.core.config.TimestampToStringDeserializer;
 
+import java.util.Set;
+
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 
-/**
- * BranchSessionVO
- */
 @JsonAutoDetect(getterVisibility = NONE, fieldVisibility = ANY)
-public class BranchSessionVO extends org.apache.seata.server.console.entity.vo.BranchSessionVO {
+public class McpGlobalSessionVO extends org.apache.seata.server.console.entity.vo.GlobalSessionVO {
 
+    private String beginTime;
     private String gmtCreate;
     private String gmtModified;
+    private Set<McpBranchSessionVO> branchSessionVOs;
+
+    @JsonProperty("beginTime")
+    @JsonDeserialize(using = TimestampToStringDeserializer.class)
+    public String getBegin() {
+        return beginTime;
+    }
+
+    public void setBeginTime(String beginTime) {
+        this.beginTime = beginTime;
+    }
 
     @JsonProperty("gmtCreate")
     @JsonDeserialize(using = TimestampToStringDeserializer.class)
@@ -51,5 +62,14 @@ public class BranchSessionVO extends org.apache.seata.server.console.entity.vo.B
 
     public void setGmtModified(String gmtModified) {
         this.gmtModified = gmtModified;
+    }
+
+    @JsonProperty("branchSessionVOs")
+    public Set<McpBranchSessionVO> getBranchSessionVO() {
+        return branchSessionVOs;
+    }
+
+    public void setBranchSessionVO(Set<McpBranchSessionVO> mcpBranchSessionVOS) {
+        this.branchSessionVOs = mcpBranchSessionVOS;
     }
 }
