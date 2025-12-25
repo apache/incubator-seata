@@ -1,0 +1,72 @@
+package org.apache.seata.mcp.core.utils;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+public class UrlUtils {
+
+    private static final Logger logger = LoggerFactory.getLogger(UrlUtils.class);
+
+    public static String buildUrl(
+            String baseUrl, String path, Map<String, String> pathParams, Map<String, Object> queryParams) {
+
+        UriComponentsBuilder builder =
+                UriComponentsBuilder.fromUriString(baseUrl).path(path);
+
+        if (pathParams != null && !pathParams.isEmpty()) {
+            for (Map.Entry<String, String> entry : pathParams.entrySet()) {
+                builder.queryParam(entry.getKey(), entry.getValue());
+            }
+        }
+
+        if (queryParams != null && !queryParams.isEmpty()) {
+            for (Map.Entry<String, Object> entry : queryParams.entrySet()) {
+                if (entry.getValue() instanceof Iterable) {
+                    for (Object value : (Iterable<?>) entry.getValue()) {
+                        builder.queryParam(entry.getKey(), value);
+                    }
+                } else if (entry.getValue() != null
+                        && entry.getValue().getClass().isArray()) {
+                    Object[] array = (Object[]) entry.getValue();
+                    for (Object value : array) {
+                        builder.queryParam(entry.getKey(), value);
+                    }
+                } else {
+                    builder.queryParam(entry.getKey(), entry.getValue());
+                }
+            }
+        }
+
+        return builder.build().toUriString();
+    }
+
+    public static Map<String, Object> objectToQueryParamMap(Object obj, ObjectMapper objectMapper) {
+        if (obj == null) {
+            return Collections.emptyMap();
+        }
+        if (obj instanceof Map) {
+            Map<?, ?> map = (Map<?, ?>) obj;
+            Map<String, Object> result = new HashMap<>(map.size());
+            map.forEach((k, v) -> {
+                if (k != null && v != null) {
+                    result.put(k.toString(), v);
+                }
+            });
+            return result;
+        }
+
+        try {
+            return objectMapper.convertValue(obj, new TypeReference<Map<String, Object>>() {});
+        } catch (IllegalArgumentException e) {
+            logger.warn("Failed to convert object to map: {}", e.getMessage());
+            return Collections.emptyMap();
+        }
+    }
+}

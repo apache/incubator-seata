@@ -17,7 +17,6 @@
 package org.apache.seata.namingserver.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.seata.common.metadata.ClusterRole;
 import org.apache.seata.common.metadata.Node;
@@ -39,15 +38,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static org.apache.seata.common.Constants.RAFT_GROUP_HEADER;
+import static org.apache.seata.mcp.core.utils.UrlUtils.buildUrl;
+import static org.apache.seata.mcp.core.utils.UrlUtils.objectToQueryParamMap;
 
 @ConditionalOnBean(ConsoleRemoteServiceImpl.class)
 @Primary
@@ -93,7 +91,7 @@ public class ConsoleLocalServiceImpl implements ConsoleApiService {
                 if (controlEndpoint != null) {
                     // Construct the target URL
                     String baseUrl = "http://" + controlEndpoint.getHost() + ":" + controlEndpoint.getPort();
-                    Map<String, Object> queryParamsMap = objectToQueryParamMap(queryParams);
+                    Map<String, Object> queryParamsMap = objectToQueryParamMap(queryParams, objectMapper);
                     String targetUrl = buildUrl(baseUrl, path, pathParams, queryParamsMap);
                     if (node.getRole() == ClusterRole.LEADER) {
                         headers.add(RAFT_GROUP_HEADER, node.getUnit());
@@ -162,61 +160,5 @@ public class ConsoleLocalServiceImpl implements ConsoleApiService {
             throw new RuntimeException(e);
         }
         return namespace;
-    }
-
-    private Map<String, Object> objectToQueryParamMap(Object obj) {
-        if (obj == null) {
-            return Collections.emptyMap();
-        }
-        if (obj instanceof Map) {
-            Map<?, ?> map = (Map<?, ?>) obj;
-            Map<String, Object> result = new HashMap<>(map.size());
-            map.forEach((k, v) -> {
-                if (k != null && v != null) {
-                    result.put(k.toString(), v);
-                }
-            });
-            return result;
-        }
-
-        try {
-            return objectMapper.convertValue(obj, new TypeReference<Map<String, Object>>() {});
-        } catch (IllegalArgumentException e) {
-            logger.warn("Failed to convert object to map: {}", e.getMessage());
-            return Collections.emptyMap();
-        }
-    }
-
-    private String buildUrl(
-            String baseUrl, String path, Map<String, String> pathParams, Map<String, Object> queryParams) {
-
-        UriComponentsBuilder builder =
-                UriComponentsBuilder.fromUriString(baseUrl).path(path);
-
-        if (pathParams != null && !pathParams.isEmpty()) {
-            for (Map.Entry<String, String> entry : pathParams.entrySet()) {
-                builder.queryParam(entry.getKey(), entry.getValue());
-            }
-        }
-
-        if (queryParams != null && !queryParams.isEmpty()) {
-            for (Map.Entry<String, Object> entry : queryParams.entrySet()) {
-                if (entry.getValue() instanceof Iterable) {
-                    for (Object value : (Iterable<?>) entry.getValue()) {
-                        builder.queryParam(entry.getKey(), value);
-                    }
-                } else if (entry.getValue() != null
-                        && entry.getValue().getClass().isArray()) {
-                    Object[] array = (Object[]) entry.getValue();
-                    for (Object value : array) {
-                        builder.queryParam(entry.getKey(), value);
-                    }
-                } else {
-                    builder.queryParam(entry.getKey(), entry.getValue());
-                }
-            }
-        }
-
-        return builder.build().toUriString();
     }
 }

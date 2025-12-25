@@ -16,7 +16,6 @@
  */
 package org.apache.seata.mcp.service.impl;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.seata.common.NamingServerLocalMarker;
 import org.apache.seata.common.exception.AuthenticationFailedException;
@@ -38,11 +37,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+
+import static org.apache.seata.mcp.core.utils.UrlUtils.buildUrl;
+import static org.apache.seata.mcp.core.utils.UrlUtils.objectToQueryParamMap;
 
 @ConditionalOnMissingBean(NamingServerLocalMarker.class)
 @Service
@@ -101,7 +100,7 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
             headers = new HttpHeaders();
         }
         headers.add(WebSecurityConfig.AUTHORIZATION_HEADER, getToken());
-        Map<String, Object> queryParamsMap = objectToQueryParamMap(queryParams);
+        Map<String, Object> queryParamsMap = objectToQueryParamMap(queryParams, objectMapper);
         String url = buildUrl(String.format(NAMING_SPACE_URL, namingSpacePort), path, pathParams, queryParamsMap);
         HttpEntity<String> entity = new HttpEntity<>(headers);
         String responseBody;
@@ -136,7 +135,7 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
             setNamespaceHeaderAndPathParam(nameSpaceDetail, headers, pathParams);
         }
         headers.add(WebSecurityConfig.AUTHORIZATION_HEADER, getToken());
-        Map<String, Object> queryParamsMap = objectToQueryParamMap(queryParams);
+        Map<String, Object> queryParamsMap = objectToQueryParamMap(queryParams, objectMapper);
         String url = buildUrl(String.format(NAMING_SPACE_URL, namingSpacePort), path, pathParams, queryParamsMap);
         HttpEntity<String> entity = new HttpEntity<>(headers);
         String responseBody;
@@ -171,7 +170,7 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
             setNamespaceHeaderAndPathParam(nameSpaceDetail, headers, pathParams);
         }
         headers.add(WebSecurityConfig.AUTHORIZATION_HEADER, getToken());
-        Map<String, Object> queryParamsMap = objectToQueryParamMap(queryParams);
+        Map<String, Object> queryParamsMap = objectToQueryParamMap(queryParams, objectMapper);
         String url = buildUrl(String.format(NAMING_SPACE_URL, namingSpacePort), path, pathParams, queryParamsMap);
         HttpEntity<String> entity = new HttpEntity<>(headers);
         String responseBody;
@@ -206,7 +205,7 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
             setNamespaceHeaderAndPathParam(nameSpaceDetail, headers, pathParams);
         }
         headers.add(WebSecurityConfig.AUTHORIZATION_HEADER, getToken());
-        Map<String, Object> queryParamsMap = objectToQueryParamMap(queryParams);
+        Map<String, Object> queryParamsMap = objectToQueryParamMap(queryParams, objectMapper);
         String url = buildUrl(String.format(NAMING_SPACE_URL, namingSpacePort), path, pathParams, queryParamsMap);
         HttpEntity<String> entity = new HttpEntity<>(headers);
         String responseBody;
@@ -223,61 +222,5 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
             logger.error("MCP Put Call TC Failed", e);
             return "MCP Put Call TC Failed: " + e.getMessage();
         }
-    }
-
-    private Map<String, Object> objectToQueryParamMap(Object obj) {
-        if (obj == null) {
-            return Collections.emptyMap();
-        }
-        if (obj instanceof Map) {
-            Map<?, ?> map = (Map<?, ?>) obj;
-            Map<String, Object> result = new HashMap<>(map.size());
-            map.forEach((k, v) -> {
-                if (k != null && v != null) {
-                    result.put(k.toString(), v);
-                }
-            });
-            return result;
-        }
-
-        try {
-            return objectMapper.convertValue(obj, new TypeReference<Map<String, Object>>() {});
-        } catch (IllegalArgumentException e) {
-            logger.warn("Failed to convert object to map: {}", e.getMessage());
-            return Collections.emptyMap();
-        }
-    }
-
-    private String buildUrl(
-            String baseUrl, String path, Map<String, String> pathParams, Map<String, Object> queryParams) {
-
-        UriComponentsBuilder builder =
-                UriComponentsBuilder.fromUriString(baseUrl).path(path);
-
-        if (pathParams != null && !pathParams.isEmpty()) {
-            for (Map.Entry<String, String> entry : pathParams.entrySet()) {
-                builder.queryParam(entry.getKey(), entry.getValue());
-            }
-        }
-
-        if (queryParams != null && !queryParams.isEmpty()) {
-            for (Map.Entry<String, Object> entry : queryParams.entrySet()) {
-                if (entry.getValue() instanceof Iterable) {
-                    for (Object value : (Iterable<?>) entry.getValue()) {
-                        builder.queryParam(entry.getKey(), value);
-                    }
-                } else if (entry.getValue() != null
-                        && entry.getValue().getClass().isArray()) {
-                    Object[] array = (Object[]) entry.getValue();
-                    for (Object value : array) {
-                        builder.queryParam(entry.getKey(), value);
-                    }
-                } else {
-                    builder.queryParam(entry.getKey(), entry.getValue());
-                }
-            }
-        }
-
-        return builder.build().toUriString();
     }
 }
