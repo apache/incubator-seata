@@ -28,7 +28,7 @@ import org.apache.seata.mcp.core.props.NameSpaceDetail;
 import org.apache.seata.mcp.core.utils.DateUtils;
 import org.apache.seata.mcp.entity.dto.GlobalSessionParamDto;
 import org.apache.seata.mcp.entity.param.GlobalAbnormalSessionParam;
-import org.apache.seata.mcp.entity.param.GlobalSessionParam;
+import org.apache.seata.mcp.entity.param.McpGlobalSessionParam;
 import org.apache.seata.mcp.entity.vo.GlobalSessionVO;
 import org.apache.seata.mcp.service.ConsoleApiService;
 import org.apache.seata.mcp.service.ModifyConfirmService;
@@ -74,7 +74,7 @@ public class GlobalSessionTools {
     public PageResult<GlobalSessionVO> queryGlobalSession(
             @McpToolParam(description = "Specify the namespace of the TC node") NameSpaceDetail nameSpaceDetail,
             @McpToolParam(description = "Query parameter objects") GlobalSessionParamDto paramDto) {
-        GlobalSessionParam param = GlobalSessionParam.covertFromDtoParam(paramDto);
+        McpGlobalSessionParam param = McpGlobalSessionParam.covertFromDtoParam(paramDto);
         if (param.getTimeStart() != null) {
             if (param.getTimeEnd() != null) {
                 if (DateUtils.judgeExceedTimeDuration(

@@ -24,11 +24,11 @@ import org.apache.seata.mcp.entity.dto.GlobalSessionParamDto;
 /**
  * Global session param
  */
-public class GlobalSessionParam extends org.apache.seata.server.console.entity.param.GlobalSessionParam {
+public class McpGlobalSessionParam extends org.apache.seata.server.console.entity.param.GlobalSessionParam {
 
-    public static GlobalSessionParam covertFromDtoParam(GlobalSessionParamDto paramDto) {
+    public static McpGlobalSessionParam covertFromDtoParam(GlobalSessionParamDto paramDto) {
         PageUtil.checkParam(paramDto.getPageNum(), paramDto.getPageSize());
-        GlobalSessionParam param = new GlobalSessionParam();
+        McpGlobalSessionParam param = new McpGlobalSessionParam();
         param.setPageSize(paramDto.getPageSize());
         param.setPageNum(paramDto.getPageNum());
         param.setStatus(paramDto.getStatus());
