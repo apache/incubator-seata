@@ -36,7 +36,7 @@ public class ModifyConfirmServiceImpl implements ModifyConfirmService {
 
     private final JwtTokenUtils jwtTokenUtils;
 
-    private static final long ModifyTokenValidityInMilliseconds = 60_000;
+    private static final long MODIFY_TOKEN_VALIDITY_IN_MILLISECONDS = 60_000;
 
     @Value("${seata.security.secretKey}")
     private String secretKey;
@@ -49,7 +49,7 @@ public class ModifyConfirmServiceImpl implements ModifyConfirmService {
     public Map<String, String> confirmAndGetKey() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         long now = (new Date()).getTime();
-        Date expirationDate = new Date(now + ModifyTokenValidityInMilliseconds);
+        Date expirationDate = new Date(now + MODIFY_TOKEN_VALIDITY_IN_MILLISECONDS);
         SecretKeySpec secretKeySpec =
                 new SecretKeySpec(Decoders.BASE64.decode(secretKey), SignatureAlgorithm.HS256.getJcaName());
         String key = Jwts.builder()
