@@ -75,7 +75,8 @@ public class HttpDispatchHandler extends BaseHttpChannelHandler<HttpRequest> {
         HttpInvocation httpInvocation = ControllerManager.getHttpInvocation(path);
 
         if (httpInvocation == null) {
-            sendErrorResponse(ctx, HttpResponseStatus.NOT_FOUND, false);
+            FullHttpResponse errorResponse = addErrorResponse(context, HttpResponseStatus.NOT_FOUND);
+            sendErrorResponse(ctx, errorResponse, false);
             return;
         }
 
@@ -95,7 +96,8 @@ public class HttpDispatchHandler extends BaseHttpChannelHandler<HttpRequest> {
                     httpInvocation.getParamMetaData(), httpInvocation.getMethod(), requestDataNode, context);
         } catch (Exception e) {
             LOGGER.error("Error parsing request arguments: {}", e.getMessage(), e);
-            sendErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST, false);
+            FullHttpResponse errorResponse = addErrorResponse(context, HttpResponseStatus.BAD_REQUEST);
+            sendErrorResponse(ctx, errorResponse, false);
             return;
         }
         context.setAttribute("args", args);
@@ -103,14 +105,19 @@ public class HttpDispatchHandler extends BaseHttpChannelHandler<HttpRequest> {
         // Execute filter chain in HTTP thread pool
         HttpRequestFilterChain filterChain = HttpRequestFilterManager.getFilterChain(this::executeFinalAction);
         HTTP_HANDLER_THREADS.execute(() -> {
+            HttpFilterContext.setCurrentContext(context);
             try {
                 filterChain.doFilter(context);
             } catch (HttpRequestFilterException e) {
                 LOGGER.warn("Request blocked by filter: {}", e.getMessage());
-                sendErrorResponse(ctx, HttpResponseStatus.BAD_REQUEST, false);
+                FullHttpResponse errorResponse = addErrorResponse(context, HttpResponseStatus.BAD_REQUEST);
+                sendErrorResponse(ctx, errorResponse, false);
             } catch (Exception e) {
                 LOGGER.error("Unexpected error during request processing: {}", e.getMessage(), e);
-                sendErrorResponse(ctx, HttpResponseStatus.INTERNAL_SERVER_ERROR, false);
+                FullHttpResponse errorResponse = addErrorResponse(context, HttpResponseStatus.INTERNAL_SERVER_ERROR);
+                sendErrorResponse(ctx, errorResponse, false);
+            } finally {
+                HttpFilterContext.clearCurrentContext();
             }
         });
     }
@@ -127,17 +134,19 @@ public class HttpDispatchHandler extends BaseHttpChannelHandler<HttpRequest> {
                 return;
             }
 
-            sendResponse(context.getContext(), context.isKeepAlive(), result);
+            sendResponse(context.getContext(), context.isKeepAlive(), result, context);
         } catch (IllegalArgumentException e) {
             LOGGER.error("Illegal argument exception: {}", e.getMessage(), e);
-            sendErrorResponse(context.getContext(), HttpResponseStatus.BAD_REQUEST, false);
+            FullHttpResponse errorResponse = addErrorResponse(context, HttpResponseStatus.BAD_REQUEST);
+            sendErrorResponse(context.getContext(), errorResponse, false);
         } catch (Exception e) {
             LOGGER.error("Exception occurred while processing HTTP request: {}", e.getMessage(), e);
-            sendErrorResponse(context.getContext(), HttpResponseStatus.INTERNAL_SERVER_ERROR, false);
+            FullHttpResponse errorResponse = addErrorResponse(context, HttpResponseStatus.INTERNAL_SERVER_ERROR);
+            sendErrorResponse(context.getContext(), errorResponse, false);
         }
     }
 
-    private void sendResponse(ChannelHandlerContext ctx, boolean keepAlive, Object result)
+    private void sendResponse(ChannelHandlerContext ctx, boolean keepAlive, Object result, HttpFilterContext<?> context)
             throws JsonProcessingException {
         FullHttpResponse response;
         if (result != null) {
@@ -149,6 +158,7 @@ public class HttpDispatchHandler extends BaseHttpChannelHandler<HttpRequest> {
             response = new DefaultFullHttpResponse(
                     HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.wrappedBuffer(Unpooled.EMPTY_BUFFER));
         }
+        context.setResponse(response);
         if (!keepAlive) {
             ctx.writeAndFlush(response).addListeners(ChannelFutureListener.CLOSE);
         } else {
@@ -156,9 +166,14 @@ public class HttpDispatchHandler extends BaseHttpChannelHandler<HttpRequest> {
         }
     }
 
-    private void sendErrorResponse(ChannelHandlerContext ctx, HttpResponseStatus status, boolean keepAlive) {
+    private FullHttpResponse addErrorResponse(HttpFilterContext<?> context, HttpResponseStatus status) {
         FullHttpResponse response = new DefaultFullHttpResponse(
                 HttpVersion.HTTP_1_1, status, Unpooled.wrappedBuffer(Unpooled.EMPTY_BUFFER));
+        context.setResponse(response);
+        return response;
+    }
+
+    private void sendErrorResponse(ChannelHandlerContext ctx, FullHttpResponse response, boolean keepAlive) {
         if (!keepAlive) {
             ctx.writeAndFlush(response).addListeners(ChannelFutureListener.CLOSE);
         } else {
