@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.apache.seata.mcp.core.config.TimestampToStringDeserializer;
+import org.apache.seata.server.console.entity.vo.GlobalSessionVO;
 
 import java.util.Set;
 
@@ -27,11 +28,11 @@ import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 
 @JsonAutoDetect(getterVisibility = NONE, fieldVisibility = ANY)
-public class McpGlobalSessionVO extends org.apache.seata.server.console.entity.vo.GlobalSessionVO {
+public class McpGlobalSessionVO extends GlobalSessionVO {
 
     private String beginTime;
-    private String gmtCreate;
-    private String gmtModified;
+    private String createTime;
+    private String modifiedTime;
     private Set<McpBranchSessionVO> mcpBranchSessionVOS;
 
     @JsonProperty("beginTime")
@@ -46,30 +47,30 @@ public class McpGlobalSessionVO extends org.apache.seata.server.console.entity.v
 
     @JsonProperty("gmtCreate")
     @JsonDeserialize(using = TimestampToStringDeserializer.class)
-    public String getCreate() {
-        return gmtCreate;
+    public String getCreateTime() {
+        return createTime;
     }
 
-    public void setGmtCreate(String gmtCreate) {
-        this.gmtCreate = gmtCreate;
+    public void setCreateTime(String createTime) {
+        this.createTime = createTime;
     }
 
     @JsonProperty("gmtModified")
     @JsonDeserialize(using = TimestampToStringDeserializer.class)
-    public String getModified() {
-        return gmtModified;
+    public String getModifiedTime() {
+        return modifiedTime;
     }
 
-    public void setGmtModified(String gmtModified) {
-        this.gmtModified = gmtModified;
+    public void setModifiedTime(String modifiedTime) {
+        this.modifiedTime = modifiedTime;
     }
 
     @JsonProperty("branchSessionVOs")
-    public Set<McpBranchSessionVO> getBranchSessionVO() {
+    public Set<McpBranchSessionVO> getMcpBranchSessionVOS() {
         return mcpBranchSessionVOS;
     }
 
-    public void setBranchSessionVO(Set<McpBranchSessionVO> mcpBranchSessionVOS) {
+    public void setMcpBranchSessionVOS(Set<McpBranchSessionVO> mcpBranchSessionVOS) {
         this.mcpBranchSessionVOS = mcpBranchSessionVOS;
     }
 }

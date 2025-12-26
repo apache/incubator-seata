@@ -20,11 +20,12 @@ import org.apache.seata.common.util.PageUtil;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.mcp.core.utils.DateUtils;
 import org.apache.seata.mcp.entity.dto.McpGlobalSessionParamDto;
+import org.apache.seata.server.console.entity.param.GlobalSessionParam;
 
 /**
  * Global session param
  */
-public class McpGlobalSessionParam extends org.apache.seata.server.console.entity.param.GlobalSessionParam {
+public class McpGlobalSessionParam extends GlobalSessionParam {
 
     public static McpGlobalSessionParam convertFromDtoParam(McpGlobalSessionParamDto paramDto) {
         PageUtil.checkParam(paramDto.getPageNum(), paramDto.getPageSize());

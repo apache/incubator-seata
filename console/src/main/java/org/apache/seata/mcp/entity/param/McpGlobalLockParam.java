@@ -20,12 +20,13 @@ import org.apache.seata.common.util.PageUtil;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.mcp.core.utils.DateUtils;
 import org.apache.seata.mcp.entity.dto.McpGlobalLockParamDto;
+import org.apache.seata.server.console.entity.param.GlobalLockParam;
 import org.springframework.beans.BeanUtils;
 
 /**
  * Global lock param
  */
-public class McpGlobalLockParam extends org.apache.seata.server.console.entity.param.GlobalLockParam {
+public class McpGlobalLockParam extends GlobalLockParam {
 
     public static McpGlobalLockParam convertFromParamDto(McpGlobalLockParamDto paramDto) {
         PageUtil.checkParam(paramDto.getPageNum(), paramDto.getPageSize());

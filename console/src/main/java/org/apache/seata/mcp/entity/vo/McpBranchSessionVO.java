@@ -20,33 +20,34 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.apache.seata.mcp.core.config.TimestampToStringDeserializer;
+import org.apache.seata.server.console.entity.vo.BranchSessionVO;
 
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 
 @JsonAutoDetect(getterVisibility = NONE, fieldVisibility = ANY)
-public class McpBranchSessionVO extends org.apache.seata.server.console.entity.vo.BranchSessionVO {
+public class McpBranchSessionVO extends BranchSessionVO {
 
-    private String gmtCreate;
-    private String gmtModified;
+    private String createTime;
+    private String modifiedTime;
 
     @JsonProperty("gmtCreate")
     @JsonDeserialize(using = TimestampToStringDeserializer.class)
-    public String getCreate() {
-        return gmtCreate;
+    public String getCreateTime() {
+        return createTime;
     }
 
-    public void setGmtCreate(String gmtCreate) {
-        this.gmtCreate = gmtCreate;
+    public void setCreateTime(String createTime) {
+        this.createTime = createTime;
     }
 
     @JsonProperty("gmtModified")
     @JsonDeserialize(using = TimestampToStringDeserializer.class)
-    public String getModified() {
-        return gmtModified;
+    public String getModifiedTime() {
+        return modifiedTime;
     }
 
-    public void setGmtModified(String gmtModified) {
-        this.gmtModified = gmtModified;
+    public void setModifiedTime(String modifiedTime) {
+        this.modifiedTime = modifiedTime;
     }
 }
