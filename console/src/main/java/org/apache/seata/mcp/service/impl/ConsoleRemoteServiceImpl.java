@@ -23,11 +23,11 @@ import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.console.config.WebSecurityConfig;
 import org.apache.seata.console.utils.JwtTokenUtils;
 import org.apache.seata.mcp.core.props.NameSpaceDetail;
-import org.apache.seata.mcp.core.props.NamingServerAddrProperties;
 import org.apache.seata.mcp.exception.ServiceCallException;
 import org.apache.seata.mcp.service.ConsoleApiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -54,17 +54,16 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
 
     private final ObjectMapper objectMapper;
 
-    private final NamingServerAddrProperties namingServerAddrProperties;
+    @Value("${seata.console.namingserver-addr:http://127.0.0.1:8081}")
+    private String namingServerAddr;
 
     public ConsoleRemoteServiceImpl(
             JwtTokenUtils jwtTokenUtils,
             RestTemplate restTemplate,
-            ObjectMapper objectMapper,
-            NamingServerAddrProperties namingServerAddrProperties) {
+            ObjectMapper objectMapper) {
         this.jwtTokenUtils = jwtTokenUtils;
         this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;
-        this.namingServerAddrProperties = namingServerAddrProperties;
     }
 
     private final Logger logger = LoggerFactory.getLogger(ConsoleRemoteServiceImpl.class);
@@ -99,7 +98,7 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
     public String getCallNameSpace(String path) {
         HttpHeaders headers = new HttpHeaders();
         headers.add(WebSecurityConfig.AUTHORIZATION_HEADER, getToken());
-        String url = buildUrl(namingServerAddrProperties.randomlyGetNamingServerAddr(), path, null, null);
+        String url = buildUrl(namingServerAddr, path, null, null);
         HttpEntity<String> entity = new HttpEntity<>(headers);
         String responseBody;
         try {
@@ -140,7 +139,7 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
         headers.add(WebSecurityConfig.AUTHORIZATION_HEADER, getToken());
         Map<String, Object> queryParamsMap = objectToQueryParamMap(objectQueryParams, objectMapper);
         String url =
-                buildUrl(namingServerAddrProperties.randomlyGetNamingServerAddr(), path, queryParams, queryParamsMap);
+                buildUrl(namingServerAddr, path, queryParams, queryParamsMap);
         HttpEntity<String> entity = new HttpEntity<>(headers);
         String responseBody;
         try {
@@ -181,7 +180,7 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
         headers.add(WebSecurityConfig.AUTHORIZATION_HEADER, getToken());
         Map<String, Object> queryParamsMap = objectToQueryParamMap(objectQueryParams, objectMapper);
         String url =
-                buildUrl(namingServerAddrProperties.randomlyGetNamingServerAddr(), path, queryParams, queryParamsMap);
+                buildUrl(namingServerAddr, path, queryParams, queryParamsMap);
         HttpEntity<String> entity = new HttpEntity<>(headers);
         String responseBody;
         try {
@@ -222,7 +221,7 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
         headers.add(WebSecurityConfig.AUTHORIZATION_HEADER, getToken());
         Map<String, Object> queryParamsMap = objectToQueryParamMap(objectQueryParams, objectMapper);
         String url =
-                buildUrl(namingServerAddrProperties.randomlyGetNamingServerAddr(), path, queryParams, queryParamsMap);
+                buildUrl(namingServerAddr, path, queryParams, queryParamsMap);
         HttpEntity<String> entity = new HttpEntity<>(headers);
         String responseBody;
         try {
