@@ -125,8 +125,8 @@ public class HttpClientUtil {
 
     public static Response doPostJson(String url, String jsonBody, Map<String, String> headers, int timeout)
             throws IOException {
-        RequestBody requestBody = jsonBody != null 
-                ? RequestBody.create(jsonBody, MEDIA_TYPE_JSON) 
+        RequestBody requestBody = jsonBody != null
+                ? RequestBody.create(jsonBody, MEDIA_TYPE_JSON)
                 : RequestBody.create(new byte[0], MEDIA_TYPE_JSON);
         Map<String, String> headersWithContentType =
                 headers != null ? new java.util.HashMap<>(headers) : new java.util.HashMap<>();
@@ -138,7 +138,7 @@ public class HttpClientUtil {
 
     public static void doPostWithHttp2(
             String url, Map<String, String> params, Map<String, String> headers, HttpCallback<Response> callback) {
-        doPostWithHttp2(url, params, headers, callback, 10);
+        doPostWithHttp2(url, params, headers, callback, 10000);
     }
 
     public static void doPostWithHttp2(
@@ -146,12 +146,12 @@ public class HttpClientUtil {
             Map<String, String> params,
             Map<String, String> headers,
             HttpCallback<Response> callback,
-            int timeoutSeconds) {
+            int timeoutMillis) {
         try {
             String contentType = headers != null ? headers.get("Content-Type") : "";
             RequestBody requestBody = createRequestBody(params, contentType);
             Request request = buildHttp2Request(url, headers, requestBody, "POST");
-            OkHttpClient client = createHttp2ClientWithTimeout(timeoutSeconds);
+            OkHttpClient client = createHttp2ClientWithTimeout(timeoutMillis);
             executeAsync(client, request, callback);
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);
@@ -162,23 +162,23 @@ public class HttpClientUtil {
     public static void doPostWithHttp2(
             String url, String body, Map<String, String> headers, HttpCallback<Response> callback) {
         // default timeout 10 seconds
-        doPostWithHttp2(url, body, headers, callback, 10);
+        doPostWithHttp2(url, body, headers, callback, 10000);
     }
 
     public static void doPostWithHttp2(
-            String url, String body, Map<String, String> headers, HttpCallback<Response> callback, int timeoutSeconds) {
-        RequestBody requestBody = body != null 
-                ? RequestBody.create(body, MEDIA_TYPE_JSON) 
+            String url, String body, Map<String, String> headers, HttpCallback<Response> callback, int timeout) {
+        RequestBody requestBody = body != null
+                ? RequestBody.create(body, MEDIA_TYPE_JSON)
                 : RequestBody.create(new byte[0], MEDIA_TYPE_JSON);
         Request request = buildHttp2Request(url, headers, requestBody, "POST");
-        OkHttpClient client = createHttp2ClientWithTimeout(timeoutSeconds);
+        OkHttpClient client = createHttp2ClientWithTimeout(timeout);
         executeAsync(client, request, callback);
     }
 
     public static void doGetWithHttp2(
-            String url, Map<String, String> headers, final HttpCallback<Response> callback, int timeoutSeconds) {
+            String url, Map<String, String> headers, final HttpCallback<Response> callback, int timeout) {
         Request request = buildHttp2Request(url, headers, null, "GET");
-        OkHttpClient client = createHttp2ClientWithTimeout(timeoutSeconds);
+        OkHttpClient client = createHttp2ClientWithTimeout(timeout);
         executeAsync(client, request, callback);
     }
 
@@ -200,22 +200,22 @@ public class HttpClientUtil {
         }
     }
 
-    private static OkHttpClient createHttp1ClientWithTimeout(int timeoutSeconds) {
-        return HTTP_CLIENT_MAP.computeIfAbsent(timeoutSeconds, k -> new OkHttpClient.Builder()
+    private static OkHttpClient createHttp1ClientWithTimeout(int timeoutMillis) {
+        return HTTP_CLIENT_MAP.computeIfAbsent(timeoutMillis, k -> new OkHttpClient.Builder()
                 // Use HTTP/1.1 (default protocol, no need to specify)
-                .connectTimeout(timeoutSeconds, TimeUnit.SECONDS)
-                .readTimeout(timeoutSeconds, TimeUnit.SECONDS)
-                .writeTimeout(timeoutSeconds, TimeUnit.SECONDS)
+                .connectTimeout(timeoutMillis, TimeUnit.MILLISECONDS)
+                .readTimeout(timeoutMillis, TimeUnit.MILLISECONDS)
+                .writeTimeout(timeoutMillis, TimeUnit.MILLISECONDS)
                 .build());
     }
 
-    private static OkHttpClient createHttp2ClientWithTimeout(int timeoutSeconds) {
-        return HTTP2_CLIENT_MAP.computeIfAbsent(timeoutSeconds, k -> new OkHttpClient.Builder()
+    private static OkHttpClient createHttp2ClientWithTimeout(int timeoutMillis) {
+        return HTTP2_CLIENT_MAP.computeIfAbsent(timeoutMillis, k -> new OkHttpClient.Builder()
                 // Use HTTP/2 prior knowledge to directly use HTTP/2 without an initial HTTP/1.1 upgrade
                 .protocols(Collections.singletonList(Protocol.H2_PRIOR_KNOWLEDGE))
-                .connectTimeout(timeoutSeconds, TimeUnit.SECONDS)
-                .readTimeout(timeoutSeconds, TimeUnit.SECONDS)
-                .writeTimeout(timeoutSeconds, TimeUnit.SECONDS)
+                .connectTimeout(timeoutMillis, TimeUnit.MILLISECONDS)
+                .readTimeout(timeoutMillis, TimeUnit.MILLISECONDS)
+                .writeTimeout(timeoutMillis, TimeUnit.MILLISECONDS)
                 .build());
     }
 
