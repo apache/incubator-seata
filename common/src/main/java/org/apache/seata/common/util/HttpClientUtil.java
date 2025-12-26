@@ -270,9 +270,9 @@ public class HttpClientUtil {
             }
             try {
                 urlBuilder
-                        .append(URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8.toString()))
+                        .append(URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8.name()))
                         .append("=")
-                        .append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8.toString()));
+                        .append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8.name()));
             } catch (java.io.UnsupportedEncodingException e) {
                 // UTF-8 is always supported
                 throw new RuntimeException(e);
