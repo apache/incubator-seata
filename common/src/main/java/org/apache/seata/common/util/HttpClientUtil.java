@@ -228,7 +228,10 @@ public class HttpClientUtil {
 
         Request.Builder requestBuilder = new Request.Builder().url(url).headers(headerBuilder.build());
 
-        if ("POST".equals(method) && requestBody != null) {
+        if ("POST".equals(method)) {
+            if (requestBody == null) {
+                requestBody = RequestBody.create(new byte[0], MEDIA_TYPE_JSON);
+            }
             requestBuilder.post(requestBody);
         } else if ("GET".equals(method)) {
             requestBuilder.get();
@@ -246,7 +249,10 @@ public class HttpClientUtil {
 
         Request.Builder requestBuilder = new Request.Builder().url(url).headers(headerBuilder.build());
 
-        if ("POST".equals(method) && requestBody != null) {
+        if ("POST".equals(method)) {
+            if (requestBody == null) {
+                requestBody = RequestBody.create(new byte[0], MEDIA_TYPE_JSON);
+            }
             requestBuilder.post(requestBody);
         } else if ("GET".equals(method)) {
             requestBuilder.get();
@@ -270,9 +276,9 @@ public class HttpClientUtil {
             }
             try {
                 urlBuilder
-                        .append(URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8.toString()))
+                        .append(URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8.name()))
                         .append("=")
-                        .append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8.toString()));
+                        .append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8.name()));
             } catch (java.io.UnsupportedEncodingException e) {
                 // UTF-8 is always supported
                 throw new RuntimeException(e);
