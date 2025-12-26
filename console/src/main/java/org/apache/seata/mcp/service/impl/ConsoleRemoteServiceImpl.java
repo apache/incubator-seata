@@ -57,10 +57,7 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
     @Value("${seata.console.namingserver-addr:http://127.0.0.1:8081}")
     private String namingServerAddr;
 
-    public ConsoleRemoteServiceImpl(
-            JwtTokenUtils jwtTokenUtils,
-            RestTemplate restTemplate,
-            ObjectMapper objectMapper) {
+    public ConsoleRemoteServiceImpl(JwtTokenUtils jwtTokenUtils, RestTemplate restTemplate, ObjectMapper objectMapper) {
         this.jwtTokenUtils = jwtTokenUtils;
         this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;
@@ -138,8 +135,7 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
         }
         headers.add(WebSecurityConfig.AUTHORIZATION_HEADER, getToken());
         Map<String, Object> queryParamsMap = objectToQueryParamMap(objectQueryParams, objectMapper);
-        String url =
-                buildUrl(namingServerAddr, path, queryParams, queryParamsMap);
+        String url = buildUrl(namingServerAddr, path, queryParams, queryParamsMap);
         HttpEntity<String> entity = new HttpEntity<>(headers);
         String responseBody;
         try {
@@ -179,8 +175,7 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
         }
         headers.add(WebSecurityConfig.AUTHORIZATION_HEADER, getToken());
         Map<String, Object> queryParamsMap = objectToQueryParamMap(objectQueryParams, objectMapper);
-        String url =
-                buildUrl(namingServerAddr, path, queryParams, queryParamsMap);
+        String url = buildUrl(namingServerAddr, path, queryParams, queryParamsMap);
         HttpEntity<String> entity = new HttpEntity<>(headers);
         String responseBody;
         try {
@@ -220,8 +215,7 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
         }
         headers.add(WebSecurityConfig.AUTHORIZATION_HEADER, getToken());
         Map<String, Object> queryParamsMap = objectToQueryParamMap(objectQueryParams, objectMapper);
-        String url =
-                buildUrl(namingServerAddr, path, queryParams, queryParamsMap);
+        String url = buildUrl(namingServerAddr, path, queryParams, queryParamsMap);
         HttpEntity<String> entity = new HttpEntity<>(headers);
         String responseBody;
         try {
