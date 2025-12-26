@@ -500,7 +500,11 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                 if (httpResponse != null) {
                     int statusCode = httpResponse.code();
                     if (statusCode == HttpStatus.SC_OK) {
-                        response = httpResponse.body().string();
+                        if (httpResponse.body() != null) {
+                            response = httpResponse.body().string();
+                        } else {
+                            throw new RetryableException("Response body is null");
+                        }
                     } else if (statusCode == HttpStatus.SC_UNAUTHORIZED) {
                         if (StringUtils.isNotBlank(USERNAME) && StringUtils.isNotBlank(PASSWORD)) {
                             refreshToken(tcAddress);
@@ -545,16 +549,21 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                 HttpClientUtil.doPost("http://" + tcAddress + "/api/v1/auth/login", param, header, 1000)) {
             if (httpResponse != null) {
                 if (httpResponse.code() == HttpStatus.SC_OK) {
-                    response = httpResponse.body().string();
-                    JsonNode jsonNode = OBJECT_MAPPER.readTree(response);
-                    String codeStatus = jsonNode.get("code").asText();
-                    if (!StringUtils.equals(codeStatus, "200")) {
-                        // authorized failed,throw exception to kill process
+                    if (httpResponse.body() != null) {
+                        response = httpResponse.body().string();
+                        JsonNode jsonNode = OBJECT_MAPPER.readTree(response);
+                        String codeStatus = jsonNode.get("code").asText();
+                        if (!StringUtils.equals(codeStatus, "200")) {
+                            // authorized failed,throw exception to kill process
+                            throw new AuthenticationFailedException(
+                                    "Authentication failed! you should configure the correct username and password.");
+                        }
+                        jwtToken = jsonNode.get("data").asText();
+                        tokenTimeStamp = System.currentTimeMillis();
+                    } else {
                         throw new AuthenticationFailedException(
-                                "Authentication failed! you should configure the correct username and password.");
+                                "Authentication failed! Response body is null.");
                     }
-                    jwtToken = jsonNode.get("data").asText();
-                    tokenTimeStamp = System.currentTimeMillis();
                 } else {
                     // authorized failed,throw exception to kill process
                     throw new AuthenticationFailedException(

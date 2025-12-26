@@ -439,6 +439,9 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
                 throw new NamingRegistryException("cannot lookup server list in vgroup: " + vGroup + ", http code: "
                         + (response != null ? response.code() : -1));
             }
+            if (response.body() == null) {
+                throw new NamingRegistryException("Response body is null for vgroup: " + vGroup);
+            }
             String jsonResponse = response.body().string();
             // jsonResponse -> MetaResponse
             MetaResponse metaResponse = OBJECT_MAPPER.readValue(jsonResponse, new TypeReference<MetaResponse>() {});
@@ -576,16 +579,21 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
                 HttpClientUtil.doPost("http://" + namingServerAddress + "/api/v1/auth/login", param, header, 1000)) {
             if (httpResponse != null) {
                 if (httpResponse.code() == HttpStatus.SC_OK) {
-                    response = httpResponse.body().string();
-                    JsonNode jsonNode = OBJECT_MAPPER.readTree(response);
-                    String codeStatus = jsonNode.get("code").asText();
-                    if (!StringUtils.equals(codeStatus, "200")) {
-                        // authorized failed,throw exception to kill process
+                    if (httpResponse.body() != null) {
+                        response = httpResponse.body().string();
+                        JsonNode jsonNode = OBJECT_MAPPER.readTree(response);
+                        String codeStatus = jsonNode.get("code").asText();
+                        if (!StringUtils.equals(codeStatus, "200")) {
+                            // authorized failed,throw exception to kill process
+                            throw new AuthenticationFailedException(
+                                    "Authentication failed! you should configure the correct username and password.");
+                        }
+                        jwtToken = jsonNode.get("data").asText();
+                        tokenTimeStamp = System.currentTimeMillis();
+                    } else {
                         throw new AuthenticationFailedException(
-                                "Authentication failed! you should configure the correct username and password.");
+                                "Authentication failed! Response body is null.");
                     }
-                    jwtToken = jsonNode.get("data").asText();
-                    tokenTimeStamp = System.currentTimeMillis();
                 } else {
                     // authorized failed,throw exception to kill process
                     throw new AuthenticationFailedException(
