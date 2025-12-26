@@ -92,7 +92,6 @@ public class HttpClientUtil {
         }));
     }
 
-    // post request
     public static Response doPost(String url, Map<String, String> params, Map<String, String> header, int timeout)
             throws IOException {
         try {
@@ -107,17 +106,15 @@ public class HttpClientUtil {
         }
     }
 
-    // post request
     public static Response doPost(String url, String body, Map<String, String> header, int timeout) throws IOException {
         String contentType = header != null ? header.get("Content-Type") : "";
         MediaType mediaType = StringUtils.isNotBlank(contentType) ? MediaType.parse(contentType) : MEDIA_TYPE_JSON;
-        RequestBody requestBody = RequestBody.create(body, mediaType);
+        RequestBody requestBody = body != null ? RequestBody.create(body, mediaType) : RequestBody.create(new byte[0], mediaType);
         Request request = buildHttp1Request(url, header, requestBody, "POST");
         OkHttpClient client = createHttp1ClientWithTimeout(timeout);
         return client.newCall(request).execute();
     }
 
-    // get request
     public static Response doGet(String url, Map<String, String> param, Map<String, String> header, int timeout)
             throws IOException {
         String urlWithParams = buildUrlWithParams(url, param);
@@ -128,8 +125,9 @@ public class HttpClientUtil {
 
     public static Response doPostJson(String url, String jsonBody, Map<String, String> headers, int timeout)
             throws IOException {
-        RequestBody requestBody = RequestBody.create(jsonBody, MEDIA_TYPE_JSON);
-        // Ensure Content-Type is set to application/json
+        RequestBody requestBody = jsonBody != null 
+                ? RequestBody.create(jsonBody, MEDIA_TYPE_JSON) 
+                : RequestBody.create(new byte[0], MEDIA_TYPE_JSON);
         Map<String, String> headersWithContentType =
                 headers != null ? new java.util.HashMap<>(headers) : new java.util.HashMap<>();
         headersWithContentType.put("Content-Type", "application/json");
@@ -169,7 +167,9 @@ public class HttpClientUtil {
 
     public static void doPostWithHttp2(
             String url, String body, Map<String, String> headers, HttpCallback<Response> callback, int timeoutSeconds) {
-        RequestBody requestBody = RequestBody.create(body, MEDIA_TYPE_JSON);
+        RequestBody requestBody = body != null 
+                ? RequestBody.create(body, MEDIA_TYPE_JSON) 
+                : RequestBody.create(new byte[0], MEDIA_TYPE_JSON);
         Request request = buildHttp2Request(url, headers, requestBody, "POST");
         OkHttpClient client = createHttp2ClientWithTimeout(timeoutSeconds);
         executeAsync(client, request, callback);
@@ -235,6 +235,8 @@ public class HttpClientUtil {
             requestBuilder.post(requestBody);
         } else if ("GET".equals(method)) {
             requestBuilder.get();
+        } else {
+            throw new IllegalArgumentException("Unsupported HTTP method: " + method);
         }
 
         return requestBuilder.build();
@@ -256,6 +258,8 @@ public class HttpClientUtil {
             requestBuilder.post(requestBody);
         } else if ("GET".equals(method)) {
             requestBuilder.get();
+        } else {
+            throw new IllegalArgumentException("Unsupported HTTP method: " + method);
         }
 
         return requestBuilder.build();
