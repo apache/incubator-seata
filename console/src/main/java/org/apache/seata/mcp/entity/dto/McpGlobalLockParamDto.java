@@ -24,16 +24,16 @@ public class McpGlobalLockParamDto implements Serializable {
 
     private static final long serialVersionUID = 615412528070131284L;
 
-    @McpToolParam(description = "Global transaction id", required = false)
+    @McpToolParam(description = "Global transaction ID", required = false)
     private String xid;
 
-    @McpToolParam(description = "the table name", required = false)
+    @McpToolParam(description = "The table name", required = false)
     private String tableName;
 
-    @McpToolParam(description = "the transaction id", required = false)
+    @McpToolParam(description = "The transaction id", required = false)
     private String transactionId;
 
-    @McpToolParam(description = "the branch id", required = false)
+    @McpToolParam(description = "The branch id", required = false)
     private String branchId;
 
     private String pk;
@@ -41,7 +41,7 @@ public class McpGlobalLockParamDto implements Serializable {
     @McpToolParam(description = "resourceId", required = false)
     private String resourceId;
 
-    @McpToolParam(description = "page number")
+    @McpToolParam(description = "Page number")
     private int pageNum;
 
     @McpToolParam(description = "Page size")

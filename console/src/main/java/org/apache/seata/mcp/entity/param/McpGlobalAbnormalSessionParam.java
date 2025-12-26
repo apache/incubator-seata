@@ -32,7 +32,7 @@ public class McpGlobalAbnormalSessionParam {
             required = false)
     private String timeEnd;
 
-    @McpToolParam(description = "PAGE NUMBER")
+    @McpToolParam(description = "Page number")
     private int pageNum;
 
     public boolean isWithBranch() {

@@ -211,7 +211,7 @@ public class GlobalSessionTools {
         }
     }
 
-    @McpTool(description = "Check out the abnormal transaction information,You can specify the time")
+    @McpTool(description = "Check out the abnormal transaction")
     public List<McpGlobalSessionVO> getAbnormalSessions(
             @McpToolParam(description = "Specify the namespace of the TC node") NameSpaceDetail nameSpaceDetail,
             @McpToolParam(description = "Query Param") McpGlobalAbnormalSessionParam abnormalSessionParam) {

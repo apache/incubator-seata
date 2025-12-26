@@ -51,7 +51,7 @@ public class NameSpaceTools {
                 nameSpacesVo.put("namespaces", dataNode.toString());
             }
         } catch (JsonProcessingException e) {
-            return SingleResult.failure("get namespace failed:" + e.getMessage());
+            return SingleResult.failure("Get namespace failed:" + e.getMessage());
         }
         return SingleResult.success(nameSpacesVo);
     }

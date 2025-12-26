@@ -122,7 +122,7 @@ public class GlobalLockTools {
         }
     }
 
-    @McpTool(description = "Check if the lock exist the branch session")
+    @McpTool(description = "Check if the branch session has a lock")
     public String checkGlobalLock(
             @McpToolParam(description = "Specify the namespace of the TC node") NameSpaceDetail nameSpaceDetail,
             @McpToolParam(description = "Global transaction id") String xid,

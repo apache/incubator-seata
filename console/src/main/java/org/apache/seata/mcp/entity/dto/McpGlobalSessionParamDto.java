@@ -26,13 +26,13 @@ public class McpGlobalSessionParamDto implements Serializable {
 
     private static final long serialVersionUID = 115488252809011284L;
 
-    @McpToolParam(description = "GLOBAL TRANSACTIONS id", required = false)
+    @McpToolParam(description = "Global transaction ID", required = false)
     private String xid;
 
     @McpToolParam(description = "applicationId", required = false)
     private String applicationId;
 
-    @McpToolParam(description = "the state enumeration class is in example", required = false)
+    @McpToolParam(description = "The valid values are defined in prompts", required = false)
     private Integer status;
 
     @McpToolParam(description = "The name of the transaction", required = false)
@@ -41,10 +41,10 @@ public class McpGlobalSessionParamDto implements Serializable {
     @McpToolParam(description = "Whether or not it contains branch transaction information", required = false)
     private boolean withBranch;
 
-    @McpToolParam(description = "PAGE NUMBER")
+    @McpToolParam(description = "Page number")
     private int pageNum;
 
-    @McpToolParam(description = "PageSize")
+    @McpToolParam(description = "Page size")
     private int pageSize;
 
     @McpToolParam(description = "The transaction start time is after this time (yyyy-MM-dd HH:mm:ss)", required = false)
