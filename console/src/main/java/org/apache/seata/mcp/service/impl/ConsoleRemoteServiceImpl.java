@@ -23,11 +23,11 @@ import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.console.config.WebSecurityConfig;
 import org.apache.seata.console.utils.JwtTokenUtils;
 import org.apache.seata.mcp.core.props.NameSpaceDetail;
+import org.apache.seata.mcp.core.props.NamingServerAddrProperties;
 import org.apache.seata.mcp.exception.ServiceCallException;
 import org.apache.seata.mcp.service.ConsoleApiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -54,19 +54,20 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
 
     private final ObjectMapper objectMapper;
 
-    public ConsoleRemoteServiceImpl(JwtTokenUtils jwtTokenUtils, RestTemplate restTemplate, ObjectMapper objectMapper) {
+    private final NamingServerAddrProperties namingServerAddrProperties;
+
+    public ConsoleRemoteServiceImpl(
+            JwtTokenUtils jwtTokenUtils,
+            RestTemplate restTemplate,
+            ObjectMapper objectMapper,
+            NamingServerAddrProperties namingServerAddrProperties) {
         this.jwtTokenUtils = jwtTokenUtils;
         this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;
+        this.namingServerAddrProperties = namingServerAddrProperties;
     }
 
-    @Value("${seata.console.naming-space-url:http://127.0.0.1:%s}")
-    private String namingSpaceUrl;
-
     private final Logger logger = LoggerFactory.getLogger(ConsoleRemoteServiceImpl.class);
-
-    @Value("${server.port:8081}")
-    private String namingSpacePort;
 
     public String getToken() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -98,7 +99,7 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
     public String getCallNameSpace(String path) {
         HttpHeaders headers = new HttpHeaders();
         headers.add(WebSecurityConfig.AUTHORIZATION_HEADER, getToken());
-        String url = buildUrl(String.format(namingSpaceUrl, namingSpacePort), path, null, null);
+        String url = buildUrl(namingServerAddrProperties.randomlyGetNamingServerAddr(), path, null, null);
         HttpEntity<String> entity = new HttpEntity<>(headers);
         String responseBody;
         try {
@@ -138,7 +139,8 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
         }
         headers.add(WebSecurityConfig.AUTHORIZATION_HEADER, getToken());
         Map<String, Object> queryParamsMap = objectToQueryParamMap(objectQueryParams, objectMapper);
-        String url = buildUrl(String.format(namingSpaceUrl, namingSpacePort), path, queryParams, queryParamsMap);
+        String url =
+                buildUrl(namingServerAddrProperties.randomlyGetNamingServerAddr(), path, queryParams, queryParamsMap);
         HttpEntity<String> entity = new HttpEntity<>(headers);
         String responseBody;
         try {
@@ -178,7 +180,8 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
         }
         headers.add(WebSecurityConfig.AUTHORIZATION_HEADER, getToken());
         Map<String, Object> queryParamsMap = objectToQueryParamMap(objectQueryParams, objectMapper);
-        String url = buildUrl(String.format(namingSpaceUrl, namingSpacePort), path, queryParams, queryParamsMap);
+        String url =
+                buildUrl(namingServerAddrProperties.randomlyGetNamingServerAddr(), path, queryParams, queryParamsMap);
         HttpEntity<String> entity = new HttpEntity<>(headers);
         String responseBody;
         try {
@@ -218,7 +221,8 @@ public class ConsoleRemoteServiceImpl implements ConsoleApiService {
         }
         headers.add(WebSecurityConfig.AUTHORIZATION_HEADER, getToken());
         Map<String, Object> queryParamsMap = objectToQueryParamMap(objectQueryParams, objectMapper);
-        String url = buildUrl(String.format(namingSpaceUrl, namingSpacePort), path, queryParams, queryParamsMap);
+        String url =
+                buildUrl(namingServerAddrProperties.randomlyGetNamingServerAddr(), path, queryParams, queryParamsMap);
         HttpEntity<String> entity = new HttpEntity<>(headers);
         String responseBody;
         try {
