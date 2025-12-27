@@ -1110,4 +1110,16 @@ public class HttpClientUtilTest {
         assertTrue(exception.getCause() instanceof IllegalArgumentException);
         assertTrue(exception.getCause().getMessage().contains("Unsupported HTTP method: PATCH"));
     }
+
+    @Test
+    void testHttpSendRes() throws IOException {
+        Response response = HttpClientUtil.doGet("http:www.baidu.com", null, null, 3000);
+        Response postResponse = HttpClientUtil.doPost("http:www.baidu.com", new HashMap<>(), new HashMap<>(), 3000);
+        Response postResponse2 = HttpClientUtil.doPost("http:www.baidu.com", "", new HashMap<>(), 3000);
+        Response nonjsonResponse = HttpClientUtil.doPostJson("http:www.baidu.com", "nonjson", new HashMap<>(), 3000);
+        assertNotNull(response);
+        assertNotNull(postResponse);
+        assertNotNull(postResponse2);
+        assertNotNull(nonjsonResponse);
+    }
 }

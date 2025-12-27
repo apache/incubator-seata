@@ -99,8 +99,7 @@ public class HttpClientUtil {
             RequestBody requestBody = createRequestBody(params, contentType);
             Request request = buildRequest(url, header, requestBody, "POST");
             OkHttpClient client = createHttp1ClientWithTimeout(timeout);
-            Response response = client.newCall(request).execute();
-            return response;
+            return client.newCall(request).execute();
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);
             throw new IOException("Failed to create request body", e);
@@ -115,8 +114,7 @@ public class HttpClientUtil {
                 : RequestBody.create(new byte[0], mediaType);
         Request request = buildRequest(url, header, requestBody, "POST");
         OkHttpClient client = createHttp1ClientWithTimeout(timeout);
-        Response response = client.newCall(request).execute();
-        return response;
+        return client.newCall(request).execute();
     }
 
     public static Response doGet(String url, Map<String, String> param, Map<String, String> header, int timeout)
@@ -124,8 +122,7 @@ public class HttpClientUtil {
         String urlWithParams = buildUrlWithParams(url, param);
         Request request = buildRequest(urlWithParams, header, null, "GET");
         OkHttpClient client = createHttp1ClientWithTimeout(timeout);
-        Response response = client.newCall(request).execute();
-        return response;
+        return client.newCall(request).execute();
     }
 
     public static Response doPostJson(String url, String jsonBody, Map<String, String> headers, int timeout)
@@ -138,8 +135,7 @@ public class HttpClientUtil {
         headersWithContentType.put("Content-Type", "application/json");
         Request request = buildRequest(url, headersWithContentType, requestBody, "POST");
         OkHttpClient client = createHttp1ClientWithTimeout(timeout);
-        Response response = client.newCall(request).execute();
-        return response;
+        return client.newCall(request).execute();
     }
 
     public static void doPostWithHttp2(
