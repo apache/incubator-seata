@@ -27,19 +27,19 @@ public class McpGlobalLockDeleteParam implements Serializable {
 
     private static final long serialVersionUID = 615412528070131284L;
 
-    @McpToolParam(description = "Global transaction id", required = true)
+    @McpToolParam(description = "Global transaction id")
     private String xid;
 
-    @McpToolParam(description = "the table name", required = true)
+    @McpToolParam(description = "the table name")
     private String tableName;
 
-    @McpToolParam(description = "the branch id", required = true)
+    @McpToolParam(description = "the branch id")
     private String branchId;
 
-    @McpToolParam(description = "the primary Key", required = true)
+    @McpToolParam(description = "the primary Key")
     private String pk;
 
-    @McpToolParam(description = "resourceId", required = true)
+    @McpToolParam(description = "resourceId")
     private String resourceId;
 
     public String getBranchId() {
