@@ -561,8 +561,7 @@ public class RaftRegistryServiceImpl implements RegistryService<ConfigChangeList
                         jwtToken = jsonNode.get("data").asText();
                         tokenTimeStamp = System.currentTimeMillis();
                     } else {
-                        throw new AuthenticationFailedException(
-                                "Authentication failed! Response body is null.");
+                        throw new AuthenticationFailedException("Authentication failed! Response body is null.");
                     }
                 } else {
                     // authorized failed,throw exception to kill process

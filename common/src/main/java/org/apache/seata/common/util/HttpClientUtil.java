@@ -109,7 +109,9 @@ public class HttpClientUtil {
     public static Response doPost(String url, String body, Map<String, String> header, int timeout) throws IOException {
         String contentType = header != null ? header.get("Content-Type") : "";
         MediaType mediaType = StringUtils.isNotBlank(contentType) ? MediaType.parse(contentType) : MEDIA_TYPE_JSON;
-        RequestBody requestBody = StringUtils.isNotBlank(body) ? RequestBody.create(body, mediaType) : RequestBody.create(new byte[0], mediaType);
+        RequestBody requestBody = StringUtils.isNotBlank(body)
+                ? RequestBody.create(body, mediaType)
+                : RequestBody.create(new byte[0], mediaType);
         Request request = buildHttp1Request(url, header, requestBody, "POST");
         OkHttpClient client = createHttp1ClientWithTimeout(timeout);
         return client.newCall(request).execute();

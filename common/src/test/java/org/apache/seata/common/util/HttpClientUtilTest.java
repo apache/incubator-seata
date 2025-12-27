@@ -93,7 +93,7 @@ public class HttpClientUtilTest {
         params.put("key2", "value2");
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/x-www-form-urlencoded");
-        
+
         Assertions.assertThrows(IOException.class, () -> {
             HttpClientUtil.doPost("http://localhost:9999/invalid", params, headers, 1000);
         });
@@ -106,7 +106,7 @@ public class HttpClientUtilTest {
         params.put("key", "value");
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
-        
+
         Assertions.assertThrows(IOException.class, () -> {
             HttpClientUtil.doPost("http://localhost:9999/invalid", params, headers, 1000);
         });
@@ -117,7 +117,7 @@ public class HttpClientUtilTest {
         // Test with null headers
         Map<String, String> params = new HashMap<>();
         params.put("key", "value");
-        
+
         Assertions.assertThrows(IOException.class, () -> {
             HttpClientUtil.doPost("http://localhost:9999/invalid", params, null, 1000);
         });
@@ -128,7 +128,7 @@ public class HttpClientUtilTest {
         // Test doPost with String body - null body should create empty RequestBody
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
-        
+
         Assertions.assertThrows(IOException.class, () -> {
             HttpClientUtil.doPost("http://localhost:9999/invalid", (String) null, headers, 1000);
         });
@@ -139,7 +139,7 @@ public class HttpClientUtilTest {
         // Test doPost with empty String body
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
-        
+
         Assertions.assertThrows(IOException.class, () -> {
             HttpClientUtil.doPost("http://localhost:9999/invalid", "", headers, 1000);
         });
@@ -150,7 +150,7 @@ public class HttpClientUtilTest {
         // Test doPost with custom Content-Type
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "text/plain");
-        
+
         Assertions.assertThrows(IOException.class, () -> {
             HttpClientUtil.doPost("http://localhost:9999/invalid", "test body", headers, 1000);
         });
@@ -186,7 +186,7 @@ public class HttpClientUtilTest {
         Map<String, String> params = new HashMap<>();
         params.put("key1", "value1");
         params.put("key2", "value2");
-        
+
         Assertions.assertThrows(IOException.class, () -> {
             HttpClientUtil.doGet("http://localhost:9999/invalid", params, new HashMap<>(), 1000);
         });
@@ -197,7 +197,7 @@ public class HttpClientUtilTest {
         // Test doGet with URL already containing query parameters
         Map<String, String> params = new HashMap<>();
         params.put("key", "value");
-        
+
         Assertions.assertThrows(IOException.class, () -> {
             HttpClientUtil.doGet("http://localhost:9999/invalid?existing=param", params, new HashMap<>(), 1000);
         });
@@ -215,7 +215,7 @@ public class HttpClientUtilTest {
     public void testDoPostJson_WithNullJsonBody() throws IOException {
         // Test doPostJson with null jsonBody
         Map<String, String> headers = new HashMap<>();
-        
+
         Assertions.assertThrows(IOException.class, () -> {
             HttpClientUtil.doPostJson("http://localhost:9999/invalid", null, headers, 1000);
         });
@@ -225,7 +225,7 @@ public class HttpClientUtilTest {
     public void testDoPostJson_WithEmptyJsonBody() throws IOException {
         // Test doPostJson with empty jsonBody
         Map<String, String> headers = new HashMap<>();
-        
+
         Assertions.assertThrows(IOException.class, () -> {
             HttpClientUtil.doPostJson("http://localhost:9999/invalid", "", headers, 1000);
         });
@@ -244,7 +244,7 @@ public class HttpClientUtilTest {
         // Test doPostJson with existing Content-Type header - should be overridden
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "text/plain");
-        
+
         Assertions.assertThrows(IOException.class, () -> {
             HttpClientUtil.doPostJson("http://localhost:9999/invalid", "{}", headers, 1000);
         });
