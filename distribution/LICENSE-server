@@ -361,7 +361,7 @@ Apache-2.0 licenses
     org.springframework:spring-webmvc 5.3.39 Apache-2.0
     org.springframework:spring-test 5.3.39 Apache-2.0
     org.apache.curator:curator-client 5.1.0 Apache-2.0
-    org.apache.fury:fury-core 0.8.0 Apache-2.0
+    org.apache.fury:fury-core 0.12.3 Apache-2.0
     org.apache.tomcat:tomcat-annotations-api 9.0.83 Apache-2.0
     org.apache.zookeeper:zookeeper 3.7.2 Apache-2.0
     org.apache.zookeeper:zookeeper-jute 3.7.2 Apache-2.0
