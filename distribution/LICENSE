@@ -221,7 +221,7 @@ Apache-2.0 licenses
     com.alibaba.nacos:nacos-api 1.4.6 Apache-2.0
     com.alibaba.nacos:nacos-client 1.4.6 Apache-2.0
     com.alibaba.nacos:nacos-common 1.4.6 Apache-2.0
-    com.alibaba:druid 1.2.20 Apache-2.0
+    com.alibaba:druid 1.2.25 Apache-2.0
     com.alibaba:fastjson 1.2.83 Apache-2.0
     com.alibaba.fastjson2:fastjson2 2.0.52 Apache-2.0
     com.alipay.sofa.common:sofa-common-tools 1.0.12 Apache-2.0
@@ -372,7 +372,7 @@ Apache-2.0 licenses
     org.jetbrains.kotlinx:kotlinx-coroutines-core 1.7.3 Apache-2.0
     org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm 1.7.3 Apache-2.0
     org.jetbrains:annotations 13.0 Apache-2.0
-    org.lz4:lz4-java 1.7.1 Apache-2.0
+    at.yawk.lz4:lz4-java 1.9.0 Apache-2.0
     org.objenesis:objenesis 3.3 Apache-2.0
     org.objenesis:objenesis 3.2 Apache-2.0
     org.springframework.boot:spring-boot 2.7.18 Apache-2.0

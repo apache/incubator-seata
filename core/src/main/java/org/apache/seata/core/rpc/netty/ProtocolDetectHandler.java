@@ -26,9 +26,10 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+import static org.apache.seata.core.protocol.ProtocolConstants.MAX_FRAME_LENGTH;
+
 public class ProtocolDetectHandler extends ByteToMessageDecoder {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolDetectHandler.class);
-
     private ProtocolDetector[] supportedProtocolDetectors;
 
     public ProtocolDetectHandler(ProtocolDetector[] supportedProtocolDetectors) {
@@ -37,6 +38,15 @@ public class ProtocolDetectHandler extends ByteToMessageDecoder {
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
+        if (in.readableBytes() > MAX_FRAME_LENGTH) {
+            LOGGER.error(
+                    "Packet size {} exceeds maximum {}, closing connection from {}",
+                    in.readableBytes(),
+                    MAX_FRAME_LENGTH,
+                    ctx.channel().remoteAddress());
+            ctx.close(); // Close the channel if the frame length exceeds the maximum allowed length
+            return;
+        }
         for (ProtocolDetector protocolDetector : supportedProtocolDetectors) {
             if (protocolDetector.detect(in)) {
                 ChannelHandler[] protocolHandlers = protocolDetector.getHandlers();

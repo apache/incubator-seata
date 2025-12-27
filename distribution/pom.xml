@@ -64,6 +64,7 @@
                         <configuration>
                             <descriptors>
                                 <descriptor>release-seata.xml</descriptor>
+                                <descriptor>source-release.xml</descriptor>
                             </descriptors>
                         </configuration>
                         <executions>

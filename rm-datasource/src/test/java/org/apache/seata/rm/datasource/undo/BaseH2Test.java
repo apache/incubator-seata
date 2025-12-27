@@ -77,7 +77,7 @@ public abstract class BaseH2Test {
     }
 
     @BeforeEach
-    private void prepareTable() {
+    public void prepareTable() {
         execSQL("DROP TABLE IF EXISTS table_name");
         execSQL("CREATE TABLE table_name ( `id` int(8), `name` varchar(64), PRIMARY KEY (`id`))");
     }

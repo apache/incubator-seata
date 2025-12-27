@@ -180,10 +180,13 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
 
         @Override
         public void channelWritabilityChanged(ChannelHandlerContext ctx) {
-            synchronized (lock) {
+            AbstractNettyRemotingServer.super.writabilityLock.lock();
+            try {
                 if (ctx.channel().isWritable()) {
-                    lock.notifyAll();
+                    AbstractNettyRemotingServer.super.writabilityCondition.signalAll();
                 }
+            } finally {
+                AbstractNettyRemotingServer.super.writabilityLock.unlock();
             }
             ctx.fireChannelWritabilityChanged();
         }

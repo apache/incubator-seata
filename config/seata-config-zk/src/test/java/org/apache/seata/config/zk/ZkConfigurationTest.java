@@ -19,6 +19,7 @@ package org.apache.seata.config.zk;
 import org.apache.curator.framework.recipes.cache.ChildData;
 import org.apache.curator.framework.recipes.cache.CuratorCacheListener;
 import org.apache.curator.test.TestingServer;
+import org.apache.seata.common.exception.NotSupportYetException;
 import org.apache.seata.config.ConfigurationChangeEvent;
 import org.apache.seata.config.ConfigurationChangeListener;
 import org.apache.seata.config.ConfigurationChangeType;
@@ -174,5 +175,140 @@ public class ZkConfigurationTest {
                     .thenThrow(new IOException("mock io exception"));
             listener.event(CuratorCacheListener.Type.NODE_CHANGED, null, mockData);
         }
+    }
+
+    // Enhanced tests from ZookeeperConfigurationEnhancedTest
+
+    @Test
+    void testGetTypeName() {
+        ZookeeperConfiguration config = new ZookeeperConfiguration();
+        Assertions.assertEquals("zk", config.getTypeName());
+    }
+
+    @Test
+    void testGetLatestConfigWithDefaultValue() {
+        ZookeeperConfiguration config = new ZookeeperConfiguration();
+        String value = config.getLatestConfig("non.existent.key", "default-value", 1000);
+
+        Assertions.assertEquals("default-value", value);
+    }
+
+    @Test
+    void testGetLatestConfigFromZookeeper() {
+        ZookeeperConfiguration config = new ZookeeperConfiguration();
+        String dataId = "test.zk.key";
+        config.putConfig(dataId, "zk-value", 1000);
+
+        String value = config.getLatestConfig(dataId, "default", 1000);
+        Assertions.assertEquals("zk-value", value);
+
+        config.removeConfig(dataId, 1000);
+    }
+
+    @Test
+    void testPutConfigIfAbsent() {
+        ZookeeperConfiguration config = new ZookeeperConfiguration();
+
+        Assertions.assertThrows(
+                NotSupportYetException.class, () -> config.putConfigIfAbsent("test.key", "test-value", 1000));
+    }
+
+    // Listener tests are already covered by testPutConfig and testRemoveConfig
+
+    @Test
+    void testGetConfig() {
+        ZookeeperConfiguration config = new ZookeeperConfiguration();
+        String dataId = "test.config.key";
+        config.putConfig(dataId, "config-value", 1000);
+
+        String value = config.getConfig(dataId, "default-value", 1000);
+        Assertions.assertEquals("config-value", value);
+
+        config.removeConfig(dataId, 1000);
+    }
+
+    @Test
+    void testGetInt() {
+        ZookeeperConfiguration config = new ZookeeperConfiguration();
+        String dataId = "test.int.key";
+        config.putConfig(dataId, "100", 1000);
+
+        int value = config.getInt(dataId, 50, 1000);
+        Assertions.assertEquals(100, value);
+
+        config.removeConfig(dataId, 1000);
+    }
+
+    @Test
+    void testGetBoolean() {
+        ZookeeperConfiguration config = new ZookeeperConfiguration();
+        String dataId = "test.boolean.key";
+        config.putConfig(dataId, "true", 1000);
+
+        boolean value = config.getBoolean(dataId, false, 1000);
+        Assertions.assertTrue(value);
+
+        config.removeConfig(dataId, 1000);
+    }
+
+    @Test
+    void testCheckExistsPath() {
+        ZookeeperConfiguration config = new ZookeeperConfiguration();
+        boolean exists = config.checkExists("/");
+        Assertions.assertTrue(exists);
+    }
+
+    @Test
+    void testCheckExistsForNonExistentPath() {
+        ZookeeperConfiguration config = new ZookeeperConfiguration();
+        boolean exists = config.checkExists("/non/existent/path");
+        Assertions.assertFalse(exists);
+    }
+
+    @Test
+    void testCreatePersistent() {
+        ZookeeperConfiguration config = new ZookeeperConfiguration();
+        String path = "/test/persistent/node";
+
+        if (!config.checkExists("/test")) {
+            config.createPersistent("/test");
+        }
+        if (!config.checkExists("/test/persistent")) {
+            config.createPersistent("/test/persistent");
+        }
+        config.createPersistent(path);
+
+        boolean exists = config.checkExists(path);
+        Assertions.assertTrue(exists);
+    }
+
+    @Test
+    void testReadData() {
+        ZookeeperConfiguration config = new ZookeeperConfiguration();
+        String dataId = "test.read.key";
+        String testValue = "read-value";
+
+        config.putConfig(dataId, testValue, 1000);
+        String path = config.buildPath(dataId);
+        String value = config.readData(path);
+
+        Assertions.assertEquals(testValue, value);
+
+        config.removeConfig(dataId, 1000);
+    }
+
+    @Test
+    void testReadDataFromNonExistentNode() {
+        ZookeeperConfiguration config = new ZookeeperConfiguration();
+        String value = config.readData("/non/existent/node");
+        Assertions.assertNull(value);
+    }
+
+    @Test
+    void testBuildPath() {
+        ZookeeperConfiguration config = new ZookeeperConfiguration();
+        String path = config.buildPath("test.key");
+        Assertions.assertTrue(path.startsWith("/seata"));
+        Assertions.assertTrue(path.contains("test.key"));
     }
 }

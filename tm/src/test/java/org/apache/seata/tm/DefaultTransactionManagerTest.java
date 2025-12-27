@@ -70,7 +70,7 @@ public class DefaultTransactionManagerTest {
     }
 
     @AfterEach
-    void destory() {
+    void destroy() {
         tmNettyRemotingClientMockedStatic.close();
     }
 

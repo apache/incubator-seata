@@ -16,16 +16,33 @@
  */
 package org.apache.seata.server.storage.raft.store;
 
+import com.alipay.sofa.jraft.Closure;
+import com.alipay.sofa.jraft.Status;
+import org.apache.seata.common.metadata.Instance;
 import org.apache.seata.core.store.MappingDO;
+import org.apache.seata.discovery.registry.MultiRegistryFactory;
+import org.apache.seata.discovery.registry.RegistryService;
 import org.apache.seata.server.BaseSpringBootTest;
+import org.apache.seata.server.cluster.raft.RaftServerManager;
+import org.apache.seata.server.cluster.raft.util.RaftTaskUtil;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 
 public class RaftVGroupMappingStoreManagerTest extends BaseSpringBootTest {
 
@@ -34,6 +51,11 @@ public class RaftVGroupMappingStoreManagerTest extends BaseSpringBootTest {
     @BeforeEach
     public void setUp() {
         raftVGroupMappingStoreManager = new RaftVGroupMappingStoreManager();
+        raftVGroupMappingStoreManager.clear("unit1");
+    }
+
+    @AfterEach
+    public void tearDown() {
         raftVGroupMappingStoreManager.clear("unit1");
     }
 
@@ -105,5 +127,319 @@ public class RaftVGroupMappingStoreManagerTest extends BaseSpringBootTest {
         assertEquals(2, result.size());
         assertEquals(mappingDO1, result.get("vgroup1"));
         assertEquals(mappingDO2, result.get("vgroup2"));
+    }
+
+    // ==================== Raft Consensus Methods Tests ====================
+
+    @Test
+    public void testAddVGroup_Success() {
+        try (MockedStatic<RaftTaskUtil> raftTaskUtilMock = Mockito.mockStatic(RaftTaskUtil.class)) {
+
+            raftTaskUtilMock
+                    .when(() -> RaftTaskUtil.createTask(any(Closure.class), any(), any(CompletableFuture.class)))
+                    .thenAnswer(invocation -> {
+                        Closure closure = invocation.getArgument(0);
+                        CompletableFuture<Boolean> future = invocation.getArgument(2);
+
+                        Status status = mock(Status.class);
+                        Mockito.when(status.isOk()).thenReturn(true);
+                        closure.run(status);
+
+                        return future.get();
+                    });
+
+            MappingDO mappingDO = new MappingDO();
+            mappingDO.setUnit("unit1");
+            mappingDO.setVGroup("vgroup-raft-test");
+
+            boolean result = raftVGroupMappingStoreManager.addVGroup(mappingDO);
+
+            assertTrue(result);
+            assertEquals(
+                    mappingDO,
+                    raftVGroupMappingStoreManager.loadVGroupsByUnit("unit1").get("vgroup-raft-test"));
+        } catch (Exception e) {
+            fail("Unexpected exception: " + e.getMessage());
+        }
+    }
+
+    @Test
+    public void testAddVGroup_Failure() {
+        try (MockedStatic<RaftTaskUtil> raftTaskUtilMock = Mockito.mockStatic(RaftTaskUtil.class)) {
+
+            raftTaskUtilMock
+                    .when(() -> RaftTaskUtil.createTask(any(Closure.class), any(), any(CompletableFuture.class)))
+                    .thenAnswer(invocation -> {
+                        Closure closure = invocation.getArgument(0);
+                        CompletableFuture<Boolean> future = invocation.getArgument(2);
+
+                        Status status = mock(Status.class);
+                        Mockito.when(status.isOk()).thenReturn(false);
+                        closure.run(status);
+
+                        return future.get();
+                    });
+
+            MappingDO mappingDO = new MappingDO();
+            mappingDO.setUnit("unit1");
+            mappingDO.setVGroup("vgroup-raft-test");
+
+            boolean result = raftVGroupMappingStoreManager.addVGroup(mappingDO);
+
+            assertFalse(result);
+            assertNull(raftVGroupMappingStoreManager.loadVGroupsByUnit("unit1").get("vgroup-raft-test"));
+        } catch (Exception e) {
+            fail("Unexpected exception: " + e.getMessage());
+        }
+    }
+
+    @Test
+    public void testAddVGroup_Exception() {
+        try (MockedStatic<RaftTaskUtil> raftTaskUtilMock = Mockito.mockStatic(RaftTaskUtil.class)) {
+
+            raftTaskUtilMock
+                    .when(() -> RaftTaskUtil.createTask(any(Closure.class), any(), any(CompletableFuture.class)))
+                    .thenThrow(new RuntimeException("Raft error"));
+
+            MappingDO mappingDO = new MappingDO();
+            mappingDO.setUnit("unit1");
+            mappingDO.setVGroup("vgroup-raft-test");
+
+            RuntimeException exception =
+                    assertThrows(RuntimeException.class, () -> raftVGroupMappingStoreManager.addVGroup(mappingDO));
+
+            assertTrue(exception.getMessage().contains("Raft error"));
+        }
+    }
+
+    @Test
+    public void testRemoveVGroup_Success() {
+        try (MockedStatic<RaftTaskUtil> raftTaskUtilMock = Mockito.mockStatic(RaftTaskUtil.class)) {
+
+            // Add a vGroup first
+            MappingDO mappingDO = new MappingDO();
+            mappingDO.setUnit("unit1");
+            mappingDO.setVGroup("vgroup-to-remove");
+            raftVGroupMappingStoreManager.localAddVGroup(mappingDO);
+
+            raftTaskUtilMock
+                    .when(() -> RaftTaskUtil.createTask(any(Closure.class), any(), any(CompletableFuture.class)))
+                    .thenAnswer(invocation -> {
+                        Closure closure = invocation.getArgument(0);
+                        CompletableFuture<Boolean> future = invocation.getArgument(2);
+
+                        Status status = mock(Status.class);
+                        Mockito.when(status.isOk()).thenReturn(true);
+                        closure.run(status);
+
+                        return future.get();
+                    });
+
+            boolean result = raftVGroupMappingStoreManager.removeVGroup("vgroup-to-remove");
+
+            assertTrue(result);
+            assertNull(raftVGroupMappingStoreManager.loadVGroupsByUnit("unit1").get("vgroup-to-remove"));
+        } catch (Exception e) {
+            fail("Unexpected exception: " + e.getMessage());
+        }
+    }
+
+    @Test
+    public void testRemoveVGroup_Failure() {
+        try (MockedStatic<RaftTaskUtil> raftTaskUtilMock = Mockito.mockStatic(RaftTaskUtil.class)) {
+
+            // Add a vGroup first
+            MappingDO mappingDO = new MappingDO();
+            mappingDO.setUnit("unit1");
+            mappingDO.setVGroup("vgroup-to-remove");
+            raftVGroupMappingStoreManager.localAddVGroup(mappingDO);
+
+            raftTaskUtilMock
+                    .when(() -> RaftTaskUtil.createTask(any(Closure.class), any(), any(CompletableFuture.class)))
+                    .thenAnswer(invocation -> {
+                        Closure closure = invocation.getArgument(0);
+                        CompletableFuture<Boolean> future = invocation.getArgument(2);
+
+                        Status status = mock(Status.class);
+                        Mockito.when(status.isOk()).thenReturn(false);
+                        closure.run(status);
+
+                        return future.get();
+                    });
+
+            boolean result = raftVGroupMappingStoreManager.removeVGroup("vgroup-to-remove");
+
+            assertFalse(result);
+            // VGroup should still exist since removal failed
+            assertNotNull(
+                    raftVGroupMappingStoreManager.loadVGroupsByUnit("unit1").get("vgroup-to-remove"));
+        } catch (Exception e) {
+            fail("Unexpected exception: " + e.getMessage());
+        }
+    }
+
+    @Test
+    public void testRemoveVGroup_Exception() {
+        try (MockedStatic<RaftTaskUtil> raftTaskUtilMock = Mockito.mockStatic(RaftTaskUtil.class)) {
+
+            raftTaskUtilMock
+                    .when(() -> RaftTaskUtil.createTask(any(Closure.class), any(), any(CompletableFuture.class)))
+                    .thenThrow(new RuntimeException("Raft error"));
+
+            RuntimeException exception = assertThrows(
+                    RuntimeException.class, () -> raftVGroupMappingStoreManager.removeVGroup("vgroup-test"));
+
+            assertTrue(exception.getMessage().contains("Raft error"));
+        }
+    }
+
+    // ==================== notifyMapping Tests ====================
+
+    @Test
+    public void testNotifyMapping_Success() {
+        try (MockedStatic<RaftServerManager> raftServerManagerMock = Mockito.mockStatic(RaftServerManager.class);
+                MockedStatic<MultiRegistryFactory> registryFactoryMock =
+                        Mockito.mockStatic(MultiRegistryFactory.class)) {
+
+            // Mock RaftServerManager
+            Set<String> groups = Collections.singleton("group1");
+            raftServerManagerMock.when(RaftServerManager::groups).thenReturn(groups);
+            raftServerManagerMock
+                    .when(() -> RaftServerManager.isLeader("group1"))
+                    .thenReturn(true);
+
+            // Mock MultiRegistryFactory
+            RegistryService<?> mockRegistryService = mock(RegistryService.class);
+            List<RegistryService<?>> registryServices = Collections.singletonList(mockRegistryService);
+            registryFactoryMock.when(MultiRegistryFactory::getInstances).thenReturn(registryServices);
+
+            // Add some vGroups
+            MappingDO mappingDO1 = new MappingDO();
+            mappingDO1.setUnit("unit1");
+            mappingDO1.setVGroup("vgroup1");
+            raftVGroupMappingStoreManager.localAddVGroup(mappingDO1);
+
+            assertDoesNotThrow(() -> raftVGroupMappingStoreManager.notifyMapping());
+        }
+    }
+
+    @Test
+    public void testNotifyMapping_WithFollowerRole() {
+        try (MockedStatic<RaftServerManager> raftServerManagerMock = Mockito.mockStatic(RaftServerManager.class);
+                MockedStatic<MultiRegistryFactory> registryFactoryMock =
+                        Mockito.mockStatic(MultiRegistryFactory.class)) {
+
+            // Mock RaftServerManager - node is follower
+            Set<String> groups = Collections.singleton("group1");
+            raftServerManagerMock.when(RaftServerManager::groups).thenReturn(groups);
+            raftServerManagerMock
+                    .when(() -> RaftServerManager.isLeader("group1"))
+                    .thenReturn(false);
+
+            // Mock MultiRegistryFactory
+            RegistryService<?> mockRegistryService = mock(RegistryService.class);
+            List<RegistryService<?>> registryServices = Collections.singletonList(mockRegistryService);
+            registryFactoryMock.when(MultiRegistryFactory::getInstances).thenReturn(registryServices);
+
+            // Add some vGroups
+            MappingDO mappingDO1 = new MappingDO();
+            mappingDO1.setUnit("unit1");
+            mappingDO1.setVGroup("vgroup1");
+            raftVGroupMappingStoreManager.localAddVGroup(mappingDO1);
+
+            assertDoesNotThrow(() -> raftVGroupMappingStoreManager.notifyMapping());
+        }
+    }
+
+    @Test
+    public void testNotifyMapping_WithMultipleGroups() {
+        try (MockedStatic<RaftServerManager> raftServerManagerMock = Mockito.mockStatic(RaftServerManager.class);
+                MockedStatic<MultiRegistryFactory> registryFactoryMock =
+                        Mockito.mockStatic(MultiRegistryFactory.class)) {
+
+            // Mock RaftServerManager with multiple groups
+            Set<String> groups = new HashSet<>(Arrays.asList("group1", "group2"));
+            raftServerManagerMock.when(RaftServerManager::groups).thenReturn(groups);
+            raftServerManagerMock
+                    .when(() -> RaftServerManager.isLeader("group1"))
+                    .thenReturn(true);
+            raftServerManagerMock
+                    .when(() -> RaftServerManager.isLeader("group2"))
+                    .thenReturn(false);
+
+            // Mock MultiRegistryFactory
+            RegistryService<?> mockRegistryService = mock(RegistryService.class);
+            List<RegistryService<?>> registryServices = Collections.singletonList(mockRegistryService);
+            registryFactoryMock.when(MultiRegistryFactory::getInstances).thenReturn(registryServices);
+
+            assertDoesNotThrow(() -> raftVGroupMappingStoreManager.notifyMapping());
+        }
+    }
+
+    @Test
+    public void testNotifyMapping_RegistryException() {
+        try (MockedStatic<RaftServerManager> raftServerManagerMock = Mockito.mockStatic(RaftServerManager.class);
+                MockedStatic<MultiRegistryFactory> registryFactoryMock =
+                        Mockito.mockStatic(MultiRegistryFactory.class)) {
+
+            // Mock RaftServerManager
+            Set<String> groups = Collections.singleton("group1");
+            raftServerManagerMock.when(RaftServerManager::groups).thenReturn(groups);
+            raftServerManagerMock
+                    .when(() -> RaftServerManager.isLeader("group1"))
+                    .thenReturn(true);
+
+            // Mock MultiRegistryFactory with registry that throws exception
+            RegistryService<?> mockRegistryService = mock(RegistryService.class);
+            try {
+                Mockito.doThrow(new RuntimeException("Registry error"))
+                        .when(mockRegistryService)
+                        .register(any(Instance.class));
+            } catch (Exception e) {
+                // This shouldn't happen as we're just configuring the mock
+            }
+            List<RegistryService<?>> registryServices = Collections.singletonList(mockRegistryService);
+            registryFactoryMock.when(MultiRegistryFactory::getInstances).thenReturn(registryServices);
+
+            RuntimeException exception =
+                    assertThrows(RuntimeException.class, () -> raftVGroupMappingStoreManager.notifyMapping());
+
+            assertTrue(exception.getMessage().contains("vGroup mapping relationship notified failed"));
+        }
+    }
+
+    // ==================== Additional Tests ====================
+
+    @Test
+    public void testLoadVGroups() {
+        MappingDO mappingDO1 = new MappingDO();
+        mappingDO1.setUnit("unit1");
+        mappingDO1.setVGroup("vgroup1");
+
+        MappingDO mappingDO2 = new MappingDO();
+        mappingDO2.setUnit("unit2");
+        mappingDO2.setVGroup("vgroup2");
+
+        raftVGroupMappingStoreManager.localAddVGroup(mappingDO1);
+        raftVGroupMappingStoreManager.localAddVGroup(mappingDO2);
+
+        Map<String, Object> result = raftVGroupMappingStoreManager.loadVGroups();
+
+        assertEquals(2, result.size());
+        assertEquals("unit1", result.get("vgroup1"));
+        assertEquals("unit2", result.get("vgroup2"));
+    }
+
+    @Test
+    public void testReadVGroups() {
+        MappingDO mappingDO = new MappingDO();
+        mappingDO.setUnit("unit1");
+        mappingDO.setVGroup("vgroup1");
+        raftVGroupMappingStoreManager.localAddVGroup(mappingDO);
+
+        Map<String, Object> loadResult = raftVGroupMappingStoreManager.loadVGroups();
+        Map<String, Object> readResult = raftVGroupMappingStoreManager.readVGroups();
+
+        assertEquals(loadResult, readResult);
     }
 }

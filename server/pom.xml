@@ -297,6 +297,11 @@
             <artifactId>bucket4j_jdk8-core</artifactId>
             <version>${bucket4j.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -388,7 +393,7 @@
                         <workingDirectory>/seata-server</workingDirectory>
                         <ports>
                             <port>8091</port>
-                            <port>7091</port>
+                            <port>9091</port>
                         </ports>
                         <labels>
                             <name>seata-server</name>
@@ -409,12 +414,13 @@
                         </entrypoint>
                         <environment>
                             <TZ>Asia/Shanghai</TZ>
+                            <LOADER_PATH>/seata-server/libs/</LOADER_PATH>
                         </environment>
                     </container>
                     <extraDirectories>
                         <paths>
                             <path>
-                                <from>src/main/resources/jdbc</from>
+                                <from>target/lib/jdbc</from>
                                 <into>/seata-server/libs/jdbc</into>
                             </path>
                             <path>

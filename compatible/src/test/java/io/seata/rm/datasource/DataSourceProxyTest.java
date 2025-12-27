@@ -101,4 +101,55 @@ public class DataSourceProxyTest {
             return new DataSourceProxy(dataSource);
         }
     }
+
+    @Test
+    public void testGetResourceId() {
+        DataSource mockDataSource = new MockDataSource();
+        DataSourceProxy proxy = getDataSourceProxy(mockDataSource);
+        Assertions.assertNotNull(proxy.getResourceId());
+    }
+
+    @Test
+    public void testGetConnection() throws Exception {
+        DataSource mockDataSource = new MockDataSource();
+        DataSourceProxy proxy = getDataSourceProxy(mockDataSource);
+        Connection connection = proxy.getConnection();
+        Assertions.assertNotNull(connection);
+    }
+
+    @Test
+    public void testGetConnectionWithCredentials() throws Exception {
+        DataSource mockDataSource = new MockDataSource();
+        DataSourceProxy proxy = getDataSourceProxy(mockDataSource);
+        Connection connection = proxy.getConnection("user", "password");
+        Assertions.assertNotNull(connection);
+    }
+
+    @Test
+    public void testConstructorWithResourceGroupId() {
+        try (MockedStatic<UndoLogManagerFactory> undoLogManagerFactoryMockedStatic =
+                Mockito.mockStatic(UndoLogManagerFactory.class)) {
+            MySQLUndoLogManager mysqlUndoLogManager = mock(MySQLUndoLogManager.class);
+            undoLogManagerFactoryMockedStatic
+                    .when(() -> UndoLogManagerFactory.getUndoLogManager(anyString()))
+                    .thenReturn(mysqlUndoLogManager);
+            doReturn(true).when(mysqlUndoLogManager).hasUndoLogTable(any(Connection.class));
+
+            DataSource mockDataSource = new MockDataSource();
+            DataSourceProxy proxy = new DataSourceProxy(mockDataSource, "test-resource-group");
+            Assertions.assertNotNull(proxy);
+            Assertions.assertNotNull(proxy.getResourceId());
+        }
+    }
+
+    @Test
+    public void testGetBranchType() {
+        DataSource mockDataSource = new MockDataSource();
+        DataSourceProxy proxy = getDataSourceProxy(mockDataSource);
+        // The getBranchType() returns org.apache.seata.core.model.BranchType
+        org.apache.seata.core.model.BranchType branchType = proxy.getBranchType();
+        Assertions.assertEquals(org.apache.seata.core.model.BranchType.AT, branchType);
+        // Verify compatibility with io.seata package by name
+        Assertions.assertEquals(io.seata.core.model.BranchType.AT.name(), branchType.name());
+    }
 }

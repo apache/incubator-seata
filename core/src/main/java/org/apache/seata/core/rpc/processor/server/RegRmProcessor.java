@@ -17,7 +17,7 @@
 package org.apache.seata.core.rpc.processor.server;
 
 import io.netty.channel.ChannelHandlerContext;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.core.protocol.RegisterRMRequest;

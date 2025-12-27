@@ -18,6 +18,7 @@ package org.apache.seata.sqlparser.druid.oscar;
 
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
+import com.alibaba.druid.sql.dialect.oscar.ast.stmt.OscarSelectQueryBlock;
 import org.apache.seata.common.loader.LoadLevel;
 import org.apache.seata.sqlparser.SQLRecognizer;
 import org.apache.seata.sqlparser.druid.SQLOperateRecognizerHolder;
@@ -47,8 +48,19 @@ public class OscarOperateRecognizerHolder implements SQLOperateRecognizerHolder 
 
     @Override
     public SQLRecognizer getSelectForUpdateRecognizer(String sql, SQLStatement ast) {
-        if (((SQLSelectStatement) ast).getSelect().getFirstQueryBlock().isForUpdate()) {
-            return new OscarSelectForUpdateRecognizer(sql, ast);
+        if ((ast instanceof SQLSelectStatement)) {
+            SQLSelectStatement selectStatement = (SQLSelectStatement) ast;
+            if (selectStatement.getSelect() != null) {
+                if (selectStatement.getSelect().getFirstQueryBlock() != null) {
+                    OscarSelectQueryBlock queryBlock =
+                            (OscarSelectQueryBlock) selectStatement.getSelect().getFirstQueryBlock();
+                    if (queryBlock.getForClause() != null) {
+                        if (queryBlock.getForClause().getOption() == OscarSelectQueryBlock.ForClause.Option.UPDATE) {
+                            return new OscarSelectForUpdateRecognizer(sql, ast);
+                        }
+                    }
+                }
+            }
         }
         return null;
     }

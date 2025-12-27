@@ -104,8 +104,9 @@ public class TableMetaTest {
         tableMeta.getAllIndexes().put(COLUMN_USERCODE, primary2);
 
         List<String> pkColumnName = tableMeta.getPrimaryKeyOnlyName();
-        Assertions.assertEquals("id", pkColumnName.get(0));
-        Assertions.assertEquals("userCode", pkColumnName.get(1));
+        Assertions.assertEquals(2, pkColumnName.size());
+        Assertions.assertTrue(pkColumnName.contains(COLUMN_ID));
+        Assertions.assertTrue(pkColumnName.contains(COLUMN_USERCODE));
     }
 
     @Test

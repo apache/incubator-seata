@@ -16,20 +16,48 @@
  */
 package org.apache.seata.core.rpc.netty.http.filter;
 
+import io.netty.channel.ChannelHandlerContext;
+import org.apache.seata.common.rpc.http.HttpContext;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
-public class HttpFilterContext<T> {
-    private final T request;
+public class HttpFilterContext<T> extends HttpContext<T> {
     private final Supplier<HttpRequestParamWrapper> paramWrapperSupplier;
     private volatile HttpRequestParamWrapper paramWrapper;
+    private final Map<String, Object> attributes = new ConcurrentHashMap<>();
+    private static final ThreadLocal<HttpFilterContext<?>> CURRENT_CONTEXT = new ThreadLocal<>();
+    private Object response;
 
-    public HttpFilterContext(T request, Supplier<HttpRequestParamWrapper> paramWrapperSupplier) {
-        this.request = request;
+    public HttpFilterContext(
+            T request,
+            ChannelHandlerContext channelHandlerContext,
+            boolean keepAlive,
+            String httpVersion,
+            Supplier<HttpRequestParamWrapper> paramWrapperSupplier) {
+        super(request, channelHandlerContext, keepAlive, httpVersion);
         this.paramWrapperSupplier = paramWrapperSupplier;
     }
 
-    public T getRequest() {
-        return request;
+    public static HttpFilterContext<?> getCurrentContext() {
+        return CURRENT_CONTEXT.get();
+    }
+
+    public static void setCurrentContext(HttpFilterContext<?> context) {
+        CURRENT_CONTEXT.set(context);
+    }
+
+    public static void clearCurrentContext() {
+        CURRENT_CONTEXT.remove();
+    }
+
+    public void setResponse(Object response) {
+        this.response = response;
+    }
+
+    public Object getResponse() {
+        return this.response;
     }
 
     public HttpRequestParamWrapper getParamWrapper() {
@@ -41,5 +69,18 @@ public class HttpFilterContext<T> {
             }
         }
         return paramWrapper;
+    }
+
+    public void setAttribute(String key, Object value) {
+        attributes.put(key, value);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <V> V getAttribute(String key) {
+        return (V) attributes.get(key);
+    }
+
+    public Object removeAttribute(String key) {
+        return attributes.remove(key);
     }
 }
