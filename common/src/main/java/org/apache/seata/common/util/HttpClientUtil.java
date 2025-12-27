@@ -163,7 +163,7 @@ public class HttpClientUtil {
 
     public static void doPostWithHttp2(
             String url, String body, Map<String, String> headers, HttpCallback<Response> callback) {
-        // default timeout 10 seconds
+        // default timeout 10000 milliseconds
         doPostWithHttp2(url, body, headers, callback, 10000);
     }
 

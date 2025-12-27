@@ -70,7 +70,7 @@ public class HttpClientUtilTest {
     }
 
     @Test
-    public void testDoPost_WithNullParams() throws IOException {
+    public void testDoPost_WithBlankParams() throws IOException {
         // Test with blank params - should create empty RequestBody
         Assertions.assertThrows(ConnectException.class, () -> {
             HttpClientUtil.doPost("http://localhost:9999/invalid", "", new HashMap<>(), 1000);
