@@ -36,6 +36,7 @@ public class McpGlobalLockParamDto implements Serializable {
     @McpToolParam(description = "The branch id", required = false)
     private String branchId;
 
+    @McpToolParam(description = "the primary Key", required = false)
     private String pk;
 
     @McpToolParam(description = "resourceId", required = false)
