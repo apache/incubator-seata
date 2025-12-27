@@ -99,7 +99,7 @@ public class ClusterData {
     }
 
     @JsonIgnore
-    public List<Node> getInstanceList() {
+    public List<NamingServerNode> getInstanceList() {
         return unitData.values().stream()
                 .map(Unit::getNamingInstanceList)
                 .flatMap(List::stream)
