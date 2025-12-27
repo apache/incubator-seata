@@ -73,7 +73,6 @@ class RaftRegistryServiceImplTest {
                 "{\"code\":\"401\",\"message\":\"Login failed\",\"data\":\"" + jwtToken + "\",\"success\":false}";
 
         try (MockedStatic<HttpClientUtil> mockedStatic = Mockito.mockStatic(HttpClientUtil.class)) {
-
             CloseableHttpResponse mockResponse = mock(CloseableHttpResponse.class);
             StatusLine mockStatusLine = mock(StatusLine.class);
 
@@ -84,18 +83,15 @@ class RaftRegistryServiceImplTest {
             when(HttpClientUtil.doPost(any(String.class), any(Map.class), any(Map.class), any(int.class)))
                     .thenReturn(mockResponse);
 
-            // Use reflection to access and invoke the private method
-            Method refreshTokenMethod = RaftRegistryServiceImpl.class.getDeclaredMethod("refreshToken", String.class);
+            Method refreshTokenMethod =
+                    RaftRegistryServiceImpl.class.getDeclaredMethod("refreshToken", String.class, Node.class);
             refreshTokenMethod.setAccessible(true);
-            assertThrows(
-                    Exception.class,
-                    () -> refreshTokenMethod.invoke(RaftRegistryServiceImpl.getInstance(), "127.0.0.1:8092"));
+
+            Node mockNode = mock(Node.class);
+            assertThrows(Exception.class, () -> refreshTokenMethod.invoke(null, "127.0.0.1:8092", mockNode));
         }
     }
 
-    /**
-     * test whether the jwtToken updated when refreshToken method invoked
-     */
     @Test
     public void testRefreshTokenSuccess()
             throws IOException, NoSuchMethodException, InvocationTargetException, IllegalAccessException,
@@ -116,9 +112,23 @@ class RaftRegistryServiceImplTest {
             when(HttpClientUtil.doPost(any(String.class), any(Map.class), any(Map.class), any(int.class)))
                     .thenReturn(mockResponse);
 
-            Method refreshTokenMethod = RaftRegistryServiceImpl.class.getDeclaredMethod("refreshToken", String.class);
+            Method refreshTokenMethod =
+                    RaftRegistryServiceImpl.class.getDeclaredMethod("refreshToken", String.class, Node.class);
             refreshTokenMethod.setAccessible(true);
-            refreshTokenMethod.invoke(RaftRegistryServiceImpl.getInstance(), "127.0.0.1:8092");
+
+            Node mockNode = mock(Node.class);
+            Map<String, Object> metadata = new HashMap<>();
+            List<Map<String, Object>> externalEndpoints = new ArrayList<>();
+            LinkedHashMap<String, Object> externalEndpoint = new LinkedHashMap<>();
+            externalEndpoint.put("host", "10.10.105.7");
+            externalEndpoint.put("controlPort", 30071);
+            externalEndpoint.put("transactionPort", 30091);
+            externalEndpoints.add(externalEndpoint);
+            metadata.put("external", externalEndpoints);
+            when(mockNode.getMetadata()).thenReturn(metadata);
+
+            refreshTokenMethod.invoke(null, "127.0.0.1:8092", mockNode);
+
             Field jwtTokenField = RaftRegistryServiceImpl.class.getDeclaredField("jwtToken");
             jwtTokenField.setAccessible(true);
             String jwtTokenAct = (String) jwtTokenField.get(null);
