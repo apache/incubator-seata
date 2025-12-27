@@ -52,7 +52,7 @@ const getCurrentLanguage = (): string => {
   return lang;
 }
 
-const getCurrentLocaleObj = (): any => {
+const getCurrentLocaleObj = (): ILocale => {
   let lang = getCurrentLanguage();
 
   return lang === zhCnKey ? zhCN : enUS;

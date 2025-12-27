@@ -16,16 +16,16 @@
  */
 package org.apache.seata.serializer.fury;
 
+import org.apache.fory.Fory;
 import org.apache.fury.Fury;
 import org.apache.fury.config.CompatibleMode;
-import org.apache.fury.exception.DeserializationException;
-import org.apache.fury.exception.InsecureException;
 import org.apache.seata.core.exception.TransactionExceptionCode;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.protocol.ResultCode;
 import org.apache.seata.core.protocol.transaction.BranchCommitRequest;
 import org.apache.seata.core.protocol.transaction.BranchCommitResponse;
+import org.apache.seata.core.serializer.Serializer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -87,19 +87,91 @@ public class FurySerializerTest {
     public void testUnSafeDeserializer() {
         // Test deserialization of an object that is not in allow list
         TestUnSafeSerializer testUnSafeSerializer = new TestUnSafeSerializer();
-        Fury fury = Fury.builder()
-                .requireClassRegistration(false)
-                .withRefTracking(true)
-                .withCompatibleMode(CompatibleMode.COMPATIBLE)
-                .build();
-        Assertions.assertThrows(
-                DeserializationException.class, () -> furySerializer.deserialize(fury.serialize(testUnSafeSerializer)));
+        byte[] bytes = new TestSerializerFactory().get().serialize(testUnSafeSerializer);
+        String className = null;
+        try {
+            furySerializer.deserialize(bytes);
+        } catch (Exception e) {
+            className = e.getClass().getSimpleName();
+        }
+        Assertions.assertEquals("DeserializationException", className);
     }
 
     @Test
     public void testUnSafeSerializer() {
         // Test serialization of an object that is not in allow list
         TestUnSafeSerializer testUnSafeSerializer = new TestUnSafeSerializer();
-        Assertions.assertThrows(InsecureException.class, () -> furySerializer.serialize(testUnSafeSerializer));
+        String className = null;
+        try {
+            furySerializer.serialize(testUnSafeSerializer);
+        } catch (Exception e) {
+            className = e.getClass().getSimpleName();
+        }
+        Assertions.assertEquals("InsecureException", className);
+    }
+
+    private static class TestSerializerFactory {
+
+        private final Serializer furyDelegate;
+
+        public TestSerializerFactory() {
+            this.furyDelegate = createFuryDelegate();
+        }
+
+        public Serializer get() {
+            return furyDelegate;
+        }
+
+        private Serializer createFuryDelegate() {
+            // First, try to load Apache Fory.
+            try {
+                Class.forName("org.apache.fory.Fury");
+                return new ForyDelegate();
+            } catch (ClassNotFoundException e) {
+            }
+            // If Fory is unavailable, fallback to Fury.
+            try {
+                Class.forName("org.apache.fury.Fury");
+                return new FuryDelegate();
+            } catch (ClassNotFoundException e) {
+                throw new IllegalStateException("Neither Apache Fory nor Apache Fury found in classpath", e);
+            }
+        }
+    }
+
+    private static class ForyDelegate implements Serializer {
+
+        @Override
+        public byte[] serialize(Object obj) {
+            Fory fory = Fory.builder()
+                    .requireClassRegistration(false)
+                    .withRefTracking(true)
+                    .withCompatibleMode(org.apache.fory.config.CompatibleMode.COMPATIBLE)
+                    .build();
+            return fory.serialize(obj);
+        }
+
+        @Override
+        public Object deserialize(byte[] bytes) {
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    private static class FuryDelegate implements Serializer {
+
+        @Override
+        public byte[] serialize(Object obj) {
+            Fury fury = Fury.builder()
+                    .requireClassRegistration(false)
+                    .withRefTracking(true)
+                    .withCompatibleMode(CompatibleMode.COMPATIBLE)
+                    .build();
+            return fury.serialize(obj);
+        }
+
+        @Override
+        public Object deserialize(byte[] bytes) {
+            throw new UnsupportedOperationException();
+        }
     }
 }

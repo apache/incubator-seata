@@ -115,7 +115,7 @@
         <dependency-check-maven.version>12.1.0</dependency-check-maven.version>
         <!-- Test -->
         <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
-        <jacoco-maven-plugin.version>0.8.7</jacoco-maven-plugin.version>
+        <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
         <!-- Packaging -->
         <maven-source-plugin.version>2.2.1</maven-source-plugin.version>
         <maven-resources-plugin.version>3.2.0</maven-resources-plugin.version>

@@ -17,6 +17,7 @@
 package org.apache.seata.common.metadata.namingserver;
 
 import org.apache.seata.common.metadata.Node;
+import org.apache.seata.common.util.StringUtils;
 
 import java.util.Objects;
 
@@ -77,7 +78,9 @@ public class NamingServerNode extends Node {
         NamingServerNode otherNode = (NamingServerNode) obj;
 
         // other node is newer than me
-        return otherNode.term > term;
+        return otherNode.term > term
+                || (otherNode.term >= term && !Objects.equals(this.getRole(), otherNode.getRole()))
+                || !StringUtils.equals(otherNode.getVersion(), this.getVersion());
     }
 
     public void setWeight(double weight) {

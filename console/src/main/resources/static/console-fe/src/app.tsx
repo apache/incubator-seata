@@ -71,14 +71,14 @@ class App extends React.Component<AppPropsType, AppStateType> {
 
   getVersion = () => {
     fetch('version.json').then(response =>
-      response.json().then(json => this.setState({ ...this.state, version: json.version }))
+      response.json().then(json => this.setState(prevState => ({ ...prevState, version: json.version })))
     );
   };
 
   get menu() {
     const { locale }: AppPropsType = this.props;
     const { MenuRouter = {} } = locale;
-    const { overview, transactionInfo, globalLockInfo, sagaStatemachineDesigner } = MenuRouter;
+    const { transactionInfo, globalLockInfo, clusterManager, sagaStatemachineDesigner } = MenuRouter;
     return {
       items: [
         // {
@@ -92,6 +92,10 @@ class App extends React.Component<AppPropsType, AppStateType> {
         {
           key: '/globallock/list',
           label: globalLockInfo,
+        },
+        {
+          key: '/cluster/list',
+          label: clusterManager,
         },
         {
           key: '/sagastatemachinedesigner',
