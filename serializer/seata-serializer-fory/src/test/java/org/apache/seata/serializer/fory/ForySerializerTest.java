@@ -22,6 +22,10 @@ import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.protocol.ResultCode;
 import org.apache.seata.core.protocol.transaction.BranchCommitRequest;
 import org.apache.seata.core.protocol.transaction.BranchCommitResponse;
+import org.apache.seata.core.serializer.Serializer;
+import org.apache.seata.core.serializer.SerializerServiceLoader;
+import org.apache.seata.core.serializer.SerializerType;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -75,5 +79,19 @@ public class ForySerializerTest {
         assertThat(t.getBranchStatus()).isEqualTo(branchCommitResponse.getBranchStatus());
         assertThat(t.getMsg()).isEqualTo(branchCommitResponse.getMsg());
         assertThat(t.getResultCode()).isEqualTo(branchCommitResponse.getResultCode());
+    }
+
+    @Test
+    public void testLoadSerializerWithType() {
+        Serializer serializer = null;
+        serializer = SerializerServiceLoader.load(SerializerType.FURY);
+        Assertions.assertNotNull(serializer, "FURY Serializer should be available");
+    }
+
+    @Test
+    public void testLoadSerializerWithVersion() {
+        Serializer serializer = null;
+        serializer = SerializerServiceLoader.load(SerializerType.FURY, (byte) 0x01);
+        Assertions.assertNotNull(serializer, "FURY Serializer should be available");
     }
 }
