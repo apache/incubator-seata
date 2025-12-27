@@ -23,6 +23,14 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
+  ai:
+    mcp:
+      server:
+        protocol: streamable
+        streamable-http:
+          mcp-endpoint: /mcp
+        name: mcp-server
+        version: 1.0.0
   application:
     name: seata-namingserver
 logging:
@@ -55,3 +63,10 @@ management:
         http.server.requests: 0.5, 0.9, 0.95, 0.99, 0.999
       percentiles-histogram:
         http.server.requests: true
+  # MCP Server Configuration
+  mcp:
+    # Maximum query time interval, The unit is milliseconds, Default one day
+    query:
+      max-query-duration: 86400000
+    auth:
+      enabled: true
