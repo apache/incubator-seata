@@ -57,7 +57,7 @@ management:
         include: "prometheus,health,info,metrics"
   metrics:
     tags:
-      application: { spring.application.name }
+      application: ${spring.application.name}
     distribution:
       percentiles:
         http.server.requests: 0.5, 0.9, 0.95, 0.99, 0.999
