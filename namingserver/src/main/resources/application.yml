@@ -45,7 +45,6 @@ console:
     protocol: http
     addr:
       - 127.0.0.1:8081
-      - 127.0.0.1:8082
 seata:
   security:
     secretKey: SeataSecretKey0c382ef121d778043159209298fd40bf3850a017
