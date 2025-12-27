@@ -94,16 +94,11 @@ public class HttpClientUtil {
 
     public static Response doPost(String url, Map<String, String> params, Map<String, String> header, int timeout)
             throws IOException {
-        try {
-            String contentType = header != null ? header.get("Content-Type") : "";
-            RequestBody requestBody = createRequestBody(params, contentType);
-            Request request = buildRequest(url, header, requestBody, "POST");
-            OkHttpClient client = createHttp1ClientWithTimeout(timeout);
-            return client.newCall(request).execute();
-        } catch (JsonProcessingException e) {
-            LOGGER.error(e.getMessage(), e);
-            throw new IOException("Failed to create request body", e);
-        }
+        String contentType = header != null ? header.get("Content-Type") : "";
+        RequestBody requestBody = createRequestBody(params, contentType);
+        Request request = buildRequest(url, header, requestBody, "POST");
+        OkHttpClient client = createHttp1ClientWithTimeout(timeout);
+        return client.newCall(request).execute();
     }
 
     public static Response doPost(String url, String body, Map<String, String> header, int timeout) throws IOException {
