@@ -27,6 +27,8 @@ public class HttpFilterContext<T> extends HttpContext<T> {
     private final Supplier<HttpRequestParamWrapper> paramWrapperSupplier;
     private volatile HttpRequestParamWrapper paramWrapper;
     private final Map<String, Object> attributes = new ConcurrentHashMap<>();
+    private static final ThreadLocal<HttpFilterContext<?>> CURRENT_CONTEXT = new ThreadLocal<>();
+    private Object response;
 
     public HttpFilterContext(
             T request,
@@ -36,6 +38,26 @@ public class HttpFilterContext<T> extends HttpContext<T> {
             Supplier<HttpRequestParamWrapper> paramWrapperSupplier) {
         super(request, channelHandlerContext, keepAlive, httpVersion);
         this.paramWrapperSupplier = paramWrapperSupplier;
+    }
+
+    public static HttpFilterContext<?> getCurrentContext() {
+        return CURRENT_CONTEXT.get();
+    }
+
+    public static void setCurrentContext(HttpFilterContext<?> context) {
+        CURRENT_CONTEXT.set(context);
+    }
+
+    public static void clearCurrentContext() {
+        CURRENT_CONTEXT.remove();
+    }
+
+    public void setResponse(Object response) {
+        this.response = response;
+    }
+
+    public Object getResponse() {
+        return this.response;
     }
 
     public HttpRequestParamWrapper getParamWrapper() {
