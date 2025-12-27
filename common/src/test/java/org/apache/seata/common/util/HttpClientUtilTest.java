@@ -17,6 +17,8 @@
 package org.apache.seata.common.util;
 
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.apache.seata.common.executor.HttpCallback;
 import org.junit.jupiter.api.AfterEach;
@@ -27,12 +29,14 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.net.ConnectException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -1040,5 +1044,70 @@ public class HttpClientUtilTest {
 
         verify(mockHttp1Client.dispatcher().executorService(), atLeastOnce()).shutdown();
         verify(mockHttp1Client.connectionPool(), atLeastOnce()).evictAll();
+    }
+
+    @Test
+    void testBuildRequest_PostWithNullRequestBody() throws Exception {
+        // Test that null requestBody for POST is replaced with empty RequestBody
+        Method buildRequestMethod = HttpClientUtil.class.getDeclaredMethod(
+                "buildRequest", String.class, Map.class, RequestBody.class, String.class);
+        buildRequestMethod.setAccessible(true);
+
+        String url = "http://localhost:8080/test";
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/json");
+
+        Request request = (Request) buildRequestMethod.invoke(null, url, headers, null, "POST");
+
+        assertNotNull(request);
+        assertEquals("POST", request.method());
+        assertNotNull(request.body());
+        assertEquals(0, request.body().contentLength());
+    }
+
+    @Test
+    void testBuildRequest_PostWithRequestBody() throws Exception {
+        Method buildRequestMethod = HttpClientUtil.class.getDeclaredMethod(
+                "buildRequest", String.class, Map.class, RequestBody.class, String.class);
+        buildRequestMethod.setAccessible(true);
+
+        String url = "http://localhost:8080/test";
+        Map<String, String> headers = new HashMap<>();
+        RequestBody requestBody = RequestBody.create("test body", okhttp3.MediaType.parse("application/json"));
+
+        Request request = (Request) buildRequestMethod.invoke(null, url, headers, requestBody, "POST");
+
+        assertNotNull(request);
+        assertEquals("POST", request.method());
+        assertNotNull(request.body());
+        assertTrue(request.body().contentLength() > 0);
+    }
+
+    @Test
+    void testBuildRequest_UnsupportedMethod() throws Exception {
+        Method buildRequestMethod = HttpClientUtil.class.getDeclaredMethod(
+                "buildRequest", String.class, Map.class, RequestBody.class, String.class);
+        buildRequestMethod.setAccessible(true);
+
+        String url = "http://localhost:8080/test";
+        Map<String, String> headers = new HashMap<>();
+
+        Exception exception = assertThrows(Exception.class, () -> {
+            buildRequestMethod.invoke(null, url, headers, null, "PUT");
+        });
+        assertTrue(exception.getCause() instanceof IllegalArgumentException);
+        assertTrue(exception.getCause().getMessage().contains("Unsupported HTTP method: PUT"));
+
+        exception = assertThrows(Exception.class, () -> {
+            buildRequestMethod.invoke(null, url, headers, null, "DELETE");
+        });
+        assertTrue(exception.getCause() instanceof IllegalArgumentException);
+        assertTrue(exception.getCause().getMessage().contains("Unsupported HTTP method: DELETE"));
+
+        exception = assertThrows(Exception.class, () -> {
+            buildRequestMethod.invoke(null, url, headers, null, "PATCH");
+        });
+        assertTrue(exception.getCause() instanceof IllegalArgumentException);
+        assertTrue(exception.getCause().getMessage().contains("Unsupported HTTP method: PATCH"));
     }
 }

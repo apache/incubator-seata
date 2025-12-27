@@ -97,9 +97,10 @@ public class HttpClientUtil {
         try {
             String contentType = header != null ? header.get("Content-Type") : "";
             RequestBody requestBody = createRequestBody(params, contentType);
-            Request request = buildHttp1Request(url, header, requestBody, "POST");
+            Request request = buildRequest(url, header, requestBody, "POST");
             OkHttpClient client = createHttp1ClientWithTimeout(timeout);
-            return client.newCall(request).execute();
+            Response response = client.newCall(request).execute();
+            return response;
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);
             throw new IOException("Failed to create request body", e);
@@ -112,17 +113,19 @@ public class HttpClientUtil {
         RequestBody requestBody = StringUtils.isNotBlank(body)
                 ? RequestBody.create(body, mediaType)
                 : RequestBody.create(new byte[0], mediaType);
-        Request request = buildHttp1Request(url, header, requestBody, "POST");
+        Request request = buildRequest(url, header, requestBody, "POST");
         OkHttpClient client = createHttp1ClientWithTimeout(timeout);
-        return client.newCall(request).execute();
+        Response response = client.newCall(request).execute();
+        return response;
     }
 
     public static Response doGet(String url, Map<String, String> param, Map<String, String> header, int timeout)
             throws IOException {
         String urlWithParams = buildUrlWithParams(url, param);
-        Request request = buildHttp1Request(urlWithParams, header, null, "GET");
+        Request request = buildRequest(urlWithParams, header, null, "GET");
         OkHttpClient client = createHttp1ClientWithTimeout(timeout);
-        return client.newCall(request).execute();
+        Response response = client.newCall(request).execute();
+        return response;
     }
 
     public static Response doPostJson(String url, String jsonBody, Map<String, String> headers, int timeout)
@@ -133,9 +136,10 @@ public class HttpClientUtil {
         Map<String, String> headersWithContentType =
                 headers != null ? new java.util.HashMap<>(headers) : new java.util.HashMap<>();
         headersWithContentType.put("Content-Type", "application/json");
-        Request request = buildHttp1Request(url, headersWithContentType, requestBody, "POST");
+        Request request = buildRequest(url, headersWithContentType, requestBody, "POST");
         OkHttpClient client = createHttp1ClientWithTimeout(timeout);
-        return client.newCall(request).execute();
+        Response response = client.newCall(request).execute();
+        return response;
     }
 
     public static void doPostWithHttp2(
@@ -152,7 +156,7 @@ public class HttpClientUtil {
         try {
             String contentType = headers != null ? headers.get("Content-Type") : "";
             RequestBody requestBody = createRequestBody(params, contentType);
-            Request request = buildHttp2Request(url, headers, requestBody, "POST");
+            Request request = buildRequest(url, headers, requestBody, "POST");
             OkHttpClient client = createHttp2ClientWithTimeout(timeoutMillis);
             executeAsync(client, request, callback);
         } catch (JsonProcessingException e) {
@@ -172,14 +176,14 @@ public class HttpClientUtil {
         RequestBody requestBody = StringUtils.isNotBlank(body)
                 ? RequestBody.create(body, MEDIA_TYPE_JSON)
                 : RequestBody.create(new byte[0], MEDIA_TYPE_JSON);
-        Request request = buildHttp2Request(url, headers, requestBody, "POST");
+        Request request = buildRequest(url, headers, requestBody, "POST");
         OkHttpClient client = createHttp2ClientWithTimeout(timeout);
         executeAsync(client, request, callback);
     }
 
     public static void doGetWithHttp2(
             String url, Map<String, String> headers, final HttpCallback<Response> callback, int timeout) {
-        Request request = buildHttp2Request(url, headers, null, "GET");
+        Request request = buildRequest(url, headers, null, "GET");
         OkHttpClient client = createHttp2ClientWithTimeout(timeout);
         executeAsync(client, request, callback);
     }
@@ -221,30 +225,7 @@ public class HttpClientUtil {
                 .build());
     }
 
-    private static Request buildHttp1Request(
-            String url, Map<String, String> headers, RequestBody requestBody, String method) {
-        Headers.Builder headerBuilder = new Headers.Builder();
-        if (headers != null) {
-            headers.forEach(headerBuilder::add);
-        }
-
-        Request.Builder requestBuilder = new Request.Builder().url(url).headers(headerBuilder.build());
-
-        if ("POST".equals(method)) {
-            if (requestBody == null) {
-                requestBody = RequestBody.create(new byte[0], MEDIA_TYPE_JSON);
-            }
-            requestBuilder.post(requestBody);
-        } else if ("GET".equals(method)) {
-            requestBuilder.get();
-        } else {
-            throw new IllegalArgumentException("Unsupported HTTP method: " + method);
-        }
-
-        return requestBuilder.build();
-    }
-
-    private static Request buildHttp2Request(
+    private static Request buildRequest(
             String url, Map<String, String> headers, RequestBody requestBody, String method) {
         Headers.Builder headerBuilder = new Headers.Builder();
         if (headers != null) {
