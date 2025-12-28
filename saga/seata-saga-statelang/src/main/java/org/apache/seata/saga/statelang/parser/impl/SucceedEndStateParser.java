@@ -24,7 +24,7 @@ import org.apache.seata.saga.statelang.parser.StateParser;
  * Succeed end state parser
  *
  */
-public class SucceedEndStateParser extends BaseStatePaser implements StateParser<SucceedEndState> {
+public class SucceedEndStateParser extends BaseStateParser implements StateParser<SucceedEndState> {
 
     @Override
     public SucceedEndState parse(Object node) {

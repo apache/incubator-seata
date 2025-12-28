@@ -37,8 +37,6 @@ public class MCPProperties {
 
     private final Environment env;
 
-    private boolean enableAuth = true;
-
     private Long queryDuration = TimeUnit.DAYS.toMillis(1);
 
     private final McpServerProperties mcpServerProperties;
@@ -79,12 +77,6 @@ public class MCPProperties {
         } catch (NumberFormatException ex) {
             queryDuration = TimeUnit.DAYS.toMillis(1);
         }
-        enableAuth = Boolean.parseBoolean(env.getProperty("seata.mcp.auth.enabled", "true"));
-
-        if (!enableAuth) {
-            logger.warn(
-                    "MCP server authentication is disabled. This creates a security risk. It is strongly recommended to enable authentication by setting seata.mcp.auth.enabled=true");
-        }
 
         if (mcpServerProperties != null) {
             McpServerProperties.ServerProtocol protocol = mcpServerProperties.getProtocol();
@@ -101,9 +93,5 @@ public class MCPProperties {
         } else {
             logger.warn("MCP server properties not properly configured");
         }
-    }
-
-    public boolean isEnableAuth() {
-        return enableAuth;
     }
 }
