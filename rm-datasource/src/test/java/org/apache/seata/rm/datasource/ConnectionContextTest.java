@@ -34,8 +34,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests for {@link ConnectionContext}.
- *
- * @author NiMv1
  */
 public class ConnectionContextTest {
 
