@@ -360,22 +360,4 @@ public class HttpClientUtil {
 
         return requestBuilder.build();
     }
-
-    private static RequestBody createRequestBody(Map<String, String> params, String contentType)
-            throws JsonProcessingException {
-        if (params == null || params.isEmpty()) {
-            return RequestBody.create(new byte[0]);
-        }
-
-        // Extract media type without parameters for robust comparison
-        String mediaTypeOnly = contentType == null ? "" : contentType.split(";")[0].trim();
-        if (MEDIA_TYPE_FORM_URLENCODED.toString().equals(mediaTypeOnly)) {
-            FormBody.Builder formBuilder = new FormBody.Builder();
-            params.forEach(formBuilder::add);
-            return formBuilder.build();
-        } else {
-            String json = OBJECT_MAPPER.writeValueAsString(params);
-            return RequestBody.create(json, MEDIA_TYPE_JSON);
-        }
-    }
 }
