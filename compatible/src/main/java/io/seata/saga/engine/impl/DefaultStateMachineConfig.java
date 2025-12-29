@@ -183,15 +183,15 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
             }
 
             @Override
-            public StateMachine registryStateMachine(StateMachine stateMachine) {
+            public StateMachine registerStateMachine(StateMachine stateMachine) {
                 org.apache.seata.saga.statelang.domain.StateMachine unwrap = ((StateMachineImpl) stateMachine).unwrap();
-                repository.registryStateMachine(unwrap);
+                repository.registerStateMachine(unwrap);
                 return stateMachine;
             }
 
             @Override
-            public void registryByResources(InputStream[] resourceAsStreamArray, String tenantId) throws IOException {
-                repository.registryByResources(resourceAsStreamArray, tenantId);
+            public void registerByResources(InputStream[] resourceAsStreamArray, String tenantId) throws IOException {
+                repository.registerByResources(resourceAsStreamArray, tenantId);
             }
         };
     }

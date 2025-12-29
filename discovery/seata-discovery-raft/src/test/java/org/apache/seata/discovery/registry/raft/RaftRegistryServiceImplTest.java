@@ -18,10 +18,9 @@ package org.apache.seata.discovery.registry.raft;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 import org.apache.http.HttpStatus;
-import org.apache.http.StatusLine;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.entity.StringEntity;
 import org.apache.seata.common.metadata.MetadataResponse;
 import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.util.*;
@@ -74,12 +73,12 @@ class RaftRegistryServiceImplTest {
 
         try (MockedStatic<HttpClientUtil> mockedStatic = Mockito.mockStatic(HttpClientUtil.class)) {
 
-            CloseableHttpResponse mockResponse = mock(CloseableHttpResponse.class);
-            StatusLine mockStatusLine = mock(StatusLine.class);
+            ResponseBody mockResponseBody = mock(ResponseBody.class);
+            Response mockResponse = mock(Response.class);
 
-            when(mockResponse.getEntity()).thenReturn(new StringEntity(responseBody));
-            when(mockResponse.getStatusLine()).thenReturn(mockStatusLine);
-            when(mockStatusLine.getStatusCode()).thenReturn(HttpStatus.SC_OK);
+            when(mockResponseBody.string()).thenReturn(responseBody);
+            when(mockResponse.code()).thenReturn(HttpStatus.SC_OK);
+            when(mockResponse.body()).thenReturn(mockResponseBody);
 
             when(HttpClientUtil.doPost(any(String.class), any(Map.class), any(Map.class), any(int.class)))
                     .thenReturn(mockResponse);
@@ -106,12 +105,12 @@ class RaftRegistryServiceImplTest {
 
         try (MockedStatic<HttpClientUtil> mockedStatic = Mockito.mockStatic(HttpClientUtil.class)) {
 
-            CloseableHttpResponse mockResponse = mock(CloseableHttpResponse.class);
-            StatusLine mockStatusLine = mock(StatusLine.class);
+            ResponseBody mockResponseBody = mock(ResponseBody.class);
+            Response mockResponse = mock(Response.class);
 
-            when(mockResponse.getEntity()).thenReturn(new StringEntity(responseBody));
-            when(mockResponse.getStatusLine()).thenReturn(mockStatusLine);
-            when(mockStatusLine.getStatusCode()).thenReturn(HttpStatus.SC_OK);
+            when(mockResponseBody.string()).thenReturn(responseBody);
+            when(mockResponse.code()).thenReturn(HttpStatus.SC_OK);
+            when(mockResponse.body()).thenReturn(mockResponseBody);
 
             when(HttpClientUtil.doPost(any(String.class), any(Map.class), any(Map.class), any(int.class)))
                     .thenReturn(mockResponse);

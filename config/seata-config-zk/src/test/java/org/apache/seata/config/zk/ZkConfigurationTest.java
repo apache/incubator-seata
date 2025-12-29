@@ -93,6 +93,12 @@ public class ZkConfigurationTest {
         };
         zookeeperConfiguration.createPersistent(zookeeperConfiguration.buildPath(dataId), "value");
         zookeeperConfiguration.addConfigListener(dataId, changeListener);
+        // Wait for listener to be fully registered
+        try {
+            Thread.sleep(200);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
         zookeeperConfiguration.putConfig(dataId, "value2");
         try {
             countDownLatch.await(10000, TimeUnit.MILLISECONDS);
@@ -128,6 +134,12 @@ public class ZkConfigurationTest {
 
         zookeeperConfiguration.addConfigListener(dataId, changeListener);
         zookeeperConfiguration.putConfig(dataId, "value2");
+        // Wait for listener to be fully registered
+        try {
+            Thread.sleep(200);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
         boolean remove = zookeeperConfiguration.removeConfig(dataId);
         Assertions.assertTrue(remove);
         try {
