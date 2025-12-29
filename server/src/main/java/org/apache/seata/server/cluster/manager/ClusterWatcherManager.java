@@ -72,19 +72,27 @@ public class ClusterWatcherManager implements ClusterChangeListener {
                     for (String group : WATCHERS.keySet()) {
                         Optional.ofNullable(WATCHERS.remove(group))
                                 .ifPresent(watchers -> watchers.parallelStream().forEach(watcher -> {
-                                    if (System.currentTimeMillis() >= watcher.getTimeout()) {
-                                        watcher.setDone(true);
-                                        // 如果超时则一定关闭流，无论是http1还是http2
-                                        // 对于HTTP/2：注册之前已经发送过headers frame，只能发送endStream=true的数据帧关闭流
-                                        // 如果没有发送过headers frame，可以发送304的headers frame并关闭流
-                                        boolean headersAlreadySent = HTTP2_HEADERS_SENT.getOrDefault(watcher, false);
-                                        sendWatcherResponse(
-                                                watcher, HttpResponseStatus.NOT_MODIFIED, true, !headersAlreadySent);
-                                        HTTP2_HEADERS_SENT.remove(watcher);
-                                    } else if (!watcher.isDone()) {
-                                        // Re-register if not done and not timeout
-                                        // Re-register
-                                        registryWatcher(watcher);
+                                    HttpContext context = watcher.getAsyncContext();
+                                    boolean isHttp2 = context instanceof HttpContext && context.isHttp2();
+                                    // 对于 HTTP2，不做超时处理，保持长连接
+                                    if (isHttp2) {
+                                        // 只检查连接是否还活跃
+                                        if (!context.getContext().channel().isActive()) {
+                                            // 连接已断开，清理资源
+                                            watcher.setDone(true);
+                                            HTTP2_HEADERS_SENT.remove(watcher);
+                                        } else {
+                                            // 连接活跃，重新注册继续监听
+                                            registryWatcher(watcher);
+                                        }
+                                    } else {
+                                        // HTTP1 保持原有超时逻辑
+                                        if (System.currentTimeMillis() >= watcher.getTimeout()) {
+                                            watcher.setDone(true);
+                                            sendWatcherResponse(watcher, HttpResponseStatus.NOT_MODIFIED, true, false);
+                                        } else if (!watcher.isDone()) {
+                                            registryWatcher(watcher);
+                                        }
                                     }
                                 }));
                     }
