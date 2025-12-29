@@ -16,6 +16,7 @@
  */
 package org.apache.seata.server.controller;
 
+import okhttp3.Response;
 import org.apache.http.HttpStatus;
 import org.apache.http.entity.ContentType;
 import org.apache.http.protocol.HTTP;
