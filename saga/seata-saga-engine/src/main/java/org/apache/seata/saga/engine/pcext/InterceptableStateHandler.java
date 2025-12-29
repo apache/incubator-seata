@@ -19,7 +19,7 @@ package org.apache.seata.saga.engine.pcext;
 import java.util.List;
 
 /**
- * Interceptible State Handler
+ * Interceptable State Handler
  *
  */
 public interface InterceptableStateHandler extends StateHandler {
