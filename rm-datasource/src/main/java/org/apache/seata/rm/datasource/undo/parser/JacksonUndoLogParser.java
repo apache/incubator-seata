@@ -35,6 +35,7 @@ import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.ser.std.ArraySerializerBase;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.seata.common.Constants;
 import org.apache.seata.common.executor.Initialize;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
@@ -185,7 +186,8 @@ public class JacksonUndoLogParser implements UndoLogParser, Initialize {
         module.addSerializer(SerialArray.class, serialArraySerializer);
         module.addDeserializer(SerialArray.class, serialArrayDeserializer);
         registerDmdbTimestampModuleIfPresent();
-        mapper.registerModule(module);
+        JavaTimeModule javaTimeModule = new JavaTimeModule();
+        mapper.registerModules(module, javaTimeModule);
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         mapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY);
         mapper.enable(MapperFeature.PROPAGATE_TRANSIENT_MARKER);

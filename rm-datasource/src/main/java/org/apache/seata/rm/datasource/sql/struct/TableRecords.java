@@ -36,6 +36,8 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.time.OffsetDateTime;
+import java.time.OffsetTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -247,6 +249,8 @@ public class TableRecords implements java.io.Serializable {
                     }
                 } else if (dataType == TIMESTAMP_WITH_TIME_ZONE || dataType == TIMESTAMP_WITH_LOCAL_TIME_ZONE) {
                     field.setValue(convertOffSetTime(timeToOffsetDateTime(resultSet.getBytes(i))));
+                } else if (dataType == Types.TIMESTAMP_WITH_TIMEZONE) {
+                    field.setValue(resultSet.getObject(i, OffsetDateTime.class));
                 } else {
                     // JDBCType.DISTINCT, JDBCType.STRUCT etc...
                     field.setValue(holdSerialDataType(resultSet.getObject(i)));
