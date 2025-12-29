@@ -44,7 +44,6 @@ import org.apache.seata.tm.api.transaction.TransactionInfo;
  * });
  * }</pre>
  *
- * @author Seata Team
  * @see TransactionalTemplate
  * @see org.apache.seata.tm.api.transaction.TransactionInfo
  * @since 1.0.0
