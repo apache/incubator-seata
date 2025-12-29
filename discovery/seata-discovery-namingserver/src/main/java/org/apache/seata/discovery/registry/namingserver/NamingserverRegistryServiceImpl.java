@@ -20,12 +20,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import okhttp3.Response;
 import org.apache.http.HttpStatus;
-import org.apache.http.StatusLine;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.ContentType;
 import org.apache.http.protocol.HTTP;
-import org.apache.http.util.EntityUtils;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.exception.AuthenticationFailedException;
 import org.apache.seata.common.exception.RetryableException;
@@ -49,7 +47,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -230,8 +227,8 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
             }
             header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
 
-            try (CloseableHttpResponse response = HttpClientUtil.doPost(url, jsonBody, header, 3000)) {
-                int statusCode = response.getStatusLine().getStatusCode();
+            try (Response response = HttpClientUtil.doPost(url, jsonBody, header, 3000)) {
+                int statusCode = response.code();
                 if (statusCode == 200) {
                     if (LOGGER.isDebugEnabled()) {
                         LOGGER.debug("instance has been registered successfully:{}", statusCode);
@@ -249,8 +246,8 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
         url = HTTP_PREFIX + url + "/naming/v1/health";
         Map<String, String> header = new HashMap<>();
         header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
-        try (CloseableHttpResponse response = HttpClientUtil.doGet(url, null, header, 3000)) {
-            int statusCode = response.getStatusLine().getStatusCode();
+        try (Response response = HttpClientUtil.doGet(url, null, header, 3000)) {
+            int statusCode = response.code();
             return statusCode == 200;
         } catch (Exception e) {
             return false;
@@ -274,8 +271,8 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
             url += params;
             Map<String, String> header = new HashMap<>();
             header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
-            try (CloseableHttpResponse response = HttpClientUtil.doPost(url, jsonBody, header, 3000)) {
-                int statusCode = response.getStatusLine().getStatusCode();
+            try (Response response = HttpClientUtil.doPost(url, jsonBody, header, 3000)) {
+                int statusCode = response.code();
                 if (statusCode == 200) {
                     LOGGER.info("instance has been unregistered successfully:{}", statusCode);
                 } else {
@@ -357,10 +354,9 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
         if (StringUtils.isNotBlank(jwtToken)) {
             header.put(AUTHORIZATION_HEADER, jwtToken);
         }
-        try (CloseableHttpResponse response = HttpClientUtil.doPost(watchAddr, (String) null, header, 30000)) {
+        try (Response response = HttpClientUtil.doPost(watchAddr, (String) null, header, 30000)) {
             if (response != null) {
-                StatusLine statusLine = response.getStatusLine();
-                return statusLine != null && statusLine.getStatusCode() == HttpStatus.SC_OK;
+                return response.code() == HttpStatus.SC_OK;
             }
         } catch (Exception e) {
             LOGGER.error("watch failed: {}", e.getMessage());
@@ -438,12 +434,15 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
         if (StringUtils.isNotBlank(jwtToken)) {
             header.put(AUTHORIZATION_HEADER, jwtToken);
         }
-        try (CloseableHttpResponse response = HttpClientUtil.doGet(url, paraMap, header, 3000)) {
-            if (response == null || response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+        try (Response response = HttpClientUtil.doGet(url, paraMap, header, 3000)) {
+            if (response == null || response.code() != HttpStatus.SC_OK) {
                 throw new NamingRegistryException("cannot lookup server list in vgroup: " + vGroup + ", http code: "
-                        + response.getStatusLine().getStatusCode());
+                        + (response != null ? response.code() : -1));
             }
-            String jsonResponse = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+            if (response.body() == null) {
+                throw new NamingRegistryException("Response body is null for vgroup: " + vGroup);
+            }
+            String jsonResponse = response.body().string();
             // jsonResponse -> MetaResponse
             MetaResponse metaResponse = OBJECT_MAPPER.readValue(jsonResponse, new TypeReference<MetaResponse>() {});
             return handleMetadata(metaResponse, vGroup);
@@ -576,20 +575,24 @@ public class NamingserverRegistryServiceImpl implements RegistryService<NamingLi
         Map<String, String> header = new HashMap<>();
         header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
         String response = null;
-        try (CloseableHttpResponse httpResponse =
+        try (Response httpResponse =
                 HttpClientUtil.doPost("http://" + namingServerAddress + "/api/v1/auth/login", param, header, 1000)) {
             if (httpResponse != null) {
-                if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                    response = EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
-                    JsonNode jsonNode = OBJECT_MAPPER.readTree(response);
-                    String codeStatus = jsonNode.get("code").asText();
-                    if (!StringUtils.equals(codeStatus, "200")) {
-                        // authorized failed,throw exception to kill process
-                        throw new AuthenticationFailedException(
-                                "Authentication failed! you should configure the correct username and password.");
+                if (httpResponse.code() == HttpStatus.SC_OK) {
+                    if (httpResponse.body() != null) {
+                        response = httpResponse.body().string();
+                        JsonNode jsonNode = OBJECT_MAPPER.readTree(response);
+                        String codeStatus = jsonNode.get("code").asText();
+                        if (!StringUtils.equals(codeStatus, "200")) {
+                            // authorized failed,throw exception to kill process
+                            throw new AuthenticationFailedException(
+                                    "Authentication failed! you should configure the correct username and password.");
+                        }
+                        jwtToken = jsonNode.get("data").asText();
+                        tokenTimeStamp = System.currentTimeMillis();
+                    } else {
+                        throw new AuthenticationFailedException("Authentication failed! Response body is null.");
                     }
-                    jwtToken = jsonNode.get("data").asText();
-                    tokenTimeStamp = System.currentTimeMillis();
                 } else {
                     // authorized failed,throw exception to kill process
                     throw new AuthenticationFailedException(

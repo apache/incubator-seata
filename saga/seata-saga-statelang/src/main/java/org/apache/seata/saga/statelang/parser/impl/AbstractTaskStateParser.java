@@ -33,7 +33,7 @@ import java.util.Map;
  * AbstractTaskStateParser
  *
  */
-public abstract class AbstractTaskStateParser extends BaseStatePaser {
+public abstract class AbstractTaskStateParser extends BaseStateParser {
 
     protected void parseTaskAttributes(AbstractTaskState state, Object node) {
 
