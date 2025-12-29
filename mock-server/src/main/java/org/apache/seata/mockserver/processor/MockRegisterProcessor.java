@@ -17,7 +17,7 @@
 package org.apache.seata.mockserver.processor;
 
 import io.netty.channel.ChannelHandlerContext;
-import org.apache.commons.lang.StringUtils;
+import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.core.protocol.AbstractResultMessage;
 import org.apache.seata.core.protocol.RegisterRMRequest;
 import org.apache.seata.core.protocol.RegisterRMResponse;
