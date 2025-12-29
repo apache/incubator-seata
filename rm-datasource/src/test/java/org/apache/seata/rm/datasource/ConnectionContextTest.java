@@ -16,14 +16,14 @@
  */
 package org.apache.seata.rm.datasource;
 
-import java.sql.SQLException;
-import java.sql.Savepoint;
-
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.rm.datasource.undo.SQLUndoLog;
 import org.apache.seata.sqlparser.SQLType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.sql.SQLException;
+import java.sql.Savepoint;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
