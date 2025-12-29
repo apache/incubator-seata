@@ -26,7 +26,7 @@ import java.util.Map;
  * Failed end state parser
  *
  */
-public class FailEndStateParser extends BaseStatePaser implements StateParser<FailEndState> {
+public class FailEndStateParser extends BaseStateParser implements StateParser<FailEndState> {
 
     @Override
     public FailEndState parse(Object node) {
