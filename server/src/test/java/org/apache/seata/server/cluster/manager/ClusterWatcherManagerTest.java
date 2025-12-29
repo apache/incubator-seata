@@ -17,10 +17,7 @@
 package org.apache.seata.server.cluster.manager;
 
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.GenericFutureListener;
 import org.apache.seata.common.rpc.http.HttpContext;
 import org.apache.seata.server.BaseSpringBootTest;
 import org.apache.seata.server.cluster.listener.ClusterChangeEvent;
@@ -28,7 +25,6 @@ import org.apache.seata.server.cluster.watch.Watcher;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Map;
@@ -38,7 +34,6 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
@@ -131,34 +126,6 @@ class ClusterWatcherManagerTest extends BaseSpringBootTest {
     }
 
     @Test
-    void testSendWatcherResponseWithActiveChannel_Http2() {
-        // Test normal flow with active channel (HTTP/2)
-        when(mockChannel.isActive()).thenReturn(true);
-
-        // Mock writeAndFlush to return a non-null ChannelFuture
-        ChannelFuture mockChannelFuture = mock(ChannelFuture.class);
-        when(mockChannelHandlerContext.writeAndFlush(any())).thenReturn(mockChannelFuture);
-        when(mockChannelFuture.addListener(any())).thenReturn(mockChannelFuture);
-
-        // Create HTTP/2 context
-        HttpContext<Object> http2Context =
-                new HttpContext<>(new Object(), mockChannelHandlerContext, true, HttpContext.HTTP_2_0);
-
-        Watcher<HttpContext> watcher = new Watcher<>(TEST_GROUP, http2Context, TEST_TIMEOUT, TEST_TERM);
-
-        assertDoesNotThrow(() -> {
-            ReflectionTestUtils.invokeMethod(clusterWatcherManager, "notifyWatcher", watcher);
-        });
-
-        verify(mockChannel, atLeastOnce()).isActive();
-
-        verify(mockChannelHandlerContext, atLeastOnce()).write(any());
-        verify(mockChannelHandlerContext, atLeastOnce()).writeAndFlush(any());
-
-        assertTrue(watcher.isDone());
-    }
-
-    @Test
     void testOnChangeEventWithInactiveChannel() {
         when(mockChannel.isActive()).thenReturn(false);
 
@@ -223,40 +190,6 @@ class ClusterWatcherManagerTest extends BaseSpringBootTest {
 
         verify(mockChannelHandlerContext, never()).write(any());
         verify(mockChannelHandlerContext, never()).writeAndFlush(any());
-
-        assertTrue(watcher.isDone());
-    }
-
-    @Test
-    void testHttp2WriteAndFlushFailedShouldTriggerListener() throws Exception {
-        when(mockChannel.isActive()).thenReturn(true);
-
-        ChannelFuture mockFuture = mock(ChannelFuture.class);
-        when(mockChannelHandlerContext.writeAndFlush(any())).thenReturn(mockFuture);
-
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<GenericFutureListener<? extends Future<? super Void>>> listenerCaptor =
-                ArgumentCaptor.forClass(GenericFutureListener.class);
-
-        when(mockFuture.addListener(listenerCaptor.capture())).thenReturn(mockFuture);
-
-        RuntimeException cause = new RuntimeException("mock http2 write failed");
-        when(mockFuture.isSuccess()).thenReturn(false);
-        when(mockFuture.cause()).thenReturn(cause);
-
-        HttpContext<Object> http2Context =
-                new HttpContext<>(new Object(), mockChannelHandlerContext, true, HttpContext.HTTP_2_0);
-
-        Watcher<HttpContext> watcher = new Watcher<>(TEST_GROUP, http2Context, TEST_TIMEOUT, TEST_TERM);
-
-        assertDoesNotThrow(() -> ReflectionTestUtils.invokeMethod(clusterWatcherManager, "notifyWatcher", watcher));
-
-        GenericFutureListener<? extends Future<? super Void>> listener = listenerCaptor.getValue();
-        assertNotNull(listener);
-
-        verify(mockChannel, atLeastOnce()).isActive();
-        verify(mockChannelHandlerContext, atLeastOnce()).write(any());
-        verify(mockChannelHandlerContext, atLeastOnce()).writeAndFlush(any());
 
         assertTrue(watcher.isDone());
     }

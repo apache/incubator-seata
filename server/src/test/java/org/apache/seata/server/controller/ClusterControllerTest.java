@@ -17,7 +17,6 @@
 package org.apache.seata.server.controller;
 
 import okhttp3.Response;
-import org.apache.http.HttpStatus;
 import org.apache.http.entity.ContentType;
 import org.apache.http.protocol.HTTP;
 import org.apache.seata.common.holder.ObjectHolder;
@@ -68,7 +67,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
         try (Response response = HttpClientUtil.doPost(
                 "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", param, header, 5000)) {
             if (response != null) {
-                Assertions.assertEquals(HttpStatus.SC_NOT_MODIFIED, response.code());
+                Assertions.assertEquals(304, response.code());
                 return;
             }
         }
@@ -142,7 +141,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
         try (Response response =
                 HttpClientUtil.doPost("http://127.0.0.1:" + port + "/metadata/v1/watch", param, header, 30000)) {
             if (response != null) {
-                Assertions.assertEquals(HttpStatus.SC_OK, response.code());
+                Assertions.assertEquals(200, response.code());
                 return;
             }
         }
@@ -230,7 +229,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
                 new HashMap<>(),
                 header,
                 5000)) {
-            Assertions.assertEquals(HttpStatus.SC_BAD_REQUEST, response.code());
+            Assertions.assertEquals(400, response.code());
         }
     }
 
@@ -340,7 +339,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
 
         try (Response response = HttpClientUtil.doPost(
                 "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", params, headers, 5000)) {
-            Assertions.assertEquals(HttpStatus.SC_BAD_REQUEST, response.code());
+            Assertions.assertEquals(400, response.code());
         }
     }
 
@@ -354,7 +353,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
 
         try (Response response = HttpClientUtil.doPostJson(
                 "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", jsonBody, headers, 5000)) {
-            Assertions.assertEquals(HttpStatus.SC_BAD_REQUEST, response.code());
+            Assertions.assertEquals(400, response.code());
         }
     }
 
@@ -370,7 +369,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
 
         try (Response response = HttpClientUtil.doPost(
                 "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", params, headers, 5000)) {
-            Assertions.assertEquals(HttpStatus.SC_BAD_REQUEST, response.code());
+            Assertions.assertEquals(400, response.code());
         }
     }
 
@@ -389,7 +388,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
                 jsonBody,
                 headers,
                 5000)) {
-            Assertions.assertEquals(HttpStatus.SC_BAD_REQUEST, response.code());
+            Assertions.assertEquals(400, response.code());
         }
     }
 
@@ -404,7 +403,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
 
         try (Response response = HttpClientUtil.doPost(
                 "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", params, headers, 5000)) {
-            Assertions.assertEquals(HttpStatus.SC_BAD_REQUEST, response.code());
+            Assertions.assertEquals(400, response.code());
         }
     }
 }
