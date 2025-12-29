@@ -24,8 +24,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Tests for {@link LockStatus}.
- *
- * @author NiMv1
  */
 public class LockStatusTest {
 

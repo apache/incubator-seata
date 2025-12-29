@@ -24,8 +24,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests for {@link ProtocolConstants}.
- *
- * @author NiMv1
  */
 public class ProtocolConstantsTest {
 

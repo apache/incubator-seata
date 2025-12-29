@@ -22,8 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests for {@link MessageType}.
- *
- * @author NiMv1
  */
 public class MessageTypeTest {
 
