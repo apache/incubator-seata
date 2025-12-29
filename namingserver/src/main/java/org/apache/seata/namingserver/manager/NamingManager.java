@@ -21,7 +21,7 @@ import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.github.benmanes.caffeine.cache.RemovalCause;
 import com.github.benmanes.caffeine.cache.RemovalListener;
 import jakarta.annotation.PostConstruct;
-import org.apache.http.client.methods.CloseableHttpResponse;
+import okhttp3.Response;
 import org.apache.http.entity.ContentType;
 import org.apache.http.protocol.HTTP;
 import org.apache.seata.common.NamingServerConstants;
@@ -219,11 +219,10 @@ public class NamingManager {
             Map<String, String> header = new HashMap<>();
             header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
 
-            try (CloseableHttpResponse closeableHttpResponse = HttpClientUtil.doGet(httpUrl, params, header, 3000)) {
-                if (closeableHttpResponse == null
-                        || closeableHttpResponse.getStatusLine().getStatusCode() != 200) {
+            try (Response httpResponse = HttpClientUtil.doGet(httpUrl, params, header, 3000)) {
+                if (httpResponse == null || httpResponse.code() != 200) {
                     return new Result<>(
-                            String.valueOf(closeableHttpResponse.getStatusLine().getStatusCode()),
+                            String.valueOf(httpResponse != null ? httpResponse.code() : 500),
                             "add vGroup in new cluster failed");
                 }
                 LOGGER.info(
@@ -252,12 +251,11 @@ public class NamingManager {
             params.put(NamingServerConstants.CONSTANT_UNIT, unitName);
             Map<String, String> header = new HashMap<>();
             header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
-            try (CloseableHttpResponse closeableHttpResponse = HttpClientUtil.doGet(httpUrl, params, header, 3000)) {
-                if (closeableHttpResponse == null
-                        || closeableHttpResponse.getStatusLine().getStatusCode() != 200) {
+            try (Response httpResponse = HttpClientUtil.doGet(httpUrl, params, header, 3000)) {
+                if (httpResponse == null || httpResponse.code() != 200) {
                     LOGGER.warn("remove vGroup in old cluster failed");
                     return new Result<>(
-                            String.valueOf(closeableHttpResponse.getStatusLine().getStatusCode()),
+                            String.valueOf(httpResponse != null ? httpResponse.code() : 500),
                             "removing vGroup " + vGroup + " in old cluster " + clusterName + " failed");
                 }
                 LOGGER.info(

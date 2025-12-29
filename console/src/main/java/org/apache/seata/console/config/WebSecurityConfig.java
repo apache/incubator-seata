@@ -106,15 +106,7 @@ public class WebSecurityConfig {
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
-        StringBuilder ignoreURLsBuilder = new StringBuilder(ignoreURLs);
-        if (!mcpProperties.isEnableAuth()) {
-            List<String> mcpEndpoints = mcpProperties.getEndpoints();
-            for (String endpoint : mcpEndpoints) {
-                ignoreURLsBuilder.append(",").append(endpoint);
-            }
-        }
-        RequestMatcher[] ignoredMatchers =
-                buildAntMatchers(ignoreURLsBuilder.toString().trim());
+        RequestMatcher[] ignoredMatchers = buildAntMatchers(ignoreURLs.trim());
         return web -> {
             if (ignoredMatchers.length > 0) {
                 web.ignoring().requestMatchers(ignoredMatchers);
@@ -126,11 +118,9 @@ public class WebSecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager)
             throws Exception {
         StringBuilder csrfIgnoreUrlsBuilder = new StringBuilder(csrfIgnoreUrls);
-        if (mcpProperties.isEnableAuth()) {
-            List<String> mcpEndpoints = mcpProperties.getEndpoints();
-            for (String endpoint : mcpEndpoints) {
-                csrfIgnoreUrlsBuilder.append(",").append(endpoint);
-            }
+        List<String> mcpEndpoints = mcpProperties.getEndpoints();
+        for (String endpoint : mcpEndpoints) {
+            csrfIgnoreUrlsBuilder.append(",").append(endpoint);
         }
         RequestMatcher[] csrfIgnored =
                 buildAntMatchers(csrfIgnoreUrlsBuilder.toString().trim());
