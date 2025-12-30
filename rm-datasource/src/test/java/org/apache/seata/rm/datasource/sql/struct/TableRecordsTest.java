@@ -324,7 +324,7 @@ public class TableRecordsTest {
     private static List<String> returnValueColumnLabelsOffsetDateTime = Lists.newArrayList("id", "time_col");
 
     private static Object[][] returnValueOffsetDateTime = new Object[][] {
-        new Object[] {1, OffsetDateTime.of(2025, 1, 15, 10, 30, 45, 0, ZoneOffset.UTC) },
+        new Object[] {1, OffsetDateTime.of(2025, 1, 15, 10, 30, 45, 0, ZoneOffset.UTC)},
     };
 
     @Test
@@ -348,7 +348,9 @@ public class TableRecordsTest {
             ResultSet originalResultSet = mockDriver.executeQuery(mockStatement, "select * from table_records_test");
             ResultSet proxyResultSet = (ResultSet) java.lang.reflect.Proxy.newProxyInstance(
                     TableRecordsTest.class.getClassLoader(), new Class[] {ResultSet.class}, (p, method, args) -> {
-                        if ("getObject".equals(method.getName()) && args.length == 2 && args[1] == OffsetDateTime.class) {
+                        if ("getObject".equals(method.getName())
+                                && args.length == 2
+                                && args[1] == OffsetDateTime.class) {
                             return originalResultSet.getObject((Integer) args[0]);
                         }
                         try {
