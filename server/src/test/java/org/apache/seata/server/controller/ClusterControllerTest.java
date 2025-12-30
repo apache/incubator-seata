@@ -112,9 +112,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
             Assertions.assertTrue(
                     elapsed < 1000,
                     "KEEPALIVE should be received immediately after connection, elapsed: " + elapsed + "ms");
-
-            // Verify connection stays alive beyond timeout period
-
+            Assertions.assertTrue(keepaliveReceived, "Keepalive should be received after connection");
         }
     }
 
