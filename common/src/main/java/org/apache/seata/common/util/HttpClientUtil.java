@@ -28,31 +28,14 @@ import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.apache.http.message.BasicNameValuePair;
 import org.apache.seata.common.executor.HttpCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -61,10 +44,7 @@ public class HttpClientUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpClientUtil.class);
 
-    private static final Map<Integer /*timeout*/, CloseableHttpClient> HTTP_CLIENT_MAP = new ConcurrentHashMap<>();
-
-    private static final PoolingHttpClientConnectionManager POOLING_HTTP_CLIENT_CONNECTION_MANAGER =
-            new PoolingHttpClientConnectionManager();
+    private static final Map<Integer /*timeout*/, OkHttpClient> HTTP_CLIENT_MAP = new ConcurrentHashMap<>();
 
     private static final Map<Integer /*timeout*/, OkHttpClient> HTTP2_CLIENT_MAP = new ConcurrentHashMap<>();
 
@@ -75,15 +55,21 @@ public class HttpClientUtil {
     public static final MediaType MEDIA_TYPE_FORM_URLENCODED = MediaType.parse("application/x-www-form-urlencoded");
 
     static {
-        POOLING_HTTP_CLIENT_CONNECTION_MANAGER.setMaxTotal(10);
-        POOLING_HTTP_CLIENT_CONNECTION_MANAGER.setDefaultMaxPerRoute(10);
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             HTTP_CLIENT_MAP.values().parallelStream().forEach(client -> {
                 try {
                     // delay 3s, make sure unregister http request send successfully
                     Thread.sleep(3000);
-                    client.close();
-                } catch (IOException | InterruptedException e) {
+                    client.dispatcher().executorService().shutdown();
+                    // Wait for up to 3 seconds for in-flight requests to complete
+                    if (!client.dispatcher().executorService().awaitTermination(3, TimeUnit.SECONDS)) {
+                        LOGGER.warn("Timeout waiting for OkHttp executor service to terminate.");
+                    }
+                    client.connectionPool().evictAll();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    LOGGER.error("Interrupted while waiting for OkHttp executor service to terminate.", e);
+                } catch (Exception e) {
                     LOGGER.error(e.getMessage(), e);
                 }
             });
@@ -106,136 +92,50 @@ public class HttpClientUtil {
         }));
     }
 
-    // post request
-    public static CloseableHttpResponse doPost(
-            String url, Map<String, String> params, Map<String, String> header, int timeout) throws IOException {
-        try {
-            URIBuilder builder = new URIBuilder(url);
-            URI uri = builder.build();
-            HttpPost httpPost = new HttpPost(uri);
-            String contentType = "";
-            if (header != null) {
-                header.forEach(httpPost::addHeader);
-                contentType = header.get("Content-Type");
-            }
-            if (StringUtils.isNotBlank(contentType)) {
-                if (ContentType.APPLICATION_FORM_URLENCODED.getMimeType().equals(contentType)) {
-                    List<NameValuePair> nameValuePairs = new ArrayList<>();
-                    params.forEach((k, v) -> {
-                        nameValuePairs.add(new BasicNameValuePair(k, v));
-                    });
-                    String requestBody = URLEncodedUtils.format(nameValuePairs, StandardCharsets.UTF_8);
-                    StringEntity stringEntity = new StringEntity(requestBody, ContentType.APPLICATION_FORM_URLENCODED);
-                    httpPost.setEntity(stringEntity);
-                } else if (ContentType.APPLICATION_JSON.getMimeType().equals(contentType)) {
-                    String requestBody = OBJECT_MAPPER.writeValueAsString(params);
-                    StringEntity stringEntity = new StringEntity(requestBody, ContentType.APPLICATION_JSON);
-                    httpPost.setEntity(stringEntity);
-                }
-            }
-            CloseableHttpClient client = HTTP_CLIENT_MAP.computeIfAbsent(timeout, k -> HttpClients.custom()
-                    .setConnectionManager(POOLING_HTTP_CLIENT_CONNECTION_MANAGER)
-                    .setDefaultRequestConfig(RequestConfig.custom()
-                            .setConnectionRequestTimeout(timeout)
-                            .setSocketTimeout(timeout)
-                            .setConnectTimeout(timeout)
-                            .build())
-                    .build());
-            return client.execute(httpPost);
-        } catch (URISyntaxException | ClientProtocolException e) {
-            LOGGER.error(e.getMessage(), e);
-        }
-        return null;
-    }
-
-    // post request
-    public static CloseableHttpResponse doPost(String url, String body, Map<String, String> header, int timeout)
+    public static Response doPost(String url, Map<String, String> params, Map<String, String> header, int timeout)
             throws IOException {
-        try {
-            URIBuilder builder = new URIBuilder(url);
-            URI uri = builder.build();
-            HttpPost httpPost = new HttpPost(uri);
-            String contentType = "";
-            if (header != null) {
-                header.forEach(httpPost::addHeader);
-                contentType = header.get("Content-Type");
-            }
-            if (StringUtils.isNotBlank(contentType)) {
-                if (ContentType.APPLICATION_JSON.getMimeType().equals(contentType)) {
-                    StringEntity stringEntity = new StringEntity(body, ContentType.APPLICATION_JSON);
-                    httpPost.setEntity(stringEntity);
-                }
-            }
-            CloseableHttpClient client = HTTP_CLIENT_MAP.computeIfAbsent(timeout, k -> HttpClients.custom()
-                    .setConnectionManager(POOLING_HTTP_CLIENT_CONNECTION_MANAGER)
-                    .setDefaultRequestConfig(RequestConfig.custom()
-                            .setConnectionRequestTimeout(timeout)
-                            .setSocketTimeout(timeout)
-                            .setConnectTimeout(timeout)
-                            .build())
-                    .build());
-            return client.execute(httpPost);
-        } catch (URISyntaxException | ClientProtocolException e) {
-            LOGGER.error(e.getMessage(), e);
-        }
-        return null;
+        String contentType = header != null ? header.get("Content-Type") : "";
+        RequestBody requestBody = createRequestBody(params, contentType);
+        Request request = buildRequest(url, header, requestBody, "POST");
+        OkHttpClient client = createHttp1ClientWithTimeout(timeout);
+        return client.newCall(request).execute();
     }
 
-    // get request
-    public static CloseableHttpResponse doGet(
-            String url, Map<String, String> param, Map<String, String> header, int timeout) throws IOException {
-        try {
-            URIBuilder builder = new URIBuilder(url);
-            if (param != null) {
-                for (String key : param.keySet()) {
-                    builder.addParameter(key, param.get(key));
-                }
-            }
-            URI uri = builder.build();
-            HttpGet httpGet = new HttpGet(uri);
-            if (header != null) {
-                header.forEach(httpGet::addHeader);
-            }
-            CloseableHttpClient client = HTTP_CLIENT_MAP.computeIfAbsent(timeout, k -> HttpClients.custom()
-                    .setConnectionManager(POOLING_HTTP_CLIENT_CONNECTION_MANAGER)
-                    .setDefaultRequestConfig(RequestConfig.custom()
-                            .setConnectionRequestTimeout(timeout)
-                            .setSocketTimeout(timeout)
-                            .setConnectTimeout(timeout)
-                            .build())
-                    .build());
-            return client.execute(httpGet);
-        } catch (URISyntaxException | ClientProtocolException e) {
-            LOGGER.error(e.getMessage(), e);
-        }
-        return null;
+    public static Response doPost(String url, String body, Map<String, String> header, int timeout) throws IOException {
+        String contentType = header != null ? header.get("Content-Type") : "";
+        MediaType mediaType = StringUtils.isNotBlank(contentType) ? MediaType.parse(contentType) : MEDIA_TYPE_JSON;
+        RequestBody requestBody = StringUtils.isNotBlank(body)
+                ? RequestBody.create(body, mediaType)
+                : RequestBody.create(new byte[0], mediaType);
+        Request request = buildRequest(url, header, requestBody, "POST");
+        OkHttpClient client = createHttp1ClientWithTimeout(timeout);
+        return client.newCall(request).execute();
     }
 
-    public static CloseableHttpResponse doPostJson(
-            String url, String jsonBody, Map<String, String> headers, int timeout) throws IOException {
-        RequestConfig requestConfig = RequestConfig.custom()
-                .setSocketTimeout(timeout)
-                .setConnectTimeout(timeout)
-                .build();
+    public static Response doGet(String url, Map<String, String> param, Map<String, String> header, int timeout)
+            throws IOException {
+        String urlWithParams = buildUrlWithParams(url, param);
+        Request request = buildRequest(urlWithParams, header, null, "GET");
+        OkHttpClient client = createHttp1ClientWithTimeout(timeout);
+        return client.newCall(request).execute();
+    }
 
-        HttpPost post = new HttpPost(url);
-        post.setConfig(requestConfig);
-
-        if (headers != null) {
-            headers.forEach(post::addHeader);
-        }
-        post.setHeader("Content-Type", "application/json");
-
-        StringEntity entity = new StringEntity(jsonBody, StandardCharsets.UTF_8);
-        post.setEntity(entity);
-
-        CloseableHttpClient client = HttpClients.createDefault();
-        return client.execute(post);
+    public static Response doPostJson(String url, String jsonBody, Map<String, String> headers, int timeout)
+            throws IOException {
+        RequestBody requestBody = jsonBody != null
+                ? RequestBody.create(jsonBody, MEDIA_TYPE_JSON)
+                : RequestBody.create(new byte[0], MEDIA_TYPE_JSON);
+        Map<String, String> headersWithContentType =
+                headers != null ? new java.util.HashMap<>(headers) : new java.util.HashMap<>();
+        headersWithContentType.put("Content-Type", "application/json");
+        Request request = buildRequest(url, headersWithContentType, requestBody, "POST");
+        OkHttpClient client = createHttp1ClientWithTimeout(timeout);
+        return client.newCall(request).execute();
     }
 
     public static void doPostWithHttp2(
             String url, Map<String, String> params, Map<String, String> headers, HttpCallback<Response> callback) {
-        doPostWithHttp2(url, params, headers, callback, 10);
+        doPostWithHttp2(url, params, headers, callback, 10000);
     }
 
     public static void doPostWithHttp2(
@@ -243,12 +143,12 @@ public class HttpClientUtil {
             Map<String, String> params,
             Map<String, String> headers,
             HttpCallback<Response> callback,
-            int timeoutSeconds) {
+            int timeoutMillis) {
         try {
             String contentType = headers != null ? headers.get("Content-Type") : "";
             RequestBody requestBody = createRequestBody(params, contentType);
-            Request request = buildHttp2Request(url, headers, requestBody, "POST");
-            OkHttpClient client = createHttp2ClientWithTimeout(timeoutSeconds);
+            Request request = buildRequest(url, headers, requestBody, "POST");
+            OkHttpClient client = createHttp2ClientWithTimeout(timeoutMillis);
             executeAsync(client, request, callback);
         } catch (JsonProcessingException e) {
             LOGGER.error(e.getMessage(), e);
@@ -258,22 +158,24 @@ public class HttpClientUtil {
 
     public static void doPostWithHttp2(
             String url, String body, Map<String, String> headers, HttpCallback<Response> callback) {
-        // default timeout 10 seconds
-        doPostWithHttp2(url, body, headers, callback, 10);
+        // default timeout 10000 milliseconds
+        doPostWithHttp2(url, body, headers, callback, 10000);
     }
 
     public static void doPostWithHttp2(
-            String url, String body, Map<String, String> headers, HttpCallback<Response> callback, int timeoutSeconds) {
-        RequestBody requestBody = RequestBody.create(body, MEDIA_TYPE_JSON);
-        Request request = buildHttp2Request(url, headers, requestBody, "POST");
-        OkHttpClient client = createHttp2ClientWithTimeout(timeoutSeconds);
+            String url, String body, Map<String, String> headers, HttpCallback<Response> callback, int timeout) {
+        RequestBody requestBody = StringUtils.isNotBlank(body)
+                ? RequestBody.create(body, MEDIA_TYPE_JSON)
+                : RequestBody.create(new byte[0], MEDIA_TYPE_JSON);
+        Request request = buildRequest(url, headers, requestBody, "POST");
+        OkHttpClient client = createHttp2ClientWithTimeout(timeout);
         executeAsync(client, request, callback);
     }
 
     public static void doGetWithHttp2(
-            String url, Map<String, String> headers, final HttpCallback<Response> callback, int timeoutSeconds) {
-        Request request = buildHttp2Request(url, headers, null, "GET");
-        OkHttpClient client = createHttp2ClientWithTimeout(timeoutSeconds);
+            String url, Map<String, String> headers, final HttpCallback<Response> callback, int timeout) {
+        Request request = buildRequest(url, headers, null, "GET");
+        OkHttpClient client = createHttp2ClientWithTimeout(timeout);
         executeAsync(client, request, callback);
     }
 
@@ -295,17 +197,26 @@ public class HttpClientUtil {
         }
     }
 
-    private static OkHttpClient createHttp2ClientWithTimeout(int timeoutSeconds) {
-        return HTTP2_CLIENT_MAP.computeIfAbsent(timeoutSeconds, k -> new OkHttpClient.Builder()
-                // Use HTTP/2 prior knowledge to directly use HTTP/2 without an initial HTTP/1.1 upgrade
-                .protocols(Collections.singletonList(Protocol.H2_PRIOR_KNOWLEDGE))
-                .connectTimeout(timeoutSeconds, TimeUnit.SECONDS)
-                .readTimeout(timeoutSeconds, TimeUnit.SECONDS)
-                .writeTimeout(timeoutSeconds, TimeUnit.SECONDS)
+    private static OkHttpClient createHttp1ClientWithTimeout(int timeoutMillis) {
+        return HTTP_CLIENT_MAP.computeIfAbsent(timeoutMillis, k -> new OkHttpClient.Builder()
+                // Use HTTP/1.1 (default protocol, no need to specify)
+                .connectTimeout(timeoutMillis, TimeUnit.MILLISECONDS)
+                .readTimeout(timeoutMillis, TimeUnit.MILLISECONDS)
+                .writeTimeout(timeoutMillis, TimeUnit.MILLISECONDS)
                 .build());
     }
 
-    private static Request buildHttp2Request(
+    private static OkHttpClient createHttp2ClientWithTimeout(int timeoutMillis) {
+        return HTTP2_CLIENT_MAP.computeIfAbsent(timeoutMillis, k -> new OkHttpClient.Builder()
+                // Use HTTP/2 prior knowledge to directly use HTTP/2 without an initial HTTP/1.1 upgrade
+                .protocols(Collections.singletonList(Protocol.H2_PRIOR_KNOWLEDGE))
+                .connectTimeout(timeoutMillis, TimeUnit.MILLISECONDS)
+                .readTimeout(timeoutMillis, TimeUnit.MILLISECONDS)
+                .writeTimeout(timeoutMillis, TimeUnit.MILLISECONDS)
+                .build());
+    }
+
+    private static Request buildRequest(
             String url, Map<String, String> headers, RequestBody requestBody, String method) {
         Headers.Builder headerBuilder = new Headers.Builder();
         if (headers != null) {
@@ -314,13 +225,44 @@ public class HttpClientUtil {
 
         Request.Builder requestBuilder = new Request.Builder().url(url).headers(headerBuilder.build());
 
-        if ("POST".equals(method) && requestBody != null) {
+        if ("POST".equals(method)) {
+            if (requestBody == null) {
+                requestBody = RequestBody.create(new byte[0], MEDIA_TYPE_JSON);
+            }
             requestBuilder.post(requestBody);
         } else if ("GET".equals(method)) {
             requestBuilder.get();
+        } else {
+            throw new IllegalArgumentException("Unsupported HTTP method: " + method);
         }
 
         return requestBuilder.build();
+    }
+
+    private static String buildUrlWithParams(String url, Map<String, String> params) {
+        if (params == null || params.isEmpty()) {
+            return url;
+        }
+        StringBuilder urlBuilder = new StringBuilder(url);
+        boolean first = !url.contains("?");
+        for (Map.Entry<String, String> entry : params.entrySet()) {
+            if (first) {
+                urlBuilder.append("?");
+                first = false;
+            } else {
+                urlBuilder.append("&");
+            }
+            try {
+                urlBuilder
+                        .append(URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8.name()))
+                        .append("=")
+                        .append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8.name()));
+            } catch (java.io.UnsupportedEncodingException e) {
+                // UTF-8 is always supported
+                throw new RuntimeException(e);
+            }
+        }
+        return urlBuilder.toString();
     }
 
     private static void executeAsync(OkHttpClient client, Request request, final HttpCallback<Response> callback) {
