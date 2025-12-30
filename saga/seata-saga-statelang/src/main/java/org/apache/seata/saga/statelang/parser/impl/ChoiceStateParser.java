@@ -30,7 +30,7 @@ import java.util.Map;
  * Single item selection state parser
  *
  */
-public class ChoiceStateParser extends BaseStatePaser implements StateParser<ChoiceState> {
+public class ChoiceStateParser extends BaseStateParser implements StateParser<ChoiceState> {
 
     @Override
     public ChoiceState parse(Object node) {
