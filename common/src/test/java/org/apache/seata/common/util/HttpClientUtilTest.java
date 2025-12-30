@@ -604,4 +604,355 @@ public class HttpClientUtilTest {
         assertNotNull(postResponse2);
         assertNotNull(nonjsonResponse);
     }
+
+    // ========== Watch 方法测试 ==========
+
+    @Test
+    void testWatch_WithInvalidUrl() {
+        // Test watch with invalid URL
+        assertThrows(IllegalArgumentException.class, () -> {
+            HttpClientUtil.watch("http:", org.apache.seata.common.metadata.ClusterWatchEvent.class);
+        });
+    }
+
+    @Test
+    void testWatch_WithConnectionFailure() {
+        // Test watch connection failure
+        assertThrows(IOException.class, () -> {
+            HttpClientUtil.watch("http://localhost:9999/invalid", org.apache.seata.common.metadata.ClusterWatchEvent.class);
+        });
+    }
+
+    @Test
+    void testWatch_WithHeaders() {
+        // Test watch with headers - should fail due to connection error
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/json");
+        headers.put("Authorization", "Bearer token123");
+
+        assertThrows(IOException.class, () -> {
+            HttpClientUtil.watch("http://localhost:9999/invalid", headers, org.apache.seata.common.metadata.ClusterWatchEvent.class);
+        });
+    }
+
+    @Test
+    void testWatch_WithNullHeaders() {
+        // Test watch with null headers
+        assertThrows(IOException.class, () -> {
+            HttpClientUtil.watch("http://localhost:9999/invalid", (Map<String, String>) null, org.apache.seata.common.metadata.ClusterWatchEvent.class);
+        });
+    }
+
+    @Test
+    void testWatch_WithEmptyHeaders() {
+        // Test watch with empty headers
+        assertThrows(IOException.class, () -> {
+            HttpClientUtil.watch("http://localhost:9999/invalid", new HashMap<>(), org.apache.seata.common.metadata.ClusterWatchEvent.class);
+        });
+    }
+
+    @Test
+    void testWatchPost_WithInvalidUrl() {
+        // Test watchPost with invalid URL
+        Map<String, String> params = new HashMap<>();
+        params.put("key", "value");
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            HttpClientUtil.watchPost("http:", params, org.apache.seata.common.metadata.ClusterWatchEvent.class);
+        });
+    }
+
+    @Test
+    void testWatchPost_WithConnectionFailure() {
+        // Test watchPost connection failure
+        Map<String, String> params = new HashMap<>();
+        params.put("key", "value");
+
+        assertThrows(IOException.class, () -> {
+            HttpClientUtil.watchPost("http://localhost:9999/invalid", params, org.apache.seata.common.metadata.ClusterWatchEvent.class);
+        });
+    }
+
+    @Test
+    void testWatchPost_WithNullParams() {
+        // Test watchPost with null params
+        assertThrows(IOException.class, () -> {
+            HttpClientUtil.watchPost("http://localhost:9999/invalid", (Map<String, String>) null, org.apache.seata.common.metadata.ClusterWatchEvent.class);
+        });
+    }
+
+    @Test
+    void testWatchPost_WithEmptyParams() {
+        // Test watchPost with empty params
+        assertThrows(IOException.class, () -> {
+            HttpClientUtil.watchPost("http://localhost:9999/invalid", new HashMap<>(), org.apache.seata.common.metadata.ClusterWatchEvent.class);
+        });
+    }
+
+    @Test
+    void testWatchPost_WithParamsAndHeaders() {
+        // Test watchPost with params and headers
+        Map<String, String> params = new HashMap<>();
+        params.put("key1", "value1");
+        params.put("key2", "value2");
+
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/json");
+        headers.put("Authorization", "Bearer token123");
+
+        assertThrows(IOException.class, () -> {
+            HttpClientUtil.watchPost("http://localhost:9999/invalid", params, headers, org.apache.seata.common.metadata.ClusterWatchEvent.class);
+        });
+    }
+
+    @Test
+    void testWatchPost_WithFormUrlEncoded() {
+        // Test watchPost with form-urlencoded content type
+        Map<String, String> params = new HashMap<>();
+        params.put("key1", "value1");
+        params.put("key2", "value2");
+
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/x-www-form-urlencoded");
+
+        assertThrows(IOException.class, () -> {
+            HttpClientUtil.watchPost("http://localhost:9999/invalid", params, headers, org.apache.seata.common.metadata.ClusterWatchEvent.class);
+        });
+    }
+
+    @Test
+    void testWatchPost_WithJsonContentType() {
+        // Test watchPost with JSON content type
+        Map<String, String> params = new HashMap<>();
+        params.put("key", "value");
+
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/json");
+
+        assertThrows(IOException.class, () -> {
+            HttpClientUtil.watchPost("http://localhost:9999/invalid", params, headers, org.apache.seata.common.metadata.ClusterWatchEvent.class);
+        });
+    }
+
+    @Test
+    void testWatchPost_WithNullHeaders() {
+        // Test watchPost with null headers
+        Map<String, String> params = new HashMap<>();
+        params.put("key", "value");
+
+        assertThrows(IOException.class, () -> {
+            HttpClientUtil.watchPost("http://localhost:9999/invalid", params, (Map<String, String>) null, org.apache.seata.common.metadata.ClusterWatchEvent.class);
+        });
+    }
+
+    @Test
+    void testWatchPost_WithEmptyHeaders() {
+        // Test watchPost with empty headers
+        Map<String, String> params = new HashMap<>();
+        params.put("key", "value");
+
+        assertThrows(IOException.class, () -> {
+            HttpClientUtil.watchPost("http://localhost:9999/invalid", params, new HashMap<>(), org.apache.seata.common.metadata.ClusterWatchEvent.class);
+        });
+    }
+
+    @Test
+    void testBuildHttp2WatchRequest_WithGetMethod() throws Exception {
+        // Test buildHttp2WatchRequest with GET method using reflection
+        Method buildHttp2WatchRequestMethod = HttpClientUtil.class.getDeclaredMethod(
+                "buildHttp2WatchRequest", String.class, Map.class, RequestBody.class, String.class);
+        buildHttp2WatchRequestMethod.setAccessible(true);
+
+        String url = "http://localhost:8080/test";
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/json");
+
+        Request request = (Request) buildHttp2WatchRequestMethod.invoke(null, url, headers, null, "GET");
+
+        assertNotNull(request);
+        assertEquals("GET", request.method());
+        assertEquals(url, request.url().toString());
+        assertNotNull(request.header("Accept"));
+        assertEquals("text/event-stream", request.header("Accept"));
+        assertEquals("application/json", request.header("Content-Type"));
+    }
+
+    @Test
+    void testBuildHttp2WatchRequest_WithPostMethod() throws Exception {
+        // Test buildHttp2WatchRequest with POST method using reflection
+        Method buildHttp2WatchRequestMethod = HttpClientUtil.class.getDeclaredMethod(
+                "buildHttp2WatchRequest", String.class, Map.class, RequestBody.class, String.class);
+        buildHttp2WatchRequestMethod.setAccessible(true);
+
+        String url = "http://localhost:8080/test";
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/json");
+
+        okhttp3.RequestBody requestBody = okhttp3.RequestBody.create("{\"key\":\"value\"}", okhttp3.MediaType.parse("application/json"));
+        Request request = (Request) buildHttp2WatchRequestMethod.invoke(null, url, headers, requestBody, "POST");
+
+        assertNotNull(request);
+        assertEquals("POST", request.method());
+        assertEquals(url, request.url().toString());
+        assertNotNull(request.header("Accept"));
+        assertEquals("text/event-stream", request.header("Accept"));
+        assertNotNull(request.body());
+    }
+
+    @Test
+    void testBuildHttp2WatchRequest_WithPutMethod() throws Exception {
+        // Test buildHttp2WatchRequest with PUT method using reflection
+        Method buildHttp2WatchRequestMethod = HttpClientUtil.class.getDeclaredMethod(
+                "buildHttp2WatchRequest", String.class, Map.class, RequestBody.class, String.class);
+        buildHttp2WatchRequestMethod.setAccessible(true);
+
+        String url = "http://localhost:8080/test";
+        Map<String, String> headers = new HashMap<>();
+
+        okhttp3.RequestBody requestBody = okhttp3.RequestBody.create("{\"key\":\"value\"}", okhttp3.MediaType.parse("application/json"));
+        Request request = (Request) buildHttp2WatchRequestMethod.invoke(null, url, headers, requestBody, "PUT");
+
+        assertNotNull(request);
+        assertEquals("PUT", request.method());
+        assertEquals(url, request.url().toString());
+        assertNotNull(request.header("Accept"));
+        assertEquals("text/event-stream", request.header("Accept"));
+        assertNotNull(request.body());
+    }
+
+    @Test
+    void testBuildHttp2WatchRequest_WithUnsupportedMethod() throws Exception {
+        // Test buildHttp2WatchRequest with unsupported method - should default to GET
+        Method buildHttp2WatchRequestMethod = HttpClientUtil.class.getDeclaredMethod(
+                "buildHttp2WatchRequest", String.class, Map.class, RequestBody.class, String.class);
+        buildHttp2WatchRequestMethod.setAccessible(true);
+
+        String url = "http://localhost:8080/test";
+        Map<String, String> headers = new HashMap<>();
+
+        Request request = (Request) buildHttp2WatchRequestMethod.invoke(null, url, headers, null, "DELETE");
+
+        assertNotNull(request);
+        // Should default to GET for unsupported methods
+        assertEquals("GET", request.method());
+        assertEquals(url, request.url().toString());
+        assertNotNull(request.header("Accept"));
+        assertEquals("text/event-stream", request.header("Accept"));
+    }
+
+    @Test
+    void testBuildHttp2WatchRequest_WithNullHeaders() throws Exception {
+        // Test buildHttp2WatchRequest with null headers
+        Method buildHttp2WatchRequestMethod = HttpClientUtil.class.getDeclaredMethod(
+                "buildHttp2WatchRequest", String.class, Map.class, RequestBody.class, String.class);
+        buildHttp2WatchRequestMethod.setAccessible(true);
+
+        String url = "http://localhost:8080/test";
+
+        Request request = (Request) buildHttp2WatchRequestMethod.invoke(null, url, null, null, "GET");
+
+        assertNotNull(request);
+        assertEquals("GET", request.method());
+        assertEquals(url, request.url().toString());
+        assertNotNull(request.header("Accept"));
+        assertEquals("text/event-stream", request.header("Accept"));
+    }
+
+    @Test
+    void testBuildHttp2WatchRequest_WithEmptyHeaders() throws Exception {
+        // Test buildHttp2WatchRequest with empty headers
+        Method buildHttp2WatchRequestMethod = HttpClientUtil.class.getDeclaredMethod(
+                "buildHttp2WatchRequest", String.class, Map.class, RequestBody.class, String.class);
+        buildHttp2WatchRequestMethod.setAccessible(true);
+
+        String url = "http://localhost:8080/test";
+        Map<String, String> headers = new HashMap<>();
+
+        Request request = (Request) buildHttp2WatchRequestMethod.invoke(null, url, headers, null, "GET");
+
+        assertNotNull(request);
+        assertEquals("GET", request.method());
+        assertEquals(url, request.url().toString());
+        assertNotNull(request.header("Accept"));
+        assertEquals("text/event-stream", request.header("Accept"));
+    }
+
+    @Test
+    void testBuildHttp2WatchRequest_WithMultipleHeaders() throws Exception {
+        // Test buildHttp2WatchRequest with multiple headers
+        Method buildHttp2WatchRequestMethod = HttpClientUtil.class.getDeclaredMethod(
+                "buildHttp2WatchRequest", String.class, Map.class, RequestBody.class, String.class);
+        buildHttp2WatchRequestMethod.setAccessible(true);
+
+        String url = "http://localhost:8080/test";
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/json");
+        headers.put("Authorization", "Bearer token123");
+        headers.put("X-Custom-Header", "custom-value");
+
+        Request request = (Request) buildHttp2WatchRequestMethod.invoke(null, url, headers, null, "GET");
+
+        assertNotNull(request);
+        assertEquals("GET", request.method());
+        assertEquals(url, request.url().toString());
+        assertNotNull(request.header("Accept"));
+        assertEquals("text/event-stream", request.header("Accept"));
+        assertEquals("application/json", request.header("Content-Type"));
+        assertEquals("Bearer token123", request.header("Authorization"));
+        assertEquals("custom-value", request.header("X-Custom-Header"));
+    }
+
+    @Test
+    void testWatchPost_WithJsonProcessingException() {
+        // Test watchPost when createRequestBody throws JsonProcessingException
+        // This is difficult to test directly since createRequestBody is private and
+        // JsonProcessingException is unlikely with Map<String, String>
+        // But we can test the error handling path by ensuring the method signature is correct
+        Map<String, String> params = new HashMap<>();
+        params.put("key", "value");
+
+        // This should fail with connection error, not JSON processing error
+        assertThrows(IOException.class, () -> {
+            HttpClientUtil.watchPost("http://localhost:9999/invalid", params, org.apache.seata.common.metadata.ClusterWatchEvent.class);
+        });
+    }
+
+    @Test
+    void testWatch_VerifyAcceptHeader() throws Exception {
+        // Test that watch methods always add Accept: text/event-stream header
+        Method buildHttp2WatchRequestMethod = HttpClientUtil.class.getDeclaredMethod(
+                "buildHttp2WatchRequest", String.class, Map.class, RequestBody.class, String.class);
+        buildHttp2WatchRequestMethod.setAccessible(true);
+
+        String url = "http://localhost:8080/test";
+        Map<String, String> headers = new HashMap<>();
+
+        Request request = (Request) buildHttp2WatchRequestMethod.invoke(null, url, headers, null, "GET");
+
+        // Verify Accept header is always set to text/event-stream
+        assertNotNull(request.header("Accept"));
+        assertEquals("text/event-stream", request.header("Accept"));
+    }
+
+    @Test
+    void testWatch_VerifyAcceptHeaderWithCustomHeaders() throws Exception {
+        // Test that Accept header is added even when other headers are present
+        Method buildHttp2WatchRequestMethod = HttpClientUtil.class.getDeclaredMethod(
+                "buildHttp2WatchRequest", String.class, Map.class, RequestBody.class, String.class);
+        buildHttp2WatchRequestMethod.setAccessible(true);
+
+        String url = "http://localhost:8080/test";
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/json");
+        headers.put("Authorization", "Bearer token123");
+
+        Request request = (Request) buildHttp2WatchRequestMethod.invoke(null, url, headers, null, "GET");
+
+        // Verify Accept header is set to text/event-stream
+        assertNotNull(request.header("Accept"));
+        assertEquals("text/event-stream", request.header("Accept"));
+        // Verify other headers are also present
+        assertEquals("application/json", request.header("Content-Type"));
+        assertEquals("Bearer token123", request.header("Authorization"));
+    }
 }
