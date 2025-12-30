@@ -187,7 +187,8 @@ public class JacksonUndoLogParser implements UndoLogParser, Initialize {
         module.addDeserializer(SerialArray.class, serialArrayDeserializer);
         registerDmdbTimestampModuleIfPresent();
         JavaTimeModule javaTimeModule = new JavaTimeModule();
-        mapper.registerModules(module, javaTimeModule);
+        mapper.registerModule(javaTimeModule);
+        mapper.registerModule(module);
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         mapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY);
         mapper.enable(MapperFeature.PROPAGATE_TRANSIENT_MARKER);

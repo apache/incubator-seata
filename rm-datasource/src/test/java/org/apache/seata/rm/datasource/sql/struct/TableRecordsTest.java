@@ -37,6 +37,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
 /**
@@ -323,7 +324,7 @@ public class TableRecordsTest {
     private static List<String> returnValueColumnLabelsOffsetDateTime = Lists.newArrayList("id", "time_col");
 
     private static Object[][] returnValueOffsetDateTime = new Object[][] {
-        new Object[] {1, OffsetDateTime.now()},
+        new Object[] {1, OffsetDateTime.of(2025, 1, 15, 10, 30, 45, 0, ZoneOffset.UTC) },
     };
 
     @Test
@@ -338,41 +339,34 @@ public class TableRecordsTest {
         dataSource.setUrl("jdbc:mock:offset");
         dataSource.setDriver(mockDriver);
 
-        MockStatementBase mockStatement = new MockStatement(getPhysicsConnection(dataSource));
-        DataSourceProxy proxy = DataSourceProxyTest.getDataSourceProxy(dataSource);
-
-        TableMetaCacheFactory.getTableMetaCache(JdbcConstants.MYSQL)
-                .refresh(proxy.getPlainConnection(), proxy.getResourceId());
-
-        TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(JdbcConstants.MYSQL)
-                .getTableMeta(proxy.getPlainConnection(), "table_records_test", proxy.getResourceId());
-
-        ResultSet originalResultSet = mockDriver.executeQuery(mockStatement, "select * from table_records_test");
-
-        ResultSet proxyResultSet = (ResultSet) java.lang.reflect.Proxy.newProxyInstance(
-                TableRecordsTest.class.getClassLoader(), new Class[] {ResultSet.class}, (p, method, args) -> {
-                    if ("getObject".equals(method.getName()) && args.length == 2 && args[1] == OffsetDateTime.class) {
-                        return originalResultSet.getObject((Integer) args[0]);
-                    }
-                    try {
-                        return method.invoke(originalResultSet, args);
-                    } catch (java.lang.reflect.InvocationTargetException e) {
-                        throw e.getTargetException();
-                    }
-                });
-
-        TableRecords tableRecords = TableRecords.buildRecords(tableMeta, proxyResultSet);
-
-        Assertions.assertNotNull(tableRecords);
-        Assertions.assertEquals(1, tableRecords.size());
-
-        Row row = tableRecords.getRows().get(0);
-        Field timeField = row.getFields().stream()
-                .filter(f -> "time_col".equalsIgnoreCase(f.getName()))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("time_col not found"));
-
-        Assertions.assertEquals(Types.TIMESTAMP_WITH_TIMEZONE, timeField.getType());
-        Assertions.assertTrue(timeField.getValue() instanceof OffsetDateTime);
+        try (MockStatementBase mockStatement = new MockStatement(getPhysicsConnection(dataSource))) {
+            DataSourceProxy proxy = DataSourceProxyTest.getDataSourceProxy(dataSource);
+            TableMetaCacheFactory.getTableMetaCache(JdbcConstants.MYSQL)
+                    .refresh(proxy.getPlainConnection(), proxy.getResourceId());
+            TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(JdbcConstants.MYSQL)
+                    .getTableMeta(proxy.getPlainConnection(), "table_records_test", proxy.getResourceId());
+            ResultSet originalResultSet = mockDriver.executeQuery(mockStatement, "select * from table_records_test");
+            ResultSet proxyResultSet = (ResultSet) java.lang.reflect.Proxy.newProxyInstance(
+                    TableRecordsTest.class.getClassLoader(), new Class[] {ResultSet.class}, (p, method, args) -> {
+                        if ("getObject".equals(method.getName()) && args.length == 2 && args[1] == OffsetDateTime.class) {
+                            return originalResultSet.getObject((Integer) args[0]);
+                        }
+                        try {
+                            return method.invoke(originalResultSet, args);
+                        } catch (java.lang.reflect.InvocationTargetException e) {
+                            throw e.getTargetException();
+                        }
+                    });
+            TableRecords tableRecords = TableRecords.buildRecords(tableMeta, proxyResultSet);
+            Assertions.assertNotNull(tableRecords);
+            Assertions.assertEquals(1, tableRecords.size());
+            Row row = tableRecords.getRows().get(0);
+            Field timeField = row.getFields().stream()
+                    .filter(f -> "time_col".equalsIgnoreCase(f.getName()))
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("time_col not found"));
+            Assertions.assertEquals(Types.TIMESTAMP_WITH_TIMEZONE, timeField.getType());
+            Assertions.assertTrue(timeField.getValue() instanceof OffsetDateTime);
+        }
     }
 }
