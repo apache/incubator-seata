@@ -32,14 +32,11 @@ import java.lang.reflect.Method;
 import java.net.ConnectException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
@@ -619,7 +616,8 @@ public class HttpClientUtilTest {
     void testWatch_WithConnectionFailure() {
         // Test watch connection failure
         assertThrows(IOException.class, () -> {
-            HttpClientUtil.watch("http://localhost:9999/invalid", org.apache.seata.common.metadata.ClusterWatchEvent.class);
+            HttpClientUtil.watch(
+                    "http://localhost:9999/invalid", org.apache.seata.common.metadata.ClusterWatchEvent.class);
         });
     }
 
@@ -631,7 +629,8 @@ public class HttpClientUtilTest {
         headers.put("Authorization", "Bearer token123");
 
         assertThrows(IOException.class, () -> {
-            HttpClientUtil.watch("http://localhost:9999/invalid", headers, org.apache.seata.common.metadata.ClusterWatchEvent.class);
+            HttpClientUtil.watch(
+                    "http://localhost:9999/invalid", headers, org.apache.seata.common.metadata.ClusterWatchEvent.class);
         });
     }
 
@@ -639,7 +638,10 @@ public class HttpClientUtilTest {
     void testWatch_WithNullHeaders() {
         // Test watch with null headers
         assertThrows(IOException.class, () -> {
-            HttpClientUtil.watch("http://localhost:9999/invalid", (Map<String, String>) null, org.apache.seata.common.metadata.ClusterWatchEvent.class);
+            HttpClientUtil.watch(
+                    "http://localhost:9999/invalid",
+                    (Map<String, String>) null,
+                    org.apache.seata.common.metadata.ClusterWatchEvent.class);
         });
     }
 
@@ -647,7 +649,10 @@ public class HttpClientUtilTest {
     void testWatch_WithEmptyHeaders() {
         // Test watch with empty headers
         assertThrows(IOException.class, () -> {
-            HttpClientUtil.watch("http://localhost:9999/invalid", new HashMap<>(), org.apache.seata.common.metadata.ClusterWatchEvent.class);
+            HttpClientUtil.watch(
+                    "http://localhost:9999/invalid",
+                    new HashMap<>(),
+                    org.apache.seata.common.metadata.ClusterWatchEvent.class);
         });
     }
 
@@ -669,7 +674,8 @@ public class HttpClientUtilTest {
         params.put("key", "value");
 
         assertThrows(IOException.class, () -> {
-            HttpClientUtil.watchPost("http://localhost:9999/invalid", params, org.apache.seata.common.metadata.ClusterWatchEvent.class);
+            HttpClientUtil.watchPost(
+                    "http://localhost:9999/invalid", params, org.apache.seata.common.metadata.ClusterWatchEvent.class);
         });
     }
 
@@ -677,7 +683,10 @@ public class HttpClientUtilTest {
     void testWatchPost_WithNullParams() {
         // Test watchPost with null params
         assertThrows(IOException.class, () -> {
-            HttpClientUtil.watchPost("http://localhost:9999/invalid", (Map<String, String>) null, org.apache.seata.common.metadata.ClusterWatchEvent.class);
+            HttpClientUtil.watchPost(
+                    "http://localhost:9999/invalid",
+                    (Map<String, String>) null,
+                    org.apache.seata.common.metadata.ClusterWatchEvent.class);
         });
     }
 
@@ -685,7 +694,10 @@ public class HttpClientUtilTest {
     void testWatchPost_WithEmptyParams() {
         // Test watchPost with empty params
         assertThrows(IOException.class, () -> {
-            HttpClientUtil.watchPost("http://localhost:9999/invalid", new HashMap<>(), org.apache.seata.common.metadata.ClusterWatchEvent.class);
+            HttpClientUtil.watchPost(
+                    "http://localhost:9999/invalid",
+                    new HashMap<>(),
+                    org.apache.seata.common.metadata.ClusterWatchEvent.class);
         });
     }
 
@@ -701,7 +713,11 @@ public class HttpClientUtilTest {
         headers.put("Authorization", "Bearer token123");
 
         assertThrows(IOException.class, () -> {
-            HttpClientUtil.watchPost("http://localhost:9999/invalid", params, headers, org.apache.seata.common.metadata.ClusterWatchEvent.class);
+            HttpClientUtil.watchPost(
+                    "http://localhost:9999/invalid",
+                    params,
+                    headers,
+                    org.apache.seata.common.metadata.ClusterWatchEvent.class);
         });
     }
 
@@ -716,7 +732,11 @@ public class HttpClientUtilTest {
         headers.put("Content-Type", "application/x-www-form-urlencoded");
 
         assertThrows(IOException.class, () -> {
-            HttpClientUtil.watchPost("http://localhost:9999/invalid", params, headers, org.apache.seata.common.metadata.ClusterWatchEvent.class);
+            HttpClientUtil.watchPost(
+                    "http://localhost:9999/invalid",
+                    params,
+                    headers,
+                    org.apache.seata.common.metadata.ClusterWatchEvent.class);
         });
     }
 
@@ -730,7 +750,11 @@ public class HttpClientUtilTest {
         headers.put("Content-Type", "application/json");
 
         assertThrows(IOException.class, () -> {
-            HttpClientUtil.watchPost("http://localhost:9999/invalid", params, headers, org.apache.seata.common.metadata.ClusterWatchEvent.class);
+            HttpClientUtil.watchPost(
+                    "http://localhost:9999/invalid",
+                    params,
+                    headers,
+                    org.apache.seata.common.metadata.ClusterWatchEvent.class);
         });
     }
 
@@ -741,7 +765,11 @@ public class HttpClientUtilTest {
         params.put("key", "value");
 
         assertThrows(IOException.class, () -> {
-            HttpClientUtil.watchPost("http://localhost:9999/invalid", params, (Map<String, String>) null, org.apache.seata.common.metadata.ClusterWatchEvent.class);
+            HttpClientUtil.watchPost(
+                    "http://localhost:9999/invalid",
+                    params,
+                    (Map<String, String>) null,
+                    org.apache.seata.common.metadata.ClusterWatchEvent.class);
         });
     }
 
@@ -752,7 +780,11 @@ public class HttpClientUtilTest {
         params.put("key", "value");
 
         assertThrows(IOException.class, () -> {
-            HttpClientUtil.watchPost("http://localhost:9999/invalid", params, new HashMap<>(), org.apache.seata.common.metadata.ClusterWatchEvent.class);
+            HttpClientUtil.watchPost(
+                    "http://localhost:9999/invalid",
+                    params,
+                    new HashMap<>(),
+                    org.apache.seata.common.metadata.ClusterWatchEvent.class);
         });
     }
 
@@ -788,7 +820,8 @@ public class HttpClientUtilTest {
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", "application/json");
 
-        okhttp3.RequestBody requestBody = okhttp3.RequestBody.create("{\"key\":\"value\"}", okhttp3.MediaType.parse("application/json"));
+        okhttp3.RequestBody requestBody =
+                okhttp3.RequestBody.create("{\"key\":\"value\"}", okhttp3.MediaType.parse("application/json"));
         Request request = (Request) buildHttp2WatchRequestMethod.invoke(null, url, headers, requestBody, "POST");
 
         assertNotNull(request);
@@ -809,7 +842,8 @@ public class HttpClientUtilTest {
         String url = "http://localhost:8080/test";
         Map<String, String> headers = new HashMap<>();
 
-        okhttp3.RequestBody requestBody = okhttp3.RequestBody.create("{\"key\":\"value\"}", okhttp3.MediaType.parse("application/json"));
+        okhttp3.RequestBody requestBody =
+                okhttp3.RequestBody.create("{\"key\":\"value\"}", okhttp3.MediaType.parse("application/json"));
         Request request = (Request) buildHttp2WatchRequestMethod.invoke(null, url, headers, requestBody, "PUT");
 
         assertNotNull(request);
@@ -913,7 +947,8 @@ public class HttpClientUtilTest {
 
         // This should fail with connection error, not JSON processing error
         assertThrows(IOException.class, () -> {
-            HttpClientUtil.watchPost("http://localhost:9999/invalid", params, org.apache.seata.common.metadata.ClusterWatchEvent.class);
+            HttpClientUtil.watchPost(
+                    "http://localhost:9999/invalid", params, org.apache.seata.common.metadata.ClusterWatchEvent.class);
         });
     }
 

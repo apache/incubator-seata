@@ -68,10 +68,8 @@ public class SeataHttpWatchTest {
     @Test
     public void testCreateWatch_WithSuccessfulResponse() throws IOException {
         // Setup
-        Request request = new Request.Builder()
-                .url("http://localhost:8080/test")
-                .get()
-                .build();
+        Request request =
+                new Request.Builder().url("http://localhost:8080/test").get().build();
 
         when(mockClient.newCall(any(Request.class))).thenReturn(mockCall);
         when(mockCall.execute()).thenReturn(mockResponse);
@@ -81,7 +79,8 @@ public class SeataHttpWatchTest {
         when(mockResponseBody.source()).thenReturn(mockSource);
 
         // Execute
-        SeataHttpWatch<ClusterWatchEvent> watch = SeataHttpWatch.createWatch(mockClient, request, ClusterWatchEvent.class);
+        SeataHttpWatch<ClusterWatchEvent> watch =
+                SeataHttpWatch.createWatch(mockClient, request, ClusterWatchEvent.class);
 
         // Verify
         assertNotNull(watch);
@@ -92,10 +91,8 @@ public class SeataHttpWatchTest {
     @Test
     public void testCreateWatch_WithUnsuccessfulResponse() throws IOException {
         // Setup
-        Request request = new Request.Builder()
-                .url("http://localhost:8080/test")
-                .get()
-                .build();
+        Request request =
+                new Request.Builder().url("http://localhost:8080/test").get().build();
 
         when(mockClient.newCall(any(Request.class))).thenReturn(mockCall);
         when(mockCall.execute()).thenReturn(mockResponse);
@@ -117,10 +114,8 @@ public class SeataHttpWatchTest {
     @Test
     public void testCreateWatch_WithUnsuccessfulResponse_IOExceptionOnBodyRead() throws IOException {
         // Setup
-        Request request = new Request.Builder()
-                .url("http://localhost:8080/test")
-                .get()
-                .build();
+        Request request =
+                new Request.Builder().url("http://localhost:8080/test").get().build();
 
         when(mockClient.newCall(any(Request.class))).thenReturn(mockCall);
         when(mockCall.execute()).thenReturn(mockResponse);
@@ -141,10 +136,8 @@ public class SeataHttpWatchTest {
     @Test
     public void testCreateWatch_WithNullContentType() throws IOException {
         // Setup
-        Request request = new Request.Builder()
-                .url("http://localhost:8080/test")
-                .get()
-                .build();
+        Request request =
+                new Request.Builder().url("http://localhost:8080/test").get().build();
 
         when(mockClient.newCall(any(Request.class))).thenReturn(mockCall);
         when(mockCall.execute()).thenReturn(mockResponse);
@@ -154,7 +147,8 @@ public class SeataHttpWatchTest {
         when(mockResponseBody.source()).thenReturn(mockSource);
 
         // Execute
-        SeataHttpWatch<ClusterWatchEvent> watch = SeataHttpWatch.createWatch(mockClient, request, ClusterWatchEvent.class);
+        SeataHttpWatch<ClusterWatchEvent> watch =
+                SeataHttpWatch.createWatch(mockClient, request, ClusterWatchEvent.class);
 
         // Verify - should still create watch but log warning
         assertNotNull(watch);
@@ -163,10 +157,8 @@ public class SeataHttpWatchTest {
     @Test
     public void testHasNext_WithAvailableData() throws IOException {
         // Setup
-        Request request = new Request.Builder()
-                .url("http://localhost:8080/test")
-                .get()
-                .build();
+        Request request =
+                new Request.Builder().url("http://localhost:8080/test").get().build();
 
         when(mockClient.newCall(any(Request.class))).thenReturn(mockCall);
         when(mockCall.execute()).thenReturn(mockResponse);
@@ -176,7 +168,8 @@ public class SeataHttpWatchTest {
         when(mockResponseBody.source()).thenReturn(mockSource);
         when(mockSource.exhausted()).thenReturn(false);
 
-        SeataHttpWatch<ClusterWatchEvent> watch = SeataHttpWatch.createWatch(mockClient, request, ClusterWatchEvent.class);
+        SeataHttpWatch<ClusterWatchEvent> watch =
+                SeataHttpWatch.createWatch(mockClient, request, ClusterWatchEvent.class);
 
         // Execute
         boolean hasNext = watch.hasNext();
@@ -189,10 +182,8 @@ public class SeataHttpWatchTest {
     @Test
     public void testHasNext_WithNoMoreData() throws IOException {
         // Setup
-        Request request = new Request.Builder()
-                .url("http://localhost:8080/test")
-                .get()
-                .build();
+        Request request =
+                new Request.Builder().url("http://localhost:8080/test").get().build();
 
         when(mockClient.newCall(any(Request.class))).thenReturn(mockCall);
         when(mockCall.execute()).thenReturn(mockResponse);
@@ -202,7 +193,8 @@ public class SeataHttpWatchTest {
         when(mockResponseBody.source()).thenReturn(mockSource);
         when(mockSource.exhausted()).thenReturn(true);
 
-        SeataHttpWatch<ClusterWatchEvent> watch = SeataHttpWatch.createWatch(mockClient, request, ClusterWatchEvent.class);
+        SeataHttpWatch<ClusterWatchEvent> watch =
+                SeataHttpWatch.createWatch(mockClient, request, ClusterWatchEvent.class);
 
         // Execute
         boolean hasNext = watch.hasNext();
@@ -214,10 +206,8 @@ public class SeataHttpWatchTest {
     @Test
     public void testHasNext_WithIOException() throws IOException {
         // Setup
-        Request request = new Request.Builder()
-                .url("http://localhost:8080/test")
-                .get()
-                .build();
+        Request request =
+                new Request.Builder().url("http://localhost:8080/test").get().build();
 
         when(mockClient.newCall(any(Request.class))).thenReturn(mockCall);
         when(mockCall.execute()).thenReturn(mockResponse);
@@ -227,7 +217,8 @@ public class SeataHttpWatchTest {
         when(mockResponseBody.source()).thenReturn(mockSource);
         when(mockSource.exhausted()).thenThrow(new IOException("Stream error"));
 
-        SeataHttpWatch<ClusterWatchEvent> watch = SeataHttpWatch.createWatch(mockClient, request, ClusterWatchEvent.class);
+        SeataHttpWatch<ClusterWatchEvent> watch =
+                SeataHttpWatch.createWatch(mockClient, request, ClusterWatchEvent.class);
 
         // Execute
         boolean hasNext = watch.hasNext();
@@ -243,10 +234,8 @@ public class SeataHttpWatchTest {
         Buffer buffer = new Buffer();
         buffer.writeString(sseData, StandardCharsets.UTF_8);
 
-        Request request = new Request.Builder()
-                .url("http://localhost:8080/test")
-                .get()
-                .build();
+        Request request =
+                new Request.Builder().url("http://localhost:8080/test").get().build();
 
         when(mockClient.newCall(any(Request.class))).thenReturn(mockCall);
         when(mockCall.execute()).thenReturn(mockResponse);
@@ -255,7 +244,8 @@ public class SeataHttpWatchTest {
         when(mockResponse.body()).thenReturn(mockResponseBody);
         when(mockResponseBody.source()).thenReturn(buffer);
 
-        SeataHttpWatch<ClusterWatchEvent> watch = SeataHttpWatch.createWatch(mockClient, request, ClusterWatchEvent.class);
+        SeataHttpWatch<ClusterWatchEvent> watch =
+                SeataHttpWatch.createWatch(mockClient, request, ClusterWatchEvent.class);
 
         // Execute
         SeataHttpWatch.Response<ClusterWatchEvent> response = watch.next();
@@ -272,14 +262,13 @@ public class SeataHttpWatchTest {
     @Test
     public void testNext_WithClusterUpdateEvent() throws IOException {
         // Setup
-        String sseData = "data: {\"type\":\"cluster-update\",\"group\":\"default-test\",\"term\":2,\"timestamp\":1234567890}\n\n";
+        String sseData =
+                "data: {\"type\":\"cluster-update\",\"group\":\"default-test\",\"term\":2,\"timestamp\":1234567890}\n\n";
         Buffer buffer = new Buffer();
         buffer.writeString(sseData, StandardCharsets.UTF_8);
 
-        Request request = new Request.Builder()
-                .url("http://localhost:8080/test")
-                .get()
-                .build();
+        Request request =
+                new Request.Builder().url("http://localhost:8080/test").get().build();
 
         when(mockClient.newCall(any(Request.class))).thenReturn(mockCall);
         when(mockCall.execute()).thenReturn(mockResponse);
@@ -288,7 +277,8 @@ public class SeataHttpWatchTest {
         when(mockResponse.body()).thenReturn(mockResponseBody);
         when(mockResponseBody.source()).thenReturn(buffer);
 
-        SeataHttpWatch<ClusterWatchEvent> watch = SeataHttpWatch.createWatch(mockClient, request, ClusterWatchEvent.class);
+        SeataHttpWatch<ClusterWatchEvent> watch =
+                SeataHttpWatch.createWatch(mockClient, request, ClusterWatchEvent.class);
 
         // Execute
         SeataHttpWatch.Response<ClusterWatchEvent> response = watch.next();
@@ -310,10 +300,8 @@ public class SeataHttpWatchTest {
         Buffer buffer = new Buffer();
         buffer.writeString(sseData, StandardCharsets.UTF_8);
 
-        Request request = new Request.Builder()
-                .url("http://localhost:8080/test")
-                .get()
-                .build();
+        Request request =
+                new Request.Builder().url("http://localhost:8080/test").get().build();
 
         when(mockClient.newCall(any(Request.class))).thenReturn(mockCall);
         when(mockCall.execute()).thenReturn(mockResponse);
@@ -322,7 +310,8 @@ public class SeataHttpWatchTest {
         when(mockResponse.body()).thenReturn(mockResponseBody);
         when(mockResponseBody.source()).thenReturn(buffer);
 
-        SeataHttpWatch<ClusterWatchEvent> watch = SeataHttpWatch.createWatch(mockClient, request, ClusterWatchEvent.class);
+        SeataHttpWatch<ClusterWatchEvent> watch =
+                SeataHttpWatch.createWatch(mockClient, request, ClusterWatchEvent.class);
 
         // Execute
         SeataHttpWatch.Response<ClusterWatchEvent> response = watch.next();
@@ -341,10 +330,8 @@ public class SeataHttpWatchTest {
         Buffer buffer = new Buffer();
         buffer.writeString(sseData, StandardCharsets.UTF_8);
 
-        Request request = new Request.Builder()
-                .url("http://localhost:8080/test")
-                .get()
-                .build();
+        Request request =
+                new Request.Builder().url("http://localhost:8080/test").get().build();
 
         when(mockClient.newCall(any(Request.class))).thenReturn(mockCall);
         when(mockCall.execute()).thenReturn(mockResponse);
@@ -353,7 +340,8 @@ public class SeataHttpWatchTest {
         when(mockResponse.body()).thenReturn(mockResponseBody);
         when(mockResponseBody.source()).thenReturn(buffer);
 
-        SeataHttpWatch<ClusterWatchEvent> watch = SeataHttpWatch.createWatch(mockClient, request, ClusterWatchEvent.class);
+        SeataHttpWatch<ClusterWatchEvent> watch =
+                SeataHttpWatch.createWatch(mockClient, request, ClusterWatchEvent.class);
 
         // Execute
         SeataHttpWatch.Response<ClusterWatchEvent> response = watch.next();
@@ -370,10 +358,8 @@ public class SeataHttpWatchTest {
         Buffer buffer = new Buffer();
         buffer.writeString(sseData, StandardCharsets.UTF_8);
 
-        Request request = new Request.Builder()
-                .url("http://localhost:8080/test")
-                .get()
-                .build();
+        Request request =
+                new Request.Builder().url("http://localhost:8080/test").get().build();
 
         when(mockClient.newCall(any(Request.class))).thenReturn(mockCall);
         when(mockCall.execute()).thenReturn(mockResponse);
@@ -382,7 +368,8 @@ public class SeataHttpWatchTest {
         when(mockResponse.body()).thenReturn(mockResponseBody);
         when(mockResponseBody.source()).thenReturn(buffer);
 
-        SeataHttpWatch<ClusterWatchEvent> watch = SeataHttpWatch.createWatch(mockClient, request, ClusterWatchEvent.class);
+        SeataHttpWatch<ClusterWatchEvent> watch =
+                SeataHttpWatch.createWatch(mockClient, request, ClusterWatchEvent.class);
 
         // Execute
         SeataHttpWatch.Response<ClusterWatchEvent> response = watch.next();
@@ -399,10 +386,8 @@ public class SeataHttpWatchTest {
         Buffer buffer = new Buffer();
         buffer.writeString(sseData, StandardCharsets.UTF_8);
 
-        Request request = new Request.Builder()
-                .url("http://localhost:8080/test")
-                .get()
-                .build();
+        Request request =
+                new Request.Builder().url("http://localhost:8080/test").get().build();
 
         when(mockClient.newCall(any(Request.class))).thenReturn(mockCall);
         when(mockCall.execute()).thenReturn(mockResponse);
@@ -411,7 +396,8 @@ public class SeataHttpWatchTest {
         when(mockResponse.body()).thenReturn(mockResponseBody);
         when(mockResponseBody.source()).thenReturn(buffer);
 
-        SeataHttpWatch<ClusterWatchEvent> watch = SeataHttpWatch.createWatch(mockClient, request, ClusterWatchEvent.class);
+        SeataHttpWatch<ClusterWatchEvent> watch =
+                SeataHttpWatch.createWatch(mockClient, request, ClusterWatchEvent.class);
 
         // Execute
         SeataHttpWatch.Response<ClusterWatchEvent> response = watch.next();
@@ -431,10 +417,8 @@ public class SeataHttpWatchTest {
         Buffer buffer = new Buffer();
         buffer.writeString(sseData, StandardCharsets.UTF_8);
 
-        Request request = new Request.Builder()
-                .url("http://localhost:8080/test")
-                .get()
-                .build();
+        Request request =
+                new Request.Builder().url("http://localhost:8080/test").get().build();
 
         when(mockClient.newCall(any(Request.class))).thenReturn(mockCall);
         when(mockCall.execute()).thenReturn(mockResponse);
@@ -443,7 +427,8 @@ public class SeataHttpWatchTest {
         when(mockResponse.body()).thenReturn(mockResponseBody);
         when(mockResponseBody.source()).thenReturn(buffer);
 
-        SeataHttpWatch<ClusterWatchEvent> watch = SeataHttpWatch.createWatch(mockClient, request, ClusterWatchEvent.class);
+        SeataHttpWatch<ClusterWatchEvent> watch =
+                SeataHttpWatch.createWatch(mockClient, request, ClusterWatchEvent.class);
 
         // Execute - read first event
         SeataHttpWatch.Response<ClusterWatchEvent> response1 = watch.next();
@@ -462,10 +447,8 @@ public class SeataHttpWatchTest {
         Buffer buffer = new Buffer();
         buffer.writeString(sseData, StandardCharsets.UTF_8);
 
-        Request request = new Request.Builder()
-                .url("http://localhost:8080/test")
-                .get()
-                .build();
+        Request request =
+                new Request.Builder().url("http://localhost:8080/test").get().build();
 
         when(mockClient.newCall(any(Request.class))).thenReturn(mockCall);
         when(mockCall.execute()).thenReturn(mockResponse);
@@ -474,7 +457,8 @@ public class SeataHttpWatchTest {
         when(mockResponse.body()).thenReturn(mockResponseBody);
         when(mockResponseBody.source()).thenReturn(buffer);
 
-        SeataHttpWatch<ClusterWatchEvent> watch = SeataHttpWatch.createWatch(mockClient, request, ClusterWatchEvent.class);
+        SeataHttpWatch<ClusterWatchEvent> watch =
+                SeataHttpWatch.createWatch(mockClient, request, ClusterWatchEvent.class);
 
         // Execute
         SeataHttpWatch.Response<ClusterWatchEvent> response = watch.next();
@@ -487,14 +471,13 @@ public class SeataHttpWatchTest {
     @Test
     public void testNext_WithUnknownLineFormat() throws IOException {
         // Setup - include unknown line format
-        String sseData = "event: custom-event\ndata: {\"type\":\"keepalive\",\"group\":\"default-test\",\"timestamp\":1234567890}\n\n";
+        String sseData =
+                "event: custom-event\ndata: {\"type\":\"keepalive\",\"group\":\"default-test\",\"timestamp\":1234567890}\n\n";
         Buffer buffer = new Buffer();
         buffer.writeString(sseData, StandardCharsets.UTF_8);
 
-        Request request = new Request.Builder()
-                .url("http://localhost:8080/test")
-                .get()
-                .build();
+        Request request =
+                new Request.Builder().url("http://localhost:8080/test").get().build();
 
         when(mockClient.newCall(any(Request.class))).thenReturn(mockCall);
         when(mockCall.execute()).thenReturn(mockResponse);
@@ -503,7 +486,8 @@ public class SeataHttpWatchTest {
         when(mockResponse.body()).thenReturn(mockResponseBody);
         when(mockResponseBody.source()).thenReturn(buffer);
 
-        SeataHttpWatch<ClusterWatchEvent> watch = SeataHttpWatch.createWatch(mockClient, request, ClusterWatchEvent.class);
+        SeataHttpWatch<ClusterWatchEvent> watch =
+                SeataHttpWatch.createWatch(mockClient, request, ClusterWatchEvent.class);
 
         // Execute
         SeataHttpWatch.Response<ClusterWatchEvent> response = watch.next();
@@ -524,8 +508,9 @@ public class SeataHttpWatchTest {
         when(mockResponseBody.source()).thenReturn(mockSource);
         when(mockSource.readUtf8Line()).thenReturn(null); // Stream closed
 
-        SeataHttpWatch<ClusterWatchEvent> watch = SeataHttpWatch.createWatch(mockClient, 
-                new Request.Builder().url("http://localhost:8080/test").get().build(), 
+        SeataHttpWatch<ClusterWatchEvent> watch = SeataHttpWatch.createWatch(
+                mockClient,
+                new Request.Builder().url("http://localhost:8080/test").get().build(),
                 ClusterWatchEvent.class);
 
         // Execute & Verify
@@ -543,10 +528,8 @@ public class SeataHttpWatchTest {
         buffer.writeString("data: {\"type\":\"keepalive\",\"group\":\"default-test\"", StandardCharsets.UTF_8);
         // Simulate stream closing before complete event
 
-        Request request = new Request.Builder()
-                .url("http://localhost:8080/test")
-                .get()
-                .build();
+        Request request =
+                new Request.Builder().url("http://localhost:8080/test").get().build();
 
         when(mockClient.newCall(any(Request.class))).thenReturn(mockCall);
         when(mockCall.execute()).thenReturn(mockResponse);
@@ -555,7 +538,8 @@ public class SeataHttpWatchTest {
         when(mockResponse.body()).thenReturn(mockResponseBody);
         when(mockResponseBody.source()).thenReturn(buffer);
 
-        SeataHttpWatch<ClusterWatchEvent> watch = SeataHttpWatch.createWatch(mockClient, request, ClusterWatchEvent.class);
+        SeataHttpWatch<ClusterWatchEvent> watch =
+                SeataHttpWatch.createWatch(mockClient, request, ClusterWatchEvent.class);
 
         // Execute - should try to parse partial data
         // This will likely result in an error response due to incomplete JSON
@@ -577,8 +561,9 @@ public class SeataHttpWatchTest {
         when(mockResponseBody.source()).thenReturn(mockSource);
         when(mockSource.readUtf8Line()).thenThrow(new IOException("Read error"));
 
-        SeataHttpWatch<ClusterWatchEvent> watch = SeataHttpWatch.createWatch(mockClient, 
-                new Request.Builder().url("http://localhost:8080/test").get().build(), 
+        SeataHttpWatch<ClusterWatchEvent> watch = SeataHttpWatch.createWatch(
+                mockClient,
+                new Request.Builder().url("http://localhost:8080/test").get().build(),
                 ClusterWatchEvent.class);
 
         // Execute & Verify
@@ -592,10 +577,8 @@ public class SeataHttpWatchTest {
     @Test
     public void testIterator() throws IOException {
         // Setup
-        Request request = new Request.Builder()
-                .url("http://localhost:8080/test")
-                .get()
-                .build();
+        Request request =
+                new Request.Builder().url("http://localhost:8080/test").get().build();
 
         when(mockClient.newCall(any(Request.class))).thenReturn(mockCall);
         when(mockCall.execute()).thenReturn(mockResponse);
@@ -604,7 +587,8 @@ public class SeataHttpWatchTest {
         when(mockResponse.body()).thenReturn(mockResponseBody);
         when(mockResponseBody.source()).thenReturn(mockSource);
 
-        SeataHttpWatch<ClusterWatchEvent> watch = SeataHttpWatch.createWatch(mockClient, request, ClusterWatchEvent.class);
+        SeataHttpWatch<ClusterWatchEvent> watch =
+                SeataHttpWatch.createWatch(mockClient, request, ClusterWatchEvent.class);
 
         // Execute
         java.util.Iterator<SeataHttpWatch.Response<ClusterWatchEvent>> iterator = watch.iterator();
@@ -617,10 +601,8 @@ public class SeataHttpWatchTest {
     @Test
     public void testRemove() throws IOException {
         // Setup
-        Request request = new Request.Builder()
-                .url("http://localhost:8080/test")
-                .get()
-                .build();
+        Request request =
+                new Request.Builder().url("http://localhost:8080/test").get().build();
 
         when(mockClient.newCall(any(Request.class))).thenReturn(mockCall);
         when(mockCall.execute()).thenReturn(mockResponse);
@@ -629,7 +611,8 @@ public class SeataHttpWatchTest {
         when(mockResponse.body()).thenReturn(mockResponseBody);
         when(mockResponseBody.source()).thenReturn(mockSource);
 
-        SeataHttpWatch<ClusterWatchEvent> watch = SeataHttpWatch.createWatch(mockClient, request, ClusterWatchEvent.class);
+        SeataHttpWatch<ClusterWatchEvent> watch =
+                SeataHttpWatch.createWatch(mockClient, request, ClusterWatchEvent.class);
 
         // Execute & Verify
         UnsupportedOperationException exception = assertThrows(UnsupportedOperationException.class, () -> {
@@ -642,10 +625,8 @@ public class SeataHttpWatchTest {
     @Test
     public void testClose() throws IOException {
         // Setup
-        Request request = new Request.Builder()
-                .url("http://localhost:8080/test")
-                .get()
-                .build();
+        Request request =
+                new Request.Builder().url("http://localhost:8080/test").get().build();
 
         when(mockClient.newCall(any(Request.class))).thenReturn(mockCall);
         when(mockCall.execute()).thenReturn(mockResponse);
@@ -654,7 +635,8 @@ public class SeataHttpWatchTest {
         when(mockResponse.body()).thenReturn(mockResponseBody);
         when(mockResponseBody.source()).thenReturn(mockSource);
 
-        SeataHttpWatch<ClusterWatchEvent> watch = SeataHttpWatch.createWatch(mockClient, request, ClusterWatchEvent.class);
+        SeataHttpWatch<ClusterWatchEvent> watch =
+                SeataHttpWatch.createWatch(mockClient, request, ClusterWatchEvent.class);
 
         // Execute
         watch.close();
@@ -669,10 +651,8 @@ public class SeataHttpWatchTest {
         // Setup - create watch with null call (using reflection or a test helper)
         // For this test, we'll verify that close handles null gracefully
         // Since the constructor is private, we'll test through the public API
-        Request request = new Request.Builder()
-                .url("http://localhost:8080/test")
-                .get()
-                .build();
+        Request request =
+                new Request.Builder().url("http://localhost:8080/test").get().build();
 
         when(mockClient.newCall(any(Request.class))).thenReturn(mockCall);
         when(mockCall.execute()).thenReturn(mockResponse);
@@ -681,7 +661,8 @@ public class SeataHttpWatchTest {
         when(mockResponse.body()).thenReturn(mockResponseBody);
         when(mockResponseBody.source()).thenReturn(mockSource);
 
-        SeataHttpWatch<ClusterWatchEvent> watch = SeataHttpWatch.createWatch(mockClient, request, ClusterWatchEvent.class);
+        SeataHttpWatch<ClusterWatchEvent> watch =
+                SeataHttpWatch.createWatch(mockClient, request, ClusterWatchEvent.class);
 
         // Execute - close should not throw exception even if called multiple times
         watch.close();
@@ -695,7 +676,7 @@ public class SeataHttpWatchTest {
         event.setType("keepalive");
         event.setGroup("test-group");
 
-        SeataHttpWatch.Response<ClusterWatchEvent> response = 
+        SeataHttpWatch.Response<ClusterWatchEvent> response =
                 new SeataHttpWatch.Response<>(SeataHttpWatch.Response.Type.KEEPALIVE, event);
 
         assertNotNull(response);
@@ -708,7 +689,7 @@ public class SeataHttpWatchTest {
         // Test Response.Type enum values
         SeataHttpWatch.Response.Type[] types = SeataHttpWatch.Response.Type.values();
         assertEquals(4, types.length);
-        
+
         assertTrue(contains(types, SeataHttpWatch.Response.Type.CLUSTER_UPDATE));
         assertTrue(contains(types, SeataHttpWatch.Response.Type.KEEPALIVE));
         assertTrue(contains(types, SeataHttpWatch.Response.Type.TIMEOUT));
@@ -751,14 +732,13 @@ public class SeataHttpWatchTest {
     @Test
     public void testNext_WithMultipleDataLines() throws IOException {
         // Setup - SSE event with multiple data lines (SSE allows multiple data: lines)
-        String sseData = "data: {\"type\":\"keepalive\"\ndata: ,\"group\":\"default-test\"\ndata: ,\"timestamp\":1234567890}\n\n";
+        String sseData =
+                "data: {\"type\":\"keepalive\"\ndata: ,\"group\":\"default-test\"\ndata: ,\"timestamp\":1234567890}\n\n";
         Buffer buffer = new Buffer();
         buffer.writeString(sseData, StandardCharsets.UTF_8);
 
-        Request request = new Request.Builder()
-                .url("http://localhost:8080/test")
-                .get()
-                .build();
+        Request request =
+                new Request.Builder().url("http://localhost:8080/test").get().build();
 
         when(mockClient.newCall(any(Request.class))).thenReturn(mockCall);
         when(mockCall.execute()).thenReturn(mockResponse);
@@ -767,7 +747,8 @@ public class SeataHttpWatchTest {
         when(mockResponse.body()).thenReturn(mockResponseBody);
         when(mockResponseBody.source()).thenReturn(buffer);
 
-        SeataHttpWatch<ClusterWatchEvent> watch = SeataHttpWatch.createWatch(mockClient, request, ClusterWatchEvent.class);
+        SeataHttpWatch<ClusterWatchEvent> watch =
+                SeataHttpWatch.createWatch(mockClient, request, ClusterWatchEvent.class);
 
         // Execute
         SeataHttpWatch.Response<ClusterWatchEvent> response = watch.next();
@@ -787,4 +768,3 @@ public class SeataHttpWatchTest {
         return false;
     }
 }
-
