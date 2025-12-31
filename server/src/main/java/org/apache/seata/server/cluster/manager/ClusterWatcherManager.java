@@ -66,7 +66,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
 
     @PostConstruct
     public void init() {
-        // Responds to monitors that time out
+        // Periodically check and respond to watchers that have timed out
         scheduledThreadPoolExecutor.scheduleAtFixedRate(
                 () -> {
                     for (String group : WATCHERS.keySet()) {
@@ -74,19 +74,14 @@ public class ClusterWatcherManager implements ClusterChangeListener {
                                 .ifPresent(watchers -> watchers.parallelStream().forEach(watcher -> {
                                     HttpContext context = watcher.getAsyncContext();
                                     boolean isHttp2 = context instanceof HttpContext && context.isHttp2();
-                                    // 对于 HTTP2，不做超时处理，保持长连接
                                     if (isHttp2) {
-                                        // 只检查连接是否还活跃
                                         if (!context.getContext().channel().isActive()) {
-                                            // 连接已断开，清理资源
                                             watcher.setDone(true);
                                             HTTP2_HEADERS_SENT.remove(watcher);
                                         } else {
-                                            // 连接活跃，重新注册继续监听
                                             registryWatcher(watcher);
                                         }
                                     } else {
-                                        // HTTP1 保持原有超时逻辑
                                         if (System.currentTimeMillis() >= watcher.getTimeout()) {
                                             watcher.setDone(true);
                                             sendWatcherResponse(watcher, HttpResponseStatus.NOT_MODIFIED, true, false);
@@ -108,7 +103,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
     public void onChangeEvent(ClusterChangeEvent event) {
         if (event.getTerm() > 0) {
             GROUP_UPDATE_TERM.put(event.getGroup(), event.getTerm());
-            // Notifications are made of changes in cluster information
+            // Notify all watchers of cluster information changes
             Optional.ofNullable(WATCHERS.remove(event.getGroup()))
                     .ifPresent(watchers -> watchers.parallelStream().forEach(this::notifyWatcher));
         }
@@ -169,7 +164,6 @@ public class ClusterWatcherManager implements ClusterChangeListener {
             return;
         }
 
-        // HTTP/1 长轮询保持原逻辑
         if (!context.isHttp2()) {
             HttpResponse response =
                     new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, nettyStatus, Unpooled.EMPTY_BUFFER);
@@ -183,7 +177,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
             return;
         }
 
-        // 第一次响应，必须先发送 headers
+        // For HTTP/2, headers must be sent first on the initial response
         if (sendHeaders) {
             Http2Headers headers = new DefaultHttp2Headers().status(nettyStatus.codeAsText());
             headers.set(HttpHeaderNames.CONTENT_TYPE, "text/event-stream; charset=utf-8");
@@ -197,33 +191,32 @@ public class ClusterWatcherManager implements ClusterChangeListener {
 
         ByteBuf content = Unpooled.copiedBuffer(sse, StandardCharsets.UTF_8);
 
-        // 发送 DATA 帧（closeStream = true 则结束本次 stream）
+        // Send DATA frame (if closeStream is true, it will end the current stream)
         ctx.write(new DefaultHttp2DataFrame(content, closeStream));
         ctx.flush();
     }
 
     private String buildSSEFormat(
             HttpResponseStatus nettyStatus, boolean closeStream, boolean sendHeaders, String group) {
-        // 决定事件类型（放在 JSON 中，而不是 SSE event 字段）
+        // Determine event type (embedded in JSON, not in SSE event field)
         String eventType;
         if (sendHeaders) {
-            // 第一次建立 stream 时发送 keepalive 事件，确认连接建立
+            // Send keepalive event when stream is first established to confirm connection
             eventType = "keepalive";
         } else if (closeStream && nettyStatus == HttpResponseStatus.NOT_MODIFIED) {
-            // 超时事件，需要关闭流
+            // Timeout event, stream needs to be closed
             eventType = "timeout";
         } else {
-            // 正常集群变更事件
+            // Normal cluster update event
             eventType = "cluster-update";
         }
 
-        // 构造 JSON 格式事件数据（包含 type 字段）
         String json = String.format(
                 "{\"type\":\"%s\",\"group\":\"%s\",\"term\":%d,\"timestamp\":%d}",
                 eventType, group, GROUP_UPDATE_TERM.getOrDefault(group, 0L), System.currentTimeMillis());
         logger.debug("Sending watch event: {}", json);
 
-        // SSE 格式：只发送 data: 字段，事件类型包含在 JSON 中
+        // SSE format: only send data: field, event type is embedded in JSON
         return "data: " + json + "\n\n";
     }
 
