@@ -58,7 +58,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
 
     @Test
     @Order(1)
-    void watchTimeoutTest() throws Exception {
+    void watchTimeoutTest_http1() throws Exception {
         Map<String, String> header = new HashMap<>();
         header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
         header.put(HTTP.CONN_KEEP_ALIVE, "close");
@@ -76,7 +76,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
 
     @Test
     @Order(2)
-    void watchTimeoutTest_withHttp2() throws Exception {
+    void watchTimeoutTest_http2() throws Exception {
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
 
@@ -93,11 +93,11 @@ class ClusterControllerTest extends BaseSpringBootTest {
 
             boolean keepaliveReceived = false;
             long startTime = System.currentTimeMillis();
-            long testDuration = 5000; // Test for 5 seconds to verify connection stays alive
-            long endTime = startTime + testDuration;
-
             // Verify KEEPALIVE is received immediately
-            Assertions.assertTrue(watch.hasNext(), "Watch should have at least one event");
+            boolean hasNext = watch.hasNext();
+            if (!hasNext) {
+                Assertions.fail("Expect KEEPALIVE Event Received...");
+            }
             SeataHttpWatch.Response<ClusterWatchEvent> firstResponse = watch.next();
             Assertions.assertEquals(
                     SeataHttpWatch.Response.Type.KEEPALIVE, firstResponse.type, "First event should be KEEPALIVE");
@@ -113,12 +113,59 @@ class ClusterControllerTest extends BaseSpringBootTest {
                     elapsed < 1000,
                     "KEEPALIVE should be received immediately after connection, elapsed: " + elapsed + "ms");
             Assertions.assertTrue(keepaliveReceived, "Keepalive should be received after connection");
+
+            // Verify connection remains alive beyond timeout period (3000ms)
+            // Note: hasNext() blocks when no data is available, so we cannot use it to check connection status
+            // Instead, we wait beyond the timeout period and then trigger a cluster change event
+            // If we can receive the event, it proves the connection is still alive
+            long timeoutPeriod = 3000; // Timeout period from query parameter
+            long waitTime = timeoutPeriod + 1000; // Wait timeout period + 1 second
+            try {
+                Thread.sleep(waitTime);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                Assertions.fail("Test interrupted while waiting for connection verification");
+            }
+
+            // Trigger a cluster change event to verify connection is still active
+            Thread triggerThread = new Thread(() -> {
+                try {
+                    Thread.sleep(2000); // Small delay to ensure we're past timeout
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                ((ApplicationEventPublisher) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
+                        .publishEvent(new ClusterChangeEvent(this, "default-test", 2, true));
+            });
+            triggerThread.start();
+            boolean clusterUpdateReceived = false;
+            if (!watch.hasNext()) {
+                Assertions.fail("Expect cluster-update Event Received...");
+            }
+            SeataHttpWatch.Response<ClusterWatchEvent> response = watch.next();
+
+            if (response.type == SeataHttpWatch.Response.Type.CLUSTER_UPDATE) {
+                clusterUpdateReceived = true;
+                Assertions.assertEquals(
+                        "cluster-update", response.object.getType(), "Event type should be 'cluster-update'");
+                Assertions.assertEquals("default-test", response.object.getGroup(), "Group should match");
+                Assertions.assertEquals(2L, response.object.getTerm().longValue(), "Term should be 2");
+            }
+
+            // Verify connection was maintained beyond timeout period
+            long totalElapsed = System.currentTimeMillis() - startTime;
+            Assertions.assertTrue(
+                    totalElapsed >= timeoutPeriod + 1000, // Should be at least timeout + 1 second
+                    "Connection should be maintained beyond timeout period, elapsed: " + totalElapsed + "ms");
+            Assertions.assertTrue(
+                    clusterUpdateReceived,
+                    "HTTP2 connection should remain open and receive cluster update event after timeout period");
         }
     }
 
     @Test
     @Order(3)
-    void watch() throws Exception {
+    void watch_http1() throws Exception {
         Map<String, String> header = new HashMap<>();
         header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
         Map<String, String> param = new HashMap<>();
@@ -147,8 +194,8 @@ class ClusterControllerTest extends BaseSpringBootTest {
     }
 
     @Test
-    @Order(3)
-    void watch_stream() throws Exception {
+    @Order(4)
+    void watchStream_http2() throws Exception {
         Map<String, String> header = new HashMap<>();
         header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
         Map<String, String> param = new HashMap<>();
@@ -175,27 +222,35 @@ class ClusterControllerTest extends BaseSpringBootTest {
         try (SeataHttpWatch<ClusterWatchEvent> watch = HttpClientUtil.watchPost(
                 "http://127.0.0.1:" + port + "/metadata/v1/watch", param, header, ClusterWatchEvent.class)) {
             // For HTTP2, connection will remain open, so we need to break after receiving expected events
-            while (watch.hasNext() && (System.currentTimeMillis() - startTime < maxWaitTime)) {
-                SeataHttpWatch.Response<ClusterWatchEvent> response = watch.next();
-                SeataHttpWatch.Response.Type type = response.type;
+            // Note: hasNext() blocks when no data is available, so we use next() directly with timeout protection
+            while (System.currentTimeMillis() - startTime < maxWaitTime) {
+                try {
+                    SeataHttpWatch.Response<ClusterWatchEvent> response = watch.next();
+                    SeataHttpWatch.Response.Type type = response.type;
 
-                // 执行业务逻辑
-                processEvent(response);
-
-                if (type == SeataHttpWatch.Response.Type.KEEPALIVE) {
-                    keepaliveReceived = true;
-                    Assertions.assertNotNull(response.object, "KEEPALIVE event data should not be null");
-                    Assertions.assertEquals("keepalive", response.object.getType(), "Event type should be 'keepalive'");
-                } else if (type == SeataHttpWatch.Response.Type.CLUSTER_UPDATE) {
-                    clusterUpdateReceived = true;
-                    Assertions.assertNotNull(response.object, "CLUSTER_UPDATE event data should not be null");
-                    Assertions.assertEquals(
-                            "cluster-update", response.object.getType(), "Event type should be 'cluster-update'");
-                    Assertions.assertEquals("default-test", response.object.getGroup(), "Group should match");
-                    Assertions.assertNotNull(response.object.getTerm(), "Term should not be null");
-                    Assertions.assertEquals(2L, response.object.getTerm().longValue(), "Term should be 2");
-                    // After receiving cluster update, exit the loop
-                    break;
+                    if (type == SeataHttpWatch.Response.Type.KEEPALIVE) {
+                        keepaliveReceived = true;
+                        Assertions.assertNotNull(response.object, "KEEPALIVE event data should not be null");
+                        Assertions.assertEquals(
+                                "keepalive", response.object.getType(), "Event type should be 'keepalive'");
+                    } else if (type == SeataHttpWatch.Response.Type.CLUSTER_UPDATE) {
+                        clusterUpdateReceived = true;
+                        Assertions.assertNotNull(response.object, "CLUSTER_UPDATE event data should not be null");
+                        Assertions.assertEquals(
+                                "cluster-update", response.object.getType(), "Event type should be 'cluster-update'");
+                        Assertions.assertEquals("default-test", response.object.getGroup(), "Group should match");
+                        Assertions.assertNotNull(response.object.getTerm(), "Term should not be null");
+                        Assertions.assertEquals(2L, response.object.getTerm().longValue(), "Term should be 2");
+                        // After receiving cluster update, exit the loop
+                        break;
+                    }
+                } catch (Exception e) {
+                    // If connection was closed or timeout, break the loop
+                    if (keepaliveReceived && clusterUpdateReceived) {
+                        // We already received expected events, break normally
+                        break;
+                    }
+                    throw new RuntimeException("Unexpected exception while waiting for events", e);
                 }
             }
 
@@ -208,16 +263,97 @@ class ClusterControllerTest extends BaseSpringBootTest {
         }
     }
 
-    private static void processEvent(SeataHttpWatch.Response<ClusterWatchEvent> response) {
-        System.out.println("Event Type: " + response.type);
-        if (response.object != null) {
-            System.out.println("Event Data: " + response.object);
+    @Test
+    @Order(5)
+    void watchMultipleClusterUpdates_http2() throws Exception {
+        Map<String, String> header = new HashMap<>();
+        header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
+        Map<String, String> param = new HashMap<>();
+        param.put("default-test", "1");
+
+        // Trigger multiple cluster change events with different terms
+        Thread triggerThread = new Thread(() -> {
+            try {
+                Thread.sleep(1000); // Wait for connection to be established
+                ApplicationEventPublisher publisher = (ApplicationEventPublisher)
+                        ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT);
+
+                // Trigger first cluster change event (term = 2)
+                publisher.publishEvent(new ClusterChangeEvent(this, "default-test", 2, true));
+                Thread.sleep(500);
+
+                // Trigger second cluster change event (term = 3)
+                publisher.publishEvent(new ClusterChangeEvent(this, "default-test", 3, true));
+                Thread.sleep(500);
+
+                // Trigger third cluster change event (term = 4)
+                publisher.publishEvent(new ClusterChangeEvent(this, "default-test", 4, true));
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        });
+        triggerThread.start();
+
+        boolean keepaliveReceived = false;
+        int clusterUpdateCount = 0;
+        long startTime = System.currentTimeMillis();
+        long maxWaitTime = 10000; // Maximum wait time: 10 seconds
+        long[] expectedTerms = {2L, 3L, 4L};
+
+        try (SeataHttpWatch<ClusterWatchEvent> watch = HttpClientUtil.watchPost(
+                "http://127.0.0.1:" + port + "/metadata/v1/watch", param, header, ClusterWatchEvent.class)) {
+            // Receive events until we get all expected cluster updates
+            while (System.currentTimeMillis() - startTime < maxWaitTime && clusterUpdateCount < expectedTerms.length) {
+                try {
+                    if (watch.hasNext()) {
+                        SeataHttpWatch.Response<ClusterWatchEvent> response = watch.next();
+                        SeataHttpWatch.Response.Type type = response.type;
+                        if (type == SeataHttpWatch.Response.Type.KEEPALIVE) {
+                            keepaliveReceived = true;
+                            Assertions.assertNotNull(response.object, "KEEPALIVE event data should not be null");
+                            Assertions.assertEquals(
+                                    "keepalive", response.object.getType(), "Event type should be 'keepalive'");
+                        } else if (type == SeataHttpWatch.Response.Type.CLUSTER_UPDATE) {
+                            clusterUpdateCount++;
+                            Assertions.assertNotNull(response.object, "CLUSTER_UPDATE event data should not be null");
+                            Assertions.assertEquals(
+                                    "cluster-update",
+                                    response.object.getType(),
+                                    "Event type should be 'cluster-update'");
+                            Assertions.assertEquals("default-test", response.object.getGroup(), "Group should match");
+                            Assertions.assertNotNull(response.object.getTerm(), "Term should not be null");
+
+                            // Verify term matches expected value
+                            long expectedTerm = expectedTerms[clusterUpdateCount - 1];
+                            Assertions.assertEquals(
+                                    expectedTerm,
+                                    response.object.getTerm().longValue(),
+                                    "Term should be " + expectedTerm + " for cluster update #" + clusterUpdateCount);
+                        }
+                    }
+                } catch (Exception e) {
+                    // If connection was closed unexpectedly, fail the test
+                    if (clusterUpdateCount < expectedTerms.length) {
+                        throw new RuntimeException("Unexpected exception while waiting for events", e);
+                    }
+                    break;
+                }
+            }
+
+            // Verify all events were received
+            Assertions.assertTrue(keepaliveReceived, "KEEPALIVE event should be received");
+            Assertions.assertEquals(
+                    expectedTerms.length,
+                    clusterUpdateCount,
+                    "Should receive " + expectedTerms.length + " cluster update events, but got " + clusterUpdateCount);
+        } catch (IOException e) {
+            throw new RuntimeException("Watch failed", e);
         }
     }
 
     @Test
-    @Order(4)
-    void testXssFilterBlocked_queryParam() throws Exception {
+    @Order(6)
+    void testXssFilterBlocked_queryParam_http1() throws Exception {
         String malicious = "<script>alert('xss')</script>";
         Map<String, String> header = new HashMap<>();
         header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
@@ -232,8 +368,8 @@ class ClusterControllerTest extends BaseSpringBootTest {
     }
 
     @Test
-    @Order(5)
-    void testXssFilterBlocked_queryParam_withGetHttp2() throws Exception {
+    @Order(7)
+    void testXssFilterBlocked_queryParam_http2() throws Exception {
         String malicious = "<script>alert('xss')</script>";
         Map<String, String> headers = new HashMap<>();
         headers.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
@@ -261,8 +397,8 @@ class ClusterControllerTest extends BaseSpringBootTest {
     }
 
     @Test
-    @Order(6)
-    void testXssFilterBlocked_formParam_withPostHttp2() throws Exception {
+    @Order(8)
+    void testXssFilterBlocked_formParam_http2() throws Exception {
         String malicious = "<script>alert('xss')</script>";
         Map<String, String> headers = new HashMap<>();
         headers.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
@@ -293,8 +429,8 @@ class ClusterControllerTest extends BaseSpringBootTest {
     }
 
     @Test
-    @Order(7)
-    void testXssFilterBlocked_bodyParam_withPostHttp2() throws Exception {
+    @Order(9)
+    void testXssFilterBlocked_bodyParam_http2() throws Exception {
         String malicious = "<script>alert('xss')</script>";
         Map<String, String> headers = new HashMap<>();
         headers.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
@@ -327,8 +463,8 @@ class ClusterControllerTest extends BaseSpringBootTest {
     }
 
     @Test
-    @Order(8)
-    void testXssFilterBlocked_formParam() throws Exception {
+    @Order(10)
+    void testXssFilterBlocked_formParam_http1() throws Exception {
         Map<String, String> headers = new HashMap<>();
         headers.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
 
@@ -342,8 +478,8 @@ class ClusterControllerTest extends BaseSpringBootTest {
     }
 
     @Test
-    @Order(9)
-    void testXssFilterBlocked_jsonBody() throws Exception {
+    @Order(11)
+    void testXssFilterBlocked_jsonBody_http1() throws Exception {
         Map<String, String> headers = new HashMap<>();
         headers.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
 
@@ -356,8 +492,8 @@ class ClusterControllerTest extends BaseSpringBootTest {
     }
 
     @Test
-    @Order(10)
-    void testXssFilterBlocked_headerParam() throws Exception {
+    @Order(12)
+    void testXssFilterBlocked_headerParam_http1() throws Exception {
         Map<String, String> headers = new HashMap<>();
         headers.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
         headers.put("X-Test-Header", "<script>alert('xss')</script>");
@@ -372,8 +508,8 @@ class ClusterControllerTest extends BaseSpringBootTest {
     }
 
     @Test
-    @Order(11)
-    void testXssFilterBlocked_multiSource() throws Exception {
+    @Order(13)
+    void testXssFilterBlocked_multiSource_http1() throws Exception {
         Map<String, String> headers = new HashMap<>();
         headers.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
         headers.put("X-Test-Header", "<script>alert('xss')</script>");
@@ -391,8 +527,8 @@ class ClusterControllerTest extends BaseSpringBootTest {
     }
 
     @Test
-    @Order(12)
-    void testXssFilterBlocked_formParamWithUserCustomKeyWords() throws Exception {
+    @Order(14)
+    void testXssFilterBlocked_formParamWithUserCustomKeyWords_http1() throws Exception {
         Map<String, String> headers = new HashMap<>();
         headers.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
 
