@@ -227,7 +227,7 @@ public class HttpClientUtil {
             RequestBody requestBody = createRequestBody(params, contentType);
             return watch(url, headers, requestBody, "POST", eventType);
         } catch (JsonProcessingException e) {
-            LOGGER.error("Failed to create request body: {}", e.getMessage(), e);
+            LOGGER.error("Failed to create request body", e);
             throw new IOException("Failed to create request body", e);
         }
     }
