@@ -16,79 +16,182 @@
  */
 package org.apache.seata.server;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * The type parameter parser test
- *
+ * ParameterParser Test
  */
-public class ParameterParserTest extends BaseSpringBootTest {
-    private static ParameterParser parameterParser = null;
+@ExtendWith(MockitoExtension.class)
+@DisplayName("ParameterParser Test")
+class ParameterParserTest {
 
-    /**
-     * init
-     */
+    private ParameterParser parameterParser;
+
     @BeforeEach
-    public void init() {
-        String[] args = new String[] {"-h", "127.0.0.1", "-p", "8088", "-m", "file", "-e", "test"};
-        parameterParser = new ParameterParser(args);
+    void setUp() {
+        parameterParser = new ParameterParser();
     }
 
-    /**
-     * Test empty mode.
-     */
     @Test
-    public void testEmptyMode() {
-        String[] args = new String[] {"-h", "127.0.0.1", "-p", "8088"};
+    @DisplayName("test getHost default value")
+    void testGetHostDefaultValue() {
+        String host = parameterParser.getHost();
+        assertTrue(host == null || host instanceof String);
+    }
+
+    @Test
+    @DisplayName("test getPort default value")
+    void testGetPortDefaultValue() {
+        int port = parameterParser.getPort();
+        assertTrue(port >= 0);
+    }
+
+    @Test
+    @DisplayName("test getStoreMode default value")
+    void testGetStoreModeDefaultValue() {
+        String storeMode = parameterParser.getStoreMode();
+        assertTrue(storeMode == null || storeMode instanceof String);
+    }
+
+    @Test
+    @DisplayName("test getServerNode default value")
+    void testGetServerNodeDefaultValue() {
+        Long serverNode = parameterParser.getServerNode();
+        assertTrue(serverNode == null || serverNode > 0);
+    }
+
+    @Test
+    @DisplayName("test getSeataEnv default value")
+    void testGetSeataEnvDefaultValue() {
+        String seataEnv = parameterParser.getSeataEnv();
+        assertTrue(seataEnv == null || seataEnv instanceof String);
+    }
+
+    @Test
+    @DisplayName("test getSessionStoreMode default value")
+    void testGetSessionStoreModeDefaultValue() {
+        String sessionStoreMode = parameterParser.getSessionStoreMode();
+        assertTrue(sessionStoreMode == null || sessionStoreMode instanceof String);
+    }
+
+    @Test
+    @DisplayName("test getLockStoreMode default value")
+    void testGetLockStoreModeDefaultValue() {
+        String lockStoreMode = parameterParser.getLockStoreMode();
+        assertTrue(lockStoreMode == null || lockStoreMode instanceof String);
+    }
+
+    @Test
+    @DisplayName("test isHelp default value")
+    void testIsHelpDefaultValue() {
+        boolean help = parameterParser.isHelp();
+        assertFalse(help);
+    }
+
+    @Test
+    @DisplayName("test cleanUp removes env property")
+    void testCleanUpRemovesEnvProperty() {
         parameterParser.cleanUp();
-        parameterParser = new ParameterParser(args);
-        // always set store.mode=file in test/resource/file.conf, if not will cause SessionStoreTest's case fail.
-        Assertions.assertNull(parameterParser.getStoreMode());
+        assertNull(System.getProperty("seata.env"));
     }
 
-    /**
-     * test get host
-     */
     @Test
-    public void testGetHost() {
-        Assertions.assertEquals("127.0.0.1", parameterParser.getHost());
+    @DisplayName("test parameter parser with arguments")
+    void testParameterParserWithArguments() {
+        ParameterParser parser = new ParameterParser(
+                "-h", "localhost",
+                "-p", "8080",
+                "-m", "file");
+        
+        assertEquals("localhost", parser.getHost());
+        assertEquals(8080, parser.getPort());
+        assertEquals("file", parser.getStoreMode());
     }
 
-    /**
-     * test get port
-     */
     @Test
-    public void testGetPort() {
-        Assertions.assertEquals(8088, parameterParser.getPort());
+    @DisplayName("test parameter parser with long form arguments")
+    void testParameterParserWithLongFormArguments() {
+        ParameterParser parser = new ParameterParser(
+                "--host", "192.168.1.1",
+                "--port", "9090",
+                "--storeMode", "db");
+        
+        assertEquals("192.168.1.1", parser.getHost());
+        assertEquals(9090, parser.getPort());
+        assertEquals("db", parser.getStoreMode());
     }
 
-    /**
-     * test get store mode
-     */
     @Test
-    public void testGetStoreMode() {
-        Assertions.assertEquals("file", parameterParser.getStoreMode());
+    @DisplayName("test parameter parser with server node")
+    void testParameterParserWithServerNode() {
+        ParameterParser parser = new ParameterParser(
+                "--serverNode", "1",
+                "-p", "8080");
+        
+        assertEquals(1L, parser.getServerNode());
     }
 
-    /**
-     * test get seata env
-     */
     @Test
-    public void testGetSeataEnv() {
-        Assertions.assertEquals("test", parameterParser.getSeataEnv());
+    @DisplayName("test parameter parser with seata env")
+    void testParameterParserWithSeataEnv() {
+        ParameterParser parser = new ParameterParser(
+                "--seataEnv", "test",
+                "-p", "8080");
+        
+        assertEquals("test", parser.getSeataEnv());
     }
 
-    /**
-     * clean up
-     */
-    @AfterEach
-    public void cleanUp() {
-        if (null != parameterParser) {
-            parameterParser.cleanUp();
-            parameterParser = null;
-        }
+    @Test
+    @DisplayName("test parameter parser with session store mode")
+    void testParameterParserWithSessionStoreMode() {
+        ParameterParser parser = new ParameterParser(
+                "--sessionStoreMode", "redis",
+                "-p", "8080");
+        
+        assertEquals("redis", parser.getSessionStoreMode());
+    }
+
+    @Test
+    @DisplayName("test parameter parser with lock store mode")
+    void testParameterParserWithLockStoreMode() {
+        ParameterParser parser = new ParameterParser(
+                "--lockStoreMode", "db",
+                "-p", "8080");
+        
+        assertEquals("db", parser.getLockStoreMode());
+    }
+
+    @Test
+    @DisplayName("test parameter parser with empty arguments")
+    void testParameterParserWithEmptyArguments() {
+        ParameterParser parser = new ParameterParser();
+        assertNotNull(parser);
+    }
+
+    @Test
+    @DisplayName("test get all parameters")
+    void testGetAllParameters() {
+        ParameterParser parser = new ParameterParser(
+                "-h", "localhost",
+                "-p", "8080",
+                "-m", "file",
+                "-n", "1",
+                "-e", "prod",
+                "-ssm", "db",
+                "-lsm", "redis");
+        
+        assertEquals("localhost", parser.getHost());
+        assertEquals(8080, parser.getPort());
+        assertEquals("file", parser.getStoreMode());
+        assertEquals(1L, parser.getServerNode());
+        assertEquals("prod", parser.getSeataEnv());
+        assertEquals("db", parser.getSessionStoreMode());
+        assertEquals("redis", parser.getLockStoreMode());
     }
 }

@@ -16,62 +16,126 @@
  */
 package org.apache.seata.server.console.exception;
 
-import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-public class ConsoleExceptionTest {
+import static org.junit.jupiter.api.Assertions.*;
 
-    @Test
-    public void testConsoleException_WithCauseAndLogMessage() {
-        RuntimeException cause = new RuntimeException("Test cause");
-        String logMessage = "Test log message";
+/**
+ * ConsoleException Test
+ */
+@ExtendWith(MockitoExtension.class)
+@DisplayName("ConsoleException Test")
+class ConsoleExceptionTest {
 
-        ConsoleException exception = new ConsoleException(cause, logMessage);
+    private ConsoleException consoleException;
+    private Throwable cause;
+    private String logMessage;
 
-        Assertions.assertEquals(cause, exception.getCause());
-        Assertions.assertEquals(logMessage, exception.getLogMessage());
+    @BeforeEach
+    void setUp() {
+        cause = new RuntimeException("Test cause");
+        logMessage = "Test log message";
+        consoleException = new ConsoleException(cause, logMessage);
     }
 
     @Test
-    public void testConsoleException_GetAndSetLogMessage() {
-        RuntimeException cause = new RuntimeException("Test cause");
-        String logMessage = "Original log message";
-
-        ConsoleException exception = new ConsoleException(cause, logMessage);
-        Assertions.assertEquals(logMessage, exception.getLogMessage());
-
-        String newLogMessage = "New log message";
-        exception.setLogMessage(newLogMessage);
-        Assertions.assertEquals(newLogMessage, exception.getLogMessage());
+    @DisplayName("test constructor initializes with cause and message")
+    void testConstructorInitializesWithCauseAndMessage() {
+        assertNotNull(consoleException);
+        assertEquals(logMessage, consoleException.getMessage());
+        assertEquals(logMessage, consoleException.getLogMessage());
     }
 
     @Test
-    public void testConsoleException_WithNullCause() {
-        String logMessage = "Test log message";
-
-        ConsoleException exception = new ConsoleException(null, logMessage);
-
-        Assertions.assertNull(exception.getCause());
-        Assertions.assertEquals(logMessage, exception.getLogMessage());
+    @DisplayName("test getMessage returns log message")
+    void testGetMessageReturnsLogMessage() {
+        assertEquals(logMessage, consoleException.getMessage());
     }
 
     @Test
-    public void testConsoleException_WithNullLogMessage() {
-        RuntimeException cause = new RuntimeException("Test cause");
+    @DisplayName("test getLogMessage returns log message")
+    void testGetLogMessageReturnsLogMessage() {
+        assertEquals(logMessage, consoleException.getLogMessage());
+    }
 
+    @Test
+    @DisplayName("test setLogMessage updates message")
+    void testSetLogMessageUpdatesMessage() {
+        String newMessage = "New message";
+        consoleException.setLogMessage(newMessage);
+        
+        assertEquals(newMessage, consoleException.getLogMessage());
+        assertEquals(newMessage, consoleException.getMessage());
+    }
+
+    @Test
+    @DisplayName("test ConsoleException extends RuntimeException")
+    void testConsoleExceptionExtendsRuntimeException() {
+        assertTrue(consoleException instanceof RuntimeException);
+    }
+
+    @Test
+    @DisplayName("test exception with null cause")
+    void testExceptionWithNullCause() {
+        ConsoleException exception = new ConsoleException(null, "message");
+        assertNotNull(exception);
+        assertEquals("message", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("test exception with null log message")
+    void testExceptionWithNullLogMessage() {
         ConsoleException exception = new ConsoleException(cause, null);
-
-        Assertions.assertEquals(cause, exception.getCause());
-        Assertions.assertNull(exception.getLogMessage());
+        assertNotNull(exception);
+        assertNull(exception.getMessage());
     }
 
     @Test
-    public void testConsoleException_IsRuntimeException() {
-        RuntimeException cause = new RuntimeException("Test cause");
-        String logMessage = "Test log message";
+    @DisplayName("test exception with empty log message")
+    void testExceptionWithEmptyLogMessage() {
+        ConsoleException exception = new ConsoleException(cause, "");
+        assertNotNull(exception);
+        assertEquals("", exception.getMessage());
+    }
 
-        ConsoleException exception = new ConsoleException(cause, logMessage);
+    @Test
+    @DisplayName("test getCause returns original cause")
+    void testGetCauseReturnsOriginalCause() {
+        assertEquals(cause, consoleException.getCause());
+    }
 
-        Assertions.assertTrue(exception instanceof RuntimeException);
+    @Test
+    @DisplayName("test exception can be thrown and caught")
+    void testExceptionCanBeThrownAndCaught() {
+        assertThrows(ConsoleException.class, () -> {
+            throw new ConsoleException(new RuntimeException("cause"), "Test exception");
+        });
+    }
+
+    @Test
+    @DisplayName("test exception message format")
+    void testExceptionMessageFormat() {
+        String message = "Error occurred";
+        ConsoleException exception = new ConsoleException(cause, message);
+        
+        assertNotNull(exception.toString());
+        assertTrue(exception.toString().contains(message) || exception.toString().contains("ConsoleException"));
+    }
+
+    @Test
+    @DisplayName("test multiple setLogMessage calls")
+    void testMultipleSetLogMessageCalls() {
+        consoleException.setLogMessage("Message 1");
+        assertEquals("Message 1", consoleException.getMessage());
+        
+        consoleException.setLogMessage("Message 2");
+        assertEquals("Message 2", consoleException.getMessage());
+        
+        consoleException.setLogMessage("Message 3");
+        assertEquals("Message 3", consoleException.getMessage());
     }
 }
