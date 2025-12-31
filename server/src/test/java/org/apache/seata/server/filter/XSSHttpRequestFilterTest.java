@@ -78,9 +78,9 @@ class XSSHttpRequestFilterTest {
         List<String> values = new ArrayList<>();
         values.add("normalValue");
         params.put("param1", values);
-        
+
         when(mockParamWrapper.getAllParamsAsMultiMap()).thenReturn(params);
-        
+
         assertDoesNotThrow(() -> xssFilter.doFilter(mockContext, mockChain));
         verify(mockChain).doFilter(mockContext);
     }
@@ -92,9 +92,9 @@ class XSSHttpRequestFilterTest {
         List<String> values = new ArrayList<>();
         values.add("<script>alert('xss')</script>");
         params.put("param1", values);
-        
+
         when(mockParamWrapper.getAllParamsAsMultiMap()).thenReturn(params);
-        
+
         assertThrows(HttpRequestFilterException.class, () -> xssFilter.doFilter(mockContext, mockChain));
     }
 
@@ -105,9 +105,9 @@ class XSSHttpRequestFilterTest {
         List<String> values = new ArrayList<>();
         values.add("javascript:alert('xss')");
         params.put("param1", values);
-        
+
         when(mockParamWrapper.getAllParamsAsMultiMap()).thenReturn(params);
-        
+
         assertThrows(HttpRequestFilterException.class, () -> xssFilter.doFilter(mockContext, mockChain));
     }
 
@@ -116,7 +116,7 @@ class XSSHttpRequestFilterTest {
     void testDoFilterWithEmptyParameters() throws HttpRequestFilterException {
         Map<String, List<String>> params = new HashMap<>();
         when(mockParamWrapper.getAllParamsAsMultiMap()).thenReturn(params);
-        
+
         assertDoesNotThrow(() -> xssFilter.doFilter(mockContext, mockChain));
         verify(mockChain).doFilter(mockContext);
     }
@@ -128,9 +128,9 @@ class XSSHttpRequestFilterTest {
         List<String> values = new ArrayList<>();
         values.add(null);
         params.put("param1", values);
-        
+
         when(mockParamWrapper.getAllParamsAsMultiMap()).thenReturn(params);
-        
+
         assertDoesNotThrow(() -> xssFilter.doFilter(mockContext, mockChain));
         verify(mockChain).doFilter(mockContext);
     }
@@ -142,9 +142,9 @@ class XSSHttpRequestFilterTest {
         List<String> values = new ArrayList<>();
         values.add("onclick=\"alert('xss')\"");
         params.put("param1", values);
-        
+
         when(mockParamWrapper.getAllParamsAsMultiMap()).thenReturn(params);
-        
+
         assertThrows(HttpRequestFilterException.class, () -> xssFilter.doFilter(mockContext, mockChain));
     }
 
@@ -155,9 +155,9 @@ class XSSHttpRequestFilterTest {
         List<String> values = new ArrayList<>();
         values.add("onononononon");
         params.put("param1", values);
-        
+
         when(mockParamWrapper.getAllParamsAsMultiMap()).thenReturn(params);
-        
+
         assertThrows(HttpRequestFilterException.class, () -> xssFilter.doFilter(mockContext, mockChain));
     }
 
@@ -165,17 +165,17 @@ class XSSHttpRequestFilterTest {
     @DisplayName("test doFilter with multiple parameters")
     void testDoFilterWithMultipleParameters() throws HttpRequestFilterException {
         Map<String, List<String>> params = new HashMap<>();
-        
+
         List<String> values1 = new ArrayList<>();
         values1.add("normalValue");
         params.put("param1", values1);
-        
+
         List<String> values2 = new ArrayList<>();
         values2.add("anotherNormalValue");
         params.put("param2", values2);
-        
+
         when(mockParamWrapper.getAllParamsAsMultiMap()).thenReturn(params);
-        
+
         assertDoesNotThrow(() -> xssFilter.doFilter(mockContext, mockChain));
         verify(mockChain).doFilter(mockContext);
     }
@@ -188,9 +188,9 @@ class XSSHttpRequestFilterTest {
         values.add("normalValue1");
         values.add("normalValue2");
         params.put("param1", values);
-        
+
         when(mockParamWrapper.getAllParamsAsMultiMap()).thenReturn(params);
-        
+
         assertDoesNotThrow(() -> xssFilter.doFilter(mockContext, mockChain));
         verify(mockChain).doFilter(mockContext);
     }
@@ -202,10 +202,9 @@ class XSSHttpRequestFilterTest {
         List<String> values = new ArrayList<>();
         values.add("<SCRIPT>alert('xss')</SCRIPT>");
         params.put("param1", values);
-        
+
         when(mockParamWrapper.getAllParamsAsMultiMap()).thenReturn(params);
-        
+
         assertThrows(HttpRequestFilterException.class, () -> xssFilter.doFilter(mockContext, mockChain));
     }
 }
-

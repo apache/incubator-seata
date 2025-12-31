@@ -65,11 +65,12 @@ class MetricsManagerTest {
         try (MockedStatic<ConfigurationFactory> configMock = mockStatic(ConfigurationFactory.class)) {
             Configuration mockConfig = mock(Configuration.class);
             configMock.when(ConfigurationFactory::getInstance).thenReturn(mockConfig);
-            when(mockConfig.getBoolean(anyString(), eq(DEFAULT_METRICS_ENABLED))).thenReturn(false);
-            
+            when(mockConfig.getBoolean(anyString(), eq(DEFAULT_METRICS_ENABLED)))
+                    .thenReturn(false);
+
             MetricsManager manager = MetricsManager.get();
             manager.init();
-            
+
             assertNull(manager.getRegistry());
         }
     }
@@ -78,16 +79,17 @@ class MetricsManagerTest {
     @DisplayName("test init with metrics enabled but no registry")
     void testInitWithMetricsEnabledButNoRegistry() {
         try (MockedStatic<ConfigurationFactory> configMock = mockStatic(ConfigurationFactory.class);
-             MockedStatic<RegistryFactory> registryMock = mockStatic(RegistryFactory.class)) {
-            
+                MockedStatic<RegistryFactory> registryMock = mockStatic(RegistryFactory.class)) {
+
             Configuration mockConfig = mock(Configuration.class);
             configMock.when(ConfigurationFactory::getInstance).thenReturn(mockConfig);
-            when(mockConfig.getBoolean(anyString(), eq(DEFAULT_METRICS_ENABLED))).thenReturn(true);
+            when(mockConfig.getBoolean(anyString(), eq(DEFAULT_METRICS_ENABLED)))
+                    .thenReturn(true);
             registryMock.when(RegistryFactory::getInstance).thenReturn(null);
-            
+
             MetricsManager manager = MetricsManager.get();
             manager.init();
-            
+
             assertNull(manager.getRegistry());
         }
     }
@@ -96,21 +98,22 @@ class MetricsManagerTest {
     @DisplayName("test init with metrics enabled and registry but no exporters")
     void testInitWithMetricsEnabledAndRegistryButNoExporters() {
         try (MockedStatic<ConfigurationFactory> configMock = mockStatic(ConfigurationFactory.class);
-             MockedStatic<RegistryFactory> registryMock = mockStatic(RegistryFactory.class);
-             MockedStatic<ExporterFactory> exporterMock = mockStatic(ExporterFactory.class)) {
-            
+                MockedStatic<RegistryFactory> registryMock = mockStatic(RegistryFactory.class);
+                MockedStatic<ExporterFactory> exporterMock = mockStatic(ExporterFactory.class)) {
+
             Configuration mockConfig = mock(Configuration.class);
             configMock.when(ConfigurationFactory::getInstance).thenReturn(mockConfig);
-            when(mockConfig.getBoolean(anyString(), eq(DEFAULT_METRICS_ENABLED))).thenReturn(true);
-            
+            when(mockConfig.getBoolean(anyString(), eq(DEFAULT_METRICS_ENABLED)))
+                    .thenReturn(true);
+
             Registry mockRegistry = mock(Registry.class);
             registryMock.when(RegistryFactory::getInstance).thenReturn(mockRegistry);
-            
+
             exporterMock.when(ExporterFactory::getInstanceList).thenReturn(Collections.emptyList());
-            
+
             MetricsManager manager = MetricsManager.get();
             manager.init();
-            
+
             assertNotNull(manager.getRegistry());
         }
     }
@@ -119,28 +122,29 @@ class MetricsManagerTest {
     @DisplayName("test init with metrics enabled, registry and exporters")
     void testInitWithMetricsEnabledRegistryAndExporters() {
         try (MockedStatic<ConfigurationFactory> configMock = mockStatic(ConfigurationFactory.class);
-             MockedStatic<RegistryFactory> registryMock = mockStatic(RegistryFactory.class);
-             MockedStatic<ExporterFactory> exporterMock = mockStatic(ExporterFactory.class);
-             MockedStatic<EventBusManager> eventBusMock = mockStatic(EventBusManager.class)) {
-            
+                MockedStatic<RegistryFactory> registryMock = mockStatic(RegistryFactory.class);
+                MockedStatic<ExporterFactory> exporterMock = mockStatic(ExporterFactory.class);
+                MockedStatic<EventBusManager> eventBusMock = mockStatic(EventBusManager.class)) {
+
             Configuration mockConfig = mock(Configuration.class);
             configMock.when(ConfigurationFactory::getInstance).thenReturn(mockConfig);
-            when(mockConfig.getBoolean(anyString(), eq(DEFAULT_METRICS_ENABLED))).thenReturn(true);
-            
+            when(mockConfig.getBoolean(anyString(), eq(DEFAULT_METRICS_ENABLED)))
+                    .thenReturn(true);
+
             Registry mockRegistry = mock(Registry.class);
             registryMock.when(RegistryFactory::getInstance).thenReturn(mockRegistry);
-            
+
             List<Exporter> exporters = new ArrayList<>();
             Exporter mockExporter = mock(Exporter.class);
             exporters.add(mockExporter);
             exporterMock.when(ExporterFactory::getInstanceList).thenReturn(exporters);
-            
+
             EventBusManager mockEventBus = mock(EventBusManager.class);
             eventBusMock.when(EventBusManager::get).thenReturn(mockEventBus);
-            
+
             MetricsManager manager = MetricsManager.get();
             manager.init();
-            
+
             assertNotNull(manager.getRegistry());
             verify(mockExporter).setRegistry(mockRegistry);
         }
@@ -157,33 +161,33 @@ class MetricsManagerTest {
     @DisplayName("test multiple exporters registration")
     void testMultipleExportersRegistration() {
         try (MockedStatic<ConfigurationFactory> configMock = mockStatic(ConfigurationFactory.class);
-             MockedStatic<RegistryFactory> registryMock = mockStatic(RegistryFactory.class);
-             MockedStatic<ExporterFactory> exporterMock = mockStatic(ExporterFactory.class);
-             MockedStatic<EventBusManager> eventBusMock = mockStatic(EventBusManager.class)) {
-            
+                MockedStatic<RegistryFactory> registryMock = mockStatic(RegistryFactory.class);
+                MockedStatic<ExporterFactory> exporterMock = mockStatic(ExporterFactory.class);
+                MockedStatic<EventBusManager> eventBusMock = mockStatic(EventBusManager.class)) {
+
             Configuration mockConfig = mock(Configuration.class);
             configMock.when(ConfigurationFactory::getInstance).thenReturn(mockConfig);
-            when(mockConfig.getBoolean(anyString(), eq(DEFAULT_METRICS_ENABLED))).thenReturn(true);
-            
+            when(mockConfig.getBoolean(anyString(), eq(DEFAULT_METRICS_ENABLED)))
+                    .thenReturn(true);
+
             Registry mockRegistry = mock(Registry.class);
             registryMock.when(RegistryFactory::getInstance).thenReturn(mockRegistry);
-            
+
             List<Exporter> exporters = new ArrayList<>();
             Exporter exporter1 = mock(Exporter.class);
             Exporter exporter2 = mock(Exporter.class);
             exporters.add(exporter1);
             exporters.add(exporter2);
             exporterMock.when(ExporterFactory::getInstanceList).thenReturn(exporters);
-            
+
             EventBusManager mockEventBus = mock(EventBusManager.class);
             eventBusMock.when(EventBusManager::get).thenReturn(mockEventBus);
-            
+
             MetricsManager manager = MetricsManager.get();
             manager.init();
-            
+
             verify(exporter1).setRegistry(mockRegistry);
             verify(exporter2).setRegistry(mockRegistry);
         }
     }
 }
-

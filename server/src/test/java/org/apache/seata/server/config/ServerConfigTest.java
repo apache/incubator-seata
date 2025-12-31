@@ -18,16 +18,13 @@ package org.apache.seata.server.config;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * ServerConfig Test
+ * ServerConfig Test - Direct testing without mocks
  */
-@ExtendWith(MockitoExtension.class)
 @DisplayName("ServerConfig Test")
 class ServerConfigTest {
 
@@ -43,7 +40,7 @@ class ServerConfigTest {
     void testEmptyServerPropertiesBeanCreation() {
         ServerConfig serverConfig = new ServerConfig();
         ServerProperties properties = serverConfig.emptyServerProperties();
-        
+
         assertNotNull(properties);
     }
 
@@ -52,7 +49,7 @@ class ServerConfigTest {
     void testEmptyServerPropertiesReturnsServerPropertiesInstance() {
         ServerConfig serverConfig = new ServerConfig();
         ServerProperties properties = serverConfig.emptyServerProperties();
-        
+
         assertNotNull(properties);
         assertTrue(properties instanceof ServerProperties);
     }
@@ -63,7 +60,7 @@ class ServerConfigTest {
         ServerConfig serverConfig = new ServerConfig();
         ServerProperties properties1 = serverConfig.emptyServerProperties();
         ServerProperties properties2 = serverConfig.emptyServerProperties();
-        
+
         assertNotNull(properties1);
         assertNotNull(properties2);
         // They might be different instances (depending on bean scope)
@@ -74,8 +71,7 @@ class ServerConfigTest {
     @Test
     @DisplayName("test configuration annotation present")
     void testConfigurationAnnotationPresent() {
-        assertTrue(ServerConfig.class.isAnnotationPresent(
-            org.springframework.context.annotation.Configuration.class));
+        assertTrue(ServerConfig.class.isAnnotationPresent(org.springframework.context.annotation.Configuration.class));
     }
 
     @Test
@@ -83,11 +79,9 @@ class ServerConfigTest {
     void testServerPropertiesHasBeanAnnotation() {
         try {
             java.lang.reflect.Method method = ServerConfig.class.getMethod("emptyServerProperties");
-            assertTrue(method.isAnnotationPresent(
-                org.springframework.context.annotation.Bean.class));
+            assertTrue(method.isAnnotationPresent(org.springframework.context.annotation.Bean.class));
         } catch (NoSuchMethodException e) {
             fail("emptyServerProperties method not found");
         }
     }
 }
-

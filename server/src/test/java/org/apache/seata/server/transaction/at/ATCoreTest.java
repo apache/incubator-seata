@@ -74,8 +74,8 @@ class ATCoreTest {
     void testLockQueryWithIsLockableTrue() throws TransactionException {
         // This test verifies that lockQuery delegates to lockManager
         // The actual implementation depends on the lock manager
-        assertThrows(NullPointerException.class, () -> 
-            atCore.lockQuery(BranchType.AT, "resourceId", "xid", "lockKeys"));
+        assertThrows(
+                NullPointerException.class, () -> atCore.lockQuery(BranchType.AT, "resourceId", "xid", "lockKeys"));
     }
 
     @Test
@@ -99,10 +99,9 @@ class ATCoreTest {
     void testBranchSessionLockWithValidBranchSession() throws TransactionException {
         when(mockBranchSession.getApplicationData()).thenReturn(null);
         when(mockBranchSession.lock(anyBoolean(), anyBoolean())).thenReturn(true);
-        
-        assertDoesNotThrow(() -> 
-            atCore.branchSessionLock(mockGlobalSession, mockBranchSession));
-        
+
+        assertDoesNotThrow(() -> atCore.branchSessionLock(mockGlobalSession, mockBranchSession));
+
         verify(mockBranchSession).lock(true, false);
     }
 
@@ -113,9 +112,9 @@ class ATCoreTest {
         when(mockBranchSession.lock(anyBoolean(), anyBoolean())).thenReturn(false);
         when(mockGlobalSession.getXid()).thenReturn("test-xid");
         when(mockBranchSession.getBranchId()).thenReturn(123L);
-        
-        assertThrows(BranchTransactionException.class, () -> 
-            atCore.branchSessionLock(mockGlobalSession, mockBranchSession));
+
+        assertThrows(
+                BranchTransactionException.class, () -> atCore.branchSessionLock(mockGlobalSession, mockBranchSession));
     }
 
     @Test
@@ -124,9 +123,8 @@ class ATCoreTest {
         String appData = "{\"autoCommit\": false}";
         when(mockBranchSession.getApplicationData()).thenReturn(appData);
         when(mockBranchSession.lock(anyBoolean(), anyBoolean())).thenReturn(true);
-        
-        assertDoesNotThrow(() -> 
-            atCore.branchSessionLock(mockGlobalSession, mockBranchSession));
+
+        assertDoesNotThrow(() -> atCore.branchSessionLock(mockGlobalSession, mockBranchSession));
     }
 
     @Test
@@ -135,9 +133,8 @@ class ATCoreTest {
         String appData = "{\"skipCheckLock\": true}";
         when(mockBranchSession.getApplicationData()).thenReturn(appData);
         when(mockBranchSession.lock(anyBoolean(), anyBoolean())).thenReturn(true);
-        
-        assertDoesNotThrow(() -> 
-            atCore.branchSessionLock(mockGlobalSession, mockBranchSession));
+
+        assertDoesNotThrow(() -> atCore.branchSessionLock(mockGlobalSession, mockBranchSession));
     }
 
     @Test
@@ -145,9 +142,8 @@ class ATCoreTest {
     void testBranchSessionLockWithEmptyApplicationData() throws TransactionException {
         when(mockBranchSession.getApplicationData()).thenReturn("");
         when(mockBranchSession.lock(anyBoolean(), anyBoolean())).thenReturn(true);
-        
-        assertDoesNotThrow(() -> 
-            atCore.branchSessionLock(mockGlobalSession, mockBranchSession));
+
+        assertDoesNotThrow(() -> atCore.branchSessionLock(mockGlobalSession, mockBranchSession));
     }
 
     @Test
@@ -161,10 +157,9 @@ class ATCoreTest {
     @DisplayName("test branchSessionUnlock with mock branch session")
     void testBranchSessionUnlockWithMockBranchSession() throws TransactionException {
         BranchSession branch = mock(BranchSession.class);
-        
+
         atCore.branchSessionUnlock(branch);
-        
+
         verify(branch).unlock();
     }
 }
-

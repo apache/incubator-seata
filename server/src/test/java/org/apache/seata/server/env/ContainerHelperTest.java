@@ -19,19 +19,12 @@ package org.apache.seata.server.env;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.MockedStatic;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.lang.reflect.Field;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 /**
- * ContainerHelper Test
+ * ContainerHelper Test - Direct testing without mocks
  */
-@ExtendWith(MockitoExtension.class)
 @DisplayName("ContainerHelper Test")
 class ContainerHelperTest {
 
@@ -126,7 +119,7 @@ class ContainerHelperTest {
         String storeMode = ContainerHelper.getStoreMode();
         String sessionStoreMode = ContainerHelper.getSessionStoreMode();
         String lockStoreMode = ContainerHelper.getLockStoreMode();
-        
+
         // All should return successfully
         assertNotNull(env != null ? env : "null");
         assertNotNull(host != null ? host : "null");
@@ -137,4 +130,3 @@ class ContainerHelperTest {
         assertNotNull(lockStoreMode != null ? lockStoreMode : "null");
     }
 }
-

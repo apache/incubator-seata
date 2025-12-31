@@ -64,9 +64,9 @@ class XACoreTest {
     void testXACoreHandlesOnlyXAType() {
         RemotingServer server = new DummyRemotingServer();
         XACore xaCore = new XACore(server);
-        
+
         BranchType branchType = xaCore.getHandleBranchType();
-        
+
         assertNotNull(branchType, "Branch type should not be null");
         assertEquals(BranchType.XA, branchType, "Should handle XA branch type only");
     }
@@ -76,12 +76,12 @@ class XACoreTest {
     void testBranchTypeConsistency() {
         RemotingServer server = new DummyRemotingServer();
         XACore xaCore = new XACore(server);
-        
+
         // Multiple calls should return consistent type
         BranchType type1 = xaCore.getHandleBranchType();
         BranchType type2 = xaCore.getHandleBranchType();
         BranchType type3 = xaCore.getHandleBranchType();
-        
+
         assertEquals(type1, type2, "First and second call should match");
         assertEquals(type2, type3, "Second and third call should match");
         assertEquals(BranchType.XA, type1, "Should always return XA");
@@ -93,19 +93,19 @@ class XACoreTest {
         RemotingServer server1 = new DummyRemotingServer();
         RemotingServer server2 = new DummyRemotingServer();
         RemotingServer server3 = new DummyRemotingServer();
-        
+
         XACore core1 = new XACore(server1);
         XACore core2 = new XACore(server2);
         XACore core3 = new XACore(server3);
-        
+
         BranchType type1 = core1.getHandleBranchType();
         BranchType type2 = core2.getHandleBranchType();
         BranchType type3 = core3.getHandleBranchType();
-        
+
         assertEquals(BranchType.XA, type1, "Core 1 should handle XA");
         assertEquals(BranchType.XA, type2, "Core 2 should handle XA");
         assertEquals(BranchType.XA, type3, "Core 3 should handle XA");
-        
+
         // All instances are different objects
         assertNotSame(core1, core2, "Core 1 and 2 should be different instances");
         assertNotSame(core2, core3, "Core 2 and 3 should be different instances");
@@ -115,9 +115,9 @@ class XACoreTest {
     @DisplayName("test XACore is instantiable with RemotingServer - direct")
     void testInstantiationWithServer() {
         RemotingServer server = new DummyRemotingServer();
-        
+
         XACore xaCore = new XACore(server);
-        
+
         assertNotNull(xaCore, "XACore should be instantiable");
         assertNotNull(xaCore.getHandleBranchType(), "Branch type should be accessible");
         assertEquals(BranchType.XA, xaCore.getHandleBranchType());
@@ -128,12 +128,12 @@ class XACoreTest {
     void testXACoreOnlyHandlesXA() {
         RemotingServer server = new DummyRemotingServer();
         XACore xaCore = new XACore(server);
-        
+
         BranchType handledType = xaCore.getHandleBranchType();
-        
+
         // Should handle XA
         assertEquals(BranchType.XA, handledType, "Should handle XA type");
-        
+
         // Should NOT handle other types
         assertNotEquals(BranchType.AT, handledType, "Should not handle AT type");
         assertNotEquals(BranchType.TCC, handledType, "Should not handle TCC type");
@@ -145,8 +145,9 @@ class XACoreTest {
     void testXACoreHierarchy() {
         RemotingServer server = new DummyRemotingServer();
         XACore xaCore = new XACore(server);
-        
-        assertTrue(xaCore instanceof org.apache.seata.server.coordinator.AbstractCore,
+
+        assertTrue(
+                xaCore instanceof org.apache.seata.server.coordinator.AbstractCore,
                 "XACore should extend AbstractCore");
     }
 
@@ -155,9 +156,9 @@ class XACoreTest {
     void testThreadSafety() throws InterruptedException {
         RemotingServer server = new DummyRemotingServer();
         final XACore xaCore = new XACore(server);
-        
+
         final BranchType[] results = new BranchType[3];
-        
+
         Thread t1 = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -176,15 +177,15 @@ class XACoreTest {
                 results[2] = xaCore.getHandleBranchType();
             }
         });
-        
+
         t1.start();
         t2.start();
         t3.start();
-        
+
         t1.join();
         t2.join();
         t3.join();
-        
+
         assertEquals(BranchType.XA, results[0], "Thread 1 should get XA");
         assertEquals(BranchType.XA, results[1], "Thread 2 should get XA");
         assertEquals(BranchType.XA, results[2], "Thread 3 should get XA");
@@ -195,14 +196,14 @@ class XACoreTest {
     void testRemotingServerStorage() {
         RemotingServer server1 = new DummyRemotingServer();
         RemotingServer server2 = new DummyRemotingServer();
-        
+
         XACore core1 = new XACore(server1);
         XACore core2 = new XACore(server2);
-        
+
         // Both should create separate instances with different servers
         assertNotNull(core1, "Core 1 should be created with server 1");
         assertNotNull(core2, "Core 2 should be created with server 2");
-        
+
         // Both should handle XA correctly
         assertEquals(BranchType.XA, core1.getHandleBranchType());
         assertEquals(BranchType.XA, core2.getHandleBranchType());
@@ -213,12 +214,11 @@ class XACoreTest {
     void testRepeatedAccess() {
         RemotingServer server = new DummyRemotingServer();
         XACore xaCore = new XACore(server);
-        
+
         // Access branch type multiple times
         for (int i = 0; i < 100; i++) {
             BranchType type = xaCore.getHandleBranchType();
-            assertEquals(BranchType.XA, type, 
-                    "Iteration " + i + ": Should always return XA");
+            assertEquals(BranchType.XA, type, "Iteration " + i + ": Should always return XA");
         }
     }
 
@@ -227,20 +227,20 @@ class XACoreTest {
     void testBranchReportAcceptsVariousStatuses() throws TransactionException {
         RemotingServer server = new DummyRemotingServer();
         XACore xaCore = new XACore(server);
-        
+
         // Should not throw exception for various statuses
         try {
             xaCore.branchReport(BranchType.XA, "xid-123", 1L, BranchStatus.PhaseOne_Failed, "data");
         } catch (Exception e) {
             fail("Should accept PhaseOne_Failed status: " + e.getMessage());
         }
-        
+
         try {
             xaCore.branchReport(BranchType.XA, "xid-456", 2L, BranchStatus.Registered, null);
         } catch (Exception e) {
             fail("Should accept Registered status: " + e.getMessage());
         }
-        
+
         try {
             xaCore.branchReport(BranchType.XA, "xid-789", 3L, BranchStatus.PhaseTwo_Committed, "");
         } catch (Exception e) {
@@ -248,4 +248,3 @@ class XACoreTest {
         }
     }
 }
-

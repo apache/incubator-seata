@@ -62,9 +62,9 @@ class TccCoreTest {
     void testTccCoreHandlesOnlyTCCType() {
         RemotingServer server = new DummyRemotingServer();
         TccCore tccCore = new TccCore(server);
-        
+
         BranchType branchType = tccCore.getHandleBranchType();
-        
+
         assertNotNull(branchType, "Branch type should not be null");
         assertEquals(BranchType.TCC, branchType, "Should handle TCC branch type only");
     }
@@ -74,12 +74,12 @@ class TccCoreTest {
     void testBranchTypeConsistency() {
         RemotingServer server = new DummyRemotingServer();
         TccCore tccCore = new TccCore(server);
-        
+
         // Multiple calls should return consistent type
         BranchType type1 = tccCore.getHandleBranchType();
         BranchType type2 = tccCore.getHandleBranchType();
         BranchType type3 = tccCore.getHandleBranchType();
-        
+
         assertEquals(type1, type2, "First and second call should match");
         assertEquals(type2, type3, "Second and third call should match");
         assertEquals(BranchType.TCC, type1, "Should always return TCC");
@@ -91,19 +91,19 @@ class TccCoreTest {
         RemotingServer server1 = new DummyRemotingServer();
         RemotingServer server2 = new DummyRemotingServer();
         RemotingServer server3 = new DummyRemotingServer();
-        
+
         TccCore core1 = new TccCore(server1);
         TccCore core2 = new TccCore(server2);
         TccCore core3 = new TccCore(server3);
-        
+
         BranchType type1 = core1.getHandleBranchType();
         BranchType type2 = core2.getHandleBranchType();
         BranchType type3 = core3.getHandleBranchType();
-        
+
         assertEquals(BranchType.TCC, type1, "Core 1 should handle TCC");
         assertEquals(BranchType.TCC, type2, "Core 2 should handle TCC");
         assertEquals(BranchType.TCC, type3, "Core 3 should handle TCC");
-        
+
         // All instances are different objects
         assertNotSame(core1, core2, "Core 1 and 2 should be different instances");
         assertNotSame(core2, core3, "Core 2 and 3 should be different instances");
@@ -113,9 +113,9 @@ class TccCoreTest {
     @DisplayName("test TccCore is instantiable with RemotingServer - direct")
     void testInstantiationWithServer() {
         RemotingServer server = new DummyRemotingServer();
-        
+
         TccCore tccCore = new TccCore(server);
-        
+
         assertNotNull(tccCore, "TccCore should be instantiable");
         assertNotNull(tccCore.getHandleBranchType(), "Branch type should be accessible");
         assertEquals(BranchType.TCC, tccCore.getHandleBranchType());
@@ -126,12 +126,12 @@ class TccCoreTest {
     void testTccCoreOnlyHandlesTCC() {
         RemotingServer server = new DummyRemotingServer();
         TccCore tccCore = new TccCore(server);
-        
+
         BranchType handledType = tccCore.getHandleBranchType();
-        
+
         // Should handle TCC
         assertEquals(BranchType.TCC, handledType, "Should handle TCC type");
-        
+
         // Should NOT handle other types
         assertNotEquals(BranchType.AT, handledType, "Should not handle AT type");
         assertNotEquals(BranchType.SAGA, handledType, "Should not handle SAGA type");
@@ -143,8 +143,9 @@ class TccCoreTest {
     void testTccCoreHierarchy() {
         RemotingServer server = new DummyRemotingServer();
         TccCore tccCore = new TccCore(server);
-        
-        assertTrue(tccCore instanceof org.apache.seata.server.coordinator.AbstractCore,
+
+        assertTrue(
+                tccCore instanceof org.apache.seata.server.coordinator.AbstractCore,
                 "TccCore should extend AbstractCore");
     }
 
@@ -153,9 +154,9 @@ class TccCoreTest {
     void testThreadSafety() throws InterruptedException {
         RemotingServer server = new DummyRemotingServer();
         final TccCore tccCore = new TccCore(server);
-        
+
         final BranchType[] results = new BranchType[3];
-        
+
         Thread t1 = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -174,15 +175,15 @@ class TccCoreTest {
                 results[2] = tccCore.getHandleBranchType();
             }
         });
-        
+
         t1.start();
         t2.start();
         t3.start();
-        
+
         t1.join();
         t2.join();
         t3.join();
-        
+
         assertEquals(BranchType.TCC, results[0], "Thread 1 should get TCC");
         assertEquals(BranchType.TCC, results[1], "Thread 2 should get TCC");
         assertEquals(BranchType.TCC, results[2], "Thread 3 should get TCC");
@@ -193,14 +194,14 @@ class TccCoreTest {
     void testRemotingServerStorage() {
         RemotingServer server1 = new DummyRemotingServer();
         RemotingServer server2 = new DummyRemotingServer();
-        
+
         TccCore core1 = new TccCore(server1);
         TccCore core2 = new TccCore(server2);
-        
+
         // Both should create separate instances with different servers
         assertNotNull(core1, "Core 1 should be created with server 1");
         assertNotNull(core2, "Core 2 should be created with server 2");
-        
+
         // Both should handle TCC correctly
         assertEquals(BranchType.TCC, core1.getHandleBranchType());
         assertEquals(BranchType.TCC, core2.getHandleBranchType());
@@ -211,13 +212,11 @@ class TccCoreTest {
     void testRepeatedAccess() {
         RemotingServer server = new DummyRemotingServer();
         TccCore tccCore = new TccCore(server);
-        
+
         // Access branch type multiple times
         for (int i = 0; i < 100; i++) {
             BranchType type = tccCore.getHandleBranchType();
-            assertEquals(BranchType.TCC, type, 
-                    "Iteration " + i + ": Should always return TCC");
+            assertEquals(BranchType.TCC, type, "Iteration " + i + ": Should always return TCC");
         }
     }
 }
-

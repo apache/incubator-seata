@@ -16,11 +16,6 @@
  */
 package org.apache.seata.server.storage;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.GlobalStatus;
@@ -34,6 +29,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -82,7 +82,7 @@ class SessionConverterTest {
     @Test
     @DisplayName("test convertGlobalSession with null returns null")
     void testConvertGlobalSessionWithNullReturnsNull() {
-        GlobalSession result = SessionConverter.convertGlobalSession((GlobalTransactionDO)null);
+        GlobalSession result = SessionConverter.convertGlobalSession((GlobalTransactionDO) null);
         assertNull(result);
     }
 
@@ -107,7 +107,7 @@ class SessionConverterTest {
     @Test
     @DisplayName("test convertBranchSession with null returns null")
     void testConvertBranchSessionWithNullReturnsNull() {
-        BranchSession result = SessionConverter.convertBranchSession((BranchTransactionDO)null);
+        BranchSession result = SessionConverter.convertBranchSession((BranchTransactionDO) null);
         assertNull(result);
     }
 
@@ -150,8 +150,8 @@ class SessionConverterTest {
     @Test
     @DisplayName("test convertToBranchSession with empty list returns empty set")
     void testConvertToBranchSessionWithEmptyListReturnsEmptySet() {
-        Set<org.apache.seata.server.console.entity.vo.BranchSessionVO> result = SessionConverter.convertToBranchSession(
-            Collections.emptyList());
+        Set<org.apache.seata.server.console.entity.vo.BranchSessionVO> result =
+                SessionConverter.convertToBranchSession(Collections.emptyList());
 
         assertTrue(result.isEmpty());
     }
@@ -162,8 +162,8 @@ class SessionConverterTest {
         List<BranchSession> branches = new ArrayList<>();
         branches.add(mockBranchSession);
 
-        Set<org.apache.seata.server.console.entity.vo.BranchSessionVO> result = SessionConverter.convertToBranchSession(
-            branches);
+        Set<org.apache.seata.server.console.entity.vo.BranchSessionVO> result =
+                SessionConverter.convertToBranchSession(branches);
 
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -172,8 +172,8 @@ class SessionConverterTest {
     @Test
     @DisplayName("test convertGlobalSession with empty list returns empty list")
     void testConvertGlobalSessionWithEmptyListReturnsEmptyList() {
-        List<org.apache.seata.server.console.entity.vo.GlobalSessionVO> result = SessionConverter.convertGlobalSession(
-            Collections.emptyList());
+        List<org.apache.seata.server.console.entity.vo.GlobalSessionVO> result =
+                SessionConverter.convertGlobalSession(Collections.emptyList());
 
         assertTrue(result.isEmpty());
     }
@@ -185,8 +185,8 @@ class SessionConverterTest {
         when(mockGlobalSession.getBranchSessions()).thenReturn(Collections.emptyList());
         sessions.add(mockGlobalSession);
 
-        List<org.apache.seata.server.console.entity.vo.GlobalSessionVO> result = SessionConverter.convertGlobalSession(
-            sessions);
+        List<org.apache.seata.server.console.entity.vo.GlobalSessionVO> result =
+                SessionConverter.convertGlobalSession(sessions);
 
         assertNotNull(result);
         assertEquals(1, result.size());

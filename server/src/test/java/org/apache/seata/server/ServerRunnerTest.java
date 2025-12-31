@@ -16,8 +16,6 @@
  */
 package org.apache.seata.server;
 
-import java.lang.reflect.Field;
-
 import org.apache.seata.core.rpc.Disposable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -28,6 +26,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.web.context.WebServerInitializedEvent;
 import org.springframework.boot.web.server.WebServer;
 import org.springframework.core.Ordered;
+
+import java.lang.reflect.Field;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -114,8 +114,8 @@ class ServerRunnerTest {
     @Test
     @DisplayName("test onApplicationEvent with other event")
     void testOnApplicationEventWithOtherEvent() {
-        org.springframework.context.event.ContextRefreshedEvent otherEvent = mock(
-            org.springframework.context.event.ContextRefreshedEvent.class);
+        org.springframework.context.event.ContextRefreshedEvent otherEvent =
+                mock(org.springframework.context.event.ContextRefreshedEvent.class);
 
         serverRunner.onApplicationEvent(otherEvent);
 
@@ -147,4 +147,3 @@ class ServerRunnerTest {
         verify(disposable).destroy();
     }
 }
-

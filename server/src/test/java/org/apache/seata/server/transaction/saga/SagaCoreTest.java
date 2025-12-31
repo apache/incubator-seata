@@ -16,7 +16,6 @@
  */
 package org.apache.seata.server.transaction.saga;
 
-import org.apache.seata.core.exception.GlobalTransactionException;
 import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.rpc.RemotingServer;
 import org.apache.seata.server.session.GlobalSession;
@@ -82,7 +81,7 @@ class SagaCoreTest {
     void testSagaCoreBranchTypeIsConsistent() {
         BranchType type1 = sagaCore.getHandleBranchType();
         BranchType type2 = sagaCore.getHandleBranchType();
-        
+
         assertEquals(type1, type2);
         assertEquals(BranchType.SAGA, type1);
     }
@@ -92,10 +91,10 @@ class SagaCoreTest {
     void testSagaCoreWithDifferentRemotingServers() {
         RemotingServer server1 = mock(RemotingServer.class);
         RemotingServer server2 = mock(RemotingServer.class);
-        
+
         SagaCore core1 = new SagaCore(server1);
         SagaCore core2 = new SagaCore(server2);
-        
+
         assertEquals(core1.getHandleBranchType(), core2.getHandleBranchType());
         assertEquals(BranchType.SAGA, core1.getHandleBranchType());
     }
@@ -112,10 +111,10 @@ class SagaCoreTest {
     void testMultipleSagaCoreInstances() {
         RemotingServer server1 = mock(RemotingServer.class);
         RemotingServer server2 = mock(RemotingServer.class);
-        
+
         SagaCore core1 = new SagaCore(server1);
         SagaCore core2 = new SagaCore(server2);
-        
+
         assertNotNull(core1);
         assertNotNull(core2);
         assertNotSame(core1, core2);
@@ -126,7 +125,7 @@ class SagaCoreTest {
     @DisplayName("test SagaCore handles SAGA branch type only")
     void testSagaCoreHandlesSAGABranchTypeOnly() {
         BranchType handledType = sagaCore.getHandleBranchType();
-        
+
         // Should only handle SAGA type
         assertEquals(BranchType.SAGA, handledType);
         assertNotEquals(BranchType.AT, handledType);
@@ -137,15 +136,14 @@ class SagaCoreTest {
     @Test
     @DisplayName("test globalSessionStatusCheck with null session")
     void testGlobalSessionStatusCheckWithNullSession() {
-        assertThrows(NullPointerException.class, () -> 
-            sagaCore.globalSessionStatusCheck(null));
+        assertThrows(NullPointerException.class, () -> sagaCore.globalSessionStatusCheck(null));
     }
 
     @Test
     @DisplayName("test branchDelete throws ShouldNeverHappenException")
     void testBranchDeleteThrowsShouldNeverHappenException() {
-        assertThrows(org.apache.seata.common.exception.ShouldNeverHappenException.class, () ->
-            sagaCore.branchDelete(mockGlobalSession, null));
+        assertThrows(
+                org.apache.seata.common.exception.ShouldNeverHappenException.class,
+                () -> sagaCore.branchDelete(mockGlobalSession, null));
     }
 }
-

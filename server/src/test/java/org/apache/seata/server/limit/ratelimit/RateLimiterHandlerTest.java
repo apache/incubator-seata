@@ -72,7 +72,7 @@ class RateLimiterHandlerTest {
     @DisplayName("test handle when rate limiter disabled")
     void testHandleWhenRateLimiterDisabled() {
         when(mockRateLimiter.isEnable()).thenReturn(false);
-        when(mockRequest.getTypeCode()).thenReturn((short)1);
+        when(mockRequest.getTypeCode()).thenReturn((short) 1);
 
         // Mock the next() method behavior
         handler.setTransactionRequestLimitHandler(null);
@@ -89,7 +89,7 @@ class RateLimiterHandlerTest {
         GlobalBeginRequest request = new GlobalBeginRequest();
         when(mockRateLimiter.isEnable()).thenReturn(true);
         when(mockRateLimiter.canPass()).thenReturn(true);
-        when(mockRequest.getTypeCode()).thenReturn((short)1);
+        when(mockRequest.getTypeCode()).thenReturn((short) 1);
 
         // Mock next handler
         AbstractTransactionRequestHandler nextHandler = mock(AbstractTransactionRequestHandler.class);
@@ -202,4 +202,3 @@ class RateLimiterHandlerTest {
         assertThrows(NullPointerException.class, () -> handler.handle(null, mockRpcContext));
     }
 }
-

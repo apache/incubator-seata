@@ -63,18 +63,13 @@ class SessionHelperTest {
     void testNewBranchByGlobalWithAllParameters() {
         String xid = "test-xid-123";
         long transactionId = 12345L;
-        
+
         when(mockGlobalSession.getXid()).thenReturn(xid);
         when(mockGlobalSession.getTransactionId()).thenReturn(transactionId);
-        
+
         BranchSession result = SessionHelper.newBranchByGlobal(
-                mockGlobalSession, 
-                BranchType.AT, 
-                "resource1", 
-                "appData", 
-                "lockKeys", 
-                "clientId");
-        
+                mockGlobalSession, BranchType.AT, "resource1", "appData", "lockKeys", "clientId");
+
         assertNotNull(result);
         assertEquals(xid, result.getXid());
         assertEquals(transactionId, result.getTransactionId());
@@ -91,17 +86,13 @@ class SessionHelperTest {
     void testNewBranchByGlobalWithoutApplicationData() {
         String xid = "test-xid-456";
         long transactionId = 456789L;
-        
+
         when(mockGlobalSession.getXid()).thenReturn(xid);
         when(mockGlobalSession.getTransactionId()).thenReturn(transactionId);
-        
+
         BranchSession result = SessionHelper.newBranchByGlobal(
-                mockGlobalSession, 
-                BranchType.TCC, 
-                "resource2", 
-                "lockKeys2", 
-                "clientId2");
-        
+                mockGlobalSession, BranchType.TCC, "resource2", "lockKeys2", "clientId2");
+
         assertNotNull(result);
         assertEquals(xid, result.getXid());
         assertEquals(transactionId, result.getTransactionId());
@@ -112,14 +103,9 @@ class SessionHelperTest {
     void testNewBranch() {
         String xid = "test-xid-789";
         long branchId = 111111L;
-        
-        BranchSession result = SessionHelper.newBranch(
-                BranchType.XA, 
-                xid, 
-                branchId, 
-                "resource3", 
-                "appData3");
-        
+
+        BranchSession result = SessionHelper.newBranch(BranchType.XA, xid, branchId, "resource3", "appData3");
+
         assertNotNull(result);
         assertEquals(xid, result.getXid());
         assertEquals(branchId, result.getBranchId());
@@ -132,9 +118,9 @@ class SessionHelperTest {
     @DisplayName("test endCommitted with commit not retry")
     void testEndCommittedWithCommitNotRetry() throws TransactionException {
         when(mockGlobalSession.getStatus()).thenReturn(GlobalStatus.Committing);
-        
+
         assertDoesNotThrow(() -> SessionHelper.endCommitted(mockGlobalSession, true));
-        
+
         verify(mockGlobalSession).changeGlobalStatus(GlobalStatus.Committed);
         verify(mockGlobalSession).end();
     }
@@ -143,7 +129,7 @@ class SessionHelperTest {
     @DisplayName("test endCommitFailed")
     void testEndCommitFailed() throws TransactionException {
         assertDoesNotThrow(() -> SessionHelper.endCommitFailed(mockGlobalSession, false));
-        
+
         verify(mockGlobalSession).changeGlobalStatus(GlobalStatus.CommitFailed);
         verify(mockGlobalSession).end();
     }
@@ -152,7 +138,7 @@ class SessionHelperTest {
     @DisplayName("test endCommitFailed with timeout")
     void testEndCommitFailedWithTimeout() throws TransactionException {
         assertDoesNotThrow(() -> SessionHelper.endCommitFailed(mockGlobalSession, false, true));
-        
+
         verify(mockGlobalSession).changeGlobalStatus(GlobalStatus.CommitRetryTimeout);
         verify(mockGlobalSession).end();
     }
@@ -162,9 +148,9 @@ class SessionHelperTest {
     void testEndRollbackedWithRetry() throws TransactionException {
         when(mockGlobalSession.getStatus()).thenReturn(GlobalStatus.Rollbacking);
         when(mockGlobalSession.isSaga()).thenReturn(false);
-        
+
         assertDoesNotThrow(() -> SessionHelper.endRollbacked(mockGlobalSession, true));
-        
+
         verify(mockGlobalSession).end();
     }
 
@@ -172,7 +158,7 @@ class SessionHelperTest {
     @DisplayName("test endRollbackFailed")
     void testEndRollbackFailed() throws TransactionException {
         assertDoesNotThrow(() -> SessionHelper.endRollbackFailed(mockGlobalSession, false));
-        
+
         verify(mockGlobalSession).changeGlobalStatus(GlobalStatus.RollbackFailed);
         verify(mockGlobalSession).end();
     }
@@ -180,22 +166,19 @@ class SessionHelperTest {
     @Test
     @DisplayName("test parallelForEach with empty collection")
     void testParallelForEachWithEmptyCollection() {
-        assertDoesNotThrow(() -> SessionHelper.parallelForEach(
-                Collections.emptyList(), mockGlobalSessionHandler));
+        assertDoesNotThrow(() -> SessionHelper.parallelForEach(Collections.emptyList(), mockGlobalSessionHandler));
     }
 
     @Test
     @DisplayName("test singleForEach with empty collection")
     void testSingleForEachWithEmptyCollection() {
-        assertDoesNotThrow(() -> SessionHelper.singleForEach(
-                Collections.emptyList(), mockGlobalSessionHandler));
+        assertDoesNotThrow(() -> SessionHelper.singleForEach(Collections.emptyList(), mockGlobalSessionHandler));
     }
 
     @Test
     @DisplayName("test forEach with null collection")
     void testForEachWithNullCollection() {
-        assertDoesNotThrow(() -> SessionHelper.forEach(
-                null, mockGlobalSessionHandler));
+        assertDoesNotThrow(() -> SessionHelper.forEach(null, mockGlobalSessionHandler));
     }
 
     @Test
@@ -210,9 +193,9 @@ class SessionHelperTest {
     void testSingleForEachWithBranchSessions() throws TransactionException {
         Collection<BranchSession> branches = new ArrayList<>();
         branches.add(mockBranchSession);
-        
+
         when(mockBranchSessionHandler.handle(mockBranchSession)).thenReturn(null);
-        
+
         Boolean result = SessionHelper.singleForEach(branches, mockBranchSessionHandler);
         assertNull(result);
         verify(mockBranchSessionHandler).handle(mockBranchSession);
@@ -222,9 +205,9 @@ class SessionHelperTest {
     @DisplayName("test processEndState with Committed status")
     void testProcessEndStateWithCommittedStatus() throws TransactionException {
         when(mockGlobalSession.getStatus()).thenReturn(GlobalStatus.Committed);
-        
+
         assertDoesNotThrow(() -> SessionHelper.processEndState(mockGlobalSession));
-        
+
         verify(mockGlobalSession, atLeastOnce()).end();
     }
 
@@ -233,9 +216,9 @@ class SessionHelperTest {
     void testProcessEndStateWithRollbackedStatus() throws TransactionException {
         when(mockGlobalSession.getStatus()).thenReturn(GlobalStatus.Rollbacked);
         when(mockGlobalSession.isSaga()).thenReturn(false);
-        
+
         assertDoesNotThrow(() -> SessionHelper.processEndState(mockGlobalSession));
-        
+
         verify(mockGlobalSession, atLeastOnce()).end();
     }
 
@@ -243,20 +226,15 @@ class SessionHelperTest {
     @DisplayName("test processEndState with invalid status")
     void testProcessEndStateWithInvalidStatus() {
         when(mockGlobalSession.getStatus()).thenReturn(GlobalStatus.Committing);
-        
+
         assertThrows(TransactionException.class, () -> SessionHelper.processEndState(mockGlobalSession));
     }
 
     @Test
     @DisplayName("test newBranch with all required parameters")
     void testNewBranchWithAllRequiredParameters() {
-        BranchSession branch = SessionHelper.newBranch(
-                BranchType.SAGA,
-                "xid123",
-                999L,
-                "resourceId",
-                "appData");
-        
+        BranchSession branch = SessionHelper.newBranch(BranchType.SAGA, "xid123", 999L, "resourceId", "appData");
+
         assertEquals("xid123", branch.getXid());
         assertEquals(999L, branch.getBranchId());
         assertEquals(BranchType.SAGA, branch.getBranchType());
@@ -264,4 +242,3 @@ class SessionHelperTest {
         assertEquals("appData", branch.getApplicationData());
     }
 }
-

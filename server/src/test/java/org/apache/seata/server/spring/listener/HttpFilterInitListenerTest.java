@@ -45,13 +45,12 @@ class HttpFilterInitListenerTest {
     @Test
     @DisplayName("test onApplicationEvent initializes filters")
     void testOnApplicationEventInitializesFilters() {
-        try (MockedStatic<HttpRequestFilterManager> filterManagerMock = 
-                mockStatic(HttpRequestFilterManager.class)) {
-            
+        try (MockedStatic<HttpRequestFilterManager> filterManagerMock = mockStatic(HttpRequestFilterManager.class)) {
+
             ContextRefreshedEvent event = mock(ContextRefreshedEvent.class);
-            
+
             listener.onApplicationEvent(event);
-            
+
             filterManagerMock.verify(HttpRequestFilterManager::initializeFilters, times(1));
         }
     }
@@ -59,15 +58,14 @@ class HttpFilterInitListenerTest {
     @Test
     @DisplayName("test onApplicationEvent called multiple times initializes only once")
     void testOnApplicationEventCalledMultipleTimesInitializesOnlyOnce() {
-        try (MockedStatic<HttpRequestFilterManager> filterManagerMock = 
-                mockStatic(HttpRequestFilterManager.class)) {
-            
+        try (MockedStatic<HttpRequestFilterManager> filterManagerMock = mockStatic(HttpRequestFilterManager.class)) {
+
             ContextRefreshedEvent event1 = mock(ContextRefreshedEvent.class);
             ContextRefreshedEvent event2 = mock(ContextRefreshedEvent.class);
-            
+
             listener.onApplicationEvent(event1);
             listener.onApplicationEvent(event2);
-            
+
             filterManagerMock.verify(HttpRequestFilterManager::initializeFilters, times(1));
         }
     }
@@ -87,11 +85,10 @@ class HttpFilterInitListenerTest {
     @Test
     @DisplayName("test onApplicationEvent with null event does not crash")
     void testOnApplicationEventWithValidEvent() {
-        try (MockedStatic<HttpRequestFilterManager> filterManagerMock = 
-                mockStatic(HttpRequestFilterManager.class)) {
-            
+        try (MockedStatic<HttpRequestFilterManager> filterManagerMock = mockStatic(HttpRequestFilterManager.class)) {
+
             ContextRefreshedEvent event = mock(ContextRefreshedEvent.class);
-            
+
             assertDoesNotThrow(() -> listener.onApplicationEvent(event));
         }
     }
@@ -99,17 +96,16 @@ class HttpFilterInitListenerTest {
     @Test
     @DisplayName("test multiple listeners only initialize once")
     void testMultipleListenersOnlyInitializeOnce() {
-        try (MockedStatic<HttpRequestFilterManager> filterManagerMock = 
-                mockStatic(HttpRequestFilterManager.class)) {
-            
+        try (MockedStatic<HttpRequestFilterManager> filterManagerMock = mockStatic(HttpRequestFilterManager.class)) {
+
             HttpFilterInitListener listener1 = new HttpFilterInitListener();
             HttpFilterInitListener listener2 = new HttpFilterInitListener();
-            
+
             ContextRefreshedEvent event = mock(ContextRefreshedEvent.class);
-            
+
             listener1.onApplicationEvent(event);
             listener2.onApplicationEvent(event);
-            
+
             // Both listeners should share the same static initialized flag
             // So filters should only be initialized once in total across instances
             filterManagerMock.verify(HttpRequestFilterManager::initializeFilters, atLeast(1));
@@ -119,16 +115,14 @@ class HttpFilterInitListenerTest {
     @Test
     @DisplayName("test listener fires on ContextRefreshedEvent")
     void testListenerFiresOnContextRefreshedEvent() {
-        try (MockedStatic<HttpRequestFilterManager> filterManagerMock = 
-                mockStatic(HttpRequestFilterManager.class)) {
-            
+        try (MockedStatic<HttpRequestFilterManager> filterManagerMock = mockStatic(HttpRequestFilterManager.class)) {
+
             ContextRefreshedEvent event = mock(ContextRefreshedEvent.class);
-            
+
             listener.onApplicationEvent(event);
-            
+
             // Verify initialization was called
             filterManagerMock.verify(HttpRequestFilterManager::initializeFilters);
         }
     }
 }
-

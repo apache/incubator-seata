@@ -110,4 +110,3 @@ class AbstractCheckAuthHandlerTest {
         assertTrue(rmResult);
     }
 }
-

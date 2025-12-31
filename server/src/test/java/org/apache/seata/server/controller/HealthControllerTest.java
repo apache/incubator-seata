@@ -54,9 +54,9 @@ class HealthControllerTest {
     @DisplayName("test health check when server started")
     void testHealthCheckWhenServerStarted() {
         when(mockServerRunner.started()).thenReturn(true);
-        
+
         String result = healthController.healthCheck();
-        
+
         assertEquals("ok", result);
         verify(mockServerRunner).started();
     }
@@ -65,9 +65,9 @@ class HealthControllerTest {
     @DisplayName("test health check when server not started")
     void testHealthCheckWhenServerNotStarted() {
         when(mockServerRunner.started()).thenReturn(false);
-        
+
         String result = healthController.healthCheck();
-        
+
         assertEquals("not_ok", result);
         verify(mockServerRunner).started();
     }
@@ -76,10 +76,10 @@ class HealthControllerTest {
     @DisplayName("test health check multiple times")
     void testHealthCheckMultipleTimes() {
         when(mockServerRunner.started()).thenReturn(true);
-        
+
         String result1 = healthController.healthCheck();
         String result2 = healthController.healthCheck();
-        
+
         assertEquals("ok", result1);
         assertEquals("ok", result2);
         verify(mockServerRunner, times(2)).started();
@@ -91,10 +91,9 @@ class HealthControllerTest {
         when(mockServerRunner.started()).thenReturn(false);
         String result1 = healthController.healthCheck();
         assertEquals("not_ok", result1);
-        
+
         when(mockServerRunner.started()).thenReturn(true);
         String result2 = healthController.healthCheck();
         assertEquals("ok", result2);
     }
 }
-

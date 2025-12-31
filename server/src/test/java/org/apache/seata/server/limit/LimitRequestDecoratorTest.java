@@ -18,7 +18,6 @@ package org.apache.seata.server.limit;
 
 import org.apache.seata.core.protocol.transaction.AbstractTransactionRequestToTC;
 import org.apache.seata.core.protocol.transaction.AbstractTransactionResponse;
-import org.apache.seata.core.protocol.transaction.GlobalBeginRequest;
 import org.apache.seata.core.rpc.RpcContext;
 import org.apache.seata.server.limit.ratelimit.RateLimiterHandler;
 import org.junit.jupiter.api.BeforeEach;
@@ -62,11 +61,11 @@ class LimitRequestDecoratorTest {
         try (MockedStatic<RateLimiterHandler> rateLimiterMock = mockStatic(RateLimiterHandler.class)) {
             RateLimiterHandler mockRateLimiter = mock(RateLimiterHandler.class);
             rateLimiterMock.when(RateLimiterHandler::getInstance).thenReturn(mockRateLimiter);
-            
+
             when(mockRateLimiter.handle(mockOriginalRequest, mockRpcContext)).thenReturn(mockResponse);
-            
+
             decorator = new LimitRequestDecorator(mockOriginalRequest);
-            
+
             short typeCode = decorator.getTypeCode();
             assertEquals((short) 1, typeCode);
             verify(mockOriginalRequest).getTypeCode();
@@ -79,13 +78,13 @@ class LimitRequestDecoratorTest {
         try (MockedStatic<RateLimiterHandler> rateLimiterMock = mockStatic(RateLimiterHandler.class)) {
             RateLimiterHandler mockRateLimiter = mock(RateLimiterHandler.class);
             rateLimiterMock.when(RateLimiterHandler::getInstance).thenReturn(mockRateLimiter);
-            
+
             when(mockRateLimiter.handle(mockOriginalRequest, mockRpcContext)).thenReturn(mockResponse);
-            
+
             decorator = new LimitRequestDecorator(mockOriginalRequest);
-            
+
             AbstractTransactionResponse result = decorator.handle(mockRpcContext);
-            
+
             assertNotNull(result);
             verify(mockRateLimiter).handle(mockOriginalRequest, mockRpcContext);
         }
@@ -97,9 +96,9 @@ class LimitRequestDecoratorTest {
         try (MockedStatic<RateLimiterHandler> rateLimiterMock = mockStatic(RateLimiterHandler.class)) {
             RateLimiterHandler mockRateLimiter = mock(RateLimiterHandler.class);
             rateLimiterMock.when(RateLimiterHandler::getInstance).thenReturn(mockRateLimiter);
-            
+
             decorator = new LimitRequestDecorator(mockOriginalRequest);
-            
+
             assertNotNull(decorator);
             verify(mockRateLimiter).setTransactionRequestLimitHandler(null);
         }
@@ -111,13 +110,13 @@ class LimitRequestDecoratorTest {
         try (MockedStatic<RateLimiterHandler> rateLimiterMock = mockStatic(RateLimiterHandler.class)) {
             RateLimiterHandler mockRateLimiter = mock(RateLimiterHandler.class);
             rateLimiterMock.when(RateLimiterHandler::getInstance).thenReturn(mockRateLimiter);
-            
+
             when(mockRateLimiter.handle(mockOriginalRequest, mockRpcContext)).thenReturn(null);
-            
+
             decorator = new LimitRequestDecorator(mockOriginalRequest);
-            
+
             AbstractTransactionResponse result = decorator.handle(mockRpcContext);
-            
+
             assertNull(result);
         }
     }
@@ -128,12 +127,12 @@ class LimitRequestDecoratorTest {
         try (MockedStatic<RateLimiterHandler> rateLimiterMock = mockStatic(RateLimiterHandler.class)) {
             RateLimiterHandler mockRateLimiter = mock(RateLimiterHandler.class);
             rateLimiterMock.when(RateLimiterHandler::getInstance).thenReturn(mockRateLimiter);
-            
+
             when(mockRateLimiter.handle(mockOriginalRequest, mockRpcContext))
                     .thenThrow(new RuntimeException("Rate limit exceeded"));
-            
+
             decorator = new LimitRequestDecorator(mockOriginalRequest);
-            
+
             assertThrows(RuntimeException.class, () -> decorator.handle(mockRpcContext));
         }
     }
@@ -144,18 +143,17 @@ class LimitRequestDecoratorTest {
         try (MockedStatic<RateLimiterHandler> rateLimiterMock = mockStatic(RateLimiterHandler.class)) {
             RateLimiterHandler mockRateLimiter = mock(RateLimiterHandler.class);
             rateLimiterMock.when(RateLimiterHandler::getInstance).thenReturn(mockRateLimiter);
-            
+
             when(mockRateLimiter.handle(any(), any())).thenReturn(mockResponse);
-            
+
             LimitRequestDecorator decorator1 = new LimitRequestDecorator(mockOriginalRequest);
             LimitRequestDecorator decorator2 = new LimitRequestDecorator(mockOriginalRequest);
-            
+
             AbstractTransactionResponse result1 = decorator1.handle(mockRpcContext);
             AbstractTransactionResponse result2 = decorator2.handle(mockRpcContext);
-            
+
             assertNotNull(result1);
             assertNotNull(result2);
         }
     }
 }
-

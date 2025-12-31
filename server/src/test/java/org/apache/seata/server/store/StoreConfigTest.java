@@ -18,19 +18,15 @@ package org.apache.seata.server.store;
 
 import org.apache.seata.common.store.LockMode;
 import org.apache.seata.common.store.SessionMode;
-import org.apache.seata.common.store.StoreMode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * StoreConfig Test
+ * StoreConfig Test - Direct testing without mocks
  */
-@ExtendWith(MockitoExtension.class)
 @DisplayName("StoreConfig Test")
 class StoreConfigTest {
 
@@ -68,10 +64,10 @@ class StoreConfigTest {
     @DisplayName("test setStartupParameter with all modes")
     void testSetStartupParameterWithAllModes() {
         StoreConfig.setStartupParameter("db", "db", "db");
-        
+
         SessionMode sessionMode = StoreConfig.getSessionMode();
         LockMode lockMode = StoreConfig.getLockMode();
-        
+
         assertEquals(SessionMode.DB, sessionMode);
         assertEquals(LockMode.DB, lockMode);
     }
@@ -121,7 +117,7 @@ class StoreConfigTest {
     @DisplayName("test setStartupParameter with null values")
     void testSetStartupParameterWithNullValues() {
         StoreConfig.setStartupParameter(null, null, null);
-        
+
         assertNotNull(StoreConfig.getSessionMode());
         assertNotNull(StoreConfig.getLockMode());
     }
@@ -133,7 +129,7 @@ class StoreConfigTest {
         StoreConfig.setStartupParameter("db", "db", "db");
         assertEquals(SessionMode.DB, StoreConfig.getSessionMode());
         assertEquals(LockMode.DB, StoreConfig.getLockMode());
-        
+
         // Reset and test FILE mode
         StoreConfig.setStartupParameter("file", "file", "file");
         assertEquals(SessionMode.FILE, StoreConfig.getSessionMode());
@@ -170,10 +166,9 @@ class StoreConfigTest {
         int branchSize = StoreConfig.getMaxBranchSessionSize();
         int globalSize = StoreConfig.getMaxGlobalSessionSize();
         int bufferSize = StoreConfig.getFileWriteBufferCacheSize();
-        
+
         assertTrue(branchSize > 0, "Branch session size should be positive");
         assertTrue(globalSize > 0, "Global session size should be positive");
         assertTrue(bufferSize > 0, "Buffer cache size should be positive");
     }
 }
-

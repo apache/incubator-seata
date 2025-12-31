@@ -71,7 +71,7 @@ class LockerManagerFactoryTest {
         LockerManagerFactory.init();
         LockManager lockManager1 = LockerManagerFactory.getLockManager();
         LockManager lockManager2 = LockerManagerFactory.getLockManager();
-        
+
         assertNotNull(lockManager1);
         assertNotNull(lockManager2);
         assertSame(lockManager1, lockManager2);
@@ -80,16 +80,15 @@ class LockerManagerFactoryTest {
     @Test
     @DisplayName("test init with specific lock mode")
     void testInitWithSpecificLockMode() {
-        try (MockedStatic<EnhancedServiceLoader> loaderMock = 
-                mockStatic(EnhancedServiceLoader.class)) {
-            
-            loaderMock.when(() -> EnhancedServiceLoader.load(
-                    LockManager.class, "file"))
+        try (MockedStatic<EnhancedServiceLoader> loaderMock = mockStatic(EnhancedServiceLoader.class)) {
+
+            loaderMock
+                    .when(() -> EnhancedServiceLoader.load(LockManager.class, "file"))
                     .thenReturn(mockLockManager);
-            
+
             LockerManagerFactory.init(LockMode.FILE);
             LockManager lockManager = LockerManagerFactory.getLockManager();
-            
+
             assertNotNull(lockManager);
         }
     }
@@ -100,9 +99,9 @@ class LockerManagerFactoryTest {
         LockerManagerFactory.init();
         LockManager lockManager1 = LockerManagerFactory.getLockManager();
         assertNotNull(lockManager1);
-        
+
         LockerManagerFactory.destroy();
-        
+
         LockManager lockManager2 = LockerManagerFactory.getLockManager();
         assertNotNull(lockManager2);
     }
@@ -113,7 +112,7 @@ class LockerManagerFactoryTest {
         LockerManagerFactory.init();
         LockerManagerFactory.init();
         LockerManagerFactory.init();
-        
+
         LockManager lockManager = LockerManagerFactory.getLockManager();
         assertNotNull(lockManager);
     }
@@ -123,13 +122,13 @@ class LockerManagerFactoryTest {
     void testThreadSafetyOfInitialization() throws InterruptedException {
         Thread thread1 = new Thread(LockerManagerFactory::init);
         Thread thread2 = new Thread(LockerManagerFactory::init);
-        
+
         thread1.start();
         thread2.start();
-        
+
         thread1.join();
         thread2.join();
-        
+
         LockManager lockManager = LockerManagerFactory.getLockManager();
         assertNotNull(lockManager);
     }
@@ -138,7 +137,7 @@ class LockerManagerFactoryTest {
     @DisplayName("test getLockManager calls init internally")
     void testGetLockManagerCallsInitInternally() {
         LockerManagerFactory.destroy();
-        
+
         LockManager lockManager = LockerManagerFactory.getLockManager();
         assertNotNull(lockManager);
     }
@@ -146,13 +145,12 @@ class LockerManagerFactoryTest {
     @Test
     @DisplayName("test init with FILE lock mode")
     void testInitWithFileLockMode() {
-        try (MockedStatic<EnhancedServiceLoader> loaderMock = 
-                mockStatic(EnhancedServiceLoader.class)) {
-            
-            loaderMock.when(() -> EnhancedServiceLoader.load(
-                    LockManager.class, "file"))
+        try (MockedStatic<EnhancedServiceLoader> loaderMock = mockStatic(EnhancedServiceLoader.class)) {
+
+            loaderMock
+                    .when(() -> EnhancedServiceLoader.load(LockManager.class, "file"))
                     .thenReturn(mockLockManager);
-            
+
             LockerManagerFactory.init(LockMode.FILE);
             assertNotNull(LockerManagerFactory.getLockManager());
         }
@@ -161,13 +159,12 @@ class LockerManagerFactoryTest {
     @Test
     @DisplayName("test init with DB lock mode")
     void testInitWithDBLockMode() {
-        try (MockedStatic<EnhancedServiceLoader> loaderMock = 
-                mockStatic(EnhancedServiceLoader.class)) {
-            
-            loaderMock.when(() -> EnhancedServiceLoader.load(
-                    LockManager.class, "db"))
+        try (MockedStatic<EnhancedServiceLoader> loaderMock = mockStatic(EnhancedServiceLoader.class)) {
+
+            loaderMock
+                    .when(() -> EnhancedServiceLoader.load(LockManager.class, "db"))
                     .thenReturn(mockLockManager);
-            
+
             LockerManagerFactory.init(LockMode.DB);
             assertNotNull(LockerManagerFactory.getLockManager());
         }
@@ -176,16 +173,14 @@ class LockerManagerFactoryTest {
     @Test
     @DisplayName("test init with REDIS lock mode")
     void testInitWithRedisLockMode() {
-        try (MockedStatic<EnhancedServiceLoader> loaderMock = 
-                mockStatic(EnhancedServiceLoader.class)) {
-            
-            loaderMock.when(() -> EnhancedServiceLoader.load(
-                    LockManager.class, "redis"))
+        try (MockedStatic<EnhancedServiceLoader> loaderMock = mockStatic(EnhancedServiceLoader.class)) {
+
+            loaderMock
+                    .when(() -> EnhancedServiceLoader.load(LockManager.class, "redis"))
                     .thenReturn(mockLockManager);
-            
+
             LockerManagerFactory.init(LockMode.REDIS);
             assertNotNull(LockerManagerFactory.getLockManager());
         }
     }
 }
-

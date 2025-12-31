@@ -19,15 +19,12 @@ package org.apache.seata.server.console.exception;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * ConsoleException Test
+ * ConsoleException Test - Direct testing without mocks
  */
-@ExtendWith(MockitoExtension.class)
 @DisplayName("ConsoleException Test")
 class ConsoleExceptionTest {
 
@@ -67,7 +64,7 @@ class ConsoleExceptionTest {
     void testSetLogMessageUpdatesMessage() {
         String newMessage = "New message";
         consoleException.setLogMessage(newMessage);
-        
+
         assertEquals(newMessage, consoleException.getLogMessage());
         assertEquals(newMessage, consoleException.getMessage());
     }
@@ -121,9 +118,10 @@ class ConsoleExceptionTest {
     void testExceptionMessageFormat() {
         String message = "Error occurred";
         ConsoleException exception = new ConsoleException(cause, message);
-        
+
         assertNotNull(exception.toString());
-        assertTrue(exception.toString().contains(message) || exception.toString().contains("ConsoleException"));
+        assertTrue(
+                exception.toString().contains(message) || exception.toString().contains("ConsoleException"));
     }
 
     @Test
@@ -131,10 +129,10 @@ class ConsoleExceptionTest {
     void testMultipleSetLogMessageCalls() {
         consoleException.setLogMessage("Message 1");
         assertEquals("Message 1", consoleException.getMessage());
-        
+
         consoleException.setLogMessage("Message 2");
         assertEquals("Message 2", consoleException.getMessage());
-        
+
         consoleException.setLogMessage("Message 3");
         assertEquals("Message 3", consoleException.getMessage());
     }

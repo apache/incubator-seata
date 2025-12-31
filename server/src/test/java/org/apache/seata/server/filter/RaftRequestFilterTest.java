@@ -16,11 +16,6 @@
  */
 package org.apache.seata.server.filter;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.seata.common.store.SessionMode;
 import org.apache.seata.core.exception.HttpRequestFilterException;
 import org.apache.seata.core.rpc.netty.http.filter.HttpFilterContext;
@@ -35,6 +30,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -76,7 +76,7 @@ class RaftRequestFilterTest {
     void testShouldApplyReturnsTrueInRaftMode() {
         try (MockedStatic<StoreConfig> storeConfigMock = mockStatic(StoreConfig.class)) {
             storeConfigMock.when(StoreConfig::getSessionMode).thenReturn(SessionMode.RAFT);
-            
+
             RaftRequestFilter filter = new RaftRequestFilter();
             assertTrue(filter.shouldApply());
         }
@@ -87,7 +87,7 @@ class RaftRequestFilterTest {
     void testShouldApplyReturnsFalseInFileMode() {
         try (MockedStatic<StoreConfig> storeConfigMock = mockStatic(StoreConfig.class)) {
             storeConfigMock.when(StoreConfig::getSessionMode).thenReturn(SessionMode.FILE);
-            
+
             RaftRequestFilter filter = new RaftRequestFilter();
             assertFalse(filter.shouldApply());
         }
@@ -100,9 +100,9 @@ class RaftRequestFilterTest {
         when(mockContext.getRequest()).thenReturn(mockHttpRequest);
         Map<String, List<String>> params = new HashMap<>();
         when(mockParamWrapper.getAllParamsAsMultiMap()).thenReturn(params);
-        
+
         raftFilter.doFilter(mockContext, mockChain);
-        
+
         verify(mockChain).doFilter(mockContext);
     }
 
@@ -114,11 +114,11 @@ class RaftRequestFilterTest {
         when(mockContext.getRequest()).thenReturn(mockHttpRequest);
         Map<String, List<String>> params = new HashMap<>();
         when(mockParamWrapper.getAllParamsAsMultiMap()).thenReturn(params);
-        
+
         RaftRequestFilter.setPrevent("default", true);
-        
+
         raftFilter.doFilter(mockContext, mockChain);
-        
+
         verify(mockChain).doFilter(mockContext);
     }
 
@@ -130,11 +130,10 @@ class RaftRequestFilterTest {
         when(mockContext.getRequest()).thenReturn(mockHttpRequest);
         Map<String, List<String>> params = new HashMap<>();
         when(mockParamWrapper.getAllParamsAsMultiMap()).thenReturn(params);
-        
+
         RaftRequestFilter.setPrevent("default", false);
-        
-        assertThrows(HttpRequestFilterException.class, () -> 
-            raftFilter.doFilter(mockContext, mockChain));
+
+        assertThrows(HttpRequestFilterException.class, () -> raftFilter.doFilter(mockContext, mockChain));
     }
 
     @Test
@@ -143,9 +142,9 @@ class RaftRequestFilterTest {
         ClusterChangeEvent event = mock(ClusterChangeEvent.class);
         when(event.getGroup()).thenReturn("group1");
         when(event.isLeader()).thenReturn(true);
-        
+
         raftFilter.onApplicationEvent(event);
-        
+
         // Verify that setPrevent was called (indirectly through the event handler)
         assertTrue(true); // Event processing completed without exception
     }
@@ -158,9 +157,9 @@ class RaftRequestFilterTest {
         when(mockContext.getRequest()).thenReturn(mockHttpRequest);
         Map<String, List<String>> params = new HashMap<>();
         when(mockParamWrapper.getAllParamsAsMultiMap()).thenReturn(params);
-        
+
         raftFilter.doFilter(mockContext, mockChain);
-        
+
         verify(mockChain).doFilter(mockContext);
     }
 
@@ -170,17 +169,17 @@ class RaftRequestFilterTest {
         when(mockHttpRequest.uri()).thenReturn("/api/v1/console/test");
         when(mockHttpRequest.method()).thenReturn(io.netty.handler.codec.http.HttpMethod.GET);
         when(mockContext.getRequest()).thenReturn(mockHttpRequest);
-        
+
         Map<String, List<String>> params = new HashMap<>();
         List<String> unitParams = new ArrayList<>();
         unitParams.add("group1");
         params.put("unit", unitParams);
         when(mockParamWrapper.getAllParamsAsMultiMap()).thenReturn(params);
-        
+
         RaftRequestFilter.setPrevent("group1", true);
-        
+
         raftFilter.doFilter(mockContext, mockChain);
-        
+
         verify(mockChain).doFilter(mockContext);
     }
 
@@ -189,7 +188,7 @@ class RaftRequestFilterTest {
     void testSetPreventMethod() {
         try (MockedStatic<StoreConfig> storeConfigMock = mockStatic(StoreConfig.class)) {
             storeConfigMock.when(StoreConfig::getSessionMode).thenReturn(SessionMode.RAFT);
-            
+
             RaftRequestFilter.setPrevent("group2", true);
             // If no exception is thrown, the method works correctly
             assertTrue(true);
@@ -203,9 +202,9 @@ class RaftRequestFilterTest {
         when(mockContext.getRequest()).thenReturn(mockHttpRequest);
         Map<String, List<String>> params = new HashMap<>();
         when(mockParamWrapper.getAllParamsAsMultiMap()).thenReturn(params);
-        
+
         raftFilter.doFilter(mockContext, mockChain);
-        
+
         verify(mockChain).doFilter(mockContext);
     }
 
@@ -216,9 +215,9 @@ class RaftRequestFilterTest {
         when(mockContext.getRequest()).thenReturn(mockHttpRequest);
         Map<String, List<String>> params = new HashMap<>();
         when(mockParamWrapper.getAllParamsAsMultiMap()).thenReturn(params);
-        
+
         raftFilter.doFilter(mockContext, mockChain);
-        
+
         verify(mockChain).doFilter(mockContext);
     }
 
@@ -230,11 +229,11 @@ class RaftRequestFilterTest {
         when(mockContext.getRequest()).thenReturn(mockHttpRequest);
         Map<String, List<String>> params = new HashMap<>();
         when(mockParamWrapper.getAllParamsAsMultiMap()).thenReturn(params);
-        
+
         RaftRequestFilter.setPrevent("default", true);
-        
+
         raftFilter.doFilter(mockContext, mockChain);
-        
+
         verify(mockChain).doFilter(mockContext);
     }
 
@@ -246,12 +245,11 @@ class RaftRequestFilterTest {
         when(mockContext.getRequest()).thenReturn(mockHttpRequest);
         Map<String, List<String>> params = new HashMap<>();
         when(mockParamWrapper.getAllParamsAsMultiMap()).thenReturn(params);
-        
+
         RaftRequestFilter.setPrevent("default", true);
-        
+
         raftFilter.doFilter(mockContext, mockChain);
-        
+
         verify(mockChain).doFilter(mockContext);
     }
 }
-

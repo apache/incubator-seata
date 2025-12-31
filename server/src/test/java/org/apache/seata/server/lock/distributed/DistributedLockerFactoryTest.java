@@ -57,7 +57,7 @@ class DistributedLockerFactoryTest {
     @DisplayName("test getDistributedLocker with file type returns default locker")
     void testGetDistributedLockerWithFileTypeReturnsDefaultLocker() {
         DistributedLocker locker = DistributedLockerFactory.getDistributedLocker("file");
-        
+
         assertNotNull(locker);
         assertTrue(locker instanceof DefaultDistributedLocker);
     }
@@ -65,15 +65,14 @@ class DistributedLockerFactoryTest {
     @Test
     @DisplayName("test getDistributedLocker with valid type")
     void testGetDistributedLockerWithValidType() {
-        try (MockedStatic<EnhancedServiceLoader> enhancedServiceLoaderMock = 
-                mockStatic(EnhancedServiceLoader.class)) {
-            
-            enhancedServiceLoaderMock.when(() -> EnhancedServiceLoader.load(
-                    DistributedLocker.class, "redis"))
+        try (MockedStatic<EnhancedServiceLoader> enhancedServiceLoaderMock = mockStatic(EnhancedServiceLoader.class)) {
+
+            enhancedServiceLoaderMock
+                    .when(() -> EnhancedServiceLoader.load(DistributedLocker.class, "redis"))
                     .thenReturn(mockDistributedLocker);
-            
+
             DistributedLocker locker = DistributedLockerFactory.getDistributedLocker("redis");
-            
+
             assertNotNull(locker);
             assertEquals(mockDistributedLocker, locker);
         }
@@ -82,15 +81,14 @@ class DistributedLockerFactoryTest {
     @Test
     @DisplayName("test getDistributedLocker with unknown type returns default locker")
     void testGetDistributedLockerWithUnknownTypeReturnsDefaultLocker() {
-        try (MockedStatic<EnhancedServiceLoader> enhancedServiceLoaderMock = 
-                mockStatic(EnhancedServiceLoader.class)) {
-            
-            enhancedServiceLoaderMock.when(() -> EnhancedServiceLoader.load(
-                    DistributedLocker.class, "unknown"))
+        try (MockedStatic<EnhancedServiceLoader> enhancedServiceLoaderMock = mockStatic(EnhancedServiceLoader.class)) {
+
+            enhancedServiceLoaderMock
+                    .when(() -> EnhancedServiceLoader.load(DistributedLocker.class, "unknown"))
                     .thenThrow(new EnhancedServiceNotFoundException("Not found"));
-            
+
             DistributedLocker locker = DistributedLockerFactory.getDistributedLocker("unknown");
-            
+
             assertNotNull(locker);
             assertTrue(locker instanceof DefaultDistributedLocker);
         }
@@ -101,7 +99,7 @@ class DistributedLockerFactoryTest {
     void testGetDistributedLockerSingletonPattern() {
         DistributedLocker locker1 = DistributedLockerFactory.getDistributedLocker("file");
         DistributedLocker locker2 = DistributedLockerFactory.getDistributedLocker("file");
-        
+
         assertSame(locker1, locker2);
     }
 
@@ -111,7 +109,7 @@ class DistributedLockerFactoryTest {
         DistributedLocker locker1 = DistributedLockerFactory.getDistributedLocker("file");
         DistributedLocker locker2 = DistributedLockerFactory.getDistributedLocker("file");
         DistributedLocker locker3 = DistributedLockerFactory.getDistributedLocker("file");
-        
+
         assertNotNull(locker1);
         assertNotNull(locker2);
         assertNotNull(locker3);
@@ -123,11 +121,11 @@ class DistributedLockerFactoryTest {
     @DisplayName("test cleanLocker resets singleton")
     void testCleanLockerResetsSingleton() {
         DistributedLocker locker1 = DistributedLockerFactory.getDistributedLocker("file");
-        
+
         DistributedLockerFactory.cleanLocker();
-        
+
         DistributedLocker locker2 = DistributedLockerFactory.getDistributedLocker("file");
-        
+
         assertNotNull(locker1);
         assertNotNull(locker2);
         // After clean, we should get a new instance (though it might be the same class)
@@ -137,16 +135,15 @@ class DistributedLockerFactoryTest {
     @Test
     @DisplayName("test getDistributedLocker with redis type")
     void testGetDistributedLockerWithRedisType() {
-        try (MockedStatic<EnhancedServiceLoader> enhancedServiceLoaderMock = 
-                mockStatic(EnhancedServiceLoader.class)) {
-            
+        try (MockedStatic<EnhancedServiceLoader> enhancedServiceLoaderMock = mockStatic(EnhancedServiceLoader.class)) {
+
             DistributedLocker redisLocker = mock(DistributedLocker.class);
-            enhancedServiceLoaderMock.when(() -> EnhancedServiceLoader.load(
-                    DistributedLocker.class, "redis"))
+            enhancedServiceLoaderMock
+                    .when(() -> EnhancedServiceLoader.load(DistributedLocker.class, "redis"))
                     .thenReturn(redisLocker);
-            
+
             DistributedLocker locker = DistributedLockerFactory.getDistributedLocker("redis");
-            
+
             assertNotNull(locker);
             assertEquals(redisLocker, locker);
         }
@@ -162,21 +159,18 @@ class DistributedLockerFactoryTest {
     @Test
     @DisplayName("test thread safety of singleton initialization")
     void testThreadSafetyOfSingletonInitialization() throws InterruptedException {
-        Thread thread1 = new Thread(() -> 
-            DistributedLockerFactory.getDistributedLocker("file"));
-        Thread thread2 = new Thread(() -> 
-            DistributedLockerFactory.getDistributedLocker("file"));
-        
+        Thread thread1 = new Thread(() -> DistributedLockerFactory.getDistributedLocker("file"));
+        Thread thread2 = new Thread(() -> DistributedLockerFactory.getDistributedLocker("file"));
+
         DistributedLockerFactory.cleanLocker();
-        
+
         thread1.start();
         thread2.start();
-        
+
         thread1.join();
         thread2.join();
-        
+
         DistributedLocker locker1 = DistributedLockerFactory.getDistributedLocker("file");
         assertNotNull(locker1);
     }
 }
-

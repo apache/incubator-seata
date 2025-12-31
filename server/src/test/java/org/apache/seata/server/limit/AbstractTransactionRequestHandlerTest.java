@@ -65,9 +65,9 @@ class AbstractTransactionRequestHandlerTest {
     @DisplayName("test next handler without chaining")
     void testNextHandlerWithoutChaining() {
         when(mockRequest.handle(mockRpcContext)).thenReturn(mockResponse);
-        
+
         AbstractTransactionResponse result = handler.handle(mockRequest, mockRpcContext);
-        
+
         assertNotNull(result);
         verify(mockRequest).handle(mockRpcContext);
     }
@@ -76,11 +76,11 @@ class AbstractTransactionRequestHandlerTest {
     @DisplayName("test next handler with chaining")
     void testNextHandlerWithChaining() {
         when(mockRequest.handle(mockRpcContext)).thenReturn(mockResponse);
-        
+
         handler.setTransactionRequestLimitHandler(nextHandler);
-        
+
         AbstractTransactionResponse result = handler.handle(mockRequest, mockRpcContext);
-        
+
         assertNotNull(result);
         verify(mockRequest).handle(mockRpcContext);
     }
@@ -89,9 +89,9 @@ class AbstractTransactionRequestHandlerTest {
     @DisplayName("test setTransactionRequestLimitHandler")
     void testSetTransactionRequestLimitHandler() {
         assertNull(handler.abstractTransactionRequestHandler);
-        
+
         handler.setTransactionRequestLimitHandler(nextHandler);
-        
+
         assertNotNull(handler.abstractTransactionRequestHandler);
         assertSame(handler.abstractTransactionRequestHandler, nextHandler);
     }
@@ -101,9 +101,9 @@ class AbstractTransactionRequestHandlerTest {
     void testNextWithNullHandler() {
         handler.setTransactionRequestLimitHandler(null);
         when(mockRequest.handle(mockRpcContext)).thenReturn(mockResponse);
-        
+
         AbstractTransactionResponse result = handler.next(mockRequest, mockRpcContext);
-        
+
         assertNotNull(result);
         verify(mockRequest).handle(mockRpcContext);
     }
@@ -114,14 +114,14 @@ class AbstractTransactionRequestHandlerTest {
         AbstractTransactionRequestHandler handler1 = new TestTransactionRequestHandler();
         AbstractTransactionRequestHandler handler2 = new TestTransactionRequestHandler();
         AbstractTransactionRequestHandler handler3 = new TestTransactionRequestHandler();
-        
+
         handler1.setTransactionRequestLimitHandler(handler2);
         handler2.setTransactionRequestLimitHandler(handler3);
-        
+
         when(mockRequest.handle(mockRpcContext)).thenReturn(mockResponse);
-        
+
         AbstractTransactionResponse result = handler1.handle(mockRequest, mockRpcContext);
-        
+
         assertNotNull(result);
     }
 
@@ -131,13 +131,13 @@ class AbstractTransactionRequestHandlerTest {
         TestTransactionRequestHandler handler1 = new TestTransactionRequestHandler();
         TestTransactionRequestHandler handler2 = new TestTransactionRequestHandler();
         TestTransactionRequestHandler handler3 = new TestTransactionRequestHandler();
-        
+
         handler.setTransactionRequestLimitHandler(handler1);
         assertEquals(handler1, handler.abstractTransactionRequestHandler);
-        
+
         handler.setTransactionRequestLimitHandler(handler2);
         assertEquals(handler2, handler.abstractTransactionRequestHandler);
-        
+
         handler.setTransactionRequestLimitHandler(handler3);
         assertEquals(handler3, handler.abstractTransactionRequestHandler);
     }
@@ -146,9 +146,9 @@ class AbstractTransactionRequestHandlerTest {
     @DisplayName("test handle delegates to next")
     void testHandleDelegatesToNext() {
         when(mockRequest.handle(mockRpcContext)).thenReturn(mockResponse);
-        
+
         AbstractTransactionResponse result = handler.handle(mockRequest, mockRpcContext);
-        
+
         assertEquals(mockResponse, result);
     }
 
@@ -156,12 +156,13 @@ class AbstractTransactionRequestHandlerTest {
     @DisplayName("test handler is abstract or can be extended")
     void testHandlerIsAbstractOrExtendable() {
         // Verify the handler instance is a subclass of AbstractTransactionRequestHandler
-        assertTrue(handler instanceof AbstractTransactionRequestHandler,
+        assertTrue(
+                handler instanceof AbstractTransactionRequestHandler,
                 "Handler should be an instance of AbstractTransactionRequestHandler");
-        
+
         // Verify it can be extended by checking TestTransactionRequestHandler
-        assertTrue(TestTransactionRequestHandler.class.getSuperclass()
-                   .equals(AbstractTransactionRequestHandler.class),
+        assertTrue(
+                TestTransactionRequestHandler.class.getSuperclass().equals(AbstractTransactionRequestHandler.class),
                 "TestTransactionRequestHandler should extend AbstractTransactionRequestHandler");
     }
 
@@ -169,9 +170,9 @@ class AbstractTransactionRequestHandlerTest {
     @DisplayName("test next method returns response from request")
     void testNextMethodReturnsResponseFromRequest() {
         when(mockRequest.handle(mockRpcContext)).thenReturn(mockResponse);
-        
+
         AbstractTransactionResponse result = handler.next(mockRequest, mockRpcContext);
-        
+
         assertEquals(mockResponse, result);
         verify(mockRequest).handle(mockRpcContext);
     }
@@ -181,10 +182,9 @@ class AbstractTransactionRequestHandlerTest {
     void testNextMethodWithChainedHandler() {
         handler.setTransactionRequestLimitHandler(nextHandler);
         when(mockRequest.handle(mockRpcContext)).thenReturn(mockResponse);
-        
+
         AbstractTransactionResponse result = handler.next(mockRequest, mockRpcContext);
-        
+
         assertNotNull(result);
     }
 }
-

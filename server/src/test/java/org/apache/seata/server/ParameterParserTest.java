@@ -19,15 +19,12 @@ package org.apache.seata.server;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * ParameterParser Test
+ * ParameterParser Test - Direct testing without mocks
  */
-@ExtendWith(MockitoExtension.class)
 @DisplayName("ParameterParser Test")
 class ParameterParserTest {
 
@@ -108,7 +105,7 @@ class ParameterParserTest {
                 "-h", "localhost",
                 "-p", "8080",
                 "-m", "file");
-        
+
         assertEquals("localhost", parser.getHost());
         assertEquals(8080, parser.getPort());
         assertEquals("file", parser.getStoreMode());
@@ -121,7 +118,7 @@ class ParameterParserTest {
                 "--host", "192.168.1.1",
                 "--port", "9090",
                 "--storeMode", "db");
-        
+
         assertEquals("192.168.1.1", parser.getHost());
         assertEquals(9090, parser.getPort());
         assertEquals("db", parser.getStoreMode());
@@ -133,7 +130,7 @@ class ParameterParserTest {
         ParameterParser parser = new ParameterParser(
                 "--serverNode", "1",
                 "-p", "8080");
-        
+
         assertEquals(1L, parser.getServerNode());
     }
 
@@ -143,7 +140,7 @@ class ParameterParserTest {
         ParameterParser parser = new ParameterParser(
                 "--seataEnv", "test",
                 "-p", "8080");
-        
+
         assertEquals("test", parser.getSeataEnv());
     }
 
@@ -153,7 +150,7 @@ class ParameterParserTest {
         ParameterParser parser = new ParameterParser(
                 "--sessionStoreMode", "redis",
                 "-p", "8080");
-        
+
         assertEquals("redis", parser.getSessionStoreMode());
     }
 
@@ -163,7 +160,7 @@ class ParameterParserTest {
         ParameterParser parser = new ParameterParser(
                 "--lockStoreMode", "db",
                 "-p", "8080");
-        
+
         assertEquals("db", parser.getLockStoreMode());
     }
 
@@ -185,7 +182,7 @@ class ParameterParserTest {
                 "-e", "prod",
                 "-ssm", "db",
                 "-lsm", "redis");
-        
+
         assertEquals("localhost", parser.getHost());
         assertEquals(8080, parser.getPort());
         assertEquals("file", parser.getStoreMode());

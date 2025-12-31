@@ -20,15 +20,12 @@ import org.apache.seata.core.event.EventBus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * EventBusManager Test
+ * EventBusManager Test - Direct testing without mocks
  */
-@ExtendWith(MockitoExtension.class)
 @DisplayName("EventBusManager Test")
 class EventBusManagerTest {
 
@@ -42,7 +39,7 @@ class EventBusManagerTest {
     void testGetSingletonInstance() {
         EventBus eventBus1 = EventBusManager.get();
         EventBus eventBus2 = EventBusManager.get();
-        
+
         assertNotNull(eventBus1);
         assertNotNull(eventBus2);
         assertSame(eventBus1, eventBus2);
@@ -60,8 +57,8 @@ class EventBusManagerTest {
     void testEventBusIsGuavaImplementation() {
         EventBus eventBus = EventBusManager.get();
         // Verify that the EventBus instance is of correct type
-        assertTrue(eventBus.getClass().getName().contains("GuavaEventBus") || 
-                   eventBus.getClass().getName().contains("EventBus"));
+        assertTrue(eventBus.getClass().getName().contains("GuavaEventBus")
+                || eventBus.getClass().getName().contains("EventBus"));
     }
 
     @Test
@@ -70,7 +67,7 @@ class EventBusManagerTest {
         EventBus bus1 = EventBusManager.get();
         EventBus bus2 = EventBusManager.get();
         EventBus bus3 = EventBusManager.get();
-        
+
         assertSame(bus1, bus2);
         assertSame(bus2, bus3);
     }
@@ -79,10 +76,9 @@ class EventBusManagerTest {
     @DisplayName("test event bus methods are accessible")
     void testEventBusMethodsAreAccessible() {
         EventBus eventBus = EventBusManager.get();
-        
+
         // Verify that the EventBus has the necessary methods
         assertNotNull(eventBus);
         assertTrue(eventBus.getClass().getMethods().length > 0);
     }
 }
-
