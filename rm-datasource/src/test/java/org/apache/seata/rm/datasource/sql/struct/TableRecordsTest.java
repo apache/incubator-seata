@@ -20,18 +20,25 @@ import com.alibaba.druid.mock.MockStatement;
 import com.alibaba.druid.mock.MockStatementBase;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.pool.DruidStatementConnection;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.collect.Lists;
 import org.apache.seata.common.exception.ShouldNeverHappenException;
 import org.apache.seata.rm.datasource.DataSourceProxy;
 import org.apache.seata.rm.datasource.DataSourceProxyTest;
 import org.apache.seata.rm.datasource.exception.TableMetaException;
 import org.apache.seata.rm.datasource.mock.MockDriver;
+import org.apache.seata.sqlparser.struct.ColumnMeta;
+import org.apache.seata.sqlparser.struct.IndexMeta;
+import org.apache.seata.sqlparser.struct.IndexType;
 import org.apache.seata.sqlparser.struct.TableMeta;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -328,7 +335,7 @@ public class TableRecordsTest {
     };
 
     @Test
-    public void testBuildRecordsWithOffsetDateTime() throws SQLException {
+    public void testBuildRecordsWithOffsetDateTime() throws SQLException, IOException {
         MockDriver mockDriver = new MockDriver(
                 returnValueColumnLabelsOffsetDateTime,
                 returnValueOffsetDateTime,
@@ -341,10 +348,26 @@ public class TableRecordsTest {
 
         try (MockStatementBase mockStatement = new MockStatement(getPhysicsConnection(dataSource))) {
             DataSourceProxy proxy = DataSourceProxyTest.getDataSourceProxy(dataSource);
-            TableMetaCacheFactory.getTableMetaCache(JdbcConstants.MYSQL)
+            TableMetaCacheFactory.getTableMetaCache(JdbcConstants.POSTGRESQL)
                     .refresh(proxy.getPlainConnection(), proxy.getResourceId());
-            TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(JdbcConstants.MYSQL)
+            TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(JdbcConstants.POSTGRESQL)
                     .getTableMeta(proxy.getPlainConnection(), "table_records_test", proxy.getResourceId());
+            ColumnMeta idColumnMeta = new ColumnMeta();
+            idColumnMeta.setColumnName("id");
+            idColumnMeta.setDataType(java.sql.Types.INTEGER);
+            idColumnMeta.setTableName("table_records_test");
+            idColumnMeta.setIsAutoincrement("NO");
+            idColumnMeta.setIsNullAble("NO");
+
+            IndexMeta primaryIndex = new IndexMeta();
+            primaryIndex.setIndexName("PRIMARY");
+            primaryIndex.setIndextype(IndexType.PRIMARY);
+            primaryIndex.getValues().add(idColumnMeta);
+
+            tableMeta.getAllIndexes().put("PRIMARY", primaryIndex);
+            if (tableMeta.getColumnMeta("id") == null) {
+                tableMeta.getAllColumns().put("id", idColumnMeta);
+            }
             ResultSet originalResultSet = mockDriver.executeQuery(mockStatement, "select * from table_records_test");
             ResultSet proxyResultSet = (ResultSet) java.lang.reflect.Proxy.newProxyInstance(
                     TableRecordsTest.class.getClassLoader(), new Class[] {ResultSet.class}, (p, method, args) -> {
@@ -369,6 +392,19 @@ public class TableRecordsTest {
                     .orElseThrow(() -> new RuntimeException("time_col not found"));
             Assertions.assertEquals(Types.TIMESTAMP_WITH_TIMEZONE, timeField.getType());
             Assertions.assertTrue(timeField.getValue() instanceof OffsetDateTime);
+
+            OffsetDateTime originalTime = (OffsetDateTime) timeField.getValue();
+
+            ObjectMapper mapper = new ObjectMapper()
+                    .registerModule(new JavaTimeModule())
+                    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                    .disableDefaultTyping();
+
+            byte[] encodedBytes = mapper.writeValueAsBytes(originalTime);
+            OffsetDateTime deserializedTime = mapper.readValue(encodedBytes, OffsetDateTime.class);
+            Assertions.assertEquals(originalTime, deserializedTime);
+        } finally {
+            dataSource.close();
         }
     }
 }
