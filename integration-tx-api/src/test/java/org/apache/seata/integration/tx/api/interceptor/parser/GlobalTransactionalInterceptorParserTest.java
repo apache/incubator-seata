@@ -40,7 +40,7 @@ public class GlobalTransactionalInterceptorParserTest {
     }
 
     @Test
-    void shouldExcludePrivateMethodsFromProxy() throws Exception {
+    void shouldProxyOnlyNonPrivateMethods() throws Exception {
         NonPrivateMethodTestClass testClass = new NonPrivateMethodTestClass();
 
         GlobalTransactionalInterceptorParser globalTransactionalInterceptorParser =
