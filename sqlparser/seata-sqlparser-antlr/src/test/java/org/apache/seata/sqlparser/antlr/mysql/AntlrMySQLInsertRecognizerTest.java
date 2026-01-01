@@ -210,7 +210,7 @@ public class AntlrMySQLInsertRecognizerTest {
         Assertions.assertEquals("users", recognizer.getTableName());
         Assertions.assertEquals(SQLType.INSERT, recognizer.getSQLType());
         Assertions.assertFalse(recognizer.insertColumnsIsEmpty());
-        
+
         List<String> columns = recognizer.getInsertColumns();
         Assertions.assertNotNull(columns);
         Assertions.assertEquals(4, columns.size());
