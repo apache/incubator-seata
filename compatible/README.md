@@ -14,7 +14,12 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-### Seata-compatible
-Starting from version 2.1.x, Seata's package name has been changed from "io.seata" to "org.apache.seata". To assist users with a smooth upgrade from older versions, we have implemented compatibility for the following commonly used APIs.
-- RootContext
+### Seata Compatibility
+
+Starting from version 2.1.x, Seata's package name has been changed from `io.seata` to `org.apache.seata`.
+
+To assist users with a smooth upgrade from older versions, 
+we have implemented compatibility for the following commonly used APIs:
+
+- `RootContext`
 
