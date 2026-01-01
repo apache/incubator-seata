@@ -24,7 +24,7 @@ public class NonPrivateMethodTestClass {
     private static final Logger LOGGER = LoggerFactory.getLogger(NonPrivateMethodTestClass.class);
 
     @GlobalTransactional(timeoutMills = 300000)
-    String dftMethod() {
+    String defaultMethod() {
         LOGGER.info("default method");
         return "default method";
     }
