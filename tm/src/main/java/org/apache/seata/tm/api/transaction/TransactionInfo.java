@@ -48,7 +48,6 @@ import java.util.Set;
  *     .build();
  * }</pre>
  *
- * @author Seata Team
  * @see org.apache.seata.tm.api.TransactionalExecutor#getTransactionInfo()
  * @see Propagation
  * @since 1.0.0
