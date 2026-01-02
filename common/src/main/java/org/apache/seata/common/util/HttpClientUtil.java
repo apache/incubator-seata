@@ -218,19 +218,20 @@ public class HttpClientUtil {
     /**
      * Create an HTTP/2 client for watch connections.
      * This client is configured for long-lived connections to receive Server-Sent Events (SSE).
+     * The client instances are cached and reused based on the connection timeout to improve performance.
      *
      * @param connectTimeoutSeconds connection timeout in seconds (fast failure if server is unreachable)
-     * @return configured OkHttpClient instance
+     * @return configured OkHttpClient instance (cached and reused)
      */
     private static OkHttpClient createHttp2WatchClient(int connectTimeoutSeconds) {
-        return new OkHttpClient.Builder()
+        return HTTP2_CLIENT_MAP.computeIfAbsent(connectTimeoutSeconds, k -> new OkHttpClient.Builder()
                 .protocols(Collections.singletonList(Protocol.H2_PRIOR_KNOWLEDGE))
                 // Fast failure during connection phase
                 .connectTimeout(connectTimeoutSeconds, TimeUnit.SECONDS)
                 // Infinite read timeout to allow continuous listening for server push
                 .readTimeout(0, TimeUnit.SECONDS)
                 .writeTimeout(connectTimeoutSeconds, TimeUnit.SECONDS)
-                .build();
+                .build());
     }
 
     public static <T> SeataHttpWatch<T> watch(String url, Map<String, String> headers, Class<T> eventType)

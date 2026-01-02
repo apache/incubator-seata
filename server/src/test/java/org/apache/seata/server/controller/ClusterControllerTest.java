@@ -274,7 +274,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
         // Trigger multiple cluster change events with different terms
         Thread triggerThread = new Thread(() -> {
             try {
-                Thread.sleep(1000); // Wait for connection to be established
+                Thread.sleep(3000); // Wait for connection to be established
                 ApplicationEventPublisher publisher = (ApplicationEventPublisher)
                         ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT);
 
@@ -325,10 +325,12 @@ class ClusterControllerTest extends BaseSpringBootTest {
 
                             // Verify term matches expected value
                             long expectedTerm = expectedTerms[clusterUpdateCount - 1];
+                            long actualTerm = response.object.getTerm().longValue();
                             Assertions.assertEquals(
                                     expectedTerm,
-                                    response.object.getTerm().longValue(),
-                                    "Term should be " + expectedTerm + " for cluster update #" + clusterUpdateCount);
+                                    actualTerm,
+                                    "Term should be " + expectedTerm + "But actualTerm is " + actualTerm
+                                            + " for cluster update #" + clusterUpdateCount);
                         }
                     }
                 } catch (Exception e) {
