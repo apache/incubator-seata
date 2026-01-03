@@ -30,6 +30,6 @@ declare module '*.svg' {
 declare module 'lodash';
 
 export interface GlobalProps {
-  locale: ILocale;
+  locale: any;
   history: History;
 }

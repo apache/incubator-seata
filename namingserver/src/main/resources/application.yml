@@ -14,10 +14,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 server:
   port: 8081
 spring:
+  threads:
+    virtual:
+      enabled: true
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  ai:
+    mcp:
+      server:
+        protocol: streamable
+        streamable-http:
+          mcp-endpoint: /mcp
+        name: mcp-server
+        version: 1.0.0
   application:
     name: seata-namingserver
 logging:
@@ -27,6 +40,16 @@ logging:
 heartbeat:
   threshold: 90000
   period: 60000
+console:
+  # console username and password configuration
+  user:
+    username:
+    password:
+  # When the console is deployed independently, configure the namingserver address
+#  namingserver:
+#    protocol: http
+#    addr:
+#      - 127.0.0.1:8081
 seata:
   security:
     secretKey: SeataSecretKey0c382ef121d778043159209298fd40bf3850a017
@@ -34,3 +57,8 @@ seata:
     csrf-ignore-urls: /naming/v1/**,/api/v1/naming/**
     ignore:
       urls: /,/**/*.css,/**/*.js,/**/*.html,/**/*.map,/**/*.svg,/**/*.png,/**/*.jpeg,/**/*.ico,/api/v1/auth/login,/version.json,/naming/v1/health,/error
+  # MCP Server Configuration
+  mcp:
+    # Maximum query time interval, The unit is milliseconds, Default one day
+    query:
+      max-query-duration: 86400000

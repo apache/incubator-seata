@@ -394,7 +394,7 @@ public class ChannelManager {
                 }
             }
 
-            // No channel on the this app node, try another one.
+            // No channel on the app node, try another one.
             if (resultChannel == null) {
                 for (ConcurrentMap.Entry<String, ConcurrentMap<Integer, RpcContext>> ipMapEntry : ipMap.entrySet()) {
                     if (ipMapEntry.getKey().equals(targetIP)) {

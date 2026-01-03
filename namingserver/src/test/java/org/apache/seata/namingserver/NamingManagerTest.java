@@ -16,8 +16,8 @@
  */
 package org.apache.seata.namingserver;
 
-import org.apache.http.StatusLine;
-import org.apache.http.client.methods.CloseableHttpResponse;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 import org.apache.seata.common.metadata.Cluster;
 import org.apache.seata.common.metadata.ClusterRole;
 import org.apache.seata.common.metadata.Node;
@@ -64,10 +64,10 @@ class NamingManagerTest {
     private ApplicationContext applicationContext;
 
     @Mock
-    private CloseableHttpResponse httpResponse;
+    private Response httpResponse;
 
     @Mock
-    private StatusLine statusLine;
+    private ResponseBody responseBody;
 
     private MockedStatic<HttpClientUtil> mockedHttpClientUtil;
 
@@ -78,7 +78,8 @@ class NamingManagerTest {
         ReflectionTestUtils.setField(namingManager, "heartbeatTimeThreshold", 500000);
         ReflectionTestUtils.setField(namingManager, "heartbeatCheckTimePeriod", 10000000);
 
-        Mockito.when(httpResponse.getStatusLine()).thenReturn(statusLine);
+        Mockito.when(httpResponse.code()).thenReturn(200);
+        Mockito.when(httpResponse.body()).thenReturn(responseBody);
         mockedHttpClientUtil = Mockito.mockStatic(HttpClientUtil.class);
         mockedHttpClientUtil
                 .when(() -> HttpClientUtil.doGet(anyString(), anyMap(), anyMap(), anyInt()))
@@ -118,7 +119,7 @@ class NamingManagerTest {
 
         assertTrue(result);
 
-        List<Node> instances = namingManager.getInstances(namespace, clusterName);
+        List<NamingServerNode> instances = namingManager.getInstances(namespace, clusterName);
         assertEquals(1, instances.size());
         assertEquals("127.0.0.1", instances.get(0).getTransaction().getHost());
         assertEquals(8080, instances.get(0).getTransaction().getPort());
@@ -153,7 +154,7 @@ class NamingManagerTest {
         node.getMetadata().put(CONSTANT_GROUP, vGroups);
         namingManager.registerInstance(node, namespace, clusterName, unitName);
 
-        List<Node> instances = namingManager.getInstances(namespace, clusterName);
+        List<NamingServerNode> instances = namingManager.getInstances(namespace, clusterName);
         assertEquals(1, instances.size());
 
         boolean result = namingManager.unregisterInstance(namespace, clusterName, unitName, node);
@@ -199,7 +200,7 @@ class NamingManagerTest {
         node.getMetadata().put(CONSTANT_GROUP, vGroups);
         namingManager.registerInstance(node, namespace, clusterName, unitName);
 
-        List<Node> instances = namingManager.getInstances(namespace, clusterName);
+        List<NamingServerNode> instances = namingManager.getInstances(namespace, clusterName);
         assertEquals(1, instances.size());
 
         ReflectionTestUtils.setField(namingManager, "heartbeatTimeThreshold", 10);
@@ -210,7 +211,7 @@ class NamingManagerTest {
         }
         namingManager.instanceHeartBeatCheck();
 
-        List<Node> afterHeartBeat = namingManager.getInstances(namespace, clusterName);
+        List<NamingServerNode> afterHeartBeat = namingManager.getInstances(namespace, clusterName);
         assertEquals(0, afterHeartBeat.size());
         Mockito.verify(applicationContext, Mockito.times(2)).publishEvent(any(ClusterChangeEvent.class));
     }
@@ -228,7 +229,7 @@ class NamingManagerTest {
         node.getMetadata().put(CONSTANT_GROUP, vGroups);
         namingManager.registerInstance(node, namespace, clusterName, unitName);
 
-        Mockito.when(statusLine.getStatusCode()).thenReturn(200);
+        Mockito.when(httpResponse.code()).thenReturn(200);
         Result<String> result = namingManager.createGroup(namespace, vGroup, clusterName, unitName);
         assertFalse(result.isSuccess());
         vGroup = "test-vGroup2";
@@ -292,8 +293,8 @@ class NamingManagerTest {
         nodeList.add(node);
         unit.setNamingInstanceList(nodeList);
 
-        Mockito.when(httpResponse.getStatusLine()).thenReturn(statusLine);
-        Mockito.when(statusLine.getStatusCode()).thenReturn(200);
+        Mockito.when(httpResponse.code()).thenReturn(200);
+        Mockito.when(httpResponse.body()).thenReturn(responseBody);
 
         mockedHttpClientUtil
                 .when(() -> HttpClientUtil.doGet(anyString(), anyMap(), anyMap(), anyInt()))
@@ -383,9 +384,15 @@ class NamingManagerTest {
         org.apache.seata.namingserver.entity.vo.v2.NamespaceVO namespaceVO =
                 result.getData().get(namespace);
         assertNotNull(namespaceVO);
-        assertNotNull(namespaceVO.getClusterVgroups());
-        assertTrue(namespaceVO.getClusterVgroups().containsKey(clusterName));
-        assertTrue(namespaceVO.getClusterVgroups().get(clusterName).contains(vGroup));
+        assertNotNull(namespaceVO.getClusters());
+        assertTrue(namespaceVO.getClusters().containsKey(clusterName));
+        org.apache.seata.namingserver.entity.vo.v2.ClusterVO clusterVO =
+                namespaceVO.getClusters().get(clusterName);
+        assertNotNull(clusterVO);
+        assertNotNull(clusterVO.getVgroups());
+        assertTrue(clusterVO.getVgroups().contains(vGroup));
+        assertNotNull(clusterVO.getUnits());
+        assertTrue(clusterVO.getUnits().contains(unitName));
     }
 
     @Test

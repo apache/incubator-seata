@@ -143,8 +143,8 @@
         <mockwebserver-version>4.12.0</mockwebserver-version>
         <native-lib-loader.version>2.4.0</native-lib-loader.version>
 
-        <!--  for fury  -->
-        <fury.version>0.8.0</fury.version>
+        <!--  for fory  -->
+        <fory.version>0.12.3</fory.version>
     </properties>
 
     <dependencyManagement>
@@ -894,11 +894,11 @@
                 <version>${rocketmq-version}</version>
             </dependency>
 
-            <!-- Fury Serialize -->
+            <!-- Fory Serialize -->
             <dependency>
-                <groupId>org.apache.fury</groupId>
-                <artifactId>fury-core</artifactId>
-                <version>${fury.version}</version>
+                <groupId>org.apache.fory</groupId>
+                <artifactId>fory-core</artifactId>
+                <version>${fory.version}</version>
             </dependency>
             <dependency>
                 <groupId>commons-io</groupId>
