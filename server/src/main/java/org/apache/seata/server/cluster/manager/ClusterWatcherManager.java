@@ -111,7 +111,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
 
     private void notifyWatcher(Watcher<HttpContext> watcher) {
         HttpContext context = watcher.getAsyncContext();
-        boolean isHttp2 = context instanceof HttpContext && context.isHttp2();
+        boolean isHttp2 = context.isHttp2();
 
         if (!isHttp2) {
             watcher.setDone(true);
