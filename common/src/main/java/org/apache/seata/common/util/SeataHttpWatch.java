@@ -16,7 +16,7 @@
  */
 package org.apache.seata.common.util;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
@@ -203,7 +203,8 @@ public class SeataHttpWatch<T>
     }
 
     /**
-     * Parse SSE event JSON into Response object
+     * Parse SSE event JSON into Response object.
+     * Uses JsonNode to parse JSON only once for better performance.
      *
      * @param json the JSON string to parse (contains type field)
      * @return the parsed Response object
@@ -211,15 +212,10 @@ public class SeataHttpWatch<T>
      */
     private Response<T> parseEvent(String json) throws IOException {
         try {
-            // Parse JSON once to get both event type and full data
-            // First, parse to extract event type
-            EventMetadata metadata = objectMapper.readValue(json, EventMetadata.class);
-
-            // Map event type from JSON to Response.Type
-            Response.Type responseType = mapEventTypeToResponseType(metadata.type);
-
-            // Deserialize the full event data (parse once, reuse if possible)
-            T eventData = objectMapper.readValue(json, eventType);
+            JsonNode jsonNode = objectMapper.readTree(json);
+            String eventTypeStr = jsonNode.has("type") ? jsonNode.get("type").asText() : null;
+            Response.Type responseType = mapEventTypeToResponseType(eventTypeStr);
+            T eventData = objectMapper.treeToValue(jsonNode, eventType);
 
             return new Response<>(responseType, eventData);
 
@@ -251,17 +247,6 @@ public class SeataHttpWatch<T>
                 LOGGER.warn("Unknown event type: {}, defaulting to CLUSTER_UPDATE", eventType);
                 return Response.Type.CLUSTER_UPDATE;
         }
-    }
-
-    /**
-     * Event metadata for parsing event type from JSON
-     */
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    private static class EventMetadata {
-        /**
-         * Event type string
-         */
-        public String type;
     }
 
     @Override
