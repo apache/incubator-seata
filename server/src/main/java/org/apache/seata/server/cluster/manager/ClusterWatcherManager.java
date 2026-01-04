@@ -73,7 +73,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
                         Optional.ofNullable(WATCHERS.remove(group))
                                 .ifPresent(watchers -> watchers.parallelStream().forEach(watcher -> {
                                     HttpContext context = watcher.getAsyncContext();
-                                    boolean isHttp2 = context instanceof HttpContext && context.isHttp2();
+                                    boolean isHttp2 = context.isHttp2();
                                     if (isHttp2) {
                                         if (!context.getContext().channel().isActive()) {
                                             watcher.setDone(true);
