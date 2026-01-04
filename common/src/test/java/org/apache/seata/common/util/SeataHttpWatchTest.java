@@ -408,10 +408,10 @@ public class SeataHttpWatchTest {
         assertNull(response.object);
     }
 
-    // TC发送SSE的固定格式\n\n 一次事件只发送一行,客户端每次读一行
+    // TC sends SSE in a fixed format: each event is sent in a single line, and the client reads one line at a time
     @Test
     public void testNext_WithMultipleEvents() throws IOException {
-        // 模拟两个事件
+        // Simulate two events
         String sseData = "data: {\"type\":\"keepalive\",\"group\":\"default-test\",\"timestamp\":1234567890}\n\n"
                 + "data: {\"type\":\"cluster-update\",\"group\":\"default-test\",\"term\":2,\"timestamp\":1234567891}\n\n";
         Buffer buffer = new Buffer();

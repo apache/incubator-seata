@@ -602,8 +602,6 @@ public class HttpClientUtilTest {
         assertNotNull(nonjsonResponse);
     }
 
-    // ========== Watch 方法测试 ==========
-
     @Test
     void testWatch_WithInvalidUrl() {
         // Test watch with invalid URL

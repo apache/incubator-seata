@@ -43,18 +43,45 @@ public class HttpClientUtil {
 
     private static final Map<Integer /*timeout*/, OkHttpClient> HTTP_CLIENT_MAP = new ConcurrentHashMap<>();
 
+    private static final Map<Integer /*timeout*/, OkHttpClient> HTTP2_CLIENT_MAP = new ConcurrentHashMap<>();
+
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     public static final MediaType MEDIA_TYPE_JSON = MediaType.parse("application/json");
 
     public static final MediaType MEDIA_TYPE_FORM_URLENCODED = MediaType.parse("application/x-www-form-urlencoded");
 
+    /**
+     * Connection timeout for HTTP/2 watch connections (in seconds).
+     * This timeout is set to 30 seconds to allow sufficient time for establishing the initial connection
+     * while ensuring quick failure if the server is unreachable. Once the connection is established,
+     * the read timeout is set to 0 (infinite) to allow long-lived connections for receiving
+     * Server-Sent Events (SSE) without interruption.
+     */
+    private static final int HTTP2_WATCH_CONNECT_TIMEOUT_SECONDS = 30;
+
     static {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             HTTP_CLIENT_MAP.values().parallelStream().forEach(client -> {
                 try {
-                    // delay 3s, make sure unregister http request send successfully
+                    // Delay 3 seconds to ensure unregister HTTP requests are sent successfully
                     Thread.sleep(3000);
+                    client.dispatcher().executorService().shutdown();
+                    // Wait for up to 3 seconds for in-flight requests to complete
+                    if (!client.dispatcher().executorService().awaitTermination(3, TimeUnit.SECONDS)) {
+                        LOGGER.warn("Timeout waiting for OkHttp executor service to terminate.");
+                    }
+                    client.connectionPool().evictAll();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    LOGGER.error("Interrupted while waiting for OkHttp executor service to terminate.", e);
+                } catch (Exception e) {
+                    LOGGER.error(e.getMessage(), e);
+                }
+            });
+
+            HTTP2_CLIENT_MAP.values().parallelStream().forEach(client -> {
+                try {
                     client.dispatcher().executorService().shutdown();
                     // Wait for up to 3 seconds for in-flight requests to complete
                     if (!client.dispatcher().executorService().awaitTermination(3, TimeUnit.SECONDS)) {
@@ -188,13 +215,23 @@ public class HttpClientUtil {
         return urlBuilder.toString();
     }
 
+    /**
+     * Create an HTTP/2 client for watch connections.
+     * This client is configured for long-lived connections to receive Server-Sent Events (SSE).
+     * The client instances are cached and reused based on the connection timeout to improve performance.
+     *
+     * @param connectTimeoutSeconds connection timeout in seconds (fast failure if server is unreachable)
+     * @return configured OkHttpClient instance (cached and reused)
+     */
     private static OkHttpClient createHttp2WatchClient(int connectTimeoutSeconds) {
-        return new OkHttpClient.Builder()
+        return HTTP2_CLIENT_MAP.computeIfAbsent(connectTimeoutSeconds, k -> new OkHttpClient.Builder()
                 .protocols(Collections.singletonList(Protocol.H2_PRIOR_KNOWLEDGE))
-                .connectTimeout(connectTimeoutSeconds, TimeUnit.SECONDS) // 连接阶段快速失败
-                .readTimeout(0, TimeUnit.SECONDS) // 等待TC推送数据(建立连接后持续监听服务器推送)
+                // Fast failure during connection phase
+                .connectTimeout(connectTimeoutSeconds, TimeUnit.SECONDS)
+                // Infinite read timeout to allow continuous listening for server push
+                .readTimeout(0, TimeUnit.SECONDS)
                 .writeTimeout(connectTimeoutSeconds, TimeUnit.SECONDS)
-                .build();
+                .build());
     }
 
     public static <T> SeataHttpWatch<T> watch(String url, Map<String, String> headers, Class<T> eventType)
@@ -209,12 +246,26 @@ public class HttpClientUtil {
     /**
      * Execute a watch request with specified HTTP method and return a Watch iterator.
      * This method creates a long-lived HTTP/2 connection to receive Server-Sent Events (SSE).
+     *
+     * @param url the URL to watch (must not be null or blank)
+     * @param headers HTTP headers
+     * @param requestBody request body (optional)
+     * @param method HTTP method (GET, POST, PUT)
+     * @param eventType the class type for deserializing event data
+     * @param <T> the event data type
+     * @return a Watch instance for receiving SSE events
+     * @throws IOException if the request fails
+     * @throws IllegalArgumentException if the URL is null or blank
      */
     private static <T> SeataHttpWatch<T> watch(
             String url, Map<String, String> headers, RequestBody requestBody, String method, Class<T> eventType)
             throws IOException {
 
-        OkHttpClient client = createHttp2WatchClient(30);
+        if (StringUtils.isBlank(url)) {
+            throw new IllegalArgumentException("URL must not be null or blank");
+        }
+
+        OkHttpClient client = createHttp2WatchClient(HTTP2_WATCH_CONNECT_TIMEOUT_SECONDS);
         Request request = buildHttp2WatchRequest(url, headers, requestBody, method);
         return SeataHttpWatch.createWatch(client, request, eventType);
     }
