@@ -224,7 +224,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
         String group = watcher.getGroup();
         Long term = GROUP_UPDATE_TERM.get(group);
         HttpContext context = watcher.getAsyncContext();
-        boolean isHttp2 = context instanceof HttpContext && context.isHttp2();
+        boolean isHttp2 = context.isHttp2();
         if (term == null || watcher.getTerm() >= term) {
             // For HTTP/2, must send response headers immediately, cannot delay
             if (isHttp2 && !HTTP2_HEADERS_SENT.getOrDefault(watcher, false)) {
