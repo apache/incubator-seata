@@ -51,7 +51,6 @@ import org.apache.seata.core.model.GlobalStatus;
  *
  * <p>Thread-safe. Transaction context managed per-thread using {@link org.apache.seata.core.context.RootContext}.</p>
  *
- * @author Seata Team
  * @see GlobalTransaction
  * @see DefaultGlobalTransaction
  * @since 1.0.0

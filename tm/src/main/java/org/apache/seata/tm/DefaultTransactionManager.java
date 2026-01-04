@@ -73,7 +73,6 @@ import java.util.concurrent.TimeoutException;
  * <p>Thread-safe and typically used indirectly through {@link org.apache.seata.tm.api.DefaultGlobalTransaction}
  * or {@link org.apache.seata.tm.api.TransactionalTemplate}.</p>
  *
- * @author Seata Team
  * @see TransactionManager
  * @see TmNettyRemotingClient
  * @see org.apache.seata.tm.api.DefaultGlobalTransaction

@@ -112,7 +112,6 @@ import java.util.List;
  * <p>This class is thread-safe and can be used concurrently. Transaction context
  * is managed per-thread and does not interfere between threads.</p>
  *
- * @author Seata Team
  * @see TransactionalExecutor
  * @see GlobalTransaction
  * @see org.apache.seata.tm.api.transaction.TransactionInfo
