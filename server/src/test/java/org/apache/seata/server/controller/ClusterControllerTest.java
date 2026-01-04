@@ -329,7 +329,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
                             Assertions.assertEquals(
                                     expectedTerm,
                                     actualTerm,
-                                    "Term should be " + expectedTerm + "But actualTerm is " + actualTerm
+                                    "Term should be " + expectedTerm + " but actualTerm is " + actualTerm
                                             + " for cluster update #" + clusterUpdateCount);
                         }
                     }
