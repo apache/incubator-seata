@@ -14,23 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.saga.statelang.parser.impl;
+package org.apache.seata.common;
 
-import org.apache.seata.saga.statelang.domain.impl.BaseState;
-
-import java.util.Map;
-
-/**
- * BaseStatePaser
- *
- */
-public abstract class BaseStatePaser {
-
-    protected void parseBaseAttributes(BaseState state, Object node) {
-
-        Map<String, Object> nodeMap = (Map<String, Object>) node;
-        state.setComment((String) nodeMap.get("Comment"));
-        state.setNext((String) nodeMap.get("Next"));
-        state.setExtensions((Map<String, Object>) nodeMap.get("Extensions"));
-    }
-}
+public interface NamingServerLocalMarker {}

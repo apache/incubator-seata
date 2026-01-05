@@ -45,7 +45,6 @@ import org.apache.seata.tm.api.transaction.SuspendedResourcesHolder;
  * }
  * }</pre>
  *
- * @author Seata Team
  * @see GlobalTransactionContext
  * @see DefaultGlobalTransaction
  * @since 1.0.0

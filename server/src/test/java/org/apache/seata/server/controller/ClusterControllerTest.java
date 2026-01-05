@@ -19,8 +19,6 @@ package org.apache.seata.server.controller;
 import okhttp3.Protocol;
 import okhttp3.Response;
 import org.apache.http.HttpStatus;
-import org.apache.http.StatusLine;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.ContentType;
 import org.apache.http.protocol.HTTP;
 import org.apache.seata.common.executor.HttpCallback;
@@ -71,11 +69,10 @@ class ClusterControllerTest extends BaseSpringBootTest {
         header.put(HTTP.CONN_KEEP_ALIVE, "close");
         Map<String, String> param = new HashMap<>();
         param.put("default-test", "1");
-        try (CloseableHttpResponse response = HttpClientUtil.doPost(
+        try (Response response = HttpClientUtil.doPost(
                 "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", param, header, 5000)) {
             if (response != null) {
-                StatusLine statusLine = response.getStatusLine();
-                Assertions.assertEquals(HttpStatus.SC_NOT_MODIFIED, statusLine.getStatusCode());
+                Assertions.assertEquals(HttpStatus.SC_NOT_MODIFIED, response.code());
                 return;
             }
         }
@@ -138,11 +135,10 @@ class ClusterControllerTest extends BaseSpringBootTest {
             }
         });
         thread.start();
-        try (CloseableHttpResponse response =
+        try (Response response =
                 HttpClientUtil.doPost("http://127.0.0.1:" + port + "/metadata/v1/watch", param, header, 30000)) {
             if (response != null) {
-                StatusLine statusLine = response.getStatusLine();
-                Assertions.assertEquals(HttpStatus.SC_OK, statusLine.getStatusCode());
+                Assertions.assertEquals(HttpStatus.SC_OK, response.code());
                 return;
             }
         }
@@ -202,14 +198,13 @@ class ClusterControllerTest extends BaseSpringBootTest {
         String malicious = "<script>alert('xss')</script>";
         Map<String, String> header = new HashMap<>();
         header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
-        try (CloseableHttpResponse response = HttpClientUtil.doGet(
+        try (Response response = HttpClientUtil.doGet(
                 "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000&testParam="
                         + URLEncoder.encode(malicious, String.valueOf(StandardCharsets.UTF_8)),
                 new HashMap<>(),
                 header,
                 5000)) {
-            Assertions.assertEquals(
-                    HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
+            Assertions.assertEquals(HttpStatus.SC_BAD_REQUEST, response.code());
         }
     }
 
@@ -333,10 +328,9 @@ class ClusterControllerTest extends BaseSpringBootTest {
         Map<String, String> params = new HashMap<>();
         params.put("testParam", "<script>alert('xss')</script>");
 
-        try (CloseableHttpResponse response = HttpClientUtil.doPost(
+        try (Response response = HttpClientUtil.doPost(
                 "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", params, headers, 5000)) {
-            Assertions.assertEquals(
-                    HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
+            Assertions.assertEquals(HttpStatus.SC_BAD_REQUEST, response.code());
         }
     }
 
@@ -348,10 +342,9 @@ class ClusterControllerTest extends BaseSpringBootTest {
 
         String jsonBody = "{\"testParam\":\"<script>alert('xss')</script>\"}";
 
-        try (CloseableHttpResponse response = HttpClientUtil.doPostJson(
+        try (Response response = HttpClientUtil.doPostJson(
                 "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", jsonBody, headers, 5000)) {
-            Assertions.assertEquals(
-                    HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
+            Assertions.assertEquals(HttpStatus.SC_BAD_REQUEST, response.code());
         }
     }
 
@@ -365,10 +358,9 @@ class ClusterControllerTest extends BaseSpringBootTest {
         Map<String, String> params = new HashMap<>();
         params.put("safeParam", "123");
 
-        try (CloseableHttpResponse response = HttpClientUtil.doPost(
+        try (Response response = HttpClientUtil.doPost(
                 "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", params, headers, 5000)) {
-            Assertions.assertEquals(
-                    HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
+            Assertions.assertEquals(HttpStatus.SC_BAD_REQUEST, response.code());
         }
     }
 
@@ -381,14 +373,13 @@ class ClusterControllerTest extends BaseSpringBootTest {
 
         String jsonBody = "{\"testParam\":\"<script>alert('xss')</script>\"}";
 
-        try (CloseableHttpResponse response = HttpClientUtil.doPostJson(
+        try (Response response = HttpClientUtil.doPostJson(
                 "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000&urlParam="
                         + URLEncoder.encode("<script>alert('xss')</script>", String.valueOf(StandardCharsets.UTF_8)),
                 jsonBody,
                 headers,
                 5000)) {
-            Assertions.assertEquals(
-                    HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
+            Assertions.assertEquals(HttpStatus.SC_BAD_REQUEST, response.code());
         }
     }
 
@@ -401,10 +392,9 @@ class ClusterControllerTest extends BaseSpringBootTest {
         Map<String, String> params = new HashMap<>();
         params.put("testParam", "custom1");
 
-        try (CloseableHttpResponse response = HttpClientUtil.doPost(
+        try (Response response = HttpClientUtil.doPost(
                 "http://127.0.0.1:" + port + "/metadata/v1/watch?timeout=3000", params, headers, 5000)) {
-            Assertions.assertEquals(
-                    HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
+            Assertions.assertEquals(HttpStatus.SC_BAD_REQUEST, response.code());
         }
     }
 }

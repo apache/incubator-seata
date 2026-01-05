@@ -69,6 +69,12 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         chain.doFilter(request, response);
     }
 
+    @Override
+    protected boolean shouldNotFilterAsyncDispatch() {
+        // allow this filter to run during async dispatch so JWT is applied for async requests
+        return false;
+    }
+
     /**
      * Get token from header
      */
