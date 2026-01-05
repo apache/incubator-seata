@@ -24,6 +24,10 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Supplier;
 
+/**
+ * Interface for NamingServer metrics management.
+ * Provides methods to track cluster nodes, watchers, and push notifications.
+ */
 public interface NamingServerMetricsManager {
 
     // Metric names
@@ -37,15 +41,33 @@ public interface NamingServerMetricsManager {
     String TAG_UNIT = "unit";
     String TAG_VGROUP = "vgroup";
 
+    /**
+     * Sets the supplier for namespace-cluster data used by cluster node count metrics.
+     */
     void setNamespaceClusterDataSupplier(Supplier<ConcurrentMap<String, ConcurrentMap<String, ClusterData>>> supplier);
 
+    /**
+     * Sets the supplier for watchers data used by watcher count metrics.
+     */
     void setWatchersSupplier(Supplier<Map<String, Queue<Watcher<?>>>> supplier);
 
+    /**
+     * Refreshes the cluster node count metrics based on current registry data.
+     */
     void refreshClusterNodeCountMetrics();
 
+    /**
+     * Refreshes the watcher count metrics based on current long-polling connections.
+     */
     void refreshWatcherCountMetrics();
 
+    /**
+     * Increments the counter for cluster change push notifications.
+     */
     void incrementClusterChangePushCount(String vgroup);
 
+    /**
+     * Gets the current count of cluster change push notifications.
+     */
     double getClusterChangePushCount(String vgroup);
 }

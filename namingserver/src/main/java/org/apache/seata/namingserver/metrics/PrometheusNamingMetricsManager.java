@@ -37,6 +37,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Supplier;
 
+/**
+ * Prometheus-based implementation of NamingServerMetricsManager.
+ * Uses Micrometer MultiGauge for dynamic tag management and automatic cleanup of stale metrics.
+ */
 @Component
 @ConditionalOnProperty(name = "seata.namingserver.metrics.enabled", havingValue = "true")
 public class PrometheusNamingMetricsManager implements NamingServerMetricsManager {
