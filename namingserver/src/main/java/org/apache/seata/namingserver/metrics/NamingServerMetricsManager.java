@@ -37,8 +37,7 @@ public interface NamingServerMetricsManager {
     String TAG_UNIT = "unit";
     String TAG_VGROUP = "vgroup";
 
-    void setNamespaceClusterDataSupplier(
-            Supplier<ConcurrentMap<String, ConcurrentMap<String, ClusterData>>> supplier);
+    void setNamespaceClusterDataSupplier(Supplier<ConcurrentMap<String, ConcurrentMap<String, ClusterData>>> supplier);
 
     void setWatchersSupplier(Supplier<Map<String, Queue<Watcher<?>>>> supplier);
 

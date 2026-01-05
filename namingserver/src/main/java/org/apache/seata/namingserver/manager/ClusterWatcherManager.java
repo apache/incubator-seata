@@ -53,8 +53,8 @@ public class ClusterWatcherManager implements ClusterChangeListener {
 
     private static final Map<String /* vgroup */, Long> GROUP_UPDATE_TERM = new ConcurrentHashMap<>();
 
-    private final ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = new ScheduledThreadPoolExecutor(1,
-            new CustomizableThreadFactory("long-polling"));
+    private final ScheduledThreadPoolExecutor scheduledThreadPoolExecutor =
+            new ScheduledThreadPoolExecutor(1, new CustomizableThreadFactory("long-polling"));
 
     @Autowired
     private NamingServerMetricsManager metricsManager;

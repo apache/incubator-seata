@@ -23,7 +23,6 @@ import org.apache.seata.common.metadata.namingserver.NamingServerNode;
 import org.apache.seata.common.metadata.namingserver.Unit;
 import org.apache.seata.namingserver.entity.pojo.ClusterData;
 import org.apache.seata.namingserver.listener.Watcher;
-import org.apache.seata.namingserver.metrics.NamingServerMetricsManager;
 import org.apache.seata.namingserver.metrics.PrometheusNamingMetricsManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -115,7 +114,8 @@ class NamingServerMetricsManagerTest {
         metricsManager.refreshWatcherCountMetrics();
 
         // Verify the metric is registered
-        Meter meter = meterRegistry.find(METRIC_WATCHER_COUNT).tag(TAG_VGROUP, vgroup).meter();
+        Meter meter =
+                meterRegistry.find(METRIC_WATCHER_COUNT).tag(TAG_VGROUP, vgroup).meter();
 
         assertNotNull(meter, "Watcher count metric should be registered");
     }
@@ -156,7 +156,7 @@ class NamingServerMetricsManagerTest {
         String unitName = "unit1";
 
         // Create two clusters in different namespaces
-        for (String namespace : new String[] { namespace1, namespace2 }) {
+        for (String namespace : new String[] {namespace1, namespace2}) {
             ClusterData clusterData = new ClusterData(clusterName, "default");
             Unit unit = new Unit();
             unit.setUnitName(unitName);

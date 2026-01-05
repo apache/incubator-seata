@@ -91,8 +91,8 @@ public class PrometheusNamingMetricsManager implements NamingServerMetricsManage
         }
 
         List<MultiGauge.Row<?>> rows = new ArrayList<>();
-        ConcurrentMap<String, ConcurrentMap<String, ClusterData>> namespaceClusterDataMap = namespaceClusterDataSupplier
-                .get();
+        ConcurrentMap<String, ConcurrentMap<String, ClusterData>> namespaceClusterDataMap =
+                namespaceClusterDataSupplier.get();
 
         if (namespaceClusterDataMap != null) {
             namespaceClusterDataMap.forEach((namespace, clusterDataMap) -> {
@@ -145,8 +145,8 @@ public class PrometheusNamingMetricsManager implements NamingServerMetricsManage
 
     @Override
     public void incrementClusterChangePushCount(String vgroup) {
-        Counter counter = clusterChangePushCounters.computeIfAbsent(vgroup,
-                v -> Counter.builder(METRIC_CLUSTER_CHANGE_PUSH_TOTAL)
+        Counter counter =
+                clusterChangePushCounters.computeIfAbsent(vgroup, v -> Counter.builder(METRIC_CLUSTER_CHANGE_PUSH_TOTAL)
                         .description("Total number of cluster change push notifications to watchers")
                         .tag(TAG_VGROUP, v)
                         .register(meterRegistry));
