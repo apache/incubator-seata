@@ -207,14 +207,10 @@ class ClusterControllerTest extends BaseSpringBootTest {
 
         try (SeataHttpWatch<ClusterWatchEvent> watch = HttpClientUtil.watchPost(
                 "http://127.0.0.1:" + port + "/metadata/v1/watch", param, header, ClusterWatchEvent.class)) {
-            logger.info("准备接受链接建立事件");
             SeataHttpWatch.Response<ClusterWatchEvent> response = watch.next();
-            logger.info("接受到的事件类型{}", response.type);
             Assertions.assertNotNull(response.object, "KEEPALIVE event data should not be null");
             Assertions.assertEquals("keepalive", response.object.getType(), "Event type should be 'keepalive'");
-            logger.info("准备接受变更事件");
             SeataHttpWatch.Response<ClusterWatchEvent> watchEventResponse = watch.next();
-            logger.info("接受到的事件类型{}", response.type);
             Assertions.assertNotNull(watchEventResponse.object, "CLUSTER_UPDATE event data should not be null");
             Assertions.assertEquals(
                     "cluster-update", watchEventResponse.object.getType(), "Event type should be 'cluster-update'");
