@@ -25,7 +25,6 @@ import org.apache.seata.common.util.HttpClientUtil;
 import org.apache.seata.common.util.SeataHttpWatch;
 import org.apache.seata.server.BaseSpringBootTest;
 import org.apache.seata.server.cluster.listener.ClusterChangeEvent;
-import org.apache.seata.server.cluster.manager.ClusterWatcherManager;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
@@ -34,7 +33,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.env.Environment;
@@ -55,33 +53,11 @@ class ClusterControllerTest extends BaseSpringBootTest {
     private static Environment environment;
     private static int port;
 
-    @Autowired
-    private ClusterWatcherManager clusterWatcherManager;
-
     @BeforeAll
     public static void setUp(ApplicationContext context) {
         environment = context.getEnvironment();
         port = Integer.parseInt(environment.getProperty(SERVER_SERVICE_PORT_CAMEL, "18091"));
     }
-
-    /*@BeforeEach
-    public void clearWatcherState() {
-        // Clear static state to avoid test pollution
-        // This ensures each test starts with a clean state
-        if (clusterWatcherManager != null) {
-            java.util.Map<String, java.util.Queue<org.apache.seata.server.cluster.watch.Watcher<org.apache.seata.common.rpc.http.HttpContext>>> watchers =
-                    (java.util.Map<String, java.util.Queue<org.apache.seata.server.cluster.watch.Watcher<org.apache.seata.common.rpc.http.HttpContext>>>)
-                            ReflectionTestUtils.getField(clusterWatcherManager, "WATCHERS");
-            java.util.Map<String, Long> groupUpdateTerm =
-                    (java.util.Map<String, Long>) ReflectionTestUtils.getField(clusterWatcherManager, "GROUP_UPDATE_TERM");
-            if (watchers != null) {
-                watchers.clear();
-            }
-            if (groupUpdateTerm != null) {
-                groupUpdateTerm.clear();
-            }
-        }
-    }*/
 
     @Test
     @Order(1)
@@ -108,7 +84,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
         headers.put("Content-Type", ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
 
         Map<String, String> params = new HashMap<>();
-        params.put("default-test", "1");
+        params.put("default-test-group-1", "1");
 
         // For HTTP2, the connection should remain open and not timeout
         // The test verifies that the connection stays alive beyond the timeout period
@@ -120,18 +96,13 @@ class ClusterControllerTest extends BaseSpringBootTest {
 
             boolean keepaliveReceived = false;
             long startTime = System.currentTimeMillis();
-            // Verify KEEPALIVE is received immediately
-            boolean hasNext = watch.hasNext();
-            if (!hasNext) {
-                Assertions.fail("Expect KEEPALIVE Event Received...");
-            }
             SeataHttpWatch.Response<ClusterWatchEvent> firstResponse = watch.next();
             Assertions.assertEquals(
                     SeataHttpWatch.Response.Type.KEEPALIVE, firstResponse.type, "First event should be KEEPALIVE");
             Assertions.assertNotNull(firstResponse.object, "Event data should not be null");
             ClusterWatchEvent keepaliveEvent = firstResponse.object;
             Assertions.assertEquals("keepalive", keepaliveEvent.getType(), "Event type should be 'keepalive'");
-            Assertions.assertEquals("default-test", keepaliveEvent.getGroup(), "Group should match");
+            Assertions.assertEquals("default-test-group-1", keepaliveEvent.getGroup(), "Group should match");
             Assertions.assertNotNull(keepaliveEvent.getTimestamp(), "Timestamp should not be null");
             keepaliveReceived = true;
 
@@ -141,10 +112,6 @@ class ClusterControllerTest extends BaseSpringBootTest {
                     "KEEPALIVE should be received immediately after connection, elapsed: " + elapsed + "ms");
             Assertions.assertTrue(keepaliveReceived, "Keepalive should be received after connection");
 
-            // Verify connection remains alive beyond timeout period (3000ms)
-            // Note: hasNext() blocks when no data is available, so we cannot use it to check connection status
-            // Instead, we wait beyond the timeout period and then trigger a cluster change event
-            // If we can receive the event, it proves the connection is still alive
             long timeoutPeriod = 3000; // Timeout period from query parameter
             long waitTime = timeoutPeriod + 1000; // Wait timeout period + 1 second
             try {
@@ -157,25 +124,22 @@ class ClusterControllerTest extends BaseSpringBootTest {
             // Trigger a cluster change event to verify connection is still active
             Thread triggerThread = new Thread(() -> {
                 try {
-                    Thread.sleep(2000); // Small delay to ensure we're past timeout
+                    Thread.sleep(2000);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
                 ((ApplicationEventPublisher) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
-                        .publishEvent(new ClusterChangeEvent(this, "default-test", 2, true));
+                        .publishEvent(new ClusterChangeEvent(this, "default-test-group-1", 2, true));
             });
             triggerThread.start();
             boolean clusterUpdateReceived = false;
-            if (!watch.hasNext()) {
-                Assertions.fail("Expect cluster-update Event Received...");
-            }
             SeataHttpWatch.Response<ClusterWatchEvent> response = watch.next();
 
             if (response.type == SeataHttpWatch.Response.Type.CLUSTER_UPDATE) {
                 clusterUpdateReceived = true;
                 Assertions.assertEquals(
                         "cluster-update", response.object.getType(), "Event type should be 'cluster-update'");
-                Assertions.assertEquals("default-test", response.object.getGroup(), "Group should match");
+                Assertions.assertEquals("default-test-group-1", response.object.getGroup(), "Group should match");
                 Assertions.assertEquals(2L, response.object.getTerm().longValue(), "Term should be 2");
             }
 
@@ -196,7 +160,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
         Map<String, String> header = new HashMap<>();
         header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
         Map<String, String> param = new HashMap<>();
-        param.put("default-test", "1");
+        param.put("default-test-group-2", "1");
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -206,7 +170,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
                     throw new RuntimeException(e);
                 }
                 ((ApplicationEventPublisher) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
-                        .publishEvent(new ClusterChangeEvent(this, "default-test", 2, true));
+                        .publishEvent(new ClusterChangeEvent(this, "default-test-group-2", 2, true));
             }
         });
         thread.start();
@@ -226,7 +190,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
         Map<String, String> header = new HashMap<>();
         header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
         Map<String, String> param = new HashMap<>();
-        param.put("default-test", "1");
+        param.put("default-test-group-3", "1");
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -236,7 +200,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
                     throw new RuntimeException(e);
                 }
                 ((ApplicationEventPublisher) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
-                        .publishEvent(new ClusterChangeEvent(this, "default-test", 2, true));
+                        .publishEvent(new ClusterChangeEvent(this, "default-test-group-3", 2, true));
             }
         });
         thread.start();
@@ -254,7 +218,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
             Assertions.assertNotNull(watchEventResponse.object, "CLUSTER_UPDATE event data should not be null");
             Assertions.assertEquals(
                     "cluster-update", watchEventResponse.object.getType(), "Event type should be 'cluster-update'");
-            Assertions.assertEquals("default-test", watchEventResponse.object.getGroup(), "Group should match");
+            Assertions.assertEquals("default-test-group-3", watchEventResponse.object.getGroup(), "Group should match");
             Assertions.assertNotNull(watchEventResponse.object.getTerm(), "Term should not be null");
             Assertions.assertEquals(2L, watchEventResponse.object.getTerm().longValue(), "Term should be 2");
         }
@@ -266,7 +230,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
         Map<String, String> header = new HashMap<>();
         header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
         Map<String, String> param = new HashMap<>();
-        param.put("default-test-2", "1");
+        param.put("default-test-group-4", "1");
 
         // Trigger multiple cluster change events with different terms
         Thread triggerThread = new Thread(() -> {
@@ -276,15 +240,15 @@ class ClusterControllerTest extends BaseSpringBootTest {
                         ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT);
 
                 // Trigger first cluster change event (term = 2)
-                publisher.publishEvent(new ClusterChangeEvent(this, "default-test-2", 2, true));
+                publisher.publishEvent(new ClusterChangeEvent(this, "default-test-group-4", 2, true));
                 Thread.sleep(1000); // Increased delay to ensure watcher is re-registered before next event
 
                 // Trigger second cluster change event (term = 3)
-                publisher.publishEvent(new ClusterChangeEvent(this, "default-test-2", 3, true));
+                publisher.publishEvent(new ClusterChangeEvent(this, "default-test-group-4", 3, true));
                 Thread.sleep(500); // Increased delay to ensure watcher is re-registered before next event
 
                 // Trigger third cluster change event (term = 4)
-                publisher.publishEvent(new ClusterChangeEvent(this, "default-test-2", 4, true));
+                publisher.publishEvent(new ClusterChangeEvent(this, "default-test-group-4", 4, true));
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
@@ -311,15 +275,16 @@ class ClusterControllerTest extends BaseSpringBootTest {
                             Assertions.assertEquals(
                                     "keepalive", response.object.getType(), "Event type should be 'keepalive'");
                         } else if (type == SeataHttpWatch.Response.Type.CLUSTER_UPDATE) {
-                            System.out.println("clusterUpdateCount当前值为" + clusterUpdateCount);
+                            logger.info("clusterUpdateCount当前值为" + clusterUpdateCount);
                             clusterUpdateCount++;
-                            System.out.println("clusterUpdateCount收到了一次变更事件当前值为" + clusterUpdateCount);
+                            logger.info("clusterUpdateCount收到了一次变更事件当前值为" + clusterUpdateCount);
                             Assertions.assertNotNull(response.object, "CLUSTER_UPDATE event data should not be null");
                             Assertions.assertEquals(
                                     "cluster-update",
                                     response.object.getType(),
                                     "Event type should be 'cluster-update'");
-                            Assertions.assertEquals("default-test-2", response.object.getGroup(), "Group should match");
+                            Assertions.assertEquals(
+                                    "default-test-group-4", response.object.getGroup(), "Group should match");
                             Assertions.assertNotNull(response.object.getTerm(), "Term should not be null");
 
                             // Verify term matches expected value

@@ -121,7 +121,6 @@ public class ClusterWatcherManager implements ClusterChangeListener {
     @Async
     public void onChangeEvent(ClusterChangeEvent event) {
         if (event.getTerm() > 0) {
-            logger.info("收到集群变更事件的通知");
             GROUP_UPDATE_TERM.put(event.getGroup(), event.getTerm());
             String group = event.getGroup();
 
@@ -136,7 +135,6 @@ public class ClusterWatcherManager implements ClusterChangeListener {
             // Handle HTTP/2 watchers: notify without removing (long-lived connection)
             Queue<Watcher<HttpContext>> http2Watchers = HTTP2_WATCHERS.get(group);
             if (http2Watchers != null && !http2Watchers.isEmpty()) {
-                // Create snapshot to avoid concurrent modification during iteration
                 List<Watcher<HttpContext>> watchersToNotify = new ArrayList<>(http2Watchers);
                 watchersToNotify.forEach(watcher -> {
                     // Only notify active watchers
@@ -166,15 +164,11 @@ public class ClusterWatcherManager implements ClusterChangeListener {
             HTTP2_HEADERS_SENT.put(watcher, true);
         }
 
-        // Update watcher's term to the latest term to prevent infinite loop
         String group = watcher.getGroup();
         Long latestTerm = GROUP_UPDATE_TERM.get(group);
         if (latestTerm != null && latestTerm > watcher.getTerm()) {
             watcher.setTerm(latestTerm);
         }
-
-        // Note: HTTP/2 watchers are not re-registered here because they remain in HTTP2_WATCHERS
-        // HTTP/1.1 watchers are done after notification, so no re-registration needed
     }
     /**
      * Send watcher response to the client.
@@ -269,9 +263,6 @@ public class ClusterWatcherManager implements ClusterChangeListener {
             HTTP2_HEADERS_SENT.put(watcher, true);
         }
 
-        // Add to appropriate watcher collection based on protocol
-        // For HTTP/2, always add to queue (long-lived connection)
-        // For HTTP/1.1, only add if term hasn't been updated
         if (isHttp2) {
             HTTP2_WATCHERS
                     .computeIfAbsent(group, value -> new ConcurrentLinkedQueue<>())
