@@ -80,7 +80,8 @@ public class ClusterWatcherManager implements ClusterChangeListener {
                                 .ifPresent(watchers -> watchers.parallelStream().forEach(watcher -> {
                                     if (System.currentTimeMillis() >= watcher.getTimeout()) {
                                         watcher.setDone(true);
-                                        sendWatcherResponse(watcher, HttpResponseStatus.NOT_MODIFIED, true, false);
+                                        sendWatcherResponse(
+                                                watcher, HttpResponseStatus.NOT_MODIFIED, true, false, null);
                                     } else if (!watcher.isDone()) {
                                         // Re-register if not timeout
                                         registryWatcher(watcher);
@@ -123,11 +124,12 @@ public class ClusterWatcherManager implements ClusterChangeListener {
         if (event.getTerm() > 0) {
             GROUP_UPDATE_TERM.put(event.getGroup(), event.getTerm());
             String group = event.getGroup();
+            Long eventTerm = event.getTerm();
 
             // Handle HTTP/1.1 watchers: remove and notify (one-time request)
             Optional.ofNullable(HTTP1_WATCHERS.remove(group))
                     .ifPresent(watchers -> watchers.parallelStream().forEach(watcher -> {
-                        notifyWatcher(watcher);
+                        notifyWatcher(watcher, eventTerm);
                         // HTTP/1.1 watcher is done after notification
                         watcher.setDone(true);
                     }));
@@ -139,7 +141,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
                 watchersToNotify.forEach(watcher -> {
                     // Only notify active watchers
                     if (watcher.getAsyncContext().getContext().channel().isActive() && !watcher.isDone()) {
-                        notifyWatcher(watcher);
+                        notifyWatcher(watcher, eventTerm);
                     } else {
                         // Remove inactive watcher
                         http2Watchers.remove(watcher);
@@ -150,7 +152,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
         }
     }
 
-    private void notifyWatcher(Watcher<HttpContext> watcher) {
+    private void notifyWatcher(Watcher<HttpContext> watcher, Long eventTerm) {
         HttpContext context = watcher.getAsyncContext();
         boolean isHttp2 = context.isHttp2();
 
@@ -159,15 +161,13 @@ public class ClusterWatcherManager implements ClusterChangeListener {
         }
 
         boolean isFirstResponse = !HTTP2_HEADERS_SENT.getOrDefault(watcher, false);
-        sendWatcherResponse(watcher, HttpResponseStatus.OK, false, isFirstResponse);
+        sendWatcherResponse(watcher, HttpResponseStatus.OK, false, isFirstResponse, eventTerm);
         if (isFirstResponse && isHttp2) {
             HTTP2_HEADERS_SENT.put(watcher, true);
         }
 
-        String group = watcher.getGroup();
-        Long latestTerm = GROUP_UPDATE_TERM.get(group);
-        if (latestTerm != null && latestTerm > watcher.getTerm()) {
-            watcher.setTerm(latestTerm);
+        if (eventTerm != null && eventTerm > watcher.getTerm()) {
+            watcher.setTerm(eventTerm);
         }
     }
     /**
@@ -177,9 +177,14 @@ public class ClusterWatcherManager implements ClusterChangeListener {
      * @param nettyStatus the HTTP status code
      * @param closeStream whether to close the HTTP/2 stream (endStream=true)
      * @param sendHeaders whether to send HTTP/2 headers frame (only needed for first response)
+     * @param term        the term to use in the response, null means get from global variable
      */
     private void sendWatcherResponse(
-            Watcher<HttpContext> watcher, HttpResponseStatus nettyStatus, boolean closeStream, boolean sendHeaders) {
+            Watcher<HttpContext> watcher,
+            HttpResponseStatus nettyStatus,
+            boolean closeStream,
+            boolean sendHeaders,
+            Long term) {
 
         HttpContext context = watcher.getAsyncContext();
         if (!(context instanceof HttpContext)) {
@@ -221,7 +226,8 @@ public class ClusterWatcherManager implements ClusterChangeListener {
         }
 
         String group = watcher.getGroup();
-        String eventData = buildEventData(nettyStatus, closeStream, sendHeaders, group);
+        Long finalTerm = term != null ? term : GROUP_UPDATE_TERM.getOrDefault(group, 0L);
+        String eventData = buildEventData(nettyStatus, closeStream, sendHeaders, group, finalTerm);
         ByteBuf content = Unpooled.copiedBuffer(eventData, StandardCharsets.UTF_8);
 
         // Send DATA frame (if closeStream is true, it will end the current stream)
@@ -230,7 +236,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
     }
 
     private String buildEventData(
-            HttpResponseStatus nettyStatus, boolean closeStream, boolean sendHeaders, String group) {
+            HttpResponseStatus nettyStatus, boolean closeStream, boolean sendHeaders, String group, Long term) {
         // Determine event type (embedded in JSON, not in a separate event field)
         String eventType;
         if (sendHeaders) {
@@ -246,7 +252,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
 
         String json = String.format(
                 "{\"type\":\"%s\",\"group\":\"%s\",\"term\":%d,\"timestamp\":%d}",
-                eventType, group, GROUP_UPDATE_TERM.getOrDefault(group, 0L), System.currentTimeMillis());
+                eventType, group, term != null ? term : 0L, System.currentTimeMillis());
         logger.debug("Sending watch event: {}", json);
         return Constants.WATCH_EVENT_PREFIX + json + "\n";
     }
@@ -259,7 +265,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
 
         // For HTTP/2, must send response headers immediately, cannot delay
         if (isHttp2 && !HTTP2_HEADERS_SENT.getOrDefault(watcher, false)) {
-            sendWatcherResponse(watcher, HttpResponseStatus.OK, false, true);
+            sendWatcherResponse(watcher, HttpResponseStatus.OK, false, true, null);
             HTTP2_HEADERS_SENT.put(watcher, true);
         }
 
@@ -270,7 +276,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
 
             // If term has been updated, notify immediately
             if (term != null && term > watcher.getTerm()) {
-                notifyWatcher(watcher);
+                notifyWatcher(watcher, null);
             }
         } else {
             if (term == null || watcher.getTerm() >= term) {
@@ -279,7 +285,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
                         .add(watcher);
             } else {
                 // Term has been updated, notify immediately (one-time request)
-                notifyWatcher(watcher);
+                notifyWatcher(watcher, null);
             }
         }
     }
