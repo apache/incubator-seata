@@ -34,6 +34,7 @@ import org.apache.seata.core.protocol.RpcMessage;
 import org.apache.seata.core.protocol.Version;
 import org.apache.seata.core.rpc.RemotingServer;
 import org.apache.seata.core.rpc.RpcContext;
+import org.apache.seata.core.rpc.TMDisconnectHandler;
 import org.apache.seata.core.rpc.processor.Pair;
 import org.apache.seata.core.rpc.processor.RemotingProcessor;
 import org.slf4j.Logger;
@@ -55,6 +56,8 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
 
     private final NettyServerBootstrap serverBootstrap;
 
+    private TMDisconnectHandler tmDisconnectHandler;
+
     @Override
     public void init() {
         super.init();
@@ -65,6 +68,15 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
         super(messageExecutor);
         serverBootstrap = new NettyServerBootstrap(nettyServerConfig);
         serverBootstrap.setChannelHandlers(new ServerHandler());
+    }
+
+    /**
+     * Set TM disconnect handler
+     *
+     * @param tmDisconnectHandler the TM disconnect handler
+     */
+    public void setTmDisconnectHandler(TMDisconnectHandler tmDisconnectHandler) {
+        this.tmDisconnectHandler = tmDisconnectHandler;
     }
 
     @Override
@@ -214,6 +226,15 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
                 LOGGER.info(ipAndPort + " to server channel inactive.");
             }
             if (rpcContext != null && rpcContext.getClientRole() != null) {
+                // Handle TM disconnection for early rollback if it's a TM role
+                if (rpcContext.getClientRole() == NettyPoolKey.TransactionRole.TMROLE && tmDisconnectHandler != null) {
+                    try {
+                        tmDisconnectHandler.handleTMDisconnect(rpcContext);
+                    } catch (Exception e) {
+                        LOGGER.error("Error handling TM disconnect for channel: " + ctx.channel(), e);
+                    }
+                }
+
                 rpcContext.release();
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("remove channel:" + ctx.channel() + "context:" + rpcContext);

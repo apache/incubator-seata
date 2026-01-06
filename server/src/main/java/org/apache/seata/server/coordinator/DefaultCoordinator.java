@@ -52,6 +52,7 @@ import org.apache.seata.core.rpc.Disposable;
 import org.apache.seata.core.rpc.RemotingServer;
 import org.apache.seata.core.rpc.RpcContext;
 import org.apache.seata.core.rpc.TransactionMessageHandler;
+import org.apache.seata.core.rpc.netty.AbstractNettyRemotingServer;
 import org.apache.seata.core.rpc.netty.ChannelManager;
 import org.apache.seata.core.rpc.netty.NettyRemotingServer;
 import org.apache.seata.server.AbstractTCInboundHandler;
@@ -756,6 +757,13 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      * Init.
      */
     public void init() {
+        // Setup TM disconnect handler for early rollback
+        if (remotingServer instanceof AbstractNettyRemotingServer) {
+            DefaultTMDisconnectHandler tmDisconnectHandler = new DefaultTMDisconnectHandler(core);
+            ((AbstractNettyRemotingServer) remotingServer).setTmDisconnectHandler(tmDisconnectHandler);
+            LOGGER.info("TM disconnect handler initialized for early rollback feature");
+        }
+
         retryRollbacking.scheduleAtFixedRate(
                 () -> SessionHolder.distributedLockAndExecute(RETRY_ROLLBACKING, this::handleRetryRollbacking),
                 0,

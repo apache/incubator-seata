@@ -544,6 +544,11 @@ public interface DefaultValues {
     boolean DEFAULT_ENABLE_BRANCH_ASYNC_REMOVE = false;
 
     /**
+     * the constant DEFAULT_ENABLE_ROLLBACK_WHEN_DISCONNECT
+     */
+    boolean DEFAULT_ENABLE_ROLLBACK_WHEN_DISCONNECT = false;
+
+    /**
      * The constant DEFAULT_DB_MAX_CONN.
      */
     int DEFAULT_DB_MAX_CONN = 100;

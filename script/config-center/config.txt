@@ -203,6 +203,9 @@ server.ratelimit.bucketTokenNumPerSecond = 999999
 server.ratelimit.bucketTokenMaxNum = 999999
 server.ratelimit.bucketTokenInitialNum = 999999
 
+#Early rollback configuration
+server.enableRollbackWhenDisconnect=false
+
 server.http.filter.xss.keywords=["<script>", "</script>", "javascript:", "vbscript:"]
 
 #Metrics configuration, only for the server

@@ -1008,6 +1008,11 @@ public interface ConfigurationKeys {
     String ENABLE_BRANCH_ASYNC_REMOVE = SERVER_PREFIX + SESSION_PREFIX + "enableBranchAsyncRemove";
 
     /**
+     * The constant ENABLE_ROLLBACK_WHEN_DISCONNECT
+     */
+    String ENABLE_ROLLBACK_WHEN_DISCONNECT = SERVER_PREFIX + "enableRollbackWhenDisconnect";
+
+    /**
      * The constant SERVER_RAFT.
      */
     String SERVER_RAFT = SERVER_PREFIX + "raft.";
