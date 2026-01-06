@@ -64,12 +64,17 @@ class ClusterWatcherManagerTest extends BaseSpringBootTest {
         Object mockRequest = new Object();
         httpContext = new HttpContext<>(mockRequest, mockChannelHandlerContext, true, HttpContext.HTTP_1_1);
 
-        Map<String, Queue<Watcher<HttpContext>>> watchers = (Map<String, Queue<Watcher<HttpContext>>>)
-                ReflectionTestUtils.getField(clusterWatcherManager, "WATCHERS");
+        Map<String, Queue<Watcher<HttpContext>>> http1Watchers = (Map<String, Queue<Watcher<HttpContext>>>)
+                ReflectionTestUtils.getField(clusterWatcherManager, "HTTP1_WATCHERS");
+        Map<String, Queue<Watcher<HttpContext>>> http2Watchers = (Map<String, Queue<Watcher<HttpContext>>>)
+                ReflectionTestUtils.getField(clusterWatcherManager, "HTTP2_WATCHERS");
         Map<String, Long> groupUpdateTerm =
                 (Map<String, Long>) ReflectionTestUtils.getField(clusterWatcherManager, "GROUP_UPDATE_TERM");
-        if (watchers != null) {
-            watchers.clear();
+        if (http1Watchers != null) {
+            http1Watchers.clear();
+        }
+        if (http2Watchers != null) {
+            http2Watchers.clear();
         }
         if (groupUpdateTerm != null) {
             groupUpdateTerm.clear();
@@ -133,10 +138,11 @@ class ClusterWatcherManagerTest extends BaseSpringBootTest {
 
         clusterWatcherManager.registryWatcher(watcher);
 
-        Map<String, Queue<Watcher<HttpContext>>> watchers = (Map<String, Queue<Watcher<HttpContext>>>)
-                ReflectionTestUtils.getField(clusterWatcherManager, "WATCHERS");
-        assertTrue(watchers.containsKey(TEST_GROUP));
-        assertEquals(1, watchers.get(TEST_GROUP).size());
+        // HTTP/1.1 watcher should be in HTTP1_WATCHERS
+        Map<String, Queue<Watcher<HttpContext>>> http1Watchers = (Map<String, Queue<Watcher<HttpContext>>>)
+                ReflectionTestUtils.getField(clusterWatcherManager, "HTTP1_WATCHERS");
+        assertTrue(http1Watchers.containsKey(TEST_GROUP));
+        assertEquals(1, http1Watchers.get(TEST_GROUP).size());
 
         ClusterChangeEvent event = new ClusterChangeEvent(this, TEST_GROUP, TEST_TERM + 1, true);
 

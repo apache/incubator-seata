@@ -23,6 +23,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.ResponseBody;
 import okio.BufferedSource;
+import org.apache.seata.common.Constants;
 import org.apache.seata.common.exception.FrameworkException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +33,8 @@ import java.util.Iterator;
 
 /**
  * Seata HTTP/2 Watch implementation.
- * Consumes server-pushed SSE data frames via an iterator-style API.
+ * Consumes server-pushed event stream via an iterator-style API.
+ * Each line contains a single event in "data: {json}" format, similar to Kubernetes watch API.
  *
  * @param <T> event data type
  */
@@ -52,7 +54,7 @@ public class SeataHttpWatch<T>
      */
     public static class Response<T> {
         /**
-         * Event type enum - matches SSE event field values
+         * Event type enum - extracted from JSON "type" field
          */
         public enum Type {
             /**
@@ -109,7 +111,7 @@ public class SeataHttpWatch<T>
                     String.format("Watch request failed with code %d: %s", response.code(), respBody));
         }
 
-        // Verify Content-Type is SSE
+        // Verify Content-Type is event stream
         String contentType = response.header("Content-Type");
         if (contentType == null || !contentType.contains("text/event-stream")) {
             LOGGER.warn("Expected Content-Type: text/event-stream, got: {}", contentType);
@@ -157,45 +159,22 @@ public class SeataHttpWatch<T>
     @Override
     public Response<T> next() {
         try {
-            // Read complete SSE event in a loop (not recursive to avoid stack overflow)
-            // SSE format: "data: {json}\n\n"
-            // Each event is separated by double newline
-            // Event type is included in the JSON data, not in a separate "event:" field
-
-            StringBuilder dataBuffer = new StringBuilder();
-
-            // Read lines until we get a complete event (ending with empty line)
-            // This loop reads all lines of a single event atomically
-            while (true) {
-                String line = source.readUtf8Line();
-
-                if (line == null) {
-                    // Stream closed
-                    if (dataBuffer.length() > 0) {
-                        // We have partial data, try to parse it
-                        String eventJson = dataBuffer.toString();
-                        return parseEvent(eventJson);
-                    }
-                    throw new RuntimeException("Stream closed unexpectedly");
-                }
-
-                if (line.startsWith("data: ")) {
-                    String jsonData = line.substring(6);
-                    if (dataBuffer.length() > 0) {
-                        dataBuffer.append('\n');
-                    }
-                    dataBuffer.append(jsonData);
-                } else if (line.isEmpty()) {
-                    // Empty line indicates end of event
-                    if (dataBuffer.length() > 0) {
-                        String eventJson = dataBuffer.toString();
-                        return parseEvent(eventJson);
-                    }
-                    // Empty line but no data, continue reading (skip blank lines between events)
-                } else {
-                    LOGGER.debug("Unknown SSE line format, ignoring: {}", line);
-                }
+            /*
+             Read a single line and parse it as an event.
+             Format: "{prefix}{json}\n" where prefix is defined in Constants.WATCH_EVENT_PREFIX.
+             Each line is a complete event, event type is included in the JSON data.
+             */
+            String line = source.readUtf8Line();
+            if (line == null) {
+                throw new RuntimeException("Stream closed unexpectedly");
             }
+
+            if (!line.startsWith(Constants.WATCH_EVENT_PREFIX)) {
+                throw new RuntimeException("Invalid event format: expected prefix '" + Constants.WATCH_EVENT_PREFIX + "', got: " + (line.length() > 20 ? line.substring(0, 20) + "..." : line));
+            }
+
+            String jsonData = line.substring(Constants.WATCH_EVENT_PREFIX.length());
+            return parseEvent(jsonData);
 
         } catch (IOException e) {
             throw new RuntimeException("IO Exception during next()", e);
@@ -203,7 +182,7 @@ public class SeataHttpWatch<T>
     }
 
     /**
-     * Parse SSE event JSON into Response object.
+     * Parse event JSON into Response object.
      * Uses JsonNode to parse JSON only once for better performance.
      *
      * @param json the JSON string to parse (contains type field)
@@ -269,3 +248,4 @@ public class SeataHttpWatch<T>
         }
     }
 }
+

@@ -29,6 +29,7 @@ import io.netty.handler.codec.http2.DefaultHttp2DataFrame;
 import io.netty.handler.codec.http2.DefaultHttp2Headers;
 import io.netty.handler.codec.http2.DefaultHttp2HeadersFrame;
 import io.netty.handler.codec.http2.Http2Headers;
+import org.apache.seata.common.Constants;
 import org.apache.seata.common.rpc.http.HttpContext;
 import org.apache.seata.common.thread.NamedThreadFactory;
 import org.apache.seata.server.cluster.listener.ClusterChangeEvent;
@@ -42,6 +43,8 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
@@ -55,7 +58,9 @@ public class ClusterWatcherManager implements ClusterChangeListener {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private static final Map<String, Queue<Watcher<HttpContext>>> WATCHERS = new ConcurrentHashMap<>();
+    // Separate watchers for HTTP/1.1 (one-time requests) and HTTP/2 (long-lived connections)
+    private static final Map<String, Queue<Watcher<HttpContext>>> HTTP1_WATCHERS = new ConcurrentHashMap<>();
+    private static final Map<String, Queue<Watcher<HttpContext>>> HTTP2_WATCHERS = new ConcurrentHashMap<>();
 
     private static final Map<String, Long> GROUP_UPDATE_TERM = new ConcurrentHashMap<>();
 
@@ -66,30 +71,44 @@ public class ClusterWatcherManager implements ClusterChangeListener {
 
     @PostConstruct
     public void init() {
-        // Periodically check and respond to watchers that have timed out
+        // Periodically check and respond to watchers
         scheduledThreadPoolExecutor.scheduleAtFixedRate(
                 () -> {
-                    for (String group : WATCHERS.keySet()) {
-                        Optional.ofNullable(WATCHERS.remove(group))
+                    // Check HTTP/1.1 watchers for timeout
+                    for (String group : HTTP1_WATCHERS.keySet()) {
+                        Optional.ofNullable(HTTP1_WATCHERS.remove(group))
                                 .ifPresent(watchers -> watchers.parallelStream().forEach(watcher -> {
-                                    HttpContext context = watcher.getAsyncContext();
-                                    boolean isHttp2 = context.isHttp2();
-                                    if (isHttp2) {
-                                        if (!context.getContext().channel().isActive()) {
-                                            watcher.setDone(true);
-                                            HTTP2_HEADERS_SENT.remove(watcher);
-                                        } else {
-                                            registryWatcher(watcher);
-                                        }
-                                    } else {
-                                        if (System.currentTimeMillis() >= watcher.getTimeout()) {
-                                            watcher.setDone(true);
-                                            sendWatcherResponse(watcher, HttpResponseStatus.NOT_MODIFIED, true, false);
-                                        } else if (!watcher.isDone()) {
-                                            registryWatcher(watcher);
-                                        }
+                                    if (System.currentTimeMillis() >= watcher.getTimeout()) {
+                                        watcher.setDone(true);
+                                        sendWatcherResponse(watcher, HttpResponseStatus.NOT_MODIFIED, true, false);
+                                    } else if (!watcher.isDone()) {
+                                        // Re-register if not timeout
+                                        registryWatcher(watcher);
                                     }
                                 }));
+                    }
+                    
+                    // Check HTTP/2 watchers for connection validity (don't remove, just check)
+                    for (Map.Entry<String, Queue<Watcher<HttpContext>>> entry : HTTP2_WATCHERS.entrySet()) {
+                        String group = entry.getKey();
+                        Queue<Watcher<HttpContext>> watchers = entry.getValue();
+                        if (watchers == null || watchers.isEmpty()) {
+                            continue;
+                        }
+                        
+                        // Create snapshot to avoid concurrent modification
+                        List<Watcher<HttpContext>> watchersToCheck = new ArrayList<>(watchers);
+                        
+                        watchersToCheck.forEach(watcher -> {
+                            HttpContext context = watcher.getAsyncContext();
+                            if (!context.getContext().channel().isActive()) {
+                                // Remove invalid watcher
+                                watchers.remove(watcher);
+                                watcher.setDone(true);
+                                HTTP2_HEADERS_SENT.remove(watcher);
+                                logger.debug("Removed inactive HTTP/2 watcher for group: {}", group);
+                            }
+                        });
                     }
                 },
                 1,
@@ -102,10 +121,34 @@ public class ClusterWatcherManager implements ClusterChangeListener {
     @Async
     public void onChangeEvent(ClusterChangeEvent event) {
         if (event.getTerm() > 0) {
+            logger.info("收到集群变更事件的通知");
             GROUP_UPDATE_TERM.put(event.getGroup(), event.getTerm());
-            // Notify all watchers of cluster information changes
-            Optional.ofNullable(WATCHERS.remove(event.getGroup()))
-                    .ifPresent(watchers -> watchers.parallelStream().forEach(this::notifyWatcher));
+            String group = event.getGroup();
+            
+            // Handle HTTP/1.1 watchers: remove and notify (one-time request)
+            Optional.ofNullable(HTTP1_WATCHERS.remove(group))
+                    .ifPresent(watchers -> watchers.parallelStream().forEach(watcher -> {
+                        notifyWatcher(watcher);
+                        // HTTP/1.1 watcher is done after notification
+                        watcher.setDone(true);
+                    }));
+            
+            // Handle HTTP/2 watchers: notify without removing (long-lived connection)
+            Queue<Watcher<HttpContext>> http2Watchers = HTTP2_WATCHERS.get(group);
+            if (http2Watchers != null && !http2Watchers.isEmpty()) {
+                // Create snapshot to avoid concurrent modification during iteration
+                List<Watcher<HttpContext>> watchersToNotify = new ArrayList<>(http2Watchers);
+                watchersToNotify.forEach(watcher -> {
+                    // Only notify active watchers
+                    if (watcher.getAsyncContext().getContext().channel().isActive() && !watcher.isDone()) {
+                        notifyWatcher(watcher);
+                    } else {
+                        // Remove inactive watcher
+                        http2Watchers.remove(watcher);
+                        HTTP2_HEADERS_SENT.remove(watcher);
+                    }
+                });
+            }
         }
     }
 
@@ -124,17 +167,14 @@ public class ClusterWatcherManager implements ClusterChangeListener {
         }
 
         // Update watcher's term to the latest term to prevent infinite loop
-        // This ensures that when registryWatcher is called, it won't trigger notifyWatcher again
         String group = watcher.getGroup();
         Long latestTerm = GROUP_UPDATE_TERM.get(group);
         if (latestTerm != null && latestTerm > watcher.getTerm()) {
             watcher.setTerm(latestTerm);
         }
-
-        // For HTTP/2, re-register the watcher to continue listening for future updates
-        if (isHttp2 && !watcher.isDone()) {
-            registryWatcher(watcher);
-        }
+        
+        // Note: HTTP/2 watchers are not re-registered here because they remain in HTTP2_WATCHERS
+        // HTTP/1.1 watchers are done after notification, so no re-registration needed
     }
     /**
      * Send watcher response to the client.
@@ -187,18 +227,17 @@ public class ClusterWatcherManager implements ClusterChangeListener {
         }
 
         String group = watcher.getGroup();
-        String sse = buildSSEFormat(nettyStatus, closeStream, sendHeaders, group);
-
-        ByteBuf content = Unpooled.copiedBuffer(sse, StandardCharsets.UTF_8);
+        String eventData = buildEventData(nettyStatus, closeStream, sendHeaders, group);
+        ByteBuf content = Unpooled.copiedBuffer(eventData, StandardCharsets.UTF_8);
 
         // Send DATA frame (if closeStream is true, it will end the current stream)
         ctx.write(new DefaultHttp2DataFrame(content, closeStream));
         ctx.flush();
     }
 
-    private String buildSSEFormat(
+    private String buildEventData(
             HttpResponseStatus nettyStatus, boolean closeStream, boolean sendHeaders, String group) {
-        // Determine event type (embedded in JSON, not in SSE event field)
+        // Determine event type (embedded in JSON, not in a separate event field)
         String eventType;
         if (sendHeaders) {
             // Send keepalive event when stream is first established to confirm connection
@@ -215,9 +254,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
                 "{\"type\":\"%s\",\"group\":\"%s\",\"term\":%d,\"timestamp\":%d}",
                 eventType, group, GROUP_UPDATE_TERM.getOrDefault(group, 0L), System.currentTimeMillis());
         logger.debug("Sending watch event: {}", json);
-
-        // SSE format: only send data: field, event type is embedded in JSON
-        return "data: " + json + "\n\n";
+        return Constants.WATCH_EVENT_PREFIX + json + "\n";
     }
 
     public void registryWatcher(Watcher<HttpContext> watcher) {
@@ -225,16 +262,32 @@ public class ClusterWatcherManager implements ClusterChangeListener {
         Long term = GROUP_UPDATE_TERM.get(group);
         HttpContext context = watcher.getAsyncContext();
         boolean isHttp2 = context.isHttp2();
-        if (term == null || watcher.getTerm() >= term) {
-            // For HTTP/2, must send response headers immediately, cannot delay
-            if (isHttp2 && !HTTP2_HEADERS_SENT.getOrDefault(watcher, false)) {
-                sendWatcherResponse(watcher, HttpResponseStatus.OK, false, true);
-                HTTP2_HEADERS_SENT.put(watcher, true);
-            }
-            WATCHERS.computeIfAbsent(group, value -> new ConcurrentLinkedQueue<>())
+
+        // For HTTP/2, must send response headers immediately, cannot delay
+        if (isHttp2 && !HTTP2_HEADERS_SENT.getOrDefault(watcher, false)) {
+            sendWatcherResponse(watcher, HttpResponseStatus.OK, false, true);
+            HTTP2_HEADERS_SENT.put(watcher, true);
+        }
+
+        // Add to appropriate watcher collection based on protocol
+        // For HTTP/2, always add to queue (long-lived connection)
+        // For HTTP/1.1, only add if term hasn't been updated
+        if (isHttp2) {
+            HTTP2_WATCHERS.computeIfAbsent(group, value -> new ConcurrentLinkedQueue<>())
                     .add(watcher);
+
+            // If term has been updated, notify immediately
+            if (term != null && term > watcher.getTerm()) {
+                notifyWatcher(watcher);
+            }
         } else {
-            notifyWatcher(watcher);
+            if (term == null || watcher.getTerm() >= term) {
+                HTTP1_WATCHERS.computeIfAbsent(group, value -> new ConcurrentLinkedQueue<>())
+                        .add(watcher);
+            } else {
+                // Term has been updated, notify immediately (one-time request)
+                notifyWatcher(watcher);
+            }
         }
     }
 }
