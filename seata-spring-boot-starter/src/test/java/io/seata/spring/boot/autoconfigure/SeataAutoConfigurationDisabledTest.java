@@ -14,12 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.spring.boot.autoconfigure;
+package io.seata.spring.boot.autoconfigure;
 
-import org.apache.seata.spring.annotation.GlobalTransactionScanner;
-import org.apache.seata.spring.boot.autoconfigure.properties.SeataProperties;
-import org.apache.seata.spring.boot.autoconfigure.properties.SpringCloudAlibabaConfiguration;
-import org.apache.seata.tm.api.FailureHandler;
+import io.seata.spring.annotation.GlobalTransactionScanner;
+import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
+import io.seata.spring.boot.autoconfigure.properties.SpringCloudAlibabaConfiguration;
+import io.seata.tm.api.FailureHandler;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
