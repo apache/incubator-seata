@@ -408,7 +408,8 @@ public class SeataHttpWatchTest {
         assertNull(response.object);
     }
 
-    // Each event is sent in a single line format: "{prefix}{json}\n" where prefix is defined in Constants.WATCH_EVENT_PREFIX, and the client reads one line at a time
+    // Each event is sent in a single line format: "{prefix}{json}\n" where prefix is defined in
+    // Constants.WATCH_EVENT_PREFIX, and the client reads one line at a time
     @Test
     public void testNext_WithMultipleEvents() throws IOException {
         // Simulate two events

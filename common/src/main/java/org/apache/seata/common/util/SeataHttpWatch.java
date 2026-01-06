@@ -160,17 +160,18 @@ public class SeataHttpWatch<T>
     public Response<T> next() {
         try {
             /*
-             Read a single line and parse it as an event.
-             Format: "{prefix}{json}\n" where prefix is defined in Constants.WATCH_EVENT_PREFIX.
-             Each line is a complete event, event type is included in the JSON data.
-             */
+            Read a single line and parse it as an event.
+            Format: "{prefix}{json}\n" where prefix is defined in Constants.WATCH_EVENT_PREFIX.
+            Each line is a complete event, event type is included in the JSON data.
+            */
             String line = source.readUtf8Line();
             if (line == null) {
                 throw new RuntimeException("Stream closed unexpectedly");
             }
 
             if (!line.startsWith(Constants.WATCH_EVENT_PREFIX)) {
-                throw new RuntimeException("Invalid event format: expected prefix '" + Constants.WATCH_EVENT_PREFIX + "', got: " + (line.length() > 20 ? line.substring(0, 20) + "..." : line));
+                throw new RuntimeException("Invalid event format: expected prefix '" + Constants.WATCH_EVENT_PREFIX
+                        + "', got: " + (line.length() > 20 ? line.substring(0, 20) + "..." : line));
             }
 
             String jsonData = line.substring(Constants.WATCH_EVENT_PREFIX.length());
@@ -248,4 +249,3 @@ public class SeataHttpWatch<T>
         }
     }
 }
-

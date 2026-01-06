@@ -28,7 +28,6 @@ import org.apache.seata.server.cluster.listener.ClusterChangeEvent;
 import org.apache.seata.server.cluster.manager.ClusterWatcherManager;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -39,7 +38,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.env.Environment;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -243,18 +241,16 @@ class ClusterControllerTest extends BaseSpringBootTest {
         });
         thread.start();
 
-
         try (SeataHttpWatch<ClusterWatchEvent> watch = HttpClientUtil.watchPost(
                 "http://127.0.0.1:" + port + "/metadata/v1/watch", param, header, ClusterWatchEvent.class)) {
             logger.info("准备接受链接建立事件");
             SeataHttpWatch.Response<ClusterWatchEvent> response = watch.next();
-            logger.info("接受到的事件类型{}",response.type);
+            logger.info("接受到的事件类型{}", response.type);
             Assertions.assertNotNull(response.object, "KEEPALIVE event data should not be null");
-            Assertions.assertEquals(
-                    "keepalive", response.object.getType(), "Event type should be 'keepalive'");
+            Assertions.assertEquals("keepalive", response.object.getType(), "Event type should be 'keepalive'");
             logger.info("准备接受变更事件");
             SeataHttpWatch.Response<ClusterWatchEvent> watchEventResponse = watch.next();
-            logger.info("接受到的事件类型{}",response.type);
+            logger.info("接受到的事件类型{}", response.type);
             Assertions.assertNotNull(watchEventResponse.object, "CLUSTER_UPDATE event data should not be null");
             Assertions.assertEquals(
                     "cluster-update", watchEventResponse.object.getType(), "Event type should be 'cluster-update'");
@@ -270,7 +266,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
         Map<String, String> header = new HashMap<>();
         header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
         Map<String, String> param = new HashMap<>();
-        param.put("default-test", "1");
+        param.put("default-test-2", "1");
 
         // Trigger multiple cluster change events with different terms
         Thread triggerThread = new Thread(() -> {
@@ -280,15 +276,15 @@ class ClusterControllerTest extends BaseSpringBootTest {
                         ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT);
 
                 // Trigger first cluster change event (term = 2)
-                publisher.publishEvent(new ClusterChangeEvent(this, "default-test", 2, true));
+                publisher.publishEvent(new ClusterChangeEvent(this, "default-test-2", 2, true));
                 Thread.sleep(1000); // Increased delay to ensure watcher is re-registered before next event
 
                 // Trigger second cluster change event (term = 3)
-                publisher.publishEvent(new ClusterChangeEvent(this, "default-test", 3, true));
+                publisher.publishEvent(new ClusterChangeEvent(this, "default-test-2", 3, true));
                 Thread.sleep(500); // Increased delay to ensure watcher is re-registered before next event
 
                 // Trigger third cluster change event (term = 4)
-                publisher.publishEvent(new ClusterChangeEvent(this, "default-test", 4, true));
+                publisher.publishEvent(new ClusterChangeEvent(this, "default-test-2", 4, true));
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
@@ -315,15 +311,15 @@ class ClusterControllerTest extends BaseSpringBootTest {
                             Assertions.assertEquals(
                                     "keepalive", response.object.getType(), "Event type should be 'keepalive'");
                         } else if (type == SeataHttpWatch.Response.Type.CLUSTER_UPDATE) {
-                            System.out.println("clusterUpdateCount当前值为" +  clusterUpdateCount);
+                            System.out.println("clusterUpdateCount当前值为" + clusterUpdateCount);
                             clusterUpdateCount++;
-                            System.out.println("clusterUpdateCount收到了一次变更事件当前值为" +  clusterUpdateCount);
+                            System.out.println("clusterUpdateCount收到了一次变更事件当前值为" + clusterUpdateCount);
                             Assertions.assertNotNull(response.object, "CLUSTER_UPDATE event data should not be null");
                             Assertions.assertEquals(
                                     "cluster-update",
                                     response.object.getType(),
                                     "Event type should be 'cluster-update'");
-                            Assertions.assertEquals("default-test", response.object.getGroup(), "Group should match");
+                            Assertions.assertEquals("default-test-2", response.object.getGroup(), "Group should match");
                             Assertions.assertNotNull(response.object.getTerm(), "Term should not be null");
 
                             // Verify term matches expected value

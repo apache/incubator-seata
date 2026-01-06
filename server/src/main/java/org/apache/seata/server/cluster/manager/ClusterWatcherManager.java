@@ -87,7 +87,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
                                     }
                                 }));
                     }
-                    
+
                     // Check HTTP/2 watchers for connection validity (don't remove, just check)
                     for (Map.Entry<String, Queue<Watcher<HttpContext>>> entry : HTTP2_WATCHERS.entrySet()) {
                         String group = entry.getKey();
@@ -95,10 +95,10 @@ public class ClusterWatcherManager implements ClusterChangeListener {
                         if (watchers == null || watchers.isEmpty()) {
                             continue;
                         }
-                        
+
                         // Create snapshot to avoid concurrent modification
                         List<Watcher<HttpContext>> watchersToCheck = new ArrayList<>(watchers);
-                        
+
                         watchersToCheck.forEach(watcher -> {
                             HttpContext context = watcher.getAsyncContext();
                             if (!context.getContext().channel().isActive()) {
@@ -124,7 +124,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
             logger.info("收到集群变更事件的通知");
             GROUP_UPDATE_TERM.put(event.getGroup(), event.getTerm());
             String group = event.getGroup();
-            
+
             // Handle HTTP/1.1 watchers: remove and notify (one-time request)
             Optional.ofNullable(HTTP1_WATCHERS.remove(group))
                     .ifPresent(watchers -> watchers.parallelStream().forEach(watcher -> {
@@ -132,7 +132,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
                         // HTTP/1.1 watcher is done after notification
                         watcher.setDone(true);
                     }));
-            
+
             // Handle HTTP/2 watchers: notify without removing (long-lived connection)
             Queue<Watcher<HttpContext>> http2Watchers = HTTP2_WATCHERS.get(group);
             if (http2Watchers != null && !http2Watchers.isEmpty()) {
@@ -172,7 +172,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
         if (latestTerm != null && latestTerm > watcher.getTerm()) {
             watcher.setTerm(latestTerm);
         }
-        
+
         // Note: HTTP/2 watchers are not re-registered here because they remain in HTTP2_WATCHERS
         // HTTP/1.1 watchers are done after notification, so no re-registration needed
     }
@@ -273,7 +273,8 @@ public class ClusterWatcherManager implements ClusterChangeListener {
         // For HTTP/2, always add to queue (long-lived connection)
         // For HTTP/1.1, only add if term hasn't been updated
         if (isHttp2) {
-            HTTP2_WATCHERS.computeIfAbsent(group, value -> new ConcurrentLinkedQueue<>())
+            HTTP2_WATCHERS
+                    .computeIfAbsent(group, value -> new ConcurrentLinkedQueue<>())
                     .add(watcher);
 
             // If term has been updated, notify immediately
@@ -282,7 +283,8 @@ public class ClusterWatcherManager implements ClusterChangeListener {
             }
         } else {
             if (term == null || watcher.getTerm() >= term) {
-                HTTP1_WATCHERS.computeIfAbsent(group, value -> new ConcurrentLinkedQueue<>())
+                HTTP1_WATCHERS
+                        .computeIfAbsent(group, value -> new ConcurrentLinkedQueue<>())
                         .add(watcher);
             } else {
                 // Term has been updated, notify immediately (one-time request)
