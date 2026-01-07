@@ -63,7 +63,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -98,8 +100,14 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     protected final Condition mergeCondition = mergeLock.newCondition();
     protected volatile boolean isSending = false;
 
+    /**
+     * Shared scheduled executor for RM/TM reconnect tasks
+     */
+    private static final ScheduledExecutorService SHARED_RECONNECT_EXECUTOR =
+            new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("NettyClientReconnectTimer", true));
+
     private final Runnable reconnectTask;
-    private AtomicBoolean timerStarted = new AtomicBoolean(false);
+    private final AtomicBoolean timerStarted = new AtomicBoolean(false);
     private final ReentrantLock reconnectLock = new ReentrantLock();
     private ScheduledFuture<?> reconnectScheduledFuture;
 
@@ -130,7 +138,7 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         reconnectLock.lock();
         try {
             if (timerStarted.compareAndSet(false, true)) {
-                reconnectScheduledFuture = timerExecutor.scheduleAtFixedRate(
+                reconnectScheduledFuture = SHARED_RECONNECT_EXECUTOR.scheduleAtFixedRate(
                         reconnectTask, SCHEDULE_DELAY_MILLS, SCHEDULE_INTERVAL_MILLS, TimeUnit.MILLISECONDS);
                 LOGGER.info("Reconnect timer started (role: {})", transactionRole.name());
             }
