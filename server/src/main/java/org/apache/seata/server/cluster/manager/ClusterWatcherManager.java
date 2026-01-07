@@ -122,9 +122,17 @@ public class ClusterWatcherManager implements ClusterChangeListener {
     @Async
     public void onChangeEvent(ClusterChangeEvent event) {
         if (event.getTerm() > 0) {
-            GROUP_UPDATE_TERM.put(event.getGroup(), event.getTerm());
             String group = event.getGroup();
             Long eventTerm = event.getTerm();
+
+            Long currentTerm = GROUP_UPDATE_TERM.get(group);
+            if (currentTerm != null && eventTerm <= currentTerm) {
+                logger.info("Discarding outdated event with term {} for group {}, current term is {}",
+                        eventTerm, group, currentTerm);
+                return;
+            }
+            
+            GROUP_UPDATE_TERM.put(group, eventTerm);
 
             // Handle HTTP/1.1 watchers: remove and notify (one-time request)
             Optional.ofNullable(HTTP1_WATCHERS.remove(group))
@@ -139,9 +147,13 @@ public class ClusterWatcherManager implements ClusterChangeListener {
             if (http2Watchers != null && !http2Watchers.isEmpty()) {
                 List<Watcher<HttpContext>> watchersToNotify = new ArrayList<>(http2Watchers);
                 watchersToNotify.forEach(watcher -> {
-                    // Only notify active watchers
                     if (watcher.getAsyncContext().getContext().channel().isActive() && !watcher.isDone()) {
-                        notifyWatcher(watcher, eventTerm);
+                        if (eventTerm > watcher.getTerm()) {
+                            notifyWatcher(watcher, eventTerm);
+                        } else {
+                            logger.info("Skipping notification for watcher with term {} >= event term {} for group {}",
+                                    watcher.getTerm(), eventTerm, group);
+                        }
                     } else {
                         // Remove inactive watcher
                         http2Watchers.remove(watcher);
