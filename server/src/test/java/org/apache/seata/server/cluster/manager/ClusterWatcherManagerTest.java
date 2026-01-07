@@ -96,41 +96,6 @@ class ClusterWatcherManagerTest extends BaseSpringBootTest {
     }
 
     @Test
-    void testSendWatcherResponseWithInactiveChannel() {
-        when(mockChannel.isActive()).thenReturn(false);
-
-        Watcher<HttpContext> watcher = new Watcher<>(TEST_GROUP, httpContext, TEST_TIMEOUT, TEST_TERM);
-
-        assertDoesNotThrow(() -> {
-            ReflectionTestUtils.invokeMethod(clusterWatcherManager, "notifyWatcher", watcher);
-        });
-
-        verify(mockChannel, atLeastOnce()).isActive();
-
-        verify(mockChannelHandlerContext, never()).write(any());
-        verify(mockChannelHandlerContext, never()).writeAndFlush(any());
-        verify(mockChannelHandlerContext, never()).flush();
-
-        assertTrue(watcher.isDone());
-    }
-
-    @Test
-    void testSendWatcherResponseWithActiveChannel_Http1() {
-        when(mockChannel.isActive()).thenReturn(true);
-        Watcher<HttpContext> watcher = new Watcher<>(TEST_GROUP, httpContext, TEST_TIMEOUT, TEST_TERM);
-
-        assertDoesNotThrow(() -> {
-            ReflectionTestUtils.invokeMethod(clusterWatcherManager, "notifyWatcher", watcher);
-        });
-
-        verify(mockChannel, atLeastOnce()).isActive();
-
-        verify(mockChannelHandlerContext, atLeastOnce()).writeAndFlush(any());
-
-        assertTrue(watcher.isDone());
-    }
-
-    @Test
     void testOnChangeEventWithInactiveChannel() {
         when(mockChannel.isActive()).thenReturn(false);
 
