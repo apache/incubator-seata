@@ -127,11 +127,14 @@ public class ClusterWatcherManager implements ClusterChangeListener {
 
             Long currentTerm = GROUP_UPDATE_TERM.get(group);
             if (currentTerm != null && eventTerm <= currentTerm) {
-                logger.info("Discarding outdated event with term {} for group {}, current term is {}",
-                        eventTerm, group, currentTerm);
+                logger.info(
+                        "Discarding outdated event with term {} for group {}, current term is {}",
+                        eventTerm,
+                        group,
+                        currentTerm);
                 return;
             }
-            
+
             GROUP_UPDATE_TERM.put(group, eventTerm);
 
             // Handle HTTP/1.1 watchers: remove and notify (one-time request)
@@ -151,8 +154,11 @@ public class ClusterWatcherManager implements ClusterChangeListener {
                         if (eventTerm > watcher.getTerm()) {
                             notifyWatcher(watcher, eventTerm);
                         } else {
-                            logger.info("Skipping notification for watcher with term {} >= event term {} for group {}",
-                                    watcher.getTerm(), eventTerm, group);
+                            logger.info(
+                                    "Skipping notification for watcher with term {} >= event term {} for group {}",
+                                    watcher.getTerm(),
+                                    eventTerm,
+                                    group);
                         }
                     } else {
                         // Remove inactive watcher
