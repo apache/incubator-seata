@@ -16,7 +16,6 @@
  */
 package org.apache.seata.common.util;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
@@ -50,27 +49,21 @@ public class SeataHttpWatch<T>
     private final Class<T> eventType;
 
     /**
-     * Response wrapper containing event type and data
+     * Response wrapper containing event data.
+     * Since event format is simplified (no type field), all successful events are treated the same.
+     * Client can determine the nature of the event by comparing metadata.term.
      */
     public static class Response<T> {
         /**
-         * Event type enum - extracted from JSON "type" field
+         * Response type enum
          */
         public enum Type {
             /**
-             * Cluster update event
+             * Normal event with data (connection established or cluster changed)
              */
-            CLUSTER_UPDATE,
+            UPDATE,
             /**
-             * Keep-alive event (connection established)
-             */
-            KEEPALIVE,
-            /**
-             * Timeout event (stream closed due to timeout)
-             */
-            TIMEOUT,
-            /**
-             * Error event
+             * Error event (parse error or connection error)
              */
             ERROR
         }
@@ -184,48 +177,21 @@ public class SeataHttpWatch<T>
 
     /**
      * Parse event JSON into Response object.
-     * Uses JsonNode to parse JSON only once for better performance.
+     * Simplified format: only contains group, timestamp, and metadata fields.
      *
-     * @param json the JSON string to parse (contains type field)
+     * @param json the JSON string to parse
      * @return the parsed Response object
      * @throws IOException if parsing fails
      */
     private Response<T> parseEvent(String json) throws IOException {
         try {
-            JsonNode jsonNode = objectMapper.readTree(json);
-            String eventTypeStr = jsonNode.has("type") ? jsonNode.get("type").asText() : null;
-            Response.Type responseType = mapEventTypeToResponseType(eventTypeStr);
-            T eventData = objectMapper.treeToValue(jsonNode, eventType);
-
-            return new Response<>(responseType, eventData);
+            T eventData = objectMapper.readValue(json, eventType);
+            return new Response<>(Response.Type.UPDATE, eventData);
 
         } catch (Exception e) {
             LOGGER.error("Failed to parse event JSON: {}", json, e);
             // Return error response
             return new Response<>(Response.Type.ERROR, null);
-        }
-    }
-
-    /**
-     * Map event type from JSON to Response.Type
-     *
-     * @param eventType the event type from JSON "type" field
-     * @return the corresponding Response.Type
-     */
-    private Response.Type mapEventTypeToResponseType(String eventType) {
-        if (eventType == null) {
-            return Response.Type.CLUSTER_UPDATE; // Default
-        }
-        switch (eventType) {
-            case "cluster-update":
-                return Response.Type.CLUSTER_UPDATE;
-            case "keepalive":
-                return Response.Type.KEEPALIVE;
-            case "timeout":
-                return Response.Type.TIMEOUT;
-            default:
-                LOGGER.warn("Unknown event type: {}, defaulting to CLUSTER_UPDATE", eventType);
-                return Response.Type.CLUSTER_UPDATE;
         }
     }
 

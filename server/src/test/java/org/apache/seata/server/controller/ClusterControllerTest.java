@@ -94,23 +94,23 @@ class ClusterControllerTest extends BaseSpringBootTest {
                 headers,
                 ClusterWatchEvent.class)) {
 
-            boolean keepaliveReceived = false;
+            boolean firstEventReceived = false;
             long startTime = System.currentTimeMillis();
             SeataHttpWatch.Response<ClusterWatchEvent> firstResponse = watch.next();
             Assertions.assertEquals(
-                    SeataHttpWatch.Response.Type.KEEPALIVE, firstResponse.type, "First event should be KEEPALIVE");
+                    SeataHttpWatch.Response.Type.UPDATE, firstResponse.type, "First event should be UPDATE");
             Assertions.assertNotNull(firstResponse.object, "Event data should not be null");
-            ClusterWatchEvent keepaliveEvent = firstResponse.object;
-            Assertions.assertEquals("keepalive", keepaliveEvent.getType(), "Event type should be 'keepalive'");
-            Assertions.assertEquals("default-test-group-1", keepaliveEvent.getGroup(), "Group should match");
-            Assertions.assertNotNull(keepaliveEvent.getTimestamp(), "Timestamp should not be null");
-            keepaliveReceived = true;
+            ClusterWatchEvent firstEvent = firstResponse.object;
+            Assertions.assertNotNull(firstEvent.getMetadata(), "Metadata should not be null");
+            Assertions.assertEquals("default-test-group-1", firstEvent.getGroup(), "Group should match");
+            Assertions.assertNotNull(firstEvent.getTimestamp(), "Timestamp should not be null");
+            firstEventReceived = true;
 
             long elapsed = System.currentTimeMillis() - startTime;
             Assertions.assertTrue(
                     elapsed < 1000,
-                    "KEEPALIVE should be received immediately after connection, elapsed: " + elapsed + "ms");
-            Assertions.assertTrue(keepaliveReceived, "Keepalive should be received after connection");
+                    "First event should be received immediately after connection, elapsed: " + elapsed + "ms");
+            Assertions.assertTrue(firstEventReceived, "First event should be received after connection");
 
             long timeoutPeriod = 3000; // Timeout period from query parameter
             long waitTime = timeoutPeriod + 1000; // Wait timeout period + 1 second
@@ -135,12 +135,11 @@ class ClusterControllerTest extends BaseSpringBootTest {
             boolean clusterUpdateReceived = false;
             SeataHttpWatch.Response<ClusterWatchEvent> response = watch.next();
 
-            if (response.type == SeataHttpWatch.Response.Type.CLUSTER_UPDATE) {
+            if (response.type == SeataHttpWatch.Response.Type.UPDATE) {
                 clusterUpdateReceived = true;
-                Assertions.assertEquals(
-                        "cluster-update", response.object.getType(), "Event type should be 'cluster-update'");
+                Assertions.assertNotNull(response.object.getMetadata(), "Metadata should not be null");
                 Assertions.assertEquals("default-test-group-1", response.object.getGroup(), "Group should match");
-                Assertions.assertEquals(2L, response.object.getTerm().longValue(), "Term should be 2");
+                Assertions.assertEquals(2L, response.object.getMetadata().getTerm(), "Term should be 2");
             }
 
             // Verify connection was maintained beyond timeout period
@@ -208,15 +207,16 @@ class ClusterControllerTest extends BaseSpringBootTest {
         try (SeataHttpWatch<ClusterWatchEvent> watch = HttpClientUtil.watchPost(
                 "http://127.0.0.1:" + port + "/metadata/v1/watch", param, header, ClusterWatchEvent.class)) {
             SeataHttpWatch.Response<ClusterWatchEvent> response = watch.next();
-            Assertions.assertNotNull(response.object, "KEEPALIVE event data should not be null");
-            Assertions.assertEquals("keepalive", response.object.getType(), "Event type should be 'keepalive'");
+            Assertions.assertNotNull(response.object, "First event data should not be null");
+            Assertions.assertEquals(SeataHttpWatch.Response.Type.UPDATE, response.type, "First event should be UPDATE");
+            Assertions.assertNotNull(response.object.getMetadata(), "Metadata should not be null");
             SeataHttpWatch.Response<ClusterWatchEvent> watchEventResponse = watch.next();
-            Assertions.assertNotNull(watchEventResponse.object, "CLUSTER_UPDATE event data should not be null");
-            Assertions.assertEquals(
-                    "cluster-update", watchEventResponse.object.getType(), "Event type should be 'cluster-update'");
+            Assertions.assertNotNull(watchEventResponse.object, "Second event data should not be null");
+            Assertions.assertEquals(SeataHttpWatch.Response.Type.UPDATE, watchEventResponse.type, "Second event should be UPDATE");
             Assertions.assertEquals("default-test-group-3", watchEventResponse.object.getGroup(), "Group should match");
-            Assertions.assertNotNull(watchEventResponse.object.getTerm(), "Term should not be null");
-            Assertions.assertEquals(2L, watchEventResponse.object.getTerm().longValue(), "Term should be 2");
+            Assertions.assertNotNull(watchEventResponse.object.getMetadata(), "Metadata should not be null");
+            Assertions.assertNotNull(watchEventResponse.object.getMetadata().getTerm(), "Term should not be null");
+            Assertions.assertEquals(2L, watchEventResponse.object.getMetadata().getTerm(), "Term should be 2");
         }
     }
 
@@ -251,7 +251,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
         });
         triggerThread.start();
 
-        boolean keepaliveReceived = false;
+        boolean firstEventReceived = false;
         int clusterUpdateCount = 0;
         long startTime = System.currentTimeMillis();
         long maxWaitTime = 10000; // Maximum wait time: 10 seconds
@@ -265,32 +265,30 @@ class ClusterControllerTest extends BaseSpringBootTest {
                     if (watch.hasNext()) {
                         SeataHttpWatch.Response<ClusterWatchEvent> response = watch.next();
                         SeataHttpWatch.Response.Type type = response.type;
-                        if (type == SeataHttpWatch.Response.Type.KEEPALIVE) {
-                            keepaliveReceived = true;
-                            Assertions.assertNotNull(response.object, "KEEPALIVE event data should not be null");
-                            Assertions.assertEquals(
-                                    "keepalive", response.object.getType(), "Event type should be 'keepalive'");
-                        } else if (type == SeataHttpWatch.Response.Type.CLUSTER_UPDATE) {
-                            logger.info("clusterUpdateCount当前值为" + clusterUpdateCount);
-                            clusterUpdateCount++;
-                            logger.info("clusterUpdateCount收到了一次变更事件当前值为" + clusterUpdateCount);
-                            Assertions.assertNotNull(response.object, "CLUSTER_UPDATE event data should not be null");
-                            Assertions.assertEquals(
-                                    "cluster-update",
-                                    response.object.getType(),
-                                    "Event type should be 'cluster-update'");
-                            Assertions.assertEquals(
-                                    "default-test-group-4", response.object.getGroup(), "Group should match");
-                            Assertions.assertNotNull(response.object.getTerm(), "Term should not be null");
-
-                            // Verify term matches expected value
-                            long expectedTerm = expectedTerms[clusterUpdateCount - 1];
-                            long actualTerm = response.object.getTerm().longValue();
-                            Assertions.assertEquals(
-                                    expectedTerm,
-                                    actualTerm,
-                                    "Term should be " + expectedTerm + " but actualTerm is " + actualTerm
-                                            + " for cluster update #" + clusterUpdateCount);
+                        if (type == SeataHttpWatch.Response.Type.UPDATE) {
+                            Assertions.assertNotNull(response.object, "Event data should not be null");
+                            Assertions.assertNotNull(response.object.getMetadata(), "Metadata should not be null");
+                            
+                            // First event is connection established, subsequent events are cluster updates
+                            if (!firstEventReceived) {
+                                firstEventReceived = true;
+                                logger.info("First event received with term: {}", response.object.getMetadata().getTerm());
+                            } else {
+                                logger.info("clusterUpdateCount当前值为" + clusterUpdateCount);
+                                clusterUpdateCount++;
+                                logger.info("clusterUpdateCount收到了一次变更事件当前值为" + clusterUpdateCount);
+                                Assertions.assertEquals(
+                                        "default-test-group-4", response.object.getGroup(), "Group should match");
+                                
+                                // Verify term matches expected value
+                                long expectedTerm = expectedTerms[clusterUpdateCount - 1];
+                                long actualTerm = response.object.getMetadata().getTerm();
+                                Assertions.assertEquals(
+                                        expectedTerm,
+                                        actualTerm,
+                                        "Term should be " + expectedTerm + " but actualTerm is " + actualTerm
+                                                + " for cluster update #" + clusterUpdateCount);
+                            }
                         }
                     }
                 } catch (Exception e) {
@@ -303,7 +301,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
             }
 
             // Verify all events were received
-            Assertions.assertTrue(keepaliveReceived, "KEEPALIVE event should be received");
+            Assertions.assertTrue(firstEventReceived, "First event should be received");
             Assertions.assertEquals(
                     expectedTerms.length,
                     clusterUpdateCount,

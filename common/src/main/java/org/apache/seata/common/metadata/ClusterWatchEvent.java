@@ -18,41 +18,27 @@ package org.apache.seata.common.metadata;
 
 /**
  * Cluster watch event data class.
- * This class represents the event data received from the cluster watch API.
- * It is used as a DTO (Data Transfer Object) for deserializing server-sent events.
- *
- * <p>The server sends events in SSE format:
+ * Simplified format: only contains group, timestamp, and full metadata.
+ * 
+ * <p>Event format:
  * <pre>
- * data: {"type":"cluster-update|keepalive|timeout","group":"default","term":123,"timestamp":1234567890}
+ * {"group":"default","timestamp":1234567890,"metadata":{"nodes":[...],"storeMode":"raft","term":2}}
  * </pre>
- *
- * <p>Note: The event type is included in the JSON data, not in a separate SSE "event:" field.
- * This simplifies parsing and reduces the number of lines to read.
+ * 
+ * <p>Client can determine if update is needed by comparing metadata.term with local term.
+ * No need for separate event type field since all events contain full metadata.
  *
  * @see org.apache.seata.common.util.SeataHttpWatch
  */
 public class ClusterWatchEvent {
 
-    /**
-     * Event type: "cluster-update", "keepalive", or "timeout"
-     */
-    private String type;
-
     private String group;
-
-    private Long term;
 
     private Long timestamp;
 
+    private MetadataResponse metadata;
+
     public ClusterWatchEvent() {}
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
 
     public String getGroup() {
         return group;
@@ -60,14 +46,6 @@ public class ClusterWatchEvent {
 
     public void setGroup(String group) {
         this.group = group;
-    }
-
-    public Long getTerm() {
-        return term;
-    }
-
-    public void setTerm(Long term) {
-        this.term = term;
     }
 
     public Long getTimestamp() {
@@ -78,12 +56,19 @@ public class ClusterWatchEvent {
         this.timestamp = timestamp;
     }
 
+    public MetadataResponse getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(MetadataResponse metadata) {
+        this.metadata = metadata;
+    }
+
     @Override
     public String toString() {
-        return "ClusterWatchEvent{" + "type='"
-                + type + '\'' + ", group='"
-                + group + '\'' + ", term="
-                + term + ", timestamp="
-                + timestamp + '}';
+        return "ClusterWatchEvent{" + "group='"
+                + group + '\'' + ", timestamp="
+                + timestamp + ", metadata="
+                + metadata + '}';
     }
 }

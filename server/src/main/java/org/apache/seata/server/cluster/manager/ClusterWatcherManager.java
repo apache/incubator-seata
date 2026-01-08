@@ -16,6 +16,10 @@
  */
 package org.apache.seata.server.cluster.manager;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.alipay.sofa.jraft.RouteTable;
+import com.alipay.sofa.jraft.entity.PeerId;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
@@ -29,11 +33,19 @@ import io.netty.handler.codec.http2.DefaultHttp2DataFrame;
 import io.netty.handler.codec.http2.DefaultHttp2Headers;
 import io.netty.handler.codec.http2.DefaultHttp2HeadersFrame;
 import io.netty.handler.codec.http2.Http2Headers;
+import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.Constants;
+import org.apache.seata.common.metadata.MetadataResponse;
+import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.rpc.http.HttpContext;
 import org.apache.seata.common.thread.NamedThreadFactory;
+import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.server.cluster.listener.ClusterChangeEvent;
 import org.apache.seata.server.cluster.listener.ClusterChangeListener;
+import org.apache.seata.server.cluster.raft.RaftServer;
+import org.apache.seata.server.cluster.raft.RaftServerManager;
+import org.apache.seata.server.cluster.raft.sync.msg.dto.RaftClusterMetadata;
 import org.apache.seata.server.cluster.watch.Watcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,17 +56,24 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import static org.apache.seata.common.ConfigurationKeys.STORE_MODE;
+import static org.apache.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
+
 @Component
 public class ClusterWatcherManager implements ClusterChangeListener {
+
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -81,7 +100,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
                                     if (System.currentTimeMillis() >= watcher.getTimeout()) {
                                         watcher.setDone(true);
                                         sendWatcherResponse(
-                                                watcher, HttpResponseStatus.NOT_MODIFIED, true, false, null);
+                                                watcher, HttpResponseStatus.NOT_MODIFIED, true, false);
                                     } else if (!watcher.isDone()) {
                                         // Re-register if not timeout
                                         registryWatcher(watcher);
@@ -179,7 +198,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
         }
 
         boolean isFirstResponse = !HTTP2_HEADERS_SENT.getOrDefault(watcher, false);
-        sendWatcherResponse(watcher, HttpResponseStatus.OK, false, isFirstResponse, eventTerm);
+        sendWatcherResponse(watcher, HttpResponseStatus.OK, false, isFirstResponse);
         if (isFirstResponse && isHttp2) {
             HTTP2_HEADERS_SENT.put(watcher, true);
         }
@@ -195,14 +214,12 @@ public class ClusterWatcherManager implements ClusterChangeListener {
      * @param nettyStatus the HTTP status code
      * @param closeStream whether to close the HTTP/2 stream (endStream=true)
      * @param sendHeaders whether to send HTTP/2 headers frame (only needed for first response)
-     * @param term        the term to use in the response, null means get from global variable
      */
     private void sendWatcherResponse(
             Watcher<HttpContext> watcher,
             HttpResponseStatus nettyStatus,
             boolean closeStream,
-            boolean sendHeaders,
-            Long term) {
+            boolean sendHeaders) {
 
         HttpContext context = watcher.getAsyncContext();
         if (!(context instanceof HttpContext)) {
@@ -244,8 +261,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
         }
 
         String group = watcher.getGroup();
-        Long finalTerm = term != null ? term : GROUP_UPDATE_TERM.getOrDefault(group, 0L);
-        String eventData = buildEventData(nettyStatus, closeStream, sendHeaders, group, finalTerm);
+        String eventData = buildEventData(group);
         ByteBuf content = Unpooled.copiedBuffer(eventData, StandardCharsets.UTF_8);
 
         // Send DATA frame (if closeStream is true, it will end the current stream)
@@ -253,26 +269,78 @@ public class ClusterWatcherManager implements ClusterChangeListener {
         ctx.flush();
     }
 
-    private String buildEventData(
-            HttpResponseStatus nettyStatus, boolean closeStream, boolean sendHeaders, String group, Long term) {
-        // Determine event type (embedded in JSON, not in a separate event field)
-        String eventType;
-        if (sendHeaders) {
-            // Send keepalive event when stream is first established to confirm connection
-            eventType = "keepalive";
-        } else if (closeStream && nettyStatus == HttpResponseStatus.NOT_MODIFIED) {
-            // Timeout event, stream needs to be closed
-            eventType = "timeout";
-        } else {
-            // Normal cluster update event
-            eventType = "cluster-update";
+    /**
+     * Get current cluster metadata for the given group.
+     * This method extracts the logic from ClusterController#cluster to avoid circular dependency.
+     *
+     * @param group the group name
+     * @return the MetadataResponse containing current cluster metadata
+     */
+    private MetadataResponse getMetadataResponse(String group) {
+        MetadataResponse metadataResponse = new MetadataResponse();
+        if (StringUtils.isBlank(group)) {
+            group = ConfigurationFactory.getInstance()
+                    .getConfig(ConfigurationKeys.SERVER_RAFT_GROUP, DEFAULT_SEATA_GROUP);
         }
+        RaftServer raftServer = RaftServerManager.getRaftServer(group);
+        if (raftServer != null) {
+            String mode = ConfigurationFactory.getInstance().getConfig(STORE_MODE);
+            metadataResponse.setStoreMode(mode);
+            RouteTable routeTable = RouteTable.getInstance();
+            try {
+                routeTable.refreshLeader(RaftServerManager.getCliClientServiceInstance(), group, 1000);
+                PeerId leader = routeTable.selectLeader(group);
+                if (leader != null) {
+                    Set<Node> nodes = new HashSet<>();
+                    RaftClusterMetadata raftClusterMetadata =
+                            raftServer.getRaftStateMachine().getRaftLeaderMetadata();
+                    Node leaderNode = raftServer
+                            .getRaftStateMachine()
+                            .getRaftLeaderMetadata()
+                            .getLeader();
+                    leaderNode.setGroup(group);
+                    nodes.add(leaderNode);
+                    nodes.addAll(raftClusterMetadata.getLearner());
+                    nodes.addAll(raftClusterMetadata.getFollowers());
+                    metadataResponse.setTerm(raftClusterMetadata.getTerm());
+                    metadataResponse.setNodes(new ArrayList<>(nodes));
+                }
+            } catch (Exception e) {
+                logger.error("Failed to get cluster metadata for group {}: {}", group, e.getMessage(), e);
+            }
+        }
+        return metadataResponse;
+    }
 
-        String json = String.format(
-                "{\"type\":\"%s\",\"group\":\"%s\",\"term\":%d,\"timestamp\":%d}",
-                eventType, group, term != null ? term : 0L, System.currentTimeMillis());
-        logger.debug("Sending watch event: {}", json);
-        return Constants.WATCH_EVENT_PREFIX + json + "\n";
+    /**
+     * Build event data with simplified format: only group, timestamp, and metadata.
+     * For HTTP/2 connections, this will send the full MetadataResponse.
+     *
+     * @param group the group name
+     * @return the event data string with prefix
+     */
+    private String buildEventData(String group) {
+        try {
+            // Get current MetadataResponse
+            MetadataResponse metadataResponse = getMetadataResponse(group);
+
+            // Build simplified JSON: only group, timestamp, and metadata
+            String json = String.format(
+                    "{\"group\":\"%s\",\"timestamp\":%d,\"metadata\":%s}",
+                    group,
+                    System.currentTimeMillis(),
+                    OBJECT_MAPPER.writeValueAsString(metadataResponse));
+
+            logger.debug("Sending watch event: group={}, term={}", group, metadataResponse.getTerm());
+            return Constants.WATCH_EVENT_PREFIX + json + "\n";
+        } catch (JsonProcessingException e) {
+            logger.error("Failed to serialize MetadataResponse for group {}: {}", group, e.getMessage(), e);
+            // Fallback: send minimal data
+            String json = String.format(
+                    "{\"group\":\"%s\",\"timestamp\":%d,\"metadata\":null}",
+                    group, System.currentTimeMillis());
+            return Constants.WATCH_EVENT_PREFIX + json + "\n";
+        }
     }
 
     public void registryWatcher(Watcher<HttpContext> watcher) {
@@ -283,7 +351,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
 
         // For HTTP/2, must send response headers immediately, cannot delay
         if (isHttp2 && !HTTP2_HEADERS_SENT.getOrDefault(watcher, false)) {
-            sendWatcherResponse(watcher, HttpResponseStatus.OK, false, true, null);
+            sendWatcherResponse(watcher, HttpResponseStatus.OK, false, true);
             HTTP2_HEADERS_SENT.put(watcher, true);
         }
 

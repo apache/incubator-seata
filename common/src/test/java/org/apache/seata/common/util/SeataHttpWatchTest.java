@@ -229,8 +229,8 @@ public class SeataHttpWatchTest {
 
     @Test
     public void testNext_WithKeepaliveEvent() throws IOException {
-        // Setup
-        String sseData = "CW:{\"type\":\"keepalive\",\"group\":\"default-test\",\"timestamp\":1234567890}\n";
+        // Setup - new format: group, timestamp, metadata
+        String sseData = "CW:{\"group\":\"default-test\",\"timestamp\":1234567890,\"metadata\":{\"nodes\":[],\"storeMode\":\"raft\",\"term\":1}}\n";
         Buffer buffer = new Buffer();
         buffer.writeString(sseData, StandardCharsets.UTF_8);
 
@@ -252,18 +252,19 @@ public class SeataHttpWatchTest {
 
         // Verify
         assertNotNull(response);
-        assertEquals(SeataHttpWatch.Response.Type.KEEPALIVE, response.type);
+        assertEquals(SeataHttpWatch.Response.Type.UPDATE, response.type);
         assertNotNull(response.object);
-        assertEquals("keepalive", response.object.getType());
         assertEquals("default-test", response.object.getGroup());
         assertEquals(1234567890L, response.object.getTimestamp());
+        assertNotNull(response.object.getMetadata());
+        assertEquals(1L, response.object.getMetadata().getTerm());
     }
 
     @Test
     public void testNext_WithClusterUpdateEvent() throws IOException {
-        // Setup
+        // Setup - new format: group, timestamp, metadata
         String sseData =
-                "CW:{\"type\":\"cluster-update\",\"group\":\"default-test\",\"term\":2,\"timestamp\":1234567890}\n";
+                "CW:{\"group\":\"default-test\",\"timestamp\":1234567890,\"metadata\":{\"nodes\":[],\"storeMode\":\"raft\",\"term\":2}}\n";
         Buffer buffer = new Buffer();
         buffer.writeString(sseData, StandardCharsets.UTF_8);
 
@@ -285,18 +286,18 @@ public class SeataHttpWatchTest {
 
         // Verify
         assertNotNull(response);
-        assertEquals(SeataHttpWatch.Response.Type.CLUSTER_UPDATE, response.type);
+        assertEquals(SeataHttpWatch.Response.Type.UPDATE, response.type);
         assertNotNull(response.object);
-        assertEquals("cluster-update", response.object.getType());
         assertEquals("default-test", response.object.getGroup());
-        assertEquals(2L, response.object.getTerm());
         assertEquals(1234567890L, response.object.getTimestamp());
+        assertNotNull(response.object.getMetadata());
+        assertEquals(2L, response.object.getMetadata().getTerm());
     }
 
     @Test
     public void testNext_WithTimeoutEvent() throws IOException {
-        // Setup
-        String sseData = "CW:{\"type\":\"timeout\",\"group\":\"default-test\",\"timestamp\":1234567890}\n";
+        // Setup - new format: group, timestamp, metadata (timeout events are no longer used, but test for compatibility)
+        String sseData = "CW:{\"group\":\"default-test\",\"timestamp\":1234567890,\"metadata\":{\"nodes\":[],\"storeMode\":\"raft\",\"term\":1}}\n";
         Buffer buffer = new Buffer();
         buffer.writeString(sseData, StandardCharsets.UTF_8);
 
@@ -316,17 +317,17 @@ public class SeataHttpWatchTest {
         // Execute
         SeataHttpWatch.Response<ClusterWatchEvent> response = watch.next();
 
-        // Verify
+        // Verify - all events are now UPDATE type
         assertNotNull(response);
-        assertEquals(SeataHttpWatch.Response.Type.TIMEOUT, response.type);
+        assertEquals(SeataHttpWatch.Response.Type.UPDATE, response.type);
         assertNotNull(response.object);
-        assertEquals("timeout", response.object.getType());
+        assertEquals("default-test", response.object.getGroup());
     }
 
     @Test
     public void testNext_WithUnknownEventType() throws IOException {
-        // Setup
-        String sseData = "CW:{\"type\":\"unknown-type\",\"group\":\"default-test\",\"timestamp\":1234567890}\n";
+        // Setup - new format doesn't have type field, so this test is for backward compatibility
+        String sseData = "CW:{\"group\":\"default-test\",\"timestamp\":1234567890,\"metadata\":{\"nodes\":[],\"storeMode\":\"raft\",\"term\":1}}\n";
         Buffer buffer = new Buffer();
         buffer.writeString(sseData, StandardCharsets.UTF_8);
 
@@ -346,15 +347,15 @@ public class SeataHttpWatchTest {
         // Execute
         SeataHttpWatch.Response<ClusterWatchEvent> response = watch.next();
 
-        // Verify - should default to CLUSTER_UPDATE for unknown types
+        // Verify - all successful events are UPDATE type
         assertNotNull(response);
-        assertEquals(SeataHttpWatch.Response.Type.CLUSTER_UPDATE, response.type);
+        assertEquals(SeataHttpWatch.Response.Type.UPDATE, response.type);
     }
 
     @Test
     public void testNext_WithNullEventType() throws IOException {
-        // Setup
-        String sseData = "CW:{\"group\":\"default-test\",\"timestamp\":1234567890}\n";
+        // Setup - new format: group, timestamp, metadata (metadata can be null)
+        String sseData = "CW:{\"group\":\"default-test\",\"timestamp\":1234567890,\"metadata\":null}\n";
         Buffer buffer = new Buffer();
         buffer.writeString(sseData, StandardCharsets.UTF_8);
 
@@ -374,9 +375,10 @@ public class SeataHttpWatchTest {
         // Execute
         SeataHttpWatch.Response<ClusterWatchEvent> response = watch.next();
 
-        // Verify - should default to CLUSTER_UPDATE when type is null
+        // Verify - all successful events are UPDATE type
         assertNotNull(response);
-        assertEquals(SeataHttpWatch.Response.Type.CLUSTER_UPDATE, response.type);
+        assertEquals(SeataHttpWatch.Response.Type.UPDATE, response.type);
+        assertNull(response.object.getMetadata());
     }
 
     @Test
@@ -412,9 +414,9 @@ public class SeataHttpWatchTest {
     // Constants.WATCH_EVENT_PREFIX, and the client reads one line at a time
     @Test
     public void testNext_WithMultipleEvents() throws IOException {
-        // Simulate two events
-        String sseData = "CW:{\"type\":\"keepalive\",\"group\":\"default-test\",\"timestamp\":1234567890}\n"
-                + "CW:{\"type\":\"cluster-update\",\"group\":\"default-test\",\"term\":2,\"timestamp\":1234567891}\n";
+        // Simulate two events - new format: group, timestamp, metadata
+        String sseData = "CW:{\"group\":\"default-test\",\"timestamp\":1234567890,\"metadata\":{\"nodes\":[],\"storeMode\":\"raft\",\"term\":1}}\n"
+                + "CW:{\"group\":\"default-test\",\"timestamp\":1234567891,\"metadata\":{\"nodes\":[],\"storeMode\":\"raft\",\"term\":2}}\n";
         Buffer buffer = new Buffer();
         buffer.writeString(sseData, StandardCharsets.UTF_8);
 
@@ -433,18 +435,19 @@ public class SeataHttpWatchTest {
 
         // Execute - read first event
         SeataHttpWatch.Response<ClusterWatchEvent> response1 = watch.next();
-        assertEquals(SeataHttpWatch.Response.Type.KEEPALIVE, response1.type);
+        assertEquals(SeataHttpWatch.Response.Type.UPDATE, response1.type);
+        assertEquals(1L, response1.object.getMetadata().getTerm());
 
         // Execute - read second event
         SeataHttpWatch.Response<ClusterWatchEvent> response2 = watch.next();
-        assertEquals(SeataHttpWatch.Response.Type.CLUSTER_UPDATE, response2.type);
-        assertEquals(2L, response2.object.getTerm());
+        assertEquals(SeataHttpWatch.Response.Type.UPDATE, response2.type);
+        assertEquals(2L, response2.object.getMetadata().getTerm());
     }
 
     @Test
     public void testNext_WithEmptyLines() throws IOException {
-        // Setup - include blank lines before event (should be skipped)
-        String sseData = "CW:{\"type\":\"keepalive\",\"group\":\"default-test\",\"timestamp\":1234567890}\n";
+        // Setup - new format: group, timestamp, metadata
+        String sseData = "CW:{\"group\":\"default-test\",\"timestamp\":1234567890,\"metadata\":{\"nodes\":[],\"storeMode\":\"raft\",\"term\":1}}\n";
         Buffer buffer = new Buffer();
         buffer.writeString(sseData, StandardCharsets.UTF_8);
 
@@ -464,9 +467,9 @@ public class SeataHttpWatchTest {
         // Execute
         SeataHttpWatch.Response<ClusterWatchEvent> response = watch.next();
 
-        // Verify - should skip empty lines and parse the event
+        // Verify - should parse the event
         assertNotNull(response);
-        assertEquals(SeataHttpWatch.Response.Type.KEEPALIVE, response.type);
+        assertEquals(SeataHttpWatch.Response.Type.UPDATE, response.type);
     }
 
     @Test
@@ -522,7 +525,7 @@ public class SeataHttpWatchTest {
     public void testNext_WithPartialDataOnStreamClose() throws IOException {
         // Setup - stream closes with partial data
         Buffer buffer = new Buffer();
-        buffer.writeString("CW:{\"type\":\"keepalive\",\"group\":\"default-test\"", StandardCharsets.UTF_8);
+        buffer.writeString("CW:{\"group\":\"default-test\",\"timestamp\":1234567890", StandardCharsets.UTF_8);
         // Simulate stream closing before complete event
 
         Request request =
@@ -670,26 +673,24 @@ public class SeataHttpWatchTest {
     public void testResponse_Constructor() {
         // Test Response inner class constructor
         ClusterWatchEvent event = new ClusterWatchEvent();
-        event.setType("keepalive");
         event.setGroup("test-group");
+        event.setTimestamp(1234567890L);
 
         SeataHttpWatch.Response<ClusterWatchEvent> response =
-                new SeataHttpWatch.Response<>(SeataHttpWatch.Response.Type.KEEPALIVE, event);
+                new SeataHttpWatch.Response<>(SeataHttpWatch.Response.Type.UPDATE, event);
 
         assertNotNull(response);
-        assertEquals(SeataHttpWatch.Response.Type.KEEPALIVE, response.type);
+        assertEquals(SeataHttpWatch.Response.Type.UPDATE, response.type);
         assertEquals(event, response.object);
     }
 
     @Test
     public void testResponse_TypeEnum() {
-        // Test Response.Type enum values
+        // Test Response.Type enum values - simplified to only UPDATE and ERROR
         SeataHttpWatch.Response.Type[] types = SeataHttpWatch.Response.Type.values();
-        assertEquals(4, types.length);
+        assertEquals(2, types.length);
 
-        assertTrue(contains(types, SeataHttpWatch.Response.Type.CLUSTER_UPDATE));
-        assertTrue(contains(types, SeataHttpWatch.Response.Type.KEEPALIVE));
-        assertTrue(contains(types, SeataHttpWatch.Response.Type.TIMEOUT));
+        assertTrue(contains(types, SeataHttpWatch.Response.Type.UPDATE));
         assertTrue(contains(types, SeataHttpWatch.Response.Type.ERROR));
     }
 
@@ -728,9 +729,9 @@ public class SeataHttpWatchTest {
 
     @Test
     public void testNext_WithMultipleDataLines() throws IOException {
-        // Setup - Test multiple events, each with prefix and JSON on a single line
-        String sseData = "CW:{\"type\":\"keepalive\",\"group\":\"default-test\",\"timestamp\":1234567890}\n"
-                + "CW:{\"type\":\"cluster-update\",\"group\":\"default-test\",\"term\":2,\"timestamp\":1234567891}\n";
+        // Setup - Test multiple events, each with prefix and JSON on a single line - new format
+        String sseData = "CW:{\"group\":\"default-test\",\"timestamp\":1234567890,\"metadata\":{\"nodes\":[],\"storeMode\":\"raft\",\"term\":1}}\n"
+                + "CW:{\"group\":\"default-test\",\"timestamp\":1234567891,\"metadata\":{\"nodes\":[],\"storeMode\":\"raft\",\"term\":2}}\n";
         Buffer buffer = new Buffer();
         buffer.writeString(sseData, StandardCharsets.UTF_8);
 
@@ -750,14 +751,16 @@ public class SeataHttpWatchTest {
         // Execute - should parse first event
         SeataHttpWatch.Response<ClusterWatchEvent> response1 = watch.next();
         assertNotNull(response1);
-        assertEquals(SeataHttpWatch.Response.Type.KEEPALIVE, response1.type);
+        assertEquals(SeataHttpWatch.Response.Type.UPDATE, response1.type);
         assertNotNull(response1.object);
+        assertEquals(1L, response1.object.getMetadata().getTerm());
 
         // Execute - should parse second event
         SeataHttpWatch.Response<ClusterWatchEvent> response2 = watch.next();
         assertNotNull(response2);
-        assertEquals(SeataHttpWatch.Response.Type.CLUSTER_UPDATE, response2.type);
+        assertEquals(SeataHttpWatch.Response.Type.UPDATE, response2.type);
         assertNotNull(response2.object);
+        assertEquals(2L, response2.object.getMetadata().getTerm());
     }
 
     private boolean contains(SeataHttpWatch.Response.Type[] types, SeataHttpWatch.Response.Type type) {
