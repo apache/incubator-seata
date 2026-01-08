@@ -48,7 +48,7 @@ public class VGroupMappingController {
         Result<?> result = new Result<>();
         MappingDO mappingDO = new MappingDO();
         mappingDO.setNamespace(Instance.getInstance().getNamespace());
-        mappingDO.setCluster(Instance.getInstance().getClusterName());
+        mappingDO.setClusterName(Instance.getInstance().getClusterName());
         mappingDO.setUnit(unit);
         mappingDO.setVGroup(vGroup);
         boolean rst = SessionHolder.getRootVGroupMappingManager().addVGroup(mappingDO);

@@ -50,7 +50,7 @@ public class DataBaseVGroupMappingStoreManagerTest extends BaseSpringBootTest {
         MappingDO mappingDO = new MappingDO();
         mappingDO.setVGroup("test-vgroup");
         mappingDO.setNamespace("test-namespace");
-        mappingDO.setCluster("test-cluster");
+        mappingDO.setClusterName("test-cluster");
 
         boolean added = storeManager.addVGroup(mappingDO);
         Assertions.assertTrue(added);

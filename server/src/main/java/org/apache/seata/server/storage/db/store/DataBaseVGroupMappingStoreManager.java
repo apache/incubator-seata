@@ -61,7 +61,8 @@ public class DataBaseVGroupMappingStoreManager implements VGroupMappingStoreMana
         Instance instance = Instance.getInstance();
         HashMap<String, Object> mappings = new HashMap<>();
         for (MappingDO mappingDO : mappingDOS) {
-            if (mappingDO.getCluster() != null && mappingDO.getCluster().equals(instance.getClusterName())) {
+            if (mappingDO.getClusterName() != null
+                    && mappingDO.getClusterName().equals(instance.getClusterName())) {
                 mappings.put(mappingDO.getVGroup(), null);
             }
         }

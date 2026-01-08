@@ -49,7 +49,7 @@ public class VGroupMappingDataBaseDAOTest extends BaseSpringBootTest {
         MappingDO mappingDO = new MappingDO();
         mappingDO.setVGroup("test-vgroup");
         mappingDO.setNamespace("test-namespace");
-        mappingDO.setCluster("test-cluster");
+        mappingDO.setClusterName("test-cluster");
 
         boolean inserted = vGroupMappingDataBaseDAO.insertMappingDO(mappingDO);
         Assertions.assertTrue(inserted);
