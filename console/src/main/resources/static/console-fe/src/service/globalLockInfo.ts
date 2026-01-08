@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 import request from '@/utils/request';
+import requestV2 from '@/utils/requestV2';
 
 export type GlobalLockParam = {
   xid?: string,
@@ -33,7 +34,7 @@ export type GlobalLockParam = {
 };
 
 export async function fetchNamespace():Promise<any> {
-  const result = await request.get('/naming/namespace', {
+  const result = await requestV2.get('/namespace', {
     method: 'get',
   });
   return result.data;

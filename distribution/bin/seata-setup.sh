@@ -124,19 +124,65 @@ if [ "$SKYWALKING_ENABLE" = "true" ]; then
 else
   echo "apm-skywalking not enabled"
 fi
-JVM_XMX=$JVM_XMX
-JVM_XMS=$JVM_XMS
-JVM_XSS=$JVM_XSS
-JVM_MetaspaceSize=$JVM_MetaspaceSize
-JVM_MaxMetaspaceSize=$JVM_MaxMetaspaceSize
-JVM_MaxDirectMemorySize=$JVM_MaxDirectMemorySize
+
+# auto JVM Memory Calculation
+AVAILABLE_MEM_BYTES=""
+
+# cgroup v1
+if [ -f /sys/fs/cgroup/memory/memory.limit_in_bytes ]; then
+  CGROUP_LIMIT=$(cat /sys/fs/cgroup/memory/memory.limit_in_bytes 2>/dev/null)
+  if [ "$CGROUP_LIMIT" != "9223372036854771712" ] && [ "$CGROUP_LIMIT" -gt 104857600 ]; then
+    AVAILABLE_MEM_BYTES=$CGROUP_LIMIT
+  fi
+# cgroup v2
+elif [ -f /sys/fs/cgroup/memory.max ]; then
+  CGROUP_LIMIT=$(cat /sys/fs/cgroup/memory.max 2>/dev/null)
+  if [ "$CGROUP_LIMIT" != "max" ] && [ "$CGROUP_LIMIT" -gt 104857600 ]; then
+    AVAILABLE_MEM_BYTES=$CGROUP_LIMIT
+  fi
+fi
+
+# for VMs / bare-metal
+if [ -z "$AVAILABLE_MEM_BYTES" ]; then
+  if command -v free >/dev/null 2>&1; then
+    AVAILABLE_MEM_BYTES=$(free -b | awk '/Mem:/ {print $2}')
+  elif [ -f /proc/meminfo ]; then
+    AVAILABLE_MEM_BYTES=$(awk '/MemTotal/ {print $2 * 1024}' /proc/meminfo)
+  fi
+fi
+
+# auto set JVM_XMX/JVM_XMS if not provided by user
+if [ -n "$AVAILABLE_MEM_BYTES" ] && [ -z "$JVM_XMX" ]; then
+  TOTAL_MEM_MB=$(( AVAILABLE_MEM_BYTES / 1024 / 1024 ))
+  if [ "$TOTAL_MEM_MB" -le 4096 ]; then
+    HEAP_PCT=70
+  else
+    HEAP_PCT=75
+  fi
+  HEAP_MB=$(( TOTAL_MEM_MB * HEAP_PCT / 100 ))
+  # minimum heap
+  [ "$HEAP_MB" -lt 256 ] && HEAP_MB=256
+
+  JVM_XMX="${HEAP_MB}m"
+  JVM_XMS="${HEAP_MB}m"
+  echo "[INFO] Auto set JVM heap to ${HEAP_MB}m (total memory: ${TOTAL_MEM_MB}MB, heap%: ${HEAP_PCT}%)"
+fi
+
+# final fallback
+JVM_XMX=${JVM_XMX:-"2048m"}
+JVM_XMS=${JVM_XMS:-"2048m"}
+JVM_XSS=${JVM_XSS:-"640k"}
+JVM_MetaspaceSize=${JVM_MetaspaceSize:-"128m"}
+JVM_MaxMetaspaceSize=${JVM_MaxMetaspaceSize:-"256m"}
+JVM_MaxDirectMemorySize=${JVM_MaxDirectMemorySize:-"1024m"}
+
 LOADER_PATH=$LOADER_PATH
 LOG_HOME=$LOG_HOME
 if [ -z "$LOG_HOME" ]; then
     LOG_HOME="$HOME/logs/seata"
     mkdir -p $LOG_HOME
 fi
-JAVA_OPT="${JAVA_OPT} -Dlog.home=${LOG_HOME} -server -Dloader.path=${LOADER_PATH:="$BASEDIR/lib"} -Xmx${JVM_XMX:="2048m"} -Xms${JVM_XMS:="2048m"} -Xss${JVM_XSS:="640k"} -XX:SurvivorRatio=10 -XX:MetaspaceSize=${JVM_MetaspaceSize:="128m"} -XX:MaxMetaspaceSize=${JVM_MaxMetaspaceSize:="256m"} -XX:MaxDirectMemorySize=${JVM_MaxDirectMemorySize:=1024m} -XX:-OmitStackTraceInFastThrow -XX:-UseAdaptiveSizePolicy"
+JAVA_OPT="${JAVA_OPT} -Dlog.home=${LOG_HOME} -server -Dloader.path=${LOADER_PATH:="$BASEDIR/lib"} -Xmx${JVM_XMX} -Xms${JVM_XMS} -Xss${JVM_XSS} -XX:SurvivorRatio=10 -XX:MetaspaceSize=${JVM_MetaspaceSize} -XX:MaxMetaspaceSize=${JVM_MaxMetaspaceSize} -XX:MaxDirectMemorySize=${JVM_MaxDirectMemorySize} -XX:-OmitStackTraceInFastThrow -XX:-UseAdaptiveSizePolicy"
 JAVA_OPT="${JAVA_OPT} -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=${LOG_HOME}/java_heapdump.hprof -XX:+DisableExplicitGC"
 
 JAVA_MAJOR_VERSION=$($JAVACMD -version 2>&1 | sed '1!d' | sed -e 's/"//g' | awk '{print $3}' | awk -F '.' '{print $1}')

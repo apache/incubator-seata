@@ -16,10 +16,14 @@
  */
 package org.apache.seata.namingserver.controller;
 
+import jakarta.annotation.Resource;
+import jakarta.servlet.AsyncContext;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.seata.common.metadata.namingserver.MetaResponse;
 import org.apache.seata.common.metadata.namingserver.NamingServerNode;
 import org.apache.seata.common.result.Result;
 import org.apache.seata.common.result.SingleResult;
+import org.apache.seata.namingserver.entity.pojo.ClusterData;
 import org.apache.seata.namingserver.entity.vo.NamespaceVO;
 import org.apache.seata.namingserver.entity.vo.monitor.ClusterVO;
 import org.apache.seata.namingserver.entity.vo.monitor.WatcherVO;
@@ -35,9 +39,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Resource;
-import javax.servlet.AsyncContext;
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -109,6 +110,16 @@ public class NamingController {
         return namingManager.monitorCluster(namespace);
     }
 
+    @GetMapping("/clusterData")
+    public SingleResult<ClusterData> getClusterData(@RequestParam String namespace, @RequestParam String clusterName) {
+        ClusterData clusterData = namingManager.getClusterData(namespace, clusterName);
+        if (clusterData != null) {
+            return SingleResult.success(clusterData);
+        } else {
+            return SingleResult.failure("Cluster not found");
+        }
+    }
+
     @GetMapping("/discovery")
     public MetaResponse discovery(@RequestParam String vGroup, @RequestParam String namespace) {
         return new MetaResponse(
@@ -133,7 +144,7 @@ public class NamingController {
     public Result<String> changeGroup(
             @RequestParam String namespace,
             @RequestParam String clusterName,
-            @RequestParam String unitName,
+            @RequestParam(defaultValue = "", required = false) String unitName,
             @RequestParam String vGroup) {
         Result<String> addGroupResult = namingManager.changeGroup(namespace, vGroup, clusterName, unitName);
         if (!addGroupResult.isSuccess()) {

@@ -28,11 +28,11 @@ import {
   Message,
   Select
 } from '@alicloud/console-components';
-import Actions, { LinkButton } from '@alicloud/console-components-actions';
+import Actions from '@alicloud/console-components-actions';
 import { withRouter } from 'react-router-dom';
+import { connect } from 'react-redux';
 import Page from '@/components/Page';
 import { GlobalProps } from '@/module';
-import styled, { css } from 'styled-components';
 import getData, {checkData, deleteData, GlobalLockParam } from '@/service/globalLockInfo';
 import PropTypes from 'prop-types';
 import moment from 'moment';
@@ -40,7 +40,7 @@ import moment from 'moment';
 import './index.scss';
 import {get} from "lodash";
 import {enUsKey, getCurrentLanguage} from "@/reducers/locale";
-import {fetchNamespace} from "@/service/transactionInfo";
+import {fetchNamespaceV2} from "@/service/transactionInfo";
 
 const { RangePicker } = DatePicker;
 const FormItem = Form.Item;
@@ -48,7 +48,7 @@ const FormItem = Form.Item;
 type GlobalLockInfoState = {
   list: Array<any>;
   total: number;
-  namespaceOptions: Map<string, { clusters: string[], vgroups: string[] }>;
+  namespaceOptions: Map<string, { clusters: string[], clusterVgroups: {[key: string]: string[]} }>;
   clusters: Array<string>;
   vgroups: Array<string>;
   loading: boolean;
@@ -71,7 +71,7 @@ class GlobalLockInfo extends React.Component<GlobalProps, GlobalLockInfoState> {
       pageSize: 10,
       pageNum: 1,
     },
-    namespaceOptions: new Map<string, { clusters: string[], vgroups: string[] }>(),
+    namespaceOptions: new Map<string, { clusters: string[], clusterVgroups: {[key: string]: string[]} }>(),
     clusters: [],
     vgroups: [],
   }
@@ -91,7 +91,10 @@ class GlobalLockInfo extends React.Component<GlobalProps, GlobalLockInfoState> {
             pageSize: 10,
             pageNum: 1,
           },
-        }, () => this.search());
+        });
+        // always load namespaces so the select options can be populated and
+        // the passed namespace/cluster/vgroup are respected
+        this.loadNamespaces();
         return;
       }
     }
@@ -99,30 +102,48 @@ class GlobalLockInfo extends React.Component<GlobalProps, GlobalLockInfoState> {
   }
   loadNamespaces = async () => {
     try {
-      const namespaces = await fetchNamespace();
-      const namespaceOptions = new Map<string, { clusters: string[], vgroups: string[] }>();
+      const namespaces = await fetchNamespaceV2();
+      const namespaceOptions = new Map<string, { clusters: string[], clusterVgroups: {[key: string]: string[]} }>();
       Object.keys(namespaces).forEach(namespaceKey => {
         const namespaceData = namespaces[namespaceKey];
+        const clustersData = namespaceData.clusters || {};
+        const clusterVgroups: {[key: string]: string[]} = {};
+        Object.keys(clustersData).forEach(clusterName => {
+          clusterVgroups[clusterName] = clustersData[clusterName].vgroups || [];
+        });
+        const clusters = Object.keys(clustersData);
         namespaceOptions.set(namespaceKey, {
-          clusters: namespaceData.clusters,
-          vgroups: namespaceData.vgroups,
+          clusters,
+          clusterVgroups,
         });
       });
       if (namespaceOptions.size > 0) {
-        // Set default namespace to the first option
+        // determine selected namespace/cluster based on existing param (from query) or fallback to first
+        const existingNamespace = this.state.globalLockParam.namespace;
+        const existingCluster = this.state.globalLockParam.cluster;
         const firstNamespace = Array.from(namespaceOptions.keys())[0];
-        const selectedNamespace = namespaceOptions.get(firstNamespace);
-        this.setState({
+        const selectedNamespaceKey = (existingNamespace && namespaceOptions.has(existingNamespace)) ? existingNamespace : firstNamespace;
+        const selectedNamespace = namespaceOptions.get(selectedNamespaceKey);
+        const clusters = selectedNamespace ? selectedNamespace.clusters : [];
+        const firstCluster = clusters.length > 0 ? clusters[0] : undefined;
+        const selectedCluster = (existingCluster && clusters.includes(existingCluster)) ? existingCluster : firstCluster;
+        const clusterVgroups = selectedNamespace ? selectedNamespace.clusterVgroups : {};
+        const selectedVgroups = selectedCluster ? clusterVgroups[selectedCluster] || [] : [];
+        // preserve vgroup from query if present and valid for the selected cluster, otherwise clear it
+        const existingVgroup = this.state.globalLockParam.vgroup;
+        const finalVgroup = (existingVgroup && selectedVgroups.includes(existingVgroup)) ? existingVgroup : '';
+        this.setState(prevState => ({
           namespaceOptions,
           globalLockParam: {
-            ...this.state.globalLockParam,
-            namespace: firstNamespace,
-            cluster: selectedNamespace ? selectedNamespace.clusters[0] : undefined,
+            ...prevState.globalLockParam,
+            namespace: selectedNamespaceKey,
+            cluster: selectedCluster,
+            vgroup: finalVgroup,
           },
           clusters: selectedNamespace ? selectedNamespace.clusters : [],
-          vgroups: selectedNamespace ? selectedNamespace.vgroups : [],
-        });
-        this.search();
+          vgroups: selectedVgroups,
+        }));
+       this.search();
       } else {
         this.setState({
           namespaceOptions,
@@ -133,13 +154,15 @@ class GlobalLockInfo extends React.Component<GlobalProps, GlobalLockInfoState> {
     }
   }
   resetSearchFilter = () => {
-    this.setState({
+    this.setState(prevState => ({
       globalLockParam: {
         // pagination info don`t reset
-        pageSize: this.state.globalLockParam.pageSize,
-        pageNum: this.state.globalLockParam.pageNum,
+        pageSize: prevState.globalLockParam.pageSize,
+        pageNum: prevState.globalLockParam.pageNum,
       },
-    });
+      clusters: [],
+      vgroups: [],
+    }));
   }
 
   search = () => {
@@ -147,13 +170,15 @@ class GlobalLockInfo extends React.Component<GlobalProps, GlobalLockInfoState> {
     getData(this.state.globalLockParam).then(data => {
       // if the result set is empty, set the page number to go back to the first page
       if (data.total === 0) {
-        this.setState({
+        this.setState(prevState => ({
           list: [],
           total: 0,
           loading: false,
-          globalLockParam: Object.assign(this.state.globalLockParam,
-            { pageNum: 1 }),
-        });
+          globalLockParam: {
+            ...prevState.globalLockParam,
+            pageNum: 1,
+          },
+        }));
         return;
       }
       // format time
@@ -169,58 +194,97 @@ class GlobalLockInfo extends React.Component<GlobalProps, GlobalLockInfoState> {
         total: data.total,
         loading: false,
       });
-    }).catch(err => {
+    }).catch(() => {
       this.setState({ loading: false });
     });
   }
 
   createTimeOnChange = (value: Array<any>) => {
     // timestamp(milliseconds)
-    const timeStart = value[0] == null ? null : moment(value[0]).unix() * 1000;
-    const timeEnd = value[1] == null ? null : moment(value[1]).unix() * 1000;
-    this.setState({
-      globalLockParam: Object.assign(this.state.globalLockParam,
-        { timeStart, timeEnd }),
-    });
+    const timeStart: number | undefined = value[0] == null ? undefined : moment(value[0]).unix() * 1000;
+    const timeEnd: number | undefined = value[1] == null ? undefined : moment(value[1]).unix() * 1000;
+    this.setState(prevState => ({
+      globalLockParam: {
+        ...prevState.globalLockParam,
+        timeStart,
+        timeEnd,
+      },
+    }));
   }
 
   searchFilterOnChange = (key:string, val:string) => {
     if (key === 'namespace') {
       const selectedNamespace = this.state.namespaceOptions.get(val);
-      this.setState({
-        clusters: selectedNamespace ? selectedNamespace.clusters : [],
-        vgroups: selectedNamespace ? selectedNamespace.vgroups : [],
-        globalLockParam: Object.assign(this.state.globalLockParam, {[key]: val}),
-      });
+      const clusters = selectedNamespace ? selectedNamespace.clusters : [];
+      const firstCluster = clusters.length > 0 ? clusters[0] : undefined;
+      const clusterVgroups = selectedNamespace ? selectedNamespace.clusterVgroups : {};
+      const vgroups = firstCluster ? clusterVgroups[firstCluster] || [] : [];
+      this.setState(prevState => ({
+        clusters,
+        vgroups,
+        globalLockParam: {
+          ...prevState.globalLockParam,
+          [key]: val,
+          cluster: firstCluster,
+          vgroup: '',
+        },
+      }));
+    } else if (key === 'cluster') {
+      const currentNamespace = this.state.globalLockParam.namespace;
+      if (currentNamespace) {
+        const namespaceData = this.state.namespaceOptions.get(currentNamespace);
+        const clusterVgroups = namespaceData ? namespaceData.clusterVgroups : {};
+        const selectedVgroups = clusterVgroups[val] || [];
+        this.setState(prevState => ({
+          vgroups: selectedVgroups,
+          globalLockParam: {
+            ...prevState.globalLockParam,
+            [key]: val,
+            vgroup: '',
+          },
+        }));
+      } else {
+        this.setState(prevState => ({
+          globalLockParam: {
+            ...prevState.globalLockParam,
+            [key]: val,
+            vgroup: '',
+          },
+        }));
+      }
     } else {
-      this.setState({
-        globalLockParam: Object.assign(this.state.globalLockParam,
-            {[key]: val}),
-      });
+      this.setState(prevState => ({
+        globalLockParam: {
+          ...prevState.globalLockParam,
+          [key]: val,
+        },
+      }));
     }
   }
 
-  paginationOnChange = (current: number, e: {}) => {
-    this.setState({
-      globalLockParam: Object.assign(this.state.globalLockParam,
-        { pageNum: current }),
-    });
-    this.search();
+  paginationOnChange = (current: number, _e?: any) => {
+    this.setState(prevState => ({
+      globalLockParam: {
+        ...prevState.globalLockParam,
+        pageNum: current,
+      },
+    }), this.search);
   }
 
   paginationOnPageSizeChange = (pageSize: number) => {
-    this.setState({
-      globalLockParam: Object.assign(this.state.globalLockParam,
-        { pageSize }),
-    });
-    this.search();
+    this.setState(prevState => ({
+      globalLockParam: {
+        ...prevState.globalLockParam,
+        pageSize,
+      },
+    }), this.search);
   }
 
   deleteCell = (val: string, index: number, record: any) => {
-    const {locale = {}} = this.props;
+    const { locale } = this.props;
     const {
       deleteGlobalLockTitle
-    } = locale;
+    } = locale.GlobalLockInfo || {};
     let width = getCurrentLanguage() === enUsKey ? '120px' : '80px'
     return (
       <Actions style={{width: width}}>
@@ -257,7 +321,8 @@ class GlobalLockInfo extends React.Component<GlobalProps, GlobalLockInfoState> {
 
 
   render() {
-    const { locale = {} } = this.props;
+    const { locale } = this.props;
+    const globalLockInfo = locale.GlobalLockInfo || {};
     const { title, subTitle, createTimeLabel,
       inputFilterPlaceholder,
       selectNamespaceFilerPlaceholder,
@@ -266,7 +331,7 @@ class GlobalLockInfo extends React.Component<GlobalProps, GlobalLockInfoState> {
       searchButtonLabel,
       resetButtonLabel,
       operateTitle,
-    } = locale;
+    } = globalLockInfo;
     return (
       <Page
         title={title}
@@ -347,6 +412,8 @@ class GlobalLockInfo extends React.Component<GlobalProps, GlobalLockInfoState> {
                   this.searchFilterOnChange('vgroup', value);
                 }}
                 dataSource={this.state.vgroups.map(value => ({ label: value, value }))}
+                value={this.state.globalLockParam.vgroup}
+                key={this.state.globalLockParam.cluster}
             />
           </FormItem>
           {/* {reset search filter button} */}
@@ -392,5 +459,8 @@ class GlobalLockInfo extends React.Component<GlobalProps, GlobalLockInfoState> {
   }
 }
 
-export default withRouter(ConfigProvider.config(GlobalLockInfo, {}));
+const mapStateToProps = (state: any) => ({
+  locale: state.locale.locale,
+});
 
+export default ConfigProvider.config(withRouter(connect(mapStateToProps)(GlobalLockInfo)), {});

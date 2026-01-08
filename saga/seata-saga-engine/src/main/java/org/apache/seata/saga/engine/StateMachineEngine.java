@@ -91,7 +91,7 @@ public interface StateMachineEngine {
      * forward restart a failed state machine instance
      *
      * @param stateMachineInstId the state machine instance id
-     * @param replaceParams the replace params
+     * @param replaceParams the replacement params
      * @return the state machine instance
      * @throws ForwardInvalidException forward invalid exception
      */
@@ -102,7 +102,7 @@ public interface StateMachineEngine {
      * forward restart a failed state machine instance asynchronously
      *
      * @param stateMachineInstId the state machine instance id
-     * @param replaceParams the replace params
+     * @param replaceParams the replacement params
      * @param callback callback after forward restart a failed state machine
      * @return the state machine instance
      * @throws ForwardInvalidException the forward invalid exception
@@ -115,7 +115,7 @@ public interface StateMachineEngine {
      * compensate a state machine instance
      *
      * @param stateMachineInstId the state machine id
-     * @param replaceParams the replace params
+     * @param replaceParams the replacement params
      * @return the state machine instance
      * @throws EngineExecutionException the engin execution exception
      */
@@ -126,7 +126,7 @@ public interface StateMachineEngine {
      * compensate a state machine instance asynchronously
      *
      * @param stateMachineInstId the state machine instance id
-     * @param replaceParams the replace params
+     * @param replaceParams the replacement params
      * @param callback callback after compensate a failed state machine
      * @return the state machine instance
      * @throws EngineExecutionException the engine execution exception
@@ -139,6 +139,7 @@ public interface StateMachineEngine {
      * skip current failed state instance and forward restart state machine instance
      *
      * @param stateMachineInstId the state machine instance id
+     * @param replaceParams the replacement params
      * @return the state machine instance
      * @throws EngineExecutionException the engine execution exception
      */

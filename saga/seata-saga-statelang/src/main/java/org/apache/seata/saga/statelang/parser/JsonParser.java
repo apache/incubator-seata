@@ -17,7 +17,6 @@
 package org.apache.seata.saga.statelang.parser;
 
 /**
- *
  * Json Parser
  *
  */
@@ -61,6 +60,7 @@ public interface JsonParser {
      *
      * @param json the parse input json
      * @param type the class type
+     * @param ignoreAutoType is ignore auto type
      * @param <T> the object type
      * @return the parse result
      */
