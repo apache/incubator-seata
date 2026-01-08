@@ -19,12 +19,21 @@ package org.apache.seata.server.controller;
 import okhttp3.Response;
 import org.apache.http.entity.ContentType;
 import org.apache.http.protocol.HTTP;
+import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.holder.ObjectHolder;
 import org.apache.seata.common.metadata.ClusterWatchEvent;
+import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.util.HttpClientUtil;
 import org.apache.seata.common.util.SeataHttpWatch;
+import org.apache.seata.common.XID;
 import org.apache.seata.server.BaseSpringBootTest;
 import org.apache.seata.server.cluster.listener.ClusterChangeEvent;
+import org.apache.seata.server.cluster.raft.RaftServer;
+import org.apache.seata.server.cluster.raft.RaftServerManager;
+import org.apache.seata.server.cluster.raft.RaftStateMachine;
+import org.apache.seata.server.cluster.raft.sync.msg.RaftClusterMetadataMsg;
+import org.apache.seata.server.cluster.raft.sync.msg.dto.RaftClusterMetadata;
+import org.apache.seata.server.store.StoreConfig;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
@@ -40,15 +49,18 @@ import org.springframework.core.env.Environment;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.apache.seata.common.ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL;
 import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
+import static org.apache.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class ClusterControllerTest extends BaseSpringBootTest {
-    Logger logger = LoggerFactory.getLogger(ClusterControllerTest.class);
+    private static Logger logger = LoggerFactory.getLogger(ClusterControllerTest.class);
 
     private static Environment environment;
     private static int port;
@@ -57,6 +69,71 @@ class ClusterControllerTest extends BaseSpringBootTest {
     public static void setUp(ApplicationContext context) {
         environment = context.getEnvironment();
         port = Integer.parseInt(environment.getProperty(SERVER_SERVICE_PORT_CAMEL, "18091"));
+        
+        // Initialize RaftServer for HTTP/2 tests that need metadata
+        try {
+            // Only initialize if not already initialized
+            if (RaftServerManager.getRaftServer(DEFAULT_SEATA_GROUP) == null) {
+                System.setProperty("server.raftPort", "9091");
+                String serverAddr = XID.getIpAddress() + ":9091" + "," + XID.getIpAddress() + ":9092" + "," + XID.getIpAddress() + ":9093";
+                System.setProperty(ConfigurationKeys.SERVER_RAFT_SERVER_ADDR, serverAddr);
+                StoreConfig.setStartupParameter("raft", "raft", "raft");
+                RaftServerManager.init();
+                RaftServerManager.start();
+            }
+        } catch (Exception e) {
+            // If initialization fails, tests will handle it
+            logger.warn("Failed to initialize RaftServer for tests: {}", e.getMessage());
+        }
+    }
+    
+    /**
+     * Helper method to trigger ClusterChangeEvent through RaftStateMachine.refreshClusterMetadata()
+     * This simulates the real event trigger mechanism.
+     * If the specified group doesn't have a RaftServer, it will use the default RaftServer.
+     */
+    private void triggerClusterChangeEvent(String group, long term, boolean isLeader) {
+        // Try to get RaftServer for the specified group, fallback to default group
+        RaftServer raftServer = RaftServerManager.getRaftServer(group);
+        if (raftServer == null) {
+            // Use default group's RaftServer if the specified group doesn't exist
+            raftServer = RaftServerManager.getRaftServer(DEFAULT_SEATA_GROUP);
+        }
+        
+        if (raftServer != null) {
+            RaftStateMachine stateMachine = raftServer.getRaftStateMachine();
+            if (stateMachine != null) {
+                // Create RaftClusterMetadata with the specified term
+                RaftClusterMetadata metadata = new RaftClusterMetadata(term);
+                
+                // Create a leader node with the specified group
+                Node leaderNode = metadata.createNode(
+                        XID.getIpAddress(), 
+                        port, 
+                        7091, 
+                        7091, 
+                        group, 
+                        null);
+                leaderNode.setRole(isLeader ? org.apache.seata.common.metadata.ClusterRole.LEADER : org.apache.seata.common.metadata.ClusterRole.FOLLOWER);
+                metadata.setLeader(leaderNode);
+                
+                // Create followers list
+                List<Node> followers = new ArrayList<>();
+                metadata.setFollowers(followers);
+                
+                // Create learner list
+                List<Node> learners = new ArrayList<>();
+                metadata.setLearner(learners);
+                
+                // Create message and trigger refresh
+                RaftClusterMetadataMsg msg = new RaftClusterMetadataMsg(metadata);
+                stateMachine.refreshClusterMetadata(msg);
+            }
+        } else {
+            // Fallback: directly publish event if RaftServer is not available
+            ((ApplicationEventPublisher) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
+                    .publishEvent(new ClusterChangeEvent(this, group, term, isLeader));
+        }
     }
 
     @Test
@@ -85,6 +162,12 @@ class ClusterControllerTest extends BaseSpringBootTest {
 
         Map<String, String> params = new HashMap<>();
         params.put("default-test-group-1", "1");
+
+        // Trigger a cluster change event to verify connection is still active
+        Thread triggerThread = new Thread(() -> {
+            triggerClusterChangeEvent("default-test-group-1", 2, true);
+        });
+        triggerThread.start();
 
         // For HTTP2, the connection should remain open and not timeout
         // The test verifies that the connection stays alive beyond the timeout period
@@ -121,17 +204,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
                 Assertions.fail("Test interrupted while waiting for connection verification");
             }
 
-            // Trigger a cluster change event to verify connection is still active
-            Thread triggerThread = new Thread(() -> {
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-                ((ApplicationEventPublisher) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
-                        .publishEvent(new ClusterChangeEvent(this, "default-test-group-1", 2, true));
-            });
-            triggerThread.start();
+
             boolean clusterUpdateReceived = false;
             SeataHttpWatch.Response<ClusterWatchEvent> response = watch.next();
 
@@ -198,8 +271,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
-                ((ApplicationEventPublisher) ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT))
-                        .publishEvent(new ClusterChangeEvent(this, "default-test-group-3", 2, true));
+                triggerClusterChangeEvent("default-test-group-3", 2, true);
             }
         });
         thread.start();
@@ -236,15 +308,15 @@ class ClusterControllerTest extends BaseSpringBootTest {
                         ObjectHolder.INSTANCE.getObject(OBJECT_KEY_SPRING_APPLICATION_CONTEXT);
 
                 // Trigger first cluster change event (term = 2)
-                publisher.publishEvent(new ClusterChangeEvent(this, "default-test-group-4", 2, true));
+                triggerClusterChangeEvent("default-test-group-4", 2, true);
                 Thread.sleep(1000); // Increased delay to ensure watcher is re-registered before next event
 
                 // Trigger second cluster change event (term = 3)
-                publisher.publishEvent(new ClusterChangeEvent(this, "default-test-group-4", 3, true));
+                triggerClusterChangeEvent("default-test-group-4", 3, true);
                 Thread.sleep(500); // Increased delay to ensure watcher is re-registered before next event
 
                 // Trigger third cluster change event (term = 4)
-                publisher.publishEvent(new ClusterChangeEvent(this, "default-test-group-4", 4, true));
+                triggerClusterChangeEvent("default-test-group-4", 4, true);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
