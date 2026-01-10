@@ -122,25 +122,31 @@ class NamingServerMetricsManagerTest {
 
     @Test
     void testClusterChangePushCounter() {
+        String namespace = "test-namespace";
+        String cluster = "test-cluster";
         String vgroup1 = "vgroup1";
         String vgroup2 = "vgroup2";
 
         // Increment counters
-        metricsManager.incrementClusterChangePushCount(vgroup1);
-        metricsManager.incrementClusterChangePushCount(vgroup1);
-        metricsManager.incrementClusterChangePushCount(vgroup2);
+        metricsManager.incrementClusterChangePushCount(namespace, cluster, vgroup1);
+        metricsManager.incrementClusterChangePushCount(namespace, cluster, vgroup1);
+        metricsManager.incrementClusterChangePushCount(namespace, cluster, vgroup2);
 
         // Verify counts
-        assertEquals(2.0, metricsManager.getClusterChangePushCount(vgroup1));
-        assertEquals(1.0, metricsManager.getClusterChangePushCount(vgroup2));
+        assertEquals(2.0, metricsManager.getClusterChangePushCount(namespace, cluster, vgroup1));
+        assertEquals(1.0, metricsManager.getClusterChangePushCount(namespace, cluster, vgroup2));
 
         // Verify metrics are registered in registry
         assertNotNull(meterRegistry
                 .find(METRIC_CLUSTER_CHANGE_PUSH_TOTAL)
+                .tag(TAG_NAMESPACE, namespace)
+                .tag(TAG_CLUSTER, cluster)
                 .tag(TAG_VGROUP, vgroup1)
                 .counter());
         assertNotNull(meterRegistry
                 .find(METRIC_CLUSTER_CHANGE_PUSH_TOTAL)
+                .tag(TAG_NAMESPACE, namespace)
+                .tag(TAG_CLUSTER, cluster)
                 .tag(TAG_VGROUP, vgroup2)
                 .counter());
     }
