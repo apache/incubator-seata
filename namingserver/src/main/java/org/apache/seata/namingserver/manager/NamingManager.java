@@ -306,7 +306,7 @@ public class NamingManager {
                 .flatMap(map -> Optional.ofNullable(map.get(namespace))
                         .flatMap(namespaceBO -> Optional.ofNullable(namespaceBO.getCluster(clusterName))))
                 .ifPresent(clusterBO -> {
-                    applicationContext.publishEvent(new ClusterChangeEvent(this, vGroup, term));
+                    applicationContext.publishEvent(new ClusterChangeEvent(this, vGroup, namespace, clusterName, term));
                 });
     }
 

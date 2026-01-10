@@ -148,18 +148,22 @@ public class PrometheusNamingMetricsManager implements NamingServerMetricsManage
     }
 
     @Override
-    public void incrementClusterChangePushCount(String vgroup) {
+    public void incrementClusterChangePushCount(String namespace, String cluster, String vgroup) {
+        String key = namespace + "|" + cluster + "|" + vgroup;
         Counter counter =
-                clusterChangePushCounters.computeIfAbsent(vgroup, v -> Counter.builder(METRIC_CLUSTER_CHANGE_PUSH_TOTAL)
+                clusterChangePushCounters.computeIfAbsent(key, k -> Counter.builder(METRIC_CLUSTER_CHANGE_PUSH_TOTAL)
                         .description("Total number of cluster change push notifications to watchers")
-                        .tag(TAG_VGROUP, v)
+                        .tag(TAG_NAMESPACE, namespace)
+                        .tag(TAG_CLUSTER, cluster)
+                        .tag(TAG_VGROUP, vgroup)
                         .register(meterRegistry));
         counter.increment();
     }
 
     @Override
-    public double getClusterChangePushCount(String vgroup) {
-        Counter counter = clusterChangePushCounters.get(vgroup);
+    public double getClusterChangePushCount(String namespace, String cluster, String vgroup) {
+        String key = namespace + "|" + cluster + "|" + vgroup;
+        Counter counter = clusterChangePushCounters.get(key);
         return counter != null ? counter.count() : 0;
     }
 }

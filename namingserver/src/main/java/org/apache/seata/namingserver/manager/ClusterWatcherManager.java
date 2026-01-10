@@ -97,7 +97,8 @@ public class ClusterWatcherManager implements ClusterChangeListener {
                 watchers.parallelStream().forEach(this::notify);
                 // Increment cluster change push counter
                 if (!watchers.isEmpty()) {
-                    metricsManager.incrementClusterChangePushCount(event.getGroup());
+                    metricsManager.incrementClusterChangePushCount(
+                            event.getNamespace(), event.getClusterName(), event.getGroup());
                     // Refresh watcher count metrics after notification
                     metricsManager.refreshWatcherCountMetrics();
                 }

@@ -62,6 +62,8 @@ public class ClusterWatcherManagerTest {
     private HttpServletRequest request;
 
     private final String TEST_GROUP = "testGroup";
+    private final String TEST_NAMESPACE = "testNamespace";
+    private final String TEST_CLUSTER = "testCluster";
     private final int TEST_TIMEOUT = 5000;
     private final Long TEST_TERM = 1000L;
     private final String TEST_CLIENT_ENDPOINT = "127.0.0.1";
@@ -144,7 +146,7 @@ public class ClusterWatcherManagerTest {
         assertNotNull(watchers);
         assertNotNull(updateTime);
 
-        ClusterChangeEvent zeroTermEvent = new ClusterChangeEvent(this, TEST_GROUP, 0);
+        ClusterChangeEvent zeroTermEvent = new ClusterChangeEvent(this, TEST_GROUP, TEST_NAMESPACE, TEST_CLUSTER, 0);
         clusterWatcherManager.onChangeEvent(zeroTermEvent);
 
         assertEquals(0, updateTime.size());
@@ -153,7 +155,8 @@ public class ClusterWatcherManagerTest {
         assertNotNull(watchers.get(TEST_GROUP));
         assertEquals(1, watchers.get(TEST_GROUP).size());
 
-        ClusterChangeEvent event = new ClusterChangeEvent(this, TEST_GROUP, TEST_TERM + 1);
+        ClusterChangeEvent event =
+                new ClusterChangeEvent(this, TEST_GROUP, TEST_NAMESPACE, TEST_CLUSTER, TEST_TERM + 1);
         clusterWatcherManager.onChangeEvent(event);
 
         Mockito.verify(response).setStatus(HttpServletResponse.SC_OK);
@@ -254,7 +257,7 @@ public class ClusterWatcherManagerTest {
                 new Watcher<>(TEST_GROUP, asyncContext, TEST_TIMEOUT, TEST_TERM, TEST_CLIENT_ENDPOINT);
         clusterWatcherManager.registryWatcher(watcher);
 
-        ClusterChangeEvent minus1TermEvent = new ClusterChangeEvent(this, TEST_GROUP, -1);
+        ClusterChangeEvent minus1TermEvent = new ClusterChangeEvent(this, TEST_GROUP, TEST_NAMESPACE, TEST_CLUSTER, -1);
         clusterWatcherManager.onChangeEvent(minus1TermEvent);
 
         Map<String, Long> updateTime =

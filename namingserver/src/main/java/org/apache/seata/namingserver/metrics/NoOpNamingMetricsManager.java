@@ -52,12 +52,12 @@ public class NoOpNamingMetricsManager implements NamingServerMetricsManager {
     }
 
     @Override
-    public void incrementClusterChangePushCount(String vgroup) {
+    public void incrementClusterChangePushCount(String namespace, String cluster, String vgroup) {
         // No-op
     }
 
     @Override
-    public double getClusterChangePushCount(String vgroup) {
+    public double getClusterChangePushCount(String namespace, String cluster, String vgroup) {
         return 0;
     }
 }
