@@ -70,9 +70,7 @@ management:
       application: ${spring.application.name}
     distribution:
       percentiles:
-        http.server.requests: 0.5, 0.9, 0.95, 0.99, 0.999
-      percentiles-histogram:
-        http.server.requests: true
+        http.server.requests: 0.5, 0.99, 0.999
   # MCP Server Configuration
   mcp:
     # Maximum query time interval, The unit is milliseconds, Default one day
