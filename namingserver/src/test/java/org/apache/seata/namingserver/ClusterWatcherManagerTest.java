@@ -31,6 +31,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -61,6 +62,9 @@ public class ClusterWatcherManagerTest {
     @Mock
     private HttpServletRequest request;
 
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
+
     private final String TEST_GROUP = "testGroup";
     private final String TEST_NAMESPACE = "testNamespace";
     private final String TEST_CLUSTER = "testCluster";
@@ -71,8 +75,9 @@ public class ClusterWatcherManagerTest {
     @BeforeEach
     void setUp() {
         clusterWatcherManager = new ClusterWatcherManager();
-        // Inject NoOp metrics manager to avoid null pointer
+        // Inject dependencies to avoid null pointer
         ReflectionTestUtils.setField(clusterWatcherManager, "metricsManager", new NoOpNamingMetricsManager());
+        ReflectionTestUtils.setField(clusterWatcherManager, "eventPublisher", eventPublisher);
 
         Mockito.when(asyncContext.getResponse()).thenReturn(response);
         Mockito.when(asyncContext.getRequest()).thenReturn(request);
