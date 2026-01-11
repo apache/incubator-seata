@@ -19,6 +19,7 @@ package org.apache.seata.common.json;
 import com.alibaba.fastjson.TypeReference;
 import org.apache.seata.common.exception.JsonParseException;
 import org.apache.seata.common.json.impl.FastjsonJsonSerializer;
+import org.apache.seata.common.json.impl.JacksonJsonSerializer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -157,7 +158,7 @@ public class FastjsonJsonSerializerTest {
     public void testFactoryReturnsDefaultInstance() {
         JsonSerializer serializer = JsonSerializerFactory.getSerializer(null);
         assertThat(serializer).isNotNull();
-        assertThat(serializer).isInstanceOf(FastjsonJsonSerializer.class);
+        assertThat(serializer).isInstanceOf(JacksonJsonSerializer.class);
     }
 
     @Test
