@@ -21,11 +21,13 @@ import jakarta.servlet.AsyncContext;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.seata.namingserver.listener.ClusterChangeEvent;
 import org.apache.seata.namingserver.listener.ClusterChangeListener;
+import org.apache.seata.namingserver.listener.ClusterChangePushEvent;
 import org.apache.seata.namingserver.listener.Watcher;
 import org.apache.seata.namingserver.metrics.NamingServerMetricsManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
@@ -58,6 +60,9 @@ public class ClusterWatcherManager implements ClusterChangeListener {
 
     @Autowired
     private NamingServerMetricsManager metricsManager;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     @PostConstruct
     public void init() {
@@ -95,10 +100,10 @@ public class ClusterWatcherManager implements ClusterChangeListener {
 
             Optional.ofNullable(WATCHERS.remove(event.getGroup())).ifPresent(watchers -> {
                 watchers.parallelStream().forEach(this::notify);
-                // Increment cluster change push counter
+                // Publish event for metrics tracking
                 if (!watchers.isEmpty()) {
-                    metricsManager.incrementClusterChangePushCount(
-                            event.getNamespace(), event.getClusterName(), event.getGroup());
+                    eventPublisher.publishEvent(new ClusterChangePushEvent(
+                            this, event.getNamespace(), event.getClusterName(), event.getGroup()));
                     // Refresh watcher count metrics after notification
                     metricsManager.refreshWatcherCountMetrics();
                 }

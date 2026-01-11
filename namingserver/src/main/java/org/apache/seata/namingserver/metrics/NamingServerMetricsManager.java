@@ -60,23 +60,4 @@ public interface NamingServerMetricsManager {
      * Refreshes the watcher count metrics based on current long-polling connections.
      */
     void refreshWatcherCountMetrics();
-
-    /**
-     * Increments the counter for cluster change push notifications.
-     *
-     * @param namespace the namespace
-     * @param cluster   the cluster name
-     * @param vgroup    the vgroup name
-     */
-    void incrementClusterChangePushCount(String namespace, String cluster, String vgroup);
-
-    /**
-     * Gets the current count of cluster change push notifications.
-     *
-     * @param namespace the namespace
-     * @param cluster   the cluster name
-     * @param vgroup    the vgroup name
-     * @return the count of push notifications
-     */
-    double getClusterChangePushCount(String namespace, String cluster, String vgroup);
 }

@@ -50,14 +50,4 @@ public class NoOpNamingMetricsManager implements NamingServerMetricsManager {
     public void refreshWatcherCountMetrics() {
         // No-op
     }
-
-    @Override
-    public void incrementClusterChangePushCount(String namespace, String cluster, String vgroup) {
-        // No-op
-    }
-
-    @Override
-    public double getClusterChangePushCount(String namespace, String cluster, String vgroup) {
-        return 0;
-    }
 }

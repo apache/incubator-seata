@@ -23,10 +23,12 @@ import io.micrometer.core.instrument.Tags;
 import jakarta.annotation.PostConstruct;
 import org.apache.seata.common.metadata.namingserver.Unit;
 import org.apache.seata.namingserver.entity.pojo.ClusterData;
+import org.apache.seata.namingserver.listener.ClusterChangePushEvent;
 import org.apache.seata.namingserver.listener.Watcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -75,6 +77,14 @@ public class PrometheusNamingMetricsManager implements NamingServerMetricsManage
                 .register(meterRegistry);
 
         LOGGER.info("NamingServer Prometheus metrics manager initialized with event-driven refresh");
+    }
+
+    /**
+     * Listens for ClusterChangePushEvent and increments the push counter.
+     */
+    @EventListener
+    public void onClusterChangePush(ClusterChangePushEvent event) {
+        incrementClusterChangePushCount(event.getNamespace(), event.getClusterName(), event.getVgroup());
     }
 
     @Override
@@ -147,8 +157,7 @@ public class PrometheusNamingMetricsManager implements NamingServerMetricsManage
         watcherCountGauge.register(rows, true);
     }
 
-    @Override
-    public void incrementClusterChangePushCount(String namespace, String cluster, String vgroup) {
+    private void incrementClusterChangePushCount(String namespace, String cluster, String vgroup) {
         String key = namespace + "|" + cluster + "|" + vgroup;
         Counter counter =
                 clusterChangePushCounters.computeIfAbsent(key, k -> Counter.builder(METRIC_CLUSTER_CHANGE_PUSH_TOTAL)
@@ -160,7 +169,10 @@ public class PrometheusNamingMetricsManager implements NamingServerMetricsManage
         counter.increment();
     }
 
-    @Override
+    /**
+     * Gets the current count of cluster change push notifications.
+     * Exposed for testing purposes.
+     */
     public double getClusterChangePushCount(String namespace, String cluster, String vgroup) {
         String key = namespace + "|" + cluster + "|" + vgroup;
         Counter counter = clusterChangePushCounters.get(key);

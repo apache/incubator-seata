@@ -22,6 +22,7 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.apache.seata.common.metadata.namingserver.NamingServerNode;
 import org.apache.seata.common.metadata.namingserver.Unit;
 import org.apache.seata.namingserver.entity.pojo.ClusterData;
+import org.apache.seata.namingserver.listener.ClusterChangePushEvent;
 import org.apache.seata.namingserver.listener.Watcher;
 import org.apache.seata.namingserver.metrics.PrometheusNamingMetricsManager;
 import org.junit.jupiter.api.BeforeEach;
@@ -127,10 +128,10 @@ class NamingServerMetricsManagerTest {
         String vgroup1 = "vgroup1";
         String vgroup2 = "vgroup2";
 
-        // Increment counters
-        metricsManager.incrementClusterChangePushCount(namespace, cluster, vgroup1);
-        metricsManager.incrementClusterChangePushCount(namespace, cluster, vgroup1);
-        metricsManager.incrementClusterChangePushCount(namespace, cluster, vgroup2);
+        // Simulate events via event listener
+        metricsManager.onClusterChangePush(new ClusterChangePushEvent(this, namespace, cluster, vgroup1));
+        metricsManager.onClusterChangePush(new ClusterChangePushEvent(this, namespace, cluster, vgroup1));
+        metricsManager.onClusterChangePush(new ClusterChangePushEvent(this, namespace, cluster, vgroup2));
 
         // Verify counts
         assertEquals(2.0, metricsManager.getClusterChangePushCount(namespace, cluster, vgroup1));
