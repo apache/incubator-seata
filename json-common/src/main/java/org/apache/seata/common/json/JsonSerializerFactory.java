@@ -25,7 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class JsonSerializerFactory {
 
-    private static final String DEFAULT_SERIALIZER = "fastjson";
+    private static final String DEFAULT_SERIALIZER = "jackson";
 
     private static final Map<String, org.apache.seata.common.json.JsonSerializer> INSTANCES = new ConcurrentHashMap<>();
 
