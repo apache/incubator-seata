@@ -634,4 +634,10 @@ public interface DefaultValues {
             "<object>",
             "<style>",
             "<link>");
+
+    boolean DEFAULT_SONATA_ENABLE_GLOBAL_SERIALIZABILITY = false;
+    String DEFAULT_SONATA_DUMMY_TABLE = "sonata_dummy";
+    int DEFAULT_SONATA_DUMMY_TABLE_SIZE = 1000000;
+    int DEFAULT_SONATA_S2PL_DUMMY_WRITE_RETRY_WARNING_THRESHOLD = 5;
+    int DEFAULT_SONATA_SSI_HELPER_BATCH_SIZE = 10;
 }

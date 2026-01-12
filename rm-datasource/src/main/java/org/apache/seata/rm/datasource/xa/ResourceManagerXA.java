@@ -167,6 +167,12 @@ public class ResourceManagerXA extends AbstractDataSourceCacheResourceManager {
                             } else {
                                 return BranchStatus.PhaseTwo_RollbackFailed_XAER_NOTA_Retryable;
                             }
+                        } else if (((XAException) sqle).errorCode == XAException.XA_RETRY) {
+                            if (committed) {
+                                return BranchStatus.PhaseTwo_CommitFailed_Retryable;
+                            } else {
+                                return BranchStatus.PhaseTwo_RollbackFailed_Retryable;
+                            }
                         }
                     } finally {
                         BaseDataSourceResource.setBranchStatus(
