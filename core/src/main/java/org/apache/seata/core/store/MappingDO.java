@@ -37,10 +37,10 @@ public class MappingDO {
         return clusterName;
     }
 
-
     public void setClusterName(String clusterName) {
         this.clusterName = clusterName;
     }
+
     public String getUnit() {
         return unit;
     }

@@ -17,6 +17,7 @@
 package org.apache.seata.server.storage.db.store;
 
 import org.apache.seata.common.loader.EnhancedServiceLoader;
+import org.apache.seata.common.metadata.Instance;
 import org.apache.seata.core.store.MappingDO;
 import org.apache.seata.core.store.db.DataSourceProvider;
 import org.apache.seata.server.BaseSpringBootTest;
@@ -26,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
 import javax.sql.DataSource;
+import java.util.List;
 
 @EnabledIfSystemProperty(named = "dbCaseEnabled", matches = "true")
 public class VGroupMappingDataBaseDAOTest extends BaseSpringBootTest {
@@ -56,5 +58,32 @@ public class VGroupMappingDataBaseDAOTest extends BaseSpringBootTest {
 
         boolean deleted = vGroupMappingDataBaseDAO.clearMappingDOByVGroup("test-vgroup");
         Assertions.assertTrue(deleted);
+    }
+
+    /**
+     * 🔑 This test covers queryMappingDO() and cluster_name mapping
+     * Required for Codecov patch coverage.
+     */
+    @Test
+    public void testQueryMappingDOWithClusterName() {
+        MappingDO mappingDO = new MappingDO();
+        mappingDO.setVGroup("test-vgroup-query");
+        mappingDO.setNamespace("test-namespace");
+        mappingDO.setClusterName("test-cluster");
+
+        boolean inserted = vGroupMappingDataBaseDAO.insertMappingDO(mappingDO);
+        Assertions.assertTrue(inserted);
+
+        Instance.getInstance().setClusterName("test-cluster");
+
+        List<MappingDO> result = vGroupMappingDataBaseDAO.queryMappingDO();
+        Assertions.assertNotNull(result);
+        Assertions.assertFalse(result.isEmpty());
+
+        MappingDO resultDO = result.get(0);
+        Assertions.assertEquals("test-cluster", resultDO.getClusterName());
+        Assertions.assertEquals("test-vgroup-query", resultDO.getVGroup());
+
+        vGroupMappingDataBaseDAO.clearMappingDOByVGroup("test-vgroup-query");
     }
 }

@@ -55,16 +55,33 @@ public class DataBaseVGroupMappingStoreManagerTest extends BaseSpringBootTest {
         boolean added = storeManager.addVGroup(mappingDO);
         Assertions.assertTrue(added);
 
-        Map<String, Object> vGroups = storeManager.loadVGroups();
-        Assertions.assertNotNull(vGroups);
-
         boolean removed = storeManager.removeVGroup("test-vgroup");
         Assertions.assertTrue(removed);
     }
 
+    /**
+     * 🔑 This test is REQUIRED for Codecov
+     * It executes the cluster_name filtering logic.
+     */
     @Test
-    public void testLoadVGroups() {
+    public void testLoadVGroupsWithMatchingCluster() {
+        Instance instance = Instance.getInstance();
+        instance.setNamespace("test-namespace");
+        instance.setClusterName("test-cluster");
+
+        MappingDO mappingDO = new MappingDO();
+        mappingDO.setVGroup("test-vgroup-load");
+        mappingDO.setNamespace("test-namespace");
+        mappingDO.setClusterName("test-cluster");
+
+        boolean added = storeManager.addVGroup(mappingDO);
+        Assertions.assertTrue(added);
+
         Map<String, Object> vGroups = storeManager.loadVGroups();
         Assertions.assertNotNull(vGroups);
+        Assertions.assertTrue(vGroups.containsKey("test-vgroup-load"));
+
+        boolean removed = storeManager.removeVGroup("test-vgroup-load");
+        Assertions.assertTrue(removed);
     }
 }
