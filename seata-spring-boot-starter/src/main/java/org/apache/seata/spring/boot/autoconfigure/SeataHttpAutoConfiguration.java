@@ -16,8 +16,8 @@
  */
 package org.apache.seata.spring.boot.autoconfigure;
 
+import org.apache.seata.integration.http.JakartaSeataWebMvcConfigurer;
 import org.apache.seata.integration.http.SeataWebMvcConfigurer;
-import org.apache.seata.integration.http.jakarta.JakartaSeataWebMvcConfigurer;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
