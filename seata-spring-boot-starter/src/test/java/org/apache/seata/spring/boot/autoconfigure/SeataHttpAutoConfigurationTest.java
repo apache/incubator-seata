@@ -17,7 +17,7 @@
 package org.apache.seata.spring.boot.autoconfigure;
 
 import org.apache.seata.integration.http.SeataWebMvcConfigurer;
-import org.apache.seata.integration.http.jakarta.JakartaSeataWebMvcConfigurer;
+import org.apache.seata.integration.http.JakartaSeataWebMvcConfigurer;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.FilteredClassLoader;
