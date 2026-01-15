@@ -63,6 +63,7 @@
 <!--        <module>namingserver</module>-->
         <module>test-suite/test-new-version</module>
         <module>test-suite/test-old-version</module>
+        <module>json-common</module>
         <!--<module>seata-plugin</module>-->
     </modules>
 
