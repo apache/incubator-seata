@@ -41,10 +41,15 @@ heartbeat:
   threshold: 90000
   period: 60000
 console:
-  namingserver:
-    protocol: http
-    addr:
-      - 127.0.0.1:8081
+  # console username and password configuration
+  user:
+    username:
+    password:
+  # When the console is deployed independently, configure the namingserver address
+#  namingserver:
+#    protocol: http
+#    addr:
+#      - 127.0.0.1:8081
 seata:
   security:
     secretKey: SeataSecretKey0c382ef121d778043159209298fd40bf3850a017
