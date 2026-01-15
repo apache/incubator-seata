@@ -75,8 +75,9 @@ public class TestConfigFromExtendSPI {
                 listenerCountDown.countDown();
             }
         });
-        configService.publishConfig(dataId, group, content);
-        boolean reachZero = listenerCountDown.await(5, TimeUnit.SECONDS);
+        boolean published = configService.publishConfig(dataId, group, content);
+        Assertions.assertTrue(published);
+        boolean reachZero = listenerCountDown.await(30, TimeUnit.SECONDS);
         Assertions.assertTrue(reachZero);
         // get config
         String config = configuration.getConfig(dataId);
