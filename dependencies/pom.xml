@@ -145,6 +145,8 @@
 
         <!--  for fory  -->
         <fory.version>0.12.3</fory.version>
+
+        <okhttp.version>4.9.3</okhttp.version>
     </properties>
 
     <dependencyManagement>
@@ -904,8 +906,8 @@
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
                 <version>${commons-io.version}</version>
-             </dependency>
-                <dependency>
+            </dependency>
+            <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
                 <version>${jackson.version}</version>
@@ -929,6 +931,16 @@
                 <groupId>com.shentongdata</groupId>
                 <artifactId>oscarJDBC8</artifactId>
                 <version>${oscar.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.squareup.okhttp3</groupId>
+                <artifactId>okhttp</artifactId>
+                <version>${okhttp.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.squareup.okhttp3</groupId>
+                <artifactId>mockwebserver</artifactId>
+                <version>${mockwebserver-version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

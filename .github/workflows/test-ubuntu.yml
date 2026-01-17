@@ -39,7 +39,7 @@ jobs:
         options: --health-cmd="curl -f http://localhost:8848/nacos" --health-interval=10s --health-timeout=5s --health-retries=3 --health-start-period=30s
     runs-on: "${{ matrix.os }}"
     strategy:
-      max-parallel: 3
+      max-parallel: 6
       fail-fast: false
       matrix:
         java: [ 8, 11, 17, 21, 25 ]
@@ -96,7 +96,7 @@ jobs:
         options: --health-cmd="curl -f http://localhost:8848/nacos" --health-interval=10s --health-timeout=5s --health-retries=3 --health-start-period=30s
     runs-on: "${{ matrix.os }}"
     strategy:
-      max-parallel: 3
+      max-parallel: 6
       fail-fast: false
       matrix:
         java: [ 17, 21, 25 ]
@@ -142,6 +142,7 @@ jobs:
     name: "test-arm64"
     runs-on: ubuntu-24.04-arm
     strategy:
+      max-parallel: 6
       fail-fast: false
       matrix:
         springboot: [
