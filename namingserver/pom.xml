@@ -33,6 +33,7 @@
     <properties>
         <java.version>25</java.version>
         <spring-boot-for-server.version>3.5.2</spring-boot-for-server.version>
+        <spring-framework-for-server.version>6.2.8</spring-framework-for-server.version>
         <snakeyaml-for-server.version>2.0</snakeyaml-for-server.version>
         <tomcat-embed.version>11.0.12</tomcat-embed.version>
         <httpclient.version>5.4.3</httpclient.version>
@@ -45,6 +46,14 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
                 <version>${spring-boot-for-server.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!-- spring-framework-->
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-framework-bom</artifactId>
+                <version>${spring-framework-for-server.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

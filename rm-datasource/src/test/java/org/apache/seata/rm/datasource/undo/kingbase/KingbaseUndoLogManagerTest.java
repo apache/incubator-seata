@@ -192,7 +192,7 @@ public class KingbaseUndoLogManagerTest {
 
         // Verify default uses UNDO_LOG_SEQ (uppercase, following Kingbase community convention)
         Assertions.assertTrue(
-                insertSql.contains("UNDO_LOG_SEQ.nextval"),
+                insertSql.contains("nextval('UNDO_LOG_SEQ')"),
                 "Should use UNDO_LOG_SEQ sequence (uppercase) by default. Actual SQL: " + insertSql);
 
         // Verify SQL contains correct table name
@@ -228,7 +228,7 @@ public class KingbaseUndoLogManagerTest {
 
         // Verify the sequence name follows the pattern: {table_name}_SEQ (uppercase for Kingbase)
         String expectedSequenceName = actualTableName.toUpperCase() + "_SEQ";
-        String expectedSequenceCall = expectedSequenceName + ".nextval";
+        String expectedSequenceCall = "nextval('" + expectedSequenceName + "')";
 
         // Test that the INSERT SQL contains the properly derived sequence name
         Assertions.assertTrue(
@@ -306,7 +306,7 @@ public class KingbaseUndoLogManagerTest {
         // Verify key SQL components
         Assertions.assertTrue(insertSql.contains("INSERT INTO undo_log"), "Should keep default table name 'undo_log'");
         Assertions.assertTrue(
-                insertSql.contains("UNDO_LOG_SEQ.nextval"),
+                insertSql.contains("nextval('UNDO_LOG_SEQ')"),
                 "Should keep default sequence name 'UNDO_LOG_SEQ' (uppercase)");
         Assertions.assertTrue(insertSql.contains("sysdate"), "Should keep Kingbase time function sysdate");
 
