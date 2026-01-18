@@ -230,51 +230,51 @@ Apache-2.0 licenses
     io.jsonwebtoken:jjwt-api 0.10.5 Apache-2.0
     io.jsonwebtoken:jjwt-impl 0.10.5 Apache-2.0
     io.jsonwebtoken:jjwt-jackson 0.10.5 Apache-2.0
-    io.netty:netty-all 4.1.101.Final Apache-2.0
-    io.netty:netty-buffer 4.1.101.Final Apache-2.0
-    io.netty:netty-codec 4.1.101.Final Apache-2.0
-    io.netty:netty-codec-dns 4.1.101.Final Apache-2.0
-    io.netty:netty-codec-haproxy 4.1.101.Final Apache-2.0
-    io.netty:netty-codec-http 4.1.101.Final Apache-2.0
-    io.netty:netty-codec-http2 4.1.101.Final Apache-2.0
-    io.netty:netty-codec-memcache 4.1.101.Final Apache-2.0
-    io.netty:netty-codec-mqtt 4.1.101.Final Apache-2.0
-    io.netty:netty-codec-redis 4.1.101.Final Apache-2.0
-    io.netty:netty-codec-smtp 4.1.101.Final Apache-2.0
-    io.netty:netty-codec-socks 4.1.101.Final Apache-2.0
-    io.netty:netty-codec-stomp 4.1.101.Final Apache-2.0
-    io.netty:netty-codec-xml 4.1.101.Final Apache-2.0
-    io.netty:netty-common 4.1.101.Final Apache-2.0
-    io.netty:netty-handler 4.1.101.Final Apache-2.0
-    io.netty:netty-handler-proxy 4.1.101.Final Apache-2.0
-    io.netty:netty-handler-ssl-ocsp 4.1.101.Final Apache-2.0
-    io.netty:netty-resolver 4.1.101.Final Apache-2.0
-    io.netty:netty-resolver-dns 4.1.101.Final Apache-2.0
-    io.netty:netty-resolver-dns-classes-macos 4.1.101.Final Apache-2.0
-    io.netty:netty-resolver-dns-native-macos 4.1.101.Final Apache-2.0
-    io.netty:netty-resolver-dns-native-macos 4.1.101.Final Apache-2.0
-    io.netty:netty-transport 4.1.101.Final Apache-2.0
-    io.netty:netty-transport-classes-epoll 4.1.101.Final Apache-2.0
-    io.netty:netty-transport-classes-kqueue 4.1.101.Final Apache-2.0
-    io.netty:netty-transport-native-epoll 4.1.101.Final Apache-2.0
-    io.netty:netty-transport-native-epoll 4.1.101.Final Apache-2.0
-    io.netty:netty-transport-native-kqueue 4.1.101.Final Apache-2.0
-    io.netty:netty-transport-native-kqueue 4.1.101.Final Apache-2.0
-    io.netty:netty-transport-native-unix-common 4.1.101.Final Apache-2.0
-    io.netty:netty-transport-rxtx 4.1.101.Final Apache-2.0
-    io.netty:netty-transport-sctp 4.1.101.Final Apache-2.0
-    io.netty:netty-transport-udt 4.1.101.Final Apache-2.0
+    io.netty:netty-all 4.1.122.Final Apache-2.0
+    io.netty:netty-buffer 4.1.122.Final Apache-2.0
+    io.netty:netty-codec 4.1.122.Final Apache-2.0
+    io.netty:netty-codec-dns 4.1.122.Final Apache-2.0
+    io.netty:netty-codec-haproxy 4.1.122.Final Apache-2.0
+    io.netty:netty-codec-http 4.1.122.Final Apache-2.0
+    io.netty:netty-codec-http2 4.1.122.Final Apache-2.0
+    io.netty:netty-codec-memcache 4.1.122.Final Apache-2.0
+    io.netty:netty-codec-mqtt 4.1.122.Final Apache-2.0
+    io.netty:netty-codec-redis 4.1.122.Final Apache-2.0
+    io.netty:netty-codec-smtp 4.1.122.Final Apache-2.0
+    io.netty:netty-codec-socks 4.1.122.Final Apache-2.0
+    io.netty:netty-codec-stomp 4.1.122.Final Apache-2.0
+    io.netty:netty-codec-xml 4.1.122.Final Apache-2.0
+    io.netty:netty-common 4.1.122.Final Apache-2.0
+    io.netty:netty-handler 4.1.122.Final Apache-2.0
+    io.netty:netty-handler-proxy 4.1.122.Final Apache-2.0
+    io.netty:netty-handler-ssl-ocsp 4.1.122.Final Apache-2.0
+    io.netty:netty-resolver 4.1.122.Final Apache-2.0
+    io.netty:netty-resolver-dns 4.1.122.Final Apache-2.0
+    io.netty:netty-resolver-dns-classes-macos 4.1.122.Final Apache-2.0
+    io.netty:netty-resolver-dns-native-macos 4.1.122.Final Apache-2.0
+    io.netty:netty-resolver-dns-native-macos 4.1.122.Final Apache-2.0
+    io.netty:netty-transport 4.1.122.Final Apache-2.0
+    io.netty:netty-transport-classes-epoll 4.1.122.Final Apache-2.0
+    io.netty:netty-transport-classes-kqueue 4.1.122.Final Apache-2.0
+    io.netty:netty-transport-native-epoll 4.1.122.Final Apache-2.0
+    io.netty:netty-transport-native-epoll 4.1.122.Final Apache-2.0
+    io.netty:netty-transport-native-kqueue 4.1.122.Final Apache-2.0
+    io.netty:netty-transport-native-kqueue 4.1.122.Final Apache-2.0
+    io.netty:netty-transport-native-unix-common 4.1.122.Final Apache-2.0
+    io.netty:netty-transport-rxtx 4.1.122.Final Apache-2.0
+    io.netty:netty-transport-sctp 4.1.122.Final Apache-2.0
+    io.netty:netty-transport-udt 4.1.122.Final Apache-2.0
     org.yaml:snakeyaml 2.0 Apache-2.0
     org.springframework:spring-aop 5.3.39 Apache-2.0
     org.springframework:spring-beans 5.3.39 Apache-2.0
-    org.springframework.boot:spring-boot 2.7.18 Apache-2.0
-    org.springframework.boot:spring-boot-autoconfigure 2.7.18 Apache-2.0
-    org.springframework.boot:spring-boot-starter 2.7.18 Apache-2.0
-    org.springframework.boot:spring-boot-starter-json 2.7.18 Apache-2.0
-    org.springframework.boot:spring-boot-starter-logging 2.7.18 Apache-2.0
-    org.springframework.boot:spring-boot-starter-security 2.7.18 Apache-2.0
-    org.springframework.boot:spring-boot-starter-tomcat 2.7.18 Apache-2.0
-    org.springframework.boot:spring-boot-starter-web 2.7.18 Apache-2.0
+    org.springframework.boot:spring-boot 3.5.2 Apache-2.0
+    org.springframework.boot:spring-boot-autoconfigure 3.5.2 Apache-2.0
+    org.springframework.boot:spring-boot-starter 3.5.2 Apache-2.0
+    org.springframework.boot:spring-boot-starter-json 3.5.2 Apache-2.0
+    org.springframework.boot:spring-boot-starter-logging 3.5.2 Apache-2.0
+    org.springframework.boot:spring-boot-starter-security 3.5.2 Apache-2.0
+    org.springframework.boot:spring-boot-starter-tomcat 3.5.2 Apache-2.0
+    org.springframework.boot:spring-boot-starter-web 3.5.2 Apache-2.0
     org.springframework:spring-context 5.3.39 Apache-2.0
     org.springframework:spring-core 5.3.39 Apache-2.0
     org.springframework:spring-expression 5.3.39 Apache-2.0
