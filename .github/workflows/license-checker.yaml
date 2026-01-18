@@ -66,7 +66,7 @@ jobs:
         run: |
           mkdir -p ./dist-material/
           cp  ./style/licenses/LICENSE.tpl ./dist-material/LICENSE.tpl
-          go install github.com/apache/skywalking-eyes/cmd/license-eye@8fc52ba
+          go install github.com/apache/skywalking-eyes/cmd/license-eye@0630b01
           license-eye dependency resolve --summary ./dist-material/LICENSE.tpl || exit 1
           if [ -f "./dist-material/LICENSE)" ]; then
             echo "echo LICENSE check"
@@ -74,7 +74,7 @@ jobs:
           fi
       - name: Check Dependencies Licenses Invalid
         run: |
-          go install github.com/apache/skywalking-eyes/cmd/license-eye@8fc52ba
+          go install github.com/apache/skywalking-eyes/cmd/license-eye@0630b01
           if [ ! -z "$(license-eye dependency check -v error | grep 'GPL\|LGPL\|ERROR')" ]; then
             echo "GPL or LGPL dependency LICENSE exists"
             license-eye dependency check -v error | grep 'GPL\|LGPL\|ERROR'
