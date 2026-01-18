@@ -18,7 +18,7 @@ name: License checker
 
 on:
   pull_request:
-      branches: [ 2.x, develop, master ]
+      branches: [ 2.*, develop, master ]
 
 jobs:
   check-license:
@@ -49,3 +49,34 @@ jobs:
           log: info
           config: .licenserc.yaml
           mode: check
+
+  print-dependency-license:
+    name: Dependency licenses print
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+      - name: Setup Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: "1.20"
+      - name: Check Dependencies Licenses
+        run: |
+          mkdir -p ./dist-material/
+          cp  ./style/licenses/LICENSE.tpl ./dist-material/LICENSE.tpl
+          go install github.com/apache/skywalking-eyes/cmd/license-eye@8fc52ba
+          license-eye dependency resolve --summary ./dist-material/LICENSE.tpl || exit 1
+          if [ -f "./dist-material/LICENSE)" ]; then
+            echo "echo LICENSE check"
+            cat ./dist-material/LICENSE
+          fi
+      - name: Check Dependencies Licenses Invalid
+        run: |
+          go install github.com/apache/skywalking-eyes/cmd/license-eye@8fc52ba
+          if [ ! -z "$(license-eye dependency check -v error | grep 'GPL\|LGPL\|ERROR')" ]; then
+            echo "GPL or LGPL dependency LICENSE exists"
+            license-eye dependency check -v error | grep 'GPL\|LGPL\|ERROR'
+            exit 1
+          fi

@@ -39,6 +39,7 @@ header:
     - 'LICENSE'
     - 'NOTICE'
     - 'DISCLAIMER'
+    - 'style/licenses/LICENSE.tpl'
     - '**/org/apache/seata/sqlparser/antlr/**/*.g4'
     - 'distribution/licenses/**'
     - 'distribution/LICENSE'
