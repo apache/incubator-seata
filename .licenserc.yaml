@@ -63,6 +63,15 @@ dependency:
     - pom.xml
     - saga/seata-saga-statemachine-designer/package.json
     - console/src/main/resources/static/console-fe/package.json
+  licenses:
+    - name: "@gcanvas/core"
+      license: MIT
+    - name: "universal-canvas-context"
+      license: BSD-3-Clause
+    - name: "universal-element"
+      license: BSD-3-Clause
+    - name: "universal-env"
+      license: BSD-3-Clause
   excludes:
     - name: org.apache.seata:*
       recursive: false
