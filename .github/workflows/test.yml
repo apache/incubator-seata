@@ -25,7 +25,7 @@ jobs:
     name: "test"
     runs-on: "${{ matrix.os }}"
     strategy:
-      max-parallel: 3
+      max-parallel: 6
       fail-fast: false
       matrix:
         java: [ 8, 11, 17, 21 ]
@@ -85,7 +85,7 @@ jobs:
     name: "test-springboot3.x"
     runs-on: "${{ matrix.os }}"
     strategy:
-      max-parallel: 3
+      max-parallel: 6
       fail-fast: false
       matrix:
         java: [ 17, 21, 25 ]

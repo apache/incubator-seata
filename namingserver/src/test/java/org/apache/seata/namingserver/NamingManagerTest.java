@@ -31,13 +31,17 @@ import org.apache.seata.namingserver.entity.vo.monitor.ClusterVO;
 import org.apache.seata.namingserver.entity.vo.v2.NamespaceVO;
 import org.apache.seata.namingserver.listener.ClusterChangeEvent;
 import org.apache.seata.namingserver.manager.NamingManager;
+import org.apache.seata.namingserver.metrics.NoOpNamingMetricsManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -55,7 +59,8 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class NamingManagerTest {
 
     private NamingManager namingManager;
@@ -77,6 +82,7 @@ class NamingManagerTest {
         ReflectionTestUtils.setField(namingManager, "applicationContext", applicationContext);
         ReflectionTestUtils.setField(namingManager, "heartbeatTimeThreshold", 500000);
         ReflectionTestUtils.setField(namingManager, "heartbeatCheckTimePeriod", 10000000);
+        ReflectionTestUtils.setField(namingManager, "metricsManager", new NoOpNamingMetricsManager());
 
         Mockito.when(httpResponse.code()).thenReturn(200);
         Mockito.when(httpResponse.body()).thenReturn(responseBody);

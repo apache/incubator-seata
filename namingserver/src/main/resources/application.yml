@@ -51,12 +51,26 @@ console:
 #    addr:
 #      - 127.0.0.1:8081
 seata:
+  namingserver:
+    metrics:
+      enabled: true
   security:
     secretKey: SeataSecretKey0c382ef121d778043159209298fd40bf3850a017
     tokenValidityInMilliseconds: 1800000
     csrf-ignore-urls: /naming/v1/**,/api/v1/naming/**
     ignore:
       urls: /,/**/*.css,/**/*.js,/**/*.html,/**/*.map,/**/*.svg,/**/*.png,/**/*.jpeg,/**/*.ico,/api/v1/auth/login,/version.json,/naming/v1/health,/error
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "prometheus,health,info,metrics"
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    distribution:
+      percentiles:
+        http.server.requests: 0.5, 0.99, 0.999
   # MCP Server Configuration
   mcp:
     # Maximum query time interval, The unit is milliseconds, Default one day

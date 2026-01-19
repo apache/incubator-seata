@@ -18,66 +18,32 @@ package org.apache.seata.namingserver.listener;
 
 import org.springframework.context.ApplicationEvent;
 
-import java.time.Clock;
+/**
+ * Event published when cluster change notifications are pushed to watchers.
+ * Used for metrics tracking via Spring's event mechanism.
+ */
+public class ClusterChangePushEvent extends ApplicationEvent {
 
-public class ClusterChangeEvent extends ApplicationEvent {
+    private final String namespace;
+    private final String clusterName;
+    private final String vgroup;
 
-    private String group;
-
-    private String namespace;
-
-    private String clusterName;
-
-    private long term;
-
-    public ClusterChangeEvent(Object source, String group, String namespace, String clusterName, long term) {
+    public ClusterChangePushEvent(Object source, String namespace, String clusterName, String vgroup) {
         super(source);
-        this.group = group;
         this.namespace = namespace;
         this.clusterName = clusterName;
-        this.term = term;
-    }
-
-    public ClusterChangeEvent(Object source, String group, String namespace, String clusterName) {
-        super(source);
-        this.group = group;
-        this.namespace = namespace;
-        this.clusterName = clusterName;
-    }
-
-    public ClusterChangeEvent(Object source, Clock clock) {
-        super(source, clock);
-    }
-
-    public String getGroup() {
-        return group;
-    }
-
-    public void setGroup(String group) {
-        this.group = group;
+        this.vgroup = vgroup;
     }
 
     public String getNamespace() {
         return namespace;
     }
 
-    public void setNamespace(String namespace) {
-        this.namespace = namespace;
-    }
-
     public String getClusterName() {
         return clusterName;
     }
 
-    public void setClusterName(String clusterName) {
-        this.clusterName = clusterName;
-    }
-
-    public long getTerm() {
-        return term;
-    }
-
-    public void setTerm(long term) {
-        this.term = term;
+    public String getVgroup() {
+        return vgroup;
     }
 }
