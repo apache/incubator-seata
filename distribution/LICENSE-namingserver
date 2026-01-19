@@ -211,21 +211,24 @@ licenses.
 Apache-2.0 licenses
 ========================================================================
 
-    com.github.ben-manes.caffeine:caffeine 2.9.3 Apache-2.0
-    commons-codec:commons-codec 1.15 Apache-2.0
+    com.github.ben-manes.caffeine:caffeine 3.2.1 Apache-2.0
+    commons-codec:commons-codec 1.18.0 Apache-2.0
     commons-io:commons-io 2.8.0 Apache-2.0
     commons-lang:commons-lang 2.6 Apache-2.0
-    org.apache.commons:commons-lang3 3.12.0 Apache-2.0
+    org.apache.commons:commons-lang3 3.17.0 Apache-2.0
     com.google.errorprone:error_prone_annotations 2.21.1 Apache-2.0
     org.apache.httpcomponents:httpasyncclient 4.1.5 Apache-2.0
     org.apache.httpcomponents:httpclient 4.5.14 Apache-2.0
     org.apache.httpcomponents:httpcore 4.4.16 Apache-2.0
     org.apache.httpcomponents:httpcore-nio 4.4.16 Apache-2.0
+    org.apache.httpcomponents.core5:httpcore5 5.3.4 Apache-2.0
+    org.apache.httpcomponents.core5:httpcore5-h2 5.3.4 Apache-2.0
     com.fasterxml.jackson.core:jackson-annotations 2.19.1 Apache-2.0
     com.fasterxml.jackson.core:jackson-core 2.19.1 Apache-2.0
     com.fasterxml.jackson.core:jackson-databind 2.19.1 Apache-2.0
     com.fasterxml.jackson.datatype:jackson-datatype-jdk8 2.19.1 Apache-2.0
     com.fasterxml.jackson.datatype:jackson-datatype-jsr310 2.19.1 Apache-2.0
+    com.fasterxml.jackson.module:jackson-module-jsonSchema 2.19.1 Apache-2.0
     com.fasterxml.jackson.module:jackson-module-parameter-names 2.19.1 Apache-2.0
     com.fasterxml.jackson.dataformat:jackson-dataformat-yaml 2.19.1 Apache-2.0
     io.jsonwebtoken:jjwt-api 0.10.5 Apache-2.0
@@ -295,7 +298,7 @@ Apache-2.0 licenses
     org.springframework.ai:spring-ai-model 1.1.0 Apache-2.0
     org.springframework.ai:spring-ai-commons 1.1.0 Apache-2.0
     org.springframework.ai:spring-ai-starter-mcp-server-webmvc 1.1.0 Apache-2.0
-    org.apache.tomcat:tomcat-annotations-api 11.0.12 Apache-2.0
+    org.apache.tomcat:tomcat-annotations-api 10.1.42 Apache-2.0
     org.apache.tomcat.embed:tomcat-embed-websocket 11.0.12 Apache-2.0
     org.apache.tomcat.embed:tomcat-embed-core 11.0.12 Apache-2.0
     org.apache.tomcat.embed:tomcat-embed-core 11.0.12 Apache-2.0
@@ -303,9 +306,23 @@ Apache-2.0 licenses
     org.jetbrains.kotlin:kotlin-stdlib 1.9.25 Apache-2.0
     org.jetbrains.kotlin:kotlin-stdlib-common 1.9.25 Apache-2.0
     io.micrometer:micrometer-core 1.15.1 Apache-2.0
+    io.micrometer:micrometer-observation 1.15.1 Apache-2.0
+    io.micrometer:micrometer-commons 1.15.1 Apache-2.0
+    io.micrometer:context-propagation 1.1.3 Apache-2.0
     com.ethlo.time:itu 1.14.0 Apache-2.0
     org.jspecify:jspecify 1.0.0 Apache-2.0
     com.github.victools:jsonschema-module-jackson 4.38.0 Apache-2.0
+    com.github.victools:jsonschema-generator 4.38.0 Apache-2.0
+    org.springaicommunity:mcp-annotations 0.7.0 Apache-2.0
+    org.jetbrains:annotations 13.0 Apache-2.0
+    com.fasterxml:classmate 1.7.0 Apache-2.0
+    javax.validation:validation-api 2.0.1.Final Apache-2.0
+    com.github.victools:jsonschema-module-swagger-2 4.38.0 Apache-2.0
+    io.swagger.core.v3:swagger-annotations-jakarta 2.2.30 Apache-2.0
+    org.apache.httpcomponents.client5:httpclient5 5.4.3 Apache-2.0
+    io.projectreactor:reactor-core 3.7.7 Apache-2.0
+    com.squareup.okhttp3:okhttp 4.9.3 Apache-2.0
+    com.networknt:json-schema-validator 2.0.0 Apache-2.0
 
 ========================================================================
 BSD-2-Clause licenses
@@ -313,6 +330,7 @@ BSD-2-Clause licenses
 
     webidl-conversions 3.0.1 BSD-2-Clause see:licenses/webidl-conversions-BSD-2-Clause
     org.hdrhistogram:HdrHistogram 2.2.2 BSD-2-Clause see:licenses/HdrHistogram-BSD-2-Clause
+    org.latencyutils:LatencyUtils 2.0.3 BSD-2-Clause see:licenses/HdrHistogram-BSD-2-Clause
 
 ========================================================================
 BSD-3-Clause licenses
@@ -383,7 +401,7 @@ EPL-1.0  licenses
 EPL-2.0 licenses
 ========================================================================
 
-    jakarta.annotation:jakarta.annotation-api 1.3.5 EPL-2.0 see:licenses/EPL-2.0
+    jakarta.annotation:jakarta.annotation-api 2.1.1 EPL-2.0 see:licenses/EPL-2.0
 
 ========================================================================
 MIT licenses
@@ -392,10 +410,13 @@ MIT licenses
     org.checkerframework:checker-qual 3.37.0 MIT see:licenses/checker-qual-MIT
     org.slf4j:jul-to-slf4j 2.0.17  MIT see:licenses/jul-to-slf4j-MIT
     org.slf4j:slf4j-api 2.0.17  MIT see:licenses/slf4j-api-MIT
+    io.modelcontextprotocol.sdk:mcp 0.16.0  MIT see:licenses/mcp-MIT
+    io.modelcontextprotocol.sdk:mcp-core 0.16.0  MIT see:licenses/mcp-core-MIT
     io.modelcontextprotocol.sdk:mcp-json 0.16.0  MIT see:licenses/mcp-json-MIT
     io.modelcontextprotocol.sdk:mcp-spring-webmvc 0.16.0  MIT see:licenses/mcp-spring-webmvc-MIT
-    io.modelcontextprotocol.sdk:mcp-json-jackson 0.16.0  MIT see:licenses/mcp-json-jackson-MIT
+    io.modelcontextprotocol.sdk:mcp-json-jackson2 0.16.0  MIT see:licenses/mcp-json-jackson-MIT
     com.knuddels:jtokkit 1.1.0  MIT see:licenses/jtokkit-MIT
+    org.reactivestreams:reactive-streams 1.0.4  MIT see:licenses/reactive-streams-MIT
 
     @alicloud/console-components 1.6.2 MIT see:licenses/alicloud-console-components-MIT
     @alicloud/console-components-actions 1.1.1 MIT see:licenses/alicloud-console-components-actions-MIT
