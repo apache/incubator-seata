@@ -323,6 +323,7 @@ Apache-2.0 licenses
     io.projectreactor:reactor-core 3.7.7 Apache-2.0
     com.squareup.okhttp3:okhttp 4.9.3 Apache-2.0
     com.networknt:json-schema-validator 2.0.0 Apache-2.0
+    com.squareup.okio:okio 2.8.0 Apache-2.0
 
 ========================================================================
 BSD-2-Clause licenses
