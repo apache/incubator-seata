@@ -60,6 +60,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -106,10 +107,11 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
     private static final ScheduledExecutorService SHARED_RECONNECT_EXECUTOR =
             new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("NettyClientReconnectTimer", true));
 
-    private final Runnable reconnectTask;
-    private final AtomicBoolean timerStarted = new AtomicBoolean(false);
-    private final ReentrantLock reconnectLock = new ReentrantLock();
-    private ScheduledFuture<?> reconnectScheduledFuture;
+    private static final ConcurrentMap<NettyPoolKey.TransactionRole, AtomicBoolean> ROLE_TIMER_STARTED =
+            new ConcurrentHashMap<>();
+
+    private static final ConcurrentMap<NettyPoolKey.TransactionRole, ScheduledFuture<?>> ROLE_RECONNECT_FUTURE =
+            new ConcurrentHashMap<>();
 
     /**
      * When sending message type is {@link MergeMessage}, will be stored to mergeMsgMap.
@@ -135,30 +137,43 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
 
     @Override
     public void init() {
-        reconnectLock.lock();
-        try {
-            if (timerStarted.compareAndSet(false, true)) {
-                reconnectScheduledFuture = SHARED_RECONNECT_EXECUTOR.scheduleAtFixedRate(
-                        reconnectTask, SCHEDULE_DELAY_MILLS, SCHEDULE_INTERVAL_MILLS, TimeUnit.MILLISECONDS);
-                LOGGER.info("Reconnect timer started (role: {})", transactionRole.name());
-            }
+        ROLE_TIMER_STARTED.computeIfAbsent(transactionRole, r -> new AtomicBoolean(false));
 
-            if (this.isEnableClientBatchSendRequest() && mergeSendExecutorService == null) {
-                mergeSendExecutorService = new ThreadPoolExecutor(
-                        MAX_MERGE_SEND_THREAD,
-                        MAX_MERGE_SEND_THREAD,
-                        KEEP_ALIVE_TIME,
-                        TimeUnit.MILLISECONDS,
-                        new LinkedBlockingQueue<>(),
-                        new NamedThreadFactory(getThreadPrefix(), MAX_MERGE_SEND_THREAD));
-                mergeSendExecutorService.submit(new MergedSendRunnable());
-            }
+        AtomicBoolean started = ROLE_TIMER_STARTED.get(transactionRole);
 
-            super.init();
-            clientBootstrap.start();
-        } finally {
-            reconnectLock.unlock();
+        if (started.compareAndSet(false, true)) {
+            ScheduledFuture<?> future = SHARED_RECONNECT_EXECUTOR.scheduleAtFixedRate(
+                    () -> {
+                        try {
+                            clientChannelManager.reconnect(getTransactionServiceGroup());
+                        } catch (Exception ex) {
+                            LOGGER.warn(
+                                    "Reconnect server failed (role: {}). {}", transactionRole.name(), ex.getMessage());
+                        }
+                    },
+                    SCHEDULE_DELAY_MILLS,
+                    SCHEDULE_INTERVAL_MILLS,
+                    TimeUnit.MILLISECONDS);
+
+            ROLE_RECONNECT_FUTURE.put(transactionRole, future);
+
+            LOGGER.info("Reconnect timer started for role: {}", transactionRole.name());
         }
+
+        if (this.isEnableClientBatchSendRequest() && mergeSendExecutorService == null) {
+
+            mergeSendExecutorService = new ThreadPoolExecutor(
+                    MAX_MERGE_SEND_THREAD,
+                    MAX_MERGE_SEND_THREAD,
+                    KEEP_ALIVE_TIME,
+                    TimeUnit.MILLISECONDS,
+                    new LinkedBlockingQueue<>(),
+                    new NamedThreadFactory(getThreadPrefix(), MAX_MERGE_SEND_THREAD));
+            mergeSendExecutorService.submit(new MergedSendRunnable());
+        }
+
+        super.init();
+        clientBootstrap.start();
     }
 
     public AbstractNettyRemotingClient(
@@ -171,19 +186,6 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
         clientBootstrap.setChannelHandlers(new ClientHandler(), new ChannelEventHandler(this));
         clientChannelManager = new NettyClientChannelManager(
                 new NettyPoolableFactory(this, clientBootstrap), getPoolKeyFunction(), nettyClientConfig);
-        this.reconnectTask = () -> {
-            if (!timerStarted.get()) {
-                return;
-            }
-            try {
-                String serviceGroup = getTransactionServiceGroup();
-                if (StringUtils.isNotBlank(serviceGroup) && timerStarted.get()) {
-                    clientChannelManager.reconnect(serviceGroup);
-                }
-            } catch (Throwable t) {
-                LOGGER.error("Reconnect task failed for role: {}", transactionRole.name(), t);
-            }
-        };
     }
 
     @Override
@@ -300,24 +302,11 @@ public abstract class AbstractNettyRemotingClient extends AbstractNettyRemoting 
 
     @Override
     public void destroy() {
-        reconnectLock.lock();
-        try {
-            if (timerStarted.compareAndSet(true, false)) {
-                if (reconnectScheduledFuture != null) {
-                    reconnectScheduledFuture.cancel(false);
-                    reconnectScheduledFuture = null;
-                }
-                LOGGER.info("Reconnect timer stopped (role: {})", transactionRole.name());
-            }
-            clientBootstrap.shutdown();
-            if (mergeSendExecutorService != null) {
-                mergeSendExecutorService.shutdown();
-                mergeSendExecutorService = null;
-            }
-            super.destroy();
-        } finally {
-            reconnectLock.unlock();
+        clientBootstrap.shutdown();
+        if (mergeSendExecutorService != null) {
+            mergeSendExecutorService.shutdown();
         }
+        super.destroy();
     }
 
     public void setTransactionMessageHandler(TransactionMessageHandler transactionMessageHandler) {

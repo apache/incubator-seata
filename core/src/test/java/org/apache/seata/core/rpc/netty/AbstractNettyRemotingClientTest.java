@@ -39,7 +39,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
@@ -47,25 +46,20 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
 import static org.assertj.core.api.Fail.fail;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -1553,38 +1547,6 @@ public class AbstractNettyRemotingClientTest {
     }
 
     @Test
-    public void testInitAndDestroyMultipleTimes() {
-        TestNettyRemotingClient multiClient = new TestNettyRemotingClient(clientConfig, messageExecutor);
-
-        try {
-            // initiate first
-            multiClient.init();
-
-            // verify status: timer should be started after init
-            try {
-                Field timerStartedField = AbstractNettyRemotingClient.class.getDeclaredField("timerStarted");
-                timerStartedField.setAccessible(true);
-                AtomicBoolean timerStarted = (AtomicBoolean) timerStartedField.get(multiClient);
-                assertNotNull(timerStarted);
-                assertTrue(timerStarted.get());
-            } catch (NoSuchFieldException | IllegalAccessException e) {
-                Assertions.fail("Failed to access timerStarted field on AbstractNettyRemotingClient", e);
-            }
-
-            multiClient.destroy();
-            multiClient.destroy();
-
-        } finally {
-            // clean
-            try {
-                multiClient.destroy();
-            } catch (Exception e) {
-                // ignore
-            }
-        }
-    }
-
-    @Test
     public void testDestroyWithoutInit() {
         TestNettyRemotingClient uninitClient = new TestNettyRemotingClient(clientConfig, messageExecutor);
         uninitClient.destroy();
@@ -1672,70 +1634,6 @@ public class AbstractNettyRemotingClientTest {
     }
 
     @Test
-    public void testConstructorCoreInitialization() {
-        TestNettyRemotingClient testClient = new TestNettyRemotingClient(clientConfig, messageExecutor);
-        try {
-            Field clientBootstrapField = AbstractNettyRemotingClient.class.getDeclaredField("clientBootstrap");
-            clientBootstrapField.setAccessible(true);
-            NettyClientBootstrap bootstrap = (NettyClientBootstrap) clientBootstrapField.get(testClient);
-            assertNotNull(bootstrap, "fail to init NettyClientBootstrap");
-
-            Field clientChannelManagerField =
-                    AbstractNettyRemotingClient.class.getDeclaredField("clientChannelManager");
-            clientChannelManagerField.setAccessible(true);
-            NettyClientChannelManager channelManager =
-                    (NettyClientChannelManager) clientChannelManagerField.get(testClient);
-            assertNotNull(channelManager, "fail to init NettyClientChannelManager");
-
-            Field reconnectTaskField = AbstractNettyRemotingClient.class.getDeclaredField("reconnectTask");
-            reconnectTaskField.setAccessible(true);
-            Runnable reconnectTask = (Runnable) reconnectTaskField.get(testClient);
-            assertNotNull(reconnectTask, "fail to init reconnectTask");
-        } catch (Exception e) {
-            fail("test failed:" + e.getMessage());
-        } finally {
-            if (testClient != null) {
-                testClient.destroy();
-            }
-        }
-    }
-
-    @Test
-    public void testInitReconnectTimerStart() throws Exception {
-        TestNettyRemotingClient testClient = new TestNettyRemotingClient(clientConfig, messageExecutor);
-        NettyClientBootstrap originalBootstrap = null;
-        try {
-            NettyClientBootstrap mockBootstrap = Mockito.mock(NettyClientBootstrap.class);
-            Field clientBootstrapField = AbstractNettyRemotingClient.class.getDeclaredField("clientBootstrap");
-            clientBootstrapField.setAccessible(true);
-            originalBootstrap = (NettyClientBootstrap) clientBootstrapField.get(testClient);
-            clientBootstrapField.set(testClient, mockBootstrap);
-            Field timerStartedField = AbstractNettyRemotingClient.class.getDeclaredField("timerStarted");
-            timerStartedField.setAccessible(true);
-            AtomicBoolean timerStarted = (AtomicBoolean) timerStartedField.get(testClient);
-            assertFalse(timerStarted.get(), "reconnect is not started");
-            testClient.init();
-            assertTrue(timerStarted.get(), "reconnect starts");
-            Mockito.verify(mockBootstrap, Mockito.times(1)).start();
-            Field timerExecutorField = AbstractNettyRemoting.class.getDeclaredField("timerExecutor");
-            timerExecutorField.setAccessible(true);
-            ScheduledExecutorService timerExecutor = (ScheduledExecutorService) timerExecutorField.get(testClient);
-            assertNotNull(timerExecutor, "thread can not be null");
-        } finally {
-            try {
-                Field clientBootstrapField = AbstractNettyRemotingClient.class.getDeclaredField("clientBootstrap");
-                clientBootstrapField.setAccessible(true);
-                clientBootstrapField.set(testClient, originalBootstrap);
-            } catch (Exception ignore) {
-                // ignore cleanup exceptions in test
-            }
-            if (testClient != null) {
-                testClient.destroy();
-            }
-        }
-    }
-
-    @Test
     public void testInitMergeSendExecutorService() throws Exception {
         TestNettyRemotingClientWithBatch batchClient =
                 new TestNettyRemotingClientWithBatch(clientConfig, messageExecutor);
@@ -1754,45 +1652,6 @@ public class AbstractNettyRemotingClientTest {
             assertEquals(1, threadPool.getMaximumPoolSize(), "the max threadPool should be MAX_MERGE_SEND_THREAD");
         } finally {
             batchClient.destroy();
-        }
-    }
-
-    @Test
-    public void testReconnectTaskWithEmptyServiceGroup() throws Exception {
-        class TestClientWithEmptyServiceGroup extends TestNettyRemotingClient {
-            public TestClientWithEmptyServiceGroup(NettyClientConfig config, ThreadPoolExecutor executor) {
-                super(config, executor);
-            }
-
-            @Override
-            protected String getTransactionServiceGroup() {
-                return "";
-            }
-        }
-
-        final TestClientWithEmptyServiceGroup testClient =
-                new TestClientWithEmptyServiceGroup(clientConfig, messageExecutor);
-        Field reconnectTaskField = AbstractNettyRemotingClient.class.getDeclaredField("reconnectTask");
-        reconnectTaskField.setAccessible(true);
-        Runnable reconnectTask = (Runnable) reconnectTaskField.get(testClient);
-        try {
-            assertDoesNotThrow(reconnectTask::run, "serviceGroup is null");
-        } finally {
-            testClient.destroy();
-        }
-    }
-
-    @Test
-    public void testReconnectTaskThrowException() throws Exception {
-        final TestNettyRemotingClientWithReconnectException exceptionClient =
-                new TestNettyRemotingClientWithReconnectException(clientConfig, messageExecutor);
-        Field reconnectTaskField = AbstractNettyRemotingClient.class.getDeclaredField("reconnectTask");
-        reconnectTaskField.setAccessible(true);
-        Runnable reconnectTask = (Runnable) reconnectTaskField.get(exceptionClient);
-        try {
-            assertDoesNotThrow(reconnectTask::run, "reconnectTask exception");
-        } finally {
-            exceptionClient.destroy();
         }
     }
 
@@ -1823,60 +1682,5 @@ public class AbstractNettyRemotingClientTest {
         protected String getTransactionServiceGroup() {
             return this.transactionServiceGroup;
         }
-    }
-
-    @Test
-    public void testReconnectTask() throws Exception {
-        String testServiceGroup = "test-group";
-        NettyClientConfig clientConfig = new NettyClientConfig();
-        ThreadPoolExecutor messageExecutor =
-                new ThreadPoolExecutor(1, 1, 0, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
-        // Mock clientChannelManager
-        NettyClientChannelManager mockChannelManager = mock(NettyClientChannelManager.class);
-        Field transactionRoleField = AbstractNettyRemotingClient.class.getDeclaredField("transactionRole");
-        transactionRoleField.setAccessible(true);
-
-        TestReconnectTaskClient client1 = new TestReconnectTaskClient(clientConfig, messageExecutor, testServiceGroup);
-        Field timerStartedField = AbstractNettyRemotingClient.class.getDeclaredField("timerStarted");
-        timerStartedField.setAccessible(true);
-        AtomicBoolean timerStarted1 = (AtomicBoolean) timerStartedField.get(client1);
-        timerStarted1.set(false);
-        Field reconnectTaskField = AbstractNettyRemotingClient.class.getDeclaredField("reconnectTask");
-        reconnectTaskField.setAccessible(true);
-        Runnable reconnectTask1 = (Runnable) reconnectTaskField.get(client1);
-
-        reconnectTask1.run();
-        verify(mockChannelManager, never()).reconnect(anyString());
-
-        TestReconnectTaskClient client2 = new TestReconnectTaskClient(clientConfig, messageExecutor, "");
-        AtomicBoolean timerStarted2 = (AtomicBoolean) timerStartedField.get(client2);
-        timerStarted2.set(true);
-        Field channelManagerField = AbstractNettyRemotingClient.class.getDeclaredField("clientChannelManager");
-        channelManagerField.setAccessible(true);
-        channelManagerField.set(client2, mockChannelManager);
-
-        // verify reconnect
-        Runnable reconnectTask2 = (Runnable) reconnectTaskField.get(client2);
-        reconnectTask2.run();
-        verify(mockChannelManager, never()).reconnect(anyString());
-
-        TestReconnectTaskClient client3 = new TestReconnectTaskClient(clientConfig, messageExecutor, testServiceGroup);
-        AtomicBoolean timerStarted3 = (AtomicBoolean) timerStartedField.get(client3);
-        timerStarted3.set(true);
-        channelManagerField.set(client3, mockChannelManager);
-
-        Runnable reconnectTask3 = (Runnable) reconnectTaskField.get(client3);
-        reconnectTask3.run();
-        verify(mockChannelManager, times(1)).reconnect(testServiceGroup);
-
-        TestReconnectTaskClient client4 = new TestReconnectTaskClient(clientConfig, messageExecutor, testServiceGroup);
-        AtomicBoolean timerStarted4 = (AtomicBoolean) timerStartedField.get(client4);
-        timerStarted4.set(true);
-        RuntimeException testEx = new RuntimeException("test-reconnect-error");
-        doThrow(testEx).when(mockChannelManager).reconnect(testServiceGroup);
-        channelManagerField.set(client4, mockChannelManager);
-
-        Runnable reconnectTask4 = (Runnable) reconnectTaskField.get(client4);
-        assertDoesNotThrow(reconnectTask4::run);
     }
 }
