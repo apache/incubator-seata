@@ -231,6 +231,10 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
         if (value == null) {
             value = environment.getProperty(org.apache.seata.common.util.StringUtils.hump2Line(dataId), dataType);
         }
+        // ensures that values are converted to their actual values
+        if (value instanceof String) {
+            value = environment.resolvePlaceholders((String) value);
+        }
         if (value == null) {
             String grouplistPrefix = SERVICE_PREFIX + DOT + SPECIAL_KEY_GROUPLIST + DOT;
             if (dataId.startsWith(grouplistPrefix)) {
