@@ -369,6 +369,9 @@ Apache-2.0 licenses
     org.jetbrains:annotations 13.0 Apache-2.0
     org.apache.commons:commons-lang3 3.12.0 Apache-2.0
     com.squareup.okhttp3:okhttp 4.9.3 Apache-2.0
+    com.squareup.okio:okio 2.8.0 Apache-2.0
+    org.jetbrains.kotlin:kotlin-stdlib 1.6.21 Apache-2.0
+    org.jetbrains.kotlin:kotlin-stdlib-common 1.6.21 Apache-2.0
 
 ========================================================================
 BSD-2-Clause licenses
