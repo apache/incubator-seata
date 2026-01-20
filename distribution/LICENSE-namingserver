@@ -339,6 +339,9 @@ BSD-3-Clause licenses
 
     org.codehaus.janino:commons-compiler 3.1.12 BSD-3-Clause see:licenses/janino-BSD-3-Clause
     org.codehaus.janino:janino 3.1.12 BSD-3-Clause see:licenses/janino-BSD-3-Clause
+    org.antlr:antlr-runtime 3.5.3 BSD-3-Clause see:licenses/antlr-runtime-BSD-3-Clause
+    org.antlr:ST4 4.3.4 BSD-3-Clause see:licenses/antlr-ST4-BSD-3-Clause
+    org.antlr:antlr4-runtime 4.13.1 BSD-3-Clause see:licenses/antlr4-runtime-BSD-3-Clause
 
     @uni/action-sheet 1.0.8 BSD-3-Clause see:licenses/uni-BSD-3-Clause
     @uni/clipboard 1.0.9 BSD-3-Clause see:licenses/uni-BSD-3-Clause
