@@ -59,7 +59,7 @@ public class ClusterController {
 
     @GetMapping("/cluster")
     public MetadataResponse cluster(String group) {
-        return clusterWatcherManager.getMetadataResponse1(group);
+        return clusterWatcherManager.getMetadataResponse(group);
     }
 
     @PostMapping("/watch")

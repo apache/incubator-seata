@@ -276,7 +276,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
      * @param group the group name
      * @return the MetadataResponse containing current cluster metadata
      */
-    public MetadataResponse getMetadataResponse1(String group) {
+    public MetadataResponse getMetadataResponse(String group) {
         MetadataResponse metadataResponse = new MetadataResponse();
         if (StringUtils.isBlank(group)) {
             group = ConfigurationFactory.getInstance()
