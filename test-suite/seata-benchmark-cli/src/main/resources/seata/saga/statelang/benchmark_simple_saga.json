@@ -1,0 +1,56 @@
+{
+  "Name": "benchmarkSimpleSaga",
+  "Comment": "Simple benchmark saga with single service task",
+  "StartState": "ProcessOrder",
+  "Version": "1.0.0",
+  "States": {
+    "ProcessOrder": {
+      "Type": "ServiceTask",
+      "ServiceName": "orderService",
+      "ServiceMethod": "createOrder",
+      "CompensateState": "CancelOrder",
+      "Input": [
+        {
+          "userId": "$.userId",
+          "productId": "$.productId",
+          "quantity": "$.quantity",
+          "amount": "$.amount"
+        }
+      ],
+      "Output": {
+        "orderResult": "$.#root"
+      },
+      "Catch": [
+        {
+          "Exceptions": ["java.lang.Exception"],
+          "Next": "CompensationTrigger"
+        }
+      ],
+      "Next": "Succeed"
+    },
+    "CancelOrder": {
+      "Type": "ServiceTask",
+      "ServiceName": "orderService",
+      "ServiceMethod": "cancelOrder",
+      "IsForCompensation": true,
+      "Input": [
+        {
+          "orderId": "$.orderResult.orderId",
+          "userId": "$.userId"
+        }
+      ]
+    },
+    "CompensationTrigger": {
+      "Type": "CompensationTrigger",
+      "Next": "Fail"
+    },
+    "Succeed": {
+      "Type": "Succeed"
+    },
+    "Fail": {
+      "Type": "Fail",
+      "ErrorCode": "SAGA_COMPENSATION",
+      "Message": "Saga compensation triggered"
+    }
+  }
+}
