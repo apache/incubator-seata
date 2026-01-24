@@ -24,12 +24,13 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * Test client handler that captures server responses
+ * Test client handler that captures server responses.
+ * Supports multiple request/response cycles using resetLatch().
  */
 public class TestClientHandler extends ChannelInboundHandlerAdapter {
 
     private final AtomicReference<Object> responseRef;
-    private final CountDownLatch responseLatch;
+    private volatile CountDownLatch responseLatch;
 
     public TestClientHandler(AtomicReference<Object> responseRef, CountDownLatch responseLatch) {
         this.responseRef = responseRef;
@@ -39,6 +40,13 @@ public class TestClientHandler extends ChannelInboundHandlerAdapter {
     public TestClientHandler() {
         this.responseRef = new AtomicReference<>();
         this.responseLatch = new CountDownLatch(1);
+    }
+
+    /**
+     * Reset the latch for a new request/response cycle
+     */
+    public void resetLatch(CountDownLatch newLatch) {
+        this.responseLatch = newLatch;
     }
 
     @Override
@@ -52,7 +60,9 @@ public class TestClientHandler extends ChannelInboundHandlerAdapter {
             // Handle direct responses (for backward compatibility)
             responseRef.set(msg);
         }
-        responseLatch.countDown();
+        if (responseLatch != null) {
+            responseLatch.countDown();
+        }
     }
 
     @Override
