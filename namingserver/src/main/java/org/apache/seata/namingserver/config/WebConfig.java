@@ -47,6 +47,7 @@ public class WebConfig {
                 .dispatcher(dispatcher)
                 .connectTimeout(DEFAULT_REQUEST_TIMEOUT, TimeUnit.MILLISECONDS)
                 .readTimeout(DEFAULT_REQUEST_TIMEOUT, TimeUnit.MILLISECONDS)
+                .writeTimeout(DEFAULT_REQUEST_TIMEOUT, TimeUnit.MILLISECONDS)
                 .build();
 
         return new RestTemplate(new OkHttp3ClientHttpRequestFactory(client));
