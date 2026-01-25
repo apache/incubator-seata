@@ -33,6 +33,7 @@ import java.util.concurrent.TimeUnit;
 import static org.apache.seata.namingserver.contants.NamingConstant.DEFAULT_CONNECTION_MAX_PER_ROUTE;
 import static org.apache.seata.namingserver.contants.NamingConstant.DEFAULT_CONNECTION_MAX_TOTAL;
 import static org.apache.seata.namingserver.contants.NamingConstant.DEFAULT_REQUEST_TIMEOUT;
+import static org.apache.seata.namingserver.contants.NamingConstant.DEFAULT_WRITE_TIMEOUT;
 
 @Configuration
 public class WebConfig {
@@ -47,7 +48,7 @@ public class WebConfig {
                 .dispatcher(dispatcher)
                 .connectTimeout(DEFAULT_REQUEST_TIMEOUT, TimeUnit.MILLISECONDS)
                 .readTimeout(DEFAULT_REQUEST_TIMEOUT, TimeUnit.MILLISECONDS)
-                .writeTimeout(DEFAULT_REQUEST_TIMEOUT, TimeUnit.MILLISECONDS)
+                .writeTimeout(DEFAULT_WRITE_TIMEOUT, TimeUnit.MILLISECONDS)
                 .build();
         
         // Create and return a RestTemplate with the custom request factory
