@@ -49,7 +49,8 @@ public class WebConfig {
                 .readTimeout(DEFAULT_REQUEST_TIMEOUT, TimeUnit.MILLISECONDS)
                 .writeTimeout(DEFAULT_REQUEST_TIMEOUT, TimeUnit.MILLISECONDS)
                 .build();
-
+        
+        // Create and return a RestTemplate with the custom request factory
         return new RestTemplate(new OkHttp3ClientHttpRequestFactory(client));
     }
 
