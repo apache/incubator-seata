@@ -17,40 +17,42 @@
 package org.apache.seata.namingserver.config;
 
 import jakarta.servlet.Filter;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import okhttp3.Dispatcher;
+import okhttp3.OkHttpClient;
 import org.apache.seata.namingserver.filter.ConsoleRemotingFilter;
 import org.apache.seata.namingserver.manager.NamingManager;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.client.OkHttp3ClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.concurrent.TimeUnit;
 
 import static org.apache.seata.namingserver.contants.NamingConstant.DEFAULT_CONNECTION_MAX_PER_ROUTE;
 import static org.apache.seata.namingserver.contants.NamingConstant.DEFAULT_CONNECTION_MAX_TOTAL;
 import static org.apache.seata.namingserver.contants.NamingConstant.DEFAULT_REQUEST_TIMEOUT;
+import static org.apache.seata.namingserver.contants.NamingConstant.DEFAULT_WRITE_TIMEOUT;
 
 @Configuration
 public class WebConfig {
 
     @Bean
     public RestTemplate restTemplate() {
-        // Create a connection manager with custom settings
-        PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
-        connectionManager.setMaxTotal(DEFAULT_CONNECTION_MAX_TOTAL); // Maximum total connections
-        connectionManager.setDefaultMaxPerRoute(DEFAULT_CONNECTION_MAX_PER_ROUTE); // Maximum connections per route
-        // Create an HttpClient with the connection manager
-        CloseableHttpClient httpClient =
-                HttpClients.custom().setConnectionManager(connectionManager).build();
-        // Create a request factory with the HttpClient
-        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
-        requestFactory.setConnectTimeout(DEFAULT_REQUEST_TIMEOUT); // Connection timeout in milliseconds
-        requestFactory.setReadTimeout(DEFAULT_REQUEST_TIMEOUT); // Read timeout in milliseconds
+        Dispatcher dispatcher = new Dispatcher();
+        dispatcher.setMaxRequests(DEFAULT_CONNECTION_MAX_TOTAL);
+        dispatcher.setMaxRequestsPerHost(DEFAULT_CONNECTION_MAX_PER_ROUTE);
+
+        OkHttpClient client = new OkHttpClient.Builder()
+                .dispatcher(dispatcher)
+                .connectTimeout(DEFAULT_REQUEST_TIMEOUT, TimeUnit.MILLISECONDS)
+                .readTimeout(DEFAULT_REQUEST_TIMEOUT, TimeUnit.MILLISECONDS)
+                .writeTimeout(DEFAULT_WRITE_TIMEOUT, TimeUnit.MILLISECONDS)
+                .build();
+        
         // Create and return a RestTemplate with the custom request factory
-        return new RestTemplate(requestFactory);
+        return new RestTemplate(new OkHttp3ClientHttpRequestFactory(client));
     }
 
     @Bean

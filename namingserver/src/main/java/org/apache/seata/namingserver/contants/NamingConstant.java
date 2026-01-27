@@ -21,6 +21,8 @@ public interface NamingConstant {
     String CONSOLE_PATTERN = "^/api/.*/console/.*";
 
     int DEFAULT_REQUEST_TIMEOUT = 5000;
+    
+    int DEFAULT_WRITE_TIMEOUT = 5000;
 
     int DEFAULT_CONNECTION_MAX_TOTAL = 100;
 
