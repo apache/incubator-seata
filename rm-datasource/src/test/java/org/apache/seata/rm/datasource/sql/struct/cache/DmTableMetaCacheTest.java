@@ -332,4 +332,102 @@ public class DmTableMetaCacheTest {
         Assertions.assertNotNull(tableMeta);
         Assertions.assertEquals(originalName, tableMeta.getOriginalTableName());
     }
+
+    @Test
+    public void testCompositeIndexWithDifferentColumnOrder() throws SQLException {
+        // Regression test for a bug fix: different column order caused List.equals to fail, which could lead to
+        // failing to recognize a primary key index.
+        // Scenario: composite primary key (ID, USER_ID) while a unique index lists the same columns in reverse order
+        // (USER_ID, ID).
+        // Before the fix: List.equals returned FALSE because of the different order, causing the primary key index to
+        // be unrecognized.
+        // After the fix: using Set.equals should return TRUE and correctly identify the index as PRIMARY.
+
+        Object[][] compositeIndexDiffOrder = new Object[][] {
+            new Object[] {"idx_id_userid", "id", false, "", 3, 1, "A", 34}, // column order 1
+            new Object[] {"idx_id_userid", "user_id", false, "", 3, 2, "A", 34} // column order 2
+        };
+        Object[][] compositePKMetas = new Object[][] {
+            new Object[] {"id"}, // PK column order 1
+            new Object[] {"user_id"} // PK column order 2
+        };
+        Object[][] compositeColumnMetas = new Object[][] {
+            new Object[] {"", "", "dt2", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"
+            },
+            new Object[] {
+                "", "", "dt2", "user_id", Types.INTEGER, "INTEGER", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"
+            }
+        };
+        Object[][] compositeTableMetas = new Object[][] {new Object[] {"", "t", "dt2"}};
+
+        MockDriver mockDriver =
+                new MockDriver(compositeColumnMetas, compositeIndexDiffOrder, compositePKMetas, compositeTableMetas);
+        DruidDataSource dataSource = new DruidDataSource();
+        dataSource.setUrl("jdbc:mock:dm");
+        dataSource.setDriver(mockDriver);
+
+        DataSourceProxy proxy = DataSourceProxyTest.getDataSourceProxy(dataSource);
+        TableMetaCache tableMetaCache = TableMetaCacheFactory.getTableMetaCache(JdbcConstants.DM);
+
+        TableMeta tableMeta = tableMetaCache.getTableMeta(proxy.getPlainConnection(), "t.dt2", proxy.getResourceId());
+
+        Assertions.assertNotNull(tableMeta);
+        IndexMeta compositeIndex = tableMeta.getAllIndexes().get("idx_id_userid");
+        Assertions.assertNotNull(compositeIndex);
+        // Key assertion: should be recognized as PRIMARY (after the fix), not mistakenly treated as UNIQUE
+        Assertions.assertEquals(
+                IndexType.PRIMARY,
+                compositeIndex.getIndextype(),
+                "Composite index with different column order should be recognized as PRIMARY");
+    }
+
+    @Test
+    public void testCompositeIndexWithExtraColumnsNotMarkedAsPrimary() throws SQLException {
+        // Regression test for a bug fix: a composite unique index that contains primary key columns plus extra columns
+        // should NOT be marked as PRIMARY.
+        // Scenario: primary key (ID), unique index (ID, NAME) — unique index contains PK column but has extra NAME.
+        // Before the fix: Oracle implementation matched by count (matchCols == pkcol.size()) and could misidentify
+        // PRIMARY.
+        // After the fix: using Set equality ({ID, NAME} != {ID}) prevents the index from being marked as PRIMARY
+
+        Object[][] mixedIndexMetas = new Object[][] {
+            new Object[] {"idx_id", "id", false, "", 3, 1, "A", 34},
+            new Object[] {"uk_id_name", "id", false, "", 3, 1, "A", 34}, // unique index contains the primary key column
+            new Object[] {"uk_id_name", "name1", false, "", 3, 2, "A", 34} // but it also has extra columns
+        };
+
+        // Use a dedicated table name to avoid cache hits from earlier tests
+        Object[][] extraColumnMetas = new Object[][] {
+            new Object[] {"", "", "dt3", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"
+            },
+            new Object[] {
+                "", "", "dt3", "name1", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"
+            }
+        };
+        Object[][] extraPkMetas = new Object[][] {new Object[] {"id"}};
+        Object[][] extraTableMetas = new Object[][] {new Object[] {"", "t", "dt3"}};
+
+        MockDriver mockDriver = new MockDriver(extraColumnMetas, mixedIndexMetas, extraPkMetas, extraTableMetas);
+        DruidDataSource dataSource = new DruidDataSource();
+        dataSource.setUrl("jdbc:mock:dm");
+        dataSource.setDriver(mockDriver);
+
+        DataSourceProxy proxy = DataSourceProxyTest.getDataSourceProxy(dataSource);
+        TableMetaCache tableMetaCache = TableMetaCacheFactory.getTableMetaCache(JdbcConstants.DM);
+
+        TableMeta tableMeta = tableMetaCache.getTableMeta(proxy.getPlainConnection(), "t.dt3", proxy.getResourceId());
+
+        Assertions.assertNotNull(tableMeta);
+        IndexMeta pkIndex = tableMeta.getAllIndexes().get("idx_id");
+        Assertions.assertNotNull(pkIndex);
+        Assertions.assertEquals(IndexType.PRIMARY, pkIndex.getIndextype(), "Single column PK index should be PRIMARY");
+
+        IndexMeta mixedIndex = tableMeta.getAllIndexes().get("uk_id_name");
+        Assertions.assertNotNull(mixedIndex);
+        // Key assertion: should remain UNIQUE (should not be misidentified as PRIMARY)
+        Assertions.assertEquals(
+                IndexType.UNIQUE,
+                mixedIndex.getIndextype(),
+                "Composite index with extra columns should NOT be marked as PRIMARY");
+    }
 }

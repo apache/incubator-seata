@@ -14,8 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.integration.http.jakarta;
+package org.apache.seata.integration.http;
 
+import org.apache.seata.integration.http.jakarta.JakartaTransactionPropagationInterceptor;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
