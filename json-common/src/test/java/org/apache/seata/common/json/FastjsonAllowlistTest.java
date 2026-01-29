@@ -153,7 +153,6 @@ public class FastjsonAllowlistTest {
                 .hasMessageContaining("com.malicious.EvilClass");
     }
 
-
     @Test
     public void testLoadUserAllowlist_thenParse() {
         JsonAllowlistManager.getInstance().loadUserAllowlist("com.trusted.model.,com.trusted.dto.SpecificDTO");
@@ -176,12 +175,10 @@ public class FastjsonAllowlistTest {
 
         }
 
-
         String json3 = "{\"@type\":\"com.untrusted.EvilClass\",\"data\":\"evil\"}";
         assertThatThrownBy(() -> jsonSerializer.parseObject(json3, Object.class, false))
                 .isInstanceOf(SecurityException.class);
     }
-
 
     public static class TestObject {
         private String name;
