@@ -20,6 +20,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import org.apache.seata.common.exception.JsonParseException;
+import org.apache.seata.common.json.JsonAllowlistManager;
 import org.apache.seata.common.json.JsonSerializer;
 import org.apache.seata.common.loader.LoadLevel;
 
@@ -132,13 +133,54 @@ public class FastjsonJsonSerializer implements JsonSerializer {
             if ("[]".equals(text)) {
                 return (T) new java.util.ArrayList<>();
             }
+
+            // Check allowlist when AutoType is enabled
+            if (!ignoreAutoType && useAutoType(text)) {
+                checkAutoTypeClasses(text);
+            }
+
             if (ignoreAutoType) {
                 return JSON.parseObject(text, type, READER_FEATURES_IGNORE_AUTO_TYPE);
             } else {
                 return JSON.parseObject(text, type, READER_FEATURES_SUPPORT_AUTO_TYPE);
             }
+        } catch (SecurityException e) {
+            throw e;
         } catch (Exception e) {
             throw new JsonParseException("FastJSON deserialize error", e);
         }
+    }
+
+    /**
+     * Check all @type classes in JSON against allowlist
+     */
+    private void checkAutoTypeClasses(String json) {
+        int index = 0;
+        while ((index = json.indexOf("\"@type\"", index)) >= 0) {
+            String className = extractTypeValue(json, index);
+            if (className != null) {
+                JsonAllowlistManager.getInstance().checkClass(className);
+            }
+            index++;
+        }
+    }
+
+    /**
+     * Extract @type value from JSON string
+     */
+    private String extractTypeValue(String json, int typeIndex) {
+        int colonIndex = json.indexOf(':', typeIndex);
+        if (colonIndex < 0) {
+            return null;
+        }
+        int startQuote = json.indexOf('"', colonIndex);
+        if (startQuote < 0) {
+            return null;
+        }
+        int endQuote = json.indexOf('"', startQuote + 1);
+        if (endQuote < 0) {
+            return null;
+        }
+        return json.substring(startQuote + 1, endQuote);
     }
 }

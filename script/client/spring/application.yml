@@ -199,6 +199,8 @@ seata:
       name:
   log:
     exception-rate: 100
+  json:
+    allowlist: com.company.model.,com.company.dto.,com.company.SpecialBean
   tcc:
     fence:
       log-table-name: tcc_fence_log
