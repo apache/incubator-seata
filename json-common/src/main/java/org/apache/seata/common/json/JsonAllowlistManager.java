@@ -22,18 +22,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * JSON deserialization allowlist manager.
- * <p>
- * Manages both built-in and user-defined allowlists for JSON deserialization security.
- * Classes not in the allowlist will be rejected during deserialization when AutoType is enabled.
- * </p>
- *
- * <p>Check logic:</p>
- * <ol>
- *   <li>Check cache first</li>
- *   <li>Check built-in allowlist (exact match + prefix match)</li>
- *   <li>Check user allowlist (exact match + prefix match)</li>
- *   <li>Reject if not in any allowlist</li>
- * </ol>
  */
 public class JsonAllowlistManager {
 
@@ -74,11 +62,6 @@ public class JsonAllowlistManager {
 
     /**
      * Load user allowlist from configuration string
-     * Format: comma-separated entries, entries ending with '.' are prefix matches,
-     * otherwise exact matches
-     * Example: "com.company.model.,com.company.SomeClass"
-     *
-     * @param config the allowlist configuration string
      */
     public void loadUserAllowlist(String config) {
         if (config == null || config.isEmpty()) {
@@ -100,8 +83,6 @@ public class JsonAllowlistManager {
 
     /**
      * Add a class to user allowlist programmatically
-     *
-     * @param className the fully qualified class name
      */
     public void addUserClass(String className) {
         if (className != null && !className.isEmpty()) {
@@ -112,8 +93,6 @@ public class JsonAllowlistManager {
 
     /**
      * Add a prefix to user allowlist programmatically
-     *
-     * @param prefix the class name prefix (should end with '.')
      */
     public void addUserPrefix(String prefix) {
         if (prefix != null && !prefix.isEmpty()) {
@@ -124,9 +103,6 @@ public class JsonAllowlistManager {
 
     /**
      * Check if a class is allowed for deserialization
-     *
-     * @param className the fully qualified class name
-     * @return true if allowed, false otherwise
      */
     public boolean isAllowed(String className) {
         if (className == null) {
@@ -136,10 +112,7 @@ public class JsonAllowlistManager {
     }
 
     /**
-     * Check if a class is allowed, throw SecurityException if not.
-     *
-     * @param className the fully qualified class name
-     * @throws SecurityException if the class is not in the allowlist
+     * Check if a class is allowed, throw SecurityException if not
      */
     public void checkClass(String className) {
         if (!isAllowed(className)) {
