@@ -33,7 +33,6 @@ public class JsonAllowlistManagerTest {
         JsonAllowlistManager.getInstance().clearUserAllowlist();
     }
 
-
     @Test
     public void testBuiltinAllowlist_primitiveWrappers() {
         JsonAllowlistManager manager = JsonAllowlistManager.getInstance();
@@ -110,7 +109,6 @@ public class JsonAllowlistManagerTest {
         assertThat(manager.isAllowed("javax.naming.InitialContext")).isFalse();
         assertThat(manager.isAllowed("com.example.MaliciousClass")).isFalse();
     }
-
 
     @Test
     public void testLoadUserAllowlist_exactMatch() {
@@ -209,7 +207,6 @@ public class JsonAllowlistManagerTest {
         assertThat(manager.isAllowed("java.lang.String")).isTrue();
     }
 
-
     @Test
     public void testCheckClass_allowed() {
         JsonAllowlistManager manager = JsonAllowlistManager.getInstance();
@@ -238,7 +235,6 @@ public class JsonAllowlistManagerTest {
 
         manager.checkClass("com.myapp.model.User");
     }
-
 
     @Test
     public void testIsAllowed_null() {
@@ -277,7 +273,6 @@ public class JsonAllowlistManagerTest {
 
         assertThat(instance1).isSameAs(instance2);
     }
-
 
     @Test
     public void testCacheWorks() {

@@ -34,7 +34,7 @@ public class JsonSerializerFactory {
     /**
      * Get JsonSerializer instance by name.
      *
-     * @param name the serializer name (e.g., "fastjson", "jackson", "gson")
+     * @param name the serializer name (e.g., "fastjson", "jackson", "gson", "fastjson2", "jackson3")
      * @return the JsonSerializer instance
      */
     public static JsonSerializer getSerializer(String name) {
