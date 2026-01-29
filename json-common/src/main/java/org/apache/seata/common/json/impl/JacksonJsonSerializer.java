@@ -84,7 +84,7 @@ public class JacksonJsonSerializer implements JsonSerializer {
             return null;
         }
         try {
-            return mapper.readValue(text, clazz);
+            return defaultObjectMapper.readValue(text, clazz);
         } catch (IOException e) {
             throw new JsonParseException("Jackson deserialize error", e);
         }
