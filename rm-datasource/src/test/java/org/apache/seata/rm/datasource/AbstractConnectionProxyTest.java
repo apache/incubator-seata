@@ -38,10 +38,10 @@ import java.util.Collections;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
@@ -91,10 +91,12 @@ class AbstractConnectionProxyTest {
 
         when(mockedDataSourceProxy.getDbType()).thenReturn(mockedDBType);
         when(mockedDataSourceProxy.getResourceId()).thenReturn(mockedResourceId);
-        when(mockedTableMetaCache.getTableMeta(mockedTargetConnection, "t1", mockedResourceId)).thenReturn(mockedTableMeta);
+        when(mockedTableMetaCache.getTableMeta(mockedTargetConnection, "t1", mockedResourceId))
+                .thenReturn(mockedTableMeta);
         when(mockedTableMeta.getPrimaryKeyOnlyName()).thenReturn(Collections.singletonList("id"));
 
-        try (MockedStatic<TableMetaCacheFactory> tableMetaCacheFactoryMockedStatic = mockStatic(TableMetaCacheFactory.class)) {
+        try (MockedStatic<TableMetaCacheFactory> tableMetaCacheFactoryMockedStatic =
+                mockStatic(TableMetaCacheFactory.class)) {
             tableMetaCacheFactoryMockedStatic
                     .when(() -> TableMetaCacheFactory.getTableMetaCache(mockedDBType))
                     .thenReturn(mockedTableMetaCache);
@@ -105,7 +107,7 @@ class AbstractConnectionProxyTest {
 
             assertNotNull(actual);
             assertInstanceOf(PreparedStatementProxy.class, actual);
-            verify(mockedTargetConnection).prepareStatement(mockedSql, new String[]{"id"});
+            verify(mockedTargetConnection).prepareStatement(mockedSql, new String[] {"id"});
             verify(mockedTableMetaCache).getTableMeta(mockedTargetConnection, "t1", mockedResourceId);
         }
     }
@@ -149,7 +151,7 @@ class AbstractConnectionProxyTest {
 
         CallableStatement mockCallable = mock(CallableStatement.class);
         when(mockedTargetConnection.prepareCall(
-                mockedSql, mockedResultSetType, mockedResultSetConcurrency, mockedResultSetHoldability))
+                        mockedSql, mockedResultSetType, mockedResultSetConcurrency, mockedResultSetHoldability))
                 .thenReturn(mockCallable);
 
         CallableStatement actual = testConnectionProxy.prepareCall(
@@ -486,7 +488,7 @@ class AbstractConnectionProxyTest {
     @Test
     public void testCreateArrayOf() throws SQLException {
         String typeName = "typeName";
-        Object[] elements = new Object[]{"elem1", "elem2"};
+        Object[] elements = new Object[] {"elem1", "elem2"};
 
         testConnectionProxy.createArrayOf(typeName, elements);
 
@@ -496,7 +498,7 @@ class AbstractConnectionProxyTest {
     @Test
     public void testCreateStruct() throws SQLException {
         String typeName = "typeName";
-        Object[] attributes = new Object[]{"attr1", "attr2"};
+        Object[] attributes = new Object[] {"attr1", "attr2"};
 
         testConnectionProxy.createStruct(typeName, attributes);
 
@@ -576,16 +578,13 @@ class AbstractConnectionProxyTest {
         }
 
         @Override
-        public void setAutoCommit(boolean autoCommit) throws SQLException {
-        }
+        public void setAutoCommit(boolean autoCommit) throws SQLException {}
 
         @Override
-        public void commit() throws SQLException {
-        }
+        public void commit() throws SQLException {}
 
         @Override
-        public void rollback() throws SQLException {
-        }
+        public void rollback() throws SQLException {}
 
         @Override
         public Savepoint setSavepoint() throws SQLException {
@@ -598,11 +597,9 @@ class AbstractConnectionProxyTest {
         }
 
         @Override
-        public void rollback(Savepoint savepoint) throws SQLException {
-        }
+        public void rollback(Savepoint savepoint) throws SQLException {}
 
         @Override
-        public void releaseSavepoint(Savepoint savepoint) throws SQLException {
-        }
+        public void releaseSavepoint(Savepoint savepoint) throws SQLException {}
     }
 }

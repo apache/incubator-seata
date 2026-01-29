@@ -40,13 +40,13 @@ import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.mock;
-import static org.mockito.ArgumentMatchers.any;;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 
 class DataSourceManagerTest {
 
@@ -91,11 +91,14 @@ class DataSourceManagerTest {
 
     @Test
     public void shouldThrowExceptionWhenLockQueryTimeout() throws TimeoutException {
-        try (MockedStatic<RmNettyRemotingClient> rmNettyRemotingClientMockedStatic = mockStatic(RmNettyRemotingClient.class)) {
+        try (MockedStatic<RmNettyRemotingClient> rmNettyRemotingClientMockedStatic =
+                mockStatic(RmNettyRemotingClient.class)) {
             // Simulate being in a global transaction
             RootContext.bind(MOCKED_XID);
             RmNettyRemotingClient mockedRmNettyRemotingClient = mock(RmNettyRemotingClient.class);
-            rmNettyRemotingClientMockedStatic.when(RmNettyRemotingClient::getInstance).thenReturn(mockedRmNettyRemotingClient);
+            rmNettyRemotingClientMockedStatic
+                    .when(RmNettyRemotingClient::getInstance)
+                    .thenReturn(mockedRmNettyRemotingClient);
             when(mockedRmNettyRemotingClient.sendSyncRequest(any())).thenThrow(TimeoutException.class);
 
             Throwable actualException = assertThrows(RmTransactionException.class, () -> {
@@ -108,11 +111,14 @@ class DataSourceManagerTest {
 
     @Test
     public void shouldThrowExceptionWhenLockQueryWithFailedResponseCode() throws TimeoutException {
-        try (MockedStatic<RmNettyRemotingClient> rmNettyRemotingClientMockedStatic = mockStatic(RmNettyRemotingClient.class)) {
+        try (MockedStatic<RmNettyRemotingClient> rmNettyRemotingClientMockedStatic =
+                mockStatic(RmNettyRemotingClient.class)) {
             // Simulate being in a global transaction
             RootContext.bind(MOCKED_XID);
             RmNettyRemotingClient mockedRmNettyRemotingClient = mock(RmNettyRemotingClient.class);
-            rmNettyRemotingClientMockedStatic.when(RmNettyRemotingClient::getInstance).thenReturn(mockedRmNettyRemotingClient);
+            rmNettyRemotingClientMockedStatic
+                    .when(RmNettyRemotingClient::getInstance)
+                    .thenReturn(mockedRmNettyRemotingClient);
             when(mockedRmNettyRemotingClient.sendSyncRequest(any())).thenReturn(new GlobalLockQueryResponse() {
                 {
                     setResultCode(ResultCode.Failed);
@@ -130,11 +136,14 @@ class DataSourceManagerTest {
 
     @Test
     public void shouldReturnLockableWhenLockQuerySuccessful() throws TimeoutException, TransactionException {
-        try (MockedStatic<RmNettyRemotingClient> rmNettyRemotingClientMockedStatic = mockStatic(RmNettyRemotingClient.class)) {
+        try (MockedStatic<RmNettyRemotingClient> rmNettyRemotingClientMockedStatic =
+                mockStatic(RmNettyRemotingClient.class)) {
             // Simulate being in a global transaction
             RootContext.bind(MOCKED_XID);
             RmNettyRemotingClient mockedRmNettyRemotingClient = mock(RmNettyRemotingClient.class);
-            rmNettyRemotingClientMockedStatic.when(RmNettyRemotingClient::getInstance).thenReturn(mockedRmNettyRemotingClient);
+            rmNettyRemotingClientMockedStatic
+                    .when(RmNettyRemotingClient::getInstance)
+                    .thenReturn(mockedRmNettyRemotingClient);
             when(mockedRmNettyRemotingClient.sendSyncRequest(any())).thenReturn(new GlobalLockQueryResponse() {
                 {
                     setResultCode(ResultCode.Success);
@@ -142,7 +151,8 @@ class DataSourceManagerTest {
                 }
             });
 
-            boolean actualLockable = dataSourceManager.lockQuery(BranchType.AT, MOCKED_RESOURCE_ID, MOCKED_XID, MOCKED_LOCK_KEYS);
+            boolean actualLockable =
+                    dataSourceManager.lockQuery(BranchType.AT, MOCKED_RESOURCE_ID, MOCKED_XID, MOCKED_LOCK_KEYS);
 
             assertTrue(actualLockable);
         }
@@ -172,7 +182,8 @@ class DataSourceManagerTest {
     @Test
     public void shouldThrowExceptionWhenBranchRollbackWithoutDataSourceProxy() {
         Throwable actualException = assertThrows(ShouldNeverHappenException.class, () -> {
-            dataSourceManager.branchRollback(BranchType.AT, MOCKED_XID, MOCKED_BRANCH_ID, MOCKED_RESOURCE_ID, "whatever");
+            dataSourceManager.branchRollback(
+                    BranchType.AT, MOCKED_XID, MOCKED_BRANCH_ID, MOCKED_RESOURCE_ID, "whatever");
         });
 
         assertEquals("resource: mockedResourceId not found", actualException.getMessage());
@@ -180,17 +191,22 @@ class DataSourceManagerTest {
 
     @Test
     public void shouldReturnUnretriableWhenBranchCommit() throws TransactionException {
-        try (MockedStatic<UndoLogManagerFactory> undoLogManagerFactoryMockedStatic = mockStatic(UndoLogManagerFactory.class)) {
+        try (MockedStatic<UndoLogManagerFactory> undoLogManagerFactoryMockedStatic =
+                mockStatic(UndoLogManagerFactory.class)) {
             UndoLogManager mockedUndoLogManager = mock(UndoLogManager.class);
             DataSourceProxy mockedDataSourceProxy = mock(DataSourceProxy.class);
-            TransactionException mockedTransactionException = new TransactionException(TransactionExceptionCode.BranchRollbackFailed_Unretriable, "Mocked undo failure");
+            TransactionException mockedTransactionException = new TransactionException(
+                    TransactionExceptionCode.BranchRollbackFailed_Unretriable, "Mocked undo failure");
 
             when(mockedDataSourceProxy.getResourceId()).thenReturn(MOCKED_RESOURCE_ID);
-            undoLogManagerFactoryMockedStatic.when(() -> UndoLogManagerFactory.getUndoLogManager(any())).thenReturn(mockedUndoLogManager);
+            undoLogManagerFactoryMockedStatic
+                    .when(() -> UndoLogManagerFactory.getUndoLogManager(any()))
+                    .thenReturn(mockedUndoLogManager);
             doThrow(mockedTransactionException).when(mockedUndoLogManager).undo(any(), anyString(), anyLong());
 
             dataSourceManager.registerResource(mockedDataSourceProxy);
-            BranchStatus actualBranchStatus = dataSourceManager.branchRollback(BranchType.AT, MOCKED_XID, MOCKED_BRANCH_ID, MOCKED_RESOURCE_ID, null);
+            BranchStatus actualBranchStatus = dataSourceManager.branchRollback(
+                    BranchType.AT, MOCKED_XID, MOCKED_BRANCH_ID, MOCKED_RESOURCE_ID, null);
 
             assertEquals(BranchStatus.PhaseTwo_RollbackFailed_Unretryable, actualBranchStatus);
         }
@@ -198,16 +214,20 @@ class DataSourceManagerTest {
 
     @Test
     public void shouldReturnRetryableWhenBranchCommit() throws TransactionException {
-        try (MockedStatic<UndoLogManagerFactory> undoLogManagerFactoryMockedStatic = mockStatic(UndoLogManagerFactory.class)) {
+        try (MockedStatic<UndoLogManagerFactory> undoLogManagerFactoryMockedStatic =
+                mockStatic(UndoLogManagerFactory.class)) {
             UndoLogManager mockedUndoLogManager = mock(UndoLogManager.class);
             DataSourceProxy mockedDataSourceProxy = mock(DataSourceProxy.class);
 
             when(mockedDataSourceProxy.getResourceId()).thenReturn(MOCKED_RESOURCE_ID);
-            undoLogManagerFactoryMockedStatic.when(() -> UndoLogManagerFactory.getUndoLogManager(any())).thenReturn(mockedUndoLogManager);
+            undoLogManagerFactoryMockedStatic
+                    .when(() -> UndoLogManagerFactory.getUndoLogManager(any()))
+                    .thenReturn(mockedUndoLogManager);
             doThrow(TransactionException.class).when(mockedUndoLogManager).undo(any(), anyString(), anyLong());
 
             dataSourceManager.registerResource(mockedDataSourceProxy);
-            BranchStatus actualBranchStatus = dataSourceManager.branchRollback(BranchType.AT, MOCKED_XID, MOCKED_BRANCH_ID, MOCKED_RESOURCE_ID, null);
+            BranchStatus actualBranchStatus = dataSourceManager.branchRollback(
+                    BranchType.AT, MOCKED_XID, MOCKED_BRANCH_ID, MOCKED_RESOURCE_ID, null);
 
             assertEquals(BranchStatus.PhaseTwo_RollbackFailed_Retryable, actualBranchStatus);
         }
@@ -215,15 +235,19 @@ class DataSourceManagerTest {
 
     @Test
     public void shouldReturnRollbackWhenBranchCommit() throws TransactionException {
-        try (MockedStatic<UndoLogManagerFactory> undoLogManagerFactoryMockedStatic = mockStatic(UndoLogManagerFactory.class)) {
+        try (MockedStatic<UndoLogManagerFactory> undoLogManagerFactoryMockedStatic =
+                mockStatic(UndoLogManagerFactory.class)) {
             UndoLogManager mockedUndoLogManager = mock(UndoLogManager.class);
             DataSourceProxy mockedDataSourceProxy = mock(DataSourceProxy.class);
 
             when(mockedDataSourceProxy.getResourceId()).thenReturn(MOCKED_RESOURCE_ID);
-            undoLogManagerFactoryMockedStatic.when(() -> UndoLogManagerFactory.getUndoLogManager(any())).thenReturn(mockedUndoLogManager);
+            undoLogManagerFactoryMockedStatic
+                    .when(() -> UndoLogManagerFactory.getUndoLogManager(any()))
+                    .thenReturn(mockedUndoLogManager);
 
             dataSourceManager.registerResource(mockedDataSourceProxy);
-            BranchStatus actualBranchStatus = dataSourceManager.branchRollback(BranchType.AT, MOCKED_XID, MOCKED_BRANCH_ID, MOCKED_RESOURCE_ID, null);
+            BranchStatus actualBranchStatus = dataSourceManager.branchRollback(
+                    BranchType.AT, MOCKED_XID, MOCKED_BRANCH_ID, MOCKED_RESOURCE_ID, null);
 
             assertEquals(BranchStatus.PhaseTwo_Rollbacked, actualBranchStatus);
         }
@@ -231,17 +255,18 @@ class DataSourceManagerTest {
 
     @Test
     public void shouldGetDataSourceCacheViaReflection() throws NoSuchFieldException, IllegalAccessException {
-        Map<String, Resource> expectedDataSourceCache = ReflectionUtil.getFieldValue(dataSourceManager, "dataSourceCache");
+        Map<String, Resource> expectedDataSourceCache =
+                ReflectionUtil.getFieldValue(dataSourceManager, "dataSourceCache");
 
         Map<String, Resource> actualDataSourceCache = dataSourceManager.getManagedResources();
 
         assertSame(expectedDataSourceCache, actualDataSourceCache);
     }
-    
+
     @Test
     public void shouldGetBranchType() {
         BranchType branchType = dataSourceManager.getBranchType();
-        
+
         assertEquals(BranchType.AT, branchType);
     }
 }
