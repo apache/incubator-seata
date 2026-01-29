@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
 import org.apache.seata.common.exception.JsonParseException;
+import org.apache.seata.common.json.JsonAllowlistManager;
 import org.apache.seata.common.json.JsonSerializer;
 import org.apache.seata.common.loader.LoadLevel;
 
@@ -147,13 +148,54 @@ public class JacksonJsonSerializer implements JsonSerializer {
             if ("[]".equals(json)) {
                 return (T) new ArrayList<>(0);
             }
+
+            // Check allowlist when AutoType is enabled
+            if (!ignoreAutoType && useAutoType(json)) {
+                checkAutoTypeClasses(json);
+            }
+
             if (ignoreAutoType) {
                 return defaultObjectMapper.readValue(json, type);
             } else {
                 return objectMapperWithAutoType.readValue(json, type);
             }
+        } catch (SecurityException e) {
+            throw e;
         } catch (IOException e) {
             throw new JsonParseException("Jackson deserialize error", e);
         }
+    }
+
+    /**
+     * Check all @type classes in JSON against allowlist
+     */
+    private void checkAutoTypeClasses(String json) {
+        int index = 0;
+        while ((index = json.indexOf("\"@type\"", index)) >= 0) {
+            String className = extractTypeValue(json, index);
+            if (className != null) {
+                JsonAllowlistManager.getInstance().checkClass(className);
+            }
+            index++;
+        }
+    }
+
+    /**
+     * Extract @type value from JSON string
+     */
+    private String extractTypeValue(String json, int typeIndex) {
+        int colonIndex = json.indexOf(':', typeIndex);
+        if (colonIndex < 0) {
+            return null;
+        }
+        int startQuote = json.indexOf('"', colonIndex);
+        if (startQuote < 0) {
+            return null;
+        }
+        int endQuote = json.indexOf('"', startQuote + 1);
+        if (endQuote < 0) {
+            return null;
+        }
+        return json.substring(startQuote + 1, endQuote);
     }
 }
