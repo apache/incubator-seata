@@ -188,7 +188,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
         };
 
         HttpClientUtil.doPostWithHttp2(
-                "http://127.0.0.1:" + port + "/metadata/v1/watch", params, headers, callback, 30);
+                "http://127.0.0.1:" + port + "/metadata/v1/watch", params, headers, callback, 30000);
         Assertions.assertTrue(latch.await(35, TimeUnit.SECONDS));
     }
 
