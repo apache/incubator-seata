@@ -207,7 +207,10 @@ public abstract class MultiVersionCompatibilityTest {
      */
     protected void startV2Server(int port) {
         serverWorkingThreads = new ThreadPoolExecutor(
-                10, 10, 500, TimeUnit.SECONDS,
+                10,
+                10,
+                500,
+                TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(2000),
                 new NamedThreadFactory("MockServerThread", 10),
                 new ThreadPoolExecutor.CallerRunsPolicy());

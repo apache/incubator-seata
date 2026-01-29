@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  * Test V2 Server with V1 Client compatibility.
  * - Server: MockNettyRemotingServer (production V2 server with MultiProtocolDecoder)
  * - Client: Manual V1 construction (simulates legacy client with ProtocolEncoderV1)
- * 
+ *
  * This tests server backward compatibility - V2 server handling V1 client.
  */
 public class ServerV2ToClientV1Test extends MultiVersionCompatibilityTest {

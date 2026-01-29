@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
  * Test V1 Server with V2 Client compatibility.
  * - Server: Manual V1 construction with TestServerHandler (simulates legacy server)
  * - Client: NettyClientBootstrap (production V2 client with MultiProtocolDecoder)
- * 
+ *
  * This tests client auto-downgrade - V2 client connecting to V1 server.
  */
 public class ServerV1ToClientV2Test extends MultiVersionCompatibilityTest {

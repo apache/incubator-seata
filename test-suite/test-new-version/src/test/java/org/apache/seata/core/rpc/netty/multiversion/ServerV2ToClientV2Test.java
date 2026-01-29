@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  * Both server and client use V2 protocol with production-like bootstrap:
  * - Server: MockNettyRemotingServer (uses ProtocolDetectHandler -> SeataDetector -> MultiProtocolDecoder)
  * - Client: NettyClientBootstrap (uses ProtocolEncoderV2 + MultiProtocolDecoder)
- * 
+ *
  * This is the most production-like test scenario.
  */
 public class ServerV2ToClientV2Test extends MultiVersionCompatibilityTest {
