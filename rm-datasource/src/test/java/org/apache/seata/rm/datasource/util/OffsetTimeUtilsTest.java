@@ -77,7 +77,8 @@ class OffsetTimeUtilsTest {
         bytes[5] = (byte) 31; // minute = 31 - 1 = 30
         bytes[6] = (byte) 46; // second = 46 - 1 = 45
 
-        OffsetDateTime expected = MOCK_UTC_DATE.atZoneSameInstant(ZoneId.of("Asia/Shanghai")).toOffsetDateTime();
+        OffsetDateTime expected =
+                MOCK_UTC_DATE.atZoneSameInstant(ZoneId.of("Asia/Shanghai")).toOffsetDateTime();
 
         OffsetDateTime actual = OffsetTimeUtils.timeToOffsetDateTime(bytes);
 
@@ -106,7 +107,8 @@ class OffsetTimeUtilsTest {
         // minutes = bytes[12] - 60; to get 0 minutes -> bytes[12] = 60
         bytes[12] = (byte) 60;
 
-        OffsetDateTime expected = MOCK_UTC_DATE.atZoneSameInstant(ZoneId.of("Asia/Shanghai")).toOffsetDateTime();
+        OffsetDateTime expected =
+                MOCK_UTC_DATE.atZoneSameInstant(ZoneId.of("Asia/Shanghai")).toOffsetDateTime();
 
         OffsetDateTime actual = OffsetTimeUtils.timeToOffsetDateTime(bytes);
 
