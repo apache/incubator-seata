@@ -54,7 +54,6 @@ import org.apache.seata.core.rpc.netty.NettyServerConfig;
 import org.apache.seata.core.rpc.netty.TestClientHandler;
 import org.apache.seata.core.rpc.netty.TestServerHandler;
 import org.apache.seata.core.rpc.netty.v1.ProtocolEncoderV1;
-import org.apache.seata.core.rpc.netty.v2.ProtocolEncoderV2;
 import org.apache.seata.mockserver.MockCoordinator;
 import org.apache.seata.mockserver.MockNettyRemotingServer;
 import org.jetbrains.annotations.NotNull;
@@ -73,11 +72,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * Prerequisites for running these tests:
- * If maven environment has dependency issues, run these commands first:
- * 1. chmod -R u+rwx ./*
- * 2. mvn -Prelease-seata -Dmaven.test.skip=true clean install -U
- * 
  * This provides common utilities for testing multi-version protocol compatibility.
  * Supports testing all 2x2 combinations:
  * - V1 Server + V1 Client (manual construction - simulates legacy)
@@ -154,12 +148,12 @@ public abstract class MultiVersionCompatibilityTest {
         if (clientBootstrap != null) {
             clientBootstrap.shutdown();
         }
-        
+
         // Shutdown V1 server
         if (serverChannel != null) {
             serverChannel.close().sync();
         }
-        
+
         // Shutdown V2 server (MockNettyRemotingServer)
         if (mockRemotingServer != null) {
             mockRemotingServer.destroy();
@@ -248,7 +242,7 @@ public abstract class MultiVersionCompatibilityTest {
     private void connectClientByVersion(
             MessageToByteEncoder encoder, byte version, String host, int port, int connectTimeout) {
         testClientHandler = createTestClientHandler();
-        
+
         Bootstrap bootstrap = new Bootstrap();
         bootstrap.group(clientGroup).channel(NioSocketChannel.class);
         bootstrap.option(ChannelOption.SO_KEEPALIVE, true);
