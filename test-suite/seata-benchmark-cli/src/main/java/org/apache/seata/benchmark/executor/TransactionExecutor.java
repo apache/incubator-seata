@@ -14,17 +14,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.namingserver.contants;
+package org.apache.seata.benchmark.executor;
 
-public interface NamingConstant {
+import org.apache.seata.benchmark.model.TransactionRecord;
 
-    String CONSOLE_PATTERN = "^/api/.*/console/.*";
+/**
+ * Transaction executor interface
+ */
+public interface TransactionExecutor {
 
-    int DEFAULT_REQUEST_TIMEOUT = 5000;
+    /**
+     * Execute a transaction
+     *
+     * @return transaction record
+     */
+    TransactionRecord execute();
 
-    int DEFAULT_WRITE_TIMEOUT = 5000;
+    /**
+     * Initialize executor
+     */
+    void init();
 
-    int DEFAULT_CONNECTION_MAX_TOTAL = 100;
-
-    int DEFAULT_CONNECTION_MAX_PER_ROUTE = 20;
+    /**
+     * Destroy executor
+     */
+    void destroy();
 }

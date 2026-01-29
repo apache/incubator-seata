@@ -14,17 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.namingserver.contants;
+package org.apache.seata.discovery.registry.nacos;
 
-public interface NamingConstant {
+import org.junit.jupiter.api.Test;
 
-    String CONSOLE_PATTERN = "^/api/.*/console/.*";
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-    int DEFAULT_REQUEST_TIMEOUT = 5000;
+class NacosRegistryProviderTest {
+    @Test
+    public void shouldReturnProviderInstance() {
+        NacosRegistryProvider actualProvider = new NacosRegistryProvider();
 
-    int DEFAULT_WRITE_TIMEOUT = 5000;
-
-    int DEFAULT_CONNECTION_MAX_TOTAL = 100;
-
-    int DEFAULT_CONNECTION_MAX_PER_ROUTE = 20;
+        assertNotNull(actualProvider.provide());
+        assertEquals(NacosRegistryServiceImpl.class, actualProvider.provide().getClass());
+    }
 }

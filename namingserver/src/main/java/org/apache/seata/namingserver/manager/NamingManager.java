@@ -22,8 +22,6 @@ import com.github.benmanes.caffeine.cache.RemovalCause;
 import com.github.benmanes.caffeine.cache.RemovalListener;
 import jakarta.annotation.PostConstruct;
 import okhttp3.Response;
-import org.apache.http.entity.ContentType;
-import org.apache.http.protocol.HTTP;
 import org.apache.seata.common.NamingServerConstants;
 import org.apache.seata.common.metadata.Cluster;
 import org.apache.seata.common.metadata.ClusterRole;
@@ -224,7 +222,7 @@ public class NamingManager {
             params.put(CONSTANT_GROUP, vGroup);
             params.put(NamingServerConstants.CONSTANT_UNIT, actualUnitName);
             Map<String, String> header = new HashMap<>();
-            header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
+            header.put("Content-Type", "application/x-www-form-urlencoded");
 
             try (Response httpResponse = HttpClientUtil.doGet(httpUrl, params, header, 3000)) {
                 if (httpResponse == null || httpResponse.code() != 200) {
@@ -257,7 +255,7 @@ public class NamingManager {
             params.put(CONSTANT_GROUP, vGroup);
             params.put(NamingServerConstants.CONSTANT_UNIT, unitName);
             Map<String, String> header = new HashMap<>();
-            header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
+            header.put("Content-Type", "application/x-www-form-urlencoded");
             try (Response httpResponse = HttpClientUtil.doGet(httpUrl, params, header, 3000)) {
                 if (httpResponse == null || httpResponse.code() != 200) {
                     LOGGER.warn("remove vGroup in old cluster failed");

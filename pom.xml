@@ -63,6 +63,7 @@
 <!--        <module>namingserver</module>-->
         <module>test-suite/test-new-version</module>
         <module>test-suite/test-old-version</module>
+        <module>test-suite/seata-benchmark-cli</module>
         <module>json-common</module>
         <!--<module>seata-plugin</module>-->
     </modules>
@@ -482,7 +483,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven-surefire-plugin.version}</version>
                 <configuration>
-                    <argLine>${maven.surefire.argLine}</argLine>
+                    <argLine>@{argLine} ${maven.surefire.argLine}</argLine>
                     <excludes>${maven.surefire.excludes}</excludes>
                 </configuration>
             </plugin>
