@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.MockedStatic;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -30,6 +31,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.mockStatic;
 
 class OffsetTimeUtilsTest {
 
@@ -67,6 +69,7 @@ class OffsetTimeUtilsTest {
 
     @Test
     void shouldUseSystemDefaultWhenBytesLessThan8() {
+        ZoneId mockZone = ZoneId.of("UTC");
         byte[] bytes = new byte[7];
         // year = 2026 -> (120 - 100)*100 + (126 - 100) = 2026
         bytes[0] = (byte) 120;
@@ -77,12 +80,15 @@ class OffsetTimeUtilsTest {
         bytes[5] = (byte) 31; // minute = 31 - 1 = 30
         bytes[6] = (byte) 46; // second = 46 - 1 = 45
 
-        OffsetDateTime expected =
-                MOCK_UTC_DATE.atZoneSameInstant(ZoneId.of("Asia/Shanghai")).toOffsetDateTime();
+        try (MockedStatic<ZoneId> mockedZoneId = mockStatic(ZoneId.class)) {
+            mockedZoneId.when(ZoneId::systemDefault).thenReturn(mockZone);
 
-        OffsetDateTime actual = OffsetTimeUtils.timeToOffsetDateTime(bytes);
+            OffsetDateTime expected = MOCK_UTC_DATE.atZoneSameInstant(mockZone).toOffsetDateTime();
 
-        assertEquals(expected, actual);
+            OffsetDateTime actual = OffsetTimeUtils.timeToOffsetDateTime(bytes);
+
+            assertEquals(expected, actual);
+        }
     }
 
     @Test
