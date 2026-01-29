@@ -234,5 +234,6 @@ public class JsonAllowlistManager {
         builtinClasses.add("java.util.regex.Pattern");
 
         builtinPrefixes.add("org.apache.seata.");
+        builtinPrefixes.add("io.seata.");
     }
 }
