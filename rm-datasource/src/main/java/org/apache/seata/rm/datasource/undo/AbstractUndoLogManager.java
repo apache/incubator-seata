@@ -149,7 +149,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
             }
             throw (SQLException) e;
         } finally {
-            Registry registry = RegistryFactory.getInstance();
+            Registry registry = getRegistry();
             if (registry != null) {
                 registry.getTimer(UndoLogConstants.TIMER_UNDO_LOG_DELETE_LATENCY)
                         .record(System.nanoTime() - start, TimeUnit.NANOSECONDS);
@@ -206,7 +206,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
             }
             throw (SQLException) e;
         } finally {
-            Registry registry = RegistryFactory.getInstance();
+            Registry registry = getRegistry();
             if (registry != null) {
                 registry.getTimer(UndoLogConstants.TIMER_UNDO_LOG_DELETE_LATENCY)
                         .record(System.nanoTime() - start, TimeUnit.NANOSECONDS);
@@ -326,7 +326,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                 buildContext(parser.getName(), compressorType, UndoLogConstants.MAX_ALLOWED_PACKET, maxAllowedPacket);
         insertUndoLogWithNormal(xid, branchId, rollbackCtx, undoLogContent, cp.getTargetConnection());
 
-        Registry registry = RegistryFactory.getInstance();
+        Registry registry = getRegistry();
         if (registry != null) {
             registry.getSummary(UndoLogConstants.SUMMARY_UNDO_LOG_SIZE).increase(undoLogContent.length);
         }
@@ -615,5 +615,15 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
 
     protected String getCheckUndoLogTableExistSql() {
         return CHECK_UNDO_LOG_TABLE_EXIST_SQL;
+    }
+
+    /**
+     * Get the metrics registry instance.
+     * This method is protected to allow testing with Mockito spy.
+     *
+     * @return the Registry instance, or null if metrics are not enabled
+     */
+    protected Registry getRegistry() {
+        return RegistryFactory.getInstance();
     }
 }
