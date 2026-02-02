@@ -18,6 +18,8 @@ package org.apache.seata.rm.datasource.undo;
 
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.constants.ConfigurationKeys;
+import org.apache.seata.metrics.Id;
+import org.apache.seata.metrics.IdConstants;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_TRANSACTION_UNDO_LOG_SERIALIZATION;
 
@@ -38,4 +40,19 @@ public interface UndoLogConstants {
     String SUB_SPLIT_KEY = ",";
 
     String MAX_ALLOWED_PACKET = "map";
+    
+    Id SUMMARY_UNDO_LOG_SIZE = new Id("seata.undo.log")
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_RM)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_SUMMARY)
+            .withTag("type", "size");
+
+    Id TIMER_UNDO_LOG_DELETE_LATENCY = new Id("seata.undo.log")
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_RM)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_TIMER)
+            .withTag("type", "delete_latency");
+
+    Id COUNTER_UNDO_LOG_DELETE_COUNT = new Id("seata.undo.log")
+            .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_RM)
+            .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_COUNTER)
+            .withTag("type", "delete_count");
 }

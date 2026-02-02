@@ -33,9 +33,12 @@ import org.apache.seata.rm.datasource.ConnectionProxy;
 import org.apache.seata.rm.datasource.DataSourceProxy;
 import org.apache.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import org.apache.seata.sqlparser.struct.TableMeta;
+import org.apache.seata.metrics.registry.RegistryFactory;
+import org.apache.seata.metrics.registry.Registry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.TimeUnit;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -130,6 +133,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
      */
     @Override
     public void deleteUndoLog(String xid, long branchId, Connection conn) throws SQLException {
+        long start = System.nanoTime();
         try (PreparedStatement deletePST = conn.prepareStatement(DELETE_UNDO_LOG_SQL);
                 PreparedStatement deleteSubPST = conn.prepareStatement(DELETE_SUB_UNDO_LOG_SQL)) {
             deletePST.setLong(1, branchId);
@@ -144,6 +148,13 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                 e = new SQLException(e);
             }
             throw (SQLException) e;
+        } finally {
+            Registry registry = RegistryFactory.getInstance();
+            if (registry != null) {
+                registry.getTimer(UndoLogConstants.TIMER_UNDO_LOG_DELETE_LATENCY)
+                        .record(System.nanoTime() - start, TimeUnit.NANOSECONDS);
+                registry.getCounter(UndoLogConstants.COUNTER_UNDO_LOG_DELETE_COUNT).increase(1);
+            }
         }
     }
 
@@ -159,6 +170,8 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
         if (CollectionUtils.isEmpty(xids) || CollectionUtils.isEmpty(branchIds)) {
             return;
         }
+        long start = System.nanoTime();
+        int totalDeleteRows = 0;
         int xidSize = xids.size();
         int branchIdSize = branchIds.size();
         String batchDeleteSql = toBatchDeleteUndoLogSql(xidSize, branchIdSize);
@@ -178,6 +191,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                 paramsIndex++;
             }
             int deleteRows = deletePST.executeUpdate();
+            totalDeleteRows += deleteRows;
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("batch delete undo log size {}", deleteRows);
             }
@@ -190,6 +204,15 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                 e = new SQLException(e);
             }
             throw (SQLException) e;
+        } finally {
+             Registry registry = RegistryFactory.getInstance();
+             if (registry != null) {
+                 registry.getTimer(UndoLogConstants.TIMER_UNDO_LOG_DELETE_LATENCY)
+                         .record(System.nanoTime() - start, TimeUnit.NANOSECONDS);
+                 if (totalDeleteRows > 0) {
+                     registry.getCounter(UndoLogConstants.COUNTER_UNDO_LOG_DELETE_COUNT).increase(totalDeleteRows);
+                 }
+             }
         }
     }
 
@@ -300,6 +323,11 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
         String rollbackCtx =
                 buildContext(parser.getName(), compressorType, UndoLogConstants.MAX_ALLOWED_PACKET, maxAllowedPacket);
         insertUndoLogWithNormal(xid, branchId, rollbackCtx, undoLogContent, cp.getTargetConnection());
+
+        Registry registry = RegistryFactory.getInstance();
+        if (registry != null) {
+            registry.getSummary(UndoLogConstants.SUMMARY_UNDO_LOG_SIZE).increase(undoLogContent.length);
+        }
     }
 
     /**

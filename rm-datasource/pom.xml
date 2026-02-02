@@ -168,5 +168,10 @@
             <artifactId>json-common</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-metrics-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>
