@@ -40,7 +40,7 @@ public interface UndoLogConstants {
     String SUB_SPLIT_KEY = ",";
 
     String MAX_ALLOWED_PACKET = "map";
-    
+
     Id SUMMARY_UNDO_LOG_SIZE = new Id("seata.undo.log")
             .withTag(IdConstants.ROLE_KEY, IdConstants.ROLE_VALUE_RM)
             .withTag(IdConstants.METER_KEY, IdConstants.METER_VALUE_SUMMARY)

@@ -28,17 +28,16 @@ import org.apache.seata.core.constants.ConfigurationKeys;
 import org.apache.seata.core.exception.BranchTransactionException;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.rpc.processor.Pair;
+import org.apache.seata.metrics.registry.Registry;
+import org.apache.seata.metrics.registry.RegistryFactory;
 import org.apache.seata.rm.datasource.ConnectionContext;
 import org.apache.seata.rm.datasource.ConnectionProxy;
 import org.apache.seata.rm.datasource.DataSourceProxy;
 import org.apache.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import org.apache.seata.sqlparser.struct.TableMeta;
-import org.apache.seata.metrics.registry.RegistryFactory;
-import org.apache.seata.metrics.registry.Registry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.TimeUnit;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -50,6 +49,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import static org.apache.seata.common.DefaultValues.DEFAULT_CLIENT_UNDO_COMPRESS_ENABLE;
 import static org.apache.seata.common.DefaultValues.DEFAULT_CLIENT_UNDO_COMPRESS_THRESHOLD;
@@ -153,7 +153,8 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
             if (registry != null) {
                 registry.getTimer(UndoLogConstants.TIMER_UNDO_LOG_DELETE_LATENCY)
                         .record(System.nanoTime() - start, TimeUnit.NANOSECONDS);
-                registry.getCounter(UndoLogConstants.COUNTER_UNDO_LOG_DELETE_COUNT).increase(1);
+                registry.getCounter(UndoLogConstants.COUNTER_UNDO_LOG_DELETE_COUNT)
+                        .increase(1);
             }
         }
     }
@@ -205,14 +206,15 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
             }
             throw (SQLException) e;
         } finally {
-             Registry registry = RegistryFactory.getInstance();
-             if (registry != null) {
-                 registry.getTimer(UndoLogConstants.TIMER_UNDO_LOG_DELETE_LATENCY)
-                         .record(System.nanoTime() - start, TimeUnit.NANOSECONDS);
-                 if (totalDeleteRows > 0) {
-                     registry.getCounter(UndoLogConstants.COUNTER_UNDO_LOG_DELETE_COUNT).increase(totalDeleteRows);
-                 }
-             }
+            Registry registry = RegistryFactory.getInstance();
+            if (registry != null) {
+                registry.getTimer(UndoLogConstants.TIMER_UNDO_LOG_DELETE_LATENCY)
+                        .record(System.nanoTime() - start, TimeUnit.NANOSECONDS);
+                if (totalDeleteRows > 0) {
+                    registry.getCounter(UndoLogConstants.COUNTER_UNDO_LOG_DELETE_COUNT)
+                            .increase(totalDeleteRows);
+                }
+            }
         }
     }
 
