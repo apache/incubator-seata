@@ -126,7 +126,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
                                 watchers.remove(watcher);
                                 watcher.setDone(true);
                                 HTTP2_HEADERS_SENT.remove(watcher);
-                                logger.debug("Removed inactive HTTP/2 watcher for group: {}", group);
+                                logger.info("Removed inactive HTTP/2 watcher for group: {}", group);
                             }
                         });
                     }
