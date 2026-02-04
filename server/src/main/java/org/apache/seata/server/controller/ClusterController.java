@@ -18,7 +18,6 @@ package org.apache.seata.server.controller;
 
 import com.alipay.sofa.jraft.RouteTable;
 import com.alipay.sofa.jraft.conf.Configuration;
-import com.alipay.sofa.jraft.entity.PeerId;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.metadata.MetadataResponse;
 import org.apache.seata.common.metadata.Node;
@@ -85,18 +84,12 @@ public class ClusterController {
         if (raftServer != null) {
             String mode = ConfigurationFactory.getInstance().getConfig(STORE_MODE);
             metadataResponse.setStoreMode(mode);
-            RouteTable routeTable = RouteTable.getInstance();
             try {
-                routeTable.refreshLeader(RaftServerManager.getCliClientServiceInstance(), group, 1000);
-                PeerId leader = routeTable.selectLeader(group);
-                if (leader != null) {
+                RaftClusterMetadata raftClusterMetadata =
+                        raftServer.getRaftStateMachine().getRaftLeaderMetadata();
+                Node leaderNode = raftClusterMetadata.getLeader();
+                if (leaderNode != null) {
                     Set<Node> nodes = new HashSet<>();
-                    RaftClusterMetadata raftClusterMetadata =
-                            raftServer.getRaftStateMachine().getRaftLeaderMetadata();
-                    Node leaderNode = raftServer
-                            .getRaftStateMachine()
-                            .getRaftLeaderMetadata()
-                            .getLeader();
                     leaderNode.setGroup(group);
                     nodes.add(leaderNode);
                     nodes.addAll(raftClusterMetadata.getLearner());
