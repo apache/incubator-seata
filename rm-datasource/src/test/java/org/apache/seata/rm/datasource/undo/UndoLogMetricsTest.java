@@ -44,7 +44,6 @@ public class UndoLogMetricsTest {
     public void testFlushUndoLogsMetrics() throws Exception {
         Registry registry = mock(Registry.class);
         org.apache.seata.metrics.Summary summary = mock(org.apache.seata.metrics.Summary.class);
-
         when(registry.getSummary(any(Id.class))).thenReturn(summary);
 
         ConnectionProxy connectionProxy = mock(ConnectionProxy.class);
@@ -53,7 +52,10 @@ public class UndoLogMetricsTest {
 
         when(connectionProxy.getContext()).thenReturn(context);
         when(connectionProxy.getDataSourceProxy()).thenReturn(dataSourceProxy);
-        when(connectionProxy.getTargetConnection()).thenReturn(mock(Connection.class));
+        Connection connection = mock(Connection.class);
+        PreparedStatement preparedStatement = mock(PreparedStatement.class);
+        when(connection.prepareStatement(any(String.class))).thenReturn(preparedStatement);
+        when(connectionProxy.getTargetConnection()).thenReturn(connection);
         when(dataSourceProxy.getResourceId()).thenReturn("jdbc:mysql://localhost:3306/test");
 
         when(context.hasUndoLog()).thenReturn(true);
@@ -92,7 +94,6 @@ public class UndoLogMetricsTest {
 
         verify(registry).getTimer(eq(UndoLogConstants.TIMER_UNDO_LOG_DELETE_LATENCY));
         verify(timer).record(anyLong(), any(TimeUnit.class));
-
         verify(registry).getCounter(eq(UndoLogConstants.COUNTER_UNDO_LOG_DELETE_COUNT));
         verify(counter).increase(1);
     }

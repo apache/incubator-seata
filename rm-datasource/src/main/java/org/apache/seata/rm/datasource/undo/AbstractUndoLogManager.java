@@ -325,7 +325,6 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
         String rollbackCtx =
                 buildContext(parser.getName(), compressorType, UndoLogConstants.MAX_ALLOWED_PACKET, maxAllowedPacket);
         insertUndoLogWithNormal(xid, branchId, rollbackCtx, undoLogContent, cp.getTargetConnection());
-
         Registry registry = getRegistry();
         if (registry != null) {
             registry.getSummary(UndoLogConstants.SUMMARY_UNDO_LOG_SIZE).increase(undoLogContent.length);
