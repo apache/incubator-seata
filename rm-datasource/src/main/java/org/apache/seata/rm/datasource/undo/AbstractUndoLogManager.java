@@ -623,6 +623,11 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
      * @return the Registry instance, or null if metrics are not enabled
      */
     protected Registry getRegistry() {
-        return RegistryFactory.getInstance();
+        try {
+            return RegistryFactory.getInstance();
+        } catch (Throwable t) {
+            LOGGER.warn("Failed to get metrics registry: {}", t.getMessage());
+            return null;
+        }
     }
 }
