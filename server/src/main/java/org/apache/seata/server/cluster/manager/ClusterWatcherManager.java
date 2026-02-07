@@ -171,10 +171,10 @@ public class ClusterWatcherManager implements ClusterChangeListener {
                             notifyWatcher(watcher, eventTerm);
                         } else {
                             logger.info(
-                                    "Skipping notification for watcher with term {} >= event term {} for group {}",
+                                    "Skipping notification for group {}: watcher already has equal or newer term (watcher term {}, event term {})",
+                                    group,
                                     watcher.getTerm(),
-                                    eventTerm,
-                                    group);
+                                    eventTerm);
                         }
                     } else {
                         // Remove inactive watcher
