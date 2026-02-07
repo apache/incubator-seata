@@ -59,7 +59,6 @@ class ClusterControllerTest extends BaseSpringBootTest {
         port = Integer.parseInt(environment.getProperty(SERVER_SERVICE_PORT_CAMEL, "18091"));
     }
 
-
     @Test
     @Order(1)
     void watchTimeoutTest_http1() throws Exception {
@@ -96,16 +95,15 @@ class ClusterControllerTest extends BaseSpringBootTest {
 
             long startTime = System.currentTimeMillis();
             SeataHttpWatch.Response<ClusterWatchEvent> response = watch.next();
-            
+
             // Verify event is received immediately after connection
             long elapsed = System.currentTimeMillis() - startTime;
             Assertions.assertTrue(
                     elapsed < 1000,
                     "First event should be received immediately after connection, elapsed: " + elapsed + "ms");
-            
+
             // Verify event data
-            Assertions.assertEquals(
-                    SeataHttpWatch.Response.Type.UPDATE, response.type, "First event should be UPDATE");
+            Assertions.assertEquals(SeataHttpWatch.Response.Type.UPDATE, response.type, "First event should be UPDATE");
             Assertions.assertNotNull(response.object, "Event data should not be null");
             Assertions.assertNotNull(response.object.getMetadata(), "Metadata should not be null");
             Assertions.assertEquals("default-test-group-1", response.object.getGroup(), "Group should match");
@@ -155,7 +153,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
         header.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
         Map<String, String> param = new HashMap<>();
         param.put("default-test-group-3", "1");
-        
+
         // Trigger a cluster change event after connection is established
         Thread thread = new Thread(new Runnable() {
             @Override
@@ -174,18 +172,20 @@ class ClusterControllerTest extends BaseSpringBootTest {
 
         try (SeataHttpWatch<ClusterWatchEvent> watch = HttpClientUtil.watchPost(
                 "http://127.0.0.1:" + port + "/metadata/v1/watch", param, header, ClusterWatchEvent.class)) {
-            
+
             // Verify HTTP/2 data push continuity: receive first event (connection established)
             SeataHttpWatch.Response<ClusterWatchEvent> firstResponse = watch.next();
             Assertions.assertNotNull(firstResponse.object, "First event data should not be null");
-            Assertions.assertEquals(SeataHttpWatch.Response.Type.UPDATE, firstResponse.type, "First event should be UPDATE");
-            
+            Assertions.assertEquals(
+                    SeataHttpWatch.Response.Type.UPDATE, firstResponse.type, "First event should be UPDATE");
+
             // Verify HTTP/2 data push continuity: receive second event (cluster change event)
             SeataHttpWatch.Response<ClusterWatchEvent> secondResponse = watch.next();
             Assertions.assertNotNull(secondResponse.object, "Second event data should not be null");
-            Assertions.assertEquals(SeataHttpWatch.Response.Type.UPDATE, secondResponse.type, "Second event should be UPDATE");
+            Assertions.assertEquals(
+                    SeataHttpWatch.Response.Type.UPDATE, secondResponse.type, "Second event should be UPDATE");
             Assertions.assertEquals("default-test-group-3", secondResponse.object.getGroup(), "Group should match");
-            
+
             logger.info("Successfully received two consecutive events from server");
         }
     }
@@ -240,7 +240,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
                         SeataHttpWatch.Response<ClusterWatchEvent> response = watch.next();
                         if (response.type == SeataHttpWatch.Response.Type.UPDATE) {
                             Assertions.assertNotNull(response.object, "Event data should not be null");
-                            
+
                             if (!firstEventReceived) {
                                 firstEventReceived = true;
                                 logger.info("First event (connection established) received");
@@ -265,7 +265,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
                     expectedUpdateCount,
                     clusterUpdateCount,
                     "Should receive " + expectedUpdateCount + " cluster update events, but got " + clusterUpdateCount);
-            
+
             logger.info("Successfully received {} consecutive cluster update events from server", clusterUpdateCount);
         } catch (IOException e) {
             throw new RuntimeException("Watch failed", e);

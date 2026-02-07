@@ -19,12 +19,12 @@ package org.apache.seata.common.metadata;
 /**
  * Cluster watch event data class.
  * Simplified format: only contains group, timestamp, and full metadata.
- * 
+ *
  * <p>Event format:
  * <pre>
  * {"group":"default","timestamp":1234567890,"metadata":{"nodes":[...],"storeMode":"raft","term":2}}
  * </pre>
- * 
+ *
  * <p>Client can determine if update is needed by comparing metadata.term with local term.
  * No need for separate event type field since all events contain full metadata.
  *

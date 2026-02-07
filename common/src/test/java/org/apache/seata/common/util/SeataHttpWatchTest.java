@@ -230,7 +230,8 @@ public class SeataHttpWatchTest {
     @Test
     public void testNext_WithKeepaliveEvent() throws IOException {
         // Setup - new format: group, timestamp, metadata
-        String sseData = "CW:{\"group\":\"default-test\",\"timestamp\":1234567890,\"metadata\":{\"nodes\":[],\"storeMode\":\"raft\",\"term\":1}}\n";
+        String sseData =
+                "CW:{\"group\":\"default-test\",\"timestamp\":1234567890,\"metadata\":{\"nodes\":[],\"storeMode\":\"raft\",\"term\":1}}\n";
         Buffer buffer = new Buffer();
         buffer.writeString(sseData, StandardCharsets.UTF_8);
 
@@ -296,8 +297,10 @@ public class SeataHttpWatchTest {
 
     @Test
     public void testNext_WithTimeoutEvent() throws IOException {
-        // Setup - new format: group, timestamp, metadata (timeout events are no longer used, but test for compatibility)
-        String sseData = "CW:{\"group\":\"default-test\",\"timestamp\":1234567890,\"metadata\":{\"nodes\":[],\"storeMode\":\"raft\",\"term\":1}}\n";
+        // Setup - new format: group, timestamp, metadata (timeout events are no longer used, but test for
+        // compatibility)
+        String sseData =
+                "CW:{\"group\":\"default-test\",\"timestamp\":1234567890,\"metadata\":{\"nodes\":[],\"storeMode\":\"raft\",\"term\":1}}\n";
         Buffer buffer = new Buffer();
         buffer.writeString(sseData, StandardCharsets.UTF_8);
 
@@ -327,7 +330,8 @@ public class SeataHttpWatchTest {
     @Test
     public void testNext_WithUnknownEventType() throws IOException {
         // Setup - new format doesn't have type field, so this test is for backward compatibility
-        String sseData = "CW:{\"group\":\"default-test\",\"timestamp\":1234567890,\"metadata\":{\"nodes\":[],\"storeMode\":\"raft\",\"term\":1}}\n";
+        String sseData =
+                "CW:{\"group\":\"default-test\",\"timestamp\":1234567890,\"metadata\":{\"nodes\":[],\"storeMode\":\"raft\",\"term\":1}}\n";
         Buffer buffer = new Buffer();
         buffer.writeString(sseData, StandardCharsets.UTF_8);
 
@@ -415,8 +419,9 @@ public class SeataHttpWatchTest {
     @Test
     public void testNext_WithMultipleEvents() throws IOException {
         // Simulate two events - new format: group, timestamp, metadata
-        String sseData = "CW:{\"group\":\"default-test\",\"timestamp\":1234567890,\"metadata\":{\"nodes\":[],\"storeMode\":\"raft\",\"term\":1}}\n"
-                + "CW:{\"group\":\"default-test\",\"timestamp\":1234567891,\"metadata\":{\"nodes\":[],\"storeMode\":\"raft\",\"term\":2}}\n";
+        String sseData =
+                "CW:{\"group\":\"default-test\",\"timestamp\":1234567890,\"metadata\":{\"nodes\":[],\"storeMode\":\"raft\",\"term\":1}}\n"
+                        + "CW:{\"group\":\"default-test\",\"timestamp\":1234567891,\"metadata\":{\"nodes\":[],\"storeMode\":\"raft\",\"term\":2}}\n";
         Buffer buffer = new Buffer();
         buffer.writeString(sseData, StandardCharsets.UTF_8);
 
@@ -447,7 +452,8 @@ public class SeataHttpWatchTest {
     @Test
     public void testNext_WithEmptyLines() throws IOException {
         // Setup - new format: group, timestamp, metadata
-        String sseData = "CW:{\"group\":\"default-test\",\"timestamp\":1234567890,\"metadata\":{\"nodes\":[],\"storeMode\":\"raft\",\"term\":1}}\n";
+        String sseData =
+                "CW:{\"group\":\"default-test\",\"timestamp\":1234567890,\"metadata\":{\"nodes\":[],\"storeMode\":\"raft\",\"term\":1}}\n";
         Buffer buffer = new Buffer();
         buffer.writeString(sseData, StandardCharsets.UTF_8);
 
@@ -730,8 +736,9 @@ public class SeataHttpWatchTest {
     @Test
     public void testNext_WithMultipleDataLines() throws IOException {
         // Setup - Test multiple events, each with prefix and JSON on a single line - new format
-        String sseData = "CW:{\"group\":\"default-test\",\"timestamp\":1234567890,\"metadata\":{\"nodes\":[],\"storeMode\":\"raft\",\"term\":1}}\n"
-                + "CW:{\"group\":\"default-test\",\"timestamp\":1234567891,\"metadata\":{\"nodes\":[],\"storeMode\":\"raft\",\"term\":2}}\n";
+        String sseData =
+                "CW:{\"group\":\"default-test\",\"timestamp\":1234567890,\"metadata\":{\"nodes\":[],\"storeMode\":\"raft\",\"term\":1}}\n"
+                        + "CW:{\"group\":\"default-test\",\"timestamp\":1234567891,\"metadata\":{\"nodes\":[],\"storeMode\":\"raft\",\"term\":2}}\n";
         Buffer buffer = new Buffer();
         buffer.writeString(sseData, StandardCharsets.UTF_8);
 

@@ -97,8 +97,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
                                 .ifPresent(watchers -> watchers.parallelStream().forEach(watcher -> {
                                     if (System.currentTimeMillis() >= watcher.getTimeout()) {
                                         watcher.setDone(true);
-                                        sendWatcherResponse(
-                                                watcher, HttpResponseStatus.NOT_MODIFIED, true, false);
+                                        sendWatcherResponse(watcher, HttpResponseStatus.NOT_MODIFIED, true, false);
                                     } else if (!watcher.isDone()) {
                                         // Re-register if not timeout
                                         registryWatcher(watcher);
@@ -214,10 +213,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
      * @param sendHeaders whether to send HTTP/2 headers frame (only needed for first response)
      */
     private void sendWatcherResponse(
-            Watcher<HttpContext> watcher,
-            HttpResponseStatus nettyStatus,
-            boolean closeStream,
-            boolean sendHeaders) {
+            Watcher<HttpContext> watcher, HttpResponseStatus nettyStatus, boolean closeStream, boolean sendHeaders) {
 
         HttpContext context = watcher.getAsyncContext();
         if (!(context instanceof HttpContext)) {
@@ -319,9 +315,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
             // Build simplified JSON: only group, timestamp, and metadata
             String json = String.format(
                     "{\"group\":\"%s\",\"timestamp\":%d,\"metadata\":%s}",
-                    group,
-                    System.currentTimeMillis(),
-                    OBJECT_MAPPER.writeValueAsString(metadataResponse));
+                    group, System.currentTimeMillis(), OBJECT_MAPPER.writeValueAsString(metadataResponse));
 
             logger.debug("Sending watch event: group={}, term={}", group, metadataResponse.getTerm());
             return Constants.WATCH_EVENT_PREFIX + json + "\n";
@@ -329,8 +323,7 @@ public class ClusterWatcherManager implements ClusterChangeListener {
             logger.error("Failed to serialize MetadataResponse for group {}: {}", group, e.getMessage(), e);
             // Fallback: send minimal data
             String json = String.format(
-                    "{\"group\":\"%s\",\"timestamp\":%d,\"metadata\":null}",
-                    group, System.currentTimeMillis());
+                    "{\"group\":\"%s\",\"timestamp\":%d,\"metadata\":null}", group, System.currentTimeMillis());
             return Constants.WATCH_EVENT_PREFIX + json + "\n";
         }
     }
