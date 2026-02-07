@@ -21,9 +21,9 @@ import io.netty.channel.ChannelHandlerContext;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.metadata.MetadataResponse;
 import org.apache.seata.common.metadata.Node;
+import org.apache.seata.common.rpc.http.HttpContext;
 import org.apache.seata.config.Configuration;
 import org.apache.seata.config.ConfigurationFactory;
-import org.apache.seata.common.rpc.http.HttpContext;
 import org.apache.seata.server.BaseSpringBootTest;
 import org.apache.seata.server.cluster.listener.ClusterChangeEvent;
 import org.apache.seata.server.cluster.raft.RaftServer;
@@ -196,7 +196,9 @@ class ClusterWatcherManagerTest extends BaseSpringBootTest {
         try (MockedStatic<ConfigurationFactory> configFactoryMock = Mockito.mockStatic(ConfigurationFactory.class);
                 MockedStatic<RaftServerManager> raftManagerMock = Mockito.mockStatic(RaftServerManager.class)) {
             configFactoryMock.when(ConfigurationFactory::getInstance).thenReturn(mockConfig);
-            raftManagerMock.when(() -> RaftServerManager.getRaftServer(defaultGroup)).thenReturn(null);
+            raftManagerMock
+                    .when(() -> RaftServerManager.getRaftServer(defaultGroup))
+                    .thenReturn(null);
 
             MetadataResponse response = clusterWatcherManager.getMetadataResponse(null);
             assertNotNull(response);
@@ -212,7 +214,9 @@ class ClusterWatcherManagerTest extends BaseSpringBootTest {
     @Test
     void getMetadataResponse_whenRaftServerNull_returnsEmptyResponse() {
         try (MockedStatic<RaftServerManager> raftManagerMock = Mockito.mockStatic(RaftServerManager.class)) {
-            raftManagerMock.when(() -> RaftServerManager.getRaftServer(TEST_GROUP)).thenReturn(null);
+            raftManagerMock
+                    .when(() -> RaftServerManager.getRaftServer(TEST_GROUP))
+                    .thenReturn(null);
 
             MetadataResponse response = clusterWatcherManager.getMetadataResponse(TEST_GROUP);
 
@@ -239,7 +243,9 @@ class ClusterWatcherManagerTest extends BaseSpringBootTest {
 
         try (MockedStatic<RaftServerManager> raftManagerMock = Mockito.mockStatic(RaftServerManager.class);
                 MockedStatic<ConfigurationFactory> configFactoryMock = Mockito.mockStatic(ConfigurationFactory.class)) {
-            raftManagerMock.when(() -> RaftServerManager.getRaftServer(TEST_GROUP)).thenReturn(mockRaftServer);
+            raftManagerMock
+                    .when(() -> RaftServerManager.getRaftServer(TEST_GROUP))
+                    .thenReturn(mockRaftServer);
             configFactoryMock.when(ConfigurationFactory::getInstance).thenReturn(mockConfig);
 
             MetadataResponse response = clusterWatcherManager.getMetadataResponse(TEST_GROUP);
@@ -279,7 +285,9 @@ class ClusterWatcherManagerTest extends BaseSpringBootTest {
 
         try (MockedStatic<RaftServerManager> raftManagerMock = Mockito.mockStatic(RaftServerManager.class);
                 MockedStatic<ConfigurationFactory> configFactoryMock = Mockito.mockStatic(ConfigurationFactory.class)) {
-            raftManagerMock.when(() -> RaftServerManager.getRaftServer(TEST_GROUP)).thenReturn(mockRaftServer);
+            raftManagerMock
+                    .when(() -> RaftServerManager.getRaftServer(TEST_GROUP))
+                    .thenReturn(mockRaftServer);
             configFactoryMock.when(ConfigurationFactory::getInstance).thenReturn(mockConfig);
 
             MetadataResponse response = clusterWatcherManager.getMetadataResponse(TEST_GROUP);
@@ -306,7 +314,9 @@ class ClusterWatcherManagerTest extends BaseSpringBootTest {
 
         try (MockedStatic<RaftServerManager> raftManagerMock = Mockito.mockStatic(RaftServerManager.class);
                 MockedStatic<ConfigurationFactory> configFactoryMock = Mockito.mockStatic(ConfigurationFactory.class)) {
-            raftManagerMock.when(() -> RaftServerManager.getRaftServer(TEST_GROUP)).thenReturn(mockRaftServer);
+            raftManagerMock
+                    .when(() -> RaftServerManager.getRaftServer(TEST_GROUP))
+                    .thenReturn(mockRaftServer);
             configFactoryMock.when(ConfigurationFactory::getInstance).thenReturn(mockConfig);
 
             MetadataResponse response = clusterWatcherManager.getMetadataResponse(TEST_GROUP);
