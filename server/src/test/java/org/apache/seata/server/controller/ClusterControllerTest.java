@@ -236,20 +236,18 @@ class ClusterControllerTest extends BaseSpringBootTest {
 
             while (System.currentTimeMillis() - startTime < maxWaitTime && clusterUpdateCount < expectedUpdateCount) {
                 try {
-                    if (watch.hasNext()) {
-                        SeataHttpWatch.Response<ClusterWatchEvent> response = watch.next();
-                        if (response.type == SeataHttpWatch.Response.Type.UPDATE) {
-                            Assertions.assertNotNull(response.object, "Event data should not be null");
+                    SeataHttpWatch.Response<ClusterWatchEvent> response = watch.next();
+                    if (response.type == SeataHttpWatch.Response.Type.UPDATE) {
+                        Assertions.assertNotNull(response.object, "Event data should not be null");
 
-                            if (!firstEventReceived) {
-                                firstEventReceived = true;
-                                logger.info("First event (connection established) received");
-                            } else {
-                                clusterUpdateCount++;
-                                Assertions.assertEquals(
-                                        "default-test-group-4", response.object.getGroup(), "Group should match");
-                                logger.info("Received cluster update event #{}", clusterUpdateCount);
-                            }
+                        if (!firstEventReceived) {
+                            firstEventReceived = true;
+                            logger.info("First event (connection established) received");
+                        } else {
+                            clusterUpdateCount++;
+                            Assertions.assertEquals(
+                                    "default-test-group-4", response.object.getGroup(), "Group should match");
+                            logger.info("Received cluster update event #{}", clusterUpdateCount);
                         }
                     }
                 } catch (Exception e) {
