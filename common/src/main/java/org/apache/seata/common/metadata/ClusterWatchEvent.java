@@ -66,9 +66,12 @@ public class ClusterWatchEvent {
 
     @Override
     public String toString() {
+        String metadataString = metadata == null
+                ? "null"
+                : "MetadataResponse{term=" + metadata.getTerm() + "}";
         return "ClusterWatchEvent{" + "group='"
                 + group + '\'' + ", timestamp="
                 + timestamp + ", metadata="
-                + metadata + '}';
+                + metadataString + '}';
     }
 }
