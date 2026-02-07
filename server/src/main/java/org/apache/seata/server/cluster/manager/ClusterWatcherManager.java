@@ -18,8 +18,6 @@ package org.apache.seata.server.cluster.manager;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.alipay.sofa.jraft.RouteTable;
-import com.alipay.sofa.jraft.entity.PeerId;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
@@ -286,18 +284,12 @@ public class ClusterWatcherManager implements ClusterChangeListener {
         if (raftServer != null) {
             String mode = ConfigurationFactory.getInstance().getConfig(STORE_MODE);
             metadataResponse.setStoreMode(mode);
-            RouteTable routeTable = RouteTable.getInstance();
             try {
-                routeTable.refreshLeader(RaftServerManager.getCliClientServiceInstance(), group, 1000);
-                PeerId leader = routeTable.selectLeader(group);
-                if (leader != null) {
+                RaftClusterMetadata raftClusterMetadata =
+                        raftServer.getRaftStateMachine().getRaftLeaderMetadata();
+                Node leaderNode = raftClusterMetadata.getLeader();
+                if (leaderNode != null) {
                     Set<Node> nodes = new HashSet<>();
-                    RaftClusterMetadata raftClusterMetadata =
-                            raftServer.getRaftStateMachine().getRaftLeaderMetadata();
-                    Node leaderNode = raftServer
-                            .getRaftStateMachine()
-                            .getRaftLeaderMetadata()
-                            .getLeader();
                     leaderNode.setGroup(group);
                     nodes.add(leaderNode);
                     nodes.addAll(raftClusterMetadata.getLearner());
