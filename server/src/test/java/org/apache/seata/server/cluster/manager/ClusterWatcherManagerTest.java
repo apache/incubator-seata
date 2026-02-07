@@ -18,24 +18,43 @@ package org.apache.seata.server.cluster.manager;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
+import org.apache.seata.common.ConfigurationKeys;
+import org.apache.seata.common.metadata.MetadataResponse;
+import org.apache.seata.common.metadata.Node;
+import org.apache.seata.config.Configuration;
+import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.common.rpc.http.HttpContext;
 import org.apache.seata.server.BaseSpringBootTest;
 import org.apache.seata.server.cluster.listener.ClusterChangeEvent;
+import org.apache.seata.server.cluster.raft.RaftServer;
+import org.apache.seata.server.cluster.raft.RaftServerManager;
+import org.apache.seata.server.cluster.raft.RaftStateMachine;
+import org.apache.seata.server.cluster.raft.sync.msg.dto.RaftClusterMetadata;
 import org.apache.seata.server.cluster.watch.Watcher;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import static org.apache.seata.common.ConfigurationKeys.STORE_MODE;
+import static org.apache.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -163,5 +182,138 @@ class ClusterWatcherManagerTest extends BaseSpringBootTest {
         verify(mockChannelHandlerContext, never()).writeAndFlush(any());
 
         assertTrue(watcher.isDone());
+    }
+
+    // --- getMetadataResponse unit tests ---
+
+    @Test
+    void getMetadataResponse_whenGroupBlank_usesDefaultGroupFromConfig() {
+        String defaultGroup = "default-from-config";
+        Configuration mockConfig = mock(Configuration.class);
+        when(mockConfig.getConfig(eq(ConfigurationKeys.SERVER_RAFT_GROUP), eq(DEFAULT_SEATA_GROUP)))
+                .thenReturn(defaultGroup);
+
+        try (MockedStatic<ConfigurationFactory> configFactoryMock = Mockito.mockStatic(ConfigurationFactory.class);
+                MockedStatic<RaftServerManager> raftManagerMock = Mockito.mockStatic(RaftServerManager.class)) {
+            configFactoryMock.when(ConfigurationFactory::getInstance).thenReturn(mockConfig);
+            raftManagerMock.when(() -> RaftServerManager.getRaftServer(defaultGroup)).thenReturn(null);
+
+            MetadataResponse response = clusterWatcherManager.getMetadataResponse(null);
+            assertNotNull(response);
+            assertNull(response.getNodes());
+            assertNull(response.getStoreMode());
+
+            response = clusterWatcherManager.getMetadataResponse("");
+            assertNotNull(response);
+            assertNull(response.getNodes());
+        }
+    }
+
+    @Test
+    void getMetadataResponse_whenRaftServerNull_returnsEmptyResponse() {
+        try (MockedStatic<RaftServerManager> raftManagerMock = Mockito.mockStatic(RaftServerManager.class)) {
+            raftManagerMock.when(() -> RaftServerManager.getRaftServer(TEST_GROUP)).thenReturn(null);
+
+            MetadataResponse response = clusterWatcherManager.getMetadataResponse(TEST_GROUP);
+
+            assertNotNull(response);
+            assertNull(response.getNodes());
+            assertNull(response.getStoreMode());
+        }
+    }
+
+    @Test
+    void getMetadataResponse_whenRaftServerNotNull_leaderNull_returnsResponseWithStoreModeOnly() {
+        RaftServer mockRaftServer = mock(RaftServer.class);
+        RaftStateMachine mockStateMachine = mock(RaftStateMachine.class);
+        RaftClusterMetadata metadata = new RaftClusterMetadata(10L);
+        metadata.setLeader(null);
+        metadata.setFollowers(Collections.emptyList());
+        metadata.setLearner(Collections.emptyList());
+
+        when(mockRaftServer.getRaftStateMachine()).thenReturn(mockStateMachine);
+        when(mockStateMachine.getRaftLeaderMetadata()).thenReturn(metadata);
+
+        Configuration mockConfig = mock(Configuration.class);
+        when(mockConfig.getConfig(STORE_MODE)).thenReturn("raft");
+
+        try (MockedStatic<RaftServerManager> raftManagerMock = Mockito.mockStatic(RaftServerManager.class);
+                MockedStatic<ConfigurationFactory> configFactoryMock = Mockito.mockStatic(ConfigurationFactory.class)) {
+            raftManagerMock.when(() -> RaftServerManager.getRaftServer(TEST_GROUP)).thenReturn(mockRaftServer);
+            configFactoryMock.when(ConfigurationFactory::getInstance).thenReturn(mockConfig);
+
+            MetadataResponse response = clusterWatcherManager.getMetadataResponse(TEST_GROUP);
+
+            assertNotNull(response);
+            assertEquals("raft", response.getStoreMode());
+            assertNull(response.getNodes());
+        }
+    }
+
+    @Test
+    void getMetadataResponse_whenRaftServerNotNull_leaderNotNull_returnsFullResponse() {
+        Node leader = new Node();
+        leader.setGroup(TEST_GROUP);
+        leader.setControl(new Node.Endpoint("127.0.0.1", 7091));
+        leader.setTransaction(new Node.Endpoint("127.0.0.1", 8091));
+        Node follower = new Node();
+        follower.setGroup(TEST_GROUP);
+        follower.setControl(new Node.Endpoint("127.0.0.2", 7092));
+        follower.setTransaction(new Node.Endpoint("127.0.0.2", 8092));
+        List<Node> followers = new ArrayList<>();
+        followers.add(follower);
+        List<Node> learners = new ArrayList<>();
+
+        RaftClusterMetadata metadata = new RaftClusterMetadata(100L);
+        metadata.setLeader(leader);
+        metadata.setFollowers(followers);
+        metadata.setLearner(learners);
+
+        RaftServer mockRaftServer = mock(RaftServer.class);
+        RaftStateMachine mockStateMachine = mock(RaftStateMachine.class);
+        when(mockRaftServer.getRaftStateMachine()).thenReturn(mockStateMachine);
+        when(mockStateMachine.getRaftLeaderMetadata()).thenReturn(metadata);
+
+        Configuration mockConfig = mock(Configuration.class);
+        when(mockConfig.getConfig(STORE_MODE)).thenReturn("raft");
+
+        try (MockedStatic<RaftServerManager> raftManagerMock = Mockito.mockStatic(RaftServerManager.class);
+                MockedStatic<ConfigurationFactory> configFactoryMock = Mockito.mockStatic(ConfigurationFactory.class)) {
+            raftManagerMock.when(() -> RaftServerManager.getRaftServer(TEST_GROUP)).thenReturn(mockRaftServer);
+            configFactoryMock.when(ConfigurationFactory::getInstance).thenReturn(mockConfig);
+
+            MetadataResponse response = clusterWatcherManager.getMetadataResponse(TEST_GROUP);
+
+            assertNotNull(response);
+            assertEquals("raft", response.getStoreMode());
+            assertEquals(100L, response.getTerm());
+            assertNotNull(response.getNodes());
+            assertEquals(2, response.getNodes().size());
+            assertEquals(TEST_GROUP, response.getNodes().get(0).getGroup());
+            assertEquals(TEST_GROUP, response.getNodes().get(1).getGroup());
+        }
+    }
+
+    @Test
+    void getMetadataResponse_whenGetRaftLeaderMetadataThrows_returnsResponseAndLogsError() {
+        RaftServer mockRaftServer = mock(RaftServer.class);
+        RaftStateMachine mockStateMachine = mock(RaftStateMachine.class);
+        when(mockRaftServer.getRaftStateMachine()).thenReturn(mockStateMachine);
+        when(mockStateMachine.getRaftLeaderMetadata()).thenThrow(new RuntimeException("test exception"));
+
+        Configuration mockConfig = mock(Configuration.class);
+        when(mockConfig.getConfig(STORE_MODE)).thenReturn("raft");
+
+        try (MockedStatic<RaftServerManager> raftManagerMock = Mockito.mockStatic(RaftServerManager.class);
+                MockedStatic<ConfigurationFactory> configFactoryMock = Mockito.mockStatic(ConfigurationFactory.class)) {
+            raftManagerMock.when(() -> RaftServerManager.getRaftServer(TEST_GROUP)).thenReturn(mockRaftServer);
+            configFactoryMock.when(ConfigurationFactory::getInstance).thenReturn(mockConfig);
+
+            MetadataResponse response = clusterWatcherManager.getMetadataResponse(TEST_GROUP);
+
+            assertNotNull(response);
+            assertEquals("raft", response.getStoreMode());
+            assertNull(response.getNodes());
+        }
     }
 }
