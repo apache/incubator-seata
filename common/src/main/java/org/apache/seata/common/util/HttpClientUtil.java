@@ -263,7 +263,11 @@ public class HttpClientUtil {
      * @throws IllegalArgumentException if the URL is null or blank
      */
     private static <T> SeataHttpWatch<T> watch(
-            String url, Map<String, String> headers, RequestBody requestBody, String method, Class<T> eventType,
+            String url,
+            Map<String, String> headers,
+            RequestBody requestBody,
+            String method,
+            Class<T> eventType,
             int readTimeoutSeconds)
             throws IOException {
 
@@ -277,8 +281,7 @@ public class HttpClientUtil {
     }
 
     public static <T> SeataHttpWatch<T> watch(
-            String url, Map<String, String> headers, Class<T> eventType, int readTimeoutSeconds)
-            throws IOException {
+            String url, Map<String, String> headers, Class<T> eventType, int readTimeoutSeconds) throws IOException {
         return watch(url, headers, null, "GET", eventType, readTimeoutSeconds);
     }
 
@@ -301,7 +304,10 @@ public class HttpClientUtil {
     }
 
     public static <T> SeataHttpWatch<T> watchPost(
-            String url, Map<String, String> params, Map<String, String> headers, Class<T> eventType,
+            String url,
+            Map<String, String> params,
+            Map<String, String> headers,
+            Class<T> eventType,
             int readTimeoutSeconds)
             throws IOException {
         try {
@@ -320,8 +326,7 @@ public class HttpClientUtil {
     }
 
     public static <T> SeataHttpWatch<T> watchPost(
-            String url, Map<String, String> params, Class<T> eventType, int readTimeoutSeconds)
-            throws IOException {
+            String url, Map<String, String> params, Class<T> eventType, int readTimeoutSeconds) throws IOException {
         return watchPost(url, params, null, eventType, readTimeoutSeconds);
     }
 
