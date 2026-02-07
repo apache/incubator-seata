@@ -31,10 +31,15 @@ import java.io.IOException;
 import java.util.Iterator;
 
 /**
+ * A single-use, forward-only event stream.
+ * <p>This class implements both {@link Iterable} and {@link Iterator}
+ * for convenience, but it supports only a single iteration.
+ * Calling {@link #iterator()} multiple times or attempting
+ * concurrent iterations is not supported.
+ *
  * Seata HTTP/2 Watch implementation.
  * Consumes server-pushed event stream via an iterator-style API.
- * Each line contains a single event in "data: {json}" format, similar to Kubernetes watch API.
- *
+ * Each line contains a single event in "data: {json}" format.
  * @param <T> event data type
  */
 public class SeataHttpWatch<T>
