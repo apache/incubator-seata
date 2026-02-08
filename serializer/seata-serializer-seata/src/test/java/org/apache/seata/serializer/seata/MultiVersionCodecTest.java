@@ -14,17 +14,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.core.rpc.netty;
+package org.apache.seata.serializer.seata;
 
-import io.netty.buffer.ByteBuf;
-import org.apache.seata.core.protocol.RpcMessage;
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * the protocol encoder
- *
- **/
-public interface ProtocolEncoder {
-    void encode(RpcMessage rpcMessage, ByteBuf out);
+ * Test for MultiVersionCodec.VersionRange
+ */
+public class MultiVersionCodecTest {
 
-    byte protocolVersion();
+    @Test
+    public void testVersionRangeWithBeginAndEnd() {
+        MultiVersionCodec.VersionRange range = new MultiVersionCodec.VersionRange("1.0", "2.0");
+        assertThat(range.getBegin()).isEqualTo("1.0");
+        assertThat(range.getEnd()).isEqualTo("2.0");
+    }
+
+    @Test
+    public void testVersionRangeWithOnlyEnd() {
+        MultiVersionCodec.VersionRange range = new MultiVersionCodec.VersionRange("2.0");
+        assertThat(range.getBegin()).isEqualTo("0");
+        assertThat(range.getEnd()).isEqualTo("2.0");
+    }
 }
