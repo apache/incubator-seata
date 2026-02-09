@@ -24,6 +24,7 @@ import org.apache.seata.common.util.BufferUtils;
 import org.apache.seata.core.protocol.AbstractMessage;
 import org.apache.seata.core.protocol.ProtocolConstants;
 import org.apache.seata.core.serializer.Serializer;
+import org.apache.seata.serializer.seata.serializer.SeataSerializerV2;
 
 import java.nio.ByteBuffer;
 
@@ -39,6 +40,8 @@ public class SeataSerializer implements Serializer {
             versionSeataSerializer = SeataSerializerV0.getInstance();
         } else if (version == ProtocolConstants.VERSION_1) {
             versionSeataSerializer = SeataSerializerV1.getInstance();
+        } else if (version == ProtocolConstants.VERSION_2) {
+            versionSeataSerializer = SeataSerializerV2.getInstance();
         }
         if (versionSeataSerializer == null) {
             throw new UnsupportedOperationException("version is not supported");
@@ -159,7 +162,7 @@ public class SeataSerializer implements Serializer {
         }
     }
 
-    private static <T> T deserializeByVersion(byte[] bytes, byte version) {
+    public static <T> T deserializeByVersion(byte[] bytes, byte version) {
         if (bytes == null || bytes.length == 0) {
             throw new IllegalArgumentException("Nothing to decode.");
         }

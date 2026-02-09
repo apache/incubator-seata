@@ -14,17 +14,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.core.rpc.netty;
+package org.apache.seata.serializer.seata;
 
-import io.netty.buffer.ByteBuf;
-import org.apache.seata.core.protocol.RpcMessage;
+import java.util.Map;
 
 /**
- * the protocol encoder
- *
- **/
-public interface ProtocolEncoder {
-    void encode(RpcMessage rpcMessage, ByteBuf out);
+ * interface MultiVersionCodec
+ */
+public interface MultiVersionCodec {
 
-    byte protocolVersion();
+    Map<VersionRange, MessageSeataCodec> oldVersionCodec();
+
+    /**
+     * version range (begin, end]
+     */
+    class VersionRange {
+        private String begin;
+        private String end;
+
+        public VersionRange(String begin, String end) {
+            this.begin = begin;
+            this.end = end;
+        }
+
+        public VersionRange(String end) {
+            this.begin = "0";
+            this.end = end;
+        }
+
+        public String getBegin() {
+            return begin;
+        }
+
+        public String getEnd() {
+            return end;
+        }
+    }
 }

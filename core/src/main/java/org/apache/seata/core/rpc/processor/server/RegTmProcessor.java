@@ -83,6 +83,7 @@ public class RegTmProcessor implements RemotingProcessor {
                             message.getTransactionServiceGroup(),
                             message.getApplicationId());
                 }
+                errorInfo = "TM checkAuth fail";
             }
         } catch (Exception exx) {
             isSuccess = false;

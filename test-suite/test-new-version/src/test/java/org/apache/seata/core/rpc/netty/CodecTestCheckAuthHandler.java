@@ -16,15 +16,23 @@
  */
 package org.apache.seata.core.rpc.netty;
 
-import io.netty.buffer.ByteBuf;
-import org.apache.seata.core.protocol.RpcMessage;
+import org.apache.seata.common.loader.LoadLevel;
+import org.apache.seata.core.protocol.RegisterTMRequest;
+import org.apache.seata.server.auth.DefaultCheckAuthHandler;
 
 /**
- * the protocol encoder
- *
+ * the type CodecTestCheckAuthHandler
  **/
-public interface ProtocolEncoder {
-    void encode(RpcMessage rpcMessage, ByteBuf out);
+@LoadLevel(name = "codecTestCheckAuthHandler", order = 101)
+public class CodecTestCheckAuthHandler extends DefaultCheckAuthHandler {
 
-    byte protocolVersion();
+    public static String CODEC_TEST_REG_ERROR = "codec_test_reg_error";
+
+    @Override
+    public boolean regTransactionManagerCheckAuth(RegisterTMRequest request) {
+        if (CODEC_TEST_REG_ERROR.equals(request.getExtraData())) {
+            return false;
+        }
+        return super.regTransactionManagerCheckAuth(request);
+    }
 }

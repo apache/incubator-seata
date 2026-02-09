@@ -126,7 +126,7 @@ public class ProtocolDecoderV1 extends LengthFieldBasedFrameDecoder implements P
                 bs = compressor.decompress(bs);
                 SerializerType protocolType = SerializerType.getByCode(rpcMessage.getCodec());
                 if (this.supportDeSerializerTypes.contains(protocolType)) {
-                    Serializer serializer = SerializerServiceLoader.load(protocolType, ProtocolConstants.VERSION_1);
+                    Serializer serializer = SerializerServiceLoader.load(protocolType, protocolVersion());
                     rpcMessage.setBody(serializer.deserialize(bs));
                 } else {
                     throw new IllegalArgumentException("SerializerType not match");
@@ -155,5 +155,10 @@ public class ProtocolDecoderV1 extends LengthFieldBasedFrameDecoder implements P
             throw new DecodeException(exx);
         }
         return decoded;
+    }
+
+    @Override
+    public byte protocolVersion() {
+        return ProtocolConstants.VERSION_1;
     }
 }

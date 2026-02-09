@@ -14,17 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.core.rpc.netty;
+package org.apache.seata.core.rpc.netty.v2;
 
-import io.netty.buffer.ByteBuf;
-import org.apache.seata.core.protocol.RpcMessage;
+import org.apache.seata.core.protocol.ProtocolConstants;
+import org.apache.seata.core.rpc.netty.v1.ProtocolDecoderV1;
 
 /**
- * the protocol encoder
- *
+ * Decoder of protocol-v2
  **/
-public interface ProtocolEncoder {
-    void encode(RpcMessage rpcMessage, ByteBuf out);
+public class ProtocolDecoderV2 extends ProtocolDecoderV1 {
 
-    byte protocolVersion();
+    @Override
+    public byte protocolVersion() {
+        return ProtocolConstants.VERSION_2;
+    }
 }
