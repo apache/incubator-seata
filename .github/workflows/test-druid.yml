@@ -39,6 +39,7 @@ jobs:
     name: "test-druid"
     runs-on: ubuntu-24.04
     strategy:
+      max-parallel: 6
       fail-fast: false
       matrix:
         druid: [

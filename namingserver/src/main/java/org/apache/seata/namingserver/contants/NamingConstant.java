@@ -22,6 +22,8 @@ public interface NamingConstant {
 
     int DEFAULT_REQUEST_TIMEOUT = 5000;
 
+    int DEFAULT_WRITE_TIMEOUT = 5000;
+
     int DEFAULT_CONNECTION_MAX_TOTAL = 100;
 
     int DEFAULT_CONNECTION_MAX_PER_ROUTE = 20;
