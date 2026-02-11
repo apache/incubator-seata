@@ -39,6 +39,7 @@ public class RegisterRMResponse extends AbstractIdentifyResponse implements Seri
     public RegisterRMResponse(boolean result) {
         super();
         setIdentified(result);
+        setResultCode(result ? ResultCode.Success : ResultCode.Failed);
     }
 
     @Override

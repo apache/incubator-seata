@@ -38,14 +38,19 @@ public interface ProtocolConstants {
     byte VERSION_0 = 0;
 
     /**
-     * Protocol version
+     * Protocol version 1
      */
     byte VERSION_1 = 1;
 
     /**
+     * Protocol version 2
+     */
+    byte VERSION_2 = 2;
+
+    /**
      * Protocol version
      */
-    byte VERSION = VERSION_1;
+    byte VERSION = VERSION_2;
 
     /**
      * Max frame length

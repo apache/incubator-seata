@@ -37,7 +37,7 @@ public class ProtocolConstantsTest {
     public void testVersionConstants() {
         assertEquals(0, ProtocolConstants.VERSION_0);
         assertEquals(1, ProtocolConstants.VERSION_1);
-        assertEquals(ProtocolConstants.VERSION_1, ProtocolConstants.VERSION);
+        assertEquals(ProtocolConstants.VERSION_2, ProtocolConstants.VERSION);
     }
 
     @Test

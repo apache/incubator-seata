@@ -41,6 +41,9 @@ public class Version {
     private static final String VERSION_0_7_1 = "0.7.1";
     private static final String VERSION_1_5_0 = "1.5.0";
     private static final String VERSION_2_3_0 = "2.3.0";
+
+    public static final String VERSION_0_7_0 = "0.7.0";
+
     private static final int MAX_VERSION_DOT = 3;
 
     /**

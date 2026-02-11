@@ -46,7 +46,7 @@ public class KingbaseUndoLogManager extends AbstractUndoLogManager {
             + ClientTableColumnsName.UNDO_LOG_XID + ", " + ClientTableColumnsName.UNDO_LOG_CONTEXT + ", "
             + ClientTableColumnsName.UNDO_LOG_ROLLBACK_INFO + ", " + ClientTableColumnsName.UNDO_LOG_LOG_STATUS + ", "
             + ClientTableColumnsName.UNDO_LOG_LOG_CREATED + ", " + ClientTableColumnsName.UNDO_LOG_LOG_MODIFIED + ")"
-            + "VALUES (" + UNDO_LOG_TABLE_NAME.toUpperCase() + "_SEQ.nextval, ?, ?, ?, ?, ?, sysdate, sysdate)";
+            + "VALUES (nextval('" + UNDO_LOG_TABLE_NAME.toUpperCase() + "_SEQ'), ?, ?, ?, ?, ?, sysdate, sysdate)";
 
     private static final String DELETE_UNDO_LOG_BY_CREATE_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME + " WHERE "
             + ClientTableColumnsName.UNDO_LOG_LOG_CREATED + " <= to_date(?,'yyyy-mm-dd hh24:mi:ss') and ROWNUM <= ?";

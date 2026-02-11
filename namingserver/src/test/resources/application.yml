@@ -29,8 +29,22 @@ heartbeat:
   threshold: 5000
   period: 5000
 seata:
+  namingserver:
+    metrics:
+      enabled: true
   security:
     secretKey: SeataSecretKey0c382ef121d778043159209298fd40bf3850a017
     tokenValidityInMilliseconds: 1800000
     ignore:
       urls: /,/**/*.css,/**/*.js,/**/*.html,/**/*.map,/**/*.svg,/**/*.png,/**/*.jpeg,/**/*.ico,/api/v1/auth/login,/version.json,/health,/error,/naming/v1/**
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "prometheus,health,info,metrics"
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    distribution:
+      percentiles:
+        http.server.requests: 0.5, 0.99, 0.999
