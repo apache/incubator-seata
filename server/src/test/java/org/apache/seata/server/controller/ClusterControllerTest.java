@@ -42,6 +42,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.apache.seata.common.ConfigurationKeys.SERVER_SERVICE_PORT_CAMEL;
 import static org.apache.seata.common.Constants.OBJECT_KEY_SPRING_APPLICATION_CONTEXT;
@@ -149,6 +150,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
     @Order(5)
     void watch_withHttp2() throws Exception {
         CountDownLatch latch = new CountDownLatch(1);
+        AtomicReference<Throwable> failure = new AtomicReference<>();
 
         Map<String, String> headers = new HashMap<>();
         headers.put(HTTP.CONTENT_TYPE, ContentType.APPLICATION_FORM_URLENCODED.getMimeType());
@@ -178,18 +180,25 @@ class ClusterControllerTest extends BaseSpringBootTest {
 
             @Override
             public void onFailure(Throwable t) {
-                Assertions.fail("Should not fail: " + t.getMessage());
+                failure.set(t);
+                latch.countDown();
             }
 
             @Override
             public void onCancelled() {
-                Assertions.fail("Should not be cancelled");
+                failure.set(new RuntimeException("Cancelled"));
+                latch.countDown();
             }
         };
 
         HttpClientUtil.doPostWithHttp2(
-                "http://127.0.0.1:" + port + "/metadata/v1/watch", params, headers, callback, 30);
-        Assertions.assertTrue(latch.await(35, TimeUnit.SECONDS));
+                "http://127.0.0.1:" + port + "/metadata/v1/watch", params, headers, callback, 30000);
+
+        boolean success = latch.await(35, TimeUnit.SECONDS);
+        if (failure.get() != null) {
+            Assertions.fail("Async failure: " + failure.get().getMessage(), failure.get());
+        }
+        Assertions.assertTrue(success, "Test timed out");
     }
 
     @Test
