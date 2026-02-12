@@ -18,6 +18,7 @@ package org.apache.seata.spring.boot.autoconfigure;
 
 import org.apache.seata.spring.annotation.GlobalTransactionScanner;
 import org.apache.seata.spring.boot.autoconfigure.properties.SeataProperties;
+import org.apache.seata.spring.boot.autoconfigure.properties.SpringCloudAlibabaConfiguration;
 import org.apache.seata.tm.TMClient;
 import org.apache.seata.tm.api.DefaultFailureHandlerImpl;
 import org.apache.seata.tm.api.FailureHandler;
@@ -27,13 +28,16 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 
 /**
@@ -79,5 +83,100 @@ public class SeataAutoConfigurationTest {
         assertThat(applicationContext.containsBean("globalTransactionScanner")).isTrue();
         GlobalTransactionScanner scanner = applicationContext.getBean(GlobalTransactionScanner.class);
         assertThat(scanner).isNotNull();
+    }
+
+    @Test
+    void testGlobalTransactionScannerProperties() {
+        GlobalTransactionScanner scanner = applicationContext.getBean(GlobalTransactionScanner.class);
+        assertThat(scanner).isNotNull();
+        // Verify scanner is configured with test properties
+        assertThat(scanner.getApplicationId()).isEqualTo("testApp");
+        assertThat(scanner.getTxServiceGroup()).isEqualTo("test_tx_group");
+    }
+
+    @Test
+    void testSeataPropertiesLoaded() {
+        // SeataProperties may be registered twice (@Component + @EnableConfigurationProperties),
+        // so we use getBeansOfType to get any instance
+        java.util.Map<String, SeataProperties> beans = applicationContext.getBeansOfType(SeataProperties.class);
+        assertThat(beans.isEmpty()).isFalse();
+        SeataProperties seataProperties = beans.values().iterator().next();
+        assertThat(seataProperties).isNotNull();
+        assertThat(seataProperties.isEnabled()).isTrue();
+        assertThat(seataProperties.getApplicationId()).isEqualTo("testApp");
+        assertThat(seataProperties.getTxServiceGroup()).isEqualTo("test_tx_group");
+    }
+
+    /**
+     * Use ApplicationContextRunner for lightweight testing of disabled scenarios
+     * and various property configurations, avoiding nested @SpringBootTest issues.
+     */
+    @Test
+    void whenSeataDisabled_thenNoBeansCreated() {
+        // Use a lightweight ApplicationContextRunner to test the disabled scenario
+        ApplicationContextRunner contextRunner = new ApplicationContextRunner()
+                .withConfiguration(
+                        AutoConfigurations.of(SeataCoreAutoConfiguration.class, SeataAutoConfiguration.class))
+                .withBean(SeataProperties.class, SeataProperties::new)
+                .withBean(SpringCloudAlibabaConfiguration.class, SpringCloudAlibabaConfiguration::new);
+
+        contextRunner.withPropertyValues("seata.enabled=false").run(context -> {
+            org.assertj.core.api.AssertionsForInterfaceTypes.assertThat(context).doesNotHaveBean(FailureHandler.class);
+            org.assertj.core.api.AssertionsForInterfaceTypes.assertThat(context)
+                    .doesNotHaveBean(GlobalTransactionScanner.class);
+        });
+    }
+
+    @Test
+    void testDefaultSeataPropertiesValues() {
+        SeataProperties props = new SeataProperties();
+        // defaults
+        assertThat(props.isEnabled()).isTrue();
+        assertThat(props.isEnableAutoDataSourceProxy()).isTrue();
+        assertThat(props.isUseJdkProxy()).isFalse();
+        assertThat(props.isExposeProxy()).isFalse();
+        assertThat(props.getScanPackages()).isEmpty();
+        assertThat(props.getExcludesForScanning()).isEmpty();
+        assertThat(props.getExcludesForAutoProxying()).isEmpty();
+    }
+
+    @Test
+    void testSeataPropertiesSetters() {
+        SeataProperties props = new SeataProperties();
+        props.setEnabled(false);
+        assertThat(props.isEnabled()).isFalse();
+
+        props.setApplicationId("myApp");
+        assertThat(props.getApplicationId()).isEqualTo("myApp");
+
+        props.setTxServiceGroup("myGroup");
+        assertThat(props.getTxServiceGroup()).isEqualTo("myGroup");
+
+        props.setUseJdkProxy(true);
+        assertThat(props.isUseJdkProxy()).isTrue();
+
+        props.setExposeProxy(true);
+        assertThat(props.isExposeProxy()).isTrue();
+
+        props.setDataSourceProxyMode("XA");
+        assertThat(props.getDataSourceProxyMode()).isEqualTo("XA");
+
+        props.setScanPackages(new String[] {"com.example"});
+        assertThat(props.getScanPackages()).hasSize(1);
+
+        props.setExcludesForScanning(new String[] {"exclude1", "exclude2"});
+        assertThat(props.getExcludesForScanning()).hasSize(2);
+
+        props.setExcludesForAutoProxying(new String[] {"ds1"});
+        assertThat(props.getExcludesForAutoProxying()).hasSize(1);
+
+        props.setAccessKey("ak");
+        assertThat(props.getAccessKey()).isEqualTo("ak");
+
+        props.setSecretKey("sk");
+        assertThat(props.getSecretKey()).isEqualTo("sk");
+
+        props.setEnableAutoDataSourceProxy(false);
+        assertThat(props.isEnableAutoDataSourceProxy()).isFalse();
     }
 }

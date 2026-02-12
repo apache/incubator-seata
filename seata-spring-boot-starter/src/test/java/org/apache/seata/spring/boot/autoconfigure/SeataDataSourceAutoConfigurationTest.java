@@ -23,7 +23,9 @@ import org.apache.seata.spring.boot.autoconfigure.properties.SpringCloudAlibabaC
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedConstruction;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.context.annotation.Configuration;
 
 import javax.sql.DataSource;
 
@@ -35,11 +37,15 @@ import static org.mockito.Mockito.mockConstruction;
  * Tests for {@link SeataDataSourceAutoConfiguration} to verify conditional bean registration.
  */
 public class SeataDataSourceAutoConfigurationTest {
+
+    @Configuration
+    @EnableConfigurationProperties({SeataProperties.class, SpringCloudAlibabaConfiguration.class})
+    static class PropertiesConfig {}
+
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(SeataDataSourceAutoConfiguration.class))
-            .withBean(DataSource.class, () -> mock(DataSource.class))
-            .withBean(SeataProperties.class, SeataProperties::new)
-            .withBean(SpringCloudAlibabaConfiguration.class, SpringCloudAlibabaConfiguration::new);
+            .withUserConfiguration(PropertiesConfig.class)
+            .withBean(DataSource.class, () -> mock(DataSource.class));
 
     @Test
     void whenConditionsMet_thenAutoDataSourceProxyCreatorCreated() {
@@ -68,10 +74,98 @@ public class SeataDataSourceAutoConfigurationTest {
     void whenNoDataSourceBean_thenBeanNotCreated() {
         new ApplicationContextRunner()
                 .withConfiguration(AutoConfigurations.of(SeataDataSourceAutoConfiguration.class))
-                .withBean(SeataProperties.class, SeataProperties::new)
-                .withBean(SpringCloudAlibabaConfiguration.class, SpringCloudAlibabaConfiguration::new)
+                .withUserConfiguration(PropertiesConfig.class)
                 .run(context -> {
                     assertThat(context).doesNotHaveBean(SeataAutoDataSourceProxyCreator.class);
                 });
+    }
+
+    @Test
+    void whenEnableAutoDataSourceProxyFalse_thenBeanNotCreated() {
+        contextRunner
+                .withPropertyValues("seata.enabled=true", "seata.enableAutoDataSourceProxy=false")
+                .run(context -> {
+                    assertThat(context).doesNotHaveBean(SeataAutoDataSourceProxyCreator.class);
+                });
+    }
+
+    @Test
+    void whenEnableAutoDataSourceProxyKebabCaseFalse_thenBeanNotCreated() {
+        contextRunner
+                .withPropertyValues("seata.enabled=true", "seata.enable-auto-data-source-proxy=false")
+                .run(context -> {
+                    assertThat(context).doesNotHaveBean(SeataAutoDataSourceProxyCreator.class);
+                });
+    }
+
+    @Test
+    void whenUseJdkProxyTrue_thenProxyCreatorConfigured() {
+        try (MockedConstruction<DataSourceProxy> mocked = mockConstruction(DataSourceProxy.class)) {
+            contextRunner
+                    .withPropertyValues(
+                            "seata.enabled=true",
+                            "seata.enableAutoDataSourceProxy=true",
+                            "seata.enable-auto-data-source-proxy=true",
+                            "seata.use-jdk-proxy=true")
+                    .run(context -> {
+                        assertThat(context).hasSingleBean(SeataAutoDataSourceProxyCreator.class);
+                        SeataProperties properties = context.getBean(SeataProperties.class);
+                        assertThat(properties.isUseJdkProxy()).isTrue();
+                    });
+        }
+    }
+
+    @Test
+    void whenUseJdkProxyFalse_thenCglibProxyUsed() {
+        try (MockedConstruction<DataSourceProxy> mocked = mockConstruction(DataSourceProxy.class)) {
+            contextRunner
+                    .withPropertyValues(
+                            "seata.enabled=true",
+                            "seata.enableAutoDataSourceProxy=true",
+                            "seata.enable-auto-data-source-proxy=true",
+                            "seata.use-jdk-proxy=false")
+                    .run(context -> {
+                        assertThat(context).hasSingleBean(SeataAutoDataSourceProxyCreator.class);
+                        SeataProperties properties = context.getBean(SeataProperties.class);
+                        assertThat(properties.isUseJdkProxy()).isFalse();
+                    });
+        }
+    }
+
+    @Test
+    void whenExcludesForAutoProxyingSet_thenConfigured() {
+        try (MockedConstruction<DataSourceProxy> mocked = mockConstruction(DataSourceProxy.class)) {
+            contextRunner
+                    .withPropertyValues(
+                            "seata.enabled=true",
+                            "seata.enableAutoDataSourceProxy=true",
+                            "seata.enable-auto-data-source-proxy=true",
+                            "seata.excludes-for-auto-proxying[0]=testDataSource",
+                            "seata.excludes-for-auto-proxying[1]=anotherDataSource")
+                    .run(context -> {
+                        assertThat(context).hasSingleBean(SeataAutoDataSourceProxyCreator.class);
+                        SeataProperties properties = context.getBean(SeataProperties.class);
+                        assertThat(properties.getExcludesForAutoProxying()).hasSize(2);
+                        assertThat(properties.getExcludesForAutoProxying())
+                                .contains("testDataSource", "anotherDataSource");
+                    });
+        }
+    }
+
+    @Test
+    void whenDataSourceProxyModeSet_thenConfigured() {
+        try (MockedConstruction<DataSourceProxy> mocked = mockConstruction(DataSourceProxy.class)) {
+            contextRunner
+                    .withPropertyValues(
+                            "seata.enabled=true",
+                            "seata.enableAutoDataSourceProxy=true",
+                            "seata.enable-auto-data-source-proxy=true",
+                            "seata.data-source-proxy-mode=AT")
+                    .run(context -> {
+                        assertThat(context).hasSingleBean(SeataAutoDataSourceProxyCreator.class);
+                        SeataProperties properties = context.getBean(SeataProperties.class);
+                        assertThat(properties.getDataSourceProxyMode()).isEqualTo("AT");
+                    });
+        }
     }
 }

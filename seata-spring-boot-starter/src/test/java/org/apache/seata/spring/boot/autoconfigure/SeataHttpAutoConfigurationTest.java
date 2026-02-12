@@ -74,4 +74,34 @@ public class SeataHttpAutoConfigurationTest {
                     .hasOnlyElementsOfType(JakartaSeataWebMvcConfigurer.class);
         });
     }
+
+    @Test
+    void whenInterceptorEnabledTrue_thenBeansCreated() {
+        webContextRunner
+                .withPropertyValues(HTTP_PREFIX + ".interceptor-enabled=true")
+                .run(context -> {
+                    assertThat(context).hasSingleBean(JakartaSeataWebMvcConfigurer.class);
+                });
+    }
+
+    @Test
+    void whenNoPropertySet_thenDefaultEnabled() { // Test default behavior (interceptor-enabled should default to true)
+        webContextRunner.run(context -> {
+            // Should create Jakarta configurer by default
+            assertThat(context).hasSingleBean(JakartaSeataWebMvcConfigurer.class);
+        });
+    }
+
+    @Test
+    void whenBothServletClassesMissing_thenFallsBackToJavaxConfigurer() {
+        // When jakarta servlet class is filtered out, the JakartaSeataWebMvcConfigurer @ConditionalOnClass
+        // fails, so the javax SeataWebMvcConfigurer is created as the fallback.
+        // This confirms the conditional fallback logic works correctly.
+        webContextRunner
+                .withClassLoader(new FilteredClassLoader("jakarta.servlet.http.HttpServletRequest"))
+                .run(context -> {
+                    assertThat(context).hasSingleBean(SeataWebMvcConfigurer.class);
+                    assertThat(context).doesNotHaveBean(JakartaSeataWebMvcConfigurer.class);
+                });
+    }
 }

@@ -136,4 +136,17 @@ class SeataSagaAutoConfigurationTest {
         assertThat(rejectedExecutionHandler).isNotNull();
         assertThat(rejectedExecutionHandler).isInstanceOf(ThreadPoolExecutor.CallerRunsPolicy.class);
     }
+
+    @Test
+    void testDbStateMachineConfigProperties() {
+        DbStateMachineConfig config = applicationContext.getBean(DbStateMachineConfig.class);
+        AssertionsForClassTypes.assertThat(config).isNotNull();
+        AssertionsForClassTypes.assertThat(config.isEnableAsync()).isTrue();
+    }
+
+    @Test
+    void testStateMachineEngineIsProcessCtrl() {
+        StateMachineEngine engine = applicationContext.getBean(StateMachineEngine.class);
+        AssertionsForClassTypes.assertThat(engine).isInstanceOf(ProcessCtrlStateMachineEngine.class);
+    }
 }
