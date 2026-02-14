@@ -21,9 +21,13 @@ import jakarta.servlet.AsyncContext;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.seata.namingserver.listener.ClusterChangeEvent;
 import org.apache.seata.namingserver.listener.ClusterChangeListener;
+import org.apache.seata.namingserver.listener.ClusterChangePushEvent;
 import org.apache.seata.namingserver.listener.Watcher;
+import org.apache.seata.namingserver.metrics.NamingServerMetricsManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
@@ -54,8 +58,17 @@ public class ClusterWatcherManager implements ClusterChangeListener {
     private final ScheduledThreadPoolExecutor scheduledThreadPoolExecutor =
             new ScheduledThreadPoolExecutor(1, new CustomizableThreadFactory("long-polling"));
 
+    @Autowired
+    private NamingServerMetricsManager metricsManager;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
     @PostConstruct
     public void init() {
+        // Register metrics data supplier
+        metricsManager.setWatchersSupplier(() -> WATCHERS);
+
         // Responds to monitors that time out
         scheduledThreadPoolExecutor.scheduleAtFixedRate(
                 () -> {
@@ -85,8 +98,16 @@ public class ClusterWatcherManager implements ClusterChangeListener {
             GROUP_UPDATE_TERM.put(event.getGroup(), event.getTerm());
             // Notifications are made of changes in cluster information
 
-            Optional.ofNullable(WATCHERS.remove(event.getGroup()))
-                    .ifPresent(watchers -> watchers.parallelStream().forEach(this::notify));
+            Optional.ofNullable(WATCHERS.remove(event.getGroup())).ifPresent(watchers -> {
+                watchers.parallelStream().forEach(this::notify);
+                // Publish event for metrics tracking
+                if (!watchers.isEmpty()) {
+                    eventPublisher.publishEvent(new ClusterChangePushEvent(
+                            this, event.getNamespace(), event.getClusterName(), event.getGroup()));
+                    // Refresh watcher count metrics after notification
+                    metricsManager.refreshWatcherCountMetrics();
+                }
+            });
         }
     }
 
@@ -113,6 +134,9 @@ public class ClusterWatcherManager implements ClusterChangeListener {
         if (term == null || watcher.getTerm() >= term) {
             WATCHERS.computeIfAbsent(group, value -> new ConcurrentLinkedQueue<>())
                     .add(watcher);
+
+            // Immediately refresh watcher count metrics
+            metricsManager.refreshWatcherCountMetrics();
         } else {
             notify(watcher);
         }

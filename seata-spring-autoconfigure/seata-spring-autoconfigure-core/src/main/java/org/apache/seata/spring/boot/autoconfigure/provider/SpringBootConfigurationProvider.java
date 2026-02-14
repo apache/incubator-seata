@@ -239,6 +239,10 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
                 return getConfigFromEnvironment(oldGrouplistDataId, dataType);
             }
         }
+        // ensures that values are converted to their actual values
+        if (value instanceof String) {
+            value = environment.resolvePlaceholders((String) value);
+        }
         return value;
     }
 

@@ -17,6 +17,8 @@
 package org.apache.seata.saga.engine.invoker.impl;
 
 import org.apache.seata.common.exception.FrameworkErrorCode;
+import org.apache.seata.common.json.JsonSerializer;
+import org.apache.seata.common.json.JsonSerializerFactory;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.saga.engine.exception.EngineExecutionException;
 import org.apache.seata.saga.engine.invoker.ServiceInvoker;
@@ -25,8 +27,6 @@ import org.apache.seata.saga.engine.utils.ExceptionUtils;
 import org.apache.seata.saga.statelang.domain.ServiceTaskState;
 import org.apache.seata.saga.statelang.domain.TaskState.Retry;
 import org.apache.seata.saga.statelang.domain.impl.ServiceTaskStateImpl;
-import org.apache.seata.saga.statelang.parser.JsonParser;
-import org.apache.seata.saga.statelang.parser.JsonParserFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -311,16 +311,16 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
         } else if (isPrimitive(paramType)) {
             return value;
         } else {
-            JsonParser jsonParser = JsonParserFactory.getJsonParser(getSagaJsonParser());
-            if (jsonParser == null) {
-                throw new RuntimeException("Cannot get JsonParser by name : " + getSagaJsonParser());
+            JsonSerializer jsonSerializer = JsonSerializerFactory.getSerializer(getSagaJsonParser());
+            if (jsonSerializer == null) {
+                throw new RuntimeException("Cannot get JsonSerializer by name : " + getSagaJsonParser());
             }
-            String jsonValue = jsonParser.toJsonString(value, true, false);
+            String jsonValue = jsonSerializer.toJSONString(value, true, false);
 
             // compatible history autoType serialize json
-            boolean useAutoType = jsonParser.useAutoType(jsonValue);
+            boolean useAutoType = jsonSerializer.useAutoType(jsonValue);
 
-            return jsonParser.parse(jsonValue, paramType, !useAutoType);
+            return jsonSerializer.parseObject(jsonValue, paramType, !useAutoType);
         }
     }
 

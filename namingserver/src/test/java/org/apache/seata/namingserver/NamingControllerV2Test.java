@@ -22,11 +22,14 @@ import org.apache.seata.common.result.SingleResult;
 import org.apache.seata.namingserver.controller.NamingControllerV2;
 import org.apache.seata.namingserver.entity.vo.v2.NamespaceVO;
 import org.apache.seata.namingserver.manager.NamingManager;
+import org.apache.seata.namingserver.metrics.NoOpNamingMetricsManager;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Map;
 import java.util.UUID;
@@ -36,15 +39,24 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class NamingControllerV2Test {
 
-    @Autowired
-    NamingControllerV2 namingControllerV2;
+    private NamingControllerV2 namingControllerV2;
 
-    @Autowired
-    NamingManager namingManager;
+    private NamingManager namingManager;
+
+    @BeforeEach
+    void setUp() {
+        namingManager = new NamingManager();
+        ReflectionTestUtils.setField(namingManager, "metricsManager", new NoOpNamingMetricsManager());
+        ReflectionTestUtils.setField(namingManager, "heartbeatTimeThreshold", 500000);
+        ReflectionTestUtils.setField(namingManager, "heartbeatCheckTimePeriod", 10000000);
+        namingManager.init();
+        namingControllerV2 = new NamingControllerV2();
+        ReflectionTestUtils.setField(namingControllerV2, "namingManager", namingManager);
+    }
 
     @Test
     void testNamespaces() {

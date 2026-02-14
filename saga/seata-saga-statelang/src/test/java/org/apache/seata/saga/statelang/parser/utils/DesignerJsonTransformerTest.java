@@ -17,6 +17,8 @@
 package org.apache.seata.saga.statelang.parser.utils;
 
 import org.apache.seata.common.exception.FrameworkException;
+import org.apache.seata.common.json.JsonSerializer;
+import org.apache.seata.common.json.JsonSerializerFactory;
 import org.apache.seata.saga.statelang.parser.JsonParser;
 import org.apache.seata.saga.statelang.parser.JsonParserFactory;
 import org.junit.jupiter.api.Assertions;
@@ -57,7 +59,7 @@ public class DesignerJsonTransformerTest {
 
     @Test
     public void testGenerateTracingGraphJsonWithNullInstance() {
-        JsonParser parser = JsonParserFactory.getJsonParser("jackson");
+        JsonSerializer parser = JsonSerializerFactory.getSerializer("jackson");
         FrameworkException e = Assertions.assertThrows(
                 FrameworkException.class, () -> DesignerJsonTransformer.generateTracingGraphJson(null, parser));
         Assertions.assertEquals("StateMachineInstance is not exits", e.getMessage());
