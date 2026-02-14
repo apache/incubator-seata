@@ -348,9 +348,13 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
                         reportStatusToTC(BranchStatus.PhaseOne_RDONLY);
                     }
                 }
+            } catch (SQLException xe) {
+                // Branch Report to TC: Exception
+                reportStatusToTC(BranchStatus.PhaseOne_PrepareFailed);
+                throw xe;
             } catch (XAException xe) {
-                // Branch Report to TC: Failed
-                reportStatusToTC(BranchStatus.PhaseOne_Failed);
+                // Branch Report to TC: Exception
+                reportStatusToTC(BranchStatus.PhaseOne_PrepareFailed);
                 throw new SQLException(
                         "Failed to end(TMSUCCESS)/prepare xa branch on " + xid + "-" + xaBranchXid.getBranchId()
                                 + " since " + xe.getMessage(),

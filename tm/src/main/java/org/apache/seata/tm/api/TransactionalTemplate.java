@@ -362,6 +362,9 @@ public class TransactionalTemplate {
                 case Finished:
                     code = TransactionalExecutor.Code.CommitFailure;
                     break;
+                case RollbackRetrying:
+                    code = TransactionalExecutor.Code.Rollbacking;
+                    break;
                 default:
             }
             Exception statusException = null;
@@ -373,9 +376,13 @@ public class TransactionalTemplate {
                 statusException = new TmTransactionException(
                         TransactionExceptionCode.TransactionTimeout,
                         String.format("Global transaction[%s] is timeout and will be rollback[TC].", tx.getXid()));
+            } else if (GlobalStatus.isOnePhasePrepareFailed(afterCommitStatus)) {
+                statusException = new TmTransactionException(
+                        TransactionExceptionCode.BranchPrepareFailed,
+                        String.format("Global transaction[%s] is branch prepare failure and will be rollback[TC].", tx.getXid()));
             }
             if (null != statusException) {
-                throw new TransactionalExecutor.ExecutionException(tx, statusException, code);
+                throw new TransactionalExecutor.ExecutionException(tx, statusException, code, statusException);
             }
             triggerAfterCommit();
         } catch (TransactionException txe) {

@@ -19,10 +19,12 @@ package org.apache.seata.server.transaction.xa;
 import org.apache.seata.core.exception.TransactionException;
 import org.apache.seata.core.model.BranchStatus;
 import org.apache.seata.core.model.BranchType;
+import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.rpc.RemotingServer;
 import org.apache.seata.server.coordinator.AbstractCore;
 import org.apache.seata.server.session.BranchSession;
 import org.apache.seata.server.session.GlobalSession;
+import org.apache.seata.server.session.SessionHolder;
 
 /**
  * The type XA core.
@@ -44,7 +46,18 @@ public class XACore extends AbstractCore {
             BranchType branchType, String xid, long branchId, BranchStatus status, String applicationData)
             throws TransactionException {
         super.branchReport(branchType, xid, branchId, status, applicationData);
-        if (BranchStatus.PhaseOne_Failed == status) {}
+        if (BranchStatus.PhaseOne_PrepareFailed == status) {
+            GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
+            // just lock changeStatus
+            SessionHolder.lockAndExecute(globalSession, () -> {
+                globalSession.close(); // Highlight: Firstly, close the session, then no more branch can be registered.
+                if (globalSession.getStatus() == GlobalStatus.Begin) {
+                    globalSession.changeGlobalStatus(GlobalStatus.RollbackRetrying);
+                    return true;
+                }
+                return false;
+            });
+        }
     }
 
     @Override
