@@ -250,4 +250,19 @@ public interface Constants {
      * CW stands for Cluster Watch
      */
     String WATCH_EVENT_PREFIX = "CW:";
+
+    /**
+     * Action status key for action context
+     */
+    String ACTION_STATUS = "actionStatus";
+
+    /**
+     * Action status: prepare method executed successfully
+     */
+    String ACTION_STATUS_SUCCESS = "success";
+
+    /**
+     * Action status: prepare method execution failed
+     */
+    String ACTION_STATUS_FAILED = "failed";
 }

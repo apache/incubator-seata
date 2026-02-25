@@ -16,6 +16,7 @@
  */
 package org.apache.seata.integration.tx.api.interceptor;
 
+import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.Constants;
 import org.apache.seata.common.exception.FrameworkException;
 import org.apache.seata.common.exception.SkipCallbackWrapperException;
@@ -23,6 +24,7 @@ import org.apache.seata.common.executor.Callback;
 import org.apache.seata.common.json.JsonUtil;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.NetUtil;
+import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.integration.tx.api.fence.DefaultCommonFenceHandler;
 import org.apache.seata.integration.tx.api.fence.hook.TccHook;
@@ -52,6 +54,9 @@ import java.util.Map;
 public class ActionInterceptorHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ActionInterceptorHandler.class);
+
+    private static final boolean ENABLE_ACTION_STATUS_REPORT = ConfigurationFactory.getInstance()
+            .getBoolean(ConfigurationKeys.CLIENT_SAGA_ACTION_STATUS_REPORT_ENABLE, false);
 
     /**
      * Handler the Tx Aspect
@@ -111,7 +116,20 @@ public class ActionInterceptorHandler {
                 }
             } else {
                 // Execute business, and return the business result
-                return targetCallback.execute();
+                try {
+                    Object result = targetCallback.execute();
+                    // Report action status: success (only for non-CommonFence mode)
+                    if (ENABLE_ACTION_STATUS_REPORT) {
+                        reportActionStatus(actionContext, Constants.ACTION_STATUS_SUCCESS);
+                    }
+                    return result;
+                } catch (Throwable t) {
+                    // Report action status: failed (only for non-CommonFence mode)
+                    if (ENABLE_ACTION_STATUS_REPORT) {
+                        reportActionStatus(actionContext, Constants.ACTION_STATUS_FAILED);
+                    }
+                    throw t;
+                }
             }
         } finally {
             try {
@@ -324,5 +342,33 @@ public class ActionInterceptorHandler {
             }
         }
         return context;
+    }
+
+    /**
+     * Report action status to TC
+     *
+     * @param actionContext the action context
+     * @param status        the action status (success/failed)
+     */
+    protected void reportActionStatus(BusinessActionContext actionContext, String status) {
+        try {
+            actionContext.setActionStatus(status);
+            actionContext.setUpdated(true);
+            BusinessActionContextUtil.reportContext(actionContext);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug(
+                        "Report action status: xid={}, branchId={}, status={}",
+                        actionContext.getXid(),
+                        actionContext.getBranchId(),
+                        status);
+            }
+        } catch (Exception e) {
+            LOGGER.warn(
+                    "Report action status failed: xid={}, branchId={}, status={}, error={}",
+                    actionContext.getXid(),
+                    actionContext.getBranchId(),
+                    status,
+                    e.getMessage());
+        }
     }
 }
