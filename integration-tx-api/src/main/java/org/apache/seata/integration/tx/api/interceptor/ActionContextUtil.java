@@ -17,10 +17,10 @@
 package org.apache.seata.integration.tx.api.interceptor;
 
 import org.apache.seata.common.exception.FrameworkException;
+import org.apache.seata.common.json.JsonUtil;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.ReflectionUtil;
 import org.apache.seata.common.util.StringUtils;
-import org.apache.seata.integration.tx.api.util.JsonUtil;
 import org.apache.seata.rm.tcc.api.BusinessActionContext;
 import org.apache.seata.rm.tcc.api.BusinessActionContextParameter;
 import org.apache.seata.rm.tcc.api.ParamType;

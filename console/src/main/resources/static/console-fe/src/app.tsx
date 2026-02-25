@@ -71,7 +71,7 @@ class App extends React.Component<AppPropsType, AppStateType> {
 
   getVersion = () => {
     fetch('version.json').then(response =>
-      response.json().then(json => this.setState({ ...this.state, version: json.version }))
+      response.json().then(json => this.setState(prevState => ({ ...prevState, version: json.version })))
     );
   };
 

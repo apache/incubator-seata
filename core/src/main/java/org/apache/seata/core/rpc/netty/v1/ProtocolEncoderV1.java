@@ -55,7 +55,6 @@ import java.util.Map;
  * </p>
  * https://github.com/seata/seata/issues/893
  *
- * @author Geng Zhang
  * @see ProtocolDecoderV1
  * @since 0.7.0
  */
@@ -73,7 +72,7 @@ public class ProtocolEncoderV1 extends MessageToByteEncoder implements ProtocolE
 
             byte messageType = rpcMessage.getMessageType();
             out.writeBytes(ProtocolConstants.MAGIC_CODE_BYTES);
-            out.writeByte(ProtocolConstants.VERSION_1);
+            out.writeByte(protocolVersion());
             // full Length(4B) and head length(2B) will fix in the end.
             out.writerIndex(out.writerIndex() + 6);
             out.writeByte(messageType);
@@ -94,7 +93,7 @@ public class ProtocolEncoderV1 extends MessageToByteEncoder implements ProtocolE
                     && messageType != ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE) {
                 // heartbeat has no body
                 Serializer serializer = SerializerServiceLoader.load(
-                        SerializerType.getByCode(rpcMessage.getCodec()), ProtocolConstants.VERSION_1);
+                        SerializerType.getByCode(rpcMessage.getCodec()), protocolVersion());
                 bodyBytes = serializer.serialize(rpcMessage.getBody());
                 Compressor compressor = CompressorFactory.getCompressor(rpcMessage.getCompressor());
                 bodyBytes = compressor.compress(bodyBytes);
@@ -131,5 +130,10 @@ public class ProtocolEncoderV1 extends MessageToByteEncoder implements ProtocolE
         } catch (Throwable e) {
             LOGGER.error("Encode request error!", e);
         }
+    }
+
+    @Override
+    public byte protocolVersion() {
+        return ProtocolConstants.VERSION_1;
     }
 }

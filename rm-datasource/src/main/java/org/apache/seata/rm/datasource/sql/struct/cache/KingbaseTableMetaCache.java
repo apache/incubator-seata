@@ -28,8 +28,8 @@ import org.apache.seata.sqlparser.util.JdbcConstants;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -123,25 +123,44 @@ public class KingbaseTableMetaCache extends OracleTableMetaCache {
     }
 
     protected void processPrimaries(TableMeta tableMeta, ResultSet rs) throws SQLException {
-        List<String> primaryKeyColumns = new ArrayList<>();
+        // Collect primary key column names that couldn't be matched directly by PK_NAME
+        Set<String> unmatchedPkColumns = new LinkedHashSet<>();
+
+        // Iterate through each row of getPrimaryKeys() result set
         while (rs.next()) {
-            String pkColName;
-            try {
-                pkColName = rs.getString("COLUMN_NAME");
-            } catch (Exception e) {
-                pkColName = rs.getString("PK_NAME");
+            String pkConstraintName = getStringSafely(rs, "PK_NAME");
+            String pkColName = getStringSafely(rs, "COLUMN_NAME");
+            if (StringUtils.isBlank(pkColName)) {
+                pkColName = pkConstraintName;
             }
-            primaryKeyColumns.add(pkColName);
+
+            // Strategy 1: Try direct match by PK constraint name
+            if (StringUtils.isNotBlank(pkConstraintName)
+                    && tableMeta.getAllIndexes().containsKey(pkConstraintName)) {
+                IndexMeta index = tableMeta.getAllIndexes().get(pkConstraintName);
+                index.setIndextype(IndexType.PRIMARY);
+            } else {
+                // Save columns for fallback column-based matching
+                if (StringUtils.isNotBlank(pkColName)) {
+                    unmatchedPkColumns.add(pkColName.toUpperCase());
+                }
+            }
         }
 
-        for (IndexMeta index : tableMeta.getAllIndexes().values()) {
-            List<String> indexColumns = index.getValues().stream()
-                    .filter(col -> col != null && StringUtils.isNotBlank(col.getColumnName()))
-                    .map(ColumnMeta::getColumnName)
-                    .collect(Collectors.toList());
+        // Strategy 2: fallback - match by column set equality (order-insensitive, deduped)
+        if (!unmatchedPkColumns.isEmpty()) {
+            for (IndexMeta index : tableMeta.getAllIndexes().values()) {
+                if (index.getIndextype().value() == IndexType.UNIQUE.value()) {
+                    Set<String> indexColsSet = index.getValues().stream()
+                            .filter(col -> col != null && StringUtils.isNotBlank(col.getColumnName()))
+                            .map(col -> col.getColumnName().toUpperCase())
+                            .collect(Collectors.toSet());
 
-            if (indexColumns.equals(primaryKeyColumns)) {
-                index.setIndextype(IndexType.PRIMARY);
+                    if (indexColsSet.equals(unmatchedPkColumns)) {
+                        index.setIndextype(IndexType.PRIMARY);
+                        break;
+                    }
+                }
             }
         }
     }
@@ -184,5 +203,13 @@ public class KingbaseTableMetaCache extends OracleTableMetaCache {
             result.setIndextype(IndexType.NORMAL);
         }
         return result;
+    }
+
+    private static String getStringSafely(ResultSet rs, String columnLabel) {
+        try {
+            return rs.getString(columnLabel);
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

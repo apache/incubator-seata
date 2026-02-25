@@ -66,10 +66,7 @@ public class RaftServerInstanceStrategy extends AbstractSeataInstanceStrategy
         String clusterType = String.valueOf(StoreConfig.getSessionMode());
         instance.addMetadata("cluster-type", "raft".equalsIgnoreCase(clusterType) ? clusterType : "default");
         RaftStateMachine stateMachine = RaftServerManager.getRaftServer(unit).getRaftStateMachine();
-        long term = RaftServerManager.getRaftServer(unit)
-                .getRaftStateMachine()
-                .getCurrentTerm()
-                .get();
+        long term = stateMachine.getCurrentTerm().get();
         instance.setTerm(term);
         instance.setRole(stateMachine.isLeader() ? ClusterRole.LEADER : ClusterRole.FOLLOWER);
         // load node Endpoint

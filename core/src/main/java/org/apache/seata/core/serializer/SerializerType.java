@@ -67,7 +67,12 @@ public enum SerializerType {
     /**
      * The fury.
      */
-    FURY((byte) 86);
+    FURY((byte) 86),
+
+    /**
+     * The fory.
+     */
+    FORY((byte) 87);
 
     private final byte code;
 

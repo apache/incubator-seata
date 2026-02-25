@@ -18,21 +18,12 @@ package org.apache.seata.server.controller;
 
 import com.alipay.sofa.jraft.RouteTable;
 import com.alipay.sofa.jraft.conf.Configuration;
-import com.alipay.sofa.jraft.entity.PeerId;
-import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.metadata.MetadataResponse;
-import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.result.Result;
 import org.apache.seata.common.rpc.http.HttpContext;
-import org.apache.seata.common.util.StringUtils;
-import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.server.cluster.manager.ClusterWatcherManager;
-import org.apache.seata.server.cluster.raft.RaftServer;
 import org.apache.seata.server.cluster.raft.RaftServerManager;
-import org.apache.seata.server.cluster.raft.sync.msg.dto.RaftClusterMetadata;
 import org.apache.seata.server.cluster.watch.Watcher;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -41,19 +32,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
-
-import static org.apache.seata.common.ConfigurationKeys.STORE_MODE;
-import static org.apache.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 
 @RestController
 @RequestMapping("/metadata/v1")
 public class ClusterController {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterController.class);
 
     @Resource
     private ClusterWatcherManager clusterWatcherManager;
@@ -76,39 +59,7 @@ public class ClusterController {
 
     @GetMapping("/cluster")
     public MetadataResponse cluster(String group) {
-        MetadataResponse metadataResponse = new MetadataResponse();
-        if (StringUtils.isBlank(group)) {
-            group = ConfigurationFactory.getInstance()
-                    .getConfig(ConfigurationKeys.SERVER_RAFT_GROUP, DEFAULT_SEATA_GROUP);
-        }
-        RaftServer raftServer = RaftServerManager.getRaftServer(group);
-        if (raftServer != null) {
-            String mode = ConfigurationFactory.getInstance().getConfig(STORE_MODE);
-            metadataResponse.setStoreMode(mode);
-            RouteTable routeTable = RouteTable.getInstance();
-            try {
-                routeTable.refreshLeader(RaftServerManager.getCliClientServiceInstance(), group, 1000);
-                PeerId leader = routeTable.selectLeader(group);
-                if (leader != null) {
-                    Set<Node> nodes = new HashSet<>();
-                    RaftClusterMetadata raftClusterMetadata =
-                            raftServer.getRaftStateMachine().getRaftLeaderMetadata();
-                    Node leaderNode = raftServer
-                            .getRaftStateMachine()
-                            .getRaftLeaderMetadata()
-                            .getLeader();
-                    leaderNode.setGroup(group);
-                    nodes.add(leaderNode);
-                    nodes.addAll(raftClusterMetadata.getLearner());
-                    nodes.addAll(raftClusterMetadata.getFollowers());
-                    metadataResponse.setTerm(raftClusterMetadata.getTerm());
-                    metadataResponse.setNodes(new ArrayList<>(nodes));
-                }
-            } catch (Exception e) {
-                LOGGER.error("there is an exception to getting the leader address: {}", e.getMessage(), e);
-            }
-        }
-        return metadataResponse;
+        return clusterWatcherManager.getMetadataResponse(group);
     }
 
     @PostMapping("/watch")

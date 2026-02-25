@@ -143,8 +143,10 @@
         <mockwebserver-version>4.12.0</mockwebserver-version>
         <native-lib-loader.version>2.4.0</native-lib-loader.version>
 
-        <!--  for fury  -->
-        <fury.version>0.8.0</fury.version>
+        <!--  for fory  -->
+        <fory.version>0.12.3</fory.version>
+
+        <okhttp.version>4.9.3</okhttp.version>
     </properties>
 
     <dependencyManagement>
@@ -162,7 +164,7 @@
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-framework-bom</artifactId>
-                <version>${spring-framework.version}</version>
+                <version>${spring-framework-bom.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -894,18 +896,18 @@
                 <version>${rocketmq-version}</version>
             </dependency>
 
-            <!-- Fury Serialize -->
+            <!-- Fory Serialize -->
             <dependency>
-                <groupId>org.apache.fury</groupId>
-                <artifactId>fury-core</artifactId>
-                <version>${fury.version}</version>
+                <groupId>org.apache.fory</groupId>
+                <artifactId>fory-core</artifactId>
+                <version>${fory.version}</version>
             </dependency>
             <dependency>
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
                 <version>${commons-io.version}</version>
-             </dependency>
-                <dependency>
+            </dependency>
+            <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
                 <version>${jackson.version}</version>
@@ -929,6 +931,16 @@
                 <groupId>com.shentongdata</groupId>
                 <artifactId>oscarJDBC8</artifactId>
                 <version>${oscar.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.squareup.okhttp3</groupId>
+                <artifactId>okhttp</artifactId>
+                <version>${okhttp.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.squareup.okhttp3</groupId>
+                <artifactId>mockwebserver</artifactId>
+                <version>${mockwebserver-version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

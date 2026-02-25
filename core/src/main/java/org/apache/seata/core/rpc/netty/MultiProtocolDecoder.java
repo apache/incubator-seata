@@ -27,9 +27,13 @@ import org.apache.seata.core.rpc.netty.v0.ProtocolDecoderV0;
 import org.apache.seata.core.rpc.netty.v0.ProtocolEncoderV0;
 import org.apache.seata.core.rpc.netty.v1.ProtocolDecoderV1;
 import org.apache.seata.core.rpc.netty.v1.ProtocolEncoderV1;
+import org.apache.seata.core.rpc.netty.v2.ProtocolDecoderV2;
+import org.apache.seata.core.rpc.netty.v2.ProtocolEncoderV2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -64,17 +68,27 @@ public class MultiProtocolDecoder extends LengthFieldBasedFrameDecoder {
 
     private final ChannelHandler[] channelHandlers;
 
+    private final byte maxCurrentVersion; // For testing purposes
+
     public MultiProtocolDecoder(ChannelHandler... channelHandlers) {
         // default is 8M
         this(ProtocolConstants.MAX_FRAME_LENGTH, channelHandlers);
     }
 
-    public MultiProtocolDecoder() {
-        // default is 8M
-        this(ProtocolConstants.MAX_FRAME_LENGTH, null);
+    /**
+     * Constructor for testing purposes to force a specific protocol version
+     * @param maxCurrentVersion the protocol version to force
+     * @param channelHandlers additional channel handlers
+     */
+    MultiProtocolDecoder(byte maxCurrentVersion, ChannelHandler... channelHandlers) {
+        this(ProtocolConstants.MAX_FRAME_LENGTH, maxCurrentVersion, channelHandlers);
     }
 
     public MultiProtocolDecoder(int maxFrameLength, ChannelHandler[] channelHandlers) {
+        this(maxFrameLength, ProtocolConstants.VERSION, channelHandlers);
+    }
+
+    MultiProtocolDecoder(int maxFrameLength, byte maxCurrentVersion, ChannelHandler[] channelHandlers) {
         /*
         int maxFrameLength,
         int lengthFieldOffset,  magic code is 2B, and version is 1B, and then FullLength. so value is 3
@@ -83,13 +97,16 @@ public class MultiProtocolDecoder extends LengthFieldBasedFrameDecoder {
         int initialBytesToStrip we will check magic code and version self, so do not strip any bytes. so values is 0
         */
         super(maxFrameLength, 3, 4, -7, 0);
+        this.maxCurrentVersion = maxCurrentVersion;
         this.protocolDecoderMap = ImmutableMap.<Byte, ProtocolDecoder>builder()
                 .put(ProtocolConstants.VERSION_0, new ProtocolDecoderV0())
                 .put(ProtocolConstants.VERSION_1, new ProtocolDecoderV1())
+                .put(ProtocolConstants.VERSION_2, new ProtocolDecoderV2())
                 .build();
         this.protocolEncoderMap = ImmutableMap.<Byte, ProtocolEncoder>builder()
                 .put(ProtocolConstants.VERSION_0, new ProtocolEncoderV0())
                 .put(ProtocolConstants.VERSION_1, new ProtocolEncoderV1())
+                .put(ProtocolConstants.VERSION_2, new ProtocolEncoderV2())
                 .build();
         this.channelHandlers = channelHandlers;
     }
@@ -110,22 +127,17 @@ public class MultiProtocolDecoder extends LengthFieldBasedFrameDecoder {
 
             if (decoded instanceof ByteBuf) {
                 frame = (ByteBuf) decoded;
+                // Ensure version is within supported range
+                if (version > maxCurrentVersion) {
+                    version = maxCurrentVersion;
+                    LOGGER.error(
+                            "Detected version {} is greater than max supported version {}, using max supported version.",
+                            version,
+                            maxCurrentVersion);
+                }
                 ProtocolDecoder decoder = protocolDecoderMap.get(version);
-                if (decoder == null) {
-                    LOGGER.error(
-                            "Decoder not found, version={}, use current version({})",
-                            version,
-                            ProtocolConstants.VERSION);
-                    decoder = protocolDecoderMap.get(ProtocolConstants.VERSION);
-                }
                 ProtocolEncoder encoder = protocolEncoderMap.get(version);
-                if (encoder == null) {
-                    LOGGER.error(
-                            "Encoder not found, version: {}, use current version({})",
-                            version,
-                            ProtocolConstants.VERSION);
-                    encoder = protocolEncoderMap.get(ProtocolConstants.VERSION);
-                }
+
                 try {
                     if (decoder == null || encoder == null) {
                         throw new UnsupportedOperationException("Unsupported version: " + version);
@@ -135,6 +147,8 @@ public class MultiProtocolDecoder extends LengthFieldBasedFrameDecoder {
                     if (version != ProtocolConstants.VERSION_0) {
                         frame.release();
                     }
+                    // Remove existing encoder if it exists (for client-side compatibility)
+                    removeExistingEncoder(ctx, encoder);
                     ctx.pipeline().addLast((ChannelHandler) decoder);
                     ctx.pipeline().addLast((ChannelHandler) encoder);
                     if (channelHandlers != null) {
@@ -185,5 +199,32 @@ public class MultiProtocolDecoder extends LengthFieldBasedFrameDecoder {
 
     protected boolean isV0(byte version) {
         return version == ProtocolConstants.VERSION_0;
+    }
+
+    /**
+     * Remove existing encoder from pipeline to avoid conflicts when adding new encoder.
+     * This is particularly important for client-side where an encoder may already exist.
+     */
+    private void removeExistingEncoder(ChannelHandlerContext ctx, ProtocolEncoder newEncoder) {
+        // Create a list to collect handlers to remove (avoid ConcurrentModificationException)
+        List<String> handlersToRemove = new ArrayList<>();
+
+        ctx.pipeline().toMap().forEach((name, handler) -> {
+            // Remove if it's a ProtocolEncoder but not the same instance we're about to add
+            // and not a ProtocolDecoder (which might also implement ProtocolEncoder)
+            if (handler instanceof ProtocolEncoder && !(handler instanceof ProtocolDecoder) && handler != newEncoder) {
+                handlersToRemove.add(name);
+            }
+        });
+
+        // Remove the handlers
+        handlersToRemove.forEach(name -> {
+            try {
+                ctx.pipeline().remove(name);
+                LOGGER.debug("Removed existing encoder: {}", name);
+            } catch (Exception e) {
+                LOGGER.warn("Failed to remove existing encoder {}: {}", name, e.getMessage());
+            }
+        });
     }
 }

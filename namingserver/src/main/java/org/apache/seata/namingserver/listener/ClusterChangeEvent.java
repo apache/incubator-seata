@@ -24,17 +24,25 @@ public class ClusterChangeEvent extends ApplicationEvent {
 
     private String group;
 
+    private String namespace;
+
+    private String clusterName;
+
     private long term;
 
-    public ClusterChangeEvent(Object source, String group, long term) {
+    public ClusterChangeEvent(Object source, String group, String namespace, String clusterName, long term) {
         super(source);
         this.group = group;
+        this.namespace = namespace;
+        this.clusterName = clusterName;
         this.term = term;
     }
 
-    public ClusterChangeEvent(Object source, String group) {
+    public ClusterChangeEvent(Object source, String group, String namespace, String clusterName) {
         super(source);
         this.group = group;
+        this.namespace = namespace;
+        this.clusterName = clusterName;
     }
 
     public ClusterChangeEvent(Object source, Clock clock) {
@@ -47,6 +55,22 @@ public class ClusterChangeEvent extends ApplicationEvent {
 
     public void setGroup(String group) {
         this.group = group;
+    }
+
+    public String getNamespace() {
+        return namespace;
+    }
+
+    public void setNamespace(String namespace) {
+        this.namespace = namespace;
+    }
+
+    public String getClusterName() {
+        return clusterName;
+    }
+
+    public void setClusterName(String clusterName) {
+        this.clusterName = clusterName;
     }
 
     public long getTerm() {

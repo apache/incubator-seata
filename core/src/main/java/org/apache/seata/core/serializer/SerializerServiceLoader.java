@@ -30,9 +30,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static org.apache.seata.core.serializer.SerializerType.FASTJSON2;
+import static org.apache.seata.core.serializer.SerializerType.FORY;
 import static org.apache.seata.core.serializer.SerializerType.FURY;
 import static org.apache.seata.core.serializer.SerializerType.HESSIAN;
 import static org.apache.seata.core.serializer.SerializerType.KRYO;
@@ -48,11 +50,17 @@ public final class SerializerServiceLoader {
     private static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
     private static final SerializerType[] DEFAULT_SERIALIZER_TYPE =
-            new SerializerType[] {SEATA, PROTOBUF, KRYO, HESSIAN, FASTJSON2, FURY};
+            new SerializerType[] {SEATA, PROTOBUF, KRYO, HESSIAN, FASTJSON2, FURY, FORY};
 
     private static final Map<String, Serializer> SERIALIZER_MAP = new HashMap<>();
 
+    private static final Map<String, String> SERIALIZER_ALIAS_MAP = new HashMap<>();
+
     private static final String SPLIT_CHAR = ",";
+
+    static {
+        SERIALIZER_ALIAS_MAP.put("fury", "fory");
+    }
 
     private SerializerServiceLoader() {}
 
@@ -75,15 +83,22 @@ public final class SerializerServiceLoader {
                     + "Please manually reference 'org.apache.seata:seata-serializer-protobuf' dependency.");
         }
 
-        String key = serializerKey(type, version);
-        Serializer serializer = SERIALIZER_MAP.get(key);
+        String serializerName = serializerKey(type, version);
+        String resolvedSerializerName = resolveSerializerName(serializerName);
+        if (!Objects.equals(serializerName, resolvedSerializerName)) {
+            LOGGER.info(
+                    "Since {} is no longer maintained, This serialization extension has been replaced with {}.",
+                    serializerName,
+                    resolvedSerializerName);
+        }
+        Serializer serializer = SERIALIZER_MAP.get(resolvedSerializerName);
         if (serializer == null) {
             if (type == SerializerType.SEATA) {
                 serializer = EnhancedServiceLoader.load(Serializer.class, type.name(), new Object[] {version});
             } else {
-                serializer = EnhancedServiceLoader.load(Serializer.class, type.name());
+                serializer = EnhancedServiceLoader.load(Serializer.class, resolvedSerializerName);
             }
-            SERIALIZER_MAP.put(key, serializer);
+            SERIALIZER_MAP.put(serializerName, serializer);
         }
         return serializer;
     }
@@ -101,12 +116,19 @@ public final class SerializerServiceLoader {
                     + "Please manually reference 'org.apache.seata:seata-serializer-protobuf' dependency.");
         }
 
-        String key = type.name();
-        Serializer serializer = SERIALIZER_MAP.get(key);
+        String serializerName = type.name();
+        String resolvedSerializerName = resolveSerializerName(serializerName);
+        if (!Objects.equals(serializerName, resolvedSerializerName)) {
+            LOGGER.info(
+                    "Since {} is no longer maintained, This serialization extension has been replaced with {}.",
+                    serializerName,
+                    resolvedSerializerName);
+        }
+        Serializer serializer = SERIALIZER_MAP.get(resolvedSerializerName);
         if (serializer == null) {
-            serializer = EnhancedServiceLoader.load(Serializer.class, type.name());
+            serializer = EnhancedServiceLoader.load(Serializer.class, resolvedSerializerName);
 
-            SERIALIZER_MAP.put(key, serializer);
+            SERIALIZER_MAP.put(serializerName, serializer);
         }
         return serializer;
     }
@@ -138,5 +160,15 @@ public final class SerializerServiceLoader {
 
     public static SerializerType getDefaultSerializerType() {
         return getSupportedSerializers().get(0);
+    }
+
+    /**
+     * Resolve serializer name from alias mapping
+     *
+     * @param serializerName the original serializer name
+     * @return the resolved serializer name
+     */
+    private static String resolveSerializerName(String serializerName) {
+        return SERIALIZER_ALIAS_MAP.getOrDefault(serializerName.toLowerCase(), serializerName);
     }
 }

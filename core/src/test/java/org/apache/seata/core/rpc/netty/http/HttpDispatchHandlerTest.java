@@ -16,39 +16,66 @@
  */
 package org.apache.seata.core.rpc.netty.http;
 
+import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
+import io.netty.handler.codec.http.DefaultFullHttpResponse;
+import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
+import org.apache.seata.common.rpc.http.HttpContext;
 import org.apache.seata.core.exception.HttpRequestFilterException;
+import org.apache.seata.core.rpc.netty.http.filter.HttpFilterContext;
+import org.apache.seata.core.rpc.netty.http.filter.HttpRequestFilter;
 import org.apache.seata.core.rpc.netty.http.filter.HttpRequestFilterChain;
 import org.apache.seata.core.rpc.netty.http.filter.HttpRequestFilterManager;
+import org.apache.seata.core.rpc.netty.http.filter.HttpRequestParamWrapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.mockito.MockedStatic;
+import org.mockito.MockitoAnnotations;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
+import static org.assertj.core.api.Fail.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 
 class HttpDispatchHandlerTest {
 
     private HttpDispatchHandler handler;
     private EmbeddedChannel channel;
     private TestController testController = new TestController();
+
+    @Mock
+    private ChannelHandlerContext mockCtx;
+
+    private FullHttpRequest testHttpRequest;
+    private ExecutorService testExecutor;
+    private EmbeddedChannel embeddedChannel;
 
     class TestController {
         public String handleRequest(String param) {
@@ -58,6 +85,7 @@ class HttpDispatchHandlerTest {
 
     @BeforeEach
     void setUp() throws NoSuchMethodException {
+        MockitoAnnotations.openMocks(this);
         handler = new HttpDispatchHandler();
         channel = new EmbeddedChannel(handler);
         Method method = TestController.class.getMethod("handleRequest", String.class);
@@ -73,6 +101,16 @@ class HttpDispatchHandlerTest {
         invocation.setParamMetaData(paramMetaDatas);
 
         ControllerManager.addHttpInvocation(invocation);
+
+        testHttpRequest = new DefaultFullHttpRequest(
+                HttpVersion.HTTP_1_1,
+                HttpMethod.GET,
+                "/test",
+                Unpooled.copiedBuffer("{\"name\":\"test\"}", StandardCharsets.UTF_8));
+        embeddedChannel = new EmbeddedChannel();
+        when(mockCtx.channel()).thenReturn(embeddedChannel);
+        when(mockCtx.pipeline()).thenReturn(embeddedChannel.pipeline());
+        testExecutor = Executors.newSingleThreadExecutor();
     }
 
     @AfterEach
@@ -81,6 +119,15 @@ class HttpDispatchHandlerTest {
         Field field2 = HttpRequestFilterManager.class.getDeclaredField("initialized");
         field2.setAccessible(true);
         field2.set(null, false);
+
+        if (testExecutor != null) {
+            testExecutor.shutdown();
+            testExecutor.awaitTermination(1, TimeUnit.SECONDS);
+        }
+        HttpFilterContext.clearCurrentContext();
+        if (embeddedChannel != null) {
+            embeddedChannel.close();
+        }
     }
 
     @Test
@@ -302,6 +349,85 @@ class HttpDispatchHandlerTest {
             FullHttpResponse response = waitForResponse(5000);
             assertEquals(HttpResponseStatus.INTERNAL_SERVER_ERROR, response.status());
         }
+    }
+
+    @Test
+    void testHttpFilterContextAvailableInThreadLocalDuringFilterExecution()
+            throws InterruptedException, ExecutionException, TimeoutException {
+        class MockHttpAspect {
+            public void beforeFilter() {
+                HttpFilterContext<?> context = HttpFilterContext.getCurrentContext();
+                assertNotNull(context, "get request and response");
+
+                HttpRequest request = (HttpRequest) context.getRequest();
+                assertNotNull(request);
+                assertEquals("/test", request.uri());
+                assertEquals(HttpMethod.GET, request.method());
+                assertEquals("test-invocation", context.getAttribute("testKey"));
+            }
+
+            public void afterFilter() {
+                HttpFilterContext<?> context = HttpFilterContext.getCurrentContext();
+                assertNotNull(context, "get request and response");
+
+                FullHttpResponse response = (FullHttpResponse) context.getResponse();
+                assertNotNull(response);
+                assertEquals(HttpResponseStatus.OK, response.status());
+            }
+
+            public void afterFinally() {
+                assertNull(HttpFilterContext.getCurrentContext(), "clean the request and response");
+            }
+        }
+
+        MockHttpAspect mockAspect = new MockHttpAspect();
+
+        HttpRequestFilter businessFilter = new HttpRequestFilter() {
+            @Override
+            public void doFilter(HttpFilterContext<?> ctx, HttpRequestFilterChain chain)
+                    throws HttpRequestFilterException {
+                mockAspect.beforeFilter();
+
+                chain.doFilter(ctx);
+
+                FullHttpResponse response =
+                        new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, Unpooled.EMPTY_BUFFER);
+                ctx.setResponse(response);
+
+                mockAspect.afterFilter();
+            }
+
+            @Override
+            public boolean shouldApply() {
+                return false;
+            }
+        };
+
+        HttpRequestFilterChain filterChain = new HttpRequestFilterChain(Arrays.asList(businessFilter), ctx -> {});
+
+        HttpFilterContext<HttpRequest> context = new HttpFilterContext<>(
+                testHttpRequest,
+                mockCtx,
+                true,
+                HttpContext.HTTP_1_1,
+                () -> new HttpRequestParamWrapper(null, null, null, null));
+        context.setAttribute("testKey", "test-invocation");
+
+        testExecutor
+                .submit(() -> {
+                    try {
+                        HttpFilterContext.setCurrentContext(context);
+                        filterChain.doFilter(context);
+                    } catch (HttpRequestFilterException e) {
+                        fail("Filter failure: " + e.getMessage());
+                    } finally {
+                        HttpFilterContext.clearCurrentContext();
+                        mockAspect.afterFinally();
+                    }
+                })
+                .get(1, TimeUnit.SECONDS);
+
+        assertNull(HttpFilterContext.getCurrentContext());
     }
 
     private FullHttpResponse waitForResponse(long timeoutMs) {
