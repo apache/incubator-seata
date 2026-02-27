@@ -54,6 +54,8 @@ public class NacosRegistryServiceImplTest {
     private MockedStatic<ConfigurationFactory> mockedConfigurationFactory;
     private Configuration mockedRegisterServiceConfiguration;
 
+    private Configuration originalFileInstance;
+
     private NacosRegistryServiceImpl nacosRegistryService;
 
     // Constants extracted
@@ -81,8 +83,9 @@ public class NacosRegistryServiceImplTest {
                 .thenReturn(mockedRegisterServiceConfiguration);
 
         Configuration mockedCurrentNacosConfiguration = mock(Configuration.class);
-        ReflectionUtil.modifyStaticFinalField(
-                ConfigurationFactory.class, "CURRENT_FILE_INSTANCE", mockedCurrentNacosConfiguration);
+        // Save original value and set mock (CURRENT_FILE_INSTANCE is volatile, not final)
+        originalFileInstance = ConfigurationFactory.CURRENT_FILE_INSTANCE;
+        ConfigurationFactory.CURRENT_FILE_INSTANCE = mockedCurrentNacosConfiguration;
 
         // default config expectations
         when(mockedCurrentNacosConfiguration.getConfig(SLB_PATTERN_KEY)).thenReturn("");
@@ -117,6 +120,10 @@ public class NacosRegistryServiceImplTest {
         } catch (Exception e) {
             // ignore cleanup errors in tearDown
         } finally {
+            // Restore original CURRENT_FILE_INSTANCE
+            if (originalFileInstance != null) {
+                ConfigurationFactory.CURRENT_FILE_INSTANCE = originalFileInstance;
+            }
             if (mockedConfigurationFactory != null) {
                 mockedConfigurationFactory.close();
             }
