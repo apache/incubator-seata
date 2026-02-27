@@ -362,8 +362,8 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
                 // Rollback and Branch Report to TC: Exception
                 rollback(BranchStatus.PhaseOne_PrepareFailed);
                 throw new SQLException(
-                        "Failed to end(TMSUCCESS)/prepare xa branch on " + xid + "-" + branchId
-                                + " since " + xe.getMessage(),
+                        "Failed to end(TMSUCCESS)/prepare xa branch on " + xid + "-" + branchId + " since "
+                                + xe.getMessage(),
                         xe);
             } finally {
                 cleanXABranchContext();

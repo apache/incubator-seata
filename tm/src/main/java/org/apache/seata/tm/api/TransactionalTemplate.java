@@ -378,7 +378,9 @@ public class TransactionalTemplate {
             } else if (GlobalStatus.isOnePhasePrepareFailed(afterCommitStatus)) {
                 statusException = new TmTransactionException(
                         TransactionExceptionCode.BranchPrepareFailed,
-                        String.format("Global transaction[%s] is branch prepare failure and will be rollback[TC].", tx.getXid()));
+                        String.format(
+                                "Global transaction[%s] is branch prepare failure and will be rollback[TC].",
+                                tx.getXid()));
             }
             if (null != statusException) {
                 throw new TransactionalExecutor.ExecutionException(tx, statusException, code, statusException);
@@ -424,7 +426,7 @@ public class TransactionalTemplate {
                 break;
             case TimeoutRollbacked:
             case Rollbacked:
-                // rollback transactions but do not exist are usually considered completed
+            // rollback transactions but do not exist are usually considered completed
             case Finished:
                 code = TransactionalExecutor.Code.RollbackDone;
                 break;
