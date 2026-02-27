@@ -169,11 +169,10 @@ public class TransactionalTemplate {
      *
      * @param business the business executor containing logic and transaction configuration
      * @return the result returned by business logic execution
-     * @throws Throwable any exception thrown by business logic (after transaction handling)
+     * @throws Throwable                                any exception thrown by business logic (after transaction handling)
      * @throws TransactionalExecutor.ExecutionException for transaction infrastructure failures
-     * @throws TransactionException for transaction operation failures
-     * @throws IllegalStateException for invalid transaction states
-     *
+     * @throws TransactionException                     for transaction operation failures
+     * @throws IllegalStateException                    for invalid transaction states
      * @see TransactionalExecutor#execute()
      * @see TransactionalExecutor#getTransactionInfo()
      * @see org.apache.seata.tm.api.transaction.Propagation
@@ -284,7 +283,7 @@ public class TransactionalTemplate {
      * Judge whether timeout
      *
      * @param beginTime the beginTime
-     * @param txInfo          the transaction info
+     * @param txInfo    the transaction info
      * @return is timeout
      */
     private boolean isTimeout(long beginTime, TransactionInfo txInfo) {
@@ -425,7 +424,7 @@ public class TransactionalTemplate {
                 break;
             case TimeoutRollbacked:
             case Rollbacked:
-            // rollback transactions but do not exist are usually considered completed
+                // rollback transactions but do not exist are usually considered completed
             case Finished:
                 code = TransactionalExecutor.Code.RollbackDone;
                 break;
