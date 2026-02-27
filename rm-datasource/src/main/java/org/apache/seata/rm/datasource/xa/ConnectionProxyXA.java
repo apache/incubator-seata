@@ -315,7 +315,6 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
 
     private void checkTimeout(Long now) throws XAException {
         if (now - branchRegisterTime > TIMEOUT) {
-            xaRollback(xaBranchXid);
             throw new XAException("XA branch timeout error");
         }
     }
@@ -359,10 +358,11 @@ public class ConnectionProxyXA extends AbstractConnectionProxyXA implements Hold
                 throw xe;
             } catch (XAException xe) {
                 isException = true;
+                long branchId = xaBranchXid.getBranchId();
                 // Rollback and Branch Report to TC: Exception
                 rollback(BranchStatus.PhaseOne_PrepareFailed);
                 throw new SQLException(
-                        "Failed to end(TMSUCCESS)/prepare xa branch on " + xid + "-" + xaBranchXid.getBranchId()
+                        "Failed to end(TMSUCCESS)/prepare xa branch on " + xid + "-" + branchId
                                 + " since " + xe.getMessage(),
                         xe);
             } finally {
