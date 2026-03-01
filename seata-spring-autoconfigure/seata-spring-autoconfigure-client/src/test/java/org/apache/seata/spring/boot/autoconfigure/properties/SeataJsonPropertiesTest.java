@@ -42,6 +42,7 @@ public class SeataJsonPropertiesTest {
     public void testAllowlistAppliedToManager() {
         SeataJsonProperties props = new SeataJsonProperties();
         props.setAllowlist("com.test.model.,com.test.dto.,com.test.SpecialBean");
+        props.init();
 
         // Prefix match
         Assertions.assertTrue(JsonAllowlistManager.getInstance().isAllowed("com.test.model.User"));
