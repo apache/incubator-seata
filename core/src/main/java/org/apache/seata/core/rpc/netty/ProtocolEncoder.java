@@ -25,4 +25,6 @@ import org.apache.seata.core.protocol.RpcMessage;
  **/
 public interface ProtocolEncoder {
     void encode(RpcMessage rpcMessage, ByteBuf out);
+
+    byte protocolVersion();
 }

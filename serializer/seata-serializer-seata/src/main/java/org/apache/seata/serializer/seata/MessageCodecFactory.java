@@ -16,15 +16,7 @@
  */
 package org.apache.seata.serializer.seata;
 
-import org.apache.seata.core.protocol.AbstractMessage;
-import org.apache.seata.core.protocol.BatchResultMessage;
-import org.apache.seata.core.protocol.MergeResultMessage;
-import org.apache.seata.core.protocol.MergedWarpMessage;
-import org.apache.seata.core.protocol.MessageType;
-import org.apache.seata.core.protocol.RegisterRMRequest;
-import org.apache.seata.core.protocol.RegisterRMResponse;
-import org.apache.seata.core.protocol.RegisterTMRequest;
-import org.apache.seata.core.protocol.RegisterTMResponse;
+import org.apache.seata.core.protocol.*;
 import org.apache.seata.core.protocol.transaction.BranchCommitRequest;
 import org.apache.seata.core.protocol.transaction.BranchCommitResponse;
 import org.apache.seata.core.protocol.transaction.BranchRegisterRequest;
@@ -74,6 +66,8 @@ import org.apache.seata.serializer.seata.protocol.transaction.GlobalRollbackResp
 import org.apache.seata.serializer.seata.protocol.transaction.GlobalStatusRequestCodec;
 import org.apache.seata.serializer.seata.protocol.transaction.GlobalStatusResponseCodec;
 import org.apache.seata.serializer.seata.protocol.transaction.UndoLogDeleteRequestCodec;
+import org.apache.seata.serializer.seata.protocol.v2.RegisterRMResponseCodecV2;
+import org.apache.seata.serializer.seata.protocol.v2.RegisterTMResponseCodecV2;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -117,13 +111,21 @@ public class MessageCodecFactory {
                 msgCodec = new RegisterTMRequestCodec();
                 break;
             case MessageType.TYPE_REG_CLT_RESULT:
-                msgCodec = new RegisterTMResponseCodec();
+                if (version == ProtocolConstants.VERSION_2) {
+                    msgCodec = new RegisterTMResponseCodecV2();
+                } else {
+                    msgCodec = new RegisterTMResponseCodec();
+                }
                 break;
             case MessageType.TYPE_REG_RM:
                 msgCodec = new RegisterRMRequestCodec();
                 break;
             case MessageType.TYPE_REG_RM_RESULT:
-                msgCodec = new RegisterRMResponseCodec();
+                if (version == ProtocolConstants.VERSION_2) {
+                    msgCodec = new RegisterRMResponseCodecV2();
+                } else {
+                    msgCodec = new RegisterRMResponseCodec();
+                }
                 break;
             case MessageType.TYPE_BRANCH_COMMIT:
                 msgCodec = new BranchCommitRequestCodec();

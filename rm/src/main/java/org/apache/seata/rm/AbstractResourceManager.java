@@ -130,6 +130,7 @@ public abstract class AbstractResourceManager implements ResourceManager {
             BranchReportRequest request = new BranchReportRequest();
             request.setXid(xid);
             request.setBranchId(branchId);
+            request.setBranchType(branchType);
             request.setStatus(status);
             request.setApplicationData(applicationData);
 
