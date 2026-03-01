@@ -20,6 +20,8 @@ import org.apache.seata.common.json.JsonAllowlistManager;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
+
 import static org.apache.seata.spring.boot.autoconfigure.StarterConstants.JSON_PREFIX;
 
 /**
@@ -42,9 +44,13 @@ public class SeataJsonProperties {
 
     public SeataJsonProperties setAllowlist(String allowlist) {
         this.allowlist = allowlist;
+        return this;
+    }
+
+    @PostConstruct
+    public void init() {
         if (allowlist != null && !allowlist.isEmpty()) {
             JsonAllowlistManager.getInstance().loadUserAllowlist(allowlist);
         }
-        return this;
     }
 }
