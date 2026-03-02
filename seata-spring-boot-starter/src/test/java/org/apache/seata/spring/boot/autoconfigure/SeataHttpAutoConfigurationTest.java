@@ -38,7 +38,7 @@ public class SeataHttpAutoConfigurationTest {
             new ApplicationContextRunner().withConfiguration(AutoConfigurations.of(SeataHttpAutoConfiguration.class));
 
     @Test
-    void whenNotWebApplication_thenNoBeansCreated() {
+    void whenNotWebApplicationThenNoBeansCreated() {
         contextRunner.run(context -> {
             assertThat(context).doesNotHaveBean(SeataWebMvcConfigurer.class);
             assertThat(context).doesNotHaveBean(JakartaSeataWebMvcConfigurer.class);
@@ -46,7 +46,7 @@ public class SeataHttpAutoConfigurationTest {
     }
 
     @Test
-    void whenInterceptorDisabled_thenNoBeansCreated() {
+    void whenInterceptorDisabledThenNoBeansCreated() {
         webContextRunner
                 .withPropertyValues(HTTP_PREFIX + ".interceptor-enabled=false")
                 .run(context -> {
@@ -56,7 +56,7 @@ public class SeataHttpAutoConfigurationTest {
     }
 
     @Test
-    void whenJakartaClassMissing_thenCreatesSeataWebMvcConfigurer() {
+    void whenJakartaClassMissingThenCreatesSeataWebMvcConfigurer() {
         webContextRunner
                 .withClassLoader(new FilteredClassLoader("jakarta.servlet.http.HttpServletRequest"))
                 .run(context -> {
@@ -66,7 +66,7 @@ public class SeataHttpAutoConfigurationTest {
     }
 
     @Test
-    void whenJakartaClassPresent_thenCreatesJakartaSeataWebMvcConfigurer() {
+    void whenJakartaClassPresentThenCreatesJakartaSeataWebMvcConfigurer() {
         webContextRunner.run(context -> {
             // Do not use assertThat(context).doesNotHaveBean(SeataWebMvcConfigurer.class),
             // because JakartaSeataWebMvcConfigurer extends SeataWebMvcConfigurer.
@@ -76,7 +76,7 @@ public class SeataHttpAutoConfigurationTest {
     }
 
     @Test
-    void whenInterceptorEnabledTrue_thenBeansCreated() {
+    void whenInterceptorEnabledTrueThenBeansCreated() {
         webContextRunner
                 .withPropertyValues(HTTP_PREFIX + ".interceptor-enabled=true")
                 .run(context -> {
@@ -85,7 +85,7 @@ public class SeataHttpAutoConfigurationTest {
     }
 
     @Test
-    void whenNoPropertySet_thenDefaultEnabled() { // Test default behavior (interceptor-enabled should default to true)
+    void whenNoPropertySetThenDefaultEnabled() { // Test default behavior (interceptor-enabled should default to true)
         webContextRunner.run(context -> {
             // Should create Jakarta configurer by default
             assertThat(context).hasSingleBean(JakartaSeataWebMvcConfigurer.class);
@@ -93,7 +93,7 @@ public class SeataHttpAutoConfigurationTest {
     }
 
     @Test
-    void whenBothServletClassesMissing_thenFallsBackToJavaxConfigurer() {
+    void whenBothServletClassesMissingThenFallsBackToJavaxConfigurer() {
         // When jakarta servlet class is filtered out, the JakartaSeataWebMvcConfigurer @ConditionalOnClass
         // fails, so the javax SeataWebMvcConfigurer is created as the fallback.
         // This confirms the conditional fallback logic works correctly.

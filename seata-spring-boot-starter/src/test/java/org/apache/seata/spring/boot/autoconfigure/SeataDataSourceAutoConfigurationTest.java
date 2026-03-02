@@ -48,7 +48,7 @@ public class SeataDataSourceAutoConfigurationTest {
             .withBean(DataSource.class, () -> mock(DataSource.class));
 
     @Test
-    void whenConditionsMet_thenAutoDataSourceProxyCreatorCreated() {
+    void whenConditionsMetThenAutoDataSourceProxyCreatorCreated() {
         try (MockedConstruction<DataSourceProxy> mocked = mockConstruction(DataSourceProxy.class)) {
             contextRunner
                     .withPropertyValues(
@@ -64,14 +64,14 @@ public class SeataDataSourceAutoConfigurationTest {
     }
 
     @Test
-    void whenDisabledByProperty_thenBeanNotCreated() {
+    void whenDisabledByPropertyThenBeanNotCreated() {
         contextRunner.withPropertyValues("seata.enabled=false").run(context -> {
             assertThat(context).doesNotHaveBean(SeataAutoDataSourceProxyCreator.class);
         });
     }
 
     @Test
-    void whenNoDataSourceBean_thenBeanNotCreated() {
+    void whenNoDataSourceBeanThenBeanNotCreated() {
         new ApplicationContextRunner()
                 .withConfiguration(AutoConfigurations.of(SeataDataSourceAutoConfiguration.class))
                 .withUserConfiguration(PropertiesConfig.class)
@@ -81,7 +81,7 @@ public class SeataDataSourceAutoConfigurationTest {
     }
 
     @Test
-    void whenEnableAutoDataSourceProxyFalse_thenBeanNotCreated() {
+    void whenEnableAutoDataSourceProxyFalseThenBeanNotCreated() {
         contextRunner
                 .withPropertyValues("seata.enabled=true", "seata.enableAutoDataSourceProxy=false")
                 .run(context -> {
@@ -90,7 +90,7 @@ public class SeataDataSourceAutoConfigurationTest {
     }
 
     @Test
-    void whenEnableAutoDataSourceProxyKebabCaseFalse_thenBeanNotCreated() {
+    void whenEnableAutoDataSourceProxyKebabCaseFalseThenBeanNotCreated() {
         contextRunner
                 .withPropertyValues("seata.enabled=true", "seata.enable-auto-data-source-proxy=false")
                 .run(context -> {
@@ -99,7 +99,7 @@ public class SeataDataSourceAutoConfigurationTest {
     }
 
     @Test
-    void whenUseJdkProxyTrue_thenProxyCreatorConfigured() {
+    void whenUseJdkProxyTrueThenProxyCreatorConfigured() {
         try (MockedConstruction<DataSourceProxy> mocked = mockConstruction(DataSourceProxy.class)) {
             contextRunner
                     .withPropertyValues(
@@ -116,7 +116,7 @@ public class SeataDataSourceAutoConfigurationTest {
     }
 
     @Test
-    void whenUseJdkProxyFalse_thenCglibProxyUsed() {
+    void whenUseJdkProxyFalseThenCglibProxyUsed() {
         try (MockedConstruction<DataSourceProxy> mocked = mockConstruction(DataSourceProxy.class)) {
             contextRunner
                     .withPropertyValues(
@@ -133,7 +133,7 @@ public class SeataDataSourceAutoConfigurationTest {
     }
 
     @Test
-    void whenExcludesForAutoProxyingSet_thenConfigured() {
+    void whenExcludesForAutoProxyingSetThenConfigured() {
         try (MockedConstruction<DataSourceProxy> mocked = mockConstruction(DataSourceProxy.class)) {
             contextRunner
                     .withPropertyValues(
@@ -153,7 +153,7 @@ public class SeataDataSourceAutoConfigurationTest {
     }
 
     @Test
-    void whenDataSourceProxyModeSet_thenConfigured() {
+    void whenDataSourceProxyModeSetThenConfigured() {
         try (MockedConstruction<DataSourceProxy> mocked = mockConstruction(DataSourceProxy.class)) {
             contextRunner
                     .withPropertyValues(

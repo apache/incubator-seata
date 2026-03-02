@@ -22,8 +22,6 @@ import org.apache.seata.spring.boot.autoconfigure.properties.SpringCloudAlibabaC
 import org.apache.seata.tm.TMClient;
 import org.apache.seata.tm.api.DefaultFailureHandlerImpl;
 import org.apache.seata.tm.api.FailureHandler;
-import java.util.Map;
-
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -37,6 +35,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
