@@ -22,6 +22,8 @@ import org.apache.seata.spring.boot.autoconfigure.properties.SpringCloudAlibabaC
 import org.apache.seata.tm.TMClient;
 import org.apache.seata.tm.api.DefaultFailureHandlerImpl;
 import org.apache.seata.tm.api.FailureHandler;
+import java.util.Map;
+
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -36,8 +38,7 @@ import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 
 /**
@@ -98,7 +99,7 @@ public class SeataAutoConfigurationTest {
     void testSeataPropertiesLoaded() {
         // SeataProperties may be registered twice (@Component + @EnableConfigurationProperties),
         // so we use getBeansOfType to get any instance
-        java.util.Map<String, SeataProperties> beans = applicationContext.getBeansOfType(SeataProperties.class);
+        Map<String, SeataProperties> beans = applicationContext.getBeansOfType(SeataProperties.class);
         assertThat(beans.isEmpty()).isFalse();
         SeataProperties seataProperties = beans.values().iterator().next();
         assertThat(seataProperties).isNotNull();
@@ -112,7 +113,7 @@ public class SeataAutoConfigurationTest {
      * and various property configurations, avoiding nested @SpringBootTest issues.
      */
     @Test
-    void whenSeataDisabled_thenNoBeansCreated() {
+    void testSeataDisabled() {
         // Use a lightweight ApplicationContextRunner to test the disabled scenario
         ApplicationContextRunner contextRunner = new ApplicationContextRunner()
                 .withConfiguration(
@@ -121,9 +122,8 @@ public class SeataAutoConfigurationTest {
                 .withBean(SpringCloudAlibabaConfiguration.class, SpringCloudAlibabaConfiguration::new);
 
         contextRunner.withPropertyValues("seata.enabled=false").run(context -> {
-            org.assertj.core.api.AssertionsForInterfaceTypes.assertThat(context).doesNotHaveBean(FailureHandler.class);
-            org.assertj.core.api.AssertionsForInterfaceTypes.assertThat(context)
-                    .doesNotHaveBean(GlobalTransactionScanner.class);
+            assertThat(context).doesNotHaveBean(FailureHandler.class);
+            assertThat(context).doesNotHaveBean(GlobalTransactionScanner.class);
         });
     }
 
