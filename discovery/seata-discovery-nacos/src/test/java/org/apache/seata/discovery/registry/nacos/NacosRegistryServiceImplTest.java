@@ -88,11 +88,20 @@ public class NacosRegistryServiceImplTest {
         when(mockedCurrentNacosConfiguration.getConfig(SLB_PATTERN_KEY)).thenReturn("");
         when(mockedCurrentNacosConfiguration.getConfig(SERVER_ADDR_KEY)).thenReturn("127.0.0.1");
 
+        // Mock for getServiceName() -> registry.nacos.application
+        when(mockedCurrentNacosConfiguration.getConfig(APPLICATION_KEY)).thenReturn(NACOS_MOCKED_APPLICATION);
         when(mockedCurrentNacosConfiguration.getConfig(APPLICATION_KEY, "seata-server"))
                 .thenReturn(NACOS_MOCKED_APPLICATION);
+
+        // Mock for getServiceGroup() -> registry.nacos.group
+        when(mockedCurrentNacosConfiguration.getConfig(GROUP_KEY)).thenReturn(NACOS_MOCKED_GROUP);
         when(mockedCurrentNacosConfiguration.getConfig(GROUP_KEY, "DEFAULT_GROUP"))
                 .thenReturn(NACOS_MOCKED_GROUP);
+
+        // Mock for getClusterName() -> registry.nacos.cluster
+        when(mockedCurrentNacosConfiguration.getConfig(CLUSTER_KEY)).thenReturn(NACOS_MOCKED_CLUSTER);
         when(mockedCurrentNacosConfiguration.getConfig(CLUSTER_KEY, "default")).thenReturn(NACOS_MOCKED_CLUSTER);
+
         when(mockedCurrentNacosConfiguration.getConfig(CONTEXT_PATH_KEY)).thenReturn("/foo");
 
         nacosRegistryService = NacosRegistryServiceImpl.getInstance();
