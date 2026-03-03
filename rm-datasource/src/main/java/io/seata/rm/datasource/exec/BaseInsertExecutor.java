@@ -147,7 +147,7 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
             PreparedStatementProxy preparedStatementProxy = (PreparedStatementProxy) statementProxy;
 
             List<List<Object>> insertRows = recognizer.getInsertRows(pkIndexMap.values());
-            if (insertRows != null && !insertRows.isEmpty()) {
+            if (!CollectionUtils.isEmpty(insertRows)) {
                 Map<Integer, ArrayList<Object>> parameters = preparedStatementProxy.getParameters();
                 final int rowSize = insertRows.size();
                 int totalPlaceholderNum = -1;
