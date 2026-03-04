@@ -35,12 +35,15 @@ import org.apache.seata.saga.statelang.domain.impl.ChoiceStateImpl;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * ChoiceState Handler
  *
  */
 public class ChoiceStateHandler implements StateHandler {
+
+    private final ReentrantLock choiceLock = new ReentrantLock();
 
     @Override
     public void process(ProcessContext context) throws EngineExecutionException {
@@ -50,7 +53,8 @@ public class ChoiceStateHandler implements StateHandler {
 
         Map<Object, String> choiceEvaluators = choiceState.getChoiceEvaluators();
         if (choiceEvaluators == null) {
-            synchronized (choiceState) {
+            choiceLock.lock();
+            try {
                 choiceEvaluators = choiceState.getChoiceEvaluators();
                 if (choiceEvaluators == null) {
 
@@ -69,6 +73,8 @@ public class ChoiceStateHandler implements StateHandler {
                     }
                     choiceState.setChoiceEvaluators(choiceEvaluators);
                 }
+            } finally {
+                choiceLock.unlock();
             }
         }
 

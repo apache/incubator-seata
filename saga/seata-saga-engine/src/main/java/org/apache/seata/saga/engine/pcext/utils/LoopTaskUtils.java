@@ -44,6 +44,7 @@ import java.util.EmptyStackException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 /**
@@ -55,6 +56,8 @@ public class LoopTaskUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(LoopTaskUtils.class);
 
     public static final String LOOP_STATE_NAME_PATTERN = "-loop-";
+
+    private static final ReentrantLock loopLock = new ReentrantLock();
 
     /**
      * get Loop Config from State
@@ -227,7 +230,8 @@ public class LoopTaskUtils {
                 currentLoopContext.getNrOfCompletedInstances().get();
 
         if (!currentLoopContext.isCompletionConditionSatisfied()) {
-            synchronized (currentLoopContext) {
+            loopLock.lock();
+            try {
                 if (!currentLoopContext.isCompletionConditionSatisfied()) {
                     Map<String, Object> stateMachineContext =
                             (Map<String, Object>) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);
@@ -247,6 +251,8 @@ public class LoopTaskUtils {
                         currentLoopContext.setCompletionConditionSatisfied(true);
                     }
                 }
+            } finally {
+                loopLock.unlock();
             }
         }
 

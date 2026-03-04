@@ -44,6 +44,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * SpringBean Service Invoker
@@ -52,6 +53,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationContextAware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SpringBeanServiceInvoker.class);
+
+    private final ReentrantLock methodLock = new ReentrantLock();
+
+    private final ReentrantLock retryLock = new ReentrantLock();
 
     private ApplicationContext applicationContext;
     private ThreadPoolExecutor threadPoolExecutor;
@@ -105,7 +110,8 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
 
         Method method = state.getMethod();
         if (method == null) {
-            synchronized (state) {
+            methodLock.lock();
+            try {
                 method = state.getMethod();
                 if (method == null) {
                     method = findMethod(bean.getClass(), state.getServiceMethod(), state.getParameterTypes());
@@ -113,6 +119,8 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
                         state.setMethod(method);
                     }
                 }
+            } finally {
+                methodLock.unlock();
             }
         }
 
@@ -196,7 +204,8 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
                 } else {
                     List<Class<? extends Exception>> exceptionClasses = retryConfig.getExceptionClasses();
                     if (exceptionClasses == null) {
-                        synchronized (retryConfig) {
+                        retryLock.lock();
+                        try {
                             exceptionClasses = retryConfig.getExceptionClasses();
                             if (exceptionClasses == null) {
 
@@ -230,6 +239,8 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
                                 }
                                 retryConfig.setExceptionClasses(exceptionClasses);
                             }
+                        } finally {
+                            retryLock.unlock();
                         }
                     }
 

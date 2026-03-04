@@ -51,6 +51,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * StateInterceptor for ServiceTask, SubStateMachine, CompensateState
@@ -60,6 +61,8 @@ import java.util.Map;
 public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceTaskHandlerInterceptor.class);
+
+    private final ReentrantLock statusLock = new ReentrantLock();
 
     @Override
     public boolean match(Class<? extends InterceptableStateHandler> clazz) {
@@ -325,7 +328,8 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
 
                 Map<Object, String> statusEvaluators = state.getStatusEvaluators();
                 if (statusEvaluators == null) {
-                    synchronized (state) {
+                    statusLock.lock();
+                    try {
                         statusEvaluators = state.getStatusEvaluators();
                         if (statusEvaluators == null) {
                             statusEvaluators = new LinkedHashMap<>(statusMatchList.size());
@@ -339,8 +343,10 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
                                     statusEvaluators.put(evaluator, statusVal);
                                 }
                             }
+                            state.setStatusEvaluators(statusEvaluators);
                         }
-                        state.setStatusEvaluators(statusEvaluators);
+                    } finally {
+                        statusLock.unlock();
                     }
                 }
 

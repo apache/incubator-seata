@@ -38,12 +38,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  */
 public class EngineUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EngineUtils.class);
+
+    private static final ReentrantLock exceptionLock = new ReentrantLock();
 
     /**
      * generate parent id
@@ -198,7 +201,8 @@ public class EngineUtils {
                 List<Class<? extends Exception>> exceptionClasses = exceptionMatch.getExceptionClasses();
                 if (CollectionUtils.isNotEmpty(exceptions)) {
                     if (exceptionClasses == null) {
-                        synchronized (exceptionMatch) {
+                        exceptionLock.lock();
+                        try {
                             exceptionClasses = exceptionMatch.getExceptionClasses();
                             if (exceptionClasses == null) {
 
@@ -232,6 +236,8 @@ public class EngineUtils {
                                 }
                                 exceptionMatch.setExceptionClasses(exceptionClasses);
                             }
+                        } finally {
+                            exceptionLock.unlock();
                         }
                     }
 

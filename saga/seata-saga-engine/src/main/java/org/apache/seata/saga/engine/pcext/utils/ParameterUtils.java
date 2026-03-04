@@ -29,12 +29,15 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * ParameterUtils
  *
  */
 public class ParameterUtils {
+
+    private static final ReentrantLock inputLock = new ReentrantLock();
 
     public static List<Object> createInputParams(
             ExpressionResolver expressionResolver,
@@ -48,15 +51,18 @@ public class ParameterUtils {
 
         List<Object> inputExpressions = serviceTaskState.getInputExpressions();
         if (inputExpressions == null) {
-            synchronized (serviceTaskState) {
+            inputLock.lock();
+            try {
                 inputExpressions = serviceTaskState.getInputExpressions();
                 if (inputExpressions == null) {
                     inputExpressions = new ArrayList<>(inputAssignments.size());
                     for (Object inputAssignment : inputAssignments) {
                         inputExpressions.add(createValueExpression(expressionResolver, inputAssignment));
                     }
+                    serviceTaskState.setInputExpressions(inputExpressions);
                 }
-                serviceTaskState.setInputExpressions(inputExpressions);
+            } finally {
+                inputLock.unlock();
             }
         }
         List<Object> inputValues = new ArrayList<>(inputExpressions.size());
@@ -77,7 +83,8 @@ public class ParameterUtils {
 
         Map<String, Object> outputExpressions = serviceTaskState.getOutputExpressions();
         if (outputExpressions == null) {
-            synchronized (serviceTaskState) {
+            inputLock.lock();
+            try {
                 outputExpressions = serviceTaskState.getOutputExpressions();
                 if (outputExpressions == null) {
                     outputExpressions = new LinkedHashMap<>(outputAssignments.size());
@@ -85,8 +92,10 @@ public class ParameterUtils {
                         outputExpressions.put(
                                 entry.getKey(), createValueExpression(expressionResolver, entry.getValue()));
                     }
+                    serviceTaskState.setOutputExpressions(outputExpressions);
                 }
-                serviceTaskState.setOutputExpressions(outputExpressions);
+            } finally {
+                inputLock.unlock();
             }
         }
         Map<String, Object> outputValues = new LinkedHashMap<>(outputExpressions.size());

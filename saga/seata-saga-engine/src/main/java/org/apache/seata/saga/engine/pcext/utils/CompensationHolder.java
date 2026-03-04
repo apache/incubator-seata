@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * CompensationHolder
@@ -60,18 +61,23 @@ public class CompensationHolder {
      */
     private Stack<StateInstance> stateStackNeedCompensation = new Stack<>();
 
+    private static final ReentrantLock holderLock = new ReentrantLock();
+
     public static CompensationHolder getCurrent(ProcessContext context, boolean forceCreate) {
 
         CompensationHolder compensationholder =
                 (CompensationHolder) context.getVariable(DomainConstants.VAR_NAME_CURRENT_COMPENSATION_HOLDER);
         if (compensationholder == null && forceCreate) {
-            synchronized (context) {
+            holderLock.lock();
+            try {
                 compensationholder =
                         (CompensationHolder) context.getVariable(DomainConstants.VAR_NAME_CURRENT_COMPENSATION_HOLDER);
                 if (compensationholder == null) {
                     compensationholder = new CompensationHolder();
                     context.setVariable(DomainConstants.VAR_NAME_CURRENT_COMPENSATION_HOLDER, compensationholder);
                 }
+            } finally {
+                holderLock.unlock();
             }
         }
         return compensationholder;

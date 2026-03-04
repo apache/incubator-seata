@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Stack;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Deliver event to event consumer directly
@@ -35,6 +36,8 @@ public class DirectEventBus extends AbstractEventBus<ProcessContext> {
     private static final Logger LOGGER = LoggerFactory.getLogger(DirectEventBus.class);
 
     private static final String VAR_NAME_SYNC_EXE_STACK = "_sync_execution_stack_";
+
+    private final ReentrantLock contextLock = new ReentrantLock();
 
     @Override
     public boolean offer(ProcessContext context) throws FrameworkException {
@@ -49,13 +52,16 @@ public class DirectEventBus extends AbstractEventBus<ProcessContext> {
         boolean isFirstEvent = false;
         Stack<ProcessContext> currentStack = (Stack<ProcessContext>) context.getVariable(VAR_NAME_SYNC_EXE_STACK);
         if (currentStack == null) {
-            synchronized (context) {
+            contextLock.lock();
+            try {
                 currentStack = (Stack<ProcessContext>) context.getVariable(VAR_NAME_SYNC_EXE_STACK);
                 if (currentStack == null) {
                     currentStack = new Stack<>();
                     context.setVariable(VAR_NAME_SYNC_EXE_STACK, currentStack);
                     isFirstEvent = true;
                 }
+            } finally {
+                contextLock.unlock();
             }
         }
 
