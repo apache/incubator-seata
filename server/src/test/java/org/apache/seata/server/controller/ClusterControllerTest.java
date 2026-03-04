@@ -258,7 +258,7 @@ class ClusterControllerTest extends BaseSpringBootTest {
                 }
             }
 
-                       Assertions.assertTrue(firstEventReceived, "First event (connection established) should be received");
+            Assertions.assertTrue(firstEventReceived, "First event (connection established) should be received");
             Assertions.assertEquals(
                     expectedUpdateCount,
                     clusterUpdateCount,
