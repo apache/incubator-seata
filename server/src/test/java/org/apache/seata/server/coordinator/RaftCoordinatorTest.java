@@ -28,6 +28,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import org.springframework.context.ApplicationContext;
 
 /**
  * The type Raft coordinator test.
@@ -41,7 +42,7 @@ public class RaftCoordinatorTest extends BaseSpringBootTest {
     private static final String ANOTHER_GROUP = "another_group";
 
     @BeforeAll
-    public static void setup() throws Exception {
+    public static void setup(ApplicationContext context) throws Exception {
         SessionHolder.init(SessionMode.FILE);
         remotingServer = new DefaultCoordinatorTest.MockServerMessageSender();
         raftCoordinator = new RaftCoordinator(remotingServer);
