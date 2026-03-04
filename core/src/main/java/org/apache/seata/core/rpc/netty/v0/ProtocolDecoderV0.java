@@ -130,7 +130,7 @@ public class ProtocolDecoderV0 extends LengthFieldBasedFrameDecoder implements P
             System.arraycopy(bs, 0, bs2, 2, length);
             byte codecType = isSeataCodec ? SerializerType.SEATA.getCode() : SerializerType.HESSIAN.getCode();
             Serializer serializer =
-                    SerializerServiceLoader.load(SerializerType.getByCode(codecType), ProtocolConstants.VERSION_0);
+                    SerializerServiceLoader.load(SerializerType.getByCode(codecType), protocolVersion());
             rpcMessage.setBody(serializer.deserialize(bs2));
         } catch (Exception e) {
             LOGGER.error("decode error", e);
@@ -150,5 +150,10 @@ public class ProtocolDecoderV0 extends LengthFieldBasedFrameDecoder implements P
             LOGGER.error("Decode frame error, cause: {}", exx.getMessage());
             throw new DecodeException(exx);
         }
+    }
+
+    @Override
+    public byte protocolVersion() {
+        return ProtocolConstants.VERSION_0;
     }
 }

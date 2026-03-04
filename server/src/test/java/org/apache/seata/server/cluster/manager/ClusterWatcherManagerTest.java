@@ -17,30 +17,44 @@
 package org.apache.seata.server.cluster.manager;
 
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.GenericFutureListener;
+import org.apache.seata.common.ConfigurationKeys;
+import org.apache.seata.common.metadata.MetadataResponse;
+import org.apache.seata.common.metadata.Node;
 import org.apache.seata.common.rpc.http.HttpContext;
+import org.apache.seata.config.Configuration;
+import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.server.BaseSpringBootTest;
 import org.apache.seata.server.cluster.listener.ClusterChangeEvent;
+import org.apache.seata.server.cluster.raft.RaftServer;
+import org.apache.seata.server.cluster.raft.RaftServerManager;
+import org.apache.seata.server.cluster.raft.RaftStateMachine;
+import org.apache.seata.server.cluster.raft.sync.msg.dto.RaftClusterMetadata;
 import org.apache.seata.server.cluster.watch.Watcher;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import static org.apache.seata.common.ConfigurationKeys.STORE_MODE;
+import static org.apache.seata.common.DefaultValues.DEFAULT_SEATA_GROUP;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -69,12 +83,17 @@ class ClusterWatcherManagerTest extends BaseSpringBootTest {
         Object mockRequest = new Object();
         httpContext = new HttpContext<>(mockRequest, mockChannelHandlerContext, true, HttpContext.HTTP_1_1);
 
-        Map<String, Queue<Watcher<HttpContext>>> watchers = (Map<String, Queue<Watcher<HttpContext>>>)
-                ReflectionTestUtils.getField(clusterWatcherManager, "WATCHERS");
+        Map<String, Queue<Watcher<HttpContext>>> http1Watchers = (Map<String, Queue<Watcher<HttpContext>>>)
+                ReflectionTestUtils.getField(clusterWatcherManager, "HTTP1_WATCHERS");
+        Map<String, Queue<Watcher<HttpContext>>> http2Watchers = (Map<String, Queue<Watcher<HttpContext>>>)
+                ReflectionTestUtils.getField(clusterWatcherManager, "HTTP2_WATCHERS");
         Map<String, Long> groupUpdateTerm =
                 (Map<String, Long>) ReflectionTestUtils.getField(clusterWatcherManager, "GROUP_UPDATE_TERM");
-        if (watchers != null) {
-            watchers.clear();
+        if (http1Watchers != null) {
+            http1Watchers.clear();
+        }
+        if (http2Watchers != null) {
+            http2Watchers.clear();
         }
         if (groupUpdateTerm != null) {
             groupUpdateTerm.clear();
@@ -96,69 +115,6 @@ class ClusterWatcherManagerTest extends BaseSpringBootTest {
     }
 
     @Test
-    void testSendWatcherResponseWithInactiveChannel() {
-        when(mockChannel.isActive()).thenReturn(false);
-
-        Watcher<HttpContext> watcher = new Watcher<>(TEST_GROUP, httpContext, TEST_TIMEOUT, TEST_TERM);
-
-        assertDoesNotThrow(() -> {
-            ReflectionTestUtils.invokeMethod(clusterWatcherManager, "notifyWatcher", watcher);
-        });
-
-        verify(mockChannel, atLeastOnce()).isActive();
-
-        verify(mockChannelHandlerContext, never()).write(any());
-        verify(mockChannelHandlerContext, never()).writeAndFlush(any());
-        verify(mockChannelHandlerContext, never()).flush();
-
-        assertTrue(watcher.isDone());
-    }
-
-    @Test
-    void testSendWatcherResponseWithActiveChannel_Http1() {
-        when(mockChannel.isActive()).thenReturn(true);
-        Watcher<HttpContext> watcher = new Watcher<>(TEST_GROUP, httpContext, TEST_TIMEOUT, TEST_TERM);
-
-        assertDoesNotThrow(() -> {
-            ReflectionTestUtils.invokeMethod(clusterWatcherManager, "notifyWatcher", watcher);
-        });
-
-        verify(mockChannel, atLeastOnce()).isActive();
-
-        verify(mockChannelHandlerContext, atLeastOnce()).writeAndFlush(any());
-
-        assertTrue(watcher.isDone());
-    }
-
-    @Test
-    void testSendWatcherResponseWithActiveChannel_Http2() {
-        // Test normal flow with active channel (HTTP/2)
-        when(mockChannel.isActive()).thenReturn(true);
-
-        // Mock writeAndFlush to return a non-null ChannelFuture
-        ChannelFuture mockChannelFuture = mock(ChannelFuture.class);
-        when(mockChannelHandlerContext.writeAndFlush(any())).thenReturn(mockChannelFuture);
-        when(mockChannelFuture.addListener(any())).thenReturn(mockChannelFuture);
-
-        // Create HTTP/2 context
-        HttpContext<Object> http2Context =
-                new HttpContext<>(new Object(), mockChannelHandlerContext, true, HttpContext.HTTP_2_0);
-
-        Watcher<HttpContext> watcher = new Watcher<>(TEST_GROUP, http2Context, TEST_TIMEOUT, TEST_TERM);
-
-        assertDoesNotThrow(() -> {
-            ReflectionTestUtils.invokeMethod(clusterWatcherManager, "notifyWatcher", watcher);
-        });
-
-        verify(mockChannel, atLeastOnce()).isActive();
-
-        verify(mockChannelHandlerContext, atLeastOnce()).write(any());
-        verify(mockChannelHandlerContext, atLeastOnce()).writeAndFlush(any());
-
-        assertTrue(watcher.isDone());
-    }
-
-    @Test
     void testOnChangeEventWithInactiveChannel() {
         when(mockChannel.isActive()).thenReturn(false);
 
@@ -166,10 +122,11 @@ class ClusterWatcherManagerTest extends BaseSpringBootTest {
 
         clusterWatcherManager.registryWatcher(watcher);
 
-        Map<String, Queue<Watcher<HttpContext>>> watchers = (Map<String, Queue<Watcher<HttpContext>>>)
-                ReflectionTestUtils.getField(clusterWatcherManager, "WATCHERS");
-        assertTrue(watchers.containsKey(TEST_GROUP));
-        assertEquals(1, watchers.get(TEST_GROUP).size());
+        // HTTP/1.1 watcher should be in HTTP1_WATCHERS
+        Map<String, Queue<Watcher<HttpContext>>> http1Watchers = (Map<String, Queue<Watcher<HttpContext>>>)
+                ReflectionTestUtils.getField(clusterWatcherManager, "HTTP1_WATCHERS");
+        assertTrue(http1Watchers.containsKey(TEST_GROUP));
+        assertEquals(1, http1Watchers.get(TEST_GROUP).size());
 
         ClusterChangeEvent event = new ClusterChangeEvent(this, TEST_GROUP, TEST_TERM + 1, true);
 
@@ -227,37 +184,146 @@ class ClusterWatcherManagerTest extends BaseSpringBootTest {
         assertTrue(watcher.isDone());
     }
 
+    // --- getMetadataResponse unit tests ---
+
     @Test
-    void testHttp2WriteAndFlushFailedShouldTriggerListener() throws Exception {
-        when(mockChannel.isActive()).thenReturn(true);
+    void getMetadataResponse_whenGroupBlank_usesDefaultGroupFromConfig() {
+        String defaultGroup = "default-from-config";
+        Configuration mockConfig = mock(Configuration.class);
+        when(mockConfig.getConfig(eq(ConfigurationKeys.SERVER_RAFT_GROUP), eq(DEFAULT_SEATA_GROUP)))
+                .thenReturn(defaultGroup);
 
-        ChannelFuture mockFuture = mock(ChannelFuture.class);
-        when(mockChannelHandlerContext.writeAndFlush(any())).thenReturn(mockFuture);
+        try (MockedStatic<ConfigurationFactory> configFactoryMock = Mockito.mockStatic(ConfigurationFactory.class);
+                MockedStatic<RaftServerManager> raftManagerMock = Mockito.mockStatic(RaftServerManager.class)) {
+            configFactoryMock.when(ConfigurationFactory::getInstance).thenReturn(mockConfig);
+            raftManagerMock
+                    .when(() -> RaftServerManager.getRaftServer(defaultGroup))
+                    .thenReturn(null);
 
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<GenericFutureListener<? extends Future<? super Void>>> listenerCaptor =
-                ArgumentCaptor.forClass(GenericFutureListener.class);
+            MetadataResponse response = clusterWatcherManager.getMetadataResponse(null);
+            assertNotNull(response);
+            assertNull(response.getNodes());
+            assertNull(response.getStoreMode());
 
-        when(mockFuture.addListener(listenerCaptor.capture())).thenReturn(mockFuture);
+            response = clusterWatcherManager.getMetadataResponse("");
+            assertNotNull(response);
+            assertNull(response.getNodes());
+        }
+    }
 
-        RuntimeException cause = new RuntimeException("mock http2 write failed");
-        when(mockFuture.isSuccess()).thenReturn(false);
-        when(mockFuture.cause()).thenReturn(cause);
+    @Test
+    void getMetadataResponse_whenRaftServerNull_returnsEmptyResponse() {
+        try (MockedStatic<RaftServerManager> raftManagerMock = Mockito.mockStatic(RaftServerManager.class)) {
+            raftManagerMock
+                    .when(() -> RaftServerManager.getRaftServer(TEST_GROUP))
+                    .thenReturn(null);
 
-        HttpContext<Object> http2Context =
-                new HttpContext<>(new Object(), mockChannelHandlerContext, true, HttpContext.HTTP_2_0);
+            MetadataResponse response = clusterWatcherManager.getMetadataResponse(TEST_GROUP);
 
-        Watcher<HttpContext> watcher = new Watcher<>(TEST_GROUP, http2Context, TEST_TIMEOUT, TEST_TERM);
+            assertNotNull(response);
+            assertNull(response.getNodes());
+            assertNull(response.getStoreMode());
+        }
+    }
 
-        assertDoesNotThrow(() -> ReflectionTestUtils.invokeMethod(clusterWatcherManager, "notifyWatcher", watcher));
+    @Test
+    void getMetadataResponse_whenRaftServerNotNull_leaderNull_returnsResponseWithStoreModeOnly() {
+        RaftServer mockRaftServer = mock(RaftServer.class);
+        RaftStateMachine mockStateMachine = mock(RaftStateMachine.class);
+        RaftClusterMetadata metadata = new RaftClusterMetadata(10L);
+        metadata.setLeader(null);
+        metadata.setFollowers(Collections.emptyList());
+        metadata.setLearner(Collections.emptyList());
 
-        GenericFutureListener<? extends Future<? super Void>> listener = listenerCaptor.getValue();
-        assertNotNull(listener);
+        when(mockRaftServer.getRaftStateMachine()).thenReturn(mockStateMachine);
+        when(mockStateMachine.getRaftLeaderMetadata()).thenReturn(metadata);
 
-        verify(mockChannel, atLeastOnce()).isActive();
-        verify(mockChannelHandlerContext, atLeastOnce()).write(any());
-        verify(mockChannelHandlerContext, atLeastOnce()).writeAndFlush(any());
+        Configuration mockConfig = mock(Configuration.class);
+        when(mockConfig.getConfig(STORE_MODE)).thenReturn("raft");
 
-        assertTrue(watcher.isDone());
+        try (MockedStatic<RaftServerManager> raftManagerMock = Mockito.mockStatic(RaftServerManager.class);
+                MockedStatic<ConfigurationFactory> configFactoryMock = Mockito.mockStatic(ConfigurationFactory.class)) {
+            raftManagerMock
+                    .when(() -> RaftServerManager.getRaftServer(TEST_GROUP))
+                    .thenReturn(mockRaftServer);
+            configFactoryMock.when(ConfigurationFactory::getInstance).thenReturn(mockConfig);
+
+            MetadataResponse response = clusterWatcherManager.getMetadataResponse(TEST_GROUP);
+
+            assertNotNull(response);
+            assertEquals("raft", response.getStoreMode());
+            assertNull(response.getNodes());
+        }
+    }
+
+    @Test
+    void getMetadataResponse_whenRaftServerNotNull_leaderNotNull_returnsFullResponse() {
+        Node leader = new Node();
+        leader.setGroup(TEST_GROUP);
+        leader.setControl(new Node.Endpoint("127.0.0.1", 7091));
+        leader.setTransaction(new Node.Endpoint("127.0.0.1", 8091));
+        Node follower = new Node();
+        follower.setGroup(TEST_GROUP);
+        follower.setControl(new Node.Endpoint("127.0.0.2", 7092));
+        follower.setTransaction(new Node.Endpoint("127.0.0.2", 8092));
+        List<Node> followers = new ArrayList<>();
+        followers.add(follower);
+        List<Node> learners = new ArrayList<>();
+
+        RaftClusterMetadata metadata = new RaftClusterMetadata(100L);
+        metadata.setLeader(leader);
+        metadata.setFollowers(followers);
+        metadata.setLearner(learners);
+
+        RaftServer mockRaftServer = mock(RaftServer.class);
+        RaftStateMachine mockStateMachine = mock(RaftStateMachine.class);
+        when(mockRaftServer.getRaftStateMachine()).thenReturn(mockStateMachine);
+        when(mockStateMachine.getRaftLeaderMetadata()).thenReturn(metadata);
+
+        Configuration mockConfig = mock(Configuration.class);
+        when(mockConfig.getConfig(STORE_MODE)).thenReturn("raft");
+
+        try (MockedStatic<RaftServerManager> raftManagerMock = Mockito.mockStatic(RaftServerManager.class);
+                MockedStatic<ConfigurationFactory> configFactoryMock = Mockito.mockStatic(ConfigurationFactory.class)) {
+            raftManagerMock
+                    .when(() -> RaftServerManager.getRaftServer(TEST_GROUP))
+                    .thenReturn(mockRaftServer);
+            configFactoryMock.when(ConfigurationFactory::getInstance).thenReturn(mockConfig);
+
+            MetadataResponse response = clusterWatcherManager.getMetadataResponse(TEST_GROUP);
+
+            assertNotNull(response);
+            assertEquals("raft", response.getStoreMode());
+            assertEquals(100L, response.getTerm());
+            assertNotNull(response.getNodes());
+            assertEquals(2, response.getNodes().size());
+            assertEquals(TEST_GROUP, response.getNodes().get(0).getGroup());
+            assertEquals(TEST_GROUP, response.getNodes().get(1).getGroup());
+        }
+    }
+
+    @Test
+    void getMetadataResponse_whenGetRaftLeaderMetadataThrows_returnsResponseAndLogsError() {
+        RaftServer mockRaftServer = mock(RaftServer.class);
+        RaftStateMachine mockStateMachine = mock(RaftStateMachine.class);
+        when(mockRaftServer.getRaftStateMachine()).thenReturn(mockStateMachine);
+        when(mockStateMachine.getRaftLeaderMetadata()).thenThrow(new RuntimeException("test exception"));
+
+        Configuration mockConfig = mock(Configuration.class);
+        when(mockConfig.getConfig(STORE_MODE)).thenReturn("raft");
+
+        try (MockedStatic<RaftServerManager> raftManagerMock = Mockito.mockStatic(RaftServerManager.class);
+                MockedStatic<ConfigurationFactory> configFactoryMock = Mockito.mockStatic(ConfigurationFactory.class)) {
+            raftManagerMock
+                    .when(() -> RaftServerManager.getRaftServer(TEST_GROUP))
+                    .thenReturn(mockRaftServer);
+            configFactoryMock.when(ConfigurationFactory::getInstance).thenReturn(mockConfig);
+
+            MetadataResponse response = clusterWatcherManager.getMetadataResponse(TEST_GROUP);
+
+            assertNotNull(response);
+            assertEquals("raft", response.getStoreMode());
+            assertNull(response.getNodes());
+        }
     }
 }

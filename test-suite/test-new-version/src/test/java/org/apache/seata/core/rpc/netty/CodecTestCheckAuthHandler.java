@@ -14,31 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.seata.common.executor;
+package org.apache.seata.core.rpc.netty;
+
+import org.apache.seata.common.loader.LoadLevel;
+import org.apache.seata.core.protocol.RegisterTMRequest;
+import org.apache.seata.server.auth.DefaultCheckAuthHandler;
 
 /**
- * The interface HttpCallback.
- *
- * @param <T> the type parameter
- */
-public interface HttpCallback<T> {
+ * the type CodecTestCheckAuthHandler
+ **/
+@LoadLevel(name = "codecTestCheckAuthHandler", order = 101)
+public class CodecTestCheckAuthHandler extends DefaultCheckAuthHandler {
 
-    /**
-     * Called when the HTTP request is successful.
-     *
-     * @param result the result of the HTTP request
-     */
-    void onSuccess(T result);
+    public static String CODEC_TEST_REG_ERROR = "codec_test_reg_error";
 
-    /**
-     * Called when the HTTP request fails.
-     *
-     * @param e the exception that occurred during the HTTP request
-     */
-    void onFailure(Throwable e);
-
-    /**
-     * Called when the HTTP request is cancelled.
-     */
-    void onCancelled();
+    @Override
+    public boolean regTransactionManagerCheckAuth(RegisterTMRequest request) {
+        if (CODEC_TEST_REG_ERROR.equals(request.getExtraData())) {
+            return false;
+        }
+        return super.regTransactionManagerCheckAuth(request);
+    }
 }

@@ -243,4 +243,11 @@ public interface Constants {
      * The constant RAFT_GROUP_HEADER
      */
     String RAFT_GROUP_HEADER = "X-SEATA-RAFT-GROUP";
+
+    /**
+     * The constant WATCH_EVENT_PREFIX
+     * Prefix for watch event data format: "{prefix}{json}\n"
+     * CW stands for Cluster Watch
+     */
+    String WATCH_EVENT_PREFIX = "CW:";
 }
