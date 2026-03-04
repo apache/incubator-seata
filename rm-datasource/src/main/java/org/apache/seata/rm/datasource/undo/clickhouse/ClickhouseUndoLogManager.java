@@ -39,14 +39,19 @@ public class ClickhouseUndoLogManager extends MySQLUndoLogManager {
 
     @Override
     public int deleteUndoLogByLogCreated(Date logCreated, int limitRows, Connection conn) throws SQLException {
+        if (logCreated == null) {
+            return 0;
+        }
         try (PreparedStatement deletePST = conn.prepareStatement(DELETE_UNDO_LOG_BY_CREATE_SQL)) {
             // Clickhouse doesn't natively support LIMIT in ALTER TABLE ... DELETE easily inside prepared statements
-            // like MySQL
-            // so we omit the LIMIT parameter for log sweeping.
-            deletePST.setDate(1, new java.sql.Date(logCreated.getTime()));
+            // like MySQL so we omit the LIMIT parameter for log sweeping.
+            if (limitRows > 0 && logger.isDebugEnabled()) {
+                logger.debug("ClickHouse log sweeping ignores limitRows: {}", limitRows);
+            }
+            deletePST.setTimestamp(1, new java.sql.Timestamp(logCreated.getTime()));
             int deleteRows = deletePST.executeUpdate();
             if (logger.isDebugEnabled()) {
-                logger.debug("batch delete undo log for clickhouse");
+                logger.debug("batch delete undo log for clickhouse, affected rows: {}", deleteRows);
             }
             return deleteRows;
         } catch (Exception e) {
