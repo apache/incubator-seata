@@ -169,9 +169,10 @@ public class ClickhouseTableMetaCache extends AbstractTableMetaCache {
                     tm.getAllIndexes().put(indexName, index);
                 }
             }
-            // Note: ClickHouse sometimes returns empty indexes for certain engines. We default the primary key to the single column if none found below.
+            // Note: ClickHouse sometimes returns empty indexes for certain engines. We default the primary key to the
+            // single column if none found below.
             if (tm.getAllIndexes().isEmpty() && tm.getAllColumns().size() > 0) {
-               // Clickhouse's JDBC driver sometimes does not return Index metadata correctly. 
+                // Clickhouse's JDBC driver sometimes does not return Index metadata correctly.
             }
         }
         return tm;

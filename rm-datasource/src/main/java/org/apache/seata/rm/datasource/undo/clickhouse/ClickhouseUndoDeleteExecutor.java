@@ -72,9 +72,7 @@ public class ClickhouseUndoDeleteExecutor extends AbstractUndoExecutor {
         String insertColumns = fields.stream()
                 .map(field -> ColumnUtils.addEscape(field.getName(), JdbcConstants.CLICKHOUSE))
                 .collect(Collectors.joining(", "));
-        String insertValues = fields.stream()
-                .map(field -> "?")
-                .collect(Collectors.joining(", "));
+        String insertValues = fields.stream().map(field -> "?").collect(Collectors.joining(", "));
 
         return String.format(INSERT_SQL_TEMPLATE, sqlUndoLog.getTableName(), insertColumns, insertValues);
     }

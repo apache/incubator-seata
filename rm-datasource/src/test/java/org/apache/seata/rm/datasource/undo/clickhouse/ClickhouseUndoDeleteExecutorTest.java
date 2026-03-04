@@ -16,10 +16,12 @@
  */
 package org.apache.seata.rm.datasource.undo.clickhouse;
 
+import org.apache.seata.rm.datasource.sql.struct.Field;
 import org.apache.seata.rm.datasource.sql.struct.Row;
 import org.apache.seata.rm.datasource.sql.struct.TableMeta;
 import org.apache.seata.rm.datasource.sql.struct.TableRecords;
 import org.apache.seata.rm.datasource.undo.SQLUndoLog;
+import org.apache.seata.sqlparser.struct.ColumnMeta;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -28,10 +30,6 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import org.apache.seata.rm.datasource.sql.struct.Field;
-import org.apache.seata.sqlparser.struct.ColumnMeta;
-
 
 public class ClickhouseUndoDeleteExecutorTest {
 
