@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS undo_log
     branch_id     Int64,
     xid           String,
     context       String,
-    rollback_info LongBlob,
+    rollback_info String,
     log_status    Int32,
     log_created   DateTime64(6),
     log_modified  DateTime64(6)
