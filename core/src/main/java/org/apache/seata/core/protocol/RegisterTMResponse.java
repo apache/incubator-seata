@@ -39,6 +39,7 @@ public class RegisterTMResponse extends AbstractIdentifyResponse implements Seri
     public RegisterTMResponse(boolean result) {
         super();
         setIdentified(result);
+        setResultCode(result ? ResultCode.Success : ResultCode.Failed);
     }
 
     @Override

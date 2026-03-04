@@ -20,7 +20,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import org.apache.seata.common.executor.HttpCallback;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
@@ -33,14 +32,11 @@ import java.lang.reflect.Method;
 import java.net.ConnectException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
@@ -262,400 +258,6 @@ public class HttpClientUtilTest {
     }
 
     @Test
-    void testDoPostWithHttp2_param_onFailure() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-
-        HttpCallback<Response> callback = new HttpCallback<Response>() {
-            @Override
-            public void onSuccess(Response response) {
-                fail("Should not succeed");
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                assertNotNull(t);
-                latch.countDown();
-            }
-
-            @Override
-            public void onCancelled() {
-                fail("Should not be cancelled");
-            }
-        };
-
-        Map<String, String> params = new HashMap<>();
-        params.put("key", "value");
-
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", "application/json");
-
-        HttpClientUtil.doPostWithHttp2("http://localhost:9999/invalid", params, headers, callback);
-        assertTrue(latch.await(10, TimeUnit.SECONDS));
-    }
-
-    @Test
-    void testDoPostWithHttp2_param_WithNullParams() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-
-        HttpCallback<Response> callback = new HttpCallback<Response>() {
-            @Override
-            public void onSuccess(Response response) {
-                fail("Should not succeed");
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                assertNotNull(t);
-                latch.countDown();
-            }
-
-            @Override
-            public void onCancelled() {
-                fail("Should not be cancelled");
-            }
-        };
-
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", "application/json");
-
-        HttpClientUtil.doPostWithHttp2("http://localhost:9999/invalid", "", headers, callback);
-        assertTrue(latch.await(10, TimeUnit.SECONDS));
-    }
-
-    @Test
-    void testDoPostWithHttp2_param_WithNullHeaders() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-
-        HttpCallback<Response> callback = new HttpCallback<Response>() {
-            @Override
-            public void onSuccess(Response response) {
-                fail("Should not succeed");
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                assertNotNull(t);
-                latch.countDown();
-            }
-
-            @Override
-            public void onCancelled() {
-                fail("Should not be cancelled");
-            }
-        };
-
-        Map<String, String> params = new HashMap<>();
-        params.put("key", "value");
-
-        HttpClientUtil.doPostWithHttp2("http://localhost:9999/invalid", params, null, callback);
-        assertTrue(latch.await(10, TimeUnit.SECONDS));
-    }
-
-    @Test
-    void testDoPostWithHttp2_param_WithFormUrlEncoded() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-
-        HttpCallback<Response> callback = new HttpCallback<Response>() {
-            @Override
-            public void onSuccess(Response response) {
-                fail("Should not succeed");
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                assertNotNull(t);
-                latch.countDown();
-            }
-
-            @Override
-            public void onCancelled() {
-                fail("Should not be cancelled");
-            }
-        };
-
-        Map<String, String> params = new HashMap<>();
-        params.put("key1", "value1");
-        params.put("key2", "value2");
-
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", "application/x-www-form-urlencoded");
-
-        HttpClientUtil.doPostWithHttp2("http://localhost:9999/invalid", params, headers, callback, 5000);
-        assertTrue(latch.await(10, TimeUnit.SECONDS));
-    }
-
-    @Test
-    void testDoPostWithHttp2_body_onFailure() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-
-        HttpCallback<Response> callback = new HttpCallback<Response>() {
-            @Override
-            public void onSuccess(Response response) {
-                fail("Should not succeed");
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                assertNotNull(t);
-                latch.countDown();
-            }
-
-            @Override
-            public void onCancelled() {
-                fail("Should not be cancelled");
-            }
-        };
-
-        String body = "{\"key\":\"value\"}";
-
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", "application/json");
-
-        HttpClientUtil.doPostWithHttp2("http://localhost:9999/invalid", body, headers, callback);
-        assertTrue(latch.await(10, TimeUnit.SECONDS));
-    }
-
-    @Test
-    void testDoPostWithHttp2_body_WithNullBody() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-
-        HttpCallback<Response> callback = new HttpCallback<Response>() {
-            @Override
-            public void onSuccess(Response response) {
-                fail("Should not succeed");
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                assertNotNull(t);
-                latch.countDown();
-            }
-
-            @Override
-            public void onCancelled() {
-                fail("Should not be cancelled");
-            }
-        };
-
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", "application/json");
-
-        HttpClientUtil.doPostWithHttp2("http://localhost:9999/invalid", (String) null, headers, callback, 5000);
-        assertTrue(latch.await(10, TimeUnit.SECONDS));
-    }
-
-    @Test
-    void testDoPostWithHttp2_body_WithEmptyBody() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-
-        HttpCallback<Response> callback = new HttpCallback<Response>() {
-            @Override
-            public void onSuccess(Response response) {
-                fail("Should not succeed");
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                assertNotNull(t);
-                latch.countDown();
-            }
-
-            @Override
-            public void onCancelled() {
-                fail("Should not be cancelled");
-            }
-        };
-
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", "application/json");
-
-        HttpClientUtil.doPostWithHttp2("http://localhost:9999/invalid", "", headers, callback, 5000);
-        assertTrue(latch.await(10, TimeUnit.SECONDS));
-    }
-
-    @Test
-    void testDoPostWithHttp2_body_WithNullHeaders() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-
-        HttpCallback<Response> callback = new HttpCallback<Response>() {
-            @Override
-            public void onSuccess(Response response) {
-                fail("Should not succeed");
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                assertNotNull(t);
-                latch.countDown();
-            }
-
-            @Override
-            public void onCancelled() {
-                fail("Should not be cancelled");
-            }
-        };
-
-        HttpClientUtil.doPostWithHttp2("http://localhost:9999/invalid", "{}", null, callback, 5000);
-        assertTrue(latch.await(10, TimeUnit.SECONDS));
-    }
-
-    @Test
-    void testDoPostWithHttp2_body_withCharset_onFailure() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-
-        HttpCallback<Response> callback = new HttpCallback<Response>() {
-            @Override
-            public void onSuccess(Response response) {
-                fail("Should not succeed");
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                assertNotNull(t);
-                latch.countDown();
-            }
-
-            @Override
-            public void onCancelled() {
-                fail("Should not be cancelled");
-            }
-        };
-
-        Map<String, String> params = new HashMap<>();
-        params.put("key", "value");
-
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8");
-
-        HttpClientUtil.doPostWithHttp2("http://localhost:9999/invalid", params, headers, callback, 30000);
-        assertTrue(latch.await(10, TimeUnit.SECONDS));
-    }
-
-    @Test
-    void testDoPostWithHttp2_withEmptyParam_onFailure() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-
-        HttpCallback<Response> callback = new HttpCallback<Response>() {
-            @Override
-            public void onSuccess(Response response) {
-                fail("Should not succeed");
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                assertNotNull(t);
-                latch.countDown();
-            }
-
-            @Override
-            public void onCancelled() {
-                fail("Should not be cancelled");
-            }
-        };
-
-        Map<String, String> params = new HashMap<>();
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", "application/json;charset=UTF-8");
-
-        HttpClientUtil.doPostWithHttp2("http://localhost:9999/invalid", params, headers, callback, 30000);
-        assertTrue(latch.await(10, TimeUnit.SECONDS));
-    }
-
-    @Test
-    void testDoGetHttp_param_onFailure() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-
-        HttpCallback<Response> callback = new HttpCallback<Response>() {
-            @Override
-            public void onSuccess(Response response) {
-                fail("Should not succeed");
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                assertNotNull(t);
-                latch.countDown();
-            }
-
-            @Override
-            public void onCancelled() {
-                fail("Should not be cancelled");
-            }
-        };
-
-        Map<String, String> params = new HashMap<>();
-        params.put("key", "value");
-
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", "application/json");
-
-        HttpClientUtil.doGetWithHttp2("http://localhost:9999/invalid", headers, callback, 30000);
-        assertTrue(latch.await(10, TimeUnit.SECONDS));
-    }
-
-    @Test
-    void testDoGetWithHttp2_WithNullHeaders() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-
-        HttpCallback<Response> callback = new HttpCallback<Response>() {
-            @Override
-            public void onSuccess(Response response) {
-                fail("Should not succeed");
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                assertNotNull(t);
-                latch.countDown();
-            }
-
-            @Override
-            public void onCancelled() {
-                fail("Should not be cancelled");
-            }
-        };
-
-        HttpClientUtil.doGetWithHttp2("http://localhost:9999/invalid", null, callback, 5000);
-        assertTrue(latch.await(10, TimeUnit.SECONDS));
-    }
-
-    @Test
-    void testDoPostWithHttp2_JsonProcessingException() throws Exception {
-        CountDownLatch latch = new CountDownLatch(1);
-
-        HttpCallback<Response> callback = new HttpCallback<Response>() {
-            @Override
-            public void onSuccess(Response response) {
-                fail("Should not succeed");
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                assertNotNull(t);
-                latch.countDown();
-            }
-
-            @Override
-            public void onCancelled() {
-                fail("Should not be cancelled");
-            }
-        };
-
-        // Create params that might cause JSON processing issues
-        // Note: In practice, Map<String, String> should always serialize correctly
-        // This test mainly covers the exception handling path
-        Map<String, String> params = new HashMap<>();
-        params.put("key", "value");
-
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", "application/json");
-
-        // This will fail due to connection error, not JSON processing
-        HttpClientUtil.doPostWithHttp2("http://localhost:9999/invalid", params, headers, callback, 5000);
-        assertTrue(latch.await(10, TimeUnit.SECONDS));
-    }
-
-    @Test
     void testDoPost_JsonProcessingException() {
         // Test that JsonProcessingException is wrapped in IOException
         Map<String, String> params = new HashMap<>();
@@ -720,63 +322,6 @@ public class HttpClientUtilTest {
         assertThrows(IOException.class, () -> {
             HttpClientUtil.doPostJson("http://localhost:9999/invalid", "{}", new HashMap<>(), 100);
         });
-    }
-
-    @Test
-    void testDoPostWithHttp2_DefaultTimeout() throws Exception {
-        // Test default timeout (10000ms) when not specified
-        CountDownLatch latch = new CountDownLatch(1);
-
-        HttpCallback<Response> callback = new HttpCallback<Response>() {
-            @Override
-            public void onSuccess(Response response) {
-                fail("Should not succeed");
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                assertNotNull(t);
-                latch.countDown();
-            }
-
-            @Override
-            public void onCancelled() {
-                fail("Should not be cancelled");
-            }
-        };
-
-        Map<String, String> params = new HashMap<>();
-        params.put("key", "value");
-
-        HttpClientUtil.doPostWithHttp2("http://localhost:9999/invalid", params, new HashMap<>(), callback);
-        assertTrue(latch.await(15, TimeUnit.SECONDS));
-    }
-
-    @Test
-    void testDoPostWithHttp2_StringBody_DefaultTimeout() throws Exception {
-        // Test default timeout for String body overload
-        CountDownLatch latch = new CountDownLatch(1);
-
-        HttpCallback<Response> callback = new HttpCallback<Response>() {
-            @Override
-            public void onSuccess(Response response) {
-                fail("Should not succeed");
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                assertNotNull(t);
-                latch.countDown();
-            }
-
-            @Override
-            public void onCancelled() {
-                fail("Should not be cancelled");
-            }
-        };
-
-        HttpClientUtil.doPostWithHttp2("http://localhost:9999/invalid", "{}", new HashMap<>(), callback);
-        assertTrue(latch.await(15, TimeUnit.SECONDS));
     }
 
     @Test
@@ -942,63 +487,6 @@ public class HttpClientUtilTest {
     }
 
     @Test
-    void testDoPostWithHttp2_WithZeroTimeout() throws Exception {
-        // Test with zero timeout
-        CountDownLatch latch = new CountDownLatch(1);
-
-        HttpCallback<Response> callback = new HttpCallback<Response>() {
-            @Override
-            public void onSuccess(Response response) {
-                fail("Should not succeed");
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                assertNotNull(t);
-                latch.countDown();
-            }
-
-            @Override
-            public void onCancelled() {
-                fail("Should not be cancelled");
-            }
-        };
-
-        Map<String, String> params = new HashMap<>();
-        params.put("key", "value");
-
-        HttpClientUtil.doPostWithHttp2("http://localhost:9999/invalid", params, new HashMap<>(), callback, 0);
-        assertTrue(latch.await(5, TimeUnit.SECONDS));
-    }
-
-    @Test
-    void testDoGetWithHttp2_WithZeroTimeout() throws Exception {
-        // Test with zero timeout
-        CountDownLatch latch = new CountDownLatch(1);
-
-        HttpCallback<Response> callback = new HttpCallback<Response>() {
-            @Override
-            public void onSuccess(Response response) {
-                fail("Should not succeed");
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                assertNotNull(t);
-                latch.countDown();
-            }
-
-            @Override
-            public void onCancelled() {
-                fail("Should not be cancelled");
-            }
-        };
-
-        HttpClientUtil.doGetWithHttp2("http://localhost:9999/invalid", new HashMap<>(), callback, 0);
-        assertTrue(latch.await(5, TimeUnit.SECONDS));
-    }
-
-    @Test
     void testShutdownHookExecution() throws Exception {
         String javaVersion = System.getProperty("java.version");
         Assumptions.assumeTrue(
@@ -1027,20 +515,11 @@ public class HttpClientUtilTest {
         httpClientMapField.setAccessible(true);
         Map<Integer, Object> httpClientMap = (Map<Integer, Object>) httpClientMapField.get(null);
 
-        Field http2ClientMapField = HttpClientUtil.class.getDeclaredField("HTTP2_CLIENT_MAP");
-        http2ClientMapField.setAccessible(true);
-        Map<Integer, OkHttpClient> http2ClientMap = (Map<Integer, OkHttpClient>) http2ClientMapField.get(null);
-
-        OkHttpClient mockHttp2Client = mock(OkHttpClient.class, RETURNS_DEEP_STUBS);
         OkHttpClient mockHttp1Client = mock(OkHttpClient.class, RETURNS_DEEP_STUBS);
 
         httpClientMap.put(1, mockHttp1Client);
-        http2ClientMap.put(2, mockHttp2Client);
 
         targetHook.run();
-
-        verify(mockHttp2Client.dispatcher().executorService(), atLeastOnce()).shutdown();
-        verify(mockHttp2Client.connectionPool(), atLeastOnce()).evictAll();
 
         verify(mockHttp1Client.dispatcher().executorService(), atLeastOnce()).shutdown();
         verify(mockHttp1Client.connectionPool(), atLeastOnce()).evictAll();
@@ -1121,5 +600,392 @@ public class HttpClientUtilTest {
         assertNotNull(postResponse);
         assertNotNull(postResponse2);
         assertNotNull(nonjsonResponse);
+    }
+
+    @Test
+    void testWatch_WithInvalidUrl() {
+        // Test watch with invalid URL
+        assertThrows(IllegalArgumentException.class, () -> {
+            HttpClientUtil.watch("http:", org.apache.seata.common.metadata.ClusterWatchEvent.class);
+        });
+    }
+
+    @Test
+    void testWatch_WithConnectionFailure() {
+        // Test watch connection failure
+        assertThrows(IOException.class, () -> {
+            HttpClientUtil.watch(
+                    "http://localhost:9999/invalid", org.apache.seata.common.metadata.ClusterWatchEvent.class);
+        });
+    }
+
+    @Test
+    void testWatch_WithHeaders() {
+        // Test watch with headers - should fail due to connection error
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/json");
+        headers.put("Authorization", "Bearer token123");
+
+        assertThrows(IOException.class, () -> {
+            HttpClientUtil.watch(
+                    "http://localhost:9999/invalid", headers, org.apache.seata.common.metadata.ClusterWatchEvent.class);
+        });
+    }
+
+    @Test
+    void testWatch_WithNullHeaders() {
+        // Test watch with null headers
+        assertThrows(IOException.class, () -> {
+            HttpClientUtil.watch(
+                    "http://localhost:9999/invalid",
+                    (Map<String, String>) null,
+                    org.apache.seata.common.metadata.ClusterWatchEvent.class);
+        });
+    }
+
+    @Test
+    void testWatch_WithEmptyHeaders() {
+        // Test watch with empty headers
+        assertThrows(IOException.class, () -> {
+            HttpClientUtil.watch(
+                    "http://localhost:9999/invalid",
+                    new HashMap<>(),
+                    org.apache.seata.common.metadata.ClusterWatchEvent.class);
+        });
+    }
+
+    @Test
+    void testWatchPost_WithInvalidUrl() {
+        // Test watchPost with invalid URL
+        Map<String, String> params = new HashMap<>();
+        params.put("key", "value");
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            HttpClientUtil.watchPost("http:", params, org.apache.seata.common.metadata.ClusterWatchEvent.class);
+        });
+    }
+
+    @Test
+    void testWatchPost_WithConnectionFailure() {
+        // Test watchPost connection failure
+        Map<String, String> params = new HashMap<>();
+        params.put("key", "value");
+
+        assertThrows(IOException.class, () -> {
+            HttpClientUtil.watchPost(
+                    "http://localhost:9999/invalid", params, org.apache.seata.common.metadata.ClusterWatchEvent.class);
+        });
+    }
+
+    @Test
+    void testWatchPost_WithNullParams() {
+        // Test watchPost with null params
+        assertThrows(IOException.class, () -> {
+            HttpClientUtil.watchPost(
+                    "http://localhost:9999/invalid",
+                    (Map<String, String>) null,
+                    org.apache.seata.common.metadata.ClusterWatchEvent.class);
+        });
+    }
+
+    @Test
+    void testWatchPost_WithEmptyParams() {
+        // Test watchPost with empty params
+        assertThrows(IOException.class, () -> {
+            HttpClientUtil.watchPost(
+                    "http://localhost:9999/invalid",
+                    new HashMap<>(),
+                    org.apache.seata.common.metadata.ClusterWatchEvent.class);
+        });
+    }
+
+    @Test
+    void testWatchPost_WithParamsAndHeaders() {
+        // Test watchPost with params and headers
+        Map<String, String> params = new HashMap<>();
+        params.put("key1", "value1");
+        params.put("key2", "value2");
+
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/json");
+        headers.put("Authorization", "Bearer token123");
+
+        assertThrows(IOException.class, () -> {
+            HttpClientUtil.watchPost(
+                    "http://localhost:9999/invalid",
+                    params,
+                    headers,
+                    org.apache.seata.common.metadata.ClusterWatchEvent.class);
+        });
+    }
+
+    @Test
+    void testWatchPost_WithFormUrlEncoded() {
+        // Test watchPost with form-urlencoded content type
+        Map<String, String> params = new HashMap<>();
+        params.put("key1", "value1");
+        params.put("key2", "value2");
+
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/x-www-form-urlencoded");
+
+        assertThrows(IOException.class, () -> {
+            HttpClientUtil.watchPost(
+                    "http://localhost:9999/invalid",
+                    params,
+                    headers,
+                    org.apache.seata.common.metadata.ClusterWatchEvent.class);
+        });
+    }
+
+    @Test
+    void testWatchPost_WithJsonContentType() {
+        // Test watchPost with JSON content type
+        Map<String, String> params = new HashMap<>();
+        params.put("key", "value");
+
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/json");
+
+        assertThrows(IOException.class, () -> {
+            HttpClientUtil.watchPost(
+                    "http://localhost:9999/invalid",
+                    params,
+                    headers,
+                    org.apache.seata.common.metadata.ClusterWatchEvent.class);
+        });
+    }
+
+    @Test
+    void testWatchPost_WithNullHeaders() {
+        // Test watchPost with null headers
+        Map<String, String> params = new HashMap<>();
+        params.put("key", "value");
+
+        assertThrows(IOException.class, () -> {
+            HttpClientUtil.watchPost(
+                    "http://localhost:9999/invalid",
+                    params,
+                    (Map<String, String>) null,
+                    org.apache.seata.common.metadata.ClusterWatchEvent.class);
+        });
+    }
+
+    @Test
+    void testWatchPost_WithEmptyHeaders() {
+        // Test watchPost with empty headers
+        Map<String, String> params = new HashMap<>();
+        params.put("key", "value");
+
+        assertThrows(IOException.class, () -> {
+            HttpClientUtil.watchPost(
+                    "http://localhost:9999/invalid",
+                    params,
+                    new HashMap<>(),
+                    org.apache.seata.common.metadata.ClusterWatchEvent.class);
+        });
+    }
+
+    @Test
+    void testBuildHttp2WatchRequest_WithGetMethod() throws Exception {
+        // Test buildHttp2WatchRequest with GET method using reflection
+        Method buildHttp2WatchRequestMethod = HttpClientUtil.class.getDeclaredMethod(
+                "buildHttp2WatchRequest", String.class, Map.class, RequestBody.class, String.class);
+        buildHttp2WatchRequestMethod.setAccessible(true);
+
+        String url = "http://localhost:8080/test";
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/json");
+
+        Request request = (Request) buildHttp2WatchRequestMethod.invoke(null, url, headers, null, "GET");
+
+        assertNotNull(request);
+        assertEquals("GET", request.method());
+        assertEquals(url, request.url().toString());
+        assertNotNull(request.header("Accept"));
+        assertEquals("text/event-stream", request.header("Accept"));
+        assertEquals("application/json", request.header("Content-Type"));
+    }
+
+    @Test
+    void testBuildHttp2WatchRequest_WithPostMethod() throws Exception {
+        // Test buildHttp2WatchRequest with POST method using reflection
+        Method buildHttp2WatchRequestMethod = HttpClientUtil.class.getDeclaredMethod(
+                "buildHttp2WatchRequest", String.class, Map.class, RequestBody.class, String.class);
+        buildHttp2WatchRequestMethod.setAccessible(true);
+
+        String url = "http://localhost:8080/test";
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/json");
+
+        okhttp3.RequestBody requestBody =
+                okhttp3.RequestBody.create("{\"key\":\"value\"}", okhttp3.MediaType.parse("application/json"));
+        Request request = (Request) buildHttp2WatchRequestMethod.invoke(null, url, headers, requestBody, "POST");
+
+        assertNotNull(request);
+        assertEquals("POST", request.method());
+        assertEquals(url, request.url().toString());
+        assertNotNull(request.header("Accept"));
+        assertEquals("text/event-stream", request.header("Accept"));
+        assertNotNull(request.body());
+    }
+
+    @Test
+    void testBuildHttp2WatchRequest_WithPutMethod() throws Exception {
+        // Test buildHttp2WatchRequest with PUT method using reflection
+        Method buildHttp2WatchRequestMethod = HttpClientUtil.class.getDeclaredMethod(
+                "buildHttp2WatchRequest", String.class, Map.class, RequestBody.class, String.class);
+        buildHttp2WatchRequestMethod.setAccessible(true);
+
+        String url = "http://localhost:8080/test";
+        Map<String, String> headers = new HashMap<>();
+
+        okhttp3.RequestBody requestBody =
+                okhttp3.RequestBody.create("{\"key\":\"value\"}", okhttp3.MediaType.parse("application/json"));
+        Request request = (Request) buildHttp2WatchRequestMethod.invoke(null, url, headers, requestBody, "PUT");
+
+        assertNotNull(request);
+        assertEquals("PUT", request.method());
+        assertEquals(url, request.url().toString());
+        assertNotNull(request.header("Accept"));
+        assertEquals("text/event-stream", request.header("Accept"));
+        assertNotNull(request.body());
+    }
+
+    @Test
+    void testBuildHttp2WatchRequest_WithUnsupportedMethod() throws Exception {
+        // Test buildHttp2WatchRequest with unsupported method - should default to GET
+        Method buildHttp2WatchRequestMethod = HttpClientUtil.class.getDeclaredMethod(
+                "buildHttp2WatchRequest", String.class, Map.class, RequestBody.class, String.class);
+        buildHttp2WatchRequestMethod.setAccessible(true);
+
+        String url = "http://localhost:8080/test";
+        Map<String, String> headers = new HashMap<>();
+
+        Request request = (Request) buildHttp2WatchRequestMethod.invoke(null, url, headers, null, "DELETE");
+
+        assertNotNull(request);
+        // Should default to GET for unsupported methods
+        assertEquals("GET", request.method());
+        assertEquals(url, request.url().toString());
+        assertNotNull(request.header("Accept"));
+        assertEquals("text/event-stream", request.header("Accept"));
+    }
+
+    @Test
+    void testBuildHttp2WatchRequest_WithNullHeaders() throws Exception {
+        // Test buildHttp2WatchRequest with null headers
+        Method buildHttp2WatchRequestMethod = HttpClientUtil.class.getDeclaredMethod(
+                "buildHttp2WatchRequest", String.class, Map.class, RequestBody.class, String.class);
+        buildHttp2WatchRequestMethod.setAccessible(true);
+
+        String url = "http://localhost:8080/test";
+
+        Request request = (Request) buildHttp2WatchRequestMethod.invoke(null, url, null, null, "GET");
+
+        assertNotNull(request);
+        assertEquals("GET", request.method());
+        assertEquals(url, request.url().toString());
+        assertNotNull(request.header("Accept"));
+        assertEquals("text/event-stream", request.header("Accept"));
+    }
+
+    @Test
+    void testBuildHttp2WatchRequest_WithEmptyHeaders() throws Exception {
+        // Test buildHttp2WatchRequest with empty headers
+        Method buildHttp2WatchRequestMethod = HttpClientUtil.class.getDeclaredMethod(
+                "buildHttp2WatchRequest", String.class, Map.class, RequestBody.class, String.class);
+        buildHttp2WatchRequestMethod.setAccessible(true);
+
+        String url = "http://localhost:8080/test";
+        Map<String, String> headers = new HashMap<>();
+
+        Request request = (Request) buildHttp2WatchRequestMethod.invoke(null, url, headers, null, "GET");
+
+        assertNotNull(request);
+        assertEquals("GET", request.method());
+        assertEquals(url, request.url().toString());
+        assertNotNull(request.header("Accept"));
+        assertEquals("text/event-stream", request.header("Accept"));
+    }
+
+    @Test
+    void testBuildHttp2WatchRequest_WithMultipleHeaders() throws Exception {
+        // Test buildHttp2WatchRequest with multiple headers
+        Method buildHttp2WatchRequestMethod = HttpClientUtil.class.getDeclaredMethod(
+                "buildHttp2WatchRequest", String.class, Map.class, RequestBody.class, String.class);
+        buildHttp2WatchRequestMethod.setAccessible(true);
+
+        String url = "http://localhost:8080/test";
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/json");
+        headers.put("Authorization", "Bearer token123");
+        headers.put("X-Custom-Header", "custom-value");
+
+        Request request = (Request) buildHttp2WatchRequestMethod.invoke(null, url, headers, null, "GET");
+
+        assertNotNull(request);
+        assertEquals("GET", request.method());
+        assertEquals(url, request.url().toString());
+        assertNotNull(request.header("Accept"));
+        assertEquals("text/event-stream", request.header("Accept"));
+        assertEquals("application/json", request.header("Content-Type"));
+        assertEquals("Bearer token123", request.header("Authorization"));
+        assertEquals("custom-value", request.header("X-Custom-Header"));
+    }
+
+    @Test
+    void testWatchPost_WithJsonProcessingException() {
+        // Test watchPost when createRequestBody throws JsonProcessingException
+        // This is difficult to test directly since createRequestBody is private and
+        // JsonProcessingException is unlikely with Map<String, String>
+        // But we can test the error handling path by ensuring the method signature is correct
+        Map<String, String> params = new HashMap<>();
+        params.put("key", "value");
+
+        // This should fail with connection error, not JSON processing error
+        assertThrows(IOException.class, () -> {
+            HttpClientUtil.watchPost(
+                    "http://localhost:9999/invalid", params, org.apache.seata.common.metadata.ClusterWatchEvent.class);
+        });
+    }
+
+    @Test
+    void testWatch_VerifyAcceptHeader() throws Exception {
+        // Test that watch methods always add Accept: text/event-stream header
+        Method buildHttp2WatchRequestMethod = HttpClientUtil.class.getDeclaredMethod(
+                "buildHttp2WatchRequest", String.class, Map.class, RequestBody.class, String.class);
+        buildHttp2WatchRequestMethod.setAccessible(true);
+
+        String url = "http://localhost:8080/test";
+        Map<String, String> headers = new HashMap<>();
+
+        Request request = (Request) buildHttp2WatchRequestMethod.invoke(null, url, headers, null, "GET");
+
+        // Verify Accept header is always set to text/event-stream
+        assertNotNull(request.header("Accept"));
+        assertEquals("text/event-stream", request.header("Accept"));
+    }
+
+    @Test
+    void testWatch_VerifyAcceptHeaderWithCustomHeaders() throws Exception {
+        // Test that Accept header is added even when other headers are present
+        Method buildHttp2WatchRequestMethod = HttpClientUtil.class.getDeclaredMethod(
+                "buildHttp2WatchRequest", String.class, Map.class, RequestBody.class, String.class);
+        buildHttp2WatchRequestMethod.setAccessible(true);
+
+        String url = "http://localhost:8080/test";
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", "application/json");
+        headers.put("Authorization", "Bearer token123");
+
+        Request request = (Request) buildHttp2WatchRequestMethod.invoke(null, url, headers, null, "GET");
+
+        // Verify Accept header is set to text/event-stream
+        assertNotNull(request.header("Accept"));
+        assertEquals("text/event-stream", request.header("Accept"));
+        // Verify other headers are also present
+        assertEquals("application/json", request.header("Content-Type"));
+        assertEquals("Bearer token123", request.header("Authorization"));
     }
 }
