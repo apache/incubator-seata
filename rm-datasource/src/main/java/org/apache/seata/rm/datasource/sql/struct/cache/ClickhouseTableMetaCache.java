@@ -79,8 +79,8 @@ public class ClickhouseTableMetaCache extends AbstractTableMetaCache {
     @Override
     protected TableMeta fetchSchema(Connection connection, String tableName) throws SQLException {
         String sql = "SELECT * FROM " + ColumnUtils.addEscape(tableName, JdbcConstants.CLICKHOUSE) + " LIMIT 1";
-        try (Statement stmt = connection.createStatement();
-                ResultSet rs = stmt.executeQuery(sql)) {
+        try (PreparedStatement ps = connection.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
             return resultSetMetaToSchema(rs.getMetaData(), connection.getMetaData(), tableName);
         } catch (SQLException sqlEx) {
             throw sqlEx;
@@ -134,7 +134,10 @@ public class ClickhouseTableMetaCache extends AbstractTableMetaCache {
             }
 
             while (onUpdateColumns.next()) {
-                tm.getAllColumns().get(onUpdateColumns.getString("COLUMN_NAME")).setOnUpdate(true);
+                ColumnMeta col = tm.getAllColumns().get(onUpdateColumns.getString("COLUMN_NAME"));
+                if (col != null) {
+                    col.setOnUpdate(true);
+                }
             }
 
             while (rsIndex.next()) {
@@ -171,8 +174,8 @@ public class ClickhouseTableMetaCache extends AbstractTableMetaCache {
             }
             // Note: ClickHouse sometimes returns empty indexes for certain engines. We default the primary key to the
             // single column if none found below.
-            if (tm.getAllIndexes().isEmpty() && tm.getAllColumns().size() > 0) {
-                // Clickhouse's JDBC driver sometimes does not return Index metadata correctly.
+            if (tm.getAllIndexes().isEmpty() && !tm.getAllColumns().isEmpty()) {
+                logger.warn("No indexes found for table {} in ClickHouse. This may affect AT mode performance or correctness.", tableName);
             }
         }
         return tm;
