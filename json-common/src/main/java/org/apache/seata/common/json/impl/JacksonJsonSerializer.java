@@ -96,7 +96,12 @@ public class JacksonJsonSerializer implements JsonSerializer {
             return null;
         }
         try {
+            if (useAutoType(text)) {
+                checkAutoTypeClasses(text);
+            }
             return objectMapperWithAutoType.readValue(text, objectMapperWithAutoType.constructType(type));
+        } catch (SecurityException e) {
+            throw e;
         } catch (IOException e) {
             throw new JsonParseException("Jackson deserialize error", e);
         }

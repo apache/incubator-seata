@@ -25,7 +25,7 @@ public class SeataJsonPropertiesTest {
 
     @AfterEach
     public void cleanup() {
-        JsonAllowlistManager.getInstance().loadUserAllowlist("");
+        JsonAllowlistManager.getInstance().clearUserAllowlist();
     }
 
     @Test

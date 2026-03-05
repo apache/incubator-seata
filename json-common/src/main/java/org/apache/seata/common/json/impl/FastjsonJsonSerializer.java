@@ -86,7 +86,12 @@ public class FastjsonJsonSerializer implements JsonSerializer {
             return null;
         }
         try {
+            if (useAutoType(text)) {
+                checkAutoTypeClasses(text);
+            }
             return JSON.parseObject(text, type);
+        } catch (SecurityException e) {
+            throw e;
         } catch (Exception e) {
             throw new JsonParseException("FastJSON deserialize error", e);
         }

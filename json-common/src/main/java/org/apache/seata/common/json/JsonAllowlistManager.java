@@ -64,10 +64,12 @@ public class JsonAllowlistManager {
      * Load user allowlist from configuration string
      */
     public void loadUserAllowlist(String config) {
+        userClasses.clear();
+        userPrefixes.clear();
+        cache.clear();
         if (config == null || config.isEmpty()) {
             return;
         }
-        cache.clear();
         for (String item : config.split(",")) {
             String trimmed = item.trim();
             if (trimmed.isEmpty()) {
