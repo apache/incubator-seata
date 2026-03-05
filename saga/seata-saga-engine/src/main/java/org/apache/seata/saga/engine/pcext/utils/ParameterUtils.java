@@ -58,8 +58,8 @@ public class ParameterUtils {
                     for (Object inputAssignment : inputAssignments) {
                         inputExpressions.add(createValueExpression(expressionResolver, inputAssignment));
                     }
-                    serviceTaskState.setInputExpressions(inputExpressions);
                 }
+                serviceTaskState.setInputExpressions(inputExpressions);
             }
         }
         List<Object> inputValues = new ArrayList<>(inputExpressions.size());
@@ -88,8 +88,8 @@ public class ParameterUtils {
                         outputExpressions.put(
                                 entry.getKey(), createValueExpression(expressionResolver, entry.getValue()));
                     }
-                    serviceTaskState.setOutputExpressions(outputExpressions);
                 }
+                serviceTaskState.setOutputExpressions(outputExpressions);
             }
         }
         Map<String, Object> outputValues = new LinkedHashMap<>(outputExpressions.size());

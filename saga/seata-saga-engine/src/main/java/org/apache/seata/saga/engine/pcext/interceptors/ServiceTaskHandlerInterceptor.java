@@ -342,8 +342,8 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
                                     statusEvaluators.put(evaluator, statusVal);
                                 }
                             }
-                            state.setStatusEvaluators(statusEvaluators);
                         }
+                        state.setStatusEvaluators(statusEvaluators);
                     }
                 }
 
