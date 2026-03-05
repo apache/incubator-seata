@@ -1,25 +1,9 @@
-# Licensed to the Apache Software Foundation (ASF) under one or more
-# contributor license agreements.  See the NOTICE file distributed with
-# this work for additional information regarding copyright ownership.
-# The ASF licenses this file to You under the Apache License, Version 2.0
-# (the "License"); you may not use this file except in compliance with
-# the License.  You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
 language: java
 sudo: false # faster builds
 
 jdk:
+  - openjdk11
   - openjdk8
-  - openjdk17
-  - openjdk21
 
 cache:
   directories:
@@ -27,22 +11,8 @@ cache:
 
 install: true
 
-before_script:
-  - if [ "$TRAVIS_JDK_VERSION" == "openjdk8" ]; then
-      export IMAGE_NAME="eclipse-temurin:8u422-b05-jre";
-    fi
-  - if [ "$TRAVIS_JDK_VERSION" == "openjdk17" ]; then
-      export IMAGE_NAME="eclipse-temurin:17.0.12_7-jre";
-    fi
-  - if [ "$TRAVIS_JDK_VERSION" == "openjdk21" ]; then
-      export IMAGE_NAME="eclipse-temurin:21.0.4_7-jre";
-    fi
-
 script:
-  - if [ "$TRAVIS_BRANCH" == "develop" ] && [ "$TRAVIS_PULL_REQUEST" == false ]; then
-      travis_wait 30 ./mvnw clean test -DskipTests=false -Dcheckstyle.skip=false -Dlicense.skip=false -P image -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
-    else
-      travis_wait 30 ./mvnw clean test -DskipTests=false -Dcheckstyle.skip=false -Dlicense.skip=false -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
-    fi
+  - mvn clean package
+
 after_success:
   - bash <(curl -s https://codecov.io/bash)
