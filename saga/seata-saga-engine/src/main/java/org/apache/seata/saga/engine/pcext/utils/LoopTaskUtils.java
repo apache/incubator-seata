@@ -17,6 +17,7 @@
 package org.apache.seata.saga.engine.pcext.utils;
 
 import org.apache.seata.common.exception.FrameworkErrorCode;
+import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.NumberUtils;
 import org.apache.seata.common.util.StringUtils;
@@ -44,7 +45,6 @@ import java.util.EmptyStackException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 
 /**
@@ -57,7 +57,7 @@ public class LoopTaskUtils {
 
     public static final String LOOP_STATE_NAME_PATTERN = "-loop-";
 
-    private static final ReentrantLock loopLock = new ReentrantLock();
+    private static final ResourceLock loopLock = new ResourceLock();
 
     /**
      * get Loop Config from State
@@ -230,8 +230,7 @@ public class LoopTaskUtils {
                 currentLoopContext.getNrOfCompletedInstances().get();
 
         if (!currentLoopContext.isCompletionConditionSatisfied()) {
-            loopLock.lock();
-            try {
+            try (ResourceLock ignored = loopLock.obtain()) {
                 if (!currentLoopContext.isCompletionConditionSatisfied()) {
                     Map<String, Object> stateMachineContext =
                             (Map<String, Object>) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);
@@ -251,8 +250,6 @@ public class LoopTaskUtils {
                         currentLoopContext.setCompletionConditionSatisfied(true);
                     }
                 }
-            } finally {
-                loopLock.unlock();
             }
         }
 

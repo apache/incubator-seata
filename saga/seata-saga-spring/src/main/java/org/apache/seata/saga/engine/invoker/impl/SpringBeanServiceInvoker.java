@@ -19,6 +19,7 @@ package org.apache.seata.saga.engine.invoker.impl;
 import org.apache.seata.common.exception.FrameworkErrorCode;
 import org.apache.seata.common.json.JsonSerializer;
 import org.apache.seata.common.json.JsonSerializerFactory;
+import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.saga.engine.exception.EngineExecutionException;
 import org.apache.seata.saga.engine.invoker.ServiceInvoker;
@@ -44,7 +45,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * SpringBean Service Invoker
@@ -54,9 +54,8 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SpringBeanServiceInvoker.class);
 
-    private final ReentrantLock methodLock = new ReentrantLock();
-
-    private final ReentrantLock retryLock = new ReentrantLock();
+    private final ResourceLock methodLock = new ResourceLock();
+    private final ResourceLock retryLock = new ResourceLock();
 
     private ApplicationContext applicationContext;
     private ThreadPoolExecutor threadPoolExecutor;
@@ -110,8 +109,7 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
 
         Method method = state.getMethod();
         if (method == null) {
-            methodLock.lock();
-            try {
+            try (ResourceLock ignored = methodLock.obtain()) {
                 method = state.getMethod();
                 if (method == null) {
                     method = findMethod(bean.getClass(), state.getServiceMethod(), state.getParameterTypes());
@@ -119,8 +117,6 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
                         state.setMethod(method);
                     }
                 }
-            } finally {
-                methodLock.unlock();
             }
         }
 
@@ -204,8 +200,7 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
                 } else {
                     List<Class<? extends Exception>> exceptionClasses = retryConfig.getExceptionClasses();
                     if (exceptionClasses == null) {
-                        retryLock.lock();
-                        try {
+                        try (ResourceLock ignored = retryLock.obtain()) {
                             exceptionClasses = retryConfig.getExceptionClasses();
                             if (exceptionClasses == null) {
 
@@ -239,8 +234,6 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
                                 }
                                 retryConfig.setExceptionClasses(exceptionClasses);
                             }
-                        } finally {
-                            retryLock.unlock();
                         }
                     }
 

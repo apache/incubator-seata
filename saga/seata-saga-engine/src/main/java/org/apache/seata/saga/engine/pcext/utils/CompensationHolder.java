@@ -17,6 +17,7 @@
 package org.apache.seata.saga.engine.pcext.utils;
 
 import org.apache.seata.common.exception.FrameworkErrorCode;
+import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.saga.engine.exception.EngineExecutionException;
@@ -36,7 +37,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * CompensationHolder
@@ -61,23 +61,20 @@ public class CompensationHolder {
      */
     private Stack<StateInstance> stateStackNeedCompensation = new Stack<>();
 
-    private static final ReentrantLock holderLock = new ReentrantLock();
+    private static final ResourceLock holderLock = new ResourceLock();
 
     public static CompensationHolder getCurrent(ProcessContext context, boolean forceCreate) {
 
         CompensationHolder compensationholder =
                 (CompensationHolder) context.getVariable(DomainConstants.VAR_NAME_CURRENT_COMPENSATION_HOLDER);
         if (compensationholder == null && forceCreate) {
-            holderLock.lock();
-            try {
+            try (ResourceLock ignored = holderLock.obtain()) {
                 compensationholder =
                         (CompensationHolder) context.getVariable(DomainConstants.VAR_NAME_CURRENT_COMPENSATION_HOLDER);
                 if (compensationholder == null) {
                     compensationholder = new CompensationHolder();
                     context.setVariable(DomainConstants.VAR_NAME_CURRENT_COMPENSATION_HOLDER, compensationholder);
                 }
-            } finally {
-                holderLock.unlock();
             }
         }
         return compensationholder;

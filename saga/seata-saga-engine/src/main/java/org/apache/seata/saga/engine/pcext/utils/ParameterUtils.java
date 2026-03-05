@@ -16,6 +16,7 @@
  */
 package org.apache.seata.saga.engine.pcext.utils;
 
+import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.saga.engine.expression.Expression;
@@ -29,7 +30,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * ParameterUtils
@@ -37,7 +37,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class ParameterUtils {
 
-    private static final ReentrantLock inputLock = new ReentrantLock();
+    private static final ResourceLock inputLock = new ResourceLock();
 
     public static List<Object> createInputParams(
             ExpressionResolver expressionResolver,
@@ -51,8 +51,7 @@ public class ParameterUtils {
 
         List<Object> inputExpressions = serviceTaskState.getInputExpressions();
         if (inputExpressions == null) {
-            inputLock.lock();
-            try {
+            try (ResourceLock ignored = inputLock.obtain()) {
                 inputExpressions = serviceTaskState.getInputExpressions();
                 if (inputExpressions == null) {
                     inputExpressions = new ArrayList<>(inputAssignments.size());
@@ -61,8 +60,6 @@ public class ParameterUtils {
                     }
                     serviceTaskState.setInputExpressions(inputExpressions);
                 }
-            } finally {
-                inputLock.unlock();
             }
         }
         List<Object> inputValues = new ArrayList<>(inputExpressions.size());
@@ -83,8 +80,7 @@ public class ParameterUtils {
 
         Map<String, Object> outputExpressions = serviceTaskState.getOutputExpressions();
         if (outputExpressions == null) {
-            inputLock.lock();
-            try {
+            try (ResourceLock ignored = inputLock.obtain()) {
                 outputExpressions = serviceTaskState.getOutputExpressions();
                 if (outputExpressions == null) {
                     outputExpressions = new LinkedHashMap<>(outputAssignments.size());
@@ -94,8 +90,6 @@ public class ParameterUtils {
                     }
                     serviceTaskState.setOutputExpressions(outputExpressions);
                 }
-            } finally {
-                inputLock.unlock();
             }
         }
         Map<String, Object> outputValues = new LinkedHashMap<>(outputExpressions.size());

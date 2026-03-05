@@ -16,13 +16,13 @@
  */
 package org.apache.seata.saga.engine.pcext.utils;
 
+import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.saga.proctrl.ProcessContext;
 import org.apache.seata.saga.statelang.domain.DomainConstants;
 
 import java.util.Collection;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Loop Context Holder for Loop Attributes
@@ -39,23 +39,20 @@ public class LoopContextHolder {
     private final Stack<Integer> forwardCounterStack = new Stack<>();
     private Collection collection;
 
-    private static final ReentrantLock contextLock = new ReentrantLock();
+    private static final ResourceLock contextLock = new ResourceLock();
 
     public static LoopContextHolder getCurrent(ProcessContext context, boolean forceCreate) {
         LoopContextHolder loopContextHolder =
                 (LoopContextHolder) context.getVariable(DomainConstants.VAR_NAME_CURRENT_LOOP_CONTEXT_HOLDER);
 
         if (null == loopContextHolder && forceCreate) {
-            contextLock.lock();
-            try {
+            try (ResourceLock ignored = contextLock.obtain()) {
                 loopContextHolder =
                         (LoopContextHolder) context.getVariable(DomainConstants.VAR_NAME_CURRENT_LOOP_CONTEXT_HOLDER);
                 if (null == loopContextHolder) {
                     loopContextHolder = new LoopContextHolder();
                     context.setVariable(DomainConstants.VAR_NAME_CURRENT_LOOP_CONTEXT_HOLDER, loopContextHolder);
                 }
-            } finally {
-                contextLock.unlock();
             }
         }
         return loopContextHolder;

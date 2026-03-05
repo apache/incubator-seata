@@ -16,6 +16,7 @@
  */
 package org.apache.seata.saga.engine.repo.impl;
 
+import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.saga.engine.repo.StateMachineRepository;
@@ -36,7 +37,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * StateMachineRepository Implementation
@@ -45,7 +45,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class StateMachineRepositoryImpl implements StateMachineRepository {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StateMachineRepositoryImpl.class);
-    private final ReentrantLock itemLock = new ReentrantLock();
+    private final ResourceLock itemLock = new ResourceLock();
     private Map<
                     String
                     /** Name_Tenant **/
@@ -68,8 +68,7 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
     public StateMachine getStateMachineById(String stateMachineId) {
         Item item = CollectionUtils.computeIfAbsent(stateMachineMapById, stateMachineId, key -> new Item());
         if (item.getValue() == null && stateLangStore != null) {
-            itemLock.lock();
-            try {
+            try (ResourceLock ignored = itemLock.obtain()) {
                 if (item.getValue() == null) {
                     StateMachine stateMachine = stateLangStore.getStateMachineById(stateMachineId);
                     if (stateMachine != null) {
@@ -85,8 +84,6 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
                         stateMachineMapById.put(stateMachine.getName() + "_" + stateMachine.getTenantId(), item);
                     }
                 }
-            } finally {
-                itemLock.unlock();
             }
         }
         return item.getValue();
@@ -97,8 +94,7 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
         Item item = CollectionUtils.computeIfAbsent(
                 stateMachineMapByNameAndTenant, stateMachineName + "_" + tenantId, key -> new Item());
         if (item.getValue() == null && stateLangStore != null) {
-            itemLock.lock();
-            try {
+            try (ResourceLock ignored = itemLock.obtain()) {
                 if (item.getValue() == null) {
                     StateMachine stateMachine = stateLangStore.getLastVersionStateMachine(stateMachineName, tenantId);
                     if (stateMachine != null) {
@@ -114,8 +110,6 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
                         stateMachineMapById.put(stateMachine.getId(), item);
                     }
                 }
-            } finally {
-                itemLock.unlock();
             }
         }
         return item.getValue();
