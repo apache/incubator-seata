@@ -32,6 +32,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.ApplicationContext;
 
 import java.util.Collection;
 
@@ -53,7 +54,7 @@ public class AbstractCoreTest extends BaseSpringBootTest {
     private static final String applicationData = "{\"data\":\"test\"}";
 
     @BeforeAll
-    public static void initSessionManager() throws Exception {
+    public static void initSessionManager(ApplicationContext context) throws Exception {
         SessionHolder.init(SessionMode.FILE);
         remotingServer = new DefaultCoordinatorTest.MockServerMessageSender();
         abstractCore = new TestableAbstractCore(remotingServer);
