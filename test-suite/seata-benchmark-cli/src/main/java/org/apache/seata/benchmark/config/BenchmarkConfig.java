@@ -134,8 +134,8 @@ public class BenchmarkConfig {
     }
 
     private void validateMode() {
-        if (mode != BranchType.AT && mode != BranchType.TCC && mode != BranchType.SAGA) {
-            throw new IllegalArgumentException("Unsupported mode: " + mode + ". Only AT, TCC, and SAGA are supported.");
+        if (mode != BranchType.AT && mode != BranchType.TCC && mode != BranchType.SAGA && mode != BranchType.XA) {
+            throw new IllegalArgumentException("Unsupported mode: " + mode + ". Only AT, TCC, SAGA, and XA are supported.");
         }
     }
 
