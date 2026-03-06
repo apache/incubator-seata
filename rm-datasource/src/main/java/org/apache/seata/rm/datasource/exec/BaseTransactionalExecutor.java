@@ -571,19 +571,23 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         Set<String> needUpdateColumns = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
         TableMeta tableMeta = getTableMeta(table);
         if (ONLY_CARE_UPDATE_COLUMNS && CollectionUtils.isNotEmpty(unescapeColumns)) {
-            if (!containsPK(table, unescapeColumns)) {
-                List<String> pkNameList = tableMeta.getEscapePkNameList(getDbType());
-                if (CollectionUtils.isNotEmpty(pkNameList)) {
+            // First add insert columns to avoid duplicates in composite primary key scenarios
+            // (fixes #8005)
+            needUpdateColumns.addAll(unescapeColumns);
+
+            // Then add missing primary key columns
+            List<String> pkNameList = tableMeta.getPrimaryKeyOnlyName();
+            for (String pkName : pkNameList) {
+                boolean pkExists = needUpdateColumns.stream()
+                        .anyMatch(col -> col.equalsIgnoreCase(pkName));
+                if (!pkExists) {
                     if (StringUtils.isNotBlank(tableAlias)) {
-                        needUpdateColumns.addAll(ColumnUtils.delEscape(
-                                getColumnNamesWithTablePrefixList(table, tableAlias, pkNameList), getDbType()));
+                        needUpdateColumns.add(getColumnNameWithTablePrefix(table, tableAlias, pkName));
                     } else {
-                        needUpdateColumns.addAll(
-                                ColumnUtils.delEscape(getColumnNamesInSQLList(pkNameList), getDbType()));
+                        needUpdateColumns.add(pkName);
                     }
                 }
             }
-            needUpdateColumns.addAll(unescapeColumns);
 
             // The on update xxx columns will be auto update by db, so it's also the actually updated columns
             List<String> onUpdateColumns = tableMeta.getOnUpdateColumnsOnlyName();
