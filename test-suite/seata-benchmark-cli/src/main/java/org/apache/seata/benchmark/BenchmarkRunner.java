@@ -22,6 +22,7 @@ import org.apache.seata.benchmark.executor.SagaModeExecutor;
 import org.apache.seata.benchmark.executor.TCCModeExecutor;
 import org.apache.seata.benchmark.executor.TransactionExecutor;
 import org.apache.seata.benchmark.executor.WorkloadGenerator;
+import org.apache.seata.benchmark.executor.XAModeExecutor;
 import org.apache.seata.benchmark.model.BenchmarkMetrics;
 import org.apache.seata.benchmark.monitor.MetricsCollector;
 import org.apache.seata.core.model.BranchType;
@@ -132,9 +133,13 @@ public class BenchmarkRunner {
                 String sagaMode = isRealMode ? " (state machine engine)" : " (empty transaction)";
                 System.out.println("Creating Saga mode executor" + sagaMode + "\n");
                 return new SagaModeExecutor(config);
+            case XA:
+                String xaMode = isRealMode ? " (MySQL via Testcontainers)" : " (empty transaction)";
+                System.out.println("Creating XA mode executor" + xaMode + "\n");
+                return new XAModeExecutor(config);
             default:
                 throw new IllegalArgumentException(
-                        "Unsupported mode: " + branchType + ". Only AT, TCC, and SAGA are supported.");
+                        "Unsupported mode: " + branchType + ". Only AT, TCC, SAGA, and XA are supported.");
         }
     }
 }
