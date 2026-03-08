@@ -60,6 +60,39 @@ seata:
     csrf-ignore-urls: /naming/v1/**,/api/v1/naming/**
     ignore:
       urls: /,/**/*.css,/**/*.js,/**/*.html,/**/*.map,/**/*.svg,/**/*.png,/**/*.jpeg,/**/*.ico,/api/v1/auth/login,/version.json,/naming/v1/health,/error
+
+  # MCP Server Configuration
+  mcp:
+    # Maximum query time interval, The unit is milliseconds, Default one day
+    query:
+      max-query-duration: 86400000
+
+  # Business data source configuration
+  businessDataSources:
+    dataSource1:
+      # Whether this data source is enabled
+      enabled: true
+      dbType: mysql
+      driverClassName: com.mysql.cj.jdbc.Driver # Currently, only mysql is supported
+      url:
+      username: root
+      password: Il02mayi
+      datasource: druid # Optional connection pool type (druid/hikari/dbcp)
+      minConn: 5
+      maxConn: 50
+      maxWait: 5000
+    dataSource2:
+      enabled: true
+      dbType: mysql
+      driverClassName: com.mysql.cj.jdbc.Driver
+      url:
+      username: root
+      password: root
+      datasource: dbcp
+      minConn: 5
+      maxConn: 50
+      maxWait: 5000
+
 management:
   endpoints:
     web:
@@ -71,8 +104,3 @@ management:
     distribution:
       percentiles:
         http.server.requests: 0.5, 0.99, 0.999
-  # MCP Server Configuration
-  mcp:
-    # Maximum query time interval, The unit is milliseconds, Default one day
-    query:
-      max-query-duration: 86400000
