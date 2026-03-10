@@ -16,8 +16,11 @@
  */
 package org.apache.seata.server.store;
 
+import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.XID;
 import org.apache.seata.common.metadata.Instance;
+import org.apache.seata.common.util.NumberUtils;
+import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.store.MappingDO;
 import org.apache.seata.discovery.registry.MultiRegistryFactory;
 import org.apache.seata.discovery.registry.RegistryService;
@@ -59,7 +62,17 @@ public interface VGroupMappingStoreManager {
         Map<String, Object> map = this.readVGroups();
         instance.addMetadata("vGroup", map);
         try {
-            InetSocketAddress address = new InetSocketAddress(XID.getIpAddress(), XID.getPort());
+            int registryPort = 0;
+            String strPort = ConfigurationFactory.getInstance()
+                    .getConfig(ConfigurationKeys.SERVER_REGISTRY_PORT_CAMEL);
+            if (strPort != null) {
+                try {
+                    registryPort = Integer.parseInt(strPort);
+                } catch (NumberFormatException ignored) {
+                }
+            }
+            int port = registryPort > 0 ? registryPort : XID.getPort();
+            InetSocketAddress address = new InetSocketAddress(XID.getIpAddress(), port);
             for (RegistryService<?> registryService : MultiRegistryFactory.getInstances()) {
                 registryService.register(address);
             }

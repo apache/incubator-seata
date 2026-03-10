@@ -197,7 +197,9 @@ public class NettyServerBootstrap implements RemotingBootstrap {
             Instance instance = Instance.getInstance();
             // Lines 177-180 are just for compatibility with test cases
             if (instance.getTransaction() == null) {
-                Instance.getInstance().setTransaction(new Node.Endpoint(XID.getIpAddress(), XID.getPort(), "netty"));
+                int regPort = getRegistryPort();
+                Instance.getInstance().setTransaction(new Node.Endpoint(XID.getIpAddress(),
+                        regPort > 0 ? regPort : XID.getPort(), "netty"));
             }
             for (RegistryService<?> registryService : MultiRegistryFactory.getInstances()) {
                 registryService.register(Instance.getInstance());
@@ -208,6 +210,18 @@ public class NettyServerBootstrap implements RemotingBootstrap {
         } catch (Exception exx) {
             throw new RuntimeException("Server start failed", exx);
         }
+    }
+
+    private int getRegistryPort() {
+        int port = 0;
+        String strPort = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SERVER_REGISTRY_PORT_CAMEL);
+        if (strPort != null) {
+            try {
+                port = Integer.parseInt(strPort);
+            } catch (NumberFormatException ignored) {
+            }
+        }
+        return port;
     }
 
     @Override
