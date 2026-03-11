@@ -59,19 +59,11 @@ public class StringUtilsTest {
     }
 
     @Test
-    public void testInputStream2String() {
-        try {
-            InputStream inputStream = StringUtilsTest.class.getClassLoader().getResourceAsStream("test.txt");
-            String result = StringUtils.inputStream2String(inputStream);
-            // Normalize line endings to handle cross-platform differences (Windows CRLF vs Unix LF)
-            result = result.replace("\r\n", "\n").replace("\r", "\n");
-            assertThat(result).isEqualTo("abc\n"
-                    + ":\"klsdf\n"
-                    + "2ks,x:\".,-3sd˚ø≤ø¬≥");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void testInputStream2String() throws IOException {
+        InputStream inputStream = StringUtilsTest.class.getClassLoader().getResourceAsStream("test.txt");
+        String result = StringUtils.inputStream2String(inputStream);
+        assertThat(result.replace("\r\n", "\n")).isEqualTo("abc\n"
+                + ":\"klsdf\n"
+                + "2ks,x:\".,-3sd˚ø≤ø¬≥");
     }
 }
