@@ -14,56 +14,78 @@
  *  limitations under the License.
  */
 
-package com.alibaba.fescar.common;
+package com.alibaba.fescar.common.util;
 
-import com.alibaba.fescar.common.util.StringUtils;
-import org.junit.Test;
-
-import javax.sql.rowset.serial.SerialBlob;
-import java.io.FileNotFoundException;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.sql.Blob;
 import java.sql.SQLException;
-import static org.assertj.core.api.Assertions.assertThat;
+
+import javax.sql.rowset.serial.SerialBlob;
 
 /**
- * @author melon.zhao
- * @since 2019/2/20
+ * The type String utils.
  */
-public class StringUtilsTest {
+public class StringUtils {
 
-    @Test
-    public void testIsEmpty() {
-        assertThat(StringUtils.isEmpty(null)).isTrue();
-        assertThat(StringUtils.isEmpty("abc")).isFalse();
-        assertThat(StringUtils.isEmpty("")).isTrue();
-        assertThat(StringUtils.isEmpty(" ")).isFalse();
+    private StringUtils() {
+
     }
 
-    @Test
-    public void testString2blob() throws SQLException {
-        assertThat(StringUtils.string2blob(null)).isNull();
-        String[] strs = new String[]{"abc", "", " "};
-        for (String str : strs) {
-            assertThat(StringUtils.string2blob(str)).isEqualTo(new SerialBlob(str.getBytes()));
+    /**
+     * Is empty boolean.
+     *
+     * @param str the str
+     * @return the boolean
+     */
+    public static final boolean isEmpty(String str) {
+        return (str == null) || (str.isEmpty());
+    }
+
+    /**
+     * String 2 blob blob.
+     *
+     * @param str the str
+     * @return the blob
+     * @throws SQLException the sql exception
+     */
+    public static Blob string2blob(String str) throws SQLException {
+        if (str == null) {
+            return null;
         }
+        return new SerialBlob(str.getBytes(StandardCharsets.UTF_8));
     }
 
-    @Test
-    public void testBlob2string() throws SQLException {
-        String[] strs = new String[]{"abc", " "};
-        for (String str : strs) {
-            assertThat(StringUtils.blob2string(new SerialBlob(str.getBytes()))).isEqualTo(str);
-
+    /**
+     * Blob 2 string string.
+     *
+     * @param blob the blob
+     * @return the string
+     * @throws SQLException the sql exception
+     */
+    public static String blob2string(Blob blob) throws SQLException {
+        if (blob == null) {
+            return null;
         }
+
+        return new String(blob.getBytes((long) 1, (int) blob.length()), StandardCharsets.UTF_8);
     }
 
-    @Test
-    public void testInputStream2String() throws IOException {
-        InputStream inputStream = StringUtilsTest.class.getClassLoader().getResourceAsStream("test.txt");
-        String result = StringUtils.inputStream2String(inputStream);
-        assertThat(result.replace("\r\n", "\n")).isEqualTo("abc\n"
-                + ":\"klsdf\n"
-                + "2ks,x:\".,-3sd˚ø≤ø¬≥");
+    /**
+     * Input stream 2 string string.
+     *
+     * @param is the is
+     * @return the string
+     * @throws IOException the io exception
+     */
+    public static String inputStream2String(InputStream is) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        int i = -1;
+        while ((i = is.read()) != -1) {
+            baos.write(i);
+        }
+        return baos.toString(StandardCharsets.UTF_8);
     }
 }
