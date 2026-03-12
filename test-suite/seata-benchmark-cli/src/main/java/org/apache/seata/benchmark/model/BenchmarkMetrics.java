@@ -121,7 +121,7 @@ public class BenchmarkMetrics {
             return cachedStats;
         }
 
-        synchronized (this) {
+        synchronized (latencies) {
             // Double-check
             if (cachedStats != null && (now - lastStatsUpdateTime) < BenchmarkConstants.LATENCY_STATS_CACHE_MS) {
                 return cachedStats;
