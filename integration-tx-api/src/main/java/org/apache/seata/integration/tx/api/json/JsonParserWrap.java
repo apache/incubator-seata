@@ -18,6 +18,10 @@ package org.apache.seata.integration.tx.api.json;
 
 import org.apache.seata.common.exception.JsonParseException;
 
+/**
+ * @deprecated use {@link org.apache.seata.common.json.JsonSerializer} in json-common module instead.
+ */
+@Deprecated
 public class JsonParserWrap implements JsonParser {
 
     private JsonParser jsonParser;
