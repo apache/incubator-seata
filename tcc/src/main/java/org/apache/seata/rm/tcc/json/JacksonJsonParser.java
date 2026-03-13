@@ -27,6 +27,10 @@ import org.apache.seata.integration.tx.api.json.JsonParser;
 
 import java.io.IOException;
 
+/**
+ * @deprecated use {@link org.apache.seata.common.json.impl.JacksonJsonSerializer} in json-common module instead.
+ */
+@Deprecated
 @LoadLevel(name = Constants.JACKSON_JSON_PARSER_NAME)
 public class JacksonJsonParser implements JsonParser {
 
