@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectMapper.DefaultTyping;
@@ -172,35 +173,22 @@ public class JacksonJsonSerializer implements JsonSerializer {
     }
 
     /**
-     * Check all @type classes in JSON against allowlist
+     * Parse JSON with defaultObjectMapper (AutoType disabled) and check all real @type fields against allowlist
      */
-    private void checkAutoTypeClasses(String json) {
-        int index = 0;
-        while ((index = json.indexOf("\"@type\"", index)) >= 0) {
-            String className = extractTypeValue(json, index);
-            if (className != null) {
-                JsonAllowlistManager.getInstance().checkClass(className);
-            }
-            index++;
-        }
+    private void checkAutoTypeClasses(String json) throws IOException {
+        JsonNode root = defaultObjectMapper.readTree(json);
+        checkJsonNode(root);
     }
 
-    /**
-     * Extract @type value from JSON string
-     */
-    private String extractTypeValue(String json, int typeIndex) {
-        int colonIndex = json.indexOf(':', typeIndex);
-        if (colonIndex < 0) {
-            return null;
+    private void checkJsonNode(JsonNode node) {
+        if (node.isObject()) {
+            JsonNode typeNode = node.get("@type");
+            if (typeNode != null && typeNode.isTextual()) {
+                JsonAllowlistManager.getInstance().checkClass(typeNode.asText());
+            }
+            node.fields().forEachRemaining(entry -> checkJsonNode(entry.getValue()));
+        } else if (node.isArray()) {
+            node.forEach(this::checkJsonNode);
         }
-        int startQuote = json.indexOf('"', colonIndex);
-        if (startQuote < 0) {
-            return null;
-        }
-        int endQuote = json.indexOf('"', startQuote + 1);
-        if (endQuote < 0) {
-            return null;
-        }
-        return json.substring(startQuote + 1, endQuote);
     }
 }

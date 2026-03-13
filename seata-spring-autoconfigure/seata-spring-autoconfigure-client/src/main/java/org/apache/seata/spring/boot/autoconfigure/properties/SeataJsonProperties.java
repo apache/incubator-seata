@@ -49,8 +49,6 @@ public class SeataJsonProperties {
 
     @PostConstruct
     public void init() {
-        if (allowlist != null && !allowlist.isEmpty()) {
-            JsonAllowlistManager.getInstance().loadUserAllowlist(allowlist);
-        }
+        JsonAllowlistManager.getInstance().loadUserAllowlist(allowlist);
     }
 }

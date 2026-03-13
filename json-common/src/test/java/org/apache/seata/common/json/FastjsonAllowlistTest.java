@@ -154,6 +154,17 @@ public class FastjsonAllowlistTest {
     }
 
     @Test
+    public void testParseObject_atTypeInStringValue_notBlocked() {
+        // @type appearing inside a string value should not be treated as AutoType metadata
+        String json = "{\"description\":\"the \\\"@type\\\" field is important\",\"name\":\"test\"}";
+
+        TestObject result = jsonSerializer.parseObject(json, TestObject.class, false);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getName()).isEqualTo("test");
+    }
+
+    @Test
     public void testLoadUserAllowlist_thenParse() {
         JsonAllowlistManager.getInstance().loadUserAllowlist("com.trusted.model.,com.trusted.dto.SpecificDTO");
 

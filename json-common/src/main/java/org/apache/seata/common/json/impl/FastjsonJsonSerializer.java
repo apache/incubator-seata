@@ -17,6 +17,8 @@
 package org.apache.seata.common.json.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import org.apache.seata.common.exception.JsonParseException;
@@ -157,35 +159,38 @@ public class FastjsonJsonSerializer implements JsonSerializer {
     }
 
     /**
-     * Check all @type classes in JSON against allowlist
+     * Parse JSON in safe mode (IgnoreAutoType) and check all real @type fields against allowlist
      */
     private void checkAutoTypeClasses(String json) {
-        int index = 0;
-        while ((index = json.indexOf("\"@type\"", index)) >= 0) {
-            String className = extractTypeValue(json, index);
-            if (className != null) {
-                JsonAllowlistManager.getInstance().checkClass(className);
-            }
-            index++;
+        Object parsed = JSON.parse(json, Feature.DisableSpecialKeyDetect, Feature.OrderedField);
+        if (parsed instanceof JSONObject) {
+            checkJsonObject((JSONObject) parsed);
+        } else if (parsed instanceof JSONArray) {
+            checkJsonArray((JSONArray) parsed);
         }
     }
 
-    /**
-     * Extract @type value from JSON string
-     */
-    private String extractTypeValue(String json, int typeIndex) {
-        int colonIndex = json.indexOf(':', typeIndex);
-        if (colonIndex < 0) {
-            return null;
+    private void checkJsonObject(JSONObject obj) {
+        Object type = obj.get("@type");
+        if (type instanceof String) {
+            JsonAllowlistManager.getInstance().checkClass((String) type);
         }
-        int startQuote = json.indexOf('"', colonIndex);
-        if (startQuote < 0) {
-            return null;
+        for (Object value : obj.values()) {
+            if (value instanceof JSONObject) {
+                checkJsonObject((JSONObject) value);
+            } else if (value instanceof JSONArray) {
+                checkJsonArray((JSONArray) value);
+            }
         }
-        int endQuote = json.indexOf('"', startQuote + 1);
-        if (endQuote < 0) {
-            return null;
+    }
+
+    private void checkJsonArray(JSONArray arr) {
+        for (Object item : arr) {
+            if (item instanceof JSONObject) {
+                checkJsonObject((JSONObject) item);
+            } else if (item instanceof JSONArray) {
+                checkJsonArray((JSONArray) item);
+            }
         }
-        return json.substring(startQuote + 1, endQuote);
     }
 }
