@@ -19,7 +19,6 @@ package org.apache.seata.server.store;
 import org.apache.seata.common.ConfigurationKeys;
 import org.apache.seata.common.XID;
 import org.apache.seata.common.metadata.Instance;
-import org.apache.seata.common.util.NumberUtils;
 import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.store.MappingDO;
 import org.apache.seata.discovery.registry.MultiRegistryFactory;
@@ -63,8 +62,7 @@ public interface VGroupMappingStoreManager {
         instance.addMetadata("vGroup", map);
         try {
             int registryPort = 0;
-            String strPort = ConfigurationFactory.getInstance()
-                    .getConfig(ConfigurationKeys.SERVER_REGISTRY_PORT_CAMEL);
+            String strPort = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SERVER_REGISTRY_PORT_CAMEL);
             if (strPort != null) {
                 try {
                     registryPort = Integer.parseInt(strPort);

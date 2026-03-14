@@ -198,8 +198,9 @@ public class NettyServerBootstrap implements RemotingBootstrap {
             // Lines 177-180 are just for compatibility with test cases
             if (instance.getTransaction() == null) {
                 int regPort = getRegistryPort();
-                Instance.getInstance().setTransaction(new Node.Endpoint(XID.getIpAddress(),
-                        regPort > 0 ? regPort : XID.getPort(), "netty"));
+                Instance.getInstance()
+                        .setTransaction(
+                                new Node.Endpoint(XID.getIpAddress(), regPort > 0 ? regPort : XID.getPort(), "netty"));
             }
             for (RegistryService<?> registryService : MultiRegistryFactory.getInstances()) {
                 registryService.register(Instance.getInstance());
