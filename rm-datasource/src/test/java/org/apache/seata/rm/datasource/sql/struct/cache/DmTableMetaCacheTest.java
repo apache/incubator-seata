@@ -386,7 +386,8 @@ public class DmTableMetaCacheTest {
         // Regression test for a bug fix: a composite unique index that contains primary key columns plus extra columns
         // should NOT be marked as PRIMARY.
         // Scenario: primary key (ID), unique index (ID, NAME) — unique index contains PK column but has extra NAME.
-        // Before the fix: the previous DM implementation matched by count (matchCols == pkcol.size()) and could misidentify
+        // Before the fix: the previous DM implementation matched by count (matchCols == pkcol.size()) and could
+        // misidentify
         // PRIMARY.
         // After the fix: using Set equality ({ID, NAME} != {ID}) prevents the index from being marked as PRIMARY
 
