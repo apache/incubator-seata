@@ -19,7 +19,9 @@ package org.apache.seata.saga.statelang.parser;
 /**
  * Json Parser
  *
+ * @deprecated use {@link org.apache.seata.common.json.JsonSerializer} in json-common module instead.
  */
+@Deprecated
 public interface JsonParser {
 
     /**
