@@ -21,7 +21,6 @@ import com.alibaba.druid.mock.MockNClob;
 import com.alibaba.druid.mock.MockRef;
 import com.alibaba.druid.mock.MockSQLXML;
 import com.alibaba.druid.pool.DruidDataSource;
-import com.alibaba.druid.pool.DruidStatementConnection;
 import com.google.common.collect.Lists;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
 import org.apache.seata.rm.datasource.mock.MockBlob;
@@ -130,9 +129,7 @@ public class PreparedStatementProxyTest {
         String sql = "update prepared_statement_proxy set name = ?";
 
         Connection targetConnection = connectionProxy.getTargetConnection();
-        if (targetConnection instanceof DruidStatementConnection) {
-            targetConnection = ((DruidStatementConnection) targetConnection).getConnection();
-        }
+        targetConnection = targetConnection.unwrap(Connection.class);
 
         PreparedStatement preparedStatement =
                 mockDriver.createSeataMockPreparedStatement((MockConnection) targetConnection, sql);
@@ -150,10 +147,7 @@ public class PreparedStatementProxyTest {
 
     private static Connection getPhysicsConnection(DruidDataSource dataSource) throws SQLException {
         Connection connection = dataSource.getConnection().getConnection();
-        if (connection instanceof DruidStatementConnection) {
-            return ((DruidStatementConnection) connection).getConnection();
-        }
-        return connection;
+        return connection.unwrap(Connection.class);
     }
 
     @Test
