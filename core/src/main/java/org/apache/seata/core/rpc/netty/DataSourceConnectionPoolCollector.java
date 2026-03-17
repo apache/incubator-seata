@@ -146,9 +146,9 @@ public class DataSourceConnectionPoolCollector {
 
         String className = dataSource.getClass().getName();
 
-        if (className.equals(HIKARI_DATASOURCE_CLASS)) {
+        if (HIKARI_DATASOURCE_CLASS.equals(className)) {
             return collectHikariMetrics(name, dataSource);
-        } else if (className.equals(DRUID_DATASOURCE_CLASS)) {
+        } else if (DRUID_DATASOURCE_CLASS.equals(className)) {
             return collectDruidMetrics(name, dataSource);
         } else {
             LOGGER.debug("Unsupported DataSource type: {}", className);
