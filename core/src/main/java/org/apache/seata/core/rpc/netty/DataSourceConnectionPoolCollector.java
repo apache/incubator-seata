@@ -27,13 +27,13 @@ import org.slf4j.LoggerFactory;
 import javax.sql.DataSource;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
  * DataSource connection pool metrics collector for HikariCP and Druid.
- *
  */
 public class DataSourceConnectionPoolCollector {
 
@@ -46,6 +46,11 @@ public class DataSourceConnectionPoolCollector {
     // Supported DataSource (pool) types
     private static final String HIKARI_DATASOURCE_CLASS = "com.zaxxer.hikari.HikariDataSource";
     private static final String DRUID_DATASOURCE_CLASS = "com.alibaba.druid.pool.DruidDataSource";
+
+    private static final int MAX_SQL_RECORDS_PER_REPORT = 100;
+    private static final long[] HISTOGRAM_RANGES = {10L, 50L, 100L, 200L, 500L, 1000L, 2000L, 5000L, 10000L};
+
+    private DataSourceConnectionPoolCollector() {}
 
     /**
      * Register a DataSource for monitoring
@@ -239,22 +244,22 @@ public class DataSourceConnectionPoolCollector {
 
             // Get pool creation time
             Object createdTime = invokeMethod(dataSource, "getCreatedTime");
-            if (createdTime instanceof java.util.Date) {
-                metrics.setPoolCreatedTime(((java.util.Date) createdTime).getTime());
+            if (createdTime instanceof Date) {
+                metrics.setPoolCreatedTime(((Date) createdTime).getTime());
             }
 
             // Inject SQL execution records from SqlCollector
             try {
                 List<SqlExecutionEntry> allSql =
-                        new ArrayList<>(SqlCollector.ALL_SQL_CACHE.asMap().values());
-                metrics.setSqlExecutionRecord(limitEntries(allSql, 100));
+                        new ArrayList<>(SqlCollector.getAllSqlMap().values());
+                metrics.setSqlExecutionRecord(limitEntries(allSql, MAX_SQL_RECORDS_PER_REPORT));
 
                 List<SqlExecutionEntry> slowSqlAsExec = new ArrayList<>();
-                for (SlowSqlEntry s : SqlCollector.SLOW_SQL_CACHE.asMap().values()) {
+                for (SlowSqlEntry s : SqlCollector.getSlowSqlMap().values()) {
                     slowSqlAsExec.add(
                             new SqlExecutionEntry(s.getSql(), s.getExecutionTimeMillis(), 0L, s.getTimestamp()));
                 }
-                metrics.setSlowSqlList(limitEntries(slowSqlAsExec, 100));
+                metrics.setSlowSqlList(limitEntries(slowSqlAsExec, MAX_SQL_RECORDS_PER_REPORT));
 
                 // Compute transaction histogram based on execution times
                 computeAndInjectHistogram(metrics, allSql);
@@ -285,7 +290,7 @@ public class DataSourceConnectionPoolCollector {
      * Ranges represent upper bounds (ms) for each bucket.
      */
     private static void computeAndInjectHistogram(DruidConnectionPoolMetrics metrics, List<SqlExecutionEntry> allSql) {
-        long[] ranges = new long[] {10, 50, 100, 200, 500, 1000, 2000, 5000, 10000};
+        long[] ranges = HISTOGRAM_RANGES.clone();
         long[] values = new long[ranges.length];
         if (allSql != null) {
             for (SqlExecutionEntry e : allSql) {
@@ -334,7 +339,8 @@ public class DataSourceConnectionPoolCollector {
             LOGGER.debug(
                     "Failed to invoke method: {} on {}",
                     methodName,
-                    obj.getClass().getSimpleName());
+                    obj.getClass().getSimpleName(),
+                    e);
             return null;
         }
     }

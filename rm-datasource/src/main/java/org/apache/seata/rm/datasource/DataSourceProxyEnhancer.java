@@ -31,6 +31,8 @@ public class DataSourceProxyEnhancer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSourceProxyEnhancer.class);
 
+    private DataSourceProxyEnhancer() {}
+
     /**
      * Register DataSource monitoring after DataSourceProxy initialization
      *

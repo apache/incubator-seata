@@ -22,11 +22,12 @@ import java.util.List;
 
 /**
  * Druid connection pool metrics for detailed monitoring.
- *
  */
 public class DruidConnectionPoolMetrics implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    private static final double MAX_ACCEPTABLE_ERROR_RATE = 0.05;
+    private static final double MAX_ACCEPTABLE_ROLLBACK_RATE = 0.1;
 
     /**
      * Active connections
@@ -444,9 +445,8 @@ public class DruidConnectionPoolMetrics implements Serializable {
         return activeConnections >= 0
                 && totalConnections >= activeConnections
                 && totalConnections <= maxPoolSize
-                && getErrorRate() < 0.05
-                && // Error rate less than 5%
-                getRollbackRate() < 0.1; // Rollback rate less than 10%
+                && getErrorRate() < MAX_ACCEPTABLE_ERROR_RATE
+                && getRollbackRate() < MAX_ACCEPTABLE_ROLLBACK_RATE;
     }
 
     /**

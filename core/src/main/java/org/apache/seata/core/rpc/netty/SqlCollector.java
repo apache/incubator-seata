@@ -22,6 +22,7 @@ import org.apache.seata.core.protocol.SlowSqlEntry;
 import org.apache.seata.core.protocol.SqlExecutionEntry;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -30,29 +31,45 @@ import java.util.concurrent.TimeUnit;
  */
 public class SqlCollector {
 
-    public static long SLOW_SQL_THRESHOLD_MILLIS = 5000;
+    private static final int SQL_CACHE_MAX_SIZE = 8192;
+    private static final int SQL_CACHE_EXPIRE_DAYS = 3;
+    private static final long DEFAULT_SLOW_SQL_THRESHOLD_MILLIS = 5000L;
+    private static volatile long slowSqlThresholdMillis = DEFAULT_SLOW_SQL_THRESHOLD_MILLIS;
 
-    public static final Cache<String, SqlExecutionEntry> ALL_SQL_CACHE = CacheBuilder.newBuilder()
-            .maximumSize(8192)
-            .expireAfterWrite(3, TimeUnit.DAYS)
+    private static final Cache<String, SqlExecutionEntry> ALL_SQL_CACHE = CacheBuilder.newBuilder()
+            .maximumSize(SQL_CACHE_MAX_SIZE)
+            .expireAfterWrite(SQL_CACHE_EXPIRE_DAYS, TimeUnit.DAYS)
             .build();
 
-    public static final Cache<String, SlowSqlEntry> SLOW_SQL_CACHE = CacheBuilder.newBuilder()
-            .maximumSize(8192)
-            .expireAfterWrite(3, TimeUnit.DAYS)
+    private static final Cache<String, SlowSqlEntry> SLOW_SQL_CACHE = CacheBuilder.newBuilder()
+            .maximumSize(SQL_CACHE_MAX_SIZE)
+            .expireAfterWrite(SQL_CACHE_EXPIRE_DAYS, TimeUnit.DAYS)
             .build();
+
+    private SqlCollector() {}
+
+    public static void setSlowSqlThresholdMillis(long threshold) {
+        slowSqlThresholdMillis = threshold;
+    }
 
     public static void addSqlExecutionEntry(
             String sql, long executionTimeMillis, long holdTimeMillis, LocalDateTime timestamp) {
-        SqlExecutionEntry sqlExecutionEntry =
-                new SqlExecutionEntry(sql, executionTimeMillis, holdTimeMillis, timestamp);
-        ALL_SQL_CACHE.put(sql, sqlExecutionEntry);
+        ALL_SQL_CACHE.put(sql, new SqlExecutionEntry(sql, executionTimeMillis, holdTimeMillis, timestamp));
     }
 
     public static void addSlowSqlEntry(String sql, long executionTimeMillis, LocalDateTime timestamp) {
-        if (executionTimeMillis >= SLOW_SQL_THRESHOLD_MILLIS) {
+        if (executionTimeMillis >= slowSqlThresholdMillis) {
             SlowSqlEntry slowSqlEntry = new SlowSqlEntry(sql, executionTimeMillis, timestamp);
             SLOW_SQL_CACHE.put(sql, slowSqlEntry);
         }
+    }
+
+    // Package-private accessors for DataSourceConnectionPoolCollector
+    static Map<String, SqlExecutionEntry> getAllSqlMap() {
+        return ALL_SQL_CACHE.asMap();
+    }
+
+    static Map<String, SlowSqlEntry> getSlowSqlMap() {
+        return SLOW_SQL_CACHE.asMap();
     }
 }

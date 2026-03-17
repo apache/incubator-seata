@@ -16,6 +16,8 @@
  */
 package org.apache.seata.rm.datasource.xa;
 
+import org.apache.seata.core.rpc.netty.SqlCollector;
+
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
@@ -35,6 +37,7 @@ import java.sql.SQLException;
 import java.sql.SQLXML;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Calendar;
 
 /**
@@ -65,10 +68,9 @@ public class PreparedStatementProxyXA extends StatementProxyXA implements Prepar
                 connectionProxyXA, (statement, args) -> statement.executeQuery(), getTargetStatement());
         long cost = System.currentTimeMillis() - start;
         if (targetSQL != null) {
-            org.apache.seata.core.rpc.netty.SqlCollector.addSqlExecutionEntry(
-                    targetSQL, cost, cost, java.time.LocalDateTime.now());
-            org.apache.seata.core.rpc.netty.SqlCollector.addSlowSqlEntry(
-                    targetSQL, cost, java.time.LocalDateTime.now());
+            LocalDateTime ts = LocalDateTime.now();
+            SqlCollector.addSqlExecutionEntry(targetSQL, cost, cost, ts);
+            SqlCollector.addSlowSqlEntry(targetSQL, cost, ts);
         }
         return res;
     }
@@ -80,10 +82,9 @@ public class PreparedStatementProxyXA extends StatementProxyXA implements Prepar
                 connectionProxyXA, (statement, args) -> statement.executeUpdate(), getTargetStatement());
         long cost = System.currentTimeMillis() - start;
         if (targetSQL != null) {
-            org.apache.seata.core.rpc.netty.SqlCollector.addSqlExecutionEntry(
-                    targetSQL, cost, cost, java.time.LocalDateTime.now());
-            org.apache.seata.core.rpc.netty.SqlCollector.addSlowSqlEntry(
-                    targetSQL, cost, java.time.LocalDateTime.now());
+            LocalDateTime ts = LocalDateTime.now();
+            SqlCollector.addSqlExecutionEntry(targetSQL, cost, cost, ts);
+            SqlCollector.addSlowSqlEntry(targetSQL, cost, ts);
         }
         return res;
     }
@@ -95,10 +96,9 @@ public class PreparedStatementProxyXA extends StatementProxyXA implements Prepar
                 connectionProxyXA, (statement, args) -> statement.execute(), getTargetStatement());
         long cost = System.currentTimeMillis() - start;
         if (targetSQL != null) {
-            org.apache.seata.core.rpc.netty.SqlCollector.addSqlExecutionEntry(
-                    targetSQL, cost, 0L, java.time.LocalDateTime.now());
-            org.apache.seata.core.rpc.netty.SqlCollector.addSlowSqlEntry(
-                    targetSQL, cost, java.time.LocalDateTime.now());
+            LocalDateTime ts = LocalDateTime.now();
+            SqlCollector.addSqlExecutionEntry(targetSQL, cost, cost, ts);
+            SqlCollector.addSlowSqlEntry(targetSQL, cost, ts);
         }
         return res;
     }

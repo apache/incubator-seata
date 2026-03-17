@@ -25,6 +25,7 @@ import java.io.Serializable;
 public class HikariConnectionPoolMetrics implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    private static final double MAX_ACCEPTABLE_TIMEOUT_RATE = 0.1;
 
     /**
      * Active connections
@@ -297,7 +298,7 @@ public class HikariConnectionPoolMetrics implements Serializable {
         return activeConnections >= 0
                 && totalConnections >= activeConnections
                 && totalConnections <= maxPoolSize
-                && connectionTimeoutRate < 0.1; // Timeout rate less than 10%
+                && connectionTimeoutRate < MAX_ACCEPTABLE_TIMEOUT_RATE;
     }
 
     @Override
