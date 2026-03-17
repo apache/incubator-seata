@@ -121,14 +121,14 @@ public class BenchmarkMetrics {
             return cachedStats;
         }
 
-        synchronized (this) {
+        synchronized (latencies) {
             // Double-check
             if (cachedStats != null && (now - lastStatsUpdateTime) < BenchmarkConstants.LATENCY_STATS_CACHE_MS) {
                 return cachedStats;
             }
 
             if (latencies.isEmpty()) {
-                cachedStats = new LatencyStats(0, 0, 0, 0);
+                cachedStats = new LatencyStats(0, 0, 0, 0, 0);
             } else {
                 List<Long> sortedLatencies = new ArrayList<>(latencies);
                 Collections.sort(sortedLatencies);
@@ -137,9 +137,10 @@ public class BenchmarkMetrics {
                 long p50 = sortedLatencies.get(Math.max(0, (int) Math.ceil(size * 0.5) - 1));
                 long p95 = sortedLatencies.get(Math.max(0, (int) Math.ceil(size * 0.95) - 1));
                 long p99 = sortedLatencies.get(Math.max(0, (int) Math.ceil(size * 0.99) - 1));
+                long p999 = sortedLatencies.get(Math.max(0, (int) Math.ceil(size * 0.999) - 1));
                 long max = sortedLatencies.get(size - 1);
 
-                cachedStats = new LatencyStats(p50, p95, p99, max);
+                cachedStats = new LatencyStats(p50, p95, p99, p999, max);
             }
 
             lastStatsUpdateTime = now;
@@ -160,12 +161,14 @@ public class BenchmarkMetrics {
         private final long p50;
         private final long p95;
         private final long p99;
+        private final long p999;
         private final long max;
 
-        public LatencyStats(long p50, long p95, long p99, long max) {
+        public LatencyStats(long p50, long p95, long p99, long p999, long max) {
             this.p50 = p50;
             this.p95 = p95;
             this.p99 = p99;
+            this.p999 = p999;
             this.max = max;
         }
 
@@ -179,6 +182,10 @@ public class BenchmarkMetrics {
 
         public long getP99() {
             return p99;
+        }
+
+        public long getP999() {
+            return p999;
         }
 
         public long getMax() {

@@ -25,7 +25,9 @@ import org.apache.seata.saga.statelang.parser.JsonParser;
 /**
  * JsonParser implement by Fastjson
  *
+ * @deprecated use {@link org.apache.seata.common.json.impl.FastjsonJsonSerializer} in json-common module instead.
  */
+@Deprecated
 @LoadLevel(name = FastjsonParser.NAME)
 public class FastjsonParser implements JsonParser {
 
