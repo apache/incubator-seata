@@ -21,6 +21,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
@@ -80,13 +81,7 @@ public class FastjsonAllowlistTest {
 
         String json = "{\"@type\":\"com.example.UserClass\",\"data\":\"test\"}";
 
-        try {
-            jsonSerializer.parseObject(json, Object.class, false);
-        } catch (SecurityException e) {
-            throw e;
-        } catch (Exception e) {
-            assertThat(e).isNotInstanceOf(SecurityException.class);
-        }
+        assertThatNoException().isThrownBy(() -> jsonSerializer.parseObject(json, Object.class, false));
     }
 
     @Test
@@ -95,14 +90,7 @@ public class FastjsonAllowlistTest {
 
         String json = "{\"@type\":\"com.mycompany.model.User\",\"id\":1}";
 
-        try {
-            jsonSerializer.parseObject(json, Object.class, false);
-        } catch (SecurityException e) {
-            throw e;
-        } catch (Exception e) {
-
-            assertThat(e).isNotInstanceOf(SecurityException.class);
-        }
+        assertThatNoException().isThrownBy(() -> jsonSerializer.parseObject(json, Object.class, false));
     }
 
     @Test

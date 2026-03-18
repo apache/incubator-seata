@@ -17,7 +17,6 @@
 package io.seata.rm.datasource.xa;
 
 import com.alibaba.druid.pool.DruidDataSource;
-import com.alibaba.druid.pool.DruidStatementConnection;
 import com.mysql.jdbc.JDBC4MySQLConnection;
 import com.mysql.jdbc.jdbc2.optional.JDBC4ConnectionWrapper;
 import io.seata.core.context.RootContext;
@@ -80,10 +79,7 @@ public class DataSourceProxyXATest {
         Connection wrappedConnection = connectionProxyXA.getWrappedConnection();
         Assertions.assertTrue(wrappedConnection instanceof PooledConnection);
 
-        Connection wrappedPhysicalConn = ((PooledConnection) wrappedConnection).getConnection();
-        if (wrappedPhysicalConn instanceof DruidStatementConnection) {
-            wrappedPhysicalConn = ((DruidStatementConnection) wrappedPhysicalConn).getConnection();
-        }
+        Connection wrappedPhysicalConn = wrappedConnection.unwrap(Connection.class);
         Assertions.assertSame(wrappedPhysicalConn, connection);
 
         XAConnection xaConnection = connectionProxyXA.getWrappedXAConnection();
@@ -120,10 +116,7 @@ public class DataSourceProxyXATest {
         Connection wrappedConnection = connectionProxyXA.getWrappedConnection();
         Assertions.assertTrue(wrappedConnection instanceof PooledConnection);
 
-        Connection wrappedPhysicalConn = ((PooledConnection) wrappedConnection).getConnection();
-        if (wrappedPhysicalConn instanceof DruidStatementConnection) {
-            wrappedPhysicalConn = ((DruidStatementConnection) wrappedPhysicalConn).getConnection();
-        }
+        Connection wrappedPhysicalConn = wrappedConnection.unwrap(Connection.class);
         Assertions.assertSame(wrappedPhysicalConn, connection);
 
         XAConnection xaConnection = connectionProxyXA.getWrappedXAConnection();

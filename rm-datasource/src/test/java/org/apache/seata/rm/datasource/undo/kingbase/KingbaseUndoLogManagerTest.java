@@ -17,7 +17,6 @@
 package org.apache.seata.rm.datasource.undo.kingbase;
 
 import com.alibaba.druid.pool.DruidDataSource;
-import com.alibaba.druid.pool.DruidStatementConnection;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
@@ -136,10 +135,7 @@ public class KingbaseUndoLogManagerTest {
 
     private Connection getPhysicsConnection(DruidDataSource dataSource) throws SQLException {
         Connection connection = dataSource.getConnection().getConnection();
-        if (connection instanceof DruidStatementConnection) {
-            return ((DruidStatementConnection) connection).getConnection();
-        }
-        return connection;
+        return connection.unwrap(Connection.class);
     }
 
     @Test
