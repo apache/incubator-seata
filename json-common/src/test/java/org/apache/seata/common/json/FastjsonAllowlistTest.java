@@ -17,11 +17,11 @@
 package org.apache.seata.common.json;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
@@ -81,7 +81,7 @@ public class FastjsonAllowlistTest {
 
         String json = "{\"@type\":\"com.example.UserClass\",\"data\":\"test\"}";
 
-        assertThatNoException().isThrownBy(() -> jsonSerializer.parseObject(json, Object.class, false));
+        Assertions.assertDoesNotThrow(() -> jsonSerializer.parseObject(json, Object.class, false));
     }
 
     @Test
@@ -90,7 +90,7 @@ public class FastjsonAllowlistTest {
 
         String json = "{\"@type\":\"com.mycompany.model.User\",\"id\":1}";
 
-        assertThatNoException().isThrownBy(() -> jsonSerializer.parseObject(json, Object.class, false));
+        Assertions.assertDoesNotThrow(() -> jsonSerializer.parseObject(json, Object.class, false));
     }
 
     @Test
