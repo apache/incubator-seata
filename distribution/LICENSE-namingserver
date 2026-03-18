@@ -211,98 +211,137 @@ licenses.
 Apache-2.0 licenses
 ========================================================================
 
-    com.github.ben-manes.caffeine:caffeine 2.9.3 Apache-2.0
-    commons-codec:commons-codec 1.15 Apache-2.0
+    com.github.ben-manes.caffeine:caffeine 3.2.1 Apache-2.0
+    commons-codec:commons-codec 1.18.0 Apache-2.0
     commons-io:commons-io 2.8.0 Apache-2.0
     commons-lang:commons-lang 2.6 Apache-2.0
-    org.apache.commons:commons-lang3 3.12.0 Apache-2.0
+    org.apache.commons:commons-lang3 3.17.0 Apache-2.0
     com.google.errorprone:error_prone_annotations 2.21.1 Apache-2.0
     org.apache.httpcomponents:httpasyncclient 4.1.5 Apache-2.0
     org.apache.httpcomponents:httpclient 4.5.14 Apache-2.0
     org.apache.httpcomponents:httpcore 4.4.16 Apache-2.0
     org.apache.httpcomponents:httpcore-nio 4.4.16 Apache-2.0
-    com.fasterxml.jackson.core:jackson-annotations 2.13.5 Apache-2.0
-    com.fasterxml.jackson.core:jackson-core 2.13.5 Apache-2.0
-    com.fasterxml.jackson.core:jackson-databind 2.13.5 Apache-2.0
-    com.fasterxml.jackson.datatype:jackson-datatype-jdk8 2.13.5 Apache-2.0
-    com.fasterxml.jackson.datatype:jackson-datatype-jsr310 2.13.5 Apache-2.0
-    com.fasterxml.jackson.module:jackson-module-parameter-names 2.13.5 Apache-2.0
+    org.apache.httpcomponents.core5:httpcore5 5.3.4 Apache-2.0
+    org.apache.httpcomponents.core5:httpcore5-h2 5.3.4 Apache-2.0
+    com.fasterxml.jackson.core:jackson-annotations 2.19.1 Apache-2.0
+    com.fasterxml.jackson.core:jackson-core 2.19.1 Apache-2.0
+    com.fasterxml.jackson.core:jackson-databind 2.19.1 Apache-2.0
+    com.fasterxml.jackson.datatype:jackson-datatype-jdk8 2.19.1 Apache-2.0
+    com.fasterxml.jackson.datatype:jackson-datatype-jsr310 2.19.1 Apache-2.0
+    com.fasterxml.jackson.module:jackson-module-jsonSchema 2.19.1 Apache-2.0
+    com.fasterxml.jackson.module:jackson-module-parameter-names 2.19.1 Apache-2.0
+    com.fasterxml.jackson.dataformat:jackson-dataformat-yaml 2.19.1 Apache-2.0
     io.jsonwebtoken:jjwt-api 0.10.5 Apache-2.0
     io.jsonwebtoken:jjwt-impl 0.10.5 Apache-2.0
     io.jsonwebtoken:jjwt-jackson 0.10.5 Apache-2.0
-    io.netty:netty-all 4.1.101.Final Apache-2.0
-    io.netty:netty-buffer 4.1.101.Final Apache-2.0
-    io.netty:netty-codec 4.1.101.Final Apache-2.0
-    io.netty:netty-codec-dns 4.1.101.Final Apache-2.0
-    io.netty:netty-codec-haproxy 4.1.101.Final Apache-2.0
-    io.netty:netty-codec-http 4.1.101.Final Apache-2.0
-    io.netty:netty-codec-http2 4.1.101.Final Apache-2.0
-    io.netty:netty-codec-memcache 4.1.101.Final Apache-2.0
-    io.netty:netty-codec-mqtt 4.1.101.Final Apache-2.0
-    io.netty:netty-codec-redis 4.1.101.Final Apache-2.0
-    io.netty:netty-codec-smtp 4.1.101.Final Apache-2.0
-    io.netty:netty-codec-socks 4.1.101.Final Apache-2.0
-    io.netty:netty-codec-stomp 4.1.101.Final Apache-2.0
-    io.netty:netty-codec-xml 4.1.101.Final Apache-2.0
-    io.netty:netty-common 4.1.101.Final Apache-2.0
-    io.netty:netty-handler 4.1.101.Final Apache-2.0
-    io.netty:netty-handler-proxy 4.1.101.Final Apache-2.0
-    io.netty:netty-handler-ssl-ocsp 4.1.101.Final Apache-2.0
-    io.netty:netty-resolver 4.1.101.Final Apache-2.0
-    io.netty:netty-resolver-dns 4.1.101.Final Apache-2.0
-    io.netty:netty-resolver-dns-classes-macos 4.1.101.Final Apache-2.0
-    io.netty:netty-resolver-dns-native-macos 4.1.101.Final Apache-2.0
-    io.netty:netty-resolver-dns-native-macos 4.1.101.Final Apache-2.0
-    io.netty:netty-transport 4.1.101.Final Apache-2.0
-    io.netty:netty-transport-classes-epoll 4.1.101.Final Apache-2.0
-    io.netty:netty-transport-classes-kqueue 4.1.101.Final Apache-2.0
-    io.netty:netty-transport-native-epoll 4.1.101.Final Apache-2.0
-    io.netty:netty-transport-native-epoll 4.1.101.Final Apache-2.0
-    io.netty:netty-transport-native-kqueue 4.1.101.Final Apache-2.0
-    io.netty:netty-transport-native-kqueue 4.1.101.Final Apache-2.0
-    io.netty:netty-transport-native-unix-common 4.1.101.Final Apache-2.0
-    io.netty:netty-transport-rxtx 4.1.101.Final Apache-2.0
-    io.netty:netty-transport-sctp 4.1.101.Final Apache-2.0
-    io.netty:netty-transport-udt 4.1.101.Final Apache-2.0
+    io.netty:netty-all 4.1.122.Final Apache-2.0
+    io.netty:netty-buffer 4.1.122.Final Apache-2.0
+    io.netty:netty-codec 4.1.122.Final Apache-2.0
+    io.netty:netty-codec-dns 4.1.122.Final Apache-2.0
+    io.netty:netty-codec-haproxy 4.1.122.Final Apache-2.0
+    io.netty:netty-codec-http 4.1.122.Final Apache-2.0
+    io.netty:netty-codec-http2 4.1.122.Final Apache-2.0
+    io.netty:netty-codec-memcache 4.1.122.Final Apache-2.0
+    io.netty:netty-codec-mqtt 4.1.122.Final Apache-2.0
+    io.netty:netty-codec-redis 4.1.122.Final Apache-2.0
+    io.netty:netty-codec-smtp 4.1.122.Final Apache-2.0
+    io.netty:netty-codec-socks 4.1.122.Final Apache-2.0
+    io.netty:netty-codec-stomp 4.1.122.Final Apache-2.0
+    io.netty:netty-codec-xml 4.1.122.Final Apache-2.0
+    io.netty:netty-common 4.1.122.Final Apache-2.0
+    io.netty:netty-handler 4.1.122.Final Apache-2.0
+    io.netty:netty-handler-proxy 4.1.122.Final Apache-2.0
+    io.netty:netty-handler-ssl-ocsp 4.1.122.Final Apache-2.0
+    io.netty:netty-resolver 4.1.122.Final Apache-2.0
+    io.netty:netty-resolver-dns 4.1.122.Final Apache-2.0
+    io.netty:netty-resolver-dns-classes-macos 4.1.122.Final Apache-2.0
+    io.netty:netty-resolver-dns-native-macos 4.1.122.Final Apache-2.0
+    io.netty:netty-resolver-dns-native-macos 4.1.122.Final Apache-2.0
+    io.netty:netty-transport 4.1.122.Final Apache-2.0
+    io.netty:netty-transport-classes-epoll 4.1.122.Final Apache-2.0
+    io.netty:netty-transport-classes-kqueue 4.1.122.Final Apache-2.0
+    io.netty:netty-transport-native-epoll 4.1.122.Final Apache-2.0
+    io.netty:netty-transport-native-epoll 4.1.122.Final Apache-2.0
+    io.netty:netty-transport-native-kqueue 4.1.122.Final Apache-2.0
+    io.netty:netty-transport-native-kqueue 4.1.122.Final Apache-2.0
+    io.netty:netty-transport-native-unix-common 4.1.122.Final Apache-2.0
+    io.netty:netty-transport-rxtx 4.1.122.Final Apache-2.0
+    io.netty:netty-transport-sctp 4.1.122.Final Apache-2.0
+    io.netty:netty-transport-udt 4.1.122.Final Apache-2.0
     org.yaml:snakeyaml 2.0 Apache-2.0
-    org.springframework:spring-aop 5.3.39 Apache-2.0
-    org.springframework:spring-beans 5.3.39 Apache-2.0
-    org.springframework.boot:spring-boot 2.7.18 Apache-2.0
-    org.springframework.boot:spring-boot-autoconfigure 2.7.18 Apache-2.0
-    org.springframework.boot:spring-boot-starter 2.7.18 Apache-2.0
-    org.springframework.boot:spring-boot-starter-json 2.7.18 Apache-2.0
-    org.springframework.boot:spring-boot-starter-logging 2.7.18 Apache-2.0
-    org.springframework.boot:spring-boot-starter-security 2.7.18 Apache-2.0
-    org.springframework.boot:spring-boot-starter-tomcat 2.7.18 Apache-2.0
-    org.springframework.boot:spring-boot-starter-web 2.7.18 Apache-2.0
-    org.springframework:spring-context 5.3.39 Apache-2.0
-    org.springframework:spring-core 5.3.39 Apache-2.0
-    org.springframework:spring-expression 5.3.39 Apache-2.0
-    org.springframework:spring-jcl 5.3.39 Apache-2.0
-    org.springframework.security:spring-security-config 5.7.11 Apache-2.0
-    org.springframework.security:spring-security-core 5.7.11 Apache-2.0
-    org.springframework.security:spring-security-crypto 5.7.11 Apache-2.0
-    org.springframework.security:spring-security-web 5.7.11 Apache-2.0
-    org.springframework:spring-web 5.3.39 Apache-2.0
-    org.springframework:spring-webmvc 5.3.39 Apache-2.0
-    org.apache.tomcat:tomcat-annotations-api 9.0.83 Apache-2.0
-    org.apache.tomcat.embed:tomcat-embed-websocket 9.0.106 Apache-2.0
-    org.apache.tomcat.embed:tomcat-embed-core 9.0.106 Apache-2.0
-    org.apache.tomcat.embed:tomcat-embed-core 9.0.106 Apache-2.0
-    org.apache.tomcat.embed:tomcat-embed-el 9.0.106 Apache-2.0
+    org.springframework:spring-aop 6.2.8 Apache-2.0
+    org.springframework:spring-beans 6.2.8 Apache-2.0
+    org.springframework:spring-context 6.2.8 Apache-2.0
+    org.springframework:spring-core 6.2.8 Apache-2.0
+    org.springframework:spring-expression 6.2.8 Apache-2.0
+    org.springframework:spring-jcl 6.2.8 Apache-2.0
+    org.springframework:spring-messaging 6.2.8 Apache-2.0
+    org.springframework.security:spring-security-config 6.5.1 Apache-2.0
+    org.springframework.security:spring-security-core 6.5.1 Apache-2.0
+    org.springframework.security:spring-security-crypto 6.5.1 Apache-2.0
+    org.springframework.security:spring-security-web 6.5.1 Apache-2.0
+    org.springframework:spring-web 6.2.8 Apache-2.0
+    org.springframework:spring-webmvc 6.2.8 Apache-2.0
+    org.springframework.boot:spring-boot 3.5.2 Apache-2.0
+    org.springframework.boot:spring-boot-autoconfigure 3.5.2 Apache-2.0
+    org.springframework.boot:spring-boot-starter 3.5.2 Apache-2.0
+    org.springframework.boot:spring-boot-starter-json 3.5.2 Apache-2.0
+    org.springframework.boot:spring-boot-starter-logging 3.5.2 Apache-2.0
+    org.springframework.boot:spring-boot-starter-security 3.5.2 Apache-2.0
+    org.springframework.boot:spring-boot-starter-tomcat 3.5.2 Apache-2.0
+    org.springframework.boot:spring-boot-starter-web 3.5.2 Apache-2.0
+    org.springframework.ai:spring-ai-autoconfigure-mcp-server-webmvc 1.1.0 Apache-2.0
+    org.springframework.ai:spring-ai-template-st 1.1.0 Apache-2.0
+    org.springframework.ai:spring-ai-autoconfigure-mcp-server-common 1.1.0 Apache-2.0
+    org.springframework.ai:spring-ai-mcp 1.1.0 Apache-2.0
+    org.springframework.ai:spring-ai-mcp-annotations 1.1.0 Apache-2.0
+    org.springframework.ai:spring-ai-model 1.1.0 Apache-2.0
+    org.springframework.ai:spring-ai-commons 1.1.0 Apache-2.0
+    org.springframework.ai:spring-ai-starter-mcp-server-webmvc 1.1.0 Apache-2.0
+    org.apache.tomcat:tomcat-annotations-api 10.1.42 Apache-2.0
+    org.apache.tomcat.embed:tomcat-embed-websocket 11.0.12 Apache-2.0
+    org.apache.tomcat.embed:tomcat-embed-core 11.0.12 Apache-2.0
+    org.apache.tomcat.embed:tomcat-embed-core 11.0.12 Apache-2.0
+    org.apache.tomcat.embed:tomcat-embed-el 11.0.12 Apache-2.0
+    org.jetbrains.kotlin:kotlin-stdlib 1.9.25 Apache-2.0
+    org.jetbrains.kotlin:kotlin-stdlib-common 1.9.25 Apache-2.0
+    io.micrometer:micrometer-core 1.15.1 Apache-2.0
+    io.micrometer:micrometer-observation 1.15.1 Apache-2.0
+    io.micrometer:micrometer-commons 1.15.1 Apache-2.0
+    io.micrometer:context-propagation 1.1.3 Apache-2.0
+    com.ethlo.time:itu 1.14.0 Apache-2.0
+    org.jspecify:jspecify 1.0.0 Apache-2.0
+    com.github.victools:jsonschema-module-jackson 4.38.0 Apache-2.0
+    com.github.victools:jsonschema-generator 4.38.0 Apache-2.0
+    org.springaicommunity:mcp-annotations 0.7.0 Apache-2.0
+    org.jetbrains:annotations 13.0 Apache-2.0
+    com.fasterxml:classmate 1.7.0 Apache-2.0
+    javax.validation:validation-api 2.0.1.Final Apache-2.0
+    com.github.victools:jsonschema-module-swagger-2 4.38.0 Apache-2.0
+    io.swagger.core.v3:swagger-annotations-jakarta 2.2.30 Apache-2.0
+    org.apache.httpcomponents.client5:httpclient5 5.4.3 Apache-2.0
+    io.projectreactor:reactor-core 3.7.7 Apache-2.0
+    com.squareup.okhttp3:okhttp 4.9.3 Apache-2.0
+    com.networknt:json-schema-validator 2.0.0 Apache-2.0
+    com.squareup.okio:okio 2.8.0 Apache-2.0
 
 ========================================================================
 BSD-2-Clause licenses
 ========================================================================
 
     webidl-conversions 3.0.1 BSD-2-Clause see:licenses/webidl-conversions-BSD-2-Clause
+    org.hdrhistogram:HdrHistogram 2.2.2 BSD-2-Clause see:licenses/HdrHistogram-BSD-2-Clause
+    org.latencyutils:LatencyUtils 2.0.3 BSD-2-Clause see:licenses/HdrHistogram-BSD-2-Clause
 
 ========================================================================
 BSD-3-Clause licenses
 ========================================================================
 
-    org.codehaus.janino:commons-compiler 3.1.10 BSD-3-Clause see:licenses/janino-BSD-3-Clause
-    org.codehaus.janino:janino 3.1.10 BSD-3-Clause see:licenses/janino-BSD-3-Clause
+    org.codehaus.janino:commons-compiler 3.1.12 BSD-3-Clause see:licenses/janino-BSD-3-Clause
+    org.codehaus.janino:janino 3.1.12 BSD-3-Clause see:licenses/janino-BSD-3-Clause
+    org.antlr:antlr-runtime 3.5.3 BSD-3-Clause see:licenses/antlr-runtime-BSD-3-Clause
+    org.antlr:ST4 4.3.4 BSD-3-Clause see:licenses/antlr-ST4-BSD-3-Clause
+    org.antlr:antlr4-runtime 4.13.1 BSD-3-Clause see:licenses/antlr4-runtime-BSD-3-Clause
 
     @uni/action-sheet 1.0.8 BSD-3-Clause see:licenses/uni-BSD-3-Clause
     @uni/clipboard 1.0.9 BSD-3-Clause see:licenses/uni-BSD-3-Clause
@@ -331,7 +370,7 @@ BSD-3-Clause licenses
     rax-create-factory 1.0.0 BSD-3-Clause see:licenses/rax-BSD-3-Clause
     rax-is-valid-element 1.0.1 BSD-3-Clause see:licenses/rax-BSD-3-Clause
     react-transition-group 2.9.0 BSD-3-Clause see:licenses/react-transition-group-BSD-3-Clause
-    serialize-javascript 5.0.1 BSD-3-Clause see:licenses/serialize-javascript-BSD-3-Clause
+    serialize-javascript 6.0.2 BSD-3-Clause see:licenses/serialize-javascript-BSD-3-Clause
     source-map 0.5.7 BSD-3-Clause see:licenses/source-map-BSD-3-Clause
     sprintf-js 1.0.3 BSD-3-Clause see:licenses/sprintf-js-BSD-3-Clause
     style-unit 2.0.1 BSD-3-Clause see:licenses/rax-BSD-3-Clause
@@ -348,6 +387,7 @@ BSD-3-Clause licenses
     universal-unit-tool 1.0.0 BSD-3-Clause see:licenses/universal-BSD-3-Clause
     universal-unit-tool/node_modules/universal-device 2.3.1 BSD-3-Clause see:licenses/universal-BSD-3-Clause
     warning 3.0.0 BSD-3-Clause see:licenses/warning-BSD-3-Clause
+    node-forge 1.3.3 BSD-3-Clause see:licenses/node-forge-BSD-3-Clause
 
 ========================================================================
 CDDL-1.0 licenses
@@ -359,22 +399,29 @@ CDDL-1.0 licenses
 EPL-1.0  licenses
 ========================================================================
 
-    ch.qos.logback:logback-classic 1.2.12 EPL-1.0 see:licenses/EPL-1.0
-    ch.qos.logback:logback-core 1.2.12 EPL-1.0 see:licenses/EPL-1.0
+    ch.qos.logback:logback-classic 1.5.18 EPL-1.0 see:licenses/EPL-1.0
+    ch.qos.logback:logback-core 1.5.18 EPL-1.0 see:licenses/EPL-1.0
 
 ========================================================================
 EPL-2.0 licenses
 ========================================================================
 
-    jakarta.annotation:jakarta.annotation-api 1.3.5 EPL-2.0 see:licenses/EPL-2.0
+    jakarta.annotation:jakarta.annotation-api 2.1.1 EPL-2.0 see:licenses/EPL-2.0
 
 ========================================================================
 MIT licenses
 ========================================================================
 
     org.checkerframework:checker-qual 3.37.0 MIT see:licenses/checker-qual-MIT
-    org.slf4j:jul-to-slf4j 1.7.36  MIT see:licenses/jul-to-slf4j-MIT
-    org.slf4j:slf4j-api 1.7.36  MIT see:licenses/slf4j-api-MIT
+    org.slf4j:jul-to-slf4j 2.0.17  MIT see:licenses/jul-to-slf4j-MIT
+    org.slf4j:slf4j-api 2.0.17  MIT see:licenses/slf4j-api-MIT
+    io.modelcontextprotocol.sdk:mcp 0.16.0  MIT see:licenses/mcp-MIT
+    io.modelcontextprotocol.sdk:mcp-core 0.16.0  MIT see:licenses/mcp-core-MIT
+    io.modelcontextprotocol.sdk:mcp-json 0.16.0  MIT see:licenses/mcp-json-MIT
+    io.modelcontextprotocol.sdk:mcp-spring-webmvc 0.16.0  MIT see:licenses/mcp-spring-webmvc-MIT
+    io.modelcontextprotocol.sdk:mcp-json-jackson2 0.16.0  MIT see:licenses/mcp-json-jackson-MIT
+    com.knuddels:jtokkit 1.1.0  MIT see:licenses/jtokkit-MIT
+    org.reactivestreams:reactive-streams 1.0.4  MIT see:licenses/reactive-streams-MIT
 
     @alicloud/console-components 1.6.2 MIT see:licenses/alicloud-console-components-MIT
     @alicloud/console-components-actions 1.1.1 MIT see:licenses/alicloud-console-components-actions-MIT
@@ -468,7 +515,7 @@ MIT licenses
     asn1.js 4.10.1 MIT see:licenses/asn1.js-MIT
     asn1.js/node_modules/bn.js 4.12.0 MIT see:licenses/bn.js-MIT
     asynckit 0.4.0 MIT see:licenses/asynckit-MIT
-    axios 1.8.2 MIT see:licenses/axios-MIT
+    axios 1.12.2 MIT see:licenses/axios-MIT
     babel-plugin-emotion 10.2.2 MIT see:licenses/babel-plugin-emotion-MIT
     babel-plugin-emotion/node_modules/babel-plugin-macros 2.8.0 MIT see:licenses/babel-plugin-emotion-MIT
     babel-plugin-emotion/node_modules/convert-source-map 1.9.0 MIT see:licenses/convert-source-map-MIT
@@ -501,7 +548,7 @@ MIT licenses
     chalk 2.4.2 MIT see:licenses/chalk-MIT
     chalk 4.1.2 MIT see:licenses/chalk-MIT
     chokidar 3.5.1 MIT see:licenses/chokidar-MIT
-    cipher-base 1.0.4 MIT see:licenses/cipher-base-MIT
+    cipher-base 1.0.6 MIT see:licenses/cipher-base-MIT
     classnames 2.2.6 MIT see:licenses/classnames-MIT
     classnames 2.5.1 MIT see:licenses/classnames-2.5.1-MIT
     clsx 2.1.0 MIT see:licenses/clsx-MIT
@@ -618,14 +665,14 @@ MIT licenses
     mime-db 1.52.0 MIT see:licenses/mime-db-MIT
     mime-types 2.1.35 MIT see:licenses/mime-types-MIT
     min-dash 4.2.1 MIT see:licenses/min-dash-MIT
-    min-document 2.19.0 MIT see:licenses/min-document-MIT
+    min-document 2.19.1 MIT see:licenses/min-document-MIT
     min-dom 4.1.0 MIT see:licenses/min-dom-MIT
     minimalistic-crypto-utils 1.0.1 MIT see:licenses/minimalistic-crypto-utils-MIT
     mocha 8.4.0 MIT see:licenses/mocha-MIT
     moment 2.30.1 MIT see:licenses/moment-MIT
     ms 2.1.2 MIT see:licenses/ms-MIT
-    nanoid 3.1.31 MIT see:licenses/nanoid-MIT
-    node-fetch 2.6.7 MIT see:licenses/node-fetch-MIT
+    nanoid 3.3.8 MIT see:licenses/nanoid-MIT
+    node-fetch 2.7.0 MIT see:licenses/node-fetch-MIT
     node-releases 2.0.14 MIT see:licenses/node-releases-MIT
     normalize-path 3.0.0 MIT see:licenses/normalize-path-MIT
     object-assign 4.1.1 MIT see:licenses/object-assign-MIT
@@ -676,7 +723,7 @@ MIT licenses
     resolve-from 4.0.0 MIT see:licenses/resolve-from-MIT
     resolve-pathname 3.0.0 MIT see:licenses/resolve-pathname-MIT
     ripemd160 2.0.2 MIT see:licenses/ripemd160-MIT
-    sha.js 2.4.11 MIT see:licenses/sha.js-MIT
+    sha.js 2.4.12 MIT see:licenses/sha.js-MIT
     safe-buffer 5.2.1 MIT see:licenses/safe-buffer-MIT
     safer-buffer 2.1.2 MIT see:licenses/safer-buffer-MIT
     scheduler 0.19.1 MIT see:licenses/scheduler-MIT
@@ -698,7 +745,7 @@ MIT licenses
     supports-color 8.1.1 MIT see:licenses/supports-color-MIT
     supports-preserve-symlinks-flag 1.0.0 MIT see:licenses/supports-preserve-symlinks-flag-MIT
     svelte 3.59.2 MIT see:licenses/svelte-MIT
-    swiper 6.5.1 MIT see:licenses/swiper-MIT
+    swiper 6.5.9 MIT see:licenses/swiper-MIT
     symbol-observable 1.2.0 MIT see:licenses/symbol-observable-MIT
     tabbable 6.2.0 MIT see:licenses/tabbable-MIT
     tiny-invariant 1.3.3 MIT see:licenses/tiny-invariant-MIT
@@ -720,6 +767,8 @@ MIT licenses
     yargs 16.2.0 MIT see:licenses/yargs-MIT
     yargs-unparser 2.0.0 MIT see:licenses/yargs-unparser-MIT
     yocto-queue 0.1.0 MIT see:licenses/yocto-queue-MIT
+    micromatch 4.0.8 MIT see:licenses/micromatch-MIT
+    js-yaml 3.14.2 MIT see:licenses/js-yaml-MIT
 
 ========================================================================
 ISC licenses
