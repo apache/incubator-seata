@@ -24,6 +24,10 @@ import org.apache.seata.integration.tx.api.json.JsonParserFactory;
 
 import java.util.Objects;
 
+/**
+ * @deprecated use {@link org.apache.seata.common.json.JsonUtil} in json-common module instead.
+ */
+@Deprecated
 public class JsonUtil {
 
     private static final String CONFIG_JSON_PARSER_NAME = ConfigurationFactory.getInstance()

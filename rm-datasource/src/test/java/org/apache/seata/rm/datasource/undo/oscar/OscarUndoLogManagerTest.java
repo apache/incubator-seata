@@ -17,7 +17,6 @@
 package org.apache.seata.rm.datasource.undo.oscar;
 
 import com.alibaba.druid.pool.DruidDataSource;
-import com.alibaba.druid.pool.DruidStatementConnection;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.seata.common.loader.EnhancedServiceLoader;
@@ -42,6 +41,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 
 import java.lang.reflect.Field;
 import java.sql.Connection;
@@ -51,6 +51,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+@DisabledIfSystemProperty(
+        named = "druid.version",
+        matches = "[0-1].[1-2].[0-24]",
+        disabledReason = "druid 1.2.24 correct support oscar")
 public class OscarUndoLogManagerTest {
 
     List<String> returnValueColumnLabels = Lists.newArrayList("log_status");
@@ -136,10 +140,7 @@ public class OscarUndoLogManagerTest {
 
     private Connection getPhysicsConnection(DruidDataSource dataSource) throws SQLException {
         Connection connection = dataSource.getConnection().getConnection();
-        if (connection instanceof DruidStatementConnection) {
-            return ((DruidStatementConnection) connection).getConnection();
-        }
-        return connection;
+        return connection.unwrap(Connection.class);
     }
 
     @Test

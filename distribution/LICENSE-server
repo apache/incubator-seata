@@ -365,6 +365,13 @@ Apache-2.0 licenses
     org.apache.tomcat:tomcat-annotations-api 9.0.83 Apache-2.0
     org.apache.zookeeper:zookeeper 3.7.2 Apache-2.0
     org.apache.zookeeper:zookeeper-jute 3.7.2 Apache-2.0
+    org.apache.fory:fory-core 0.12.3 Apache-2.0
+    org.jetbrains:annotations 13.0 Apache-2.0
+    org.apache.commons:commons-lang3 3.12.0 Apache-2.0
+    com.squareup.okhttp3:okhttp 4.9.3 Apache-2.0
+    com.squareup.okio:okio 2.8.0 Apache-2.0
+    org.jetbrains.kotlin:kotlin-stdlib 1.6.21 Apache-2.0
+    org.jetbrains.kotlin:kotlin-stdlib-common 1.6.21 Apache-2.0
 
 ========================================================================
 BSD-2-Clause licenses
@@ -372,6 +379,7 @@ BSD-2-Clause licenses
 
     org.postgresql:postgresql 42.3.8 BSD-2-Clause see:licenses/postgresql-BSD-2-Clause
     com.github.luben:zstd-jni 1.5.0-4 BSD-2-Clause see:licenses/zstd-jni-BSD-2-Clause
+    at.yawk.lz4:lz4-java 1.8.0 BSD-2-Clause see:licenses/lz4-BSD-2-Clause
 
 ========================================================================
 BSD-3-Clause licenses
