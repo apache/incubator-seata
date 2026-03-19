@@ -53,6 +53,7 @@ public class MetricsCollector {
             writer.println("Latency P50 (ms)," + latency.getP50());
             writer.println("Latency P95 (ms)," + latency.getP95());
             writer.println("Latency P99 (ms)," + latency.getP99());
+            writer.println("Latency P99.9 (ms)," + latency.getP999());
             writer.println("Latency Max (ms)," + latency.getMax());
 
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -83,6 +84,7 @@ public class MetricsCollector {
         report.append(String.format("  P50:                 %d ms\n", latency.getP50()));
         report.append(String.format("  P95:                 %d ms\n", latency.getP95()));
         report.append(String.format("  P99:                 %d ms\n", latency.getP99()));
+        report.append(String.format("  P99.9:               %d ms\n", latency.getP999()));
         report.append(String.format("  Max:                 %d ms\n", latency.getMax()));
         report.append("===================================================\n");
 

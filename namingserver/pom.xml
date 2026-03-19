@@ -40,7 +40,7 @@
 
     <dependencyManagement>
         <dependencies>
-            <!-- Spring Boot -->
+            <!-- Spring Boot  -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
@@ -48,7 +48,7 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            <!-- spring-framework-->
+            <!-- spring-framework  -->
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-framework-bom</artifactId>
@@ -98,6 +98,7 @@
             <version>${tomcat-embed.version}</version>
         </dependency>
 
+        <!-- Force override explicit versions for key dependencies to bypass BOM conflict -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
@@ -129,7 +130,6 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>

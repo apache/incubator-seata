@@ -20,10 +20,8 @@ import com.alibaba.druid.mock.MockStatementBase;
 import com.alibaba.druid.mock.handler.MockExecuteHandler;
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
-import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLSelectQueryBlock;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
-import org.apache.seata.sqlparser.druid.mysql.MySQLSelectForUpdateRecognizer;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 
 import java.sql.ResultSet;
@@ -74,13 +72,8 @@ public class MockExecuteHandlerImpl implements MockExecuteHandler {
             SQLSelectStatement ast = (SQLSelectStatement) asts.get(0);
             SQLSelectQueryBlock queryBlock = ast.getSelect().getFirstQueryBlock();
             String tableName = "";
-            if (queryBlock.getFrom() instanceof SQLExprTableSource) {
-                MySQLSelectForUpdateRecognizer recognizer = new MySQLSelectForUpdateRecognizer(sql, ast);
-                tableName = recognizer.getTableName();
-            } else {
-                // select * from t inner join t1...
-                tableName = queryBlock.getFrom().toString();
-            }
+            // select * from t inner join t1...
+            tableName = queryBlock.getFrom().toString();
             for (Object[] meta : mockColumnsMetasReturnValue) {
                 if (tableName.equalsIgnoreCase(meta[2].toString())) {
                     metas.add(meta);

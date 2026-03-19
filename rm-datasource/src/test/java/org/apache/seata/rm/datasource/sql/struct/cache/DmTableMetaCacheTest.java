@@ -348,8 +348,8 @@ public class DmTableMetaCacheTest {
             new Object[] {"idx_id_userid", "user_id", false, "", 3, 2, "A", 34} // column order 2
         };
         Object[][] compositePKMetas = new Object[][] {
-            new Object[] {"id"}, // PK column order 1
-            new Object[] {"user_id"} // PK column order 2
+            new Object[] {"user_id"}, // PK column order 1 (intentionally different from index order)
+            new Object[] {"id"} // PK column order 2
         };
         Object[][] compositeColumnMetas = new Object[][] {
             new Object[] {"", "", "dt2", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"
@@ -386,7 +386,8 @@ public class DmTableMetaCacheTest {
         // Regression test for a bug fix: a composite unique index that contains primary key columns plus extra columns
         // should NOT be marked as PRIMARY.
         // Scenario: primary key (ID), unique index (ID, NAME) — unique index contains PK column but has extra NAME.
-        // Before the fix: Oracle implementation matched by count (matchCols == pkcol.size()) and could misidentify
+        // Before the fix: the previous DM implementation matched by count (matchCols == pkcol.size()) and could
+        // misidentify
         // PRIMARY.
         // After the fix: using Set equality ({ID, NAME} != {ID}) prevents the index from being marked as PRIMARY
 
