@@ -39,14 +39,14 @@ public class LoopContextHolder {
     private final Stack<Integer> forwardCounterStack = new Stack<>();
     private Collection collection;
 
-    private static final ResourceLock contextLock = new ResourceLock();
+    private static final ResourceLock CONTEXT_LOCK = new ResourceLock();
 
     public static LoopContextHolder getCurrent(ProcessContext context, boolean forceCreate) {
         LoopContextHolder loopContextHolder =
                 (LoopContextHolder) context.getVariable(DomainConstants.VAR_NAME_CURRENT_LOOP_CONTEXT_HOLDER);
 
         if (null == loopContextHolder && forceCreate) {
-            try (ResourceLock ignored = contextLock.obtain()) {
+            try (ResourceLock ignored = CONTEXT_LOCK.obtain()) {
                 loopContextHolder =
                         (LoopContextHolder) context.getVariable(DomainConstants.VAR_NAME_CURRENT_LOOP_CONTEXT_HOLDER);
                 if (null == loopContextHolder) {

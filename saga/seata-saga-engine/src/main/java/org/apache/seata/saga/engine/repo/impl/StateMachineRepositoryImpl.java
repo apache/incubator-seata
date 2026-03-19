@@ -45,7 +45,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class StateMachineRepositoryImpl implements StateMachineRepository {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StateMachineRepositoryImpl.class);
-    private final ResourceLock itemLock = new ResourceLock();
+    private final ResourceLock ITEM_LOCK = new ResourceLock();
     private Map<
                     String
                     /** Name_Tenant **/
@@ -68,7 +68,7 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
     public StateMachine getStateMachineById(String stateMachineId) {
         Item item = CollectionUtils.computeIfAbsent(stateMachineMapById, stateMachineId, key -> new Item());
         if (item.getValue() == null && stateLangStore != null) {
-            try (ResourceLock ignored = itemLock.obtain()) {
+            try (ResourceLock ignored = ITEM_LOCK.obtain()) {
                 if (item.getValue() == null) {
                     StateMachine stateMachine = stateLangStore.getStateMachineById(stateMachineId);
                     if (stateMachine != null) {
@@ -94,7 +94,7 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
         Item item = CollectionUtils.computeIfAbsent(
                 stateMachineMapByNameAndTenant, stateMachineName + "_" + tenantId, key -> new Item());
         if (item.getValue() == null && stateLangStore != null) {
-            try (ResourceLock ignored = itemLock.obtain()) {
+            try (ResourceLock ignored = ITEM_LOCK.obtain()) {
                 if (item.getValue() == null) {
                     StateMachine stateMachine = stateLangStore.getLastVersionStateMachine(stateMachineName, tenantId);
                     if (stateMachine != null) {

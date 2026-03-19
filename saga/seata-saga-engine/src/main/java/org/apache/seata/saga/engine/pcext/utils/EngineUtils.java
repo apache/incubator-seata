@@ -46,7 +46,7 @@ public class EngineUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EngineUtils.class);
 
-    private static final ResourceLock exceptionLock = new ResourceLock();
+    private static final ResourceLock EXCEPTION_LOCK = new ResourceLock();
 
     /**
      * generate parent id
@@ -201,7 +201,7 @@ public class EngineUtils {
                 List<Class<? extends Exception>> exceptionClasses = exceptionMatch.getExceptionClasses();
                 if (CollectionUtils.isNotEmpty(exceptions)) {
                     if (exceptionClasses == null) {
-                        try (ResourceLock ignored = exceptionLock.obtain()) {
+                        try (ResourceLock ignored = EXCEPTION_LOCK.obtain()) {
                             exceptionClasses = exceptionMatch.getExceptionClasses();
                             if (exceptionClasses == null) {
 

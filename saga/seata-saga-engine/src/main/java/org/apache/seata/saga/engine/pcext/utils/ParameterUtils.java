@@ -37,7 +37,7 @@ import java.util.Map;
  */
 public class ParameterUtils {
 
-    private static final ResourceLock inputLock = new ResourceLock();
+    private static final ResourceLock INPUT_LOCK = new ResourceLock();
 
     public static List<Object> createInputParams(
             ExpressionResolver expressionResolver,
@@ -51,7 +51,7 @@ public class ParameterUtils {
 
         List<Object> inputExpressions = serviceTaskState.getInputExpressions();
         if (inputExpressions == null) {
-            try (ResourceLock ignored = inputLock.obtain()) {
+            try (ResourceLock ignored = INPUT_LOCK.obtain()) {
                 inputExpressions = serviceTaskState.getInputExpressions();
                 if (inputExpressions == null) {
                     inputExpressions = new ArrayList<>(inputAssignments.size());
@@ -80,7 +80,7 @@ public class ParameterUtils {
 
         Map<String, Object> outputExpressions = serviceTaskState.getOutputExpressions();
         if (outputExpressions == null) {
-            try (ResourceLock ignored = inputLock.obtain()) {
+            try (ResourceLock ignored = INPUT_LOCK.obtain()) {
                 outputExpressions = serviceTaskState.getOutputExpressions();
                 if (outputExpressions == null) {
                     outputExpressions = new LinkedHashMap<>(outputAssignments.size());

@@ -61,14 +61,14 @@ public class CompensationHolder {
      */
     private Stack<StateInstance> stateStackNeedCompensation = new Stack<>();
 
-    private static final ResourceLock holderLock = new ResourceLock();
+    private static final ResourceLock HOLDER_LOCK = new ResourceLock();
 
     public static CompensationHolder getCurrent(ProcessContext context, boolean forceCreate) {
 
         CompensationHolder compensationholder =
                 (CompensationHolder) context.getVariable(DomainConstants.VAR_NAME_CURRENT_COMPENSATION_HOLDER);
         if (compensationholder == null && forceCreate) {
-            try (ResourceLock ignored = holderLock.obtain()) {
+            try (ResourceLock ignored = HOLDER_LOCK.obtain()) {
                 compensationholder =
                         (CompensationHolder) context.getVariable(DomainConstants.VAR_NAME_CURRENT_COMPENSATION_HOLDER);
                 if (compensationholder == null) {

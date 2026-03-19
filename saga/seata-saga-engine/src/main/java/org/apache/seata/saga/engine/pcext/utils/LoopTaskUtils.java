@@ -57,7 +57,7 @@ public class LoopTaskUtils {
 
     public static final String LOOP_STATE_NAME_PATTERN = "-loop-";
 
-    private static final ResourceLock loopLock = new ResourceLock();
+    private static final ResourceLock LOOP_LOCK = new ResourceLock();
 
     /**
      * get Loop Config from State
@@ -230,7 +230,7 @@ public class LoopTaskUtils {
                 currentLoopContext.getNrOfCompletedInstances().get();
 
         if (!currentLoopContext.isCompletionConditionSatisfied()) {
-            try (ResourceLock ignored = loopLock.obtain()) {
+            try (ResourceLock ignored = LOOP_LOCK.obtain()) {
                 if (!currentLoopContext.isCompletionConditionSatisfied()) {
                     Map<String, Object> stateMachineContext =
                             (Map<String, Object>) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);
