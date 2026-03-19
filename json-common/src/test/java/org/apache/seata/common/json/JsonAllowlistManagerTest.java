@@ -93,10 +93,36 @@ public class JsonAllowlistManagerTest {
         JsonAllowlistManager manager = JsonAllowlistManager.getInstance();
 
         assertThat(manager.isAllowed("org.apache.seata.core.model.BranchType")).isTrue();
+        assertThat(manager.isAllowed("io.seata.saga.engine.mock.DemoService$People"))
+                .isTrue();
         assertThat(manager.isAllowed("org.apache.seata.rm.datasource.undo.UndoLogParser"))
                 .isTrue();
         assertThat(manager.isAllowed("org.apache.seata.common.json.JsonAllowlistManager"))
                 .isTrue();
+    }
+
+    @Test
+    public void testBuiltinAllowlist_objectArrayDescriptorsByPrefix() {
+        JsonAllowlistManager manager = JsonAllowlistManager.getInstance();
+
+        assertThat(manager.isAllowed("[Lorg.apache.seata.common.json.JsonAllowlistManager;"))
+                .isTrue();
+        assertThat(manager.isAllowed("[Lio.seata.saga.engine.mock.DemoService$People;"))
+                .isTrue();
+        assertThat(manager.isAllowed("[[Lio.seata.saga.engine.mock.DemoService$People;"))
+                .isTrue();
+        assertThat(manager.isAllowed("[Lcom.malicious.EvilClass;")).isFalse();
+    }
+
+    @Test
+    public void testBuiltinAllowlist_objectArrayCanonicalNameByPrefix() {
+        JsonAllowlistManager manager = JsonAllowlistManager.getInstance();
+
+        assertThat(manager.isAllowed("io.seata.saga.engine.mock.DemoService$People[]"))
+                .isTrue();
+        assertThat(manager.isAllowed("io.seata.saga.engine.mock.DemoService$People[][]"))
+                .isTrue();
+        assertThat(manager.isAllowed("com.malicious.EvilClass[]")).isFalse();
     }
 
     @Test

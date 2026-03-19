@@ -133,6 +133,14 @@ public class JsonAllowlistManager {
     }
 
     private boolean doCheck(String className) {
+        if (isExactOrPrefixAllowed(className)) {
+            return true;
+        }
+        String componentClassName = extractArrayComponentClassName(className);
+        return componentClassName != null && isExactOrPrefixAllowed(componentClassName);
+    }
+
+    private boolean isExactOrPrefixAllowed(String className) {
         if (builtinClasses.contains(className)) {
             return true;
         }
@@ -150,6 +158,34 @@ public class JsonAllowlistManager {
             }
         }
         return false;
+    }
+
+    private String extractArrayComponentClassName(String className) {
+        if (className == null || className.isEmpty()) {
+            return null;
+        }
+
+        String normalized = className;
+        while (normalized.endsWith("[]")) {
+            normalized = normalized.substring(0, normalized.length() - 2);
+        }
+        if (!normalized.equals(className)) {
+            return normalized;
+        }
+
+        if (!normalized.startsWith("[")) {
+            return null;
+        }
+        while (normalized.startsWith("[")) {
+            normalized = normalized.substring(1);
+        }
+        if (normalized.length() == 1) {
+            return null;
+        }
+        if (normalized.startsWith("L") && normalized.endsWith(";")) {
+            return normalized.substring(1, normalized.length() - 1);
+        }
+        return null;
     }
 
     private void initBuiltinAllowlist() {
