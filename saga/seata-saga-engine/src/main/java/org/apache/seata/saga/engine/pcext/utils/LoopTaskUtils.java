@@ -17,6 +17,7 @@
 package org.apache.seata.saga.engine.pcext.utils;
 
 import org.apache.seata.common.exception.FrameworkErrorCode;
+import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.common.util.NumberUtils;
 import org.apache.seata.common.util.StringUtils;
@@ -55,6 +56,8 @@ public class LoopTaskUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(LoopTaskUtils.class);
 
     public static final String LOOP_STATE_NAME_PATTERN = "-loop-";
+
+    private static final ResourceLock LOOP_LOCK = new ResourceLock();
 
     /**
      * get Loop Config from State
@@ -227,7 +230,7 @@ public class LoopTaskUtils {
                 currentLoopContext.getNrOfCompletedInstances().get();
 
         if (!currentLoopContext.isCompletionConditionSatisfied()) {
-            synchronized (currentLoopContext) {
+            try (ResourceLock ignored = LOOP_LOCK.obtain()) {
                 if (!currentLoopContext.isCompletionConditionSatisfied()) {
                     Map<String, Object> stateMachineContext =
                             (Map<String, Object>) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);

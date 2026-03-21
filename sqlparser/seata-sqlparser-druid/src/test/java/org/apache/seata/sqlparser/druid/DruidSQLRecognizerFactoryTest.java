@@ -29,6 +29,7 @@ import org.apache.seata.sqlparser.druid.oracle.OracleOperateRecognizerHolder;
 import org.apache.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 
 import java.util.List;
 
@@ -219,6 +220,28 @@ public class DruidSQLRecognizerFactoryTest {
                 NotSupportYetException.class, () -> recognizerFactory.create(sql9, JdbcConstants.ORACLE));
         Assertions.assertThrows(
                 NotSupportYetException.class, () -> recognizerFactory.create(sql9, JdbcConstants.KINGBASE));
+    }
+
+    @EnabledIfSystemProperty(
+            named = "druid.version",
+            matches = "(1\\.[3-9]\\..*)|(2\\..*)|(1\\.2\\.[5-9].*)|(1\\.2\\.[1-9][0-9].*)")
+    @Test
+    public void testIsSqlSyntaxSupportsForOscar() {
+        SQLRecognizerFactory recognizerFactory =
+                EnhancedServiceLoader.load(SQLRecognizerFactory.class, SqlParserType.SQL_PARSER_TYPE_DRUID);
+
+        String sql1 = "delete from t where id in (select id from b)";
+
+        Assertions.assertThrows(
+                NotSupportYetException.class, () -> recognizerFactory.create(sql1, JdbcConstants.OSCAR));
+
+        String sql2 = "select * from (select * from t) for update";
+        Assertions.assertThrows(
+                NotSupportYetException.class, () -> recognizerFactory.create(sql2, JdbcConstants.OSCAR));
+
+        String sql5 = "insert into a select * from b";
+        Assertions.assertThrows(
+                NotSupportYetException.class, () -> recognizerFactory.create(sql5, JdbcConstants.OSCAR));
     }
 
     @Test
