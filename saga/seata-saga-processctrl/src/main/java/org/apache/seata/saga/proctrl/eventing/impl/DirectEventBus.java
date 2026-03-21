@@ -17,6 +17,7 @@
 package org.apache.seata.saga.proctrl.eventing.impl;
 
 import org.apache.seata.common.exception.FrameworkException;
+import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.saga.proctrl.ProcessContext;
 import org.apache.seata.saga.proctrl.eventing.EventConsumer;
@@ -36,6 +37,8 @@ public class DirectEventBus extends AbstractEventBus<ProcessContext> {
 
     private static final String VAR_NAME_SYNC_EXE_STACK = "_sync_execution_stack_";
 
+    private final ResourceLock CONTEXT_LOCK = new ResourceLock();
+
     @Override
     public boolean offer(ProcessContext context) throws FrameworkException {
         List<EventConsumer> eventHandlers = getEventConsumers(context.getClass());
@@ -49,7 +52,7 @@ public class DirectEventBus extends AbstractEventBus<ProcessContext> {
         boolean isFirstEvent = false;
         Stack<ProcessContext> currentStack = (Stack<ProcessContext>) context.getVariable(VAR_NAME_SYNC_EXE_STACK);
         if (currentStack == null) {
-            synchronized (context) {
+            try (ResourceLock ignored = CONTEXT_LOCK.obtain()) {
                 currentStack = (Stack<ProcessContext>) context.getVariable(VAR_NAME_SYNC_EXE_STACK);
                 if (currentStack == null) {
                     currentStack = new Stack<>();
