@@ -88,9 +88,7 @@ public class FastjsonJsonSerializer implements JsonSerializer {
             return null;
         }
         try {
-            if (useAutoType(text)) {
-                checkAutoTypeClasses(text);
-            }
+            checkAutoTypeClasses(text);
             return JSON.parseObject(text, type);
         } catch (SecurityException e) {
             throw e;
@@ -141,8 +139,7 @@ public class FastjsonJsonSerializer implements JsonSerializer {
                 return (T) new java.util.ArrayList<>();
             }
 
-            // Check allowlist when AutoType is enabled
-            if (!ignoreAutoType && useAutoType(text)) {
+            if (!ignoreAutoType) {
                 checkAutoTypeClasses(text);
             }
 
@@ -159,7 +156,8 @@ public class FastjsonJsonSerializer implements JsonSerializer {
     }
 
     /**
-     * Parse JSON in safe mode (IgnoreAutoType) and check all real @type fields against allowlist
+     * Parse JSON with DisableSpecialKeyDetect (treats @type as a normal key without triggering
+     * AutoType resolution) and check all real @type fields against the allowlist.
      */
     private void checkAutoTypeClasses(String json) {
         Object parsed = JSON.parse(json, Feature.DisableSpecialKeyDetect, Feature.OrderedField);

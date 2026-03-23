@@ -136,8 +136,26 @@ public class JsonAllowlistManager {
         if (isExactOrPrefixAllowed(className)) {
             return true;
         }
+        if (isPrimitiveArrayDescriptor(className)) {
+            return true;
+        }
         String componentClassName = extractArrayComponentClassName(className);
         return componentClassName != null && isExactOrPrefixAllowed(componentClassName);
+    }
+
+    /**
+     * Check if className is a multi-dimensional primitive array descriptor (e.g. "[[I", "[[Z").
+     * Single-dimensional primitive arrays (e.g. "[I") are already in the builtin allowlist.
+     */
+    private boolean isPrimitiveArrayDescriptor(String className) {
+        if (className == null || !className.startsWith("[[")) {
+            return false;
+        }
+        String stripped = className;
+        while (stripped.startsWith("[")) {
+            stripped = stripped.substring(1);
+        }
+        return stripped.length() == 1 && PRIMITIVE_DESCRIPTORS.indexOf(stripped.charAt(0)) >= 0;
     }
 
     private boolean isExactOrPrefixAllowed(String className) {
@@ -160,11 +178,14 @@ public class JsonAllowlistManager {
         return false;
     }
 
+    private static final String PRIMITIVE_DESCRIPTORS = "BCSIJFDZ";
+
     private String extractArrayComponentClassName(String className) {
         if (className == null || className.isEmpty()) {
             return null;
         }
 
+        // Canonical name format: e.g. "int[][]", "String[]"
         String normalized = className;
         while (normalized.endsWith("[]")) {
             normalized = normalized.substring(0, normalized.length() - 2);
@@ -173,15 +194,18 @@ public class JsonAllowlistManager {
             return normalized;
         }
 
+        // JVM descriptor format: e.g. "[[I", "[Ljava.lang.String;"
         if (!normalized.startsWith("[")) {
             return null;
         }
         while (normalized.startsWith("[")) {
             normalized = normalized.substring(1);
         }
+        // Primitive descriptor (e.g. "I", "Z") — handled by isPrimitiveArrayDescriptor
         if (normalized.length() == 1) {
             return null;
         }
+        // Object descriptor: Lclassname;
         if (normalized.startsWith("L") && normalized.endsWith(";")) {
             return normalized.substring(1, normalized.length() - 1);
         }

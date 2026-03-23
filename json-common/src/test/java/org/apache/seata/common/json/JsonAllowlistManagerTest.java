@@ -55,10 +55,25 @@ public class JsonAllowlistManagerTest {
     public void testBuiltinAllowlist_arrays() {
         JsonAllowlistManager manager = JsonAllowlistManager.getInstance();
 
+        // 1D primitive arrays
         assertThat(manager.isAllowed("[B")).isTrue();
         assertThat(manager.isAllowed("[I")).isTrue();
         assertThat(manager.isAllowed("[J")).isTrue();
         assertThat(manager.isAllowed("[Z")).isTrue();
+        assertThat(manager.isAllowed("[C")).isTrue();
+        assertThat(manager.isAllowed("[S")).isTrue();
+        assertThat(manager.isAllowed("[F")).isTrue();
+        assertThat(manager.isAllowed("[D")).isTrue();
+
+        // Multi-dimensional primitive arrays
+        assertThat(manager.isAllowed("[[I")).isTrue();
+        assertThat(manager.isAllowed("[[Z")).isTrue();
+        assertThat(manager.isAllowed("[[B")).isTrue();
+        assertThat(manager.isAllowed("[[J")).isTrue();
+        assertThat(manager.isAllowed("[[[D")).isTrue();
+        assertThat(manager.isAllowed("[[[F")).isTrue();
+
+        // Object arrays
         assertThat(manager.isAllowed("[Ljava.lang.String;")).isTrue();
         assertThat(manager.isAllowed("[Ljava.lang.Object;")).isTrue();
     }
