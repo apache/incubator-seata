@@ -53,6 +53,7 @@ public class NacosRegistryServiceImplTest {
 
     private MockedStatic<ConfigurationFactory> mockedConfigurationFactory;
     private Configuration mockedRegisterServiceConfiguration;
+    private Configuration mockedFileConfiguration;
 
     private NacosRegistryServiceImpl nacosRegistryService;
 
@@ -63,6 +64,8 @@ public class NacosRegistryServiceImplTest {
     private static final String APPLICATION_KEY = "registry.nacos.application";
     private static final String GROUP_KEY = "registry.nacos.group";
     private static final String CLUSTER_KEY = "registry.nacos.cluster";
+    private static final String IP_KEY = "registry.nacos.ip";
+    private static final String PORT_KEY = "registry.nacos.port";
 
     private static final String NACOS_MOCKED_APPLICATION = "MOCKED_APP";
     private static final String NACOS_MOCKED_GROUP = "MOCKED_GROUP";
@@ -73,36 +76,33 @@ public class NacosRegistryServiceImplTest {
     public void beforeEach() throws Exception {
         mockedNamingService = mock(NamingService.class);
         mockedNamingMaintainService = mock(NamingMaintainService.class);
+        mockedFileConfiguration = mock(Configuration.class);
 
         mockedConfigurationFactory = mockStatic(ConfigurationFactory.class);
         mockedRegisterServiceConfiguration = mock(Configuration.class);
         mockedConfigurationFactory
                 .when(ConfigurationFactory::getInstance)
                 .thenReturn(mockedRegisterServiceConfiguration);
-
-        Configuration mockedCurrentNacosConfiguration = mock(Configuration.class);
         ReflectionUtil.modifyStaticFinalField(
-                ConfigurationFactory.class, "CURRENT_FILE_INSTANCE", mockedCurrentNacosConfiguration);
+                ConfigurationFactory.class, "CURRENT_FILE_INSTANCE", mockedFileConfiguration);
 
         // default config expectations
-        when(mockedCurrentNacosConfiguration.getConfig(SLB_PATTERN_KEY)).thenReturn("");
-        when(mockedCurrentNacosConfiguration.getConfig(SERVER_ADDR_KEY)).thenReturn("127.0.0.1");
+        when(mockedFileConfiguration.getConfig(SLB_PATTERN_KEY)).thenReturn("");
+        when(mockedFileConfiguration.getConfig(SERVER_ADDR_KEY)).thenReturn("127.0.0.1");
 
         // Mock for getServiceName() -> registry.nacos.application
-        when(mockedCurrentNacosConfiguration.getConfig(APPLICATION_KEY)).thenReturn(NACOS_MOCKED_APPLICATION);
-        when(mockedCurrentNacosConfiguration.getConfig(APPLICATION_KEY, "seata-server"))
-                .thenReturn(NACOS_MOCKED_APPLICATION);
+        when(mockedFileConfiguration.getConfig(APPLICATION_KEY)).thenReturn(NACOS_MOCKED_APPLICATION);
+        when(mockedFileConfiguration.getConfig(APPLICATION_KEY, "seata-server")).thenReturn(NACOS_MOCKED_APPLICATION);
 
         // Mock for getServiceGroup() -> registry.nacos.group
-        when(mockedCurrentNacosConfiguration.getConfig(GROUP_KEY)).thenReturn(NACOS_MOCKED_GROUP);
-        when(mockedCurrentNacosConfiguration.getConfig(GROUP_KEY, "DEFAULT_GROUP"))
-                .thenReturn(NACOS_MOCKED_GROUP);
+        when(mockedFileConfiguration.getConfig(GROUP_KEY)).thenReturn(NACOS_MOCKED_GROUP);
+        when(mockedFileConfiguration.getConfig(GROUP_KEY, "DEFAULT_GROUP")).thenReturn(NACOS_MOCKED_GROUP);
 
         // Mock for getClusterName() -> registry.nacos.cluster
-        when(mockedCurrentNacosConfiguration.getConfig(CLUSTER_KEY)).thenReturn(NACOS_MOCKED_CLUSTER);
-        when(mockedCurrentNacosConfiguration.getConfig(CLUSTER_KEY, "default")).thenReturn(NACOS_MOCKED_CLUSTER);
+        when(mockedFileConfiguration.getConfig(CLUSTER_KEY)).thenReturn(NACOS_MOCKED_CLUSTER);
+        when(mockedFileConfiguration.getConfig(CLUSTER_KEY, "default")).thenReturn(NACOS_MOCKED_CLUSTER);
 
-        when(mockedCurrentNacosConfiguration.getConfig(CONTEXT_PATH_KEY)).thenReturn("/foo");
+        when(mockedFileConfiguration.getConfig(CONTEXT_PATH_KEY)).thenReturn("/foo");
 
         nacosRegistryService = NacosRegistryServiceImpl.getInstance();
 
@@ -114,7 +114,7 @@ public class NacosRegistryServiceImplTest {
     @AfterEach
     public void afterEach() {
         // Clear any system properties set by tests
-        Arrays.asList("username", "password", "accessKey", "secretKey", "ramRoleName", "contextPath")
+        Arrays.asList("username", "password", "accessKey", "secretKey", "ramRoleName", "contextPath", IP_KEY, PORT_KEY)
                 .forEach(System::clearProperty);
 
         // reset static fields to avoid test interdependence
@@ -425,5 +425,76 @@ public class NacosRegistryServiceImplTest {
                         eq(Collections.singletonList(expectedCluster)),
                         eventListenerCaptor.capture());
         return eventListenerCaptor.getValue();
+    }
+
+    @Test
+    public void shouldRegisterWithCustomIpAndPort() throws Exception {
+        InetSocketAddress inetSocketAddress = new InetSocketAddress("127.0.0.1", 8091);
+
+        when(mockedFileConfiguration.getConfig(eq(IP_KEY))).thenReturn("192.168.1.100");
+        when(mockedFileConfiguration.getInt(eq(PORT_KEY), eq(0))).thenReturn(21908);
+
+        nacosRegistryService.register(inetSocketAddress);
+
+        verify(mockedNamingService)
+                .registerInstance(
+                        NACOS_MOCKED_APPLICATION, NACOS_MOCKED_GROUP, "192.168.1.100", 21908, NACOS_MOCKED_CLUSTER);
+    }
+
+    @Test
+    public void shouldUnregisterWithCustomIpAndPort() throws Exception {
+        InetSocketAddress inetSocketAddress = new InetSocketAddress("127.0.0.1", 8091);
+
+        when(mockedFileConfiguration.getConfig(eq(IP_KEY))).thenReturn("192.168.1.100");
+        when(mockedFileConfiguration.getInt(eq(PORT_KEY), eq(0))).thenReturn(21908);
+
+        nacosRegistryService.unregister(inetSocketAddress);
+
+        verify(mockedNamingService)
+                .deregisterInstance(
+                        NACOS_MOCKED_APPLICATION, NACOS_MOCKED_GROUP, "192.168.1.100", 21908, NACOS_MOCKED_CLUSTER);
+    }
+
+    @Test
+    public void shouldFallbackToOriginalAddressWhenNoOverrideConfigured() throws Exception {
+        InetSocketAddress address = new InetSocketAddress("127.0.0.1", 8091);
+
+        nacosRegistryService.register(address);
+
+        verify(mockedNamingService)
+                .registerInstance(
+                        NACOS_MOCKED_APPLICATION, NACOS_MOCKED_GROUP, "127.0.0.1", 8091, NACOS_MOCKED_CLUSTER);
+    }
+
+    @Test
+    public void shouldRegisterWithSystemPropertyOverride() throws Exception {
+        InetSocketAddress inetSocketAddress = new InetSocketAddress("127.0.0.1", 8091);
+
+        System.setProperty(IP_KEY, "10.0.0.5");
+        System.setProperty(PORT_KEY, "33333");
+
+        when(mockedFileConfiguration.getConfig(eq(IP_KEY))).thenReturn(null);
+        when(mockedFileConfiguration.getInt(eq(PORT_KEY), eq(0))).thenReturn(0);
+
+        nacosRegistryService.register(inetSocketAddress);
+
+        verify(mockedNamingService).registerInstance(anyString(), anyString(), eq("10.0.0.5"), eq(33333), anyString());
+    }
+
+    @Test
+    public void shouldPreferSystemPropertyOverFileConfig() throws Exception {
+        InetSocketAddress address = new InetSocketAddress("127.0.0.1", 8091);
+
+        System.setProperty(IP_KEY, "10.0.0.5");
+        System.setProperty(PORT_KEY, "33333");
+
+        when(mockedFileConfiguration.getConfig(eq(IP_KEY))).thenReturn("192.168.1.100");
+        when(mockedFileConfiguration.getInt(eq(PORT_KEY), eq(0))).thenReturn(21908);
+
+        nacosRegistryService.register(address);
+
+        verify(mockedNamingService)
+                .registerInstance(
+                        NACOS_MOCKED_APPLICATION, NACOS_MOCKED_GROUP, "10.0.0.5", 33333, NACOS_MOCKED_CLUSTER);
     }
 }

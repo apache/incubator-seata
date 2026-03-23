@@ -61,6 +61,8 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     private static final String PRO_APPLICATION_KEY = "application";
     private static final String PRO_CLIENT_APPLICATION = "clientApplication";
     private static final String PRO_GROUP_KEY = "group";
+    private static final String PRO_IP_KEY = "ip";
+    private static final String PRO_PORT_KEY = "port";
     private static final String USER_NAME = "username";
     private static final String PASSWORD = "password";
     private static final String ACCESS_KEY = "accessKey";
@@ -118,25 +120,65 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     @Override
     public void register(InetSocketAddress address) throws Exception {
         NetUtil.validAddress(address);
+        InetSocketAddress registryAddress = getRegistryAddress(address);
         getNamingInstance()
                 .registerInstance(
                         getServiceName(),
                         getServiceGroup(),
-                        address.getAddress().getHostAddress(),
-                        address.getPort(),
+                        registryAddress.getAddress().getHostAddress(),
+                        registryAddress.getPort(),
                         getClusterName());
     }
 
     @Override
     public void unregister(InetSocketAddress address) throws Exception {
         NetUtil.validAddress(address);
+        InetSocketAddress registryAddress = getRegistryAddress(address);
         getNamingInstance()
                 .deregisterInstance(
                         getServiceName(),
                         getServiceGroup(),
-                        address.getAddress().getHostAddress(),
-                        address.getPort(),
+                        registryAddress.getAddress().getHostAddress(),
+                        registryAddress.getPort(),
                         getClusterName());
+    }
+
+    private InetSocketAddress getRegistryAddress(InetSocketAddress address) {
+        String ipKey = getNacosIpFileKey();
+        String portKey = getNacosPortFileKey();
+
+        String overrideIp = System.getProperty(ipKey);
+        if (StringUtils.isBlank(overrideIp)) {
+            overrideIp = getFileConfig().getConfig(ipKey);
+        }
+
+        int overridePort = 0;
+        String sysPort = System.getProperty(portKey);
+        if (StringUtils.isNotBlank(sysPort)) {
+            try {
+                overridePort = Integer.parseInt(sysPort);
+            } catch (NumberFormatException e) {
+                LOGGER.warn("Invalid system property for Nacos registry port: {}", sysPort);
+            }
+        }
+        if (overridePort <= 0) {
+            overridePort = getFileConfig().getInt(portKey, 0);
+        }
+
+        if (StringUtils.isBlank(overrideIp) && overridePort <= 0) {
+            return address;
+        }
+
+        String defaultIp = address.getAddress().getHostAddress();
+        int defaultPort = address.getPort();
+
+        String finalIp = StringUtils.isNotBlank(overrideIp) ? overrideIp : defaultIp;
+        int finalPort = overridePort > 0 ? overridePort : defaultPort;
+
+        InetSocketAddress registryAddress = new InetSocketAddress(finalIp, finalPort);
+        NetUtil.validAddress(registryAddress);
+
+        return registryAddress;
     }
 
     @Override
@@ -470,5 +512,13 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
                 ConfigurationKeys.FILE_ROOT_REGISTRY,
                 REGISTRY_TYPE,
                 CONTEXT_PATH);
+    }
+
+    private static String getNacosIpFileKey() {
+        return "registry" + CONFIG_SPLIT_CHAR + REGISTRY_TYPE + CONFIG_SPLIT_CHAR + PRO_IP_KEY;
+    }
+
+    private static String getNacosPortFileKey() {
+        return "registry" + CONFIG_SPLIT_CHAR + REGISTRY_TYPE + CONFIG_SPLIT_CHAR + PRO_PORT_KEY;
     }
 }
