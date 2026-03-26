@@ -19,6 +19,7 @@ package org.apache.seata.saga.engine.invoker.impl;
 import org.apache.seata.common.exception.FrameworkErrorCode;
 import org.apache.seata.common.json.JsonSerializer;
 import org.apache.seata.common.json.JsonSerializerFactory;
+import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.common.util.CollectionUtils;
 import org.apache.seata.saga.engine.exception.EngineExecutionException;
 import org.apache.seata.saga.engine.invoker.ServiceInvoker;
@@ -52,6 +53,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationContextAware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SpringBeanServiceInvoker.class);
+
+    private final ResourceLock METHOD_LOCK = new ResourceLock();
+    private final ResourceLock RETRY_LOCK = new ResourceLock();
 
     private ApplicationContext applicationContext;
     private ThreadPoolExecutor threadPoolExecutor;
@@ -105,7 +109,7 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
 
         Method method = state.getMethod();
         if (method == null) {
-            synchronized (state) {
+            try (ResourceLock ignored = METHOD_LOCK.obtain()) {
                 method = state.getMethod();
                 if (method == null) {
                     method = findMethod(bean.getClass(), state.getServiceMethod(), state.getParameterTypes());
@@ -196,7 +200,7 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
                 } else {
                     List<Class<? extends Exception>> exceptionClasses = retryConfig.getExceptionClasses();
                     if (exceptionClasses == null) {
-                        synchronized (retryConfig) {
+                        try (ResourceLock ignored = RETRY_LOCK.obtain()) {
                             exceptionClasses = retryConfig.getExceptionClasses();
                             if (exceptionClasses == null) {
 

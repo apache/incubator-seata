@@ -25,7 +25,9 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * JsonParserFactory
  *
+ * @deprecated use {@link org.apache.seata.common.json.JsonSerializerFactory} in json-common module instead.
  */
+@Deprecated
 public class JsonParserFactory {
 
     private JsonParserFactory() {}

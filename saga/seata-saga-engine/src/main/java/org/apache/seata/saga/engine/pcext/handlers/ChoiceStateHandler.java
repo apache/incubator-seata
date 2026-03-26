@@ -17,6 +17,7 @@
 package org.apache.seata.saga.engine.pcext.handlers;
 
 import org.apache.seata.common.exception.FrameworkErrorCode;
+import org.apache.seata.common.lock.ResourceLock;
 import org.apache.seata.common.util.StringUtils;
 import org.apache.seata.saga.engine.StateMachineConfig;
 import org.apache.seata.saga.engine.exception.EngineExecutionException;
@@ -42,6 +43,8 @@ import java.util.Map;
  */
 public class ChoiceStateHandler implements StateHandler {
 
+    private final ResourceLock CHOICE_LOCK = new ResourceLock();
+
     @Override
     public void process(ProcessContext context) throws EngineExecutionException {
 
@@ -50,7 +53,7 @@ public class ChoiceStateHandler implements StateHandler {
 
         Map<Object, String> choiceEvaluators = choiceState.getChoiceEvaluators();
         if (choiceEvaluators == null) {
-            synchronized (choiceState) {
+            try (ResourceLock ignored = CHOICE_LOCK.obtain()) {
                 choiceEvaluators = choiceState.getChoiceEvaluators();
                 if (choiceEvaluators == null) {
 

@@ -348,8 +348,8 @@ public class KingbaseTableMetaCacheTest {
             new Object[] {"idx_id_userid", "user_id", false, "", 3, 2, "A", 34} // column order 2
         };
         Object[][] compositePKMetas = new Object[][] {
-            new Object[] {"id"}, // PK column order 1
-            new Object[] {"user_id"} // PK column order 2
+            new Object[] {"user_id"}, // PK column order 1 (reverse of index)
+            new Object[] {"id"} // PK column order 2
         };
         Object[][] compositeColumnMetas = new Object[][] {
             new Object[] {"", "", "kt2", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"

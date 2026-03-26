@@ -24,6 +24,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * @deprecated use {@link org.apache.seata.common.json.JsonSerializerFactory} in json-common module instead.
+ */
+@Deprecated
 public class JsonParserFactory {
 
     private static final Map<String, JsonParserWrap> JSON_PARSER_INSTANCES = new ConcurrentHashMap<>();
