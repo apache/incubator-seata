@@ -151,6 +151,16 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
                 Map<Integer, ArrayList<Object>> parameters = preparedStatementProxy.getParameters();
                 final int rowSize = insertRows.size();
                 int totalPlaceholderNum = -1;
+                // Calculate the number of hidden JDBC parameters per row caused by function
+                // expressions (e.g. ST_GeomFromText(CONCAT('POINT(', ?, ' ', ?, ')'))) that
+                // contain parameter placeholders not visible in the parsed row structure.
+                int nonEmptyRowCount = 0;
+                for (List<Object> r : insertRows) {
+                    if (!r.isEmpty()) {
+                        nonEmptyRowCount++;
+                    }
+                }
+                int hiddenParamsPerRow = 0;
                 for (List<Object> row : insertRows) {
                     // oracle insert sql statement specify RETURN_GENERATED_KEYS will append :rowid on sql end
                     // insert parameter count will than the actual +1
@@ -162,6 +172,13 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
                         if (PLACEHOLDER.equals(r)) {
                             totalPlaceholderNum += 1;
                             currentRowPlaceholderNum += 1;
+                        }
+                    }
+                    if (hiddenParamsPerRow == 0 && nonEmptyRowCount > 0) {
+                        int visiblePlaceholdersPerRow = currentRowPlaceholderNum + 1;
+                        int actualParamsPerRow = parameters.size() / nonEmptyRowCount;
+                        if (actualParamsPerRow > visiblePlaceholdersPerRow) {
+                            hiddenParamsPerRow = actualParamsPerRow - visiblePlaceholdersPerRow;
                         }
                     }
                     String pkKey;
@@ -196,6 +213,9 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
                             pkValuesMap.put(ColumnUtils.delEscape(pkKey, getDbType()), pkValues);
                         }
                     }
+                    // Adjust totalPlaceholderNum to account for hidden parameters inside
+                    // function expressions, so the next row's parameter offset is correct.
+                    totalPlaceholderNum += hiddenParamsPerRow;
                 }
             }
         } else {
