@@ -17,9 +17,8 @@
 package org.apache.seata.common.json.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.parser.Feature;
+import com.alibaba.fastjson.parser.ParserConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import org.apache.seata.common.exception.JsonParseException;
 import org.apache.seata.common.json.JsonAllowlistManager;
@@ -59,6 +58,20 @@ public class FastjsonJsonSerializer implements JsonSerializer {
     private static final Feature[] READER_FEATURES_IGNORE_AUTO_TYPE =
             new Feature[] {Feature.IgnoreAutoType, Feature.OrderedField};
 
+    private static final ParserConfig ALLOWLIST_PARSER_CONFIG = new ParserConfig();
+
+    static {
+        ALLOWLIST_PARSER_CONFIG.setAutoTypeSupport(true);
+        ALLOWLIST_PARSER_CONFIG.addAutoTypeCheckHandler((typeName, expectClass, features) -> {
+            JsonAllowlistManager.getInstance().checkClass(typeName);
+            try {
+                return Class.forName(typeName);
+            } catch (ClassNotFoundException e) {
+                return null;
+            }
+        });
+    }
+
     public static final String NAME = "fastjson";
 
     @Override
@@ -88,11 +101,11 @@ public class FastjsonJsonSerializer implements JsonSerializer {
             return null;
         }
         try {
-            checkAutoTypeClasses(text);
-            return JSON.parseObject(text, type);
+            return JSON.parseObject(text, type, ALLOWLIST_PARSER_CONFIG, Feature.SupportAutoType, Feature.OrderedField);
         } catch (SecurityException e) {
             throw e;
         } catch (Exception e) {
+            rethrowIfSecurityException(e);
             throw new JsonParseException("FastJSON deserialize error", e);
         }
     }
@@ -139,56 +152,27 @@ public class FastjsonJsonSerializer implements JsonSerializer {
                 return (T) new java.util.ArrayList<>();
             }
 
-            if (!ignoreAutoType) {
-                checkAutoTypeClasses(text);
-            }
-
             if (ignoreAutoType) {
                 return JSON.parseObject(text, type, READER_FEATURES_IGNORE_AUTO_TYPE);
             } else {
-                return JSON.parseObject(text, type, READER_FEATURES_SUPPORT_AUTO_TYPE);
+                return JSON.parseObject(
+                        text, type, ALLOWLIST_PARSER_CONFIG, Feature.SupportAutoType, Feature.OrderedField);
             }
         } catch (SecurityException e) {
             throw e;
         } catch (Exception e) {
+            rethrowIfSecurityException(e);
             throw new JsonParseException("FastJSON deserialize error", e);
         }
     }
 
-    /**
-     * Parse JSON with DisableSpecialKeyDetect (treats @type as a normal key without triggering
-     * AutoType resolution) and check all real @type fields against the allowlist.
-     */
-    private void checkAutoTypeClasses(String json) {
-        Object parsed = JSON.parse(json, Feature.DisableSpecialKeyDetect, Feature.OrderedField);
-        if (parsed instanceof JSONObject) {
-            checkJsonObject((JSONObject) parsed);
-        } else if (parsed instanceof JSONArray) {
-            checkJsonArray((JSONArray) parsed);
-        }
-    }
-
-    private void checkJsonObject(JSONObject obj) {
-        Object type = obj.get("@type");
-        if (type instanceof String) {
-            JsonAllowlistManager.getInstance().checkClass((String) type);
-        }
-        for (Object value : obj.values()) {
-            if (value instanceof JSONObject) {
-                checkJsonObject((JSONObject) value);
-            } else if (value instanceof JSONArray) {
-                checkJsonArray((JSONArray) value);
+    private static void rethrowIfSecurityException(Throwable e) {
+        Throwable cause = e.getCause();
+        while (cause != null) {
+            if (cause instanceof SecurityException) {
+                throw (SecurityException) cause;
             }
-        }
-    }
-
-    private void checkJsonArray(JSONArray arr) {
-        for (Object item : arr) {
-            if (item instanceof JSONObject) {
-                checkJsonObject((JSONObject) item);
-            } else if (item instanceof JSONArray) {
-                checkJsonArray((JSONArray) item);
-            }
+            cause = cause.getCause();
         }
     }
 }
