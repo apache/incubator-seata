@@ -1,0 +1,83 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+syntax = "proto3";
+
+package org.apache.seata.protocol.protobuf;
+
+option java_multiple_files = true;
+option java_outer_classname = "ConnectionPoolMetricsMessage";
+option java_package = "org.apache.seata.serializer.protobuf.generated";
+
+message HikariConnectionPoolMetricsProto {
+  string poolName = 1;
+  int32 activeConnections = 2;
+  int32 idleConnections = 3;
+  int32 totalConnections = 4;
+  int32 maxPoolSize = 5;
+  int32 minIdle = 6;
+  int32 waitThreadCount = 7;
+  int32 connectionTimeout = 8;
+  int64 validationTimeout = 9;
+  bool autoCommit = 10;
+  int64 idleTimeout = 11;
+  string jdbcUrl = 12;
+  string dataSourceClassName = 13;
+  int64 timestamp = 14;
+}
+
+message DruidConnectionPoolMetricsProto {
+  string poolName = 1;
+  int32 activeConnections = 2;
+  int32 idleConnections = 3;
+  int32 totalConnections = 4;
+  int32 maxPoolSize = 5;
+  int32 minIdle = 6;
+  int32 waitThreadCount = 7;
+  int64 maxWaitTime = 8;
+  int64 timeBetweenEvictionRunsMills = 9;
+  int64 maxEvictableTimeMills = 10;
+  int64 executeCount = 11;
+  int64 errorCount = 12;
+  int64 commitCount = 13;
+  int64 rollbackCount = 14;
+  int64 logicConnectCount = 15;
+  string jdbcUrl = 16;
+  int64 timestamp = 17;
+  // SQL lists
+  repeated SqlExecutionEntryProto slowSqlList = 18;
+  repeated SqlExecutionEntryProto sqlExecutionRecord = 19;
+  // Transaction histogram
+  repeated int64 transactionHistogramRanges = 20;
+  repeated int64 transactionHistogramValues = 21;
+}
+
+message ConnectionPoolMetricsMessageProto {
+  string applicationId = 1;
+  string clientUrl = 2;
+  int64 sequenceNumber = 3;
+  int64 timestamp = 4;
+  repeated HikariConnectionPoolMetricsProto hikariMetrics = 5;
+  repeated DruidConnectionPoolMetricsProto druidMetrics = 6;
+}
+
+// SQL execution entry
+message SqlExecutionEntryProto {
+  string sql = 1;
+  int64 executionTimeMillis = 2;
+  int64 holdTimeMillis = 3;
+  string timestamp = 4; // ISO-8601 string
+}
