@@ -194,16 +194,39 @@ public abstract class BaseInsertExecutor<T, S extends Statement> extends Abstrac
                         Object pkValue = row.get(pkIndex);
                         if (PLACEHOLDER.equals(pkValue)) {
                             int currentRowNotPlaceholderNumBeforePkIndex = 0;
-                            for (int n = 0, len = row.size(); n < len; n++) {
-                                Object r = row.get(n);
-                                if (n < pkIndex && !PLACEHOLDER.equals(r)) {
-                                    currentRowNotPlaceholderNumBeforePkIndex++;
+                            int hiddenParamsBeforePk = 0;
+                            if (hiddenParamsPerRow > 0) {
+                                int sqlMethodExprCountTotal = 0;
+                                int sqlMethodExprCountBeforePk = 0;
+                                for (int n = 0, len = row.size(); n < len; n++) {
+                                    Object r = row.get(n);
+                                    if (r instanceof SqlMethodExpr) {
+                                        sqlMethodExprCountTotal++;
+                                        if (n < pkIndex) {
+                                            sqlMethodExprCountBeforePk++;
+                                        }
+                                    }
+                                    if (n < pkIndex && !PLACEHOLDER.equals(r)) {
+                                        currentRowNotPlaceholderNumBeforePkIndex++;
+                                    }
+                                }
+                                if (sqlMethodExprCountTotal > 0) {
+                                    hiddenParamsBeforePk = hiddenParamsPerRow
+                                            * sqlMethodExprCountBeforePk / sqlMethodExprCountTotal;
+                                }
+                            } else {
+                                for (int n = 0, len = row.size(); n < len; n++) {
+                                    Object r = row.get(n);
+                                    if (n < pkIndex && !PLACEHOLDER.equals(r)) {
+                                        currentRowNotPlaceholderNumBeforePkIndex++;
+                                    }
                                 }
                             }
                             int idx = totalPlaceholderNum
                                     - currentRowPlaceholderNum
                                     + pkIndex
-                                    - currentRowNotPlaceholderNumBeforePkIndex;
+                                    - currentRowNotPlaceholderNumBeforePkIndex
+                                    + hiddenParamsBeforePk;
                             ArrayList<Object> parameter = parameters.get(idx + 1);
                             pkValues.addAll(parameter);
                         } else {
