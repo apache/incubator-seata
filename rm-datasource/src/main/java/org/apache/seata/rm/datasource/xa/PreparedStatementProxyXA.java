@@ -39,12 +39,19 @@ import java.util.Calendar;
 
 /**
  * PreparedStatement proxy for XA mode.
- *
  */
 public class PreparedStatementProxyXA extends StatementProxyXA implements PreparedStatement {
 
+    protected String targetSQL;
+
     public PreparedStatementProxyXA(AbstractConnectionProxyXA connectionProxyXA, PreparedStatement targetStatement) {
         super(connectionProxyXA, targetStatement);
+    }
+
+    public PreparedStatementProxyXA(
+            AbstractConnectionProxyXA connectionProxyXA, PreparedStatement targetStatement, String targetSQL) {
+        super(connectionProxyXA, targetStatement);
+        this.targetSQL = targetSQL;
     }
 
     private PreparedStatement getTargetStatement() {
@@ -53,20 +60,47 @@ public class PreparedStatementProxyXA extends StatementProxyXA implements Prepar
 
     @Override
     public ResultSet executeQuery() throws SQLException {
-        return ExecuteTemplateXA.execute(
+        long start = System.currentTimeMillis();
+        ResultSet res = ExecuteTemplateXA.execute(
                 connectionProxyXA, (statement, args) -> statement.executeQuery(), getTargetStatement());
+        long cost = System.currentTimeMillis() - start;
+        if (targetSQL != null) {
+            org.apache.seata.core.rpc.netty.SqlCollector.addSqlExecutionEntry(
+                    targetSQL, cost, cost, java.time.LocalDateTime.now());
+            org.apache.seata.core.rpc.netty.SqlCollector.addSlowSqlEntry(
+                    targetSQL, cost, java.time.LocalDateTime.now());
+        }
+        return res;
     }
 
     @Override
     public int executeUpdate() throws SQLException {
-        return ExecuteTemplateXA.execute(
+        long start = System.currentTimeMillis();
+        int res = ExecuteTemplateXA.execute(
                 connectionProxyXA, (statement, args) -> statement.executeUpdate(), getTargetStatement());
+        long cost = System.currentTimeMillis() - start;
+        if (targetSQL != null) {
+            org.apache.seata.core.rpc.netty.SqlCollector.addSqlExecutionEntry(
+                    targetSQL, cost, cost, java.time.LocalDateTime.now());
+            org.apache.seata.core.rpc.netty.SqlCollector.addSlowSqlEntry(
+                    targetSQL, cost, java.time.LocalDateTime.now());
+        }
+        return res;
     }
 
     @Override
     public boolean execute() throws SQLException {
-        return ExecuteTemplateXA.execute(
+        long start = System.currentTimeMillis();
+        boolean res = ExecuteTemplateXA.execute(
                 connectionProxyXA, (statement, args) -> statement.execute(), getTargetStatement());
+        long cost = System.currentTimeMillis() - start;
+        if (targetSQL != null) {
+            org.apache.seata.core.rpc.netty.SqlCollector.addSqlExecutionEntry(
+                    targetSQL, cost, 0L, java.time.LocalDateTime.now());
+            org.apache.seata.core.rpc.netty.SqlCollector.addSlowSqlEntry(
+                    targetSQL, cost, java.time.LocalDateTime.now());
+        }
+        return res;
     }
 
     @Override

@@ -16,14 +16,37 @@
  */
 package org.apache.seata.server.config;
 
+import org.apache.seata.server.common.HttpClient;
+import org.apache.seata.server.metrics.ConnectionPoolService;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class ServerConfig {
     @Bean
+    @ConditionalOnProperty(name = "seata.enableConnectionPoolMetrics", havingValue = "false")
     public ServerProperties emptyServerProperties() {
         return new ServerProperties();
+    }
+
+    @Bean
+    @ConditionalOnProperty(name = "seata.enableConnectionPoolMetrics", havingValue = "true")
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+
+    @Bean
+    @ConditionalOnProperty(name = "seata.enableConnectionPoolMetrics", havingValue = "true")
+    public HttpClient httpClient(RestTemplate restTemplate) {
+        return new HttpClient(restTemplate);
+    }
+
+    @Bean
+    @ConditionalOnProperty(name = "seata.enableConnectionPoolMetrics", havingValue = "true")
+    public ConnectionPoolService connectionPoolService(HttpClient httpClient) {
+        return new ConnectionPoolService(httpClient);
     }
 }

@@ -16,9 +16,10 @@
  */
 package org.apache.seata.serializer.protobuf.manager;
 
+import org.apache.seata.core.protocol.*;
 import org.apache.seata.core.protocol.BatchResultMessage;
+import org.apache.seata.core.protocol.ConnectionPoolMetricsMessage;
 import org.apache.seata.core.protocol.HeartbeatMessage;
-import org.apache.seata.core.protocol.MergeResultMessage;
 import org.apache.seata.core.protocol.MergedWarpMessage;
 import org.apache.seata.core.protocol.RegisterRMRequest;
 import org.apache.seata.core.protocol.RegisterRMResponse;
@@ -45,65 +46,8 @@ import org.apache.seata.core.protocol.transaction.GlobalRollbackResponse;
 import org.apache.seata.core.protocol.transaction.GlobalStatusRequest;
 import org.apache.seata.core.protocol.transaction.GlobalStatusResponse;
 import org.apache.seata.core.protocol.transaction.UndoLogDeleteRequest;
-import org.apache.seata.serializer.protobuf.convertor.BatchResultMessageConvertor;
-import org.apache.seata.serializer.protobuf.convertor.BranchCommitRequestConvertor;
-import org.apache.seata.serializer.protobuf.convertor.BranchCommitResponseConvertor;
-import org.apache.seata.serializer.protobuf.convertor.BranchRegisterRequestConvertor;
-import org.apache.seata.serializer.protobuf.convertor.BranchRegisterResponseConvertor;
-import org.apache.seata.serializer.protobuf.convertor.BranchReportRequestConvertor;
-import org.apache.seata.serializer.protobuf.convertor.BranchReportResponseConvertor;
-import org.apache.seata.serializer.protobuf.convertor.BranchRollbackRequestConvertor;
-import org.apache.seata.serializer.protobuf.convertor.BranchRollbackResponseConvertor;
-import org.apache.seata.serializer.protobuf.convertor.GlobalBeginRequestConvertor;
-import org.apache.seata.serializer.protobuf.convertor.GlobalBeginResponseConvertor;
-import org.apache.seata.serializer.protobuf.convertor.GlobalCommitRequestConvertor;
-import org.apache.seata.serializer.protobuf.convertor.GlobalCommitResponseConvertor;
-import org.apache.seata.serializer.protobuf.convertor.GlobalLockQueryRequestConvertor;
-import org.apache.seata.serializer.protobuf.convertor.GlobalLockQueryResponseConvertor;
-import org.apache.seata.serializer.protobuf.convertor.GlobalReportRequestConvertor;
-import org.apache.seata.serializer.protobuf.convertor.GlobalReportResponseConvertor;
-import org.apache.seata.serializer.protobuf.convertor.GlobalRollbackRequestConvertor;
-import org.apache.seata.serializer.protobuf.convertor.GlobalRollbackResponseConvertor;
-import org.apache.seata.serializer.protobuf.convertor.GlobalStatusRequestConvertor;
-import org.apache.seata.serializer.protobuf.convertor.GlobalStatusResponseConvertor;
-import org.apache.seata.serializer.protobuf.convertor.HeartbeatMessageConvertor;
-import org.apache.seata.serializer.protobuf.convertor.MergeResultMessageConvertor;
-import org.apache.seata.serializer.protobuf.convertor.MergedWarpMessageConvertor;
-import org.apache.seata.serializer.protobuf.convertor.PbConvertor;
-import org.apache.seata.serializer.protobuf.convertor.RegisterRMRequestConvertor;
-import org.apache.seata.serializer.protobuf.convertor.RegisterRMResponseConvertor;
-import org.apache.seata.serializer.protobuf.convertor.RegisterTMRequestConvertor;
-import org.apache.seata.serializer.protobuf.convertor.RegisterTMResponseConvertor;
-import org.apache.seata.serializer.protobuf.convertor.UndoLogDeleteRequestConvertor;
-import org.apache.seata.serializer.protobuf.generated.BatchResultMessageProto;
-import org.apache.seata.serializer.protobuf.generated.BranchCommitRequestProto;
-import org.apache.seata.serializer.protobuf.generated.BranchCommitResponseProto;
-import org.apache.seata.serializer.protobuf.generated.BranchRegisterRequestProto;
-import org.apache.seata.serializer.protobuf.generated.BranchRegisterResponseProto;
-import org.apache.seata.serializer.protobuf.generated.BranchReportRequestProto;
-import org.apache.seata.serializer.protobuf.generated.BranchReportResponseProto;
-import org.apache.seata.serializer.protobuf.generated.BranchRollbackRequestProto;
-import org.apache.seata.serializer.protobuf.generated.BranchRollbackResponseProto;
-import org.apache.seata.serializer.protobuf.generated.GlobalBeginRequestProto;
-import org.apache.seata.serializer.protobuf.generated.GlobalBeginResponseProto;
-import org.apache.seata.serializer.protobuf.generated.GlobalCommitRequestProto;
-import org.apache.seata.serializer.protobuf.generated.GlobalCommitResponseProto;
-import org.apache.seata.serializer.protobuf.generated.GlobalLockQueryRequestProto;
-import org.apache.seata.serializer.protobuf.generated.GlobalLockQueryResponseProto;
-import org.apache.seata.serializer.protobuf.generated.GlobalReportRequestProto;
-import org.apache.seata.serializer.protobuf.generated.GlobalReportResponseProto;
-import org.apache.seata.serializer.protobuf.generated.GlobalRollbackRequestProto;
-import org.apache.seata.serializer.protobuf.generated.GlobalRollbackResponseProto;
-import org.apache.seata.serializer.protobuf.generated.GlobalStatusRequestProto;
-import org.apache.seata.serializer.protobuf.generated.GlobalStatusResponseProto;
-import org.apache.seata.serializer.protobuf.generated.HeartbeatMessageProto;
-import org.apache.seata.serializer.protobuf.generated.MergedResultMessageProto;
-import org.apache.seata.serializer.protobuf.generated.MergedWarpMessageProto;
-import org.apache.seata.serializer.protobuf.generated.RegisterRMRequestProto;
-import org.apache.seata.serializer.protobuf.generated.RegisterRMResponseProto;
-import org.apache.seata.serializer.protobuf.generated.RegisterTMRequestProto;
-import org.apache.seata.serializer.protobuf.generated.RegisterTMResponseProto;
-import org.apache.seata.serializer.protobuf.generated.UndoLogDeleteRequestProto;
+import org.apache.seata.serializer.protobuf.convertor.*;
+import org.apache.seata.serializer.protobuf.generated.*;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -168,6 +112,8 @@ public class ProtobufConvertManager {
                     MergedWarpMessage.class.getName(), new MergedWarpMessageConvertor());
             protobufConvertManager.convertorMap.put(HeartbeatMessage.class.getName(), new HeartbeatMessageConvertor());
             protobufConvertManager.convertorMap.put(
+                    ConnectionPoolMetricsMessage.class.getName(), new ConnectionPoolMetricsMessageConvertor());
+            protobufConvertManager.convertorMap.put(
                     MergeResultMessage.class.getName(), new MergeResultMessageConvertor());
             protobufConvertManager.convertorMap.put(
                     RegisterRMRequest.class.getName(), new RegisterRMRequestConvertor());
@@ -228,6 +174,9 @@ public class ProtobufConvertManager {
             protobufConvertManager.protoClazzMap.put(
                     HeartbeatMessageProto.getDescriptor().getFullName(), HeartbeatMessageProto.class);
             protobufConvertManager.protoClazzMap.put(
+                    ConnectionPoolMetricsMessageProto.getDescriptor().getFullName(),
+                    ConnectionPoolMetricsMessageProto.class);
+            protobufConvertManager.protoClazzMap.put(
                     MergedResultMessageProto.getDescriptor().getFullName(), MergedResultMessageProto.class);
             protobufConvertManager.protoClazzMap.put(
                     RegisterRMRequestProto.getDescriptor().getFullName(), RegisterRMRequestProto.class);
@@ -287,6 +236,8 @@ public class ProtobufConvertManager {
                     MergedWarpMessageProto.class.getName(), new MergedWarpMessageConvertor());
             protobufConvertManager.reverseConvertorMap.put(
                     HeartbeatMessageProto.class.getName(), new HeartbeatMessageConvertor());
+            protobufConvertManager.reverseConvertorMap.put(
+                    ConnectionPoolMetricsMessageProto.class.getName(), new ConnectionPoolMetricsMessageConvertor());
             protobufConvertManager.reverseConvertorMap.put(
                     MergedResultMessageProto.class.getName(), new MergeResultMessageConvertor());
             protobufConvertManager.reverseConvertorMap.put(
