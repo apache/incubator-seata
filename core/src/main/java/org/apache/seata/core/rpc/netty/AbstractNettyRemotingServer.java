@@ -26,6 +26,7 @@ import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import org.apache.seata.common.util.NetUtil;
 import org.apache.seata.common.util.StringUtils;
+import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.protocol.AbstractMessage;
 import org.apache.seata.core.protocol.HeartbeatMessage;
 import org.apache.seata.core.protocol.MergedWarpMessage;
@@ -76,6 +77,28 @@ public abstract class AbstractNettyRemotingServer extends AbstractNettyRemoting 
         }
         RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
         return super.sendSync(channel, rpcMessage, NettyServerConfig.getRpcRequestTimeout());
+    }
+
+    @Override
+    public Object sendSyncRequest(
+            String resourceId, String clientId, Object msg, boolean tryOtherApp, String xid, BranchType branchType)
+            throws TimeoutException, IOException {
+        Channel channel = ChannelManager.getChannel(resourceId, clientId, tryOtherApp, xid, branchType);
+        if (channel == null) {
+            throw new IOException("rm client is not connected. dbkey:" + resourceId + ",clientId:" + clientId);
+        }
+        RpcContext rpcContext = ChannelManager.getContextFromIdentified(channel);
+        if (rpcContext != null) {
+            rpcContext.incrementActiveCount();
+        }
+        RpcMessage rpcMessage = buildRequestMessage(msg, ProtocolConstants.MSGTYPE_RESQUEST_SYNC);
+        try {
+            return super.sendSync(channel, rpcMessage, NettyServerConfig.getRpcRequestTimeout());
+        } finally {
+            if (rpcContext != null) {
+                rpcContext.decrementActiveCount();
+            }
+        }
     }
 
     @Override

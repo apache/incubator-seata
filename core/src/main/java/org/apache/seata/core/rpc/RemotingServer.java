@@ -17,6 +17,7 @@
 package org.apache.seata.core.rpc;
 
 import io.netty.channel.Channel;
+import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.protocol.MessageType;
 import org.apache.seata.core.protocol.RpcMessage;
 import org.apache.seata.core.rpc.processor.RemotingProcessor;
@@ -44,6 +45,24 @@ public interface RemotingServer {
      */
     Object sendSyncRequest(String resourceId, String clientId, Object msg, boolean tryOtherApp)
             throws TimeoutException, IOException;
+
+    /**
+     * server send sync request with transaction context.
+     *
+     * @param resourceId rm client resourceId
+     * @param clientId   rm client id
+     * @param msg        transaction message {@code org.apache.seata.core.protocol}
+     * @param tryOtherApp try other app
+     * @param xid global transaction xid
+     * @param branchType branch type
+     * @return client result message
+     * @throws TimeoutException TimeoutException
+     */
+    default Object sendSyncRequest(
+            String resourceId, String clientId, Object msg, boolean tryOtherApp, String xid, BranchType branchType)
+            throws TimeoutException, IOException {
+        return sendSyncRequest(resourceId, clientId, msg, tryOtherApp);
+    }
 
     /**
      * server send sync request.

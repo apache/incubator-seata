@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -52,6 +53,11 @@ public class RpcContext {
     private Channel channel;
 
     private Set<String> resourceSets;
+
+    /**
+     * current active sync requests on this context
+     */
+    private final AtomicInteger activeCount = new AtomicInteger();
 
     /**
      * id
@@ -321,6 +327,18 @@ public class RpcContext {
      */
     public void setClientId(String clientId) {
         this.clientId = clientId;
+    }
+
+    public int getActiveCount() {
+        return activeCount.get();
+    }
+
+    public void incrementActiveCount() {
+        activeCount.incrementAndGet();
+    }
+
+    public void decrementActiveCount() {
+        activeCount.updateAndGet(current -> current > 0 ? current - 1 : 0);
     }
 
     @Override

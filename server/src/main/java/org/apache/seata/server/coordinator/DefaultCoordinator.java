@@ -26,6 +26,7 @@ import org.apache.seata.config.ConfigurationFactory;
 import org.apache.seata.core.constants.ConfigurationKeys;
 import org.apache.seata.core.context.RootContext;
 import org.apache.seata.core.exception.TransactionException;
+import org.apache.seata.core.model.BranchType;
 import org.apache.seata.core.model.GlobalStatus;
 import org.apache.seata.core.protocol.AbstractMessage;
 import org.apache.seata.core.protocol.AbstractResultMessage;
@@ -546,7 +547,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      * Undo log delete.
      */
     protected void undoLogDelete() {
-        Map<String, Channel> rmChannels = ChannelManager.getRmChannels();
+        Map<String, Channel> rmChannels = ChannelManager.getRmChannels(BranchType.AT);
         if (rmChannels == null || rmChannels.isEmpty()) {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("no active rm channels to delete undo log");
