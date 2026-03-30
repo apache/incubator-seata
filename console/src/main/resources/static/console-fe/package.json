@@ -61,7 +61,7 @@
     "husky": "^8.0.3",
     "lint-staged": "^15.2.0",
     "mini-css-extract-plugin": "^2.9.2",
-    "node-sass": "^9.0.0",
+    "sass": "^1.86.0",
     "css-minimizer-webpack-plugin": "^5.0.1",
     "prettier": "3.2.4",
     "sass-loader": "^13.3.3",
@@ -81,7 +81,7 @@
     "axios": "^1.13.5",
     "browserify-sign": "^4.2.2",
     "decode-uri-component": "^0.4.1",
-    "elliptic": "^6.5.7",
+    "elliptic": "^6.6.1",
     "history": "^4.10.1",
     "jquery": "^3.7.1",
     "loader-utils": "^3.2.1",
@@ -121,6 +121,7 @@
     "brace-expansion": "^1.1.13",
     "bn.js": "^4.12.3",
     "picomatch": "^4.0.4",
-    "yaml": "^1.10.3"
+    "yaml": "^1.10.3",
+    "@tootallnate/once": "^3.0.1"
   }
 }
