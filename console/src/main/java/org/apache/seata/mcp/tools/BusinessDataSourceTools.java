@@ -57,7 +57,7 @@ public class BusinessDataSourceTools {
 
     @McpTool(description = "Obtained by table nameSchema")
     public List<Map<String, Object>> getTableSchema(
-            @McpToolParam(description = "Table Name", required = true) String tableName,
+            @McpToolParam(description = "Table Name") String tableName,
             @McpToolParam(description = "The identity of the data source, start with jdbc://", required = true)
                     String resourceId) {
         LOGGER.info("User try to get table schema, tableName: {}, resourceId: {}", tableName, resourceId);
@@ -66,7 +66,7 @@ public class BusinessDataSourceTools {
 
     @McpTool(description = "Execute the SQL query result, It can only be used to query business data!!!")
     public List<Map<String, Object>> runSql(
-            @McpToolParam(description = "SQL statement, String type", required = true) String sql,
+            @McpToolParam(description = "SQL statement, String type") String sql,
             @McpToolParam(description = "The identity of the data source, start with jdbc://", required = true)
                     String resourceId) {
         LOGGER.info("User try to run sql: {}, resourceId: {}", sql, resourceId);
